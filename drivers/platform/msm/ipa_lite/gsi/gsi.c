@@ -37,62 +37,62 @@ struct gsi_ctx *gsi_ctx;
 
 static void __gsi_config_type_irq(int ee, uint32_t mask, uint32_t val)
 {
+	uint32_t offset = GSI_EE_n_CNTXT_TYPE_IRQ_MSK_OFFS(ee);
 	uint32_t curr;
 
-	curr = gsi_readl(gsi_ctx->base +
-			GSI_EE_n_CNTXT_TYPE_IRQ_MSK_OFFS(ee));
-	gsi_writel((curr & ~mask) | (val & mask), gsi_ctx->base +
-			GSI_EE_n_CNTXT_TYPE_IRQ_MSK_OFFS(ee));
+	curr = gsi_readl(gsi_ctx->base + offset);
+	val = (curr & ~mask) | (val & mask);
+	gsi_writel(val, gsi_ctx->base + offset);
 }
 
 static void __gsi_config_ch_irq(int ee, uint32_t mask, uint32_t val)
 {
+	uint32_t offset = GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_MSK_OFFS(ee);
 	uint32_t curr;
 
-	curr = gsi_readl(gsi_ctx->base +
-			GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_MSK_OFFS(ee));
-	gsi_writel((curr & ~mask) | (val & mask), gsi_ctx->base +
-			GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_MSK_OFFS(ee));
+	curr = gsi_readl(gsi_ctx->base + offset);
+	val = (curr & ~mask) | (val & mask);
+	gsi_writel(val, gsi_ctx->base + offset);
 }
 
 static void __gsi_config_evt_irq(int ee, uint32_t mask, uint32_t val)
 {
+	uint32_t offset = GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_MSK_OFFS(ee);
 	uint32_t curr;
 
-	curr = gsi_readl(gsi_ctx->base +
-			GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_MSK_OFFS(ee));
-	gsi_writel((curr & ~mask) | (val & mask), gsi_ctx->base +
-			GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_MSK_OFFS(ee));
+	curr = gsi_readl(gsi_ctx->base + offset);
+	val = (curr & ~mask) | (val & mask);
+	gsi_writel(val, gsi_ctx->base + offset);
 }
 
 static void __gsi_config_ieob_irq(int ee, uint32_t mask, uint32_t val)
 {
+	uint32_t offset = GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee);
 	uint32_t curr;
 
-	curr = gsi_readl(gsi_ctx->base +
-			GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee));
-	gsi_writel((curr & ~mask) | (val & mask), gsi_ctx->base +
-			GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee));
+	curr = gsi_readl(gsi_ctx->base + offset);
+	val = (curr & ~mask) | (val & mask);
+	gsi_writel(val, gsi_ctx->base + offset);
 }
 
 static void __gsi_config_glob_irq(int ee, uint32_t mask, uint32_t val)
 {
+	uint32_t offset = GSI_EE_n_CNTXT_GLOB_IRQ_EN_OFFS(ee);
 	uint32_t curr;
 
-	curr = gsi_readl(gsi_ctx->base +
-			GSI_EE_n_CNTXT_GLOB_IRQ_EN_OFFS(ee));
-	gsi_writel((curr & ~mask) | (val & mask), gsi_ctx->base +
-			GSI_EE_n_CNTXT_GLOB_IRQ_EN_OFFS(ee));
+	curr = gsi_readl(gsi_ctx->base + offset);
+	val = (curr & ~mask) | (val & mask);
+	gsi_writel(val, gsi_ctx->base + offset);
 }
 
 static void __gsi_config_gen_irq(int ee, uint32_t mask, uint32_t val)
 {
+	uint32_t offset = GSI_EE_n_CNTXT_GSI_IRQ_EN_OFFS(ee);
 	uint32_t curr;
 
-	curr = gsi_readl(gsi_ctx->base +
-			GSI_EE_n_CNTXT_GSI_IRQ_EN_OFFS(ee));
-	gsi_writel((curr & ~mask) | (val & mask), gsi_ctx->base +
-			GSI_EE_n_CNTXT_GSI_IRQ_EN_OFFS(ee));
+	curr = gsi_readl(gsi_ctx->base + offset);
+	val = (curr & ~mask) | (val & mask);
+	gsi_writel(val, gsi_ctx->base + offset);
 }
 
 static void gsi_handle_ch_ctrl(int ee)
