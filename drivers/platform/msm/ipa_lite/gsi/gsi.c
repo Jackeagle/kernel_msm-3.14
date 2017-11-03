@@ -2224,8 +2224,8 @@ int gsi_query_channel_info(unsigned long chan_hdl,
 	struct gsi_chan_ctx *ctx;
 	spinlock_t *slock;
 	unsigned long flags;
-	uint64_t rp;
-	uint64_t wp;
+	uint64_t lo;
+	uint64_t hi;
 	int ee = gsi_ctx->per.ee;
 
 	if (!gsi_ctx) {
@@ -2249,34 +2249,32 @@ int gsi_query_channel_info(unsigned long chan_hdl,
 
 	spin_lock_irqsave(slock, flags);
 
-	rp = gsi_readl(gsi_ctx->base +
+	lo = gsi_readl(gsi_ctx->base +
 		GSI_EE_n_GSI_CH_k_CNTXT_4_OFFS(ctx->props.ch_id, ee));
-	rp |= ((uint64_t)gsi_readl(gsi_ctx->base +
-		GSI_EE_n_GSI_CH_k_CNTXT_5_OFFS(ctx->props.ch_id, ee))) << 32;
-	ctx->ring.rp = rp;
-	info->rp = rp;
+	hi = gsi_readl(gsi_ctx->base +
+		GSI_EE_n_GSI_CH_k_CNTXT_5_OFFS(ctx->props.ch_id, ee));
+	info->rp = hi << 32 | lo;
+	ctx->ring.rp = info->rp;
 
-	wp = gsi_readl(gsi_ctx->base +
+	lo = gsi_readl(gsi_ctx->base +
 		GSI_EE_n_GSI_CH_k_CNTXT_6_OFFS(ctx->props.ch_id, ee));
-	wp |= ((uint64_t)gsi_readl(gsi_ctx->base +
-		GSI_EE_n_GSI_CH_k_CNTXT_7_OFFS(ctx->props.ch_id, ee))) << 32;
-	ctx->ring.wp = wp;
-	info->wp = wp;
+	hi = gsi_readl(gsi_ctx->base +
+		GSI_EE_n_GSI_CH_k_CNTXT_7_OFFS(ctx->props.ch_id, ee));
+	info->wp = hi << 32 | lo;
+	ctx->ring.wp = info->wp;
 
 	if (info->evt_valid) {
-		rp = gsi_readl(gsi_ctx->base +
+		lo = gsi_readl(gsi_ctx->base +
 			GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(ctx->evtr->id, ee));
-		rp |= ((uint64_t)gsi_readl(gsi_ctx->base +
-			GSI_EE_n_EV_CH_k_CNTXT_5_OFFS(ctx->evtr->id, ee)))
-			<< 32;
-		info->evt_rp = rp;
+		hi = gsi_readl(gsi_ctx->base +
+			GSI_EE_n_EV_CH_k_CNTXT_5_OFFS(ctx->evtr->id, ee));
+		info->evt_rp = hi << 32 | lo;
 
-		wp = gsi_readl(gsi_ctx->base +
+		lo = gsi_readl(gsi_ctx->base +
 			GSI_EE_n_EV_CH_k_CNTXT_6_OFFS(ctx->evtr->id, ee));
-		wp |= ((uint64_t)gsi_readl(gsi_ctx->base +
-			GSI_EE_n_EV_CH_k_CNTXT_7_OFFS(ctx->evtr->id, ee)))
-			<< 32;
-		info->evt_wp = wp;
+		hi = gsi_readl(gsi_ctx->base +
+			GSI_EE_n_EV_CH_k_CNTXT_7_OFFS(ctx->evtr->id, ee));
+		info->evt_wp = hi << 32 | lo;
 	}
 
 	spin_unlock_irqrestore(slock, flags);
