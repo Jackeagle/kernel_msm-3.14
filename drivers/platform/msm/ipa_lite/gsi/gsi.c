@@ -2678,19 +2678,19 @@ EXPORT_SYMBOL(gsi_set_channel_cfg);
 
 static void gsi_configure_ieps(void __iomem *gsi_base)
 {
-	gsi_writel(1, gsi_base + GSI_GSI_IRAM_PTR_CH_CMD_OFFS);
-	gsi_writel(2, gsi_base + GSI_GSI_IRAM_PTR_CH_DB_OFFS);
-	gsi_writel(3, gsi_base + GSI_GSI_IRAM_PTR_CH_DIS_COMP_OFFS);
-	gsi_writel(4, gsi_base + GSI_GSI_IRAM_PTR_CH_EMPTY_OFFS);
-	gsi_writel(5, gsi_base + GSI_GSI_IRAM_PTR_EE_GENERIC_CMD_OFFS);
-	gsi_writel(6, gsi_base + GSI_GSI_IRAM_PTR_EVENT_GEN_COMP_OFFS);
-	gsi_writel(7, gsi_base + GSI_GSI_IRAM_PTR_INT_MOD_STOPED_OFFS);
-	gsi_writel(8, gsi_base + GSI_GSI_IRAM_PTR_PERIPH_IF_TLV_IN_0_OFFS);
-	gsi_writel(9, gsi_base + GSI_GSI_IRAM_PTR_PERIPH_IF_TLV_IN_2_OFFS);
-	gsi_writel(10, gsi_base + GSI_GSI_IRAM_PTR_PERIPH_IF_TLV_IN_1_OFFS);
-	gsi_writel(11, gsi_base + GSI_GSI_IRAM_PTR_NEW_RE_OFFS);
-	gsi_writel(12, gsi_base + GSI_GSI_IRAM_PTR_READ_ENG_COMP_OFFS);
-	gsi_writel(13, gsi_base + GSI_GSI_IRAM_PTR_TIMER_EXPIRED_OFFS);
+	writel(1, gsi_base + GSI_GSI_IRAM_PTR_CH_CMD_OFFS);
+	writel(2, gsi_base + GSI_GSI_IRAM_PTR_CH_DB_OFFS);
+	writel(3, gsi_base + GSI_GSI_IRAM_PTR_CH_DIS_COMP_OFFS);
+	writel(4, gsi_base + GSI_GSI_IRAM_PTR_CH_EMPTY_OFFS);
+	writel(5, gsi_base + GSI_GSI_IRAM_PTR_EE_GENERIC_CMD_OFFS);
+	writel(6, gsi_base + GSI_GSI_IRAM_PTR_EVENT_GEN_COMP_OFFS);
+	writel(7, gsi_base + GSI_GSI_IRAM_PTR_INT_MOD_STOPED_OFFS);
+	writel(8, gsi_base + GSI_GSI_IRAM_PTR_PERIPH_IF_TLV_IN_0_OFFS);
+	writel(9, gsi_base + GSI_GSI_IRAM_PTR_PERIPH_IF_TLV_IN_2_OFFS);
+	writel(10, gsi_base + GSI_GSI_IRAM_PTR_PERIPH_IF_TLV_IN_1_OFFS);
+	writel(11, gsi_base + GSI_GSI_IRAM_PTR_NEW_RE_OFFS);
+	writel(12, gsi_base + GSI_GSI_IRAM_PTR_READ_ENG_COMP_OFFS);
+	writel(13, gsi_base + GSI_GSI_IRAM_PTR_TIMER_EXPIRED_OFFS);
 }
 
 static void gsi_configure_bck_prs_matrix(void __iomem *gsi_base)
@@ -2699,36 +2699,28 @@ static void gsi_configure_bck_prs_matrix(void __iomem *gsi_base)
 	 * For now, these are default values. In the future, GSI FW image will
 	 * produce optimized back-pressure values based on the FW image.
 	 */
-	gsi_writel(0xfffffffe,
-		gsi_base + GSI_IC_DISABLE_CHNL_BCK_PRS_LSB_OFFS);
-	gsi_writel(0xffffffff,
-		gsi_base + GSI_IC_DISABLE_CHNL_BCK_PRS_MSB_OFFS);
-	gsi_writel(0xffffffbf, gsi_base + GSI_IC_GEN_EVNT_BCK_PRS_LSB_OFFS);
-	gsi_writel(0xffffffff, gsi_base + GSI_IC_GEN_EVNT_BCK_PRS_MSB_OFFS);
-	gsi_writel(0xffffefff, gsi_base + GSI_IC_GEN_INT_BCK_PRS_LSB_OFFS);
-	gsi_writel(0xffffffff, gsi_base + GSI_IC_GEN_INT_BCK_PRS_MSB_OFFS);
-	gsi_writel(0xffffefff,
-		gsi_base + GSI_IC_STOP_INT_MOD_BCK_PRS_LSB_OFFS);
-	gsi_writel(0xffffffff,
-		gsi_base + GSI_IC_STOP_INT_MOD_BCK_PRS_MSB_OFFS);
-	gsi_writel(0x00000000,
-		gsi_base + GSI_IC_PROCESS_DESC_BCK_PRS_LSB_OFFS);
-	gsi_writel(0x00000000,
-		gsi_base + GSI_IC_PROCESS_DESC_BCK_PRS_MSB_OFFS);
-	gsi_writel(0xf9ffffff, gsi_base + GSI_IC_TLV_STOP_BCK_PRS_LSB_OFFS);
-	gsi_writel(0xffffffff, gsi_base + GSI_IC_TLV_STOP_BCK_PRS_MSB_OFFS);
-	gsi_writel(0xf9ffffff, gsi_base + GSI_IC_TLV_RESET_BCK_PRS_LSB_OFFS);
-	gsi_writel(0xffffffff, gsi_base + GSI_IC_TLV_RESET_BCK_PRS_MSB_OFFS);
-	gsi_writel(0xffffffff, gsi_base + GSI_IC_RGSTR_TIMER_BCK_PRS_LSB_OFFS);
-	gsi_writel(0xfffffffe, gsi_base + GSI_IC_RGSTR_TIMER_BCK_PRS_MSB_OFFS);
-	gsi_writel(0xffffffff, gsi_base + GSI_IC_READ_BCK_PRS_LSB_OFFS);
-	gsi_writel(0xffffefff, gsi_base + GSI_IC_READ_BCK_PRS_MSB_OFFS);
-	gsi_writel(0xffffffff, gsi_base + GSI_IC_WRITE_BCK_PRS_LSB_OFFS);
-	gsi_writel(0xffffdfff, gsi_base + GSI_IC_WRITE_BCK_PRS_MSB_OFFS);
-	gsi_writel(0xffffffff,
-		gsi_base + GSI_IC_UCONTROLLER_GPR_BCK_PRS_LSB_OFFS);
-	gsi_writel(0xff03ffff,
-		gsi_base + GSI_IC_UCONTROLLER_GPR_BCK_PRS_MSB_OFFS);
+	writel(0xfffffffe, gsi_base + GSI_IC_DISABLE_CHNL_BCK_PRS_LSB_OFFS);
+	writel(0xffffffff, gsi_base + GSI_IC_DISABLE_CHNL_BCK_PRS_MSB_OFFS);
+	writel(0xffffffbf, gsi_base + GSI_IC_GEN_EVNT_BCK_PRS_LSB_OFFS);
+	writel(0xffffffff, gsi_base + GSI_IC_GEN_EVNT_BCK_PRS_MSB_OFFS);
+	writel(0xffffefff, gsi_base + GSI_IC_GEN_INT_BCK_PRS_LSB_OFFS);
+	writel(0xffffffff, gsi_base + GSI_IC_GEN_INT_BCK_PRS_MSB_OFFS);
+	writel(0xffffefff, gsi_base + GSI_IC_STOP_INT_MOD_BCK_PRS_LSB_OFFS);
+	writel(0xffffffff, gsi_base + GSI_IC_STOP_INT_MOD_BCK_PRS_MSB_OFFS);
+	writel(0x00000000, gsi_base + GSI_IC_PROCESS_DESC_BCK_PRS_LSB_OFFS);
+	writel(0x00000000, gsi_base + GSI_IC_PROCESS_DESC_BCK_PRS_MSB_OFFS);
+	writel(0xf9ffffff, gsi_base + GSI_IC_TLV_STOP_BCK_PRS_LSB_OFFS);
+	writel(0xffffffff, gsi_base + GSI_IC_TLV_STOP_BCK_PRS_MSB_OFFS);
+	writel(0xf9ffffff, gsi_base + GSI_IC_TLV_RESET_BCK_PRS_LSB_OFFS);
+	writel(0xffffffff, gsi_base + GSI_IC_TLV_RESET_BCK_PRS_MSB_OFFS);
+	writel(0xffffffff, gsi_base + GSI_IC_RGSTR_TIMER_BCK_PRS_LSB_OFFS);
+	writel(0xfffffffe, gsi_base + GSI_IC_RGSTR_TIMER_BCK_PRS_MSB_OFFS);
+	writel(0xffffffff, gsi_base + GSI_IC_READ_BCK_PRS_LSB_OFFS);
+	writel(0xffffefff, gsi_base + GSI_IC_READ_BCK_PRS_MSB_OFFS);
+	writel(0xffffffff, gsi_base + GSI_IC_WRITE_BCK_PRS_LSB_OFFS);
+	writel(0xffffdfff, gsi_base + GSI_IC_WRITE_BCK_PRS_MSB_OFFS);
+	writel(0xffffffff, gsi_base + GSI_IC_UCONTROLLER_GPR_BCK_PRS_LSB_OFFS);
+	writel(0xff03ffff, gsi_base + GSI_IC_UCONTROLLER_GPR_BCK_PRS_MSB_OFFS);
 }
 
 int gsi_configure_regs(phys_addr_t gsi_base_addr, u32 gsi_size,
@@ -2741,9 +2733,8 @@ int gsi_configure_regs(phys_addr_t gsi_base_addr, u32 gsi_size,
 		GSIERR("ioremap failed for 0x%pa\n", &gsi_base_addr);
 		return -GSI_STATUS_RES_ALLOC_FAILURE;
 	}
-	gsi_writel(0, gsi_base + GSI_GSI_PERIPH_BASE_ADDR_MSB_OFFS);
-	gsi_writel(per_base_addr,
-			gsi_base + GSI_GSI_PERIPH_BASE_ADDR_LSB_OFFS);
+	writel(0, gsi_base + GSI_GSI_PERIPH_BASE_ADDR_MSB_OFFS);
+	writel(per_base_addr, gsi_base + GSI_GSI_PERIPH_BASE_ADDR_LSB_OFFS);
 	gsi_configure_bck_prs_matrix(gsi_base);
 	gsi_configure_ieps(gsi_base);
 	iounmap(gsi_base);
@@ -2772,7 +2763,7 @@ int gsi_enable_fw(phys_addr_t gsi_base_addr, u32 gsi_size, enum gsi_ver ver)
 	if (ver >= GSI_VER_1_2) {
 		value = ((1 << GSI_GSI_MCS_CFG_MCS_ENABLE_SHFT) &
 				GSI_GSI_MCS_CFG_MCS_ENABLE_BMSK);
-		gsi_writel(value, gsi_base + GSI_GSI_MCS_CFG_OFFS);
+		writel(value, gsi_base + GSI_GSI_MCS_CFG_OFFS);
 
 		value = (((1 << GSI_GSI_CFG_GSI_ENABLE_SHFT) &
 				GSI_GSI_CFG_GSI_ENABLE_BMSK) |
@@ -2786,7 +2777,7 @@ int gsi_enable_fw(phys_addr_t gsi_base_addr, u32 gsi_size, enum gsi_ver ver)
 				GSI_GSI_CFG_GSI_PWR_CLPS_BMSK) |
 			((0 << GSI_GSI_CFG_BP_MTRIX_DISABLE_SHFT) &
 				GSI_GSI_CFG_BP_MTRIX_DISABLE_BMSK));
-		gsi_writel(value, gsi_base + GSI_GSI_CFG_OFFS);
+		writel(value, gsi_base + GSI_GSI_CFG_OFFS);
 	} else {
 		value = (((1 << GSI_GSI_CFG_GSI_ENABLE_SHFT) &
 				GSI_GSI_CFG_GSI_ENABLE_BMSK) |
@@ -2796,7 +2787,7 @@ int gsi_enable_fw(phys_addr_t gsi_base_addr, u32 gsi_size, enum gsi_ver ver)
 				GSI_GSI_CFG_DOUBLE_MCS_CLK_FREQ_BMSK) |
 			((0 << GSI_GSI_CFG_UC_IS_MCS_SHFT) &
 				GSI_GSI_CFG_UC_IS_MCS_BMSK));
-		gsi_writel(value, gsi_base + GSI_GSI_CFG_OFFS);
+		writel(value, gsi_base + GSI_GSI_CFG_OFFS);
 	}
 
 	iounmap(gsi_base);
