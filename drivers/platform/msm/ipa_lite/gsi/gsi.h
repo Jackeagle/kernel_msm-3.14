@@ -840,14 +840,22 @@ uint16_t gsi_find_idx_from_addr(struct gsi_ring_ctx *ctx, uint64_t addr);
 void gsi_update_ch_dp_stats(struct gsi_chan_ctx *ctx, uint16_t used);
 int msm_gsi_init(struct platform_device *pdev);
 
-static inline u32 gsi_readl(void __iomem *c)
+/*
+ * Read a value from the given offset into the I/O space defined in
+ * the GSI context.
+ */
+static inline u32 gsi_readl(u32 offset)
 {
-	return readl(c);
+	return readl(gsi_ctx->base + offset);
 }
 
-static inline void gsi_writel(u32 v, void __iomem *c)
+/*
+ * Write the provided value to the given offset into the I/O space
+ * defined in the GSI context.
+ */
+static inline void gsi_writel(u32 v, u32 offset)
 {
-	writel(v, c);
+	writel(v, gsi_ctx->base + offset);
 }
 
 /**
