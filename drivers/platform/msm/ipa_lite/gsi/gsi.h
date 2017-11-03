@@ -25,9 +25,6 @@
 #define GSI_EVT_RING_MAX  23
 #define GSI_NO_EVT_ERINDEX 31
 
-#define gsi_readl(c)		readl(c)
-#define gsi_writel(v, c)	writel((v), (c))
-
 #define GSI_IPC_LOGGING(buf, fmt, args...) \
 	do { \
 		if (buf) \
@@ -842,6 +839,16 @@ void gsi_debugfs_init(void);
 uint16_t gsi_find_idx_from_addr(struct gsi_ring_ctx *ctx, uint64_t addr);
 void gsi_update_ch_dp_stats(struct gsi_chan_ctx *ctx, uint16_t used);
 int msm_gsi_init(struct platform_device *pdev);
+
+static inline u32 gsi_readl(void __iomem *c)
+{
+	return readl(c);
+}
+
+static inline void gsi_writel(u32 v, void __iomem *c)
+{
+	writel(v, c);
+}
 
 /**
  * gsi_register_device - Peripheral should call this function to
