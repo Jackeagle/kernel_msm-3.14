@@ -2678,10 +2678,8 @@ int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
 }
 EXPORT_SYMBOL(gsi_set_channel_cfg);
 
-static void gsi_configure_ieps(void *base)
+static void gsi_configure_ieps(void __iomem *gsi_base)
 {
-	void __iomem *gsi_base = (void __iomem *)base;
-
 	gsi_writel(1, gsi_base + GSI_GSI_IRAM_PTR_CH_CMD_OFFS);
 	gsi_writel(2, gsi_base + GSI_GSI_IRAM_PTR_CH_DB_OFFS);
 	gsi_writel(3, gsi_base + GSI_GSI_IRAM_PTR_CH_DIS_COMP_OFFS);
@@ -2697,9 +2695,8 @@ static void gsi_configure_ieps(void *base)
 	gsi_writel(13, gsi_base + GSI_GSI_IRAM_PTR_TIMER_EXPIRED_OFFS);
 }
 
-static void gsi_configure_bck_prs_matrix(void *base)
+static void gsi_configure_bck_prs_matrix(void __iomem *gsi_base)
 {
-	void __iomem *gsi_base = (void __iomem *)base;
 	/*
 	 * For now, these are default values. In the future, GSI FW image will
 	 * produce optimized back-pressure values based on the FW image.
@@ -2749,8 +2746,8 @@ int gsi_configure_regs(phys_addr_t gsi_base_addr, u32 gsi_size,
 	gsi_writel(0, gsi_base + GSI_GSI_PERIPH_BASE_ADDR_MSB_OFFS);
 	gsi_writel(per_base_addr,
 			gsi_base + GSI_GSI_PERIPH_BASE_ADDR_LSB_OFFS);
-	gsi_configure_bck_prs_matrix((void *)gsi_base);
-	gsi_configure_ieps((void *)gsi_base);
+	gsi_configure_bck_prs_matrix(gsi_base);
+	gsi_configure_ieps(gsi_base);
 	iounmap(gsi_base);
 
 	return 0;
