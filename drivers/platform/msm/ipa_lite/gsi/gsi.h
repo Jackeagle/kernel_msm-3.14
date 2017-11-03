@@ -25,8 +25,8 @@
 #define GSI_EVT_RING_MAX  23
 #define GSI_NO_EVT_ERINDEX 31
 
-#define gsi_readl(c)	({ u32 __v = readl_relaxed(c); __iormb(); __v; })
-#define gsi_writel(v, c)	({ __iowmb(); writel_relaxed((v), (c)); })
+#define gsi_readl(c)		readl(c)
+#define gsi_writel(v, c)	writel((v), (c))
 
 #define GSI_IPC_LOGGING(buf, fmt, args...) \
 	do { \
