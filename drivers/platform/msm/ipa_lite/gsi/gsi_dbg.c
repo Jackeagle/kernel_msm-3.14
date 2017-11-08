@@ -21,7 +21,6 @@
 #include "gsi_reg.h"
 #include "gsi.h"
 
-static struct dentry *dent;
 static char dbg_buff[4096];
 static void *gsi_ipc_logbuf_low;
 
@@ -763,6 +762,7 @@ const struct file_operations gsi_ipc_low_ops = {
 
 void gsi_debugfs_init(void)
 {
+	struct dentry *dent;
 	struct dentry *dfile;
 	const mode_t read_only_mode = S_IRUSR | S_IRGRP | S_IROTH;
 	const mode_t write_only_mode = S_IWUSR | S_IWGRP;
