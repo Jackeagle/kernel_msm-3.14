@@ -763,7 +763,7 @@ const struct file_operations gsi_ipc_low_ops = {
 
 void gsi_debugfs_init(void)
 {
-	static struct dentry *dfile;
+	struct dentry *dfile;
 	const mode_t read_only_mode = S_IRUSR | S_IRGRP | S_IROTH;
 	const mode_t write_only_mode = S_IWUSR | S_IWGRP;
 
