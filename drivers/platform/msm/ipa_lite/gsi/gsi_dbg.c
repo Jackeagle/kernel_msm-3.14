@@ -11,6 +11,8 @@
  */
 #ifdef CONFIG_DEBUG_FS
 
+#define pr_fmt(fmt)	"%s:%d " fmt, __func__, __LINE__
+
 #include <linux/completion.h>
 #include <linux/debugfs.h>
 #include <linux/dma-mapping.h>
@@ -18,13 +20,6 @@
 #include <linux/uaccess.h>
 #include "gsi_reg.h"
 #include "gsi.h"
-
-#define TERR(fmt, args...) \
-		pr_err("%s:%d " fmt, __func__, __LINE__, ## args)
-#define TDBG(fmt, args...) \
-		pr_debug("%s:%d " fmt, __func__, __LINE__, ## args)
-#define PRT_STAT(fmt, args...) \
-		pr_err(fmt, ## args)
 
 static struct dentry *dent;
 static char dbg_buff[4096];
@@ -69,52 +64,52 @@ static ssize_t gsi_dump_evt(struct file *file,
 	if (kstrtou32(token, 0, &arg2))
 		return -EINVAL;
 
-	TDBG("arg1=%u arg2=%u\n", arg1, arg2);
+	pr_debug("arg1=%u arg2=%u\n", arg1, arg2);
 
 	if (arg1 >= gsi_ctx->max_ev) {
-		TERR("invalid evt ring id %u\n", arg1);
+		pr_err("invalid evt ring id %u\n", arg1);
 		return -EFAULT;
 	}
 
 	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_0_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("EV%2d CTX0  0x%x\n", arg1, val);
+	pr_err("EV%2d CTX0  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_1_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("EV%2d CTX1  0x%x\n", arg1, val);
+	pr_err("EV%2d CTX1  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_2_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("EV%2d CTX2  0x%x\n", arg1, val);
+	pr_err("EV%2d CTX2  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_3_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("EV%2d CTX3  0x%x\n", arg1, val);
+	pr_err("EV%2d CTX3  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("EV%2d CTX4  0x%x\n", arg1, val);
+	pr_err("EV%2d CTX4  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_5_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("EV%2d CTX5  0x%x\n", arg1, val);
+	pr_err("EV%2d CTX5  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_6_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("EV%2d CTX6  0x%x\n", arg1, val);
+	pr_err("EV%2d CTX6  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_7_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("EV%2d CTX7  0x%x\n", arg1, val);
+	pr_err("EV%2d CTX7  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_8_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("EV%2d CTX8  0x%x\n", arg1, val);
+	pr_err("EV%2d CTX8  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_9_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("EV%2d CTX9  0x%x\n", arg1, val);
+	pr_err("EV%2d CTX9  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_10_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("EV%2d CTX10 0x%x\n", arg1, val);
+	pr_err("EV%2d CTX10 0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_11_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("EV%2d CTX11 0x%x\n", arg1, val);
+	pr_err("EV%2d CTX11 0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_12_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("EV%2d CTX12 0x%x\n", arg1, val);
+	pr_err("EV%2d CTX12 0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_13_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("EV%2d CTX13 0x%x\n", arg1, val);
+	pr_err("EV%2d CTX13 0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_EV_CH_k_SCRATCH_0_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("EV%2d SCR0  0x%x\n", arg1, val);
+	pr_err("EV%2d SCR0  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_EV_CH_k_SCRATCH_1_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("EV%2d SCR1  0x%x\n", arg1, val);
+	pr_err("EV%2d SCR1  0x%x\n", arg1, val);
 
 	if (arg2) {
 		ctx = &gsi_ctx->evtr[arg1];
 
 		if (ctx->props.ring_base_vaddr) {
 			for (i = 0; i < ctx->props.ring_len / 16; i++)
-				TERR("EV%2d (0x%08llx) %08x %08x %08x %08x\n",
+				pr_err("EV%2d (0x%08llx) %08x %08x %08x %08x\n",
 				arg1, ctx->props.ring_base_addr + i * 16,
 				*(u32 *)((u8 *)ctx->props.ring_base_vaddr +
 					i * 16 + 0),
@@ -125,7 +120,7 @@ static ssize_t gsi_dump_evt(struct file *file,
 				*(u32 *)((u8 *)ctx->props.ring_base_vaddr +
 					i * 16 + 12));
 		} else {
-			TERR("No VA supplied for event ring id %u\n", arg1);
+			pr_err("No VA supplied for event ring id %u\n", arg1);
 		}
 	}
 
@@ -166,52 +161,52 @@ static ssize_t gsi_dump_ch(struct file *file,
 	if (kstrtou32(token, 0, &arg2))
 		return -EINVAL;
 
-	TDBG("arg1=%u arg2=%u\n", arg1, arg2);
+	pr_debug("arg1=%u arg2=%u\n", arg1, arg2);
 
 	if (arg1 >= gsi_ctx->max_ch) {
-		TERR("invalid chan id %u\n", arg1);
+		pr_err("invalid chan id %u\n", arg1);
 		return -EFAULT;
 	}
 
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("CH%2d CTX0  0x%x\n", arg1, val);
+	pr_err("CH%2d CTX0  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_1_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("CH%2d CTX1  0x%x\n", arg1, val);
+	pr_err("CH%2d CTX1  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_2_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("CH%2d CTX2  0x%x\n", arg1, val);
+	pr_err("CH%2d CTX2  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_3_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("CH%2d CTX3  0x%x\n", arg1, val);
+	pr_err("CH%2d CTX3  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_4_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("CH%2d CTX4  0x%x\n", arg1, val);
+	pr_err("CH%2d CTX4  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_5_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("CH%2d CTX5  0x%x\n", arg1, val);
+	pr_err("CH%2d CTX5  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_6_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("CH%2d CTX6  0x%x\n", arg1, val);
+	pr_err("CH%2d CTX6  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_7_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("CH%2d CTX7  0x%x\n", arg1, val);
+	pr_err("CH%2d CTX7  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_RE_FETCH_READ_PTR_OFFS(arg1,
 			gsi_ctx->per.ee));
-	TERR("CH%2d REFRP 0x%x\n", arg1, val);
+	pr_err("CH%2d REFRP 0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_RE_FETCH_WRITE_PTR_OFFS(arg1,
 			gsi_ctx->per.ee));
-	TERR("CH%2d REFWP 0x%x\n", arg1, val);
+	pr_err("CH%2d REFWP 0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_QOS_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("CH%2d QOS   0x%x\n", arg1, val);
+	pr_err("CH%2d QOS   0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_SCRATCH_0_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("CH%2d SCR0  0x%x\n", arg1, val);
+	pr_err("CH%2d SCR0  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_SCRATCH_1_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("CH%2d SCR1  0x%x\n", arg1, val);
+	pr_err("CH%2d SCR1  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_SCRATCH_2_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("CH%2d SCR2  0x%x\n", arg1, val);
+	pr_err("CH%2d SCR2  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_SCRATCH_3_OFFS(arg1, gsi_ctx->per.ee));
-	TERR("CH%2d SCR3  0x%x\n", arg1, val);
+	pr_err("CH%2d SCR3  0x%x\n", arg1, val);
 
 	if (arg2) {
 		ctx = &gsi_ctx->chan[arg1];
 
 		if (ctx->props.ring_base_vaddr) {
 			for (i = 0; i < ctx->props.ring_len / 16; i++)
-				TERR("CH%2d (0x%08llx) %08x %08x %08x %08x\n",
+				pr_err("CH%2d (0x%08llx) %08x %08x %08x %08x\n",
 				arg1, ctx->props.ring_base_addr + i * 16,
 				*(u32 *)((u8 *)ctx->props.ring_base_vaddr +
 					i * 16 + 0),
@@ -222,7 +217,7 @@ static ssize_t gsi_dump_ch(struct file *file,
 				*(u32 *)((u8 *)ctx->props.ring_base_vaddr +
 					i * 16 + 12));
 		} else {
-			TERR("No VA supplied for chan id %u\n", arg1);
+			pr_err("No VA supplied for chan id %u\n", arg1);
 		}
 	}
 
@@ -235,62 +230,62 @@ static ssize_t gsi_dump_ee(struct file *file,
 	uint32_t val;
 
 	val = gsi_readl(GSI_GSI_MANAGER_EE_QOS_n_OFFS(gsi_ctx->per.ee));
-	TERR("EE%2d QOS 0x%x\n", gsi_ctx->per.ee, val);
+	pr_err("EE%2d QOS 0x%x\n", gsi_ctx->per.ee, val);
 	val = gsi_readl(GSI_EE_n_GSI_STATUS_OFFS(gsi_ctx->per.ee));
-	TERR("EE%2d STATUS 0x%x\n", gsi_ctx->per.ee, val);
+	pr_err("EE%2d STATUS 0x%x\n", gsi_ctx->per.ee, val);
 	if (gsi_ctx->per.ver == GSI_VER_1_0) {
 		val = gsi_readl(GSI_V1_0_EE_n_GSI_HW_PARAM_OFFS(gsi_ctx->per.ee));
-		TERR("EE%2d HW_PARAM 0x%x\n", gsi_ctx->per.ee, val);
+		pr_err("EE%2d HW_PARAM 0x%x\n", gsi_ctx->per.ee, val);
 	} else if (gsi_ctx->per.ver == GSI_VER_1_2) {
 		val = gsi_readl(GSI_V1_2_EE_n_GSI_HW_PARAM_0_OFFS(gsi_ctx->per.ee));
-		TERR("EE%2d HW_PARAM_0 0x%x\n", gsi_ctx->per.ee, val);
+		pr_err("EE%2d HW_PARAM_0 0x%x\n", gsi_ctx->per.ee, val);
 		val = gsi_readl(GSI_V1_2_EE_n_GSI_HW_PARAM_1_OFFS(gsi_ctx->per.ee));
-		TERR("EE%2d HW_PARAM_1 0x%x\n", gsi_ctx->per.ee, val);
+		pr_err("EE%2d HW_PARAM_1 0x%x\n", gsi_ctx->per.ee, val);
 	} else if (gsi_ctx->per.ver == GSI_VER_1_3) {
 		val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_0_OFFS(gsi_ctx->per.ee));
-		TERR("EE%2d HW_PARAM_0 0x%x\n", gsi_ctx->per.ee, val);
+		pr_err("EE%2d HW_PARAM_0 0x%x\n", gsi_ctx->per.ee, val);
 		val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_1_OFFS(gsi_ctx->per.ee));
-		TERR("EE%2d HW_PARAM_1 0x%x\n", gsi_ctx->per.ee, val);
+		pr_err("EE%2d HW_PARAM_1 0x%x\n", gsi_ctx->per.ee, val);
 		val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->per.ee));
-		TERR("EE%2d HW_PARAM_2 0x%x\n", gsi_ctx->per.ee, val);
+		pr_err("EE%2d HW_PARAM_2 0x%x\n", gsi_ctx->per.ee, val);
 	} else if (gsi_ctx->per.ver == GSI_VER_2_0) {
 		val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_0_OFFS(gsi_ctx->per.ee));
-		TERR("EE%2d HW_PARAM_0 0x%x\n", gsi_ctx->per.ee, val);
+		pr_err("EE%2d HW_PARAM_0 0x%x\n", gsi_ctx->per.ee, val);
 		val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_1_OFFS(gsi_ctx->per.ee));
-		TERR("EE%2d HW_PARAM_1 0x%x\n", gsi_ctx->per.ee, val);
+		pr_err("EE%2d HW_PARAM_1 0x%x\n", gsi_ctx->per.ee, val);
 		val = gsi_readl(GSI_V2_0_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->per.ee));
-		TERR("EE%2d HW_PARAM_2 0x%x\n", gsi_ctx->per.ee, val);
+		pr_err("EE%2d HW_PARAM_2 0x%x\n", gsi_ctx->per.ee, val);
 	} else {
 		WARN_ON(1);
 	}
 	val = gsi_readl(GSI_EE_n_GSI_SW_VERSION_OFFS(gsi_ctx->per.ee));
-	TERR("EE%2d SW_VERSION 0x%x\n", gsi_ctx->per.ee, val);
+	pr_err("EE%2d SW_VERSION 0x%x\n", gsi_ctx->per.ee, val);
 	val = gsi_readl(GSI_EE_n_GSI_MCS_CODE_VER_OFFS(gsi_ctx->per.ee));
-	TERR("EE%2d MCS_CODE_VER 0x%x\n", gsi_ctx->per.ee, val);
+	pr_err("EE%2d MCS_CODE_VER 0x%x\n", gsi_ctx->per.ee, val);
 	val = gsi_readl(GSI_EE_n_CNTXT_TYPE_IRQ_MSK_OFFS(gsi_ctx->per.ee));
-	TERR("EE%2d TYPE_IRQ_MSK 0x%x\n", gsi_ctx->per.ee, val);
+	pr_err("EE%2d TYPE_IRQ_MSK 0x%x\n", gsi_ctx->per.ee, val);
 	val = gsi_readl(GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_MSK_OFFS(gsi_ctx->per.ee));
-	TERR("EE%2d CH_IRQ_MSK 0x%x\n", gsi_ctx->per.ee, val);
+	pr_err("EE%2d CH_IRQ_MSK 0x%x\n", gsi_ctx->per.ee, val);
 	val = gsi_readl(GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_MSK_OFFS(gsi_ctx->per.ee));
-	TERR("EE%2d EV_IRQ_MSK 0x%x\n", gsi_ctx->per.ee, val);
+	pr_err("EE%2d EV_IRQ_MSK 0x%x\n", gsi_ctx->per.ee, val);
 	val = gsi_readl(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(gsi_ctx->per.ee));
-	TERR("EE%2d IEOB_IRQ_MSK 0x%x\n", gsi_ctx->per.ee, val);
+	pr_err("EE%2d IEOB_IRQ_MSK 0x%x\n", gsi_ctx->per.ee, val);
 	val = gsi_readl(GSI_EE_n_CNTXT_GLOB_IRQ_EN_OFFS(gsi_ctx->per.ee));
-	TERR("EE%2d GLOB_IRQ_EN 0x%x\n", gsi_ctx->per.ee, val);
+	pr_err("EE%2d GLOB_IRQ_EN 0x%x\n", gsi_ctx->per.ee, val);
 	val = gsi_readl(GSI_EE_n_CNTXT_GSI_IRQ_EN_OFFS(gsi_ctx->per.ee));
-	TERR("EE%2d GSI_IRQ_EN 0x%x\n", gsi_ctx->per.ee, val);
+	pr_err("EE%2d GSI_IRQ_EN 0x%x\n", gsi_ctx->per.ee, val);
 	val = gsi_readl(GSI_EE_n_CNTXT_INTSET_OFFS(gsi_ctx->per.ee));
-	TERR("EE%2d INTSET 0x%x\n", gsi_ctx->per.ee, val);
+	pr_err("EE%2d INTSET 0x%x\n", gsi_ctx->per.ee, val);
 	val = gsi_readl(GSI_EE_n_CNTXT_MSI_BASE_LSB_OFFS(gsi_ctx->per.ee));
-	TERR("EE%2d MSI_BASE_LSB 0x%x\n", gsi_ctx->per.ee, val);
+	pr_err("EE%2d MSI_BASE_LSB 0x%x\n", gsi_ctx->per.ee, val);
 	val = gsi_readl(GSI_EE_n_CNTXT_MSI_BASE_MSB_OFFS(gsi_ctx->per.ee));
-	TERR("EE%2d MSI_BASE_MSB 0x%x\n", gsi_ctx->per.ee, val);
+	pr_err("EE%2d MSI_BASE_MSB 0x%x\n", gsi_ctx->per.ee, val);
 	val = gsi_readl(GSI_EE_n_CNTXT_INT_VEC_OFFS(gsi_ctx->per.ee));
-	TERR("EE%2d INT_VEC 0x%x\n", gsi_ctx->per.ee, val);
+	pr_err("EE%2d INT_VEC 0x%x\n", gsi_ctx->per.ee, val);
 	val = gsi_readl(GSI_EE_n_CNTXT_SCRATCH_0_OFFS(gsi_ctx->per.ee));
-	TERR("EE%2d SCR0 0x%x\n", gsi_ctx->per.ee, val);
+	pr_err("EE%2d SCR0 0x%x\n", gsi_ctx->per.ee, val);
 	val = gsi_readl(GSI_EE_n_CNTXT_SCRATCH_1_OFFS(gsi_ctx->per.ee));
-	TERR("EE%2d SCR1 0x%x\n", gsi_ctx->per.ee, val);
+	pr_err("EE%2d SCR1 0x%x\n", gsi_ctx->per.ee, val);
 
 	return count;
 }
@@ -303,26 +298,26 @@ static ssize_t gsi_dump_map(struct file *file,
 	uint32_t val2;
 	int i;
 
-	TERR("EVT bitmap 0x%lx\n", gsi_ctx->evt_bmap);
+	pr_err("EVT bitmap 0x%lx\n", gsi_ctx->evt_bmap);
 	for (i = 0; i < gsi_ctx->max_ch; i++) {
 		ctx = &gsi_ctx->chan[i];
 
 		if (ctx->allocated) {
-			TERR("VIRT CH%2d -> VIRT EV%2d\n", ctx->props.ch_id,
+			pr_err("VIRT CH%2d -> VIRT EV%2d\n", ctx->props.ch_id,
 				ctx->evtr ? ctx->evtr->id : GSI_NO_EVT_ERINDEX);
 			val1 = gsi_readl(GSI_GSI_DEBUG_EE_n_CH_k_VP_TABLE_OFFS(i,
 					gsi_ctx->per.ee));
-			TERR("VIRT CH%2d -> PHYS CH%2d\n", ctx->props.ch_id,
+			pr_err("VIRT CH%2d -> PHYS CH%2d\n", ctx->props.ch_id,
 				val1 &
 				GSI_GSI_DEBUG_EE_n_CH_k_VP_TABLE_PHY_CH_BMSK);
 			if (ctx->evtr) {
 				val2 = gsi_readl(GSI_GSI_DEBUG_EE_n_EV_k_VP_TABLE_OFFS(
 					ctx->evtr->id, gsi_ctx->per.ee));
-				TERR("VRT EV%2d -> PHYS EV%2d\n", ctx->evtr->id,
+				pr_err("VRT EV%2d -> PHYS EV%2d\n", ctx->evtr->id,
 				val2 &
 				GSI_GSI_DEBUG_EE_n_CH_k_VP_TABLE_PHY_CH_BMSK);
 			}
-			TERR("\n");
+			pr_err("\n");
 		}
 	}
 
@@ -334,26 +329,26 @@ static void gsi_dump_ch_stats(struct gsi_chan_ctx *ctx)
 	if (!ctx->allocated)
 		return;
 
-	PRT_STAT("CH%2d:\n", ctx->props.ch_id);
-	PRT_STAT("queued=%lu compl=%lu\n",
+	printk(KERN_ERR "CH%2d:\n", ctx->props.ch_id);
+	printk(KERN_ERR "queued=%lu compl=%lu\n",
 		ctx->stats.queued,
 		ctx->stats.completed);
-	PRT_STAT("cb->poll=%lu poll->cb=%lu\n",
+	printk(KERN_ERR "cb->poll=%lu poll->cb=%lu\n",
 		ctx->stats.callback_to_poll,
 		ctx->stats.poll_to_callback);
-	PRT_STAT("invalid_tre_error=%lu\n",
+	printk(KERN_ERR "invalid_tre_error=%lu\n",
 		ctx->stats.invalid_tre_error);
-	PRT_STAT("poll_ok=%lu poll_empty=%lu\n",
+	printk(KERN_ERR "poll_ok=%lu poll_empty=%lu\n",
 		ctx->stats.poll_ok, ctx->stats.poll_empty);
 	if (ctx->evtr)
-		PRT_STAT("compl_evt=%lu\n",
+		printk(KERN_ERR "compl_evt=%lu\n",
 			ctx->evtr->stats.completed);
 
-	PRT_STAT("ch_below_lo=%lu\n", ctx->stats.dp.ch_below_lo);
-	PRT_STAT("ch_below_hi=%lu\n", ctx->stats.dp.ch_below_hi);
-	PRT_STAT("ch_above_hi=%lu\n", ctx->stats.dp.ch_above_hi);
-	PRT_STAT("time_empty=%lums\n", ctx->stats.dp.empty_time);
-	PRT_STAT("\n");
+	printk(KERN_ERR "ch_below_lo=%lu\n", ctx->stats.dp.ch_below_lo);
+	printk(KERN_ERR "ch_below_hi=%lu\n", ctx->stats.dp.ch_below_hi);
+	printk(KERN_ERR "ch_above_hi=%lu\n", ctx->stats.dp.ch_above_hi);
+	printk(KERN_ERR "time_empty=%lums\n", ctx->stats.dp.empty_time);
+	printk(KERN_ERR "\n");
 }
 
 static ssize_t gsi_dump_stats(struct file *file,
@@ -389,7 +384,7 @@ static ssize_t gsi_dump_stats(struct file *file,
 
 	return count;
 error:
-	TERR("Usage: echo ch_id > stats. Use -1 for all\n");
+	pr_err("Usage: echo ch_id > stats. Use -1 for all\n");
 	return -EFAULT;
 }
 
@@ -398,7 +393,7 @@ static int gsi_dbg_create_stats_wq(void)
 	gsi_ctx->dp_stat_wq =
 		create_singlethread_workqueue("gsi_stat");
 	if (!gsi_ctx->dp_stat_wq) {
-		TERR("failed create workqueue\n");
+		pr_err("failed create workqueue\n");
 		return -ENOMEM;
 	}
 
@@ -443,7 +438,7 @@ static ssize_t gsi_enable_dp_stats(struct file *file,
 	}
 
 	if (gsi_ctx->chan[ch_id].enable_dp_stats == enable) {
-		TERR("ch_%d: already enabled/disabled\n", ch_id);
+		pr_err("ch_%d: already enabled/disabled\n", ch_id);
 		return -EFAULT;
 	}
 	gsi_ctx->chan[ch_id].enable_dp_stats = enable;
@@ -468,7 +463,7 @@ static ssize_t gsi_enable_dp_stats(struct file *file,
 
 	return count;
 error:
-	TERR("Usage: echo [+-]ch_id > enable_dp_stats\n");
+	pr_err("Usage: echo [+-]ch_id > enable_dp_stats\n");
 	return -EFAULT;
 }
 
@@ -494,12 +489,12 @@ static ssize_t gsi_set_max_elem_dp_stats(struct file *file,
 
 	token = strsep(&sptr, " ");
 	if (!token) {
-		TERR("\n");
+		pr_err("\n");
 		goto error;
 	}
 
 	if (kstrtou32(token, 0, &ch_id)) {
-		TERR("\n");
+		pr_err("\n");
 		goto error;
 	}
 
@@ -510,19 +505,19 @@ static ssize_t gsi_set_max_elem_dp_stats(struct file *file,
 			goto error;
 		if (ch_id >= gsi_ctx->max_ch)
 			goto error;
-		PRT_STAT("ch %d: max_re_expected=%d\n", ch_id,
+		printk(KERN_ERR "ch %d: max_re_expected=%d\n", ch_id,
 			gsi_ctx->chan[ch_id].props.max_re_expected);
 		return count;
 	}
 	if (kstrtou32(token, 0, &max_elem)) {
-		TERR("\n");
+		pr_err("\n");
 		goto error;
 	}
 
-	TDBG("ch_id=%u max_elem=%u\n", ch_id, max_elem);
+	pr_debug("ch_id=%u max_elem=%u\n", ch_id, max_elem);
 
 	if (ch_id >= gsi_ctx->max_ch) {
-		TERR("invalid chan id %u\n", ch_id);
+		pr_err("invalid chan id %u\n", ch_id);
 		goto error;
 	}
 
@@ -531,8 +526,8 @@ static ssize_t gsi_set_max_elem_dp_stats(struct file *file,
 	return count;
 
 error:
-	TERR("Usage: (set) echo <ch_id> <max_elem> > max_elem_dp_stats\n");
-	TERR("Usage: (get) echo <ch_id> > max_elem_dp_stats\n");
+	pr_err("Usage: (set) echo <ch_id> <max_elem> > max_elem_dp_stats\n");
+	pr_err("Usage: (get) echo <ch_id> > max_elem_dp_stats\n");
 	return -EFAULT;
 }
 
@@ -574,7 +569,7 @@ static void gsi_dbg_update_ch_dp_stats(struct gsi_chan_ctx *ctx)
 	else
 		used_hw = ctx->ring.max_num_elem + 1 - (start_hw - end_hw);
 
-	TDBG("ch %d used %d\n", ctx->props.ch_id, used_hw);
+	pr_debug("ch %d used %d\n", ctx->props.ch_id, used_hw);
 	gsi_update_ch_dp_stats(ctx, used_hw);
 }
 
@@ -627,7 +622,7 @@ static ssize_t gsi_rst_stats(struct file *file,
 
 	return count;
 error:
-	TERR("Usage: echo ch_id > rst_stats. Use -1 for all\n");
+	pr_err("Usage: echo ch_id > rst_stats. Use -1 for all\n");
 	return -EFAULT;
 }
 
@@ -660,7 +655,7 @@ static ssize_t gsi_print_dp_stats(struct file *file,
 	}
 
 	if (gsi_ctx->chan[ch_id].print_dp_stats == enable) {
-		TERR("ch_%d: already enabled/disabled\n", ch_id);
+		pr_err("ch_%d: already enabled/disabled\n", ch_id);
 		return -EFAULT;
 	}
 	gsi_ctx->chan[ch_id].print_dp_stats = enable;
@@ -685,7 +680,7 @@ static ssize_t gsi_print_dp_stats(struct file *file,
 
 	return count;
 error:
-	TERR("Usage: echo [+-]ch_id > print_dp_stats\n");
+	pr_err("Usage: echo [+-]ch_id > print_dp_stats\n");
 	return -EFAULT;
 }
 
@@ -713,7 +708,7 @@ static ssize_t gsi_enable_ipc_low(struct file *file,
 				ipc_log_context_create(GSI_IPC_LOG_PAGES,
 					"gsi_low", 0);
 			if (gsi_ipc_logbuf_low == NULL)
-				TERR("failed to get ipc_logbuf_low\n");
+				pr_err("failed to get ipc_logbuf_low\n");
 		}
 		gsi_ctx->ipc_logbuf_low = gsi_ipc_logbuf_low;
 	} else {
@@ -776,77 +771,77 @@ void gsi_debugfs_init(void)
 
 	dent = debugfs_create_dir("gsi", 0);
 	if (IS_ERR(dent)) {
-		TERR("fail to create dir\n");
+		pr_err("fail to create dir\n");
 		return;
 	}
 
 	dfile = debugfs_create_file("ev_dump", write_only_mode,
 			dent, 0, &gsi_ev_dump_ops);
 	if (!dfile || IS_ERR(dfile)) {
-		TERR("fail to create ev_dump file\n");
+		pr_err("fail to create ev_dump file\n");
 		goto fail;
 	}
 
 	dfile = debugfs_create_file("ch_dump", write_only_mode,
 			dent, 0, &gsi_ch_dump_ops);
 	if (!dfile || IS_ERR(dfile)) {
-		TERR("fail to create ch_dump file\n");
+		pr_err("fail to create ch_dump file\n");
 		goto fail;
 	}
 
 	dfile = debugfs_create_file("ee_dump", read_only_mode, dent,
 			0, &gsi_ee_dump_ops);
 	if (!dfile || IS_ERR(dfile)) {
-		TERR("fail to create ee_dump file\n");
+		pr_err("fail to create ee_dump file\n");
 		goto fail;
 	}
 
 	dfile = debugfs_create_file("map", read_only_mode, dent,
 			0, &gsi_map_ops);
 	if (!dfile || IS_ERR(dfile)) {
-		TERR("fail to create map file\n");
+		pr_err("fail to create map file\n");
 		goto fail;
 	}
 
 	dfile = debugfs_create_file("stats", write_only_mode, dent,
 			0, &gsi_stats_ops);
 	if (!dfile || IS_ERR(dfile)) {
-		TERR("fail to create stats file\n");
+		pr_err("fail to create stats file\n");
 		goto fail;
 	}
 
 	dfile = debugfs_create_file("enable_dp_stats", write_only_mode, dent,
 			0, &gsi_enable_dp_stats_ops);
 	if (!dfile || IS_ERR(dfile)) {
-		TERR("fail to create stats file\n");
+		pr_err("fail to create stats file\n");
 		goto fail;
 	}
 
 	dfile = debugfs_create_file("max_elem_dp_stats", write_only_mode,
 		dent, 0, &gsi_max_elem_dp_stats_ops);
 	if (!dfile || IS_ERR(dfile)) {
-		TERR("fail to create stats file\n");
+		pr_err("fail to create stats file\n");
 		goto fail;
 	}
 
 	dfile = debugfs_create_file("rst_stats", write_only_mode,
 		dent, 0, &gsi_rst_stats_ops);
 	if (!dfile || IS_ERR(dfile)) {
-		TERR("fail to create stats file\n");
+		pr_err("fail to create stats file\n");
 		goto fail;
 	}
 
 	dfile = debugfs_create_file("print_dp_stats",
 		write_only_mode, dent, 0, &gsi_print_dp_stats_ops);
 	if (!dfile || IS_ERR(dfile)) {
-		TERR("fail to create stats file\n");
+		pr_err("fail to create stats file\n");
 		goto fail;
 	}
 
 	dfile = debugfs_create_file("ipc_low", write_only_mode,
 		dent, 0, &gsi_ipc_low_ops);
 	if (!dfile || IS_ERR(dfile)) {
-		TERR("could not create ipc_low\n");
+		pr_err("could not create ipc_low\n");
 		goto fail;
 	}
 	pr_err("%s - complete\n", __func__);
