@@ -762,55 +762,58 @@ const struct file_operations gsi_ipc_low_ops = {
 
 void gsi_debugfs_init(void)
 {
-	struct dentry *dent;
+	struct dentry *gsi_dir;
 	struct dentry *dfile;
 	const mode_t read_only_mode = S_IRUSR | S_IRGRP | S_IROTH;
 	const mode_t write_only_mode = S_IWUSR | S_IWGRP;
 
 	pr_err("%s - \n", __func__);
 
-	dent = debugfs_create_dir("gsi", 0);
-	if (IS_ERR(dent)) {
+	gsi_dir = debugfs_create_dir("gsi", 0);
+	if (IS_ERR(gsi_dir)) {
 		pr_err("fail to create dir\n");
 		return;
 	}
 
 	dfile = debugfs_create_file("ev_dump", write_only_mode,
-			dent, 0, &gsi_ev_dump_ops);
+			gsi_dir, 0, &gsi_ev_dump_ops);
 	if (!dfile || IS_ERR(dfile)) {
 		pr_err("fail to create ev_dump file\n");
 		goto fail;
 	}
 
 	dfile = debugfs_create_file("ch_dump", write_only_mode,
-			dent, 0, &gsi_ch_dump_ops);
+			gsi_dir, 0, &gsi_ch_dump_ops);
 	if (!dfile || IS_ERR(dfile)) {
 		pr_err("fail to create ch_dump file\n");
 		goto fail;
 	}
 
-	dfile = debugfs_create_file("ee_dump", read_only_mode, dent,
+	dfile = debugfs_create_file("ee_dump", read_only_mode,
+			gsi_dir,
 			0, &gsi_ee_dump_ops);
 	if (!dfile || IS_ERR(dfile)) {
 		pr_err("fail to create ee_dump file\n");
 		goto fail;
 	}
 
-	dfile = debugfs_create_file("map", read_only_mode, dent,
+	dfile = debugfs_create_file("map", read_only_mode, gsi_dir,
 			0, &gsi_map_ops);
 	if (!dfile || IS_ERR(dfile)) {
 		pr_err("fail to create map file\n");
 		goto fail;
 	}
 
-	dfile = debugfs_create_file("stats", write_only_mode, dent,
+	dfile = debugfs_create_file("stats", write_only_mode,
+			gsi_dir,
 			0, &gsi_stats_ops);
 	if (!dfile || IS_ERR(dfile)) {
 		pr_err("fail to create stats file\n");
 		goto fail;
 	}
 
-	dfile = debugfs_create_file("enable_dp_stats", write_only_mode, dent,
+	dfile = debugfs_create_file("enable_dp_stats",
+			write_only_mode, gsi_dir,
 			0, &gsi_enable_dp_stats_ops);
 	if (!dfile || IS_ERR(dfile)) {
 		pr_err("fail to create stats file\n");
@@ -818,28 +821,28 @@ void gsi_debugfs_init(void)
 	}
 
 	dfile = debugfs_create_file("max_elem_dp_stats", write_only_mode,
-		dent, 0, &gsi_max_elem_dp_stats_ops);
+		gsi_dir, 0, &gsi_max_elem_dp_stats_ops);
 	if (!dfile || IS_ERR(dfile)) {
 		pr_err("fail to create stats file\n");
 		goto fail;
 	}
 
 	dfile = debugfs_create_file("rst_stats", write_only_mode,
-		dent, 0, &gsi_rst_stats_ops);
+		gsi_dir, 0, &gsi_rst_stats_ops);
 	if (!dfile || IS_ERR(dfile)) {
 		pr_err("fail to create stats file\n");
 		goto fail;
 	}
 
 	dfile = debugfs_create_file("print_dp_stats",
-		write_only_mode, dent, 0, &gsi_print_dp_stats_ops);
+		write_only_mode, gsi_dir, 0, &gsi_print_dp_stats_ops);
 	if (!dfile || IS_ERR(dfile)) {
 		pr_err("fail to create stats file\n");
 		goto fail;
 	}
 
 	dfile = debugfs_create_file("ipc_low", write_only_mode,
-		dent, 0, &gsi_ipc_low_ops);
+		gsi_dir, 0, &gsi_ipc_low_ops);
 	if (!dfile || IS_ERR(dfile)) {
 		pr_err("could not create ipc_low\n");
 		goto fail;
@@ -847,7 +850,7 @@ void gsi_debugfs_init(void)
 	pr_err("%s - complete\n", __func__);
 	return;
 fail:
-	debugfs_remove_recursive(dent);
+	debugfs_remove_recursive(gsi_dir);
 }
 #else
 void gsi_debugfs_init(void)
