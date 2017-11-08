@@ -777,14 +777,14 @@ void gsi_debugfs_init(void)
 
 	dfile = debugfs_create_file("ev_dump", write_only_mode,
 			gsi_dir, NULL, &gsi_ev_dump_ops);
-	if (!dfile || IS_ERR(dfile)) {
+	if (IS_ERR_OR_NULL(dfile)) {
 		pr_err("fail to create ev_dump file\n");
 		goto fail;
 	}
 
 	dfile = debugfs_create_file("ch_dump", write_only_mode,
 			gsi_dir, NULL, &gsi_ch_dump_ops);
-	if (!dfile || IS_ERR(dfile)) {
+	if (IS_ERR_OR_NULL(dfile)) {
 		pr_err("fail to create ch_dump file\n");
 		goto fail;
 	}
@@ -792,14 +792,14 @@ void gsi_debugfs_init(void)
 	dfile = debugfs_create_file("ee_dump", read_only_mode,
 			gsi_dir,
 			NULL, &gsi_ee_dump_ops);
-	if (!dfile || IS_ERR(dfile)) {
+	if (IS_ERR_OR_NULL(dfile)) {
 		pr_err("fail to create ee_dump file\n");
 		goto fail;
 	}
 
 	dfile = debugfs_create_file("map", read_only_mode, gsi_dir,
 			NULL, &gsi_map_ops);
-	if (!dfile || IS_ERR(dfile)) {
+	if (IS_ERR_OR_NULL(dfile)) {
 		pr_err("fail to create map file\n");
 		goto fail;
 	}
@@ -807,7 +807,7 @@ void gsi_debugfs_init(void)
 	dfile = debugfs_create_file("stats", write_only_mode,
 			gsi_dir,
 			NULL, &gsi_stats_ops);
-	if (!dfile || IS_ERR(dfile)) {
+	if (IS_ERR_OR_NULL(dfile)) {
 		pr_err("fail to create stats file\n");
 		goto fail;
 	}
@@ -815,35 +815,35 @@ void gsi_debugfs_init(void)
 	dfile = debugfs_create_file("enable_dp_stats",
 			write_only_mode, gsi_dir,
 			NULL, &gsi_enable_dp_stats_ops);
-	if (!dfile || IS_ERR(dfile)) {
+	if (IS_ERR_OR_NULL(dfile)) {
 		pr_err("fail to create stats file\n");
 		goto fail;
 	}
 
 	dfile = debugfs_create_file("max_elem_dp_stats", write_only_mode,
 		gsi_dir, NULL, &gsi_max_elem_dp_stats_ops);
-	if (!dfile || IS_ERR(dfile)) {
+	if (IS_ERR_OR_NULL(dfile)) {
 		pr_err("fail to create stats file\n");
 		goto fail;
 	}
 
 	dfile = debugfs_create_file("rst_stats", write_only_mode,
 		gsi_dir, NULL, &gsi_rst_stats_ops);
-	if (!dfile || IS_ERR(dfile)) {
+	if (IS_ERR_OR_NULL(dfile)) {
 		pr_err("fail to create stats file\n");
 		goto fail;
 	}
 
 	dfile = debugfs_create_file("print_dp_stats",
 		write_only_mode, gsi_dir, NULL, &gsi_print_dp_stats_ops);
-	if (!dfile || IS_ERR(dfile)) {
+	if (IS_ERR_OR_NULL(dfile)) {
 		pr_err("fail to create stats file\n");
 		goto fail;
 	}
 
 	dfile = debugfs_create_file("ipc_low", write_only_mode,
 		gsi_dir, NULL, &gsi_ipc_low_ops);
-	if (!dfile || IS_ERR(dfile)) {
+	if (IS_ERR_OR_NULL(dfile)) {
 		pr_err("could not create ipc_low\n");
 		goto fail;
 	}
