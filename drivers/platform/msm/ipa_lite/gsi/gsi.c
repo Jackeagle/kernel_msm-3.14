@@ -136,7 +136,7 @@ static void gsi_handle_ev_ctrl(int ee)
 	GSIDBG("ev %x\n", ch);
 	for (i = 0; i < 32; i++) {
 		if ((1 << i) & ch) {
-			if (i >= gsi_ctx->max_ev || i >= GSI_EVT_RING_MAX) {
+			if (i >= gsi_ctx->max_ev) {
 				GSIERR("invalid event %d\n", i);
 				break;
 			}
@@ -441,7 +441,7 @@ static void gsi_handle_ieob(int ee)
 
 	for (i = 0; i < 32; i++) {
 		if ((1 << i) & ch & msk) {
-			if (i >= gsi_ctx->max_ev || i >= GSI_EVT_RING_MAX) {
+			if (i >= gsi_ctx->max_ev) {
 				GSIERR("invalid event %d\n", i);
 				break;
 			}
@@ -667,15 +667,21 @@ static uint32_t gsi_get_max_event_rings(enum gsi_ver ver)
 			GSI_V2_0_EE_n_GSI_HW_PARAM_2_GSI_NUM_EV_PER_EE_SHFT;
 		break;
 	default:
-		GSIERR("bad gsi version %d\n", ver);
+		GSIERR("bad gsi version %d\n", (int)ver);
 		WARN_ON(1);
 		reg = 0;
 	}
 
-	GSIDBG("max event rings %d\n", reg);
+	if (WARN_ON(reg > GSI_EVT_RING_MAX)) {
+		GSIERR("bad gsi max event rings %u\n", reg);
+		reg = 0;
+	} else {
+		GSIDBG("max event rings %d\n", reg);
+	}
 
 	return reg;
 }
+
 int gsi_complete_clk_grant(unsigned long dev_hdl)
 {
 	unsigned long flags;
