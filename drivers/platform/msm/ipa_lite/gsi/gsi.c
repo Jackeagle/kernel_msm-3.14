@@ -807,33 +807,6 @@ int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl)
 	return GSI_STATUS_SUCCESS;
 }
 
-int gsi_write_device_scratch(unsigned long dev_hdl,
-		struct gsi_device_scratch *val)
-{
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -GSI_STATUS_NODEV;
-	}
-
-	if (!gsi_ctx->per_registered) {
-		GSIERR("no client registered\n");
-		return -GSI_STATUS_INVALID_PARAMS;
-	}
-
-	if (dev_hdl != (uintptr_t)gsi_ctx) {
-		GSIERR("bad params dev_hdl=0x%lx gsi_ctx=0x%p\n", dev_hdl,
-				gsi_ctx);
-		return -GSI_STATUS_INVALID_PARAMS;
-	}
-
-	mutex_lock(&gsi_ctx->mlock);
-	gsi_writel(gsi_ctx->scratch.word0.val,
-			GSI_EE_n_CNTXT_SCRATCH_0_OFFS(gsi_ctx->per.ee));
-	mutex_unlock(&gsi_ctx->mlock);
-
-	return GSI_STATUS_SUCCESS;
-}
-
 int gsi_deregister_device(unsigned long dev_hdl, bool force)
 {
 	if (!gsi_ctx) {

@@ -871,19 +871,6 @@ static inline void gsi_writel(u32 v, u32 offset)
 int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl);
 
 /**
- * gsi_write_device_scratch - Peripheral should call this function to
- * write to the EE scratch area
- *
- * @dev_hdl:  Client handle previously obtained from
- *            gsi_register_device
- * @val:      Value to write
- *
- * @Return gsi_status
- */
-int gsi_write_device_scratch(unsigned long dev_hdl,
-		struct gsi_device_scratch *val);
-
-/**
  * gsi_deregister_device - Peripheral should call this function to
  * de-register itself with GSI
  *
