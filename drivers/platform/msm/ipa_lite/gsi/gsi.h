@@ -972,20 +972,6 @@ int gsi_ring_evt_ring_db(unsigned long evt_ring_hdl, uint64_t value);
 int gsi_reset_evt_ring(unsigned long evt_ring_hdl);
 
 /**
- * gsi_get_evt_ring_cfg - This function returns the current config
- * of the specified event ring
- *
- * @evt_ring_hdl:  Client handle previously obtained from
- *             gsi_alloc_evt_ring
- * @props:         where to copy properties to
- * @scr:           where to copy scratch info to
- *
- * @Return gsi_status
- */
-int gsi_get_evt_ring_cfg(unsigned long evt_ring_hdl,
-		struct gsi_evt_ring_props *props, union gsi_evt_scratch *scr);
-
-/**
  * gsi_set_evt_ring_cfg - This function applies the supplied config
  * to the specified event ring.
  *
