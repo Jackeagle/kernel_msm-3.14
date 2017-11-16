@@ -871,19 +871,6 @@ static inline void gsi_writel(u32 v, u32 offset)
 int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl);
 
 /**
- * gsi_complete_clk_grant - Peripheral should call this function to
- * grant the clock resource requested by GSI previously that could not
- * be granted synchronously. GSI will release the clock resource using
- * the rel_clk_cb when appropriate
- *
- * @dev_hdl:	   Client handle previously obtained from
- *	   gsi_register_device
- *
- * @Return gsi_status
- */
-int gsi_complete_clk_grant(unsigned long dev_hdl);
-
-/**
  * gsi_write_device_scratch - Peripheral should call this function to
  * write to the EE scratch area
  *

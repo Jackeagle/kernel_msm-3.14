@@ -682,34 +682,6 @@ static uint32_t gsi_get_max_event_rings(enum gsi_ver ver)
 	return reg;
 }
 
-int gsi_complete_clk_grant(unsigned long dev_hdl)
-{
-	unsigned long flags;
-
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -GSI_STATUS_NODEV;
-	}
-
-	if (!gsi_ctx->per_registered) {
-		GSIERR("no client registered\n");
-		return -GSI_STATUS_INVALID_PARAMS;
-	}
-
-	if (dev_hdl != (uintptr_t)gsi_ctx) {
-		GSIERR("bad params dev_hdl=0x%lx gsi_ctx=0x%p\n", dev_hdl,
-				gsi_ctx);
-		return -GSI_STATUS_INVALID_PARAMS;
-	}
-
-	spin_lock_irqsave(&gsi_ctx->slock, flags);
-	gsi_handle_irq();
-	gsi_ctx->per.rel_clk_cb(gsi_ctx->per.user_data);
-	spin_unlock_irqrestore(&gsi_ctx->slock, flags);
-
-	return GSI_STATUS_SUCCESS;
-}
-
 int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl)
 {
 	int res;
