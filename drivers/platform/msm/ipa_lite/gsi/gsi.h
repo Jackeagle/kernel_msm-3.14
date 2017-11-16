@@ -1054,21 +1054,6 @@ int gsi_reset_channel(unsigned long chan_hdl);
 int gsi_dealloc_channel(unsigned long chan_hdl);
 
 /**
- * gsi_stop_db_channel - Peripheral should call this function to
- * stop a channel when all transfer elements till the doorbell
- * have been processed
- *
- * @chan_hdl:  Client handle previously obtained from
- *             gsi_alloc_channel
- *
- * This function can sleep
- *
- * @Return -GSI_STATUS_AGAIN if client should call stop/stop_db again
- *	   other error codes for failure
- */
-int gsi_stop_db_channel(unsigned long chan_hdl);
-
-/**
  * gsi_query_channel_db_addr - Peripheral should call this function to
  * query the physical addresses of the channel doorbell registers
  *
