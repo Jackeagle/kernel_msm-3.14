@@ -1070,19 +1070,6 @@ int gsi_query_channel_db_addr(unsigned long chan_hdl,
 		uint32_t *db_addr_wp_lsb, uint32_t *db_addr_wp_msb);
 
 /**
- * gsi_query_channel_info - Peripheral can call this function to query the
- * channel and associated event ring (if any) status.
- *
- * @chan_hdl:  Client handle previously obtained from
- *             gsi_alloc_channel
- * @info:      Where to read the values into
- *
- * @Return gsi_status
- */
-int gsi_query_channel_info(unsigned long chan_hdl,
-		struct gsi_chan_info *info);
-
-/**
  * gsi_is_channel_empty - Peripheral can call this function to query if
  * the channel is empty. This is only applicable to GPI. "Empty" means
  * GSI has consumed all descriptors for a TO_GSI channel and SW has

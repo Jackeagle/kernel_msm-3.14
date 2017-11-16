@@ -1937,66 +1937,6 @@ static void __gsi_query_channel_free_re(struct gsi_chan_ctx *ctx,
 	*num_free_re = ctx->ring.max_num_elem - used;
 }
 
-int gsi_query_channel_info(unsigned long chan_hdl,
-		struct gsi_chan_info *info)
-{
-	struct gsi_chan_ctx *ctx;
-	spinlock_t *slock;
-	unsigned long flags;
-	uint64_t lo;
-	uint64_t hi;
-	int ee = gsi_ctx->per.ee;
-
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -GSI_STATUS_NODEV;
-	}
-
-	if (chan_hdl >= gsi_ctx->max_ch || !info) {
-		GSIERR("bad params chan_hdl=%lu info=%p\n", chan_hdl, info);
-		return -GSI_STATUS_INVALID_PARAMS;
-	}
-
-	ctx = &gsi_ctx->chan[chan_hdl];
-	if (ctx->evtr) {
-		slock = &ctx->evtr->ring.slock;
-		info->evt_valid = true;
-	} else {
-		slock = &ctx->ring.slock;
-		info->evt_valid = false;
-	}
-
-	spin_lock_irqsave(slock, flags);
-
-	lo = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_4_OFFS(ctx->props.ch_id, ee));
-	hi = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_5_OFFS(ctx->props.ch_id, ee));
-	info->rp = hi << 32 | lo;
-	ctx->ring.rp = info->rp;
-
-	lo = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_6_OFFS(ctx->props.ch_id, ee));
-	hi = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_7_OFFS(ctx->props.ch_id, ee));
-	info->wp = hi << 32 | lo;
-	ctx->ring.wp = info->wp;
-
-	if (info->evt_valid) {
-		lo = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(ctx->evtr->id, ee));
-		hi = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_5_OFFS(ctx->evtr->id, ee));
-		info->evt_rp = hi << 32 | lo;
-
-		lo = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_6_OFFS(ctx->evtr->id, ee));
-		hi = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_7_OFFS(ctx->evtr->id, ee));
-		info->evt_wp = hi << 32 | lo;
-	}
-
-	spin_unlock_irqrestore(slock, flags);
-
-	GSIDBG("ch=%lu RP=0x%llx WP=0x%llx ev_valid=%d ERP=0x%llx EWP=0x%llx\n",
-			chan_hdl, info->rp, info->wp,
-			info->evt_valid, info->evt_rp, info->evt_wp);
-
-	return GSI_STATUS_SUCCESS;
-}
-
 int gsi_is_channel_empty(unsigned long chan_hdl, bool *is_empty)
 {
 	struct gsi_chan_ctx *ctx;
