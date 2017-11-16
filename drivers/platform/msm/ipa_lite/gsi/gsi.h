@@ -931,18 +931,6 @@ int gsi_write_evt_ring_scratch(unsigned long evt_ring_hdl,
 int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl);
 
 /**
- * gsi_ring_evt_ring_db - Peripheral should call this function for
- * ringing the event ring doorbell with given value
- *
- * @evt_ring_hdl:    Client handle previously obtained from
- *	     gsi_alloc_evt_ring
- * @value:           The value to be used for ringing the doorbell
- *
- * @Return gsi_status
- */
-int gsi_ring_evt_ring_db(unsigned long evt_ring_hdl, uint64_t value);
-
-/**
  * gsi_reset_evt_ring - Peripheral should call this function to
  * reset an event ring to recover from error state
  *
