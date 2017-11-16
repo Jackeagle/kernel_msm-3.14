@@ -931,22 +931,6 @@ int gsi_write_evt_ring_scratch(unsigned long evt_ring_hdl,
 int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl);
 
 /**
- * gsi_query_evt_ring_db_addr - Peripheral should call this function to
- * query the physical addresses of the event ring doorbell registers
- *
- * @evt_ring_hdl:    Client handle previously obtained from
- *	     gsi_alloc_evt_ring
- * @db_addr_wp_lsb:  Physical address of doorbell register where the 32
- *                   LSBs of the doorbell value should be written
- * @db_addr_wp_msb:  Physical address of doorbell register where the 32
- *                   MSBs of the doorbell value should be written
- *
- * @Return gsi_status
- */
-int gsi_query_evt_ring_db_addr(unsigned long evt_ring_hdl,
-		uint32_t *db_addr_wp_lsb, uint32_t *db_addr_wp_msb);
-
-/**
  * gsi_ring_evt_ring_db - Peripheral should call this function for
  * ringing the event ring doorbell with given value
  *

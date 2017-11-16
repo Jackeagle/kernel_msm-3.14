@@ -1194,43 +1194,6 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 	return GSI_STATUS_SUCCESS;
 }
 
-int gsi_query_evt_ring_db_addr(unsigned long evt_ring_hdl,
-		uint32_t *db_addr_wp_lsb, uint32_t *db_addr_wp_msb)
-{
-	struct gsi_evt_ctx *ctx;
-
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -GSI_STATUS_NODEV;
-	}
-
-	if (!db_addr_wp_msb || !db_addr_wp_lsb) {
-		GSIERR("bad params msb=%p lsb=%p\n", db_addr_wp_msb,
-				db_addr_wp_lsb);
-		return -GSI_STATUS_INVALID_PARAMS;
-	}
-
-	if (evt_ring_hdl >= gsi_ctx->max_ev) {
-		GSIERR("bad params evt_ring_hdl=%lu\n", evt_ring_hdl);
-		return -GSI_STATUS_INVALID_PARAMS;
-	}
-
-	ctx = &gsi_ctx->evtr[evt_ring_hdl];
-
-	if (ctx->state != GSI_EVT_RING_STATE_ALLOCATED) {
-		GSIERR("bad state %d\n",
-				gsi_ctx->evtr[evt_ring_hdl].state);
-		return -GSI_STATUS_UNSUPPORTED_OP;
-	}
-
-	*db_addr_wp_lsb = gsi_ctx->per.phys_addr +
-		GSI_EE_n_EV_CH_k_DOORBELL_0_OFFS(evt_ring_hdl, gsi_ctx->per.ee);
-	*db_addr_wp_msb = gsi_ctx->per.phys_addr +
-		GSI_EE_n_EV_CH_k_DOORBELL_1_OFFS(evt_ring_hdl, gsi_ctx->per.ee);
-
-	return GSI_STATUS_SUCCESS;
-}
-
 int gsi_ring_evt_ring_db(unsigned long evt_ring_hdl, uint64_t value)
 {
 	struct gsi_evt_ctx *ctx;
