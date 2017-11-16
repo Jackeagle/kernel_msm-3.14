@@ -972,23 +972,6 @@ int gsi_ring_evt_ring_db(unsigned long evt_ring_hdl, uint64_t value);
 int gsi_reset_evt_ring(unsigned long evt_ring_hdl);
 
 /**
- * gsi_set_evt_ring_cfg - This function applies the supplied config
- * to the specified event ring.
- *
- * exclusive property of the event ring cannot be changed after
- * gsi_alloc_evt_ring
- *
- * @evt_ring_hdl:  Client handle previously obtained from
- *             gsi_alloc_evt_ring
- * @props:         the properties to apply
- * @scr:           the scratch info to apply
- *
- * @Return gsi_status
- */
-int gsi_set_evt_ring_cfg(unsigned long evt_ring_hdl,
-		struct gsi_evt_ring_props *props, union gsi_evt_scratch *scr);
-
-/**
  * gsi_alloc_channel - Peripheral should call this function to
  * allocate a channel
  *

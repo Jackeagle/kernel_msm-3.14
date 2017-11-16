@@ -1316,47 +1316,6 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 	return GSI_STATUS_SUCCESS;
 }
 
-int gsi_set_evt_ring_cfg(unsigned long evt_ring_hdl,
-		struct gsi_evt_ring_props *props, union gsi_evt_scratch *scr)
-{
-	struct gsi_evt_ctx *ctx;
-
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -GSI_STATUS_NODEV;
-	}
-
-	if (!props || gsi_validate_evt_ring_props(props)) {
-		GSIERR("bad params props=%p\n", props);
-		return -GSI_STATUS_INVALID_PARAMS;
-	}
-
-	if (evt_ring_hdl >= gsi_ctx->max_ev) {
-		GSIERR("bad params evt_ring_hdl=%lu\n", evt_ring_hdl);
-		return -GSI_STATUS_INVALID_PARAMS;
-	}
-
-	ctx = &gsi_ctx->evtr[evt_ring_hdl];
-
-	if (ctx->state != GSI_EVT_RING_STATE_ALLOCATED) {
-		GSIERR("bad state %d\n", ctx->state);
-		return -GSI_STATUS_UNSUPPORTED_OP;
-	}
-
-	if (ctx->props.exclusive != props->exclusive) {
-		GSIERR("changing immutable fields not supported\n");
-		return -GSI_STATUS_UNSUPPORTED_OP;
-	}
-
-	mutex_lock(&ctx->mlock);
-	ctx->props = *props;
-	if (scr)
-		ctx->scratch = *scr;
-	mutex_unlock(&ctx->mlock);
-
-	return gsi_reset_evt_ring(evt_ring_hdl);
-}
-
 static void gsi_program_chan_ctx(struct gsi_chan_props *props, unsigned int ee,
 		uint8_t erindex)
 {
