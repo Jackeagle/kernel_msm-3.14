@@ -857,18 +857,10 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 		 GSI_EE_n_EV_CH_k_CNTXT_8_INT_MODC_BMSK));
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_8_OFFS(evt_id, ee));
 
-	val = (props->intvec & GSI_EE_n_EV_CH_k_CNTXT_9_INTVEC_BMSK) <<
-		GSI_EE_n_EV_CH_k_CNTXT_9_INTVEC_SHFT;
-	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_9_OFFS(evt_id, ee));
-
-	val = (props->msi_addr & GSI_EE_n_EV_CH_k_CNTXT_10_MSI_ADDR_LSB_BMSK) <<
-		GSI_EE_n_EV_CH_k_CNTXT_10_MSI_ADDR_LSB_SHFT;
-	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_10_OFFS(evt_id, ee));
-
-	val = ((props->msi_addr >> 32) &
-		GSI_EE_n_EV_CH_k_CNTXT_11_MSI_ADDR_MSB_BMSK) <<
-		GSI_EE_n_EV_CH_k_CNTXT_11_MSI_ADDR_MSB_SHFT;
-	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_11_OFFS(evt_id, ee));
+	/* No MSI write data, and MSI address high and low address is 0 */
+	gsi_writel(0, GSI_EE_n_EV_CH_k_CNTXT_9_OFFS(evt_id, ee));
+	gsi_writel(0, GSI_EE_n_EV_CH_k_CNTXT_10_OFFS(evt_id, ee));
+	gsi_writel(0, GSI_EE_n_EV_CH_k_CNTXT_11_OFFS(evt_id, ee));
 
 	val = (props->rp_update_addr &
 			GSI_EE_n_EV_CH_k_CNTXT_12_RP_UPDATE_ADDR_LSB_BMSK) <<
