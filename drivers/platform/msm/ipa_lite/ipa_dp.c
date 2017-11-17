@@ -2862,7 +2862,6 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	}
 
 	memset(&gsi_channel_props, 0, sizeof(gsi_channel_props));
-	gsi_channel_props.prot = GSI_CHAN_PROT_GPI;
 	if (IPA_CLIENT_IS_PROD(ep->client)) {
 		gsi_channel_props.dir = GSI_CHAN_DIR_TO_GSI;
 	} else {
@@ -3078,7 +3077,6 @@ int ipa_gsi_ch20_wa(void)
 
 
 	memset(&gsi_channel_props, 0, sizeof(gsi_channel_props));
-	gsi_channel_props.prot = GSI_CHAN_PROT_GPI;
 	gsi_channel_props.dir = GSI_CHAN_DIR_TO_GSI;
 	gsi_channel_props.evt_ring_hdl = ~0;
 	gsi_channel_props.re_size = GSI_CHAN_RE_SIZE_16B;

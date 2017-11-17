@@ -180,7 +180,6 @@ static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 
 	/* Set up channel properties */
 	memset(&chan_props, 0, sizeof(struct gsi_chan_props));
-	chan_props.prot = GSI_CHAN_PROT_GPI;
 	chan_props.dir = GSI_CHAN_DIR_FROM_GSI;
 	chan_props.ch_id = orig_chan_props->ch_id;
 	chan_props.evt_ring_hdl = orig_chan_props->evt_ring_hdl;

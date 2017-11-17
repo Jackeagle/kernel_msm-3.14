@@ -330,7 +330,6 @@ static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 	}
 
 	ch_ctx = &gsi_ctx->chan[ch_id];
-	BUG_ON(ch_ctx->props.prot != GSI_CHAN_PROT_GPI);
 	rp = evt->xfer_ptr;
 
 	while (ch_ctx->ring.rp_local != rp) {
@@ -1181,7 +1180,7 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, unsigned int ee,
 {
 	uint32_t val;
 
-	val = (((props->prot << GSI_EE_n_GSI_CH_k_CNTXT_0_CHTYPE_PROTOCOL_SHFT)
+	val = (((GSI_CHAN_PROT_GPI << GSI_EE_n_GSI_CH_k_CNTXT_0_CHTYPE_PROTOCOL_SHFT)
 			& GSI_EE_n_GSI_CH_k_CNTXT_0_CHTYPE_PROTOCOL_BMSK) |
 		((props->dir << GSI_EE_n_GSI_CH_k_CNTXT_0_CHTYPE_DIR_SHFT) &
 			 GSI_EE_n_GSI_CH_k_CNTXT_0_CHTYPE_DIR_BMSK) |
@@ -1273,9 +1272,8 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 		return -GSI_STATUS_INVALID_PARAMS;
 	}
 
-	if (props->prot == GSI_CHAN_PROT_GPI &&
-			!props->ring_base_vaddr) {
-		GSIERR("protocol %u requires ring base VA\n", props->prot);
+	if (!props->ring_base_vaddr) {
+		GSIERR("GPI protocol requires ring base VA\n");
 		return -GSI_STATUS_INVALID_PARAMS;
 	}
 
@@ -1284,7 +1282,7 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 		return -GSI_STATUS_INVALID_PARAMS;
 	}
 
-	if (props->prot == GSI_CHAN_PROT_GPI && !props->xfer_cb) {
+	if (!props->xfer_cb) {
 		GSIERR("xfer callback must be provided\n");
 		return -GSI_STATUS_INVALID_PARAMS;
 	}
@@ -1818,12 +1816,6 @@ int gsi_is_channel_empty(unsigned long chan_hdl, bool *is_empty)
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
-
-	if (ctx->props.prot != GSI_CHAN_PROT_GPI) {
-		GSIERR("op not supported for protocol %u\n", ctx->props.prot);
-		return -GSI_STATUS_UNSUPPORTED_OP;
-	}
-
 	if (ctx->evtr)
 		slock = &ctx->evtr->ring.slock;
 	else
@@ -1877,12 +1869,6 @@ int gsi_queue_xfer(unsigned long chan_hdl, uint16_t num_xfers,
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
-
-	if (ctx->props.prot != GSI_CHAN_PROT_GPI) {
-		GSIERR("op not supported for protocol %u\n", ctx->props.prot);
-		return -GSI_STATUS_UNSUPPORTED_OP;
-	}
-
 	if (ctx->evtr)
 		slock = &ctx->evtr->ring.slock;
 	else
@@ -1964,12 +1950,6 @@ int gsi_start_xfer(unsigned long chan_hdl)
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
-
-	if (ctx->props.prot != GSI_CHAN_PROT_GPI) {
-		GSIERR("op not supported for protocol %u\n", ctx->props.prot);
-		return -GSI_STATUS_UNSUPPORTED_OP;
-	}
-
 	if (ctx->state != GSI_CHAN_STATE_STARTED) {
 		GSIERR("bad state %d\n", ctx->state);
 		return -GSI_STATUS_UNSUPPORTED_OP;
@@ -2002,12 +1982,6 @@ int gsi_poll_channel(unsigned long chan_hdl,
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
-
-	if (ctx->props.prot != GSI_CHAN_PROT_GPI) {
-		GSIERR("op not supported for protocol %u\n", ctx->props.prot);
-		return -GSI_STATUS_UNSUPPORTED_OP;
-	}
-
 	if (!ctx->evtr) {
 		GSIERR("no event ring associated chan_hdl=%lu\n", chan_hdl);
 		return -GSI_STATUS_UNSUPPORTED_OP;
@@ -2052,12 +2026,6 @@ int gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode)
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
-
-	if (ctx->props.prot != GSI_CHAN_PROT_GPI) {
-		GSIERR("op not supported for protocol %u\n", ctx->props.prot);
-		return -GSI_STATUS_UNSUPPORTED_OP;
-	}
-
 	if (!ctx->evtr || !ctx->evtr->props.exclusive) {
 		GSIERR("cannot configure mode on chan_hdl=%lu\n",
 				chan_hdl);
