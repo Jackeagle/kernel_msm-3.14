@@ -28,10 +28,6 @@
 
 #define GSI_RESET_WA_MIN_SLEEP 1000
 #define GSI_RESET_WA_MAX_SLEEP 2000
-static const struct of_device_id msm_gsi_match[] = {
-	{ .compatible = "qcom,msm_gsi", },
-	{ },
-};
 
 struct gsi_ctx *gsi_ctx;
 
