@@ -199,14 +199,6 @@ struct gsi_device_scratch {
  * @phys_addr:  physical address of GSI block
  * @size:       register size of GSI block
  * @notify_cb:  general notification callback
- * @req_clk_cb: callback to request peripheral clock
- *		granted should be set to true if request is completed
- *		synchronously, false otherwise (peripheral needs
- *		to call gsi_complete_clk_grant later when request is
- *		completed)
- *		if this callback is not provided, then GSI will assume
- *		peripheral is clocked at all times
- * @rel_clk_cb: callback to release peripheral clock
  * @user_data:  cookie used for notifications
  *
  * All the callbacks are in interrupt context
@@ -222,8 +214,6 @@ struct gsi_per_props {
 	phys_addr_t phys_addr;
 	unsigned long size;
 	void (*notify_cb)(struct gsi_per_notify *notify);
-	void (*req_clk_cb)(void *user_data, bool *granted);
-	int (*rel_clk_cb)(void *user_data);
 	void *user_data;
 };
 

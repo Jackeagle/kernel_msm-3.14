@@ -2250,8 +2250,6 @@ static int ipa3_post_init(const struct ipa3_plat_drv_res *resource_p,
 	gsi_props.phys_addr = resource_p->transport_mem_base;
 	gsi_props.size = resource_p->transport_mem_size;
 	gsi_props.notify_cb = ipa_gsi_notify_cb;
-	gsi_props.req_clk_cb = NULL;
-	gsi_props.rel_clk_cb = NULL;
 
 	result = gsi_register_device(&gsi_props,
 		&ipa3_ctx->gsi_dev_hdl);

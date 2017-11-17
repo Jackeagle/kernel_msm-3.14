@@ -577,17 +577,7 @@ static irqreturn_t gsi_isr(int irq, void *ctxt)
 {
 	BUG_ON(ctxt != gsi_ctx);
 
-	if (gsi_ctx->per.req_clk_cb) {
-		bool granted = false;
-
-		gsi_ctx->per.req_clk_cb(gsi_ctx->per.user_data, &granted);
-		if (granted) {
-			gsi_handle_irq();
-			gsi_ctx->per.rel_clk_cb(gsi_ctx->per.user_data);
-		}
-	} else {
-		gsi_handle_irq();
-	}
+	gsi_handle_irq();
 
 	return IRQ_HANDLED;
 }
@@ -703,11 +693,6 @@ int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl)
 		return -GSI_STATUS_INVALID_PARAMS;
 	}
 
-	if (props->req_clk_cb && !props->rel_clk_cb) {
-		GSIERR("rel callback  must be provided\n");
-		return -GSI_STATUS_INVALID_PARAMS;
-	}
-
 	if (gsi_ctx->per_registered) {
 		GSIERR("per already registered\n");
 		return -GSI_STATUS_UNSUPPORTED_OP;
@@ -720,12 +705,8 @@ int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl)
 			return -GSI_STATUS_INVALID_PARAMS;
 		}
 
-		res = devm_request_irq(gsi_ctx->dev, props->irq,
-				(irq_handler_t) gsi_isr,
-				props->req_clk_cb ? IRQF_TRIGGER_RISING :
-					IRQF_TRIGGER_HIGH,
-				"gsi",
-				gsi_ctx);
+		res = devm_request_irq(gsi_ctx->dev, props->irq, gsi_isr,
+					IRQF_TRIGGER_HIGH, "gsi", gsi_ctx);
 		if (res) {
 			GSIERR("failed to register isr for %u\n", props->irq);
 			return -GSI_STATUS_ERROR;
