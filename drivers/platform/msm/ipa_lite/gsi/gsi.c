@@ -862,15 +862,9 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 	gsi_writel(0, GSI_EE_n_EV_CH_k_CNTXT_10_OFFS(evt_id, ee));
 	gsi_writel(0, GSI_EE_n_EV_CH_k_CNTXT_11_OFFS(evt_id, ee));
 
-	val = (props->rp_update_addr &
-			GSI_EE_n_EV_CH_k_CNTXT_12_RP_UPDATE_ADDR_LSB_BMSK) <<
-		GSI_EE_n_EV_CH_k_CNTXT_12_RP_UPDATE_ADDR_LSB_SHFT;
-	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_12_OFFS(evt_id, ee));
-
-	val = ((props->rp_update_addr >> 32) &
-		GSI_EE_n_EV_CH_k_CNTXT_13_RP_UPDATE_ADDR_MSB_BMSK) <<
-		GSI_EE_n_EV_CH_k_CNTXT_13_RP_UPDATE_ADDR_MSB_SHFT;
-	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_13_OFFS(evt_id, ee));
+	/* We don't need to get event read pointer updates */
+	gsi_writel(0, GSI_EE_n_EV_CH_k_CNTXT_12_OFFS(evt_id, ee));
+	gsi_writel(0, GSI_EE_n_EV_CH_k_CNTXT_13_OFFS(evt_id, ee));
 }
 
 static void gsi_init_evt_ring(struct gsi_evt_ring_props *props,

@@ -2770,7 +2770,6 @@ int ipa3_alloc_common_event_ring(void)
 	gsi_evt_ring_props.ring_base_addr = evt_dma_addr;
 	gsi_evt_ring_props.int_modt = 0;
 	gsi_evt_ring_props.int_modc = 1; /* moderation comes from channel*/
-	gsi_evt_ring_props.rp_update_addr = 0;
 	gsi_evt_ring_props.exclusive = false;
 	gsi_evt_ring_props.err_cb = ipa_gsi_evt_ring_err_cb;
 	gsi_evt_ring_props.user_data = NULL;
@@ -2852,7 +2851,6 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 			ep->client,
 			gsi_evt_ring_props.int_modt,
 			gsi_evt_ring_props.int_modc);
-		gsi_evt_ring_props.rp_update_addr = 0;
 		gsi_evt_ring_props.exclusive = true;
 		gsi_evt_ring_props.err_cb = ipa_gsi_evt_ring_err_cb;
 		gsi_evt_ring_props.user_data = NULL;
