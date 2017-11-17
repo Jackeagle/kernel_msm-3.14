@@ -2755,7 +2755,6 @@ int ipa3_alloc_common_event_ring(void)
 	int result;
 
 	memset(&gsi_evt_ring_props, 0, sizeof(gsi_evt_ring_props));
-	gsi_evt_ring_props.intf = GSI_EVT_CHTYPE_GPI_EV;
 	gsi_evt_ring_props.intr = GSI_INTR_IRQ;
 	gsi_evt_ring_props.re_size = GSI_EVT_RING_RE_SIZE_16B;
 
@@ -2820,7 +2819,6 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		ep->gsi_evt_ring_hdl = ipa3_ctx->gsi_evt_comm_hdl;
 	} else if (ep->sys->policy != IPA_POLICY_NOINTR_MODE ||
 	     IPA_CLIENT_IS_CONS(ep->client)) {
-		gsi_evt_ring_props.intf = GSI_EVT_CHTYPE_GPI_EV;
 		gsi_evt_ring_props.intr = GSI_INTR_IRQ;
 		gsi_evt_ring_props.re_size =
 			GSI_EVT_RING_RE_SIZE_16B;

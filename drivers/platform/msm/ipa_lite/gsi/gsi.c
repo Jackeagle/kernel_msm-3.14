@@ -450,7 +450,6 @@ static void gsi_handle_ieob(int ee)
 			if (ctx->props.intr == GSI_INTR_MSI)
 				continue;
 
-			BUG_ON(ctx->props.intf != GSI_EVT_CHTYPE_GPI_EV);
 			spin_lock_irqsave(&ctx->ring.slock, flags);
 check_again:
 			cntr = 0;
@@ -834,10 +833,9 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 {
 	uint32_t val;
 
-	GSIDBG("intf=%u intr=%u re=%u\n", props->intf, props->intr,
-			props->re_size);
+	GSIDBG("intf=GPI intr=%u re=%u\n", props->intr, props->re_size);
 
-	val = (((props->intf << GSI_EE_n_EV_CH_k_CNTXT_0_CHTYPE_SHFT) &
+	val = (((GSI_EVT_CHTYPE_GPI_EV << GSI_EE_n_EV_CH_k_CNTXT_0_CHTYPE_SHFT) &
 			GSI_EE_n_EV_CH_k_CNTXT_0_CHTYPE_BMSK) |
 		((props->intr << GSI_EE_n_EV_CH_k_CNTXT_0_INTYPE_SHFT) &
 			GSI_EE_n_EV_CH_k_CNTXT_0_INTYPE_BMSK) |
@@ -940,24 +938,13 @@ static int gsi_validate_evt_ring_props(struct gsi_evt_ring_props *props)
 		return -GSI_STATUS_INVALID_PARAMS;
 	}
 
-	if (props->intf == GSI_EVT_CHTYPE_GPI_EV &&
-			!props->ring_base_vaddr) {
-		GSIERR("protocol %u requires ring base VA\n", props->intf);
+	if (!props->ring_base_vaddr) {
+		GSIERR("GPI protocol requires ring base VA\n");
 		return -GSI_STATUS_INVALID_PARAMS;
 	}
 
-	if (props->intf == GSI_EVT_CHTYPE_MHI_EV &&
-			(!props->evchid_valid ||
-			props->evchid > GSI_MHI_ER_END ||
-			props->evchid < GSI_MHI_ER_START)) {
-		GSIERR("MHI requires evchid valid=%d val=%u\n",
-				props->evchid_valid, props->evchid);
-		return -GSI_STATUS_INVALID_PARAMS;
-	}
-
-	if (props->intf != GSI_EVT_CHTYPE_MHI_EV &&
-			props->evchid_valid) {
-		GSIERR("protocol %u cannot specify evchid\n", props->intf);
+	if (props->evchid_valid) {
+		GSIERR("GPI protocol cannot specify evchid\n");
 		return -GSI_STATUS_INVALID_PARAMS;
 	}
 
@@ -969,6 +956,7 @@ static int gsi_validate_evt_ring_props(struct gsi_evt_ring_props *props)
 	return GSI_STATUS_SUCCESS;
 }
 
+/* Note: only GPI interfaces are currently supported */
 int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, unsigned long dev_hdl,
 		unsigned long *evt_ring_hdl)
 {
@@ -1051,19 +1039,14 @@ int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, unsigned long dev_hdl,
 	ctx->id = evt_id;
 	*evt_ring_hdl = evt_id;
 	atomic_inc(&gsi_ctx->num_evt_ring);
-	if (props->intf == GSI_EVT_CHTYPE_GPI_EV)
-		gsi_prime_evt_ring(ctx);
+	gsi_prime_evt_ring(ctx);
 	mutex_unlock(&gsi_ctx->mlock);
 
 	spin_lock_irqsave(&gsi_ctx->slock, flags);
 	gsi_writel(1 << evt_id, GSI_EE_n_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(ee));
 
-	/* enable ieob interrupts for GPI, enable MSI interrupts */
-	if ((props->intf != GSI_EVT_CHTYPE_GPI_EV) &&
-		(props->intr != GSI_INTR_MSI))
-		__gsi_config_ieob_irq(gsi_ctx->per.ee, 1 << evt_id, 0);
-	else
-		__gsi_config_ieob_irq(gsi_ctx->per.ee, 1 << ctx->id, ~0);
+	/* enable ieob interrupts */
+	__gsi_config_ieob_irq(gsi_ctx->per.ee, 1 << ctx->id, ~0);
 	spin_unlock_irqrestore(&gsi_ctx->slock, flags);
 
 	return GSI_STATUS_SUCCESS;
@@ -1221,8 +1204,7 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 	/* restore scratch */
 	__gsi_write_evt_ring_scratch(evt_ring_hdl, ctx->scratch);
 
-	if (ctx->props.intf == GSI_EVT_CHTYPE_GPI_EV)
-		gsi_prime_evt_ring(ctx);
+	gsi_prime_evt_ring(ctx);
 	mutex_unlock(&gsi_ctx->mlock);
 
 	return GSI_STATUS_SUCCESS;
