@@ -936,11 +936,6 @@ static int gsi_validate_evt_ring_props(struct gsi_evt_ring_props *props)
 		return -GSI_STATUS_INVALID_PARAMS;
 	}
 
-	if (props->evchid_valid) {
-		GSIERR("GPI protocol cannot specify evchid\n");
-		return -GSI_STATUS_INVALID_PARAMS;
-	}
-
 	if (!props->err_cb) {
 		GSIERR("err callback must be provided\n");
 		return -GSI_STATUS_INVALID_PARAMS;
@@ -977,20 +972,17 @@ int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, unsigned long dev_hdl,
 		return -GSI_STATUS_INVALID_PARAMS;
 	}
 
-	if (!props->evchid_valid) {
-		mutex_lock(&gsi_ctx->mlock);
-		evt_id = find_first_zero_bit(&gsi_ctx->evt_bmap,
-				sizeof(unsigned long) * BITS_PER_BYTE);
-		if (evt_id == sizeof(unsigned long) * BITS_PER_BYTE) {
-			GSIERR("failed to alloc event ID\n");
-			mutex_unlock(&gsi_ctx->mlock);
-			return -GSI_STATUS_RES_ALLOC_FAILURE;
-		}
-		set_bit(evt_id, &gsi_ctx->evt_bmap);
+	mutex_lock(&gsi_ctx->mlock);
+	evt_id = find_first_zero_bit(&gsi_ctx->evt_bmap,
+			sizeof(unsigned long) * BITS_PER_BYTE);
+	if (evt_id == sizeof(unsigned long) * BITS_PER_BYTE) {
+		GSIERR("failed to alloc event ID\n");
 		mutex_unlock(&gsi_ctx->mlock);
-	} else {
-		evt_id = props->evchid;
+		return -GSI_STATUS_RES_ALLOC_FAILURE;
 	}
+	set_bit(evt_id, &gsi_ctx->evt_bmap);
+	mutex_unlock(&gsi_ctx->mlock);
+
 	GSIDBG("Using %lu as virt evt id\n", evt_id);
 
 	ctx = &gsi_ctx->evtr[evt_id];
@@ -1009,8 +1001,7 @@ int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, unsigned long dev_hdl,
 	res = wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT);
 	if (res == 0) {
 		GSIERR("evt_id=%lu timed out\n", evt_id);
-		if (!props->evchid_valid)
-			clear_bit(evt_id, &gsi_ctx->evt_bmap);
+		clear_bit(evt_id, &gsi_ctx->evt_bmap);
 		mutex_unlock(&gsi_ctx->mlock);
 		return -GSI_STATUS_TIMED_OUT;
 	}
@@ -1018,8 +1009,7 @@ int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, unsigned long dev_hdl,
 	if (ctx->state != GSI_EVT_RING_STATE_ALLOCATED) {
 		GSIERR("evt_id=%lu allocation failed state=%u\n",
 				evt_id, ctx->state);
-		if (!props->evchid_valid)
-			clear_bit(evt_id, &gsi_ctx->evt_bmap);
+		clear_bit(evt_id, &gsi_ctx->evt_bmap);
 		mutex_unlock(&gsi_ctx->mlock);
 		return -GSI_STATUS_RES_ALLOC_FAILURE;
 	}
@@ -1135,13 +1125,10 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 				ctx->state);
 		BUG();
 	}
+
+	clear_bit(evt_ring_hdl, &gsi_ctx->evt_bmap);
 	mutex_unlock(&gsi_ctx->mlock);
 
-	if (!ctx->props.evchid_valid) {
-		mutex_lock(&gsi_ctx->mlock);
-		clear_bit(evt_ring_hdl, &gsi_ctx->evt_bmap);
-		mutex_unlock(&gsi_ctx->mlock);
-	}
 	atomic_dec(&gsi_ctx->num_evt_ring);
 
 	return GSI_STATUS_SUCCESS;
