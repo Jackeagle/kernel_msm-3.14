@@ -443,13 +443,6 @@ static void gsi_handle_ieob(int ee)
 			}
 			ctx = &gsi_ctx->evtr[i];
 
-			/*
-			 * Don't handle MSI interrupts, only handle IEOB
-			 * IRQs
-			 */
-			if (ctx->props.intr == GSI_INTR_MSI)
-				continue;
-
 			spin_lock_irqsave(&ctx->ring.slock, flags);
 check_again:
 			cntr = 0;
@@ -833,11 +826,11 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 {
 	uint32_t val;
 
-	GSIDBG("intf=GPI intr=%u re=%u\n", props->intr, props->re_size);
+	GSIDBG("intf=GPI intr=IRQ re=%u\n", props->re_size);
 
 	val = (((GSI_EVT_CHTYPE_GPI_EV << GSI_EE_n_EV_CH_k_CNTXT_0_CHTYPE_SHFT) &
 			GSI_EE_n_EV_CH_k_CNTXT_0_CHTYPE_BMSK) |
-		((props->intr << GSI_EE_n_EV_CH_k_CNTXT_0_INTYPE_SHFT) &
+		((GSI_INTR_IRQ << GSI_EE_n_EV_CH_k_CNTXT_0_INTYPE_SHFT) &
 			GSI_EE_n_EV_CH_k_CNTXT_0_INTYPE_BMSK) |
 		((props->re_size << GSI_EE_n_EV_CH_k_CNTXT_0_ELEMENT_SIZE_SHFT)
 			& GSI_EE_n_EV_CH_k_CNTXT_0_ELEMENT_SIZE_BMSK));
@@ -956,7 +949,7 @@ static int gsi_validate_evt_ring_props(struct gsi_evt_ring_props *props)
 	return GSI_STATUS_SUCCESS;
 }
 
-/* Note: only GPI interfaces are currently supported */
+/* Note: only GPI interfaces, IRQ interrupts are currently supported */
 int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, unsigned long dev_hdl,
 		unsigned long *evt_ring_hdl)
 {
