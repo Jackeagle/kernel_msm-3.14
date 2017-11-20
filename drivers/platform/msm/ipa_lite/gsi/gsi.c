@@ -689,30 +689,29 @@ int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl)
 		return -GSI_STATUS_UNSUPPORTED_OP;
 	}
 
-	spin_lock_init(&gsi_ctx->slock);
-	if (props->intr == GSI_INTR_IRQ) {
-		if (!props->irq) {
-			GSIERR("bad irq specified %u\n", props->irq);
-			return -GSI_STATUS_INVALID_PARAMS;
-		}
-
-		res = devm_request_irq(gsi_ctx->dev, props->irq, gsi_isr,
-					IRQF_TRIGGER_HIGH, "gsi", gsi_ctx);
-		if (res) {
-			GSIERR("failed to register isr for %u\n", props->irq);
-			return -GSI_STATUS_ERROR;
-		}
-
-		res = enable_irq_wake(props->irq);
-		if (res)
-			GSIERR("failed to enable wake irq %u\n", props->irq);
-		else
-			GSIERR("GSI irq is wake enabled %u\n", props->irq);
-
-	} else {
+	if (props->intr != GSI_INTR_IRQ) {
 		GSIERR("do not support interrupt type %u\n", props->intr);
 		return -GSI_STATUS_UNSUPPORTED_OP;
 	}
+
+	if (!props->irq) {
+		GSIERR("bad irq specified %u\n", props->irq);
+		return -GSI_STATUS_INVALID_PARAMS;
+	}
+
+	spin_lock_init(&gsi_ctx->slock);
+	res = devm_request_irq(gsi_ctx->dev, props->irq, gsi_isr,
+				IRQF_TRIGGER_HIGH, "gsi", gsi_ctx);
+	if (res) {
+		GSIERR("failed to register isr for %u\n", props->irq);
+		return -GSI_STATUS_ERROR;
+	}
+
+	res = enable_irq_wake(props->irq);
+	if (res)
+		GSIERR("failed to enable wake irq %u\n", props->irq);
+	else
+		GSIERR("GSI irq is wake enabled %u\n", props->irq);
 
 	gsi_ctx->base = devm_ioremap_nocache(gsi_ctx->dev, props->phys_addr,
 				props->size);
