@@ -3032,7 +3032,7 @@ int ipa3_stop_gsi_channel(u32 clnt_hdl)
 		res = gsi_stop_channel(ep->gsi_chan_hdl);
 		IPADBG("gsi_stop_channel ch: %lu returned %d\n",
 			ep->gsi_chan_hdl, res);
-		if (res != -GSI_STATUS_AGAIN && res != -GSI_STATUS_TIMED_OUT)
+		if (res != -GSI_STATUS_AGAIN && res != -ETIMEDOUT)
 			goto end_sequence;
 
 		IPADBG("Inject a DMA_TASK with 1B packet to IPA\n");

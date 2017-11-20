@@ -1591,7 +1591,7 @@ int gsi_stop_channel(unsigned long chan_hdl)
 			goto free_lock;
 		}
 		GSIDBG("chan_hdl=%lu timed out\n", chan_hdl);
-		res = -GSI_STATUS_TIMED_OUT;
+		res = -ETIMEDOUT;
 		goto free_lock;
 	}
 

@@ -1076,8 +1076,7 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 		if (result == GSI_STATUS_SUCCESS)
 			break;
 
-		if (result != -GSI_STATUS_AGAIN &&
-		    result != -GSI_STATUS_TIMED_OUT)
+		if (result != -GSI_STATUS_AGAIN && result != -ETIMEDOUT)
 			break;
 	}
 
