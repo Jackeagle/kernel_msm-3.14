@@ -1094,7 +1094,7 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 	if (res == 0) {
 		GSIERR("evt_id=%lu timed out\n", evt_ring_hdl);
 		mutex_unlock(&gsi_ctx->mlock);
-		return -GSI_STATUS_TIMED_OUT;
+		return -ETIMEDOUT;
 	}
 
 	if (ctx->state != GSI_EVT_RING_STATE_NOT_ALLOCATED) {
