@@ -980,7 +980,7 @@ int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, unsigned long dev_hdl,
 		GSIERR("evt_id=%lu timed out\n", evt_id);
 		clear_bit(evt_id, &gsi_ctx->evt_bmap);
 		mutex_unlock(&gsi_ctx->mlock);
-		return -GSI_STATUS_TIMED_OUT;
+		return -ETIMEDOUT;
 	}
 
 	if (ctx->state != GSI_EVT_RING_STATE_ALLOCATED) {
