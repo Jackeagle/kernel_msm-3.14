@@ -797,10 +797,12 @@ static int ipa3_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			mutex_unlock(&rmnet_ipa3_ctx->add_mux_channel_lock);
 			break;
 		case RMNET_IOCTL_SET_EGRESS_DATA_FORMAT:
-			rc = handle3_egress_format(dev, &extend_ioctl_data);
+			if (handle3_egress_format(dev, &extend_ioctl_data))
+				rc = -EFAULT;
 			break;
 		case RMNET_IOCTL_SET_INGRESS_DATA_FORMAT:/*  Set IDF  */
-			rc = handle3_ingress_format(dev, &extend_ioctl_data);
+			if (handle3_ingress_format(dev, &extend_ioctl_data))
+				rc = -EFAULT;
 			break;
 		/*  Get agg count  */
 		case RMNET_IOCTL_GET_AGGREGATION_COUNT:
