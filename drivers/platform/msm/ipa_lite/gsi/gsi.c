@@ -717,7 +717,6 @@ int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl)
 				props->size);
 	if (!gsi_ctx->base) {
 		GSIERR("failed to remap GSI HW\n");
-		devm_free_irq(gsi_ctx->dev, props->irq, gsi_ctx);
 		return -GSI_STATUS_RES_ALLOC_FAILURE;
 	}
 
@@ -729,14 +728,12 @@ int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl)
 	gsi_ctx->max_ch = gsi_get_max_channels(gsi_ctx->per.ver);
 	if (gsi_ctx->max_ch == 0) {
 		devm_iounmap(gsi_ctx->dev, gsi_ctx->base);
-		devm_free_irq(gsi_ctx->dev, props->irq, gsi_ctx);
 		GSIERR("failed to get max channels\n");
 		return -GSI_STATUS_ERROR;
 	}
 	gsi_ctx->max_ev = gsi_get_max_event_rings(gsi_ctx->per.ver);
 	if (gsi_ctx->max_ev == 0) {
 		devm_iounmap(gsi_ctx->dev, gsi_ctx->base);
-		devm_free_irq(gsi_ctx->dev, props->irq, gsi_ctx);
 		GSIERR("failed to get max event rings\n");
 		return -GSI_STATUS_ERROR;
 	}
@@ -812,7 +809,6 @@ int gsi_deregister_device(unsigned long dev_hdl, bool force)
 	__gsi_config_glob_irq(gsi_ctx->per.ee, ~0, 0);
 	__gsi_config_gen_irq(gsi_ctx->per.ee, ~0, 0);
 
-	devm_free_irq(gsi_ctx->dev, gsi_ctx->per.irq, gsi_ctx);
 	devm_iounmap(gsi_ctx->dev, gsi_ctx->base);
 	memset(gsi_ctx, 0, sizeof(*gsi_ctx));
 
