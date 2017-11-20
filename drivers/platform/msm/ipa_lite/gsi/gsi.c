@@ -1361,7 +1361,7 @@ int gsi_alloc_channel(struct gsi_chan_props *props, unsigned long dev_hdl,
 		GSIERR("chan_hdl=%u timed out\n", props->ch_id);
 		mutex_unlock(&gsi_ctx->mlock);
 		devm_kfree(gsi_ctx->dev, user_data);
-		return -GSI_STATUS_TIMED_OUT;
+		return -ETIMEDOUT;
 	}
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED) {
 		GSIERR("chan_hdl=%u allocation failed state=%d\n",
