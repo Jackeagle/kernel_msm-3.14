@@ -285,6 +285,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 	gsi_res = gsi_start_channel(ep->gsi_chan_hdl);
 	if (gsi_res != GSI_STATUS_SUCCESS) {
 		IPAERR("Error starting channel: %d\n", gsi_res);
+		result = -EFAULT;
 		goto start_chan_fail;
 	}
 
