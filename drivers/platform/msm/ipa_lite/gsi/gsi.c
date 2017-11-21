@@ -1455,7 +1455,7 @@ int gsi_query_channel_db_addr(unsigned long chan_hdl,
 {
 	if (!gsi_ctx) {
 		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -GSI_STATUS_NODEV;
+		return -ENODEV;
 	}
 
 	if (!db_addr_wp_msb || !db_addr_wp_lsb) {
@@ -1625,7 +1625,7 @@ int gsi_reset_channel(unsigned long chan_hdl)
 
 	if (!gsi_ctx) {
 		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -GSI_STATUS_NODEV;
+		return -ENODEV;
 	}
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
@@ -1798,7 +1798,7 @@ int gsi_is_channel_empty(unsigned long chan_hdl, bool *is_empty)
 
 	if (!gsi_ctx) {
 		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -GSI_STATUS_NODEV;
+		return -ENODEV;
 	}
 
 	if (chan_hdl >= gsi_ctx->max_ch || !is_empty) {
@@ -1851,7 +1851,7 @@ int gsi_queue_xfer(unsigned long chan_hdl, uint16_t num_xfers,
 
 	if (!gsi_ctx) {
 		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -GSI_STATUS_NODEV;
+		return -ENODEV;
 	}
 
 	if (chan_hdl >= gsi_ctx->max_ch || !num_xfers || !xfer) {
@@ -1933,7 +1933,7 @@ int gsi_start_xfer(unsigned long chan_hdl)
 
 	if (!gsi_ctx) {
 		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -GSI_STATUS_NODEV;
+		return -ENODEV;
 	}
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
@@ -2060,7 +2060,7 @@ int gsi_get_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
 
 	if (!gsi_ctx) {
 		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -GSI_STATUS_NODEV;
+		return -ENODEV;
 	}
 
 	if (!props || !scr) {
@@ -2095,7 +2095,7 @@ int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
 
 	if (!gsi_ctx) {
 		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -GSI_STATUS_NODEV;
+		return -ENODEV;
 	}
 
 	if (!props || gsi_validate_channel_props(props)) {
@@ -2273,7 +2273,7 @@ int gsi_halt_channel_ee(unsigned int chan_idx, unsigned int ee, int *code)
 
 	if (!gsi_ctx) {
 		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -GSI_STATUS_NODEV;
+		return -ENODEV;
 	}
 
 	if (chan_idx >= gsi_ctx->max_ch || !code) {
