@@ -1604,7 +1604,7 @@ int gsi_stop_channel(unsigned long chan_hdl)
 
 	if (ctx->state == GSI_CHAN_STATE_STOP_IN_PROC) {
 		GSIERR("chan=%lu busy try again\n", chan_hdl);
-		res = -GSI_STATUS_AGAIN;
+		res = -EAGAIN;
 		goto free_lock;
 	}
 
