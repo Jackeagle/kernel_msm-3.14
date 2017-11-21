@@ -1654,7 +1654,7 @@ reset:
 	if (res == 0) {
 		GSIERR("chan_hdl=%lu timed out\n", chan_hdl);
 		mutex_unlock(&gsi_ctx->mlock);
-		return -GSI_STATUS_TIMED_OUT;
+		return -ETIMEDOUT;
 	}
 
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED) {
