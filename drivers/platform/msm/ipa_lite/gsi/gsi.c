@@ -1873,7 +1873,7 @@ int gsi_queue_xfer(unsigned long chan_hdl, uint16_t num_xfers,
 		GSIERR("chan_hdl=%lu num_xfers=%u free=%u\n",
 				chan_hdl, num_xfers, free);
 		spin_unlock_irqrestore(slock, flags);
-		return -GSI_STATUS_RING_INSUFFICIENT_SPACE;
+		return -ENOSPC;
 	}
 
 	wp_rollback = ctx->ring.wp_local;
