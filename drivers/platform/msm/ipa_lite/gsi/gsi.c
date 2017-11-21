@@ -686,12 +686,12 @@ int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl)
 
 	if (gsi_ctx->per_registered) {
 		GSIERR("per already registered\n");
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	if (props->intr != GSI_INTR_IRQ) {
 		GSIERR("do not support interrupt type %u\n", props->intr);
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	if (!props->irq) {
@@ -790,13 +790,13 @@ int gsi_deregister_device(unsigned long dev_hdl, bool force)
 	if (!force && atomic_read(&gsi_ctx->num_chan)) {
 		GSIERR("%u channels are allocated\n",
 				atomic_read(&gsi_ctx->num_chan));
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	if (!force && atomic_read(&gsi_ctx->num_evt_ring)) {
 		GSIERR("%u evt rings are allocated\n",
 				atomic_read(&gsi_ctx->num_evt_ring));
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	/* disable all interrupts */
@@ -1041,7 +1041,7 @@ int gsi_write_evt_ring_scratch(unsigned long evt_ring_hdl,
 	if (ctx->state != GSI_EVT_RING_STATE_ALLOCATED) {
 		GSIERR("bad state %d\n",
 				gsi_ctx->evtr[evt_ring_hdl].state);
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	mutex_lock(&ctx->mlock);
@@ -1074,13 +1074,13 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 	if (atomic_read(&ctx->chan_ref_cnt)) {
 		GSIERR("%d channels still using this event ring\n",
 			atomic_read(&ctx->chan_ref_cnt));
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	/* TODO: add check for ERROR state */
 	if (ctx->state != GSI_EVT_RING_STATE_ALLOCATED) {
 		GSIERR("bad state %d\n", ctx->state);
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	mutex_lock(&gsi_ctx->mlock);
@@ -1132,7 +1132,7 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 
 	if (ctx->state != GSI_EVT_RING_STATE_ALLOCATED) {
 		GSIERR("bad state %d\n", ctx->state);
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	mutex_lock(&gsi_ctx->mlock);
@@ -1325,7 +1325,7 @@ int gsi_alloc_channel(struct gsi_chan_props *props, unsigned long dev_hdl,
 			gsi_ctx->evtr[props->evt_ring_hdl].props.exclusive) {
 			GSIERR("evt ring=%lu exclusively used by chan_hdl=%p\n",
 				props->evt_ring_hdl, chan_hdl);
-			return -GSI_STATUS_UNSUPPORTED_OP;
+			return -ENOTSUPP;
 		}
 	}
 
@@ -1437,7 +1437,7 @@ int gsi_write_channel_scratch(unsigned long chan_hdl,
 		gsi_ctx->chan[chan_hdl].state != GSI_CHAN_STATE_STOPPED) {
 		GSIERR("bad state %d\n",
 				gsi_ctx->chan[chan_hdl].state);
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
@@ -1472,7 +1472,7 @@ int gsi_query_channel_db_addr(unsigned long chan_hdl,
 	if (gsi_ctx->chan[chan_hdl].state == GSI_CHAN_STATE_NOT_ALLOCATED) {
 		GSIERR("bad state %d\n",
 				gsi_ctx->chan[chan_hdl].state);
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	*db_addr_wp_lsb = gsi_ctx->per.phys_addr +
@@ -1506,7 +1506,7 @@ int gsi_start_channel(unsigned long chan_hdl)
 		ctx->state != GSI_CHAN_STATE_STOP_IN_PROC &&
 		ctx->state != GSI_CHAN_STATE_STOPPED) {
 		GSIERR("bad state %d\n", ctx->state);
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	mutex_lock(&gsi_ctx->mlock);
@@ -1562,7 +1562,7 @@ int gsi_stop_channel(unsigned long chan_hdl)
 		ctx->state != GSI_CHAN_STATE_STOP_IN_PROC &&
 		ctx->state != GSI_CHAN_STATE_ERROR) {
 		GSIERR("bad state %d\n", ctx->state);
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	mutex_lock(&gsi_ctx->mlock);
@@ -1637,7 +1637,7 @@ int gsi_reset_channel(unsigned long chan_hdl)
 
 	if (ctx->state != GSI_CHAN_STATE_STOPPED) {
 		GSIERR("bad state %d\n", ctx->state);
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	mutex_lock(&gsi_ctx->mlock);
@@ -1703,7 +1703,7 @@ int gsi_dealloc_channel(unsigned long chan_hdl)
 
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED) {
 		GSIERR("bad state %d\n", ctx->state);
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	mutex_lock(&gsi_ctx->mlock);
@@ -1944,7 +1944,7 @@ int gsi_start_xfer(unsigned long chan_hdl)
 	ctx = &gsi_ctx->chan[chan_hdl];
 	if (ctx->state != GSI_CHAN_STATE_STARTED) {
 		GSIERR("bad state %d\n", ctx->state);
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	if (ctx->ring.wp == ctx->ring.wp_local)
@@ -1976,7 +1976,7 @@ int gsi_poll_channel(unsigned long chan_hdl,
 	ctx = &gsi_ctx->chan[chan_hdl];
 	if (!ctx->evtr) {
 		GSIERR("no event ring associated chan_hdl=%lu\n", chan_hdl);
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	spin_lock_irqsave(&ctx->evtr->ring.slock, flags);
@@ -2021,7 +2021,7 @@ int gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode)
 	if (!ctx->evtr || !ctx->evtr->props.exclusive) {
 		GSIERR("cannot configure mode on chan_hdl=%lu\n",
 				chan_hdl);
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	if (atomic_read(&ctx->poll_mode))
@@ -2032,7 +2032,7 @@ int gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode)
 	if (mode == curr) {
 		GSIERR("already in requested mode %u chan_hdl=%lu\n",
 				curr, chan_hdl);
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	spin_lock_irqsave(&gsi_ctx->slock, flags);
@@ -2077,7 +2077,7 @@ int gsi_get_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
 
 	if (ctx->state == GSI_CHAN_STATE_NOT_ALLOCATED) {
 		GSIERR("bad state %d\n", ctx->state);
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	mutex_lock(&ctx->mlock);
@@ -2112,13 +2112,13 @@ int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
 
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED) {
 		GSIERR("bad state %d\n", ctx->state);
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	if (ctx->props.ch_id != props->ch_id ||
 		ctx->props.evt_ring_hdl != props->evt_ring_hdl) {
 		GSIERR("changing immutable fields not supported\n");
-		return -GSI_STATUS_UNSUPPORTED_OP;
+		return -ENOTSUPP;
 	}
 
 	mutex_lock(&ctx->mlock);
