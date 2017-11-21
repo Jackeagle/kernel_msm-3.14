@@ -704,7 +704,7 @@ int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl)
 				IRQF_TRIGGER_HIGH, "gsi", gsi_ctx);
 	if (res) {
 		GSIERR("failed to register isr for %u\n", props->irq);
-		return -GSI_STATUS_ERROR;
+		return -EIO;
 	}
 
 	res = enable_irq_wake(props->irq);
@@ -728,12 +728,12 @@ int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl)
 	gsi_ctx->max_ch = gsi_get_max_channels(gsi_ctx->per.ver);
 	if (gsi_ctx->max_ch == 0) {
 		GSIERR("failed to get max channels\n");
-		return -GSI_STATUS_ERROR;
+		return -EIO;
 	}
 	gsi_ctx->max_ev = gsi_get_max_event_rings(gsi_ctx->per.ver);
 	if (gsi_ctx->max_ev == 0) {
 		GSIERR("failed to get max event rings\n");
-		return -GSI_STATUS_ERROR;
+		return -EIO;
 	}
 
 	/* bitmap is max events excludes reserved events */
@@ -2209,7 +2209,7 @@ int gsi_enable_fw(phys_addr_t gsi_base_addr, u32 gsi_size, enum gsi_ver ver)
 
 	if (ver <= GSI_VER_ERR || ver >= GSI_VER_MAX) {
 		GSIERR("Incorrect version %d\n", ver);
-		return -GSI_STATUS_ERROR;
+		return -EIO;
 	}
 
 	gsi_base = ioremap_nocache(gsi_base_addr, gsi_size);
@@ -2312,7 +2312,7 @@ int gsi_halt_channel_ee(unsigned int chan_idx, unsigned int ee, int *code)
 		gsi_readl(GSI_EE_n_CNTXT_SCRATCH_0_OFFS(gsi_ctx->per.ee));
 	if (gsi_ctx->scratch.word0.s.generic_ee_cmd_return_code == 0) {
 		GSIERR("No response received\n");
-		res = -GSI_STATUS_ERROR;
+		res = -EIO;
 		goto free_lock;
 	}
 
