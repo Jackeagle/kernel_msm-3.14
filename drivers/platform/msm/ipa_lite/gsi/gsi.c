@@ -2304,7 +2304,7 @@ int gsi_halt_channel_ee(unsigned int chan_idx, unsigned int ee, int *code)
 		msecs_to_jiffies(GSI_CMD_TIMEOUT));
 	if (res == 0) {
 		GSIERR("chan_idx=%u ee=%u timed out\n", chan_idx, ee);
-		res = -GSI_STATUS_TIMED_OUT;
+		res = -ETIMEDOUT;
 		goto free_lock;
 	}
 
