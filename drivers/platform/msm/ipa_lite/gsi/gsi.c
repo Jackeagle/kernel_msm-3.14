@@ -1965,7 +1965,7 @@ int gsi_poll_channel(unsigned long chan_hdl,
 
 	if (!gsi_ctx) {
 		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -GSI_STATUS_NODEV;
+		return -ENODEV;
 	}
 
 	if (chan_hdl >= gsi_ctx->max_ch || !notify) {
