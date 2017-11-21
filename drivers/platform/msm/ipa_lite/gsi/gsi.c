@@ -1028,7 +1028,7 @@ int gsi_write_evt_ring_scratch(unsigned long evt_ring_hdl,
 
 	if (!gsi_ctx) {
 		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -GSI_STATUS_NODEV;
+		return -ENODEV;
 	}
 
 	if (evt_ring_hdl >= gsi_ctx->max_ev) {
