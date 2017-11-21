@@ -1991,7 +1991,7 @@ int gsi_poll_channel(unsigned long chan_hdl,
 	if (ctx->evtr->ring.rp == ctx->evtr->ring.rp_local) {
 		spin_unlock_irqrestore(&ctx->evtr->ring.slock, flags);
 		ctx->stats.poll_empty++;
-		return GSI_STATUS_POLL_EMPTY;
+		return -GSI_STATUS_POLL_EMPTY;
 	}
 
 	gsi_process_evt_re(ctx->evtr, notify, false);
