@@ -1719,7 +1719,7 @@ int gsi_dealloc_channel(unsigned long chan_hdl)
 	if (res == 0) {
 		GSIERR("chan_hdl=%lu timed out\n", chan_hdl);
 		mutex_unlock(&gsi_ctx->mlock);
-		return -GSI_STATUS_TIMED_OUT;
+		return -ETIMEDOUT;
 	}
 	if (ctx->state != GSI_CHAN_STATE_NOT_ALLOCATED) {
 		GSIERR("chan_hdl=%lu unexpected state=%u\n", chan_hdl,
