@@ -935,7 +935,7 @@ int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, unsigned long dev_hdl,
 
 	if (!gsi_ctx) {
 		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -GSI_STATUS_NODEV;
+		return -ENODEV;
 	}
 
 	if (!props || !evt_ring_hdl || dev_hdl != (uintptr_t)gsi_ctx) {
