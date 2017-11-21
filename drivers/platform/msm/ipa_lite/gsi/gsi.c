@@ -1300,7 +1300,7 @@ int gsi_alloc_channel(struct gsi_chan_props *props, unsigned long dev_hdl,
 
 	if (!gsi_ctx) {
 		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -GSI_STATUS_NODEV;
+		return -ENODEV;
 	}
 
 	if (!props || !chan_hdl || dev_hdl != (uintptr_t)gsi_ctx) {
@@ -1332,7 +1332,7 @@ int gsi_alloc_channel(struct gsi_chan_props *props, unsigned long dev_hdl,
 	ctx = &gsi_ctx->chan[props->ch_id];
 	if (ctx->allocated) {
 		GSIERR("chan %d already allocated\n", props->ch_id);
-		return -GSI_STATUS_NODEV;
+		return -ENODEV;
 	}
 
 	memset(ctx, 0, sizeof(*ctx));
