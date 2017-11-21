@@ -1073,9 +1073,6 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 	/* channel stop might fail on timeout if IPA is busy */
 	for (i = 0; i < IPA_GSI_CHANNEL_STOP_MAX_RETRY; i++) {
 		result = ipa3_stop_gsi_channel(clnt_hdl);
-		if (result == GSI_STATUS_SUCCESS)
-			break;
-
 		if (result != -EAGAIN && result != -ETIMEDOUT)
 			break;
 	}
