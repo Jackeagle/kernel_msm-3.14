@@ -717,7 +717,7 @@ int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl)
 				props->size);
 	if (!gsi_ctx->base) {
 		GSIERR("failed to remap GSI HW\n");
-		return -GSI_STATUS_RES_ALLOC_FAILURE;
+		return -ENOMEM;
 	}
 
 	gsi_ctx->per = *props;
@@ -955,7 +955,7 @@ int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, unsigned long dev_hdl,
 	if (evt_id == sizeof(unsigned long) * BITS_PER_BYTE) {
 		GSIERR("failed to alloc event ID\n");
 		mutex_unlock(&gsi_ctx->mlock);
-		return -GSI_STATUS_RES_ALLOC_FAILURE;
+		return -ENOMEM;
 	}
 	set_bit(evt_id, &gsi_ctx->evt_bmap);
 	mutex_unlock(&gsi_ctx->mlock);
@@ -988,7 +988,7 @@ int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, unsigned long dev_hdl,
 				evt_id, ctx->state);
 		clear_bit(evt_id, &gsi_ctx->evt_bmap);
 		mutex_unlock(&gsi_ctx->mlock);
-		return -GSI_STATUS_RES_ALLOC_FAILURE;
+		return -ENOMEM;
 	}
 
 	gsi_program_evt_ring_ctx(props, evt_id, gsi_ctx->per.ee);
@@ -1341,7 +1341,7 @@ int gsi_alloc_channel(struct gsi_chan_props *props, unsigned long dev_hdl,
 		GFP_KERNEL);
 	if (user_data == NULL) {
 		GSIERR("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -GSI_STATUS_RES_ALLOC_FAILURE;
+		return -ENOMEM;
 	}
 
 	mutex_init(&ctx->mlock);
@@ -1368,7 +1368,7 @@ int gsi_alloc_channel(struct gsi_chan_props *props, unsigned long dev_hdl,
 				props->ch_id, ctx->state);
 		mutex_unlock(&gsi_ctx->mlock);
 		devm_kfree(gsi_ctx->dev, user_data);
-		return -GSI_STATUS_RES_ALLOC_FAILURE;
+		return -ENOMEM;
 	}
 	mutex_unlock(&gsi_ctx->mlock);
 
@@ -2191,7 +2191,7 @@ int gsi_configure_regs(phys_addr_t gsi_base_addr, u32 gsi_size,
 	gsi_base = ioremap_nocache(gsi_base_addr, gsi_size);
 	if (!gsi_base) {
 		GSIERR("ioremap failed for 0x%pa\n", &gsi_base_addr);
-		return -GSI_STATUS_RES_ALLOC_FAILURE;
+		return -ENOMEM;
 	}
 	writel(0, gsi_base + GSI_GSI_PERIPH_BASE_ADDR_MSB_OFFS);
 	writel(per_base_addr, gsi_base + GSI_GSI_PERIPH_BASE_ADDR_LSB_OFFS);
@@ -2215,7 +2215,7 @@ int gsi_enable_fw(phys_addr_t gsi_base_addr, u32 gsi_size, enum gsi_ver ver)
 	gsi_base = ioremap_nocache(gsi_base_addr, gsi_size);
 	if (!gsi_base) {
 		GSIERR("ioremap failed for 0x%pa\n", &gsi_base_addr);
-		return -GSI_STATUS_RES_ALLOC_FAILURE;
+		return -ENOMEM;
 	}
 
 	/* Enable the MCS and set to x2 clocks */
