@@ -666,7 +666,7 @@ int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl)
 
 	if (!gsi_ctx) {
 		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -GSI_STATUS_NODEV;
+		return -ENODEV;
 	}
 
 	if (!props || !dev_hdl) {
@@ -773,7 +773,7 @@ int gsi_deregister_device(unsigned long dev_hdl, bool force)
 {
 	if (!gsi_ctx) {
 		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -GSI_STATUS_NODEV;
+		return -ENODEV;
 	}
 
 	if (!gsi_ctx->per_registered) {
