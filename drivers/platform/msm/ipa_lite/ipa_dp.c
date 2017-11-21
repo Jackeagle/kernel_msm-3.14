@@ -3017,7 +3017,7 @@ static int ipa_poll_gsi_pkt(struct ipa3_sys_context *sys,
 
 	ret = gsi_poll_channel(sys->ep->gsi_chan_hdl,
 		&xfer_notify);
-	if (ret == -GSI_STATUS_POLL_EMPTY)
+	if (ret == -ENOENT)
 		return ret;
 	else if (ret != GSI_STATUS_SUCCESS) {
 		IPAERR("Poll channel err: %d\n", ret);
