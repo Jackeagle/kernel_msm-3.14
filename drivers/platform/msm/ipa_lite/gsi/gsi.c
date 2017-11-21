@@ -1598,7 +1598,7 @@ int gsi_stop_channel(unsigned long chan_hdl)
 	if (ctx->state != GSI_CHAN_STATE_STOPPED &&
 		ctx->state != GSI_CHAN_STATE_STOP_IN_PROC) {
 		GSIERR("chan=%lu unexpected state=%u\n", chan_hdl, ctx->state);
-		res = -GSI_STATUS_BAD_STATE;
+		res = -EBUSY;
 		goto free_lock;
 	}
 
