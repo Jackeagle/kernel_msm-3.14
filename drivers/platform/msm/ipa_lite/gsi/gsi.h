@@ -85,7 +85,6 @@ enum gsi_status {
 	GSI_STATUS_UNSUPPORTED_OP = 7,
 	GSI_STATUS_NODEV = 8,
 	GSI_STATUS_POLL_EMPTY = 9,
-	GSI_STATUS_EVT_RING_INCOMPATIBLE = 10,
 };
 
 enum gsi_per_evt {
