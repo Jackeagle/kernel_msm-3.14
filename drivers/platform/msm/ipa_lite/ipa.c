@@ -358,11 +358,6 @@ struct iommu_domain *ipa3_get_uc_smmu_domain(void)
 	return NULL;
 }
 
-struct device *ipa3_get_dma_dev(void)
-{
-	return ipa3_ctx->pdev;
-}
-
 /**
  * ipa3_get_smmu_ctx()- Return the smmu context
  *

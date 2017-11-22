@@ -1723,7 +1723,6 @@ int _ipa_read_ep_reg_v3_0(char *buf, int max_len, int pipe);
 int _ipa_read_ep_reg_v4_0(char *buf, int max_len, int pipe);
 void _ipa_enable_clks_v3_0(void);
 void _ipa_disable_clks_v3_0(void);
-struct device *ipa3_get_dma_dev(void);
 void ipa3_suspend_active_aggr_wa(u32 clnt_hdl);
 void ipa3_suspend_handler(enum ipa_irq_type interrupt,
 				void *private_data,
