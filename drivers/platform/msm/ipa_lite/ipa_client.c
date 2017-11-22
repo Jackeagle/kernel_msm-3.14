@@ -174,7 +174,7 @@ static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 	struct ipa_mem_buffer *chan_dma)
 {
 	struct gsi_chan_props chan_props;
-	enum gsi_status gsi_res;
+	int gsi_res;
 	dma_addr_t chan_dma_addr;
 	int result;
 
@@ -219,7 +219,7 @@ static int ipa3_restore_channel_properties(struct ipa3_ep_context *ep,
 	struct gsi_chan_props *chan_props,
 	union gsi_channel_scratch *chan_scratch)
 {
-	enum gsi_status gsi_res;
+	int gsi_res;
 
 	gsi_res = gsi_set_channel_cfg(ep->gsi_chan_hdl, chan_props,
 		chan_scratch);
@@ -235,7 +235,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 	struct ipa3_ep_context *ep)
 {
 	int result = -EFAULT;
-	enum gsi_status gsi_res;
+	int gsi_res;
 	struct gsi_chan_props orig_chan_props;
 	union gsi_channel_scratch orig_chan_scratch;
 	struct ipa_mem_buffer chan_dma;
@@ -380,7 +380,7 @@ int ipa3_reset_gsi_channel(u32 clnt_hdl)
 {
 	struct ipa3_ep_context *ep;
 	int result = -EFAULT;
-	enum gsi_status gsi_res;
+	int gsi_res;
 	int aggr_active_bitmap = 0;
 
 	IPADBG("entry\n");
@@ -438,7 +438,7 @@ int ipa3_reset_gsi_event_ring(u32 clnt_hdl)
 {
 	struct ipa3_ep_context *ep;
 	int result = -EFAULT;
-	enum gsi_status gsi_res;
+	int gsi_res;
 
 	IPADBG("entry\n");
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
@@ -564,7 +564,7 @@ int ipa3_request_gsi_channel(struct ipa_request_gsi_channel_params *params,
 	struct ipa3_ep_context *ep;
 	struct ipahal_reg_ep_cfg_status ep_status;
 	unsigned long gsi_dev_hdl;
-	enum gsi_status gsi_res;
+	int gsi_res;
 	const struct ipa_gsi_ep_config *gsi_ep_cfg_ptr;
 
 	IPADBG("entry\n");
@@ -751,7 +751,7 @@ int ipa3_release_gsi_channel(u32 clnt_hdl)
 {
 	struct ipa3_ep_context *ep;
 	int result = -EFAULT;
-	enum gsi_status gsi_res;
+	int gsi_res;
 
 	IPADBG("entry\n");
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
@@ -795,7 +795,7 @@ int ipa3_start_gsi_channel(u32 clnt_hdl)
 {
 	struct ipa3_ep_context *ep;
 	int result = -EFAULT;
-	enum gsi_status gsi_res;
+	int gsi_res;
 
 	IPADBG("entry\n");
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes  ||
