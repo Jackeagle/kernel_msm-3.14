@@ -442,7 +442,7 @@ int ipa3_send(struct ipa3_sys_context *sys,
 	IPADBG_LOW("ch:%lu queue xfer\n", sys->ep->gsi_chan_hdl);
 	result = gsi_queue_xfer(sys->ep->gsi_chan_hdl, num_desc,
 			gsi_xfer_elem_array, true);
-	if (result != GSI_STATUS_SUCCESS) {
+	if (result) {
 		IPAERR("GSI xfer failed.\n");
 		goto failure;
 	}
@@ -769,7 +769,7 @@ static void ipa3_rx_switch_to_intr_mode(struct ipa3_sys_context *sys)
 	ipa3_dec_release_wakelock();
 	ret = gsi_config_channel_mode(sys->ep->gsi_chan_hdl,
 		GSI_CHAN_MODE_CALLBACK);
-	if (ret != GSI_STATUS_SUCCESS) {
+	if (ret) {
 		IPAERR("Failed to switch to intr mode.\n");
 		goto fail;
 	}
@@ -1077,13 +1077,13 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 			break;
 	}
 
-	if (result != GSI_STATUS_SUCCESS) {
+	if (result) {
 		IPAERR("GSI stop chan err: %d.\n", result);
 		ipa_assert();
 		return result;
 	}
 	result = ipa3_reset_gsi_channel(clnt_hdl);
-	if (result != GSI_STATUS_SUCCESS) {
+	if (result) {
 		IPAERR("Failed to reset chan: %d.\n", result);
 		ipa_assert();
 		return result;
@@ -1093,7 +1093,7 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 		ep->gsi_mem_info.chan_ring_base_vaddr,
 		ep->gsi_mem_info.chan_ring_base_addr);
 	result = gsi_dealloc_channel(ep->gsi_chan_hdl);
-	if (result != GSI_STATUS_SUCCESS) {
+	if (result) {
 		IPAERR("Failed to dealloc chan: %d.\n", result);
 		ipa_assert();
 		return result;
@@ -1105,7 +1105,7 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 			ep->gsi_mem_info.chan_ring_len;
 	} else if (ep->gsi_evt_ring_hdl != ~0) {
 		result = gsi_reset_evt_ring(ep->gsi_evt_ring_hdl);
-		if (result != GSI_STATUS_SUCCESS) {
+		if (result) {
 			IPAERR("Failed to reset evt ring: %d.\n",
 					result);
 			BUG();
@@ -1116,7 +1116,7 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 			ep->gsi_mem_info.evt_ring_base_vaddr,
 			ep->gsi_mem_info.evt_ring_base_addr);
 		result = gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl);
-		if (result != GSI_STATUS_SUCCESS) {
+		if (result) {
 			IPAERR("Failed to dealloc evt ring: %d.\n",
 					result);
 			BUG();
@@ -1563,7 +1563,7 @@ static void ipa3_replenish_rx_cache(struct ipa3_sys_context *sys)
 
 		ret = gsi_queue_xfer(sys->ep->gsi_chan_hdl,
 				1, &gsi_xfer_elem_one, false);
-		if (ret != GSI_STATUS_SUCCESS) {
+		if (ret) {
 			IPAERR("failed to provide buffer: %d\n",
 				ret);
 			goto fail_provide_rx_buffer;
@@ -1667,7 +1667,7 @@ static void ipa3_replenish_rx_cache_recycle(struct ipa3_sys_context *sys)
 
 		ret = gsi_queue_xfer(sys->ep->gsi_chan_hdl,
 				1, &gsi_xfer_elem_one, false);
-		if (ret != GSI_STATUS_SUCCESS) {
+		if (ret) {
 			IPAERR("failed to provide buffer: %d\n",
 				ret);
 			goto fail_provide_rx_buffer;
@@ -1732,7 +1732,7 @@ static void ipa3_fast_replenish_rx_cache(struct ipa3_sys_context *sys)
 
 		ret = gsi_queue_xfer(sys->ep->gsi_chan_hdl, 1,
 			&gsi_xfer_elem_one, false);
-		if (ret != GSI_STATUS_SUCCESS) {
+		if (ret) {
 			IPAERR("failed to provide buffer: %d\n",
 				ret);
 			break;
@@ -2853,7 +2853,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 
 		result = gsi_alloc_evt_ring(&gsi_evt_ring_props,
 			ipa3_ctx->gsi_dev_hdl, &ep->gsi_evt_ring_hdl);
-		if (result != GSI_STATUS_SUCCESS)
+		if (result)
 			goto fail_alloc_evt_ring;
 	}
 
@@ -2923,7 +2923,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		gsi_channel_props.xfer_cb = ipa_gsi_irq_rx_notify_cb;
 	result = gsi_alloc_channel(&gsi_channel_props, ipa3_ctx->gsi_dev_hdl,
 		&ep->gsi_chan_hdl);
-	if (result != GSI_STATUS_SUCCESS)
+	if (result)
 		goto fail_alloc_channel;
 
 	memset(&ch_scratch, 0, sizeof(ch_scratch));
@@ -2931,13 +2931,13 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		GSI_CHAN_RE_SIZE_16B;
 	ch_scratch.gpi.outstanding_threshold = 2 * GSI_CHAN_RE_SIZE_16B;
 	result = gsi_write_channel_scratch(ep->gsi_chan_hdl, ch_scratch);
-	if (result != GSI_STATUS_SUCCESS) {
+	if (result) {
 		IPAERR("failed to write scratch %d\n", result);
 		goto fail_write_channel_scratch;
 	}
 
 	result = gsi_start_channel(ep->gsi_chan_hdl);
-	if (result != GSI_STATUS_SUCCESS)
+	if (result)
 		goto fail_start_channel;
 	if (ep->client == IPA_CLIENT_MEMCPY_DMA_SYNC_CONS)
 		gsi_config_channel_mode(ep->gsi_chan_hdl,
@@ -2947,7 +2947,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 fail_start_channel:
 fail_write_channel_scratch:
 	if (gsi_dealloc_channel(ep->gsi_chan_hdl)
-		!= GSI_STATUS_SUCCESS) {
+		!= 0) {
 		IPAERR("Failed to dealloc GSI chan.\n");
 		BUG();
 	}
@@ -3012,14 +3012,14 @@ static int ipa_poll_gsi_pkt(struct ipa3_sys_context *sys,
 		mem_info->phys_base = sys->ep->phys_base;
 		mem_info->size = (u32)sys->ep->bytes_xfered;
 		sys->ep->bytes_xfered_valid = false;
-		return GSI_STATUS_SUCCESS;
+		return 0;
 	}
 
 	ret = gsi_poll_channel(sys->ep->gsi_chan_hdl,
 		&xfer_notify);
 	if (ret == -ENOENT)
 		return ret;
-	else if (ret != GSI_STATUS_SUCCESS) {
+	else if (ret) {
 		IPAERR("Poll channel err: %d\n", ret);
 		return ret;
 	}
@@ -3093,7 +3093,7 @@ int ipa_gsi_ch20_wa(void)
 		result = gsi_alloc_channel(&gsi_channel_props,
 			ipa3_ctx->gsi_dev_hdl,
 			&chan_hdl[i]);
-		if (result != GSI_STATUS_SUCCESS) {
+		if (result) {
 			IPAERR("failed to alloc channel %d err %d\n",
 				i, result);
 			return result;
@@ -3104,7 +3104,7 @@ int ipa_gsi_ch20_wa(void)
 	gsi_channel_props.ch_id = IPA_GSI_CH_20_WA_VIRT_CHAN;
 	result = gsi_alloc_channel(&gsi_channel_props, ipa3_ctx->gsi_dev_hdl,
 		&chan_hdl_to_keep);
-	if (result != GSI_STATUS_SUCCESS) {
+	if (result) {
 		IPAERR("failed to alloc channel %d err %d\n",
 			i, result);
 		return result;
@@ -3113,7 +3113,7 @@ int ipa_gsi_ch20_wa(void)
 	/* release all other channels */
 	for (i = 0; i < IPA_GSI_CH_20_WA_NUM_CH_TO_ALLOC; i++) {
 		result = gsi_dealloc_channel(chan_hdl[i]);
-		if (result != GSI_STATUS_SUCCESS) {
+		if (result) {
 			IPAERR("failed to dealloc channel %d err %d\n",
 				i, result);
 			return result;

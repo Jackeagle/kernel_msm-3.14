@@ -766,7 +766,7 @@ int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl)
 
 	*dev_hdl = (uintptr_t)gsi_ctx;
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 }
 
 int gsi_deregister_device(unsigned long dev_hdl, bool force)
@@ -809,7 +809,7 @@ int gsi_deregister_device(unsigned long dev_hdl, bool force)
 
 	memset(gsi_ctx, 0, sizeof(*gsi_ctx));
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 }
 
 static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
@@ -918,7 +918,7 @@ static int gsi_validate_evt_ring_props(struct gsi_evt_ring_props *props)
 		return -EINVAL;
 	}
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 }
 
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
@@ -1009,7 +1009,7 @@ int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, unsigned long dev_hdl,
 	__gsi_config_ieob_irq(gsi_ctx->per.ee, 1 << ctx->id, ~0);
 	spin_unlock_irqrestore(&gsi_ctx->slock, flags);
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 }
 
 static void __gsi_write_evt_ring_scratch(unsigned long evt_ring_hdl,
@@ -1049,7 +1049,7 @@ int gsi_write_evt_ring_scratch(unsigned long evt_ring_hdl,
 	__gsi_write_evt_ring_scratch(evt_ring_hdl, val);
 	mutex_unlock(&ctx->mlock);
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 }
 
 int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
@@ -1108,7 +1108,7 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 
 	atomic_dec(&gsi_ctx->num_evt_ring);
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 }
 
 int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
@@ -1164,7 +1164,7 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 	gsi_prime_evt_ring(ctx);
 	mutex_unlock(&gsi_ctx->mlock);
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 }
 
 static void gsi_program_chan_ctx(struct gsi_chan_props *props, unsigned int ee,
@@ -1284,7 +1284,7 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 		return -EINVAL;
 	}
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 }
 
 int gsi_alloc_channel(struct gsi_chan_props *props, unsigned long dev_hdl,
@@ -1393,7 +1393,7 @@ int gsi_alloc_channel(struct gsi_chan_props *props, unsigned long dev_hdl,
 	ctx->stats.dp.last_timestamp = jiffies_to_msecs(jiffies);
 	atomic_inc(&gsi_ctx->num_chan);
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 }
 
 static void __gsi_write_channel_scratch(unsigned long chan_hdl,
@@ -1447,7 +1447,7 @@ int gsi_write_channel_scratch(unsigned long chan_hdl,
 	__gsi_write_channel_scratch(chan_hdl, val);
 	mutex_unlock(&ctx->mlock);
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 }
 
 int gsi_query_channel_db_addr(unsigned long chan_hdl,
@@ -1480,7 +1480,7 @@ int gsi_query_channel_db_addr(unsigned long chan_hdl,
 	*db_addr_wp_msb = gsi_ctx->per.phys_addr +
 		GSI_EE_n_GSI_CH_k_DOORBELL_1_OFFS(chan_hdl, gsi_ctx->per.ee);
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 }
 
 int gsi_start_channel(unsigned long chan_hdl)
@@ -1531,7 +1531,7 @@ int gsi_start_channel(unsigned long chan_hdl)
 
 	mutex_unlock(&gsi_ctx->mlock);
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 }
 
 int gsi_stop_channel(unsigned long chan_hdl)
@@ -1555,7 +1555,7 @@ int gsi_stop_channel(unsigned long chan_hdl)
 
 	if (ctx->state == GSI_CHAN_STATE_STOPPED) {
 		GSIDBG("chan_hdl=%lu already stopped\n", chan_hdl);
-		return GSI_STATUS_SUCCESS;
+		return 0;
 	}
 
 	if (ctx->state != GSI_CHAN_STATE_STARTED &&
@@ -1587,7 +1587,7 @@ int gsi_stop_channel(unsigned long chan_hdl)
 			GSI_EE_n_GSI_CH_k_CNTXT_0_CHSTATE_BMSK) >>
 			GSI_EE_n_GSI_CH_k_CNTXT_0_CHSTATE_SHFT;
 		if (ctx->state == GSI_CHAN_STATE_STOPPED) {
-			res = GSI_STATUS_SUCCESS;
+			res = 0;
 			goto free_lock;
 		}
 		GSIDBG("chan_hdl=%lu timed out\n", chan_hdl);
@@ -1608,7 +1608,7 @@ int gsi_stop_channel(unsigned long chan_hdl)
 		goto free_lock;
 	}
 
-	res = GSI_STATUS_SUCCESS;
+	res = 0;
 
 free_lock:
 	mutex_unlock(&gsi_ctx->mlock);
@@ -1679,7 +1679,7 @@ reset:
 
 	mutex_unlock(&gsi_ctx->mlock);
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 }
 
 int gsi_dealloc_channel(unsigned long chan_hdl)
@@ -1735,7 +1735,7 @@ int gsi_dealloc_channel(unsigned long chan_hdl)
 		atomic_dec(&ctx->evtr->chan_ref_cnt);
 	atomic_dec(&gsi_ctx->num_chan);
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 }
 
 void gsi_update_ch_dp_stats(struct gsi_chan_ctx *ctx, uint16_t used)
@@ -1833,7 +1833,7 @@ int gsi_is_channel_empty(unsigned long chan_hdl, bool *is_empty)
 	GSIDBG("ch=%lu RP=0x%llx WP=0x%llx RP_LOCAL=0x%llx\n",
 			chan_hdl, rp, wp, ctx->ring.rp_local);
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 }
 
 int gsi_queue_xfer(unsigned long chan_hdl, uint16_t num_xfers,
@@ -1924,7 +1924,7 @@ int gsi_queue_xfer(unsigned long chan_hdl, uint16_t num_xfers,
 
 	spin_unlock_irqrestore(slock, flags);
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 }
 
 int gsi_start_xfer(unsigned long chan_hdl)
@@ -1948,11 +1948,11 @@ int gsi_start_xfer(unsigned long chan_hdl)
 	}
 
 	if (ctx->ring.wp == ctx->ring.wp_local)
-		return GSI_STATUS_SUCCESS;
+		return 0;
 
 	gsi_ring_chan_doorbell(ctx);
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 };
 
 int gsi_poll_channel(unsigned long chan_hdl,
@@ -1998,7 +1998,7 @@ int gsi_poll_channel(unsigned long chan_hdl,
 	spin_unlock_irqrestore(&ctx->evtr->ring.slock, flags);
 	ctx->stats.poll_ok++;
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 }
 
 int gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode)
@@ -2050,7 +2050,7 @@ int gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode)
 	atomic_set(&ctx->poll_mode, mode);
 	spin_unlock_irqrestore(&gsi_ctx->slock, flags);
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 }
 
 int gsi_get_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
@@ -2085,7 +2085,7 @@ int gsi_get_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
 	*scr = ctx->scratch;
 	mutex_unlock(&ctx->mlock);
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 }
 
 int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
@@ -2133,7 +2133,7 @@ int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
 	__gsi_write_channel_scratch(chan_hdl, ctx->scratch);
 	mutex_unlock(&ctx->mlock);
 
-	return GSI_STATUS_SUCCESS;
+	return 0;
 }
 
 static void gsi_configure_ieps(void __iomem *gsi_base)
@@ -2316,7 +2316,7 @@ int gsi_halt_channel_ee(unsigned int chan_idx, unsigned int ee, int *code)
 		goto free_lock;
 	}
 
-	res = GSI_STATUS_SUCCESS;
+	res = 0;
 	*code = gsi_ctx->scratch.word0.s.generic_ee_cmd_return_code;
 free_lock:
 	mutex_unlock(&gsi_ctx->mlock);

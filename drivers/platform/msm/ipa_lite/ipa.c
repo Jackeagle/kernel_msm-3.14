@@ -637,7 +637,7 @@ static void ipa3_halt_q6_cons_gsi_channels(void)
 			ret = gsi_halt_channel_ee(
 				gsi_ep_cfg->ipa_gsi_chan_num, gsi_ep_cfg->ee,
 				&code);
-			if (ret == GSI_STATUS_SUCCESS)
+			if (!ret)
 				IPADBG("halted gsi ch %d ee %d with code %d\n",
 				gsi_ep_cfg->ipa_gsi_chan_num,
 				gsi_ep_cfg->ee,
@@ -2253,7 +2253,7 @@ static int ipa3_post_init(const struct ipa3_plat_drv_res *resource_p,
 
 	result = gsi_register_device(&gsi_props,
 		&ipa3_ctx->gsi_dev_hdl);
-	if (result != GSI_STATUS_SUCCESS) {
+	if (result) {
 		IPAERR(":gsi register error - %d\n", result);
 		result = -ENODEV;
 		goto fail_register_device;

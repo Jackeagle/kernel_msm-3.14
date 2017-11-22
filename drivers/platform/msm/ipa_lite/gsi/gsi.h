@@ -74,10 +74,6 @@
 
 /* msm_gsi.h */
 
-enum gsi_status {
-	GSI_STATUS_SUCCESS = 0,
-};
-
 enum gsi_per_evt {
 	GSI_PER_EVT_GLOB_ERROR,
 	GSI_PER_EVT_GLOB_GP1,

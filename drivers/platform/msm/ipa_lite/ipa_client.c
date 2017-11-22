@@ -200,7 +200,7 @@ static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 	chan_props.xfer_cb = ipa_xfer_cb;
 
 	gsi_res = gsi_set_channel_cfg(ep->gsi_chan_hdl, &chan_props, NULL);
-	if (gsi_res != GSI_STATUS_SUCCESS) {
+	if (gsi_res) {
 		IPAERR("Error setting channel properties\n");
 		result = -EFAULT;
 		goto set_chan_cfg_fail;
@@ -223,7 +223,7 @@ static int ipa3_restore_channel_properties(struct ipa3_ep_context *ep,
 
 	gsi_res = gsi_set_channel_cfg(ep->gsi_chan_hdl, chan_props,
 		chan_scratch);
-	if (gsi_res != GSI_STATUS_SUCCESS) {
+	if (gsi_res) {
 		IPAERR("Error restoring channel properties\n");
 		return -EFAULT;
 	}
@@ -252,7 +252,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 
 	/* Reset channel */
 	gsi_res = gsi_reset_channel(ep->gsi_chan_hdl);
-	if (gsi_res != GSI_STATUS_SUCCESS) {
+	if (gsi_res) {
 		IPAERR("Error resetting channel: %d\n", gsi_res);
 		return -EFAULT;
 	}
@@ -262,7 +262,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 	memset(&orig_chan_scratch, 0, sizeof(union gsi_channel_scratch));
 	gsi_res = gsi_get_channel_cfg(ep->gsi_chan_hdl, &orig_chan_props,
 		&orig_chan_scratch);
-	if (gsi_res != GSI_STATUS_SUCCESS) {
+	if (gsi_res) {
 		IPAERR("Error getting channel properties: %d\n", gsi_res);
 		return -EFAULT;
 	}
@@ -283,7 +283,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 
 	/* Start channel and put 1 Byte descriptor on it */
 	gsi_res = gsi_start_channel(ep->gsi_chan_hdl);
-	if (gsi_res != GSI_STATUS_SUCCESS) {
+	if (gsi_res) {
 		IPAERR("Error starting channel: %d\n", gsi_res);
 		result = -EFAULT;
 		goto start_chan_fail;
@@ -299,7 +299,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 
 	gsi_res = gsi_queue_xfer(ep->gsi_chan_hdl, 1, &xfer_elem,
 		true);
-	if (gsi_res != GSI_STATUS_SUCCESS) {
+	if (gsi_res) {
 		IPAERR("Error queueing xfer: %d\n", gsi_res);
 		result = -EFAULT;
 		goto queue_xfer_fail;
@@ -329,7 +329,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 
 	/* Reset channel */
 	gsi_res = gsi_reset_channel(ep->gsi_chan_hdl);
-	if (gsi_res != GSI_STATUS_SUCCESS) {
+	if (gsi_res) {
 		IPAERR("Error resetting channel: %d\n", gsi_res);
 		result = -EFAULT;
 		goto start_chan_fail;
@@ -415,7 +415,7 @@ int ipa3_reset_gsi_channel(u32 clnt_hdl)
 	 */
 	msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
 	gsi_res = gsi_reset_channel(ep->gsi_chan_hdl);
-	if (gsi_res != GSI_STATUS_SUCCESS) {
+	if (gsi_res) {
 		IPAERR("Error resetting channel: %d\n", gsi_res);
 		result = -EFAULT;
 		goto reset_chan_fail;
@@ -453,7 +453,7 @@ int ipa3_reset_gsi_event_ring(u32 clnt_hdl)
 		IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
 	/* Reset event ring */
 	gsi_res = gsi_reset_evt_ring(ep->gsi_evt_ring_hdl);
-	if (gsi_res != GSI_STATUS_SUCCESS) {
+	if (gsi_res) {
 		IPAERR("Error resetting event: %d\n", gsi_res);
 		result = -EFAULT;
 		goto reset_evt_fail;
@@ -625,7 +625,7 @@ int ipa3_request_gsi_channel(struct ipa_request_gsi_channel_params *params,
 	gsi_dev_hdl = ipa3_ctx->gsi_dev_hdl;
 	gsi_res = gsi_alloc_evt_ring(&params->evt_ring_params, gsi_dev_hdl,
 		&ep->gsi_evt_ring_hdl);
-	if (gsi_res != GSI_STATUS_SUCCESS) {
+	if (gsi_res) {
 		IPAERR("Error allocating event ring: %d\n", gsi_res);
 		result = -EFAULT;
 		goto ipa_cfg_ep_fail;
@@ -633,7 +633,7 @@ int ipa3_request_gsi_channel(struct ipa_request_gsi_channel_params *params,
 
 	gsi_res = gsi_write_evt_ring_scratch(ep->gsi_evt_ring_hdl,
 		params->evt_scratch);
-	if (gsi_res != GSI_STATUS_SUCCESS) {
+	if (gsi_res) {
 		IPAERR("Error writing event ring scratch: %d\n", gsi_res);
 		result = -EFAULT;
 		goto write_evt_scratch_fail;
@@ -650,7 +650,7 @@ int ipa3_request_gsi_channel(struct ipa_request_gsi_channel_params *params,
 	params->chan_params.ch_id = gsi_ep_cfg_ptr->ipa_gsi_chan_num;
 	gsi_res = gsi_alloc_channel(&params->chan_params, gsi_dev_hdl,
 		&ep->gsi_chan_hdl);
-	if (gsi_res != GSI_STATUS_SUCCESS) {
+	if (gsi_res) {
 		IPAERR("Error allocating channel: %d, chan_id: %d\n", gsi_res,
 			params->chan_params.ch_id);
 		result = -EFAULT;
@@ -661,7 +661,7 @@ int ipa3_request_gsi_channel(struct ipa_request_gsi_channel_params *params,
 		sizeof(union __packed gsi_channel_scratch));
 	gsi_res = gsi_write_channel_scratch(ep->gsi_chan_hdl,
 		params->chan_scratch);
-	if (gsi_res != GSI_STATUS_SUCCESS) {
+	if (gsi_res) {
 		IPAERR("Error writing channel scratch: %d\n", gsi_res);
 		result = -EFAULT;
 		goto write_chan_scratch_fail;
@@ -670,7 +670,7 @@ int ipa3_request_gsi_channel(struct ipa_request_gsi_channel_params *params,
 	gsi_res = gsi_query_channel_db_addr(ep->gsi_chan_hdl,
 		&out_params->db_reg_phs_addr_lsb,
 		&out_params->db_reg_phs_addr_msb);
-	if (gsi_res != GSI_STATUS_SUCCESS) {
+	if (gsi_res) {
 		IPAERR("Error querying channel DB registers addresses: %d\n",
 			gsi_res);
 		result = -EFAULT;
@@ -766,13 +766,13 @@ int ipa3_release_gsi_channel(u32 clnt_hdl)
 		IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
 
 	gsi_res = gsi_dealloc_channel(ep->gsi_chan_hdl);
-	if (gsi_res != GSI_STATUS_SUCCESS) {
+	if (gsi_res) {
 		IPAERR("Error deallocating channel: %d\n", gsi_res);
 		goto dealloc_chan_fail;
 	}
 
 	gsi_res = gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl);
-	if (gsi_res != GSI_STATUS_SUCCESS) {
+	if (gsi_res) {
 		IPAERR("Error deallocating event: %d\n", gsi_res);
 		goto dealloc_chan_fail;
 	}
@@ -810,7 +810,7 @@ int ipa3_start_gsi_channel(u32 clnt_hdl)
 		IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
 
 	gsi_res = gsi_start_channel(ep->gsi_chan_hdl);
-	if (gsi_res != GSI_STATUS_SUCCESS) {
+	if (gsi_res) {
 		IPAERR("Error starting channel: %d\n", gsi_res);
 		goto start_chan_fail;
 	}
