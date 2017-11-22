@@ -76,7 +76,6 @@
 
 enum gsi_status {
 	GSI_STATUS_SUCCESS = 0,
-	GSI_STATUS_INVALID_PARAMS = 1,
 };
 
 enum gsi_per_evt {

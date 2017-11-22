@@ -671,17 +671,17 @@ int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl)
 
 	if (!props || !dev_hdl) {
 		GSIERR("bad params props=%p dev_hdl=%p\n", props, dev_hdl);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	if (props->ver <= GSI_VER_ERR || props->ver >= GSI_VER_MAX) {
 		GSIERR("bad params gsi_ver=%d\n", props->ver);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	if (!props->notify_cb) {
 		GSIERR("notify callback must be provided\n");
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	if (gsi_ctx->per_registered) {
@@ -696,7 +696,7 @@ int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl)
 
 	if (!props->irq) {
 		GSIERR("bad irq specified %u\n", props->irq);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	spin_lock_init(&gsi_ctx->slock);
@@ -778,13 +778,13 @@ int gsi_deregister_device(unsigned long dev_hdl, bool force)
 
 	if (!gsi_ctx->per_registered) {
 		GSIERR("no client registered\n");
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	if (dev_hdl != (uintptr_t)gsi_ctx) {
 		GSIERR("bad params dev_hdl=0x%lx gsi_ctx=0x%p\n", dev_hdl,
 				gsi_ctx);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	if (!force && atomic_read(&gsi_ctx->num_chan)) {
@@ -895,7 +895,7 @@ static int gsi_validate_evt_ring_props(struct gsi_evt_ring_props *props)
 				 props->ring_len % 16)) {
 		GSIERR("bad params ring_len %u not a multiple of RE size %u\n",
 				props->ring_len, props->re_size);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	ra = props->ring_base_addr;
@@ -905,17 +905,17 @@ static int gsi_validate_evt_ring_props(struct gsi_evt_ring_props *props)
 		GSIERR("bad params ring base not aligned 0x%llx align 0x%lx\n",
 				props->ring_base_addr,
 				roundup_pow_of_two(props->ring_len));
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	if (!props->ring_base_vaddr) {
 		GSIERR("GPI protocol requires ring base VA\n");
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	if (!props->err_cb) {
 		GSIERR("err callback must be provided\n");
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	return GSI_STATUS_SUCCESS;
@@ -941,12 +941,12 @@ int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, unsigned long dev_hdl,
 	if (!props || !evt_ring_hdl || dev_hdl != (uintptr_t)gsi_ctx) {
 		GSIERR("bad params props=%p dev_hdl=0x%lx evt_ring_hdl=%p\n",
 				props, dev_hdl, evt_ring_hdl);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	if (gsi_validate_evt_ring_props(props)) {
 		GSIERR("invalid params\n");
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	mutex_lock(&gsi_ctx->mlock);
@@ -1033,7 +1033,7 @@ int gsi_write_evt_ring_scratch(unsigned long evt_ring_hdl,
 
 	if (evt_ring_hdl >= gsi_ctx->max_ev) {
 		GSIERR("bad params evt_ring_hdl=%lu\n", evt_ring_hdl);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->evtr[evt_ring_hdl];
@@ -1066,7 +1066,7 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 
 	if (evt_ring_hdl >= gsi_ctx->max_ev) {
 		GSIERR("bad params evt_ring_hdl=%lu\n", evt_ring_hdl);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->evtr[evt_ring_hdl];
@@ -1125,7 +1125,7 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 
 	if (evt_ring_hdl >= gsi_ctx->max_ev) {
 		GSIERR("bad params evt_ring_hdl=%lu\n", evt_ring_hdl);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->evtr[evt_ring_hdl];
@@ -1229,7 +1229,7 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 
 	if (props->ch_id >= gsi_ctx->max_ch) {
 		GSIERR("ch_id %u invalid\n", props->ch_id);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	if ((props->re_size == GSI_CHAN_RE_SIZE_4B &&
@@ -1240,7 +1240,7 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 				 props->ring_len % 32)) {
 		GSIERR("bad params ring_len %u not a multiple of re size %u\n",
 				props->ring_len, props->re_size);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	ra = props->ring_base_addr;
@@ -1250,7 +1250,7 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 		GSIERR("bad params ring base not aligned 0x%llx align 0x%lx\n",
 				props->ring_base_addr,
 				roundup_pow_of_two(props->ring_len));
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	last = props->ring_base_addr + props->ring_len - props->re_size;
@@ -1261,27 +1261,27 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 		GSIERR("MSB is not fixed on ring base 0x%llx size 0x%x\n",
 			props->ring_base_addr,
 			props->ring_len);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	if (!props->ring_base_vaddr) {
 		GSIERR("GPI protocol requires ring base VA\n");
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	if (props->low_weight > GSI_MAX_CH_LOW_WEIGHT) {
 		GSIERR("invalid channel low weight %u\n", props->low_weight);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	if (!props->xfer_cb) {
 		GSIERR("xfer callback must be provided\n");
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	if (!props->err_cb) {
 		GSIERR("err callback must be provided\n");
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	return GSI_STATUS_SUCCESS;
@@ -1306,18 +1306,18 @@ int gsi_alloc_channel(struct gsi_chan_props *props, unsigned long dev_hdl,
 	if (!props || !chan_hdl || dev_hdl != (uintptr_t)gsi_ctx) {
 		GSIERR("bad params props=%p dev_hdl=0x%lx chan_hdl=%p\n",
 				props, dev_hdl, chan_hdl);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	if (gsi_validate_channel_props(props)) {
 		GSIERR("bad params\n");
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	if (props->evt_ring_hdl != ~0) {
 		if (props->evt_ring_hdl >= GSI_EVT_RING_MAX) {
 			GSIERR("invalid evt ring=%lu\n", props->evt_ring_hdl);
-			return -GSI_STATUS_INVALID_PARAMS;
+			return -EINVAL;
 		}
 
 		if (atomic_read(
@@ -1430,7 +1430,7 @@ int gsi_write_channel_scratch(unsigned long chan_hdl,
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
 		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	if (gsi_ctx->chan[chan_hdl].state != GSI_CHAN_STATE_ALLOCATED &&
@@ -1461,12 +1461,12 @@ int gsi_query_channel_db_addr(unsigned long chan_hdl,
 	if (!db_addr_wp_msb || !db_addr_wp_lsb) {
 		GSIERR("bad params msb=%p lsb=%p\n", db_addr_wp_msb,
 				db_addr_wp_lsb);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
 		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	if (gsi_ctx->chan[chan_hdl].state == GSI_CHAN_STATE_NOT_ALLOCATED) {
@@ -1497,7 +1497,7 @@ int gsi_start_channel(unsigned long chan_hdl)
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
 		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
@@ -1548,7 +1548,7 @@ int gsi_stop_channel(unsigned long chan_hdl)
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
 		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
@@ -1630,7 +1630,7 @@ int gsi_reset_channel(unsigned long chan_hdl)
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
 		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
@@ -1696,7 +1696,7 @@ int gsi_dealloc_channel(unsigned long chan_hdl)
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
 		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
@@ -1804,7 +1804,7 @@ int gsi_is_channel_empty(unsigned long chan_hdl, bool *is_empty)
 	if (chan_hdl >= gsi_ctx->max_ch || !is_empty) {
 		GSIERR("bad params chan_hdl=%lu is_empty=%p\n",
 				chan_hdl, is_empty);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
@@ -1857,7 +1857,7 @@ int gsi_queue_xfer(unsigned long chan_hdl, uint16_t num_xfers,
 	if (chan_hdl >= gsi_ctx->max_ch || !num_xfers || !xfer) {
 		GSIERR("bad params chan_hdl=%lu num_xfers=%u xfer=%p\n",
 				chan_hdl, num_xfers, xfer);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
@@ -1911,7 +1911,7 @@ int gsi_queue_xfer(unsigned long chan_hdl, uint16_t num_xfers,
 		/* reject all the xfers */
 		ctx->ring.wp_local = wp_rollback;
 		spin_unlock_irqrestore(slock, flags);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	ctx->stats.queued += num_xfers;
@@ -1938,7 +1938,7 @@ int gsi_start_xfer(unsigned long chan_hdl)
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
 		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
@@ -1970,7 +1970,7 @@ int gsi_poll_channel(unsigned long chan_hdl,
 
 	if (chan_hdl >= gsi_ctx->max_ch || !notify) {
 		GSIERR("bad params chan_hdl=%lu notify=%p\n", chan_hdl, notify);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
@@ -2014,7 +2014,7 @@ int gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode)
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
 		GSIERR("bad params chan_hdl=%lu mode=%u\n", chan_hdl, mode);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
@@ -2065,12 +2065,12 @@ int gsi_get_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
 
 	if (!props || !scr) {
 		GSIERR("bad params props=%p scr=%p\n", props, scr);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
 		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
@@ -2100,12 +2100,12 @@ int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
 
 	if (!props || gsi_validate_channel_props(props)) {
 		GSIERR("bad params props=%p\n", props);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
 		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
@@ -2278,7 +2278,7 @@ int gsi_halt_channel_ee(unsigned int chan_idx, unsigned int ee, int *code)
 
 	if (chan_idx >= gsi_ctx->max_ch || !code) {
 		GSIERR("bad params chan_idx=%d\n", chan_idx);
-		return -GSI_STATUS_INVALID_PARAMS;
+		return -EINVAL;
 	}
 
 	mutex_lock(&gsi_ctx->mlock);
