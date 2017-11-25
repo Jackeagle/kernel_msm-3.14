@@ -15,6 +15,7 @@
 #include <linux/debugfs.h>
 #include <linux/kernel.h>
 #include <linux/stringify.h>
+#include <linux/stat.h>
 #include "ipa_i.h"
 
 #define IPA_MAX_MSG_LEN 4096
@@ -614,10 +615,8 @@ const struct file_operations ipa3_ipc_low_ops = {
 void ipa3_debugfs_init(void)
 {
 	static struct dentry *ipa_dir;
-	const mode_t read_only_mode = S_IRUSR | S_IRGRP | S_IROTH;
-	const mode_t read_write_mode = S_IRUSR | S_IRGRP | S_IROTH |
-			S_IWUSR | S_IWGRP;
 	const mode_t write_only_mode = S_IWUSR | S_IWGRP;
+	const mode_t read_write_mode = S_IRUGO | write_only_mode;
 	struct dentry *file;
 
 	ipa_dir = debugfs_create_dir("ipa", 0);
@@ -626,7 +625,7 @@ void ipa3_debugfs_init(void)
 		return;
 	}
 
-	file = debugfs_create_u32("hw_type", read_only_mode,
+	file = debugfs_create_u32("hw_type", S_IRUGO,
 			ipa_dir, &ipa3_ctx->ipa_hw_type);
 	if (!file) {
 		IPAERR("could not create hw_type file\n");
@@ -634,7 +633,7 @@ void ipa3_debugfs_init(void)
 	}
 
 	dfile_gen_reg = debugfs_create_file("gen_reg",
-			read_only_mode, ipa_dir, 0,
+			S_IRUGO, ipa_dir, 0,
 			&ipa3_gen_reg_ops);
 	if (IS_ERR_OR_NULL(dfile_gen_reg)) {
 		IPAERR("fail to create file for debug_fs gen_reg\n");
@@ -672,7 +671,7 @@ void ipa3_debugfs_init(void)
 	}
 
 
-	dfile_stats = debugfs_create_file("stats", read_only_mode,
+	dfile_stats = debugfs_create_file("stats", S_IRUGO,
 			ipa_dir, 0,
 			&ipa3_stats_ops);
 	if (IS_ERR_OR_NULL(dfile_stats)) {
@@ -688,7 +687,7 @@ void ipa3_debugfs_init(void)
 		goto fail;
 	}
 
-	dfile_msg = debugfs_create_file("msg", read_only_mode,
+	dfile_msg = debugfs_create_file("msg", S_IRUGO,
 			ipa_dir, 0,
 			&ipa3_msg_ops);
 	if (IS_ERR_OR_NULL(dfile_msg)) {
@@ -697,7 +696,7 @@ void ipa3_debugfs_init(void)
 	}
 
 	dfile_status_stats = debugfs_create_file("status_stats",
-			read_only_mode, ipa_dir, 0, &ipa3_status_stats_ops);
+			S_IRUGO, ipa_dir, 0, &ipa3_status_stats_ops);
 	if (IS_ERR_OR_NULL(dfile_status_stats)) {
 		IPAERR("fail to create file for debug_fs status_stats\n");
 		goto fail;
