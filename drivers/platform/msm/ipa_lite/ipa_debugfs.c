@@ -636,19 +636,18 @@ void ipa3_debugfs_init(void)
 	dfile_gen_reg = debugfs_create_file("gen_reg",
 			read_only_mode, ipa_dir, 0,
 			&ipa3_gen_reg_ops);
-	if (!dfile_gen_reg || IS_ERR(dfile_gen_reg)) {
+	if (IS_ERR_OR_NULL(dfile_gen_reg)) {
 		IPAERR("fail to create file for debug_fs gen_reg\n");
 		goto fail;
 	}
 
 	dfile_active_clients = debugfs_create_file("active_clients",
 			read_write_mode, ipa_dir, 0, &ipa3_active_clients);
-	if (!dfile_active_clients || IS_ERR(dfile_active_clients)) {
+	if (IS_ERR_OR_NULL(dfile_active_clients)) {
 		IPAERR("fail to create file for debug_fs active_clients\n");
 		goto fail;
 	}
 
-	active_clients_buf = NULL;
 	active_clients_buf = kzalloc(IPA_DBG_ACTIVE_CLIENT_BUF_SIZE,
 			GFP_KERNEL);
 	if (active_clients_buf == NULL)
@@ -657,14 +656,14 @@ void ipa3_debugfs_init(void)
 	dfile_ep_reg = debugfs_create_file("ep_reg",
 			read_write_mode, ipa_dir, 0,
 			&ipa3_ep_reg_ops);
-	if (!dfile_ep_reg || IS_ERR(dfile_ep_reg)) {
+	if (IS_ERR_OR_NULL(dfile_ep_reg)) {
 		IPAERR("fail to create file for debug_fs ep_reg\n");
 		goto fail;
 	}
 
 	dfile_keep_awake = debugfs_create_file("keep_awake", read_write_mode,
 			ipa_dir, 0, &ipa3_keep_awake_ops);
-	if (!dfile_keep_awake || IS_ERR(dfile_keep_awake)) {
+	if (IS_ERR_OR_NULL(dfile_keep_awake)) {
 		IPAERR("fail to create file for debug_fs dfile_keep_awake\n");
 		goto fail;
 	}
@@ -672,7 +671,7 @@ void ipa3_debugfs_init(void)
 	dfile_ep_holb = debugfs_create_file("holb", write_only_mode,
 			ipa_dir,
 			0, &ipa3_ep_holb_ops);
-	if (!dfile_ep_holb || IS_ERR(dfile_ep_holb)) {
+	if (IS_ERR_OR_NULL(dfile_ep_holb)) {
 		IPAERR("fail to create file for debug_fs dfile_ep_hol_en\n");
 		goto fail;
 	}
@@ -681,7 +680,7 @@ void ipa3_debugfs_init(void)
 	dfile_stats = debugfs_create_file("stats", read_only_mode,
 			ipa_dir, 0,
 			&ipa3_stats_ops);
-	if (!dfile_stats || IS_ERR(dfile_stats)) {
+	if (IS_ERR_OR_NULL(dfile_stats)) {
 		IPAERR("fail to create file for debug_fs stats\n");
 		goto fail;
 	}
@@ -689,7 +688,7 @@ void ipa3_debugfs_init(void)
 	dfile_dbg_cnt = debugfs_create_file("dbg_cnt",
 			read_write_mode, ipa_dir, 0,
 			&ipa3_dbg_cnt_ops);
-	if (!dfile_dbg_cnt || IS_ERR(dfile_dbg_cnt)) {
+	if (IS_ERR_OR_NULL(dfile_dbg_cnt)) {
 		IPAERR("fail to create file for debug_fs dbg_cnt\n");
 		goto fail;
 	}
@@ -697,14 +696,14 @@ void ipa3_debugfs_init(void)
 	dfile_msg = debugfs_create_file("msg", read_only_mode,
 			ipa_dir, 0,
 			&ipa3_msg_ops);
-	if (!dfile_msg || IS_ERR(dfile_msg)) {
+	if (IS_ERR_OR_NULL(dfile_msg)) {
 		IPAERR("fail to create file for debug_fs msg\n");
 		goto fail;
 	}
 
 	dfile_status_stats = debugfs_create_file("status_stats",
 			read_only_mode, ipa_dir, 0, &ipa3_status_stats_ops);
-	if (!dfile_status_stats || IS_ERR(dfile_status_stats)) {
+	if (IS_ERR_OR_NULL(dfile_status_stats)) {
 		IPAERR("fail to create file for debug_fs status_stats\n");
 		goto fail;
 	}
@@ -734,7 +733,7 @@ void ipa3_debugfs_init(void)
 
 	file = debugfs_create_file("enable_low_prio_print", write_only_mode,
 		ipa_dir, 0, &ipa3_ipc_low_ops);
-	if (!file) {
+	if (IS_ERR_OR_NULL(file)) {
 		IPAERR("could not create enable_low_prio_print file\n");
 		goto fail;
 	}
