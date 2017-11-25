@@ -40,14 +40,6 @@
 #include <asm/cacheflush.h>
 #include "gsi/gsi.h"
 
-#ifdef CONFIG_ARM64
-
-/* Outer caches unsupported on ARM64 platforms */
-#define outer_flush_range(x, y)
-#define __cpuc_flush_dcache_area __flush_dcache_area
-
-#endif
-
 #define IPA_SUBSYSTEM_NAME "ipa_fws"
 #include "ipa_i.h"
 #include "ipahal/ipahal.h"
