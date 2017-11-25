@@ -611,125 +611,93 @@ void ipa3_debugfs_init(void)
 	struct dentry *file;
 
 	ipa_dir = debugfs_create_dir("ipa", 0);
-	if (IS_ERR(ipa_dir)) {
-		IPAERR("fail to create folder in debug_fs.\n");
-		return;
-	}
+	if (IS_ERR(ipa_dir))
+		goto fail;
 
 	file = debugfs_create_u32("hw_type", S_IRUGO,
 			ipa_dir, &ipa3_ctx->ipa_hw_type);
-	if (!file) {
-		IPAERR("could not create hw_type file\n");
+	if (!file)
 		goto fail;
-	}
 
 	file = debugfs_create_file("gen_reg",
 			S_IRUGO, ipa_dir, 0,
 			&ipa3_gen_reg_ops);
-	if (IS_ERR_OR_NULL(file)) {
-		IPAERR("fail to create file for debug_fs gen_reg\n");
+	if (IS_ERR_OR_NULL(file))
 		goto fail;
-	}
 
 	file = debugfs_create_file("active_clients",
 			read_write_mode, ipa_dir, 0, &ipa3_active_clients);
-	if (IS_ERR_OR_NULL(file)) {
-		IPAERR("fail to create file for debug_fs active_clients\n");
+	if (IS_ERR_OR_NULL(file))
 		goto fail;
-	}
 
 	file = debugfs_create_file("ep_reg",
 			read_write_mode, ipa_dir, 0,
 			&ipa3_ep_reg_ops);
-	if (IS_ERR_OR_NULL(file)) {
-		IPAERR("fail to create file for debug_fs ep_reg\n");
+	if (IS_ERR_OR_NULL(file))
 		goto fail;
-	}
 
 	file = debugfs_create_file("keep_awake", read_write_mode,
 			ipa_dir, 0, &ipa3_keep_awake_ops);
-	if (IS_ERR_OR_NULL(file)) {
-		IPAERR("fail to create file for debug_fs keep_awake\n");
+	if (IS_ERR_OR_NULL(file))
 		goto fail;
-	}
 
 	file = debugfs_create_file("holb", write_only_mode,
 			ipa_dir,
 			0, &ipa3_ep_holb_ops);
-	if (IS_ERR_OR_NULL(file)) {
-		IPAERR("fail to create file for debug_fs dfile_ep_hol_en\n");
+	if (IS_ERR_OR_NULL(file))
 		goto fail;
-	}
-
 
 	file = debugfs_create_file("stats", S_IRUGO,
 			ipa_dir, 0,
 			&ipa3_stats_ops);
-	if (IS_ERR_OR_NULL(file)) {
-		IPAERR("fail to create file for debug_fs stats\n");
+	if (IS_ERR_OR_NULL(file))
 		goto fail;
-	}
 
 	file = debugfs_create_file("dbg_cnt",
 			read_write_mode, ipa_dir, 0,
 			&ipa3_dbg_cnt_ops);
-	if (IS_ERR_OR_NULL(file)) {
-		IPAERR("fail to create file for debug_fs dbg_cnt\n");
+	if (IS_ERR_OR_NULL(file))
 		goto fail;
-	}
 
 	file = debugfs_create_file("msg", S_IRUGO,
 			ipa_dir, 0,
 			&ipa3_msg_ops);
-	if (IS_ERR_OR_NULL(file)) {
-		IPAERR("fail to create file for debug_fs msg\n");
+	if (IS_ERR_OR_NULL(file))
 		goto fail;
-	}
 
 	file = debugfs_create_file("status_stats",
 			S_IRUGO, ipa_dir, 0, &ipa3_status_stats_ops);
-	if (IS_ERR_OR_NULL(file)) {
-		IPAERR("fail to create file for debug_fs status_stats\n");
+	if (IS_ERR_OR_NULL(file))
 		goto fail;
-	}
 
 	file = debugfs_create_u32("enable_clock_scaling", read_write_mode,
 		ipa_dir, &ipa3_ctx->enable_clock_scaling);
-	if (!file) {
-		IPAERR("could not create enable_clock_scaling file\n");
+	if (!file)
 		goto fail;
-	}
 
 	file = debugfs_create_u32("clock_scaling_bw_threshold_nominal_mbps",
 		read_write_mode, ipa_dir,
 		&ipa3_ctx->ctrl->clock_scaling_bw_threshold_nominal);
-	if (!file) {
-		IPAERR("could not create bw_threshold_nominal_mbps\n");
+	if (!file)
 		goto fail;
-	}
 
 	file = debugfs_create_u32("clock_scaling_bw_threshold_turbo_mbps",
 		read_write_mode, ipa_dir,
 		&ipa3_ctx->ctrl->clock_scaling_bw_threshold_turbo);
-	if (!file) {
-		IPAERR("could not create bw_threshold_turbo_mbps\n");
+	if (!file)
 		goto fail;
-	}
 
 	file = debugfs_create_file("enable_low_prio_print", write_only_mode,
 		ipa_dir, 0, &ipa3_ipc_low_ops);
-	if (IS_ERR_OR_NULL(file)) {
-		IPAERR("could not create enable_low_prio_print file\n");
+	if (IS_ERR_OR_NULL(file))
 		goto fail;
-	}
 
 	active_clients_buf = kzalloc(IPA_DBG_ACTIVE_CLIENT_BUF_SIZE,
 			GFP_KERNEL);
-	if (!active_clients_buf)
-		IPAERR("fail to allocate active clients memory buffer");
-
-	return;
+	if (active_clients_buf)
+		return;
 fail:
+	IPAERR("error while creating ipa debugfs hierarchy\n");
 	debugfs_remove_recursive(ipa_dir);
 }
 
