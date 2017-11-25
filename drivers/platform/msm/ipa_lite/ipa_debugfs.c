@@ -648,11 +648,6 @@ void ipa3_debugfs_init(void)
 		goto fail;
 	}
 
-	active_clients_buf = kzalloc(IPA_DBG_ACTIVE_CLIENT_BUF_SIZE,
-			GFP_KERNEL);
-	if (active_clients_buf == NULL)
-		IPAERR("fail to allocate active clients memory buffer");
-
 	dfile_ep_reg = debugfs_create_file("ep_reg",
 			read_write_mode, ipa_dir, 0,
 			&ipa3_ep_reg_ops);
@@ -737,6 +732,11 @@ void ipa3_debugfs_init(void)
 		IPAERR("could not create enable_low_prio_print file\n");
 		goto fail;
 	}
+
+	active_clients_buf = kzalloc(IPA_DBG_ACTIVE_CLIENT_BUF_SIZE,
+			GFP_KERNEL);
+	if (!active_clients_buf)
+		IPAERR("fail to allocate active clients memory buffer");
 
 	return;
 fail:
