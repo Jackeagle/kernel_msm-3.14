@@ -18,7 +18,6 @@
 #include "ipa_i.h"
 
 #define IPA_MAX_MSG_LEN 4096
-#define IPA_DBG_MAX_RULE_IN_TBL 128
 #define IPA_DBG_ACTIVE_CLIENT_BUF_SIZE ((IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN \
 	* IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES) + IPA_MAX_MSG_LEN)
 
@@ -739,26 +738,6 @@ fail:
 	debugfs_remove_recursive(dent);
 }
 
-void ipa3_debugfs_remove(void)
-{
-	if (IS_ERR(dent)) {
-		IPAERR("ipa3_debugfs_remove: folder was not created.\n");
-		return;
-	}
-	if (active_clients_buf != NULL) {
-		kfree(active_clients_buf);
-		active_clients_buf = NULL;
-	}
-	debugfs_remove_recursive(dent);
-}
-
-struct dentry *ipa_debugfs_get_root(void)
-{
-	return dent;
-}
-EXPORT_SYMBOL(ipa_debugfs_get_root);
-
 #else /* !CONFIG_DEBUG_FS */
 void ipa3_debugfs_init(void) {}
-void ipa3_debugfs_remove(void) {}
 #endif
