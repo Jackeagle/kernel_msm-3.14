@@ -49,22 +49,10 @@
 #define IPA_GPIO_OUT_CLK_RSP_CMPLT_IDX 0
 #define IPA_GPIO_OUT_CLK_VOTE_IDX 1
 
-#define IPA_SUMMING_THRESHOLD (0x10)
 #define IPA_PIPE_MEM_START_OFST (0x0)
 #define IPA_PIPE_MEM_SIZE (0x0)
-#define IPA_MOBILE_AP_MODE(x) (x == IPA_MODE_MOBILE_AP_ETH || \
-			       x == IPA_MODE_MOBILE_AP_WAN)
-#define IPA_CNOC_CLK_RATE (75 * 1000 * 1000UL)
-#define IPA_A5_MUX_HEADER_LENGTH (8)
-
-#define IPA_AGGR_MAX_STR_LENGTH (10)
 
 #define CLEANUP_TAG_PROCESS_TIMEOUT 500
-
-#define IPA_AGGR_STR_IN_BYTES(str) \
-	(strnlen((str), IPA_AGGR_MAX_STR_LENGTH - 1) + 1)
-
-#define IPA_TRANSPORT_PROD_TIMEOUT_MSEC 100
 
 #define IPA_ACTIVE_CLIENTS_TABLE_BUF_SIZE 2048
 
@@ -86,9 +74,6 @@
 
 /* The relative location in /lib/firmware where the FWs will reside */
 #define IPA_FWS_PATH "ipa/ipa_fws.elf"
-
-#define IPA_TZ_UNLOCK_ATTRIBUTE 0x0C0311
-#define TZ_MEM_PROTECT_REGION_ID 0x10
 
 struct tz_smmu_ipa_protect_region_iovec_s {
 	u64 input_addr;
