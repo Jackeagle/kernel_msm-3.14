@@ -3539,55 +3539,53 @@ void ipa_assert(void)
  }
 #endif
 
+/**
+ * ipa3_set_rt_tuple_mask() - Sets the rt tuple masking for the given tbl
+ *  table index must be for AP EP (not modem)
+ *  updates the the routing masking values without changing the flt ones.
+ *
+ * @tbl_idx: routing table index to configure the tuple masking
+ * @tuple: the tuple members masking
+ * Returns:	 0 on success, negative on failure
+ *
+ */
+int ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple)
+{
+	struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
 
- /**
-  * ipa3_set_rt_tuple_mask() - Sets the rt tuple masking for the given tbl
-  *  table index must be for AP EP (not modem)
-  *  updates the the routing masking values without changing the flt ones.
-  *
-  * @tbl_idx: routing table index to configure the tuple masking
-  * @tuple: the tuple members masking
-  * Returns:	 0 on success, negative on failure
-  *
-  */
- int ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple)
- {
-		 struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
+	if (!tuple) {
+			IPAERR("bad tuple\n");
+			return -EINVAL;
+	}
 
-		 if (!tuple) {
-				 IPAERR("bad tuple\n");
-				 return -EINVAL;
-		 }
+	if (tbl_idx >=
+			max(IPA_MEM_PART(v6_rt_num_index),
+			IPA_MEM_PART(v4_rt_num_index)) ||
+			tbl_idx < 0) {
+			IPAERR("bad table index\n");
+			return -EINVAL;
+	}
 
-		 if (tbl_idx >=
-				 max(IPA_MEM_PART(v6_rt_num_index),
-				 IPA_MEM_PART(v4_rt_num_index)) ||
-				 tbl_idx < 0) {
-				 IPAERR("bad table index\n");
-				 return -EINVAL;
-		 }
+	if (tbl_idx >= IPA_MEM_PART(v4_modem_rt_index_lo) &&
+			tbl_idx <= IPA_MEM_PART(v4_modem_rt_index_hi)) {
+			IPAERR("cannot configure modem v4 rt tuple by AP\n");
+			return -EINVAL;
+	}
 
-		 if (tbl_idx >= IPA_MEM_PART(v4_modem_rt_index_lo) &&
-				 tbl_idx <= IPA_MEM_PART(v4_modem_rt_index_hi)) {
-				 IPAERR("cannot configure modem v4 rt tuple by AP\n");
-				 return -EINVAL;
-		 }
+	if (tbl_idx >= IPA_MEM_PART(v6_modem_rt_index_lo) &&
+			tbl_idx <= IPA_MEM_PART(v6_modem_rt_index_hi)) {
+			IPAERR("cannot configure modem v6 rt tuple by AP\n");
+			return -EINVAL;
+	}
 
-		 if (tbl_idx >= IPA_MEM_PART(v6_modem_rt_index_lo) &&
-				 tbl_idx <= IPA_MEM_PART(v6_modem_rt_index_hi)) {
-				 IPAERR("cannot configure modem v6 rt tuple by AP\n");
-				 return -EINVAL;
-		 }
+	ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n,
+			tbl_idx, &fltrt_tuple);
+	fltrt_tuple.rt = *tuple;
+	ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n,
+			tbl_idx, &fltrt_tuple);
 
-		 ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n,
-				 tbl_idx, &fltrt_tuple);
-		 fltrt_tuple.rt = *tuple;
-		 ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n,
-				 tbl_idx, &fltrt_tuple);
+	return 0;
+}
 
-		 return 0;
- }
-
-
- MODULE_LICENSE("GPL v2");
+MODULE_LICENSE("GPL v2");
 MODULE_DESCRIPTION("IPA HW device driver");
