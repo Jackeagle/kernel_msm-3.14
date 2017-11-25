@@ -29,7 +29,6 @@ const char *ipa3_event_name[] = {
 	__stringify(IPA_SSR_AFTER_POWERUP)
 };
 
-static struct dentry *dent;
 static struct dentry *dfile_gen_reg;
 static struct dentry *dfile_ep_reg;
 static struct dentry *dfile_keep_awake;
@@ -614,26 +613,28 @@ const struct file_operations ipa3_ipc_low_ops = {
 
 void ipa3_debugfs_init(void)
 {
+	static struct dentry *ipa_dir;
 	const mode_t read_only_mode = S_IRUSR | S_IRGRP | S_IROTH;
 	const mode_t read_write_mode = S_IRUSR | S_IRGRP | S_IROTH |
 			S_IWUSR | S_IWGRP;
 	const mode_t write_only_mode = S_IWUSR | S_IWGRP;
 	struct dentry *file;
 
-	dent = debugfs_create_dir("ipa", 0);
-	if (IS_ERR(dent)) {
+	ipa_dir = debugfs_create_dir("ipa", 0);
+	if (IS_ERR(ipa_dir)) {
 		IPAERR("fail to create folder in debug_fs.\n");
 		return;
 	}
 
 	file = debugfs_create_u32("hw_type", read_only_mode,
-			dent, &ipa3_ctx->ipa_hw_type);
+			ipa_dir, &ipa3_ctx->ipa_hw_type);
 	if (!file) {
 		IPAERR("could not create hw_type file\n");
 		goto fail;
 	}
 
-	dfile_gen_reg = debugfs_create_file("gen_reg", read_only_mode, dent, 0,
+	dfile_gen_reg = debugfs_create_file("gen_reg",
+			read_only_mode, ipa_dir, 0,
 			&ipa3_gen_reg_ops);
 	if (!dfile_gen_reg || IS_ERR(dfile_gen_reg)) {
 		IPAERR("fail to create file for debug_fs gen_reg\n");
@@ -641,7 +642,7 @@ void ipa3_debugfs_init(void)
 	}
 
 	dfile_active_clients = debugfs_create_file("active_clients",
-			read_write_mode, dent, 0, &ipa3_active_clients);
+			read_write_mode, ipa_dir, 0, &ipa3_active_clients);
 	if (!dfile_active_clients || IS_ERR(dfile_active_clients)) {
 		IPAERR("fail to create file for debug_fs active_clients\n");
 		goto fail;
@@ -653,7 +654,8 @@ void ipa3_debugfs_init(void)
 	if (active_clients_buf == NULL)
 		IPAERR("fail to allocate active clients memory buffer");
 
-	dfile_ep_reg = debugfs_create_file("ep_reg", read_write_mode, dent, 0,
+	dfile_ep_reg = debugfs_create_file("ep_reg",
+			read_write_mode, ipa_dir, 0,
 			&ipa3_ep_reg_ops);
 	if (!dfile_ep_reg || IS_ERR(dfile_ep_reg)) {
 		IPAERR("fail to create file for debug_fs ep_reg\n");
@@ -661,13 +663,14 @@ void ipa3_debugfs_init(void)
 	}
 
 	dfile_keep_awake = debugfs_create_file("keep_awake", read_write_mode,
-			dent, 0, &ipa3_keep_awake_ops);
+			ipa_dir, 0, &ipa3_keep_awake_ops);
 	if (!dfile_keep_awake || IS_ERR(dfile_keep_awake)) {
 		IPAERR("fail to create file for debug_fs dfile_keep_awake\n");
 		goto fail;
 	}
 
-	dfile_ep_holb = debugfs_create_file("holb", write_only_mode, dent,
+	dfile_ep_holb = debugfs_create_file("holb", write_only_mode,
+			ipa_dir,
 			0, &ipa3_ep_holb_ops);
 	if (!dfile_ep_holb || IS_ERR(dfile_ep_holb)) {
 		IPAERR("fail to create file for debug_fs dfile_ep_hol_en\n");
@@ -675,21 +678,24 @@ void ipa3_debugfs_init(void)
 	}
 
 
-	dfile_stats = debugfs_create_file("stats", read_only_mode, dent, 0,
+	dfile_stats = debugfs_create_file("stats", read_only_mode,
+			ipa_dir, 0,
 			&ipa3_stats_ops);
 	if (!dfile_stats || IS_ERR(dfile_stats)) {
 		IPAERR("fail to create file for debug_fs stats\n");
 		goto fail;
 	}
 
-	dfile_dbg_cnt = debugfs_create_file("dbg_cnt", read_write_mode, dent, 0,
+	dfile_dbg_cnt = debugfs_create_file("dbg_cnt",
+			read_write_mode, ipa_dir, 0,
 			&ipa3_dbg_cnt_ops);
 	if (!dfile_dbg_cnt || IS_ERR(dfile_dbg_cnt)) {
 		IPAERR("fail to create file for debug_fs dbg_cnt\n");
 		goto fail;
 	}
 
-	dfile_msg = debugfs_create_file("msg", read_only_mode, dent, 0,
+	dfile_msg = debugfs_create_file("msg", read_only_mode,
+			ipa_dir, 0,
 			&ipa3_msg_ops);
 	if (!dfile_msg || IS_ERR(dfile_msg)) {
 		IPAERR("fail to create file for debug_fs msg\n");
@@ -697,21 +703,21 @@ void ipa3_debugfs_init(void)
 	}
 
 	dfile_status_stats = debugfs_create_file("status_stats",
-			read_only_mode, dent, 0, &ipa3_status_stats_ops);
+			read_only_mode, ipa_dir, 0, &ipa3_status_stats_ops);
 	if (!dfile_status_stats || IS_ERR(dfile_status_stats)) {
 		IPAERR("fail to create file for debug_fs status_stats\n");
 		goto fail;
 	}
 
 	file = debugfs_create_u32("enable_clock_scaling", read_write_mode,
-		dent, &ipa3_ctx->enable_clock_scaling);
+		ipa_dir, &ipa3_ctx->enable_clock_scaling);
 	if (!file) {
 		IPAERR("could not create enable_clock_scaling file\n");
 		goto fail;
 	}
 
 	file = debugfs_create_u32("clock_scaling_bw_threshold_nominal_mbps",
-		read_write_mode, dent,
+		read_write_mode, ipa_dir,
 		&ipa3_ctx->ctrl->clock_scaling_bw_threshold_nominal);
 	if (!file) {
 		IPAERR("could not create bw_threshold_nominal_mbps\n");
@@ -719,7 +725,7 @@ void ipa3_debugfs_init(void)
 	}
 
 	file = debugfs_create_u32("clock_scaling_bw_threshold_turbo_mbps",
-		read_write_mode, dent,
+		read_write_mode, ipa_dir,
 		&ipa3_ctx->ctrl->clock_scaling_bw_threshold_turbo);
 	if (!file) {
 		IPAERR("could not create bw_threshold_turbo_mbps\n");
@@ -727,7 +733,7 @@ void ipa3_debugfs_init(void)
 	}
 
 	file = debugfs_create_file("enable_low_prio_print", write_only_mode,
-		dent, 0, &ipa3_ipc_low_ops);
+		ipa_dir, 0, &ipa3_ipc_low_ops);
 	if (!file) {
 		IPAERR("could not create enable_low_prio_print file\n");
 		goto fail;
@@ -735,7 +741,7 @@ void ipa3_debugfs_init(void)
 
 	return;
 fail:
-	debugfs_remove_recursive(dent);
+	debugfs_remove_recursive(ipa_dir);
 }
 
 #else /* !CONFIG_DEBUG_FS */
