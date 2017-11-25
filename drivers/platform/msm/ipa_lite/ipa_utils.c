@@ -2433,18 +2433,6 @@ bool ipa3_is_ready(void)
 }
 
 /**
- * ipa3_is_client_handle_valid() - check if IPA client handle is valid handle
- *
- * Return value: true for yes; false for no
- */
-bool ipa3_is_client_handle_valid(u32 clnt_hdl)
-{
-	if (clnt_hdl >= 0 && clnt_hdl < ipa3_ctx->ipa_num_pipes)
-		return true;
-	return false;
-}
-
-/**
  * ipa3_proxy_clk_unvote() - called to remove IPA clock proxy vote
  *
  * Return value: none
@@ -2485,23 +2473,6 @@ u16 ipa3_get_smem_restr_bytes(void)
 	return 0;
 }
 
-
-
-/**
- * ipa3_get_modem_cfg_emb_pipe_flt()- Return ipa3_ctx->modem_cfg_emb_pipe_flt
- *
- * Return value: true if modem configures embedded pipe flt, false otherwise
- */
-bool ipa3_get_modem_cfg_emb_pipe_flt(void)
-{
-	if (ipa3_ctx)
-		return ipa3_ctx->modem_cfg_emb_pipe_flt;
-
-	IPAERR("IPA driver has not been initialized\n");
-
-	return false;
-}
-
 u32 ipa3_get_num_pipes(void)
 {
 	return ipahal_read_reg(IPA_ENABLED_PIPES);
@@ -2538,8 +2509,6 @@ int ipa3_disable_apps_wan_cons_deaggr(uint32_t agg_size, uint32_t agg_count)
 	}
 	return res;
 }
-
-
 
 void *ipa3_get_ipc_logbuf(void)
 {
@@ -2585,7 +2554,8 @@ bool ipa_is_modem_pipe(int pipe_idx)
 
 static void ipa3_write_rsrc_grp_type_reg(int group_index,
 			enum ipa_rsrc_grp_type_src n, bool src,
-			struct ipahal_reg_rsrc_grp_cfg *val) {
+			struct ipahal_reg_rsrc_grp_cfg *val)
+{
 	u8 hw_type_idx;
 
 	hw_type_idx = ipa3_get_hw_type_index();
@@ -3240,47 +3210,6 @@ bool ipa3_is_msm_device(void)
 }
 
 /**
-* ipa3_disable_prefetch() - disable\enable tx prefetch
-*
-* @client: the client which is related to the TX where prefetch will be
-*          disabled
-*
-* Return value: Non applicable
-*
-*/
-void ipa3_disable_prefetch(enum ipa_client_type client)
-{
-	struct ipahal_reg_tx_cfg cfg;
-	u8 qmb;
-
-	qmb = ipa3_get_qmb_master_sel(client);
-
-	IPADBG("disabling prefetch for qmb %d\n", (int)qmb);
-
-	ipahal_read_reg_fields(IPA_TX_CFG, &cfg);
-	/* QMB0 (DDR) correlates with TX0, QMB1(PCIE) correlates with TX1 */
-	if (qmb == QMB_MASTER_SELECT_DDR)
-		cfg.tx0_prefetch_disable = true;
-	else
-		cfg.tx1_prefetch_disable = true;
-	ipahal_write_reg_fields(IPA_TX_CFG, &cfg);
-}
-
-/**
- * ipa3_get_pdev() - return a pointer to IPA dev struct
- *
- * Return value: a pointer to IPA dev struct
- *
- */
-struct device *ipa3_get_pdev(void)
-{
-	if (!ipa3_ctx)
-		return NULL;
-
-	return ipa3_ctx->pdev;
-}
-
-/**
  * ipa3_enable_dcd() - enable dynamic clock division on IPA
  *
  * Return value: Non applicable
@@ -3341,7 +3270,6 @@ int ipa3_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple)
         return 0;
 }
 
-
 /**
  * ipa_write_64() - convert 64 bit value to byte array
  * @w: 64 bit integer
@@ -3363,100 +3291,6 @@ u8 *ipa_write_64(u64 w, u8 *dest)
 	*dest++ = (u8)((w >> 40) & 0xFF);
 	*dest++ = (u8)((w >> 48) & 0xFF);
 	*dest++ = (u8)((w >> 56) & 0xFF);
-
-	return dest;
-}
-
-/**
- * ipa_write_32() - convert 32 bit value to byte array
- * @w: 32 bit integer
- * @dest: byte array
- *
- * Return value: converted value
- */
-u8 *ipa_write_32(u32 w, u8 *dest)
-{
-	if (unlikely(dest == NULL)) {
-		pr_err("ipa_write_32: NULL address!\n");
-		return dest;
-	}
-	*dest++ = (u8)((w) & 0xFF);
-	*dest++ = (u8)((w >> 8) & 0xFF);
-	*dest++ = (u8)((w >> 16) & 0xFF);
-	*dest++ = (u8)((w >> 24) & 0xFF);
-
-	return dest;
-}
-
-/**
- * ipa_write_16() - convert 16 bit value to byte array
- * @hw: 16 bit integer
- * @dest: byte array
- *
- * Return value: converted value
- */
-u8 *ipa_write_16(u16 hw, u8 *dest)
-{
-	if (unlikely(dest == NULL)) {
-		pr_err("ipa_write_16: NULL address!\n");
-		return dest;
-	}
-	*dest++ = (u8)((hw) & 0xFF);
-	*dest++ = (u8)((hw >> 8) & 0xFF);
-
-	return dest;
-}
-
-/**
- * ipa_write_8() - convert 8 bit value to byte array
- * @hw: 8 bit integer
- * @dest: byte array
- *
- * Return value: converted value
- */
-u8 *ipa_write_8(u8 b, u8 *dest)
-{
-	if (unlikely(dest == NULL)) {
-		pr_err("ipa_write_8: NULL address!\n");
-		return dest;
-	}
-	*dest++ = (b) & 0xFF;
-
-	return dest;
-}
-
-/**
- * ipa_pad_to_64() - pad byte array to 64 bit value
- * @dest: byte array
- *
- * Return value: padded value
- */
-u8 *ipa_pad_to_64(u8 *dest)
-{
-	int i = (long)dest & 0x7;
-	int j;
-
-	if (i)
-		for (j = 0; j < (8 - i); j++)
-			*dest++ = 0;
-
-	return dest;
-}
-
-/**
- * ipa_pad_to_32() - pad byte array to 32 bit value
- * @dest: byte array
- *
- * Return value: padded value
- */
-u8 *ipa_pad_to_32(u8 *dest)
-{
-	int i = (long)dest & 0x3;
-	int j;
-
-	if (i)
-		for (j = 0; j < (4 - i); j++)
-			*dest++ = 0;
 
 	return dest;
 }

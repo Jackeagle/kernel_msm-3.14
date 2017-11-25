@@ -1646,8 +1646,6 @@ bool ipa3_is_ready(void);
 void ipa3_proxy_clk_vote(void);
 void ipa3_proxy_clk_unvote(void);
 
-bool ipa3_is_client_handle_valid(u32 clnt_hdl);
-
 enum ipa_client_type ipa3_get_client_mapping(int pipe_idx);
 
 void ipa_init_ep_flt_bitmap(void);
@@ -1655,8 +1653,6 @@ void ipa_init_ep_flt_bitmap(void);
 bool ipa_is_ep_support_flt(int pipe_idx);
 
 enum ipa_rm_resource_name ipa3_get_rm_resource_from_ep(int pipe_idx);
-
-bool ipa3_get_modem_cfg_emb_pipe_flt(void);
 
 u8 ipa3_get_qmb_master_sel(enum ipa_client_type client);
 
@@ -1828,9 +1824,7 @@ void ipa3_recycle_wan_skb(struct sk_buff *skb);
 void ipa3_reset_freeze_vote(void);
 struct dentry *ipa_debugfs_get_root(void);
 bool ipa3_is_msm_device(void);
-struct device *ipa3_get_pdev(void);
 void ipa3_enable_dcd(void);
-void ipa3_disable_prefetch(enum ipa_client_type client);
 int ipa3_alloc_common_event_ring(void);
 int ipa3_allocate_dma_task_for_gsi(void);
 void ipa3_free_dma_task_for_gsi(void);
