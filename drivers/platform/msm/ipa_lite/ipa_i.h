@@ -1536,18 +1536,10 @@ struct ipa_req_chan_out_params {
 
 /* public APIs */
 /* Generic GSI channels functions */
-int ipa3_request_gsi_channel(struct ipa_request_gsi_channel_params *params,
-			     struct ipa_req_chan_out_params *out_params);
-
-int ipa3_release_gsi_channel(u32 clnt_hdl);
-
-int ipa3_start_gsi_channel(u32 clnt_hdl);
 
 int ipa3_stop_gsi_channel(u32 clnt_hdl);
 
 int ipa3_reset_gsi_channel(u32 clnt_hdl);
-
-int ipa3_reset_gsi_event_ring(u32 clnt_hdl);
 
 /*
  * Configuration
@@ -1739,7 +1731,6 @@ void ipa3_install_dflt_flt_rules(u32 ipa_ep_idx);
 void ipa3_delete_dflt_flt_rules(u32 ipa_ep_idx);
 
 int ipa3_enable_data_path(u32 clnt_hdl);
-int ipa3_disable_data_path(u32 clnt_hdl);
 int ipa3_alloc_rule_id(struct idr *rule_ids);
 int ipa3_id_alloc(void *ptr);
 void *ipa3_id_find(u32 id);
