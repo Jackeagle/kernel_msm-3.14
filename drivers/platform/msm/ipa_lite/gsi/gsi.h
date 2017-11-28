@@ -88,13 +88,11 @@ enum gsi_per_evt {
 /**
  * gsi_per_notify - Peripheral callback info
  *
- * @user_data: cookie supplied in gsi_register_device
  * @evt_id:    type of notification
  * @err_desc:  error related information
  *
  */
 struct gsi_per_notify {
-	void *user_data;
 	enum gsi_per_evt evt_id;
 	union {
 		uint16_t err_desc;
@@ -180,7 +178,6 @@ struct gsi_device_scratch {
  * @phys_addr:  physical address of GSI block
  * @size:       register size of GSI block
  * @notify_cb:  general notification callback
- * @user_data:  cookie used for notifications
  *
  * All the callbacks are in interrupt context
  *
@@ -192,7 +189,6 @@ struct gsi_per_props {
 	phys_addr_t phys_addr;
 	unsigned long size;
 	void (*notify_cb)(struct gsi_per_notify *notify);
-	void *user_data;
 };
 
 enum gsi_chan_mode {

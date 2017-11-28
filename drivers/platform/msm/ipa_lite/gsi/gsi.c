@@ -166,7 +166,6 @@ static void gsi_handle_glob_err(uint32_t err)
 	switch (log->err_type) {
 	case GSI_ERR_TYPE_GLOB:
 		per_notify.evt_id = GSI_PER_EVT_GLOB_ERROR;
-		per_notify.user_data = gsi_ctx->per.user_data;
 		per_notify.data.err_desc = err & 0xFFFF;
 		gsi_ctx->per.notify_cb(&per_notify);
 		break;
@@ -265,8 +264,6 @@ static void gsi_handle_glob_ee(int ee)
 	uint32_t clr = ~0;
 
 	val = gsi_readl(GSI_EE_n_CNTXT_GLOB_IRQ_STTS_OFFS(ee));
-
-	notify.user_data = gsi_ctx->per.user_data;
 
 	if (val & GSI_EE_n_CNTXT_GLOB_IRQ_STTS_ERROR_INT_BMSK) {
 		err = gsi_readl(GSI_EE_n_ERROR_LOG_OFFS(ee));
@@ -502,8 +499,6 @@ static void gsi_handle_general(int ee)
 	struct gsi_per_notify notify;
 
 	val = gsi_readl(GSI_EE_n_CNTXT_GSI_IRQ_STTS_OFFS(ee));
-
-	notify.user_data = gsi_ctx->per.user_data;
 
 	if (val & GSI_EE_n_CNTXT_GSI_IRQ_CLR_GSI_MCS_STACK_OVRFLOW_BMSK)
 		notify.evt_id = GSI_PER_EVT_GENERAL_MCS_STACK_OVERFLOW;
