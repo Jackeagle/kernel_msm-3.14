@@ -2217,7 +2217,6 @@ static int ipa3_post_init(const struct ipa3_plat_drv_res *resource_p,
 	memset(&gsi_props, 0, sizeof(gsi_props));
 	gsi_props.ver = ipa3_get_gsi_ver(resource_p->ipa_hw_type);
 	gsi_props.ee = resource_p->ee;
-	gsi_props.intr = GSI_INTR_IRQ;
 	gsi_props.irq = resource_p->transport_irq;
 	gsi_props.phys_addr = resource_p->transport_mem_base;
 	gsi_props.size = resource_p->transport_mem_size;

@@ -176,9 +176,6 @@ struct gsi_device_scratch {
  *
  * @gsi:        GSI core version
  * @ee:         EE where this driver and peripheral driver runs
- * @intr:       control interrupt type
- * @intvec:     write data for MSI write
- * @msi_addr:   MSI address
  * @irq:        IRQ number
  * @phys_addr:  physical address of GSI block
  * @size:       register size of GSI block
@@ -191,9 +188,6 @@ struct gsi_device_scratch {
 struct gsi_per_props {
 	enum gsi_ver ver;
 	unsigned int ee;
-	enum gsi_intr_type intr;
-	uint32_t intvec;
-	uint64_t msi_addr;
 	unsigned int irq;
 	phys_addr_t phys_addr;
 	unsigned long size;

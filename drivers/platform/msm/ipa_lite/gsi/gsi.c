@@ -689,11 +689,6 @@ void *gsi_register_device(struct gsi_per_props *props)
 		return ERR_PTR(-ENOTSUPP);
 	}
 
-	if (props->intr != GSI_INTR_IRQ) {
-		GSIERR("do not support interrupt type %u\n", props->intr);
-		return ERR_PTR(-ENOTSUPP);
-	}
-
 	if (!props->irq) {
 		GSIERR("bad irq specified %u\n", props->irq);
 		return ERR_PTR(-EINVAL);
@@ -753,7 +748,7 @@ void *gsi_register_device(struct gsi_per_props *props)
 	__gsi_config_gen_irq(props->ee, ~0,
 		~GSI_EE_n_CNTXT_GSI_IRQ_CLR_GSI_BREAK_POINT_BMSK);
 
-	gsi_writel(props->intr, GSI_EE_n_CNTXT_INTSET_OFFS(gsi_ctx->per.ee));
+	gsi_writel(GSI_INTR_IRQ, GSI_EE_n_CNTXT_INTSET_OFFS(gsi_ctx->per.ee));
 
 	val = gsi_readl(GSI_EE_n_GSI_STATUS_OFFS(gsi_ctx->per.ee));
 	if (val & GSI_EE_n_GSI_STATUS_ENABLED_BMSK)
