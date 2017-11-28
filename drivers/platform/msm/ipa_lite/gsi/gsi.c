@@ -1280,7 +1280,7 @@ int gsi_alloc_channel(struct gsi_chan_props *props, void *dev_hdl,
 		return -EINVAL;
 	}
 
-	if (props->evt_ring_hdl != ~0) {
+	if (props->evt_ring_hdl != GSI_NO_EVT_ERINDEX) {
 		if (props->evt_ring_hdl >= GSI_EVT_RING_MAX) {
 			GSIERR("invalid evt ring=%lu\n", props->evt_ring_hdl);
 			return -EINVAL;
@@ -1338,8 +1338,7 @@ int gsi_alloc_channel(struct gsi_chan_props *props, void *dev_hdl,
 	}
 	mutex_unlock(&gsi_ctx->mlock);
 
-	erindex = props->evt_ring_hdl != ~0 ? props->evt_ring_hdl :
-		GSI_NO_EVT_ERINDEX;
+	erindex = props->evt_ring_hdl;
 	if (erindex != GSI_NO_EVT_ERINDEX) {
 		ctx->evtr = &gsi_ctx->evtr[erindex];
 		atomic_inc(&ctx->evtr->chan_ref_cnt);

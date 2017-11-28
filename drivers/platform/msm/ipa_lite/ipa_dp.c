@@ -1103,7 +1103,7 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 	if (ep->sys->use_comm_evt_ring) {
 		ipa3_ctx->gsi_evt_comm_ring_rem +=
 			ep->gsi_mem_info.chan_ring_len;
-	} else if (ep->gsi_evt_ring_hdl != ~0) {
+	} else if (ep->gsi_evt_ring_hdl != GSI_NO_EVT_ERINDEX) {
 		result = gsi_reset_evt_ring(ep->gsi_evt_ring_hdl);
 		if (result) {
 			IPAERR("Failed to reset evt ring: %d.\n",
@@ -2798,7 +2798,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	}
 
 	evt_dma_addr = 0;
-	ep->gsi_evt_ring_hdl = ~0;
+	ep->gsi_evt_ring_hdl = GSI_NO_EVT_ERINDEX;
 	memset(&gsi_evt_ring_props, 0, sizeof(gsi_evt_ring_props));
 	if (ep->sys->use_comm_evt_ring) {
 		if (ipa3_ctx->gsi_evt_comm_ring_rem < 2 * in->desc_fifo_sz) {
@@ -2956,9 +2956,9 @@ fail_alloc_channel:
 			gsi_channel_props.ring_base_vaddr, dma_addr);
 fail_alloc_channel_ring:
 fail_get_gsi_ep_info:
-	if (ep->gsi_evt_ring_hdl != ~0) {
+	if (ep->gsi_evt_ring_hdl != GSI_NO_EVT_ERINDEX) {
 		gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl);
-		ep->gsi_evt_ring_hdl = ~0;
+		ep->gsi_evt_ring_hdl = GSI_NO_EVT_ERINDEX;
 	}
 fail_alloc_evt_ring:
 	if (gsi_evt_ring_props.ring_base_vaddr)
@@ -3074,7 +3074,7 @@ int ipa_gsi_ch20_wa(void)
 
 	memset(&gsi_channel_props, 0, sizeof(gsi_channel_props));
 	gsi_channel_props.dir = GSI_CHAN_DIR_TO_GSI;
-	gsi_channel_props.evt_ring_hdl = ~0;
+	gsi_channel_props.evt_ring_hdl = GSI_NO_EVT_ERINDEX;
 	gsi_channel_props.re_size = GSI_CHAN_RE_SIZE_16B;
 	gsi_channel_props.ring_len = 4 * gsi_channel_props.re_size;
 	gsi_channel_props.ring_base_vaddr =
