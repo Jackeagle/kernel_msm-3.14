@@ -1251,8 +1251,7 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 	return 0;
 }
 
-int gsi_alloc_channel(struct gsi_chan_props *props, void *dev_hdl,
-		unsigned long *chan_hdl)
+long gsi_alloc_channel(struct gsi_chan_props *props, void *dev_hdl)
 {
 	struct gsi_chan_ctx *ctx;
 	uint32_t val;
@@ -1261,15 +1260,15 @@ int gsi_alloc_channel(struct gsi_chan_props *props, void *dev_hdl,
 	enum gsi_ch_cmd_opcode op = GSI_CH_ALLOCATE;
 	uint8_t erindex;
 	void **user_data;
+	long chan_id;
 
 	if (!gsi_ctx) {
 		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
 		return -ENODEV;
 	}
 
-	if (!props || !chan_hdl || dev_hdl != gsi_ctx) {
-		GSIERR("bad params props=%p dev_hdl=%p chan_hdl=%p\n",
-				props, dev_hdl, chan_hdl);
+	if (!props || dev_hdl != gsi_ctx) {
+		GSIERR("bad params props=%p dev_hdl=%p\n", props, dev_hdl);
 		return -EINVAL;
 	}
 
@@ -1287,15 +1286,16 @@ int gsi_alloc_channel(struct gsi_chan_props *props, void *dev_hdl,
 		if (atomic_read(
 			&gsi_ctx->evtr[props->evt_ring_hdl].chan_ref_cnt) &&
 			gsi_ctx->evtr[props->evt_ring_hdl].props.exclusive) {
-			GSIERR("evt ring=%lu exclusively used by chan_hdl=%p\n",
-				props->evt_ring_hdl, chan_hdl);
+			GSIERR("evt ring=%lu exclusively in use\n",
+				props->evt_ring_hdl);
 			return -ENOTSUPP;
 		}
 	}
 
-	ctx = &gsi_ctx->chan[props->ch_id];
+	chan_id = (long)props->ch_id;
+	ctx = &gsi_ctx->chan[chan_id];
 	if (ctx->allocated) {
-		GSIERR("chan %d already allocated\n", props->ch_id);
+		GSIERR("chan %ld already allocated\n", chan_id);
 		return -ENODEV;
 	}
 
@@ -1314,22 +1314,22 @@ int gsi_alloc_channel(struct gsi_chan_props *props, void *dev_hdl,
 	ctx->props = *props;
 
 	mutex_lock(&gsi_ctx->mlock);
-	gsi_ctx->ch_dbg[props->ch_id].ch_allocate++;
-	val = (((props->ch_id << GSI_EE_n_GSI_CH_CMD_CHID_SHFT) &
+	gsi_ctx->ch_dbg[chan_id].ch_allocate++;
+	val = ((((uint32_t)chan_id << GSI_EE_n_GSI_CH_CMD_CHID_SHFT) &
 				GSI_EE_n_GSI_CH_CMD_CHID_BMSK) |
 		((op << GSI_EE_n_GSI_CH_CMD_OPCODE_SHFT) &
 			 GSI_EE_n_GSI_CH_CMD_OPCODE_BMSK));
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(ee));
 	res = wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT);
 	if (res == 0) {
-		GSIERR("chan_hdl=%u timed out\n", props->ch_id);
+		GSIERR("chan_id=%ld timed out\n", chan_id);
 		mutex_unlock(&gsi_ctx->mlock);
 		devm_kfree(gsi_ctx->dev, user_data);
 		return -ETIMEDOUT;
 	}
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED) {
-		GSIERR("chan_hdl=%u allocation failed state=%d\n",
-				props->ch_id, ctx->state);
+		GSIERR("chan_id=%ld allocation failed state=%d\n",
+				chan_id, ctx->state);
 		mutex_unlock(&gsi_ctx->mlock);
 		devm_kfree(gsi_ctx->dev, user_data);
 		return -ENOMEM;
@@ -1351,12 +1351,11 @@ int gsi_alloc_channel(struct gsi_chan_props *props, void *dev_hdl,
 	if (!props->max_re_expected)
 		ctx->props.max_re_expected = ctx->ring.max_num_elem;
 	ctx->user_data = user_data;
-	*chan_hdl = props->ch_id;
 	ctx->allocated = true;
 	ctx->stats.dp.last_timestamp = jiffies_to_msecs(jiffies);
 	atomic_inc(&gsi_ctx->num_chan);
 
-	return 0;
+	return chan_id;
 }
 
 static void __gsi_write_channel_scratch(unsigned long chan_hdl,

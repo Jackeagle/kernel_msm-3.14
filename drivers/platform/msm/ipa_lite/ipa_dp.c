@@ -2922,10 +2922,10 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		gsi_channel_props.xfer_cb = ipa_gsi_irq_tx_notify_cb;
 	else
 		gsi_channel_props.xfer_cb = ipa_gsi_irq_rx_notify_cb;
-	result = gsi_alloc_channel(&gsi_channel_props, ipa3_ctx->gsi_dev_hdl,
-		&ep->gsi_chan_hdl);
-	if (result)
+	result = gsi_alloc_channel(&gsi_channel_props, ipa3_ctx->gsi_dev_hdl);
+	if (result < 0)
 		goto fail_alloc_channel;
+	ep->gsi_chan_hdl = result;
 
 	memset(&ch_scratch, 0, sizeof(ch_scratch));
 	ch_scratch.gpi.max_outstanding_tre = gsi_ep_info->ipa_if_tlv *
@@ -3092,24 +3092,23 @@ int ipa_gsi_ch20_wa(void)
 	for (i = 0; i < IPA_GSI_CH_20_WA_NUM_CH_TO_ALLOC; i++) {
 		gsi_channel_props.ch_id = i;
 		result = gsi_alloc_channel(&gsi_channel_props,
-			ipa3_ctx->gsi_dev_hdl,
-			&chan_hdl[i]);
-		if (result) {
+						ipa3_ctx->gsi_dev_hdl);
+		if (result < 0) {
 			IPAERR("failed to alloc channel %d err %d\n",
 				i, result);
 			return result;
 		}
+		chan_hdl[i] = result;
 	}
 
 	/* allocate channel 20 */
 	gsi_channel_props.ch_id = IPA_GSI_CH_20_WA_VIRT_CHAN;
-	result = gsi_alloc_channel(&gsi_channel_props, ipa3_ctx->gsi_dev_hdl,
-		&chan_hdl_to_keep);
-	if (result) {
-		IPAERR("failed to alloc channel %d err %d\n",
-			i, result);
+	result = gsi_alloc_channel(&gsi_channel_props, ipa3_ctx->gsi_dev_hdl);
+	if (result < 0) {
+		IPAERR("failed to alloc channel %d err %d\n", i, result);
 		return result;
 	}
+	chan_hdl_to_keep = result;
 
 	/* release all other channels */
 	for (i = 0; i < IPA_GSI_CH_20_WA_NUM_CH_TO_ALLOC; i++) {

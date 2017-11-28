@@ -591,16 +591,13 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl);
  * allocate a channel
  *
  * @props:     Channel properties
- * @dev_hdl:   Client handle previously obtained from
- *             gsi_register_device
- * @chan_hdl:  Handle populated by GSI, opaque to client
+ * @dev_hdl:   Client handle previously obtained from gsi_register_device
  *
  * This function can sleep
  *
- * @Return gsi_status
+ * @Return Channel handle populated by GSI, opaque to client, or negative errno
  */
-int gsi_alloc_channel(struct gsi_chan_props *props, void *dev_hdl,
-		unsigned long *chan_hdl);
+long gsi_alloc_channel(struct gsi_chan_props *props, void *dev_hdl);
 
 /**
  * gsi_write_channel_scratch - Peripheral should call this function to
@@ -664,7 +661,7 @@ int gsi_reset_channel(unsigned long chan_hdl);
  *
  * This function can sleep
  *
- * @Return gsi_status
+ * @Return 0, or a negative errno
  */
 int gsi_dealloc_channel(unsigned long chan_hdl);
 
