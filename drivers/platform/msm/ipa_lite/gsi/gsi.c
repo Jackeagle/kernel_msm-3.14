@@ -1021,37 +1021,6 @@ static void __gsi_write_evt_ring_scratch(unsigned long evt_ring_hdl,
 			gsi_ctx->per.ee));
 }
 
-int gsi_write_evt_ring_scratch(unsigned long evt_ring_hdl,
-		union __packed gsi_evt_scratch val)
-{
-	struct gsi_evt_ctx *ctx;
-
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -ENODEV;
-	}
-
-	if (evt_ring_hdl >= gsi_ctx->max_ev) {
-		GSIERR("bad params evt_ring_hdl=%lu\n", evt_ring_hdl);
-		return -EINVAL;
-	}
-
-	ctx = &gsi_ctx->evtr[evt_ring_hdl];
-
-	if (ctx->state != GSI_EVT_RING_STATE_ALLOCATED) {
-		GSIERR("bad state %d\n",
-				gsi_ctx->evtr[evt_ring_hdl].state);
-		return -ENOTSUPP;
-	}
-
-	mutex_lock(&ctx->mlock);
-	ctx->scratch = val;
-	__gsi_write_evt_ring_scratch(evt_ring_hdl, val);
-	mutex_unlock(&ctx->mlock);
-
-	return 0;
-}
-
 int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 {
 	uint32_t val;
@@ -1446,39 +1415,6 @@ int gsi_write_channel_scratch(unsigned long chan_hdl,
 	ctx->scratch = val;
 	__gsi_write_channel_scratch(chan_hdl, val);
 	mutex_unlock(&ctx->mlock);
-
-	return 0;
-}
-
-int gsi_query_channel_db_addr(unsigned long chan_hdl,
-		uint32_t *db_addr_wp_lsb, uint32_t *db_addr_wp_msb)
-{
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -ENODEV;
-	}
-
-	if (!db_addr_wp_msb || !db_addr_wp_lsb) {
-		GSIERR("bad params msb=%p lsb=%p\n", db_addr_wp_msb,
-				db_addr_wp_lsb);
-		return -EINVAL;
-	}
-
-	if (chan_hdl >= gsi_ctx->max_ch) {
-		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
-		return -EINVAL;
-	}
-
-	if (gsi_ctx->chan[chan_hdl].state == GSI_CHAN_STATE_NOT_ALLOCATED) {
-		GSIERR("bad state %d\n",
-				gsi_ctx->chan[chan_hdl].state);
-		return -ENOTSUPP;
-	}
-
-	*db_addr_wp_lsb = gsi_ctx->per.phys_addr +
-		GSI_EE_n_GSI_CH_k_DOORBELL_0_OFFS(chan_hdl, gsi_ctx->per.ee);
-	*db_addr_wp_msb = gsi_ctx->per.phys_addr +
-		GSI_EE_n_GSI_CH_k_DOORBELL_1_OFFS(chan_hdl, gsi_ctx->per.ee);
 
 	return 0;
 }
@@ -1953,7 +1889,7 @@ int gsi_start_xfer(unsigned long chan_hdl)
 	gsi_ring_chan_doorbell(ctx);
 
 	return 0;
-};
+}
 
 int gsi_poll_channel(unsigned long chan_hdl,
 		struct gsi_chan_xfer_notify *notify)

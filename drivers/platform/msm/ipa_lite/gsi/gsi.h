@@ -564,19 +564,6 @@ int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, unsigned long dev_hdl,
 		unsigned long *evt_ring_hdl);
 
 /**
- * gsi_write_evt_ring_scratch - Peripheral should call this function to
- * write to the scratch area of the event ring context
- *
- * @evt_ring_hdl:  Client handle previously obtained from
- *	   gsi_alloc_evt_ring
- * @val:           Value to write
- *
- * @Return gsi_status
- */
-int gsi_write_evt_ring_scratch(unsigned long evt_ring_hdl,
-		union __packed gsi_evt_scratch val);
-
-/**
  * gsi_dealloc_evt_ring - Peripheral should call this function to
  * de-allocate an event ring. There should not exist any active
  * channels using this event ring
@@ -684,22 +671,6 @@ int gsi_reset_channel(unsigned long chan_hdl);
  * @Return gsi_status
  */
 int gsi_dealloc_channel(unsigned long chan_hdl);
-
-/**
- * gsi_query_channel_db_addr - Peripheral should call this function to
- * query the physical addresses of the channel doorbell registers
- *
- * @chan_hdl:        Client handle previously obtained from
- *	     gsi_alloc_channel
- * @db_addr_wp_lsb:  Physical address of doorbell register where the 32
- *                   LSBs of the doorbell value should be written
- * @db_addr_wp_msb:  Physical address of doorbell register where the 32
- *                   MSBs of the doorbell value should be written
- *
- * @Return gsi_status
- */
-int gsi_query_channel_db_addr(unsigned long chan_hdl,
-		uint32_t *db_addr_wp_lsb, uint32_t *db_addr_wp_msb);
 
 /**
  * gsi_is_channel_empty - Peripheral can call this function to query if
