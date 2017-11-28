@@ -534,18 +534,11 @@ void *gsi_register_device(struct gsi_per_props *props);
  * gsi_deregister_device - Peripheral should call this function to
  * de-register itself with GSI
  *
- * @dev_hdl:  Client handle previously obtained from
- *            gsi_register_device
- * @force:    When set to true, cleanup is performed even if there
- *            are in use resources like channels, event rings, etc.
- *            this would be used after GSI reset to recover from some
- *            fatal error
- *            When set to false, there must not exist any allocated
- *            channels and event rings.
+ * @dev_hdl:  Client handle previously obtained from gsi_register_device
  *
- * @Return gsi_status
+ * @Return 0, or a negative errno
  */
-int gsi_deregister_device(void *dev_hdl, bool force);
+int gsi_deregister_device(void *dev_hdl);
 
 /**
  * gsi_alloc_evt_ring - Peripheral should call this function to

@@ -2267,7 +2267,7 @@ static int ipa3_post_init(const struct ipa3_plat_drv_res *resource_p,
 	return 0;
 
 fail_setup_apps_pipes:
-	gsi_deregister_device(ipa3_ctx->gsi_dev_hdl, false);
+	gsi_deregister_device(ipa3_ctx->gsi_dev_hdl);
 fail_register_device:
 	return result;
 }

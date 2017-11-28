@@ -767,15 +767,15 @@ void *gsi_register_device(struct gsi_per_props *props)
 	return gsi_ctx;
 }
 
-int gsi_deregister_device(void *dev_hdl, bool force)
+int gsi_deregister_device(void *dev_hdl)
 {
-	if (!force && atomic_read(&gsi_ctx->num_chan)) {
+	if (atomic_read(&gsi_ctx->num_chan)) {
 		GSIERR("%u channels are allocated\n",
 				atomic_read(&gsi_ctx->num_chan));
 		return -ENOTSUPP;
 	}
 
-	if (!force && atomic_read(&gsi_ctx->num_evt_ring)) {
+	if (atomic_read(&gsi_ctx->num_evt_ring)) {
 		GSIERR("%u evt rings are allocated\n",
 				atomic_read(&gsi_ctx->num_evt_ring));
 		return -ENOTSUPP;
