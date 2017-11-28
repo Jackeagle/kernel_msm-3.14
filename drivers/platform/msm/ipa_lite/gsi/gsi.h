@@ -552,28 +552,24 @@ int gsi_deregister_device(void *dev_hdl, bool force);
  * allocate an event ring
  *
  * @props:	   Event ring properties
- * @dev_hdl:	   Client handle previously obtained from
- *	   gsi_register_device
- * @evt_ring_hdl:  Handle populated by GSI, opaque to client
+ * @dev_hdl:	   Client handle previously obtained from gsi_register_device
  *
  * This function can sleep
  *
- * @Return gsi_status
+ * @Return Client handle populated by GSI, or a negative errno
  */
-int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, void *dev_hdl,
-		unsigned long *evt_ring_hdl);
+long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, void *dev_hdl);
 
 /**
  * gsi_dealloc_evt_ring - Peripheral should call this function to
  * de-allocate an event ring. There should not exist any active
  * channels using this event ring
  *
- * @evt_ring_hdl:  Client handle previously obtained from
- *	   gsi_alloc_evt_ring
+ * @evt_ring_hdl:  Client handle previously obtained from gsi_alloc_evt_ring
  *
  * This function can sleep
  *
- * @Return gsi_status
+ * @Return 0, or a negative errno
  */
 int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl);
 

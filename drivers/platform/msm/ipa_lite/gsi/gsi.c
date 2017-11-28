@@ -919,8 +919,7 @@ static int gsi_validate_evt_ring_props(struct gsi_evt_ring_props *props)
 }
 
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
-int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, void *dev_hdl,
-		unsigned long *evt_ring_hdl)
+long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, void *dev_hdl)
 {
 	unsigned long evt_id;
 	enum gsi_evt_ch_cmd_opcode op = GSI_EVT_ALLOCATE;
@@ -929,15 +928,15 @@ int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, void *dev_hdl,
 	int res;
 	int ee = gsi_ctx->per.ee;
 	unsigned long flags;
+	size_t bit_count;
 
 	if (!gsi_ctx) {
 		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
 		return -ENODEV;
 	}
 
-	if (!props || !evt_ring_hdl || dev_hdl != gsi_ctx) {
-		GSIERR("bad params props=%p dev_hdl=%p evt_ring_hdl=%p\n",
-				props, dev_hdl, evt_ring_hdl);
+	if (!props || dev_hdl != gsi_ctx) {
+		GSIERR("bad params props=%p dev_hdl=%p\n", props, dev_hdl);
 		return -EINVAL;
 	}
 
@@ -946,10 +945,10 @@ int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, void *dev_hdl,
 		return -EINVAL;
 	}
 
+	bit_count = sizeof(unsigned long) * BITS_PER_BYTE;
 	mutex_lock(&gsi_ctx->mlock);
-	evt_id = find_first_zero_bit(&gsi_ctx->evt_bmap,
-			sizeof(unsigned long) * BITS_PER_BYTE);
-	if (evt_id == sizeof(unsigned long) * BITS_PER_BYTE) {
+	evt_id = find_first_zero_bit(&gsi_ctx->evt_bmap, bit_count);
+	if (evt_id == bit_count) {
 		GSIERR("failed to alloc event ID\n");
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ENOMEM;
@@ -994,7 +993,6 @@ int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, void *dev_hdl,
 	gsi_init_evt_ring(props, &ctx->ring);
 
 	ctx->id = evt_id;
-	*evt_ring_hdl = evt_id;
 	atomic_inc(&gsi_ctx->num_evt_ring);
 	gsi_prime_evt_ring(ctx);
 	mutex_unlock(&gsi_ctx->mlock);
@@ -1006,7 +1004,7 @@ int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, void *dev_hdl,
 	__gsi_config_ieob_irq(gsi_ctx->per.ee, 1 << ctx->id, ~0);
 	spin_unlock_irqrestore(&gsi_ctx->slock, flags);
 
-	return 0;
+	return evt_id;
 }
 
 static void __gsi_write_evt_ring_scratch(unsigned long evt_ring_hdl,

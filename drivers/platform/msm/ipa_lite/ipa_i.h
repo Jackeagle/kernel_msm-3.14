@@ -1815,7 +1815,7 @@ void ipa3_reset_freeze_vote(void);
 struct dentry *ipa_debugfs_get_root(void);
 bool ipa3_is_msm_device(void);
 void ipa3_enable_dcd(void);
-int ipa3_alloc_common_event_ring(void);
+long ipa3_alloc_common_event_ring(void);
 int ipa3_allocate_dma_task_for_gsi(void);
 void ipa3_free_dma_task_for_gsi(void);
 int ipa3_disable_apps_wan_cons_deaggr(uint32_t agg_size, uint32_t agg_count);

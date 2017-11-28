@@ -2744,11 +2744,11 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 	}
 }
 
-int ipa3_alloc_common_event_ring(void)
+long ipa3_alloc_common_event_ring(void)
 {
 	struct gsi_evt_ring_props gsi_evt_ring_props;
 	dma_addr_t evt_dma_addr;
-	int result;
+	long result;
 
 	memset(&gsi_evt_ring_props, 0, sizeof(gsi_evt_ring_props));
 	gsi_evt_ring_props.re_size = GSI_EVT_RING_RE_SIZE_16B;
@@ -2770,12 +2770,12 @@ int ipa3_alloc_common_event_ring(void)
 	gsi_evt_ring_props.err_cb = ipa_gsi_evt_ring_err_cb;
 	gsi_evt_ring_props.user_data = NULL;
 
-	result = gsi_alloc_evt_ring(&gsi_evt_ring_props,
-		ipa3_ctx->gsi_dev_hdl, &ipa3_ctx->gsi_evt_comm_hdl);
-	if (result) {
-		IPAERR("gsi_alloc_evt_ring failed %d\n", result);
+	result = gsi_alloc_evt_ring(&gsi_evt_ring_props, ipa3_ctx->gsi_dev_hdl);
+	if (result < 0) {
+		IPAERR("gsi_alloc_evt_ring failed %ld\n", result);
 		return result;
 	}
+	ipa3_ctx->gsi_evt_comm_hdl = result;
 	ipa3_ctx->gsi_evt_comm_ring_rem = IPA_COMMON_EVENT_RING_SIZE;
 
 	return 0;
@@ -2852,9 +2852,10 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		gsi_evt_ring_props.user_data = NULL;
 
 		result = gsi_alloc_evt_ring(&gsi_evt_ring_props,
-			ipa3_ctx->gsi_dev_hdl, &ep->gsi_evt_ring_hdl);
-		if (result)
+						ipa3_ctx->gsi_dev_hdl);
+		if (result < 0)
 			goto fail_alloc_evt_ring;
+		ep->gsi_evt_ring_hdl = result;
 	}
 
 	memset(&gsi_channel_props, 0, sizeof(gsi_channel_props));
