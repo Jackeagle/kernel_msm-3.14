@@ -1715,7 +1715,7 @@ static uint16_t __gsi_query_channel_free_re(struct gsi_chan_ctx *ctx)
 	return ctx->ring.max_num_elem - used;
 }
 
-int gsi_is_channel_empty(unsigned long chan_hdl, bool *is_empty)
+bool gsi_is_channel_empty(unsigned long chan_hdl)
 {
 	struct gsi_chan_ctx *ctx;
 	spinlock_t *slock;
@@ -1723,17 +1723,7 @@ int gsi_is_channel_empty(unsigned long chan_hdl, bool *is_empty)
 	uint64_t rp;
 	uint64_t wp;
 	int ee = gsi_ctx->per.ee;
-
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -ENODEV;
-	}
-
-	if (chan_hdl >= gsi_ctx->max_ch || !is_empty) {
-		GSIERR("bad params chan_hdl=%lu is_empty=%p\n",
-				chan_hdl, is_empty);
-		return -EINVAL;
-	}
+	bool is_empty;
 
 	ctx = &gsi_ctx->chan[chan_hdl];
 	if (ctx->evtr)
@@ -1752,16 +1742,16 @@ int gsi_is_channel_empty(unsigned long chan_hdl, bool *is_empty)
 	ctx->ring.wp = wp;
 
 	if (ctx->props.dir == GSI_CHAN_DIR_FROM_GSI)
-		*is_empty = (ctx->ring.rp_local == rp) ? true : false;
+		is_empty = (ctx->ring.rp_local == rp) ? true : false;
 	else
-		*is_empty = (wp == rp) ? true : false;
+		is_empty = (wp == rp) ? true : false;
 
 	spin_unlock_irqrestore(slock, flags);
 
 	GSIDBG("ch=%lu RP=0x%llx WP=0x%llx RP_LOCAL=0x%llx\n",
 			chan_hdl, rp, wp, ctx->ring.rp_local);
 
-	return 0;
+	return is_empty;
 }
 
 int gsi_queue_xfer(unsigned long chan_hdl, uint16_t num_xfers,

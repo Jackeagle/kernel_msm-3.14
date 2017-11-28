@@ -672,11 +672,10 @@ int gsi_dealloc_channel(unsigned long chan_hdl);
  * processed all completed descriptors for a FROM_GSI channel.
  *
  * @chan_hdl:  Client handle previously obtained from gsi_alloc_channel
- * @is_empty:  set by GSI based on channel emptiness
  *
- * @Return gsi_status
+ * @Return true if channel is empty, false otherwise
  */
-int gsi_is_channel_empty(unsigned long chan_hdl, bool *is_empty);
+bool gsi_is_channel_empty(unsigned long chan_hdl);
 
 /**
  * gsi_get_channel_cfg - This function returns the current config

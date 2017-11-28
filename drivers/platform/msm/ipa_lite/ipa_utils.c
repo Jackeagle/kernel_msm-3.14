@@ -2793,12 +2793,9 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 
 static void ipa3_gsi_poll_after_suspend(struct ipa3_ep_context *ep)
 {
-	bool empty;
-
 	IPADBG("switch ch %ld to poll\n", ep->gsi_chan_hdl);
 	gsi_config_channel_mode(ep->gsi_chan_hdl, GSI_CHAN_MODE_POLL);
-	gsi_is_channel_empty(ep->gsi_chan_hdl, &empty);
-	if (!empty) {
+	if (!gsi_is_channel_empty(ep->gsi_chan_hdl)) {
 		IPADBG("ch %ld not empty\n", ep->gsi_chan_hdl);
 		/* queue a work to start polling if don't have one */
 		atomic_set(&ipa3_ctx->transport_pm.eot_activity, 1);
