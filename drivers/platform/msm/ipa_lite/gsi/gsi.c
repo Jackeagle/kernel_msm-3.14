@@ -781,7 +781,11 @@ int gsi_deregister_device(void *dev_hdl)
 		return -ENOTSUPP;
 	}
 
-	/* disable all interrupts */
+	/*
+	 * Don't bother clearing the error log again (ERROR_LOG) or
+	 * setting the interrupt type again (INTSET).  Disable all
+	 * interrupts.
+	 */
 	__gsi_config_type_irq(gsi_ctx->per.ee, ~0, 0);
 	__gsi_config_ch_irq(gsi_ctx->per.ee, ~0, 0);
 	__gsi_config_evt_irq(gsi_ctx->per.ee, ~0, 0);
@@ -789,7 +793,14 @@ int gsi_deregister_device(void *dev_hdl)
 	__gsi_config_glob_irq(gsi_ctx->per.ee, ~0, 0);
 	__gsi_config_gen_irq(gsi_ctx->per.ee, ~0, 0);
 
-	memset(gsi_ctx, 0, sizeof(*gsi_ctx));
+	/* Clean up everything else set up by gsi_register_device() */
+	gsi_ctx->evt_bmap = 0;
+	gsi_ctx->max_ev = 0;
+	gsi_ctx->max_ch = 0;
+	gsi_ctx->per_registered = false;
+	/* XXX We don't know whether enabling this succeeded */
+	/* (void)disable_irq_wake(gsi_ctx->per.irq); */
+	memset(&gsi_ctx->per, 0, sizeof(gsi_ctx->per));
 
 	return 0;
 }
