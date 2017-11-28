@@ -659,7 +659,7 @@ static uint32_t gsi_get_max_event_rings(enum gsi_ver ver)
 	return reg;
 }
 
-int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl)
+int gsi_register_device(struct gsi_per_props *props, void **dev_hdl)
 {
 	int res;
 	uint32_t val;
@@ -764,12 +764,12 @@ int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl)
 	if (gsi_ctx->per.ver >= GSI_VER_1_2)
 		gsi_writel(0, GSI_EE_n_ERROR_LOG_OFFS(gsi_ctx->per.ee));
 
-	*dev_hdl = (uintptr_t)gsi_ctx;
+	*dev_hdl = gsi_ctx;
 
 	return 0;
 }
 
-int gsi_deregister_device(unsigned long dev_hdl, bool force)
+int gsi_deregister_device(void *dev_hdl, bool force)
 {
 	if (!gsi_ctx) {
 		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
@@ -781,9 +781,8 @@ int gsi_deregister_device(unsigned long dev_hdl, bool force)
 		return -EINVAL;
 	}
 
-	if (dev_hdl != (uintptr_t)gsi_ctx) {
-		GSIERR("bad params dev_hdl=0x%lx gsi_ctx=0x%p\n", dev_hdl,
-				gsi_ctx);
+	if (dev_hdl != gsi_ctx) {
+		GSIERR("bad params dev_hdl=%p gsi_ctx=%p\n", dev_hdl, gsi_ctx);
 		return -EINVAL;
 	}
 
@@ -922,7 +921,7 @@ static int gsi_validate_evt_ring_props(struct gsi_evt_ring_props *props)
 }
 
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
-int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, unsigned long dev_hdl,
+int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, void *dev_hdl,
 		unsigned long *evt_ring_hdl)
 {
 	unsigned long evt_id;
@@ -938,8 +937,8 @@ int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, unsigned long dev_hdl,
 		return -ENODEV;
 	}
 
-	if (!props || !evt_ring_hdl || dev_hdl != (uintptr_t)gsi_ctx) {
-		GSIERR("bad params props=%p dev_hdl=0x%lx evt_ring_hdl=%p\n",
+	if (!props || !evt_ring_hdl || dev_hdl != gsi_ctx) {
+		GSIERR("bad params props=%p dev_hdl=%p evt_ring_hdl=%p\n",
 				props, dev_hdl, evt_ring_hdl);
 		return -EINVAL;
 	}
@@ -1256,7 +1255,7 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 	return 0;
 }
 
-int gsi_alloc_channel(struct gsi_chan_props *props, unsigned long dev_hdl,
+int gsi_alloc_channel(struct gsi_chan_props *props, void *dev_hdl,
 		unsigned long *chan_hdl)
 {
 	struct gsi_chan_ctx *ctx;
@@ -1272,8 +1271,8 @@ int gsi_alloc_channel(struct gsi_chan_props *props, unsigned long dev_hdl,
 		return -ENODEV;
 	}
 
-	if (!props || !chan_hdl || dev_hdl != (uintptr_t)gsi_ctx) {
-		GSIERR("bad params props=%p dev_hdl=0x%lx chan_hdl=%p\n",
+	if (!props || !chan_hdl || dev_hdl != gsi_ctx) {
+		GSIERR("bad params props=%p dev_hdl=%p chan_hdl=%p\n",
 				props, dev_hdl, chan_hdl);
 		return -EINVAL;
 	}

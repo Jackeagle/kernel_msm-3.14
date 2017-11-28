@@ -1228,7 +1228,7 @@ struct ipa3_context {
 	u32 wan_rx_ring_size;
 	u32 lan_rx_ring_size;
 	bool skip_uc_pipe_reset;
-	unsigned long gsi_dev_hdl;
+	void *gsi_dev_hdl;
 	u32 ee;
 	bool apply_rg10_wa;
 	bool gsi_ch20_wa;

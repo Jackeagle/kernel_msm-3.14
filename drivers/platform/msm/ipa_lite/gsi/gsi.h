@@ -528,7 +528,7 @@ static inline void gsi_writel(u32 v, u32 offset)
  * @Return -GSI_STATUS_AGAIN if request should be re-tried later
  *	   other error codes for failure
  */
-int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl);
+int gsi_register_device(struct gsi_per_props *props, void **dev_hdl);
 
 /**
  * gsi_deregister_device - Peripheral should call this function to
@@ -545,7 +545,7 @@ int gsi_register_device(struct gsi_per_props *props, unsigned long *dev_hdl);
  *
  * @Return gsi_status
  */
-int gsi_deregister_device(unsigned long dev_hdl, bool force);
+int gsi_deregister_device(void *dev_hdl, bool force);
 
 /**
  * gsi_alloc_evt_ring - Peripheral should call this function to
@@ -560,7 +560,7 @@ int gsi_deregister_device(unsigned long dev_hdl, bool force);
  *
  * @Return gsi_status
  */
-int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, unsigned long dev_hdl,
+int gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, void *dev_hdl,
 		unsigned long *evt_ring_hdl);
 
 /**
@@ -603,7 +603,7 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl);
  *
  * @Return gsi_status
  */
-int gsi_alloc_channel(struct gsi_chan_props *props, unsigned long dev_hdl,
+int gsi_alloc_channel(struct gsi_chan_props *props, void *dev_hdl,
 		unsigned long *chan_hdl);
 
 /**
