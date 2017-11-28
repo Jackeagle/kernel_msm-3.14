@@ -769,21 +769,6 @@ void *gsi_register_device(struct gsi_per_props *props)
 
 int gsi_deregister_device(void *dev_hdl, bool force)
 {
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -ENODEV;
-	}
-
-	if (!gsi_ctx->per_registered) {
-		GSIERR("no client registered\n");
-		return -EINVAL;
-	}
-
-	if (dev_hdl != gsi_ctx) {
-		GSIERR("bad params dev_hdl=%p gsi_ctx=%p\n", dev_hdl, gsi_ctx);
-		return -EINVAL;
-	}
-
 	if (!force && atomic_read(&gsi_ctx->num_chan)) {
 		GSIERR("%u channels are allocated\n",
 				atomic_read(&gsi_ctx->num_chan));
