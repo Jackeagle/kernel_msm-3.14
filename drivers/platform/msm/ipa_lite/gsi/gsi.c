@@ -1687,8 +1687,7 @@ void gsi_update_ch_dp_stats(struct gsi_chan_ctx *ctx, uint16_t used)
 	ctx->stats.dp.last_timestamp = now;
 }
 
-static void __gsi_query_channel_free_re(struct gsi_chan_ctx *ctx,
-		uint16_t *num_free_re)
+static uint16_t __gsi_query_channel_free_re(struct gsi_chan_ctx *ctx)
 {
 	uint16_t start;
 	uint16_t end;
@@ -1713,7 +1712,7 @@ static void __gsi_query_channel_free_re(struct gsi_chan_ctx *ctx,
 	else
 		used = ctx->ring.max_num_elem + 1 - (start - end);
 
-	*num_free_re = ctx->ring.max_num_elem - used;
+	return ctx->ring.max_num_elem - used;
 }
 
 int gsi_is_channel_empty(unsigned long chan_hdl, bool *is_empty)
@@ -1796,7 +1795,7 @@ int gsi_queue_xfer(unsigned long chan_hdl, uint16_t num_xfers,
 		slock = &ctx->ring.slock;
 
 	spin_lock_irqsave(slock, flags);
-	__gsi_query_channel_free_re(ctx, &free);
+	free = __gsi_query_channel_free_re(ctx);
 
 	if (num_xfers > free) {
 		GSIERR("chan_hdl=%lu num_xfers=%u free=%u\n",
