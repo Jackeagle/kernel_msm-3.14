@@ -2223,9 +2223,10 @@ static int ipa3_post_init(const struct ipa3_plat_drv_res *resource_p,
 	gsi_props.size = resource_p->transport_mem_size;
 	gsi_props.notify_cb = ipa_gsi_notify_cb;
 
-	result = gsi_register_device(&gsi_props, &ipa3_ctx->gsi_dev_hdl);
-	if (result) {
-		IPAERR(":gsi register error - %d\n", result);
+	ipa3_ctx->gsi_dev_hdl = gsi_register_device(&gsi_props);
+	if (IS_ERR(ipa3_ctx->gsi_dev_hdl)) {
+		IPAERR(":gsi register error - %ld\n",
+				PTR_ERR(ipa3_ctx->gsi_dev_hdl));
 		result = -ENODEV;
 		goto fail_register_device;
 	}

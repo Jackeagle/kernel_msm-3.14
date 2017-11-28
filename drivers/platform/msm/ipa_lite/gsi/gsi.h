@@ -528,7 +528,7 @@ static inline void gsi_writel(u32 v, u32 offset)
  * @Return -GSI_STATUS_AGAIN if request should be re-tried later
  *	   other error codes for failure
  */
-int gsi_register_device(struct gsi_per_props *props, void **dev_hdl);
+void *gsi_register_device(struct gsi_per_props *props);
 
 /**
  * gsi_deregister_device - Peripheral should call this function to

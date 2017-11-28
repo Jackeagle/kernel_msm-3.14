@@ -659,44 +659,44 @@ static uint32_t gsi_get_max_event_rings(enum gsi_ver ver)
 	return reg;
 }
 
-int gsi_register_device(struct gsi_per_props *props, void **dev_hdl)
+void *gsi_register_device(struct gsi_per_props *props)
 {
 	int res;
 	uint32_t val;
 
 	if (!gsi_ctx) {
 		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -ENODEV;
+		return ERR_PTR(-ENODEV);
 	}
 
-	if (!props || !dev_hdl) {
-		GSIERR("bad params props=%p dev_hdl=%p\n", props, dev_hdl);
-		return -EINVAL;
+	if (!props) {
+		GSIERR("bad params props=%p\n", props);
+		return ERR_PTR(-EINVAL);
 	}
 
 	if (props->ver <= GSI_VER_ERR || props->ver >= GSI_VER_MAX) {
 		GSIERR("bad params gsi_ver=%d\n", props->ver);
-		return -EINVAL;
+		return ERR_PTR(-EINVAL);
 	}
 
 	if (!props->notify_cb) {
 		GSIERR("notify callback must be provided\n");
-		return -EINVAL;
+		return ERR_PTR(-EINVAL);
 	}
 
 	if (gsi_ctx->per_registered) {
 		GSIERR("per already registered\n");
-		return -ENOTSUPP;
+		return ERR_PTR(-ENOTSUPP);
 	}
 
 	if (props->intr != GSI_INTR_IRQ) {
 		GSIERR("do not support interrupt type %u\n", props->intr);
-		return -ENOTSUPP;
+		return ERR_PTR(-ENOTSUPP);
 	}
 
 	if (!props->irq) {
 		GSIERR("bad irq specified %u\n", props->irq);
-		return -EINVAL;
+		return ERR_PTR(-EINVAL);
 	}
 
 	spin_lock_init(&gsi_ctx->slock);
@@ -704,7 +704,7 @@ int gsi_register_device(struct gsi_per_props *props, void **dev_hdl)
 				IRQF_TRIGGER_HIGH, "gsi", gsi_ctx);
 	if (res) {
 		GSIERR("failed to register isr for %u\n", props->irq);
-		return -EIO;
+		return ERR_PTR(-EIO);
 	}
 
 	res = enable_irq_wake(props->irq);
@@ -717,7 +717,7 @@ int gsi_register_device(struct gsi_per_props *props, void **dev_hdl)
 				props->size);
 	if (!gsi_ctx->base) {
 		GSIERR("failed to remap GSI HW\n");
-		return -ENOMEM;
+		return ERR_PTR(-ENOMEM);
 	}
 
 	gsi_ctx->per = *props;
@@ -728,12 +728,12 @@ int gsi_register_device(struct gsi_per_props *props, void **dev_hdl)
 	gsi_ctx->max_ch = gsi_get_max_channels(gsi_ctx->per.ver);
 	if (gsi_ctx->max_ch == 0) {
 		GSIERR("failed to get max channels\n");
-		return -EIO;
+		return ERR_PTR(-EIO);
 	}
 	gsi_ctx->max_ev = gsi_get_max_event_rings(gsi_ctx->per.ver);
 	if (gsi_ctx->max_ev == 0) {
 		GSIERR("failed to get max event rings\n");
-		return -EIO;
+		return ERR_PTR(-EIO);
 	}
 
 	/* bitmap is max events excludes reserved events */
@@ -764,9 +764,7 @@ int gsi_register_device(struct gsi_per_props *props, void **dev_hdl)
 	if (gsi_ctx->per.ver >= GSI_VER_1_2)
 		gsi_writel(0, GSI_EE_n_ERROR_LOG_OFFS(gsi_ctx->per.ee));
 
-	*dev_hdl = gsi_ctx;
-
-	return 0;
+	return gsi_ctx;
 }
 
 int gsi_deregister_device(void *dev_hdl, bool force)
