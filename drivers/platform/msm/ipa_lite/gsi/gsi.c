@@ -374,16 +374,15 @@ static void gsi_ring_evt_doorbell(struct gsi_evt_ctx *ctx)
 {
 	uint32_t val;
 
-	/* write order MUST be MSB followed by LSB */
-	val = ((ctx->ring.wp_local >> 32) &
-			GSI_EE_n_EV_CH_k_DOORBELL_1_WRITE_PTR_MSB_BMSK) <<
-			GSI_EE_n_EV_CH_k_DOORBELL_1_WRITE_PTR_MSB_SHFT;
+	/*
+	 * The doorbell 0 and 1 registers store the low-order and
+	 * high-order 32 bits of the event ring doorbell register,
+	 * respectively.  LSB (doorbell 0) must be written last.
+	 */
+	val = ctx->ring.wp_local >> 32;
 	gsi_writel(val, GSI_EE_n_EV_CH_k_DOORBELL_1_OFFS(ctx->id,
 				gsi_ctx->per.ee));
-
-	val = (ctx->ring.wp_local &
-			GSI_EE_n_EV_CH_k_DOORBELL_0_WRITE_PTR_LSB_BMSK) <<
-			GSI_EE_n_EV_CH_k_DOORBELL_0_WRITE_PTR_LSB_SHFT;
+	val = ctx->ring.wp_local & GENMASK(31, 0);
 	gsi_writel(val, GSI_EE_n_EV_CH_k_DOORBELL_0_OFFS(ctx->id,
 				gsi_ctx->per.ee));
 }
@@ -402,16 +401,15 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *ctx)
 		gsi_ring_evt_doorbell(ctx->evtr);
 	ctx->ring.wp = ctx->ring.wp_local;
 
-	/* write order MUST be MSB followed by LSB */
-	val = ((ctx->ring.wp_local >> 32) &
-			GSI_EE_n_GSI_CH_k_DOORBELL_1_WRITE_PTR_MSB_BMSK) <<
-			GSI_EE_n_GSI_CH_k_DOORBELL_1_WRITE_PTR_MSB_SHFT;
+	/*
+	 * The doorbell 0 and 1 registers store the low-order and
+	 * high-order 32 bits of the channel ring doorbell register,
+	 * respectively.  LSB (doorbell 0) must be written last.
+	 */
+	val = ctx->ring.wp_local >> 32;
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_DOORBELL_1_OFFS(ctx->props.ch_id,
 				gsi_ctx->per.ee));
-
-	val = (ctx->ring.wp_local &
-			GSI_EE_n_GSI_CH_k_DOORBELL_0_WRITE_PTR_LSB_BMSK) <<
-			GSI_EE_n_GSI_CH_k_DOORBELL_0_WRITE_PTR_LSB_SHFT;
+	val = ctx->ring.wp_local & GENMASK(31, 0);
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_DOORBELL_0_OFFS(ctx->props.ch_id,
 				gsi_ctx->per.ee));
 }
