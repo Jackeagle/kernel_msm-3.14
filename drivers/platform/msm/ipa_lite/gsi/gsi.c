@@ -815,14 +815,15 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 		GSI_EE_n_EV_CH_k_CNTXT_1_R_LENGTH_SHFT;
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_1_OFFS(evt_id, ee));
 
-	val = (props->ring_base_addr &
-			GSI_EE_n_EV_CH_k_CNTXT_2_R_BASE_ADDR_LSBS_BMSK) <<
-		GSI_EE_n_EV_CH_k_CNTXT_2_R_BASE_ADDR_LSBS_SHFT;
+	/*
+	 * The context 2 and 3 registers store the low-order and
+	 * high-order 32 bits of the address of the event ring,
+	 * respectively.
+	 */
+	val = props->ring_base_addr & GENMASK(31, 0);
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_2_OFFS(evt_id, ee));
 
-	val = ((props->ring_base_addr >> 32) &
-		GSI_EE_n_EV_CH_k_CNTXT_3_R_BASE_ADDR_MSBS_BMSK) <<
-		GSI_EE_n_EV_CH_k_CNTXT_3_R_BASE_ADDR_MSBS_SHFT;
+	val = props->ring_base_addr >> 32;
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_3_OFFS(evt_id, ee));
 
 	val = (((props->int_modt << GSI_EE_n_EV_CH_k_CNTXT_8_INT_MODT_SHFT) &
@@ -1136,14 +1137,15 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, unsigned int ee,
 		GSI_EE_n_GSI_CH_k_CNTXT_1_R_LENGTH_SHFT;
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_CNTXT_1_OFFS(props->ch_id, ee));
 
-	val = (props->ring_base_addr &
-			GSI_EE_n_GSI_CH_k_CNTXT_2_R_BASE_ADDR_LSBS_BMSK) <<
-		GSI_EE_n_GSI_CH_k_CNTXT_2_R_BASE_ADDR_LSBS_SHFT;
+	/*
+	 * The context 2 and 3 registers store the low-order and
+	 * high-order 32 bits of the address of the channel ring,
+	 * respectively.
+	 */
+	val = props->ring_base_addr & GENMASK(31, 0);
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_CNTXT_2_OFFS(props->ch_id, ee));
 
-	val = ((props->ring_base_addr >> 32) &
-		GSI_EE_n_GSI_CH_k_CNTXT_3_R_BASE_ADDR_MSBS_BMSK) <<
-		GSI_EE_n_GSI_CH_k_CNTXT_3_R_BASE_ADDR_MSBS_SHFT;
+	val = props->ring_base_addr >> 32;
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_CNTXT_3_OFFS(props->ch_id, ee));
 
 	val = (((props->low_weight << GSI_EE_n_GSI_CH_k_QOS_WRR_WEIGHT_SHFT) &
