@@ -715,7 +715,6 @@ void *gsi_register_device(struct gsi_per_props *props)
 		GSIERR("Manager EE has not enabled GSI, GSI un-usable\n");
 		return ERR_PTR(-EIO);
 	}
-	gsi_ctx->enabled = true;
 
 	gsi_ctx->per_registered = true;
 	mutex_init(&gsi_ctx->mlock);

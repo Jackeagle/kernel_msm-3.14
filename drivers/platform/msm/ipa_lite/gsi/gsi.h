@@ -387,7 +387,6 @@ struct gsi_ctx {
 	struct mutex mlock;
 	spinlock_t slock;
 	unsigned long evt_bmap;
-	bool enabled;
 	atomic_t num_chan;
 	atomic_t num_evt_ring;
 	struct gsi_ee_scratch scratch;
