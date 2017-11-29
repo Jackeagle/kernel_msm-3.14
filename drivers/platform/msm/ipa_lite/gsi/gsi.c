@@ -709,10 +709,19 @@ void *gsi_register_device(struct gsi_per_props *props)
 	}
 
 	gsi_ctx->per = *props;
+
+	val = gsi_readl(GSI_EE_n_GSI_STATUS_OFFS(gsi_ctx->per.ee));
+	if (!(val & GSI_EE_n_GSI_STATUS_ENABLED_BMSK)) {
+		GSIERR("Manager EE has not enabled GSI, GSI un-usable\n");
+		return ERR_PTR(-EIO);
+	}
+	gsi_ctx->enabled = true;
+
 	gsi_ctx->per_registered = true;
 	mutex_init(&gsi_ctx->mlock);
 	atomic_set(&gsi_ctx->num_chan, 0);
 	atomic_set(&gsi_ctx->num_evt_ring, 0);
+
 	gsi_ctx->max_ch = gsi_get_max_channels(gsi_ctx->per.ver);
 	if (gsi_ctx->max_ch == 0) {
 		GSIERR("failed to get max channels\n");
@@ -742,12 +751,6 @@ void *gsi_register_device(struct gsi_per_props *props)
 		~GSI_EE_n_CNTXT_GSI_IRQ_CLR_GSI_BREAK_POINT_BMSK);
 
 	gsi_writel(GSI_INTR_IRQ, GSI_EE_n_CNTXT_INTSET_OFFS(gsi_ctx->per.ee));
-
-	val = gsi_readl(GSI_EE_n_GSI_STATUS_OFFS(gsi_ctx->per.ee));
-	if (val & GSI_EE_n_GSI_STATUS_ENABLED_BMSK)
-		gsi_ctx->enabled = true;
-	else
-		GSIERR("Manager EE has not enabled GSI, GSI un-usable\n");
 
 	if (gsi_ctx->per.ver >= GSI_VER_1_2)
 		gsi_writel(0, GSI_EE_n_ERROR_LOG_OFFS(gsi_ctx->per.ee));
