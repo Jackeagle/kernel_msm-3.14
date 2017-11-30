@@ -45,38 +45,6 @@ static void gsi_irq_update(uint32_t offset, uint32_t mask, uint32_t val)
 	gsi_writel(val, offset);
 }
 
-static void __gsi_config_type_irq(int ee, uint32_t val)
-{
-	gsi_irq_set(GSI_EE_n_CNTXT_TYPE_IRQ_MSK_OFFS(ee), val);
-}
-
-static void __gsi_config_ch_irq(int ee, uint32_t val)
-{
-	gsi_irq_set(GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_MSK_OFFS(ee), val);
-}
-
-static void __gsi_config_evt_irq(int ee, uint32_t val)
-{
-	gsi_irq_set(GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_MSK_OFFS(ee), val);
-}
-
-static void __gsi_config_ieob_irq(int ee, uint32_t val)
-{
-	gsi_irq_set(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee), val);
-}
-
-static void __gsi_config_glob_irq(int ee, uint32_t val)
-{
-	gsi_irq_set(GSI_EE_n_CNTXT_GLOB_IRQ_EN_OFFS(ee), val);
-}
-
-static void __gsi_config_gen_irq(int ee, uint32_t val)
-{
-	/* Never enable GSI_BREAK_POINT */
-	val &= ~GSI_EE_n_CNTXT_GSI_IRQ_CLR_GSI_BREAK_POINT_BMSK;
-	gsi_irq_set(GSI_EE_n_CNTXT_GSI_IRQ_EN_OFFS(ee), val);
-}
-
 static void gsi_irq_control_event(uint32_t ee, uint8_t evt_id, bool enable)
 {
 	uint32_t mask = 1U << evt_id;
@@ -90,12 +58,14 @@ static void gsi_irq_control_all(uint32_t ee, bool enable)
 	uint32_t val = enable ? ~0 : 0;
 
 	/* Inter EE commands / interrupt are no supported. */
-	__gsi_config_type_irq(ee, val);
-	__gsi_config_ch_irq(ee, val);
-	__gsi_config_evt_irq(ee, val);
-	__gsi_config_ieob_irq(ee, val);
-	__gsi_config_glob_irq(ee, val);
-	__gsi_config_gen_irq(ee, val);
+	gsi_irq_set(GSI_EE_n_CNTXT_TYPE_IRQ_MSK_OFFS(ee), val);
+	gsi_irq_set(GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_MSK_OFFS(ee), val);
+	gsi_irq_set(GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_MSK_OFFS(ee), val);
+	gsi_irq_set(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee), val);
+	gsi_irq_set(GSI_EE_n_CNTXT_GLOB_IRQ_EN_OFFS(ee), val);
+	/* Never enable GSI_BREAK_POINT */
+	val &= ~GSI_EE_n_CNTXT_GSI_IRQ_CLR_GSI_BREAK_POINT_BMSK;
+	gsi_irq_set(GSI_EE_n_CNTXT_GSI_IRQ_EN_OFFS(ee), val);
 }
 
 static void gsi_handle_ch_ctrl(int ee)
