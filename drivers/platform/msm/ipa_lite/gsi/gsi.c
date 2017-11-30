@@ -67,6 +67,8 @@ static void __gsi_config_glob_irq(int ee, uint32_t mask, uint32_t val)
 
 static void __gsi_config_gen_irq(int ee, uint32_t mask, uint32_t val)
 {
+	/* Never enable GSI_BREAK_POINT */
+	val &= ~GSI_EE_n_CNTXT_GSI_IRQ_CLR_GSI_BREAK_POINT_BMSK;
 	gsi_irq_update(GSI_EE_n_CNTXT_GSI_IRQ_EN_OFFS(ee), mask, val);
 }
 
@@ -716,17 +718,13 @@ void *gsi_register_device(struct gsi_per_props *props)
 	gsi_ctx->evt_bmap |= ((1 << (GSI_MHI_ER_END + 1)) - 1) ^
 		((1 << GSI_MHI_ER_START) - 1);
 
-	/*
-	 * enable all interrupts but GSI_BREAK_POINT.
-	 * Inter EE commands / interrupt are no supported.
-	 */
+	/* Inter EE commands / interrupt are no supported. */
 	__gsi_config_type_irq(props->ee, ~0, ~0);
 	__gsi_config_ch_irq(props->ee, ~0, ~0);
 	__gsi_config_evt_irq(props->ee, ~0, ~0);
 	__gsi_config_ieob_irq(props->ee, ~0, ~0);
 	__gsi_config_glob_irq(props->ee, ~0, ~0);
-	__gsi_config_gen_irq(props->ee, ~0,
-		~GSI_EE_n_CNTXT_GSI_IRQ_CLR_GSI_BREAK_POINT_BMSK);
+	__gsi_config_gen_irq(props->ee, ~0, ~0);
 
 	gsi_writel(GSI_INTR_IRQ, GSI_EE_n_CNTXT_INTSET_OFFS(gsi_ctx->per.ee));
 
