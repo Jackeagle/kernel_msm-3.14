@@ -80,6 +80,19 @@ static void gsi_irq_control_event(uint32_t ee, uint8_t evt_id, bool enable)
 	gsi_irq_update(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee), mask, val);
 }
 
+static void gsi_irq_control_all(uint32_t ee, bool enable)
+{
+	uint32_t val = enable ? ~0 : 0;
+
+	/* Inter EE commands / interrupt are no supported. */
+	__gsi_config_type_irq(ee, ~0, val);
+	__gsi_config_ch_irq(ee, ~0, val);
+	__gsi_config_evt_irq(ee, ~0, val);
+	__gsi_config_ieob_irq(ee, ~0, val);
+	__gsi_config_glob_irq(ee, ~0, val);
+	__gsi_config_gen_irq(ee, ~0, val);
+}
+
 static void gsi_handle_ch_ctrl(int ee)
 {
 	uint32_t ch;
@@ -726,13 +739,8 @@ void *gsi_register_device(struct gsi_per_props *props)
 	gsi_ctx->evt_bmap |= ((1 << (GSI_MHI_ER_END + 1)) - 1) ^
 		((1 << GSI_MHI_ER_START) - 1);
 
-	/* Inter EE commands / interrupt are no supported. */
-	__gsi_config_type_irq(props->ee, ~0, ~0);
-	__gsi_config_ch_irq(props->ee, ~0, ~0);
-	__gsi_config_evt_irq(props->ee, ~0, ~0);
-	__gsi_config_ieob_irq(props->ee, ~0, ~0);
-	__gsi_config_glob_irq(props->ee, ~0, ~0);
-	__gsi_config_gen_irq(props->ee, ~0, ~0);
+	/* Enable all interrupts */
+	gsi_irq_control_all(props->ee, true);
 
 	gsi_writel(GSI_INTR_IRQ, GSI_EE_n_CNTXT_INTSET_OFFS(gsi_ctx->per.ee));
 
@@ -761,12 +769,7 @@ int gsi_deregister_device(void *dev_hdl)
 	 * setting the interrupt type again (INTSET).  Disable all
 	 * interrupts.
 	 */
-	__gsi_config_type_irq(gsi_ctx->per.ee, ~0, 0);
-	__gsi_config_ch_irq(gsi_ctx->per.ee, ~0, 0);
-	__gsi_config_evt_irq(gsi_ctx->per.ee, ~0, 0);
-	__gsi_config_ieob_irq(gsi_ctx->per.ee, ~0, 0);
-	__gsi_config_glob_irq(gsi_ctx->per.ee, ~0, 0);
-	__gsi_config_gen_irq(gsi_ctx->per.ee, ~0, 0);
+	gsi_irq_control_all(gsi_ctx->per.ee, false);
 
 	/* Clean up everything else set up by gsi_register_device() */
 	gsi_ctx->evt_bmap = 0;
