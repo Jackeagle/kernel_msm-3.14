@@ -31,6 +31,11 @@
 
 struct gsi_ctx *gsi_ctx;
 
+static void gsi_irq_set(uint32_t offset, uint32_t val)
+{
+	gsi_writel(val, offset);
+}
+
 static void gsi_irq_update(uint32_t offset, uint32_t mask, uint32_t val)
 {
 	uint32_t curr;
@@ -42,34 +47,34 @@ static void gsi_irq_update(uint32_t offset, uint32_t mask, uint32_t val)
 
 static void __gsi_config_type_irq(int ee, uint32_t val)
 {
-	gsi_irq_update(GSI_EE_n_CNTXT_TYPE_IRQ_MSK_OFFS(ee), ~0, val);
+	gsi_irq_set(GSI_EE_n_CNTXT_TYPE_IRQ_MSK_OFFS(ee), val);
 }
 
 static void __gsi_config_ch_irq(int ee, uint32_t val)
 {
-	gsi_irq_update(GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_MSK_OFFS(ee), ~0, val);
+	gsi_irq_set(GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_MSK_OFFS(ee), val);
 }
 
 static void __gsi_config_evt_irq(int ee, uint32_t val)
 {
-	gsi_irq_update(GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_MSK_OFFS(ee), ~0, val);
+	gsi_irq_set(GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_MSK_OFFS(ee), val);
 }
 
 static void __gsi_config_ieob_irq(int ee, uint32_t val)
 {
-	gsi_irq_update(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee), ~0, val);
+	gsi_irq_set(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee), val);
 }
 
 static void __gsi_config_glob_irq(int ee, uint32_t val)
 {
-	gsi_irq_update(GSI_EE_n_CNTXT_GLOB_IRQ_EN_OFFS(ee), ~0, val);
+	gsi_irq_set(GSI_EE_n_CNTXT_GLOB_IRQ_EN_OFFS(ee), val);
 }
 
 static void __gsi_config_gen_irq(int ee, uint32_t val)
 {
 	/* Never enable GSI_BREAK_POINT */
 	val &= ~GSI_EE_n_CNTXT_GSI_IRQ_CLR_GSI_BREAK_POINT_BMSK;
-	gsi_irq_update(GSI_EE_n_CNTXT_GSI_IRQ_EN_OFFS(ee), ~0, val);
+	gsi_irq_set(GSI_EE_n_CNTXT_GSI_IRQ_EN_OFFS(ee), val);
 }
 
 static void gsi_irq_control_event(uint32_t ee, uint8_t evt_id, bool enable)
