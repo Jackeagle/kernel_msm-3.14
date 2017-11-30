@@ -72,6 +72,14 @@ static void __gsi_config_gen_irq(int ee, uint32_t mask, uint32_t val)
 	gsi_irq_update(GSI_EE_n_CNTXT_GSI_IRQ_EN_OFFS(ee), mask, val);
 }
 
+static void gsi_irq_control_event(uint32_t ee, uint8_t evt_id, bool enable)
+{
+	uint32_t mask = 1U << evt_id;
+	uint32_t val = enable ? ~0 : 0;
+
+	gsi_irq_update(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee), mask, val);
+}
+
 static void gsi_handle_ch_ctrl(int ee)
 {
 	uint32_t ch;
@@ -965,7 +973,7 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, void *dev_hdl)
 	gsi_writel(1 << evt_id, GSI_EE_n_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(ee));
 
 	/* enable ieob interrupts */
-	__gsi_config_ieob_irq(gsi_ctx->per.ee, 1 << ctx->id, ~0);
+	gsi_irq_control_event(gsi_ctx->per.ee, ctx->id, true);
 	spin_unlock_irqrestore(&gsi_ctx->slock, flags);
 
 	return evt_id;
@@ -1921,13 +1929,13 @@ int gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode)
 	spin_lock_irqsave(&gsi_ctx->slock, flags);
 	if (curr == GSI_CHAN_MODE_CALLBACK &&
 			mode == GSI_CHAN_MODE_POLL) {
-		__gsi_config_ieob_irq(gsi_ctx->per.ee, 1 << ctx->evtr->id, 0);
+		gsi_irq_control_event(gsi_ctx->per.ee, ctx->evtr->id, false);
 		ctx->stats.callback_to_poll++;
 	}
 
 	if (curr == GSI_CHAN_MODE_POLL &&
 			mode == GSI_CHAN_MODE_CALLBACK) {
-		__gsi_config_ieob_irq(gsi_ctx->per.ee, 1 << ctx->evtr->id, ~0);
+		gsi_irq_control_event(gsi_ctx->per.ee, ctx->evtr->id, true);
 		ctx->stats.poll_to_callback++;
 	}
 	atomic_set(&ctx->poll_mode, mode);
