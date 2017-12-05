@@ -119,8 +119,6 @@ static struct {
 } smmu_info;
 
 static char *active_clients_table_buf;
-static enum ipa_hw_type ipa_api_hw_type;
-
 
 int ipa3_active_clients_log_print_buffer(char *buf, int size)
 {
@@ -268,17 +266,6 @@ static int ipa3_active_clients_log_init(void)
 bail:
 	return -ENOMEM;
 }
-
-/**
- * ipa_get_hw_type() - Return IPA HW version
- *
- * Return value: enum ipa_hw_type
- */
-enum ipa_hw_type ipa_get_hw_type(void)
-{
-        return ipa_api_hw_type;
-}
-EXPORT_SYMBOL(ipa_get_hw_type);
 
 void ipa3_active_clients_log_clear(void)
 {
@@ -860,7 +847,7 @@ int _ipa_init_sram_v3(void)
 	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(modem_ofst) - 4);
 	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(modem_ofst));
 	ipa3_sram_set_canary(ipa_sram_mmio,
-		(ipa_get_hw_type() >= IPA_HW_v3_5) ?
+		(ipa3_ctx->ipa_hw_type >= IPA_HW_v3_5) ?
 			IPA_MEM_PART(uc_event_ring_ofst) :
 			IPA_MEM_PART(end_ofst));
 

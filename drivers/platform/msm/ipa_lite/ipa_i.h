@@ -1823,7 +1823,6 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p);
 int ipa3_add_hdr(struct ipa_ioc_add_hdr *hdrs);
 
 int ipa3_setup_dflt_rt_tables(void);
-enum ipa_hw_type ipa_get_hw_type(void);
 int ipa3_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple);
 int ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple);
 
