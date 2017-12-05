@@ -2872,14 +2872,14 @@ static int get_ipa_dts_configuration(struct platform_device *pdev,
 	/* Get IPA HW Version */
 	result = of_property_read_u32(pdev->dev.of_node, "qcom,ipa-hw-ver",
 					&ipa_drv_res->ipa_hw_type);
-	if ((result) || (ipa_drv_res->ipa_hw_type == 0)) {
+	if (result) {
 		IPAERR(":get resource failed for ipa-hw-ver!\n");
 		return -ENODEV;
 	}
 	IPADBG(": ipa_hw_type = %d", ipa_drv_res->ipa_hw_type);
 
-	if (ipa_drv_res->ipa_hw_type < IPA_HW_v3_5_1) {
-		IPAERR(":IPA version below 3.0 not supported!\n");
+	if (ipa_drv_res->ipa_hw_type != IPA_HW_v3_5_1) {
+		IPAERR(":only IPA version 3.5.1 supported!\n");
 		return -ENODEV;
 	}
 
