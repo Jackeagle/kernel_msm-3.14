@@ -1241,8 +1241,6 @@ struct ipa3_plat_drv_res {
 	u32 gsi_mem_size;
 	u32 ipa_irq;
 	u32 gsi_irq;
-	u32 ipa_pipe_mem_start_ofst;
-	u32 ipa_pipe_mem_size;
 	u32 ee;
 	bool modem_cfg_emb_pipe_flt;
 	bool ipa_wdi2;

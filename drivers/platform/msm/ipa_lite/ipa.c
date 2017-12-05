@@ -49,9 +49,6 @@
 #define IPA_GPIO_OUT_CLK_RSP_CMPLT_IDX 0
 #define IPA_GPIO_OUT_CLK_VOTE_IDX 1
 
-#define IPA_PIPE_MEM_START_OFST (0x0)
-#define IPA_PIPE_MEM_SIZE (0x0)
-
 #define CLEANUP_TAG_PROCESS_TIMEOUT 500
 
 #define IPA_ACTIVE_CLIENTS_TABLE_BUF_SIZE 2048
@@ -2739,8 +2736,6 @@ static int get_ipa_dts_configuration(struct platform_device *pdev,
 	u32 ipa_hw_type = 0;
 
 	/* initialize ipa3_res */
-	ipa_drv_res->ipa_pipe_mem_start_ofst = IPA_PIPE_MEM_START_OFST;
-	ipa_drv_res->ipa_pipe_mem_size = IPA_PIPE_MEM_SIZE;
 	ipa_drv_res->modem_cfg_emb_pipe_flt = false;
 	ipa_drv_res->use_64_bit_dma_mask = false;
 	ipa_drv_res->use_bw_vote = false;
@@ -2852,19 +2847,6 @@ static int get_ipa_dts_configuration(struct platform_device *pdev,
 	}
 	ipa_drv_res->gsi_irq = resource->start;
 	IPADBG(": gsi-irq = %d\n", ipa_drv_res->gsi_irq);
-
-	/* Get IPA pipe mem start ofst */
-	resource = platform_get_resource_byname(pdev, IORESOURCE_MEM,
-			"ipa-pipe-mem");
-	if (!resource) {
-		IPADBG(":not using pipe memory - resource nonexisting\n");
-	} else {
-		ipa_drv_res->ipa_pipe_mem_start_ofst = resource->start;
-		ipa_drv_res->ipa_pipe_mem_size = resource_size(resource);
-		IPADBG(":using pipe memory - at 0x%x of size 0x%x\n",
-				ipa_drv_res->ipa_pipe_mem_start_ofst,
-				ipa_drv_res->ipa_pipe_mem_size);
-	}
 
 	/* Get IPA IRQ number */
 	resource = platform_get_resource_byname(pdev, IORESOURCE_IRQ,
