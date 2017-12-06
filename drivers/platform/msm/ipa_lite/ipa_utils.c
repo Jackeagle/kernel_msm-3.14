@@ -646,32 +646,6 @@ int ipa3_init_hw(void)
 }
 
 /**
- * ipa3_get_hw_type_index() - Get HW type index which is used as the entry index
- *	for ep\resource groups related arrays .
- *
- * Return value: HW type index
- */
-u8 ipa3_get_hw_type_index(void)
-{
-	u8 hw_type_index;
-
-	switch (ipa3_ctx->ipa_hw_type) {
-	case IPA_HW_v3_5_1:
-		hw_type_index = IPA_3_5_1;
-		break;
-	case IPA_HW_v4_0:
-		hw_type_index = IPA_4_0;
-		break;
-	default:
-		IPAERR("Incorrect IPA version %d\n", ipa3_ctx->ipa_hw_type);
-		hw_type_index = IPA_3_0;
-		break;
-	}
-
-	return hw_type_index;
-}
-
-/**
  * ipa3_get_ep_mapping() - provide endpoint mapping
  * @client: client type
  *
@@ -686,11 +660,11 @@ int ipa3_get_ep_mapping(enum ipa_client_type client)
 		return IPA_EP_NOT_ALLOCATED;
 	}
 
-	if (!ipa3_ep_mapping[ipa3_get_hw_type_index()][client].valid) {
+	if (!ipa3_ep_mapping[IPA_3_5_1][client].valid) {
 		return IPA_EP_NOT_ALLOCATED;
 	}
 
-	ipa_ep_idx = ipa3_ep_mapping[ipa3_get_hw_type_index()][client].
+	ipa_ep_idx = ipa3_ep_mapping[IPA_3_5_1][client].
 		ipa_gsi_ep_info.ipa_ep_num;
 	if (ipa_ep_idx < 0 || (ipa_ep_idx >= IPA3_MAX_NUM_PIPES
 		&& client != IPA_CLIENT_DUMMY_CONS))
@@ -713,10 +687,10 @@ const struct ipa_gsi_ep_config *ipa3_get_gsi_ep_info
 	if (ep_idx == IPA_EP_NOT_ALLOCATED)
 		return NULL;
 
-	if (!ipa3_ep_mapping[ipa3_get_hw_type_index()][client].valid)
+	if (!ipa3_ep_mapping[IPA_3_5_1][client].valid)
 		return NULL;
 
-	return &(ipa3_ep_mapping[ipa3_get_hw_type_index()]
+	return &(ipa3_ep_mapping[IPA_3_5_1]
 		[client].ipa_gsi_ep_info);
 }
 
@@ -733,10 +707,10 @@ int ipa_get_ep_group(enum ipa_client_type client)
 		return -EINVAL;
 	}
 
-	if (!ipa3_ep_mapping[ipa3_get_hw_type_index()][client].valid)
+	if (!ipa3_ep_mapping[IPA_3_5_1][client].valid)
 		return -EINVAL;
 
-	return ipa3_ep_mapping[ipa3_get_hw_type_index()][client].group_num;
+	return ipa3_ep_mapping[IPA_3_5_1][client].group_num;
 }
 
 /**
@@ -752,10 +726,10 @@ u8 ipa3_get_qmb_master_sel(enum ipa_client_type client)
 		return -EINVAL;
 	}
 
-	if (!ipa3_ep_mapping[ipa3_get_hw_type_index()][client].valid)
+	if (!ipa3_ep_mapping[IPA_3_5_1][client].valid)
 		return -EINVAL;
 
-	return ipa3_ep_mapping[ipa3_get_hw_type_index()]
+	return ipa3_ep_mapping[IPA_3_5_1]
 		[client].qmb_master_sel;
 }
 
@@ -789,7 +763,7 @@ enum ipa_client_type ipa3_get_client_mapping(int pipe_idx)
 void ipa_init_ep_flt_bitmap(void)
 {
 	enum ipa_client_type cl;
-	u8 hw_type_idx = ipa3_get_hw_type_index();
+	u8 hw_type_idx = IPA_3_5_1;
 	u32 bitmap;
 	u32 pipe_num;
 
@@ -855,7 +829,7 @@ int ipa3_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 	if (seq_cfg->set_dynamic)
 		type = seq_cfg->seq_type;
 	else
-		type = ipa3_ep_mapping[ipa3_get_hw_type_index()]
+		type = ipa3_ep_mapping[IPA_3_5_1]
 			[ipa3_ctx->ep[clnt_hdl].client].sequencer_type;
 
 	if (type != IPA_DPS_HPS_SEQ_TYPE_INVALID) {
@@ -2558,7 +2532,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 {
 	u8 hw_type_idx;
 
-	hw_type_idx = ipa3_get_hw_type_index();
+	hw_type_idx = IPA_3_5_1;
 
 	switch (hw_type_idx) {
 	case IPA_3_5_1:
@@ -2646,7 +2620,7 @@ static void ipa3_configure_rx_hps_clients(int depth, bool min)
 	struct ipahal_reg_rx_hps_clients val;
 	u8 hw_type_idx;
 
-	hw_type_idx = ipa3_get_hw_type_index();
+	hw_type_idx = IPA_3_5_1;
 
 	/*
 	 * depth 0 contains 4 first clients out of 6
@@ -2682,7 +2656,7 @@ static void ipa3_configure_rx_hps_weight(void)
 	struct ipahal_reg_rx_hps_weights val;
 	u8 hw_type_idx;
 
-	hw_type_idx = ipa3_get_hw_type_index();
+	hw_type_idx = IPA_3_5_1;
 
 	val.hps_queue_weight_0 =
 			ipa3_rsrc_rx_grp_hps_weight_config
@@ -2718,7 +2692,7 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 	IPADBG("ENTER\n");
 	IPADBG("Assign source rsrc groups min-max limits\n");
 
-	hw_type_idx = ipa3_get_hw_type_index();
+	hw_type_idx = IPA_3_5_1;
 	switch (hw_type_idx) {
 	case IPA_3_5_1:
 		src_rsrc_type_max = IPA_v3_5_RSRC_GRP_TYPE_SRC_MAX;
