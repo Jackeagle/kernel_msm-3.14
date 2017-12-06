@@ -3095,28 +3095,6 @@ int ipa3_load_fws(const struct firmware *firmware, phys_addr_t gsi_mem_base)
 }
 
 /**
- * ipa3_is_msm_device() - Is the running device a MSM or MDM?
- *  Determine according to IPA version
- *
- * Return value: true if MSM, false if MDM
- *
- */
-bool ipa3_is_msm_device(void)
-{
-	switch (ipa3_ctx->ipa_hw_type) {
-	case IPA_HW_v4_0:
-		return false;
-	case IPA_HW_v3_5_1:
-		return true;
-	default:
-		IPAERR("unknown HW type %d\n", ipa3_ctx->ipa_hw_type);
-		ipa_assert();
-	}
-
-	return false;
-}
-
-/**
  * ipa3_enable_dcd() - enable dynamic clock division on IPA
  *
  * Return value: Non applicable

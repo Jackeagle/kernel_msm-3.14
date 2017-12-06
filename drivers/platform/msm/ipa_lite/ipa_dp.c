@@ -3041,16 +3041,15 @@ static unsigned long tag_to_pointer_wa(uint64_t tag)
 static uint64_t pointer_to_tag_wa(struct ipa3_tx_pkt_wrapper *tx_pkt)
 {
 	u16 temp;
+
 	/* Add the check but it might have throughput issue */
-	if (ipa3_is_msm_device()) {
-		temp = (u16) (~((unsigned long) tx_pkt &
-			0xFFFF000000000000) >> 48);
-		if (temp) {
-			IPAERR("The 16 prefix is not all 1s (%p)\n",
-			tx_pkt);
-			BUG();
-		}
+	temp = (u16) (~((unsigned long) tx_pkt & 0xFFFF000000000000) >> 48);
+	if (temp) {
+		IPAERR("The 16 prefix is not all 1s (%p)\n",
+		tx_pkt);
+		BUG();
 	}
+
 	return (unsigned long)tx_pkt & 0x0000FFFFFFFFFFFF;
 }
 

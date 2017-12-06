@@ -2245,46 +2245,6 @@ static const struct file_operations ipa3_drv_fops = {
 	.open = ipa3_open
 };
 
-static int ipa3_manual_load_ipa_fws(void)
-{
-	int result;
-	const struct firmware *fw;
-
-	IPADBG("Manual FW loading process initiated\n");
-
-	result = request_firmware(&fw, IPA_FWS_PATH, ipa3_ctx->dev);
-	if (result < 0) {
-		IPAERR("request_firmware failed, error %d\n", result);
-		return result;
-	}
-	if (fw == NULL) {
-		IPAERR("Firmware is NULL!\n");
-		return -EINVAL;
-	}
-
-	IPADBG("FWs are available for loading\n");
-
-	result = ipa3_load_fws(fw, ipa3_res.transport_mem_base);
-	if (result) {
-		IPAERR("Manual IPA FWs loading has failed\n");
-		release_firmware(fw);
-		return result;
-	}
-
-	result = gsi_enable_fw(ipa3_res.transport_mem_base,
-				ipa3_res.transport_mem_size);
-	if (result) {
-		IPAERR("Failed to enable GSI FW\n");
-		release_firmware(fw);
-		return result;
-	}
-
-	release_firmware(fw);
-
-	IPADBG("Manual FW loading process is complete\n");
-	return 0;
-}
-
 static int ipa3_pil_load_ipa_fws(void)
 {
 	void *subsystem_get_retval = NULL;
@@ -2338,10 +2298,7 @@ static ssize_t ipa3_write(struct file *file, const char __user *buf,
 
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
 
-	if (ipa3_is_msm_device() || (ipa3_ctx->ipa_hw_type >= IPA_HW_v3_5))
-			result = ipa3_pil_load_ipa_fws();
-	else
-		result = ipa3_manual_load_ipa_fws();
+	result = ipa3_pil_load_ipa_fws();
 
 	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 

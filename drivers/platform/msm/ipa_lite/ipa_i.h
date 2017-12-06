@@ -1799,7 +1799,6 @@ int ipa3_rx_poll(u32 clnt_hdl, int budget);
 void ipa3_recycle_wan_skb(struct sk_buff *skb);
 void ipa3_reset_freeze_vote(void);
 struct dentry *ipa_debugfs_get_root(void);
-bool ipa3_is_msm_device(void);
 void ipa3_enable_dcd(void);
 long ipa3_alloc_common_event_ring(void);
 int ipa3_allocate_dma_task_for_gsi(void);
