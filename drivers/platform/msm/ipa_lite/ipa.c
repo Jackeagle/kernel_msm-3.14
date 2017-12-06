@@ -2104,35 +2104,6 @@ static void ipa3_uc_is_loaded(void)
 	complete_all(&ipa3_ctx->uc_loaded_completion_obj);
 }
 
-static enum gsi_ver ipa3_get_gsi_ver(enum ipa_hw_type ipa_hw_type)
-{
-	enum gsi_ver gsi_ver;
-
-	switch (ipa_hw_type) {
-	case IPA_HW_v3_0:
-	case IPA_HW_v3_1:
-		gsi_ver = GSI_VER_1_0;
-		break;
-	case IPA_HW_v3_5:
-		gsi_ver = GSI_VER_1_2;
-		break;
-	case IPA_HW_v3_5_1:
-		gsi_ver = GSI_VER_1_3;
-		break;
-	case IPA_HW_v4_0:
-		gsi_ver = GSI_VER_2_0;
-		break;
-	default:
-		IPAERR("No GSI version for ipa type %d\n", ipa_hw_type);
-		WARN_ON(1);
-		gsi_ver = GSI_VER_ERR;
-	}
-
-	IPADBG("GSI version %d\n", gsi_ver);
-
-	return gsi_ver;
-}
-
 /**
  * ipa3_post_init() - Initialize the IPA Driver (Part II).
  * This part contains all initialization which requires interaction with
@@ -2202,7 +2173,7 @@ static int ipa3_post_init(const struct ipa3_plat_drv_res *resource_p,
 	}
 
 	memset(&gsi_props, 0, sizeof(gsi_props));
-	gsi_props.ver = ipa3_get_gsi_ver(resource_p->ipa_hw_type);
+	gsi_props.ver = GSI_VER_1_3;
 	gsi_props.ee = resource_p->ee;
 	gsi_props.irq = resource_p->transport_irq;
 	gsi_props.phys_addr = resource_p->transport_mem_base;
@@ -2303,7 +2274,7 @@ static int ipa3_manual_load_ipa_fws(void)
 
 	result = gsi_enable_fw(ipa3_res.transport_mem_base,
 				ipa3_res.transport_mem_size,
-				ipa3_get_gsi_ver(ipa3_res.ipa_hw_type));
+				GSI_VER_1_3);
 	if (result) {
 		IPAERR("Failed to enable GSI FW\n");
 		release_firmware(fw);
