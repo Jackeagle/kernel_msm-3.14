@@ -172,7 +172,6 @@ struct gsi_device_scratch {
 /**
  * gsi_per_props - Peripheral related properties
  *
- * @gsi:        GSI core version
  * @ee:         EE where this driver and peripheral driver runs
  * @irq:        IRQ number
  * @phys_addr:  physical address of GSI block
@@ -183,7 +182,6 @@ struct gsi_device_scratch {
  *
  */
 struct gsi_per_props {
-	enum gsi_ver ver;
 	unsigned int ee;
 	unsigned int irq;
 	phys_addr_t phys_addr;
