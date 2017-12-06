@@ -562,45 +562,21 @@ static uint32_t gsi_get_max_channels(void)
 	return reg;
 }
 
-static uint32_t gsi_get_max_event_rings(enum gsi_ver ver)
+static uint32_t gsi_get_max_event_rings(void)
 {
 	uint32_t reg;
 
-	switch (ver) {
-	case GSI_VER_1_0:
-		reg = gsi_readl(GSI_V1_0_EE_n_GSI_HW_PARAM_OFFS(gsi_ctx->per.ee));
-		reg = (reg & GSI_V1_0_EE_n_GSI_HW_PARAM_GSI_EV_CH_NUM_BMSK) >>
-			GSI_V1_0_EE_n_GSI_HW_PARAM_GSI_EV_CH_NUM_SHFT;
-		break;
-	case GSI_VER_1_2:
-		reg = gsi_readl(GSI_V1_2_EE_n_GSI_HW_PARAM_0_OFFS(gsi_ctx->per.ee));
-		reg = (reg & GSI_V1_2_EE_n_GSI_HW_PARAM_0_GSI_EV_CH_NUM_BMSK) >>
-			GSI_V1_2_EE_n_GSI_HW_PARAM_0_GSI_EV_CH_NUM_SHFT;
-		break;
-	case GSI_VER_1_3:
-		reg = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->per.ee));
-		reg = (reg &
-			GSI_V1_3_EE_n_GSI_HW_PARAM_2_GSI_NUM_EV_PER_EE_BMSK) >>
-			GSI_V1_3_EE_n_GSI_HW_PARAM_2_GSI_NUM_EV_PER_EE_SHFT;
-		break;
-	case GSI_VER_2_0:
-		reg = gsi_readl(GSI_V2_0_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->per.ee));
-		reg = (reg &
-			GSI_V2_0_EE_n_GSI_HW_PARAM_2_GSI_NUM_EV_PER_EE_BMSK) >>
-			GSI_V2_0_EE_n_GSI_HW_PARAM_2_GSI_NUM_EV_PER_EE_SHFT;
-		break;
-	default:
-		GSIERR("bad gsi version %d\n", (int)ver);
-		WARN_ON(1);
-		reg = 0;
-	}
+	/* SDM845 uses GSI hardware version 1.3.0 */
+	reg = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->per.ee));
+	reg = (reg & GSI_V1_3_EE_n_GSI_HW_PARAM_2_GSI_NUM_EV_PER_EE_BMSK) >>
+		GSI_V1_3_EE_n_GSI_HW_PARAM_2_GSI_NUM_EV_PER_EE_SHFT;
 
 	if (WARN_ON(reg > GSI_EVT_RING_MAX)) {
 		GSIERR("bad gsi max event rings %u\n", reg);
-		reg = 0;
-	} else {
-		GSIDBG("max event rings %d\n", reg);
+
+		return 0;
 	}
+	GSIDBG("max event rings %d\n", reg);
 
 	return reg;
 }
@@ -679,7 +655,7 @@ void *gsi_register_device(struct gsi_per_props *props)
 		GSIERR("failed to get max channels\n");
 		return ERR_PTR(-EIO);
 	}
-	gsi_ctx->max_ev = gsi_get_max_event_rings(gsi_ctx->per.ver);
+	gsi_ctx->max_ev = gsi_get_max_event_rings();
 	if (gsi_ctx->max_ev == 0) {
 		GSIERR("failed to get max event rings\n");
 		return ERR_PTR(-EIO);
