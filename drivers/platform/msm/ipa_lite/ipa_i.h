@@ -1090,7 +1090,6 @@ struct ipa_hw_stats {
  * @transport_pm: transport power management related information
  * @disconnect_lock: protects LAN_CONS packet receive notification CB
  * @ipa3_active_clients: structure for reference counting connected IPA clients
- * @use_ipa_teth_bridge: use tethering bridge driver
  * @modem_cfg_emb_pipe_flt: modem configure embedded pipe filtering rules
  * @logbuf: ipc log buffer for high priority messages
  * @logbuf_low: ipc log buffer for low priority messages
@@ -1186,7 +1185,6 @@ struct ipa3_context {
 	struct mutex msg_lock;
 	wait_queue_head_t msg_waitq;
 	bool ipa_config_is_mhi;
-	bool use_ipa_teth_bridge;
 	bool modem_cfg_emb_pipe_flt;
 	bool ipa_wdi2;
 	bool use_64_bit_dma_mask;
@@ -1237,7 +1235,6 @@ struct ipa3_context {
 };
 
 struct ipa3_plat_drv_res {
-	bool use_ipa_teth_bridge;
 	u32 ipa_mem_base;
 	u32 ipa_mem_size;
 	u32 transport_mem_base;
