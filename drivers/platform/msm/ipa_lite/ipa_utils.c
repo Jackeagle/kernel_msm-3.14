@@ -2639,41 +2639,25 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 	int src_grp_idx_max;
 	int dst_grp_idx_max;
 	struct ipahal_reg_rsrc_grp_cfg val;
-	u8 hw_type_idx;
 
 	IPADBG("ENTER\n");
 	IPADBG("Assign source rsrc groups min-max limits\n");
 
-	hw_type_idx = IPA_3_5_1;
-	switch (hw_type_idx) {
-	case IPA_3_5_1:
-		src_rsrc_type_max = IPA_v3_5_RSRC_GRP_TYPE_SRC_MAX;
-		dst_rsrc_type_max = IPA_v3_5_RSRC_GRP_TYPE_DST_MAX;
-		src_grp_idx_max = IPA_v3_5_SRC_GROUP_MAX;
-		dst_grp_idx_max = IPA_v3_5_DST_GROUP_MAX;
-		break;
-	case IPA_4_0:
-		src_rsrc_type_max = IPA_v4_0_RSRC_GRP_TYPE_SRC_MAX;
-		dst_rsrc_type_max = IPA_v4_0_RSRC_GRP_TYPE_DST_MAX;
-		src_grp_idx_max = IPA_v4_0_SRC_GROUP_MAX;
-		dst_grp_idx_max = IPA_v4_0_DST_GROUP_MAX;
-		break;
-	default:
-		IPAERR("invalid hw type index\n");
-		WARN_ON(1);
-		return;
-	}
+	src_rsrc_type_max = IPA_v3_5_RSRC_GRP_TYPE_SRC_MAX;
+	dst_rsrc_type_max = IPA_v3_5_RSRC_GRP_TYPE_DST_MAX;
+	src_grp_idx_max = IPA_v3_5_SRC_GROUP_MAX;
+	dst_grp_idx_max = IPA_v3_5_DST_GROUP_MAX;
 
 	for (i = 0; i < src_rsrc_type_max; i++) {
 		for (j = 0; j < src_grp_idx_max; j = j + 2) {
 			val.x_min =
-			ipa3_rsrc_src_grp_config[hw_type_idx][i][j].min;
+			ipa3_rsrc_src_grp_config[IPA_3_5_1][i][j].min;
 			val.x_max =
-			ipa3_rsrc_src_grp_config[hw_type_idx][i][j].max;
+			ipa3_rsrc_src_grp_config[IPA_3_5_1][i][j].max;
 			val.y_min =
-			ipa3_rsrc_src_grp_config[hw_type_idx][i][j + 1].min;
+			ipa3_rsrc_src_grp_config[IPA_3_5_1][i][j + 1].min;
 			val.y_max =
-			ipa3_rsrc_src_grp_config[hw_type_idx][i][j + 1].max;
+			ipa3_rsrc_src_grp_config[IPA_3_5_1][i][j + 1].max;
 			ipa3_write_rsrc_grp_type_reg(j, i, true, &val);
 		}
 	}
@@ -2683,13 +2667,13 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 	for (i = 0; i < dst_rsrc_type_max; i++) {
 		for (j = 0; j < dst_grp_idx_max; j = j + 2) {
 			val.x_min =
-			ipa3_rsrc_dst_grp_config[hw_type_idx][i][j].min;
+			ipa3_rsrc_dst_grp_config[IPA_3_5_1][i][j].min;
 			val.x_max =
-			ipa3_rsrc_dst_grp_config[hw_type_idx][i][j].max;
+			ipa3_rsrc_dst_grp_config[IPA_3_5_1][i][j].max;
 			val.y_min =
-			ipa3_rsrc_dst_grp_config[hw_type_idx][i][j + 1].min;
+			ipa3_rsrc_dst_grp_config[IPA_3_5_1][i][j + 1].min;
 			val.y_max =
-			ipa3_rsrc_dst_grp_config[hw_type_idx][i][j + 1].max;
+			ipa3_rsrc_dst_grp_config[IPA_3_5_1][i][j + 1].max;
 			ipa3_write_rsrc_grp_type_reg(j, i, false, &val);
 		}
 	}
