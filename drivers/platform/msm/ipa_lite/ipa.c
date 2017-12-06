@@ -2465,7 +2465,6 @@ static int ipa3_pre_init(const struct ipa3_plat_drv_res *resource_p,
 	ipa3_ctx->ipa_wrapper_base = resource_p->ipa_mem_base;
 	ipa3_ctx->ipa_wrapper_size = resource_p->ipa_mem_size;
 	ipa3_ctx->ipa_hw_type = resource_p->ipa_hw_type;
-	ipa3_ctx->ipa_hw_mode = resource_p->ipa_hw_mode;
 	ipa3_ctx->modem_cfg_emb_pipe_flt = resource_p->modem_cfg_emb_pipe_flt;
 	ipa3_ctx->use_64_bit_dma_mask = resource_p->use_64_bit_dma_mask;
 	ipa3_ctx->wan_rx_ring_size = resource_p->wan_rx_ring_size;
@@ -2827,7 +2826,6 @@ static int get_ipa_dts_configuration(struct platform_device *pdev,
 	ipa_drv_res->ipa_pipe_mem_start_ofst = IPA_PIPE_MEM_START_OFST;
 	ipa_drv_res->ipa_pipe_mem_size = IPA_PIPE_MEM_SIZE;
 	ipa_drv_res->ipa_hw_type = 0;
-	ipa_drv_res->ipa_hw_mode = 0;
 	ipa_drv_res->modem_cfg_emb_pipe_flt = false;
 	ipa_drv_res->use_64_bit_dma_mask = false;
 	ipa_drv_res->use_bw_vote = false;
@@ -2851,15 +2849,6 @@ static int get_ipa_dts_configuration(struct platform_device *pdev,
 		IPAERR(":only IPA version 3.5.1 supported!\n");
 		return -ENODEV;
 	}
-
-	/* Get IPA HW mode */
-	result = of_property_read_u32(pdev->dev.of_node, "qcom,ipa-hw-mode",
-			&ipa_drv_res->ipa_hw_mode);
-	if (result)
-		IPADBG("using default (IPA_MODE_NORMAL) for ipa-hw-mode\n");
-	else
-		IPADBG(": found ipa_drv_res->ipa_hw_mode = %d",
-				ipa_drv_res->ipa_hw_mode);
 
 	/* Get IPA WAN / LAN RX pool size */
 	result = of_property_read_u32(pdev->dev.of_node,

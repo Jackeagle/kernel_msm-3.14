@@ -171,18 +171,6 @@
 #define IPA_WAN_MSG_IPv6_ADDR_GW_LEN 4
 
 /**
- * enum ipa_hw_mode - IPA hardware mode
- * @IPA_HW_Normal: Regular IPA hardware
- * @IPA_HW_Virtual: IPA hardware supporting virtual memory allocation
- * @IPA_HW_PCIE: IPA hardware supporting memory allocation over PCIE Bridge
- */
-enum ipa_hw_mode {
-        IPA_HW_MODE_NORMAL  = 0,
-        IPA_HW_MODE_VIRTUAL = 1,
-        IPA_HW_MODE_PCIE    = 2
-};
-
-/**
  * enum ipa_voltage_level - IPA Voltage levels
  */
 enum ipa_voltage_level {
@@ -1199,7 +1187,6 @@ struct ipa3_context {
 	struct mutex msg_lock;
 	wait_queue_head_t msg_waitq;
 	enum ipa_hw_type ipa_hw_type;
-	enum ipa_hw_mode ipa_hw_mode;
 	bool ipa_config_is_mhi;
 	bool use_ipa_teth_bridge;
 	bool modem_cfg_emb_pipe_flt;
@@ -1262,7 +1249,6 @@ struct ipa3_plat_drv_res {
 	u32 ipa_pipe_mem_start_ofst;
 	u32 ipa_pipe_mem_size;
 	enum ipa_hw_type ipa_hw_type;
-	enum ipa_hw_mode ipa_hw_mode;
 	u32 ee;
 	bool modem_cfg_emb_pipe_flt;
 	bool ipa_wdi2;
