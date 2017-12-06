@@ -232,31 +232,15 @@ static ssize_t gsi_dump_ee(struct file *file,
 	pr_err("EE%2d QOS 0x%x\n", gsi_ctx->per.ee, val);
 	val = gsi_readl(GSI_EE_n_GSI_STATUS_OFFS(gsi_ctx->per.ee));
 	pr_err("EE%2d STATUS 0x%x\n", gsi_ctx->per.ee, val);
-	if (gsi_ctx->per.ver == GSI_VER_1_0) {
-		val = gsi_readl(GSI_V1_0_EE_n_GSI_HW_PARAM_OFFS(gsi_ctx->per.ee));
-		pr_err("EE%2d HW_PARAM 0x%x\n", gsi_ctx->per.ee, val);
-	} else if (gsi_ctx->per.ver == GSI_VER_1_2) {
-		val = gsi_readl(GSI_V1_2_EE_n_GSI_HW_PARAM_0_OFFS(gsi_ctx->per.ee));
-		pr_err("EE%2d HW_PARAM_0 0x%x\n", gsi_ctx->per.ee, val);
-		val = gsi_readl(GSI_V1_2_EE_n_GSI_HW_PARAM_1_OFFS(gsi_ctx->per.ee));
-		pr_err("EE%2d HW_PARAM_1 0x%x\n", gsi_ctx->per.ee, val);
-	} else if (gsi_ctx->per.ver == GSI_VER_1_3) {
-		val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_0_OFFS(gsi_ctx->per.ee));
-		pr_err("EE%2d HW_PARAM_0 0x%x\n", gsi_ctx->per.ee, val);
-		val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_1_OFFS(gsi_ctx->per.ee));
-		pr_err("EE%2d HW_PARAM_1 0x%x\n", gsi_ctx->per.ee, val);
-		val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->per.ee));
-		pr_err("EE%2d HW_PARAM_2 0x%x\n", gsi_ctx->per.ee, val);
-	} else if (gsi_ctx->per.ver == GSI_VER_2_0) {
-		val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_0_OFFS(gsi_ctx->per.ee));
-		pr_err("EE%2d HW_PARAM_0 0x%x\n", gsi_ctx->per.ee, val);
-		val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_1_OFFS(gsi_ctx->per.ee));
-		pr_err("EE%2d HW_PARAM_1 0x%x\n", gsi_ctx->per.ee, val);
-		val = gsi_readl(GSI_V2_0_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->per.ee));
-		pr_err("EE%2d HW_PARAM_2 0x%x\n", gsi_ctx->per.ee, val);
-	} else {
-		WARN_ON(1);
-	}
+
+	/* SDM845 uses GSI hardware version 1.3.0 */
+	val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_0_OFFS(gsi_ctx->per.ee));
+	pr_err("EE%2d HW_PARAM_0 0x%x\n", gsi_ctx->per.ee, val);
+	val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_1_OFFS(gsi_ctx->per.ee));
+	pr_err("EE%2d HW_PARAM_1 0x%x\n", gsi_ctx->per.ee, val);
+	val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->per.ee));
+	pr_err("EE%2d HW_PARAM_2 0x%x\n", gsi_ctx->per.ee, val);
+
 	val = gsi_readl(GSI_EE_n_GSI_SW_VERSION_OFFS(gsi_ctx->per.ee));
 	pr_err("EE%2d SW_VERSION 0x%x\n", gsi_ctx->per.ee, val);
 	val = gsi_readl(GSI_EE_n_GSI_MCS_CODE_VER_OFFS(gsi_ctx->per.ee));
