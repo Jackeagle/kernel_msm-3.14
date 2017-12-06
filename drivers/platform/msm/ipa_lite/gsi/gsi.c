@@ -595,11 +595,6 @@ void *gsi_register_device(struct gsi_per_props *props)
 		return ERR_PTR(-EINVAL);
 	}
 
-	if (props->ver <= GSI_VER_ERR || props->ver >= GSI_VER_MAX) {
-		GSIERR("bad params gsi_ver=%d\n", props->ver);
-		return ERR_PTR(-EINVAL);
-	}
-
 	if (!props->notify_cb) {
 		GSIERR("notify callback must be provided\n");
 		return ERR_PTR(-EINVAL);
@@ -670,8 +665,7 @@ void *gsi_register_device(struct gsi_per_props *props)
 
 	gsi_writel(GSI_INTR_IRQ, GSI_EE_n_CNTXT_INTSET_OFFS(gsi_ctx->per.ee));
 
-	if (gsi_ctx->per.ver >= GSI_VER_1_2)
-		gsi_writel(0, GSI_EE_n_ERROR_LOG_OFFS(gsi_ctx->per.ee));
+	gsi_writel(0, GSI_EE_n_ERROR_LOG_OFFS(gsi_ctx->per.ee));
 
 	return gsi_ctx;
 }
