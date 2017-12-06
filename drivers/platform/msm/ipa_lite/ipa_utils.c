@@ -2530,87 +2530,39 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 			enum ipa_rsrc_grp_type_src n, bool src,
 			struct ipahal_reg_rsrc_grp_cfg *val)
 {
-	u8 hw_type_idx;
-
-	hw_type_idx = IPA_3_5_1;
-
-	switch (hw_type_idx) {
-	case IPA_3_5_1:
-		if (src) {
-			switch (group_index) {
-			case IPA_v3_5_GROUP_LWA_DL:
-			case IPA_v3_5_GROUP_UL_DL:
-				ipahal_write_reg_n_fields(
-					IPA_SRC_RSRC_GRP_01_RSRC_TYPE_n,
-					n, val);
-				break;
-			case IPA_v3_5_GROUP_UC_RX_Q:
-				ipahal_write_reg_n_fields(
-					IPA_SRC_RSRC_GRP_23_RSRC_TYPE_n,
-					n, val);
-				break;
-			default:
-				IPAERR(
-				" Invalid source resource group,index #%d\n",
-				group_index);
-				break;
-			}
-		} else {
-			switch (group_index) {
-			case IPA_v3_5_GROUP_LWA_DL:
-			case IPA_v3_5_GROUP_UL_DL:
-				ipahal_write_reg_n_fields(
-					IPA_DST_RSRC_GRP_01_RSRC_TYPE_n,
-					n, val);
-				break;
-			default:
-				IPAERR(
-				" Invalid destination resource group,index #%d\n",
-				group_index);
-				break;
-			}
+	if (src) {
+		switch (group_index) {
+		case IPA_v3_5_GROUP_LWA_DL:
+		case IPA_v3_5_GROUP_UL_DL:
+			ipahal_write_reg_n_fields(
+				IPA_SRC_RSRC_GRP_01_RSRC_TYPE_n,
+				n, val);
+			break;
+		case IPA_v3_5_GROUP_UC_RX_Q:
+			ipahal_write_reg_n_fields(
+				IPA_SRC_RSRC_GRP_23_RSRC_TYPE_n,
+				n, val);
+			break;
+		default:
+			IPAERR(
+			" Invalid source resource group,index #%d\n",
+			group_index);
+			break;
 		}
-		break;
-	case IPA_4_0:
-		if (src) {
-			switch (group_index) {
-			case IPA_v4_0_GROUP_LWA_DL:
-			case IPA_v4_0_GROUP_UL_DL:
-				ipahal_write_reg_n_fields(
-					IPA_SRC_RSRC_GRP_01_RSRC_TYPE_n,
-					n, val);
-				break;
-			case IPA_v4_0_GROUP_UC_RX_Q:
-				ipahal_write_reg_n_fields(
-					IPA_SRC_RSRC_GRP_23_RSRC_TYPE_n,
-					n, val);
-				break;
-			default:
-				IPAERR(
-				" Invalid source resource group,index #%d\n",
-				group_index);
-				break;
-			}
-		} else {
-			switch (group_index) {
-			case IPA_v4_0_GROUP_LWA_DL:
-			case IPA_v4_0_GROUP_UL_DL:
-				ipahal_write_reg_n_fields(
-					IPA_DST_RSRC_GRP_01_RSRC_TYPE_n,
-					n, val);
-				break;
-			default:
-				IPAERR(
-				" Invalid destination resource group,index #%d\n",
-				group_index);
-				break;
-			}
+	} else {
+		switch (group_index) {
+		case IPA_v3_5_GROUP_LWA_DL:
+		case IPA_v3_5_GROUP_UL_DL:
+			ipahal_write_reg_n_fields(
+				IPA_DST_RSRC_GRP_01_RSRC_TYPE_n,
+				n, val);
+			break;
+		default:
+			IPAERR(
+			" Invalid destination resource group,index #%d\n",
+			group_index);
+			break;
 		}
-		break;
-	default:
-		IPAERR("invalid hw type\n");
-		WARN_ON(1);
-		return;
 	}
 }
 
