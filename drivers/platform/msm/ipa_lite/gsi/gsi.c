@@ -2071,15 +2071,10 @@ int gsi_configure_regs(phys_addr_t gsi_base_addr, u32 gsi_size,
 	return 0;
 }
 
-int gsi_enable_fw(phys_addr_t gsi_base_addr, u32 gsi_size, enum gsi_ver ver)
+int gsi_enable_fw(phys_addr_t gsi_base_addr, u32 gsi_size)
 {
 	void __iomem *gsi_base;
 	uint32_t value;
-
-	if (ver <= GSI_VER_ERR || ver >= GSI_VER_MAX) {
-		GSIERR("Incorrect version %d\n", ver);
-		return -EIO;
-	}
 
 	gsi_base = ioremap_nocache(gsi_base_addr, gsi_size);
 	if (!gsi_base) {
@@ -2088,35 +2083,23 @@ int gsi_enable_fw(phys_addr_t gsi_base_addr, u32 gsi_size, enum gsi_ver ver)
 	}
 
 	/* Enable the MCS and set to x2 clocks */
-	if (ver >= GSI_VER_1_2) {
-		value = ((1 << GSI_GSI_MCS_CFG_MCS_ENABLE_SHFT) &
-				GSI_GSI_MCS_CFG_MCS_ENABLE_BMSK);
-		writel(value, gsi_base + GSI_GSI_MCS_CFG_OFFS);
+	value = ((1 << GSI_GSI_MCS_CFG_MCS_ENABLE_SHFT) &
+			GSI_GSI_MCS_CFG_MCS_ENABLE_BMSK);
+	writel(value, gsi_base + GSI_GSI_MCS_CFG_OFFS);
 
-		value = (((1 << GSI_GSI_CFG_GSI_ENABLE_SHFT) &
-				GSI_GSI_CFG_GSI_ENABLE_BMSK) |
-			((0 << GSI_GSI_CFG_MCS_ENABLE_SHFT) &
-				GSI_GSI_CFG_MCS_ENABLE_BMSK) |
-			((1 << GSI_GSI_CFG_DOUBLE_MCS_CLK_FREQ_SHFT) &
-				GSI_GSI_CFG_DOUBLE_MCS_CLK_FREQ_BMSK) |
-			((0 << GSI_GSI_CFG_UC_IS_MCS_SHFT) &
-				GSI_GSI_CFG_UC_IS_MCS_BMSK) |
-			((0 << GSI_GSI_CFG_GSI_PWR_CLPS_SHFT) &
-				GSI_GSI_CFG_GSI_PWR_CLPS_BMSK) |
-			((0 << GSI_GSI_CFG_BP_MTRIX_DISABLE_SHFT) &
-				GSI_GSI_CFG_BP_MTRIX_DISABLE_BMSK));
-		writel(value, gsi_base + GSI_GSI_CFG_OFFS);
-	} else {
-		value = (((1 << GSI_GSI_CFG_GSI_ENABLE_SHFT) &
-				GSI_GSI_CFG_GSI_ENABLE_BMSK) |
-			((1 << GSI_GSI_CFG_MCS_ENABLE_SHFT) &
-				GSI_GSI_CFG_MCS_ENABLE_BMSK) |
-			((1 << GSI_GSI_CFG_DOUBLE_MCS_CLK_FREQ_SHFT) &
-				GSI_GSI_CFG_DOUBLE_MCS_CLK_FREQ_BMSK) |
-			((0 << GSI_GSI_CFG_UC_IS_MCS_SHFT) &
-				GSI_GSI_CFG_UC_IS_MCS_BMSK));
-		writel(value, gsi_base + GSI_GSI_CFG_OFFS);
-	}
+	value = (((1 << GSI_GSI_CFG_GSI_ENABLE_SHFT) &
+			GSI_GSI_CFG_GSI_ENABLE_BMSK) |
+		((0 << GSI_GSI_CFG_MCS_ENABLE_SHFT) &
+			GSI_GSI_CFG_MCS_ENABLE_BMSK) |
+		((1 << GSI_GSI_CFG_DOUBLE_MCS_CLK_FREQ_SHFT) &
+			GSI_GSI_CFG_DOUBLE_MCS_CLK_FREQ_BMSK) |
+		((0 << GSI_GSI_CFG_UC_IS_MCS_SHFT) &
+			GSI_GSI_CFG_UC_IS_MCS_BMSK) |
+		((0 << GSI_GSI_CFG_GSI_PWR_CLPS_SHFT) &
+			GSI_GSI_CFG_GSI_PWR_CLPS_BMSK) |
+		((0 << GSI_GSI_CFG_BP_MTRIX_DISABLE_SHFT) &
+			GSI_GSI_CFG_BP_MTRIX_DISABLE_BMSK));
+	writel(value, gsi_base + GSI_GSI_CFG_OFFS);
 
 	iounmap(gsi_base);
 

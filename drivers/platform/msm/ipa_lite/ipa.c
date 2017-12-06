@@ -2273,8 +2273,7 @@ static int ipa3_manual_load_ipa_fws(void)
 	}
 
 	result = gsi_enable_fw(ipa3_res.transport_mem_base,
-				ipa3_res.transport_mem_size,
-				GSI_VER_1_3);
+				ipa3_res.transport_mem_size);
 	if (result) {
 		IPAERR("Failed to enable GSI FW\n");
 		release_firmware(fw);

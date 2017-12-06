@@ -763,11 +763,10 @@ int gsi_configure_regs(phys_addr_t gsi_base_addr, u32 gsi_size,
  *
  * @gsi_base_addr: Base address of GSI register space
  * @gsi_size: Mapping size of the GSI register space
- * @ver: GSI core version
 
  * @Return gsi_status
  */
-int gsi_enable_fw(phys_addr_t gsi_base_addr, u32 gsi_size, enum gsi_ver ver);
+int gsi_enable_fw(phys_addr_t gsi_base_addr, u32 gsi_size);
 
 /**
  * gsi_get_inst_ram_offset_and_size - Peripheral should call this function
