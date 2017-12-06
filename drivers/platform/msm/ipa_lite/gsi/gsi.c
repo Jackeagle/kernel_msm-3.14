@@ -244,8 +244,7 @@ static void gsi_handle_glob_ee(int ee)
 
 	if (val & GSI_EE_n_CNTXT_GLOB_IRQ_STTS_ERROR_INT_BMSK) {
 		err = gsi_readl(GSI_EE_n_ERROR_LOG_OFFS(ee));
-		if (gsi_ctx->per.ver >= GSI_VER_1_2)
-			gsi_writel(0, GSI_EE_n_ERROR_LOG_OFFS(ee));
+		gsi_writel(0, GSI_EE_n_ERROR_LOG_OFFS(ee));
 		gsi_writel(clr, GSI_EE_n_ERROR_LOG_CLR_OFFS(ee));
 		gsi_handle_glob_err(err);
 	}
