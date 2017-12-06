@@ -543,45 +543,21 @@ static irqreturn_t gsi_isr(int irq, void *ctxt)
 	return IRQ_HANDLED;
 }
 
-static uint32_t gsi_get_max_channels(enum gsi_ver ver)
+static uint32_t gsi_get_max_channels(void)
 {
 	uint32_t reg;
 
-	switch (ver) {
-	case GSI_VER_1_0:
-		reg = gsi_readl(GSI_V1_0_EE_n_GSI_HW_PARAM_OFFS(gsi_ctx->per.ee));
-		reg = (reg & GSI_V1_0_EE_n_GSI_HW_PARAM_GSI_CH_NUM_BMSK) >>
-			GSI_V1_0_EE_n_GSI_HW_PARAM_GSI_CH_NUM_SHFT;
-		break;
-	case GSI_VER_1_2:
-		reg = gsi_readl(GSI_V1_2_EE_n_GSI_HW_PARAM_0_OFFS(gsi_ctx->per.ee));
-		reg = (reg & GSI_V1_2_EE_n_GSI_HW_PARAM_0_GSI_CH_NUM_BMSK) >>
-			GSI_V1_2_EE_n_GSI_HW_PARAM_0_GSI_CH_NUM_SHFT;
-		break;
-	case GSI_VER_1_3:
-		reg = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->per.ee));
-		reg = (reg &
-			GSI_V1_3_EE_n_GSI_HW_PARAM_2_GSI_NUM_CH_PER_EE_BMSK) >>
-			GSI_V1_3_EE_n_GSI_HW_PARAM_2_GSI_NUM_CH_PER_EE_SHFT;
-		break;
-	case GSI_VER_2_0:
-		reg = gsi_readl(GSI_V2_0_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->per.ee));
-		reg = (reg &
-			GSI_V2_0_EE_n_GSI_HW_PARAM_2_GSI_NUM_CH_PER_EE_BMSK) >>
-			GSI_V2_0_EE_n_GSI_HW_PARAM_2_GSI_NUM_CH_PER_EE_SHFT;
-		break;
-	default:
-		GSIERR("bad gsi version %d\n", (int)ver);
-		WARN_ON(1);
-		reg = 0;
-	}
+	/* SDM845 uses GSI hardware version 1.3.0 */
+	reg = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->per.ee));
+	reg = (reg & GSI_V1_3_EE_n_GSI_HW_PARAM_2_GSI_NUM_CH_PER_EE_BMSK) >>
+		GSI_V1_3_EE_n_GSI_HW_PARAM_2_GSI_NUM_CH_PER_EE_SHFT;
 
 	if (WARN_ON(reg > GSI_CHAN_MAX)) {
 		GSIERR("bad gsi max channels %u\n", reg);
-		reg = 0;
-	} else {
-		GSIDBG("max channels %d\n", reg);
+
+		return 0;
 	}
+	GSIDBG("max channels %d\n", reg);
 
 	return reg;
 }
@@ -698,7 +674,7 @@ void *gsi_register_device(struct gsi_per_props *props)
 	atomic_set(&gsi_ctx->num_chan, 0);
 	atomic_set(&gsi_ctx->num_evt_ring, 0);
 
-	gsi_ctx->max_ch = gsi_get_max_channels(gsi_ctx->per.ver);
+	gsi_ctx->max_ch = gsi_get_max_channels();
 	if (gsi_ctx->max_ch == 0) {
 		GSIERR("failed to get max channels\n");
 		return ERR_PTR(-EIO);
