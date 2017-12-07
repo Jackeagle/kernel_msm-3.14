@@ -1236,7 +1236,6 @@ struct ipa3_plat_drv_res {
 	u32 ipa_irq;
 	u32 gsi_irq;
 	u32 ee;
-	bool use_bw_vote;
 	u32 wan_rx_ring_size;
 	u32 lan_rx_ring_size;
 	bool skip_uc_pipe_reset;

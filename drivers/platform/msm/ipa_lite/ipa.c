@@ -1380,18 +1380,8 @@ fail_ch20_wa:
 
 static int ipa3_get_clks(struct device *dev)
 {
-	if (ipa3_res.use_bw_vote) {
-		IPADBG("Vote IPA clock by bw voting via bus scaling driver\n");
-		ipa3_clk = NULL;
-		return 0;
-	}
-
-	ipa3_clk = clk_get(dev, "core_clk");
-	if (IS_ERR(ipa3_clk)) {
-		if (ipa3_clk != ERR_PTR(-EPROBE_DEFER))
-			IPAERR("fail to get ipa clk\n");
-		return PTR_ERR(ipa3_clk);
-	}
+	IPADBG("Vote IPA clock by bw voting via bus scaling driver\n");
+	ipa3_clk = NULL;
 	return 0;
 }
 
@@ -2732,7 +2722,6 @@ static int get_ipa_dts_configuration(struct platform_device *pdev,
 	u32 ipa_hw_type = 0;
 
 	/* initialize ipa3_res */
-	ipa_drv_res->use_bw_vote = false;
 	ipa_drv_res->wan_rx_ring_size = IPA_GENERIC_RX_POOL_SZ;
 	ipa_drv_res->lan_rx_ring_size = IPA_GENERIC_RX_POOL_SZ;
 	ipa_drv_res->apply_rg10_wa = false;
@@ -2774,13 +2763,6 @@ static int get_ipa_dts_configuration(struct platform_device *pdev,
 	else
 		IPADBG(": found ipa_drv_res->lan-rx-ring-size = %u",
 			ipa_drv_res->lan_rx_ring_size);
-
-	ipa_drv_res->use_bw_vote =
-			of_property_read_bool(pdev->dev.of_node,
-			"qcom,bandwidth-vote-for-ipa");
-	IPADBG(": use_bw_vote = %s\n",
-			ipa_drv_res->use_bw_vote
-			? "True" : "False");
 
 	ipa_drv_res->skip_uc_pipe_reset =
 		of_property_read_bool(pdev->dev.of_node,
