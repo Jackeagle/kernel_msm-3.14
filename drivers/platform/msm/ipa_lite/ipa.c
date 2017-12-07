@@ -100,8 +100,6 @@ static DECLARE_WORK(ipa_dec_clients_disable_clks_on_wq_work,
 static struct ipa3_plat_drv_res ipa3_res = {0, };
 struct msm_bus_scale_pdata *ipa3_bus_scale_table;
 
-static struct clk *ipa3_clk;
-
 struct ipa3_context *ipa3_ctx;
 static struct device *master_dev;
 struct platform_device *ipa3_pdev;
@@ -1378,25 +1376,12 @@ fail_ch20_wa:
 	return result;
 }
 
-static int ipa3_get_clks(struct device *dev)
-{
-	IPADBG("Vote IPA clock by bw voting via bus scaling driver\n");
-	ipa3_clk = NULL;
-	return 0;
-}
-
 /**
  * _ipa_enable_clks_v3_0() - Enable IPA clocks.
  */
 void _ipa_enable_clks_v3_0(void)
 {
 	IPADBG_LOW("curr_ipa_clk_rate=%d", ipa3_ctx->curr_ipa_clk_rate);
-	if (ipa3_clk) {
-		IPADBG_LOW("enabling gcc_ipa_clk\n");
-		clk_prepare(ipa3_clk);
-		clk_enable(ipa3_clk);
-		clk_set_rate(ipa3_clk, ipa3_ctx->curr_ipa_clk_rate);
-	}
 
 	ipa3_uc_notify_clk_state(true);
 }
@@ -1450,10 +1435,6 @@ void _ipa_disable_clks_v3_0(void)
 {
 	ipa3_suspend_apps_pipes(true);
 	ipa3_uc_notify_clk_state(false);
-	if (ipa3_clk) {
-		IPADBG_LOW("disabling gcc_ipa_clk\n");
-		clk_disable_unprepare(ipa3_clk);
-	}
 }
 
 /**
@@ -1845,8 +1826,6 @@ int ipa3_set_required_perf_profile(enum ipa_voltage_level floor_voltage,
 	ipa3_ctx->curr_ipa_clk_rate = clk_rate;
 	IPADBG_LOW("setting clock rate to %u\n", ipa3_ctx->curr_ipa_clk_rate);
 	if (atomic_read(&ipa3_ctx->ipa3_active_clients.cnt) > 0) {
-		if (ipa3_clk)
-			clk_set_rate(ipa3_clk, ipa3_ctx->curr_ipa_clk_rate);
 		if (msm_bus_scale_client_update_request(ipa3_ctx->ipa_bus_hdl,
 				ipa3_get_bus_vote()))
 			WARN_ON(1);
@@ -2452,11 +2431,6 @@ static int ipa3_pre_init(const struct ipa3_plat_drv_res *resource_p,
 		goto fail_bus_reg;
 	}
 
-	/* get IPA clocks */
-	result = ipa3_get_clks(master_dev);
-	if (result)
-		goto fail_clk;
-
 	/* init active_clients_log after getting ipa-clk */
 	if (ipa3_active_clients_log_init())
 		goto fail_init_active_client;
@@ -2688,10 +2662,6 @@ fail_remap:
 	ipa3_disable_clks();
 	ipa3_active_clients_log_destroy();
 fail_init_active_client:
-	if (ipa3_clk)
-		clk_put(ipa3_clk);
-	ipa3_clk = NULL;
-fail_clk:
 	msm_bus_scale_unregister_client(ipa3_ctx->ipa_bus_hdl);
 fail_bus_reg:
 	if (ipa3_bus_scale_table) {
