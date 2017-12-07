@@ -2353,24 +2353,6 @@ static int ipa3_pre_init(const struct ipa3_plat_drv_res *resource_p,
 	ipa3_ctx->ipa_wrapper_size = resource_p->ipa_mem_size;
 	ipa3_ctx->ee = resource_p->ee;
 	ipa3_ctx->ipa3_active_clients_logging.log_rdy = false;
-	if (resource_p->ipa_tz_unlock_reg) {
-		ipa3_ctx->ipa_tz_unlock_reg_num =
-			resource_p->ipa_tz_unlock_reg_num;
-		ipa3_ctx->ipa_tz_unlock_reg = kcalloc(
-			ipa3_ctx->ipa_tz_unlock_reg_num,
-			sizeof(*ipa3_ctx->ipa_tz_unlock_reg),
-			GFP_KERNEL);
-		if (ipa3_ctx->ipa_tz_unlock_reg == NULL) {
-			result = -ENOMEM;
-			goto fail_tz_unlock_reg;
-		}
-		for (i = 0; i < ipa3_ctx->ipa_tz_unlock_reg_num; i++) {
-			ipa3_ctx->ipa_tz_unlock_reg[i].reg_addr =
-				resource_p->ipa_tz_unlock_reg[i].reg_addr;
-			ipa3_ctx->ipa_tz_unlock_reg[i].size =
-				resource_p->ipa_tz_unlock_reg[i].size;
-		}
-	}
 
 	/* default aggregation parameters */
 	ipa3_ctx->aggregation_type = IPA_MBIM_16;
@@ -2654,8 +2636,6 @@ fail_init_mem_partition:
 fail_bind:
 	kfree(ipa3_ctx->ctrl);
 fail_mem_ctrl:
-	kfree(ipa3_ctx->ipa_tz_unlock_reg);
-fail_tz_unlock_reg:
 	if (ipa3_ctx->logbuf)
 		ipc_log_context_destroy(ipa3_ctx->logbuf);
 	kfree(ipa3_ctx);
@@ -2667,15 +2647,9 @@ fail_mem_ctx:
 static int get_ipa_dts_configuration(struct platform_device *pdev,
 		struct ipa3_plat_drv_res *ipa_drv_res)
 {
-	int i, result, pos;
+	int result;
 	struct resource *resource;
-	u32 *ipa_tz_unlock_reg;
-	int elem_num;
 	u32 ipa_hw_type = 0;
-
-	/* initialize ipa3_res */
-	ipa_drv_res->ipa_tz_unlock_reg_num = 0;
-	ipa_drv_res->ipa_tz_unlock_reg = NULL;
 
 	/* Get IPA HW Version */
 	result = of_property_read_u32(pdev->dev.of_node, "qcom,ipa-hw-ver",
@@ -2745,46 +2719,6 @@ static int get_ipa_dts_configuration(struct platform_device *pdev,
 	if (result)
 		ipa_drv_res->ee = 0;
 
-	elem_num = of_property_count_elems_of_size(pdev->dev.of_node,
-		"qcom,ipa-tz-unlock-reg", sizeof(u32));
-
-	if (elem_num > 0 && elem_num % 2 == 0) {
-		ipa_drv_res->ipa_tz_unlock_reg_num = elem_num / 2;
-
-		ipa_tz_unlock_reg = kcalloc(elem_num, sizeof(u32), GFP_KERNEL);
-		if (ipa_tz_unlock_reg == NULL)
-			return -ENOMEM;
-
-		ipa_drv_res->ipa_tz_unlock_reg = kcalloc(
-			ipa_drv_res->ipa_tz_unlock_reg_num,
-			sizeof(*ipa_drv_res->ipa_tz_unlock_reg),
-			GFP_KERNEL);
-		if (ipa_drv_res->ipa_tz_unlock_reg == NULL) {
-			kfree(ipa_tz_unlock_reg);
-			return -ENOMEM;
-		}
-
-		if (of_property_read_u32_array(pdev->dev.of_node,
-			"qcom,ipa-tz-unlock-reg", ipa_tz_unlock_reg,
-			elem_num)) {
-			IPAERR("failed to read register addresses\n");
-			kfree(ipa_tz_unlock_reg);
-			kfree(ipa_drv_res->ipa_tz_unlock_reg);
-			return -EFAULT;
-		}
-
-		pos = 0;
-		for (i = 0; i < ipa_drv_res->ipa_tz_unlock_reg_num; i++) {
-			ipa_drv_res->ipa_tz_unlock_reg[i].reg_addr =
-				ipa_tz_unlock_reg[pos++];
-			ipa_drv_res->ipa_tz_unlock_reg[i].size =
-				ipa_tz_unlock_reg[pos++];
-			IPADBG("tz unlock reg %d: addr 0x%pa size %d\n", i,
-				&ipa_drv_res->ipa_tz_unlock_reg[i].reg_addr,
-				ipa_drv_res->ipa_tz_unlock_reg[i].size);
-		}
-		kfree(ipa_tz_unlock_reg);
-	}
 	return 0;
 }
 

@@ -992,11 +992,6 @@ struct ipa3_ready_cb_info {
 	void *user_data;
 };
 
-struct ipa_tz_unlock_reg_info {
-	u64 reg_addr;
-	u32 size;
-};
-
 struct ipa_dma_task_info {
 	struct ipa_mem_buffer mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
@@ -1212,8 +1207,6 @@ struct ipa3_context {
 	struct completion init_completion_obj;
 	struct completion uc_loaded_completion_obj;
 	struct ipa3_smp2p_info smp2p_info;
-	u32 ipa_tz_unlock_reg_num;
-	struct ipa_tz_unlock_reg_info *ipa_tz_unlock_reg;
 	struct ipa_dma_task_info dma_task_info;
 	struct ipa_hw_stats hw_stats;
 };
@@ -1226,8 +1219,6 @@ struct ipa3_plat_drv_res {
 	u32 ipa_irq;
 	u32 gsi_irq;
 	u32 ee;
-	u32 ipa_tz_unlock_reg_num;
-	struct ipa_tz_unlock_reg_info *ipa_tz_unlock_reg;
 };
 
 /**
