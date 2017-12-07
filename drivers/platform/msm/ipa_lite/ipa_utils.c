@@ -2497,70 +2497,6 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 	}
 }
 
-static void ipa3_configure_rx_hps_clients(int depth, bool min)
-{
-	int i;
-	struct ipahal_reg_rx_hps_clients val;
-	u8 hw_type_idx;
-
-	hw_type_idx = IPA_3_5_1;
-
-	/*
-	 * depth 0 contains 4 first clients out of 6
-	 * depth 1 contains 2 last clients out of 6
-	 */
-	for (i = 0 ; i < (depth ? 2 : 4) ; i++) {
-		if (min)
-			val.client_minmax[i] =
-				ipa3_rsrc_rx_grp_config
-				[hw_type_idx]
-				[IPA_RSRC_GRP_TYPE_RX_HPS_CMDQ]
-				[!depth ? i : 4 + i].min;
-		else
-			val.client_minmax[i] =
-				ipa3_rsrc_rx_grp_config
-				[hw_type_idx]
-				[IPA_RSRC_GRP_TYPE_RX_HPS_CMDQ]
-				[!depth ? i : 4 + i].max;
-	}
-	if (depth) {
-		ipahal_write_reg_fields(min ? IPA_RX_HPS_CLIENTS_MIN_DEPTH_1 :
-					IPA_RX_HPS_CLIENTS_MAX_DEPTH_1,
-					&val);
-	} else {
-		ipahal_write_reg_fields(min ? IPA_RX_HPS_CLIENTS_MIN_DEPTH_0 :
-					IPA_RX_HPS_CLIENTS_MAX_DEPTH_0,
-					&val);
-	}
-}
-
-static void ipa3_configure_rx_hps_weight(void)
-{
-	struct ipahal_reg_rx_hps_weights val;
-	u8 hw_type_idx;
-
-	hw_type_idx = IPA_3_5_1;
-
-	val.hps_queue_weight_0 =
-			ipa3_rsrc_rx_grp_hps_weight_config
-			[hw_type_idx][IPA_RSRC_GRP_TYPE_RX_HPS_WEIGHT_CONFIG]
-			[0];
-	val.hps_queue_weight_1 =
-			ipa3_rsrc_rx_grp_hps_weight_config
-			[hw_type_idx][IPA_RSRC_GRP_TYPE_RX_HPS_WEIGHT_CONFIG]
-			[1];
-	val.hps_queue_weight_2 =
-			ipa3_rsrc_rx_grp_hps_weight_config
-			[hw_type_idx][IPA_RSRC_GRP_TYPE_RX_HPS_WEIGHT_CONFIG]
-			[2];
-	val.hps_queue_weight_3 =
-			ipa3_rsrc_rx_grp_hps_weight_config
-			[hw_type_idx][IPA_RSRC_GRP_TYPE_RX_HPS_WEIGHT_CONFIG]
-			[3];
-
-	ipahal_write_reg_fields(IPA_HPS_FTCH_ARB_QUEUE_WEIGHT, &val);
-}
-
 void ipa3_set_resorce_groups_min_max_limits(void)
 {
 	int i;
@@ -2609,27 +2545,8 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 		}
 	}
 
-	/* move resource group configuration from HLOS to TZ */
-	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v3_1) {
-		IPAERR("skip configuring ipa_rx_hps_clients from HLOS\n");
-		return;
-	}
-
-	IPADBG("Assign RX_HPS CMDQ rsrc groups min-max limits\n");
-
-	ipa3_configure_rx_hps_clients(0, true);
-	ipa3_configure_rx_hps_clients(0, false);
-
-	/* only hw_type v3_0\3_1 have 6 RX_HPS_CMDQ and needs depth 1*/
-	if (ipa3_ctx->ipa_hw_type <= IPA_HW_v3_1) {
-		ipa3_configure_rx_hps_clients(1, true);
-		ipa3_configure_rx_hps_clients(1, false);
-	}
-
-	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v3_5)
-		ipa3_configure_rx_hps_weight();
-
-	IPADBG("EXIT\n");
+	/* Resource group configuration is done by TZ */
+	IPAERR("skip configuring ipa_rx_hps_clients from HLOS\n");
 }
 
 static void ipa3_gsi_poll_after_suspend(struct ipa3_ep_context *ep)
