@@ -104,7 +104,6 @@ struct ipa3_context *ipa3_ctx;
 static struct device *master_dev;
 struct platform_device *ipa3_pdev;
 static struct {
-	bool present;
 	bool fast_map;
 	bool s1_bypass;
 	u32 ipa_base;
@@ -2344,11 +2343,6 @@ static int ipa3_pre_init(const struct ipa3_plat_drv_res *resource_p,
 
 	ipa3_ctx->pdev = ipa_dev;
 	ipa3_ctx->uc_pdev = ipa_dev;
-	ipa3_ctx->smmu_present = smmu_info.present;
-	if (!ipa3_ctx->smmu_present)
-		ipa3_ctx->smmu_s1_bypass = true;
-	else
-		ipa3_ctx->smmu_s1_bypass = smmu_info.s1_bypass;
 	ipa3_ctx->ipa_wrapper_base = resource_p->ipa_mem_base;
 	ipa3_ctx->ipa_wrapper_size = resource_p->ipa_mem_size;
 	ipa3_ctx->ee = resource_p->ee;
@@ -2941,9 +2935,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 			iova_p, pa_p, size_p,
 			IOMMU_READ | IOMMU_WRITE | IOMMU_MMIO);
 	}
-
-
-	smmu_info.present = true;
 
 	if (!ipa3_bus_scale_table)
 		ipa3_bus_scale_table = msm_bus_cl_get_pdata(ipa3_pdev);

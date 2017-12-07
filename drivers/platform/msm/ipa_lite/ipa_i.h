@@ -1194,8 +1194,6 @@ struct ipa3_context {
 
 	void *gsi_dev_hdl;
 	u32 ee;
-	bool smmu_present;
-	bool smmu_s1_bypass;
 	u32 wdi_map_cnt;
 	struct wakeup_source w_lock;
 	struct ipa3_wakelock_ref_cnt wakelock_ref_cnt;
