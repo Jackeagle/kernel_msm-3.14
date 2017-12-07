@@ -604,11 +604,6 @@ void ipa3_debugfs_init(void)
 	if (IS_ERR(ipa_dir))
 		goto fail;
 
-	file = debugfs_create_u32("hw_type", S_IRUGO,
-			ipa_dir, &ipa3_ctx->ipa_hw_type);
-	if (!file)
-		goto fail;
-
 	file = debugfs_create_file("gen_reg",
 			S_IRUGO, ipa_dir, 0,
 			&ipa3_gen_reg_ops);
