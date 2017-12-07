@@ -633,22 +633,6 @@ remap_fail:
 }
 
 /**
- * ipa3_uc_load_notify() - Notification about uC loading
- *
- * This function should be called when IPA uC interface layer cannot
- * determine by itself about uC loading by waits for external notification.
- * Example is resource group 10 limitation were ipa driver does not get uC
- * interrupts.
- * The function should perform actions that were not done at init due to uC
- * not being loaded then.
- */
-void ipa3_uc_load_notify(void)
-{
-	return;
-}
-EXPORT_SYMBOL(ipa3_uc_load_notify);
-
-/**
  * ipa3_uc_send_cmd() - Send a command to the uC
  *
  * Note1: This function sends command with 32bit parameter and do not
