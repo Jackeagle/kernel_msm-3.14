@@ -2400,7 +2400,6 @@ static int ipa3_pre_init(const struct ipa3_plat_drv_res *resource_p,
 		ipa3_ctx->smmu_s1_bypass = smmu_info.s1_bypass;
 	ipa3_ctx->ipa_wrapper_base = resource_p->ipa_mem_base;
 	ipa3_ctx->ipa_wrapper_size = resource_p->ipa_mem_size;
-	ipa3_ctx->ipa_hw_type = resource_p->ipa_hw_type;
 	ipa3_ctx->modem_cfg_emb_pipe_flt = resource_p->modem_cfg_emb_pipe_flt;
 	ipa3_ctx->use_64_bit_dma_mask = resource_p->use_64_bit_dma_mask;
 	ipa3_ctx->wan_rx_ring_size = resource_p->wan_rx_ring_size;
@@ -2498,8 +2497,7 @@ static int ipa3_pre_init(const struct ipa3_plat_drv_res *resource_p,
 		goto fail_remap;
 	}
 
-	if (ipahal_init(ipa3_ctx->ipa_hw_type, ipa3_ctx->mmio,
-		ipa3_ctx->pdev)) {
+	if (ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio, ipa3_ctx->pdev)) {
 		IPAERR("fail to init ipahal\n");
 		result = -EFAULT;
 		goto fail_ipahal;

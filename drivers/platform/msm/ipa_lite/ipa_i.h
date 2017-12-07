@@ -1090,7 +1090,6 @@ struct ipa_hw_stats {
  * @transport_pm: transport power management related information
  * @disconnect_lock: protects LAN_CONS packet receive notification CB
  * @ipa3_active_clients: structure for reference counting connected IPA clients
- * @ipa_hw_type: type of IPA HW type (e.g. IPA 1.0, IPA 1.1 etc')
  * @use_ipa_teth_bridge: use tethering bridge driver
  * @modem_cfg_emb_pipe_flt: modem configure embedded pipe filtering rules
  * @logbuf: ipc log buffer for high priority messages
@@ -1186,7 +1185,6 @@ struct ipa3_context {
 	struct list_head pull_msg_list;
 	struct mutex msg_lock;
 	wait_queue_head_t msg_waitq;
-	enum ipa_hw_type ipa_hw_type;
 	bool ipa_config_is_mhi;
 	bool use_ipa_teth_bridge;
 	bool modem_cfg_emb_pipe_flt;
