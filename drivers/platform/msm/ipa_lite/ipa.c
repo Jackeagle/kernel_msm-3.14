@@ -2773,7 +2773,7 @@ static int get_ipa_dts_configuration(struct platform_device *pdev,
 		of_property_read_bool(pdev->dev.of_node,
 		"qcom,do-not-use-ch-gsi-20");
 	IPADBG(": GSI CH 20 WA is = %s\n",
-		ipa_drv_res->apply_rg10_wa
+		ipa_drv_res->gsi_ch20_wa
 		? "Needed" : "Not needed");
 
 	elem_num = of_property_count_elems_of_size(pdev->dev.of_node,
