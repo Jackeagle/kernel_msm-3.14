@@ -1092,7 +1092,6 @@ struct ipa_hw_stats {
  * @ipa3_active_clients: structure for reference counting connected IPA clients
  * @logbuf: ipc log buffer for high priority messages
  * @logbuf_low: ipc log buffer for low priority messages
- * @use_64_bit_dma_mask: using 64bits dma mask
  * @ipa_bus_hdl: msm driver handle for the data path bus
  * @ctrl: holds the core specific operations based on
  *  core version (vtable like)
@@ -1183,7 +1182,6 @@ struct ipa3_context {
 	struct mutex msg_lock;
 	wait_queue_head_t msg_waitq;
 	bool ipa_config_is_mhi;
-	bool use_64_bit_dma_mask;
 	/* featurize if memory footprint becomes a concern */
 	struct ipa3_stats stats;
 	void *smem_pipe_mem;
@@ -1238,7 +1236,6 @@ struct ipa3_plat_drv_res {
 	u32 ipa_irq;
 	u32 gsi_irq;
 	u32 ee;
-	bool use_64_bit_dma_mask;
 	bool use_bw_vote;
 	u32 wan_rx_ring_size;
 	u32 lan_rx_ring_size;
