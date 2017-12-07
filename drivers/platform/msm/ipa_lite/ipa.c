@@ -2736,11 +2736,11 @@ static int get_ipa_dts_configuration(struct platform_device *pdev,
 	struct resource *resource;
 	u32 *ipa_tz_unlock_reg;
 	int elem_num;
+	u32 ipa_hw_type = 0;
 
 	/* initialize ipa3_res */
 	ipa_drv_res->ipa_pipe_mem_start_ofst = IPA_PIPE_MEM_START_OFST;
 	ipa_drv_res->ipa_pipe_mem_size = IPA_PIPE_MEM_SIZE;
-	ipa_drv_res->ipa_hw_type = 0;
 	ipa_drv_res->modem_cfg_emb_pipe_flt = false;
 	ipa_drv_res->use_64_bit_dma_mask = false;
 	ipa_drv_res->use_bw_vote = false;
@@ -2753,14 +2753,14 @@ static int get_ipa_dts_configuration(struct platform_device *pdev,
 
 	/* Get IPA HW Version */
 	result = of_property_read_u32(pdev->dev.of_node, "qcom,ipa-hw-ver",
-					&ipa_drv_res->ipa_hw_type);
+					&ipa_hw_type);
 	if (result) {
 		IPAERR(":get resource failed for ipa-hw-ver!\n");
 		return -ENODEV;
 	}
-	IPADBG(": ipa_hw_type = %d", ipa_drv_res->ipa_hw_type);
+	IPADBG(": ipa_hw_type = %d", ipa_hw_type);
 
-	if (ipa_drv_res->ipa_hw_type != IPA_HW_v3_5_1) {
+	if (ipa_hw_type != IPA_HW_v3_5_1) {
 		IPAERR(":only IPA version 3.5.1 supported!\n");
 		return -ENODEV;
 	}
