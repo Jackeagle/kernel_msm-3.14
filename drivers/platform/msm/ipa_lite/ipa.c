@@ -2080,21 +2080,6 @@ static void ipa3_trigger_ipa_ready_cbs(void)
 	mutex_unlock(&ipa3_ctx->lock);
 }
 
-static int ipa3_gsi_pre_fw_load_init(void)
-{
-	int result;
-
-	result = gsi_configure_regs(ipa3_res.transport_mem_base,
-		ipa3_res.transport_mem_size,
-		ipa3_res.ipa_mem_base);
-	if (result) {
-		IPAERR("Failed to configure GSI registers\n");
-		return -EINVAL;
-	}
-
-	return 0;
-}
-
 static void ipa3_uc_is_loaded(void)
 {
 	IPADBG("\n");
@@ -2677,29 +2662,12 @@ static int ipa3_pre_init(const struct ipa3_plat_drv_res *resource_p,
 		goto fail_create_apps_resource;
 	}
 
-	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v3_5)
-		ipa3_enable_dcd();
+	ipa3_enable_dcd();
 
 	INIT_LIST_HEAD(&ipa3_ctx->ipa_ready_cb_list);
 
 	init_completion(&ipa3_ctx->init_completion_obj);
 	init_completion(&ipa3_ctx->uc_loaded_completion_obj);
-
-	/*
-	 * We can't register the GSI driver yet, as it expects
-	 * the GSI FW to be up and running before the registration.
-	 *
-	 * For IPA3.0, the GSI configuration is done by the GSI driver.
-	 * For IPA3.1 (and on), the GSI configuration is done by TZ.
-	 */
-	if (ipa3_ctx->ipa_hw_type == IPA_HW_v3_0) {
-		result = ipa3_gsi_pre_fw_load_init();
-		if (result) {
-			IPAERR("gsi pre FW loading config failed\n");
-			result = -ENODEV;
-			goto fail_ipa_init_interrupts;
-		}
-	}
 
 	cdev_init(&ipa3_ctx->cdev, &ipa3_drv_fops);
 	ipa3_ctx->cdev.owner = THIS_MODULE;
@@ -2718,7 +2686,6 @@ static int ipa3_pre_init(const struct ipa3_plat_drv_res *resource_p,
 	return 0;
 
 fail_cdev_add:
-fail_ipa_init_interrupts:
 fail_create_apps_resource:
 	device_destroy(ipa3_ctx->class, ipa3_ctx->dev_num);
 fail_device_create:
