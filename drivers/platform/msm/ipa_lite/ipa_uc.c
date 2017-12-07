@@ -604,7 +604,6 @@ int ipa3_uc_interface_init(void)
 	}
 
 	mutex_init(&ipa3_ctx->uc_ctx.uc_lock);
-	spin_lock_init(&ipa3_ctx->uc_ctx.uc_spinlock);
 
 	phys_addr = ipa3_ctx->ipa_wrapper_base +
 		ipa3_ctx->ctrl->ipa_reg_base_ofst +

@@ -930,7 +930,6 @@ enum ipa3_hw_flags {
  * @uc_loaded: Indicates if uC has loaded
  * @uc_failed: Indicates if uC has failed / returned an error
  * @uc_lock: uC interface lock to allow only one uC interaction at a time
- * @uc_spinlock: same as uc_lock but for irq contexts
  * @uc_completation: Completion mechanism to wait for uC commands
  * @uc_sram_mmio: Pointer to uC mapped memory
  * @pending_cmd: The last command sent waiting to be ACKed
@@ -943,7 +942,6 @@ struct ipa3_uc_ctx {
 	bool uc_loaded;
 	bool uc_failed;
 	struct mutex uc_lock;
-	spinlock_t uc_spinlock;
 	struct completion uc_completion;
 	struct IpaHwSharedMemCommonMapping_t *uc_sram_mmio;
 	struct IpaHwEventLogInfoData_t *uc_event_top_mmio;
