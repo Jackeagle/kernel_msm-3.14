@@ -1101,7 +1101,6 @@ struct ipa_hw_stats {
  * @uc_wdi_ctx: WDI specific fields for uC interface
  * @ipa_num_pipes: The number of pipes used by IPA HW
  * @ipa_client_apps_wan_cons_agg_gro: RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA
- * @gsi_ch20_wa: Indicates whether to apply GSI physical channel 20 workaround
  * @w_lock: Indicates the wakeup source.
  * @wakelock_ref_cnt: Indicates the number of times wakelock is acquired
  * @ipa_initialization_complete: Indicates that IPA is fully initialized
@@ -1200,7 +1199,6 @@ struct ipa3_context {
 
 	void *gsi_dev_hdl;
 	u32 ee;
-	bool gsi_ch20_wa;
 	bool smmu_present;
 	bool smmu_s1_bypass;
 	u32 wdi_map_cnt;
@@ -1760,7 +1758,6 @@ void ipa3_dec_release_wakelock(void);
 int ipa3_load_fws(const struct firmware *firmware, phys_addr_t gsi_mem_base);
 int ipa3_register_ipa_ready_cb(void (*ipa_ready_cb)(void *), void *user_data);
 const char *ipa_hw_error_str(enum ipa_hw_errors err_type);
-int ipa_gsi_ch20_wa(void);
 int ipa3_rx_poll(u32 clnt_hdl, int budget);
 void ipa3_recycle_wan_skb(struct sk_buff *skb);
 void ipa3_reset_freeze_vote(void);

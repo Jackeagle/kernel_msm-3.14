@@ -1258,15 +1258,6 @@ static int ipa3_setup_apps_pipes(void)
 	struct ipa_sys_connect_params sys_in;
 	int result = 0;
 
-	if (ipa3_ctx->gsi_ch20_wa) {
-		IPADBG("Allocating GSI physical channel 20\n");
-		result = ipa_gsi_ch20_wa();
-		if (result) {
-			IPAERR("ipa_gsi_ch20_wa failed %d\n", result);
-			goto fail_ch20_wa;
-		}
-	}
-
 	/* allocate the common PROD event ring */
 	if (ipa3_alloc_common_event_ring()) {
 		IPAERR("ipa3_alloc_common_event_ring failed.\n");
@@ -2361,7 +2352,6 @@ static int ipa3_pre_init(const struct ipa3_plat_drv_res *resource_p,
 	ipa3_ctx->ipa_wrapper_base = resource_p->ipa_mem_base;
 	ipa3_ctx->ipa_wrapper_size = resource_p->ipa_mem_size;
 	ipa3_ctx->ee = resource_p->ee;
-	ipa3_ctx->gsi_ch20_wa = false;
 	ipa3_ctx->ipa3_active_clients_logging.log_rdy = false;
 	if (resource_p->ipa_tz_unlock_reg) {
 		ipa3_ctx->ipa_tz_unlock_reg_num =
