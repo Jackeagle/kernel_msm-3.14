@@ -1103,7 +1103,6 @@ struct ipa_hw_stats {
  * @uc_wdi_ctx: WDI specific fields for uC interface
  * @ipa_num_pipes: The number of pipes used by IPA HW
  * @ipa_client_apps_wan_cons_agg_gro: RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA
- * @apply_rg10_wa: Indicates whether to use register group 10 workaround
  * @gsi_ch20_wa: Indicates whether to apply GSI physical channel 20 workaround
  * @w_lock: Indicates the wakeup source.
  * @wakelock_ref_cnt: Indicates the number of times wakelock is acquired
@@ -1203,7 +1202,6 @@ struct ipa3_context {
 
 	void *gsi_dev_hdl;
 	u32 ee;
-	bool apply_rg10_wa;
 	bool gsi_ch20_wa;
 	bool smmu_present;
 	bool smmu_s1_bypass;

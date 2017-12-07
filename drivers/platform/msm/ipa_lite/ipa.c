@@ -2104,15 +2104,11 @@ static int ipa3_post_init(const struct ipa3_plat_drv_res *resource_p,
 	idr = &(ipa3_ctx->flt_rule_ids[IPA_IP_v6]);
 	idr_init(idr);
 
-	if (!ipa3_ctx->apply_rg10_wa) {
-		result = ipa3_init_interrupts();
-		if (result) {
-			IPAERR("ipa initialization of interrupts failed\n");
-			result = -ENODEV;
-			goto fail_register_device;
-		}
-	} else {
-		IPADBG("Initialization of ipa interrupts skipped\n");
+	result = ipa3_init_interrupts();
+	if (result) {
+		IPAERR("ipa initialization of interrupts failed\n");
+		result = -ENODEV;
+		goto fail_register_device;
 	}
 
 	memset(&gsi_props, 0, sizeof(gsi_props));
@@ -2365,7 +2361,6 @@ static int ipa3_pre_init(const struct ipa3_plat_drv_res *resource_p,
 	ipa3_ctx->ipa_wrapper_base = resource_p->ipa_mem_base;
 	ipa3_ctx->ipa_wrapper_size = resource_p->ipa_mem_size;
 	ipa3_ctx->ee = resource_p->ee;
-	ipa3_ctx->apply_rg10_wa = false;
 	ipa3_ctx->gsi_ch20_wa = resource_p->gsi_ch20_wa;
 	ipa3_ctx->ipa3_active_clients_logging.log_rdy = false;
 	if (resource_p->ipa_tz_unlock_reg) {
