@@ -586,15 +586,10 @@ void ipa3_cfg_qsb(void)
 	struct ipahal_reg_qsb_max_writes max_writes = { 0 };
 
 	max_reads.qmb_0_max_reads = 8,
-	max_reads.qmb_1_max_reads = 8,
+	max_reads.qmb_1_max_reads = 12;
 
 	max_writes.qmb_0_max_writes = 8;
-	max_writes.qmb_1_max_writes = 2;
-
-	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v3_5) {
-		max_writes.qmb_1_max_writes = 4;
-		max_reads.qmb_1_max_reads = 12;
-	}
+	max_writes.qmb_1_max_writes = 4;
 
 	ipahal_write_reg_fields(IPA_QSB_MAX_WRITES, &max_writes);
 	ipahal_write_reg_fields(IPA_QSB_MAX_READS, &max_reads);
