@@ -189,7 +189,7 @@ static void ipa3_enable_tx_suspend_wa(struct work_struct *work)
 	en |= suspend_bmask;
 	IPADBG("enable TX_SUSPEND_IRQ, IPA_IRQ_EN_EE reg, write val = %u\n"
 		, en);
-	ipa3_uc_rg10_write_reg(IPA_IRQ_EN_EE_n, ipa_ee, en);
+	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, ipa_ee, en);
 	ipa3_process_interrupts(false);
 	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 
@@ -212,7 +212,7 @@ static void ipa3_tx_suspend_interrupt_wa(void)
 	val &= ~suspend_bmask;
 	IPADBG("Disabling TX_SUSPEND_IRQ, write val: %u to IPA_IRQ_EN_EE reg\n",
 		val);
-	ipa3_uc_rg10_write_reg(IPA_IRQ_EN_EE_n, ipa_ee, val);
+	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, ipa_ee, val);
 
 	IPADBG_LOW(" processing suspend interrupt work-around, delayed work\n");
 	queue_delayed_work(ipa_interrupt_wq, &dwork_en_suspend_int,
@@ -255,7 +255,7 @@ static void ipa3_process_interrupts(bool isr_context)
 				 * clearing unhandled interrupts
 				 */
 				if (uc_irq)
-					ipa3_uc_rg10_write_reg(IPA_IRQ_CLR_EE_n,
+					ipahal_write_reg_n(IPA_IRQ_CLR_EE_n,
 							ipa_ee, bmsk);
 
 				/*
@@ -274,7 +274,7 @@ static void ipa3_process_interrupts(bool isr_context)
 				 * to avoid clearing interrupt data
 				 */
 				if (!uc_irq)
-					ipa3_uc_rg10_write_reg(IPA_IRQ_CLR_EE_n,
+					ipahal_write_reg_n(IPA_IRQ_CLR_EE_n,
 							ipa_ee, bmsk);
 			}
 			bmsk = bmsk << 1;
@@ -363,7 +363,7 @@ int ipa3_add_interrupt_handler(enum ipa_irq_type interrupt,
 	IPADBG("read IPA_IRQ_EN_EE_n register. reg = %d\n", val);
 	bmsk = 1 << irq_num;
 	val |= bmsk;
-	ipa3_uc_rg10_write_reg(IPA_IRQ_EN_EE_n, ipa_ee, val);
+	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, ipa_ee, val);
 	IPADBG("wrote IPA_IRQ_EN_EE_n register. reg = %d\n", val);
 
 	/* register SUSPEND_IRQ_EN_EE_n_ADDR for L2 interrupt*/
@@ -427,7 +427,7 @@ int ipa3_remove_interrupt_handler(enum ipa_irq_type interrupt)
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, ipa_ee);
 	bmsk = 1 << irq_num;
 	val &= ~bmsk;
-	ipa3_uc_rg10_write_reg(IPA_IRQ_EN_EE_n, ipa_ee, val);
+	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, ipa_ee, val);
 
 	return 0;
 }

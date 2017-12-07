@@ -791,18 +791,3 @@ int ipa3_uc_update_hw_flags(u32 flags)
 	return ipa3_uc_send_cmd(cmd.raw32b, IPA_CPU_2_HW_CMD_UPDATE_FLAGS, 0,
 		false, HZ);
 }
-
-/**
- * ipa3_uc_rg10_write_reg() - write to register possibly via uC
- *
- * if the RG10 limitation workaround is enabled, then writing
- * to a register will be proxied by the uC due to H/W limitation.
- * This func should be called for RG10 registers only
- *
- * @Parameters: Like ipahal_write_reg_n() parameters
- *
- */
-void ipa3_uc_rg10_write_reg(enum ipahal_reg_name reg, u32 n, u32 val)
-{
-	return ipahal_write_reg_n(reg, n, val);
-}

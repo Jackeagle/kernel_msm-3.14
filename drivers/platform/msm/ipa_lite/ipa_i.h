@@ -1725,7 +1725,6 @@ int ipa3_uc_update_hw_flags(u32 flags);
 void ipa3_tag_destroy_imm(void *user1, int user2);
 const struct ipa_gsi_ep_config *ipa3_get_gsi_ep_info
 	(enum ipa_client_type client);
-void ipa3_uc_rg10_write_reg(enum ipahal_reg_name reg, u32 n, u32 val);
 
 int ipa_init_quota_stats(u32 pipe_bitmask);
 
