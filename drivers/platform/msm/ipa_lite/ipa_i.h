@@ -1228,7 +1228,6 @@ struct ipa3_plat_drv_res {
 	u32 ipa_irq;
 	u32 gsi_irq;
 	u32 ee;
-	bool gsi_ch20_wa;
 	bool tethered_flow_control;
 	u32 ipa_tz_unlock_reg_num;
 	struct ipa_tz_unlock_reg_info *ipa_tz_unlock_reg;
