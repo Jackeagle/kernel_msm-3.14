@@ -1237,10 +1237,10 @@ struct ipa3_context {
 struct ipa3_plat_drv_res {
 	u32 ipa_mem_base;
 	u32 ipa_mem_size;
-	u32 transport_mem_base;
-	u32 transport_mem_size;
+	u32 gsi_mem_base;
+	u32 gsi_mem_size;
 	u32 ipa_irq;
-	u32 transport_irq;
+	u32 gsi_irq;
 	u32 ipa_pipe_mem_start_ofst;
 	u32 ipa_pipe_mem_size;
 	u32 ee;

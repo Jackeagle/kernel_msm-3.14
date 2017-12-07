@@ -2153,9 +2153,9 @@ static int ipa3_post_init(const struct ipa3_plat_drv_res *resource_p,
 
 	memset(&gsi_props, 0, sizeof(gsi_props));
 	gsi_props.ee = resource_p->ee;
-	gsi_props.irq = resource_p->transport_irq;
-	gsi_props.phys_addr = resource_p->transport_mem_base;
-	gsi_props.size = resource_p->transport_mem_size;
+	gsi_props.irq = resource_p->gsi_irq;
+	gsi_props.phys_addr = resource_p->gsi_mem_base;
+	gsi_props.size = resource_p->gsi_mem_size;
 	gsi_props.notify_cb = ipa_gsi_notify_cb;
 
 	ipa3_ctx->gsi_dev_hdl = gsi_register_device(&gsi_props);
@@ -2837,11 +2837,11 @@ static int get_ipa_dts_configuration(struct platform_device *pdev,
 		IPAERR(":get resource failed for gsi-base!\n");
 		return -ENODEV;
 	}
-	ipa_drv_res->transport_mem_base = resource->start;
-	ipa_drv_res->transport_mem_size = resource_size(resource);
+	ipa_drv_res->gsi_mem_base = resource->start;
+	ipa_drv_res->gsi_mem_size = resource_size(resource);
 	IPADBG(": gsi-base = 0x%x, size = 0x%x\n",
-			ipa_drv_res->transport_mem_base,
-			ipa_drv_res->transport_mem_size);
+			ipa_drv_res->gsi_mem_base,
+			ipa_drv_res->gsi_mem_size);
 
 	/* Get IPA GSI IRQ number */
 	resource = platform_get_resource_byname(pdev, IORESOURCE_IRQ,
@@ -2850,8 +2850,8 @@ static int get_ipa_dts_configuration(struct platform_device *pdev,
 		IPAERR(":get resource failed for gsi-irq!\n");
 		return -ENODEV;
 	}
-	ipa_drv_res->transport_irq = resource->start;
-	IPADBG(": gsi-irq = %d\n", ipa_drv_res->transport_irq);
+	ipa_drv_res->gsi_irq = resource->start;
+	IPADBG(": gsi-irq = %d\n", ipa_drv_res->gsi_irq);
 
 	/* Get IPA pipe mem start ofst */
 	resource = platform_get_resource_byname(pdev, IORESOURCE_MEM,
