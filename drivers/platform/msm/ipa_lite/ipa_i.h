@@ -1090,7 +1090,6 @@ struct ipa_hw_stats {
  * @transport_pm: transport power management related information
  * @disconnect_lock: protects LAN_CONS packet receive notification CB
  * @ipa3_active_clients: structure for reference counting connected IPA clients
- * @modem_cfg_emb_pipe_flt: modem configure embedded pipe filtering rules
  * @logbuf: ipc log buffer for high priority messages
  * @logbuf_low: ipc log buffer for low priority messages
  * @ipa_wdi2: using wdi-2.0
@@ -1185,7 +1184,6 @@ struct ipa3_context {
 	struct mutex msg_lock;
 	wait_queue_head_t msg_waitq;
 	bool ipa_config_is_mhi;
-	bool modem_cfg_emb_pipe_flt;
 	bool ipa_wdi2;
 	bool use_64_bit_dma_mask;
 	/* featurize if memory footprint becomes a concern */
@@ -1242,7 +1240,6 @@ struct ipa3_plat_drv_res {
 	u32 ipa_irq;
 	u32 gsi_irq;
 	u32 ee;
-	bool modem_cfg_emb_pipe_flt;
 	bool ipa_wdi2;
 	bool use_64_bit_dma_mask;
 	bool use_bw_vote;

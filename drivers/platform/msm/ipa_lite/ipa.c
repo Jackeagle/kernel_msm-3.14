@@ -2397,7 +2397,6 @@ static int ipa3_pre_init(const struct ipa3_plat_drv_res *resource_p,
 		ipa3_ctx->smmu_s1_bypass = smmu_info.s1_bypass;
 	ipa3_ctx->ipa_wrapper_base = resource_p->ipa_mem_base;
 	ipa3_ctx->ipa_wrapper_size = resource_p->ipa_mem_size;
-	ipa3_ctx->modem_cfg_emb_pipe_flt = resource_p->modem_cfg_emb_pipe_flt;
 	ipa3_ctx->use_64_bit_dma_mask = resource_p->use_64_bit_dma_mask;
 	ipa3_ctx->wan_rx_ring_size = resource_p->wan_rx_ring_size;
 	ipa3_ctx->lan_rx_ring_size = resource_p->lan_rx_ring_size;
@@ -2736,7 +2735,6 @@ static int get_ipa_dts_configuration(struct platform_device *pdev,
 	u32 ipa_hw_type = 0;
 
 	/* initialize ipa3_res */
-	ipa_drv_res->modem_cfg_emb_pipe_flt = false;
 	ipa_drv_res->use_64_bit_dma_mask = false;
 	ipa_drv_res->use_bw_vote = false;
 	ipa_drv_res->wan_rx_ring_size = IPA_GENERIC_RX_POOL_SZ;
@@ -2780,13 +2778,6 @@ static int get_ipa_dts_configuration(struct platform_device *pdev,
 	else
 		IPADBG(": found ipa_drv_res->lan-rx-ring-size = %u",
 			ipa_drv_res->lan_rx_ring_size);
-
-	ipa_drv_res->modem_cfg_emb_pipe_flt =
-			of_property_read_bool(pdev->dev.of_node,
-			"qcom,modem-cfg-emb-pipe-flt");
-	IPADBG(": modem configure embedded pipe filtering = %s\n",
-			ipa_drv_res->modem_cfg_emb_pipe_flt
-			? "True" : "False");
 
 	ipa_drv_res->use_64_bit_dma_mask =
 			of_property_read_bool(pdev->dev.of_node,

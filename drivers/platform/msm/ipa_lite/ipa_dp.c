@@ -999,8 +999,7 @@ int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
 
 	ipa3_ctx->skip_ep_cfg_shadow[ipa_ep_idx] = ep->skip_ep_cfg;
 	if (!ep->skip_ep_cfg && IPA_CLIENT_IS_PROD(sys_in->client)) {
-		if (ipa3_ctx->modem_cfg_emb_pipe_flt &&
-			sys_in->client == IPA_CLIENT_APPS_WAN_PROD)
+		if (sys_in->client == IPA_CLIENT_APPS_WAN_PROD)
 			IPADBG("modem cfg emb pipe flt\n");
 	}
 
@@ -1129,8 +1128,7 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 		ipa3_cleanup_rx(ep->sys);
 
 	if (!ep->skip_ep_cfg && IPA_CLIENT_IS_PROD(ep->client)) {
-		if (ipa3_ctx->modem_cfg_emb_pipe_flt &&
-			ep->client == IPA_CLIENT_APPS_WAN_PROD)
+		if (ep->client == IPA_CLIENT_APPS_WAN_PROD)
 			IPADBG("modem cfg emb pipe flt\n");
 	}
 
