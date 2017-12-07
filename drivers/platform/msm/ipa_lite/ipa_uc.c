@@ -162,21 +162,6 @@ union IpaHwChkChEmptyCmdData_t {
 	u32 raw32b;
 } __packed;
 
-/**
- * When resource group 10 limitation mitigation is enabled, uC send
- * cmd should be able to run in interrupt context, so using spin lock
- * instead of mutex.
- */
-#define IPA3_UC_LOCK(flags)						 \
-do {									 \
-	mutex_lock(&ipa3_ctx->uc_ctx.uc_lock);			 \
-} while (0)
-
-#define IPA3_UC_UNLOCK(flags)						      \
-do {									      \
-	mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);		      \
-} while (0)
-
 struct ipa3_uc_hdlrs ipa3_uc_hdlrs[IPA_HW_NUM_FEATURES] = { { 0 } };
 
 const char *ipa_hw_error_str(enum ipa_hw_errors err_type)
@@ -473,11 +458,11 @@ static int ipa3_uc_send_cmd_64b_param(u32 cmd_lo, u32 cmd_hi, u32 opcode,
 	int retries = 0;
 
 send_cmd_lock:
-	IPA3_UC_LOCK(flags);
+	mutex_lock(&ipa3_ctx->uc_ctx.uc_lock);
 
 	if (ipa3_uc_state_check()) {
 		IPADBG("uC send command aborted\n");
-		IPA3_UC_UNLOCK(flags);
+		mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
 		return -EBADF;
 	}
 send_cmd:
@@ -521,7 +506,7 @@ send_cmd:
 					ipa_hw_error_str(ipa3_ctx->
 					uc_ctx.uc_error_type));
 			}
-			IPA3_UC_UNLOCK(flags);
+			mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
 			BUG();
 			return -EFAULT;
 		}
@@ -534,7 +519,7 @@ send_cmd:
 					ipa_hw_error_str(ipa3_ctx->
 					uc_ctx.uc_error_type));
 			}
-			IPA3_UC_UNLOCK(flags);
+			mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
 			BUG();
 			return -EFAULT;
 		}
@@ -548,11 +533,11 @@ send_cmd:
 			retries++;
 			if (retries == IPA_GSI_CHANNEL_STOP_MAX_RETRY) {
 				IPAERR("Failed after %d tries\n", retries);
-				IPA3_UC_UNLOCK(flags);
+				mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
 				BUG();
 				return -EFAULT;
 			}
-			IPA3_UC_UNLOCK(flags);
+			mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
 			if (ipa3_ctx->uc_ctx.uc_status ==
 			    IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE)
 				ipa3_inject_dma_task_for_gsi();
@@ -567,7 +552,7 @@ send_cmd:
 			retries++;
 			if (retries >= IPA_GSI_CHANNEL_EMPTY_MAX_RETRY) {
 				IPAERR("Failed after %d tries\n", retries);
-				IPA3_UC_UNLOCK(flags);
+				mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
 				return -EFAULT;
 			}
 			usleep_range(IPA_GSI_CHANNEL_EMPTY_SLEEP_MIN_USEC,
@@ -577,11 +562,11 @@ send_cmd:
 
 		IPAERR("Recevied status %u, Expected status %u\n",
 			ipa3_ctx->uc_ctx.uc_status, expected_status);
-		IPA3_UC_UNLOCK(flags);
+		mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
 		return -EFAULT;
 	}
 
-	IPA3_UC_UNLOCK(flags);
+	mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
 
 	IPADBG("uC cmd %u send succeeded\n", opcode);
 
@@ -705,9 +690,9 @@ void ipa3_uc_register_handlers(enum ipa3_hw_features feature,
 		return;
 	}
 
-	IPA3_UC_LOCK(flags);
+	mutex_lock(&ipa3_ctx->uc_ctx.uc_lock);
 	ipa3_uc_hdlrs[feature] = *hdlrs;
-	IPA3_UC_UNLOCK(flags);
+	mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
 
 	IPADBG("uC handlers registered for feature %u\n", feature);
 }
