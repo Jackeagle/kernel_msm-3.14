@@ -2365,7 +2365,7 @@ static int ipa3_pre_init(const struct ipa3_plat_drv_res *resource_p,
 	ipa3_ctx->ipa_wrapper_base = resource_p->ipa_mem_base;
 	ipa3_ctx->ipa_wrapper_size = resource_p->ipa_mem_size;
 	ipa3_ctx->ee = resource_p->ee;
-	ipa3_ctx->apply_rg10_wa = resource_p->apply_rg10_wa;
+	ipa3_ctx->apply_rg10_wa = false;
 	ipa3_ctx->gsi_ch20_wa = resource_p->gsi_ch20_wa;
 	ipa3_ctx->ipa3_active_clients_logging.log_rdy = false;
 	if (resource_p->ipa_tz_unlock_reg) {
@@ -2689,7 +2689,6 @@ static int get_ipa_dts_configuration(struct platform_device *pdev,
 	u32 ipa_hw_type = 0;
 
 	/* initialize ipa3_res */
-	ipa_drv_res->apply_rg10_wa = false;
 	ipa_drv_res->gsi_ch20_wa = false;
 	ipa_drv_res->ipa_tz_unlock_reg_num = 0;
 	ipa_drv_res->ipa_tz_unlock_reg = NULL;
@@ -2761,13 +2760,6 @@ static int get_ipa_dts_configuration(struct platform_device *pdev,
 			&ipa_drv_res->ee);
 	if (result)
 		ipa_drv_res->ee = 0;
-
-	ipa_drv_res->apply_rg10_wa =
-		of_property_read_bool(pdev->dev.of_node,
-		"qcom,use-rg10-limitation-mitigation");
-	IPADBG(": Use Register Group 10 limitation mitigation = %s\n",
-		ipa_drv_res->apply_rg10_wa
-		? "True" : "False");
 
 	ipa_drv_res->gsi_ch20_wa =
 		of_property_read_bool(pdev->dev.of_node,
