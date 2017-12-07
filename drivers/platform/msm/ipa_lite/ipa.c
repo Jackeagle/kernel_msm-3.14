@@ -843,10 +843,7 @@ int _ipa_init_sram_v3(void)
 		IPA_MEM_PART(modem_hdr_proc_ctx_ofst));
 	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(modem_ofst) - 4);
 	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(modem_ofst));
-	ipa3_sram_set_canary(ipa_sram_mmio,
-		(ipa3_ctx->ipa_hw_type >= IPA_HW_v3_5) ?
-			IPA_MEM_PART(uc_event_ring_ofst) :
-			IPA_MEM_PART(end_ofst));
+	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(uc_event_ring_ofst));
 
 	iounmap(ipa_sram_mmio);
 
