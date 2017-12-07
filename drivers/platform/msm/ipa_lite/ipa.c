@@ -2458,8 +2458,7 @@ static int ipa3_pre_init(const struct ipa3_plat_drv_res *resource_p,
 		result = -ENOMEM;
 		goto fail_mem_ctrl;
 	}
-	result = ipa3_controller_static_bind(ipa3_ctx->ctrl,
-			ipa3_ctx->ipa_hw_type);
+	result = ipa3_controller_static_bind(ipa3_ctx->ctrl);
 	if (result) {
 		IPAERR("fail to static bind IPA ctrl.\n");
 		result = -EFAULT;

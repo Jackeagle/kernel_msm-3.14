@@ -1958,8 +1958,7 @@ int ipa3_init_mem_partition(struct device_node *node)
  *  This function can avoid the runtime assignment by using C99 special
  *  struct initialization - hard decision... time.vs.mem
  */
-int ipa3_controller_static_bind(struct ipa3_controller *ctrl,
-		enum ipa_hw_type hw_type)
+int ipa3_controller_static_bind(struct ipa3_controller *ctrl)
 {
 	ctrl->ipa_init_rt4 = _ipa_init_rt4_v3;
     ctrl->ipa_init_rt6 = _ipa_init_rt6_v3;
