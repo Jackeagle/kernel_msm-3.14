@@ -2364,8 +2364,6 @@ static int ipa3_pre_init(const struct ipa3_plat_drv_res *resource_p,
 		ipa3_ctx->smmu_s1_bypass = smmu_info.s1_bypass;
 	ipa3_ctx->ipa_wrapper_base = resource_p->ipa_mem_base;
 	ipa3_ctx->ipa_wrapper_size = resource_p->ipa_mem_size;
-	ipa3_ctx->wan_rx_ring_size = IPA_GENERIC_RX_POOL_SZ;
-	ipa3_ctx->lan_rx_ring_size = IPA_GENERIC_RX_POOL_SZ;
 	ipa3_ctx->skip_uc_pipe_reset = resource_p->skip_uc_pipe_reset;
 	ipa3_ctx->ee = resource_p->ee;
 	ipa3_ctx->apply_rg10_wa = resource_p->apply_rg10_wa;

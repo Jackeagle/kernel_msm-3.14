@@ -1202,8 +1202,6 @@ struct ipa3_context {
 
 	struct ipa3_uc_ctx uc_ctx;
 
-	u32 wan_rx_ring_size;
-	u32 lan_rx_ring_size;
 	bool skip_uc_pipe_reset;
 	void *gsi_dev_hdl;
 	u32 ee;
