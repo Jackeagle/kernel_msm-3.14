@@ -107,7 +107,6 @@ static struct device *master_dev;
 struct platform_device *ipa3_pdev;
 static struct {
 	bool present;
-	bool arm_smmu;
 	bool fast_map;
 	bool s1_bypass;
 	bool use_64_bit_dma_mask;
@@ -3277,51 +3276,16 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		return result;
 	}
 
-	if (of_property_read_bool(pdev_p->dev.of_node, "qcom,arm-smmu")) {
-		if (of_property_read_bool(pdev_p->dev.of_node,
-		    "qcom,smmu-s1-bypass"))
-			smmu_info.s1_bypass = true;
-		if (of_property_read_bool(pdev_p->dev.of_node,
-			"qcom,smmu-fast-map"))
-			smmu_info.fast_map = true;
-		if (of_property_read_bool(pdev_p->dev.of_node,
-			"qcom,use-64-bit-dma-mask"))
-			smmu_info.use_64_bit_dma_mask = true;
-		smmu_info.arm_smmu = true;
-		pr_info("IPA smmu_info.s1_bypass=%d smmu_info.fast_map=%d\n",
-			smmu_info.s1_bypass, smmu_info.fast_map);
-	} else if (of_property_read_bool(pdev_p->dev.of_node,
-				"qcom,msm-smmu")) {
-		IPAERR("Legacy IOMMU not supported\n");
-		result = -EOPNOTSUPP;
-	} else {
-		if (of_property_read_bool(pdev_p->dev.of_node,
-			"qcom,use-64-bit-dma-mask")) {
-			if (dma_set_mask(&pdev_p->dev, DMA_BIT_MASK(64)) ||
-			    dma_set_coherent_mask(&pdev_p->dev,
-			    DMA_BIT_MASK(64))) {
-				IPAERR("DMA set 64bit mask failed\n");
-				return -EOPNOTSUPP;
-			}
-		} else {
-			if (dma_set_mask(&pdev_p->dev, DMA_BIT_MASK(32)) ||
-			    dma_set_coherent_mask(&pdev_p->dev,
-			    DMA_BIT_MASK(32))) {
-				IPAERR("DMA set 32bit mask failed\n");
-				return -EOPNOTSUPP;
-			}
-		}
-
-		if (!ipa3_bus_scale_table)
-			ipa3_bus_scale_table = msm_bus_cl_get_pdata(pdev_p);
-		/* Proceed to real initialization */
-
-		result = ipa3_pre_init(&ipa3_res, dev);
-		if (result) {
-			IPAERR("ipa3_init failed\n");
-			return result;
-		}
-	}
+	/* The SDM845 has an SMMU, and uses the ARM SMMU driver */
+	if (of_property_read_bool(pdev_p->dev.of_node, "qcom,smmu-s1-bypass"))
+		smmu_info.s1_bypass = true;
+	if (of_property_read_bool(pdev_p->dev.of_node, "qcom,smmu-fast-map"))
+		smmu_info.fast_map = true;
+	if (of_property_read_bool(pdev_p->dev.of_node,
+		"qcom,use-64-bit-dma-mask"))
+		smmu_info.use_64_bit_dma_mask = true;
+	pr_info("IPA smmu_info.s1_bypass=%d smmu_info.fast_map=%d\n",
+		smmu_info.s1_bypass, smmu_info.fast_map);
 
 	result = of_platform_populate(pdev_p->dev.of_node,
 		ipa_plat_drv_match, NULL, &pdev_p->dev);
