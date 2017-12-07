@@ -2364,7 +2364,6 @@ static int ipa3_pre_init(const struct ipa3_plat_drv_res *resource_p,
 		ipa3_ctx->smmu_s1_bypass = smmu_info.s1_bypass;
 	ipa3_ctx->ipa_wrapper_base = resource_p->ipa_mem_base;
 	ipa3_ctx->ipa_wrapper_size = resource_p->ipa_mem_size;
-	ipa3_ctx->skip_uc_pipe_reset = resource_p->skip_uc_pipe_reset;
 	ipa3_ctx->ee = resource_p->ee;
 	ipa3_ctx->apply_rg10_wa = resource_p->apply_rg10_wa;
 	ipa3_ctx->gsi_ch20_wa = resource_p->gsi_ch20_wa;
@@ -2708,13 +2707,6 @@ static int get_ipa_dts_configuration(struct platform_device *pdev,
 		IPAERR(":only IPA version 3.5.1 supported!\n");
 		return -ENODEV;
 	}
-
-	ipa_drv_res->skip_uc_pipe_reset =
-		of_property_read_bool(pdev->dev.of_node,
-		"qcom,skip-uc-pipe-reset");
-	IPADBG(": skip uC pipe reset = %s\n",
-		ipa_drv_res->skip_uc_pipe_reset
-		? "True" : "False");
 
 	/* Get IPA wrapper address */
 	resource = platform_get_resource_byname(pdev, IORESOURCE_MEM,

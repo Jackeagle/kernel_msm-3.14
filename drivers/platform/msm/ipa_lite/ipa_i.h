@@ -1102,7 +1102,6 @@ struct ipa_hw_stats {
  * @uc_ctx: uC interface context
  * @uc_wdi_ctx: WDI specific fields for uC interface
  * @ipa_num_pipes: The number of pipes used by IPA HW
- * @skip_uc_pipe_reset: Indicates whether pipe reset via uC needs to be avoided
  * @ipa_client_apps_wan_cons_agg_gro: RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA
  * @apply_rg10_wa: Indicates whether to use register group 10 workaround
  * @gsi_ch20_wa: Indicates whether to apply GSI physical channel 20 workaround
@@ -1202,7 +1201,6 @@ struct ipa3_context {
 
 	struct ipa3_uc_ctx uc_ctx;
 
-	bool skip_uc_pipe_reset;
 	void *gsi_dev_hdl;
 	u32 ee;
 	bool apply_rg10_wa;
@@ -1234,7 +1232,6 @@ struct ipa3_plat_drv_res {
 	u32 ipa_irq;
 	u32 gsi_irq;
 	u32 ee;
-	bool skip_uc_pipe_reset;
 	bool apply_rg10_wa;
 	bool gsi_ch20_wa;
 	bool tethered_flow_control;
