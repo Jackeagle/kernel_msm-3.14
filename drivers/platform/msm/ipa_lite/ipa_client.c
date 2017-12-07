@@ -56,15 +56,13 @@ int ipa3_enable_data_path(u32 clnt_hdl)
 	}
 
 	/* Enable the pipe */
-	if (ipa3_ctx->ipa_hw_type < IPA_HW_v4_0) {
-		if (IPA_CLIENT_IS_CONS(ep->client) &&
-		    (ep->keep_ipa_awake ||
-		    ipa3_ctx->resume_on_connect[ep->client] ||
-		    !ipa3_should_pipe_be_suspended(ep->client))) {
-			memset(&ep_cfg_ctrl, 0, sizeof(ep_cfg_ctrl));
-			ep_cfg_ctrl.ipa_ep_suspend = false;
-			res = ipa3_cfg_ep_ctrl(clnt_hdl, &ep_cfg_ctrl);
-		}
+	if (IPA_CLIENT_IS_CONS(ep->client) &&
+		(ep->keep_ipa_awake ||
+		ipa3_ctx->resume_on_connect[ep->client] ||
+		!ipa3_should_pipe_be_suspended(ep->client))) {
+		memset(&ep_cfg_ctrl, 0, sizeof(ep_cfg_ctrl));
+		ep_cfg_ctrl.ipa_ep_suspend = false;
+		res = ipa3_cfg_ep_ctrl(clnt_hdl, &ep_cfg_ctrl);
 	}
 
 	return res;

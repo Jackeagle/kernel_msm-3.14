@@ -865,14 +865,6 @@ int ipa3_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 		return result;
 
 	if (IPA_CLIENT_IS_PROD(ipa3_ctx->ep[clnt_hdl].client)) {
-
-		if (ipa3_ctx->ipa_hw_type >= IPA_HW_v4_0) {
-			result = ipa3_cfg_ep_conn_track(clnt_hdl,
-				&ipa_ep_cfg->conn_track);
-			if (result)
-				return result;
-		}
-
 		result = ipa3_cfg_ep_mode(clnt_hdl, &ipa_ep_cfg->mode);
 		if (result)
 			return result;
@@ -1187,12 +1179,6 @@ int ipa3_cfg_ep_ctrl(u32 clnt_hdl, const struct ipa_ep_cfg_ctrl *ep_ctrl)
 		return -EINVAL;
 	}
 
-	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v4_0 && ep_ctrl->ipa_ep_suspend) {
-		IPAERR("pipe suspend is not supported\n");
-		WARN_ON(1);
-		return -EPERM;
-	}
-
 	IPADBG("pipe=%d ep_suspend=%d, ep_delay=%d\n",
 		clnt_hdl,
 		ep_ctrl->ipa_ep_suspend,
@@ -1411,15 +1397,13 @@ int ipa3_cfg_ep_route(u32 clnt_hdl, const struct ipa_ep_cfg_route *ep_route)
 	ipa3_ctx->ep[clnt_hdl].rt_tbl_idx =
 		IPA_MEM_PART(v4_apps_rt_index_lo);
 
-	if (ipa3_ctx->ipa_hw_type < IPA_HW_v4_0) {
-		IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
 
-		init_rt.route_table_index = ipa3_ctx->ep[clnt_hdl].rt_tbl_idx;
-		ipahal_write_reg_n_fields(IPA_ENDP_INIT_ROUTE_n,
-			clnt_hdl, &init_rt);
+	init_rt.route_table_index = ipa3_ctx->ep[clnt_hdl].rt_tbl_idx;
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_ROUTE_n,
+		clnt_hdl, &init_rt);
 
-		IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
-	}
+	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
 
 	return 0;
 }
@@ -1614,18 +1598,11 @@ int ipa3_set_aggr_mode(enum ipa_aggr_mode mode)
 {
 	struct ipahal_reg_qcncm qcncm;
 
-	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v4_0) {
-		if (mode != IPA_MBIM_AGGR) {
-			IPAERR("Only MBIM mode is supported staring 4.0\n");
-			return -EPERM;
-		}
-	} else {
-		IPA_ACTIVE_CLIENTS_INC_SIMPLE();
-		ipahal_read_reg_fields(IPA_QCNCM, &qcncm);
-		qcncm.mode_en = mode;
-		ipahal_write_reg_fields(IPA_QCNCM, &qcncm);
-		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
-	}
+	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipahal_read_reg_fields(IPA_QCNCM, &qcncm);
+	qcncm.mode_en = mode;
+	ipahal_write_reg_fields(IPA_QCNCM, &qcncm);
+	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 
 	return 0;
 }
@@ -1644,11 +1621,6 @@ int ipa3_set_aggr_mode(enum ipa_aggr_mode mode)
 int ipa3_set_qcncm_ndp_sig(char sig[3])
 {
 	struct ipahal_reg_qcncm qcncm;
-
-	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v4_0) {
-		IPAERR("QCNCM mode is not supported staring 4.0\n");
-		return -EPERM;
-	}
 
 	if (sig == NULL) {
 		IPAERR("bad argument for ipa3_set_qcncm_ndp_sig/n");
@@ -1673,11 +1645,6 @@ int ipa3_set_qcncm_ndp_sig(char sig[3])
 int ipa3_set_single_ndp_per_mbim(bool enable)
 {
 	struct ipahal_reg_single_ndp_mode mode;
-
-	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v4_0) {
-		IPAERR("QCNCM mode is not supported staring 4.0\n");
-		return -EPERM;
-	}
 
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
 	ipahal_read_reg_fields(IPA_SINGLE_NDP_MODE, &mode);
@@ -1994,12 +1961,6 @@ int ipa3_init_mem_partition(struct device_node *node)
 int ipa3_controller_static_bind(struct ipa3_controller *ctrl,
 		enum ipa_hw_type hw_type)
 {
-	if (hw_type >= IPA_HW_v4_0) {
-		ctrl->ipa_clk_rate_turbo = IPA_V4_0_CLK_RATE_TURBO;
-		ctrl->ipa_clk_rate_nominal = IPA_V4_0_CLK_RATE_NOMINAL;
-		ctrl->ipa_clk_rate_svs = IPA_V4_0_CLK_RATE_SVS;
-	}
-
 	ctrl->ipa_init_rt4 = _ipa_init_rt4_v3;
     ctrl->ipa_init_rt6 = _ipa_init_rt6_v3;
     ctrl->ipa_init_flt4 = _ipa_init_flt4_v3;
@@ -2016,9 +1977,6 @@ int ipa3_controller_static_bind(struct ipa3_controller *ctrl,
 	ctrl->ipa_init_sram = _ipa_init_sram_v3;
 	ctrl->ipa_sram_read_settings = _ipa_sram_settings_read_v3_0;
 	ctrl->ipa_init_hdr = _ipa_init_hdr_v3_0;
-
-	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v4_0)
-		ctrl->ipa3_read_ep_reg = _ipa_read_ep_reg_v4_0;
 
 	return 0;
 }
@@ -2695,7 +2653,6 @@ void ipa3_suspend_apps_pipes(bool suspend)
 	struct ipa_ep_cfg_ctrl cfg;
 	int ipa_ep_idx;
 	struct ipa3_ep_context *ep;
-	int res;
 
 	memset(&cfg, 0, sizeof(cfg));
 	cfg.ipa_ep_suspend = suspend;
@@ -2710,23 +2667,7 @@ void ipa3_suspend_apps_pipes(bool suspend)
 	if (ep->valid) {
 		IPADBG("%s pipe %d\n", suspend ? "suspend" : "unsuspend",
 			ipa_ep_idx);
-		if (ipa3_ctx->ipa_hw_type >= IPA_HW_v4_0) {
-			if (suspend) {
-				res = ipa3_stop_gsi_channel(ipa_ep_idx);
-				if (res) {
-					IPAERR("failed to stop LAN channel\n");
-					ipa_assert();
-				}
-			} else {
-				res = gsi_start_channel(ep->gsi_chan_hdl);
-				if (res) {
-					IPAERR("failed to start LAN channel\n");
-					ipa_assert();
-				}
-			}
-		} else {
-			ipa3_cfg_ep_ctrl(ipa_ep_idx, &cfg);
-		}
+		ipa3_cfg_ep_ctrl(ipa_ep_idx, &cfg);
 		if (suspend)
 			ipa3_gsi_poll_after_suspend(ep);
 		else if (!atomic_read(&ep->sys->curr_polling_state))
@@ -2744,23 +2685,7 @@ void ipa3_suspend_apps_pipes(bool suspend)
 	if (ep->valid) {
 		IPADBG("%s pipe %d\n", suspend ? "suspend" : "unsuspend",
 			ipa_ep_idx);
-		if (ipa3_ctx->ipa_hw_type >= IPA_HW_v4_0) {
-			if (suspend) {
-				res = ipa3_stop_gsi_channel(ipa_ep_idx);
-				if (res) {
-					IPAERR("failed to stop WAN channel\n");
-					ipa_assert();
-				}
-			} else {
-				res = gsi_start_channel(ep->gsi_chan_hdl);
-				if (res) {
-					IPAERR("failed to start WAN channel\n");
-					ipa_assert();
-				}
-			}
-		} else {
-			ipa3_cfg_ep_ctrl(ipa_ep_idx, &cfg);
-		}
+		ipa3_cfg_ep_ctrl(ipa_ep_idx, &cfg);
 		if (suspend)
 			ipa3_gsi_poll_after_suspend(ep);
 		else if (!atomic_read(&ep->sys->curr_polling_state))

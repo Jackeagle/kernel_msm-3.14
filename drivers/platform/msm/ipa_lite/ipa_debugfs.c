@@ -359,11 +359,6 @@ static ssize_t ipa3_write_dbg_cnt(struct file *file, const char __user *buf,
 	u32 option = 0;
 	struct ipahal_reg_debug_cnt_ctrl dbg_cnt_ctrl;
 
-	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v4_0) {
-		IPAERR("IPA_DEBUG_CNT_CTRL is not supported in IPA 4.0\n");
-		return -EPERM;
-	}
-
 	if (sizeof(dbg_buff) < count + 1)
 		return -EFAULT;
 
@@ -398,11 +393,6 @@ static ssize_t ipa3_read_dbg_cnt(struct file *file, char __user *ubuf,
 {
 	int nbytes;
 	u32 regval;
-
-	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v4_0) {
-		IPAERR("IPA_DEBUG_CNT_REG is not supported in IPA 4.0\n");
-		return -EPERM;
-	}
 
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
 	regval =
