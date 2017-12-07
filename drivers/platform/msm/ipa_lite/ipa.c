@@ -106,8 +106,6 @@ struct platform_device *ipa3_pdev;
 static struct {
 	bool fast_map;
 	bool s1_bypass;
-	u32 ipa_base;
-	u32 ipa_size;
 } smmu_info;
 
 static char *active_clients_table_buf;
@@ -2671,9 +2669,6 @@ static int get_ipa_dts_configuration(struct platform_device *pdev,
 	IPADBG(": ipa-base = 0x%x, size = 0x%x\n",
 			ipa_drv_res->ipa_mem_base,
 			ipa_drv_res->ipa_mem_size);
-
-	smmu_info.ipa_base = ipa_drv_res->ipa_mem_base;
-	smmu_info.ipa_size = ipa_drv_res->ipa_mem_size;
 
 	/* Get IPA GSI address */
 	resource = platform_get_resource_byname(pdev, IORESOURCE_MEM,
