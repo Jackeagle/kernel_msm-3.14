@@ -1893,6 +1893,14 @@ static int ipa3_init_interrupts(void)
 {
 	int result;
 
+	/* Get IPA IRQ number */
+	ipa3_res.ipa_irq = platform_get_irq_byname(ipa3_pdev, "ipa-irq");
+	if (ipa3_res.ipa_irq < 0) {
+		IPAERR(":failed to get ipa-irq!\n");
+		return -ENODEV;
+	}
+	IPADBG(":ipa-irq = %d\n", ipa3_res.ipa_irq);
+
 	/*register IPA IRQ handler*/
 	result = ipa3_interrupts_init(ipa3_res.ipa_irq, 0,
 			master_dev);
@@ -2647,14 +2655,6 @@ static int get_ipa_dts_configuration(void)
 		return -ENODEV;
 	}
 	IPADBG(": gsi-irq = %d\n", ipa3_res.gsi_irq);
-
-	/* Get IPA IRQ number */
-	ipa3_res.ipa_irq = platform_get_irq_byname(ipa3_pdev, "ipa-irq");
-	if (ipa3_res.ipa_irq < 0) {
-		IPAERR(":failed to get ipa-irq!\n");
-		return -ENODEV;
-	}
-	IPADBG(":ipa-irq = %d\n", ipa3_res.ipa_irq);
 
 	result = of_property_read_u32(ipa3_pdev->dev.of_node, "qcom,ee",
 			&ipa3_res.ee);
