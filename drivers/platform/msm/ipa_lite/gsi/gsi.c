@@ -30,7 +30,6 @@
 #define GSI_RESET_WA_MAX_SLEEP 2000
 
 enum gsi_per_evt {
-	GSI_PER_EVT_GLOB_ERROR,
 	GSI_PER_EVT_GLOB_GP1,
 	GSI_PER_EVT_GLOB_GP2,
 	GSI_PER_EVT_GLOB_GP3,
@@ -154,10 +153,6 @@ static void gsi_handle_ev_ctrl(int ee)
 static void gsi_notify(struct gsi_per_notify *notify)
 {
 	switch (notify->evt_id) {
-	case GSI_PER_EVT_GLOB_ERROR:
-		GSIERR("Got GSI_PER_EVT_GLOB_ERROR\n");
-		GSIERR("Err_desc = 0x%04x\n", notify->data.err_desc);
-		break;
 	case GSI_PER_EVT_GLOB_GP1:
 		GSIERR("Got GSI_PER_EVT_GLOB_GP1\n");
 		BUG();
@@ -199,7 +194,6 @@ static void gsi_handle_glob_err(uint32_t err)
 	struct gsi_evt_ctx *ev;
 	struct gsi_chan_err_notify chan_notify;
 	struct gsi_evt_err_notify evt_notify;
-	struct gsi_per_notify per_notify;
 	uint32_t val;
 
 	log = (struct gsi_log_err *)&err;
@@ -209,9 +203,8 @@ static void gsi_handle_glob_err(uint32_t err)
 			log->arg2, log->arg3);
 	switch (log->err_type) {
 	case GSI_ERR_TYPE_GLOB:
-		per_notify.evt_id = GSI_PER_EVT_GLOB_ERROR;
-		per_notify.data.err_desc = err & 0xFFFF;
-		gsi_notify(&per_notify);
+		GSIERR("Got global GP ERROR\n");
+		GSIERR("Err_desc = 0x%04x\n", err & 0xffff);
 		break;
 	case GSI_ERR_TYPE_CHAN:
 		if (log->virt_idx >= gsi_ctx->max_ch) {
