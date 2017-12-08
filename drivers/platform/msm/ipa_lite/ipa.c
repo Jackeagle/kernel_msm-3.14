@@ -96,8 +96,6 @@ static DECLARE_WORK(ipa_dec_clients_disable_clks_on_wq_work,
 	ipa_dec_clients_disable_clks_on_wq);
 
 static struct {
-	u32 ipa_mem_base;
-	u32 ipa_mem_size;
 	u32 gsi_mem_base;
 	u32 gsi_mem_size;
 	u32 gsi_irq;
@@ -2317,14 +2315,12 @@ static int ipa3_pre_init(struct device *ipa_dev)
 		IPAERR(":get resource failed for ipa-base!\n");
 		return -ENODEV;
 	}
-	ipa3_res.ipa_mem_base = res->start;
-	ipa3_res.ipa_mem_size = resource_size(res);
+	ipa3_ctx->ipa_wrapper_base = res->start;
+	ipa3_ctx->ipa_wrapper_size = resource_size(res);
 	IPADBG(": ipa-base = 0x%x, size = 0x%x\n",
-			ipa3_res.ipa_mem_base,
-			ipa3_res.ipa_mem_size);
+			ipa3_ctx->ipa_wrapper_base,
+			ipa3_ctx->ipa_wrapper_size);
 
-	ipa3_ctx->ipa_wrapper_base = ipa3_res.ipa_mem_base;
-	ipa3_ctx->ipa_wrapper_size = ipa3_res.ipa_mem_size;
 	ipa3_ctx->ee = ipa3_res.ee;
 	ipa3_ctx->ipa3_active_clients_logging.log_rdy = false;
 
