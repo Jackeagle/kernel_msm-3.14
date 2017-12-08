@@ -2594,7 +2594,7 @@ fail_mem_ctx:
 	return result;
 }
 
-static int get_ipa_dts_configuration(struct ipa3_plat_drv_res *ipa_drv_res)
+static int get_ipa_dts_configuration(void)
 {
 	int result;
 	struct resource *resource;
@@ -2621,11 +2621,11 @@ static int get_ipa_dts_configuration(struct ipa3_plat_drv_res *ipa_drv_res)
 		IPAERR(":get resource failed for ipa-base!\n");
 		return -ENODEV;
 	}
-	ipa_drv_res->ipa_mem_base = resource->start;
-	ipa_drv_res->ipa_mem_size = resource_size(resource);
+	ipa3_res.ipa_mem_base = resource->start;
+	ipa3_res.ipa_mem_size = resource_size(resource);
 	IPADBG(": ipa-base = 0x%x, size = 0x%x\n",
-			ipa_drv_res->ipa_mem_base,
-			ipa_drv_res->ipa_mem_size);
+			ipa3_res.ipa_mem_base,
+			ipa3_res.ipa_mem_size);
 
 	/* Get IPA GSI address */
 	resource = platform_get_resource_byname(ipa3_pdev, IORESOURCE_MEM,
@@ -2634,11 +2634,11 @@ static int get_ipa_dts_configuration(struct ipa3_plat_drv_res *ipa_drv_res)
 		IPAERR(":get resource failed for gsi-base!\n");
 		return -ENODEV;
 	}
-	ipa_drv_res->gsi_mem_base = resource->start;
-	ipa_drv_res->gsi_mem_size = resource_size(resource);
+	ipa3_res.gsi_mem_base = resource->start;
+	ipa3_res.gsi_mem_size = resource_size(resource);
 	IPADBG(": gsi-base = 0x%x, size = 0x%x\n",
-			ipa_drv_res->gsi_mem_base,
-			ipa_drv_res->gsi_mem_size);
+			ipa3_res.gsi_mem_base,
+			ipa3_res.gsi_mem_size);
 
 	/* Get IPA GSI IRQ number */
 	resource = platform_get_resource_byname(ipa3_pdev, IORESOURCE_IRQ,
@@ -2647,8 +2647,8 @@ static int get_ipa_dts_configuration(struct ipa3_plat_drv_res *ipa_drv_res)
 		IPAERR(":get resource failed for gsi-irq!\n");
 		return -ENODEV;
 	}
-	ipa_drv_res->gsi_irq = resource->start;
-	IPADBG(": gsi-irq = %d\n", ipa_drv_res->gsi_irq);
+	ipa3_res.gsi_irq = resource->start;
+	IPADBG(": gsi-irq = %d\n", ipa3_res.gsi_irq);
 
 	/* Get IPA IRQ number */
 	resource = platform_get_resource_byname(ipa3_pdev, IORESOURCE_IRQ,
@@ -2657,13 +2657,13 @@ static int get_ipa_dts_configuration(struct ipa3_plat_drv_res *ipa_drv_res)
 		IPAERR(":get resource failed for ipa-irq!\n");
 		return -ENODEV;
 	}
-	ipa_drv_res->ipa_irq = resource->start;
-	IPADBG(":ipa-irq = %d\n", ipa_drv_res->ipa_irq);
+	ipa3_res.ipa_irq = resource->start;
+	IPADBG(":ipa-irq = %d\n", ipa3_res.ipa_irq);
 
 	result = of_property_read_u32(ipa3_pdev->dev.of_node, "qcom,ee",
-			&ipa_drv_res->ee);
+			&ipa3_res.ee);
 	if (result)
-		ipa_drv_res->ee = 0;
+		ipa3_res.ee = 0;
 
 	return 0;
 }
@@ -3009,7 +3009,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	if (!ipa3_pdev)
 		ipa3_pdev = pdev_p;
 
-	result = get_ipa_dts_configuration(&ipa3_res);
+	result = get_ipa_dts_configuration();
 	if (result) {
 		IPAERR("IPA dts parsing failed\n");
 		return result;
