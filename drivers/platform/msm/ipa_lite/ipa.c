@@ -2632,15 +2632,6 @@ static int get_ipa_dts_configuration(void)
 {
 	int result;
 	struct resource *resource;
-	enum ipa_hw_type ipa_version;
-
-	/* Get IPA HW Version */
-	ipa_version = ipa_version_get(ipa3_pdev);
-	IPADBG(": ipa_version = %d", ipa_version);
-	if (ipa_version != IPA_HW_v3_5_1) {
-		IPAERR(":only IPA version 3.5.1 supported!\n");
-		return -ENODEV;
-	}
 
 	/* Get IPA GSI address */
 	resource = platform_get_resource_byname(ipa3_pdev, IORESOURCE_MEM,
@@ -2982,8 +2973,9 @@ static const struct of_device_id ipa_plat_drv_match[] = {
 
 int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 {
-	int result;
 	struct device *dev = &pdev_p->dev;
+	enum ipa_hw_type ipa_version;
+	int result;
 
 	IPADBG("IPA driver probing started\n");
 	IPADBG("dev->of_node->name = %s\n", dev->of_node->name);
@@ -3002,15 +2994,21 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	    "qcom,smp2pgpio-map-ipa-1-out"))
 		return ipa3_smp2p_probe(dev);
 
+	/* First find out whether we're working with supported hardware */
+	ipa_version = ipa_version_get(pdev_p);
+	IPADBG(": ipa_version = %d", ipa_version);
+	if (ipa_version != IPA_HW_v3_5_1) {
+		IPAERR(":only IPA version 3.5.1 supported!\n");
+		return -ENODEV;
+	}
+	ipa3_pdev = pdev_p;
+	master_dev = dev;
+
 	result = msm_gsi_init(pdev_p);
 	if (result) {
 		pr_err("ipa: error initializing gsi driver.\n");
 		return result;
 	}
-
-	master_dev = dev;
-	if (!ipa3_pdev)
-		ipa3_pdev = pdev_p;
 
 	result = get_ipa_dts_configuration();
 	if (result) {
