@@ -95,7 +95,16 @@ static void ipa_dec_clients_disable_clks_on_wq(struct work_struct *work);
 static DECLARE_WORK(ipa_dec_clients_disable_clks_on_wq_work,
 	ipa_dec_clients_disable_clks_on_wq);
 
-static struct ipa3_plat_drv_res ipa3_res = {0, };
+static struct {
+	u32 ipa_mem_base;
+	u32 ipa_mem_size;
+	u32 gsi_mem_base;
+	u32 gsi_mem_size;
+	u32 ipa_irq;
+	u32 gsi_irq;
+	u32 ee;
+} ipa3_res;
+
 struct msm_bus_scale_pdata *ipa3_bus_scale_table;
 
 struct ipa3_context *ipa3_ctx;

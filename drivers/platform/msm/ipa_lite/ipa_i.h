@@ -1209,16 +1209,6 @@ struct ipa3_context {
 	struct ipa_hw_stats hw_stats;
 };
 
-struct ipa3_plat_drv_res {
-	u32 ipa_mem_base;
-	u32 ipa_mem_size;
-	u32 gsi_mem_base;
-	u32 gsi_mem_size;
-	u32 ipa_irq;
-	u32 gsi_irq;
-	u32 ee;
-};
-
 /**
  * struct ipa3_mem_partition - represents IPA RAM Map as read from DTS
  * Order and type of members should not be changed without a suitable change
