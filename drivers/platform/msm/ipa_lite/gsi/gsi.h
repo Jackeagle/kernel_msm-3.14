@@ -186,7 +186,6 @@ struct gsi_per_props {
 	unsigned int irq;
 	phys_addr_t phys_addr;
 	unsigned long size;
-	void (*notify_cb)(struct gsi_per_notify *notify);
 };
 
 enum gsi_chan_mode {

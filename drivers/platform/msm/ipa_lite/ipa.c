@@ -88,8 +88,6 @@ static int ipa3_q6_clean_q6_tables(void);
 static void ipa3_start_tag_process(struct work_struct *work);
 static DECLARE_WORK(ipa3_tag_work, ipa3_start_tag_process);
 
-static void ipa_gsi_notify_cb(struct gsi_per_notify *notify);
-
 static void ipa3_post_init_wq(struct work_struct *work);
 static DECLARE_WORK(ipa3_post_init_work, ipa3_post_init_wq);
 
@@ -2104,7 +2102,6 @@ static int ipa3_post_init(const struct ipa3_plat_drv_res *resource_p,
 	gsi_props.irq = resource_p->gsi_irq;
 	gsi_props.phys_addr = resource_p->gsi_mem_base;
 	gsi_props.size = resource_p->gsi_mem_size;
-	gsi_props.notify_cb = ipa_gsi_notify_cb;
 
 	ipa3_ctx->gsi_dev_hdl = gsi_register_device(&gsi_props);
 	if (IS_ERR(ipa3_ctx->gsi_dev_hdl)) {
@@ -3130,47 +3127,6 @@ int ipa3_ap_resume(struct device *dev)
 struct ipa3_context *ipa3_get_ctx(void)
 {
 	return ipa3_ctx;
-}
-
-static void ipa_gsi_notify_cb(struct gsi_per_notify *notify)
-{
-	switch (notify->evt_id) {
-	case GSI_PER_EVT_GLOB_ERROR:
-		IPAERR("Got GSI_PER_EVT_GLOB_ERROR\n");
-		IPAERR("Err_desc = 0x%04x\n", notify->data.err_desc);
-		break;
-	case GSI_PER_EVT_GLOB_GP1:
-		IPAERR("Got GSI_PER_EVT_GLOB_GP1\n");
-		BUG();
-		break;
-	case GSI_PER_EVT_GLOB_GP2:
-		IPAERR("Got GSI_PER_EVT_GLOB_GP2\n");
-		BUG();
-		break;
-	case GSI_PER_EVT_GLOB_GP3:
-		IPAERR("Got GSI_PER_EVT_GLOB_GP3\n");
-		BUG();
-		break;
-	case GSI_PER_EVT_GENERAL_BREAK_POINT:
-		IPAERR("Got GSI_PER_EVT_GENERAL_BREAK_POINT\n");
-		break;
-	case GSI_PER_EVT_GENERAL_BUS_ERROR:
-		IPAERR("Got GSI_PER_EVT_GENERAL_BUS_ERROR\n");
-		BUG();
-		break;
-	case GSI_PER_EVT_GENERAL_CMD_FIFO_OVERFLOW:
-		IPAERR("Got GSI_PER_EVT_GENERAL_CMD_FIFO_OVERFLOW\n");
-		BUG();
-		break;
-	case GSI_PER_EVT_GENERAL_MCS_STACK_OVERFLOW:
-		IPAERR("Got GSI_PER_EVT_GENERAL_MCS_STACK_OVERFLOW\n");
-		BUG();
-		break;
-	default:
-		IPAERR("Received unexpected evt: %d\n",
-			notify->evt_id);
-		BUG();
-	}
 }
 
 int ipa3_register_ipa_ready_cb(void (*ipa_ready_cb)(void *), void *user_data)
