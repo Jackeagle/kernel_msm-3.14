@@ -1880,7 +1880,7 @@ void ipa3_suspend_handler(enum ipa_irq_type interrupt,
  * Return codes: 0 in success, negative in failure
  *
  */
-int ipa3_init_interrupts(void)
+static int ipa3_init_interrupts(void)
 {
 	int result;
 
