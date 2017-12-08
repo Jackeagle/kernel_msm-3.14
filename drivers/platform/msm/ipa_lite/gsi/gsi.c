@@ -29,28 +29,6 @@
 #define GSI_RESET_WA_MIN_SLEEP 1000
 #define GSI_RESET_WA_MAX_SLEEP 2000
 
-enum gsi_per_evt {
-	GSI_PER_EVT_GENERAL_BREAK_POINT,
-	GSI_PER_EVT_GENERAL_BUS_ERROR,
-	GSI_PER_EVT_GENERAL_CMD_FIFO_OVERFLOW,
-	GSI_PER_EVT_GENERAL_MCS_STACK_OVERFLOW,
-};
-
-/**
- * gsi_per_notify - Peripheral callback info
- *
- * @evt_id:    type of notification
- * @err_desc:  error related information
- *
- */
-
-struct gsi_per_notify {
-	enum gsi_per_evt evt_id;
-	union {
-		uint16_t err_desc;
-	} data;
-};
-
 struct gsi_ctx *gsi_ctx;
 
 static void gsi_irq_set(uint32_t offset, uint32_t val)
@@ -144,31 +122,6 @@ static void gsi_handle_ev_ctrl(int ee)
 			GSIDBG("evt %u state updated to %u\n", i, ctx->state);
 			complete(&ctx->compl);
 		}
-	}
-}
-
-static void gsi_notify(struct gsi_per_notify *notify)
-{
-	switch (notify->evt_id) {
-	case GSI_PER_EVT_GENERAL_BREAK_POINT:
-		GSIERR("Got GSI_PER_EVT_GENERAL_BREAK_POINT\n");
-		break;
-	case GSI_PER_EVT_GENERAL_BUS_ERROR:
-		GSIERR("Got GSI_PER_EVT_GENERAL_BUS_ERROR\n");
-		BUG();
-		break;
-	case GSI_PER_EVT_GENERAL_CMD_FIFO_OVERFLOW:
-		GSIERR("Got GSI_PER_EVT_GENERAL_CMD_FIFO_OVERFLOW\n");
-		BUG();
-		break;
-	case GSI_PER_EVT_GENERAL_MCS_STACK_OVERFLOW:
-		GSIERR("Got GSI_PER_EVT_GENERAL_MCS_STACK_OVERFLOW\n");
-		BUG();
-		break;
-	default:
-		GSIERR("Received unexpected evt: %d\n",
-			notify->evt_id);
-		BUG();
 	}
 }
 
@@ -514,23 +467,26 @@ static void gsi_handle_inter_ee_ev_ctrl(int ee)
 static void gsi_handle_general(int ee)
 {
 	uint32_t val;
-	struct gsi_per_notify notify;
 
 	val = gsi_readl(GSI_EE_n_CNTXT_GSI_IRQ_STTS_OFFS(ee));
 
-	if (val & GSI_EE_n_CNTXT_GSI_IRQ_CLR_GSI_MCS_STACK_OVRFLOW_BMSK)
-		notify.evt_id = GSI_PER_EVT_GENERAL_MCS_STACK_OVERFLOW;
+	if (val & GSI_EE_n_CNTXT_GSI_IRQ_CLR_GSI_MCS_STACK_OVRFLOW_BMSK) {
+		GSIERR("Got MCS stack overflow\n");
+		BUG();
+	}
 
-	if (val & GSI_EE_n_CNTXT_GSI_IRQ_CLR_GSI_CMD_FIFO_OVRFLOW_BMSK)
-		notify.evt_id = GSI_PER_EVT_GENERAL_CMD_FIFO_OVERFLOW;
+	if (val & GSI_EE_n_CNTXT_GSI_IRQ_CLR_GSI_CMD_FIFO_OVRFLOW_BMSK) {
+		GSIERR("Got command FIFO overflow\n");
+		BUG();
+	}
 
-	if (val & GSI_EE_n_CNTXT_GSI_IRQ_CLR_GSI_BUS_ERROR_BMSK)
-		notify.evt_id = GSI_PER_EVT_GENERAL_BUS_ERROR;
+	if (val & GSI_EE_n_CNTXT_GSI_IRQ_CLR_GSI_BUS_ERROR_BMSK) {
+		GSIERR("Got bus error\n");
+		BUG();
+	}
 
 	if (val & GSI_EE_n_CNTXT_GSI_IRQ_CLR_GSI_BREAK_POINT_BMSK)
-		notify.evt_id = GSI_PER_EVT_GENERAL_BREAK_POINT;
-
-	gsi_notify(&notify);
+		GSIERR("Got breakpoint\n");
 
 	gsi_writel(val, GSI_EE_n_CNTXT_GSI_IRQ_CLR_OFFS(ee));
 }
