@@ -2289,7 +2289,6 @@ static int ipa3_alloc_pkt_init(void)
 * This part contains all initialization which doesn't require IPA HW, such
 * as structure allocations and initializations, register writes, etc.
 *
-* @resource_p:	contain platform specific values from DST file
 * @pdev:	The platform device structure representing the IPA driver
 *
 * Function initialization process:
@@ -2316,8 +2315,7 @@ static int ipa3_alloc_pkt_init(void)
 * Initialize IPA RM (resource manager)
 * Configure GSI registers (in GSI case)
 */
-static int ipa3_pre_init(const struct ipa3_plat_drv_res *resource_p,
-		struct device *ipa_dev)
+static int ipa3_pre_init(struct device *ipa_dev)
 {
 	int result = 0;
 	int i;
@@ -2338,9 +2336,9 @@ static int ipa3_pre_init(const struct ipa3_plat_drv_res *resource_p,
 
 	ipa3_ctx->pdev = ipa_dev;
 	ipa3_ctx->uc_pdev = ipa_dev;
-	ipa3_ctx->ipa_wrapper_base = resource_p->ipa_mem_base;
-	ipa3_ctx->ipa_wrapper_size = resource_p->ipa_mem_size;
-	ipa3_ctx->ee = resource_p->ee;
+	ipa3_ctx->ipa_wrapper_base = ipa3_res.ipa_mem_base;
+	ipa3_ctx->ipa_wrapper_size = ipa3_res.ipa_mem_size;
+	ipa3_ctx->ee = ipa3_res.ee;
 	ipa3_ctx->ipa3_active_clients_logging.log_rdy = false;
 
 	/* default aggregation parameters */
@@ -2396,11 +2394,11 @@ static int ipa3_pre_init(const struct ipa3_plat_drv_res *resource_p,
 	ipa3_enable_clks();
 
 	/* setup IPA register access */
-	IPADBG("Mapping 0x%x\n", resource_p->ipa_mem_base +
+	IPADBG("Mapping 0x%x\n", ipa3_res.ipa_mem_base +
 		ipa3_ctx->ctrl->ipa_reg_base_ofst);
-	ipa3_ctx->mmio = ioremap(resource_p->ipa_mem_base +
+	ipa3_ctx->mmio = ioremap(ipa3_res.ipa_mem_base +
 			ipa3_ctx->ctrl->ipa_reg_base_ofst,
-			resource_p->ipa_mem_size);
+			ipa3_res.ipa_mem_size);
 	if (!ipa3_ctx->mmio) {
 		IPAERR(":ipa-base ioremap err.\n");
 		result = -EFAULT;
@@ -2932,7 +2930,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		ipa3_bus_scale_table = msm_bus_cl_get_pdata(ipa3_pdev);
 
 	/* Proceed to real initialization */
-	result = ipa3_pre_init(&ipa3_res, dev);
+	result = ipa3_pre_init(dev);
 	if (result) {
 		IPAERR("ipa_init failed\n");
 		arm_iommu_detach_device(cb->dev);
