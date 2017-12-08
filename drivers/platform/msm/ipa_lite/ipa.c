@@ -2612,22 +2612,32 @@ fail_mem_ctx:
 	return result;
 }
 
+/* Return the IPA hardware version, or IPA_HW_None for any error */
+static enum ipa_hw_type ipa_version_get(struct platform_device *pdev)
+{
+	struct device_node *node = pdev->dev.of_node;
+	u32 ipa_version = 0;
+
+	if (of_property_read_u32(node, "qcom,ipa-hw-ver", &ipa_version))
+		return IPA_HW_None;
+
+	/* Make sure the value returned is in range */
+	if (ipa_version >= IPA_HW_MAX)
+		return IPA_HW_None;
+
+	return (enum ipa_hw_type)ipa_version;
+}
+
 static int get_ipa_dts_configuration(void)
 {
 	int result;
 	struct resource *resource;
-	u32 ipa_hw_type = 0;
+	enum ipa_hw_type ipa_version;
 
 	/* Get IPA HW Version */
-	result = of_property_read_u32(ipa3_pdev->dev.of_node, "qcom,ipa-hw-ver",
-					&ipa_hw_type);
-	if (result) {
-		IPAERR(":get resource failed for ipa-hw-ver!\n");
-		return -ENODEV;
-	}
-	IPADBG(": ipa_hw_type = %d", ipa_hw_type);
-
-	if (ipa_hw_type != IPA_HW_v3_5_1) {
+	ipa_version = ipa_version_get(ipa3_pdev);
+	IPADBG(": ipa_version = %d", ipa_version);
+	if (ipa_version != IPA_HW_v3_5_1) {
 		IPAERR(":only IPA version 3.5.1 supported!\n");
 		return -ENODEV;
 	}
