@@ -100,7 +100,6 @@ static struct {
 	u32 ipa_mem_size;
 	u32 gsi_mem_base;
 	u32 gsi_mem_size;
-	u32 ipa_irq;
 	u32 gsi_irq;
 	u32 ee;
 } ipa3_res;
@@ -1892,18 +1891,18 @@ void ipa3_suspend_handler(enum ipa_irq_type interrupt,
 static int ipa3_init_interrupts(void)
 {
 	int result;
+	int ipa_irq;
 
 	/* Get IPA IRQ number */
-	ipa3_res.ipa_irq = platform_get_irq_byname(ipa3_pdev, "ipa-irq");
-	if (ipa3_res.ipa_irq < 0) {
+	ipa_irq = platform_get_irq_byname(ipa3_pdev, "ipa-irq");
+	if (ipa_irq < 0) {
 		IPAERR(":failed to get ipa-irq!\n");
 		return -ENODEV;
 	}
-	IPADBG(":ipa-irq = %d\n", ipa3_res.ipa_irq);
+	IPADBG(":ipa-irq = %d\n", ipa_irq);
 
 	/*register IPA IRQ handler*/
-	result = ipa3_interrupts_init(ipa3_res.ipa_irq, 0,
-			master_dev);
+	result = ipa3_interrupts_init(ipa_irq, 0, master_dev);
 	if (result) {
 		IPAERR("ipa interrupts initialization failed\n");
 		return -ENODEV;
@@ -1921,7 +1920,7 @@ static int ipa3_init_interrupts(void)
 	return 0;
 
 fail_add_interrupt_handler:
-	free_irq(ipa3_res.ipa_irq, master_dev);
+	free_irq(ipa_irq, master_dev);
 	return result;
 }
 
