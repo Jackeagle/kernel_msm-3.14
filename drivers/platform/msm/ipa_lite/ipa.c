@@ -2530,8 +2530,6 @@ static int ipa3_pre_init(struct device *ipa_dev)
 
 	cdev_init(&ipa3_ctx->cdev, &ipa3_drv_fops);
 	ipa3_ctx->cdev.owner = THIS_MODULE;
-	ipa3_ctx->cdev.ops = &ipa3_drv_fops;  /* from LDD3 */
-
 	result = cdev_add(&ipa3_ctx->cdev, ipa3_ctx->dev_num, 1);
 	if (result) {
 		IPAERR(":cdev_add err=%d\n", -result);
