@@ -581,7 +581,8 @@ static uint32_t gsi_get_max_event_rings(void)
 
 void *gsi_register_device(struct gsi_per_props *props)
 {
-	int res;
+	struct platform_device *ipa3_pdev = to_platform_device(gsi_ctx->dev);
+	int ret;
 	uint32_t val;
 
 	if (!props) {
@@ -594,21 +595,25 @@ void *gsi_register_device(struct gsi_per_props *props)
 		return ERR_PTR(-ENOTSUPP);
 	}
 
-	if (!props->irq) {
-		GSIERR("bad irq specified %u\n", props->irq);
-		return ERR_PTR(-EINVAL);
+	/* Get IPA GSI IRQ number */
+	ret = platform_get_irq_byname(ipa3_pdev, "gsi-irq");
+	if (ret < 0) {
+		GSIERR(":failed to get gsi-irq!\n");
+		return ERR_PTR(-ENODEV);
 	}
+	props->irq = ret;
+	GSIDBG(": gsi-irq = %d\n", props->irq);
 
 	spin_lock_init(&gsi_ctx->slock);
-	res = devm_request_irq(gsi_ctx->dev, props->irq, gsi_isr,
+	ret = devm_request_irq(gsi_ctx->dev, props->irq, gsi_isr,
 				IRQF_TRIGGER_HIGH, "gsi", gsi_ctx);
-	if (res) {
+	if (ret) {
 		GSIERR("failed to register isr for %u\n", props->irq);
 		return ERR_PTR(-EIO);
 	}
 
-	res = enable_irq_wake(props->irq);
-	if (res)
+	ret = enable_irq_wake(props->irq);
+	if (ret)
 		GSIERR("failed to enable wake irq %u\n", props->irq);
 	else
 		GSIERR("GSI irq is wake enabled %u\n", props->irq);

@@ -98,7 +98,6 @@ static DECLARE_WORK(ipa_dec_clients_disable_clks_on_wq_work,
 static struct {
 	u32 gsi_mem_base;
 	u32 gsi_mem_size;
-	u32 gsi_irq;
 	u32 ee;
 } ipa3_res;
 
@@ -2081,7 +2080,6 @@ static int ipa3_post_init(struct device *ipa_dev)
 
 	memset(&gsi_props, 0, sizeof(gsi_props));
 	gsi_props.ee = ipa3_res.ee;
-	gsi_props.irq = ipa3_res.gsi_irq;
 	gsi_props.phys_addr = ipa3_res.gsi_mem_base;
 	gsi_props.size = ipa3_res.gsi_mem_size;
 
@@ -2645,14 +2643,6 @@ static int get_ipa_dts_configuration(void)
 	IPADBG(": gsi-base = 0x%x, size = 0x%x\n",
 			ipa3_res.gsi_mem_base,
 			ipa3_res.gsi_mem_size);
-
-	/* Get IPA GSI IRQ number */
-	ipa3_res.gsi_irq = platform_get_irq_byname(ipa3_pdev, "gsi-irq");
-	if (ipa3_res.gsi_irq < 0) {
-		IPAERR(":failed to get gsi-irq!\n");
-		return -ENODEV;
-	}
-	IPADBG(": gsi-irq = %d\n", ipa3_res.gsi_irq);
 
 	result = of_property_read_u32(ipa3_pdev->dev.of_node, "qcom,ee",
 			&ipa3_res.ee);
