@@ -176,7 +176,6 @@ static void gsi_handle_glob_err(uint32_t err)
 	struct gsi_per_notify per_notify;
 	uint32_t val;
 
-	(void)gsi_notify;
 	log = (struct gsi_log_err *)&err;
 	GSIERR("log err_type=%u ee=%u idx=%u\n", log->err_type, log->ee,
 			log->virt_idx);
@@ -186,7 +185,7 @@ static void gsi_handle_glob_err(uint32_t err)
 	case GSI_ERR_TYPE_GLOB:
 		per_notify.evt_id = GSI_PER_EVT_GLOB_ERROR;
 		per_notify.data.err_desc = err & 0xFFFF;
-		gsi_ctx->per.notify_cb(&per_notify);
+		gsi_notify(&per_notify);
 		break;
 	case GSI_ERR_TYPE_CHAN:
 		if (log->virt_idx >= gsi_ctx->max_ch) {
@@ -297,12 +296,12 @@ static void gsi_handle_glob_ee(int ee)
 
 	if (val & GSI_EE_n_CNTXT_GLOB_IRQ_EN_GP_INT2_BMSK) {
 		notify.evt_id = GSI_PER_EVT_GLOB_GP2;
-		gsi_ctx->per.notify_cb(&notify);
+		gsi_notify(&notify);
 	}
 
 	if (val & GSI_EE_n_CNTXT_GLOB_IRQ_EN_GP_INT3_BMSK) {
 		notify.evt_id = GSI_PER_EVT_GLOB_GP3;
-		gsi_ctx->per.notify_cb(&notify);
+		gsi_notify(&notify);
 	}
 
 	gsi_writel(val, GSI_EE_n_CNTXT_GLOB_IRQ_CLR_OFFS(ee));
@@ -528,8 +527,7 @@ static void gsi_handle_general(int ee)
 	if (val & GSI_EE_n_CNTXT_GSI_IRQ_CLR_GSI_BREAK_POINT_BMSK)
 		notify.evt_id = GSI_PER_EVT_GENERAL_BREAK_POINT;
 
-	if (gsi_ctx->per.notify_cb)
-		gsi_ctx->per.notify_cb(&notify);
+	gsi_notify(&notify);
 
 	gsi_writel(val, GSI_EE_n_CNTXT_GSI_IRQ_CLR_OFFS(ee));
 }
@@ -634,11 +632,6 @@ void *gsi_register_device(struct gsi_per_props *props)
 
 	if (!props) {
 		GSIERR("bad params props=%p\n", props);
-		return ERR_PTR(-EINVAL);
-	}
-
-	if (!props->notify_cb) {
-		GSIERR("notify callback must be provided\n");
 		return ERR_PTR(-EINVAL);
 	}
 
