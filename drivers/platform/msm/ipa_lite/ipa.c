@@ -2290,6 +2290,7 @@ static int ipa3_alloc_pkt_init(void)
 static int ipa3_pre_init(struct device *ipa_dev)
 {
 	int result = 0;
+	struct resource *res;
 	int i;
 	struct ipa_active_client_logging_info log_info;
 
@@ -2308,6 +2309,20 @@ static int ipa3_pre_init(struct device *ipa_dev)
 
 	ipa3_ctx->pdev = ipa_dev;
 	ipa3_ctx->uc_pdev = ipa_dev;
+
+	/* Get IPA wrapper address */
+	res = platform_get_resource_byname(ipa3_pdev, IORESOURCE_MEM,
+			"ipa-base");
+	if (!res) {
+		IPAERR(":get resource failed for ipa-base!\n");
+		return -ENODEV;
+	}
+	ipa3_res.ipa_mem_base = res->start;
+	ipa3_res.ipa_mem_size = resource_size(res);
+	IPADBG(": ipa-base = 0x%x, size = 0x%x\n",
+			ipa3_res.ipa_mem_base,
+			ipa3_res.ipa_mem_size);
+
 	ipa3_ctx->ipa_wrapper_base = ipa3_res.ipa_mem_base;
 	ipa3_ctx->ipa_wrapper_size = ipa3_res.ipa_mem_size;
 	ipa3_ctx->ee = ipa3_res.ee;
@@ -2620,19 +2635,6 @@ static int get_ipa_dts_configuration(void)
 		IPAERR(":only IPA version 3.5.1 supported!\n");
 		return -ENODEV;
 	}
-
-	/* Get IPA wrapper address */
-	resource = platform_get_resource_byname(ipa3_pdev, IORESOURCE_MEM,
-			"ipa-base");
-	if (!resource) {
-		IPAERR(":get resource failed for ipa-base!\n");
-		return -ENODEV;
-	}
-	ipa3_res.ipa_mem_base = resource->start;
-	ipa3_res.ipa_mem_size = resource_size(resource);
-	IPADBG(": ipa-base = 0x%x, size = 0x%x\n",
-			ipa3_res.ipa_mem_base,
-			ipa3_res.ipa_mem_size);
 
 	/* Get IPA GSI address */
 	resource = platform_get_resource_byname(ipa3_pdev, IORESOURCE_MEM,
