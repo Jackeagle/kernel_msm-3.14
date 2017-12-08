@@ -125,6 +125,47 @@ static void gsi_handle_ev_ctrl(int ee)
 	}
 }
 
+static void gsi_notify(struct gsi_per_notify *notify)
+{
+	switch (notify->evt_id) {
+	case GSI_PER_EVT_GLOB_ERROR:
+		GSIERR("Got GSI_PER_EVT_GLOB_ERROR\n");
+		GSIERR("Err_desc = 0x%04x\n", notify->data.err_desc);
+		break;
+	case GSI_PER_EVT_GLOB_GP1:
+		GSIERR("Got GSI_PER_EVT_GLOB_GP1\n");
+		BUG();
+		break;
+	case GSI_PER_EVT_GLOB_GP2:
+		GSIERR("Got GSI_PER_EVT_GLOB_GP2\n");
+		BUG();
+		break;
+	case GSI_PER_EVT_GLOB_GP3:
+		GSIERR("Got GSI_PER_EVT_GLOB_GP3\n");
+		BUG();
+		break;
+	case GSI_PER_EVT_GENERAL_BREAK_POINT:
+		GSIERR("Got GSI_PER_EVT_GENERAL_BREAK_POINT\n");
+		break;
+	case GSI_PER_EVT_GENERAL_BUS_ERROR:
+		GSIERR("Got GSI_PER_EVT_GENERAL_BUS_ERROR\n");
+		BUG();
+		break;
+	case GSI_PER_EVT_GENERAL_CMD_FIFO_OVERFLOW:
+		GSIERR("Got GSI_PER_EVT_GENERAL_CMD_FIFO_OVERFLOW\n");
+		BUG();
+		break;
+	case GSI_PER_EVT_GENERAL_MCS_STACK_OVERFLOW:
+		GSIERR("Got GSI_PER_EVT_GENERAL_MCS_STACK_OVERFLOW\n");
+		BUG();
+		break;
+	default:
+		GSIERR("Received unexpected evt: %d\n",
+			notify->evt_id);
+		BUG();
+	}
+}
+
 static void gsi_handle_glob_err(uint32_t err)
 {
 	struct gsi_log_err *log;
@@ -135,6 +176,7 @@ static void gsi_handle_glob_err(uint32_t err)
 	struct gsi_per_notify per_notify;
 	uint32_t val;
 
+	(void)gsi_notify;
 	log = (struct gsi_log_err *)&err;
 	GSIERR("log err_type=%u ee=%u idx=%u\n", log->err_type, log->ee,
 			log->virt_idx);
