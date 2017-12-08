@@ -2038,7 +2038,6 @@ static void ipa3_uc_is_loaded(void)
  * This part contains all initialization which requires interaction with
  * IPA HW (via GSI).
  *
- * @resource_p:	contain platform specific values from DST file
  * @pdev:	The platform device structure representing the IPA driver
  *
  * Function initialization process:
@@ -2056,8 +2055,7 @@ static void ipa3_uc_is_loaded(void)
  * - Trigger IPA ready callbacks (to all subscribers)
  * - Trigger IPA completion object (to all who wait on it)
  */
-static int ipa3_post_init(const struct ipa3_plat_drv_res *resource_p,
-			  struct device *ipa_dev)
+static int ipa3_post_init(struct device *ipa_dev)
 {
 	int result;
 	struct gsi_per_props gsi_props;
@@ -2098,10 +2096,10 @@ static int ipa3_post_init(const struct ipa3_plat_drv_res *resource_p,
 	}
 
 	memset(&gsi_props, 0, sizeof(gsi_props));
-	gsi_props.ee = resource_p->ee;
-	gsi_props.irq = resource_p->gsi_irq;
-	gsi_props.phys_addr = resource_p->gsi_mem_base;
-	gsi_props.size = resource_p->gsi_mem_size;
+	gsi_props.ee = ipa3_res.ee;
+	gsi_props.irq = ipa3_res.gsi_irq;
+	gsi_props.phys_addr = ipa3_res.gsi_mem_base;
+	gsi_props.size = ipa3_res.gsi_mem_size;
 
 	ipa3_ctx->gsi_dev_hdl = gsi_register_device(&gsi_props);
 	if (IS_ERR(ipa3_ctx->gsi_dev_hdl)) {
@@ -2154,7 +2152,7 @@ fail_register_device:
 
 static void ipa3_post_init_wq(struct work_struct *work)
 {
-	ipa3_post_init(&ipa3_res, ipa3_ctx->dev);
+	ipa3_post_init(ipa3_ctx->dev);
 }
 
 
