@@ -584,11 +584,6 @@ void *gsi_register_device(struct gsi_per_props *props)
 	int res;
 	uint32_t val;
 
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return ERR_PTR(-ENODEV);
-	}
-
 	if (!props) {
 		GSIERR("bad params props=%p\n", props);
 		return ERR_PTR(-EINVAL);
