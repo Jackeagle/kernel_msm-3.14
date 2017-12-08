@@ -2366,11 +2366,11 @@ static int ipa3_pre_init(struct device *ipa_dev)
 	ipa3_enable_clks();
 
 	/* setup IPA register access */
-	IPADBG("Mapping 0x%x\n", ipa3_res.ipa_mem_base +
+	IPADBG("Mapping 0x%x\n", ipa3_ctx->ipa_wrapper_base +
 		ipa3_ctx->ctrl->ipa_reg_base_ofst);
-	ipa3_ctx->mmio = ioremap(ipa3_res.ipa_mem_base +
+	ipa3_ctx->mmio = ioremap(ipa3_ctx->ipa_wrapper_base +
 			ipa3_ctx->ctrl->ipa_reg_base_ofst,
-			ipa3_res.ipa_mem_size);
+			ipa3_ctx->ipa_wrapper_size);
 	if (!ipa3_ctx->mmio) {
 		IPAERR(":ipa-base ioremap err.\n");
 		result = -EFAULT;
