@@ -2641,23 +2641,19 @@ static int get_ipa_dts_configuration(void)
 			ipa3_res.gsi_mem_size);
 
 	/* Get IPA GSI IRQ number */
-	resource = platform_get_resource_byname(ipa3_pdev, IORESOURCE_IRQ,
-			"gsi-irq");
-	if (!resource) {
-		IPAERR(":get resource failed for gsi-irq!\n");
+	ipa3_res.gsi_irq = platform_get_irq_byname(ipa3_pdev, "gsi-irq");
+	if (ipa3_res.gsi_irq < 0) {
+		IPAERR(":failed to get gsi-irq!\n");
 		return -ENODEV;
 	}
-	ipa3_res.gsi_irq = resource->start;
 	IPADBG(": gsi-irq = %d\n", ipa3_res.gsi_irq);
 
 	/* Get IPA IRQ number */
-	resource = platform_get_resource_byname(ipa3_pdev, IORESOURCE_IRQ,
-			"ipa-irq");
-	if (!resource) {
-		IPAERR(":get resource failed for ipa-irq!\n");
+	ipa3_res.ipa_irq = platform_get_irq_byname(ipa3_pdev, "ipa-irq");
+	if (ipa3_res.ipa_irq < 0) {
+		IPAERR(":failed to get ipa-irq!\n");
 		return -ENODEV;
 	}
-	ipa3_res.ipa_irq = resource->start;
 	IPADBG(":ipa-irq = %d\n", ipa3_res.ipa_irq);
 
 	result = of_property_read_u32(ipa3_pdev->dev.of_node, "qcom,ee",
