@@ -30,9 +30,6 @@
 #define GSI_RESET_WA_MAX_SLEEP 2000
 
 enum gsi_per_evt {
-	GSI_PER_EVT_GLOB_GP1,
-	GSI_PER_EVT_GLOB_GP2,
-	GSI_PER_EVT_GLOB_GP3,
 	GSI_PER_EVT_GENERAL_BREAK_POINT,
 	GSI_PER_EVT_GENERAL_BUS_ERROR,
 	GSI_PER_EVT_GENERAL_CMD_FIFO_OVERFLOW,
@@ -153,18 +150,6 @@ static void gsi_handle_ev_ctrl(int ee)
 static void gsi_notify(struct gsi_per_notify *notify)
 {
 	switch (notify->evt_id) {
-	case GSI_PER_EVT_GLOB_GP1:
-		GSIERR("Got GSI_PER_EVT_GLOB_GP1\n");
-		BUG();
-		break;
-	case GSI_PER_EVT_GLOB_GP2:
-		GSIERR("Got GSI_PER_EVT_GLOB_GP2\n");
-		BUG();
-		break;
-	case GSI_PER_EVT_GLOB_GP3:
-		GSIERR("Got GSI_PER_EVT_GLOB_GP3\n");
-		BUG();
-		break;
 	case GSI_PER_EVT_GENERAL_BREAK_POINT:
 		GSIERR("Got GSI_PER_EVT_GENERAL_BREAK_POINT\n");
 		break;
@@ -297,7 +282,6 @@ static void gsi_handle_glob_ee(int ee)
 {
 	uint32_t val;
 	uint32_t err;
-	struct gsi_per_notify notify;
 	uint32_t clr = ~0;
 
 	val = gsi_readl(GSI_EE_n_CNTXT_GLOB_IRQ_STTS_OFFS(ee));
@@ -314,13 +298,13 @@ static void gsi_handle_glob_ee(int ee)
 	}
 
 	if (val & GSI_EE_n_CNTXT_GLOB_IRQ_EN_GP_INT2_BMSK) {
-		notify.evt_id = GSI_PER_EVT_GLOB_GP2;
-		gsi_notify(&notify);
+		GSIERR("Got global GP INT2\n");
+		BUG();
 	}
 
 	if (val & GSI_EE_n_CNTXT_GLOB_IRQ_EN_GP_INT3_BMSK) {
-		notify.evt_id = GSI_PER_EVT_GLOB_GP3;
-		gsi_notify(&notify);
+		GSIERR("Got global GP INT3\n");
+		BUG();
 	}
 
 	gsi_writel(val, GSI_EE_n_CNTXT_GLOB_IRQ_CLR_OFFS(ee));
