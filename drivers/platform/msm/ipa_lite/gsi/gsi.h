@@ -74,31 +74,6 @@
 
 /* msm_gsi.h */
 
-enum gsi_per_evt {
-	GSI_PER_EVT_GLOB_ERROR,
-	GSI_PER_EVT_GLOB_GP1,
-	GSI_PER_EVT_GLOB_GP2,
-	GSI_PER_EVT_GLOB_GP3,
-	GSI_PER_EVT_GENERAL_BREAK_POINT,
-	GSI_PER_EVT_GENERAL_BUS_ERROR,
-	GSI_PER_EVT_GENERAL_CMD_FIFO_OVERFLOW,
-	GSI_PER_EVT_GENERAL_MCS_STACK_OVERFLOW,
-};
-
-/**
- * gsi_per_notify - Peripheral callback info
- *
- * @evt_id:    type of notification
- * @err_desc:  error related information
- *
- */
-struct gsi_per_notify {
-	enum gsi_per_evt evt_id;
-	union {
-		uint16_t err_desc;
-	} data;
-};
-
 /**
  * struct ipa_gsi_ep_config - IPA GSI endpoint configurations
  *
