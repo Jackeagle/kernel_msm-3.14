@@ -2167,24 +2167,12 @@ static int ipa3_open(struct inode *inode, struct file *filp)
 static ssize_t ipa3_write(struct file *file, const char __user *buf,
                           size_t count, loff_t *ppos)
 {
-	unsigned long missing;
-	int result = -EINVAL;
+	int result;
 
-	char dbg_buff[16] = { 0 };
+	if (!count)
+		return 0;
 
-	if (sizeof(dbg_buff) < count + 1) {
-			IPAERR("ipalite: %s - dbg_buff 16, count = %ld\n",
-					__func__, count);
-			return -EFAULT;
-	}
-
-	missing = copy_from_user(dbg_buff, buf, count);
-	if (missing) {
-		IPAERR("Unable to copy data from user\n");
-		return -EFAULT;
-	}
-
-	/* Prevent consequent calls from trying to load the FW again. */
+	/* Prevent concurrent calls from trying to load the FW again. */
 	if (ipa3_is_ready())
 		return count;
 
@@ -2198,10 +2186,10 @@ static ssize_t ipa3_write(struct file *file, const char __user *buf,
 		IPAERR("IPA FW loading process has failed\n");
 		return result;
 	}
-
-	queue_work(ipa3_ctx->transport_power_mgmt_wq,
-		&ipa3_post_init_work);
 	pr_info("IPA FW loaded successfully\n");
+
+	queue_work(ipa3_ctx->transport_power_mgmt_wq, &ipa3_post_init_work);
+
 	return count;
 }
 
