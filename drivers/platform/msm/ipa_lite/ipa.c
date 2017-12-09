@@ -2622,18 +2622,6 @@ static enum ipa_hw_type ipa_version_get(struct platform_device *pdev)
 	return (enum ipa_hw_type)ipa_version;
 }
 
-static int get_ipa_dts_configuration(void)
-{
-	int result;
-
-	result = of_property_read_u32(ipa3_pdev->dev.of_node, "qcom,ee",
-			&ipa3_res.ee);
-	if (result)
-		ipa3_res.ee = 0;
-
-	return 0;
-}
-
 static int ipa_smmu_uc_cb_probe(struct device *dev)
 {
 	struct ipa_smmu_cb_ctx *cb = ipa3_get_uc_smmu_ctx();
@@ -2982,11 +2970,10 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		return result;
 	}
 
-	result = get_ipa_dts_configuration();
-	if (result) {
-		IPAERR("IPA dts parsing failed\n");
-		return result;
-	}
+	result = of_property_read_u32(ipa3_pdev->dev.of_node, "qcom,ee",
+			&ipa3_res.ee);
+	if (result)
+		ipa3_res.ee = 0;	/* Default to 0 if not present */
 
 	/* The SDM845 has an SMMU, and uses the ARM SMMU driver */
 	if (of_property_read_bool(pdev_p->dev.of_node, "qcom,smmu-s1-bypass"))
