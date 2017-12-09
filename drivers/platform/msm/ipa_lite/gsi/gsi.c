@@ -637,7 +637,10 @@ void *gsi_register_device(struct gsi_per_props *props)
 		return ERR_PTR(-ENOMEM);
 	}
 
-	gsi_ctx->per = *props;
+	gsi_ctx->per.ee = props->ee;
+	gsi_ctx->per.irq = props->irq;
+	gsi_ctx->per.phys_addr = props->phys_addr;
+	gsi_ctx->per.size = props->size;
 
 	val = gsi_readl(GSI_EE_n_GSI_STATUS_OFFS(gsi_ctx->per.ee));
 	if (!(val & GSI_EE_n_GSI_STATUS_ENABLED_BMSK)) {
