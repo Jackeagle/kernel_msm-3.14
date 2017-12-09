@@ -70,37 +70,37 @@ static ssize_t gsi_dump_evt(struct file *file,
 		return -EFAULT;
 	}
 
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_0_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_0_OFFS(arg1, gsi_ctx->ee));
 	pr_err("EV%2d CTX0  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_1_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_1_OFFS(arg1, gsi_ctx->ee));
 	pr_err("EV%2d CTX1  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_2_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_2_OFFS(arg1, gsi_ctx->ee));
 	pr_err("EV%2d CTX2  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_3_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_3_OFFS(arg1, gsi_ctx->ee));
 	pr_err("EV%2d CTX3  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(arg1, gsi_ctx->ee));
 	pr_err("EV%2d CTX4  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_5_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_5_OFFS(arg1, gsi_ctx->ee));
 	pr_err("EV%2d CTX5  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_6_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_6_OFFS(arg1, gsi_ctx->ee));
 	pr_err("EV%2d CTX6  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_7_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_7_OFFS(arg1, gsi_ctx->ee));
 	pr_err("EV%2d CTX7  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_8_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_8_OFFS(arg1, gsi_ctx->ee));
 	pr_err("EV%2d CTX8  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_9_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_9_OFFS(arg1, gsi_ctx->ee));
 	pr_err("EV%2d CTX9  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_10_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_10_OFFS(arg1, gsi_ctx->ee));
 	pr_err("EV%2d CTX10 0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_11_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_11_OFFS(arg1, gsi_ctx->ee));
 	pr_err("EV%2d CTX11 0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_12_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_12_OFFS(arg1, gsi_ctx->ee));
 	pr_err("EV%2d CTX12 0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_13_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_13_OFFS(arg1, gsi_ctx->ee));
 	pr_err("EV%2d CTX13 0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_SCRATCH_0_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_EV_CH_k_SCRATCH_0_OFFS(arg1, gsi_ctx->ee));
 	pr_err("EV%2d SCR0  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_SCRATCH_1_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_EV_CH_k_SCRATCH_1_OFFS(arg1, gsi_ctx->ee));
 	pr_err("EV%2d SCR1  0x%x\n", arg1, val);
 
 	if (arg2) {
@@ -167,37 +167,37 @@ static ssize_t gsi_dump_ch(struct file *file,
 		return -EFAULT;
 	}
 
-	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(arg1, gsi_ctx->ee));
 	pr_err("CH%2d CTX0  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_1_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_1_OFFS(arg1, gsi_ctx->ee));
 	pr_err("CH%2d CTX1  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_2_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_2_OFFS(arg1, gsi_ctx->ee));
 	pr_err("CH%2d CTX2  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_3_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_3_OFFS(arg1, gsi_ctx->ee));
 	pr_err("CH%2d CTX3  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_4_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_4_OFFS(arg1, gsi_ctx->ee));
 	pr_err("CH%2d CTX4  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_5_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_5_OFFS(arg1, gsi_ctx->ee));
 	pr_err("CH%2d CTX5  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_6_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_6_OFFS(arg1, gsi_ctx->ee));
 	pr_err("CH%2d CTX6  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_7_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_7_OFFS(arg1, gsi_ctx->ee));
 	pr_err("CH%2d CTX7  0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_RE_FETCH_READ_PTR_OFFS(arg1,
-			gsi_ctx->per.ee));
+			gsi_ctx->ee));
 	pr_err("CH%2d REFRP 0x%x\n", arg1, val);
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_RE_FETCH_WRITE_PTR_OFFS(arg1,
-			gsi_ctx->per.ee));
+			gsi_ctx->ee));
 	pr_err("CH%2d REFWP 0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_GSI_CH_k_QOS_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_GSI_CH_k_QOS_OFFS(arg1, gsi_ctx->ee));
 	pr_err("CH%2d QOS   0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_GSI_CH_k_SCRATCH_0_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_GSI_CH_k_SCRATCH_0_OFFS(arg1, gsi_ctx->ee));
 	pr_err("CH%2d SCR0  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_GSI_CH_k_SCRATCH_1_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_GSI_CH_k_SCRATCH_1_OFFS(arg1, gsi_ctx->ee));
 	pr_err("CH%2d SCR1  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_GSI_CH_k_SCRATCH_2_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_GSI_CH_k_SCRATCH_2_OFFS(arg1, gsi_ctx->ee));
 	pr_err("CH%2d SCR2  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_GSI_CH_k_SCRATCH_3_OFFS(arg1, gsi_ctx->per.ee));
+	val = gsi_readl(GSI_EE_n_GSI_CH_k_SCRATCH_3_OFFS(arg1, gsi_ctx->ee));
 	pr_err("CH%2d SCR3  0x%x\n", arg1, val);
 
 	if (arg2) {
@@ -228,47 +228,47 @@ static ssize_t gsi_dump_ee(struct file *file,
 {
 	uint32_t val;
 
-	val = gsi_readl(GSI_GSI_MANAGER_EE_QOS_n_OFFS(gsi_ctx->per.ee));
-	pr_err("EE%2d QOS 0x%x\n", gsi_ctx->per.ee, val);
-	val = gsi_readl(GSI_EE_n_GSI_STATUS_OFFS(gsi_ctx->per.ee));
-	pr_err("EE%2d STATUS 0x%x\n", gsi_ctx->per.ee, val);
+	val = gsi_readl(GSI_GSI_MANAGER_EE_QOS_n_OFFS(gsi_ctx->ee));
+	pr_err("EE%2d QOS 0x%x\n", gsi_ctx->ee, val);
+	val = gsi_readl(GSI_EE_n_GSI_STATUS_OFFS(gsi_ctx->ee));
+	pr_err("EE%2d STATUS 0x%x\n", gsi_ctx->ee, val);
 
 	/* SDM845 uses GSI hardware version 1.3.0 */
-	val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_0_OFFS(gsi_ctx->per.ee));
-	pr_err("EE%2d HW_PARAM_0 0x%x\n", gsi_ctx->per.ee, val);
-	val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_1_OFFS(gsi_ctx->per.ee));
-	pr_err("EE%2d HW_PARAM_1 0x%x\n", gsi_ctx->per.ee, val);
-	val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->per.ee));
-	pr_err("EE%2d HW_PARAM_2 0x%x\n", gsi_ctx->per.ee, val);
+	val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_0_OFFS(gsi_ctx->ee));
+	pr_err("EE%2d HW_PARAM_0 0x%x\n", gsi_ctx->ee, val);
+	val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_1_OFFS(gsi_ctx->ee));
+	pr_err("EE%2d HW_PARAM_1 0x%x\n", gsi_ctx->ee, val);
+	val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->ee));
+	pr_err("EE%2d HW_PARAM_2 0x%x\n", gsi_ctx->ee, val);
 
-	val = gsi_readl(GSI_EE_n_GSI_SW_VERSION_OFFS(gsi_ctx->per.ee));
-	pr_err("EE%2d SW_VERSION 0x%x\n", gsi_ctx->per.ee, val);
-	val = gsi_readl(GSI_EE_n_GSI_MCS_CODE_VER_OFFS(gsi_ctx->per.ee));
-	pr_err("EE%2d MCS_CODE_VER 0x%x\n", gsi_ctx->per.ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_TYPE_IRQ_MSK_OFFS(gsi_ctx->per.ee));
-	pr_err("EE%2d TYPE_IRQ_MSK 0x%x\n", gsi_ctx->per.ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_MSK_OFFS(gsi_ctx->per.ee));
-	pr_err("EE%2d CH_IRQ_MSK 0x%x\n", gsi_ctx->per.ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_MSK_OFFS(gsi_ctx->per.ee));
-	pr_err("EE%2d EV_IRQ_MSK 0x%x\n", gsi_ctx->per.ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(gsi_ctx->per.ee));
-	pr_err("EE%2d IEOB_IRQ_MSK 0x%x\n", gsi_ctx->per.ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_GLOB_IRQ_EN_OFFS(gsi_ctx->per.ee));
-	pr_err("EE%2d GLOB_IRQ_EN 0x%x\n", gsi_ctx->per.ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_GSI_IRQ_EN_OFFS(gsi_ctx->per.ee));
-	pr_err("EE%2d GSI_IRQ_EN 0x%x\n", gsi_ctx->per.ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_INTSET_OFFS(gsi_ctx->per.ee));
-	pr_err("EE%2d INTSET 0x%x\n", gsi_ctx->per.ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_MSI_BASE_LSB_OFFS(gsi_ctx->per.ee));
-	pr_err("EE%2d MSI_BASE_LSB 0x%x\n", gsi_ctx->per.ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_MSI_BASE_MSB_OFFS(gsi_ctx->per.ee));
-	pr_err("EE%2d MSI_BASE_MSB 0x%x\n", gsi_ctx->per.ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_INT_VEC_OFFS(gsi_ctx->per.ee));
-	pr_err("EE%2d INT_VEC 0x%x\n", gsi_ctx->per.ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_SCRATCH_0_OFFS(gsi_ctx->per.ee));
-	pr_err("EE%2d SCR0 0x%x\n", gsi_ctx->per.ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_SCRATCH_1_OFFS(gsi_ctx->per.ee));
-	pr_err("EE%2d SCR1 0x%x\n", gsi_ctx->per.ee, val);
+	val = gsi_readl(GSI_EE_n_GSI_SW_VERSION_OFFS(gsi_ctx->ee));
+	pr_err("EE%2d SW_VERSION 0x%x\n", gsi_ctx->ee, val);
+	val = gsi_readl(GSI_EE_n_GSI_MCS_CODE_VER_OFFS(gsi_ctx->ee));
+	pr_err("EE%2d MCS_CODE_VER 0x%x\n", gsi_ctx->ee, val);
+	val = gsi_readl(GSI_EE_n_CNTXT_TYPE_IRQ_MSK_OFFS(gsi_ctx->ee));
+	pr_err("EE%2d TYPE_IRQ_MSK 0x%x\n", gsi_ctx->ee, val);
+	val = gsi_readl(GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_MSK_OFFS(gsi_ctx->ee));
+	pr_err("EE%2d CH_IRQ_MSK 0x%x\n", gsi_ctx->ee, val);
+	val = gsi_readl(GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_MSK_OFFS(gsi_ctx->ee));
+	pr_err("EE%2d EV_IRQ_MSK 0x%x\n", gsi_ctx->ee, val);
+	val = gsi_readl(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(gsi_ctx->ee));
+	pr_err("EE%2d IEOB_IRQ_MSK 0x%x\n", gsi_ctx->ee, val);
+	val = gsi_readl(GSI_EE_n_CNTXT_GLOB_IRQ_EN_OFFS(gsi_ctx->ee));
+	pr_err("EE%2d GLOB_IRQ_EN 0x%x\n", gsi_ctx->ee, val);
+	val = gsi_readl(GSI_EE_n_CNTXT_GSI_IRQ_EN_OFFS(gsi_ctx->ee));
+	pr_err("EE%2d GSI_IRQ_EN 0x%x\n", gsi_ctx->ee, val);
+	val = gsi_readl(GSI_EE_n_CNTXT_INTSET_OFFS(gsi_ctx->ee));
+	pr_err("EE%2d INTSET 0x%x\n", gsi_ctx->ee, val);
+	val = gsi_readl(GSI_EE_n_CNTXT_MSI_BASE_LSB_OFFS(gsi_ctx->ee));
+	pr_err("EE%2d MSI_BASE_LSB 0x%x\n", gsi_ctx->ee, val);
+	val = gsi_readl(GSI_EE_n_CNTXT_MSI_BASE_MSB_OFFS(gsi_ctx->ee));
+	pr_err("EE%2d MSI_BASE_MSB 0x%x\n", gsi_ctx->ee, val);
+	val = gsi_readl(GSI_EE_n_CNTXT_INT_VEC_OFFS(gsi_ctx->ee));
+	pr_err("EE%2d INT_VEC 0x%x\n", gsi_ctx->ee, val);
+	val = gsi_readl(GSI_EE_n_CNTXT_SCRATCH_0_OFFS(gsi_ctx->ee));
+	pr_err("EE%2d SCR0 0x%x\n", gsi_ctx->ee, val);
+	val = gsi_readl(GSI_EE_n_CNTXT_SCRATCH_1_OFFS(gsi_ctx->ee));
+	pr_err("EE%2d SCR1 0x%x\n", gsi_ctx->ee, val);
 
 	return count;
 }
@@ -289,13 +289,13 @@ static ssize_t gsi_dump_map(struct file *file,
 			pr_err("VIRT CH%2d -> VIRT EV%2d\n", ctx->props.ch_id,
 				ctx->evtr ? ctx->evtr->id : GSI_NO_EVT_ERINDEX);
 			val1 = gsi_readl(GSI_GSI_DEBUG_EE_n_CH_k_VP_TABLE_OFFS(i,
-					gsi_ctx->per.ee));
+					gsi_ctx->ee));
 			pr_err("VIRT CH%2d -> PHYS CH%2d\n", ctx->props.ch_id,
 				val1 &
 				GSI_GSI_DEBUG_EE_n_CH_k_VP_TABLE_PHY_CH_BMSK);
 			if (ctx->evtr) {
 				val2 = gsi_readl(GSI_GSI_DEBUG_EE_n_EV_k_VP_TABLE_OFFS(
-					ctx->evtr->id, gsi_ctx->per.ee));
+					ctx->evtr->id, gsi_ctx->ee));
 				pr_err("VRT EV%2d -> PHYS EV%2d\n", ctx->evtr->id,
 				val2 &
 				GSI_GSI_DEBUG_EE_n_CH_k_VP_TABLE_PHY_CH_BMSK);
@@ -533,7 +533,7 @@ static void gsi_dbg_update_ch_dp_stats(struct gsi_chan_ctx *ctx)
 	uint16_t end_hw;
 	uint64_t rp_hw;
 	uint64_t wp_hw;
-	int ee = gsi_ctx->per.ee;
+	int ee = gsi_ctx->ee;
 	uint16_t used_hw;
 
 	rp_hw = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_4_OFFS(ctx->props.ch_id, ee));

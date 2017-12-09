@@ -157,7 +157,6 @@ struct gsi_device_scratch {
  *
  */
 struct gsi_per_props {
-	unsigned int ee;
 	unsigned int irq;
 };
 
@@ -348,6 +347,7 @@ struct gsi_generic_ee_cmd_debug_stats {
 struct gsi_ctx {
 	void __iomem *base;
 	struct device *dev;
+	u32 ee;
 	struct gsi_per_props per;
 	bool per_registered;
 	struct gsi_chan_ctx chan[GSI_CHAN_MAX];
