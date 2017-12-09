@@ -579,24 +579,19 @@ static uint32_t gsi_get_max_event_rings(void)
 	return reg;
 }
 
-void *gsi_register_device(struct gsi_per_props *props)
+void *gsi_register_device(u32 ee)
 {
 	struct platform_device *ipa3_pdev = to_platform_device(gsi_ctx->dev);
 	struct resource *res;
 	int ret;
 	uint32_t val;
 
-	if (!props) {
-		GSIERR("bad params props=%p\n", props);
-		return ERR_PTR(-EINVAL);
-	}
-
 	if (gsi_ctx->per_registered) {
 		GSIERR("per already registered\n");
 		return ERR_PTR(-ENOTSUPP);
 	}
 
-	gsi_ctx->per.ee = props->ee;
+	gsi_ctx->per.ee = ee;
 
 	/* Get IPA GSI IRQ number */
 	ret = platform_get_irq_byname(ipa3_pdev, "gsi-irq");

@@ -2034,7 +2034,6 @@ static void ipa3_uc_is_loaded(void)
 static int ipa3_post_init(struct device *ipa_dev)
 {
 	int result;
-	struct gsi_per_props gsi_props;
 	struct ipa3_uc_hdlrs uc_hdlrs = { 0 };
 	struct idr *idr;
 
@@ -2071,10 +2070,7 @@ static int ipa3_post_init(struct device *ipa_dev)
 		goto fail_register_device;
 	}
 
-	memset(&gsi_props, 0, sizeof(gsi_props));
-	gsi_props.ee = ipa3_ctx->ee;
-
-	ipa3_ctx->gsi_dev_hdl = gsi_register_device(&gsi_props);
+	ipa3_ctx->gsi_dev_hdl = gsi_register_device(ipa3_ctx->ee);
 	if (IS_ERR(ipa3_ctx->gsi_dev_hdl)) {
 		IPAERR(":gsi register error - %ld\n",
 				PTR_ERR(ipa3_ctx->gsi_dev_hdl));

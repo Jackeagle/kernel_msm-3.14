@@ -483,13 +483,12 @@ static inline void gsi_writel(u32 v, u32 offset)
  * gsi_register_device - Peripheral should call this function to
  * register itself with GSI before invoking any other APIs
  *
- * @props:  Peripheral properties
- * @dev_hdl:  Handle populated by GSI, opaque to client
+ * @ee:  AP execution environment (EE) number to use
  *
  * @Return -GSI_STATUS_AGAIN if request should be re-tried later
  *	   other error codes for failure
  */
-void *gsi_register_device(struct gsi_per_props *props);
+void *gsi_register_device(u32 ee);
 
 /**
  * gsi_deregister_device - Peripheral should call this function to
