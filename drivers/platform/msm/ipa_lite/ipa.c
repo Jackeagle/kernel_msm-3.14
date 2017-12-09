@@ -2077,7 +2077,7 @@ static int ipa3_post_init(struct device *ipa_dev)
 	}
 
 	memset(&gsi_props, 0, sizeof(gsi_props));
-	gsi_props.ee = ipa3_res.ee;
+	gsi_props.ee = ipa3_ctx->ee;
 
 	ipa3_ctx->gsi_dev_hdl = gsi_register_device(&gsi_props);
 	if (IS_ERR(ipa3_ctx->gsi_dev_hdl)) {
