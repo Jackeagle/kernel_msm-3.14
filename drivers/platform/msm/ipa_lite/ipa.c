@@ -95,10 +95,6 @@ static void ipa_dec_clients_disable_clks_on_wq(struct work_struct *work);
 static DECLARE_WORK(ipa_dec_clients_disable_clks_on_wq_work,
 	ipa_dec_clients_disable_clks_on_wq);
 
-static struct {
-	u32 ee;
-} ipa3_res;
-
 struct msm_bus_scale_pdata *ipa3_bus_scale_table;
 
 struct ipa3_context *ipa3_ctx;
@@ -2281,7 +2277,7 @@ static int ipa3_alloc_pkt_init(void)
 */
 static int ipa3_pre_init(struct device *ipa_dev)
 {
-	int result = 0;
+	int result;
 	struct resource *res;
 	int i;
 	struct ipa_active_client_logging_info log_info;
@@ -2315,7 +2311,11 @@ static int ipa3_pre_init(struct device *ipa_dev)
 			ipa3_ctx->ipa_wrapper_base,
 			ipa3_ctx->ipa_wrapper_size);
 
-	ipa3_ctx->ee = ipa3_res.ee;
+	result = of_property_read_u32(ipa3_pdev->dev.of_node, "qcom,ee",
+			&ipa3_ctx->ee);
+	if (result)
+		ipa3_ctx->ee = 0;	/* Default to 0 if not found */
+
 	ipa3_ctx->ipa3_active_clients_logging.log_rdy = false;
 
 	/* default aggregation parameters */
@@ -2969,11 +2969,6 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		pr_err("ipa: error initializing gsi driver.\n");
 		return result;
 	}
-
-	result = of_property_read_u32(ipa3_pdev->dev.of_node, "qcom,ee",
-			&ipa3_res.ee);
-	if (result)
-		ipa3_res.ee = 0;	/* Default to 0 if not present */
 
 	/* The SDM845 has an SMMU, and uses the ARM SMMU driver */
 	if (of_property_read_bool(pdev_p->dev.of_node, "qcom,smmu-s1-bypass"))
