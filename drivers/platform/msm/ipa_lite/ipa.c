@@ -98,7 +98,6 @@ static DECLARE_WORK(ipa_dec_clients_disable_clks_on_wq_work,
 struct msm_bus_scale_pdata *ipa3_bus_scale_table;
 
 struct ipa3_context *ipa3_ctx;
-static struct device *master_dev;
 struct platform_device *ipa3_pdev;
 static struct {
 	bool fast_map;
@@ -1893,7 +1892,7 @@ static int ipa3_init_interrupts(void)
 	IPADBG(":ipa-irq = %d\n", ipa_irq);
 
 	/*register IPA IRQ handler*/
-	result = ipa3_interrupts_init(ipa_irq, 0, master_dev);
+	result = ipa3_interrupts_init(ipa_irq, 0, &ipa3_pdev->dev);
 	if (result) {
 		IPAERR("ipa interrupts initialization failed\n");
 		return -ENODEV;
@@ -1911,7 +1910,7 @@ static int ipa3_init_interrupts(void)
 	return 0;
 
 fail_add_interrupt_handler:
-	free_irq(ipa_irq, master_dev);
+	free_irq(ipa_irq, &ipa3_pdev->dev);
 	return result;
 }
 
@@ -2336,7 +2335,7 @@ static int ipa3_pre_init(struct device *ipa_dev)
 		goto fail_bind;
 	}
 
-	result = ipa3_init_mem_partition(master_dev->of_node);
+	result = ipa3_init_mem_partition(ipa3_pdev->dev.of_node);
 	if (result) {
 		IPAERR(":ipa3_init_mem_partition failed!\n");
 		result = -ENODEV;
@@ -2961,7 +2960,6 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		return -ENODEV;
 	}
 	ipa3_pdev = pdev_p;
-	master_dev = dev;
 
 	result = msm_gsi_init(pdev_p);
 	if (result) {
