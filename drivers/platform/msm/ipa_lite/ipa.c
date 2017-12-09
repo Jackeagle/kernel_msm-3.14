@@ -96,8 +96,6 @@ static DECLARE_WORK(ipa_dec_clients_disable_clks_on_wq_work,
 	ipa_dec_clients_disable_clks_on_wq);
 
 static struct {
-	u32 gsi_mem_base;
-	u32 gsi_mem_size;
 	u32 ee;
 } ipa3_res;
 
@@ -2080,8 +2078,6 @@ static int ipa3_post_init(struct device *ipa_dev)
 
 	memset(&gsi_props, 0, sizeof(gsi_props));
 	gsi_props.ee = ipa3_res.ee;
-	gsi_props.phys_addr = ipa3_res.gsi_mem_base;
-	gsi_props.size = ipa3_res.gsi_mem_size;
 
 	ipa3_ctx->gsi_dev_hdl = gsi_register_device(&gsi_props);
 	if (IS_ERR(ipa3_ctx->gsi_dev_hdl)) {
@@ -2629,20 +2625,6 @@ static enum ipa_hw_type ipa_version_get(struct platform_device *pdev)
 static int get_ipa_dts_configuration(void)
 {
 	int result;
-	struct resource *resource;
-
-	/* Get IPA GSI address */
-	resource = platform_get_resource_byname(ipa3_pdev, IORESOURCE_MEM,
-			"gsi-base");
-	if (!resource) {
-		IPAERR(":get resource failed for gsi-base!\n");
-		return -ENODEV;
-	}
-	ipa3_res.gsi_mem_base = resource->start;
-	ipa3_res.gsi_mem_size = resource_size(resource);
-	IPADBG(": gsi-base = 0x%x, size = 0x%x\n",
-			ipa3_res.gsi_mem_base,
-			ipa3_res.gsi_mem_size);
 
 	result = of_property_read_u32(ipa3_pdev->dev.of_node, "qcom,ee",
 			&ipa3_res.ee);

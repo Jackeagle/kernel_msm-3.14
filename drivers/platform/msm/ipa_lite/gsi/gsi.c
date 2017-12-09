@@ -582,6 +582,7 @@ static uint32_t gsi_get_max_event_rings(void)
 void *gsi_register_device(struct gsi_per_props *props)
 {
 	struct platform_device *ipa3_pdev = to_platform_device(gsi_ctx->dev);
+	struct resource *res;
 	int ret;
 	uint32_t val;
 
@@ -618,6 +619,17 @@ void *gsi_register_device(struct gsi_per_props *props)
 	else
 		GSIERR("GSI irq is wake enabled %u\n", props->irq);
 
+	/* Get IPA GSI address */
+	res = platform_get_resource_byname(ipa3_pdev, IORESOURCE_MEM,
+			"gsi-base");
+	if (!res) {
+		GSIERR(":get resource failed for gsi-base!\n");
+		return ERR_PTR(-ENODEV);
+	}
+	props->phys_addr = res->start;
+	props->size = resource_size(res);
+	GSIDBG(": gsi-base = %pa, size = 0x%lx\n",
+			&props->phys_addr, props->size);
 	gsi_ctx->base = devm_ioremap_nocache(gsi_ctx->dev, props->phys_addr,
 				props->size);
 	if (!gsi_ctx->base) {
