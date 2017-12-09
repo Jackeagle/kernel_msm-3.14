@@ -159,8 +159,6 @@ struct gsi_device_scratch {
 struct gsi_per_props {
 	unsigned int ee;
 	unsigned int irq;
-	phys_addr_t phys_addr;
-	unsigned long size;
 };
 
 enum gsi_chan_mode {

@@ -583,6 +583,7 @@ void *gsi_register_device(u32 ee)
 {
 	struct platform_device *ipa3_pdev = to_platform_device(gsi_ctx->dev);
 	struct resource *res;
+	resource_size_t size;
 	int ret;
 	uint32_t val;
 
@@ -623,13 +624,10 @@ void *gsi_register_device(u32 ee)
 		GSIERR(":get resource failed for gsi-base!\n");
 		return ERR_PTR(-ENODEV);
 	}
-	gsi_ctx->per.phys_addr = res->start;
-	gsi_ctx->per.size = resource_size(res);
-	GSIDBG(": gsi-base = %pa, size = 0x%lx\n",
-			&gsi_ctx->per.phys_addr, gsi_ctx->per.size);
-	gsi_ctx->base = devm_ioremap_nocache(gsi_ctx->dev,
-					gsi_ctx->per.phys_addr,
-					gsi_ctx->per.size);
+	size = resource_size(res);
+	GSIDBG(": gsi-base = %pa, size = %pa\n", &res->start, &size);
+
+	gsi_ctx->base = devm_ioremap_nocache(gsi_ctx->dev, res->start, size);
 	if (!gsi_ctx->base) {
 		GSIERR("failed to remap GSI HW\n");
 		return ERR_PTR(-ENOMEM);
