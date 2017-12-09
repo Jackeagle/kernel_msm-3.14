@@ -2934,24 +2934,23 @@ static const struct of_device_id ipa_plat_drv_match[] = {
 int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 {
 	struct device *dev = &pdev_p->dev;
+	struct device_node *node = dev->of_node;
 	enum ipa_hw_type ipa_version;
 	int result;
 
 	IPADBG("IPA driver probing started\n");
-	IPADBG("dev->of_node->name = %s\n", dev->of_node->name);
+	IPADBG("dev->of_node->name = %s\n", node->name);
 
-	if (of_device_is_compatible(dev->of_node, "qcom,ipa-smmu-ap-cb"))
+	if (of_device_is_compatible(node, "qcom,ipa-smmu-ap-cb"))
 		return ipa_smmu_ap_cb_probe(dev);
 
-	if (of_device_is_compatible(dev->of_node, "qcom,ipa-smmu-uc-cb"))
+	if (of_device_is_compatible(node, "qcom,ipa-smmu-uc-cb"))
 		return ipa_smmu_uc_cb_probe(dev);
 
-	if (of_device_is_compatible(dev->of_node,
-	    "qcom,smp2pgpio-map-ipa-1-in"))
+	if (of_device_is_compatible(node, "qcom,smp2pgpio-map-ipa-1-in"))
 		return ipa3_smp2p_probe(dev);
 
-	if (of_device_is_compatible(dev->of_node,
-	    "qcom,smp2pgpio-map-ipa-1-out"))
+	if (of_device_is_compatible(node, "qcom,smp2pgpio-map-ipa-1-out"))
 		return ipa3_smp2p_probe(dev);
 
 	/* First find out whether we're working with supported hardware */
@@ -2971,19 +2970,17 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	}
 
 	/* The SDM845 has an SMMU, and uses the ARM SMMU driver */
-	if (of_property_read_bool(pdev_p->dev.of_node, "qcom,smmu-s1-bypass"))
+	if (of_property_read_bool(node, "qcom,smmu-s1-bypass"))
 		smmu_info.s1_bypass = true;
-	if (of_property_read_bool(pdev_p->dev.of_node, "qcom,smmu-fast-map"))
+	if (of_property_read_bool(node, "qcom,smmu-fast-map"))
 		smmu_info.fast_map = true;
 	pr_info("IPA smmu_info.s1_bypass=%d smmu_info.fast_map=%d\n",
 		smmu_info.s1_bypass, smmu_info.fast_map);
 
-	result = of_platform_populate(pdev_p->dev.of_node,
-		ipa_plat_drv_match, NULL, &pdev_p->dev);
-	if (result) {
+	result = of_platform_populate(node, ipa_plat_drv_match, NULL,
+					&pdev_p->dev);
+	if (result)
 		IPAERR("failed to populate platform\n");
-		return result;
-	}
 
 	return result;
 }
