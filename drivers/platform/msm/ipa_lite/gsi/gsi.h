@@ -144,22 +144,6 @@ struct gsi_device_scratch {
         uint16_t max_usb_pkt_size;
 };
 
-/**
- * gsi_per_props - Peripheral related properties
- *
- * @ee:         EE where this driver and peripheral driver runs
- * @irq:        IRQ number
- * @phys_addr:  physical address of GSI block
- * @size:       register size of GSI block
- * @notify_cb:  general notification callback
- *
- * All the callbacks are in interrupt context
- *
- */
-struct gsi_per_props {
-	unsigned int irq;
-};
-
 enum gsi_chan_mode {
 	GSI_CHAN_MODE_CALLBACK = 0x0,
 	GSI_CHAN_MODE_POLL = 0x1,
@@ -348,7 +332,7 @@ struct gsi_ctx {
 	void __iomem *base;
 	struct device *dev;
 	u32 ee;
-	struct gsi_per_props per;
+	unsigned int irq;
 	bool per_registered;
 	struct gsi_chan_ctx chan[GSI_CHAN_MAX];
 	struct ch_debug_stats ch_dbg[GSI_CHAN_MAX];

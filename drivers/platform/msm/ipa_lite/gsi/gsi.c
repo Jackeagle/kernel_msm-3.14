@@ -600,22 +600,22 @@ void *gsi_register_device(u32 ee)
 		GSIERR(":failed to get gsi-irq!\n");
 		return ERR_PTR(-ENODEV);
 	}
-	gsi_ctx->per.irq = ret;
-	GSIDBG(": gsi-irq = %d\n", gsi_ctx->per.irq);
+	gsi_ctx->irq = ret;
+	GSIDBG(": gsi-irq = %d\n", gsi_ctx->irq);
 
 	spin_lock_init(&gsi_ctx->slock);
-	ret = devm_request_irq(gsi_ctx->dev, gsi_ctx->per.irq, gsi_isr,
+	ret = devm_request_irq(gsi_ctx->dev, gsi_ctx->irq, gsi_isr,
 				IRQF_TRIGGER_HIGH, "gsi", gsi_ctx);
 	if (ret) {
-		GSIERR("failed to register isr for %u\n", gsi_ctx->per.irq);
+		GSIERR("failed to register isr for %u\n", gsi_ctx->irq);
 		return ERR_PTR(-EIO);
 	}
 
-	ret = enable_irq_wake(gsi_ctx->per.irq);
+	ret = enable_irq_wake(gsi_ctx->irq);
 	if (ret)
-		GSIERR("failed to enable wake irq %u\n", gsi_ctx->per.irq);
+		GSIERR("failed to enable wake irq %u\n", gsi_ctx->irq);
 	else
-		GSIERR("GSI irq is wake enabled %u\n", gsi_ctx->per.irq);
+		GSIERR("GSI irq is wake enabled %u\n", gsi_ctx->irq);
 
 	/* Get IPA GSI address */
 	res = platform_get_resource_byname(ipa3_pdev, IORESOURCE_MEM,
@@ -698,8 +698,7 @@ int gsi_deregister_device(void *dev_hdl)
 	gsi_ctx->max_ch = 0;
 	gsi_ctx->per_registered = false;
 	/* XXX We don't know whether enabling this succeeded */
-	/* (void)disable_irq_wake(gsi_ctx->per.irq); */
-	memset(&gsi_ctx->per, 0, sizeof(gsi_ctx->per));
+	/* (void)disable_irq_wake(gsi_ctx->irq); */
 
 	return 0;
 }
