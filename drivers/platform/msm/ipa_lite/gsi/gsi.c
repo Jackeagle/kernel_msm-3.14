@@ -596,28 +596,30 @@ void *gsi_register_device(struct gsi_per_props *props)
 		return ERR_PTR(-ENOTSUPP);
 	}
 
+	gsi_ctx->per.ee = props->ee;
+
 	/* Get IPA GSI IRQ number */
 	ret = platform_get_irq_byname(ipa3_pdev, "gsi-irq");
 	if (ret < 0) {
 		GSIERR(":failed to get gsi-irq!\n");
 		return ERR_PTR(-ENODEV);
 	}
-	props->irq = ret;
-	GSIDBG(": gsi-irq = %d\n", props->irq);
+	gsi_ctx->per.irq = ret;
+	GSIDBG(": gsi-irq = %d\n", gsi_ctx->per.irq);
 
 	spin_lock_init(&gsi_ctx->slock);
-	ret = devm_request_irq(gsi_ctx->dev, props->irq, gsi_isr,
+	ret = devm_request_irq(gsi_ctx->dev, gsi_ctx->per.irq, gsi_isr,
 				IRQF_TRIGGER_HIGH, "gsi", gsi_ctx);
 	if (ret) {
-		GSIERR("failed to register isr for %u\n", props->irq);
+		GSIERR("failed to register isr for %u\n", gsi_ctx->per.irq);
 		return ERR_PTR(-EIO);
 	}
 
-	ret = enable_irq_wake(props->irq);
+	ret = enable_irq_wake(gsi_ctx->per.irq);
 	if (ret)
-		GSIERR("failed to enable wake irq %u\n", props->irq);
+		GSIERR("failed to enable wake irq %u\n", gsi_ctx->per.irq);
 	else
-		GSIERR("GSI irq is wake enabled %u\n", props->irq);
+		GSIERR("GSI irq is wake enabled %u\n", gsi_ctx->per.irq);
 
 	/* Get IPA GSI address */
 	res = platform_get_resource_byname(ipa3_pdev, IORESOURCE_MEM,
@@ -626,21 +628,18 @@ void *gsi_register_device(struct gsi_per_props *props)
 		GSIERR(":get resource failed for gsi-base!\n");
 		return ERR_PTR(-ENODEV);
 	}
-	props->phys_addr = res->start;
-	props->size = resource_size(res);
+	gsi_ctx->per.phys_addr = res->start;
+	gsi_ctx->per.size = resource_size(res);
 	GSIDBG(": gsi-base = %pa, size = 0x%lx\n",
-			&props->phys_addr, props->size);
-	gsi_ctx->base = devm_ioremap_nocache(gsi_ctx->dev, props->phys_addr,
-				props->size);
+			&gsi_ctx->per.phys_addr, gsi_ctx->per.size);
+	gsi_ctx->base = devm_ioremap_nocache(gsi_ctx->dev,
+					gsi_ctx->per.phys_addr,
+					gsi_ctx->per.size);
 	if (!gsi_ctx->base) {
 		GSIERR("failed to remap GSI HW\n");
 		return ERR_PTR(-ENOMEM);
 	}
 
-	gsi_ctx->per.ee = props->ee;
-	gsi_ctx->per.irq = props->irq;
-	gsi_ctx->per.phys_addr = props->phys_addr;
-	gsi_ctx->per.size = props->size;
 
 	val = gsi_readl(GSI_EE_n_GSI_STATUS_OFFS(gsi_ctx->per.ee));
 	if (!(val & GSI_EE_n_GSI_STATUS_ENABLED_BMSK)) {
@@ -670,7 +669,7 @@ void *gsi_register_device(struct gsi_per_props *props)
 		((1 << GSI_MHI_ER_START) - 1);
 
 	/* Enable all interrupts */
-	gsi_irq_control_all(props->ee, true);
+	gsi_irq_control_all(gsi_ctx->per.ee, true);
 
 	gsi_writel(GSI_INTR_IRQ, GSI_EE_n_CNTXT_INTSET_OFFS(gsi_ctx->per.ee));
 
