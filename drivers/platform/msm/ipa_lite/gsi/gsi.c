@@ -105,7 +105,7 @@ static void gsi_handle_ch_ctrl(int ee)
 	ch = gsi_readl(GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_OFFS(ee));
 	gsi_writel(ch, GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_CLR_OFFS(ee));
 	GSIDBG("ch %x\n", ch);
-	for (i = 0; i < 32; i++) {
+	for (i = 0; GSI_CHAN_MAX; i++) {
 		if ((1 << i) & ch) {
 			if (i >= gsi_ctx->max_ch) {
 				GSIERR("invalid channel %d\n", i);
@@ -134,7 +134,7 @@ static void gsi_handle_ev_ctrl(int ee)
 	ch = gsi_readl(GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_OFFS(ee));
 	gsi_writel(ch, GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_CLR_OFFS(ee));
 	GSIDBG("ev %x\n", ch);
-	for (i = 0; i < 32; i++) {
+	for (i = 0; i < GSI_EVT_RING_MAX; i++) {
 		if ((1 << i) & ch) {
 			if (i >= gsi_ctx->max_ev) {
 				GSIERR("invalid event %d\n", i);
@@ -439,7 +439,7 @@ static void gsi_handle_ieob(int ee)
 	msk = gsi_readl(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee));
 	gsi_writel(ch & msk, GSI_EE_n_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(ee));
 
-	for (i = 0; i < 32; i++) {
+	for (i = 0; i < GSI_EVT_RING_MAX; i++) {
 		if ((1 << i) & ch & msk) {
 			if (i >= gsi_ctx->max_ev) {
 				GSIERR("invalid event %d\n", i);
@@ -486,7 +486,7 @@ static void gsi_handle_inter_ee_ch_ctrl(int ee)
 
 	ch = gsi_readl(GSI_INTER_EE_n_SRC_GSI_CH_IRQ_OFFS(ee));
 	gsi_writel(ch, GSI_INTER_EE_n_SRC_GSI_CH_IRQ_CLR_OFFS(ee));
-	for (i = 0; i < 32; i++) {
+	for (i = 0; i < GSI_CHAN_MAX; i++) {
 		if ((1 << i) & ch) {
 			/* not currently expected */
 			GSIERR("ch %u was inter-EE changed\n", i);
@@ -501,7 +501,7 @@ static void gsi_handle_inter_ee_ev_ctrl(int ee)
 
 	ch = gsi_readl(GSI_INTER_EE_n_SRC_EV_CH_IRQ_OFFS(ee));
 	gsi_writel(ch, GSI_INTER_EE_n_SRC_EV_CH_IRQ_CLR_OFFS(ee));
-	for (i = 0; i < 32; i++) {
+	for (i = 0; i < GSI_EVT_RING_MAX; i++) {
 		if ((1 << i) & ch) {
 			/* not currently expected */
 			GSIERR("evt %u was inter-EE changed\n", i);
