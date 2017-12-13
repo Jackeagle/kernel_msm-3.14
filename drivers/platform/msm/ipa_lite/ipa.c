@@ -298,7 +298,7 @@ static struct iommu_domain *ipa3_get_smmu_domain(void)
 	return NULL;
 }
 
-struct iommu_domain *ipa3_get_uc_smmu_domain(void)
+static struct iommu_domain *ipa3_get_uc_smmu_domain(void)
 {
 	if (smmu_cb[IPA_SMMU_CB_UC].valid)
 		return smmu_cb[IPA_SMMU_CB_UC].mapping->domain;
