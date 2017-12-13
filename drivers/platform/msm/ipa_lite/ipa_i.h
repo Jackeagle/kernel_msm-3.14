@@ -1714,7 +1714,6 @@ int ipa_reset_drop_stats(enum ipa_client_type client);
 
 int ipa_reset_all_drop_stats(void);
 u32 ipa3_get_num_pipes(void);
-struct ipa_smmu_cb_ctx *ipa3_get_smmu_ctx(void);
 struct ipa_smmu_cb_ctx *ipa3_get_uc_smmu_ctx(void);
 int ipa3_iommu_map(struct iommu_domain *domain, unsigned long iova,
 	phys_addr_t paddr, size_t size, int prot);
