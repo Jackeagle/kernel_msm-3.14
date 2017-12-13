@@ -323,7 +323,7 @@ static struct ipa_smmu_cb_ctx *ipa3_get_smmu_ctx(void)
  *
  * Return value: pointer to smmu context address
  */
-struct ipa_smmu_cb_ctx *ipa3_get_uc_smmu_ctx(void)
+static struct ipa_smmu_cb_ctx *ipa3_get_uc_smmu_ctx(void)
 {
 	return &smmu_cb[IPA_SMMU_CB_UC];
 }
