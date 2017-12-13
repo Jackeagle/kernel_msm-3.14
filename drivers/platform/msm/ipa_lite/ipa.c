@@ -332,61 +332,6 @@ static struct iommu_domain *ipa3_get_uc_smmu_domain(void)
 	return NULL;
 }
 
-#if 0
-static int ipa3_setup_exception_path(void)
-{
-
-	struct ipahal_reg_route route = { 0 };
-	int ret;
-	struct ipa_ioc_add_hdr *hdr;
-	struct ipa_hdr_add *hdr_entry;
-
-	/* install the basic exception header */
-	hdr = kzalloc(sizeof(struct ipa_ioc_add_hdr) + 1 *
-		      sizeof(struct ipa_hdr_add), GFP_KERNEL);
-	if (!hdr) {
-		IPAERR("fail to alloc exception hdr\n");
-		return -ENOMEM;
-	}
-	hdr->num_hdrs = 1;
-	hdr->commit = 1;
-	hdr_entry = &hdr->hdr[0];
-
-	strlcpy(hdr_entry->name, IPA_LAN_RX_HDR_NAME, IPA_RESOURCE_NAME_MAX);
-	hdr_entry->hdr_len = IPA_LAN_RX_HEADER_LENGTH;
-
-	if (ipa3_add_hdr(hdr)) {
-		IPAERR("fail to add exception hdr\n");
-		ret = -EPERM;
-		goto bail;
-	}
-
-	if (hdr_entry->status) {
-		IPAERR("fail to add exception hdr\n");
-		ret = -EPERM;
-		goto bail;
-	}
-
-	ipa3_ctx->excp_hdr_hdl = hdr_entry->hdr_hdl;
-	/* set the route register to pass exception packets to Apps */
-	route.route_def_pipe = ipa3_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
-	route.route_frag_def_pipe = ipa3_get_ep_mapping(
-		IPA_CLIENT_APPS_LAN_CONS);
-	route.route_def_hdr_table = !ipa3_ctx->hdr_tbl_lcl;
-	route.route_def_retain_hdr = 1;
-
-	if (ipa3_cfg_route(&route)) {
-		IPAERR("fail to add exception hdr\n");
-		ret = -EPERM;
-		goto bail;
-	}
-
-	ret = 0;
-bail:
-	return ret;
-}
-#endif
-
 static int ipa3_init_smem_region(int memory_region_size,
 				int memory_region_offset)
 {
@@ -1307,15 +1252,6 @@ static int ipa3_setup_apps_pipes(void)
 	}
 	IPADBG("rt hash tuple is configured\n");
 
-	#if 0
-	if (ipa3_setup_exception_path()) {
-		IPAERR(":fail to setup excp path\n");
-		result = -EPERM;
-		goto fail_flt_hash_tuple;
-	}
-	IPADBG("Exception path was successfully set");
-	#endif
-
 	/* LAN IN (IPA->AP) */
 	memset(&sys_in, 0, sizeof(struct ipa_sys_connect_params));
 	sys_in.client = IPA_CLIENT_APPS_LAN_CONS;
@@ -1348,10 +1284,6 @@ static int ipa3_setup_apps_pipes(void)
 	return 0;
 
 fail_flt_hash_tuple:
-	#if 0
-	if (ipa3_ctx->excp_hdr_hdl)
-		__ipa3_del_hdr(ipa3_ctx->excp_hdr_hdl, false);
-	#endif
 	ipa3_teardown_sys_pipe(ipa3_ctx->clnt_hdl_cmd);
 fail_ch20_wa:
 	return result;
