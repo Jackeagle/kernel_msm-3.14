@@ -308,30 +308,6 @@ static struct ipa_smmu_cb_ctx *ipa3_get_uc_smmu_ctx(void)
 	return &smmu_cb[IPA_SMMU_CB_UC];
 }
 
-static struct iommu_domain *ipa3_get_smmu_domain(void)
-{
-	struct ipa_smmu_cb_ctx *cb = ipa3_get_smmu_ctx();
-
-	if (cb->valid)
-		return cb->mapping->domain;
-
-	IPAERR("CB not valid\n");
-
-	return NULL;
-}
-
-static struct iommu_domain *ipa3_get_uc_smmu_domain(void)
-{
-	struct ipa_smmu_cb_ctx *cb = ipa3_get_uc_smmu_ctx();
-
-	if (cb->valid)
-		return cb->mapping->domain;
-
-	IPAERR("CB not valid\n");
-
-	return NULL;
-}
-
 static int ipa3_init_smem_region(int memory_region_size,
 				int memory_region_offset)
 {
@@ -2550,26 +2526,13 @@ static int ipa3_iommu_map(struct iommu_domain *domain,
 	unsigned long iova, phys_addr_t paddr, size_t size, int prot)
 {
 	struct ipa_smmu_cb_ctx *ap_cb = ipa3_get_smmu_ctx();
-	struct ipa_smmu_cb_ctx *uc_cb = ipa3_get_uc_smmu_ctx();
 
 	IPADBG("domain =0x%p iova 0x%lx\n", domain, iova);
 	IPADBG("paddr =0x%pa size 0x%x\n", &paddr, (u32)size);
 
 	/* make sure no overlapping */
-	if (domain == ipa3_get_smmu_domain()) {
-		if (iova >= ap_cb->va_start && iova < ap_cb->va_end) {
-			IPAERR("iommu AP overlap addr 0x%lx\n", iova);
-			ipa_assert();
-			return -EFAULT;
-		}
-	} else if (domain == ipa3_get_uc_smmu_domain()) {
-		if (iova >= uc_cb->va_start && iova < uc_cb->va_end) {
-			IPAERR("iommu uC overlap addr 0x%lx\n", iova);
-			ipa_assert();
-			return -EFAULT;
-		}
-	} else {
-		IPAERR("Unexpected domain 0x%p\n", domain);
+	if (iova >= ap_cb->va_start && iova < ap_cb->va_end) {
+		IPAERR("iommu AP overlap addr 0x%lx\n", iova);
 		ipa_assert();
 		return -EFAULT;
 	}
