@@ -1868,20 +1868,6 @@ static void ipa3_register_panic_hdlr(void)
 		&ipa3_panic_blk);
 }
 
-static void ipa3_trigger_ipa_ready_cbs(void)
-{
-	struct ipa3_ready_cb_info *info;
-
-	mutex_lock(&ipa3_ctx->lock);
-
-	/* Call all the CBs */
-	list_for_each_entry(info, &ipa3_ctx->ipa_ready_cb_list, link)
-		if (info->ready_cb)
-			info->ready_cb(info->user_data);
-
-	mutex_unlock(&ipa3_ctx->lock);
-}
-
 static void ipa3_uc_is_loaded(void)
 {
 	IPADBG("\n");
@@ -1985,8 +1971,6 @@ static int ipa3_post_init(struct device *ipa_dev)
 	ipa3_ctx->ipa_initialization_complete = true;
 	mutex_unlock(&ipa3_ctx->lock);
 
-
-	ipa3_trigger_ipa_ready_cbs();
 	complete_all(&ipa3_ctx->init_completion_obj);
 	pr_info("IPA driver initialization was successful.\n");
 
