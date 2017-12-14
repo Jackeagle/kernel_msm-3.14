@@ -939,26 +939,6 @@ static int get_ipa_rmnet_dts_configuration(struct platform_device *pdev,
 }
 
 struct ipa3_rmnet_context ipa3_rmnet_ctx;
-static int ipa3_wwan_probe(struct platform_device *pdev);
-struct platform_device *m_pdev;
-
-static void ipa3_delayed_probe(struct work_struct *work)
-{
-	(void)ipa3_wwan_probe(m_pdev);
-}
-
-static DECLARE_WORK(ipa3_scheduled_probe, ipa3_delayed_probe);
-
-static void ipa3_ready_cb(void *user_data)
-{
-	struct platform_device *pdev = (struct platform_device *)(user_data);
-
-	m_pdev = pdev;
-
-	IPAWANDBG("IPA ready callback has been triggered!\n");
-
-	schedule_work(&ipa3_scheduled_probe);
-}
 
 void ipa3_wan_ioctl_deinit(void)
 {
@@ -994,17 +974,8 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 	pr_info("rmnet_ipa3 started initialization\n");
 
 	if (!ipa3_is_ready()) {
-		IPAWANDBG("IPA driver not ready, registering callback\n");
-		ret = ipa3_register_ipa_ready_cb(ipa3_ready_cb, (void *)pdev);
-		/*
-		 * If we received -EEXIST, IPA has initialized. So we need
-		 * to continue the probing process.
-		 */
-		if (ret != -EEXIST) {
-			if (ret)
-				IPAWANERR("IPA CB reg failed - %d\n", ret);
-			return ret;
-		}
+		IPAWANDBG("IPA driver not ready, deferring\n");
+		return -EPROBE_DEFER;
 	}
 
 	ret = get_ipa_rmnet_dts_configuration(pdev, &ipa3_rmnet_res);
