@@ -2546,7 +2546,7 @@ static enum ipa_hw_type ipa_version_get(struct platform_device *pdev)
 	return (enum ipa_hw_type)ipa_version;
 }
 
-int ipa3_iommu_map(struct iommu_domain *domain,
+static int ipa3_iommu_map(struct iommu_domain *domain,
 	unsigned long iova, phys_addr_t paddr, size_t size, int prot)
 {
 	struct ipa_smmu_cb_ctx *ap_cb = ipa3_get_smmu_ctx();

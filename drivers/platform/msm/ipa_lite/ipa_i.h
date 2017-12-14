@@ -1714,8 +1714,6 @@ int ipa_reset_drop_stats(enum ipa_client_type client);
 
 int ipa_reset_all_drop_stats(void);
 u32 ipa3_get_num_pipes(void);
-int ipa3_iommu_map(struct iommu_domain *domain, unsigned long iova,
-	phys_addr_t paddr, size_t size, int prot);
 int ipa3_ap_suspend(struct device *dev);
 int ipa3_ap_resume(struct device *dev);
 int ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple);
