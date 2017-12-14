@@ -2546,6 +2546,37 @@ static enum ipa_hw_type ipa_version_get(struct platform_device *pdev)
 	return (enum ipa_hw_type)ipa_version;
 }
 
+int ipa3_iommu_map(struct iommu_domain *domain,
+	unsigned long iova, phys_addr_t paddr, size_t size, int prot)
+{
+	struct ipa_smmu_cb_ctx *ap_cb = ipa3_get_smmu_ctx();
+	struct ipa_smmu_cb_ctx *uc_cb = ipa3_get_uc_smmu_ctx();
+
+	IPADBG("domain =0x%p iova 0x%lx\n", domain, iova);
+	IPADBG("paddr =0x%pa size 0x%x\n", &paddr, (u32)size);
+
+	/* make sure no overlapping */
+	if (domain == ipa3_get_smmu_domain()) {
+		if (iova >= ap_cb->va_start && iova < ap_cb->va_end) {
+			IPAERR("iommu AP overlap addr 0x%lx\n", iova);
+			ipa_assert();
+			return -EFAULT;
+		}
+	} else if (domain == ipa3_get_uc_smmu_domain()) {
+		if (iova >= uc_cb->va_start && iova < uc_cb->va_end) {
+			IPAERR("iommu uC overlap addr 0x%lx\n", iova);
+			ipa_assert();
+			return -EFAULT;
+		}
+	} else {
+		IPAERR("Unexpected domain 0x%p\n", domain);
+		ipa_assert();
+		return -EFAULT;
+	}
+
+	return iommu_map(domain, iova, paddr, size, prot);
+}
+
 static int ipa_smmu_uc_cb_probe(struct device *dev)
 {
 	struct ipa_smmu_cb_ctx *cb = ipa3_get_uc_smmu_ctx();
@@ -2993,37 +3024,6 @@ int ipa3_register_ipa_ready_cb(void (*ipa_ready_cb)(void *), void *user_data)
 	mutex_unlock(&ipa3_ctx->lock);
 
 	return 0;
-}
-
-int ipa3_iommu_map(struct iommu_domain *domain,
-	unsigned long iova, phys_addr_t paddr, size_t size, int prot)
-{
-	struct ipa_smmu_cb_ctx *ap_cb = ipa3_get_smmu_ctx();
-	struct ipa_smmu_cb_ctx *uc_cb = ipa3_get_uc_smmu_ctx();
-
-	IPADBG("domain =0x%p iova 0x%lx\n", domain, iova);
-	IPADBG("paddr =0x%pa size 0x%x\n", &paddr, (u32)size);
-
-	/* make sure no overlapping */
-	if (domain == ipa3_get_smmu_domain()) {
-		if (iova >= ap_cb->va_start && iova < ap_cb->va_end) {
-			IPAERR("iommu AP overlap addr 0x%lx\n", iova);
-			ipa_assert();
-			return -EFAULT;
-		}
-	} else if (domain == ipa3_get_uc_smmu_domain()) {
-		if (iova >= uc_cb->va_start && iova < uc_cb->va_end) {
-			IPAERR("iommu uC overlap addr 0x%lx\n", iova);
-			ipa_assert();
-			return -EFAULT;
-		}
-	} else {
-		IPAERR("Unexpected domain 0x%p\n", domain);
-		ipa_assert();
-		return -EFAULT;
-	}
-
-	return iommu_map(domain, iova, paddr, size, prot);
 }
 
 static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
