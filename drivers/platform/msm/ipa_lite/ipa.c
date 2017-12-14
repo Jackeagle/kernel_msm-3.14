@@ -2402,8 +2402,6 @@ static int ipa3_pre_init(struct device *ipa_dev)
 
 	ipa3_enable_dcd();
 
-	INIT_LIST_HEAD(&ipa3_ctx->ipa_ready_cb_list);
-
 	init_completion(&ipa3_ctx->init_completion_obj);
 	init_completion(&ipa3_ctx->uc_loaded_completion_obj);
 
@@ -2914,37 +2912,6 @@ int ipa3_ap_resume(struct device *dev)
 struct ipa3_context *ipa3_get_ctx(void)
 {
 	return ipa3_ctx;
-}
-
-int ipa3_register_ipa_ready_cb(void (*ipa_ready_cb)(void *), void *user_data)
-{
-	struct ipa3_ready_cb_info *cb_info = NULL;
-
-	/* check ipa3_ctx existed or not */
-	if (!ipa3_ctx) {
-		IPADBG("IPA driver has't initialized\n");
-		return -ENXIO;
-	}
-	mutex_lock(&ipa3_ctx->lock);
-	if (ipa3_ctx->ipa_initialization_complete) {
-		mutex_unlock(&ipa3_ctx->lock);
-		IPADBG("IPA driver finished initialization already\n");
-		return -EEXIST;
-	}
-
-	cb_info = kmalloc(sizeof(struct ipa3_ready_cb_info), GFP_KERNEL);
-	if (!cb_info) {
-		mutex_unlock(&ipa3_ctx->lock);
-		return -ENOMEM;
-	}
-
-	cb_info->ready_cb = ipa_ready_cb;
-	cb_info->user_data = user_data;
-
-	list_add_tail(&cb_info->link, &ipa3_ctx->ipa_ready_cb_list);
-	mutex_unlock(&ipa3_ctx->lock);
-
-	return 0;
 }
 
 static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,

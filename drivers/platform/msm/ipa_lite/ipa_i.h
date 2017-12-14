@@ -192,7 +192,6 @@ struct ipa_tx_suspend_irq_data {
 };
 
 
-typedef void (*ipa_ready_cb)(void *user_data);
 typedef void (*ipa_notify_cb)(void *priv, enum ipa_dp_evt_type evt,
                        unsigned long data);
 
@@ -977,21 +976,6 @@ struct ipa3_smp2p_info {
 	bool res_sent;
 };
 
-/**
- * struct ipa3_ready_cb_info - A list of all the registrations
- *  for an indication of IPA driver readiness
- *
- * @link: linked list link
- * @ready_cb: callback
- * @user_data: User data
- *
- */
-struct ipa3_ready_cb_info {
-	struct list_head link;
-	ipa_ready_cb ready_cb;
-	void *user_data;
-};
-
 struct ipa_dma_task_info {
 	struct ipa_mem_buffer mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
@@ -1099,8 +1083,6 @@ struct ipa_hw_stats {
  * @w_lock: Indicates the wakeup source.
  * @wakelock_ref_cnt: Indicates the number of times wakelock is acquired
  * @ipa_initialization_complete: Indicates that IPA is fully initialized
- * @ipa_ready_cb_list: A list of all the clients who require a CB when IPA
- *  driver is ready/initialized.
  * @init_completion_obj: Completion object to be used in case IPA driver hasn't
  *  finished initializing. Example of use - IOCTLs to /dev/ipa
  * IPA context - holds all relevant info about IPA driver and its state
@@ -1201,7 +1183,6 @@ struct ipa3_context {
 	bool ipa_client_apps_wan_cons_agg_gro;
 	/* M-release support to know client pipes */
 	bool ipa_initialization_complete;
-	struct list_head ipa_ready_cb_list;
 	struct completion init_completion_obj;
 	struct completion uc_loaded_completion_obj;
 	struct ipa3_smp2p_info smp2p_info;
@@ -1725,7 +1706,6 @@ int ipa3_uc_panic_notifier(struct notifier_block *this,
 void ipa3_inc_acquire_wakelock(void);
 void ipa3_dec_release_wakelock(void);
 int ipa3_load_fws(const struct firmware *firmware, phys_addr_t gsi_mem_base);
-int ipa3_register_ipa_ready_cb(void (*ipa_ready_cb)(void *), void *user_data);
 const char *ipa_hw_error_str(enum ipa_hw_errors err_type);
 int ipa3_rx_poll(u32 clnt_hdl, int budget);
 void ipa3_recycle_wan_skb(struct sk_buff *skb);
