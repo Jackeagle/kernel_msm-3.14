@@ -310,8 +310,10 @@ static struct ipa_smmu_cb_ctx *ipa3_get_uc_smmu_ctx(void)
 
 static struct iommu_domain *ipa3_get_smmu_domain(void)
 {
-	if (smmu_cb[IPA_SMMU_CB_AP].valid)
-		return smmu_cb[IPA_SMMU_CB_AP].mapping->domain;
+	struct ipa_smmu_cb_ctx *cb = ipa3_get_smmu_ctx();
+
+	if (cb->valid)
+		return cb->mapping->domain;
 
 	IPAERR("CB not valid\n");
 
@@ -320,8 +322,10 @@ static struct iommu_domain *ipa3_get_smmu_domain(void)
 
 static struct iommu_domain *ipa3_get_uc_smmu_domain(void)
 {
-	if (smmu_cb[IPA_SMMU_CB_UC].valid)
-		return smmu_cb[IPA_SMMU_CB_UC].mapping->domain;
+	struct ipa_smmu_cb_ctx *cb = ipa3_get_uc_smmu_ctx();
+
+	if (cb->valid)
+		return cb->mapping->domain;
 
 	IPAERR("CB not valid\n");
 
