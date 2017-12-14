@@ -588,9 +588,6 @@ int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr)
 		return -EFAULT;
 	}
 
-	if(!ipa3_ctx)
-		return -EFAULT;
-
 	sys = ipa3_ctx->ep[ep_idx].sys;
 	if(!sys)
 		return -EFAULT;
