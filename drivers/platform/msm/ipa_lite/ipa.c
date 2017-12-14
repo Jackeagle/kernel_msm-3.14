@@ -279,14 +279,8 @@ static void ipa3_active_clients_log_destroy(void)
 		flags);
 }
 
-enum ipa_smmu_cb_type {
-	IPA_SMMU_CB_AP,
-	IPA_SMMU_CB_UC,
-	IPA_SMMU_CB_MAX
-
-};
-
-static struct ipa_smmu_cb_ctx smmu_cb[IPA_SMMU_CB_MAX];
+static struct ipa_smmu_cb_ctx ap_smmu_cb;
+static struct ipa_smmu_cb_ctx uc_smmu_cb;
 
 static int ipa3_init_smem_region(int memory_region_size,
 				int memory_region_offset)
@@ -2505,7 +2499,7 @@ static enum ipa_hw_type ipa_version_get(struct platform_device *pdev)
 static int ipa3_iommu_map(struct iommu_domain *domain,
 	unsigned long iova, phys_addr_t paddr, size_t size, int prot)
 {
-	struct ipa_smmu_cb_ctx *ap_cb = &smmu_cb[IPA_SMMU_CB_AP];
+	struct ipa_smmu_cb_ctx *ap_cb = &ap_smmu_cb;
 
 	IPADBG("domain =0x%p iova 0x%lx\n", domain, iova);
 	IPADBG("paddr =0x%pa size 0x%x\n", &paddr, (u32)size);
@@ -2522,7 +2516,7 @@ static int ipa3_iommu_map(struct iommu_domain *domain,
 
 static int ipa_smmu_uc_cb_probe(struct device *dev)
 {
-	struct ipa_smmu_cb_ctx *cb = &smmu_cb[IPA_SMMU_CB_UC];
+	struct ipa_smmu_cb_ctx *cb = &uc_smmu_cb;
 	int atomic_ctx = 1;
 	int bypass = 1;
 	int fast = 1;
@@ -2612,7 +2606,7 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 
 static int ipa_smmu_ap_cb_probe(struct device *dev)
 {
-	struct ipa_smmu_cb_ctx *cb = &smmu_cb[IPA_SMMU_CB_AP];
+	struct ipa_smmu_cb_ctx *cb = &ap_smmu_cb;
 	int result;
 	int atomic_ctx = 1;
 	int fast = 1;
