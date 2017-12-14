@@ -288,26 +288,6 @@ enum ipa_smmu_cb_type {
 
 static struct ipa_smmu_cb_ctx smmu_cb[IPA_SMMU_CB_MAX];
 
-static struct iommu_domain *ipa3_get_smmu_domain(void)
-{
-	if (smmu_cb[IPA_SMMU_CB_AP].valid)
-		return smmu_cb[IPA_SMMU_CB_AP].mapping->domain;
-
-	IPAERR("CB not valid\n");
-
-	return NULL;
-}
-
-static struct iommu_domain *ipa3_get_uc_smmu_domain(void)
-{
-	if (smmu_cb[IPA_SMMU_CB_UC].valid)
-		return smmu_cb[IPA_SMMU_CB_UC].mapping->domain;
-
-	IPAERR("CB not valid\n");
-
-	return NULL;
-}
-
 /**
  * ipa3_get_smmu_ctx()- Return the smmu context
  *
@@ -326,6 +306,26 @@ static struct ipa_smmu_cb_ctx *ipa3_get_smmu_ctx(void)
 static struct ipa_smmu_cb_ctx *ipa3_get_uc_smmu_ctx(void)
 {
 	return &smmu_cb[IPA_SMMU_CB_UC];
+}
+
+static struct iommu_domain *ipa3_get_smmu_domain(void)
+{
+	if (smmu_cb[IPA_SMMU_CB_AP].valid)
+		return smmu_cb[IPA_SMMU_CB_AP].mapping->domain;
+
+	IPAERR("CB not valid\n");
+
+	return NULL;
+}
+
+static struct iommu_domain *ipa3_get_uc_smmu_domain(void)
+{
+	if (smmu_cb[IPA_SMMU_CB_UC].valid)
+		return smmu_cb[IPA_SMMU_CB_UC].mapping->domain;
+
+	IPAERR("CB not valid\n");
+
+	return NULL;
 }
 
 #if 0
