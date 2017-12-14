@@ -1314,13 +1314,6 @@ static int ipa3_setup_apps_pipes(void)
 		goto fail_flt_hash_tuple;
 	}
 	IPADBG("Exception path was successfully set");
-
-	if (ipa3_setup_dflt_rt_tables()) {
-                IPAERR(":fail to setup dflt routes\n");
-                result = -EPERM;
-                goto fail_flt_hash_tuple;
-    }
-        IPADBG("default routing was set\n");
 	#endif
 
 	/* LAN IN (IPA->AP) */
