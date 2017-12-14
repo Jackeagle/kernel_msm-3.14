@@ -1204,11 +1204,6 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb,
 	const struct ipa_gsi_ep_config *gsi_ep;
 	int data_idx;
 
-	if (unlikely(!ipa3_ctx)) {
-		IPAERR("IPA3 driver was not initialized\n");
-		return -EINVAL;
-	}
-
 	if (skb->len == 0) {
 		IPAERR("packet size is 0\n");
 		return -EINVAL;
