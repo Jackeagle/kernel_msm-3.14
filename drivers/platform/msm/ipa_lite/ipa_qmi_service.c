@@ -11,6 +11,8 @@
  *
  */
 
+#define pr_fmt(fmt)    "ipa-wan %s:%d " fmt, __func__, __LINE__
+
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/errno.h>

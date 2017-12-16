@@ -14,6 +14,8 @@
  * WWAN Transport Network Driver.
  */
 
+#define pr_fmt(fmt)    "ipa-wan %s:%d " fmt, __func__, __LINE__
+
 #include <linux/completion.h>
 #include <linux/errno.h>
 #include <linux/if_arp.h>
@@ -398,8 +400,7 @@ static void apps_ipa_packet_receive_notify(void *priv,
 		}
 
 		if (result)	{
-			pr_err_ratelimited("ipa-wan %s:%d fail on netif_receive_skb\n",
-							   __func__, __LINE__);
+			pr_err_ratelimited("fail on netif_receive_skb\n");
 			dev->stats.rx_dropped++;
 		}
 		dev->stats.rx_packets++;

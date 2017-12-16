@@ -30,7 +30,7 @@
 
 #define IPAWANDBG(fmt, args...) \
 	do { \
-		pr_err("ipa-wan %s:%d " fmt, __func__, __LINE__, ## args); \
+		pr_err(fmt, ## args); \
 		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf(), \
 			"ipa-wan %s:%d " fmt, __func__, __LINE__, ## args); \
 		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf_low(), \
@@ -40,14 +40,14 @@
 
 #define IPAWANDBG_LOW(fmt, args...) \
 	do { \
-		pr_debug("ipa-wan %s:%d " fmt, __func__, __LINE__, ## args); \
+		pr_debug(fmt, ## args); \
 		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf_low(), \
 			"ipa-wan %s:%d " fmt, __func__, __LINE__, ## args); \
 	} while (0)
 
 #define IPAWANERR(fmt, args...) \
 	do { \
-		pr_err("ipa-wan %s:%d " fmt, __func__, __LINE__, ## args); \
+		pr_err(fmt, ## args); \
 		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf(), \
 			"ipa-wan %s:%d " fmt, __func__, __LINE__, ## args); \
 		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf_low(), \
@@ -56,7 +56,7 @@
 
 #define IPAWANINFO(fmt, args...) \
 	do { \
-		pr_info("ipa-wan %s:%d " fmt, __func__, __LINE__, ## args); \
+		pr_info(fmt, ## args); \
 		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf(), \
 			"ipa-wan %s:%d " fmt, __func__, __LINE__, ## args); \
 		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf_low(), \
