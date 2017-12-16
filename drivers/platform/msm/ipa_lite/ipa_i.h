@@ -72,11 +72,9 @@
 		pr_debug(fmt, ## args);\
 		if (ipa3_ctx) { \
 			IPA_IPC_LOGGING(ipa3_ctx->logbuf, \
-				"ipa %s:%d " fmt, __func__, __LINE__, \
-					## args); \
+				pr_fmt(fmt), ## args); \
 			IPA_IPC_LOGGING(ipa3_ctx->logbuf_low, \
-				"ipa %s:%d " fmt, __func__, __LINE__, \
-					## args); \
+				pr_fmt(fmt), ## args); \
 		} \
 	} while (0)
 
@@ -85,8 +83,7 @@
 		pr_debug(fmt, ## args);\
 		if (ipa3_ctx) \
 			IPA_IPC_LOGGING(ipa3_ctx->logbuf_low, \
-				"ipa %s:%d " fmt, __func__, __LINE__, \
-					## args); \
+				pr_fmt(fmt), ## args); \
 	} while (0)
 
 #define IPAERR(fmt, args...) \
@@ -94,11 +91,9 @@
 		pr_err(fmt, ## args);\
 		if (ipa3_ctx) { \
 			IPA_IPC_LOGGING(ipa3_ctx->logbuf, \
-				"ipa %s:%d " fmt, __func__, __LINE__, \
-					## args); \
+				pr_fmt(fmt), ## args); \
 			IPA_IPC_LOGGING(ipa3_ctx->logbuf_low, \
-				"ipa %s:%d " fmt, __func__, __LINE__, \
-					## args); \
+				pr_fmt(fmt), ## args); \
 		} \
 	} while (0)
 
@@ -107,11 +102,9 @@
 		pr_err_ratelimited(fmt, ## args);\
 		if (ipa3_ctx) { \
 			IPA_IPC_LOGGING(ipa3_ctx->logbuf, \
-				"ipa %s:%d " fmt, __func__, __LINE__, \
-					## args); \
+				pr_fmt(fmt), ## args); \
 			IPA_IPC_LOGGING(ipa3_ctx->logbuf_low, \
-				"ipa %s:%d " fmt, __func__, __LINE__, \
-					## args); \
+				pr_fmt(fmt), ## args); \
 		} \
 	} while (0)
 
