@@ -231,7 +231,7 @@ static int ipa3_active_clients_log_init(void)
 	active_clients_table_buf = kzalloc(sizeof(
 			char[IPA_ACTIVE_CLIENTS_TABLE_BUF_SIZE]), GFP_KERNEL);
 	if (ipa3_ctx->ipa3_active_clients_logging.log_buffer == NULL) {
-		pr_err("Active Clients Logging memory allocation failed");
+		printk(KERN_ERR "Active Clients Logging memory allocation failed");
 		goto bail;
 	}
 	for (i = 0; i < IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES; i++) {
@@ -1967,7 +1967,7 @@ static int ipa3_post_init(struct device *ipa_dev)
 	mutex_unlock(&ipa3_ctx->lock);
 
 	complete_all(&ipa3_ctx->init_completion_obj);
-	pr_info("IPA driver initialization was successful.\n");
+	printk(KERN_INFO "IPA driver initialization was successful.\n");
 
 	return 0;
 
@@ -2043,7 +2043,7 @@ static ssize_t ipa3_write(struct file *file, const char __user *buf,
 		IPAERR("IPA FW loading process has failed\n");
 		return result;
 	}
-	pr_info("IPA FW loaded successfully\n");
+	printk(KERN_INFO "IPA FW loaded successfully\n");
 
 	queue_work(ipa3_ctx->transport_power_mgmt_wq, &ipa3_post_init_work);
 
@@ -2833,7 +2833,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 
 	result = msm_gsi_init(pdev_p);
 	if (result) {
-		pr_err("ipa: error initializing gsi driver.\n");
+		printk(KERN_ERR "ipa: error initializing gsi driver.\n");
 		return result;
 	}
 
@@ -2842,7 +2842,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		smmu_info.s1_bypass = true;
 	if (of_property_read_bool(node, "qcom,smmu-fast-map"))
 		smmu_info.fast_map = true;
-	pr_info("IPA smmu_info.s1_bypass=%d smmu_info.fast_map=%d\n",
+	printk(KERN_INFO "IPA smmu_info.s1_bypass=%d smmu_info.fast_map=%d\n",
 		smmu_info.s1_bypass, smmu_info.fast_map);
 
 	result = of_platform_populate(node, ipa_plat_drv_match, NULL,
@@ -3228,7 +3228,9 @@ static struct platform_driver ipa_plat_drv = {
 
 static int __init ipa_module_init(void)
 {
-	pr_debug("IPA module init\n");
+#ifdef DEBUG
+	printk(KERN_DEBUG "IPA module init\n");
+#endif
 
 	/* Register as a platform device driver */
 	return platform_driver_register(&ipa_plat_drv);

@@ -2970,7 +2970,7 @@ int ipa3_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple)
 u8 *ipa_write_64(u64 w, u8 *dest)
 {
 	if (unlikely(dest == NULL)) {
-		pr_err("ipa_write_64: NULL address!\n");
+		printk(KERN_ERR "ipa_write_64: NULL address!\n");
 		return dest;
 	}
 	*dest++ = (u8)((w) & 0xFF);
@@ -3013,7 +3013,7 @@ const char *ipa_clients_strings[IPA_CLIENT_MAX] = {
 
 void ipa_assert(void)
 {
-	pr_err("IPA: unrecoverable error has occurred, asserting\n");
+	printk(KERN_ERR "IPA: unrecoverable error has occurred, asserting\n");
 	BUG();
 }
 
