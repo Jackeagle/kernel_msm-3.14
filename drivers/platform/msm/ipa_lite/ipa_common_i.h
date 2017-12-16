@@ -811,8 +811,7 @@ struct ipa_ep_cfg_ctrl {
 #define IPA_IPC_LOGGING(buf, fmt, args...) \
 	do { \
 		if (buf) \
-			ipc_log_string((buf), fmt, __func__, __LINE__,\
-				## args); \
+			ipc_log_string((buf), fmt, ## args); \
 	} while (0)
 void ipa_inc_client_enable_clks(struct ipa_active_client_logging_info *id);
 void ipa_dec_client_disable_clks(struct ipa_active_client_logging_info *id);

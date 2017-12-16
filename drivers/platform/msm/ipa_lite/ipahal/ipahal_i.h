@@ -23,9 +23,11 @@
 		pr_debug(IPAHAL_DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
 			## args); \
 		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf(), \
-			IPAHAL_DRV_NAME " %s:%d " fmt, ## args); \
+			IPAHAL_DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
+				## args); \
 		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf_low(), \
-			IPAHAL_DRV_NAME " %s:%d " fmt, ## args); \
+			IPAHAL_DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
+				## args); \
 	} while (0)
 
 #define IPAHAL_DBG_LOW(fmt, args...) \
@@ -33,7 +35,8 @@
 		pr_debug(IPAHAL_DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
 			## args); \
 		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf_low(), \
-			IPAHAL_DRV_NAME " %s:%d " fmt, ## args); \
+			IPAHAL_DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
+				## args); \
 	} while (0)
 
 #define IPAHAL_ERR(fmt, args...) \
@@ -41,9 +44,11 @@
 		pr_err(IPAHAL_DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
 			## args); \
 		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf(), \
-			IPAHAL_DRV_NAME " %s:%d " fmt, ## args); \
+			IPAHAL_DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
+				## args); \
 		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf_low(), \
-			IPAHAL_DRV_NAME " %s:%d " fmt, ## args); \
+			IPAHAL_DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
+				## args); \
 	} while (0)
 
 #define IPAHAL_MEM_ALLOC(__size, __is_atomic_ctx) \

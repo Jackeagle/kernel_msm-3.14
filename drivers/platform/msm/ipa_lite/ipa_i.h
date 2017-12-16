@@ -72,9 +72,11 @@
 		pr_debug(DRV_NAME " %s:%d " fmt, __func__, __LINE__, ## args);\
 		if (ipa3_ctx) { \
 			IPA_IPC_LOGGING(ipa3_ctx->logbuf, \
-				DRV_NAME " %s:%d " fmt, ## args); \
+				DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
+					## args); \
 			IPA_IPC_LOGGING(ipa3_ctx->logbuf_low, \
-				DRV_NAME " %s:%d " fmt, ## args); \
+				DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
+					## args); \
 		} \
 	} while (0)
 
@@ -83,7 +85,8 @@
 		pr_debug(DRV_NAME " %s:%d " fmt, __func__, __LINE__, ## args);\
 		if (ipa3_ctx) \
 			IPA_IPC_LOGGING(ipa3_ctx->logbuf_low, \
-				DRV_NAME " %s:%d " fmt, ## args); \
+				DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
+					## args); \
 	} while (0)
 
 #define IPAERR(fmt, args...) \
@@ -91,9 +94,11 @@
 		pr_err(DRV_NAME " %s:%d " fmt, __func__, __LINE__, ## args);\
 		if (ipa3_ctx) { \
 			IPA_IPC_LOGGING(ipa3_ctx->logbuf, \
-				DRV_NAME " %s:%d " fmt, ## args); \
+				DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
+					## args); \
 			IPA_IPC_LOGGING(ipa3_ctx->logbuf_low, \
-				DRV_NAME " %s:%d " fmt, ## args); \
+				DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
+					## args); \
 		} \
 	} while (0)
 
@@ -103,9 +108,11 @@
 		__LINE__, ## args);\
 		if (ipa3_ctx) { \
 			IPA_IPC_LOGGING(ipa3_ctx->logbuf, \
-				DRV_NAME " %s:%d " fmt, ## args); \
+				DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
+					## args); \
 			IPA_IPC_LOGGING(ipa3_ctx->logbuf_low, \
-				DRV_NAME " %s:%d " fmt, ## args); \
+				DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
+					## args); \
 		} \
 	} while (0)
 
