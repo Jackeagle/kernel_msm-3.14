@@ -398,7 +398,7 @@ static void apps_ipa_packet_receive_notify(void *priv,
 		}
 
 		if (result)	{
-			pr_err_ratelimited(DEV_NAME " %s:%d fail on netif_receive_skb\n",
+			pr_err_ratelimited("ipa-wan %s:%d fail on netif_receive_skb\n",
 							   __func__, __LINE__);
 			dev->stats.rx_dropped++;
 		}

@@ -16,38 +16,36 @@
 #include <linux/if_ether.h>
 #include "../ipa_common_i.h"
 
-#define IPAHAL_DRV_NAME "ipahal"
-
 #define IPAHAL_DBG(fmt, args...) \
 	do { \
-		pr_debug(IPAHAL_DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
+		pr_debug("ipahal %s:%d " fmt, __func__, __LINE__, \
 			## args); \
 		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf(), \
-			IPAHAL_DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
+			"ipahal %s:%d " fmt, __func__, __LINE__, \
 				## args); \
 		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf_low(), \
-			IPAHAL_DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
+			"ipahal %s:%d " fmt, __func__, __LINE__, \
 				## args); \
 	} while (0)
 
 #define IPAHAL_DBG_LOW(fmt, args...) \
 	do { \
-		pr_debug(IPAHAL_DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
+		pr_debug("ipahal %s:%d " fmt, __func__, __LINE__, \
 			## args); \
 		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf_low(), \
-			IPAHAL_DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
+			"ipahal %s:%d " fmt, __func__, __LINE__, \
 				## args); \
 	} while (0)
 
 #define IPAHAL_ERR(fmt, args...) \
 	do { \
-		pr_err(IPAHAL_DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
+		pr_err("ipahal %s:%d " fmt, __func__, __LINE__, \
 			## args); \
 		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf(), \
-			IPAHAL_DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
+			"ipahal %s:%d " fmt, __func__, __LINE__, \
 				## args); \
 		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf_low(), \
-			IPAHAL_DRV_NAME " %s:%d " fmt, __func__, __LINE__, \
+			"ipahal %s:%d " fmt, __func__, __LINE__, \
 				## args); \
 	} while (0)
 
