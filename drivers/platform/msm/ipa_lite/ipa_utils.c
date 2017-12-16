@@ -99,8 +99,6 @@
 #define QMB_MASTER_SELECT_DDR  (0)
 #define QMB_MASTER_SELECT_PCIE (1)
 
-#define DRV_NAME "ipa"
-
 /* Resource Group index*/
 #define IPA_v3_0_GROUP_UL               (0)
 #define IPA_v3_0_GROUP_DL               (1)
