@@ -2596,22 +2596,22 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	void *smem_addr;
 	int i;
 
-	IPADBG("AP CB probe: sub pdev=%p\n", dev);
+	pr_debug("AP CB probe: sub pdev=%p\n", dev);
 
 	result = of_property_read_u32_array(dev->of_node, "qcom,iova-mapping",
 		iova_ap_mapping, 2);
 	if (result) {
-		IPAERR("Fail to read AP start/size iova addresses\n");
+		pr_err("Fail to read AP start/size iova addresses\n");
 		return result;
 	}
 	cb->va_start = iova_ap_mapping[0];
 	cb->va_size = iova_ap_mapping[1];
 	cb->va_end = cb->va_start + cb->va_size;
-	IPADBG("AP va_start=0x%x va_sise=0x%x\n", cb->va_start, cb->va_size);
+	pr_debug("AP va_start=0x%x va_sise=0x%x\n", cb->va_start, cb->va_size);
 
 	if (dma_set_mask(dev, DMA_BIT_MASK(64)) ||
 			dma_set_coherent_mask(dev, DMA_BIT_MASK(64))) {
-		IPAERR("DMA set 64bit mask failed\n");
+		pr_err("DMA set 64bit mask failed\n");
 		return -EOPNOTSUPP;
 	}
 
@@ -2619,48 +2619,48 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	cb->mapping = arm_iommu_create_mapping(dev->bus,
 					cb->va_start, cb->va_size);
 	if (IS_ERR_OR_NULL(cb->mapping)) {
-		IPADBG("Fail to create mapping\n");
+		pr_debug("Fail to create mapping\n");
 		/* assume this failure is because iommu driver is not ready */
 		return -EPROBE_DEFER;
 	}
-	IPADBG("SMMU mapping created\n");
+	pr_debug("SMMU mapping created\n");
 	cb->valid = true;
 
 	if (smmu_info.s1_bypass) {
 		if (iommu_domain_set_attr(cb->mapping->domain,
 				DOMAIN_ATTR_S1_BYPASS,
 				&bypass)) {
-			IPAERR("couldn't set bypass\n");
+			pr_err("couldn't set bypass\n");
 			arm_iommu_release_mapping(cb->mapping);
 			cb->valid = false;
 			return -EIO;
 		}
-		IPADBG("SMMU S1 BYPASS\n");
+		pr_debug("SMMU S1 BYPASS\n");
 	} else {
 		if (iommu_domain_set_attr(cb->mapping->domain,
 				DOMAIN_ATTR_ATOMIC,
 				&atomic_ctx)) {
-			IPAERR("couldn't set domain as atomic\n");
+			pr_err("couldn't set domain as atomic\n");
 			arm_iommu_release_mapping(cb->mapping);
 			cb->valid = false;
 			return -EIO;
 		}
-		IPADBG("SMMU atomic set\n");
+		pr_debug("SMMU atomic set\n");
 
 		if (iommu_domain_set_attr(cb->mapping->domain,
 				DOMAIN_ATTR_FAST,
 				&fast)) {
-			IPAERR("couldn't set fast map\n");
+			pr_err("couldn't set fast map\n");
 			arm_iommu_release_mapping(cb->mapping);
 			cb->valid = false;
 			return -EIO;
 		}
-		IPADBG("SMMU fast map set\n");
+		pr_debug("SMMU fast map set\n");
 	}
 
 	result = arm_iommu_attach_device(cb->dev, cb->mapping);
 	if (result) {
-		IPAERR("couldn't attach to IOMMU ret=%d\n", result);
+		pr_debug("couldn't attach to IOMMU ret=%d\n", result);
 		cb->valid = false;
 		return result;
 	}
@@ -2670,7 +2670,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	if (add_map) {
 		/* mapping size is an array of 3-tuple of u32 */
 		if (add_map_size % (3 * sizeof(u32))) {
-			IPAERR("wrong additional mapping format\n");
+			pr_err("wrong additional mapping format\n");
 			cb->valid = false;
 			return -EFAULT;
 		}
@@ -2686,7 +2686,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 
 			IPA_SMMU_ROUND_TO_PAGE(iova, pa, size,
 				iova_p, pa_p, size_p);
-			IPADBG("mapping 0x%lx to 0x%pa size %d\n",
+			pr_debug("mapping 0x%lx to 0x%pa size %d\n",
 				iova_p, &pa_p, size_p);
 			ipa3_iommu_map(cb->mapping->domain,
 				iova_p, pa_p, size_p,
@@ -2706,7 +2706,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 
 		IPA_SMMU_ROUND_TO_PAGE(iova, pa, IPA_SMEM_SIZE,
 			iova_p, pa_p, size_p);
-		IPADBG("mapping 0x%lx to 0x%pa size %d\n",
+		pr_debug("mapping 0x%lx to 0x%pa size %d\n",
 			iova_p, &pa_p, size_p);
 		ipa3_iommu_map(cb->mapping->domain,
 			iova_p, pa_p, size_p,
@@ -2719,7 +2719,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	/* Proceed to real initialization */
 	result = ipa3_pre_init(dev);
 	if (result) {
-		IPAERR("ipa_init failed\n");
+		pr_err("ipa_init failed\n");
 		arm_iommu_detach_device(cb->dev);
 		arm_iommu_release_mapping(cb->mapping);
 		cb->valid = false;
