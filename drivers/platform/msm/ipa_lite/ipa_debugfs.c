@@ -12,6 +12,8 @@
 
 #ifdef CONFIG_DEBUG_FS
 
+#define pr_fmt(fmt)    "ipa %s:%d " fmt, __func__, __LINE__
+
 #include <linux/debugfs.h>
 #include <linux/kernel.h>
 #include <linux/stringify.h>

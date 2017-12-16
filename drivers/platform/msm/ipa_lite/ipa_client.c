@@ -9,6 +9,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+
+#define pr_fmt(fmt)    "ipa %s:%d " fmt, __func__, __LINE__
+
 #include <asm/barrier.h>
 #include <linux/delay.h>
 #include <linux/device.h>

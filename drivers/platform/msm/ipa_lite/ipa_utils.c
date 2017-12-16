@@ -10,6 +10,8 @@
  * GNU General Public License for more details.
  */
 
+#define pr_fmt(fmt)    "ipa %s:%d " fmt, __func__, __LINE__
+
 #include <net/ip.h>
 #include <linux/genalloc.h>	/* gen_pool_alloc() */
 #include <linux/io.h>

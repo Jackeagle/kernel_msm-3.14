@@ -10,6 +10,8 @@
  * GNU General Public License for more details.
  */
 
+#define pr_fmt(fmt)    "ipa %s:%d " fmt, __func__, __LINE__
+
 #include <linux/delay.h>
 #include "ipa_i.h"
 
