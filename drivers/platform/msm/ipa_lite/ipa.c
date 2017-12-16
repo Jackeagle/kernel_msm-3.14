@@ -1902,11 +1902,6 @@ static int ipa3_post_init(struct device *ipa_dev)
 	struct ipa3_uc_hdlrs uc_hdlrs = { 0 };
 	struct idr *idr;
 
-	if (ipa3_ctx == NULL) {
-		IPADBG("IPA driver haven't initialized\n");
-		return -ENXIO;
-	}
-
 	/* Prevent consequent calls from trying to load the FW again. */
 	if (ipa3_ctx->ipa_initialization_complete)
 		return 0;
