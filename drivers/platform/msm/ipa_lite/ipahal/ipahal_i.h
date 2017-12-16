@@ -19,24 +19,21 @@
 #define IPAHAL_DBG(fmt, args...) \
 	do { \
 		pr_debug(fmt, ## args); \
-		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf(), pr_fmt(fmt), ## args); \
-		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf_low(), \
-			pr_fmt(fmt), ## args); \
+		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf(), fmt, ## args); \
+		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf_low(), fmt, ## args); \
 	} while (0)
 
 #define IPAHAL_DBG_LOW(fmt, args...) \
 	do { \
 		pr_debug(fmt, ## args); \
-		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf_low(), \
-			pr_fmt(fmt), ## args); \
+		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf_low(), fmt, ## args); \
 	} while (0)
 
 #define IPAHAL_ERR(fmt, args...) \
 	do { \
 		pr_err(fmt, ## args); \
-		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf(), pr_fmt(fmt), ## args); \
-		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf_low(), \
-			pr_fmt(fmt), ## args); \
+		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf(), fmt, ## args); \
+		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf_low(), fmt, ## args); \
 	} while (0)
 
 #define IPAHAL_MEM_ALLOC(__size, __is_atomic_ctx) \

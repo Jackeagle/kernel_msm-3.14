@@ -71,10 +71,8 @@
 	do { \
 		pr_debug(fmt, ## args);\
 		if (ipa3_ctx) { \
-			IPA_IPC_LOGGING(ipa3_ctx->logbuf, \
-				pr_fmt(fmt), ## args); \
-			IPA_IPC_LOGGING(ipa3_ctx->logbuf_low, \
-				pr_fmt(fmt), ## args); \
+			IPA_IPC_LOGGING(ipa3_ctx->logbuf, fmt, ## args); \
+			IPA_IPC_LOGGING(ipa3_ctx->logbuf_low, fmt, ## args); \
 		} \
 	} while (0)
 
@@ -82,18 +80,15 @@
 	do { \
 		pr_debug(fmt, ## args);\
 		if (ipa3_ctx) \
-			IPA_IPC_LOGGING(ipa3_ctx->logbuf_low, \
-				pr_fmt(fmt), ## args); \
+			IPA_IPC_LOGGING(ipa3_ctx->logbuf_low, fmt, ## args); \
 	} while (0)
 
 #define IPAERR(fmt, args...) \
 	do { \
 		pr_err(fmt, ## args);\
 		if (ipa3_ctx) { \
-			IPA_IPC_LOGGING(ipa3_ctx->logbuf, \
-				pr_fmt(fmt), ## args); \
-			IPA_IPC_LOGGING(ipa3_ctx->logbuf_low, \
-				pr_fmt(fmt), ## args); \
+			IPA_IPC_LOGGING(ipa3_ctx->logbuf, fmt, ## args); \
+			IPA_IPC_LOGGING(ipa3_ctx->logbuf_low, fmt, ## args); \
 		} \
 	} while (0)
 
@@ -101,10 +96,8 @@
 	do { \
 		pr_err_ratelimited(fmt, ## args);\
 		if (ipa3_ctx) { \
-			IPA_IPC_LOGGING(ipa3_ctx->logbuf, \
-				pr_fmt(fmt), ## args); \
-			IPA_IPC_LOGGING(ipa3_ctx->logbuf_low, \
-				pr_fmt(fmt), ## args); \
+			IPA_IPC_LOGGING(ipa3_ctx->logbuf, fmt, ## args); \
+			IPA_IPC_LOGGING(ipa3_ctx->logbuf_low, fmt, ## args); \
 		} \
 	} while (0)
 
