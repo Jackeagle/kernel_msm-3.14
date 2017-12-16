@@ -18,8 +18,7 @@
 
 #define IPAHAL_DBG(fmt, args...) \
 	do { \
-		pr_debug("ipahal %s:%d " fmt, __func__, __LINE__, \
-			## args); \
+		pr_debug(fmt, ## args); \
 		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf(), \
 			"ipahal %s:%d " fmt, __func__, __LINE__, \
 				## args); \
@@ -30,8 +29,7 @@
 
 #define IPAHAL_DBG_LOW(fmt, args...) \
 	do { \
-		pr_debug("ipahal %s:%d " fmt, __func__, __LINE__, \
-			## args); \
+		pr_debug(fmt, ## args); \
 		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf_low(), \
 			"ipahal %s:%d " fmt, __func__, __LINE__, \
 				## args); \
@@ -39,8 +37,7 @@
 
 #define IPAHAL_ERR(fmt, args...) \
 	do { \
-		pr_err("ipahal %s:%d " fmt, __func__, __LINE__, \
-			## args); \
+		pr_err(fmt, ## args); \
 		IPA_IPC_LOGGING(ipa3_get_ipc_logbuf(), \
 			"ipahal %s:%d " fmt, __func__, __LINE__, \
 				## args); \

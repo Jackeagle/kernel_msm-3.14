@@ -10,6 +10,8 @@
  * GNU General Public License for more details.
  */
 
+#define pr_fmt(fmt)	"ipahal %s:%d " fmt, __func__, __LINE__
+
 #include <linux/ipc_logging.h>
 #include <linux/debugfs.h>
 #include "ipahal.h"

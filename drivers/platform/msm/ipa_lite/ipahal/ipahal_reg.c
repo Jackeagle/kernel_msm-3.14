@@ -10,6 +10,8 @@
  * GNU General Public License for more details.
  */
 
+#define pr_fmt(fmt)	"ipahal %s:%d " fmt, __func__, __LINE__
+
 #ifndef __KERNEL__
 #include <stdint.h>
 #include <stddef.h>
