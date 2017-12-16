@@ -2137,18 +2137,18 @@ static int ipa3_pre_init(struct device *ipa_dev)
 	int i;
 	struct ipa_active_client_logging_info log_info;
 
-	IPADBG("IPA Driver initialization started\n");
+	pr_debug("IPA Driver initialization started\n");
 
 	ipa3_ctx = kzalloc(sizeof(*ipa3_ctx), GFP_KERNEL);
 	if (!ipa3_ctx) {
-		IPAERR(":kzalloc err.\n");
+		pr_err(":kzalloc err.\n");
 		result = -ENOMEM;
 		goto fail_mem_ctx;
 	}
 
 	ipa3_ctx->logbuf = ipc_log_context_create(IPA_IPC_LOG_PAGES, "ipa", 0);
 	if (ipa3_ctx->logbuf == NULL)
-		IPAERR("failed to create IPC log, continue...\n");
+		pr_err("failed to create IPC log, continue...\n");
 
 	ipa3_ctx->pdev = ipa_dev;
 	ipa3_ctx->uc_pdev = ipa_dev;
