@@ -816,6 +816,10 @@ struct ipa_ep_cfg_ctrl {
 void ipa_inc_client_enable_clks(struct ipa_active_client_logging_info *id);
 void ipa_dec_client_disable_clks(struct ipa_active_client_logging_info *id);
 int ipa_inc_client_enable_clks_no_block(struct ipa_active_client_logging_info *id);
+
+#define ipa_ipc_logging(logbuf, fmt, args...) \
+		__ipa_ipc_logging(logbuf, pr_fmt(fmt), ## args)
+void __ipa_ipc_logging(void *logbuf, const char *fmt, ...);
 void *ipa3_get_ipc_logbuf(void);
 void *ipa3_get_ipc_logbuf_low(void);
 void ipa_assert(void);
