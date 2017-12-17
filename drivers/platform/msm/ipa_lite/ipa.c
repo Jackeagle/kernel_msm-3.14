@@ -1904,10 +1904,6 @@ static int ipa3_post_init(struct device *ipa_dev)
 	struct ipa3_uc_hdlrs uc_hdlrs = { 0 };
 	struct idr *idr;
 
-	/* Prevent consequent calls from trying to load the FW again. */
-	if (ipa3_ctx->ipa_initialization_complete)
-		return 0;
-
 	/*
 	 * indication whether working in MHI config or non MHI config is given
 	 * in ipa3_write which is launched before ipa3_post_init. i.e. from
@@ -1964,9 +1960,7 @@ static int ipa3_post_init(struct device *ipa_dev)
 
 	ipa3_ctx->q6_proxy_clk_vote_valid = true;
 
-	mutex_lock(&ipa3_ctx->lock);
-	ipa3_ctx->ipa_initialization_complete = true;
-	mutex_unlock(&ipa3_ctx->lock);
+	atomic_set(&ipa3_ctx->state, IPA_STATE_READY);
 
 	complete_all(&ipa3_ctx->init_completion_obj);
 	printk(KERN_INFO "IPA driver initialization was successful.\n");
@@ -1976,6 +1970,9 @@ static int ipa3_post_init(struct device *ipa_dev)
 fail_setup_apps_pipes:
 	gsi_deregister_device(ipa3_ctx->gsi_dev_hdl);
 fail_register_device:
+	/* Maybe it'll work another time?  (Doubtful...) */
+	atomic_set(&ipa3_ctx->state, IPA_STATE_INITIAL);
+
 	return result;
 }
 
@@ -2026,13 +2023,16 @@ static int ipa3_open(struct inode *inode, struct file *filp)
 static ssize_t ipa3_write(struct file *file, const char __user *buf,
                           size_t count, loff_t *ppos)
 {
+	atomic_t *statep;
 	int result;
 
 	if (!count)
 		return 0;
 
-	/* Prevent concurrent calls from trying to load the FW again. */
-	if (ipa3_is_ready())
+	/* Only proceed if we're in initial state; ignore otherwise */
+	statep = &ipa3_ctx->state;
+	result = atomic_cmpxchg(statep, IPA_STATE_INITIAL, IPA_STATE_STARTING);
+	if (result != IPA_STATE_INITIAL)
 		return count;
 
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
@@ -2043,6 +2043,9 @@ static ssize_t ipa3_write(struct file *file, const char __user *buf,
 
 	if (result) {
 		ipa_err("IPA FW loading process has failed\n");
+		/* Maybe it'll work another time?  (Doubtful...) */
+		atomic_set(statep, IPA_STATE_INITIAL);
+
 		return result;
 	}
 	printk(KERN_INFO "IPA FW loaded successfully\n");

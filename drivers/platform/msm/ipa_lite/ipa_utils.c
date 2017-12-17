@@ -2324,16 +2324,11 @@ fail_free_desc:
  */
 bool ipa3_is_ready(void)
 {
-	bool complete;
+	if (ipa3_ctx)
+		return atomic_read(&ipa3_ctx->state) == IPA_STATE_READY;
+	ipa_err("ipalite: ipa context null\n");
 
-	if (ipa3_ctx == NULL) {
-		ipa_err("ipalite: ipa context null\n");
-		return false;
-	}
-	mutex_lock(&ipa3_ctx->lock);
-	complete = ipa3_ctx->ipa_initialization_complete;
-	mutex_unlock(&ipa3_ctx->lock);
-	return complete;
+	return false;
 }
 
 /**

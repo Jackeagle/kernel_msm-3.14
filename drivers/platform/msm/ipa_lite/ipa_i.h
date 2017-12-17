@@ -328,6 +328,11 @@ struct ipa3_status_stats {
 	unsigned int curr;
 };
 
+/* Possible values for the ipa3_ctx->state field */
+#define IPA_STATE_INITIAL	0	/* Initial state (assumed 0) */
+#define IPA_STATE_STARTING	1	/* Starting up, not ready */
+#define IPA_STATE_READY		2	/* Ready to use */
+
 /**
  * struct ipa3_ep_context - IPA end point context
  * @valid: flag indicating id EP context is valid
@@ -1040,7 +1045,6 @@ struct ipa_hw_stats {
  * @ipa_client_apps_wan_cons_agg_gro: RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA
  * @w_lock: Indicates the wakeup source.
  * @wakelock_ref_cnt: Indicates the number of times wakelock is acquired
- * @ipa_initialization_complete: Indicates that IPA is fully initialized
  * @init_completion_obj: Completion object to be used in case IPA driver hasn't
  *  finished initializing. Example of use - IOCTLs to /dev/ipa
  * IPA context - holds all relevant info about IPA driver and its state
@@ -1048,6 +1052,7 @@ struct ipa_hw_stats {
 struct ipa3_context {
 	struct class *class;
 	dev_t dev_num;
+	atomic_t state;
 	struct device *dev;
 	struct cdev cdev;
 	struct ipa3_ep_context ep[IPA3_MAX_NUM_PIPES];
@@ -1140,7 +1145,6 @@ struct ipa3_context {
 	/* RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA */
 	bool ipa_client_apps_wan_cons_agg_gro;
 	/* M-release support to know client pipes */
-	bool ipa_initialization_complete;
 	struct completion init_completion_obj;
 	struct completion uc_loaded_completion_obj;
 	struct ipa3_smp2p_info smp2p_info;
