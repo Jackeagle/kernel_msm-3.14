@@ -2367,12 +2367,7 @@ void ipa3_proxy_clk_vote(void)
  */
 u16 ipa3_get_smem_restr_bytes(void)
 {
-	if (ipa3_ctx)
-		return ipa3_ctx->smem_restricted_bytes;
-
-	IPAERR("IPA Driver not initialized\n");
-
-	return 0;
+	return ipa3_ctx->smem_restricted_bytes;
 }
 
 u32 ipa3_get_num_pipes(void)
