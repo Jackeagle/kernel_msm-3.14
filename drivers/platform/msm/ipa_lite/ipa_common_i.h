@@ -814,6 +814,37 @@ int ipa_inc_client_enable_clks_no_block(struct ipa_active_client_logging_info *i
 
 #define ipa_ipc_logging(logbuf_low, fmt, args...) \
 		__ipa_ipc_logging(logbuf_low, pr_fmt(fmt), ## args)
+
+#define ipa_debug(fmt, args...) \
+	do { \
+		pr_debug(fmt, ## args); \
+		__ipa_ipc_logging(false, pr_fmt(fmt), ## args); \
+	} while (0)
+
+#define ipa_debug_low(fmt, args...) \
+	do { \
+		pr_debug(fmt, ## args); \
+		__ipa_ipc_logging(true, pr_fmt(fmt), ## args); \
+	} while (0)
+
+#define ipa_err(fmt, args...) \
+	do { \
+		pr_err(fmt, ## args); \
+		__ipa_ipc_logging(false, pr_fmt(fmt), ## args); \
+	} while (0)
+
+#define ipa_err_ratelimited(fmt, args...) \
+	do { \
+		pr_err_ratelimited(fmt, ## args); \
+		__ipa_ipc_logging(false, pr_fmt(fmt), ## args); \
+	} while (0)
+
+#define ipa_info(fmt, args...) \
+	do { \
+		pr_info(fmt, ## args); \
+		__ipa_ipc_logging(false, pr_fmt(fmt), ## args); \
+	} while (0)
+
 void __ipa_ipc_logging(bool logbuf_low, const char *fmt, ...);
 void ipa_assert(void);
 int ipa_get_ep_mapping(enum ipa_client_type client);
