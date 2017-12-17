@@ -2407,32 +2407,16 @@ int ipa3_disable_apps_wan_cons_deaggr(uint32_t agg_size, uint32_t agg_count)
 	return 0;
 }
 
-void __ipa_ipc_logging(void *logbuf, const char *fmt, ...)
+void __ipa_ipc_logging(bool logbuf_low, const char *fmt, ...)
 {
 	va_list arg_list;
 
-	if (!logbuf)
-		return;
-
 	va_start(arg_list, fmt);
-	(void)ipc_log_va_list(logbuf, fmt, arg_list);
+	if (logbuf_low)
+		(void)ipc_log_va_list(ipa3_ctx->logbuf_low, fmt, arg_list);
+	else
+		(void)ipc_log_va_list(ipa3_ctx->logbuf, fmt, arg_list);
 	va_end(arg_list);
-}
-
-void *ipa3_get_ipc_logbuf(void)
-{
-	if (ipa3_ctx)
-		return ipa3_ctx->logbuf;
-
-	return NULL;
-}
-
-void *ipa3_get_ipc_logbuf_low(void)
-{
-	if (ipa3_ctx)
-		return ipa3_ctx->logbuf_low;
-
-	return NULL;
 }
 
 /**

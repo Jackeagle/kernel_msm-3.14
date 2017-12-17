@@ -31,29 +31,29 @@
 #define IPAWANDBG(fmt, args...) \
 	do { \
 		pr_err(fmt, ## args); \
-		ipa_ipc_logging(ipa3_get_ipc_logbuf(), fmt, ## args); \
-		ipa_ipc_logging(ipa3_get_ipc_logbuf_low(), fmt, ## args); \
+		ipa_ipc_logging(false, fmt, ## args); \
+		ipa_ipc_logging(true, fmt, ## args); \
 	} while (0)
 
 
 #define IPAWANDBG_LOW(fmt, args...) \
 	do { \
 		pr_debug(fmt, ## args); \
-		ipa_ipc_logging(ipa3_get_ipc_logbuf_low(), fmt, ## args); \
+		ipa_ipc_logging(true, fmt, ## args); \
 	} while (0)
 
 #define IPAWANERR(fmt, args...) \
 	do { \
 		pr_err(fmt, ## args); \
-		ipa_ipc_logging(ipa3_get_ipc_logbuf(), fmt, ## args); \
-		ipa_ipc_logging(ipa3_get_ipc_logbuf_low(), fmt, ## args); \
+		ipa_ipc_logging(false, fmt, ## args); \
+		ipa_ipc_logging(true, fmt, ## args); \
 	} while (0)
 
 #define IPAWANINFO(fmt, args...) \
 	do { \
 		pr_info(fmt, ## args); \
-		ipa_ipc_logging(ipa3_get_ipc_logbuf(), fmt, ## args); \
-		ipa_ipc_logging(ipa3_get_ipc_logbuf_low(), fmt, ## args); \
+		ipa_ipc_logging(false, fmt, ## args); \
+		ipa_ipc_logging(true, fmt, ## args); \
 	} while (0)
 
 
