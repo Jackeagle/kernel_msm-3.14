@@ -1507,8 +1507,6 @@ int ipa3_remove_interrupt_handler(enum ipa_irq_type interrupt);
  */
 int ipa3_get_ep_mapping(enum ipa_client_type client);
 
-bool ipa3_is_ready(void);
-
 void ipa3_proxy_clk_vote(void);
 void ipa3_proxy_clk_unvote(void);
 

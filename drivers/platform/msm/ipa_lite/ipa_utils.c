@@ -2317,21 +2317,6 @@ fail_free_desc:
 }
 
 /**
- * ipa3_is_ready() - check if IPA module was initialized
- * successfully
- *
- * Return value: true for yes; false for no
- */
-bool ipa3_is_ready(void)
-{
-	if (ipa3_ctx)
-		return atomic_read(&ipa3_ctx->state) == IPA_STATE_READY;
-	ipa_err("ipalite: ipa context null\n");
-
-	return false;
-}
-
-/**
  * ipa3_proxy_clk_unvote() - called to remove IPA clock proxy vote
  *
  * Return value: none
