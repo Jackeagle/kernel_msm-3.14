@@ -28,32 +28,6 @@
 #define DEV_NAME "ipa-wan"
 #define SUBSYS_MODEM "modem"
 
-#define IPAWANDBG(fmt, args...) \
-	do { \
-		pr_err(fmt, ## args); \
-		ipa_ipc_logging(false, fmt, ## args); \
-	} while (0)
-
-
-#define IPAWANDBG_LOW(fmt, args...) \
-	do { \
-		pr_debug(fmt, ## args); \
-		ipa_ipc_logging(true, fmt, ## args); \
-	} while (0)
-
-#define IPAWANERR(fmt, args...) \
-	do { \
-		pr_err(fmt, ## args); \
-		ipa_ipc_logging(false, fmt, ## args); \
-	} while (0)
-
-#define IPAWANINFO(fmt, args...) \
-	do { \
-		pr_info(fmt, ## args); \
-		ipa_ipc_logging(false, fmt, ## args); \
-	} while (0)
-
-
 /* User space may not have this defined. */
 #ifndef IFNAMSIZ
 #define IFNAMSIZ 16
