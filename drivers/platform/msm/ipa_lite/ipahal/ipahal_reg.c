@@ -116,7 +116,7 @@ static const char *ipareg_name_to_str[IPA_REG_MAX] = {
 static void ipareg_construct_dummy(enum ipahal_reg_name reg,
 	const void *fields, u32 *val)
 {
-	IPAHAL_ERR("No construct function for %s\n",
+	ipa_err("No construct function for %s\n",
 		ipahal_reg_name_str(reg));
 	WARN_ON(1);
 }
@@ -124,7 +124,7 @@ static void ipareg_construct_dummy(enum ipahal_reg_name reg,
 static void ipareg_parse_dummy(enum ipahal_reg_name reg,
 	void *fields, u32 val)
 {
-	IPAHAL_ERR("No parse function for %s\n",
+	ipa_err("No parse function for %s\n",
 		ipahal_reg_name_str(reg));
 	WARN_ON(1);
 }
@@ -485,7 +485,7 @@ static void ipareg_construct_debug_cnt_ctrl_n(
 	case DBG_CNT_TYPE_IPV4_FLTR:
 		type = 0x0;
 		if (!dbg_cnt_ctrl->rule_idx_pipe_rule) {
-			IPAHAL_ERR("No FLT global rules\n");
+			ipa_err("No FLT global rules\n");
 			WARN_ON(1);
 		}
 		break;
@@ -498,7 +498,7 @@ static void ipareg_construct_debug_cnt_ctrl_n(
 	case DBG_CNT_TYPE_IPV6_FLTR:
 		type = 0x4;
 		if (!dbg_cnt_ctrl->rule_idx_pipe_rule) {
-			IPAHAL_ERR("No FLT global rules\n");
+			ipa_err("No FLT global rules\n");
 			WARN_ON(1);
 		}
 		break;
@@ -506,7 +506,7 @@ static void ipareg_construct_debug_cnt_ctrl_n(
 		type = 0x5;
 		break;
 	default:
-		IPAHAL_ERR("Invalid dbg_cnt_ctrl type (%d) for %s\n",
+		ipa_err("Invalid dbg_cnt_ctrl type (%d) for %s\n",
 			dbg_cnt_ctrl->type, ipahal_reg_name_str(reg));
 		WARN_ON(1);
 		return;
@@ -618,7 +618,7 @@ static void ipareg_construct_endp_init_cfg_n(
 		cs_offload_en = 2;
 		break;
 	default:
-		IPAHAL_ERR("Invalid cs_offload_en value for %s\n",
+		ipa_err("Invalid cs_offload_en value for %s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON(1);
 		return;
@@ -1603,10 +1603,10 @@ int ipahal_reg_init(enum ipa_hw_type ipa_hw_type)
 	int j;
 	struct ipahal_reg_obj zero_obj;
 
-	IPAHAL_DBG_LOW("Entry - HW_TYPE=%d\n", ipa_hw_type);
+	ipa_debug_low("Entry - HW_TYPE=%d\n", ipa_hw_type);
 
 	if ((ipa_hw_type < 0) || (ipa_hw_type >= IPA_HW_MAX)) {
-		IPAHAL_ERR("invalid IPA HW type (%d)\n", ipa_hw_type);
+		ipa_err("invalid IPA HW type (%d)\n", ipa_hw_type);
 		return -EINVAL;
 	}
 
@@ -1624,19 +1624,19 @@ int ipahal_reg_init(enum ipa_hw_type ipa_hw_type)
 				 * Check validity
 				 */
 				if (!ipahal_reg_objs[i+1][j].offset) {
-					IPAHAL_ERR(
+					ipa_err(
 					  "reg=%s with zero offset ipa_ver=%d\n",
 					  ipahal_reg_name_str(j), i+1);
 					WARN_ON(1);
 				}
 				if (!ipahal_reg_objs[i+1][j].construct) {
-					IPAHAL_ERR(
+					ipa_err(
 					  "reg=%s with NULL construct func ipa_ver=%d\n",
 					  ipahal_reg_name_str(j), i+1);
 					WARN_ON(1);
 				}
 				if (!ipahal_reg_objs[i+1][j].parse) {
-					IPAHAL_ERR(
+					ipa_err(
 					  "reg=%s with NULL parse func ipa_ver=%d\n",
 					  ipahal_reg_name_str(j), i+1);
 					WARN_ON(1);
@@ -1655,7 +1655,7 @@ int ipahal_reg_init(enum ipa_hw_type ipa_hw_type)
 const char *ipahal_reg_name_str(enum ipahal_reg_name reg_name)
 {
 	if (reg_name < 0 || reg_name >= IPA_REG_MAX) {
-		IPAHAL_ERR("requested name of invalid reg=%d\n", reg_name);
+		ipa_err("requested name of invalid reg=%d\n", reg_name);
 		return "Invalid Register";
 	}
 
@@ -1670,17 +1670,17 @@ u32 ipahal_read_reg_n(enum ipahal_reg_name reg, u32 n)
 	u32 offset;
 
 	if (reg >= IPA_REG_MAX) {
-		IPAHAL_ERR("Invalid register reg=%u\n", reg);
+		ipa_err("Invalid register reg=%u\n", reg);
 		WARN_ON(1);
 		return -EFAULT;
 	}
 
-	IPAHAL_DBG_LOW("read from %s n=%u\n",
+	ipa_debug_low("read from %s n=%u\n",
 		ipahal_reg_name_str(reg), n);
 
 	offset = ipahal_reg_objs[ipahal_ctx->hw_type][reg].offset;
 	if (offset == -1) {
-		IPAHAL_ERR("Read access to obsolete reg=%s\n",
+		ipa_err("Read access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON(1);
 		return -EFAULT;
@@ -1697,15 +1697,15 @@ u32 ipahal_read_reg_mn(enum ipahal_reg_name reg, u32 m, u32 n)
 	u32 offset;
 
 	if (reg >= IPA_REG_MAX) {
-		IPAHAL_ERR("Invalid register reg=%u\n", reg);
+		ipa_err("Invalid register reg=%u\n", reg);
 		return -EFAULT;
 	}
 
-	IPAHAL_DBG_LOW("read %s m=%u n=%u\n",
+	ipa_debug_low("read %s m=%u n=%u\n",
 		ipahal_reg_name_str(reg), m, n);
 	offset = ipahal_reg_objs[ipahal_ctx->hw_type][reg].offset;
 	if (offset == -1) {
-		IPAHAL_ERR("Read access to obsolete reg=%s\n",
+		ipa_err("Read access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON_ONCE(1);
 		return -EFAULT;
@@ -1729,15 +1729,15 @@ void ipahal_write_reg_mn(enum ipahal_reg_name reg, u32 m, u32 n, u32 val)
 	u32 offset;
 
 	if (reg >= IPA_REG_MAX) {
-		IPAHAL_ERR("Invalid register reg=%u\n", reg);
+		ipa_err("Invalid register reg=%u\n", reg);
 		return;
 	}
 
-	IPAHAL_DBG_LOW("write to %s m=%u n=%u val=%u\n",
+	ipa_debug_low("write to %s m=%u n=%u val=%u\n",
 		ipahal_reg_name_str(reg), m, n, val);
 	offset = ipahal_reg_objs[ipahal_ctx->hw_type][reg].offset;
 	if (offset == -1) {
-		IPAHAL_ERR("Write access to obsolete reg=%s\n",
+		ipa_err("Write access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON(1);
 		return;
@@ -1762,22 +1762,22 @@ u32 ipahal_read_reg_n_fields(enum ipahal_reg_name reg, u32 n, void *fields)
 	u32 offset;
 
 	if (!fields) {
-		IPAHAL_ERR("Input error fields=%p\n", fields);
+		ipa_err("Input error fields=%p\n", fields);
 		WARN_ON(1);
 		return -EFAULT;
 	}
 
 	if (reg >= IPA_REG_MAX) {
-		IPAHAL_ERR("Invalid register reg=%u\n", reg);
+		ipa_err("Invalid register reg=%u\n", reg);
 		WARN_ON(1);
 		return -EFAULT;
 	}
 
-	IPAHAL_DBG_LOW("read from %s n=%u and parse it\n",
+	ipa_debug_low("read from %s n=%u and parse it\n",
 		ipahal_reg_name_str(reg), n);
 	offset = ipahal_reg_objs[ipahal_ctx->hw_type][reg].offset;
 	if (offset == -1) {
-		IPAHAL_ERR("Read access to obsolete reg=%s\n",
+		ipa_err("Read access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON(1);
 		return -EFAULT;
@@ -1799,20 +1799,20 @@ void ipahal_write_reg_n_fields(enum ipahal_reg_name reg, u32 n,
 	u32 offset;
 
 	if (!fields) {
-		IPAHAL_ERR("Input error fields=%p\n", fields);
+		ipa_err("Input error fields=%p\n", fields);
 		return;
 	}
 
 	if (reg >= IPA_REG_MAX) {
-		IPAHAL_ERR("Invalid register reg=%u\n", reg);
+		ipa_err("Invalid register reg=%u\n", reg);
 		return;
 	}
 
-	IPAHAL_DBG_LOW("write to %s n=%u after constructing it\n",
+	ipa_debug_low("write to %s n=%u after constructing it\n",
 		ipahal_reg_name_str(reg), n);
 	offset = ipahal_reg_objs[ipahal_ctx->hw_type][reg].offset;
 	if (offset == -1) {
-		IPAHAL_ERR("Write access to obsolete reg=%s\n",
+		ipa_err("Write access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON(1);
 		return;
@@ -1831,16 +1831,16 @@ u32 ipahal_get_reg_mn_ofst(enum ipahal_reg_name reg, u32 m, u32 n)
 	u32 offset;
 
 	if (reg >= IPA_REG_MAX) {
-		IPAHAL_ERR("Invalid register reg=%u\n", reg);
+		ipa_err("Invalid register reg=%u\n", reg);
 		WARN_ON(1);
 		return -EFAULT;
 	}
 
-	IPAHAL_DBG_LOW("get offset of %s m=%u n=%u\n",
+	ipa_debug_low("get offset of %s m=%u n=%u\n",
 		ipahal_reg_name_str(reg), m, n);
 	offset = ipahal_reg_objs[ipahal_ctx->hw_type][reg].offset;
 	if (offset == -1) {
-		IPAHAL_ERR("Access to obsolete reg=%s\n",
+		ipa_err("Access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON(1);
 		return -EFAULT;
@@ -1876,7 +1876,7 @@ u32 ipahal_get_reg_base(void)
 void ipahal_get_disable_aggr_valmask(struct ipahal_reg_valmask *valmask)
 {
 	if (!valmask) {
-		IPAHAL_ERR("Input error\n");
+		ipa_err("Input error\n");
 		return;
 	}
 
@@ -1912,7 +1912,7 @@ void ipahal_get_aggr_force_close_valmask(int ep_idx,
 	u32 bmsk;
 
 	if (!valmask) {
-		IPAHAL_ERR("Input error\n");
+		ipa_err("Input error\n");
 		return;
 	}
 
@@ -1932,7 +1932,7 @@ void ipahal_get_aggr_force_close_valmask(int ep_idx,
 	}
 
 	if (ep_idx > (sizeof(valmask->val) * 8 - 1)) {
-		IPAHAL_ERR("too big ep_idx %d\n", ep_idx);
+		ipa_err("too big ep_idx %d\n", ep_idx);
 		ipa_assert();
 		return;
 	}
@@ -1945,7 +1945,7 @@ void ipahal_get_fltrt_hash_flush_valmask(
 	struct ipahal_reg_valmask *valmask)
 {
 	if (!flush || !valmask) {
-		IPAHAL_ERR("Input error: flush=%p ; valmask=%p\n",
+		ipa_err("Input error: flush=%p ; valmask=%p\n",
 			flush, valmask);
 		return;
 	}
@@ -1972,7 +1972,7 @@ void ipahal_get_status_ep_valmask(int pipe_num,
 	struct ipahal_reg_valmask *valmask)
 {
 	if (!valmask) {
-		IPAHAL_ERR("Input error\n");
+		ipa_err("Input error\n");
 		return;
 	}
 

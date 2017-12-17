@@ -77,7 +77,7 @@ static u64 ipa_fltrt_create_tbl_addr(bool is_sys, u64 addr)
 {
 	if (is_sys) {
 		if (addr & IPA3_0_HW_TBL_SYSADDR_ALIGNMENT) {
-			IPAHAL_ERR(
+			ipa_err(
 				"sys addr is not aligned accordingly addr=0x%pad\n",
 				&addr);
 			ipa_assert();
@@ -85,7 +85,7 @@ static u64 ipa_fltrt_create_tbl_addr(bool is_sys, u64 addr)
 		}
 	} else {
 		if (addr & IPA3_0_HW_TBL_LCLADDR_ALIGNMENT) {
-			IPAHAL_ERR("addr/ofst isn't lcl addr aligned %llu\n",
+			ipa_err("addr/ofst isn't lcl addr aligned %llu\n",
 				addr);
 			ipa_assert();
 			return 0;
@@ -106,12 +106,12 @@ static u64 ipa_fltrt_create_tbl_addr(bool is_sys, u64 addr)
 
 static void ipa_fltrt_parse_tbl_addr(u64 hwaddr, u64 *addr, bool *is_sys)
 {
-	IPAHAL_DBG_LOW("Parsing hwaddr 0x%llx\n", hwaddr);
+	ipa_debug_low("Parsing hwaddr 0x%llx\n", hwaddr);
 
 	*is_sys = !(hwaddr & 0x1);
 	hwaddr &= (~0ULL - 1);
 	if (hwaddr & IPA3_0_HW_TBL_SYSADDR_ALIGNMENT) {
-		IPAHAL_ERR(
+		ipa_err(
 			"sys addr is not aligned accordingly addr=0x%pad\n",
 			&hwaddr);
 		ipa_assert();
@@ -244,10 +244,10 @@ int ipahal_fltrt_init(enum ipa_hw_type ipa_hw_type)
 	struct ipa_mem_buffer *mem;
 	int rc = -EFAULT;
 
-	IPAHAL_DBG("Entry - HW_TYPE=%d\n", ipa_hw_type);
+	ipa_debug("Entry - HW_TYPE=%d\n", ipa_hw_type);
 
 	if (ipa_hw_type >= IPA_HW_MAX) {
-		IPAHAL_ERR("Invalid H/W type\n");
+		ipa_err("Invalid H/W type\n");
 		return -EFAULT;
 	}
 
@@ -264,79 +264,79 @@ int ipahal_fltrt_init(enum ipa_hw_type ipa_hw_type)
 			 * Check validity
 			 */
 			if (!ipahal_fltrt_objs[i+1].tbl_width) {
-				IPAHAL_ERR(
+				ipa_err(
 				 "Zero tbl width ipaver=%d\n",
 				 i+1);
 				WARN_ON(1);
 			}
 			if (!ipahal_fltrt_objs[i+1].sysaddr_alignment) {
-				IPAHAL_ERR(
+				ipa_err(
 				  "No tbl sysaddr alignment ipaver=%d\n",
 				  i+1);
 				WARN_ON(1);
 			}
 			if (!ipahal_fltrt_objs[i+1].lcladdr_alignment) {
-				IPAHAL_ERR(
+				ipa_err(
 				  "No tbl lcladdr alignment ipaver=%d\n",
 				  i+1);
 				WARN_ON(1);
 			}
 			if (!ipahal_fltrt_objs[i+1].blk_sz_alignment) {
-				IPAHAL_ERR(
+				ipa_err(
 				  "No blk sz alignment ipaver=%d\n",
 				  i+1);
 				WARN_ON(1);
 			}
 			if (!ipahal_fltrt_objs[i+1].rule_start_alignment) {
-				IPAHAL_ERR(
+				ipa_err(
 				  "No rule start alignment ipaver=%d\n",
 				  i+1);
 				WARN_ON(1);
 			}
 			if (!ipahal_fltrt_objs[i+1].tbl_hdr_width) {
-				IPAHAL_ERR(
+				ipa_err(
 				 "Zero tbl hdr width ipaver=%d\n",
 				 i+1);
 				WARN_ON(1);
 			}
 			if (!ipahal_fltrt_objs[i+1].tbl_addr_mask) {
-				IPAHAL_ERR(
+				ipa_err(
 				 "Zero tbl hdr width ipaver=%d\n",
 				 i+1);
 				WARN_ON(1);
 			}
 			if (ipahal_fltrt_objs[i+1].rule_id_bit_len < 2) {
-				IPAHAL_ERR(
+				ipa_err(
 				 "Too little bits for rule_id ipaver=%d\n",
 				 i+1);
 				WARN_ON(1);
 			}
 			if (!ipahal_fltrt_objs[i+1].rule_buf_size) {
-				IPAHAL_ERR(
+				ipa_err(
 				 "zero rule buf size ipaver=%d\n",
 				 i+1);
 				WARN_ON(1);
 			}
 			if (!ipahal_fltrt_objs[i+1].write_val_to_hdr) {
-				IPAHAL_ERR(
+				ipa_err(
 				  "No write_val_to_hdr CB ipaver=%d\n",
 				  i+1);
 				WARN_ON(1);
 			}
 			if (!ipahal_fltrt_objs[i+1].create_flt_bitmap) {
-				IPAHAL_ERR(
+				ipa_err(
 				  "No create_flt_bitmap CB ipaver=%d\n",
 				  i+1);
 				WARN_ON(1);
 			}
 			if (!ipahal_fltrt_objs[i+1].create_tbl_addr) {
-				IPAHAL_ERR(
+				ipa_err(
 				  "No create_tbl_addr CB ipaver=%d\n",
 				  i+1);
 				WARN_ON(1);
 			}
 			if (!ipahal_fltrt_objs[i+1].parse_tbl_addr) {
-				IPAHAL_ERR(
+				ipa_err(
 				  "No parse_tbl_addr CB ipaver=%d\n",
 				  i+1);
 				WARN_ON(1);
@@ -353,21 +353,21 @@ int ipahal_fltrt_init(enum ipa_hw_type ipa_hw_type)
 	mem->base = dma_alloc_coherent(ipahal_ctx->ipa_pdev, mem->size,
 		&mem->phys_base, GFP_KERNEL);
 	if (!mem->base) {
-		IPAHAL_ERR("DMA buff alloc fail %d bytes for empty tbl\n",
+		ipa_err("DMA buff alloc fail %d bytes for empty tbl\n",
 			mem->size);
 		return -ENOMEM;
 	}
 
 	if (mem->phys_base &
 		ipahal_fltrt_objs[ipa_hw_type].sysaddr_alignment) {
-		IPAHAL_ERR("Empty table buf is not address aligned 0x%pad\n",
+		ipa_err("Empty table buf is not address aligned 0x%pad\n",
 			&mem->phys_base);
 		rc = -EFAULT;
 		goto clear_empty_tbl;
 	}
 
 	memset(mem->base, 0, mem->size);
-	IPAHAL_DBG("empty table allocated in system memory");
+	ipa_debug("empty table allocated in system memory");
 
 	return 0;
 
@@ -379,7 +379,7 @@ clear_empty_tbl:
 
 void ipahal_fltrt_destroy(void)
 {
-	IPAHAL_DBG("Entry\n");
+	ipa_debug("Entry\n");
 
 	if (ipahal_ctx && ipahal_ctx->empty_fltrt_tbl.base)
 		dma_free_coherent(ipahal_ctx->ipa_pdev,
@@ -424,20 +424,20 @@ int ipahal_rule_decrease_priority(int *prio)
 	obj = &ipahal_fltrt_objs[ipahal_ctx->hw_type];
 
 	if (!prio) {
-		IPAHAL_ERR("Invalid Input\n");
+		ipa_err("Invalid Input\n");
 		return -EINVAL;
 	}
 
 	/* Priority logic is reverse. 0 priority considred max priority */
 	if (*prio > obj->rule_min_prio || *prio < obj->rule_max_prio) {
-		IPAHAL_ERR("Invalid given priority %d\n", *prio);
+		ipa_err("Invalid given priority %d\n", *prio);
 		return -EINVAL;
 	}
 
 	*prio += 1;
 
 	if (*prio > obj->rule_min_prio) {
-		IPAHAL_ERR("Cannot decrease priority. Already on min\n");
+		ipa_err("Cannot decrease priority. Already on min\n");
 		*prio -= 1;
 		return -EFAULT;
 	}
@@ -487,29 +487,29 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 	struct ipahal_fltrt_obj *obj;
 	int flag;
 
-	IPAHAL_DBG("Entry\n");
+	ipa_debug("Entry\n");
 
 	flag = atomic ? GFP_ATOMIC : GFP_KERNEL;
 	obj = &ipahal_fltrt_objs[ipahal_ctx->hw_type];
 
 	if (!tbls_num || !nhash_hdr_size || !mem) {
-		IPAHAL_ERR("Input Error: tbls_num=%d nhash_hdr_sz=%d mem=%p\n",
+		ipa_err("Input Error: tbls_num=%d nhash_hdr_sz=%d mem=%p\n",
 			tbls_num, nhash_hdr_size, mem);
 		return -EINVAL;
 	}
 	if (obj->support_hash && !hash_hdr_size) {
-		IPAHAL_ERR("Input Error: hash_hdr_sz=%d\n", hash_hdr_size);
+		ipa_err("Input Error: hash_hdr_sz=%d\n", hash_hdr_size);
 		return -EINVAL;
 	}
 
 	if (nhash_hdr_size < (tbls_num * obj->tbl_hdr_width)) {
-		IPAHAL_ERR("No enough spc at non-hash hdr blk for all tbls\n");
+		ipa_err("No enough spc at non-hash hdr blk for all tbls\n");
 		WARN_ON(1);
 		return -EINVAL;
 	}
 	if (obj->support_hash &&
 		(hash_hdr_size < (tbls_num * obj->tbl_hdr_width))) {
-		IPAHAL_ERR("No enough spc at hash hdr blk for all tbls\n");
+		ipa_err("No enough spc at hash hdr blk for all tbls\n");
 		WARN_ON(1);
 		return -EINVAL;
 	}
@@ -518,7 +518,7 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 	mem->base = dma_alloc_coherent(ipahal_ctx->ipa_pdev, mem->size,
 		&mem->phys_base, flag);
 	if (!mem->base) {
-		IPAHAL_ERR("fail to alloc DMA buff of size %d\n", mem->size);
+		ipa_err("fail to alloc DMA buff of size %d\n", mem->size);
 		return -ENOMEM;
 	}
 
@@ -555,19 +555,19 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 	struct ipahal_fltrt_obj *obj;
 	int flag;
 
-	IPAHAL_DBG("Entry - ep_bitmap 0x%llx\n", ep_bitmap);
+	ipa_debug("Entry - ep_bitmap 0x%llx\n", ep_bitmap);
 
 	flag = atomic ? GFP_ATOMIC : GFP_KERNEL;
 	obj = &ipahal_fltrt_objs[ipahal_ctx->hw_type];
 
 	if (!tbls_num || !nhash_hdr_size || !mem) {
-		IPAHAL_ERR("Input Error: tbls_num=%d nhash_hdr_sz=%d mem=%p\n",
+		ipa_err("Input Error: tbls_num=%d nhash_hdr_sz=%d mem=%p\n",
 			tbls_num, nhash_hdr_size, mem);
 		return -EINVAL;
 	}
 
 	if (obj->support_hash && !hash_hdr_size) {
-		IPAHAL_ERR("Input Error: hash_hdr_sz=%d\n", hash_hdr_size);
+		ipa_err("Input Error: hash_hdr_sz=%d\n", hash_hdr_size);
 		return -EINVAL;
 	}
 
@@ -578,7 +578,7 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 			flt_spc -= obj->tbl_hdr_width;
 		flt_spc /= obj->tbl_hdr_width;
 		if (tbls_num > flt_spc)  {
-			IPAHAL_ERR("space for hash flt hdr is too small\n");
+			ipa_err("space for hash flt hdr is too small\n");
 			WARN_ON(1);
 			return -EPERM;
 		}
@@ -590,7 +590,7 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 		flt_spc -= obj->tbl_hdr_width;
 	flt_spc /= obj->tbl_hdr_width;
 	if (tbls_num > flt_spc)  {
-		IPAHAL_ERR("space for non-hash flt hdr is too small\n");
+		ipa_err("space for non-hash flt hdr is too small\n");
 		WARN_ON(1);
 		return -EPERM;
 	}
@@ -601,13 +601,13 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 	mem->base = dma_alloc_coherent(ipahal_ctx->ipa_pdev, mem->size,
 		&mem->phys_base, flag);
 	if (!mem->base) {
-		IPAHAL_ERR("fail to alloc DMA buff of size %d\n", mem->size);
+		ipa_err("fail to alloc DMA buff of size %d\n", mem->size);
 		return -ENOMEM;
 	}
 
 	if (ep_bitmap) {
 		flt_bitmap = obj->create_flt_bitmap(ep_bitmap);
-		IPAHAL_DBG("flt bitmap 0x%llx\n", flt_bitmap);
+		ipa_debug("flt bitmap 0x%llx\n", flt_bitmap);
 		obj->write_val_to_hdr(flt_bitmap, mem->base);
 	}
 

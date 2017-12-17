@@ -63,7 +63,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_task_32b_addr(
 
 	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
 	if (unlikely(!pyld)) {
-		IPAHAL_ERR("kzalloc err\n");
+		ipa_err("kzalloc err\n");
 		return pyld;
 	}
 	/* Currently supports only one packet */
@@ -72,12 +72,12 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_task_32b_addr(
 	data = (struct ipa_imm_cmd_hw_dma_task_32b_addr *)pyld->data;
 
 	if (unlikely(dma_params->size1 & ~0xFFFF)) {
-		IPAHAL_ERR("Size1 is bigger than 16bit width 0x%x\n",
+		ipa_err("Size1 is bigger than 16bit width 0x%x\n",
 			dma_params->size1);
 		WARN_ON(1);
 	}
 	if (unlikely(dma_params->packet_size & ~0xFFFF)) {
-		IPAHAL_ERR("Pkt size is bigger than 16bit width 0x%x\n",
+		ipa_err("Pkt size is bigger than 16bit width 0x%x\n",
 			dma_params->packet_size);
 		WARN_ON(1);
 	}
@@ -103,7 +103,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_packet_tag_status(
 
 	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
 	if (unlikely(!pyld)) {
-		IPAHAL_ERR("kzalloc err\n");
+		ipa_err("kzalloc err\n");
 		return pyld;
 	}
 	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
@@ -111,7 +111,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_packet_tag_status(
 	data = (struct ipa_imm_cmd_hw_ip_packet_tag_status *)pyld->data;
 
 	if (unlikely(tag_params->tag & ~0xFFFFFFFFFFFF)) {
-		IPAHAL_ERR("tag is bigger than 48bit width 0x%llx\n",
+		ipa_err("tag is bigger than 48bit width 0x%llx\n",
 			tag_params->tag);
 		WARN_ON(1);
 	}
@@ -130,7 +130,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_shared_mem(
 
 	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
 	if (unlikely(!pyld)) {
-		IPAHAL_ERR("kzalloc err\n");
+		ipa_err("kzalloc err\n");
 		return pyld;
 	}
 	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
@@ -138,12 +138,12 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_shared_mem(
 	data = (struct ipa_imm_cmd_hw_dma_shared_mem *)pyld->data;
 
 	if (unlikely(mem_params->size & ~0xFFFF)) {
-		IPAHAL_ERR("Size is bigger than 16bit width 0x%x\n",
+		ipa_err("Size is bigger than 16bit width 0x%x\n",
 			mem_params->size);
 		WARN_ON(1);
 	}
 	if (unlikely(mem_params->local_addr & ~0xFFFF)) {
-		IPAHAL_ERR("Local addr is bigger than 16bit width 0x%x\n",
+		ipa_err("Local addr is bigger than 16bit width 0x%x\n",
 			mem_params->local_addr);
 		WARN_ON(1);
 	}
@@ -163,7 +163,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_shared_mem(
 		data->pipeline_clear_options = 2;
 		break;
 	default:
-		IPAHAL_ERR("unsupported pipline clear option %d\n",
+		ipa_err("unsupported pipline clear option %d\n",
 			mem_params->pipeline_clear_options);
 		WARN_ON(1);
 	};
@@ -180,13 +180,13 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_shared_mem_v_4_0(
 		(struct ipahal_imm_cmd_dma_shared_mem *)params;
 
 	if (unlikely(mem_params->size & ~0xFFFF)) {
-		IPAHAL_ERR("Size is bigger than 16bit width 0x%x\n",
+		ipa_err("Size is bigger than 16bit width 0x%x\n",
 			mem_params->size);
 		WARN_ON(1);
 		return NULL;
 	}
 	if (unlikely(mem_params->local_addr & ~0xFFFF)) {
-		IPAHAL_ERR("Local addr is bigger than 16bit width 0x%x\n",
+		ipa_err("Local addr is bigger than 16bit width 0x%x\n",
 			mem_params->local_addr);
 		WARN_ON(1);
 		return NULL;
@@ -218,7 +218,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_shared_mem_v_4_0(
 		pyld->opcode |= (2 << 9);
 		break;
 	default:
-		IPAHAL_ERR("unsupported pipline clear option %d\n",
+		ipa_err("unsupported pipline clear option %d\n",
 			mem_params->pipeline_clear_options);
 		WARN_ON(1);
 	};
@@ -236,7 +236,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_register_write(
 
 	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
 	if (unlikely(!pyld)) {
-		IPAHAL_ERR("kzalloc err\n");
+		ipa_err("kzalloc err\n");
 		return pyld;
 	}
 	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
@@ -244,7 +244,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_register_write(
 	data = (struct ipa_imm_cmd_hw_register_write *)pyld->data;
 
 	if (unlikely(regwrt_params->offset & ~0xFFFF)) {
-		IPAHAL_ERR("Offset is bigger than 16bit width 0x%x\n",
+		ipa_err("Offset is bigger than 16bit width 0x%x\n",
 			regwrt_params->offset);
 		WARN_ON(1);
 	}
@@ -264,7 +264,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_register_write(
 		data->pipeline_clear_options = 2;
 		break;
 	default:
-		IPAHAL_ERR("unsupported pipline clear option %d\n",
+		ipa_err("unsupported pipline clear option %d\n",
 			regwrt_params->pipeline_clear_options);
 		WARN_ON(1);
 	};
@@ -281,7 +281,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_register_write_v_4_0(
 		(struct ipahal_imm_cmd_register_write *)params;
 
 	if (unlikely(regwrt_params->offset & ~0xFFFF)) {
-		IPAHAL_ERR("Offset is bigger than 16bit width 0x%x\n",
+		ipa_err("Offset is bigger than 16bit width 0x%x\n",
 			regwrt_params->offset);
 		WARN_ON(1);
 		return NULL;
@@ -312,7 +312,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_register_write_v_4_0(
 		pyld->opcode |= (2 << 9);
 		break;
 	default:
-		IPAHAL_ERR("unsupported pipline clear option %d\n",
+		ipa_err("unsupported pipline clear option %d\n",
 			regwrt_params->pipeline_clear_options);
 		WARN_ON(1);
 	};
@@ -330,7 +330,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_packet_init(
 
 	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
 	if (unlikely(!pyld)) {
-		IPAHAL_ERR("kzalloc err\n");
+		ipa_err("kzalloc err\n");
 		return pyld;
 	}
 	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
@@ -338,7 +338,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_packet_init(
 	data = (struct ipa_imm_cmd_hw_ip_packet_init *)pyld->data;
 
 	if (unlikely(pktinit_params->destination_pipe_index & ~0x1F)) {
-		IPAHAL_ERR("Dst pipe idx is bigger than 5bit width 0x%x\n",
+		ipa_err("Dst pipe idx is bigger than 5bit width 0x%x\n",
 			pktinit_params->destination_pipe_index);
 		WARN_ON(1);
 	}
@@ -357,7 +357,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_nat_dma(
 
 	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
 	if (unlikely(!pyld)) {
-		IPAHAL_ERR("kzalloc err\n");
+		ipa_err("kzalloc err\n");
 		return pyld;
 	}
 	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
@@ -382,7 +382,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_table_dma_ipav4(
 
 	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
 	if (unlikely(!pyld)) {
-		IPAHAL_ERR("kzalloc err\n");
+		ipa_err("kzalloc err\n");
 		return pyld;
 	}
 	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
@@ -407,7 +407,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_hdr_init_system(
 
 	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
 	if (unlikely(!pyld)) {
-		IPAHAL_ERR("kzalloc err\n");
+		ipa_err("kzalloc err\n");
 		return pyld;
 	}
 	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
@@ -429,7 +429,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_hdr_init_local(
 
 	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
 	if (unlikely(!pyld)) {
-		IPAHAL_ERR("kzalloc err\n");
+		ipa_err("kzalloc err\n");
 		return pyld;
 	}
 	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
@@ -437,7 +437,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_hdr_init_local(
 	data = (struct ipa_imm_cmd_hw_hdr_init_local *)pyld->data;
 
 	if (unlikely(lclhdr_params->size_hdr_table & ~0xFFF)) {
-		IPAHAL_ERR("Hdr tble size is bigger than 12bit width 0x%x\n",
+		ipa_err("Hdr tble size is bigger than 12bit width 0x%x\n",
 			lclhdr_params->size_hdr_table);
 		WARN_ON(1);
 	}
@@ -458,7 +458,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v6_routing_init(
 
 	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
 	if (unlikely(!pyld)) {
-		IPAHAL_ERR("kzalloc err\n");
+		ipa_err("kzalloc err\n");
 		return pyld;
 	}
 	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
@@ -485,7 +485,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_routing_init(
 
 	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
 	if (unlikely(!pyld)) {
-		IPAHAL_ERR("kzalloc err\n");
+		ipa_err("kzalloc err\n");
 		return pyld;
 	}
 	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
@@ -512,7 +512,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_nat_init(
 
 	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
 	if (unlikely(!pyld)) {
-		IPAHAL_ERR("kzalloc err\n");
+		ipa_err("kzalloc err\n");
 		return pyld;
 	}
 	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
@@ -551,7 +551,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v6_filter_init(
 
 	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
 	if (unlikely(!pyld)) {
-		IPAHAL_ERR("kzalloc err\n");
+		ipa_err("kzalloc err\n");
 		return pyld;
 	}
 	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
@@ -578,7 +578,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_filter_init(
 
 	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
 	if (unlikely(!pyld)) {
-		IPAHAL_ERR("kzalloc err\n");
+		ipa_err("kzalloc err\n");
 		return pyld;
 	}
 	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
@@ -688,10 +688,10 @@ static int ipahal_imm_cmd_init(enum ipa_hw_type ipa_hw_type)
 	int j;
 	struct ipahal_imm_cmd_obj zero_obj;
 
-	IPAHAL_DBG_LOW("Entry - HW_TYPE=%d\n", ipa_hw_type);
+	ipa_debug_low("Entry - HW_TYPE=%d\n", ipa_hw_type);
 
 	if ((ipa_hw_type < 0) || (ipa_hw_type >= IPA_HW_MAX)) {
-		IPAHAL_ERR("invalid IPA HW type (%d)\n", ipa_hw_type);
+		ipa_err("invalid IPA HW type (%d)\n", ipa_hw_type);
 		return -EINVAL;
 	}
 
@@ -709,13 +709,13 @@ static int ipahal_imm_cmd_init(enum ipa_hw_type ipa_hw_type)
 				 * Check validity
 				 */
 				if (!ipahal_imm_cmd_objs[i+1][j].opcode) {
-					IPAHAL_ERR(
+					ipa_err(
 					  "imm_cmd=%s with zero opcode ipa_ver=%d\n",
 					  ipahal_imm_cmd_name_str(j), i+1);
 					WARN_ON(1);
 				}
 				if (!ipahal_imm_cmd_objs[i+1][j].construct) {
-					IPAHAL_ERR(
+					ipa_err(
 					  "imm_cmd=%s with NULL construct func ipa_ver=%d\n",
 					  ipahal_imm_cmd_name_str(j), i+1);
 					WARN_ON(1);
@@ -734,7 +734,7 @@ static int ipahal_imm_cmd_init(enum ipa_hw_type ipa_hw_type)
 const char *ipahal_imm_cmd_name_str(enum ipahal_imm_cmd_name cmd_name)
 {
 	if (cmd_name < 0 || cmd_name >= IPA_IMM_CMD_MAX) {
-		IPAHAL_ERR("requested name of invalid imm_cmd=%d\n", cmd_name);
+		ipa_err("requested name of invalid imm_cmd=%d\n", cmd_name);
 		return "Invalid IMM_CMD";
 	}
 
@@ -749,16 +749,16 @@ static u16 ipahal_imm_cmd_get_opcode(enum ipahal_imm_cmd_name cmd)
 	u32 opcode;
 
 	if (cmd >= IPA_IMM_CMD_MAX) {
-		IPAHAL_ERR("Invalid immediate command imm_cmd=%u\n", cmd);
+		ipa_err("Invalid immediate command imm_cmd=%u\n", cmd);
 		ipa_assert();
 		return -EFAULT;
 	}
 
-	IPAHAL_DBG_LOW("Get opcode of IMM_CMD=%s\n",
+	ipa_debug_low("Get opcode of IMM_CMD=%s\n",
 		ipahal_imm_cmd_name_str(cmd));
 	opcode = ipahal_imm_cmd_objs[ipahal_ctx->hw_type][cmd].opcode;
 	if (opcode == -1) {
-		IPAHAL_ERR("Try to get opcode of obsolete IMM_CMD=%s\n",
+		ipa_err("Try to get opcode of obsolete IMM_CMD=%s\n",
 			ipahal_imm_cmd_name_str(cmd));
 		ipa_assert();
 		return -EFAULT;
@@ -777,18 +777,18 @@ struct ipahal_imm_cmd_pyld *ipahal_construct_imm_cmd(
 	enum ipahal_imm_cmd_name cmd, const void *params, bool is_atomic_ctx)
 {
 	if (!params) {
-		IPAHAL_ERR("Input error: params=%p\n", params);
+		ipa_err("Input error: params=%p\n", params);
 		ipa_assert();
 		return NULL;
 	}
 
 	if (cmd >= IPA_IMM_CMD_MAX) {
-		IPAHAL_ERR("Invalid immediate command %u\n", cmd);
+		ipa_err("Invalid immediate command %u\n", cmd);
 		ipa_assert();
 		return NULL;
 	}
 
-	IPAHAL_DBG_LOW("construct IMM_CMD:%s\n", ipahal_imm_cmd_name_str(cmd));
+	ipa_debug_low("construct IMM_CMD:%s\n", ipahal_imm_cmd_name_str(cmd));
 	return ipahal_imm_cmd_objs[ipahal_ctx->hw_type][cmd].construct(
 		cmd, params, is_atomic_ctx);
 }
@@ -821,7 +821,7 @@ struct ipahal_imm_cmd_pyld *ipahal_construct_nop_imm_cmd(
 		&cmd, is_atomic_ctx);
 
 	if (!cmd_pyld)
-		IPAHAL_ERR("failed to construct register_write imm cmd\n");
+		ipa_err("failed to construct register_write imm cmd\n");
 
 	return cmd_pyld;
 }
@@ -894,7 +894,7 @@ static void ipa_pkt_status_parse(
 		opcode = IPAHAL_PKT_STATUS_OPCODE_PACKET_2ND_PASS;
 		break;
 	default:
-		IPAHAL_ERR("unsupported Status Opcode 0x%x\n",
+		ipa_err("unsupported Status Opcode 0x%x\n",
 			hw_status->status_opcode);
 		WARN_ON(1);
 	};
@@ -911,7 +911,7 @@ static void ipa_pkt_status_parse(
 		status->nat_type = IPAHAL_PKT_STATUS_NAT_DST;
 		break;
 	default:
-		IPAHAL_ERR("unsupported Status NAT type 0x%x\n",
+		ipa_err("unsupported Status NAT type 0x%x\n",
 			hw_status->nat_type);
 		WARN_ON(1);
 	};
@@ -942,7 +942,7 @@ static void ipa_pkt_status_parse(
 			exception_type = IPAHAL_PKT_STATUS_EXCEPTION_NAT;
 		break;
 	default:
-		IPAHAL_ERR("unsupported Status Exception type 0x%x\n",
+		ipa_err("unsupported Status Exception type 0x%x\n",
 			hw_status->exception);
 		WARN_ON(1);
 	};
@@ -1008,10 +1008,10 @@ static int ipahal_pkt_status_init(enum ipa_hw_type ipa_hw_type)
 	int i;
 	struct ipahal_pkt_status_obj zero_obj;
 
-	IPAHAL_DBG_LOW("Entry - HW_TYPE=%d\n", ipa_hw_type);
+	ipa_debug_low("Entry - HW_TYPE=%d\n", ipa_hw_type);
 
 	if ((ipa_hw_type < 0) || (ipa_hw_type >= IPA_HW_MAX)) {
-		IPAHAL_ERR("invalid IPA HW type (%d)\n", ipa_hw_type);
+		ipa_err("invalid IPA HW type (%d)\n", ipa_hw_type);
 		return -EINVAL;
 	}
 
@@ -1039,13 +1039,13 @@ static int ipahal_pkt_status_init(enum ipa_hw_type ipa_hw_type)
 			 * Check validity
 			 */
 			if (!ipahal_pkt_status_objs[i+1].size) {
-				IPAHAL_ERR(
+				ipa_err(
 				  "Packet Status with zero size ipa_ver=%d\n",
 				  i+1);
 				WARN_ON(1);
 			}
 			if (!ipahal_pkt_status_objs[i+1].parse) {
-				IPAHAL_ERR(
+				ipa_err(
 				  "Packet Status without Parse func ipa_ver=%d\n",
 				  i+1);
 				WARN_ON(1);
@@ -1073,12 +1073,12 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 	struct ipahal_pkt_status *status)
 {
 	if (!unparsed_status || !status) {
-		IPAHAL_ERR("Input Error: unparsed_status=%p status=%p\n",
+		ipa_err("Input Error: unparsed_status=%p status=%p\n",
 			unparsed_status, status);
 		return;
 	}
 
-	IPAHAL_DBG_LOW("Parse Status Packet\n");
+	ipa_debug_low("Parse Status Packet\n");
 	memset(status, 0, sizeof(*status));
 	ipahal_pkt_status_objs[ipahal_ctx->hw_type].parse(unparsed_status,
 		status);
@@ -1092,7 +1092,7 @@ const char *ipahal_pkt_status_exception_str(
 	enum ipahal_pkt_status_exception exception)
 {
 	if (exception < 0 || exception >= IPAHAL_PKT_STATUS_EXCEPTION_MAX) {
-		IPAHAL_ERR(
+		ipa_err(
 			"requested string of invalid pkt_status exception=%d\n",
 			exception);
 		return "Invalid PKT_STATUS_EXCEPTION";
@@ -1106,7 +1106,7 @@ static void ipahal_debugfs_init(void)
 {
 	ipahal_ctx->dent = debugfs_create_dir("ipahal", 0);
 	if (!ipahal_ctx->dent || IS_ERR(ipahal_ctx->dent)) {
-		IPAHAL_ERR("fail to create ipahal debugfs folder\n");
+		ipa_err("fail to create ipahal debugfs folder\n");
 		goto fail;
 	}
 
@@ -1122,7 +1122,7 @@ static void ipahal_debugfs_remove(void)
 		return;
 
 	if (IS_ERR(ipahal_ctx->dent)) {
-		IPAHAL_ERR("ipahal debugfs folder was not created\n");
+		ipa_err("ipahal debugfs folder was not created\n");
 		return;
 	}
 
@@ -1162,7 +1162,7 @@ static struct ipahal_hdr_funcs hdr_funcs;
 static void ipahal_hdr_init(enum ipa_hw_type ipa_hw_type)
 {
 
-	IPAHAL_DBG("Entry - HW_TYPE=%d\n", ipa_hw_type);
+	ipa_debug("Entry - HW_TYPE=%d\n", ipa_hw_type);
 
 	/*
 	 * once there are changes in HW and need to use different case, insert
@@ -1175,7 +1175,7 @@ static void ipahal_hdr_init(enum ipa_hw_type ipa_hw_type)
 		hdr_funcs.ipahal_cp_hdr_to_hw_buff =
 				ipahal_cp_hdr_to_hw_buff_v3;
 	}
-	IPAHAL_DBG("Exit\n");
+	ipa_debug("Exit\n");
 }
 
 /*
@@ -1189,17 +1189,17 @@ static void ipahal_hdr_init(enum ipa_hw_type ipa_hw_type)
 void ipahal_cp_hdr_to_hw_buff(void *base, u32 offset, u8 *const hdr,
 		u32 hdr_len)
 {
-	IPAHAL_DBG_LOW("Entry\n");
-	IPAHAL_DBG("base %p, offset %d, hdr %p, hdr_len %d\n", base,
+	ipa_debug_low("Entry\n");
+	ipa_debug("base %p, offset %d, hdr %p, hdr_len %d\n", base,
 			offset, hdr, hdr_len);
 	if (!base || !hdr_len || !hdr) {
-		IPAHAL_ERR("failed on validating params");
+		ipa_err("failed on validating params");
 		return;
 	}
 
 	hdr_funcs.ipahal_cp_hdr_to_hw_buff(base, offset, hdr, hdr_len);
 
-	IPAHAL_DBG_LOW("Exit\n");
+	ipa_debug_low("Exit\n");
 }
 
 /*
@@ -1223,36 +1223,36 @@ int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base,
 {
 	int result;
 
-	IPAHAL_DBG("Entry - IPA HW TYPE=%d base=%p ipa_pdev=%p\n",
+	ipa_debug("Entry - IPA HW TYPE=%d base=%p ipa_pdev=%p\n",
 		ipa_hw_type, base, ipa_pdev);
 
 	ipahal_ctx = kzalloc(sizeof(*ipahal_ctx), GFP_KERNEL);
 	if (!ipahal_ctx) {
-		IPAHAL_ERR("kzalloc err for ipahal_ctx\n");
+		ipa_err("kzalloc err for ipahal_ctx\n");
 		result = -ENOMEM;
 		goto bail_err_exit;
 	}
 
 	if (ipa_hw_type < IPA_HW_v3_5_1) {
-		IPAHAL_ERR("ipahal supported on IPAv3 and later only\n");
+		ipa_err("ipahal supported on IPAv3 and later only\n");
 		result = -EINVAL;
 		goto bail_free_ctx;
 	}
 
 	if (ipa_hw_type >= IPA_HW_MAX) {
-		IPAHAL_ERR("invalid IPA HW type (%d)\n", ipa_hw_type);
+		ipa_err("invalid IPA HW type (%d)\n", ipa_hw_type);
 		result = -EINVAL;
 		goto bail_free_ctx;
 	}
 
 	if (!base) {
-		IPAHAL_ERR("invalid memory io mapping addr\n");
+		ipa_err("invalid memory io mapping addr\n");
 		result = -EINVAL;
 		goto bail_free_ctx;
 	}
 
 	if (!ipa_pdev) {
-		IPAHAL_ERR("invalid IPA platform device\n");
+		ipa_err("invalid IPA platform device\n");
 		result = -EINVAL;
 		goto bail_free_ctx;
 	}
@@ -1262,25 +1262,25 @@ int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base,
 	ipahal_ctx->ipa_pdev = ipa_pdev;
 
 	if (ipahal_reg_init(ipa_hw_type)) {
-		IPAHAL_ERR("failed to init ipahal reg\n");
+		ipa_err("failed to init ipahal reg\n");
 		result = -EFAULT;
 		goto bail_free_ctx;
 	}
 
 	if (ipahal_imm_cmd_init(ipa_hw_type)) {
-		IPAHAL_ERR("failed to init ipahal imm cmd\n");
+		ipa_err("failed to init ipahal imm cmd\n");
 		result = -EFAULT;
 		goto bail_free_ctx;
 	}
 
 	if (ipahal_pkt_status_init(ipa_hw_type)) {
-		IPAHAL_ERR("failed to init ipahal pkt status\n");
+		ipa_err("failed to init ipahal pkt status\n");
 		result = -EFAULT;
 		goto bail_free_ctx;
 	}
 
 	if (ipahal_fltrt_init(ipa_hw_type)) {
-                IPAHAL_ERR("failed to init ipahal flt rt\n");
+                ipa_err("failed to init ipahal flt rt\n");
                 result = -EFAULT;
                 goto bail_free_ctx;
     }
@@ -1299,7 +1299,7 @@ bail_err_exit:
 
 void ipahal_destroy(void)
 {
-	IPAHAL_DBG("Entry\n");
+	ipa_debug("Entry\n");
 	ipahal_debugfs_remove();
 	kfree(ipahal_ctx);
 	ipahal_ctx = NULL;

@@ -16,24 +16,6 @@
 #include <linux/if_ether.h>
 #include "../ipa_common_i.h"
 
-#define IPAHAL_DBG(fmt, args...) \
-	do { \
-		pr_debug(fmt, ## args); \
-		ipa_ipc_logging(false, fmt, ## args); \
-	} while (0)
-
-#define IPAHAL_DBG_LOW(fmt, args...) \
-	do { \
-		pr_debug(fmt, ## args); \
-		ipa_ipc_logging(true, fmt, ## args); \
-	} while (0)
-
-#define IPAHAL_ERR(fmt, args...) \
-	do { \
-		pr_err(fmt, ## args); \
-		ipa_ipc_logging(false, fmt, ## args); \
-	} while (0)
-
 #define IPAHAL_MEM_ALLOC(__size, __is_atomic_ctx) \
 	(kzalloc((__size), ((__is_atomic_ctx) ? GFP_ATOMIC : GFP_KERNEL)))
 

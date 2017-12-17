@@ -812,9 +812,6 @@ void ipa_inc_client_enable_clks(struct ipa_active_client_logging_info *id);
 void ipa_dec_client_disable_clks(struct ipa_active_client_logging_info *id);
 int ipa_inc_client_enable_clks_no_block(struct ipa_active_client_logging_info *id);
 
-#define ipa_ipc_logging(logbuf_low, fmt, args...) \
-		__ipa_ipc_logging(logbuf_low, pr_fmt(fmt), ## args)
-
 #define ipa_debug(fmt, args...) \
 	do { \
 		pr_debug(fmt, ## args); \
