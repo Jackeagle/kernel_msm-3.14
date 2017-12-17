@@ -32,7 +32,6 @@
 	do { \
 		pr_err(fmt, ## args); \
 		ipa_ipc_logging(false, fmt, ## args); \
-		ipa_ipc_logging(true, fmt, ## args); \
 	} while (0)
 
 
@@ -46,14 +45,12 @@
 	do { \
 		pr_err(fmt, ## args); \
 		ipa_ipc_logging(false, fmt, ## args); \
-		ipa_ipc_logging(true, fmt, ## args); \
 	} while (0)
 
 #define IPAWANINFO(fmt, args...) \
 	do { \
 		pr_info(fmt, ## args); \
 		ipa_ipc_logging(false, fmt, ## args); \
-		ipa_ipc_logging(true, fmt, ## args); \
 	} while (0)
 
 
