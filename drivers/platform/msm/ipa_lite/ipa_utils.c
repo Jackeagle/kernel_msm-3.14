@@ -2338,7 +2338,7 @@ bool ipa3_is_ready(void)
  */
 void ipa3_proxy_clk_unvote(void)
 {
-	if (ipa3_is_ready() && ipa3_ctx->q6_proxy_clk_vote_valid) {
+	if (ipa3_ctx->q6_proxy_clk_vote_valid) {
 		IPA_ACTIVE_CLIENTS_DEC_SPECIAL("PROXY_CLK_VOTE");
 		ipa3_ctx->q6_proxy_clk_vote_valid = false;
 	}
