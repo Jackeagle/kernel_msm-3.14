@@ -2504,6 +2504,11 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 
 	ipa_debug("UC CB PROBE sub pdev=%p\n", dev);
 
+	if (ipa3_ctx == NULL) {
+		ipa_err("ipa3_ctx was not initialized\n");
+		return -EPROBE_DEFER;
+	}
+
 	ret = of_property_read_u32_array(dev->of_node, "qcom,iova-mapping",
 			iova_ap_mapping, 2);
 	if (ret) {
