@@ -40,17 +40,17 @@ int ipa3_enable_data_path(u32 clnt_hdl)
 	memset(&rsrc_grp, 0, sizeof(rsrc_grp));
 	rsrc_grp.rsrc_grp = ipa_get_ep_group(ep->client);
 	if (rsrc_grp.rsrc_grp == -1) {
-		IPAERR("invalid group for client %d\n", ep->client);
+		ipa_err("invalid group for client %d\n", ep->client);
 		WARN_ON(1);
 		return -EFAULT;
 	}
 
-	IPADBG("Setting group %d for pipe %d\n",
+	ipa_debug("Setting group %d for pipe %d\n",
 		rsrc_grp.rsrc_grp, clnt_hdl);
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_RSRC_GRP_n, clnt_hdl,
 		&rsrc_grp);
 
-	IPADBG("Enabling data path\n");
+	ipa_debug("Enabling data path\n");
 	if (IPA_CLIENT_IS_CONS(ep->client)) {
 		memset(&holb_cfg, 0, sizeof(holb_cfg));
 		holb_cfg.en = IPA_HOLB_TMR_DIS;
@@ -76,25 +76,25 @@ static void ipa_chan_err_cb(struct gsi_chan_err_notify *notify)
 	if (notify) {
 		switch (notify->evt_id) {
 		case GSI_CHAN_INVALID_TRE_ERR:
-			IPAERR("Received GSI_CHAN_INVALID_TRE_ERR\n");
+			ipa_err("Received GSI_CHAN_INVALID_TRE_ERR\n");
 			break;
 		case GSI_CHAN_NON_ALLOCATED_EVT_ACCESS_ERR:
-			IPAERR("Received GSI_CHAN_NON_ALLOC_EVT_ACCESS_ERR\n");
+			ipa_err("Received GSI_CHAN_NON_ALLOC_EVT_ACCESS_ERR\n");
 			break;
 		case GSI_CHAN_OUT_OF_BUFFERS_ERR:
-			IPAERR("Received GSI_CHAN_OUT_OF_BUFFERS_ERR\n");
+			ipa_err("Received GSI_CHAN_OUT_OF_BUFFERS_ERR\n");
 			break;
 		case GSI_CHAN_OUT_OF_RESOURCES_ERR:
-			IPAERR("Received GSI_CHAN_OUT_OF_RESOURCES_ERR\n");
+			ipa_err("Received GSI_CHAN_OUT_OF_RESOURCES_ERR\n");
 			break;
 		case GSI_CHAN_UNSUPPORTED_INTER_EE_OP_ERR:
-			IPAERR("Received GSI_CHAN_UNSUPP_INTER_EE_OP_ERR\n");
+			ipa_err("Received GSI_CHAN_UNSUPP_INTER_EE_OP_ERR\n");
 			break;
 		case GSI_CHAN_HWO_1_ERR:
-			IPAERR("Received GSI_CHAN_HWO_1_ERR\n");
+			ipa_err("Received GSI_CHAN_HWO_1_ERR\n");
 			break;
 		default:
-			IPAERR("Unexpected err evt: %d\n", notify->evt_id);
+			ipa_err("Unexpected err evt: %d\n", notify->evt_id);
 		}
 		BUG();
 	}
@@ -136,7 +136,7 @@ static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 
 	gsi_res = gsi_set_channel_cfg(ep->gsi_chan_hdl, &chan_props, NULL);
 	if (gsi_res) {
-		IPAERR("Error setting channel properties\n");
+		ipa_err("Error setting channel properties\n");
 		result = -EFAULT;
 		goto set_chan_cfg_fail;
 	}
@@ -159,7 +159,7 @@ static int ipa3_restore_channel_properties(struct ipa3_ep_context *ep,
 	gsi_res = gsi_set_channel_cfg(ep->gsi_chan_hdl, chan_props,
 		chan_scratch);
 	if (gsi_res) {
-		IPAERR("Error restoring channel properties\n");
+		ipa_err("Error restoring channel properties\n");
 		return -EFAULT;
 	}
 
@@ -182,13 +182,13 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 	bool pipe_suspended = false;
 	struct ipa_ep_cfg_ctrl ctrl;
 
-	IPADBG("Applying reset channel with open aggregation frame WA\n");
+	ipa_debug("Applying reset channel with open aggregation frame WA\n");
 	ipahal_write_reg(IPA_AGGR_FORCE_CLOSE, (1 << clnt_hdl));
 
 	/* Reset channel */
 	gsi_res = gsi_reset_channel(ep->gsi_chan_hdl);
 	if (gsi_res) {
-		IPAERR("Error resetting channel: %d\n", gsi_res);
+		ipa_err("Error resetting channel: %d\n", gsi_res);
 		return -EFAULT;
 	}
 
@@ -198,7 +198,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 	gsi_res = gsi_get_channel_cfg(ep->gsi_chan_hdl, &orig_chan_props,
 		&orig_chan_scratch);
 	if (gsi_res) {
-		IPAERR("Error getting channel properties: %d\n", gsi_res);
+		ipa_err("Error getting channel properties: %d\n", gsi_res);
 		return -EFAULT;
 	}
 	memset(&chan_dma, 0, sizeof(struct ipa_mem_buffer));
@@ -209,7 +209,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 
 	ipahal_read_reg_n_fields(IPA_ENDP_INIT_CTRL_n, clnt_hdl, &ctrl);
 	if (ctrl.ipa_ep_suspend) {
-		IPADBG("pipe is suspended, remove suspend\n");
+		ipa_debug("pipe is suspended, remove suspend\n");
 		pipe_suspended = true;
 		ctrl.ipa_ep_suspend = false;
 		ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n,
@@ -219,7 +219,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 	/* Start channel and put 1 Byte descriptor on it */
 	gsi_res = gsi_start_channel(ep->gsi_chan_hdl);
 	if (gsi_res) {
-		IPAERR("Error starting channel: %d\n", gsi_res);
+		ipa_err("Error starting channel: %d\n", gsi_res);
 		result = -EFAULT;
 		goto start_chan_fail;
 	}
@@ -235,7 +235,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 	gsi_res = gsi_queue_xfer(ep->gsi_chan_hdl, 1, &xfer_elem,
 		true);
 	if (gsi_res) {
-		IPAERR("Error queueing xfer: %d\n", gsi_res);
+		ipa_err("Error queueing xfer: %d\n", gsi_res);
 		result = -EFAULT;
 		goto queue_xfer_fail;
 	}
@@ -249,7 +249,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 	}
 
 	if (aggr_active_bitmap & (1 << clnt_hdl)) {
-		IPAERR("Failed closing aggr frame for client: %d\n",
+		ipa_err("Failed closing aggr frame for client: %d\n",
 			clnt_hdl);
 		BUG();
 	}
@@ -258,14 +258,14 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 
 	result = ipa3_stop_gsi_channel(clnt_hdl);
 	if (result) {
-		IPAERR("Error stopping channel: %d\n", result);
+		ipa_err("Error stopping channel: %d\n", result);
 		goto start_chan_fail;
 	}
 
 	/* Reset channel */
 	gsi_res = gsi_reset_channel(ep->gsi_chan_hdl);
 	if (gsi_res) {
-		IPAERR("Error resetting channel: %d\n", gsi_res);
+		ipa_err("Error resetting channel: %d\n", gsi_res);
 		result = -EFAULT;
 		goto start_chan_fail;
 	}
@@ -277,7 +277,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 	msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
 
 	if (pipe_suspended) {
-		IPADBG("suspend the pipe again\n");
+		ipa_debug("suspend the pipe again\n");
 		ctrl.ipa_ep_suspend = true;
 		ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n,
 			clnt_hdl, &ctrl);
@@ -298,7 +298,7 @@ queue_xfer_fail:
 	dma_free_coherent(ipa3_ctx->pdev, 1, buff, dma_addr);
 start_chan_fail:
 	if (pipe_suspended) {
-		IPADBG("suspend the pipe again\n");
+		ipa_debug("suspend the pipe again\n");
 		ctrl.ipa_ep_suspend = true;
 		ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n,
 			clnt_hdl, &ctrl);
@@ -318,10 +318,10 @@ int ipa3_reset_gsi_channel(u32 clnt_hdl)
 	int gsi_res;
 	int aggr_active_bitmap = 0;
 
-	IPADBG("entry\n");
+	ipa_debug("entry\n");
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 		ipa3_ctx->ep[clnt_hdl].valid == 0) {
-		IPAERR("Bad parameter.\n");
+		ipa_err("Bad parameter.\n");
 		return -EINVAL;
 	}
 
@@ -351,7 +351,7 @@ int ipa3_reset_gsi_channel(u32 clnt_hdl)
 	msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
 	gsi_res = gsi_reset_channel(ep->gsi_chan_hdl);
 	if (gsi_res) {
-		IPAERR("Error resetting channel: %d\n", gsi_res);
+		ipa_err("Error resetting channel: %d\n", gsi_res);
 		result = -EFAULT;
 		goto reset_chan_fail;
 	}
@@ -360,7 +360,7 @@ finish_reset:
 	if (!ep->keep_ipa_awake)
 		IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
 
-	IPADBG("exit\n");
+	ipa_debug("exit\n");
 	return 0;
 
 reset_chan_fail:

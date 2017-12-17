@@ -132,7 +132,7 @@ static ssize_t ipa3_write_ep_reg(struct file *file, const char __user *buf,
 		return -EFAULT;
 
 	if (option >= ipa3_ctx->ipa_num_pipes) {
-		IPAERR("bad pipe specified %u\n", option);
+		ipa_err("bad pipe specified %u\n", option);
 		return count;
 	}
 
@@ -479,7 +479,7 @@ static ssize_t ipa3_print_active_clients_log(struct file *file,
 	int table_size;
 
 	if (active_clients_buf == NULL) {
-		IPAERR("Active Clients buffer is not allocated");
+		ipa_err("Active Clients buffer is not allocated");
 		return 0;
 	}
 	memset(active_clients_buf, 0, IPA_DBG_ACTIVE_CLIENT_BUF_SIZE);
@@ -541,7 +541,7 @@ static ssize_t ipa3_enable_ipc_low(struct file *file,
 					"ipa_low", 0);
 		}
 			if (ipa_ipc_low_buff == NULL)
-				IPAERR("failed to get logbuf_low\n");
+				ipa_err("failed to get logbuf_low\n");
 		ipa3_ctx->logbuf_low = ipa_ipc_low_buff;
 	} else {
 		ipa3_ctx->logbuf_low = NULL;
@@ -684,7 +684,7 @@ void ipa3_debugfs_init(void)
 	if (active_clients_buf)
 		return;
 fail:
-	IPAERR("error while creating ipa debugfs hierarchy\n");
+	ipa_err("error while creating ipa debugfs hierarchy\n");
 	debugfs_remove_recursive(ipa_dir);
 }
 

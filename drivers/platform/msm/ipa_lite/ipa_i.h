@@ -67,30 +67,6 @@
 
 #define IPA_IPC_LOG_PAGES 50
 
-#define IPADBG(fmt, args...) \
-	do { \
-		pr_debug(fmt, ## args);\
-		ipa_ipc_logging(false, fmt, ## args); \
-	} while (0)
-
-#define IPADBG_LOW(fmt, args...) \
-	do { \
-		pr_debug(fmt, ## args);\
-		ipa_ipc_logging(true, fmt, ## args); \
-	} while (0)
-
-#define IPAERR(fmt, args...) \
-	do { \
-		pr_err(fmt, ## args);\
-		ipa_ipc_logging(false, fmt, ## args); \
-	} while (0)
-
-#define IPAERR_RL(fmt, args...) \
-	do { \
-		pr_err_ratelimited(fmt, ## args);\
-		ipa_ipc_logging(false, fmt, ## args); \
-	} while (0)
-
 #define IPA_MEM_CANARY_VAL 0xdeadbeef
 
 #define IPA_STATS

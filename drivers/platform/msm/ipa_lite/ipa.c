@@ -167,7 +167,7 @@ int ipa3_active_clients_log_print_table(char *buf, int size)
 					iterator->id_string, iterator->count);
 			break;
 		default:
-			IPAERR("Trying to print illegal active_clients type");
+			ipa_err("Trying to print illegal active_clients type");
 			break;
 		}
 	}
@@ -186,7 +186,7 @@ static int ipa3_active_clients_panic_notifier(struct notifier_block *this,
 	mutex_lock(&ipa3_ctx->ipa3_active_clients.mutex);
 	ipa3_active_clients_log_print_table(active_clients_table_buf,
 			IPA_ACTIVE_CLIENTS_TABLE_BUF_SIZE);
-	IPAERR("%s", active_clients_table_buf);
+	ipa_err("%s", active_clients_table_buf);
 	mutex_unlock(&ipa3_ctx->ipa3_active_clients.mutex);
 
 	return NOTIFY_DONE;
@@ -304,7 +304,7 @@ static int ipa3_init_smem_region(int memory_region_size,
 	mem.base = dma_alloc_coherent(ipa3_ctx->pdev, mem.size,
 		&mem.phys_base, GFP_KERNEL);
 	if (!mem.base) {
-		IPAERR("failed to alloc DMA buff of size %d\n", mem.size);
+		ipa_err("failed to alloc DMA buff of size %d\n", mem.size);
 		return -ENOMEM;
 	}
 
@@ -319,7 +319,7 @@ static int ipa3_init_smem_region(int memory_region_size,
 	cmd_pyld = ipahal_construct_imm_cmd(
 		IPA_IMM_CMD_DMA_SHARED_MEM, &cmd, false);
 	if (!cmd_pyld) {
-		IPAERR("failed to construct dma_shared_mem imm cmd\n");
+		ipa_err("failed to construct dma_shared_mem imm cmd\n");
 		return -ENOMEM;
 	}
 	desc.opcode = cmd_pyld->opcode;
@@ -329,7 +329,7 @@ static int ipa3_init_smem_region(int memory_region_size,
 
 	rc = ipa3_send_cmd(1, &desc);
 	if (rc) {
-		IPAERR("failed to send immediate command (error %d)\n", rc);
+		ipa_err("failed to send immediate command (error %d)\n", rc);
 		rc = -EFAULT;
 	}
 
@@ -358,7 +358,7 @@ int ipa3_init_q6_smem(void)
 	rc = ipa3_init_smem_region(IPA_MEM_PART(modem_size),
 		IPA_MEM_PART(modem_ofst));
 	if (rc) {
-		IPAERR("failed to initialize Modem RAM memory\n");
+		ipa_err("failed to initialize Modem RAM memory\n");
 		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 		return rc;
 	}
@@ -366,7 +366,7 @@ int ipa3_init_q6_smem(void)
 	rc = ipa3_init_smem_region(IPA_MEM_PART(modem_hdr_size),
 		IPA_MEM_PART(modem_hdr_ofst));
 	if (rc) {
-		IPAERR("failed to initialize Modem HDRs RAM memory\n");
+		ipa_err("failed to initialize Modem HDRs RAM memory\n");
 		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 		return rc;
 	}
@@ -374,7 +374,7 @@ int ipa3_init_q6_smem(void)
 	rc = ipa3_init_smem_region(IPA_MEM_PART(modem_hdr_proc_ctx_size),
 		IPA_MEM_PART(modem_hdr_proc_ctx_ofst));
 	if (rc) {
-		IPAERR("failed to initialize Modem proc ctx RAM memory\n");
+		ipa_err("failed to initialize Modem proc ctx RAM memory\n");
 		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 		return rc;
 	}
@@ -382,7 +382,7 @@ int ipa3_init_q6_smem(void)
 	rc = ipa3_init_smem_region(IPA_MEM_PART(modem_comp_decomp_size),
 		IPA_MEM_PART(modem_comp_decomp_ofst));
 	if (rc) {
-		IPAERR("failed to initialize Modem Comp/Decomp RAM memory\n");
+		ipa_err("failed to initialize Modem Comp/Decomp RAM memory\n");
 		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 		return rc;
 	}
@@ -472,7 +472,7 @@ static void ipa3_halt_q6_cons_gsi_channels(void)
 
 			gsi_ep_cfg = ipa3_get_gsi_ep_info(client_idx);
 			if (!gsi_ep_cfg) {
-				IPAERR("failed to get GSI config\n");
+				ipa_err("failed to get GSI config\n");
 				ipa_assert();
 				return;
 			}
@@ -481,12 +481,12 @@ static void ipa3_halt_q6_cons_gsi_channels(void)
 				gsi_ep_cfg->ipa_gsi_chan_num, gsi_ep_cfg->ee,
 				&code);
 			if (!ret)
-				IPADBG("halted gsi ch %d ee %d with code %d\n",
+				ipa_debug("halted gsi ch %d ee %d with code %d\n",
 				gsi_ep_cfg->ipa_gsi_chan_num,
 				gsi_ep_cfg->ee,
 				code);
 			else
-				IPAERR("failed to halt ch %d ee %d code %d\n",
+				ipa_err("failed to halt ch %d ee %d code %d\n",
 				gsi_ep_cfg->ipa_gsi_chan_num,
 				gsi_ep_cfg->ee,
 				code);
@@ -509,7 +509,7 @@ static int ipa3_q6_set_ex_path_to_apps(void)
 	desc = kcalloc(ipa3_ctx->ipa_num_pipes, sizeof(struct ipa3_desc),
 			GFP_KERNEL);
 	if (!desc) {
-		IPAERR("failed to allocate memory\n");
+		ipa_err("failed to allocate memory\n");
 		return -ENOMEM;
 	}
 
@@ -537,7 +537,7 @@ static int ipa3_q6_set_ex_path_to_apps(void)
 			cmd_pyld = ipahal_construct_imm_cmd(
 				IPA_IMM_CMD_REGISTER_WRITE, &reg_write, false);
 			if (!cmd_pyld) {
-				IPAERR("fail construct register_write cmd\n");
+				ipa_err("fail construct register_write cmd\n");
 				BUG();
 			}
 
@@ -565,7 +565,7 @@ static int ipa3_q6_set_ex_path_to_apps(void)
 			cmd_pyld = ipahal_construct_imm_cmd(
 				IPA_IMM_CMD_REGISTER_WRITE, &reg_write, false);
 			if (!cmd_pyld) {
-				IPAERR("fail construct register_write cmd\n");
+				ipa_err("fail construct register_write cmd\n");
 				ipa_assert();
 				return -EFAULT;
 			}
@@ -584,7 +584,7 @@ static int ipa3_q6_set_ex_path_to_apps(void)
 	retval = ipa3_tag_process(desc, num_descs,
 		msecs_to_jiffies(CLEANUP_TAG_PROCESS_TIMEOUT));
 	if (retval) {
-		IPAERR("TAG process failed! (error %d)\n", retval);
+		ipa_err("TAG process failed! (error %d)\n", retval);
 		/* For timeout error ipa3_destroy_imm cb will destroy user1 */
 		if (retval != -ETIME) {
 			for (index = 0; index < num_descs; index++)
@@ -609,7 +609,7 @@ static int ipa3_q6_set_ex_path_to_apps(void)
 */
 void ipa3_q6_pre_shutdown_cleanup(void)
 {
-	IPADBG_LOW("ENTER\n");
+	ipa_debug_low("ENTER\n");
 
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
 
@@ -617,11 +617,11 @@ void ipa3_q6_pre_shutdown_cleanup(void)
 	ipa3_q6_avoid_holb();
 
 	if (ipa3_q6_clean_q6_tables()) {
-		IPAERR("Failed to clean Q6 tables\n");
+		ipa_err("Failed to clean Q6 tables\n");
 		BUG();
 	}
 	if (ipa3_q6_set_ex_path_to_apps()) {
-		IPAERR("Failed to redirect exceptions to APPS\n");
+		ipa_err("Failed to redirect exceptions to APPS\n");
 		BUG();
 	}
 	/* Remove delay from Q6 PRODs to avoid pending descriptors
@@ -630,7 +630,7 @@ void ipa3_q6_pre_shutdown_cleanup(void)
 	ipa3_q6_pipe_delay(false);
 
 	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
-	IPADBG_LOW("Exit with success\n");
+	ipa_debug_low("Exit with success\n");
 }
 
 /*
@@ -645,10 +645,10 @@ void ipa3_q6_post_shutdown_cleanup(void)
 	int client_idx;
 	int ep_idx;
 
-	IPADBG_LOW("ENTER\n");
+	ipa_debug_low("ENTER\n");
 
 	if (!ipa3_ctx->uc_ctx.uc_loaded) {
-		IPAERR("uC is not loaded. Skipping\n");
+		ipa_err("uC is not loaded. Skipping\n");
 		return;
 	}
 
@@ -665,7 +665,7 @@ void ipa3_q6_post_shutdown_cleanup(void)
 				continue;
 
 			if (ipa3_uc_is_gsi_channel_empty(client_idx)) {
-				IPAERR("fail to validate Q6 ch emptiness %d\n",
+				ipa_err("fail to validate Q6 ch emptiness %d\n",
 					client_idx);
 				BUG();
 				return;
@@ -673,7 +673,7 @@ void ipa3_q6_post_shutdown_cleanup(void)
 		}
 
 	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
-	IPADBG_LOW("Exit with success\n");
+	ipa_debug_low("Exit with success\n");
 }
 
 static inline void ipa3_sram_set_canary(u32 *sram_mmio, int offset)
@@ -699,7 +699,7 @@ int _ipa_init_sram_v3(void)
 
 	ipa_sram_mmio = ioremap(phys_addr, ipa3_ctx->smem_sz);
 	if (!ipa_sram_mmio) {
-		IPAERR("fail to ioremap IPA SRAM\n");
+		ipa_err("fail to ioremap IPA SRAM\n");
 		return -ENOMEM;
 	}
 
@@ -754,7 +754,7 @@ int _ipa_init_hdr_v3_0(void)
 	mem.base = dma_alloc_coherent(ipa3_ctx->pdev, mem.size, &mem.phys_base,
 		GFP_KERNEL);
 	if (!mem.base) {
-		IPAERR("fail to alloc DMA buff of size %d\n", mem.size);
+		ipa_err("fail to alloc DMA buff of size %d\n", mem.size);
 		return -ENOMEM;
 	}
 	memset(mem.base, 0, mem.size);
@@ -766,7 +766,7 @@ int _ipa_init_hdr_v3_0(void)
 	cmd_pyld = ipahal_construct_imm_cmd(
 		IPA_IMM_CMD_HDR_INIT_LOCAL, &cmd, false);
 	if (!cmd_pyld) {
-		IPAERR("fail to construct hdr_init_local imm cmd\n");
+		ipa_err("fail to construct hdr_init_local imm cmd\n");
 		dma_free_coherent(ipa3_ctx->pdev,
 			mem.size, mem.base,
 			mem.phys_base);
@@ -779,7 +779,7 @@ int _ipa_init_hdr_v3_0(void)
 	IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
 	if (ipa3_send_cmd(1, &desc)) {
-		IPAERR("fail to send immediate command\n");
+		ipa_err("fail to send immediate command\n");
 		ipahal_destroy_imm_cmd(cmd_pyld);
 		dma_free_coherent(ipa3_ctx->pdev,
 			mem.size, mem.base,
@@ -795,7 +795,7 @@ int _ipa_init_hdr_v3_0(void)
 	mem.base = dma_alloc_coherent(ipa3_ctx->pdev, mem.size, &mem.phys_base,
 		GFP_KERNEL);
 	if (!mem.base) {
-		IPAERR("fail to alloc DMA buff of size %d\n", mem.size);
+		ipa_err("fail to alloc DMA buff of size %d\n", mem.size);
 		return -ENOMEM;
 	}
 	memset(mem.base, 0, mem.size);
@@ -811,7 +811,7 @@ int _ipa_init_hdr_v3_0(void)
 	cmd_pyld = ipahal_construct_imm_cmd(
 		IPA_IMM_CMD_DMA_SHARED_MEM, &dma_cmd, false);
 	if (!cmd_pyld) {
-		IPAERR("fail to construct dma_shared_mem imm\n");
+		ipa_err("fail to construct dma_shared_mem imm\n");
 		dma_free_coherent(ipa3_ctx->pdev,
 			mem.size, mem.base,
 			mem.phys_base);
@@ -824,7 +824,7 @@ int _ipa_init_hdr_v3_0(void)
 	IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
 	if (ipa3_send_cmd(1, &desc)) {
-		IPAERR("fail to send immediate command\n");
+		ipa_err("fail to send immediate command\n");
 		ipahal_destroy_imm_cmd(cmd_pyld);
 		dma_free_coherent(ipa3_ctx->pdev,
 			mem.size,
@@ -859,13 +859,13 @@ int _ipa_init_rt4_v3(void)
                 i <= IPA_MEM_PART(v4_modem_rt_index_hi);
                 i++)
                 ipa3_ctx->rt_idx_bitmap[IPA_IP_v4] |= (1 << i);
-        IPADBG("v4 rt bitmap 0x%lx\n", ipa3_ctx->rt_idx_bitmap[IPA_IP_v4]);
+        ipa_debug("v4 rt bitmap 0x%lx\n", ipa3_ctx->rt_idx_bitmap[IPA_IP_v4]);
 
         rc = ipahal_rt_generate_empty_img(IPA_MEM_PART(v4_rt_num_index),
                 IPA_MEM_PART(v4_rt_hash_size), IPA_MEM_PART(v4_rt_nhash_size),
                 &mem, false);
         if (rc) {
-                IPAERR("fail generate empty v4 rt img\n");
+                ipa_err("fail generate empty v4 rt img\n");
                 return rc;
         }
 
@@ -877,14 +877,14 @@ int _ipa_init_rt4_v3(void)
         v4_cmd.nhash_rules_size = mem.size;
         v4_cmd.nhash_local_addr = ipa3_ctx->smem_restricted_bytes +
                 IPA_MEM_PART(v4_rt_nhash_ofst);
-        IPADBG("putting hashable routing IPv4 rules to phys 0x%x\n",
+        ipa_debug("putting hashable routing IPv4 rules to phys 0x%x\n",
                                 v4_cmd.hash_local_addr);
-        IPADBG("putting non-hashable routing IPv4 rules to phys 0x%x\n",
+        ipa_debug("putting non-hashable routing IPv4 rules to phys 0x%x\n",
                                 v4_cmd.nhash_local_addr);
         cmd_pyld = ipahal_construct_imm_cmd(
                 IPA_IMM_CMD_IP_V4_ROUTING_INIT, &v4_cmd, false);
         if (!cmd_pyld) {
-                IPAERR("fail construct ip_v4_rt_init imm cmd\n");
+                ipa_err("fail construct ip_v4_rt_init imm cmd\n");
                 rc = -EPERM;
                 goto free_mem;
         }
@@ -896,7 +896,7 @@ int _ipa_init_rt4_v3(void)
         IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
         if (ipa3_send_cmd(1, &desc)) {
-                IPAERR("fail to send immediate command\n");
+                ipa_err("fail to send immediate command\n");
                 rc = -EFAULT;
         }
 
@@ -925,13 +925,13 @@ int _ipa_init_rt6_v3(void)
                 i <= IPA_MEM_PART(v6_modem_rt_index_hi);
                 i++)
                 ipa3_ctx->rt_idx_bitmap[IPA_IP_v6] |= (1 << i);
-        IPADBG("v6 rt bitmap 0x%lx\n", ipa3_ctx->rt_idx_bitmap[IPA_IP_v6]);
+        ipa_debug("v6 rt bitmap 0x%lx\n", ipa3_ctx->rt_idx_bitmap[IPA_IP_v6]);
 
         rc = ipahal_rt_generate_empty_img(IPA_MEM_PART(v6_rt_num_index),
                 IPA_MEM_PART(v6_rt_hash_size), IPA_MEM_PART(v6_rt_nhash_size),
                 &mem, false);
         if (rc) {
-                IPAERR("fail generate empty v6 rt img\n");
+                ipa_err("fail generate empty v6 rt img\n");
                 return rc;
         }
 
@@ -943,14 +943,14 @@ int _ipa_init_rt6_v3(void)
         v6_cmd.nhash_rules_size = mem.size;
         v6_cmd.nhash_local_addr = ipa3_ctx->smem_restricted_bytes +
                 IPA_MEM_PART(v6_rt_nhash_ofst);
-        IPADBG("putting hashable routing IPv6 rules to phys 0x%x\n",
+        ipa_debug("putting hashable routing IPv6 rules to phys 0x%x\n",
                                 v6_cmd.hash_local_addr);
-        IPADBG("putting non-hashable routing IPv6 rules to phys 0x%x\n",
+        ipa_debug("putting non-hashable routing IPv6 rules to phys 0x%x\n",
                                 v6_cmd.nhash_local_addr);
         cmd_pyld = ipahal_construct_imm_cmd(
                 IPA_IMM_CMD_IP_V6_ROUTING_INIT, &v6_cmd, false);
         if (!cmd_pyld) {
-                IPAERR("fail construct ip_v6_rt_init imm cmd\n");
+                ipa_err("fail construct ip_v6_rt_init imm cmd\n");
                 rc = -EPERM;
                 goto free_mem;
         }
@@ -962,7 +962,7 @@ int _ipa_init_rt6_v3(void)
         IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
         if (ipa3_send_cmd(1, &desc)) {
-                IPAERR("fail to send immediate command\n");
+                ipa_err("fail to send immediate command\n");
                 rc = -EFAULT;
         }
 
@@ -991,7 +991,7 @@ int _ipa_init_flt4_v3(void)
                 IPA_MEM_PART(v4_flt_nhash_size), ipa3_ctx->ep_flt_bitmap,
                 &mem, false);
         if (rc) {
-                IPAERR("fail generate empty v4 flt img\n");
+                ipa_err("fail generate empty v4 flt img\n");
                 return rc;
         }
 
@@ -1003,14 +1003,14 @@ int _ipa_init_flt4_v3(void)
         v4_cmd.nhash_rules_size = mem.size;
         v4_cmd.nhash_local_addr = ipa3_ctx->smem_restricted_bytes +
                 IPA_MEM_PART(v4_flt_nhash_ofst);
-        IPADBG("putting hashable filtering IPv4 rules to phys 0x%x\n",
+        ipa_debug("putting hashable filtering IPv4 rules to phys 0x%x\n",
                                 v4_cmd.hash_local_addr);
-        IPADBG("putting non-hashable filtering IPv4 rules to phys 0x%x\n",
+        ipa_debug("putting non-hashable filtering IPv4 rules to phys 0x%x\n",
                                 v4_cmd.nhash_local_addr);
         cmd_pyld = ipahal_construct_imm_cmd(
                 IPA_IMM_CMD_IP_V4_FILTER_INIT, &v4_cmd, false);
         if (!cmd_pyld) {
-                IPAERR("fail construct ip_v4_flt_init imm cmd\n");
+                ipa_err("fail construct ip_v4_flt_init imm cmd\n");
                 rc = -EPERM;
                 goto free_mem;
         }
@@ -1022,7 +1022,7 @@ int _ipa_init_flt4_v3(void)
         IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
         if (ipa3_send_cmd(1, &desc)) {
-                IPAERR("fail to send immediate command\n");
+                ipa_err("fail to send immediate command\n");
                 rc = -EFAULT;
         }
 
@@ -1051,7 +1051,7 @@ int _ipa_init_flt6_v3(void)
                 IPA_MEM_PART(v6_flt_nhash_size), ipa3_ctx->ep_flt_bitmap,
                 &mem, false);
         if (rc) {
-                IPAERR("fail generate empty v6 flt img\n");
+                ipa_err("fail generate empty v6 flt img\n");
                 return rc;
         }
 
@@ -1063,15 +1063,15 @@ int _ipa_init_flt6_v3(void)
         v6_cmd.nhash_rules_size = mem.size;
         v6_cmd.nhash_local_addr = ipa3_ctx->smem_restricted_bytes +
                 IPA_MEM_PART(v6_flt_nhash_ofst);
-        IPADBG("putting hashable filtering IPv6 rules to phys 0x%x\n",
+        ipa_debug("putting hashable filtering IPv6 rules to phys 0x%x\n",
                                 v6_cmd.hash_local_addr);
-        IPADBG("putting non-hashable filtering IPv6 rules to phys 0x%x\n",
+        ipa_debug("putting non-hashable filtering IPv6 rules to phys 0x%x\n",
                                 v6_cmd.nhash_local_addr);
 
         cmd_pyld = ipahal_construct_imm_cmd(
                 IPA_IMM_CMD_IP_V6_FILTER_INIT, &v6_cmd, false);
         if (!cmd_pyld) {
-                IPAERR("fail construct ip_v6_flt_init imm cmd\n");
+                ipa_err("fail construct ip_v6_flt_init imm cmd\n");
                 rc = -EPERM;
                 goto free_mem;
         }
@@ -1083,7 +1083,7 @@ int _ipa_init_flt6_v3(void)
         IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
         if (ipa3_send_cmd(1, &desc)) {
-                IPAERR("fail to send immediate command\n");
+                ipa_err("fail to send immediate command\n");
                 rc = -EFAULT;
         }
 
@@ -1110,7 +1110,7 @@ static int ipa3_setup_flt_hash_tuple(void)
 			continue;
 
 		if (ipa3_set_flt_tuple_mask(pipe_idx, &tuple)) {
-		IPAERR("failed to setup pipe %d flt tuple\n", pipe_idx);
+		ipa_err("failed to setup pipe %d flt tuple\n", pipe_idx);
 		return -EFAULT;
         }
 	}
@@ -1139,7 +1139,7 @@ static int ipa3_setup_rt_hash_tuple(void)
 			continue;
 
 		if (ipa3_set_rt_tuple_mask(tbl_idx, &tuple)) {
-			IPAERR("failed to setup tbl %d rt tuple\n", tbl_idx);
+			ipa_err("failed to setup tbl %d rt tuple\n", tbl_idx);
 			return -EFAULT;
 		}
 	}
@@ -1154,7 +1154,7 @@ static int ipa3_setup_apps_pipes(void)
 
 	/* allocate the common PROD event ring */
 	if (ipa3_alloc_common_event_ring()) {
-		IPAERR("ipa3_alloc_common_event_ring failed.\n");
+		ipa_err("ipa3_alloc_common_event_ring failed.\n");
 		result = -EPERM;
 		goto fail_ch20_wa;
 	}
@@ -1166,43 +1166,43 @@ static int ipa3_setup_apps_pipes(void)
 	sys_in.ipa_ep_cfg.mode.mode = IPA_DMA;
 	sys_in.ipa_ep_cfg.mode.dst = IPA_CLIENT_APPS_LAN_CONS;
 	if (ipa3_setup_sys_pipe(&sys_in, &ipa3_ctx->clnt_hdl_cmd)) {
-		IPAERR(":setup sys pipe (APPS_CMD_PROD) failed.\n");
+		ipa_err(":setup sys pipe (APPS_CMD_PROD) failed.\n");
 		result = -EPERM;
 		goto fail_ch20_wa;
 	}
-	IPADBG("Apps to IPA cmd pipe is connected\n");
+	ipa_debug("Apps to IPA cmd pipe is connected\n");
 
 	ipa3_ctx->ctrl->ipa_init_sram();
-	IPADBG("SRAM initialized\n");
+	ipa_debug("SRAM initialized\n");
 
 	ipa3_ctx->ctrl->ipa_init_hdr();
-	IPADBG("HDR initialized\n");
+	ipa_debug("HDR initialized\n");
 
 	ipa3_ctx->ctrl->ipa_init_rt4();
-        IPADBG("V4 RT initialized\n");
+        ipa_debug("V4 RT initialized\n");
 
         ipa3_ctx->ctrl->ipa_init_rt6();
-        IPADBG("V6 RT initialized\n");
+        ipa_debug("V6 RT initialized\n");
 
         ipa3_ctx->ctrl->ipa_init_flt4();
-        IPADBG("V4 FLT initialized\n");
+        ipa_debug("V4 FLT initialized\n");
 
         ipa3_ctx->ctrl->ipa_init_flt6();
-        IPADBG("V6 FLT initialized\n");
+        ipa_debug("V6 FLT initialized\n");
 
 	if (ipa3_setup_flt_hash_tuple()) {
-		IPAERR(":fail to configure flt hash tuple\n");
+		ipa_err(":fail to configure flt hash tuple\n");
 		result = -EPERM;
 		goto fail_flt_hash_tuple;
 	}
-	IPADBG("flt hash tuple is configured\n");
+	ipa_debug("flt hash tuple is configured\n");
 
 	if (ipa3_setup_rt_hash_tuple()) {
-		IPAERR(":fail to configure rt hash tuple\n");
+		ipa_err(":fail to configure rt hash tuple\n");
 		result = -EPERM;
 		goto fail_flt_hash_tuple;
 	}
-	IPADBG("rt hash tuple is configured\n");
+	ipa_debug("rt hash tuple is configured\n");
 
 	/* LAN IN (IPA->AP) */
 	memset(&sys_in, 0, sizeof(struct ipa_sys_connect_params));
@@ -1228,7 +1228,7 @@ static int ipa3_setup_apps_pipes(void)
 	 */
 	spin_lock_init(&ipa3_ctx->disconnect_lock);
 	if (ipa3_setup_sys_pipe(&sys_in, &ipa3_ctx->clnt_hdl_data_in)) {
-		IPAERR(":setup sys pipe (LAN_CONS) failed.\n");
+		ipa_err(":setup sys pipe (LAN_CONS) failed.\n");
 		result = -EPERM;
 		goto fail_flt_hash_tuple;
 	}
@@ -1246,7 +1246,7 @@ fail_ch20_wa:
  */
 void _ipa_enable_clks_v3_0(void)
 {
-	IPADBG_LOW("curr_ipa_clk_rate=%d", ipa3_ctx->curr_ipa_clk_rate);
+	ipa_debug_low("curr_ipa_clk_rate=%d", ipa3_ctx->curr_ipa_clk_rate);
 
 	ipa3_uc_notify_clk_state(true);
 }
@@ -1270,7 +1270,7 @@ static unsigned int ipa3_get_bus_vote(void)
 		WARN_ON(1);
 	}
 
-	IPADBG("curr %d idx %d\n", ipa3_ctx->curr_ipa_clk_rate, idx);
+	ipa_debug("curr %d idx %d\n", ipa3_ctx->curr_ipa_clk_rate, idx);
 
 	return idx;
 }
@@ -1283,7 +1283,7 @@ static unsigned int ipa3_get_bus_vote(void)
 */
 void ipa3_enable_clks(void)
 {
-	IPADBG("enabling IPA clocks and bus voting\n");
+	ipa_debug("enabling IPA clocks and bus voting\n");
 
 	if (msm_bus_scale_client_update_request(ipa3_ctx->ipa_bus_hdl,
 	    ipa3_get_bus_vote()))
@@ -1310,7 +1310,7 @@ void _ipa_disable_clks_v3_0(void)
 */
 void ipa3_disable_clks(void)
 {
-	IPADBG("disabling IPA clocks and bus voting\n");
+	ipa_debug("disabling IPA clocks and bus voting\n");
 
 	ipa3_ctx->ctrl->ipa3_disable_clks();
 
@@ -1333,14 +1333,14 @@ static void ipa3_start_tag_process(struct work_struct *work)
 {
 	int res;
 
-	IPADBG("starting TAG process\n");
+	ipa_debug("starting TAG process\n");
 	/* close aggregation frames on all pipes */
 	res = ipa3_tag_aggr_force_close(-1);
 	if (res)
-		IPAERR("ipa3_tag_aggr_force_close failed %d\n", res);
+		ipa_err("ipa3_tag_aggr_force_close failed %d\n", res);
 	IPA_ACTIVE_CLIENTS_DEC_SPECIAL("TAG_PROCESS");
 
-	IPADBG("TAG process done\n");
+	ipa_debug("TAG process done\n");
 }
 
 /**
@@ -1399,7 +1399,7 @@ void ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 				struct ipa3_active_client_htable_entry),
 				int_ctx ? GFP_ATOMIC : GFP_KERNEL);
 		if (hentry == NULL) {
-			IPAERR("failed allocating active clients hash entry");
+			ipa_err("failed allocating active clients hash entry");
 			spin_unlock_irqrestore(
 				&ipa3_ctx->ipa3_active_clients_logging.lock,
 				flags);
@@ -1457,7 +1457,7 @@ void ipa3_inc_client_enable_clks(struct ipa_active_client_logging_info *id)
 	ipa3_active_clients_log_inc(id, false);
 	ret = atomic_inc_not_zero(&ipa3_ctx->ipa3_active_clients.cnt);
 	if (ret) {
-		IPADBG_LOW("active clients = %d\n",
+		ipa_debug_low("active clients = %d\n",
 			atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
 		return;
 	}
@@ -1468,14 +1468,14 @@ void ipa3_inc_client_enable_clks(struct ipa_active_client_logging_info *id)
 	ret = atomic_inc_not_zero(&ipa3_ctx->ipa3_active_clients.cnt);
 	if (ret) {
 		mutex_unlock(&ipa3_ctx->ipa3_active_clients.mutex);
-		IPADBG_LOW("active clients = %d\n",
+		ipa_debug_low("active clients = %d\n",
 			atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
 		return;
 	}
 
 	ipa3_enable_clks();
 	atomic_inc(&ipa3_ctx->ipa3_active_clients.cnt);
-	IPADBG_LOW("active clients = %d\n",
+	ipa_debug_low("active clients = %d\n",
 		atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
 	ipa3_suspend_apps_pipes(false);
 	mutex_unlock(&ipa3_ctx->ipa3_active_clients.mutex);
@@ -1497,7 +1497,7 @@ int ipa3_inc_client_enable_clks_no_block(struct ipa_active_client_logging_info
 	ret = atomic_inc_not_zero(&ipa3_ctx->ipa3_active_clients.cnt);
 	if (ret) {
 		ipa3_active_clients_log_inc(id, true);
-		IPADBG_LOW("active clients = %d\n",
+		ipa_debug_low("active clients = %d\n",
 			atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
 		return 0;
 	}
@@ -1510,7 +1510,7 @@ static void __ipa3_dec_client_disable_clks(void)
 	int ret;
 
 	if (!atomic_read(&ipa3_ctx->ipa3_active_clients.cnt)) {
-		IPAERR("trying to disable clocks with refcnt is 0!\n");
+		ipa_err("trying to disable clocks with refcnt is 0!\n");
 		ipa_assert();
 		return;
 	}
@@ -1541,7 +1541,7 @@ static void __ipa3_dec_client_disable_clks(void)
 unlock_mutex:
 	mutex_unlock(&ipa3_ctx->ipa3_active_clients.mutex);
 bail:
-	IPADBG_LOW("active clients = %d\n",
+	ipa_debug_low("active clients = %d\n",
 		atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
 }
 
@@ -1583,7 +1583,7 @@ void ipa3_dec_client_disable_clks_no_block(
 	ipa3_active_clients_log_dec(id, true);
 	ret = atomic_add_unless(&ipa3_ctx->ipa3_active_clients.cnt, -1, 1);
 	if (ret) {
-		IPADBG_LOW("active clients = %d\n",
+		ipa_debug_low("active clients = %d\n",
 			atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
 		return;
 	}
@@ -1608,7 +1608,7 @@ void ipa3_inc_acquire_wakelock(void)
 	ipa3_ctx->wakelock_ref_cnt.cnt++;
 	if (ipa3_ctx->wakelock_ref_cnt.cnt == 1)
 		__pm_stay_awake(&ipa3_ctx->w_lock);
-	IPADBG_LOW("active wakelock ref cnt = %d\n",
+	ipa_debug_low("active wakelock ref cnt = %d\n",
 		ipa3_ctx->wakelock_ref_cnt.cnt);
 	spin_unlock_irqrestore(&ipa3_ctx->wakelock_ref_cnt.spinlock, flags);
 }
@@ -1627,7 +1627,7 @@ void ipa3_dec_release_wakelock(void)
 
 	spin_lock_irqsave(&ipa3_ctx->wakelock_ref_cnt.spinlock, flags);
 	ipa3_ctx->wakelock_ref_cnt.cnt--;
-	IPADBG_LOW("active wakelock ref cnt = %d\n",
+	ipa_debug_low("active wakelock ref cnt = %d\n",
 		ipa3_ctx->wakelock_ref_cnt.cnt);
 	if (ipa3_ctx->wakelock_ref_cnt.cnt == 0)
 		__pm_relax(&ipa3_ctx->w_lock);
@@ -1640,17 +1640,17 @@ int ipa3_set_required_perf_profile(enum ipa_voltage_level floor_voltage,
 	enum ipa_voltage_level needed_voltage;
 	u32 clk_rate;
 
-	IPADBG_LOW("floor_voltage=%d, bandwidth_mbps=%u",
+	ipa_debug_low("floor_voltage=%d, bandwidth_mbps=%u",
 					floor_voltage, bandwidth_mbps);
 
 	if (floor_voltage < IPA_VOLTAGE_UNSPECIFIED ||
 		floor_voltage >= IPA_VOLTAGE_MAX) {
-		IPAERR("bad voltage\n");
+		ipa_err("bad voltage\n");
 		return -EINVAL;
 	}
 
 	if (ipa3_ctx->enable_clock_scaling) {
-		IPADBG_LOW("Clock scaling is enabled\n");
+		ipa_debug_low("Clock scaling is enabled\n");
 		if (bandwidth_mbps >=
 			ipa3_ctx->ctrl->clock_scaling_bw_threshold_turbo)
 			needed_voltage = IPA_VOLTAGE_TURBO;
@@ -1660,7 +1660,7 @@ int ipa3_set_required_perf_profile(enum ipa_voltage_level floor_voltage,
 		else
 			needed_voltage = IPA_VOLTAGE_SVS;
 	} else {
-		IPADBG_LOW("Clock scaling is disabled\n");
+		ipa_debug_low("Clock scaling is disabled\n");
 		needed_voltage = IPA_VOLTAGE_NOMINAL;
 	}
 
@@ -1676,29 +1676,29 @@ int ipa3_set_required_perf_profile(enum ipa_voltage_level floor_voltage,
 		clk_rate = ipa3_ctx->ctrl->ipa_clk_rate_turbo;
 		break;
 	default:
-		IPAERR("bad voltage\n");
+		ipa_err("bad voltage\n");
 		WARN_ON(1);
 		return -EFAULT;
 	}
 
 	if (clk_rate == ipa3_ctx->curr_ipa_clk_rate) {
-		IPADBG_LOW("Same voltage\n");
+		ipa_debug_low("Same voltage\n");
 		return 0;
 	}
 
 	/* Hold the mutex to avoid race conditions with ipa3_enable_clocks() */
 	mutex_lock(&ipa3_ctx->ipa3_active_clients.mutex);
 	ipa3_ctx->curr_ipa_clk_rate = clk_rate;
-	IPADBG_LOW("setting clock rate to %u\n", ipa3_ctx->curr_ipa_clk_rate);
+	ipa_debug_low("setting clock rate to %u\n", ipa3_ctx->curr_ipa_clk_rate);
 	if (atomic_read(&ipa3_ctx->ipa3_active_clients.cnt) > 0) {
 		if (msm_bus_scale_client_update_request(ipa3_ctx->ipa_bus_hdl,
 				ipa3_get_bus_vote()))
 			WARN_ON(1);
 	} else {
-		IPADBG_LOW("clocks are gated, not setting rate\n");
+		ipa_debug_low("clocks are gated, not setting rate\n");
 	}
 	mutex_unlock(&ipa3_ctx->ipa3_active_clients.mutex);
-	IPADBG_LOW("Done\n");
+	ipa_debug_low("Done\n");
 
 	return 0;
 }
@@ -1721,7 +1721,7 @@ void ipa3_suspend_handler(enum ipa_irq_type interrupt,
 	u32 i = 0;
 	struct ipa_ep_cfg_holb holb_cfg;
 
-	IPADBG("interrupt=%d, interrupt_data=%u\n",
+	ipa_debug("interrupt=%d, interrupt_data=%u\n",
 		interrupt, suspend_data);
 	memset(&holb_cfg, 0, sizeof(holb_cfg));
 	holb_cfg.tmr_val = 0;
@@ -1740,8 +1740,8 @@ void ipa3_suspend_handler(enum ipa_irq_type interrupt,
 					) {
 					IPA_ACTIVE_CLIENTS_INC_EP(
 						ipa3_ctx->ep[i].client);
-					IPADBG_LOW("Pipes un-suspended.\n");
-					IPADBG_LOW("Enter poll mode.\n");
+					ipa_debug_low("Pipes un-suspended.\n");
+					ipa_debug_low("Enter poll mode.\n");
 					atomic_set(
 					&ipa3_ctx->transport_pm.dec_clients,
 					1);
@@ -1767,15 +1767,15 @@ static int ipa3_init_interrupts(void)
 	/* Get IPA IRQ number */
 	ipa_irq = platform_get_irq_byname(ipa3_pdev, "ipa-irq");
 	if (ipa_irq < 0) {
-		IPAERR(":failed to get ipa-irq!\n");
+		ipa_err(":failed to get ipa-irq!\n");
 		return -ENODEV;
 	}
-	IPADBG(":ipa-irq = %d\n", ipa_irq);
+	ipa_debug(":ipa-irq = %d\n", ipa_irq);
 
 	/*register IPA IRQ handler*/
 	result = ipa3_interrupts_init(ipa_irq, 0, &ipa3_pdev->dev);
 	if (result) {
-		IPAERR("ipa interrupts initialization failed\n");
+		ipa_err("ipa interrupts initialization failed\n");
 		return -ENODEV;
 	}
 
@@ -1783,7 +1783,7 @@ static int ipa3_init_interrupts(void)
 	result = ipa3_add_interrupt_handler(IPA_TX_SUSPEND_IRQ,
 			ipa3_suspend_handler, false, NULL);
 	if (result) {
-		IPAERR("register handler for suspend interrupt failed\n");
+		ipa_err("register handler for suspend interrupt failed\n");
 		result = -ENODEV;
 		goto fail_add_interrupt_handler;
 	}
@@ -1804,7 +1804,7 @@ static void ipa3_freeze_clock_vote_and_notify_modem(void)
 		return;
 
 	if (ipa3_ctx->smp2p_info.out_base_id == 0) {
-		IPAERR("smp2p out gpio not assigned\n");
+		ipa_err("smp2p out gpio not assigned\n");
 		return;
 	}
 
@@ -1822,7 +1822,7 @@ static void ipa3_freeze_clock_vote_and_notify_modem(void)
 		IPA_GPIO_OUT_CLK_RSP_CMPLT_IDX, 1);
 
 	ipa3_ctx->smp2p_info.res_sent = true;
-	IPADBG("IPA clocks are %s\n",
+	ipa_debug("IPA clocks are %s\n",
 		ipa3_ctx->smp2p_info.ipa_clk_on ? "ON" : "OFF");
 }
 
@@ -1850,10 +1850,10 @@ static int ipa3_panic_notifier(struct notifier_block *this,
 
 	ipa3_freeze_clock_vote_and_notify_modem();
 
-	IPADBG("Calling uC panic handler\n");
+	ipa_debug("Calling uC panic handler\n");
 	res = ipa3_uc_panic_notifier(this, event, ptr);
 	if (res)
-		IPAERR("uC panic handler failed %d\n", res);
+		ipa_err("uC panic handler failed %d\n", res);
 
 	return NOTIFY_DONE;
 }
@@ -1872,7 +1872,7 @@ static void ipa3_register_panic_hdlr(void)
 
 static void ipa3_uc_is_loaded(void)
 {
-	IPADBG("\n");
+	ipa_debug("\n");
 	complete_all(&ipa3_ctx->uc_loaded_completion_obj);
 }
 
@@ -1915,7 +1915,7 @@ static int ipa3_post_init(struct device *ipa_dev)
 	 * entry will be returned from ipa3_get_hw_type_index()
 	 */
 	ipa_init_ep_flt_bitmap();
-	IPADBG("EP with flt support bitmap 0x%x (%u pipes)\n",
+	ipa_debug("EP with flt support bitmap 0x%x (%u pipes)\n",
 		ipa3_ctx->ep_flt_bitmap, ipa3_ctx->ep_flt_num);
 
 	/* Assign resource limitation to each group */
@@ -1927,35 +1927,35 @@ static int ipa3_post_init(struct device *ipa_dev)
 
 	result = ipa3_init_interrupts();
 	if (result) {
-		IPAERR("ipa initialization of interrupts failed\n");
+		ipa_err("ipa initialization of interrupts failed\n");
 		result = -ENODEV;
 		goto fail_register_device;
 	}
 
 	ipa3_ctx->gsi_dev_hdl = gsi_register_device(ipa3_ctx->ee);
 	if (IS_ERR(ipa3_ctx->gsi_dev_hdl)) {
-		IPAERR(":gsi register error - %ld\n",
+		ipa_err(":gsi register error - %ld\n",
 				PTR_ERR(ipa3_ctx->gsi_dev_hdl));
 		result = -ENODEV;
 		goto fail_register_device;
 	}
-	IPADBG("IPA gsi is registered\n");
+	ipa_debug("IPA gsi is registered\n");
 
 	/* setup the AP-IPA pipes */
 	if (ipa3_setup_apps_pipes()) {
-		IPAERR(":failed to setup IPA-Apps pipes\n");
+		ipa_err(":failed to setup IPA-Apps pipes\n");
 		result = -ENODEV;
 		goto fail_setup_apps_pipes;
 	}
-	IPADBG("IPA GPI pipes were connected\n");
+	ipa_debug("IPA GPI pipes were connected\n");
 
 	ipa3_debugfs_init();
 
 	result = ipa3_uc_interface_init();
 	if (result)
-		IPAERR(":ipa Uc interface init failed (%d)\n", -result);
+		ipa_err(":ipa Uc interface init failed (%d)\n", -result);
 	else
-		IPADBG(":ipa Uc interface init ok\n");
+		ipa_debug(":ipa Uc interface init ok\n");
 
 	uc_hdlrs.ipa_uc_loaded_hdlr = ipa3_uc_is_loaded;
 	ipa3_uc_register_handlers(IPA_HW_FEATURE_COMMON, &uc_hdlrs);
@@ -2000,15 +2000,15 @@ static int ipa3_pil_load_ipa_fws(void)
 {
 	void *subsystem_get_retval = NULL;
 
-	IPADBG("PIL FW loading process initiated\n");
+	ipa_debug("PIL FW loading process initiated\n");
 
 	subsystem_get_retval = subsystem_get(IPA_SUBSYSTEM_NAME);
 	if (IS_ERR_OR_NULL(subsystem_get_retval)) {
-		IPAERR("Unable to trigger PIL process for FW loading\n");
+		ipa_err("Unable to trigger PIL process for FW loading\n");
 		return -EINVAL;
 	}
 
-	IPADBG("PIL FW loading process is complete\n");
+	ipa_debug("PIL FW loading process is complete\n");
 	return 0;
 }
 
@@ -2016,7 +2016,7 @@ static int ipa3_open(struct inode *inode, struct file *filp)
 {
         struct ipa3_context *ctx = NULL;
 
-        IPADBG_LOW("ENTER\n");
+        ipa_debug_low("ENTER\n");
 
         ctx = container_of(inode->i_cdev, struct ipa3_context, cdev);
         filp->private_data = ctx;
@@ -2042,7 +2042,7 @@ static ssize_t ipa3_write(struct file *file, const char __user *buf,
 	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 
 	if (result) {
-		IPAERR("IPA FW loading process has failed\n");
+		ipa_err("IPA FW loading process has failed\n");
 		return result;
 	}
 	printk(KERN_INFO "IPA FW loaded successfully\n");
@@ -2062,7 +2062,7 @@ static int ipa3_alloc_pkt_init(void)
 	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_PACKET_INIT,
 		&cmd, false);
 	if (!cmd_pyld) {
-		IPAERR("failed to construct IMM cmd\n");
+		ipa_err("failed to construct IMM cmd\n");
 		return -ENOMEM;
 	}
 	ipa3_ctx->pkt_init_imm_opcode = cmd_pyld->opcode;
@@ -2071,7 +2071,7 @@ static int ipa3_alloc_pkt_init(void)
 	mem.base = dma_alloc_coherent(ipa3_ctx->pdev, mem.size,
 		&mem.phys_base, GFP_KERNEL);
 	if (!mem.base) {
-		IPAERR("failed to alloc DMA buff of size %d\n", mem.size);
+		ipa_err("failed to alloc DMA buff of size %d\n", mem.size);
 		ipahal_destroy_imm_cmd(cmd_pyld);
 		return -ENOMEM;
 	}
@@ -2083,7 +2083,7 @@ static int ipa3_alloc_pkt_init(void)
 		cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_PACKET_INIT,
 			&cmd, false);
 		if (!cmd_pyld) {
-			IPAERR("failed to construct IMM cmd\n");
+			ipa_err("failed to construct IMM cmd\n");
 			dma_free_coherent(ipa3_ctx->pdev,
 				mem.size,
 				mem.base,
@@ -2157,12 +2157,12 @@ static int ipa3_pre_init(struct device *ipa_dev)
 	res = platform_get_resource_byname(ipa3_pdev, IORESOURCE_MEM,
 			"ipa-base");
 	if (!res) {
-		IPAERR(":get resource failed for ipa-base!\n");
+		ipa_err(":get resource failed for ipa-base!\n");
 		return -ENODEV;
 	}
 	ipa3_ctx->ipa_wrapper_base = res->start;
 	ipa3_ctx->ipa_wrapper_size = resource_size(res);
-	IPADBG(": ipa-base = 0x%x, size = 0x%x\n",
+	ipa_debug(": ipa-base = 0x%x, size = 0x%x\n",
 			ipa3_ctx->ipa_wrapper_base,
 			ipa3_ctx->ipa_wrapper_size);
 
@@ -2180,26 +2180,26 @@ static int ipa3_pre_init(struct device *ipa_dev)
 
 	ipa3_ctx->ctrl = kzalloc(sizeof(*ipa3_ctx->ctrl), GFP_KERNEL);
 	if (!ipa3_ctx->ctrl) {
-		IPAERR("memory allocation error for ctrl\n");
+		ipa_err("memory allocation error for ctrl\n");
 		result = -ENOMEM;
 		goto fail_mem_ctrl;
 	}
 	result = ipa3_controller_static_bind(ipa3_ctx->ctrl);
 	if (result) {
-		IPAERR("fail to static bind IPA ctrl.\n");
+		ipa_err("fail to static bind IPA ctrl.\n");
 		result = -EFAULT;
 		goto fail_bind;
 	}
 
 	result = ipa3_init_mem_partition(ipa3_pdev->dev.of_node);
 	if (result) {
-		IPAERR(":ipa3_init_mem_partition failed!\n");
+		ipa_err(":ipa3_init_mem_partition failed!\n");
 		result = -ENODEV;
 		goto fail_init_mem_partition;
 	}
 
 	if (ipa3_bus_scale_table) {
-		IPADBG("Use bus scaling info from device tree #usecases=%d\n",
+		ipa_debug("Use bus scaling info from device tree #usecases=%d\n",
 			ipa3_bus_scale_table->num_usecases);
 		ipa3_ctx->ctrl->msm_bus_data_ptr = ipa3_bus_scale_table;
 	}
@@ -2209,7 +2209,7 @@ static int ipa3_pre_init(struct device *ipa_dev)
 		msm_bus_scale_register_client(
 			ipa3_ctx->ctrl->msm_bus_data_ptr);
 	if (!ipa3_ctx->ipa_bus_hdl) {
-		IPAERR("fail to register with bus mgr!\n");
+		ipa_err("fail to register with bus mgr!\n");
 		result = -ENODEV;
 		goto fail_bus_reg;
 	}
@@ -2226,61 +2226,61 @@ static int ipa3_pre_init(struct device *ipa_dev)
 	ipa3_enable_clks();
 
 	/* setup IPA register access */
-	IPADBG("Mapping 0x%x\n", ipa3_ctx->ipa_wrapper_base +
+	ipa_debug("Mapping 0x%x\n", ipa3_ctx->ipa_wrapper_base +
 		ipa3_ctx->ctrl->ipa_reg_base_ofst);
 	ipa3_ctx->mmio = ioremap(ipa3_ctx->ipa_wrapper_base +
 			ipa3_ctx->ctrl->ipa_reg_base_ofst,
 			ipa3_ctx->ipa_wrapper_size);
 	if (!ipa3_ctx->mmio) {
-		IPAERR(":ipa-base ioremap err.\n");
+		ipa_err(":ipa-base ioremap err.\n");
 		result = -EFAULT;
 		goto fail_remap;
 	}
 
 	if (ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio, ipa3_ctx->pdev)) {
-		IPAERR("fail to init ipahal\n");
+		ipa_err("fail to init ipahal\n");
 		result = -EFAULT;
 		goto fail_ipahal;
 	}
 
 	result = ipa3_init_hw();
 	if (result) {
-		IPAERR(":error initializing HW.\n");
+		ipa_err(":error initializing HW.\n");
 		result = -ENODEV;
 		goto fail_init_hw;
 	}
 
-	IPADBG("IPA HW initialization sequence completed");
+	ipa_debug("IPA HW initialization sequence completed");
 
 	ipa3_ctx->ipa_num_pipes = ipa3_get_num_pipes();
 	if (ipa3_ctx->ipa_num_pipes > IPA3_MAX_NUM_PIPES) {
-		IPAERR("IPA has more pipes then supported! has %d, max %d\n",
+		ipa_err("IPA has more pipes then supported! has %d, max %d\n",
 			ipa3_ctx->ipa_num_pipes, IPA3_MAX_NUM_PIPES);
 		result = -ENODEV;
 		goto fail_init_hw;
 	}
 
 	ipa3_ctx->ctrl->ipa_sram_read_settings();
-	IPADBG("SRAM, size: 0x%x, restricted bytes: 0x%x\n",
+	ipa_debug("SRAM, size: 0x%x, restricted bytes: 0x%x\n",
 		ipa3_ctx->smem_sz, ipa3_ctx->smem_restricted_bytes);
 
-	IPADBG("hdr_lcl=%u ip4_rt_hash=%u ip4_rt_nonhash=%u\n",
+	ipa_debug("hdr_lcl=%u ip4_rt_hash=%u ip4_rt_nonhash=%u\n",
 		ipa3_ctx->hdr_tbl_lcl, ipa3_ctx->ip4_rt_tbl_hash_lcl,
 		ipa3_ctx->ip4_rt_tbl_nhash_lcl);
 
-	IPADBG("ip6_rt_hash=%u ip6_rt_nonhash=%u\n",
+	ipa_debug("ip6_rt_hash=%u ip6_rt_nonhash=%u\n",
 		ipa3_ctx->ip6_rt_tbl_hash_lcl, ipa3_ctx->ip6_rt_tbl_nhash_lcl);
 
-	IPADBG("ip4_flt_hash=%u ip4_flt_nonhash=%u\n",
+	ipa_debug("ip4_flt_hash=%u ip4_flt_nonhash=%u\n",
 		ipa3_ctx->ip4_flt_tbl_hash_lcl,
 		ipa3_ctx->ip4_flt_tbl_nhash_lcl);
 
-	IPADBG("ip6_flt_hash=%u ip6_flt_nonhash=%u\n",
+	ipa_debug("ip6_flt_hash=%u ip6_flt_nonhash=%u\n",
 		ipa3_ctx->ip6_flt_tbl_hash_lcl,
 		ipa3_ctx->ip6_flt_tbl_nhash_lcl);
 
 	if (ipa3_ctx->smem_reqd_sz > ipa3_ctx->smem_sz) {
-		IPAERR("SW expect more core memory, needed %d, avail %d\n",
+		ipa_err("SW expect more core memory, needed %d, avail %d\n",
 			ipa3_ctx->smem_reqd_sz, ipa3_ctx->smem_sz);
 		result = -ENOMEM;
 		goto fail_init_hw;
@@ -2295,7 +2295,7 @@ static int ipa3_pre_init(struct device *ipa_dev)
 	ipa3_ctx->power_mgmt_wq =
 		create_singlethread_workqueue("ipa_power_mgmt");
 	if (!ipa3_ctx->power_mgmt_wq) {
-		IPAERR("failed to create power mgmt wq\n");
+		ipa_err("failed to create power mgmt wq\n");
 		result = -ENOMEM;
 		goto fail_init_hw;
 	}
@@ -2303,7 +2303,7 @@ static int ipa3_pre_init(struct device *ipa_dev)
 	ipa3_ctx->transport_power_mgmt_wq =
 		create_singlethread_workqueue("transport_power_mgmt");
 	if (!ipa3_ctx->transport_power_mgmt_wq) {
-		IPAERR("failed to create transport power mgmt wq\n");
+		ipa_err("failed to create transport power mgmt wq\n");
 		result = -ENOMEM;
 		goto fail_create_transport_wq;
 	}
@@ -2316,7 +2316,7 @@ static int ipa3_pre_init(struct device *ipa_dev)
 		kmem_cache_create("IPA_HDR_PROC_CTX_OFFSET",
 		sizeof(struct ipa3_hdr_proc_ctx_offset_entry), 0, 0, NULL);
 	if (!ipa3_ctx->hdr_proc_ctx_offset_cache) {
-		IPAERR(":ipa hdr proc ctx off cache create failed\n");
+		ipa_err(":ipa hdr proc ctx off cache create failed\n");
 		result = -ENOMEM;
 		goto fail_hdr_proc_ctx_offset_cache;
 	}
@@ -2325,7 +2325,7 @@ static int ipa3_pre_init(struct device *ipa_dev)
 	   kmem_cache_create("IPA_TX_PKT_WRAPPER",
 			   sizeof(struct ipa3_tx_pkt_wrapper), 0, 0, NULL);
 	if (!ipa3_ctx->tx_pkt_wrapper_cache) {
-		IPAERR(":ipa tx pkt wrapper cache create failed\n");
+		ipa_err(":ipa tx pkt wrapper cache create failed\n");
 		result = -ENOMEM;
 		goto fail_tx_pkt_wrapper_cache;
 	}
@@ -2333,7 +2333,7 @@ static int ipa3_pre_init(struct device *ipa_dev)
 	   kmem_cache_create("IPA_RX_PKT_WRAPPER",
 			   sizeof(struct ipa3_rx_pkt_wrapper), 0, 0, NULL);
 	if (!ipa3_ctx->rx_pkt_wrapper_cache) {
-		IPAERR(":ipa rx pkt wrapper cache create failed\n");
+		ipa_err(":ipa rx pkt wrapper cache create failed\n");
 		result = -ENOMEM;
 		goto fail_rx_pkt_wrapper_cache;
 	}
@@ -2341,7 +2341,7 @@ static int ipa3_pre_init(struct device *ipa_dev)
 	/* allocate memory for DMA_TASK workaround */
 	result = ipa3_allocate_dma_task_for_gsi();
 	if (result) {
-		IPAERR("failed to allocate dma task\n");
+		ipa_err("failed to allocate dma task\n");
 		goto fail_dma_task;
 	}
 
@@ -2373,7 +2373,7 @@ static int ipa3_pre_init(struct device *ipa_dev)
 
 	result = alloc_chrdev_region(&ipa3_ctx->dev_num, 0, 1, DRV_NAME);
 	if (result) {
-		IPAERR("alloc_chrdev_region err.\n");
+		ipa_err("alloc_chrdev_region err.\n");
 		result = -ENODEV;
 		goto fail_alloc_chrdev_region;
 	}
@@ -2381,7 +2381,7 @@ static int ipa3_pre_init(struct device *ipa_dev)
 	ipa3_ctx->dev = device_create(ipa3_ctx->class, NULL, ipa3_ctx->dev_num,
 			ipa3_ctx, DRV_NAME);
 	if (IS_ERR(ipa3_ctx->dev)) {
-		IPAERR(":device_create err.\n");
+		ipa_err(":device_create err.\n");
 		result = -ENODEV;
 		goto fail_device_create;
 	}
@@ -2392,7 +2392,7 @@ static int ipa3_pre_init(struct device *ipa_dev)
 
 	result = ipa3_alloc_pkt_init();
 	if (result) {
-		IPAERR("Failed to alloc pkt_init payload\n");
+		ipa_err("Failed to alloc pkt_init payload\n");
 		result = -ENODEV;
 		goto fail_create_apps_resource;
 	}
@@ -2406,11 +2406,11 @@ static int ipa3_pre_init(struct device *ipa_dev)
 	ipa3_ctx->cdev.owner = THIS_MODULE;
 	result = cdev_add(&ipa3_ctx->cdev, ipa3_ctx->dev_num, 1);
 	if (result) {
-		IPAERR(":cdev_add err=%d\n", -result);
+		ipa_err(":cdev_add err=%d\n", -result);
 		result = -ENODEV;
 		goto fail_cdev_add;
 	}
-	IPADBG("ipa cdev added successful. major:%d minor:%d\n",
+	ipa_debug("ipa cdev added successful. major:%d minor:%d\n",
 			MAJOR(ipa3_ctx->dev_num),
 			MINOR(ipa3_ctx->dev_num));
 
@@ -2480,12 +2480,12 @@ static int ipa3_iommu_map(struct iommu_domain *domain,
 {
 	struct ipa_smmu_cb_ctx *ap_cb = &ap_smmu_cb;
 
-	IPADBG("domain =0x%p iova 0x%lx\n", domain, iova);
-	IPADBG("paddr =0x%pa size 0x%x\n", &paddr, (u32)size);
+	ipa_debug("domain =0x%p iova 0x%lx\n", domain, iova);
+	ipa_debug("paddr =0x%pa size 0x%x\n", &paddr, (u32)size);
 
 	/* make sure no overlapping */
 	if (iova >= ap_cb->va_start && iova < ap_cb->va_end) {
-		IPAERR("iommu AP overlap addr 0x%lx\n", iova);
+		ipa_err("iommu AP overlap addr 0x%lx\n", iova);
 		ipa_assert();
 		return -EFAULT;
 	}
@@ -2502,76 +2502,76 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 	int ret;
 	u32 iova_ap_mapping[2];
 
-	IPADBG("UC CB PROBE sub pdev=%p\n", dev);
+	ipa_debug("UC CB PROBE sub pdev=%p\n", dev);
 
 	ret = of_property_read_u32_array(dev->of_node, "qcom,iova-mapping",
 			iova_ap_mapping, 2);
 	if (ret) {
-		IPAERR("Fail to read UC start/size iova addresses\n");
+		ipa_err("Fail to read UC start/size iova addresses\n");
 		return ret;
 	}
 	cb->va_start = iova_ap_mapping[0];
 	cb->va_size = iova_ap_mapping[1];
 	cb->va_end = cb->va_start + cb->va_size;
-	IPADBG("UC va_start=0x%x va_sise=0x%x\n", cb->va_start, cb->va_size);
+	ipa_debug("UC va_start=0x%x va_sise=0x%x\n", cb->va_start, cb->va_size);
 
 	if (dma_set_mask(dev, DMA_BIT_MASK(64)) ||
 			dma_set_coherent_mask(dev, DMA_BIT_MASK(64))) {
-		IPAERR("DMA set 64bit mask failed\n");
+		ipa_err("DMA set 64bit mask failed\n");
 		return -EOPNOTSUPP;
 	}
-	IPADBG("UC CB PROBE=%p create IOMMU mapping\n", dev);
+	ipa_debug("UC CB PROBE=%p create IOMMU mapping\n", dev);
 
 	cb->dev = dev;
 	cb->mapping = arm_iommu_create_mapping(dev->bus,
 			cb->va_start, cb->va_size);
 	if (IS_ERR_OR_NULL(cb->mapping)) {
-		IPADBG("Fail to create mapping\n");
+		ipa_debug("Fail to create mapping\n");
 		/* assume this failure is because iommu driver is not ready */
 		return -EPROBE_DEFER;
 	}
-	IPADBG("SMMU mapping created\n");
+	ipa_debug("SMMU mapping created\n");
 	cb->valid = true;
 
-	IPADBG("UC CB PROBE sub pdev=%p set attribute\n", dev);
+	ipa_debug("UC CB PROBE sub pdev=%p set attribute\n", dev);
 	if (smmu_info.s1_bypass) {
 		if (iommu_domain_set_attr(cb->mapping->domain,
 				DOMAIN_ATTR_S1_BYPASS,
 				&bypass)) {
-			IPAERR("couldn't set bypass\n");
+			ipa_err("couldn't set bypass\n");
 			arm_iommu_release_mapping(cb->mapping);
 			cb->valid = false;
 			return -EIO;
 		}
-		IPADBG("SMMU S1 BYPASS\n");
+		ipa_debug("SMMU S1 BYPASS\n");
 	} else {
 		if (iommu_domain_set_attr(cb->mapping->domain,
 				DOMAIN_ATTR_ATOMIC,
 				&atomic_ctx)) {
-			IPAERR("couldn't set domain as atomic\n");
+			ipa_err("couldn't set domain as atomic\n");
 			arm_iommu_release_mapping(cb->mapping);
 			cb->valid = false;
 			return -EIO;
 		}
-		IPADBG("SMMU atomic set\n");
+		ipa_debug("SMMU atomic set\n");
 
 		if (smmu_info.fast_map) {
 			if (iommu_domain_set_attr(cb->mapping->domain,
 					DOMAIN_ATTR_FAST,
 					&fast)) {
-				IPAERR("couldn't set fast map\n");
+				ipa_err("couldn't set fast map\n");
 				arm_iommu_release_mapping(cb->mapping);
 				cb->valid = false;
 				return -EIO;
 			}
-			IPADBG("SMMU fast map set\n");
+			ipa_debug("SMMU fast map set\n");
 		}
 	}
 
-	IPADBG("UC CB PROBE sub pdev=%p attaching IOMMU device\n", dev);
+	ipa_debug("UC CB PROBE sub pdev=%p attaching IOMMU device\n", dev);
 	ret = arm_iommu_attach_device(cb->dev, cb->mapping);
 	if (ret) {
-		IPAERR("could not attach device ret=%d\n", ret);
+		ipa_err("could not attach device ret=%d\n", ret);
 		arm_iommu_release_mapping(cb->mapping);
 		cb->valid = false;
 		return ret;
@@ -2742,52 +2742,52 @@ static int ipa3_smp2p_probe(struct device *dev)
 	int res;
 
 	if (ipa3_ctx == NULL) {
-		IPAERR("ipa3_ctx was not initialized\n");
+		ipa_err("ipa3_ctx was not initialized\n");
 		return -EPROBE_DEFER;
 	}
-	IPADBG("node->name=%s\n", node->name);
+	ipa_debug("node->name=%s\n", node->name);
 	if (strcmp("qcom,smp2pgpio_map_ipa_1_out", node->name) == 0) {
 		res = of_get_gpio(node, 0);
 		if (res < 0) {
-			IPADBG("of_get_gpio returned %d\n", res);
+			ipa_debug("of_get_gpio returned %d\n", res);
 			return res;
 		}
 
 		ipa3_ctx->smp2p_info.out_base_id = res;
-		IPADBG("smp2p out_base_id=%d\n",
+		ipa_debug("smp2p out_base_id=%d\n",
 			ipa3_ctx->smp2p_info.out_base_id);
 	} else if (strcmp("qcom,smp2pgpio_map_ipa_1_in", node->name) == 0) {
 		int irq;
 
 		res = of_get_gpio(node, 0);
 		if (res < 0) {
-			IPADBG("of_get_gpio returned %d\n", res);
+			ipa_debug("of_get_gpio returned %d\n", res);
 			return res;
 		}
 
 		ipa3_ctx->smp2p_info.in_base_id = res;
-		IPADBG("smp2p in_base_id=%d\n",
+		ipa_debug("smp2p in_base_id=%d\n",
 			ipa3_ctx->smp2p_info.in_base_id);
 
 		/* register for modem clk query */
 		irq = gpio_to_irq(ipa3_ctx->smp2p_info.in_base_id +
 			IPA_GPIO_IN_QUERY_CLK_IDX);
 		if (irq < 0) {
-			IPAERR("gpio_to_irq failed %d\n", irq);
+			ipa_err("gpio_to_irq failed %d\n", irq);
 			return -ENODEV;
 		}
-		IPADBG("smp2p irq#=%d\n", irq);
+		ipa_debug("smp2p irq#=%d\n", irq);
 		res = request_irq(irq,
 			(irq_handler_t)ipa3_smp2p_modem_clk_query_isr,
 			IRQF_TRIGGER_RISING, "ipa_smp2p_clk_vote", dev);
 		if (res) {
-			IPAERR("fail to register smp2p irq=%d\n", irq);
+			ipa_err("fail to register smp2p irq=%d\n", irq);
 			return -ENODEV;
 		}
 		res = enable_irq_wake(ipa3_ctx->smp2p_info.in_base_id +
 			IPA_GPIO_IN_QUERY_CLK_IDX);
 		if (res)
-			IPAERR("failed to enable irq wake\n");
+			ipa_err("failed to enable irq wake\n");
 	}
 
 	return 0;
@@ -2809,8 +2809,8 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	enum ipa_hw_type ipa_version;
 	int result;
 
-	IPADBG("IPA driver probing started\n");
-	IPADBG("dev->of_node->name = %s\n", node->name);
+	ipa_debug("IPA driver probing started\n");
+	ipa_debug("dev->of_node->name = %s\n", node->name);
 
 	if (of_device_is_compatible(node, "qcom,ipa-smmu-ap-cb"))
 		return ipa_smmu_ap_cb_probe(dev);
@@ -2826,9 +2826,9 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 
 	/* First find out whether we're working with supported hardware */
 	ipa_version = ipa_version_get(pdev_p);
-	IPADBG(": ipa_version = %d", ipa_version);
+	ipa_debug(": ipa_version = %d", ipa_version);
 	if (ipa_version != IPA_HW_v3_5_1) {
-		IPAERR(":only IPA version 3.5.1 supported!\n");
+		ipa_err(":only IPA version 3.5.1 supported!\n");
 		return -ENODEV;
 	}
 	ipa3_pdev = pdev_p;
@@ -2850,7 +2850,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	result = of_platform_populate(node, ipa_plat_drv_match, NULL,
 					&pdev_p->dev);
 	if (result)
-		IPAERR("failed to populate platform\n");
+		ipa_err("failed to populate platform\n");
 
 	return result;
 }
@@ -2869,13 +2869,13 @@ int ipa3_ap_suspend(struct device *dev)
 {
 	int i;
 
-	IPADBG("Enter...\n");
+	ipa_debug("Enter...\n");
 
 	/* In case there is a tx/rx handler in polling mode fail to suspend */
 	for (i = 0; i < ipa3_ctx->ipa_num_pipes; i++) {
 		if (ipa3_ctx->ep[i].sys &&
 			atomic_read(&ipa3_ctx->ep[i].sys->curr_polling_state)) {
-			IPAERR("EP %d is in polling state, do not suspend\n",
+			ipa_err("EP %d is in polling state, do not suspend\n",
 				i);
 			return -EAGAIN;
 		}
@@ -2886,7 +2886,7 @@ int ipa3_ap_suspend(struct device *dev)
 	 */
 	atomic_set(&ipa3_ctx->transport_pm.eot_activity, 0);
 	//ipa3_disable_clks();
-	IPADBG("Exit\n");
+	ipa_debug("Exit\n");
 
 	return 0;
 }
@@ -2926,10 +2926,10 @@ static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
         u32 lcl_hdr_sz;
         struct ipa_mem_buffer mem;
 
-        IPADBG("Entry\n");
+        ipa_debug("Entry\n");
 
         if ((ip >= IPA_IP_MAX) || (rlt >= IPA_RULE_TYPE_MAX)) {
-                IPAERR("Input Err: ip=%d ; rlt=%d\n", ip, rlt);
+                ipa_err("Input Err: ip=%d ; rlt=%d\n", ip, rlt);
                 return -EINVAL;
         }
 
@@ -2937,14 +2937,14 @@ static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
         desc = kcalloc(ipa3_ctx->ep_flt_num, sizeof(struct ipa3_desc),
                 GFP_KERNEL);
         if (!desc) {
-                IPAERR("failed to allocate memory\n");
+                ipa_err("failed to allocate memory\n");
                 return -ENOMEM;
         }
 
         cmd_pyld = kcalloc(ipa3_ctx->ep_flt_num,
                 sizeof(struct ipahal_imm_cmd_pyld *), GFP_KERNEL);
         if (!cmd_pyld) {
-                IPAERR("failed to allocate memory\n");
+                ipa_err("failed to allocate memory\n");
                 retval = -ENOMEM;
                 goto free_desc;
         }
@@ -2970,7 +2970,7 @@ static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
         retval = ipahal_flt_generate_empty_img(1, lcl_hdr_sz, lcl_hdr_sz,
                 0, &mem, true);
         if (retval) {
-                IPAERR("failed to generate flt single tbl empty img\n");
+                ipa_err("failed to generate flt single tbl empty img\n");
                 goto free_cmd_pyld;
         }
 
@@ -2998,7 +2998,7 @@ static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
                         cmd_pyld[num_cmds] = ipahal_construct_imm_cmd(
                                 IPA_IMM_CMD_DMA_SHARED_MEM, &cmd, false);
                         if (!cmd_pyld[num_cmds]) {
-                                IPAERR("fail construct dma_shared_mem cmd\n");
+                                ipa_err("fail construct dma_shared_mem cmd\n");
                                 retval = -ENOMEM;
                                 goto free_empty_img;
                         }
@@ -3012,10 +3012,10 @@ static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
                 flt_idx++;
         }
 
-        IPADBG("Sending %d descriptors for flt tbl clearing\n", num_cmds);
+        ipa_debug("Sending %d descriptors for flt tbl clearing\n", num_cmds);
         retval = ipa3_send_cmd(num_cmds, desc);
         if (retval) {
-                IPAERR("failed to send immediate command (err %d)\n", retval);
+                ipa_err("failed to send immediate command (err %d)\n", retval);
                 retval = -EFAULT;
         }
 
@@ -3043,10 +3043,10 @@ static int ipa3_q6_clean_q6_rt_tbls(enum ipa_ip_type ip,
         u32 lcl_hdr_sz;
         struct ipa_mem_buffer mem;
 
-        IPADBG("Entry\n");
+        ipa_debug("Entry\n");
 
         if ((ip >= IPA_IP_MAX) || (rlt >= IPA_RULE_TYPE_MAX)) {
-                IPAERR("Input Err: ip=%d ; rlt=%d\n", ip, rlt);
+                ipa_err("Input Err: ip=%d ; rlt=%d\n", ip, rlt);
                 return -EINVAL;
         }
 
@@ -3076,13 +3076,13 @@ static int ipa3_q6_clean_q6_rt_tbls(enum ipa_ip_type ip,
                 modem_rt_index_hi - modem_rt_index_lo + 1,
                 lcl_hdr_sz, lcl_hdr_sz, &mem, true);
         if (retval) {
-                IPAERR("fail generate empty rt img\n");
+                ipa_err("fail generate empty rt img\n");
                 return -ENOMEM;
         }
 
         desc = kzalloc(sizeof(struct ipa3_desc), GFP_KERNEL);
         if (!desc) {
-                IPAERR("failed to allocate memory\n");
+                ipa_err("failed to allocate memory\n");
                 goto free_empty_img;
         }
 
@@ -3097,7 +3097,7 @@ static int ipa3_q6_clean_q6_rt_tbls(enum ipa_ip_type ip,
         cmd_pyld = ipahal_construct_imm_cmd(
                         IPA_IMM_CMD_DMA_SHARED_MEM, &cmd, false);
         if (!cmd_pyld) {
-                IPAERR("failed to construct dma_shared_mem imm cmd\n");
+                ipa_err("failed to construct dma_shared_mem imm cmd\n");
                 retval = -ENOMEM;
                 goto free_desc;
         }
@@ -3106,10 +3106,10 @@ static int ipa3_q6_clean_q6_rt_tbls(enum ipa_ip_type ip,
         desc->len = cmd_pyld->len;
         desc->type = IPA_IMM_CMD_DESC;
 
-        IPADBG("Sending 1 descriptor for rt tbl clearing\n");
+        ipa_debug("Sending 1 descriptor for rt tbl clearing\n");
         retval = ipa3_send_cmd(1, desc);
         if (retval) {
-                IPAERR("failed to send immediate command (err %d)\n", retval);
+                ipa_err("failed to send immediate command (err %d)\n", retval);
                 retval = -EFAULT;
         }
 
@@ -3131,47 +3131,47 @@ static int ipa3_q6_clean_q6_tables(void)
         struct ipahal_reg_fltrt_hash_flush flush;
         struct ipahal_reg_valmask valmask;
 
-        IPADBG("Entry\n");
+        ipa_debug("Entry\n");
 
 
         if (ipa3_q6_clean_q6_flt_tbls(IPA_IP_v4, IPA_RULE_HASHABLE)) {
-                IPAERR("failed to clean q6 flt tbls (v4/hashable)\n");
+                ipa_err("failed to clean q6 flt tbls (v4/hashable)\n");
                 return -EFAULT;
         }
         if (ipa3_q6_clean_q6_flt_tbls(IPA_IP_v6, IPA_RULE_HASHABLE)) {
-                IPAERR("failed to clean q6 flt tbls (v6/hashable)\n");
+                ipa_err("failed to clean q6 flt tbls (v6/hashable)\n");
                 return -EFAULT;
         }
         if (ipa3_q6_clean_q6_flt_tbls(IPA_IP_v4, IPA_RULE_NON_HASHABLE)) {
-                IPAERR("failed to clean q6 flt tbls (v4/non-hashable)\n");
+                ipa_err("failed to clean q6 flt tbls (v4/non-hashable)\n");
                 return -EFAULT;
         }
         if (ipa3_q6_clean_q6_flt_tbls(IPA_IP_v6, IPA_RULE_NON_HASHABLE)) {
-                IPAERR("failed to clean q6 flt tbls (v6/non-hashable)\n");
+                ipa_err("failed to clean q6 flt tbls (v6/non-hashable)\n");
                 return -EFAULT;
         }
 
         if (ipa3_q6_clean_q6_rt_tbls(IPA_IP_v4, IPA_RULE_HASHABLE)) {
-                IPAERR("failed to clean q6 rt tbls (v4/hashable)\n");
+                ipa_err("failed to clean q6 rt tbls (v4/hashable)\n");
                 return -EFAULT;
         }
         if (ipa3_q6_clean_q6_rt_tbls(IPA_IP_v6, IPA_RULE_HASHABLE)) {
-                IPAERR("failed to clean q6 rt tbls (v6/hashable)\n");
+                ipa_err("failed to clean q6 rt tbls (v6/hashable)\n");
                 return -EFAULT;
         }
         if (ipa3_q6_clean_q6_rt_tbls(IPA_IP_v4, IPA_RULE_NON_HASHABLE)) {
-                IPAERR("failed to clean q6 rt tbls (v4/non-hashable)\n");
+                ipa_err("failed to clean q6 rt tbls (v4/non-hashable)\n");
                 return -EFAULT;
         }
         if (ipa3_q6_clean_q6_rt_tbls(IPA_IP_v6, IPA_RULE_NON_HASHABLE)) {
-                IPAERR("failed to clean q6 rt tbls (v6/non-hashable)\n");
+                ipa_err("failed to clean q6 rt tbls (v6/non-hashable)\n");
                 return -EFAULT;
         }
 
         /* Flush rules cache */
         desc = kzalloc(sizeof(struct ipa3_desc), GFP_KERNEL);
         if (!desc) {
-                IPAERR("failed to allocate memory\n");
+                ipa_err("failed to allocate memory\n");
                 return -ENOMEM;
         }
 
@@ -3188,7 +3188,7 @@ static int ipa3_q6_clean_q6_tables(void)
         cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE,
                 &reg_write_cmd, false);
         if (!cmd_pyld) {
-                IPAERR("fail construct register_write imm cmd\n");
+                ipa_err("fail construct register_write imm cmd\n");
                 retval = -EFAULT;
                 goto bail_desc;
         }
@@ -3198,10 +3198,10 @@ static int ipa3_q6_clean_q6_tables(void)
         desc->len = cmd_pyld->len;
         desc->type = IPA_IMM_CMD_DESC;
 
-        IPADBG("Sending 1 descriptor for tbls flush\n");
+        ipa_debug("Sending 1 descriptor for tbls flush\n");
         retval = ipa3_send_cmd(1, desc);
         if (retval) {
-                IPAERR("failed to send immediate command (err %d)\n", retval);
+                ipa_err("failed to send immediate command (err %d)\n", retval);
                 retval = -EFAULT;
         }
 
@@ -3209,7 +3209,7 @@ static int ipa3_q6_clean_q6_tables(void)
 
 bail_desc:
         kfree(desc);
-        IPADBG("Done - retval = %d\n", retval);
+        ipa_debug("Done - retval = %d\n", retval);
         return retval;
 }
 

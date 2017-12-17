@@ -491,7 +491,7 @@ bool ipa3_should_pipe_be_suspended(enum ipa_client_type client)
 
 	ipa_ep_idx = ipa3_get_ep_mapping(client);
 	if (ipa_ep_idx == -1) {
-		IPAERR("Invalid client.\n");
+		ipa_err("Invalid client.\n");
 		WARN_ON(1);
 		return false;
 	}
@@ -550,19 +550,19 @@ void _ipa_sram_settings_read_v3_0(void)
 int ipa3_cfg_route(struct ipahal_reg_route *route)
 {
 
-	IPADBG("disable_route_block=%d, default_pipe=%d, default_hdr_tbl=%d\n",
+	ipa_debug("disable_route_block=%d, default_pipe=%d, default_hdr_tbl=%d\n",
 		route->route_dis,
 		route->route_def_pipe,
 		route->route_def_hdr_table);
-	IPADBG("default_hdr_ofst=%d, default_frag_pipe=%d\n",
+	ipa_debug("default_hdr_ofst=%d, default_frag_pipe=%d\n",
 		route->route_def_hdr_ofst,
 		route->route_frag_def_pipe);
 
-	IPADBG("default_retain_hdr=%d\n",
+	ipa_debug("default_retain_hdr=%d\n",
 		route->route_def_retain_hdr);
 
 	if (route->route_dis) {
-		IPAERR("Route disable is not supported!\n");
+		ipa_err("Route disable is not supported!\n");
 		return -EPERM;
 	}
 
@@ -629,7 +629,7 @@ int ipa3_get_ep_mapping(enum ipa_client_type client)
 	int ipa_ep_idx;
 
 	if (client >= IPA_CLIENT_MAX || client < 0) {
-		IPAERR_RL("Bad client number! client =%d\n", client);
+		ipa_err_ratelimited("Bad client number! client =%d\n", client);
 		return IPA_EP_NOT_ALLOCATED;
 	}
 
@@ -676,7 +676,7 @@ const struct ipa_gsi_ep_config *ipa3_get_gsi_ep_info
 int ipa_get_ep_group(enum ipa_client_type client)
 {
 	if (client >= IPA_CLIENT_MAX || client < 0) {
-		IPAERR("Bad client number! client =%d\n", client);
+		ipa_err("Bad client number! client =%d\n", client);
 		return -EINVAL;
 	}
 
@@ -695,7 +695,7 @@ int ipa_get_ep_group(enum ipa_client_type client)
 u8 ipa3_get_qmb_master_sel(enum ipa_client_type client)
 {
 	if (client >= IPA_CLIENT_MAX || client < 0) {
-		IPAERR("Bad client number! client =%d\n", client);
+		ipa_err("Bad client number! client =%d\n", client);
 		return -EINVAL;
 	}
 
@@ -722,7 +722,7 @@ u8 ipa3_get_qmb_master_sel(enum ipa_client_type client)
 enum ipa_client_type ipa3_get_client_mapping(int pipe_idx)
 {
 	if (pipe_idx >= ipa3_ctx->ipa_num_pipes || pipe_idx < 0) {
-		IPAERR("Bad pipe index!\n");
+		ipa_err("Bad pipe index!\n");
 		return -EINVAL;
 	}
 
@@ -769,7 +769,7 @@ void ipa_init_ep_flt_bitmap(void)
 bool ipa_is_ep_support_flt(int pipe_idx)
 {
 	if (pipe_idx >= ipa3_ctx->ipa_num_pipes || pipe_idx < 0) {
-		IPAERR("Bad pipe index!\n");
+		ipa_err("Bad pipe index!\n");
 		return false;
 	}
 
@@ -790,12 +790,12 @@ int ipa3_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0) {
-		IPAERR("bad param, clnt_hdl = %d", clnt_hdl);
+		ipa_err("bad param, clnt_hdl = %d", clnt_hdl);
 		return -EINVAL;
 	}
 
 	if (IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client)) {
-		IPAERR("SEQ does not apply to IPA consumer EP %d\n", clnt_hdl);
+		ipa_err("SEQ does not apply to IPA consumer EP %d\n", clnt_hdl);
 		return -EINVAL;
 	}
 
@@ -808,19 +808,19 @@ int ipa3_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 	if (type != IPA_DPS_HPS_SEQ_TYPE_INVALID) {
 		if (ipa3_ctx->ep[clnt_hdl].cfg.mode.mode == IPA_DMA &&
 			!IPA_DPS_HPS_SEQ_TYPE_IS_DMA(type)) {
-			IPAERR("Configuring non-DMA SEQ type to DMA pipe\n");
+			ipa_err("Configuring non-DMA SEQ type to DMA pipe\n");
 			BUG();
 		}
 		IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
 		/* Configure sequencers type*/
 
-		IPADBG("set sequencers to sequence 0x%x, ep = %d\n", type,
+		ipa_debug("set sequencers to sequence 0x%x, ep = %d\n", type,
 				clnt_hdl);
 		ipahal_write_reg_n(IPA_ENDP_INIT_SEQ_n, clnt_hdl, type);
 
 		IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
 	} else {
-		IPADBG("should not set sequencer type of ep = %d\n", clnt_hdl);
+		ipa_debug("should not set sequencer type of ep = %d\n", clnt_hdl);
 	}
 
 	return 0;
@@ -844,7 +844,7 @@ int ipa3_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ipa_ep_cfg == NULL) {
-		IPAERR("bad parm.\n");
+		ipa_err("bad parm.\n");
 		return -EINVAL;
 	}
 
@@ -912,18 +912,18 @@ int ipa3_cfg_ep_conn_track(u32 clnt_hdl,
 {
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 		ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_conn_track == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		ipa_err("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 			clnt_hdl,
 			ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
 	}
 
 	if (IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client)) {
-		IPAERR("IPv6CT does not apply to IPA out EP %d\n", clnt_hdl);
+		ipa_err("IPv6CT does not apply to IPA out EP %d\n", clnt_hdl);
 		return -EINVAL;
 	}
 
-	IPADBG("pipe=%d, conn_track_en=%d(%s)\n",
+	ipa_debug("pipe=%d, conn_track_en=%d(%s)\n",
 		clnt_hdl,
 		ep_conn_track->conn_track_en,
 		ipa3_get_ipv6ct_en_str(ep_conn_track->conn_track_en));
@@ -956,13 +956,13 @@ int ipa3_cfg_ep_status(u32 clnt_hdl,
 {
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_status == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		ipa_err("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 					clnt_hdl,
 					ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
 	}
 
-	IPADBG("pipe=%d, status_en=%d status_ep=%d status_location=%d\n",
+	ipa_debug("pipe=%d, status_en=%d status_ep=%d status_location=%d\n",
 			clnt_hdl,
 			ep_status->status_en,
 			ep_status->status_ep,
@@ -995,7 +995,7 @@ int ipa3_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || cfg == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		ipa_err("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 					clnt_hdl,
 					ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
@@ -1007,7 +1007,7 @@ int ipa3_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 	/* Override QMB master selection */
 	qmb_master_sel = ipa3_get_qmb_master_sel(ipa3_ctx->ep[clnt_hdl].client);
 	ipa3_ctx->ep[clnt_hdl].cfg.cfg.gen_qmb_master_sel = qmb_master_sel;
-	IPADBG(
+	ipa_debug(
 	       "pipe=%d, frag_ofld_en=%d cs_ofld_en=%d mdata_hdr_ofst=%d gen_qmb_master_sel=%d\n",
 			clnt_hdl,
 			ipa3_ctx->ep[clnt_hdl].cfg.cfg.frag_offload_en,
@@ -1040,13 +1040,13 @@ int ipa3_cfg_ep_metadata_mask(u32 clnt_hdl,
 {
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || metadata_mask == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		ipa_err("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 					clnt_hdl,
 					ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
 	}
 
-	IPADBG("pipe=%d, metadata_mask=0x%x\n",
+	ipa_debug("pipe=%d, metadata_mask=0x%x\n",
 			clnt_hdl,
 			metadata_mask->metadata_mask);
 
@@ -1078,24 +1078,24 @@ int ipa3_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_hdr == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		ipa_err("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 				clnt_hdl, ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
 	}
-	IPADBG("pipe=%d metadata_reg_valid=%d\n",
+	ipa_debug("pipe=%d metadata_reg_valid=%d\n",
 		clnt_hdl,
 		ep_hdr->hdr_metadata_reg_valid);
 
-	IPADBG("remove_additional=%d, a5_mux=%d, ofst_pkt_size=0x%x\n",
+	ipa_debug("remove_additional=%d, a5_mux=%d, ofst_pkt_size=0x%x\n",
 		ep_hdr->hdr_remove_additional,
 		ep_hdr->hdr_a5_mux,
 		ep_hdr->hdr_ofst_pkt_size);
 
-	IPADBG("ofst_pkt_size_valid=%d, additional_const_len=0x%x\n",
+	ipa_debug("ofst_pkt_size_valid=%d, additional_const_len=0x%x\n",
 		ep_hdr->hdr_ofst_pkt_size_valid,
 		ep_hdr->hdr_additional_const_len);
 
-	IPADBG("ofst_metadata=0x%x, ofst_metadata_valid=%d, len=0x%x",
+	ipa_debug("ofst_metadata=0x%x, ofst_metadata_valid=%d, len=0x%x",
 		ep_hdr->hdr_ofst_metadata,
 		ep_hdr->hdr_ofst_metadata_valid,
 		ep_hdr->hdr_len);
@@ -1130,23 +1130,23 @@ int ipa3_cfg_ep_hdr_ext(u32 clnt_hdl,
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_hdr_ext == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		ipa_err("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 				clnt_hdl, ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
 	}
 
-	IPADBG("pipe=%d hdr_pad_to_alignment=%d\n",
+	ipa_debug("pipe=%d hdr_pad_to_alignment=%d\n",
 		clnt_hdl,
 		ep_hdr_ext->hdr_pad_to_alignment);
 
-	IPADBG("hdr_total_len_or_pad_offset=%d\n",
+	ipa_debug("hdr_total_len_or_pad_offset=%d\n",
 		ep_hdr_ext->hdr_total_len_or_pad_offset);
 
-	IPADBG("hdr_payload_len_inc_padding=%d hdr_total_len_or_pad=%d\n",
+	ipa_debug("hdr_payload_len_inc_padding=%d hdr_total_len_or_pad=%d\n",
 		ep_hdr_ext->hdr_payload_len_inc_padding,
 		ep_hdr_ext->hdr_total_len_or_pad);
 
-	IPADBG("hdr_total_len_or_pad_valid=%d hdr_little_endian=%d\n",
+	ipa_debug("hdr_total_len_or_pad_valid=%d hdr_little_endian=%d\n",
 		ep_hdr_ext->hdr_total_len_or_pad_valid,
 		ep_hdr_ext->hdr_little_endian);
 
@@ -1175,11 +1175,11 @@ int ipa3_cfg_ep_hdr_ext(u32 clnt_hdl,
 int ipa3_cfg_ep_ctrl(u32 clnt_hdl, const struct ipa_ep_cfg_ctrl *ep_ctrl)
 {
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes || ep_ctrl == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d\n", clnt_hdl);
+		ipa_err("bad parm, clnt_hdl = %d\n", clnt_hdl);
 		return -EINVAL;
 	}
 
-	IPADBG("pipe=%d ep_suspend=%d, ep_delay=%d\n",
+	ipa_debug("pipe=%d ep_suspend=%d, ep_delay=%d\n",
 		clnt_hdl,
 		ep_ctrl->ipa_ep_suspend,
 		ep_ctrl->ipa_ep_delay);
@@ -1225,20 +1225,20 @@ int ipa3_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_mode == NULL) {
-		IPAERR("bad params clnt_hdl=%d , ep_valid=%d ep_mode=%p\n",
+		ipa_err("bad params clnt_hdl=%d , ep_valid=%d ep_mode=%p\n",
 				clnt_hdl, ipa3_ctx->ep[clnt_hdl].valid,
 				ep_mode);
 		return -EINVAL;
 	}
 
 	if (IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client)) {
-		IPAERR("MODE does not apply to IPA out EP %d\n", clnt_hdl);
+		ipa_err("MODE does not apply to IPA out EP %d\n", clnt_hdl);
 		return -EINVAL;
 	}
 
 	ep = ipa3_get_ep_mapping(ep_mode->dst);
 	if (ep == -1 && ep_mode->mode == IPA_DMA) {
-		IPAERR("dst %d does not exist in DMA mode\n", ep_mode->dst);
+		ipa_err("dst %d does not exist in DMA mode\n", ep_mode->dst);
 		return -EINVAL;
 	}
 
@@ -1247,7 +1247,7 @@ int ipa3_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 	if (!IPA_CLIENT_IS_CONS(ep_mode->dst))
 		ep = ipa3_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
 
-	IPADBG("pipe=%d mode=%d(%s), dst_client_number=%d",
+	ipa_debug("pipe=%d mode=%d(%s), dst_client_number=%d",
 			clnt_hdl,
 			ep_mode->mode,
 			ipa3_get_mode_type_str(ep_mode->mode),
@@ -1314,19 +1314,19 @@ int ipa3_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 {
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_aggr == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		ipa_err("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 			clnt_hdl, ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
 	}
 
 	if (ep_aggr->aggr_en == IPA_ENABLE_DEAGGR &&
 	    !IPA_EP_SUPPORTS_DEAGGR(clnt_hdl)) {
-		IPAERR("pipe=%d cannot be configured to DEAGGR\n", clnt_hdl);
+		ipa_err("pipe=%d cannot be configured to DEAGGR\n", clnt_hdl);
 		WARN_ON(1);
 		return -EINVAL;
 	}
 
-	IPADBG("pipe=%d en=%d(%s), type=%d(%s), byte_limit=%d, time_limit=%d\n",
+	ipa_debug("pipe=%d en=%d(%s), type=%d(%s), byte_limit=%d, time_limit=%d\n",
 			clnt_hdl,
 			ep_aggr->aggr_en,
 			ipa3_get_aggr_enable_str(ep_aggr->aggr_en),
@@ -1334,7 +1334,7 @@ int ipa3_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 			ipa3_get_aggr_type_str(ep_aggr->aggr),
 			ep_aggr->aggr_byte_limit,
 			ep_aggr->aggr_time_limit);
-	IPADBG("hard_byte_limit_en=%d aggr_sw_eof_active=%d\n",
+	ipa_debug("hard_byte_limit_en=%d aggr_sw_eof_active=%d\n",
 		ep_aggr->aggr_hard_byte_limit_en,
 		ep_aggr->aggr_sw_eof_active);
 
@@ -1365,13 +1365,13 @@ int ipa3_cfg_ep_route(u32 clnt_hdl, const struct ipa_ep_cfg_route *ep_route)
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_route == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		ipa_err("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 			clnt_hdl, ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
 	}
 
 	if (IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client)) {
-		IPAERR("ROUTE does not apply to IPA out EP %d\n",
+		ipa_err("ROUTE does not apply to IPA out EP %d\n",
 				clnt_hdl);
 		return -EINVAL;
 	}
@@ -1381,15 +1381,15 @@ int ipa3_cfg_ep_route(u32 clnt_hdl, const struct ipa_ep_cfg_route *ep_route)
 	 * success
 	 */
 	if (ipa3_ctx->ep[clnt_hdl].cfg.mode.mode == IPA_DMA) {
-		IPADBG("DMA enabled for ep %d, dst pipe is part of DMA\n",
+		ipa_debug("DMA enabled for ep %d, dst pipe is part of DMA\n",
 				clnt_hdl);
 		return 0;
 	}
 
 	if (ep_route->rt_tbl_hdl)
-		IPAERR("client specified non-zero RT TBL hdl - ignore it\n");
+		ipa_err("client specified non-zero RT TBL hdl - ignore it\n");
 
-	IPADBG("pipe=%d, rt_tbl_hdl=%d\n",
+	ipa_debug("pipe=%d, rt_tbl_hdl=%d\n",
 			clnt_hdl,
 			ep_route->rt_tbl_hdl);
 
@@ -1428,12 +1428,12 @@ int ipa3_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_holb == NULL ||
 	    ep_holb->tmr_val > ipa3_ctx->ctrl->max_holb_tmr_val ||
 	    ep_holb->en > 1) {
-		IPAERR("bad parm.\n");
+		ipa_err("bad parm.\n");
 		return -EINVAL;
 	}
 
 	if (IPA_CLIENT_IS_PROD(ipa3_ctx->ep[clnt_hdl].client)) {
-		IPAERR("HOLB does not apply to IPA in EP %d\n", clnt_hdl);
+		ipa_err("HOLB does not apply to IPA in EP %d\n", clnt_hdl);
 		return -EINVAL;
 	}
 
@@ -1449,7 +1449,7 @@ int ipa3_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 
 	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
 
-	IPADBG("cfg holb %u ep=%d tmr=%d\n", ep_holb->en, clnt_hdl,
+	ipa_debug("cfg holb %u ep=%d tmr=%d\n", ep_holb->en, clnt_hdl,
 				ep_holb->tmr_val);
 
 	return 0;
@@ -1489,19 +1489,19 @@ int ipa3_cfg_ep_deaggr(u32 clnt_hdl,
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_deaggr == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		ipa_err("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 				clnt_hdl, ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
 	}
 
-	IPADBG("pipe=%d deaggr_hdr_len=%d\n",
+	ipa_debug("pipe=%d deaggr_hdr_len=%d\n",
 		clnt_hdl,
 		ep_deaggr->deaggr_hdr_len);
 
-	IPADBG("packet_offset_valid=%d\n",
+	ipa_debug("packet_offset_valid=%d\n",
 		ep_deaggr->packet_offset_valid);
 
-	IPADBG("packet_offset_location=%d max_packet_len=%d\n",
+	ipa_debug("packet_offset_location=%d max_packet_len=%d\n",
 		ep_deaggr->packet_offset_location,
 		ep_deaggr->max_packet_len);
 
@@ -1536,12 +1536,12 @@ int ipa3_cfg_ep_metadata(u32 clnt_hdl, const struct ipa_ep_cfg_metadata *ep_md)
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 		ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_md == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		ipa_err("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 					clnt_hdl, ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
 	}
 
-	IPADBG("pipe=%d, mux id=%d\n", clnt_hdl, ep_md->qmap_id);
+	ipa_debug("pipe=%d, mux id=%d\n", clnt_hdl, ep_md->qmap_id);
 
 	/* copy over EP cfg */
 	ipa3_ctx->ep[clnt_hdl].cfg.meta = *ep_md;
@@ -1578,13 +1578,13 @@ void ipa3_dump_buff_internal(void *base, dma_addr_t phy_base, u32 size)
 	u32 *cur = (u32 *)base;
 	u8 *byt;
 
-	IPADBG("system phys addr=%pa len=%u\n", &phy_base, size);
+	ipa_debug("system phys addr=%pa len=%u\n", &phy_base, size);
 	for (i = 0; i < size / 4; i++) {
 		byt = (u8 *)(cur + i);
-		IPADBG("%2d %08x   %02x %02x %02x %02x\n", i, *(cur + i),
+		ipa_debug("%2d %08x   %02x %02x %02x %02x\n", i, *(cur + i),
 				byt[0], byt[1], byt[2], byt[3]);
 	}
-	IPADBG("END\n");
+	ipa_debug("END\n");
 }
 
 /**
@@ -1623,7 +1623,7 @@ int ipa3_set_qcncm_ndp_sig(char sig[3])
 	struct ipahal_reg_qcncm qcncm;
 
 	if (sig == NULL) {
-		IPAERR("bad argument for ipa3_set_qcncm_ndp_sig/n");
+		ipa_err("bad argument for ipa3_set_qcncm_ndp_sig/n");
 		return -EINVAL;
 	}
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
@@ -1671,7 +1671,7 @@ int ipa3_straddle_boundary(u32 start, u32 end, u32 boundary)
 	u32 next_start;
 	u32 prev_end;
 
-	IPADBG("start=%u end=%u boundary=%u\n", start, end, boundary);
+	ipa_debug("start=%u end=%u boundary=%u\n", start, end, boundary);
 
 	next_start = (start + (boundary - 1)) & ~(boundary - 1);
 	prev_end = ((end + (boundary - 1)) & ~(boundary - 1)) - boundary;
@@ -1700,7 +1700,7 @@ int ipa3_init_mem_partition(struct device_node *node)
 	memset(&ipa3_ctx->ctrl->mem_partition, 0,
 		sizeof(ipa3_ctx->ctrl->mem_partition));
 
-	IPADBG("Reading from DTS as u32 array\n");
+	ipa_debug("Reading from DTS as u32 array\n");
 
 	/*
 	 * The size of ipa-ram-mmap array depends on the IPA version. The
@@ -1715,233 +1715,233 @@ int ipa3_init_mem_partition(struct device_node *node)
 		1, ram_mmap_current_version_size);
 
 	if (IPA_MEM_PART(uc_event_ring_ofst) & 1023) {
-		IPAERR("UC EVENT RING OFST 0x%x is unaligned\n",
+		ipa_err("UC EVENT RING OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(uc_event_ring_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("UC EVENT RING OFST 0x%x SIZE 0x%x\n",
+	ipa_debug("UC EVENT RING OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(uc_event_ring_ofst),
 		IPA_MEM_PART(uc_event_ring_size));
 
-	IPADBG("NAT OFST 0x%x SIZE 0x%x\n", IPA_MEM_PART(nat_ofst),
+	ipa_debug("NAT OFST 0x%x SIZE 0x%x\n", IPA_MEM_PART(nat_ofst),
 		IPA_MEM_PART(nat_size));
 
 	if (IPA_MEM_PART(uc_info_ofst) & 3) {
-		IPAERR("UC INFO OFST 0x%x is unaligned\n",
+		ipa_err("UC INFO OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(uc_info_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("UC INFO OFST 0x%x SIZE 0x%x\n",
+	ipa_debug("UC INFO OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(uc_info_ofst), IPA_MEM_PART(uc_info_size));
 
-	IPADBG("RAM OFST 0x%x\n", IPA_MEM_PART(ofst_start));
+	ipa_debug("RAM OFST 0x%x\n", IPA_MEM_PART(ofst_start));
 
 	if (IPA_MEM_PART(v4_flt_hash_ofst) & 7) {
-		IPAERR("V4 FLT HASHABLE OFST 0x%x is unaligned\n",
+		ipa_err("V4 FLT HASHABLE OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(v4_flt_hash_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("V4 FLT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
+	ipa_debug("V4 FLT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
 		IPA_MEM_PART(v4_flt_hash_ofst),
 		IPA_MEM_PART(v4_flt_hash_size),
 		IPA_MEM_PART(v4_flt_hash_size_ddr));
 
 	if (IPA_MEM_PART(v4_flt_nhash_ofst) & 7) {
-		IPAERR("V4 FLT NON-HASHABLE OFST 0x%x is unaligned\n",
+		ipa_err("V4 FLT NON-HASHABLE OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(v4_flt_nhash_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("V4 FLT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
+	ipa_debug("V4 FLT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
 		IPA_MEM_PART(v4_flt_nhash_ofst),
 		IPA_MEM_PART(v4_flt_nhash_size),
 		IPA_MEM_PART(v4_flt_nhash_size_ddr));
 
 	if (IPA_MEM_PART(v6_flt_hash_ofst) & 7) {
-		IPAERR("V6 FLT HASHABLE OFST 0x%x is unaligned\n",
+		ipa_err("V6 FLT HASHABLE OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(v6_flt_hash_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("V6 FLT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
+	ipa_debug("V6 FLT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
 		IPA_MEM_PART(v6_flt_hash_ofst), IPA_MEM_PART(v6_flt_hash_size),
 		IPA_MEM_PART(v6_flt_hash_size_ddr));
 
 	if (IPA_MEM_PART(v6_flt_nhash_ofst) & 7) {
-		IPAERR("V6 FLT NON-HASHABLE OFST 0x%x is unaligned\n",
+		ipa_err("V6 FLT NON-HASHABLE OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(v6_flt_nhash_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("V6 FLT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
+	ipa_debug("V6 FLT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
 		IPA_MEM_PART(v6_flt_nhash_ofst),
 		IPA_MEM_PART(v6_flt_nhash_size),
 		IPA_MEM_PART(v6_flt_nhash_size_ddr));
 
-	IPADBG("V4 RT NUM INDEX 0x%x\n", IPA_MEM_PART(v4_rt_num_index));
+	ipa_debug("V4 RT NUM INDEX 0x%x\n", IPA_MEM_PART(v4_rt_num_index));
 
-	IPADBG("V4 RT MODEM INDEXES 0x%x - 0x%x\n",
+	ipa_debug("V4 RT MODEM INDEXES 0x%x - 0x%x\n",
 		IPA_MEM_PART(v4_modem_rt_index_lo),
 		IPA_MEM_PART(v4_modem_rt_index_hi));
 
-	IPADBG("V4 RT APPS INDEXES 0x%x - 0x%x\n",
+	ipa_debug("V4 RT APPS INDEXES 0x%x - 0x%x\n",
 		IPA_MEM_PART(v4_apps_rt_index_lo),
 		IPA_MEM_PART(v4_apps_rt_index_hi));
 
 	if (IPA_MEM_PART(v4_rt_hash_ofst) & 7) {
-		IPAERR("V4 RT HASHABLE OFST 0x%x is unaligned\n",
+		ipa_err("V4 RT HASHABLE OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(v4_rt_hash_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("V4 RT HASHABLE OFST 0x%x\n", IPA_MEM_PART(v4_rt_hash_ofst));
+	ipa_debug("V4 RT HASHABLE OFST 0x%x\n", IPA_MEM_PART(v4_rt_hash_ofst));
 
-	IPADBG("V4 RT HASHABLE SIZE 0x%x DDR SIZE 0x%x\n",
+	ipa_debug("V4 RT HASHABLE SIZE 0x%x DDR SIZE 0x%x\n",
 		IPA_MEM_PART(v4_rt_hash_size),
 		IPA_MEM_PART(v4_rt_hash_size_ddr));
 
 	if (IPA_MEM_PART(v4_rt_nhash_ofst) & 7) {
-		IPAERR("V4 RT NON-HASHABLE OFST 0x%x is unaligned\n",
+		ipa_err("V4 RT NON-HASHABLE OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(v4_rt_nhash_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("V4 RT NON-HASHABLE OFST 0x%x\n",
+	ipa_debug("V4 RT NON-HASHABLE OFST 0x%x\n",
 		IPA_MEM_PART(v4_rt_nhash_ofst));
 
-	IPADBG("V4 RT HASHABLE SIZE 0x%x DDR SIZE 0x%x\n",
+	ipa_debug("V4 RT HASHABLE SIZE 0x%x DDR SIZE 0x%x\n",
 		IPA_MEM_PART(v4_rt_nhash_size),
 		IPA_MEM_PART(v4_rt_nhash_size_ddr));
 
-	IPADBG("V6 RT NUM INDEX 0x%x\n", IPA_MEM_PART(v6_rt_num_index));
+	ipa_debug("V6 RT NUM INDEX 0x%x\n", IPA_MEM_PART(v6_rt_num_index));
 
-	IPADBG("V6 RT MODEM INDEXES 0x%x - 0x%x\n",
+	ipa_debug("V6 RT MODEM INDEXES 0x%x - 0x%x\n",
 		IPA_MEM_PART(v6_modem_rt_index_lo),
 		IPA_MEM_PART(v6_modem_rt_index_hi));
 
-	IPADBG("V6 RT APPS INDEXES 0x%x - 0x%x\n",
+	ipa_debug("V6 RT APPS INDEXES 0x%x - 0x%x\n",
 		IPA_MEM_PART(v6_apps_rt_index_lo),
 		IPA_MEM_PART(v6_apps_rt_index_hi));
 
 	if (IPA_MEM_PART(v6_rt_hash_ofst) & 7) {
-		IPAERR("V6 RT HASHABLE OFST 0x%x is unaligned\n",
+		ipa_err("V6 RT HASHABLE OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(v6_rt_hash_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("V6 RT HASHABLE OFST 0x%x\n", IPA_MEM_PART(v6_rt_hash_ofst));
+	ipa_debug("V6 RT HASHABLE OFST 0x%x\n", IPA_MEM_PART(v6_rt_hash_ofst));
 
-	IPADBG("V6 RT HASHABLE SIZE 0x%x DDR SIZE 0x%x\n",
+	ipa_debug("V6 RT HASHABLE SIZE 0x%x DDR SIZE 0x%x\n",
 		IPA_MEM_PART(v6_rt_hash_size),
 		IPA_MEM_PART(v6_rt_hash_size_ddr));
 
 	if (IPA_MEM_PART(v6_rt_nhash_ofst) & 7) {
-		IPAERR("V6 RT NON-HASHABLE OFST 0x%x is unaligned\n",
+		ipa_err("V6 RT NON-HASHABLE OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(v6_rt_nhash_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("V6 RT NON-HASHABLE OFST 0x%x\n",
+	ipa_debug("V6 RT NON-HASHABLE OFST 0x%x\n",
 		IPA_MEM_PART(v6_rt_nhash_ofst));
 
-	IPADBG("V6 RT NON-HASHABLE SIZE 0x%x DDR SIZE 0x%x\n",
+	ipa_debug("V6 RT NON-HASHABLE SIZE 0x%x DDR SIZE 0x%x\n",
 		IPA_MEM_PART(v6_rt_nhash_size),
 		IPA_MEM_PART(v6_rt_nhash_size_ddr));
 
 	if (IPA_MEM_PART(modem_hdr_ofst) & 7) {
-		IPAERR("MODEM HDR OFST 0x%x is unaligned\n",
+		ipa_err("MODEM HDR OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(modem_hdr_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("MODEM HDR OFST 0x%x SIZE 0x%x\n",
+	ipa_debug("MODEM HDR OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(modem_hdr_ofst), IPA_MEM_PART(modem_hdr_size));
 
 	if (IPA_MEM_PART(apps_hdr_ofst) & 7) {
-		IPAERR("APPS HDR OFST 0x%x is unaligned\n",
+		ipa_err("APPS HDR OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(apps_hdr_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("APPS HDR OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
+	ipa_debug("APPS HDR OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
 		IPA_MEM_PART(apps_hdr_ofst), IPA_MEM_PART(apps_hdr_size),
 		IPA_MEM_PART(apps_hdr_size_ddr));
 
 	if (IPA_MEM_PART(modem_hdr_proc_ctx_ofst) & 7) {
-		IPAERR("MODEM HDR PROC CTX OFST 0x%x is unaligned\n",
+		ipa_err("MODEM HDR PROC CTX OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(modem_hdr_proc_ctx_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("MODEM HDR PROC CTX OFST 0x%x SIZE 0x%x\n",
+	ipa_debug("MODEM HDR PROC CTX OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(modem_hdr_proc_ctx_ofst),
 		IPA_MEM_PART(modem_hdr_proc_ctx_size));
 
 	if (IPA_MEM_PART(apps_hdr_proc_ctx_ofst) & 7) {
-		IPAERR("APPS HDR PROC CTX OFST 0x%x is unaligned\n",
+		ipa_err("APPS HDR PROC CTX OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(apps_hdr_proc_ctx_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("APPS HDR PROC CTX OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
+	ipa_debug("APPS HDR PROC CTX OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
 		IPA_MEM_PART(apps_hdr_proc_ctx_ofst),
 		IPA_MEM_PART(apps_hdr_proc_ctx_size),
 		IPA_MEM_PART(apps_hdr_proc_ctx_size_ddr));
 
 	if (IPA_MEM_PART(pdn_config_ofst) & 7) {
-		IPAERR("PDN CONFIG OFST 0x%x is unaligned\n",
+		ipa_err("PDN CONFIG OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(pdn_config_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("PDN CONFIG OFST 0x%x SIZE 0x%x\n",
+	ipa_debug("PDN CONFIG OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(pdn_config_ofst),
 		IPA_MEM_PART(pdn_config_size));
 
 	if (IPA_MEM_PART(modem_ofst) & 7) {
-		IPAERR("MODEM OFST 0x%x is unaligned\n",
+		ipa_err("MODEM OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(modem_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("MODEM OFST 0x%x SIZE 0x%x\n", IPA_MEM_PART(modem_ofst),
+	ipa_debug("MODEM OFST 0x%x SIZE 0x%x\n", IPA_MEM_PART(modem_ofst),
 		IPA_MEM_PART(modem_size));
 
-	IPADBG("V4 APPS HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
+	ipa_debug("V4 APPS HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(apps_v4_flt_hash_ofst),
 		IPA_MEM_PART(apps_v4_flt_hash_size));
 
-	IPADBG("V4 APPS NON-HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
+	ipa_debug("V4 APPS NON-HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(apps_v4_flt_nhash_ofst),
 		IPA_MEM_PART(apps_v4_flt_nhash_size));
 
-	IPADBG("V6 APPS HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
+	ipa_debug("V6 APPS HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(apps_v6_flt_hash_ofst),
 		IPA_MEM_PART(apps_v6_flt_hash_size));
 
-	IPADBG("V6 APPS NON-HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
+	ipa_debug("V6 APPS NON-HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(apps_v6_flt_nhash_ofst),
 		IPA_MEM_PART(apps_v6_flt_nhash_size));
 
-	IPADBG("RAM END OFST 0x%x\n",
+	ipa_debug("RAM END OFST 0x%x\n",
 		IPA_MEM_PART(end_ofst));
 
-	IPADBG("V4 APPS HASHABLE RT OFST 0x%x SIZE 0x%x\n",
+	ipa_debug("V4 APPS HASHABLE RT OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(apps_v4_rt_hash_ofst),
 		IPA_MEM_PART(apps_v4_rt_hash_size));
 
-	IPADBG("V4 APPS NON-HASHABLE RT OFST 0x%x SIZE 0x%x\n",
+	ipa_debug("V4 APPS NON-HASHABLE RT OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(apps_v4_rt_nhash_ofst),
 		IPA_MEM_PART(apps_v4_rt_nhash_size));
 
-	IPADBG("V6 APPS HASHABLE RT OFST 0x%x SIZE 0x%x\n",
+	ipa_debug("V6 APPS HASHABLE RT OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(apps_v6_rt_hash_ofst),
 		IPA_MEM_PART(apps_v6_rt_hash_size));
 
-	IPADBG("V6 APPS NON-HASHABLE RT OFST 0x%x SIZE 0x%x\n",
+	ipa_debug("V6 APPS NON-HASHABLE RT OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(apps_v6_rt_nhash_ofst),
 		IPA_MEM_PART(apps_v6_rt_nhash_size));
 
@@ -2034,7 +2034,7 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 
 	/* Not enough room for the required descriptors for the tag process */
 	if (IPA_TAG_MAX_DESC - descs_num < REQUIRED_TAG_PROCESS_DESCRIPTORS) {
-		IPAERR("up to %d descriptors are allowed (received %d)\n",
+		ipa_err("up to %d descriptors are allowed (received %d)\n",
 		       IPA_TAG_MAX_DESC - REQUIRED_TAG_PROCESS_DESCRIPTORS,
 		       descs_num);
 		return -ENOMEM;
@@ -2042,7 +2042,7 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 
 	ep_idx = ipa3_get_ep_mapping(IPA_CLIENT_APPS_CMD_PROD);
 	if (-1 == ep_idx) {
-		IPAERR("Client %u is not mapped\n",
+		ipa_err("Client %u is not mapped\n",
 			IPA_CLIENT_APPS_CMD_PROD);
 		return -EFAULT;
 	}
@@ -2050,7 +2050,7 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 
 	tag_desc = kzalloc(sizeof(*tag_desc) * IPA_TAG_MAX_DESC, GFP_KERNEL);
 	if (!tag_desc) {
-		IPAERR("failed to allocate memory\n");
+		ipa_err("failed to allocate memory\n");
 		return -ENOMEM;
 	}
 
@@ -2065,7 +2065,7 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 	cmd_pyld = ipahal_construct_nop_imm_cmd(
 		false, IPAHAL_FULL_PIPELINE_CLEAR, false);
 	if (!cmd_pyld) {
-		IPAERR("failed to construct NOP imm cmd\n");
+		ipa_err("failed to construct NOP imm cmd\n");
 		res = -ENOMEM;
 		goto fail_free_tag_desc;
 	}
@@ -2083,7 +2083,7 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 	cmd_pyld = ipahal_construct_imm_cmd(
 		IPA_IMM_CMD_IP_PACKET_INIT, &pktinit_cmd, false);
 	if (!cmd_pyld) {
-		IPAERR("failed to construct ip_packet_init imm cmd\n");
+		ipa_err("failed to construct ip_packet_init imm cmd\n");
 		res = -ENOMEM;
 		goto fail_free_desc;
 	}
@@ -2100,7 +2100,7 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 	cmd_pyld = ipahal_construct_imm_cmd(
 		IPA_IMM_CMD_IP_PACKET_TAG_STATUS, &status, false);
 	if (!cmd_pyld) {
-		IPAERR("failed to construct ip_packet_tag_status imm cmd\n");
+		ipa_err("failed to construct ip_packet_tag_status imm cmd\n");
 		res = -ENOMEM;
 		goto fail_free_desc;
 	}
@@ -2114,7 +2114,7 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 
 	comp = kzalloc(sizeof(*comp), GFP_KERNEL);
 	if (!comp) {
-		IPAERR("no mem\n");
+		ipa_err("no mem\n");
 		res = -ENOMEM;
 		goto fail_free_desc;
 	}
@@ -2126,7 +2126,7 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 	/* dummy packet to send to IPA. packet payload is a completion object */
 	dummy_skb = alloc_skb(sizeof(comp), GFP_KERNEL);
 	if (!dummy_skb) {
-		IPAERR("failed to allocate memory\n");
+		ipa_err("failed to allocate memory\n");
 		res = -ENOMEM;
 		goto fail_free_comp;
 	}
@@ -2143,17 +2143,17 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 	/* send all descriptors to IPA with single EOT */
 	res = ipa3_send(sys, desc_idx, tag_desc, true);
 	if (res) {
-		IPAERR("failed to send TAG packets %d\n", res);
+		ipa_err("failed to send TAG packets %d\n", res);
 		res = -ENOMEM;
 		goto fail_free_comp;
 	}
 	kfree(tag_desc);
 	tag_desc = NULL;
 
-	IPADBG("waiting for TAG response\n");
+	ipa_debug("waiting for TAG response\n");
 	res = wait_for_completion_timeout(&comp->comp, timeout);
 	if (res == 0) {
-		IPAERR("timeout (%lu msec) on waiting for TAG response\n",
+		ipa_err("timeout (%lu msec) on waiting for TAG response\n",
 			timeout);
 		WARN_ON(1);
 		if (atomic_dec_return(&comp->cnt) == 0)
@@ -2161,7 +2161,7 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 		return -ETIME;
 	}
 
-	IPADBG("TAG response arrived!\n");
+	ipa_debug("TAG response arrived!\n");
 	if (atomic_dec_return(&comp->cnt) == 0)
 		kfree(comp);
 
@@ -2220,9 +2220,9 @@ static int ipa3_tag_generate_force_close_desc(struct ipa3_desc desc[],
 		ipahal_read_reg_n_fields(IPA_ENDP_INIT_AGGR_n, i, &ep_aggr);
 		if (!ep_aggr.aggr_en)
 			continue;
-		IPADBG("Force close ep: %d\n", i);
+		ipa_debug("Force close ep: %d\n", i);
 		if (desc_idx + 1 > desc_size) {
-			IPAERR("Internal error - no descriptors\n");
+			ipa_err("Internal error - no descriptors\n");
 			res = -EFAULT;
 			goto fail_no_desc;
 		}
@@ -2238,7 +2238,7 @@ static int ipa3_tag_generate_force_close_desc(struct ipa3_desc desc[],
 		cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE,
 			&reg_write_agg_close, false);
 		if (!cmd_pyld) {
-			IPAERR("failed to construct register_write imm cmd\n");
+			ipa_err("failed to construct register_write imm cmd\n");
 			res = -ENOMEM;
 			goto fail_alloc_reg_write_agg_close;
 		}
@@ -2278,7 +2278,7 @@ int ipa3_tag_aggr_force_close(int pipe_num)
 	int num_aggr_descs;
 
 	if (pipe_num < -1 || pipe_num >= (int)ipa3_ctx->ipa_num_pipes) {
-		IPAERR("Invalid pipe number %d\n", pipe_num);
+		ipa_err("Invalid pipe number %d\n", pipe_num);
 		return -EINVAL;
 	}
 
@@ -2294,7 +2294,7 @@ int ipa3_tag_aggr_force_close(int pipe_num)
 
 	desc = kcalloc(num_descs, sizeof(*desc), GFP_KERNEL);
 	if (!desc) {
-		IPAERR("no mem\n");
+		ipa_err("no mem\n");
 		return -ENOMEM;
 	}
 
@@ -2302,7 +2302,7 @@ int ipa3_tag_aggr_force_close(int pipe_num)
 	num_aggr_descs = ipa3_tag_generate_force_close_desc(desc, num_descs,
 						start_pipe, end_pipe);
 	if (num_aggr_descs < 0) {
-		IPAERR("ipa3_tag_generate_force_close_desc failed %d\n",
+		ipa_err("ipa3_tag_generate_force_close_desc failed %d\n",
 			num_aggr_descs);
 		goto fail_free_desc;
 	}
@@ -2327,7 +2327,7 @@ bool ipa3_is_ready(void)
 	bool complete;
 
 	if (ipa3_ctx == NULL) {
-		IPAERR("ipalite: ipa context null\n");
+		ipa_err("ipalite: ipa context null\n");
 		return false;
 	}
 	mutex_lock(&ipa3_ctx->lock);
@@ -2390,15 +2390,15 @@ int ipa3_disable_apps_wan_cons_deaggr(uint32_t agg_size, uint32_t agg_count)
 	/* checking if IPA-HW can support */
 	limit = ipahal_aggr_get_max_byte_limit();
 	if ((agg_size >> 10) > limit) {
-		IPAERR("IPA-AGG byte limit %d\n", limit);
-		IPAERR("exceed aggr_byte_limit\n");
+		ipa_err("IPA-AGG byte limit %d\n", limit);
+		ipa_err("exceed aggr_byte_limit\n");
 		return -1;
 	}
 
 	limit = ipahal_aggr_get_max_pkt_limit();
 	if (agg_count > limit) {
-		IPAERR("IPA-AGG pkt limit %d\n", limit);
-		IPAERR("exceed aggr_pkt_limit\n");
+		ipa_err("IPA-AGG pkt limit %d\n", limit);
+		ipa_err("exceed aggr_pkt_limit\n");
 		return -1;
 	}
 
@@ -2432,7 +2432,7 @@ bool ipa_is_modem_pipe(int pipe_idx)
 	int client_idx;
 
 	if (pipe_idx >= ipa3_ctx->ipa_num_pipes || pipe_idx < 0) {
-		IPAERR("Bad pipe index!\n");
+		ipa_err("Bad pipe index!\n");
 		return false;
 	}
 
@@ -2465,7 +2465,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 				n, val);
 			break;
 		default:
-			IPAERR(
+			ipa_err(
 			" Invalid source resource group,index #%d\n",
 			group_index);
 			break;
@@ -2479,7 +2479,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 				n, val);
 			break;
 		default:
-			IPAERR(
+			ipa_err(
 			" Invalid destination resource group,index #%d\n",
 			group_index);
 			break;
@@ -2497,8 +2497,8 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 	int dst_grp_idx_max;
 	struct ipahal_reg_rsrc_grp_cfg val;
 
-	IPADBG("ENTER\n");
-	IPADBG("Assign source rsrc groups min-max limits\n");
+	ipa_debug("ENTER\n");
+	ipa_debug("Assign source rsrc groups min-max limits\n");
 
 	src_rsrc_type_max = IPA_v3_5_RSRC_GRP_TYPE_SRC_MAX;
 	dst_rsrc_type_max = IPA_v3_5_RSRC_GRP_TYPE_DST_MAX;
@@ -2519,7 +2519,7 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 		}
 	}
 
-	IPADBG("Assign destination rsrc groups min-max limits\n");
+	ipa_debug("Assign destination rsrc groups min-max limits\n");
 
 	for (i = 0; i < dst_rsrc_type_max; i++) {
 		for (j = 0; j < dst_grp_idx_max; j = j + 2) {
@@ -2536,15 +2536,15 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 	}
 
 	/* Resource group configuration is done by TZ */
-	IPAERR("skip configuring ipa_rx_hps_clients from HLOS\n");
+	ipa_err("skip configuring ipa_rx_hps_clients from HLOS\n");
 }
 
 static void ipa3_gsi_poll_after_suspend(struct ipa3_ep_context *ep)
 {
-	IPADBG("switch ch %ld to poll\n", ep->gsi_chan_hdl);
+	ipa_debug("switch ch %ld to poll\n", ep->gsi_chan_hdl);
 	gsi_config_channel_mode(ep->gsi_chan_hdl, GSI_CHAN_MODE_POLL);
 	if (!gsi_is_channel_empty(ep->gsi_chan_hdl)) {
-		IPADBG("ch %ld not empty\n", ep->gsi_chan_hdl);
+		ipa_debug("ch %ld not empty\n", ep->gsi_chan_hdl);
 		/* queue a work to start polling if don't have one */
 		atomic_set(&ipa3_ctx->transport_pm.eot_activity, 1);
 		if (!atomic_read(&ep->sys->curr_polling_state)) {
@@ -2566,13 +2566,13 @@ void ipa3_suspend_apps_pipes(bool suspend)
 
 	ipa_ep_idx = ipa3_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
 	if (ipa_ep_idx < 0) {
-		IPAERR("IPA client mapping failed\n");
+		ipa_err("IPA client mapping failed\n");
 		ipa_assert();
 		return;
 	}
 	ep = &ipa3_ctx->ep[ipa_ep_idx];
 	if (ep->valid) {
-		IPADBG("%s pipe %d\n", suspend ? "suspend" : "unsuspend",
+		ipa_debug("%s pipe %d\n", suspend ? "suspend" : "unsuspend",
 			ipa_ep_idx);
 		ipa3_cfg_ep_ctrl(ipa_ep_idx, &cfg);
 		if (suspend)
@@ -2585,12 +2585,12 @@ void ipa3_suspend_apps_pipes(bool suspend)
 	ipa_ep_idx = ipa3_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
 	/* Considering the case for SSR. */
 	if (ipa_ep_idx == -1) {
-		IPADBG("Invalid client.\n");
+		ipa_debug("Invalid client.\n");
 		return;
 	}
 	ep = &ipa3_ctx->ep[ipa_ep_idx];
 	if (ep->valid) {
-		IPADBG("%s pipe %d\n", suspend ? "suspend" : "unsuspend",
+		ipa_debug("%s pipe %d\n", suspend ? "suspend" : "unsuspend",
 			ipa_ep_idx);
 		ipa3_cfg_ep_ctrl(ipa_ep_idx, &cfg);
 		if (suspend)
@@ -2605,14 +2605,14 @@ int ipa3_allocate_dma_task_for_gsi(void)
 {
 	struct ipahal_imm_cmd_dma_task_32b_addr cmd = { 0 };
 
-	IPADBG("Allocate mem\n");
+	ipa_debug("Allocate mem\n");
 	ipa3_ctx->dma_task_info.mem.size = IPA_GSI_CHANNEL_STOP_PKT_SIZE;
 	ipa3_ctx->dma_task_info.mem.base = dma_alloc_coherent(ipa3_ctx->pdev,
 		ipa3_ctx->dma_task_info.mem.size,
 		&ipa3_ctx->dma_task_info.mem.phys_base,
 		GFP_KERNEL);
 	if (!ipa3_ctx->dma_task_info.mem.base) {
-		IPAERR("no mem\n");
+		ipa_err("no mem\n");
 		return -EFAULT;
 	}
 
@@ -2623,7 +2623,7 @@ int ipa3_allocate_dma_task_for_gsi(void)
 	ipa3_ctx->dma_task_info.cmd_pyld = ipahal_construct_imm_cmd(
 			IPA_IMM_CMD_DMA_TASK_32B_ADDR, &cmd, false);
 	if (!ipa3_ctx->dma_task_info.cmd_pyld) {
-		IPAERR("failed to construct dma_task_32b_addr cmd\n");
+		ipa_err("failed to construct dma_task_32b_addr cmd\n");
 		dma_free_coherent(ipa3_ctx->pdev,
 			ipa3_ctx->dma_task_info.mem.size,
 			ipa3_ctx->dma_task_info.mem.base,
@@ -2661,10 +2661,10 @@ int ipa3_inject_dma_task_for_gsi(void)
 	desc.len = ipa3_ctx->dma_task_info.cmd_pyld->len;
 	desc.type = IPA_IMM_CMD_DESC;
 
-	IPADBG("sending 1B packet to IPA\n");
+	ipa_debug("sending 1B packet to IPA\n");
 	if (ipa3_send_cmd_timeout(1, &desc,
 		IPA_DMA_TASK_FOR_GSI_TIMEOUT_MSEC)) {
-		IPAERR("ipa3_send_cmd failed\n");
+		ipa_err("ipa3_send_cmd failed\n");
 		return -EFAULT;
 	}
 
@@ -2689,7 +2689,7 @@ int ipa3_stop_gsi_channel(u32 clnt_hdl)
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 		ipa3_ctx->ep[clnt_hdl].valid == 0) {
-		IPAERR("bad parm.\n");
+		ipa_err("bad parm.\n");
 		return -EINVAL;
 	}
 
@@ -2700,28 +2700,28 @@ int ipa3_stop_gsi_channel(u32 clnt_hdl)
 	memset(&mem, 0, sizeof(mem));
 
 	if (IPA_CLIENT_IS_PROD(ep->client)) {
-		IPADBG("Calling gsi_stop_channel ch:%lu\n",
+		ipa_debug("Calling gsi_stop_channel ch:%lu\n",
 			ep->gsi_chan_hdl);
 		res = gsi_stop_channel(ep->gsi_chan_hdl);
-		IPADBG("gsi_stop_channel ch: %lu returned %d\n",
+		ipa_debug("gsi_stop_channel ch: %lu returned %d\n",
 			ep->gsi_chan_hdl, res);
 		goto end_sequence;
 	}
 
 	for (i = 0; i < IPA_GSI_CHANNEL_STOP_MAX_RETRY; i++) {
-		IPADBG("Calling gsi_stop_channel ch:%lu\n",
+		ipa_debug("Calling gsi_stop_channel ch:%lu\n",
 			ep->gsi_chan_hdl);
 		res = gsi_stop_channel(ep->gsi_chan_hdl);
-		IPADBG("gsi_stop_channel ch: %lu returned %d\n",
+		ipa_debug("gsi_stop_channel ch: %lu returned %d\n",
 			ep->gsi_chan_hdl, res);
 		if (res != -EAGAIN && res != -ETIMEDOUT)
 			goto end_sequence;
 
-		IPADBG("Inject a DMA_TASK with 1B packet to IPA\n");
+		ipa_debug("Inject a DMA_TASK with 1B packet to IPA\n");
 		/* Send a 1B packet DMA_TASK to IPA and try again */
 		res = ipa3_inject_dma_task_for_gsi();
 		if (res) {
-			IPAERR("Failed to inject DMA TASk for GSI\n");
+			ipa_err("Failed to inject DMA TASk for GSI\n");
 			goto end_sequence;
 		}
 
@@ -2730,7 +2730,7 @@ int ipa3_stop_gsi_channel(u32 clnt_hdl)
 			IPA_GSI_CHANNEL_STOP_SLEEP_MAX_USEC);
 	}
 
-	IPAERR("Failed  to stop GSI channel with retries\n");
+	ipa_err("Failed  to stop GSI channel with retries\n");
 	res = -EFAULT;
 end_sequence:
 	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
@@ -2746,31 +2746,31 @@ static int ipa3_load_single_fw(const struct firmware *firmware,
 	const uint32_t *elf_data_ptr;
 
 	if (phdr->p_offset > firmware->size) {
-		IPAERR("Invalid ELF: offset=%u is beyond elf_size=%zu\n",
+		ipa_err("Invalid ELF: offset=%u is beyond elf_size=%zu\n",
 			phdr->p_offset, firmware->size);
 		return -EINVAL;
 	}
 	if ((firmware->size - phdr->p_offset) < phdr->p_filesz) {
-		IPAERR("Invalid ELF: offset=%u filesz=%u elf_size=%zu\n",
+		ipa_err("Invalid ELF: offset=%u filesz=%u elf_size=%zu\n",
 			phdr->p_offset, phdr->p_filesz, firmware->size);
 		return -EINVAL;
 	}
 
 	if (phdr->p_memsz % sizeof(uint32_t)) {
-		IPAERR("FW mem size %u doesn't align to 32bit\n",
+		ipa_err("FW mem size %u doesn't align to 32bit\n",
 			phdr->p_memsz);
 		return -EFAULT;
 	}
 
 	if (phdr->p_filesz > phdr->p_memsz) {
-		IPAERR("FW image too big src_size=%u dst_size=%u\n",
+		ipa_err("FW image too big src_size=%u dst_size=%u\n",
 			phdr->p_filesz, phdr->p_memsz);
 		return -EFAULT;
 	}
 
 	fw_mem_base = ioremap(phdr->p_vaddr, phdr->p_memsz);
 	if (!fw_mem_base) {
-		IPAERR("Failed to map 0x%x for the size of %u\n",
+		ipa_err("Failed to map 0x%x for the size of %u\n",
 			phdr->p_vaddr, phdr->p_memsz);
 		return -ENOMEM;
 	}
@@ -2811,14 +2811,14 @@ int ipa3_load_fws(const struct firmware *firmware, phys_addr_t gsi_mem_base)
 	int rc;
 
 	if (!gsi_mem_base) {
-		IPAERR("Invalid GSI base address\n");
+		ipa_err("Invalid GSI base address\n");
 		return -EINVAL;
 	}
 
 	ipa_assert_on(!firmware);
 	/* One program header per FW image: GSI, DPS and HPS */
 	if (firmware->size < (sizeof(*ehdr) + 3 * sizeof(*phdr))) {
-		IPAERR("Missing ELF and Program headers firmware size=%zu\n",
+		ipa_err("Missing ELF and Program headers firmware size=%zu\n",
 			firmware->size);
 		return -EINVAL;
 	}
@@ -2826,7 +2826,7 @@ int ipa3_load_fws(const struct firmware *firmware, phys_addr_t gsi_mem_base)
 	ehdr = (struct elf32_hdr *) firmware->data;
 	ipa_assert_on(!ehdr);
 	if (ehdr->e_phnum != 3) {
-		IPAERR("Unexpected number of ELF program headers\n");
+		ipa_err("Unexpected number of ELF program headers\n");
 		return -EINVAL;
 	}
 	phdr = (struct elf32_phdr *)(firmware->data + sizeof(*ehdr));
@@ -2842,13 +2842,13 @@ int ipa3_load_fws(const struct firmware *firmware, phys_addr_t gsi_mem_base)
 	/* Load GSI FW image */
 	gsi_get_inst_ram_offset_and_size(&gsi_iram_ofst, &gsi_iram_size);
 	if (phdr->p_vaddr != (gsi_mem_base + gsi_iram_ofst)) {
-		IPAERR(
+		ipa_err(
 			"Invalid GSI FW img load addr vaddr=0x%x gsi_mem_base=%pa gsi_iram_ofst=0x%lx\n"
 			, phdr->p_vaddr, &gsi_mem_base, gsi_iram_ofst);
 		return -EINVAL;
 	}
 	if (phdr->p_memsz > gsi_iram_size) {
-		IPAERR("Invalid GSI FW img size memsz=%d gsi_iram_size=%lu\n",
+		ipa_err("Invalid GSI FW img size memsz=%d gsi_iram_size=%lu\n",
 			phdr->p_memsz, gsi_iram_size);
 		return -EINVAL;
 	}
@@ -2862,13 +2862,13 @@ int ipa3_load_fws(const struct firmware *firmware, phys_addr_t gsi_mem_base)
 	/* Load IPA DPS FW image */
 	ipa_reg_ofst = ipahal_get_reg_ofst(IPA_DPS_SEQUENCER_FIRST);
 	if (phdr->p_vaddr != (ipa_reg_mem_base + ipa_reg_ofst)) {
-		IPAERR(
+		ipa_err(
 			"Invalid IPA DPS img load addr vaddr=0x%x ipa_reg_mem_base=%pa ipa_reg_ofst=%u\n"
 			, phdr->p_vaddr, &ipa_reg_mem_base, ipa_reg_ofst);
 		return -EINVAL;
 	}
 	if (phdr->p_memsz > ipahal_get_dps_img_mem_size()) {
-		IPAERR("Invalid IPA DPS img size memsz=%d dps_mem_size=%u\n",
+		ipa_err("Invalid IPA DPS img size memsz=%d dps_mem_size=%u\n",
 			phdr->p_memsz, ipahal_get_dps_img_mem_size());
 		return -EINVAL;
 	}
@@ -2881,13 +2881,13 @@ int ipa3_load_fws(const struct firmware *firmware, phys_addr_t gsi_mem_base)
 	/* Load IPA HPS FW image */
 	ipa_reg_ofst = ipahal_get_reg_ofst(IPA_HPS_SEQUENCER_FIRST);
 	if (phdr->p_vaddr != (ipa_reg_mem_base + ipa_reg_ofst)) {
-		IPAERR(
+		ipa_err(
 			"Invalid IPA HPS img load addr vaddr=0x%x ipa_reg_mem_base=%pa ipa_reg_ofst=%u\n"
 			, phdr->p_vaddr, &ipa_reg_mem_base, ipa_reg_ofst);
 		return -EINVAL;
 	}
 	if (phdr->p_memsz > ipahal_get_hps_img_mem_size()) {
-		IPAERR("Invalid IPA HPS img size memsz=%d dps_mem_size=%u\n",
+		ipa_err("Invalid IPA HPS img size memsz=%d dps_mem_size=%u\n",
 			phdr->p_memsz, ipahal_get_hps_img_mem_size());
 		return -EINVAL;
 	}
@@ -2895,7 +2895,7 @@ int ipa3_load_fws(const struct firmware *firmware, phys_addr_t gsi_mem_base)
 	if (rc)
 		return rc;
 
-	IPADBG("IPA FWs (GSI FW, DPS and HPS) loaded successfully\n");
+	ipa_debug("IPA FWs (GSI FW, DPS and HPS) loaded successfully\n");
 	return 0;
 }
 
@@ -2932,22 +2932,22 @@ int ipa3_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple)
         struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
 
         if (!tuple) {
-                IPAERR("bad tuple\n");
+                ipa_err("bad tuple\n");
                 return -EINVAL;
         }
 
         if (pipe_idx >= ipa3_ctx->ipa_num_pipes || pipe_idx < 0) {
-                IPAERR("bad pipe index!\n");
+                ipa_err("bad pipe index!\n");
                 return -EINVAL;
         }
 
         if (!ipa_is_ep_support_flt(pipe_idx)) {
-                IPAERR("pipe %d not filtering pipe\n", pipe_idx);
+                ipa_err("pipe %d not filtering pipe\n", pipe_idx);
                 return -EINVAL;
         }
 
         if (ipa_is_modem_pipe(pipe_idx)) {
-                IPAERR("modem pipe tuple is not configured by AP\n");
+                ipa_err("modem pipe tuple is not configured by AP\n");
                 return -EINVAL;
         }
 
@@ -3033,16 +3033,16 @@ void ipa_assert(void)
 		 int result = -EFAULT;
 
 		 if (hdrs == NULL || hdrs->num_hdrs == 0) {
-				 IPAERR_RL("bad parm\n");
+				 ipa_err_ratelimited("bad parm\n");
 				 return -EINVAL;
 		 }
 
 		 mutex_lock(&ipa3_ctx->lock);
-		 IPADBG("adding %d headers to IPA driver internal data struct\n",
+		 ipa_debug("adding %d headers to IPA driver internal data struct\n",
 						 hdrs->num_hdrs);
 		 for (i = 0; i < hdrs->num_hdrs; i++) {
 				 if (__ipa_add_hdr(&hdrs->hdr[i])) {
-						 IPAERR_RL("failed to add hdr %d\n", i);
+						 ipa_err_ratelimited("failed to add hdr %d\n", i);
 						 hdrs->hdr[i].status = -1;
 				 } else {
 						 hdrs->hdr[i].status = 0;
@@ -3050,7 +3050,7 @@ void ipa_assert(void)
 		 }
 
 		 if (hdrs->commit) {
-				 IPADBG("committing all headers to IPA core");
+				 ipa_debug("committing all headers to IPA core");
 				 if (ipa3_ctx->ctrl->ipa3_commit_hdr()) {
 						 result = -EPERM;
 						 goto bail;
@@ -3078,7 +3078,7 @@ int ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple)
 	struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
 
 	if (!tuple) {
-			IPAERR("bad tuple\n");
+			ipa_err("bad tuple\n");
 			return -EINVAL;
 	}
 
@@ -3086,19 +3086,19 @@ int ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple)
 			max(IPA_MEM_PART(v6_rt_num_index),
 			IPA_MEM_PART(v4_rt_num_index)) ||
 			tbl_idx < 0) {
-			IPAERR("bad table index\n");
+			ipa_err("bad table index\n");
 			return -EINVAL;
 	}
 
 	if (tbl_idx >= IPA_MEM_PART(v4_modem_rt_index_lo) &&
 			tbl_idx <= IPA_MEM_PART(v4_modem_rt_index_hi)) {
-			IPAERR("cannot configure modem v4 rt tuple by AP\n");
+			ipa_err("cannot configure modem v4 rt tuple by AP\n");
 			return -EINVAL;
 	}
 
 	if (tbl_idx >= IPA_MEM_PART(v6_modem_rt_index_lo) &&
 			tbl_idx <= IPA_MEM_PART(v6_modem_rt_index_hi)) {
-			IPAERR("cannot configure modem v6 rt tuple by AP\n");
+			ipa_err("cannot configure modem v6 rt tuple by AP\n");
 			return -EINVAL;
 	}
 
