@@ -2423,6 +2423,7 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 	int fast = 1;
 	int ret;
 	u32 iova_ap_mapping[2];
+	u32 va_size;
 
 	ipa_debug("UC CB PROBE sub pdev=%p\n", dev);
 
@@ -2438,9 +2439,9 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 		return ret;
 	}
 	cb->va_start = iova_ap_mapping[0];
-	cb->va_size = iova_ap_mapping[1];
-	cb->va_end = cb->va_start + cb->va_size;
-	ipa_debug("UC va_start=0x%x va_sise=0x%x\n", cb->va_start, cb->va_size);
+	va_size = iova_ap_mapping[1];
+	cb->va_end = cb->va_start + va_size;
+	ipa_debug("UC va_start=0x%x va_sise=0x%x\n", cb->va_start, va_size);
 
 	if (dma_set_mask(dev, DMA_BIT_MASK(64)) ||
 			dma_set_coherent_mask(dev, DMA_BIT_MASK(64))) {
@@ -2451,7 +2452,7 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 
 	cb->dev = dev;
 	cb->mapping = arm_iommu_create_mapping(dev->bus,
-			cb->va_start, cb->va_size);
+			cb->va_start, va_size);
 	if (IS_ERR_OR_NULL(cb->mapping)) {
 		ipa_debug("Fail to create mapping\n");
 		/* assume this failure is because iommu driver is not ready */
@@ -2517,6 +2518,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	int fast = 1;
 	int bypass = 1;
 	u32 iova_ap_mapping[2];
+	u32 va_size;
 	u32 add_map_size;
 	const u32 *add_map;
 	void *smem_addr;
@@ -2531,9 +2533,9 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		return result;
 	}
 	cb->va_start = iova_ap_mapping[0];
-	cb->va_size = iova_ap_mapping[1];
-	cb->va_end = cb->va_start + cb->va_size;
-	pr_debug("AP va_start=0x%x va_sise=0x%x\n", cb->va_start, cb->va_size);
+	va_size = iova_ap_mapping[1];
+	cb->va_end = cb->va_start + va_size;
+	pr_debug("AP va_start=0x%x va_sise=0x%x\n", cb->va_start, va_size);
 
 	if (dma_set_mask(dev, DMA_BIT_MASK(64)) ||
 			dma_set_coherent_mask(dev, DMA_BIT_MASK(64))) {
@@ -2543,7 +2545,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 
 	cb->dev = dev;
 	cb->mapping = arm_iommu_create_mapping(dev->bus,
-					cb->va_start, cb->va_size);
+					cb->va_start, va_size);
 	if (IS_ERR_OR_NULL(cb->mapping)) {
 		pr_debug("Fail to create mapping\n");
 		/* assume this failure is because iommu driver is not ready */
