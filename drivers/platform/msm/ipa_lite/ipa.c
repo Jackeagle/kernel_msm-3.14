@@ -2309,15 +2309,6 @@ static int ipa3_pre_init(struct device *ipa_dev)
 
 	/* init the lookaside cache */
 
-	ipa3_ctx->hdr_proc_ctx_offset_cache =
-		kmem_cache_create("IPA_HDR_PROC_CTX_OFFSET",
-		sizeof(struct ipa3_hdr_proc_ctx_offset_entry), 0, 0, NULL);
-	if (!ipa3_ctx->hdr_proc_ctx_offset_cache) {
-		ipa_err(":ipa hdr proc ctx off cache create failed\n");
-		result = -ENOMEM;
-		goto fail_hdr_proc_ctx_offset_cache;
-	}
-
 	ipa3_ctx->tx_pkt_wrapper_cache =
 	   kmem_cache_create("IPA_TX_PKT_WRAPPER",
 			   sizeof(struct ipa3_tx_pkt_wrapper), 0, 0, NULL);
@@ -2413,8 +2404,6 @@ fail_rx_pkt_wrapper_cache:
 	kmem_cache_destroy(ipa3_ctx->rx_pkt_wrapper_cache);
 fail_tx_pkt_wrapper_cache:
 	kmem_cache_destroy(ipa3_ctx->tx_pkt_wrapper_cache);
-fail_hdr_proc_ctx_offset_cache:
-	kmem_cache_destroy(ipa3_ctx->hdr_proc_ctx_offset_cache);
 fail_create_transport_wq:
 	destroy_workqueue(ipa3_ctx->power_mgmt_wq);
 fail_init_hw:
