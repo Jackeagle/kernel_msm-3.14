@@ -852,14 +852,7 @@ int _ipa_init_rt4_v3(void)
         struct ipa_mem_buffer mem;
         struct ipahal_imm_cmd_ip_v4_routing_init v4_cmd;
         struct ipahal_imm_cmd_pyld *cmd_pyld;
-        int i;
         int rc = 0;
-
-        for (i = IPA_MEM_PART(v4_modem_rt_index_lo);
-                i <= IPA_MEM_PART(v4_modem_rt_index_hi);
-                i++)
-                ipa3_ctx->rt_idx_bitmap[IPA_IP_v4] |= (1 << i);
-        ipa_debug("v4 rt bitmap 0x%lx\n", ipa3_ctx->rt_idx_bitmap[IPA_IP_v4]);
 
         rc = ipahal_rt_generate_empty_img(IPA_MEM_PART(v4_rt_num_index),
                 IPA_MEM_PART(v4_rt_hash_size), IPA_MEM_PART(v4_rt_nhash_size),
@@ -918,14 +911,7 @@ int _ipa_init_rt6_v3(void)
         struct ipa_mem_buffer mem;
         struct ipahal_imm_cmd_ip_v6_routing_init v6_cmd;
         struct ipahal_imm_cmd_pyld *cmd_pyld;
-        int i;
         int rc = 0;
-
-        for (i = IPA_MEM_PART(v6_modem_rt_index_lo);
-                i <= IPA_MEM_PART(v6_modem_rt_index_hi);
-                i++)
-                ipa3_ctx->rt_idx_bitmap[IPA_IP_v6] |= (1 << i);
-        ipa_debug("v6 rt bitmap 0x%lx\n", ipa3_ctx->rt_idx_bitmap[IPA_IP_v6]);
 
         rc = ipahal_rt_generate_empty_img(IPA_MEM_PART(v6_rt_num_index),
                 IPA_MEM_PART(v6_rt_hash_size), IPA_MEM_PART(v6_rt_nhash_size),

@@ -944,7 +944,6 @@ struct ipa_hw_stats {
  * @reap_rt_tbl_set: list of sys mem routing tables waiting to be reaped
  * @tx_pkt_wrapper_cache: Tx packets cache
  * @rx_pkt_wrapper_cache: Rx packets cache
- * @rt_idx_bitmap: routing table index bitmap
  * @lock: this does NOT protect the linked lists within ipa3_sys_context
  * @smem_sz: shared memory size available for SW use starting
  *  from non-restricted bytes
@@ -1003,7 +1002,6 @@ struct ipa3_context {
 	u32 ipa_wrapper_size;
 	struct kmem_cache *tx_pkt_wrapper_cache;
 	struct kmem_cache *rx_pkt_wrapper_cache;
-	unsigned long rt_idx_bitmap[IPA_IP_MAX];
 	struct mutex lock;
 	u16 smem_sz;
 	u16 smem_restricted_bytes;
