@@ -2505,8 +2505,6 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 		return ret;
 	}
 
-	cb->next_addr = cb->va_end;
-
 	return 0;
 }
 
