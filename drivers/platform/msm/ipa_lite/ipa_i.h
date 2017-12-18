@@ -936,7 +936,6 @@ struct ipa_hw_stats {
   power-save
  * @ep_flt_bitmap: End-points supporting filtering bitmap
  * @ep_flt_num: End-points supporting filtering number
- * @resume_on_connect: resume ep on ipa connect
  * @flt_tbl: list of all IPA filter tables
  * @flt_rule_ids: idr structure that holds the rule_id for each rule
  * @mode: IPA operating mode
@@ -1007,7 +1006,6 @@ struct ipa3_context {
 	struct ipa3_ep_context ep[IPA3_MAX_NUM_PIPES];
 	u32 ep_flt_bitmap;
 	u32 ep_flt_num;
-	bool resume_on_connect[IPA_CLIENT_MAX];
 	struct idr flt_rule_ids[IPA_IP_MAX];
 	void __iomem *mmio;
 	u32 ipa_wrapper_base;
