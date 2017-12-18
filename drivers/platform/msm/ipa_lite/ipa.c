@@ -2303,12 +2303,6 @@ static int ipa3_pre_init(struct device *ipa_dev)
 		goto fail_dma_task;
 	}
 
-	INIT_LIST_HEAD(&ipa3_ctx->intf_list);
-	INIT_LIST_HEAD(&ipa3_ctx->msg_list);
-	INIT_LIST_HEAD(&ipa3_ctx->pull_msg_list);
-	init_waitqueue_head(&ipa3_ctx->msg_waitq);
-	mutex_init(&ipa3_ctx->msg_lock);
-
 	mutex_init(&ipa3_ctx->lock);
 
 	idr_init(&ipa3_ctx->ipa_idr);

@@ -1005,11 +1005,6 @@ struct ipa3_context {
 	u32 clnt_hdl_cmd;
 	u32 clnt_hdl_data_in;
 	u32 clnt_hdl_data_out;
-	struct list_head intf_list;
-	struct list_head msg_list;
-	struct list_head pull_msg_list;
-	struct mutex msg_lock;
-	wait_queue_head_t msg_waitq;
 	/* featurize if memory footprint becomes a concern */
 	struct ipa3_stats stats;
 	void *logbuf;
