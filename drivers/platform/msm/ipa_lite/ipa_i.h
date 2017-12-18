@@ -298,7 +298,6 @@ struct ipa3_hdr_proc_ctx_tbl {
 	struct list_head head_free_offset_list[IPA_HDR_PROC_CTX_BIN_MAX];
 	u32 proc_ctx_cnt;
 	u32 end;
-	u32 start_offset;
 };
 
 struct ipa_gsi_ep_mem_info {
