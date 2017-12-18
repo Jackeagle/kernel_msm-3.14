@@ -27,11 +27,6 @@
 #define IPA_DUMP_STATUS_FIELD(f) \
 	printk(KERN_ERR #f "=0x%x\n", status->f)
 
-const char *ipa3_event_name[] = {
-	__stringify(IPA_SSR_BEFORE_SHUTDOWN),
-	__stringify(IPA_SSR_AFTER_POWERUP)
-};
-
 static char dbg_buff[IPA_MAX_MSG_LEN];
 static char *active_clients_buf;
 
@@ -414,8 +409,7 @@ static ssize_t ipa3_read_msg(struct file *file, char __user *ubuf,
 	int i;
 	for (i = 0; i < IPA_EVENT_MAX_NUM; i++) {
 		nbytes = scnprintf(dbg_buff + cnt, IPA_MAX_MSG_LEN - cnt,
-				"msg[%u:%27s] W:0 R:0\n", i,
-				ipa3_event_name[i]);
+				"msg[%u] W:0 R:0\n", i);
 		cnt += nbytes;
 	}
 

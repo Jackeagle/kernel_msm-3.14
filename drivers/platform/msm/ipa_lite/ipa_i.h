@@ -625,14 +625,7 @@ enum ipa3_config_this_ep {
 	IPA_DO_NOT_CONFIGURE_THIS_EP,
 };
 
-enum ipa_ssr_event {
-        IPA_SSR_BEFORE_SHUTDOWN,
-        IPA_SSR_AFTER_POWERUP,
-        IPA_SSR_EVENT_MAX
-};
-
-#define IPA_EVENT_MAX_NUM (IPA_SSR_EVENT_MAX)
-#define IPA_EVENT_MAX ((int)IPA_EVENT_MAX_NUM)
+#define IPA_EVENT_MAX_NUM (0)
 
 struct ipa3_stats {
 	u32 tx_sw_pkts;
