@@ -2305,9 +2305,6 @@ static int ipa3_pre_init(struct device *ipa_dev)
 
 	mutex_init(&ipa3_ctx->lock);
 
-	idr_init(&ipa3_ctx->ipa_idr);
-	spin_lock_init(&ipa3_ctx->idr_lock);
-
 	ipa3_ctx->class = class_create(THIS_MODULE, DRV_NAME);
 
 	result = alloc_chrdev_region(&ipa3_ctx->dev_num, 0, 1, DRV_NAME);
@@ -2363,7 +2360,6 @@ fail_device_create:
 fail_alloc_chrdev_region:
 	ipa3_free_dma_task_for_gsi();
 fail_dma_task:
-	idr_destroy(&ipa3_ctx->ipa_idr);
 fail_rx_pkt_wrapper_cache:
 	kmem_cache_destroy(ipa3_ctx->rx_pkt_wrapper_cache);
 fail_tx_pkt_wrapper_cache:
