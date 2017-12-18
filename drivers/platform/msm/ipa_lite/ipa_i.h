@@ -942,13 +942,7 @@ struct ipa_hw_stats {
  * @ipa_wrapper_base: IPA wrapper base address
  * @rt_tbl_set: list of routing tables each of which is a list of rules
  * @reap_rt_tbl_set: list of sys mem routing tables waiting to be reaped
- * @flt_rule_cache: filter rule cache
- * @rt_rule_cache: routing rule cache
- * @hdr_cache: header cache
- * @hdr_offset_cache: header offset cache
- * @hdr_proc_ctx_cache: processing context cache
  * @hdr_proc_ctx_offset_cache: processing context offset cache
- * @rt_tbl_cache: routing table cache
  * @tx_pkt_wrapper_cache: Tx packets cache
  * @rx_pkt_wrapper_cache: Rx packets cache
  * @rt_idx_bitmap: routing table index bitmap
@@ -1008,13 +1002,7 @@ struct ipa3_context {
 	void __iomem *mmio;
 	u32 ipa_wrapper_base;
 	u32 ipa_wrapper_size;
-	struct kmem_cache *flt_rule_cache;
-	struct kmem_cache *rt_rule_cache;
-	struct kmem_cache *hdr_cache;
-	struct kmem_cache *hdr_offset_cache;
-	struct kmem_cache *hdr_proc_ctx_cache;
 	struct kmem_cache *hdr_proc_ctx_offset_cache;
-	struct kmem_cache *rt_tbl_cache;
 	struct kmem_cache *tx_pkt_wrapper_cache;
 	struct kmem_cache *rx_pkt_wrapper_cache;
 	unsigned long rt_idx_bitmap[IPA_IP_MAX];
