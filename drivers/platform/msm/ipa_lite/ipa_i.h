@@ -34,15 +34,7 @@
 
 
 #define DRV_NAME "ipa"
-#define NAT_DEV_NAME "ipaNatTable"
 #define IPA_COOKIE 0x57831603
-#define IPA_RT_RULE_COOKIE 0x57831604
-#define IPA_RT_TBL_COOKIE 0x57831605
-#define IPA_FLT_COOKIE 0x57831606
-#define IPA_HDR_COOKIE 0x57831607
-#define IPA_PROC_HDR_COOKIE 0x57831608
-
-#define MTU_BYTE 1500
 
 #define IPA_EP_NOT_ALLOCATED (-1)
 #define IPA3_MAX_NUM_PIPES 31
@@ -52,11 +44,7 @@
 #define IPA_LAN_RX_HEADER_LENGTH (2)
 #define IPA_QMAP_HEADER_LENGTH (4)
 #define IPA_DL_CHECKSUM_LENGTH (8)
-#define IPA_NUM_DESC_PER_SW_TX (3)
 #define IPA_GENERIC_RX_POOL_SZ 192
-#define IPA_UC_FINISH_MAX 6
-#define IPA_UC_WAIT_MIN_SLEEP 1000
-#define IPA_UC_WAII_MAX_SLEEP 1200
 /*
  * The transport descriptor size was changed to GSI_CHAN_RE_SIZE_16B, but
  * IPA users still use sps_iovec size as FIFO element size.
