@@ -245,7 +245,6 @@ struct ipa3_client_names {
 };
 
 struct ipa_smmu_cb_ctx {
-	bool valid;
 	struct device *dev;
 	struct dma_iommu_mapping *mapping;
 	u32 va_start;

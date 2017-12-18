@@ -2459,7 +2459,6 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 		return -EPROBE_DEFER;
 	}
 	ipa_debug("SMMU mapping created\n");
-	cb->valid = true;
 
 	ipa_debug("UC CB PROBE sub pdev=%p set attribute\n", dev);
 	if (smmu_info.s1_bypass) {
@@ -2468,7 +2467,6 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 				&bypass)) {
 			ipa_err("couldn't set bypass\n");
 			arm_iommu_release_mapping(cb->mapping);
-			cb->valid = false;
 			return -EIO;
 		}
 		ipa_debug("SMMU S1 BYPASS\n");
@@ -2478,7 +2476,6 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 				&atomic_ctx)) {
 			ipa_err("couldn't set domain as atomic\n");
 			arm_iommu_release_mapping(cb->mapping);
-			cb->valid = false;
 			return -EIO;
 		}
 		ipa_debug("SMMU atomic set\n");
@@ -2489,7 +2486,6 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 					&fast)) {
 				ipa_err("couldn't set fast map\n");
 				arm_iommu_release_mapping(cb->mapping);
-				cb->valid = false;
 				return -EIO;
 			}
 			ipa_debug("SMMU fast map set\n");
@@ -2501,7 +2497,6 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 	if (ret) {
 		ipa_err("could not attach device ret=%d\n", ret);
 		arm_iommu_release_mapping(cb->mapping);
-		cb->valid = false;
 		return ret;
 	}
 
@@ -2550,7 +2545,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		return -EPROBE_DEFER;
 	}
 	pr_debug("SMMU mapping created\n");
-	cb->valid = true;
 
 	if (smmu_info.s1_bypass) {
 		if (iommu_domain_set_attr(cb->mapping->domain,
@@ -2558,7 +2552,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 				&bypass)) {
 			pr_err("couldn't set bypass\n");
 			arm_iommu_release_mapping(cb->mapping);
-			cb->valid = false;
 			return -EIO;
 		}
 		pr_debug("SMMU S1 BYPASS\n");
@@ -2568,7 +2561,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 				&atomic_ctx)) {
 			pr_err("couldn't set domain as atomic\n");
 			arm_iommu_release_mapping(cb->mapping);
-			cb->valid = false;
 			return -EIO;
 		}
 		pr_debug("SMMU atomic set\n");
@@ -2578,7 +2570,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 				&fast)) {
 			pr_err("couldn't set fast map\n");
 			arm_iommu_release_mapping(cb->mapping);
-			cb->valid = false;
 			return -EIO;
 		}
 		pr_debug("SMMU fast map set\n");
@@ -2587,7 +2578,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	result = arm_iommu_attach_device(cb->dev, cb->mapping);
 	if (result) {
 		pr_debug("couldn't attach to IOMMU ret=%d\n", result);
-		cb->valid = false;
 		return result;
 	}
 
@@ -2597,7 +2587,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		/* mapping size is an array of 3-tuple of u32 */
 		if (add_map_size % (3 * sizeof(u32))) {
 			pr_err("wrong additional mapping format\n");
-			cb->valid = false;
 			return -EFAULT;
 		}
 
@@ -2648,7 +2637,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		pr_err("ipa_init failed\n");
 		arm_iommu_detach_device(cb->dev);
 		arm_iommu_release_mapping(cb->mapping);
-		cb->valid = false;
 		return result;
 	}
 
