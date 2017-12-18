@@ -630,18 +630,17 @@ int ipa3_get_ep_mapping(enum ipa_client_type client)
 
 	if (client >= IPA_CLIENT_MAX || client < 0) {
 		ipa_err_ratelimited("Bad client number! client =%d\n", client);
-		return IPA_EP_NOT_ALLOCATED;
+		return -EINVAL;
 	}
 
-	if (!ipa3_ep_mapping[IPA_3_5_1][client].valid) {
-		return IPA_EP_NOT_ALLOCATED;
-	}
+	if (!ipa3_ep_mapping[IPA_3_5_1][client].valid)
+		return -ESRCH;
 
 	ipa_ep_idx = ipa3_ep_mapping[IPA_3_5_1][client].
 		ipa_gsi_ep_info.ipa_ep_num;
 	if (ipa_ep_idx < 0 || (ipa_ep_idx >= IPA3_MAX_NUM_PIPES
 		&& client != IPA_CLIENT_DUMMY_CONS))
-		return IPA_EP_NOT_ALLOCATED;
+		return -ENOENT;
 	return ipa_ep_idx;
 }
 
