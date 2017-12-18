@@ -949,9 +949,6 @@ struct ipa_hw_stats {
  *  from non-restricted bytes
  * @smem_restricted_bytes: the bytes that SW should not use in the shared mem
  * @nat_mem: NAT memory
- * @aggregation_type: aggregation type used on USB client endpoint
- * @aggregation_byte_limit: aggregation byte limit used on USB client endpoint
- * @aggregation_time_limit: aggregation time limit used on USB client endpoint
  * @hdr_tbl_lcl: where hdr tbl resides 1-local, 0-system
  * @hdr_mem: header memory
  * @hdr_proc_ctx_mem: processing context memory
@@ -1003,9 +1000,6 @@ struct ipa3_context {
 	u16 smem_sz;
 	u16 smem_restricted_bytes;
 	u16 smem_reqd_sz;
-	uint aggregation_type;
-	uint aggregation_byte_limit;
-	uint aggregation_time_limit;
 	bool hdr_tbl_lcl;
 	bool ip4_rt_tbl_hash_lcl;
 	bool ip4_rt_tbl_nhash_lcl;

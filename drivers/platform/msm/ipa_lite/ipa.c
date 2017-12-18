@@ -2156,11 +2156,6 @@ static int ipa3_pre_init(struct device *ipa_dev)
 
 	ipa3_ctx->ipa3_active_clients_logging.log_rdy = false;
 
-	/* default aggregation parameters */
-	ipa3_ctx->aggregation_type = IPA_MBIM_16;
-	ipa3_ctx->aggregation_byte_limit = 1;
-	ipa3_ctx->aggregation_time_limit = 0;
-
 	ipa3_ctx->ctrl = kzalloc(sizeof(*ipa3_ctx->ctrl), GFP_KERNEL);
 	if (!ipa3_ctx->ctrl) {
 		ipa_err("memory allocation error for ctrl\n");
