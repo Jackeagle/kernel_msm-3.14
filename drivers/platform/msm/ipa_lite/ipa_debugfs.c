@@ -401,21 +401,6 @@ static ssize_t ipa3_read_dbg_cnt(struct file *file, char __user *ubuf,
 	return simple_read_from_buffer(ubuf, count, ppos, dbg_buff, nbytes);
 }
 
-static ssize_t ipa3_read_msg(struct file *file, char __user *ubuf,
-		size_t count, loff_t *ppos)
-{
-	int nbytes;
-	int cnt = 0;
-	int i;
-	for (i = 0; i < IPA_EVENT_MAX_NUM; i++) {
-		nbytes = scnprintf(dbg_buff + cnt, IPA_MAX_MSG_LEN - cnt,
-				"msg[%u] W:0 R:0\n", i);
-		cnt += nbytes;
-	}
-
-	return simple_read_from_buffer(ubuf, count, ppos, dbg_buff, cnt);
-}
-
 static void ipa_dump_status(struct ipahal_pkt_status *status)
 {
 	IPA_DUMP_STATUS_FIELD(status_opcode);
@@ -581,10 +566,6 @@ const struct file_operations ipa3_stats_ops = {
 	.read = ipa3_read_stats,
 };
 
-const struct file_operations ipa3_msg_ops = {
-	.read = ipa3_read_msg,
-};
-
 const struct file_operations ipa3_dbg_cnt_ops = {
 	.read = ipa3_read_dbg_cnt,
 	.write = ipa3_write_dbg_cnt,
@@ -655,12 +636,6 @@ void ipa3_debugfs_init(void)
 	file = debugfs_create_file("dbg_cnt",
 			read_write_mode, ipa_dir, 0,
 			&ipa3_dbg_cnt_ops);
-	if (IS_ERR_OR_NULL(file))
-		goto fail;
-
-	file = debugfs_create_file("msg", S_IRUGO,
-			ipa_dir, 0,
-			&ipa3_msg_ops);
 	if (IS_ERR_OR_NULL(file))
 		goto fail;
 
