@@ -256,22 +256,6 @@ struct ipa_smmu_cb_ctx {
 };
 
 /**
- * struct ipa3_hdr_tbl - IPA header table
- * @head_hdr_entry_list: header entries list
- * @head_offset_list: header offset list
- * @head_free_offset_list: header free offset list
- * @hdr_cnt: number of headers
- * @end: the last header index
- */
-struct ipa3_hdr_tbl {
-	struct list_head head_hdr_entry_list;
-	struct list_head head_offset_list[IPA_HDR_BIN_MAX];
-	struct list_head head_free_offset_list[IPA_HDR_BIN_MAX];
-	u32 hdr_cnt;
-	u32 end;
-};
-
-/**
  * struct ipa3_hdr_offset_entry - IPA header offset entry
  * @link: entry's link in global processing context header offset entries list
  * @offset: the offset
@@ -281,23 +265,6 @@ struct ipa3_hdr_proc_ctx_offset_entry {
 	struct list_head link;
 	u32 offset;
 	u32 bin;
-};
-
-/**
- * struct ipa3_hdr_proc_ctx_tbl - IPA processing context header table
- * @head_proc_ctx_entry_list: header entries list
- * @head_offset_list: header offset list
- * @head_free_offset_list: header free offset list
- * @proc_ctx_cnt: number of processing context headers
- * @end: the last processing context header index
- * @start_offset: offset in words of processing context header table
- */
-struct ipa3_hdr_proc_ctx_tbl {
-	struct list_head head_proc_ctx_entry_list;
-	struct list_head head_offset_list[IPA_HDR_PROC_CTX_BIN_MAX];
-	struct list_head head_free_offset_list[IPA_HDR_PROC_CTX_BIN_MAX];
-	u32 proc_ctx_cnt;
-	u32 end;
 };
 
 struct ipa_gsi_ep_mem_info {
@@ -976,7 +943,6 @@ struct ipa_hw_stats {
  * @mode: IPA operating mode
  * @mmio: iomem
  * @ipa_wrapper_base: IPA wrapper base address
- * @hdr_proc_ctx_tbl: IPA processing context table
  * @rt_tbl_set: list of routing tables each of which is a list of rules
  * @reap_rt_tbl_set: list of sys mem routing tables waiting to be reaped
  * @flt_rule_cache: filter rule cache
@@ -1048,7 +1014,6 @@ struct ipa3_context {
 	void __iomem *mmio;
 	u32 ipa_wrapper_base;
 	u32 ipa_wrapper_size;
-	struct ipa3_hdr_proc_ctx_tbl hdr_proc_ctx_tbl;
 	struct kmem_cache *flt_rule_cache;
 	struct kmem_cache *rt_rule_cache;
 	struct kmem_cache *hdr_cache;

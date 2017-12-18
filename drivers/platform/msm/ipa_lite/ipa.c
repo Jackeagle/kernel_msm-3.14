@@ -2137,7 +2137,6 @@ static int ipa3_pre_init(struct device *ipa_dev)
 {
 	int result;
 	struct resource *res;
-	int i;
 	struct ipa_active_client_logging_info log_info;
 
 	pr_debug("IPA Driver initialization started\n");
@@ -2346,14 +2345,6 @@ static int ipa3_pre_init(struct device *ipa_dev)
 	if (result) {
 		ipa_err("failed to allocate dma task\n");
 		goto fail_dma_task;
-	}
-
-	/* init the various list heads */
-	INIT_LIST_HEAD(&ipa3_ctx->hdr_proc_ctx_tbl.head_proc_ctx_entry_list);
-	for (i = 0; i < IPA_HDR_PROC_CTX_BIN_MAX; i++) {
-		INIT_LIST_HEAD(&ipa3_ctx->hdr_proc_ctx_tbl.head_offset_list[i]);
-		INIT_LIST_HEAD(&ipa3_ctx->
-				hdr_proc_ctx_tbl.head_free_offset_list[i]);
 	}
 
 	INIT_LIST_HEAD(&ipa3_ctx->intf_list);
