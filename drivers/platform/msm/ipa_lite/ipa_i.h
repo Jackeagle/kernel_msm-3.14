@@ -1012,7 +1012,6 @@ struct ipa3_context {
 	u32 ipa_bus_hdl;
 	struct ipa3_controller *ctrl;
 	struct device *pdev;
-	struct device *uc_pdev;
 	u32 enable_clock_scaling;
 	u32 curr_ipa_clk_rate;
 	bool q6_proxy_clk_vote_valid;

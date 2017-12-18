@@ -2133,7 +2133,6 @@ static int ipa3_pre_init(struct device *ipa_dev)
 		pr_err("failed to create IPC log, continue...\n");
 
 	ipa3_ctx->pdev = ipa_dev;
-	ipa3_ctx->uc_pdev = ipa_dev;
 
 	/* Get IPA wrapper address */
 	res = platform_get_resource_byname(ipa3_pdev, IORESOURCE_MEM,
@@ -2516,7 +2515,6 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 	}
 
 	cb->next_addr = cb->va_end;
-	ipa3_ctx->uc_pdev = dev;
 
 	return 0;
 }
