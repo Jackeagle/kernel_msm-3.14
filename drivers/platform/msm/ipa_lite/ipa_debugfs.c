@@ -551,6 +551,22 @@ static ssize_t ipa3_enable_ipc_low(struct file *file,
 	return count;
 }
 
+/*
+ * File operation to implement a read for a file whose content
+ * is a constant string.  Pass constant string as data parameter
+ * to debugfs_create_file().  String should contain a newline
+ * (if desired).
+ */
+static ssize_t
+const_string_read_fop(struct file *file, char __user *buf, size_t len,
+			loff_t *ppos)
+{
+	char *string = file_inode(file)->i_private;
+	size_t size = strlen(string) + 1;
+
+	return simple_read_from_buffer(buf, len, ppos, string, size);
+}
+
 const struct file_operations ipa3_gen_reg_ops = {
 	.read = ipa3_read_gen_reg,
 };
@@ -595,6 +611,10 @@ const struct file_operations ipa3_ipc_low_ops = {
 	.write = ipa3_enable_ipc_low,
 };
 
+static const struct file_operations const_string_fops = {
+	.read = const_string_read_fop,
+};
+
 void ipa3_debugfs_init(void)
 {
 	static struct dentry *ipa_dir;
@@ -602,6 +622,7 @@ void ipa3_debugfs_init(void)
 	const mode_t read_write_mode = S_IRUGO | write_only_mode;
 	struct dentry *file;
 
+	(void)const_string_fops;
 	ipa_dir = debugfs_create_dir("ipa", 0);
 	if (IS_ERR(ipa_dir))
 		goto fail;
