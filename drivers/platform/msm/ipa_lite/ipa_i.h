@@ -908,24 +908,6 @@ struct ipa_quota_stats_all {
 	struct ipa_quota_stats client[IPA_CLIENT_MAX];
 };
 
-struct ipa_drop_stats {
-	u32 drop_packet_cnt;
-	u32 drop_byte_cnt;
-};
-
-struct ipa_drop_stats_all {
-	struct ipa_drop_stats client[IPA_CLIENT_MAX];
-};
-
-struct ipa_hw_stats_drop {
-	struct ipa_drop_stats_all stats;
-};
-
-struct ipa_hw_stats {
-	bool enabled;
-	struct ipa_hw_stats_drop drop;
-};
-
 /**
  * struct ipa3_context - IPA context
  * @class: pointer to the struct class
@@ -1030,7 +1012,6 @@ struct ipa3_context {
 	struct completion uc_loaded_completion_obj;
 	struct ipa3_smp2p_info smp2p_info;
 	struct ipa_dma_task_info dma_task_info;
-	struct ipa_hw_stats hw_stats;
 };
 
 /**
@@ -1524,12 +1505,6 @@ int ipa_get_quota_stats(struct ipa_quota_stats_all *out);
 int ipa_reset_quota_stats(enum ipa_client_type client);
 
 int ipa_reset_all_quota_stats(void);
-
-int ipa_init_drop_stats(u32 pipe_bitmask);
-
-int ipa_get_drop_stats(struct ipa_drop_stats_all *out);
-
-int ipa_reset_drop_stats(enum ipa_client_type client);
 
 int ipa_reset_all_drop_stats(void);
 u32 ipa3_get_num_pipes(void);
