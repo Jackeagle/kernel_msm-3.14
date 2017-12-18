@@ -2242,20 +2242,10 @@ static int ipa3_pre_init(struct device *ipa_dev)
 	ipa_debug("SRAM, size: 0x%x, restricted bytes: 0x%x\n",
 		ipa3_ctx->smem_sz, ipa3_ctx->smem_restricted_bytes);
 
-	ipa_debug("hdr_lcl=%u ip4_rt_hash=%u ip4_rt_nonhash=%u\n",
-		ipa3_ctx->hdr_tbl_lcl, ipa3_ctx->ip4_rt_tbl_hash_lcl,
-		ipa3_ctx->ip4_rt_tbl_nhash_lcl);
-
-	ipa_debug("ip6_rt_hash=%u ip6_rt_nonhash=%u\n",
-		ipa3_ctx->ip6_rt_tbl_hash_lcl, ipa3_ctx->ip6_rt_tbl_nhash_lcl);
-
-	ipa_debug("ip4_flt_hash=%u ip4_flt_nonhash=%u\n",
-		ipa3_ctx->ip4_flt_tbl_hash_lcl,
-		ipa3_ctx->ip4_flt_tbl_nhash_lcl);
-
-	ipa_debug("ip6_flt_hash=%u ip6_flt_nonhash=%u\n",
-		ipa3_ctx->ip6_flt_tbl_hash_lcl,
-		ipa3_ctx->ip6_flt_tbl_nhash_lcl);
+	ipa_debug("hdr_lcl=0 ip4_rt_hash=0 ip4_rt_nonhash=0\n");
+	ipa_debug("ip6_rt_hash=0 ip6_rt_nonhash=0\n");
+	ipa_debug("ip4_flt_hash=0 ip4_flt_nonhash=0\n");
+	ipa_debug("ip6_flt_hash=0 ip6_flt_nonhash=0\n");
 
 	if (ipa3_ctx->smem_reqd_sz > ipa3_ctx->smem_sz) {
 		ipa_err("SW expect more core memory, needed %d, avail %d\n",

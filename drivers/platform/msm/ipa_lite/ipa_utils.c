@@ -519,16 +519,6 @@ void _ipa_sram_settings_read_v3_0(void)
 	ipa3_ctx->smem_restricted_bytes *= 8;
 	ipa3_ctx->smem_sz *= 8;
 	ipa3_ctx->smem_reqd_sz = IPA_MEM_PART(end_ofst);
-	ipa3_ctx->hdr_tbl_lcl = 0;
-
-	ipa3_ctx->ip4_rt_tbl_hash_lcl = 0;
-	ipa3_ctx->ip4_rt_tbl_nhash_lcl = 0;
-	ipa3_ctx->ip6_rt_tbl_hash_lcl = 0;
-	ipa3_ctx->ip6_rt_tbl_nhash_lcl = 0;
-	ipa3_ctx->ip4_flt_tbl_hash_lcl = 0;
-	ipa3_ctx->ip4_flt_tbl_nhash_lcl = 0;
-	ipa3_ctx->ip6_flt_tbl_hash_lcl = 0;
-	ipa3_ctx->ip6_flt_tbl_nhash_lcl = 0;
 }
 
 /**

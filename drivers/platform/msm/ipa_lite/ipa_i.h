@@ -949,13 +949,8 @@ struct ipa_hw_stats {
  *  from non-restricted bytes
  * @smem_restricted_bytes: the bytes that SW should not use in the shared mem
  * @nat_mem: NAT memory
- * @hdr_tbl_lcl: where hdr tbl resides 1-local, 0-system
  * @hdr_mem: header memory
  * @hdr_proc_ctx_mem: processing context memory
- * @ip4_rt_tbl_lcl: where ip4 rt tables reside 1-local; 0-system
- * @ip6_rt_tbl_lcl: where ip6 rt tables reside 1-local; 0-system
- * @ip4_flt_tbl_lcl: where ip4 flt tables reside 1-local; 0-system
- * @ip6_flt_tbl_lcl: where ip6 flt tables reside 1-local; 0-system
  * @power_mgmt_wq: workqueue for power management
  * @transport_power_mgmt_wq: workqueue transport related power management
  * @tag_process_before_gating: indicates whether to start tag process before
@@ -1000,15 +995,6 @@ struct ipa3_context {
 	u16 smem_sz;
 	u16 smem_restricted_bytes;
 	u16 smem_reqd_sz;
-	bool hdr_tbl_lcl;
-	bool ip4_rt_tbl_hash_lcl;
-	bool ip4_rt_tbl_nhash_lcl;
-	bool ip6_rt_tbl_hash_lcl;
-	bool ip6_rt_tbl_nhash_lcl;
-	bool ip4_flt_tbl_hash_lcl;
-	bool ip4_flt_tbl_nhash_lcl;
-	bool ip6_flt_tbl_hash_lcl;
-	bool ip6_flt_tbl_nhash_lcl;
 	struct ipa3_active_clients ipa3_active_clients;
 	struct ipa3_active_clients_log_ctx ipa3_active_clients_logging;
 	struct workqueue_struct *power_mgmt_wq;
