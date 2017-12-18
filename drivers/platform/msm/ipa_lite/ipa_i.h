@@ -963,7 +963,6 @@ struct ipa_hw_stats {
  * @ctrl: holds the core specific operations based on
  *  core version (vtable like)
  * @pkt_init_imm_opcode: opcode for IP_PACKET_INIT imm cmd
- * @enable_clock_scaling: clock scaling is enabled ?
  * @curr_ipa_clk_rate: IPA current clock rate
  * @wcstats: wlan common buffer stats
  * @uc_ctx: uC interface context
@@ -1012,7 +1011,6 @@ struct ipa3_context {
 	u32 ipa_bus_hdl;
 	struct ipa3_controller *ctrl;
 	struct device *pdev;
-	u32 enable_clock_scaling;
 	u32 curr_ipa_clk_rate;
 	bool q6_proxy_clk_vote_valid;
 	u32 ipa_num_pipes;

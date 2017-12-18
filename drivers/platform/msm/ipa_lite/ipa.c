@@ -1634,20 +1634,14 @@ int ipa3_set_required_perf_profile(enum ipa_voltage_level floor_voltage,
 		return -EINVAL;
 	}
 
-	if (ipa3_ctx->enable_clock_scaling) {
-		ipa_debug_low("Clock scaling is enabled\n");
-		if (bandwidth_mbps >=
-			ipa3_ctx->ctrl->clock_scaling_bw_threshold_turbo)
-			needed_voltage = IPA_VOLTAGE_TURBO;
-		else if (bandwidth_mbps >=
-			ipa3_ctx->ctrl->clock_scaling_bw_threshold_nominal)
-			needed_voltage = IPA_VOLTAGE_NOMINAL;
-		else
-			needed_voltage = IPA_VOLTAGE_SVS;
-	} else {
-		ipa_debug_low("Clock scaling is disabled\n");
+	ipa_debug_low("Clock scaling is enabled\n");
+	if (bandwidth_mbps >= ipa3_ctx->ctrl->clock_scaling_bw_threshold_turbo)
+		needed_voltage = IPA_VOLTAGE_TURBO;
+	else if (bandwidth_mbps >=
+		ipa3_ctx->ctrl->clock_scaling_bw_threshold_nominal)
 		needed_voltage = IPA_VOLTAGE_NOMINAL;
-	}
+	else
+		needed_voltage = IPA_VOLTAGE_SVS;
 
 	needed_voltage = max(needed_voltage, floor_voltage);
 	switch (needed_voltage) {
@@ -2194,8 +2188,7 @@ static int ipa3_pre_init(struct device *ipa_dev)
 	if (ipa3_active_clients_log_init())
 		goto fail_init_active_client;
 
-	/* Enable ipa3_ctx->enable_clock_scaling */
-	ipa3_ctx->enable_clock_scaling = 1;
+	/* Clock scaling is enabled */
 	ipa3_ctx->curr_ipa_clk_rate = ipa3_ctx->ctrl->ipa_clk_rate_turbo;
 
 	/* enable IPA clocks explicitly to allow the initialization */

@@ -622,7 +622,6 @@ void ipa3_debugfs_init(void)
 	const mode_t read_write_mode = S_IRUGO | write_only_mode;
 	struct dentry *file;
 
-	(void)const_string_fops;
 	ipa_dir = debugfs_create_dir("ipa", 0);
 	if (IS_ERR(ipa_dir))
 		goto fail;
@@ -678,8 +677,8 @@ void ipa3_debugfs_init(void)
 	if (IS_ERR_OR_NULL(file))
 		goto fail;
 
-	file = debugfs_create_u32("enable_clock_scaling", read_write_mode,
-		ipa_dir, &ipa3_ctx->enable_clock_scaling);
+	file = debugfs_create_file("enable_clock_scaling", S_IRUGO, ipa_dir,
+			"1\n", &const_string_fops);
 	if (!file)
 		goto fail;
 
