@@ -248,7 +248,6 @@ struct ipa_smmu_cb_ctx {
 	bool valid;
 	struct device *dev;
 	struct dma_iommu_mapping *mapping;
-	struct iommu_domain *iommu;
 	unsigned long next_addr;
 	u32 va_start;
 	u32 va_end;
