@@ -897,17 +897,6 @@ struct ipa_dma_task_info {
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 };
 
-struct ipa_quota_stats {
-	u64 num_ipv4_bytes;
-	u64 num_ipv6_bytes;
-	u32 num_ipv4_pkts;
-	u32 num_ipv6_pkts;
-};
-
-struct ipa_quota_stats_all {
-	struct ipa_quota_stats client[IPA_CLIENT_MAX];
-};
-
 /**
  * struct ipa3_context - IPA context
  * @class: pointer to the struct class
@@ -1497,14 +1486,6 @@ int ipa3_uc_update_hw_flags(u32 flags);
 void ipa3_tag_destroy_imm(void *user1, int user2);
 const struct ipa_gsi_ep_config *ipa3_get_gsi_ep_info
 	(enum ipa_client_type client);
-
-int ipa_init_quota_stats(u32 pipe_bitmask);
-
-int ipa_get_quota_stats(struct ipa_quota_stats_all *out);
-
-int ipa_reset_quota_stats(enum ipa_client_type client);
-
-int ipa_reset_all_quota_stats(void);
 
 int ipa_reset_all_drop_stats(void);
 u32 ipa3_get_num_pipes(void);
