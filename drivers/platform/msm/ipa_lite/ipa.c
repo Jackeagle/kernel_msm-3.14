@@ -71,9 +71,6 @@
 	} while (0)
 
 
-/* The relative location in /lib/firmware where the FWs will reside */
-#define IPA_FWS_PATH "ipa/ipa_fws.elf"
-
 struct tz_smmu_ipa_protect_region_iovec_s {
 	u64 input_addr;
 	u64 output_addr;
