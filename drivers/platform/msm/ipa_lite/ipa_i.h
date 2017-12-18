@@ -1557,7 +1557,6 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout);
 int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr);
 
 int ipa3_straddle_boundary(u32 start, u32 end, u32 boundary);
-struct ipa3_context *ipa3_get_ctx(void);
 void ipa3_enable_clks(void);
 void ipa3_disable_clks(void);
 void ipa3_inc_client_enable_clks(struct ipa_active_client_logging_info *id);

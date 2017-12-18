@@ -2914,11 +2914,6 @@ int ipa3_ap_resume(struct device *dev)
 	return 0;
 }
 
-struct ipa3_context *ipa3_get_ctx(void)
-{
-	return ipa3_ctx;
-}
-
 static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
         enum ipa_rule_type rlt)
 {
