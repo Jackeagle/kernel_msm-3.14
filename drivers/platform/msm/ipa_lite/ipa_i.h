@@ -949,9 +949,6 @@ struct ipa_hw_stats {
  *  from non-restricted bytes
  * @smem_restricted_bytes: the bytes that SW should not use in the shared mem
  * @nat_mem: NAT memory
- * @excp_hdr_hdl: exception header handle
- * @dflt_v4_rt_rule_hdl: default v4 routing rule handle
- * @dflt_v6_rt_rule_hdl: default v6 routing rule handle
  * @aggregation_type: aggregation type used on USB client endpoint
  * @aggregation_byte_limit: aggregation byte limit used on USB client endpoint
  * @aggregation_time_limit: aggregation time limit used on USB client endpoint
@@ -1006,15 +1003,10 @@ struct ipa3_context {
 	u16 smem_sz;
 	u16 smem_restricted_bytes;
 	u16 smem_reqd_sz;
-	u32 excp_hdr_hdl;
-	u32 dflt_v4_rt_rule_hdl;
-	u32 dflt_v6_rt_rule_hdl;
 	uint aggregation_type;
 	uint aggregation_byte_limit;
 	uint aggregation_time_limit;
 	bool hdr_tbl_lcl;
-	struct ipa_mem_buffer hdr_mem;
-	struct ipa_mem_buffer hdr_proc_ctx_mem;
 	bool ip4_rt_tbl_hash_lcl;
 	bool ip4_rt_tbl_nhash_lcl;
 	bool ip6_rt_tbl_hash_lcl;
@@ -1035,16 +1027,13 @@ struct ipa3_context {
 	u32 clnt_hdl_data_in;
 	u32 clnt_hdl_data_out;
 	spinlock_t disconnect_lock;
-	u8 a5_pipe_index;
 	struct list_head intf_list;
 	struct list_head msg_list;
 	struct list_head pull_msg_list;
 	struct mutex msg_lock;
 	wait_queue_head_t msg_waitq;
-	bool ipa_config_is_mhi;
 	/* featurize if memory footprint becomes a concern */
 	struct ipa3_stats stats;
-	void *smem_pipe_mem;
 	void *logbuf;
 	void *logbuf_low;
 	u32 ipa_bus_hdl;
@@ -1064,7 +1053,6 @@ struct ipa3_context {
 
 	void *gsi_dev_hdl;
 	u32 ee;
-	u32 wdi_map_cnt;
 	struct wakeup_source w_lock;
 	struct ipa3_wakelock_ref_cnt wakelock_ref_cnt;
 	/* RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA */
