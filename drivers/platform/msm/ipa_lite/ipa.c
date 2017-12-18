@@ -2349,11 +2349,6 @@ static int ipa3_pre_init(struct device *ipa_dev)
 	}
 
 	/* init the various list heads */
-	INIT_LIST_HEAD(&ipa3_ctx->hdr_tbl.head_hdr_entry_list);
-	for (i = 0; i < IPA_HDR_BIN_MAX; i++) {
-		INIT_LIST_HEAD(&ipa3_ctx->hdr_tbl.head_offset_list[i]);
-		INIT_LIST_HEAD(&ipa3_ctx->hdr_tbl.head_free_offset_list[i]);
-	}
 	INIT_LIST_HEAD(&ipa3_ctx->hdr_proc_ctx_tbl.head_proc_ctx_entry_list);
 	for (i = 0; i < IPA_HDR_PROC_CTX_BIN_MAX; i++) {
 		INIT_LIST_HEAD(&ipa3_ctx->hdr_proc_ctx_tbl.head_offset_list[i]);
