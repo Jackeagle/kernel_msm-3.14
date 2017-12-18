@@ -996,7 +996,6 @@ int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
 	if (IPA_CLIENT_IS_CONS(sys_in->client))
 		ipa3_replenish_rx_cache(ep->sys);
 
-	ipa3_ctx->skip_ep_cfg_shadow[ipa_ep_idx] = ep->skip_ep_cfg;
 	if (!ep->skip_ep_cfg && IPA_CLIENT_IS_PROD(sys_in->client)) {
 		if (sys_in->client == IPA_CLIENT_APPS_WAN_PROD)
 			ipa_debug("modem cfg emb pipe flt\n");

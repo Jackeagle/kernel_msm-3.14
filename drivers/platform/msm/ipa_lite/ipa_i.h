@@ -933,7 +933,6 @@ struct ipa_hw_stats {
  * @dev: the dev_t of the device
  * @cdev: cdev of the device
  * @ep: list of all end points
- * @skip_ep_cfg_shadow: state to update filter table correctly across
   power-save
  * @ep_flt_bitmap: End-points supporting filtering bitmap
  * @ep_flt_num: End-points supporting filtering number
@@ -1006,7 +1005,6 @@ struct ipa3_context {
 	struct device *dev;
 	struct cdev cdev;
 	struct ipa3_ep_context ep[IPA3_MAX_NUM_PIPES];
-	bool skip_ep_cfg_shadow[IPA3_MAX_NUM_PIPES];
 	u32 ep_flt_bitmap;
 	u32 ep_flt_num;
 	bool resume_on_connect[IPA_CLIENT_MAX];
