@@ -813,33 +813,6 @@ struct ipa3_uc_hdlrs {
 };
 
 /**
- * enum ipa3_hw_flags - flags which defines the behavior of HW
- *
- * @IPA_HW_FLAG_HALT_SYSTEM_ON_ASSERT_FAILURE: Halt system in case of assert
- *	failure.
- * @IPA_HW_FLAG_NO_REPORT_MHI_CHANNEL_ERORR: Channel error would be reported
- *	in the event ring only. No event to CPU.
- * @IPA_HW_FLAG_NO_REPORT_MHI_CHANNEL_WAKE_UP: No need to report event
- *	IPA_HW_2_CPU_EVENT_MHI_WAKE_UP_REQUEST
- * @IPA_HW_FLAG_WORK_OVER_DDR: Perform all transaction to external addresses by
- *	QMB (avoid memcpy)
- * @IPA_HW_FLAG_NO_REPORT_OOB: If set do not report that the device is OOB in
- *	IN Channel
- * @IPA_HW_FLAG_NO_REPORT_DB_MODE: If set, do not report that the device is
- *	entering a mode where it expects a doorbell to be rung for OUT Channel
- * @IPA_HW_FLAG_NO_START_OOB_TIMER
- */
-enum ipa3_hw_flags {
-	IPA_HW_FLAG_HALT_SYSTEM_ON_ASSERT_FAILURE	= 0x01,
-	IPA_HW_FLAG_NO_REPORT_MHI_CHANNEL_ERORR		= 0x02,
-	IPA_HW_FLAG_NO_REPORT_MHI_CHANNEL_WAKE_UP	= 0x04,
-	IPA_HW_FLAG_WORK_OVER_DDR			= 0x08,
-	IPA_HW_FLAG_NO_REPORT_OOB			= 0x10,
-	IPA_HW_FLAG_NO_REPORT_DB_MODE			= 0x20,
-	IPA_HW_FLAG_NO_START_OOB_TIMER			= 0x40
-};
-
-/**
  * struct ipa3_uc_ctx - IPA uC context
  * @uc_inited: Indicates if uC interface has been initialized
  * @uc_loaded: Indicates if uC has loaded
