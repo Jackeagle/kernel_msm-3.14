@@ -642,8 +642,6 @@ struct ipa3_stats {
 	u32 rx_repl_repost;
 	u32 tx_pkts_compl;
 	u32 rx_q_len;
-	u32 msg_w[IPA_EVENT_MAX_NUM];
-	u32 msg_r[IPA_EVENT_MAX_NUM];
 	u32 stat_compl;
 	u32 aggr_close;
 	u32 wan_aggr_close;

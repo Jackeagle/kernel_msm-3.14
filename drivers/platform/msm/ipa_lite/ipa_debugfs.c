@@ -414,10 +414,8 @@ static ssize_t ipa3_read_msg(struct file *file, char __user *ubuf,
 	int i;
 	for (i = 0; i < IPA_EVENT_MAX_NUM; i++) {
 		nbytes = scnprintf(dbg_buff + cnt, IPA_MAX_MSG_LEN - cnt,
-				"msg[%u:%27s] W:%u R:%u\n", i,
-				ipa3_event_name[i],
-				ipa3_ctx->stats.msg_w[i],
-				ipa3_ctx->stats.msg_r[i]);
+				"msg[%u:%27s] W:0 R:0\n", i,
+				ipa3_event_name[i]);
 		cnt += nbytes;
 	}
 
