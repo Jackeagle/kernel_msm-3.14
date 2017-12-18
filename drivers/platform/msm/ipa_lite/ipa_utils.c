@@ -520,16 +520,10 @@ void _ipa_sram_settings_read_v3_0(void)
 	ipa3_ctx->smem_sz *= 8;
 	ipa3_ctx->smem_reqd_sz = IPA_MEM_PART(end_ofst);
 	ipa3_ctx->hdr_tbl_lcl = 0;
-	ipa3_ctx->hdr_proc_ctx_tbl_lcl = 1;
 
-	/*
-	 * when proc ctx table is located in internal memory,
-	 * modem entries resides first.
-	 */
-	if (ipa3_ctx->hdr_proc_ctx_tbl_lcl) {
-		ipa3_ctx->hdr_proc_ctx_tbl.start_offset =
-			IPA_MEM_PART(modem_hdr_proc_ctx_size);
-	}
+	/* proc ctx table modem entries resides first. */
+	ipa3_ctx->hdr_proc_ctx_tbl.start_offset =
+		IPA_MEM_PART(modem_hdr_proc_ctx_size);
 	ipa3_ctx->ip4_rt_tbl_hash_lcl = 0;
 	ipa3_ctx->ip4_rt_tbl_nhash_lcl = 0;
 	ipa3_ctx->ip6_rt_tbl_hash_lcl = 0;

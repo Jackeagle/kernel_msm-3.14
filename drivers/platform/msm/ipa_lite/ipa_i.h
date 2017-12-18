@@ -1002,7 +1002,6 @@ struct ipa_hw_stats {
  * @aggregation_byte_limit: aggregation byte limit used on USB client endpoint
  * @aggregation_time_limit: aggregation time limit used on USB client endpoint
  * @hdr_tbl_lcl: where hdr tbl resides 1-local, 0-system
- * @hdr_proc_ctx_tbl_lcl: where proc_ctx tbl resides true-local, false-system
  * @hdr_mem: header memory
  * @hdr_proc_ctx_mem: processing context memory
  * @ip4_rt_tbl_lcl: where ip4 rt tables reside 1-local; 0-system
@@ -1072,7 +1071,6 @@ struct ipa3_context {
 	uint aggregation_byte_limit;
 	uint aggregation_time_limit;
 	bool hdr_tbl_lcl;
-	bool hdr_proc_ctx_tbl_lcl;
 	struct ipa_mem_buffer hdr_mem;
 	struct ipa_mem_buffer hdr_proc_ctx_mem;
 	bool ip4_rt_tbl_hash_lcl;
