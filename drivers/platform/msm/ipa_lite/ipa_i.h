@@ -956,7 +956,6 @@ struct ipa_hw_stats {
  * @tag_process_before_gating: indicates whether to start tag process before
  *  gating IPA clocks
  * @transport_pm: transport power management related information
- * @disconnect_lock: protects LAN_CONS packet receive notification CB
  * @ipa3_active_clients: structure for reference counting connected IPA clients
  * @logbuf: ipc log buffer for high priority messages
  * @logbuf_low: ipc log buffer for low priority messages
@@ -1006,7 +1005,6 @@ struct ipa3_context {
 	u32 clnt_hdl_cmd;
 	u32 clnt_hdl_data_in;
 	u32 clnt_hdl_data_out;
-	spinlock_t disconnect_lock;
 	struct list_head intf_list;
 	struct list_head msg_list;
 	struct list_head pull_msg_list;

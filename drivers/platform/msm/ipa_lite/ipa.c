@@ -1212,7 +1212,6 @@ static int ipa3_setup_apps_pipes(void)
 	 * thread may nullify it - e.g. on EP disconnect.
 	 * This lock intended to protect the access to the source EP call-back
 	 */
-	spin_lock_init(&ipa3_ctx->disconnect_lock);
 	if (ipa3_setup_sys_pipe(&sys_in, &ipa3_ctx->clnt_hdl_data_in)) {
 		ipa_err(":setup sys pipe (LAN_CONS) failed.\n");
 		result = -EPERM;
