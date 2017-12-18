@@ -937,7 +937,6 @@ struct ipa_hw_stats {
  * @ep_flt_bitmap: End-points supporting filtering bitmap
  * @ep_flt_num: End-points supporting filtering number
  * @flt_tbl: list of all IPA filter tables
- * @flt_rule_ids: idr structure that holds the rule_id for each rule
  * @mode: IPA operating mode
  * @mmio: iomem
  * @ipa_wrapper_base: IPA wrapper base address
@@ -1006,7 +1005,6 @@ struct ipa3_context {
 	struct ipa3_ep_context ep[IPA3_MAX_NUM_PIPES];
 	u32 ep_flt_bitmap;
 	u32 ep_flt_num;
-	struct idr flt_rule_ids[IPA_IP_MAX];
 	void __iomem *mmio;
 	u32 ipa_wrapper_base;
 	u32 ipa_wrapper_size;

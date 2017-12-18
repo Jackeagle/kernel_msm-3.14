@@ -1902,7 +1902,6 @@ static int ipa3_post_init(struct device *ipa_dev)
 {
 	int result;
 	struct ipa3_uc_hdlrs uc_hdlrs = { 0 };
-	struct idr *idr;
 
 	/*
 	 * indication whether working in MHI config or non MHI config is given
@@ -1916,10 +1915,6 @@ static int ipa3_post_init(struct device *ipa_dev)
 
 	/* Assign resource limitation to each group */
 	ipa3_set_resorce_groups_min_max_limits();
-	idr = &(ipa3_ctx->flt_rule_ids[IPA_IP_v4]);
-	idr_init(idr);
-	idr = &(ipa3_ctx->flt_rule_ids[IPA_IP_v6]);
-	idr_init(idr);
 
 	result = ipa3_init_interrupts();
 	if (result) {
