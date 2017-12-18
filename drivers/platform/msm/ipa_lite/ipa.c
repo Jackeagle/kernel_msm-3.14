@@ -2402,6 +2402,8 @@ static int ipa3_iommu_map(struct iommu_domain *domain,
 {
 	struct ipa_smmu_cb_ctx *ap_cb = &ap_smmu_cb;
 
+	pr_debug("mapping 0x%lx to 0x%pa size %zu\n", iova, &paddr, size);
+
 	ipa_debug("domain =0x%p iova 0x%lx\n", domain, iova);
 	ipa_debug("paddr =0x%pa size 0x%x\n", &paddr, (u32)size);
 
@@ -2601,8 +2603,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 
 			IPA_SMMU_ROUND_TO_PAGE(iova, pa, size,
 				iova_p, pa_p, size_p);
-			pr_debug("mapping 0x%lx to 0x%pa size %d\n",
-				iova_p, &pa_p, size_p);
 			ipa3_iommu_map(cb->mapping->domain,
 				iova_p, pa_p, size_p,
 				IOMMU_READ | IOMMU_WRITE | IOMMU_MMIO);
@@ -2621,8 +2621,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 
 		IPA_SMMU_ROUND_TO_PAGE(iova, pa, IPA_SMEM_SIZE,
 			iova_p, pa_p, size_p);
-		pr_debug("mapping 0x%lx to 0x%pa size %d\n",
-			iova_p, &pa_p, size_p);
 		ipa3_iommu_map(cb->mapping->domain,
 			iova_p, pa_p, size_p,
 			IOMMU_READ | IOMMU_WRITE | IOMMU_MMIO);
