@@ -2496,10 +2496,7 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 	ipa_debug("CB PROBE pdev=%p attaching IOMMU device\n", dev);
 	ret = arm_iommu_attach_device(dev, cb->mapping);
 	if (ret) {
-		if (for_ap)
-			pr_debug("couldn't attach to IOMMU ret=%d\n", ret);
-		else
-			ipa_err("could not attach device ret=%d\n", ret);
+		ipa_err("could not attach device ret=%d\n", ret);
 		arm_iommu_release_mapping(cb->mapping);
 	}
 
