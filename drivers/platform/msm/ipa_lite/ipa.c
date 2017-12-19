@@ -2419,6 +2419,50 @@ static int ipa3_iommu_map(struct iommu_domain *domain,
 	return iommu_map(domain, iova, paddr, size, prot);
 }
 
+/*
+ * Common probe processing for SMMU context blocks.  This function
+ * populates all of the fields of the SMMU CB context provided.
+ *
+ * If successful, this function returns a created mapping in
+ * cb->mapping.  The caller is responsible for releasing that
+ * mapping in the event of a subsequent error.
+ */
+static int ipa_smmu_probe_common(struct device *dev, struct ipa_smmu_cb_ctx *cb)
+{
+	struct device_node *node = dev->of_node;
+	u32 iova_mapping[2];
+	u32 va_size;
+	int ret;
+
+	ret = of_property_read_u32_array(node, "qcom,iova-mapping",
+						iova_mapping, 2);
+	if (ret) {
+		ipa_err("Fail to read start/size iova addresses\n");
+		return ret;
+	}
+	cb->dev = dev;
+	cb->va_start = iova_mapping[0];
+	va_size = iova_mapping[1];
+	cb->va_end = cb->va_start + va_size;
+	ipa_debug("va_start=0x%x va_size=0x%x\n", cb->va_start, va_size);
+
+	if (dma_set_mask(dev, DMA_BIT_MASK(64)) ||
+			dma_set_coherent_mask(dev, DMA_BIT_MASK(64))) {
+		pr_err("DMA set 64bit mask failed\n");
+		return -EOPNOTSUPP;
+	}
+
+	cb->mapping = arm_iommu_create_mapping(dev->bus, cb->va_start, va_size);
+	if (IS_ERR_OR_NULL(cb->mapping)) {
+		pr_debug("Fail to create mapping\n");
+		/* assume this failure is because iommu driver is not ready */
+		return -EPROBE_DEFER;
+	}
+	pr_debug("SMMU mapping created\n");
+
+	return 0;
+}
+
 static int ipa_smmu_uc_cb_probe(struct device *dev)
 {
 	struct ipa_smmu_cb_ctx *cb = &uc_smmu_cb;
@@ -2426,8 +2470,6 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 	int bypass = 1;
 	int fast = 1;
 	int ret;
-	u32 iova_ap_mapping[2];
-	u32 va_size;
 
 	ipa_debug("UC CB PROBE sub pdev=%p\n", dev);
 
@@ -2436,34 +2478,9 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 		return -EPROBE_DEFER;
 	}
 
-	cb->dev = dev;
-
-	ret = of_property_read_u32_array(dev->of_node, "qcom,iova-mapping",
-			iova_ap_mapping, 2);
-	if (ret) {
-		ipa_err("Fail to read UC start/size iova addresses\n");
+	ret = ipa_smmu_probe_common(dev, cb);
+	if (ret)
 		return ret;
-	}
-	cb->va_start = iova_ap_mapping[0];
-	va_size = iova_ap_mapping[1];
-	cb->va_end = cb->va_start + va_size;
-	ipa_debug("UC va_start=0x%x va_sise=0x%x\n", cb->va_start, va_size);
-
-	if (dma_set_mask(dev, DMA_BIT_MASK(64)) ||
-			dma_set_coherent_mask(dev, DMA_BIT_MASK(64))) {
-		ipa_err("DMA set 64bit mask failed\n");
-		return -EOPNOTSUPP;
-	}
-	ipa_debug("UC CB PROBE=%p create IOMMU mapping\n", dev);
-
-	cb->mapping = arm_iommu_create_mapping(dev->bus,
-			cb->va_start, va_size);
-	if (IS_ERR_OR_NULL(cb->mapping)) {
-		ipa_debug("Fail to create mapping\n");
-		/* assume this failure is because iommu driver is not ready */
-		return -EPROBE_DEFER;
-	}
-	ipa_debug("SMMU mapping created\n");
 
 	ipa_debug("UC CB PROBE sub pdev=%p set attribute\n", dev);
 	if (smmu_info.s1_bypass) {
@@ -2515,8 +2532,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	int atomic_ctx = 1;
 	int fast = 1;
 	int bypass = 1;
-	u32 iova_ap_mapping[2];
-	u32 va_size;
 	u32 add_map_size;
 	const u32 *add_map;
 	void *smem_addr;
@@ -2524,33 +2539,9 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 
 	pr_debug("AP CB probe: sub pdev=%p\n", dev);
 
-	cb->dev = dev;
-
-	result = of_property_read_u32_array(dev->of_node, "qcom,iova-mapping",
-		iova_ap_mapping, 2);
-	if (result) {
-		pr_err("Fail to read AP start/size iova addresses\n");
+	result = ipa_smmu_probe_common(dev, cb);
+	if (result)
 		return result;
-	}
-	cb->va_start = iova_ap_mapping[0];
-	va_size = iova_ap_mapping[1];
-	cb->va_end = cb->va_start + va_size;
-	pr_debug("AP va_start=0x%x va_sise=0x%x\n", cb->va_start, va_size);
-
-	if (dma_set_mask(dev, DMA_BIT_MASK(64)) ||
-			dma_set_coherent_mask(dev, DMA_BIT_MASK(64))) {
-		pr_err("DMA set 64bit mask failed\n");
-		return -EOPNOTSUPP;
-	}
-
-	cb->mapping = arm_iommu_create_mapping(dev->bus,
-					cb->va_start, va_size);
-	if (IS_ERR_OR_NULL(cb->mapping)) {
-		pr_debug("Fail to create mapping\n");
-		/* assume this failure is because iommu driver is not ready */
-		return -EPROBE_DEFER;
-	}
-	pr_debug("SMMU mapping created\n");
 
 	if (smmu_info.s1_bypass) {
 		if (iommu_domain_set_attr(cb->mapping->domain,
