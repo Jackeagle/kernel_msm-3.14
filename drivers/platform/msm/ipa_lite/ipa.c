@@ -2424,8 +2424,10 @@ static int ipa3_iommu_map(struct iommu_domain *domain,
  * populates all of the fields of the SMMU CB context provided.
  *
  * If successful, this function returns a created mapping in
- * cb->mapping.  The caller is responsible for releasing that
- * mapping in the event of a subsequent error.
+ * cb->mapping.  The mapping will have beeen attached to the device
+ * provided.  In the event of a subsequent error, the caller is
+ * responsible for detaching the mapping from the device and
+ * releasing mapping.
  */
 static int ipa_smmu_probe_common(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 {
@@ -2493,14 +2495,22 @@ static int ipa_smmu_probe_common(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 		}
 	}
 
+	ipa_debug("CB PROBE pdev=%p attaching IOMMU device\n", dev);
+	ret = arm_iommu_attach_device(dev, cb->mapping);
+	if (ret) {
+		if (for_ap) {
+			pr_debug("couldn't attach to IOMMU ret=%d\n", ret);
+		} else {
+			ipa_err("could not attach device ret=%d\n", ret);
+			arm_iommu_release_mapping(cb->mapping);
+		}
+	}
+
 	return 0;
 }
 
 static int ipa_smmu_uc_cb_probe(struct device *dev)
 {
-	struct ipa_smmu_cb_ctx *cb = &uc_smmu_cb;
-	int ret;
-
 	ipa_debug("UC CB PROBE sub pdev=%p\n", dev);
 
 	if (ipa3_ctx == NULL) {
@@ -2508,19 +2518,7 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 		return -EPROBE_DEFER;
 	}
 
-	ret = ipa_smmu_probe_common(dev, cb);
-	if (ret)
-		return ret;
-
-	ipa_debug("UC CB PROBE sub pdev=%p attaching IOMMU device\n", dev);
-	ret = arm_iommu_attach_device(cb->dev, cb->mapping);
-	if (ret) {
-		ipa_err("could not attach device ret=%d\n", ret);
-		arm_iommu_release_mapping(cb->mapping);
-		return ret;
-	}
-
-	return 0;
+	return ipa_smmu_probe_common(dev, &uc_smmu_cb);
 }
 
 static int ipa_smmu_ap_cb_probe(struct device *dev)
@@ -2537,12 +2535,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	result = ipa_smmu_probe_common(dev, cb);
 	if (result)
 		return result;
-
-	result = arm_iommu_attach_device(cb->dev, cb->mapping);
-	if (result) {
-		pr_debug("couldn't attach to IOMMU ret=%d\n", result);
-		return result;
-	}
 
 	add_map = of_get_property(dev->of_node,
 		"qcom,additional-mapping", &add_map_size);
