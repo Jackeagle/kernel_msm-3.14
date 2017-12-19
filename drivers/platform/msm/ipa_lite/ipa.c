@@ -2436,6 +2436,8 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 		return -EPROBE_DEFER;
 	}
 
+	cb->dev = dev;
+
 	ret = of_property_read_u32_array(dev->of_node, "qcom,iova-mapping",
 			iova_ap_mapping, 2);
 	if (ret) {
@@ -2454,7 +2456,6 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 	}
 	ipa_debug("UC CB PROBE=%p create IOMMU mapping\n", dev);
 
-	cb->dev = dev;
 	cb->mapping = arm_iommu_create_mapping(dev->bus,
 			cb->va_start, va_size);
 	if (IS_ERR_OR_NULL(cb->mapping)) {
@@ -2523,6 +2524,8 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 
 	pr_debug("AP CB probe: sub pdev=%p\n", dev);
 
+	cb->dev = dev;
+
 	result = of_property_read_u32_array(dev->of_node, "qcom,iova-mapping",
 		iova_ap_mapping, 2);
 	if (result) {
@@ -2540,7 +2543,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		return -EOPNOTSUPP;
 	}
 
-	cb->dev = dev;
 	cb->mapping = arm_iommu_create_mapping(dev->bus,
 					cb->va_start, va_size);
 	if (IS_ERR_OR_NULL(cb->mapping)) {
