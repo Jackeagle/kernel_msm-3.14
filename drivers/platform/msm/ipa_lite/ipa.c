@@ -2389,9 +2389,10 @@ static enum ipa_hw_type ipa_version_get(struct platform_device *pdev)
 }
 
 static int ipa3_iommu_map(struct iommu_domain *domain,
-	unsigned long iova, phys_addr_t paddr, size_t size, int prot)
+	unsigned long iova, phys_addr_t paddr, size_t size)
 {
 	struct ipa_smmu_cb_ctx *ap_cb = &ap_smmu_cb;
+	int prot = IOMMU_READ | IOMMU_WRITE | IOMMU_MMIO;
 
 	/*
 	 * Round physical and I/O virtual addresses down to PAGE_SIZE
@@ -2599,8 +2600,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 			u32 pa = be32_to_cpu(add_map[i + 1]);
 			u32 size = be32_to_cpu(add_map[i + 2]);
 
-			ipa3_iommu_map(cb->mapping->domain, iova, pa, size,
-				IOMMU_READ | IOMMU_WRITE | IOMMU_MMIO);
+			ipa3_iommu_map(cb->mapping->domain, iova, pa, size);
 		}
 	}
 
@@ -2611,8 +2611,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		phys_addr_t iova = smem_virt_to_phys(smem_addr);
 		phys_addr_t pa = iova;
 
-		ipa3_iommu_map(cb->mapping->domain, iova, pa, IPA_SMEM_SIZE,
-			IOMMU_READ | IOMMU_WRITE | IOMMU_MMIO);
+		ipa3_iommu_map(cb->mapping->domain, iova, pa, IPA_SMEM_SIZE);
 	}
 
 	if (!ipa3_bus_scale_table)
