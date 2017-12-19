@@ -62,15 +62,6 @@
 
 #define IPA_SMEM_SIZE (8 * 1024)
 
-/* round addresses for closes page per SMMU requirements */
-#define IPA_SMMU_ROUND_TO_PAGE(iova, pa, size, iova_p, pa_p, size_p) \
-	do { \
-		(iova_p) = rounddown((iova), PAGE_SIZE); \
-		(pa_p) = rounddown((pa), PAGE_SIZE); \
-		(size_p) = roundup((size) + (pa) - (pa_p), PAGE_SIZE); \
-	} while (0)
-
-
 struct tz_smmu_ipa_protect_region_iovec_s {
 	u64 input_addr;
 	u64 output_addr;
@@ -2402,6 +2393,16 @@ static int ipa3_iommu_map(struct iommu_domain *domain,
 {
 	struct ipa_smmu_cb_ctx *ap_cb = &ap_smmu_cb;
 
+	/*
+	 * Round physical and I/O virtual addresses down to PAGE_SIZE
+	 * boundaries, and extend the size to reflect the effect of
+	 * rounding.  Round the size up to a PAGE_SIZE multiple.
+	 */
+	iova = rounddown(iova, PAGE_SIZE);
+	size += paddr % PAGE_SIZE;
+	size = roundup(size, PAGE_SIZE);
+	paddr = rounddown(paddr, PAGE_SIZE);
+
 	pr_debug("mapping 0x%lx to 0x%pa size %zu\n", iova, &paddr, size);
 
 	ipa_debug("domain =0x%p iova 0x%lx\n", domain, iova);
@@ -2597,14 +2598,8 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 			u32 iova = be32_to_cpu(add_map[i]);
 			u32 pa = be32_to_cpu(add_map[i + 1]);
 			u32 size = be32_to_cpu(add_map[i + 2]);
-			unsigned long iova_p;
-			phys_addr_t pa_p;
-			u32 size_p;
 
-			IPA_SMMU_ROUND_TO_PAGE(iova, pa, size,
-				iova_p, pa_p, size_p);
-			ipa3_iommu_map(cb->mapping->domain,
-				iova_p, pa_p, size_p,
+			ipa3_iommu_map(cb->mapping->domain, iova, pa, size,
 				IOMMU_READ | IOMMU_WRITE | IOMMU_MMIO);
 		}
 	}
@@ -2615,14 +2610,8 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	if (smem_addr) {
 		phys_addr_t iova = smem_virt_to_phys(smem_addr);
 		phys_addr_t pa = iova;
-		unsigned long iova_p;
-		phys_addr_t pa_p;
-		u32 size_p;
 
-		IPA_SMMU_ROUND_TO_PAGE(iova, pa, IPA_SMEM_SIZE,
-			iova_p, pa_p, size_p);
-		ipa3_iommu_map(cb->mapping->domain,
-			iova_p, pa_p, size_p,
+		ipa3_iommu_map(cb->mapping->domain, iova, pa, IPA_SMEM_SIZE,
 			IOMMU_READ | IOMMU_WRITE | IOMMU_MMIO);
 	}
 
