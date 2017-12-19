@@ -2433,8 +2433,10 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 {
 	struct device_node *node = dev->of_node;
 	bool for_ap = cb == &ap_smmu_cb;
+	struct dma_iommu_mapping *mapping;
 	u32 iova_mapping[2];
-	u32 va_size;
+	dma_addr_t va_start;
+	size_t va_size;
 	int data = 1;
 	int ret;
 
@@ -2444,14 +2446,12 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 		ipa_err("Fail to read start/size iova addresses\n");
 		return ret;
 	}
-	cb->dev = dev;
-	cb->va_start = (dma_addr_t)iova_mapping[0];
-	va_size = iova_mapping[1];
-	cb->va_end = cb->va_start + va_size;
-	ipa_debug("va_start=%pad va_size=0x%x\n", &cb->va_start, va_size);
+	va_start = (dma_addr_t)iova_mapping[0];
+	va_size = (size_t)iova_mapping[1];
+	ipa_debug("va_start=%pad va_size=0x%zx\n", &va_start, va_size);
 
-	cb->mapping = arm_iommu_create_mapping(dev->bus, cb->va_start, va_size);
-	if (IS_ERR_OR_NULL(cb->mapping)) {
+	mapping = arm_iommu_create_mapping(dev->bus, va_start, va_size);
+	if (IS_ERR_OR_NULL(mapping)) {
 		pr_debug("Fail to create mapping\n");
 		/* assume this failure is because iommu driver is not ready */
 		return -EPROBE_DEFER;
@@ -2461,14 +2461,14 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 	ipa_debug("CB PROBE pdev=%p set attribute\n", dev);
 	ret = -EIO; /* Response for any error setting attributes */
 	if (smmu_info.s1_bypass) {
-		if (iommu_domain_set_attr(cb->mapping->domain,
+		if (iommu_domain_set_attr(mapping->domain,
 				DOMAIN_ATTR_S1_BYPASS, &data)) {
 			pr_err("couldn't set bypass\n");
 			goto err_release_mapping;
 		}
 		pr_debug("SMMU S1 BYPASS\n");
 	} else {
-		if (iommu_domain_set_attr(cb->mapping->domain,
+		if (iommu_domain_set_attr(mapping->domain,
 				DOMAIN_ATTR_ATOMIC, &data)) {
 			pr_err("couldn't set domain as atomic\n");
 			goto err_release_mapping;
@@ -2476,7 +2476,7 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 		pr_debug("SMMU atomic set\n");
 
 		if (for_ap || smmu_info.fast_map) {
-			if (iommu_domain_set_attr(cb->mapping->domain,
+			if (iommu_domain_set_attr(mapping->domain,
 					DOMAIN_ATTR_FAST, &data)) {
 				ipa_err("couldn't set fast map\n");
 				goto err_release_mapping;
@@ -2492,16 +2492,21 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 	}
 
 	ipa_debug("CB PROBE pdev=%p attaching IOMMU device\n", dev);
-	ret = arm_iommu_attach_device(dev, cb->mapping);
+	ret = arm_iommu_attach_device(dev, mapping);
 	if (ret) {
 		ipa_err("could not attach device ret=%d\n", ret);
 		goto err_release_mapping;
 	}
 
+	cb->dev = dev;
+	cb->mapping = mapping;
+	cb->va_start = va_start;
+	cb->va_end = va_start + va_size;
+
 	return 0;
 
 err_release_mapping:
-	arm_iommu_release_mapping(cb->mapping);
+	arm_iommu_release_mapping(mapping);
 
 	return ret;
 }
