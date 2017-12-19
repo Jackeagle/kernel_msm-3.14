@@ -2450,12 +2450,6 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 	cb->va_end = cb->va_start + va_size;
 	ipa_debug("va_start=0x%x va_size=0x%x\n", cb->va_start, va_size);
 
-	if (dma_set_mask(dev, DMA_BIT_MASK(64)) ||
-			dma_set_coherent_mask(dev, DMA_BIT_MASK(64))) {
-		pr_err("DMA set 64bit mask failed\n");
-		return -EOPNOTSUPP;
-	}
-
 	cb->mapping = arm_iommu_create_mapping(dev->bus, cb->va_start, va_size);
 	if (IS_ERR_OR_NULL(cb->mapping)) {
 		pr_debug("Fail to create mapping\n");
@@ -2489,6 +2483,12 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 			}
 			ipa_debug("SMMU fast map set\n");
 		}
+	}
+
+	if (dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64))) {
+		pr_err("DMA set 64bit mask failed\n");
+		ret = -EOPNOTSUPP;
+		goto err_release_mapping;
 	}
 
 	ipa_debug("CB PROBE pdev=%p attaching IOMMU device\n", dev);
