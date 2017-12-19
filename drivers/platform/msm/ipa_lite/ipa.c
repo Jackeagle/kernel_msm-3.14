@@ -2435,9 +2435,7 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 	bool for_ap = cb == &ap_smmu_cb;
 	u32 iova_mapping[2];
 	u32 va_size;
-	int atomic_ctx = 1;
-	int bypass = 1;
-	int fast = 1;
+	int data = 1;
 	int ret;
 
 	ret = of_property_read_u32_array(node, "qcom,iova-mapping",
@@ -2469,7 +2467,7 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 	ipa_debug("CB PROBE pdev=%p set attribute\n", dev);
 	if (smmu_info.s1_bypass) {
 		if (iommu_domain_set_attr(cb->mapping->domain,
-				DOMAIN_ATTR_S1_BYPASS, &bypass)) {
+				DOMAIN_ATTR_S1_BYPASS, &data)) {
 			pr_err("couldn't set bypass\n");
 			arm_iommu_release_mapping(cb->mapping);
 			return -EIO;
@@ -2477,7 +2475,7 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 		pr_debug("SMMU S1 BYPASS\n");
 	} else {
 		if (iommu_domain_set_attr(cb->mapping->domain,
-				DOMAIN_ATTR_ATOMIC, &atomic_ctx)) {
+				DOMAIN_ATTR_ATOMIC, &data)) {
 			pr_err("couldn't set domain as atomic\n");
 			arm_iommu_release_mapping(cb->mapping);
 			return -EIO;
@@ -2486,7 +2484,7 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 
 		if (for_ap || smmu_info.fast_map) {
 			if (iommu_domain_set_attr(cb->mapping->domain,
-					DOMAIN_ATTR_FAST, &fast)) {
+					DOMAIN_ATTR_FAST, &data)) {
 				ipa_err("couldn't set fast map\n");
 				arm_iommu_release_mapping(cb->mapping);
 				return -EIO;
