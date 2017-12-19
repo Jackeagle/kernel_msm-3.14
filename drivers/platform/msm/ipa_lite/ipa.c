@@ -2465,20 +2465,19 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 	pr_debug("SMMU mapping created\n");
 
 	ipa_debug("CB PROBE pdev=%p set attribute\n", dev);
+	ret = -EIO; /* Response for any error setting attributes */
 	if (smmu_info.s1_bypass) {
 		if (iommu_domain_set_attr(cb->mapping->domain,
 				DOMAIN_ATTR_S1_BYPASS, &data)) {
 			pr_err("couldn't set bypass\n");
-			arm_iommu_release_mapping(cb->mapping);
-			return -EIO;
+			goto err_release_mapping;
 		}
 		pr_debug("SMMU S1 BYPASS\n");
 	} else {
 		if (iommu_domain_set_attr(cb->mapping->domain,
 				DOMAIN_ATTR_ATOMIC, &data)) {
 			pr_err("couldn't set domain as atomic\n");
-			arm_iommu_release_mapping(cb->mapping);
-			return -EIO;
+			goto err_release_mapping;
 		}
 		pr_debug("SMMU atomic set\n");
 
@@ -2486,8 +2485,7 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 			if (iommu_domain_set_attr(cb->mapping->domain,
 					DOMAIN_ATTR_FAST, &data)) {
 				ipa_err("couldn't set fast map\n");
-				arm_iommu_release_mapping(cb->mapping);
-				return -EIO;
+				goto err_release_mapping;
 			}
 			ipa_debug("SMMU fast map set\n");
 		}
@@ -2497,10 +2495,15 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 	ret = arm_iommu_attach_device(dev, cb->mapping);
 	if (ret) {
 		ipa_err("could not attach device ret=%d\n", ret);
-		arm_iommu_release_mapping(cb->mapping);
+		goto err_release_mapping;
 	}
 
 	return 0;
+
+err_release_mapping:
+	arm_iommu_release_mapping(cb->mapping);
+
+	return ret;
 }
 
 static int ipa_smmu_uc_cb_probe(struct device *dev)
