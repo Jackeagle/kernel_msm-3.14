@@ -247,8 +247,8 @@ struct ipa3_client_names {
 struct ipa_smmu_cb_ctx {
 	struct device *dev;
 	struct dma_iommu_mapping *mapping;
-	u32 va_start;
-	u32 va_end;
+	dma_addr_t va_start;
+	dma_addr_t va_end;
 };
 
 /**

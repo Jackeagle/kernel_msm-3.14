@@ -2445,10 +2445,10 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 		return ret;
 	}
 	cb->dev = dev;
-	cb->va_start = iova_mapping[0];
+	cb->va_start = (dma_addr_t)iova_mapping[0];
 	va_size = iova_mapping[1];
 	cb->va_end = cb->va_start + va_size;
-	ipa_debug("va_start=0x%x va_size=0x%x\n", cb->va_start, va_size);
+	ipa_debug("va_start=%pad va_size=0x%x\n", &cb->va_start, va_size);
 
 	cb->mapping = arm_iommu_create_mapping(dev->bus, cb->va_start, va_size);
 	if (IS_ERR_OR_NULL(cb->mapping)) {
