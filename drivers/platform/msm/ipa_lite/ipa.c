@@ -2419,6 +2419,13 @@ static int ipa3_iommu_map(struct iommu_domain *domain,
 	return iommu_map(domain, iova, paddr, size, prot);
 }
 
+static int
+ipa_smmu_domain_attr_set(struct iommu_domain *domain, enum iommu_attr attr)
+{
+	int data = 1;
+
+	return iommu_domain_set_attr(domain, attr, &data);
+}
 /*
  * Common probe processing for SMMU context blocks.  This function
  * populates all of the fields of the SMMU CB context provided.
@@ -2434,10 +2441,10 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 	struct device_node *node = dev->of_node;
 	bool for_ap = cb == &ap_smmu_cb;
 	struct dma_iommu_mapping *mapping;
+	struct iommu_domain *domain;
 	u32 iova_mapping[2];
 	dma_addr_t va_start;
 	size_t va_size;
-	int data = 1;
 	int ret;
 
 	ret = of_property_read_u32_array(node, "qcom,iova-mapping",
@@ -2456,28 +2463,26 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 		/* assume this failure is because iommu driver is not ready */
 		return -EPROBE_DEFER;
 	}
+	domain = mapping->domain;
 	pr_debug("SMMU mapping created\n");
 
 	ipa_debug("CB PROBE pdev=%p set attribute\n", dev);
 	ret = -EIO; /* Response for any error setting attributes */
 	if (smmu_info.s1_bypass) {
-		if (iommu_domain_set_attr(mapping->domain,
-				DOMAIN_ATTR_S1_BYPASS, &data)) {
+		if (ipa_smmu_domain_attr_set(domain, DOMAIN_ATTR_S1_BYPASS)) {
 			pr_err("couldn't set bypass\n");
 			goto err_release_mapping;
 		}
 		pr_debug("SMMU S1 BYPASS\n");
 	} else {
-		if (iommu_domain_set_attr(mapping->domain,
-				DOMAIN_ATTR_ATOMIC, &data)) {
+		if (ipa_smmu_domain_attr_set(domain, DOMAIN_ATTR_ATOMIC)) {
 			pr_err("couldn't set domain as atomic\n");
 			goto err_release_mapping;
 		}
 		pr_debug("SMMU atomic set\n");
 
 		if (for_ap || smmu_info.fast_map) {
-			if (iommu_domain_set_attr(mapping->domain,
-					DOMAIN_ATTR_FAST, &data)) {
+			if (ipa_smmu_domain_attr_set(domain, DOMAIN_ATTR_FAST)) {
 				ipa_err("couldn't set fast map\n");
 				goto err_release_mapping;
 			}
