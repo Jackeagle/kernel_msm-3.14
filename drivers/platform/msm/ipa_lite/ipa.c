@@ -2558,6 +2558,13 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		}
 	}
 
+	ipa3_ctx = kzalloc(sizeof(*ipa3_ctx), GFP_KERNEL);
+	if (!ipa3_ctx) {
+		pr_err(":kzalloc err.\n");
+		ipa_smmu_detach(cb);
+		return -ENOMEM;
+	}
+
 	/* map SMEM memory for IPA table accesses */
 	smem_addr = smem_alloc(SMEM_IPA_FILTER_TABLE, IPA_SMEM_SIZE,
 		SMEM_MODEM, 0);
@@ -2566,13 +2573,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		phys_addr_t pa = iova;
 
 		ipa3_iommu_map(cb->mapping->domain, iova, pa, IPA_SMEM_SIZE);
-	}
-
-	ipa3_ctx = kzalloc(sizeof(*ipa3_ctx), GFP_KERNEL);
-	if (!ipa3_ctx) {
-		pr_err(":kzalloc err.\n");
-		ipa_smmu_detach(cb);
-		return -ENOMEM;
 	}
 
 	ipa3_ctx->bus_scale_table = msm_bus_cl_get_pdata(ipa3_pdev);
