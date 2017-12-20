@@ -674,20 +674,13 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout)
 			num_desc, last_desc->callback, last_desc->user1);
 	last_desc->callback = ipa3_transport_irq_cmd_ack_free;
 	last_desc->user1 = comp;
-	if (num_desc == 1) {
-		if (ipa3_send_one(sys, descr, true)) {
-			ipa_err("fail to send immediate command\n");
-			kfree(comp);
-			result = -EFAULT;
-			goto bail;
-		}
-	} else {
-		if (ipa3_send(sys, num_desc, descr, true)) {
-			ipa_err("fail to send multiple immediate command set\n");
-			kfree(comp);
-			result = -EFAULT;
-			goto bail;
-		}
+
+	if (ipa3_send(sys, num_desc, descr, true)) {
+		ipa_err("fail to send %hu immediate command%s\n",
+			num_desc, num_desc == 1 ? "" : "s");
+		kfree(comp);
+		result = -EFAULT;
+		goto bail;
 	}
 
 	completed = wait_for_completion_timeout(
