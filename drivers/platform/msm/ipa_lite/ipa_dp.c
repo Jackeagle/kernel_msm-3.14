@@ -601,18 +601,11 @@ int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr)
 			num_desc, last_desc->callback, last_desc->user1);
 	last_desc->callback = ipa3_transport_irq_cmd_ack;
 	last_desc->user1 = last_desc;
-	if (num_desc == 1) {
-		if (ipa3_send_one(sys, descr, true)) {
-			ipa_err("fail to send immediate command\n");
-			result = -EFAULT;
-			goto bail;
-		}
-	} else {
-		if (ipa3_send(sys, num_desc, descr, true)) {
-			ipa_err("fail to send multiple immediate command set\n");
-			result = -EFAULT;
-			goto bail;
-		}
+	if (ipa3_send(sys, num_desc, descr, true)) {
+		ipa_err("fail to send %hu immediate command%s\n",
+				num_desc, num_desc == 1 ? "" : "s");
+		result = -EFAULT;
+		goto bail;
 	}
 	wait_for_completion(&last_desc->xfer_done);
 bail:
