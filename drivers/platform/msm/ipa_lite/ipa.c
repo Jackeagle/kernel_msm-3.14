@@ -2429,7 +2429,7 @@ static int ipa3_iommu_map(struct iommu_domain *domain,
  * responsible for detaching the mapping from the device and
  * releasing mapping.
  */
-static int ipa_smmu_probe_common(struct device *dev, struct ipa_smmu_cb_ctx *cb)
+static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 {
 	struct device_node *node = dev->of_node;
 	bool for_ap = cb == &ap_smmu_cb;
@@ -2518,7 +2518,7 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 		return -EPROBE_DEFER;
 	}
 
-	return ipa_smmu_probe_common(dev, &uc_smmu_cb);
+	return ipa_smmu_attach(dev, &uc_smmu_cb);
 }
 
 static int ipa_smmu_ap_cb_probe(struct device *dev)
@@ -2532,7 +2532,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 
 	pr_debug("AP CB probe: sub pdev=%p\n", dev);
 
-	result = ipa_smmu_probe_common(dev, cb);
+	result = ipa_smmu_attach(dev, cb);
 	if (result)
 		return result;
 
