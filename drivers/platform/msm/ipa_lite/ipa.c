@@ -85,7 +85,7 @@ static void ipa_dec_clients_disable_clks_on_wq(struct work_struct *work);
 static DECLARE_WORK(ipa_dec_clients_disable_clks_on_wq_work,
 	ipa_dec_clients_disable_clks_on_wq);
 
-struct msm_bus_scale_pdata *ipa3_bus_scale_table;
+static struct msm_bus_scale_pdata *ipa3_bus_scale_table;
 
 struct ipa3_context *ipa3_ctx;
 struct platform_device *ipa3_pdev;
