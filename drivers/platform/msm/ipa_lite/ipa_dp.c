@@ -594,22 +594,22 @@ int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr)
 		return -EFAULT;
 
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	last_desc = &descr[num_desc - 1];
 	if (num_desc == 1) {
-		init_completion(&descr->xfer_done);
+		init_completion(&last_desc->xfer_done);
 
-		if (descr->callback || descr->user1)
+		if (last_desc->callback || last_desc->user1)
 			WARN_ON(1);
 
-		descr->callback = ipa3_transport_irq_cmd_ack;
-		descr->user1 = descr;
+		last_desc->callback = ipa3_transport_irq_cmd_ack;
+		last_desc->user1 = last_desc;
 		if (ipa3_send_one(sys, descr, true)) {
 			ipa_err("fail to send immediate command\n");
 			result = -EFAULT;
 			goto bail;
 		}
-		wait_for_completion(&descr->xfer_done);
+		wait_for_completion(&last_desc->xfer_done);
 	} else {
-		last_desc = &descr[num_desc - 1];
 		init_completion(&last_desc->xfer_done);
 
 		if (last_desc->callback || last_desc->user1)
