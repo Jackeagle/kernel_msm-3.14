@@ -2570,29 +2570,25 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		ipa3_iommu_map(cb->mapping->domain, iova, pa, IPA_SMEM_SIZE);
 	}
 
-	ipa3_bus_scale_table = msm_bus_cl_get_pdata(ipa3_pdev);
-
 	ipa3_ctx = kzalloc(sizeof(*ipa3_ctx), GFP_KERNEL);
 	if (!ipa3_ctx) {
 		pr_err(":kzalloc err.\n");
-		if (ipa3_bus_scale_table) {
-			msm_bus_cl_clear_pdata(ipa3_bus_scale_table);
-			ipa3_bus_scale_table = NULL;
-		}
 		ipa_smmu_detach(cb);
 		return -ENOMEM;
 	}
+
+	ipa3_bus_scale_table = msm_bus_cl_get_pdata(ipa3_pdev);
 
 	/* Proceed to real initialization */
 	result = ipa3_pre_init(dev);
 	if (result) {
 		pr_err("ipa_init failed\n");
-		kfree(ipa3_ctx);
-		ipa3_ctx = NULL;
 		if (ipa3_bus_scale_table) {
 			msm_bus_cl_clear_pdata(ipa3_bus_scale_table);
 			ipa3_bus_scale_table = NULL;
 		}
+		kfree(ipa3_ctx);
+		ipa3_ctx = NULL;
 		ipa_smmu_detach(cb);
 	}
 
