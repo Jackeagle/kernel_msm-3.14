@@ -85,7 +85,9 @@ static void ipa_dec_clients_disable_clks_on_wq(struct work_struct *work);
 static DECLARE_WORK(ipa_dec_clients_disable_clks_on_wq_work,
 	ipa_dec_clients_disable_clks_on_wq);
 
-struct ipa3_context *ipa3_ctx;
+static struct ipa3_context ipa3_ctx_struct;
+struct ipa3_context *ipa3_ctx = &ipa3_ctx_struct;
+
 static struct {
 	bool fast_map;
 	bool s1_bypass;
@@ -2683,19 +2685,11 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	if (of_device_is_compatible(node, "qcom,smp2pgpio-map-ipa-1-out"))
 		return ipa3_smp2p_probe(dev);
 
-	ipa3_ctx = kzalloc(sizeof(*ipa3_ctx), GFP_KERNEL);
-	if (!ipa3_ctx) {
-		pr_err(":kzalloc err.\n");
-		return -ENOMEM;
-	}
-
 	/* Find out whether we're working with supported hardware */
 	ipa_version = ipa_version_get(pdev_p);
 	ipa_debug(": ipa_version = %d", ipa_version);
 	if (ipa_version != IPA_HW_v3_5_1) {
 		ipa_err(":only IPA version 3.5.1 supported!\n");
-		kfree(ipa3_ctx);
-		ipa3_ctx = NULL;
 		return -ENODEV;
 	}
 
@@ -2704,8 +2698,6 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	result = msm_gsi_init(pdev_p);
 	if (result) {
 		printk(KERN_ERR "ipa: error initializing gsi driver.\n");
-		kfree(ipa3_ctx);
-		ipa3_ctx = NULL;
 		return result;
 	}
 
@@ -2718,11 +2710,8 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		smmu_info.s1_bypass, smmu_info.fast_map);
 
 	result = of_platform_populate(node, ipa_plat_drv_match, NULL, dev);
-	if (result) {
+	if (result)
 		ipa_err("failed to populate platform\n");
-		kfree(ipa3_ctx);
-		ipa3_ctx = NULL;
-	}
 
 	return result;
 }
