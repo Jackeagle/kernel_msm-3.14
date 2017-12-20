@@ -2534,18 +2534,14 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 
 	pr_debug("AP CB probe: sub pdev=%p\n", dev);
 
-	ipa3_ctx = kzalloc(sizeof(*ipa3_ctx), GFP_KERNEL);
-	if (!ipa3_ctx) {
-		pr_err(":kzalloc err.\n");
-		return -ENOMEM;
+	if (ipa3_ctx == NULL) {
+		ipa_err("ipa3_ctx was not initialized\n");
+		return -EPROBE_DEFER;
 	}
 
 	result = ipa_smmu_attach(dev, cb);
-	if (result) {
-		kfree(ipa3_ctx);
-		ipa3_ctx = NULL;
+	if (result)
 		return result;
-	}
 
 	add_map = of_get_property(dev->of_node,
 		"qcom,additional-mapping", &add_map_size);
@@ -2553,8 +2549,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		/* mapping size is an array of 3-tuple of u32 */
 		if (add_map_size % (3 * sizeof(u32))) {
 			pr_err("wrong additional mapping format\n");
-			kfree(ipa3_ctx);
-			ipa3_ctx = NULL;
 			ipa_smmu_detach(cb);
 			return -EFAULT;
 		}
@@ -2589,8 +2583,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 			msm_bus_cl_clear_pdata(ipa3_ctx->bus_scale_table);
 			ipa3_ctx->bus_scale_table = NULL;
 		}
-		kfree(ipa3_ctx);
-		ipa3_ctx = NULL;
 		ipa_smmu_detach(cb);
 	}
 
@@ -2715,10 +2707,19 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	printk(KERN_INFO "IPA smmu_info.s1_bypass=%d smmu_info.fast_map=%d\n",
 		smmu_info.s1_bypass, smmu_info.fast_map);
 
+	ipa3_ctx = kzalloc(sizeof(*ipa3_ctx), GFP_KERNEL);
+	if (!ipa3_ctx) {
+		pr_err(":kzalloc err.\n");
+		return -ENOMEM;
+	}
+
 	result = of_platform_populate(node, ipa_plat_drv_match, NULL,
 					&pdev_p->dev);
-	if (result)
+	if (result) {
 		ipa_err("failed to populate platform\n");
+		kfree(ipa3_ctx);
+		ipa3_ctx = NULL;
+	}
 
 	return result;
 }
