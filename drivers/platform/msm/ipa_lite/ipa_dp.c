@@ -571,7 +571,7 @@ static void ipa3_transport_irq_cmd_ack_free(void *tag_comp, int ignored)
  */
 int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr)
 {
-	struct ipa3_desc *desc;
+	struct ipa3_desc *last_desc;
 	int i, result = 0;
 	struct ipa3_sys_context *sys;
 	int ep_idx;
@@ -609,20 +609,20 @@ int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr)
 		}
 		wait_for_completion(&descr->xfer_done);
 	} else {
-		desc = &descr[num_desc - 1];
-		init_completion(&desc->xfer_done);
+		last_desc = &descr[num_desc - 1];
+		init_completion(&last_desc->xfer_done);
 
-		if (desc->callback || desc->user1)
+		if (last_desc->callback || last_desc->user1)
 			WARN_ON(1);
 
-		desc->callback = ipa3_transport_irq_cmd_ack;
-		desc->user1 = desc;
+		last_desc->callback = ipa3_transport_irq_cmd_ack;
+		last_desc->user1 = last_desc;
 		if (ipa3_send(sys, num_desc, descr, true)) {
 			ipa_err("fail to send multiple immediate command set\n");
 			result = -EFAULT;
 			goto bail;
 		}
-		wait_for_completion(&desc->xfer_done);
+		wait_for_completion(&last_desc->xfer_done);
 	}
 
 bail:
