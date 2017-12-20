@@ -2693,16 +2693,18 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	}
 	ipa3_pdev = pdev_p;
 
-	result = msm_gsi_init(pdev_p);
-	if (result) {
-		printk(KERN_ERR "ipa: error initializing gsi driver.\n");
-		return result;
-	}
-
 	ipa3_ctx = kzalloc(sizeof(*ipa3_ctx), GFP_KERNEL);
 	if (!ipa3_ctx) {
 		pr_err(":kzalloc err.\n");
 		return -ENOMEM;
+	}
+
+	result = msm_gsi_init(pdev_p);
+	if (result) {
+		printk(KERN_ERR "ipa: error initializing gsi driver.\n");
+		kfree(ipa3_ctx);
+		ipa3_ctx = NULL;
+		return result;
 	}
 
 	/* The SDM845 has an SMMU, and uses the ARM SMMU driver */
