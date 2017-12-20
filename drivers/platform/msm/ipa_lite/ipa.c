@@ -85,8 +85,6 @@ static void ipa_dec_clients_disable_clks_on_wq(struct work_struct *work);
 static DECLARE_WORK(ipa_dec_clients_disable_clks_on_wq_work,
 	ipa_dec_clients_disable_clks_on_wq);
 
-static struct msm_bus_scale_pdata *ipa3_bus_scale_table;
-
 struct ipa3_context *ipa3_ctx;
 struct platform_device *ipa3_pdev;
 static struct {
@@ -2149,10 +2147,10 @@ static int ipa3_pre_init(struct device *ipa_dev)
 		goto fail_init_mem_partition;
 	}
 
-	if (ipa3_bus_scale_table) {
+	if (ipa3_ctx->bus_scale_table) {
 		ipa_debug("Use bus scaling info from device tree #usecases=%d\n",
-			ipa3_bus_scale_table->num_usecases);
-		ipa3_ctx->ctrl->msm_bus_data_ptr = ipa3_bus_scale_table;
+			ipa3_ctx->bus_scale_table->num_usecases);
+		ipa3_ctx->ctrl->msm_bus_data_ptr = ipa3_ctx->bus_scale_table;
 	}
 
 	/* get BUS handle */
@@ -2577,15 +2575,15 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		return -ENOMEM;
 	}
 
-	ipa3_bus_scale_table = msm_bus_cl_get_pdata(ipa3_pdev);
+	ipa3_ctx->bus_scale_table = msm_bus_cl_get_pdata(ipa3_pdev);
 
 	/* Proceed to real initialization */
 	result = ipa3_pre_init(dev);
 	if (result) {
 		pr_err("ipa_init failed\n");
-		if (ipa3_bus_scale_table) {
-			msm_bus_cl_clear_pdata(ipa3_bus_scale_table);
-			ipa3_bus_scale_table = NULL;
+		if (ipa3_ctx->bus_scale_table) {
+			msm_bus_cl_clear_pdata(ipa3_ctx->bus_scale_table);
+			ipa3_ctx->bus_scale_table = NULL;
 		}
 		kfree(ipa3_ctx);
 		ipa3_ctx = NULL;

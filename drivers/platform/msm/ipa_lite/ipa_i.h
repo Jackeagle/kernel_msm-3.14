@@ -910,6 +910,9 @@ struct ipa3_context {
 	atomic_t state;
 	struct device *dev;
 	struct cdev cdev;
+
+	struct msm_bus_scale_pdata *bus_scale_table;
+
 	struct ipa3_ep_context ep[IPA3_MAX_NUM_PIPES];
 	u32 ep_flt_bitmap;
 	u32 ep_flt_num;
