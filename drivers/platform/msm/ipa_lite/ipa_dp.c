@@ -662,6 +662,9 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout)
 	atomic_set(&comp->cnt, 2);
 
 	sys = ipa3_ctx->ep[ep_idx].sys;
+	if(!sys)
+		return -EFAULT;
+
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
 
 	if (num_desc == 1) {
