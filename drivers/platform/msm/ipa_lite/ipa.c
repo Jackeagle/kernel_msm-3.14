@@ -1,5 +1,6 @@
 /* Copyright (c) 2012-2017, The Linux Foundation. All rights reserved.
  *
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
  * only version 2 as published by the Free Software Foundation.
@@ -2516,11 +2517,6 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 {
 	ipa_debug("UC CB PROBE sub pdev=%p\n", dev);
 
-	if (ipa3_ctx == NULL) {
-		ipa_err("ipa3_ctx was not initialized\n");
-		return -EPROBE_DEFER;
-	}
-
 	return ipa_smmu_attach(dev, &uc_smmu_cb);
 }
 
@@ -2534,11 +2530,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	int i;
 
 	pr_debug("AP CB probe: sub pdev=%p\n", dev);
-
-	if (ipa3_ctx == NULL) {
-		ipa_err("ipa3_ctx was not initialized\n");
-		return -EPROBE_DEFER;
-	}
 
 	result = ipa_smmu_attach(dev, cb);
 	if (result)
@@ -2602,10 +2593,6 @@ static int ipa3_smp2p_probe(struct device *dev)
 	struct device_node *node = dev->of_node;
 	int res;
 
-	if (ipa3_ctx == NULL) {
-		ipa_err("ipa3_ctx was not initialized\n");
-		return -EPROBE_DEFER;
-	}
 	ipa_debug("node->name=%s\n", node->name);
 	if (strcmp("qcom,smp2pgpio_map_ipa_1_out", node->name) == 0) {
 		res = of_get_gpio(node, 0);

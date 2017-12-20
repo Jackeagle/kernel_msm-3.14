@@ -2371,9 +2371,6 @@ void __ipa_ipc_logging(bool only_low, const char *fmt, ...)
 {
 	va_list arg_list;
 
-	if (!ipa3_ctx)
-		return;
-
 	va_start(arg_list, fmt);
 	if (!only_low)
 		(void)ipc_log_va_list(ipa3_ctx->logbuf, fmt, arg_list);

@@ -974,7 +974,7 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 
 	printk(KERN_INFO "rmnet_ipa3 started initialization\n");
 
-	if (!ipa3_ctx || atomic_read(&ipa3_ctx->state) != IPA_STATE_READY) {
+	if (atomic_read(&ipa3_ctx->state) != IPA_STATE_READY) {
 		ipa_debug("IPA driver not ready, deferring\n");
 		return -EPROBE_DEFER;
 	}
