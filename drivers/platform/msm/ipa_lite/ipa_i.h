@@ -905,6 +905,8 @@ struct ipa_dma_task_info {
  * IPA context - holds all relevant info about IPA driver and its state
  */
 struct ipa3_context {
+	struct platform_device *ipa3_pdev;
+
 	struct class *class;
 	dev_t dev_num;
 	atomic_t state;

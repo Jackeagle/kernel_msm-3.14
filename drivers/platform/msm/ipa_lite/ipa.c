@@ -86,7 +86,6 @@ static DECLARE_WORK(ipa_dec_clients_disable_clks_on_wq_work,
 	ipa_dec_clients_disable_clks_on_wq);
 
 struct ipa3_context *ipa3_ctx;
-struct platform_device *ipa3_pdev;
 static struct {
 	bool fast_map;
 	bool s1_bypass;
@@ -1730,7 +1729,7 @@ static int ipa3_init_interrupts(void)
 	int ipa_irq;
 
 	/* Get IPA IRQ number */
-	ipa_irq = platform_get_irq_byname(ipa3_pdev, "ipa-irq");
+	ipa_irq = platform_get_irq_byname(ipa3_ctx->ipa3_pdev, "ipa-irq");
 	if (ipa_irq < 0) {
 		ipa_err(":failed to get ipa-irq!\n");
 		return -ENODEV;
@@ -1738,7 +1737,7 @@ static int ipa3_init_interrupts(void)
 	ipa_debug(":ipa-irq = %d\n", ipa_irq);
 
 	/*register IPA IRQ handler*/
-	result = ipa3_interrupts_init(ipa_irq, 0, &ipa3_pdev->dev);
+	result = ipa3_interrupts_init(ipa_irq, 0, &ipa3_ctx->ipa3_pdev->dev);
 	if (result) {
 		ipa_err("ipa interrupts initialization failed\n");
 		return -ENODEV;
@@ -1756,7 +1755,7 @@ static int ipa3_init_interrupts(void)
 	return 0;
 
 fail_add_interrupt_handler:
-	free_irq(ipa_irq, &ipa3_pdev->dev);
+	free_irq(ipa_irq, &ipa3_ctx->ipa3_pdev->dev);
 	return result;
 }
 
@@ -2108,7 +2107,7 @@ static int ipa3_pre_init(struct device *ipa_dev)
 	ipa3_ctx->pdev = ipa_dev;
 
 	/* Get IPA wrapper address */
-	res = platform_get_resource_byname(ipa3_pdev, IORESOURCE_MEM,
+	res = platform_get_resource_byname(ipa3_ctx->ipa3_pdev, IORESOURCE_MEM,
 			"ipa-base");
 	if (!res) {
 		ipa_err(":get resource failed for ipa-base!\n");
@@ -2120,7 +2119,7 @@ static int ipa3_pre_init(struct device *ipa_dev)
 			ipa3_ctx->ipa_wrapper_base,
 			ipa3_ctx->ipa_wrapper_size);
 
-	result = of_property_read_u32(ipa3_pdev->dev.of_node, "qcom,ee",
+	result = of_property_read_u32(ipa3_ctx->ipa3_pdev->dev.of_node, "qcom,ee",
 			&ipa3_ctx->ee);
 	if (result)
 		ipa3_ctx->ee = 0;	/* Default to 0 if not found */
@@ -2140,7 +2139,7 @@ static int ipa3_pre_init(struct device *ipa_dev)
 		goto fail_bind;
 	}
 
-	result = ipa3_init_mem_partition(ipa3_pdev->dev.of_node);
+	result = ipa3_init_mem_partition(ipa3_ctx->ipa3_pdev->dev.of_node);
 	if (result) {
 		ipa_err(":ipa3_init_mem_partition failed!\n");
 		result = -ENODEV;
@@ -2573,7 +2572,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		ipa3_iommu_map(cb->mapping->domain, iova, pa, IPA_SMEM_SIZE);
 	}
 
-	ipa3_ctx->bus_scale_table = msm_bus_cl_get_pdata(ipa3_pdev);
+	ipa3_ctx->bus_scale_table = msm_bus_cl_get_pdata(ipa3_ctx->ipa3_pdev);
 
 	/* Proceed to real initialization */
 	result = ipa3_pre_init(dev);
@@ -2691,13 +2690,14 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		ipa_err(":only IPA version 3.5.1 supported!\n");
 		return -ENODEV;
 	}
-	ipa3_pdev = pdev_p;
 
 	ipa3_ctx = kzalloc(sizeof(*ipa3_ctx), GFP_KERNEL);
 	if (!ipa3_ctx) {
 		pr_err(":kzalloc err.\n");
 		return -ENOMEM;
 	}
+
+	ipa3_ctx->ipa3_pdev = pdev_p;
 
 	result = msm_gsi_init(pdev_p);
 	if (result) {
@@ -2715,8 +2715,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	printk(KERN_INFO "IPA smmu_info.s1_bypass=%d smmu_info.fast_map=%d\n",
 		smmu_info.s1_bypass, smmu_info.fast_map);
 
-	result = of_platform_populate(node, ipa_plat_drv_match, NULL,
-					&pdev_p->dev);
+	result = of_platform_populate(node, ipa_plat_drv_match, NULL, dev);
 	if (result) {
 		ipa_err("failed to populate platform\n");
 		kfree(ipa3_ctx);
