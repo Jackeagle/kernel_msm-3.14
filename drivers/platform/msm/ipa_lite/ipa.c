@@ -2538,12 +2538,21 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	if (result)
 		return result;
 
+	ipa3_ctx = kzalloc(sizeof(*ipa3_ctx), GFP_KERNEL);
+	if (!ipa3_ctx) {
+		pr_err(":kzalloc err.\n");
+		ipa_smmu_detach(cb);
+		return -ENOMEM;
+	}
+
 	add_map = of_get_property(dev->of_node,
 		"qcom,additional-mapping", &add_map_size);
 	if (add_map) {
 		/* mapping size is an array of 3-tuple of u32 */
 		if (add_map_size % (3 * sizeof(u32))) {
 			pr_err("wrong additional mapping format\n");
+			kfree(ipa3_ctx);
+			ipa3_ctx = NULL;
 			ipa_smmu_detach(cb);
 			return -EFAULT;
 		}
@@ -2556,13 +2565,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 
 			ipa3_iommu_map(cb->mapping->domain, iova, pa, size);
 		}
-	}
-
-	ipa3_ctx = kzalloc(sizeof(*ipa3_ctx), GFP_KERNEL);
-	if (!ipa3_ctx) {
-		pr_err(":kzalloc err.\n");
-		ipa_smmu_detach(cb);
-		return -ENOMEM;
 	}
 
 	/* map SMEM memory for IPA table accesses */
