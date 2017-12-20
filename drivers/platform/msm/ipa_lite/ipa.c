@@ -2699,6 +2699,12 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		return result;
 	}
 
+	ipa3_ctx = kzalloc(sizeof(*ipa3_ctx), GFP_KERNEL);
+	if (!ipa3_ctx) {
+		pr_err(":kzalloc err.\n");
+		return -ENOMEM;
+	}
+
 	/* The SDM845 has an SMMU, and uses the ARM SMMU driver */
 	if (of_property_read_bool(node, "qcom,smmu-s1-bypass"))
 		smmu_info.s1_bypass = true;
@@ -2706,12 +2712,6 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		smmu_info.fast_map = true;
 	printk(KERN_INFO "IPA smmu_info.s1_bypass=%d smmu_info.fast_map=%d\n",
 		smmu_info.s1_bypass, smmu_info.fast_map);
-
-	ipa3_ctx = kzalloc(sizeof(*ipa3_ctx), GFP_KERNEL);
-	if (!ipa3_ctx) {
-		pr_err(":kzalloc err.\n");
-		return -ENOMEM;
-	}
 
 	result = of_platform_populate(node, ipa_plat_drv_match, NULL,
 					&pdev_p->dev);
