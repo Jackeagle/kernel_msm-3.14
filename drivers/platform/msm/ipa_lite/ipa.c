@@ -2103,13 +2103,6 @@ static int ipa3_pre_init(struct device *ipa_dev)
 
 	pr_debug("IPA Driver initialization started\n");
 
-	ipa3_ctx = kzalloc(sizeof(*ipa3_ctx), GFP_KERNEL);
-	if (!ipa3_ctx) {
-		pr_err(":kzalloc err.\n");
-		result = -ENOMEM;
-		goto fail_mem_ctx;
-	}
-
 	ipa3_ctx->logbuf = ipc_log_context_create(IPA_IPC_LOG_PAGES, "ipa", 0);
 	if (ipa3_ctx->logbuf == NULL)
 		pr_err("failed to create IPC log, continue...\n");
@@ -2363,9 +2356,7 @@ fail_bind:
 fail_mem_ctrl:
 	if (ipa3_ctx->logbuf)
 		ipc_log_context_destroy(ipa3_ctx->logbuf);
-	kfree(ipa3_ctx);
-	ipa3_ctx = NULL;
-fail_mem_ctx:
+
 	return result;
 }
 
@@ -2582,10 +2573,23 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	if (!ipa3_bus_scale_table)
 		ipa3_bus_scale_table = msm_bus_cl_get_pdata(ipa3_pdev);
 
+	ipa3_ctx = kzalloc(sizeof(*ipa3_ctx), GFP_KERNEL);
+	if (!ipa3_ctx) {
+		pr_err(":kzalloc err.\n");
+		if (ipa3_bus_scale_table) {
+			msm_bus_cl_clear_pdata(ipa3_bus_scale_table);
+			ipa3_bus_scale_table = NULL;
+		}
+		ipa_smmu_detach(cb);
+		return -ENOMEM;
+	}
+
 	/* Proceed to real initialization */
 	result = ipa3_pre_init(dev);
 	if (result) {
 		pr_err("ipa_init failed\n");
+		kfree(ipa3_ctx);
+		ipa3_ctx = NULL;
 		if (ipa3_bus_scale_table) {
 			msm_bus_cl_clear_pdata(ipa3_bus_scale_table);
 			ipa3_bus_scale_table = NULL;
