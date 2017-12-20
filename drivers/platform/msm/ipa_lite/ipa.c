@@ -2570,8 +2570,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		ipa3_iommu_map(cb->mapping->domain, iova, pa, IPA_SMEM_SIZE);
 	}
 
-	if (!ipa3_bus_scale_table)
-		ipa3_bus_scale_table = msm_bus_cl_get_pdata(ipa3_pdev);
+	ipa3_bus_scale_table = msm_bus_cl_get_pdata(ipa3_pdev);
 
 	ipa3_ctx = kzalloc(sizeof(*ipa3_ctx), GFP_KERNEL);
 	if (!ipa3_ctx) {
