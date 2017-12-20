@@ -2516,6 +2516,15 @@ err_release_mapping:
 	return ret;
 }
 
+/* Un-do the side-effects of a successful call to ipa_smmu_attach(). */
+static void ipa_smmu_detach(struct ipa_smmu_cb_ctx *cb)
+{
+	arm_iommu_detach_device(cb->dev);
+	arm_iommu_release_mapping(cb->mapping);
+
+	memset(cb, 0, sizeof(*cb));
+}
+
 static int ipa_smmu_uc_cb_probe(struct device *dev)
 {
 	ipa_debug("UC CB PROBE sub pdev=%p\n", dev);
@@ -2579,9 +2588,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	result = ipa3_pre_init(dev);
 	if (result) {
 		pr_err("ipa_init failed\n");
-		arm_iommu_detach_device(cb->dev);
-		arm_iommu_release_mapping(cb->mapping);
-		return result;
+		ipa_smmu_detach(cb);
 	}
 
 	return result;
