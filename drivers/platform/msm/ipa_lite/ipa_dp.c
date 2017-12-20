@@ -584,7 +584,7 @@ int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr)
 		ipa_debug("sending imm cmd %d\n", descr[i].opcode);
 
 	ep_idx = ipa3_get_ep_mapping(IPA_CLIENT_APPS_CMD_PROD);
-	if (-1 == ep_idx) {
+	if (ep_idx < 0) {
 		ipa_err("Client %u is not mapped\n",
 			IPA_CLIENT_APPS_CMD_PROD);
 		return -EFAULT;
@@ -656,7 +656,7 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout)
 		ipa_debug("sending imm cmd %d\n", descr[i].opcode);
 
 	ep_idx = ipa3_get_ep_mapping(IPA_CLIENT_APPS_CMD_PROD);
-	if (-1 == ep_idx) {
+	if (ep_idx < 0) {
 		ipa_err("Client %u is not mapped\n",
 			IPA_CLIENT_APPS_CMD_PROD);
 		return -EFAULT;
@@ -872,7 +872,7 @@ int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
 	}
 
 	ipa_ep_idx = ipa3_get_ep_mapping(sys_in->client);
-	if (ipa_ep_idx == -1) {
+	if (ipa_ep_idx < 0) {
 		ipa_err("Invalid client.\n");
 		goto fail_gen;
 	}
@@ -1222,7 +1222,7 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb,
 	 */
 	if (IPA_CLIENT_IS_CONS(dst)) {
 		src_ep_idx = ipa3_get_ep_mapping(IPA_CLIENT_APPS_LAN_PROD);
-		if (-1 == src_ep_idx) {
+		if (src_ep_idx < 0) {
 			ipa_err("Client %u is not mapped\n",
 				IPA_CLIENT_APPS_LAN_PROD);
 			goto fail_gen;
@@ -1230,7 +1230,7 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb,
 		dst_ep_idx = ipa3_get_ep_mapping(dst);
 	} else {
 		src_ep_idx = ipa3_get_ep_mapping(dst);
-		if (-1 == src_ep_idx) {
+		if (src_ep_idx < 0) {
 			ipa_err("Client %u is not mapped\n", dst);
 			goto fail_gen;
 		}
@@ -2394,11 +2394,10 @@ static void ipa3_recycle_rx_wrapper(struct ipa3_rx_pkt_wrapper *rx_pkt)
 void ipa3_recycle_wan_skb(struct sk_buff *skb)
 {
 	struct ipa3_rx_pkt_wrapper *rx_pkt;
-	int ep_idx = ipa3_get_ep_mapping(
-	   IPA_CLIENT_APPS_WAN_CONS);
+	int ep_idx = ipa3_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
 	gfp_t flag = GFP_NOWAIT | __GFP_NOWARN;
 
-	if (unlikely(ep_idx == -1)) {
+	if (unlikely(ep_idx < 0)) {
 		ipa_err("dest EP does not exist\n");
 		ipa_assert();
 	}

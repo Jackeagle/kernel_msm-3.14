@@ -378,7 +378,7 @@ int ipa3_add_interrupt_handler(enum ipa_irq_type interrupt,
 				ep_idx = ipa3_get_ep_mapping(client_idx);
 				ipa_debug("modem ep_idx(%d) client_idx = %d\n",
 					ep_idx, client_idx);
-			if (ep_idx == -1)
+			if (ep_idx < 0)
 				ipa_debug("Invalid IPA client\n");
 			else
 				val &= ~(1 << ep_idx);

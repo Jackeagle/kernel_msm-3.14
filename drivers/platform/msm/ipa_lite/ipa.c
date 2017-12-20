@@ -408,7 +408,7 @@ static void ipa3_q6_pipe_delay(bool delay)
 	for (client_idx = 0; client_idx < IPA_CLIENT_MAX; client_idx++) {
 		if (IPA_CLIENT_IS_Q6_PROD(client_idx)) {
 			ep_idx = ipa3_get_ep_mapping(client_idx);
-			if (ep_idx == -1)
+			if (ep_idx < 0)
 				continue;
 
 			ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n,
@@ -434,7 +434,7 @@ static void ipa3_q6_avoid_holb(void)
 	for (client_idx = 0; client_idx < IPA_CLIENT_MAX; client_idx++) {
 		if (IPA_CLIENT_IS_Q6_CONS(client_idx)) {
 			ep_idx = ipa3_get_ep_mapping(client_idx);
-			if (ep_idx == -1)
+			if (ep_idx < 0)
 				continue;
 
 			/*
@@ -467,7 +467,7 @@ static void ipa3_halt_q6_cons_gsi_channels(void)
 	for (client_idx = 0; client_idx < IPA_CLIENT_MAX; client_idx++) {
 		if (IPA_CLIENT_IS_Q6_CONS(client_idx)) {
 			ep_idx = ipa3_get_ep_mapping(client_idx);
-			if (ep_idx == -1)
+			if (ep_idx < 0)
 				continue;
 
 			gsi_ep_cfg = ipa3_get_gsi_ep_info(client_idx);
@@ -516,7 +516,7 @@ static int ipa3_q6_set_ex_path_to_apps(void)
 	/* Set the exception path to AP */
 	for (client_idx = 0; client_idx < IPA_CLIENT_MAX; client_idx++) {
 		ep_idx = ipa3_get_ep_mapping(client_idx);
-		if (ep_idx == -1)
+		if (ep_idx < 0)
 			continue;
 
 		if (ipa3_ctx->ep[ep_idx].valid &&
@@ -661,7 +661,7 @@ void ipa3_q6_post_shutdown_cleanup(void)
 	for (client_idx = 0; client_idx < IPA_CLIENT_MAX; client_idx++)
 		if (IPA_CLIENT_IS_Q6_PROD(client_idx)) {
 			ep_idx = ipa3_get_ep_mapping(client_idx);
-			if (ep_idx == -1)
+			if (ep_idx < 0)
 				continue;
 
 			if (ipa3_uc_is_gsi_channel_empty(client_idx)) {

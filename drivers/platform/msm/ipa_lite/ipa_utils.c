@@ -490,7 +490,7 @@ bool ipa3_should_pipe_be_suspended(enum ipa_client_type client)
 	int ipa_ep_idx;
 
 	ipa_ep_idx = ipa3_get_ep_mapping(client);
-	if (ipa_ep_idx == -1) {
+	if (ipa_ep_idx < 0) {
 		ipa_err("Invalid client.\n");
 		WARN_ON(1);
 		return false;
@@ -657,7 +657,7 @@ const struct ipa_gsi_ep_config *ipa3_get_gsi_ep_info
 	int ep_idx;
 
 	ep_idx = ipa3_get_ep_mapping(client);
-	if (ep_idx == IPA_EP_NOT_ALLOCATED)
+	if (ep_idx < 0)
 		return NULL;
 
 	if (!ipa3_ep_mapping[IPA_3_5_1][client].valid)
@@ -1237,7 +1237,7 @@ int ipa3_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 	}
 
 	ep = ipa3_get_ep_mapping(ep_mode->dst);
-	if (ep == -1 && ep_mode->mode == IPA_DMA) {
+	if (ep < 0 && ep_mode->mode == IPA_DMA) {
 		ipa_err("dst %d does not exist in DMA mode\n", ep_mode->dst);
 		return -EINVAL;
 	}
@@ -2041,7 +2041,7 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 	}
 
 	ep_idx = ipa3_get_ep_mapping(IPA_CLIENT_APPS_CMD_PROD);
-	if (-1 == ep_idx) {
+	if (ep_idx < 0) {
 		ipa_err("Client %u is not mapped\n",
 			IPA_CLIENT_APPS_CMD_PROD);
 		return -EFAULT;
