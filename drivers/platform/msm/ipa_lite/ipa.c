@@ -2534,15 +2534,17 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 
 	pr_debug("AP CB probe: sub pdev=%p\n", dev);
 
-	result = ipa_smmu_attach(dev, cb);
-	if (result)
-		return result;
-
 	ipa3_ctx = kzalloc(sizeof(*ipa3_ctx), GFP_KERNEL);
 	if (!ipa3_ctx) {
 		pr_err(":kzalloc err.\n");
-		ipa_smmu_detach(cb);
 		return -ENOMEM;
+	}
+
+	result = ipa_smmu_attach(dev, cb);
+	if (result) {
+		kfree(ipa3_ctx);
+		ipa3_ctx = NULL;
+		return result;
 	}
 
 	add_map = of_get_property(dev->of_node,
