@@ -635,7 +635,6 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout)
 	int i, result = 0;
 	struct ipa3_sys_context *sys;
 	int ep_idx;
-	int completed;
 	struct ipa3_tag_completion *comp;
 
 	if (!num_desc || !descr || !timeout)
@@ -676,23 +675,26 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout)
 	last_desc->user1 = comp;
 
 	if (ipa3_send(sys, num_desc, descr, true)) {
+		/* Callback won't run; drop reference on its behalf */
+		atomic_dec(&comp->cnt);
 		ipa_err("fail to send %hu immediate command%s\n",
 			num_desc, num_desc == 1 ? "" : "s");
-		kfree(comp);
 		result = -EFAULT;
-		goto bail;
+	} else {
+		long completed;
+
+		completed = wait_for_completion_timeout(&comp->comp,
+						msecs_to_jiffies(timeout));
+		if (!completed)
+			ipa_debug("timeout waiting for imm-cmd ACK\n");
+
 	}
 
-	completed = wait_for_completion_timeout(
-		&comp->comp, msecs_to_jiffies(timeout));
-	if (!completed)
-		ipa_debug("timeout waiting for imm-cmd ACK\n");
-
-	if (atomic_dec_return(&comp->cnt) == 0)
+	if (!atomic_dec_return(&comp->cnt))
 		kfree(comp);
 
-bail:
 	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+
 	return result;
 }
 
