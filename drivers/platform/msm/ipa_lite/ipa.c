@@ -2558,6 +2558,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		/* mapping size is an array of 3-tuple of u32 */
 		if (add_map_size % (3 * sizeof(u32))) {
 			pr_err("wrong additional mapping format\n");
+			ipa_smmu_detach(cb);
 			return -EFAULT;
 		}
 
