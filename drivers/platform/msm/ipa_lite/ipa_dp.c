@@ -638,6 +638,9 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout)
 	int completed;
 	struct ipa3_tag_completion *comp;
 
+	if (!num_desc || !descr || !timeout)
+		return -EFAULT;
+
 	for (i = 0; i < num_desc; i++)
 		ipa_debug("sending imm cmd %d\n", descr[i].opcode);
 
