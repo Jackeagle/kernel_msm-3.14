@@ -576,9 +576,8 @@ int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr)
 	struct ipa3_sys_context *sys;
 	int ep_idx;
 
-	if (!descr) {
+	if (!num_desc || !descr)
 		return -EFAULT;
-	}
 
 	for (i = 0; i < num_desc; i++)
 		ipa_debug("sending imm cmd %d\n", descr[i].opcode);
