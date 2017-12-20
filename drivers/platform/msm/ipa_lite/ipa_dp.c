@@ -667,12 +667,13 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout)
 
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
 
+	last_desc = &descr[num_desc - 1];
 	if (num_desc == 1) {
-		if (descr->callback || descr->user1)
+		if (last_desc->callback || last_desc->user1)
 			WARN_ON(1);
 
-		descr->callback = ipa3_transport_irq_cmd_ack_free;
-		descr->user1 = comp;
+		last_desc->callback = ipa3_transport_irq_cmd_ack_free;
+		last_desc->user1 = comp;
 		if (ipa3_send_one(sys, descr, true)) {
 			ipa_err("fail to send immediate command\n");
 			kfree(comp);
@@ -680,8 +681,6 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout)
 			goto bail;
 		}
 	} else {
-		last_desc = &descr[num_desc - 1];
-
 		if (last_desc->callback || last_desc->user1)
 			WARN_ON(1);
 
