@@ -2356,10 +2356,7 @@ fail_remap:
 fail_init_active_client:
 	msm_bus_scale_unregister_client(ipa3_ctx->ipa_bus_hdl);
 fail_bus_reg:
-	if (ipa3_bus_scale_table) {
-		msm_bus_cl_clear_pdata(ipa3_bus_scale_table);
-		ipa3_bus_scale_table = NULL;
-	}
+	ipa3_ctx->ctrl->msm_bus_data_ptr = NULL;
 fail_init_mem_partition:
 fail_bind:
 	kfree(ipa3_ctx->ctrl);
@@ -2589,6 +2586,10 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	result = ipa3_pre_init(dev);
 	if (result) {
 		pr_err("ipa_init failed\n");
+		if (ipa3_bus_scale_table) {
+			msm_bus_cl_clear_pdata(ipa3_bus_scale_table);
+			ipa3_bus_scale_table = NULL;
+		}
 		ipa_smmu_detach(cb);
 	}
 
