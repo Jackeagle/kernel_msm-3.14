@@ -2683,18 +2683,20 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	if (of_device_is_compatible(node, "qcom,smp2pgpio-map-ipa-1-out"))
 		return ipa3_smp2p_probe(dev);
 
-	/* First find out whether we're working with supported hardware */
-	ipa_version = ipa_version_get(pdev_p);
-	ipa_debug(": ipa_version = %d", ipa_version);
-	if (ipa_version != IPA_HW_v3_5_1) {
-		ipa_err(":only IPA version 3.5.1 supported!\n");
-		return -ENODEV;
-	}
-
 	ipa3_ctx = kzalloc(sizeof(*ipa3_ctx), GFP_KERNEL);
 	if (!ipa3_ctx) {
 		pr_err(":kzalloc err.\n");
 		return -ENOMEM;
+	}
+
+	/* Find out whether we're working with supported hardware */
+	ipa_version = ipa_version_get(pdev_p);
+	ipa_debug(": ipa_version = %d", ipa_version);
+	if (ipa_version != IPA_HW_v3_5_1) {
+		ipa_err(":only IPA version 3.5.1 supported!\n");
+		kfree(ipa3_ctx);
+		ipa3_ctx = NULL;
+		return -ENODEV;
 	}
 
 	ipa3_ctx->ipa3_pdev = pdev_p;
