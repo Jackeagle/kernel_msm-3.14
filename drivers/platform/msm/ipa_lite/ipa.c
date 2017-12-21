@@ -2652,17 +2652,23 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	if (IS_ERR(ipa3_ctx->gsi_ctx)) {
 		printk(KERN_ERR "ipa: error initializing gsi driver.\n");
 		result = PTR_ERR(ipa3_ctx->gsi_ctx);
-		ipa3_ctx->gsi_ctx = NULL;
-		ipa3_ctx->ipa3_pdev = NULL;
-
-		return result;
+		goto err_clear_gsi_ctx;
 	}
 
 	result = of_platform_populate(node, ipa_plat_drv_match, NULL, dev);
-	if (result)
+	if (result) {
 		ipa_err("failed to populate platform\n");
+		goto err_clear_gsi_ctx;
+	}
+
+	return 0;
+
+err_clear_gsi_ctx:
+	ipa3_ctx->gsi_ctx = NULL;
+	ipa3_ctx->ipa3_pdev = NULL;
 
 	return result;
+
 }
 
 /**
