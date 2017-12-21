@@ -2432,9 +2432,13 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 	domain = mapping->domain;
 	pr_debug("SMMU mapping created\n");
 
-	ipa_debug("CB PROBE pdev=%p set attribute\n", dev);
+	cb->s1_bypass = of_property_read_bool(node, "qcom,qcom,smmu-s1-bypass");
+
+	ipa_debug("CB PROBE pdev=%p set attribute, bypass = %d\n",
+			dev, cb->s1_bypass);
+
 	ret = -EIO; /* Response for any error setting attributes */
-	if (ipa3_ctx->smmu_s1_bypass) {
+	if (cb->s1_bypass) {
 		if (ipa_smmu_domain_attr_set(domain, DOMAIN_ATTR_S1_BYPASS)) {
 			pr_err("couldn't set bypass\n");
 			goto err_release_mapping;
@@ -2671,12 +2675,9 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	}
 
 	/* The SDM845 has an SMMU, and uses the ARM SMMU driver */
-	ipa3_ctx->smmu_s1_bypass =
-			of_property_read_bool(node, "qcom,smmu-s1-bypass");
 	ipa3_ctx->smmu_fast_map =
 			of_property_read_bool(node, "qcom,smmu-fast-map");
-	printk(KERN_INFO "IPA smmu_s1_bypass=%d smmu_fast_map=%d\n",
-		ipa3_ctx->smmu_s1_bypass, ipa3_ctx->smmu_fast_map);
+	printk(KERN_INFO "IPA smmu_fast_map=%d\n", ipa3_ctx->smmu_fast_map);
 
 	result = of_platform_populate(node, ipa_plat_drv_match, NULL, dev);
 	if (result)

@@ -249,6 +249,7 @@ struct ipa_smmu_cb_ctx {
 	struct dma_iommu_mapping *mapping;
 	dma_addr_t va_start;
 	dma_addr_t va_end;
+	bool s1_bypass;
 };
 
 /**
@@ -909,7 +910,6 @@ struct ipa3_context {
 	struct gsi_ctx *gsi_ctx;
 
 	bool smmu_fast_map;
-	bool smmu_s1_bypass;
 	struct ipa_smmu_cb_ctx ap_smmu_cb;
 	struct ipa_smmu_cb_ctx uc_smmu_cb;
 
