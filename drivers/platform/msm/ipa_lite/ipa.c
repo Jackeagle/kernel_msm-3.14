@@ -250,8 +250,6 @@ static void ipa3_active_clients_log_destroy(void)
 		flags);
 }
 
-static struct ipa_smmu_cb_ctx uc_smmu_cb;
-
 static int ipa3_init_smem_region(int memory_region_size,
 				int memory_region_offset)
 {
@@ -2497,7 +2495,7 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 {
 	ipa_debug("UC CB PROBE sub pdev=%p\n", dev);
 
-	return ipa_smmu_attach(dev, &uc_smmu_cb);
+	return ipa_smmu_attach(dev, &ipa3_ctx->uc_smmu_cb);
 }
 
 static int ipa_smmu_ap_cb_probe(struct device *dev)
