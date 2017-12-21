@@ -908,6 +908,7 @@ struct ipa3_context {
 	struct platform_device *ipa3_pdev;
 
 	bool smmu_fast_map;
+	bool smmu_s1_bypass;
 
 	struct class *class;
 	dev_t dev_num;
