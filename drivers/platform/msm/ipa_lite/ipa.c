@@ -2389,28 +2389,26 @@ static int
 ipa_smmu_domain_attr_set(struct device *dev, struct iommu_domain *domain)
 {
 	struct device_node *node = dev->of_node;
+	enum iommu_attr attr;
+	char *attr_string;
 	int data = 1;
-	bool bypass;
 	int ret;
 
-	bypass = of_property_read_bool(node, "qcom,qcom,smmu-s1-bypass");
-
-	ipa_debug("CB PROBE pdev=%p set attribute, bypass = %d\n", dev, bypass);
-
-	if (bypass) {
-		ret = iommu_domain_set_attr(domain, DOMAIN_ATTR_S1_BYPASS,
-				&data);
-		if (ret)
-			pr_err("couldn't set bypass\n");
-		else
-			pr_debug("SMMU S1 BYPASS\n");
+	if (of_property_read_bool(node, "qcom,qcom,smmu-s1-bypass")) {
+		attr = DOMAIN_ATTR_S1_BYPASS;
+		attr_string = "S1 bypass";
 	} else {
-		ret = iommu_domain_set_attr(domain, DOMAIN_ATTR_ATOMIC, &data);
-		if (ret)
-			pr_err("couldn't set domain as atomic\n");
-		else
-			pr_debug("SMMU atomic set\n");
+		attr = DOMAIN_ATTR_ATOMIC;
+		attr_string = "atomic";
 	}
+
+	ipa_debug("CB PROBE pdev=%p set attribute %s\n", dev, attr_string);
+
+	ret = iommu_domain_set_attr(domain, attr, &data);
+	if (ret)
+		pr_err("couldn't set %s\n", attr_string);
+	else
+		pr_debug("SMMU %s\n", attr_string);
 
 	return ret;
 }
