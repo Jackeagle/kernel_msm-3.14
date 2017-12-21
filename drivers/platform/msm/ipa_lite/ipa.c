@@ -2405,7 +2405,6 @@ ipa_smmu_domain_attr_set(struct iommu_domain *domain, enum iommu_attr attr)
 static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 {
 	struct device_node *node = dev->of_node;
-	bool for_ap = cb == &ipa3_ctx->ap_smmu_cb;
 	struct dma_iommu_mapping *mapping;
 	struct iommu_domain *domain;
 	u32 iova_mapping[2];
@@ -2450,14 +2449,6 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 			goto err_release_mapping;
 		}
 		pr_debug("SMMU atomic set\n");
-
-		if (for_ap || ipa3_ctx->smmu_fast_map) {
-			if (ipa_smmu_domain_attr_set(domain, DOMAIN_ATTR_FAST)) {
-				ipa_err("couldn't set fast map\n");
-				goto err_release_mapping;
-			}
-			ipa_debug("SMMU fast map set\n");
-		}
 	}
 
 	if (dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64))) {
@@ -2673,11 +2664,6 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 
 		return result;
 	}
-
-	/* The SDM845 has an SMMU, and uses the ARM SMMU driver */
-	ipa3_ctx->smmu_fast_map =
-			of_property_read_bool(node, "qcom,smmu-fast-map");
-	printk(KERN_INFO "IPA smmu_fast_map=%d\n", ipa3_ctx->smmu_fast_map);
 
 	result = of_platform_populate(node, ipa_plat_drv_match, NULL, dev);
 	if (result)
