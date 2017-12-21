@@ -2411,6 +2411,7 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 	dma_addr_t va_start;
 	size_t va_size;
 	int ret;
+	bool bypass;
 
 	ret = of_property_read_u32_array(node, "qcom,iova-mapping",
 						iova_mapping, 2);
@@ -2431,13 +2432,12 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 	domain = mapping->domain;
 	pr_debug("SMMU mapping created\n");
 
-	cb->s1_bypass = of_property_read_bool(node, "qcom,qcom,smmu-s1-bypass");
+	bypass = of_property_read_bool(node, "qcom,qcom,smmu-s1-bypass");
 
-	ipa_debug("CB PROBE pdev=%p set attribute, bypass = %d\n",
-			dev, cb->s1_bypass);
+	ipa_debug("CB PROBE pdev=%p set attribute, bypass = %d\n", dev, bypass);
 
 	ret = -EIO; /* Response for any error setting attributes */
-	if (cb->s1_bypass) {
+	if (bypass) {
 		if (ipa_smmu_domain_attr_set(domain, DOMAIN_ATTR_S1_BYPASS)) {
 			pr_err("couldn't set bypass\n");
 			goto err_release_mapping;
