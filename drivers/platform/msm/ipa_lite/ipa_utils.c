@@ -2977,52 +2977,6 @@ void ipa_assert(void)
 	BUG();
 }
 
-#if 0
- /**
-  * ipa3_add_hdr() - add the specified headers to SW and optionally commit them
-  * to IPA HW
-  * @hdrs:		 [inout] set of headers to add
-  *
-  * Returns:	 0 on success, negative on failure
-  *
-  * Note:		 Should not be called from atomic context
-  */
- int ipa3_add_hdr(struct ipa_ioc_add_hdr *hdrs)
- {
-		 int i;
-		 int result = -EFAULT;
-
-		 if (hdrs == NULL || hdrs->num_hdrs == 0) {
-				 ipa_err_ratelimited("bad parm\n");
-				 return -EINVAL;
-		 }
-
-		 mutex_lock(&ipa3_ctx->lock);
-		 ipa_debug("adding %d headers to IPA driver internal data struct\n",
-						 hdrs->num_hdrs);
-		 for (i = 0; i < hdrs->num_hdrs; i++) {
-				 if (__ipa_add_hdr(&hdrs->hdr[i])) {
-						 ipa_err_ratelimited("failed to add hdr %d\n", i);
-						 hdrs->hdr[i].status = -1;
-				 } else {
-						 hdrs->hdr[i].status = 0;
-				 }
-		 }
-
-		 if (hdrs->commit) {
-				 ipa_debug("committing all headers to IPA core");
-				 if (ipa3_ctx->ctrl->ipa3_commit_hdr()) {
-						 result = -EPERM;
-						 goto bail;
-				 }
-		 }
-		 result = 0;
- bail:
-		 mutex_unlock(&ipa3_ctx->lock);
-		 return result;
- }
-#endif
-
 /**
  * ipa3_set_rt_tuple_mask() - Sets the rt tuple masking for the given tbl
  *  table index must be for AP EP (not modem)
