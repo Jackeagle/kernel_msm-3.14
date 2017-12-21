@@ -2086,11 +2086,6 @@ static int ipa3_pre_init(void)
 			ipa3_ctx->ipa_wrapper_base,
 			ipa3_ctx->ipa_wrapper_size);
 
-	result = of_property_read_u32(ipa3_ctx->ipa3_pdev->dev.of_node, "qcom,ee",
-			&ipa3_ctx->ee);
-	if (result)
-		ipa3_ctx->ee = 0;	/* Default to 0 if not found */
-
 	ipa3_ctx->ipa3_active_clients_logging.log_rdy = false;
 
 	ipa3_ctx->ctrl = kzalloc(sizeof(*ipa3_ctx->ctrl), GFP_KERNEL);
@@ -2645,6 +2640,10 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_destroy_logbuf;
 	}
 
+	result = of_property_read_u32(node, "qcom,ee", &ipa3_ctx->ee);
+	if (result)
+		ipa3_ctx->ee = 0;	/* Default to 0 if not found */
+
 	ipa3_ctx->gsi_ctx = msm_gsi_init(pdev_p);
 	if (IS_ERR(ipa3_ctx->gsi_ctx)) {
 		ipa_err("ipa: error initializing gsi driver.\n");
@@ -2662,6 +2661,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 
 err_clear_gsi_ctx:
 	ipa3_ctx->gsi_ctx = NULL;
+	ipa3_ctx->ee = 0;
 err_destroy_logbuf:
 	if (ipa3_ctx->logbuf) {
 		(void)ipc_log_context_destroy(ipa3_ctx->logbuf);
