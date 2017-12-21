@@ -2073,10 +2073,6 @@ static int ipa3_pre_init(void)
 
 	pr_debug("IPA Driver initialization started\n");
 
-	ipa3_ctx->logbuf = ipc_log_context_create(IPA_IPC_LOG_PAGES, "ipa", 0);
-	if (ipa3_ctx->logbuf == NULL)
-		pr_err("failed to create IPC log, continue...\n");
-
 	/* Get IPA wrapper address */
 	res = platform_get_resource_byname(ipa3_ctx->ipa3_pdev, IORESOURCE_MEM,
 			"ipa-base");
@@ -2100,8 +2096,7 @@ static int ipa3_pre_init(void)
 	ipa3_ctx->ctrl = kzalloc(sizeof(*ipa3_ctx->ctrl), GFP_KERNEL);
 	if (!ipa3_ctx->ctrl) {
 		ipa_err("memory allocation error for ctrl\n");
-		result = -ENOMEM;
-		goto fail_mem_ctrl;
+		return -ENOMEM;
 	}
 	result = ipa3_controller_static_bind(ipa3_ctx->ctrl);
 	if (result) {
@@ -2321,9 +2316,6 @@ fail_bus_reg:
 fail_init_mem_partition:
 fail_bind:
 	kfree(ipa3_ctx->ctrl);
-fail_mem_ctrl:
-	if (ipa3_ctx->logbuf)
-		ipc_log_context_destroy(ipa3_ctx->logbuf);
 
 	return result;
 }
@@ -2638,15 +2630,20 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	if (of_device_is_compatible(node, "qcom,smp2pgpio-map-ipa-1-out"))
 		return ipa3_smp2p_probe(dev);
 
+	ipa3_ctx->ipa3_pdev = pdev_p;
+	/* Initialize the log buffer right away, to capture all messages */
+	ipa3_ctx->logbuf = ipc_log_context_create(IPA_IPC_LOG_PAGES, "ipa", 0);
+	if (!ipa3_ctx->logbuf)
+		pr_err("failed to create IPC log, continue...\n");
+
 	/* Find out whether we're working with supported hardware */
 	ipa_version = ipa_version_get(pdev_p);
 	ipa_debug(": ipa_version = %d", ipa_version);
 	if (ipa_version != IPA_HW_v3_5_1) {
 		ipa_err(":only IPA version 3.5.1 supported!\n");
-		return -ENODEV;
+		result = -ENODEV;
+		goto err_destroy_logbuf;
 	}
-
-	ipa3_ctx->ipa3_pdev = pdev_p;
 
 	ipa3_ctx->gsi_ctx = msm_gsi_init(pdev_p);
 	if (IS_ERR(ipa3_ctx->gsi_ctx)) {
@@ -2665,6 +2662,11 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 
 err_clear_gsi_ctx:
 	ipa3_ctx->gsi_ctx = NULL;
+err_destroy_logbuf:
+	if (ipa3_ctx->logbuf) {
+		(void)ipc_log_context_destroy(ipa3_ctx->logbuf);
+		ipa3_ctx->logbuf = NULL;
+	}
 	ipa3_ctx->ipa3_pdev = NULL;
 
 	return result;
