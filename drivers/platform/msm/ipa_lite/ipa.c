@@ -2064,8 +2064,9 @@ static int ipa3_alloc_pkt_init(void)
 * Initialize IPA RM (resource manager)
 * Configure GSI registers (in GSI case)
 */
-static int ipa3_pre_init(struct device *ipa_dev)
+static int ipa3_pre_init(void)
 {
+	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	int result;
 	struct resource *res;
 	struct ipa_active_client_logging_info log_info;
@@ -2154,7 +2155,7 @@ static int ipa3_pre_init(struct device *ipa_dev)
 		goto fail_remap;
 	}
 
-	if (ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio, ipa_dev)) {
+	if (ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio, dev)) {
 		ipa_err("fail to init ipahal\n");
 		result = -EFAULT;
 		goto fail_ipahal;
@@ -2533,7 +2534,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	ipa3_ctx->bus_scale_table = msm_bus_cl_get_pdata(ipa3_ctx->ipa3_pdev);
 
 	/* Proceed to real initialization */
-	result = ipa3_pre_init(dev);
+	result = ipa3_pre_init();
 	if (result) {
 		pr_err("ipa_init failed\n");
 		if (ipa3_ctx->bus_scale_table) {
