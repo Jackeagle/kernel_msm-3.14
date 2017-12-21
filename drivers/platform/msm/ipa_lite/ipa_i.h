@@ -907,6 +907,8 @@ struct ipa_dma_task_info {
 struct ipa3_context {
 	struct platform_device *ipa3_pdev;
 
+	bool smmu_fast_map;
+
 	struct class *class;
 	dev_t dev_num;
 	atomic_t state;

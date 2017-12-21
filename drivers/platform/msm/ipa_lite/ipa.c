@@ -78,7 +78,6 @@ static struct ipa3_context ipa3_ctx_struct;
 struct ipa3_context *ipa3_ctx = &ipa3_ctx_struct;
 
 static struct {
-	bool fast_map;
 	bool s1_bypass;
 } smmu_info;
 
@@ -2457,7 +2456,7 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 		}
 		pr_debug("SMMU atomic set\n");
 
-		if (for_ap || smmu_info.fast_map) {
+		if (for_ap || ipa3_ctx->smmu_fast_map) {
 			if (ipa_smmu_domain_attr_set(domain, DOMAIN_ATTR_FAST)) {
 				ipa_err("couldn't set fast map\n");
 				goto err_release_mapping;
@@ -2680,9 +2679,9 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	if (of_property_read_bool(node, "qcom,smmu-s1-bypass"))
 		smmu_info.s1_bypass = true;
 	if (of_property_read_bool(node, "qcom,smmu-fast-map"))
-		smmu_info.fast_map = true;
-	printk(KERN_INFO "IPA smmu_info.s1_bypass=%d smmu_info.fast_map=%d\n",
-		smmu_info.s1_bypass, smmu_info.fast_map);
+		ipa3_ctx->smmu_fast_map = true;
+	printk(KERN_INFO "IPA smmu_info.s1_bypass=%d smmu_fast_map=%d\n",
+		smmu_info.s1_bypass, ipa3_ctx->smmu_fast_map);
 
 	result = of_platform_populate(node, ipa_plat_drv_match, NULL, dev);
 	if (result)
