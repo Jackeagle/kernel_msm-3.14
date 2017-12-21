@@ -269,10 +269,10 @@ static int ipa3_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 		if (qmap_check &&
 			atomic_read(&wwan_ptr->outstanding_pkts) <
 					wwan_ptr->outstanding_high_ctl) {
-			printk(KERN_ERR "[%s]Queue stop, send ctrl pkts\n", dev->name);
+			ipa_err("[%s]Queue stop, send ctrl pkts\n", dev->name);
 			goto send;
 		} else {
-			printk(KERN_ERR "[%s]fatal: ipa3_wwan_xmit stopped\n",
+			ipa_err("[%s]fatal: ipa3_wwan_xmit stopped\n",
 				  dev->name);
 			return NETDEV_TX_BUSY;
 		}
@@ -905,24 +905,24 @@ static int get_ipa_rmnet_dts_configuration(struct platform_device *pdev,
 	ipa_rmnet_drv_res->ipa_rmnet_ssr =
 			of_property_read_bool(pdev->dev.of_node,
 			"qcom,rmnet-ipa-ssr");
-	printk(KERN_INFO "IPA SSR support = %s\n",
+	ipa_info("IPA SSR support = %s\n",
 		ipa_rmnet_drv_res->ipa_rmnet_ssr ? "True" : "False");
 	ipa_rmnet_drv_res->ipa_loaduC =
 			of_property_read_bool(pdev->dev.of_node,
 			"qcom,ipa-loaduC");
-	printk(KERN_INFO "IPA ipa-loaduC = %s\n",
+	ipa_info("IPA ipa-loaduC = %s\n",
 		ipa_rmnet_drv_res->ipa_loaduC ? "True" : "False");
 
 	ipa_rmnet_drv_res->ipa_advertise_sg_support =
 		of_property_read_bool(pdev->dev.of_node,
 		"qcom,ipa-advertise-sg-support");
-	printk(KERN_INFO "IPA SG support = %s\n",
+	ipa_info("IPA SG support = %s\n",
 		ipa_rmnet_drv_res->ipa_advertise_sg_support ? "True" : "False");
 
 	ipa_rmnet_drv_res->ipa_napi_enable =
 		of_property_read_bool(pdev->dev.of_node,
 			"qcom,ipa-napi-enable");
-	printk(KERN_INFO "IPA Napi Enable = %s\n",
+	ipa_info("IPA Napi Enable = %s\n",
 		ipa_rmnet_drv_res->ipa_napi_enable ? "True" : "False");
 
 	/* Get IPA WAN RX desc fifo size */
@@ -930,7 +930,7 @@ static int get_ipa_rmnet_dts_configuration(struct platform_device *pdev,
 			"qcom,wan-rx-desc-size",
 			&ipa_rmnet_drv_res->wan_rx_desc_size);
 	if (result)
-		printk(KERN_INFO "using default for wan-rx-desc-size = %u\n",
+		ipa_info("using default for wan-rx-desc-size = %u\n",
 				ipa_rmnet_drv_res->wan_rx_desc_size);
 	else
 		ipa_debug(": found ipa_drv_res->wan-rx-desc-size = %u\n",
@@ -972,7 +972,7 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 	int ret, i;
 	struct net_device *dev;
 
-	printk(KERN_INFO "rmnet_ipa3 started initialization\n");
+	ipa_info("rmnet_ipa3 started initialization\n");
 
 	if (atomic_read(&ipa3_ctx->state) != IPA_STATE_READY) {
 		ipa_debug("IPA driver not ready, deferring\n");
@@ -1067,7 +1067,7 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 
 	/* Till the system is suspended, we keep the clock open */
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
-	printk(KERN_ERR "rmnet_ipa completed initialization\n");
+	ipa_err("rmnet_ipa completed initialization\n");
 	return 0;
 config_err:
 	if (ipa3_rmnet_res.ipa_napi_enable)
@@ -1085,7 +1085,7 @@ static int ipa3_wwan_remove(struct platform_device *pdev)
 {
 	int ret;
 
-	printk(KERN_INFO "rmnet_ipa started deinitialization\n");
+	ipa_info("rmnet_ipa started deinitialization\n");
 	mutex_lock(&rmnet_ipa3_ctx->pipe_handle_guard);
 	ret = ipa3_teardown_sys_pipe(rmnet_ipa3_ctx->ipa3_to_apps_hdl);
 	if (ret < 0)
@@ -1111,7 +1111,7 @@ static int ipa3_wwan_remove(struct platform_device *pdev)
 		ipa3_wan_ioctl_deinit();
 
 	atomic_set(&rmnet_ipa3_ctx->is_initialized, 0);
-	printk(KERN_INFO "rmnet_ipa completed deinitialization\n");
+	ipa_info("rmnet_ipa completed deinitialization\n");
 	return 0;
 }
 

@@ -202,7 +202,7 @@ static int ipa3_active_clients_log_init(void)
 	ipa3_ctx->active_clients_table_buf = kzalloc(sizeof(
 			char[IPA_ACTIVE_CLIENTS_TABLE_BUF_SIZE]), GFP_KERNEL);
 	if (ipa3_ctx->ipa3_active_clients_logging.log_buffer == NULL) {
-		printk(KERN_ERR "Active Clients Logging memory allocation failed");
+		ipa_err("Active Clients Logging memory allocation failed");
 		goto bail;
 	}
 	for (i = 0; i < IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES; i++) {
@@ -1895,7 +1895,7 @@ static int ipa3_post_init(struct device *ipa_dev)
 	atomic_set(&ipa3_ctx->state, IPA_STATE_READY);
 
 	complete_all(&ipa3_ctx->init_completion_obj);
-	printk(KERN_INFO "IPA driver initialization was successful.\n");
+	ipa_info("IPA driver initialization was successful.\n");
 
 	return 0;
 
@@ -1980,7 +1980,7 @@ static ssize_t ipa3_write(struct file *file, const char __user *buf,
 
 		return result;
 	}
-	printk(KERN_INFO "IPA FW loaded successfully\n");
+	ipa_info("IPA FW loaded successfully\n");
 
 	queue_work(ipa3_ctx->transport_power_mgmt_wq, &ipa3_post_init_work);
 
@@ -2647,7 +2647,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 
 	ipa3_ctx->gsi_ctx = msm_gsi_init(pdev_p);
 	if (IS_ERR(ipa3_ctx->gsi_ctx)) {
-		printk(KERN_ERR "ipa: error initializing gsi driver.\n");
+		ipa_err("ipa: error initializing gsi driver.\n");
 		result = PTR_ERR(ipa3_ctx->gsi_ctx);
 		goto err_clear_gsi_ctx;
 	}
@@ -3043,11 +3043,10 @@ static struct platform_driver ipa_plat_drv = {
 
 static int __init ipa_module_init(void)
 {
-#ifdef DEBUG
-	printk(KERN_DEBUG "IPA module init\n");
-#endif
+	ipa_debug("IPA module init\n");
 
 	/* Register as a platform device driver */
+
 	return platform_driver_register(&ipa_plat_drv);
 }
 subsys_initcall(ipa_module_init);

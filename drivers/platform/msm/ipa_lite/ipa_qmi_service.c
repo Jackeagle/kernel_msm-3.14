@@ -453,13 +453,13 @@ static int ipa3_qmi_init_modem_send_sync_msg(void)
 	resp_desc.msg_id = QMI_IPA_INIT_MODEM_DRIVER_RESP_V01;
 	resp_desc.ei_array = ipa3_init_modem_driver_resp_msg_data_v01_ei;
 
-	printk(KERN_INFO "Sending QMI_IPA_INIT_MODEM_DRIVER_REQ_V01\n");
+	ipa_info("Sending QMI_IPA_INIT_MODEM_DRIVER_REQ_V01\n");
 	if (unlikely(!ipa_q6_clnt))
 		return -ETIMEDOUT;
 	rc = qmi_send_req_wait(ipa_q6_clnt, &req_desc, &req, sizeof(req),
 			&resp_desc, &resp, sizeof(resp),
 			QMI_SEND_REQ_TIMEOUT_MS);
-	printk(KERN_INFO "QMI_IPA_INIT_MODEM_DRIVER_REQ_V01 response received\n");
+	ipa_info("QMI_IPA_INIT_MODEM_DRIVER_REQ_V01 response received\n");
 	return ipa3_check_qmi_response(rc,
 		QMI_IPA_INIT_MODEM_DRIVER_REQ_V01, resp.resp.result,
 		resp.resp.error, "ipa_init_modem_driver_resp_msg_v01");

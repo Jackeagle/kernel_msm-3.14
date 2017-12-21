@@ -1421,7 +1421,7 @@ begin:
 		rx_pkt = kmem_cache_zalloc(ipa3_ctx->rx_pkt_wrapper_cache,
 					   flag);
 		if (!rx_pkt) {
-			printk_ratelimited(KERN_ERR "%s fail alloc rx wrapper sys=%p\n",
+			pr_err_ratelimited("%s fail alloc rx wrapper sys=%p\n",
 					__func__, sys);
 			goto fail_kmem_cache_alloc;
 		}
@@ -1432,7 +1432,7 @@ begin:
 
 		rx_pkt->data.skb = sys->get_skb(sys->rx_buff_sz, flag);
 		if (rx_pkt->data.skb == NULL) {
-			printk_ratelimited(KERN_ERR "%s fail alloc skb sys=%p\n",
+			pr_err_ratelimited("%s fail alloc skb sys=%p\n",
 					__func__, sys);
 			goto fail_skb_alloc;
 		}
@@ -1441,7 +1441,7 @@ begin:
 						     sys->rx_buff_sz,
 						     DMA_FROM_DEVICE);
 		if (dma_mapping_error(dev, rx_pkt->data.dma_addr)) {
-			printk_ratelimited(KERN_ERR "%s dma map fail %p for %p sys=%p\n",
+			pr_err_ratelimited("%s dma map fail %p for %p sys=%p\n",
 			       __func__, (void *)rx_pkt->data.dma_addr,
 			       ptr, sys);
 			goto fail_dma_mapping;
@@ -1469,7 +1469,7 @@ fail_kmem_cache_alloc:
 			IPA_STATS_INC_CNT(ipa3_ctx->stats.lan_repl_rx_empty);
 		else
 			WARN_ON(1);
-		printk_ratelimited(KERN_ERR "%s sys=%p repl ring empty\n",
+		pr_err_ratelimited("%s sys=%p repl ring empty\n",
 				__func__, sys);
 		goto begin;
 	}

@@ -25,7 +25,7 @@
 	* IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES) + IPA_MAX_MSG_LEN)
 
 #define IPA_DUMP_STATUS_FIELD(f) \
-	printk(KERN_ERR #f "=0x%x\n", status->f)
+	ipa_err(#f "=0x%x\n", status->f)
 
 static char dbg_buff[IPA_MAX_MSG_LEN];
 static char *active_clients_buf;
@@ -411,7 +411,7 @@ static void ipa_dump_status(struct ipahal_pkt_status *status)
 	IPA_DUMP_STATUS_FIELD(endp_dest_idx);
 	IPA_DUMP_STATUS_FIELD(metadata);
 	IPA_DUMP_STATUS_FIELD(ucp);
-	printk(KERN_ERR "tag = 0x%llx\n", (u64)status->tag_info & 0xFFFFFFFFFFFF);
+	ipa_err("tag = 0x%llx\n", (u64)status->tag_info & 0xFFFFFFFFFFFF);
 	IPA_DUMP_STATUS_FIELD(seq_num);
 	IPA_DUMP_STATUS_FIELD(time_of_day_ctr);
 	IPA_DUMP_STATUS_FIELD(hdr_local);
@@ -435,11 +435,11 @@ static ssize_t ipa_status_stats_read(struct file *file, char __user *ubuf,
 			continue;
 
 		memcpy(stats, ipa3_ctx->ep[i].sys->status_stat, sizeof(*stats));
-		printk(KERN_ERR "Statuses for pipe %d\n", i);
+		ipa_err("Statuses for pipe %d\n", i);
 		for (j = 0; j < IPA_MAX_STATUS_STAT_NUM; j++) {
-			printk(KERN_ERR "curr=%d\n", stats->curr);
+			ipa_err("curr=%d\n", stats->curr);
 			ipa_dump_status(&stats->status[stats->curr]);
-			printk(KERN_ERR "\n\n\n");
+			ipa_err("\n\n\n");
 			stats->curr = (stats->curr + 1) %
 				IPA_MAX_STATUS_STAT_NUM;
 		}
