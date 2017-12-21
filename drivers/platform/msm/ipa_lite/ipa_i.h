@@ -932,6 +932,7 @@ struct ipa3_context {
 	u16 smem_reqd_sz;
 	struct ipa3_active_clients ipa3_active_clients;
 	struct ipa3_active_clients_log_ctx ipa3_active_clients_logging;
+	char *active_clients_table_buf;
 	struct workqueue_struct *power_mgmt_wq;
 	struct workqueue_struct *transport_power_mgmt_wq;
 	bool tag_process_before_gating;

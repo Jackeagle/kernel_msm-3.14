@@ -77,8 +77,6 @@ static DECLARE_WORK(ipa_dec_clients_disable_clks_on_wq_work,
 static struct ipa3_context ipa3_ctx_struct;
 struct ipa3_context *ipa3_ctx = &ipa3_ctx_struct;
 
-static char *active_clients_table_buf;
-
 int ipa3_active_clients_log_print_buffer(char *buf, int size)
 {
 	int i;
@@ -155,9 +153,9 @@ static int ipa3_active_clients_panic_notifier(struct notifier_block *this,
 		unsigned long event, void *ptr)
 {
 	mutex_lock(&ipa3_ctx->ipa3_active_clients.mutex);
-	ipa3_active_clients_log_print_table(active_clients_table_buf,
+	ipa3_active_clients_log_print_table(ipa3_ctx->active_clients_table_buf,
 			IPA_ACTIVE_CLIENTS_TABLE_BUF_SIZE);
-	ipa_err("%s", active_clients_table_buf);
+	ipa_err("%s", ipa3_ctx->active_clients_table_buf);
 	mutex_unlock(&ipa3_ctx->ipa3_active_clients.mutex);
 
 	return NOTIFY_DONE;
@@ -201,7 +199,7 @@ static int ipa3_active_clients_log_init(void)
 			IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES *
 			sizeof(char[IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN]),
 			GFP_KERNEL);
-	active_clients_table_buf = kzalloc(sizeof(
+	ipa3_ctx->active_clients_table_buf = kzalloc(sizeof(
 			char[IPA_ACTIVE_CLIENTS_TABLE_BUF_SIZE]), GFP_KERNEL);
 	if (ipa3_ctx->ipa3_active_clients_logging.log_buffer == NULL) {
 		printk(KERN_ERR "Active Clients Logging memory allocation failed");
