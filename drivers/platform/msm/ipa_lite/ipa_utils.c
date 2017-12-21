@@ -610,7 +610,7 @@ int ipa3_get_ep_mapping(enum ipa_client_type client)
 	int ipa_ep_idx;
 
 	if (client >= IPA_CLIENT_MAX || client < 0) {
-		ipa_err_ratelimited("Bad client number! client =%d\n", client);
+		pr_err_ratelimited("Bad client number! client =%d\n", client);
 		return -EINVAL;
 	}
 

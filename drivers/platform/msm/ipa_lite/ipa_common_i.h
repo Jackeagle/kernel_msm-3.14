@@ -830,12 +830,6 @@ int ipa_inc_client_enable_clks_no_block(struct ipa_active_client_logging_info *i
 		__ipa_ipc_logging(false, pr_fmt(fmt), ## args); \
 	} while (0)
 
-#define ipa_err_ratelimited(fmt, args...) \
-	do { \
-		pr_err_ratelimited(fmt, ## args); \
-		__ipa_ipc_logging(false, pr_fmt(fmt), ## args); \
-	} while (0)
-
 #define ipa_info(fmt, args...) \
 	do { \
 		pr_info(fmt, ## args); \
