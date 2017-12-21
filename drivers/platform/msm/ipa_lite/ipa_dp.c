@@ -93,6 +93,7 @@ static u32 ipa_adjust_ra_buff_base_sz(u32 aggr_byte_limit);
 static void ipa3_wq_write_done_common(struct ipa3_sys_context *sys,
 				struct ipa3_tx_pkt_wrapper *tx_pkt)
 {
+	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct ipa3_tx_pkt_wrapper *next_pkt;
 	int i, cnt;
 
@@ -115,12 +116,12 @@ static void ipa3_wq_write_done_common(struct ipa3_sys_context *sys,
 		spin_unlock_bh(&sys->spinlock);
 		if (!tx_pkt->no_unmap_dma) {
 			if (tx_pkt->type != IPA_DATA_DESC_SKB_PAGED) {
-				dma_unmap_single(ipa3_ctx->pdev,
+				dma_unmap_single(dev,
 					tx_pkt->mem.phys_base,
 					tx_pkt->mem.size,
 					DMA_TO_DEVICE);
 			} else {
-				dma_unmap_page(ipa3_ctx->pdev,
+				dma_unmap_page(dev,
 					next_pkt->mem.phys_base,
 					next_pkt->mem.size,
 					DMA_TO_DEVICE);
@@ -303,6 +304,7 @@ int ipa3_send(struct ipa3_sys_context *sys,
 		struct ipa3_desc *desc,
 		bool in_atomic)
 {
+	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct ipa3_tx_pkt_wrapper *tx_pkt, *tx_pkt_first;
 	struct ipahal_imm_cmd_pyld *tag_pyld_ret = NULL;
 	struct ipa3_tx_pkt_wrapper *next_pkt;
@@ -373,10 +375,10 @@ int ipa3_send(struct ipa3_sys_context *sys,
 
 			if (!desc[i].dma_address_valid) {
 				tx_pkt->mem.phys_base =
-					dma_map_single(ipa3_ctx->pdev,
-					tx_pkt->mem.base,
-					tx_pkt->mem.size,
-					DMA_TO_DEVICE);
+					dma_map_single(dev,
+						tx_pkt->mem.base,
+						tx_pkt->mem.size,
+						DMA_TO_DEVICE);
 			} else {
 					tx_pkt->mem.phys_base =
 						desc[i].dma_address;
@@ -388,17 +390,17 @@ int ipa3_send(struct ipa3_sys_context *sys,
 
 			if (!desc[i].dma_address_valid) {
 				tx_pkt->mem.phys_base =
-					skb_frag_dma_map(ipa3_ctx->pdev,
-					desc[i].frag,
-					0, tx_pkt->mem.size,
-					DMA_TO_DEVICE);
+					skb_frag_dma_map(dev,
+						desc[i].frag,
+						0, tx_pkt->mem.size,
+						DMA_TO_DEVICE);
 			} else {
 				tx_pkt->mem.phys_base =
 					desc[i].dma_address;
 				tx_pkt->no_unmap_dma = true;
 			}
 		}
-		if (dma_mapping_error(ipa3_ctx->pdev, tx_pkt->mem.phys_base)) {
+		if (dma_mapping_error(dev, tx_pkt->mem.phys_base)) {
 			ipa_err("failed to do dma map.\n");
 			goto failure_dma_map;
 		}
@@ -475,11 +477,11 @@ failure:
 
 		if (!tx_pkt->no_unmap_dma) {
 			if (desc[j].type != IPA_DATA_DESC_SKB_PAGED) {
-				dma_unmap_single(ipa3_ctx->pdev,
+				dma_unmap_single(dev,
 					tx_pkt->mem.phys_base,
 					tx_pkt->mem.size, DMA_TO_DEVICE);
 			} else {
-				dma_unmap_page(ipa3_ctx->pdev,
+				dma_unmap_page(dev,
 					tx_pkt->mem.phys_base,
 					tx_pkt->mem.size,
 					DMA_TO_DEVICE);
@@ -1012,6 +1014,7 @@ fail_gen:
  */
 int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 {
+	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct ipa3_ep_context *ep;
 	int empty;
 	int result;
@@ -1067,7 +1070,7 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 		ipa_assert();
 		return result;
 	}
-	dma_free_coherent(ipa3_ctx->pdev,
+	dma_free_coherent(dev,
 		ep->gsi_mem_info.chan_ring_len,
 		ep->gsi_mem_info.chan_ring_base_vaddr,
 		ep->gsi_mem_info.chan_ring_base_addr);
@@ -1090,7 +1093,7 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 			BUG();
 			return result;
 		}
-		dma_free_coherent(ipa3_ctx->pdev,
+		dma_free_coherent(dev,
 			ep->gsi_mem_info.evt_ring_len,
 			ep->gsi_mem_info.evt_ring_base_vaddr,
 			ep->gsi_mem_info.evt_ring_base_addr);
@@ -1398,6 +1401,7 @@ static void ipa3_wq_handle_rx(struct work_struct *work)
 
 static void ipa3_wq_repl_rx(struct work_struct *work)
 {
+	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct ipa3_sys_context *sys;
 	void *ptr;
 	struct ipa3_rx_pkt_wrapper *rx_pkt;
@@ -1433,10 +1437,10 @@ begin:
 			goto fail_skb_alloc;
 		}
 		ptr = skb_put(rx_pkt->data.skb, sys->rx_buff_sz);
-		rx_pkt->data.dma_addr = dma_map_single(ipa3_ctx->pdev, ptr,
+		rx_pkt->data.dma_addr = dma_map_single(dev, ptr,
 						     sys->rx_buff_sz,
 						     DMA_FROM_DEVICE);
-		if (dma_mapping_error(ipa3_ctx->pdev, rx_pkt->data.dma_addr)) {
+		if (dma_mapping_error(dev, rx_pkt->data.dma_addr)) {
 			printk_ratelimited(KERN_ERR "%s dma map fail %p for %p sys=%p\n",
 			       __func__, (void *)rx_pkt->data.dma_addr,
 			       ptr, sys);
@@ -1486,6 +1490,7 @@ fail_kmem_cache_alloc:
  */
 static void ipa3_replenish_rx_cache(struct ipa3_sys_context *sys)
 {
+	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	void *ptr;
 	struct ipa3_rx_pkt_wrapper *rx_pkt;
 	int ret;
@@ -1513,10 +1518,10 @@ static void ipa3_replenish_rx_cache(struct ipa3_sys_context *sys)
 			goto fail_skb_alloc;
 		}
 		ptr = skb_put(rx_pkt->data.skb, sys->rx_buff_sz);
-		rx_pkt->data.dma_addr = dma_map_single(ipa3_ctx->pdev, ptr,
+		rx_pkt->data.dma_addr = dma_map_single(dev, ptr,
 						     sys->rx_buff_sz,
 						     DMA_FROM_DEVICE);
-		if (dma_mapping_error(ipa3_ctx->pdev, rx_pkt->data.dma_addr)) {
+		if (dma_mapping_error(dev, rx_pkt->data.dma_addr)) {
 			ipa_err("dma_map_single failure %p for %p\n",
 			       (void *)rx_pkt->data.dma_addr, ptr);
 			goto fail_dma_mapping;
@@ -1557,7 +1562,7 @@ static void ipa3_replenish_rx_cache(struct ipa3_sys_context *sys)
 fail_provide_rx_buffer:
 	list_del(&rx_pkt->link);
 	rx_len_cached = --sys->len;
-	dma_unmap_single(ipa3_ctx->pdev, rx_pkt->data.dma_addr,
+	dma_unmap_single(dev, rx_pkt->data.dma_addr,
 			sys->rx_buff_sz, DMA_FROM_DEVICE);
 fail_dma_mapping:
 	sys->free_skb(rx_pkt->data.skb);
@@ -1571,6 +1576,7 @@ fail_kmem_cache_alloc:
 
 static void ipa3_replenish_rx_cache_recycle(struct ipa3_sys_context *sys)
 {
+	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	void *ptr;
 	struct ipa3_rx_pkt_wrapper *rx_pkt;
 	int ret;
@@ -1601,10 +1607,9 @@ static void ipa3_replenish_rx_cache_recycle(struct ipa3_sys_context *sys)
 				goto fail_kmem_cache_alloc;
 			}
 			ptr = skb_put(rx_pkt->data.skb, sys->rx_buff_sz);
-			rx_pkt->data.dma_addr = dma_map_single(ipa3_ctx->pdev,
+			rx_pkt->data.dma_addr = dma_map_single(dev,
 				ptr, sys->rx_buff_sz, DMA_FROM_DEVICE);
-			if (dma_mapping_error(ipa3_ctx->pdev,
-				rx_pkt->data.dma_addr)) {
+			if (dma_mapping_error(dev, rx_pkt->data.dma_addr)) {
 				ipa_err("dma_map_single failure %p for %p\n",
 					(void *)rx_pkt->data.dma_addr, ptr);
 				goto fail_dma_mapping;
@@ -1617,9 +1622,9 @@ static void ipa3_replenish_rx_cache_recycle(struct ipa3_sys_context *sys)
 			spin_unlock_bh(&sys->spinlock);
 			INIT_LIST_HEAD(&rx_pkt->link);
 			ptr = skb_put(rx_pkt->data.skb, sys->rx_buff_sz);
-			rx_pkt->data.dma_addr = dma_map_single(ipa3_ctx->pdev,
+			rx_pkt->data.dma_addr = dma_map_single(dev,
 				ptr, sys->rx_buff_sz, DMA_FROM_DEVICE);
-			if (dma_mapping_error(ipa3_ctx->pdev,
+			if (dma_mapping_error(dev,
 				rx_pkt->data.dma_addr)) {
 				ipa_err("dma_map_single failure %p for %p\n",
 					(void *)rx_pkt->data.dma_addr, ptr);
@@ -1661,7 +1666,7 @@ fail_provide_rx_buffer:
 	rx_len_cached = --sys->len;
 	list_del(&rx_pkt->link);
 	INIT_LIST_HEAD(&rx_pkt->link);
-	dma_unmap_single(ipa3_ctx->pdev, rx_pkt->data.dma_addr,
+	dma_unmap_single(dev, rx_pkt->data.dma_addr,
 		sys->rx_buff_sz, DMA_FROM_DEVICE);
 fail_dma_mapping:
 	spin_lock_bh(&sys->spinlock);
@@ -1761,6 +1766,7 @@ static void ipa3_replenish_rx_work_func(struct work_struct *work)
  */
 static void ipa3_cleanup_rx(struct ipa3_sys_context *sys)
 {
+	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct ipa3_rx_pkt_wrapper *rx_pkt;
 	struct ipa3_rx_pkt_wrapper *r;
 	u32 head;
@@ -1769,7 +1775,7 @@ static void ipa3_cleanup_rx(struct ipa3_sys_context *sys)
 	list_for_each_entry_safe(rx_pkt, r,
 				 &sys->head_desc_list, link) {
 		list_del(&rx_pkt->link);
-		dma_unmap_single(ipa3_ctx->pdev, rx_pkt->data.dma_addr,
+		dma_unmap_single(dev, rx_pkt->data.dma_addr,
 			sys->rx_buff_sz, DMA_FROM_DEVICE);
 		sys->free_skb(rx_pkt->data.skb);
 		kmem_cache_free(ipa3_ctx->rx_pkt_wrapper_cache, rx_pkt);
@@ -1778,7 +1784,7 @@ static void ipa3_cleanup_rx(struct ipa3_sys_context *sys)
 	list_for_each_entry_safe(rx_pkt, r,
 				 &sys->rcycl_list, link) {
 		list_del(&rx_pkt->link);
-		dma_unmap_single(ipa3_ctx->pdev, rx_pkt->data.dma_addr,
+		dma_unmap_single(dev, rx_pkt->data.dma_addr,
 			sys->rx_buff_sz, DMA_FROM_DEVICE);
 		sys->free_skb(rx_pkt->data.skb);
 		kmem_cache_free(ipa3_ctx->rx_pkt_wrapper_cache, rx_pkt);
@@ -1789,8 +1795,8 @@ static void ipa3_cleanup_rx(struct ipa3_sys_context *sys)
 		tail = atomic_read(&sys->repl.tail_idx);
 		while (head != tail) {
 			rx_pkt = sys->repl.cache[head];
-			dma_unmap_single(ipa3_ctx->pdev, rx_pkt->data.dma_addr,
-					sys->rx_buff_sz, DMA_FROM_DEVICE);
+				dma_unmap_single(dev, rx_pkt->data.dma_addr,
+						sys->rx_buff_sz, DMA_FROM_DEVICE);
 			sys->free_skb(rx_pkt->data.skb);
 			kmem_cache_free(ipa3_ctx->rx_pkt_wrapper_cache, rx_pkt);
 			head = (head + 1) % sys->repl.capacity;
@@ -2397,6 +2403,7 @@ void ipa3_recycle_wan_skb(struct sk_buff *skb)
 
 static void ipa3_wq_rx_common(struct ipa3_sys_context *sys, u32 size)
 {
+	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct ipa3_rx_pkt_wrapper *rx_pkt_expected;
 	struct sk_buff *rx_skb;
 
@@ -2414,7 +2421,7 @@ static void ipa3_wq_rx_common(struct ipa3_sys_context *sys, u32 size)
 		rx_pkt_expected->len = size;
 	spin_unlock_bh(&sys->spinlock);
 	rx_skb = rx_pkt_expected->data.skb;
-	dma_unmap_single(ipa3_ctx->pdev, rx_pkt_expected->data.dma_addr,
+	dma_unmap_single(dev, rx_pkt_expected->data.dma_addr,
 			sys->rx_buff_sz, DMA_FROM_DEVICE);
 	skb_set_tail_pointer(rx_skb, rx_pkt_expected->len);
 	rx_skb->len = rx_pkt_expected->len;
@@ -2717,6 +2724,7 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 
 long ipa3_alloc_common_event_ring(void)
 {
+	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct gsi_evt_ring_props gsi_evt_ring_props;
 	dma_addr_t evt_dma_addr;
 	long result;
@@ -2727,8 +2735,8 @@ long ipa3_alloc_common_event_ring(void)
 	gsi_evt_ring_props.ring_len = IPA_COMMON_EVENT_RING_SIZE;
 
 	gsi_evt_ring_props.ring_base_vaddr =
-		dma_alloc_coherent(ipa3_ctx->pdev,
-		gsi_evt_ring_props.ring_len, &evt_dma_addr, GFP_KERNEL);
+		dma_alloc_coherent(dev, gsi_evt_ring_props.ring_len,
+					&evt_dma_addr, GFP_KERNEL);
 	if (!gsi_evt_ring_props.ring_base_vaddr) {
 		ipa_err("fail to dma alloc %u bytes\n",
 			gsi_evt_ring_props.ring_len);
@@ -2755,6 +2763,7 @@ long ipa3_alloc_common_event_ring(void)
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	struct ipa3_ep_context *ep)
 {
+	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct gsi_evt_ring_props gsi_evt_ring_props;
 	struct gsi_chan_props gsi_channel_props;
 	union __packed gsi_channel_scratch ch_scratch;
@@ -2794,9 +2803,8 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		gsi_evt_ring_props.ring_len = 2 * in->desc_fifo_sz;
 
 		gsi_evt_ring_props.ring_base_vaddr =
-			dma_alloc_coherent(ipa3_ctx->pdev,
-			gsi_evt_ring_props.ring_len,
-			&evt_dma_addr, GFP_KERNEL);
+			dma_alloc_coherent(dev, gsi_evt_ring_props.ring_len,
+				&evt_dma_addr, GFP_KERNEL);
 		if (!gsi_evt_ring_props.ring_base_vaddr) {
 			ipa_err("fail to dma alloc %u bytes\n",
 				gsi_evt_ring_props.ring_len);
@@ -2864,7 +2872,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	else
 		gsi_channel_props.ring_len = 2 * in->desc_fifo_sz;
 	gsi_channel_props.ring_base_vaddr =
-		dma_alloc_coherent(ipa3_ctx->pdev, gsi_channel_props.ring_len,
+		dma_alloc_coherent(dev, gsi_channel_props.ring_len,
 			&dma_addr, GFP_KERNEL);
 	if (!gsi_channel_props.ring_base_vaddr) {
 		ipa_err("fail to dma alloc %u bytes\n",
@@ -2924,7 +2932,7 @@ fail_write_channel_scratch:
 		BUG();
 	}
 fail_alloc_channel:
-	dma_free_coherent(ipa3_ctx->pdev, gsi_channel_props.ring_len,
+	dma_free_coherent(dev, gsi_channel_props.ring_len,
 			gsi_channel_props.ring_base_vaddr, dma_addr);
 fail_alloc_channel_ring:
 fail_get_gsi_ep_info:
@@ -2934,7 +2942,7 @@ fail_get_gsi_ep_info:
 	}
 fail_alloc_evt_ring:
 	if (gsi_evt_ring_props.ring_base_vaddr)
-		dma_free_coherent(ipa3_ctx->pdev, gsi_evt_ring_props.ring_len,
+		dma_free_coherent(dev, gsi_evt_ring_props.ring_len,
 			gsi_evt_ring_props.ring_base_vaddr, evt_dma_addr);
 	ipa_err("Return with err: %d\n", result);
 	return result;

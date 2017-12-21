@@ -107,6 +107,7 @@ static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 	struct gsi_chan_props *orig_chan_props,
 	struct ipa_mem_buffer *chan_dma)
 {
+	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct gsi_chan_props chan_props;
 	int gsi_res;
 	dma_addr_t chan_dma_addr;
@@ -120,7 +121,7 @@ static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 	chan_props.re_size = GSI_CHAN_RE_SIZE_16B;
 	chan_props.ring_len = 2 * GSI_CHAN_RE_SIZE_16B;
 	chan_props.ring_base_vaddr =
-		dma_alloc_coherent(ipa3_ctx->pdev, chan_props.ring_len,
+		dma_alloc_coherent(dev, chan_props.ring_len,
 		&chan_dma_addr, 0);
 	chan_props.ring_base_addr = chan_dma_addr;
 	chan_dma->base = chan_props.ring_base_vaddr;
@@ -143,10 +144,9 @@ static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 	return 0;
 
 set_chan_cfg_fail:
-	dma_free_coherent(ipa3_ctx->pdev, chan_dma->size,
+	dma_free_coherent(dev, chan_dma->size,
 		chan_dma->base, chan_dma->phys_base);
 	return result;
-
 }
 
 static int ipa3_restore_channel_properties(struct ipa3_ep_context *ep,
@@ -168,6 +168,7 @@ static int ipa3_restore_channel_properties(struct ipa3_ep_context *ep,
 static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 	struct ipa3_ep_context *ep)
 {
+	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	int result = -EFAULT;
 	int gsi_res;
 	struct gsi_chan_props orig_chan_props;
@@ -224,8 +225,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 	}
 
 	memset(&xfer_elem, 0, sizeof(struct gsi_xfer_elem));
-	buff = dma_alloc_coherent(ipa3_ctx->pdev, 1, &dma_addr,
-		GFP_KERNEL);
+	buff = dma_alloc_coherent(dev, 1, &dma_addr, GFP_KERNEL);
 	xfer_elem.addr = dma_addr;
 	xfer_elem.len = 1;
 	xfer_elem.flags = GSI_XFER_FLAG_EOT;
@@ -253,7 +253,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 		BUG();
 	}
 
-	dma_free_coherent(ipa3_ctx->pdev, 1, buff, dma_addr);
+	dma_free_coherent(dev, 1, buff, dma_addr);
 
 	result = ipa3_stop_gsi_channel(clnt_hdl);
 	if (result) {
@@ -287,14 +287,14 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 		&orig_chan_scratch);
 	if (result)
 		goto restore_props_fail;
-	dma_free_coherent(ipa3_ctx->pdev, chan_dma.size,
+	dma_free_coherent(dev, chan_dma.size,
 		chan_dma.base, chan_dma.phys_base);
 
 	return 0;
 
 queue_xfer_fail:
 	ipa3_stop_gsi_channel(clnt_hdl);
-	dma_free_coherent(ipa3_ctx->pdev, 1, buff, dma_addr);
+	dma_free_coherent(dev, 1, buff, dma_addr);
 start_chan_fail:
 	if (pipe_suspended) {
 		ipa_debug("suspend the pipe again\n");
@@ -305,7 +305,7 @@ start_chan_fail:
 	ipa3_restore_channel_properties(ep, &orig_chan_props,
 		&orig_chan_scratch);
 restore_props_fail:
-	dma_free_coherent(ipa3_ctx->pdev, chan_dma.size,
+	dma_free_coherent(dev, chan_dma.size,
 		chan_dma.base, chan_dma.phys_base);
 	return result;
 }

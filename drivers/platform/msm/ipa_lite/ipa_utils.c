@@ -2560,11 +2560,12 @@ void ipa3_suspend_apps_pipes(bool suspend)
 
 int ipa3_allocate_dma_task_for_gsi(void)
 {
+	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct ipahal_imm_cmd_dma_task_32b_addr cmd = { 0 };
 
 	ipa_debug("Allocate mem\n");
 	ipa3_ctx->dma_task_info.mem.size = IPA_GSI_CHANNEL_STOP_PKT_SIZE;
-	ipa3_ctx->dma_task_info.mem.base = dma_alloc_coherent(ipa3_ctx->pdev,
+	ipa3_ctx->dma_task_info.mem.base = dma_alloc_coherent(dev,
 		ipa3_ctx->dma_task_info.mem.size,
 		&ipa3_ctx->dma_task_info.mem.phys_base,
 		GFP_KERNEL);
@@ -2581,7 +2582,7 @@ int ipa3_allocate_dma_task_for_gsi(void)
 			IPA_IMM_CMD_DMA_TASK_32B_ADDR, &cmd, false);
 	if (!ipa3_ctx->dma_task_info.cmd_pyld) {
 		ipa_err("failed to construct dma_task_32b_addr cmd\n");
-		dma_free_coherent(ipa3_ctx->pdev,
+		dma_free_coherent(dev,
 			ipa3_ctx->dma_task_info.mem.size,
 			ipa3_ctx->dma_task_info.mem.base,
 			ipa3_ctx->dma_task_info.mem.phys_base);
@@ -2595,7 +2596,9 @@ int ipa3_allocate_dma_task_for_gsi(void)
 
 void ipa3_free_dma_task_for_gsi(void)
 {
-	dma_free_coherent(ipa3_ctx->pdev,
+	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
+
+	dma_free_coherent(dev,
 		ipa3_ctx->dma_task_info.mem.size,
 		ipa3_ctx->dma_task_info.mem.base,
 		ipa3_ctx->dma_task_info.mem.phys_base);

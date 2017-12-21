@@ -253,6 +253,7 @@ static void ipa3_active_clients_log_destroy(void)
 static int ipa3_init_smem_region(int memory_region_size,
 				int memory_region_offset)
 {
+	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct ipahal_imm_cmd_dma_shared_mem cmd;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	struct ipa3_desc desc;
@@ -267,7 +268,7 @@ static int ipa3_init_smem_region(int memory_region_size,
 	memset(&mem, 0, sizeof(mem));
 
 	mem.size = memory_region_size;
-	mem.base = dma_alloc_coherent(ipa3_ctx->pdev, mem.size,
+	mem.base = dma_alloc_coherent(dev, mem.size,
 		&mem.phys_base, GFP_KERNEL);
 	if (!mem.base) {
 		ipa_err("failed to alloc DMA buff of size %d\n", mem.size);
@@ -300,8 +301,7 @@ static int ipa3_init_smem_region(int memory_region_size,
 	}
 
 	ipahal_destroy_imm_cmd(cmd_pyld);
-	dma_free_coherent(ipa3_ctx->pdev, mem.size, mem.base,
-		mem.phys_base);
+	dma_free_coherent(dev, mem.size, mem.base, mem.phys_base);
 
 	return rc;
 }
@@ -710,6 +710,7 @@ int _ipa_init_sram_v3(void)
  */
 int _ipa_init_hdr_v3_0(void)
 {
+	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct ipa3_desc desc = { 0 };
 	struct ipa_mem_buffer mem;
 	struct ipahal_imm_cmd_hdr_init_local cmd = {0};
@@ -717,8 +718,8 @@ int _ipa_init_hdr_v3_0(void)
 	struct ipahal_imm_cmd_dma_shared_mem dma_cmd = { 0 };
 
 	mem.size = IPA_MEM_PART(modem_hdr_size) + IPA_MEM_PART(apps_hdr_size);
-	mem.base = dma_alloc_coherent(ipa3_ctx->pdev, mem.size, &mem.phys_base,
-		GFP_KERNEL);
+	mem.base = dma_alloc_coherent(dev, mem.size, &mem.phys_base,
+					GFP_KERNEL);
 	if (!mem.base) {
 		ipa_err("fail to alloc DMA buff of size %d\n", mem.size);
 		return -ENOMEM;
@@ -733,9 +734,7 @@ int _ipa_init_hdr_v3_0(void)
 		IPA_IMM_CMD_HDR_INIT_LOCAL, &cmd, false);
 	if (!cmd_pyld) {
 		ipa_err("fail to construct hdr_init_local imm cmd\n");
-		dma_free_coherent(ipa3_ctx->pdev,
-			mem.size, mem.base,
-			mem.phys_base);
+		dma_free_coherent(dev, mem.size, mem.base, mem.phys_base);
 		return -EFAULT;
 	}
 	desc.opcode = cmd_pyld->opcode;
@@ -747,19 +746,17 @@ int _ipa_init_hdr_v3_0(void)
 	if (ipa3_send_cmd(1, &desc)) {
 		ipa_err("fail to send immediate command\n");
 		ipahal_destroy_imm_cmd(cmd_pyld);
-		dma_free_coherent(ipa3_ctx->pdev,
-			mem.size, mem.base,
-			mem.phys_base);
+		dma_free_coherent(dev, mem.size, mem.base, mem.phys_base);
 		return -EFAULT;
 	}
 
 	ipahal_destroy_imm_cmd(cmd_pyld);
-	dma_free_coherent(ipa3_ctx->pdev, mem.size, mem.base, mem.phys_base);
+	dma_free_coherent(dev, mem.size, mem.base, mem.phys_base);
 
 	mem.size = IPA_MEM_PART(modem_hdr_proc_ctx_size) +
 		IPA_MEM_PART(apps_hdr_proc_ctx_size);
-	mem.base = dma_alloc_coherent(ipa3_ctx->pdev, mem.size, &mem.phys_base,
-		GFP_KERNEL);
+	mem.base = dma_alloc_coherent(dev, mem.size, &mem.phys_base,
+					GFP_KERNEL);
 	if (!mem.base) {
 		ipa_err("fail to alloc DMA buff of size %d\n", mem.size);
 		return -ENOMEM;
@@ -778,9 +775,7 @@ int _ipa_init_hdr_v3_0(void)
 		IPA_IMM_CMD_DMA_SHARED_MEM, &dma_cmd, false);
 	if (!cmd_pyld) {
 		ipa_err("fail to construct dma_shared_mem imm\n");
-		dma_free_coherent(ipa3_ctx->pdev,
-			mem.size, mem.base,
-			mem.phys_base);
+		dma_free_coherent(dev, mem.size, mem.base, mem.phys_base);
 		return -EFAULT;
 	}
 	desc.opcode = cmd_pyld->opcode;
@@ -792,17 +787,14 @@ int _ipa_init_hdr_v3_0(void)
 	if (ipa3_send_cmd(1, &desc)) {
 		ipa_err("fail to send immediate command\n");
 		ipahal_destroy_imm_cmd(cmd_pyld);
-		dma_free_coherent(ipa3_ctx->pdev,
-			mem.size,
-			mem.base,
-			mem.phys_base);
+		dma_free_coherent(dev, mem.size, mem.base, mem.phys_base);
 		return -EFAULT;
 	}
 	ipahal_destroy_imm_cmd(cmd_pyld);
 
 	ipahal_write_reg(IPA_LOCAL_PKT_PROC_CNTXT_BASE, dma_cmd.local_addr);
 
-	dma_free_coherent(ipa3_ctx->pdev, mem.size, mem.base, mem.phys_base);
+	dma_free_coherent(dev, mem.size, mem.base, mem.phys_base);
 
 	return 0;
 }
@@ -1997,6 +1989,7 @@ static ssize_t ipa3_write(struct file *file, const char __user *buf,
 
 static int ipa3_alloc_pkt_init(void)
 {
+	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct ipa_mem_buffer mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	struct ipahal_imm_cmd_ip_packet_init cmd = {0};
@@ -2011,8 +2004,8 @@ static int ipa3_alloc_pkt_init(void)
 	ipa3_ctx->pkt_init_imm_opcode = cmd_pyld->opcode;
 
 	mem.size = cmd_pyld->len * ipa3_ctx->ipa_num_pipes;
-	mem.base = dma_alloc_coherent(ipa3_ctx->pdev, mem.size,
-		&mem.phys_base, GFP_KERNEL);
+	mem.base = dma_alloc_coherent(dev, mem.size, &mem.phys_base,
+					GFP_KERNEL);
 	if (!mem.base) {
 		ipa_err("failed to alloc DMA buff of size %d\n", mem.size);
 		ipahal_destroy_imm_cmd(cmd_pyld);
@@ -2027,10 +2020,8 @@ static int ipa3_alloc_pkt_init(void)
 			&cmd, false);
 		if (!cmd_pyld) {
 			ipa_err("failed to construct IMM cmd\n");
-			dma_free_coherent(ipa3_ctx->pdev,
-				mem.size,
-				mem.base,
-				mem.phys_base);
+			dma_free_coherent(dev, mem.size, mem.base,
+						mem.phys_base);
 			return -ENOMEM;
 		}
 		memcpy(mem.base + i * cmd_pyld->len, cmd_pyld->data,
@@ -2084,8 +2075,6 @@ static int ipa3_pre_init(struct device *ipa_dev)
 	ipa3_ctx->logbuf = ipc_log_context_create(IPA_IPC_LOG_PAGES, "ipa", 0);
 	if (ipa3_ctx->logbuf == NULL)
 		pr_err("failed to create IPC log, continue...\n");
-
-	ipa3_ctx->pdev = ipa_dev;
 
 	/* Get IPA wrapper address */
 	res = platform_get_resource_byname(ipa3_ctx->ipa3_pdev, IORESOURCE_MEM,
@@ -2165,7 +2154,7 @@ static int ipa3_pre_init(struct device *ipa_dev)
 		goto fail_remap;
 	}
 
-	if (ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio, ipa3_ctx->pdev)) {
+	if (ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio, ipa_dev)) {
 		ipa_err("fail to init ipahal\n");
 		result = -EFAULT;
 		goto fail_ipahal;
