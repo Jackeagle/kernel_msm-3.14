@@ -441,7 +441,7 @@ extern struct gsi_ctx *gsi_ctx;
 void gsi_debugfs_init(void);
 uint16_t gsi_find_idx_from_addr(struct gsi_ring_ctx *ctx, uint64_t addr);
 void gsi_update_ch_dp_stats(struct gsi_chan_ctx *ctx, uint16_t used);
-int msm_gsi_init(struct platform_device *pdev);
+struct gsi_ctx *msm_gsi_init(struct platform_device *pdev);
 
 /*
  * Read a value from the given offset into the I/O space defined in

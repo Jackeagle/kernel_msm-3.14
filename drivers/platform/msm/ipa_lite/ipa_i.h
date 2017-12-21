@@ -906,6 +906,7 @@ struct ipa_dma_task_info {
  */
 struct ipa3_context {
 	struct platform_device *ipa3_pdev;
+	struct gsi_ctx *gsi_ctx;
 
 	bool smmu_fast_map;
 	bool smmu_s1_bypass;

@@ -2663,9 +2663,13 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 
 	ipa3_ctx->ipa3_pdev = pdev_p;
 
-	result = msm_gsi_init(pdev_p);
-	if (result) {
+	ipa3_ctx->gsi_ctx = msm_gsi_init(pdev_p);
+	if (IS_ERR(ipa3_ctx->gsi_ctx)) {
 		printk(KERN_ERR "ipa: error initializing gsi driver.\n");
+		result = PTR_ERR(ipa3_ctx->gsi_ctx);
+		ipa3_ctx->gsi_ctx = NULL;
+		ipa3_ctx->ipa3_pdev = NULL;
+
 		return result;
 	}
 
