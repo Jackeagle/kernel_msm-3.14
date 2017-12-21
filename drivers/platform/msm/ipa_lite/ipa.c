@@ -2071,7 +2071,7 @@ static int ipa3_pre_init(void)
 	struct resource *res;
 	struct ipa_active_client_logging_info log_info;
 
-	pr_debug("IPA Driver initialization started\n");
+	ipa_debug("IPA Driver initialization started\n");
 
 	/* Get IPA wrapper address */
 	res = platform_get_resource_byname(ipa3_ctx->ipa3_pdev, IORESOURCE_MEM,
@@ -2352,7 +2352,7 @@ static int ipa3_iommu_map(struct iommu_domain *domain,
 	size = roundup(size, PAGE_SIZE);
 	paddr = rounddown(paddr, PAGE_SIZE);
 
-	pr_debug("mapping 0x%lx to 0x%pa size %zu\n", iova, &paddr, size);
+	ipa_debug("mapping 0x%lx to 0x%pa size %zu\n", iova, &paddr, size);
 
 	ipa_debug("domain =0x%p iova 0x%lx\n", domain, iova);
 	ipa_debug("paddr =0x%pa size 0x%x\n", &paddr, (u32)size);
@@ -2388,9 +2388,9 @@ ipa_smmu_domain_attr_set(struct device *dev, struct iommu_domain *domain)
 
 	ret = iommu_domain_set_attr(domain, attr, &data);
 	if (ret)
-		pr_err("couldn't set %s\n", attr_string);
+		ipa_err("couldn't set %s\n", attr_string);
 	else
-		pr_debug("SMMU %s\n", attr_string);
+		ipa_debug("SMMU %s\n", attr_string);
 
 	return ret;
 }
@@ -2425,11 +2425,11 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 
 	mapping = arm_iommu_create_mapping(dev->bus, va_start, va_size);
 	if (IS_ERR_OR_NULL(mapping)) {
-		pr_debug("Fail to create mapping\n");
+		ipa_debug("Fail to create mapping\n");
 		/* assume this failure is because iommu driver is not ready */
 		return -EPROBE_DEFER;
 	}
-	pr_debug("SMMU mapping created\n");
+	ipa_debug("SMMU mapping created\n");
 
 	if (ipa_smmu_domain_attr_set(dev, mapping->domain)) {
 		ret = -EIO;
@@ -2437,7 +2437,7 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 	}
 
 	if (dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64))) {
-		pr_err("DMA set 64bit mask failed\n");
+		ipa_err("DMA set 64bit mask failed\n");
 		ret = -EOPNOTSUPP;
 		goto err_release_mapping;
 	}
@@ -2487,7 +2487,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	void *smem_addr;
 	int i;
 
-	pr_debug("AP CB probe: sub pdev=%p\n", dev);
+	ipa_debug("AP CB probe: sub pdev=%p\n", dev);
 
 	result = ipa_smmu_attach(dev, cb);
 	if (result)
@@ -2498,7 +2498,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	if (add_map) {
 		/* mapping size is an array of 3-tuple of u32 */
 		if (add_map_size % (3 * sizeof(u32))) {
-			pr_err("wrong additional mapping format\n");
+			ipa_err("wrong additional mapping format\n");
 			ipa_smmu_detach(cb);
 			return -EFAULT;
 		}
@@ -2528,7 +2528,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	/* Proceed to real initialization */
 	result = ipa3_pre_init();
 	if (result) {
-		pr_err("ipa_init failed\n");
+		ipa_err("ipa_init failed\n");
 		if (ipa3_ctx->bus_scale_table) {
 			msm_bus_cl_clear_pdata(ipa3_ctx->bus_scale_table);
 			ipa3_ctx->bus_scale_table = NULL;
@@ -2634,7 +2634,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	/* Initialize the log buffer right away, to capture all messages */
 	ipa3_ctx->logbuf = ipc_log_context_create(IPA_IPC_LOG_PAGES, "ipa", 0);
 	if (!ipa3_ctx->logbuf)
-		pr_err("failed to create IPC log, continue...\n");
+		ipa_err("failed to create IPC log, continue...\n");
 
 	/* Find out whether we're working with supported hardware */
 	ipa_version = ipa_version_get(pdev_p);
