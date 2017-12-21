@@ -63,18 +63,6 @@
 
 #define IPA_SMEM_SIZE (8 * 1024)
 
-struct tz_smmu_ipa_protect_region_iovec_s {
-	u64 input_addr;
-	u64 output_addr;
-	u64 size;
-	u32 attr;
-} __packed;
-
-struct tz_smmu_ipa_protect_region_s {
-	phys_addr_t iovec_buf;
-	u32 size_bytes;
-} __packed;
-
 static int ipa3_q6_clean_q6_tables(void);
 static void ipa3_start_tag_process(struct work_struct *work);
 static DECLARE_WORK(ipa3_tag_work, ipa3_start_tag_process);
