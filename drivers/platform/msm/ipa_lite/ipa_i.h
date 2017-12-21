@@ -910,6 +910,7 @@ struct ipa3_context {
 
 	bool smmu_fast_map;
 	bool smmu_s1_bypass;
+	struct ipa_smmu_cb_ctx ap_smmu_cb;
 
 	struct class *class;
 	dev_t dev_num;

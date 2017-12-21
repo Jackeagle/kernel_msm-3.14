@@ -250,7 +250,6 @@ static void ipa3_active_clients_log_destroy(void)
 		flags);
 }
 
-static struct ipa_smmu_cb_ctx ap_smmu_cb;
 static struct ipa_smmu_cb_ctx uc_smmu_cb;
 
 static int ipa3_init_smem_region(int memory_region_size,
@@ -2360,7 +2359,7 @@ static enum ipa_hw_type ipa_version_get(struct platform_device *pdev)
 static int ipa3_iommu_map(struct iommu_domain *domain,
 	unsigned long iova, phys_addr_t paddr, size_t size)
 {
-	struct ipa_smmu_cb_ctx *ap_cb = &ap_smmu_cb;
+	struct ipa_smmu_cb_ctx *ap_cb = &ipa3_ctx->ap_smmu_cb;
 	int prot = IOMMU_READ | IOMMU_WRITE | IOMMU_MMIO;
 
 	/*
@@ -2408,7 +2407,7 @@ ipa_smmu_domain_attr_set(struct iommu_domain *domain, enum iommu_attr attr)
 static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 {
 	struct device_node *node = dev->of_node;
-	bool for_ap = cb == &ap_smmu_cb;
+	bool for_ap = cb == &ipa3_ctx->ap_smmu_cb;
 	struct dma_iommu_mapping *mapping;
 	struct iommu_domain *domain;
 	u32 iova_mapping[2];
@@ -2503,7 +2502,7 @@ static int ipa_smmu_uc_cb_probe(struct device *dev)
 
 static int ipa_smmu_ap_cb_probe(struct device *dev)
 {
-	struct ipa_smmu_cb_ctx *cb = &ap_smmu_cb;
+	struct ipa_smmu_cb_ctx *cb = &ipa3_ctx->ap_smmu_cb;
 	int result;
 	u32 add_map_size;
 	const u32 *add_map;
