@@ -2386,11 +2386,33 @@ static int ipa3_iommu_map(struct iommu_domain *domain,
 }
 
 static int
-ipa_smmu_domain_attr_set(struct iommu_domain *domain, enum iommu_attr attr)
+ipa_smmu_domain_attr_set(struct device *dev, struct iommu_domain *domain)
 {
+	struct device_node *node = dev->of_node;
 	int data = 1;
+	bool bypass;
+	int ret;
 
-	return iommu_domain_set_attr(domain, attr, &data);
+	bypass = of_property_read_bool(node, "qcom,qcom,smmu-s1-bypass");
+
+	ipa_debug("CB PROBE pdev=%p set attribute, bypass = %d\n", dev, bypass);
+
+	if (bypass) {
+		ret = iommu_domain_set_attr(domain, DOMAIN_ATTR_S1_BYPASS,
+				&data);
+		if (ret)
+			pr_err("couldn't set bypass\n");
+		else
+			pr_debug("SMMU S1 BYPASS\n");
+	} else {
+		ret = iommu_domain_set_attr(domain, DOMAIN_ATTR_ATOMIC, &data);
+		if (ret)
+			pr_err("couldn't set domain as atomic\n");
+		else
+			pr_debug("SMMU atomic set\n");
+	}
+
+	return ret;
 }
 /*
  * Common probe processing for SMMU context blocks.  This function
@@ -2406,12 +2428,10 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 {
 	struct device_node *node = dev->of_node;
 	struct dma_iommu_mapping *mapping;
-	struct iommu_domain *domain;
 	u32 iova_mapping[2];
 	dma_addr_t va_start;
 	size_t va_size;
 	int ret;
-	bool bypass;
 
 	ret = of_property_read_u32_array(node, "qcom,iova-mapping",
 						iova_mapping, 2);
@@ -2429,26 +2449,11 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 		/* assume this failure is because iommu driver is not ready */
 		return -EPROBE_DEFER;
 	}
-	domain = mapping->domain;
 	pr_debug("SMMU mapping created\n");
 
-	bypass = of_property_read_bool(node, "qcom,qcom,smmu-s1-bypass");
-
-	ipa_debug("CB PROBE pdev=%p set attribute, bypass = %d\n", dev, bypass);
-
-	ret = -EIO; /* Response for any error setting attributes */
-	if (bypass) {
-		if (ipa_smmu_domain_attr_set(domain, DOMAIN_ATTR_S1_BYPASS)) {
-			pr_err("couldn't set bypass\n");
-			goto err_release_mapping;
-		}
-		pr_debug("SMMU S1 BYPASS\n");
-	} else {
-		if (ipa_smmu_domain_attr_set(domain, DOMAIN_ATTR_ATOMIC)) {
-			pr_err("couldn't set domain as atomic\n");
-			goto err_release_mapping;
-		}
-		pr_debug("SMMU atomic set\n");
+	if (ipa_smmu_domain_attr_set(dev, mapping->domain)) {
+		ret = -EIO;
+		goto err_release_mapping;
 	}
 
 	if (dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64))) {
