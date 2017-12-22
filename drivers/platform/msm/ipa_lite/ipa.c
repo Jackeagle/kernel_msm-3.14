@@ -2069,10 +2069,6 @@ static int ipa3_pre_init(void)
 
 	ipa_debug("IPA Driver initialization started\n");
 
-	/* init active_clients_log after getting ipa-clk */
-	if (ipa3_active_clients_log_init())
-		return -ENOMEM;
-
 	/* Clock scaling is enabled */
 	ipa3_ctx->curr_ipa_clk_rate = ipa3_ctx->ctrl->ipa_clk_rate_turbo;
 
@@ -2249,7 +2245,6 @@ fail_ipahal:
 	iounmap(ipa3_ctx->mmio);
 fail_remap:
 	ipa3_disable_clks();
-	ipa3_active_clients_log_destroy();
 
 	return result;
 }
@@ -2615,6 +2610,12 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_clear_pdata;
 	}
 
+	/* init active_clients_log */
+	if (ipa3_active_clients_log_init()) {
+		result  =-ENOMEM;
+		goto err_unregister_bus_handle;
+	}
+
 	ipa3_ctx->gsi_ctx = msm_gsi_init(pdev_p);
 	if (IS_ERR(ipa3_ctx->gsi_ctx)) {
 		ipa_err("ipa: error initializing gsi driver.\n");
@@ -2632,6 +2633,8 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 
 err_clear_gsi_ctx:
 	ipa3_ctx->gsi_ctx = NULL;
+	ipa3_active_clients_log_destroy();
+err_unregister_bus_handle:
 	msm_bus_scale_unregister_client(ipa3_ctx->ipa_bus_hdl);
 	ipa3_ctx->ipa_bus_hdl = 0;
 err_clear_pdata:
