@@ -1377,10 +1377,6 @@ int ipa3_inc_client_enable_clks_no_block(struct ipa_active_client_logging_info
 void ipa3_dec_client_disable_clks(struct ipa_active_client_logging_info *id);
 void ipa3_dec_client_disable_clks_no_block(
 	struct ipa_active_client_logging_info *id);
-void ipa3_active_clients_log_dec(struct ipa_active_client_logging_info *id,
-		bool int_ctx);
-void ipa3_active_clients_log_inc(struct ipa_active_client_logging_info *id,
-		bool int_ctx);
 int ipa3_active_clients_log_print_buffer(char *buf, int size);
 int ipa3_active_clients_log_print_table(char *buf, int size);
 void ipa3_active_clients_log_clear(void);

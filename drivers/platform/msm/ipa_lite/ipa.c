@@ -1309,7 +1309,8 @@ static void ipa3_start_tag_process(struct work_struct *work)
 * - Remove and deallocate unneeded data structure
 * - Log the call in the circular history buffer (unless it is a simple call)
 */
-void ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
+static void
+ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 		bool inc, bool int_ctx)
 {
 	char temp_str[IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN];
@@ -1374,13 +1375,15 @@ void ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 		flags);
 }
 
-void ipa3_active_clients_log_dec(struct ipa_active_client_logging_info *id,
+static void
+ipa3_active_clients_log_dec(struct ipa_active_client_logging_info *id,
 		bool int_ctx)
 {
 	ipa3_active_clients_log_mod(id, false, int_ctx);
 }
 
-void ipa3_active_clients_log_inc(struct ipa_active_client_logging_info *id,
+static void
+ipa3_active_clients_log_inc(struct ipa_active_client_logging_info *id,
 		bool int_ctx)
 {
 	ipa3_active_clients_log_mod(id, true, int_ctx);
