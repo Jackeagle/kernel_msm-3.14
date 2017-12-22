@@ -2072,8 +2072,6 @@ static int ipa3_pre_init(void)
 
 	ipa_debug("IPA Driver initialization started\n");
 
-	ipa3_ctx->ipa3_active_clients_logging.log_rdy = false;
-
 	ipa3_ctx->ctrl = kzalloc(sizeof(*ipa3_ctx->ctrl), GFP_KERNEL);
 	if (!ipa3_ctx->ctrl) {
 		ipa_err("memory allocation error for ctrl\n");
