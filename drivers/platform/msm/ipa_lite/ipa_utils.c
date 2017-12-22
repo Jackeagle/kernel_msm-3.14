@@ -1938,12 +1938,12 @@ int ipa3_init_mem_partition(struct device_node *node)
  *  This function can avoid the runtime assignment by using C99 special
  *  struct initialization - hard decision... time.vs.mem
  */
-int ipa3_controller_static_bind(struct ipa3_controller *ctrl)
+void ipa3_controller_static_bind(struct ipa3_controller *ctrl)
 {
 	ctrl->ipa_init_rt4 = _ipa_init_rt4_v3;
-    ctrl->ipa_init_rt6 = _ipa_init_rt6_v3;
-    ctrl->ipa_init_flt4 = _ipa_init_flt4_v3;
-    ctrl->ipa_init_flt6 = _ipa_init_flt6_v3;
+	ctrl->ipa_init_rt6 = _ipa_init_rt6_v3;
+	ctrl->ipa_init_flt4 = _ipa_init_flt4_v3;
+	ctrl->ipa_init_flt6 = _ipa_init_flt6_v3;
 	ctrl->ipa3_read_ep_reg = _ipa_read_ep_reg_v3_0;
 	ctrl->ipa3_enable_clks = _ipa_enable_clks_v3_0;
 	ctrl->ipa3_disable_clks = _ipa_disable_clks_v3_0;
@@ -1956,8 +1956,6 @@ int ipa3_controller_static_bind(struct ipa3_controller *ctrl)
 	ctrl->ipa_init_sram = _ipa_init_sram_v3;
 	ctrl->ipa_sram_read_settings = _ipa_sram_settings_read_v3_0;
 	ctrl->ipa_init_hdr = _ipa_init_hdr_v3_0;
-
-	return 0;
 }
 
 void ipa3_skb_recycle(struct sk_buff *skb)

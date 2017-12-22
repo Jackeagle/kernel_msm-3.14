@@ -2073,12 +2073,7 @@ static int ipa3_pre_init(void)
 	ipa_debug("IPA Driver initialization started\n");
 
 	ipa3_ctx->ctrl = &ipa3_ctx->ctrl_struct;
-	result = ipa3_controller_static_bind(ipa3_ctx->ctrl);
-	if (result) {
-		ipa_err("fail to static bind IPA ctrl.\n");
-		result = -EFAULT;
-		goto fail_bind;
-	}
+	ipa3_controller_static_bind(ipa3_ctx->ctrl);
 
 	result = ipa3_init_mem_partition(ipa3_ctx->ipa3_pdev->dev.of_node);
 	if (result) {
@@ -2289,7 +2284,7 @@ fail_init_active_client:
 fail_bus_reg:
 	ipa3_ctx->ctrl->msm_bus_data_ptr = NULL;
 fail_init_mem_partition:
-fail_bind:
+	memset(ipa3_ctx->ctrl, 0, sizeof(*ipa3_ctx->ctrl));
 	ipa3_ctx->ctrl = NULL;
 
 	return result;
