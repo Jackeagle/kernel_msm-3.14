@@ -656,8 +656,253 @@ struct ipa3_tag_completion {
 	atomic_t cnt;
 };
 
-struct ipa3_controller;
+/**
+ * struct ipa3_mem_partition - represents IPA RAM Map as read from DTS
+ * Order and type of members should not be changed without a suitable change
+ * to DTS file or the code that reads it.
+ *
+ * IPA SRAM memory layout:
+ * +-------------------------+
+ * |    UC MEM               |
+ * +-------------------------+
+ * |    UC INFO              |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * | V4 FLT HDR HASHABLE     |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * | V4 FLT HDR NON-HASHABLE |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * | V6 FLT HDR HASHABLE     |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * | V6 FLT HDR NON-HASHABLE |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * | V4 RT HDR HASHABLE      |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * | V4 RT HDR NON-HASHABLE  |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * | V6 RT HDR HASHABLE      |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * | V6 RT HDR NON-HASHABLE  |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |  MODEM HDR              |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * | MODEM PROC CTX          |
+ * +-------------------------+
+ * | APPS PROC CTX           |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * | PDN CONFIG              |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * | QUOTA STATS             |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * | TETH STATS              |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * | V4 FLT STATS            |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * | V6 FLT STATS            |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * | V4 RT STATS             |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * | V6 RT STATS             |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * | DROP STATS              |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |  MODEM MEM              |
+ * +-------------------------+
+ * |    CANARY               |
+ * +-------------------------+
+ * |  UC EVENT RING          | From IPA 3.5
+ * +-------------------------+
+ */
+struct ipa3_mem_partition {
+	u32 ofst_start;
+	u32 nat_ofst;
+	u32 nat_size;
+	u32 v4_flt_hash_ofst;
+	u32 v4_flt_hash_size;
+	u32 v4_flt_hash_size_ddr;
+	u32 v4_flt_nhash_ofst;
+	u32 v4_flt_nhash_size;
+	u32 v4_flt_nhash_size_ddr;
+	u32 v6_flt_hash_ofst;
+	u32 v6_flt_hash_size;
+	u32 v6_flt_hash_size_ddr;
+	u32 v6_flt_nhash_ofst;
+	u32 v6_flt_nhash_size;
+	u32 v6_flt_nhash_size_ddr;
+	u32 v4_rt_num_index;
+	u32 v4_modem_rt_index_lo;
+	u32 v4_modem_rt_index_hi;
+	u32 v4_apps_rt_index_lo;
+	u32 v4_apps_rt_index_hi;
+	u32 v4_rt_hash_ofst;
+	u32 v4_rt_hash_size;
+	u32 v4_rt_hash_size_ddr;
+	u32 v4_rt_nhash_ofst;
+	u32 v4_rt_nhash_size;
+	u32 v4_rt_nhash_size_ddr;
+	u32 v6_rt_num_index;
+	u32 v6_modem_rt_index_lo;
+	u32 v6_modem_rt_index_hi;
+	u32 v6_apps_rt_index_lo;
+	u32 v6_apps_rt_index_hi;
+	u32 v6_rt_hash_ofst;
+	u32 v6_rt_hash_size;
+	u32 v6_rt_hash_size_ddr;
+	u32 v6_rt_nhash_ofst;
+	u32 v6_rt_nhash_size;
+	u32 v6_rt_nhash_size_ddr;
+	u32 modem_hdr_ofst;
+	u32 modem_hdr_size;
+	u32 apps_hdr_ofst;
+	u32 apps_hdr_size;
+	u32 apps_hdr_size_ddr;
+	u32 modem_hdr_proc_ctx_ofst;
+	u32 modem_hdr_proc_ctx_size;
+	u32 apps_hdr_proc_ctx_ofst;
+	u32 apps_hdr_proc_ctx_size;
+	u32 apps_hdr_proc_ctx_size_ddr;
+	u32 modem_comp_decomp_ofst;
+	u32 modem_comp_decomp_size;
+	u32 modem_ofst;
+	u32 modem_size;
+	u32 apps_v4_flt_hash_ofst;
+	u32 apps_v4_flt_hash_size;
+	u32 apps_v4_flt_nhash_ofst;
+	u32 apps_v4_flt_nhash_size;
+	u32 apps_v6_flt_hash_ofst;
+	u32 apps_v6_flt_hash_size;
+	u32 apps_v6_flt_nhash_ofst;
+	u32 apps_v6_flt_nhash_size;
+	u32 uc_info_ofst;
+	u32 uc_info_size;
+	u32 end_ofst;
+	u32 apps_v4_rt_hash_ofst;
+	u32 apps_v4_rt_hash_size;
+	u32 apps_v4_rt_nhash_ofst;
+	u32 apps_v4_rt_nhash_size;
+	u32 apps_v6_rt_hash_ofst;
+	u32 apps_v6_rt_hash_size;
+	u32 apps_v6_rt_nhash_ofst;
+	u32 apps_v6_rt_nhash_size;
+	u32 uc_event_ring_ofst;
+	u32 uc_event_ring_size;
+	u32 pdn_config_ofst;
+	u32 pdn_config_size;
+	u32 stats_quota_ofst;
+	u32 stats_quota_size;
+	u32 stats_tethering_ofst;
+	u32 stats_tethering_size;
+	u32 stats_flt_v4_ofst;
+	u32 stats_flt_v4_size;
+	u32 stats_flt_v6_ofst;
+	u32 stats_flt_v6_size;
+	u32 stats_rt_v4_ofst;
+	u32 stats_rt_v4_size;
+	u32 stats_rt_v6_ofst;
+	u32 stats_rt_v6_size;
+	u32 stats_drop_ofst;
+	u32 stats_drop_size;
+};
 
+struct ipa3_controller {
+	struct ipa3_mem_partition mem_partition;
+	u32 ipa_clk_rate_turbo;
+	u32 ipa_clk_rate_nominal;
+	u32 ipa_clk_rate_svs;
+	u32 clock_scaling_bw_threshold_turbo;
+	u32 clock_scaling_bw_threshold_nominal;
+	u32 ipa_reg_base_ofst;
+	u32 max_holb_tmr_val;
+	void (*ipa_sram_read_settings)(void);
+	int (*ipa_init_sram)(void);
+	int (*ipa_init_hdr)(void);
+	int (*ipa_init_rt4)(void);
+	int (*ipa_init_rt6)(void);
+	int (*ipa_init_flt4)(void);
+	int (*ipa_init_flt6)(void);
+	int (*ipa3_read_ep_reg)(char *buff, int max_len, int pipe);
+	int (*ipa3_commit_flt)(enum ipa_ip_type ip);
+        int (*ipa3_commit_rt)(enum ipa_ip_type ip);
+        int (*ipa3_commit_hdr)(void);
+	void (*ipa3_enable_clks)(void);
+	void (*ipa3_disable_clks)(void);
+	struct msm_bus_scale_pdata *msm_bus_data_ptr;
+};
 
 /**
  * union Ipa3HwFeatureInfoData_t - parameters for stats/config blob
@@ -968,254 +1213,6 @@ struct ipa3_context {
 	struct completion uc_loaded_completion_obj;
 	struct ipa3_smp2p_info smp2p_info;
 	struct ipa_dma_task_info dma_task_info;
-};
-
-/**
- * struct ipa3_mem_partition - represents IPA RAM Map as read from DTS
- * Order and type of members should not be changed without a suitable change
- * to DTS file or the code that reads it.
- *
- * IPA SRAM memory layout:
- * +-------------------------+
- * |    UC MEM               |
- * +-------------------------+
- * |    UC INFO              |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * | V4 FLT HDR HASHABLE     |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * | V4 FLT HDR NON-HASHABLE |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * | V6 FLT HDR HASHABLE     |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * | V6 FLT HDR NON-HASHABLE |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * | V4 RT HDR HASHABLE      |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * | V4 RT HDR NON-HASHABLE  |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * | V6 RT HDR HASHABLE      |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * | V6 RT HDR NON-HASHABLE  |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |  MODEM HDR              |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * | MODEM PROC CTX          |
- * +-------------------------+
- * | APPS PROC CTX           |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * | PDN CONFIG              |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * | QUOTA STATS             |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * | TETH STATS              |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * | V4 FLT STATS            |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * | V6 FLT STATS            |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * | V4 RT STATS             |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * | V6 RT STATS             |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * | DROP STATS              |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |  MODEM MEM              |
- * +-------------------------+
- * |    CANARY               |
- * +-------------------------+
- * |  UC EVENT RING          | From IPA 3.5
- * +-------------------------+
- */
-struct ipa3_mem_partition {
-	u32 ofst_start;
-	u32 nat_ofst;
-	u32 nat_size;
-	u32 v4_flt_hash_ofst;
-	u32 v4_flt_hash_size;
-	u32 v4_flt_hash_size_ddr;
-	u32 v4_flt_nhash_ofst;
-	u32 v4_flt_nhash_size;
-	u32 v4_flt_nhash_size_ddr;
-	u32 v6_flt_hash_ofst;
-	u32 v6_flt_hash_size;
-	u32 v6_flt_hash_size_ddr;
-	u32 v6_flt_nhash_ofst;
-	u32 v6_flt_nhash_size;
-	u32 v6_flt_nhash_size_ddr;
-	u32 v4_rt_num_index;
-	u32 v4_modem_rt_index_lo;
-	u32 v4_modem_rt_index_hi;
-	u32 v4_apps_rt_index_lo;
-	u32 v4_apps_rt_index_hi;
-	u32 v4_rt_hash_ofst;
-	u32 v4_rt_hash_size;
-	u32 v4_rt_hash_size_ddr;
-	u32 v4_rt_nhash_ofst;
-	u32 v4_rt_nhash_size;
-	u32 v4_rt_nhash_size_ddr;
-	u32 v6_rt_num_index;
-	u32 v6_modem_rt_index_lo;
-	u32 v6_modem_rt_index_hi;
-	u32 v6_apps_rt_index_lo;
-	u32 v6_apps_rt_index_hi;
-	u32 v6_rt_hash_ofst;
-	u32 v6_rt_hash_size;
-	u32 v6_rt_hash_size_ddr;
-	u32 v6_rt_nhash_ofst;
-	u32 v6_rt_nhash_size;
-	u32 v6_rt_nhash_size_ddr;
-	u32 modem_hdr_ofst;
-	u32 modem_hdr_size;
-	u32 apps_hdr_ofst;
-	u32 apps_hdr_size;
-	u32 apps_hdr_size_ddr;
-	u32 modem_hdr_proc_ctx_ofst;
-	u32 modem_hdr_proc_ctx_size;
-	u32 apps_hdr_proc_ctx_ofst;
-	u32 apps_hdr_proc_ctx_size;
-	u32 apps_hdr_proc_ctx_size_ddr;
-	u32 modem_comp_decomp_ofst;
-	u32 modem_comp_decomp_size;
-	u32 modem_ofst;
-	u32 modem_size;
-	u32 apps_v4_flt_hash_ofst;
-	u32 apps_v4_flt_hash_size;
-	u32 apps_v4_flt_nhash_ofst;
-	u32 apps_v4_flt_nhash_size;
-	u32 apps_v6_flt_hash_ofst;
-	u32 apps_v6_flt_hash_size;
-	u32 apps_v6_flt_nhash_ofst;
-	u32 apps_v6_flt_nhash_size;
-	u32 uc_info_ofst;
-	u32 uc_info_size;
-	u32 end_ofst;
-	u32 apps_v4_rt_hash_ofst;
-	u32 apps_v4_rt_hash_size;
-	u32 apps_v4_rt_nhash_ofst;
-	u32 apps_v4_rt_nhash_size;
-	u32 apps_v6_rt_hash_ofst;
-	u32 apps_v6_rt_hash_size;
-	u32 apps_v6_rt_nhash_ofst;
-	u32 apps_v6_rt_nhash_size;
-	u32 uc_event_ring_ofst;
-	u32 uc_event_ring_size;
-	u32 pdn_config_ofst;
-	u32 pdn_config_size;
-	u32 stats_quota_ofst;
-	u32 stats_quota_size;
-	u32 stats_tethering_ofst;
-	u32 stats_tethering_size;
-	u32 stats_flt_v4_ofst;
-	u32 stats_flt_v4_size;
-	u32 stats_flt_v6_ofst;
-	u32 stats_flt_v6_size;
-	u32 stats_rt_v4_ofst;
-	u32 stats_rt_v4_size;
-	u32 stats_rt_v6_ofst;
-	u32 stats_rt_v6_size;
-	u32 stats_drop_ofst;
-	u32 stats_drop_size;
-};
-
-struct ipa3_controller {
-	struct ipa3_mem_partition mem_partition;
-	u32 ipa_clk_rate_turbo;
-	u32 ipa_clk_rate_nominal;
-	u32 ipa_clk_rate_svs;
-	u32 clock_scaling_bw_threshold_turbo;
-	u32 clock_scaling_bw_threshold_nominal;
-	u32 ipa_reg_base_ofst;
-	u32 max_holb_tmr_val;
-	void (*ipa_sram_read_settings)(void);
-	int (*ipa_init_sram)(void);
-	int (*ipa_init_hdr)(void);
-	int (*ipa_init_rt4)(void);
-	int (*ipa_init_rt6)(void);
-	int (*ipa_init_flt4)(void);
-	int (*ipa_init_flt6)(void);
-	int (*ipa3_read_ep_reg)(char *buff, int max_len, int pipe);
-	int (*ipa3_commit_flt)(enum ipa_ip_type ip);
-        int (*ipa3_commit_rt)(enum ipa_ip_type ip);
-        int (*ipa3_commit_hdr)(void);
-	void (*ipa3_enable_clks)(void);
-	void (*ipa3_disable_clks)(void);
-	struct msm_bus_scale_pdata *msm_bus_data_ptr;
 };
 
 extern struct ipa3_context *ipa3_ctx;
