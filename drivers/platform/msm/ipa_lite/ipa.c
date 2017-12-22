@@ -2089,8 +2089,10 @@ static int ipa3_pre_init(void)
 	}
 
 	/* init active_clients_log after getting ipa-clk */
-	if (ipa3_active_clients_log_init())
+	if (ipa3_active_clients_log_init()) {
+		result = -ENOMEM;
 		goto fail_init_active_client;
+	}
 
 	/* Clock scaling is enabled */
 	ipa3_ctx->curr_ipa_clk_rate = ipa3_ctx->ctrl->ipa_clk_rate_turbo;
