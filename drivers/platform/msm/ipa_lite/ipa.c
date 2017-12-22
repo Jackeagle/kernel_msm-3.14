@@ -2460,21 +2460,10 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		ipa3_iommu_map(cb->mapping->domain, iova, pa, IPA_SMEM_SIZE);
 	}
 
-	/* get BUS handle */
-	ipa3_ctx->ipa_bus_hdl = msm_bus_scale_register_client(
-					ipa3_ctx->ctrl->msm_bus_data_ptr);
-	if (!ipa3_ctx->ipa_bus_hdl) {
-		ipa_err("fail to register with bus mgr!\n");
-		ipa_smmu_detach(cb);
-		return -ENODEV;
-	}
-
 	/* Proceed to real initialization */
 	result = ipa3_pre_init();
 	if (result) {
 		ipa_err("ipa_init failed\n");
-		msm_bus_scale_unregister_client(ipa3_ctx->ipa_bus_hdl);
-		ipa3_ctx->ipa_bus_hdl = 0;
 		ipa_smmu_detach(cb);
 	}
 
@@ -2620,6 +2609,15 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		ipa_debug("Use bus scaling info from device tree #usecases=%d\n",
 			ipa3_ctx->ctrl->msm_bus_data_ptr->num_usecases);
 
+	/* get BUS handle */
+	ipa3_ctx->ipa_bus_hdl = msm_bus_scale_register_client(
+					ipa3_ctx->ctrl->msm_bus_data_ptr);
+	if (!ipa3_ctx->ipa_bus_hdl) {
+		ipa_err("fail to register with bus mgr!\n");
+		result = -ENODEV;
+		goto err_clear_pdata;
+	}
+
 	ipa3_ctx->gsi_ctx = msm_gsi_init(pdev_p);
 	if (IS_ERR(ipa3_ctx->gsi_ctx)) {
 		ipa_err("ipa: error initializing gsi driver.\n");
@@ -2637,6 +2635,9 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 
 err_clear_gsi_ctx:
 	ipa3_ctx->gsi_ctx = NULL;
+	msm_bus_scale_unregister_client(ipa3_ctx->ipa_bus_hdl);
+	ipa3_ctx->ipa_bus_hdl = 0;
+err_clear_pdata:
 	msm_bus_cl_clear_pdata(ipa3_ctx->ctrl->msm_bus_data_ptr);
 err_clear_ctrl:
 	/*
