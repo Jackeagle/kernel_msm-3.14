@@ -2068,23 +2068,9 @@ static int ipa3_pre_init(void)
 {
 	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	int result;
-	struct resource *res;
 	struct ipa_active_client_logging_info log_info;
 
 	ipa_debug("IPA Driver initialization started\n");
-
-	/* Get IPA wrapper address */
-	res = platform_get_resource_byname(ipa3_ctx->ipa3_pdev, IORESOURCE_MEM,
-			"ipa-base");
-	if (!res) {
-		ipa_err(":get resource failed for ipa-base!\n");
-		return -ENODEV;
-	}
-	ipa3_ctx->ipa_wrapper_base = res->start;
-	ipa3_ctx->ipa_wrapper_size = resource_size(res);
-	ipa_debug(": ipa-base = 0x%x, size = 0x%x\n",
-			ipa3_ctx->ipa_wrapper_base,
-			ipa3_ctx->ipa_wrapper_size);
 
 	ipa3_ctx->ipa3_active_clients_logging.log_rdy = false;
 
@@ -2608,6 +2594,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	struct device *dev = &pdev_p->dev;
 	struct device_node *node = dev->of_node;
 	enum ipa_hw_type ipa_version;
+	struct resource *res;
 	int result;
 
 	ipa_debug("IPA driver probing started\n");
@@ -2644,6 +2631,19 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	if (result)
 		ipa3_ctx->ee = 0;	/* Default to 0 if not found */
 
+	/* Get IPA wrapper address */
+	res = platform_get_resource_byname(pdev_p, IORESOURCE_MEM, "ipa-base");
+	if (!res) {
+		ipa_err(":get resource failed for ipa-base!\n");
+		result = -ENODEV;
+		goto err_clear_ee;
+	}
+	ipa3_ctx->ipa_wrapper_base = res->start;
+	ipa3_ctx->ipa_wrapper_size = resource_size(res);
+	ipa_debug(": ipa-base = 0x%x, size = 0x%x\n",
+			ipa3_ctx->ipa_wrapper_base,
+			ipa3_ctx->ipa_wrapper_size);
+
 	ipa3_ctx->gsi_ctx = msm_gsi_init(pdev_p);
 	if (IS_ERR(ipa3_ctx->gsi_ctx)) {
 		ipa_err("ipa: error initializing gsi driver.\n");
@@ -2661,6 +2661,9 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 
 err_clear_gsi_ctx:
 	ipa3_ctx->gsi_ctx = NULL;
+	ipa3_ctx->ipa_wrapper_size = 0;
+	ipa3_ctx->ipa_wrapper_base = 0;
+err_clear_ee:
 	ipa3_ctx->ee = 0;
 err_destroy_logbuf:
 	if (ipa3_ctx->logbuf) {
