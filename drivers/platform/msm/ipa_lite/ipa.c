@@ -2473,24 +2473,21 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		ipa3_iommu_map(cb->mapping->domain, iova, pa, IPA_SMEM_SIZE);
 	}
 
-	ipa3_ctx->bus_scale_table = msm_bus_cl_get_pdata(ipa3_ctx->ipa3_pdev);
-	if (ipa3_ctx->bus_scale_table) {
+	ipa3_ctx->ctrl->msm_bus_data_ptr =
+			msm_bus_cl_get_pdata(ipa3_ctx->ipa3_pdev);
+	if (ipa3_ctx->ctrl->msm_bus_data_ptr)
 		ipa_debug("Use bus scaling info from device tree #usecases=%d\n",
-			ipa3_ctx->bus_scale_table->num_usecases);
-		ipa3_ctx->ctrl->msm_bus_data_ptr = ipa3_ctx->bus_scale_table;
-	}
-
+			ipa3_ctx->ctrl->msm_bus_data_ptr->num_usecases);
 
 	/* Proceed to real initialization */
 	result = ipa3_pre_init();
 	if (result) {
 		ipa_err("ipa_init failed\n");
-		if (ipa3_ctx->bus_scale_table) {
-			msm_bus_cl_clear_pdata(ipa3_ctx->bus_scale_table);
-			ipa3_ctx->bus_scale_table = NULL;
+		if (ipa3_ctx->ctrl->msm_bus_data_ptr) {
+			msm_bus_cl_clear_pdata(ipa3_ctx->ctrl->msm_bus_data_ptr);
+			ipa3_ctx->ctrl->msm_bus_data_ptr = NULL;
 		}
 		ipa_smmu_detach(cb);
-		ipa3_ctx->ctrl->msm_bus_data_ptr = NULL;
 	}
 
 	return result;
