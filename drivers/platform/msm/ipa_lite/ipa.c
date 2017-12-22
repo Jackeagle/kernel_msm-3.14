@@ -2072,20 +2072,9 @@ static int ipa3_pre_init(void)
 
 	ipa_debug("IPA Driver initialization started\n");
 
-	/* get BUS handle */
-	ipa3_ctx->ipa_bus_hdl =
-		msm_bus_scale_register_client(
-			ipa3_ctx->ctrl->msm_bus_data_ptr);
-	if (!ipa3_ctx->ipa_bus_hdl) {
-		ipa_err("fail to register with bus mgr!\n");
-		return -ENODEV;
-	}
-
 	/* init active_clients_log after getting ipa-clk */
-	if (ipa3_active_clients_log_init()) {
-		result = -ENOMEM;
-		goto fail_init_active_client;
-	}
+	if (ipa3_active_clients_log_init())
+		return -ENOMEM;
 
 	/* Clock scaling is enabled */
 	ipa3_ctx->curr_ipa_clk_rate = ipa3_ctx->ctrl->ipa_clk_rate_turbo;
@@ -2264,8 +2253,6 @@ fail_ipahal:
 fail_remap:
 	ipa3_disable_clks();
 	ipa3_active_clients_log_destroy();
-fail_init_active_client:
-	msm_bus_scale_unregister_client(ipa3_ctx->ipa_bus_hdl);
 
 	return result;
 }
@@ -2473,10 +2460,21 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		ipa3_iommu_map(cb->mapping->domain, iova, pa, IPA_SMEM_SIZE);
 	}
 
+	/* get BUS handle */
+	ipa3_ctx->ipa_bus_hdl = msm_bus_scale_register_client(
+					ipa3_ctx->ctrl->msm_bus_data_ptr);
+	if (!ipa3_ctx->ipa_bus_hdl) {
+		ipa_err("fail to register with bus mgr!\n");
+		ipa_smmu_detach(cb);
+		return -ENODEV;
+	}
+
 	/* Proceed to real initialization */
 	result = ipa3_pre_init();
 	if (result) {
 		ipa_err("ipa_init failed\n");
+		msm_bus_scale_unregister_client(ipa3_ctx->ipa_bus_hdl);
+		ipa3_ctx->ipa_bus_hdl = 0;
 		ipa_smmu_detach(cb);
 	}
 
