@@ -2067,17 +2067,10 @@ static int ipa3_alloc_pkt_init(void)
 static int ipa3_pre_init(void)
 {
 	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
-	int result;
+	int result = 0;
 	struct ipa_active_client_logging_info log_info;
 
 	ipa_debug("IPA Driver initialization started\n");
-
-	result = ipa3_init_mem_partition(ipa3_ctx->ipa3_pdev->dev.of_node);
-	if (result) {
-		ipa_err(":ipa3_init_mem_partition failed!\n");
-		result = -ENODEV;
-		goto fail_init_mem_partition;
-	}
 
 	if (ipa3_ctx->bus_scale_table) {
 		ipa_debug("Use bus scaling info from device tree #usecases=%d\n",
@@ -2280,7 +2273,6 @@ fail_init_active_client:
 	msm_bus_scale_unregister_client(ipa3_ctx->ipa_bus_hdl);
 fail_bus_reg:
 	ipa3_ctx->ctrl->msm_bus_data_ptr = NULL;
-fail_init_mem_partition:
 
 	return result;
 }
@@ -2631,6 +2623,13 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	ipa3_ctx->ctrl = &ipa3_ctx->ctrl_struct;
 	ipa3_controller_static_bind(ipa3_ctx->ctrl);
 
+	result = ipa3_init_mem_partition(node);
+	if (result) {
+		ipa_err(":ipa3_init_mem_partition failed!\n");
+		result = -ENODEV;
+		goto err_clear_ctrl;
+	}
+
 	ipa3_ctx->gsi_ctx = msm_gsi_init(pdev_p);
 	if (IS_ERR(ipa3_ctx->gsi_ctx)) {
 		ipa_err("ipa: error initializing gsi driver.\n");
@@ -2648,6 +2647,8 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 
 err_clear_gsi_ctx:
 	ipa3_ctx->gsi_ctx = NULL;
+err_clear_ctrl:
+	/* Zeroing ctrl sub-structure resets its embedded mem partition */
 	memset(ipa3_ctx->ctrl, 0, sizeof(*ipa3_ctx->ctrl));
 	ipa3_ctx->ctrl = NULL;
 	ipa3_ctx->ipa_wrapper_size = 0;
