@@ -2439,9 +2439,20 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 
 	ipa_debug("AP CB probe: sub pdev=%p\n", dev);
 
+	ipa3_ctx->ctrl->msm_bus_data_ptr =
+			msm_bus_cl_get_pdata(ipa3_ctx->ipa3_pdev);
+	if (ipa3_ctx->ctrl->msm_bus_data_ptr)
+		ipa_debug("Use bus scaling info from device tree #usecases=%d\n",
+			ipa3_ctx->ctrl->msm_bus_data_ptr->num_usecases);
+
 	result = ipa_smmu_attach(dev, cb);
-	if (result)
+	if (result) {
+		if (ipa3_ctx->ctrl->msm_bus_data_ptr) {
+			msm_bus_cl_clear_pdata(ipa3_ctx->ctrl->msm_bus_data_ptr);
+			ipa3_ctx->ctrl->msm_bus_data_ptr = NULL;
+		}
 		return result;
+	}
 
 	add_map = of_get_property(dev->of_node,
 		"qcom,additional-mapping", &add_map_size);
@@ -2449,6 +2460,11 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		/* mapping size is an array of 3-tuple of u32 */
 		if (add_map_size % (3 * sizeof(u32))) {
 			ipa_err("wrong additional mapping format\n");
+			if (ipa3_ctx->ctrl->msm_bus_data_ptr) {
+				msm_bus_cl_clear_pdata(
+					ipa3_ctx->ctrl->msm_bus_data_ptr);
+				ipa3_ctx->ctrl->msm_bus_data_ptr = NULL;
+			}
 			ipa_smmu_detach(cb);
 			return -EFAULT;
 		}
@@ -2472,12 +2488,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 
 		ipa3_iommu_map(cb->mapping->domain, iova, pa, IPA_SMEM_SIZE);
 	}
-
-	ipa3_ctx->ctrl->msm_bus_data_ptr =
-			msm_bus_cl_get_pdata(ipa3_ctx->ipa3_pdev);
-	if (ipa3_ctx->ctrl->msm_bus_data_ptr)
-		ipa_debug("Use bus scaling info from device tree #usecases=%d\n",
-			ipa3_ctx->ctrl->msm_bus_data_ptr->num_usecases);
 
 	/* Proceed to real initialization */
 	result = ipa3_pre_init();
