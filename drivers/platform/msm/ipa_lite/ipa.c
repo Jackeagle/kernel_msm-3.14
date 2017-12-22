@@ -238,16 +238,10 @@ void ipa3_active_clients_log_clear(void)
 
 static void ipa3_active_clients_log_destroy(void)
 {
-	unsigned long flags;
-
-	spin_lock_irqsave(&ipa3_ctx->ipa3_active_clients_logging.lock, flags);
-	ipa3_ctx->ipa3_active_clients_logging.log_rdy = 0;
+	kfree(ipa3_ctx->active_clients_table_buf);
 	kfree(ipa3_ctx->ipa3_active_clients_logging.log_buffer[0]);
-	ipa3_ctx->ipa3_active_clients_logging.log_head = 0;
-	ipa3_ctx->ipa3_active_clients_logging.log_tail =
-			IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES - 1;
-	spin_unlock_irqrestore(&ipa3_ctx->ipa3_active_clients_logging.lock,
-		flags);
+	memset(&ipa3_ctx->ipa3_active_clients_logging, 0,
+		sizeof(ipa3_ctx->ipa3_active_clients_logging));
 }
 
 static int ipa3_init_smem_region(int memory_region_size,
