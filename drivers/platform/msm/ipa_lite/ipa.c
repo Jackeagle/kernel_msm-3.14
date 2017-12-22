@@ -2439,20 +2439,9 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 
 	ipa_debug("AP CB probe: sub pdev=%p\n", dev);
 
-	ipa3_ctx->ctrl->msm_bus_data_ptr =
-			msm_bus_cl_get_pdata(ipa3_ctx->ipa3_pdev);
-	if (ipa3_ctx->ctrl->msm_bus_data_ptr)
-		ipa_debug("Use bus scaling info from device tree #usecases=%d\n",
-			ipa3_ctx->ctrl->msm_bus_data_ptr->num_usecases);
-
 	result = ipa_smmu_attach(dev, cb);
-	if (result) {
-		if (ipa3_ctx->ctrl->msm_bus_data_ptr) {
-			msm_bus_cl_clear_pdata(ipa3_ctx->ctrl->msm_bus_data_ptr);
-			ipa3_ctx->ctrl->msm_bus_data_ptr = NULL;
-		}
+	if (result)
 		return result;
-	}
 
 	add_map = of_get_property(dev->of_node,
 		"qcom,additional-mapping", &add_map_size);
@@ -2460,11 +2449,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		/* mapping size is an array of 3-tuple of u32 */
 		if (add_map_size % (3 * sizeof(u32))) {
 			ipa_err("wrong additional mapping format\n");
-			if (ipa3_ctx->ctrl->msm_bus_data_ptr) {
-				msm_bus_cl_clear_pdata(
-					ipa3_ctx->ctrl->msm_bus_data_ptr);
-				ipa3_ctx->ctrl->msm_bus_data_ptr = NULL;
-			}
 			ipa_smmu_detach(cb);
 			return -EFAULT;
 		}
@@ -2493,10 +2477,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	result = ipa3_pre_init();
 	if (result) {
 		ipa_err("ipa_init failed\n");
-		if (ipa3_ctx->ctrl->msm_bus_data_ptr) {
-			msm_bus_cl_clear_pdata(ipa3_ctx->ctrl->msm_bus_data_ptr);
-			ipa3_ctx->ctrl->msm_bus_data_ptr = NULL;
-		}
 		ipa_smmu_detach(cb);
 	}
 
@@ -2637,6 +2617,11 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_clear_ctrl;
 	}
 
+	ipa3_ctx->ctrl->msm_bus_data_ptr = msm_bus_cl_get_pdata(pdev_p);
+	if (ipa3_ctx->ctrl->msm_bus_data_ptr)
+		ipa_debug("Use bus scaling info from device tree #usecases=%d\n",
+			ipa3_ctx->ctrl->msm_bus_data_ptr->num_usecases);
+
 	ipa3_ctx->gsi_ctx = msm_gsi_init(pdev_p);
 	if (IS_ERR(ipa3_ctx->gsi_ctx)) {
 		ipa_err("ipa: error initializing gsi driver.\n");
@@ -2654,8 +2639,12 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 
 err_clear_gsi_ctx:
 	ipa3_ctx->gsi_ctx = NULL;
+	msm_bus_cl_clear_pdata(ipa3_ctx->ctrl->msm_bus_data_ptr);
 err_clear_ctrl:
-	/* Zeroing ctrl sub-structure resets its embedded mem partition */
+	/*
+	 * Zeroing ctrl sub-structure resets its embedded mem partition
+	 * and makes msm_bus_data_ptr NULL.
+	 */
 	memset(ipa3_ctx->ctrl, 0, sizeof(*ipa3_ctx->ctrl));
 	ipa3_ctx->ctrl = NULL;
 	ipa3_ctx->ipa_wrapper_size = 0;
