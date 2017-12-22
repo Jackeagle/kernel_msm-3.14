@@ -2072,11 +2072,7 @@ static int ipa3_pre_init(void)
 
 	ipa_debug("IPA Driver initialization started\n");
 
-	ipa3_ctx->ctrl = kzalloc(sizeof(*ipa3_ctx->ctrl), GFP_KERNEL);
-	if (!ipa3_ctx->ctrl) {
-		ipa_err("memory allocation error for ctrl\n");
-		return -ENOMEM;
-	}
+	ipa3_ctx->ctrl = &ipa3_ctx->ctrl_struct;
 	result = ipa3_controller_static_bind(ipa3_ctx->ctrl);
 	if (result) {
 		ipa_err("fail to static bind IPA ctrl.\n");
@@ -2294,7 +2290,7 @@ fail_bus_reg:
 	ipa3_ctx->ctrl->msm_bus_data_ptr = NULL;
 fail_init_mem_partition:
 fail_bind:
-	kfree(ipa3_ctx->ctrl);
+	ipa3_ctx->ctrl = NULL;
 
 	return result;
 }

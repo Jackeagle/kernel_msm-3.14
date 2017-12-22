@@ -1194,6 +1194,7 @@ struct ipa3_context {
 	void *logbuf_low;
 	u32 ipa_bus_hdl;
 	struct ipa3_controller *ctrl;
+	struct ipa3_controller ctrl_struct;
 	u32 curr_ipa_clk_rate;
 	bool q6_proxy_clk_vote_valid;
 	u32 ipa_num_pipes;
