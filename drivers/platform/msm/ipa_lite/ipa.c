@@ -1574,69 +1574,6 @@ void ipa3_dec_release_wakelock(void)
 	spin_unlock_irqrestore(&ipa3_ctx->wakelock_ref_cnt.spinlock, flags);
 }
 
-int ipa3_set_required_perf_profile(enum ipa_voltage_level floor_voltage,
-				  u32 bandwidth_mbps)
-{
-	enum ipa_voltage_level needed_voltage;
-	u32 clk_rate;
-
-	ipa_debug_low("floor_voltage=%d, bandwidth_mbps=%u",
-					floor_voltage, bandwidth_mbps);
-
-	if (floor_voltage < IPA_VOLTAGE_UNSPECIFIED ||
-		floor_voltage >= IPA_VOLTAGE_MAX) {
-		ipa_err("bad voltage\n");
-		return -EINVAL;
-	}
-
-	ipa_debug_low("Clock scaling is enabled\n");
-	if (bandwidth_mbps >= ipa3_ctx->ctrl->clock_scaling_bw_threshold_turbo)
-		needed_voltage = IPA_VOLTAGE_TURBO;
-	else if (bandwidth_mbps >=
-		ipa3_ctx->ctrl->clock_scaling_bw_threshold_nominal)
-		needed_voltage = IPA_VOLTAGE_NOMINAL;
-	else
-		needed_voltage = IPA_VOLTAGE_SVS;
-
-	needed_voltage = max(needed_voltage, floor_voltage);
-	switch (needed_voltage) {
-	case IPA_VOLTAGE_SVS:
-		clk_rate = ipa3_ctx->ctrl->ipa_clk_rate_svs;
-		break;
-	case IPA_VOLTAGE_NOMINAL:
-		clk_rate = ipa3_ctx->ctrl->ipa_clk_rate_nominal;
-		break;
-	case IPA_VOLTAGE_TURBO:
-		clk_rate = ipa3_ctx->ctrl->ipa_clk_rate_turbo;
-		break;
-	default:
-		ipa_err("bad voltage\n");
-		WARN_ON(1);
-		return -EFAULT;
-	}
-
-	if (clk_rate == ipa3_ctx->curr_ipa_clk_rate) {
-		ipa_debug_low("Same voltage\n");
-		return 0;
-	}
-
-	/* Hold the mutex to avoid race conditions with ipa3_enable_clocks() */
-	mutex_lock(&ipa3_ctx->ipa3_active_clients.mutex);
-	ipa3_ctx->curr_ipa_clk_rate = clk_rate;
-	ipa_debug_low("setting clock rate to %u\n", ipa3_ctx->curr_ipa_clk_rate);
-	if (atomic_read(&ipa3_ctx->ipa3_active_clients.cnt) > 0) {
-		if (msm_bus_scale_client_update_request(ipa3_ctx->ipa_bus_hdl,
-				ipa3_get_bus_vote()))
-			WARN_ON(1);
-	} else {
-		ipa_debug_low("clocks are gated, not setting rate\n");
-	}
-	mutex_unlock(&ipa3_ctx->ipa3_active_clients.mutex);
-	ipa_debug_low("Done\n");
-
-	return 0;
-}
-
 /**
 * ipa3_suspend_handler() - Handles the suspend interrupt:
 * wakes up the suspended peripheral by requesting its consumer

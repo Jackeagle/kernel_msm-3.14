@@ -1413,9 +1413,6 @@ int ipa3_id_alloc(void *ptr);
 void *ipa3_id_find(u32 id);
 void ipa3_id_remove(u32 id);
 
-int ipa3_set_required_perf_profile(enum ipa_voltage_level floor_voltage,
-				  u32 bandwidth_mbps);
-
 int ipa3_cfg_ep_status(u32 clnt_hdl,
 		const struct ipahal_reg_ep_cfg_status *ipa_ep_cfg);
 
