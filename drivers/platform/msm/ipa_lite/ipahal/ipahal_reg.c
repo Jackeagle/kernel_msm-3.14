@@ -1590,6 +1590,8 @@ static struct ipahal_reg_obj ipahal_reg_objs[IPA_HW_MAX][IPA_REG_MAX] = {
 		0x00000758, 0x4 },
 };
 
+static struct ipahal_reg_obj ipahal_regs[IPA_REG_MAX];
+
 static void ipahal_reg_validate(const struct ipahal_reg_obj *reg_obj, int reg)
 {
 	if (!reg_obj->offset) {
@@ -1623,6 +1625,20 @@ int ipahal_reg_init(void)
 
 	ipa_debug_low("Entry - HW_TYPE=%d\n", ipahal_ctx->hw_type);
 
+	/* Build up a the register descriptions we'll use */
+	for (i = 0; i < IPA_REG_MAX ; i++) {
+		for (j = ipahal_ctx->hw_type; j >= IPA_HW_v3_0; j--) {
+			const struct ipahal_reg_obj *reg;
+
+			reg = &ipahal_reg_objs[j][i];
+			if (memcmp(reg, &zero_obj, sizeof(*reg))) {
+				ipahal_reg_validate(reg, i);
+				ipahal_regs[i] = *reg;
+				break;
+			}
+		}
+	}
+
 	for (i = IPA_HW_v3_0 ; i < ipahal_ctx->hw_type ; i++) {
 		for (j = 0; j < IPA_REG_MAX ; j++) {
 			if (!memcmp(&ipahal_reg_objs[i+1][j], &zero_obj,
@@ -1638,6 +1654,11 @@ int ipahal_reg_init(void)
 				ipahal_reg_validate(&ipahal_reg_objs[i+1][j], j);
 			}
 		}
+	}
+
+	if (memcmp(&ipahal_regs, &ipahal_reg_objs[ipahal_ctx->hw_type],
+				sizeof(ipahal_regs))) {
+		ipa_err("ipahal_regs[] DOES NOT MATCH ipahal_reg_objs[]\n");
 	}
 
 	return 0;
