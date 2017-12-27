@@ -1590,6 +1590,24 @@ static struct ipahal_reg_obj ipahal_reg_objs[IPA_HW_MAX][IPA_REG_MAX] = {
 		0x00000758, 0x4 },
 };
 
+static void ipahal_reg_validate(const struct ipahal_reg_obj *reg_obj, int reg)
+{
+	if (!reg_obj->offset) {
+		ipa_err("reg=%s with zero offset\n", ipahal_reg_name_str(reg));
+		WARN_ON(1);
+	}
+	if (!reg_obj->construct) {
+		ipa_err("reg=%s with NULL construct func\n",
+				ipahal_reg_name_str(reg));
+		WARN_ON(1);
+	}
+	if (!reg_obj->parse) {
+		ipa_err("reg=%s with NULL parse func\n",
+				ipahal_reg_name_str(reg));
+		WARN_ON(1);
+	}
+}
+
 /*
  * ipahal_reg_init() - Build the registers information table
  *  See ipahal_reg_objs[][] comments
@@ -1617,24 +1635,7 @@ int ipahal_reg_init(enum ipa_hw_type ipa_hw_type)
 				 * explicitly overridden register.
 				 * Check validity
 				 */
-				if (!ipahal_reg_objs[i+1][j].offset) {
-					ipa_err(
-					  "reg=%s with zero offset ipa_ver=%d\n",
-					  ipahal_reg_name_str(j), i+1);
-					WARN_ON(1);
-				}
-				if (!ipahal_reg_objs[i+1][j].construct) {
-					ipa_err(
-					  "reg=%s with NULL construct func ipa_ver=%d\n",
-					  ipahal_reg_name_str(j), i+1);
-					WARN_ON(1);
-				}
-				if (!ipahal_reg_objs[i+1][j].parse) {
-					ipa_err(
-					  "reg=%s with NULL parse func ipa_ver=%d\n",
-					  ipahal_reg_name_str(j), i+1);
-					WARN_ON(1);
-				}
+				ipahal_reg_validate(&ipahal_reg_objs[i+1][j], j);
 			}
 		}
 	}
