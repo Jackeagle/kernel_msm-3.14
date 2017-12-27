@@ -1226,35 +1226,30 @@ int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base,
 	ipa_debug("Entry - IPA HW TYPE=%d base=%p ipa_pdev=%p\n",
 		ipa_hw_type, base, ipa_pdev);
 
-	ipahal_ctx = kzalloc(sizeof(*ipahal_ctx), GFP_KERNEL);
-	if (!ipahal_ctx) {
-		ipa_err("kzalloc err for ipahal_ctx\n");
-		result = -ENOMEM;
-		goto bail_err_exit;
-	}
-
 	if (ipa_hw_type < IPA_HW_v3_5_1) {
 		ipa_err("ipahal supported on IPAv3 and later only\n");
-		result = -EINVAL;
-		goto bail_free_ctx;
+		return -EINVAL;
 	}
 
 	if (ipa_hw_type >= IPA_HW_MAX) {
 		ipa_err("invalid IPA HW type (%d)\n", ipa_hw_type);
-		result = -EINVAL;
-		goto bail_free_ctx;
+		return -EINVAL;
 	}
 
 	if (!base) {
 		ipa_err("invalid memory io mapping addr\n");
-		result = -EINVAL;
-		goto bail_free_ctx;
+		return -EINVAL;
 	}
 
 	if (!ipa_pdev) {
 		ipa_err("invalid IPA platform device\n");
-		result = -EINVAL;
-		goto bail_free_ctx;
+		return -EINVAL;
+	}
+
+	ipahal_ctx = kzalloc(sizeof(*ipahal_ctx), GFP_KERNEL);
+	if (!ipahal_ctx) {
+		ipa_err("kzalloc err for ipahal_ctx\n");
+		return -ENOMEM;
 	}
 
 	ipahal_ctx->hw_type = ipa_hw_type;
@@ -1293,7 +1288,7 @@ int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base,
 bail_free_ctx:
 	kfree(ipahal_ctx);
 	ipahal_ctx = NULL;
-bail_err_exit:
+
 	return result;
 }
 
