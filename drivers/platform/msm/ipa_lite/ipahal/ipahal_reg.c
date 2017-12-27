@@ -1601,11 +1601,10 @@ int ipahal_reg_init(enum ipa_hw_type ipa_hw_type)
 {
 	int i;
 	int j;
-	struct ipahal_reg_obj zero_obj;
+	static const struct ipahal_reg_obj zero_obj;
 
 	ipa_debug_low("Entry - HW_TYPE=%d\n", ipa_hw_type);
 
-	memset(&zero_obj, 0, sizeof(zero_obj));
 	for (i = IPA_HW_v3_0 ; i < ipa_hw_type ; i++) {
 		for (j = 0; j < IPA_REG_MAX ; j++) {
 			if (!memcmp(&ipahal_reg_objs[i+1][j], &zero_obj,
