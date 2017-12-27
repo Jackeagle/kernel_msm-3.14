@@ -1231,16 +1231,6 @@ int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base,
 		return -EINVAL;
 	}
 
-	if (!base) {
-		ipa_err("invalid memory io mapping addr\n");
-		return -EINVAL;
-	}
-
-	if (!ipa_pdev) {
-		ipa_err("invalid IPA platform device\n");
-		return -EINVAL;
-	}
-
 	ipahal_ctx = kzalloc(sizeof(*ipahal_ctx), GFP_KERNEL);
 	if (!ipahal_ctx) {
 		ipa_err("kzalloc err for ipahal_ctx\n");
