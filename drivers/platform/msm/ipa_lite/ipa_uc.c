@@ -260,7 +260,7 @@ bad_uc_top_ofst:
  *               and there was no recent failure in one of the commands.
  *               A negative value is returned otherwise.
  */
-int ipa3_uc_state_check(void)
+static int ipa3_uc_state_check(void)
 {
 	if (!ipa3_ctx->uc_ctx.uc_inited) {
 		ipa_err("uC interface not initialized\n");
