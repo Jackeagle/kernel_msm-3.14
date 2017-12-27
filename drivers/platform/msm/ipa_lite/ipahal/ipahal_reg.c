@@ -1212,7 +1212,7 @@ struct ipahal_reg_obj {
  * If offset is OFFSET_INVAL, this means that the register is removed on
  *  the specific version.
  */
-static const struct ipahal_reg_obj ipahal_reg_objs[IPA_HW_MAX][IPA_REG_MAX] = {
+static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 	/* IPAv3 */
 	[IPA_HW_v3_0] = {
 		[IPA_ROUTE] = {
