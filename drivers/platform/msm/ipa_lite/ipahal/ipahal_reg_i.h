@@ -13,7 +13,7 @@
 #ifndef _IPAHAL_REG_I_H_
 #define _IPAHAL_REG_I_H_
 
-int ipahal_reg_init(enum ipa_hw_type ipa_hw_type);
+int ipahal_reg_init(void);
 
 #define IPA_SETFIELD(val, shift, mask) (((val) << (shift)) & (mask))
 #define IPA_SETFIELD_IN_REG(reg, val, shift, mask) \

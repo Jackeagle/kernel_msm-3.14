@@ -1615,15 +1615,15 @@ static void ipahal_reg_validate(const struct ipahal_reg_obj *reg_obj, int reg)
  * Note: As global variables are initialized with zero, any un-overridden
  *  register entry will be zero. By this we recognize them.
  */
-int ipahal_reg_init(enum ipa_hw_type ipa_hw_type)
+int ipahal_reg_init(void)
 {
 	int i;
 	int j;
 	static const struct ipahal_reg_obj zero_obj;
 
-	ipa_debug_low("Entry - HW_TYPE=%d\n", ipa_hw_type);
+	ipa_debug_low("Entry - HW_TYPE=%d\n", ipahal_ctx->hw_type);
 
-	for (i = IPA_HW_v3_0 ; i < ipa_hw_type ; i++) {
+	for (i = IPA_HW_v3_0 ; i < ipahal_ctx->hw_type ; i++) {
 		for (j = 0; j < IPA_REG_MAX ; j++) {
 			if (!memcmp(&ipahal_reg_objs[i+1][j], &zero_obj,
 				sizeof(struct ipahal_reg_obj))) {
