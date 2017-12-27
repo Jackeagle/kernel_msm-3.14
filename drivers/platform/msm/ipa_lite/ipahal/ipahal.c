@@ -1226,13 +1226,8 @@ int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base,
 	ipa_debug("Entry - IPA HW TYPE=%d base=%p ipa_pdev=%p\n",
 		ipa_hw_type, base, ipa_pdev);
 
-	if (ipa_hw_type < IPA_HW_v3_5_1) {
-		ipa_err("ipahal supported on IPAv3 and later only\n");
-		return -EINVAL;
-	}
-
-	if (ipa_hw_type >= IPA_HW_MAX) {
-		ipa_err("invalid IPA HW type (%d)\n", ipa_hw_type);
+	if (ipa_hw_type != IPA_HW_v3_5_1) {
+		ipa_err("ipahal supported on IPAv3.5.1 only\n");
 		return -EINVAL;
 	}
 
