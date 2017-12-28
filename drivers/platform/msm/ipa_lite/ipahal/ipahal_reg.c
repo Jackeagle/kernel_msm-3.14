@@ -1227,7 +1227,7 @@ struct ipahal_reg_obj {
  * If offset is -1, this means that the register is removed on the
  *  specific version.
  */
-static struct ipahal_reg_obj ipahal_reg_objs[IPA_HW_MAX][IPA_REG_MAX] = {
+static const struct ipahal_reg_obj ipahal_reg_objs[IPA_HW_MAX][IPA_REG_MAX] = {
 	/* IPAv3 */
 	[IPA_HW_v3_0][IPA_ROUTE] = {
 		ipareg_construct_route, ipareg_parse_dummy,
@@ -1637,28 +1637,6 @@ int ipahal_reg_init(void)
 				break;
 			}
 		}
-	}
-
-	for (i = IPA_HW_v3_0 ; i < ipahal_ctx->hw_type ; i++) {
-		for (j = 0; j < IPA_REG_MAX ; j++) {
-			if (!memcmp(&ipahal_reg_objs[i+1][j], &zero_obj,
-				sizeof(struct ipahal_reg_obj))) {
-				memcpy(&ipahal_reg_objs[i+1][j],
-					&ipahal_reg_objs[i][j],
-					sizeof(struct ipahal_reg_obj));
-			} else {
-				/*
-				 * explicitly overridden register.
-				 * Check validity
-				 */
-				ipahal_reg_validate(&ipahal_reg_objs[i+1][j], j);
-			}
-		}
-	}
-
-	if (memcmp(&ipahal_regs, &ipahal_reg_objs[ipahal_ctx->hw_type],
-				sizeof(ipahal_regs))) {
-		ipa_err("ipahal_regs[] DOES NOT MATCH ipahal_reg_objs[]\n");
 	}
 
 	return 0;
