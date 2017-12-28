@@ -1679,7 +1679,7 @@ int ipahal_reg_init(void)
 /*
  * Get the offset of a n parameterized register
  */
-u32 ipahal_get_reg_n_ofst(enum ipahal_reg_name reg, u32 n)
+u32 ipahal_reg_n_offset(enum ipahal_reg_name reg, u32 n)
 {
 	u32 offset;
 
@@ -1713,7 +1713,7 @@ u32 ipahal_get_reg_n_ofst(enum ipahal_reg_name reg, u32 n)
  */
 u32 ipahal_read_reg_n(enum ipahal_reg_name reg, u32 n)
 {
-	u32 offset = ipahal_get_reg_n_ofst(reg, n);
+	u32 offset = ipahal_reg_n_offset(reg, n);
 
 	if (!offset)
 		return 0;
@@ -1726,7 +1726,7 @@ u32 ipahal_read_reg_n(enum ipahal_reg_name reg, u32 n)
  */
 void ipahal_write_reg_n(enum ipahal_reg_name reg, u32 n, u32 val)
 {
-	u32 offset = ipahal_get_reg_n_ofst(reg, n);
+	u32 offset = ipahal_reg_n_offset(reg, n);
 
 	if (!offset)
 		return;
@@ -1748,7 +1748,7 @@ u32 ipahal_read_reg_n_fields(enum ipahal_reg_name reg, u32 n, void *fields)
 		return 0;
 	}
 
-	offset = ipahal_get_reg_n_ofst(reg, n);
+	offset = ipahal_reg_n_offset(reg, n);
 	if (!offset)
 		return 0;
 
@@ -1776,7 +1776,7 @@ void ipahal_write_reg_n_fields(enum ipahal_reg_name reg, u32 n,
 		return;
 	}
 
-	offset = ipahal_get_reg_n_ofst(reg, n);
+	offset = ipahal_reg_n_offset(reg, n);
 	if (!offset)
 		return;
 

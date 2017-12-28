@@ -2209,7 +2209,7 @@ static int ipa3_tag_generate_force_close_desc(struct ipa3_desc desc[],
 		reg_write_agg_close.pipeline_clear_options =
 			IPAHAL_FULL_PIPELINE_CLEAR;
 		reg_write_agg_close.offset =
-			ipahal_get_reg_ofst(IPA_AGGR_FORCE_CLOSE);
+			ipahal_reg_offset(IPA_AGGR_FORCE_CLOSE);
 		ipahal_get_aggr_force_close_valmask(i, &valmask);
 		reg_write_agg_close.value = valmask.val;
 		reg_write_agg_close.value_mask = valmask.mask;
@@ -2818,7 +2818,7 @@ int ipa3_load_fws(const struct firmware *firmware, phys_addr_t gsi_mem_base)
 	ipa_reg_mem_base = ipa3_ctx->ipa_wrapper_base + ipahal_get_reg_base();
 
 	/* Load IPA DPS FW image */
-	ipa_reg_ofst = ipahal_get_reg_ofst(IPA_DPS_SEQUENCER_FIRST);
+	ipa_reg_ofst = ipahal_reg_offset(IPA_DPS_SEQUENCER_FIRST);
 	if (phdr->p_vaddr != (ipa_reg_mem_base + ipa_reg_ofst)) {
 		ipa_err(
 			"Invalid IPA DPS img load addr vaddr=0x%x ipa_reg_mem_base=%pa ipa_reg_ofst=%u\n"
@@ -2837,7 +2837,7 @@ int ipa3_load_fws(const struct firmware *firmware, phys_addr_t gsi_mem_base)
 	phdr++;
 
 	/* Load IPA HPS FW image */
-	ipa_reg_ofst = ipahal_get_reg_ofst(IPA_HPS_SEQUENCER_FIRST);
+	ipa_reg_ofst = ipahal_reg_offset(IPA_HPS_SEQUENCER_FIRST);
 	if (phdr->p_vaddr != (ipa_reg_mem_base + ipa_reg_ofst)) {
 		ipa_err(
 			"Invalid IPA HPS img load addr vaddr=0x%x ipa_reg_mem_base=%pa ipa_reg_ofst=%u\n"

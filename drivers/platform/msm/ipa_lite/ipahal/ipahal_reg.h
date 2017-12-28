@@ -424,14 +424,14 @@ struct ipahal_ep_cfg_ctrl_scnd {
 /*
  * Get the offset of a n parameterized register
  */
-u32 ipahal_get_reg_n_ofst(enum ipahal_reg_name reg, u32 n);
+u32 ipahal_reg_n_offset(enum ipahal_reg_name reg, u32 n);
 
 /*
  * Get the offset of a register
  */
-static inline u32 ipahal_get_reg_ofst(enum ipahal_reg_name reg)
+static inline u32 ipahal_reg_offset(enum ipahal_reg_name reg)
 {
-	return ipahal_get_reg_n_ofst(reg, 0);
+	return ipahal_reg_n_offset(reg, 0);
 }
 
 /*

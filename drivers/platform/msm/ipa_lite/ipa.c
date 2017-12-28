@@ -487,8 +487,7 @@ static int ipa3_q6_set_ex_path_to_apps(void)
 			reg_write.pipeline_clear_options =
 				IPAHAL_HPS_CLEAR;
 			reg_write.offset =
-				ipahal_get_reg_n_ofst(IPA_ENDP_STATUS_n,
-					ep_idx);
+				ipahal_reg_n_offset(IPA_ENDP_STATUS_n, ep_idx);
 			ipahal_get_status_ep_valmask(
 				ipa3_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS),
 				&valmask);
@@ -518,8 +517,7 @@ static int ipa3_q6_set_ex_path_to_apps(void)
 			reg_write.pipeline_clear_options =
 				IPAHAL_HPS_CLEAR;
 			reg_write.offset =
-				ipahal_get_reg_n_ofst(IPA_ENDP_STATUS_n,
-					ep_idx);
+				ipahal_reg_n_offset(IPA_ENDP_STATUS_n, ep_idx);
 			reg_write.value = 0;
 			reg_write.value_mask = ~0;
 			cmd_pyld = ipahal_construct_imm_cmd(
@@ -654,7 +652,7 @@ int _ipa_init_sram_v3(void)
 
 	phys_addr = ipa3_ctx->ipa_wrapper_base +
 		ipa3_ctx->ctrl->ipa_reg_base_ofst +
-		ipahal_get_reg_n_ofst(IPA_SRAM_DIRECT_ACCESS_n,
+		ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_n,
 			ipa3_ctx->smem_restricted_bytes / 4);
 
 	ipa_sram_mmio = ioremap(phys_addr, ipa3_ctx->smem_sz);
@@ -2920,7 +2918,7 @@ static int ipa3_q6_clean_q6_tables(void)
         ipahal_get_fltrt_hash_flush_valmask(&flush, &valmask);
         reg_write_cmd.skip_pipeline_clear = false;
         reg_write_cmd.pipeline_clear_options = IPAHAL_HPS_CLEAR;
-        reg_write_cmd.offset = ipahal_get_reg_ofst(IPA_FILT_ROUT_HASH_FLUSH);
+        reg_write_cmd.offset = ipahal_reg_offset(IPA_FILT_ROUT_HASH_FLUSH);
         reg_write_cmd.value = valmask.val;
         reg_write_cmd.value_mask = valmask.mask;
         cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE,
