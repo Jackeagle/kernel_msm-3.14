@@ -1345,24 +1345,6 @@ int ipa3_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 }
 
 /**
- * ipa3_cfg_ep_holb_by_client() - IPA end-point holb configuration
- *
- * Wrapper function for ipa3_cfg_ep_holb() with client name instead of
- * client handle. This function is used for clients that does not have
- * client handle.
- *
- * @client:	[in] client name
- * @ipa_ep_cfg:	[in] IPA end-point configuration params
- *
- * Returns:	0 on success, negative on failure
- */
-int ipa3_cfg_ep_holb_by_client(enum ipa_client_type client,
-				const struct ipa_ep_cfg_holb *ep_holb)
-{
-	return ipa3_cfg_ep_holb(ipa3_get_ep_mapping(client), ep_holb);
-}
-
-/**
  * ipa3_cfg_ep_deaggr() -  IPA end-point deaggregation configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ep_deaggr:	[in] IPA end-point configuration params
