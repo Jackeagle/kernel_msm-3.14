@@ -427,18 +427,9 @@ struct ipahal_ep_cfg_ctrl_scnd {
 u32 ipahal_read_reg_n(enum ipahal_reg_name reg, u32 n);
 
 /*
- * ipahal_write_reg_mn() - Write to m/n parameterized reg a raw value
- */
-void ipahal_write_reg_mn(enum ipahal_reg_name reg, u32 m, u32 n, u32 val);
-
-/*
  * ipahal_write_reg_n() - Write to n parameterized reg a raw value
  */
-static inline void ipahal_write_reg_n(enum ipahal_reg_name reg,
-	u32 n, u32 val)
-{
-	ipahal_write_reg_mn(reg, 0, n, val);
-}
+void ipahal_write_reg_n(enum ipahal_reg_name reg, u32 n, u32 val);
 
 /*
  * ipahal_read_reg_n_fields() - Get the parsed value of n parameterized reg
@@ -446,7 +437,7 @@ static inline void ipahal_write_reg_n(enum ipahal_reg_name reg,
 u32 ipahal_read_reg_n_fields(enum ipahal_reg_name reg, u32 n, void *fields);
 
 /*
- * ipahal_write_reg_n_fields() - Write to n parameterized reg a prased value
+ * ipahal_write_reg_n_fields() - Write to n parameterized reg a parsed value
  */
 void ipahal_write_reg_n_fields(enum ipahal_reg_name reg, u32 n,
 	const void *fields);
@@ -462,10 +453,9 @@ static inline u32 ipahal_read_reg(enum ipahal_reg_name reg)
 /*
  * ipahal_write_reg() - Write to reg a raw value
  */
-static inline void ipahal_write_reg(enum ipahal_reg_name reg,
-	u32 val)
+static inline void ipahal_write_reg(enum ipahal_reg_name reg, u32 val)
 {
-	ipahal_write_reg_mn(reg, 0, 0, val);
+	ipahal_write_reg_n(reg, 0, val);
 }
 
 /*
