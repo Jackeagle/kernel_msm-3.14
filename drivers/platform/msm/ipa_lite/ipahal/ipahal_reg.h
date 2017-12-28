@@ -427,11 +427,6 @@ struct ipahal_ep_cfg_ctrl_scnd {
 u32 ipahal_read_reg_n(enum ipahal_reg_name reg, u32 n);
 
 /*
- * ipahal_read_reg_mn() - Get mn parameterized reg value
- */
-u32 ipahal_read_reg_mn(enum ipahal_reg_name reg, u32 m, u32 n);
-
-/*
  * ipahal_write_reg_mn() - Write to m/n parameterized reg a raw value
  */
 void ipahal_write_reg_mn(enum ipahal_reg_name reg, u32 m, u32 n, u32 val);
