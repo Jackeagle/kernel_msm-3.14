@@ -772,6 +772,44 @@ int ipa3_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 }
 
 /**
+ * ipa3_cfg_ep_metadata_mask() - IPA end-point meta-data mask configuration
+ * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
+ * @ipa_ep_cfg:	[in] IPA end-point configuration params
+ *
+ * Returns:	0 on success, negative on failure
+ *
+ * Note:	Should not be called from atomic context
+ */
+int ipa3_cfg_ep_metadata_mask(u32 clnt_hdl,
+		const struct ipa_ep_cfg_metadata_mask
+		*metadata_mask)
+{
+	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
+	    ipa3_ctx->ep[clnt_hdl].valid == 0 || metadata_mask == NULL) {
+		ipa_err("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+					clnt_hdl,
+					ipa3_ctx->ep[clnt_hdl].valid);
+		return -EINVAL;
+	}
+
+	ipa_debug("pipe=%d, metadata_mask=0x%x\n",
+			clnt_hdl,
+			metadata_mask->metadata_mask);
+
+	/* copy over EP cfg */
+	ipa3_ctx->ep[clnt_hdl].cfg.metadata_mask = *metadata_mask;
+
+	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_n,
+		clnt_hdl, metadata_mask);
+
+	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+
+	return 0;
+}
+
+/**
  * ipa3_cfg_ep - IPA end-point configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ipa_ep_cfg:	[in] IPA end-point configuration params
@@ -908,44 +946,6 @@ int ipa3_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CFG_n, clnt_hdl,
 				  &ipa3_ctx->ep[clnt_hdl].cfg.cfg);
-
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
-
-	return 0;
-}
-
-/**
- * ipa3_cfg_ep_metadata_mask() - IPA end-point meta-data mask configuration
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg:	[in] IPA end-point configuration params
- *
- * Returns:	0 on success, negative on failure
- *
- * Note:	Should not be called from atomic context
- */
-int ipa3_cfg_ep_metadata_mask(u32 clnt_hdl,
-		const struct ipa_ep_cfg_metadata_mask
-		*metadata_mask)
-{
-	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
-	    ipa3_ctx->ep[clnt_hdl].valid == 0 || metadata_mask == NULL) {
-		ipa_err("bad parm, clnt_hdl = %d , ep_valid = %d\n",
-					clnt_hdl,
-					ipa3_ctx->ep[clnt_hdl].valid);
-		return -EINVAL;
-	}
-
-	ipa_debug("pipe=%d, metadata_mask=0x%x\n",
-			clnt_hdl,
-			metadata_mask->metadata_mask);
-
-	/* copy over EP cfg */
-	ipa3_ctx->ep[clnt_hdl].cfg.metadata_mask = *metadata_mask;
-
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
-
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_n,
-		clnt_hdl, metadata_mask);
 
 	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
 
