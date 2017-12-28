@@ -1686,7 +1686,7 @@ u32 ipahal_read_reg_n(enum ipahal_reg_name reg, u32 n)
 	if (reg >= IPA_REG_MAX) {
 		ipa_err("Invalid register reg=%u\n", reg);
 		WARN_ON(1);
-		return -EFAULT;
+		return 0;
 	}
 
 	ipa_debug_low("read from %s n=%u\n",
@@ -1703,7 +1703,7 @@ u32 ipahal_read_reg_n(enum ipahal_reg_name reg, u32 n)
 		ipa_err("Read access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON(1);
-		return -EFAULT;
+		return 0;
 	}
 	offset += ipahal_regs[reg].n_ofst * n;
 	return ioread32(ipahal_ctx->base + offset);
@@ -1751,13 +1751,13 @@ u32 ipahal_read_reg_n_fields(enum ipahal_reg_name reg, u32 n, void *fields)
 	if (!fields) {
 		ipa_err("Input error fields=%p\n", fields);
 		WARN_ON(1);
-		return -EFAULT;
+		return 0;
 	}
 
 	if (reg >= IPA_REG_MAX) {
 		ipa_err("Invalid register reg=%u\n", reg);
 		WARN_ON(1);
-		return -EFAULT;
+		return 0;
 	}
 
 	ipa_debug_low("read from %s n=%u and parse it\n",
@@ -1767,13 +1767,13 @@ u32 ipahal_read_reg_n_fields(enum ipahal_reg_name reg, u32 n, void *fields)
 		ipa_err("Read access to undefined reg=%s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON_ONCE(1);
-		return -EFAULT;
+		return 0;
 	}
 	if (offset == OFFSET_INVAL) {
 		ipa_err("Read access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON(1);
-		return -EFAULT;
+		return 0;
 	}
 	offset += ipahal_regs[reg].n_ofst * n;
 	val = ioread32(ipahal_ctx->base + offset);
@@ -1839,7 +1839,7 @@ u32 ipahal_get_reg_n_ofst(enum ipahal_reg_name reg, u32 n)
 	if (reg >= IPA_REG_MAX) {
 		ipa_err("Invalid register reg=%u\n", reg);
 		WARN_ON(1);
-		return -EFAULT;
+		return 0;
 	}
 
 	ipa_debug_low("get offset of %s n=%u\n", ipahal_reg_name_str(reg), n);
@@ -1848,13 +1848,13 @@ u32 ipahal_get_reg_n_ofst(enum ipahal_reg_name reg, u32 n)
 		ipa_err("Access to undefined reg=%s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON(1);
-		return -EFAULT;
+		return 0;
 	}
 	if (offset == OFFSET_INVAL) {
 		ipa_err("Access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON(1);
-		return -EFAULT;
+		return 0;
 	}
 	offset += ipahal_regs[reg].n_ofst * n;
 
