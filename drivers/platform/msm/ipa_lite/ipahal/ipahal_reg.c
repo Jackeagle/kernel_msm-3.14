@@ -1830,9 +1830,9 @@ void ipahal_write_reg_n_fields(enum ipahal_reg_name reg, u32 n,
 }
 
 /*
- * Get the offset of a m/n parameterized register
+ * Get the offset of a n parameterized register
  */
-u32 ipahal_get_reg_mn_ofst(enum ipahal_reg_name reg, u32 m, u32 n)
+u32 ipahal_get_reg_n_ofst(enum ipahal_reg_name reg, u32 n)
 {
 	u32 offset;
 
@@ -1842,8 +1842,7 @@ u32 ipahal_get_reg_mn_ofst(enum ipahal_reg_name reg, u32 m, u32 n)
 		return -EFAULT;
 	}
 
-	ipa_debug_low("get offset of %s m=%u n=%u\n",
-		ipahal_reg_name_str(reg), m, n);
+	ipa_debug_low("get offset of %s n=%u\n", ipahal_reg_name_str(reg), n);
 	offset = ipahal_regs[reg].offset;
 	if (!offset) {
 		ipa_err("Access to undefined reg=%s\n",
@@ -1857,13 +1856,6 @@ u32 ipahal_get_reg_mn_ofst(enum ipahal_reg_name reg, u32 m, u32 n)
 		WARN_ON(1);
 		return -EFAULT;
 	}
-	/*
-	 * Currently there is one register with m and n parameters
-	 *	IPA_UC_MAILBOX_m_n. The m value of it is 0x80.
-	 * If more such registers will be added in the future,
-	 *	we can move the m parameter to the table above.
-	 */
-	offset +=  0x80 * m;
 	offset += ipahal_regs[reg].n_ofst * n;
 
 	return offset;

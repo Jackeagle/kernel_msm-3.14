@@ -476,24 +476,16 @@ static inline void ipahal_write_reg_fields(enum ipahal_reg_name reg,
 }
 
 /*
- * Get the offset of a m/n parameterized register
- */
-u32 ipahal_get_reg_mn_ofst(enum ipahal_reg_name reg, u32 m, u32 n);
-
-/*
  * Get the offset of a n parameterized register
  */
-static inline u32 ipahal_get_reg_n_ofst(enum ipahal_reg_name reg, u32 n)
-{
-	return ipahal_get_reg_mn_ofst(reg, 0, n);
-}
+u32 ipahal_get_reg_n_ofst(enum ipahal_reg_name reg, u32 n);
 
 /*
  * Get the offset of a register
  */
 static inline u32 ipahal_get_reg_ofst(enum ipahal_reg_name reg)
 {
-	return ipahal_get_reg_mn_ofst(reg, 0, 0);
+	return ipahal_get_reg_n_ofst(reg, 0);
 }
 
 /*
