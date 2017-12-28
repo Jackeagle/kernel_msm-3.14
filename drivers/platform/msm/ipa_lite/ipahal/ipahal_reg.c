@@ -1694,14 +1694,14 @@ u32 ipahal_read_reg_n(enum ipahal_reg_name reg, u32 n)
 	ipa_debug_low("read from %s n=%u\n",
 		ipahal_reg_name_str(reg), n);
 
-	offset = ipahal_reg_objs[ipahal_ctx->hw_type][reg].offset;
+	offset = ipahal_regs[reg].offset;
 	if (offset == -1) {
 		ipa_err("Read access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON(1);
 		return -EFAULT;
 	}
-	offset += ipahal_reg_objs[ipahal_ctx->hw_type][reg].n_ofst * n;
+	offset += ipahal_regs[reg].n_ofst * n;
 	return ioread32(ipahal_ctx->base + offset);
 }
 
@@ -1719,7 +1719,7 @@ u32 ipahal_read_reg_mn(enum ipahal_reg_name reg, u32 m, u32 n)
 
 	ipa_debug_low("read %s m=%u n=%u\n",
 		ipahal_reg_name_str(reg), m, n);
-	offset = ipahal_reg_objs[ipahal_ctx->hw_type][reg].offset;
+	offset = ipahal_regs[reg].offset;
 	if (offset == -1) {
 		ipa_err("Read access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
@@ -1733,7 +1733,7 @@ u32 ipahal_read_reg_mn(enum ipahal_reg_name reg, u32 m, u32 n)
 	 *	we can move the m parameter to the table above.
 	 */
 	offset += 0x80 * m;
-	offset += ipahal_reg_objs[ipahal_ctx->hw_type][reg].n_ofst * n;
+	offset += ipahal_regs[reg].n_ofst * n;
 	return ioread32(ipahal_ctx->base + offset);
 }
 
@@ -1751,7 +1751,7 @@ void ipahal_write_reg_mn(enum ipahal_reg_name reg, u32 m, u32 n, u32 val)
 
 	ipa_debug_low("write to %s m=%u n=%u val=%u\n",
 		ipahal_reg_name_str(reg), m, n, val);
-	offset = ipahal_reg_objs[ipahal_ctx->hw_type][reg].offset;
+	offset = ipahal_regs[reg].offset;
 	if (offset == -1) {
 		ipa_err("Write access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
@@ -1765,7 +1765,7 @@ void ipahal_write_reg_mn(enum ipahal_reg_name reg, u32 m, u32 n, u32 val)
 	 *	we can move the m parameter to the table above.
 	 */
 	offset +=  0x80 * m;
-	offset += ipahal_reg_objs[ipahal_ctx->hw_type][reg].n_ofst * n;
+	offset += ipahal_regs[reg].n_ofst * n;
 	iowrite32(val, ipahal_ctx->base + offset);
 }
 
@@ -1791,16 +1791,16 @@ u32 ipahal_read_reg_n_fields(enum ipahal_reg_name reg, u32 n, void *fields)
 
 	ipa_debug_low("read from %s n=%u and parse it\n",
 		ipahal_reg_name_str(reg), n);
-	offset = ipahal_reg_objs[ipahal_ctx->hw_type][reg].offset;
+	offset = ipahal_regs[reg].offset;
 	if (offset == -1) {
 		ipa_err("Read access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON(1);
 		return -EFAULT;
 	}
-	offset += ipahal_reg_objs[ipahal_ctx->hw_type][reg].n_ofst * n;
+	offset += ipahal_regs[reg].n_ofst * n;
 	val = ioread32(ipahal_ctx->base + offset);
-	ipahal_reg_objs[ipahal_ctx->hw_type][reg].parse(reg, fields, val);
+	ipahal_regs[reg].parse(reg, fields, val);
 
 	return val;
 }
@@ -1826,15 +1826,15 @@ void ipahal_write_reg_n_fields(enum ipahal_reg_name reg, u32 n,
 
 	ipa_debug_low("write to %s n=%u after constructing it\n",
 		ipahal_reg_name_str(reg), n);
-	offset = ipahal_reg_objs[ipahal_ctx->hw_type][reg].offset;
+	offset = ipahal_regs[reg].offset;
 	if (offset == -1) {
 		ipa_err("Write access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON(1);
 		return;
 	}
-	offset += ipahal_reg_objs[ipahal_ctx->hw_type][reg].n_ofst * n;
-	ipahal_reg_objs[ipahal_ctx->hw_type][reg].construct(reg, fields, &val);
+	offset += ipahal_regs[reg].n_ofst * n;
+	ipahal_regs[reg].construct(reg, fields, &val);
 
 	iowrite32(val, ipahal_ctx->base + offset);
 }
@@ -1854,7 +1854,7 @@ u32 ipahal_get_reg_mn_ofst(enum ipahal_reg_name reg, u32 m, u32 n)
 
 	ipa_debug_low("get offset of %s m=%u n=%u\n",
 		ipahal_reg_name_str(reg), m, n);
-	offset = ipahal_reg_objs[ipahal_ctx->hw_type][reg].offset;
+	offset = ipahal_regs[reg].offset;
 	if (offset == -1) {
 		ipa_err("Access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
@@ -1868,7 +1868,7 @@ u32 ipahal_get_reg_mn_ofst(enum ipahal_reg_name reg, u32 m, u32 n)
 	 *	we can move the m parameter to the table above.
 	 */
 	offset +=  0x80 * m;
-	offset += ipahal_reg_objs[ipahal_ctx->hw_type][reg].n_ofst * n;
+	offset += ipahal_regs[reg].n_ofst * n;
 
 	return offset;
 }
