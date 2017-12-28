@@ -113,15 +113,6 @@ static const char *ipareg_name_to_str[IPA_REG_MAX] = {
 	__stringify(IPA_STAT_DROP_CNT_MASK_n),
 };
 
-/*
- * ipahal_reg_name_str() - returns string that represent the register
- * @reg_name: [in] register name
- */
-static const char *ipahal_reg_name_str(enum ipahal_reg_name reg_name)
-{
-	return ipareg_name_to_str[reg_name];
-}
-
 static void ipareg_construct_rx_hps_clients_depth1(
 	enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
@@ -500,7 +491,7 @@ static void ipareg_construct_debug_cnt_ctrl_n(
 		break;
 	default:
 		ipa_err("Invalid dbg_cnt_ctrl type (%d) for %s\n",
-			dbg_cnt_ctrl->type, ipahal_reg_name_str(reg));
+			dbg_cnt_ctrl->type, ipareg_name_to_str[reg]);
 		WARN_ON(1);
 		return;
 
@@ -612,7 +603,7 @@ static void ipareg_construct_endp_init_cfg_n(
 		break;
 	default:
 		ipa_err("Invalid cs_offload_en value for %s\n",
-			ipahal_reg_name_str(reg));
+			ipareg_name_to_str[reg]);
 		WARN_ON(1);
 		return;
 	}
@@ -1678,17 +1669,15 @@ u32 ipahal_reg_n_offset(enum ipahal_reg_name reg, u32 n)
 {
 	u32 offset;
 
-	ipa_debug_low("get offset of %s n=%u\n", ipahal_reg_name_str(reg), n);
+	ipa_debug_low("get offset of %s n=%u\n", ipareg_name_to_str[reg], n);
 	offset = ipahal_regs[reg].offset;
 	if (!offset) {
-		ipa_err("Access to undefined reg=%s\n",
-			ipahal_reg_name_str(reg));
+		ipa_err("Access to undefined reg=%s\n", ipareg_name_to_str[reg]);
 		WARN_ON(1);
 		return 0;
 	}
 	if (offset == OFFSET_INVAL) {
-		ipa_err("Access to obsolete reg=%s\n",
-			ipahal_reg_name_str(reg));
+		ipa_err("Access to obsolete reg=%s\n", ipareg_name_to_str[reg]);
 		WARN_ON(1);
 		return 0;
 	}
@@ -1738,7 +1727,7 @@ u32 ipahal_read_reg_n_fields(enum ipahal_reg_name reg, u32 n, void *fields)
 	val = ioread32(ipahal_ctx->base + offset);
 
 	if (WARN_ON(!ipahal_regs[reg].parse))
-		ipa_err("No parse function for %s\n", ipahal_reg_name_str(reg));
+		ipa_err("No parse function for %s\n", ipareg_name_to_str[reg]);
 	else
 		ipahal_regs[reg].parse(reg, fields, val);
 
@@ -1760,7 +1749,7 @@ void ipahal_write_reg_n_fields(enum ipahal_reg_name reg, u32 n,
 
 	if (WARN_ON(!ipahal_regs[reg].construct))
 		ipa_err("No construct function for %s\n",
-			ipahal_reg_name_str(reg));
+			ipareg_name_to_str[reg]);
 	else
 		ipahal_regs[reg].construct(reg, fields, &val);
 
