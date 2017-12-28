@@ -1683,12 +1683,6 @@ u32 ipahal_reg_n_offset(enum ipahal_reg_name reg, u32 n)
 {
 	u32 offset;
 
-	if (reg >= IPA_REG_MAX) {
-		ipa_err("Invalid register reg=%u\n", reg);
-		WARN_ON(1);
-		return 0;
-	}
-
 	ipa_debug_low("get offset of %s n=%u\n", ipahal_reg_name_str(reg), n);
 	offset = ipahal_regs[reg].offset;
 	if (!offset) {
