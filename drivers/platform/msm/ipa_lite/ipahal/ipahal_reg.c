@@ -1677,6 +1677,38 @@ int ipahal_reg_init(void)
 }
 
 /*
+ * Get the offset of a n parameterized register
+ */
+u32 ipahal_get_reg_n_ofst(enum ipahal_reg_name reg, u32 n)
+{
+	u32 offset;
+
+	if (reg >= IPA_REG_MAX) {
+		ipa_err("Invalid register reg=%u\n", reg);
+		WARN_ON(1);
+		return 0;
+	}
+
+	ipa_debug_low("get offset of %s n=%u\n", ipahal_reg_name_str(reg), n);
+	offset = ipahal_regs[reg].offset;
+	if (!offset) {
+		ipa_err("Access to undefined reg=%s\n",
+			ipahal_reg_name_str(reg));
+		WARN_ON(1);
+		return 0;
+	}
+	if (offset == OFFSET_INVAL) {
+		ipa_err("Access to obsolete reg=%s\n",
+			ipahal_reg_name_str(reg));
+		WARN_ON(1);
+		return 0;
+	}
+	offset += ipahal_regs[reg].n_ofst * n;
+
+	return offset;
+}
+
+/*
  * ipahal_read_reg_n() - Get n parameterized reg value
  */
 u32 ipahal_read_reg_n(enum ipahal_reg_name reg, u32 n)
@@ -1827,38 +1859,6 @@ void ipahal_write_reg_n_fields(enum ipahal_reg_name reg, u32 n,
 		ipahal_regs[reg].construct(reg, fields, &val);
 
 	iowrite32(val, ipahal_ctx->base + offset);
-}
-
-/*
- * Get the offset of a n parameterized register
- */
-u32 ipahal_get_reg_n_ofst(enum ipahal_reg_name reg, u32 n)
-{
-	u32 offset;
-
-	if (reg >= IPA_REG_MAX) {
-		ipa_err("Invalid register reg=%u\n", reg);
-		WARN_ON(1);
-		return 0;
-	}
-
-	ipa_debug_low("get offset of %s n=%u\n", ipahal_reg_name_str(reg), n);
-	offset = ipahal_regs[reg].offset;
-	if (!offset) {
-		ipa_err("Access to undefined reg=%s\n",
-			ipahal_reg_name_str(reg));
-		WARN_ON(1);
-		return 0;
-	}
-	if (offset == OFFSET_INVAL) {
-		ipa_err("Access to obsolete reg=%s\n",
-			ipahal_reg_name_str(reg));
-		WARN_ON(1);
-		return 0;
-	}
-	offset += ipahal_regs[reg].n_ofst * n;
-
-	return offset;
 }
 
 u32 ipahal_get_reg_base(void)

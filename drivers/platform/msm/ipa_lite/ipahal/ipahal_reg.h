@@ -422,6 +422,19 @@ struct ipahal_ep_cfg_ctrl_scnd {
 };
 
 /*
+ * Get the offset of a n parameterized register
+ */
+u32 ipahal_get_reg_n_ofst(enum ipahal_reg_name reg, u32 n);
+
+/*
+ * Get the offset of a register
+ */
+static inline u32 ipahal_get_reg_ofst(enum ipahal_reg_name reg)
+{
+	return ipahal_get_reg_n_ofst(reg, 0);
+}
+
+/*
  * ipahal_read_reg_n() - Get the raw value of n parameterized reg
  */
 u32 ipahal_read_reg_n(enum ipahal_reg_name reg, u32 n);
@@ -473,19 +486,6 @@ static inline void ipahal_write_reg_fields(enum ipahal_reg_name reg,
 	const void *fields)
 {
 	ipahal_write_reg_n_fields(reg, 0, fields);
-}
-
-/*
- * Get the offset of a n parameterized register
- */
-u32 ipahal_get_reg_n_ofst(enum ipahal_reg_name reg, u32 n);
-
-/*
- * Get the offset of a register
- */
-static inline u32 ipahal_get_reg_ofst(enum ipahal_reg_name reg)
-{
-	return ipahal_get_reg_n_ofst(reg, 0);
 }
 
 /*
