@@ -1204,9 +1204,10 @@ static void ipareg_parse_hps_queue_weights(
  * struct ipahal_reg_obj - Register H/W information for specific IPA version
  * @construct - CB to construct register value from abstracted structure
  * @parse - CB to parse register value to abstracted structure
- * @offset - register offset relative to base address
+ * @offset - register offset relative to base address (or OFFSET_INVAL)
  * @n_ofst - N parameterized register sub-offset
  */
+#define OFFSET_INVAL	((u32)0xffffffff)
 struct ipahal_reg_obj {
 	void (*construct)(enum ipahal_reg_name reg, const void *fields,
 		u32 *val);
@@ -1224,8 +1225,8 @@ struct ipahal_reg_obj {
  *  the init function will fill it with the information from the previous
  *  IPA version.
  * Information is considered missing if all of the fields are 0.
- * If offset is -1, this means that the register is removed on the
- *  specific version.
+ * If offset is OFFSET_INVAL, this means that the register is removed on
+ *  the specific version.
  */
 static const struct ipahal_reg_obj ipahal_reg_objs[IPA_HW_MAX][IPA_REG_MAX] = {
 	/* IPAv3 */
@@ -1446,10 +1447,10 @@ static const struct ipahal_reg_obj ipahal_reg_objs[IPA_HW_MAX][IPA_REG_MAX] = {
 		0x00000404, 0x20},
 	[IPA_HW_v3_5][IPA_SRC_RSRC_GRP_45_RSRC_TYPE_n] = {
 		ipareg_construct_dummy, ipareg_parse_dummy,
-		-1, 0},
+		OFFSET_INVAL, 0},
 	[IPA_HW_v3_5][IPA_SRC_RSRC_GRP_67_RSRC_TYPE_n] = {
 		ipareg_construct_dummy, ipareg_parse_dummy,
-		-1, 0},
+		OFFSET_INVAL, 0},
 	[IPA_HW_v3_5][IPA_DST_RSRC_GRP_01_RSRC_TYPE_n] = {
 		ipareg_construct_rsrg_grp_xy_v3_5, ipareg_parse_dummy,
 		0x00000500, 0x20},
@@ -1458,10 +1459,10 @@ static const struct ipahal_reg_obj ipahal_reg_objs[IPA_HW_MAX][IPA_REG_MAX] = {
 		0x00000504, 0x20},
 	[IPA_HW_v3_5][IPA_DST_RSRC_GRP_45_RSRC_TYPE_n] = {
 		ipareg_construct_dummy, ipareg_parse_dummy,
-		-1, 0},
+		OFFSET_INVAL, 0},
 	[IPA_HW_v3_5][IPA_DST_RSRC_GRP_67_RSRC_TYPE_n] = {
 		ipareg_construct_dummy, ipareg_parse_dummy,
-		-1, 0},
+		OFFSET_INVAL, 0},
 	[IPA_HW_v3_5][IPA_ENDP_INIT_RSRC_GRP_n] = {
 		ipareg_construct_endp_init_rsrc_grp_n_v3_5,
 		ipareg_parse_dummy,
@@ -1472,14 +1473,14 @@ static const struct ipahal_reg_obj ipahal_reg_objs[IPA_HW_MAX][IPA_REG_MAX] = {
 		0x000023C4, 0},
 	[IPA_HW_v3_5][IPA_RX_HPS_CLIENTS_MIN_DEPTH_1] = {
 		ipareg_construct_dummy, ipareg_parse_dummy,
-		-1, 0},
+		OFFSET_INVAL, 0},
 	[IPA_HW_v3_5][IPA_RX_HPS_CLIENTS_MAX_DEPTH_0] = {
 		ipareg_construct_rx_hps_clients_depth0_v3_5,
 		ipareg_parse_dummy,
 		0x000023CC, 0},
 	[IPA_HW_v3_5][IPA_RX_HPS_CLIENTS_MAX_DEPTH_1] = {
 		ipareg_construct_dummy, ipareg_parse_dummy,
-		-1, 0},
+		OFFSET_INVAL, 0},
 	[IPA_HW_v3_5][IPA_SPARE_REG_1] = {
 		ipareg_construct_dummy, ipareg_parse_dummy,
 		0x00002780, 0},
@@ -1502,16 +1503,16 @@ static const struct ipahal_reg_obj ipahal_reg_objs[IPA_HW_MAX][IPA_REG_MAX] = {
 		0x000001FC, 0},
 	[IPA_HW_v4_0][IPA_DEBUG_CNT_REG_n] = {
 		ipareg_construct_dummy, ipareg_parse_dummy,
-		-1, 0},
+		OFFSET_INVAL, 0},
 	[IPA_HW_v4_0][IPA_DEBUG_CNT_CTRL_n] = {
 		ipareg_construct_debug_cnt_ctrl_n, ipareg_parse_dummy,
-		-1, 0},
+		OFFSET_INVAL, 0},
 	[IPA_HW_v4_0][IPA_QCNCM] = {
 		ipareg_construct_qcncm, ipareg_parse_qcncm,
-		-1, 0},
+		OFFSET_INVAL, 0},
 	[IPA_HW_v4_0][IPA_SINGLE_NDP_MODE] = {
 		ipareg_construct_single_ndp_mode, ipareg_parse_single_ndp_mode,
-		-1, 0},
+		OFFSET_INVAL, 0},
 	[IPA_HW_v4_0][IPA_QSB_MAX_READS] = {
 		ipareg_construct_qsb_max_reads_v4_0, ipareg_parse_dummy,
 		0x00000078, 0},
@@ -1523,7 +1524,7 @@ static const struct ipahal_reg_obj ipahal_reg_objs[IPA_HW_MAX][IPA_REG_MAX] = {
 		0x000000b4, 0},
 	[IPA_HW_v4_0][IPA_ENDP_INIT_ROUTE_n] = {
 		ipareg_construct_endp_init_route_n, ipareg_parse_dummy,
-		-1, 0},
+		OFFSET_INVAL, 0},
 	[IPA_HW_v4_0][IPA_ENDP_STATUS_n] = {
 		ipareg_construct_endp_status_n_v4_0, ipareg_parse_dummy,
 		0x00000840, 0x70},
@@ -1673,7 +1674,7 @@ u32 ipahal_read_reg_n(enum ipahal_reg_name reg, u32 n)
 		ipahal_reg_name_str(reg), n);
 
 	offset = ipahal_regs[reg].offset;
-	if (offset == -1) {
+	if (offset == OFFSET_INVAL) {
 		ipa_err("Read access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON(1);
@@ -1698,7 +1699,7 @@ u32 ipahal_read_reg_mn(enum ipahal_reg_name reg, u32 m, u32 n)
 	ipa_debug_low("read %s m=%u n=%u\n",
 		ipahal_reg_name_str(reg), m, n);
 	offset = ipahal_regs[reg].offset;
-	if (offset == -1) {
+	if (offset == OFFSET_INVAL) {
 		ipa_err("Read access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON_ONCE(1);
@@ -1730,7 +1731,7 @@ void ipahal_write_reg_mn(enum ipahal_reg_name reg, u32 m, u32 n, u32 val)
 	ipa_debug_low("write to %s m=%u n=%u val=%u\n",
 		ipahal_reg_name_str(reg), m, n, val);
 	offset = ipahal_regs[reg].offset;
-	if (offset == -1) {
+	if (offset == OFFSET_INVAL) {
 		ipa_err("Write access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON(1);
@@ -1770,7 +1771,7 @@ u32 ipahal_read_reg_n_fields(enum ipahal_reg_name reg, u32 n, void *fields)
 	ipa_debug_low("read from %s n=%u and parse it\n",
 		ipahal_reg_name_str(reg), n);
 	offset = ipahal_regs[reg].offset;
-	if (offset == -1) {
+	if (offset == OFFSET_INVAL) {
 		ipa_err("Read access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON(1);
@@ -1805,7 +1806,7 @@ void ipahal_write_reg_n_fields(enum ipahal_reg_name reg, u32 n,
 	ipa_debug_low("write to %s n=%u after constructing it\n",
 		ipahal_reg_name_str(reg), n);
 	offset = ipahal_regs[reg].offset;
-	if (offset == -1) {
+	if (offset == OFFSET_INVAL) {
 		ipa_err("Write access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON(1);
@@ -1833,7 +1834,7 @@ u32 ipahal_get_reg_mn_ofst(enum ipahal_reg_name reg, u32 m, u32 n)
 	ipa_debug_low("get offset of %s m=%u n=%u\n",
 		ipahal_reg_name_str(reg), m, n);
 	offset = ipahal_regs[reg].offset;
-	if (offset == -1) {
+	if (offset == OFFSET_INVAL) {
 		ipa_err("Access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
 		WARN_ON(1);
