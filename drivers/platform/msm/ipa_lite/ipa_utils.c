@@ -831,62 +831,6 @@ int ipa3_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 	return 0;
 }
 
-static const char *ipa3_get_ipv6ct_en_str(enum ipa_ipv6ct_en_type ipv6ct_en)
-{
-	switch (ipv6ct_en) {
-	case (IPA_BYPASS_IPV6CT):
-		return "ipv6ct disabled";
-	case (IPA_ENABLE_IPV6CT):
-		return "ipv6ct enabled";
-	}
-
-	return "undefined";
-}
-
-/**
- * ipa3_cfg_ep_conn_track() - IPA end-point IPv6CT configuration
- * @clnt_hdl:		[in] opaque client handle assigned by IPA to client
- * @ep_conn_track:	[in] IPA IPv6CT end-point configuration params
- *
- * Returns:	0 on success, negative on failure
- *
- * Note:	Should not be called from atomic context
- */
-int ipa3_cfg_ep_conn_track(u32 clnt_hdl,
-	const struct ipa_ep_cfg_conn_track *ep_conn_track)
-{
-	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
-		ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_conn_track == NULL) {
-		ipa_err("bad parm, clnt_hdl = %d , ep_valid = %d\n",
-			clnt_hdl,
-			ipa3_ctx->ep[clnt_hdl].valid);
-		return -EINVAL;
-	}
-
-	if (IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client)) {
-		ipa_err("IPv6CT does not apply to IPA out EP %d\n", clnt_hdl);
-		return -EINVAL;
-	}
-
-	ipa_debug("pipe=%d, conn_track_en=%d(%s)\n",
-		clnt_hdl,
-		ep_conn_track->conn_track_en,
-		ipa3_get_ipv6ct_en_str(ep_conn_track->conn_track_en));
-
-	/* copy over EP cfg */
-	ipa3_ctx->ep[clnt_hdl].cfg.conn_track = *ep_conn_track;
-
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
-
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CONN_TRACK_n, clnt_hdl,
-		ep_conn_track);
-
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
-
-	return 0;
-}
-
-
 /**
  * ipa3_cfg_ep_status() - IPA end-point status configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
