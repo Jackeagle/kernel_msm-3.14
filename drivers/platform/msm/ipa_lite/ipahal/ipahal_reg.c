@@ -1214,365 +1214,413 @@ struct ipahal_reg_obj {
  */
 static const struct ipahal_reg_obj ipahal_reg_objs[IPA_HW_MAX][IPA_REG_MAX] = {
 	/* IPAv3 */
-	[IPA_HW_v3_0][IPA_ROUTE] = {
-		ipareg_construct_route, NULL,
-		0x00000048, 0},
-	[IPA_HW_v3_0][IPA_IRQ_STTS_EE_n] = {
-		NULL, NULL,
-		0x00003008, 0x1000},
-	[IPA_HW_v3_0][IPA_IRQ_EN_EE_n] = {
-		NULL, NULL,
-		0x0000300c, 0x1000},
-	[IPA_HW_v3_0][IPA_IRQ_CLR_EE_n] = {
-		NULL, NULL,
-		0x00003010, 0x1000},
-	[IPA_HW_v3_0][IPA_IRQ_SUSPEND_INFO_EE_n] = {
-		NULL, NULL,
-		0x00003098, 0x1000},
-	[IPA_HW_v3_0][IPA_BCR] = {
-		NULL, NULL,
-		0x000001D0, 0},
-	[IPA_HW_v3_0][IPA_ENABLED_PIPES] = {
-		NULL, NULL,
-		0x00000038, 0},
-	[IPA_HW_v3_0][IPA_COMP_SW_RESET] = {
-		NULL, NULL,
-		0x00000040, 0},
-	[IPA_HW_v3_0][IPA_VERSION] = {
-		NULL, NULL,
-		0x00000034, 0},
-	[IPA_HW_v3_0][IPA_TAG_TIMER] = {
-		NULL, NULL,
-		0x00000060, 0 },
-	[IPA_HW_v3_0][IPA_COMP_HW_VERSION] = {
-		NULL, NULL,
-		0x00000030, 0},
-	[IPA_HW_v3_0][IPA_SPARE_REG_1] = {
-		NULL, NULL,
-		0x00005090, 0},
-	[IPA_HW_v3_0][IPA_SPARE_REG_2] = {
-		NULL, NULL,
-		0x00005094, 0},
-	[IPA_HW_v3_0][IPA_COMP_CFG] = {
-		NULL, NULL,
-		0x0000003C, 0},
-	[IPA_HW_v3_0][IPA_STATE_AGGR_ACTIVE] = {
-		NULL, NULL,
-		0x0000010C, 0},
-	[IPA_HW_v3_0][IPA_ENDP_INIT_HDR_n] = {
-		ipareg_construct_endp_init_hdr_n, NULL,
-		0x00000810, 0x70},
-	[IPA_HW_v3_0][IPA_ENDP_INIT_HDR_EXT_n] = {
-		ipareg_construct_endp_init_hdr_ext_n, NULL,
-		0x00000814, 0x70},
-	[IPA_HW_v3_0][IPA_ENDP_INIT_AGGR_n] = {
-		ipareg_construct_endp_init_aggr_n,
-		ipareg_parse_endp_init_aggr_n,
-		0x00000824, 0x70},
-	[IPA_HW_v3_0][IPA_AGGR_FORCE_CLOSE] = {
-		NULL, NULL,
-		0x000001EC, 0},
-	[IPA_HW_v3_0][IPA_ENDP_INIT_ROUTE_n] = {
-		ipareg_construct_endp_init_route_n, NULL,
-		0x00000828, 0x70},
-	[IPA_HW_v3_0][IPA_ENDP_INIT_MODE_n] = {
-		ipareg_construct_endp_init_mode_n, NULL,
-		0x00000820, 0x70},
-	[IPA_HW_v3_0][IPA_ENDP_INIT_NAT_n] = {
-		ipareg_construct_endp_init_nat_n, NULL,
-		0x0000080C, 0x70},
-	[IPA_HW_v3_0][IPA_ENDP_INIT_CTRL_n] = {
-		ipareg_construct_endp_init_ctrl_n,
-		ipareg_parse_endp_init_ctrl_n,
-		0x00000800, 0x70},
-	[IPA_HW_v3_0][IPA_ENDP_INIT_CTRL_SCND_n] = {
-		ipareg_construct_endp_init_ctrl_scnd_n, NULL,
-		0x00000804, 0x70 },
-	[IPA_HW_v3_0][IPA_ENDP_INIT_HOL_BLOCK_EN_n] = {
-		ipareg_construct_endp_init_hol_block_en_n,
-		NULL,
-		0x0000082c, 0x70},
-	[IPA_HW_v3_0][IPA_ENDP_INIT_HOL_BLOCK_TIMER_n] = {
-		ipareg_construct_endp_init_hol_block_timer_n,
-		NULL,
-		0x00000830, 0x70},
-	[IPA_HW_v3_0][IPA_ENDP_INIT_DEAGGR_n] = {
-		ipareg_construct_endp_init_deaggr_n,
-		NULL,
-		0x00000834, 0x70},
-	[IPA_HW_v3_0][IPA_ENDP_INIT_SEQ_n] = {
-		NULL, NULL,
-		0x0000083C, 0x70},
-	[IPA_HW_v3_0][IPA_DEBUG_CNT_REG_n] = {
-		NULL, NULL,
-		0x00000600, 0x4},
-	[IPA_HW_v3_0][IPA_ENDP_INIT_CFG_n] = {
-		ipareg_construct_endp_init_cfg_n, NULL,
-		0x00000808, 0x70},
-	[IPA_HW_v3_0][IPA_IRQ_EE_UC_n] = {
-		NULL, NULL,
-		0x0000301c, 0x1000},
-	[IPA_HW_v3_0][IPA_ENDP_INIT_HDR_METADATA_MASK_n] = {
-		ipareg_construct_endp_init_hdr_metadata_mask_n,
-		NULL,
-		0x00000818, 0x70},
-	[IPA_HW_v3_0][IPA_ENDP_INIT_HDR_METADATA_n] = {
-		ipareg_construct_endp_init_hdr_metadata_n,
-		NULL,
-		0x0000081c, 0x70},
-	[IPA_HW_v3_0][IPA_ENDP_INIT_RSRC_GRP_n] = {
-		ipareg_construct_endp_init_rsrc_grp_n,
-		NULL,
-		0x00000838, 0x70},
-	[IPA_HW_v3_0][IPA_SHARED_MEM_SIZE] = {
-		NULL, ipareg_parse_shared_mem_size,
-		0x00000054, 0},
-	[IPA_HW_v3_0][IPA_SRAM_DIRECT_ACCESS_n] = {
-		NULL, NULL,
-		0x00007000, 0x4},
-	[IPA_HW_v3_0][IPA_DEBUG_CNT_CTRL_n] = {
-		ipareg_construct_debug_cnt_ctrl_n, NULL,
-		0x00000640, 0x4},
-	[IPA_HW_v3_0][IPA_UC_MAILBOX_m_n] = {
-		NULL, NULL,
-		0x00032000, 0x4},
-	[IPA_HW_v3_0][IPA_FILT_ROUT_HASH_FLUSH] = {
-		NULL, NULL,
-		0x00000090, 0},
-	[IPA_HW_v3_0][IPA_SINGLE_NDP_MODE] = {
-		ipareg_construct_single_ndp_mode, ipareg_parse_single_ndp_mode,
-		0x00000068, 0},
-	[IPA_HW_v3_0][IPA_QCNCM] = {
-		ipareg_construct_qcncm, ipareg_parse_qcncm,
-		0x00000064, 0},
-	[IPA_HW_v3_0][IPA_SYS_PKT_PROC_CNTXT_BASE] = {
-		NULL, NULL,
-		0x000001e0, 0},
-	[IPA_HW_v3_0][IPA_LOCAL_PKT_PROC_CNTXT_BASE] = {
-		NULL, NULL,
-		0x000001e8, 0},
-	[IPA_HW_v3_0][IPA_ENDP_STATUS_n] = {
-		ipareg_construct_endp_status_n, NULL,
-		0x00000840, 0x70},
-	[IPA_HW_v3_0][IPA_ENDP_FILTER_ROUTER_HSH_CFG_n] = {
-		ipareg_construct_hash_cfg_n, ipareg_parse_hash_cfg_n,
-		0x0000085C, 0x70},
-	[IPA_HW_v3_0][IPA_SRC_RSRC_GRP_01_RSRC_TYPE_n] = {
-		ipareg_construct_rsrg_grp_xy, NULL,
-		0x00000400, 0x20},
-	[IPA_HW_v3_0][IPA_SRC_RSRC_GRP_23_RSRC_TYPE_n] = {
-		ipareg_construct_rsrg_grp_xy, NULL,
-		0x00000404, 0x20},
-	[IPA_HW_v3_0][IPA_SRC_RSRC_GRP_45_RSRC_TYPE_n] = {
-		ipareg_construct_rsrg_grp_xy, NULL,
-		0x00000408, 0x20},
-	[IPA_HW_v3_0][IPA_SRC_RSRC_GRP_67_RSRC_TYPE_n] = {
-		ipareg_construct_rsrg_grp_xy, NULL,
-		0x0000040C, 0x20},
-	[IPA_HW_v3_0][IPA_DST_RSRC_GRP_01_RSRC_TYPE_n] = {
-		ipareg_construct_rsrg_grp_xy, NULL,
-		0x00000500, 0x20},
-	[IPA_HW_v3_0][IPA_DST_RSRC_GRP_23_RSRC_TYPE_n] = {
-		ipareg_construct_rsrg_grp_xy, NULL,
-		0x00000504, 0x20},
-	[IPA_HW_v3_0][IPA_DST_RSRC_GRP_45_RSRC_TYPE_n] = {
-		ipareg_construct_rsrg_grp_xy, NULL,
-		0x00000508, 0x20},
-	[IPA_HW_v3_0][IPA_DST_RSRC_GRP_67_RSRC_TYPE_n] = {
-		ipareg_construct_rsrg_grp_xy, NULL,
-		0x0000050c, 0x20},
-	[IPA_HW_v3_0][IPA_RX_HPS_CLIENTS_MIN_DEPTH_0] = {
-		ipareg_construct_rx_hps_clients_depth0, NULL,
-		0x000023C4, 0},
-	[IPA_HW_v3_0][IPA_RX_HPS_CLIENTS_MIN_DEPTH_1] = {
-		ipareg_construct_rx_hps_clients_depth1, NULL,
-		0x000023C8, 0},
-	[IPA_HW_v3_0][IPA_RX_HPS_CLIENTS_MAX_DEPTH_0] = {
-		ipareg_construct_rx_hps_clients_depth0, NULL,
-		0x000023CC, 0},
-	[IPA_HW_v3_0][IPA_RX_HPS_CLIENTS_MAX_DEPTH_1] = {
-		ipareg_construct_rx_hps_clients_depth1, NULL,
-		0x000023D0, 0},
-	[IPA_HW_v3_0][IPA_QSB_MAX_WRITES] = {
-		ipareg_construct_qsb_max_writes, NULL,
-		0x00000074, 0},
-	[IPA_HW_v3_0][IPA_QSB_MAX_READS] = {
-		ipareg_construct_qsb_max_reads, NULL,
-		0x00000078, 0},
-	[IPA_HW_v3_0][IPA_DPS_SEQUENCER_FIRST] = {
-		NULL, NULL,
-		0x0001e000, 0},
-	[IPA_HW_v3_0][IPA_HPS_SEQUENCER_FIRST] = {
-		NULL, NULL,
-		0x0001e080, 0},
+	[IPA_HW_v3_0] = {
+		[IPA_ROUTE] = {
+			ipareg_construct_route, NULL, 0x00000048, 0,
+		},
+		[IPA_IRQ_STTS_EE_n] = {
+			NULL, NULL, 0x00003008, 0x1000,
+		},
+		[IPA_IRQ_EN_EE_n] = {
+			NULL, NULL, 0x0000300c, 0x1000,
+		},
+		[IPA_IRQ_CLR_EE_n] = {
+			NULL, NULL, 0x00003010, 0x1000,
+		},
+		[IPA_IRQ_SUSPEND_INFO_EE_n] = {
+			NULL, NULL, 0x00003098, 0x1000,
+		},
+		[IPA_BCR] = {
+			NULL, NULL, 0x000001D0, 0,
+		},
+		[IPA_ENABLED_PIPES] = {
+			NULL, NULL, 0x00000038, 0,
+		},
+		[IPA_COMP_SW_RESET] = {
+			NULL, NULL, 0x00000040, 0,
+		},
+		[IPA_VERSION] = {
+			NULL, NULL, 0x00000034, 0,
+		},
+		[IPA_TAG_TIMER] = {
+			NULL, NULL, 0x00000060, 0,
+		},
+		[IPA_COMP_HW_VERSION] = {
+			NULL, NULL, 0x00000030, 0,
+		},
+		[IPA_SPARE_REG_1] = {
+			NULL, NULL, 0x00005090, 0,
+		},
+		[IPA_SPARE_REG_2] = {
+			NULL, NULL, 0x00005094, 0,
+		},
+		[IPA_COMP_CFG] = {
+			NULL, NULL, 0x0000003C, 0,
+		},
+		[IPA_STATE_AGGR_ACTIVE] = {
+			NULL, NULL, 0x0000010C, 0,
+		},
+		[IPA_ENDP_INIT_HDR_n] = {
+			ipareg_construct_endp_init_hdr_n,
+			NULL, 0x00000810, 0x70,
+		},
+		[IPA_ENDP_INIT_HDR_EXT_n] = {
+			ipareg_construct_endp_init_hdr_ext_n,
+			NULL, 0x00000814, 0x70,
+		},
+		[IPA_ENDP_INIT_AGGR_n] = {
+			ipareg_construct_endp_init_aggr_n,
+			ipareg_parse_endp_init_aggr_n, 0x00000824, 0x70,
+		},
+		[IPA_AGGR_FORCE_CLOSE] = {
+			NULL, NULL, 0x000001EC, 0,
+		},
+		[IPA_ENDP_INIT_ROUTE_n] = {
+			ipareg_construct_endp_init_route_n,
+			NULL, 0x00000828, 0x70,
+		},
+		[IPA_ENDP_INIT_MODE_n] = {
+			ipareg_construct_endp_init_mode_n,
+			NULL, 0x00000820, 0x70,
+		},
+		[IPA_ENDP_INIT_NAT_n] = {
+			ipareg_construct_endp_init_nat_n,
+			NULL, 0x0000080C, 0x70,
+		},
+		[IPA_ENDP_INIT_CTRL_n] = {
+			ipareg_construct_endp_init_ctrl_n,
+			ipareg_parse_endp_init_ctrl_n, 0x00000800, 0x70,
+		},
+		[IPA_ENDP_INIT_CTRL_SCND_n] = {
+			ipareg_construct_endp_init_ctrl_scnd_n,
+			NULL, 0x00000804, 0x70,
+		},
+		[IPA_ENDP_INIT_HOL_BLOCK_EN_n] = {
+			ipareg_construct_endp_init_hol_block_en_n,
+			NULL, 0x0000082c, 0x70,
+		},
+		[IPA_ENDP_INIT_HOL_BLOCK_TIMER_n] = {
+			ipareg_construct_endp_init_hol_block_timer_n,
+			NULL, 0x00000830, 0x70,
+		},
+		[IPA_ENDP_INIT_DEAGGR_n] = {
+			ipareg_construct_endp_init_deaggr_n,
+			NULL, 0x00000834, 0x70,
+		},
+		[IPA_ENDP_INIT_SEQ_n] = {
+			NULL, NULL, 0x0000083C, 0x70,
+		},
+		[IPA_DEBUG_CNT_REG_n] = {
+			NULL, NULL, 0x00000600, 0x4,
+		},
+		[IPA_ENDP_INIT_CFG_n] = {
+			ipareg_construct_endp_init_cfg_n,
+			NULL, 0x00000808, 0x70,
+		},
+		[IPA_IRQ_EE_UC_n] = {
+			NULL, NULL, 0x0000301c, 0x1000,
+		},
+		[IPA_ENDP_INIT_HDR_METADATA_MASK_n] = {
+			ipareg_construct_endp_init_hdr_metadata_mask_n,
+			NULL, 0x00000818, 0x70,
+		},
+		[IPA_ENDP_INIT_HDR_METADATA_n] = {
+			ipareg_construct_endp_init_hdr_metadata_n,
+			NULL, 0x0000081c, 0x70,
+		},
+		[IPA_ENDP_INIT_RSRC_GRP_n] = {
+			ipareg_construct_endp_init_rsrc_grp_n,
+			NULL, 0x00000838, 0x70,
+		},
+		[IPA_SHARED_MEM_SIZE] = {
+			NULL, ipareg_parse_shared_mem_size, 0x00000054, 0,
+		},
+		[IPA_SRAM_DIRECT_ACCESS_n] = {
+			NULL, NULL, 0x00007000, 0x4,
+		},
+		[IPA_DEBUG_CNT_CTRL_n] = {
+			ipareg_construct_debug_cnt_ctrl_n,
+			NULL, 0x00000640, 0x4,
+		},
+		[IPA_UC_MAILBOX_m_n] = {
+			NULL, NULL, 0x00032000, 0x4,
+		},
+		[IPA_FILT_ROUT_HASH_FLUSH] = {
+			NULL, NULL, 0x00000090, 0,
+		},
+		[IPA_SINGLE_NDP_MODE] = {
+			ipareg_construct_single_ndp_mode,
+			ipareg_parse_single_ndp_mode, 0x00000068, 0,
+		},
+		[IPA_QCNCM] = {
+			ipareg_construct_qcncm,
+			ipareg_parse_qcncm, 0x00000064, 0,
+		},
+		[IPA_SYS_PKT_PROC_CNTXT_BASE] = {
+			NULL, NULL, 0x000001e0, 0,
+		},
+		[IPA_LOCAL_PKT_PROC_CNTXT_BASE] = {
+			NULL, NULL, 0x000001e8, 0,
+		},
+		[IPA_ENDP_STATUS_n] = {
+			ipareg_construct_endp_status_n,
+			NULL, 0x00000840, 0x70,
+		},
+		[IPA_ENDP_FILTER_ROUTER_HSH_CFG_n] = {
+			ipareg_construct_hash_cfg_n,
+			ipareg_parse_hash_cfg_n, 0x0000085C, 0x70,
+		},
+		[IPA_SRC_RSRC_GRP_01_RSRC_TYPE_n] = {
+			ipareg_construct_rsrg_grp_xy,
+			NULL, 0x00000400, 0x20,
+		},
+		[IPA_SRC_RSRC_GRP_23_RSRC_TYPE_n] = {
+			ipareg_construct_rsrg_grp_xy,
+			NULL, 0x00000404, 0x20,
+		},
+		[IPA_SRC_RSRC_GRP_45_RSRC_TYPE_n] = {
+			ipareg_construct_rsrg_grp_xy,
+			NULL, 0x00000408, 0x20,
+		},
+		[IPA_SRC_RSRC_GRP_67_RSRC_TYPE_n] = {
+			ipareg_construct_rsrg_grp_xy,
+			NULL, 0x0000040C, 0x20,
+		},
+		[IPA_DST_RSRC_GRP_01_RSRC_TYPE_n] = {
+			ipareg_construct_rsrg_grp_xy,
+			NULL, 0x00000500, 0x20,
+		},
+		[IPA_DST_RSRC_GRP_23_RSRC_TYPE_n] = {
+			ipareg_construct_rsrg_grp_xy,
+			NULL, 0x00000504, 0x20,
+		},
+		[IPA_DST_RSRC_GRP_45_RSRC_TYPE_n] = {
+			ipareg_construct_rsrg_grp_xy,
+			NULL, 0x00000508, 0x20,
+		},
+		[IPA_DST_RSRC_GRP_67_RSRC_TYPE_n] = {
+			ipareg_construct_rsrg_grp_xy, NULL,
+			0x0000050c, 0x20,
+		},
+		[IPA_RX_HPS_CLIENTS_MIN_DEPTH_0] = {
+			ipareg_construct_rx_hps_clients_depth0,
+			NULL, 0x000023C4, 0,
+		},
+		[IPA_RX_HPS_CLIENTS_MIN_DEPTH_1] = {
+			ipareg_construct_rx_hps_clients_depth1,
+			NULL, 0x000023C8, 0,
+		},
+		[IPA_RX_HPS_CLIENTS_MAX_DEPTH_0] = {
+			ipareg_construct_rx_hps_clients_depth0,
+			NULL, 0x000023CC, 0,
+		},
+		[IPA_RX_HPS_CLIENTS_MAX_DEPTH_1] = {
+			ipareg_construct_rx_hps_clients_depth1,
+			NULL, 0x000023D0, 0,
+		},
+		[IPA_QSB_MAX_WRITES] = {
+			ipareg_construct_qsb_max_writes,
+			NULL, 0x00000074, 0,
+		},
+		[IPA_QSB_MAX_READS] = {
+			ipareg_construct_qsb_max_reads, NULL, 0x00000078, 0
+		},
+		[IPA_DPS_SEQUENCER_FIRST] = {
+			NULL, NULL, 0x0001e000, 0,
+		},
+		[IPA_HPS_SEQUENCER_FIRST] = {
+			NULL, NULL, 0x0001e080, 0
+		},
+	},
 
 
 	/* IPAv3.1 */
-	[IPA_HW_v3_1][IPA_IRQ_SUSPEND_INFO_EE_n] = {
-		NULL, NULL,
-		0x00003030, 0x1000},
-	[IPA_HW_v3_1][IPA_SUSPEND_IRQ_EN_EE_n] = {
-		NULL, NULL,
-		0x00003034, 0x1000},
-	[IPA_HW_v3_1][IPA_SUSPEND_IRQ_CLR_EE_n] = {
-		NULL, NULL,
-		0x00003038, 0x1000},
+	[IPA_HW_v3_1] = {
+		[IPA_IRQ_SUSPEND_INFO_EE_n] = {
+			NULL, NULL, 0x00003030, 0x1000,
+		},
+		[IPA_SUSPEND_IRQ_EN_EE_n] = {
+			NULL, NULL, 0x00003034, 0x1000,
+		},
+		[IPA_SUSPEND_IRQ_CLR_EE_n] = {
+			NULL, NULL, 0x00003038, 0x1000,
+		},
+	},
 
 
 	/* IPAv3.5 */
-	[IPA_HW_v3_5][IPA_TX_CFG] = {
-		ipareg_construct_tx_cfg, ipareg_parse_tx_cfg,
-		0x000001FC, 0},
-	[IPA_HW_v3_5][IPA_SRC_RSRC_GRP_01_RSRC_TYPE_n] = {
-		ipareg_construct_rsrg_grp_xy_v3_5, NULL,
-		0x00000400, 0x20},
-	[IPA_HW_v3_5][IPA_SRC_RSRC_GRP_23_RSRC_TYPE_n] = {
-		ipareg_construct_rsrg_grp_xy_v3_5, NULL,
-		0x00000404, 0x20},
-	[IPA_HW_v3_5][IPA_SRC_RSRC_GRP_45_RSRC_TYPE_n] = {
-		NULL, NULL,
-		OFFSET_INVAL, 0},
-	[IPA_HW_v3_5][IPA_SRC_RSRC_GRP_67_RSRC_TYPE_n] = {
-		NULL, NULL,
-		OFFSET_INVAL, 0},
-	[IPA_HW_v3_5][IPA_DST_RSRC_GRP_01_RSRC_TYPE_n] = {
-		ipareg_construct_rsrg_grp_xy_v3_5, NULL,
-		0x00000500, 0x20},
-	[IPA_HW_v3_5][IPA_DST_RSRC_GRP_23_RSRC_TYPE_n] = {
-		ipareg_construct_rsrg_grp_xy_v3_5, NULL,
-		0x00000504, 0x20},
-	[IPA_HW_v3_5][IPA_DST_RSRC_GRP_45_RSRC_TYPE_n] = {
-		NULL, NULL,
-		OFFSET_INVAL, 0},
-	[IPA_HW_v3_5][IPA_DST_RSRC_GRP_67_RSRC_TYPE_n] = {
-		NULL, NULL,
-		OFFSET_INVAL, 0},
-	[IPA_HW_v3_5][IPA_ENDP_INIT_RSRC_GRP_n] = {
-		ipareg_construct_endp_init_rsrc_grp_n_v3_5,
-		NULL,
-		0x00000838, 0x70},
-	[IPA_HW_v3_5][IPA_RX_HPS_CLIENTS_MIN_DEPTH_0] = {
-		ipareg_construct_rx_hps_clients_depth0_v3_5,
-		NULL,
-		0x000023C4, 0},
-	[IPA_HW_v3_5][IPA_RX_HPS_CLIENTS_MIN_DEPTH_1] = {
-		NULL, NULL,
-		OFFSET_INVAL, 0},
-	[IPA_HW_v3_5][IPA_RX_HPS_CLIENTS_MAX_DEPTH_0] = {
-		ipareg_construct_rx_hps_clients_depth0_v3_5,
-		NULL,
-		0x000023CC, 0},
-	[IPA_HW_v3_5][IPA_RX_HPS_CLIENTS_MAX_DEPTH_1] = {
-		NULL, NULL,
-		OFFSET_INVAL, 0},
-	[IPA_HW_v3_5][IPA_SPARE_REG_1] = {
-		NULL, NULL,
-		0x00002780, 0},
-	[IPA_HW_v3_5][IPA_SPARE_REG_2] = {
-		NULL, NULL,
-		0x00002784, 0},
-	[IPA_HW_v3_5][IPA_IDLE_INDICATION_CFG] = {
-		ipareg_construct_idle_indication_cfg, NULL,
-		0x00000220, 0},
-	[IPA_HW_v3_5][IPA_HPS_FTCH_ARB_QUEUE_WEIGHT] = {
-		ipareg_construct_hps_queue_weights,
-		ipareg_parse_hps_queue_weights, 0x000005a4, 0},
+	[IPA_HW_v3_5] = {
+		[IPA_TX_CFG] = {
+			ipareg_construct_tx_cfg,
+			ipareg_parse_tx_cfg, 0x000001FC, 0,
+		},
+		[IPA_SRC_RSRC_GRP_01_RSRC_TYPE_n] = {
+			ipareg_construct_rsrg_grp_xy_v3_5,
+			NULL, 0x00000400, 0x20,
+		},
+		[IPA_SRC_RSRC_GRP_23_RSRC_TYPE_n] = {
+			ipareg_construct_rsrg_grp_xy_v3_5,
+			NULL, 0x00000404, 0x20,
+		},
+		[IPA_SRC_RSRC_GRP_45_RSRC_TYPE_n] = {
+			NULL, NULL, OFFSET_INVAL, 0,
+		},
+		[IPA_SRC_RSRC_GRP_67_RSRC_TYPE_n] = {
+			NULL, NULL, OFFSET_INVAL, 0,
+		},
+		[IPA_DST_RSRC_GRP_01_RSRC_TYPE_n] = {
+			ipareg_construct_rsrg_grp_xy_v3_5,
+			NULL, 0x00000500, 0x20,
+		},
+		[IPA_DST_RSRC_GRP_23_RSRC_TYPE_n] = {
+			ipareg_construct_rsrg_grp_xy_v3_5,
+			NULL, 0x00000504, 0x20,
+		},
+		[IPA_DST_RSRC_GRP_45_RSRC_TYPE_n] = {
+			NULL, NULL, OFFSET_INVAL, 0,
+		},
+		[IPA_DST_RSRC_GRP_67_RSRC_TYPE_n] = {
+			NULL, NULL, OFFSET_INVAL, 0,
+		},
+		[IPA_ENDP_INIT_RSRC_GRP_n] = {
+			ipareg_construct_endp_init_rsrc_grp_n_v3_5,
+			NULL, 0x00000838, 0x70,
+		},
+		[IPA_RX_HPS_CLIENTS_MIN_DEPTH_0] = {
+			ipareg_construct_rx_hps_clients_depth0_v3_5,
+			NULL, 0x000023C4, 0,
+		},
+		[IPA_RX_HPS_CLIENTS_MIN_DEPTH_1] = {
+			NULL, NULL, OFFSET_INVAL, 0,
+		},
+		[IPA_RX_HPS_CLIENTS_MAX_DEPTH_0] = {
+			ipareg_construct_rx_hps_clients_depth0_v3_5,
+			NULL, 0x000023CC, 0,
+		},
+		[IPA_RX_HPS_CLIENTS_MAX_DEPTH_1] = {
+			NULL, NULL, OFFSET_INVAL, 0,
+		},
+		[IPA_SPARE_REG_1] = {
+			NULL, NULL, 0x00002780, 0,
+		},
+		[IPA_SPARE_REG_2] = {
+			NULL, NULL, 0x00002784, 0,
+		},
+		[IPA_IDLE_INDICATION_CFG] = {
+			ipareg_construct_idle_indication_cfg,
+			NULL, 0x00000220, 0,
+		},
+		[IPA_HPS_FTCH_ARB_QUEUE_WEIGHT] = {
+			ipareg_construct_hps_queue_weights,
+			ipareg_parse_hps_queue_weights, 0x000005a4, 0,
+		},
+	},
 
 	/* IPAv4.0 */
-	[IPA_HW_v4_0][IPA_ENDP_INIT_CTRL_n] = {
-		ipareg_construct_endp_init_ctrl_n_v4_0, NULL,
-		0x00000800, 0x70 },
-	[IPA_HW_v4_0][IPA_TX_CFG] = {
-		ipareg_construct_tx_cfg_v4_0, ipareg_parse_tx_cfg_v4_0,
-		0x000001FC, 0},
-	[IPA_HW_v4_0][IPA_DEBUG_CNT_REG_n] = {
-		NULL, NULL,
-		OFFSET_INVAL, 0},
-	[IPA_HW_v4_0][IPA_DEBUG_CNT_CTRL_n] = {
-		ipareg_construct_debug_cnt_ctrl_n, NULL,
-		OFFSET_INVAL, 0},
-	[IPA_HW_v4_0][IPA_QCNCM] = {
-		ipareg_construct_qcncm, ipareg_parse_qcncm,
-		OFFSET_INVAL, 0},
-	[IPA_HW_v4_0][IPA_SINGLE_NDP_MODE] = {
-		ipareg_construct_single_ndp_mode, ipareg_parse_single_ndp_mode,
-		OFFSET_INVAL, 0},
-	[IPA_HW_v4_0][IPA_QSB_MAX_READS] = {
-		ipareg_construct_qsb_max_reads_v4_0, NULL,
-		0x00000078, 0},
-	[IPA_HW_v4_0][IPA_FILT_ROUT_HASH_FLUSH] = {
-		NULL, NULL,
-		0x0000014c, 0},
-	[IPA_HW_v4_0][IPA_STATE_AGGR_ACTIVE] = {
-		NULL, NULL,
-		0x000000b4, 0},
-	[IPA_HW_v4_0][IPA_ENDP_INIT_ROUTE_n] = {
-		ipareg_construct_endp_init_route_n, NULL,
-		OFFSET_INVAL, 0},
-	[IPA_HW_v4_0][IPA_ENDP_STATUS_n] = {
-		ipareg_construct_endp_status_n_v4_0, NULL,
-		0x00000840, 0x70},
-	[IPA_HW_v4_0][IPA_CLKON_CFG] = {
-		NULL, NULL,
-		0x00000044, 0},
-	[IPA_HW_v4_0][IPA_ENDP_INIT_CONN_TRACK_n] = {
-		ipareg_construct_endp_init_conn_track_n,
-		NULL,
-		0x00000850, 0x70},
-	[IPA_HW_v4_0][IPA_STAT_QUOTA_BASE_n] = {
-		NULL, NULL,
-		0x00000700, 0x4 },
-	[IPA_HW_v4_0][IPA_STAT_QUOTA_MASK_n] = {
-		NULL, NULL,
-		0x00000708, 0x4 },
-	[IPA_HW_v4_0][IPA_STAT_TETHERING_BASE_n] = {
-		NULL, NULL,
-		0x00000710, 0x4 },
-	[IPA_HW_v4_0][IPA_STAT_TETHERING_MASK_n] = {
-		NULL, NULL,
-		0x00000718, 0x4 },
-	[IPA_HW_v4_0][IPA_STAT_FILTER_IPV4_BASE] = {
-		NULL, NULL,
-		0x00000720, 0x0 },
-	[IPA_HW_v4_0][IPA_STAT_FILTER_IPV6_BASE] = {
-		NULL, NULL,
-		0x00000724, 0x0 },
-	[IPA_HW_v4_0][IPA_STAT_ROUTER_IPV4_BASE] = {
-		NULL, NULL,
-		0x00000728, 0x0 },
-	[IPA_HW_v4_0][IPA_STAT_ROUTER_IPV6_BASE] = {
-		NULL, NULL,
-		0x0000072C, 0x0 },
-	[IPA_HW_v4_0][IPA_STAT_FILTER_IPV4_START_ID] = {
-		NULL, NULL,
-		0x00000730, 0x0 },
-	[IPA_HW_v4_0][IPA_STAT_FILTER_IPV6_START_ID] = {
-		NULL, NULL,
-		0x00000734, 0x0 },
-	[IPA_HW_v4_0][IPA_STAT_ROUTER_IPV4_START_ID] = {
-		NULL, NULL,
-		0x00000738, 0x0 },
-	[IPA_HW_v4_0][IPA_STAT_ROUTER_IPV6_START_ID] = {
-		NULL, NULL,
-		0x0000073C, 0x0 },
-	[IPA_HW_v4_0][IPA_STAT_FILTER_IPV4_END_ID] = {
-		NULL, NULL,
-		0x00000740, 0x0 },
-	[IPA_HW_v4_0][IPA_STAT_FILTER_IPV6_END_ID] = {
-		NULL, NULL,
-		0x00000744, 0x0 },
-	[IPA_HW_v4_0][IPA_STAT_ROUTER_IPV4_END_ID] = {
-		NULL, NULL,
-		0x00000748, 0x0 },
-	[IPA_HW_v4_0][IPA_STAT_ROUTER_IPV6_END_ID] = {
-		NULL, NULL,
-		0x0000074C, 0x0 },
-	[IPA_HW_v4_0][IPA_STAT_DROP_CNT_BASE_n] = {
-		NULL, NULL,
-		0x00000750, 0x4 },
-	[IPA_HW_v4_0][IPA_STAT_DROP_CNT_MASK_n] = {
-		NULL, NULL,
-		0x00000758, 0x4 },
+	[IPA_HW_v4_0] = {
+		[IPA_ENDP_INIT_CTRL_n] = {
+			ipareg_construct_endp_init_ctrl_n_v4_0,
+			NULL, 0x00000800, 0x70,
+		},
+		[IPA_TX_CFG] = {
+			ipareg_construct_tx_cfg_v4_0,
+			ipareg_parse_tx_cfg_v4_0, 0x000001FC, 0,
+		},
+		[IPA_DEBUG_CNT_REG_n] = {
+			NULL, NULL, OFFSET_INVAL, 0,
+		},
+		[IPA_DEBUG_CNT_CTRL_n] = {
+			ipareg_construct_debug_cnt_ctrl_n,
+			NULL, OFFSET_INVAL, 0,
+		},
+		[IPA_QCNCM] = {
+			ipareg_construct_qcncm,
+			ipareg_parse_qcncm, OFFSET_INVAL, 0,
+		},
+		[IPA_SINGLE_NDP_MODE] = {
+			ipareg_construct_single_ndp_mode,
+			ipareg_parse_single_ndp_mode, OFFSET_INVAL, 0,
+		},
+		[IPA_QSB_MAX_READS] = {
+			ipareg_construct_qsb_max_reads_v4_0,
+			NULL, 0x00000078, 0,
+		},
+		[IPA_FILT_ROUT_HASH_FLUSH] = {
+			NULL, NULL, 0x0000014c, 0,
+		},
+		[IPA_STATE_AGGR_ACTIVE] = {
+			NULL, NULL, 0x000000b4, 0,
+		},
+		[IPA_ENDP_INIT_ROUTE_n] = {
+			ipareg_construct_endp_init_route_n,
+			NULL, OFFSET_INVAL, 0,
+		},
+		[IPA_ENDP_STATUS_n] = {
+			ipareg_construct_endp_status_n_v4_0,
+			NULL, 0x00000840, 0x70,
+		},
+		[IPA_CLKON_CFG] = {
+			NULL, NULL, 0x00000044, 0,
+		},
+		[IPA_ENDP_INIT_CONN_TRACK_n] = {
+			ipareg_construct_endp_init_conn_track_n,
+			NULL, 0x00000850, 0x70,
+		},
+		[IPA_STAT_QUOTA_BASE_n] = {
+			NULL, NULL, 0x00000700, 0x4,
+		},
+		[IPA_STAT_QUOTA_MASK_n] = {
+			NULL, NULL, 0x00000708, 0x4,
+		},
+		[IPA_STAT_TETHERING_BASE_n] = {
+			NULL, NULL, 0x00000710, 0x4,
+		},
+		[IPA_STAT_TETHERING_MASK_n] = {
+			NULL, NULL, 0x00000718, 0x4,
+		},
+		[IPA_STAT_FILTER_IPV4_BASE] = {
+			NULL, NULL, 0x00000720, 0x0,
+		},
+		[IPA_STAT_FILTER_IPV6_BASE] = {
+			NULL, NULL, 0x00000724, 0x0,
+		},
+		[IPA_STAT_ROUTER_IPV4_BASE] = {
+			NULL, NULL, 0x00000728, 0x0,
+		},
+		[IPA_STAT_ROUTER_IPV6_BASE] = {
+			NULL, NULL, 0x0000072C, 0x0,
+		},
+		[IPA_STAT_FILTER_IPV4_START_ID] = {
+			NULL, NULL, 0x00000730, 0x0,
+		},
+		[IPA_STAT_FILTER_IPV6_START_ID] = {
+			NULL, NULL, 0x00000734, 0x0,
+		},
+		[IPA_STAT_ROUTER_IPV4_START_ID] = {
+			NULL, NULL, 0x00000738, 0x0,
+		},
+		[IPA_STAT_ROUTER_IPV6_START_ID] = {
+			NULL, NULL, 0x0000073C, 0x0,
+		},
+		[IPA_STAT_FILTER_IPV4_END_ID] = {
+			NULL, NULL, 0x00000740, 0x0,
+		},
+		[IPA_STAT_FILTER_IPV6_END_ID] = {
+			NULL, NULL, 0x00000744, 0x0,
+		},
+		[IPA_STAT_ROUTER_IPV4_END_ID] = {
+			NULL, NULL, 0x00000748, 0x0,
+		},
+		[IPA_STAT_ROUTER_IPV6_END_ID] = {
+			NULL, NULL, 0x0000074C, 0x0,
+		},
+		[IPA_STAT_DROP_CNT_BASE_n] = {
+			NULL, NULL, 0x00000750, 0x4,
+		},
+		[IPA_STAT_DROP_CNT_MASK_n] = {
+			NULL, NULL, 0x00000758, 0x4,
+		},
+	},
 };
 
 static struct ipahal_reg_obj ipahal_regs[IPA_REG_MAX];
