@@ -113,6 +113,20 @@ static const char *ipareg_name_to_str[IPA_REG_MAX] = {
 	__stringify(IPA_STAT_DROP_CNT_MASK_n),
 };
 
+/*
+ * ipahal_reg_name_str() - returns string that represent the register
+ * @reg_name: [in] register name
+ */
+const char *ipahal_reg_name_str(enum ipahal_reg_name reg_name)
+{
+	if (reg_name < 0 || reg_name >= IPA_REG_MAX) {
+		ipa_err("requested name of invalid reg=%d\n", reg_name);
+		return "Invalid Register";
+	}
+
+	return ipareg_name_to_str[reg_name];
+}
+
 static void ipareg_construct_rx_hps_clients_depth1(
 	enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
@@ -1660,20 +1674,6 @@ int ipahal_reg_init(void)
 	}
 
 	return 0;
-}
-
-/*
- * ipahal_reg_name_str() - returns string that represent the register
- * @reg_name: [in] register name
- */
-const char *ipahal_reg_name_str(enum ipahal_reg_name reg_name)
-{
-	if (reg_name < 0 || reg_name >= IPA_REG_MAX) {
-		ipa_err("requested name of invalid reg=%d\n", reg_name);
-		return "Invalid Register";
-	}
-
-	return ipareg_name_to_str[reg_name];
 }
 
 /*
