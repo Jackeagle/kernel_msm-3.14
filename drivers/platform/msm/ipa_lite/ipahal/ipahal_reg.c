@@ -119,11 +119,6 @@ static const char *ipareg_name_to_str[IPA_REG_MAX] = {
  */
 static const char *ipahal_reg_name_str(enum ipahal_reg_name reg_name)
 {
-	if (reg_name < 0 || reg_name >= IPA_REG_MAX) {
-		ipa_err("requested name of invalid reg=%d\n", reg_name);
-		return "Invalid Register";
-	}
-
 	return ipareg_name_to_str[reg_name];
 }
 
