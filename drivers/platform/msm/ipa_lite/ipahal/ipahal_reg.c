@@ -1742,12 +1742,6 @@ u32 ipahal_read_reg_n_fields(enum ipahal_reg_name reg, u32 n, void *fields)
 	u32 offset;
 	u32 val;
 
-	if (!fields) {
-		ipa_err("Input error fields=%p\n", fields);
-		WARN_ON(1);
-		return 0;
-	}
-
 	offset = ipahal_reg_n_offset(reg, n);
 	if (!offset)
 		return 0;
