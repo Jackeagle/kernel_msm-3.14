@@ -1595,17 +1595,13 @@ static struct ipahal_reg_obj ipahal_regs[IPA_REG_MAX];
 
 static void ipahal_reg_validate(const struct ipahal_reg_obj *reg_obj, int reg)
 {
-	if (!reg_obj->offset) {
-		ipa_err("reg=%s with zero offset\n", ipahal_reg_name_str(reg));
-		WARN_ON(1);
-	}
 	if (!reg_obj->construct) {
-		ipa_err("reg=%s with NULL construct func\n",
+		ipa_err("reg=%s with non-zero offset, NULL construct func\n",
 				ipahal_reg_name_str(reg));
 		WARN_ON(1);
 	}
 	if (!reg_obj->parse) {
-		ipa_err("reg=%s with NULL parse func\n",
+		ipa_err("reg=%s with non-zero offset, NULL parse func\n",
 				ipahal_reg_name_str(reg));
 		WARN_ON(1);
 	}
@@ -1622,7 +1618,6 @@ int ipahal_reg_init(void)
 {
 	int i;
 	int j;
-	static const struct ipahal_reg_obj zero_obj;
 
 	ipa_debug_low("Entry - HW_TYPE=%d\n", ipahal_ctx->hw_type);
 
@@ -1632,7 +1627,7 @@ int ipahal_reg_init(void)
 			const struct ipahal_reg_obj *reg;
 
 			reg = &ipahal_reg_objs[j][i];
-			if (memcmp(reg, &zero_obj, sizeof(*reg))) {
+			if (reg->offset) {
 				ipahal_reg_validate(reg, i);
 				ipahal_regs[i] = *reg;
 				break;
@@ -1674,6 +1669,12 @@ u32 ipahal_read_reg_n(enum ipahal_reg_name reg, u32 n)
 		ipahal_reg_name_str(reg), n);
 
 	offset = ipahal_regs[reg].offset;
+	if (!offset) {
+		ipa_err("Read access to undefined reg=%s\n",
+			ipahal_reg_name_str(reg));
+		WARN_ON(1);
+		return -EFAULT;
+	}
 	if (offset == OFFSET_INVAL) {
 		ipa_err("Read access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
@@ -1699,6 +1700,12 @@ u32 ipahal_read_reg_mn(enum ipahal_reg_name reg, u32 m, u32 n)
 	ipa_debug_low("read %s m=%u n=%u\n",
 		ipahal_reg_name_str(reg), m, n);
 	offset = ipahal_regs[reg].offset;
+	if (!offset) {
+		ipa_err("Read access to undefined reg=%s\n",
+			ipahal_reg_name_str(reg));
+		WARN_ON_ONCE(1);
+		return -EFAULT;
+	}
 	if (offset == OFFSET_INVAL) {
 		ipa_err("Read access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
@@ -1731,6 +1738,12 @@ void ipahal_write_reg_mn(enum ipahal_reg_name reg, u32 m, u32 n, u32 val)
 	ipa_debug_low("write to %s m=%u n=%u val=%u\n",
 		ipahal_reg_name_str(reg), m, n, val);
 	offset = ipahal_regs[reg].offset;
+	if (!offset) {
+		ipa_err("WRITE access to undefined reg=%s\n",
+			ipahal_reg_name_str(reg));
+		WARN_ON_ONCE(1);
+		return;
+	}
 	if (offset == OFFSET_INVAL) {
 		ipa_err("Write access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
@@ -1771,6 +1784,12 @@ u32 ipahal_read_reg_n_fields(enum ipahal_reg_name reg, u32 n, void *fields)
 	ipa_debug_low("read from %s n=%u and parse it\n",
 		ipahal_reg_name_str(reg), n);
 	offset = ipahal_regs[reg].offset;
+	if (!offset) {
+		ipa_err("Read access to undefined reg=%s\n",
+			ipahal_reg_name_str(reg));
+		WARN_ON_ONCE(1);
+		return -EFAULT;
+	}
 	if (offset == OFFSET_INVAL) {
 		ipa_err("Read access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
@@ -1806,6 +1825,12 @@ void ipahal_write_reg_n_fields(enum ipahal_reg_name reg, u32 n,
 	ipa_debug_low("write to %s n=%u after constructing it\n",
 		ipahal_reg_name_str(reg), n);
 	offset = ipahal_regs[reg].offset;
+	if (!offset) {
+		ipa_err("Write access to undefined reg=%s\n",
+			ipahal_reg_name_str(reg));
+		WARN_ON_ONCE(1);
+		return;
+	}
 	if (offset == OFFSET_INVAL) {
 		ipa_err("Write access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
@@ -1834,6 +1859,12 @@ u32 ipahal_get_reg_mn_ofst(enum ipahal_reg_name reg, u32 m, u32 n)
 	ipa_debug_low("get offset of %s m=%u n=%u\n",
 		ipahal_reg_name_str(reg), m, n);
 	offset = ipahal_regs[reg].offset;
+	if (!offset) {
+		ipa_err("Access to undefined reg=%s\n",
+			ipahal_reg_name_str(reg));
+		WARN_ON(1);
+		return -EFAULT;
+	}
 	if (offset == OFFSET_INVAL) {
 		ipa_err("Access to obsolete reg=%s\n",
 			ipahal_reg_name_str(reg));
