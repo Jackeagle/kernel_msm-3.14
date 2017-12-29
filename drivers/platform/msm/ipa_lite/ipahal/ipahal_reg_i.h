@@ -13,7 +13,7 @@
 #ifndef _IPAHAL_REG_I_H_
 #define _IPAHAL_REG_I_H_
 
-int ipahal_reg_init(void);
+void ipahal_reg_init(void);
 
 #define IPA_SETFIELD(val, shift, mask) (((val) << (shift)) & (mask))
 #define IPA_SETFIELD_IN_REG(reg, val, shift, mask) \

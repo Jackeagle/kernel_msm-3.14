@@ -1679,7 +1679,7 @@ static struct ipahal_reg_obj ipahal_regs[IPA_REG_MAX];
  * Note: As global variables are initialized with zero, any un-overridden
  *  register entry will be zero. By this we recognize them.
  */
-int ipahal_reg_init(void)
+void ipahal_reg_init(void)
 {
 	int i;
 	int j;
@@ -1698,8 +1698,6 @@ int ipahal_reg_init(void)
 			}
 		}
 	}
-
-	return 0;
 }
 
 /*
