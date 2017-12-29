@@ -1765,11 +1765,6 @@ void ipahal_write_reg_n_fields(enum ipahal_reg_name reg, u32 n,
 	u32 offset;
 	u32 val = 0;
 
-	if (!fields) {
-		ipa_err("Input error fields=%p\n", fields);
-		return;
-	}
-
 	offset = ipahal_reg_n_offset(reg, n);
 	if (!offset)
 		return;
