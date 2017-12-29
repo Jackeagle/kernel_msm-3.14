@@ -120,7 +120,11 @@ static int ipa3_handle_interrupt(int irq_num, bool isr_context)
 			ipa_ee);
 		ipa_debug_low("get interrupt %d\n", suspend_data);
 
-		/* Clearing L2 interrupts status */
+		/*
+		 * Clear L2 interrupts status.  Note the following
+		 * must not be executed for IPA hardware versions
+		 * prior to 3.1.
+		 */
 		ipahal_write_reg_n(IPA_SUSPEND_IRQ_CLR_EE_n,
 			ipa_ee, suspend_data);
 		if (!ipa3_is_valid_ep(suspend_data))
@@ -369,7 +373,11 @@ int ipa3_add_interrupt_handler(enum ipa_irq_type interrupt,
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, ipa_ee, val);
 	ipa_debug("wrote IPA_IRQ_EN_EE_n register. reg = %d\n", val);
 
-	/* register SUSPEND_IRQ_EN_EE_n_ADDR for L2 interrupt*/
+	/*
+	 * Register SUSPEND_IRQ_EN_EE_n_ADDR for L2 interrupt.
+	 * Note the following must not be executed for IPA hardware
+	 * versions prior to 3.1.
+	 */
 	if (interrupt == IPA_TX_SUSPEND_IRQ) {
 		val = ~0;
 		for (client_idx = 0; client_idx < IPA_CLIENT_MAX; client_idx++)
@@ -421,7 +429,11 @@ int ipa3_remove_interrupt_handler(enum ipa_irq_type interrupt)
 	ipa_interrupt_to_cb[irq_num].private_data = NULL;
 	ipa_interrupt_to_cb[irq_num].interrupt = -1;
 
-	/* clean SUSPEND_IRQ_EN_EE_n_ADDR for L2 interrupt */
+	/*
+	 * Unregister SUSPEND_IRQ_EN_EE_n_ADDR for L2 interrupt.
+	 * Note the following must not be executed for IPA hardware
+	 * versions prior to 3.1.
+	 */
 	if (interrupt == IPA_TX_SUSPEND_IRQ) {
 		ipahal_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_n, ipa_ee, 0);
 		ipa_debug("wrote IPA_SUSPEND_IRQ_EN_EE_n reg = %d\n", 0);

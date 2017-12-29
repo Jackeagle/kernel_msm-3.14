@@ -2141,6 +2141,10 @@ static int ipa3_pre_init(void)
 		goto fail_create_apps_resource;
 	}
 
+	/*
+	 * Note enabling dynamic clock division must not be
+	 * attempted for IPA hardware versions prior to 3.5.
+	 */
 	ipa3_enable_dcd();
 
 	init_completion(&ipa3_ctx->init_completion_obj);

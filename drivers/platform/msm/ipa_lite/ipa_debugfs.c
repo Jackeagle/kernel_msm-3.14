@@ -647,9 +647,9 @@ void ipa3_debugfs_init(void)
 
 	/*
 	 * Starting with IPA hardware 4.0, registers IPA_DEBUG_CNT_REG_n
-	 * and IPA_DEBUG_CNT_CTRL_n will longer be supported.  These
+	 * and IPA_DEBUG_CNT_CTRL_n will no longer be supported.  These
 	 * registers are read and written (respectively) by debugfs
-	 * file "debug_cnt" created here.  Once we support newer
+	 * file "dbg_cnt" created here.  Once we support newer
 	 * versions of IPA hardware, creating "debug_cnt" should be
 	 * done conditionally to avoid accessing unsupported registers.
 	 */
