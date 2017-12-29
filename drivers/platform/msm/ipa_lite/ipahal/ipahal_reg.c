@@ -1671,16 +1671,7 @@ u32 ipahal_reg_n_offset(enum ipahal_reg_name reg, u32 n)
 
 	ipa_debug_low("get offset of %s n=%u\n", ipareg_name_to_str[reg], n);
 	offset = ipahal_regs[reg].offset;
-	if (!offset) {
-		ipa_err("Access to undefined reg=%s\n", ipareg_name_to_str[reg]);
-		WARN_ON(1);
-		return 0;
-	}
-	if (offset == OFFSET_INVAL) {
-		ipa_err("Access to obsolete reg=%s\n", ipareg_name_to_str[reg]);
-		WARN_ON(1);
-		return 0;
-	}
+	BUG_ON(!offset || offset == OFFSET_INVAL);
 	offset += ipahal_regs[reg].n_ofst * n;
 
 	return offset;
