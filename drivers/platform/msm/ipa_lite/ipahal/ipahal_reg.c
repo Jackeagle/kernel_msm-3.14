@@ -1748,14 +1748,7 @@ void ipahal_write_reg_n(enum ipahal_reg_name reg, u32 n, u32 val)
  */
 u32 ipahal_read_reg_n_fields(enum ipahal_reg_name reg, u32 n, void *fields)
 {
-	u32 offset;
-	u32 val;
-
-	offset = ipahal_reg_n_offset(reg, n);
-	if (!offset)
-		return 0;
-
-	val = ioread32(ipahal_ctx->base + offset);
+	u32 val = ipahal_read_reg_n(reg, n);
 
 	if (WARN_ON(!ipahal_regs[reg].parse))
 		ipa_err("No parse function for %s\n", ipareg_name_to_str[reg]);
@@ -1771,12 +1764,7 @@ u32 ipahal_read_reg_n_fields(enum ipahal_reg_name reg, u32 n, void *fields)
 void ipahal_write_reg_n_fields(enum ipahal_reg_name reg, u32 n,
 		const void *fields)
 {
-	u32 offset;
 	u32 val = 0;
-
-	offset = ipahal_reg_n_offset(reg, n);
-	if (!offset)
-		return;
 
 	if (WARN_ON(!ipahal_regs[reg].construct))
 		ipa_err("No construct function for %s\n",
@@ -1784,7 +1772,7 @@ void ipahal_write_reg_n_fields(enum ipahal_reg_name reg, u32 n,
 	else
 		ipahal_regs[reg].construct(reg, fields, &val);
 
-	iowrite32(val, ipahal_ctx->base + offset);
+	ipahal_write_reg_n(reg, n, val);
 }
 
 u32 ipahal_get_reg_base(void)
