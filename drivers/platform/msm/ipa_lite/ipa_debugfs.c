@@ -139,34 +139,46 @@ static ssize_t ipa3_write_ep_reg(struct file *file, const char __user *buf,
 /**
  * _ipa_read_ep_reg_v3_0() - Reads and prints endpoint configuration registers
  *
- * Returns the number of characters printed
+ * Returns the number of characters printed (excluding terminating '\0').
  */
 int _ipa_read_ep_reg_v3_0(char *buf, int max_len, int pipe)
 {
-	return scnprintf(
-		dbg_buff, IPA_MAX_MSG_LEN,
-		"IPA_ENDP_INIT_NAT_%u=0x%x\n"
-		"IPA_ENDP_INIT_HDR_%u=0x%x\n"
-		"IPA_ENDP_INIT_HDR_EXT_%u=0x%x\n"
-		"IPA_ENDP_INIT_MODE_%u=0x%x\n"
-		"IPA_ENDP_INIT_AGGR_%u=0x%x\n"
-		"IPA_ENDP_INIT_ROUTE_%u=0x%x\n"
-		"IPA_ENDP_INIT_CTRL_%u=0x%x\n"
-		"IPA_ENDP_INIT_HOL_EN_%u=0x%x\n"
-		"IPA_ENDP_INIT_HOL_TIMER_%u=0x%x\n"
-		"IPA_ENDP_INIT_DEAGGR_%u=0x%x\n"
-		"IPA_ENDP_INIT_CFG_%u=0x%x\n",
-		pipe, ipahal_read_reg_n(IPA_ENDP_INIT_NAT_n, pipe),
-		pipe, ipahal_read_reg_n(IPA_ENDP_INIT_HDR_n, pipe),
-		pipe, ipahal_read_reg_n(IPA_ENDP_INIT_HDR_EXT_n, pipe),
-		pipe, ipahal_read_reg_n(IPA_ENDP_INIT_MODE_n, pipe),
-		pipe, ipahal_read_reg_n(IPA_ENDP_INIT_AGGR_n, pipe),
-		pipe, ipahal_read_reg_n(IPA_ENDP_INIT_ROUTE_n, pipe),
-		pipe, ipahal_read_reg_n(IPA_ENDP_INIT_CTRL_n, pipe),
-		pipe, ipahal_read_reg_n(IPA_ENDP_INIT_HOL_BLOCK_EN_n, pipe),
-		pipe, ipahal_read_reg_n(IPA_ENDP_INIT_HOL_BLOCK_TIMER_n, pipe),
-		pipe, ipahal_read_reg_n(IPA_ENDP_INIT_DEAGGR_n, pipe),
-		pipe, ipahal_read_reg_n(IPA_ENDP_INIT_CFG_n, pipe));
+	ssize_t offset = 0;
+
+	offset += scnprintf(dbg_buff + offset, IPA_MAX_MSG_LEN - offset,
+			"IPA_ENDP_INIT_NAT_%u=0x%x\n"
+			"IPA_ENDP_INIT_HDR_%u=0x%x\n"
+			"IPA_ENDP_INIT_HDR_EXT_%u=0x%x\n"
+			"IPA_ENDP_INIT_MODE_%u=0x%x\n"
+			"IPA_ENDP_INIT_AGGR_%u=0x%x\n",
+			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_NAT_n, pipe),
+			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_HDR_n, pipe),
+			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_HDR_EXT_n, pipe),
+			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_MODE_n, pipe),
+			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_AGGR_n, pipe));
+	/*
+	 * Starting IPA_HW_v4_0 the following register will have to
+	 * be formatted into the buffer conditionally.  It will no
+	 * longer be supported and we shouldn't attempt to read it.
+	 */
+	offset += scnprintf(dbg_buff + offset, IPA_MAX_MSG_LEN - offset,
+			"IPA_ENDP_INIT_ROUTE_%u=0x%x\n",
+			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_ROUTE_n, pipe));
+	offset += scnprintf(dbg_buff + offset, IPA_MAX_MSG_LEN - offset,
+			"IPA_ENDP_INIT_CTRL_%u=0x%x\n"
+			"IPA_ENDP_INIT_HOL_EN_%u=0x%x\n"
+			"IPA_ENDP_INIT_HOL_TIMER_%u=0x%x\n"
+			"IPA_ENDP_INIT_DEAGGR_%u=0x%x\n"
+			"IPA_ENDP_INIT_CFG_%u=0x%x\n",
+			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_CTRL_n, pipe),
+			pipe,
+			ipahal_read_reg_n(IPA_ENDP_INIT_HOL_BLOCK_EN_n, pipe),
+			pipe,
+			ipahal_read_reg_n(IPA_ENDP_INIT_HOL_BLOCK_TIMER_n, pipe),
+			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_DEAGGR_n, pipe),
+			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_CFG_n, pipe));
+
+	return offset;
 }
 
 /**
