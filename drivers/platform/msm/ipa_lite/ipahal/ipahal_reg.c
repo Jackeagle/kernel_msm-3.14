@@ -1736,7 +1736,7 @@ void ipahal_write_reg_n(enum ipahal_reg_name reg, u32 n, u32 val)
 /*
  * ipahal_read_reg_n_fields() - Get the parsed value of n parameterized reg
  */
-u32 ipahal_read_reg_n_fields(enum ipahal_reg_name reg, u32 n, void *fields)
+void ipahal_read_reg_n_fields(enum ipahal_reg_name reg, u32 n, void *fields)
 {
 	u32 val = ipahal_read_reg_n(reg, n);
 
@@ -1744,8 +1744,6 @@ u32 ipahal_read_reg_n_fields(enum ipahal_reg_name reg, u32 n, void *fields)
 		ipa_err("No parse function for %s\n", ipareg_name_to_str[reg]);
 	else
 		ipahal_regs[reg].parse(reg, fields, val);
-
-	return val;
 }
 
 /*
