@@ -1722,12 +1722,7 @@ u32 ipahal_reg_n_offset(enum ipahal_reg_name reg, u32 n)
  */
 u32 ipahal_read_reg_n(enum ipahal_reg_name reg, u32 n)
 {
-	u32 offset = ipahal_reg_n_offset(reg, n);
-
-	if (!offset)
-		return 0;
-
-	return ioread32(ipahal_ctx->base + offset);
+	return ioread32(ipahal_ctx->base + ipahal_reg_n_offset(reg, n));
 }
 
 /*
@@ -1735,12 +1730,7 @@ u32 ipahal_read_reg_n(enum ipahal_reg_name reg, u32 n)
  */
 void ipahal_write_reg_n(enum ipahal_reg_name reg, u32 n, u32 val)
 {
-	u32 offset = ipahal_reg_n_offset(reg, n);
-
-	if (!offset)
-		return;
-
-	iowrite32(val, ipahal_ctx->base + offset);
+	iowrite32(val, ipahal_ctx->base + ipahal_reg_n_offset(reg, n));
 }
 
 /*
