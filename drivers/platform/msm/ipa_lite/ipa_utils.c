@@ -1421,34 +1421,6 @@ int ipa3_set_aggr_mode(enum ipa_aggr_mode mode)
 }
 
 /**
- * ipa3_set_qcncm_ndp_sig() - Set the NDP signature used for QCNCM aggregation
- * mode
- * @sig:	[in] the first 3 bytes of QCNCM NDP signature (expected to be
- * "QND")
- *
- * Set the NDP signature used for QCNCM aggregation mode. The fourth byte
- * (expected to be 'P') needs to be set using the header addition mechanism
- *
- * Returns:	0 on success, negative on failure
- */
-int ipa3_set_qcncm_ndp_sig(char sig[3])
-{
-	struct ipahal_reg_qcncm qcncm;
-
-	if (sig == NULL) {
-		ipa_err("bad argument for ipa3_set_qcncm_ndp_sig/n");
-		return -EINVAL;
-	}
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
-	ipahal_read_reg_fields(IPA_QCNCM, &qcncm);
-	qcncm.mode_val = ((sig[0] << 16) | (sig[1] << 8) | sig[2]);
-	ipahal_write_reg_fields(IPA_QCNCM, &qcncm);
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
-
-	return 0;
-}
-
-/**
  * ipa3_set_single_ndp_per_mbim() - Enable/disable single NDP per MBIM frame
  * configuration
  * @enable:	[in] true for single NDP/MBIM; false otherwise

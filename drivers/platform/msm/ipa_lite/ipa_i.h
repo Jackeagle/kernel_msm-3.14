@@ -1261,8 +1261,6 @@ int ipa3_cfg_ep_ctrl(u32 clnt_hdl, const struct ipa_ep_cfg_ctrl *ep_ctrl);
  */
 int ipa3_set_aggr_mode(enum ipa_aggr_mode mode);
 
-int ipa3_set_qcncm_ndp_sig(char sig[3]);
-
 int ipa3_set_single_ndp_per_mbim(bool enable);
 
 /*
