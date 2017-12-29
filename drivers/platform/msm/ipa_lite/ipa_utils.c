@@ -1240,64 +1240,6 @@ int ipa3_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 }
 
 /**
- * ipa3_cfg_ep_route() - IPA end-point routing configuration
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg:	[in] IPA end-point configuration params
- *
- * Returns:	0 on success, negative on failure
- *
- * Note:	Should not be called from atomic context
- */
-int ipa3_cfg_ep_route(u32 clnt_hdl, const struct ipa_ep_cfg_route *ep_route)
-{
-	struct ipahal_reg_endp_init_route init_rt;
-
-	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
-	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_route == NULL) {
-		ipa_err("bad parm, clnt_hdl = %d , ep_valid = %d\n",
-			clnt_hdl, ipa3_ctx->ep[clnt_hdl].valid);
-		return -EINVAL;
-	}
-
-	if (IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client)) {
-		ipa_err("ROUTE does not apply to IPA out EP %d\n",
-				clnt_hdl);
-		return -EINVAL;
-	}
-
-	/*
-	 * if DMA mode was configured previously for this EP, return with
-	 * success
-	 */
-	if (ipa3_ctx->ep[clnt_hdl].cfg.mode.mode == IPA_DMA) {
-		ipa_debug("DMA enabled for ep %d, dst pipe is part of DMA\n",
-				clnt_hdl);
-		return 0;
-	}
-
-	if (ep_route->rt_tbl_hdl)
-		ipa_err("client specified non-zero RT TBL hdl - ignore it\n");
-
-	ipa_debug("pipe=%d, rt_tbl_hdl=%d\n",
-			clnt_hdl,
-			ep_route->rt_tbl_hdl);
-
-	/* always use "default" routing table when programming EP ROUTE reg */
-	ipa3_ctx->ep[clnt_hdl].rt_tbl_idx =
-		IPA_MEM_PART(v4_apps_rt_index_lo);
-
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
-
-	init_rt.route_table_index = ipa3_ctx->ep[clnt_hdl].rt_tbl_idx;
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_ROUTE_n,
-		clnt_hdl, &init_rt);
-
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
-
-	return 0;
-}
-
-/**
  * ipa3_cfg_ep_holb() - IPA end-point holb configuration
  *
  * If an IPA producer pipe is full, IPA HW by default will block
