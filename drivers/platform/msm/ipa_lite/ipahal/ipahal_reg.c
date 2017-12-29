@@ -1185,6 +1185,57 @@ static void ipareg_parse_hps_queue_weights(
 }
 
 /*
+ * The offsets of certain registers may change between different
+ * versions of IPA hardware.  In addition, the format of information
+ * read or written for a particular register change slightly for new
+ * hardware.  The "ipahal" layer hides this by abstracting register
+ * access, allowing access to each register to be performed using a
+ * symbolic name.
+ *
+ * The following table consists of blocks of "register object"
+ * definitions associated with versions of IPA hardware.  The first
+ * version of IPA hardware supported by the "ipahal" layer is 3.0;
+ * essentially all registers needed for IPA operation have a
+ * register object associated with IPA_HW_v3_0.
+ *
+ * Versions of IPA hardware newer than 3.0 do not need to specify
+ * register object entries if they are accessed the same way as was
+ * defined by an older version.  The only entries defined for newer
+ * hardware are registers whose offset or data format has changed,
+ * or registers that are new and not present in older hardware.
+ *
+ * IPA version 3.1, for example, has only three entries defined:
+ * IPA_IRQ_SUSPEND_INFO_EE_n, which is located at a different
+ * offset than in IPA version 3.0; and IPA_SUSPEND_IRQ_EN_EE_n
+ * and IPA_SUSPEND_IRQ_CLR_EE_n, which were not previously defined.
+ * All other registers will use the access method defined for IPA
+ * version 3.0.
+ *
+ * The definitions used for each hardware version is based on the
+ * definition used by the next earlier version.  So IPA hardware
+ * version 3.5 uses definitions for version 3.1, and its block of
+ * register objects will consist only of overrides, or registers
+ * not defined prior to version 3.5.
+ *
+ * The entries in this table have the following constraints:
+ * - 0 is not a valid offset; an entry having a 0 offset is
+ *   indicates the corresponding register is accessed according
+ *   to a register object defined for an earlier hardware version.
+ *   It is a bug for code to attempt to access a register which
+ *   has an undefined (zero) offset value.
+ * - An offset of OFFSET_INVAL indicates that a register is not
+ *   supported for a particular hardware version.  It is a bug for
+ *   code to attempt to access an unsupported register.
+ * - If a construct function is supplied, the register must be
+ *   written using ipahal_write_reg_n_fields() (or its wrapper
+ *   function ipahal_write_reg_fields()).
+ * - Generally, if a parse function is supplied, the register should
+ *   generally only be read using ipahal_read_reg_n_fields() (or
+ *   ipahal_read_reg_fields()).  (Currently some debug code reads
+ *   some registers directly, without parsing.)
+ */
+
+/*
  * struct ipahal_reg_obj - Register H/W information for specific IPA version
  * @construct - CB to construct register value from abstracted structure
  * @parse - CB to parse register value to abstracted structure
@@ -1201,17 +1252,6 @@ struct ipahal_reg_obj {
 	u32 n_ofst;
 };
 
-/*
- * This table contains the info regarding each register for IPAv3 and later.
- * Information like: offset and construct/parse functions.
- * All the information on the register on IPAv3 are statically defined below.
- * If information is missing regarding some register on some IPA version,
- *  the init function will fill it with the information from the previous
- *  IPA version.
- * Information is considered missing if all of the fields are 0.
- * If offset is OFFSET_INVAL, this means that the register is removed on
- *  the specific version.
- */
 static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 	/* IPAv3 */
 	[IPA_HW_v3_0] = {
