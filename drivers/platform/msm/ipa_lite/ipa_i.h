@@ -1261,8 +1261,6 @@ int ipa3_cfg_ep_ctrl(u32 clnt_hdl, const struct ipa_ep_cfg_ctrl *ep_ctrl);
  */
 int ipa3_set_aggr_mode(enum ipa_aggr_mode mode);
 
-int ipa3_set_single_ndp_per_mbim(bool enable);
-
 /*
  * Data path
  */
@@ -1344,7 +1342,6 @@ int ipa_get_ep_group(enum ipa_client_type client);
 
 int ipa3_init_hw(void);
 struct ipa3_rt_tbl *__ipa3_find_rt_tbl(enum ipa_ip_type ip, const char *name);
-int ipa3_set_single_ndp_per_mbim(bool);
 void ipa3_debugfs_init(void);
 
 void ipa3_dump_buff_internal(void *base, dma_addr_t phy_base, u32 size);

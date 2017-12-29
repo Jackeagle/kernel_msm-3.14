@@ -1421,26 +1421,6 @@ int ipa3_set_aggr_mode(enum ipa_aggr_mode mode)
 }
 
 /**
- * ipa3_set_single_ndp_per_mbim() - Enable/disable single NDP per MBIM frame
- * configuration
- * @enable:	[in] true for single NDP/MBIM; false otherwise
- *
- * Returns:	0 on success
- */
-int ipa3_set_single_ndp_per_mbim(bool enable)
-{
-	struct ipahal_reg_single_ndp_mode mode;
-
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
-	ipahal_read_reg_fields(IPA_SINGLE_NDP_MODE, &mode);
-	mode.single_ndp_en = enable;
-	ipahal_write_reg_fields(IPA_SINGLE_NDP_MODE, &mode);
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
-
-	return 0;
-}
-
-/**
  * ipa3_straddle_boundary() - Checks whether a memory buffer straddles a
  * boundary
  * @start: start address of the memory buffer
