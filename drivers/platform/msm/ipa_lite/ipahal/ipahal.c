@@ -690,11 +690,6 @@ static int ipahal_imm_cmd_init(enum ipa_hw_type ipa_hw_type)
 
 	ipa_debug_low("Entry - HW_TYPE=%d\n", ipa_hw_type);
 
-	if ((ipa_hw_type < 0) || (ipa_hw_type >= IPA_HW_MAX)) {
-		ipa_err("invalid IPA HW type (%d)\n", ipa_hw_type);
-		return -EINVAL;
-	}
-
 	memset(&zero_obj, 0, sizeof(zero_obj));
 	for (i = IPA_HW_v3_0 ; i < ipa_hw_type ; i++) {
 		for (j = 0; j < IPA_IMM_CMD_MAX ; j++) {
