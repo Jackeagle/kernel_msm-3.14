@@ -681,17 +681,6 @@ static const struct ipahal_imm_cmd_obj
 
 static struct ipahal_imm_cmd_obj ipahal_imm_cmds[IPA_IMM_CMD_MAX];
 
-static void
-ipahal_imm_cmd_validate(const struct ipahal_imm_cmd_obj *imm_cmd_obj,
-		int imm_cmd)
-{
-	if (!imm_cmd_obj->construct) {
-		ipa_err("imm_cmd=%s with NULL construct func\n",
-			ipahal_imm_cmd_name_str(imm_cmd));
-		WARN_ON(1);
-	}
-}
-
 /*
  * ipahal_imm_cmd_init() - Build the Immediate command information table
  *  See ipahal_imm_cmd_objs[][] comments
@@ -710,7 +699,7 @@ static int ipahal_imm_cmd_init(void)
 
 			imm_cmd = &ipahal_imm_cmd_objs[j][i];
 			if (imm_cmd->opcode) {
-				ipahal_imm_cmd_validate(imm_cmd, i);
+				BUG_ON(!imm_cmd->construct);
 				ipahal_imm_cmds[i] = *imm_cmd;
 				break;
 			}
