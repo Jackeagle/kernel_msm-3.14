@@ -698,15 +698,15 @@ ipahal_imm_cmd_validate(const struct ipahal_imm_cmd_obj *imm_cmd_obj,
  * ipahal_imm_cmd_init() - Build the Immediate command information table
  *  See ipahal_imm_cmd_objs[][] comments
  */
-static int ipahal_imm_cmd_init(enum ipa_hw_type ipa_hw_type)
+static int ipahal_imm_cmd_init(void)
 {
 	int i;
 	int j;
 	static const struct ipahal_imm_cmd_obj zero_obj;
 
-	ipa_debug_low("Entry - HW_TYPE=%d\n", ipa_hw_type);
+	ipa_debug_low("Entry - HW_TYPE=%d\n", ipahal_ctx->hw_type);
 
-	for (i = IPA_HW_v3_0 ; i < ipa_hw_type ; i++) {
+	for (i = IPA_HW_v3_0 ; i < ipahal_ctx->hw_type ; i++) {
 		for (j = 0; j < IPA_IMM_CMD_MAX ; j++) {
 			if (!memcmp(&ipahal_imm_cmd_objs[i+1][j], &zero_obj,
 				sizeof(struct ipahal_imm_cmd_obj))) {
@@ -1242,7 +1242,7 @@ int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base,
 
 	ipahal_reg_init();
 
-	if (ipahal_imm_cmd_init(ipa_hw_type)) {
+	if (ipahal_imm_cmd_init()) {
 		ipa_err("failed to init ipahal imm cmd\n");
 		result = -EFAULT;
 		goto bail_free_ctx;
