@@ -616,9 +616,10 @@ struct ipahal_imm_cmd_obj {
  *  the init function will fill it with the information from the previous
  *  IPA version.
  * Information is considered missing if all of the fields are 0
- * If opcode is -1, this means that the IMM is removed on the
+ * If opcode is OPCODE_INVAL, this means that the IMM is removed on the
  *  specific version
  */
+#define OPCODE_INVAL	((u16)0xffff)
 static const struct ipahal_imm_cmd_obj
 		ipahal_imm_cmd_objs[IPA_HW_MAX][IPA_IMM_CMD_MAX] = {
 	/* IPAv3 */
@@ -669,7 +670,7 @@ static const struct ipahal_imm_cmd_obj
 	/* NAT_DMA was renamed to TABLE_DMA for IPAv4 */
 	[IPA_HW_v4_0][IPA_IMM_CMD_NAT_DMA] = {
 		NULL,
-		-1 },
+		OPCODE_INVAL },
 	[IPA_HW_v4_0][IPA_IMM_CMD_TABLE_DMA] = {
 		ipa_imm_cmd_construct_table_dma_ipav4,
 		14},
@@ -755,7 +756,7 @@ static u16 ipahal_imm_cmd_get_opcode(enum ipahal_imm_cmd_name cmd)
 	ipa_debug_low("Get opcode of IMM_CMD=%s\n",
 		ipahal_imm_cmd_name_str(cmd));
 	opcode = ipahal_imm_cmds[cmd].opcode;
-	if (opcode == -1) {
+	if (opcode == OPCODE_INVAL) {
 		ipa_err("Try to get opcode of obsolete IMM_CMD=%s\n",
 			ipahal_imm_cmd_name_str(cmd));
 		ipa_assert();
