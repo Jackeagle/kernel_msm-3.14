@@ -771,18 +771,16 @@ ipahal_construct_imm_cmd(enum ipahal_imm_cmd_name cmd, const void *params,
  * The functionality given by this function can be reached by
  *  ipahal_construct_imm_cmd(). This function is helper to the core driver
  *  to reach this NOP functionlity easily.
- * @skip_pipline_clear: if to skip pipeline clear waiting (don't wait)
  * @pipline_clr_opt: options for pipeline clear waiting
  */
 struct ipahal_imm_cmd_pyld *ipahal_construct_nop_imm_cmd(
-	bool skip_pipline_clear,
 	enum ipahal_pipeline_clear_option pipline_clr_opt)
 {
 	struct ipahal_imm_cmd_register_write cmd;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 
 	memset(&cmd, 0, sizeof(cmd));
-	cmd.skip_pipeline_clear = skip_pipline_clear;
+	cmd.skip_pipeline_clear = false;
 	cmd.pipeline_clear_options = pipline_clr_opt;
 	cmd.value_mask = 0x0;
 
