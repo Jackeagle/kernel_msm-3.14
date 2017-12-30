@@ -752,7 +752,7 @@ static u16 ipahal_imm_cmd_get_opcode(enum ipahal_imm_cmd_name cmd)
 	if (cmd >= IPA_IMM_CMD_MAX) {
 		ipa_err("Invalid immediate command imm_cmd=%u\n", cmd);
 		ipa_assert();
-		return -EFAULT;
+		return 0;
 	}
 
 	ipa_debug_low("Get opcode of IMM_CMD=%s\n",
@@ -762,7 +762,7 @@ static u16 ipahal_imm_cmd_get_opcode(enum ipahal_imm_cmd_name cmd)
 		ipa_err("Try to get opcode of obsolete IMM_CMD=%s\n",
 			ipahal_imm_cmd_name_str(cmd));
 		ipa_assert();
-		return -EFAULT;
+		return 0;
 	}
 
 	return opcode;
