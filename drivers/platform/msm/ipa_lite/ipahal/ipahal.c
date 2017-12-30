@@ -995,7 +995,7 @@ static int ipahal_pkt_status_init(enum ipa_hw_type ipa_hw_type)
  */
 u32 ipahal_pkt_status_get_size(void)
 {
-	return ipahal_pkt_status_objs[ipahal_ctx->hw_type].size;
+	return IPA3_0_PKT_STATUS_SIZE;
 }
 
 /*
