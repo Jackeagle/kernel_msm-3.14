@@ -924,9 +924,8 @@ u32 ipahal_pkt_status_get_size(void)
 void ipahal_pkt_status_parse(const void *unparsed_status,
 	struct ipahal_pkt_status *status)
 {
-	if (!unparsed_status || !status) {
-		ipa_err("Input Error: unparsed_status=%p status=%p\n",
-			unparsed_status, status);
+	if (!unparsed_status) {
+		ipa_err("Input Error: null unparsed_status\n");
 		return;
 	}
 
