@@ -773,12 +773,10 @@ ipahal_construct_imm_cmd(enum ipahal_imm_cmd_name cmd, const void *params,
  *  to reach this NOP functionlity easily.
  * @skip_pipline_clear: if to skip pipeline clear waiting (don't wait)
  * @pipline_clr_opt: options for pipeline clear waiting
- * @is_atomic_ctx: is called in atomic context or can sleep?
  */
 struct ipahal_imm_cmd_pyld *ipahal_construct_nop_imm_cmd(
 	bool skip_pipline_clear,
-	enum ipahal_pipeline_clear_option pipline_clr_opt,
-	bool is_atomic_ctx)
+	enum ipahal_pipeline_clear_option pipline_clr_opt)
 {
 	struct ipahal_imm_cmd_register_write cmd;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
@@ -789,7 +787,7 @@ struct ipahal_imm_cmd_pyld *ipahal_construct_nop_imm_cmd(
 	cmd.value_mask = 0x0;
 
 	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE,
-		&cmd, is_atomic_ctx);
+		&cmd, false);
 
 	if (!cmd_pyld)
 		ipa_err("failed to construct register_write imm cmd\n");

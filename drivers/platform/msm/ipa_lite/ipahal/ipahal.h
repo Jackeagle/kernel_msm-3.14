@@ -375,12 +375,10 @@ struct ipahal_imm_cmd_pyld *ipahal_construct_imm_cmd(
  *  to reach this NOP functionlity easily.
  * @skip_pipline_clear: if to skip pipeline clear waiting (don't wait)
  * @pipline_clr_opt: options for pipeline clear waiting
- * @is_atomic_ctx: is called in atomic context or can sleep?
  */
 struct ipahal_imm_cmd_pyld *ipahal_construct_nop_imm_cmd(
 	bool skip_pipline_clear,
-	enum ipahal_pipeline_clear_option pipline_clr_opt,
-	bool is_atomic_ctx);
+	enum ipahal_pipeline_clear_option pipline_clr_opt);
 
 /*
  * ipahal_destroy_imm_cmd() - Destroy/Release bulk that was built
