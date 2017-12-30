@@ -769,12 +769,6 @@ struct ipahal_imm_cmd_pyld *ipahal_construct_imm_cmd(
 		return NULL;
 	}
 
-	if (cmd >= IPA_IMM_CMD_MAX) {
-		ipa_err("Invalid immediate command %u\n", cmd);
-		ipa_assert();
-		return NULL;
-	}
-
 	ipa_debug_low("construct IMM_CMD:%s\n",
 			ipahal_imm_cmd_name_to_str[cmd]);
 
