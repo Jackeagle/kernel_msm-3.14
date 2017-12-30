@@ -373,10 +373,8 @@ struct ipahal_imm_cmd_pyld *ipahal_construct_imm_cmd(
  * The functionality given by this function can be reached by
  *  ipahal_construct_imm_cmd(). This function is helper to the core driver
  *  to reach this NOP functionlity easily.
- * @pipline_clr_opt: options for pipeline clear waiting
  */
-struct ipahal_imm_cmd_pyld *ipahal_construct_nop_imm_cmd(
-	enum ipahal_pipeline_clear_option pipline_clr_opt);
+struct ipahal_imm_cmd_pyld *ipahal_construct_nop_imm_cmd(void);
 
 /*
  * ipahal_destroy_imm_cmd() - Destroy/Release bulk that was built
