@@ -37,15 +37,6 @@ static const char *ipahal_imm_cmd_name_to_str[IPA_IMM_CMD_MAX] = {
 	__stringify(IPA_IMM_CMD_TABLE_DMA),
 };
 
-/*
- * ipahal_imm_cmd_name_str() - returns string that represent the imm cmd
- * @cmd_name: [in] Immediate command name
- */
-static const char *ipahal_imm_cmd_name_str(enum ipahal_imm_cmd_name cmd_name)
-{
-	return ipahal_imm_cmd_name_to_str[cmd_name];
-}
-
 static const char *ipahal_pkt_status_exception_to_str
 	[IPAHAL_PKT_STATUS_EXCEPTION_MAX] = {
 	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_NONE),
@@ -751,11 +742,11 @@ static u16 ipahal_imm_cmd_get_opcode(enum ipahal_imm_cmd_name cmd)
 	}
 
 	ipa_debug_low("Get opcode of IMM_CMD=%s\n",
-		ipahal_imm_cmd_name_str(cmd));
+			ipahal_imm_cmd_name_to_str[cmd]);
 	opcode = ipahal_imm_cmds[cmd].opcode;
 	if (opcode == OPCODE_INVAL) {
 		ipa_err("Try to get opcode of obsolete IMM_CMD=%s\n",
-			ipahal_imm_cmd_name_str(cmd));
+			ipahal_imm_cmd_name_to_str[cmd]);
 		ipa_assert();
 		return 0;
 	}
@@ -784,7 +775,9 @@ struct ipahal_imm_cmd_pyld *ipahal_construct_imm_cmd(
 		return NULL;
 	}
 
-	ipa_debug_low("construct IMM_CMD:%s\n", ipahal_imm_cmd_name_str(cmd));
+	ipa_debug_low("construct IMM_CMD:%s\n",
+			ipahal_imm_cmd_name_to_str[cmd]);
+
 	return ipahal_imm_cmds[cmd].construct(cmd, params, is_atomic_ctx);
 }
 
