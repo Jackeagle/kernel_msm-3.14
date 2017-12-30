@@ -685,11 +685,6 @@ static void
 ipahal_imm_cmd_validate(const struct ipahal_imm_cmd_obj *imm_cmd_obj,
 		int imm_cmd)
 {
-	if (!imm_cmd_obj->opcode) {
-		ipa_err("imm_cmd=%s with zero opcode\n",
-			ipahal_imm_cmd_name_str(imm_cmd));
-		WARN_ON(1);
-	}
 	if (!imm_cmd_obj->construct) {
 		ipa_err("imm_cmd=%s with NULL construct func\n",
 			ipahal_imm_cmd_name_str(imm_cmd));
@@ -705,7 +700,6 @@ static int ipahal_imm_cmd_init(void)
 {
 	int i;
 	int j;
-	static const struct ipahal_imm_cmd_obj zero_obj;
 
 	ipa_debug_low("Entry - HW_TYPE=%d\n", ipahal_ctx->hw_type);
 
@@ -715,7 +709,7 @@ static int ipahal_imm_cmd_init(void)
 			const struct ipahal_imm_cmd_obj *imm_cmd;
 
 			imm_cmd = &ipahal_imm_cmd_objs[j][i];
-			if (memcmp(imm_cmd, &zero_obj, sizeof(*imm_cmd))) {
+			if (imm_cmd->opcode) {
 				ipahal_imm_cmd_validate(imm_cmd, i);
 				ipahal_imm_cmds[i] = *imm_cmd;
 				break;
