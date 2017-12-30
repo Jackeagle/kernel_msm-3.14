@@ -358,12 +358,6 @@ struct ipahal_imm_cmd_pyld {
 /* Immediate command Function APIs */
 
 /*
- * ipahal_imm_cmd_name_str() - returns string that represent the imm cmd
- * @cmd_name: [in] Immediate command name
- */
-const char *ipahal_imm_cmd_name_str(enum ipahal_imm_cmd_name cmd_name);
-
-/*
  * ipahal_construct_imm_cmd() - Construct immdiate command
  * This function builds imm cmd bulk that can be be sent to IPA
  * The command will be allocated dynamically.

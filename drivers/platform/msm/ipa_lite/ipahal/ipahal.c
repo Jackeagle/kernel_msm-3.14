@@ -41,7 +41,7 @@ static const char *ipahal_imm_cmd_name_to_str[IPA_IMM_CMD_MAX] = {
  * ipahal_imm_cmd_name_str() - returns string that represent the imm cmd
  * @cmd_name: [in] Immediate command name
  */
-const char *ipahal_imm_cmd_name_str(enum ipahal_imm_cmd_name cmd_name)
+static const char *ipahal_imm_cmd_name_str(enum ipahal_imm_cmd_name cmd_name)
 {
 	if (cmd_name < 0 || cmd_name >= IPA_IMM_CMD_MAX) {
 		ipa_err("requested name of invalid imm_cmd=%d\n", cmd_name);
