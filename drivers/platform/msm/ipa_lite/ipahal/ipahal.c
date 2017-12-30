@@ -754,15 +754,10 @@ static u16 ipahal_imm_cmd_get_opcode(enum ipahal_imm_cmd_name cmd)
  * The command will be allocated dynamically.
  * After done using it, call ipahal_destroy_imm_cmd() to release it
  */
-struct ipahal_imm_cmd_pyld *ipahal_construct_imm_cmd(
-	enum ipahal_imm_cmd_name cmd, const void *params, bool is_atomic_ctx)
+struct ipahal_imm_cmd_pyld *
+ipahal_construct_imm_cmd(enum ipahal_imm_cmd_name cmd, const void *params,
+				bool is_atomic_ctx)
 {
-	if (!params) {
-		ipa_err("Input error: params=%p\n", params);
-		ipa_assert();
-		return NULL;
-	}
-
 	ipa_debug_low("construct IMM_CMD:%s\n",
 			ipahal_imm_cmd_name_to_str[cmd]);
 
