@@ -619,7 +619,7 @@ struct ipahal_imm_cmd_obj {
  * If opcode is -1, this means that the IMM is removed on the
  *  specific version
  */
-static struct ipahal_imm_cmd_obj
+static const struct ipahal_imm_cmd_obj
 		ipahal_imm_cmd_objs[IPA_HW_MAX][IPA_IMM_CMD_MAX] = {
 	/* IPAv3 */
 	[IPA_HW_v3_0][IPA_IMM_CMD_IP_V4_FILTER_INIT] = {
@@ -720,28 +720,6 @@ static int ipahal_imm_cmd_init(void)
 				break;
 			}
 		}
-	}
-
-	for (i = IPA_HW_v3_0 ; i < ipahal_ctx->hw_type ; i++) {
-		for (j = 0; j < IPA_IMM_CMD_MAX ; j++) {
-			if (!memcmp(&ipahal_imm_cmd_objs[i+1][j], &zero_obj,
-				sizeof(struct ipahal_imm_cmd_obj))) {
-				memcpy(&ipahal_imm_cmd_objs[i+1][j],
-					&ipahal_imm_cmd_objs[i][j],
-					sizeof(struct ipahal_imm_cmd_obj));
-			} else {
-				/*
-				 * explicitly overridden immediate command.
-				 * Check validity
-				 */
-				ipahal_imm_cmd_validate(&ipahal_imm_cmd_objs[i+1][j], j);
-			}
-		}
-	}
-
-	if (memcmp(&ipahal_imm_cmds, &ipahal_imm_cmd_objs[ipahal_ctx->hw_type],
-				sizeof(ipahal_imm_cmds))) {
-		ipa_err("ipahal_imm_cmds[] DOES NOT MATCH[]\n");
 	}
 
 	return 0;
