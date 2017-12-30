@@ -905,43 +905,11 @@ static void ipa_pkt_status_parse(
 }
 
 /*
- * struct ipahal_pkt_status_obj - Pakcet Status H/W information for
- *  specific IPA version
- * @size: H/W size of the status packet
- * @parse: CB that parses the H/W packet status into the abstracted structure
- */
-struct ipahal_pkt_status_obj {
-	u32 size;
-	void (*parse)(const void *unparsed_status,
-		struct ipahal_pkt_status *status);
-};
-
-/*
- * This table contains the info regard packet status for IPAv3 and later
- * Information like: size of packet status and parsing function
- * All the information on the pkt Status on IPAv3 are statically defined below.
- * If information is missing regard some IPA version, the init function
- *  will fill it with the information from the previous IPA version.
- * Information is considered missing if all of the fields are 0
- */
-static struct ipahal_pkt_status_obj ipahal_pkt_status_objs[IPA_HW_MAX] = {
-	/* IPAv3 */
-	[IPA_HW_v3_0] = {
-		IPA3_0_PKT_STATUS_SIZE,
-		ipa_pkt_status_parse,
-		},
-};
-
-/*
- * ipahal_pkt_status_init() - Build the packet status information array
- *  for the different IPA versions
- *  See ipahal_pkt_status_objs[] comments
+ * ipahal_pkt_status_init() - perform initialization related to
+ * parsing packet status
  */
 static int ipahal_pkt_status_init(enum ipa_hw_type ipa_hw_type)
 {
-	int i;
-	struct ipahal_pkt_status_obj zero_obj;
-
 	ipa_debug_low("Entry - HW_TYPE=%d\n", ipa_hw_type);
 
 	if ((ipa_hw_type < 0) || (ipa_hw_type >= IPA_HW_MAX)) {
@@ -959,33 +927,6 @@ static int ipahal_pkt_status_init(enum ipa_hw_type ipa_hw_type)
 	 */
 	BUILD_BUG_ON(sizeof(struct ipa_pkt_status_hw) !=
 		IPA3_0_PKT_STATUS_SIZE);
-
-	memset(&zero_obj, 0, sizeof(zero_obj));
-	for (i = IPA_HW_v3_0 ; i < ipa_hw_type ; i++) {
-		if (!memcmp(&ipahal_pkt_status_objs[i+1], &zero_obj,
-			sizeof(struct ipahal_pkt_status_obj))) {
-			memcpy(&ipahal_pkt_status_objs[i+1],
-				&ipahal_pkt_status_objs[i],
-				sizeof(struct ipahal_pkt_status_obj));
-		} else {
-			/*
-			 * explicitly overridden Packet Status info
-			 * Check validity
-			 */
-			if (!ipahal_pkt_status_objs[i+1].size) {
-				ipa_err(
-				  "Packet Status with zero size ipa_ver=%d\n",
-				  i+1);
-				WARN_ON(1);
-			}
-			if (!ipahal_pkt_status_objs[i+1].parse) {
-				ipa_err(
-				  "Packet Status without Parse func ipa_ver=%d\n",
-				  i+1);
-				WARN_ON(1);
-			}
-		}
-	}
 
 	return 0;
 }
