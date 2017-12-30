@@ -623,60 +623,64 @@ struct ipahal_imm_cmd_obj {
 static const struct ipahal_imm_cmd_obj
 		ipahal_imm_cmd_objs[IPA_HW_MAX][IPA_IMM_CMD_MAX] = {
 	/* IPAv3 */
-	[IPA_HW_v3_0][IPA_IMM_CMD_IP_V4_FILTER_INIT] = {
-		ipa_imm_cmd_construct_ip_v4_filter_init,
-		3},
-	[IPA_HW_v3_0][IPA_IMM_CMD_IP_V6_FILTER_INIT] = {
-		ipa_imm_cmd_construct_ip_v6_filter_init,
-		4},
-	[IPA_HW_v3_0][IPA_IMM_CMD_IP_V4_NAT_INIT] = {
-		ipa_imm_cmd_construct_ip_v4_nat_init,
-		5},
-	[IPA_HW_v3_0][IPA_IMM_CMD_IP_V4_ROUTING_INIT] = {
-		ipa_imm_cmd_construct_ip_v4_routing_init,
-		7},
-	[IPA_HW_v3_0][IPA_IMM_CMD_IP_V6_ROUTING_INIT] = {
-		ipa_imm_cmd_construct_ip_v6_routing_init,
-		8},
-	[IPA_HW_v3_0][IPA_IMM_CMD_HDR_INIT_LOCAL] = {
-		ipa_imm_cmd_construct_hdr_init_local,
-		9},
-	[IPA_HW_v3_0][IPA_IMM_CMD_HDR_INIT_SYSTEM] = {
-		ipa_imm_cmd_construct_hdr_init_system,
-		10},
-	[IPA_HW_v3_0][IPA_IMM_CMD_REGISTER_WRITE] = {
-		ipa_imm_cmd_construct_register_write,
-		12},
-	[IPA_HW_v3_0][IPA_IMM_CMD_NAT_DMA] = {
-		ipa_imm_cmd_construct_nat_dma,
-		14},
-	[IPA_HW_v3_0][IPA_IMM_CMD_IP_PACKET_INIT] = {
-		ipa_imm_cmd_construct_ip_packet_init,
-		16},
-	[IPA_HW_v3_0][IPA_IMM_CMD_DMA_TASK_32B_ADDR] = {
-		ipa_imm_cmd_construct_dma_task_32b_addr,
-		17},
-	[IPA_HW_v3_0][IPA_IMM_CMD_DMA_SHARED_MEM] = {
-		ipa_imm_cmd_construct_dma_shared_mem,
-		19},
-	[IPA_HW_v3_0][IPA_IMM_CMD_IP_PACKET_TAG_STATUS] = {
-		ipa_imm_cmd_construct_ip_packet_tag_status,
-		20},
+	[IPA_HW_v3_0] = {
+		[IPA_IMM_CMD_IP_V4_FILTER_INIT] = {
+			ipa_imm_cmd_construct_ip_v4_filter_init, 3,
+		},
+		[IPA_IMM_CMD_IP_V6_FILTER_INIT] = {
+			ipa_imm_cmd_construct_ip_v6_filter_init, 4,
+		},
+		[IPA_IMM_CMD_IP_V4_NAT_INIT] = {
+			ipa_imm_cmd_construct_ip_v4_nat_init, 5,
+		},
+		[IPA_IMM_CMD_IP_V4_ROUTING_INIT] = {
+			ipa_imm_cmd_construct_ip_v4_routing_init, 7,
+		},
+		[IPA_IMM_CMD_IP_V6_ROUTING_INIT] = {
+			ipa_imm_cmd_construct_ip_v6_routing_init, 8,
+		},
+		[IPA_IMM_CMD_HDR_INIT_LOCAL] = {
+			ipa_imm_cmd_construct_hdr_init_local, 9,
+		},
+		[IPA_IMM_CMD_HDR_INIT_SYSTEM] = {
+			ipa_imm_cmd_construct_hdr_init_system, 10,
+		},
+		[IPA_IMM_CMD_REGISTER_WRITE] = {
+			ipa_imm_cmd_construct_register_write, 12,
+		},
+		[IPA_IMM_CMD_NAT_DMA] = {
+			ipa_imm_cmd_construct_nat_dma, 14,
+		},
+		[IPA_IMM_CMD_IP_PACKET_INIT] = {
+			ipa_imm_cmd_construct_ip_packet_init, 16,
+		},
+		[IPA_IMM_CMD_DMA_TASK_32B_ADDR] = {
+			ipa_imm_cmd_construct_dma_task_32b_addr, 17,
+		},
+		[IPA_IMM_CMD_DMA_SHARED_MEM] = {
+			ipa_imm_cmd_construct_dma_shared_mem, 19,
+		},
+		[IPA_IMM_CMD_IP_PACKET_TAG_STATUS] = {
+			ipa_imm_cmd_construct_ip_packet_tag_status, 20,
+		},
+	},
 
 	/* IPAv4 */
-	[IPA_HW_v4_0][IPA_IMM_CMD_REGISTER_WRITE] = {
-		ipa_imm_cmd_construct_register_write_v_4_0,
-		12},
-	/* NAT_DMA was renamed to TABLE_DMA for IPAv4 */
-	[IPA_HW_v4_0][IPA_IMM_CMD_NAT_DMA] = {
-		NULL,
-		OPCODE_INVAL },
-	[IPA_HW_v4_0][IPA_IMM_CMD_TABLE_DMA] = {
-		ipa_imm_cmd_construct_table_dma_ipav4,
-		14},
-	[IPA_HW_v4_0][IPA_IMM_CMD_DMA_SHARED_MEM] = {
-		ipa_imm_cmd_construct_dma_shared_mem_v_4_0,
-		19},
+	[IPA_HW_v4_0] = {
+		[IPA_IMM_CMD_REGISTER_WRITE] = {
+			ipa_imm_cmd_construct_register_write_v_4_0, 12,
+		},
+		/* NAT_DMA was renamed to TABLE_DMA for IPAv4 */
+		[IPA_IMM_CMD_NAT_DMA] = {
+			NULL, OPCODE_INVAL,
+		},
+		[IPA_IMM_CMD_TABLE_DMA] = {
+			ipa_imm_cmd_construct_table_dma_ipav4, 14,
+		},
+		[IPA_IMM_CMD_DMA_SHARED_MEM] = {
+			ipa_imm_cmd_construct_dma_shared_mem_v_4_0, 19,
+		},
+	},
 };
 
 static struct ipahal_imm_cmd_obj ipahal_imm_cmds[IPA_IMM_CMD_MAX];
