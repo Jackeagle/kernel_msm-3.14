@@ -1014,8 +1014,7 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 
 	ipa_debug_low("Parse Status Packet\n");
 	memset(status, 0, sizeof(*status));
-	ipahal_pkt_status_objs[ipahal_ctx->hw_type].parse(unparsed_status,
-		status);
+	ipa_pkt_status_parse(unparsed_status, status);
 }
 
 /*
