@@ -665,6 +665,21 @@ static const struct ipahal_imm_cmd_obj
 		},
 	},
 
+	/* IPAv3.1 */
+	[IPA_HW_v3_1] = {
+		/* All inherited from IPA_HW_v3_0. */
+	},
+
+	/* IPAv3.5 */
+	[IPA_HW_v3_5] = {
+		/* All inherited from IPA_HW_v3_1. */
+	},
+
+	/* IPAv3.5.1 */
+	[IPA_HW_v3_5_1] = {
+		/* All inherited from IPA_HW_v3_5. */
+	},
+
 	/* IPAv4 */
 	[IPA_HW_v4_0] = {
 		[IPA_IMM_CMD_REGISTER_WRITE] = {
