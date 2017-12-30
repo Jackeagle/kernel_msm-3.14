@@ -678,6 +678,22 @@ static struct ipahal_imm_cmd_obj
 		19},
 };
 
+static void
+ipahal_imm_cmd_validate(const struct ipahal_imm_cmd_obj *imm_cmd_obj,
+		int imm_cmd)
+{
+	if (!imm_cmd_obj->opcode) {
+		ipa_err("imm_cmd=%s with zero opcode\n",
+			ipahal_imm_cmd_name_str(imm_cmd));
+		WARN_ON(1);
+	}
+	if (!imm_cmd_obj->construct) {
+		ipa_err("imm_cmd=%s with NULL construct func\n",
+			ipahal_imm_cmd_name_str(imm_cmd));
+		WARN_ON(1);
+	}
+}
+
 /*
  * ipahal_imm_cmd_init() - Build the Immediate command information table
  *  See ipahal_imm_cmd_objs[][] comments
@@ -702,18 +718,7 @@ static int ipahal_imm_cmd_init(enum ipa_hw_type ipa_hw_type)
 				 * explicitly overridden immediate command.
 				 * Check validity
 				 */
-				if (!ipahal_imm_cmd_objs[i+1][j].opcode) {
-					ipa_err(
-					  "imm_cmd=%s with zero opcode ipa_ver=%d\n",
-					  ipahal_imm_cmd_name_str(j), i+1);
-					WARN_ON(1);
-				}
-				if (!ipahal_imm_cmd_objs[i+1][j].construct) {
-					ipa_err(
-					  "imm_cmd=%s with NULL construct func ipa_ver=%d\n",
-					  ipahal_imm_cmd_name_str(j), i+1);
-					WARN_ON(1);
-				}
+				ipahal_imm_cmd_validate(&ipahal_imm_cmd_objs[i+1][j], j);
 			}
 		}
 	}
