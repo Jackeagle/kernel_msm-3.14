@@ -757,10 +757,11 @@ struct ipahal_imm_cmd_pyld *ipahal_construct_nop_imm_cmd(void)
 	struct ipahal_imm_cmd_register_write cmd;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 
-	memset(&cmd, 0, sizeof(cmd));
+	cmd.offset = 0;
+	cmd.value = 0;
+	cmd.value_mask = 0x0;
 	cmd.skip_pipeline_clear = false;
 	cmd.pipeline_clear_options = IPAHAL_FULL_PIPELINE_CLEAR;
-	cmd.value_mask = 0x0;
 
 	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE, &cmd);
 
