@@ -621,7 +621,7 @@ struct ipahal_imm_cmd_obj {
  */
 #define OPCODE_INVAL	((u16)0xffff)
 static const struct ipahal_imm_cmd_obj
-		ipahal_imm_cmd_objs[IPA_HW_MAX][IPA_IMM_CMD_MAX] = {
+		ipahal_imm_cmd_objs[][IPA_IMM_CMD_MAX] = {
 	/* IPAv3 */
 	[IPA_HW_v3_0] = {
 		[IPA_IMM_CMD_IP_V4_FILTER_INIT] = {
