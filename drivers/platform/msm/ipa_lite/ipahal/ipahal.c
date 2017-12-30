@@ -37,6 +37,20 @@ static const char *ipahal_imm_cmd_name_to_str[IPA_IMM_CMD_MAX] = {
 	__stringify(IPA_IMM_CMD_TABLE_DMA),
 };
 
+/*
+ * ipahal_imm_cmd_name_str() - returns string that represent the imm cmd
+ * @cmd_name: [in] Immediate command name
+ */
+const char *ipahal_imm_cmd_name_str(enum ipahal_imm_cmd_name cmd_name)
+{
+	if (cmd_name < 0 || cmd_name >= IPA_IMM_CMD_MAX) {
+		ipa_err("requested name of invalid imm_cmd=%d\n", cmd_name);
+		return "Invalid IMM_CMD";
+	}
+
+	return ipahal_imm_cmd_name_to_str[cmd_name];
+}
+
 static const char *ipahal_pkt_status_exception_to_str
 	[IPAHAL_PKT_STATUS_EXCEPTION_MAX] = {
 	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_NONE),
@@ -726,20 +740,6 @@ static int ipahal_imm_cmd_init(void)
 	}
 
 	return 0;
-}
-
-/*
- * ipahal_imm_cmd_name_str() - returns string that represent the imm cmd
- * @cmd_name: [in] Immediate command name
- */
-const char *ipahal_imm_cmd_name_str(enum ipahal_imm_cmd_name cmd_name)
-{
-	if (cmd_name < 0 || cmd_name >= IPA_IMM_CMD_MAX) {
-		ipa_err("requested name of invalid imm_cmd=%d\n", cmd_name);
-		return "Invalid IMM_CMD";
-	}
-
-	return ipahal_imm_cmd_name_to_str[cmd_name];
 }
 
 /*
