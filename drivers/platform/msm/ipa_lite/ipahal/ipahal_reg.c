@@ -1516,6 +1516,13 @@ static const struct ipahal_reg_obj ipahal_reg_objs[IPA_HW_MAX][IPA_REG_MAX] = {
 		},
 	},
 
+
+	/* IPAv3.5.1 */
+	[IPA_HW_v3_5_1] = {
+		/* All inherited from IPA_HW_v3_5. */
+	},
+
+
 	/* IPAv4.0 */
 	[IPA_HW_v4_0] = {
 		[IPA_ENDP_INIT_CTRL_n] = {
