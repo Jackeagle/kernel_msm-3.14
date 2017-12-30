@@ -678,6 +678,8 @@ static struct ipahal_imm_cmd_obj
 		19},
 };
 
+static struct ipahal_imm_cmd_obj ipahal_imm_cmds[IPA_IMM_CMD_MAX];
+
 static void
 ipahal_imm_cmd_validate(const struct ipahal_imm_cmd_obj *imm_cmd_obj,
 		int imm_cmd)
@@ -706,6 +708,20 @@ static int ipahal_imm_cmd_init(void)
 
 	ipa_debug_low("Entry - HW_TYPE=%d\n", ipahal_ctx->hw_type);
 
+	/* Build up a the immediate command descriptions we'll use */
+	for (i = 0; i < IPA_IMM_CMD_MAX ; i++) {
+		for (j = ipahal_ctx->hw_type; j >= IPA_HW_v3_0; j--) {
+			const struct ipahal_imm_cmd_obj *imm_cmd;
+
+			imm_cmd = &ipahal_imm_cmd_objs[j][i];
+			if (memcmp(imm_cmd, &zero_obj, sizeof(*imm_cmd))) {
+				ipahal_imm_cmd_validate(imm_cmd, i);
+				ipahal_imm_cmds[i] = *imm_cmd;
+				break;
+			}
+		}
+	}
+
 	for (i = IPA_HW_v3_0 ; i < ipahal_ctx->hw_type ; i++) {
 		for (j = 0; j < IPA_IMM_CMD_MAX ; j++) {
 			if (!memcmp(&ipahal_imm_cmd_objs[i+1][j], &zero_obj,
@@ -721,6 +737,11 @@ static int ipahal_imm_cmd_init(void)
 				ipahal_imm_cmd_validate(&ipahal_imm_cmd_objs[i+1][j], j);
 			}
 		}
+	}
+
+	if (memcmp(&ipahal_imm_cmds, &ipahal_imm_cmd_objs[ipahal_ctx->hw_type],
+				sizeof(ipahal_imm_cmds))) {
+		ipa_err("ipahal_imm_cmds[] DOES NOT MATCH[]\n");
 	}
 
 	return 0;
