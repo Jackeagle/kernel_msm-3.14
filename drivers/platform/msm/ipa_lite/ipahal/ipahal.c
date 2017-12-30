@@ -776,7 +776,7 @@ static u16 ipahal_imm_cmd_get_opcode(enum ipahal_imm_cmd_name cmd)
 
 	ipa_debug_low("Get opcode of IMM_CMD=%s\n",
 		ipahal_imm_cmd_name_str(cmd));
-	opcode = ipahal_imm_cmd_objs[ipahal_ctx->hw_type][cmd].opcode;
+	opcode = ipahal_imm_cmds[cmd].opcode;
 	if (opcode == -1) {
 		ipa_err("Try to get opcode of obsolete IMM_CMD=%s\n",
 			ipahal_imm_cmd_name_str(cmd));
@@ -809,8 +809,7 @@ struct ipahal_imm_cmd_pyld *ipahal_construct_imm_cmd(
 	}
 
 	ipa_debug_low("construct IMM_CMD:%s\n", ipahal_imm_cmd_name_str(cmd));
-	return ipahal_imm_cmd_objs[ipahal_ctx->hw_type][cmd].construct(
-		cmd, params, is_atomic_ctx);
+	return ipahal_imm_cmds[cmd].construct(cmd, params, is_atomic_ctx);
 }
 
 /*
