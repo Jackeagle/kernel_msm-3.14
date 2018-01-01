@@ -735,12 +735,6 @@ static u16 ipahal_imm_cmd_get_opcode(enum ipahal_imm_cmd_name cmd)
 {
 	u32 opcode;
 
-	if (cmd >= IPA_IMM_CMD_MAX) {
-		ipa_err("Invalid immediate command imm_cmd=%u\n", cmd);
-		ipa_assert();
-		return 0;
-	}
-
 	ipa_debug_low("Get opcode of IMM_CMD=%s\n",
 			ipahal_imm_cmd_name_to_str[cmd]);
 	opcode = ipahal_imm_cmds[cmd].opcode;
