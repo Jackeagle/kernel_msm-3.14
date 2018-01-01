@@ -19,23 +19,6 @@
 
 struct ipahal_context *ipahal_ctx;
 
-static const char *ipahal_imm_cmd_name_to_str[IPA_IMM_CMD_MAX] = {
-	__stringify(IPA_IMM_CMD_IP_V4_FILTER_INIT),
-	__stringify(IPA_IMM_CMD_IP_V6_FILTER_INIT),
-	__stringify(IPA_IMM_CMD_IP_V4_NAT_INIT),
-	__stringify(IPA_IMM_CMD_IP_V4_ROUTING_INIT),
-	__stringify(IPA_IMM_CMD_IP_V6_ROUTING_INIT),
-	__stringify(IPA_IMM_CMD_HDR_INIT_LOCAL),
-	__stringify(IPA_IMM_CMD_HDR_INIT_SYSTEM),
-	__stringify(IPA_IMM_CMD_REGISTER_WRITE),
-	__stringify(IPA_IMM_CMD_NAT_DMA),
-	__stringify(IPA_IMM_CMD_IP_PACKET_INIT),
-	__stringify(IPA_IMM_CMD_DMA_SHARED_MEM),
-	__stringify(IPA_IMM_CMD_IP_PACKET_TAG_STATUS),
-	__stringify(IPA_IMM_CMD_DMA_TASK_32B_ADDR),
-	__stringify(IPA_IMM_CMD_TABLE_DMA),
-};
-
 static const char *ipahal_pkt_status_exception_to_str
 	[IPAHAL_PKT_STATUS_EXCEPTION_MAX] = {
 	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_NONE),
@@ -693,6 +676,23 @@ static const struct ipahal_imm_cmd_obj
 			ipa_imm_cmd_construct_dma_shared_mem_v_4_0, 19,
 		},
 	},
+};
+
+static const char *ipahal_imm_cmd_name_to_str[IPA_IMM_CMD_MAX] = {
+	__stringify(IPA_IMM_CMD_IP_V4_FILTER_INIT),
+	__stringify(IPA_IMM_CMD_IP_V6_FILTER_INIT),
+	__stringify(IPA_IMM_CMD_IP_V4_NAT_INIT),
+	__stringify(IPA_IMM_CMD_IP_V4_ROUTING_INIT),
+	__stringify(IPA_IMM_CMD_IP_V6_ROUTING_INIT),
+	__stringify(IPA_IMM_CMD_HDR_INIT_LOCAL),
+	__stringify(IPA_IMM_CMD_HDR_INIT_SYSTEM),
+	__stringify(IPA_IMM_CMD_REGISTER_WRITE),
+	__stringify(IPA_IMM_CMD_NAT_DMA),
+	__stringify(IPA_IMM_CMD_IP_PACKET_INIT),
+	__stringify(IPA_IMM_CMD_DMA_SHARED_MEM),
+	__stringify(IPA_IMM_CMD_IP_PACKET_TAG_STATUS),
+	__stringify(IPA_IMM_CMD_DMA_TASK_32B_ADDR),
+	__stringify(IPA_IMM_CMD_TABLE_DMA),
 };
 
 static struct ipahal_imm_cmd_obj ipahal_imm_cmds[IPA_IMM_CMD_MAX];
