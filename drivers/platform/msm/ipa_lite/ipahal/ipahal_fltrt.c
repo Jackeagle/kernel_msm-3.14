@@ -135,7 +135,7 @@ static void ipa_fltrt_parse_tbl_addr(u64 hwaddr, u64 *addr, bool *is_sys)
  *  IPA version.
  * Information is considered missing if all of the fields are 0.
  */
-static const struct ipahal_fltrt_obj ipahal_fltrt_objs[IPA_HW_MAX] = {
+static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 	/* IPAv3 */
 	[IPA_HW_v3_0] = {
 		true,
