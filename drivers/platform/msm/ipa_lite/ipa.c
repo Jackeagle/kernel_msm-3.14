@@ -277,8 +277,7 @@ static int ipa3_init_smem_region(int memory_region_size,
 	cmd.system_addr = mem.phys_base;
 	cmd.local_addr = ipa3_ctx->smem_restricted_bytes +
 		memory_region_offset;
-	cmd_pyld = ipahal_construct_imm_cmd(
-		IPA_IMM_CMD_DMA_SHARED_MEM, &cmd, false);
+	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_DMA_SHARED_MEM, &cmd);
 	if (!cmd_pyld) {
 		ipa_err("failed to construct dma_shared_mem imm cmd\n");
 		return -ENOMEM;
@@ -494,7 +493,7 @@ static int ipa3_q6_set_ex_path_to_apps(void)
 			reg_write.value = valmask.val;
 			reg_write.value_mask = valmask.mask;
 			cmd_pyld = ipahal_construct_imm_cmd(
-				IPA_IMM_CMD_REGISTER_WRITE, &reg_write, false);
+					IPA_IMM_CMD_REGISTER_WRITE, &reg_write);
 			if (!cmd_pyld) {
 				ipa_err("fail construct register_write cmd\n");
 				BUG();
@@ -521,7 +520,7 @@ static int ipa3_q6_set_ex_path_to_apps(void)
 			reg_write.value = 0;
 			reg_write.value_mask = ~0;
 			cmd_pyld = ipahal_construct_imm_cmd(
-				IPA_IMM_CMD_REGISTER_WRITE, &reg_write, false);
+					IPA_IMM_CMD_REGISTER_WRITE, &reg_write);
 			if (!cmd_pyld) {
 				ipa_err("fail construct register_write cmd\n");
 				ipa_assert();
@@ -722,8 +721,7 @@ int _ipa_init_hdr_v3_0(void)
 	cmd.size_hdr_table = mem.size;
 	cmd.hdr_addr = ipa3_ctx->smem_restricted_bytes +
 		IPA_MEM_PART(modem_hdr_ofst);
-	cmd_pyld = ipahal_construct_imm_cmd(
-		IPA_IMM_CMD_HDR_INIT_LOCAL, &cmd, false);
+	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_HDR_INIT_LOCAL, &cmd);
 	if (!cmd_pyld) {
 		ipa_err("fail to construct hdr_init_local imm cmd\n");
 		dma_free_coherent(dev, mem.size, mem.base, mem.phys_base);
@@ -763,8 +761,8 @@ int _ipa_init_hdr_v3_0(void)
 	dma_cmd.local_addr = ipa3_ctx->smem_restricted_bytes +
 		IPA_MEM_PART(modem_hdr_proc_ctx_ofst);
 	dma_cmd.size = mem.size;
-	cmd_pyld = ipahal_construct_imm_cmd(
-		IPA_IMM_CMD_DMA_SHARED_MEM, &dma_cmd, false);
+	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_DMA_SHARED_MEM,
+						&dma_cmd);
 	if (!cmd_pyld) {
 		ipa_err("fail to construct dma_shared_mem imm\n");
 		dma_free_coherent(dev, mem.size, mem.base, mem.phys_base);
@@ -824,8 +822,8 @@ int _ipa_init_rt4_v3(void)
                                 v4_cmd.hash_local_addr);
         ipa_debug("putting non-hashable routing IPv4 rules to phys 0x%x\n",
                                 v4_cmd.nhash_local_addr);
-        cmd_pyld = ipahal_construct_imm_cmd(
-                IPA_IMM_CMD_IP_V4_ROUTING_INIT, &v4_cmd, false);
+        cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_V4_ROUTING_INIT,
+						&v4_cmd);
         if (!cmd_pyld) {
                 ipa_err("fail construct ip_v4_rt_init imm cmd\n");
                 rc = -EPERM;
@@ -883,8 +881,8 @@ int _ipa_init_rt6_v3(void)
                                 v6_cmd.hash_local_addr);
         ipa_debug("putting non-hashable routing IPv6 rules to phys 0x%x\n",
                                 v6_cmd.nhash_local_addr);
-        cmd_pyld = ipahal_construct_imm_cmd(
-                IPA_IMM_CMD_IP_V6_ROUTING_INIT, &v6_cmd, false);
+        cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_V6_ROUTING_INIT,
+						&v6_cmd);
         if (!cmd_pyld) {
                 ipa_err("fail construct ip_v6_rt_init imm cmd\n");
                 rc = -EPERM;
@@ -943,8 +941,8 @@ int _ipa_init_flt4_v3(void)
                                 v4_cmd.hash_local_addr);
         ipa_debug("putting non-hashable filtering IPv4 rules to phys 0x%x\n",
                                 v4_cmd.nhash_local_addr);
-        cmd_pyld = ipahal_construct_imm_cmd(
-                IPA_IMM_CMD_IP_V4_FILTER_INIT, &v4_cmd, false);
+        cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_V4_FILTER_INIT,
+						&v4_cmd);
         if (!cmd_pyld) {
                 ipa_err("fail construct ip_v4_flt_init imm cmd\n");
                 rc = -EPERM;
@@ -1004,8 +1002,8 @@ int _ipa_init_flt6_v3(void)
         ipa_debug("putting non-hashable filtering IPv6 rules to phys 0x%x\n",
                                 v6_cmd.nhash_local_addr);
 
-        cmd_pyld = ipahal_construct_imm_cmd(
-                IPA_IMM_CMD_IP_V6_FILTER_INIT, &v6_cmd, false);
+        cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_V6_FILTER_INIT,
+						&v6_cmd);
         if (!cmd_pyld) {
                 ipa_err("fail construct ip_v6_flt_init imm cmd\n");
                 rc = -EPERM;
@@ -1927,8 +1925,7 @@ static int ipa3_alloc_pkt_init(void)
 	struct ipahal_imm_cmd_ip_packet_init cmd = {0};
 	int i;
 
-	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_PACKET_INIT,
-		&cmd, false);
+	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_PACKET_INIT, &cmd);
 	if (!cmd_pyld) {
 		ipa_err("failed to construct IMM cmd\n");
 		return -ENOMEM;
@@ -1949,7 +1946,7 @@ static int ipa3_alloc_pkt_init(void)
 	for (i = 0; i < ipa3_ctx->ipa_num_pipes; i++) {
 		cmd.destination_pipe_index = i;
 		cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_PACKET_INIT,
-			&cmd, false);
+							&cmd);
 		if (!cmd_pyld) {
 			ipa_err("failed to construct IMM cmd\n");
 			dma_free_coherent(dev, mem.size, mem.base,
@@ -2736,7 +2733,8 @@ static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
                                 ipahal_get_hw_tbl_hdr_width() +
                                 flt_idx * ipahal_get_hw_tbl_hdr_width();
                         cmd_pyld[num_cmds] = ipahal_construct_imm_cmd(
-                                IPA_IMM_CMD_DMA_SHARED_MEM, &cmd, false);
+						IPA_IMM_CMD_DMA_SHARED_MEM,
+						&cmd);
                         if (!cmd_pyld[num_cmds]) {
                                 ipa_err("fail construct dma_shared_mem cmd\n");
                                 retval = -ENOMEM;
@@ -2834,8 +2832,7 @@ static int ipa3_q6_clean_q6_rt_tbls(enum ipa_ip_type ip,
         cmd.local_addr = ipa3_ctx->smem_restricted_bytes +
                 lcl_addr_mem_part +
                 modem_rt_index_lo * ipahal_get_hw_tbl_hdr_width();
-        cmd_pyld = ipahal_construct_imm_cmd(
-                        IPA_IMM_CMD_DMA_SHARED_MEM, &cmd, false);
+        cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_DMA_SHARED_MEM, &cmd);
         if (!cmd_pyld) {
                 ipa_err("failed to construct dma_shared_mem imm cmd\n");
                 retval = -ENOMEM;
@@ -2926,7 +2923,7 @@ static int ipa3_q6_clean_q6_tables(void)
         reg_write_cmd.value = valmask.val;
         reg_write_cmd.value_mask = valmask.mask;
         cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE,
-                &reg_write_cmd, false);
+						&reg_write_cmd);
         if (!cmd_pyld) {
                 ipa_err("fail construct register_write imm cmd\n");
                 retval = -EFAULT;

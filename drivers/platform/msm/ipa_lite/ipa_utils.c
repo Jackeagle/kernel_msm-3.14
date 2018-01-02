@@ -1842,8 +1842,8 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 	/* IP_PACKET_INIT IC for tag status to be sent to apps */
 	pktinit_cmd.destination_pipe_index =
 		ipa3_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
-	cmd_pyld = ipahal_construct_imm_cmd(
-		IPA_IMM_CMD_IP_PACKET_INIT, &pktinit_cmd, false);
+	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_PACKET_INIT,
+						&pktinit_cmd);
 	if (!cmd_pyld) {
 		ipa_err("failed to construct ip_packet_init imm cmd\n");
 		res = -ENOMEM;
@@ -1860,7 +1860,8 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 	/* status IC */
 	status.tag = IPA_COOKIE;
 	cmd_pyld = ipahal_construct_imm_cmd(
-		IPA_IMM_CMD_IP_PACKET_TAG_STATUS, &status, false);
+				IPA_IMM_CMD_IP_PACKET_TAG_STATUS,
+				&status);
 	if (!cmd_pyld) {
 		ipa_err("failed to construct ip_packet_tag_status imm cmd\n");
 		res = -ENOMEM;
@@ -1997,8 +1998,9 @@ static int ipa3_tag_generate_force_close_desc(struct ipa3_desc desc[],
 		ipahal_get_aggr_force_close_valmask(i, &valmask);
 		reg_write_agg_close.value = valmask.val;
 		reg_write_agg_close.value_mask = valmask.mask;
-		cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE,
-			&reg_write_agg_close, false);
+		cmd_pyld = ipahal_construct_imm_cmd(
+				IPA_IMM_CMD_REGISTER_WRITE,
+				&reg_write_agg_close);
 		if (!cmd_pyld) {
 			ipa_err("failed to construct register_write imm cmd\n");
 			res = -ENOMEM;
@@ -2361,7 +2363,7 @@ int ipa3_allocate_dma_task_for_gsi(void)
 	cmd.addr1 = ipa3_ctx->dma_task_info.mem.phys_base;
 	cmd.packet_size = ipa3_ctx->dma_task_info.mem.size;
 	ipa3_ctx->dma_task_info.cmd_pyld = ipahal_construct_imm_cmd(
-			IPA_IMM_CMD_DMA_TASK_32B_ADDR, &cmd, false);
+			IPA_IMM_CMD_DMA_TASK_32B_ADDR, &cmd);
 	if (!ipa3_ctx->dma_task_info.cmd_pyld) {
 		ipa_err("failed to construct dma_task_32b_addr cmd\n");
 		dma_free_coherent(dev,

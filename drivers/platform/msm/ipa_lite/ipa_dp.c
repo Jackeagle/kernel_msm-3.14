@@ -2959,7 +2959,7 @@ static int ipa_populate_tag_field(struct ipa3_desc *desc,
 	if (desc->pyld == NULL) {
 		tag_cmd.tag = pointer_to_tag_wa(tx_pkt);
 		tag_pyld = ipahal_construct_imm_cmd(
-			IPA_IMM_CMD_IP_PACKET_TAG_STATUS, &tag_cmd, true);
+			IPA_IMM_CMD_IP_PACKET_TAG_STATUS, &tag_cmd);
 		if (unlikely(!tag_pyld)) {
 			ipa_err("Failed to construct ip_packet_tag_status\n");
 			return -EFAULT;

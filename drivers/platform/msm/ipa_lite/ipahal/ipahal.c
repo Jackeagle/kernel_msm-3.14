@@ -756,8 +756,7 @@ static u16 ipahal_imm_cmd_get_opcode(enum ipahal_imm_cmd_name cmd)
  * After done using it, call ipahal_destroy_imm_cmd() to release it
  */
 struct ipahal_imm_cmd_pyld *
-ipahal_construct_imm_cmd(enum ipahal_imm_cmd_name cmd, const void *params,
-				bool is_atomic_ctx)
+ipahal_construct_imm_cmd(enum ipahal_imm_cmd_name cmd, const void *params)
 
 {
 	ipa_debug_low("construct IMM_CMD:%s\n",
@@ -784,8 +783,7 @@ struct ipahal_imm_cmd_pyld *ipahal_construct_nop_imm_cmd(void)
 	cmd.pipeline_clear_options = IPAHAL_FULL_PIPELINE_CLEAR;
 	cmd.value_mask = 0x0;
 
-	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE,
-		&cmd, false);
+	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE, &cmd);
 
 	if (!cmd_pyld)
 		ipa_err("failed to construct register_write imm cmd\n");

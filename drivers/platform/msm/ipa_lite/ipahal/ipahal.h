@@ -364,7 +364,7 @@ struct ipahal_imm_cmd_pyld {
  * After done using it, call ipahal_destroy_imm_cmd() to release it
  */
 struct ipahal_imm_cmd_pyld *ipahal_construct_imm_cmd(
-	enum ipahal_imm_cmd_name cmd, const void *params, bool is_atomic_ctx);
+	enum ipahal_imm_cmd_name cmd, const void *params);
 
 /*
  * ipahal_construct_nop_imm_cmd() - Construct immediate comamnd for NO-Op
