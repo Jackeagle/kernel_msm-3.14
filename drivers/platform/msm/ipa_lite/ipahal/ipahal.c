@@ -54,14 +54,14 @@ static u16 ipahal_imm_cmd_get_opcode(enum ipahal_imm_cmd_name cmd);
 
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_task_32b_addr(
-	enum ipahal_imm_cmd_name cmd, const void *params, bool is_atomic_ctx)
+	enum ipahal_imm_cmd_name cmd, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_dma_task_32b_addr *data;
 	struct ipahal_imm_cmd_dma_task_32b_addr *dma_params =
 		(struct ipahal_imm_cmd_dma_task_32b_addr *)params;
 
-	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
+	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), false);
 	if (unlikely(!pyld)) {
 		ipa_err("kzalloc err\n");
 		return pyld;
@@ -93,15 +93,16 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_task_32b_addr(
 	return pyld;
 }
 
+/* NOTE:  this function is called in atomic state */
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_packet_tag_status(
-	enum ipahal_imm_cmd_name cmd, const void *params, bool is_atomic_ctx)
+	enum ipahal_imm_cmd_name cmd, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_packet_tag_status *data;
 	struct ipahal_imm_cmd_ip_packet_tag_status *tag_params =
 		(struct ipahal_imm_cmd_ip_packet_tag_status *)params;
 
-	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
+	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), true);
 	if (unlikely(!pyld)) {
 		ipa_err("kzalloc err\n");
 		return pyld;
@@ -121,14 +122,14 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_packet_tag_status(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_shared_mem(
-	enum ipahal_imm_cmd_name cmd, const void *params, bool is_atomic_ctx)
+	enum ipahal_imm_cmd_name cmd, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_dma_shared_mem *data;
 	struct ipahal_imm_cmd_dma_shared_mem *mem_params =
 		(struct ipahal_imm_cmd_dma_shared_mem *)params;
 
-	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
+	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), false);
 	if (unlikely(!pyld)) {
 		ipa_err("kzalloc err\n");
 		return pyld;
@@ -172,7 +173,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_shared_mem(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_shared_mem_v_4_0(
-	enum ipahal_imm_cmd_name cmd, const void *params, bool is_atomic_ctx)
+	enum ipahal_imm_cmd_name cmd, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_dma_shared_mem_v_4_0 *data;
@@ -192,7 +193,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_shared_mem_v_4_0(
 		return NULL;
 	}
 
-	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
+	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), false);
 	if (unlikely(!pyld)) {
 		WARN_ON(1);
 		return pyld;
@@ -227,14 +228,14 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_shared_mem_v_4_0(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_register_write(
-	enum ipahal_imm_cmd_name cmd, const void *params, bool is_atomic_ctx)
+	enum ipahal_imm_cmd_name cmd, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_register_write *data;
 	struct ipahal_imm_cmd_register_write *regwrt_params =
 		(struct ipahal_imm_cmd_register_write *)params;
 
-	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
+	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), false);
 	if (unlikely(!pyld)) {
 		ipa_err("kzalloc err\n");
 		return pyld;
@@ -273,7 +274,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_register_write(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_register_write_v_4_0(
-	enum ipahal_imm_cmd_name cmd, const void *params, bool is_atomic_ctx)
+	enum ipahal_imm_cmd_name cmd, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_register_write_v_4_0 *data;
@@ -287,7 +288,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_register_write_v_4_0(
 		return NULL;
 	}
 
-	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
+	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), false);
 	if (unlikely(!pyld)) {
 		WARN_ON(1);
 		return pyld;
@@ -321,14 +322,14 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_register_write_v_4_0(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_packet_init(
-	enum ipahal_imm_cmd_name cmd, const void *params, bool is_atomic_ctx)
+	enum ipahal_imm_cmd_name cmd, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_packet_init *data;
 	struct ipahal_imm_cmd_ip_packet_init *pktinit_params =
 		(struct ipahal_imm_cmd_ip_packet_init *)params;
 
-	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
+	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), false);
 	if (unlikely(!pyld)) {
 		ipa_err("kzalloc err\n");
 		return pyld;
@@ -348,14 +349,14 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_packet_init(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_nat_dma(
-	enum ipahal_imm_cmd_name cmd, const void *params, bool is_atomic_ctx)
+	enum ipahal_imm_cmd_name cmd, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_nat_dma *data;
 	struct ipahal_imm_cmd_nat_dma *nat_params =
 		(struct ipahal_imm_cmd_nat_dma *)params;
 
-	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
+	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), false);
 	if (unlikely(!pyld)) {
 		ipa_err("kzalloc err\n");
 		return pyld;
@@ -373,14 +374,14 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_nat_dma(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_table_dma_ipav4(
-	enum ipahal_imm_cmd_name cmd, const void *params, bool is_atomic_ctx)
+	enum ipahal_imm_cmd_name cmd, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_table_dma_ipav4 *data;
 	struct ipahal_imm_cmd_table_dma *nat_params =
 		(struct ipahal_imm_cmd_table_dma *)params;
 
-	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
+	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), false);
 	if (unlikely(!pyld)) {
 		ipa_err("kzalloc err\n");
 		return pyld;
@@ -398,14 +399,14 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_table_dma_ipav4(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_hdr_init_system(
-	enum ipahal_imm_cmd_name cmd, const void *params, bool is_atomic_ctx)
+	enum ipahal_imm_cmd_name cmd, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_hdr_init_system *data;
 	struct ipahal_imm_cmd_hdr_init_system *syshdr_params =
 		(struct ipahal_imm_cmd_hdr_init_system *)params;
 
-	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
+	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), false);
 	if (unlikely(!pyld)) {
 		ipa_err("kzalloc err\n");
 		return pyld;
@@ -420,14 +421,14 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_hdr_init_system(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_hdr_init_local(
-	enum ipahal_imm_cmd_name cmd, const void *params, bool is_atomic_ctx)
+	enum ipahal_imm_cmd_name cmd, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_hdr_init_local *data;
 	struct ipahal_imm_cmd_hdr_init_local *lclhdr_params =
 		(struct ipahal_imm_cmd_hdr_init_local *)params;
 
-	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
+	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), false);
 	if (unlikely(!pyld)) {
 		ipa_err("kzalloc err\n");
 		return pyld;
@@ -449,14 +450,14 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_hdr_init_local(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v6_routing_init(
-	enum ipahal_imm_cmd_name cmd, const void *params, bool is_atomic_ctx)
+	enum ipahal_imm_cmd_name cmd, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v6_routing_init *data;
 	struct ipahal_imm_cmd_ip_v6_routing_init *rt6_params =
 		(struct ipahal_imm_cmd_ip_v6_routing_init *)params;
 
-	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
+	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), false);
 	if (unlikely(!pyld)) {
 		ipa_err("kzalloc err\n");
 		return pyld;
@@ -476,14 +477,14 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v6_routing_init(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_routing_init(
-	enum ipahal_imm_cmd_name cmd, const void *params, bool is_atomic_ctx)
+	enum ipahal_imm_cmd_name cmd, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v4_routing_init *data;
 	struct ipahal_imm_cmd_ip_v4_routing_init *rt4_params =
 		(struct ipahal_imm_cmd_ip_v4_routing_init *)params;
 
-	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
+	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), false);
 	if (unlikely(!pyld)) {
 		ipa_err("kzalloc err\n");
 		return pyld;
@@ -503,14 +504,14 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_routing_init(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_nat_init(
-	enum ipahal_imm_cmd_name cmd, const void *params, bool is_atomic_ctx)
+	enum ipahal_imm_cmd_name cmd, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v4_nat_init *data;
 	struct ipahal_imm_cmd_ip_v4_nat_init *nat4_params =
 		(struct ipahal_imm_cmd_ip_v4_nat_init *)params;
 
-	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
+	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), false);
 	if (unlikely(!pyld)) {
 		ipa_err("kzalloc err\n");
 		return pyld;
@@ -542,14 +543,14 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_nat_init(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v6_filter_init(
-	enum ipahal_imm_cmd_name cmd, const void *params, bool is_atomic_ctx)
+	enum ipahal_imm_cmd_name cmd, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v6_filter_init *data;
 	struct ipahal_imm_cmd_ip_v6_filter_init *flt6_params =
 		(struct ipahal_imm_cmd_ip_v6_filter_init *)params;
 
-	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
+	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), false);
 	if (unlikely(!pyld)) {
 		ipa_err("kzalloc err\n");
 		return pyld;
@@ -569,14 +570,14 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v6_filter_init(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_filter_init(
-	enum ipahal_imm_cmd_name cmd, const void *params, bool is_atomic_ctx)
+	enum ipahal_imm_cmd_name cmd, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v4_filter_init *data;
 	struct ipahal_imm_cmd_ip_v4_filter_init *flt4_params =
 		(struct ipahal_imm_cmd_ip_v4_filter_init *)params;
 
-	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), is_atomic_ctx);
+	pyld = IPAHAL_MEM_ALLOC(sizeof(*pyld) + sizeof(*data), false);
 	if (unlikely(!pyld)) {
 		ipa_err("kzalloc err\n");
 		return pyld;
@@ -603,7 +604,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_filter_init(
  */
 struct ipahal_imm_cmd_obj {
 	struct ipahal_imm_cmd_pyld *(*construct)(enum ipahal_imm_cmd_name cmd,
-		const void *params, bool is_atomic_ctx);
+		const void *params);
 	u16 opcode;
 };
 
@@ -757,11 +758,12 @@ static u16 ipahal_imm_cmd_get_opcode(enum ipahal_imm_cmd_name cmd)
 struct ipahal_imm_cmd_pyld *
 ipahal_construct_imm_cmd(enum ipahal_imm_cmd_name cmd, const void *params,
 				bool is_atomic_ctx)
+
 {
 	ipa_debug_low("construct IMM_CMD:%s\n",
 			ipahal_imm_cmd_name_to_str[cmd]);
 
-	return ipahal_imm_cmds[cmd].construct(cmd, params, is_atomic_ctx);
+	return ipahal_imm_cmds[cmd].construct(cmd, params);
 }
 
 /*
