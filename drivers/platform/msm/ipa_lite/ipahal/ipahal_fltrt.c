@@ -214,6 +214,63 @@ static struct ipahal_fltrt_obj ipahal_fltrt_objs[IPA_HW_MAX] = {
 	},
 };
 
+static void ipahal_fltrt_validate(const struct ipahal_fltrt_obj *fltrt_obj)
+{
+	if (!fltrt_obj->tbl_width) {
+		ipa_err("Zero tbl width\n");
+		WARN_ON(1);
+	}
+	if (!fltrt_obj->sysaddr_alignment) {
+		ipa_err("No tbl sysaddr alignment\n");
+		WARN_ON(1);
+	}
+	if (!fltrt_obj->lcladdr_alignment) {
+		ipa_err(
+			"No tbl lcladdr alignment\n");
+		WARN_ON(1);
+	}
+	if (!fltrt_obj->blk_sz_alignment) {
+		ipa_err("No blk sz alignment\n");
+		WARN_ON(1);
+	}
+	if (!fltrt_obj->rule_start_alignment) {
+		ipa_err("No rule start alignment\n");
+		WARN_ON(1);
+	}
+	if (!fltrt_obj->tbl_hdr_width) {
+		ipa_err("Zero tbl hdr width\n");
+		WARN_ON(1);
+	}
+	if (!fltrt_obj->tbl_addr_mask) {
+		ipa_err("Zero tbl hdr width\n");
+		WARN_ON(1);
+	}
+	if (fltrt_obj->rule_id_bit_len < 2) {
+		ipa_err("Too little bits for rule_id\n");
+		WARN_ON(1);
+	}
+	if (!fltrt_obj->rule_buf_size) {
+		ipa_err("zero rule buf size\n");
+		WARN_ON(1);
+	}
+	if (!fltrt_obj->write_val_to_hdr) {
+		ipa_err("No write_val_to_hdr CB\n");
+		WARN_ON(1);
+	}
+	if (!fltrt_obj->create_flt_bitmap) {
+		ipa_err("No create_flt_bitmap CB\n");
+		WARN_ON(1);
+	}
+	if (!fltrt_obj->create_tbl_addr) {
+		ipa_err("No create_tbl_addr CB\n");
+		WARN_ON(1);
+	}
+	if (!fltrt_obj->parse_tbl_addr) {
+		ipa_err("No parse_tbl_addr CB\n");
+		WARN_ON(1);
+	}
+}
+
 /*
  * ipahal_fltrt_init() - Build the FLT/RT information table
  *  See ipahal_fltrt_objs[] comments
@@ -241,84 +298,7 @@ int ipahal_fltrt_init(enum ipa_hw_type ipa_hw_type)
 			 * explicitly overridden FLT RT info
 			 * Check validity
 			 */
-			if (!ipahal_fltrt_objs[i+1].tbl_width) {
-				ipa_err(
-				 "Zero tbl width ipaver=%d\n",
-				 i+1);
-				WARN_ON(1);
-			}
-			if (!ipahal_fltrt_objs[i+1].sysaddr_alignment) {
-				ipa_err(
-				  "No tbl sysaddr alignment ipaver=%d\n",
-				  i+1);
-				WARN_ON(1);
-			}
-			if (!ipahal_fltrt_objs[i+1].lcladdr_alignment) {
-				ipa_err(
-				  "No tbl lcladdr alignment ipaver=%d\n",
-				  i+1);
-				WARN_ON(1);
-			}
-			if (!ipahal_fltrt_objs[i+1].blk_sz_alignment) {
-				ipa_err(
-				  "No blk sz alignment ipaver=%d\n",
-				  i+1);
-				WARN_ON(1);
-			}
-			if (!ipahal_fltrt_objs[i+1].rule_start_alignment) {
-				ipa_err(
-				  "No rule start alignment ipaver=%d\n",
-				  i+1);
-				WARN_ON(1);
-			}
-			if (!ipahal_fltrt_objs[i+1].tbl_hdr_width) {
-				ipa_err(
-				 "Zero tbl hdr width ipaver=%d\n",
-				 i+1);
-				WARN_ON(1);
-			}
-			if (!ipahal_fltrt_objs[i+1].tbl_addr_mask) {
-				ipa_err(
-				 "Zero tbl hdr width ipaver=%d\n",
-				 i+1);
-				WARN_ON(1);
-			}
-			if (ipahal_fltrt_objs[i+1].rule_id_bit_len < 2) {
-				ipa_err(
-				 "Too little bits for rule_id ipaver=%d\n",
-				 i+1);
-				WARN_ON(1);
-			}
-			if (!ipahal_fltrt_objs[i+1].rule_buf_size) {
-				ipa_err(
-				 "zero rule buf size ipaver=%d\n",
-				 i+1);
-				WARN_ON(1);
-			}
-			if (!ipahal_fltrt_objs[i+1].write_val_to_hdr) {
-				ipa_err(
-				  "No write_val_to_hdr CB ipaver=%d\n",
-				  i+1);
-				WARN_ON(1);
-			}
-			if (!ipahal_fltrt_objs[i+1].create_flt_bitmap) {
-				ipa_err(
-				  "No create_flt_bitmap CB ipaver=%d\n",
-				  i+1);
-				WARN_ON(1);
-			}
-			if (!ipahal_fltrt_objs[i+1].create_tbl_addr) {
-				ipa_err(
-				  "No create_tbl_addr CB ipaver=%d\n",
-				  i+1);
-				WARN_ON(1);
-			}
-			if (!ipahal_fltrt_objs[i+1].parse_tbl_addr) {
-				ipa_err(
-				  "No parse_tbl_addr CB ipaver=%d\n",
-				  i+1);
-				WARN_ON(1);
-			}
+			ipahal_fltrt_validate(&ipahal_fltrt_objs[i + 1]);
 		}
 	}
 
