@@ -126,22 +126,6 @@ static void ipa_fltrt_parse_tbl_addr(u64 hwaddr, u64 *addr, bool *is_sys)
 	*addr = hwaddr;
 }
 
-/* Update these tables of the number of equations changes */
-static const int ipa3_0_ofst_meq32[] = { IPA_OFFSET_MEQ32_0,
-					IPA_OFFSET_MEQ32_1};
-static const int ipa3_0_ofst_meq128[] = { IPA_OFFSET_MEQ128_0,
-					IPA_OFFSET_MEQ128_1};
-static const int ipa3_0_ihl_ofst_rng16[] = { IPA_IHL_OFFSET_RANGE16_0,
-					IPA_IHL_OFFSET_RANGE16_1};
-static const int ipa3_0_ihl_ofst_meq32[] = { IPA_IHL_OFFSET_MEQ32_0,
-					IPA_IHL_OFFSET_MEQ32_1};
-
-#define IPA_IS_RAN_OUT_OF_EQ(__eq_array, __eq_index) \
-	(ARRAY_SIZE(__eq_array) <= (__eq_index))
-
-#define IPA_GET_RULE_EQ_BIT_PTRN(__eq) \
-	(BIT(ipahal_fltrt_objs[ipahal_ctx->hw_type].eq_bitfield[(__eq)]))
-
 /*
  * This array contains the FLT/RT info for IPAv3 and later.
  * All the information on IPAv3 are statically defined below.
