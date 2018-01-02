@@ -32,8 +32,8 @@ static const char *ipahal_pkt_status_exception_to_str
 	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_IPV6CT),
 };
 
-static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_task_32b_addr(
-	u16 opcode, const void *params)
+static struct ipahal_imm_cmd_pyld *
+ipa_imm_cmd_construct_dma_task_32b_addr(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_dma_task_32b_addr *data;
@@ -73,8 +73,8 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_task_32b_addr(
 }
 
 /* NOTE:  this function is called in atomic state */
-static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_packet_tag_status(
-	u16 opcode, const void *params)
+static struct ipahal_imm_cmd_pyld *
+ipa_imm_cmd_construct_ip_packet_tag_status(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_packet_tag_status *data;
@@ -100,8 +100,8 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_packet_tag_status(
 	return pyld;
 }
 
-static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_shared_mem(
-	u16 opcode, const void *params)
+static struct ipahal_imm_cmd_pyld *
+ipa_imm_cmd_construct_dma_shared_mem(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_dma_shared_mem *data;
@@ -151,8 +151,8 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_shared_mem(
 	return pyld;
 }
 
-static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_shared_mem_v_4_0(
-	u16 opcode, const void *params)
+static struct ipahal_imm_cmd_pyld *
+ipa_imm_cmd_construct_dma_shared_mem_v_4_0(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_dma_shared_mem_v_4_0 *data;
@@ -206,8 +206,8 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_shared_mem_v_4_0(
 	return pyld;
 }
 
-static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_register_write(
-	u16 opcode, const void *params)
+static struct ipahal_imm_cmd_pyld *
+ipa_imm_cmd_construct_register_write(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_register_write *data;
@@ -252,8 +252,8 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_register_write(
 	return pyld;
 }
 
-static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_register_write_v_4_0(
-	u16 opcode, const void *params)
+static struct ipahal_imm_cmd_pyld *
+ipa_imm_cmd_construct_register_write_v_4_0(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_register_write_v_4_0 *data;
@@ -300,8 +300,8 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_register_write_v_4_0(
 	return pyld;
 }
 
-static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_packet_init(
-	u16 opcode, const void *params)
+static struct ipahal_imm_cmd_pyld *
+ipa_imm_cmd_construct_ip_packet_init(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_packet_init *data;
@@ -327,8 +327,8 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_packet_init(
 	return pyld;
 }
 
-static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_nat_dma(
-	u16 opcode, const void *params)
+static struct ipahal_imm_cmd_pyld *
+ipa_imm_cmd_construct_nat_dma(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_nat_dma *data;
@@ -352,8 +352,8 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_nat_dma(
 	return pyld;
 }
 
-static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_table_dma_ipav4(
-	u16 opcode, const void *params)
+static struct ipahal_imm_cmd_pyld *
+ipa_imm_cmd_construct_table_dma_ipav4(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_table_dma_ipav4 *data;
@@ -377,8 +377,8 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_table_dma_ipav4(
 	return pyld;
 }
 
-static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_hdr_init_system(
-	u16 opcode, const void *params)
+static struct ipahal_imm_cmd_pyld *
+ipa_imm_cmd_construct_hdr_init_system(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_hdr_init_system *data;
@@ -399,8 +399,8 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_hdr_init_system(
 	return pyld;
 }
 
-static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_hdr_init_local(
-	u16 opcode, const void *params)
+static struct ipahal_imm_cmd_pyld *
+ipa_imm_cmd_construct_hdr_init_local(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_hdr_init_local *data;
@@ -428,8 +428,8 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_hdr_init_local(
 	return pyld;
 }
 
-static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v6_routing_init(
-	u16 opcode, const void *params)
+static struct ipahal_imm_cmd_pyld *
+ipa_imm_cmd_construct_ip_v6_routing_init(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v6_routing_init *data;
@@ -455,8 +455,8 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v6_routing_init(
 	return pyld;
 }
 
-static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_routing_init(
-	u16 opcode, const void *params)
+static struct ipahal_imm_cmd_pyld *
+ipa_imm_cmd_construct_ip_v4_routing_init(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v4_routing_init *data;
@@ -482,8 +482,8 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_routing_init(
 	return pyld;
 }
 
-static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_nat_init(
-	u16 opcode, const void *params)
+static struct ipahal_imm_cmd_pyld *
+ipa_imm_cmd_construct_ip_v4_nat_init(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v4_nat_init *data;
@@ -521,8 +521,8 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_nat_init(
 	return pyld;
 }
 
-static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v6_filter_init(
-	u16 opcode, const void *params)
+static struct ipahal_imm_cmd_pyld *
+ipa_imm_cmd_construct_ip_v6_filter_init(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v6_filter_init *data;
@@ -548,8 +548,8 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v6_filter_init(
 	return pyld;
 }
 
-static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_filter_init(
-	u16 opcode, const void *params)
+static struct ipahal_imm_cmd_pyld *
+ipa_imm_cmd_construct_ip_v4_filter_init(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v4_filter_init *data;
