@@ -56,14 +56,14 @@ enum ipa_fltrt_equations {
  * Needed due to rules classification to hashable and non-hashable.
  * Higher priority is lower in number. i.e. 0 is highest priority
  */
-#define IPA3_0_RULE_MAX_PRIORITY (0)
-#define IPA3_0_RULE_MIN_PRIORITY (1023)
+#define IPA3_0_RULE_MAX_PRIORITY	0
+#define IPA3_0_RULE_MIN_PRIORITY	1023
 
 /*
  * RULE ID, bit length (e.g. 10 bits).
  */
 #define IPA3_0_RULE_ID_BIT_LEN		10
-#define IPA3_0_LOW_RULE_ID (1)
+#define IPA3_0_LOW_RULE_ID		1
 
 /**
  * struct ipa3_0_rt_rule_hw_hdr - HW header of IPA routing rule
