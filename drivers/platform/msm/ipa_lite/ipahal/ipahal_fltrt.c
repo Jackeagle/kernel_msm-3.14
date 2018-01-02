@@ -66,6 +66,7 @@ struct ipahal_fltrt_obj {
 	u8 eq_bitfield[IPA_EQ_MAX];
 };
 
+static struct ipahal_fltrt_obj ipahal_fltrt;
 
 static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap)
 {
@@ -287,6 +288,18 @@ int ipahal_fltrt_init(void)
 
 	ipa_debug("Entry - HW_TYPE=%d\n", ipahal_ctx->hw_type);
 
+       /* Build up a the filter table descriptions we'll use */
+	for (i = ipahal_ctx->hw_type; i >= IPA_HW_v3_0; i--) {
+		const struct ipahal_fltrt_obj *fltrt;
+
+		fltrt = &ipahal_fltrt_objs[i];
+		if (memcmp(fltrt, &zero_obj, sizeof(*fltrt))) {
+			ipahal_fltrt_validate(fltrt);
+			ipahal_fltrt = *fltrt;
+			break;
+		}
+	}
+
 	for (i = IPA_HW_v3_0 ; i < ipahal_ctx->hw_type ; i++) {
 		if (!memcmp(&ipahal_fltrt_objs[i+1], &zero_obj,
 			sizeof(struct ipahal_fltrt_obj))) {
@@ -300,6 +313,11 @@ int ipahal_fltrt_init(void)
 			 */
 			ipahal_fltrt_validate(&ipahal_fltrt_objs[i + 1]);
 		}
+	}
+
+	if (memcmp(&ipahal_fltrt, &ipahal_fltrt_objs[ipahal_ctx->hw_type],
+				sizeof(ipahal_fltrt))) {
+		ipa_err("ipahal_fltrt DOES NOT MATCH ipahal_fltrt_objs[]\n");
 	}
 
 	mem = &ipahal_ctx->empty_fltrt_tbl;

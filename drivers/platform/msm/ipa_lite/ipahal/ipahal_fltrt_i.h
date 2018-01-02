@@ -42,15 +42,14 @@ enum ipa_fltrt_equations {
 /* Width and Alignment values for H/W structures.
  * Specific for IPA version.
  */
+#define IPA3_0_HW_TBL_WIDTH		8
 #define IPA3_0_HW_TBL_SYSADDR_ALIGNMENT (127)
 #define IPA3_0_HW_TBL_LCLADDR_ALIGNMENT (7)
 #define IPA3_0_HW_TBL_BLK_SIZE_ALIGNMENT (127)
-#define IPA3_0_HW_TBL_WIDTH (8)
 #define IPA3_0_HW_TBL_HDR_WIDTH (8)
 #define IPA3_0_HW_TBL_ADDR_MASK (127)
 #define IPA3_0_HW_RULE_BUF_SIZE (256)
 #define IPA3_0_HW_RULE_START_ALIGNMENT (7)
-
 
 /*
  * Rules Priority.
