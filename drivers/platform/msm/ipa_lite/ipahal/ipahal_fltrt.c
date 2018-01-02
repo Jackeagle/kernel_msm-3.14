@@ -291,6 +291,15 @@ static int ipahal_empty_fltrt_init(void)
 	return 0;
 }
 
+static void ipahal_empty_fltrt_destroy(void)
+{
+	struct ipa_mem_buffer *mem = &ipahal_ctx->empty_fltrt_tbl;
+	struct device *dev = ipahal_ctx->ipa_pdev;
+
+	dma_free_coherent(dev, mem->size, mem->base, mem->phys_base);
+	memset(mem, 0, sizeof(*mem));
+}
+
 /*
  * ipahal_fltrt_init() - Build the FLT/RT information table
  *  See ipahal_fltrt_objs[] comments
@@ -319,11 +328,8 @@ void ipahal_fltrt_destroy(void)
 {
 	ipa_debug("Entry\n");
 
-	if (ipahal_ctx && ipahal_ctx->empty_fltrt_tbl.base)
-		dma_free_coherent(ipahal_ctx->ipa_pdev,
-			ipahal_ctx->empty_fltrt_tbl.size,
-			ipahal_ctx->empty_fltrt_tbl.base,
-			ipahal_ctx->empty_fltrt_tbl.phys_base);
+	if (ipahal_ctx)
+		ipahal_empty_fltrt_destroy();
 }
 
 /* Get the H/W table (flt/rt) header width */
