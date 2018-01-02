@@ -230,26 +230,6 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 	},
 };
 
-static void ipahal_fltrt_validate(const struct ipahal_fltrt_obj *fltrt_obj)
-{
-	if (!fltrt_obj->write_val_to_hdr) {
-		ipa_err("No write_val_to_hdr CB\n");
-		WARN_ON(1);
-	}
-	if (!fltrt_obj->create_flt_bitmap) {
-		ipa_err("No create_flt_bitmap CB\n");
-		WARN_ON(1);
-	}
-	if (!fltrt_obj->create_tbl_addr) {
-		ipa_err("No create_tbl_addr CB\n");
-		WARN_ON(1);
-	}
-	if (!fltrt_obj->parse_tbl_addr) {
-		ipa_err("No parse_tbl_addr CB\n");
-		WARN_ON(1);
-	}
-}
-
 /*
  * ipahal_fltrt_init() - Build the FLT/RT information table
  *  See ipahal_fltrt_objs[] comments
@@ -268,7 +248,6 @@ int ipahal_fltrt_init(void)
 
 		fltrt = &ipahal_fltrt_objs[i];
 		if (fltrt->tbl_width) {
-			ipahal_fltrt_validate(fltrt);
 			ipahal_fltrt = *fltrt;
 			break;
 		}
