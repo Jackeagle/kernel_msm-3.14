@@ -909,17 +909,6 @@ static void ipa_pkt_status_parse(
 }
 
 /*
- * ipahal_pkt_status_init() - perform initialization related to
- * parsing packet status
- */
-static int ipahal_pkt_status_init(enum ipa_hw_type ipa_hw_type)
-{
-	ipa_debug_low("Entry - HW_TYPE=%d\n", ipa_hw_type);
-
-	return 0;
-}
-
-/*
  * ipahal_pkt_status_get_size() - Get H/W size of packet status
  */
 u32 ipahal_pkt_status_get_size(void)
@@ -1103,14 +1092,9 @@ int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base,
 	ipahal_ctx->base = base;
 	ipahal_ctx->ipa_pdev = ipa_pdev;
 
+	/* Packet status parsing code requires no initialization */
 	ipahal_reg_init();
 	ipahal_imm_cmd_init();
-
-	if (ipahal_pkt_status_init(ipa_hw_type)) {
-		ipa_err("failed to init ipahal pkt status\n");
-		result = -EFAULT;
-		goto bail_free_ctx;
-	}
 
 	if (ipahal_fltrt_init(ipa_hw_type)) {
                 ipa_err("failed to init ipahal flt rt\n");
