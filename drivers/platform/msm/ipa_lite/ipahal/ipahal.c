@@ -992,34 +992,11 @@ static void ipahal_cp_hdr_to_hw_buff_v3(void *const base, u32 offset,
 	memcpy(base + offset, hdr, hdr_len);
 }
 
-/*
- * struct ipahal_hdr_funcs - headers handling functions for specific IPA
- * version
- * @ipahal_cp_hdr_to_hw_buff - copy function for regular headers
- */
-struct ipahal_hdr_funcs {
-	void (*ipahal_cp_hdr_to_hw_buff)(void *const base, u32 offset,
-			u8 *const hdr, u32 hdr_len);
-};
-
-static struct ipahal_hdr_funcs hdr_funcs;
-
 static void ipahal_hdr_init(enum ipa_hw_type ipa_hw_type)
 {
 
 	ipa_debug("Entry - HW_TYPE=%d\n", ipa_hw_type);
 
-	/*
-	 * once there are changes in HW and need to use different case, insert
-	 * new case for the new h/w. put the default always for the latest HW
-	 * and make sure all previous supported versions have their cases.
-	 */
-	switch (ipa_hw_type) {
-	case IPA_HW_v3_0:
-	default:
-		hdr_funcs.ipahal_cp_hdr_to_hw_buff =
-				ipahal_cp_hdr_to_hw_buff_v3;
-	}
 	ipa_debug("Exit\n");
 }
 
