@@ -590,6 +590,20 @@ struct ipa3_desc {
 	bool skip_db_ring;
 };
 
+/*
+ * Helper function to fill in some IPA descriptor fields for an
+ * immediate command using an immediate command payload returned by
+ * ipahal_construct_imm_cmd().
+ */
+static inline void
+ipa_desc_fill_imm_cmd(struct ipa3_desc *desc, struct ipahal_imm_cmd_pyld *pyld)
+{
+	desc->type = IPA_IMM_CMD_DESC;
+	desc->pyld = pyld->data;
+	desc->len = pyld->len;
+	desc->opcode = pyld->opcode;
+}
+
 /**
  * struct  ipa_rx_data - information needed
  * to send to wlan driver on receiving data from ipa hw

@@ -2968,13 +2968,11 @@ static int ipa_populate_tag_field(struct ipa3_desc *desc,
 		 * This is for 32-bit pointer, will need special
 		 * handling if 64-bit pointer is used
 		 */
-		ipa_debug_low("tx_pkt sent in tag: 0x%p\n", tx_pkt);
-		desc->pyld = tag_pyld->data;
-		desc->opcode = tag_pyld->opcode;
-		desc->len = tag_pyld->len;
+		ipa_desc_fill_imm_cmd(desc, tag_pyld);
 		desc->user1 = tag_pyld;
-		desc->type = IPA_IMM_CMD_DESC;
 		desc->callback = ipa3_tag_destroy_imm;
+
+		ipa_debug_low("tx_pkt sent in tag: 0x%p\n", tx_pkt);
 
 		*tag_pyld_ret = tag_pyld;
 	}

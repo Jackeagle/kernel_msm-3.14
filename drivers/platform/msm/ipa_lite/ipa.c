@@ -282,10 +282,7 @@ static int ipa3_init_smem_region(int memory_region_size,
 		ipa_err("failed to construct dma_shared_mem imm cmd\n");
 		return -ENOMEM;
 	}
-	desc.opcode = cmd_pyld->opcode;
-	desc.pyld = cmd_pyld->data;
-	desc.len = cmd_pyld->len;
-	desc.type = IPA_IMM_CMD_DESC;
+	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
 	rc = ipa3_send_cmd(1, &desc);
 	if (rc) {
@@ -498,13 +495,10 @@ static int ipa3_q6_set_ex_path_to_apps(void)
 				ipa_err("fail construct register_write cmd\n");
 				BUG();
 			}
-
-			desc[num_descs].opcode = cmd_pyld->opcode;
-			desc[num_descs].type = IPA_IMM_CMD_DESC;
+			ipa_desc_fill_imm_cmd(&desc[num_descs], cmd_pyld);
 			desc[num_descs].callback = ipa3_destroy_imm;
 			desc[num_descs].user1 = cmd_pyld;
-			desc[num_descs].pyld = cmd_pyld->data;
-			desc[num_descs].len = cmd_pyld->len;
+
 			num_descs++;
 		}
 
@@ -526,13 +520,10 @@ static int ipa3_q6_set_ex_path_to_apps(void)
 				ipa_assert();
 				return -EFAULT;
 			}
-
-			desc[num_descs].opcode = cmd_pyld->opcode;
-			desc[num_descs].type = IPA_IMM_CMD_DESC;
+			ipa_desc_fill_imm_cmd(&desc[num_descs], cmd_pyld);
 			desc[num_descs].callback = ipa3_destroy_imm;
 			desc[num_descs].user1 = cmd_pyld;
-			desc[num_descs].pyld = cmd_pyld->data;
-			desc[num_descs].len = cmd_pyld->len;
+
 			num_descs++;
 		}
 	}
@@ -727,10 +718,7 @@ int _ipa_init_hdr_v3_0(void)
 		dma_free_coherent(dev, mem.size, mem.base, mem.phys_base);
 		return -EFAULT;
 	}
-	desc.opcode = cmd_pyld->opcode;
-	desc.type = IPA_IMM_CMD_DESC;
-	desc.pyld = cmd_pyld->data;
-	desc.len = cmd_pyld->len;
+	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 	IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
 	if (ipa3_send_cmd(1, &desc)) {
@@ -768,10 +756,7 @@ int _ipa_init_hdr_v3_0(void)
 		dma_free_coherent(dev, mem.size, mem.base, mem.phys_base);
 		return -EFAULT;
 	}
-	desc.opcode = cmd_pyld->opcode;
-	desc.pyld = cmd_pyld->data;
-	desc.len = cmd_pyld->len;
-	desc.type = IPA_IMM_CMD_DESC;
+	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 	IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
 	if (ipa3_send_cmd(1, &desc)) {
@@ -829,11 +814,7 @@ int _ipa_init_rt4_v3(void)
                 rc = -EPERM;
                 goto free_mem;
         }
-
-        desc.opcode = cmd_pyld->opcode;
-        desc.type = IPA_IMM_CMD_DESC;
-        desc.pyld = cmd_pyld->data;
-        desc.len = cmd_pyld->len;
+	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
         IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
         if (ipa3_send_cmd(1, &desc)) {
@@ -888,11 +869,7 @@ int _ipa_init_rt6_v3(void)
                 rc = -EPERM;
                 goto free_mem;
         }
-
-        desc.opcode = cmd_pyld->opcode;
-        desc.type = IPA_IMM_CMD_DESC;
-        desc.pyld = cmd_pyld->data;
-        desc.len = cmd_pyld->len;
+	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
         IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
         if (ipa3_send_cmd(1, &desc)) {
@@ -948,11 +925,7 @@ int _ipa_init_flt4_v3(void)
                 rc = -EPERM;
                 goto free_mem;
         }
-
-        desc.opcode = cmd_pyld->opcode;
-        desc.type = IPA_IMM_CMD_DESC;
-        desc.pyld = cmd_pyld->data;
-        desc.len = cmd_pyld->len;
+	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
         IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
         if (ipa3_send_cmd(1, &desc)) {
@@ -1009,11 +982,7 @@ int _ipa_init_flt6_v3(void)
                 rc = -EPERM;
                 goto free_mem;
         }
-
-        desc.opcode = cmd_pyld->opcode;
-        desc.type = IPA_IMM_CMD_DESC;
-        desc.pyld = cmd_pyld->data;
-        desc.len = cmd_pyld->len;
+	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
         IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
         if (ipa3_send_cmd(1, &desc)) {
@@ -2740,10 +2709,8 @@ static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
                                 retval = -ENOMEM;
                                 goto free_empty_img;
                         }
-                        desc[num_cmds].opcode = cmd_pyld[num_cmds]->opcode;
-                        desc[num_cmds].pyld = cmd_pyld[num_cmds]->data;
-                        desc[num_cmds].len = cmd_pyld[num_cmds]->len;
-                        desc[num_cmds].type = IPA_IMM_CMD_DESC;
+			ipa_desc_fill_imm_cmd(&desc[num_cmds],
+						cmd_pyld[num_cmds]);
                         num_cmds++;
                 }
 
@@ -2838,10 +2805,7 @@ static int ipa3_q6_clean_q6_rt_tbls(enum ipa_ip_type ip,
                 retval = -ENOMEM;
                 goto free_desc;
         }
-	desc->opcode = cmd_pyld->opcode;
-        desc->pyld = cmd_pyld->data;
-        desc->len = cmd_pyld->len;
-        desc->type = IPA_IMM_CMD_DESC;
+	ipa_desc_fill_imm_cmd(desc, cmd_pyld);
 
         ipa_debug("Sending 1 descriptor for rt tbl clearing\n");
         retval = ipa3_send_cmd(1, desc);
@@ -2929,11 +2893,7 @@ static int ipa3_q6_clean_q6_tables(void)
                 retval = -EFAULT;
                 goto bail_desc;
         }
-
-        desc->opcode = cmd_pyld->opcode;
-		desc->pyld = cmd_pyld->data;
-        desc->len = cmd_pyld->len;
-        desc->type = IPA_IMM_CMD_DESC;
+	ipa_desc_fill_imm_cmd(desc, cmd_pyld);
 
         ipa_debug("Sending 1 descriptor for tbls flush\n");
         retval = ipa3_send_cmd(1, desc);
