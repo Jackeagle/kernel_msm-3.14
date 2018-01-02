@@ -17,6 +17,8 @@
 #include "ipahal_i.h"
 #include "ipahal_reg_i.h"
 
+#define IPAHAL_MEM_ALLOC(__size, __is_atomic_ctx) \
+	(kzalloc((__size), ((__is_atomic_ctx) ? GFP_ATOMIC : GFP_KERNEL)))
 
 struct ipahal_context *ipahal_ctx;
 
