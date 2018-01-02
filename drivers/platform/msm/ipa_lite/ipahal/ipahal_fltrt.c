@@ -20,6 +20,33 @@
 #include "ipahal_i.h"
 
 /*
+ * Width and alignment values for H/W structures.  Values could
+ * differ for different versions of IPA hardware.
+ */
+#define IPA3_0_HW_TBL_WIDTH		8
+#define IPA3_0_HW_TBL_SYSADDR_ALIGN	128
+#define IPA3_0_HW_TBL_LCLADDR_ALIGN	8
+#define IPA3_0_HW_TBL_BLK_SIZE_ALIGN	128
+#define IPA3_0_HW_RULE_START_ALIGN	8
+#define IPA3_0_HW_TBL_HDR_WIDTH		8
+#define IPA3_0_HW_TBL_ADDR_MASK		127
+#define IPA3_0_HW_RULE_BUF_SIZE		256
+
+/*
+ * Rules Priority.
+ * Needed due to rules classification to hashable and non-hashable.
+ * Higher priority is lower in number. i.e. 0 is highest priority
+ */
+#define IPA3_0_RULE_MAX_PRIORITY	0
+#define IPA3_0_RULE_MIN_PRIORITY	1023
+
+/*
+ * RULE ID, bit length (e.g. 10 bits).
+ */
+#define IPA3_0_RULE_ID_BIT_LEN		10
+#define IPA3_0_LOW_RULE_ID		1
+
+/*
  * struct ipahal_fltrt_obj - Flt/Rt H/W information for specific IPA version
  * @support_hash: Is hashable tables supported
  * @tbl_width: Width of table in bytes
