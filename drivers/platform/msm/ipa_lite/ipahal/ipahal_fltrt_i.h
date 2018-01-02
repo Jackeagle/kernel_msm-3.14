@@ -62,7 +62,7 @@ enum ipa_fltrt_equations {
 /*
  * RULE ID, bit length (e.g. 10 bits).
  */
-#define IPA3_0_RULE_ID_BIT_LEN (10)
+#define IPA3_0_RULE_ID_BIT_LEN		10
 #define IPA3_0_LOW_RULE_ID (1)
 
 /**
