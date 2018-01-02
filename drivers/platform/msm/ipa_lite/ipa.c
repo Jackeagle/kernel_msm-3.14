@@ -1971,17 +1971,6 @@ static int ipa3_pre_init(void)
 
 	ipa_debug("IPA Driver initialization started\n");
 
-	/* setup IPA register access */
-	ipa_debug("Mapping 0x%x\n", ipa3_ctx->ipa_wrapper_base +
-		ipa3_ctx->ctrl->ipa_reg_base_ofst);
-	ipa3_ctx->mmio = ioremap(ipa3_ctx->ipa_wrapper_base +
-			ipa3_ctx->ctrl->ipa_reg_base_ofst,
-			ipa3_ctx->ipa_wrapper_size);
-	if (!ipa3_ctx->mmio) {
-		ipa_err(":ipa-base ioremap err.\n");
-		return -EFAULT;
-	}
-
 	/* Clock scaling is enabled */
 	ipa3_ctx->curr_ipa_clk_rate = ipa3_ctx->ctrl->ipa_clk_rate_turbo;
 
@@ -2148,8 +2137,6 @@ fail_init_hw:
 	ipahal_destroy();
 fail_ipahal:
 	ipa3_disable_clks();
-	iounmap(ipa3_ctx->mmio);
-	ipa3_ctx->mmio = NULL;
 
 	return result;
 }
@@ -2357,9 +2344,23 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		ipa3_iommu_map(cb->mapping->domain, iova, pa, IPA_SMEM_SIZE);
 	}
 
+	/* setup IPA register access */
+	ipa_debug("Mapping 0x%x\n", ipa3_ctx->ipa_wrapper_base +
+		ipa3_ctx->ctrl->ipa_reg_base_ofst);
+	ipa3_ctx->mmio = ioremap(ipa3_ctx->ipa_wrapper_base +
+				ipa3_ctx->ctrl->ipa_reg_base_ofst,
+				ipa3_ctx->ipa_wrapper_size);
+	if (!ipa3_ctx->mmio) {
+		ipa_err(":ipa-base ioremap err.\n");
+		ipa_smmu_detach(cb);
+		return -EFAULT;
+	}
+
 	/* Proceed to real initialization */
 	result = ipa3_pre_init();
 	if (result) {
+		iounmap(ipa3_ctx->mmio);
+		ipa3_ctx->mmio = NULL;
 		ipa_err("ipa_init failed\n");
 		ipa_smmu_detach(cb);
 	}
