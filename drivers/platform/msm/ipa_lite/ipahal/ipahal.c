@@ -992,14 +992,6 @@ static void ipahal_cp_hdr_to_hw_buff_v3(void *const base, u32 offset,
 	memcpy(base + offset, hdr, hdr_len);
 }
 
-static void ipahal_hdr_init(enum ipa_hw_type ipa_hw_type)
-{
-
-	ipa_debug("Entry - HW_TYPE=%d\n", ipa_hw_type);
-
-	ipa_debug("Exit\n");
-}
-
 /*
  * ipahal_cp_hdr_to_hw_buff() - copy header to hardware buffer according to
  * base address and offset given.
@@ -1071,7 +1063,6 @@ int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base,
 		return -EFAULT;
 	}
 
-	ipahal_hdr_init(ipa_hw_type);
 	ipahal_debugfs_init();
 
 	return 0;
