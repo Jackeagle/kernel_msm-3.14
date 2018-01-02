@@ -175,6 +175,21 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[IPA_HW_MAX] = {
 		},
 	},
 
+	/* IPAv3.1 */
+	[IPA_HW_v3_1] = {
+		/* All inherited from IPA_HW_v3_0. */
+	},
+
+	/* IPAv3.5 */
+	[IPA_HW_v3_5] = {
+	},
+		/* All inherited from IPA_HW_v3_1. */
+
+	/* IPAv3.5.1 */
+	[IPA_HW_v3_5_1] = {
+		/* All inherited from IPA_HW_v3_5. */
+	},
+
 	/* IPAv4 */
 	[IPA_HW_v4_0] = {
 		true,
