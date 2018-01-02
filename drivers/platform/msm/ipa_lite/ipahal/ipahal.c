@@ -1042,7 +1042,7 @@ void ipahal_cp_hdr_to_hw_buff(void *base, u32 offset, u8 *const hdr,
 		return;
 	}
 
-	hdr_funcs.ipahal_cp_hdr_to_hw_buff(base, offset, hdr, hdr_len);
+	ipahal_cp_hdr_to_hw_buff_v3(base, offset, hdr, hdr_len);
 
 	ipa_debug_low("Exit\n");
 }
