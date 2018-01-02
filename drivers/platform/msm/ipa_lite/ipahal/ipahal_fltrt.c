@@ -232,10 +232,6 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 
 static void ipahal_fltrt_validate(const struct ipahal_fltrt_obj *fltrt_obj)
 {
-	if (!fltrt_obj->tbl_hdr_width) {
-		ipa_err("Zero tbl hdr width\n");
-		WARN_ON(1);
-	}
 	if (!fltrt_obj->tbl_addr_mask) {
 		ipa_err("Zero tbl hdr width\n");
 		WARN_ON(1);
