@@ -536,16 +536,60 @@ struct ipahal_imm_cmd_obj {
 };
 
 /*
- * This table contains the info regard each immediate command for IPAv3
- *  and later.
- * Information like: opcode and construct functions.
- * All the information on the IMM on IPAv3 are statically defined below.
- * If information is missing regard some IMM on some IPA version,
- *  the init function will fill it with the information from the previous
- *  IPA version.
- * Information is considered missing if all of the fields are 0
- * If opcode is OPCODE_INVAL, this means that the IMM is removed on the
- *  specific version
+ * The The opcode used for certain immediate commands may change
+ * between different versions of IPA hardare.  The format of the
+ * command data passed to the IPA can change slightly with new
+ * hardware.  The "ipahal" layer uses the ipahal_imm_cmd_obj[][]
+ * table to hide the version-specific details of creating immediate
+ * commands.
+ *
+ * The following table consists of blocks of "immediate command
+ * object" definitions associated with versions of IPA hardware.
+ * The entries for each immediate command contain a construct
+ * functino and an opcode to use for a given version of IPA
+ * hardware.  The first version of IPA hardware supported by the
+ * "ipahal" layer is 3.0.
+ *
+ * Versions of IPA hardware newer than 3.0 do not need to specify
+ * immediate command object entries if they are accessed the same
+ * way as was defined by an older version.  The only entries defined
+ * for newer hardware are for immediate commands whose opcode or
+ * command format has changed, or immediate commands that are new
+ * and not present in older hardware.
+ *
+ * The construct function for an immediate command is given an IPA
+ * opcode, plus a non-null pointer to a command-specific parameter
+ * block used to initialize the command.  The construct function
+ * allocates a buffer to hold the command payload, and a pointer to
+ * that buffer is returned once the parameters have been formatted
+ * into it.  It is the caller's responsibility to ensure this buffer
+ * gets freed when it is no longer needed.  The construct function
+ * returns null if the buffer could not be allocated.
+ *
+ * No opcodes or command formats changed between IPA version 3.0
+ * and IPA version 3.5.1, so all definitions from version 3.0 are
+ * inherited by these newer versions.  We know, however, that some
+ * of these *are* changing for upcoming hardware.
+ *
+ * The entries in this table have the following constraints:
+ * - 0 is not a valid opcode; an entry having a 0 opcode indicates
+ *   that the corresponding immediate command is formatted according
+ *   to an immediate command object defined for an earlier hardware
+ *   version.
+ * - An opcode of OPCODE_INVAL indicates that a command is not
+ *   supported for a particular hardware version.  It is an error
+ *   for code to attempt to execute a command that is not
+ *   unsupported by the current IPA hardware.
+ *
+ * A caller constructs an immediate command by providing a command
+ * id and a parameter block to ipahal_construct_imm_cmd().  Such
+ * calls are subject to these constraints:
+ * - The command id supplied must be valid:
+ *     - It must be a member of the ipahal_imm_cmd_name enumerated
+ *       type less than IPA_IMM_CMD_MAX
+ *     - It must be a command supported by the underlying hardware
+ * - The parameter block must be a non-null pointer referring to
+ *   parameter data that is formatted properly for the command.
  */
 #define OPCODE_INVAL	((u16)0xffff)
 static const struct ipahal_imm_cmd_obj
