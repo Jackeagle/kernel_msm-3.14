@@ -223,14 +223,13 @@ static struct ipahal_fltrt_obj ipahal_fltrt_objs[IPA_HW_MAX] = {
  */
 int ipahal_fltrt_init(enum ipa_hw_type ipa_hw_type)
 {
-	struct ipahal_fltrt_obj zero_obj;
+	static const struct ipahal_fltrt_obj zero_obj;
 	int i;
 	struct ipa_mem_buffer *mem;
 	int rc = -EFAULT;
 
 	ipa_debug("Entry - HW_TYPE=%d\n", ipa_hw_type);
 
-	memset(&zero_obj, 0, sizeof(zero_obj));
 	for (i = IPA_HW_v3_0 ; i < ipa_hw_type ; i++) {
 		if (!memcmp(&ipahal_fltrt_objs[i+1], &zero_obj,
 			sizeof(struct ipahal_fltrt_obj))) {
