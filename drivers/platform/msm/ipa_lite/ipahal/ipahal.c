@@ -1066,8 +1066,6 @@ u32 ipahal_get_hps_img_mem_size(void)
 int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base,
 	struct device *ipa_pdev)
 {
-	int result;
-
 	ipa_debug("Entry - IPA HW TYPE=%d base=%p ipa_pdev=%p\n",
 		ipa_hw_type, base, ipa_pdev);
 
@@ -1091,21 +1089,15 @@ int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base,
 	ipahal_imm_cmd_init();
 
 	if (ipahal_fltrt_init()) {
-                ipa_err("failed to init ipahal flt rt\n");
-                result = -EFAULT;
-                goto bail_free_ctx;
-    }
+		kfree(ipahal_ctx);
+		ipahal_ctx = NULL;
+		return -EFAULT;
+	}
 
 	ipahal_hdr_init(ipa_hw_type);
 	ipahal_debugfs_init();
 
 	return 0;
-
-bail_free_ctx:
-	kfree(ipahal_ctx);
-	ipahal_ctx = NULL;
-
-	return result;
 }
 
 void ipahal_destroy(void)
