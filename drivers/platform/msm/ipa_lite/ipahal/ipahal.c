@@ -33,20 +33,45 @@ static const char *ipahal_pkt_status_exception_to_str
 };
 
 static struct ipahal_imm_cmd_pyld *
+ipahal_imm_cmd_pyld_alloc_common(u16 opcode, size_t pyld_size, gfp_t flags)
+{
+	struct ipahal_imm_cmd_pyld *pyld;
+
+	pyld = kzalloc(sizeof(*pyld) + pyld_size, flags);
+	if (unlikely(!pyld)) {
+		ipa_err("kzalloc err (opcode %hu pyld_size %zu)\n",
+				opcode, pyld_size);
+		return NULL;
+	}
+	pyld->opcode = opcode;
+	pyld->len = pyld_size;
+
+	return pyld;
+}
+
+static struct ipahal_imm_cmd_pyld *
+ipahal_imm_cmd_pyld_alloc(u16 opcode, size_t pyld_size)
+{
+	return ipahal_imm_cmd_pyld_alloc_common(opcode, pyld_size, GFP_KERNEL);
+}
+
+static struct ipahal_imm_cmd_pyld *
+ipahal_imm_cmd_pyld_alloc_atomic(u16 opcode, size_t pyld_size)
+{
+	return ipahal_imm_cmd_pyld_alloc_common(opcode, pyld_size, GFP_ATOMIC);
+}
+
+static struct ipahal_imm_cmd_pyld *
 ipa_imm_cmd_construct_dma_task_32b_addr(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_dma_task_32b_addr *data;
 	const struct ipahal_imm_cmd_dma_task_32b_addr *dma_params = params;
 
-	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
-	if (unlikely(!pyld)) {
-		ipa_err("kzalloc err\n");
-		return pyld;
-	}
-	pyld->opcode = opcode;
+	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
 	pyld->opcode += 1 << 8;	/* Currently supports only one packet */
-	pyld->len = sizeof(*data);
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	if (unlikely(dma_params->size1 & ~0xFFFF)) {
@@ -79,13 +104,9 @@ ipa_imm_cmd_construct_ip_packet_tag_status(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_ip_packet_tag_status *data;
 	const struct ipahal_imm_cmd_ip_packet_tag_status *tag_params = params;
 
-	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_ATOMIC);
-	if (unlikely(!pyld)) {
-		ipa_err("kzalloc err\n");
-		return pyld;
-	}
-	pyld->opcode = opcode;
-	pyld->len = sizeof(*data);
+	pyld = ipahal_imm_cmd_pyld_alloc_atomic(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	if (unlikely(tag_params->tag & ~0xFFFFFFFFFFFF)) {
@@ -105,13 +126,9 @@ ipa_imm_cmd_construct_dma_shared_mem(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_dma_shared_mem *data;
 	const struct ipahal_imm_cmd_dma_shared_mem *mem_params = params;
 
-	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
-	if (unlikely(!pyld)) {
-		ipa_err("kzalloc err\n");
-		return pyld;
-	}
-	pyld->opcode = opcode;
-	pyld->len = sizeof(*data);
+	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	if (unlikely(mem_params->size & ~0xFFFF)) {
@@ -168,14 +185,9 @@ ipa_imm_cmd_construct_dma_shared_mem_v_4_0(u16 opcode, const void *params)
 		return NULL;
 	}
 
-	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
-	if (unlikely(!pyld)) {
-		WARN_ON(1);
-		return pyld;
-	}
-
-	pyld->opcode = opcode;
-	pyld->len = sizeof(*data);
+	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->direction = mem_params->is_read ? 1 : 0;
@@ -209,13 +221,9 @@ ipa_imm_cmd_construct_register_write(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_register_write *data;
 	const struct ipahal_imm_cmd_register_write *regwrt_params = params;
 
-	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
-	if (unlikely(!pyld)) {
-		ipa_err("kzalloc err\n");
-		return pyld;
-	}
-	pyld->opcode = opcode;
-	pyld->len = sizeof(*data);
+	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	if (unlikely(regwrt_params->offset & ~0xFFFF)) {
@@ -261,13 +269,9 @@ ipa_imm_cmd_construct_register_write_v_4_0(u16 opcode, const void *params)
 		return NULL;
 	}
 
-	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
-	if (unlikely(!pyld)) {
-		WARN_ON(1);
-		return pyld;
-	}
-	pyld->opcode = opcode;
-	pyld->len = sizeof(*data);
+	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->offset = regwrt_params->offset;
@@ -301,13 +305,9 @@ ipa_imm_cmd_construct_ip_packet_init(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_ip_packet_init *data;
 	const struct ipahal_imm_cmd_ip_packet_init *pktinit_params = params;
 
-	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
-	if (unlikely(!pyld)) {
-		ipa_err("kzalloc err\n");
-		return pyld;
-	}
-	pyld->opcode = opcode;
-	pyld->len = sizeof(*data);
+	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	if (unlikely(pktinit_params->destination_pipe_index & ~0x1F)) {
@@ -327,13 +327,9 @@ ipa_imm_cmd_construct_nat_dma(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_nat_dma *data;
 	const struct ipahal_imm_cmd_nat_dma *nat_params = params;
 
-	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
-	if (unlikely(!pyld)) {
-		ipa_err("kzalloc err\n");
-		return pyld;
-	}
-	pyld->opcode = opcode;
-	pyld->len = sizeof(*data);
+	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
+	if (unlikely(!pyld))
+		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->table_index = nat_params->table_index;
@@ -351,13 +347,9 @@ ipa_imm_cmd_construct_table_dma_ipav4(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_table_dma_ipav4 *data;
 	const struct ipahal_imm_cmd_table_dma *nat_params = params;
 
-	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
-	if (unlikely(!pyld)) {
-		ipa_err("kzalloc err\n");
-		return pyld;
-	}
-	pyld->opcode = opcode;
-	pyld->len = sizeof(*data);
+	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->table_index = nat_params->table_index;
@@ -375,13 +367,9 @@ ipa_imm_cmd_construct_hdr_init_system(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_hdr_init_system *data;
 	const struct ipahal_imm_cmd_hdr_init_system *syshdr_params = params;
 
-	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
-	if (unlikely(!pyld)) {
-		ipa_err("kzalloc err\n");
-		return pyld;
-	}
-	pyld->opcode = opcode;
-	pyld->len = sizeof(*data);
+	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->hdr_table_addr = syshdr_params->hdr_table_addr;
@@ -396,13 +384,9 @@ ipa_imm_cmd_construct_hdr_init_local(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_hdr_init_local *data;
 	const struct ipahal_imm_cmd_hdr_init_local *lclhdr_params = params;
 
-	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
-	if (unlikely(!pyld)) {
-		ipa_err("kzalloc err\n");
-		return pyld;
-	}
-	pyld->opcode = opcode;
-	pyld->len = sizeof(*data);
+	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	if (unlikely(lclhdr_params->size_hdr_table & ~0xFFF)) {
@@ -424,13 +408,9 @@ ipa_imm_cmd_construct_ip_v6_routing_init(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_ip_v6_routing_init *data;
 	const struct ipahal_imm_cmd_ip_v6_routing_init *rt6_params = params;
 
-	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
-	if (unlikely(!pyld)) {
-		ipa_err("kzalloc err\n");
-		return pyld;
-	}
-	pyld->opcode = opcode;
-	pyld->len = sizeof(*data);
+	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->hash_rules_addr = rt6_params->hash_rules_addr;
@@ -450,13 +430,9 @@ ipa_imm_cmd_construct_ip_v4_routing_init(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_ip_v4_routing_init *data;
 	const struct ipahal_imm_cmd_ip_v4_routing_init *rt4_params = params;
 
-	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
-	if (unlikely(!pyld)) {
-		ipa_err("kzalloc err\n");
-		return pyld;
-	}
-	pyld->opcode = opcode;
-	pyld->len = sizeof(*data);
+	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->hash_rules_addr = rt4_params->hash_rules_addr;
@@ -476,13 +452,9 @@ ipa_imm_cmd_construct_ip_v4_nat_init(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_ip_v4_nat_init *data;
 	const struct ipahal_imm_cmd_ip_v4_nat_init *nat4_params = params;
 
-	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
-	if (unlikely(!pyld)) {
-		ipa_err("kzalloc err\n");
-		return pyld;
-	}
-	pyld->opcode = opcode;
-	pyld->len = sizeof(*data);
+	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->ipv4_rules_addr = nat4_params->ipv4_rules_addr;
@@ -514,13 +486,9 @@ ipa_imm_cmd_construct_ip_v6_filter_init(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_ip_v6_filter_init *data;
 	const struct ipahal_imm_cmd_ip_v6_filter_init *flt6_params = params;
 
-	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
-	if (unlikely(!pyld)) {
-		ipa_err("kzalloc err\n");
-		return pyld;
-	}
-	pyld->opcode = opcode;
-	pyld->len = sizeof(*data);
+	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->hash_rules_addr = flt6_params->hash_rules_addr;
@@ -540,13 +508,9 @@ ipa_imm_cmd_construct_ip_v4_filter_init(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_ip_v4_filter_init *data;
 	const struct ipahal_imm_cmd_ip_v4_filter_init *flt4_params = params;
 
-	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
-	if (unlikely(!pyld)) {
-		ipa_err("kzalloc err\n");
-		return pyld;
-	}
-	pyld->opcode = opcode;
-	pyld->len = sizeof(*data);
+	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->hash_rules_addr = flt4_params->hash_rules_addr;
