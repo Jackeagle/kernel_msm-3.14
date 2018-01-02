@@ -288,7 +288,7 @@ int ipahal_fltrt_init(void)
 
 	ipa_debug("Entry - HW_TYPE=%d\n", ipahal_ctx->hw_type);
 
-       /* Build up a the filter table descriptions we'll use */
+       /* Build up a the filter/route table descriptions we'll use */
 	for (i = ipahal_ctx->hw_type; i >= IPA_HW_v3_0; i--) {
 		const struct ipahal_fltrt_obj *fltrt;
 
@@ -325,7 +325,7 @@ int ipahal_fltrt_init(void)
 	/* setup an empty  table in system memory; This will
 	 * be used, for example, to delete a rt tbl safely
 	 */
-	mem->size = ipahal_fltrt_objs[ipahal_ctx->hw_type].tbl_width;
+	mem->size = ipahal_fltrt.tbl_width;
 	mem->base = dma_alloc_coherent(ipahal_ctx->ipa_pdev, mem->size,
 		&mem->phys_base, GFP_KERNEL);
 	if (!mem->base) {
@@ -334,8 +334,7 @@ int ipahal_fltrt_init(void)
 		return -ENOMEM;
 	}
 
-	if (mem->phys_base &
-		ipahal_fltrt_objs[ipahal_ctx->hw_type].sysaddr_alignment) {
+	if (mem->phys_base & ipahal_fltrt.sysaddr_alignment) {
 		ipa_err("Empty table buf is not address aligned 0x%pad\n",
 			&mem->phys_base);
 		rc = -EFAULT;
@@ -367,7 +366,7 @@ void ipahal_fltrt_destroy(void)
 /* Get the H/W table (flt/rt) header width */
 u32 ipahal_get_hw_tbl_hdr_width(void)
 {
-	return ipahal_fltrt_objs[ipahal_ctx->hw_type].tbl_hdr_width;
+	return ipahal_fltrt.tbl_hdr_width;
 }
 
 /* Get the H/W local table (SRAM) address alignment
@@ -376,7 +375,7 @@ u32 ipahal_get_hw_tbl_hdr_width(void)
  */
 u32 ipahal_get_lcl_tbl_addr_alignment(void)
 {
-	return ipahal_fltrt_objs[ipahal_ctx->hw_type].lcladdr_alignment;
+	return ipahal_fltrt.lcladdr_alignment;
 }
 
 /*
@@ -387,7 +386,7 @@ u32 ipahal_get_lcl_tbl_addr_alignment(void)
  */
 int ipahal_get_rule_max_priority(void)
 {
-	return ipahal_fltrt_objs[ipahal_ctx->hw_type].rule_max_prio;
+	return ipahal_fltrt.rule_max_prio;
 }
 
 /* Given a priority, calc and return the next lower one if it is in
@@ -397,7 +396,7 @@ int ipahal_rule_decrease_priority(int *prio)
 {
 	struct ipahal_fltrt_obj *obj;
 
-	obj = &ipahal_fltrt_objs[ipahal_ctx->hw_type];
+	obj = &ipahal_fltrt;
 
 	if (!prio) {
 		ipa_err("Invalid Input\n");
@@ -426,9 +425,7 @@ int ipahal_rule_decrease_priority(int *prio)
  */
 bool ipahal_is_rule_miss_id(u32 id)
 {
-	return (id ==
-		((1U << ipahal_fltrt_objs[ipahal_ctx->hw_type].rule_id_bit_len)
-		-1));
+	return id == ((1U << ipahal_fltrt.rule_id_bit_len) - 1);
 }
 
 /* Get rule ID with high bit only asserted
@@ -436,13 +433,13 @@ bool ipahal_is_rule_miss_id(u32 id)
  */
 u32 ipahal_get_rule_id_hi_bit(void)
 {
-	return BIT(ipahal_fltrt_objs[ipahal_ctx->hw_type].rule_id_bit_len - 1);
+	return BIT(ipahal_fltrt.rule_id_bit_len - 1);
 }
 
 /* Get the low value possible to be used for rule-id */
 u32 ipahal_get_low_rule_id(void)
 {
-	return  ipahal_fltrt_objs[ipahal_ctx->hw_type].low_rule_id;
+	return ipahal_fltrt.low_rule_id;
 }
 
 /*
@@ -466,7 +463,7 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 	ipa_debug("Entry\n");
 
 	flag = atomic ? GFP_ATOMIC : GFP_KERNEL;
-	obj = &ipahal_fltrt_objs[ipahal_ctx->hw_type];
+	obj = &ipahal_fltrt;
 
 	if (!tbls_num || !nhash_hdr_size || !mem) {
 		ipa_err("Input Error: tbls_num=%d nhash_hdr_sz=%d mem=%p\n",
@@ -534,7 +531,7 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 	ipa_debug("Entry - ep_bitmap 0x%llx\n", ep_bitmap);
 
 	flag = atomic ? GFP_ATOMIC : GFP_KERNEL;
-	obj = &ipahal_fltrt_objs[ipahal_ctx->hw_type];
+	obj = &ipahal_fltrt;
 
 	if (!tbls_num || !nhash_hdr_size || !mem) {
 		ipa_err("Input Error: tbls_num=%d nhash_hdr_sz=%d mem=%p\n",
