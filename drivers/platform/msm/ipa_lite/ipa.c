@@ -2344,23 +2344,9 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		ipa3_iommu_map(cb->mapping->domain, iova, pa, IPA_SMEM_SIZE);
 	}
 
-	/* setup IPA register access */
-	ipa_debug("Mapping 0x%x\n", ipa3_ctx->ipa_wrapper_base +
-		ipa3_ctx->ctrl->ipa_reg_base_ofst);
-	ipa3_ctx->mmio = ioremap(ipa3_ctx->ipa_wrapper_base +
-				ipa3_ctx->ctrl->ipa_reg_base_ofst,
-				ipa3_ctx->ipa_wrapper_size);
-	if (!ipa3_ctx->mmio) {
-		ipa_err(":ipa-base ioremap err.\n");
-		ipa_smmu_detach(cb);
-		return -EFAULT;
-	}
-
 	/* Proceed to real initialization */
 	result = ipa3_pre_init();
 	if (result) {
-		iounmap(ipa3_ctx->mmio);
-		ipa3_ctx->mmio = NULL;
 		ipa_err("ipa_init failed\n");
 		ipa_smmu_detach(cb);
 	}
@@ -2495,11 +2481,23 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	ipa3_ctx->ctrl = &ipa3_ctx->ctrl_struct;
 	ipa3_controller_static_bind(ipa3_ctx->ctrl);
 
+	/* setup IPA register access */
+	ipa_debug("Mapping 0x%x\n", ipa3_ctx->ipa_wrapper_base +
+		ipa3_ctx->ctrl->ipa_reg_base_ofst);
+	ipa3_ctx->mmio = ioremap(ipa3_ctx->ipa_wrapper_base +
+				ipa3_ctx->ctrl->ipa_reg_base_ofst,
+				ipa3_ctx->ipa_wrapper_size);
+	if (!ipa3_ctx->mmio) {
+		ipa_err(":ipa-base ioremap err.\n");
+		result = -EFAULT;
+		goto err_clear_ctrl;
+	}
+
 	result = ipa3_init_mem_partition(node);
 	if (result) {
 		ipa_err(":ipa3_init_mem_partition failed!\n");
 		result = -ENODEV;
-		goto err_clear_ctrl;
+		goto err_iounmap;
 	}
 
 	ipa3_ctx->ctrl->msm_bus_data_ptr = msm_bus_cl_get_pdata(pdev_p);
@@ -2545,6 +2543,9 @@ err_unregister_bus_handle:
 	ipa3_ctx->ipa_bus_hdl = 0;
 err_clear_pdata:
 	msm_bus_cl_clear_pdata(ipa3_ctx->ctrl->msm_bus_data_ptr);
+err_iounmap:
+	iounmap(ipa3_ctx->mmio);
+	ipa3_ctx->mmio = NULL;
 err_clear_ctrl:
 	/*
 	 * Zeroing ctrl sub-structure resets its embedded mem partition
