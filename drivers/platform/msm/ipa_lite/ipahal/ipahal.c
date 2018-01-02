@@ -912,11 +912,6 @@ static int ipahal_pkt_status_init(enum ipa_hw_type ipa_hw_type)
 {
 	ipa_debug_low("Entry - HW_TYPE=%d\n", ipa_hw_type);
 
-	if ((ipa_hw_type < 0) || (ipa_hw_type >= IPA_HW_MAX)) {
-		ipa_err("invalid IPA HW type (%d)\n", ipa_hw_type);
-		return -EINVAL;
-	}
-
 	/*
 	 * Since structure alignment is implementation dependent,
 	 * add test to avoid different and incompatible data layouts.
