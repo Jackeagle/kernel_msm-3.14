@@ -230,11 +230,6 @@ int ipahal_fltrt_init(enum ipa_hw_type ipa_hw_type)
 
 	ipa_debug("Entry - HW_TYPE=%d\n", ipa_hw_type);
 
-	if (ipa_hw_type >= IPA_HW_MAX) {
-		ipa_err("Invalid H/W type\n");
-		return -EFAULT;
-	}
-
 	memset(&zero_obj, 0, sizeof(zero_obj));
 	for (i = IPA_HW_v3_0 ; i < ipa_hw_type ; i++) {
 		if (!memcmp(&ipahal_fltrt_objs[i+1], &zero_obj,
