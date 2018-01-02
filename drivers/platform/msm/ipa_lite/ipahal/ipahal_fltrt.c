@@ -24,7 +24,7 @@
  * @support_hash: Is hashable tables supported
  * @tbl_width: Width of table in bytes
  * @sysaddr_align: System table address alignment
- * @lcladdr_alignment: Local table offset alignment
+ * @lcladdr_align: Local table offset alignment
  * @blk_sz_alignment: Rules block size alignment
  * @rule_start_alignment: Rule start address alignment
  * @tbl_hdr_width: Width of the header structure in bytes
@@ -49,7 +49,7 @@ struct ipahal_fltrt_obj {
 	bool support_hash;
 	u32 tbl_width;
 	u32 sysaddr_align;
-	u32 lcladdr_alignment;
+	u32 lcladdr_align;
 	u32 blk_sz_alignment;
 	u32 rule_start_alignment;
 	u32 tbl_hdr_width;
@@ -85,7 +85,7 @@ static u64 ipa_fltrt_create_tbl_addr(bool is_sys, u64 addr)
 			return 0;
 		}
 	} else {
-		if (addr & ipahal_fltrt.lcladdr_alignment) {
+		if (addr % ipahal_fltrt.lcladdr_align) {
 			ipa_err("addr/ofst isn't lcl addr aligned %llu\n",
 				addr);
 			ipa_assert();
@@ -97,7 +97,7 @@ static u64 ipa_fltrt_create_tbl_addr(bool is_sys, u64 addr)
 		 * (local address aligned) and left shifted to its place.
 		 * Local bit need to be enabled.
 		 */
-		addr /= ipahal_fltrt.lcladdr_alignment + 1;
+		addr /= ipahal_fltrt.lcladdr_align;
 		addr *= ipahal_fltrt.tbl_addr_mask + 1;
 		addr += 1;
 	}
@@ -121,7 +121,7 @@ static void ipa_fltrt_parse_tbl_addr(u64 hwaddr, u64 *addr, bool *is_sys)
 
 	if (!*is_sys) {
 		hwaddr /= ipahal_fltrt.tbl_addr_mask + 1;
-		hwaddr *= ipahal_fltrt.lcladdr_alignment + 1;
+		hwaddr *= ipahal_fltrt.lcladdr_align;
 	}
 
 	*addr = hwaddr;
@@ -141,7 +141,7 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 		.support_hash		= true,
 		.tbl_width		= IPA3_0_HW_TBL_WIDTH,
 		.sysaddr_align		= IPA3_0_HW_TBL_SYSADDR_ALIGN,
-		.lcladdr_alignment	= IPA3_0_HW_TBL_LCLADDR_ALIGNMENT,
+		.lcladdr_align		= IPA3_0_HW_TBL_LCLADDR_ALIGN,
 		.blk_sz_alignment	= IPA3_0_HW_TBL_BLK_SIZE_ALIGNMENT,
 		.rule_start_alignment	= IPA3_0_HW_RULE_START_ALIGNMENT,
 		.tbl_hdr_width		= IPA3_0_HW_TBL_HDR_WIDTH,
@@ -195,7 +195,7 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 		.support_hash		= true,
 		.tbl_width		= IPA3_0_HW_TBL_WIDTH,
 		.sysaddr_align		= IPA3_0_HW_TBL_SYSADDR_ALIGN,
-		.lcladdr_alignment	= IPA3_0_HW_TBL_LCLADDR_ALIGNMENT,
+		.lcladdr_align		= IPA3_0_HW_TBL_LCLADDR_ALIGN,
 		.blk_sz_alignment	= IPA3_0_HW_TBL_BLK_SIZE_ALIGNMENT,
 		.rule_start_alignment	= IPA3_0_HW_RULE_START_ALIGNMENT,
 		.tbl_hdr_width		= IPA3_0_HW_TBL_HDR_WIDTH,
@@ -353,7 +353,7 @@ u32 ipahal_get_hw_tbl_hdr_width(void)
  */
 u32 ipahal_get_lcl_tbl_addr_alignment(void)
 {
-	return ipahal_fltrt.lcladdr_alignment;
+	return ipahal_fltrt.lcladdr_align - 1;
 }
 
 /*
