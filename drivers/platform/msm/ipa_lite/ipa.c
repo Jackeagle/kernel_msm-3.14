@@ -1971,12 +1971,6 @@ static int ipa3_pre_init(void)
 
 	ipa_debug("IPA Driver initialization started\n");
 
-	/* Clock scaling is enabled */
-	ipa3_ctx->curr_ipa_clk_rate = ipa3_ctx->ctrl->ipa_clk_rate_turbo;
-
-	/* enable IPA clocks explicitly to allow the initialization */
-	ipa3_enable_clks();
-
 	/* setup IPA register access */
 	ipa_debug("Mapping 0x%x\n", ipa3_ctx->ipa_wrapper_base +
 		ipa3_ctx->ctrl->ipa_reg_base_ofst);
@@ -1985,9 +1979,14 @@ static int ipa3_pre_init(void)
 			ipa3_ctx->ipa_wrapper_size);
 	if (!ipa3_ctx->mmio) {
 		ipa_err(":ipa-base ioremap err.\n");
-		result = -EFAULT;
-		goto fail_remap;
+		return -EFAULT;
 	}
+
+	/* Clock scaling is enabled */
+	ipa3_ctx->curr_ipa_clk_rate = ipa3_ctx->ctrl->ipa_clk_rate_turbo;
+
+	/* enable IPA clocks explicitly to allow the initialization */
+	ipa3_enable_clks();
 
 	if (ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio, dev)) {
 		ipa_err("fail to init ipahal\n");
@@ -2148,9 +2147,9 @@ fail_create_transport_wq:
 fail_init_hw:
 	ipahal_destroy();
 fail_ipahal:
-	iounmap(ipa3_ctx->mmio);
-fail_remap:
 	ipa3_disable_clks();
+	iounmap(ipa3_ctx->mmio);
+	ipa3_ctx->mmio = NULL;
 
 	return result;
 }
