@@ -287,7 +287,7 @@ int ipahal_fltrt_init(void)
 	 */
 	mem->size = ipahal_fltrt.tbl_width;
 	mem->base = dma_alloc_coherent(ipahal_ctx->ipa_pdev, mem->size,
-		&mem->phys_base, GFP_KERNEL);
+					&mem->phys_base, GFP_KERNEL);
 	if (!mem->base) {
 		ipa_err("DMA buff alloc fail %d bytes for empty tbl\n",
 			mem->size);
@@ -301,7 +301,6 @@ int ipahal_fltrt_init(void)
 		goto clear_empty_tbl;
 	}
 
-	memset(mem->base, 0, mem->size);
 	ipa_debug("empty table allocated in system memory");
 
 	return 0;
