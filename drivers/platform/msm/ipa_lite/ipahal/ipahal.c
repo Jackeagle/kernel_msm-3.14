@@ -701,7 +701,7 @@ static struct ipahal_imm_cmd_obj ipahal_imm_cmds[IPA_IMM_CMD_MAX];
  * ipahal_imm_cmd_init() - Build the Immediate command information table
  *  See ipahal_imm_cmd_objs[][] comments
  */
-static int ipahal_imm_cmd_init(void)
+static void ipahal_imm_cmd_init(void)
 {
 	int i;
 	int j;
@@ -721,8 +721,6 @@ static int ipahal_imm_cmd_init(void)
 			}
 		}
 	}
-
-	return 0;
 }
 
 /*
@@ -1186,12 +1184,7 @@ int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base,
 	ipahal_ctx->ipa_pdev = ipa_pdev;
 
 	ipahal_reg_init();
-
-	if (ipahal_imm_cmd_init()) {
-		ipa_err("failed to init ipahal imm cmd\n");
-		result = -EFAULT;
-		goto bail_free_ctx;
-	}
+	ipahal_imm_cmd_init();
 
 	if (ipahal_pkt_status_init(ipa_hw_type)) {
 		ipa_err("failed to init ipahal pkt status\n");
