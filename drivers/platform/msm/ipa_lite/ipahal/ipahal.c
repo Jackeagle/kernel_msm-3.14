@@ -946,38 +946,6 @@ const char *ipahal_pkt_status_exception_str(
 	return ipahal_pkt_status_exception_to_str[exception];
 }
 
-#ifdef CONFIG_DEBUG_FS
-static void ipahal_debugfs_init(void)
-{
-	ipahal_ctx->dent = debugfs_create_dir("ipahal", 0);
-	if (!ipahal_ctx->dent || IS_ERR(ipahal_ctx->dent)) {
-		ipa_err("fail to create ipahal debugfs folder\n");
-		goto fail;
-	}
-
-	return;
-fail:
-	debugfs_remove_recursive(ipahal_ctx->dent);
-	ipahal_ctx->dent = NULL;
-}
-
-static void ipahal_debugfs_remove(void)
-{
-	if (!ipahal_ctx)
-		return;
-
-	if (IS_ERR(ipahal_ctx->dent)) {
-		ipa_err("ipahal debugfs folder was not created\n");
-		return;
-	}
-
-	debugfs_remove_recursive(ipahal_ctx->dent);
-}
-#else /* CONFIG_DEBUG_FS */
-static void ipahal_debugfs_init(void) {}
-static void ipahal_debugfs_remove(void) {}
-#endif /* CONFIG_DEBUG_FS */
-
 /*
  * ipahal_cp_hdr_to_hw_buff() - copy header to hardware buffer according to
  * base address and offset given.
@@ -1050,15 +1018,12 @@ int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base,
 		return -EFAULT;
 	}
 
-	ipahal_debugfs_init();
-
 	return 0;
 }
 
 void ipahal_destroy(void)
 {
 	ipa_debug("Entry\n");
-	ipahal_debugfs_remove();
 	kfree(ipahal_ctx);
 	ipahal_ctx = NULL;
 }
