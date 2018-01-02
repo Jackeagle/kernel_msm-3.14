@@ -1922,8 +1922,9 @@ static int ipa3_alloc_pkt_init(void)
 						mem.phys_base);
 			return -ENOMEM;
 		}
-		memcpy(mem.base + i * cmd_pyld->len, cmd_pyld->data,
-			cmd_pyld->len);
+		memcpy(mem.base + i * cmd_pyld->len,
+				ipahal_imm_cmd_pyld_data(cmd_pyld),
+				cmd_pyld->len);
 		ipa3_ctx->pkt_init_imm[i] = mem.phys_base + i * cmd_pyld->len;
 		ipahal_destroy_imm_cmd(cmd_pyld);
 	}

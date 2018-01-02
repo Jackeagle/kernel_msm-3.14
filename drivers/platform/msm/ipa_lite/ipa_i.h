@@ -599,7 +599,7 @@ static inline void
 ipa_desc_fill_imm_cmd(struct ipa3_desc *desc, struct ipahal_imm_cmd_pyld *pyld)
 {
 	desc->type = IPA_IMM_CMD_DESC;
-	desc->pyld = pyld->data;
+	desc->pyld = ipahal_imm_cmd_pyld_data(pyld);
 	desc->len = pyld->len;
 	desc->opcode = pyld->opcode;
 }

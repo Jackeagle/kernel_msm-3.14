@@ -345,15 +345,22 @@ struct ipahal_imm_cmd_dma_task_32b_addr {
  * struct ipahal_imm_cmd_pyld - Immediate cmd payload information
  * @len: length of the buffer
  * @opcode: opcode of the immediate command
- * @data: buffer contains the immediate command payload. Buffer goes
- *  back to back with this structure
+ * The immediate command type-specific payload implicitly follows these
+ * common fields
  */
 struct ipahal_imm_cmd_pyld {
 	u16 len;
 	u16 opcode;
-	u8 data[0];
 };
 
+/*
+ * Return the address of type-specific data portion of an immediate
+ * command payload.
+ */
+static inline void *ipahal_imm_cmd_pyld_data(struct ipahal_imm_cmd_pyld *pyld)
+{
+	return pyld + 1;
+}
 
 /* Immediate command Function APIs */
 

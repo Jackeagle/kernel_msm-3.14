@@ -47,7 +47,7 @@ ipa_imm_cmd_construct_dma_task_32b_addr(u16 opcode, const void *params)
 	pyld->opcode = opcode;
 	pyld->opcode += 1 << 8;	/* Currently supports only one packet */
 	pyld->len = sizeof(*data);
-	data = (struct ipa_imm_cmd_hw_dma_task_32b_addr *)pyld->data;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	if (unlikely(dma_params->size1 & ~0xFFFF)) {
 		ipa_err("Size1 is bigger than 16bit width 0x%x\n",
@@ -86,7 +86,7 @@ ipa_imm_cmd_construct_ip_packet_tag_status(u16 opcode, const void *params)
 	}
 	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
-	data = (struct ipa_imm_cmd_hw_ip_packet_tag_status *)pyld->data;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	if (unlikely(tag_params->tag & ~0xFFFFFFFFFFFF)) {
 		ipa_err("tag is bigger than 48bit width 0x%llx\n",
@@ -112,7 +112,7 @@ ipa_imm_cmd_construct_dma_shared_mem(u16 opcode, const void *params)
 	}
 	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
-	data = (struct ipa_imm_cmd_hw_dma_shared_mem *)pyld->data;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	if (unlikely(mem_params->size & ~0xFFFF)) {
 		ipa_err("Size is bigger than 16bit width 0x%x\n",
@@ -176,7 +176,7 @@ ipa_imm_cmd_construct_dma_shared_mem_v_4_0(u16 opcode, const void *params)
 
 	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
-	data = (struct ipa_imm_cmd_hw_dma_shared_mem_v_4_0 *)pyld->data;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->direction = mem_params->is_read ? 1 : 0;
 	data->clear_after_read = mem_params->clear_after_read;
@@ -216,7 +216,7 @@ ipa_imm_cmd_construct_register_write(u16 opcode, const void *params)
 	}
 	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
-	data = (struct ipa_imm_cmd_hw_register_write *)pyld->data;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	if (unlikely(regwrt_params->offset & ~0xFFFF)) {
 		ipa_err("Offset is bigger than 16bit width 0x%x\n",
@@ -268,7 +268,7 @@ ipa_imm_cmd_construct_register_write_v_4_0(u16 opcode, const void *params)
 	}
 	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
-	data = (struct ipa_imm_cmd_hw_register_write_v_4_0 *)pyld->data;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->offset = regwrt_params->offset;
 	data->offset_high = regwrt_params->offset >> 16;
@@ -308,7 +308,7 @@ ipa_imm_cmd_construct_ip_packet_init(u16 opcode, const void *params)
 	}
 	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
-	data = (struct ipa_imm_cmd_hw_ip_packet_init *)pyld->data;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	if (unlikely(pktinit_params->destination_pipe_index & ~0x1F)) {
 		ipa_err("Dst pipe idx is bigger than 5bit width 0x%x\n",
@@ -334,7 +334,7 @@ ipa_imm_cmd_construct_nat_dma(u16 opcode, const void *params)
 	}
 	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
-	data = (struct ipa_imm_cmd_hw_nat_dma *)pyld->data;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->table_index = nat_params->table_index;
 	data->base_addr = nat_params->base_addr;
@@ -358,7 +358,7 @@ ipa_imm_cmd_construct_table_dma_ipav4(u16 opcode, const void *params)
 	}
 	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
-	data = (struct ipa_imm_cmd_hw_table_dma_ipav4 *)pyld->data;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->table_index = nat_params->table_index;
 	data->base_addr = nat_params->base_addr;
@@ -382,7 +382,7 @@ ipa_imm_cmd_construct_hdr_init_system(u16 opcode, const void *params)
 	}
 	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
-	data = (struct ipa_imm_cmd_hw_hdr_init_system *)pyld->data;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->hdr_table_addr = syshdr_params->hdr_table_addr;
 
@@ -403,7 +403,7 @@ ipa_imm_cmd_construct_hdr_init_local(u16 opcode, const void *params)
 	}
 	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
-	data = (struct ipa_imm_cmd_hw_hdr_init_local *)pyld->data;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	if (unlikely(lclhdr_params->size_hdr_table & ~0xFFF)) {
 		ipa_err("Hdr tble size is bigger than 12bit width 0x%x\n",
@@ -431,7 +431,7 @@ ipa_imm_cmd_construct_ip_v6_routing_init(u16 opcode, const void *params)
 	}
 	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
-	data = (struct ipa_imm_cmd_hw_ip_v6_routing_init *)pyld->data;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->hash_rules_addr = rt6_params->hash_rules_addr;
 	data->hash_rules_size = rt6_params->hash_rules_size;
@@ -457,7 +457,7 @@ ipa_imm_cmd_construct_ip_v4_routing_init(u16 opcode, const void *params)
 	}
 	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
-	data = (struct ipa_imm_cmd_hw_ip_v4_routing_init *)pyld->data;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->hash_rules_addr = rt4_params->hash_rules_addr;
 	data->hash_rules_size = rt4_params->hash_rules_size;
@@ -483,7 +483,7 @@ ipa_imm_cmd_construct_ip_v4_nat_init(u16 opcode, const void *params)
 	}
 	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
-	data = (struct ipa_imm_cmd_hw_ip_v4_nat_init *)pyld->data;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->ipv4_rules_addr = nat4_params->ipv4_rules_addr;
 	data->ipv4_expansion_rules_addr =
@@ -521,7 +521,7 @@ ipa_imm_cmd_construct_ip_v6_filter_init(u16 opcode, const void *params)
 	}
 	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
-	data = (struct ipa_imm_cmd_hw_ip_v6_filter_init *)pyld->data;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->hash_rules_addr = flt6_params->hash_rules_addr;
 	data->hash_rules_size = flt6_params->hash_rules_size;
@@ -547,7 +547,7 @@ ipa_imm_cmd_construct_ip_v4_filter_init(u16 opcode, const void *params)
 	}
 	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
-	data = (struct ipa_imm_cmd_hw_ip_v4_filter_init *)pyld->data;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->hash_rules_addr = flt4_params->hash_rules_addr;
 	data->hash_rules_size = flt4_params->hash_rules_size;
