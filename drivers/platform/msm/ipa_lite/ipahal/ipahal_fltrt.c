@@ -258,14 +258,46 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 };
 
 /*
+ * Set up an empty table in system memory.  This will be used, for
+ * example, to delete a route table safely.
+ */
+static int ipahal_empty_fltrt_init(void)
+{
+	struct device *dev = ipahal_ctx->ipa_pdev;
+	size_t size = ipahal_fltrt.tbl_width;
+	dma_addr_t phys_base;
+	void *base;
+
+	base = dma_alloc_coherent(dev, size, &phys_base, GFP_KERNEL);
+	if (!base) {
+		ipa_err("DMA buff alloc fail %zu bytes for empty tbl\n", size);
+		return -ENOMEM;
+	}
+
+	if (phys_base % ipahal_fltrt.sysaddr_align) {
+		ipa_err("Empty table buf is not address aligned 0x%pad\n",
+			&phys_base);
+		dma_free_coherent(dev, size, base, phys_base);
+
+		return -EFAULT;
+	}
+
+	ipahal_ctx->empty_fltrt_tbl.size = ipahal_fltrt.tbl_width;
+	ipahal_ctx->empty_fltrt_tbl.base = base;
+	ipahal_ctx->empty_fltrt_tbl.phys_base = phys_base;
+
+	ipa_debug("empty table allocated in system memory");
+
+	return 0;
+}
+
+/*
  * ipahal_fltrt_init() - Build the FLT/RT information table
  *  See ipahal_fltrt_objs[] comments
  */
 int ipahal_fltrt_init(void)
 {
 	int i;
-	struct ipa_mem_buffer *mem;
-	int rc = -EFAULT;
 
 	ipa_debug("Entry - HW_TYPE=%d\n", ipahal_ctx->hw_type);
 
@@ -280,35 +312,7 @@ int ipahal_fltrt_init(void)
 		}
 	}
 
-	mem = &ipahal_ctx->empty_fltrt_tbl;
-
-	/* setup an empty  table in system memory; This will
-	 * be used, for example, to delete a rt tbl safely
-	 */
-	mem->size = ipahal_fltrt.tbl_width;
-	mem->base = dma_alloc_coherent(ipahal_ctx->ipa_pdev, mem->size,
-					&mem->phys_base, GFP_KERNEL);
-	if (!mem->base) {
-		ipa_err("DMA buff alloc fail %d bytes for empty tbl\n",
-			mem->size);
-		return -ENOMEM;
-	}
-
-	if (mem->phys_base % ipahal_fltrt.sysaddr_align) {
-		ipa_err("Empty table buf is not address aligned 0x%pad\n",
-			&mem->phys_base);
-		rc = -EFAULT;
-		goto clear_empty_tbl;
-	}
-
-	ipa_debug("empty table allocated in system memory");
-
-	return 0;
-
-clear_empty_tbl:
-	dma_free_coherent(ipahal_ctx->ipa_pdev, mem->size, mem->base,
-		mem->phys_base);
-	return rc;
+	return ipahal_empty_fltrt_init();
 }
 
 void ipahal_fltrt_destroy(void)
