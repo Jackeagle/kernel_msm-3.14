@@ -232,10 +232,6 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 
 static void ipahal_fltrt_validate(const struct ipahal_fltrt_obj *fltrt_obj)
 {
-	if (!fltrt_obj->blk_sz_alignment) {
-		ipa_err("No blk sz alignment\n");
-		WARN_ON(1);
-	}
 	if (!fltrt_obj->rule_start_alignment) {
 		ipa_err("No rule start alignment\n");
 		WARN_ON(1);
