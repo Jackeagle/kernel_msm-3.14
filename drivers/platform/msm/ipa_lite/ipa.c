@@ -1971,17 +1971,16 @@ static int ipa3_pre_init(void)
 
 	ipa_debug("IPA Driver initialization started\n");
 
+	if (ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio, dev)) {
+		ipa_err("fail to init ipahal\n");
+		return -EFAULT;
+	}
+
 	/* Clock scaling is enabled */
 	ipa3_ctx->curr_ipa_clk_rate = ipa3_ctx->ctrl->ipa_clk_rate_turbo;
 
 	/* enable IPA clocks explicitly to allow the initialization */
 	ipa3_enable_clks();
-
-	if (ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio, dev)) {
-		ipa_err("fail to init ipahal\n");
-		result = -EFAULT;
-		goto fail_ipahal;
-	}
 
 	result = ipa3_init_hw();
 	if (result) {
@@ -2134,9 +2133,8 @@ fail_tx_pkt_wrapper_cache:
 fail_create_transport_wq:
 	destroy_workqueue(ipa3_ctx->power_mgmt_wq);
 fail_init_hw:
-	ipahal_destroy();
-fail_ipahal:
 	ipa3_disable_clks();
+	ipahal_destroy();
 
 	return result;
 }
