@@ -37,8 +37,7 @@ ipa_imm_cmd_construct_dma_task_32b_addr(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_dma_task_32b_addr *data;
-	struct ipahal_imm_cmd_dma_task_32b_addr *dma_params =
-		(struct ipahal_imm_cmd_dma_task_32b_addr *)params;
+	const struct ipahal_imm_cmd_dma_task_32b_addr *dma_params = params;
 
 	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
 	if (unlikely(!pyld)) {
@@ -78,8 +77,7 @@ ipa_imm_cmd_construct_ip_packet_tag_status(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_packet_tag_status *data;
-	struct ipahal_imm_cmd_ip_packet_tag_status *tag_params =
-		(struct ipahal_imm_cmd_ip_packet_tag_status *)params;
+	const struct ipahal_imm_cmd_ip_packet_tag_status *tag_params = params;
 
 	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_ATOMIC);
 	if (unlikely(!pyld)) {
@@ -105,8 +103,7 @@ ipa_imm_cmd_construct_dma_shared_mem(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_dma_shared_mem *data;
-	struct ipahal_imm_cmd_dma_shared_mem *mem_params =
-		(struct ipahal_imm_cmd_dma_shared_mem *)params;
+	const struct ipahal_imm_cmd_dma_shared_mem *mem_params = params;
 
 	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
 	if (unlikely(!pyld)) {
@@ -156,8 +153,7 @@ ipa_imm_cmd_construct_dma_shared_mem_v_4_0(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_dma_shared_mem_v_4_0 *data;
-	struct ipahal_imm_cmd_dma_shared_mem *mem_params =
-		(struct ipahal_imm_cmd_dma_shared_mem *)params;
+	const struct ipahal_imm_cmd_dma_shared_mem *mem_params = params;
 
 	if (unlikely(mem_params->size & ~0xFFFF)) {
 		ipa_err("Size is bigger than 16bit width 0x%x\n",
@@ -211,8 +207,7 @@ ipa_imm_cmd_construct_register_write(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_register_write *data;
-	struct ipahal_imm_cmd_register_write *regwrt_params =
-		(struct ipahal_imm_cmd_register_write *)params;
+	const struct ipahal_imm_cmd_register_write *regwrt_params = params;
 
 	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
 	if (unlikely(!pyld)) {
@@ -257,8 +252,7 @@ ipa_imm_cmd_construct_register_write_v_4_0(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_register_write_v_4_0 *data;
-	struct ipahal_imm_cmd_register_write *regwrt_params =
-		(struct ipahal_imm_cmd_register_write *)params;
+	const struct ipahal_imm_cmd_register_write *regwrt_params = params;
 
 	if (unlikely(regwrt_params->offset & ~0xFFFF)) {
 		ipa_err("Offset is bigger than 16bit width 0x%x\n",
@@ -305,8 +299,7 @@ ipa_imm_cmd_construct_ip_packet_init(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_packet_init *data;
-	struct ipahal_imm_cmd_ip_packet_init *pktinit_params =
-		(struct ipahal_imm_cmd_ip_packet_init *)params;
+	const struct ipahal_imm_cmd_ip_packet_init *pktinit_params = params;
 
 	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
 	if (unlikely(!pyld)) {
@@ -332,8 +325,7 @@ ipa_imm_cmd_construct_nat_dma(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_nat_dma *data;
-	struct ipahal_imm_cmd_nat_dma *nat_params =
-		(struct ipahal_imm_cmd_nat_dma *)params;
+	const struct ipahal_imm_cmd_nat_dma *nat_params = params;
 
 	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
 	if (unlikely(!pyld)) {
@@ -357,8 +349,7 @@ ipa_imm_cmd_construct_table_dma_ipav4(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_table_dma_ipav4 *data;
-	struct ipahal_imm_cmd_table_dma *nat_params =
-		(struct ipahal_imm_cmd_table_dma *)params;
+	const struct ipahal_imm_cmd_table_dma *nat_params = params;
 
 	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
 	if (unlikely(!pyld)) {
@@ -382,8 +373,7 @@ ipa_imm_cmd_construct_hdr_init_system(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_hdr_init_system *data;
-	struct ipahal_imm_cmd_hdr_init_system *syshdr_params =
-		(struct ipahal_imm_cmd_hdr_init_system *)params;
+	const struct ipahal_imm_cmd_hdr_init_system *syshdr_params = params;
 
 	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
 	if (unlikely(!pyld)) {
@@ -404,8 +394,7 @@ ipa_imm_cmd_construct_hdr_init_local(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_hdr_init_local *data;
-	struct ipahal_imm_cmd_hdr_init_local *lclhdr_params =
-		(struct ipahal_imm_cmd_hdr_init_local *)params;
+	const struct ipahal_imm_cmd_hdr_init_local *lclhdr_params = params;
 
 	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
 	if (unlikely(!pyld)) {
@@ -433,8 +422,7 @@ ipa_imm_cmd_construct_ip_v6_routing_init(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v6_routing_init *data;
-	struct ipahal_imm_cmd_ip_v6_routing_init *rt6_params =
-		(struct ipahal_imm_cmd_ip_v6_routing_init *)params;
+	const struct ipahal_imm_cmd_ip_v6_routing_init *rt6_params = params;
 
 	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
 	if (unlikely(!pyld)) {
@@ -460,8 +448,7 @@ ipa_imm_cmd_construct_ip_v4_routing_init(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v4_routing_init *data;
-	struct ipahal_imm_cmd_ip_v4_routing_init *rt4_params =
-		(struct ipahal_imm_cmd_ip_v4_routing_init *)params;
+	const struct ipahal_imm_cmd_ip_v4_routing_init *rt4_params = params;
 
 	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
 	if (unlikely(!pyld)) {
@@ -487,8 +474,7 @@ ipa_imm_cmd_construct_ip_v4_nat_init(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v4_nat_init *data;
-	struct ipahal_imm_cmd_ip_v4_nat_init *nat4_params =
-		(struct ipahal_imm_cmd_ip_v4_nat_init *)params;
+	const struct ipahal_imm_cmd_ip_v4_nat_init *nat4_params = params;
 
 	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
 	if (unlikely(!pyld)) {
@@ -526,8 +512,7 @@ ipa_imm_cmd_construct_ip_v6_filter_init(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v6_filter_init *data;
-	struct ipahal_imm_cmd_ip_v6_filter_init *flt6_params =
-		(struct ipahal_imm_cmd_ip_v6_filter_init *)params;
+	const struct ipahal_imm_cmd_ip_v6_filter_init *flt6_params = params;
 
 	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
 	if (unlikely(!pyld)) {
@@ -553,8 +538,7 @@ ipa_imm_cmd_construct_ip_v4_filter_init(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v4_filter_init *data;
-	struct ipahal_imm_cmd_ip_v4_filter_init *flt4_params =
-		(struct ipahal_imm_cmd_ip_v4_filter_init *)params;
+	const struct ipahal_imm_cmd_ip_v4_filter_init *flt4_params = params;
 
 	pyld = kzalloc(sizeof(*pyld) + sizeof(*data), GFP_KERNEL);
 	if (unlikely(!pyld)) {
