@@ -1090,7 +1090,7 @@ int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base,
 	ipahal_reg_init();
 	ipahal_imm_cmd_init();
 
-	if (ipahal_fltrt_init(ipa_hw_type)) {
+	if (ipahal_fltrt_init()) {
                 ipa_err("failed to init ipahal flt rt\n");
                 result = -EFAULT;
                 goto bail_free_ctx;

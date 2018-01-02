@@ -278,16 +278,16 @@ static void ipahal_fltrt_validate(const struct ipahal_fltrt_obj *fltrt_obj)
  * Note: As global variables are initialized with zero, any un-overridden
  *  register entry will be zero. By this we recognize them.
  */
-int ipahal_fltrt_init(enum ipa_hw_type ipa_hw_type)
+int ipahal_fltrt_init(void)
 {
 	static const struct ipahal_fltrt_obj zero_obj;
 	int i;
 	struct ipa_mem_buffer *mem;
 	int rc = -EFAULT;
 
-	ipa_debug("Entry - HW_TYPE=%d\n", ipa_hw_type);
+	ipa_debug("Entry - HW_TYPE=%d\n", ipahal_ctx->hw_type);
 
-	for (i = IPA_HW_v3_0 ; i < ipa_hw_type ; i++) {
+	for (i = IPA_HW_v3_0 ; i < ipahal_ctx->hw_type ; i++) {
 		if (!memcmp(&ipahal_fltrt_objs[i+1], &zero_obj,
 			sizeof(struct ipahal_fltrt_obj))) {
 			memcpy(&ipahal_fltrt_objs[i+1],
@@ -307,7 +307,7 @@ int ipahal_fltrt_init(enum ipa_hw_type ipa_hw_type)
 	/* setup an empty  table in system memory; This will
 	 * be used, for example, to delete a rt tbl safely
 	 */
-	mem->size = ipahal_fltrt_objs[ipa_hw_type].tbl_width;
+	mem->size = ipahal_fltrt_objs[ipahal_ctx->hw_type].tbl_width;
 	mem->base = dma_alloc_coherent(ipahal_ctx->ipa_pdev, mem->size,
 		&mem->phys_base, GFP_KERNEL);
 	if (!mem->base) {
@@ -317,7 +317,7 @@ int ipahal_fltrt_init(enum ipa_hw_type ipa_hw_type)
 	}
 
 	if (mem->phys_base &
-		ipahal_fltrt_objs[ipa_hw_type].sysaddr_alignment) {
+		ipahal_fltrt_objs[ipahal_ctx->hw_type].sysaddr_alignment) {
 		ipa_err("Empty table buf is not address aligned 0x%pad\n",
 			&mem->phys_base);
 		rc = -EFAULT;

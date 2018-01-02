@@ -174,7 +174,7 @@ struct ipa4_0_flt_rule_hw_hdr {
 	} u;
 };
 
-int ipahal_fltrt_init(enum ipa_hw_type ipa_hw_type);
+int ipahal_fltrt_init(void);
 void ipahal_fltrt_destroy(void);
 
 #endif /* _IPAHAL_FLTRT_I_H_ */
