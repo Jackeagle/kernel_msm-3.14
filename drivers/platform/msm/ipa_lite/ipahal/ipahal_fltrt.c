@@ -135,7 +135,7 @@ static void ipa_fltrt_parse_tbl_addr(u64 hwaddr, u64 *addr, bool *is_sys)
  *  IPA version.
  * Information is considered missing if all of the fields are 0.
  */
-static struct ipahal_fltrt_obj ipahal_fltrt_objs[IPA_HW_MAX] = {
+static const struct ipahal_fltrt_obj ipahal_fltrt_objs[IPA_HW_MAX] = {
 	/* IPAv3 */
 	[IPA_HW_v3_0] = {
 		true,
@@ -298,26 +298,6 @@ int ipahal_fltrt_init(void)
 			ipahal_fltrt = *fltrt;
 			break;
 		}
-	}
-
-	for (i = IPA_HW_v3_0 ; i < ipahal_ctx->hw_type ; i++) {
-		if (!memcmp(&ipahal_fltrt_objs[i+1], &zero_obj,
-			sizeof(struct ipahal_fltrt_obj))) {
-			memcpy(&ipahal_fltrt_objs[i+1],
-				&ipahal_fltrt_objs[i],
-				sizeof(struct ipahal_fltrt_obj));
-		} else {
-			/*
-			 * explicitly overridden FLT RT info
-			 * Check validity
-			 */
-			ipahal_fltrt_validate(&ipahal_fltrt_objs[i + 1]);
-		}
-	}
-
-	if (memcmp(&ipahal_fltrt, &ipahal_fltrt_objs[ipahal_ctx->hw_type],
-				sizeof(ipahal_fltrt))) {
-		ipa_err("ipahal_fltrt DOES NOT MATCH ipahal_fltrt_objs[]\n");
 	}
 
 	mem = &ipahal_ctx->empty_fltrt_tbl;
