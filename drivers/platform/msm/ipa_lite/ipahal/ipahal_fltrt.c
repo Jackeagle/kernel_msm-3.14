@@ -232,10 +232,6 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 
 static void ipahal_fltrt_validate(const struct ipahal_fltrt_obj *fltrt_obj)
 {
-	if (!fltrt_obj->tbl_addr_mask) {
-		ipa_err("Zero tbl hdr width\n");
-		WARN_ON(1);
-	}
 	if (fltrt_obj->rule_id_bit_len < 2) {
 		ipa_err("Too little bits for rule_id\n");
 		WARN_ON(1);
