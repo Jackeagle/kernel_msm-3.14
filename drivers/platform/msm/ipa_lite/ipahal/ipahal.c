@@ -727,17 +727,6 @@ static int ipahal_imm_cmd_init(void)
 }
 
 /*
- * ipahal_imm_cmd_get_opcode() - Get the fixed opcode of the immediate command
- */
-static u16 ipahal_imm_cmd_get_opcode(enum ipahal_imm_cmd_name cmd)
-{
-	ipa_debug_low("Get opcode of IMM_CMD=%s\n",
-			ipahal_imm_cmd_name_to_str[cmd]);
-
-	return ipahal_imm_cmds[cmd].opcode;
-}
-
-/*
  * ipahal_construct_imm_cmd() - Construct immdiate command
  * This function builds imm cmd bulk that can be be sent to IPA
  * The command will be allocated dynamically.
@@ -747,7 +736,7 @@ struct ipahal_imm_cmd_pyld *
 ipahal_construct_imm_cmd(enum ipahal_imm_cmd_name cmd, const void *params)
 
 {
-	u16 opcode = ipahal_imm_cmd_get_opcode(cmd);
+	u16 opcode = ipahal_imm_cmds[cmd].opcode;
 
 	ipa_debug_low("construct IMM_CMD:%s\n",
 			ipahal_imm_cmd_name_to_str[cmd]);
