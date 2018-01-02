@@ -232,10 +232,6 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 
 static void ipahal_fltrt_validate(const struct ipahal_fltrt_obj *fltrt_obj)
 {
-	if (!fltrt_obj->sysaddr_alignment) {
-		ipa_err("No tbl sysaddr alignment\n");
-		WARN_ON(1);
-	}
 	if (!fltrt_obj->lcladdr_alignment) {
 		ipa_err(
 			"No tbl lcladdr alignment\n");
