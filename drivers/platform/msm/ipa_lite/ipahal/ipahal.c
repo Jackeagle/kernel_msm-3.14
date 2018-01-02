@@ -979,20 +979,6 @@ static void ipahal_debugfs_remove(void) {}
 #endif /* CONFIG_DEBUG_FS */
 
 /*
- * ipahal_cp_hdr_to_hw_buff_v3() - copy header to hardware buffer according to
- * base address and offset given.
- * @base: dma base address
- * @offset: offset from base address where the data will be copied
- * @hdr: the header to be copied
- * @hdr_len: the length of the header
- */
-static void ipahal_cp_hdr_to_hw_buff_v3(void *const base, u32 offset,
-		u8 *const hdr, u32 hdr_len)
-{
-	memcpy(base + offset, hdr, hdr_len);
-}
-
-/*
  * ipahal_cp_hdr_to_hw_buff() - copy header to hardware buffer according to
  * base address and offset given.
  * @base: dma base address
@@ -1011,7 +997,8 @@ void ipahal_cp_hdr_to_hw_buff(void *base, u32 offset, u8 *const hdr,
 		return;
 	}
 
-	ipahal_cp_hdr_to_hw_buff_v3(base, offset, hdr, hdr_len);
+	/* Copy the header to the hardware buffer */
+	memcpy(base + offset, hdr, hdr_len);
 
 	ipa_debug_low("Exit\n");
 }
