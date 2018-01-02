@@ -731,19 +731,10 @@ static int ipahal_imm_cmd_init(void)
  */
 static u16 ipahal_imm_cmd_get_opcode(enum ipahal_imm_cmd_name cmd)
 {
-	u32 opcode;
-
 	ipa_debug_low("Get opcode of IMM_CMD=%s\n",
 			ipahal_imm_cmd_name_to_str[cmd]);
-	opcode = ipahal_imm_cmds[cmd].opcode;
-	if (opcode == OPCODE_INVAL) {
-		ipa_err("Try to get opcode of obsolete IMM_CMD=%s\n",
-			ipahal_imm_cmd_name_to_str[cmd]);
-		ipa_assert();
-		return 0;
-	}
 
-	return opcode;
+	return ipahal_imm_cmds[cmd].opcode;
 }
 
 /*
