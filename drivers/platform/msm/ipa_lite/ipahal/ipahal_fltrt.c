@@ -217,10 +217,6 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[IPA_HW_MAX] = {
 
 static void ipahal_fltrt_validate(const struct ipahal_fltrt_obj *fltrt_obj)
 {
-	if (!fltrt_obj->tbl_width) {
-		ipa_err("Zero tbl width\n");
-		WARN_ON(1);
-	}
 	if (!fltrt_obj->sysaddr_alignment) {
 		ipa_err("No tbl sysaddr alignment\n");
 		WARN_ON(1);
@@ -275,13 +271,9 @@ static void ipahal_fltrt_validate(const struct ipahal_fltrt_obj *fltrt_obj)
 /*
  * ipahal_fltrt_init() - Build the FLT/RT information table
  *  See ipahal_fltrt_objs[] comments
- *
- * Note: As global variables are initialized with zero, any un-overridden
- *  register entry will be zero. By this we recognize them.
  */
 int ipahal_fltrt_init(void)
 {
-	static const struct ipahal_fltrt_obj zero_obj;
 	int i;
 	struct ipa_mem_buffer *mem;
 	int rc = -EFAULT;
@@ -293,7 +285,7 @@ int ipahal_fltrt_init(void)
 		const struct ipahal_fltrt_obj *fltrt;
 
 		fltrt = &ipahal_fltrt_objs[i];
-		if (memcmp(fltrt, &zero_obj, sizeof(*fltrt))) {
+		if (fltrt->tbl_width) {
 			ipahal_fltrt_validate(fltrt);
 			ipahal_fltrt = *fltrt;
 			break;
