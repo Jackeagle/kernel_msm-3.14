@@ -77,7 +77,7 @@ static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap)
 static u64 ipa_fltrt_create_tbl_addr(bool is_sys, u64 addr)
 {
 	if (is_sys) {
-		if (addr & IPA3_0_HW_TBL_SYSADDR_ALIGNMENT) {
+		if (addr & ipahal_fltrt.sysaddr_alignment) {
 			ipa_err(
 				"sys addr is not aligned accordingly addr=0x%pad\n",
 				&addr);
@@ -85,7 +85,7 @@ static u64 ipa_fltrt_create_tbl_addr(bool is_sys, u64 addr)
 			return 0;
 		}
 	} else {
-		if (addr & IPA3_0_HW_TBL_LCLADDR_ALIGNMENT) {
+		if (addr & ipahal_fltrt.lcladdr_alignment) {
 			ipa_err("addr/ofst isn't lcl addr aligned %llu\n",
 				addr);
 			ipa_assert();
@@ -97,8 +97,8 @@ static u64 ipa_fltrt_create_tbl_addr(bool is_sys, u64 addr)
 		 * (local address aligned) and left shifted to its place.
 		 * Local bit need to be enabled.
 		 */
-		addr /= IPA3_0_HW_TBL_LCLADDR_ALIGNMENT + 1;
-		addr *= IPA3_0_HW_TBL_ADDR_MASK + 1;
+		addr /= ipahal_fltrt.lcladdr_alignment + 1;
+		addr *= ipahal_fltrt.tbl_addr_mask + 1;
 		addr += 1;
 	}
 
@@ -111,7 +111,7 @@ static void ipa_fltrt_parse_tbl_addr(u64 hwaddr, u64 *addr, bool *is_sys)
 
 	*is_sys = !(hwaddr & 0x1);
 	hwaddr &= (~0ULL - 1);
-	if (hwaddr & IPA3_0_HW_TBL_SYSADDR_ALIGNMENT) {
+	if (hwaddr & ipahal_fltrt.sysaddr_alignment) {
 		ipa_err(
 			"sys addr is not aligned accordingly addr=0x%pad\n",
 			&hwaddr);
@@ -120,8 +120,8 @@ static void ipa_fltrt_parse_tbl_addr(u64 hwaddr, u64 *addr, bool *is_sys)
 	}
 
 	if (!*is_sys) {
-		hwaddr /= IPA3_0_HW_TBL_ADDR_MASK + 1;
-		hwaddr *= IPA3_0_HW_TBL_LCLADDR_ALIGNMENT + 1;
+		hwaddr /= ipahal_fltrt.tbl_addr_mask + 1;
+		hwaddr *= ipahal_fltrt.lcladdr_alignment + 1;
 	}
 
 	*addr = hwaddr;
