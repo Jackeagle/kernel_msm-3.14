@@ -777,6 +777,10 @@ static void ipa_pkt_status_parse(
 	struct ipa_pkt_status_hw *hw_status =
 		(struct ipa_pkt_status_hw *)unparsed_status;
 
+	/* Our packet status struct has to match what hardware supplies */
+	BUILD_BUG_ON(sizeof(struct ipa_pkt_status_hw) !=
+		IPA3_0_PKT_STATUS_SIZE);
+
 	is_ipv6 = (hw_status->status_mask & 0x80) ? false : true;
 
 	status->pkt_len = hw_status->pkt_len;
@@ -911,17 +915,6 @@ static void ipa_pkt_status_parse(
 static int ipahal_pkt_status_init(enum ipa_hw_type ipa_hw_type)
 {
 	ipa_debug_low("Entry - HW_TYPE=%d\n", ipa_hw_type);
-
-	/*
-	 * Since structure alignment is implementation dependent,
-	 * add test to avoid different and incompatible data layouts.
-	 *
-	 * In case new H/W has different size or structure of status packet,
-	 * add a compile time validty check for it like below (as well as
-	 * the new defines and/or the new strucutre in the internal header).
-	 */
-	BUILD_BUG_ON(sizeof(struct ipa_pkt_status_hw) !=
-		IPA3_0_PKT_STATUS_SIZE);
 
 	return 0;
 }
