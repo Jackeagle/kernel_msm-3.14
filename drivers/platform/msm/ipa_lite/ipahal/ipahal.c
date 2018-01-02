@@ -50,11 +50,8 @@ static const char *ipahal_pkt_status_exception_to_str
 	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_IPV6CT),
 };
 
-static u16 ipahal_imm_cmd_get_opcode(enum ipahal_imm_cmd_name cmd);
-
-
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_task_32b_addr(
-	enum ipahal_imm_cmd_name cmd, const void *params)
+	u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_dma_task_32b_addr *data;
@@ -66,8 +63,8 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_task_32b_addr(
 		ipa_err("kzalloc err\n");
 		return pyld;
 	}
-	/* Currently supports only one packet */
-	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd) + (1 << 8);
+	pyld->opcode = opcode;
+	pyld->opcode += 1 << 8;	/* Currently supports only one packet */
 	pyld->len = sizeof(*data);
 	data = (struct ipa_imm_cmd_hw_dma_task_32b_addr *)pyld->data;
 
@@ -95,7 +92,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_task_32b_addr(
 
 /* NOTE:  this function is called in atomic state */
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_packet_tag_status(
-	enum ipahal_imm_cmd_name cmd, const void *params)
+	u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_packet_tag_status *data;
@@ -107,7 +104,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_packet_tag_status(
 		ipa_err("kzalloc err\n");
 		return pyld;
 	}
-	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
+	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
 	data = (struct ipa_imm_cmd_hw_ip_packet_tag_status *)pyld->data;
 
@@ -122,7 +119,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_packet_tag_status(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_shared_mem(
-	enum ipahal_imm_cmd_name cmd, const void *params)
+	u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_dma_shared_mem *data;
@@ -134,7 +131,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_shared_mem(
 		ipa_err("kzalloc err\n");
 		return pyld;
 	}
-	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
+	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
 	data = (struct ipa_imm_cmd_hw_dma_shared_mem *)pyld->data;
 
@@ -173,7 +170,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_shared_mem(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_shared_mem_v_4_0(
-	enum ipahal_imm_cmd_name cmd, const void *params)
+	u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_dma_shared_mem_v_4_0 *data;
@@ -199,7 +196,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_shared_mem_v_4_0(
 		return pyld;
 	}
 
-	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
+	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
 	data = (struct ipa_imm_cmd_hw_dma_shared_mem_v_4_0 *)pyld->data;
 
@@ -228,7 +225,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_dma_shared_mem_v_4_0(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_register_write(
-	enum ipahal_imm_cmd_name cmd, const void *params)
+	u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_register_write *data;
@@ -240,7 +237,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_register_write(
 		ipa_err("kzalloc err\n");
 		return pyld;
 	}
-	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
+	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
 	data = (struct ipa_imm_cmd_hw_register_write *)pyld->data;
 
@@ -274,7 +271,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_register_write(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_register_write_v_4_0(
-	enum ipahal_imm_cmd_name cmd, const void *params)
+	u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_register_write_v_4_0 *data;
@@ -293,7 +290,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_register_write_v_4_0(
 		WARN_ON(1);
 		return pyld;
 	}
-	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
+	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
 	data = (struct ipa_imm_cmd_hw_register_write_v_4_0 *)pyld->data;
 
@@ -322,7 +319,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_register_write_v_4_0(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_packet_init(
-	enum ipahal_imm_cmd_name cmd, const void *params)
+	u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_packet_init *data;
@@ -334,7 +331,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_packet_init(
 		ipa_err("kzalloc err\n");
 		return pyld;
 	}
-	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
+	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
 	data = (struct ipa_imm_cmd_hw_ip_packet_init *)pyld->data;
 
@@ -349,7 +346,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_packet_init(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_nat_dma(
-	enum ipahal_imm_cmd_name cmd, const void *params)
+	u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_nat_dma *data;
@@ -361,7 +358,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_nat_dma(
 		ipa_err("kzalloc err\n");
 		return pyld;
 	}
-	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
+	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
 	data = (struct ipa_imm_cmd_hw_nat_dma *)pyld->data;
 
@@ -374,7 +371,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_nat_dma(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_table_dma_ipav4(
-	enum ipahal_imm_cmd_name cmd, const void *params)
+	u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_table_dma_ipav4 *data;
@@ -386,7 +383,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_table_dma_ipav4(
 		ipa_err("kzalloc err\n");
 		return pyld;
 	}
-	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
+	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
 	data = (struct ipa_imm_cmd_hw_table_dma_ipav4 *)pyld->data;
 
@@ -399,7 +396,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_table_dma_ipav4(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_hdr_init_system(
-	enum ipahal_imm_cmd_name cmd, const void *params)
+	u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_hdr_init_system *data;
@@ -411,7 +408,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_hdr_init_system(
 		ipa_err("kzalloc err\n");
 		return pyld;
 	}
-	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
+	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
 	data = (struct ipa_imm_cmd_hw_hdr_init_system *)pyld->data;
 
@@ -421,7 +418,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_hdr_init_system(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_hdr_init_local(
-	enum ipahal_imm_cmd_name cmd, const void *params)
+	u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_hdr_init_local *data;
@@ -433,7 +430,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_hdr_init_local(
 		ipa_err("kzalloc err\n");
 		return pyld;
 	}
-	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
+	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
 	data = (struct ipa_imm_cmd_hw_hdr_init_local *)pyld->data;
 
@@ -450,7 +447,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_hdr_init_local(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v6_routing_init(
-	enum ipahal_imm_cmd_name cmd, const void *params)
+	u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v6_routing_init *data;
@@ -462,7 +459,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v6_routing_init(
 		ipa_err("kzalloc err\n");
 		return pyld;
 	}
-	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
+	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
 	data = (struct ipa_imm_cmd_hw_ip_v6_routing_init *)pyld->data;
 
@@ -477,7 +474,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v6_routing_init(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_routing_init(
-	enum ipahal_imm_cmd_name cmd, const void *params)
+	u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v4_routing_init *data;
@@ -489,7 +486,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_routing_init(
 		ipa_err("kzalloc err\n");
 		return pyld;
 	}
-	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
+	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
 	data = (struct ipa_imm_cmd_hw_ip_v4_routing_init *)pyld->data;
 
@@ -504,7 +501,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_routing_init(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_nat_init(
-	enum ipahal_imm_cmd_name cmd, const void *params)
+	u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v4_nat_init *data;
@@ -516,7 +513,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_nat_init(
 		ipa_err("kzalloc err\n");
 		return pyld;
 	}
-	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
+	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
 	data = (struct ipa_imm_cmd_hw_ip_v4_nat_init *)pyld->data;
 
@@ -543,7 +540,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_nat_init(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v6_filter_init(
-	enum ipahal_imm_cmd_name cmd, const void *params)
+	u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v6_filter_init *data;
@@ -555,7 +552,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v6_filter_init(
 		ipa_err("kzalloc err\n");
 		return pyld;
 	}
-	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
+	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
 	data = (struct ipa_imm_cmd_hw_ip_v6_filter_init *)pyld->data;
 
@@ -570,7 +567,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v6_filter_init(
 }
 
 static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_filter_init(
-	enum ipahal_imm_cmd_name cmd, const void *params)
+	u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v4_filter_init *data;
@@ -582,7 +579,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_filter_init(
 		ipa_err("kzalloc err\n");
 		return pyld;
 	}
-	pyld->opcode = ipahal_imm_cmd_get_opcode(cmd);
+	pyld->opcode = opcode;
 	pyld->len = sizeof(*data);
 	data = (struct ipa_imm_cmd_hw_ip_v4_filter_init *)pyld->data;
 
@@ -603,7 +600,7 @@ static struct ipahal_imm_cmd_pyld *ipa_imm_cmd_construct_ip_v4_filter_init(
  * @opcode - Immediate command OpCode
  */
 struct ipahal_imm_cmd_obj {
-	struct ipahal_imm_cmd_pyld *(*construct)(enum ipahal_imm_cmd_name cmd,
+	struct ipahal_imm_cmd_pyld *(*construct)(u16 opcode,
 		const void *params);
 	u16 opcode;
 };
@@ -759,10 +756,12 @@ struct ipahal_imm_cmd_pyld *
 ipahal_construct_imm_cmd(enum ipahal_imm_cmd_name cmd, const void *params)
 
 {
+	u16 opcode = ipahal_imm_cmd_get_opcode(cmd);
+
 	ipa_debug_low("construct IMM_CMD:%s\n",
 			ipahal_imm_cmd_name_to_str[cmd]);
 
-	return ipahal_imm_cmds[cmd].construct(cmd, params);
+	return ipahal_imm_cmds[cmd].construct(opcode, params);
 }
 
 /*
