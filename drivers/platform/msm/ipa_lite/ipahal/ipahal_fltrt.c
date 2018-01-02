@@ -232,10 +232,6 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 
 static void ipahal_fltrt_validate(const struct ipahal_fltrt_obj *fltrt_obj)
 {
-	if (!fltrt_obj->rule_buf_size) {
-		ipa_err("zero rule buf size\n");
-		WARN_ON(1);
-	}
 	if (!fltrt_obj->write_val_to_hdr) {
 		ipa_err("No write_val_to_hdr CB\n");
 		WARN_ON(1);

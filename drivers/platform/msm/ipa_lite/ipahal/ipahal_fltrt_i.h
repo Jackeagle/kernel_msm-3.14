@@ -49,7 +49,7 @@ enum ipa_fltrt_equations {
 #define IPA3_0_HW_RULE_START_ALIGN	8
 #define IPA3_0_HW_TBL_HDR_WIDTH		8
 #define IPA3_0_HW_TBL_ADDR_MASK		127
-#define IPA3_0_HW_RULE_BUF_SIZE (256)
+#define IPA3_0_HW_RULE_BUF_SIZE		256
 
 /*
  * Rules Priority.
