@@ -23,7 +23,7 @@
  * struct ipahal_fltrt_obj - Flt/Rt H/W information for specific IPA version
  * @support_hash: Is hashable tables supported
  * @tbl_width: Width of table in bytes
- * @sysaddr_alignment: System table address alignment
+ * @sysaddr_align: System table address alignment
  * @lcladdr_alignment: Local table offset alignment
  * @blk_sz_alignment: Rules block size alignment
  * @rule_start_alignment: Rule start address alignment
@@ -48,7 +48,7 @@
 struct ipahal_fltrt_obj {
 	bool support_hash;
 	u32 tbl_width;
-	u32 sysaddr_alignment;
+	u32 sysaddr_align;
 	u32 lcladdr_alignment;
 	u32 blk_sz_alignment;
 	u32 rule_start_alignment;
@@ -77,7 +77,7 @@ static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap)
 static u64 ipa_fltrt_create_tbl_addr(bool is_sys, u64 addr)
 {
 	if (is_sys) {
-		if (addr & ipahal_fltrt.sysaddr_alignment) {
+		if (addr % ipahal_fltrt.sysaddr_align) {
 			ipa_err(
 				"sys addr is not aligned accordingly addr=0x%pad\n",
 				&addr);
@@ -111,7 +111,7 @@ static void ipa_fltrt_parse_tbl_addr(u64 hwaddr, u64 *addr, bool *is_sys)
 
 	*is_sys = !(hwaddr & 0x1);
 	hwaddr &= (~0ULL - 1);
-	if (hwaddr & ipahal_fltrt.sysaddr_alignment) {
+	if (hwaddr % ipahal_fltrt.sysaddr_align) {
 		ipa_err(
 			"sys addr is not aligned accordingly addr=0x%pad\n",
 			&hwaddr);
@@ -140,7 +140,7 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 	[IPA_HW_v3_0] = {
 		.support_hash		= true,
 		.tbl_width		= IPA3_0_HW_TBL_WIDTH,
-		.sysaddr_alignment	= IPA3_0_HW_TBL_SYSADDR_ALIGNMENT,
+		.sysaddr_align		= IPA3_0_HW_TBL_SYSADDR_ALIGN,
 		.lcladdr_alignment	= IPA3_0_HW_TBL_LCLADDR_ALIGNMENT,
 		.blk_sz_alignment	= IPA3_0_HW_TBL_BLK_SIZE_ALIGNMENT,
 		.rule_start_alignment	= IPA3_0_HW_RULE_START_ALIGNMENT,
@@ -194,7 +194,7 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 	[IPA_HW_v4_0] = {
 		.support_hash		= true,
 		.tbl_width		= IPA3_0_HW_TBL_WIDTH,
-		.sysaddr_alignment	= IPA3_0_HW_TBL_SYSADDR_ALIGNMENT,
+		.sysaddr_align		= IPA3_0_HW_TBL_SYSADDR_ALIGN,
 		.lcladdr_alignment	= IPA3_0_HW_TBL_LCLADDR_ALIGNMENT,
 		.blk_sz_alignment	= IPA3_0_HW_TBL_BLK_SIZE_ALIGNMENT,
 		.rule_start_alignment	= IPA3_0_HW_RULE_START_ALIGNMENT,
@@ -317,7 +317,7 @@ int ipahal_fltrt_init(void)
 		return -ENOMEM;
 	}
 
-	if (mem->phys_base & ipahal_fltrt.sysaddr_alignment) {
+	if (mem->phys_base % ipahal_fltrt.sysaddr_align) {
 		ipa_err("Empty table buf is not address aligned 0x%pad\n",
 			&mem->phys_base);
 		rc = -EFAULT;
