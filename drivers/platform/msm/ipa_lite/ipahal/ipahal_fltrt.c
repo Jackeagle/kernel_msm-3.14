@@ -25,7 +25,7 @@
  * @tbl_width: Width of table in bytes
  * @sysaddr_align: System table address alignment
  * @lcladdr_align: Local table offset alignment
- * @blk_sz_alignment: Rules block size alignment
+ * @blk_sz_align: Rules block size alignment
  * @rule_start_alignment: Rule start address alignment
  * @tbl_hdr_width: Width of the header structure in bytes
  * @tbl_addr_mask: Masking for Table address
@@ -50,7 +50,7 @@ struct ipahal_fltrt_obj {
 	u32 tbl_width;
 	u32 sysaddr_align;
 	u32 lcladdr_align;
-	u32 blk_sz_alignment;
+	u32 blk_sz_align;
 	u32 rule_start_alignment;
 	u32 tbl_hdr_width;
 	u32 tbl_addr_mask;
@@ -142,7 +142,7 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 		.tbl_width		= IPA3_0_HW_TBL_WIDTH,
 		.sysaddr_align		= IPA3_0_HW_TBL_SYSADDR_ALIGN,
 		.lcladdr_align		= IPA3_0_HW_TBL_LCLADDR_ALIGN,
-		.blk_sz_alignment	= IPA3_0_HW_TBL_BLK_SIZE_ALIGNMENT,
+		.blk_sz_align		= IPA3_0_HW_TBL_BLK_SIZE_ALIGN,
 		.rule_start_alignment	= IPA3_0_HW_RULE_START_ALIGNMENT,
 		.tbl_hdr_width		= IPA3_0_HW_TBL_HDR_WIDTH,
 		.tbl_addr_mask		= IPA3_0_HW_TBL_ADDR_MASK,
@@ -196,7 +196,7 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 		.tbl_width		= IPA3_0_HW_TBL_WIDTH,
 		.sysaddr_align		= IPA3_0_HW_TBL_SYSADDR_ALIGN,
 		.lcladdr_align		= IPA3_0_HW_TBL_LCLADDR_ALIGN,
-		.blk_sz_alignment	= IPA3_0_HW_TBL_BLK_SIZE_ALIGNMENT,
+		.blk_sz_align		= IPA3_0_HW_TBL_BLK_SIZE_ALIGN,
 		.rule_start_alignment	= IPA3_0_HW_RULE_START_ALIGNMENT,
 		.tbl_hdr_width		= IPA3_0_HW_TBL_HDR_WIDTH,
 		.tbl_addr_mask		= IPA3_0_HW_TBL_ADDR_MASK,
