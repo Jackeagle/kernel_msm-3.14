@@ -248,11 +248,17 @@ struct ipahal_imm_cmd_ip_packet_init {
  * @IPAHAL_FULL_PIPELINE_CLEAR: Wait for full pipeline to be clear.
  *  All groups / Rx queues shall not be serviced until IPA pipeline is fully
  *  clear. This should be used for debug only.
+ *
+ *  The values assigned to these are assumed by the REGISTER_WRITE
+ *  (struct ipa_imm_cmd_hw_register_write) and the DMA_SHARED_MEM
+ *  (struct ipa_imm_cmd_hw_dma_shared_mem) immediate commands for
+ *  IPA version 3 hardware.  They are also used to modify the opcode
+ *  used to implement these commands for IPA version 4 hardware.
  */
 enum ipahal_pipeline_clear_option {
-	IPAHAL_HPS_CLEAR,
-	IPAHAL_SRC_GRP_CLEAR,
-	IPAHAL_FULL_PIPELINE_CLEAR
+	IPAHAL_HPS_CLEAR		= 0,
+	IPAHAL_SRC_GRP_CLEAR		= 1,
+	IPAHAL_FULL_PIPELINE_CLEAR	= 2,
 };
 
 /*
