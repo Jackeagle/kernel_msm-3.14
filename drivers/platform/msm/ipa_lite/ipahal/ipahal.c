@@ -847,39 +847,8 @@ static void ipa_pkt_status_parse(
 	else
 		status->exception = exception;
 
-	if (hw_status->status_mask & 0x0001)
-		status->status_mask |= IPAHAL_PKT_STATUS_MASK_FRAG_PROCESS;
-	if (hw_status->status_mask & 0x0002)
-		status->status_mask |= IPAHAL_PKT_STATUS_MASK_FILT_PROCESS;
-	if (hw_status->status_mask & 0x0004)
-		status->status_mask |= IPAHAL_PKT_STATUS_MASK_NAT_PROCESS;
-	if (hw_status->status_mask & 0x0008)
-		status->status_mask |= IPAHAL_PKT_STATUS_MASK_ROUTE_PROCESS;
-	if (hw_status->status_mask & 0x0010)
-		status->status_mask |= IPAHAL_PKT_STATUS_MASK_TAG_VALID;
-	if (hw_status->status_mask & 0x0020)
-		status->status_mask |= IPAHAL_PKT_STATUS_MASK_FRAGMENT;
-	if (hw_status->status_mask & 0x0040)
-		status->status_mask |= IPAHAL_PKT_STATUS_MASK_FIRST_FRAGMENT;
-	if (hw_status->status_mask & 0x0080)
-		status->status_mask |= IPAHAL_PKT_STATUS_MASK_V4;
-	if (hw_status->status_mask & 0x0100)
-		status->status_mask |= IPAHAL_PKT_STATUS_MASK_CKSUM_PROCESS;
-	if (hw_status->status_mask & 0x0200)
-		status->status_mask |= IPAHAL_PKT_STATUS_MASK_AGGR_PROCESS;
-	if (hw_status->status_mask & 0x0400)
-		status->status_mask |= IPAHAL_PKT_STATUS_MASK_DEST_EOT;
-	if (hw_status->status_mask & 0x0800)
-		status->status_mask |= IPAHAL_PKT_STATUS_MASK_DEAGGR_PROCESS;
-	if (hw_status->status_mask & 0x1000)
-		status->status_mask |= IPAHAL_PKT_STATUS_MASK_DEAGG_FIRST;
-	if (hw_status->status_mask & 0x2000)
-		status->status_mask |= IPAHAL_PKT_STATUS_MASK_SRC_EOT;
-	if (hw_status->status_mask & 0x4000)
-		status->status_mask |= IPAHAL_PKT_STATUS_MASK_PREV_EOT;
-	if (hw_status->status_mask & 0x8000)
-		status->status_mask |= IPAHAL_PKT_STATUS_MASK_BYTE_LIMIT;
-	status->status_mask &= 0xFFFF;
+	/* If hardware status values change we may have to re-map this */
+	status->status_mask = hw_status->status_mask;
 }
 
 /*
