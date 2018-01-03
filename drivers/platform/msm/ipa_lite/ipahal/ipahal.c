@@ -755,6 +755,18 @@ static bool status_opcode_valid(u8 status_opcode)
 	}
 }
 
+static bool nat_type_valid(u8 nat_type)
+{
+	switch (nat_type) {
+	case IPAHAL_PKT_STATUS_NAT_NONE:
+	case IPAHAL_PKT_STATUS_NAT_SRC:
+	case IPAHAL_PKT_STATUS_NAT_DST:
+		return true;
+	default:
+		return false;
+	}
+}
+
 #define IPA_PKT_STATUS_SET_MSK(__hw_bit_msk, __shft) \
 	(status->status_mask |= \
 		((hw_status->status_mask & (__hw_bit_msk) ? 1 : 0) << (__shft)))
@@ -764,6 +776,7 @@ static void ipa_pkt_status_parse(
 {
 	const struct ipa_pkt_status_hw *hw_status = unparsed_status;
 	u8 status_opcode = (u8)hw_status->status_opcode;
+	u8 nat_type = (u8)hw_status->nat_type;
 	enum ipahal_pkt_status_exception exception_type = 0;
 	bool is_ipv6;
 
@@ -804,18 +817,10 @@ static void ipa_pkt_status_parse(
 	else
 		status->status_opcode = status_opcode;
 
-	switch (hw_status->nat_type) {
-	case IPAHAL_PKT_STATUS_NAT_NONE:
-	case IPAHAL_PKT_STATUS_NAT_SRC:
-	case IPAHAL_PKT_STATUS_NAT_DST:
-		status->nat_type = hw_status->nat_type;
-		break;
-	default:
-		ipa_err("unsupported Status NAT type 0x%x\n",
-			hw_status->nat_type);
-		WARN_ON(1);
-		break;
-	}
+	if (WARN_ON(!nat_type_valid((nat_type))))
+		ipa_err("unsupported Status NAT type 0x%x\n", nat_type);
+	else
+		status->nat_type = nat_type;
 
 	switch (hw_status->exception) {
 	case 0:
