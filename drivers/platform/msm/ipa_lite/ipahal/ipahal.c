@@ -364,6 +364,8 @@ ipa_imm_cmd_construct_hdr_init_local(u16 opcode, const void *params)
 
 	if (check_too_big("Hdr tble sz", lclhdr_params->size_hdr_table, 12))
 		return NULL;
+	if (check_too_big("Hdr addr", lclhdr_params->hdr_addr, 16))
+		return NULL;
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
