@@ -295,6 +295,11 @@ ipa_imm_cmd_construct_nat_dma(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_nat_dma *data;
 	const struct ipahal_imm_cmd_nat_dma *nat_params = params;
 
+	if (check_too_big("Tble idx", nat_params->table_index, 3))
+		return NULL;
+	if (check_too_big("Base addr", nat_params->base_addr, 2))
+		return NULL;
+
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (unlikely(!pyld))
 		return NULL;
@@ -314,6 +319,11 @@ ipa_imm_cmd_construct_table_dma_ipav4(u16 opcode, const void *params)
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_table_dma_ipav4 *data;
 	const struct ipahal_imm_cmd_table_dma *nat_params = params;
+
+	if (check_too_big("Tble idx", nat_params->table_index, 3))
+		return NULL;
+	if (check_too_big("Base addr", nat_params->base_addr, 2))
+		return NULL;
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
