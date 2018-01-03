@@ -1956,8 +1956,7 @@ begin:
 			WARN_ON(1);
 			BUG();
 		}
-		if (IPAHAL_PKT_STATUS_MASK_FLAG_VAL(
-			IPAHAL_PKT_STATUS_MASK_TAG_VALID, &status)) {
+		if (status.status_mask & IPAHAL_PKT_STATUS_MASK_TAG_VALID) {
 			struct ipa3_tag_completion *comp;
 
 			ipa_debug_low("TAG packet arrived\n");
@@ -2163,7 +2162,7 @@ static int ipa3_wan_rx_pyld_hdlr(struct sk_buff *skb,
 	struct sk_buff *skb2;
 	u16 pkt_len_with_pad;
 	u32 qmap_hdr;
-	int checksum_trailer_exists;
+	int checksum;
 	int frame_len;
 	int ep_idx;
 	unsigned int used = *(unsigned int *)skb->cb;
@@ -2195,6 +2194,8 @@ static int ipa3_wan_rx_pyld_hdlr(struct sk_buff *skb,
 
 	pkt_status_sz = ipahal_pkt_status_get_size();
 	while (skb->len) {
+		u32 status_mask;
+
 		ipa_debug_low("LEN_REM %d\n", skb->len);
 		if (skb->len < pkt_status_sz) {
 			ipa_err("status straddles buffer\n");
@@ -2265,14 +2266,13 @@ static int ipa3_wan_rx_pyld_hdlr(struct sk_buff *skb,
 		pkt_len_with_pad = ntohs((qmap_hdr>>16) & 0xffff);
 		ipa_debug_low("pkt_len with pad %d\n", pkt_len_with_pad);
 		/*get the CHECKSUM_PROCESS bit*/
-		checksum_trailer_exists = IPAHAL_PKT_STATUS_MASK_FLAG_VAL(
-			IPAHAL_PKT_STATUS_MASK_CKSUM_PROCESS, &status);
-		ipa_debug_low("checksum_trailer_exists %d\n",
-				checksum_trailer_exists);
+		status_mask = status.status_mask;
+		checksum = status_mask & IPAHAL_PKT_STATUS_MASK_CKSUM_PROCESS;
+		ipa_debug_low("checksum_trailer_exists %d\n", !!checksum);
 
 		frame_len = pkt_status_sz + IPA_QMAP_HEADER_LENGTH +
 			    pkt_len_with_pad;
-		if (checksum_trailer_exists)
+		if (checksum)
 			frame_len += IPA_DL_CHECKSUM_LENGTH;
 		ipa_debug_low("frame_len %d\n", frame_len);
 

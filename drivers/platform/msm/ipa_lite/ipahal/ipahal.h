@@ -499,15 +499,6 @@ enum ipahal_pkt_status_mask {
 };
 
 /*
- * Returns boolean value representing a property of the a packet.
- * @__flag_mask: The mask value of the flag of the status bitmask of
- * @__status: Pointer to abstracted status structure
- *  the needed property. See enum ipahal_pkt_status_mask
- */
-#define IPAHAL_PKT_STATUS_MASK_FLAG_VAL(__flag_mask, __status) \
-	(((__status)->status_mask) & (__flag_mask) ? true : false)
-
-/*
  * enum ipahal_pkt_status_nat_type - Type of NAT
  *
  *  The values assigned here are assumed by ipa_pkt_status_parse() to
