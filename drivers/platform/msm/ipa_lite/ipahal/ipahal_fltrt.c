@@ -155,12 +155,48 @@ static void ipa_fltrt_parse_tbl_addr(u64 hwaddr, u64 *addr, bool *is_sys)
 }
 
 /*
- * This array contains the FLT/RT info for IPAv3 and later.
- * All the information on IPAv3 are statically defined below.
- * If information is missing regarding on some IPA version,
- *  the init function will fill it with the information from the previous
- *  IPA version.
- * Information is considered missing if all of the fields are 0.
+ * The IPA implements offloaded packet filtering and routing
+ * capabilities.  This is managed by programming IPA-resident
+ * tables of rules that define the processing that should be
+ * performed by the IPA and the conditions under which they
+ * should be applied.  Aspects of these rules are constrained
+ * by things like table entry sizes and alignment requirements.
+ * As IPA technology evolves, some of these constraints may
+ * change, and the following table specifies the parameters
+ * that should be used for particular versions of IPA hardware.
+ *
+ * The table consists of a set of "filter/route objects", each of
+ * which is a structure that defines the constraints that must be
+ * used for a particular version of IPA hardware.  There are also a
+ * few functions that format data related to these tables to be sent
+ * to the IPA, or parse an address coming from it.  The first
+ * version of IPA hardware supported by the "ipahal" layer is 3.0.
+ *
+ * A version of IPA hardware newer than 3.0 does not need to
+ * provide an entry in the following array if the constraints for
+ * that version are the same as was defined by an older version;
+ * it only requires an entry if one or more parameters differ from
+ * what's used in the previous version.  If a slot below is empty
+ * (indicated by a 0 tbl_width field) the corresponding hardware
+ * version's properties are taken from an older hardware version.
+ *
+ * The entries in this table have the following constraints.  Much
+ * of this will be dictated by the hardware; the following statements
+ * document assumptions of the code:
+ * - 0 is not a valid table width; a 0 tbl_width value in an
+ *   entry indicates the entry contains no definitions, and
+ *   the definitions for that corresponding hardware version
+ *   are inherited from an earlier version's entry.
+ * - sysaddr_align is non-zero, and is a power of 2
+ * - lcladdr_align is non-zero, and is a power of 2.
+ * - blk_sz_align is non-zero, and is a power of 2.
+ * - rule_start_align is non-zero, and is a power of 2.
+ * - tbl_hdr_width is non-zero
+ * - tbl_addr_mask is non-zero and is one less than a power of 2
+ * - rule_min_prio is not less than rule_max_prio (0 is max prio)
+ * - rule_id_bit_len is 2 or more
+ * - write_val_to_hdr, create_flt_bitmap, create_tbl_addr, and
+ *   parse_tbl_addr must be non-null function pointers
  */
 static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 	/* IPAv3 */
