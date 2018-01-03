@@ -73,15 +73,13 @@ ipa_imm_cmd_construct_dma_task_32b_addr(u16 opcode, const void *params)
 	pyld->opcode += 1 << 8;	/* Currently supports only one packet */
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
-	if (unlikely(dma_params->size1 & ~0xFFFF)) {
+	if (WARN_ON(dma_params->size1 & ~0xFFFF)) {
 		ipa_err("Size1 is bigger than 16bit width 0x%x\n",
 			dma_params->size1);
-		WARN_ON(1);
 	}
-	if (unlikely(dma_params->packet_size & ~0xFFFF)) {
+	if (WARN_ON(dma_params->packet_size & ~0xFFFF)) {
 		ipa_err("Pkt size is bigger than 16bit width 0x%x\n",
 			dma_params->packet_size);
-		WARN_ON(1);
 	}
 	data->cmplt = dma_params->cmplt ? 1 : 0;
 	data->eof = dma_params->eof ? 1 : 0;
@@ -108,10 +106,9 @@ ipa_imm_cmd_construct_ip_packet_tag_status(u16 opcode, const void *params)
 		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
-	if (unlikely(tag_params->tag & ~0xFFFFFFFFFFFF)) {
+	if (WARN_ON(tag_params->tag & ~0xFFFFFFFFFFFF)) {
 		ipa_err("tag is bigger than 48bit width 0x%llx\n",
 			tag_params->tag);
-		WARN_ON(1);
 	}
 	data->tag = tag_params->tag;
 
@@ -130,15 +127,13 @@ ipa_imm_cmd_construct_dma_shared_mem(u16 opcode, const void *params)
 		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
-	if (unlikely(mem_params->size & ~0xFFFF)) {
+	if (WARN_ON(mem_params->size & ~0xFFFF)) {
 		ipa_err("Size is bigger than 16bit width 0x%x\n",
 			mem_params->size);
-		WARN_ON(1);
 	}
-	if (unlikely(mem_params->local_addr & ~0xFFFF)) {
+	if (WARN_ON(mem_params->local_addr & ~0xFFFF)) {
 		ipa_err("Local addr is bigger than 16bit width 0x%x\n",
 			mem_params->local_addr);
-		WARN_ON(1);
 	}
 	data->direction = mem_params->is_read ? 1 : 0;
 	data->size = mem_params->size;
@@ -171,16 +166,14 @@ ipa_imm_cmd_construct_dma_shared_mem_v_4_0(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_dma_shared_mem_v_4_0 *data;
 	const struct ipahal_imm_cmd_dma_shared_mem *mem_params = params;
 
-	if (unlikely(mem_params->size & ~0xFFFF)) {
+	if (WARN_ON(mem_params->size & ~0xFFFF)) {
 		ipa_err("Size is bigger than 16bit width 0x%x\n",
 			mem_params->size);
-		WARN_ON(1);
 		return NULL;
 	}
-	if (unlikely(mem_params->local_addr & ~0xFFFF)) {
+	if (WARN_ON(mem_params->local_addr & ~0xFFFF)) {
 		ipa_err("Local addr is bigger than 16bit width 0x%x\n",
 			mem_params->local_addr);
-		WARN_ON(1);
 		return NULL;
 	}
 
@@ -225,10 +218,9 @@ ipa_imm_cmd_construct_register_write(u16 opcode, const void *params)
 		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
-	if (unlikely(regwrt_params->offset & ~0xFFFF)) {
+	if (WARN_ON(regwrt_params->offset & ~0xFFFF)) {
 		ipa_err("Offset is bigger than 16bit width 0x%x\n",
 			regwrt_params->offset);
-		WARN_ON(1);
 	}
 	data->offset = regwrt_params->offset;
 	data->value = regwrt_params->value;
@@ -261,10 +253,9 @@ ipa_imm_cmd_construct_register_write_v_4_0(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_register_write_v_4_0 *data;
 	const struct ipahal_imm_cmd_register_write *regwrt_params = params;
 
-	if (unlikely(regwrt_params->offset & ~0xFFFF)) {
+	if (WARN_ON(regwrt_params->offset & ~0xFFFF)) {
 		ipa_err("Offset is bigger than 16bit width 0x%x\n",
 			regwrt_params->offset);
-		WARN_ON(1);
 		return NULL;
 	}
 
@@ -309,10 +300,9 @@ ipa_imm_cmd_construct_ip_packet_init(u16 opcode, const void *params)
 		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
-	if (unlikely(pktinit_params->destination_pipe_index & ~0x1F)) {
+	if (WARN_ON(pktinit_params->destination_pipe_index & ~0x1F)) {
 		ipa_err("Dst pipe idx is bigger than 5bit width 0x%x\n",
 			pktinit_params->destination_pipe_index);
-		WARN_ON(1);
 	}
 	data->destination_pipe_index = pktinit_params->destination_pipe_index;
 
@@ -388,10 +378,9 @@ ipa_imm_cmd_construct_hdr_init_local(u16 opcode, const void *params)
 		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
-	if (unlikely(lclhdr_params->size_hdr_table & ~0xFFF)) {
+	if (WARN_ON(lclhdr_params->size_hdr_table & ~0xFFF)) {
 		ipa_err("Hdr tble size is bigger than 12bit width 0x%x\n",
 			lclhdr_params->size_hdr_table);
-		WARN_ON(1);
 	}
 	data->hdr_table_addr = lclhdr_params->hdr_table_addr;
 	data->size_hdr_table = lclhdr_params->size_hdr_table;
