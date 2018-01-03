@@ -189,14 +189,12 @@ ipa_imm_cmd_construct_dma_shared_mem_v_4_0(u16 opcode, const void *params)
 	data->local_addr = mem_params->local_addr;
 	data->system_addr = mem_params->system_addr;
 	pyld->opcode |= (mem_params->skip_pipeline_clear ? 1 : 0) << 8;
+
 	switch (mem_params->pipeline_clear_options) {
 	case IPAHAL_HPS_CLEAR:
-		break;
 	case IPAHAL_SRC_GRP_CLEAR:
-		pyld->opcode |= (1 << 9);
-		break;
 	case IPAHAL_FULL_PIPELINE_CLEAR:
-		pyld->opcode |= (2 << 9);
+		pyld->opcode |= mem_params->pipeline_clear_options << 9;
 		break;
 	default:
 		ipa_err("unsupported pipline clear option %d\n",
@@ -270,12 +268,9 @@ ipa_imm_cmd_construct_register_write_v_4_0(u16 opcode, const void *params)
 	pyld->opcode |= (regwrt_params->skip_pipeline_clear ? 1 : 0) << 8;
 	switch (regwrt_params->pipeline_clear_options) {
 	case IPAHAL_HPS_CLEAR:
-		break;
 	case IPAHAL_SRC_GRP_CLEAR:
-		pyld->opcode |= (1 << 9);
-		break;
 	case IPAHAL_FULL_PIPELINE_CLEAR:
-		pyld->opcode |= (2 << 9);
+		pyld->opcode |= regwrt_params->pipeline_clear_options << 9;
 		break;
 	default:
 		ipa_err("unsupported pipline clear option %d\n",
