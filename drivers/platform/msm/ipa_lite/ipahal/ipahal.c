@@ -132,7 +132,9 @@ static bool pipeline_clear_options_bad(u16 option)
 		break;
 	}
 
-	return true;
+	ipa_err("unsupported pipeline clear option %hu\n", option);
+
+	return WARN_ON(true);
 }
 
 static struct ipahal_imm_cmd_pyld *
@@ -153,11 +155,8 @@ ipa_imm_cmd_construct_dma_shared_mem(u16 opcode, const void *params)
 			mem_params->local_addr);
 		return NULL;
 	}
-	if (WARN_ON(pipeline_clear_options_bad(pipeline_clear_options))) {
-		ipa_err("unsupported pipeline clear option %hu\n",
-			pipeline_clear_options);
+	if (pipeline_clear_options_bad(pipeline_clear_options))
 		return NULL;
-	}
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
@@ -192,11 +191,8 @@ ipa_imm_cmd_construct_dma_shared_mem_v_4_0(u16 opcode, const void *params)
 			mem_params->local_addr);
 		return NULL;
 	}
-	if (WARN_ON(pipeline_clear_options_bad(pipeline_clear_options))) {
-		ipa_err("unsupported pipeline clear option %hu\n",
-			pipeline_clear_options);
+	if (pipeline_clear_options_bad(pipeline_clear_options))
 		return NULL;
-	}
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
@@ -228,12 +224,8 @@ ipa_imm_cmd_construct_register_write(u16 opcode, const void *params)
 			regwrt_params->offset);
 		return NULL;
 	}
-
-	if (WARN_ON(pipeline_clear_options_bad(pipeline_clear_options))) {
-		ipa_err("unsupported pipeline clear option %hu\n",
-			pipeline_clear_options);
+	if (pipeline_clear_options_bad(pipeline_clear_options))
 		return NULL;
-	}
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
@@ -262,11 +254,8 @@ ipa_imm_cmd_construct_register_write_v_4_0(u16 opcode, const void *params)
 			regwrt_params->offset);
 		return NULL;
 	}
-	if (WARN_ON(pipeline_clear_options_bad(pipeline_clear_options))) {
-		ipa_err("unsupported pipeline clear option %hu\n",
-			pipeline_clear_options);
+	if (pipeline_clear_options_bad(pipeline_clear_options))
 		return NULL;
-	}
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
