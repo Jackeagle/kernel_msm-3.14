@@ -118,12 +118,27 @@ ipa_imm_cmd_construct_ip_packet_tag_status(u16 opcode, const void *params)
 	return pyld;
 }
 
+static bool pipeline_clear_options_bad(u16 option)
+{
+	switch (option) {
+	case IPAHAL_HPS_CLEAR:
+	case IPAHAL_SRC_GRP_CLEAR:
+	case IPAHAL_FULL_PIPELINE_CLEAR:
+		return false;
+	default:
+		break;
+	}
+
+	return true;
+}
+
 static struct ipahal_imm_cmd_pyld *
 ipa_imm_cmd_construct_dma_shared_mem(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_dma_shared_mem *data;
 	const struct ipahal_imm_cmd_dma_shared_mem *mem_params = params;
+	u16 pipeline_clear_options = (u16)mem_params->pipeline_clear_options;
 
 	if (WARN_ON(mem_params->size & ~0xFFFF)) {
 		ipa_err("Size is bigger than 16bit width 0x%x\n",
@@ -133,16 +148,9 @@ ipa_imm_cmd_construct_dma_shared_mem(u16 opcode, const void *params)
 		ipa_err("Local addr is bigger than 16bit width 0x%x\n",
 			mem_params->local_addr);
 	}
-
-	switch (mem_params->pipeline_clear_options) {
-	case IPAHAL_HPS_CLEAR:
-	case IPAHAL_SRC_GRP_CLEAR:
-	case IPAHAL_FULL_PIPELINE_CLEAR:
-		break;
-	default:
-		ipa_err("unsupported pipline clear option %d\n",
-			mem_params->pipeline_clear_options);
-		WARN_ON(1);
+	if (WARN_ON(pipeline_clear_options_bad(pipeline_clear_options))) {
+		ipa_err("unsupported pipeline clear option %hu\n",
+			pipeline_clear_options);
 	}
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
@@ -155,7 +163,7 @@ ipa_imm_cmd_construct_dma_shared_mem(u16 opcode, const void *params)
 	data->local_addr = mem_params->local_addr;
 	data->system_addr = mem_params->system_addr;
 	data->skip_pipeline_clear = mem_params->skip_pipeline_clear ? 1 : 0;
-	data->pipeline_clear_options = mem_params->pipeline_clear_options;
+	data->pipeline_clear_options = pipeline_clear_options;
 
 	return pyld;
 }
@@ -166,6 +174,7 @@ ipa_imm_cmd_construct_dma_shared_mem_v_4_0(u16 opcode, const void *params)
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_dma_shared_mem_v_4_0 *data;
 	const struct ipahal_imm_cmd_dma_shared_mem *mem_params = params;
+	u16 pipeline_clear_options = (u16)mem_params->pipeline_clear_options;
 
 	if (WARN_ON(mem_params->size & ~0xFFFF)) {
 		ipa_err("Size is bigger than 16bit width 0x%x\n",
@@ -177,16 +186,9 @@ ipa_imm_cmd_construct_dma_shared_mem_v_4_0(u16 opcode, const void *params)
 			mem_params->local_addr);
 		return NULL;
 	}
-
-	switch (mem_params->pipeline_clear_options) {
-	case IPAHAL_HPS_CLEAR:
-	case IPAHAL_SRC_GRP_CLEAR:
-	case IPAHAL_FULL_PIPELINE_CLEAR:
-		break;
-	default:
-		ipa_err("unsupported pipline clear option %d\n",
-			mem_params->pipeline_clear_options);
-		WARN_ON(1);
+	if (WARN_ON(pipeline_clear_options_bad(pipeline_clear_options))) {
+		ipa_err("unsupported pipeline clear option %hu\n",
+			pipeline_clear_options);
 	}
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
@@ -195,7 +197,7 @@ ipa_imm_cmd_construct_dma_shared_mem_v_4_0(u16 opcode, const void *params)
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	pyld->opcode |= (mem_params->skip_pipeline_clear ? 1 : 0) << 8;
-	pyld->opcode |= mem_params->pipeline_clear_options << 9;
+	pyld->opcode |= pipeline_clear_options << 9;
 
 	data->direction = mem_params->is_read ? 1 : 0;
 	data->clear_after_read = mem_params->clear_after_read;
@@ -212,21 +214,16 @@ ipa_imm_cmd_construct_register_write(u16 opcode, const void *params)
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_register_write *data;
 	const struct ipahal_imm_cmd_register_write *regwrt_params = params;
+	u16 pipeline_clear_options = (u16)regwrt_params->pipeline_clear_options;
 
 	if (WARN_ON(regwrt_params->offset & ~0xFFFF)) {
 		ipa_err("Offset is bigger than 16bit width 0x%x\n",
 			regwrt_params->offset);
 	}
 
-	switch (regwrt_params->pipeline_clear_options) {
-	case IPAHAL_HPS_CLEAR:
-	case IPAHAL_SRC_GRP_CLEAR:
-	case IPAHAL_FULL_PIPELINE_CLEAR:
-		break;
-	default:
-		ipa_err("unsupported pipline clear option %d\n",
-			regwrt_params->pipeline_clear_options);
-		WARN_ON(1);
+	if (WARN_ON(pipeline_clear_options_bad(pipeline_clear_options))) {
+		ipa_err("unsupported pipeline clear option %hu\n",
+			pipeline_clear_options);
 	}
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
@@ -238,7 +235,7 @@ ipa_imm_cmd_construct_register_write(u16 opcode, const void *params)
 	data->value = regwrt_params->value;
 	data->value_mask = regwrt_params->value_mask;
 	data->skip_pipeline_clear = regwrt_params->skip_pipeline_clear ? 1 : 0;
-	data->pipeline_clear_options = regwrt_params->pipeline_clear_options;
+	data->pipeline_clear_options = pipeline_clear_options;
 
 	return pyld;
 }
@@ -249,22 +246,16 @@ ipa_imm_cmd_construct_register_write_v_4_0(u16 opcode, const void *params)
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_register_write_v_4_0 *data;
 	const struct ipahal_imm_cmd_register_write *regwrt_params = params;
+	u16 pipeline_clear_options = (u16)regwrt_params->pipeline_clear_options;
 
 	if (WARN_ON(regwrt_params->offset & ~0xFFFF)) {
 		ipa_err("Offset is bigger than 16bit width 0x%x\n",
 			regwrt_params->offset);
 		return NULL;
 	}
-
-	switch (regwrt_params->pipeline_clear_options) {
-	case IPAHAL_HPS_CLEAR:
-	case IPAHAL_SRC_GRP_CLEAR:
-	case IPAHAL_FULL_PIPELINE_CLEAR:
-		break;
-	default:
-		ipa_err("unsupported pipline clear option %d\n",
-			regwrt_params->pipeline_clear_options);
-		WARN_ON(1);
+	if (WARN_ON(pipeline_clear_options_bad(pipeline_clear_options))) {
+		ipa_err("unsupported pipeline clear option %hu\n",
+			pipeline_clear_options);
 	}
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
@@ -273,7 +264,7 @@ ipa_imm_cmd_construct_register_write_v_4_0(u16 opcode, const void *params)
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	pyld->opcode |= (regwrt_params->skip_pipeline_clear ? 1 : 0) << 8;
-	pyld->opcode |= regwrt_params->pipeline_clear_options << 9;
+	pyld->opcode |= pipeline_clear_options << 9;
 
 	data->offset = regwrt_params->offset;
 	data->offset_high = regwrt_params->offset >> 16;
