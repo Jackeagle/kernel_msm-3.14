@@ -19,8 +19,7 @@
 
 struct ipahal_context *ipahal_ctx;
 
-static const char *ipahal_pkt_status_exception_to_str
-	[IPAHAL_PKT_STATUS_EXCEPTION_MAX] = {
+static const char *ipahal_pkt_status_exception_to_str[] = {
 	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_NONE),
 	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_DEAGGR),
 	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_IPTYPE),
