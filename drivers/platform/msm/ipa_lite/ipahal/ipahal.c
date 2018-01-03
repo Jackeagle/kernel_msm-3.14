@@ -134,6 +134,17 @@ ipa_imm_cmd_construct_dma_shared_mem(u16 opcode, const void *params)
 			mem_params->local_addr);
 	}
 
+	switch (mem_params->pipeline_clear_options) {
+	case IPAHAL_HPS_CLEAR:
+	case IPAHAL_SRC_GRP_CLEAR:
+	case IPAHAL_FULL_PIPELINE_CLEAR:
+		break;
+	default:
+		ipa_err("unsupported pipline clear option %d\n",
+			mem_params->pipeline_clear_options);
+		WARN_ON(1);
+	}
+
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
 		return NULL;
@@ -144,18 +155,7 @@ ipa_imm_cmd_construct_dma_shared_mem(u16 opcode, const void *params)
 	data->local_addr = mem_params->local_addr;
 	data->system_addr = mem_params->system_addr;
 	data->skip_pipeline_clear = mem_params->skip_pipeline_clear ? 1 : 0;
-	switch (mem_params->pipeline_clear_options) {
-	case IPAHAL_HPS_CLEAR:
-	case IPAHAL_SRC_GRP_CLEAR:
-	case IPAHAL_FULL_PIPELINE_CLEAR:
-		data->pipeline_clear_options =
-				mem_params->pipeline_clear_options;
-		break;
-	default:
-		ipa_err("unsupported pipline clear option %d\n",
-			mem_params->pipeline_clear_options);
-		WARN_ON(1);
-	};
+	data->pipeline_clear_options = mem_params->pipeline_clear_options;
 
 	return pyld;
 }
@@ -219,6 +219,17 @@ ipa_imm_cmd_construct_register_write(u16 opcode, const void *params)
 			regwrt_params->offset);
 	}
 
+	switch (regwrt_params->pipeline_clear_options) {
+	case IPAHAL_HPS_CLEAR:
+	case IPAHAL_SRC_GRP_CLEAR:
+	case IPAHAL_FULL_PIPELINE_CLEAR:
+		break;
+	default:
+		ipa_err("unsupported pipline clear option %d\n",
+			regwrt_params->pipeline_clear_options);
+		WARN_ON(1);
+	}
+
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
 		return NULL;
@@ -228,18 +239,7 @@ ipa_imm_cmd_construct_register_write(u16 opcode, const void *params)
 	data->value = regwrt_params->value;
 	data->value_mask = regwrt_params->value_mask;
 	data->skip_pipeline_clear = regwrt_params->skip_pipeline_clear ? 1 : 0;
-	switch (regwrt_params->pipeline_clear_options) {
-	case IPAHAL_HPS_CLEAR:
-	case IPAHAL_SRC_GRP_CLEAR:
-	case IPAHAL_FULL_PIPELINE_CLEAR:
-		data->pipeline_clear_options =
-				regwrt_params->pipeline_clear_options;
-		break;
-	default:
-		ipa_err("unsupported pipline clear option %d\n",
-			regwrt_params->pipeline_clear_options);
-		WARN_ON(1);
-	};
+	data->pipeline_clear_options = regwrt_params->pipeline_clear_options;
 
 	return pyld;
 }
