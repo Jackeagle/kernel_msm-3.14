@@ -70,10 +70,12 @@ ipa_imm_cmd_construct_dma_task_32b_addr(u16 opcode, const void *params)
 	if (WARN_ON(dma_params->size1 & ~0xFFFF)) {
 		ipa_err("Size1 is bigger than 16bit width 0x%x\n",
 			dma_params->size1);
+		return NULL;
 	}
 	if (WARN_ON(dma_params->packet_size & ~0xFFFF)) {
 		ipa_err("Pkt size is bigger than 16bit width 0x%x\n",
 			dma_params->packet_size);
+		return NULL;
 	}
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
@@ -106,6 +108,7 @@ ipa_imm_cmd_construct_ip_packet_tag_status(u16 opcode, const void *params)
 	if (WARN_ON(tag_params->tag & ~0xFFFFFFFFFFFF)) {
 		ipa_err("tag is bigger than 48bit width 0x%llx\n",
 			tag_params->tag);
+		return NULL;
 	}
 
 	pyld = ipahal_imm_cmd_pyld_alloc_atomic(opcode, sizeof(*data));
@@ -143,14 +146,17 @@ ipa_imm_cmd_construct_dma_shared_mem(u16 opcode, const void *params)
 	if (WARN_ON(mem_params->size & ~0xFFFF)) {
 		ipa_err("Size is bigger than 16bit width 0x%x\n",
 			mem_params->size);
+		return NULL;
 	}
 	if (WARN_ON(mem_params->local_addr & ~0xFFFF)) {
 		ipa_err("Local addr is bigger than 16bit width 0x%x\n",
 			mem_params->local_addr);
+		return NULL;
 	}
 	if (WARN_ON(pipeline_clear_options_bad(pipeline_clear_options))) {
 		ipa_err("unsupported pipeline clear option %hu\n",
 			pipeline_clear_options);
+		return NULL;
 	}
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
@@ -189,6 +195,7 @@ ipa_imm_cmd_construct_dma_shared_mem_v_4_0(u16 opcode, const void *params)
 	if (WARN_ON(pipeline_clear_options_bad(pipeline_clear_options))) {
 		ipa_err("unsupported pipeline clear option %hu\n",
 			pipeline_clear_options);
+		return NULL;
 	}
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
@@ -219,11 +226,13 @@ ipa_imm_cmd_construct_register_write(u16 opcode, const void *params)
 	if (WARN_ON(regwrt_params->offset & ~0xFFFF)) {
 		ipa_err("Offset is bigger than 16bit width 0x%x\n",
 			regwrt_params->offset);
+		return NULL;
 	}
 
 	if (WARN_ON(pipeline_clear_options_bad(pipeline_clear_options))) {
 		ipa_err("unsupported pipeline clear option %hu\n",
 			pipeline_clear_options);
+		return NULL;
 	}
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
@@ -256,6 +265,7 @@ ipa_imm_cmd_construct_register_write_v_4_0(u16 opcode, const void *params)
 	if (WARN_ON(pipeline_clear_options_bad(pipeline_clear_options))) {
 		ipa_err("unsupported pipeline clear option %hu\n",
 			pipeline_clear_options);
+		return NULL;
 	}
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
@@ -284,6 +294,7 @@ ipa_imm_cmd_construct_ip_packet_init(u16 opcode, const void *params)
 	if (WARN_ON(pktinit_params->destination_pipe_index & ~0x1F)) {
 		ipa_err("Dst pipe idx is bigger than 5bit width 0x%x\n",
 			pktinit_params->destination_pipe_index);
+		return NULL;
 	}
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
@@ -363,6 +374,7 @@ ipa_imm_cmd_construct_hdr_init_local(u16 opcode, const void *params)
 	if (WARN_ON(lclhdr_params->size_hdr_table & ~0xFFF)) {
 		ipa_err("Hdr tble size is bigger than 12bit width 0x%x\n",
 			lclhdr_params->size_hdr_table);
+		return NULL;
 	}
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
