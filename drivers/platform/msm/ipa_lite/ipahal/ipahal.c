@@ -767,6 +767,28 @@ static bool nat_type_valid(u8 nat_type)
 	}
 }
 
+/*
+ * Maps an exception type returned in a ipa_pkt_status_hw structure
+ * to the ipahal_pkt_status_exception value that represents it in
+ * the exception field of a ipahal_pkt_status structure.  Returns
+ * IPAHAL_PKT_STATUS_EXCEPTION_MAX for an unrecognized value.
+ */
+static enum ipahal_pkt_status_exception
+exception_map(u8 exception, bool is_ipv6)
+{
+	switch (exception) {
+	case 0x00:	return IPAHAL_PKT_STATUS_EXCEPTION_NONE;
+	case 0x01:	return IPAHAL_PKT_STATUS_EXCEPTION_DEAGGR;
+	case 0x04:	return IPAHAL_PKT_STATUS_EXCEPTION_IPTYPE;
+	case 0x08:	return IPAHAL_PKT_STATUS_EXCEPTION_PACKET_LENGTH;
+	case 0x10:	return IPAHAL_PKT_STATUS_EXCEPTION_FRAG_RULE_MISS;
+	case 0x20:	return IPAHAL_PKT_STATUS_EXCEPTION_SW_FILT;
+	case 0x40:	return is_ipv6 ? IPAHAL_PKT_STATUS_EXCEPTION_IPV6CT
+				       : IPAHAL_PKT_STATUS_EXCEPTION_NAT;
+	default:	return IPAHAL_PKT_STATUS_EXCEPTION_MAX;
+	}
+}
+
 #define IPA_PKT_STATUS_SET_MSK(__hw_bit_msk, __shft) \
 	(status->status_mask |= \
 		((hw_status->status_mask & (__hw_bit_msk) ? 1 : 0) << (__shft)))
@@ -777,7 +799,7 @@ static void ipa_pkt_status_parse(
 	const struct ipa_pkt_status_hw *hw_status = unparsed_status;
 	u8 status_opcode = (u8)hw_status->status_opcode;
 	u8 nat_type = (u8)hw_status->nat_type;
-	enum ipahal_pkt_status_exception exception_type = 0;
+	enum ipahal_pkt_status_exception exception;
 	bool is_ipv6;
 
 	/* Our packet status struct has to match what hardware supplies */
@@ -822,38 +844,12 @@ static void ipa_pkt_status_parse(
 	else
 		status->nat_type = nat_type;
 
-	switch (hw_status->exception) {
-	case 0:
-		exception_type = IPAHAL_PKT_STATUS_EXCEPTION_NONE;
-		break;
-	case 1:
-		exception_type = IPAHAL_PKT_STATUS_EXCEPTION_DEAGGR;
-		break;
-	case 4:
-		exception_type = IPAHAL_PKT_STATUS_EXCEPTION_IPTYPE;
-		break;
-	case 8:
-		exception_type = IPAHAL_PKT_STATUS_EXCEPTION_PACKET_LENGTH;
-		break;
-	case 16:
-		exception_type = IPAHAL_PKT_STATUS_EXCEPTION_FRAG_RULE_MISS;
-		break;
-	case 32:
-		exception_type = IPAHAL_PKT_STATUS_EXCEPTION_SW_FILT;
-		break;
-	case 64:
-		if (is_ipv6)
-			exception_type = IPAHAL_PKT_STATUS_EXCEPTION_IPV6CT;
-		else
-			exception_type = IPAHAL_PKT_STATUS_EXCEPTION_NAT;
-		break;
-	default:
+	exception = exception_map((u8)hw_status->exception, is_ipv6);
+	if (WARN_ON(exception == IPAHAL_PKT_STATUS_EXCEPTION_MAX))
 		ipa_err("unsupported Status Exception type 0x%x\n",
-			hw_status->exception);
-		WARN_ON(1);
-		break;
-	}
-	status->exception = exception_type;
+				hw_status->exception);
+	else
+		status->exception = exception;
 
 	IPA_PKT_STATUS_SET_MSK(0x1, IPAHAL_PKT_STATUS_MASK_FRAG_PROCESS_SHFT);
 	IPA_PKT_STATUS_SET_MSK(0x2, IPAHAL_PKT_STATUS_MASK_FILT_PROCESS_SHFT);
