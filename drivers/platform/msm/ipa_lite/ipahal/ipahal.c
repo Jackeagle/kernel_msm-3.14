@@ -769,12 +769,10 @@ struct ipahal_imm_cmd_pyld *ipahal_construct_nop_imm_cmd(void)
 static void ipa_pkt_status_parse(
 	const void *unparsed_status, struct ipahal_pkt_status *status)
 {
+	const struct ipa_pkt_status_hw *hw_status = unparsed_status;
 	enum ipahal_pkt_status_opcode opcode = 0;
 	enum ipahal_pkt_status_exception exception_type = 0;
 	bool is_ipv6;
-
-	struct ipa_pkt_status_hw *hw_status =
-		(struct ipa_pkt_status_hw *)unparsed_status;
 
 	/* Our packet status struct has to match what hardware supplies */
 	BUILD_BUG_ON(sizeof(struct ipa_pkt_status_hw) !=
