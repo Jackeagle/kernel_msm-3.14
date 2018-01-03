@@ -489,6 +489,15 @@ ipa_imm_cmd_construct_ip_v6_filter_init(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_ip_v6_filter_init *data;
 	const struct ipahal_imm_cmd_ip_v6_filter_init *flt6_params = params;
 
+	if (check_too_big("Hash rules sz", flt6_params->hash_rules_size, 12))
+		return NULL;
+	if (check_too_big("Hash lcl addr", flt6_params->hash_local_addr, 16))
+		return NULL;
+	if (check_too_big("NHash rules sz", flt6_params->nhash_rules_size, 12))
+		return NULL;
+	if (check_too_big("NHash lcl addr", flt6_params->nhash_local_addr, 16))
+		return NULL;
+
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
 		return NULL;
@@ -510,6 +519,15 @@ ipa_imm_cmd_construct_ip_v4_filter_init(u16 opcode, const void *params)
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v4_filter_init *data;
 	const struct ipahal_imm_cmd_ip_v4_filter_init *flt4_params = params;
+
+	if (check_too_big("Hash rules sz", flt4_params->hash_rules_size, 12))
+		return NULL;
+	if (check_too_big("Hash lcl addr", flt4_params->hash_local_addr, 16))
+		return NULL;
+	if (check_too_big("NHash rules sz", flt4_params->nhash_rules_size, 12))
+		return NULL;
+	if (check_too_big("NHash lcl addr", flt4_params->nhash_local_addr, 16))
+		return NULL;
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
