@@ -269,7 +269,7 @@ ipa_imm_cmd_construct_register_write_v_4_0(u16 opcode, const void *params)
 		pyld->opcode |= BIT(8);
 	pyld->opcode |= pipeline_clear_options << 9;
 
-	data->offset = regwrt_params->offset;
+	data->offset = regwrt_params->offset & MASK(16);
 	data->offset_high = regwrt_params->offset >> 16;
 	data->value = regwrt_params->value;
 	data->value_mask = regwrt_params->value_mask;
