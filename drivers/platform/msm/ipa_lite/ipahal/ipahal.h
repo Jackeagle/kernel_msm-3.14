@@ -509,11 +509,15 @@ enum ipahal_pkt_status_mask {
 
 /*
  * enum ipahal_pkt_status_nat_type - Type of NAT
+ *
+ *  The values assigned here are assumed by ipa_pkt_status_parse() to
+ *  match values returned in the nat_type field of a ipa_pkt_status_hw
+ *  structure inserted by the IPA in received buffer.
  */
 enum ipahal_pkt_status_nat_type {
-	IPAHAL_PKT_STATUS_NAT_NONE,
-	IPAHAL_PKT_STATUS_NAT_SRC,
-	IPAHAL_PKT_STATUS_NAT_DST,
+	IPAHAL_PKT_STATUS_NAT_NONE	= 0,
+	IPAHAL_PKT_STATUS_NAT_SRC	= 1,
+	IPAHAL_PKT_STATUS_NAT_DST	= 2,
 };
 
 /*
