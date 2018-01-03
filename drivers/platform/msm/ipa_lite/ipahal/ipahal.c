@@ -63,6 +63,23 @@ ipahal_imm_cmd_pyld_alloc_atomic(u16 opcode, size_t pyld_size)
 	return ipahal_imm_cmd_pyld_alloc_common(opcode, pyld_size, GFP_ATOMIC);
 }
 
+/*
+ * Returns true if the value provided is too big to be represented
+ * in the given number of bits.  In this case, WARN_ON() is called,
+ * and a message is printed and using ipa_err().
+ *
+ * Returns false if the value is OK (not too big).
+ */
+static bool check_too_big(char *name, u64 value, u8 bits)
+{
+	if (!WARN_ON(value & ~MASK(bits)))
+		return false;
+
+	ipa_err("%s is bigger than %hhubit width 0x%llx\n", name, bits, value);
+
+	return true;
+}
+
 static struct ipahal_imm_cmd_pyld *
 ipa_imm_cmd_construct_dma_task_32b_addr(u16 opcode, const void *params)
 {
@@ -70,16 +87,10 @@ ipa_imm_cmd_construct_dma_task_32b_addr(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_dma_task_32b_addr *data;
 	const struct ipahal_imm_cmd_dma_task_32b_addr *dma_params = params;
 
-	if (WARN_ON(dma_params->size1 & ~MASK(16))) {
-		ipa_err("Size1 is bigger than 16bit width 0x%x\n",
-			dma_params->size1);
+	if (check_too_big("Size1", dma_params->size1, 16))
 		return NULL;
-	}
-	if (WARN_ON(dma_params->packet_size & ~MASK(16))) {
-		ipa_err("Pkt size is bigger than 16bit width 0x%x\n",
-			dma_params->packet_size);
+	if (check_too_big("Pkt sz", dma_params->packet_size, 16))
 		return NULL;
-	}
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
@@ -108,11 +119,8 @@ ipa_imm_cmd_construct_ip_packet_tag_status(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_ip_packet_tag_status *data;
 	const struct ipahal_imm_cmd_ip_packet_tag_status *tag_params = params;
 
-	if (WARN_ON(tag_params->tag & ~MASK(48))) {
-		ipa_err("tag is bigger than 48bit width 0x%llx\n",
-			tag_params->tag);
+	if (check_too_big("tag", tag_params->tag, 48))
 		return NULL;
-	}
 
 	pyld = ipahal_imm_cmd_pyld_alloc_atomic(opcode, sizeof(*data));
 	if (!pyld)
@@ -148,16 +156,10 @@ ipa_imm_cmd_construct_dma_shared_mem(u16 opcode, const void *params)
 	const struct ipahal_imm_cmd_dma_shared_mem *mem_params = params;
 	u16 pipeline_clear_options = (u16)mem_params->pipeline_clear_options;
 
-	if (WARN_ON(mem_params->size & ~MASK(16))) {
-		ipa_err("Size is bigger than 16bit width 0x%x\n",
-			mem_params->size);
+	if (check_too_big("Size", mem_params->size, 16))
 		return NULL;
-	}
-	if (WARN_ON(mem_params->local_addr & ~MASK(16))) {
-		ipa_err("Local addr is bigger than 16bit width 0x%x\n",
-			mem_params->local_addr);
+	if (check_too_big("Lcl addr", mem_params->local_addr, 16))
 		return NULL;
-	}
 	if (pipeline_clear_options_bad(pipeline_clear_options))
 		return NULL;
 
@@ -184,16 +186,10 @@ ipa_imm_cmd_construct_dma_shared_mem_v_4_0(u16 opcode, const void *params)
 	const struct ipahal_imm_cmd_dma_shared_mem *mem_params = params;
 	u16 pipeline_clear_options = (u16)mem_params->pipeline_clear_options;
 
-	if (WARN_ON(mem_params->size & ~MASK(16))) {
-		ipa_err("Size is bigger than 16bit width 0x%x\n",
-			mem_params->size);
+	if (check_too_big("Size", mem_params->size, 16))
 		return NULL;
-	}
-	if (WARN_ON(mem_params->local_addr & ~MASK(16))) {
-		ipa_err("Local addr is bigger than 16bit width 0x%x\n",
-			mem_params->local_addr);
+	if (check_too_big("Lcl addr", mem_params->local_addr, 16))
 		return NULL;
-	}
 	if (pipeline_clear_options_bad(pipeline_clear_options))
 		return NULL;
 
@@ -222,11 +218,8 @@ ipa_imm_cmd_construct_register_write(u16 opcode, const void *params)
 	const struct ipahal_imm_cmd_register_write *regwrt_params = params;
 	u16 pipeline_clear_options = (u16)regwrt_params->pipeline_clear_options;
 
-	if (WARN_ON(regwrt_params->offset & ~MASK(16))) {
-		ipa_err("Offset is bigger than 16bit width 0x%x\n",
-			regwrt_params->offset);
+	if (check_too_big("Offset", regwrt_params->offset, 16))
 		return NULL;
-	}
 	if (pipeline_clear_options_bad(pipeline_clear_options))
 		return NULL;
 
@@ -252,11 +245,8 @@ ipa_imm_cmd_construct_register_write_v_4_0(u16 opcode, const void *params)
 	const struct ipahal_imm_cmd_register_write *regwrt_params = params;
 	u16 pipeline_clear_options = (u16)regwrt_params->pipeline_clear_options;
 
-	if (WARN_ON(regwrt_params->offset & ~MASK(16))) {
-		ipa_err("Offset is bigger than 16bit width 0x%x\n",
-			regwrt_params->offset);
+	if (check_too_big("Offset", regwrt_params->offset, 16))
 		return NULL;
-	}
 	if (pipeline_clear_options_bad(pipeline_clear_options))
 		return NULL;
 
@@ -284,11 +274,9 @@ ipa_imm_cmd_construct_ip_packet_init(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_ip_packet_init *data;
 	const struct ipahal_imm_cmd_ip_packet_init *pktinit_params = params;
 
-	if (WARN_ON(pktinit_params->destination_pipe_index & ~MASK(5))) {
-		ipa_err("Dst pipe idx is bigger than 5bit width 0x%x\n",
-			pktinit_params->destination_pipe_index);
+	if (check_too_big("Dst pipe idx",
+				pktinit_params->destination_pipe_index, 5))
 		return NULL;
-	}
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
@@ -364,11 +352,8 @@ ipa_imm_cmd_construct_hdr_init_local(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_hdr_init_local *data;
 	const struct ipahal_imm_cmd_hdr_init_local *lclhdr_params = params;
 
-	if (WARN_ON(lclhdr_params->size_hdr_table & ~MASK(12))) {
-		ipa_err("Hdr tble size is bigger than 12bit width 0x%x\n",
-			lclhdr_params->size_hdr_table);
+	if (check_too_big("Hdr tble sz", lclhdr_params->size_hdr_table, 12))
 		return NULL;
-	}
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
