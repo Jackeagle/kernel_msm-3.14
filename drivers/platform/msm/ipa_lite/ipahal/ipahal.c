@@ -265,7 +265,8 @@ ipa_imm_cmd_construct_register_write_v_4_0(u16 opcode, const void *params)
 		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
-	pyld->opcode |= (regwrt_params->skip_pipeline_clear ? 1 : 0) << 8;
+	if (regwrt_params->skip_pipeline_clear)
+		pyld->opcode |= BIT(8);
 	pyld->opcode |= pipeline_clear_options << 9;
 
 	data->offset = regwrt_params->offset;
