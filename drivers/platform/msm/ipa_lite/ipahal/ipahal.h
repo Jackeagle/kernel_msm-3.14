@@ -406,15 +406,20 @@ static inline void ipahal_destroy_imm_cmd(struct ipahal_imm_cmd_pyld *pyld)
  * @IPAHAL_STATUS_OPCODE_PACKET_2ND_PASS: Packet Status generated as part of
  *  IPA second processing pass for a packet (i.e. IPA XLAT processing for
  *  the translated packet).
+ *
+ *  The values assigned here are assumed by ipa_pkt_status_parse()
+ *  to match values returned in the status_opcode field of a
+ *  ipa_pkt_status_hw structure inserted by the IPA in received
+ *  buffer.
  */
 enum ipahal_pkt_status_opcode {
-	IPAHAL_PKT_STATUS_OPCODE_PACKET = 0,
-	IPAHAL_PKT_STATUS_OPCODE_NEW_FRAG_RULE,
-	IPAHAL_PKT_STATUS_OPCODE_DROPPED_PACKET,
-	IPAHAL_PKT_STATUS_OPCODE_SUSPENDED_PACKET,
-	IPAHAL_PKT_STATUS_OPCODE_LOG,
-	IPAHAL_PKT_STATUS_OPCODE_DCMP,
-	IPAHAL_PKT_STATUS_OPCODE_PACKET_2ND_PASS,
+	IPAHAL_PKT_STATUS_OPCODE_PACKET			= 0x01,
+	IPAHAL_PKT_STATUS_OPCODE_NEW_FRAG_RULE		= 0x02,
+	IPAHAL_PKT_STATUS_OPCODE_DROPPED_PACKET		= 0x04,
+	IPAHAL_PKT_STATUS_OPCODE_SUSPENDED_PACKET	= 0x08,
+	IPAHAL_PKT_STATUS_OPCODE_LOG			= 0x10,
+	IPAHAL_PKT_STATUS_OPCODE_DCMP			= 0x20,
+	IPAHAL_PKT_STATUS_OPCODE_PACKET_2ND_PASS	= 0x40,
 };
 
 /*

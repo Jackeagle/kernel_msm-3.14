@@ -747,7 +747,6 @@ static void ipa_pkt_status_parse(
 	const void *unparsed_status, struct ipahal_pkt_status *status)
 {
 	const struct ipa_pkt_status_hw *hw_status = unparsed_status;
-	enum ipahal_pkt_status_opcode opcode = 0;
 	enum ipahal_pkt_status_exception exception_type = 0;
 	bool is_ipv6;
 
@@ -784,33 +783,22 @@ static void ipa_pkt_status_parse(
 	status->frag_rule = hw_status->frag_rule;
 
 	switch (hw_status->status_opcode) {
-	case 0x1:
-		opcode = IPAHAL_PKT_STATUS_OPCODE_PACKET;
-		break;
-	case 0x2:
-		opcode = IPAHAL_PKT_STATUS_OPCODE_NEW_FRAG_RULE;
-		break;
-	case 0x4:
-		opcode = IPAHAL_PKT_STATUS_OPCODE_DROPPED_PACKET;
-		break;
-	case 0x8:
-		opcode = IPAHAL_PKT_STATUS_OPCODE_SUSPENDED_PACKET;
-		break;
-	case 0x10:
-		opcode = IPAHAL_PKT_STATUS_OPCODE_LOG;
-		break;
-	case 0x20:
-		opcode = IPAHAL_PKT_STATUS_OPCODE_DCMP;
-		break;
-	case 0x40:
-		opcode = IPAHAL_PKT_STATUS_OPCODE_PACKET_2ND_PASS;
+	case IPAHAL_PKT_STATUS_OPCODE_PACKET:
+	case IPAHAL_PKT_STATUS_OPCODE_NEW_FRAG_RULE:
+	case IPAHAL_PKT_STATUS_OPCODE_DROPPED_PACKET:
+	case IPAHAL_PKT_STATUS_OPCODE_SUSPENDED_PACKET:
+	case IPAHAL_PKT_STATUS_OPCODE_LOG:
+	case IPAHAL_PKT_STATUS_OPCODE_DCMP:
+	case IPAHAL_PKT_STATUS_OPCODE_PACKET_2ND_PASS:
+		status->status_opcode = hw_status->status_opcode;
 		break;
 	default:
 		ipa_err("unsupported Status Opcode 0x%x\n",
 			hw_status->status_opcode);
 		WARN_ON(1);
-	};
-	status->status_opcode = opcode;
+		status->status_opcode = 0;
+		break;
+	}
 
 	switch (hw_status->nat_type) {
 	case 0:
