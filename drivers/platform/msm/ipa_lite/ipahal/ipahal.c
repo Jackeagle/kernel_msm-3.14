@@ -932,16 +932,9 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
  * ipahal_pkt_status_exception_str() - returns string represents exception type
  * @exception: [in] The exception type
  */
-const char *ipahal_pkt_status_exception_str(
-	enum ipahal_pkt_status_exception exception)
+const char *
+ipahal_pkt_status_exception_str(enum ipahal_pkt_status_exception exception)
 {
-	if (exception < 0 || exception >= IPAHAL_PKT_STATUS_EXCEPTION_MAX) {
-		ipa_err(
-			"requested string of invalid pkt_status exception=%d\n",
-			exception);
-		return "Invalid PKT_STATUS_EXCEPTION";
-	}
-
 	return ipahal_pkt_status_exception_to_str[exception];
 }
 
