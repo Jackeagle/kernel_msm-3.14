@@ -448,6 +448,13 @@ ipa_imm_cmd_construct_ip_v4_nat_init(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_ip_v4_nat_init *data;
 	const struct ipahal_imm_cmd_ip_v4_nat_init *nat4_params = params;
 
+	if (check_too_big("Tble index", nat4_params->table_index, 3))
+		return NULL;
+	if (check_too_big("Sz basetbls", nat4_params->size_base_tables, 12))
+		return NULL;
+	if (check_too_big("Sz exptbls", nat4_params->size_expansion_tables, 10))
+		return NULL;
+
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
 		return NULL;
