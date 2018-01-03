@@ -739,6 +739,22 @@ struct ipahal_imm_cmd_pyld *ipahal_construct_nop_imm_cmd(void)
 
 /* IPA Packet Status Logic */
 
+static bool status_opcode_valid(u8 status_opcode)
+{
+	switch ((enum ipahal_pkt_status_opcode)status_opcode) {
+	case IPAHAL_PKT_STATUS_OPCODE_PACKET:
+	case IPAHAL_PKT_STATUS_OPCODE_NEW_FRAG_RULE:
+	case IPAHAL_PKT_STATUS_OPCODE_DROPPED_PACKET:
+	case IPAHAL_PKT_STATUS_OPCODE_SUSPENDED_PACKET:
+	case IPAHAL_PKT_STATUS_OPCODE_LOG:
+	case IPAHAL_PKT_STATUS_OPCODE_DCMP:
+	case IPAHAL_PKT_STATUS_OPCODE_PACKET_2ND_PASS:
+		return true;
+	default:
+		return false;
+	}
+}
+
 #define IPA_PKT_STATUS_SET_MSK(__hw_bit_msk, __shft) \
 	(status->status_mask |= \
 		((hw_status->status_mask & (__hw_bit_msk) ? 1 : 0) << (__shft)))
@@ -747,6 +763,7 @@ static void ipa_pkt_status_parse(
 	const void *unparsed_status, struct ipahal_pkt_status *status)
 {
 	const struct ipa_pkt_status_hw *hw_status = unparsed_status;
+	u8 status_opcode = (u8)hw_status->status_opcode;
 	enum ipahal_pkt_status_exception exception_type = 0;
 	bool is_ipv6;
 
@@ -782,23 +799,10 @@ static void ipa_pkt_status_parse(
 	status->frag_hit = hw_status->frag_hit;
 	status->frag_rule = hw_status->frag_rule;
 
-	switch (hw_status->status_opcode) {
-	case IPAHAL_PKT_STATUS_OPCODE_PACKET:
-	case IPAHAL_PKT_STATUS_OPCODE_NEW_FRAG_RULE:
-	case IPAHAL_PKT_STATUS_OPCODE_DROPPED_PACKET:
-	case IPAHAL_PKT_STATUS_OPCODE_SUSPENDED_PACKET:
-	case IPAHAL_PKT_STATUS_OPCODE_LOG:
-	case IPAHAL_PKT_STATUS_OPCODE_DCMP:
-	case IPAHAL_PKT_STATUS_OPCODE_PACKET_2ND_PASS:
-		status->status_opcode = hw_status->status_opcode;
-		break;
-	default:
-		ipa_err("unsupported Status Opcode 0x%x\n",
-			hw_status->status_opcode);
-		WARN_ON(1);
-		status->status_opcode = 0;
-		break;
-	}
+	if (WARN_ON(!status_opcode_valid(status_opcode)))
+		ipa_err("unsupported Status Opcode 0x%x\n", status_opcode);
+	else
+		status->status_opcode = status_opcode;
 
 	switch (hw_status->nat_type) {
 	case 0:
