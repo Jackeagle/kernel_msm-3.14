@@ -451,7 +451,7 @@ enum ipahal_pkt_status_exception {
 };
 
 /*
- * enum ipahal_pkt_status_mask - Packet Status bitmask shift values of
+ * enum ipahal_pkt_status_mask - Packet Status bitmask values of
  *  the contained flags. This bitmask indicates flags on the properties of
  *  the packet as well as IPA processing it may had.
  * @FRAG_PROCESS: Frag block processing flag: Was pkt processed by frag block?
@@ -480,32 +480,32 @@ enum ipahal_pkt_status_exception {
  * @BYTE_LIMIT: Flag specifying if pkt is over a configured byte limit.
  */
 enum ipahal_pkt_status_mask {
-	IPAHAL_PKT_STATUS_MASK_FRAG_PROCESS_SHFT = 0,
-	IPAHAL_PKT_STATUS_MASK_FILT_PROCESS_SHFT,
-	IPAHAL_PKT_STATUS_MASK_NAT_PROCESS_SHFT,
-	IPAHAL_PKT_STATUS_MASK_ROUTE_PROCESS_SHFT,
-	IPAHAL_PKT_STATUS_MASK_TAG_VALID_SHFT,
-	IPAHAL_PKT_STATUS_MASK_FRAGMENT_SHFT,
-	IPAHAL_PKT_STATUS_MASK_FIRST_FRAGMENT_SHFT,
-	IPAHAL_PKT_STATUS_MASK_V4_SHFT,
-	IPAHAL_PKT_STATUS_MASK_CKSUM_PROCESS_SHFT,
-	IPAHAL_PKT_STATUS_MASK_AGGR_PROCESS_SHFT,
-	IPAHAL_PKT_STATUS_MASK_DEST_EOT_SHFT,
-	IPAHAL_PKT_STATUS_MASK_DEAGGR_PROCESS_SHFT,
-	IPAHAL_PKT_STATUS_MASK_DEAGG_FIRST_SHFT,
-	IPAHAL_PKT_STATUS_MASK_SRC_EOT_SHFT,
-	IPAHAL_PKT_STATUS_MASK_PREV_EOT_SHFT,
-	IPAHAL_PKT_STATUS_MASK_BYTE_LIMIT_SHFT,
+	IPAHAL_PKT_STATUS_MASK_FRAG_PROCESS	= 0x0001,
+	IPAHAL_PKT_STATUS_MASK_FILT_PROCESS	= 0x0002,
+	IPAHAL_PKT_STATUS_MASK_NAT_PROCESS	= 0x0004,
+	IPAHAL_PKT_STATUS_MASK_ROUTE_PROCESS	= 0x0008,
+	IPAHAL_PKT_STATUS_MASK_TAG_VALID	= 0x0010,
+	IPAHAL_PKT_STATUS_MASK_FRAGMENT		= 0x0020,
+	IPAHAL_PKT_STATUS_MASK_FIRST_FRAGMENT	= 0x0040,
+	IPAHAL_PKT_STATUS_MASK_V4		= 0x0080,
+	IPAHAL_PKT_STATUS_MASK_CKSUM_PROCESS	= 0x0100,
+	IPAHAL_PKT_STATUS_MASK_AGGR_PROCESS	= 0x0200,
+	IPAHAL_PKT_STATUS_MASK_DEST_EOT		= 0x0400,
+	IPAHAL_PKT_STATUS_MASK_DEAGGR_PROCESS	= 0x0800,
+	IPAHAL_PKT_STATUS_MASK_DEAGG_FIRST	= 0x1000,
+	IPAHAL_PKT_STATUS_MASK_SRC_EOT		= 0x2000,
+	IPAHAL_PKT_STATUS_MASK_PREV_EOT		= 0x4000,
+	IPAHAL_PKT_STATUS_MASK_BYTE_LIMIT	= 0x8000,
 };
 
 /*
  * Returns boolean value representing a property of the a packet.
- * @__flag_shft: The shift value of the flag of the status bitmask of
- * @__status: Pointer to abstracrted status structure
+ * @__flag_mask: The mask value of the flag of the status bitmask of
+ * @__status: Pointer to abstracted status structure
  *  the needed property. See enum ipahal_pkt_status_mask
  */
-#define IPAHAL_PKT_STATUS_MASK_FLAG_VAL(__flag_shft, __status) \
-	(((__status)->status_mask) & ((u32)0x1<<(__flag_shft)) ? true : false)
+#define IPAHAL_PKT_STATUS_MASK_FLAG_VAL(__flag_mask, __status) \
+	(((__status)->status_mask) & (__flag_mask) ? true : false)
 
 /*
  * enum ipahal_pkt_status_nat_type - Type of NAT

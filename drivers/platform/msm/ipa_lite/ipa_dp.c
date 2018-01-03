@@ -1957,7 +1957,7 @@ begin:
 			BUG();
 		}
 		if (IPAHAL_PKT_STATUS_MASK_FLAG_VAL(
-			IPAHAL_PKT_STATUS_MASK_TAG_VALID_SHFT, &status)) {
+			IPAHAL_PKT_STATUS_MASK_TAG_VALID, &status)) {
 			struct ipa3_tag_completion *comp;
 
 			ipa_debug_low("TAG packet arrived\n");
@@ -2266,7 +2266,7 @@ static int ipa3_wan_rx_pyld_hdlr(struct sk_buff *skb,
 		ipa_debug_low("pkt_len with pad %d\n", pkt_len_with_pad);
 		/*get the CHECKSUM_PROCESS bit*/
 		checksum_trailer_exists = IPAHAL_PKT_STATUS_MASK_FLAG_VAL(
-			IPAHAL_PKT_STATUS_MASK_CKSUM_PROCESS_SHFT, &status);
+			IPAHAL_PKT_STATUS_MASK_CKSUM_PROCESS, &status);
 		ipa_debug_low("checksum_trailer_exists %d\n",
 				checksum_trailer_exists);
 
