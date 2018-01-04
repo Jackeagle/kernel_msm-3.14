@@ -548,11 +548,13 @@ ipa_imm_cmd_construct_ip_v4_filter_init(u16 opcode, const void *params)
  * struct ipahal_imm_cmd_obj - immediate command H/W information for
  *  specific IPA version
  * @construct - CB to construct imm command payload from abstracted structure
+ * @name - Command "name" (i.e., symbolic identifier)
  * @opcode - Immediate command OpCode
  */
 struct ipahal_imm_cmd_obj {
 	struct ipahal_imm_cmd_pyld *(*construct)(u16 opcode,
 		const void *params);
+	const char *name;
 	u16 opcode;
 };
 
@@ -618,11 +620,13 @@ struct ipahal_imm_cmd_obj {
 #define imm_cmd_obj(id, f, o)			\
 	[idsym(id)] = {				\
 		.construct = cfunc(f),		\
+		.name = #id,			\
 		.opcode = o,			\
 	}
 #define imm_cmd_obj_inval(id)			\
 	[idsym(id)] = {				\
 		.construct = NULL,		\
+		.name = NULL,			\
 		.opcode = OPCODE_INVAL,		\
 	}
 static const struct ipahal_imm_cmd_obj
@@ -672,23 +676,6 @@ static const struct ipahal_imm_cmd_obj
 #undef idsym
 #undef cfunc
 
-static const char *ipahal_imm_cmd_name_to_str[IPA_IMM_CMD_MAX] = {
-	__stringify(IP_V4_FILTER_INIT),
-	__stringify(IP_V6_FILTER_INIT),
-	__stringify(IP_V4_NAT_INIT),
-	__stringify(IP_V4_ROUTING_INIT),
-	__stringify(IP_V6_ROUTING_INIT),
-	__stringify(HDR_INIT_LOCAL),
-	__stringify(HDR_INIT_SYSTEM),
-	__stringify(REGISTER_WRITE),
-	__stringify(NAT_DMA),
-	__stringify(IP_PACKET_INIT),
-	__stringify(DMA_SHARED_MEM),
-	__stringify(IP_PACKET_TAG_STATUS),
-	__stringify(DMA_TASK_32B_ADDR),
-	__stringify(TABLE_DMA),
-};
-
 static struct ipahal_imm_cmd_obj ipahal_imm_cmds[IPA_IMM_CMD_MAX];
 
 /*
@@ -727,12 +714,11 @@ struct ipahal_imm_cmd_pyld *
 ipahal_construct_imm_cmd(enum ipahal_imm_cmd_name cmd, const void *params)
 
 {
-	u16 opcode = ipahal_imm_cmds[cmd].opcode;
+	const struct ipahal_imm_cmd_obj *imm_cmd = &ipahal_imm_cmds[cmd];
 
-	ipa_debug_low("construct IMM_CMD:%s\n",
-			ipahal_imm_cmd_name_to_str[cmd]);
+	ipa_debug_low("construct IMM_CMD:%s\n", imm_cmd->name);
 
-	return ipahal_imm_cmds[cmd].construct(opcode, params);
+	return imm_cmd->construct(imm_cmd->opcode, params);
 }
 
 /*
