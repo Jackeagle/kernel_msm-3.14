@@ -15,13 +15,6 @@
 
 void ipahal_reg_init(void);
 
-#define IPA_SETFIELD(val, shift, mask) (((val) << (shift)) & (mask))
-#define IPA_SETFIELD_IN_REG(reg, val, shift, mask) \
-			(reg |= ((val) << (shift)) & (mask))
-#define IPA_GETFIELD_FROM_REG(reg, shift, mask) \
-		(((reg) & (mask)) >> (shift))
-
-
 /* IPA_ROUTE register */
 #define IPA_ROUTE_ROUTE_DIS_SHFT 0x0
 #define IPA_ROUTE_ROUTE_DIS_BMSK 0x1

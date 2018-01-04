@@ -24,6 +24,12 @@
 #include "ipahal_reg.h"
 #include "ipahal_reg_i.h"
 
+#define IPA_SETFIELD(val, shift, mask) (((val) << (shift)) & (mask))
+#define IPA_SETFIELD_IN_REG(reg, val, shift, mask) \
+			(reg |= ((val) << (shift)) & (mask))
+#define IPA_GETFIELD_FROM_REG(reg, shift, mask) \
+		(((reg) & (mask)) >> (shift))
+
 /*
  * struct ipahal_reg_obj - Register H/W information for specific IPA version
  * @construct - CB to construct register value from abstracted structure
