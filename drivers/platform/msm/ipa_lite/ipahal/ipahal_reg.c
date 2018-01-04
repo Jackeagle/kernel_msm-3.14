@@ -24,107 +24,19 @@
 #include "ipahal_reg.h"
 #include "ipahal_reg_i.h"
 
-static const char *ipareg_name_to_str[IPA_REG_MAX] = {
-	__stringify(ROUTE),
-	__stringify(IRQ_STTS_EE_n),
-	__stringify(IRQ_EN_EE_n),
-	__stringify(IRQ_CLR_EE_n),
-	__stringify(IRQ_SUSPEND_INFO_EE_n),
-	__stringify(SUSPEND_IRQ_EN_EE_n),
-	__stringify(SUSPEND_IRQ_CLR_EE_n),
-	__stringify(BCR),
-	__stringify(ENABLED_PIPES),
-	__stringify(COMP_SW_RESET),
-	__stringify(VERSION),
-	__stringify(TAG_TIMER),
-	__stringify(COMP_HW_VERSION),
-	__stringify(SPARE_REG_1),
-	__stringify(SPARE_REG_2),
-	__stringify(COMP_CFG),
-	__stringify(STATE_AGGR_ACTIVE),
-	__stringify(ENDP_INIT_HDR_n),
-	__stringify(ENDP_INIT_HDR_EXT_n),
-	__stringify(ENDP_INIT_AGGR_n),
-	__stringify(AGGR_FORCE_CLOSE),
-	__stringify(ENDP_INIT_ROUTE_n),
-	__stringify(ENDP_INIT_MODE_n),
-	__stringify(ENDP_INIT_NAT_n),
-	__stringify(ENDP_INIT_CONN_TRACK_n),
-	__stringify(ENDP_INIT_CTRL_n),
-	__stringify(ENDP_INIT_CTRL_SCND_n),
-	__stringify(ENDP_INIT_HOL_BLOCK_EN_n),
-	__stringify(ENDP_INIT_HOL_BLOCK_TIMER_n),
-	__stringify(ENDP_INIT_DEAGGR_n),
-	__stringify(ENDP_INIT_SEQ_n),
-	__stringify(DEBUG_CNT_REG_n),
-	__stringify(ENDP_INIT_CFG_n),
-	__stringify(IRQ_EE_UC_n),
-	__stringify(ENDP_INIT_HDR_METADATA_MASK_n),
-	__stringify(ENDP_INIT_HDR_METADATA_n),
-	__stringify(ENDP_INIT_RSRC_GRP_n),
-	__stringify(SHARED_MEM_SIZE),
-	__stringify(SRAM_DIRECT_ACCESS_n),
-	__stringify(DEBUG_CNT_CTRL_n),
-	__stringify(UC_MAILBOX_m_n),
-	__stringify(FILT_ROUT_HASH_FLUSH),
-	__stringify(SINGLE_NDP_MODE),
-	__stringify(QCNCM),
-	__stringify(SYS_PKT_PROC_CNTXT_BASE),
-	__stringify(LOCAL_PKT_PROC_CNTXT_BASE),
-	__stringify(ENDP_STATUS_n),
-	__stringify(ENDP_FILTER_ROUTER_HSH_CFG_n),
-	__stringify(SRC_RSRC_GRP_01_RSRC_TYPE_n),
-	__stringify(SRC_RSRC_GRP_23_RSRC_TYPE_n),
-	__stringify(SRC_RSRC_GRP_45_RSRC_TYPE_n),
-	__stringify(SRC_RSRC_GRP_67_RSRC_TYPE_n),
-	__stringify(DST_RSRC_GRP_01_RSRC_TYPE_n),
-	__stringify(DST_RSRC_GRP_23_RSRC_TYPE_n),
-	__stringify(DST_RSRC_GRP_45_RSRC_TYPE_n),
-	__stringify(DST_RSRC_GRP_67_RSRC_TYPE_n),
-	__stringify(RX_HPS_CLIENTS_MIN_DEPTH_0),
-	__stringify(RX_HPS_CLIENTS_MIN_DEPTH_1),
-	__stringify(RX_HPS_CLIENTS_MAX_DEPTH_0),
-	__stringify(RX_HPS_CLIENTS_MAX_DEPTH_1),
-	__stringify(HPS_FTCH_ARB_QUEUE_WEIGHT),
-	__stringify(QSB_MAX_WRITES),
-	__stringify(QSB_MAX_READS),
-	__stringify(TX_CFG),
-	__stringify(IDLE_INDICATION_CFG),
-	__stringify(DPS_SEQUENCER_FIRST),
-	__stringify(HPS_SEQUENCER_FIRST),
-	__stringify(CLKON_CFG),
-	__stringify(STAT_QUOTA_BASE_n),
-	__stringify(STAT_QUOTA_MASK_n),
-	__stringify(STAT_TETHERING_BASE_n),
-	__stringify(STAT_TETHERING_MASK_n),
-	__stringify(STAT_FILTER_IPV4_BASE),
-	__stringify(STAT_FILTER_IPV6_BASE),
-	__stringify(STAT_ROUTER_IPV4_BASE),
-	__stringify(STAT_ROUTER_IPV6_BASE),
-	__stringify(STAT_FILTER_IPV4_START_ID),
-	__stringify(STAT_FILTER_IPV6_START_ID),
-	__stringify(STAT_ROUTER_IPV4_START_ID),
-	__stringify(STAT_ROUTER_IPV6_START_ID),
-	__stringify(STAT_FILTER_IPV4_END_ID),
-	__stringify(STAT_FILTER_IPV6_END_ID),
-	__stringify(STAT_ROUTER_IPV4_END_ID),
-	__stringify(STAT_ROUTER_IPV6_END_ID),
-	__stringify(STAT_DROP_CNT_BASE_n),
-	__stringify(STAT_DROP_CNT_MASK_n),
-};
-
 /*
  * struct ipahal_reg_obj - Register H/W information for specific IPA version
  * @construct - CB to construct register value from abstracted structure
  * @parse - CB to parse register value to abstracted structure
+ * @name - register "name" (i.e., symbolic identifier)
  * @offset - register offset relative to base address (or OFFSET_INVAL)
  * @n_ofst - N parameterized register sub-offset
  */
 struct ipahal_reg_obj {
 	void (*construct)(enum ipahal_reg_name reg, const void *fields,
 		u32 *val);
-	void (*parse)(enum ipahal_reg_name reg, void *fields,
-		u32 val);
+	void (*parse)(enum ipahal_reg_name reg, void *fields, u32 val);
+	const char *name;
 	u32 offset;
 	u16 n_ofst;
 };
@@ -509,7 +421,7 @@ static void ipareg_construct_debug_cnt_ctrl_n(
 		break;
 	default:
 		ipa_err("Invalid dbg_cnt_ctrl type (%d) for %s\n",
-			dbg_cnt_ctrl->type, ipareg_name_to_str[reg]);
+			dbg_cnt_ctrl->type, ipahal_regs[reg].name);
 		WARN_ON(1);
 		return;
 
@@ -621,7 +533,7 @@ static void ipareg_construct_endp_init_cfg_n(
 		break;
 	default:
 		ipa_err("Invalid cs_offload_en value for %s\n",
-			ipareg_name_to_str[reg]);
+			ipahal_regs[reg].name);
 		WARN_ON(1);
 		return;
 	}
@@ -1261,6 +1173,7 @@ static void ipareg_parse_hps_queue_weights(
 	[idsym(id)] = {				\
 		.construct = cf,		\
 		.parse = pf,			\
+		.name = #id,			\
 		.offset = o,			\
 		.n_ofst = n,			\
 	}
@@ -1526,7 +1439,7 @@ u32 ipahal_reg_n_offset(enum ipahal_reg_name reg, u32 n)
 {
 	u32 offset;
 
-	ipa_debug_low("get offset of %s n=%u\n", ipareg_name_to_str[reg], n);
+	ipa_debug_low("get offset of %s n=%u\n", ipahal_regs[reg].name, n);
 	offset = ipahal_regs[reg].offset;
 	BUG_ON(!offset || offset == OFFSET_INVAL);
 	offset += ipahal_regs[reg].n_ofst * n;
@@ -1558,7 +1471,7 @@ void ipahal_read_reg_n_fields(enum ipahal_reg_name reg, u32 n, void *fields)
 	u32 val = ipahal_read_reg_n(reg, n);
 
 	if (WARN_ON(!ipahal_regs[reg].parse))
-		ipa_err("No parse function for %s\n", ipareg_name_to_str[reg]);
+		ipa_err("No parse function for %s\n", ipahal_regs[reg].name);
 	else
 		ipahal_regs[reg].parse(reg, fields, val);
 }
@@ -1573,7 +1486,7 @@ void ipahal_write_reg_n_fields(enum ipahal_reg_name reg, u32 n,
 
 	if (WARN_ON(!ipahal_regs[reg].construct))
 		ipa_err("No construct function for %s\n",
-			ipareg_name_to_str[reg]);
+			ipahal_regs[reg].name);
 	else
 		ipahal_regs[reg].construct(reg, fields, &val);
 
