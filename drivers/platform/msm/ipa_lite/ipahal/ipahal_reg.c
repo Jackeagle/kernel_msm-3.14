@@ -46,8 +46,7 @@ static struct ipahal_reg_obj ipahal_regs[IPA_REG_MAX];
 static void ipareg_construct_rx_hps_clients_depth1(
 	enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
-	struct ipahal_reg_rx_hps_clients *clients =
-		(struct ipahal_reg_rx_hps_clients *)fields;
+	const struct ipahal_reg_rx_hps_clients *clients = fields;
 
 	IPA_SETFIELD_IN_REG(*val, clients->client_minmax[0],
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_SHFT(0),
@@ -61,8 +60,7 @@ static void ipareg_construct_rx_hps_clients_depth1(
 static void ipareg_construct_rx_hps_clients_depth0(
 	enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
-	struct ipahal_reg_rx_hps_clients *clients =
-		(struct ipahal_reg_rx_hps_clients *)fields;
+	const struct ipahal_reg_rx_hps_clients *clients = fields;
 
 	IPA_SETFIELD_IN_REG(*val, clients->client_minmax[0],
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_SHFT(0),
@@ -84,8 +82,7 @@ static void ipareg_construct_rx_hps_clients_depth0(
 static void ipareg_construct_rx_hps_clients_depth0_v3_5(
 	enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
-	struct ipahal_reg_rx_hps_clients *clients =
-		(struct ipahal_reg_rx_hps_clients *)fields;
+	const struct ipahal_reg_rx_hps_clients *clients = fields;
 
 	IPA_SETFIELD_IN_REG(*val, clients->client_minmax[0],
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_SHFT(0),
@@ -107,8 +104,7 @@ static void ipareg_construct_rx_hps_clients_depth0_v3_5(
 static void ipareg_construct_rsrg_grp_xy(
 	enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
-	struct ipahal_reg_rsrc_grp_cfg *grp =
-		(struct ipahal_reg_rsrc_grp_cfg *)fields;
+	const struct ipahal_reg_rsrc_grp_cfg *grp = fields;
 
 	IPA_SETFIELD_IN_REG(*val, grp->x_min,
 		IPA_RSRC_GRP_XY_RSRC_TYPE_n_X_MIN_LIM_SHFT,
@@ -127,8 +123,7 @@ static void ipareg_construct_rsrg_grp_xy(
 static void ipareg_construct_rsrg_grp_xy_v3_5(
 	enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
-	struct ipahal_reg_rsrc_grp_cfg *grp =
-		(struct ipahal_reg_rsrc_grp_cfg *)fields;
+	const struct ipahal_reg_rsrc_grp_cfg *grp = fields;
 
 	IPA_SETFIELD_IN_REG(*val, grp->x_min,
 		IPA_RSRC_GRP_XY_RSRC_TYPE_n_X_MIN_LIM_SHFT_V3_5,
@@ -152,8 +147,7 @@ static void ipareg_construct_rsrg_grp_xy_v3_5(
 static void ipareg_construct_hash_cfg_n(
 	enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
-	struct ipahal_reg_fltrt_hash_tuple *tuple =
-		(struct ipahal_reg_fltrt_hash_tuple *)fields;
+	const struct ipahal_reg_fltrt_hash_tuple *tuple = fields;
 
 	IPA_SETFIELD_IN_REG(*val, tuple->flt.src_id,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_FILTER_HASH_MSK_SRC_ID_SHFT,
@@ -280,8 +274,7 @@ static void ipareg_parse_hash_cfg_n(
 static void ipareg_construct_endp_status_n(
 	enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
-	struct ipahal_reg_ep_cfg_status *ep_status =
-		(struct ipahal_reg_ep_cfg_status *)fields;
+	const struct ipahal_reg_ep_cfg_status *ep_status = fields;
 
 	IPA_SETFIELD_IN_REG(*val, ep_status->status_en,
 			IPA_ENDP_STATUS_n_STATUS_EN_SHFT,
@@ -299,8 +292,7 @@ static void ipareg_construct_endp_status_n(
 static void ipareg_construct_endp_status_n_v4_0(
 	enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
-	struct ipahal_reg_ep_cfg_status *ep_status =
-		(struct ipahal_reg_ep_cfg_status *)fields;
+	const struct ipahal_reg_ep_cfg_status *ep_status = fields;
 
 	IPA_SETFIELD_IN_REG(*val, ep_status->status_en,
 			IPA_ENDP_STATUS_n_STATUS_EN_SHFT,
@@ -322,8 +314,7 @@ static void ipareg_construct_endp_status_n_v4_0(
 static void ipareg_construct_qcncm(
 	enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
-	struct ipahal_reg_qcncm *qcncm =
-		(struct ipahal_reg_qcncm *)fields;
+	const struct ipahal_reg_qcncm *qcncm = fields;
 
 	IPA_SETFIELD_IN_REG(*val, qcncm->mode_en ? 1 : 0,
 		IPA_QCNCM_MODE_EN_SHFT,
@@ -357,8 +348,7 @@ static void ipareg_parse_qcncm(
 static void ipareg_construct_single_ndp_mode(
 	enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
-	struct ipahal_reg_single_ndp_mode *mode =
-		(struct ipahal_reg_single_ndp_mode *)fields;
+	const struct ipahal_reg_single_ndp_mode *mode = fields;
 
 	IPA_SETFIELD_IN_REG(*val, mode->single_ndp_en ? 1 : 0,
 		IPA_SINGLE_NDP_MODE_SINGLE_NDP_EN_SHFT,
@@ -387,8 +377,7 @@ static void ipareg_parse_single_ndp_mode(
 static void ipareg_construct_debug_cnt_ctrl_n(
 	enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
-	struct ipahal_reg_debug_cnt_ctrl *dbg_cnt_ctrl =
-		(struct ipahal_reg_debug_cnt_ctrl *)fields;
+	const struct ipahal_reg_debug_cnt_ctrl *dbg_cnt_ctrl = fields;
 	u8 type;
 
 	IPA_SETFIELD_IN_REG(*val, dbg_cnt_ctrl->en ? 1 : 0,
@@ -473,8 +462,7 @@ static void ipareg_parse_shared_mem_size(
 static void ipareg_construct_endp_init_rsrc_grp_n(
 		enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
-	struct ipahal_reg_endp_init_rsrc_grp *rsrc_grp =
-		(struct ipahal_reg_endp_init_rsrc_grp *)fields;
+	const struct ipahal_reg_endp_init_rsrc_grp *rsrc_grp = fields;
 
 	IPA_SETFIELD_IN_REG(*val, rsrc_grp->rsrc_grp,
 		IPA_ENDP_INIT_RSRC_GRP_n_RSRC_GRP_SHFT,
@@ -484,8 +472,7 @@ static void ipareg_construct_endp_init_rsrc_grp_n(
 static void ipareg_construct_endp_init_rsrc_grp_n_v3_5(
 		enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
-	struct ipahal_reg_endp_init_rsrc_grp *rsrc_grp =
-		(struct ipahal_reg_endp_init_rsrc_grp *)fields;
+	const struct ipahal_reg_endp_init_rsrc_grp *rsrc_grp = fields;
 
 	IPA_SETFIELD_IN_REG(*val, rsrc_grp->rsrc_grp,
 		IPA_ENDP_INIT_RSRC_GRP_n_RSRC_GRP_SHFT_v3_5,
@@ -495,8 +482,7 @@ static void ipareg_construct_endp_init_rsrc_grp_n_v3_5(
 static void ipareg_construct_endp_init_hdr_metadata_n(
 		enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
-	struct ipa_ep_cfg_metadata *metadata =
-		(struct ipa_ep_cfg_metadata *)fields;
+	const struct ipa_ep_cfg_metadata *metadata = fields;
 
 	IPA_SETFIELD_IN_REG(*val, metadata->qmap_id,
 			IPA_ENDP_INIT_HDR_METADATA_n_METADATA_SHFT,
@@ -506,8 +492,7 @@ static void ipareg_construct_endp_init_hdr_metadata_n(
 static void ipareg_construct_endp_init_hdr_metadata_mask_n(
 		enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
-	struct ipa_ep_cfg_metadata_mask *metadata_mask =
-		(struct ipa_ep_cfg_metadata_mask *)fields;
+	const struct ipa_ep_cfg_metadata_mask *metadata_mask = fields;
 
 	IPA_SETFIELD_IN_REG(*val, metadata_mask->metadata_mask,
 			IPA_ENDP_INIT_HDR_METADATA_MASK_n_METADATA_MASK_SHFT,
@@ -517,8 +502,7 @@ static void ipareg_construct_endp_init_hdr_metadata_mask_n(
 static void ipareg_construct_endp_init_cfg_n(
 	enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
-	struct ipa_ep_cfg_cfg *cfg =
-		(struct ipa_ep_cfg_cfg *)fields;
+	const struct ipa_ep_cfg_cfg *cfg = fields;
 	u32 cs_offload_en;
 
 	switch (cfg->cs_offload_en) {
@@ -556,8 +540,7 @@ static void ipareg_construct_endp_init_cfg_n(
 static void ipareg_construct_endp_init_deaggr_n(
 		enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
-	struct ipa_ep_cfg_deaggr *ep_deaggr =
-		(struct ipa_ep_cfg_deaggr *)fields;
+	const struct ipa_ep_cfg_deaggr *ep_deaggr = fields;
 
 	IPA_SETFIELD_IN_REG(*val, ep_deaggr->deaggr_hdr_len,
 		IPA_ENDP_INIT_DEAGGR_n_DEAGGR_HDR_LEN_SHFT,
@@ -579,8 +562,7 @@ static void ipareg_construct_endp_init_deaggr_n(
 static void ipareg_construct_endp_init_hol_block_en_n(
 	enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
-	struct ipa_ep_cfg_holb *ep_holb =
-		(struct ipa_ep_cfg_holb *)fields;
+	const struct ipa_ep_cfg_holb *ep_holb = fields;
 
 	IPA_SETFIELD_IN_REG(*val, ep_holb->en,
 		IPA_ENDP_INIT_HOL_BLOCK_EN_n_EN_SHFT,
@@ -590,8 +572,7 @@ static void ipareg_construct_endp_init_hol_block_en_n(
 static void ipareg_construct_endp_init_hol_block_timer_n(
 	enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
-	struct ipa_ep_cfg_holb *ep_holb =
-		(struct ipa_ep_cfg_holb *)fields;
+	const struct ipa_ep_cfg_holb *ep_holb = fields;
 
 	IPA_SETFIELD_IN_REG(*val, ep_holb->tmr_val,
 		IPA_ENDP_INIT_HOL_BLOCK_TIMER_n_TIMER_SHFT,
@@ -601,8 +582,7 @@ static void ipareg_construct_endp_init_hol_block_timer_n(
 static void ipareg_construct_endp_init_ctrl_n(enum ipahal_reg_name reg,
 	const void *fields, u32 *val)
 {
-	struct ipa_ep_cfg_ctrl *ep_ctrl =
-		(struct ipa_ep_cfg_ctrl *)fields;
+	const struct ipa_ep_cfg_ctrl *ep_ctrl = fields;
 
 	IPA_SETFIELD_IN_REG(*val, ep_ctrl->ipa_ep_suspend,
 		IPA_ENDP_INIT_CTRL_n_ENDP_SUSPEND_SHFT,
@@ -631,8 +611,7 @@ static void ipareg_parse_endp_init_ctrl_n(enum ipahal_reg_name reg,
 static void ipareg_construct_endp_init_ctrl_n_v4_0(enum ipahal_reg_name reg,
 	const void *fields, u32 *val)
 {
-	struct ipa_ep_cfg_ctrl *ep_ctrl =
-		(struct ipa_ep_cfg_ctrl *)fields;
+	const struct ipa_ep_cfg_ctrl *ep_ctrl = fields;
 
 	WARN_ON(ep_ctrl->ipa_ep_suspend);
 
@@ -644,8 +623,7 @@ static void ipareg_construct_endp_init_ctrl_n_v4_0(enum ipahal_reg_name reg,
 static void ipareg_construct_endp_init_ctrl_scnd_n(enum ipahal_reg_name reg,
 	const void *fields, u32 *val)
 {
-	struct ipahal_ep_cfg_ctrl_scnd *ep_ctrl_scnd =
-		(struct ipahal_ep_cfg_ctrl_scnd *)fields;
+	const struct ipahal_ep_cfg_ctrl_scnd *ep_ctrl_scnd = fields;
 
 	IPA_SETFIELD_IN_REG(*val, ep_ctrl_scnd->endp_delay,
 		IPA_ENDP_INIT_CTRL_SCND_n_ENDP_DELAY_SHFT,
@@ -655,8 +633,7 @@ static void ipareg_construct_endp_init_ctrl_scnd_n(enum ipahal_reg_name reg,
 static void ipareg_construct_endp_init_nat_n(enum ipahal_reg_name reg,
 		const void *fields, u32 *val)
 {
-	struct ipa_ep_cfg_nat *ep_nat =
-		(struct ipa_ep_cfg_nat *)fields;
+	const struct ipa_ep_cfg_nat *ep_nat = fields;
 
 	IPA_SETFIELD_IN_REG(*val, ep_nat->nat_en,
 		IPA_ENDP_INIT_NAT_n_NAT_EN_SHFT,
@@ -666,8 +643,7 @@ static void ipareg_construct_endp_init_nat_n(enum ipahal_reg_name reg,
 static void ipareg_construct_endp_init_conn_track_n(enum ipahal_reg_name reg,
 	const void *fields, u32 *val)
 {
-	struct ipa_ep_cfg_conn_track *ep_ipv6ct =
-		(struct ipa_ep_cfg_conn_track *)fields;
+	const struct ipa_ep_cfg_conn_track *ep_ipv6ct = fields;
 
 	IPA_SETFIELD_IN_REG(*val, ep_ipv6ct->conn_track_en,
 		IPA_ENDP_INIT_CONN_TRACK_n_CONN_TRACK_EN_SHFT,
@@ -677,8 +653,7 @@ static void ipareg_construct_endp_init_conn_track_n(enum ipahal_reg_name reg,
 static void ipareg_construct_endp_init_mode_n(enum ipahal_reg_name reg,
 		const void *fields, u32 *val)
 {
-	struct ipahal_reg_endp_init_mode *init_mode =
-		(struct ipahal_reg_endp_init_mode *)fields;
+	const struct ipahal_reg_endp_init_mode *init_mode = fields;
 
 	IPA_SETFIELD_IN_REG(*val, init_mode->ep_mode.mode,
 		IPA_ENDP_INIT_MODE_n_MODE_SHFT,
@@ -692,8 +667,7 @@ static void ipareg_construct_endp_init_mode_n(enum ipahal_reg_name reg,
 static void ipareg_construct_endp_init_route_n(enum ipahal_reg_name reg,
 	const void *fields, u32 *val)
 {
-	struct ipahal_reg_endp_init_route *ep_init_rt =
-		(struct ipahal_reg_endp_init_route *)fields;
+	const struct ipahal_reg_endp_init_route *ep_init_rt = fields;
 
 	IPA_SETFIELD_IN_REG(*val, ep_init_rt->route_table_index,
 		IPA_ENDP_INIT_ROUTE_n_ROUTE_TABLE_INDEX_SHFT,
@@ -737,8 +711,7 @@ static void ipareg_parse_endp_init_aggr_n(enum ipahal_reg_name reg,
 static void ipareg_construct_endp_init_aggr_n(enum ipahal_reg_name reg,
 	const void *fields, u32 *val)
 {
-	struct ipa_ep_cfg_aggr *ep_aggr =
-		(struct ipa_ep_cfg_aggr *)fields;
+	const struct ipa_ep_cfg_aggr *ep_aggr = fields;
 
 	IPA_SETFIELD_IN_REG(*val, ep_aggr->aggr_en,
 		IPA_ENDP_INIT_AGGR_n_AGGR_EN_SHFT,
@@ -772,11 +745,8 @@ static void ipareg_construct_endp_init_aggr_n(enum ipahal_reg_name reg,
 static void ipareg_construct_endp_init_hdr_ext_n(enum ipahal_reg_name reg,
 	const void *fields, u32 *val)
 {
-	struct ipa_ep_cfg_hdr_ext *ep_hdr_ext;
-	u8 hdr_endianness;
-
-	ep_hdr_ext = (struct ipa_ep_cfg_hdr_ext *)fields;
-	hdr_endianness = ep_hdr_ext->hdr_little_endian ? 0 : 1;
+	const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext = fields;
+	u8 hdr_endianness = ep_hdr_ext->hdr_little_endian ? 0 : 1;
 
 	IPA_SETFIELD_IN_REG(*val, ep_hdr_ext->hdr_pad_to_alignment,
 		IPA_ENDP_INIT_HDR_EXT_n_HDR_PAD_TO_ALIGNMENT_SHFT,
@@ -806,9 +776,7 @@ static void ipareg_construct_endp_init_hdr_ext_n(enum ipahal_reg_name reg,
 static void ipareg_construct_endp_init_hdr_n(enum ipahal_reg_name reg,
 	const void *fields, u32 *val)
 {
-	struct ipa_ep_cfg_hdr *ep_hdr;
-
-	ep_hdr = (struct ipa_ep_cfg_hdr *)fields;
+	const struct ipa_ep_cfg_hdr *ep_hdr = fields;
 
 	IPA_SETFIELD_IN_REG(*val, ep_hdr->hdr_metadata_reg_valid,
 		IPA_ENDP_INIT_HDR_n_HDR_METADATA_REG_VALID_SHFT_v2,
@@ -850,9 +818,7 @@ static void ipareg_construct_endp_init_hdr_n(enum ipahal_reg_name reg,
 static void ipareg_construct_route(enum ipahal_reg_name reg,
 	const void *fields, u32 *val)
 {
-	struct ipahal_reg_route *route;
-
-	route = (struct ipahal_reg_route *)fields;
+	const struct ipahal_reg_route *route = fields;
 
 	IPA_SETFIELD_IN_REG(*val, route->route_dis,
 		IPA_ROUTE_ROUTE_DIS_SHFT,
@@ -882,9 +848,7 @@ static void ipareg_construct_route(enum ipahal_reg_name reg,
 static void ipareg_construct_qsb_max_writes(enum ipahal_reg_name reg,
 	const void *fields, u32 *val)
 {
-	struct ipahal_reg_qsb_max_writes *max_writes;
-
-	max_writes = (struct ipahal_reg_qsb_max_writes *)fields;
+	const struct ipahal_reg_qsb_max_writes *max_writes = fields;
 
 	IPA_SETFIELD_IN_REG(*val, max_writes->qmb_0_max_writes,
 			    IPA_QSB_MAX_WRITES_GEN_QMB_0_MAX_WRITES_SHFT,
@@ -897,9 +861,7 @@ static void ipareg_construct_qsb_max_writes(enum ipahal_reg_name reg,
 static void ipareg_construct_qsb_max_reads(enum ipahal_reg_name reg,
 	const void *fields, u32 *val)
 {
-	struct ipahal_reg_qsb_max_reads *max_reads;
-
-	max_reads = (struct ipahal_reg_qsb_max_reads *)fields;
+	const struct ipahal_reg_qsb_max_reads *max_reads = fields;
 
 	IPA_SETFIELD_IN_REG(*val, max_reads->qmb_0_max_reads,
 			    IPA_QSB_MAX_READS_GEN_QMB_0_MAX_READS_SHFT,
@@ -912,9 +874,7 @@ static void ipareg_construct_qsb_max_reads(enum ipahal_reg_name reg,
 static void ipareg_construct_qsb_max_reads_v4_0(enum ipahal_reg_name reg,
 	const void *fields, u32 *val)
 {
-	struct ipahal_reg_qsb_max_reads *max_reads;
-
-	max_reads = (struct ipahal_reg_qsb_max_reads *)fields;
+	const struct ipahal_reg_qsb_max_reads *max_reads = fields;
 
 	IPA_SETFIELD_IN_REG(*val, max_reads->qmb_0_max_reads,
 			    IPA_QSB_MAX_READS_GEN_QMB_0_MAX_READS_SHFT,
@@ -988,9 +948,7 @@ static void ipareg_parse_tx_cfg_v4_0(enum ipahal_reg_name reg,
 static void ipareg_construct_tx_cfg(enum ipahal_reg_name reg,
 	const void *fields, u32 *val)
 {
-	struct ipahal_reg_tx_cfg *tx_cfg;
-
-	tx_cfg = (struct ipahal_reg_tx_cfg *)fields;
+	const struct ipahal_reg_tx_cfg *tx_cfg = fields;
 
 	if (tx_cfg->tx0_prefetch_almost_empty_size !=
 			tx_cfg->tx1_prefetch_almost_empty_size)
@@ -1012,9 +970,7 @@ static void ipareg_construct_tx_cfg(enum ipahal_reg_name reg,
 static void ipareg_construct_tx_cfg_v4_0(enum ipahal_reg_name reg,
 	const void *fields, u32 *val)
 {
-	struct ipahal_reg_tx_cfg *tx_cfg;
-
-	tx_cfg = (struct ipahal_reg_tx_cfg *)fields;
+	const struct ipahal_reg_tx_cfg *tx_cfg = fields;
 
 	IPA_SETFIELD_IN_REG(*val, tx_cfg->tx0_prefetch_almost_empty_size,
 		IPA_TX_CFG_PREFETCH_ALMOST_EMPTY_SIZE_TX0_SHFT_V4_0,
@@ -1044,9 +1000,9 @@ static void ipareg_construct_tx_cfg_v4_0(enum ipahal_reg_name reg,
 static void ipareg_construct_idle_indication_cfg(enum ipahal_reg_name reg,
 	const void *fields, u32 *val)
 {
-	struct ipahal_reg_idle_indication_cfg *idle_indication_cfg;
+	const struct ipahal_reg_idle_indication_cfg *idle_indication_cfg;
 
-	idle_indication_cfg = (struct ipahal_reg_idle_indication_cfg *)fields;
+	idle_indication_cfg = fields;
 
 	IPA_SETFIELD_IN_REG(*val,
 		idle_indication_cfg->enter_idle_debounce_thresh,
@@ -1062,9 +1018,7 @@ static void ipareg_construct_idle_indication_cfg(enum ipahal_reg_name reg,
 static void ipareg_construct_hps_queue_weights(enum ipahal_reg_name reg,
 	const void *fields, u32 *val)
 {
-	struct ipahal_reg_rx_hps_weights *hps_weights;
-
-	hps_weights = (struct ipahal_reg_rx_hps_weights *)fields;
+	const struct ipahal_reg_rx_hps_weights *hps_weights = fields;
 
 	IPA_SETFIELD_IN_REG(*val,
 		hps_weights->hps_queue_weight_0,
