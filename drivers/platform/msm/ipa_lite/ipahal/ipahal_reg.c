@@ -26,7 +26,7 @@
 
 #define IPA_SETFIELD(val, shift, mask) (((val) << (shift)) & (mask))
 #define IPA_SETFIELD_IN_REG(reg, val, shift, mask) \
-			(reg |= ((val) << (shift)) & (mask))
+			(reg |= IPA_SETFIELD(val, shift, mask))
 #define IPA_GETFIELD_FROM_REG(reg, shift, mask) \
 		(((reg) & (mask)) >> (shift))
 
