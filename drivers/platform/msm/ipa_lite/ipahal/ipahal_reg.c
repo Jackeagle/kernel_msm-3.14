@@ -113,6 +113,24 @@ static const char *ipareg_name_to_str[IPA_REG_MAX] = {
 	__stringify(STAT_DROP_CNT_MASK_n),
 };
 
+/*
+ * struct ipahal_reg_obj - Register H/W information for specific IPA version
+ * @construct - CB to construct register value from abstracted structure
+ * @parse - CB to parse register value to abstracted structure
+ * @offset - register offset relative to base address (or OFFSET_INVAL)
+ * @n_ofst - N parameterized register sub-offset
+ */
+struct ipahal_reg_obj {
+	void (*construct)(enum ipahal_reg_name reg, const void *fields,
+		u32 *val);
+	void (*parse)(enum ipahal_reg_name reg, void *fields,
+		u32 val);
+	u32 offset;
+	u16 n_ofst;
+};
+
+static struct ipahal_reg_obj ipahal_regs[IPA_REG_MAX];
+
 static void ipareg_construct_rx_hps_clients_depth1(
 	enum ipahal_reg_name reg, const void *fields, u32 *val)
 {
@@ -1234,23 +1252,7 @@ static void ipareg_parse_hps_queue_weights(
  *   ipahal_read_reg_fields()).  (Currently some debug code reads
  *   some registers directly, without parsing.)
  */
-
-/*
- * struct ipahal_reg_obj - Register H/W information for specific IPA version
- * @construct - CB to construct register value from abstracted structure
- * @parse - CB to parse register value to abstracted structure
- * @offset - register offset relative to base address (or OFFSET_INVAL)
- * @n_ofst - N parameterized register sub-offset
- */
 #define OFFSET_INVAL	((u32)0xffffffff)
-struct ipahal_reg_obj {
-	void (*construct)(enum ipahal_reg_name reg, const void *fields,
-		u32 *val);
-	void (*parse)(enum ipahal_reg_name reg, void *fields,
-		u32 val);
-	u32 offset;
-	u16 n_ofst;
-};
 
 #define cfunc(f)	ipareg_construct_ ## f
 #define pfunc(f)	ipareg_parse_ ## f
@@ -1488,8 +1490,6 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 #undef idsym
 #undef pfunc
 #undef cfunc
-
-static struct ipahal_reg_obj ipahal_regs[IPA_REG_MAX];
 
 /*
  * ipahal_reg_init() - Build the registers information table
