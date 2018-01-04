@@ -33,8 +33,7 @@
  * @n_ofst - N parameterized register sub-offset
  */
 struct ipahal_reg_obj {
-	void (*construct)(enum ipahal_reg_name reg, const void *fields,
-		u32 *val);
+	u32 (*construct)(enum ipahal_reg_name reg, const void *fields);
 	void (*parse)(enum ipahal_reg_name reg, void *fields, u32 val);
 	const char *name;
 	u32 offset;
@@ -43,160 +42,178 @@ struct ipahal_reg_obj {
 
 static struct ipahal_reg_obj ipahal_regs[IPA_REG_MAX];
 
-static void ipareg_construct_rx_hps_clients_depth1(
-	enum ipahal_reg_name reg, const void *fields, u32 *val)
+static u32 ipareg_construct_rx_hps_clients_depth1(
+	enum ipahal_reg_name reg, const void *fields)
 {
 	const struct ipahal_reg_rx_hps_clients *clients = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, clients->client_minmax[0],
+	IPA_SETFIELD_IN_REG(val, clients->client_minmax[0],
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_SHFT(0),
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_BMSK(0));
 
-	IPA_SETFIELD_IN_REG(*val, clients->client_minmax[1],
+	IPA_SETFIELD_IN_REG(val, clients->client_minmax[1],
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_SHFT(1),
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_BMSK(1));
+
+	return val;
 }
 
-static void ipareg_construct_rx_hps_clients_depth0(
-	enum ipahal_reg_name reg, const void *fields, u32 *val)
+static u32 ipareg_construct_rx_hps_clients_depth0(
+	enum ipahal_reg_name reg, const void *fields)
 {
 	const struct ipahal_reg_rx_hps_clients *clients = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, clients->client_minmax[0],
+	IPA_SETFIELD_IN_REG(val, clients->client_minmax[0],
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_SHFT(0),
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_BMSK(0));
 
-	IPA_SETFIELD_IN_REG(*val, clients->client_minmax[1],
+	IPA_SETFIELD_IN_REG(val, clients->client_minmax[1],
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_SHFT(1),
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_BMSK(1));
 
-	IPA_SETFIELD_IN_REG(*val, clients->client_minmax[2],
+	IPA_SETFIELD_IN_REG(val, clients->client_minmax[2],
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_SHFT(2),
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_BMSK(2));
 
-	IPA_SETFIELD_IN_REG(*val, clients->client_minmax[3],
+	IPA_SETFIELD_IN_REG(val, clients->client_minmax[3],
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_SHFT(3),
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_BMSK(3));
+
+	return val;
 }
 
-static void ipareg_construct_rx_hps_clients_depth0_v3_5(
-	enum ipahal_reg_name reg, const void *fields, u32 *val)
+static u32 ipareg_construct_rx_hps_clients_depth0_v3_5(
+	enum ipahal_reg_name reg, const void *fields)
 {
 	const struct ipahal_reg_rx_hps_clients *clients = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, clients->client_minmax[0],
+	IPA_SETFIELD_IN_REG(val, clients->client_minmax[0],
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_SHFT(0),
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_BMSK_V3_5(0));
 
-	IPA_SETFIELD_IN_REG(*val, clients->client_minmax[1],
+	IPA_SETFIELD_IN_REG(val, clients->client_minmax[1],
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_SHFT(1),
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_BMSK_V3_5(1));
 
-	IPA_SETFIELD_IN_REG(*val, clients->client_minmax[2],
+	IPA_SETFIELD_IN_REG(val, clients->client_minmax[2],
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_SHFT(2),
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_BMSK_V3_5(2));
 
-	IPA_SETFIELD_IN_REG(*val, clients->client_minmax[3],
+	IPA_SETFIELD_IN_REG(val, clients->client_minmax[3],
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_SHFT(3),
 		IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_BMSK_V3_5(3));
+
+	return val;
 }
 
-static void ipareg_construct_rsrg_grp_xy(
-	enum ipahal_reg_name reg, const void *fields, u32 *val)
+static u32 ipareg_construct_rsrg_grp_xy(
+	enum ipahal_reg_name reg, const void *fields)
 {
 	const struct ipahal_reg_rsrc_grp_cfg *grp = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, grp->x_min,
+	IPA_SETFIELD_IN_REG(val, grp->x_min,
 		IPA_RSRC_GRP_XY_RSRC_TYPE_n_X_MIN_LIM_SHFT,
 		IPA_RSRC_GRP_XY_RSRC_TYPE_n_X_MIN_LIM_BMSK);
-	IPA_SETFIELD_IN_REG(*val, grp->x_max,
+	IPA_SETFIELD_IN_REG(val, grp->x_max,
 		IPA_RSRC_GRP_XY_RSRC_TYPE_n_X_MAX_LIM_SHFT,
 		IPA_RSRC_GRP_XY_RSRC_TYPE_n_X_MAX_LIM_BMSK);
-	IPA_SETFIELD_IN_REG(*val, grp->y_min,
+	IPA_SETFIELD_IN_REG(val, grp->y_min,
 		IPA_RSRC_GRP_XY_RSRC_TYPE_n_Y_MIN_LIM_SHFT,
 		IPA_RSRC_GRP_XY_RSRC_TYPE_n_Y_MIN_LIM_BMSK);
-	IPA_SETFIELD_IN_REG(*val, grp->y_max,
+	IPA_SETFIELD_IN_REG(val, grp->y_max,
 		IPA_RSRC_GRP_XY_RSRC_TYPE_n_Y_MAX_LIM_SHFT,
 		IPA_RSRC_GRP_XY_RSRC_TYPE_n_Y_MAX_LIM_BMSK);
+
+	return val;
 }
 
-static void ipareg_construct_rsrg_grp_xy_v3_5(
-	enum ipahal_reg_name reg, const void *fields, u32 *val)
+static u32 ipareg_construct_rsrg_grp_xy_v3_5(
+	enum ipahal_reg_name reg, const void *fields)
 {
 	const struct ipahal_reg_rsrc_grp_cfg *grp = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, grp->x_min,
+	IPA_SETFIELD_IN_REG(val, grp->x_min,
 		IPA_RSRC_GRP_XY_RSRC_TYPE_n_X_MIN_LIM_SHFT_V3_5,
 		IPA_RSRC_GRP_XY_RSRC_TYPE_n_X_MIN_LIM_BMSK_V3_5);
-	IPA_SETFIELD_IN_REG(*val, grp->x_max,
+	IPA_SETFIELD_IN_REG(val, grp->x_max,
 		IPA_RSRC_GRP_XY_RSRC_TYPE_n_X_MAX_LIM_SHFT_V3_5,
 		IPA_RSRC_GRP_XY_RSRC_TYPE_n_X_MAX_LIM_BMSK_V3_5);
 
 	/* DST_23 register has only X fields at ipa V3_5 */
 	if (reg == IPA_DST_RSRC_GRP_23_RSRC_TYPE_n)
-		return;
+		return val;
 
-	IPA_SETFIELD_IN_REG(*val, grp->y_min,
+	IPA_SETFIELD_IN_REG(val, grp->y_min,
 		IPA_RSRC_GRP_XY_RSRC_TYPE_n_Y_MIN_LIM_SHFT_V3_5,
 		IPA_RSRC_GRP_XY_RSRC_TYPE_n_Y_MIN_LIM_BMSK_V3_5);
-	IPA_SETFIELD_IN_REG(*val, grp->y_max,
+	IPA_SETFIELD_IN_REG(val, grp->y_max,
 		IPA_RSRC_GRP_XY_RSRC_TYPE_n_Y_MAX_LIM_SHFT_V3_5,
 		IPA_RSRC_GRP_XY_RSRC_TYPE_n_Y_MAX_LIM_BMSK_V3_5);
+
+	return val;
 }
 
-static void ipareg_construct_hash_cfg_n(
-	enum ipahal_reg_name reg, const void *fields, u32 *val)
+static u32 ipareg_construct_hash_cfg_n(
+	enum ipahal_reg_name reg, const void *fields)
 {
 	const struct ipahal_reg_fltrt_hash_tuple *tuple = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, tuple->flt.src_id,
+	IPA_SETFIELD_IN_REG(val, tuple->flt.src_id,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_FILTER_HASH_MSK_SRC_ID_SHFT,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_FILTER_HASH_MSK_SRC_ID_BMSK);
-	IPA_SETFIELD_IN_REG(*val, tuple->flt.src_ip_addr,
+	IPA_SETFIELD_IN_REG(val, tuple->flt.src_ip_addr,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_FILTER_HASH_MSK_SRC_IP_SHFT,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_FILTER_HASH_MSK_SRC_IP_BMSK);
-	IPA_SETFIELD_IN_REG(*val, tuple->flt.dst_ip_addr,
+	IPA_SETFIELD_IN_REG(val, tuple->flt.dst_ip_addr,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_FILTER_HASH_MSK_DST_IP_SHFT,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_FILTER_HASH_MSK_DST_IP_BMSK);
-	IPA_SETFIELD_IN_REG(*val, tuple->flt.src_port,
+	IPA_SETFIELD_IN_REG(val, tuple->flt.src_port,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_FILTER_HASH_MSK_SRC_PORT_SHFT,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_FILTER_HASH_MSK_SRC_PORT_BMSK);
-	IPA_SETFIELD_IN_REG(*val, tuple->flt.dst_port,
+	IPA_SETFIELD_IN_REG(val, tuple->flt.dst_port,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_FILTER_HASH_MSK_DST_PORT_SHFT,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_FILTER_HASH_MSK_DST_PORT_BMSK);
-	IPA_SETFIELD_IN_REG(*val, tuple->flt.protocol,
+	IPA_SETFIELD_IN_REG(val, tuple->flt.protocol,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_FILTER_HASH_MSK_PROTOCOL_SHFT,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_FILTER_HASH_MSK_PROTOCOL_BMSK);
-	IPA_SETFIELD_IN_REG(*val, tuple->flt.meta_data,
+	IPA_SETFIELD_IN_REG(val, tuple->flt.meta_data,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_FILTER_HASH_MSK_METADATA_SHFT,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_FILTER_HASH_MSK_METADATA_BMSK);
-	IPA_SETFIELD_IN_REG(*val, tuple->undefined1,
+	IPA_SETFIELD_IN_REG(val, tuple->undefined1,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_UNDEFINED1_SHFT,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_UNDEFINED1_BMSK);
-	IPA_SETFIELD_IN_REG(*val, tuple->rt.src_id,
+	IPA_SETFIELD_IN_REG(val, tuple->rt.src_id,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_ROUTER_HASH_MSK_SRC_ID_SHFT,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_ROUTER_HASH_MSK_SRC_ID_BMSK);
-	IPA_SETFIELD_IN_REG(*val, tuple->rt.src_ip_addr,
+	IPA_SETFIELD_IN_REG(val, tuple->rt.src_ip_addr,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_ROUTER_HASH_MSK_SRC_IP_SHFT,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_ROUTER_HASH_MSK_SRC_IP_BMSK);
-	IPA_SETFIELD_IN_REG(*val, tuple->rt.dst_ip_addr,
+	IPA_SETFIELD_IN_REG(val, tuple->rt.dst_ip_addr,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_ROUTER_HASH_MSK_DST_IP_SHFT,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_ROUTER_HASH_MSK_DST_IP_BMSK);
-	IPA_SETFIELD_IN_REG(*val, tuple->rt.src_port,
+	IPA_SETFIELD_IN_REG(val, tuple->rt.src_port,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_ROUTER_HASH_MSK_SRC_PORT_SHFT,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_ROUTER_HASH_MSK_SRC_PORT_BMSK);
-	IPA_SETFIELD_IN_REG(*val, tuple->rt.dst_port,
+	IPA_SETFIELD_IN_REG(val, tuple->rt.dst_port,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_ROUTER_HASH_MSK_DST_PORT_SHFT,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_ROUTER_HASH_MSK_DST_PORT_BMSK);
-	IPA_SETFIELD_IN_REG(*val, tuple->rt.protocol,
+	IPA_SETFIELD_IN_REG(val, tuple->rt.protocol,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_ROUTER_HASH_MSK_PROTOCOL_SHFT,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_ROUTER_HASH_MSK_PROTOCOL_BMSK);
-	IPA_SETFIELD_IN_REG(*val, tuple->rt.meta_data,
+	IPA_SETFIELD_IN_REG(val, tuple->rt.meta_data,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_ROUTER_HASH_MSK_METADATA_SHFT,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_ROUTER_HASH_MSK_METADATA_BMSK);
-	IPA_SETFIELD_IN_REG(*val, tuple->undefined2,
+	IPA_SETFIELD_IN_REG(val, tuple->undefined2,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_UNDEFINED2_SHFT,
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_UNDEFINED2_BMSK);
+
+	return val;
 }
 
 static void ipareg_parse_hash_cfg_n(
@@ -270,59 +287,68 @@ static void ipareg_parse_hash_cfg_n(
 		IPA_ENDP_FILTER_ROUTER_HSH_CFG_n_UNDEFINED2_BMSK);
 }
 
-static void ipareg_construct_endp_status_n(
-	enum ipahal_reg_name reg, const void *fields, u32 *val)
+static u32 ipareg_construct_endp_status_n(
+	enum ipahal_reg_name reg, const void *fields)
 {
 	const struct ipahal_reg_ep_cfg_status *ep_status = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, ep_status->status_en,
+	IPA_SETFIELD_IN_REG(val, ep_status->status_en,
 			IPA_ENDP_STATUS_n_STATUS_EN_SHFT,
 			IPA_ENDP_STATUS_n_STATUS_EN_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_status->status_ep,
+	IPA_SETFIELD_IN_REG(val, ep_status->status_ep,
 			IPA_ENDP_STATUS_n_STATUS_ENDP_SHFT,
 			IPA_ENDP_STATUS_n_STATUS_ENDP_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_status->status_location,
+	IPA_SETFIELD_IN_REG(val, ep_status->status_location,
 			IPA_ENDP_STATUS_n_STATUS_LOCATION_SHFT,
 			IPA_ENDP_STATUS_n_STATUS_LOCATION_BMSK);
+
+	return val;
 }
 
-static void ipareg_construct_endp_status_n_v4_0(
-	enum ipahal_reg_name reg, const void *fields, u32 *val)
+static u32 ipareg_construct_endp_status_n_v4_0(
+	enum ipahal_reg_name reg, const void *fields)
 {
 	const struct ipahal_reg_ep_cfg_status *ep_status = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, ep_status->status_en,
+	IPA_SETFIELD_IN_REG(val, ep_status->status_en,
 			IPA_ENDP_STATUS_n_STATUS_EN_SHFT,
 			IPA_ENDP_STATUS_n_STATUS_EN_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_status->status_ep,
+	IPA_SETFIELD_IN_REG(val, ep_status->status_ep,
 			IPA_ENDP_STATUS_n_STATUS_ENDP_SHFT,
 			IPA_ENDP_STATUS_n_STATUS_ENDP_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_status->status_location,
+	IPA_SETFIELD_IN_REG(val, ep_status->status_location,
 			IPA_ENDP_STATUS_n_STATUS_LOCATION_SHFT,
 			IPA_ENDP_STATUS_n_STATUS_LOCATION_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_status->status_pkt_suppress,
+	IPA_SETFIELD_IN_REG(val, ep_status->status_pkt_suppress,
 			IPA_ENDP_STATUS_n_STATUS_PKT_SUPPRESS_SHFT,
 			IPA_ENDP_STATUS_n_STATUS_PKT_SUPPRESS_BMSK);
+
+	return val;
 }
 
-static void ipareg_construct_qcncm(
-	enum ipahal_reg_name reg, const void *fields, u32 *val)
+static u32 ipareg_construct_qcncm(
+	enum ipahal_reg_name reg, const void *fields)
 {
 	const struct ipahal_reg_qcncm *qcncm = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, qcncm->mode_en ? 1 : 0,
+	IPA_SETFIELD_IN_REG(val, qcncm->mode_en ? 1 : 0,
 		IPA_QCNCM_MODE_EN_SHFT,
 		IPA_QCNCM_MODE_EN_BMSK);
-	IPA_SETFIELD_IN_REG(*val, qcncm->mode_val,
+	IPA_SETFIELD_IN_REG(val, qcncm->mode_val,
 		IPA_QCNCM_MODE_VAL_SHFT,
 		IPA_QCNCM_MODE_VAL_BMSK);
-	IPA_SETFIELD_IN_REG(*val, qcncm->undefined,
+	IPA_SETFIELD_IN_REG(val, qcncm->undefined,
 		0, IPA_QCNCM_MODE_VAL_BMSK);
+
+	return val;
 }
 
 static void ipareg_parse_qcncm(
@@ -343,18 +369,21 @@ static void ipareg_parse_qcncm(
 		0, IPA_QCNCM_MODE_UNDEFINED2_BMSK);
 }
 
-static void ipareg_construct_single_ndp_mode(
-	enum ipahal_reg_name reg, const void *fields, u32 *val)
+static u32 ipareg_construct_single_ndp_mode(
+	enum ipahal_reg_name reg, const void *fields)
 {
 	const struct ipahal_reg_single_ndp_mode *mode = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, mode->single_ndp_en ? 1 : 0,
+	IPA_SETFIELD_IN_REG(val, mode->single_ndp_en ? 1 : 0,
 		IPA_SINGLE_NDP_MODE_SINGLE_NDP_EN_SHFT,
 		IPA_SINGLE_NDP_MODE_SINGLE_NDP_EN_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, mode->undefined,
+	IPA_SETFIELD_IN_REG(val, mode->undefined,
 		IPA_SINGLE_NDP_MODE_UNDEFINED_SHFT,
 		IPA_SINGLE_NDP_MODE_UNDEFINED_BMSK);
+
+	return val;
 }
 
 static void ipareg_parse_single_ndp_mode(
@@ -371,13 +400,14 @@ static void ipareg_parse_single_ndp_mode(
 		IPA_SINGLE_NDP_MODE_UNDEFINED_BMSK);
 }
 
-static void ipareg_construct_debug_cnt_ctrl_n(
-	enum ipahal_reg_name reg, const void *fields, u32 *val)
+static u32 ipareg_construct_debug_cnt_ctrl_n(
+	enum ipahal_reg_name reg, const void *fields)
 {
 	const struct ipahal_reg_debug_cnt_ctrl *dbg_cnt_ctrl = fields;
+	u32 val = 0;
 	u8 type;
 
-	IPA_SETFIELD_IN_REG(*val, dbg_cnt_ctrl->en ? 1 : 0,
+	IPA_SETFIELD_IN_REG(val, dbg_cnt_ctrl->en ? 1 : 0,
 		IPA_DEBUG_CNT_CTRL_n_DBG_CNT_EN_SHFT,
 		IPA_DEBUG_CNT_CTRL_n_DBG_CNT_EN_BMSK);
 
@@ -409,35 +439,37 @@ static void ipareg_construct_debug_cnt_ctrl_n(
 		ipa_err("Invalid dbg_cnt_ctrl type (%d) for %s\n",
 			dbg_cnt_ctrl->type, ipahal_regs[reg].name);
 		WARN_ON(1);
-		return;
+		return val;
 
 	};
 
-	IPA_SETFIELD_IN_REG(*val, type,
+	IPA_SETFIELD_IN_REG(val, type,
 		IPA_DEBUG_CNT_CTRL_n_DBG_CNT_TYPE_SHFT,
 		IPA_DEBUG_CNT_CTRL_n_DBG_CNT_TYPE_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, dbg_cnt_ctrl->product ? 1 : 0,
+	IPA_SETFIELD_IN_REG(val, dbg_cnt_ctrl->product ? 1 : 0,
 		IPA_DEBUG_CNT_CTRL_n_DBG_CNT_PRODUCT_SHFT,
 		IPA_DEBUG_CNT_CTRL_n_DBG_CNT_PRODUCT_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, dbg_cnt_ctrl->src_pipe,
+	IPA_SETFIELD_IN_REG(val, dbg_cnt_ctrl->src_pipe,
 		IPA_DEBUG_CNT_CTRL_n_DBG_CNT_SOURCE_PIPE_SHFT,
 		IPA_DEBUG_CNT_CTRL_n_DBG_CNT_SOURCE_PIPE_BMSK);
 
 	if (ipahal_ctx->hw_type <= IPA_HW_v3_1) {
-		IPA_SETFIELD_IN_REG(*val, dbg_cnt_ctrl->rule_idx,
+		IPA_SETFIELD_IN_REG(val, dbg_cnt_ctrl->rule_idx,
 			IPA_DEBUG_CNT_CTRL_n_DBG_CNT_RULE_INDEX_SHFT,
 			IPA_DEBUG_CNT_CTRL_n_DBG_CNT_RULE_INDEX_BMSK);
-		IPA_SETFIELD_IN_REG(*val, dbg_cnt_ctrl->rule_idx_pipe_rule,
+		IPA_SETFIELD_IN_REG(val, dbg_cnt_ctrl->rule_idx_pipe_rule,
 			IPA_DEBUG_CNT_CTRL_n_DBG_CNT_RULE_INDEX_PIPE_RULE_SHFT,
 			IPA_DEBUG_CNT_CTRL_n_DBG_CNT_RULE_INDEX_PIPE_RULE_BMSK
 			);
 	} else {
-		IPA_SETFIELD_IN_REG(*val, dbg_cnt_ctrl->rule_idx,
+		IPA_SETFIELD_IN_REG(val, dbg_cnt_ctrl->rule_idx,
 			IPA_DEBUG_CNT_CTRL_n_DBG_CNT_RULE_INDEX_SHFT,
 			IPA_DEBUG_CNT_CTRL_n_DBG_CNT_RULE_INDEX_BMSK_V3_5);
 	}
+
+	return val;
 }
 
 static void ipareg_parse_shared_mem_size(
@@ -455,50 +487,63 @@ static void ipareg_parse_shared_mem_size(
 		IPA_SHARED_MEM_SIZE_SHARED_MEM_BADDR_BMSK);
 }
 
-static void ipareg_construct_endp_init_rsrc_grp_n(
-		enum ipahal_reg_name reg, const void *fields, u32 *val)
+static u32 ipareg_construct_endp_init_rsrc_grp_n(
+		enum ipahal_reg_name reg, const void *fields)
 {
 	const struct ipahal_reg_endp_init_rsrc_grp *rsrc_grp = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, rsrc_grp->rsrc_grp,
+	IPA_SETFIELD_IN_REG(val, rsrc_grp->rsrc_grp,
 		IPA_ENDP_INIT_RSRC_GRP_n_RSRC_GRP_SHFT,
 		IPA_ENDP_INIT_RSRC_GRP_n_RSRC_GRP_BMSK);
+
+	return val;
 }
 
-static void ipareg_construct_endp_init_rsrc_grp_n_v3_5(
-		enum ipahal_reg_name reg, const void *fields, u32 *val)
+static u32 ipareg_construct_endp_init_rsrc_grp_n_v3_5(
+		enum ipahal_reg_name reg, const void *fields)
 {
 	const struct ipahal_reg_endp_init_rsrc_grp *rsrc_grp = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, rsrc_grp->rsrc_grp,
+	IPA_SETFIELD_IN_REG(val, rsrc_grp->rsrc_grp,
 		IPA_ENDP_INIT_RSRC_GRP_n_RSRC_GRP_SHFT_v3_5,
 		IPA_ENDP_INIT_RSRC_GRP_n_RSRC_GRP_BMSK_v3_5);
+
+	return val;
 }
 
-static void ipareg_construct_endp_init_hdr_metadata_n(
-		enum ipahal_reg_name reg, const void *fields, u32 *val)
+static u32 ipareg_construct_endp_init_hdr_metadata_n(
+		enum ipahal_reg_name reg, const void *fields)
 {
 	const struct ipa_ep_cfg_metadata *metadata = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, metadata->qmap_id,
+	IPA_SETFIELD_IN_REG(val, metadata->qmap_id,
 			IPA_ENDP_INIT_HDR_METADATA_n_METADATA_SHFT,
 			IPA_ENDP_INIT_HDR_METADATA_n_METADATA_BMSK);
+
+	return val;
 }
 
-static void ipareg_construct_endp_init_hdr_metadata_mask_n(
-		enum ipahal_reg_name reg, const void *fields, u32 *val)
+static u32 ipareg_construct_endp_init_hdr_metadata_mask_n(
+		enum ipahal_reg_name reg, const void *fields)
 {
 	const struct ipa_ep_cfg_metadata_mask *metadata_mask = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, metadata_mask->metadata_mask,
+	IPA_SETFIELD_IN_REG(val, metadata_mask->metadata_mask,
 			IPA_ENDP_INIT_HDR_METADATA_MASK_n_METADATA_MASK_SHFT,
 			IPA_ENDP_INIT_HDR_METADATA_MASK_n_METADATA_MASK_BMSK);
+
+	return val;
 }
 
-static void ipareg_construct_endp_init_cfg_n(
-	enum ipahal_reg_name reg, const void *fields, u32 *val)
+static u32 ipareg_construct_endp_init_cfg_n(
+	enum ipahal_reg_name reg, const void *fields)
 {
 	const struct ipa_ep_cfg_cfg *cfg = fields;
+	u32 val = 0;
 	u32 cs_offload_en;
 
 	switch (cfg->cs_offload_en) {
@@ -515,78 +560,91 @@ static void ipareg_construct_endp_init_cfg_n(
 		ipa_err("Invalid cs_offload_en value for %s\n",
 			ipahal_regs[reg].name);
 		WARN_ON(1);
-		return;
+		return 0;
 	}
 
-	IPA_SETFIELD_IN_REG(*val, cfg->frag_offload_en ? 1 : 0,
+	IPA_SETFIELD_IN_REG(val, cfg->frag_offload_en ? 1 : 0,
 			IPA_ENDP_INIT_CFG_n_FRAG_OFFLOAD_EN_SHFT,
 			IPA_ENDP_INIT_CFG_n_FRAG_OFFLOAD_EN_BMSK);
-	IPA_SETFIELD_IN_REG(*val, cs_offload_en,
+	IPA_SETFIELD_IN_REG(val, cs_offload_en,
 			IPA_ENDP_INIT_CFG_n_CS_OFFLOAD_EN_SHFT,
 			IPA_ENDP_INIT_CFG_n_CS_OFFLOAD_EN_BMSK);
-	IPA_SETFIELD_IN_REG(*val, cfg->cs_metadata_hdr_offset,
+	IPA_SETFIELD_IN_REG(val, cfg->cs_metadata_hdr_offset,
 			IPA_ENDP_INIT_CFG_n_CS_METADATA_HDR_OFFSET_SHFT,
 			IPA_ENDP_INIT_CFG_n_CS_METADATA_HDR_OFFSET_BMSK);
-	IPA_SETFIELD_IN_REG(*val, cfg->gen_qmb_master_sel,
+	IPA_SETFIELD_IN_REG(val, cfg->gen_qmb_master_sel,
 			IPA_ENDP_INIT_CFG_n_CS_GEN_QMB_MASTER_SEL_SHFT,
 			IPA_ENDP_INIT_CFG_n_CS_GEN_QMB_MASTER_SEL_BMSK);
 
+	return val;
 }
 
-static void ipareg_construct_endp_init_deaggr_n(
-		enum ipahal_reg_name reg, const void *fields, u32 *val)
+static u32 ipareg_construct_endp_init_deaggr_n(
+		enum ipahal_reg_name reg, const void *fields)
 {
 	const struct ipa_ep_cfg_deaggr *ep_deaggr = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, ep_deaggr->deaggr_hdr_len,
+	IPA_SETFIELD_IN_REG(val, ep_deaggr->deaggr_hdr_len,
 		IPA_ENDP_INIT_DEAGGR_n_DEAGGR_HDR_LEN_SHFT,
 		IPA_ENDP_INIT_DEAGGR_n_DEAGGR_HDR_LEN_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_deaggr->packet_offset_valid,
+	IPA_SETFIELD_IN_REG(val, ep_deaggr->packet_offset_valid,
 		IPA_ENDP_INIT_DEAGGR_n_PACKET_OFFSET_VALID_SHFT,
 		IPA_ENDP_INIT_DEAGGR_n_PACKET_OFFSET_VALID_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_deaggr->packet_offset_location,
+	IPA_SETFIELD_IN_REG(val, ep_deaggr->packet_offset_location,
 		IPA_ENDP_INIT_DEAGGR_n_PACKET_OFFSET_LOCATION_SHFT,
 		IPA_ENDP_INIT_DEAGGR_n_PACKET_OFFSET_LOCATION_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_deaggr->max_packet_len,
+	IPA_SETFIELD_IN_REG(val, ep_deaggr->max_packet_len,
 		IPA_ENDP_INIT_DEAGGR_n_MAX_PACKET_LEN_SHFT,
 		IPA_ENDP_INIT_DEAGGR_n_MAX_PACKET_LEN_BMSK);
+
+	return val;
 }
 
-static void ipareg_construct_endp_init_hol_block_en_n(
-	enum ipahal_reg_name reg, const void *fields, u32 *val)
+static u32 ipareg_construct_endp_init_hol_block_en_n(
+	enum ipahal_reg_name reg, const void *fields)
 {
 	const struct ipa_ep_cfg_holb *ep_holb = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, ep_holb->en,
+	IPA_SETFIELD_IN_REG(val, ep_holb->en,
 		IPA_ENDP_INIT_HOL_BLOCK_EN_n_EN_SHFT,
 		IPA_ENDP_INIT_HOL_BLOCK_EN_n_EN_BMSK);
+
+	return val;
 }
 
-static void ipareg_construct_endp_init_hol_block_timer_n(
-	enum ipahal_reg_name reg, const void *fields, u32 *val)
+static u32 ipareg_construct_endp_init_hol_block_timer_n(
+	enum ipahal_reg_name reg, const void *fields)
 {
 	const struct ipa_ep_cfg_holb *ep_holb = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, ep_holb->tmr_val,
+	IPA_SETFIELD_IN_REG(val, ep_holb->tmr_val,
 		IPA_ENDP_INIT_HOL_BLOCK_TIMER_n_TIMER_SHFT,
 		IPA_ENDP_INIT_HOL_BLOCK_TIMER_n_TIMER_BMSK);
+
+	return val;
 }
 
-static void ipareg_construct_endp_init_ctrl_n(enum ipahal_reg_name reg,
-	const void *fields, u32 *val)
+static u32 ipareg_construct_endp_init_ctrl_n(enum ipahal_reg_name reg,
+	const void *fields)
 {
 	const struct ipa_ep_cfg_ctrl *ep_ctrl = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, ep_ctrl->ipa_ep_suspend,
+	IPA_SETFIELD_IN_REG(val, ep_ctrl->ipa_ep_suspend,
 		IPA_ENDP_INIT_CTRL_n_ENDP_SUSPEND_SHFT,
 		IPA_ENDP_INIT_CTRL_n_ENDP_SUSPEND_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_ctrl->ipa_ep_delay,
+	IPA_SETFIELD_IN_REG(val, ep_ctrl->ipa_ep_delay,
 		IPA_ENDP_INIT_CTRL_n_ENDP_DELAY_SHFT,
 		IPA_ENDP_INIT_CTRL_n_ENDP_DELAY_BMSK);
+
+	return val;
 }
 
 static void ipareg_parse_endp_init_ctrl_n(enum ipahal_reg_name reg,
@@ -603,71 +661,89 @@ static void ipareg_parse_endp_init_ctrl_n(enum ipahal_reg_name reg,
 		IPA_ENDP_INIT_CTRL_n_ENDP_DELAY_SHFT);
 }
 
-static void ipareg_construct_endp_init_ctrl_n_v4_0(enum ipahal_reg_name reg,
-	const void *fields, u32 *val)
+static u32 ipareg_construct_endp_init_ctrl_n_v4_0(enum ipahal_reg_name reg,
+	const void *fields)
 {
 	const struct ipa_ep_cfg_ctrl *ep_ctrl = fields;
+	u32 val = 0;
 
 	WARN_ON(ep_ctrl->ipa_ep_suspend);
 
-	IPA_SETFIELD_IN_REG(*val, ep_ctrl->ipa_ep_delay,
+	IPA_SETFIELD_IN_REG(val, ep_ctrl->ipa_ep_delay,
 		IPA_ENDP_INIT_CTRL_n_ENDP_DELAY_SHFT,
 		IPA_ENDP_INIT_CTRL_n_ENDP_DELAY_BMSK);
+
+	return val;
 }
 
-static void ipareg_construct_endp_init_ctrl_scnd_n(enum ipahal_reg_name reg,
-	const void *fields, u32 *val)
+static u32 ipareg_construct_endp_init_ctrl_scnd_n(enum ipahal_reg_name reg,
+	const void *fields)
 {
 	const struct ipahal_ep_cfg_ctrl_scnd *ep_ctrl_scnd = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, ep_ctrl_scnd->endp_delay,
+	IPA_SETFIELD_IN_REG(val, ep_ctrl_scnd->endp_delay,
 		IPA_ENDP_INIT_CTRL_SCND_n_ENDP_DELAY_SHFT,
 		IPA_ENDP_INIT_CTRL_SCND_n_ENDP_DELAY_BMSK);
+
+	return val;
 }
 
-static void ipareg_construct_endp_init_nat_n(enum ipahal_reg_name reg,
-		const void *fields, u32 *val)
+static u32 ipareg_construct_endp_init_nat_n(enum ipahal_reg_name reg,
+		const void *fields)
 {
 	const struct ipa_ep_cfg_nat *ep_nat = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, ep_nat->nat_en,
+	IPA_SETFIELD_IN_REG(val, ep_nat->nat_en,
 		IPA_ENDP_INIT_NAT_n_NAT_EN_SHFT,
 		IPA_ENDP_INIT_NAT_n_NAT_EN_BMSK);
+
+	return val;
 }
 
-static void ipareg_construct_endp_init_conn_track_n(enum ipahal_reg_name reg,
-	const void *fields, u32 *val)
+static u32 ipareg_construct_endp_init_conn_track_n(enum ipahal_reg_name reg,
+	const void *fields)
 {
 	const struct ipa_ep_cfg_conn_track *ep_ipv6ct = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, ep_ipv6ct->conn_track_en,
+	IPA_SETFIELD_IN_REG(val, ep_ipv6ct->conn_track_en,
 		IPA_ENDP_INIT_CONN_TRACK_n_CONN_TRACK_EN_SHFT,
 		IPA_ENDP_INIT_CONN_TRACK_n_CONN_TRACK_EN_BMSK);
+
+	return val;
 }
 
-static void ipareg_construct_endp_init_mode_n(enum ipahal_reg_name reg,
-		const void *fields, u32 *val)
+static u32 ipareg_construct_endp_init_mode_n(enum ipahal_reg_name reg,
+		const void *fields)
 {
 	const struct ipahal_reg_endp_init_mode *init_mode = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, init_mode->ep_mode.mode,
+	IPA_SETFIELD_IN_REG(val, init_mode->ep_mode.mode,
 		IPA_ENDP_INIT_MODE_n_MODE_SHFT,
 		IPA_ENDP_INIT_MODE_n_MODE_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, init_mode->dst_pipe_number,
+	IPA_SETFIELD_IN_REG(val, init_mode->dst_pipe_number,
 		IPA_ENDP_INIT_MODE_n_DEST_PIPE_INDEX_SHFT,
 		IPA_ENDP_INIT_MODE_n_DEST_PIPE_INDEX_BMSK);
+
+	return val;
 }
 
-static void ipareg_construct_endp_init_route_n(enum ipahal_reg_name reg,
-	const void *fields, u32 *val)
+static u32 ipareg_construct_endp_init_route_n(enum ipahal_reg_name reg,
+	const void *fields)
 {
 	const struct ipahal_reg_endp_init_route *ep_init_rt = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, ep_init_rt->route_table_index,
+	IPA_SETFIELD_IN_REG(val, ep_init_rt->route_table_index,
 		IPA_ENDP_INIT_ROUTE_n_ROUTE_TABLE_INDEX_SHFT,
 		IPA_ENDP_INIT_ROUTE_n_ROUTE_TABLE_INDEX_BMSK);
 
+
+	return val;
 }
 
 static void ipareg_parse_endp_init_aggr_n(enum ipahal_reg_name reg,
@@ -702,186 +778,207 @@ static void ipareg_parse_endp_init_aggr_n(enum ipahal_reg_name reg,
 			IPA_ENDP_INIT_AGGR_n_AGGR_HARD_BYTE_LIMIT_ENABLE_SHFT);
 }
 
-static void ipareg_construct_endp_init_aggr_n(enum ipahal_reg_name reg,
-	const void *fields, u32 *val)
+static u32 ipareg_construct_endp_init_aggr_n(enum ipahal_reg_name reg,
+	const void *fields)
 {
 	const struct ipa_ep_cfg_aggr *ep_aggr = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, ep_aggr->aggr_en,
+	IPA_SETFIELD_IN_REG(val, ep_aggr->aggr_en,
 		IPA_ENDP_INIT_AGGR_n_AGGR_EN_SHFT,
 		IPA_ENDP_INIT_AGGR_n_AGGR_EN_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_aggr->aggr,
+	IPA_SETFIELD_IN_REG(val, ep_aggr->aggr,
 		IPA_ENDP_INIT_AGGR_n_AGGR_TYPE_SHFT,
 		IPA_ENDP_INIT_AGGR_n_AGGR_TYPE_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_aggr->aggr_byte_limit,
+	IPA_SETFIELD_IN_REG(val, ep_aggr->aggr_byte_limit,
 		IPA_ENDP_INIT_AGGR_n_AGGR_BYTE_LIMIT_SHFT,
 		IPA_ENDP_INIT_AGGR_n_AGGR_BYTE_LIMIT_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_aggr->aggr_time_limit,
+	IPA_SETFIELD_IN_REG(val, ep_aggr->aggr_time_limit,
 		IPA_ENDP_INIT_AGGR_n_AGGR_TIME_LIMIT_SHFT,
 		IPA_ENDP_INIT_AGGR_n_AGGR_TIME_LIMIT_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_aggr->aggr_pkt_limit,
+	IPA_SETFIELD_IN_REG(val, ep_aggr->aggr_pkt_limit,
 		IPA_ENDP_INIT_AGGR_n_AGGR_PKT_LIMIT_SHFT,
 		IPA_ENDP_INIT_AGGR_n_AGGR_PKT_LIMIT_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_aggr->aggr_sw_eof_active,
+	IPA_SETFIELD_IN_REG(val, ep_aggr->aggr_sw_eof_active,
 		IPA_ENDP_INIT_AGGR_n_AGGR_SW_EOF_ACTIVE_SHFT,
 		IPA_ENDP_INIT_AGGR_n_AGGR_SW_EOF_ACTIVE_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_aggr->aggr_hard_byte_limit_en,
+	IPA_SETFIELD_IN_REG(val, ep_aggr->aggr_hard_byte_limit_en,
 		IPA_ENDP_INIT_AGGR_n_AGGR_HARD_BYTE_LIMIT_ENABLE_SHFT,
 		IPA_ENDP_INIT_AGGR_n_AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK);
+
+	return val;
 }
 
-static void ipareg_construct_endp_init_hdr_ext_n(enum ipahal_reg_name reg,
-	const void *fields, u32 *val)
+static u32 ipareg_construct_endp_init_hdr_ext_n(enum ipahal_reg_name reg,
+	const void *fields)
 {
 	const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext = fields;
+	u32 val = 0;
 	u8 hdr_endianness = ep_hdr_ext->hdr_little_endian ? 0 : 1;
 
-	IPA_SETFIELD_IN_REG(*val, ep_hdr_ext->hdr_pad_to_alignment,
+	IPA_SETFIELD_IN_REG(val, ep_hdr_ext->hdr_pad_to_alignment,
 		IPA_ENDP_INIT_HDR_EXT_n_HDR_PAD_TO_ALIGNMENT_SHFT,
 		IPA_ENDP_INIT_HDR_EXT_n_HDR_PAD_TO_ALIGNMENT_BMSK_v3_0);
 
-	IPA_SETFIELD_IN_REG(*val, ep_hdr_ext->hdr_total_len_or_pad_offset,
+	IPA_SETFIELD_IN_REG(val, ep_hdr_ext->hdr_total_len_or_pad_offset,
 		IPA_ENDP_INIT_HDR_EXT_n_HDR_TOTAL_LEN_OR_PAD_OFFSET_SHFT,
 		IPA_ENDP_INIT_HDR_EXT_n_HDR_TOTAL_LEN_OR_PAD_OFFSET_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_hdr_ext->hdr_payload_len_inc_padding,
+	IPA_SETFIELD_IN_REG(val, ep_hdr_ext->hdr_payload_len_inc_padding,
 		IPA_ENDP_INIT_HDR_EXT_n_HDR_PAYLOAD_LEN_INC_PADDING_SHFT,
 		IPA_ENDP_INIT_HDR_EXT_n_HDR_PAYLOAD_LEN_INC_PADDING_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_hdr_ext->hdr_total_len_or_pad,
+	IPA_SETFIELD_IN_REG(val, ep_hdr_ext->hdr_total_len_or_pad,
 		IPA_ENDP_INIT_HDR_EXT_n_HDR_TOTAL_LEN_OR_PAD_SHFT,
 		IPA_ENDP_INIT_HDR_EXT_n_HDR_TOTAL_LEN_OR_PAD_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_hdr_ext->hdr_total_len_or_pad_valid,
+	IPA_SETFIELD_IN_REG(val, ep_hdr_ext->hdr_total_len_or_pad_valid,
 		IPA_ENDP_INIT_HDR_EXT_n_HDR_TOTAL_LEN_OR_PAD_VALID_SHFT,
 		IPA_ENDP_INIT_HDR_EXT_n_HDR_TOTAL_LEN_OR_PAD_VALID_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, hdr_endianness,
+	IPA_SETFIELD_IN_REG(val, hdr_endianness,
 		IPA_ENDP_INIT_HDR_EXT_n_HDR_ENDIANNESS_SHFT,
 		IPA_ENDP_INIT_HDR_EXT_n_HDR_ENDIANNESS_BMSK);
+
+	return val;
 }
 
-static void ipareg_construct_endp_init_hdr_n(enum ipahal_reg_name reg,
-	const void *fields, u32 *val)
+static u32 ipareg_construct_endp_init_hdr_n(enum ipahal_reg_name reg,
+	const void *fields)
 {
 	const struct ipa_ep_cfg_hdr *ep_hdr = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, ep_hdr->hdr_metadata_reg_valid,
+	IPA_SETFIELD_IN_REG(val, ep_hdr->hdr_metadata_reg_valid,
 		IPA_ENDP_INIT_HDR_n_HDR_METADATA_REG_VALID_SHFT_v2,
 		IPA_ENDP_INIT_HDR_n_HDR_METADATA_REG_VALID_BMSK_v2);
 
-	IPA_SETFIELD_IN_REG(*val, ep_hdr->hdr_remove_additional,
+	IPA_SETFIELD_IN_REG(val, ep_hdr->hdr_remove_additional,
 		IPA_ENDP_INIT_HDR_n_HDR_LEN_INC_DEAGG_HDR_SHFT_v2,
 		IPA_ENDP_INIT_HDR_n_HDR_LEN_INC_DEAGG_HDR_BMSK_v2);
 
-	IPA_SETFIELD_IN_REG(*val, ep_hdr->hdr_a5_mux,
+	IPA_SETFIELD_IN_REG(val, ep_hdr->hdr_a5_mux,
 		IPA_ENDP_INIT_HDR_n_HDR_A5_MUX_SHFT,
 		IPA_ENDP_INIT_HDR_n_HDR_A5_MUX_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_hdr->hdr_ofst_pkt_size,
+	IPA_SETFIELD_IN_REG(val, ep_hdr->hdr_ofst_pkt_size,
 		IPA_ENDP_INIT_HDR_n_HDR_OFST_PKT_SIZE_SHFT,
 		IPA_ENDP_INIT_HDR_n_HDR_OFST_PKT_SIZE_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_hdr->hdr_ofst_pkt_size_valid,
+	IPA_SETFIELD_IN_REG(val, ep_hdr->hdr_ofst_pkt_size_valid,
 		IPA_ENDP_INIT_HDR_n_HDR_OFST_PKT_SIZE_VALID_SHFT,
 		IPA_ENDP_INIT_HDR_n_HDR_OFST_PKT_SIZE_VALID_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_hdr->hdr_additional_const_len,
+	IPA_SETFIELD_IN_REG(val, ep_hdr->hdr_additional_const_len,
 		IPA_ENDP_INIT_HDR_n_HDR_ADDITIONAL_CONST_LEN_SHFT,
 		IPA_ENDP_INIT_HDR_n_HDR_ADDITIONAL_CONST_LEN_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_hdr->hdr_ofst_metadata,
+	IPA_SETFIELD_IN_REG(val, ep_hdr->hdr_ofst_metadata,
 		IPA_ENDP_INIT_HDR_n_HDR_OFST_METADATA_SHFT,
 		IPA_ENDP_INIT_HDR_n_HDR_OFST_METADATA_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_hdr->hdr_ofst_metadata_valid,
+	IPA_SETFIELD_IN_REG(val, ep_hdr->hdr_ofst_metadata_valid,
 		IPA_ENDP_INIT_HDR_n_HDR_OFST_METADATA_VALID_SHFT,
 		IPA_ENDP_INIT_HDR_n_HDR_OFST_METADATA_VALID_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, ep_hdr->hdr_len,
+	IPA_SETFIELD_IN_REG(val, ep_hdr->hdr_len,
 		IPA_ENDP_INIT_HDR_n_HDR_LEN_SHFT,
 		IPA_ENDP_INIT_HDR_n_HDR_LEN_BMSK);
+
+	return val;
 }
 
-static void ipareg_construct_route(enum ipahal_reg_name reg,
-	const void *fields, u32 *val)
+static u32 ipareg_construct_route(enum ipahal_reg_name reg,
+	const void *fields)
 {
 	const struct ipahal_reg_route *route = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, route->route_dis,
+	IPA_SETFIELD_IN_REG(val, route->route_dis,
 		IPA_ROUTE_ROUTE_DIS_SHFT,
 		IPA_ROUTE_ROUTE_DIS_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, route->route_def_pipe,
+	IPA_SETFIELD_IN_REG(val, route->route_def_pipe,
 		IPA_ROUTE_ROUTE_DEF_PIPE_SHFT,
 		IPA_ROUTE_ROUTE_DEF_PIPE_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, route->route_def_hdr_table,
+	IPA_SETFIELD_IN_REG(val, route->route_def_hdr_table,
 		IPA_ROUTE_ROUTE_DEF_HDR_TABLE_SHFT,
 		IPA_ROUTE_ROUTE_DEF_HDR_TABLE_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, route->route_def_hdr_ofst,
+	IPA_SETFIELD_IN_REG(val, route->route_def_hdr_ofst,
 		IPA_ROUTE_ROUTE_DEF_HDR_OFST_SHFT,
 		IPA_ROUTE_ROUTE_DEF_HDR_OFST_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, route->route_frag_def_pipe,
+	IPA_SETFIELD_IN_REG(val, route->route_frag_def_pipe,
 		IPA_ROUTE_ROUTE_FRAG_DEF_PIPE_SHFT,
 		IPA_ROUTE_ROUTE_FRAG_DEF_PIPE_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val, route->route_def_retain_hdr,
+	IPA_SETFIELD_IN_REG(val, route->route_def_retain_hdr,
 		IPA_ROUTE_ROUTE_DEF_RETAIN_HDR_SHFT,
 		IPA_ROUTE_ROUTE_DEF_RETAIN_HDR_BMSK);
+
+	return val;
 }
 
-static void ipareg_construct_qsb_max_writes(enum ipahal_reg_name reg,
-	const void *fields, u32 *val)
+static u32 ipareg_construct_qsb_max_writes(enum ipahal_reg_name reg,
+	const void *fields)
 {
 	const struct ipahal_reg_qsb_max_writes *max_writes = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, max_writes->qmb_0_max_writes,
+	IPA_SETFIELD_IN_REG(val, max_writes->qmb_0_max_writes,
 			    IPA_QSB_MAX_WRITES_GEN_QMB_0_MAX_WRITES_SHFT,
 			    IPA_QSB_MAX_WRITES_GEN_QMB_0_MAX_WRITES_BMSK);
-	IPA_SETFIELD_IN_REG(*val, max_writes->qmb_1_max_writes,
+	IPA_SETFIELD_IN_REG(val, max_writes->qmb_1_max_writes,
 			    IPA_QSB_MAX_WRITES_GEN_QMB_1_MAX_WRITES_SHFT,
 			    IPA_QSB_MAX_WRITES_GEN_QMB_1_MAX_WRITES_BMSK);
+
+	return val;
 }
 
-static void ipareg_construct_qsb_max_reads(enum ipahal_reg_name reg,
-	const void *fields, u32 *val)
+static u32 ipareg_construct_qsb_max_reads(enum ipahal_reg_name reg,
+	const void *fields)
 {
 	const struct ipahal_reg_qsb_max_reads *max_reads = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, max_reads->qmb_0_max_reads,
+	IPA_SETFIELD_IN_REG(val, max_reads->qmb_0_max_reads,
 			    IPA_QSB_MAX_READS_GEN_QMB_0_MAX_READS_SHFT,
 			    IPA_QSB_MAX_READS_GEN_QMB_0_MAX_READS_BMSK);
-	IPA_SETFIELD_IN_REG(*val, max_reads->qmb_1_max_reads,
+	IPA_SETFIELD_IN_REG(val, max_reads->qmb_1_max_reads,
 			    IPA_QSB_MAX_READS_GEN_QMB_1_MAX_READS_SHFT,
 			    IPA_QSB_MAX_READS_GEN_QMB_1_MAX_READS_BMSK);
+
+	return val;
 }
 
-static void ipareg_construct_qsb_max_reads_v4_0(enum ipahal_reg_name reg,
-	const void *fields, u32 *val)
+static u32 ipareg_construct_qsb_max_reads_v4_0(enum ipahal_reg_name reg,
+	const void *fields)
 {
 	const struct ipahal_reg_qsb_max_reads *max_reads = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, max_reads->qmb_0_max_reads,
+	IPA_SETFIELD_IN_REG(val, max_reads->qmb_0_max_reads,
 			    IPA_QSB_MAX_READS_GEN_QMB_0_MAX_READS_SHFT,
 			    IPA_QSB_MAX_READS_GEN_QMB_0_MAX_READS_BMSK);
-	IPA_SETFIELD_IN_REG(*val, max_reads->qmb_1_max_reads,
+	IPA_SETFIELD_IN_REG(val, max_reads->qmb_1_max_reads,
 			    IPA_QSB_MAX_READS_GEN_QMB_1_MAX_READS_SHFT,
 			    IPA_QSB_MAX_READS_GEN_QMB_1_MAX_READS_BMSK);
-	IPA_SETFIELD_IN_REG(*val, max_reads->qmb_0_max_read_beats,
+	IPA_SETFIELD_IN_REG(val, max_reads->qmb_0_max_read_beats,
 		    IPA_QSB_MAX_READS_GEN_QMB_0_MAX_READS_BEATS_SHFT_V4_0,
 		    IPA_QSB_MAX_READS_GEN_QMB_0_MAX_READS_BEATS_BMSK_V4_0);
-	IPA_SETFIELD_IN_REG(*val, max_reads->qmb_1_max_read_beats,
+	IPA_SETFIELD_IN_REG(val, max_reads->qmb_1_max_read_beats,
 		    IPA_QSB_MAX_READS_GEN_QMB_1_MAX_READS_BEATS_SHFT_V4_0,
 		    IPA_QSB_MAX_READS_GEN_QMB_1_MAX_READS_BEATS_BMSK_V4_0);
+
+	return val;
 }
 
 static void ipareg_parse_tx_cfg(enum ipahal_reg_name reg,
@@ -935,100 +1032,112 @@ static void ipareg_parse_tx_cfg_v4_0(enum ipahal_reg_name reg,
 		IPA_TX_CFG_PA_MASK_EN_BMSK_V4_0);
 }
 
-static void ipareg_construct_tx_cfg(enum ipahal_reg_name reg,
-	const void *fields, u32 *val)
+static u32 ipareg_construct_tx_cfg(enum ipahal_reg_name reg,
+	const void *fields)
 {
 	const struct ipahal_reg_tx_cfg *tx_cfg = fields;
+	u32 val = 0;
 
 	if (tx_cfg->tx0_prefetch_almost_empty_size !=
 			tx_cfg->tx1_prefetch_almost_empty_size)
 		ipa_assert();
 
-	IPA_SETFIELD_IN_REG(*val, tx_cfg->tx0_prefetch_disable,
+	IPA_SETFIELD_IN_REG(val, tx_cfg->tx0_prefetch_disable,
 		IPA_TX_CFG_TX0_PREFETCH_DISABLE_SHFT_V3_5,
 		IPA_TX_CFG_TX0_PREFETCH_DISABLE_BMSK_V3_5);
 
-	IPA_SETFIELD_IN_REG(*val, tx_cfg->tx1_prefetch_disable,
+	IPA_SETFIELD_IN_REG(val, tx_cfg->tx1_prefetch_disable,
 		IPA_TX_CFG_TX1_PREFETCH_DISABLE_SHFT_V3_5,
 		IPA_TX_CFG_TX1_PREFETCH_DISABLE_BMSK_V3_5);
 
-	IPA_SETFIELD_IN_REG(*val, tx_cfg->tx0_prefetch_almost_empty_size,
+	IPA_SETFIELD_IN_REG(val, tx_cfg->tx0_prefetch_almost_empty_size,
 		IPA_TX_CFG_PREFETCH_ALMOST_EMPTY_SIZE_SHFT_V3_5,
 		IPA_TX_CFG_PREFETCH_ALMOST_EMPTY_SIZE_BMSK_V3_5);
+
+	return val;
 }
 
-static void ipareg_construct_tx_cfg_v4_0(enum ipahal_reg_name reg,
-	const void *fields, u32 *val)
+static u32 ipareg_construct_tx_cfg_v4_0(enum ipahal_reg_name reg,
+	const void *fields)
 {
 	const struct ipahal_reg_tx_cfg *tx_cfg = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val, tx_cfg->tx0_prefetch_almost_empty_size,
+	IPA_SETFIELD_IN_REG(val, tx_cfg->tx0_prefetch_almost_empty_size,
 		IPA_TX_CFG_PREFETCH_ALMOST_EMPTY_SIZE_TX0_SHFT_V4_0,
 		IPA_TX_CFG_PREFETCH_ALMOST_EMPTY_SIZE_TX0_BMSK_V4_0);
 
-	IPA_SETFIELD_IN_REG(*val, tx_cfg->tx1_prefetch_almost_empty_size,
+	IPA_SETFIELD_IN_REG(val, tx_cfg->tx1_prefetch_almost_empty_size,
 		IPA_TX_CFG_PREFETCH_ALMOST_EMPTY_SIZE_TX1_SHFT_V4_0,
 		IPA_TX_CFG_PREFETCH_ALMOST_EMPTY_SIZE_TX1_BMSK_V4_0);
 
-	IPA_SETFIELD_IN_REG(*val, tx_cfg->dmaw_scnd_outsd_pred_threshold,
+	IPA_SETFIELD_IN_REG(val, tx_cfg->dmaw_scnd_outsd_pred_threshold,
 		IPA_TX_CFG_DMAW_SCND_OUTSD_PRED_THRESHOLD_SHFT_V4_0,
 		IPA_TX_CFG_DMAW_SCND_OUTSD_PRED_THRESHOLD_BMSK_V4_0);
 
-	IPA_SETFIELD_IN_REG(*val, tx_cfg->dmaw_max_beats_256_dis,
+	IPA_SETFIELD_IN_REG(val, tx_cfg->dmaw_max_beats_256_dis,
 		IPA_TX_CFG_DMAW_MAX_BEATS_256_DIS_SHFT_V4_0,
 		IPA_TX_CFG_DMAW_MAX_BEATS_256_DIS_BMSK_V4_0);
 
-	IPA_SETFIELD_IN_REG(*val, tx_cfg->dmaw_scnd_outsd_pred_en,
+	IPA_SETFIELD_IN_REG(val, tx_cfg->dmaw_scnd_outsd_pred_en,
 		IPA_TX_CFG_DMAW_SCND_OUTSD_PRED_EN_SHFT_V4_0,
 		IPA_TX_CFG_DMAW_SCND_OUTSD_PRED_EN_BMSK_V4_0);
 
-	IPA_SETFIELD_IN_REG(*val, tx_cfg->pa_mask_en,
+	IPA_SETFIELD_IN_REG(val, tx_cfg->pa_mask_en,
 		IPA_TX_CFG_PA_MASK_EN_SHFT_V4_0,
 		IPA_TX_CFG_PA_MASK_EN_BMSK_V4_0);
+
+	return val;
 }
 
-static void ipareg_construct_idle_indication_cfg(enum ipahal_reg_name reg,
-	const void *fields, u32 *val)
+static u32 ipareg_construct_idle_indication_cfg(enum ipahal_reg_name reg,
+	const void *fields)
 {
 	const struct ipahal_reg_idle_indication_cfg *idle_indication_cfg;
+	u32 val = 0;
 
 	idle_indication_cfg = fields;
 
-	IPA_SETFIELD_IN_REG(*val,
+	IPA_SETFIELD_IN_REG(val,
 		idle_indication_cfg->enter_idle_debounce_thresh,
 		IPA_IDLE_INDICATION_CFG_ENTER_IDLE_DEBOUNCE_THRESH_SHFT_V3_5,
 		IPA_IDLE_INDICATION_CFG_ENTER_IDLE_DEBOUNCE_THRESH_BMSK_V3_5);
 
-	IPA_SETFIELD_IN_REG(*val,
+	IPA_SETFIELD_IN_REG(val,
 		idle_indication_cfg->const_non_idle_enable,
 		IPA_IDLE_INDICATION_CFG_CONST_NON_IDLE_ENABLE_SHFT_V3_5,
 		IPA_IDLE_INDICATION_CFG_CONST_NON_IDLE_ENABLE_BMSK_V3_5);
+
+	return val;
 }
 
-static void ipareg_construct_hps_queue_weights(enum ipahal_reg_name reg,
-	const void *fields, u32 *val)
+static u32 ipareg_construct_hps_queue_weights(enum ipahal_reg_name reg,
+	const void *fields)
 {
 	const struct ipahal_reg_rx_hps_weights *hps_weights = fields;
+	u32 val = 0;
 
-	IPA_SETFIELD_IN_REG(*val,
+	IPA_SETFIELD_IN_REG(val,
 		hps_weights->hps_queue_weight_0,
 		IPA_HPS_FTCH_ARB_QUEUE_WEIGHTS_RX_HPS_QUEUE_WEIGHT_0_SHFT,
 		IPA_HPS_FTCH_ARB_QUEUE_WEIGHTS_RX_HPS_QUEUE_WEIGHT_0_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val,
+	IPA_SETFIELD_IN_REG(val,
 		hps_weights->hps_queue_weight_1,
 		IPA_HPS_FTCH_ARB_QUEUE_WEIGHTS_RX_HPS_QUEUE_WEIGHT_1_SHFT,
 		IPA_HPS_FTCH_ARB_QUEUE_WEIGHTS_RX_HPS_QUEUE_WEIGHT_1_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val,
+	IPA_SETFIELD_IN_REG(val,
 		hps_weights->hps_queue_weight_2,
 		IPA_HPS_FTCH_ARB_QUEUE_WEIGHTS_RX_HPS_QUEUE_WEIGHT_2_SHFT,
 		IPA_HPS_FTCH_ARB_QUEUE_WEIGHTS_RX_HPS_QUEUE_WEIGHT_2_BMSK);
 
-	IPA_SETFIELD_IN_REG(*val,
+	IPA_SETFIELD_IN_REG(val,
 		hps_weights->hps_queue_weight_3,
 		IPA_HPS_FTCH_ARB_QUEUE_WEIGHTS_RX_HPS_QUEUE_WEIGHT_3_SHFT,
 		IPA_HPS_FTCH_ARB_QUEUE_WEIGHTS_RX_HPS_QUEUE_WEIGHT_3_BMSK);
+
+	return val;
 }
 
 static void ipareg_parse_hps_queue_weights(
@@ -1429,7 +1538,7 @@ void ipahal_write_reg_n_fields(enum ipahal_reg_name reg, u32 n,
 		ipa_err("No construct function for %s\n",
 			ipahal_regs[reg].name);
 	else
-		ipahal_regs[reg].construct(reg, fields, &val);
+		val = ipahal_regs[reg].construct(reg, fields);
 
 	ipahal_write_reg_n(reg, n, val);
 }
