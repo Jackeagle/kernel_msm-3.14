@@ -673,20 +673,20 @@ static const struct ipahal_imm_cmd_obj
 #undef cfunc
 
 static const char *ipahal_imm_cmd_name_to_str[IPA_IMM_CMD_MAX] = {
-	__stringify(IPA_IMM_CMD_IP_V4_FILTER_INIT),
-	__stringify(IPA_IMM_CMD_IP_V6_FILTER_INIT),
-	__stringify(IPA_IMM_CMD_IP_V4_NAT_INIT),
-	__stringify(IPA_IMM_CMD_IP_V4_ROUTING_INIT),
-	__stringify(IPA_IMM_CMD_IP_V6_ROUTING_INIT),
-	__stringify(IPA_IMM_CMD_HDR_INIT_LOCAL),
-	__stringify(IPA_IMM_CMD_HDR_INIT_SYSTEM),
-	__stringify(IPA_IMM_CMD_REGISTER_WRITE),
-	__stringify(IPA_IMM_CMD_NAT_DMA),
-	__stringify(IPA_IMM_CMD_IP_PACKET_INIT),
-	__stringify(IPA_IMM_CMD_DMA_SHARED_MEM),
-	__stringify(IPA_IMM_CMD_IP_PACKET_TAG_STATUS),
-	__stringify(IPA_IMM_CMD_DMA_TASK_32B_ADDR),
-	__stringify(IPA_IMM_CMD_TABLE_DMA),
+	__stringify(IP_V4_FILTER_INIT),
+	__stringify(IP_V6_FILTER_INIT),
+	__stringify(IP_V4_NAT_INIT),
+	__stringify(IP_V4_ROUTING_INIT),
+	__stringify(IP_V6_ROUTING_INIT),
+	__stringify(HDR_INIT_LOCAL),
+	__stringify(HDR_INIT_SYSTEM),
+	__stringify(REGISTER_WRITE),
+	__stringify(NAT_DMA),
+	__stringify(IP_PACKET_INIT),
+	__stringify(DMA_SHARED_MEM),
+	__stringify(IP_PACKET_TAG_STATUS),
+	__stringify(DMA_TASK_32B_ADDR),
+	__stringify(TABLE_DMA),
 };
 
 static struct ipahal_imm_cmd_obj ipahal_imm_cmds[IPA_IMM_CMD_MAX];
