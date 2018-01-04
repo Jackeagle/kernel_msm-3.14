@@ -613,49 +613,35 @@ struct ipahal_imm_cmd_obj {
  *   parameter data that is formatted properly for the command.
  */
 #define OPCODE_INVAL	((u16)0xffff)
+#define cfunc(f)	ipa_imm_cmd_construct_ ## f
+#define idsym(id)	IPA_IMM_CMD_ ## id
+#define imm_cmd_obj(id, f, o)			\
+	[idsym(id)] = {				\
+		.construct = cfunc(f),		\
+		.opcode = o,			\
+	}
+#define imm_cmd_obj_inval(id)			\
+	[idsym(id)] = {				\
+		.construct = NULL,		\
+		.opcode = OPCODE_INVAL,		\
+	}
 static const struct ipahal_imm_cmd_obj
 		ipahal_imm_cmd_objs[][IPA_IMM_CMD_MAX] = {
 	/* IPAv3 */
 	[IPA_HW_v3_0] = {
-		[IPA_IMM_CMD_IP_V4_FILTER_INIT] = {
-			ipa_imm_cmd_construct_ip_v4_filter_init, 3,
-		},
-		[IPA_IMM_CMD_IP_V6_FILTER_INIT] = {
-			ipa_imm_cmd_construct_ip_v6_filter_init, 4,
-		},
-		[IPA_IMM_CMD_IP_V4_NAT_INIT] = {
-			ipa_imm_cmd_construct_ip_v4_nat_init, 5,
-		},
-		[IPA_IMM_CMD_IP_V4_ROUTING_INIT] = {
-			ipa_imm_cmd_construct_ip_v4_routing_init, 7,
-		},
-		[IPA_IMM_CMD_IP_V6_ROUTING_INIT] = {
-			ipa_imm_cmd_construct_ip_v6_routing_init, 8,
-		},
-		[IPA_IMM_CMD_HDR_INIT_LOCAL] = {
-			ipa_imm_cmd_construct_hdr_init_local, 9,
-		},
-		[IPA_IMM_CMD_HDR_INIT_SYSTEM] = {
-			ipa_imm_cmd_construct_hdr_init_system, 10,
-		},
-		[IPA_IMM_CMD_REGISTER_WRITE] = {
-			ipa_imm_cmd_construct_register_write, 12,
-		},
-		[IPA_IMM_CMD_NAT_DMA] = {
-			ipa_imm_cmd_construct_nat_dma, 14,
-		},
-		[IPA_IMM_CMD_IP_PACKET_INIT] = {
-			ipa_imm_cmd_construct_ip_packet_init, 16,
-		},
-		[IPA_IMM_CMD_DMA_TASK_32B_ADDR] = {
-			ipa_imm_cmd_construct_dma_task_32b_addr, 17,
-		},
-		[IPA_IMM_CMD_DMA_SHARED_MEM] = {
-			ipa_imm_cmd_construct_dma_shared_mem, 19,
-		},
-		[IPA_IMM_CMD_IP_PACKET_TAG_STATUS] = {
-			ipa_imm_cmd_construct_ip_packet_tag_status, 20,
-		},
+		imm_cmd_obj(IP_V4_FILTER_INIT,	ip_v4_filter_init,	3),
+		imm_cmd_obj(IP_V6_FILTER_INIT,	ip_v6_filter_init,	4),
+		imm_cmd_obj(IP_V4_NAT_INIT,	ip_v4_nat_init,		5),
+		imm_cmd_obj(IP_V4_ROUTING_INIT,	ip_v4_routing_init,	7),
+		imm_cmd_obj(IP_V6_ROUTING_INIT,	ip_v6_routing_init,	8),
+		imm_cmd_obj(HDR_INIT_LOCAL,	hdr_init_local,		9),
+		imm_cmd_obj(HDR_INIT_SYSTEM,	hdr_init_system,	10),
+		imm_cmd_obj(REGISTER_WRITE,	register_write,		12),
+		imm_cmd_obj(NAT_DMA,		nat_dma,		14),
+		imm_cmd_obj(IP_PACKET_INIT,	ip_packet_init,		16),
+		imm_cmd_obj(DMA_TASK_32B_ADDR,	dma_task_32b_addr,	17),
+		imm_cmd_obj(DMA_SHARED_MEM,	dma_shared_mem,		19),
+		imm_cmd_obj(IP_PACKET_TAG_STATUS, ip_packet_tag_status,	20),
 	},
 
 	/* IPAv3.1 */
@@ -675,21 +661,16 @@ static const struct ipahal_imm_cmd_obj
 
 	/* IPAv4 */
 	[IPA_HW_v4_0] = {
-		[IPA_IMM_CMD_REGISTER_WRITE] = {
-			ipa_imm_cmd_construct_register_write_v_4_0, 12,
-		},
+		imm_cmd_obj(REGISTER_WRITE, 	register_write_v_4_0,	12),
 		/* NAT_DMA was renamed to TABLE_DMA for IPAv4 */
-		[IPA_IMM_CMD_NAT_DMA] = {
-			NULL, OPCODE_INVAL,
-		},
-		[IPA_IMM_CMD_TABLE_DMA] = {
-			ipa_imm_cmd_construct_table_dma_ipav4, 14,
-		},
-		[IPA_IMM_CMD_DMA_SHARED_MEM] = {
-			ipa_imm_cmd_construct_dma_shared_mem_v_4_0, 19,
-		},
+		imm_cmd_obj_inval(NAT_DMA),
+		imm_cmd_obj(TABLE_DMA,		table_dma_ipav4,	14),
+		imm_cmd_obj(DMA_SHARED_MEM,	dma_shared_mem_v_4_0,	19),
 	},
 };
+#undef imm_cmd_obj
+#undef idsym
+#undef cfunc
 
 static const char *ipahal_imm_cmd_name_to_str[IPA_IMM_CMD_MAX] = {
 	__stringify(IPA_IMM_CMD_IP_V4_FILTER_INIT),
