@@ -24,9 +24,45 @@
 #include "ipahal_reg.h"
 #include "ipahal_reg_i.h"
 
-#define IPA_SETFIELD(val, shift, mask) (((val) << (shift)) & (mask))
-#define IPA_GETFIELD_FROM_REG(reg, shift, mask) \
-		(((reg) & (mask)) >> (shift))
+/*
+ * A field_mask is a bitmask that defines both the width and
+ * position of a field within in a 32-bit register.  Set bits in a
+ * field_mask define which bits are considered part of a field.  At
+ * least one bit must be set, and all set bits in a field_mask must
+ * be contiguous.
+ *
+ * The "width" of a field (1-32) can be determined by counting the
+ * number of 1 bits in its field_mask.  The "shift" for a field
+ * (i.e. the position of its rightmost set bit, 0-31) is the same as
+ * the number of low-order 0 bits in the field_mask.  For constant
+ * field_mask, these values can be computed at compile time using
+ * compiler builtins.  (We always inline this, and ensure we're
+ * using non-zero constants, to ensure this happens.)
+ */
+#define field_width(field_mask)        __builtin_popcount(field_mask)
+#define field_shift(field_mask)        __ffs(field_mask)
+
+/* Generate a field value--the given value shifted into the field's position */
+static __always_inline u32 field_gen(u32 val, u32 field_mask)
+{
+	BUILD_BUG_ON(!__builtin_constant_p(field_mask));
+	BUILD_BUG_ON(!field_mask);
+	WARN_ON(val > field_mask >> field_shift(field_mask));
+
+       return val << field_shift(field_mask) & field_mask;
+}
+
+/* Extract the value of a field from the given register */
+static __always_inline u32 field_val(u32 reg, u32 field_mask)
+{
+	BUILD_BUG_ON(!__builtin_constant_p(field_mask));
+	BUILD_BUG_ON(!field_mask);
+
+	return (reg & field_mask) >> field_shift(field_mask);
+}
+
+#define IPA_SETFIELD(val, shift, mask)		field_gen(val, mask)
+#define IPA_GETFIELD_FROM_REG(reg, shift, mask)	field_val(reg, mask)
 
 /*
  * struct ipahal_reg_obj - Register H/W information for specific IPA version
