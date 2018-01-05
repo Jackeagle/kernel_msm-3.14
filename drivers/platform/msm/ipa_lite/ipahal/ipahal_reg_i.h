@@ -122,8 +122,8 @@ void ipahal_reg_init(void);
 #define ENDP_DELAY_SHFT				1
 
 /* IPA_ENDP_INIT_CTRL_SCND_n register */
-#define IPA_ENDP_INIT_CTRL_SCND_n_ENDP_DELAY_BMSK 0x2
-#define IPA_ENDP_INIT_CTRL_SCND_n_ENDP_DELAY_SHFT 0x1
+#define ENDP_DELAY_BMSK				0x00000002
+#define ENDP_DELAY_SHFT				1
 
 /* IPA_ENDP_INIT_HOL_BLOCK_EN_n register */
 #define IPA_ENDP_INIT_HOL_BLOCK_EN_n_RMSK 0x1

@@ -664,8 +664,8 @@ static u32 ipareg_construct_endp_init_ctrl_scnd_n(enum ipahal_reg_name reg,
 	const struct ipahal_ep_cfg_ctrl_scnd *ep_ctrl_scnd = fields;
 
 	return IPA_SETFIELD(ep_ctrl_scnd->endp_delay,
-			IPA_ENDP_INIT_CTRL_SCND_n_ENDP_DELAY_SHFT,
-			IPA_ENDP_INIT_CTRL_SCND_n_ENDP_DELAY_BMSK);
+			ENDP_DELAY_SHFT,
+			ENDP_DELAY_BMSK);
 }
 
 static u32 ipareg_construct_endp_init_nat_n(enum ipahal_reg_name reg,
