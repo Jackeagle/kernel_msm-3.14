@@ -622,12 +622,12 @@ static u32 ipareg_construct_endp_init_ctrl_n(enum ipahal_reg_name reg,
 	u32 val;
 
 	val = IPA_SETFIELD(ep_ctrl->ipa_ep_suspend,
-			IPA_ENDP_INIT_CTRL_n_ENDP_SUSPEND_SHFT,
-			IPA_ENDP_INIT_CTRL_n_ENDP_SUSPEND_BMSK);
+			ENDP_SUSPEND_SHFT,
+			ENDP_SUSPEND_BMSK);
 
 	val |= IPA_SETFIELD(ep_ctrl->ipa_ep_delay,
-			IPA_ENDP_INIT_CTRL_n_ENDP_DELAY_SHFT,
-			IPA_ENDP_INIT_CTRL_n_ENDP_DELAY_BMSK);
+			ENDP_DELAY_SHFT,
+			ENDP_DELAY_BMSK);
 
 	return val;
 }
@@ -638,12 +638,12 @@ static void ipareg_parse_endp_init_ctrl_n(enum ipahal_reg_name reg,
 	struct ipa_ep_cfg_ctrl *ep_ctrl = fields;
 
 	ep_ctrl->ipa_ep_suspend =
-		((val & IPA_ENDP_INIT_CTRL_n_ENDP_SUSPEND_BMSK) >>
-			IPA_ENDP_INIT_CTRL_n_ENDP_SUSPEND_SHFT);
+		((val & ENDP_SUSPEND_BMSK) >>
+			ENDP_SUSPEND_SHFT);
 
 	ep_ctrl->ipa_ep_delay =
-		((val & IPA_ENDP_INIT_CTRL_n_ENDP_DELAY_BMSK) >>
-		IPA_ENDP_INIT_CTRL_n_ENDP_DELAY_SHFT);
+		((val & ENDP_DELAY_BMSK) >>
+		ENDP_DELAY_SHFT);
 }
 
 static u32 ipareg_construct_endp_init_ctrl_n_v4_0(enum ipahal_reg_name reg,
@@ -654,8 +654,8 @@ static u32 ipareg_construct_endp_init_ctrl_n_v4_0(enum ipahal_reg_name reg,
 	WARN_ON(ep_ctrl->ipa_ep_suspend);
 
 	return IPA_SETFIELD(ep_ctrl->ipa_ep_delay,
-			IPA_ENDP_INIT_CTRL_n_ENDP_DELAY_SHFT,
-			IPA_ENDP_INIT_CTRL_n_ENDP_DELAY_BMSK);
+			ENDP_DELAY_SHFT,
+			ENDP_DELAY_BMSK);
 }
 
 static u32 ipareg_construct_endp_init_ctrl_scnd_n(enum ipahal_reg_name reg,
