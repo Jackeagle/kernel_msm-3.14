@@ -601,8 +601,8 @@ static u32 ipareg_construct_endp_init_hol_block_en_n(
 	const struct ipa_ep_cfg_holb *ep_holb = fields;
 
 	return IPA_SETFIELD(ep_holb->en,
-			IPA_ENDP_INIT_HOL_BLOCK_EN_n_EN_SHFT,
-			IPA_ENDP_INIT_HOL_BLOCK_EN_n_EN_BMSK);
+			HOL_BLOCK_EN_SHFT,
+			HOL_BLOCK_EN_BMSK);
 }
 
 static u32 ipareg_construct_endp_init_hol_block_timer_n(
