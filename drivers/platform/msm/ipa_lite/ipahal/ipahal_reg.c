@@ -120,17 +120,17 @@ static u32 ipareg_construct_rsrg_grp_xy(
 	u32 val;
 
 	val = IPA_SETFIELD(grp->x_min,
-			IPA_RSRC_GRP_XY_RSRC_TYPE_n_X_MIN_LIM_SHFT,
-			IPA_RSRC_GRP_XY_RSRC_TYPE_n_X_MIN_LIM_BMSK);
+			X_MIN_LIM_SHFT,
+			X_MIN_LIM_BMSK);
 	val |= IPA_SETFIELD(grp->x_max,
-			IPA_RSRC_GRP_XY_RSRC_TYPE_n_X_MAX_LIM_SHFT,
-			IPA_RSRC_GRP_XY_RSRC_TYPE_n_X_MAX_LIM_BMSK);
+			X_MAX_LIM_SHFT,
+			X_MAX_LIM_BMSK);
 	val |= IPA_SETFIELD(grp->y_min,
-			IPA_RSRC_GRP_XY_RSRC_TYPE_n_Y_MIN_LIM_SHFT,
-			IPA_RSRC_GRP_XY_RSRC_TYPE_n_Y_MIN_LIM_BMSK);
+			Y_MIN_LIM_SHFT,
+			Y_MIN_LIM_BMSK);
 	val |= IPA_SETFIELD(grp->y_max,
-			IPA_RSRC_GRP_XY_RSRC_TYPE_n_Y_MAX_LIM_SHFT,
-			IPA_RSRC_GRP_XY_RSRC_TYPE_n_Y_MAX_LIM_BMSK);
+			Y_MAX_LIM_SHFT,
+			Y_MAX_LIM_BMSK);
 
 	return val;
 }
@@ -142,22 +142,22 @@ static u32 ipareg_construct_rsrg_grp_xy_v3_5(
 	u32 val;
 
 	val = IPA_SETFIELD(grp->x_min,
-			IPA_RSRC_GRP_XY_RSRC_TYPE_n_X_MIN_LIM_SHFT_V3_5,
-			IPA_RSRC_GRP_XY_RSRC_TYPE_n_X_MIN_LIM_BMSK_V3_5);
+			X_MIN_LIM_SHFT_V3_5,
+			X_MIN_LIM_BMSK_V3_5);
 	val |= IPA_SETFIELD(grp->x_max,
-			IPA_RSRC_GRP_XY_RSRC_TYPE_n_X_MAX_LIM_SHFT_V3_5,
-			IPA_RSRC_GRP_XY_RSRC_TYPE_n_X_MAX_LIM_BMSK_V3_5);
+			X_MAX_LIM_SHFT_V3_5,
+			X_MAX_LIM_BMSK_V3_5);
 
 	/* DST_23 register has only X fields at ipa V3_5 */
 	if (reg == IPA_DST_RSRC_GRP_23_RSRC_TYPE_n)
 		return val;
 
 	val |= IPA_SETFIELD(grp->y_min,
-			IPA_RSRC_GRP_XY_RSRC_TYPE_n_Y_MIN_LIM_SHFT_V3_5,
-			IPA_RSRC_GRP_XY_RSRC_TYPE_n_Y_MIN_LIM_BMSK_V3_5);
+			Y_MIN_LIM_SHFT_V3_5,
+			Y_MIN_LIM_BMSK_V3_5);
 	val |= IPA_SETFIELD(grp->y_max,
-			IPA_RSRC_GRP_XY_RSRC_TYPE_n_Y_MAX_LIM_SHFT_V3_5,
-			IPA_RSRC_GRP_XY_RSRC_TYPE_n_Y_MAX_LIM_BMSK_V3_5);
+			Y_MAX_LIM_SHFT_V3_5,
+			Y_MAX_LIM_BMSK_V3_5);
 
 	return val;
 }
