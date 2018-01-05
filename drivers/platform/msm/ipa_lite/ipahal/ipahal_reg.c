@@ -482,12 +482,12 @@ static void ipareg_parse_shared_mem_size(
 
 	memset(smem_sz, 0, sizeof(struct ipahal_reg_shared_mem_size));
 	smem_sz->shared_mem_sz = IPA_GETFIELD_FROM_REG(val,
-		IPA_SHARED_MEM_SIZE_SHARED_MEM_SIZE_SHFT,
-		IPA_SHARED_MEM_SIZE_SHARED_MEM_SIZE_BMSK);
+		SHARED_MEM_SIZE_SHFT,
+		SHARED_MEM_SIZE_BMSK);
 
 	smem_sz->shared_mem_baddr = IPA_GETFIELD_FROM_REG(val,
-		IPA_SHARED_MEM_SIZE_SHARED_MEM_BADDR_SHFT,
-		IPA_SHARED_MEM_SIZE_SHARED_MEM_BADDR_BMSK);
+		SHARED_MEM_BADDR_SHFT,
+		SHARED_MEM_BADDR_BMSK);
 }
 
 static u32 ipareg_construct_endp_init_rsrc_grp_n(
