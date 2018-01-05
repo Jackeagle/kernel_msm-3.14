@@ -291,11 +291,10 @@ void ipahal_reg_init(void);
 #define X_MIN_LIM_BMSK_V3_5			0x0000003f
 #define X_MIN_LIM_SHFT_V3_5			0
 
-/* IPA_IPA_IPA_RX_HPS_CLIENTS_MIN/MAX_DEPTH_0/1 registers */
-#define IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_BMSK(n) (0x7F << (8 * (n)))
-#define IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_BMSK_V3_5(n) \
-						(0xF << (8 * (n)))
-#define IPA_RX_HPS_CLIENTS_MINMAX_DEPTH_X_CLIENT_n_SHFT(n) (8 * (n))
+/* IPA_RX_HPS_CLIENTS_MIN/MAX_DEPTH_0/1 registers */
+#define MINMAX_DEPTH_X_CLIENT_n_BMSK(n)		(0x7f << (8 * (n)))
+#define MINMAX_DEPTH_X_CLIENT_n_BMSK_V3_5(n)	(0x0f << (8 * (n)))
+#define MINMAX_DEPTH_X_CLIENT_n_SHFT(n)		(8 * (n))
 
 /* IPA_QSB_MAX_WRITES register */
 #define IPA_QSB_MAX_WRITES_GEN_QMB_0_MAX_WRITES_BMSK (0xf)
