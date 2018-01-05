@@ -723,28 +723,28 @@ static void ipareg_parse_endp_init_aggr_n(enum ipahal_reg_name reg,
 	memset(ep_aggr, 0, sizeof(struct ipa_ep_cfg_aggr));
 
 	ep_aggr->aggr_en =
-		(((val & IPA_ENDP_INIT_AGGR_n_AGGR_EN_BMSK) >>
-			IPA_ENDP_INIT_AGGR_n_AGGR_EN_SHFT)
+		(((val & AGGR_EN_BMSK) >>
+			AGGR_EN_SHFT)
 			== IPA_ENABLE_AGGR);
 	ep_aggr->aggr =
-		((val & IPA_ENDP_INIT_AGGR_n_AGGR_TYPE_BMSK) >>
-			IPA_ENDP_INIT_AGGR_n_AGGR_TYPE_SHFT);
+		((val & AGGR_TYPE_BMSK) >>
+			AGGR_TYPE_SHFT);
 	ep_aggr->aggr_byte_limit =
-		((val & IPA_ENDP_INIT_AGGR_n_AGGR_BYTE_LIMIT_BMSK) >>
-			IPA_ENDP_INIT_AGGR_n_AGGR_BYTE_LIMIT_SHFT);
+		((val & AGGR_BYTE_LIMIT_BMSK) >>
+			AGGR_BYTE_LIMIT_SHFT);
 	ep_aggr->aggr_time_limit =
-		((val & IPA_ENDP_INIT_AGGR_n_AGGR_TIME_LIMIT_BMSK) >>
-			IPA_ENDP_INIT_AGGR_n_AGGR_TIME_LIMIT_SHFT);
+		((val & AGGR_TIME_LIMIT_BMSK) >>
+			AGGR_TIME_LIMIT_SHFT);
 	ep_aggr->aggr_pkt_limit =
-		((val & IPA_ENDP_INIT_AGGR_n_AGGR_PKT_LIMIT_BMSK) >>
-			IPA_ENDP_INIT_AGGR_n_AGGR_PKT_LIMIT_SHFT);
+		((val & AGGR_PKT_LIMIT_BMSK) >>
+			AGGR_PKT_LIMIT_SHFT);
 	ep_aggr->aggr_sw_eof_active =
-		((val & IPA_ENDP_INIT_AGGR_n_AGGR_SW_EOF_ACTIVE_BMSK) >>
-			IPA_ENDP_INIT_AGGR_n_AGGR_SW_EOF_ACTIVE_SHFT);
+		((val & AGGR_SW_EOF_ACTIVE_BMSK) >>
+			AGGR_SW_EOF_ACTIVE_SHFT);
 	ep_aggr->aggr_hard_byte_limit_en =
-		((val & IPA_ENDP_INIT_AGGR_n_AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK)
+		((val & AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK)
 			>>
-			IPA_ENDP_INIT_AGGR_n_AGGR_HARD_BYTE_LIMIT_ENABLE_SHFT);
+			AGGR_HARD_BYTE_LIMIT_ENABLE_SHFT);
 }
 
 static u32 ipareg_construct_endp_init_aggr_n(enum ipahal_reg_name reg,
@@ -754,32 +754,32 @@ static u32 ipareg_construct_endp_init_aggr_n(enum ipahal_reg_name reg,
 	u32 val;
 
 	val = IPA_SETFIELD(ep_aggr->aggr_en,
-			IPA_ENDP_INIT_AGGR_n_AGGR_EN_SHFT,
-			IPA_ENDP_INIT_AGGR_n_AGGR_EN_BMSK);
+			AGGR_EN_SHFT,
+			AGGR_EN_BMSK);
 
 	val |= IPA_SETFIELD(ep_aggr->aggr,
-			IPA_ENDP_INIT_AGGR_n_AGGR_TYPE_SHFT,
-			IPA_ENDP_INIT_AGGR_n_AGGR_TYPE_BMSK);
+			AGGR_TYPE_SHFT,
+			AGGR_TYPE_BMSK);
 
 	val |= IPA_SETFIELD(ep_aggr->aggr_byte_limit,
-			IPA_ENDP_INIT_AGGR_n_AGGR_BYTE_LIMIT_SHFT,
-			IPA_ENDP_INIT_AGGR_n_AGGR_BYTE_LIMIT_BMSK);
+			AGGR_BYTE_LIMIT_SHFT,
+			AGGR_BYTE_LIMIT_BMSK);
 
 	val |= IPA_SETFIELD(ep_aggr->aggr_time_limit,
-			IPA_ENDP_INIT_AGGR_n_AGGR_TIME_LIMIT_SHFT,
-			IPA_ENDP_INIT_AGGR_n_AGGR_TIME_LIMIT_BMSK);
+			AGGR_TIME_LIMIT_SHFT,
+			AGGR_TIME_LIMIT_BMSK);
 
 	val |= IPA_SETFIELD(ep_aggr->aggr_pkt_limit,
-			IPA_ENDP_INIT_AGGR_n_AGGR_PKT_LIMIT_SHFT,
-			IPA_ENDP_INIT_AGGR_n_AGGR_PKT_LIMIT_BMSK);
+			AGGR_PKT_LIMIT_SHFT,
+			AGGR_PKT_LIMIT_BMSK);
 
 	val |= IPA_SETFIELD(ep_aggr->aggr_sw_eof_active,
-			IPA_ENDP_INIT_AGGR_n_AGGR_SW_EOF_ACTIVE_SHFT,
-			IPA_ENDP_INIT_AGGR_n_AGGR_SW_EOF_ACTIVE_BMSK);
+			AGGR_SW_EOF_ACTIVE_SHFT,
+			AGGR_SW_EOF_ACTIVE_BMSK);
 
 	val |= IPA_SETFIELD(ep_aggr->aggr_hard_byte_limit_en,
-			IPA_ENDP_INIT_AGGR_n_AGGR_HARD_BYTE_LIMIT_ENABLE_SHFT,
-			IPA_ENDP_INIT_AGGR_n_AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK);
+			AGGR_HARD_BYTE_LIMIT_ENABLE_SHFT,
+			AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK);
 
 	return val;
 }
@@ -1529,29 +1529,29 @@ void ipahal_get_disable_aggr_valmask(struct ipahal_reg_valmask *valmask)
 		return;
 	}
 
-	valmask->val = (1 & IPA_ENDP_INIT_AGGR_n_AGGR_FORCE_CLOSE_BMSK) <<
-		IPA_ENDP_INIT_AGGR_n_AGGR_FORCE_CLOSE_SHFT;
-	valmask->mask = IPA_ENDP_INIT_AGGR_n_AGGR_FORCE_CLOSE_BMSK <<
-		IPA_ENDP_INIT_AGGR_n_AGGR_FORCE_CLOSE_SHFT;
+	valmask->val = (1 & AGGR_FORCE_CLOSE_BMSK) <<
+		AGGR_FORCE_CLOSE_SHFT;
+	valmask->mask = AGGR_FORCE_CLOSE_BMSK <<
+		AGGR_FORCE_CLOSE_SHFT;
 
-	valmask->val |= ((0 & IPA_ENDP_INIT_AGGR_n_AGGR_EN_BMSK) <<
-		IPA_ENDP_INIT_AGGR_n_AGGR_EN_SHFT);
-	valmask->mask |= ((IPA_ENDP_INIT_AGGR_n_AGGR_EN_BMSK <<
-		IPA_ENDP_INIT_AGGR_n_AGGR_EN_SHFT));
+	valmask->val |= ((0 & AGGR_EN_BMSK) <<
+		AGGR_EN_SHFT);
+	valmask->mask |= ((AGGR_EN_BMSK <<
+		AGGR_EN_SHFT));
 }
 
 u32 ipahal_aggr_get_max_byte_limit(void)
 {
 	return
-		IPA_ENDP_INIT_AGGR_n_AGGR_BYTE_LIMIT_BMSK >>
-		IPA_ENDP_INIT_AGGR_n_AGGR_BYTE_LIMIT_SHFT;
+		AGGR_BYTE_LIMIT_BMSK >>
+		AGGR_BYTE_LIMIT_SHFT;
 }
 
 u32 ipahal_aggr_get_max_pkt_limit(void)
 {
 	return
-		IPA_ENDP_INIT_AGGR_n_AGGR_PKT_LIMIT_BMSK >>
-		IPA_ENDP_INIT_AGGR_n_AGGR_PKT_LIMIT_SHFT;
+		AGGR_PKT_LIMIT_BMSK >>
+		AGGR_PKT_LIMIT_SHFT;
 }
 
 void ipahal_get_aggr_force_close_valmask(int ep_idx,
