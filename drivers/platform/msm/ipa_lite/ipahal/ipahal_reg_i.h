@@ -176,9 +176,9 @@ void ipahal_reg_init(void);
 #define METADATA_MASK_BMSK			0xffffffff
 #define METADATA_MASK_SHFT			0
 
-/* IPA_IPA_ENDP_INIT_HDR_METADATA_n register */
-#define IPA_ENDP_INIT_HDR_METADATA_n_METADATA_BMSK 0xffffffff
-#define IPA_ENDP_INIT_HDR_METADATA_n_METADATA_SHFT 0x0
+/* IPA_ENDP_INIT_HDR_METADATA_n register */
+#define METADATA_BMSK				0xffffffff
+#define METADATA_SHFT				0
 
 /* IPA_ENDP_INIT_RSRC_GRP_n register */
 #define IPA_ENDP_INIT_RSRC_GRP_n_RSRC_GRP_BMSK 0x7

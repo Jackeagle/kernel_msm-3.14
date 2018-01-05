@@ -516,8 +516,8 @@ static u32 ipareg_construct_endp_init_hdr_metadata_n(
 	const struct ipa_ep_cfg_metadata *metadata = fields;
 
 	return IPA_SETFIELD(metadata->qmap_id,
-			IPA_ENDP_INIT_HDR_METADATA_n_METADATA_SHFT,
-			IPA_ENDP_INIT_HDR_METADATA_n_METADATA_BMSK);
+			METADATA_SHFT,
+			METADATA_BMSK);
 }
 
 static u32 ipareg_construct_endp_init_hdr_metadata_mask_n(
@@ -526,8 +526,8 @@ static u32 ipareg_construct_endp_init_hdr_metadata_mask_n(
 	const struct ipa_ep_cfg_metadata_mask *metadata_mask = fields;
 
 	return IPA_SETFIELD(metadata_mask->metadata_mask,
-			IPA_ENDP_INIT_HDR_METADATA_MASK_n_METADATA_MASK_SHFT,
-			IPA_ENDP_INIT_HDR_METADATA_MASK_n_METADATA_MASK_BMSK);
+			METADATA_MASK_SHFT,
+			METADATA_MASK_BMSK);
 }
 
 static u32 ipareg_construct_endp_init_cfg_n(
