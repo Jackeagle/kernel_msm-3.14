@@ -349,8 +349,11 @@ static u32 ipareg_construct_qcncm(
 	val |= IPA_SETFIELD(qcncm->mode_val,
 			MODE_VAL_SHFT,
 			MODE_VAL_BMSK);
-	val |= IPA_SETFIELD(qcncm->undefined,
-			0, MODE_VAL_BMSK);
+	/*
+	 * For some reason, the undefined value is formatted
+	 * using the wrong mask, and without shifting.
+	 */
+	val |= qcncm->undefined & MODE_VAL_BMSK;
 
 	return val;
 }
@@ -367,10 +370,13 @@ static void ipareg_parse_qcncm(
 	qcncm->mode_val = IPA_GETFIELD_FROM_REG(val,
 		MODE_VAL_SHFT,
 		MODE_VAL_BMSK);
-	qcncm->undefined = IPA_GETFIELD_FROM_REG(val,
-		0, QCNCM_UNDEFINED1_BMSK);
-	qcncm->undefined |= IPA_GETFIELD_FROM_REG(val,
-		0, MODE_UNDEFINED2_BMSK);
+	/*
+	 * For some reason, the undefined value extracts field
+	 * values without shifting to account for the position
+	 * of the defined fields.
+	 */
+	qcncm->undefined = val & QCNCM_UNDEFINED1_BMSK;
+	qcncm->undefined |= val & MODE_UNDEFINED2_BMSK;
 }
 
 static u32 ipareg_construct_single_ndp_mode(
