@@ -956,16 +956,16 @@ static void ipareg_parse_tx_cfg(enum ipahal_reg_name reg,
 	struct ipahal_reg_tx_cfg *tx_cfg = fields;
 
 	tx_cfg->tx0_prefetch_disable = IPA_GETFIELD_FROM_REG(val,
-		IPA_TX_CFG_TX0_PREFETCH_DISABLE_SHFT_V3_5,
-		IPA_TX_CFG_TX0_PREFETCH_DISABLE_BMSK_V3_5);
+		TX0_PREFETCH_DISABLE_SHFT_V3_5,
+		TX0_PREFETCH_DISABLE_BMSK_V3_5);
 
 	tx_cfg->tx1_prefetch_disable = IPA_GETFIELD_FROM_REG(val,
-		IPA_TX_CFG_TX1_PREFETCH_DISABLE_SHFT_V3_5,
-		IPA_TX_CFG_TX1_PREFETCH_DISABLE_BMSK_V3_5);
+		TX1_PREFETCH_DISABLE_SHFT_V3_5,
+		TX1_PREFETCH_DISABLE_BMSK_V3_5);
 
 	tx_cfg->tx0_prefetch_almost_empty_size = IPA_GETFIELD_FROM_REG(val,
-		IPA_TX_CFG_PREFETCH_ALMOST_EMPTY_SIZE_SHFT_V3_5,
-		IPA_TX_CFG_PREFETCH_ALMOST_EMPTY_SIZE_BMSK_V3_5);
+		PREFETCH_ALMOST_EMPTY_SIZE_SHFT_V3_5,
+		PREFETCH_ALMOST_EMPTY_SIZE_BMSK_V3_5);
 
 	tx_cfg->tx1_prefetch_almost_empty_size =
 		tx_cfg->tx0_prefetch_almost_empty_size;
@@ -1012,16 +1012,16 @@ static u32 ipareg_construct_tx_cfg(enum ipahal_reg_name reg,
 		ipa_assert();
 
 	val = IPA_SETFIELD(tx_cfg->tx0_prefetch_disable,
-			IPA_TX_CFG_TX0_PREFETCH_DISABLE_SHFT_V3_5,
-			IPA_TX_CFG_TX0_PREFETCH_DISABLE_BMSK_V3_5);
+			TX0_PREFETCH_DISABLE_SHFT_V3_5,
+			TX0_PREFETCH_DISABLE_BMSK_V3_5);
 
 	val |= IPA_SETFIELD(tx_cfg->tx1_prefetch_disable,
-			IPA_TX_CFG_TX1_PREFETCH_DISABLE_SHFT_V3_5,
-			IPA_TX_CFG_TX1_PREFETCH_DISABLE_BMSK_V3_5);
+			TX1_PREFETCH_DISABLE_SHFT_V3_5,
+			TX1_PREFETCH_DISABLE_BMSK_V3_5);
 
 	val |= IPA_SETFIELD(tx_cfg->tx0_prefetch_almost_empty_size,
-			IPA_TX_CFG_PREFETCH_ALMOST_EMPTY_SIZE_SHFT_V3_5,
-			IPA_TX_CFG_PREFETCH_ALMOST_EMPTY_SIZE_BMSK_V3_5);
+			PREFETCH_ALMOST_EMPTY_SIZE_SHFT_V3_5,
+			PREFETCH_ALMOST_EMPTY_SIZE_BMSK_V3_5);
 
 	return val;
 }
