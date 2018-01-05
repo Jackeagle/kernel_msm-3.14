@@ -919,11 +919,11 @@ static u32 ipareg_construct_qsb_max_reads(enum ipahal_reg_name reg,
 	u32 val;
 
 	val = IPA_SETFIELD(max_reads->qmb_0_max_reads,
-			    IPA_QSB_MAX_READS_GEN_QMB_0_MAX_READS_SHFT,
-			    IPA_QSB_MAX_READS_GEN_QMB_0_MAX_READS_BMSK);
+			    GEN_QMB_0_MAX_READS_SHFT,
+			    GEN_QMB_0_MAX_READS_BMSK);
 	val |= IPA_SETFIELD(max_reads->qmb_1_max_reads,
-			    IPA_QSB_MAX_READS_GEN_QMB_1_MAX_READS_SHFT,
-			    IPA_QSB_MAX_READS_GEN_QMB_1_MAX_READS_BMSK);
+			    GEN_QMB_1_MAX_READS_SHFT,
+			    GEN_QMB_1_MAX_READS_BMSK);
 
 	return val;
 }
@@ -935,11 +935,11 @@ static u32 ipareg_construct_qsb_max_reads_v4_0(enum ipahal_reg_name reg,
 	u32 val;
 
 	val = IPA_SETFIELD(max_reads->qmb_0_max_reads,
-			    IPA_QSB_MAX_READS_GEN_QMB_0_MAX_READS_SHFT,
-			    IPA_QSB_MAX_READS_GEN_QMB_0_MAX_READS_BMSK);
+			    GEN_QMB_0_MAX_READS_SHFT,
+			    GEN_QMB_0_MAX_READS_BMSK);
 	val |= IPA_SETFIELD(max_reads->qmb_1_max_reads,
-			    IPA_QSB_MAX_READS_GEN_QMB_1_MAX_READS_SHFT,
-			    IPA_QSB_MAX_READS_GEN_QMB_1_MAX_READS_BMSK);
+			    GEN_QMB_1_MAX_READS_SHFT,
+			    GEN_QMB_1_MAX_READS_BMSK);
 	val |= IPA_SETFIELD(max_reads->qmb_0_max_read_beats,
 			IPA_QSB_MAX_READS_BEATS_GEN_QMB_0_MAX_READS_BEATS_SHFT_V4_0,
 			IPA_QSB_MAX_READS_BEATS_GEN_QMB_0_MAX_READS_BEATS_BMSK_V4_0);
