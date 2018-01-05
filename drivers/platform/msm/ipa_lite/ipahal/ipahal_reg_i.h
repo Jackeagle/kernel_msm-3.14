@@ -156,11 +156,11 @@ void ipahal_reg_init(void);
 #define HPS_SEQ_TYPE_BMSK			0x0000000f
 #define HPS_SEQ_TYPE_SHFT			0
 
-/* IPA_DEBUG_CNT_REG_m register */
-#define IPA_DEBUG_CNT_REG_N_RMSK 0xffffffff
-#define IPA_DEBUG_CNT_REG_N_MAX 15
-#define IPA_DEBUG_CNT_REG_N_DBG_CNT_REG_BMSK 0xffffffff
-#define IPA_DEBUG_CNT_REG_N_DBG_CNT_REG_SHFT 0x0
+/* IPA_DEBUG_CNT_REG_n register */
+#define DBG_CNT_RMSK				0xffffffff
+#define DBG_CNT_MAX				15
+#define DBG_CNT_REG_BMSK			0xffffffff
+#define DBG_CNT_REG_SHFT			0
 
 /* IPA_ENDP_INIT_CFG_n register */
 #define IPA_ENDP_INIT_CFG_n_CS_GEN_QMB_MASTER_SEL_BMSK 0x100
