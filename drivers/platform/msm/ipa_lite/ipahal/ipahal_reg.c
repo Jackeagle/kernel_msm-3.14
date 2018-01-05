@@ -1598,17 +1598,13 @@ void ipahal_get_fltrt_hash_flush_valmask(
 	memset(valmask, 0, sizeof(struct ipahal_reg_valmask));
 
 	if (flush->v6_rt)
-		valmask->val |=
-			(1<<IPA_FILT_ROUT_HASH_FLUSH_IPv6_ROUT_SHFT);
+		valmask->val |= 1 << IPv6_ROUT_SHFT;
 	if (flush->v6_flt)
-		valmask->val |=
-			(1<<IPA_FILT_ROUT_HASH_FLUSH_IPv6_FILT_SHFT);
+		valmask->val |= 1 << IPv6_FILT_SHFT;
 	if (flush->v4_rt)
-		valmask->val |=
-			(1<<IPA_FILT_ROUT_HASH_FLUSH_IPv4_ROUT_SHFT);
+		valmask->val |= 1 << IPv4_ROUT_SHFT;
 	if (flush->v4_flt)
-		valmask->val |=
-			(1<<IPA_FILT_ROUT_HASH_FLUSH_IPv4_FILT_SHFT);
+		valmask->val |= 1 << IPv4_FILT_SHFT;
 
 	valmask->mask = valmask->val;
 }

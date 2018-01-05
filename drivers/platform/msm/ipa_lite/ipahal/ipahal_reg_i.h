@@ -208,10 +208,10 @@ void ipahal_reg_init(void);
 #define DBG_CNT_EN_SHFT				0
 
 /* IPA_FILT_ROUT_HASH_FLUSH register */
-#define IPA_FILT_ROUT_HASH_FLUSH_IPv4_FILT_SHFT 12
-#define IPA_FILT_ROUT_HASH_FLUSH_IPv4_ROUT_SHFT 8
-#define IPA_FILT_ROUT_HASH_FLUSH_IPv6_FILT_SHFT 4
-#define IPA_FILT_ROUT_HASH_FLUSH_IPv6_ROUT_SHFT 0
+#define IPv4_FILT_SHFT				12
+#define IPv4_ROUT_SHFT				8
+#define IPv6_FILT_SHFT				4
+#define IPv6_ROUT_SHFT				0
 
 /* IPA_SINGLE_NDP_MODE register */
 #define IPA_SINGLE_NDP_MODE_UNDEFINED_BMSK 0xfffffffe
