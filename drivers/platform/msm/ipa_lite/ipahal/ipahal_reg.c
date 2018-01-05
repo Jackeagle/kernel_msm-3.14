@@ -344,13 +344,13 @@ static u32 ipareg_construct_qcncm(
 	u32 val;
 
 	val = IPA_SETFIELD(qcncm->mode_en ? 1 : 0,
-			IPA_QCNCM_MODE_EN_SHFT,
-			IPA_QCNCM_MODE_EN_BMSK);
+			MODE_EN_SHFT,
+			MODE_EN_BMSK);
 	val |= IPA_SETFIELD(qcncm->mode_val,
-			IPA_QCNCM_MODE_VAL_SHFT,
-			IPA_QCNCM_MODE_VAL_BMSK);
+			MODE_VAL_SHFT,
+			MODE_VAL_BMSK);
 	val |= IPA_SETFIELD(qcncm->undefined,
-			0, IPA_QCNCM_MODE_VAL_BMSK);
+			0, MODE_VAL_BMSK);
 
 	return val;
 }
@@ -362,15 +362,15 @@ static void ipareg_parse_qcncm(
 
 	memset(qcncm, 0, sizeof(struct ipahal_reg_qcncm));
 	qcncm->mode_en = IPA_GETFIELD_FROM_REG(val,
-		IPA_QCNCM_MODE_EN_SHFT,
-		IPA_QCNCM_MODE_EN_BMSK);
+		MODE_EN_SHFT,
+		MODE_EN_BMSK);
 	qcncm->mode_val = IPA_GETFIELD_FROM_REG(val,
-		IPA_QCNCM_MODE_VAL_SHFT,
-		IPA_QCNCM_MODE_VAL_BMSK);
+		MODE_VAL_SHFT,
+		MODE_VAL_BMSK);
 	qcncm->undefined = IPA_GETFIELD_FROM_REG(val,
-		0, IPA_QCNCM_UNDEFINED1_BMSK);
+		0, QCNCM_UNDEFINED1_BMSK);
 	qcncm->undefined |= IPA_GETFIELD_FROM_REG(val,
-		0, IPA_QCNCM_MODE_UNDEFINED2_BMSK);
+		0, MODE_UNDEFINED2_BMSK);
 }
 
 static u32 ipareg_construct_single_ndp_mode(
