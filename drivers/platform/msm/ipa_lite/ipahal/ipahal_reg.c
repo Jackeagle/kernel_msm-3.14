@@ -412,8 +412,8 @@ static u32 ipareg_construct_debug_cnt_ctrl_n(
 	u8 type;
 
 	val = IPA_SETFIELD(dbg_cnt_ctrl->en ? 1 : 0,
-			IPA_DEBUG_CNT_CTRL_n_DBG_CNT_EN_SHFT,
-			IPA_DEBUG_CNT_CTRL_n_DBG_CNT_EN_BMSK);
+			DBG_CNT_EN_SHFT,
+			DBG_CNT_EN_BMSK);
 
 	switch (dbg_cnt_ctrl->type) {
 	case DBG_CNT_TYPE_IPV4_FLTR:
@@ -448,28 +448,28 @@ static u32 ipareg_construct_debug_cnt_ctrl_n(
 	};
 
 	val |= IPA_SETFIELD(type,
-			IPA_DEBUG_CNT_CTRL_n_DBG_CNT_TYPE_SHFT,
-			IPA_DEBUG_CNT_CTRL_n_DBG_CNT_TYPE_BMSK);
+			DBG_CNT_TYPE_SHFT,
+			DBG_CNT_TYPE_BMSK);
 
 	val |= IPA_SETFIELD(dbg_cnt_ctrl->product ? 1 : 0,
-			IPA_DEBUG_CNT_CTRL_n_PRODUCT_SHFT,
-			IPA_DEBUG_CNT_CTRL_n_PRODUCT_BMSK);
+			PRODUCT_SHFT,
+			PRODUCT_BMSK);
 
 	val |= IPA_SETFIELD(dbg_cnt_ctrl->src_pipe,
-			IPA_DEBUG_CNT_CTRL_n_SOURCE_PIPE_SHFT,
-			IPA_DEBUG_CNT_CTRL_n_SOURCE_PIPE_BMSK);
+			SOURCE_PIPE_SHFT,
+			SOURCE_PIPE_BMSK);
 
 	if (ipahal_ctx->hw_type <= IPA_HW_v3_1) {
 		val |= IPA_SETFIELD(dbg_cnt_ctrl->rule_idx,
-			IPA_DEBUG_CNT_CTRL_n_RULE_INDEX_SHFT,
-			IPA_DEBUG_CNT_CTRL_n_RULE_INDEX_BMSK);
+			RULE_INDEX_SHFT,
+			RULE_INDEX_BMSK);
 		val |= IPA_SETFIELD(dbg_cnt_ctrl->rule_idx_pipe_rule,
-			IPA_DEBUG_CNT_CTRL_n_RULE_INDEX_PIPE_RULE_SHFT,
-			IPA_DEBUG_CNT_CTRL_n_RULE_INDEX_PIPE_RULE_BMSK);
+			RULE_INDEX_PIPE_RULE_SHFT,
+			RULE_INDEX_PIPE_RULE_BMSK);
 	} else {
 		val |= IPA_SETFIELD(dbg_cnt_ctrl->rule_idx,
-			IPA_DEBUG_CNT_CTRL_n_RULE_INDEX_SHFT,
-			IPA_DEBUG_CNT_CTRL_n_RULE_INDEX_BMSK_V3_5);
+			RULE_INDEX_SHFT,
+			RULE_INDEX_BMSK_V3_5);
 	}
 
 	return val;
