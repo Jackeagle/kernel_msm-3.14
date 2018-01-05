@@ -496,8 +496,8 @@ static u32 ipareg_construct_endp_init_rsrc_grp_n(
 	const struct ipahal_reg_endp_init_rsrc_grp *rsrc_grp = fields;
 
 	return IPA_SETFIELD(rsrc_grp->rsrc_grp,
-			IPA_ENDP_INIT_RSRC_GRP_n_RSRC_GRP_SHFT,
-			IPA_ENDP_INIT_RSRC_GRP_n_RSRC_GRP_BMSK);
+			RSRC_GRP_SHFT,
+			RSRC_GRP_BMSK);
 }
 
 static u32 ipareg_construct_endp_init_rsrc_grp_n_v3_5(
@@ -506,8 +506,8 @@ static u32 ipareg_construct_endp_init_rsrc_grp_n_v3_5(
 	const struct ipahal_reg_endp_init_rsrc_grp *rsrc_grp = fields;
 
 	return IPA_SETFIELD(rsrc_grp->rsrc_grp,
-			IPA_ENDP_INIT_RSRC_GRP_n_RSRC_GRP_SHFT_v3_5,
-			IPA_ENDP_INIT_RSRC_GRP_n_RSRC_GRP_BMSK_v3_5);
+			RSRC_GRP_SHFT_v3_5,
+			RSRC_GRP_BMSK_v3_5);
 }
 
 static u32 ipareg_construct_endp_init_hdr_metadata_n(
