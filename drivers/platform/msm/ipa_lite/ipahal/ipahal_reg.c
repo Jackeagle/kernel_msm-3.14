@@ -298,16 +298,16 @@ static u32 ipareg_construct_endp_status_n(
 	u32 val;
 
 	val = IPA_SETFIELD(ep_status->status_en,
-			IPA_ENDP_STATUS_n_STATUS_EN_SHFT,
-			IPA_ENDP_STATUS_n_STATUS_EN_BMSK);
+			STATUS_EN_SHFT,
+			STATUS_EN_BMSK);
 
 	val |= IPA_SETFIELD(ep_status->status_ep,
-			IPA_ENDP_STATUS_n_STATUS_ENDP_SHFT,
-			IPA_ENDP_STATUS_n_STATUS_ENDP_BMSK);
+			STATUS_ENDP_SHFT,
+			STATUS_ENDP_BMSK);
 
 	val |= IPA_SETFIELD(ep_status->status_location,
-			IPA_ENDP_STATUS_n_STATUS_LOCATION_SHFT,
-			IPA_ENDP_STATUS_n_STATUS_LOCATION_BMSK);
+			STATUS_LOCATION_SHFT,
+			STATUS_LOCATION_BMSK);
 
 	return val;
 }
@@ -319,20 +319,20 @@ static u32 ipareg_construct_endp_status_n_v4_0(
 	u32 val;
 
 	val = IPA_SETFIELD(ep_status->status_en,
-			IPA_ENDP_STATUS_n_STATUS_EN_SHFT,
-			IPA_ENDP_STATUS_n_STATUS_EN_BMSK);
+			STATUS_EN_SHFT,
+			STATUS_EN_BMSK);
 
 	val |= IPA_SETFIELD(ep_status->status_ep,
-			IPA_ENDP_STATUS_n_STATUS_ENDP_SHFT,
-			IPA_ENDP_STATUS_n_STATUS_ENDP_BMSK);
+			STATUS_ENDP_SHFT,
+			STATUS_ENDP_BMSK);
 
 	val |= IPA_SETFIELD(ep_status->status_location,
-			IPA_ENDP_STATUS_n_STATUS_LOCATION_SHFT,
-			IPA_ENDP_STATUS_n_STATUS_LOCATION_BMSK);
+			STATUS_LOCATION_SHFT,
+			STATUS_LOCATION_BMSK);
 
 	val |= IPA_SETFIELD(ep_status->status_pkt_suppress,
-			IPA_ENDP_STATUS_n_STATUS_PKT_SUPPRESS_SHFT,
-			IPA_ENDP_STATUS_n_STATUS_PKT_SUPPRESS_BMSK);
+			STATUS_PKT_SUPPRESS_SHFT,
+			STATUS_PKT_SUPPRESS_BMSK);
 
 	return val;
 }
@@ -1617,11 +1617,6 @@ void ipahal_get_status_ep_valmask(int pipe_num,
 		return;
 	}
 
-	valmask->val =
-		(pipe_num & IPA_ENDP_STATUS_n_STATUS_ENDP_BMSK) <<
-		IPA_ENDP_STATUS_n_STATUS_ENDP_SHFT;
-
-	valmask->mask =
-		IPA_ENDP_STATUS_n_STATUS_ENDP_BMSK <<
-		IPA_ENDP_STATUS_n_STATUS_ENDP_SHFT;
+	valmask->val = (pipe_num & STATUS_ENDP_BMSK) << STATUS_ENDP_SHFT;
+	valmask->mask = STATUS_ENDP_BMSK << STATUS_ENDP_SHFT;
 }
