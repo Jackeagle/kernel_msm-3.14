@@ -695,12 +695,12 @@ static u32 ipareg_construct_endp_init_mode_n(enum ipahal_reg_name reg,
 	u32 val;
 
 	val = IPA_SETFIELD(init_mode->ep_mode.mode,
-			IPA_ENDP_INIT_MODE_n_MODE_SHFT,
-			IPA_ENDP_INIT_MODE_n_MODE_BMSK);
+			MODE_SHFT,
+			MODE_BMSK);
 
 	val |= IPA_SETFIELD(init_mode->dst_pipe_number,
-			IPA_ENDP_INIT_MODE_n_DEST_PIPE_INDEX_SHFT,
-			IPA_ENDP_INIT_MODE_n_DEST_PIPE_INDEX_BMSK);
+			DEST_PIPE_INDEX_SHFT,
+			DEST_PIPE_INDEX_BMSK);
 
 	return val;
 }
