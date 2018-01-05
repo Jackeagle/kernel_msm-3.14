@@ -380,12 +380,12 @@ static u32 ipareg_construct_single_ndp_mode(
 	u32 val;
 
 	val = IPA_SETFIELD(mode->single_ndp_en ? 1 : 0,
-			IPA_SINGLE_NDP_MODE_SINGLE_NDP_EN_SHFT,
-			IPA_SINGLE_NDP_MODE_SINGLE_NDP_EN_BMSK);
+			SINGLE_NDP_EN_SHFT,
+			SINGLE_NDP_EN_BMSK);
 
 	val |= IPA_SETFIELD(mode->undefined,
-			IPA_SINGLE_NDP_MODE_UNDEFINED_SHFT,
-			IPA_SINGLE_NDP_MODE_UNDEFINED_BMSK);
+			SINGLE_NDP_UNDEFINED_SHFT,
+			SINGLE_NDP_UNDEFINED_BMSK);
 
 	return val;
 }
@@ -397,11 +397,11 @@ static void ipareg_parse_single_ndp_mode(
 
 	memset(mode, 0, sizeof(struct ipahal_reg_single_ndp_mode));
 	mode->single_ndp_en = IPA_GETFIELD_FROM_REG(val,
-		IPA_SINGLE_NDP_MODE_SINGLE_NDP_EN_SHFT,
-		IPA_SINGLE_NDP_MODE_SINGLE_NDP_EN_BMSK);
+		SINGLE_NDP_EN_SHFT,
+		SINGLE_NDP_EN_BMSK);
 	mode->undefined = IPA_GETFIELD_FROM_REG(val,
-		IPA_SINGLE_NDP_MODE_UNDEFINED_SHFT,
-		IPA_SINGLE_NDP_MODE_UNDEFINED_BMSK);
+		SINGLE_NDP_UNDEFINED_SHFT,
+		SINGLE_NDP_UNDEFINED_BMSK);
 }
 
 static u32 ipareg_construct_debug_cnt_ctrl_n(
