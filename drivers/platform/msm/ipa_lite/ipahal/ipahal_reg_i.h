@@ -108,8 +108,8 @@ void ipahal_reg_init(void);
 #define MODE_SHFT				0
 
 /* IPA_ENDP_INIT_NAT_n register */
-#define IPA_ENDP_INIT_NAT_n_NAT_EN_BMSK 0x3
-#define IPA_ENDP_INIT_NAT_n_NAT_EN_SHFT 0x0
+#define NAT_EN_BMSK				0x00000003
+#define NAT_EN_SHFT				0
 
 /* IPA_ENDP_INIT_CONN_TRACK_n register */
 #define IPA_ENDP_INIT_CONN_TRACK_n_CONN_TRACK_EN_BMSK 0x1

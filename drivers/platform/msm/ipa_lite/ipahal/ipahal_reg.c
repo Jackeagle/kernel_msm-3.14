@@ -674,8 +674,8 @@ static u32 ipareg_construct_endp_init_nat_n(enum ipahal_reg_name reg,
 	const struct ipa_ep_cfg_nat *ep_nat = fields;
 
 	return IPA_SETFIELD(ep_nat->nat_en,
-			IPA_ENDP_INIT_NAT_n_NAT_EN_SHFT,
-			IPA_ENDP_INIT_NAT_n_NAT_EN_BMSK);
+			NAT_EN_SHFT,
+			NAT_EN_BMSK);
 }
 
 static u32 ipareg_construct_endp_init_conn_track_n(enum ipahal_reg_name reg,
