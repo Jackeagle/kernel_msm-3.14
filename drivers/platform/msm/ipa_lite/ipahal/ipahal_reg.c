@@ -684,8 +684,8 @@ static u32 ipareg_construct_endp_init_conn_track_n(enum ipahal_reg_name reg,
 	const struct ipa_ep_cfg_conn_track *ep_ipv6ct = fields;
 
 	return IPA_SETFIELD(ep_ipv6ct->conn_track_en,
-			IPA_ENDP_INIT_CONN_TRACK_n_CONN_TRACK_EN_SHFT,
-			IPA_ENDP_INIT_CONN_TRACK_n_CONN_TRACK_EN_BMSK);
+			CONN_TRACK_EN_SHFT,
+			CONN_TRACK_EN_BMSK);
 }
 
 static u32 ipareg_construct_endp_init_mode_n(enum ipahal_reg_name reg,
