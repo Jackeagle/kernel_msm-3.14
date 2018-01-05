@@ -1068,12 +1068,12 @@ static u32 ipareg_construct_idle_indication_cfg(enum ipahal_reg_name reg,
 	idle_indication_cfg = fields;
 
 	val = IPA_SETFIELD(idle_indication_cfg->enter_idle_debounce_thresh,
-		IPA_IDLE_INDICATION_CFG_ENTER_IDLE_DEBOUNCE_THRESH_SHFT_V3_5,
-		IPA_IDLE_INDICATION_CFG_ENTER_IDLE_DEBOUNCE_THRESH_BMSK_V3_5);
+		ENTER_IDLE_DEBOUNCE_THRESH_SHFT_V3_5,
+		ENTER_IDLE_DEBOUNCE_THRESH_BMSK_V3_5);
 
 	val |= IPA_SETFIELD(idle_indication_cfg->const_non_idle_enable,
-		IPA_IDLE_INDICATION_CFG_CONST_NON_IDLE_ENABLE_SHFT_V3_5,
-		IPA_IDLE_INDICATION_CFG_CONST_NON_IDLE_ENABLE_BMSK_V3_5);
+		CONST_NON_IDLE_ENABLE_SHFT_V3_5,
+		CONST_NON_IDLE_ENABLE_BMSK_V3_5);
 
 	return val;
 }
