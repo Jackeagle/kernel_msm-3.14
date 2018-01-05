@@ -903,11 +903,11 @@ static u32 ipareg_construct_qsb_max_writes(enum ipahal_reg_name reg,
 	u32 val;
 
 	val = IPA_SETFIELD(max_writes->qmb_0_max_writes,
-			    IPA_QSB_MAX_WRITES_GEN_QMB_0_MAX_WRITES_SHFT,
-			    IPA_QSB_MAX_WRITES_GEN_QMB_0_MAX_WRITES_BMSK);
+			    GEN_QMB_0_MAX_WRITES_SHFT,
+			    GEN_QMB_0_MAX_WRITES_BMSK);
 	val |= IPA_SETFIELD(max_writes->qmb_1_max_writes,
-			    IPA_QSB_MAX_WRITES_GEN_QMB_1_MAX_WRITES_SHFT,
-			    IPA_QSB_MAX_WRITES_GEN_QMB_1_MAX_WRITES_BMSK);
+			    GEN_QMB_1_MAX_WRITES_SHFT,
+			    GEN_QMB_1_MAX_WRITES_BMSK);
 
 	return val;
 }
