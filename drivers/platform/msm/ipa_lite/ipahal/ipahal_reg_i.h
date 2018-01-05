@@ -133,8 +133,8 @@ void ipahal_reg_init(void);
 #define HOL_BLOCK_EN_SHFT			0
 
 /* IPA_ENDP_INIT_HOL_BLOCK_TIMER_n register */
-#define IPA_ENDP_INIT_HOL_BLOCK_TIMER_n_TIMER_BMSK 0xffffffff
-#define IPA_ENDP_INIT_HOL_BLOCK_TIMER_n_TIMER_SHFT 0x0
+#define TIMER_BMSK				0xffffffff
+#define TIMER_SHFT				0
 
 /* IPA_ENDP_INIT_DEAGGR_n register */
 #define IPA_ENDP_INIT_DEAGGR_n_MAX_PACKET_LEN_BMSK 0xFFFF0000

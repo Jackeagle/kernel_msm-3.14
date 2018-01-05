@@ -611,8 +611,8 @@ static u32 ipareg_construct_endp_init_hol_block_timer_n(
 	const struct ipa_ep_cfg_holb *ep_holb = fields;
 
 	return IPA_SETFIELD(ep_holb->tmr_val,
-			IPA_ENDP_INIT_HOL_BLOCK_TIMER_n_TIMER_SHFT,
-			IPA_ENDP_INIT_HOL_BLOCK_TIMER_n_TIMER_BMSK);
+			TIMER_SHFT,
+			TIMER_BMSK);
 }
 
 static u32 ipareg_construct_endp_init_ctrl_n(enum ipahal_reg_name reg,
