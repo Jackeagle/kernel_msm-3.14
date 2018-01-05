@@ -43,7 +43,7 @@
 #define field_shift(field_mask)        __ffs(field_mask)
 
 /* Generate a field value--the given value shifted into the field's position */
-static __always_inline u32 field_gen(u32 val, u32 field_mask)
+static __always_inline u32 _field_gen(u32 val, u32 field_mask)
 {
 	BUILD_BUG_ON(!__builtin_constant_p(field_mask));
 	BUILD_BUG_ON(!field_mask);
@@ -53,7 +53,7 @@ static __always_inline u32 field_gen(u32 val, u32 field_mask)
 }
 
 /* Extract the value of a field from the given register */
-static __always_inline u32 field_val(u32 reg, u32 field_mask)
+static __always_inline u32 _field_val(u32 reg, u32 field_mask)
 {
 	BUILD_BUG_ON(!__builtin_constant_p(field_mask));
 	BUILD_BUG_ON(!field_mask);
@@ -61,8 +61,8 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 	return (reg & field_mask) >> field_shift(field_mask);
 }
 
-#define IPA_SETFIELD(val, shift, mask)		field_gen(val, mask)
-#define IPA_GETFIELD_FROM_REG(reg, shift, mask)	field_val(reg, mask)
+#define field_gen(val, shift, mask)	_field_gen(val, mask)
+#define field_val(reg, shift, mask)	_field_val(reg, mask)
 
 /*
  * struct ipahal_reg_obj - Register H/W information for specific IPA version
@@ -88,11 +88,11 @@ static u32 ipareg_construct_rx_hps_clients_depth1(
 	const struct ipahal_reg_rx_hps_clients *clients = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(clients->client_minmax[0],
+	val = field_gen(clients->client_minmax[0],
 			MINMAX_DEPTH_X_CLIENT_n_SHFT(0),
 			MINMAX_DEPTH_X_CLIENT_n_BMSK(0));
 
-	val |= IPA_SETFIELD(clients->client_minmax[1],
+	val |= field_gen(clients->client_minmax[1],
 			MINMAX_DEPTH_X_CLIENT_n_SHFT(1),
 			MINMAX_DEPTH_X_CLIENT_n_BMSK(1));
 
@@ -105,19 +105,19 @@ static u32 ipareg_construct_rx_hps_clients_depth0(
 	const struct ipahal_reg_rx_hps_clients *clients = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(clients->client_minmax[0],
+	val = field_gen(clients->client_minmax[0],
 			MINMAX_DEPTH_X_CLIENT_n_SHFT(0),
 			MINMAX_DEPTH_X_CLIENT_n_BMSK(0));
 
-	val |= IPA_SETFIELD(clients->client_minmax[1],
+	val |= field_gen(clients->client_minmax[1],
 			MINMAX_DEPTH_X_CLIENT_n_SHFT(1),
 			MINMAX_DEPTH_X_CLIENT_n_BMSK(1));
 
-	val |= IPA_SETFIELD(clients->client_minmax[2],
+	val |= field_gen(clients->client_minmax[2],
 			MINMAX_DEPTH_X_CLIENT_n_SHFT(2),
 			MINMAX_DEPTH_X_CLIENT_n_BMSK(2));
 
-	val |= IPA_SETFIELD(clients->client_minmax[3],
+	val |= field_gen(clients->client_minmax[3],
 			MINMAX_DEPTH_X_CLIENT_n_SHFT(3),
 			MINMAX_DEPTH_X_CLIENT_n_BMSK(3));
 
@@ -130,19 +130,19 @@ static u32 ipareg_construct_rx_hps_clients_depth0_v3_5(
 	const struct ipahal_reg_rx_hps_clients *clients = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(clients->client_minmax[0],
+	val = field_gen(clients->client_minmax[0],
 			MINMAX_DEPTH_X_CLIENT_n_SHFT(0),
 			MINMAX_DEPTH_X_CLIENT_n_BMSK_V3_5(0));
 
-	val |= IPA_SETFIELD(clients->client_minmax[1],
+	val |= field_gen(clients->client_minmax[1],
 			MINMAX_DEPTH_X_CLIENT_n_SHFT(1),
 			MINMAX_DEPTH_X_CLIENT_n_BMSK_V3_5(1));
 
-	val |= IPA_SETFIELD(clients->client_minmax[2],
+	val |= field_gen(clients->client_minmax[2],
 			MINMAX_DEPTH_X_CLIENT_n_SHFT(2),
 			MINMAX_DEPTH_X_CLIENT_n_BMSK_V3_5(2));
 
-	val |= IPA_SETFIELD(clients->client_minmax[3],
+	val |= field_gen(clients->client_minmax[3],
 			MINMAX_DEPTH_X_CLIENT_n_SHFT(3),
 			MINMAX_DEPTH_X_CLIENT_n_BMSK_V3_5(3));
 
@@ -155,16 +155,16 @@ static u32 ipareg_construct_rsrg_grp_xy(
 	const struct ipahal_reg_rsrc_grp_cfg *grp = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(grp->x_min,
+	val = field_gen(grp->x_min,
 			X_MIN_LIM_SHFT,
 			X_MIN_LIM_BMSK);
-	val |= IPA_SETFIELD(grp->x_max,
+	val |= field_gen(grp->x_max,
 			X_MAX_LIM_SHFT,
 			X_MAX_LIM_BMSK);
-	val |= IPA_SETFIELD(grp->y_min,
+	val |= field_gen(grp->y_min,
 			Y_MIN_LIM_SHFT,
 			Y_MIN_LIM_BMSK);
-	val |= IPA_SETFIELD(grp->y_max,
+	val |= field_gen(grp->y_max,
 			Y_MAX_LIM_SHFT,
 			Y_MAX_LIM_BMSK);
 
@@ -177,10 +177,10 @@ static u32 ipareg_construct_rsrg_grp_xy_v3_5(
 	const struct ipahal_reg_rsrc_grp_cfg *grp = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(grp->x_min,
+	val = field_gen(grp->x_min,
 			X_MIN_LIM_SHFT_V3_5,
 			X_MIN_LIM_BMSK_V3_5);
-	val |= IPA_SETFIELD(grp->x_max,
+	val |= field_gen(grp->x_max,
 			X_MAX_LIM_SHFT_V3_5,
 			X_MAX_LIM_BMSK_V3_5);
 
@@ -188,10 +188,10 @@ static u32 ipareg_construct_rsrg_grp_xy_v3_5(
 	if (reg == IPA_DST_RSRC_GRP_23_RSRC_TYPE_n)
 		return val;
 
-	val |= IPA_SETFIELD(grp->y_min,
+	val |= field_gen(grp->y_min,
 			Y_MIN_LIM_SHFT_V3_5,
 			Y_MIN_LIM_BMSK_V3_5);
-	val |= IPA_SETFIELD(grp->y_max,
+	val |= field_gen(grp->y_max,
 			Y_MAX_LIM_SHFT_V3_5,
 			Y_MAX_LIM_BMSK_V3_5);
 
@@ -204,52 +204,52 @@ static u32 ipareg_construct_hash_cfg_n(
 	const struct ipahal_reg_fltrt_hash_tuple *tuple = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(tuple->flt.src_id,
+	val = field_gen(tuple->flt.src_id,
 		FILTER_HASH_MSK_SRC_ID_SHFT,
 		FILTER_HASH_MSK_SRC_ID_BMSK);
-	val |= IPA_SETFIELD(tuple->flt.src_ip_addr,
+	val |= field_gen(tuple->flt.src_ip_addr,
 		FILTER_HASH_MSK_SRC_IP_SHFT,
 		FILTER_HASH_MSK_SRC_IP_BMSK);
-	val |= IPA_SETFIELD(tuple->flt.dst_ip_addr,
+	val |= field_gen(tuple->flt.dst_ip_addr,
 		FILTER_HASH_MSK_DST_IP_SHFT,
 		FILTER_HASH_MSK_DST_IP_BMSK);
-	val |= IPA_SETFIELD(tuple->flt.src_port,
+	val |= field_gen(tuple->flt.src_port,
 		FILTER_HASH_MSK_SRC_PORT_SHFT,
 		FILTER_HASH_MSK_SRC_PORT_BMSK);
-	val |= IPA_SETFIELD(tuple->flt.dst_port,
+	val |= field_gen(tuple->flt.dst_port,
 		FILTER_HASH_MSK_DST_PORT_SHFT,
 		FILTER_HASH_MSK_DST_PORT_BMSK);
-	val |= IPA_SETFIELD(tuple->flt.protocol,
+	val |= field_gen(tuple->flt.protocol,
 		FILTER_HASH_MSK_PROTOCOL_SHFT,
 		FILTER_HASH_MSK_PROTOCOL_BMSK);
-	val |= IPA_SETFIELD(tuple->flt.meta_data,
+	val |= field_gen(tuple->flt.meta_data,
 		FILTER_HASH_MSK_METADATA_SHFT,
 		FILTER_HASH_MSK_METADATA_BMSK);
-	val |= IPA_SETFIELD(tuple->undefined1,
+	val |= field_gen(tuple->undefined1,
 		FILTER_HASH_UNDEFINED1_SHFT,
 		FILTER_HASH_UNDEFINED1_BMSK);
-	val |= IPA_SETFIELD(tuple->rt.src_id,
+	val |= field_gen(tuple->rt.src_id,
 		ROUTER_HASH_MSK_SRC_ID_SHFT,
 		ROUTER_HASH_MSK_SRC_ID_BMSK);
-	val |= IPA_SETFIELD(tuple->rt.src_ip_addr,
+	val |= field_gen(tuple->rt.src_ip_addr,
 		ROUTER_HASH_MSK_SRC_IP_SHFT,
 		ROUTER_HASH_MSK_SRC_IP_BMSK);
-	val |= IPA_SETFIELD(tuple->rt.dst_ip_addr,
+	val |= field_gen(tuple->rt.dst_ip_addr,
 		ROUTER_HASH_MSK_DST_IP_SHFT,
 		ROUTER_HASH_MSK_DST_IP_BMSK);
-	val |= IPA_SETFIELD(tuple->rt.src_port,
+	val |= field_gen(tuple->rt.src_port,
 		ROUTER_HASH_MSK_SRC_PORT_SHFT,
 		ROUTER_HASH_MSK_SRC_PORT_BMSK);
-	val |= IPA_SETFIELD(tuple->rt.dst_port,
+	val |= field_gen(tuple->rt.dst_port,
 		ROUTER_HASH_MSK_DST_PORT_SHFT,
 		ROUTER_HASH_MSK_DST_PORT_BMSK);
-	val |= IPA_SETFIELD(tuple->rt.protocol,
+	val |= field_gen(tuple->rt.protocol,
 		ROUTER_HASH_MSK_PROTOCOL_SHFT,
 		ROUTER_HASH_MSK_PROTOCOL_BMSK);
-	val |= IPA_SETFIELD(tuple->rt.meta_data,
+	val |= field_gen(tuple->rt.meta_data,
 		ROUTER_HASH_MSK_METADATA_SHFT,
 		ROUTER_HASH_MSK_METADATA_BMSK);
-	val |= IPA_SETFIELD(tuple->undefined2,
+	val |= field_gen(tuple->undefined2,
 		ROUTER_HASH_UNDEFINED2_SHFT,
 		ROUTER_HASH_UNDEFINED2_BMSK);
 
@@ -264,67 +264,67 @@ static void ipareg_parse_hash_cfg_n(
 	memset(tuple, 0, sizeof(*tuple));
 
 	tuple->flt.src_id =
-		IPA_GETFIELD_FROM_REG(val,
+		field_val(val,
 		FILTER_HASH_MSK_SRC_ID_SHFT,
 		FILTER_HASH_MSK_SRC_ID_BMSK);
 	tuple->flt.src_ip_addr =
-		IPA_GETFIELD_FROM_REG(val,
+		field_val(val,
 		FILTER_HASH_MSK_SRC_IP_SHFT,
 		FILTER_HASH_MSK_SRC_IP_BMSK);
 	tuple->flt.dst_ip_addr =
-		IPA_GETFIELD_FROM_REG(val,
+		field_val(val,
 		FILTER_HASH_MSK_DST_IP_SHFT,
 		FILTER_HASH_MSK_DST_IP_BMSK);
 	tuple->flt.src_port =
-		IPA_GETFIELD_FROM_REG(val,
+		field_val(val,
 		FILTER_HASH_MSK_SRC_PORT_SHFT,
 		FILTER_HASH_MSK_SRC_PORT_BMSK);
 	tuple->flt.dst_port =
-		IPA_GETFIELD_FROM_REG(val,
+		field_val(val,
 		FILTER_HASH_MSK_DST_PORT_SHFT,
 		FILTER_HASH_MSK_DST_PORT_BMSK);
 	tuple->flt.protocol =
-		IPA_GETFIELD_FROM_REG(val,
+		field_val(val,
 		FILTER_HASH_MSK_PROTOCOL_SHFT,
 		FILTER_HASH_MSK_PROTOCOL_BMSK);
 	tuple->flt.meta_data =
-		IPA_GETFIELD_FROM_REG(val,
+		field_val(val,
 		FILTER_HASH_MSK_METADATA_SHFT,
 		FILTER_HASH_MSK_METADATA_BMSK);
 	tuple->undefined1 =
-		IPA_GETFIELD_FROM_REG(val,
+		field_val(val,
 		FILTER_HASH_UNDEFINED1_SHFT,
 		FILTER_HASH_UNDEFINED1_BMSK);
 	tuple->rt.src_id =
-		IPA_GETFIELD_FROM_REG(val,
+		field_val(val,
 		ROUTER_HASH_MSK_SRC_ID_SHFT,
 		ROUTER_HASH_MSK_SRC_ID_BMSK);
 	tuple->rt.src_ip_addr =
-		IPA_GETFIELD_FROM_REG(val,
+		field_val(val,
 		ROUTER_HASH_MSK_SRC_IP_SHFT,
 		ROUTER_HASH_MSK_SRC_IP_BMSK);
 	tuple->rt.dst_ip_addr =
-		IPA_GETFIELD_FROM_REG(val,
+		field_val(val,
 		ROUTER_HASH_MSK_DST_IP_SHFT,
 		ROUTER_HASH_MSK_DST_IP_BMSK);
 	tuple->rt.src_port =
-		IPA_GETFIELD_FROM_REG(val,
+		field_val(val,
 		ROUTER_HASH_MSK_SRC_PORT_SHFT,
 		ROUTER_HASH_MSK_SRC_PORT_BMSK);
 	tuple->rt.dst_port =
-		IPA_GETFIELD_FROM_REG(val,
+		field_val(val,
 		ROUTER_HASH_MSK_DST_PORT_SHFT,
 		ROUTER_HASH_MSK_DST_PORT_BMSK);
 	tuple->rt.protocol =
-		IPA_GETFIELD_FROM_REG(val,
+		field_val(val,
 		ROUTER_HASH_MSK_PROTOCOL_SHFT,
 		ROUTER_HASH_MSK_PROTOCOL_BMSK);
 	tuple->rt.meta_data =
-		IPA_GETFIELD_FROM_REG(val,
+		field_val(val,
 		ROUTER_HASH_MSK_METADATA_SHFT,
 		ROUTER_HASH_MSK_METADATA_BMSK);
 	tuple->undefined2 =
-		IPA_GETFIELD_FROM_REG(val,
+		field_val(val,
 		ROUTER_HASH_UNDEFINED2_SHFT,
 		ROUTER_HASH_UNDEFINED2_BMSK);
 }
@@ -335,15 +335,15 @@ static u32 ipareg_construct_endp_status_n(
 	const struct ipahal_reg_ep_cfg_status *ep_status = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(ep_status->status_en,
+	val = field_gen(ep_status->status_en,
 			STATUS_EN_SHFT,
 			STATUS_EN_BMSK);
 
-	val |= IPA_SETFIELD(ep_status->status_ep,
+	val |= field_gen(ep_status->status_ep,
 			STATUS_ENDP_SHFT,
 			STATUS_ENDP_BMSK);
 
-	val |= IPA_SETFIELD(ep_status->status_location,
+	val |= field_gen(ep_status->status_location,
 			STATUS_LOCATION_SHFT,
 			STATUS_LOCATION_BMSK);
 
@@ -356,19 +356,19 @@ static u32 ipareg_construct_endp_status_n_v4_0(
 	const struct ipahal_reg_ep_cfg_status *ep_status = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(ep_status->status_en,
+	val = field_gen(ep_status->status_en,
 			STATUS_EN_SHFT,
 			STATUS_EN_BMSK);
 
-	val |= IPA_SETFIELD(ep_status->status_ep,
+	val |= field_gen(ep_status->status_ep,
 			STATUS_ENDP_SHFT,
 			STATUS_ENDP_BMSK);
 
-	val |= IPA_SETFIELD(ep_status->status_location,
+	val |= field_gen(ep_status->status_location,
 			STATUS_LOCATION_SHFT,
 			STATUS_LOCATION_BMSK);
 
-	val |= IPA_SETFIELD(ep_status->status_pkt_suppress,
+	val |= field_gen(ep_status->status_pkt_suppress,
 			STATUS_PKT_SUPPRESS_SHFT,
 			STATUS_PKT_SUPPRESS_BMSK);
 
@@ -381,10 +381,10 @@ static u32 ipareg_construct_qcncm(
 	const struct ipahal_reg_qcncm *qcncm = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(qcncm->mode_en ? 1 : 0,
+	val = field_gen(qcncm->mode_en ? 1 : 0,
 			MODE_EN_SHFT,
 			MODE_EN_BMSK);
-	val |= IPA_SETFIELD(qcncm->mode_val,
+	val |= field_gen(qcncm->mode_val,
 			MODE_VAL_SHFT,
 			MODE_VAL_BMSK);
 	/*
@@ -403,10 +403,10 @@ static void ipareg_parse_qcncm(
 
 	memset(qcncm, 0, sizeof(*qcncm));
 
-	qcncm->mode_en = IPA_GETFIELD_FROM_REG(val,
+	qcncm->mode_en = field_val(val,
 		MODE_EN_SHFT,
 		MODE_EN_BMSK);
-	qcncm->mode_val = IPA_GETFIELD_FROM_REG(val,
+	qcncm->mode_val = field_val(val,
 		MODE_VAL_SHFT,
 		MODE_VAL_BMSK);
 	/*
@@ -424,11 +424,11 @@ static u32 ipareg_construct_single_ndp_mode(
 	const struct ipahal_reg_single_ndp_mode *mode = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(mode->single_ndp_en ? 1 : 0,
+	val = field_gen(mode->single_ndp_en ? 1 : 0,
 			SINGLE_NDP_EN_SHFT,
 			SINGLE_NDP_EN_BMSK);
 
-	val |= IPA_SETFIELD(mode->undefined,
+	val |= field_gen(mode->undefined,
 			SINGLE_NDP_UNDEFINED_SHFT,
 			SINGLE_NDP_UNDEFINED_BMSK);
 
@@ -442,10 +442,10 @@ static void ipareg_parse_single_ndp_mode(
 
 	memset(mode, 0, sizeof(*mode));
 
-	mode->single_ndp_en = IPA_GETFIELD_FROM_REG(val,
+	mode->single_ndp_en = field_val(val,
 		SINGLE_NDP_EN_SHFT,
 		SINGLE_NDP_EN_BMSK);
-	mode->undefined = IPA_GETFIELD_FROM_REG(val,
+	mode->undefined = field_val(val,
 		SINGLE_NDP_UNDEFINED_SHFT,
 		SINGLE_NDP_UNDEFINED_BMSK);
 }
@@ -457,7 +457,7 @@ static u32 ipareg_construct_debug_cnt_ctrl_n(
 	u32 val;
 	u8 type;
 
-	val = IPA_SETFIELD(dbg_cnt_ctrl->en ? 1 : 0,
+	val = field_gen(dbg_cnt_ctrl->en ? 1 : 0,
 			DBG_CNT_EN_SHFT,
 			DBG_CNT_EN_BMSK);
 
@@ -493,27 +493,27 @@ static u32 ipareg_construct_debug_cnt_ctrl_n(
 
 	};
 
-	val |= IPA_SETFIELD(type,
+	val |= field_gen(type,
 			DBG_CNT_TYPE_SHFT,
 			DBG_CNT_TYPE_BMSK);
 
-	val |= IPA_SETFIELD(dbg_cnt_ctrl->product ? 1 : 0,
+	val |= field_gen(dbg_cnt_ctrl->product ? 1 : 0,
 			PRODUCT_SHFT,
 			PRODUCT_BMSK);
 
-	val |= IPA_SETFIELD(dbg_cnt_ctrl->src_pipe,
+	val |= field_gen(dbg_cnt_ctrl->src_pipe,
 			SOURCE_PIPE_SHFT,
 			SOURCE_PIPE_BMSK);
 
 	if (ipahal_ctx->hw_type <= IPA_HW_v3_1) {
-		val |= IPA_SETFIELD(dbg_cnt_ctrl->rule_idx,
+		val |= field_gen(dbg_cnt_ctrl->rule_idx,
 			RULE_INDEX_SHFT,
 			RULE_INDEX_BMSK);
-		val |= IPA_SETFIELD(dbg_cnt_ctrl->rule_idx_pipe_rule,
+		val |= field_gen(dbg_cnt_ctrl->rule_idx_pipe_rule,
 			RULE_INDEX_PIPE_RULE_SHFT,
 			RULE_INDEX_PIPE_RULE_BMSK);
 	} else {
-		val |= IPA_SETFIELD(dbg_cnt_ctrl->rule_idx,
+		val |= field_gen(dbg_cnt_ctrl->rule_idx,
 			RULE_INDEX_SHFT,
 			RULE_INDEX_BMSK_V3_5);
 	}
@@ -528,11 +528,11 @@ static void ipareg_parse_shared_mem_size(
 
 	memset(smem_sz, 0, sizeof(*smem_sz));
 
-	smem_sz->shared_mem_sz = IPA_GETFIELD_FROM_REG(val,
+	smem_sz->shared_mem_sz = field_val(val,
 		SHARED_MEM_SIZE_SHFT,
 		SHARED_MEM_SIZE_BMSK);
 
-	smem_sz->shared_mem_baddr = IPA_GETFIELD_FROM_REG(val,
+	smem_sz->shared_mem_baddr = field_val(val,
 		SHARED_MEM_BADDR_SHFT,
 		SHARED_MEM_BADDR_BMSK);
 }
@@ -542,7 +542,7 @@ static u32 ipareg_construct_endp_init_rsrc_grp_n(
 {
 	const struct ipahal_reg_endp_init_rsrc_grp *rsrc_grp = fields;
 
-	return IPA_SETFIELD(rsrc_grp->rsrc_grp,
+	return field_gen(rsrc_grp->rsrc_grp,
 			RSRC_GRP_SHFT,
 			RSRC_GRP_BMSK);
 }
@@ -552,7 +552,7 @@ static u32 ipareg_construct_endp_init_rsrc_grp_n_v3_5(
 {
 	const struct ipahal_reg_endp_init_rsrc_grp *rsrc_grp = fields;
 
-	return IPA_SETFIELD(rsrc_grp->rsrc_grp,
+	return field_gen(rsrc_grp->rsrc_grp,
 			RSRC_GRP_SHFT_v3_5,
 			RSRC_GRP_BMSK_v3_5);
 }
@@ -562,7 +562,7 @@ static u32 ipareg_construct_endp_init_hdr_metadata_n(
 {
 	const struct ipa_ep_cfg_metadata *metadata = fields;
 
-	return IPA_SETFIELD(metadata->qmap_id,
+	return field_gen(metadata->qmap_id,
 			METADATA_SHFT,
 			METADATA_BMSK);
 }
@@ -572,7 +572,7 @@ static u32 ipareg_construct_endp_init_hdr_metadata_mask_n(
 {
 	const struct ipa_ep_cfg_metadata_mask *metadata_mask = fields;
 
-	return IPA_SETFIELD(metadata_mask->metadata_mask,
+	return field_gen(metadata_mask->metadata_mask,
 			METADATA_MASK_SHFT,
 			METADATA_MASK_BMSK);
 }
@@ -601,16 +601,16 @@ static u32 ipareg_construct_endp_init_cfg_n(
 		return 0;
 	}
 
-	val = IPA_SETFIELD(cfg->frag_offload_en ? 1 : 0,
+	val = field_gen(cfg->frag_offload_en ? 1 : 0,
 			FRAG_OFFLOAD_EN_SHFT,
 			FRAG_OFFLOAD_EN_BMSK);
-	val |= IPA_SETFIELD(cs_offload_en,
+	val |= field_gen(cs_offload_en,
 			CS_OFFLOAD_EN_SHFT,
 			CS_OFFLOAD_EN_BMSK);
-	val |= IPA_SETFIELD(cfg->cs_metadata_hdr_offset,
+	val |= field_gen(cfg->cs_metadata_hdr_offset,
 			CS_METADATA_HDR_OFFSET_SHFT,
 			CS_METADATA_HDR_OFFSET_BMSK);
-	val |= IPA_SETFIELD(cfg->gen_qmb_master_sel,
+	val |= field_gen(cfg->gen_qmb_master_sel,
 			CS_GEN_QMB_MASTER_SEL_SHFT,
 			CS_GEN_QMB_MASTER_SEL_BMSK);
 
@@ -623,19 +623,19 @@ static u32 ipareg_construct_endp_init_deaggr_n(
 	const struct ipa_ep_cfg_deaggr *ep_deaggr = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(ep_deaggr->deaggr_hdr_len,
+	val = field_gen(ep_deaggr->deaggr_hdr_len,
 			DEAGGR_HDR_LEN_SHFT,
 			DEAGGR_HDR_LEN_BMSK);
 
-	val |= IPA_SETFIELD(ep_deaggr->packet_offset_valid,
+	val |= field_gen(ep_deaggr->packet_offset_valid,
 			PACKET_OFFSET_VALID_SHFT,
 			PACKET_OFFSET_VALID_BMSK);
 
-	val |= IPA_SETFIELD(ep_deaggr->packet_offset_location,
+	val |= field_gen(ep_deaggr->packet_offset_location,
 			PACKET_OFFSET_LOCATION_SHFT,
 			PACKET_OFFSET_LOCATION_BMSK);
 
-	val |= IPA_SETFIELD(ep_deaggr->max_packet_len,
+	val |= field_gen(ep_deaggr->max_packet_len,
 			MAX_PACKET_LEN_SHFT,
 			MAX_PACKET_LEN_BMSK);
 
@@ -647,7 +647,7 @@ static u32 ipareg_construct_endp_init_hol_block_en_n(
 {
 	const struct ipa_ep_cfg_holb *ep_holb = fields;
 
-	return IPA_SETFIELD(ep_holb->en,
+	return field_gen(ep_holb->en,
 			HOL_BLOCK_EN_SHFT,
 			HOL_BLOCK_EN_BMSK);
 }
@@ -657,7 +657,7 @@ static u32 ipareg_construct_endp_init_hol_block_timer_n(
 {
 	const struct ipa_ep_cfg_holb *ep_holb = fields;
 
-	return IPA_SETFIELD(ep_holb->tmr_val,
+	return field_gen(ep_holb->tmr_val,
 			TIMER_SHFT,
 			TIMER_BMSK);
 }
@@ -668,11 +668,11 @@ static u32 ipareg_construct_endp_init_ctrl_n(enum ipahal_reg_name reg,
 	const struct ipa_ep_cfg_ctrl *ep_ctrl = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(ep_ctrl->ipa_ep_suspend,
+	val = field_gen(ep_ctrl->ipa_ep_suspend,
 			ENDP_SUSPEND_SHFT,
 			ENDP_SUSPEND_BMSK);
 
-	val |= IPA_SETFIELD(ep_ctrl->ipa_ep_delay,
+	val |= field_gen(ep_ctrl->ipa_ep_delay,
 			ENDP_DELAY_SHFT,
 			ENDP_DELAY_BMSK);
 
@@ -686,11 +686,11 @@ static void ipareg_parse_endp_init_ctrl_n(enum ipahal_reg_name reg,
 
 	memset(ep_ctrl, 0, sizeof(*ep_ctrl));
 
-	ep_ctrl->ipa_ep_suspend = IPA_GETFIELD_FROM_REG(val,
+	ep_ctrl->ipa_ep_suspend = field_val(val,
 						ENDP_SUSPEND_SHFT,
 						ENDP_SUSPEND_BMSK);
 
-	ep_ctrl->ipa_ep_delay = IPA_GETFIELD_FROM_REG(val,
+	ep_ctrl->ipa_ep_delay = field_val(val,
 						ENDP_DELAY_SHFT,
 						ENDP_DELAY_BMSK);
 }
@@ -702,7 +702,7 @@ static u32 ipareg_construct_endp_init_ctrl_n_v4_0(enum ipahal_reg_name reg,
 
 	WARN_ON(ep_ctrl->ipa_ep_suspend);
 
-	return IPA_SETFIELD(ep_ctrl->ipa_ep_delay,
+	return field_gen(ep_ctrl->ipa_ep_delay,
 			ENDP_DELAY_SHFT,
 			ENDP_DELAY_BMSK);
 }
@@ -712,7 +712,7 @@ static u32 ipareg_construct_endp_init_ctrl_scnd_n(enum ipahal_reg_name reg,
 {
 	const struct ipahal_ep_cfg_ctrl_scnd *ep_ctrl_scnd = fields;
 
-	return IPA_SETFIELD(ep_ctrl_scnd->endp_delay,
+	return field_gen(ep_ctrl_scnd->endp_delay,
 			ENDP_DELAY_SHFT,
 			ENDP_DELAY_BMSK);
 }
@@ -722,7 +722,7 @@ static u32 ipareg_construct_endp_init_nat_n(enum ipahal_reg_name reg,
 {
 	const struct ipa_ep_cfg_nat *ep_nat = fields;
 
-	return IPA_SETFIELD(ep_nat->nat_en,
+	return field_gen(ep_nat->nat_en,
 			NAT_EN_SHFT,
 			NAT_EN_BMSK);
 }
@@ -732,7 +732,7 @@ static u32 ipareg_construct_endp_init_conn_track_n(enum ipahal_reg_name reg,
 {
 	const struct ipa_ep_cfg_conn_track *ep_ipv6ct = fields;
 
-	return IPA_SETFIELD(ep_ipv6ct->conn_track_en,
+	return field_gen(ep_ipv6ct->conn_track_en,
 			CONN_TRACK_EN_SHFT,
 			CONN_TRACK_EN_BMSK);
 }
@@ -743,11 +743,11 @@ static u32 ipareg_construct_endp_init_mode_n(enum ipahal_reg_name reg,
 	const struct ipahal_reg_endp_init_mode *init_mode = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(init_mode->ep_mode.mode,
+	val = field_gen(init_mode->ep_mode.mode,
 			MODE_SHFT,
 			MODE_BMSK);
 
-	val |= IPA_SETFIELD(init_mode->dst_pipe_number,
+	val |= field_gen(init_mode->dst_pipe_number,
 			DEST_PIPE_INDEX_SHFT,
 			DEST_PIPE_INDEX_BMSK);
 
@@ -759,7 +759,7 @@ static u32 ipareg_construct_endp_init_route_n(enum ipahal_reg_name reg,
 {
 	const struct ipahal_reg_endp_init_route *ep_init_rt = fields;
 
-	return IPA_SETFIELD(ep_init_rt->route_table_index,
+	return field_gen(ep_init_rt->route_table_index,
 			ROUTE_TABLE_INDEX_SHFT,
 			ROUTE_TABLE_INDEX_BMSK);
 }
@@ -772,24 +772,24 @@ static void ipareg_parse_endp_init_aggr_n(enum ipahal_reg_name reg,
 	memset(ep_aggr, 0, sizeof(*ep_aggr));
 
 	ep_aggr->aggr_en =
-			IPA_GETFIELD_FROM_REG(val, AGGR_EN_SHFT, AGGR_EN_BMSK)
+			field_val(val, AGGR_EN_SHFT, AGGR_EN_BMSK)
 				== IPA_ENABLE_AGGR;
-	ep_aggr->aggr = IPA_GETFIELD_FROM_REG(val,
+	ep_aggr->aggr = field_val(val,
 						AGGR_TYPE_SHFT,
 						AGGR_TYPE_BMSK);
-	ep_aggr->aggr_byte_limit = IPA_GETFIELD_FROM_REG(val,
+	ep_aggr->aggr_byte_limit = field_val(val,
 						AGGR_BYTE_LIMIT_SHFT,
 						AGGR_BYTE_LIMIT_BMSK);
-	ep_aggr->aggr_time_limit = IPA_GETFIELD_FROM_REG(val,
+	ep_aggr->aggr_time_limit = field_val(val,
 						AGGR_TIME_LIMIT_SHFT,
 						AGGR_TIME_LIMIT_BMSK);
-	ep_aggr->aggr_pkt_limit = IPA_GETFIELD_FROM_REG(val,
+	ep_aggr->aggr_pkt_limit = field_val(val,
 						AGGR_PKT_LIMIT_SHFT,
 						AGGR_PKT_LIMIT_BMSK);
-	ep_aggr->aggr_sw_eof_active = IPA_GETFIELD_FROM_REG(val,
+	ep_aggr->aggr_sw_eof_active = field_val(val,
 						AGGR_SW_EOF_ACTIVE_SHFT,
 						AGGR_SW_EOF_ACTIVE_BMSK);
-	ep_aggr->aggr_hard_byte_limit_en = IPA_GETFIELD_FROM_REG(val,
+	ep_aggr->aggr_hard_byte_limit_en = field_val(val,
 						AGGR_HARD_BYTE_LIMIT_ENABLE_SHFT,
 						AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK);
 }
@@ -800,31 +800,31 @@ static u32 ipareg_construct_endp_init_aggr_n(enum ipahal_reg_name reg,
 	const struct ipa_ep_cfg_aggr *ep_aggr = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(ep_aggr->aggr_en,
+	val = field_gen(ep_aggr->aggr_en,
 			AGGR_EN_SHFT,
 			AGGR_EN_BMSK);
 
-	val |= IPA_SETFIELD(ep_aggr->aggr,
+	val |= field_gen(ep_aggr->aggr,
 			AGGR_TYPE_SHFT,
 			AGGR_TYPE_BMSK);
 
-	val |= IPA_SETFIELD(ep_aggr->aggr_byte_limit,
+	val |= field_gen(ep_aggr->aggr_byte_limit,
 			AGGR_BYTE_LIMIT_SHFT,
 			AGGR_BYTE_LIMIT_BMSK);
 
-	val |= IPA_SETFIELD(ep_aggr->aggr_time_limit,
+	val |= field_gen(ep_aggr->aggr_time_limit,
 			AGGR_TIME_LIMIT_SHFT,
 			AGGR_TIME_LIMIT_BMSK);
 
-	val |= IPA_SETFIELD(ep_aggr->aggr_pkt_limit,
+	val |= field_gen(ep_aggr->aggr_pkt_limit,
 			AGGR_PKT_LIMIT_SHFT,
 			AGGR_PKT_LIMIT_BMSK);
 
-	val |= IPA_SETFIELD(ep_aggr->aggr_sw_eof_active,
+	val |= field_gen(ep_aggr->aggr_sw_eof_active,
 			AGGR_SW_EOF_ACTIVE_SHFT,
 			AGGR_SW_EOF_ACTIVE_BMSK);
 
-	val |= IPA_SETFIELD(ep_aggr->aggr_hard_byte_limit_en,
+	val |= field_gen(ep_aggr->aggr_hard_byte_limit_en,
 			AGGR_HARD_BYTE_LIMIT_ENABLE_SHFT,
 			AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK);
 
@@ -838,27 +838,27 @@ static u32 ipareg_construct_endp_init_hdr_ext_n(enum ipahal_reg_name reg,
 	u8 hdr_endianness = ep_hdr_ext->hdr_little_endian ? 0 : 1;
 	u32 val;
 
-	val = IPA_SETFIELD(ep_hdr_ext->hdr_pad_to_alignment,
+	val = field_gen(ep_hdr_ext->hdr_pad_to_alignment,
 			HDR_PAD_TO_ALIGNMENT_SHFT,
 			HDR_PAD_TO_ALIGNMENT_BMSK_v3_0);
 
-	val |= IPA_SETFIELD(ep_hdr_ext->hdr_total_len_or_pad_offset,
+	val |= field_gen(ep_hdr_ext->hdr_total_len_or_pad_offset,
 			HDR_TOTAL_LEN_OR_PAD_OFFSET_SHFT,
 			HDR_TOTAL_LEN_OR_PAD_OFFSET_BMSK);
 
-	val |= IPA_SETFIELD(ep_hdr_ext->hdr_payload_len_inc_padding,
+	val |= field_gen(ep_hdr_ext->hdr_payload_len_inc_padding,
 			HDR_PAYLOAD_LEN_INC_PADDING_SHFT,
 			HDR_PAYLOAD_LEN_INC_PADDING_BMSK);
 
-	val |= IPA_SETFIELD(ep_hdr_ext->hdr_total_len_or_pad,
+	val |= field_gen(ep_hdr_ext->hdr_total_len_or_pad,
 			HDR_TOTAL_LEN_OR_PAD_SHFT,
 			HDR_TOTAL_LEN_OR_PAD_BMSK);
 
-	val |= IPA_SETFIELD(ep_hdr_ext->hdr_total_len_or_pad_valid,
+	val |= field_gen(ep_hdr_ext->hdr_total_len_or_pad_valid,
 			HDR_TOTAL_LEN_OR_PAD_VALID_SHFT,
 			HDR_TOTAL_LEN_OR_PAD_VALID_BMSK);
 
-	val |= IPA_SETFIELD(hdr_endianness,
+	val |= field_gen(hdr_endianness,
 			HDR_ENDIANNESS_SHFT,
 			HDR_ENDIANNESS_BMSK);
 
@@ -871,39 +871,39 @@ static u32 ipareg_construct_endp_init_hdr_n(enum ipahal_reg_name reg,
 	const struct ipa_ep_cfg_hdr *ep_hdr = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(ep_hdr->hdr_metadata_reg_valid,
+	val = field_gen(ep_hdr->hdr_metadata_reg_valid,
 			HDR_METADATA_REG_VALID_SHFT_v2,
 			HDR_METADATA_REG_VALID_BMSK_v2);
 
-	val |= IPA_SETFIELD(ep_hdr->hdr_remove_additional,
+	val |= field_gen(ep_hdr->hdr_remove_additional,
 			HDR_LEN_INC_DEAGG_HDR_SHFT_v2,
 			HDR_LEN_INC_DEAGG_HDR_BMSK_v2);
 
-	val |= IPA_SETFIELD(ep_hdr->hdr_a5_mux,
+	val |= field_gen(ep_hdr->hdr_a5_mux,
 			HDR_A5_MUX_SHFT,
 			HDR_A5_MUX_BMSK);
 
-	val |= IPA_SETFIELD(ep_hdr->hdr_ofst_pkt_size,
+	val |= field_gen(ep_hdr->hdr_ofst_pkt_size,
 			HDR_OFST_PKT_SIZE_SHFT,
 			HDR_OFST_PKT_SIZE_BMSK);
 
-	val |= IPA_SETFIELD(ep_hdr->hdr_ofst_pkt_size_valid,
+	val |= field_gen(ep_hdr->hdr_ofst_pkt_size_valid,
 			HDR_OFST_PKT_SIZE_VALID_SHFT,
 			HDR_OFST_PKT_SIZE_VALID_BMSK);
 
-	val |= IPA_SETFIELD(ep_hdr->hdr_additional_const_len,
+	val |= field_gen(ep_hdr->hdr_additional_const_len,
 			HDR_ADDITIONAL_CONST_LEN_SHFT,
 			HDR_ADDITIONAL_CONST_LEN_BMSK);
 
-	val |= IPA_SETFIELD(ep_hdr->hdr_ofst_metadata,
+	val |= field_gen(ep_hdr->hdr_ofst_metadata,
 			HDR_OFST_METADATA_SHFT,
 			HDR_OFST_METADATA_BMSK);
 
-	val |= IPA_SETFIELD(ep_hdr->hdr_ofst_metadata_valid,
+	val |= field_gen(ep_hdr->hdr_ofst_metadata_valid,
 			HDR_OFST_METADATA_VALID_SHFT,
 			HDR_OFST_METADATA_VALID_BMSK);
 
-	val |= IPA_SETFIELD(ep_hdr->hdr_len,
+	val |= field_gen(ep_hdr->hdr_len,
 			HDR_LEN_SHFT,
 			HDR_LEN_BMSK);
 
@@ -916,27 +916,27 @@ static u32 ipareg_construct_route(enum ipahal_reg_name reg,
 	const struct ipahal_reg_route *route = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(route->route_dis,
+	val = field_gen(route->route_dis,
 			ROUTE_DIS_SHFT,
 			ROUTE_DIS_BMSK);
 
-	val |= IPA_SETFIELD(route->route_def_pipe,
+	val |= field_gen(route->route_def_pipe,
 			ROUTE_DEF_PIPE_SHFT,
 			ROUTE_DEF_PIPE_BMSK);
 
-	val |= IPA_SETFIELD(route->route_def_hdr_table,
+	val |= field_gen(route->route_def_hdr_table,
 			ROUTE_DEF_HDR_TABLE_SHFT,
 			ROUTE_DEF_HDR_TABLE_BMSK);
 
-	val |= IPA_SETFIELD(route->route_def_hdr_ofst,
+	val |= field_gen(route->route_def_hdr_ofst,
 			ROUTE_DEF_HDR_OFST_SHFT,
 			ROUTE_DEF_HDR_OFST_BMSK);
 
-	val |= IPA_SETFIELD(route->route_frag_def_pipe,
+	val |= field_gen(route->route_frag_def_pipe,
 			ROUTE_FRAG_DEF_PIPE_SHFT,
 			ROUTE_FRAG_DEF_PIPE_BMSK);
 
-	val |= IPA_SETFIELD(route->route_def_retain_hdr,
+	val |= field_gen(route->route_def_retain_hdr,
 			ROUTE_DEF_RETAIN_HDR_SHFT,
 			ROUTE_DEF_RETAIN_HDR_BMSK);
 
@@ -949,10 +949,10 @@ static u32 ipareg_construct_qsb_max_writes(enum ipahal_reg_name reg,
 	const struct ipahal_reg_qsb_max_writes *max_writes = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(max_writes->qmb_0_max_writes,
+	val = field_gen(max_writes->qmb_0_max_writes,
 			    GEN_QMB_0_MAX_WRITES_SHFT,
 			    GEN_QMB_0_MAX_WRITES_BMSK);
-	val |= IPA_SETFIELD(max_writes->qmb_1_max_writes,
+	val |= field_gen(max_writes->qmb_1_max_writes,
 			    GEN_QMB_1_MAX_WRITES_SHFT,
 			    GEN_QMB_1_MAX_WRITES_BMSK);
 
@@ -965,10 +965,10 @@ static u32 ipareg_construct_qsb_max_reads(enum ipahal_reg_name reg,
 	const struct ipahal_reg_qsb_max_reads *max_reads = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(max_reads->qmb_0_max_reads,
+	val = field_gen(max_reads->qmb_0_max_reads,
 			    GEN_QMB_0_MAX_READS_SHFT,
 			    GEN_QMB_0_MAX_READS_BMSK);
-	val |= IPA_SETFIELD(max_reads->qmb_1_max_reads,
+	val |= field_gen(max_reads->qmb_1_max_reads,
 			    GEN_QMB_1_MAX_READS_SHFT,
 			    GEN_QMB_1_MAX_READS_BMSK);
 
@@ -981,16 +981,16 @@ static u32 ipareg_construct_qsb_max_reads_v4_0(enum ipahal_reg_name reg,
 	const struct ipahal_reg_qsb_max_reads *max_reads = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(max_reads->qmb_0_max_reads,
+	val = field_gen(max_reads->qmb_0_max_reads,
 			    GEN_QMB_0_MAX_READS_SHFT,
 			    GEN_QMB_0_MAX_READS_BMSK);
-	val |= IPA_SETFIELD(max_reads->qmb_1_max_reads,
+	val |= field_gen(max_reads->qmb_1_max_reads,
 			    GEN_QMB_1_MAX_READS_SHFT,
 			    GEN_QMB_1_MAX_READS_BMSK);
-	val |= IPA_SETFIELD(max_reads->qmb_0_max_read_beats,
+	val |= field_gen(max_reads->qmb_0_max_read_beats,
 			GEN_QMB_0_MAX_READS_BEATS_SHFT_V4_0,
 			GEN_QMB_0_MAX_READS_BEATS_BMSK_V4_0);
-	val |= IPA_SETFIELD(max_reads->qmb_1_max_read_beats,
+	val |= field_gen(max_reads->qmb_1_max_read_beats,
 			GEN_QMB_1_MAX_READS_BEATS_SHFT_V4_0,
 			GEN_QMB_1_MAX_READS_BEATS_BMSK_V4_0);
 
@@ -1004,15 +1004,15 @@ static void ipareg_parse_tx_cfg(enum ipahal_reg_name reg,
 
 	memset(tx_cfg, 0, sizeof(*tx_cfg));
 
-	tx_cfg->tx0_prefetch_disable = IPA_GETFIELD_FROM_REG(val,
+	tx_cfg->tx0_prefetch_disable = field_val(val,
 		TX0_PREFETCH_DISABLE_SHFT_V3_5,
 		TX0_PREFETCH_DISABLE_BMSK_V3_5);
 
-	tx_cfg->tx1_prefetch_disable = IPA_GETFIELD_FROM_REG(val,
+	tx_cfg->tx1_prefetch_disable = field_val(val,
 		TX1_PREFETCH_DISABLE_SHFT_V3_5,
 		TX1_PREFETCH_DISABLE_BMSK_V3_5);
 
-	tx_cfg->tx0_prefetch_almost_empty_size = IPA_GETFIELD_FROM_REG(val,
+	tx_cfg->tx0_prefetch_almost_empty_size = field_val(val,
 		PREFETCH_ALMOST_EMPTY_SIZE_SHFT_V3_5,
 		PREFETCH_ALMOST_EMPTY_SIZE_BMSK_V3_5);
 
@@ -1027,27 +1027,27 @@ static void ipareg_parse_tx_cfg_v4_0(enum ipahal_reg_name reg,
 
 	memset(tx_cfg, 0, sizeof(*tx_cfg));
 
-	tx_cfg->tx0_prefetch_almost_empty_size = IPA_GETFIELD_FROM_REG(val,
+	tx_cfg->tx0_prefetch_almost_empty_size = field_val(val,
 		PREFETCH_ALMOST_EMPTY_SIZE_TX0_SHFT_V4_0,
 		PREFETCH_ALMOST_EMPTY_SIZE_TX0_BMSK_V4_0);
 
-	tx_cfg->tx1_prefetch_almost_empty_size = IPA_GETFIELD_FROM_REG(val,
+	tx_cfg->tx1_prefetch_almost_empty_size = field_val(val,
 		PREFETCH_ALMOST_EMPTY_SIZE_TX1_SHFT_V4_0,
 		PREFETCH_ALMOST_EMPTY_SIZE_TX1_BMSK_V4_0);
 
-	tx_cfg->dmaw_scnd_outsd_pred_en = IPA_GETFIELD_FROM_REG(val,
+	tx_cfg->dmaw_scnd_outsd_pred_en = field_val(val,
 		DMAW_SCND_OUTSD_PRED_EN_SHFT_V4_0,
 		DMAW_SCND_OUTSD_PRED_EN_BMSK_V4_0);
 
-	tx_cfg->dmaw_scnd_outsd_pred_threshold = IPA_GETFIELD_FROM_REG(val,
+	tx_cfg->dmaw_scnd_outsd_pred_threshold = field_val(val,
 		DMAW_SCND_OUTSD_PRED_THRESHOLD_SHFT_V4_0,
 		DMAW_SCND_OUTSD_PRED_THRESHOLD_BMSK_V4_0);
 
-	tx_cfg->dmaw_max_beats_256_dis = IPA_GETFIELD_FROM_REG(val,
+	tx_cfg->dmaw_max_beats_256_dis = field_val(val,
 		DMAW_MAX_BEATS_256_DIS_SHFT_V4_0,
 		DMAW_MAX_BEATS_256_DIS_BMSK_V4_0);
 
-	tx_cfg->pa_mask_en = IPA_GETFIELD_FROM_REG(val,
+	tx_cfg->pa_mask_en = field_val(val,
 		PA_MASK_EN_SHFT_V4_0,
 		PA_MASK_EN_BMSK_V4_0);
 }
@@ -1062,15 +1062,15 @@ static u32 ipareg_construct_tx_cfg(enum ipahal_reg_name reg,
 			tx_cfg->tx1_prefetch_almost_empty_size)
 		ipa_assert();
 
-	val = IPA_SETFIELD(tx_cfg->tx0_prefetch_disable,
+	val = field_gen(tx_cfg->tx0_prefetch_disable,
 			TX0_PREFETCH_DISABLE_SHFT_V3_5,
 			TX0_PREFETCH_DISABLE_BMSK_V3_5);
 
-	val |= IPA_SETFIELD(tx_cfg->tx1_prefetch_disable,
+	val |= field_gen(tx_cfg->tx1_prefetch_disable,
 			TX1_PREFETCH_DISABLE_SHFT_V3_5,
 			TX1_PREFETCH_DISABLE_BMSK_V3_5);
 
-	val |= IPA_SETFIELD(tx_cfg->tx0_prefetch_almost_empty_size,
+	val |= field_gen(tx_cfg->tx0_prefetch_almost_empty_size,
 			PREFETCH_ALMOST_EMPTY_SIZE_SHFT_V3_5,
 			PREFETCH_ALMOST_EMPTY_SIZE_BMSK_V3_5);
 
@@ -1083,27 +1083,27 @@ static u32 ipareg_construct_tx_cfg_v4_0(enum ipahal_reg_name reg,
 	const struct ipahal_reg_tx_cfg *tx_cfg = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(tx_cfg->tx0_prefetch_almost_empty_size,
+	val = field_gen(tx_cfg->tx0_prefetch_almost_empty_size,
 			PREFETCH_ALMOST_EMPTY_SIZE_TX0_SHFT_V4_0,
 			PREFETCH_ALMOST_EMPTY_SIZE_TX0_BMSK_V4_0);
 
-	val |= IPA_SETFIELD(tx_cfg->tx1_prefetch_almost_empty_size,
+	val |= field_gen(tx_cfg->tx1_prefetch_almost_empty_size,
 			PREFETCH_ALMOST_EMPTY_SIZE_TX1_SHFT_V4_0,
 			PREFETCH_ALMOST_EMPTY_SIZE_TX1_BMSK_V4_0);
 
-	val |= IPA_SETFIELD(tx_cfg->dmaw_scnd_outsd_pred_threshold,
+	val |= field_gen(tx_cfg->dmaw_scnd_outsd_pred_threshold,
 			DMAW_SCND_OUTSD_PRED_THRESHOLD_SHFT_V4_0,
 			DMAW_SCND_OUTSD_PRED_THRESHOLD_BMSK_V4_0);
 
-	val |= IPA_SETFIELD(tx_cfg->dmaw_max_beats_256_dis,
+	val |= field_gen(tx_cfg->dmaw_max_beats_256_dis,
 			DMAW_MAX_BEATS_256_DIS_SHFT_V4_0,
 			DMAW_MAX_BEATS_256_DIS_BMSK_V4_0);
 
-	val |= IPA_SETFIELD(tx_cfg->dmaw_scnd_outsd_pred_en,
+	val |= field_gen(tx_cfg->dmaw_scnd_outsd_pred_en,
 			DMAW_SCND_OUTSD_PRED_EN_SHFT_V4_0,
 			DMAW_SCND_OUTSD_PRED_EN_BMSK_V4_0);
 
-	val |= IPA_SETFIELD(tx_cfg->pa_mask_en,
+	val |= field_gen(tx_cfg->pa_mask_en,
 			PA_MASK_EN_SHFT_V4_0,
 			PA_MASK_EN_BMSK_V4_0);
 
@@ -1118,11 +1118,11 @@ static u32 ipareg_construct_idle_indication_cfg(enum ipahal_reg_name reg,
 
 	idle_indication_cfg = fields;
 
-	val = IPA_SETFIELD(idle_indication_cfg->enter_idle_debounce_thresh,
+	val = field_gen(idle_indication_cfg->enter_idle_debounce_thresh,
 		ENTER_IDLE_DEBOUNCE_THRESH_SHFT_V3_5,
 		ENTER_IDLE_DEBOUNCE_THRESH_BMSK_V3_5);
 
-	val |= IPA_SETFIELD(idle_indication_cfg->const_non_idle_enable,
+	val |= field_gen(idle_indication_cfg->const_non_idle_enable,
 		CONST_NON_IDLE_ENABLE_SHFT_V3_5,
 		CONST_NON_IDLE_ENABLE_BMSK_V3_5);
 
@@ -1135,19 +1135,19 @@ static u32 ipareg_construct_hps_queue_weights(enum ipahal_reg_name reg,
 	const struct ipahal_reg_rx_hps_weights *hps_weights = fields;
 	u32 val;
 
-	val = IPA_SETFIELD(hps_weights->hps_queue_weight_0,
+	val = field_gen(hps_weights->hps_queue_weight_0,
 		RX_HPS_QUEUE_WEIGHT_0_SHFT,
 		RX_HPS_QUEUE_WEIGHT_0_BMSK);
 
-	val |= IPA_SETFIELD(hps_weights->hps_queue_weight_1,
+	val |= field_gen(hps_weights->hps_queue_weight_1,
 		RX_HPS_QUEUE_WEIGHT_1_SHFT,
 		RX_HPS_QUEUE_WEIGHT_1_BMSK);
 
-	val |= IPA_SETFIELD(hps_weights->hps_queue_weight_2,
+	val |= field_gen(hps_weights->hps_queue_weight_2,
 		RX_HPS_QUEUE_WEIGHT_2_SHFT,
 		RX_HPS_QUEUE_WEIGHT_2_BMSK);
 
-	val |= IPA_SETFIELD(hps_weights->hps_queue_weight_3,
+	val |= field_gen(hps_weights->hps_queue_weight_3,
 		RX_HPS_QUEUE_WEIGHT_3_SHFT,
 		RX_HPS_QUEUE_WEIGHT_3_BMSK);
 
@@ -1161,19 +1161,19 @@ static void ipareg_parse_hps_queue_weights(
 
 	memset(hps_weights, 0, sizeof(*hps_weights));
 
-	hps_weights->hps_queue_weight_0 = IPA_GETFIELD_FROM_REG(val,
+	hps_weights->hps_queue_weight_0 = field_val(val,
 		RX_HPS_QUEUE_WEIGHT_0_SHFT,
 		RX_HPS_QUEUE_WEIGHT_0_BMSK);
 
-	hps_weights->hps_queue_weight_1 = IPA_GETFIELD_FROM_REG(val,
+	hps_weights->hps_queue_weight_1 = field_val(val,
 		RX_HPS_QUEUE_WEIGHT_1_SHFT,
 		RX_HPS_QUEUE_WEIGHT_1_BMSK);
 
-	hps_weights->hps_queue_weight_2 = IPA_GETFIELD_FROM_REG(val,
+	hps_weights->hps_queue_weight_2 = field_val(val,
 		RX_HPS_QUEUE_WEIGHT_2_SHFT,
 		RX_HPS_QUEUE_WEIGHT_2_BMSK);
 
-	hps_weights->hps_queue_weight_3 = IPA_GETFIELD_FROM_REG(val,
+	hps_weights->hps_queue_weight_3 = field_val(val,
 		RX_HPS_QUEUE_WEIGHT_3_SHFT,
 		RX_HPS_QUEUE_WEIGHT_3_BMSK);
 }
@@ -1575,12 +1575,12 @@ u32 ipahal_get_reg_base(void)
 
 void ipahal_get_disable_aggr_valmask(struct ipahal_reg_valmask *valmask)
 {
-	valmask->val = IPA_GETFIELD_FROM_REG(0xffffffff,
+	valmask->val = field_val(0xffffffff,
 				AGGR_FORCE_CLOSE_SHFT,
 				AGGR_FORCE_CLOSE_BMSK);
 	valmask->mask = AGGR_FORCE_CLOSE_BMSK;
 
-	valmask->val |= IPA_GETFIELD_FROM_REG(0x00000000,
+	valmask->val |= field_val(0x00000000,
 				AGGR_EN_SHFT,
 				AGGR_EN_BMSK);
 	valmask->mask |= AGGR_EN_BMSK;
@@ -1588,13 +1588,13 @@ void ipahal_get_disable_aggr_valmask(struct ipahal_reg_valmask *valmask)
 
 u32 ipahal_aggr_get_max_byte_limit(void)
 {
-	return IPA_GETFIELD_FROM_REG(0xffffffff, AGGR_BYTE_LIMIT_SHFT,
+	return field_val(0xffffffff, AGGR_BYTE_LIMIT_SHFT,
 					AGGR_BYTE_LIMIT_BMSK);
 }
 
 u32 ipahal_aggr_get_max_pkt_limit(void)
 {
-	return IPA_GETFIELD_FROM_REG(0xffffffff, AGGR_PKT_LIMIT_SHFT,
+	return field_val(0xffffffff, AGGR_PKT_LIMIT_SHFT,
 					AGGR_PKT_LIMIT_BMSK);
 }
 
@@ -1608,17 +1608,17 @@ void ipahal_get_aggr_force_close_valmask(int ep_idx,
 	}
 
 	if (ipahal_ctx->hw_type <= IPA_HW_v3_1) {
-		valmask->val |= IPA_SETFIELD(1U << ep_idx,
+		valmask->val |= field_gen(1U << ep_idx,
 					PIPE_BITMAP_SHFT,
 					PIPE_BITMAP_BMSK);
 		valmask->mask = PIPE_BITMAP_BMSK;
 	} else if (ipahal_ctx->hw_type <= IPA_HW_v3_5_1) {
-		valmask->val |= IPA_SETFIELD(1U << ep_idx,
+		valmask->val |= field_gen(1U << ep_idx,
 					PIPE_BITMAP_SHFT_V3_5,
 					PIPE_BITMAP_BMSK_V3_5);
 		valmask->mask = PIPE_BITMAP_BMSK_V3_5;
 	} else {
-		valmask->val |= IPA_SETFIELD(1U << ep_idx,
+		valmask->val |= field_gen(1U << ep_idx,
 					PIPE_BITMAP_SHFT_V4_0,
 					PIPE_BITMAP_BMSK_V4_0);
 		valmask->mask = PIPE_BITMAP_BMSK_V4_0;
@@ -1633,13 +1633,13 @@ void ipahal_get_fltrt_hash_flush_valmask(
 
 	memset(valmask, 0, sizeof(struct ipahal_reg_valmask));
 
-	val = IPA_SETFIELD(flush->v6_rt ? 1 : 0,
+	val = field_gen(flush->v6_rt ? 1 : 0,
 			IPv6_ROUT_SHFT, IPv6_ROUT_BMSK);
-	val |= IPA_SETFIELD(flush->v6_flt ? 1 : 0,
+	val |= field_gen(flush->v6_flt ? 1 : 0,
 			IPv6_FILT_SHFT, IPv6_FILT_BMSK);
-	val |= IPA_SETFIELD(flush->v4_rt ? 1 : 0,
+	val |= field_gen(flush->v4_rt ? 1 : 0,
 			IPv4_ROUT_SHFT, IPv4_ROUT_BMSK);
-	val |= IPA_SETFIELD(flush->v4_flt ? 1 : 0,
+	val |= field_gen(flush->v4_flt ? 1 : 0,
 			IPv4_FILT_SHFT, IPv4_FILT_BMSK);
 
 	/*
@@ -1655,7 +1655,7 @@ void ipahal_get_fltrt_hash_flush_valmask(
 void ipahal_get_status_ep_valmask(int pipe_num,
 	struct ipahal_reg_valmask *valmask)
 {
-	valmask->val = IPA_SETFIELD(pipe_num,
+	valmask->val = field_gen(pipe_num,
 				STATUS_ENDP_SHFT, STATUS_ENDP_BMSK);
 	valmask->mask = STATUS_ENDP_BMSK;
 }
