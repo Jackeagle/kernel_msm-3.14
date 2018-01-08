@@ -643,13 +643,13 @@ static void ipareg_parse_endp_init_ctrl_n(enum ipahal_reg_name reg,
 {
 	struct ipa_ep_cfg_ctrl *ep_ctrl = fields;
 
-	ep_ctrl->ipa_ep_suspend =
-		((val & ENDP_SUSPEND_BMSK) >>
-			ENDP_SUSPEND_SHFT);
+	ep_ctrl->ipa_ep_suspend = IPA_GETFIELD_FROM_REG(val,
+						ENDP_SUSPEND_SHFT,
+						ENDP_SUSPEND_BMSK);
 
-	ep_ctrl->ipa_ep_delay =
-		((val & ENDP_DELAY_BMSK) >>
-		ENDP_DELAY_SHFT);
+	ep_ctrl->ipa_ep_delay = IPA_GETFIELD_FROM_REG(val,
+						ENDP_DELAY_SHFT,
+						ENDP_DELAY_BMSK);
 }
 
 static u32 ipareg_construct_endp_init_ctrl_n_v4_0(enum ipahal_reg_name reg,
@@ -729,28 +729,26 @@ static void ipareg_parse_endp_init_aggr_n(enum ipahal_reg_name reg,
 	memset(ep_aggr, 0, sizeof(struct ipa_ep_cfg_aggr));
 
 	ep_aggr->aggr_en =
-		(((val & AGGR_EN_BMSK) >>
-			AGGR_EN_SHFT)
-			== IPA_ENABLE_AGGR);
-	ep_aggr->aggr =
-		((val & AGGR_TYPE_BMSK) >>
-			AGGR_TYPE_SHFT);
-	ep_aggr->aggr_byte_limit =
-		((val & AGGR_BYTE_LIMIT_BMSK) >>
-			AGGR_BYTE_LIMIT_SHFT);
-	ep_aggr->aggr_time_limit =
-		((val & AGGR_TIME_LIMIT_BMSK) >>
-			AGGR_TIME_LIMIT_SHFT);
-	ep_aggr->aggr_pkt_limit =
-		((val & AGGR_PKT_LIMIT_BMSK) >>
-			AGGR_PKT_LIMIT_SHFT);
-	ep_aggr->aggr_sw_eof_active =
-		((val & AGGR_SW_EOF_ACTIVE_BMSK) >>
-			AGGR_SW_EOF_ACTIVE_SHFT);
-	ep_aggr->aggr_hard_byte_limit_en =
-		((val & AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK)
-			>>
-			AGGR_HARD_BYTE_LIMIT_ENABLE_SHFT);
+			IPA_GETFIELD_FROM_REG(val, AGGR_EN_SHFT, AGGR_EN_BMSK)
+				== IPA_ENABLE_AGGR;
+	ep_aggr->aggr = IPA_GETFIELD_FROM_REG(val,
+						AGGR_TYPE_SHFT,
+						AGGR_TYPE_BMSK);
+	ep_aggr->aggr_byte_limit = IPA_GETFIELD_FROM_REG(val,
+						AGGR_BYTE_LIMIT_SHFT,
+						AGGR_BYTE_LIMIT_BMSK);
+	ep_aggr->aggr_time_limit = IPA_GETFIELD_FROM_REG(val,
+						AGGR_TIME_LIMIT_SHFT,
+						AGGR_TIME_LIMIT_BMSK);
+	ep_aggr->aggr_pkt_limit = IPA_GETFIELD_FROM_REG(val,
+						AGGR_PKT_LIMIT_SHFT,
+						AGGR_PKT_LIMIT_BMSK);
+	ep_aggr->aggr_sw_eof_active = IPA_GETFIELD_FROM_REG(val,
+						AGGR_SW_EOF_ACTIVE_SHFT,
+						AGGR_SW_EOF_ACTIVE_BMSK);
+	ep_aggr->aggr_hard_byte_limit_en = IPA_GETFIELD_FROM_REG(val,
+						AGGR_HARD_BYTE_LIMIT_ENABLE_SHFT,
+						AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK);
 }
 
 static u32 ipareg_construct_endp_init_aggr_n(enum ipahal_reg_name reg,
