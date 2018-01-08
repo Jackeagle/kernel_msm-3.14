@@ -1533,14 +1533,12 @@ void ipahal_get_disable_aggr_valmask(struct ipahal_reg_valmask *valmask)
 	valmask->val = IPA_GETFIELD_FROM_REG(0xffffffff,
 				AGGR_FORCE_CLOSE_SHFT,
 				AGGR_FORCE_CLOSE_BMSK);
-	valmask->mask = AGGR_FORCE_CLOSE_BMSK <<
-		AGGR_FORCE_CLOSE_SHFT;
+	valmask->mask = AGGR_FORCE_CLOSE_BMSK;
 
 	valmask->val |= IPA_GETFIELD_FROM_REG(0x00000000,
 				AGGR_EN_SHFT,
 				AGGR_EN_BMSK);
-	valmask->mask |= ((AGGR_EN_BMSK <<
-		AGGR_EN_SHFT));
+	valmask->mask |= AGGR_EN_BMSK;
 }
 
 u32 ipahal_aggr_get_max_byte_limit(void)
