@@ -311,20 +311,12 @@ ipareg_construct_debug_cnt_ctrl_n(enum ipahal_reg reg, const void *fields)
 
 	switch (type) {
 	case DBG_CNT_TYPE_IPV4_FLTR:
-		if (!dbg_cnt_ctrl->rule_idx_pipe_rule) {
-			ipa_err("No FLT global rules\n");
-			WARN_ON(1);
-		}
 		break;
 	case DBG_CNT_TYPE_IPV4_ROUT:
 		break;
 	case DBG_CNT_TYPE_GENERAL:
 		break;
 	case DBG_CNT_TYPE_IPV6_FLTR:
-		if (!dbg_cnt_ctrl->rule_idx_pipe_rule) {
-			ipa_err("No FLT global rules\n");
-			WARN_ON(1);
-		}
 		break;
 	case DBG_CNT_TYPE_IPV6_ROUT:
 		break;
@@ -334,6 +326,10 @@ ipareg_construct_debug_cnt_ctrl_n(enum ipahal_reg reg, const void *fields)
 		WARN_ON(1);
 		return 0;
 	};
+
+	if (type == DBG_CNT_TYPE_IPV4_FLTR || type == DBG_CNT_TYPE_IPV6_FLTR)
+		if (WARN_ON(!dbg_cnt_ctrl->rule_idx_pipe_rule))
+			ipa_err("No FLT global rules\n");
 
 	val = field_gen(dbg_cnt_ctrl->en ? 1 : 0, DBG_CNT_EN_BMSK);
 	val |= field_gen(type, DBG_CNT_TYPE_BMSK);
