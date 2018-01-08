@@ -302,6 +302,26 @@ ipareg_parse_single_ndp_mode(enum ipahal_reg reg, void *fields, u32 val)
 	mode->undefined = field_val(val, SINGLE_NDP_UNDEFINED_BMSK);
 }
 
+static bool
+debug_cnt_ctrl_type_valid(u8 dbg_cnt_ctrl_type, enum ipahal_reg reg)
+{
+	switch (dbg_cnt_ctrl_type) {
+	case DBG_CNT_TYPE_IPV4_FLTR:
+	case DBG_CNT_TYPE_IPV4_ROUT:
+	case DBG_CNT_TYPE_GENERAL:
+	case DBG_CNT_TYPE_IPV6_FLTR:
+	case DBG_CNT_TYPE_IPV6_ROUT:
+		return true;
+	default:
+		break;
+	}
+
+	ipa_err("Invalid dbg_cnt_ctrl type (%hhu) for %s\n",
+			dbg_cnt_ctrl_type, ipahal_regs[reg].name);
+
+	return false;
+}
+
 static u32
 ipareg_construct_debug_cnt_ctrl_n(enum ipahal_reg reg, const void *fields)
 {
@@ -309,23 +329,8 @@ ipareg_construct_debug_cnt_ctrl_n(enum ipahal_reg reg, const void *fields)
 	u32 val;
 	u8 type = (u8)dbg_cnt_ctrl->type;
 
-	switch (type) {
-	case DBG_CNT_TYPE_IPV4_FLTR:
-		break;
-	case DBG_CNT_TYPE_IPV4_ROUT:
-		break;
-	case DBG_CNT_TYPE_GENERAL:
-		break;
-	case DBG_CNT_TYPE_IPV6_FLTR:
-		break;
-	case DBG_CNT_TYPE_IPV6_ROUT:
-		break;
-	default:
-		ipa_err("Invalid dbg_cnt_ctrl type (%d) for %s\n",
-			dbg_cnt_ctrl->type, ipahal_regs[reg].name);
-		WARN_ON(1);
+	if (WARN_ON(!debug_cnt_ctrl_type_valid(type, reg)))
 		return 0;
-	};
 
 	if (type == DBG_CNT_TYPE_IPV4_FLTR || type == DBG_CNT_TYPE_IPV6_FLTR)
 		if (WARN_ON(!dbg_cnt_ctrl->rule_idx_pipe_rule))
