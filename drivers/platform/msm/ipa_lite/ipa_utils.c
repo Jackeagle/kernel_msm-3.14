@@ -207,13 +207,13 @@ static const struct rsrc_min_max ipa3_rsrc_src_grp_config
 	[IPA_3_5_1] = {
 		/* LWA_DL  UL_DL    not used  UC_RX_Q, other are invalid */
 		[IPA_v3_5_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS] = {
-		{1, 255}, {1, 255}, {0, 0}, {1, 255}, {0, 0}, {0, 0} },
+		{1, 63}, {1, 63}, {0, 0}, {1, 63}, {0, 0}, {0, 0} },
 		[IPA_v3_5_RSRC_GRP_TYPE_SRS_DESCRIPTOR_LISTS] = {
 		{10, 10}, {10, 10}, {0, 0}, {8, 8}, {0, 0}, {0, 0} },
 		[IPA_v3_5_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF] = {
 		{12, 12}, {14, 14}, {0, 0}, {8, 8}, {0, 0}, {0, 0} },
 		[IPA_v3_5_RSRC_GRP_TYPE_SRC_HPS_DMARS] = {
-		{0, 255}, {0, 255}, {0, 255}, {0, 255},  {0, 0}, {0, 0} },
+		{0, 63}, {0, 63}, {0, 255}, {0, 255},  {0, 0}, {0, 0} },
 		[IPA_v3_5_RSRC_GRP_TYPE_SRC_ACK_ENTRIES] = {
 		{14, 14}, {20, 20}, {0, 0}, {14, 14}, {0, 0}, {0, 0} },
 	},
@@ -239,7 +239,7 @@ static const struct rsrc_min_max ipa3_rsrc_dst_grp_config
 		[IPA_v3_5_RSRC_GRP_TYPE_DST_DATA_SECTORS] = {
 		{4, 4}, {4, 4}, {3, 3}, {0, 0}, {0, 0}, {0, 0} },
 		[IPA_v3_5_RSRC_GRP_TYPE_DST_DPS_DMARS] = {
-		{2, 255}, {1, 255}, {1, 2}, {0, 0}, {0, 0}, {0, 0} },
+		{2, 63}, {1, 63}, {1, 2}, {0, 0}, {0, 0}, {0, 0} },
 	},
 	[IPA_4_0] = {
 		/*LWA_DL UL/DL/DPL uC, other are invalid */
