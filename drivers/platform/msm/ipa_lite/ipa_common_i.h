@@ -263,9 +263,9 @@ struct ipa_mem_buffer {
  * enum ipa_cs_offload - checksum offload setting
  */
 enum ipa_cs_offload {
-        IPA_DISABLE_CS_OFFLOAD,
-        IPA_ENABLE_CS_OFFLOAD_UL,
-        IPA_ENABLE_CS_OFFLOAD_DL,
+        IPA_DISABLE_CS_OFFLOAD		= 0,
+        IPA_ENABLE_CS_OFFLOAD_UL	= 1,
+        IPA_ENABLE_CS_OFFLOAD_DL	= 2,
         IPA_CS_RSVD
 };
 
