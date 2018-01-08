@@ -241,11 +241,11 @@ struct ipahal_reg_fltrt_hash_tuple {
  * DBG_CNT_TYPE_IPV4_ROUT - Count IPv6 routing rules
  */
 enum ipahal_reg_dbg_cnt_type {
-	DBG_CNT_TYPE_IPV4_FLTR,
-	DBG_CNT_TYPE_IPV4_ROUT,
-	DBG_CNT_TYPE_GENERAL,
-	DBG_CNT_TYPE_IPV6_FLTR,
-	DBG_CNT_TYPE_IPV6_ROUT,
+	DBG_CNT_TYPE_IPV4_FLTR	= 0,
+	DBG_CNT_TYPE_IPV4_ROUT	= 1,
+	DBG_CNT_TYPE_GENERAL	= 2,
+	DBG_CNT_TYPE_IPV6_FLTR	= 4,
+	DBG_CNT_TYPE_IPV6_ROUT	= 5,
 };
 
 /*

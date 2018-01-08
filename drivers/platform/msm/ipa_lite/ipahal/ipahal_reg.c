@@ -307,31 +307,26 @@ ipareg_construct_debug_cnt_ctrl_n(enum ipahal_reg reg, const void *fields)
 {
 	const struct ipahal_reg_debug_cnt_ctrl *dbg_cnt_ctrl = fields;
 	u32 val;
-	u8 type;
+	u8 type = (u8)dbg_cnt_ctrl->type;
 
-	switch (dbg_cnt_ctrl->type) {
+	switch (type) {
 	case DBG_CNT_TYPE_IPV4_FLTR:
-		type = 0x0;
 		if (!dbg_cnt_ctrl->rule_idx_pipe_rule) {
 			ipa_err("No FLT global rules\n");
 			WARN_ON(1);
 		}
 		break;
 	case DBG_CNT_TYPE_IPV4_ROUT:
-		type = 0x1;
 		break;
 	case DBG_CNT_TYPE_GENERAL:
-		type = 0x2;
 		break;
 	case DBG_CNT_TYPE_IPV6_FLTR:
-		type = 0x4;
 		if (!dbg_cnt_ctrl->rule_idx_pipe_rule) {
 			ipa_err("No FLT global rules\n");
 			WARN_ON(1);
 		}
 		break;
 	case DBG_CNT_TYPE_IPV6_ROUT:
-		type = 0x5;
 		break;
 	default:
 		ipa_err("Invalid dbg_cnt_ctrl type (%d) for %s\n",
