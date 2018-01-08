@@ -1565,9 +1565,6 @@ u32 ipahal_aggr_get_max_pkt_limit(void)
 void ipahal_get_aggr_force_close_valmask(int ep_idx,
 	struct ipahal_reg_valmask *valmask)
 {
-	u32 shft;
-	u32 bmsk;
-
 	if (ep_idx > (sizeof(valmask->val) * 8 - 1)) {
 		ipa_err("too big ep_idx %d\n", ep_idx);
 		ipa_assert();
@@ -1575,17 +1572,21 @@ void ipahal_get_aggr_force_close_valmask(int ep_idx,
 	}
 
 	if (ipahal_ctx->hw_type <= IPA_HW_v3_1) {
-		shft = PIPE_BITMAP_SHFT;
-		bmsk = PIPE_BITMAP_BMSK;
+		valmask->val |= IPA_SETFIELD(1U << ep_idx,
+					PIPE_BITMAP_SHFT,
+					PIPE_BITMAP_BMSK);
+		valmask->mask = PIPE_BITMAP_BMSK;
 	} else if (ipahal_ctx->hw_type <= IPA_HW_v3_5_1) {
-		shft = PIPE_BITMAP_SHFT_V3_5;
-		bmsk = PIPE_BITMAP_BMSK_V3_5;
+		valmask->val |= IPA_SETFIELD(1U << ep_idx,
+					PIPE_BITMAP_SHFT_V3_5,
+					PIPE_BITMAP_BMSK_V3_5);
+		valmask->mask = PIPE_BITMAP_BMSK_V3_5;
 	} else {
-		shft = PIPE_BITMAP_SHFT_V4_0;
-		bmsk = PIPE_BITMAP_BMSK_V4_0;
+		valmask->val |= IPA_SETFIELD(1U << ep_idx,
+					PIPE_BITMAP_SHFT_V4_0,
+					PIPE_BITMAP_BMSK_V4_0);
+		valmask->mask = PIPE_BITMAP_BMSK_V4_0;
 	}
-	valmask->val |= IPA_SETFIELD(1 << ep_idx, shft, bmsk);
-	valmask->mask = bmsk;
 }
 
 void ipahal_get_fltrt_hash_flush_valmask(
