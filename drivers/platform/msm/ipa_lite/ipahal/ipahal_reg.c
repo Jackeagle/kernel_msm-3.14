@@ -225,6 +225,8 @@ static void ipareg_parse_hash_cfg_n(
 {
 	struct ipahal_reg_fltrt_hash_tuple *tuple = fields;
 
+	memset(tuple, 0, sizeof(*tuple));
+
 	tuple->flt.src_id =
 		IPA_GETFIELD_FROM_REG(val,
 		FILTER_HASH_MSK_SRC_ID_SHFT,
@@ -363,7 +365,8 @@ static void ipareg_parse_qcncm(
 {
 	struct ipahal_reg_qcncm *qcncm = fields;
 
-	memset(qcncm, 0, sizeof(struct ipahal_reg_qcncm));
+	memset(qcncm, 0, sizeof(*qcncm));
+
 	qcncm->mode_en = IPA_GETFIELD_FROM_REG(val,
 		MODE_EN_SHFT,
 		MODE_EN_BMSK);
@@ -401,7 +404,8 @@ static void ipareg_parse_single_ndp_mode(
 {
 	struct ipahal_reg_single_ndp_mode *mode = fields;
 
-	memset(mode, 0, sizeof(struct ipahal_reg_single_ndp_mode));
+	memset(mode, 0, sizeof(*mode));
+
 	mode->single_ndp_en = IPA_GETFIELD_FROM_REG(val,
 		SINGLE_NDP_EN_SHFT,
 		SINGLE_NDP_EN_BMSK);
@@ -486,7 +490,8 @@ static void ipareg_parse_shared_mem_size(
 {
 	struct ipahal_reg_shared_mem_size *smem_sz = fields;
 
-	memset(smem_sz, 0, sizeof(struct ipahal_reg_shared_mem_size));
+	memset(smem_sz, 0, sizeof(*smem_sz));
+
 	smem_sz->shared_mem_sz = IPA_GETFIELD_FROM_REG(val,
 		SHARED_MEM_SIZE_SHFT,
 		SHARED_MEM_SIZE_BMSK);
@@ -643,6 +648,8 @@ static void ipareg_parse_endp_init_ctrl_n(enum ipahal_reg_name reg,
 {
 	struct ipa_ep_cfg_ctrl *ep_ctrl = fields;
 
+	memset(ep_ctrl, 0, sizeof(*ep_ctrl));
+
 	ep_ctrl->ipa_ep_suspend = IPA_GETFIELD_FROM_REG(val,
 						ENDP_SUSPEND_SHFT,
 						ENDP_SUSPEND_BMSK);
@@ -726,7 +733,7 @@ static void ipareg_parse_endp_init_aggr_n(enum ipahal_reg_name reg,
 {
 	struct ipa_ep_cfg_aggr *ep_aggr = fields;
 
-	memset(ep_aggr, 0, sizeof(struct ipa_ep_cfg_aggr));
+	memset(ep_aggr, 0, sizeof(*ep_aggr));
 
 	ep_aggr->aggr_en =
 			IPA_GETFIELD_FROM_REG(val, AGGR_EN_SHFT, AGGR_EN_BMSK)
@@ -959,6 +966,8 @@ static void ipareg_parse_tx_cfg(enum ipahal_reg_name reg,
 {
 	struct ipahal_reg_tx_cfg *tx_cfg = fields;
 
+	memset(tx_cfg, 0, sizeof(*tx_cfg));
+
 	tx_cfg->tx0_prefetch_disable = IPA_GETFIELD_FROM_REG(val,
 		TX0_PREFETCH_DISABLE_SHFT_V3_5,
 		TX0_PREFETCH_DISABLE_BMSK_V3_5);
@@ -979,6 +988,8 @@ static void ipareg_parse_tx_cfg_v4_0(enum ipahal_reg_name reg,
 	void *fields, u32 val)
 {
 	struct ipahal_reg_tx_cfg *tx_cfg = fields;
+
+	memset(tx_cfg, 0, sizeof(*tx_cfg));
 
 	tx_cfg->tx0_prefetch_almost_empty_size = IPA_GETFIELD_FROM_REG(val,
 		PREFETCH_ALMOST_EMPTY_SIZE_TX0_SHFT_V4_0,
@@ -1112,7 +1123,7 @@ static void ipareg_parse_hps_queue_weights(
 {
 	struct ipahal_reg_rx_hps_weights *hps_weights = fields;
 
-	memset(hps_weights, 0, sizeof(struct ipahal_reg_rx_hps_weights));
+	memset(hps_weights, 0, sizeof(*hps_weights));
 
 	hps_weights->hps_queue_weight_0 = IPA_GETFIELD_FROM_REG(val,
 		RX_HPS_QUEUE_WEIGHT_0_SHFT,
