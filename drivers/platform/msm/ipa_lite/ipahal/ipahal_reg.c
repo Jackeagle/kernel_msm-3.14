@@ -340,8 +340,7 @@ ipareg_construct_debug_cnt_ctrl_n(enum ipahal_reg reg, const void *fields)
 		ipa_err("Invalid dbg_cnt_ctrl type (%d) for %s\n",
 			dbg_cnt_ctrl->type, ipahal_regs[reg].name);
 		WARN_ON(1);
-		return val;
-
+		return 0;
 	};
 
 	val |= field_gen(type, DBG_CNT_TYPE_BMSK);
