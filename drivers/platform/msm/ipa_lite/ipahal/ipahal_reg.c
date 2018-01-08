@@ -1588,7 +1588,7 @@ void ipahal_get_aggr_force_close_valmask(int ep_idx,
 		return;
 	}
 	valmask->val |= IPA_SETFIELD(1 << ep_idx, shft, bmsk);
-	valmask->mask = bmsk << shft;
+	valmask->mask = bmsk;
 }
 
 void ipahal_get_fltrt_hash_flush_valmask(
