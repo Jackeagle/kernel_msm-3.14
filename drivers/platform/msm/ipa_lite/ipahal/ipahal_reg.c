@@ -309,9 +309,6 @@ ipareg_construct_debug_cnt_ctrl_n(enum ipahal_reg reg, const void *fields)
 	u32 val;
 	u8 type;
 
-	val = field_gen(dbg_cnt_ctrl->en ? 1 : 0,
-			DBG_CNT_EN_BMSK);
-
 	switch (dbg_cnt_ctrl->type) {
 	case DBG_CNT_TYPE_IPV4_FLTR:
 		type = 0x0;
@@ -343,6 +340,7 @@ ipareg_construct_debug_cnt_ctrl_n(enum ipahal_reg reg, const void *fields)
 		return 0;
 	};
 
+	val = field_gen(dbg_cnt_ctrl->en ? 1 : 0, DBG_CNT_EN_BMSK);
 	val |= field_gen(type, DBG_CNT_TYPE_BMSK);
 	val |= field_gen(dbg_cnt_ctrl->product ? 1 : 0, PRODUCT_BMSK);
 	val |= field_gen(dbg_cnt_ctrl->src_pipe, SOURCE_PIPE_BMSK);
