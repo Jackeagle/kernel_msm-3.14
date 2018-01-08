@@ -398,25 +398,30 @@ ipareg_construct_endp_init_hdr_metadata_mask_n(enum ipahal_reg reg,
 	return field_gen(metadata_mask->metadata_mask, METADATA_MASK_BMSK);
 }
 
+static bool cs_offload_en_valid(u8 cs_offload_en, enum ipahal_reg reg)
+{
+	switch (cs_offload_en) {
+	case IPA_DISABLE_CS_OFFLOAD:
+	case IPA_ENABLE_CS_OFFLOAD_UL:
+	case IPA_ENABLE_CS_OFFLOAD_DL:
+		return true;
+	default:
+		break;
+	}
+
+	ipa_err("Invalid cs_offload_en value for %s\n", ipahal_regs[reg].name);
+
+	return false;
+}
+
 static u32
 ipareg_construct_endp_init_cfg_n(enum ipahal_reg reg, const void *fields)
 {
 	const struct ipa_ep_cfg_cfg *cfg = fields;
 	u32 val;
 
-	switch (cfg->cs_offload_en) {
-	case IPA_DISABLE_CS_OFFLOAD:
-		break;
-	case IPA_ENABLE_CS_OFFLOAD_UL:
-		break;
-	case IPA_ENABLE_CS_OFFLOAD_DL:
-		break;
-	default:
-		ipa_err("Invalid cs_offload_en value for %s\n",
-			ipahal_regs[reg].name);
-		WARN_ON(1);
+	if (WARN_ON(!cs_offload_en_valid(cfg->cs_offload_en, reg)))
 		return 0;
-	}
 
 	val = field_gen(cfg->frag_offload_en ? 1 : 0, FRAG_OFFLOAD_EN_BMSK);
 	val |= field_gen(cfg->cs_offload_en, CS_OFFLOAD_EN_BMSK);
