@@ -1543,16 +1543,14 @@ void ipahal_get_disable_aggr_valmask(struct ipahal_reg_valmask *valmask)
 
 u32 ipahal_aggr_get_max_byte_limit(void)
 {
-	return
-		AGGR_BYTE_LIMIT_BMSK >>
-		AGGR_BYTE_LIMIT_SHFT;
+	return IPA_GETFIELD_FROM_REG(0xffffffff, AGGR_BYTE_LIMIT_SHFT,
+					AGGR_BYTE_LIMIT_BMSK);
 }
 
 u32 ipahal_aggr_get_max_pkt_limit(void)
 {
-	return
-		AGGR_PKT_LIMIT_BMSK >>
-		AGGR_PKT_LIMIT_SHFT;
+	return IPA_GETFIELD_FROM_REG(0xffffffff, AGGR_PKT_LIMIT_SHFT,
+					AGGR_PKT_LIMIT_BMSK);
 }
 
 void ipahal_get_aggr_force_close_valmask(int ep_idx,
