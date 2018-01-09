@@ -718,10 +718,6 @@ ipareg_construct_tx_cfg(enum ipahal_reg reg, const void *fields)
 	const struct ipahal_reg_tx_cfg *tx_cfg = fields;
 	u32 val;
 
-	if (tx_cfg->tx0_prefetch_almost_empty_size !=
-			tx_cfg->tx1_prefetch_almost_empty_size)
-		ipa_assert();
-
 	val = field_gen(tx_cfg->tx0_prefetch_disable,
 			TX0_PREFETCH_DISABLE_BMSK_V3_5);
 	val |= field_gen(tx_cfg->tx1_prefetch_disable,
