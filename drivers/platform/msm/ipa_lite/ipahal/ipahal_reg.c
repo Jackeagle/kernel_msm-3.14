@@ -1245,8 +1245,6 @@ void ipahal_get_fltrt_hash_flush_valmask(
 {
 	u32 val;
 
-	memset(valmask, 0, sizeof(struct ipahal_reg_valmask));
-
 	val = field_gen(flush->v6_rt ? 1 : 0, IPv6_ROUT_BMSK);
 	val |= field_gen(flush->v6_flt ? 1 : 0, IPv6_FILT_BMSK);
 	val |= field_gen(flush->v4_rt ? 1 : 0, IPv4_ROUT_BMSK);
