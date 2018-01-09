@@ -1618,6 +1618,7 @@ void ipahal_get_status_ep_valmask(int pipe_num,
 		return;
 	}
 
-	valmask->val = (pipe_num & STATUS_ENDP_BMSK) << STATUS_ENDP_SHFT;
-	valmask->mask = STATUS_ENDP_BMSK << STATUS_ENDP_SHFT;
+	valmask->val = IPA_SETFIELD(pipe_num,
+				STATUS_ENDP_SHFT, STATUS_ENDP_BMSK);
+	valmask->mask = STATUS_ENDP_BMSK;
 }
