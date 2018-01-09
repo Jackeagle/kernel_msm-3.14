@@ -1613,11 +1613,6 @@ void ipahal_get_fltrt_hash_flush_valmask(
 void ipahal_get_status_ep_valmask(int pipe_num,
 	struct ipahal_reg_valmask *valmask)
 {
-	if (!valmask) {
-		ipa_err("Input error\n");
-		return;
-	}
-
 	valmask->val = IPA_SETFIELD(pipe_num,
 				STATUS_ENDP_SHFT, STATUS_ENDP_BMSK);
 	valmask->mask = STATUS_ENDP_BMSK;
