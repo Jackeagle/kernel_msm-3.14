@@ -2186,6 +2186,7 @@ static int ipa3_iommu_map(struct iommu_domain *domain,
 	return iommu_map(domain, iova, paddr, size, prot);
 }
 
+/* Returns negative on error, 1 if S1 bypass, 0 otherwise. */
 static int
 ipa_smmu_domain_attr_set(struct device *dev, struct iommu_domain *domain)
 {
@@ -2206,13 +2207,16 @@ ipa_smmu_domain_attr_set(struct device *dev, struct iommu_domain *domain)
 	ipa_debug("CB PROBE pdev=%p set attribute %s\n", dev, attr_string);
 
 	ret = iommu_domain_set_attr(domain, attr, &data);
-	if (ret)
+	if (ret) {
 		ipa_err("couldn't set %s\n", attr_string);
-	else
-		ipa_debug("SMMU %s\n", attr_string);
+		return ret;
+	}
 
-	return ret;
+	ipa_debug("SMMU %s\n", attr_string);
+
+	return attr == DOMAIN_ATTR_S1_BYPASS ? 1 : 0;
 }
+
 /*
  * Common probe processing for SMMU context blocks.  This function
  * populates all of the fields of the SMMU CB context provided.
@@ -2231,6 +2235,7 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 	dma_addr_t va_start;
 	size_t va_size;
 	int ret;
+	bool s1_bypass;
 
 	ret = of_property_read_u32_array(node, "qcom,iova-mapping",
 						iova_mapping, 2);
@@ -2250,10 +2255,12 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 	}
 	ipa_debug("SMMU mapping created\n");
 
-	if (ipa_smmu_domain_attr_set(dev, mapping->domain)) {
+	ret = ipa_smmu_domain_attr_set(dev, mapping->domain);
+	if (ret < 0) {
 		ret = -EIO;
 		goto err_release_mapping;
 	}
+	s1_bypass = !!ret;
 
 	if (dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64))) {
 		ipa_err("DMA set 64bit mask failed\n");
@@ -2272,6 +2279,7 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 	cb->mapping = mapping;
 	cb->va_start = va_start;
 	cb->va_end = va_start + va_size;
+	cb->s1_bypass = s1_bypass;
 
 	return 0;
 

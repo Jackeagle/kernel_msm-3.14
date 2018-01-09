@@ -249,6 +249,7 @@ struct ipa_smmu_cb_ctx {
 	struct dma_iommu_mapping *mapping;
 	dma_addr_t va_start;
 	dma_addr_t va_end;
+	bool s1_bypass;
 };
 
 /**
