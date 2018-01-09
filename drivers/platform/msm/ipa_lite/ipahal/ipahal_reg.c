@@ -1104,7 +1104,7 @@ void ipahal_reg_init(void)
 
 	ipa_debug_low("Entry - HW_TYPE=%d\n", ipahal_ctx->hw_type);
 
-	/* Build up a the register descriptions we'll use */
+	/* Build up the register descriptions we'll use */
 	for (i = 0; i < IPA_REG_MAX ; i++) {
 		for (j = ipahal_ctx->hw_type; j >= IPA_HW_v3_0; j--) {
 			const struct ipahal_reg_obj *reg;
