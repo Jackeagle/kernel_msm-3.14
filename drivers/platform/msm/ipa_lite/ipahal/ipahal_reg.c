@@ -1589,12 +1589,6 @@ void ipahal_get_fltrt_hash_flush_valmask(
 {
 	u32 val;
 
-	if (!flush || !valmask) {
-		ipa_err("Input error: flush=%p ; valmask=%p\n",
-			flush, valmask);
-		return;
-	}
-
 	memset(valmask, 0, sizeof(struct ipahal_reg_valmask));
 
 	val = IPA_SETFIELD(flush->v6_rt ? 1 : 0,
