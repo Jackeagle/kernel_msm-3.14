@@ -348,12 +348,14 @@ struct ipahal_reg_single_ndp_mode {
  * @mode_en: When QCNCM_MODE_EN=1, IPA will use QCNCM signature.
  * @mode_val: Used only when QCNCM_MODE_EN=1 and sets SW Signature in
  *	the NDP header.
- * @unused: undefined bits of the register
+ * @undef1: unused bits in the low-order byte of the register
+ * @undef2: unused bits in the high-order byte of the register
  */
 struct ipahal_reg_qcncm {
 	bool mode_en;
 	u32 mode_val;
-	u32 undefined;
+	u32 undef1;
+	u32 undef2;
 };
 
 /*

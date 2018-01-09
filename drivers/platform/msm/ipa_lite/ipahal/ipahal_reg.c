@@ -252,11 +252,8 @@ ipareg_construct_qcncm(enum ipahal_reg reg, const void *fields)
 
 	val = field_gen(qcncm->mode_en ? 1 : 0, MODE_EN_BMSK);
 	val |= field_gen(qcncm->mode_val, MODE_VAL_BMSK);
-	/*
-	 * For some reason, the undefined value is formatted
-	 * using the wrong mask, and without shifting.
-	 */
-	val |= qcncm->undefined & MODE_VAL_BMSK;
+	val |= field_gen(qcncm->undef1, QCNCM_UNDEFINED1_BMSK);
+	val |= field_gen(qcncm->undef2, MODE_UNDEFINED2_BMSK);
 
 	return val;
 }
@@ -270,13 +267,8 @@ ipareg_parse_qcncm(enum ipahal_reg reg, void *fields, u32 val)
 
 	qcncm->mode_en = field_val(val, MODE_EN_BMSK);
 	qcncm->mode_val = field_val(val, MODE_VAL_BMSK);
-	/*
-	 * For some reason, the undefined value extracts field
-	 * values without shifting to account for the position
-	 * of the defined fields.
-	 */
-	qcncm->undefined = val & QCNCM_UNDEFINED1_BMSK;
-	qcncm->undefined |= val & MODE_UNDEFINED2_BMSK;
+	qcncm->undef1 = field_val(val, QCNCM_UNDEFINED1_BMSK);
+	qcncm->undef2 = field_val(val, MODE_UNDEFINED2_BMSK);
 }
 
 static u32
