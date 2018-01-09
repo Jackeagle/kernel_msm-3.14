@@ -1561,11 +1561,6 @@ void ipahal_get_aggr_force_close_valmask(int ep_idx,
 	u32 shft;
 	u32 bmsk;
 
-	if (!valmask) {
-		ipa_err("Input error\n");
-		return;
-	}
-
 	if (ipahal_ctx->hw_type <= IPA_HW_v3_1) {
 		shft = PIPE_BITMAP_SHFT;
 		bmsk = PIPE_BITMAP_BMSK;
