@@ -1587,6 +1587,8 @@ void ipahal_get_fltrt_hash_flush_valmask(
 	struct ipahal_reg_fltrt_hash_flush *flush,
 	struct ipahal_reg_valmask *valmask)
 {
+	u32 val;
+
 	if (!flush || !valmask) {
 		ipa_err("Input error: flush=%p ; valmask=%p\n",
 			flush, valmask);
@@ -1595,16 +1597,23 @@ void ipahal_get_fltrt_hash_flush_valmask(
 
 	memset(valmask, 0, sizeof(struct ipahal_reg_valmask));
 
-	if (flush->v6_rt)
-		valmask->val |= 1 << IPv6_ROUT_SHFT;
-	if (flush->v6_flt)
-		valmask->val |= 1 << IPv6_FILT_SHFT;
-	if (flush->v4_rt)
-		valmask->val |= 1 << IPv4_ROUT_SHFT;
-	if (flush->v4_flt)
-		valmask->val |= 1 << IPv4_FILT_SHFT;
+	val = IPA_SETFIELD(flush->v6_rt ? 1 : 0,
+			IPv6_ROUT_SHFT, IPv6_ROUT_BMSK);
+	val |= IPA_SETFIELD(flush->v6_flt ? 1 : 0,
+			IPv6_FILT_SHFT, IPv6_FILT_BMSK);
+	val |= IPA_SETFIELD(flush->v4_rt ? 1 : 0,
+			IPv4_ROUT_SHFT, IPv4_ROUT_BMSK);
+	val |= IPA_SETFIELD(flush->v4_flt ? 1 : 0,
+			IPv4_FILT_SHFT, IPv4_FILT_BMSK);
 
-	valmask->mask = valmask->val;
+	/*
+	 * The mask indicates which bits in the value are valid.
+	 * Technically we should set all four bits in the mask,
+	 * but in this case setting just the bits set in the value
+	 * has the same effect.
+	 */
+	valmask->val = val;
+	valmask->mask = val;
 }
 
 void ipahal_get_status_ep_valmask(int pipe_num,
