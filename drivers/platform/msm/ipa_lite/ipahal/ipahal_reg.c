@@ -1530,11 +1530,6 @@ u32 ipahal_get_reg_base(void)
 
 void ipahal_get_disable_aggr_valmask(struct ipahal_reg_valmask *valmask)
 {
-	if (!valmask) {
-		ipa_err("Input error\n");
-		return;
-	}
-
 	valmask->val = (1 & AGGR_FORCE_CLOSE_BMSK) <<
 		AGGR_FORCE_CLOSE_SHFT;
 	valmask->mask = AGGR_FORCE_CLOSE_BMSK <<
