@@ -78,7 +78,7 @@ static void gsi_handle_ch_ctrl(int ee)
 	ch = gsi_readl(GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_OFFS(ee));
 	gsi_writel(ch, GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_CLR_OFFS(ee));
 	GSIDBG("ch %x\n", ch);
-	for (i = 0; GSI_CHAN_MAX; i++) {
+	for (i = 0; i < GSI_CHAN_MAX; i++) {
 		if ((1 << i) & ch) {
 			if (i >= gsi_ctx->max_ch) {
 				GSIERR("invalid channel %d\n", i);
