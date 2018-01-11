@@ -311,32 +311,32 @@ int ipa3_init_q6_smem(void)
 
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
 
-	rc = ipa3_init_smem_region(IPA_MEM_PART(modem_size),
-		IPA_MEM_PART(modem_ofst));
+	rc = ipa3_init_smem_region(IPA_MEM_PART(MODEM_SIZE),
+		IPA_MEM_PART(MODEM_OFST));
 	if (rc) {
 		ipa_err("failed to initialize Modem RAM memory\n");
 		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 		return rc;
 	}
 
-	rc = ipa3_init_smem_region(IPA_MEM_PART(modem_hdr_size),
-		IPA_MEM_PART(modem_hdr_ofst));
+	rc = ipa3_init_smem_region(IPA_MEM_PART(MODEM_HDR_SIZE),
+		IPA_MEM_PART(MODEM_HDR_OFST));
 	if (rc) {
 		ipa_err("failed to initialize Modem HDRs RAM memory\n");
 		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 		return rc;
 	}
 
-	rc = ipa3_init_smem_region(IPA_MEM_PART(modem_hdr_proc_ctx_size),
-		IPA_MEM_PART(modem_hdr_proc_ctx_ofst));
+	rc = ipa3_init_smem_region(IPA_MEM_PART(MODEM_HDR_PROC_CTX_SIZE),
+		IPA_MEM_PART(MODEM_HDR_PROC_CTX_OFST));
 	if (rc) {
 		ipa_err("failed to initialize Modem proc ctx RAM memory\n");
 		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 		return rc;
 	}
 
-	rc = ipa3_init_smem_region(IPA_MEM_PART(modem_comp_decomp_size),
-		IPA_MEM_PART(modem_comp_decomp_ofst));
+	rc = ipa3_init_smem_region(IPA_MEM_PART(MODEM_COMP_DECOMP_SIZE),
+		IPA_MEM_PART(MODEM_COMP_DECOMP_OFST));
 	if (rc) {
 		ipa_err("failed to initialize Modem Comp/Decomp RAM memory\n");
 		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
@@ -652,33 +652,33 @@ int _ipa_init_sram_v3(void)
 	}
 
 	/* Consult with ipa_i.h on the location of the CANARY values */
-	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(v4_flt_hash_ofst) - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(v4_flt_hash_ofst));
+	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(V4_FLT_HASH_OFST) - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(V4_FLT_HASH_OFST));
 	ipa3_sram_set_canary(ipa_sram_mmio,
-		IPA_MEM_PART(v4_flt_nhash_ofst) - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(v4_flt_nhash_ofst));
-	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(v6_flt_hash_ofst) - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(v6_flt_hash_ofst));
+		IPA_MEM_PART(V4_FLT_NHASH_OFST) - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(V4_FLT_NHASH_OFST));
+	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(V6_FLT_HASH_OFST) - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(V6_FLT_HASH_OFST));
 	ipa3_sram_set_canary(ipa_sram_mmio,
-		IPA_MEM_PART(v6_flt_nhash_ofst) - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(v6_flt_nhash_ofst));
-	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(v4_rt_hash_ofst) - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(v4_rt_hash_ofst));
-	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(v4_rt_nhash_ofst) - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(v4_rt_nhash_ofst));
-	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(v6_rt_hash_ofst) - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(v6_rt_hash_ofst));
-	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(v6_rt_nhash_ofst) - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(v6_rt_nhash_ofst));
-	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(modem_hdr_ofst) - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(modem_hdr_ofst));
+		IPA_MEM_PART(V6_FLT_NHASH_OFST) - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(V6_FLT_NHASH_OFST));
+	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(V4_RT_HASH_OFST) - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(V4_RT_HASH_OFST));
+	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(V4_RT_NHASH_OFST) - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(V4_RT_NHASH_OFST));
+	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(V6_RT_HASH_OFST) - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(V6_RT_HASH_OFST));
+	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(V6_RT_NHASH_OFST) - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(V6_RT_NHASH_OFST));
+	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(MODEM_HDR_OFST) - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(MODEM_HDR_OFST));
 	ipa3_sram_set_canary(ipa_sram_mmio,
-		IPA_MEM_PART(modem_hdr_proc_ctx_ofst) - 4);
+		IPA_MEM_PART(MODEM_HDR_PROC_CTX_OFST) - 4);
 	ipa3_sram_set_canary(ipa_sram_mmio,
-		IPA_MEM_PART(modem_hdr_proc_ctx_ofst));
-	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(modem_ofst) - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(modem_ofst));
-	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(uc_event_ring_ofst));
+		IPA_MEM_PART(MODEM_HDR_PROC_CTX_OFST));
+	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(MODEM_OFST) - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(MODEM_OFST));
+	ipa3_sram_set_canary(ipa_sram_mmio, IPA_MEM_PART(UC_EVENT_RING_OFST));
 
 	iounmap(ipa_sram_mmio);
 
@@ -699,7 +699,7 @@ int _ipa_init_hdr_v3_0(void)
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	struct ipahal_imm_cmd_dma_shared_mem dma_cmd = { 0 };
 
-	mem.size = IPA_MEM_PART(modem_hdr_size) + IPA_MEM_PART(apps_hdr_size);
+	mem.size = IPA_MEM_PART(MODEM_HDR_SIZE) + IPA_MEM_PART(APPS_HDR_SIZE);
 	mem.base = dma_alloc_coherent(dev, mem.size, &mem.phys_base,
 					GFP_KERNEL);
 	if (!mem.base) {
@@ -711,7 +711,7 @@ int _ipa_init_hdr_v3_0(void)
 	cmd.hdr_table_addr = mem.phys_base;
 	cmd.size_hdr_table = mem.size;
 	cmd.hdr_addr = ipa3_ctx->smem_restricted_bytes +
-		IPA_MEM_PART(modem_hdr_ofst);
+		IPA_MEM_PART(MODEM_HDR_OFST);
 	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_HDR_INIT_LOCAL, &cmd);
 	if (!cmd_pyld) {
 		ipa_err("fail to construct hdr_init_local imm cmd\n");
@@ -731,8 +731,8 @@ int _ipa_init_hdr_v3_0(void)
 	ipahal_destroy_imm_cmd(cmd_pyld);
 	dma_free_coherent(dev, mem.size, mem.base, mem.phys_base);
 
-	mem.size = IPA_MEM_PART(modem_hdr_proc_ctx_size) +
-		IPA_MEM_PART(apps_hdr_proc_ctx_size);
+	mem.size = IPA_MEM_PART(MODEM_HDR_PROC_CTX_SIZE) +
+		IPA_MEM_PART(APPS_HDR_PROC_CTX_SIZE);
 	mem.base = dma_alloc_coherent(dev, mem.size, &mem.phys_base,
 					GFP_KERNEL);
 	if (!mem.base) {
@@ -747,7 +747,7 @@ int _ipa_init_hdr_v3_0(void)
 	dma_cmd.pipeline_clear_options = IPAHAL_HPS_CLEAR;
 	dma_cmd.system_addr = mem.phys_base;
 	dma_cmd.local_addr = ipa3_ctx->smem_restricted_bytes +
-		IPA_MEM_PART(modem_hdr_proc_ctx_ofst);
+		IPA_MEM_PART(MODEM_HDR_PROC_CTX_OFST);
 	dma_cmd.size = mem.size;
 	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_DMA_SHARED_MEM,
 						&dma_cmd);
@@ -787,8 +787,8 @@ int _ipa_init_rt4_v3(void)
         struct ipahal_imm_cmd_pyld *cmd_pyld;
         int rc = 0;
 
-        rc = ipahal_rt_generate_empty_img(IPA_MEM_PART(v4_rt_num_index),
-                IPA_MEM_PART(v4_rt_hash_size), IPA_MEM_PART(v4_rt_nhash_size),
+        rc = ipahal_rt_generate_empty_img(IPA_MEM_PART(V4_RT_NUM_INDEX),
+                IPA_MEM_PART(V4_RT_HASH_SIZE), IPA_MEM_PART(V4_RT_NHASH_SIZE),
                 &mem, false);
         if (rc) {
                 ipa_err("fail generate empty v4 rt img\n");
@@ -798,11 +798,11 @@ int _ipa_init_rt4_v3(void)
         v4_cmd.hash_rules_addr = mem.phys_base;
         v4_cmd.hash_rules_size = mem.size;
         v4_cmd.hash_local_addr = ipa3_ctx->smem_restricted_bytes +
-                IPA_MEM_PART(v4_rt_hash_ofst);
+                IPA_MEM_PART(V4_RT_HASH_OFST);
         v4_cmd.nhash_rules_addr = mem.phys_base;
         v4_cmd.nhash_rules_size = mem.size;
         v4_cmd.nhash_local_addr = ipa3_ctx->smem_restricted_bytes +
-                IPA_MEM_PART(v4_rt_nhash_ofst);
+                IPA_MEM_PART(V4_RT_NHASH_OFST);
         ipa_debug("putting hashable routing IPv4 rules to phys 0x%x\n",
                                 v4_cmd.hash_local_addr);
         ipa_debug("putting non-hashable routing IPv4 rules to phys 0x%x\n",
@@ -842,8 +842,8 @@ int _ipa_init_rt6_v3(void)
         struct ipahal_imm_cmd_pyld *cmd_pyld;
         int rc = 0;
 
-        rc = ipahal_rt_generate_empty_img(IPA_MEM_PART(v6_rt_num_index),
-                IPA_MEM_PART(v6_rt_hash_size), IPA_MEM_PART(v6_rt_nhash_size),
+        rc = ipahal_rt_generate_empty_img(IPA_MEM_PART(V6_RT_NUM_INDEX),
+                IPA_MEM_PART(V6_RT_HASH_SIZE), IPA_MEM_PART(V6_RT_NHASH_SIZE),
                 &mem, false);
         if (rc) {
                 ipa_err("fail generate empty v6 rt img\n");
@@ -853,11 +853,11 @@ int _ipa_init_rt6_v3(void)
         v6_cmd.hash_rules_addr = mem.phys_base;
         v6_cmd.hash_rules_size = mem.size;
         v6_cmd.hash_local_addr = ipa3_ctx->smem_restricted_bytes +
-                IPA_MEM_PART(v6_rt_hash_ofst);
+                IPA_MEM_PART(V6_RT_HASH_OFST);
         v6_cmd.nhash_rules_addr = mem.phys_base;
         v6_cmd.nhash_rules_size = mem.size;
         v6_cmd.nhash_local_addr = ipa3_ctx->smem_restricted_bytes +
-                IPA_MEM_PART(v6_rt_nhash_ofst);
+                IPA_MEM_PART(V6_RT_NHASH_OFST);
         ipa_debug("putting hashable routing IPv6 rules to phys 0x%x\n",
                                 v6_cmd.hash_local_addr);
         ipa_debug("putting non-hashable routing IPv6 rules to phys 0x%x\n",
@@ -898,8 +898,8 @@ int _ipa_init_flt4_v3(void)
         int rc;
 
         rc = ipahal_flt_generate_empty_img(ipa3_ctx->ep_flt_num,
-                IPA_MEM_PART(v4_flt_hash_size),
-                IPA_MEM_PART(v4_flt_nhash_size), ipa3_ctx->ep_flt_bitmap,
+                IPA_MEM_PART(V4_FLT_HASH_SIZE),
+                IPA_MEM_PART(V4_FLT_NHASH_SIZE), ipa3_ctx->ep_flt_bitmap,
                 &mem, false);
         if (rc) {
                 ipa_err("fail generate empty v4 flt img\n");
@@ -909,11 +909,11 @@ int _ipa_init_flt4_v3(void)
         v4_cmd.hash_rules_addr = mem.phys_base;
         v4_cmd.hash_rules_size = mem.size;
         v4_cmd.hash_local_addr = ipa3_ctx->smem_restricted_bytes +
-                IPA_MEM_PART(v4_flt_hash_ofst);
+                IPA_MEM_PART(V4_FLT_HASH_OFST);
         v4_cmd.nhash_rules_addr = mem.phys_base;
         v4_cmd.nhash_rules_size = mem.size;
         v4_cmd.nhash_local_addr = ipa3_ctx->smem_restricted_bytes +
-                IPA_MEM_PART(v4_flt_nhash_ofst);
+                IPA_MEM_PART(V4_FLT_NHASH_OFST);
         ipa_debug("putting hashable filtering IPv4 rules to phys 0x%x\n",
                                 v4_cmd.hash_local_addr);
         ipa_debug("putting non-hashable filtering IPv4 rules to phys 0x%x\n",
@@ -954,8 +954,8 @@ int _ipa_init_flt6_v3(void)
         int rc;
 
         rc = ipahal_flt_generate_empty_img(ipa3_ctx->ep_flt_num,
-                IPA_MEM_PART(v6_flt_hash_size),
-                IPA_MEM_PART(v6_flt_nhash_size), ipa3_ctx->ep_flt_bitmap,
+                IPA_MEM_PART(V6_FLT_HASH_SIZE),
+                IPA_MEM_PART(V6_FLT_NHASH_SIZE), ipa3_ctx->ep_flt_bitmap,
                 &mem, false);
         if (rc) {
                 ipa_err("fail generate empty v6 flt img\n");
@@ -965,11 +965,11 @@ int _ipa_init_flt6_v3(void)
         v6_cmd.hash_rules_addr = mem.phys_base;
         v6_cmd.hash_rules_size = mem.size;
         v6_cmd.hash_local_addr = ipa3_ctx->smem_restricted_bytes +
-                IPA_MEM_PART(v6_flt_hash_ofst);
+                IPA_MEM_PART(V6_FLT_HASH_OFST);
         v6_cmd.nhash_rules_addr = mem.phys_base;
         v6_cmd.nhash_rules_size = mem.size;
         v6_cmd.nhash_local_addr = ipa3_ctx->smem_restricted_bytes +
-                IPA_MEM_PART(v6_flt_nhash_ofst);
+                IPA_MEM_PART(V6_FLT_NHASH_OFST);
         ipa_debug("putting hashable filtering IPv6 rules to phys 0x%x\n",
                                 v6_cmd.hash_local_addr);
         ipa_debug("putting non-hashable filtering IPv6 rules to phys 0x%x\n",
@@ -1029,16 +1029,16 @@ static int ipa3_setup_rt_hash_tuple(void)
 	memset(&tuple, 0, sizeof(struct ipahal_reg_hash_tuple));
 
 	for (tbl_idx = 0;
-		tbl_idx < max(IPA_MEM_PART(v6_rt_num_index),
-		IPA_MEM_PART(v4_rt_num_index));
+		tbl_idx < max(IPA_MEM_PART(V6_RT_NUM_INDEX),
+		IPA_MEM_PART(V4_RT_NUM_INDEX));
 		tbl_idx++) {
 
-		if (tbl_idx >= IPA_MEM_PART(v4_modem_rt_index_lo) &&
-			tbl_idx <= IPA_MEM_PART(v4_modem_rt_index_hi))
+		if (tbl_idx >= IPA_MEM_PART(V4_MODEM_RT_INDEX_LO) &&
+			tbl_idx <= IPA_MEM_PART(V4_MODEM_RT_INDEX_HI))
 			continue;
 
-		if (tbl_idx >= IPA_MEM_PART(v6_modem_rt_index_lo) &&
-			tbl_idx <= IPA_MEM_PART(v6_modem_rt_index_hi))
+		if (tbl_idx >= IPA_MEM_PART(V6_MODEM_RT_INDEX_LO) &&
+			tbl_idx <= IPA_MEM_PART(V6_MODEM_RT_INDEX_HI))
 			continue;
 
 		if (ipa3_set_rt_tuple_mask(tbl_idx, &tuple)) {
@@ -2652,19 +2652,19 @@ static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
 
         if (ip == IPA_IP_v4) {
                 if (rlt == IPA_RULE_HASHABLE) {
-                        lcl_addr_mem_part = IPA_MEM_PART(v4_flt_hash_ofst);
-                        lcl_hdr_sz = IPA_MEM_PART(v4_flt_hash_size);
+                        lcl_addr_mem_part = IPA_MEM_PART(V4_FLT_HASH_OFST);
+                        lcl_hdr_sz = IPA_MEM_PART(V4_FLT_HASH_SIZE);
                 } else {
-                        lcl_addr_mem_part = IPA_MEM_PART(v4_flt_nhash_ofst);
-                        lcl_hdr_sz = IPA_MEM_PART(v4_flt_nhash_size);
+                        lcl_addr_mem_part = IPA_MEM_PART(V4_FLT_NHASH_OFST);
+                        lcl_hdr_sz = IPA_MEM_PART(V4_FLT_NHASH_SIZE);
                 }
         } else {
                 if (rlt == IPA_RULE_HASHABLE) {
-                        lcl_addr_mem_part = IPA_MEM_PART(v6_flt_hash_ofst);
-                        lcl_hdr_sz = IPA_MEM_PART(v6_flt_hash_size);
+                        lcl_addr_mem_part = IPA_MEM_PART(V6_FLT_HASH_OFST);
+                        lcl_hdr_sz = IPA_MEM_PART(V6_FLT_HASH_SIZE);
                 } else {
-                        lcl_addr_mem_part = IPA_MEM_PART(v6_flt_nhash_ofst);
-                        lcl_hdr_sz = IPA_MEM_PART(v6_flt_nhash_size);
+                        lcl_addr_mem_part = IPA_MEM_PART(V6_FLT_NHASH_OFST);
+                        lcl_hdr_sz = IPA_MEM_PART(V6_FLT_NHASH_SIZE);
                 }
         }
 
@@ -2751,24 +2751,24 @@ static int ipa3_q6_clean_q6_rt_tbls(enum ipa_ip_type ip,
         }
 
         if (ip == IPA_IP_v4) {
-                modem_rt_index_lo = IPA_MEM_PART(v4_modem_rt_index_lo);
-                modem_rt_index_hi = IPA_MEM_PART(v4_modem_rt_index_hi);
+                modem_rt_index_lo = IPA_MEM_PART(V4_MODEM_RT_INDEX_LO);
+                modem_rt_index_hi = IPA_MEM_PART(V4_MODEM_RT_INDEX_HI);
                 if (rlt == IPA_RULE_HASHABLE) {
-                        lcl_addr_mem_part = IPA_MEM_PART(v4_rt_hash_ofst);
-                        lcl_hdr_sz =  IPA_MEM_PART(v4_flt_hash_size);
+                        lcl_addr_mem_part = IPA_MEM_PART(V4_RT_HASH_OFST);
+                        lcl_hdr_sz =  IPA_MEM_PART(V4_FLT_HASH_SIZE);
                 } else {
-                        lcl_addr_mem_part = IPA_MEM_PART(v4_rt_nhash_ofst);
-                        lcl_hdr_sz = IPA_MEM_PART(v4_flt_nhash_size);
+                        lcl_addr_mem_part = IPA_MEM_PART(V4_RT_NHASH_OFST);
+                        lcl_hdr_sz = IPA_MEM_PART(V4_FLT_NHASH_SIZE);
                 }
         } else {
-                modem_rt_index_lo = IPA_MEM_PART(v6_modem_rt_index_lo);
-                modem_rt_index_hi = IPA_MEM_PART(v6_modem_rt_index_hi);
+                modem_rt_index_lo = IPA_MEM_PART(V6_MODEM_RT_INDEX_LO);
+                modem_rt_index_hi = IPA_MEM_PART(V6_MODEM_RT_INDEX_HI);
                 if (rlt == IPA_RULE_HASHABLE) {
-                        lcl_addr_mem_part = IPA_MEM_PART(v6_rt_hash_ofst);
-                        lcl_hdr_sz =  IPA_MEM_PART(v6_flt_hash_size);
+                        lcl_addr_mem_part = IPA_MEM_PART(V6_RT_HASH_OFST);
+                        lcl_hdr_sz =  IPA_MEM_PART(V6_FLT_HASH_SIZE);
                 } else {
-                        lcl_addr_mem_part = IPA_MEM_PART(v6_rt_nhash_ofst);
-                        lcl_hdr_sz = IPA_MEM_PART(v6_flt_nhash_size);
+                        lcl_addr_mem_part = IPA_MEM_PART(V6_RT_NHASH_OFST);
+                        lcl_hdr_sz = IPA_MEM_PART(V6_FLT_NHASH_SIZE);
                 }
         }
 

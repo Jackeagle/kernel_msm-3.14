@@ -329,75 +329,75 @@ static int ipa3_qmi_init_modem_send_sync_msg(void)
 	req.platform_type_valid = true;
 	req.platform_type = ipa_wan_platform;
 
-	req.hdr_tbl_info_valid = (IPA_MEM_PART(modem_hdr_size) != 0);
+	req.hdr_tbl_info_valid = (IPA_MEM_PART(MODEM_HDR_SIZE) != 0);
 	req.hdr_tbl_info.modem_offset_start =
-		IPA_MEM_PART(modem_hdr_ofst) + smem_restr_bytes;
-	req.hdr_tbl_info.modem_offset_end = IPA_MEM_PART(modem_hdr_ofst) +
-		smem_restr_bytes + IPA_MEM_PART(modem_hdr_size) - 1;
+		IPA_MEM_PART(MODEM_HDR_OFST) + smem_restr_bytes;
+	req.hdr_tbl_info.modem_offset_end = IPA_MEM_PART(MODEM_HDR_OFST) +
+		smem_restr_bytes + IPA_MEM_PART(MODEM_HDR_SIZE) - 1;
 
 	req.v4_route_tbl_info_valid = true;
 	req.v4_route_tbl_info.route_tbl_start_addr =
-		IPA_MEM_PART(v4_rt_nhash_ofst) + smem_restr_bytes;
+		IPA_MEM_PART(V4_RT_NHASH_OFST) + smem_restr_bytes;
 	req.v4_route_tbl_info.num_indices =
-		IPA_MEM_PART(v4_modem_rt_index_hi);
+		IPA_MEM_PART(V4_MODEM_RT_INDEX_HI);
 	req.v6_route_tbl_info_valid = true;
 
 	req.v6_route_tbl_info.route_tbl_start_addr =
-		IPA_MEM_PART(v6_rt_nhash_ofst) + smem_restr_bytes;
+		IPA_MEM_PART(V6_RT_NHASH_OFST) + smem_restr_bytes;
 	req.v6_route_tbl_info.num_indices =
-		IPA_MEM_PART(v6_modem_rt_index_hi);
+		IPA_MEM_PART(V6_MODEM_RT_INDEX_HI);
 
 	req.v4_filter_tbl_start_addr_valid = true;
 	req.v4_filter_tbl_start_addr =
-		IPA_MEM_PART(v4_flt_nhash_ofst) + smem_restr_bytes;
+		IPA_MEM_PART(V4_FLT_NHASH_OFST) + smem_restr_bytes;
 
 	req.v6_filter_tbl_start_addr_valid = true;
 	req.v6_filter_tbl_start_addr =
-		IPA_MEM_PART(v6_flt_nhash_ofst) + smem_restr_bytes;
+		IPA_MEM_PART(V6_FLT_NHASH_OFST) + smem_restr_bytes;
 
-	req.modem_mem_info_valid = (IPA_MEM_PART(modem_size) != 0);
+	req.modem_mem_info_valid = (IPA_MEM_PART(MODEM_SIZE) != 0);
 	req.modem_mem_info.block_start_addr =
-		IPA_MEM_PART(modem_ofst) + smem_restr_bytes;
-	req.modem_mem_info.size = IPA_MEM_PART(modem_size);
+		IPA_MEM_PART(MODEM_OFST) + smem_restr_bytes;
+	req.modem_mem_info.size = IPA_MEM_PART(MODEM_SIZE);
 
 	req.ctrl_comm_dest_end_pt_valid = true;
 	req.ctrl_comm_dest_end_pt =
 		ipa3_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
 
 	req.hdr_proc_ctx_tbl_info_valid =
-		(IPA_MEM_PART(modem_hdr_proc_ctx_size) != 0);
+		(IPA_MEM_PART(MODEM_HDR_PROC_CTX_SIZE) != 0);
 	req.hdr_proc_ctx_tbl_info.modem_offset_start =
-		IPA_MEM_PART(modem_hdr_proc_ctx_ofst) + smem_restr_bytes;
+		IPA_MEM_PART(MODEM_HDR_PROC_CTX_OFST) + smem_restr_bytes;
 	req.hdr_proc_ctx_tbl_info.modem_offset_end =
-		IPA_MEM_PART(modem_hdr_proc_ctx_ofst) +
-		IPA_MEM_PART(modem_hdr_proc_ctx_size) + smem_restr_bytes - 1;
+		IPA_MEM_PART(MODEM_HDR_PROC_CTX_OFST) +
+		IPA_MEM_PART(MODEM_HDR_PROC_CTX_SIZE) + smem_restr_bytes - 1;
 
-	req.zip_tbl_info_valid = (IPA_MEM_PART(modem_comp_decomp_size) != 0);
+	req.zip_tbl_info_valid = (IPA_MEM_PART(MODEM_COMP_DECOMP_SIZE) != 0);
 	req.zip_tbl_info.modem_offset_start =
-		IPA_MEM_PART(modem_comp_decomp_size) + smem_restr_bytes;
+		IPA_MEM_PART(MODEM_COMP_DECOMP_SIZE) + smem_restr_bytes;
 	req.zip_tbl_info.modem_offset_end =
-		IPA_MEM_PART(modem_comp_decomp_ofst) +
-		IPA_MEM_PART(modem_comp_decomp_size) + smem_restr_bytes - 1;
+		IPA_MEM_PART(MODEM_COMP_DECOMP_OFST) +
+		IPA_MEM_PART(MODEM_COMP_DECOMP_SIZE) + smem_restr_bytes - 1;
 
 	req.v4_hash_route_tbl_info_valid = true;
 	req.v4_hash_route_tbl_info.route_tbl_start_addr =
-		IPA_MEM_PART(v4_rt_hash_ofst) + smem_restr_bytes;
+		IPA_MEM_PART(V4_RT_HASH_OFST) + smem_restr_bytes;
 	req.v4_hash_route_tbl_info.num_indices =
-		IPA_MEM_PART(v4_modem_rt_index_hi);
+		IPA_MEM_PART(V4_MODEM_RT_INDEX_HI);
 
 	req.v6_hash_route_tbl_info_valid = true;
 	req.v6_hash_route_tbl_info.route_tbl_start_addr =
-		IPA_MEM_PART(v6_rt_hash_ofst) + smem_restr_bytes;
+		IPA_MEM_PART(V6_RT_HASH_OFST) + smem_restr_bytes;
 	req.v6_hash_route_tbl_info.num_indices =
-		IPA_MEM_PART(v6_modem_rt_index_hi);
+		IPA_MEM_PART(V6_MODEM_RT_INDEX_HI);
 
 	req.v4_hash_filter_tbl_start_addr_valid = true;
 	req.v4_hash_filter_tbl_start_addr =
-		IPA_MEM_PART(v4_flt_hash_ofst) + smem_restr_bytes;
+		IPA_MEM_PART(V4_FLT_HASH_OFST) + smem_restr_bytes;
 
 	req.v6_hash_filter_tbl_start_addr_valid = true;
 	req.v6_hash_filter_tbl_start_addr =
-		IPA_MEM_PART(v6_flt_hash_ofst) + smem_restr_bytes;
+		IPA_MEM_PART(V6_FLT_HASH_OFST) + smem_restr_bytes;
 
 	if (!ipa3_uc_loaded_check()) {  /* First time boot */
 		req.is_ssr_bootup_valid = false;
