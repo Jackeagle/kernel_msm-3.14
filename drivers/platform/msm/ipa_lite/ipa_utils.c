@@ -638,7 +638,7 @@ void _ipa_sram_settings_read_v3_0(void)
 	/* reg fields are in 8B units */
 	ipa3_ctx->smem_restricted_bytes *= 8;
 	ipa3_ctx->smem_sz *= 8;
-	ipa3_ctx->smem_reqd_sz = IPA_MEM_PART(END_OFST);
+	ipa3_ctx->smem_reqd_sz = ipa3_mem(END_OFST);
 }
 
 /**
@@ -1599,236 +1599,236 @@ int ipa3_init_mem_partition(struct device_node *node)
 		(u32 *)&ipa3_ctx->ctrl->mem_partition,
 		1, ram_mmap_current_version_size);
 
-	if (IPA_MEM_PART(UC_EVENT_RING_OFST) & 1023) {
+	if (ipa3_mem(UC_EVENT_RING_OFST) & 1023) {
 		ipa_err("UC EVENT RING OFST 0x%x is unaligned\n",
-			IPA_MEM_PART(UC_EVENT_RING_OFST));
+			ipa3_mem(UC_EVENT_RING_OFST));
 		return -ENODEV;
 	}
 
 	ipa_debug("UC EVENT RING OFST 0x%x SIZE 0x%x\n",
-		IPA_MEM_PART(UC_EVENT_RING_OFST),
-		IPA_MEM_PART(UC_EVENT_RING_SIZE));
+		ipa3_mem(UC_EVENT_RING_OFST),
+		ipa3_mem(UC_EVENT_RING_SIZE));
 
-	ipa_debug("NAT OFST 0x%x SIZE 0x%x\n", IPA_MEM_PART(NAT_OFST),
-		IPA_MEM_PART(NAT_SIZE));
+	ipa_debug("NAT OFST 0x%x SIZE 0x%x\n", ipa3_mem(NAT_OFST),
+		ipa3_mem(NAT_SIZE));
 
-	if (IPA_MEM_PART(UC_INFO_OFST) & 3) {
+	if (ipa3_mem(UC_INFO_OFST) & 3) {
 		ipa_err("UC INFO OFST 0x%x is unaligned\n",
-			IPA_MEM_PART(UC_INFO_OFST));
+			ipa3_mem(UC_INFO_OFST));
 		return -ENODEV;
 	}
 
 	ipa_debug("UC INFO OFST 0x%x SIZE 0x%x\n",
-		IPA_MEM_PART(UC_INFO_OFST), IPA_MEM_PART(UC_INFO_SIZE));
+		ipa3_mem(UC_INFO_OFST), ipa3_mem(UC_INFO_SIZE));
 
-	ipa_debug("RAM OFST 0x%x\n", IPA_MEM_PART(OFST_START));
+	ipa_debug("RAM OFST 0x%x\n", ipa3_mem(OFST_START));
 
-	if (IPA_MEM_PART(V4_FLT_HASH_OFST) & 7) {
+	if (ipa3_mem(V4_FLT_HASH_OFST) & 7) {
 		ipa_err("V4 FLT HASHABLE OFST 0x%x is unaligned\n",
-			IPA_MEM_PART(V4_FLT_HASH_OFST));
+			ipa3_mem(V4_FLT_HASH_OFST));
 		return -ENODEV;
 	}
 
 	ipa_debug("V4 FLT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-		IPA_MEM_PART(V4_FLT_HASH_OFST),
-		IPA_MEM_PART(V4_FLT_HASH_SIZE),
-		IPA_MEM_PART(V4_FLT_HASH_SIZE_DDR));
+		ipa3_mem(V4_FLT_HASH_OFST),
+		ipa3_mem(V4_FLT_HASH_SIZE),
+		ipa3_mem(V4_FLT_HASH_SIZE_DDR));
 
-	if (IPA_MEM_PART(V4_FLT_NHASH_OFST) & 7) {
+	if (ipa3_mem(V4_FLT_NHASH_OFST) & 7) {
 		ipa_err("V4 FLT NON-HASHABLE OFST 0x%x is unaligned\n",
-			IPA_MEM_PART(V4_FLT_NHASH_OFST));
+			ipa3_mem(V4_FLT_NHASH_OFST));
 		return -ENODEV;
 	}
 
 	ipa_debug("V4 FLT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-		IPA_MEM_PART(V4_FLT_NHASH_OFST),
-		IPA_MEM_PART(V4_FLT_NHASH_SIZE),
-		IPA_MEM_PART(V4_FLT_NHASH_SIZE_DDR));
+		ipa3_mem(V4_FLT_NHASH_OFST),
+		ipa3_mem(V4_FLT_NHASH_SIZE),
+		ipa3_mem(V4_FLT_NHASH_SIZE_DDR));
 
-	if (IPA_MEM_PART(V6_FLT_HASH_OFST) & 7) {
+	if (ipa3_mem(V6_FLT_HASH_OFST) & 7) {
 		ipa_err("V6 FLT HASHABLE OFST 0x%x is unaligned\n",
-			IPA_MEM_PART(V6_FLT_HASH_OFST));
+			ipa3_mem(V6_FLT_HASH_OFST));
 		return -ENODEV;
 	}
 
 	ipa_debug("V6 FLT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-		IPA_MEM_PART(V6_FLT_HASH_OFST), IPA_MEM_PART(V6_FLT_HASH_SIZE),
-		IPA_MEM_PART(V6_FLT_HASH_SIZE_DDR));
+		ipa3_mem(V6_FLT_HASH_OFST), ipa3_mem(V6_FLT_HASH_SIZE),
+		ipa3_mem(V6_FLT_HASH_SIZE_DDR));
 
-	if (IPA_MEM_PART(V6_FLT_NHASH_OFST) & 7) {
+	if (ipa3_mem(V6_FLT_NHASH_OFST) & 7) {
 		ipa_err("V6 FLT NON-HASHABLE OFST 0x%x is unaligned\n",
-			IPA_MEM_PART(V6_FLT_NHASH_OFST));
+			ipa3_mem(V6_FLT_NHASH_OFST));
 		return -ENODEV;
 	}
 
 	ipa_debug("V6 FLT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-		IPA_MEM_PART(V6_FLT_NHASH_OFST),
-		IPA_MEM_PART(V6_FLT_NHASH_SIZE),
-		IPA_MEM_PART(V6_FLT_NHASH_SIZE_DDR));
+		ipa3_mem(V6_FLT_NHASH_OFST),
+		ipa3_mem(V6_FLT_NHASH_SIZE),
+		ipa3_mem(V6_FLT_NHASH_SIZE_DDR));
 
-	ipa_debug("V4 RT NUM INDEX 0x%x\n", IPA_MEM_PART(V4_RT_NUM_INDEX));
+	ipa_debug("V4 RT NUM INDEX 0x%x\n", ipa3_mem(V4_RT_NUM_INDEX));
 
 	ipa_debug("V4 RT MODEM INDEXES 0x%x - 0x%x\n",
-		IPA_MEM_PART(V4_MODEM_RT_INDEX_LO),
-		IPA_MEM_PART(V4_MODEM_RT_INDEX_HI));
+		ipa3_mem(V4_MODEM_RT_INDEX_LO),
+		ipa3_mem(V4_MODEM_RT_INDEX_HI));
 
 	ipa_debug("V4 RT APPS INDEXES 0x%x - 0x%x\n",
-		IPA_MEM_PART(V4_APPS_RT_INDEX_LO),
-		IPA_MEM_PART(V4_APPS_RT_INDEX_HI));
+		ipa3_mem(V4_APPS_RT_INDEX_LO),
+		ipa3_mem(V4_APPS_RT_INDEX_HI));
 
-	if (IPA_MEM_PART(V4_RT_HASH_OFST) & 7) {
+	if (ipa3_mem(V4_RT_HASH_OFST) & 7) {
 		ipa_err("V4 RT HASHABLE OFST 0x%x is unaligned\n",
-			IPA_MEM_PART(V4_RT_HASH_OFST));
+			ipa3_mem(V4_RT_HASH_OFST));
 		return -ENODEV;
 	}
 
-	ipa_debug("V4 RT HASHABLE OFST 0x%x\n", IPA_MEM_PART(V4_RT_HASH_OFST));
+	ipa_debug("V4 RT HASHABLE OFST 0x%x\n", ipa3_mem(V4_RT_HASH_OFST));
 
 	ipa_debug("V4 RT HASHABLE SIZE 0x%x DDR SIZE 0x%x\n",
-		IPA_MEM_PART(V4_RT_HASH_SIZE),
-		IPA_MEM_PART(V4_RT_HASH_SIZE_DDR));
+		ipa3_mem(V4_RT_HASH_SIZE),
+		ipa3_mem(V4_RT_HASH_SIZE_DDR));
 
-	if (IPA_MEM_PART(V4_RT_NHASH_OFST) & 7) {
+	if (ipa3_mem(V4_RT_NHASH_OFST) & 7) {
 		ipa_err("V4 RT NON-HASHABLE OFST 0x%x is unaligned\n",
-			IPA_MEM_PART(V4_RT_NHASH_OFST));
+			ipa3_mem(V4_RT_NHASH_OFST));
 		return -ENODEV;
 	}
 
 	ipa_debug("V4 RT NON-HASHABLE OFST 0x%x\n",
-		IPA_MEM_PART(V4_RT_NHASH_OFST));
+		ipa3_mem(V4_RT_NHASH_OFST));
 
 	ipa_debug("V4 RT HASHABLE SIZE 0x%x DDR SIZE 0x%x\n",
-		IPA_MEM_PART(V4_RT_NHASH_SIZE),
-		IPA_MEM_PART(V4_RT_NHASH_SIZE_DDR));
+		ipa3_mem(V4_RT_NHASH_SIZE),
+		ipa3_mem(V4_RT_NHASH_SIZE_DDR));
 
-	ipa_debug("V6 RT NUM INDEX 0x%x\n", IPA_MEM_PART(V6_RT_NUM_INDEX));
+	ipa_debug("V6 RT NUM INDEX 0x%x\n", ipa3_mem(V6_RT_NUM_INDEX));
 
 	ipa_debug("V6 RT MODEM INDEXES 0x%x - 0x%x\n",
-		IPA_MEM_PART(V6_MODEM_RT_INDEX_LO),
-		IPA_MEM_PART(V6_MODEM_RT_INDEX_HI));
+		ipa3_mem(V6_MODEM_RT_INDEX_LO),
+		ipa3_mem(V6_MODEM_RT_INDEX_HI));
 
 	ipa_debug("V6 RT APPS INDEXES 0x%x - 0x%x\n",
-		IPA_MEM_PART(V6_APPS_RT_INDEX_LO),
-		IPA_MEM_PART(V6_APPS_RT_INDEX_HI));
+		ipa3_mem(V6_APPS_RT_INDEX_LO),
+		ipa3_mem(V6_APPS_RT_INDEX_HI));
 
-	if (IPA_MEM_PART(V6_RT_HASH_OFST) & 7) {
+	if (ipa3_mem(V6_RT_HASH_OFST) & 7) {
 		ipa_err("V6 RT HASHABLE OFST 0x%x is unaligned\n",
-			IPA_MEM_PART(V6_RT_HASH_OFST));
+			ipa3_mem(V6_RT_HASH_OFST));
 		return -ENODEV;
 	}
 
-	ipa_debug("V6 RT HASHABLE OFST 0x%x\n", IPA_MEM_PART(V6_RT_HASH_OFST));
+	ipa_debug("V6 RT HASHABLE OFST 0x%x\n", ipa3_mem(V6_RT_HASH_OFST));
 
 	ipa_debug("V6 RT HASHABLE SIZE 0x%x DDR SIZE 0x%x\n",
-		IPA_MEM_PART(V6_RT_HASH_SIZE),
-		IPA_MEM_PART(V6_RT_HASH_SIZE_DDR));
+		ipa3_mem(V6_RT_HASH_SIZE),
+		ipa3_mem(V6_RT_HASH_SIZE_DDR));
 
-	if (IPA_MEM_PART(V6_RT_NHASH_OFST) & 7) {
+	if (ipa3_mem(V6_RT_NHASH_OFST) & 7) {
 		ipa_err("V6 RT NON-HASHABLE OFST 0x%x is unaligned\n",
-			IPA_MEM_PART(V6_RT_NHASH_OFST));
+			ipa3_mem(V6_RT_NHASH_OFST));
 		return -ENODEV;
 	}
 
 	ipa_debug("V6 RT NON-HASHABLE OFST 0x%x\n",
-		IPA_MEM_PART(V6_RT_NHASH_OFST));
+		ipa3_mem(V6_RT_NHASH_OFST));
 
 	ipa_debug("V6 RT NON-HASHABLE SIZE 0x%x DDR SIZE 0x%x\n",
-		IPA_MEM_PART(V6_RT_NHASH_SIZE),
-		IPA_MEM_PART(V6_RT_NHASH_SIZE_DDR));
+		ipa3_mem(V6_RT_NHASH_SIZE),
+		ipa3_mem(V6_RT_NHASH_SIZE_DDR));
 
-	if (IPA_MEM_PART(MODEM_HDR_OFST) & 7) {
+	if (ipa3_mem(MODEM_HDR_OFST) & 7) {
 		ipa_err("MODEM HDR OFST 0x%x is unaligned\n",
-			IPA_MEM_PART(MODEM_HDR_OFST));
+			ipa3_mem(MODEM_HDR_OFST));
 		return -ENODEV;
 	}
 
 	ipa_debug("MODEM HDR OFST 0x%x SIZE 0x%x\n",
-		IPA_MEM_PART(MODEM_HDR_OFST), IPA_MEM_PART(MODEM_HDR_SIZE));
+		ipa3_mem(MODEM_HDR_OFST), ipa3_mem(MODEM_HDR_SIZE));
 
-	if (IPA_MEM_PART(APPS_HDR_OFST) & 7) {
+	if (ipa3_mem(APPS_HDR_OFST) & 7) {
 		ipa_err("APPS HDR OFST 0x%x is unaligned\n",
-			IPA_MEM_PART(APPS_HDR_OFST));
+			ipa3_mem(APPS_HDR_OFST));
 		return -ENODEV;
 	}
 
 	ipa_debug("APPS HDR OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-		IPA_MEM_PART(APPS_HDR_OFST), IPA_MEM_PART(APPS_HDR_SIZE),
-		IPA_MEM_PART(APPS_HDR_SIZE_DDR));
+		ipa3_mem(APPS_HDR_OFST), ipa3_mem(APPS_HDR_SIZE),
+		ipa3_mem(APPS_HDR_SIZE_DDR));
 
-	if (IPA_MEM_PART(MODEM_HDR_PROC_CTX_OFST) & 7) {
+	if (ipa3_mem(MODEM_HDR_PROC_CTX_OFST) & 7) {
 		ipa_err("MODEM HDR PROC CTX OFST 0x%x is unaligned\n",
-			IPA_MEM_PART(MODEM_HDR_PROC_CTX_OFST));
+			ipa3_mem(MODEM_HDR_PROC_CTX_OFST));
 		return -ENODEV;
 	}
 
 	ipa_debug("MODEM HDR PROC CTX OFST 0x%x SIZE 0x%x\n",
-		IPA_MEM_PART(MODEM_HDR_PROC_CTX_OFST),
-		IPA_MEM_PART(MODEM_HDR_PROC_CTX_SIZE));
+		ipa3_mem(MODEM_HDR_PROC_CTX_OFST),
+		ipa3_mem(MODEM_HDR_PROC_CTX_SIZE));
 
-	if (IPA_MEM_PART(APPS_HDR_PROC_CTX_OFST) & 7) {
+	if (ipa3_mem(APPS_HDR_PROC_CTX_OFST) & 7) {
 		ipa_err("APPS HDR PROC CTX OFST 0x%x is unaligned\n",
-			IPA_MEM_PART(APPS_HDR_PROC_CTX_OFST));
+			ipa3_mem(APPS_HDR_PROC_CTX_OFST));
 		return -ENODEV;
 	}
 
 	ipa_debug("APPS HDR PROC CTX OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-		IPA_MEM_PART(APPS_HDR_PROC_CTX_OFST),
-		IPA_MEM_PART(APPS_HDR_PROC_CTX_SIZE),
-		IPA_MEM_PART(APPS_HDR_PROC_CTX_SIZE_DDR));
+		ipa3_mem(APPS_HDR_PROC_CTX_OFST),
+		ipa3_mem(APPS_HDR_PROC_CTX_SIZE),
+		ipa3_mem(APPS_HDR_PROC_CTX_SIZE_DDR));
 
-	if (IPA_MEM_PART(PDN_CONFIG_OFST) & 7) {
+	if (ipa3_mem(PDN_CONFIG_OFST) & 7) {
 		ipa_err("PDN CONFIG OFST 0x%x is unaligned\n",
-			IPA_MEM_PART(PDN_CONFIG_OFST));
+			ipa3_mem(PDN_CONFIG_OFST));
 		return -ENODEV;
 	}
 
 	ipa_debug("PDN CONFIG OFST 0x%x SIZE 0x%x\n",
-		IPA_MEM_PART(PDN_CONFIG_OFST),
-		IPA_MEM_PART(PDN_CONFIG_SIZE));
+		ipa3_mem(PDN_CONFIG_OFST),
+		ipa3_mem(PDN_CONFIG_SIZE));
 
-	if (IPA_MEM_PART(MODEM_OFST) & 7) {
+	if (ipa3_mem(MODEM_OFST) & 7) {
 		ipa_err("MODEM OFST 0x%x is unaligned\n",
-			IPA_MEM_PART(MODEM_OFST));
+			ipa3_mem(MODEM_OFST));
 		return -ENODEV;
 	}
 
-	ipa_debug("MODEM OFST 0x%x SIZE 0x%x\n", IPA_MEM_PART(MODEM_OFST),
-		IPA_MEM_PART(MODEM_SIZE));
+	ipa_debug("MODEM OFST 0x%x SIZE 0x%x\n", ipa3_mem(MODEM_OFST),
+		ipa3_mem(MODEM_SIZE));
 
 	ipa_debug("V4 APPS HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
-		IPA_MEM_PART(APPS_V4_FLT_HASH_OFST),
-		IPA_MEM_PART(APPS_V4_FLT_HASH_SIZE));
+		ipa3_mem(APPS_V4_FLT_HASH_OFST),
+		ipa3_mem(APPS_V4_FLT_HASH_SIZE));
 
 	ipa_debug("V4 APPS NON-HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
-		IPA_MEM_PART(APPS_V4_FLT_NHASH_OFST),
-		IPA_MEM_PART(APPS_V4_FLT_NHASH_SIZE));
+		ipa3_mem(APPS_V4_FLT_NHASH_OFST),
+		ipa3_mem(APPS_V4_FLT_NHASH_SIZE));
 
 	ipa_debug("V6 APPS HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
-		IPA_MEM_PART(APPS_V6_FLT_HASH_OFST),
-		IPA_MEM_PART(APPS_V6_FLT_HASH_SIZE));
+		ipa3_mem(APPS_V6_FLT_HASH_OFST),
+		ipa3_mem(APPS_V6_FLT_HASH_SIZE));
 
 	ipa_debug("V6 APPS NON-HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
-		IPA_MEM_PART(APPS_V6_FLT_NHASH_OFST),
-		IPA_MEM_PART(APPS_V6_FLT_NHASH_SIZE));
+		ipa3_mem(APPS_V6_FLT_NHASH_OFST),
+		ipa3_mem(APPS_V6_FLT_NHASH_SIZE));
 
 	ipa_debug("RAM END OFST 0x%x\n",
-		IPA_MEM_PART(END_OFST));
+		ipa3_mem(END_OFST));
 
 	ipa_debug("V4 APPS HASHABLE RT OFST 0x%x SIZE 0x%x\n",
-		IPA_MEM_PART(APPS_V4_RT_HASH_OFST),
-		IPA_MEM_PART(APPS_V4_RT_HASH_SIZE));
+		ipa3_mem(APPS_V4_RT_HASH_OFST),
+		ipa3_mem(APPS_V4_RT_HASH_SIZE));
 
 	ipa_debug("V4 APPS NON-HASHABLE RT OFST 0x%x SIZE 0x%x\n",
-		IPA_MEM_PART(APPS_V4_RT_NHASH_OFST),
-		IPA_MEM_PART(APPS_V4_RT_NHASH_SIZE));
+		ipa3_mem(APPS_V4_RT_NHASH_OFST),
+		ipa3_mem(APPS_V4_RT_NHASH_SIZE));
 
 	ipa_debug("V6 APPS HASHABLE RT OFST 0x%x SIZE 0x%x\n",
-		IPA_MEM_PART(APPS_V6_RT_HASH_OFST),
-		IPA_MEM_PART(APPS_V6_RT_HASH_SIZE));
+		ipa3_mem(APPS_V6_RT_HASH_OFST),
+		ipa3_mem(APPS_V6_RT_HASH_SIZE));
 
 	ipa_debug("V6 APPS NON-HASHABLE RT OFST 0x%x SIZE 0x%x\n",
-		IPA_MEM_PART(APPS_V6_RT_NHASH_OFST),
-		IPA_MEM_PART(APPS_V6_RT_NHASH_SIZE));
+		ipa3_mem(APPS_V6_RT_NHASH_OFST),
+		ipa3_mem(APPS_V6_RT_NHASH_SIZE));
 
 	return 0;
 }
@@ -2888,21 +2888,21 @@ int ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple)
 	}
 
 	if (tbl_idx >=
-			max(IPA_MEM_PART(V6_RT_NUM_INDEX),
-			IPA_MEM_PART(V4_RT_NUM_INDEX)) ||
+			max(ipa3_mem(V6_RT_NUM_INDEX),
+			ipa3_mem(V4_RT_NUM_INDEX)) ||
 			tbl_idx < 0) {
 			ipa_err("bad table index\n");
 			return -EINVAL;
 	}
 
-	if (tbl_idx >= IPA_MEM_PART(V4_MODEM_RT_INDEX_LO) &&
-			tbl_idx <= IPA_MEM_PART(V4_MODEM_RT_INDEX_HI)) {
+	if (tbl_idx >= ipa3_mem(V4_MODEM_RT_INDEX_LO) &&
+			tbl_idx <= ipa3_mem(V4_MODEM_RT_INDEX_HI)) {
 			ipa_err("cannot configure modem v4 rt tuple by AP\n");
 			return -EINVAL;
 	}
 
-	if (tbl_idx >= IPA_MEM_PART(V6_MODEM_RT_INDEX_LO) &&
-			tbl_idx <= IPA_MEM_PART(V6_MODEM_RT_INDEX_HI)) {
+	if (tbl_idx >= ipa3_mem(V6_MODEM_RT_INDEX_LO) &&
+			tbl_idx <= ipa3_mem(V6_MODEM_RT_INDEX_HI)) {
 			ipa_err("cannot configure modem v6 rt tuple by AP\n");
 			return -EINVAL;
 	}
