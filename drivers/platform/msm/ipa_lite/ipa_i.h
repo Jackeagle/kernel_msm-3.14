@@ -96,7 +96,7 @@
 	~(IPA_HDR_PROC_CTX_TABLE_ALIGNMENT_BYTE - 1))
 
 #define MAX_RESOURCE_TO_CLIENTS (IPA_CLIENT_MAX)
-#define IPA_MEM_PART(x_) (ipa3_ctx->ctrl->mem_partition[x_])
+#define IPA_MEM_PART(x_) ipa3_mem(x_)
 
 #define IPA_GSI_CHANNEL_STOP_MAX_RETRY 10
 #define IPA_GSI_CHANNEL_STOP_PKT_SIZE 1
@@ -1365,6 +1365,8 @@ void ipa3_dump_buff_internal(void *base, dma_addr_t phy_base, u32 size);
 #define IPA_DUMP_BUFF(base, phy_base, size)
 #endif
 int ipa3_init_mem_partition(struct device_node *dev_node);
+u32 ipa3_mem(enum ipa3_mem_partition index);
+
 struct ipa3_controller *ipa3_controller_init(void);
 int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout);
 int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr);

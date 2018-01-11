@@ -1852,6 +1852,11 @@ static struct ipa3_controller ipa_controller_v3 = {
 	.ipa_init_hdr		= _ipa_init_hdr_v3_0,
 };
 
+u32 ipa3_mem(enum ipa3_mem_partition index)
+{
+	return ipa3_ctx->ctrl->mem_partition[index];
+}
+
 /**
  * ipa_controller_init() - return the appropriate methods for IPA Driver
  */
