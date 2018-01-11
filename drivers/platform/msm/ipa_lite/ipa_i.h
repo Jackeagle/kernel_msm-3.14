@@ -96,7 +96,7 @@
 	~(IPA_HDR_PROC_CTX_TABLE_ALIGNMENT_BYTE - 1))
 
 #define MAX_RESOURCE_TO_CLIENTS (IPA_CLIENT_MAX)
-#define IPA_MEM_PART(x_) (ipa3_ctx->ctrl->mem_partition.x_)
+#define IPA_MEM_PART(x_) (ipa3_ctx->ctrl->mem_partition[x_])
 
 #define IPA_GSI_CHANNEL_STOP_MAX_RETRY 10
 #define IPA_GSI_CHANNEL_STOP_PKT_SIZE 1
@@ -672,7 +672,8 @@ struct ipa3_tag_completion {
 };
 
 /**
- * struct ipa3_mem_partition - represents IPA RAM Map as read from DTS
+ * enum ipa3_mem_partition - IPA RAM Map is defined as an array of
+ * 32-bit values read from DTS whose order is defined by this type.
  * Order and type of members should not be changed without a suitable change
  * to DTS file or the code that reads it.
  *
@@ -803,99 +804,100 @@ struct ipa3_tag_completion {
  * |  UC EVENT RING          | From IPA 3.5
  * +-------------------------+
  */
-struct ipa3_mem_partition {
-	u32 ofst_start;
-	u32 nat_ofst;
-	u32 nat_size;
-	u32 v4_flt_hash_ofst;
-	u32 v4_flt_hash_size;
-	u32 v4_flt_hash_size_ddr;
-	u32 v4_flt_nhash_ofst;
-	u32 v4_flt_nhash_size;
-	u32 v4_flt_nhash_size_ddr;
-	u32 v6_flt_hash_ofst;
-	u32 v6_flt_hash_size;
-	u32 v6_flt_hash_size_ddr;
-	u32 v6_flt_nhash_ofst;
-	u32 v6_flt_nhash_size;
-	u32 v6_flt_nhash_size_ddr;
-	u32 v4_rt_num_index;
-	u32 v4_modem_rt_index_lo;
-	u32 v4_modem_rt_index_hi;
-	u32 v4_apps_rt_index_lo;
-	u32 v4_apps_rt_index_hi;
-	u32 v4_rt_hash_ofst;
-	u32 v4_rt_hash_size;
-	u32 v4_rt_hash_size_ddr;
-	u32 v4_rt_nhash_ofst;
-	u32 v4_rt_nhash_size;
-	u32 v4_rt_nhash_size_ddr;
-	u32 v6_rt_num_index;
-	u32 v6_modem_rt_index_lo;
-	u32 v6_modem_rt_index_hi;
-	u32 v6_apps_rt_index_lo;
-	u32 v6_apps_rt_index_hi;
-	u32 v6_rt_hash_ofst;
-	u32 v6_rt_hash_size;
-	u32 v6_rt_hash_size_ddr;
-	u32 v6_rt_nhash_ofst;
-	u32 v6_rt_nhash_size;
-	u32 v6_rt_nhash_size_ddr;
-	u32 modem_hdr_ofst;
-	u32 modem_hdr_size;
-	u32 apps_hdr_ofst;
-	u32 apps_hdr_size;
-	u32 apps_hdr_size_ddr;
-	u32 modem_hdr_proc_ctx_ofst;
-	u32 modem_hdr_proc_ctx_size;
-	u32 apps_hdr_proc_ctx_ofst;
-	u32 apps_hdr_proc_ctx_size;
-	u32 apps_hdr_proc_ctx_size_ddr;
-	u32 modem_comp_decomp_ofst;
-	u32 modem_comp_decomp_size;
-	u32 modem_ofst;
-	u32 modem_size;
-	u32 apps_v4_flt_hash_ofst;
-	u32 apps_v4_flt_hash_size;
-	u32 apps_v4_flt_nhash_ofst;
-	u32 apps_v4_flt_nhash_size;
-	u32 apps_v6_flt_hash_ofst;
-	u32 apps_v6_flt_hash_size;
-	u32 apps_v6_flt_nhash_ofst;
-	u32 apps_v6_flt_nhash_size;
-	u32 uc_info_ofst;
-	u32 uc_info_size;
-	u32 end_ofst;
-	u32 apps_v4_rt_hash_ofst;
-	u32 apps_v4_rt_hash_size;
-	u32 apps_v4_rt_nhash_ofst;
-	u32 apps_v4_rt_nhash_size;
-	u32 apps_v6_rt_hash_ofst;
-	u32 apps_v6_rt_hash_size;
-	u32 apps_v6_rt_nhash_ofst;
-	u32 apps_v6_rt_nhash_size;
-	u32 uc_event_ring_ofst;
-	u32 uc_event_ring_size;
-	u32 pdn_config_ofst;
-	u32 pdn_config_size;
-	u32 stats_quota_ofst;
-	u32 stats_quota_size;
-	u32 stats_tethering_ofst;
-	u32 stats_tethering_size;
-	u32 stats_flt_v4_ofst;
-	u32 stats_flt_v4_size;
-	u32 stats_flt_v6_ofst;
-	u32 stats_flt_v6_size;
-	u32 stats_rt_v4_ofst;
-	u32 stats_rt_v4_size;
-	u32 stats_rt_v6_ofst;
-	u32 stats_rt_v6_size;
-	u32 stats_drop_ofst;
-	u32 stats_drop_size;
+enum ipa3_mem_partition {
+	ofst_start,
+	nat_ofst,
+	nat_size,
+	v4_flt_hash_ofst,
+	v4_flt_hash_size,
+	v4_flt_hash_size_ddr,
+	v4_flt_nhash_ofst,
+	v4_flt_nhash_size,
+	v4_flt_nhash_size_ddr,
+	v6_flt_hash_ofst,
+	v6_flt_hash_size,
+	v6_flt_hash_size_ddr,
+	v6_flt_nhash_ofst,
+	v6_flt_nhash_size,
+	v6_flt_nhash_size_ddr,
+	v4_rt_num_index,
+	v4_modem_rt_index_lo,
+	v4_modem_rt_index_hi,
+	v4_apps_rt_index_lo,
+	v4_apps_rt_index_hi,
+	v4_rt_hash_ofst,
+	v4_rt_hash_size,
+	v4_rt_hash_size_ddr,
+	v4_rt_nhash_ofst,
+	v4_rt_nhash_size,
+	v4_rt_nhash_size_ddr,
+	v6_rt_num_index,
+	v6_modem_rt_index_lo,
+	v6_modem_rt_index_hi,
+	v6_apps_rt_index_lo,
+	v6_apps_rt_index_hi,
+	v6_rt_hash_ofst,
+	v6_rt_hash_size,
+	v6_rt_hash_size_ddr,
+	v6_rt_nhash_ofst,
+	v6_rt_nhash_size,
+	v6_rt_nhash_size_ddr,
+	modem_hdr_ofst,
+	modem_hdr_size,
+	apps_hdr_ofst,
+	apps_hdr_size,
+	apps_hdr_size_ddr,
+	modem_hdr_proc_ctx_ofst,
+	modem_hdr_proc_ctx_size,
+	apps_hdr_proc_ctx_ofst,
+	apps_hdr_proc_ctx_size,
+	apps_hdr_proc_ctx_size_ddr,
+	modem_comp_decomp_ofst,
+	modem_comp_decomp_size,
+	modem_ofst,
+	modem_size,
+	apps_v4_flt_hash_ofst,
+	apps_v4_flt_hash_size,
+	apps_v4_flt_nhash_ofst,
+	apps_v4_flt_nhash_size,
+	apps_v6_flt_hash_ofst,
+	apps_v6_flt_hash_size,
+	apps_v6_flt_nhash_ofst,
+	apps_v6_flt_nhash_size,
+	uc_info_ofst,
+	uc_info_size,
+	end_ofst,
+	apps_v4_rt_hash_ofst,
+	apps_v4_rt_hash_size,
+	apps_v4_rt_nhash_ofst,
+	apps_v4_rt_nhash_size,
+	apps_v6_rt_hash_ofst,
+	apps_v6_rt_hash_size,
+	apps_v6_rt_nhash_ofst,
+	apps_v6_rt_nhash_size,
+	uc_event_ring_ofst,
+	uc_event_ring_size,
+	pdn_config_ofst,
+	pdn_config_size,
+	stats_quota_ofst,
+	stats_quota_size,
+	stats_tethering_ofst,
+	stats_tethering_size,
+	stats_flt_v4_ofst,
+	stats_flt_v4_size,
+	stats_flt_v6_ofst,
+	stats_flt_v6_size,
+	stats_rt_v4_ofst,
+	stats_rt_v4_size,
+	stats_rt_v6_ofst,
+	stats_rt_v6_size,
+	stats_drop_ofst,
+	stats_drop_size,
+	IPA_MEM_MAX,
 };
 
 struct ipa3_controller {
-	struct ipa3_mem_partition mem_partition;
+	u32 mem_partition[IPA_MEM_MAX];
 	u32 ipa_clk_rate_turbo;
 	u32 ipa_clk_rate_nominal;
 	u32 ipa_clk_rate_svs;
