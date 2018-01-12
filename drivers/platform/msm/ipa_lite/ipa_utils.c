@@ -435,44 +435,161 @@ static const struct ipa_ep_configuration ipa3_ep_mapping
 
 };
 
-static struct msm_bus_vectors ipa_init_vectors_v3_0[]  = {
+static struct msm_bus_vectors ipa_min_vectors_v3_0[] = {
 	{
 		.src = MSM_BUS_MASTER_IPA,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
-		.ab = 0,
-		.ib = 0,
+		.ab = 0 * 1000ULL,
+		.ib = 0 * 1000ULL,
 	},
 	{
 		.src = MSM_BUS_MASTER_IPA,
 		.dst = MSM_BUS_SLAVE_OCIMEM,
-		.ab = 0,
-		.ib = 0,
+		.ab = 0 * 1000ULL,
+		.ib = 0 * 1000ULL,
+	},
+	{
+		.src = MSM_BUS_MASTER_AMPSS_M0,
+		.dst = MSM_BUS_SLAVE_IPA_CFG,
+		.ab = 0 * 1000ULL,
+		.ib = 0 * 1000ULL,
+	},
+	{
+		.src = MSM_BUS_MASTER_IPA_CORE,
+		.dst = MSM_BUS_SLAVE_IPA_CORE,
+		.ab = 0 * 1000ULL,
+		.ib = 0 * 1000ULL,
 	},
 };
 
-static struct msm_bus_vectors ipa_nominal_perf_vectors_v3_0[]  = {
+static struct msm_bus_vectors ipa_svs2_vectors_v3_0[] = {
 	{
 		.src = MSM_BUS_MASTER_IPA,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
-		.ab = 100000000,
-		.ib = 1300000000,
+		.ab = 80000 * 1000ULL,
+		.ib = 600000 * 1000ULL,
 	},
 	{
 		.src = MSM_BUS_MASTER_IPA,
 		.dst = MSM_BUS_SLAVE_OCIMEM,
-		.ab = 100000000,
-		.ib = 1300000000,
+		.ab = 80000 * 1000ULL,
+		.ib = 350000 * 1000ULL,
+	},
+	{	/*gcc_config_noc_clk_src */
+		.src = MSM_BUS_MASTER_AMPSS_M0,
+		.dst = MSM_BUS_SLAVE_IPA_CFG,
+		.ab = 40000 * 1000ULL,
+		.ib = 40000 * 1000ULL,
+	},
+	{
+		.src = MSM_BUS_MASTER_IPA_CORE,
+		.dst = MSM_BUS_SLAVE_IPA_CORE,
+		.ab = 0 * 1000ULL,
+		.ib = 75 * 1000ULL, /* IB defined for IPA2X_clk in MHz*/
+	},
+};
+
+static struct msm_bus_vectors ipa_svs_vectors_v3_0[] = {
+	{
+		.src = MSM_BUS_MASTER_IPA,
+		.dst = MSM_BUS_SLAVE_EBI_CH0,
+		.ab = 80000 * 1000ULL,
+		.ib = 640000 * 1000ULL,
+	},
+	{
+		.src = MSM_BUS_MASTER_IPA,
+		.dst = MSM_BUS_SLAVE_OCIMEM,
+		.ab = 80000 * 1000ULL,
+		.ib = 640000 * 1000ULL,
+	},
+	{
+		.src = MSM_BUS_MASTER_AMPSS_M0,
+		.dst = MSM_BUS_SLAVE_IPA_CFG,
+		.ab = 80000 * 1000ULL,
+		.ib = 80000 * 1000ULL,
+	},
+	{
+		.src = MSM_BUS_MASTER_IPA_CORE,
+		.dst = MSM_BUS_SLAVE_IPA_CORE,
+		.ab = 0 * 1000ULL,
+		.ib = 150 * 1000ULL, /* IB defined for IPA2X_clk in MHz*/
+	},
+};
+
+static struct msm_bus_vectors ipa_nominal_perf_vectors_v3_0[] = {
+	{
+		.src = MSM_BUS_MASTER_IPA,
+		.dst = MSM_BUS_SLAVE_EBI_CH0,
+		.ab = 206000 * 1000ULL,
+		.ib = 960000 * 1000ULL,
+	},
+	{
+		.src = MSM_BUS_MASTER_IPA,
+		.dst = MSM_BUS_SLAVE_OCIMEM,
+		.ab = 206000 * 1000ULL,
+		.ib = 960000 * 1000ULL,
+	},
+	{
+		.src = MSM_BUS_MASTER_AMPSS_M0,
+		.dst = MSM_BUS_SLAVE_IPA_CFG,
+		.ab = 206000 * 1000ULL,
+		.ib = 160000 * 1000ULL,
+	},
+	{
+		.src = MSM_BUS_MASTER_IPA_CORE,
+		.dst = MSM_BUS_SLAVE_IPA_CORE,
+		.ab = 0 * 1000ULL,
+		.ib = 300 * 1000ULL, /* IB defined for IPA2X_clk in MHz*/
+	},
+};
+
+static struct msm_bus_vectors ipa_turbo_perf_vectors_v3_0[] = {
+	{
+		.src = MSM_BUS_MASTER_IPA,
+		.dst = MSM_BUS_SLAVE_EBI_CH0,
+		.ab = 206000 * 1000ULL,
+		.ib = 3600000 * 1000ULL,
+	},
+	{
+		.src = MSM_BUS_MASTER_IPA,
+		.dst = MSM_BUS_SLAVE_OCIMEM,
+		.ab = 206000 * 1000ULL,
+		.ib = 3600000 * 1000ULL,
+	},
+	{
+		.src = MSM_BUS_MASTER_AMPSS_M0,
+		.dst = MSM_BUS_SLAVE_IPA_CFG,
+		.ab = 206000 * 1000ULL,
+		.ib = 300000 * 1000ULL,
+	},
+	{
+		.src = MSM_BUS_MASTER_IPA_CORE,
+		.dst = MSM_BUS_SLAVE_IPA_CORE,
+		.ab = 0 * 1000ULL,
+		.ib = 355 * 1000ULL, /* IB defined for IPA clk in MHz*/
 	},
 };
 
 static struct msm_bus_paths ipa_usecases_v3_0[]  = {
 	{
-		.num_paths = ARRAY_SIZE(ipa_init_vectors_v3_0),
-		.vectors = ipa_init_vectors_v3_0,
+		.num_paths = ARRAY_SIZE(ipa_min_vectors_v3_0),
+		.vectors = ipa_min_vectors_v3_0,
+	},
+	{
+		.num_paths = ARRAY_SIZE(ipa_svs2_vectors_v3_0),
+		.vectors = ipa_svs2_vectors_v3_0,
+	},
+	{
+		.num_paths = ARRAY_SIZE(ipa_svs_vectors_v3_0),
+		.vectors = ipa_svs_vectors_v3_0,
 	},
 	{
 		.num_paths = ARRAY_SIZE(ipa_nominal_perf_vectors_v3_0),
 		.vectors = ipa_nominal_perf_vectors_v3_0,
+	},
+	{
+		.num_paths = ARRAY_SIZE(ipa_turbo_perf_vectors_v3_0),
+		.vectors = ipa_turbo_perf_vectors_v3_0,
 	},
 };
 
