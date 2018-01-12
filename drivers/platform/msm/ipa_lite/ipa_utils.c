@@ -1716,6 +1716,25 @@ int ipa3_init_mem_partition(struct device_node *node)
 	return 0;
 }
 
+static struct ipa3_controller ipa_controller_v3 = {
+	.ipa_init_rt4		= _ipa_init_rt4_v3,
+	.ipa_init_rt6		= _ipa_init_rt6_v3,
+	.ipa_init_flt4		= _ipa_init_flt4_v3,
+	.ipa_init_flt6		= _ipa_init_flt6_v3,
+	.ipa3_read_ep_reg	= _ipa_read_ep_reg_v3_0,
+	.ipa3_enable_clks	= _ipa_enable_clks_v3_0,
+	.ipa3_disable_clks	= _ipa_disable_clks_v3_0,
+	.msm_bus_data_ptr	= &ipa_bus_client_pdata_v3_0,
+	.clock_scaling_bw_threshold_nominal =
+				IPA_V3_0_BW_THRESHOLD_NOMINAL_MBPS,
+	.clock_scaling_bw_threshold_turbo =
+				IPA_V3_0_BW_THRESHOLD_TURBO_MBPS,
+	.ipa_reg_base_ofst	= IPA_REG_BASE_OFFSET,
+	.ipa_init_sram		= _ipa_init_sram_v3,
+	.ipa_sram_read_settings	= _ipa_sram_settings_read_v3_0,
+	.ipa_init_hdr		= _ipa_init_hdr_v3_0,
+};
+
 /**
  * ipa_ctrl_static_bind() - set the appropriate methods for
  *  IPA Driver based on the HW version
@@ -1728,22 +1747,7 @@ int ipa3_init_mem_partition(struct device_node *node)
  */
 void ipa3_controller_static_bind(struct ipa3_controller *ctrl)
 {
-	ctrl->ipa_init_rt4 = _ipa_init_rt4_v3;
-	ctrl->ipa_init_rt6 = _ipa_init_rt6_v3;
-	ctrl->ipa_init_flt4 = _ipa_init_flt4_v3;
-	ctrl->ipa_init_flt6 = _ipa_init_flt6_v3;
-	ctrl->ipa3_read_ep_reg = _ipa_read_ep_reg_v3_0;
-	ctrl->ipa3_enable_clks = _ipa_enable_clks_v3_0;
-	ctrl->ipa3_disable_clks = _ipa_disable_clks_v3_0;
-	ctrl->msm_bus_data_ptr = &ipa_bus_client_pdata_v3_0;
-	ctrl->clock_scaling_bw_threshold_nominal =
-		IPA_V3_0_BW_THRESHOLD_NOMINAL_MBPS;
-	ctrl->clock_scaling_bw_threshold_turbo =
-		IPA_V3_0_BW_THRESHOLD_TURBO_MBPS;
-	ctrl->ipa_reg_base_ofst = IPA_REG_BASE_OFFSET;
-	ctrl->ipa_init_sram = _ipa_init_sram_v3;
-	ctrl->ipa_sram_read_settings = _ipa_sram_settings_read_v3_0;
-	ctrl->ipa_init_hdr = _ipa_init_hdr_v3_0;
+	*ctrl = ipa_controller_v3;
 }
 
 void ipa3_skb_recycle(struct sk_buff *skb)
