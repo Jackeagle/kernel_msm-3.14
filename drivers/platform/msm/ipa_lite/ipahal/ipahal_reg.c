@@ -1181,7 +1181,7 @@ void ipahal_write_reg_n_fields(enum ipahal_reg reg, u32 n,
 
 u32 ipahal_get_reg_base(void)
 {
-	return 0x00040000;
+	return IPA_REG_BASE_OFFSET;
 }
 
 

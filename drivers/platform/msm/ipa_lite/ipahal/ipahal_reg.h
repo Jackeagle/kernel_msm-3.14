@@ -13,6 +13,9 @@
 #ifndef _IPAHAL_REG_H_
 #define _IPAHAL_REG_H_
 
+/* Offset past base of IPA "wrapper" space for register access */
+#define IPA_REG_BASE_OFFSET			0x00040000
+
 /*
  * Registers names
  *
