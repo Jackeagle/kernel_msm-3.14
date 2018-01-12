@@ -2585,7 +2585,8 @@ int ipa3_load_fws(const struct firmware *firmware, phys_addr_t gsi_mem_base)
 		return rc;
 
 	phdr++;
-	ipa_reg_mem_base = ipa3_ctx->ipa_wrapper_base + ipahal_get_reg_base();
+	ipa_reg_mem_base = ipa3_ctx->ipa_wrapper_base +
+				ipa3_ctx->ctrl->ipa_reg_base_ofst;
 
 	/* Load IPA DPS FW image */
 	ipa_reg_ofst = ipahal_reg_offset(IPA_DPS_SEQUENCER_FIRST);
