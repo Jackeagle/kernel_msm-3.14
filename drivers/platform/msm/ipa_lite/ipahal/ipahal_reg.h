@@ -13,9 +13,6 @@
 #ifndef _IPAHAL_REG_H_
 #define _IPAHAL_REG_H_
 
-/* Offset past base of IPA "wrapper" space for register access */
-#define IPA_REG_BASE_OFFSET			0x00040000
-
 /*
  * Registers names
  *
@@ -493,11 +490,6 @@ static inline void ipahal_write_reg_fields(enum ipahal_reg reg,
 {
 	ipahal_write_reg_n_fields(reg, 0, fields);
 }
-
-/*
- * Get the register base address
- */
-u32 ipahal_get_reg_base(void);
 
 /*
  * Specific functions

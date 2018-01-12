@@ -31,6 +31,9 @@
 #include "ipahal/ipahal_fltrt.h"
 
 
+/* Offset past base of IPA "wrapper" space for register access */
+#define IPA_REG_BASE_OFFSET	0x00040000
+
 #define IPA_V4_0_CLK_RATE_SVS (125 * 1000 * 1000UL)
 #define IPA_V4_0_CLK_RATE_NOMINAL (220 * 1000 * 1000UL)
 #define IPA_V4_0_CLK_RATE_TURBO (250 * 1000 * 1000UL)
@@ -1737,7 +1740,7 @@ void ipa3_controller_static_bind(struct ipa3_controller *ctrl)
 		IPA_V3_0_BW_THRESHOLD_NOMINAL_MBPS;
 	ctrl->clock_scaling_bw_threshold_turbo =
 		IPA_V3_0_BW_THRESHOLD_TURBO_MBPS;
-	ctrl->ipa_reg_base_ofst = ipahal_get_reg_base();
+	ctrl->ipa_reg_base_ofst = IPA_REG_BASE_OFFSET;
 	ctrl->ipa_init_sram = _ipa_init_sram_v3;
 	ctrl->ipa_sram_read_settings = _ipa_sram_settings_read_v3_0;
 	ctrl->ipa_init_hdr = _ipa_init_hdr_v3_0;
