@@ -2505,18 +2505,13 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_iounmap;
 	}
 
-	ipa3_ctx->ctrl->msm_bus_data_ptr = msm_bus_cl_get_pdata(pdev_p);
-	if (ipa3_ctx->ctrl->msm_bus_data_ptr)
-		ipa_debug("Use bus scaling info from device tree #usecases=%d\n",
-			ipa3_ctx->ctrl->msm_bus_data_ptr->num_usecases);
-
 	/* get BUS handle */
 	ipa3_ctx->ipa_bus_hdl = msm_bus_scale_register_client(
 					ipa3_ctx->ctrl->msm_bus_data_ptr);
 	if (!ipa3_ctx->ipa_bus_hdl) {
 		ipa_err("fail to register with bus mgr!\n");
 		result = -ENODEV;
-		goto err_clear_pdata;
+		goto err_iounmap;
 	}
 
 	/* init active_clients_log */
@@ -2546,8 +2541,6 @@ err_clear_gsi_ctx:
 err_unregister_bus_handle:
 	msm_bus_scale_unregister_client(ipa3_ctx->ipa_bus_hdl);
 	ipa3_ctx->ipa_bus_hdl = 0;
-err_clear_pdata:
-	msm_bus_cl_clear_pdata(ipa3_ctx->ctrl->msm_bus_data_ptr);
 err_iounmap:
 	iounmap(ipa3_ctx->mmio);
 	ipa3_ctx->mmio = NULL;
