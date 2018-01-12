@@ -2484,8 +2484,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 			ipa3_ctx->ipa_wrapper_base,
 			ipa3_ctx->ipa_wrapper_size);
 
-	ipa3_ctx->ctrl = &ipa3_ctx->ctrl_struct;
-	ipa3_controller_static_bind(ipa3_ctx->ctrl);
+	ipa3_ctx->ctrl = ipa3_controller_init();
 
 	/* setup IPA register access */
 	ipa_debug("Mapping 0x%x\n", ipa3_ctx->ipa_wrapper_base +
@@ -2553,11 +2552,6 @@ err_iounmap:
 	iounmap(ipa3_ctx->mmio);
 	ipa3_ctx->mmio = NULL;
 err_clear_ctrl:
-	/*
-	 * Zeroing ctrl sub-structure resets its embedded mem partition
-	 * and makes msm_bus_data_ptr NULL.
-	 */
-	memset(ipa3_ctx->ctrl, 0, sizeof(*ipa3_ctx->ctrl));
 	ipa3_ctx->ctrl = NULL;
 	ipa3_ctx->ipa_wrapper_size = 0;
 	ipa3_ctx->ipa_wrapper_base = 0;

@@ -1207,7 +1207,6 @@ struct ipa3_context {
 	void *logbuf_low;
 	u32 ipa_bus_hdl;
 	struct ipa3_controller *ctrl;
-	struct ipa3_controller ctrl_struct;
 	u32 curr_ipa_clk_rate;
 	bool q6_proxy_clk_vote_valid;
 	u32 ipa_num_pipes;
@@ -1364,7 +1363,7 @@ void ipa3_dump_buff_internal(void *base, dma_addr_t phy_base, u32 size);
 #define IPA_DUMP_BUFF(base, phy_base, size)
 #endif
 int ipa3_init_mem_partition(struct device_node *dev_node);
-void ipa3_controller_static_bind(struct ipa3_controller *controller);
+struct ipa3_controller *ipa3_controller_init(void);
 int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout);
 int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr);
 

@@ -1736,18 +1736,11 @@ static struct ipa3_controller ipa_controller_v3 = {
 };
 
 /**
- * ipa_ctrl_static_bind() - set the appropriate methods for
- *  IPA Driver based on the HW version
- *
- *  @ctrl: data structure which holds the function pointers
- *  @hw_type: the HW type in use
- *
- *  This function can avoid the runtime assignment by using C99 special
- *  struct initialization - hard decision... time.vs.mem
+ * ipa_controller_init() - return the appropriate methods for IPA Driver
  */
-void ipa3_controller_static_bind(struct ipa3_controller *ctrl)
+struct ipa3_controller *ipa3_controller_init(void)
 {
-	*ctrl = ipa_controller_v3;
+	return &ipa_controller_v3;
 }
 
 void ipa3_skb_recycle(struct sk_buff *skb)
