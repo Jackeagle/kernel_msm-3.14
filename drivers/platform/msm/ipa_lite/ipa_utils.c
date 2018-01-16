@@ -1675,9 +1675,12 @@ int ipa3_straddle_boundary(u32 start, u32 end, u32 boundary)
 #define IPA_MEM_STATS_DROP_SIZE			0x0
 
 #define ALIGN_CHECK(name)	BUILD_BUG_ON(name % name ## _ALIGN)
+#define NONZERO_CHECK(name)	BUILD_BUG_ON(!name)
+#define LO_HI_CHECK(name)	BUILD_BUG_ON(name ## _LO > name ## _HI)
 static int mem_partition_valid(void)
 {
 	/* Verify what we can at compile time */
+
 	ALIGN_CHECK(IPA_MEM_V4_FLT_HASH_OFST);
 	ALIGN_CHECK(IPA_MEM_V4_FLT_NHASH_OFST);
 	ALIGN_CHECK(IPA_MEM_V6_FLT_HASH_OFST);
@@ -1695,8 +1698,16 @@ static int mem_partition_valid(void)
 	ALIGN_CHECK(IPA_MEM_MODEM_OFST);
 	ALIGN_CHECK(IPA_MEM_UC_INFO_OFST);
 
+	NONZERO_CHECK(IPA_MEM_V4_RT_NUM_INDEX);
+	NONZERO_CHECK(IPA_MEM_V6_RT_NUM_INDEX);
+
+	LO_HI_CHECK(IPA_MEM_V4_MODEM_RT_INDEX);
+	LO_HI_CHECK(IPA_MEM_V6_MODEM_RT_INDEX);
+
 	return 0;
 }
+#undef LO_HI_CHECK
+#undef NONZERO_CHECK
 #undef ALIGN_CHECK
 
 /**
