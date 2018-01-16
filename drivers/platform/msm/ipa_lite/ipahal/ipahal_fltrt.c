@@ -459,37 +459,35 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 {
 	int i;
 	u64 addr;
-	struct ipahal_fltrt_obj *obj;
 	int flag;
 
 	ipa_debug("Entry\n");
 
 	flag = atomic ? GFP_ATOMIC : GFP_KERNEL;
-	obj = &ipahal_fltrt;
 
 	if (!tbls_num || !nhash_hdr_size || !mem) {
 		ipa_err("Input Error: tbls_num=%d nhash_hdr_sz=%d mem=%p\n",
 			tbls_num, nhash_hdr_size, mem);
 		return -EINVAL;
 	}
-	if (obj->support_hash && !hash_hdr_size) {
+	if (ipahal_fltrt.support_hash && !hash_hdr_size) {
 		ipa_err("Input Error: hash_hdr_sz=%d\n", hash_hdr_size);
 		return -EINVAL;
 	}
 
-	if (nhash_hdr_size < (tbls_num * obj->tbl_hdr_width)) {
+	if (nhash_hdr_size < (tbls_num * ipahal_fltrt.tbl_hdr_width)) {
 		ipa_err("No enough spc at non-hash hdr blk for all tbls\n");
 		WARN_ON(1);
 		return -EINVAL;
 	}
-	if (obj->support_hash &&
-		(hash_hdr_size < (tbls_num * obj->tbl_hdr_width))) {
+	if (ipahal_fltrt.support_hash &&
+		(hash_hdr_size < (tbls_num * ipahal_fltrt.tbl_hdr_width))) {
 		ipa_err("No enough spc at hash hdr blk for all tbls\n");
 		WARN_ON(1);
 		return -EINVAL;
 	}
 
-	mem->size = tbls_num * obj->tbl_hdr_width;
+	mem->size = tbls_num * ipahal_fltrt.tbl_hdr_width;
 	mem->base = dma_alloc_coherent(ipahal_ctx->ipa_pdev, mem->size,
 		&mem->phys_base, flag);
 	if (!mem->base) {
@@ -497,11 +495,11 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 		return -ENOMEM;
 	}
 
-	addr = obj->create_tbl_addr(true,
+	addr = ipahal_fltrt.create_tbl_addr(true,
 		ipahal_ctx->empty_fltrt_tbl.phys_base);
 	for (i = 0; i < tbls_num; i++)
-		obj->write_val_to_hdr(addr,
-			mem->base + i * obj->tbl_hdr_width);
+		ipahal_fltrt.write_val_to_hdr(addr,
+			mem->base + i * ipahal_fltrt.tbl_hdr_width);
 
 	return 0;
 }
