@@ -525,13 +525,11 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 	u64 flt_bitmap;
 	int i;
 	u64 addr;
-	struct ipahal_fltrt_obj *obj;
 	int flag;
 
 	ipa_debug("Entry - ep_bitmap 0x%llx\n", ep_bitmap);
 
 	flag = atomic ? GFP_ATOMIC : GFP_KERNEL;
-	obj = &ipahal_fltrt;
 
 	if (!tbls_num || !nhash_hdr_size || !mem) {
 		ipa_err("Input Error: tbls_num=%d nhash_hdr_sz=%d mem=%p\n",
@@ -539,17 +537,17 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 		return -EINVAL;
 	}
 
-	if (obj->support_hash && !hash_hdr_size) {
+	if (ipahal_fltrt.support_hash && !hash_hdr_size) {
 		ipa_err("Input Error: hash_hdr_sz=%d\n", hash_hdr_size);
 		return -EINVAL;
 	}
 
-	if (obj->support_hash) {
+	if (ipahal_fltrt.support_hash) {
 		flt_spc = hash_hdr_size;
 		/* bitmap word */
 		if (ep_bitmap)
-			flt_spc -= obj->tbl_hdr_width;
-		flt_spc /= obj->tbl_hdr_width;
+			flt_spc -= ipahal_fltrt.tbl_hdr_width;
+		flt_spc /= ipahal_fltrt.tbl_hdr_width;
 		if (tbls_num > flt_spc)  {
 			ipa_err("space for hash flt hdr is too small\n");
 			WARN_ON(1);
@@ -560,17 +558,17 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 	flt_spc = nhash_hdr_size;
 	/* bitmap word */
 	if (ep_bitmap)
-		flt_spc -= obj->tbl_hdr_width;
-	flt_spc /= obj->tbl_hdr_width;
+		flt_spc -= ipahal_fltrt.tbl_hdr_width;
+	flt_spc /= ipahal_fltrt.tbl_hdr_width;
 	if (tbls_num > flt_spc)  {
 		ipa_err("space for non-hash flt hdr is too small\n");
 		WARN_ON(1);
 		return -EPERM;
 	}
 
-	mem->size = tbls_num * obj->tbl_hdr_width;
+	mem->size = tbls_num * ipahal_fltrt.tbl_hdr_width;
 	if (ep_bitmap)
-		mem->size += obj->tbl_hdr_width;
+		mem->size += ipahal_fltrt.tbl_hdr_width;
 	mem->base = dma_alloc_coherent(ipahal_ctx->ipa_pdev, mem->size,
 		&mem->phys_base, flag);
 	if (!mem->base) {
@@ -579,22 +577,22 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 	}
 
 	if (ep_bitmap) {
-		flt_bitmap = obj->create_flt_bitmap(ep_bitmap);
+		flt_bitmap = ipahal_fltrt.create_flt_bitmap(ep_bitmap);
 		ipa_debug("flt bitmap 0x%llx\n", flt_bitmap);
-		obj->write_val_to_hdr(flt_bitmap, mem->base);
+		ipahal_fltrt.write_val_to_hdr(flt_bitmap, mem->base);
 	}
 
-	addr = obj->create_tbl_addr(true,
+	addr = ipahal_fltrt.create_tbl_addr(true,
 		ipahal_ctx->empty_fltrt_tbl.phys_base);
 
 	if (ep_bitmap) {
 		for (i = 1; i <= tbls_num; i++)
-			obj->write_val_to_hdr(addr,
-				mem->base + i * obj->tbl_hdr_width);
+			ipahal_fltrt.write_val_to_hdr(addr,
+				mem->base + i * ipahal_fltrt.tbl_hdr_width);
 	} else {
 		for (i = 0; i < tbls_num; i++)
-			obj->write_val_to_hdr(addr,
-				mem->base + i * obj->tbl_hdr_width);
+			ipahal_fltrt.write_val_to_hdr(addr,
+				mem->base + i * ipahal_fltrt.tbl_hdr_width);
 	}
 
 	return 0;
