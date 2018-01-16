@@ -531,7 +531,7 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 
 	flag = atomic ? GFP_ATOMIC : GFP_KERNEL;
 
-	if (!tbls_num || !nhash_hdr_size || !mem) {
+	if (!tbls_num || !nhash_hdr_size) {
 		ipa_err("Input Error: tbls_num=%d nhash_hdr_sz=%d mem=%p\n",
 			tbls_num, nhash_hdr_size, mem);
 		return -EINVAL;
