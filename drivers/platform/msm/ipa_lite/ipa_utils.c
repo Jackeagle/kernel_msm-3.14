@@ -1674,14 +1674,37 @@ int ipa3_straddle_boundary(u32 start, u32 end, u32 boundary)
 #define IPA_MEM_STATS_DROP_OFST			0x0
 #define IPA_MEM_STATS_DROP_SIZE			0x0
 
+#define ALIGN_CHECK(name)	BUILD_BUG_ON(name % name ## _ALIGN)
+static int mem_partition_valid(void)
+{
+	/* Verify what we can at compile time */
+	ALIGN_CHECK(IPA_MEM_V4_FLT_HASH_OFST);
+	ALIGN_CHECK(IPA_MEM_V4_FLT_NHASH_OFST);
+	ALIGN_CHECK(IPA_MEM_V6_FLT_HASH_OFST);
+	ALIGN_CHECK(IPA_MEM_V6_FLT_NHASH_OFST);
+	ALIGN_CHECK(IPA_MEM_V4_RT_HASH_OFST);
+	ALIGN_CHECK(IPA_MEM_V4_RT_NHASH_OFST);
+	ALIGN_CHECK(IPA_MEM_V6_RT_HASH_OFST);
+	ALIGN_CHECK(IPA_MEM_V6_RT_NHASH_OFST);
+	ALIGN_CHECK(IPA_MEM_MODEM_HDR_OFST);
+	ALIGN_CHECK(IPA_MEM_APPS_HDR_OFST);
+	ALIGN_CHECK(IPA_MEM_MODEM_HDR_PROC_CTX_OFST);
+	ALIGN_CHECK(IPA_MEM_PDN_CONFIG_OFST);
+	ALIGN_CHECK(IPA_MEM_UC_EVENT_RING_OFST);
+	ALIGN_CHECK(IPA_MEM_APPS_HDR_PROC_CTX_OFST);
+	ALIGN_CHECK(IPA_MEM_MODEM_OFST);
+	ALIGN_CHECK(IPA_MEM_UC_INFO_OFST);
+
+	return 0;
+}
+#undef ALIGN_CHECK
+
 /**
  * ipa3_init_mem_partition() - Reads IPA memory map from DTS, performs alignment
  * checks and logs the fetched values.
  *
  * Returns:	0 on success
  */
-
-#define ALIGN_CHECK(name)	BUILD_BUG_ON(name % name ## _ALIGN)
 int ipa3_init_mem_partition(struct device_node *node)
 {
 	u32 *mem = &ipa3_ctx->ctrl->mem_partition[0];
@@ -1696,7 +1719,6 @@ int ipa3_init_mem_partition(struct device_node *node)
 	ipa_debug("NAT OFST 0x%x SIZE 0x%x\n", mem[NAT_OFST], mem[NAT_SIZE]);
 
 	mem[V4_FLT_HASH_OFST] = IPA_MEM_V4_FLT_HASH_OFST;
-	ALIGN_CHECK(IPA_MEM_V4_FLT_HASH_OFST);
 	mem[V4_FLT_HASH_SIZE] = IPA_MEM_V4_FLT_HASH_SIZE;
 	mem[V4_FLT_HASH_SIZE_DDR] = IPA_MEM_V4_FLT_HASH_SIZE_DDR;
 	ipa_debug("V4 FLT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
@@ -1705,7 +1727,6 @@ int ipa3_init_mem_partition(struct device_node *node)
 		mem[V4_FLT_HASH_SIZE_DDR]);
 
 	mem[V4_FLT_NHASH_OFST] = IPA_MEM_V4_FLT_NHASH_OFST;
-	ALIGN_CHECK(IPA_MEM_V4_FLT_NHASH_OFST);
 	mem[V4_FLT_NHASH_SIZE] = IPA_MEM_V4_FLT_NHASH_SIZE;
 	mem[V4_FLT_NHASH_SIZE_DDR] = IPA_MEM_V4_FLT_NHASH_SIZE_DDR;
 	ipa_debug("V4 FLT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
@@ -1714,7 +1735,6 @@ int ipa3_init_mem_partition(struct device_node *node)
 		mem[V4_FLT_NHASH_SIZE_DDR]);
 
 	mem[V6_FLT_HASH_OFST] = IPA_MEM_V6_FLT_HASH_OFST;
-	ALIGN_CHECK(IPA_MEM_V6_FLT_HASH_OFST);
 	mem[V6_FLT_HASH_SIZE] = IPA_MEM_V6_FLT_HASH_SIZE;
 	mem[V6_FLT_HASH_SIZE_DDR] = IPA_MEM_V6_FLT_HASH_SIZE_DDR;
 	ipa_debug("V6 FLT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
@@ -1722,7 +1742,6 @@ int ipa3_init_mem_partition(struct device_node *node)
 		mem[V6_FLT_HASH_SIZE_DDR]);
 
 	mem[V6_FLT_NHASH_OFST] = IPA_MEM_V6_FLT_NHASH_OFST;
-	ALIGN_CHECK(IPA_MEM_V6_FLT_NHASH_OFST);
 	mem[V6_FLT_NHASH_SIZE] = IPA_MEM_V6_FLT_NHASH_SIZE;
 	mem[V6_FLT_NHASH_SIZE_DDR] = IPA_MEM_V6_FLT_NHASH_SIZE_DDR;
 	ipa_debug("V6 FLT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
@@ -1746,7 +1765,6 @@ int ipa3_init_mem_partition(struct device_node *node)
 		mem[V4_APPS_RT_INDEX_HI]);
 
 	mem[V4_RT_HASH_OFST] = IPA_MEM_V4_RT_HASH_OFST;
-	ALIGN_CHECK(IPA_MEM_V4_RT_HASH_OFST);
 	mem[V4_RT_HASH_SIZE] = IPA_MEM_V4_RT_HASH_SIZE;
 	mem[V4_RT_HASH_SIZE_DDR] = IPA_MEM_V4_RT_HASH_SIZE_DDR;
 	ipa_debug("V4 RT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
@@ -1755,7 +1773,6 @@ int ipa3_init_mem_partition(struct device_node *node)
 		mem[V4_RT_HASH_SIZE_DDR]);
 
 	mem[V4_RT_NHASH_OFST] = IPA_MEM_V4_RT_NHASH_OFST;
-	ALIGN_CHECK(IPA_MEM_V4_RT_NHASH_OFST);
 	mem[V4_RT_NHASH_SIZE] = IPA_MEM_V4_RT_NHASH_SIZE;
 	mem[V4_RT_NHASH_SIZE_DDR] = IPA_MEM_V4_RT_NHASH_SIZE_DDR;
 	ipa_debug("V4 RT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
@@ -1779,7 +1796,6 @@ int ipa3_init_mem_partition(struct device_node *node)
 		mem[V6_APPS_RT_INDEX_HI]);
 
 	mem[V6_RT_HASH_OFST] = IPA_MEM_V6_RT_HASH_OFST;
-	ALIGN_CHECK(IPA_MEM_V6_RT_HASH_OFST);
 	mem[V6_RT_HASH_SIZE] = IPA_MEM_V6_RT_HASH_SIZE;
 	mem[V6_RT_HASH_SIZE_DDR] = IPA_MEM_V6_RT_HASH_SIZE_DDR;
 	ipa_debug("V6 RT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
@@ -1788,7 +1804,6 @@ int ipa3_init_mem_partition(struct device_node *node)
 		mem[V6_RT_HASH_SIZE_DDR]);
 
 	mem[V6_RT_NHASH_OFST] = IPA_MEM_V6_RT_NHASH_OFST;
-	ALIGN_CHECK(IPA_MEM_V6_RT_NHASH_OFST);
 	mem[V6_RT_NHASH_SIZE] = IPA_MEM_V6_RT_NHASH_SIZE;
 	mem[V6_RT_NHASH_SIZE_DDR] = IPA_MEM_V6_RT_NHASH_SIZE_DDR;
 	ipa_debug("V6 RT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
@@ -1797,14 +1812,12 @@ int ipa3_init_mem_partition(struct device_node *node)
 		mem[V6_RT_NHASH_SIZE_DDR]);
 
 	mem[MODEM_HDR_OFST] = IPA_MEM_MODEM_HDR_OFST;
-	ALIGN_CHECK(IPA_MEM_MODEM_HDR_OFST);
 	mem[MODEM_HDR_SIZE] = IPA_MEM_MODEM_HDR_SIZE;
 	ipa_debug("MODEM HDR OFST 0x%x SIZE 0x%x\n",
 		mem[MODEM_HDR_OFST],
 		mem[MODEM_HDR_SIZE]);
 
 	mem[APPS_HDR_OFST] = IPA_MEM_APPS_HDR_OFST;
-	ALIGN_CHECK(IPA_MEM_APPS_HDR_OFST);
 	mem[APPS_HDR_SIZE] = IPA_MEM_APPS_HDR_SIZE;
 	mem[APPS_HDR_SIZE_DDR] = IPA_MEM_APPS_HDR_SIZE_DDR;
 	ipa_debug("APPS HDR OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
@@ -1813,7 +1826,6 @@ int ipa3_init_mem_partition(struct device_node *node)
 		mem[APPS_HDR_SIZE_DDR]);
 
 	mem[MODEM_HDR_PROC_CTX_OFST] = IPA_MEM_MODEM_HDR_PROC_CTX_OFST;
-	ALIGN_CHECK(IPA_MEM_MODEM_HDR_PROC_CTX_OFST);
 	mem[MODEM_HDR_PROC_CTX_SIZE] = IPA_MEM_MODEM_HDR_PROC_CTX_SIZE;
 	ipa_debug("MODEM HDR PROC CTX OFST 0x%x SIZE 0x%x\n",
 		mem[MODEM_HDR_PROC_CTX_OFST],
@@ -1821,7 +1833,6 @@ int ipa3_init_mem_partition(struct device_node *node)
 
 	mem[APPS_HDR_PROC_CTX_OFST] = IPA_MEM_APPS_HDR_PROC_CTX_OFST;
 	mem[APPS_HDR_PROC_CTX_SIZE] = IPA_MEM_APPS_HDR_PROC_CTX_SIZE;
-	ALIGN_CHECK(IPA_MEM_PDN_CONFIG_OFST);
 	mem[APPS_HDR_PROC_CTX_SIZE_DDR] =
 			IPA_MEM_APPS_HDR_PROC_CTX_SIZE_DDR;
 	ipa_debug("APPS HDR PROC CTX OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
@@ -1834,7 +1845,6 @@ int ipa3_init_mem_partition(struct device_node *node)
 
 	mem[MODEM_OFST] = IPA_MEM_MODEM_OFST;
 	mem[MODEM_SIZE] = IPA_MEM_MODEM_SIZE;
-	ALIGN_CHECK(IPA_MEM_UC_EVENT_RING_OFST);
 	ipa_debug("MODEM OFST 0x%x SIZE 0x%x\n",
 		mem[MODEM_OFST],
 		mem[MODEM_SIZE]);
@@ -1865,7 +1875,6 @@ int ipa3_init_mem_partition(struct device_node *node)
 
 	mem[UC_INFO_OFST] = IPA_MEM_UC_INFO_OFST;
 	mem[UC_INFO_SIZE] = IPA_MEM_UC_INFO_SIZE;
-	ALIGN_CHECK(IPA_MEM_APPS_HDR_PROC_CTX_OFST);
 	ipa_debug("UC INFO OFST 0x%x SIZE 0x%x\n",
 		mem[UC_INFO_OFST], mem[UC_INFO_SIZE]);
 
@@ -1897,7 +1906,6 @@ int ipa3_init_mem_partition(struct device_node *node)
 		mem[APPS_V6_RT_NHASH_SIZE]);
 
 	mem[UC_EVENT_RING_OFST] = IPA_MEM_UC_EVENT_RING_OFST;
-	ALIGN_CHECK(IPA_MEM_MODEM_OFST);
 	mem[UC_EVENT_RING_SIZE] = IPA_MEM_UC_EVENT_RING_SIZE;
 	ipa_debug("UC EVENT RING OFST 0x%x SIZE 0x%x\n",
 		mem[UC_EVENT_RING_OFST],
@@ -1906,7 +1914,6 @@ int ipa3_init_mem_partition(struct device_node *node)
 	/* End of fields supported for SDM670 and SDM845 */
 
 	mem[PDN_CONFIG_OFST] = IPA_MEM_PDN_CONFIG_OFST;
-	ALIGN_CHECK(IPA_MEM_UC_INFO_OFST);
 	ipa_debug("PDN CONFIG OFST 0x%x SIZE 0x%x\n",
 		mem[PDN_CONFIG_OFST],
 		mem[PDN_CONFIG_SIZE]);
@@ -1927,9 +1934,8 @@ int ipa3_init_mem_partition(struct device_node *node)
 	mem[STATS_DROP_OFST] = IPA_MEM_STATS_RT_V6_SIZE;
 	mem[STATS_DROP_SIZE] = IPA_MEM_STATS_DROP_OFST;
 
-	return 0;
+	return mem_partition_valid();
 }
-#undef ALIGN_CHECK
 
 static struct ipa3_controller ipa_controller_v3 = {
 	.ipa_init_rt4		= _ipa_init_rt4_v3,
