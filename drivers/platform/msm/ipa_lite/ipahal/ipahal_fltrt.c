@@ -399,24 +399,21 @@ int ipahal_get_rule_max_priority(void)
  */
 int ipahal_rule_decrease_priority(int *prio)
 {
-	struct ipahal_fltrt_obj *obj;
-
-	obj = &ipahal_fltrt;
-
 	if (!prio) {
 		ipa_err("Invalid Input\n");
 		return -EINVAL;
 	}
 
 	/* Priority logic is reverse. 0 priority considred max priority */
-	if (*prio > obj->rule_min_prio || *prio < obj->rule_max_prio) {
+	if (*prio > ipahal_fltrt.rule_min_prio ||
+			*prio < ipahal_fltrt.rule_max_prio) {
 		ipa_err("Invalid given priority %d\n", *prio);
 		return -EINVAL;
 	}
 
 	*prio += 1;
 
-	if (*prio > obj->rule_min_prio) {
+	if (*prio > ipahal_fltrt.rule_min_prio) {
 		ipa_err("Cannot decrease priority. Already on min\n");
 		*prio -= 1;
 		return -EFAULT;
