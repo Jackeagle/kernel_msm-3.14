@@ -2370,11 +2370,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	if (result)
 		return result;
 
-	if (ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio)) {
-		ipa_err("fail to init ipahal\n");
-		ipa_smmu_detach(cb);
-		return -EFAULT;
-	}
+	ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio);
 
 	if (!config_valid()) {
 		ipahal_destroy();

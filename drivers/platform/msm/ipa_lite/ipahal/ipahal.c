@@ -935,7 +935,7 @@ u32 ipahal_get_hps_img_mem_size(void)
 	return IPA_HW_HPS_IMG_MEM_SIZE_V3_0;
 }
 
-int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base)
+void ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base)
 {
 	ipa_debug("Entry - IPA HW TYPE=%d base=%p\n", ipa_hw_type, base);
 
@@ -947,8 +947,6 @@ int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base)
 	ipahal_reg_init();
 	ipahal_imm_cmd_init();
 	ipahal_fltrt_init();
-
-	return 0;
 }
 
 /*
