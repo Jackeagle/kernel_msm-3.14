@@ -2625,6 +2625,7 @@ static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
         int index;
         u32 lcl_addr_mem_part;
         u32 lcl_hdr_sz;
+        u32 lcl_hdr_nsz;
         struct ipa_mem_buffer mem;
 
         ipa_debug("Entry\n");
@@ -2651,24 +2652,22 @@ static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
         }
 
         if (ip == IPA_IP_v4) {
-                if (rlt == IPA_RULE_HASHABLE) {
+                if (rlt == IPA_RULE_HASHABLE)
                         lcl_addr_mem_part = ipa3_mem(V4_FLT_HASH_OFST);
-                        lcl_hdr_sz = ipa3_mem(V4_FLT_HASH_SIZE);
-                } else {
+                else
                         lcl_addr_mem_part = ipa3_mem(V4_FLT_NHASH_OFST);
-                        lcl_hdr_sz = ipa3_mem(V4_FLT_NHASH_SIZE);
-                }
+		lcl_hdr_sz = ipa3_mem(V4_FLT_HASH_SIZE);
+		lcl_hdr_nsz = ipa3_mem(V4_FLT_NHASH_SIZE);
         } else {
-                if (rlt == IPA_RULE_HASHABLE) {
+                if (rlt == IPA_RULE_HASHABLE)
                         lcl_addr_mem_part = ipa3_mem(V6_FLT_HASH_OFST);
-                        lcl_hdr_sz = ipa3_mem(V6_FLT_HASH_SIZE);
-                } else {
+                else
                         lcl_addr_mem_part = ipa3_mem(V6_FLT_NHASH_OFST);
-                        lcl_hdr_sz = ipa3_mem(V6_FLT_NHASH_SIZE);
-                }
+		lcl_hdr_sz = ipa3_mem(V6_FLT_HASH_SIZE);
+		lcl_hdr_nsz = ipa3_mem(V6_FLT_NHASH_SIZE);
         }
 
-        retval = ipahal_flt_generate_empty_img(1, lcl_hdr_sz, lcl_hdr_sz,
+        retval = ipahal_flt_generate_empty_img(1, lcl_hdr_sz, lcl_hdr_nsz,
                 0, &mem, true);
         if (retval) {
                 ipa_err("failed to generate flt single tbl empty img\n");
