@@ -20,7 +20,8 @@
 /* Produce a contiguous bitmask with a positive number of low-order bits set. */
 #define MASK(bits)	GENMASK((bits) - 1, 0)
 
-struct ipahal_context *ipahal_ctx;
+static struct ipahal_context ipahal_ctx_struct;
+struct ipahal_context *ipahal_ctx = &ipahal_ctx_struct;
 
 static const char *ipahal_pkt_status_exception_to_str[] = {
 	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_NONE),
@@ -943,12 +944,6 @@ int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base)
 		return -EINVAL;
 	}
 
-	ipahal_ctx = kzalloc(sizeof(*ipahal_ctx), GFP_KERNEL);
-	if (!ipahal_ctx) {
-		ipa_err("kzalloc err for ipahal_ctx\n");
-		return -ENOMEM;
-	}
-
 	ipahal_ctx->hw_type = ipa_hw_type;
 	ipahal_ctx->base = base;
 	/* ipahal_ctx->ipa_pdev must be set by a call to ipahal_dev_init() */
@@ -983,8 +978,6 @@ void ipahal_dev_destroy(void)
 void ipahal_destroy(void)
 {
 	ipa_debug("Entry\n");
-	kfree(ipahal_ctx);
-	ipahal_ctx = NULL;
 }
 
 void ipahal_free_dma_mem(struct ipa_mem_buffer *mem)
