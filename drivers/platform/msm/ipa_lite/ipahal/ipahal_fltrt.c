@@ -461,12 +461,6 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 
 	flag = atomic ? GFP_ATOMIC : GFP_KERNEL;
 
-	if (hash_hdr_size < tbls_num * ipahal_fltrt.tbl_hdr_width) {
-		ipa_err("No enough spc at hash hdr blk for all tbls\n");
-		WARN_ON(1);
-		return -EINVAL;
-	}
-
 	mem->size = tbls_num * ipahal_fltrt.tbl_hdr_width;
 	mem->base = dma_alloc_coherent(ipahal_ctx->ipa_pdev, mem->size,
 		&mem->phys_base, flag);
