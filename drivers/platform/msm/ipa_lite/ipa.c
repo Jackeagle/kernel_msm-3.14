@@ -1739,16 +1739,6 @@ static int ipa3_post_init(struct device *ipa_dev)
 	int result;
 	struct ipa3_uc_hdlrs uc_hdlrs = { 0 };
 
-	/*
-	 * indication whether working in MHI config or non MHI config is given
-	 * in ipa3_write which is launched before ipa3_post_init. i.e. from
-	 * this point it is safe to use ipa3_ep_mapping array and the correct
-	 * entry will be returned from ipa3_get_hw_type_index()
-	 */
-	ipa_init_ep_flt_bitmap();
-	ipa_debug("EP with flt support bitmap 0x%x (%u pipes)\n",
-		ipa3_ctx->ep_flt_bitmap, ipa3_ctx->ep_flt_num);
-
 	/* Assign resource limitation to each group */
 	ipa3_set_resorce_groups_min_max_limits();
 
@@ -2504,6 +2494,10 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		result = -ENODEV;
 		goto err_iounmap;
 	}
+
+	ipa_init_ep_flt_bitmap();
+	ipa_debug("EP with flt support bitmap 0x%x (%u pipes)\n",
+		ipa3_ctx->ep_flt_bitmap, ipa3_ctx->ep_flt_num);
 
 	/* get BUS handle */
 	ipa3_ctx->ipa_bus_hdl = msm_bus_scale_register_client(
