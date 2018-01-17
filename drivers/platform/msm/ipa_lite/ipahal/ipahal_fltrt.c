@@ -470,11 +470,6 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 		return -EINVAL;
 	}
 
-	if (nhash_hdr_size < (tbls_num * ipahal_fltrt.tbl_hdr_width)) {
-		ipa_err("No enough spc at non-hash hdr blk for all tbls\n");
-		WARN_ON(1);
-		return -EINVAL;
-	}
 	if (ipahal_fltrt.support_hash &&
 		(hash_hdr_size < (tbls_num * ipahal_fltrt.tbl_hdr_width))) {
 		ipa_err("No enough spc at hash hdr blk for all tbls\n");
