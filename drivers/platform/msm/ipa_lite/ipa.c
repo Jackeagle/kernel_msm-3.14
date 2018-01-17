@@ -2740,6 +2740,7 @@ static int ipa3_q6_clean_q6_rt_tbls(enum ipa_ip_type ip,
         u32 modem_rt_index_hi;
         u32 lcl_addr_mem_part;
         u32 lcl_hdr_sz;
+        u32 lcl_hdr_nsz;
         struct ipa_mem_buffer mem;
 
         ipa_debug("Entry\n");
@@ -2752,28 +2753,26 @@ static int ipa3_q6_clean_q6_rt_tbls(enum ipa_ip_type ip,
         if (ip == IPA_IP_v4) {
                 modem_rt_index_lo = ipa3_mem(V4_MODEM_RT_INDEX_LO);
                 modem_rt_index_hi = ipa3_mem(V4_MODEM_RT_INDEX_HI);
-                if (rlt == IPA_RULE_HASHABLE) {
+                if (rlt == IPA_RULE_HASHABLE)
                         lcl_addr_mem_part = ipa3_mem(V4_RT_HASH_OFST);
-                        lcl_hdr_sz = ipa3_mem(V4_RT_HASH_SIZE);
-                } else {
+                else
                         lcl_addr_mem_part = ipa3_mem(V4_RT_NHASH_OFST);
-                        lcl_hdr_sz = ipa3_mem(V4_RT_NHASH_SIZE);
-                }
+		lcl_hdr_sz = ipa3_mem(V4_RT_HASH_SIZE);
+		lcl_hdr_nsz = ipa3_mem(V4_RT_NHASH_SIZE);
         } else {
                 modem_rt_index_lo = ipa3_mem(V6_MODEM_RT_INDEX_LO);
                 modem_rt_index_hi = ipa3_mem(V6_MODEM_RT_INDEX_HI);
-                if (rlt == IPA_RULE_HASHABLE) {
+                if (rlt == IPA_RULE_HASHABLE)
                         lcl_addr_mem_part = ipa3_mem(V6_RT_HASH_OFST);
-                        lcl_hdr_sz = ipa3_mem(V6_RT_HASH_SIZE);
-                } else {
+                else
                         lcl_addr_mem_part = ipa3_mem(V6_RT_NHASH_OFST);
-                        lcl_hdr_sz = ipa3_mem(V6_RT_NHASH_SIZE);
-                }
+		lcl_hdr_sz = ipa3_mem(V6_RT_HASH_SIZE);
+		lcl_hdr_nsz = ipa3_mem(V6_RT_NHASH_SIZE);
         }
 
         retval = ipahal_rt_generate_empty_img(
                 modem_rt_index_hi - modem_rt_index_lo + 1,
-                lcl_hdr_sz, lcl_hdr_sz, &mem, true);
+                lcl_hdr_sz, lcl_hdr_nsz, &mem, true);
         if (retval) {
                 ipa_err("fail generate empty rt img\n");
                 return -ENOMEM;
