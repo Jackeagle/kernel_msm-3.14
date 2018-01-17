@@ -2370,12 +2370,26 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	if (result)
 		return result;
 
+	if (ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio, dev)) {
+		ipa_err("fail to init ipahal\n");
+		ipa_smmu_detach(cb);
+		return -EFAULT;
+	}
+
+	if (!config_valid()) {
+		ipahal_destroy();
+		ipa_smmu_detach(cb);
+		ipa_err("invalid configuration\n");
+		return -EFAULT;
+	}
+
 	add_map = of_get_property(dev->of_node,
 		"qcom,additional-mapping", &add_map_size);
 	if (add_map) {
 		/* mapping size is an array of 3-tuple of u32 */
 		if (add_map_size % (3 * sizeof(u32))) {
 			ipa_err("wrong additional mapping format\n");
+			ipahal_destroy();
 			ipa_smmu_detach(cb);
 			return -EFAULT;
 		}
@@ -2398,19 +2412,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		phys_addr_t pa = iova;
 
 		ipa3_iommu_map(cb->mapping->domain, iova, pa, IPA_SMEM_SIZE);
-	}
-
-	if (ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio, dev)) {
-		ipa_err("fail to init ipahal\n");
-		ipa_smmu_detach(cb);
-		return -EFAULT;
-	}
-
-	if (!config_valid()) {
-		ipa_err("invalid configuration\n");
-		ipahal_destroy();
-		ipa_smmu_detach(cb);
-		return -EFAULT;
 	}
 
 	/* Proceed to real initialization */
