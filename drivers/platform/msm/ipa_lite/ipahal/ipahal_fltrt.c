@@ -520,24 +520,20 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 		return -ENOMEM;
 	}
 
+	i = 0;
 	if (ep_bitmap) {
 		flt_bitmap = ipahal_fltrt.create_flt_bitmap(ep_bitmap);
 		ipa_debug("flt bitmap 0x%llx\n", flt_bitmap);
 		ipahal_fltrt.write_val_to_hdr(flt_bitmap, mem->base);
+		i++;
 	}
 
 	addr = ipahal_fltrt.create_tbl_addr(true,
 		ipahal_ctx->empty_fltrt_tbl.phys_base);
 
-	if (ep_bitmap) {
-		for (i = 1; i < tbls_num; i++)
-			ipahal_fltrt.write_val_to_hdr(addr,
-				mem->base + i * ipahal_fltrt.tbl_hdr_width);
-	} else {
-		for (i = 0; i < tbls_num; i++)
-			ipahal_fltrt.write_val_to_hdr(addr,
-				mem->base + i * ipahal_fltrt.tbl_hdr_width);
-	}
+	for (; i < tbls_num; i++)
+		ipahal_fltrt.write_val_to_hdr(addr,
+			mem->base + i * ipahal_fltrt.tbl_hdr_width);
 
 	return 0;
 }
