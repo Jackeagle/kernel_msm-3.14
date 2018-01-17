@@ -48,7 +48,6 @@
 
 /*
  * struct ipahal_fltrt_obj - Flt/Rt H/W information for specific IPA version
- * @support_hash: Is hashable tables supported
  * @tbl_width: Width of table in bytes
  * @sysaddr_align: System table address alignment
  * @lcladdr_align: Local table offset alignment
@@ -73,7 +72,6 @@
  * @eq_bitfield: Array of the bit fields of the support equations
  */
 struct ipahal_fltrt_obj {
-	bool support_hash;
 	u32 tbl_width;
 	u32 sysaddr_align;
 	u32 lcladdr_align;
@@ -201,7 +199,6 @@ static void ipa_fltrt_parse_tbl_addr(u64 hwaddr, u64 *addr, bool *is_sys)
 static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 	/* IPAv3 */
 	[IPA_HW_v3_0] = {
-		.support_hash		= true,
 		.tbl_width		= IPA3_0_HW_TBL_WIDTH,
 		.sysaddr_align		= IPA3_0_HW_TBL_SYSADDR_ALIGN,
 		.lcladdr_align		= IPA3_0_HW_TBL_LCLADDR_ALIGN,
@@ -255,7 +252,6 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 
 	/* IPAv4 */
 	[IPA_HW_v4_0] = {
-		.support_hash		= true,
 		.tbl_width		= IPA3_0_HW_TBL_WIDTH,
 		.sysaddr_align		= IPA3_0_HW_TBL_SYSADDR_ALIGN,
 		.lcladdr_align		= IPA3_0_HW_TBL_LCLADDR_ALIGN,
@@ -465,13 +461,12 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 
 	flag = atomic ? GFP_ATOMIC : GFP_KERNEL;
 
-	if (ipahal_fltrt.support_hash && !hash_hdr_size) {
+	if (!hash_hdr_size) {
 		ipa_err("Input Error: hash_hdr_sz=%d\n", hash_hdr_size);
 		return -EINVAL;
 	}
 
-	if (ipahal_fltrt.support_hash &&
-		(hash_hdr_size < (tbls_num * ipahal_fltrt.tbl_hdr_width))) {
+	if (hash_hdr_size < tbls_num * ipahal_fltrt.tbl_hdr_width) {
 		ipa_err("No enough spc at hash hdr blk for all tbls\n");
 		WARN_ON(1);
 		return -EINVAL;
@@ -527,21 +522,19 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 		return -EINVAL;
 	}
 
-	if (ipahal_fltrt.support_hash && !hash_hdr_size) {
+	if (!hash_hdr_size) {
 		ipa_err("Input Error: hash_hdr_sz=%d\n", hash_hdr_size);
 		return -EINVAL;
 	}
 
-	if (ipahal_fltrt.support_hash) {
-		flt_spc = hash_hdr_size;
-		/* bitmap word */
-		if (ep_bitmap)
-			flt_spc -= ipahal_fltrt.tbl_hdr_width;
-		if (flt_spc < tbls_num * ipahal_fltrt.tbl_hdr_width)  {
-			ipa_err("space for hash flt hdr is too small\n");
-			WARN_ON(1);
-			return -EPERM;
-		}
+	flt_spc = hash_hdr_size;
+	/* bitmap word */
+	if (ep_bitmap)
+		flt_spc -= ipahal_fltrt.tbl_hdr_width;
+	if (flt_spc < tbls_num * ipahal_fltrt.tbl_hdr_width)  {
+		ipa_err("space for hash flt hdr is too small\n");
+		WARN_ON(1);
+		return -EPERM;
 	}
 
 	flt_spc = nhash_hdr_size;
