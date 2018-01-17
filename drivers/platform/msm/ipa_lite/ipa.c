@@ -2570,6 +2570,11 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	}
 
 	ipa_init_ep_flt_bitmap();
+	if (!ipa3_ctx->ep_flt_num) {
+		ipa_err("no endpoints support filtering\n");
+		result = -ENODEV;
+		goto err_iounmap;
+	}
 	ipa_debug("EP with flt support bitmap 0x%x (%u pipes)\n",
 		ipa3_ctx->ep_flt_bitmap, ipa3_ctx->ep_flt_num);
 
