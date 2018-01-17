@@ -2370,7 +2370,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	if (result)
 		return result;
 
-	if (ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio, dev)) {
+	if (ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio)) {
 		ipa_err("fail to init ipahal\n");
 		ipa_smmu_detach(cb);
 		return -EFAULT;
@@ -2383,12 +2383,20 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		return -EFAULT;
 	}
 
+	if (ipahal_dev_init(dev)) {
+		ipahal_destroy();
+		ipa_smmu_detach(cb);
+		ipa_err("failed to assign IPA HAL dev pointer\n");
+		return -EFAULT;
+	}
+
 	add_map = of_get_property(dev->of_node,
 		"qcom,additional-mapping", &add_map_size);
 	if (add_map) {
 		/* mapping size is an array of 3-tuple of u32 */
 		if (add_map_size % (3 * sizeof(u32))) {
 			ipa_err("wrong additional mapping format\n");
+			ipahal_dev_destroy();
 			ipahal_destroy();
 			ipa_smmu_detach(cb);
 			return -EFAULT;
@@ -2418,6 +2426,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	result = ipa3_pre_init();
 	if (result) {
 		ipa_err("ipa_init failed\n");
+		ipahal_dev_destroy();
 		ipahal_destroy();
 		ipa_smmu_detach(cb);
 	}

@@ -934,11 +934,9 @@ u32 ipahal_get_hps_img_mem_size(void)
 	return IPA_HW_HPS_IMG_MEM_SIZE_V3_0;
 }
 
-int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base,
-	struct device *ipa_pdev)
+int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base)
 {
-	ipa_debug("Entry - IPA HW TYPE=%d base=%p ipa_pdev=%p\n",
-		ipa_hw_type, base, ipa_pdev);
+	ipa_debug("Entry - IPA HW TYPE=%d base=%p\n", ipa_hw_type, base);
 
 	if (ipa_hw_type != IPA_HW_v3_5_1) {
 		ipa_err("ipahal supported on IPAv3.5.1 only\n");
@@ -953,26 +951,38 @@ int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base,
 
 	ipahal_ctx->hw_type = ipa_hw_type;
 	ipahal_ctx->base = base;
-	ipahal_ctx->ipa_pdev = ipa_pdev;
+	/* ipahal_ctx->ipa_pdev must be set by a call to ipahal_dev_init() */
 
 	/* Packet status parsing code requires no initialization */
 	ipahal_reg_init();
 	ipahal_imm_cmd_init();
 	ipahal_fltrt_init();
 
-	if (ipahal_empty_fltrt_init(ipa_pdev)) {
-		kfree(ipahal_ctx);
-		ipahal_ctx = NULL;
-		return -EFAULT;
-	}
-
 	return 0;
+}
+
+/*
+ * Assign the IPA HAL's device pointer.
+ *
+ * We let the empty table entry init function do that assignment if
+ * successful; that way we can use a non-null dev pointer to
+ * determine whether the empty table entry needs to be destroyed.
+ */
+int ipahal_dev_init(struct device *dev)
+{
+	ipa_debug("IPA HAL ipa_pdev=%p\n", dev);
+
+	return ipahal_empty_fltrt_init(dev);
+}
+
+void ipahal_dev_destroy(void)
+{
+	ipahal_empty_fltrt_destroy();
 }
 
 void ipahal_destroy(void)
 {
 	ipa_debug("Entry\n");
-	ipahal_empty_fltrt_destroy();
 	kfree(ipahal_ctx);
 	ipahal_ctx = NULL;
 }
