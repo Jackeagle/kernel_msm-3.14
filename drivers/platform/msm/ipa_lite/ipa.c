@@ -2022,21 +2022,10 @@ static bool config_valid(void)
 */
 static int ipa3_pre_init(void)
 {
-	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	int result = 0;
 	struct ipa_active_client_logging_info log_info;
 
 	ipa_debug("IPA Driver initialization started\n");
-
-	if (ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio, dev)) {
-		ipa_err("fail to init ipahal\n");
-		return -EFAULT;
-	}
-
-	if (!config_valid()) {
-		ipa_err("invalid configuration\n");
-		return -EFAULT;
-	}
 
 	/* Clock scaling is enabled */
 	ipa3_ctx->curr_ipa_clk_rate = ipa3_ctx->ctrl->ipa_clk_rate_turbo;
@@ -2196,7 +2185,6 @@ fail_create_transport_wq:
 	destroy_workqueue(ipa3_ctx->power_mgmt_wq);
 fail_init_hw:
 	ipa3_disable_clks();
-	ipahal_destroy();
 
 	return result;
 }
@@ -2412,10 +2400,24 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		ipa3_iommu_map(cb->mapping->domain, iova, pa, IPA_SMEM_SIZE);
 	}
 
+	if (ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio, dev)) {
+		ipa_err("fail to init ipahal\n");
+		ipa_smmu_detach(cb);
+		return -EFAULT;
+	}
+
+	if (!config_valid()) {
+		ipa_err("invalid configuration\n");
+		ipahal_destroy();
+		ipa_smmu_detach(cb);
+		return -EFAULT;
+	}
+
 	/* Proceed to real initialization */
 	result = ipa3_pre_init();
 	if (result) {
 		ipa_err("ipa_init failed\n");
+		ipahal_destroy();
 		ipa_smmu_detach(cb);
 	}
 
