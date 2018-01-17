@@ -1931,6 +1931,12 @@ static bool config_valid(void)
 	u32 table_count;
 
 	required_size = ipa3_mem(V4_RT_NUM_INDEX) * width;
+	if (ipa3_mem(V4_RT_HASH_SIZE) < required_size) {
+		ipa_err("V4_RT_HASH_SIZE too small (%u < %u * %u)\n",
+			ipa3_mem(V4_RT_HASH_SIZE), ipa3_mem(V4_RT_NUM_INDEX),
+			width);
+		return false;
+	}
 	if (ipa3_mem(V4_RT_NHASH_SIZE) < required_size) {
 		ipa_err("V4_RT_NHASH_SIZE too small (%u < %u * %u)\n",
 			ipa3_mem(V4_RT_NHASH_SIZE), ipa3_mem(V4_RT_NUM_INDEX),
@@ -1939,6 +1945,12 @@ static bool config_valid(void)
 	}
 
 	required_size = ipa3_mem(V6_RT_NUM_INDEX) * width;
+	if (ipa3_mem(V6_RT_HASH_SIZE) < required_size) {
+		ipa_err("V6_RT_HASH_SIZE too small (%u < %u * %u)\n",
+			ipa3_mem(V6_RT_HASH_SIZE), ipa3_mem(V6_RT_NUM_INDEX),
+			width);
+		return false;
+	}
 	if (ipa3_mem(V6_RT_NHASH_SIZE) < required_size) {
 		ipa_err("V6_RT_NHASH_SIZE too small (%u < %u * %u)\n",
 			ipa3_mem(V6_RT_NHASH_SIZE), ipa3_mem(V6_RT_NUM_INDEX),
@@ -1950,6 +1962,11 @@ static bool config_valid(void)
 	lo_index = ipa3_mem(V4_MODEM_RT_INDEX_LO);
 	table_count = hi_index - lo_index + 1;
 	required_size = table_count * width;
+	if (ipa3_mem(V4_RT_HASH_SIZE) < required_size) {
+		ipa_err("V4_RT_HASH_SIZE too small for modem (%u < %u * %u)\n",
+			ipa3_mem(V4_RT_HASH_SIZE), table_count, width);
+		return false;
+	}
 	if (ipa3_mem(V4_RT_NHASH_SIZE) < required_size) {
 		ipa_err("V4_RT_NHASH_SIZE too small for modem (%u < %u * %u)\n",
 			ipa3_mem(V4_RT_NHASH_SIZE), table_count, width);
@@ -1960,6 +1977,11 @@ static bool config_valid(void)
 	lo_index = ipa3_mem(V6_MODEM_RT_INDEX_LO);
 	table_count = hi_index - lo_index + 1;
 	required_size = table_count * width;
+	if (ipa3_mem(V6_RT_HASH_SIZE) < required_size) {
+		ipa_err("V6_RT_HASH_SIZE too small for modem (%u < %u * %u)\n",
+			ipa3_mem(V6_RT_HASH_SIZE), table_count, width);
+		return false;
+	}
 	if (ipa3_mem(V6_RT_NHASH_SIZE) < required_size) {
 		ipa_err("V6_RT_NHASH_SIZE too small for modem (%u < %u * %u)\n",
 			ipa3_mem(V6_RT_NHASH_SIZE), table_count, width);
