@@ -2755,20 +2755,20 @@ static int ipa3_q6_clean_q6_rt_tbls(enum ipa_ip_type ip,
                 modem_rt_index_hi = ipa3_mem(V4_MODEM_RT_INDEX_HI);
                 if (rlt == IPA_RULE_HASHABLE) {
                         lcl_addr_mem_part = ipa3_mem(V4_RT_HASH_OFST);
-                        lcl_hdr_sz =  ipa3_mem(V4_FLT_HASH_SIZE);
+                        lcl_hdr_sz = ipa3_mem(V4_RT_HASH_SIZE);
                 } else {
                         lcl_addr_mem_part = ipa3_mem(V4_RT_NHASH_OFST);
-                        lcl_hdr_sz = ipa3_mem(V4_FLT_NHASH_SIZE);
+                        lcl_hdr_sz = ipa3_mem(V4_RT_NHASH_SIZE);
                 }
         } else {
                 modem_rt_index_lo = ipa3_mem(V6_MODEM_RT_INDEX_LO);
                 modem_rt_index_hi = ipa3_mem(V6_MODEM_RT_INDEX_HI);
                 if (rlt == IPA_RULE_HASHABLE) {
                         lcl_addr_mem_part = ipa3_mem(V6_RT_HASH_OFST);
-                        lcl_hdr_sz =  ipa3_mem(V6_FLT_HASH_SIZE);
+                        lcl_hdr_sz = ipa3_mem(V6_RT_HASH_SIZE);
                 } else {
                         lcl_addr_mem_part = ipa3_mem(V6_RT_NHASH_OFST);
-                        lcl_hdr_sz = ipa3_mem(V6_FLT_NHASH_SIZE);
+                        lcl_hdr_sz = ipa3_mem(V6_RT_NHASH_SIZE);
                 }
         }
 
