@@ -293,9 +293,8 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
  * Set up an empty table in system memory.  This will be used, for
  * example, to delete a route table safely.
  */
-static int ipahal_empty_fltrt_init(void)
+int ipahal_empty_fltrt_init(struct device *dev)
 {
-	struct device *dev = ipahal_ctx->ipa_pdev;
 	size_t size = ipahal_fltrt.tbl_width;
 	dma_addr_t phys_base;
 	void *base;
@@ -323,7 +322,7 @@ static int ipahal_empty_fltrt_init(void)
 	return 0;
 }
 
-static void ipahal_empty_fltrt_destroy(void)
+void ipahal_empty_fltrt_destroy(void)
 {
 	struct ipa_mem_buffer *mem = &ipahal_ctx->empty_fltrt_tbl;
 	struct device *dev = ipahal_ctx->ipa_pdev;
@@ -336,7 +335,7 @@ static void ipahal_empty_fltrt_destroy(void)
  * ipahal_fltrt_init() - Build the FLT/RT information table
  *  See ipahal_fltrt_objs[] comments
  */
-int ipahal_fltrt_init(void)
+void ipahal_fltrt_init(void)
 {
 	int i;
 
@@ -352,16 +351,6 @@ int ipahal_fltrt_init(void)
 			break;
 		}
 	}
-
-	return ipahal_empty_fltrt_init();
-}
-
-void ipahal_fltrt_destroy(void)
-{
-	ipa_debug("Entry\n");
-
-	if (ipahal_ctx)
-		ipahal_empty_fltrt_destroy();
 }
 
 /* Get the H/W table (flt/rt) header width */

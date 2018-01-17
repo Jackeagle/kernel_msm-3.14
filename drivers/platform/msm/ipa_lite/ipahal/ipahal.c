@@ -958,8 +958,9 @@ int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base,
 	/* Packet status parsing code requires no initialization */
 	ipahal_reg_init();
 	ipahal_imm_cmd_init();
+	ipahal_fltrt_init();
 
-	if (ipahal_fltrt_init()) {
+	if (ipahal_empty_fltrt_init(ipa_pdev)) {
 		kfree(ipahal_ctx);
 		ipahal_ctx = NULL;
 		return -EFAULT;
@@ -971,6 +972,7 @@ int ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base,
 void ipahal_destroy(void)
 {
 	ipa_debug("Entry\n");
+	ipahal_empty_fltrt_destroy();
 	kfree(ipahal_ctx);
 	ipahal_ctx = NULL;
 }
