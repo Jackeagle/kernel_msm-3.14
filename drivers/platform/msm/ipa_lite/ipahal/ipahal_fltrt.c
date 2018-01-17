@@ -486,7 +486,6 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 	u32 nhash_hdr_size, u64 ep_bitmap, struct ipa_mem_buffer *mem,
 	bool atomic)
 {
-	int flt_spc;
 	u64 flt_bitmap;
 	int i;
 	u64 addr;
@@ -496,29 +495,24 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 
 	flag = atomic ? GFP_ATOMIC : GFP_KERNEL;
 
-	flt_spc = hash_hdr_size;
-	/* bitmap word */
 	if (ep_bitmap)
-		flt_spc -= ipahal_fltrt.tbl_hdr_width;
-	if (flt_spc < tbls_num * ipahal_fltrt.tbl_hdr_width)  {
+		tbls_num++;
+
+	/* bitmap word */
+	if (hash_hdr_size < tbls_num * ipahal_fltrt.tbl_hdr_width)  {
 		ipa_err("space for hash flt hdr is too small\n");
 		WARN_ON(1);
 		return -EPERM;
 	}
 
-	flt_spc = nhash_hdr_size;
 	/* bitmap word */
-	if (ep_bitmap)
-		flt_spc -= ipahal_fltrt.tbl_hdr_width;
-	if (flt_spc < tbls_num * ipahal_fltrt.tbl_hdr_width) {
+	if (nhash_hdr_size < tbls_num * ipahal_fltrt.tbl_hdr_width) {
 		ipa_err("space for non-hash flt hdr is too small\n");
 		WARN_ON(1);
 		return -EPERM;
 	}
 
 	mem->size = tbls_num * ipahal_fltrt.tbl_hdr_width;
-	if (ep_bitmap)
-		mem->size += ipahal_fltrt.tbl_hdr_width;
 	mem->base = dma_alloc_coherent(ipahal_ctx->ipa_pdev, mem->size,
 		&mem->phys_base, flag);
 	if (!mem->base) {
@@ -536,7 +530,7 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 		ipahal_ctx->empty_fltrt_tbl.phys_base);
 
 	if (ep_bitmap) {
-		for (i = 1; i <= tbls_num; i++)
+		for (i = 1; i < tbls_num; i++)
 			ipahal_fltrt.write_val_to_hdr(addr,
 				mem->base + i * ipahal_fltrt.tbl_hdr_width);
 	} else {
