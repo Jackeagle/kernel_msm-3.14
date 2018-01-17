@@ -1986,6 +1986,31 @@ static bool config_valid(void)
 		return false;
 	}
 
+	/* Filter tables need an extra slot to hold an endpoint bitmap */
+	table_count = ipa3_ctx->ep_flt_num + 1;
+	required_size = table_count * width;
+	if (ipa3_mem(V4_FLT_HASH_SIZE) < required_size) {
+		ipa_err("V4_FLT_HASH_SIZE too small  (%u < %u * %u)\n",
+			ipa3_mem(V4_RT_HASH_SIZE), table_count, width);
+		return false;
+	}
+	if (ipa3_mem(V4_FLT_NHASH_SIZE) < required_size) {
+		ipa_err("V4_FLT_NHASH_SIZE too small (%u < %u * %u)\n",
+			ipa3_mem(V4_FLT_NHASH_SIZE), table_count, width);
+		return false;
+	}
+
+	if (ipa3_mem(V6_FLT_HASH_SIZE) < required_size) {
+		ipa_err("V6_FLT_HASH_SIZE too small  (%u < %u * %u)\n",
+			ipa3_mem(V6_FLT_HASH_SIZE), table_count, width);
+		return false;
+	}
+	if (ipa3_mem(V6_FLT_NHASH_SIZE) < required_size) {
+		ipa_err("V6_FLT_NHASH_SIZE too small (%u < %u * %u)\n",
+			ipa3_mem(V6_FLT_NHASH_SIZE), table_count, width);
+		return false;
+	}
+
 	return true;
 }
 
