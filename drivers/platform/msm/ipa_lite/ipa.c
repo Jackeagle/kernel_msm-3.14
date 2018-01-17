@@ -2370,17 +2370,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	if (result)
 		return result;
 
-	ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio);
-
-	if (!config_valid()) {
-		ipahal_destroy();
-		ipa_smmu_detach(cb);
-		ipa_err("invalid configuration\n");
-		return -EFAULT;
-	}
-
 	if (ipahal_dev_init(dev)) {
-		ipahal_destroy();
 		ipa_smmu_detach(cb);
 		ipa_err("failed to assign IPA HAL dev pointer\n");
 		return -EFAULT;
@@ -2393,7 +2383,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		if (add_map_size % (3 * sizeof(u32))) {
 			ipa_err("wrong additional mapping format\n");
 			ipahal_dev_destroy();
-			ipahal_destroy();
 			ipa_smmu_detach(cb);
 			return -EFAULT;
 		}
@@ -2423,7 +2412,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	if (result) {
 		ipa_err("ipa_init failed\n");
 		ipahal_dev_destroy();
-		ipahal_destroy();
 		ipa_smmu_detach(cb);
 	}
 
@@ -2568,21 +2556,30 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_clear_ctrl;
 	}
 
+	ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio);
+
 	result = ipa3_init_mem_partition(node);
 	if (result) {
 		ipa_err(":ipa3_init_mem_partition failed!\n");
 		result = -ENODEV;
-		goto err_iounmap;
+		goto err_hal_destroy;
 	}
 
 	ipa_init_ep_flt_bitmap();
 	if (!ipa3_ctx->ep_flt_num) {
 		ipa_err("no endpoints support filtering\n");
 		result = -ENODEV;
-		goto err_iounmap;
+		goto err_hal_destroy;
 	}
 	ipa_debug("EP with flt support bitmap 0x%x (%u pipes)\n",
 		ipa3_ctx->ep_flt_bitmap, ipa3_ctx->ep_flt_num);
+
+	/* Make sure we have a valid configuration before proceeding */
+	if (!config_valid()) {
+		ipa_err("invalid configuration\n");
+		result = -EFAULT;
+		goto err_hal_destroy;
+	}
 
 	/* get BUS handle */
 	ipa3_ctx->ipa_bus_hdl = msm_bus_scale_register_client(
@@ -2590,7 +2587,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	if (!ipa3_ctx->ipa_bus_hdl) {
 		ipa_err("fail to register with bus mgr!\n");
 		result = -ENODEV;
-		goto err_iounmap;
+		goto err_hal_destroy;
 	}
 
 	/* init active_clients_log */
@@ -2620,7 +2617,8 @@ err_clear_gsi_ctx:
 err_unregister_bus_handle:
 	msm_bus_scale_unregister_client(ipa3_ctx->ipa_bus_hdl);
 	ipa3_ctx->ipa_bus_hdl = 0;
-err_iounmap:
+err_hal_destroy:
+	ipahal_destroy();
 	iounmap(ipa3_ctx->mmio);
 	ipa3_ctx->mmio = NULL;
 err_clear_ctrl:
