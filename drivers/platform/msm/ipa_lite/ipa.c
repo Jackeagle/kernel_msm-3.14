@@ -1922,6 +1922,53 @@ static int ipa3_alloc_pkt_init(void)
 	return 0;
 }
 
+static bool config_valid(void)
+{
+	u32 width = ipahal_get_hw_tbl_hdr_width();
+	u32 required_size;
+	u32 hi_index;
+	u32 lo_index;
+	u32 table_count;
+
+	required_size = ipa3_mem(V4_RT_NUM_INDEX) * width;
+	if (ipa3_mem(V4_RT_NHASH_SIZE) < required_size) {
+		ipa_err("V4_RT_NHASH_SIZE too small (%u < %u * %u)\n",
+			ipa3_mem(V4_RT_NHASH_SIZE), ipa3_mem(V4_RT_NUM_INDEX),
+			width);
+		return false;
+	}
+
+	required_size = ipa3_mem(V6_RT_NUM_INDEX) * width;
+	if (ipa3_mem(V6_RT_NHASH_SIZE) < required_size) {
+		ipa_err("V6_RT_NHASH_SIZE too small (%u < %u * %u)\n",
+			ipa3_mem(V6_RT_NHASH_SIZE), ipa3_mem(V6_RT_NUM_INDEX),
+			width);
+		return false;
+	}
+
+	hi_index = ipa3_mem(V4_MODEM_RT_INDEX_HI);
+	lo_index = ipa3_mem(V4_MODEM_RT_INDEX_LO);
+	table_count = hi_index - lo_index + 1;
+	required_size = table_count * width;
+	if (ipa3_mem(V4_RT_NHASH_SIZE) < required_size) {
+		ipa_err("V4_RT_NHASH_SIZE too small for modem (%u < %u * %u)\n",
+			ipa3_mem(V4_RT_NHASH_SIZE), table_count, width);
+		return false;
+	}
+
+	hi_index = ipa3_mem(V6_MODEM_RT_INDEX_HI);
+	lo_index = ipa3_mem(V6_MODEM_RT_INDEX_LO);
+	table_count = hi_index - lo_index + 1;
+	required_size = table_count * width;
+	if (ipa3_mem(V6_RT_NHASH_SIZE) < required_size) {
+		ipa_err("V6_RT_NHASH_SIZE too small for modem (%u < %u * %u)\n",
+			ipa3_mem(V6_RT_NHASH_SIZE), table_count, width);
+		return false;
+	}
+
+	return true;
+}
+
 /**
 * ipa3_pre_init() - Initialize the IPA Driver.
 * This part contains all initialization which doesn't require IPA HW, such
@@ -1963,6 +2010,11 @@ static int ipa3_pre_init(void)
 
 	if (ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio, dev)) {
 		ipa_err("fail to init ipahal\n");
+		return -EFAULT;
+	}
+
+	if (!config_valid()) {
+		ipa_err("invalid configuration\n");
 		return -EFAULT;
 	}
 
