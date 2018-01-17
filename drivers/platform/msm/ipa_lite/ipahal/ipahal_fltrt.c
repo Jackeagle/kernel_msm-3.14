@@ -547,8 +547,7 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 		/* bitmap word */
 		if (ep_bitmap)
 			flt_spc -= ipahal_fltrt.tbl_hdr_width;
-		flt_spc /= ipahal_fltrt.tbl_hdr_width;
-		if (tbls_num > flt_spc)  {
+		if (flt_spc < tbls_num * ipahal_fltrt.tbl_hdr_width)  {
 			ipa_err("space for hash flt hdr is too small\n");
 			WARN_ON(1);
 			return -EPERM;
@@ -559,8 +558,7 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 	/* bitmap word */
 	if (ep_bitmap)
 		flt_spc -= ipahal_fltrt.tbl_hdr_width;
-	flt_spc /= ipahal_fltrt.tbl_hdr_width;
-	if (tbls_num > flt_spc)  {
+	if (flt_spc < tbls_num * ipahal_fltrt.tbl_hdr_width) {
 		ipa_err("space for non-hash flt hdr is too small\n");
 		WARN_ON(1);
 		return -EPERM;
