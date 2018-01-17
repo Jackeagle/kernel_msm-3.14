@@ -498,20 +498,6 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 	if (ep_bitmap)
 		tbls_num++;
 
-	/* bitmap word */
-	if (hash_hdr_size < tbls_num * width)  {
-		ipa_err("space for hash flt hdr is too small\n");
-		WARN_ON(1);
-		return -EPERM;
-	}
-
-	/* bitmap word */
-	if (nhash_hdr_size < tbls_num * width) {
-		ipa_err("space for non-hash flt hdr is too small\n");
-		WARN_ON(1);
-		return -EPERM;
-	}
-
 	mem->size = tbls_num * width;
 	mem->base = dma_alloc_coherent(ipahal_ctx->ipa_pdev, mem->size,
 		&mem->phys_base, flag);
