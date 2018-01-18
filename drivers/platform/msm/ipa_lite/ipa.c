@@ -247,7 +247,6 @@ static void ipa3_active_clients_log_destroy(void)
 static int ipa3_init_smem_region(int memory_region_size,
 				int memory_region_offset)
 {
-	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct ipahal_imm_cmd_dma_shared_mem cmd;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	struct ipa3_desc desc;
@@ -257,19 +256,12 @@ static int ipa3_init_smem_region(int memory_region_size,
 	if (memory_region_size == 0)
 		return 0;
 
-	memset(&desc, 0, sizeof(desc));
-	memset(&cmd, 0, sizeof(cmd));
-	memset(&mem, 0, sizeof(mem));
-
-	mem.size = memory_region_size;
-	mem.base = dma_alloc_coherent(dev, mem.size,
-		&mem.phys_base, GFP_KERNEL);
-	if (!mem.base) {
+	if (ipahal_dma_alloc(&mem, memory_region_size, GFP_KERNEL)) {
 		ipa_err("failed to alloc DMA buff of size %d\n", mem.size);
 		return -ENOMEM;
 	}
 
-	memset(mem.base, 0, mem.size);
+	memset(&cmd, 0, sizeof(cmd));
 	cmd.is_read = false;
 	cmd.skip_pipeline_clear = false;
 	cmd.pipeline_clear_options = IPAHAL_HPS_CLEAR;
@@ -282,6 +274,8 @@ static int ipa3_init_smem_region(int memory_region_size,
 		ipa_err("failed to construct dma_shared_mem imm cmd\n");
 		return -ENOMEM;
 	}
+
+	memset(&desc, 0, sizeof(desc));
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
 	rc = ipa3_send_cmd(1, &desc);
@@ -291,7 +285,7 @@ static int ipa3_init_smem_region(int memory_region_size,
 	}
 
 	ipahal_destroy_imm_cmd(cmd_pyld);
-	dma_free_coherent(dev, mem.size, mem.base, mem.phys_base);
+	ipahal_dma_free(&mem);
 
 	return rc;
 }
