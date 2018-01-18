@@ -264,12 +264,8 @@ struct ipa3_hdr_proc_ctx_offset_entry {
 };
 
 struct ipa_gsi_ep_mem_info {
-	u16 evt_ring_len;
-	u64 evt_ring_base_addr;
-	void *evt_ring_base_vaddr;
-	u16 chan_ring_len;
-	u64 chan_ring_base_addr;
-	void *chan_ring_base_vaddr;
+	struct ipa_mem_buffer evt_ring;
+	struct ipa_mem_buffer chan_ring;
 };
 
 struct ipa3_status_stats {

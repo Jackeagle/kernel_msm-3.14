@@ -1071,9 +1071,9 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 		return result;
 	}
 	dma_free_coherent(dev,
-		ep->gsi_mem_info.chan_ring_len,
-		ep->gsi_mem_info.chan_ring_base_vaddr,
-		ep->gsi_mem_info.chan_ring_base_addr);
+		ep->gsi_mem_info.chan_ring.size,
+		ep->gsi_mem_info.chan_ring.base,
+		ep->gsi_mem_info.chan_ring.phys_base);
 	result = gsi_dealloc_channel(ep->gsi_chan_hdl);
 	if (result) {
 		ipa_err("Failed to dealloc chan: %d.\n", result);
@@ -1084,7 +1084,7 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 	/* free event ring only when it is present */
 	if (ep->sys->use_comm_evt_ring) {
 		ipa3_ctx->gsi_evt_comm_ring_rem +=
-			ep->gsi_mem_info.chan_ring_len;
+			ep->gsi_mem_info.chan_ring.size;
 	} else if (ep->gsi_evt_ring_hdl != GSI_NO_EVT_ERINDEX) {
 		result = gsi_reset_evt_ring(ep->gsi_evt_ring_hdl);
 		if (result) {
@@ -1094,9 +1094,9 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 			return result;
 		}
 		dma_free_coherent(dev,
-			ep->gsi_mem_info.evt_ring_len,
-			ep->gsi_mem_info.evt_ring_base_vaddr,
-			ep->gsi_mem_info.evt_ring_base_addr);
+			ep->gsi_mem_info.evt_ring.size,
+			ep->gsi_mem_info.evt_ring.base,
+			ep->gsi_mem_info.evt_ring.phys_base);
 		result = gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl);
 		if (result) {
 			ipa_err("Failed to dealloc evt ring: %d.\n",
@@ -2813,10 +2813,10 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		gsi_evt_ring_props.ring_base_addr = evt_dma_addr;
 
 		/* copy mem info */
-		ep->gsi_mem_info.evt_ring_len = gsi_evt_ring_props.ring_len;
-		ep->gsi_mem_info.evt_ring_base_addr =
+		ep->gsi_mem_info.evt_ring.size = gsi_evt_ring_props.ring_len;
+		ep->gsi_mem_info.evt_ring.phys_base =
 			gsi_evt_ring_props.ring_base_addr;
-		ep->gsi_mem_info.evt_ring_base_vaddr =
+		ep->gsi_mem_info.evt_ring.base =
 			gsi_evt_ring_props.ring_base_vaddr;
 
 		gsi_evt_ring_props.int_modt = IPA_GSI_EVT_RING_INT_MODT;
@@ -2883,10 +2883,10 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	gsi_channel_props.ring_base_addr = dma_addr;
 
 	/* copy mem info */
-	ep->gsi_mem_info.chan_ring_len = gsi_channel_props.ring_len;
-	ep->gsi_mem_info.chan_ring_base_addr =
+	ep->gsi_mem_info.chan_ring.size = gsi_channel_props.ring_len;
+	ep->gsi_mem_info.chan_ring.phys_base =
 		gsi_channel_props.ring_base_addr;
-	ep->gsi_mem_info.chan_ring_base_vaddr =
+	ep->gsi_mem_info.chan_ring.base =
 		gsi_channel_props.ring_base_vaddr;
 
 	gsi_channel_props.use_db_eng = GSI_CHAN_DB_MODE;
