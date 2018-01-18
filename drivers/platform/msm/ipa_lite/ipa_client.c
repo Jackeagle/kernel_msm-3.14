@@ -123,7 +123,10 @@ static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 	chan_props.ring_base_vaddr =
 		dma_alloc_coherent(dev, chan_props.ring_len,
 		&chan_dma_addr, 0);
+	if (!chan_props.ring_base_vaddr)
+		return -ENOMEM;
 	chan_props.ring_base_addr = chan_dma_addr;
+
 	chan_dma->base = chan_props.ring_base_vaddr;
 	chan_dma->phys_base = chan_props.ring_base_addr;
 	chan_dma->size = chan_props.ring_len;
@@ -226,6 +229,11 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 
 	memset(&xfer_elem, 0, sizeof(struct gsi_xfer_elem));
 	buff = dma_alloc_coherent(dev, 1, &dma_addr, GFP_KERNEL);
+	if (!buff) {
+		ipa_err("Error allocating DMA\n");
+		result = -ENOMEM;
+		goto dma_alloc_fail;
+	}
 	xfer_elem.addr = dma_addr;
 	xfer_elem.len = 1;
 	xfer_elem.flags = GSI_XFER_FLAG_EOT;
@@ -293,8 +301,9 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 	return 0;
 
 queue_xfer_fail:
-	ipa3_stop_gsi_channel(clnt_hdl);
 	dma_free_coherent(dev, 1, buff, dma_addr);
+dma_alloc_fail:
+	ipa3_stop_gsi_channel(clnt_hdl);
 start_chan_fail:
 	if (pipe_suspended) {
 		ipa_debug("suspend the pipe again\n");
