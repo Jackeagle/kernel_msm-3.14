@@ -157,14 +157,12 @@ static int ipa3_restore_channel_properties(struct ipa3_ep_context *ep,
 static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 	struct ipa3_ep_context *ep)
 {
-	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
-	int result = -EFAULT;
+	int result;
 	int gsi_res;
 	struct gsi_chan_props orig_chan_props;
 	union gsi_channel_scratch orig_chan_scratch;
 	struct ipa_mem_buffer chan_dma;
-	void *buff;
-	dma_addr_t dma_addr;
+	struct ipa_mem_buffer dma_byte;
 	struct gsi_xfer_elem xfer_elem;
 	int i;
 	int aggr_active_bitmap = 0;
@@ -212,20 +210,19 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 		goto start_chan_fail;
 	}
 
-	memset(&xfer_elem, 0, sizeof(struct gsi_xfer_elem));
-	buff = dma_alloc_coherent(dev, 1, &dma_addr, GFP_KERNEL);
-	if (!buff) {
+	if (ipahal_dma_alloc(&dma_byte, 1, GFP_KERNEL)) {
 		ipa_err("Error allocating DMA\n");
 		result = -ENOMEM;
 		goto dma_alloc_fail;
 	}
-	xfer_elem.addr = dma_addr;
-	xfer_elem.len = 1;
+
+	memset(&xfer_elem, 0, sizeof(struct gsi_xfer_elem));
+	xfer_elem.addr = dma_byte.phys_base;
+	xfer_elem.len = 1;	/* = dma_byte.size; */
 	xfer_elem.flags = GSI_XFER_FLAG_EOT;
 	xfer_elem.type = GSI_XFER_ELEM_DATA;
 
-	gsi_res = gsi_queue_xfer(ep->gsi_chan_hdl, 1, &xfer_elem,
-		true);
+	gsi_res = gsi_queue_xfer(ep->gsi_chan_hdl, 1, &xfer_elem, true);
 	if (gsi_res) {
 		ipa_err("Error queueing xfer: %d\n", gsi_res);
 		result = -EFAULT;
@@ -246,7 +243,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 		BUG();
 	}
 
-	dma_free_coherent(dev, 1, buff, dma_addr);
+	ipahal_dma_free(&dma_byte);
 
 	result = ipa3_stop_gsi_channel(clnt_hdl);
 	if (result) {
@@ -285,7 +282,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 	return 0;
 
 queue_xfer_fail:
-	dma_free_coherent(dev, 1, buff, dma_addr);
+	ipahal_dma_free(&dma_byte);
 dma_alloc_fail:
 	ipa3_stop_gsi_channel(clnt_hdl);
 start_chan_fail:
