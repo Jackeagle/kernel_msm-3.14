@@ -686,30 +686,27 @@ int _ipa_init_sram_v3(void)
  */
 int _ipa_init_hdr_v3_0(void)
 {
-	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct ipa3_desc desc = { 0 };
 	struct ipa_mem_buffer mem;
 	struct ipahal_imm_cmd_hdr_init_local cmd = {0};
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	struct ipahal_imm_cmd_dma_shared_mem dma_cmd = { 0 };
+	u32 dma_size;
 
-	mem.size = ipa3_mem(MODEM_HDR_SIZE) + ipa3_mem(APPS_HDR_SIZE);
-	mem.base = dma_alloc_coherent(dev, mem.size, &mem.phys_base,
-					GFP_KERNEL);
-	if (!mem.base) {
-		ipa_err("fail to alloc DMA buff of size %d\n", mem.size);
+	dma_size = ipa3_mem(MODEM_HDR_SIZE) + ipa3_mem(APPS_HDR_SIZE);
+	if (ipahal_dma_alloc(&mem, dma_size, GFP_KERNEL)) {
+		ipa_err("fail to alloc DMA buff of size %u\n", dma_size);
 		return -ENOMEM;
 	}
-	memset(mem.base, 0, mem.size);
 
 	cmd.hdr_table_addr = mem.phys_base;
 	cmd.size_hdr_table = mem.size;
 	cmd.hdr_addr = ipa3_ctx->smem_restricted_bytes +
-		ipa3_mem(MODEM_HDR_OFST);
+					ipa3_mem(MODEM_HDR_OFST);
 	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_HDR_INIT_LOCAL, &cmd);
 	if (!cmd_pyld) {
 		ipa_err("fail to construct hdr_init_local imm cmd\n");
-		dma_free_coherent(dev, mem.size, mem.base, mem.phys_base);
+		ipahal_dma_free(&mem);
 		return -EFAULT;
 	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
@@ -718,23 +715,20 @@ int _ipa_init_hdr_v3_0(void)
 	if (ipa3_send_cmd(1, &desc)) {
 		ipa_err("fail to send immediate command\n");
 		ipahal_destroy_imm_cmd(cmd_pyld);
-		dma_free_coherent(dev, mem.size, mem.base, mem.phys_base);
+		ipahal_dma_free(&mem);
 		return -EFAULT;
 	}
 
 	ipahal_destroy_imm_cmd(cmd_pyld);
-	dma_free_coherent(dev, mem.size, mem.base, mem.phys_base);
+	ipahal_dma_free(&mem);
 
-	mem.size = ipa3_mem(MODEM_HDR_PROC_CTX_SIZE) +
-		ipa3_mem(APPS_HDR_PROC_CTX_SIZE);
-	mem.base = dma_alloc_coherent(dev, mem.size, &mem.phys_base,
-					GFP_KERNEL);
-	if (!mem.base) {
-		ipa_err("fail to alloc DMA buff of size %d\n", mem.size);
+	dma_size = ipa3_mem(MODEM_HDR_PROC_CTX_SIZE) +
+			ipa3_mem(APPS_HDR_PROC_CTX_SIZE);
+	if (ipahal_dma_alloc(&mem, dma_size, GFP_KERNEL)) {
+		ipa_err("fail to alloc DMA buff of size %u\n", dma_size);
 		return -ENOMEM;
 	}
 	memset(mem.base, 0, mem.size);
-	memset(&desc, 0, sizeof(desc));
 
 	dma_cmd.is_read = false;
 	dma_cmd.skip_pipeline_clear = false;
@@ -747,23 +741,25 @@ int _ipa_init_hdr_v3_0(void)
 						&dma_cmd);
 	if (!cmd_pyld) {
 		ipa_err("fail to construct dma_shared_mem imm\n");
-		dma_free_coherent(dev, mem.size, mem.base, mem.phys_base);
+		ipahal_dma_free(&mem);
 		return -EFAULT;
 	}
+
+	memset(&desc, 0, sizeof(desc));
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 	IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
 	if (ipa3_send_cmd(1, &desc)) {
 		ipa_err("fail to send immediate command\n");
 		ipahal_destroy_imm_cmd(cmd_pyld);
-		dma_free_coherent(dev, mem.size, mem.base, mem.phys_base);
+		ipahal_dma_free(&mem);
 		return -EFAULT;
 	}
 	ipahal_destroy_imm_cmd(cmd_pyld);
 
 	ipahal_write_reg(IPA_LOCAL_PKT_PROC_CNTXT_BASE, dma_cmd.local_addr);
 
-	dma_free_coherent(dev, mem.size, mem.base, mem.phys_base);
+	ipahal_dma_free(&mem);
 
 	return 0;
 }
