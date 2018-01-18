@@ -950,22 +950,27 @@ void ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base)
 }
 
 /*
- * Assign the IPA HAL's device pointer.
- *
- * We let the empty table entry init function do that assignment if
- * successful; that way we can use a non-null dev pointer to
- * determine whether the empty table entry needs to be destroyed.
+ * Assign the IPA HAL's device pointer.  Once it's assigned we can
+ * initialize the empty table entry.
  */
 int ipahal_dev_init(struct device *dev)
 {
+	int ret;
+
 	ipa_debug("IPA HAL ipa_pdev=%p\n", dev);
 
-	return ipahal_empty_fltrt_init(dev);
+	ipahal_ctx->ipa_pdev = dev;
+	ret = ipahal_empty_fltrt_init();
+	if (ret)
+		ipahal_ctx->ipa_pdev = NULL;
+
+	return ret;
 }
 
 void ipahal_dev_destroy(void)
 {
 	ipahal_empty_fltrt_destroy();
+	ipahal_ctx->ipa_pdev = NULL;
 }
 
 void ipahal_destroy(void)

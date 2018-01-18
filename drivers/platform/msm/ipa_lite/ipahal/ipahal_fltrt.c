@@ -294,8 +294,9 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
  * example, to delete a route table safely.  If successful, record
  * the table and also the dev pointer in the IPA HAL context.
  */
-int ipahal_empty_fltrt_init(struct device *dev)
+int ipahal_empty_fltrt_init(void)
 {
+	struct device *dev = ipahal_ctx->ipa_pdev;
 	size_t size = ipahal_fltrt.tbl_width;
 	dma_addr_t phys_base;
 	void *base;
@@ -314,7 +315,6 @@ int ipahal_empty_fltrt_init(struct device *dev)
 		return -EFAULT;
 	}
 
-	ipahal_ctx->ipa_pdev = dev;
 	ipahal_ctx->empty_fltrt_tbl.size = ipahal_fltrt.tbl_width;
 	ipahal_ctx->empty_fltrt_tbl.base = base;
 	ipahal_ctx->empty_fltrt_tbl.phys_base = phys_base;
@@ -335,8 +335,6 @@ void ipahal_empty_fltrt_destroy(void)
 	ipahal_ctx->empty_fltrt_tbl_addr = 0;
 	dma_free_coherent(dev, mem->size, mem->base, mem->phys_base);
 	memset(mem, 0, sizeof(*mem));
-
-	ipahal_ctx->ipa_pdev = NULL;
 }
 
 /*

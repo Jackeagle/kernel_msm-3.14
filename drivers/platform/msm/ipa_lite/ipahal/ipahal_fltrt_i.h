@@ -40,7 +40,7 @@ enum ipa_fltrt_equations {
 };
 
 void ipahal_fltrt_init(void);
-int ipahal_empty_fltrt_init(struct device *dev);
+int ipahal_empty_fltrt_init(void);
 void ipahal_empty_fltrt_destroy(void);
 
 #endif /* _IPAHAL_FLTRT_I_H_ */
