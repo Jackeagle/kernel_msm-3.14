@@ -122,7 +122,8 @@ static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 	chan_props.ring_len = 2 * GSI_CHAN_RE_SIZE_16B;
 	chan_props.ring_base_vaddr =
 		dma_alloc_coherent(dev, chan_props.ring_len,
-		&chan_dma_addr, 0);
+		&chan_dma_addr, GFP_KERNEL);
+
 	if (!chan_props.ring_base_vaddr)
 		return -ENOMEM;
 	chan_props.ring_base_addr = chan_dma_addr;
