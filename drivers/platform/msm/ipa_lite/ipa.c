@@ -1894,6 +1894,9 @@ static int ipa3_alloc_pkt_init(void)
 							&cmd);
 		if (!cmd_pyld) {
 			ipa_err("failed to construct IMM cmd\n");
+			memset(&ipa3_ctx->pkt_init_imm[0], 0,
+					i * sizeof(ipa3_ctx->pkt_init_imm[0]));
+			ipa3_ctx->pkt_init_imm_opcode = 0;
 			dma_free_coherent(dev, mem.size, mem.base,
 						mem.phys_base);
 			return -ENOMEM;
