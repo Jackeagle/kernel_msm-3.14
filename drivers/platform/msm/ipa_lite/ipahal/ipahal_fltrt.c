@@ -433,6 +433,13 @@ u32 ipahal_get_low_rule_id(void)
 	return ipahal_fltrt.low_rule_id;
 }
 
+void ipahal_free_empty_img(struct ipa_mem_buffer *mem)
+{
+	dma_free_coherent(ipahal_ctx->ipa_pdev, mem->size, mem->base,
+		mem->phys_base);
+	memset(mem, 0, sizeof(*mem));
+}
+
 /*
  * ipahal_rt_generate_empty_img() - Generate empty route image
  *  Creates routing header buffer for the given tables number.
@@ -519,11 +526,4 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
 		ipahal_fltrt.write_val_to_hdr(addr, mem->base + i++ * width);
 
 	return 0;
-}
-
-void ipahal_free_empty_img(struct ipa_mem_buffer *mem)
-{
-	dma_free_coherent(ipahal_ctx->ipa_pdev, mem->size, mem->base,
-		mem->phys_base);
-	memset(mem, 0, sizeof(*mem));
 }
