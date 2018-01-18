@@ -631,6 +631,16 @@ u32 ipahal_get_dps_img_mem_size(void);
  */
 u32 ipahal_get_hps_img_mem_size(void);
 
+/*
+ * ipahal_dma_alloc() - allocate a DMA buffer, describe it in mem struct
+ */
+int ipahal_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp);
+
+/*
+ * ipahal_dma_free() - free a previously-allocated DMA buffer described by mem
+ */
+void ipahal_dma_free(struct ipa_mem_buffer *mem);
+
 void ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base);
 int ipahal_dev_init(struct device *ipa_pdev);
 void ipahal_dev_destroy(void);
