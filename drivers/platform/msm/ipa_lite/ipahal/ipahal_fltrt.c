@@ -86,7 +86,7 @@ struct ipahal_fltrt_obj {
 	u32 rule_buf_size;
 	u8* (*write_val_to_hdr)(u64 val, u8 *hdr);
 	u64 (*create_flt_bitmap)(u64 ep_bitmap);
-	u64 (*create_tbl_addr)(bool is_sys, u64 addr);
+	u64 (*create_tbl_addr)(u64 addr);
 	void (*parse_tbl_addr)(u64 hwaddr, u64 *addr, bool *is_sys);
 	u8 eq_bitfield[IPA_EQ_MAX];
 };
@@ -99,32 +99,13 @@ static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap)
 	return (ep_bitmap << 1) & ~0x1;
 }
 
-static u64 ipa_fltrt_create_tbl_addr(bool is_sys, u64 addr)
+static u64 ipa_fltrt_create_tbl_addr(u64 addr)
 {
-	if (is_sys) {
-		if (addr % ipahal_fltrt.sysaddr_align) {
-			ipa_err(
-				"sys addr is not aligned accordingly addr=0x%pad\n",
-				&addr);
-			ipa_assert();
-			return 0;
-		}
-	} else {
-		if (addr % ipahal_fltrt.lcladdr_align) {
-			ipa_err("addr/ofst isn't lcl addr aligned %llu\n",
-				addr);
-			ipa_assert();
-			return 0;
-		}
-		/*
-		 * for local tables (at sram) offsets is used as tables
-		 * addresses. offset need to be in 8B units
-		 * (local address aligned) and left shifted to its place.
-		 * Local bit need to be enabled.
-		 */
-		addr /= ipahal_fltrt.lcladdr_align;
-		addr *= ipahal_fltrt.tbl_addr_mask + 1;
-		addr += 1;
+	if (addr % ipahal_fltrt.sysaddr_align) {
+		ipa_err("sys addr is not aligned accordingly addr=0x%pad\n",
+			&addr);
+		ipa_assert();
+		return 0;
 	}
 
 	return addr;
@@ -312,7 +293,7 @@ int ipahal_empty_fltrt_init(void)
 		return -EFAULT;
 	}
 	ipahal_ctx->empty_fltrt_tbl_addr =
-			ipahal_fltrt.create_tbl_addr(true, mem->phys_base);
+			ipahal_fltrt.create_tbl_addr(mem->phys_base);
 
 	ipa_debug("empty table allocated in system memory");
 
@@ -321,10 +302,8 @@ int ipahal_empty_fltrt_init(void)
 
 void ipahal_empty_fltrt_destroy(void)
 {
-	struct ipa_mem_buffer *mem = &ipahal_ctx->empty_fltrt_tbl;
-
 	ipahal_ctx->empty_fltrt_tbl_addr = 0;
-	ipahal_dma_free(mem);
+	ipahal_dma_free(&ipahal_ctx->empty_fltrt_tbl);
 }
 
 /*
