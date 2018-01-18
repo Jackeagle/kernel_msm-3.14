@@ -87,7 +87,7 @@ struct ipahal_fltrt_obj {
 	u8* (*write_val_to_hdr)(u64 val, u8 *hdr);
 	u64 (*create_flt_bitmap)(u64 ep_bitmap);
 	u64 (*create_tbl_addr)(u64 addr);
-	void (*parse_tbl_addr)(u64 hwaddr, u64 *addr, bool *is_sys);
+	void (*parse_tbl_addr)(u64 hwaddr, u64 *addr);
 	u8 eq_bitfield[IPA_EQ_MAX];
 };
 
@@ -111,23 +111,16 @@ static u64 ipa_fltrt_create_tbl_addr(u64 addr)
 	return addr;
 }
 
-static void ipa_fltrt_parse_tbl_addr(u64 hwaddr, u64 *addr, bool *is_sys)
+static void ipa_fltrt_parse_tbl_addr(u64 hwaddr, u64 *addr)
 {
 	ipa_debug_low("Parsing hwaddr 0x%llx\n", hwaddr);
 
-	*is_sys = !(hwaddr & 0x1);
-	hwaddr &= (~0ULL - 1);
+	BUG_ON(hwaddr & 0x1);
 	if (hwaddr % ipahal_fltrt.sysaddr_align) {
-		ipa_err(
-			"sys addr is not aligned accordingly addr=0x%pad\n",
+		ipa_err("sys addr is not aligned accordingly addr=0x%pad\n",
 			&hwaddr);
 		ipa_assert();
 		return;
-	}
-
-	if (!*is_sys) {
-		hwaddr /= ipahal_fltrt.tbl_addr_mask + 1;
-		hwaddr *= ipahal_fltrt.lcladdr_align;
 	}
 
 	*addr = hwaddr;
