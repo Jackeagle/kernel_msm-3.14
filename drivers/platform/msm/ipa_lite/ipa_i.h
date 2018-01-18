@@ -263,11 +263,6 @@ struct ipa3_hdr_proc_ctx_offset_entry {
 	u32 bin;
 };
 
-struct ipa_gsi_ep_mem_info {
-	struct ipa_mem_buffer evt_ring;
-	struct ipa_mem_buffer chan_ring;
-};
-
 struct ipa3_status_stats {
 	struct ipahal_pkt_status status[IPA_MAX_STATUS_STAT_NUM];
 	unsigned int curr;
@@ -283,8 +278,9 @@ struct ipa3_status_stats {
  * @valid: flag indicating id EP context is valid
  * @client: EP client type
  * @gsi_chan_hdl: EP's GSI channel handle
+ * @gsi_chan_ring_mem: EP's GSI channel ring memory info
  * @gsi_evt_ring_hdl: EP's GSI channel event ring handle
- * @gsi_mem_info: EP's GSI channel rings info
+ * @gsi_evt_ring_mem: EP's GSI event ring memory info
  * @chan_scratch: EP's GSI channel scratch info
  * @cfg: EP cionfiguration
  * @dst_pipe_index: destination pipe index
@@ -305,8 +301,9 @@ struct ipa3_ep_context {
 	int valid;
 	enum ipa_client_type client;
 	unsigned long gsi_chan_hdl;
+	struct ipa_mem_buffer gsi_chan_ring_mem;
 	unsigned long gsi_evt_ring_hdl;
-	struct ipa_gsi_ep_mem_info gsi_mem_info;
+	struct ipa_mem_buffer gsi_evt_ring_mem;
 	union __packed gsi_channel_scratch chan_scratch;
 	bool bytes_xfered_valid;
 	u16 bytes_xfered;
