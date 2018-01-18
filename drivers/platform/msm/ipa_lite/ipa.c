@@ -1912,6 +1912,17 @@ static int ipa3_alloc_pkt_init(void)
 	return 0;
 }
 
+static void ipa3_free_pkt_init(void)
+{
+	struct ipa_mem_buffer *mem = &ipa3_ctx->pkt_init_mem;
+	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
+
+	memset(&ipa3_ctx->pkt_init_imm, 0, sizeof(ipa3_ctx->pkt_init_imm));
+	ipa3_ctx->pkt_init_imm_opcode = 0;
+	dma_free_coherent(dev, mem->size, mem->base, mem->phys_base);
+	memset(mem, 0, sizeof(*mem));
+}
+
 static bool config_valid(void)
 {
 	u32 width = ipahal_get_hw_tbl_hdr_width();
@@ -2178,7 +2189,7 @@ static int ipa3_pre_init(void)
 	if (result) {
 		ipa_err(":cdev_add err=%d\n", -result);
 		result = -ENODEV;
-		goto fail_cdev_add;
+		goto err_free_pkt_init;
 	}
 	ipa_debug("ipa cdev added successful. major:%d minor:%d\n",
 			MAJOR(ipa3_ctx->dev_num),
@@ -2186,7 +2197,8 @@ static int ipa3_pre_init(void)
 
 	return 0;
 
-fail_cdev_add:
+err_free_pkt_init:
+	ipa3_free_pkt_init();
 fail_create_apps_resource:
 	device_destroy(ipa3_ctx->class, ipa3_ctx->dev_num);
 fail_device_create:
