@@ -296,31 +296,23 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
  */
 int ipahal_empty_fltrt_init(void)
 {
-	struct device *dev = ipahal_ctx->ipa_pdev;
-	size_t size = ipahal_fltrt.tbl_width;
-	dma_addr_t phys_base;
-	void *base;
+	struct ipa_mem_buffer *mem = &ipahal_ctx->empty_fltrt_tbl;
+	u32 size = ipahal_fltrt.tbl_width;
 
-	base = dma_alloc_coherent(dev, size, &phys_base, GFP_KERNEL);
-	if (!base) {
-		ipa_err("DMA buff alloc fail %zu bytes for empty tbl\n", size);
+	if (ipahal_dma_alloc(mem, size, GFP_KERNEL)) {
+		ipa_err("DMA buff alloc fail %u bytes for empty tbl\n", size);
 		return -ENOMEM;
 	}
 
-	if (phys_base % ipahal_fltrt.sysaddr_align) {
+	if (mem->phys_base % ipahal_fltrt.sysaddr_align) {
 		ipa_err("Empty table buf is not address aligned 0x%pad\n",
-			&phys_base);
-		dma_free_coherent(dev, size, base, phys_base);
+			&mem->phys_base);
+		ipahal_dma_free(mem);
 
 		return -EFAULT;
 	}
-
-	ipahal_ctx->empty_fltrt_tbl.size = ipahal_fltrt.tbl_width;
-	ipahal_ctx->empty_fltrt_tbl.base = base;
-	ipahal_ctx->empty_fltrt_tbl.phys_base = phys_base;
-
 	ipahal_ctx->empty_fltrt_tbl_addr =
-			ipahal_fltrt.create_tbl_addr(true, phys_base);
+			ipahal_fltrt.create_tbl_addr(true, mem->phys_base);
 
 	ipa_debug("empty table allocated in system memory");
 
@@ -330,11 +322,9 @@ int ipahal_empty_fltrt_init(void)
 void ipahal_empty_fltrt_destroy(void)
 {
 	struct ipa_mem_buffer *mem = &ipahal_ctx->empty_fltrt_tbl;
-	struct device *dev = ipahal_ctx->ipa_pdev;
 
 	ipahal_ctx->empty_fltrt_tbl_addr = 0;
-	dma_free_coherent(dev, mem->size, mem->base, mem->phys_base);
-	memset(mem, 0, sizeof(*mem));
+	ipahal_dma_free(mem);
 }
 
 /*
