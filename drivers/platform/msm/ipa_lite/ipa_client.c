@@ -107,11 +107,11 @@ static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 	struct gsi_chan_props *orig_chan_props,
 	struct ipa_mem_buffer *chan_dma)
 {
-	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct gsi_chan_props chan_props;
-	int gsi_res;
-	dma_addr_t chan_dma_addr;
-	int result;
+
+	/* Allocate the DMA space first; it can fail */
+	if (ipahal_dma_alloc(chan_dma, 2 * GSI_CHAN_RE_SIZE_16B, GFP_KERNEL))
+		return -ENOMEM;
 
 	/* Set up channel properties */
 	memset(&chan_props, 0, sizeof(struct gsi_chan_props));
@@ -119,18 +119,9 @@ static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 	chan_props.ch_id = orig_chan_props->ch_id;
 	chan_props.evt_ring_hdl = orig_chan_props->evt_ring_hdl;
 	chan_props.re_size = GSI_CHAN_RE_SIZE_16B;
-	chan_props.ring_len = 2 * GSI_CHAN_RE_SIZE_16B;
-	chan_props.ring_base_vaddr =
-		dma_alloc_coherent(dev, chan_props.ring_len,
-		&chan_dma_addr, GFP_KERNEL);
-
-	if (!chan_props.ring_base_vaddr)
-		return -ENOMEM;
-	chan_props.ring_base_addr = chan_dma_addr;
-
-	chan_dma->base = chan_props.ring_base_vaddr;
-	chan_dma->phys_base = chan_props.ring_base_addr;
-	chan_dma->size = chan_props.ring_len;
+	chan_props.ring_base_vaddr = chan_dma->base;
+	chan_props.ring_base_addr = chan_dma->phys_base;
+	chan_props.ring_len = chan_dma->size;
 	chan_props.use_db_eng = GSI_CHAN_DIRECT_MODE;
 	chan_props.max_prefetch = GSI_ONE_PREFETCH_SEG;
 	chan_props.low_weight = 1;
@@ -138,19 +129,13 @@ static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 	chan_props.err_cb = ipa_chan_err_cb;
 	chan_props.xfer_cb = ipa_xfer_cb;
 
-	gsi_res = gsi_set_channel_cfg(ep->gsi_chan_hdl, &chan_props, NULL);
-	if (gsi_res) {
+	if (gsi_set_channel_cfg(ep->gsi_chan_hdl, &chan_props, NULL)) {
 		ipa_err("Error setting channel properties\n");
-		result = -EFAULT;
-		goto set_chan_cfg_fail;
+		ipahal_dma_free(chan_dma);
+		return -EFAULT;
 	}
 
 	return 0;
-
-set_chan_cfg_fail:
-	dma_free_coherent(dev, chan_dma->size,
-		chan_dma->base, chan_dma->phys_base);
-	return result;
 }
 
 static int ipa3_restore_channel_properties(struct ipa3_ep_context *ep,
@@ -205,9 +190,8 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 		ipa_err("Error getting channel properties: %d\n", gsi_res);
 		return -EFAULT;
 	}
-	memset(&chan_dma, 0, sizeof(struct ipa_mem_buffer));
 	result = ipa3_reconfigure_channel_to_gpi(ep, &orig_chan_props,
-		&chan_dma);
+			&chan_dma);
 	if (result)
 		return -EFAULT;
 
@@ -296,8 +280,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 		&orig_chan_scratch);
 	if (result)
 		goto restore_props_fail;
-	dma_free_coherent(dev, chan_dma.size,
-		chan_dma.base, chan_dma.phys_base);
+	ipahal_dma_free(&chan_dma);
 
 	return 0;
 
@@ -315,8 +298,8 @@ start_chan_fail:
 	ipa3_restore_channel_properties(ep, &orig_chan_props,
 		&orig_chan_scratch);
 restore_props_fail:
-	dma_free_coherent(dev, chan_dma.size,
-		chan_dma.base, chan_dma.phys_base);
+	ipahal_dma_free(&chan_dma);
+
 	return result;
 }
 
