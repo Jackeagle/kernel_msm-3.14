@@ -433,6 +433,25 @@ u32 ipahal_get_low_rule_id(void)
 	return ipahal_fltrt.low_rule_id;
 }
 
+static int
+ipahal_alloc_empty_img(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp)
+{
+	dma_addr_t phys;
+	void *cpu_addr;
+
+	cpu_addr = dma_alloc_coherent(ipahal_ctx->ipa_pdev, size, &phys, gfp);
+	if (!cpu_addr) {
+		ipa_err("failed to alloc DMA buff of size %u\n", size);
+		return -ENOMEM;
+	}
+
+	mem->base = cpu_addr;
+	mem->phys_base = phys;
+	mem->size = size;
+
+	return 0;
+}
+
 void ipahal_free_empty_img(struct ipa_mem_buffer *mem)
 {
 	dma_free_coherent(ipahal_ctx->ipa_pdev, mem->size, mem->base,
@@ -460,13 +479,8 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
 
 	flag = atomic ? GFP_ATOMIC : GFP_KERNEL;
 
-	mem->size = tbls_num * width;
-	mem->base = dma_alloc_coherent(ipahal_ctx->ipa_pdev, mem->size,
-		&mem->phys_base, flag);
-	if (!mem->base) {
-		ipa_err("fail to alloc DMA buff of size %d\n", mem->size);
+	if (ipahal_alloc_empty_img(mem, tbls_num * width, flag))
 		return -ENOMEM;
-	}
 
 	addr = ipahal_fltrt.create_tbl_addr(true,
 		ipahal_ctx->empty_fltrt_tbl.phys_base);
@@ -503,13 +517,8 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
 	if (ep_bitmap)
 		tbls_num++;
 
-	mem->size = tbls_num * width;
-	mem->base = dma_alloc_coherent(ipahal_ctx->ipa_pdev, mem->size,
-		&mem->phys_base, flag);
-	if (!mem->base) {
-		ipa_err("fail to alloc DMA buff of size %d\n", mem->size);
+	if (ipahal_alloc_empty_img(mem, tbls_num * width, flag))
 		return -ENOMEM;
-	}
 
 	if (ep_bitmap) {
 		u64 flt_bitmap = ipahal_fltrt.create_flt_bitmap(ep_bitmap);
