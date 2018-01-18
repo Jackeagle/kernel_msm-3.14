@@ -824,7 +824,7 @@ int _ipa_init_rt4_v3(void)
         ipahal_destroy_imm_cmd(cmd_pyld);
 
 free_mem:
-        ipahal_free_dma_mem(&mem);
+        ipahal_free_empty_img(&mem);
         return rc;
 }
 
@@ -878,7 +878,7 @@ int _ipa_init_rt6_v3(void)
         ipahal_destroy_imm_cmd(cmd_pyld);
 
 free_mem:
-        ipahal_free_dma_mem(&mem);
+        ipahal_free_empty_img(&mem);
         return rc;
 }
 
@@ -932,7 +932,7 @@ int _ipa_init_flt4_v3(void)
         ipahal_destroy_imm_cmd(cmd_pyld);
 
 free_mem:
-        ipahal_free_dma_mem(&mem);
+        ipahal_free_empty_img(&mem);
         return rc;
 }
 
@@ -987,7 +987,7 @@ int _ipa_init_flt6_v3(void)
         ipahal_destroy_imm_cmd(cmd_pyld);
 
 free_mem:
-        ipahal_free_dma_mem(&mem);
+        ipahal_free_empty_img(&mem);
         return rc;
 }
 
@@ -2810,7 +2810,7 @@ static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
         }
 
 free_empty_img:
-        ipahal_free_dma_mem(&mem);
+        ipahal_free_empty_img(&mem);
 free_cmd_pyld:
         for (index = 0; index < num_cmds; index++)
                 ipahal_destroy_imm_cmd(cmd_pyld[index]);
@@ -2895,7 +2895,7 @@ static int ipa3_q6_clean_q6_rt_tbls(enum ipa_ip_type ip,
 free_desc:
         kfree(desc);
 free_empty_img:
-        ipahal_free_dma_mem(&mem);
+        ipahal_free_empty_img(&mem);
         return retval;
 }
 

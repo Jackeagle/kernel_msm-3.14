@@ -973,7 +973,7 @@ void ipahal_destroy(void)
 	ipa_debug("Entry\n");
 }
 
-void ipahal_free_dma_mem(struct ipa_mem_buffer *mem)
+void ipahal_free_empty_img(struct ipa_mem_buffer *mem)
 {
 	if (likely(mem)) {
 		dma_free_coherent(ipahal_ctx->ipa_pdev, mem->size, mem->base,
