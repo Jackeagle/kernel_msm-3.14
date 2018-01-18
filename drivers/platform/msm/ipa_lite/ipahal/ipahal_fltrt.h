@@ -159,7 +159,7 @@ u32 ipahal_get_low_rule_id(void);
  * @atomic: should DMA allocation be executed with atomic flag
  */
 int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
-		bool atomic);
+		gfp_t gfp);
 
 /*
  * ipahal_flt_generate_empty_img() - Generate empty filter image
@@ -172,7 +172,7 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
  * @atomic: should DMA allocation be executed with atomic flag
  */
 int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
-		struct ipa_mem_buffer *mem, bool atomic);
+		struct ipa_mem_buffer *mem, gfp_t gfp);
 
 /*
  * ipahal_free_empty_img() - free empty filter or route image

@@ -465,21 +465,18 @@ void ipahal_free_empty_img(struct ipa_mem_buffer *mem)
  *  For each table, make it point to the empty table on DDR.
  * @tbls_num: Number of tables. For each will have an entry in the header
  * @mem: mem object that points to DMA mem representing the hdr structure
- * @atomic: should DMA allocation be executed with atomic flag
+ * @gfp: GFP flag to supply with DMA allocation request
  */
 int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
-		bool atomic)
+		gfp_t gfp)
 {
 	u32 width = ipahal_fltrt.tbl_hdr_width;
 	int i = 0;
 	u64 addr;
-	int flag;
 
 	ipa_debug("Entry\n");
 
-	flag = atomic ? GFP_ATOMIC : GFP_KERNEL;
-
-	if (ipahal_alloc_empty_img(mem, tbls_num * width, flag))
+	if (ipahal_alloc_empty_img(mem, tbls_num * width, gfp))
 		return -ENOMEM;
 
 	addr = ipahal_fltrt.create_tbl_addr(true,
@@ -500,24 +497,21 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
  *  should be: bit0->EP0, bit1->EP1
  *  If bitmap is zero -> create tbl without bitmap entry
  * @mem: mem object that points to DMA mem representing the hdr structure
- * @atomic: should DMA allocation be executed with atomic flag
+ * @gfp: GFP flag to supply with DMA allocation request
  */
 int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
-		struct ipa_mem_buffer *mem, bool atomic)
+		struct ipa_mem_buffer *mem, gfp_t gfp)
 {
 	u32 width = ipahal_fltrt.tbl_hdr_width;
 	int i = 0;
 	u64 addr;
-	int flag;
 
 	ipa_debug("Entry - ep_bitmap 0x%llx\n", ep_bitmap);
-
-	flag = atomic ? GFP_ATOMIC : GFP_KERNEL;
 
 	if (ep_bitmap)
 		tbls_num++;
 
-	if (ipahal_alloc_empty_img(mem, tbls_num * width, flag))
+	if (ipahal_alloc_empty_img(mem, tbls_num * width, gfp))
 		return -ENOMEM;
 
 	if (ep_bitmap) {

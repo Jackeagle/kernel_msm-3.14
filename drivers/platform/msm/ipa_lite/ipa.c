@@ -788,7 +788,7 @@ int _ipa_init_rt4_v3(void)
         int rc = 0;
 
         rc = ipahal_rt_generate_empty_img(ipa3_mem(V4_RT_NUM_INDEX), &mem,
-						false);
+						GFP_KERNEL);
         if (rc) {
                 ipa_err("fail generate empty v4 rt img\n");
                 return rc;
@@ -842,7 +842,7 @@ int _ipa_init_rt6_v3(void)
         int rc = 0;
 
         rc = ipahal_rt_generate_empty_img(ipa3_mem(V6_RT_NUM_INDEX), &mem,
-						false);
+						GFP_KERNEL);
         if (rc) {
                 ipa_err("fail generate empty v6 rt img\n");
                 return rc;
@@ -896,7 +896,8 @@ int _ipa_init_flt4_v3(void)
         int rc;
 
         rc = ipahal_flt_generate_empty_img(ipa3_ctx->ep_flt_num,
-					ipa3_ctx->ep_flt_bitmap, &mem, false);
+					ipa3_ctx->ep_flt_bitmap, &mem,
+					GFP_KERNEL);
         if (rc) {
                 ipa_err("fail generate empty v4 flt img\n");
                 return rc;
@@ -950,7 +951,8 @@ int _ipa_init_flt6_v3(void)
         int rc;
 
         rc = ipahal_flt_generate_empty_img(ipa3_ctx->ep_flt_num,
-					ipa3_ctx->ep_flt_bitmap, &mem, false);
+					ipa3_ctx->ep_flt_bitmap, &mem,
+					GFP_KERNEL);
         if (rc) {
                 ipa_err("fail generate empty v6 flt img\n");
                 return rc;
@@ -2759,7 +2761,7 @@ static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
                         lcl_addr_mem_part = ipa3_mem(V6_FLT_NHASH_OFST);
         }
 
-        retval = ipahal_flt_generate_empty_img(1, 0, &mem, true);
+        retval = ipahal_flt_generate_empty_img(1, 0, &mem, GFP_ATOMIC);
         if (retval) {
                 ipa_err("failed to generate flt single tbl empty img\n");
                 goto free_cmd_pyld;
@@ -2856,7 +2858,7 @@ static int ipa3_q6_clean_q6_rt_tbls(enum ipa_ip_type ip,
         }
 
         retval = ipahal_rt_generate_empty_img(
-                modem_rt_index_hi - modem_rt_index_lo + 1, &mem, true);
+                modem_rt_index_hi - modem_rt_index_lo + 1, &mem, GFP_ATOMIC);
         if (retval) {
                 ipa_err("fail generate empty rt img\n");
                 return -ENOMEM;
