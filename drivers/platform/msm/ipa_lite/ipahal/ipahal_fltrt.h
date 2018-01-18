@@ -166,14 +166,11 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
  *  Creates filter header buffer for the given tables number.
  *  For each table, make it point to the empty table on DDR.
  * @tbls_num: Number of tables. For each will have an entry in the header
- * @hash_hdr_size: SRAM buf size of the hash tbls hdr. Used for space check
- * @nhash_hdr_size: SRAM buf size of the nhash tbls hdr. Used for space check
  * @ep_bitmap: Bitmap representing the EP that has flt tables. The format
  *  should be: bit0->EP0, bit1->EP1
  * @mem: mem object that points to DMA mem representing the hdr structure
  * @atomic: should DMA allocation be executed with atomic flag
  */
-int ipahal_flt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
-	u32 nhash_hdr_size, u64 ep_bitmap, struct ipa_mem_buffer *mem,
-	bool atomic);
+int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
+		struct ipa_mem_buffer *mem, bool atomic);
 #endif /* _IPAHAL_FLTRT_H_ */
