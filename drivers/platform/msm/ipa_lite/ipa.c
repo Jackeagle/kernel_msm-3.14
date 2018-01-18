@@ -787,9 +787,8 @@ int _ipa_init_rt4_v3(void)
         struct ipahal_imm_cmd_pyld *cmd_pyld;
         int rc = 0;
 
-        rc = ipahal_rt_generate_empty_img(ipa3_mem(V4_RT_NUM_INDEX),
-                ipa3_mem(V4_RT_HASH_SIZE), ipa3_mem(V4_RT_NHASH_SIZE),
-                &mem, false);
+        rc = ipahal_rt_generate_empty_img(ipa3_mem(V4_RT_NUM_INDEX), &mem,
+						false);
         if (rc) {
                 ipa_err("fail generate empty v4 rt img\n");
                 return rc;
@@ -842,9 +841,8 @@ int _ipa_init_rt6_v3(void)
         struct ipahal_imm_cmd_pyld *cmd_pyld;
         int rc = 0;
 
-        rc = ipahal_rt_generate_empty_img(ipa3_mem(V6_RT_NUM_INDEX),
-                ipa3_mem(V6_RT_HASH_SIZE), ipa3_mem(V6_RT_NHASH_SIZE),
-                &mem, false);
+        rc = ipahal_rt_generate_empty_img(ipa3_mem(V6_RT_NUM_INDEX), &mem,
+						false);
         if (rc) {
                 ipa_err("fail generate empty v6 rt img\n");
                 return rc;
@@ -2812,8 +2810,6 @@ static int ipa3_q6_clean_q6_rt_tbls(enum ipa_ip_type ip,
         u32 modem_rt_index_lo;
         u32 modem_rt_index_hi;
         u32 lcl_addr_mem_part;
-        u32 lcl_hdr_sz;
-        u32 lcl_hdr_nsz;
         struct ipa_mem_buffer mem;
 
         ipa_debug("Entry\n");
@@ -2830,8 +2826,6 @@ static int ipa3_q6_clean_q6_rt_tbls(enum ipa_ip_type ip,
                         lcl_addr_mem_part = ipa3_mem(V4_RT_HASH_OFST);
                 else
                         lcl_addr_mem_part = ipa3_mem(V4_RT_NHASH_OFST);
-		lcl_hdr_sz = ipa3_mem(V4_RT_HASH_SIZE);
-		lcl_hdr_nsz = ipa3_mem(V4_RT_NHASH_SIZE);
         } else {
                 modem_rt_index_lo = ipa3_mem(V6_MODEM_RT_INDEX_LO);
                 modem_rt_index_hi = ipa3_mem(V6_MODEM_RT_INDEX_HI);
@@ -2839,13 +2833,10 @@ static int ipa3_q6_clean_q6_rt_tbls(enum ipa_ip_type ip,
                         lcl_addr_mem_part = ipa3_mem(V6_RT_HASH_OFST);
                 else
                         lcl_addr_mem_part = ipa3_mem(V6_RT_NHASH_OFST);
-		lcl_hdr_sz = ipa3_mem(V6_RT_HASH_SIZE);
-		lcl_hdr_nsz = ipa3_mem(V6_RT_NHASH_SIZE);
         }
 
         retval = ipahal_rt_generate_empty_img(
-                modem_rt_index_hi - modem_rt_index_lo + 1,
-                lcl_hdr_sz, lcl_hdr_nsz, &mem, true);
+                modem_rt_index_hi - modem_rt_index_lo + 1, &mem, true);
         if (retval) {
                 ipa_err("fail generate empty rt img\n");
                 return -ENOMEM;

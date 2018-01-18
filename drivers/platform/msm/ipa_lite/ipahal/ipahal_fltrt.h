@@ -155,13 +155,11 @@ u32 ipahal_get_low_rule_id(void);
  *  Creates routing header buffer for the given tables number.
  * For each table, make it point to the empty table on DDR.
  * @tbls_num: Number of tables. For each will have an entry in the header
- * @hash_hdr_size: SRAM buf size of the hash tbls hdr. Used for space check
- * @nhash_hdr_size: SRAM buf size of the nhash tbls hdr. Used for space check
  * @mem: mem object that points to DMA mem representing the hdr structure
  * @atomic: should DMA allocation be executed with atomic flag
  */
-int ipahal_rt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
-	u32 nhash_hdr_size, struct ipa_mem_buffer *mem, bool atomic);
+int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
+		bool atomic);
 
 /*
  * ipahal_flt_generate_empty_img() - Generate empty filter image
