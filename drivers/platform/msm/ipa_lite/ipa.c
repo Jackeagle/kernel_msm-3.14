@@ -1864,10 +1864,10 @@ static ssize_t ipa3_write(struct file *file, const char __user *buf,
 
 static int ipa3_alloc_pkt_init(void)
 {
-	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct ipa_mem_buffer *mem = &ipa3_ctx->pkt_init_mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	struct ipahal_imm_cmd_ip_packet_init cmd = {0};
+	u32 dma_size;
 	int i;
 
 	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_PACKET_INIT, &cmd);
@@ -1876,18 +1876,14 @@ static int ipa3_alloc_pkt_init(void)
 		return -ENOMEM;
 	}
 	ipa3_ctx->pkt_init_imm_opcode = cmd_pyld->opcode;
-
-	mem->size = cmd_pyld->len * ipa3_ctx->ipa_num_pipes;
-	mem->base = dma_alloc_coherent(dev, mem->size, &mem->phys_base,
-					GFP_KERNEL);
-	if (!mem->base) {
-		ipa_err("failed to alloc DMA buff of size %d\n", mem->size);
-		ipahal_destroy_imm_cmd(cmd_pyld);
-		return -ENOMEM;
-	}
+	dma_size = cmd_pyld->len * ipa3_ctx->ipa_num_pipes;
 	ipahal_destroy_imm_cmd(cmd_pyld);
 
-	memset(mem->base, 0, mem->size);
+	if (ipahal_dma_alloc(mem, dma_size, GFP_KERNEL)) {
+		ipa_err("failed to alloc DMA buff of size %d\n", mem->size);
+		return -ENOMEM;
+	}
+
 	for (i = 0; i < ipa3_ctx->ipa_num_pipes; i++) {
 		cmd.destination_pipe_index = i;
 		cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_PACKET_INIT,
@@ -1897,9 +1893,7 @@ static int ipa3_alloc_pkt_init(void)
 			memset(&ipa3_ctx->pkt_init_imm[0], 0,
 					i * sizeof(ipa3_ctx->pkt_init_imm[0]));
 			ipa3_ctx->pkt_init_imm_opcode = 0;
-			dma_free_coherent(dev, mem->size, mem->base,
-						mem->phys_base);
-			memset(mem, 0, sizeof(*mem));
+			ipahal_dma_free(mem);
 			return -ENOMEM;
 		}
 		memcpy(mem->base + i * cmd_pyld->len,
@@ -1914,13 +1908,9 @@ static int ipa3_alloc_pkt_init(void)
 
 static void ipa3_free_pkt_init(void)
 {
-	struct ipa_mem_buffer *mem = &ipa3_ctx->pkt_init_mem;
-	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
-
 	memset(&ipa3_ctx->pkt_init_imm, 0, sizeof(ipa3_ctx->pkt_init_imm));
 	ipa3_ctx->pkt_init_imm_opcode = 0;
-	dma_free_coherent(dev, mem->size, mem->base, mem->phys_base);
-	memset(mem, 0, sizeof(*mem));
+	ipahal_dma_free(&ipa3_ctx->pkt_init_mem);
 }
 
 static bool config_valid(void)
