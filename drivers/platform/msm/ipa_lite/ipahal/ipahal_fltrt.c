@@ -520,3 +520,14 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
 
 	return 0;
 }
+
+void ipahal_free_empty_img(struct ipa_mem_buffer *mem)
+{
+	if (likely(mem)) {
+		dma_free_coherent(ipahal_ctx->ipa_pdev, mem->size, mem->base,
+			mem->phys_base);
+		mem->size = 0;
+		mem->base = NULL;
+		mem->phys_base = 0;
+	}
+}

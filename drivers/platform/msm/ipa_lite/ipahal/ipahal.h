@@ -635,6 +635,5 @@ void ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base);
 int ipahal_dev_init(struct device *ipa_pdev);
 void ipahal_dev_destroy(void);
 void ipahal_destroy(void);
-void ipahal_free_empty_img(struct ipa_mem_buffer *mem);
 
 #endif /* _IPAHAL_H_ */

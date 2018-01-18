@@ -173,4 +173,10 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
  */
 int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
 		struct ipa_mem_buffer *mem, bool atomic);
+
+/*
+ * ipahal_free_empty_img() - free empty filter or route image
+ */
+void ipahal_free_empty_img(struct ipa_mem_buffer *mem);
+
 #endif /* _IPAHAL_FLTRT_H_ */
