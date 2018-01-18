@@ -444,7 +444,8 @@ u32 ipahal_get_low_rule_id(void)
 int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
 		bool atomic)
 {
-	int i;
+	u32 width = ipahal_fltrt.tbl_hdr_width;
+	int i = 0;
 	u64 addr;
 	int flag;
 
@@ -452,7 +453,7 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
 
 	flag = atomic ? GFP_ATOMIC : GFP_KERNEL;
 
-	mem->size = tbls_num * ipahal_fltrt.tbl_hdr_width;
+	mem->size = tbls_num * width;
 	mem->base = dma_alloc_coherent(ipahal_ctx->ipa_pdev, mem->size,
 		&mem->phys_base, flag);
 	if (!mem->base) {
@@ -462,9 +463,9 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
 
 	addr = ipahal_fltrt.create_tbl_addr(true,
 		ipahal_ctx->empty_fltrt_tbl.phys_base);
-	for (i = 0; i < tbls_num; i++)
-		ipahal_fltrt.write_val_to_hdr(addr,
-			mem->base + i * ipahal_fltrt.tbl_hdr_width);
+
+	while (i < tbls_num)
+		ipahal_fltrt.write_val_to_hdr(addr, mem->base + i++ * width);
 
 	return 0;
 }
