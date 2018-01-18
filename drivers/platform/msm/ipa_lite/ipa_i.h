@@ -1213,6 +1213,7 @@ struct ipa3_context {
 	u32 ipa_num_pipes;
 	dma_addr_t pkt_init_imm[IPA3_MAX_NUM_PIPES];
 	u32 pkt_init_imm_opcode;
+	struct ipa_mem_buffer pkt_init_mem;
 
 	struct ipa3_uc_ctx uc_ctx;
 
