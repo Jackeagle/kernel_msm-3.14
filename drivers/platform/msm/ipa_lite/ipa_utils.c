@@ -804,18 +804,18 @@ void ipa_init_ep_flt_bitmap(void)
 {
 	enum ipa_client_type cl;
 	u8 hw_type_idx = IPA_3_5_1;
-	u32 bitmap;
-	u32 pipe_num;
-
-	bitmap = 0;
+	u32 bitmap = 0;
 
 	BUG_ON(ipa3_ctx->ep_flt_bitmap);
 
 	for (cl = 0; cl < IPA_CLIENT_MAX ; cl++) {
-		if (ipa3_ep_mapping[hw_type_idx][cl].support_flt) {
-			pipe_num = ipa3_ep_mapping[hw_type_idx][cl].
-				ipa_gsi_ep_info.ipa_ep_num;
-			bitmap |= (1U << pipe_num);
+		const struct ipa_ep_configuration *ep_config;
+
+		ep_config = &ipa3_ep_mapping[hw_type_idx][cl];
+		if (ep_config->support_flt) {
+			u32 pipe_num = ep_config->ipa_gsi_ep_info.ipa_ep_num;
+
+			bitmap |= BIT(pipe_num);
 			if (bitmap != ipa3_ctx->ep_flt_bitmap) {
 				ipa3_ctx->ep_flt_bitmap = bitmap;
 				ipa3_ctx->ep_flt_num++;
