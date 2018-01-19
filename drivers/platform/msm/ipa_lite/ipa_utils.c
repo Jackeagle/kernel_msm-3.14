@@ -874,6 +874,46 @@ static const char *ipa3_get_mode_type_str(enum ipa_mode_type mode)
 }
 
 /**
+ * ipa3_cfg_ep_cfg() - IPA end-point cfg configuration
+ * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
+ * @ipa_ep_cfg:	[in] IPA end-point configuration params
+ *
+ * Returns:	0 on success, negative on failure
+ *
+ * Note:	Should not be called from atomic context
+ */
+static int ipa3_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
+{
+	u8 qmb_master_sel;
+
+	if (!client_handle_valid(clnt_hdl))
+		return -EINVAL;
+
+	/* copy over EP cfg */
+	ipa3_ctx->ep[clnt_hdl].cfg.cfg = *cfg;
+
+	/* Override QMB master selection */
+	qmb_master_sel = ipa3_get_qmb_master_sel(ipa3_ctx->ep[clnt_hdl].client);
+	ipa3_ctx->ep[clnt_hdl].cfg.cfg.gen_qmb_master_sel = qmb_master_sel;
+	ipa_debug(
+	       "pipe=%d, frag_ofld_en=%d cs_ofld_en=%d mdata_hdr_ofst=%d gen_qmb_master_sel=%d\n",
+			clnt_hdl,
+			ipa3_ctx->ep[clnt_hdl].cfg.cfg.frag_offload_en,
+			ipa3_ctx->ep[clnt_hdl].cfg.cfg.cs_offload_en,
+			ipa3_ctx->ep[clnt_hdl].cfg.cfg.cs_metadata_hdr_offset,
+			ipa3_ctx->ep[clnt_hdl].cfg.cfg.gen_qmb_master_sel);
+
+	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CFG_n, clnt_hdl,
+				  &ipa3_ctx->ep[clnt_hdl].cfg.cfg);
+
+	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+
+	return 0;
+}
+
+/**
  * ipa3_cfg_ep_mode() - IPA end-point mode configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ipa_ep_cfg:	[in] IPA end-point configuration params
@@ -1134,46 +1174,6 @@ int ipa3_cfg_ep_status(u32 clnt_hdl,
 	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
 
 	ipahal_write_reg_n_fields(IPA_ENDP_STATUS_n, clnt_hdl, ep_status);
-
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
-
-	return 0;
-}
-
-/**
- * ipa3_cfg_ep_cfg() - IPA end-point cfg configuration
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg:	[in] IPA end-point configuration params
- *
- * Returns:	0 on success, negative on failure
- *
- * Note:	Should not be called from atomic context
- */
-int ipa3_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
-{
-	u8 qmb_master_sel;
-
-	if (!client_handle_valid(clnt_hdl))
-		return -EINVAL;
-
-	/* copy over EP cfg */
-	ipa3_ctx->ep[clnt_hdl].cfg.cfg = *cfg;
-
-	/* Override QMB master selection */
-	qmb_master_sel = ipa3_get_qmb_master_sel(ipa3_ctx->ep[clnt_hdl].client);
-	ipa3_ctx->ep[clnt_hdl].cfg.cfg.gen_qmb_master_sel = qmb_master_sel;
-	ipa_debug(
-	       "pipe=%d, frag_ofld_en=%d cs_ofld_en=%d mdata_hdr_ofst=%d gen_qmb_master_sel=%d\n",
-			clnt_hdl,
-			ipa3_ctx->ep[clnt_hdl].cfg.cfg.frag_offload_en,
-			ipa3_ctx->ep[clnt_hdl].cfg.cfg.cs_offload_en,
-			ipa3_ctx->ep[clnt_hdl].cfg.cfg.cs_metadata_hdr_offset,
-			ipa3_ctx->ep[clnt_hdl].cfg.cfg.gen_qmb_master_sel);
-
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
-
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CFG_n, clnt_hdl,
-				  &ipa3_ctx->ep[clnt_hdl].cfg.cfg);
 
 	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
 
