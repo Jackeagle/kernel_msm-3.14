@@ -865,7 +865,7 @@ static bool _client_handle_valid(const char *func, u32 clnt_hdl)
  *
  * Note:	Should not be called from atomic context
  */
-int ipa3_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
+static int ipa3_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 {
 	int type;
 
