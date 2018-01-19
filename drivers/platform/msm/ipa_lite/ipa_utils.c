@@ -907,6 +907,54 @@ static const char *ipa3_get_aggr_type_str(enum ipa_aggr_type aggr_type)
 }
 
 /**
+ * ipa3_cfg_ep_hdr() -  IPA end-point header configuration
+ * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
+ * @ipa_ep_cfg:	[in] IPA end-point configuration params
+ *
+ * Returns:	0 on success, negative on failure
+ *
+ * Note:	Should not be called from atomic context
+ */
+static int ipa3_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
+{
+	struct ipa3_ep_context *ep;
+
+	if (!client_handle_valid(clnt_hdl))
+		return -EINVAL;
+
+	ipa_debug("pipe=%d metadata_reg_valid=%d\n",
+		clnt_hdl,
+		ep_hdr->hdr_metadata_reg_valid);
+
+	ipa_debug("remove_additional=%d, a5_mux=%d, ofst_pkt_size=0x%x\n",
+		ep_hdr->hdr_remove_additional,
+		ep_hdr->hdr_a5_mux,
+		ep_hdr->hdr_ofst_pkt_size);
+
+	ipa_debug("ofst_pkt_size_valid=%d, additional_const_len=0x%x\n",
+		ep_hdr->hdr_ofst_pkt_size_valid,
+		ep_hdr->hdr_additional_const_len);
+
+	ipa_debug("ofst_metadata=0x%x, ofst_metadata_valid=%d, len=0x%x",
+		ep_hdr->hdr_ofst_metadata,
+		ep_hdr->hdr_ofst_metadata_valid,
+		ep_hdr->hdr_len);
+
+	ep = &ipa3_ctx->ep[clnt_hdl];
+
+	/* copy over EP cfg */
+	ep->cfg.hdr = *ep_hdr;
+
+	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_n, clnt_hdl, &ep->cfg.hdr);
+
+	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+
+	return 0;
+}
+
+/**
  * ipa3_cfg_ep_hdr_ext() -  IPA end-point extended header configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ep_hdr_ext:	[in] IPA end-point configuration params
@@ -915,7 +963,7 @@ static const char *ipa3_get_aggr_type_str(enum ipa_aggr_type aggr_type)
  *
  * Note:	Should not be called from atomic context
  */
-int ipa3_cfg_ep_hdr_ext(u32 clnt_hdl,
+static int ipa3_cfg_ep_hdr_ext(u32 clnt_hdl,
 		       const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
 {
 	struct ipa3_ep_context *ep;
@@ -1299,54 +1347,6 @@ int ipa3_cfg_ep_status(u32 clnt_hdl,
 	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
 
 	ipahal_write_reg_n_fields(IPA_ENDP_STATUS_n, clnt_hdl, ep_status);
-
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
-
-	return 0;
-}
-
-/**
- * ipa3_cfg_ep_hdr() -  IPA end-point header configuration
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg:	[in] IPA end-point configuration params
- *
- * Returns:	0 on success, negative on failure
- *
- * Note:	Should not be called from atomic context
- */
-int ipa3_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
-{
-	struct ipa3_ep_context *ep;
-
-	if (!client_handle_valid(clnt_hdl))
-		return -EINVAL;
-
-	ipa_debug("pipe=%d metadata_reg_valid=%d\n",
-		clnt_hdl,
-		ep_hdr->hdr_metadata_reg_valid);
-
-	ipa_debug("remove_additional=%d, a5_mux=%d, ofst_pkt_size=0x%x\n",
-		ep_hdr->hdr_remove_additional,
-		ep_hdr->hdr_a5_mux,
-		ep_hdr->hdr_ofst_pkt_size);
-
-	ipa_debug("ofst_pkt_size_valid=%d, additional_const_len=0x%x\n",
-		ep_hdr->hdr_ofst_pkt_size_valid,
-		ep_hdr->hdr_additional_const_len);
-
-	ipa_debug("ofst_metadata=0x%x, ofst_metadata_valid=%d, len=0x%x",
-		ep_hdr->hdr_ofst_metadata,
-		ep_hdr->hdr_ofst_metadata_valid,
-		ep_hdr->hdr_len);
-
-	ep = &ipa3_ctx->ep[clnt_hdl];
-
-	/* copy over EP cfg */
-	ep->cfg.hdr = *ep_hdr;
-
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
-
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_n, clnt_hdl, &ep->cfg.hdr);
 
 	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
 
