@@ -1355,7 +1355,7 @@ int ipa3_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 int ipa3_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 {
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
-	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_holb == NULL ||
+	    ipa3_ctx->ep[clnt_hdl].valid == 0 ||
 	    ep_holb->tmr_val > ipa3_ctx->ctrl->max_holb_tmr_val ||
 	    ep_holb->en > 1) {
 		ipa_err("bad parm.\n");
