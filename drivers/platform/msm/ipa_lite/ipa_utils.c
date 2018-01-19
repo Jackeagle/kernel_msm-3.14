@@ -2936,14 +2936,6 @@ int ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple)
 {
 	struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
 
-	if (tbl_idx >=
-			max(ipa3_mem(V6_RT_NUM_INDEX),
-			ipa3_mem(V4_RT_NUM_INDEX)) ||
-			tbl_idx < 0) {
-			ipa_err("bad table index\n");
-			return -EINVAL;
-	}
-
 	if (tbl_idx >= ipa3_mem(V4_MODEM_RT_INDEX_LO) &&
 			tbl_idx <= ipa3_mem(V4_MODEM_RT_INDEX_HI)) {
 			ipa_err("cannot configure modem v4 rt tuple by AP\n");
