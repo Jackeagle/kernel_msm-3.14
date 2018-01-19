@@ -2829,10 +2829,6 @@ void ipa3_enable_dcd(void)
  */
 void ipa_write_64(u64 w, u8 *dest)
 {
-	if (unlikely(dest == NULL)) {
-		ipa_err("ipa_write_64: NULL address!\n");
-		return;
-	}
 	*dest++ = (u8)((w) & 0xFF);
 	*dest++ = (u8)((w >> 8) & 0xFF);
 	*dest++ = (u8)((w >> 16) & 0xFF);
