@@ -951,13 +951,10 @@ static int ipa3_cfg_ep_metadata_mask(u32 clnt_hdl,
  */
 int ipa3_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 {
-	int result = -EINVAL;
+	int result;
 
-	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
-	    ipa3_ctx->ep[clnt_hdl].valid == 0) {
-		ipa_err("bad parm.\n");
+	if (!client_handle_valid(clnt_hdl))
 		return -EINVAL;
-	}
 
 	result = ipa3_cfg_ep_hdr(clnt_hdl, &ipa_ep_cfg->hdr);
 	if (result)
