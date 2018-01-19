@@ -954,7 +954,7 @@ int ipa3_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 	int result = -EINVAL;
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
-	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ipa_ep_cfg == NULL) {
+	    ipa3_ctx->ep[clnt_hdl].valid == 0) {
 		ipa_err("bad parm.\n");
 		return -EINVAL;
 	}
