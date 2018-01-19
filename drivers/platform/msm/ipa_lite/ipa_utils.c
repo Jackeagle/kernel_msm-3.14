@@ -698,28 +698,6 @@ ep_configuration(enum ipa_client_type client)
 }
 
 /**
- * ipa3_get_ep_mapping() - provide endpoint mapping
- * @client: client type
- *
- * Return value: endpoint mapping
- */
-int ipa3_get_ep_mapping(enum ipa_client_type client)
-{
-	const struct ipa_ep_configuration *ep_config;
-	int ipa_ep_idx;
-
-	ep_config = ep_configuration(client);
-	if (!ep_config)
-		return -ESRCH;
-
-	ipa_ep_idx = ep_config->ipa_gsi_ep_info.ipa_ep_num;
-	if (ipa_ep_idx < 0 || (ipa_ep_idx >= IPA3_MAX_NUM_PIPES
-		&& client != IPA_CLIENT_DUMMY_CONS))
-		return -ENOENT;
-	return ipa_ep_idx;
-}
-
-/**
  * ipa3_get_gsi_ep_info() - provide gsi ep information
  * @client: IPA client value
  *
@@ -739,6 +717,28 @@ const struct ipa_gsi_ep_config *ipa3_get_gsi_ep_info
 
 	return &(ipa3_ep_mapping[IPA_3_5_1]
 		[client].ipa_gsi_ep_info);
+}
+
+/**
+ * ipa3_get_ep_mapping() - provide endpoint mapping
+ * @client: client type
+ *
+ * Return value: endpoint mapping
+ */
+int ipa3_get_ep_mapping(enum ipa_client_type client)
+{
+	const struct ipa_ep_configuration *ep_config;
+	int ipa_ep_idx;
+
+	ep_config = ep_configuration(client);
+	if (!ep_config)
+		return -ESRCH;
+
+	ipa_ep_idx = ep_config->ipa_gsi_ep_info.ipa_ep_num;
+	if (ipa_ep_idx < 0 || (ipa_ep_idx >= IPA3_MAX_NUM_PIPES
+		&& client != IPA_CLIENT_DUMMY_CONS))
+		return -ENOENT;
+	return ipa_ep_idx;
 }
 
 /**
