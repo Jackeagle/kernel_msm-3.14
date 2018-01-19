@@ -96,7 +96,7 @@ static struct ipahal_fltrt_obj ipahal_fltrt;
 static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap)
 {
 	/* At IPA3, there global configuration is possible but not used */
-	return (ep_bitmap << 1) & ~0x1;
+	return ep_bitmap << 1;
 }
 
 static u64 ipa_fltrt_create_tbl_addr(u64 addr)
