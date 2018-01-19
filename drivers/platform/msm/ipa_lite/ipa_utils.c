@@ -918,7 +918,7 @@ static int ipa3_cfg_ep_metadata_mask(u32 clnt_hdl,
 		*metadata_mask)
 {
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
-	    ipa3_ctx->ep[clnt_hdl].valid == 0 || metadata_mask == NULL) {
+	    ipa3_ctx->ep[clnt_hdl].valid == 0) {
 		ipa_err("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 					clnt_hdl,
 					ipa3_ctx->ep[clnt_hdl].valid);
