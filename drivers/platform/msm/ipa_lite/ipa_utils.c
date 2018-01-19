@@ -1171,7 +1171,7 @@ int ipa3_cfg_ep_hdr_ext(u32 clnt_hdl,
  */
 int ipa3_cfg_ep_ctrl(u32 clnt_hdl, const struct ipa_ep_cfg_ctrl *ep_ctrl)
 {
-	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes || ep_ctrl == NULL) {
+	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes) {
 		ipa_err("bad parm, clnt_hdl = %d\n", clnt_hdl);
 		return -EINVAL;
 	}
