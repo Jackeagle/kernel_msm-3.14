@@ -873,6 +873,84 @@ static const char *ipa3_get_mode_type_str(enum ipa_mode_type mode)
 	return "undefined";
 }
 
+static const char *ipa3_get_aggr_enable_str(enum ipa_aggr_en_type aggr_en)
+{
+	switch (aggr_en) {
+	case (IPA_BYPASS_AGGR):
+			return "no aggregation";
+	case (IPA_ENABLE_AGGR):
+			return "aggregation enabled";
+	case (IPA_ENABLE_DEAGGR):
+		return "de-aggregation enabled";
+	}
+
+	return "undefined";
+}
+
+static const char *ipa3_get_aggr_type_str(enum ipa_aggr_type aggr_type)
+{
+	switch (aggr_type) {
+	case (IPA_MBIM_16):
+			return "MBIM_16";
+	case (IPA_HDLC):
+		return "HDLC";
+	case (IPA_TLP):
+			return "TLP";
+	case (IPA_RNDIS):
+			return "RNDIS";
+	case (IPA_GENERIC):
+			return "GENERIC";
+	case (IPA_QCMAP):
+			return "QCMAP";
+	}
+	return "undefined";
+}
+
+/**
+ * ipa3_cfg_ep_aggr() - IPA end-point aggregation configuration
+ * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
+ * @ipa_ep_cfg:	[in] IPA end-point configuration params
+ *
+ * Returns:	0 on success, negative on failure
+ *
+ * Note:	Should not be called from atomic context
+ */
+static int ipa3_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
+{
+	if (!client_handle_valid(clnt_hdl))
+		return -EINVAL;
+
+	if (ep_aggr->aggr_en == IPA_ENABLE_DEAGGR &&
+	    !IPA_EP_SUPPORTS_DEAGGR(clnt_hdl)) {
+		ipa_err("pipe=%d cannot be configured to DEAGGR\n", clnt_hdl);
+		WARN_ON(1);
+		return -EINVAL;
+	}
+
+	ipa_debug("pipe=%d en=%d(%s), type=%d(%s), byte_limit=%d, time_limit=%d\n",
+			clnt_hdl,
+			ep_aggr->aggr_en,
+			ipa3_get_aggr_enable_str(ep_aggr->aggr_en),
+			ep_aggr->aggr,
+			ipa3_get_aggr_type_str(ep_aggr->aggr),
+			ep_aggr->aggr_byte_limit,
+			ep_aggr->aggr_time_limit);
+	ipa_debug("hard_byte_limit_en=%d aggr_sw_eof_active=%d\n",
+		ep_aggr->aggr_hard_byte_limit_en,
+		ep_aggr->aggr_sw_eof_active);
+
+	/* copy over EP cfg */
+	ipa3_ctx->ep[clnt_hdl].cfg.aggr = *ep_aggr;
+
+	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_AGGR_n, clnt_hdl, ep_aggr);
+
+	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+
+	return 0;
+}
+
 /**
  * ipa3_cfg_ep_cfg() - IPA end-point cfg configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
@@ -1299,84 +1377,6 @@ int ipa3_cfg_ep_ctrl(u32 clnt_hdl, const struct ipa_ep_cfg_ctrl *ep_ctrl)
 	if (ep_ctrl->ipa_ep_suspend == true &&
 			IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client))
 		ipa3_suspend_active_aggr_wa(clnt_hdl);
-
-	return 0;
-}
-
-const char *ipa3_get_aggr_enable_str(enum ipa_aggr_en_type aggr_en)
-{
-	switch (aggr_en) {
-	case (IPA_BYPASS_AGGR):
-			return "no aggregation";
-	case (IPA_ENABLE_AGGR):
-			return "aggregation enabled";
-	case (IPA_ENABLE_DEAGGR):
-		return "de-aggregation enabled";
-	}
-
-	return "undefined";
-}
-
-const char *ipa3_get_aggr_type_str(enum ipa_aggr_type aggr_type)
-{
-	switch (aggr_type) {
-	case (IPA_MBIM_16):
-			return "MBIM_16";
-	case (IPA_HDLC):
-		return "HDLC";
-	case (IPA_TLP):
-			return "TLP";
-	case (IPA_RNDIS):
-			return "RNDIS";
-	case (IPA_GENERIC):
-			return "GENERIC";
-	case (IPA_QCMAP):
-			return "QCMAP";
-	}
-	return "undefined";
-}
-
-/**
- * ipa3_cfg_ep_aggr() - IPA end-point aggregation configuration
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg:	[in] IPA end-point configuration params
- *
- * Returns:	0 on success, negative on failure
- *
- * Note:	Should not be called from atomic context
- */
-int ipa3_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
-{
-	if (!client_handle_valid(clnt_hdl))
-		return -EINVAL;
-
-	if (ep_aggr->aggr_en == IPA_ENABLE_DEAGGR &&
-	    !IPA_EP_SUPPORTS_DEAGGR(clnt_hdl)) {
-		ipa_err("pipe=%d cannot be configured to DEAGGR\n", clnt_hdl);
-		WARN_ON(1);
-		return -EINVAL;
-	}
-
-	ipa_debug("pipe=%d en=%d(%s), type=%d(%s), byte_limit=%d, time_limit=%d\n",
-			clnt_hdl,
-			ep_aggr->aggr_en,
-			ipa3_get_aggr_enable_str(ep_aggr->aggr_en),
-			ep_aggr->aggr,
-			ipa3_get_aggr_type_str(ep_aggr->aggr),
-			ep_aggr->aggr_byte_limit,
-			ep_aggr->aggr_time_limit);
-	ipa_debug("hard_byte_limit_en=%d aggr_sw_eof_active=%d\n",
-		ep_aggr->aggr_hard_byte_limit_en,
-		ep_aggr->aggr_sw_eof_active);
-
-	/* copy over EP cfg */
-	ipa3_ctx->ep[clnt_hdl].cfg.aggr = *ep_aggr;
-
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
-
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_AGGR_n, clnt_hdl, ep_aggr);
-
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
 
 	return 0;
 }
