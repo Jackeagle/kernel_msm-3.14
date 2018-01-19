@@ -2829,14 +2829,7 @@ void ipa3_enable_dcd(void)
  */
 void ipa_write_64(u64 w, u8 *dest)
 {
-	*dest++ = (u8)((w) & 0xFF);
-	*dest++ = (u8)((w >> 8) & 0xFF);
-	*dest++ = (u8)((w >> 16) & 0xFF);
-	*dest++ = (u8)((w >> 24) & 0xFF);
-	*dest++ = (u8)((w >> 32) & 0xFF);
-	*dest++ = (u8)((w >> 40) & 0xFF);
-	*dest++ = (u8)((w >> 48) & 0xFF);
-	*dest++ = (u8)((w >> 56) & 0xFF);
+	put_unaligned(w, dest);
 }
 
 const char *ipa_clients_strings[IPA_CLIENT_MAX] = {
