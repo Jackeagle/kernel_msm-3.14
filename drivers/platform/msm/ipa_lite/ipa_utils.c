@@ -2936,11 +2936,6 @@ int ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple)
 {
 	struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
 
-	if (!tuple) {
-			ipa_err("bad tuple\n");
-			return -EINVAL;
-	}
-
 	if (tbl_idx >=
 			max(ipa3_mem(V6_RT_NUM_INDEX),
 			ipa3_mem(V4_RT_NUM_INDEX)) ||
