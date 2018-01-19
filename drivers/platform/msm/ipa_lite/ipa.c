@@ -998,10 +998,7 @@ static int ipa3_setup_flt_hash_tuple(void)
 		if (ipa_is_modem_pipe(pipe_idx))
 			continue;
 
-		if (ipa3_set_flt_tuple_mask(pipe_idx, &tuple)) {
-		ipa_err("failed to setup pipe %d flt tuple\n", pipe_idx);
-		return -EFAULT;
-        }
+		ipa3_set_flt_tuple_mask(pipe_idx, &tuple);
 	}
 
 	return 0;

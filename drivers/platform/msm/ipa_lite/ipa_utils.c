@@ -2832,7 +2832,7 @@ void ipa3_enable_dcd(void)
  * Returns:     0 on success, negative on failure
  *
  */
-int ipa3_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple)
+void ipa3_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple)
 {
         struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
 
@@ -2841,8 +2841,6 @@ int ipa3_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple)
         fltrt_tuple.flt = *tuple;
         ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n,
                 pipe_idx, &fltrt_tuple);
-
-        return 0;
 }
 
 /**
