@@ -905,6 +905,49 @@ int ipa3_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 }
 
 /**
+ * ipa3_cfg_ep_deaggr() -  IPA end-point deaggregation configuration
+ * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
+ * @ep_deaggr:	[in] IPA end-point configuration params
+ *
+ * Returns:	0 on success, negative on failure
+ *
+ * Note:	Should not be called from atomic context
+ */
+static int ipa3_cfg_ep_deaggr(u32 clnt_hdl,
+			const struct ipa_ep_cfg_deaggr *ep_deaggr)
+{
+	struct ipa3_ep_context *ep;
+
+	if (!client_handle_valid(clnt_hdl))
+		return -EINVAL;
+
+	ipa_debug("pipe=%d deaggr_hdr_len=%d\n",
+		clnt_hdl,
+		ep_deaggr->deaggr_hdr_len);
+
+	ipa_debug("packet_offset_valid=%d\n",
+		ep_deaggr->packet_offset_valid);
+
+	ipa_debug("packet_offset_location=%d max_packet_len=%d\n",
+		ep_deaggr->packet_offset_location,
+		ep_deaggr->max_packet_len);
+
+	ep = &ipa3_ctx->ep[clnt_hdl];
+
+	/* copy over EP cfg */
+	ep->cfg.deaggr = *ep_deaggr;
+
+	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_n, clnt_hdl,
+		&ep->cfg.deaggr);
+
+	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+
+	return 0;
+}
+
+/**
  * ipa3_cfg_ep_metadata_mask() - IPA end-point meta-data mask configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ipa_ep_cfg:	[in] IPA end-point configuration params
@@ -1382,49 +1425,6 @@ int ipa3_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 
 	ipa_debug("cfg holb %u ep=%d tmr=%d\n", ep_holb->en, clnt_hdl,
 				ep_holb->tmr_val);
-
-	return 0;
-}
-
-/**
- * ipa3_cfg_ep_deaggr() -  IPA end-point deaggregation configuration
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ep_deaggr:	[in] IPA end-point configuration params
- *
- * Returns:	0 on success, negative on failure
- *
- * Note:	Should not be called from atomic context
- */
-int ipa3_cfg_ep_deaggr(u32 clnt_hdl,
-			const struct ipa_ep_cfg_deaggr *ep_deaggr)
-{
-	struct ipa3_ep_context *ep;
-
-	if (!client_handle_valid(clnt_hdl))
-		return -EINVAL;
-
-	ipa_debug("pipe=%d deaggr_hdr_len=%d\n",
-		clnt_hdl,
-		ep_deaggr->deaggr_hdr_len);
-
-	ipa_debug("packet_offset_valid=%d\n",
-		ep_deaggr->packet_offset_valid);
-
-	ipa_debug("packet_offset_location=%d max_packet_len=%d\n",
-		ep_deaggr->packet_offset_location,
-		ep_deaggr->max_packet_len);
-
-	ep = &ipa3_ctx->ep[clnt_hdl];
-
-	/* copy over EP cfg */
-	ep->cfg.deaggr = *ep_deaggr;
-
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
-
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_n, clnt_hdl,
-		&ep->cfg.deaggr);
-
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
 
 	return 0;
 }
