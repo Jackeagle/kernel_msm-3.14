@@ -2936,18 +2936,6 @@ int ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple)
 {
 	struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
 
-	if (tbl_idx >= ipa3_mem(V4_MODEM_RT_INDEX_LO) &&
-			tbl_idx <= ipa3_mem(V4_MODEM_RT_INDEX_HI)) {
-			ipa_err("cannot configure modem v4 rt tuple by AP\n");
-			return -EINVAL;
-	}
-
-	if (tbl_idx >= ipa3_mem(V6_MODEM_RT_INDEX_LO) &&
-			tbl_idx <= ipa3_mem(V6_MODEM_RT_INDEX_HI)) {
-			ipa_err("cannot configure modem v6 rt tuple by AP\n");
-			return -EINVAL;
-	}
-
 	ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n,
 			tbl_idx, &fltrt_tuple);
 	fltrt_tuple.rt = *tuple;
