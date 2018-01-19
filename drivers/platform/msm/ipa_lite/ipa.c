@@ -984,7 +984,7 @@ free_mem:
 }
 
 
-static int ipa3_setup_flt_hash_tuple(void)
+static void ipa3_setup_flt_hash_tuple(void)
 {
 	int pipe_idx;
 	struct ipahal_reg_hash_tuple tuple;
@@ -1000,8 +1000,6 @@ static int ipa3_setup_flt_hash_tuple(void)
 
 		ipa3_set_flt_tuple_mask(pipe_idx, &tuple);
 	}
-
-	return 0;
 }
 
 static void ipa3_setup_rt_hash_tuple(void)
@@ -1071,11 +1069,7 @@ static int ipa3_setup_apps_pipes(void)
         ipa3_ctx->ctrl->ipa_init_flt6();
         ipa_debug("V6 FLT initialized\n");
 
-	if (ipa3_setup_flt_hash_tuple()) {
-		ipa_err(":fail to configure flt hash tuple\n");
-		result = -EPERM;
-		goto fail_flt_hash_tuple;
-	}
+	ipa3_setup_flt_hash_tuple();
 	ipa_debug("flt hash tuple is configured\n");
 
 	ipa3_setup_rt_hash_tuple();
