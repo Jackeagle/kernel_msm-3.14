@@ -2823,27 +2823,6 @@ void ipa3_enable_dcd(void)
 }
 
 /**
- * ipa3_set_flt_tuple_mask() - Sets the flt tuple masking for the given pipe
- *  Pipe must be for AP EP (not modem) and support filtering
- *  updates the the filtering masking values without changing the rt ones.
- *
- * @pipe_idx: filter pipe index to configure the tuple masking
- * @tuple: the tuple members masking
- * Returns:     0 on success, negative on failure
- *
- */
-void ipa3_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple)
-{
-        struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
-
-        ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n,
-                pipe_idx, &fltrt_tuple);
-        fltrt_tuple.flt = *tuple;
-        ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n,
-                pipe_idx, &fltrt_tuple);
-}
-
-/**
  * ipa_write_64() - convert 64 bit value to byte array
  * @w: 64 bit integer
  * @dest: byte array
@@ -2898,6 +2877,27 @@ void ipa_assert(void)
 {
 	ipa_err("IPA: unrecoverable error has occurred, asserting\n");
 	BUG();
+}
+
+/**
+ * ipa3_set_flt_tuple_mask() - Sets the flt tuple masking for the given pipe
+ *  Pipe must be for AP EP (not modem) and support filtering
+ *  updates the the filtering masking values without changing the rt ones.
+ *
+ * @pipe_idx: filter pipe index to configure the tuple masking
+ * @tuple: the tuple members masking
+ * Returns:     0 on success, negative on failure
+ *
+ */
+void ipa3_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple)
+{
+        struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
+
+        ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n,
+                pipe_idx, &fltrt_tuple);
+        fltrt_tuple.flt = *tuple;
+        ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n,
+                pipe_idx, &fltrt_tuple);
 }
 
 /**
