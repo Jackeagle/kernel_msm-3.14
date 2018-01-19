@@ -1007,7 +1007,7 @@ static int ipa3_setup_flt_hash_tuple(void)
 	return 0;
 }
 
-static int ipa3_setup_rt_hash_tuple(void)
+static void ipa3_setup_rt_hash_tuple(void)
 {
 	int tbl_idx;
 	struct ipahal_reg_hash_tuple tuple;
@@ -1029,8 +1029,6 @@ static int ipa3_setup_rt_hash_tuple(void)
 
 		ipa3_set_rt_tuple_mask(tbl_idx, &tuple);
 	}
-
-	return 0;
 }
 
 static int ipa3_setup_apps_pipes(void)
@@ -1083,11 +1081,7 @@ static int ipa3_setup_apps_pipes(void)
 	}
 	ipa_debug("flt hash tuple is configured\n");
 
-	if (ipa3_setup_rt_hash_tuple()) {
-		ipa_err(":fail to configure rt hash tuple\n");
-		result = -EPERM;
-		goto fail_flt_hash_tuple;
-	}
+	ipa3_setup_rt_hash_tuple();
 	ipa_debug("rt hash tuple is configured\n");
 
 	/* LAN IN (IPA->AP) */
