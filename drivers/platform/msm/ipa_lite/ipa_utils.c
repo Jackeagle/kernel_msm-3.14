@@ -2836,11 +2836,6 @@ int ipa3_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple)
 {
         struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
 
-        if (pipe_idx >= ipa3_ctx->ipa_num_pipes || pipe_idx < 0) {
-                ipa_err("bad pipe index!\n");
-                return -EINVAL;
-        }
-
         if (!ipa_is_ep_support_flt(pipe_idx)) {
                 ipa_err("pipe %d not filtering pipe\n", pipe_idx);
                 return -EINVAL;
