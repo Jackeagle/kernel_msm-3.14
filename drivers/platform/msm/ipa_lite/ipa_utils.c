@@ -747,15 +747,13 @@ int ipa3_get_ep_mapping(enum ipa_client_type client)
  */
 int ipa_get_ep_group(enum ipa_client_type client)
 {
-	if (client >= IPA_CLIENT_MAX || client < 0) {
-		ipa_err("Bad client number! client =%d\n", client);
-		return -EINVAL;
-	}
+	const struct ipa_ep_configuration *ep_config;
 
-	if (!ipa3_ep_mapping[IPA_3_5_1][client].valid)
-		return -EINVAL;
+	ep_config = ep_configuration(client);
+	if (ep_config)
+		return ep_config->group_num;
 
-	return ipa3_ep_mapping[IPA_3_5_1][client].group_num;
+	return -EINVAL;
 }
 
 /**
@@ -766,16 +764,13 @@ int ipa_get_ep_group(enum ipa_client_type client)
  */
 u8 ipa3_get_qmb_master_sel(enum ipa_client_type client)
 {
-	if (client >= IPA_CLIENT_MAX || client < 0) {
-		ipa_err("Bad client number! client =%d\n", client);
-		return -EINVAL;
-	}
+	const struct ipa_ep_configuration *ep_config;
 
-	if (!ipa3_ep_mapping[IPA_3_5_1][client].valid)
-		return -EINVAL;
+	ep_config = ep_configuration(client);
+	if (ep_config)
+		return ep_config->qmb_master_sel;
 
-	return ipa3_ep_mapping[IPA_3_5_1]
-		[client].qmb_master_sel;
+	return -EINVAL;
 }
 
 /* ipa3_set_client() - provide client mapping
