@@ -843,6 +843,20 @@ bool ipa_is_ep_support_flt(int pipe_idx)
 	return ipa3_ctx->ep_flt_bitmap & BIT(pipe_idx);
 }
 
+#define client_handle_valid(clnt_hdl) \
+	_client_handle_valid(__func__, (clnt_hdl))
+static bool _client_handle_valid(const char *func, u32 clnt_hdl)
+{
+	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes)
+		ipa_err("%s: bad clnt_hdl %u", func, clnt_hdl);
+	else if (!ipa3_ctx->ep[clnt_hdl].valid)
+		ipa_err("%s: clnt_hdl %u not valid", func, clnt_hdl);
+	else
+		return true;
+
+	return false;
+}
+
 /**
  * ipa3_cfg_ep_seq() - IPA end-point HPS/DPS sequencer type configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
@@ -855,11 +869,8 @@ int ipa3_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 {
 	int type;
 
-	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
-	    ipa3_ctx->ep[clnt_hdl].valid == 0) {
-		ipa_err("bad param, clnt_hdl = %d", clnt_hdl);
+	if (!client_handle_valid(clnt_hdl))
 		return -EINVAL;
-	}
 
 	if (IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client)) {
 		ipa_err("SEQ does not apply to IPA consumer EP %d\n", clnt_hdl);
