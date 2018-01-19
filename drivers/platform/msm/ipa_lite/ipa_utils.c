@@ -2836,16 +2836,6 @@ int ipa3_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple)
 {
         struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
 
-        if (!ipa_is_ep_support_flt(pipe_idx)) {
-                ipa_err("pipe %d not filtering pipe\n", pipe_idx);
-                return -EINVAL;
-        }
-
-        if (ipa_is_modem_pipe(pipe_idx)) {
-                ipa_err("modem pipe tuple is not configured by AP\n");
-                return -EINVAL;
-        }
-
         ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n,
                 pipe_idx, &fltrt_tuple);
         fltrt_tuple.flt = *tuple;
