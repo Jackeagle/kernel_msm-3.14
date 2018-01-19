@@ -1221,7 +1221,7 @@ int ipa3_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 	struct ipahal_reg_endp_init_mode init_mode;
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
-	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_mode == NULL) {
+	    ipa3_ctx->ep[clnt_hdl].valid == 0) {
 		ipa_err("bad params clnt_hdl=%d , ep_valid=%d ep_mode=%p\n",
 				clnt_hdl, ipa3_ctx->ep[clnt_hdl].valid,
 				ep_mode);
