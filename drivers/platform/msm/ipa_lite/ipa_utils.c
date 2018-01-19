@@ -907,6 +907,53 @@ static const char *ipa3_get_aggr_type_str(enum ipa_aggr_type aggr_type)
 }
 
 /**
+ * ipa3_cfg_ep_hdr_ext() -  IPA end-point extended header configuration
+ * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
+ * @ep_hdr_ext:	[in] IPA end-point configuration params
+ *
+ * Returns:	0 on success, negative on failure
+ *
+ * Note:	Should not be called from atomic context
+ */
+int ipa3_cfg_ep_hdr_ext(u32 clnt_hdl,
+		       const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
+{
+	struct ipa3_ep_context *ep;
+
+	if (!client_handle_valid(clnt_hdl))
+		return -EINVAL;
+
+	ipa_debug("pipe=%d hdr_pad_to_alignment=%d\n",
+		clnt_hdl,
+		ep_hdr_ext->hdr_pad_to_alignment);
+
+	ipa_debug("hdr_total_len_or_pad_offset=%d\n",
+		ep_hdr_ext->hdr_total_len_or_pad_offset);
+
+	ipa_debug("hdr_payload_len_inc_padding=%d hdr_total_len_or_pad=%d\n",
+		ep_hdr_ext->hdr_payload_len_inc_padding,
+		ep_hdr_ext->hdr_total_len_or_pad);
+
+	ipa_debug("hdr_total_len_or_pad_valid=%d hdr_little_endian=%d\n",
+		ep_hdr_ext->hdr_total_len_or_pad_valid,
+		ep_hdr_ext->hdr_little_endian);
+
+	ep = &ipa3_ctx->ep[clnt_hdl];
+
+	/* copy over EP cfg */
+	ep->cfg.hdr_ext = *ep_hdr_ext;
+
+	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_n, clnt_hdl,
+		&ep->cfg.hdr_ext);
+
+	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+
+	return 0;
+}
+
+/**
  * ipa3_cfg_ep_aggr() - IPA end-point aggregation configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ipa_ep_cfg:	[in] IPA end-point configuration params
@@ -1300,53 +1347,6 @@ int ipa3_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_n, clnt_hdl, &ep->cfg.hdr);
-
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
-
-	return 0;
-}
-
-/**
- * ipa3_cfg_ep_hdr_ext() -  IPA end-point extended header configuration
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ep_hdr_ext:	[in] IPA end-point configuration params
- *
- * Returns:	0 on success, negative on failure
- *
- * Note:	Should not be called from atomic context
- */
-int ipa3_cfg_ep_hdr_ext(u32 clnt_hdl,
-		       const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
-{
-	struct ipa3_ep_context *ep;
-
-	if (!client_handle_valid(clnt_hdl))
-		return -EINVAL;
-
-	ipa_debug("pipe=%d hdr_pad_to_alignment=%d\n",
-		clnt_hdl,
-		ep_hdr_ext->hdr_pad_to_alignment);
-
-	ipa_debug("hdr_total_len_or_pad_offset=%d\n",
-		ep_hdr_ext->hdr_total_len_or_pad_offset);
-
-	ipa_debug("hdr_payload_len_inc_padding=%d hdr_total_len_or_pad=%d\n",
-		ep_hdr_ext->hdr_payload_len_inc_padding,
-		ep_hdr_ext->hdr_total_len_or_pad);
-
-	ipa_debug("hdr_total_len_or_pad_valid=%d hdr_little_endian=%d\n",
-		ep_hdr_ext->hdr_total_len_or_pad_valid,
-		ep_hdr_ext->hdr_little_endian);
-
-	ep = &ipa3_ctx->ep[clnt_hdl];
-
-	/* copy over EP cfg */
-	ep->cfg.hdr_ext = *ep_hdr_ext;
-
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
-
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_n, clnt_hdl,
-		&ep->cfg.hdr_ext);
 
 	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
 
