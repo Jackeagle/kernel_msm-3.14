@@ -1027,10 +1027,7 @@ static int ipa3_setup_rt_hash_tuple(void)
 			tbl_idx <= ipa3_mem(V6_MODEM_RT_INDEX_HI))
 			continue;
 
-		if (ipa3_set_rt_tuple_mask(tbl_idx, &tuple)) {
-			ipa_err("failed to setup tbl %d rt tuple\n", tbl_idx);
-			return -EFAULT;
-		}
+		ipa3_set_rt_tuple_mask(tbl_idx, &tuple);
 	}
 
 	return 0;

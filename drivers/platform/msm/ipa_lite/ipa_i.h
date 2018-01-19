@@ -1427,7 +1427,6 @@ int ipa_reset_all_drop_stats(void);
 u32 ipa3_get_num_pipes(void);
 int ipa3_ap_suspend(struct device *dev);
 int ipa3_ap_resume(struct device *dev);
-int ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple);
 void ipa3_set_resorce_groups_min_max_limits(void);
 void ipa3_suspend_apps_pipes(bool suspend);
 int ipa3_inject_dma_task_for_gsi(void);
@@ -1450,6 +1449,6 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p);
 int ipa3_add_hdr(struct ipa_ioc_add_hdr *hdrs);
 
 int ipa3_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple);
-int ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple);
+void ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple);
 
 #endif /* _IPA3_I_H_ */

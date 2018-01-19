@@ -2932,7 +2932,7 @@ void ipa_assert(void)
  * Returns:	 0 on success, negative on failure
  *
  */
-int ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple)
+void ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple)
 {
 	struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
 
@@ -2941,8 +2941,6 @@ int ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple)
 	fltrt_tuple.rt = *tuple;
 	ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n,
 			tbl_idx, &fltrt_tuple);
-
-	return 0;
 }
 
 MODULE_LICENSE("GPL v2");
