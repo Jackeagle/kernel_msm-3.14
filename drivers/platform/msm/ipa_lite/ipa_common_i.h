@@ -847,7 +847,7 @@ int ipa_uc_state_check(void);
 void ipa_set_tag_process_before_gating(bool val);
 
 int ipa_tear_down_uc_offload_pipes(int ipa_ep_idx_ul, int ipa_ep_idx_dl);
-u8 *ipa_write_64(u64 w, u8 *dest);
+void ipa_write_64(u64 w, u8 *dest);
 int ipa_start_gsi_channel(u32 clnt_hdl);
 void *ipa_get_ipc_logbuf(void);
 

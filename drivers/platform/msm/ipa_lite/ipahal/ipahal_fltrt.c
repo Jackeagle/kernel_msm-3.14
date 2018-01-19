@@ -84,7 +84,7 @@ struct ipahal_fltrt_obj {
 	u32 low_rule_id;
 	u32 rule_id_bit_len;
 	u32 rule_buf_size;
-	u8* (*write_val_to_hdr)(u64 val, u8 *hdr);
+	void (*write_val_to_hdr)(u64 val, u8 *hdr);
 	u64 (*create_flt_bitmap)(u64 ep_bitmap);
 	u64 (*create_tbl_addr)(u64 addr);
 	u64 (*parse_tbl_addr)(u64 hwaddr);

@@ -2826,14 +2826,12 @@ void ipa3_enable_dcd(void)
  * ipa_write_64() - convert 64 bit value to byte array
  * @w: 64 bit integer
  * @dest: byte array
- *
- * Return value: converted value
  */
-u8 *ipa_write_64(u64 w, u8 *dest)
+void ipa_write_64(u64 w, u8 *dest)
 {
 	if (unlikely(dest == NULL)) {
 		ipa_err("ipa_write_64: NULL address!\n");
-		return dest;
+		return;
 	}
 	*dest++ = (u8)((w) & 0xFF);
 	*dest++ = (u8)((w >> 8) & 0xFF);
@@ -2843,8 +2841,6 @@ u8 *ipa_write_64(u64 w, u8 *dest)
 	*dest++ = (u8)((w >> 40) & 0xFF);
 	*dest++ = (u8)((w >> 48) & 0xFF);
 	*dest++ = (u8)((w >> 56) & 0xFF);
-
-	return dest;
 }
 
 const char *ipa_clients_strings[IPA_CLIENT_MAX] = {
