@@ -1305,7 +1305,7 @@ const char *ipa3_get_aggr_type_str(enum ipa_aggr_type aggr_type)
 int ipa3_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 {
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
-	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_aggr == NULL) {
+	    ipa3_ctx->ep[clnt_hdl].valid == 0) {
 		ipa_err("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 			clnt_hdl, ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
