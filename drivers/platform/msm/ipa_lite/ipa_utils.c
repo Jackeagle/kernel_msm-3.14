@@ -680,6 +680,23 @@ int ipa3_init_hw(void)
 	return 0;
 }
 
+static const struct ipa_ep_configuration *
+ep_configuration(enum ipa_client_type client)
+{
+	const struct ipa_ep_configuration *ep_config;
+
+	if (client >= IPA_CLIENT_MAX || client < 0) {
+		pr_err_ratelimited("Bad client number! client =%d\n", client);
+		return NULL;
+	}
+
+	ep_config = &ipa3_ep_mapping[IPA_3_5_1][client];
+	if (ep_config->valid)
+		return ep_config;
+
+	return NULL;
+}
+
 /**
  * ipa3_get_ep_mapping() - provide endpoint mapping
  * @client: client type
@@ -688,18 +705,14 @@ int ipa3_init_hw(void)
  */
 int ipa3_get_ep_mapping(enum ipa_client_type client)
 {
+	const struct ipa_ep_configuration *ep_config;
 	int ipa_ep_idx;
 
-	if (client >= IPA_CLIENT_MAX || client < 0) {
-		pr_err_ratelimited("Bad client number! client =%d\n", client);
-		return -EINVAL;
-	}
-
-	if (!ipa3_ep_mapping[IPA_3_5_1][client].valid)
+	ep_config = ep_configuration(client);
+	if (!ep_config)
 		return -ESRCH;
 
-	ipa_ep_idx = ipa3_ep_mapping[IPA_3_5_1][client].
-		ipa_gsi_ep_info.ipa_ep_num;
+	ipa_ep_idx = ep_config->ipa_gsi_ep_info.ipa_ep_num;
 	if (ipa_ep_idx < 0 || (ipa_ep_idx >= IPA3_MAX_NUM_PIPES
 		&& client != IPA_CLIENT_DUMMY_CONS))
 		return -ENOENT;
