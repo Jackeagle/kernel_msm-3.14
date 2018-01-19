@@ -703,20 +703,16 @@ ep_configuration(enum ipa_client_type client)
  *
  * Return value: pointer to ipa_gsi_ep_info
  */
-const struct ipa_gsi_ep_config *ipa3_get_gsi_ep_info
-	(enum ipa_client_type client)
+const struct ipa_gsi_ep_config *
+ipa3_get_gsi_ep_info(enum ipa_client_type client)
 {
-	int ep_idx;
+	const struct ipa_ep_configuration *ep_config;
 
-	ep_idx = ipa3_get_ep_mapping(client);
-	if (ep_idx < 0)
-		return NULL;
+	ep_config = ep_configuration(client);
+	if (ep_config)
+		return &ep_config->ipa_gsi_ep_info;
 
-	if (!ipa3_ep_mapping[IPA_3_5_1][client].valid)
-		return NULL;
-
-	return &(ipa3_ep_mapping[IPA_3_5_1]
-		[client].ipa_gsi_ep_info);
+	return NULL;
 }
 
 /**
