@@ -1400,12 +1400,8 @@ int ipa3_cfg_ep_deaggr(u32 clnt_hdl,
 {
 	struct ipa3_ep_context *ep;
 
-	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
-	    ipa3_ctx->ep[clnt_hdl].valid == 0) {
-		ipa_err("bad parm, clnt_hdl = %d , ep_valid = %d\n",
-				clnt_hdl, ipa3_ctx->ep[clnt_hdl].valid);
+	if (!client_handle_valid(clnt_hdl))
 		return -EINVAL;
-	}
 
 	ipa_debug("pipe=%d deaggr_hdr_len=%d\n",
 		clnt_hdl,
