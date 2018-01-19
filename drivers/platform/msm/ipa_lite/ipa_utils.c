@@ -2618,11 +2618,8 @@ int ipa3_stop_gsi_channel(u32 clnt_hdl)
 	int i;
 	struct ipa3_ep_context *ep;
 
-	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
-		ipa3_ctx->ep[clnt_hdl].valid == 0) {
-		ipa_err("bad parm.\n");
+	if (!client_handle_valid(clnt_hdl))
 		return -EINVAL;
-	}
 
 	ep = &ipa3_ctx->ep[clnt_hdl];
 
