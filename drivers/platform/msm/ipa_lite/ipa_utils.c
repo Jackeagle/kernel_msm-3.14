@@ -840,7 +840,7 @@ bool ipa_is_ep_support_flt(int pipe_idx)
 		return false;
 	}
 
-	return ipa3_ctx->ep_flt_bitmap & (1U<<pipe_idx);
+	return ipa3_ctx->ep_flt_bitmap & BIT(pipe_idx);
 }
 
 /**
