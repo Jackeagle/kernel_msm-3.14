@@ -628,16 +628,12 @@ void _ipa_sram_settings_read_v3_0(void)
 {
 	struct ipahal_reg_shared_mem_size smem_sz;
 
-	memset(&smem_sz, 0, sizeof(smem_sz));
-
 	ipahal_read_reg_fields(IPA_SHARED_MEM_SIZE, &smem_sz);
 
-	ipa3_ctx->smem_restricted_bytes = smem_sz.shared_mem_baddr;
-	ipa3_ctx->smem_sz = smem_sz.shared_mem_sz;
-
 	/* reg fields are in 8B units */
-	ipa3_ctx->smem_restricted_bytes *= 8;
-	ipa3_ctx->smem_sz *= 8;
+	ipa3_ctx->smem_restricted_bytes = smem_sz.shared_mem_baddr * 8;
+	ipa3_ctx->smem_sz = smem_sz.shared_mem_sz * 8;
+
 	ipa3_ctx->smem_reqd_sz = ipa3_mem(END_OFST);
 }
 
