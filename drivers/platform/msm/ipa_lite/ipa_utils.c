@@ -2893,11 +2893,11 @@ void ipa3_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple)
 {
         struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
 
-        ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n,
-                pipe_idx, &fltrt_tuple);
+        ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n, pipe_idx,
+					&fltrt_tuple);
         fltrt_tuple.flt = *tuple;
-        ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n,
-                pipe_idx, &fltrt_tuple);
+        ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n, pipe_idx,
+					&fltrt_tuple);
 }
 
 /**
@@ -2914,11 +2914,11 @@ void ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple)
 {
 	struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
 
-	ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n,
-			tbl_idx, &fltrt_tuple);
+	ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n, tbl_idx,
+					&fltrt_tuple);
 	fltrt_tuple.rt = *tuple;
-	ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n,
-			tbl_idx, &fltrt_tuple);
+	ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n, tbl_idx,
+					&fltrt_tuple);
 }
 
 MODULE_LICENSE("GPL v2");
