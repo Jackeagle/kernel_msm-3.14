@@ -919,9 +919,6 @@ static int ipa3_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 {
 	struct ipa3_ep_context *ep;
 
-	if (!client_handle_valid(clnt_hdl))
-		return -EINVAL;
-
 	ipa_debug("pipe=%d metadata_reg_valid=%d\n",
 		clnt_hdl,
 		ep_hdr->hdr_metadata_reg_valid);
@@ -968,9 +965,6 @@ static int ipa3_cfg_ep_hdr_ext(u32 clnt_hdl,
 {
 	struct ipa3_ep_context *ep;
 
-	if (!client_handle_valid(clnt_hdl))
-		return -EINVAL;
-
 	ipa_debug("pipe=%d hdr_pad_to_alignment=%d\n",
 		clnt_hdl,
 		ep_hdr_ext->hdr_pad_to_alignment);
@@ -1012,9 +1006,6 @@ static int ipa3_cfg_ep_hdr_ext(u32 clnt_hdl,
  */
 static int ipa3_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 {
-	if (!client_handle_valid(clnt_hdl))
-		return -EINVAL;
-
 	if (ep_aggr->aggr_en == IPA_ENABLE_DEAGGR &&
 	    !IPA_EP_SUPPORTS_DEAGGR(clnt_hdl)) {
 		ipa_err("pipe=%d cannot be configured to DEAGGR\n", clnt_hdl);
@@ -1059,9 +1050,6 @@ static int ipa3_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 {
 	u8 qmb_master_sel;
 
-	if (!client_handle_valid(clnt_hdl))
-		return -EINVAL;
-
 	/* copy over EP cfg */
 	ipa3_ctx->ep[clnt_hdl].cfg.cfg = *cfg;
 
@@ -1099,9 +1087,6 @@ static int ipa3_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 {
 	int ep;
 	struct ipahal_reg_endp_init_mode init_mode;
-
-	if (!client_handle_valid(clnt_hdl))
-		return -EINVAL;
 
 	if (IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client)) {
 		ipa_err("MODE does not apply to IPA out EP %d\n", clnt_hdl);
@@ -1152,9 +1137,6 @@ static int ipa3_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 {
 	int type;
 
-	if (!client_handle_valid(clnt_hdl))
-		return -EINVAL;
-
 	if (IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client)) {
 		ipa_err("SEQ does not apply to IPA consumer EP %d\n", clnt_hdl);
 		return -EINVAL;
@@ -1201,9 +1183,6 @@ static int ipa3_cfg_ep_deaggr(u32 clnt_hdl,
 {
 	struct ipa3_ep_context *ep;
 
-	if (!client_handle_valid(clnt_hdl))
-		return -EINVAL;
-
 	ipa_debug("pipe=%d deaggr_hdr_len=%d\n",
 		clnt_hdl,
 		ep_deaggr->deaggr_hdr_len);
@@ -1243,9 +1222,6 @@ static int ipa3_cfg_ep_metadata_mask(u32 clnt_hdl,
 		const struct ipa_ep_cfg_metadata_mask
 		*metadata_mask)
 {
-	if (!client_handle_valid(clnt_hdl))
-		return -EINVAL;
-
 	ipa_debug("pipe=%d, metadata_mask=0x%x\n",
 			clnt_hdl,
 			metadata_mask->metadata_mask);
