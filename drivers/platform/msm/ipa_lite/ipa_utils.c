@@ -1447,12 +1447,8 @@ int ipa3_cfg_ep_metadata(u32 clnt_hdl, const struct ipa_ep_cfg_metadata *ep_md)
 	u32 qmap_id = 0;
 	struct ipa_ep_cfg_metadata ep_md_reg_wrt;
 
-	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
-		ipa3_ctx->ep[clnt_hdl].valid == 0) {
-		ipa_err("bad parm, clnt_hdl = %d , ep_valid = %d\n",
-					clnt_hdl, ipa3_ctx->ep[clnt_hdl].valid);
+	if (!client_handle_valid(clnt_hdl))
 		return -EINVAL;
-	}
 
 	ipa_debug("pipe=%d, mux id=%d\n", clnt_hdl, ep_md->qmap_id);
 
