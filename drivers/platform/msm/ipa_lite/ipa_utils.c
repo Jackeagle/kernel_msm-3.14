@@ -857,6 +857,76 @@ static bool _client_handle_valid(const char *func, u32 clnt_hdl)
 	return false;
 }
 
+static const char *ipa3_get_mode_type_str(enum ipa_mode_type mode)
+{
+	switch (mode) {
+	case (IPA_BASIC):
+		return "Basic";
+	case (IPA_ENABLE_FRAMING_HDLC):
+		return "HDLC framing";
+	case (IPA_ENABLE_DEFRAMING_HDLC):
+		return "HDLC de-framing";
+	case (IPA_DMA):
+		return "DMA";
+	}
+
+	return "undefined";
+}
+
+/**
+ * ipa3_cfg_ep_mode() - IPA end-point mode configuration
+ * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
+ * @ipa_ep_cfg:	[in] IPA end-point configuration params
+ *
+ * Returns:	0 on success, negative on failure
+ *
+ * Note:	Should not be called from atomic context
+ */
+static int ipa3_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
+{
+	int ep;
+	struct ipahal_reg_endp_init_mode init_mode;
+
+	if (!client_handle_valid(clnt_hdl))
+		return -EINVAL;
+
+	if (IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client)) {
+		ipa_err("MODE does not apply to IPA out EP %d\n", clnt_hdl);
+		return -EINVAL;
+	}
+
+	ep = ipa3_get_ep_mapping(ep_mode->dst);
+	if (ep < 0 && ep_mode->mode == IPA_DMA) {
+		ipa_err("dst %d does not exist in DMA mode\n", ep_mode->dst);
+		return -EINVAL;
+	}
+
+	WARN_ON(ep_mode->mode == IPA_DMA && IPA_CLIENT_IS_PROD(ep_mode->dst));
+
+	if (!IPA_CLIENT_IS_CONS(ep_mode->dst))
+		ep = ipa3_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
+
+	ipa_debug("pipe=%d mode=%d(%s), dst_client_number=%d",
+			clnt_hdl,
+			ep_mode->mode,
+			ipa3_get_mode_type_str(ep_mode->mode),
+			ep_mode->dst);
+
+	/* copy over EP cfg */
+	ipa3_ctx->ep[clnt_hdl].cfg.mode = *ep_mode;
+	ipa3_ctx->ep[clnt_hdl].dst_pipe_index = ep;
+
+	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+
+	init_mode.dst_pipe_number = ipa3_ctx->ep[clnt_hdl].dst_pipe_index;
+	init_mode.ep_mode = *ep_mode;
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_MODE_n, clnt_hdl, &init_mode);
+
+	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+
+	return 0;
+}
+
 /**
  * ipa3_cfg_ep_seq() - IPA end-point HPS/DPS sequencer type configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
@@ -1229,76 +1299,6 @@ int ipa3_cfg_ep_ctrl(u32 clnt_hdl, const struct ipa_ep_cfg_ctrl *ep_ctrl)
 	if (ep_ctrl->ipa_ep_suspend == true &&
 			IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client))
 		ipa3_suspend_active_aggr_wa(clnt_hdl);
-
-	return 0;
-}
-
-const char *ipa3_get_mode_type_str(enum ipa_mode_type mode)
-{
-	switch (mode) {
-	case (IPA_BASIC):
-		return "Basic";
-	case (IPA_ENABLE_FRAMING_HDLC):
-		return "HDLC framing";
-	case (IPA_ENABLE_DEFRAMING_HDLC):
-		return "HDLC de-framing";
-	case (IPA_DMA):
-		return "DMA";
-	}
-
-	return "undefined";
-}
-
-/**
- * ipa3_cfg_ep_mode() - IPA end-point mode configuration
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg:	[in] IPA end-point configuration params
- *
- * Returns:	0 on success, negative on failure
- *
- * Note:	Should not be called from atomic context
- */
-int ipa3_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
-{
-	int ep;
-	struct ipahal_reg_endp_init_mode init_mode;
-
-	if (!client_handle_valid(clnt_hdl))
-		return -EINVAL;
-
-	if (IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client)) {
-		ipa_err("MODE does not apply to IPA out EP %d\n", clnt_hdl);
-		return -EINVAL;
-	}
-
-	ep = ipa3_get_ep_mapping(ep_mode->dst);
-	if (ep < 0 && ep_mode->mode == IPA_DMA) {
-		ipa_err("dst %d does not exist in DMA mode\n", ep_mode->dst);
-		return -EINVAL;
-	}
-
-	WARN_ON(ep_mode->mode == IPA_DMA && IPA_CLIENT_IS_PROD(ep_mode->dst));
-
-	if (!IPA_CLIENT_IS_CONS(ep_mode->dst))
-		ep = ipa3_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
-
-	ipa_debug("pipe=%d mode=%d(%s), dst_client_number=%d",
-			clnt_hdl,
-			ep_mode->mode,
-			ipa3_get_mode_type_str(ep_mode->mode),
-			ep_mode->dst);
-
-	/* copy over EP cfg */
-	ipa3_ctx->ep[clnt_hdl].cfg.mode = *ep_mode;
-	ipa3_ctx->ep[clnt_hdl].dst_pipe_index = ep;
-
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
-
-	init_mode.dst_pipe_number = ipa3_ctx->ep[clnt_hdl].dst_pipe_index;
-	init_mode.ep_mode = *ep_mode;
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_MODE_n, clnt_hdl, &init_mode);
-
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
 
 	return 0;
 }
