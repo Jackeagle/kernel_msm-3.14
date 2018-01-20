@@ -690,7 +690,7 @@ static void ipahal_imm_cmd_init(void)
 
 	ipa_debug_low("Entry - HW_TYPE=%d\n", ipahal_ctx->hw_type);
 
-	/* Build up a the immediate command descriptions we'll use */
+	/* Build up the immediate command descriptions we'll use */
 	for (i = 0; i < IPA_IMM_CMD_MAX ; i++) {
 		for (j = ipahal_ctx->hw_type; j >= IPA_HW_v3_0; j--) {
 			const struct ipahal_imm_cmd_obj *imm_cmd;
