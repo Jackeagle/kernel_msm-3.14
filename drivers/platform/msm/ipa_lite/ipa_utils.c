@@ -26,6 +26,7 @@
 #include <linux/module.h>
 #include <linux/of.h>
 #include <linux/platform_device.h>
+#include <asm/unaligned.h>
 #include "ipa_i.h"
 #include "ipahal/ipahal.h"
 #include "ipahal/ipahal_fltrt.h"
@@ -2832,7 +2833,7 @@ void ipa_write_64(u64 w, u8 *dest)
 	put_unaligned(w, dest);
 }
 
-const char *ipa_clients_strings[IPA_CLIENT_MAX] = {
+static const char *ipa_clients_strings[IPA_CLIENT_MAX] = {
 	[IPA_CLIENT_A2_EMBEDDED_PROD] = __stringify(IPA_CLIENT_A2_EMBEDDED_PROD),
 	[IPA_CLIENT_A2_EMBEDDED_CONS] = __stringify(IPA_CLIENT_A2_EMBEDDED_CONS),
 	[IPA_CLIENT_APPS_LAN_PROD] = __stringify(IPA_CLIENT_APPS_LAN_PROD),
@@ -2857,6 +2858,17 @@ const char *ipa_clients_strings[IPA_CLIENT_MAX] = {
 	[IPA_CLIENT_Q6_DECOMP2_CONS] = __stringify(IPA_CLIENT_Q6_DECOMP2_CONS),
 	[IPA_CLIENT_Q6_LTE_WIFI_AGGR_CONS] = __stringify(IPA_CLIENT_Q6_LTE_WIFI_AGGR_CONS),
 };
+
+const char *ipa_client_string(enum ipa_client_type client)
+{
+	if (client < 0 || client >= IPA_CLIENT_MAX)
+		return "Invalid client";
+
+	if (ipa_clients_strings[client])
+		return ipa_clients_strings[client];
+
+	return "Undefined client";
+}
 
 void ipa_assert(void)
 {

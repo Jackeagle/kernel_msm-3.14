@@ -22,8 +22,7 @@
 		log_info.file = __FILENAME__; \
 		log_info.line = __LINE__; \
 		log_info.type = EP; \
-		log_info.id_string = (client < 0 || client >= IPA_CLIENT_MAX) \
-			? "Invalid Client" : ipa_clients_strings[client]
+		log_info.id_string = ipa_client_string(client)
 
 #define IPA_ACTIVE_CLIENTS_PREP_SIMPLE(log_info) \
 		log_info.file = __FILENAME__; \
@@ -440,8 +439,6 @@ struct ipa_hdr_offset_entry {
 	u32 bin;
 };
 
-extern const char *ipa_clients_strings[];
-
 /**
  * struct ipa_hdr_add - header descriptor includes in and out
  * parameters
@@ -850,5 +847,7 @@ int ipa_tear_down_uc_offload_pipes(int ipa_ep_idx_ul, int ipa_ep_idx_dl);
 void ipa_write_64(u64 w, u8 *dest);
 int ipa_start_gsi_channel(u32 clnt_hdl);
 void *ipa_get_ipc_logbuf(void);
+
+const char *ipa_client_string(enum ipa_client_type client);
 
 #endif /* _IPA_COMMON_I_H_ */
