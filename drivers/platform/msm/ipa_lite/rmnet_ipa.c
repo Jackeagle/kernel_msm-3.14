@@ -74,11 +74,6 @@ static int ipa3_rmnet_poll(struct napi_struct *napi, int budget);
 static void ipa3_wake_tx_queue(struct work_struct *work);
 static DECLARE_WORK(ipa3_tx_wakequeue_work, ipa3_wake_tx_queue);
 
-enum ipa3_wwan_device_status {
-	WWAN_DEVICE_INACTIVE = 0,
-	WWAN_DEVICE_ACTIVE   = 1
-};
-
 struct ipa3_rmnet_plat_drv_res {
 	bool ipa_rmnet_ssr;
 	bool ipa_loaduC;
@@ -96,7 +91,7 @@ struct ipa3_rmnet_plat_drv_res {
  * @outstanding_low: number of outstanding packets which shall cause
  * @ch_id: channel id
  * @lock: spinlock for mutual exclusion
- * @device_status: holds device status
+ * @device_active: true if device is active
  *
  * WWAN private - holds all relevant info about WWAN driver
  */
@@ -108,7 +103,7 @@ struct ipa3_wwan_private {
 	int outstanding_high;
 	int outstanding_low;
 	spinlock_t lock;
-	enum ipa3_wwan_device_status device_status;
+	bool device_active;
 	struct napi_struct napi;
 };
 
@@ -159,7 +154,7 @@ static int __ipa_wwan_open(struct net_device *dev)
 	struct ipa3_wwan_private *wwan_ptr = netdev_priv(dev);
 
 	ipa_debug("[%s] __wwan_open()\n", dev->name);
-	wwan_ptr->device_status = WWAN_DEVICE_ACTIVE;
+	wwan_ptr->device_active = true;
 
 	if (ipa3_rmnet_res.ipa_napi_enable)
 		napi_enable(&(wwan_ptr->napi));
@@ -192,8 +187,8 @@ static int __ipa_wwan_close(struct net_device *dev)
 	struct ipa3_wwan_private *wwan_ptr = netdev_priv(dev);
 	int rc = 0;
 
-	if (wwan_ptr->device_status == WWAN_DEVICE_ACTIVE) {
-		wwan_ptr->device_status = WWAN_DEVICE_INACTIVE;
+	if (wwan_ptr->device_active) {
+		wwan_ptr->device_active = false;
 		/* do not close wwan port once up,  this causes
 		 * remote side to hang if tried to open again
 		 */
