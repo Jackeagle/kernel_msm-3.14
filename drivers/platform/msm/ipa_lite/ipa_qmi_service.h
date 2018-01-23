@@ -70,8 +70,6 @@ extern struct elem_info ipa3_stop_data_usage_quota_req_msg_data_v01_ei[];
 extern struct elem_info ipa3_stop_data_usage_quota_resp_msg_data_v01_ei[];
 extern struct elem_info ipa3_init_modem_driver_cmplt_req_msg_data_v01_ei[];
 extern struct elem_info ipa3_init_modem_driver_cmplt_resp_msg_data_v01_ei[];
-extern struct elem_info ipa3_install_fltr_rule_req_ex_msg_data_v01_ei[];
-extern struct elem_info ipa3_install_fltr_rule_resp_ex_msg_data_v01_ei[];
 
 /**
  * struct ipa3_rmnet_context - IPA rmnet context
