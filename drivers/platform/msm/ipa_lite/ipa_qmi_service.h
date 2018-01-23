@@ -50,8 +50,6 @@ extern struct elem_info ipa3_indication_reg_resp_msg_data_v01_ei[];
 extern struct elem_info ipa3_master_driver_init_complt_ind_msg_data_v01_ei[];
 extern struct elem_info ipa3_install_fltr_rule_req_msg_data_v01_ei[];
 extern struct elem_info ipa3_install_fltr_rule_resp_msg_data_v01_ei[];
-extern struct elem_info ipa3_fltr_installed_notif_req_msg_data_v01_ei[];
-extern struct elem_info ipa3_fltr_installed_notif_resp_msg_data_v01_ei[];
 extern struct elem_info ipa3_enable_force_clear_datapath_req_msg_data_v01_ei[];
 extern struct elem_info ipa3_enable_force_clear_datapath_resp_msg_data_v01_ei[];
 extern struct elem_info ipa3_disable_force_clear_datapath_req_msg_data_v01_ei[];
