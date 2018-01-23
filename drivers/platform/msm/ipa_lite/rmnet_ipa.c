@@ -860,8 +860,7 @@ static void ipa3_wwan_setup(struct net_device *dev)
 {
 	dev->netdev_ops = &ipa3_wwan_ops_ip;
 	ether_setup(dev);
-	/* set this after calling ether_setup */
-	dev->header_ops = 0;  /* No header */
+	dev->header_ops = NULL;  /* No header (override ether_setup() value) */
 	dev->type = ARPHRD_RAWIP;
 	dev->hard_header_len = 0;
 	dev->mtu = WWAN_DATA_LEN;
