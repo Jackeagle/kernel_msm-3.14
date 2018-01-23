@@ -107,7 +107,6 @@ struct ipa3_wwan_private {
 	int outstanding_high_ctl;
 	int outstanding_high;
 	int outstanding_low;
-	uint32_t ch_id;
 	spinlock_t lock;
 	enum ipa3_wwan_device_status device_status;
 	struct napi_struct napi;
