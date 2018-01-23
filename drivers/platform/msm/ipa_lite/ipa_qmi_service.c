@@ -584,14 +584,6 @@ static void ipa3_q6_clnt_notify(struct qmi_handle *handle,
 	}
 }
 
-static void ipa3_q6_clnt_ind_cb(struct qmi_handle *handle, unsigned int msg_id,
-			       void *msg, unsigned int msg_len,
-			       void *ind_cb_priv)
-{
-	if (handle != ipa_q6_clnt)
-		ipa_err("Wrong client\n");
-}
-
 static void ipa3_q6_clnt_svc_arrive(struct work_struct *work)
 {
 	int rc;
@@ -616,10 +608,6 @@ static void ipa3_q6_clnt_svc_arrive(struct work_struct *work)
 		ipa_q6_clnt = NULL;
 		return;
 	}
-
-	rc = qmi_register_ind_cb(ipa_q6_clnt, ipa3_q6_clnt_ind_cb, NULL);
-	if (rc < 0)
-		ipa_err("Unable to register for indications\n");
 
 	ipa_q6_clnt_reset = 0;
 	ipa_debug("Q6 QMI service available now\n");
