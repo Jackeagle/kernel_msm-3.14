@@ -2638,65 +2638,6 @@ static struct elem_info ipa3_data_usage_quota_info_type_data_v01_ei[] = {
 	},
 };
 
-struct elem_info ipa3_set_data_usage_quota_req_msg_data_v01_ei[] = {
-	{
-		.data_type	= QMI_OPT_FLAG,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint8_t),
-		.is_array	= NO_ARRAY,
-		.tlv_type	= 0x10,
-		.offset		= offsetof(
-			struct ipa_set_data_usage_quota_req_msg_v01,
-			apn_quota_list_valid),
-	},
-	{
-		.data_type	= QMI_DATA_LEN,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint8_t),
-		.is_array	= NO_ARRAY,
-		.tlv_type	= 0x10,
-		.offset		= offsetof(
-			struct ipa_set_data_usage_quota_req_msg_v01,
-			apn_quota_list_len),
-	},
-	{
-		.data_type	= QMI_STRUCT,
-		.elem_len	= QMI_IPA_MAX_APN_V01,
-		.elem_size	= sizeof(struct
-					ipa_data_usage_quota_info_type_v01),
-		.is_array	= VAR_LEN_ARRAY,
-		.tlv_type	= 0x10,
-		.offset		= offsetof(
-			struct ipa_set_data_usage_quota_req_msg_v01,
-			apn_quota_list),
-		.ei_array	= ipa3_data_usage_quota_info_type_data_v01_ei,
-	},
-	{
-		.data_type	= QMI_EOTI,
-		.is_array	= NO_ARRAY,
-		.tlv_type	= QMI_COMMON_TLV_TYPE,
-	},
-};
-
-struct elem_info ipa3_set_data_usage_quota_resp_msg_data_v01_ei[] = {
-	{
-		.data_type	= QMI_STRUCT,
-		.elem_len	= 1,
-		.elem_size	= sizeof(struct qmi_response_type_v01),
-		.is_array	= NO_ARRAY,
-		.tlv_type	= 0x02,
-		.offset		= offsetof(
-			struct ipa_set_data_usage_quota_resp_msg_v01,
-			resp),
-		.ei_array	= get_qmi_response_type_v01_ei(),
-	},
-	{
-		.data_type	= QMI_EOTI,
-		.is_array	= NO_ARRAY,
-		.tlv_type	= QMI_COMMON_TLV_TYPE,
-	},
-};
-
 struct elem_info ipa3_data_usage_quota_reached_ind_msg_data_v01_ei[] = {
 	{
 		.data_type	= QMI_STRUCT,
@@ -2709,34 +2650,6 @@ struct elem_info ipa3_data_usage_quota_reached_ind_msg_data_v01_ei[] = {
 			struct ipa_data_usage_quota_reached_ind_msg_v01,
 			apn),
 		.ei_array	= ipa3_data_usage_quota_info_type_data_v01_ei,
-	},
-	{
-		.data_type	= QMI_EOTI,
-		.is_array	= NO_ARRAY,
-		.tlv_type	= QMI_COMMON_TLV_TYPE,
-	},
-};
-
-struct elem_info ipa3_stop_data_usage_quota_req_msg_data_v01_ei[] = {
-	/* ipa_stop_data_usage_quota_req_msg is empty */
-	{
-		.data_type	= QMI_EOTI,
-		.is_array	= NO_ARRAY,
-		.tlv_type	= QMI_COMMON_TLV_TYPE,
-	},
-};
-
-struct elem_info ipa3_stop_data_usage_quota_resp_msg_data_v01_ei[] = {
-	{
-		.data_type	= QMI_STRUCT,
-		.elem_len	= 1,
-		.elem_size	= sizeof(struct qmi_response_type_v01),
-		.is_array	= NO_ARRAY,
-		.tlv_type	= 0x02,
-		.offset		= offsetof(
-			struct ipa_stop_data_usage_quota_resp_msg_v01,
-			resp),
-		.ei_array	= get_qmi_response_type_v01_ei(),
 	},
 	{
 		.data_type	= QMI_EOTI,
