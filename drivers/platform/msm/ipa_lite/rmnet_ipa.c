@@ -573,9 +573,6 @@ static int handle3_egress_format(struct net_device *dev,
 	return rc;
 }
 
-static struct cdev ipa3_wan_ioctl_cdev;
-
-
 /**
  * ipa3_wwan_ioctl() - I/O control for wwan network driver.
  *
@@ -939,7 +936,6 @@ struct ipa3_rmnet_context ipa3_rmnet_ctx;
 
 void ipa3_wan_ioctl_deinit(void)
 {
-	cdev_del(&ipa3_wan_ioctl_cdev);
 }
 
 /**
