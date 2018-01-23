@@ -272,6 +272,7 @@ static int ipa3_init_smem_region(int memory_region_size,
 	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_DMA_SHARED_MEM, &cmd);
 	if (!cmd_pyld) {
 		ipa_err("failed to construct dma_shared_mem imm cmd\n");
+		ipahal_dma_free(&mem);
 		return -ENOMEM;
 	}
 
