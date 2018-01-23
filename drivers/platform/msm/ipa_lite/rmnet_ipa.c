@@ -575,7 +575,6 @@ static int handle3_egress_format(struct net_device *dev,
 
 static unsigned int dev_num = 1;
 static struct cdev ipa3_wan_ioctl_cdev;
-static unsigned int ipa3_process_ioctl = 1;
 static struct class *class;
 static dev_t device;
 
@@ -951,7 +950,6 @@ void ipa3_wan_ioctl_deinit(void)
 
 void ipa3_wan_ioctl_enable_qmi_messages(void)
 {
-	ipa3_process_ioctl = 1;
 }
 
 /**
@@ -1225,7 +1223,6 @@ static struct platform_driver rmnet_ipa_driver = {
 
  void ipa3_wan_ioctl_stop_qmi_messages(void)
 {
-	ipa3_process_ioctl = 0;
 }
 
 static int ipa3_ssr_notifier_cb(struct notifier_block *this,
