@@ -97,8 +97,6 @@ int ipa3_qmi_enable_force_clear_datapath_send(
 int ipa3_qmi_disable_force_clear_datapath_send(
 	struct ipa_disable_force_clear_datapath_req_msg_v01 *req);
 
-void ipa3_wan_ioctl_deinit(void);
-
 void ipa3_qmi_stop_workqueues(void);
 
 void ipa3_q6_handshake_complete(bool ssr_bootup);

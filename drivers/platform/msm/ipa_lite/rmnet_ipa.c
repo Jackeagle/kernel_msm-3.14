@@ -934,10 +934,6 @@ static int get_ipa_rmnet_dts_configuration(struct platform_device *pdev,
 
 struct ipa3_rmnet_context ipa3_rmnet_ctx;
 
-void ipa3_wan_ioctl_deinit(void)
-{
-}
-
 /**
  * ipa3_wwan_probe() - Initialized the module and registers as a
  * network interface to the network stack
@@ -1055,9 +1051,8 @@ config_err:
 	unregister_netdev(dev);
 
 alloc_netdev_err:
-	ipa3_wan_ioctl_deinit();
-
 	atomic_set(&rmnet_ipa3_ctx->is_ssr, 0);
+
 	return ret;
 }
 
@@ -1086,9 +1081,6 @@ static int ipa3_wwan_remove(struct platform_device *pdev)
 	if (IPA_NETDEV())
 		free_netdev(IPA_NETDEV());
 	rmnet_ipa3_ctx->wwan_priv = NULL;
-	/* No need to remove wwan_ioctl during SSR */
-	if (!atomic_read(&rmnet_ipa3_ctx->is_ssr))
-		ipa3_wan_ioctl_deinit();
 
 	atomic_set(&rmnet_ipa3_ctx->is_initialized, 0);
 	ipa_info("rmnet_ipa completed deinitialization\n");
