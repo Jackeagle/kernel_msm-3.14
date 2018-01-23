@@ -1324,10 +1324,6 @@ int ipa3_send(struct ipa3_sys_context *sys,
 		struct ipa3_desc *desc,
 		bool in_atomic);
 
-int ipa3_qmi_enable_force_clear_datapath_send(
-		struct ipa_enable_force_clear_datapath_req_msg_v01 *req);
-
-
 int ipa3_get_ep_mapping(enum ipa_client_type client);
 int ipa_get_ep_group(enum ipa_client_type client);
 
