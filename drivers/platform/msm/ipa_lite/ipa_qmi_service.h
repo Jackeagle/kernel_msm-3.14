@@ -97,10 +97,6 @@ int ipa3_qmi_enable_force_clear_datapath_send(
 int ipa3_qmi_disable_force_clear_datapath_send(
 	struct ipa_disable_force_clear_datapath_req_msg_v01 *req);
 
-void ipa3_wan_ioctl_stop_qmi_messages(void);
-
-void ipa3_wan_ioctl_enable_qmi_messages(void);
-
 void ipa3_wan_ioctl_deinit(void);
 
 void ipa3_qmi_stop_workqueues(void);

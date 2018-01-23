@@ -948,10 +948,6 @@ void ipa3_wan_ioctl_deinit(void)
 	unregister_chrdev_region(device, dev_num);
 }
 
-void ipa3_wan_ioctl_enable_qmi_messages(void)
-{
-}
-
 /**
  * ipa3_wwan_probe() - Initialized the module and registers as a
  * network interface to the network stack
@@ -1009,10 +1005,6 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 	else
 		/* LE platform not loads uC */
 		ipa3_qmi_service_init(QMI_IPA_PLATFORM_TYPE_LE_V01);
-
-
-	/* Enable sending QMI messages after SSR */
-	ipa3_wan_ioctl_enable_qmi_messages();
 
 	/* initialize wan-driver netdev */
 	dev = alloc_netdev(sizeof(struct ipa3_wwan_private),
@@ -1221,10 +1213,6 @@ static struct platform_driver rmnet_ipa_driver = {
 	.remove = ipa3_wwan_remove,
 };
 
- void ipa3_wan_ioctl_stop_qmi_messages(void)
-{
-}
-
 static int ipa3_ssr_notifier_cb(struct notifier_block *this,
 			   unsigned long code,
 			   void *data)
@@ -1241,7 +1229,6 @@ static int ipa3_ssr_notifier_cb(struct notifier_block *this,
 			netif_stop_queue(IPA_NETDEV());
 
 		ipa3_qmi_stop_workqueues();
-		ipa3_wan_ioctl_stop_qmi_messages();
 		ipa_stop_polling_stats();
 		if (atomic_read(&rmnet_ipa3_ctx->is_initialized))
 			platform_driver_unregister(&rmnet_ipa_driver);
