@@ -99,12 +99,10 @@ static struct msg_desc ipa3_init_modem_driver_cmplt_resp_desc = {
 
 static int ipa3_handle_indication_req(void *req_h, void *req)
 {
-	struct ipa_indication_reg_req_msg_v01 *indication_req;
 	struct ipa_indication_reg_resp_msg_v01 resp;
 	struct ipa_master_driver_init_complt_ind_msg_v01 ind;
 	int rc;
 
-	indication_req = (struct ipa_indication_reg_req_msg_v01 *)req;
 	ipa_debug("Received INDICATION Request\n");
 
 	memset(&resp, 0, sizeof(struct ipa_indication_reg_resp_msg_v01));
@@ -132,12 +130,10 @@ static int ipa3_handle_indication_req(void *req_h, void *req)
 
 static int ipa3_handle_modem_init_cmplt_req(void *req_h, void *req)
 {
-	struct ipa_init_modem_driver_cmplt_req_msg_v01 *cmplt_req;
 	struct ipa_init_modem_driver_cmplt_resp_msg_v01 resp;
 	int rc;
 
 	ipa_debug("Received QMI_IPA_INIT_MODEM_DRIVER_CMPLT_REQ_V01\n");
-	cmplt_req = (struct ipa_init_modem_driver_cmplt_req_msg_v01 *)req;
 
 	if (ipa3_modem_init_cmplt == false)
 		ipa3_modem_init_cmplt = true;
