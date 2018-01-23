@@ -574,7 +574,6 @@ static int handle3_egress_format(struct net_device *dev,
 }
 
 static struct cdev ipa3_wan_ioctl_cdev;
-static struct class *class;
 
 
 /**
@@ -941,7 +940,6 @@ struct ipa3_rmnet_context ipa3_rmnet_ctx;
 void ipa3_wan_ioctl_deinit(void)
 {
 	cdev_del(&ipa3_wan_ioctl_cdev);
-	class_destroy(class);
 }
 
 /**
