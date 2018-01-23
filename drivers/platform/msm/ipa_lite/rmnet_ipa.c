@@ -1008,17 +1008,11 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 		       ipa3_rmnet_poll, NAPI_WEIGHT);
 	ret = register_netdev(dev);
 	if (ret) {
-		ipa_err("unable to register ipa_netdev %d rc=%d\n",
-			0, ret);
-		return -EFAULT;
+		ipa_err("unable to register ipa_netdev %d rc=%d\n", 0, ret);
+		goto config_err;
 	}
 
 	ipa_debug("IPA-WWAN devices (%s) initialization ok :>>>>\n", dev->name);
-	if (ret) {
-		ipa_err("default configuration failed rc=%d\n",
-				ret);
-		goto config_err;
-	}
 	atomic_set(&rmnet_ipa3_ctx->is_initialized, 1);
 	if (!atomic_read(&rmnet_ipa3_ctx->is_ssr)) {
 		/* offline charging mode */
