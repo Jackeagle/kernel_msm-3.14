@@ -573,7 +573,6 @@ static int handle3_egress_format(struct net_device *dev,
 	return rc;
 }
 
-static unsigned int dev_num = 1;
 static struct cdev ipa3_wan_ioctl_cdev;
 static struct class *class;
 static dev_t device;
@@ -945,7 +944,6 @@ void ipa3_wan_ioctl_deinit(void)
 	cdev_del(&ipa3_wan_ioctl_cdev);
 	device_destroy(class, device);
 	class_destroy(class);
-	unregister_chrdev_region(device, dev_num);
 }
 
 /**
