@@ -135,8 +135,7 @@ static int ipa3_handle_modem_init_cmplt_req(void *req_h, void *req)
 
 	ipa_debug("Received QMI_IPA_INIT_MODEM_DRIVER_CMPLT_REQ_V01\n");
 
-	if (ipa3_modem_init_cmplt == false)
-		ipa3_modem_init_cmplt = true;
+	ipa3_modem_init_cmplt = true;
 
 	memset(&resp, 0, sizeof(resp));
 	resp.resp.result = IPA_QMI_RESULT_SUCCESS_V01;
