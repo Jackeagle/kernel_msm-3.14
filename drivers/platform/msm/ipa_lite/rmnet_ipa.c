@@ -1002,8 +1002,6 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 		goto alloc_netdev_err;
 	}
 	rmnet_ipa3_ctx->wwan_priv = netdev_priv(dev);
-	memset(rmnet_ipa3_ctx->wwan_priv, 0,
-		sizeof(*(rmnet_ipa3_ctx->wwan_priv)));
 	ipa_debug("wwan_ptr (private) = %p", rmnet_ipa3_ctx->wwan_priv);
 	rmnet_ipa3_ctx->wwan_priv->net = dev;
 	rmnet_ipa3_ctx->wwan_priv->outstanding_high = DEFAULT_OUTSTANDING_HIGH;
