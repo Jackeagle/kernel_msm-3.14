@@ -63,7 +63,6 @@ extern struct elem_info ipa3_get_data_stats_req_msg_data_v01_ei[];
 extern struct elem_info ipa3_get_data_stats_resp_msg_data_v01_ei[];
 extern struct elem_info ipa3_get_apn_data_stats_req_msg_data_v01_ei[];
 extern struct elem_info ipa3_get_apn_data_stats_resp_msg_data_v01_ei[];
-extern struct elem_info ipa3_data_usage_quota_reached_ind_msg_data_v01_ei[];
 extern struct elem_info ipa3_init_modem_driver_cmplt_req_msg_data_v01_ei[];
 extern struct elem_info ipa3_init_modem_driver_cmplt_resp_msg_data_v01_ei[];
 

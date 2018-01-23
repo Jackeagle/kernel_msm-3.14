@@ -588,33 +588,8 @@ static void ipa3_q6_clnt_ind_cb(struct qmi_handle *handle, unsigned int msg_id,
 			       void *msg, unsigned int msg_len,
 			       void *ind_cb_priv)
 {
-	struct ipa_data_usage_quota_reached_ind_msg_v01 qmi_ind;
-	struct msg_desc qmi_ind_desc;
-	int rc = 0;
-
-	if (handle != ipa_q6_clnt) {
+	if (handle != ipa_q6_clnt)
 		ipa_err("Wrong client\n");
-		return;
-	}
-
-	if (msg_id == QMI_IPA_DATA_USAGE_QUOTA_REACHED_IND_V01) {
-		memset(&qmi_ind, 0, sizeof(
-			struct ipa_data_usage_quota_reached_ind_msg_v01));
-		qmi_ind_desc.max_msg_len =
-			QMI_IPA_DATA_USAGE_QUOTA_REACHED_IND_MAX_MSG_LEN_V01;
-		qmi_ind_desc.msg_id = QMI_IPA_DATA_USAGE_QUOTA_REACHED_IND_V01;
-		qmi_ind_desc.ei_array =
-			ipa3_data_usage_quota_reached_ind_msg_data_v01_ei;
-
-		rc = qmi_kernel_decode(&qmi_ind_desc, &qmi_ind, msg, msg_len);
-		if (rc < 0) {
-			ipa_err("Error decoding msg_id %d\n", msg_id);
-			return;
-		}
-		ipa_debug("Quota reached indication on qmux(%d) Mbytes(%lu)\n",
-			  qmi_ind.apn.mux_id,
-			  (unsigned long int) qmi_ind.apn.num_Mbytes);
-	}
 }
 
 static void ipa3_q6_clnt_svc_arrive(struct work_struct *work)
