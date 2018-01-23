@@ -109,7 +109,6 @@ struct ipa3_wwan_private {
 	int outstanding_low;
 	uint32_t ch_id;
 	spinlock_t lock;
-	struct completion resource_granted_completion;
 	enum ipa3_wwan_device_status device_status;
 	struct napi_struct napi;
 };
@@ -161,8 +160,6 @@ static int __ipa_wwan_open(struct net_device *dev)
 	struct ipa3_wwan_private *wwan_ptr = netdev_priv(dev);
 
 	ipa_debug("[%s] __wwan_open()\n", dev->name);
-	if (wwan_ptr->device_status != WWAN_DEVICE_ACTIVE)
-		reinit_completion(&wwan_ptr->resource_granted_completion);
 	wwan_ptr->device_status = WWAN_DEVICE_ACTIVE;
 
 	if (ipa3_rmnet_res.ipa_napi_enable)
@@ -201,7 +198,6 @@ static int __ipa_wwan_close(struct net_device *dev)
 		/* do not close wwan port once up,  this causes
 		 * remote side to hang if tried to open again
 		 */
-		reinit_completion(&wwan_ptr->resource_granted_completion);
 		return rc;
 	} else {
 		return -EBADF;
@@ -1008,8 +1004,6 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 	rmnet_ipa3_ctx->wwan_priv->outstanding_low = DEFAULT_OUTSTANDING_LOW;
 	atomic_set(&rmnet_ipa3_ctx->wwan_priv->outstanding_pkts, 0);
 	spin_lock_init(&rmnet_ipa3_ctx->wwan_priv->lock);
-	init_completion(
-		&rmnet_ipa3_ctx->wwan_priv->resource_granted_completion);
 
 	/* Enable SG support in netdevice. */
 	if (ipa3_rmnet_res.ipa_advertise_sg_support)
