@@ -21,10 +21,6 @@
 /**
  * name of the DL wwan default routing tables for v4 and v6
  */
-#define IPA_A7_QMAP_HDR_NAME "ipa_qmap_hdr"
-#define IPA_DFLT_WAN_RT_TBL_NAME "ipa_dflt_wan_rt"
-#define MAX_NUM_Q6_RULE 35
-#define MAX_NUM_QMI_RULE_CACHE 10
 #define DEV_NAME "ipa-wan"
 #define SUBSYS_MODEM "modem"
 
