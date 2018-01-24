@@ -97,10 +97,46 @@ static struct msg_desc ipa3_init_modem_driver_cmplt_resp_desc = {
 	.ei_array = ipa3_init_modem_driver_cmplt_resp_msg_data_v01_ei,
 };
 
+/*
+ * The AP and modem synchronize by performing a handshake operation
+ * over QMI.  It involves both sides initiating a request/response
+ * transaction, followed the AP sending an indication to the modem.
+ *
+ * The AP is considered the master, and must tell the modem about
+ * some of the operational parameters they must agree on (such as
+ * the way shared IPA memory is laid out).  This information is
+ * contained in an "init modem driver" request sent to the modem.
+ * The modem uses this information for initialization, and once
+ * it's done it sends its response (normally indicating success).
+ *
+ * The modem, meanwhile, is able to perform some initialization
+ * before it receives the information from the "init modem driver"
+ * request, and will send an "indication register" request to the
+ * AP once it is prepared to receive indications from the AP.  When
+ * this is received, the AP sends a response indicating success.
+ *
+ * The above two request/response transactions can occur in any
+ * order.  Regardless, once both have completed successfully, the AP
+ * sends a "master driver complete" indication to the modem, which
+ * completes the handshake.
+ */
+static int ipa3_qmi_send_handshake_complete_indication(void)
+{
+	struct msg_desc *desc = &ipa3_master_driver_complete_indication_desc;
+	struct ipa_master_driver_init_complt_ind_msg_v01 ind;
+	size_t size = sizeof(ind);
+
+	ipa_debug("send indication to modem\n");
+
+	memset(&ind, 0, size);
+	ind.master_driver_init_status.result = IPA_QMI_RESULT_SUCCESS_V01;
+
+	return qmi_send_ind(ipa3_svc_handle, curr_conn, desc, &ind, size);
+}
+
 static int ipa3_handle_indication_req(void *req_h, void *req)
 {
 	struct ipa_indication_reg_resp_msg_v01 resp;
-	struct ipa_master_driver_init_complt_ind_msg_v01 ind;
 	int rc;
 
 	ipa_debug("Received INDICATION Request\n");
@@ -111,20 +147,11 @@ static int ipa3_handle_indication_req(void *req_h, void *req)
 			&ipa3_indication_reg_resp_desc, &resp, sizeof(resp));
 	ipa3_qmi_indication_fin = true;
 	/* check if need sending indication to modem */
-	if (ipa3_qmi_modem_init_fin)	{
-		ipa_debug("send indication to modem (%d)\n",
-		ipa3_qmi_modem_init_fin);
-		memset(&ind, 0, sizeof(struct
-				ipa_master_driver_init_complt_ind_msg_v01));
-		ind.master_driver_init_status.result =
-			IPA_QMI_RESULT_SUCCESS_V01;
-		rc = qmi_send_ind_from_cb(ipa3_svc_handle, curr_conn,
-			&ipa3_master_driver_complete_indication_desc,
-			&ind,
-			sizeof(ind));
-	} else {
+	if (ipa3_qmi_modem_init_fin)
+		rc = ipa3_qmi_send_handshake_complete_indication();
+	else
 		ipa_err("not send indication\n");
-	}
+
 	return rc;
 }
 
@@ -488,7 +515,6 @@ static void ipa3_q6_clnt_notify(struct qmi_handle *handle,
 static void ipa3_q6_clnt_svc_arrive(struct work_struct *work)
 {
 	int rc;
-	struct ipa_master_driver_init_complt_ind_msg_v01 ind;
 
 	/* Create a Local client port for QMI communication */
 	ipa_q6_clnt = qmi_handle_create(ipa3_q6_clnt_notify, NULL);
@@ -538,22 +564,10 @@ static void ipa3_q6_clnt_svc_arrive(struct work_struct *work)
 	ipa_debug("complete, ipa3_qmi_modem_init_fin : %d\n",
 		ipa3_qmi_modem_init_fin);
 
-	if (ipa3_qmi_indication_fin)	{
-		ipa_debug("send indication to modem (%d)\n",
-		ipa3_qmi_indication_fin);
-		memset(&ind, 0, sizeof(struct
-				ipa_master_driver_init_complt_ind_msg_v01));
-		ind.master_driver_init_status.result =
-			IPA_QMI_RESULT_SUCCESS_V01;
-		rc = qmi_send_ind(ipa3_svc_handle, curr_conn,
-			&ipa3_master_driver_complete_indication_desc,
-			&ind,
-			sizeof(ind));
-		ipa_debug("ipa_qmi_service_client good\n");
-	} else {
-		ipa_err("not send indication (%d)\n",
-		ipa3_qmi_indication_fin);
-	}
+	if (ipa3_qmi_indication_fin)
+		(void)ipa3_qmi_send_handshake_complete_indication();
+	else
+		ipa_err("not send indication\n");
 }
 
 
