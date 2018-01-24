@@ -38,6 +38,11 @@
 		.elem_size	= sizeof(uint32_t),		\
 		SINGLE_ELEM_INFO_COMMON
 
+#define U16_ELEM_INFO_COMMON					\
+		.data_type	= QMI_UNSIGNED_2_BYTE,		\
+		.elem_size	= sizeof(uint16_t),		\
+		SINGLE_ELEM_INFO_COMMON
+
 #define U8_ELEM_INFO_COMMON					\
 		.data_type	= QMI_UNSIGNED_1_BYTE,		\
 		.elem_size	= sizeof(uint8_t),		\
@@ -165,20 +170,14 @@ static struct elem_info ipa3_ipfltr_range_eq_16_type_data_v01_ei[] = {
 			offset),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_2_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint16_t),
-		.is_array	= NO_ARRAY,
+		U16_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(
 			struct ipa_ipfltr_range_eq_16_type_v01,
 			range_low),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_2_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint16_t),
-		.is_array	= NO_ARRAY,
+		U16_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(
 			struct ipa_ipfltr_range_eq_16_type_v01,
@@ -227,10 +226,7 @@ static struct elem_info ipa3_ipfltr_eq_16_type_data_v01_ei[] = {
 			offset),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_2_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint16_t),
-		.is_array	= NO_ARRAY,
+		U16_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_ipfltr_eq_16_type_v01,
 					value),
@@ -290,10 +286,7 @@ static struct elem_info ipa3_ipfltr_mask_eq_128_type_data_v01_ei[] = {
 
 static struct elem_info ipa3_filter_rule_type_data_v01_ei[] = {
 	{
-		.data_type	= QMI_UNSIGNED_2_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint16_t),
-		.is_array	= NO_ARRAY,
+		U16_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(
 			struct ipa_filter_rule_type_v01,
