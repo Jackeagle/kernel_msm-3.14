@@ -134,6 +134,13 @@ static int ipa3_qmi_send_handshake_complete_indication(void)
 	return qmi_send_ind(ipa3_svc_handle, curr_conn, desc, &ind, size);
 }
 
+static int ipa3_send_resp_from_cb(void *req_h, struct msg_desc *resp_desc,
+			  void *resp, size_t resp_size)
+{
+	return qmi_send_resp_from_cb(ipa3_svc_handle, curr_conn, req_h,
+			resp_desc, resp, (unsigned int)resp_size);
+}
+
 static int ipa3_handle_indication_req(void *req_h, void *req)
 {
 	struct ipa_indication_reg_resp_msg_v01 resp;
@@ -143,7 +150,7 @@ static int ipa3_handle_indication_req(void *req_h, void *req)
 
 	memset(&resp, 0, sizeof(struct ipa_indication_reg_resp_msg_v01));
 	resp.resp.result = IPA_QMI_RESULT_SUCCESS_V01;
-	rc = qmi_send_resp_from_cb(ipa3_svc_handle, curr_conn, req_h,
+	rc = ipa3_send_resp_from_cb(req_h,
 			&ipa3_indication_reg_resp_desc, &resp, sizeof(resp));
 	ipa3_qmi_indication_fin = true;
 	/* check if need sending indication to modem */
@@ -167,7 +174,7 @@ static int ipa3_handle_modem_init_cmplt_req(void *req_h, void *req)
 	memset(&resp, 0, sizeof(resp));
 	resp.resp.result = IPA_QMI_RESULT_SUCCESS_V01;
 
-	rc = qmi_send_resp_from_cb(ipa3_svc_handle, curr_conn, req_h,
+	rc = ipa3_send_resp_from_cb(req_h,
 			&ipa3_init_modem_driver_cmplt_resp_desc,
 			&resp, sizeof(resp));
 
