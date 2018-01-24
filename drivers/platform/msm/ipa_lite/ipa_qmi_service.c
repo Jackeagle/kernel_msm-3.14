@@ -392,8 +392,9 @@ static int ipa3_qmi_init_modem_send_sync_msg(void)
 	struct ipa_init_modem_driver_req_msg_v01 req;
 	struct ipa_init_modem_driver_resp_msg_v01 resp;
 	struct msg_desc req_desc, resp_desc;
+	u32 offset;
 	int rc;
-	u16 smem_restr_bytes = ipa3_get_smem_restr_bytes();
+	u16 restricted_bytes = ipa3_get_smem_restr_bytes();
 
 	memset(&req, 0, sizeof(struct ipa_init_modem_driver_req_msg_v01));
 	memset(&resp, 0, sizeof(struct ipa_init_modem_driver_resp_msg_v01));
@@ -401,82 +402,81 @@ static int ipa3_qmi_init_modem_send_sync_msg(void)
 	req.platform_type_valid = true;
 	req.platform_type = ipa_wan_platform;
 
-	req.hdr_tbl_info_valid = (ipa3_mem(MODEM_HDR_SIZE) != 0);
-	req.hdr_tbl_info.modem_offset_start =
-		ipa3_mem(MODEM_HDR_OFST) + smem_restr_bytes;
-	req.hdr_tbl_info.modem_offset_end = ipa3_mem(MODEM_HDR_OFST) +
-		smem_restr_bytes + ipa3_mem(MODEM_HDR_SIZE) - 1;
+	if (ipa3_mem(MODEM_HDR_SIZE)) {
+		req.hdr_tbl_info_valid = true;
+		offset = restricted_bytes + ipa3_mem(MODEM_HDR_OFST);
+		req.hdr_tbl_info.modem_offset_start = offset;
+		req.hdr_tbl_info.modem_offset_end =
+			offset + ipa3_mem(MODEM_HDR_SIZE) - 1;
+	}
 
 	req.v4_route_tbl_info_valid = true;
-	req.v4_route_tbl_info.route_tbl_start_addr =
-		ipa3_mem(V4_RT_NHASH_OFST) + smem_restr_bytes;
-	req.v4_route_tbl_info.num_indices =
-		ipa3_mem(V4_MODEM_RT_INDEX_HI);
-	req.v6_route_tbl_info_valid = true;
+	offset = restricted_bytes + ipa3_mem(V4_RT_NHASH_OFST);
+	req.v4_route_tbl_info.route_tbl_start_addr = offset;
+	req.v4_route_tbl_info.num_indices = ipa3_mem(V4_MODEM_RT_INDEX_HI);
 
-	req.v6_route_tbl_info.route_tbl_start_addr =
-		ipa3_mem(V6_RT_NHASH_OFST) + smem_restr_bytes;
-	req.v6_route_tbl_info.num_indices =
-		ipa3_mem(V6_MODEM_RT_INDEX_HI);
+	req.v6_route_tbl_info_valid = true;
+	offset = restricted_bytes + ipa3_mem(V6_RT_NHASH_OFST);
+	req.v6_route_tbl_info.route_tbl_start_addr = offset;
+	req.v6_route_tbl_info.num_indices = ipa3_mem(V6_MODEM_RT_INDEX_HI);
 
 	req.v4_filter_tbl_start_addr_valid = true;
-	req.v4_filter_tbl_start_addr =
-		ipa3_mem(V4_FLT_NHASH_OFST) + smem_restr_bytes;
+	offset = restricted_bytes + ipa3_mem(V4_FLT_NHASH_OFST);
+	req.v4_filter_tbl_start_addr = offset;
 
 	req.v6_filter_tbl_start_addr_valid = true;
-	req.v6_filter_tbl_start_addr =
-		ipa3_mem(V6_FLT_NHASH_OFST) + smem_restr_bytes;
+	offset = restricted_bytes + ipa3_mem(V6_FLT_NHASH_OFST);
+	req.v6_filter_tbl_start_addr = offset;
 
-	req.modem_mem_info_valid = (ipa3_mem(MODEM_SIZE) != 0);
-	req.modem_mem_info.block_start_addr =
-		ipa3_mem(MODEM_OFST) + smem_restr_bytes;
-	req.modem_mem_info.size = ipa3_mem(MODEM_SIZE);
+	if (ipa3_mem(MODEM_SIZE)) {
+		req.modem_mem_info_valid = true;
+		offset = restricted_bytes + ipa3_mem(MODEM_OFST);
+		req.modem_mem_info.block_start_addr = offset;
+		req.modem_mem_info.size = ipa3_mem(MODEM_SIZE);
+	}
 
 	req.ctrl_comm_dest_end_pt_valid = true;
 	req.ctrl_comm_dest_end_pt =
 		ipa3_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
 
-	req.hdr_proc_ctx_tbl_info_valid =
-		(ipa3_mem(MODEM_HDR_PROC_CTX_SIZE) != 0);
-	req.hdr_proc_ctx_tbl_info.modem_offset_start =
-		ipa3_mem(MODEM_HDR_PROC_CTX_OFST) + smem_restr_bytes;
-	req.hdr_proc_ctx_tbl_info.modem_offset_end =
-		ipa3_mem(MODEM_HDR_PROC_CTX_OFST) +
-		ipa3_mem(MODEM_HDR_PROC_CTX_SIZE) + smem_restr_bytes - 1;
+	if (ipa3_mem(MODEM_HDR_PROC_CTX_SIZE)) {
+		req.hdr_proc_ctx_tbl_info_valid = true;
+		offset = restricted_bytes + ipa3_mem(MODEM_HDR_PROC_CTX_OFST);
+		req.hdr_proc_ctx_tbl_info.modem_offset_start = offset;
+		req.hdr_proc_ctx_tbl_info.modem_offset_end =
+			offset + ipa3_mem(MODEM_HDR_PROC_CTX_SIZE) - 1;
+	}
 
-	req.zip_tbl_info_valid = (ipa3_mem(MODEM_COMP_DECOMP_SIZE) != 0);
-	req.zip_tbl_info.modem_offset_start =
-		ipa3_mem(MODEM_COMP_DECOMP_SIZE) + smem_restr_bytes;
-	req.zip_tbl_info.modem_offset_end =
-		ipa3_mem(MODEM_COMP_DECOMP_OFST) +
-		ipa3_mem(MODEM_COMP_DECOMP_SIZE) + smem_restr_bytes - 1;
+	if (ipa3_mem(MODEM_COMP_DECOMP_SIZE)) {
+		req.zip_tbl_info_valid = true;
+		offset = restricted_bytes + ipa3_mem(MODEM_COMP_DECOMP_OFST);
+		req.zip_tbl_info.modem_offset_start = offset;
+		req.zip_tbl_info.modem_offset_end =
+			offset + ipa3_mem(MODEM_COMP_DECOMP_SIZE) - 1;
+	}
 
 	req.v4_hash_route_tbl_info_valid = true;
-	req.v4_hash_route_tbl_info.route_tbl_start_addr =
-		ipa3_mem(V4_RT_HASH_OFST) + smem_restr_bytes;
-	req.v4_hash_route_tbl_info.num_indices =
-		ipa3_mem(V4_MODEM_RT_INDEX_HI);
+	offset = restricted_bytes + ipa3_mem(V4_RT_HASH_OFST);
+	req.v4_hash_route_tbl_info.route_tbl_start_addr = offset;
+	req.v4_hash_route_tbl_info.num_indices = ipa3_mem(V4_MODEM_RT_INDEX_HI);
 
 	req.v6_hash_route_tbl_info_valid = true;
-	req.v6_hash_route_tbl_info.route_tbl_start_addr =
-		ipa3_mem(V6_RT_HASH_OFST) + smem_restr_bytes;
-	req.v6_hash_route_tbl_info.num_indices =
-		ipa3_mem(V6_MODEM_RT_INDEX_HI);
+	offset = restricted_bytes + ipa3_mem(V6_RT_HASH_OFST);
+	req.v6_hash_route_tbl_info.route_tbl_start_addr = offset;
+	req.v6_hash_route_tbl_info.num_indices = ipa3_mem(V6_MODEM_RT_INDEX_HI);
 
 	req.v4_hash_filter_tbl_start_addr_valid = true;
-	req.v4_hash_filter_tbl_start_addr =
-		ipa3_mem(V4_FLT_HASH_OFST) + smem_restr_bytes;
+	offset = restricted_bytes + ipa3_mem(V4_FLT_HASH_OFST);
+	req.v4_hash_filter_tbl_start_addr = offset;
 
 	req.v6_hash_filter_tbl_start_addr_valid = true;
-	req.v6_hash_filter_tbl_start_addr =
-		ipa3_mem(V6_FLT_HASH_OFST) + smem_restr_bytes;
+	offset = restricted_bytes + ipa3_mem(V6_FLT_HASH_OFST);
+	req.v6_hash_filter_tbl_start_addr = offset;
 
-	if (!ipa3_uc_loaded_check()) {  /* First time boot */
-		req.is_ssr_bootup_valid = false;
-		req.is_ssr_bootup = 0;
-	} else {  /* After SSR boot */
+	/* Distinguish between first time and SSR boot */
+	if (ipa3_uc_loaded_check()) {
 		req.is_ssr_bootup_valid = true;
-		req.is_ssr_bootup = 1;
+		req.is_ssr_bootup = 1;	/* Not first time */
 	}
 
 	ipa_debug("platform_type %d\n", req.platform_type);
