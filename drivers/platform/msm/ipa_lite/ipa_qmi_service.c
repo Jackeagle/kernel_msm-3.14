@@ -197,13 +197,13 @@ static int ipa3_a5_svc_connect_cb(struct qmi_handle *handle, void *conn_h)
 	return 0;
 }
 
-static int ipa3_a5_svc_disconnect_cb(struct qmi_handle *handle,
-				  void *conn_h)
+static int ipa3_a5_svc_disconnect_cb(struct qmi_handle *handle, void *conn_h)
 {
-	if (ipa3_svc_handle != handle || curr_conn != conn_h)
+	if (curr_conn != conn_h)
 		return -EINVAL;
 
 	curr_conn = NULL;
+
 	return 0;
 }
 
