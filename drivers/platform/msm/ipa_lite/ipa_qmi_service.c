@@ -143,16 +143,20 @@ static int ipa3_send_resp_from_cb(void *req_h, struct msg_desc *resp_desc,
 
 static int ipa3_handle_indication_req(void *req_h, void *req)
 {
+	struct msg_desc *desc = &ipa3_indication_reg_resp_desc;
 	struct ipa_indication_reg_resp_msg_v01 resp;
+	size_t size = sizeof(resp);
 	int rc;
 
 	ipa_debug("Received INDICATION Request\n");
 
-	memset(&resp, 0, sizeof(struct ipa_indication_reg_resp_msg_v01));
+	memset(&resp, 0, size);
 	resp.resp.result = IPA_QMI_RESULT_SUCCESS_V01;
-	rc = ipa3_send_resp_from_cb(req_h,
-			&ipa3_indication_reg_resp_desc, &resp, sizeof(resp));
+
+	rc = ipa3_send_resp_from_cb(req_h, desc, &resp, size);
+
 	ipa3_qmi_indication_fin = true;
+
 	/* check if need sending indication to modem */
 	if (ipa3_qmi_modem_init_fin)
 		rc = ipa3_qmi_send_handshake_complete_indication();
