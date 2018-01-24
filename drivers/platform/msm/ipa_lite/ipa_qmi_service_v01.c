@@ -48,22 +48,21 @@
 		.elem_size	= sizeof(uint8_t),		\
 		SINGLE_ELEM_INFO_COMMON
 
+#define U32_ELEM_INFO_COMMON					\
+		.data_type	= QMI_UNSIGNED_4_BYTE,		\
+		.elem_size	= sizeof(uint32_t),		\
+		SINGLE_ELEM_INFO_COMMON
+
 /* Type Definitions  */
 static struct elem_info ipa3_hdr_tbl_info_type_data_v01_ei[] = {
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_hdr_tbl_info_type_v01,
 					modem_offset_start),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_hdr_tbl_info_type_v01,
 					modem_offset_end),
@@ -73,19 +72,13 @@ static struct elem_info ipa3_hdr_tbl_info_type_data_v01_ei[] = {
 
 static struct elem_info ipa3_route_tbl_info_type_data_v01_ei[] = {
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_route_tbl_info_type_v01,
 					route_tbl_start_addr),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_route_tbl_info_type_v01,
 					num_indices),
@@ -95,19 +88,13 @@ static struct elem_info ipa3_route_tbl_info_type_data_v01_ei[] = {
 
 static struct elem_info ipa3_modem_mem_info_type_data_v01_ei[] = {
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_modem_mem_info_type_v01,
 					block_start_addr),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_modem_mem_info_type_v01,
 					size),
@@ -117,20 +104,14 @@ static struct elem_info ipa3_modem_mem_info_type_data_v01_ei[] = {
 
 static struct elem_info ipa3_hdr_proc_ctx_tbl_info_type_data_v01_ei[] = {
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(
 			struct ipa_hdr_proc_ctx_tbl_info_type_v01,
 			modem_offset_start),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(
 			struct ipa_hdr_proc_ctx_tbl_info_type_v01,
@@ -141,19 +122,13 @@ static struct elem_info ipa3_hdr_proc_ctx_tbl_info_type_data_v01_ei[] = {
 
 static struct elem_info ipa3_zip_tbl_info_type_data_v01_ei[] = {
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_zip_tbl_info_type_v01,
 					modem_offset_start),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_zip_tbl_info_type_v01,
 					modem_offset_end),
@@ -195,20 +170,14 @@ static struct elem_info ipa3_ipfltr_mask_eq_32_type_data_v01_ei[] = {
 				offset),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(
 				struct ipa_ipfltr_mask_eq_32_type_v01,
 				mask),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(
 			struct ipa_ipfltr_mask_eq_32_type_v01,
@@ -242,10 +211,7 @@ static struct elem_info ipa3_ipfltr_eq_32_type_data_v01_ei[] = {
 					offset),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_ipfltr_eq_32_type_v01,
 					value),
@@ -369,10 +335,7 @@ static struct elem_info ipa3_filter_rule_type_data_v01_ei[] = {
 					flow_eq_present),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_filter_rule_type_v01,
 					flow_eq),
@@ -471,10 +434,7 @@ static struct elem_info ipa3_filter_rule_type_data_v01_ei[] = {
 
 static struct elem_info ipa_filter_spec_type_data_v01_ei[] = {
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_filter_spec_type_v01,
 					filter_spec_identifier),
@@ -508,10 +468,7 @@ static struct elem_info ipa_filter_spec_type_data_v01_ei[] = {
 					is_routing_table_index_valid),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_filter_spec_type_v01,
 					route_table_index),
@@ -523,10 +480,7 @@ static struct elem_info ipa_filter_spec_type_data_v01_ei[] = {
 					is_mux_id_valid),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_filter_spec_type_v01,
 					mux_id),
@@ -564,10 +518,7 @@ static struct elem_info ipa_filter_spec_ex_type_data_v01_ei[] = {
 					is_routing_table_index_valid),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_filter_spec_ex_type_v01,
 					route_table_index),
@@ -579,19 +530,13 @@ static struct elem_info ipa_filter_spec_ex_type_data_v01_ei[] = {
 					is_mux_id_valid),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_filter_spec_ex_type_v01,
 					mux_id),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_filter_spec_ex_type_v01,
 					rule_id),
@@ -608,20 +553,14 @@ static struct elem_info ipa_filter_spec_ex_type_data_v01_ei[] = {
 static struct
 elem_info ipa3_filter_rule_identifier_to_handle_map_data_v01_ei[] = {
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(
 			struct ipa_filter_rule_identifier_to_handle_map_v01,
 			filter_spec_identifier),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(
 			struct ipa_filter_rule_identifier_to_handle_map_v01,
@@ -707,10 +646,7 @@ struct elem_info ipa3_init_modem_driver_req_msg_data_v01_ei[] = {
 			v4_filter_tbl_start_addr_valid),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= 0x14,
 		.offset		= offsetof(
 			struct ipa_init_modem_driver_req_msg_v01,
@@ -724,10 +660,7 @@ struct elem_info ipa3_init_modem_driver_req_msg_data_v01_ei[] = {
 			v6_filter_tbl_start_addr_valid),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= 0x15,
 		.offset		= offsetof(
 			struct ipa_init_modem_driver_req_msg_v01,
@@ -759,10 +692,7 @@ struct elem_info ipa3_init_modem_driver_req_msg_data_v01_ei[] = {
 			ctrl_comm_dest_end_pt_valid),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= 0x17,
 		.offset		= offsetof(
 			struct ipa_init_modem_driver_req_msg_v01,
@@ -863,10 +793,7 @@ struct elem_info ipa3_init_modem_driver_req_msg_data_v01_ei[] = {
 			v4_hash_filter_tbl_start_addr_valid),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= 0x1D,
 		.offset		= offsetof(
 			struct ipa_init_modem_driver_req_msg_v01,
@@ -880,10 +807,7 @@ struct elem_info ipa3_init_modem_driver_req_msg_data_v01_ei[] = {
 			v6_hash_filter_tbl_start_addr_valid),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= 0x1E,
 		.offset		= offsetof(
 			struct ipa_init_modem_driver_req_msg_v01,
@@ -912,10 +836,7 @@ struct elem_info ipa3_init_modem_driver_resp_msg_data_v01_ei[] = {
 			ctrl_comm_dest_end_pt_valid),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= 0x10,
 		.offset		= offsetof(
 			struct ipa_init_modem_driver_resp_msg_v01,
@@ -929,10 +850,7 @@ struct elem_info ipa3_init_modem_driver_resp_msg_data_v01_ei[] = {
 			default_end_pt_valid),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= 0x11,
 		.offset		= offsetof(
 			struct ipa_init_modem_driver_resp_msg_v01,
@@ -1080,10 +998,7 @@ struct elem_info ipa3_install_fltr_rule_req_msg_data_v01_ei[] = {
 			source_pipe_index_valid),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= 0x11,
 		.offset		= offsetof(
 			struct ipa_install_fltr_rule_req_msg_v01,
@@ -1097,10 +1012,7 @@ struct elem_info ipa3_install_fltr_rule_req_msg_data_v01_ei[] = {
 			num_ipv4_filters_valid),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= 0x12,
 		.offset		= offsetof(
 			struct ipa_install_fltr_rule_req_msg_v01,
@@ -1114,10 +1026,7 @@ struct elem_info ipa3_install_fltr_rule_req_msg_data_v01_ei[] = {
 			num_ipv6_filters_valid),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= 0x13,
 		.offset		= offsetof(
 			struct ipa_install_fltr_rule_req_msg_v01,
@@ -1290,10 +1199,7 @@ struct elem_info ipa3_config_req_msg_data_v01_ei[] = {
 			max_aggr_frame_size_valid),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= 0x12,
 		.offset		= offsetof(
 			struct ipa_config_req_msg_v01,
@@ -1433,10 +1339,7 @@ struct elem_info ipa3_config_req_msg_data_v01_ei[] = {
 			ul_fifo_size_valid),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= 0x1C,
 		.offset		= offsetof(
 			struct ipa_config_req_msg_v01,
@@ -1450,10 +1353,7 @@ struct elem_info ipa3_config_req_msg_data_v01_ei[] = {
 			dl_fifo_size_valid),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= 0x1D,
 		.offset		= offsetof(
 			struct ipa_config_req_msg_v01,
@@ -1467,10 +1367,7 @@ struct elem_info ipa3_config_req_msg_data_v01_ei[] = {
 			dl_buf_size_valid),
 	},
 	{
-		.data_type	= QMI_UNSIGNED_4_BYTE,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		U32_ELEM_INFO_COMMON,
 		.tlv_type	= 0x1E,
 		.offset		= offsetof(
 			struct ipa_config_req_msg_v01,
