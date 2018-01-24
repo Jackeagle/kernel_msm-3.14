@@ -168,21 +168,22 @@ static int ipa3_handle_indication_req(void *req_h, void *req)
 
 static int ipa3_handle_modem_init_cmplt_req(void *req_h, void *req)
 {
+	struct msg_desc *desc = &ipa3_init_modem_driver_cmplt_resp_desc;
 	struct ipa_init_modem_driver_cmplt_resp_msg_v01 resp;
+	size_t size = sizeof(resp);
 	int rc;
 
 	ipa_debug("Received QMI_IPA_INIT_MODEM_DRIVER_CMPLT_REQ_V01\n");
 
 	ipa3_modem_init_cmplt = true;
 
-	memset(&resp, 0, sizeof(resp));
+	memset(&resp, 0, size);
 	resp.resp.result = IPA_QMI_RESULT_SUCCESS_V01;
 
-	rc = ipa3_send_resp_from_cb(req_h,
-			&ipa3_init_modem_driver_cmplt_resp_desc,
-			&resp, sizeof(resp));
+	rc = ipa3_send_resp_from_cb(req_h, desc, &resp, size);
 
 	ipa_debug("Sent QMI_IPA_INIT_MODEM_DRIVER_CMPLT_RESP_V01\n");
+
 	return rc;
 }
 
