@@ -166,6 +166,25 @@ static int ipa3_handle_indication_req(void *req_h, void *req)
 	return rc;
 }
 
+static int ipa3_handle_config_req(void *req_h, void *req)
+{
+	struct msg_desc *desc = &ipa3_config_req_desc;
+	struct ipa_config_resp_msg_v01 resp;
+	size_t size = sizeof(resp);
+	int rc;
+
+	ipa_debug("Received QMI_IPA_CONFIG_REQ_V01\n");
+
+	memset(&resp, 0, size);
+	resp.resp.result = IPA_QMI_RESULT_SUCCESS_V01;
+
+	rc = ipa3_send_resp_from_cb(req_h, desc, &resp, size);
+
+	ipa_debug("Sent QMI_IPA_CONFIG_RESP_V01\n");
+
+	return rc;
+}
+
 static int ipa3_handle_modem_init_cmplt_req(void *req_h, void *req)
 {
 	struct msg_desc *desc = &ipa3_init_modem_driver_cmplt_resp_desc;
@@ -249,6 +268,8 @@ static int ipa3_a5_svc_req_cb(struct qmi_handle *handle, void *conn_h,
 		rc = ipa3_handle_indication_req(req_h, req);
 		break;
 	case QMI_IPA_CONFIG_REQ_V01:
+		rc = ipa3_handle_config_req(req_h, req);
+		break;
 	case QMI_IPA_INSTALL_FILTER_RULE_REQ_V01:
 		rc = 0;
 		break;
