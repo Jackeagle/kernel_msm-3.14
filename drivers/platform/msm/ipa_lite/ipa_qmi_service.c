@@ -43,7 +43,7 @@
 
 static struct qmi_handle *ipa3_svc_handle;
 static void ipa3_a5_svc_recv_msg(struct work_struct *work);
-static DECLARE_DELAYED_WORK(work_recv_msg, ipa3_a5_svc_recv_msg);
+static DECLARE_WORK(work_recv_msg, ipa3_a5_svc_recv_msg);
 static struct workqueue_struct *ipa_svc_workqueue;
 static struct workqueue_struct *ipa_clnt_req_workqueue;
 static struct workqueue_struct *ipa_clnt_resp_workqueue;
@@ -328,7 +328,7 @@ static void qmi_ipa_a5_svc_ntfy(struct qmi_handle *handle,
 	if (workqueues_stopped)
 		return;
 
-	queue_delayed_work(ipa_svc_workqueue, &work_recv_msg, 0);
+	queue_work(ipa_svc_workqueue, &work_recv_msg);
 }
 
 static struct qmi_svc_ops_options ipa3_a5_svc_ops_options = {
@@ -346,11 +346,11 @@ static struct qmi_svc_ops_options ipa3_a5_svc_ops_options = {
 /*                 QMI A5 client ->Q6               */
 /****************************************************/
 static void ipa3_q6_clnt_recv_msg(struct work_struct *work);
-static DECLARE_DELAYED_WORK(ipa3_work_recv_msg_client, ipa3_q6_clnt_recv_msg);
+static DECLARE_WORK(ipa3_work_recv_msg_client, ipa3_q6_clnt_recv_msg);
 static void ipa3_q6_clnt_svc_arrive(struct work_struct *work);
-static DECLARE_DELAYED_WORK(ipa3_work_svc_arrive, ipa3_q6_clnt_svc_arrive);
+static DECLARE_WORK(ipa3_work_svc_arrive, ipa3_q6_clnt_svc_arrive);
 static void ipa3_q6_clnt_svc_exit(struct work_struct *work);
-static DECLARE_DELAYED_WORK(ipa3_work_svc_exit, ipa3_q6_clnt_svc_exit);
+static DECLARE_WORK(ipa3_work_svc_exit, ipa3_q6_clnt_svc_exit);
 /* Test client port for IPC Router */
 static struct qmi_handle *ipa_q6_clnt;
 static int ipa_q6_clnt_reset;
@@ -559,8 +559,7 @@ static void ipa3_q6_clnt_notify(struct qmi_handle *handle,
 	if (workqueues_stopped)
 		return;
 
-	queue_delayed_work(ipa_clnt_resp_workqueue,
-				   &ipa3_work_recv_msg_client, 0);
+	queue_work(ipa_clnt_resp_workqueue, &ipa3_work_recv_msg_client);
 }
 
 static void ipa3_q6_clnt_svc_arrive(struct work_struct *work)
@@ -639,11 +638,9 @@ static int ipa3_q6_clnt_svc_event_notify(struct notifier_block *this,
 
 	ipa_debug("event %ld\n", code);
 	if (code == QMI_SERVER_ARRIVE)
-		queue_delayed_work(ipa_clnt_req_workqueue,
-					   &ipa3_work_svc_arrive, 0);
+		queue_work(ipa_clnt_req_workqueue, &ipa3_work_svc_arrive);
 	else if (code == QMI_SERVER_EXIT)
-		queue_delayed_work(ipa_clnt_req_workqueue,
-					   &ipa3_work_svc_exit, 0);
+		queue_work(ipa_clnt_req_workqueue, &ipa3_work_svc_exit);
 
 	return 0;
 }
@@ -806,8 +803,8 @@ void ipa3_qmi_stop_workqueues(void)
 	workqueues_stopped = true;
 
 	/* Making sure that the current scheduled work won't be executed */
-	cancel_delayed_work(&work_recv_msg);
-	cancel_delayed_work(&ipa3_work_recv_msg_client);
-	cancel_delayed_work(&ipa3_work_svc_arrive);
-	cancel_delayed_work(&ipa3_work_svc_exit);
+	cancel_work(&work_recv_msg);
+	cancel_work(&ipa3_work_recv_msg_client);
+	cancel_work(&ipa3_work_svc_arrive);
+	cancel_work(&ipa3_work_svc_exit);
 }
