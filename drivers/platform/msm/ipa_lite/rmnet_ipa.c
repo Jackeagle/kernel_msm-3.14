@@ -144,11 +144,6 @@ static int ipa3_find_mux_channel_index(uint32_t mux_id)
 	return MAX_NUM_OF_MUX_CHANNEL;
 }
 
-
-#ifdef INIT_COMPLETION
-#define reinit_completion(x) INIT_COMPLETION(*(x))
-#endif /* INIT_COMPLETION */
-
 static int __ipa_wwan_open(struct net_device *dev)
 {
 	struct ipa3_wwan_private *wwan_ptr = netdev_priv(dev);
