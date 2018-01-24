@@ -190,9 +190,6 @@ static int ipa3_handle_modem_init_cmplt_req(void *req_h, void *req)
 static int ipa3_a5_svc_connect_cb(struct qmi_handle *handle,
 			       void *conn_h)
 {
-	if (!conn_h)
-		return -EINVAL;
-
 	if (curr_conn) {
 		ipa_err("Service is busy\n");
 		return -ECONNREFUSED;
