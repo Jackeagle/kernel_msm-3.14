@@ -189,11 +189,13 @@ static int ipa3_wwan_stop(struct net_device *dev)
 
 static int ipa3_wwan_change_mtu(struct net_device *dev, int new_mtu)
 {
-	if (0 > new_mtu || WWAN_DATA_LEN < new_mtu)
+	if (new_mtu > WWAN_DATA_LEN)
 		return -EINVAL;
+
 	ipa_debug("[%s] MTU change: old=%d new=%d\n",
 		dev->name, dev->mtu, new_mtu);
 	dev->mtu = new_mtu;
+
 	return 0;
 }
 
