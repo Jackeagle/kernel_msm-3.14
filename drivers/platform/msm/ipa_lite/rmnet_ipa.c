@@ -166,22 +166,6 @@ static int ipa3_wwan_open(struct net_device *dev)
 	return 0;
 }
 
-static int __ipa_wwan_close(struct net_device *dev)
-{
-	struct ipa3_wwan_private *wwan_ptr = netdev_priv(dev);
-	int rc = 0;
-
-	if (wwan_ptr->device_active) {
-		wwan_ptr->device_active = false;
-		/* do not close wwan port once up,  this causes
-		 * remote side to hang if tried to open again
-		 */
-		return rc;
-	} else {
-		return -EBADF;
-	}
-}
-
 /**
  * ipa3_wwan_stop() - Stops the wwan network interface. Closes
  * logical channel on A2 MUX driver and stops the network stack
@@ -191,13 +175,15 @@ static int __ipa_wwan_close(struct net_device *dev)
  *
  * Return codes:
  * 0: success
- * -ENODEV: Error while opening logical channel on A2 MUX driver
  */
 static int ipa3_wwan_stop(struct net_device *dev)
 {
+	struct ipa3_wwan_private *wwan_ptr = netdev_priv(dev);
+
 	ipa_debug("[%s] ipa3_wwan_stop()\n", dev->name);
-	__ipa_wwan_close(dev);
+	wwan_ptr->device_active = false;
 	netif_stop_queue(dev);
+
 	return 0;
 }
 
