@@ -638,18 +638,13 @@ static int ipa3_q6_clnt_svc_event_notify(struct notifier_block *this,
 		return 0;
 
 	ipa_debug("event %ld\n", code);
-	switch (code) {
-	case QMI_SERVER_ARRIVE:
+	if (code == QMI_SERVER_ARRIVE)
 		queue_delayed_work(ipa_clnt_req_workqueue,
 					   &ipa3_work_svc_arrive, 0);
-		break;
-	case QMI_SERVER_EXIT:
+	else if (code == QMI_SERVER_EXIT)
 		queue_delayed_work(ipa_clnt_req_workqueue,
 					   &ipa3_work_svc_exit, 0);
-		break;
-	default:
-		break;
-	}
+
 	return 0;
 }
 
