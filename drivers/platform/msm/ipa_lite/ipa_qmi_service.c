@@ -190,7 +190,7 @@ static int ipa3_handle_modem_init_cmplt_req(void *req_h, void *req)
 static int ipa3_a5_svc_connect_cb(struct qmi_handle *handle,
 			       void *conn_h)
 {
-	if (ipa3_svc_handle != handle || !conn_h)
+	if (!conn_h)
 		return -EINVAL;
 
 	if (curr_conn) {
