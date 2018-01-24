@@ -241,9 +241,8 @@ static int ipa3_a5_svc_req_cb(struct qmi_handle *handle, void *conn_h,
 {
 	int rc;
 
-	if (ipa3_svc_handle != handle || curr_conn != conn_h) {
+	if (curr_conn != conn_h)
 		return -EINVAL;
-	}
 
 	switch (msg_id) {
 	case QMI_IPA_INDICATION_REGISTER_REQ_V01:
