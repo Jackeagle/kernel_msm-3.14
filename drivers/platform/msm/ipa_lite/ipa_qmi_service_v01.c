@@ -277,8 +277,7 @@ static struct elem_info ipa3_filter_rule_type_data_v01_ei[] = {
 	{
 		.data_type = QMI_STRUCT,
 		.elem_len  = QMI_IPA_IPFLTR_NUM_IHL_RANGE_16_EQNS_V01,
-		.elem_size = sizeof(
-			struct ipa_ipfltr_range_eq_16_type_v01),
+		.elem_size = sizeof(struct ipa_ipfltr_range_eq_16_type_v01),
 		.is_array  = STATIC_ARRAY,
 		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
@@ -383,8 +382,7 @@ static struct elem_info ipa3_filter_rule_type_data_v01_ei[] = {
 		.data_type = QMI_STRUCT,
 		.elem_len  =
 			QMI_IPA_IPFLTR_NUM_MEQ_128_EQNS_V01,
-		.elem_size = sizeof(
-			struct ipa_ipfltr_mask_eq_128_type_v01),
+		.elem_size = sizeof(struct ipa_ipfltr_mask_eq_128_type_v01),
 		.is_array  = STATIC_ARRAY,
 		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
@@ -685,8 +683,7 @@ struct elem_info ipa3_init_modem_driver_req_msg_data_v01_ei[] = {
 	{
 		.data_type = QMI_STRUCT,
 		.elem_len  = 1,
-		.elem_size = sizeof(
-			struct ipa_hdr_proc_ctx_tbl_info_type_v01),
+		.elem_size = sizeof(struct ipa_hdr_proc_ctx_tbl_info_type_v01),
 		.is_array  = NO_ARRAY,
 		.tlv_type  = 0x19,
 		.offset    = offsetof(struct ipa_init_modem_driver_req_msg_v01,
@@ -1041,8 +1038,7 @@ struct elem_info ipa3_install_fltr_rule_resp_msg_data_v01_ei[] = {
 	{
 		.data_type = QMI_STRUCT,
 		.elem_len  = QMI_IPA_MAX_FILTERS_V01,
-		.elem_size = sizeof(
-			struct ipa_filter_rule_identifier_to_handle_map_v01),
+		.elem_size = sizeof(struct ipa_filter_rule_identifier_to_handle_map_v01),
 		.is_array  = VAR_LEN_ARRAY,
 		.tlv_type  = 0x10,
 		.offset    = offsetof(struct ipa_install_fltr_rule_resp_msg_v01,
