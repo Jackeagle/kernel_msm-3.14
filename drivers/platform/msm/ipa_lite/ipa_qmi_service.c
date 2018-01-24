@@ -552,18 +552,15 @@ static void ipa3_q6_clnt_recv_msg(struct work_struct *work)
 static void ipa3_q6_clnt_notify(struct qmi_handle *handle,
 			     enum qmi_event_type event, void *notify_priv)
 {
+	if (event != QMI_RECV_MSG)
+		return;		/* Silently ignore unsupported events */
+
+	ipa_debug_low("client qmi recv message called");
 	if (workqueues_stopped)
 		return;
 
-	switch (event) {
-	case QMI_RECV_MSG:
-		ipa_debug_low("client qmi recv message called");
-		queue_delayed_work(ipa_clnt_resp_workqueue,
-					   &ipa3_work_recv_msg_client, 0);
-		break;
-	default:
-		break;
-	}
+	queue_delayed_work(ipa_clnt_resp_workqueue,
+				   &ipa3_work_recv_msg_client, 0);
 }
 
 static void ipa3_q6_clnt_svc_arrive(struct work_struct *work)
