@@ -143,6 +143,7 @@ static void gsi_handle_glob_err(uint32_t err)
 	case GSI_ERR_TYPE_GLOB:
 		GSIERR("Got global GP ERROR\n");
 		GSIERR("Err_desc = 0x%04x\n", err & 0xffff);
+		BUG();
 		break;
 	case GSI_ERR_TYPE_CHAN:
 		if (log->virt_idx >= gsi_ctx->max_ch) {
