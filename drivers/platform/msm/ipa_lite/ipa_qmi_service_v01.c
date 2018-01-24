@@ -16,12 +16,19 @@
 
 #include <soc/qcom/msm_qmi_interface.h>
 
+/*
+ * The following structures define the format of QMI messages
+ * exchanged between the AP and modem.  Macros are used to condense
+ * the definitions for common field values to make it more obvious
+ * what fields really do have differing values.  Unless specified
+ * the "tlv_type" field has value QMI_COMMON_TLV_TYPE (which is 0).
+ */
+
 /* Every element info array must be terminated with an entry like this */
 #define ELEM_INFO_ARRAY_END				\
 	{						\
 		.data_type = QMI_EOTI,			\
 		.is_array  = NO_ARRAY,			\
-		.tlv_type  = QMI_COMMON_TLV_TYPE,	\
 	}
 
 #define SINGLE_ELEM_INFO_COMMON				\
@@ -57,13 +64,11 @@
 static struct elem_info ipa3_hdr_tbl_info_type_data_v01_ei[] = {
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_hdr_tbl_info_type_v01,
 					modem_offset_start),
 	},
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_hdr_tbl_info_type_v01,
 					modem_offset_end),
 	},
@@ -73,13 +78,11 @@ static struct elem_info ipa3_hdr_tbl_info_type_data_v01_ei[] = {
 static struct elem_info ipa3_route_tbl_info_type_data_v01_ei[] = {
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_route_tbl_info_type_v01,
 					route_tbl_start_addr),
 	},
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_route_tbl_info_type_v01,
 					num_indices),
 	},
@@ -89,13 +92,11 @@ static struct elem_info ipa3_route_tbl_info_type_data_v01_ei[] = {
 static struct elem_info ipa3_modem_mem_info_type_data_v01_ei[] = {
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_modem_mem_info_type_v01,
 					block_start_addr),
 	},
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_modem_mem_info_type_v01, size),
 	},
 	ELEM_INFO_ARRAY_END,
@@ -104,13 +105,11 @@ static struct elem_info ipa3_modem_mem_info_type_data_v01_ei[] = {
 static struct elem_info ipa3_hdr_proc_ctx_tbl_info_type_data_v01_ei[] = {
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_hdr_proc_ctx_tbl_info_type_v01,
 					modem_offset_start),
 	},
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_hdr_proc_ctx_tbl_info_type_v01,
 					modem_offset_end),
 	},
@@ -120,13 +119,11 @@ static struct elem_info ipa3_hdr_proc_ctx_tbl_info_type_data_v01_ei[] = {
 static struct elem_info ipa3_zip_tbl_info_type_data_v01_ei[] = {
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_zip_tbl_info_type_v01,
 					modem_offset_start),
 	},
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_zip_tbl_info_type_v01,
 					modem_offset_end),
 	},
@@ -136,19 +133,16 @@ static struct elem_info ipa3_zip_tbl_info_type_data_v01_ei[] = {
 static struct elem_info ipa3_ipfltr_range_eq_16_type_data_v01_ei[] = {
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_ipfltr_range_eq_16_type_v01,
 					offset),
 	},
 	{
 		U16_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_ipfltr_range_eq_16_type_v01,
 					range_low),
 	},
 	{
 		U16_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_ipfltr_range_eq_16_type_v01,
 					range_high),
 	},
@@ -158,19 +152,16 @@ static struct elem_info ipa3_ipfltr_range_eq_16_type_data_v01_ei[] = {
 static struct elem_info ipa3_ipfltr_mask_eq_32_type_data_v01_ei[] = {
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_ipfltr_mask_eq_32_type_v01,
 					offset),
 	},
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_ipfltr_mask_eq_32_type_v01,
 					mask),
 	},
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_ipfltr_mask_eq_32_type_v01,
 					value),
 	},
@@ -180,13 +171,11 @@ static struct elem_info ipa3_ipfltr_mask_eq_32_type_data_v01_ei[] = {
 static struct elem_info ipa3_ipfltr_eq_16_type_data_v01_ei[] = {
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_ipfltr_eq_16_type_v01,
 					offset),
 	},
 	{
 		U16_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_ipfltr_eq_16_type_v01,
 					value),
 	},
@@ -196,13 +185,11 @@ static struct elem_info ipa3_ipfltr_eq_16_type_data_v01_ei[] = {
 static struct elem_info ipa3_ipfltr_eq_32_type_data_v01_ei[] = {
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_ipfltr_eq_32_type_v01,
 					offset),
 	},
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_ipfltr_eq_32_type_v01,
 					value),
 	},
@@ -212,7 +199,6 @@ static struct elem_info ipa3_ipfltr_eq_32_type_data_v01_ei[] = {
 static struct elem_info ipa3_ipfltr_mask_eq_128_type_data_v01_ei[] = {
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_ipfltr_mask_eq_128_type_v01,
 					offset),
 	},
@@ -221,7 +207,6 @@ static struct elem_info ipa3_ipfltr_mask_eq_128_type_data_v01_ei[] = {
 		.elem_len  = 16,
 		.elem_size = sizeof(uint8_t),
 		.is_array  = STATIC_ARRAY,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_ipfltr_mask_eq_128_type_v01,
 					mask),
 	},
@@ -230,7 +215,6 @@ static struct elem_info ipa3_ipfltr_mask_eq_128_type_data_v01_ei[] = {
 		.elem_len  = 16,
 		.elem_size = sizeof(uint8_t),
 		.is_array  = STATIC_ARRAY,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_ipfltr_mask_eq_128_type_v01,
 					value),
 	},
@@ -240,37 +224,31 @@ static struct elem_info ipa3_ipfltr_mask_eq_128_type_data_v01_ei[] = {
 static struct elem_info ipa3_filter_rule_type_data_v01_ei[] = {
 	{
 		U16_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					rule_eq_bitmap),
 	},
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					tos_eq_present),
 	},
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					tos_eq),
 	},
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					protocol_eq_present),
 	},
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					protocol_eq),
 	},
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					num_ihl_offset_range_16),
 	},
@@ -279,14 +257,12 @@ static struct elem_info ipa3_filter_rule_type_data_v01_ei[] = {
 		.elem_len  = QMI_IPA_IPFLTR_NUM_IHL_RANGE_16_EQNS_V01,
 		.elem_size = sizeof(struct ipa_ipfltr_range_eq_16_type_v01),
 		.is_array  = STATIC_ARRAY,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					ihl_offset_range_16),
 		.ei_array  = ipa3_ipfltr_range_eq_16_type_data_v01_ei,
 	},
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					num_offset_meq_32),
 	},
@@ -295,38 +271,32 @@ static struct elem_info ipa3_filter_rule_type_data_v01_ei[] = {
 		.elem_len  = QMI_IPA_IPFLTR_NUM_MEQ_32_EQNS_V01,
 		.elem_size = sizeof(struct ipa_ipfltr_mask_eq_32_type_v01),
 		.is_array  = STATIC_ARRAY,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					offset_meq_32),
 		.ei_array  = ipa3_ipfltr_mask_eq_32_type_data_v01_ei,
 	},
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					tc_eq_present),
 	},
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					tc_eq),
 	},
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					flow_eq_present),
 	},
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					flow_eq),
 	},
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					ihl_offset_eq_16_present),
 	},
@@ -335,14 +305,12 @@ static struct elem_info ipa3_filter_rule_type_data_v01_ei[] = {
 		.elem_len  = 1,
 		.elem_size = sizeof(struct ipa_ipfltr_eq_16_type_v01),
 		.is_array  = NO_ARRAY,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					ihl_offset_eq_16),
 		.ei_array  = ipa3_ipfltr_eq_16_type_data_v01_ei,
 	},
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					ihl_offset_eq_32_present),
 	},
@@ -351,14 +319,12 @@ static struct elem_info ipa3_filter_rule_type_data_v01_ei[] = {
 		.elem_len  = 1,
 		.elem_size = sizeof(struct ipa_ipfltr_eq_32_type_v01),
 		.is_array  = NO_ARRAY,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					ihl_offset_eq_32),
 		.ei_array  = ipa3_ipfltr_eq_32_type_data_v01_ei,
 	},
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					num_ihl_offset_meq_32),
 	},
@@ -367,14 +333,12 @@ static struct elem_info ipa3_filter_rule_type_data_v01_ei[] = {
 		.elem_len  = QMI_IPA_IPFLTR_NUM_IHL_MEQ_32_EQNS_V01,
 		.elem_size = sizeof(struct ipa_ipfltr_mask_eq_32_type_v01),
 		.is_array  = STATIC_ARRAY,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					ihl_offset_meq_32),
 		.ei_array  = ipa3_ipfltr_mask_eq_32_type_data_v01_ei,
 	},
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					num_offset_meq_128),
 	},
@@ -384,14 +348,12 @@ static struct elem_info ipa3_filter_rule_type_data_v01_ei[] = {
 			QMI_IPA_IPFLTR_NUM_MEQ_128_EQNS_V01,
 		.elem_size = sizeof(struct ipa_ipfltr_mask_eq_128_type_v01),
 		.is_array  = STATIC_ARRAY,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					offset_meq_128),
 		.ei_array  = ipa3_ipfltr_mask_eq_128_type_data_v01_ei,
 	},
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					metadata_meq32_present),
 	},
@@ -400,14 +362,12 @@ static struct elem_info ipa3_filter_rule_type_data_v01_ei[] = {
 		.elem_len  = 1,
 		.elem_size = sizeof(struct ipa_ipfltr_mask_eq_32_type_v01),
 		.is_array  = NO_ARRAY,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					metadata_meq32),
 		.ei_array  = ipa3_ipfltr_mask_eq_32_type_data_v01_ei,
 	},
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_type_v01,
 					ipv4_frag_eq_present),
 	},
@@ -417,13 +377,11 @@ static struct elem_info ipa3_filter_rule_type_data_v01_ei[] = {
 static struct elem_info ipa_filter_spec_type_data_v01_ei[] = {
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_spec_type_v01,
 					filter_spec_identifier),
 	},
 	{
 		ENUM_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_spec_type_v01,
 					ip_type),
 	},
@@ -432,38 +390,32 @@ static struct elem_info ipa_filter_spec_type_data_v01_ei[] = {
 		.elem_len  = 1,
 		.elem_size = sizeof(struct ipa_filter_rule_type_v01),
 		.is_array  = NO_ARRAY,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_spec_type_v01,
 					filter_rule),
 		.ei_array  = ipa3_filter_rule_type_data_v01_ei,
 	},
 	{
 		ENUM_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_spec_type_v01,
 					filter_action),
 	},
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_spec_type_v01,
 					is_routing_table_index_valid),
 	},
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_spec_type_v01,
 					route_table_index),
 	},
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_spec_type_v01,
 					is_mux_id_valid),
 	},
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_spec_type_v01,
 					mux_id),
 	},
@@ -473,7 +425,6 @@ static struct elem_info ipa_filter_spec_type_data_v01_ei[] = {
 static struct elem_info ipa_filter_spec_ex_type_data_v01_ei[] = {
 	{
 		ENUM_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_spec_ex_type_v01,
 					ip_type),
 	},
@@ -482,50 +433,42 @@ static struct elem_info ipa_filter_spec_ex_type_data_v01_ei[] = {
 		.elem_len  = 1,
 		.elem_size = sizeof(struct ipa_filter_rule_type_v01),
 		.is_array  = NO_ARRAY,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_spec_ex_type_v01,
 					filter_rule),
 		.ei_array  = ipa3_filter_rule_type_data_v01_ei,
 	},
 	{
 		ENUM_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_spec_ex_type_v01,
 					filter_action),
 	},
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_spec_ex_type_v01,
 					is_routing_table_index_valid),
 	},
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_spec_ex_type_v01,
 					route_table_index),
 	},
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_spec_ex_type_v01,
 					is_mux_id_valid),
 	},
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_spec_ex_type_v01,
 					mux_id),
 	},
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_spec_ex_type_v01,
 					rule_id),
 	},
 	{
 		U8_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_spec_ex_type_v01,
 					is_rule_hashable),
 	},
@@ -536,13 +479,11 @@ static struct
 elem_info ipa3_filter_rule_identifier_to_handle_map_data_v01_ei[] = {
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_identifier_to_handle_map_v01,
 					filter_spec_identifier),
 	},
 	{
 		U32_ELEM_INFO_COMMON,
-		.tlv_type  = QMI_COMMON_TLV_TYPE,
 		.offset    = offsetof(struct ipa_filter_rule_identifier_to_handle_map_v01,
 					filter_handle),
 	},
