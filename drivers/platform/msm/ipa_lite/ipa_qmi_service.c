@@ -686,7 +686,7 @@ deregister_qmi_srv:
 	qmi_svc_unregister(ipa3_svc_handle);
 destroy_qmi_handle:
 	qmi_handle_destroy(ipa3_svc_handle);
-	ipa3_svc_handle = 0;
+	ipa3_svc_handle = NULL;
 destroy_ipa_A7_svc_wq:
 	destroy_workqueue(ipa_svc_workqueue);
 	ipa_svc_workqueue = NULL;
@@ -757,7 +757,7 @@ void ipa3_qmi_service_exit(void)
 		ipa_clnt_resp_workqueue = NULL;
 	}
 
-	ipa3_svc_handle = 0;
+	ipa3_svc_handle = NULL;
 	ipa3_qmi_modem_init_fin = false;
 	ipa3_qmi_indication_fin = false;
 	ipa3_modem_init_cmplt = false;
