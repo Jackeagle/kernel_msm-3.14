@@ -243,15 +243,13 @@ static void ipa3_a5_svc_recv_msg(struct work_struct *work)
 static void qmi_ipa_a5_svc_ntfy(struct qmi_handle *handle,
 		enum qmi_event_type event, void *priv)
 {
-	switch (event) {
-	case QMI_RECV_MSG:
-		if (!workqueues_stopped)
-			queue_delayed_work(ipa_svc_workqueue,
-					   &work_recv_msg, 0);
-		break;
-	default:
-		break;
-	}
+	if (event != QMI_RECV_MSG)
+		return;		/* Silently ignore unsupported events */
+
+	if (workqueues_stopped)
+		return;
+
+	queue_delayed_work(ipa_svc_workqueue, &work_recv_msg, 0);
 }
 
 static struct qmi_svc_ops_options ipa3_a5_svc_ops_options = {
