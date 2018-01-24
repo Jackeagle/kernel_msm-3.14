@@ -144,18 +144,6 @@ static int ipa3_find_mux_channel_index(uint32_t mux_id)
 	return MAX_NUM_OF_MUX_CHANNEL;
 }
 
-static int __ipa_wwan_open(struct net_device *dev)
-{
-	struct ipa3_wwan_private *wwan_ptr = netdev_priv(dev);
-
-	ipa_debug("[%s] __wwan_open()\n", dev->name);
-	wwan_ptr->device_active = true;
-
-	if (ipa3_rmnet_res.ipa_napi_enable)
-		napi_enable(&(wwan_ptr->napi));
-	return 0;
-}
-
 /**
  * wwan_open() - Opens the wwan network interface. Opens logical
  * channel on A2 MUX driver and starts the network stack queue
@@ -164,17 +152,18 @@ static int __ipa_wwan_open(struct net_device *dev)
  *
  * Return codes:
  * 0: success
- * -ENODEV: Error while opening logical channel on A2 MUX driver
  */
 static int ipa3_wwan_open(struct net_device *dev)
 {
-	int rc = 0;
+	struct ipa3_wwan_private *wwan_ptr = netdev_priv(dev);
 
 	ipa_debug("[%s] wwan_open()\n", dev->name);
-	rc = __ipa_wwan_open(dev);
-	if (rc == 0)
-		netif_start_queue(dev);
-	return rc;
+	wwan_ptr->device_active = true;
+	if (ipa3_rmnet_res.ipa_napi_enable)
+		napi_enable(&wwan_ptr->napi);
+	netif_start_queue(dev);
+
+	return 0;
 }
 
 static int __ipa_wwan_close(struct net_device *dev)
