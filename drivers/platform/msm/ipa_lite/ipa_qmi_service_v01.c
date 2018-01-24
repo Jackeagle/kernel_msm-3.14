@@ -24,11 +24,19 @@
 		.tlv_type	= QMI_COMMON_TLV_TYPE,		\
 	}
 
+#define SINGLE_ELEM_INFO_COMMON					\
+		.elem_len	= 1,				\
+		.is_array	= NO_ARRAY
+
 #define FLAG_ELEM_INFO_COMMON					\
 		.data_type	= QMI_OPT_FLAG,			\
 		.elem_size	= sizeof(uint8_t),		\
-		.elem_len	= 1,				\
-		.is_array	= NO_ARRAY
+		SINGLE_ELEM_INFO_COMMON
+
+#define ENUM_ELEM_INFO_COMMON					\
+		.data_type	= QMI_SIGNED_4_BYTE_ENUM,	\
+		.elem_size	= sizeof(uint32_t),		\
+		SINGLE_ELEM_INFO_COMMON
 
 /* Type Definitions  */
 static struct elem_info ipa3_hdr_tbl_info_type_data_v01_ei[] = {
@@ -534,10 +542,7 @@ static struct elem_info ipa_filter_spec_type_data_v01_ei[] = {
 					filter_spec_identifier),
 	},
 	{
-		.data_type	= QMI_SIGNED_4_BYTE_ENUM,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		ENUM_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_filter_spec_type_v01,
 					ip_type),
@@ -553,10 +558,7 @@ static struct elem_info ipa_filter_spec_type_data_v01_ei[] = {
 		.ei_array	= ipa3_filter_rule_type_data_v01_ei,
 	},
 	{
-		.data_type	= QMI_SIGNED_4_BYTE_ENUM,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		ENUM_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_filter_spec_type_v01,
 					filter_action),
@@ -602,10 +604,7 @@ static struct elem_info ipa_filter_spec_type_data_v01_ei[] = {
 
 static struct elem_info ipa_filter_spec_ex_type_data_v01_ei[] = {
 	{
-		.data_type	= QMI_SIGNED_4_BYTE_ENUM,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		ENUM_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_filter_spec_ex_type_v01,
 					ip_type),
@@ -621,10 +620,7 @@ static struct elem_info ipa_filter_spec_ex_type_data_v01_ei[] = {
 		.ei_array	= ipa3_filter_rule_type_data_v01_ei,
 	},
 	{
-		.data_type	= QMI_SIGNED_4_BYTE_ENUM,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		ENUM_ELEM_INFO_COMMON,
 		.tlv_type	= QMI_COMMON_TLV_TYPE,
 		.offset		= offsetof(struct ipa_filter_spec_ex_type_v01,
 					filter_action),
@@ -720,10 +716,7 @@ struct elem_info ipa3_init_modem_driver_req_msg_data_v01_ei[] = {
 			platform_type_valid),
 	},
 	{
-		.data_type	= QMI_SIGNED_4_BYTE_ENUM,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		ENUM_ELEM_INFO_COMMON,
 		.tlv_type	= 0x10,
 		.offset		= offsetof(
 			struct ipa_init_modem_driver_req_msg_v01,
@@ -1361,10 +1354,7 @@ struct elem_info ipa3_config_req_msg_data_v01_ei[] = {
 			peripheral_type_valid),
 	},
 	{
-		.data_type	= QMI_SIGNED_4_BYTE_ENUM,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		ENUM_ELEM_INFO_COMMON,
 		.tlv_type	= 0x10,
 		.offset		= offsetof(
 			struct ipa_config_req_msg_v01,
@@ -1412,10 +1402,7 @@ struct elem_info ipa3_config_req_msg_data_v01_ei[] = {
 			ipa_ingress_pipe_mode_valid),
 	},
 	{
-		.data_type	= QMI_SIGNED_4_BYTE_ENUM,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		ENUM_ELEM_INFO_COMMON,
 		.tlv_type	= 0x13,
 		.offset		= offsetof(
 			struct ipa_config_req_msg_v01,
@@ -1429,10 +1416,7 @@ struct elem_info ipa3_config_req_msg_data_v01_ei[] = {
 			peripheral_speed_info_valid),
 	},
 	{
-		.data_type	= QMI_SIGNED_4_BYTE_ENUM,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		ENUM_ELEM_INFO_COMMON,
 		.tlv_type	= 0x14,
 		.offset		= offsetof(
 			struct ipa_config_req_msg_v01,
@@ -1446,10 +1430,7 @@ struct elem_info ipa3_config_req_msg_data_v01_ei[] = {
 			dl_accumulation_time_limit_valid),
 	},
 	{
-		.data_type	= QMI_SIGNED_4_BYTE_ENUM,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		ENUM_ELEM_INFO_COMMON,
 		.tlv_type	= 0x15,
 		.offset		= offsetof(
 			struct ipa_config_req_msg_v01,
@@ -1463,10 +1444,7 @@ struct elem_info ipa3_config_req_msg_data_v01_ei[] = {
 			dl_accumulation_pkt_limit_valid),
 	},
 	{
-		.data_type	= QMI_SIGNED_4_BYTE_ENUM,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		ENUM_ELEM_INFO_COMMON,
 		.tlv_type	= 0x16,
 		.offset		= offsetof(
 			struct ipa_config_req_msg_v01,
@@ -1480,10 +1458,7 @@ struct elem_info ipa3_config_req_msg_data_v01_ei[] = {
 			dl_accumulation_byte_limit_valid),
 	},
 	{
-		.data_type	= QMI_SIGNED_4_BYTE_ENUM,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		ENUM_ELEM_INFO_COMMON,
 		.tlv_type	= 0x17,
 		.offset		= offsetof(
 			struct ipa_config_req_msg_v01,
@@ -1497,10 +1472,7 @@ struct elem_info ipa3_config_req_msg_data_v01_ei[] = {
 			ul_accumulation_time_limit_valid),
 	},
 	{
-		.data_type	= QMI_SIGNED_4_BYTE_ENUM,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		ENUM_ELEM_INFO_COMMON,
 		.tlv_type	= 0x18,
 		.offset		= offsetof(
 			struct ipa_config_req_msg_v01,
@@ -1514,10 +1486,7 @@ struct elem_info ipa3_config_req_msg_data_v01_ei[] = {
 			hw_control_flags_valid),
 	},
 	{
-		.data_type	= QMI_SIGNED_4_BYTE_ENUM,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		ENUM_ELEM_INFO_COMMON,
 		.tlv_type	= 0x19,
 		.offset		= offsetof(
 			struct ipa_config_req_msg_v01,
@@ -1531,10 +1500,7 @@ struct elem_info ipa3_config_req_msg_data_v01_ei[] = {
 			ul_msi_event_threshold_valid),
 	},
 	{
-		.data_type	= QMI_SIGNED_4_BYTE_ENUM,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		ENUM_ELEM_INFO_COMMON,
 		.tlv_type	= 0x1A,
 		.offset		= offsetof(
 			struct ipa_config_req_msg_v01,
@@ -1548,10 +1514,7 @@ struct elem_info ipa3_config_req_msg_data_v01_ei[] = {
 			dl_msi_event_threshold_valid),
 	},
 	{
-		.data_type	= QMI_SIGNED_4_BYTE_ENUM,
-		.elem_len	= 1,
-		.elem_size	= sizeof(uint32_t),
-		.is_array	= NO_ARRAY,
+		ENUM_ELEM_INFO_COMMON,
 		.tlv_type	= 0x1B,
 		.offset		= offsetof(
 			struct ipa_config_req_msg_v01,
