@@ -383,7 +383,6 @@ static int ipa3_check_qmi_response(int rc,
 		req_id, result, error);
 		return result;
 	}
-	ipa_debug_low("Received %s successfully\n", resp_type);
 	return 0;
 }
 
@@ -523,6 +522,12 @@ static int ipa3_qmi_init_modem_send_sync_msg(void)
 			&resp_desc, &resp, sizeof(resp),
 			QMI_SEND_REQ_TIMEOUT_MS);
 	ipa_info("QMI_IPA_INIT_MODEM_DRIVER_REQ_V01 response received\n");
+
+	if (!rc && resp.resp.result == IPA_QMI_RESULT_SUCCESS_V01) {
+		ipa_debug_low("Received init_modem_driver successfully\n");
+		return 0;
+	}
+
 	return ipa3_check_qmi_response(rc,
 		QMI_IPA_INIT_MODEM_DRIVER_REQ_V01, resp.resp.result,
 		resp.resp.error, "ipa_init_modem_driver_resp_msg_v01");
