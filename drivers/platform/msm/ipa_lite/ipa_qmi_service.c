@@ -390,43 +390,27 @@ static int ipa3_check_qmi_response(int rc,
 static void
 init_modem_driver_req_msg_dump(struct ipa_init_modem_driver_req_msg_v01 *req)
 {
-	ipa_debug("platform_type %d\n", req->platform_type);
-	ipa_debug("hdr_tbl_info.modem_offset_start %d\n",
-			req->hdr_tbl_info.modem_offset_start);
-	ipa_debug("hdr_tbl_info.modem_offset_end %d\n",
-			req->hdr_tbl_info.modem_offset_end);
-	ipa_debug("v4_route_tbl_info.route_tbl_start_addr %d\n",
-			req->v4_route_tbl_info.route_tbl_start_addr);
-	ipa_debug("v4_route_tbl_info.num_indices %d\n",
-			req->v4_route_tbl_info.num_indices);
-	ipa_debug("v6_route_tbl_info.route_tbl_start_addr %d\n",
-			req->v6_route_tbl_info.route_tbl_start_addr);
-	ipa_debug("v6_route_tbl_info.num_indices %d\n",
-			req->v6_route_tbl_info.num_indices);
-	ipa_debug("v4_filter_tbl_start_addr %d\n",
-			req->v4_filter_tbl_start_addr);
-	ipa_debug("v6_filter_tbl_start_addr %d\n",
-			req->v6_filter_tbl_start_addr);
-	ipa_debug("modem_mem_info.block_start_addr %d\n",
-			req->modem_mem_info.block_start_addr);
-	ipa_debug("modem_mem_info.size %d\n",
-			req->modem_mem_info.size);
-	ipa_debug("ctrl_comm_dest_end_pt %d\n",
-			req->ctrl_comm_dest_end_pt);
-	ipa_debug("is_ssr_bootup %d\n",
-			req->is_ssr_bootup);
-	ipa_debug("v4_hash_route_tbl_info.route_tbl_start_addr %d\n",
-			req->v4_hash_route_tbl_info.route_tbl_start_addr);
-	ipa_debug("v4_hash_route_tbl_info.num_indices %d\n",
-			req->v4_hash_route_tbl_info.num_indices);
-	ipa_debug("v6_hash_route_tbl_info.route_tbl_start_addr %d\n",
-			req->v6_hash_route_tbl_info.route_tbl_start_addr);
-	ipa_debug("v6_hash_route_tbl_info.num_indices %d\n",
-			req->v6_hash_route_tbl_info.num_indices);
-	ipa_debug("v4_hash_filter_tbl_start_addr %d\n",
-			req->v4_hash_filter_tbl_start_addr);
-	ipa_debug("v6_hash_filter_tbl_start_addr %d\n",
-			req->v6_hash_filter_tbl_start_addr);
+#define DUMP(field)	ipa_debug(#field " %d\n", req->field)
+	DUMP(platform_type);
+	DUMP(hdr_tbl_info.modem_offset_start);
+	DUMP(hdr_tbl_info.modem_offset_end);
+	DUMP(v4_route_tbl_info.route_tbl_start_addr);
+	DUMP(v4_route_tbl_info.num_indices);
+	DUMP(v6_route_tbl_info.route_tbl_start_addr);
+	DUMP(v6_route_tbl_info.num_indices);
+	DUMP(v4_filter_tbl_start_addr);
+	DUMP(v6_filter_tbl_start_addr);
+	DUMP(modem_mem_info.block_start_addr);
+	DUMP(modem_mem_info.size);
+	DUMP(ctrl_comm_dest_end_pt);
+	DUMP(is_ssr_bootup);
+	DUMP(v4_hash_route_tbl_info.route_tbl_start_addr);
+	DUMP(v4_hash_route_tbl_info.num_indices);
+	DUMP(v6_hash_route_tbl_info.route_tbl_start_addr);
+	DUMP(v6_hash_route_tbl_info.num_indices);
+	DUMP(v4_hash_filter_tbl_start_addr);
+	DUMP(v6_hash_filter_tbl_start_addr);
+#undef DUMP
 }
 
 static int ipa3_qmi_init_modem_send_sync_msg(void)
