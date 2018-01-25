@@ -540,10 +540,10 @@ remap_fail:
  *                  the expected.
  */
 static int ipa3_uc_send_cmd(u32 cmd, u32 opcode, u32 expected_status,
-		    bool polling_mode, unsigned long timeout_jiffies)
+		    unsigned long timeout_jiffies)
 {
 	return ipa3_uc_send_cmd_64b_param(cmd, 0, opcode,
-		expected_status, polling_mode, timeout_jiffies);
+		expected_status, false, timeout_jiffies);
 }
 
 int ipa3_uc_is_gsi_channel_empty(enum ipa_client_type ipa_client)
@@ -572,7 +572,7 @@ int ipa3_uc_is_gsi_channel_empty(enum ipa_client_type ipa_client)
 	       gsi_ep_info->ipa_gsi_chan_num);
 
 	ret = ipa3_uc_send_cmd(cmd.raw32b, IPA_CPU_2_HW_CMD_GSI_CH_EMPTY, 0,
-			      false, 10*HZ);
+			      10*HZ);
 
 	return ret;
 }
