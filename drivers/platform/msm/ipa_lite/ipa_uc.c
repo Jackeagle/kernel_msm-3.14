@@ -359,60 +359,60 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
  */
 static int ipa3_uc_send_cmd(u32 cmd, u32 opcode, unsigned long timeout_jiffies)
 {
+	struct ipa3_uc_ctx *uc_ctx = &ipa3_ctx->uc_ctx;
+	struct IpaHwSharedMemCommonMapping_t *mmio = uc_ctx->uc_sram_mmio;
 	int retries = 0;
 
 send_cmd_lock:
-	mutex_lock(&ipa3_ctx->uc_ctx.uc_lock);
+	mutex_lock(&uc_ctx->uc_lock);
 
 	if (ipa3_uc_state_check()) {
 		ipa_debug("uC send command aborted\n");
-		mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
+		mutex_unlock(&uc_ctx->uc_lock);
 		return -EBADF;
 	}
 send_cmd:
-	init_completion(&ipa3_ctx->uc_ctx.uc_completion);
+	init_completion(&uc_ctx->uc_completion);
 
-	ipa3_ctx->uc_ctx.uc_sram_mmio->cmdParams = cmd;
-	ipa3_ctx->uc_ctx.uc_sram_mmio->cmdParams_hi = 0;
-	ipa3_ctx->uc_ctx.uc_sram_mmio->cmdOp = opcode;
-	ipa3_ctx->uc_ctx.pending_cmd = opcode;
-	ipa3_ctx->uc_ctx.uc_sram_mmio->responseOp = 0;
-	ipa3_ctx->uc_ctx.uc_sram_mmio->responseParams = 0;
+	uc_ctx->pending_cmd = opcode;
+	uc_ctx->uc_status = 0;
 
-	ipa3_ctx->uc_ctx.uc_status = 0;
+	mmio->cmdOp = opcode;
+	mmio->cmdParams = cmd;
+	mmio->cmdParams_hi = 0;
+	mmio->responseOp = 0;
+	mmio->responseParams = 0;
 
 	/* ensure write to shared memory is done before triggering uc */
 	wmb();
 
 	ipahal_write_reg_n(IPA_IRQ_EE_UC_n, 0, 0x1);
 
-	if (wait_for_completion_timeout(&ipa3_ctx->uc_ctx.uc_completion,
+	if (wait_for_completion_timeout(&uc_ctx->uc_completion,
 		timeout_jiffies) == 0) {
 		ipa_err("uC timed out\n");
-		if (ipa3_ctx->uc_ctx.uc_failed) {
+		if (uc_ctx->uc_failed)
 			ipa_err("uC reported on Error, errorType = %s\n",
-				ipa_hw_error_str(ipa3_ctx->
-				uc_ctx.uc_error_type));
-		}
-		mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
+				ipa_hw_error_str(uc_ctx->uc_error_type));
+		mutex_unlock(&uc_ctx->uc_lock);
 		BUG();
 		return -EFAULT;
 	}
 
-	if (ipa3_ctx->uc_ctx.uc_status) {
-		if (ipa3_ctx->uc_ctx.uc_status ==
+	if (uc_ctx->uc_status) {
+		if (uc_ctx->uc_status ==
 		    IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE ||
-		    ipa3_ctx->uc_ctx.uc_status ==
+		    uc_ctx->uc_status ==
 		    IPA_HW_CONS_DISABLE_CMD_GSI_STOP_FAILURE) {
 			retries++;
 			if (retries == IPA_GSI_CHANNEL_STOP_MAX_RETRY) {
 				ipa_err("Failed after %d tries\n", retries);
-				mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
+				mutex_unlock(&uc_ctx->uc_lock);
 				BUG();
 				return -EFAULT;
 			}
-			mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
-			if (ipa3_ctx->uc_ctx.uc_status ==
+			mutex_unlock(&uc_ctx->uc_lock);
+			if (uc_ctx->uc_status ==
 			    IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE)
 				ipa3_inject_dma_task_for_gsi();
 			/* sleep for short period to flush IPA */
@@ -421,12 +421,11 @@ send_cmd:
 			goto send_cmd_lock;
 		}
 
-		if (ipa3_ctx->uc_ctx.uc_status ==
-			IPA_HW_GSI_CH_NOT_EMPTY_FAILURE) {
+		if (uc_ctx->uc_status == IPA_HW_GSI_CH_NOT_EMPTY_FAILURE) {
 			retries++;
 			if (retries >= IPA_GSI_CHANNEL_EMPTY_MAX_RETRY) {
 				ipa_err("Failed after %d tries\n", retries);
-				mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
+				mutex_unlock(&uc_ctx->uc_lock);
 				return -EFAULT;
 			}
 			usleep_range(IPA_GSI_CHANNEL_EMPTY_SLEEP_MIN_USEC,
@@ -434,12 +433,12 @@ send_cmd:
 			goto send_cmd;
 		}
 
-		ipa_err("Received status %u\n", ipa3_ctx->uc_ctx.uc_status);
-		mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
+		ipa_err("Received status %u\n", uc_ctx->uc_status);
+		mutex_unlock(&uc_ctx->uc_lock);
 		return -EFAULT;
 	}
 
-	mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
+	mutex_unlock(&uc_ctx->uc_lock);
 
 	ipa_debug("uC cmd %u send succeeded\n", opcode);
 
