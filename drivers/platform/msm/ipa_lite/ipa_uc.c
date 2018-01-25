@@ -33,8 +33,6 @@
 /**
  * enum ipa3_cpu_2_hw_commands - Values that represent the commands from the CPU
  * IPA_CPU_2_HW_CMD_NO_OP : No operation is required.
- * IPA_CPU_2_HW_CMD_UPDATE_FLAGS : Update SW flags which defines the behavior
- *                                 of HW.
  * IPA_CPU_2_HW_CMD_DEBUG_RUN_TEST : Launch predefined test over HW.
  * IPA_CPU_2_HW_CMD_DEBUG_GET_INFO : Read HW internal debug information.
  * IPA_CPU_2_HW_CMD_ERR_FATAL : CPU instructs HW to perform error fatal
@@ -48,8 +46,6 @@
 enum ipa3_cpu_2_hw_commands {
 	IPA_CPU_2_HW_CMD_NO_OP                     =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 0),
-	IPA_CPU_2_HW_CMD_UPDATE_FLAGS              =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 1),
 	IPA_CPU_2_HW_CMD_DEBUG_RUN_TEST            =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 2),
 	IPA_CPU_2_HW_CMD_DEBUG_GET_INFO            =
@@ -133,19 +129,6 @@ union IpaHwCpuCmdCompletedResponseData_t {
 	} __packed params;
 	u32 raw32b;
 } __packed;
-
-/**
- * union IpaHwUpdateFlagsCmdData_t - Structure holding the parameters for
- * IPA_CPU_2_HW_CMD_UPDATE_FLAGS command
- * @newFlags: SW flags defined the behavior of HW.
- *	This field is expected to be used as bitmask for enum ipa3_hw_flags
- */
-union IpaHwUpdateFlagsCmdData_t {
-	struct IpaHwUpdateFlagsCmdParams_t {
-		u32 newFlags;
-	} params;
-	u32 raw32b;
-};
 
 /**
  * union IpaHwChkChEmptyCmdData_t -  Structure holding the parameters for
@@ -744,20 +727,4 @@ int ipa3_uc_notify_clk_state(bool enabled)
 			     IPA_CPU_2_HW_CMD_CLK_GATE;
 
 	return ipa3_uc_send_cmd(0, opcode, 0, true, 0);
-}
-
-/**
- * ipa3_uc_update_hw_flags() - send uC the HW flags to be used
- * @flags: This field is expected to be used as bitmask for enum ipa3_hw_flags
- *
- * Returns: 0 on success, negative on failure
- */
-int ipa3_uc_update_hw_flags(u32 flags)
-{
-	union IpaHwUpdateFlagsCmdData_t cmd;
-
-	memset(&cmd, 0, sizeof(cmd));
-	cmd.params.newFlags = flags;
-	return ipa3_uc_send_cmd(cmd.raw32b, IPA_CPU_2_HW_CMD_UPDATE_FLAGS, 0,
-		false, HZ);
 }
