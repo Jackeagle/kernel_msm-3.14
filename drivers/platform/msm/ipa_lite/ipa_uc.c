@@ -339,8 +339,26 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 }
 
-static int ipa3_uc_send_cmd_64b_param(u32 cmd, u32 opcode,
-	u32 expected_status, unsigned long timeout_jiffies)
+/**
+ * ipa3_uc_send_cmd() - Send a command to the uC
+ *
+ * Note1: This function sends command with 32bit parameter and do not
+ *	use the higher 32bit of the command parameter (set to zero).
+ *
+ * Note2: In case the operation times out (No response from the uC) or
+ *       polling maximal amount of retries has reached, the logic
+ *       considers it as an invalid state of the uC/IPA, and
+ *       issues a kernel panic.
+ *
+ * Returns: 0 on success.
+ *          -EINVAL in case of invalid input.
+ *          -EBADF in case uC interface is not initialized /
+ *                 or the uC has failed previously.
+ *          -EFAULT in case the received status doesn't match
+ *                  the expected.
+ */
+static int ipa3_uc_send_cmd(u32 cmd, u32 opcode, u32 expected_status,
+		    unsigned long timeout_jiffies)
 {
 	int retries = 0;
 
@@ -487,31 +505,6 @@ irq_fail0:
 	iounmap(ipa3_ctx->uc_ctx.uc_sram_mmio);
 remap_fail:
 	return result;
-}
-
-/**
- * ipa3_uc_send_cmd() - Send a command to the uC
- *
- * Note1: This function sends command with 32bit parameter and do not
- *	use the higher 32bit of the command parameter (set to zero).
- *
- * Note2: In case the operation times out (No response from the uC) or
- *       polling maximal amount of retries has reached, the logic
- *       considers it as an invalid state of the uC/IPA, and
- *       issues a kernel panic.
- *
- * Returns: 0 on success.
- *          -EINVAL in case of invalid input.
- *          -EBADF in case uC interface is not initialized /
- *                 or the uC has failed previously.
- *          -EFAULT in case the received status doesn't match
- *                  the expected.
- */
-static int ipa3_uc_send_cmd(u32 cmd, u32 opcode, u32 expected_status,
-		    unsigned long timeout_jiffies)
-{
-	return ipa3_uc_send_cmd_64b_param(cmd, opcode,
-		expected_status, timeout_jiffies);
 }
 
 int ipa3_uc_is_gsi_channel_empty(enum ipa_client_type ipa_client)
