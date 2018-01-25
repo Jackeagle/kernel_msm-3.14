@@ -1675,7 +1675,6 @@ static void ipa3_register_panic_hdlr(void)
 static void ipa3_uc_is_loaded(void)
 {
 	ipa_debug("\n");
-	complete_all(&ipa3_ctx->uc_loaded_completion_obj);
 }
 
 /**
@@ -2151,7 +2150,6 @@ static int ipa3_pre_init(void)
 	ipa3_enable_dcd();
 
 	init_completion(&ipa3_ctx->init_completion_obj);
-	init_completion(&ipa3_ctx->uc_loaded_completion_obj);
 
 	cdev_init(&ipa3_ctx->cdev, &ipa3_drv_fops);
 	ipa3_ctx->cdev.owner = THIS_MODULE;

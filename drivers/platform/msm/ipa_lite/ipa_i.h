@@ -1218,7 +1218,6 @@ struct ipa3_context {
 	bool ipa_client_apps_wan_cons_agg_gro;
 	/* M-release support to know client pipes */
 	struct completion init_completion_obj;
-	struct completion uc_loaded_completion_obj;
 	struct ipa3_smp2p_info smp2p_info;
 	struct ipa_dma_task_info dma_task_info;
 };
