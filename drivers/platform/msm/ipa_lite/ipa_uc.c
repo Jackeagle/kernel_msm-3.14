@@ -357,8 +357,7 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
  *          -EFAULT in case the received status doesn't match
  *                  the expected.
  */
-static int ipa3_uc_send_cmd(u32 cmd, u32 opcode, u32 expected_status,
-		    unsigned long timeout_jiffies)
+static int ipa3_uc_send_cmd(u32 cmd, u32 opcode, unsigned long timeout_jiffies)
 {
 	int retries = 0;
 
@@ -400,7 +399,7 @@ send_cmd:
 		return -EFAULT;
 	}
 
-	if (ipa3_ctx->uc_ctx.uc_status != expected_status) {
+	if (ipa3_ctx->uc_ctx.uc_status) {
 		if (ipa3_ctx->uc_ctx.uc_status ==
 		    IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE ||
 		    ipa3_ctx->uc_ctx.uc_status ==
@@ -435,8 +434,7 @@ send_cmd:
 			goto send_cmd;
 		}
 
-		ipa_err("Recevied status %u, Expected status %u\n",
-			ipa3_ctx->uc_ctx.uc_status, expected_status);
+		ipa_err("Received status %u\n", ipa3_ctx->uc_ctx.uc_status);
 		mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
 		return -EFAULT;
 	}
@@ -532,8 +530,7 @@ int ipa3_uc_is_gsi_channel_empty(enum ipa_client_type ipa_client)
 	ipa_debug("uC emptiness check for IPA GSI Channel %d\n",
 	       gsi_ep_info->ipa_gsi_chan_num);
 
-	ret = ipa3_uc_send_cmd(cmd.raw32b, IPA_CPU_2_HW_CMD_GSI_CH_EMPTY, 0,
-			      10*HZ);
+	ret = ipa3_uc_send_cmd(cmd.raw32b, IPA_CPU_2_HW_CMD_GSI_CH_EMPTY, 10*HZ);
 
 	return ret;
 }
