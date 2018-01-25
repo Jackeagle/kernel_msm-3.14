@@ -390,9 +390,6 @@ send_cmd:
 
 	if (!wait_for_completion_timeout(&uc_ctx->uc_completion, 10 * HZ)) {
 		ipa_err("uC timed out\n");
-		if (uc_ctx->uc_failed)
-			ipa_err("uC reported on Error, errorType = %s\n",
-				ipa_hw_error_str(uc_ctx->uc_error_type));
 		mutex_unlock(&uc_ctx->uc_lock);
 		BUG();
 		return -EFAULT;
