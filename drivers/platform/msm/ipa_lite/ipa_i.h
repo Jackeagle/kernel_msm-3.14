@@ -1031,27 +1031,6 @@ struct IpaHwSharedMemCommonMapping_t {
 } __packed;
 
 /**
- * struct ipa3_uc_hdlrs - IPA uC callback functions
- * @ipa_uc_loaded_hdlr: Function handler when uC is loaded
- * @ipa_uc_event_hdlr: Event handler function
- * @ipa3_uc_response_hdlr: Response handler function
- * @ipa_uc_event_log_info_hdlr: Log event handler function
- */
-struct ipa3_uc_hdlrs {
-	void (*ipa_uc_loaded_hdlr)(void);
-
-	void (*ipa_uc_event_hdlr)
-		(struct IpaHwSharedMemCommonMapping_t *uc_sram_mmio);
-
-	int (*ipa3_uc_response_hdlr)
-		(struct IpaHwSharedMemCommonMapping_t *uc_sram_mmio,
-		u32 *uc_status);
-
-	void (*ipa_uc_event_log_info_hdlr)
-		(struct IpaHwEventLogInfoData_t *uc_event_top_mmio);
-};
-
-/**
  * struct ipa3_uc_ctx - IPA uC context
  * @uc_inited: Indicates if uC interface has been initialized
  * @uc_loaded: Indicates if uC has loaded

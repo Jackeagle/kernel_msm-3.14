@@ -86,8 +86,6 @@ union IpaHwChkChEmptyCmdData_t {
 	u32 raw32b;
 } __packed;
 
-struct ipa3_uc_hdlrs ipa3_uc_hdlrs[IPA_HW_NUM_FEATURES] = { { 0 } };
-
 const char *ipa_hw_error_str(enum ipa_hw_errors err_type)
 {
 	const char *str;
@@ -129,8 +127,6 @@ const char *ipa_hw_error_str(enum ipa_hw_errors err_type)
 
 static void ipa3_log_evt_hdlr(void)
 {
-	int i;
-
 	if (!ipa3_ctx->uc_ctx.uc_event_top_ofst) {
 		ipa3_ctx->uc_ctx.uc_event_top_ofst =
 			ipa3_ctx->uc_ctx.uc_sram_mmio->eventParams;
@@ -151,12 +147,6 @@ static void ipa3_log_evt_hdlr(void)
 		if (!ipa3_ctx->uc_ctx.uc_event_top_mmio) {
 			ipa_err("fail to ioremap uc top\n");
 			goto bad_uc_top_ofst;
-		}
-
-		for (i = 0; i < IPA_HW_NUM_FEATURES; i++) {
-			if (ipa3_uc_hdlrs[i].ipa_uc_event_log_info_hdlr)
-				ipa3_uc_hdlrs[i].ipa_uc_event_log_info_hdlr
-					(ipa3_ctx->uc_ctx.uc_event_top_mmio);
 		}
 	} else {
 
@@ -236,10 +226,6 @@ static void ipa3_uc_event_handler(enum ipa_irq_type interrupt,
 		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 		return;
 	}
-	/* Feature specific handling */
-	if (ipa3_uc_hdlrs[feature].ipa_uc_event_hdlr)
-		ipa3_uc_hdlrs[feature].ipa_uc_event_hdlr
-			(ipa3_ctx->uc_ctx.uc_sram_mmio);
 
 	/* General handling */
 	if (ipa3_ctx->uc_ctx.uc_sram_mmio->eventOp ==
@@ -305,8 +291,6 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 {
 	union IpaHwCpuCmdCompletedResponseData_t uc_rsp;
 	u8 feature;
-	int res;
-	int i;
 
 	WARN_ON(private_data != ipa3_ctx);
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
@@ -322,20 +306,6 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 		return;
 	}
 
-	/* Feature specific handling */
-	if (ipa3_uc_hdlrs[feature].ipa3_uc_response_hdlr) {
-		res = ipa3_uc_hdlrs[feature].ipa3_uc_response_hdlr(
-			ipa3_ctx->uc_ctx.uc_sram_mmio,
-			&ipa3_ctx->uc_ctx.uc_status);
-		if (res == 0) {
-			ipa_debug("feature %d specific response handler\n",
-				feature);
-			complete_all(&ipa3_ctx->uc_ctx.uc_completion);
-			IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
-			return;
-		}
-	}
-
 	/* General handling */
 	if (ipa3_ctx->uc_ctx.uc_sram_mmio->responseOp ==
 			IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED) {
@@ -347,11 +317,6 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 		 * IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED is received.
 		 */
 		ipa3_proxy_clk_unvote();
-
-		for (i = 0; i < IPA_HW_NUM_FEATURES; i++) {
-			if (ipa3_uc_hdlrs[i].ipa_uc_loaded_hdlr)
-				ipa3_uc_hdlrs[i].ipa_uc_loaded_hdlr();
-		}
 	} else if (ipa3_ctx->uc_ctx.uc_sram_mmio->responseOp ==
 		   IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED) {
 		uc_rsp.raw32b = ipa3_ctx->uc_ctx.uc_sram_mmio->responseParams;
