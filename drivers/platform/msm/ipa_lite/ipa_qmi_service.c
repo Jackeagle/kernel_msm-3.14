@@ -422,6 +422,9 @@ static int ipa3_qmi_init_modem_send_sync_msg(void)
 	int rc;
 	u16 restricted_bytes = ipa3_get_smem_restr_bytes();
 
+	if (unlikely(!ipa_q6_clnt))
+		return -ETIMEDOUT;
+
 	memset(&req, 0, sizeof(struct ipa_init_modem_driver_req_msg_v01));
 	memset(&resp, 0, sizeof(struct ipa_init_modem_driver_resp_msg_v01));
 
@@ -516,8 +519,6 @@ static int ipa3_qmi_init_modem_send_sync_msg(void)
 	resp_desc.ei_array = ipa3_init_modem_driver_resp_msg_data_v01_ei;
 
 	ipa_info("Sending QMI_IPA_INIT_MODEM_DRIVER_REQ_V01\n");
-	if (unlikely(!ipa_q6_clnt))
-		return -ETIMEDOUT;
 	rc = qmi_send_req_wait(ipa_q6_clnt, &req_desc, &req, sizeof(req),
 			&resp_desc, &resp, sizeof(resp),
 			QMI_SEND_REQ_TIMEOUT_MS);
