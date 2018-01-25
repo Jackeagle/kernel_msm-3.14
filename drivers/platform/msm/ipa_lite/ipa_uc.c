@@ -37,8 +37,6 @@ enum ipa3_cpu_2_hw_commands {
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 5),
 	IPA_CPU_2_HW_CMD_CLK_UNGATE                =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 6),
-	IPA_CPU_2_HW_CMD_REG_WRITE                 =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 9),
 	IPA_CPU_2_HW_CMD_GSI_CH_EMPTY              =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 10),
 };
@@ -55,18 +53,6 @@ enum ipa3_hw_2_cpu_responses {
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 1),
 	IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED  =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 2),
-};
-
-/**
- * struct IpaHwRegWriteCmdData_t - holds the parameters for
- * IPA_CPU_2_HW_CMD_REG_WRITE command. Parameters are
- * sent as 64b immediate parameters.
- * @RegisterAddress: RG10 register address where the value needs to be written
- * @RegisterValue: 32-Bit value to be written into the register
- */
-struct IpaHwRegWriteCmdData_t {
-	u32 RegisterAddress;
-	u32 RegisterValue;
 };
 
 /**
