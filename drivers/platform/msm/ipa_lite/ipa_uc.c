@@ -28,7 +28,6 @@
  *                              handling.
  * IPA_CPU_2_HW_CMD_CLK_GATE : CPU instructs HW to goto Clock Gated state.
  * IPA_CPU_2_HW_CMD_CLK_UNGATE : CPU instructs HW to goto Clock Ungated state.
- * IPA_CPU_2_HW_CMD_MEMCPY : CPU instructs HW to do memcopy using QMB.
  * IPA_CPU_2_HW_CMD_GSI_CH_EMPTY : Command to check for GSI channel emptiness.
  */
 enum ipa3_cpu_2_hw_commands {
@@ -38,8 +37,6 @@ enum ipa3_cpu_2_hw_commands {
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 5),
 	IPA_CPU_2_HW_CMD_CLK_UNGATE                =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 6),
-	IPA_CPU_2_HW_CMD_MEMCPY                    =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 7),
 	IPA_CPU_2_HW_CMD_REG_WRITE                 =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 9),
 	IPA_CPU_2_HW_CMD_GSI_CH_EMPTY              =
@@ -58,19 +55,6 @@ enum ipa3_hw_2_cpu_responses {
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 1),
 	IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED  =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 2),
-};
-
-/**
- * struct IpaHwMemCopyData_t - Structure holding the parameters
- * for IPA_CPU_2_HW_CMD_MEMCPY command.
- *
- * The parameters are passed as immediate params in the shared memory
- */
-struct IpaHwMemCopyData_t  {
-	u32 destination_addr;
-	u32 source_addr;
-	u32 dest_buffer_size;
-	u32 source_buffer_size;
 };
 
 /**
