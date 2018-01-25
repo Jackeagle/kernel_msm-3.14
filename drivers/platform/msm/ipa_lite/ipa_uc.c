@@ -357,7 +357,7 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
  *          -EFAULT in case the received status doesn't match
  *                  the expected.
  */
-static int ipa3_uc_send_cmd(u32 cmd, u32 opcode, unsigned long timeout_jiffies)
+static int ipa3_uc_send_cmd(u32 cmd, u32 opcode)
 {
 	struct ipa3_uc_ctx *uc_ctx = &ipa3_ctx->uc_ctx;
 	struct IpaHwSharedMemCommonMapping_t *mmio = uc_ctx->uc_sram_mmio;
@@ -388,8 +388,7 @@ send_cmd:
 
 	ipahal_write_reg_n(IPA_IRQ_EE_UC_n, 0, 0x1);
 
-	if (wait_for_completion_timeout(&uc_ctx->uc_completion,
-		timeout_jiffies) == 0) {
+	if (!wait_for_completion_timeout(&uc_ctx->uc_completion, 10 * HZ)) {
 		ipa_err("uC timed out\n");
 		if (uc_ctx->uc_failed)
 			ipa_err("uC reported on Error, errorType = %s\n",
@@ -529,7 +528,7 @@ int ipa3_uc_is_gsi_channel_empty(enum ipa_client_type ipa_client)
 	ipa_debug("uC emptiness check for IPA GSI Channel %d\n",
 	       gsi_ep_info->ipa_gsi_chan_num);
 
-	ret = ipa3_uc_send_cmd(cmd.raw32b, IPA_CPU_2_HW_CMD_GSI_CH_EMPTY, 10*HZ);
+	ret = ipa3_uc_send_cmd(cmd.raw32b, IPA_CPU_2_HW_CMD_GSI_CH_EMPTY);
 
 	return ret;
 }
