@@ -355,22 +355,6 @@ static DECLARE_WORK(ipa3_work_svc_exit, ipa3_q6_clnt_svc_exit);
 static struct qmi_handle *ipa_q6_clnt;
 static int ipa_q6_clnt_reset;
 
-static int ipa3_check_qmi_response(int rc,
-				  int req_id,
-				  enum ipa_qmi_result_type_v01 result,
-				  enum ipa_qmi_error_type_v01 error,
-				  char *resp_type)
-{
-	if (result != IPA_QMI_RESULT_SUCCESS_V01 &&
-	    ipa3_rmnet_ctx.ipa_rmnet_ssr) {
-		ipa_err(
-		"Got bad response %d from request id %d (error %d)\n",
-		req_id, result, error);
-		return result;
-	}
-	return 0;
-}
-
 static void
 init_modem_driver_req_msg_dump(struct ipa_init_modem_driver_req_msg_v01 *req)
 {
@@ -516,14 +500,12 @@ static int ipa3_qmi_init_modem_send_sync_msg(void)
 		return rc;
 	}
 
-	if (resp.resp.result == IPA_QMI_RESULT_SUCCESS_V01) {
+	if (resp.resp.result == IPA_QMI_RESULT_SUCCESS_V01)
 		ipa_debug_low("Received init_modem_driver successfully\n");
-		return 0;
-	}
-
-	return ipa3_check_qmi_response(rc,
-		QMI_IPA_INIT_MODEM_DRIVER_REQ_V01, resp.resp.result,
-		resp.resp.error, "ipa_init_modem_driver_resp_msg_v01");
+	else if (ipa3_rmnet_ctx.ipa_rmnet_ssr)
+		ipa_err("Got bad response %d on init_modem_driver\n",
+				resp.resp.result);
+	return 0;
 }
 
 static void ipa3_q6_clnt_recv_msg(struct work_struct *work)
