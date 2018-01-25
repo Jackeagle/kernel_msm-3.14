@@ -33,10 +33,6 @@
 enum ipa3_cpu_2_hw_commands {
 	IPA_CPU_2_HW_CMD_ERR_FATAL                 =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 4),
-	IPA_CPU_2_HW_CMD_CLK_GATE                  =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 5),
-	IPA_CPU_2_HW_CMD_CLK_UNGATE                =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 6),
 	IPA_CPU_2_HW_CMD_GSI_CH_EMPTY              =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 10),
 };
@@ -653,21 +649,7 @@ int ipa3_uc_is_gsi_channel_empty(enum ipa_client_type ipa_client)
  */
 int ipa3_uc_notify_clk_state(bool enabled)
 {
-	u32 opcode;
+	ipa_debug("uC clock %s notification\n", enabled ? "UNGATE" : "GATE");
 
-	/*
-	 * If the uC interface has not been initialized yet,
-	 * don't notify the uC on the enable/disable
-	 */
-	if (ipa3_uc_state_check()) {
-		ipa_debug("uC interface will not notify the UC on clock state\n");
-		return 0;
-	}
-
-	ipa_debug("uC clock %s notification\n", (enabled) ? "UNGATE" : "GATE");
-
-	opcode = (enabled) ? IPA_CPU_2_HW_CMD_CLK_UNGATE :
-			     IPA_CPU_2_HW_CMD_CLK_GATE;
-
-	return ipa3_uc_send_cmd(0, opcode, 0, true, 0);
+	return 0;
 }
