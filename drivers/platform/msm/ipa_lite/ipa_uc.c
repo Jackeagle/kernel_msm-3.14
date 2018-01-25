@@ -592,12 +592,6 @@ int ipa3_uc_send_cmd(u32 cmd, u32 opcode, u32 expected_status,
 void ipa3_uc_register_handlers(enum ipa3_hw_features feature,
 			      struct ipa3_uc_hdlrs *hdlrs)
 {
-	if (0 > feature || IPA_HW_FEATURE_MAX <= feature) {
-		ipa_err("Feature %u is invalid, not registering hdlrs\n",
-		       feature);
-		return;
-	}
-
 	mutex_lock(&ipa3_ctx->uc_ctx.uc_lock);
 	ipa3_uc_hdlrs[feature] = *hdlrs;
 	mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
