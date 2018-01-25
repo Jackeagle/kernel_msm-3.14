@@ -1413,7 +1413,6 @@ int ipa3_uc_send_cmd(u32 cmd, u32 opcode, u32 expected_status,
 		    bool polling_mode, unsigned long timeout_jiffies);
 void ipa3_uc_register_handlers(enum ipa3_hw_features feature,
 			      struct ipa3_uc_hdlrs *hdlrs);
-int ipa3_uc_notify_clk_state(bool enabled);
 void ipa3_tag_destroy_imm(void *user1, int user2);
 const struct ipa_gsi_ep_config *ipa3_get_gsi_ep_info
 	(enum ipa_client_type client);

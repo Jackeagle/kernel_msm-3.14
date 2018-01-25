@@ -1118,8 +1118,6 @@ fail_ch20_wa:
 void _ipa_enable_clks_v3_0(void)
 {
 	ipa_debug_low("curr_ipa_clk_rate=%d", ipa3_ctx->curr_ipa_clk_rate);
-
-	ipa3_uc_notify_clk_state(true);
 }
 
 static unsigned int ipa3_get_bus_vote(void)
@@ -1170,7 +1168,6 @@ void ipa3_enable_clks(void)
 void _ipa_disable_clks_v3_0(void)
 {
 	ipa3_suspend_apps_pipes(true);
-	ipa3_uc_notify_clk_state(false);
 }
 
 /**

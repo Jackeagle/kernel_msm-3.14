@@ -635,21 +635,3 @@ int ipa3_uc_is_gsi_channel_empty(enum ipa_client_type ipa_client)
 
 	return ret;
 }
-
-
-/**
- * ipa3_uc_notify_clk_state() - notify to uC of clock enable / disable
- * @enabled: true if clock are enabled
- *
- * The function uses the uC interface in order to notify uC before IPA clocks
- * are disabled to make sure uC is not in the middle of operation.
- * Also after clocks are enabled ned to notify uC to start processing.
- *
- * Returns: 0 on success, negative on failure
- */
-int ipa3_uc_notify_clk_state(bool enabled)
-{
-	ipa_debug("uC clock %s notification\n", enabled ? "UNGATE" : "GATE");
-
-	return 0;
-}
