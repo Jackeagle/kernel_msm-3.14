@@ -581,24 +581,6 @@ int ipa3_uc_send_cmd(u32 cmd, u32 opcode, u32 expected_status,
 		expected_status, polling_mode, timeout_jiffies);
 }
 
-/**
- * ipa3_uc_register_handlers() - Registers event, response and log event
- *                              handlers for a specific feature.Please note
- *                              that currently only one handler can be
- *                              registered per feature.
- *
- * Return value: None
- */
-void ipa3_uc_register_handlers(enum ipa3_hw_features feature,
-			      struct ipa3_uc_hdlrs *hdlrs)
-{
-	mutex_lock(&ipa3_ctx->uc_ctx.uc_lock);
-	ipa3_uc_hdlrs[feature] = *hdlrs;
-	mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
-
-	ipa_debug("uC handlers registered for feature %u\n", feature);
-}
-
 int ipa3_uc_is_gsi_channel_empty(enum ipa_client_type ipa_client)
 {
 	const struct ipa_gsi_ep_config *gsi_ep_info;
