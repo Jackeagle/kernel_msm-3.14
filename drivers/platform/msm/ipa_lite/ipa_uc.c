@@ -24,24 +24,14 @@
 
 /**
  * enum ipa3_cpu_2_hw_commands - Values that represent the commands from the CPU
- * IPA_CPU_2_HW_CMD_NO_OP : No operation is required.
- * IPA_CPU_2_HW_CMD_DEBUG_RUN_TEST : Launch predefined test over HW.
- * IPA_CPU_2_HW_CMD_DEBUG_GET_INFO : Read HW internal debug information.
  * IPA_CPU_2_HW_CMD_ERR_FATAL : CPU instructs HW to perform error fatal
  *                              handling.
  * IPA_CPU_2_HW_CMD_CLK_GATE : CPU instructs HW to goto Clock Gated state.
  * IPA_CPU_2_HW_CMD_CLK_UNGATE : CPU instructs HW to goto Clock Ungated state.
  * IPA_CPU_2_HW_CMD_MEMCPY : CPU instructs HW to do memcopy using QMB.
- * IPA_CPU_2_HW_CMD_RESET_PIPE : Command to reset a pipe - SW WA for a HW bug.
  * IPA_CPU_2_HW_CMD_GSI_CH_EMPTY : Command to check for GSI channel emptiness.
  */
 enum ipa3_cpu_2_hw_commands {
-	IPA_CPU_2_HW_CMD_NO_OP                     =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 0),
-	IPA_CPU_2_HW_CMD_DEBUG_RUN_TEST            =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 2),
-	IPA_CPU_2_HW_CMD_DEBUG_GET_INFO            =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 3),
 	IPA_CPU_2_HW_CMD_ERR_FATAL                 =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 4),
 	IPA_CPU_2_HW_CMD_CLK_GATE                  =
@@ -50,8 +40,6 @@ enum ipa3_cpu_2_hw_commands {
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 6),
 	IPA_CPU_2_HW_CMD_MEMCPY                    =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 7),
-	IPA_CPU_2_HW_CMD_RESET_PIPE                =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 8),
 	IPA_CPU_2_HW_CMD_REG_WRITE                 =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 9),
 	IPA_CPU_2_HW_CMD_GSI_CH_EMPTY              =
