@@ -367,11 +367,6 @@ static int ipa3_check_qmi_response(int rc,
 			"Timeout for qmi request id %d\n", req_id);
 			return rc;
 		}
-		if ((rc == -ENETRESET) || (rc == -ENODEV)) {
-			ipa_err(
-			"SSR while waiting for qmi request id %d\n", req_id);
-			return rc;
-		}
 		ipa_err("Error sending qmi request id %d, rc = %d\n",
 			req_id, rc);
 		return rc;
@@ -587,9 +582,8 @@ static void ipa3_q6_clnt_svc_arrive(struct work_struct *work)
 	/* Initialize modem IPA-driver */
 	ipa_debug("send ipa3_qmi_init_modem_send_sync_msg to modem\n");
 	rc = ipa3_qmi_init_modem_send_sync_msg();
-	if ((rc == -ENETRESET) || (rc == -ENODEV)) {
-		ipa_err(
-			"ipa3_qmi_init_modem_send_sync_msg failed due to SSR!\n");
+	if (rc == -ENETRESET || rc == -ENODEV) {
+		ipa_err("qmi_init_modem_send_sync_msg failed due to SSR!\n");
 		/* Cleanup will take place when ipa3_wwan_remove is called */
 		return;
 	}
