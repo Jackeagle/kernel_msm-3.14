@@ -539,7 +539,7 @@ remap_fail:
  *          -EFAULT in case the received status doesn't match
  *                  the expected.
  */
-int ipa3_uc_send_cmd(u32 cmd, u32 opcode, u32 expected_status,
+static int ipa3_uc_send_cmd(u32 cmd, u32 opcode, u32 expected_status,
 		    bool polling_mode, unsigned long timeout_jiffies)
 {
 	return ipa3_uc_send_cmd_64b_param(cmd, 0, opcode,
