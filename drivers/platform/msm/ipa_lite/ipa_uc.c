@@ -339,6 +339,36 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 }
 
+/*
+ * Send a command to the microcontroller and wait for it to complete.
+ * Returns 0 if command completed, -ETIMEDOUT if it timed out.
+ * Assumes caller holds uc_ctx->uc_lock mutex.
+ */
+static bool send_uc_command(struct ipa3_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
+{
+	struct IpaHwSharedMemCommonMapping_t *mmio = uc_ctx->uc_sram_mmio;
+	int ret;
+
+	init_completion(&uc_ctx->uc_completion);
+
+	uc_ctx->pending_cmd = opcode;
+	uc_ctx->uc_status = 0;
+
+	mmio->cmdOp = opcode;
+	mmio->cmdParams = cmd;
+	mmio->cmdParams_hi = 0;
+	mmio->responseOp = 0;
+	mmio->responseParams = 0;
+
+	wmb();	/* ensure write to shared memory is done before triggering uc */
+
+	ipahal_write_reg_n(IPA_IRQ_EE_UC_n, 0, 0x1);
+
+	ret = wait_for_completion_timeout(&uc_ctx->uc_completion, 10 * HZ);
+
+	return ret ? 0 : -ETIMEDOUT;
+}
+
 /**
  * ipa3_uc_send_cmd() - Send a command to the uC
  *
@@ -360,8 +390,8 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 static int ipa3_uc_send_cmd(u32 cmd, u32 opcode)
 {
 	struct ipa3_uc_ctx *uc_ctx = &ipa3_ctx->uc_ctx;
-	struct IpaHwSharedMemCommonMapping_t *mmio = uc_ctx->uc_sram_mmio;
 	int retries = 0;
+	int ret;
 
 send_cmd_lock:
 	mutex_lock(&uc_ctx->uc_lock);
@@ -372,23 +402,8 @@ send_cmd_lock:
 		return -EBADF;
 	}
 send_cmd:
-	init_completion(&uc_ctx->uc_completion);
-
-	uc_ctx->pending_cmd = opcode;
-	uc_ctx->uc_status = 0;
-
-	mmio->cmdOp = opcode;
-	mmio->cmdParams = cmd;
-	mmio->cmdParams_hi = 0;
-	mmio->responseOp = 0;
-	mmio->responseParams = 0;
-
-	/* ensure write to shared memory is done before triggering uc */
-	wmb();
-
-	ipahal_write_reg_n(IPA_IRQ_EE_UC_n, 0, 0x1);
-
-	if (!wait_for_completion_timeout(&uc_ctx->uc_completion, 10 * HZ)) {
+	ret = send_uc_command(uc_ctx, cmd, opcode);
+	if (ret == -ETIMEDOUT) {
 		ipa_err("uC timed out\n");
 		mutex_unlock(&uc_ctx->uc_lock);
 		BUG();
