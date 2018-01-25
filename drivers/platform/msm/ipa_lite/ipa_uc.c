@@ -23,15 +23,6 @@
 #define IPA_UC_POLL_MAX_RETRY 10000
 
 /**
- * Mailbox register to Interrupt HWP for CPU cmd
- * Usage of IPA_UC_MAILBOX_m_n doorbell instead of IPA_IRQ_EE_UC_0
- * due to HW limitation.
- *
- */
-#define IPA_CPU_2_HW_CMD_MBOX_m          0
-#define IPA_CPU_2_HW_CMD_MBOX_n         23
-
-/**
  * enum ipa3_cpu_2_hw_commands - Values that represent the commands from the CPU
  * IPA_CPU_2_HW_CMD_NO_OP : No operation is required.
  * IPA_CPU_2_HW_CMD_DEBUG_RUN_TEST : Launch predefined test over HW.
