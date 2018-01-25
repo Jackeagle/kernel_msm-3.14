@@ -340,10 +340,8 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 }
 
 static int ipa3_uc_send_cmd_64b_param(u32 cmd_lo, u32 cmd_hi, u32 opcode,
-	u32 expected_status, bool polling_mode, unsigned long timeout_jiffies)
+	u32 expected_status, unsigned long timeout_jiffies)
 {
-	int index;
-	union IpaHwCpuCmdCompletedResponseData_t uc_rsp;
 	int retries = 0;
 
 send_cmd_lock:
@@ -371,47 +369,17 @@ send_cmd:
 
 	ipahal_write_reg_n(IPA_IRQ_EE_UC_n, 0, 0x1);
 
-	if (polling_mode) {
-		for (index = 0; index < IPA_UC_POLL_MAX_RETRY; index++) {
-			if (ipa3_ctx->uc_ctx.uc_sram_mmio->responseOp ==
-			    IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED) {
-				uc_rsp.raw32b = ipa3_ctx->uc_ctx.uc_sram_mmio->
-						responseParams;
-				if (uc_rsp.params.originalCmdOp ==
-					ipa3_ctx->uc_ctx.pending_cmd) {
-					ipa3_ctx->uc_ctx.uc_status =
-						uc_rsp.params.status;
-					break;
-				}
-			}
-			usleep_range(IPA_UC_POLL_SLEEP_USEC,
-					IPA_UC_POLL_SLEEP_USEC);
+	if (wait_for_completion_timeout(&ipa3_ctx->uc_ctx.uc_completion,
+		timeout_jiffies) == 0) {
+		ipa_err("uC timed out\n");
+		if (ipa3_ctx->uc_ctx.uc_failed) {
+			ipa_err("uC reported on Error, errorType = %s\n",
+				ipa_hw_error_str(ipa3_ctx->
+				uc_ctx.uc_error_type));
 		}
-
-		if (index == IPA_UC_POLL_MAX_RETRY) {
-			ipa_err("uC max polling retries reached\n");
-			if (ipa3_ctx->uc_ctx.uc_failed) {
-				ipa_err("uC reported on Error, errorType = %s\n",
-					ipa_hw_error_str(ipa3_ctx->
-					uc_ctx.uc_error_type));
-			}
-			mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
-			BUG();
-			return -EFAULT;
-		}
-	} else {
-		if (wait_for_completion_timeout(&ipa3_ctx->uc_ctx.uc_completion,
-			timeout_jiffies) == 0) {
-			ipa_err("uC timed out\n");
-			if (ipa3_ctx->uc_ctx.uc_failed) {
-				ipa_err("uC reported on Error, errorType = %s\n",
-					ipa_hw_error_str(ipa3_ctx->
-					uc_ctx.uc_error_type));
-			}
-			mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
-			BUG();
-			return -EFAULT;
-		}
+		mutex_unlock(&ipa3_ctx->uc_ctx.uc_lock);
+		BUG();
+		return -EFAULT;
 	}
 
 	if (ipa3_ctx->uc_ctx.uc_status != expected_status) {
@@ -543,7 +511,7 @@ static int ipa3_uc_send_cmd(u32 cmd, u32 opcode, u32 expected_status,
 		    unsigned long timeout_jiffies)
 {
 	return ipa3_uc_send_cmd_64b_param(cmd, 0, opcode,
-		expected_status, false, timeout_jiffies);
+		expected_status, timeout_jiffies);
 }
 
 int ipa3_uc_is_gsi_channel_empty(enum ipa_client_type ipa_client)
