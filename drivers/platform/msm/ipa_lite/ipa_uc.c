@@ -61,22 +61,15 @@ enum ipa3_cpu_2_hw_commands {
 /**
  * enum ipa3_hw_2_cpu_responses -  Values that represent common HW responses
  *  to CPU commands.
- * @IPA_HW_2_CPU_RESPONSE_NO_OP : No operation response
  * @IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED : HW shall send this command once
  *  boot sequence is completed and HW is ready to serve commands from CPU
  * @IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED: Response to CPU commands
- * @IPA_HW_2_CPU_RESPONSE_DEBUG_GET_INFO : Response to
- *  IPA_CPU_2_HW_CMD_DEBUG_GET_INFO command
  */
 enum ipa3_hw_2_cpu_responses {
-	IPA_HW_2_CPU_RESPONSE_NO_OP          =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 0),
 	IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 1),
 	IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED  =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 2),
-	IPA_HW_2_CPU_RESPONSE_DEBUG_GET_INFO =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 3),
 };
 
 /**
