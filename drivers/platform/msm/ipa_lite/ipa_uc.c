@@ -339,7 +339,7 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 }
 
-static int ipa3_uc_send_cmd_64b_param(u32 cmd_lo, u32 cmd_hi, u32 opcode,
+static int ipa3_uc_send_cmd_64b_param(u32 cmd, u32 opcode,
 	u32 expected_status, unsigned long timeout_jiffies)
 {
 	int retries = 0;
@@ -355,8 +355,8 @@ send_cmd_lock:
 send_cmd:
 	init_completion(&ipa3_ctx->uc_ctx.uc_completion);
 
-	ipa3_ctx->uc_ctx.uc_sram_mmio->cmdParams = cmd_lo;
-	ipa3_ctx->uc_ctx.uc_sram_mmio->cmdParams_hi = cmd_hi;
+	ipa3_ctx->uc_ctx.uc_sram_mmio->cmdParams = cmd;
+	ipa3_ctx->uc_ctx.uc_sram_mmio->cmdParams_hi = 0;
 	ipa3_ctx->uc_ctx.uc_sram_mmio->cmdOp = opcode;
 	ipa3_ctx->uc_ctx.pending_cmd = opcode;
 	ipa3_ctx->uc_ctx.uc_sram_mmio->responseOp = 0;
@@ -510,7 +510,7 @@ remap_fail:
 static int ipa3_uc_send_cmd(u32 cmd, u32 opcode, u32 expected_status,
 		    unsigned long timeout_jiffies)
 {
-	return ipa3_uc_send_cmd_64b_param(cmd, 0, opcode,
+	return ipa3_uc_send_cmd_64b_param(cmd, opcode,
 		expected_status, timeout_jiffies);
 }
 
