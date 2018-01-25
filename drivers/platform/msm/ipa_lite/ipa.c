@@ -1672,11 +1672,6 @@ static void ipa3_register_panic_hdlr(void)
 		&ipa3_panic_blk);
 }
 
-static void ipa3_uc_is_loaded(void)
-{
-	ipa_debug("\n");
-}
-
 /**
  * ipa3_post_init() - Initialize the IPA Driver (Part II).
  * This part contains all initialization which requires interaction with
@@ -1702,7 +1697,6 @@ static void ipa3_uc_is_loaded(void)
 static int ipa3_post_init(struct device *ipa_dev)
 {
 	int result;
-	struct ipa3_uc_hdlrs uc_hdlrs = { 0 };
 
 	/* Assign resource limitation to each group */
 	ipa3_set_resorce_groups_min_max_limits();
@@ -1738,9 +1732,6 @@ static int ipa3_post_init(struct device *ipa_dev)
 		ipa_err(":ipa Uc interface init failed (%d)\n", -result);
 	else
 		ipa_debug(":ipa Uc interface init ok\n");
-
-	uc_hdlrs.ipa_uc_loaded_hdlr = ipa3_uc_is_loaded;
-	ipa3_uc_register_handlers(IPA_HW_FEATURE_COMMON, &uc_hdlrs);
 
 	ipa3_register_panic_hdlr();
 
