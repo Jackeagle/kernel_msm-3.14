@@ -339,6 +339,13 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 }
 
+static bool uc_cmd_should_retry(u32 status)
+{
+	return status == IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE ||
+		status == IPA_HW_CONS_DISABLE_CMD_GSI_STOP_FAILURE ||
+		status == IPA_HW_GSI_CH_NOT_EMPTY_FAILURE;
+}
+
 /*
  * Send a command to the microcontroller and wait for it to complete.
  * Returns 0 if command completed, -ETIMEDOUT if it timed out.
@@ -370,6 +377,9 @@ static bool send_uc_command(struct ipa3_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
 
 	if (!uc_ctx->uc_status)
 		return 0;		/* Success! */
+
+	if (uc_cmd_should_retry(uc_ctx->uc_status))
+		return -EAGAIN;
 
 	return -EFAULT;
 }
@@ -422,8 +432,16 @@ send_cmd:
 	}
 
 	/* We didn't time out, but we got an error.  See if we should retry. */
+	if (ret != -EAGAIN) {
+		mutex_unlock(&uc_ctx->uc_lock);
+		ipa_err("Received status %u\n", uc_ctx->uc_status);
+
+		return -EFAULT;
+	}
+
+	retries++;
+
 	if (uc_ctx->uc_status == IPA_HW_GSI_CH_NOT_EMPTY_FAILURE) {
-		retries++;
 		if (retries >= IPA_GSI_CHANNEL_EMPTY_MAX_RETRY) {
 			ipa_err("Failed after %d tries\n", retries);
 			mutex_unlock(&uc_ctx->uc_lock);
@@ -432,11 +450,7 @@ send_cmd:
 		usleep_range(IPA_GSI_CHANNEL_EMPTY_SLEEP_MIN_USEC,
 			IPA_GSI_CHANNEL_EMPTY_SLEEP_MAX_USEC);
 		goto send_cmd;
-	}
-
-	if (uc_ctx->uc_status == IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE ||
-		uc_ctx->uc_status == IPA_HW_CONS_DISABLE_CMD_GSI_STOP_FAILURE) {
-		retries++;
+	} else {
 		if (retries == IPA_GSI_CHANNEL_STOP_MAX_RETRY) {
 			ipa_err("Failed after %d tries\n", retries);
 			mutex_unlock(&uc_ctx->uc_lock);
@@ -453,7 +467,7 @@ send_cmd:
 		goto send_cmd_lock;
 	}
 
-	ipa_err("Received status %u\n", uc_ctx->uc_status);
+	/* The all cases are covered above so we won't get here... */
 	mutex_unlock(&uc_ctx->uc_lock);
 
 	return -EFAULT;
