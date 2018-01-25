@@ -15,8 +15,9 @@
 #include <linux/delay.h>
 #include "ipa_i.h"
 
+/* Supports hardware interface version 0x2000 */
+
 #define IPA_RAM_UC_SMEM_SIZE 128
-#define IPA_HW_INTERFACE_VERSION     0x2000
 #define IPA_PKT_FLUSH_TO_US 100
 #define IPA_UC_POLL_SLEEP_USEC 100
 #define IPA_UC_POLL_MAX_RETRY 10000
