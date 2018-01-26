@@ -388,6 +388,34 @@ static bool send_uc_command(struct ipa3_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
 	return -EFAULT;
 }
 
+/*
+ * Try to send a microcontroller command.  Returns 0 if successful,
+ * -EIO if an unrecoverable error occurs.  Returns -EAGAIN if an
+ * error occurred but the command should be retried, or -EFAULT for
+ * any other error.
+ */
+static int try_send_uc_command(struct ipa3_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
+{
+	int ret;
+
+	ret = send_uc_command(uc_ctx, cmd, opcode);
+	if (!ret) {
+		ipa_debug("uC cmd %u send succeeded\n", opcode);
+		return 0;
+	}
+
+	if (ret == -ETIMEDOUT) {
+		ipa_err("uC timed out\n");
+		return -EIO;
+	}
+
+	/* Didn't time out, but we got an error; if not retrying, report it. */
+	if (ret != -EAGAIN)
+		ipa_err("Received status %u\n", uc_ctx->uc_status);
+
+	return ret;
+}
+
 /**
  * ipa3_uc_send_cmd() - Send a command to the uC
  *
@@ -422,22 +450,9 @@ send_cmd_lock:
 		goto out;
 	}
 send_cmd:
-	ret = send_uc_command(uc_ctx, cmd, opcode);
-	if (!ret) {
-		ipa_debug("uC cmd %u send succeeded\n", opcode);
+	ret = try_send_uc_command(uc_ctx, cmd, opcode);
+	if (ret != -EAGAIN)
 		goto out;
-	}
-	if (ret == -ETIMEDOUT) {
-		ipa_err("uC timed out\n");
-		ret = -EIO;
-		goto out;
-	}
-
-	/* We didn't time out, but we got an error.  See if we should retry. */
-	if (ret != -EAGAIN) {
-		ipa_err("Received status %u\n", uc_ctx->uc_status);
-		goto out;
-	}
 
 	/* The command is retryable.  Record some retry parameters. */
 	if (uc_ctx->uc_status == IPA_HW_GSI_CH_NOT_EMPTY_FAILURE) {
