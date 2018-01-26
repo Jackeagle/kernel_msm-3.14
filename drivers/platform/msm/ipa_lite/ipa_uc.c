@@ -453,14 +453,21 @@ send_cmd:
 		goto out;
 	}
 
-	if (uc_ctx->uc_status == IPA_HW_GSI_CH_NOT_EMPTY_FAILURE) {
+	/* Normally we just delay for a bit and try again. */
+	if (uc_ctx->uc_status != IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE) {
 		usleep_range(UC_CMD_RETRY_USLEEP_MIN, UC_CMD_RETRY_USLEEP_MAX);
 		goto send_cmd;
 	}
 
+	/*
+	 * If the microcontroller reports a producer disable stop failure
+	 * we try to unblock the GSI channel by sending a 1-byte DMA.
+	 * In this case we need to drop and re-acquire the mutex.
+	 */
 	mutex_unlock(&uc_ctx->uc_lock);
-	if (uc_ctx->uc_status == IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE)
-		ipa3_inject_dma_task_for_gsi();
+
+	ipa3_inject_dma_task_for_gsi();
+
 	/* Sleep for a short period to flush IPA before trying again. */
 	usleep_range(UC_CMD_RETRY_USLEEP_MIN, UC_CMD_RETRY_USLEEP_MAX);
 	goto send_cmd_lock;
