@@ -409,7 +409,8 @@ static bool send_uc_command(struct ipa3_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
 static int ipa3_uc_send_cmd(u32 cmd, u32 opcode)
 {
 	struct ipa3_uc_ctx *uc_ctx = &ipa3_ctx->uc_ctx;
-	int retries = 0;
+	u32 retries = 0;
+	u32 last_try;
 	int ret;
 
 send_cmd_lock:
@@ -441,10 +442,17 @@ send_cmd:
 		return -EFAULT;
 	}
 
+	/*
+	 * The command is retryable.  Record the retry limit.
+	 * XXX This should be done once at the top, based on command.
+	 */
+	if (uc_ctx->uc_status == IPA_HW_GSI_CH_NOT_EMPTY_FAILURE)
+		last_try = IPA_GSI_CHANNEL_EMPTY_MAX_RETRY;
+	else
+		last_try = IPA_GSI_CHANNEL_STOP_MAX_RETRY;
 	retries++;
-
 	if (uc_ctx->uc_status == IPA_HW_GSI_CH_NOT_EMPTY_FAILURE) {
-		if (retries >= IPA_GSI_CHANNEL_EMPTY_MAX_RETRY) {
+		if (retries >= last_try) {
 			ipa_err("Failed after %d tries\n", retries);
 			mutex_unlock(&uc_ctx->uc_lock);
 			return -EFAULT;
@@ -452,7 +460,7 @@ send_cmd:
 		usleep_range(UC_CMD_RETRY_USLEEP_MIN, UC_CMD_RETRY_USLEEP_MAX);
 		goto send_cmd;
 	} else {
-		if (retries == IPA_GSI_CHANNEL_STOP_MAX_RETRY) {
+		if (retries >= last_try) {
 			ipa_err("Failed after %d tries\n", retries);
 			goto out_unrecoverable;
 		}
