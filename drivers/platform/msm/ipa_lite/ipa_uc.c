@@ -501,30 +501,27 @@ out:
  */
 int ipa3_uc_interface_init(void)
 {
-	int result;
 	unsigned long phys_addr;
+	void *mmio;
+	int result;
 
 	if (ipa3_ctx->uc_ctx.uc_inited) {
 		ipa_debug("uC interface already initialized\n");
 		return 0;
 	}
 
-	mutex_init(&ipa3_ctx->uc_ctx.uc_lock);
-
 	phys_addr = ipa3_ctx->ipa_wrapper_base +
-		ipa3_ctx->ctrl->ipa_reg_base_ofst +
-		ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_n, 0);
-	ipa3_ctx->uc_ctx.uc_sram_mmio = ioremap(phys_addr,
-					       IPA_RAM_UC_SMEM_SIZE);
-	if (!ipa3_ctx->uc_ctx.uc_sram_mmio) {
+			ipa3_ctx->ctrl->ipa_reg_base_ofst +
+			ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_n, 0);
+	mmio = ioremap(phys_addr, IPA_RAM_UC_SMEM_SIZE);
+	if (!mmio) {
 		ipa_err("Fail to ioremap IPA uC SRAM\n");
 		result = -ENOMEM;
 		goto remap_fail;
 	}
 
 	result = ipa3_add_interrupt_handler(IPA_UC_IRQ_0,
-		ipa3_uc_event_handler, true,
-		ipa3_ctx);
+			ipa3_uc_event_handler, true, ipa3_ctx);
 	if (result) {
 		ipa_err("Fail to register for UC_IRQ0 rsp interrupt\n");
 		result = -EFAULT;
@@ -532,14 +529,15 @@ int ipa3_uc_interface_init(void)
 	}
 
 	result = ipa3_add_interrupt_handler(IPA_UC_IRQ_1,
-		ipa3_uc_response_hdlr, true,
-		ipa3_ctx);
+			ipa3_uc_response_hdlr, true, ipa3_ctx);
 	if (result) {
 		ipa_err("fail to register for UC_IRQ1 rsp interrupt\n");
 		result = -EFAULT;
 		goto irq_fail1;
 	}
 
+	mutex_init(&ipa3_ctx->uc_ctx.uc_lock);
+	ipa3_ctx->uc_ctx.uc_sram_mmio = mmio;
 	ipa3_ctx->uc_ctx.uc_inited = true;
 
 	ipa_debug("IPA uC interface is initialized\n");
@@ -548,7 +546,7 @@ int ipa3_uc_interface_init(void)
 irq_fail1:
 	ipa3_remove_interrupt_handler(IPA_UC_IRQ_0);
 irq_fail0:
-	iounmap(ipa3_ctx->uc_ctx.uc_sram_mmio);
+	iounmap(mmio);
 remap_fail:
 	return result;
 }
