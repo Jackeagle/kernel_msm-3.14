@@ -325,17 +325,23 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 		 */
 		ipa3_proxy_clk_unvote();
 	} else if (response_op == IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED) {
+		struct IpaHwCpuCmdCompletedResponseParams_t *params;
+
+		/* Grab the response data so we can extract its parameters */
 		uc_rsp.raw32b = mmio->responseParams;
+		params = &uc_rsp.params;
+
 		ipa_debug("uC cmd response opcode=%u status=%u\n",
-		       uc_rsp.params.originalCmdOp, uc_rsp.params.status);
-		if (uc_rsp.params.originalCmdOp ==
-		    ipa3_ctx->uc_ctx.pending_cmd) {
-			ipa3_ctx->uc_ctx.uc_status = uc_rsp.params.status;
+		       params->originalCmdOp, params->status);
+
+		/* Make sure we were expecting the command that completed */
+		if (params->originalCmdOp == ipa3_ctx->uc_ctx.pending_cmd) {
+			ipa3_ctx->uc_ctx.uc_status = params->status;
 			complete_all(&ipa3_ctx->uc_ctx.uc_completion);
 		} else {
 			ipa_err("Expected cmd=%u rcvd cmd=%u\n",
-			       ipa3_ctx->uc_ctx.pending_cmd,
-			       uc_rsp.params.originalCmdOp);
+				ipa3_ctx->uc_ctx.pending_cmd,
+				params->originalCmdOp);
 		}
 	} else {
 		ipa_err("Unsupported uC rsp opcode = %u\n", response_op);
