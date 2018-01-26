@@ -22,6 +22,10 @@
 #define IPA_UC_POLL_SLEEP_USEC 100
 #define IPA_UC_POLL_MAX_RETRY 10000
 
+/* How long to sleep (range) between microcontroller command retries */
+#define UC_CMD_RETRY_USLEEP_MIN	1000	/* 1 second */
+#define UC_CMD_RETRY_USLEEP_MAX	2000	/* 2 seconds */
+
 /**
  * enum ipa3_cpu_2_hw_commands - Values that represent the commands from the CPU
  * IPA_CPU_2_HW_CMD_ERR_FATAL : CPU instructs HW to perform error fatal
@@ -447,8 +451,7 @@ send_cmd:
 			mutex_unlock(&uc_ctx->uc_lock);
 			return -EFAULT;
 		}
-		usleep_range(IPA_GSI_CHANNEL_EMPTY_SLEEP_MIN_USEC,
-			IPA_GSI_CHANNEL_EMPTY_SLEEP_MAX_USEC);
+		usleep_range(UC_CMD_RETRY_USLEEP_MIN, UC_CMD_RETRY_USLEEP_MAX);
 		goto send_cmd;
 	} else {
 		if (retries == IPA_GSI_CHANNEL_STOP_MAX_RETRY) {
@@ -462,8 +465,7 @@ send_cmd:
 			IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE)
 			ipa3_inject_dma_task_for_gsi();
 		/* sleep for short period to flush IPA */
-		usleep_range(IPA_GSI_CHANNEL_STOP_SLEEP_MIN_USEC,
-			IPA_GSI_CHANNEL_STOP_SLEEP_MAX_USEC);
+		usleep_range(UC_CMD_RETRY_USLEEP_MIN, UC_CMD_RETRY_USLEEP_MAX);
 		goto send_cmd_lock;
 	}
 
