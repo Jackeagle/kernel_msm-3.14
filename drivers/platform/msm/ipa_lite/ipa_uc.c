@@ -430,9 +430,7 @@ send_cmd:
 	}
 	if (ret == -ETIMEDOUT) {
 		ipa_err("uC timed out\n");
-		mutex_unlock(&uc_ctx->uc_lock);
-		BUG();
-		return -EFAULT;
+		goto out_unrecoverable;
 	}
 
 	/* We didn't time out, but we got an error.  See if we should retry. */
@@ -456,9 +454,7 @@ send_cmd:
 	} else {
 		if (retries == IPA_GSI_CHANNEL_STOP_MAX_RETRY) {
 			ipa_err("Failed after %d tries\n", retries);
-			mutex_unlock(&uc_ctx->uc_lock);
-			BUG();
-			return -EFAULT;
+			goto out_unrecoverable;
 		}
 		mutex_unlock(&uc_ctx->uc_lock);
 		if (uc_ctx->uc_status ==
@@ -468,10 +464,9 @@ send_cmd:
 		usleep_range(UC_CMD_RETRY_USLEEP_MIN, UC_CMD_RETRY_USLEEP_MAX);
 		goto send_cmd_lock;
 	}
-
-	/* The all cases are covered above so we won't get here... */
+out_unrecoverable:
 	mutex_unlock(&uc_ctx->uc_lock);
-
+	BUG();
 	return -EFAULT;
 }
 
