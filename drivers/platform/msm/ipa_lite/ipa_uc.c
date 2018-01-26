@@ -548,13 +548,8 @@ int ipa3_uc_panic_notifier(struct notifier_block *this,
 	if (ipa3_inc_client_enable_clks_no_block(&log_info))
 		goto fail;
 
-	ipa3_ctx->uc_ctx.uc_sram_mmio->cmdOp =
-		IPA_CPU_2_HW_CMD_ERR_FATAL;
-	ipa3_ctx->uc_ctx.pending_cmd = ipa3_ctx->uc_ctx.uc_sram_mmio->cmdOp;
-	/* ensure write to shared memory is done before triggering uc */
-	wmb();
-
-	ipahal_write_reg_n(IPA_IRQ_EE_UC_n, 0, 0x1);
+	send_uc_command_nowait(&ipa3_ctx->uc_ctx, 0,
+				IPA_CPU_2_HW_CMD_ERR_FATAL);
 
 	/* give uc enough time to save state */
 	udelay(IPA_PKT_FLUSH_TO_US);
