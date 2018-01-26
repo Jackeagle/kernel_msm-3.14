@@ -295,13 +295,15 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 {
 	union IpaHwCpuCmdCompletedResponseData_t uc_rsp;
 	struct IpaHwSharedMemCommonMapping_t *mmio;
+	u8 response_op;
 	u8 feature;
 
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
 	mmio = ipa3_ctx->uc_ctx.uc_sram_mmio;
-	ipa_debug("uC rsp opcode=%u\n", mmio->responseOp);
+	response_op = mmio->responseOp;
+	ipa_debug("uC rsp opcode=%hhu\n", response_op);
 
-	feature = EXTRACT_UC_FEATURE(mmio->responseOp);
+	feature = EXTRACT_UC_FEATURE(response_op);
 	if (feature >= IPA_HW_FEATURE_MAX) {
 		ipa_err("Invalid feature %u for event %u\n", feature,
 				mmio->eventOp);
@@ -315,7 +317,7 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 	 * this, the AP should only receive responses from the
 	 * microntroller when it has sent it a request message.
 	 */
-	if (mmio->responseOp == IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED) {
+	if (response_op == IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED) {
 		ipa3_ctx->uc_ctx.uc_loaded = true;
 
 		ipa_debug("IPA uC loaded\n");
@@ -324,7 +326,7 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 		 * IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED is received.
 		 */
 		ipa3_proxy_clk_unvote();
-	} else if (mmio->responseOp == IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED) {
+	} else if (response_op == IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED) {
 		uc_rsp.raw32b = mmio->responseParams;
 		ipa_debug("uC cmd response opcode=%u status=%u\n",
 		       uc_rsp.params.originalCmdOp, uc_rsp.params.status);
@@ -338,7 +340,7 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 			       uc_rsp.params.originalCmdOp);
 		}
 	} else {
-		ipa_err("Unsupported uC rsp opcode = %u\n", mmio->responseOp);
+		ipa_err("Unsupported uC rsp opcode = %u\n", response_op);
 	}
 	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 }
