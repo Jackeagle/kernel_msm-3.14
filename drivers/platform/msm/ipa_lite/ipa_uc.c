@@ -365,8 +365,13 @@ static bool send_uc_command(struct ipa3_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
 	ipahal_write_reg_n(IPA_IRQ_EE_UC_n, 0, 0x1);
 
 	ret = wait_for_completion_timeout(&uc_ctx->uc_completion, 10 * HZ);
+	if (!ret)
+		return -ETIMEDOUT;
 
-	return ret ? 0 : -ETIMEDOUT;
+	if (!uc_ctx->uc_status)
+		return 0;		/* Success! */
+
+	return -EFAULT;
 }
 
 /**
@@ -403,6 +408,12 @@ send_cmd_lock:
 	}
 send_cmd:
 	ret = send_uc_command(uc_ctx, cmd, opcode);
+	if (!ret) {
+		mutex_unlock(&uc_ctx->uc_lock);
+		ipa_debug("uC cmd %u send succeeded\n", opcode);
+
+		return 0;
+	}
 	if (ret == -ETIMEDOUT) {
 		ipa_err("uC timed out\n");
 		mutex_unlock(&uc_ctx->uc_lock);
@@ -410,50 +421,42 @@ send_cmd:
 		return -EFAULT;
 	}
 
-	if (uc_ctx->uc_status) {
-		if (uc_ctx->uc_status ==
-		    IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE ||
-		    uc_ctx->uc_status ==
-		    IPA_HW_CONS_DISABLE_CMD_GSI_STOP_FAILURE) {
-			retries++;
-			if (retries == IPA_GSI_CHANNEL_STOP_MAX_RETRY) {
-				ipa_err("Failed after %d tries\n", retries);
-				mutex_unlock(&uc_ctx->uc_lock);
-				BUG();
-				return -EFAULT;
-			}
+	/* We didn't time out, but we got an error.  See if we should retry. */
+	if (uc_ctx->uc_status == IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE ||
+		uc_ctx->uc_status == IPA_HW_CONS_DISABLE_CMD_GSI_STOP_FAILURE) {
+		retries++;
+		if (retries == IPA_GSI_CHANNEL_STOP_MAX_RETRY) {
+			ipa_err("Failed after %d tries\n", retries);
 			mutex_unlock(&uc_ctx->uc_lock);
-			if (uc_ctx->uc_status ==
-			    IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE)
-				ipa3_inject_dma_task_for_gsi();
-			/* sleep for short period to flush IPA */
-			usleep_range(IPA_GSI_CHANNEL_STOP_SLEEP_MIN_USEC,
-				IPA_GSI_CHANNEL_STOP_SLEEP_MAX_USEC);
-			goto send_cmd_lock;
+			BUG();
+			return -EFAULT;
 		}
-
-		if (uc_ctx->uc_status == IPA_HW_GSI_CH_NOT_EMPTY_FAILURE) {
-			retries++;
-			if (retries >= IPA_GSI_CHANNEL_EMPTY_MAX_RETRY) {
-				ipa_err("Failed after %d tries\n", retries);
-				mutex_unlock(&uc_ctx->uc_lock);
-				return -EFAULT;
-			}
-			usleep_range(IPA_GSI_CHANNEL_EMPTY_SLEEP_MIN_USEC,
-				IPA_GSI_CHANNEL_EMPTY_SLEEP_MAX_USEC);
-			goto send_cmd;
-		}
-
-		ipa_err("Received status %u\n", uc_ctx->uc_status);
 		mutex_unlock(&uc_ctx->uc_lock);
-		return -EFAULT;
+		if (uc_ctx->uc_status ==
+			IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE)
+			ipa3_inject_dma_task_for_gsi();
+		/* sleep for short period to flush IPA */
+		usleep_range(IPA_GSI_CHANNEL_STOP_SLEEP_MIN_USEC,
+			IPA_GSI_CHANNEL_STOP_SLEEP_MAX_USEC);
+		goto send_cmd_lock;
 	}
 
+	if (uc_ctx->uc_status == IPA_HW_GSI_CH_NOT_EMPTY_FAILURE) {
+		retries++;
+		if (retries >= IPA_GSI_CHANNEL_EMPTY_MAX_RETRY) {
+			ipa_err("Failed after %d tries\n", retries);
+			mutex_unlock(&uc_ctx->uc_lock);
+			return -EFAULT;
+		}
+		usleep_range(IPA_GSI_CHANNEL_EMPTY_SLEEP_MIN_USEC,
+			IPA_GSI_CHANNEL_EMPTY_SLEEP_MAX_USEC);
+		goto send_cmd;
+	}
+
+	ipa_err("Received status %u\n", uc_ctx->uc_status);
 	mutex_unlock(&uc_ctx->uc_lock);
 
-	ipa_debug("uC cmd %u send succeeded\n", opcode);
-
-	return 0;
+	return -EFAULT;
 }
 
 /**
