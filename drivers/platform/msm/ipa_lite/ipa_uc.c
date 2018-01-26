@@ -294,24 +294,24 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 				void *interrupt_data)
 {
 	union IpaHwCpuCmdCompletedResponseData_t uc_rsp;
+	struct IpaHwSharedMemCommonMapping_t *mmio;
 	u8 feature;
 
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
-	ipa_debug("uC rsp opcode=%u\n",
-			ipa3_ctx->uc_ctx.uc_sram_mmio->responseOp);
+	mmio = ipa3_ctx->uc_ctx.uc_sram_mmio;
+	ipa_debug("uC rsp opcode=%u\n", mmio->responseOp);
 
-	feature = EXTRACT_UC_FEATURE(ipa3_ctx->uc_ctx.uc_sram_mmio->responseOp);
+	feature = EXTRACT_UC_FEATURE(mmio->responseOp);
 
 	if (0 > feature || IPA_HW_FEATURE_MAX <= feature) {
-		ipa_err("Invalid feature %u for event %u\n",
-			feature, ipa3_ctx->uc_ctx.uc_sram_mmio->eventOp);
+		ipa_err("Invalid feature %u for event %u\n", feature,
+				mmio->eventOp);
 		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 		return;
 	}
 
 	/* General handling */
-	if (ipa3_ctx->uc_ctx.uc_sram_mmio->responseOp ==
-			IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED) {
+	if (mmio->responseOp == IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED) {
 		ipa3_ctx->uc_ctx.uc_loaded = true;
 
 		ipa_debug("IPA uC loaded\n");
@@ -320,12 +320,10 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 		 * IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED is received.
 		 */
 		ipa3_proxy_clk_unvote();
-	} else if (ipa3_ctx->uc_ctx.uc_sram_mmio->responseOp ==
-		   IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED) {
-		uc_rsp.raw32b = ipa3_ctx->uc_ctx.uc_sram_mmio->responseParams;
+	} else if (mmio->responseOp == IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED) {
+		uc_rsp.raw32b = mmio->responseParams;
 		ipa_debug("uC cmd response opcode=%u status=%u\n",
-		       uc_rsp.params.originalCmdOp,
-		       uc_rsp.params.status);
+		       uc_rsp.params.originalCmdOp, uc_rsp.params.status);
 		if (uc_rsp.params.originalCmdOp ==
 		    ipa3_ctx->uc_ctx.pending_cmd) {
 			ipa3_ctx->uc_ctx.uc_status = uc_rsp.params.status;
@@ -336,8 +334,7 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 			       uc_rsp.params.originalCmdOp);
 		}
 	} else {
-		ipa_err("Unsupported uC rsp opcode = %u\n",
-		       ipa3_ctx->uc_ctx.uc_sram_mmio->responseOp);
+		ipa_err("Unsupported uC rsp opcode = %u\n", mmio->responseOp);
 	}
 	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 }
