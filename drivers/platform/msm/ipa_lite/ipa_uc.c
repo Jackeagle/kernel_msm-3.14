@@ -296,7 +296,6 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 	union IpaHwCpuCmdCompletedResponseData_t uc_rsp;
 	u8 feature;
 
-	WARN_ON(private_data != ipa3_ctx);
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
 	ipa_debug("uC rsp opcode=%u\n",
 			ipa3_ctx->uc_ctx.uc_sram_mmio->responseOp);
