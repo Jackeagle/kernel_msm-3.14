@@ -422,6 +422,18 @@ send_cmd:
 	}
 
 	/* We didn't time out, but we got an error.  See if we should retry. */
+	if (uc_ctx->uc_status == IPA_HW_GSI_CH_NOT_EMPTY_FAILURE) {
+		retries++;
+		if (retries >= IPA_GSI_CHANNEL_EMPTY_MAX_RETRY) {
+			ipa_err("Failed after %d tries\n", retries);
+			mutex_unlock(&uc_ctx->uc_lock);
+			return -EFAULT;
+		}
+		usleep_range(IPA_GSI_CHANNEL_EMPTY_SLEEP_MIN_USEC,
+			IPA_GSI_CHANNEL_EMPTY_SLEEP_MAX_USEC);
+		goto send_cmd;
+	}
+
 	if (uc_ctx->uc_status == IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE ||
 		uc_ctx->uc_status == IPA_HW_CONS_DISABLE_CMD_GSI_STOP_FAILURE) {
 		retries++;
@@ -439,18 +451,6 @@ send_cmd:
 		usleep_range(IPA_GSI_CHANNEL_STOP_SLEEP_MIN_USEC,
 			IPA_GSI_CHANNEL_STOP_SLEEP_MAX_USEC);
 		goto send_cmd_lock;
-	}
-
-	if (uc_ctx->uc_status == IPA_HW_GSI_CH_NOT_EMPTY_FAILURE) {
-		retries++;
-		if (retries >= IPA_GSI_CHANNEL_EMPTY_MAX_RETRY) {
-			ipa_err("Failed after %d tries\n", retries);
-			mutex_unlock(&uc_ctx->uc_lock);
-			return -EFAULT;
-		}
-		usleep_range(IPA_GSI_CHANNEL_EMPTY_SLEEP_MIN_USEC,
-			IPA_GSI_CHANNEL_EMPTY_SLEEP_MAX_USEC);
-		goto send_cmd;
 	}
 
 	ipa_err("Received status %u\n", uc_ctx->uc_status);
