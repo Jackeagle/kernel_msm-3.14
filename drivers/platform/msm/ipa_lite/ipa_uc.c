@@ -296,17 +296,15 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 	union IpaHwCpuCmdCompletedResponseData_t uc_rsp;
 	struct IpaHwSharedMemCommonMapping_t *mmio;
 	u8 response_op;
-	u8 feature;
 
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
 	mmio = ipa3_ctx->uc_ctx.uc_sram_mmio;
 	response_op = mmio->responseOp;
 	ipa_debug("uC rsp opcode=%hhu\n", response_op);
 
-	feature = EXTRACT_UC_FEATURE(response_op);
-	if (feature >= IPA_HW_FEATURE_MAX) {
-		ipa_err("Invalid feature %u for event %u\n", feature,
-				mmio->eventOp);
+	if (EXTRACT_UC_FEATURE(response_op) >= IPA_HW_FEATURE_MAX) {
+		ipa_err("Invalid feature %hhu for event %u\n",
+			EXTRACT_UC_FEATURE(response_op), mmio->eventOp);
 		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 		return;
 	}
