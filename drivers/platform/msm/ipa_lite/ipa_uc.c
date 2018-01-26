@@ -557,17 +557,15 @@ int ipa3_uc_is_gsi_channel_empty(enum ipa_client_type ipa_client)
 {
 	const struct ipa_gsi_ep_config *gsi_ep_info;
 	union IpaHwChkChEmptyCmdData_t cmd;
-	int ret;
 
 	gsi_ep_info = ipa3_get_gsi_ep_info(ipa_client);
 	if (!gsi_ep_info) {
-		ipa_err("Failed getting GSI EP info for client=%d\n",
-		       ipa_client);
+		ipa_err("GSI EP info unavailable, client=%d\n", ipa_client);
 		return 0;
 	}
 
 	if (ipa3_uc_state_check()) {
-		ipa_debug("uC cannot be used to validate ch emptiness clnt=%d\n"
+		ipa_debug("uC unavailable, client=%d\n"
 			, ipa_client);
 		return 0;
 	}
@@ -576,9 +574,7 @@ int ipa3_uc_is_gsi_channel_empty(enum ipa_client_type ipa_client)
 	cmd.params.vir_ch_id = gsi_ep_info->ipa_gsi_chan_num;
 
 	ipa_debug("uC emptiness check for IPA GSI Channel %d\n",
-	       gsi_ep_info->ipa_gsi_chan_num);
+			gsi_ep_info->ipa_gsi_chan_num);
 
-	ret = ipa3_uc_send_cmd(cmd.raw32b, IPA_CPU_2_HW_CMD_GSI_CH_EMPTY);
-
-	return ret;
+	return ipa3_uc_send_cmd(cmd.raw32b, IPA_CPU_2_HW_CMD_GSI_CH_EMPTY);
 }
