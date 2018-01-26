@@ -418,28 +418,25 @@ send_cmd_lock:
 
 	if (ipa3_uc_state_check()) {
 		ipa_debug("uC send command aborted\n");
-		mutex_unlock(&uc_ctx->uc_lock);
-		return -EBADF;
+		ret = -EBADF;
+		goto out;
 	}
 send_cmd:
 	ret = send_uc_command(uc_ctx, cmd, opcode);
 	if (!ret) {
-		mutex_unlock(&uc_ctx->uc_lock);
 		ipa_debug("uC cmd %u send succeeded\n", opcode);
-
-		return 0;
+		goto out;
 	}
 	if (ret == -ETIMEDOUT) {
 		ipa_err("uC timed out\n");
-		goto out_unrecoverable;
+		ret = -EIO;
+		goto out;
 	}
 
 	/* We didn't time out, but we got an error.  See if we should retry. */
 	if (ret != -EAGAIN) {
-		mutex_unlock(&uc_ctx->uc_lock);
 		ipa_err("Received status %u\n", uc_ctx->uc_status);
-
-		return -EFAULT;
+		goto out;
 	}
 
 	/*
@@ -454,15 +451,16 @@ send_cmd:
 	if (uc_ctx->uc_status == IPA_HW_GSI_CH_NOT_EMPTY_FAILURE) {
 		if (retries >= last_try) {
 			ipa_err("Failed after %d tries\n", retries);
-			mutex_unlock(&uc_ctx->uc_lock);
-			return -EFAULT;
+			ret = -EFAULT;
+			goto out;
 		}
 		usleep_range(UC_CMD_RETRY_USLEEP_MIN, UC_CMD_RETRY_USLEEP_MAX);
 		goto send_cmd;
 	} else {
 		if (retries >= last_try) {
 			ipa_err("Failed after %d tries\n", retries);
-			goto out_unrecoverable;
+			ret = -EIO;
+			goto out;
 		}
 		mutex_unlock(&uc_ctx->uc_lock);
 		if (uc_ctx->uc_status ==
@@ -472,10 +470,12 @@ send_cmd:
 		usleep_range(UC_CMD_RETRY_USLEEP_MIN, UC_CMD_RETRY_USLEEP_MAX);
 		goto send_cmd_lock;
 	}
-out_unrecoverable:
+out:
 	mutex_unlock(&uc_ctx->uc_lock);
-	BUG();
-	return -EFAULT;
+	if (ret == -EIO)
+		BUG();
+
+	return ret;
 }
 
 /**
