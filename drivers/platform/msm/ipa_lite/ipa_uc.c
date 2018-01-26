@@ -302,15 +302,19 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 	ipa_debug("uC rsp opcode=%u\n", mmio->responseOp);
 
 	feature = EXTRACT_UC_FEATURE(mmio->responseOp);
-
-	if (IPA_HW_FEATURE_MAX <= feature) {
+	if (feature >= IPA_HW_FEATURE_MAX) {
 		ipa_err("Invalid feature %u for event %u\n", feature,
 				mmio->eventOp);
 		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 		return;
 	}
 
-	/* General handling */
+	/*
+	 * An INIT_COMPLETED response message is sent to the AP by
+	 * the microcontroller when it is operational.  Other than
+	 * this, the AP should only receive responses from the
+	 * microntroller when it has sent it a request message.
+	 */
 	if (mmio->responseOp == IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED) {
 		ipa3_ctx->uc_ctx.uc_loaded = true;
 
