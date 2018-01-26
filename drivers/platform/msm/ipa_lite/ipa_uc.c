@@ -440,18 +440,20 @@ send_cmd:
 	}
 
 	/*
-	 * The command is retryable.  Record the retry limit.
+	 * The command is retryable.  Record some retry parameters.
 	 * XXX This should be done once at the top, based on command.
 	 */
-	if (uc_ctx->uc_status == IPA_HW_GSI_CH_NOT_EMPTY_FAILURE)
+	if (uc_ctx->uc_status == IPA_HW_GSI_CH_NOT_EMPTY_FAILURE) {
 		last_try = IPA_GSI_CHANNEL_EMPTY_MAX_RETRY;
-	else
+		ret = -EFAULT;
+	} else {
 		last_try = IPA_GSI_CHANNEL_STOP_MAX_RETRY;
+		ret = -EIO;
+	}
 	retries++;
 	if (uc_ctx->uc_status == IPA_HW_GSI_CH_NOT_EMPTY_FAILURE) {
 		if (retries >= last_try) {
 			ipa_err("Failed after %d tries\n", retries);
-			ret = -EFAULT;
 			goto out;
 		}
 		usleep_range(UC_CMD_RETRY_USLEEP_MIN, UC_CMD_RETRY_USLEEP_MAX);
@@ -459,7 +461,6 @@ send_cmd:
 	} else {
 		if (retries >= last_try) {
 			ipa_err("Failed after %d tries\n", retries);
-			ret = -EIO;
 			goto out;
 		}
 		mutex_unlock(&uc_ctx->uc_lock);
