@@ -535,13 +535,11 @@ remap_fail:
 int ipa3_uc_panic_notifier(struct notifier_block *this,
 		unsigned long event, void *ptr)
 {
-	int result = 0;
 	struct ipa_active_client_logging_info log_info;
 
 	ipa_debug("this=%p evt=%lu ptr=%p\n", this, event, ptr);
 
-	result = ipa3_uc_state_check();
-	if (result)
+	if (ipa3_uc_state_check())
 		goto fail;
 
 	IPA_ACTIVE_CLIENTS_PREP_SIMPLE(log_info);
@@ -556,7 +554,6 @@ int ipa3_uc_panic_notifier(struct notifier_block *this,
 
 	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 	ipa_debug("err_fatal issued\n");
-
 fail:
 	return NOTIFY_DONE;
 }
