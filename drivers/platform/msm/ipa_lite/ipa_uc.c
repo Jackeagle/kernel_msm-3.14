@@ -456,15 +456,14 @@ send_cmd:
 	if (uc_ctx->uc_status == IPA_HW_GSI_CH_NOT_EMPTY_FAILURE) {
 		usleep_range(UC_CMD_RETRY_USLEEP_MIN, UC_CMD_RETRY_USLEEP_MAX);
 		goto send_cmd;
-	} else {
-		mutex_unlock(&uc_ctx->uc_lock);
-		if (uc_ctx->uc_status ==
-			IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE)
-			ipa3_inject_dma_task_for_gsi();
-		/* sleep for short period to flush IPA */
-		usleep_range(UC_CMD_RETRY_USLEEP_MIN, UC_CMD_RETRY_USLEEP_MAX);
-		goto send_cmd_lock;
 	}
+
+	mutex_unlock(&uc_ctx->uc_lock);
+	if (uc_ctx->uc_status == IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE)
+		ipa3_inject_dma_task_for_gsi();
+	/* Sleep for a short period to flush IPA before trying again. */
+	usleep_range(UC_CMD_RETRY_USLEEP_MIN, UC_CMD_RETRY_USLEEP_MAX);
+	goto send_cmd_lock;
 out:
 	mutex_unlock(&uc_ctx->uc_lock);
 	if (ret == -EIO)
