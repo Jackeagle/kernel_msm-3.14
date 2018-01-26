@@ -255,40 +255,6 @@ static void ipa3_uc_event_handler(enum ipa_irq_type interrupt,
 
 }
 
-int ipa3_uc_panic_notifier(struct notifier_block *this,
-		unsigned long event, void *ptr)
-{
-	int result = 0;
-	struct ipa_active_client_logging_info log_info;
-
-	ipa_debug("this=%p evt=%lu ptr=%p\n", this, event, ptr);
-
-	result = ipa3_uc_state_check();
-	if (result)
-		goto fail;
-
-	IPA_ACTIVE_CLIENTS_PREP_SIMPLE(log_info);
-	if (ipa3_inc_client_enable_clks_no_block(&log_info))
-		goto fail;
-
-	ipa3_ctx->uc_ctx.uc_sram_mmio->cmdOp =
-		IPA_CPU_2_HW_CMD_ERR_FATAL;
-	ipa3_ctx->uc_ctx.pending_cmd = ipa3_ctx->uc_ctx.uc_sram_mmio->cmdOp;
-	/* ensure write to shared memory is done before triggering uc */
-	wmb();
-
-	ipahal_write_reg_n(IPA_IRQ_EE_UC_n, 0, 0x1);
-
-	/* give uc enough time to save state */
-	udelay(IPA_PKT_FLUSH_TO_US);
-
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
-	ipa_debug("err_fatal issued\n");
-
-fail:
-	return NOTIFY_DONE;
-}
-
 static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 				void *private_data,
 				void *interrupt_data)
@@ -564,6 +530,40 @@ irq_fail0:
 	iounmap(mmio);
 remap_fail:
 	return result;
+}
+
+int ipa3_uc_panic_notifier(struct notifier_block *this,
+		unsigned long event, void *ptr)
+{
+	int result = 0;
+	struct ipa_active_client_logging_info log_info;
+
+	ipa_debug("this=%p evt=%lu ptr=%p\n", this, event, ptr);
+
+	result = ipa3_uc_state_check();
+	if (result)
+		goto fail;
+
+	IPA_ACTIVE_CLIENTS_PREP_SIMPLE(log_info);
+	if (ipa3_inc_client_enable_clks_no_block(&log_info))
+		goto fail;
+
+	ipa3_ctx->uc_ctx.uc_sram_mmio->cmdOp =
+		IPA_CPU_2_HW_CMD_ERR_FATAL;
+	ipa3_ctx->uc_ctx.pending_cmd = ipa3_ctx->uc_ctx.uc_sram_mmio->cmdOp;
+	/* ensure write to shared memory is done before triggering uc */
+	wmb();
+
+	ipahal_write_reg_n(IPA_IRQ_EE_UC_n, 0, 0x1);
+
+	/* give uc enough time to save state */
+	udelay(IPA_PKT_FLUSH_TO_US);
+
+	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_debug("err_fatal issued\n");
+
+fail:
+	return NOTIFY_DONE;
 }
 
 int ipa3_uc_is_gsi_channel_empty(enum ipa_client_type ipa_client)
