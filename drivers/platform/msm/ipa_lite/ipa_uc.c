@@ -221,7 +221,7 @@ static void ipa3_uc_event_handler(enum ipa_irq_type interrupt,
 
 	feature = EXTRACT_UC_FEATURE(mmio->eventOp);
 
-	if (0 > feature || IPA_HW_FEATURE_MAX <= feature) {
+	if (IPA_HW_FEATURE_MAX <= feature) {
 		ipa_err("Invalid feature %u for event %u\n",
 			feature, mmio->eventOp);
 		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
