@@ -132,35 +132,29 @@ const char *ipa_hw_error_str(enum ipa_hw_errors err_type)
 static void ipa3_log_evt_hdlr(void)
 {
 	struct ipa3_uc_ctx *uc_ctx = &ipa3_ctx->uc_ctx;
+	u32 offset = uc_ctx->uc_sram_mmio->eventParams;
 
 	if (!uc_ctx->uc_event_top_ofst) {
-		uc_ctx->uc_event_top_ofst = uc_ctx->uc_sram_mmio->eventParams;
-		if (uc_ctx->uc_event_top_ofst +
-			sizeof(struct IpaHwEventLogInfoData_t) >=
+		uc_ctx->uc_event_top_ofst = offset;
+		if (offset + sizeof(struct IpaHwEventLogInfoData_t) >=
 			ipa3_ctx->ctrl->ipa_reg_base_ofst +
 			ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_n, 0) +
 			ipa3_ctx->smem_sz) {
-			ipa_err("uc_top 0x%x outside SRAM\n",
-				uc_ctx->uc_event_top_ofst);
+			ipa_err("uc_top 0x%x outside SRAM\n", offset);
 			goto bad_uc_top_ofst;
 		}
 
-		uc_ctx->uc_event_top_mmio = ioremap(
-			ipa3_ctx->ipa_wrapper_base +
-			uc_ctx->uc_event_top_ofst,
-			sizeof(struct IpaHwEventLogInfoData_t));
+		uc_ctx->uc_event_top_mmio =
+				ioremap(ipa3_ctx->ipa_wrapper_base + offset,
+					sizeof(struct IpaHwEventLogInfoData_t));
 		if (!uc_ctx->uc_event_top_mmio) {
 			ipa_err("fail to ioremap uc top\n");
 			goto bad_uc_top_ofst;
 		}
 	} else {
-
-		if (uc_ctx->uc_sram_mmio->eventParams !=
-			uc_ctx->uc_event_top_ofst) {
+		if (offset != uc_ctx->uc_event_top_ofst) {
 			ipa_err("uc top ofst changed new=%u cur=%u\n",
-				uc_ctx->uc_sram_mmio->
-				eventParams,
-				uc_ctx->uc_event_top_ofst);
+				offset, uc_ctx->uc_event_top_ofst);
 		}
 	}
 
