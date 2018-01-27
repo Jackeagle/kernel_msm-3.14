@@ -134,6 +134,10 @@ static void ipa3_log_evt_hdlr(void)
 	struct ipa3_uc_ctx *uc_ctx = &ipa3_ctx->uc_ctx;
 	u32 offset = uc_ctx->uc_sram_mmio->eventParams;
 
+	/* If the the event top offset is what we set it to, we're done */
+	if (offset == uc_ctx->uc_event_top_ofst)
+		return;
+
 	if (!uc_ctx->uc_event_top_ofst) {
 		uc_ctx->uc_event_top_ofst = offset;
 		if (offset + sizeof(struct IpaHwEventLogInfoData_t) >=
