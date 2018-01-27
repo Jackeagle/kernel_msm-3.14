@@ -214,8 +214,6 @@ static void ipa3_uc_event_handler(enum ipa_irq_type interrupt,
 	union IpaHwErrorEventData_t evt;
 	u8 feature;
 
-	WARN_ON(private_data != ipa3_ctx);
-
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
 
 	ipa_debug("uC evt opcode=%u\n",
