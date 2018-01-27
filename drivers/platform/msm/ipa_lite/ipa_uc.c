@@ -211,28 +211,26 @@ static void ipa3_uc_event_handler(enum ipa_irq_type interrupt,
 				 void *private_data,
 				 void *interrupt_data)
 {
+	struct IpaHwSharedMemCommonMapping_t *mmio;
 	union IpaHwErrorEventData_t evt;
 	u8 feature;
 
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	mmio = ipa3_ctx->uc_ctx.uc_sram_mmio;
+	ipa_debug("uC evt opcode=%u\n", mmio->eventOp);
 
-	ipa_debug("uC evt opcode=%u\n",
-		ipa3_ctx->uc_ctx.uc_sram_mmio->eventOp);
-
-
-	feature = EXTRACT_UC_FEATURE(ipa3_ctx->uc_ctx.uc_sram_mmio->eventOp);
+	feature = EXTRACT_UC_FEATURE(mmio->eventOp);
 
 	if (0 > feature || IPA_HW_FEATURE_MAX <= feature) {
 		ipa_err("Invalid feature %u for event %u\n",
-			feature, ipa3_ctx->uc_ctx.uc_sram_mmio->eventOp);
+			feature, mmio->eventOp);
 		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 		return;
 	}
 
 	/* General handling */
-	if (ipa3_ctx->uc_ctx.uc_sram_mmio->eventOp ==
-	    IPA_HW_2_CPU_EVENT_ERROR) {
-		evt.raw32b = ipa3_ctx->uc_ctx.uc_sram_mmio->eventParams;
+	if (mmio->eventOp == IPA_HW_2_CPU_EVENT_ERROR) {
+		evt.raw32b = mmio->eventParams;
 		ipa_err("uC Error, evt errorType = %s\n",
 			ipa_hw_error_str(evt.params.errorType));
 		ipa3_ctx->uc_ctx.uc_failed = true;
@@ -240,14 +238,11 @@ static void ipa3_uc_event_handler(enum ipa_irq_type interrupt,
 		ipa3_ctx->uc_ctx.uc_error_timestamp =
 			ipahal_read_reg(IPA_TAG_TIMER);
 		BUG();
-	} else if (ipa3_ctx->uc_ctx.uc_sram_mmio->eventOp ==
-		IPA_HW_2_CPU_EVENT_LOG_INFO) {
-		ipa_debug("uC evt log info ofst=0x%x\n",
-			ipa3_ctx->uc_ctx.uc_sram_mmio->eventParams);
+	} else if (mmio->eventOp == IPA_HW_2_CPU_EVENT_LOG_INFO) {
+		ipa_debug("uC evt log info ofst=0x%x\n", mmio->eventParams);
 		ipa3_log_evt_hdlr();
 	} else {
-		ipa_debug("unsupported uC evt opcode=%u\n",
-				ipa3_ctx->uc_ctx.uc_sram_mmio->eventOp);
+		ipa_debug("unsupported uC evt opcode=%u\n", mmio->eventOp);
 	}
 	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 
