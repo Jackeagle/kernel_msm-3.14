@@ -214,17 +214,15 @@ static void ipa3_uc_event_handler(enum ipa_irq_type interrupt,
 	struct IpaHwSharedMemCommonMapping_t *mmio;
 	union IpaHwErrorEventData_t evt;
 	u8 event_op;
-	u8 feature;
 
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
 	mmio = ipa3_ctx->uc_ctx.uc_sram_mmio;
 	event_op = mmio->eventOp;
 	ipa_debug("uC evt opcode=%u\n", event_op);
 
-	feature = EXTRACT_UC_FEATURE(event_op);
-
-	if (IPA_HW_FEATURE_MAX <= feature) {
-		ipa_err("Invalid feature %u for event %u\n", feature, event_op);
+	if (EXTRACT_UC_FEATURE(event_op) >= IPA_HW_FEATURE_MAX) {
+		ipa_err("Invalid feature %u for event %u\n",
+			EXTRACT_UC_FEATURE(event_op), event_op);
 		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
 		return;
 	}
@@ -246,7 +244,6 @@ static void ipa3_uc_event_handler(enum ipa_irq_type interrupt,
 		ipa_debug("unsupported uC evt opcode=%u\n", event_op);
 	}
 	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
-
 }
 
 static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
