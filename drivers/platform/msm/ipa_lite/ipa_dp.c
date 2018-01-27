@@ -86,7 +86,7 @@ static int ipa_populate_tag_field(struct ipa3_desc *desc,
 static int ipa_poll_gsi_pkt(struct ipa3_sys_context *sys,
 	struct ipa_mem_buffer *mem_info);
 static unsigned long tag_to_pointer_wa(uint64_t tag);
-static uint64_t pointer_to_tag_wa(struct ipa3_tx_pkt_wrapper *tx_pkt);
+static u64 pointer_to_tag_wa(struct ipa3_tx_pkt_wrapper *tx_pkt);
 
 static u32 ipa_adjust_ra_buff_base_sz(u32 aggr_byte_limit);
 
@@ -3012,19 +3012,19 @@ static unsigned long tag_to_pointer_wa(uint64_t tag)
 	return 0xFFFF000000000000 | (unsigned long) tag;
 }
 
-static uint64_t pointer_to_tag_wa(struct ipa3_tx_pkt_wrapper *tx_pkt)
+static u64 pointer_to_tag_wa(struct ipa3_tx_pkt_wrapper *tx_pkt)
 {
 	u16 temp;
 
 	/* Add the check but it might have throughput issue */
-	temp = (u16) (~((unsigned long) tx_pkt & GENMASK(63,48)) >> 48);
+	temp = (u16) (~((u64)tx_pkt & GENMASK(63,48)) >> 48);
 	if (temp) {
 		ipa_err("The 16 prefix is not all 1s (%p)\n",
 		tx_pkt);
 		BUG();
 	}
 
-	return (unsigned long)tx_pkt & GENMASK(47,0);
+	return (u64)tx_pkt & GENMASK(47,0);
 }
 
 /**
