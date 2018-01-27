@@ -912,20 +912,6 @@ struct ipa3_controller {
 };
 
 /**
- * union Ipa3HwFeatureInfoData_t - parameters for stats/config blob
- *
- * @offset : Location of a feature within the EventInfoData
- * @size : Size of the feature
- */
-union Ipa3HwFeatureInfoData_t {
-        struct IpaHwFeatureInfoParams_t {
-                u32 offset:16;
-                u32 size:16;
-        } __packed params;
-        u32 raw32b;
-} __packed;
-
-/**
  * union IpaHwErrorEventData_t - HW->CPU Common Events
  * @errorType : Entered when a system error is detected by the HW. Type of
  * error is specified by IPA_HW_ERRORS
@@ -937,47 +923,6 @@ union IpaHwErrorEventData_t {
                 u32 reserved:24;
         } __packed params;
         u32 raw32b;
-} __packed;
-
-/**
- * struct Ipa3HwEventInfoData_t - Structure holding the parameters for
- * statistics and config info
- *
- * @baseAddrOffset : Base Address Offset of the statistics or config
- * structure from IPA_WRAPPER_BASE
- * @Ipa3HwFeatureInfoData_t : Location and size of each feature within
- * the statistics or config structure
- *
- * @note    Information about each feature in the featureInfo[]
- * array is populated at predefined indices per the IPA_HW_FEATURES
- * enum definition
- */
-struct Ipa3HwEventInfoData_t {
-        u32 baseAddrOffset;
-        union Ipa3HwFeatureInfoData_t featureInfo[IPA_HW_NUM_FEATURES];
-} __packed;
-
-/**
- * struct IpaHwEventLogInfoData_t - Structure holding the parameters for
- * IPA_HW_2_CPU_EVENT_LOG_INFO Event
- *
- * @featureMask : Mask indicating the features enabled in HW.
- * Refer IPA_HW_FEATURE_MASK
- * @circBuffBaseAddrOffset : Base Address Offset of the Circular Event
- * Log Buffer structure
- * @statsInfo : Statistics related information
- * @configInfo : Configuration related information
- *
- * @note    The offset location of this structure from IPA_WRAPPER_BASE
- * will be provided as Event Params for the IPA_HW_2_CPU_EVENT_LOG_INFO
- * Event
- */
-struct IpaHwEventLogInfoData_t {
-        u32 featureMask;
-        u32 circBuffBaseAddrOffset;
-        struct Ipa3HwEventInfoData_t statsInfo;
-        struct Ipa3HwEventInfoData_t configInfo;
-
 } __packed;
 
 /**
