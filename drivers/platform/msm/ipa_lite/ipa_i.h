@@ -1048,7 +1048,6 @@ struct ipa3_uc_ctx {
 	struct mutex uc_lock;
 	struct completion uc_completion;
 	struct IpaHwSharedMemCommonMapping_t *uc_sram_mmio;
-	struct IpaHwEventLogInfoData_t *uc_event_top_mmio;
 	u32 uc_event_top_ofst;
 	u32 pending_cmd;
 	u32 uc_status;
