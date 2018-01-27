@@ -3009,7 +3009,7 @@ static int ipa_poll_gsi_pkt(struct ipa3_sys_context *sys,
 
 static unsigned long tag_to_pointer_wa(uint64_t tag)
 {
-	return 0xFFFF000000000000 | (unsigned long) tag;
+	return GENMASK(63,48) | (unsigned long) tag;
 }
 
 static u64 pointer_to_tag_wa(struct ipa3_tx_pkt_wrapper *tx_pkt)
