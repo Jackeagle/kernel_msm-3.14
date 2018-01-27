@@ -3037,12 +3037,13 @@ static u32 ipa_adjust_ra_buff_base_sz(u32 aggr_byte_limit)
 {
 	aggr_byte_limit += IPA_MTU;
 	aggr_byte_limit += IPA_GENERIC_RX_BUFF_LIMIT;
-	aggr_byte_limit--;
-	aggr_byte_limit |= aggr_byte_limit >> 1;
-	aggr_byte_limit |= aggr_byte_limit >> 2;
-	aggr_byte_limit |= aggr_byte_limit >> 4;
-	aggr_byte_limit |= aggr_byte_limit >> 8;
-	aggr_byte_limit |= aggr_byte_limit >> 16;
-	aggr_byte_limit++;
-	return aggr_byte_limit >> 1;
+
+	/*
+	 * We want a power-of-2 that's *less than* the value, so we
+	 * start by subracting 1.  We find the highest set bit in
+	 * that, and use that to compute a power of 2.
+	 */
+	/* ipa_assert(aggr_byte_limit > 1); */
+
+	return 1 << __fls(aggr_byte_limit - 1);
 }
