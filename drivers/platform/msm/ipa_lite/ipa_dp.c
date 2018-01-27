@@ -3014,13 +3014,12 @@ static unsigned long tag_to_pointer_wa(uint64_t tag)
 
 static u64 pointer_to_tag_wa(struct ipa3_tx_pkt_wrapper *tx_pkt)
 {
-	u16 temp;
+	u64 addr;
 
 	/* Add the check but it might have throughput issue */
-	temp = (u16) (~((u64)tx_pkt & GENMASK(63,48)) >> 48);
-	if (temp) {
-		ipa_err("The 16 prefix is not all 1s (%p)\n",
-		tx_pkt);
+	addr = ~((u64)tx_pkt & GENMASK(63,48)) >> 48;
+	if (addr) {
+		ipa_err("The 16 prefix is not all 1s (%p)\n", tx_pkt);
 		BUG();
 	}
 
