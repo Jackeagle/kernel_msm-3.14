@@ -2432,13 +2432,9 @@ static void ipa3_wq_rx_common(struct ipa3_sys_context *sys, u32 size)
 static void ipa3_wq_rx_avail(struct work_struct *work)
 {
 	struct ipa3_rx_pkt_wrapper *rx_pkt;
-	struct ipa3_sys_context *sys;
 
 	rx_pkt = container_of(work, struct ipa3_rx_pkt_wrapper, work);
-	if (unlikely(rx_pkt == NULL))
-		WARN_ON(1);
-	sys = rx_pkt->sys;
-	ipa3_wq_rx_common(sys, 0);
+	ipa3_wq_rx_common(rx_pkt->sys, 0);
 }
 
 static void ipa3_free_rx_wrapper(struct ipa3_rx_pkt_wrapper *rk_pkt)
