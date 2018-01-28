@@ -2947,7 +2947,7 @@ ipa_populate_tag_field(struct ipa3_desc *desc,
 		struct ipa3_tx_pkt_wrapper *tx_pkt)
 {
 	struct ipahal_imm_cmd_pyld *tag_pyld;
-	struct ipahal_imm_cmd_ip_packet_tag_status tag_cmd = {0};
+	struct ipahal_imm_cmd_ip_packet_tag_status tag_cmd;
 
 	/* ipa_assert(!desc->pyld); */
 	tag_cmd.tag = pointer_to_tag_wa(tx_pkt);
@@ -2957,10 +2957,7 @@ ipa_populate_tag_field(struct ipa3_desc *desc,
 		ipa_err("Failed to construct ip_packet_tag_status\n");
 		return NULL;
 	}
-	/*
-	 * This is for 32-bit pointer, will need special
-	 * handling if 64-bit pointer is used
-	 */
+
 	ipa_desc_fill_imm_cmd(desc, tag_pyld);
 	desc->user1 = tag_pyld;
 	desc->callback = ipa3_tag_destroy_imm;
