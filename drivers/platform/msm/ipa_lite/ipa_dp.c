@@ -80,9 +80,8 @@ static void ipa3_wq_rx_avail(struct work_struct *work);
 static void ipa3_wq_repl_rx(struct work_struct *work);
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	struct ipa3_ep_context *ep);
-static int ipa_populate_tag_field(struct ipa3_desc *desc,
-		struct ipa3_tx_pkt_wrapper *tx_pkt,
-		struct ipahal_imm_cmd_pyld **tag_pyld_ret);
+static struct ipahal_imm_cmd_pyld *ipa_populate_tag_field(
+		struct ipa3_desc *desc, struct ipa3_tx_pkt_wrapper *tx_pkt);
 static int ipa_poll_gsi_pkt(struct ipa3_sys_context *sys,
 	struct ipa_mem_buffer *mem_info);
 static struct ipa3_tx_pkt_wrapper *tag_to_pointer_wa(u64 tag);
@@ -360,8 +359,8 @@ int ipa3_send(struct ipa3_sys_context *sys,
 
 		/* populate tag field if payload is null */
 		if (desc[i].is_tag_status && desc[i].pyld) {
-			if (ipa_populate_tag_field(&desc[i], tx_pkt,
-				&tag_pyld_ret)) {
+			tag_pyld_ret = ipa_populate_tag_field(&desc[i], tx_pkt);
+			if (!tag_pyld_ret) {
 				ipa_err("Failed to populate tag field\n");
 				goto failure_dma_map;
 			}
@@ -466,7 +465,7 @@ int ipa3_send(struct ipa3_sys_context *sys,
 	return 0;
 
 failure_dma_map:
-		kmem_cache_free(ipa3_ctx->tx_pkt_wrapper_cache, tx_pkt);
+	kmem_cache_free(ipa3_ctx->tx_pkt_wrapper_cache, tx_pkt);
 
 failure:
 	ipahal_destroy_imm_cmd(tag_pyld_ret);
@@ -2943,9 +2942,9 @@ fail_alloc_evt_ring:
 	return result;
 }
 
-static int ipa_populate_tag_field(struct ipa3_desc *desc,
-		struct ipa3_tx_pkt_wrapper *tx_pkt,
-		struct ipahal_imm_cmd_pyld **tag_pyld_ret)
+static struct ipahal_imm_cmd_pyld *
+ipa_populate_tag_field(struct ipa3_desc *desc,
+		struct ipa3_tx_pkt_wrapper *tx_pkt)
 {
 	struct ipahal_imm_cmd_pyld *tag_pyld;
 	struct ipahal_imm_cmd_ip_packet_tag_status tag_cmd = {0};
@@ -2956,7 +2955,7 @@ static int ipa_populate_tag_field(struct ipa3_desc *desc,
 						&tag_cmd);
 	if (unlikely(!tag_pyld)) {
 		ipa_err("Failed to construct ip_packet_tag_status\n");
-		return -EFAULT;
+		return NULL;
 	}
 	/*
 	 * This is for 32-bit pointer, will need special
@@ -2968,9 +2967,7 @@ static int ipa_populate_tag_field(struct ipa3_desc *desc,
 
 	ipa_debug_low("tx_pkt sent in tag: 0x%p\n", tx_pkt);
 
-	*tag_pyld_ret = tag_pyld;
-
-	return 0;
+	return tag_pyld;
 }
 
 static int
