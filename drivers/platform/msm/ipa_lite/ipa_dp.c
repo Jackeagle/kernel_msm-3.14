@@ -85,7 +85,7 @@ static int ipa_populate_tag_field(struct ipa3_desc *desc,
 		struct ipahal_imm_cmd_pyld **tag_pyld_ret);
 static int ipa_poll_gsi_pkt(struct ipa3_sys_context *sys,
 	struct ipa_mem_buffer *mem_info);
-static unsigned long tag_to_pointer_wa(uint64_t tag);
+static struct ipa3_tx_pkt_wrapper *tag_to_pointer_wa(u64 tag);
 static u64 pointer_to_tag_wa(struct ipa3_tx_pkt_wrapper *tx_pkt);
 
 static u32 ipa_adjust_ra_buff_base_sz(u32 aggr_byte_limit);
@@ -1836,7 +1836,6 @@ static int ipa3_lan_rx_pyld_hdlr(struct sk_buff *skb,
 	unsigned int used_align = ALIGN(used, 32);
 	unsigned long unused = IPA_GENERIC_RX_BUFF_BASE_SZ - used;
 	struct ipa3_tx_pkt_wrapper *tx_pkt = NULL;
-	unsigned long ptr;
 
 	IPA_DUMP_BUFF(skb->data, 0, skb->len);
 
@@ -1974,8 +1973,7 @@ begin:
 					kfree(comp);
 				continue;
 			} else {
-				ptr = tag_to_pointer_wa(status.tag_info);
-				tx_pkt = (struct ipa3_tx_pkt_wrapper *)ptr;
+				tx_pkt = tag_to_pointer_wa(status.tag_info);
 				ipa_debug_low("tx_pkt recv = %p\n", tx_pkt);
 			}
 		}
@@ -3007,9 +3005,11 @@ static int ipa_poll_gsi_pkt(struct ipa3_sys_context *sys,
 	return ret;
 }
 
-static unsigned long tag_to_pointer_wa(u64 tag)
+static struct ipa3_tx_pkt_wrapper *tag_to_pointer_wa(u64 tag)
 {
-	return (unsigned long)(GENMASK(63,48) | tag);
+	u64 addr = GENMASK(63,48) | tag;
+
+	return (struct ipa3_tx_pkt_wrapper *)addr;
 }
 
 static u64 pointer_to_tag_wa(struct ipa3_tx_pkt_wrapper *tx_pkt)
