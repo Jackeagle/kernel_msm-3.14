@@ -2408,15 +2408,16 @@ static void ipa3_wq_rx_common(struct ipa3_sys_context *sys, u32 size)
 		WARN_ON(1);
 		return;
 	}
+
 	spin_lock_bh(&sys->spinlock);
 	rx_pkt_expected = list_first_entry(&sys->head_desc_list,
-					   struct ipa3_rx_pkt_wrapper,
-					   link);
+					   struct ipa3_rx_pkt_wrapper, link);
 	list_del(&rx_pkt_expected->link);
 	sys->len--;
+	spin_unlock_bh(&sys->spinlock);
+
 	if (size)
 		rx_pkt_expected->len = size;
-	spin_unlock_bh(&sys->spinlock);
 	rx_skb = rx_pkt_expected->data.skb;
 	dma_unmap_single(dev, rx_pkt_expected->data.dma_addr,
 			sys->rx_buff_sz, DMA_FROM_DEVICE);
