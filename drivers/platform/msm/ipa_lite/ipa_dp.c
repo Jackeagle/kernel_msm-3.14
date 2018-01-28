@@ -2974,8 +2974,8 @@ static int ipa_populate_tag_field(struct ipa3_desc *desc,
 	return 0;
 }
 
-static int ipa_poll_gsi_pkt(struct ipa3_sys_context *sys,
-		struct ipa_mem_buffer *mem_info)
+static int
+ipa_poll_gsi_pkt(struct ipa3_sys_context *sys, struct ipa_mem_buffer *mem_info)
 {
 	int ret;
 	struct gsi_chan_xfer_notify xfer_notify;
@@ -2988,19 +2988,16 @@ static int ipa_poll_gsi_pkt(struct ipa3_sys_context *sys,
 		return 0;
 	}
 
-	ret = gsi_poll_channel(sys->ep->gsi_chan_hdl,
-		&xfer_notify);
-	if (ret == -ENOENT)
-		return ret;
-	else if (ret) {
-		ipa_err("Poll channel err: %d\n", ret);
+	ret = gsi_poll_channel(sys->ep->gsi_chan_hdl, &xfer_notify);
+	if (ret) {
+		if (ret != -ENOENT)
+			ipa_err("Poll channel err: %d\n", ret);
 		return ret;
 	}
 
-	rx_pkt = (struct ipa3_rx_pkt_wrapper *)
-		xfer_notify.xfer_user_data;
+	rx_pkt = xfer_notify.xfer_user_data;
 	mem_info->phys_base = rx_pkt->data.dma_addr;
-	mem_info->size = xfer_notify.bytes_xfered;
+	mem_info->size = (u32)xfer_notify.bytes_xfered;
 
 	return ret;
 }
