@@ -358,8 +358,8 @@ int ipa3_send(struct ipa3_sys_context *sys,
 			INIT_WORK(&tx_pkt->work, ipa3_wq_write_done);
 		}
 
-		/* populate tag field */
-		if (desc[i].is_tag_status) {
+		/* populate tag field if payload is null */
+		if (desc[i].is_tag_status && desc[i].pyld) {
 			if (ipa_populate_tag_field(&desc[i], tx_pkt,
 				&tag_pyld_ret)) {
 				ipa_err("Failed to populate tag field\n");
@@ -2950,10 +2950,7 @@ static int ipa_populate_tag_field(struct ipa3_desc *desc,
 	struct ipahal_imm_cmd_pyld *tag_pyld;
 	struct ipahal_imm_cmd_ip_packet_tag_status tag_cmd = {0};
 
-	/* populate tag field only if it is NULL */
-	if (desc->pyld)
-		return 0;
-
+	/* ipa_assert(!desc->pyld); */
 	tag_cmd.tag = pointer_to_tag_wa(tx_pkt);
 	tag_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_PACKET_TAG_STATUS,
 						&tag_cmd);
