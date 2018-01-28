@@ -2951,26 +2951,28 @@ static int ipa_populate_tag_field(struct ipa3_desc *desc,
 	struct ipahal_imm_cmd_ip_packet_tag_status tag_cmd = {0};
 
 	/* populate tag field only if it is NULL */
-	if (desc->pyld == NULL) {
-		tag_cmd.tag = pointer_to_tag_wa(tx_pkt);
-		tag_pyld = ipahal_construct_imm_cmd(
-			IPA_IMM_CMD_IP_PACKET_TAG_STATUS, &tag_cmd);
-		if (unlikely(!tag_pyld)) {
-			ipa_err("Failed to construct ip_packet_tag_status\n");
-			return -EFAULT;
-		}
-		/*
-		 * This is for 32-bit pointer, will need special
-		 * handling if 64-bit pointer is used
-		 */
-		ipa_desc_fill_imm_cmd(desc, tag_pyld);
-		desc->user1 = tag_pyld;
-		desc->callback = ipa3_tag_destroy_imm;
+	if (desc->pyld)
+		return 0;
 
-		ipa_debug_low("tx_pkt sent in tag: 0x%p\n", tx_pkt);
-
-		*tag_pyld_ret = tag_pyld;
+	tag_cmd.tag = pointer_to_tag_wa(tx_pkt);
+	tag_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_PACKET_TAG_STATUS,
+						&tag_cmd);
+	if (unlikely(!tag_pyld)) {
+		ipa_err("Failed to construct ip_packet_tag_status\n");
+		return -EFAULT;
 	}
+	/*
+	 * This is for 32-bit pointer, will need special
+	 * handling if 64-bit pointer is used
+	 */
+	ipa_desc_fill_imm_cmd(desc, tag_pyld);
+	desc->user1 = tag_pyld;
+	desc->callback = ipa3_tag_destroy_imm;
+
+	ipa_debug_low("tx_pkt sent in tag: 0x%p\n", tx_pkt);
+
+	*tag_pyld_ret = tag_pyld;
+
 	return 0;
 }
 
