@@ -1347,7 +1347,6 @@ void ipa3_dec_release_wakelock(void);
 int ipa3_load_fws(const struct firmware *firmware, phys_addr_t gsi_mem_base);
 const char *ipa_hw_error_str(enum ipa_hw_errors err_type);
 int ipa3_rx_poll(u32 clnt_hdl, int budget);
-void ipa3_recycle_wan_skb(struct sk_buff *skb);
 void ipa3_reset_freeze_vote(void);
 struct dentry *ipa_debugfs_get_root(void);
 void ipa3_enable_dcd(void);

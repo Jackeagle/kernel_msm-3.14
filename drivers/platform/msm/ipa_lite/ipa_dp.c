@@ -2375,29 +2375,6 @@ static void ipa3_recycle_rx_wrapper(struct ipa3_rx_pkt_wrapper *rx_pkt)
 	spin_unlock_bh(&rx_pkt->sys->spinlock);
 }
 
-void ipa3_recycle_wan_skb(struct sk_buff *skb)
-{
-	struct ipa3_rx_pkt_wrapper *rx_pkt;
-	int ep_idx = ipa3_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
-	gfp_t flag = GFP_NOWAIT | __GFP_NOWARN;
-
-	if (unlikely(ep_idx < 0)) {
-		ipa_err("dest EP does not exist\n");
-		ipa_assert();
-	}
-
-	rx_pkt = kmem_cache_zalloc(ipa3_ctx->rx_pkt_wrapper_cache,
-					flag);
-	if (!rx_pkt)
-		ipa_assert();
-
-	INIT_WORK(&rx_pkt->work, ipa3_wq_rx_avail);
-	rx_pkt->sys = ipa3_ctx->ep[ep_idx].sys;
-
-	rx_pkt->data.skb = skb;
-	ipa3_recycle_rx_wrapper(rx_pkt);
-}
-
 static void ipa3_wq_rx_common(struct ipa3_sys_context *sys, u32 size)
 {
 	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
