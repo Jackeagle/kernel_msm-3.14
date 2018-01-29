@@ -826,11 +826,6 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, void *dev_hdl)
 	unsigned long flags;
 	size_t bit_count;
 
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -ENODEV;
-	}
-
 	if (!props || dev_hdl != gsi_ctx) {
 		GSIERR("bad params props=%p dev_hdl=%p\n", props, dev_hdl);
 		return -EINVAL;
