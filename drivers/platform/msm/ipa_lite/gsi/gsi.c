@@ -709,13 +709,13 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 {
 	uint32_t val;
 
-	GSIDBG("intf=GPI intr=IRQ re=%u\n", props->re_size);
+	GSIDBG("intf=GPI intr=IRQ re=%u\n", GSI_EVT_RING_RE_SIZE_16B);
 
 	val = (((GSI_EVT_CHTYPE_GPI_EV << GSI_EE_n_EV_CH_k_CNTXT_0_CHTYPE_SHFT) &
 			GSI_EE_n_EV_CH_k_CNTXT_0_CHTYPE_BMSK) |
 		((GSI_INTR_IRQ << GSI_EE_n_EV_CH_k_CNTXT_0_INTYPE_SHFT) &
 			GSI_EE_n_EV_CH_k_CNTXT_0_INTYPE_BMSK) |
-		((props->re_size << GSI_EE_n_EV_CH_k_CNTXT_0_ELEMENT_SIZE_SHFT)
+		((GSI_EVT_RING_RE_SIZE_16B << GSI_EE_n_EV_CH_k_CNTXT_0_ELEMENT_SIZE_SHFT)
 			& GSI_EE_n_EV_CH_k_CNTXT_0_ELEMENT_SIZE_BMSK));
 
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_0_OFFS(evt_id, ee));
