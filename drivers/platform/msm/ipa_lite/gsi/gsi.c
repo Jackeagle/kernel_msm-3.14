@@ -20,6 +20,8 @@
 #include "gsi.h"
 #include "gsi_reg.h"
 
+#define GSI_EVT_RING_ELEMENT_SIZE	16	/* bytes */
+
 #define GSI_CMD_TIMEOUT (5*HZ)
 #define GSI_STOP_CMD_TIMEOUT_MS 20
 #define GSI_MAX_CH_LOW_WEIGHT 15
@@ -709,13 +711,13 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 {
 	uint32_t val;
 
-	GSIDBG("intf=GPI intr=IRQ re=%u\n", GSI_EVT_RING_RE_SIZE_16B);
+	GSIDBG("intf=GPI intr=IRQ re=%u\n", GSI_EVT_RING_ELEMENT_SIZE);
 
 	val = (((GSI_EVT_CHTYPE_GPI_EV << GSI_EE_n_EV_CH_k_CNTXT_0_CHTYPE_SHFT) &
 			GSI_EE_n_EV_CH_k_CNTXT_0_CHTYPE_BMSK) |
 		((GSI_INTR_IRQ << GSI_EE_n_EV_CH_k_CNTXT_0_INTYPE_SHFT) &
 			GSI_EE_n_EV_CH_k_CNTXT_0_INTYPE_BMSK) |
-		((GSI_EVT_RING_RE_SIZE_16B << GSI_EE_n_EV_CH_k_CNTXT_0_ELEMENT_SIZE_SHFT)
+		((GSI_EVT_RING_ELEMENT_SIZE << GSI_EE_n_EV_CH_k_CNTXT_0_ELEMENT_SIZE_SHFT)
 			& GSI_EE_n_EV_CH_k_CNTXT_0_ELEMENT_SIZE_BMSK));
 
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_0_OFFS(evt_id, ee));
@@ -761,7 +763,7 @@ static void gsi_init_evt_ring(struct gsi_evt_ring_props *props,
 	ctx->wp_local = ctx->base;
 	ctx->rp_local = ctx->base;
 	ctx->len = props->ring_len;
-	ctx->elem_sz = GSI_EVT_RING_RE_SIZE_16B;
+	ctx->elem_sz = GSI_EVT_RING_ELEMENT_SIZE;
 	ctx->max_num_elem = ctx->len / ctx->elem_sz - 1;
 	ctx->end = ctx->base + (ctx->max_num_elem + 1) * ctx->elem_sz;
 }
@@ -784,7 +786,7 @@ static int gsi_validate_evt_ring_props(struct gsi_evt_ring_props *props)
 
 	if (props->ring_len % 16) {
 		GSIERR("bad params ring_len %u not a multiple of RE size %u\n",
-				props->ring_len, GSI_EVT_RING_RE_SIZE_16B);
+				props->ring_len, GSI_EVT_RING_ELEMENT_SIZE);
 		return -EINVAL;
 	}
 
