@@ -257,7 +257,7 @@ int ipa3_rx_poll(u32 clnt_hdl, int weight)
 
                 atomic_set(&ipa3_ctx->transport_pm.eot_activity, 1);
                 ret = ipa_poll_gsi_pkt(ep->sys, &mem_info);
-                if (ret)
+                if (ret < 0)
                         break;
 
                 ipa3_wq_rx_common(ep->sys, mem_info.size);
@@ -722,7 +722,7 @@ static int ipa3_handle_rx_core(struct ipa3_sys_context *sys)
 	/* Stop if the leave polling state */
 	while (atomic_read(&sys->curr_polling_state)) {
 		ret = ipa_poll_gsi_pkt(sys, &mem_info);
-		if (ret)
+		if (ret < 0)
 			break;
 
 		ipa3_wq_rx_common(sys, mem_info.size);
@@ -2946,7 +2946,7 @@ ipa_poll_gsi_pkt(struct ipa3_sys_context *sys, struct ipa_mem_buffer *mem_info)
 		mem_info->phys_base = sys->ep->phys_base;
 		mem_info->size = (u32)sys->ep->bytes_xfered;
 		sys->ep->bytes_xfered_valid = false;
-		return 0;
+		return (int)mem_info->size;
 	}
 
 	ret = gsi_poll_channel(sys->ep->gsi_chan_hdl, &xfer_notify);
@@ -2960,7 +2960,7 @@ ipa_poll_gsi_pkt(struct ipa3_sys_context *sys, struct ipa_mem_buffer *mem_info)
 	mem_info->phys_base = rx_pkt->data.dma_addr;
 	mem_info->size = (u32)xfer_notify.bytes_xfered;
 
-	return ret;
+	return (int)mem_info->size;
 }
 
 static struct ipa3_tx_pkt_wrapper *tag_to_pointer_wa(u64 tag)
