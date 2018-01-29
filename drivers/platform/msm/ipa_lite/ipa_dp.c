@@ -2632,6 +2632,7 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 	struct ipa3_sys_context *sys = notify->chan_user_data;
 	struct ipa3_rx_pkt_wrapper *rx_pkt_rcvd = notify->xfer_user_data;
 	struct ipa3_rx_pkt_wrapper *rx_pkt_expected;
+	enum gsi_chan_evt evt_id = notify->evt_id;
 	int clk_off;
 
 	rx_pkt_expected = list_first_entry(&sys->head_desc_list,
@@ -2645,34 +2646,32 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 	sys->ep->bytes_xfered = notify->bytes_xfered;
 	sys->ep->phys_base = rx_pkt_rcvd->data.dma_addr;
 
-	switch (notify->evt_id) {
-	case GSI_CHAN_EVT_EOT:
-	case GSI_CHAN_EVT_EOB:
-		atomic_set(&ipa3_ctx->transport_pm.eot_activity, 1);
-		if (!atomic_read(&sys->curr_polling_state)) {
-			/* put the gsi channel into polling mode */
-			gsi_config_channel_mode(sys->ep->gsi_chan_hdl,
-				GSI_CHAN_MODE_POLL);
-			ipa3_inc_acquire_wakelock();
-			atomic_set(&sys->curr_polling_state, 1);
-			if (sys->ep->napi_enabled) {
-				struct ipa_active_client_logging_info log;
+	if (evt_id != GSI_CHAN_EVT_EOT && evt_id != GSI_CHAN_EVT_EOB) {
+		ipa_err("received unexpected event id %d\n", evt_id);
+		return;
+	}
 
-				IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log, "NAPI");
-				clk_off = ipa3_inc_client_enable_clks_no_block(
-					&log);
-				if (!clk_off)
-					sys->ep->client_notify(sys->ep->priv,
-						IPA_CLIENT_START_POLL, 0);
-				else
-					queue_work(sys->wq, &sys->work);
-			} else {
+	atomic_set(&ipa3_ctx->transport_pm.eot_activity, 1);
+	if (!atomic_read(&sys->curr_polling_state)) {
+		/* put the gsi channel into polling mode */
+		gsi_config_channel_mode(sys->ep->gsi_chan_hdl,
+			GSI_CHAN_MODE_POLL);
+		ipa3_inc_acquire_wakelock();
+		atomic_set(&sys->curr_polling_state, 1);
+		if (sys->ep->napi_enabled) {
+			struct ipa_active_client_logging_info log;
+
+			IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log, "NAPI");
+			clk_off = ipa3_inc_client_enable_clks_no_block(
+				&log);
+			if (!clk_off)
+				sys->ep->client_notify(sys->ep->priv,
+					IPA_CLIENT_START_POLL, 0);
+			else
 				queue_work(sys->wq, &sys->work);
-			}
+		} else {
+			queue_work(sys->wq, &sys->work);
 		}
-		break;
-	default:
-		ipa_err("received unexpected event id %d\n", notify->evt_id);
 	}
 }
 
