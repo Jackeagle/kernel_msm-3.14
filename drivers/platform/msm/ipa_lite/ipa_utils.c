@@ -600,87 +600,6 @@ static struct msm_bus_scale_pdata ipa_bus_client_pdata_v3_0 = {
 	.name = "ipa",
 };
 
-/**
- * ipa3_should_pipe_be_suspended() - returns true when the client's pipe should
- * be suspended during a power save scenario. False otherwise.
- *
- * @client: [IN] IPA client
- */
-bool ipa3_should_pipe_be_suspended(enum ipa_client_type client)
-{
-	int ipa_ep_idx;
-
-	ipa_ep_idx = ipa3_get_ep_mapping(client);
-	if (ipa_ep_idx < 0) {
-		ipa_err("Invalid client.\n");
-		WARN_ON(1);
-		return false;
-	}
-
-	return false;
-}
-
- /**
- * _ipa_sram_settings_read_v3_0() - Read SRAM settings from HW
- *
- * Returns:	None
- */
-void _ipa_sram_settings_read_v3_0(void)
-{
-	struct ipahal_reg_shared_mem_size smem_sz;
-
-	ipahal_read_reg_fields(IPA_SHARED_MEM_SIZE, &smem_sz);
-
-	/* reg fields are in 8B units */
-	ipa3_ctx->smem_restricted_bytes = smem_sz.shared_mem_baddr * 8;
-	ipa3_ctx->smem_sz = smem_sz.shared_mem_sz * 8;
-
-	ipa3_ctx->smem_reqd_sz = ipa3_mem(END_OFST);
-}
-
-/**
- * ipa3_cfg_qsb() - Configure IPA QSB maximal reads and writes
- *
- * Returns:	None
- */
-void ipa3_cfg_qsb(void)
-{
-	struct ipahal_reg_qsb_max_reads max_reads = { 0 };
-	struct ipahal_reg_qsb_max_writes max_writes = { 0 };
-
-	max_reads.qmb_0_max_reads = 8,
-	max_reads.qmb_1_max_reads = 12;
-
-	max_writes.qmb_0_max_writes = 8;
-	max_writes.qmb_1_max_writes = 4;
-
-	ipahal_write_reg_fields(IPA_QSB_MAX_WRITES, &max_writes);
-	ipahal_write_reg_fields(IPA_QSB_MAX_READS, &max_reads);
-}
-
-/**
- * ipa3_init_hw() - initialize HW
- *
- * Return codes:
- * 0: success
- */
-int ipa3_init_hw(void)
-{
-	u32 ipa_version = 0;
-
-	/* Read IPA version and make sure we have access to the registers */
-	ipa_version = ipahal_read_reg(IPA_VERSION);
-	if (ipa_version == 0)
-		return -EFAULT;
-
-	/* SDM845 has IPA version 3.5.1 */
-	ipahal_write_reg(IPA_BCR, IPA_BCR_REG_VAL_v3_5);
-
-	ipa3_cfg_qsb();
-
-	return 0;
-}
-
 static const struct ipa_ep_configuration *
 ep_configuration(enum ipa_client_type client)
 {
@@ -795,6 +714,87 @@ enum ipa_client_type ipa3_get_client_mapping(int pipe_idx)
 	}
 
 	return ipa3_ctx->ep[pipe_idx].client;
+}
+
+/**
+ * ipa3_should_pipe_be_suspended() - returns true when the client's pipe should
+ * be suspended during a power save scenario. False otherwise.
+ *
+ * @client: [IN] IPA client
+ */
+bool ipa3_should_pipe_be_suspended(enum ipa_client_type client)
+{
+	int ipa_ep_idx;
+
+	ipa_ep_idx = ipa3_get_ep_mapping(client);
+	if (ipa_ep_idx < 0) {
+		ipa_err("Invalid client.\n");
+		WARN_ON(1);
+		return false;
+	}
+
+	return false;
+}
+
+ /**
+ * _ipa_sram_settings_read_v3_0() - Read SRAM settings from HW
+ *
+ * Returns:	None
+ */
+void _ipa_sram_settings_read_v3_0(void)
+{
+	struct ipahal_reg_shared_mem_size smem_sz;
+
+	ipahal_read_reg_fields(IPA_SHARED_MEM_SIZE, &smem_sz);
+
+	/* reg fields are in 8B units */
+	ipa3_ctx->smem_restricted_bytes = smem_sz.shared_mem_baddr * 8;
+	ipa3_ctx->smem_sz = smem_sz.shared_mem_sz * 8;
+
+	ipa3_ctx->smem_reqd_sz = ipa3_mem(END_OFST);
+}
+
+/**
+ * ipa3_cfg_qsb() - Configure IPA QSB maximal reads and writes
+ *
+ * Returns:	None
+ */
+void ipa3_cfg_qsb(void)
+{
+	struct ipahal_reg_qsb_max_reads max_reads = { 0 };
+	struct ipahal_reg_qsb_max_writes max_writes = { 0 };
+
+	max_reads.qmb_0_max_reads = 8,
+	max_reads.qmb_1_max_reads = 12;
+
+	max_writes.qmb_0_max_writes = 8;
+	max_writes.qmb_1_max_writes = 4;
+
+	ipahal_write_reg_fields(IPA_QSB_MAX_WRITES, &max_writes);
+	ipahal_write_reg_fields(IPA_QSB_MAX_READS, &max_reads);
+}
+
+/**
+ * ipa3_init_hw() - initialize HW
+ *
+ * Return codes:
+ * 0: success
+ */
+int ipa3_init_hw(void)
+{
+	u32 ipa_version = 0;
+
+	/* Read IPA version and make sure we have access to the registers */
+	ipa_version = ipahal_read_reg(IPA_VERSION);
+	if (ipa_version == 0)
+		return -EFAULT;
+
+	/* SDM845 has IPA version 3.5.1 */
+	ipahal_write_reg(IPA_BCR, IPA_BCR_REG_VAL_v3_5);
+
+	ipa3_cfg_qsb();
+
+	return 0;
 }
 
 /**
