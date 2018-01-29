@@ -1129,9 +1129,10 @@ static int ipa3_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
  */
 static int ipa3_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 {
+	enum ipa_client_type client = ipa3_ctx->ep[clnt_hdl].client;
 	int type;
 
-	if (IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client)) {
+	if (IPA_CLIENT_IS_CONS(client)) {
 		ipa_err("SEQ does not apply to IPA consumer EP %d\n", clnt_hdl);
 		return -EINVAL;
 	}
@@ -1139,8 +1140,7 @@ static int ipa3_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 	if (seq_cfg->set_dynamic)
 		type = seq_cfg->seq_type;
 	else
-		type = ipa3_ep_mapping[IPA_3_5_1]
-			[ipa3_ctx->ep[clnt_hdl].client].sequencer_type;
+		type = ipa3_ep_mapping[IPA_3_5_1][client].sequencer_type;
 
 	if (type != IPA_DPS_HPS_SEQ_TYPE_INVALID) {
 		if (ipa3_ctx->ep[clnt_hdl].cfg.mode.mode == IPA_DMA &&
