@@ -2652,26 +2652,25 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 	}
 
 	atomic_set(&ipa3_ctx->transport_pm.eot_activity, 1);
-	if (!atomic_read(&sys->curr_polling_state)) {
-		/* put the gsi channel into polling mode */
-		gsi_config_channel_mode(sys->ep->gsi_chan_hdl,
-			GSI_CHAN_MODE_POLL);
-		ipa3_inc_acquire_wakelock();
-		atomic_set(&sys->curr_polling_state, 1);
-		if (sys->ep->napi_enabled) {
-			struct ipa_active_client_logging_info log;
+	if (atomic_read(&sys->curr_polling_state))
+		return;
 
-			IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log, "NAPI");
-			clk_off = ipa3_inc_client_enable_clks_no_block(
-				&log);
-			if (!clk_off)
-				sys->ep->client_notify(sys->ep->priv,
-					IPA_CLIENT_START_POLL, 0);
-			else
-				queue_work(sys->wq, &sys->work);
-		} else {
+	/* put the gsi channel into polling mode */
+	gsi_config_channel_mode(sys->ep->gsi_chan_hdl, GSI_CHAN_MODE_POLL);
+	ipa3_inc_acquire_wakelock();
+	atomic_set(&sys->curr_polling_state, 1);
+	if (sys->ep->napi_enabled) {
+		struct ipa_active_client_logging_info log;
+
+		IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log, "NAPI");
+		clk_off = ipa3_inc_client_enable_clks_no_block(&log);
+		if (!clk_off)
+			sys->ep->client_notify(sys->ep->priv,
+				IPA_CLIENT_START_POLL, 0);
+		else
 			queue_work(sys->wq, &sys->work);
-		}
+	} else {
+		queue_work(sys->wq, &sys->work);
 	}
 }
 
