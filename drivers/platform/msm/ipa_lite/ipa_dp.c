@@ -260,7 +260,7 @@ int ipa3_rx_poll(u32 clnt_hdl, int weight)
                 if (ret < 0)
                         break;
 
-                ipa3_wq_rx_common(ep->sys, mem_info.size);
+                ipa3_wq_rx_common(ep->sys, (u32)ret);
                 cnt += IPA_WAN_AGGR_PKT_CNT;
                 total_cnt++;
 
@@ -725,7 +725,7 @@ static int ipa3_handle_rx_core(struct ipa3_sys_context *sys)
 		if (ret < 0)
 			break;
 
-		ipa3_wq_rx_common(sys, mem_info.size);
+		ipa3_wq_rx_common(sys, (u32)ret);
 
 		++cnt;
 	}
