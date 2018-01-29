@@ -1140,7 +1140,7 @@ static int ipa3_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 	if (seq_cfg->set_dynamic)
 		type = seq_cfg->seq_type;
 	else
-		type = ipa3_ep_mapping[IPA_3_5_1][client].sequencer_type;
+		type = ep_configuration(client)->sequencer_type;
 
 	if (type != IPA_DPS_HPS_SEQ_TYPE_INVALID) {
 		if (ipa3_ctx->ep[clnt_hdl].cfg.mode.mode == IPA_DMA &&
