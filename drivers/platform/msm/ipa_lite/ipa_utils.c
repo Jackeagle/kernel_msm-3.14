@@ -653,6 +653,13 @@ int ipa3_get_ep_mapping(enum ipa_client_type client)
 	return -ENOENT;
 }
 
+struct ipa3_ep_context *ipa3_get_ep_context(enum ipa_client_type client)
+{
+	int ipa_ep_idx = ipa3_get_ep_mapping(client);
+
+	return ipa_ep_idx < 0 ? NULL : &ipa3_ctx->ep[ipa_ep_idx];
+}
+
 /**
  * ipa_get_ep_group() - provide endpoint group by client
  * @client: client type
@@ -1980,7 +1987,7 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 	struct sk_buff *dummy_skb;
 	int res;
 	struct ipa3_tag_completion *comp;
-	int ep_idx;
+	struct ipa3_ep_context *ep;
 
 	/* Not enough room for the required descriptors for the tag process */
 	if (IPA_TAG_MAX_DESC - descs_num < REQUIRED_TAG_PROCESS_DESCRIPTORS) {
@@ -1990,13 +1997,12 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 		return -ENOMEM;
 	}
 
-	ep_idx = ipa3_get_ep_mapping(IPA_CLIENT_APPS_CMD_PROD);
-	if (ep_idx < 0) {
-		ipa_err("Client %u is not mapped\n",
-			IPA_CLIENT_APPS_CMD_PROD);
+	ep = ipa3_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
+	if (!ep) {
+		ipa_err("Client %u is not mapped\n", IPA_CLIENT_APPS_CMD_PROD);
 		return -EFAULT;
 	}
-	sys = ipa3_ctx->ep[ep_idx].sys;
+	sys = ep->sys;
 
 	tag_desc = kzalloc(sizeof(*tag_desc) * IPA_TAG_MAX_DESC, GFP_KERNEL);
 	if (!tag_desc) {
