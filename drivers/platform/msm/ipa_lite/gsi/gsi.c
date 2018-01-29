@@ -1853,11 +1853,6 @@ int gsi_get_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
 {
 	struct gsi_chan_ctx *ctx;
 
-	if (!props || !scr) {
-		GSIERR("bad params props=%p scr=%p\n", props, scr);
-		return -EINVAL;
-	}
-
 	if (chan_hdl >= gsi_ctx->max_ch) {
 		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
 		return -EINVAL;
