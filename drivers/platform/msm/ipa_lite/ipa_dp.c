@@ -835,7 +835,7 @@ int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
 	int result = -EINVAL;
 	char buff[IPA_RESOURCE_NAME_MAX];
 
-	if (sys_in->client >= IPA_CLIENT_MAX || sys_in->desc_fifo_sz == 0) {
+	if (sys_in->desc_fifo_sz == 0) {
 		ipa_err("bad parm client:%d fifo_sz:%d\n",
 			sys_in->client, sys_in->desc_fifo_sz);
 		goto fail_gen;
