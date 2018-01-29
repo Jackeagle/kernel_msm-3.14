@@ -782,12 +782,9 @@ static int gsi_validate_evt_ring_props(struct gsi_evt_ring_props *props)
 {
 	uint64_t ra;
 
-	if ((props->re_size == GSI_EVT_RING_RE_SIZE_4B &&
-				props->ring_len % 4) ||
-			(props->re_size == GSI_EVT_RING_RE_SIZE_16B &&
-				 props->ring_len % 16)) {
+	if (props->ring_len % 16) {
 		GSIERR("bad params ring_len %u not a multiple of RE size %u\n",
-				props->ring_len, props->re_size);
+				props->ring_len, GSI_EVT_RING_RE_SIZE_16B);
 		return -EINVAL;
 	}
 
