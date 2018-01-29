@@ -761,7 +761,7 @@ static void gsi_init_evt_ring(struct gsi_evt_ring_props *props,
 	ctx->wp_local = ctx->base;
 	ctx->rp_local = ctx->base;
 	ctx->len = props->ring_len;
-	ctx->elem_sz = props->re_size;
+	ctx->elem_sz = GSI_EVT_RING_RE_SIZE_16B;
 	ctx->max_num_elem = ctx->len / ctx->elem_sz - 1;
 	ctx->end = ctx->base + (ctx->max_num_elem + 1) * ctx->elem_sz;
 }
