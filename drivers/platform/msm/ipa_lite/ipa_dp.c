@@ -570,10 +570,10 @@ static void ipa3_transport_irq_cmd_ack_free(void *tag_comp, int ignored)
  */
 int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr)
 {
+	struct ipa3_ep_context *ep;
 	struct ipa3_desc *last_desc;
 	int i, result = 0;
 	struct ipa3_sys_context *sys;
-	int ep_idx;
 
 	if (!num_desc || !descr)
 		return -EFAULT;
@@ -581,14 +581,14 @@ int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr)
 	for (i = 0; i < num_desc; i++)
 		ipa_debug("sending imm cmd %d\n", descr[i].opcode);
 
-	ep_idx = ipa3_get_ep_mapping(IPA_CLIENT_APPS_CMD_PROD);
-	if (ep_idx < 0) {
+	ep = ipa3_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
+	if (!ep) {
 		ipa_err("Client %u is not mapped\n",
 			IPA_CLIENT_APPS_CMD_PROD);
 		return -EFAULT;
 	}
 
-	sys = ipa3_ctx->ep[ep_idx].sys;
+	sys = ep->sys;
 	if(!sys)
 		return -EFAULT;
 
