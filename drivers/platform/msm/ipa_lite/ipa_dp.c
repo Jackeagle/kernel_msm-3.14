@@ -2784,7 +2784,6 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		gsi_channel_props.ch_id = gsi_ep_info->ipa_gsi_chan_num;
 
 	gsi_channel_props.evt_ring_hdl = ep->gsi_evt_ring_hdl;
-	gsi_channel_props.re_size = GSI_CHAN_RE_SIZE_16B;
 
 	/*
 	 * GSI ring length is calculated based on the desc_fifo_sz which was

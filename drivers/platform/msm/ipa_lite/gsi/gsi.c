@@ -1148,6 +1148,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props, void *dev_hdl)
 	void **user_data;
 	long chan_id;
 
+	props->re_size = GSI_CHAN_RE_SIZE_16B;
 	if (gsi_validate_channel_props(props)) {
 		GSIERR("bad params\n");
 		return -EINVAL;
