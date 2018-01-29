@@ -2938,15 +2938,13 @@ ipa_populate_tag_field(struct ipa3_desc *desc,
 static int
 ipa_poll_gsi_pkt(struct ipa3_sys_context *sys, struct ipa_mem_buffer *mem_info)
 {
-	int ret;
 	struct gsi_chan_xfer_notify xfer_notify;
-	struct ipa3_rx_pkt_wrapper *rx_pkt;
+	int ret;
 
 	if (sys->ep->bytes_xfered_valid) {
-		mem_info->phys_base = sys->ep->phys_base;
-		mem_info->size = (u32)sys->ep->bytes_xfered;
 		sys->ep->bytes_xfered_valid = false;
-		return (int)mem_info->size;
+
+		return (int)sys->ep->bytes_xfered;
 	}
 
 	ret = gsi_poll_channel(sys->ep->gsi_chan_hdl, &xfer_notify);
@@ -2956,11 +2954,7 @@ ipa_poll_gsi_pkt(struct ipa3_sys_context *sys, struct ipa_mem_buffer *mem_info)
 		return ret;
 	}
 
-	rx_pkt = xfer_notify.xfer_user_data;
-	mem_info->phys_base = rx_pkt->data.dma_addr;
-	mem_info->size = (u32)xfer_notify.bytes_xfered;
-
-	return (int)mem_info->size;
+	return (int)xfer_notify.bytes_xfered;
 }
 
 static struct ipa3_tx_pkt_wrapper *tag_to_pointer_wa(u64 tag)
