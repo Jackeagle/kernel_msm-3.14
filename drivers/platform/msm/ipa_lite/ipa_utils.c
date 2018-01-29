@@ -296,7 +296,7 @@ struct ipa_ep_configuration {
 };
 
 /* clients not included in the list below are considered as invalid */
-static const struct ipa_ep_configuration ipa3_ep_mapping
+static const struct ipa_ep_configuration ipa3_ep_configuration
 					[IPA_VER_MAX][IPA_CLIENT_MAX] = {
 	/* IPA_3_5_1 */
 	[IPA_3_5_1][IPA_CLIENT_APPS_LAN_PROD] = {
@@ -608,7 +608,7 @@ ep_configuration(enum ipa_client_type client)
 		return NULL;
 	}
 
-	return &ipa3_ep_mapping[IPA_3_5_1][client];
+	return &ipa3_ep_configuration[IPA_3_5_1][client];
 }
 
 /**
