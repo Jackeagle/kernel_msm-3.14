@@ -2633,11 +2633,6 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 	struct ipa3_rx_pkt_wrapper *rx_pkt_expected, *rx_pkt_rcvd;
 	int clk_off;
 
-	if (!notify) {
-		ipa_err("gsi notify is NULL.\n");
-		return;
-	}
-
 	sys = (struct ipa3_sys_context *)notify->chan_user_data;
 	rx_pkt_expected = list_first_entry(&sys->head_desc_list,
 					   struct ipa3_rx_pkt_wrapper, link);
