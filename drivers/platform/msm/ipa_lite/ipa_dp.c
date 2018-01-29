@@ -2617,15 +2617,14 @@ static void ipa_gsi_irq_tx_notify_cb(struct gsi_chan_xfer_notify *notify)
 
 	ipa_debug_low("event %d notified\n", notify->evt_id);
 
-	switch (notify->evt_id) {
-	case GSI_CHAN_EVT_EOT:
-		atomic_set(&ipa3_ctx->transport_pm.eot_activity, 1);
-		tx_pkt = notify->xfer_user_data;
-		queue_work(tx_pkt->sys->wq, &tx_pkt->work);
-		break;
-	default:
+	if (notify->evt_id != GSI_CHAN_EVT_EOT) {
 		ipa_err("received unexpected event id %d\n", notify->evt_id);
+		return;
 	}
+
+	atomic_set(&ipa3_ctx->transport_pm.eot_activity, 1);
+	tx_pkt = notify->xfer_user_data;
+	queue_work(tx_pkt->sys->wq, &tx_pkt->work);
 }
 
 static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
