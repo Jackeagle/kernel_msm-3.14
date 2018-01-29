@@ -632,8 +632,8 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout)
 {
 	struct ipa3_desc *last_desc;
 	int i, result = 0;
+	struct ipa3_ep_context *ep;
 	struct ipa3_sys_context *sys;
-	int ep_idx;
 	struct ipa3_tag_completion *comp;
 
 	if (!num_desc || !descr || !timeout)
@@ -642,12 +642,15 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout)
 	for (i = 0; i < num_desc; i++)
 		ipa_debug("sending imm cmd %d\n", descr[i].opcode);
 
-	ep_idx = ipa3_get_ep_mapping(IPA_CLIENT_APPS_CMD_PROD);
-	if (ep_idx < 0) {
+	ep = ipa3_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
+	if (!ep) {
 		ipa_err("Client %u is not mapped\n",
 			IPA_CLIENT_APPS_CMD_PROD);
 		return -EFAULT;
 	}
+	sys = ep->sys;
+	if(!sys)
+		return -EFAULT;
 
 	comp = kzalloc(sizeof(*comp), GFP_ATOMIC);
 	if (!comp) {
@@ -658,10 +661,6 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout)
 
 	/* completion needs to be released from both here and in ack callback */
 	atomic_set(&comp->cnt, 2);
-
-	sys = ipa3_ctx->ep[ep_idx].sys;
-	if(!sys)
-		return -EFAULT;
 
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
 
