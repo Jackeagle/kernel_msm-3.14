@@ -1148,12 +1148,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props, void *dev_hdl)
 	void **user_data;
 	long chan_id;
 
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -ENODEV;
-	}
-
-	if (!props || dev_hdl != gsi_ctx) {
+	if (!props) {
 		GSIERR("bad params props=%p dev_hdl=%p\n", props, dev_hdl);
 		return -EINVAL;
 	}
