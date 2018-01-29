@@ -2629,15 +2629,13 @@ static void ipa_gsi_irq_tx_notify_cb(struct gsi_chan_xfer_notify *notify)
 
 static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 {
-	struct ipa3_sys_context *sys;
-	struct ipa3_rx_pkt_wrapper *rx_pkt_expected, *rx_pkt_rcvd;
+	struct ipa3_sys_context *sys = notify->chan_user_data;
+	struct ipa3_rx_pkt_wrapper *rx_pkt_rcvd = notify->xfer_user_data;
+	struct ipa3_rx_pkt_wrapper *rx_pkt_expected;
 	int clk_off;
 
-	sys = (struct ipa3_sys_context *)notify->chan_user_data;
 	rx_pkt_expected = list_first_entry(&sys->head_desc_list,
 					   struct ipa3_rx_pkt_wrapper, link);
-	rx_pkt_rcvd = (struct ipa3_rx_pkt_wrapper *)notify->xfer_user_data;
-
 	if (rx_pkt_expected != rx_pkt_rcvd) {
 		ipa_err("Pkt was not filled in head of rx buffer.\n");
 		WARN_ON(1);
