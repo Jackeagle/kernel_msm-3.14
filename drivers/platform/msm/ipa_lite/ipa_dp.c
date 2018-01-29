@@ -719,9 +719,9 @@ static int ipa3_handle_rx_core(struct ipa3_sys_context *sys, bool process_all,
 	int ret;
 	int cnt = 0;
 	struct ipa_mem_buffer mem_info = { 0 };
+	int polling_state = in_poll_state ? 1 : 0;
 
-	while ((in_poll_state ? atomic_read(&sys->curr_polling_state) :
-		!atomic_read(&sys->curr_polling_state))) {
+	while (atomic_read(&sys->curr_polling_state) == polling_state) {
 		if (cnt && !process_all)
 			break;
 
