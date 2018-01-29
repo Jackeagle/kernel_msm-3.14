@@ -835,7 +835,7 @@ int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
 	int result = -EINVAL;
 	char buff[IPA_RESOURCE_NAME_MAX];
 
-	if (sys_in == NULL || clnt_hdl == NULL) {
+	if (clnt_hdl == NULL) {
 		ipa_err("NULL args\n");
 		goto fail_gen;
 	}
