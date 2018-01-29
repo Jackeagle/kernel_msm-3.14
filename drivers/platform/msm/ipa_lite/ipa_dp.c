@@ -82,8 +82,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	struct ipa3_ep_context *ep);
 static struct ipahal_imm_cmd_pyld *ipa_populate_tag_field(
 		struct ipa3_desc *desc, struct ipa3_tx_pkt_wrapper *tx_pkt);
-static int ipa_poll_gsi_pkt(struct ipa3_sys_context *sys,
-	struct ipa_mem_buffer *mem_info);
+static int ipa_poll_gsi_pkt(struct ipa3_sys_context *sys);
 static struct ipa3_tx_pkt_wrapper *tag_to_pointer_wa(u64 tag);
 static u64 pointer_to_tag_wa(struct ipa3_tx_pkt_wrapper *tx_pkt);
 
@@ -238,7 +237,6 @@ int ipa3_rx_poll(u32 clnt_hdl, int weight)
         struct ipa3_ep_context *ep;
         int ret;
         int cnt = 0;
-        struct ipa_mem_buffer mem_info = {0};
         static int total_cnt;
         struct ipa_active_client_logging_info log;
 
@@ -256,7 +254,7 @@ int ipa3_rx_poll(u32 clnt_hdl, int weight)
                    atomic_read(&ep->sys->curr_polling_state)) {
 
                 atomic_set(&ipa3_ctx->transport_pm.eot_activity, 1);
-                ret = ipa_poll_gsi_pkt(ep->sys, &mem_info);
+                ret = ipa_poll_gsi_pkt(ep->sys);
                 if (ret < 0)
                         break;
 
@@ -717,11 +715,10 @@ static int ipa3_handle_rx_core(struct ipa3_sys_context *sys)
 {
 	int ret;
 	int cnt = 0;
-	struct ipa_mem_buffer mem_info = { 0 };
 
 	/* Stop if the leave polling state */
 	while (atomic_read(&sys->curr_polling_state)) {
-		ret = ipa_poll_gsi_pkt(sys, &mem_info);
+		ret = ipa_poll_gsi_pkt(sys);
 		if (ret < 0)
 			break;
 
@@ -2936,7 +2933,7 @@ ipa_populate_tag_field(struct ipa3_desc *desc,
 }
 
 static int
-ipa_poll_gsi_pkt(struct ipa3_sys_context *sys, struct ipa_mem_buffer *mem_info)
+ipa_poll_gsi_pkt(struct ipa3_sys_context *sys)
 {
 	struct gsi_chan_xfer_notify xfer_notify;
 	int ret;
