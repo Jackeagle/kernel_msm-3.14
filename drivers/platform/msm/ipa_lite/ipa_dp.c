@@ -713,15 +713,14 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout)
  *  - Call the endpoints notify function, passing the skb in the parameters
  *  - Replenish the rx cache
  */
-static int ipa3_handle_rx_core(struct ipa3_sys_context *sys, bool process_all,
-		bool in_poll_state)
+static int ipa3_handle_rx_core(struct ipa3_sys_context *sys, bool process_all)
 {
 	int ret;
 	int cnt = 0;
 	struct ipa_mem_buffer mem_info = { 0 };
-	int polling_state = in_poll_state ? 1 : 0;
 
-	while (atomic_read(&sys->curr_polling_state) == polling_state) {
+	/* Stop if the polling state changes */
+	while (atomic_read(&sys->curr_polling_state)) {
 		if (cnt && !process_all)
 			break;
 
@@ -777,7 +776,7 @@ static void ipa3_handle_rx(struct ipa3_sys_context *sys)
 
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
 	do {
-		cnt = ipa3_handle_rx_core(sys, true, true);
+		cnt = ipa3_handle_rx_core(sys, true);
 		if (cnt == 0)
 			inactive_cycles++;
 		else
