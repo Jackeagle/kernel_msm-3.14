@@ -2723,11 +2723,6 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	dma_addr_t evt_dma_addr;
 	int result;
 
-	if (!ep) {
-		ipa_err("EP context is empty\n");
-		return -EINVAL;
-	}
-
 	evt_dma_addr = 0;
 	ep->gsi_evt_ring_hdl = GSI_NO_EVT_ERINDEX;
 	memset(&gsi_evt_ring_props, 0, sizeof(gsi_evt_ring_props));
