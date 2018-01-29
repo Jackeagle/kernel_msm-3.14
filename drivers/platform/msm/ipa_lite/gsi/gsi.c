@@ -826,11 +826,6 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, void *dev_hdl)
 	unsigned long flags;
 	size_t bit_count;
 
-	if (dev_hdl != gsi_ctx) {
-		GSIERR("bad params props=%p dev_hdl=%p\n", props, dev_hdl);
-		return -EINVAL;
-	}
-
 	if (gsi_validate_evt_ring_props(props)) {
 		GSIERR("invalid params\n");
 		return -EINVAL;
