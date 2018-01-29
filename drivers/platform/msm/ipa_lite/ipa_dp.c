@@ -2629,6 +2629,7 @@ static void ipa_gsi_irq_tx_notify_cb(struct gsi_chan_xfer_notify *notify)
 
 static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 {
+	struct ipa_active_client_logging_info log;
 	struct ipa3_sys_context *sys = notify->chan_user_data;
 	struct ipa3_rx_pkt_wrapper *rx_pkt_rcvd = notify->xfer_user_data;
 	struct ipa3_rx_pkt_wrapper *rx_pkt_expected;
@@ -2659,19 +2660,17 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 	gsi_config_channel_mode(sys->ep->gsi_chan_hdl, GSI_CHAN_MODE_POLL);
 	ipa3_inc_acquire_wakelock();
 	atomic_set(&sys->curr_polling_state, 1);
-	if (sys->ep->napi_enabled) {
-		struct ipa_active_client_logging_info log;
-
-		IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log, "NAPI");
-		clk_off = ipa3_inc_client_enable_clks_no_block(&log);
-		if (!clk_off)
-			sys->ep->client_notify(sys->ep->priv,
-				IPA_CLIENT_START_POLL, 0);
-		else
-			queue_work(sys->wq, &sys->work);
-	} else {
+	if (!sys->ep->napi_enabled) {
 		queue_work(sys->wq, &sys->work);
+		return;
 	}
+
+	IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log, "NAPI");
+	clk_off = ipa3_inc_client_enable_clks_no_block(&log);
+	if (!clk_off)
+		sys->ep->client_notify(sys->ep->priv, IPA_CLIENT_START_POLL, 0);
+	else
+		queue_work(sys->wq, &sys->work);
 }
 
 long ipa3_alloc_common_event_ring(void)
