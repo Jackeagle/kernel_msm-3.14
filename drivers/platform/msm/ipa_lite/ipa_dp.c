@@ -2669,8 +2669,6 @@ long ipa3_alloc_common_event_ring(void)
 	long result;
 
 	memset(&gsi_evt_ring_props, 0, sizeof(gsi_evt_ring_props));
-	gsi_evt_ring_props.re_size = GSI_EVT_RING_RE_SIZE_16B;
-
 	gsi_evt_ring_props.ring_len = IPA_COMMON_EVENT_RING_SIZE;
 
 	gsi_evt_ring_props.ring_base_vaddr =
@@ -2727,8 +2725,6 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		ep->gsi_evt_ring_hdl = ipa3_ctx->gsi_evt_comm_hdl;
 	} else if (ep->sys->policy != IPA_POLICY_NOINTR_MODE ||
 	     IPA_CLIENT_IS_CONS(ep->client)) {
-		gsi_evt_ring_props.re_size = GSI_EVT_RING_RE_SIZE_16B;
-
 		/*
 		 * GSI ring length is calculated based on the desc_fifo_sz
 		 * which was meant to define the BAM desc fifo. GSI descriptors
