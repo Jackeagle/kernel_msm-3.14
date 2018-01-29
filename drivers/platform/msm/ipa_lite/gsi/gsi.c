@@ -1851,14 +1851,7 @@ int gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode)
 int gsi_get_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
 		union gsi_channel_scratch *scr)
 {
-	struct gsi_chan_ctx *ctx;
-
-	if (chan_hdl >= gsi_ctx->max_ch) {
-		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
-		return -EINVAL;
-	}
-
-	ctx = &gsi_ctx->chan[chan_hdl];
+	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_hdl];
 
 	if (ctx->state == GSI_CHAN_STATE_NOT_ALLOCATED) {
 		GSIERR("bad state %d\n", ctx->state);
