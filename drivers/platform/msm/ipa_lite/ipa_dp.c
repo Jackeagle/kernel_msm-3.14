@@ -797,10 +797,9 @@ static void ipa3_handle_rx(struct ipa3_sys_context *sys)
 
 static void ipa3_switch_to_intr_rx_work_func(struct work_struct *work)
 {
-	struct delayed_work *dwork;
+	struct delayed_work *dwork = to_delayed_work(work);
 	struct ipa3_sys_context *sys;
 
-	dwork = container_of(work, struct delayed_work, work);
 	sys = container_of(dwork, struct ipa3_sys_context, switch_to_intr_work);
 
 	if (sys->ep->napi_enabled) {
@@ -1745,10 +1744,9 @@ static void ipa3_fast_replenish_rx_cache(struct ipa3_sys_context *sys)
 
 static void ipa3_replenish_rx_work_func(struct work_struct *work)
 {
-	struct delayed_work *dwork;
+	struct delayed_work *dwork = to_delayed_work(work);
 	struct ipa3_sys_context *sys;
 
-	dwork = container_of(work, struct delayed_work, work);
 	sys = container_of(dwork, struct ipa3_sys_context, replenish_rx_work);
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
 	sys->repl_hdlr(sys);
