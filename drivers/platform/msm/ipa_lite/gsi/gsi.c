@@ -1853,11 +1853,6 @@ int gsi_get_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
 {
 	struct gsi_chan_ctx *ctx;
 
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -ENODEV;
-	}
-
 	if (!props || !scr) {
 		GSIERR("bad params props=%p scr=%p\n", props, scr);
 		return -EINVAL;
