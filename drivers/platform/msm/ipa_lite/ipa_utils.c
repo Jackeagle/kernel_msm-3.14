@@ -603,18 +603,12 @@ static struct msm_bus_scale_pdata ipa_bus_client_pdata_v3_0 = {
 static const struct ipa_ep_configuration *
 ep_configuration(enum ipa_client_type client)
 {
-	const struct ipa_ep_configuration *ep_config;
-
 	if (client >= IPA_CLIENT_MAX || client < 0) {
 		pr_err_ratelimited("Bad client number! client =%d\n", client);
 		return NULL;
 	}
 
-	ep_config = &ipa3_ep_mapping[IPA_3_5_1][client];
-	if (ep_config->valid)
-		return ep_config;
-
-	return NULL;
+	return &ipa3_ep_mapping[IPA_3_5_1][client];
 }
 
 /**
@@ -629,7 +623,7 @@ ipa3_get_gsi_ep_info(enum ipa_client_type client)
 	const struct ipa_ep_configuration *ep_config;
 
 	ep_config = ep_configuration(client);
-	if (ep_config)
+	if (ep_config && ep_config->valid)
 		return &ep_config->ipa_gsi_ep_info;
 
 	return NULL;
@@ -670,7 +664,7 @@ int ipa_get_ep_group(enum ipa_client_type client)
 	const struct ipa_ep_configuration *ep_config;
 
 	ep_config = ep_configuration(client);
-	if (ep_config)
+	if (ep_config && ep_config->valid)
 		return ep_config->group_num;
 
 	return -EINVAL;
@@ -687,7 +681,7 @@ u8 ipa3_get_qmb_master_sel(enum ipa_client_type client)
 	const struct ipa_ep_configuration *ep_config;
 
 	ep_config = ep_configuration(client);
-	if (ep_config)
+	if (ep_config && ep_config->valid)
 		return ep_config->qmb_master_sel;
 
 	return -EINVAL;
