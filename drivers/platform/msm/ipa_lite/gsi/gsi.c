@@ -823,7 +823,6 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, void *dev_hdl)
 	unsigned long flags;
 	size_t bit_count;
 
-	props->re_size = GSI_EVT_RING_RE_SIZE_16B;
 	if (gsi_validate_evt_ring_props(props)) {
 		GSIERR("invalid params\n");
 		return -EINVAL;
