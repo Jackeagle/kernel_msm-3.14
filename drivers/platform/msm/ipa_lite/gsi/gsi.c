@@ -1148,11 +1148,6 @@ long gsi_alloc_channel(struct gsi_chan_props *props, void *dev_hdl)
 	void **user_data;
 	long chan_id;
 
-	if (!props) {
-		GSIERR("bad params props=%p dev_hdl=%p\n", props, dev_hdl);
-		return -EINVAL;
-	}
-
 	if (gsi_validate_channel_props(props)) {
 		GSIERR("bad params\n");
 		return -EINVAL;
