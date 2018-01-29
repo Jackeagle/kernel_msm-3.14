@@ -1086,16 +1086,16 @@ static int ipa3_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
  */
 static int ipa3_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 {
-	int ep;
 	struct ipahal_reg_endp_init_mode init_mode;
+	int ipa_ep_idx;
 
 	if (IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client)) {
 		ipa_err("MODE does not apply to IPA out EP %d\n", clnt_hdl);
 		return -EINVAL;
 	}
 
-	ep = ipa3_get_ep_mapping(ep_mode->dst);
-	if (ep < 0 && ep_mode->mode == IPA_DMA) {
+	ipa_ep_idx = ipa3_get_ep_mapping(ep_mode->dst);
+	if (ipa_ep_idx < 0 && ep_mode->mode == IPA_DMA) {
 		ipa_err("dst %d does not exist in DMA mode\n", ep_mode->dst);
 		return -EINVAL;
 	}
@@ -1103,7 +1103,7 @@ static int ipa3_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 	WARN_ON(ep_mode->mode == IPA_DMA && IPA_CLIENT_IS_PROD(ep_mode->dst));
 
 	if (!IPA_CLIENT_IS_CONS(ep_mode->dst))
-		ep = ipa3_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
+		ipa_ep_idx = ipa3_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
 
 	ipa_debug("pipe=%d mode=%d(%s), dst_client_number=%d",
 			clnt_hdl,
@@ -1113,7 +1113,7 @@ static int ipa3_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 
 	/* copy over EP cfg */
 	ipa3_ctx->ep[clnt_hdl].cfg.mode = *ep_mode;
-	ipa3_ctx->ep[clnt_hdl].dst_pipe_index = ep;
+	ipa3_ctx->ep[clnt_hdl].dst_pipe_index = ipa_ep_idx;
 
 	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
 
