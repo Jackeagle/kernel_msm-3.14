@@ -805,7 +805,7 @@ void ipa_init_ep_flt_bitmap(void)
 	for (cl = 0; cl < IPA_CLIENT_MAX ; cl++) {
 		const struct ipa_ep_configuration *ep_config;
 
-		ep_config = &ipa3_ep_mapping[IPA_3_5_1][cl];
+		ep_config = ep_configuration(cl);
 		if (ep_config->support_flt) {
 			u32 pipe_num = ep_config->ipa_gsi_ep_info.ipa_ep_num;
 
