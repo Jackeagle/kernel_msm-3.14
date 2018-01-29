@@ -798,7 +798,6 @@ int ipa3_init_hw(void)
 void ipa_init_ep_flt_bitmap(void)
 {
 	enum ipa_client_type cl;
-	u8 hw_type_idx = IPA_3_5_1;
 	u32 bitmap = 0;
 
 	BUG_ON(ipa3_ctx->ep_flt_bitmap);
@@ -806,7 +805,7 @@ void ipa_init_ep_flt_bitmap(void)
 	for (cl = 0; cl < IPA_CLIENT_MAX ; cl++) {
 		const struct ipa_ep_configuration *ep_config;
 
-		ep_config = &ipa3_ep_mapping[hw_type_idx][cl];
+		ep_config = &ipa3_ep_mapping[IPA_3_5_1][cl];
 		if (ep_config->support_flt) {
 			u32 pipe_num = ep_config->ipa_gsi_ep_info.ipa_ep_num;
 
