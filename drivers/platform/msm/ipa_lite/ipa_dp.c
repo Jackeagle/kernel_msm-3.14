@@ -835,12 +835,6 @@ int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
 	int result = -EINVAL;
 	char buff[IPA_RESOURCE_NAME_MAX];
 
-	if (sys_in->desc_fifo_sz == 0) {
-		ipa_err("bad parm client:%d fifo_sz:%d\n",
-			sys_in->client, sys_in->desc_fifo_sz);
-		goto fail_gen;
-	}
-
 	ipa_ep_idx = ipa3_get_ep_mapping(sys_in->client);
 	if (ipa_ep_idx < 0) {
 		ipa_err("Invalid client.\n");
