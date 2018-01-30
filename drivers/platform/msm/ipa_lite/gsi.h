@@ -26,24 +26,6 @@
 #define GSI_EVT_RING_MAX  23
 #define GSI_NO_EVT_ERINDEX 31
 
-#define GSIDBG(fmt, args...) \
-	do { \
-		pr_debug(fmt, ## args); \
-		__ipa_ipc_logging(false, pr_fmt(fmt), ## args); \
-	} while (0)
-
-#define GSIDBG_LOW(fmt, args...) \
-	do { \
-		pr_debug(fmt, ## args); \
-		__ipa_ipc_logging(true, pr_fmt(fmt), ## args); \
-	} while (0)
-
-#define GSIERR(fmt, args...) \
-	do { \
-		pr_err(fmt, ## args); \
-		__ipa_ipc_logging(false, pr_fmt(fmt), ## args); \
-	} while (0)
-
 #define IPA_GSI_CHANNEL_STOP_SLEEP_MIN_USEC (1000)
 #define IPA_GSI_CHANNEL_STOP_SLEEP_MAX_USEC (2000)
 

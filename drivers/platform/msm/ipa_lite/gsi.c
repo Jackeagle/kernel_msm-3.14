@@ -82,11 +82,11 @@ static void gsi_handle_ch_ctrl(int ee)
 
 	ch = gsi_readl(GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_OFFS(ee));
 	gsi_writel(ch, GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_CLR_OFFS(ee));
-	GSIDBG("ch %x\n", ch);
+	ipa_debug("ch %x\n", ch);
 	for (i = 0; i < GSI_CHAN_MAX; i++) {
 		if ((1 << i) & ch) {
 			if (i >= gsi_ctx->max_ch) {
-				GSIERR("invalid channel %d\n", i);
+				ipa_err("invalid channel %d\n", i);
 				break;
 			}
 
@@ -95,7 +95,7 @@ static void gsi_handle_ch_ctrl(int ee)
 			ctx->state = (val &
 				GSI_EE_n_GSI_CH_k_CNTXT_0_CHSTATE_BMSK) >>
 				GSI_EE_n_GSI_CH_k_CNTXT_0_CHSTATE_SHFT;
-			GSIDBG("ch %u state updated to %u\n", i, ctx->state);
+			ipa_debug("ch %u state updated to %u\n", i, ctx->state);
 			complete(&ctx->compl);
 			gsi_ctx->ch_dbg[i].cmd_completed++;
 		}
@@ -111,11 +111,11 @@ static void gsi_handle_ev_ctrl(int ee)
 
 	ch = gsi_readl(GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_OFFS(ee));
 	gsi_writel(ch, GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_CLR_OFFS(ee));
-	GSIDBG("ev %x\n", ch);
+	ipa_debug("ev %x\n", ch);
 	for (i = 0; i < GSI_EVT_RING_MAX; i++) {
 		if ((1 << i) & ch) {
 			if (i >= gsi_ctx->max_ev) {
-				GSIERR("invalid event %d\n", i);
+				ipa_err("invalid event %d\n", i);
 				break;
 			}
 
@@ -124,7 +124,7 @@ static void gsi_handle_ev_ctrl(int ee)
 			ctx->state = (val &
 				GSI_EE_n_EV_CH_k_CNTXT_0_CHSTATE_BMSK) >>
 				GSI_EE_n_EV_CH_k_CNTXT_0_CHSTATE_SHFT;
-			GSIDBG("evt %u state updated to %u\n", i, ctx->state);
+			ipa_debug("evt %u state updated to %u\n", i, ctx->state);
 			complete(&ctx->compl);
 		}
 	}
@@ -140,19 +140,19 @@ static void gsi_handle_glob_err(uint32_t err)
 	uint32_t val;
 
 	log = (struct gsi_log_err *)&err;
-	GSIERR("log err_type=%u ee=%u idx=%u\n", log->err_type, log->ee,
+	ipa_err("log err_type=%u ee=%u idx=%u\n", log->err_type, log->ee,
 			log->virt_idx);
-	GSIERR("code=%u arg1=%u arg2=%u arg3=%u\n", log->code, log->arg1,
+	ipa_err("code=%u arg1=%u arg2=%u arg3=%u\n", log->code, log->arg1,
 			log->arg2, log->arg3);
 	switch (log->err_type) {
 	case GSI_ERR_TYPE_GLOB:
-		GSIERR("Got global GP ERROR\n");
-		GSIERR("Err_desc = 0x%04x\n", err & 0xffff);
+		ipa_err("Got global GP ERROR\n");
+		ipa_err("Err_desc = 0x%04x\n", err & 0xffff);
 		BUG();
 		break;
 	case GSI_ERR_TYPE_CHAN:
 		if (log->virt_idx >= gsi_ctx->max_ch) {
-			GSIERR("Unexpected ch %d\n", log->virt_idx);
+			ipa_err("Unexpected ch %d\n", log->virt_idx);
 			WARN_ON(1);
 			return;
 		}
@@ -167,7 +167,7 @@ static void gsi_handle_glob_err(uint32_t err)
 			ch->state = (val &
 				GSI_EE_n_GSI_CH_k_CNTXT_0_CHSTATE_BMSK) >>
 				GSI_EE_n_GSI_CH_k_CNTXT_0_CHSTATE_SHFT;
-			GSIDBG("ch %u state updated to %u\n", log->virt_idx,
+			ipa_debug("ch %u state updated to %u\n", log->virt_idx,
 					ch->state);
 			ch->stats.invalid_tre_error++;
 			BUG_ON(ch->state != GSI_CHAN_STATE_ERROR);
@@ -199,7 +199,7 @@ static void gsi_handle_glob_err(uint32_t err)
 		break;
 	case GSI_ERR_TYPE_EVT:
 		if (log->virt_idx >= gsi_ctx->max_ev) {
-			GSIERR("Unexpected ev %d\n", log->virt_idx);
+			ipa_err("Unexpected ev %d\n", log->virt_idx);
 			WARN_ON(1);
 			return;
 		}
@@ -257,12 +257,12 @@ static void gsi_handle_glob_ee(int ee)
 	}
 
 	if (val & GSI_EE_n_CNTXT_GLOB_IRQ_EN_GP_INT2_BMSK) {
-		GSIERR("Got global GP INT2\n");
+		ipa_err("Got global GP INT2\n");
 		BUG();
 	}
 
 	if (val & GSI_EE_n_CNTXT_GLOB_IRQ_EN_GP_INT3_BMSK) {
-		GSIERR("Got global GP INT3\n");
+		ipa_err("Got global GP INT3\n");
 		BUG();
 	}
 
@@ -300,7 +300,7 @@ static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 
 	ch_id = evt->chid;
 	if (ch_id >= gsi_ctx->max_ch) {
-		GSIERR("Unexpected ch %d\n", ch_id);
+		ipa_err("Unexpected ch %d\n", ch_id);
 		WARN_ON(1);
 		return;
 	}
@@ -326,7 +326,7 @@ static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 	notify->bytes_xfered = evt->len;
 	if (callback) {
 		if (atomic_read(&ch_ctx->poll_mode)) {
-			GSIERR("Calling client callback in polling mode\n");
+			ipa_err("Calling client callback in polling mode\n");
 			WARN_ON(1);
 		}
 		ch_ctx->props.xfer_cb(notify);
@@ -411,7 +411,7 @@ static void gsi_handle_ieob(int ee)
 	for (i = 0; i < GSI_EVT_RING_MAX; i++) {
 		if ((1 << i) & ch & msk) {
 			if (i >= gsi_ctx->max_ev) {
-				GSIERR("invalid event %d\n", i);
+				ipa_err("invalid event %d\n", i);
 				break;
 			}
 			ctx = &gsi_ctx->evtr[i];
@@ -450,7 +450,7 @@ static void gsi_handle_inter_ee_ch_ctrl(int ee)
 	for (i = 0; i < GSI_CHAN_MAX; i++) {
 		if ((1 << i) & ch) {
 			/* not currently expected */
-			GSIERR("ch %u was inter-EE changed\n", i);
+			ipa_err("ch %u was inter-EE changed\n", i);
 		}
 	}
 }
@@ -465,7 +465,7 @@ static void gsi_handle_inter_ee_ev_ctrl(int ee)
 	for (i = 0; i < GSI_EVT_RING_MAX; i++) {
 		if ((1 << i) & ch) {
 			/* not currently expected */
-			GSIERR("evt %u was inter-EE changed\n", i);
+			ipa_err("evt %u was inter-EE changed\n", i);
 		}
 	}
 }
@@ -477,22 +477,22 @@ static void gsi_handle_general(int ee)
 	val = gsi_readl(GSI_EE_n_CNTXT_GSI_IRQ_STTS_OFFS(ee));
 
 	if (val & GSI_EE_n_CNTXT_GSI_IRQ_CLR_GSI_MCS_STACK_OVRFLOW_BMSK) {
-		GSIERR("Got MCS stack overflow\n");
+		ipa_err("Got MCS stack overflow\n");
 		BUG();
 	}
 
 	if (val & GSI_EE_n_CNTXT_GSI_IRQ_CLR_GSI_CMD_FIFO_OVRFLOW_BMSK) {
-		GSIERR("Got command FIFO overflow\n");
+		ipa_err("Got command FIFO overflow\n");
 		BUG();
 	}
 
 	if (val & GSI_EE_n_CNTXT_GSI_IRQ_CLR_GSI_BUS_ERROR_BMSK) {
-		GSIERR("Got bus error\n");
+		ipa_err("Got bus error\n");
 		BUG();
 	}
 
 	if (val & GSI_EE_n_CNTXT_GSI_IRQ_CLR_GSI_BREAK_POINT_BMSK)
-		GSIERR("Got breakpoint\n");
+		ipa_err("Got breakpoint\n");
 
 	gsi_writel(val, GSI_EE_n_CNTXT_GSI_IRQ_CLR_OFFS(ee));
 }
@@ -510,7 +510,7 @@ static void gsi_handle_irq(void)
 		if (!type)
 			break;
 
-		GSIDBG_LOW("type %x\n", type);
+		ipa_debug_low("type %x\n", type);
 
 		if (type & GSI_EE_n_CNTXT_TYPE_IRQ_CH_CTRL_BMSK)
 			gsi_handle_ch_ctrl(ee);
@@ -557,11 +557,11 @@ static uint32_t gsi_get_max_channels(void)
 		GSI_V1_3_EE_n_GSI_HW_PARAM_2_GSI_NUM_CH_PER_EE_SHFT;
 
 	if (WARN_ON(reg > GSI_CHAN_MAX)) {
-		GSIERR("bad gsi max channels %u\n", reg);
+		ipa_err("bad gsi max channels %u\n", reg);
 
 		return 0;
 	}
-	GSIDBG("max channels %d\n", reg);
+	ipa_debug("max channels %d\n", reg);
 
 	return reg;
 }
@@ -576,11 +576,11 @@ static uint32_t gsi_get_max_event_rings(void)
 		GSI_V1_3_EE_n_GSI_HW_PARAM_2_GSI_NUM_EV_PER_EE_SHFT;
 
 	if (WARN_ON(reg > GSI_EVT_RING_MAX)) {
-		GSIERR("bad gsi max event rings %u\n", reg);
+		ipa_err("bad gsi max event rings %u\n", reg);
 
 		return 0;
 	}
-	GSIDBG("max event rings %d\n", reg);
+	ipa_debug("max event rings %d\n", reg);
 
 	return reg;
 }
@@ -594,7 +594,7 @@ int gsi_register_device(u32 ee)
 	uint32_t val;
 
 	if (gsi_ctx->per_registered) {
-		GSIERR("per already registered\n");
+		ipa_err("per already registered\n");
 		return -ENOTSUPP;
 	}
 
@@ -603,46 +603,46 @@ int gsi_register_device(u32 ee)
 	/* Get IPA GSI IRQ number */
 	ret = platform_get_irq_byname(ipa3_pdev, "gsi-irq");
 	if (ret < 0) {
-		GSIERR(":failed to get gsi-irq!\n");
+		ipa_err(":failed to get gsi-irq!\n");
 		return -ENODEV;
 	}
 	gsi_ctx->irq = ret;
-	GSIDBG(": gsi-irq = %d\n", gsi_ctx->irq);
+	ipa_debug(": gsi-irq = %d\n", gsi_ctx->irq);
 
 	spin_lock_init(&gsi_ctx->slock);
 	ret = devm_request_irq(gsi_ctx->dev, gsi_ctx->irq, gsi_isr,
 				IRQF_TRIGGER_HIGH, "gsi", gsi_ctx);
 	if (ret) {
-		GSIERR("failed to register isr for %u\n", gsi_ctx->irq);
+		ipa_err("failed to register isr for %u\n", gsi_ctx->irq);
 		return -EIO;
 	}
 
 	ret = enable_irq_wake(gsi_ctx->irq);
 	if (ret)
-		GSIERR("failed to enable wake irq %u\n", gsi_ctx->irq);
+		ipa_err("failed to enable wake irq %u\n", gsi_ctx->irq);
 	else
-		GSIERR("GSI irq is wake enabled %u\n", gsi_ctx->irq);
+		ipa_err("GSI irq is wake enabled %u\n", gsi_ctx->irq);
 
 	/* Get IPA GSI address */
 	res = platform_get_resource_byname(ipa3_pdev, IORESOURCE_MEM,
 			"gsi-base");
 	if (!res) {
-		GSIERR(":get resource failed for gsi-base!\n");
+		ipa_err(":get resource failed for gsi-base!\n");
 		return -ENODEV;
 	}
 	size = resource_size(res);
-	GSIDBG(": gsi-base = %pa, size = %pa\n", &res->start, &size);
+	ipa_debug(": gsi-base = %pa, size = %pa\n", &res->start, &size);
 
 	gsi_ctx->base = devm_ioremap_nocache(gsi_ctx->dev, res->start, size);
 	if (!gsi_ctx->base) {
-		GSIERR("failed to remap GSI HW\n");
+		ipa_err("failed to remap GSI HW\n");
 		return -ENOMEM;
 	}
 
 
 	val = gsi_readl(GSI_EE_n_GSI_STATUS_OFFS(gsi_ctx->ee));
 	if (!(val & GSI_EE_n_GSI_STATUS_ENABLED_BMSK)) {
-		GSIERR("Manager EE has not enabled GSI, GSI un-usable\n");
+		ipa_err("Manager EE has not enabled GSI, GSI un-usable\n");
 		return -EIO;
 	}
 
@@ -653,12 +653,12 @@ int gsi_register_device(u32 ee)
 
 	gsi_ctx->max_ch = gsi_get_max_channels();
 	if (!gsi_ctx->max_ch) {
-		GSIERR("failed to get max channels\n");
+		ipa_err("failed to get max channels\n");
 		return -EIO;
 	}
 	gsi_ctx->max_ev = gsi_get_max_event_rings();
 	if (!gsi_ctx->max_ev) {
-		GSIERR("failed to get max event rings\n");
+		ipa_err("failed to get max event rings\n");
 		return -EIO;
 	}
 
@@ -680,13 +680,13 @@ int gsi_register_device(u32 ee)
 int gsi_deregister_device(void)
 {
 	if (atomic_read(&gsi_ctx->num_chan)) {
-		GSIERR("%u channels are allocated\n",
+		ipa_err("%u channels are allocated\n",
 				atomic_read(&gsi_ctx->num_chan));
 		return -ENOTSUPP;
 	}
 
 	if (atomic_read(&gsi_ctx->num_evt_ring)) {
-		GSIERR("%u evt rings are allocated\n",
+		ipa_err("%u evt rings are allocated\n",
 				atomic_read(&gsi_ctx->num_evt_ring));
 		return -ENOTSUPP;
 	}
@@ -714,7 +714,7 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 {
 	uint32_t val;
 
-	GSIDBG("intf=GPI intr=IRQ re=%u\n", GSI_EVT_RING_ELEMENT_SIZE);
+	ipa_debug("intf=GPI intr=IRQ re=%u\n", GSI_EVT_RING_ELEMENT_SIZE);
 
 	val = (((GSI_EVT_CHTYPE_GPI_EV << GSI_EE_n_EV_CH_k_CNTXT_0_CHTYPE_SHFT) &
 			GSI_EE_n_EV_CH_k_CNTXT_0_CHTYPE_BMSK) |
@@ -788,7 +788,7 @@ static int gsi_validate_evt_ring_props(struct gsi_evt_ring_props *props)
 	uint64_t ra;
 
 	if (props->ring_len % 16) {
-		GSIERR("bad params ring_len %u not a multiple of RE size %u\n",
+		ipa_err("bad params ring_len %u not a multiple of RE size %u\n",
 				props->ring_len, GSI_EVT_RING_ELEMENT_SIZE);
 		return -EINVAL;
 	}
@@ -797,19 +797,19 @@ static int gsi_validate_evt_ring_props(struct gsi_evt_ring_props *props)
 	do_div(ra, roundup_pow_of_two(props->ring_len));
 
 	if (props->ring_base_addr != ra * roundup_pow_of_two(props->ring_len)) {
-		GSIERR("bad params ring base not aligned 0x%llx align 0x%lx\n",
+		ipa_err("bad params ring base not aligned 0x%llx align 0x%lx\n",
 				props->ring_base_addr,
 				roundup_pow_of_two(props->ring_len));
 		return -EINVAL;
 	}
 
 	if (!props->ring_base_vaddr) {
-		GSIERR("GPI protocol requires ring base VA\n");
+		ipa_err("GPI protocol requires ring base VA\n");
 		return -EINVAL;
 	}
 
 	if (!props->err_cb) {
-		GSIERR("err callback must be provided\n");
+		ipa_err("err callback must be provided\n");
 		return -EINVAL;
 	}
 
@@ -829,7 +829,7 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props)
 	size_t bit_count;
 
 	if (gsi_validate_evt_ring_props(props)) {
-		GSIERR("invalid params\n");
+		ipa_err("invalid params\n");
 		return -EINVAL;
 	}
 
@@ -837,14 +837,14 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props)
 	mutex_lock(&gsi_ctx->mlock);
 	evt_id = find_first_zero_bit(&gsi_ctx->evt_bmap, bit_count);
 	if (evt_id == bit_count) {
-		GSIERR("failed to alloc event ID\n");
+		ipa_err("failed to alloc event ID\n");
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ENOMEM;
 	}
 	set_bit(evt_id, &gsi_ctx->evt_bmap);
 	mutex_unlock(&gsi_ctx->mlock);
 
-	GSIDBG("Using %lu as virt evt id\n", evt_id);
+	ipa_debug("Using %lu as virt evt id\n", evt_id);
 
 	ctx = &gsi_ctx->evtr[evt_id];
 	memset(ctx, 0, sizeof(*ctx));
@@ -861,14 +861,14 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props)
 	gsi_writel(val, GSI_EE_n_EV_CH_CMD_OFFS(ee));
 	res = wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT);
 	if (res == 0) {
-		GSIERR("evt_id=%lu timed out\n", evt_id);
+		ipa_err("evt_id=%lu timed out\n", evt_id);
 		clear_bit(evt_id, &gsi_ctx->evt_bmap);
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
 	}
 
 	if (ctx->state != GSI_EVT_RING_STATE_ALLOCATED) {
-		GSIERR("evt_id=%lu allocation failed state=%u\n",
+		ipa_err("evt_id=%lu allocation failed state=%u\n",
 				evt_id, ctx->state);
 		clear_bit(evt_id, &gsi_ctx->evt_bmap);
 		mutex_unlock(&gsi_ctx->mlock);
@@ -912,21 +912,21 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 	int res;
 
 	if (evt_ring_hdl >= gsi_ctx->max_ev) {
-		GSIERR("bad params evt_ring_hdl=%lu\n", evt_ring_hdl);
+		ipa_err("bad params evt_ring_hdl=%lu\n", evt_ring_hdl);
 		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->evtr[evt_ring_hdl];
 
 	if (atomic_read(&ctx->chan_ref_cnt)) {
-		GSIERR("%d channels still using this event ring\n",
+		ipa_err("%d channels still using this event ring\n",
 			atomic_read(&ctx->chan_ref_cnt));
 		return -ENOTSUPP;
 	}
 
 	/* TODO: add check for ERROR state */
 	if (ctx->state != GSI_EVT_RING_STATE_ALLOCATED) {
-		GSIERR("bad state %d\n", ctx->state);
+		ipa_err("bad state %d\n", ctx->state);
 		return -ENOTSUPP;
 	}
 
@@ -939,13 +939,13 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 	gsi_writel(val, GSI_EE_n_EV_CH_CMD_OFFS(gsi_ctx->ee));
 	res = wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT);
 	if (res == 0) {
-		GSIERR("evt_id=%lu timed out\n", evt_ring_hdl);
+		ipa_err("evt_id=%lu timed out\n", evt_ring_hdl);
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
 	}
 
 	if (ctx->state != GSI_EVT_RING_STATE_NOT_ALLOCATED) {
-		GSIERR("evt_id=%lu unexpected state=%u\n", evt_ring_hdl,
+		ipa_err("evt_id=%lu unexpected state=%u\n", evt_ring_hdl,
 				ctx->state);
 		BUG();
 	}
@@ -966,14 +966,14 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 	int res;
 
 	if (evt_ring_hdl >= gsi_ctx->max_ev) {
-		GSIERR("bad params evt_ring_hdl=%lu\n", evt_ring_hdl);
+		ipa_err("bad params evt_ring_hdl=%lu\n", evt_ring_hdl);
 		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->evtr[evt_ring_hdl];
 
 	if (ctx->state != GSI_EVT_RING_STATE_ALLOCATED) {
-		GSIERR("bad state %d\n", ctx->state);
+		ipa_err("bad state %d\n", ctx->state);
 		return -ENOTSUPP;
 	}
 
@@ -986,13 +986,13 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 	gsi_writel(val, GSI_EE_n_EV_CH_CMD_OFFS(gsi_ctx->ee));
 	res = wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT);
 	if (res == 0) {
-		GSIERR("evt_id=%lu timed out\n", evt_ring_hdl);
+		ipa_err("evt_id=%lu timed out\n", evt_ring_hdl);
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
 	}
 
 	if (ctx->state != GSI_EVT_RING_STATE_ALLOCATED) {
-		GSIERR("evt_id=%lu unexpected state=%u\n", evt_ring_hdl,
+		ipa_err("evt_id=%lu unexpected state=%u\n", evt_ring_hdl,
 				ctx->state);
 		BUG();
 	}
@@ -1071,12 +1071,12 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 	uint64_t last;
 
 	if (props->ch_id >= gsi_ctx->max_ch) {
-		GSIERR("ch_id %u invalid\n", props->ch_id);
+		ipa_err("ch_id %u invalid\n", props->ch_id);
 		return -EINVAL;
 	}
 
 	if (props->ring_len % 16) {
-		GSIERR("bad params ring_len %u not a multiple of re size %u\n",
+		ipa_err("bad params ring_len %u not a multiple of re size %u\n",
 				props->ring_len, GSI_CHAN_RING_ELEMENT_SIZE);
 		return -EINVAL;
 	}
@@ -1085,7 +1085,7 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 	do_div(ra, roundup_pow_of_two(props->ring_len));
 
 	if (props->ring_base_addr != ra * roundup_pow_of_two(props->ring_len)) {
-		GSIERR("bad params ring base not aligned 0x%llx align 0x%lx\n",
+		ipa_err("bad params ring base not aligned 0x%llx align 0x%lx\n",
 				props->ring_base_addr,
 				roundup_pow_of_two(props->ring_len));
 		return -EINVAL;
@@ -1097,29 +1097,29 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 	/* MSB should stay same within the ring */
 	if ((props->ring_base_addr & 0xFFFFFFFF00000000ULL) !=
 	    (last & 0xFFFFFFFF00000000ULL)) {
-		GSIERR("MSB is not fixed on ring base 0x%llx size 0x%x\n",
+		ipa_err("MSB is not fixed on ring base 0x%llx size 0x%x\n",
 			props->ring_base_addr,
 			props->ring_len);
 		return -EINVAL;
 	}
 
 	if (!props->ring_base_vaddr) {
-		GSIERR("GPI protocol requires ring base VA\n");
+		ipa_err("GPI protocol requires ring base VA\n");
 		return -EINVAL;
 	}
 
 	if (props->low_weight > GSI_MAX_CH_LOW_WEIGHT) {
-		GSIERR("invalid channel low weight %u\n", props->low_weight);
+		ipa_err("invalid channel low weight %u\n", props->low_weight);
 		return -EINVAL;
 	}
 
 	if (!props->xfer_cb) {
-		GSIERR("xfer callback must be provided\n");
+		ipa_err("xfer callback must be provided\n");
 		return -EINVAL;
 	}
 
 	if (!props->err_cb) {
-		GSIERR("err callback must be provided\n");
+		ipa_err("err callback must be provided\n");
 		return -EINVAL;
 	}
 
@@ -1138,20 +1138,20 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	long chan_id;
 
 	if (gsi_validate_channel_props(props)) {
-		GSIERR("bad params\n");
+		ipa_err("bad params\n");
 		return -EINVAL;
 	}
 
 	if (props->evt_ring_hdl != GSI_NO_EVT_ERINDEX) {
 		if (props->evt_ring_hdl >= GSI_EVT_RING_MAX) {
-			GSIERR("invalid evt ring=%lu\n", props->evt_ring_hdl);
+			ipa_err("invalid evt ring=%lu\n", props->evt_ring_hdl);
 			return -EINVAL;
 		}
 
 		if (atomic_read(
 			&gsi_ctx->evtr[props->evt_ring_hdl].chan_ref_cnt) &&
 			gsi_ctx->evtr[props->evt_ring_hdl].props.exclusive) {
-			GSIERR("evt ring=%lu exclusively in use\n",
+			ipa_err("evt ring=%lu exclusively in use\n",
 				props->evt_ring_hdl);
 			return -ENOTSUPP;
 		}
@@ -1160,7 +1160,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	chan_id = (long)props->ch_id;
 	ctx = &gsi_ctx->chan[chan_id];
 	if (ctx->allocated) {
-		GSIERR("chan %ld already allocated\n", chan_id);
+		ipa_err("chan %ld already allocated\n", chan_id);
 		return -ENODEV;
 	}
 
@@ -1169,7 +1169,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 		(props->ring_len / GSI_CHAN_RING_ELEMENT_SIZE) * sizeof(void *),
 		GFP_KERNEL);
 	if (user_data == NULL) {
-		GSIERR("%s:%d gsi context not allocated\n", __func__, __LINE__);
+		ipa_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
 		return -ENOMEM;
 	}
 
@@ -1187,13 +1187,13 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(ee));
 	res = wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT);
 	if (res == 0) {
-		GSIERR("chan_id=%ld timed out\n", chan_id);
+		ipa_err("chan_id=%ld timed out\n", chan_id);
 		mutex_unlock(&gsi_ctx->mlock);
 		devm_kfree(gsi_ctx->dev, user_data);
 		return -ETIMEDOUT;
 	}
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED) {
-		GSIERR("chan_id=%ld allocation failed state=%d\n",
+		ipa_err("chan_id=%ld allocation failed state=%d\n",
 				chan_id, ctx->state);
 		mutex_unlock(&gsi_ctx->mlock);
 		devm_kfree(gsi_ctx->dev, user_data);
@@ -1251,13 +1251,13 @@ int gsi_write_channel_scratch(unsigned long chan_hdl,
 	struct gsi_chan_ctx *ctx;
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
-		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
+		ipa_err("bad params chan_hdl=%lu\n", chan_hdl);
 		return -EINVAL;
 	}
 
 	if (gsi_ctx->chan[chan_hdl].state != GSI_CHAN_STATE_ALLOCATED &&
 		gsi_ctx->chan[chan_hdl].state != GSI_CHAN_STATE_STOPPED) {
-		GSIERR("bad state %d\n",
+		ipa_err("bad state %d\n",
 				gsi_ctx->chan[chan_hdl].state);
 		return -ENOTSUPP;
 	}
@@ -1280,7 +1280,7 @@ int gsi_start_channel(unsigned long chan_hdl)
 	struct gsi_chan_ctx *ctx;
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
-		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
+		ipa_err("bad params chan_hdl=%lu\n", chan_hdl);
 		return -EINVAL;
 	}
 
@@ -1289,7 +1289,7 @@ int gsi_start_channel(unsigned long chan_hdl)
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED &&
 		ctx->state != GSI_CHAN_STATE_STOP_IN_PROC &&
 		ctx->state != GSI_CHAN_STATE_STOPPED) {
-		GSIERR("bad state %d\n", ctx->state);
+		ipa_err("bad state %d\n", ctx->state);
 		return -ENOTSUPP;
 	}
 
@@ -1304,12 +1304,12 @@ int gsi_start_channel(unsigned long chan_hdl)
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(gsi_ctx->ee));
 	res = wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT);
 	if (res == 0) {
-		GSIERR("chan_hdl=%lu timed out\n", chan_hdl);
+		ipa_err("chan_hdl=%lu timed out\n", chan_hdl);
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
 	}
 	if (ctx->state != GSI_CHAN_STATE_STARTED) {
-		GSIERR("chan=%lu unexpected state=%u\n", chan_hdl, ctx->state);
+		ipa_err("chan=%lu unexpected state=%u\n", chan_hdl, ctx->state);
 		BUG();
 	}
 
@@ -1326,21 +1326,21 @@ int gsi_stop_channel(unsigned long chan_hdl)
 	struct gsi_chan_ctx *ctx;
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
-		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
+		ipa_err("bad params chan_hdl=%lu\n", chan_hdl);
 		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
 
 	if (ctx->state == GSI_CHAN_STATE_STOPPED) {
-		GSIDBG("chan_hdl=%lu already stopped\n", chan_hdl);
+		ipa_debug("chan_hdl=%lu already stopped\n", chan_hdl);
 		return 0;
 	}
 
 	if (ctx->state != GSI_CHAN_STATE_STARTED &&
 		ctx->state != GSI_CHAN_STATE_STOP_IN_PROC &&
 		ctx->state != GSI_CHAN_STATE_ERROR) {
-		GSIERR("bad state %d\n", ctx->state);
+		ipa_err("bad state %d\n", ctx->state);
 		return -ENOTSUPP;
 	}
 
@@ -1369,20 +1369,20 @@ int gsi_stop_channel(unsigned long chan_hdl)
 			res = 0;
 			goto free_lock;
 		}
-		GSIDBG("chan_hdl=%lu timed out\n", chan_hdl);
+		ipa_debug("chan_hdl=%lu timed out\n", chan_hdl);
 		res = -ETIMEDOUT;
 		goto free_lock;
 	}
 
 	if (ctx->state != GSI_CHAN_STATE_STOPPED &&
 		ctx->state != GSI_CHAN_STATE_STOP_IN_PROC) {
-		GSIERR("chan=%lu unexpected state=%u\n", chan_hdl, ctx->state);
+		ipa_err("chan=%lu unexpected state=%u\n", chan_hdl, ctx->state);
 		res = -EBUSY;
 		goto free_lock;
 	}
 
 	if (ctx->state == GSI_CHAN_STATE_STOP_IN_PROC) {
-		GSIERR("chan=%lu busy try again\n", chan_hdl);
+		ipa_err("chan=%lu busy try again\n", chan_hdl);
 		res = -EAGAIN;
 		goto free_lock;
 	}
@@ -1403,14 +1403,14 @@ int gsi_reset_channel(unsigned long chan_hdl)
 	bool reset_done = false;
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
-		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
+		ipa_err("bad params chan_hdl=%lu\n", chan_hdl);
 		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
 
 	if (ctx->state != GSI_CHAN_STATE_STOPPED) {
-		GSIERR("bad state %d\n", ctx->state);
+		ipa_err("bad state %d\n", ctx->state);
 		return -ENOTSUPP;
 	}
 
@@ -1426,13 +1426,13 @@ reset:
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(gsi_ctx->ee));
 	res = wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT);
 	if (res == 0) {
-		GSIERR("chan_hdl=%lu timed out\n", chan_hdl);
+		ipa_err("chan_hdl=%lu timed out\n", chan_hdl);
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
 	}
 
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED) {
-		GSIERR("chan_hdl=%lu unexpected state=%u\n", chan_hdl,
+		ipa_err("chan_hdl=%lu unexpected state=%u\n", chan_hdl,
 				ctx->state);
 		BUG();
 	}
@@ -1464,14 +1464,14 @@ int gsi_dealloc_channel(unsigned long chan_hdl)
 	struct gsi_chan_ctx *ctx;
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
-		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
+		ipa_err("bad params chan_hdl=%lu\n", chan_hdl);
 		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
 
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED) {
-		GSIERR("bad state %d\n", ctx->state);
+		ipa_err("bad state %d\n", ctx->state);
 		return -ENOTSUPP;
 	}
 
@@ -1486,12 +1486,12 @@ int gsi_dealloc_channel(unsigned long chan_hdl)
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(gsi_ctx->ee));
 	res = wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT);
 	if (res == 0) {
-		GSIERR("chan_hdl=%lu timed out\n", chan_hdl);
+		ipa_err("chan_hdl=%lu timed out\n", chan_hdl);
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
 	}
 	if (ctx->state != GSI_CHAN_STATE_NOT_ALLOCATED) {
-		GSIERR("chan_hdl=%lu unexpected state=%u\n", chan_hdl,
+		ipa_err("chan_hdl=%lu unexpected state=%u\n", chan_hdl,
 				ctx->state);
 		BUG();
 	}
@@ -1588,7 +1588,7 @@ bool gsi_is_channel_empty(unsigned long chan_hdl)
 
 	spin_unlock_irqrestore(slock, flags);
 
-	GSIDBG("ch=%lu RP=0x%llx WP=0x%llx RP_LOCAL=0x%llx\n",
+	ipa_debug("ch=%lu RP=0x%llx WP=0x%llx RP_LOCAL=0x%llx\n",
 			chan_hdl, rp, wp, ctx->ring.rp_local);
 
 	return is_empty;
@@ -1608,7 +1608,7 @@ int gsi_queue_xfer(unsigned long chan_hdl, uint16_t num_xfers,
 	unsigned long flags;
 
 	if (chan_hdl >= gsi_ctx->max_ch || !num_xfers || !xfer) {
-		GSIERR("bad params chan_hdl=%lu num_xfers=%u xfer=%p\n",
+		ipa_err("bad params chan_hdl=%lu num_xfers=%u xfer=%p\n",
 				chan_hdl, num_xfers, xfer);
 		return -EINVAL;
 	}
@@ -1623,7 +1623,7 @@ int gsi_queue_xfer(unsigned long chan_hdl, uint16_t num_xfers,
 	free = __gsi_query_channel_free_re(ctx);
 
 	if (num_xfers > free) {
-		GSIERR("chan_hdl=%lu num_xfers=%u free=%u\n",
+		ipa_err("chan_hdl=%lu num_xfers=%u free=%u\n",
 				chan_hdl, num_xfers, free);
 		spin_unlock_irqrestore(slock, flags);
 		return -ENOSPC;
@@ -1641,7 +1641,7 @@ int gsi_queue_xfer(unsigned long chan_hdl, uint16_t num_xfers,
 		} else if (xfer[i].type == GSI_XFER_ELEM_NOP) {
 			tre.re_type = GSI_RE_NOP;
 		} else {
-			GSIERR("chan_hdl=%lu bad RE type=%u\n", chan_hdl,
+			ipa_err("chan_hdl=%lu bad RE type=%u\n", chan_hdl,
 				xfer[i].type);
 			break;
 		}
@@ -1685,13 +1685,13 @@ int gsi_start_xfer(unsigned long chan_hdl)
 	struct gsi_chan_ctx *ctx;
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
-		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
+		ipa_err("bad params chan_hdl=%lu\n", chan_hdl);
 		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
 	if (ctx->state != GSI_CHAN_STATE_STARTED) {
-		GSIERR("bad state %d\n", ctx->state);
+		ipa_err("bad state %d\n", ctx->state);
 		return -ENOTSUPP;
 	}
 
@@ -1712,13 +1712,13 @@ int gsi_poll_channel(unsigned long chan_hdl,
 	unsigned long flags;
 
 	if (chan_hdl >= gsi_ctx->max_ch || !notify) {
-		GSIERR("bad params chan_hdl=%lu notify=%p\n", chan_hdl, notify);
+		ipa_err("bad params chan_hdl=%lu notify=%p\n", chan_hdl, notify);
 		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
 	if (!ctx->evtr) {
-		GSIERR("no event ring associated chan_hdl=%lu\n", chan_hdl);
+		ipa_err("no event ring associated chan_hdl=%lu\n", chan_hdl);
 		return -ENOTSUPP;
 	}
 
@@ -1751,13 +1751,13 @@ int gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode)
 	unsigned long flags;
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
-		GSIERR("bad params chan_hdl=%lu mode=%u\n", chan_hdl, mode);
+		ipa_err("bad params chan_hdl=%lu mode=%u\n", chan_hdl, mode);
 		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
 	if (!ctx->evtr || !ctx->evtr->props.exclusive) {
-		GSIERR("cannot configure mode on chan_hdl=%lu\n",
+		ipa_err("cannot configure mode on chan_hdl=%lu\n",
 				chan_hdl);
 		return -ENOTSUPP;
 	}
@@ -1768,7 +1768,7 @@ int gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode)
 		curr = GSI_CHAN_MODE_CALLBACK;
 
 	if (mode == curr) {
-		GSIERR("already in requested mode %u chan_hdl=%lu\n",
+		ipa_err("already in requested mode %u chan_hdl=%lu\n",
 				curr, chan_hdl);
 		return -ENOTSUPP;
 	}
@@ -1797,7 +1797,7 @@ int gsi_get_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
 	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_hdl];
 
 	if (ctx->state == GSI_CHAN_STATE_NOT_ALLOCATED) {
-		GSIERR("bad state %d\n", ctx->state);
+		ipa_err("bad state %d\n", ctx->state);
 		return -ENOTSUPP;
 	}
 
@@ -1815,25 +1815,25 @@ int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
 	struct gsi_chan_ctx *ctx;
 
 	if (gsi_validate_channel_props(props)) {
-		GSIERR("bad params props=%p\n", props);
+		ipa_err("bad params props=%p\n", props);
 		return -EINVAL;
 	}
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
-		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
+		ipa_err("bad params chan_hdl=%lu\n", chan_hdl);
 		return -EINVAL;
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
 
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED) {
-		GSIERR("bad state %d\n", ctx->state);
+		ipa_err("bad state %d\n", ctx->state);
 		return -ENOTSUPP;
 	}
 
 	if (ctx->props.ch_id != props->ch_id ||
 		ctx->props.evt_ring_hdl != props->evt_ring_hdl) {
-		GSIERR("changing immutable fields not supported\n");
+		ipa_err("changing immutable fields not supported\n");
 		return -ENOTSUPP;
 	}
 
@@ -1906,7 +1906,7 @@ int gsi_configure_regs(phys_addr_t gsi_base_addr, u32 gsi_size,
 
 	gsi_base = ioremap_nocache(gsi_base_addr, gsi_size);
 	if (!gsi_base) {
-		GSIERR("ioremap failed for 0x%pa\n", &gsi_base_addr);
+		ipa_err("ioremap failed for 0x%pa\n", &gsi_base_addr);
 		return -ENOMEM;
 	}
 	writel(0, gsi_base + GSI_GSI_PERIPH_BASE_ADDR_MSB_OFFS);
@@ -1925,7 +1925,7 @@ int gsi_enable_fw(phys_addr_t gsi_base_addr, u32 gsi_size)
 
 	gsi_base = ioremap_nocache(gsi_base_addr, gsi_size);
 	if (!gsi_base) {
-		GSIERR("ioremap failed for 0x%pa\n", &gsi_base_addr);
+		ipa_err("ioremap failed for 0x%pa\n", &gsi_base_addr);
 		return -ENOMEM;
 	}
 
@@ -1971,7 +1971,7 @@ int gsi_halt_channel_ee(unsigned int chan_idx, unsigned int ee, int *code)
 	int res;
 
 	if (chan_idx >= gsi_ctx->max_ch || !code) {
-		GSIERR("bad params chan_idx=%d\n", chan_idx);
+		ipa_err("bad params chan_idx=%d\n", chan_idx);
 		return -EINVAL;
 	}
 
@@ -1997,7 +1997,7 @@ int gsi_halt_channel_ee(unsigned int chan_idx, unsigned int ee, int *code)
 	res = wait_for_completion_timeout(&gsi_ctx->gen_ee_cmd_compl,
 		msecs_to_jiffies(GSI_CMD_TIMEOUT));
 	if (res == 0) {
-		GSIERR("chan_idx=%u ee=%u timed out\n", chan_idx, ee);
+		ipa_err("chan_idx=%u ee=%u timed out\n", chan_idx, ee);
 		res = -ETIMEDOUT;
 		goto free_lock;
 	}
@@ -2005,7 +2005,7 @@ int gsi_halt_channel_ee(unsigned int chan_idx, unsigned int ee, int *code)
 	gsi_ctx->scratch.word0.val =
 		gsi_readl(GSI_EE_n_CNTXT_SCRATCH_0_OFFS(gsi_ctx->ee));
 	if (gsi_ctx->scratch.word0.s.generic_ee_cmd_return_code == 0) {
-		GSIERR("No response received\n");
+		ipa_err("No response received\n");
 		res = -EIO;
 		goto free_lock;
 	}
@@ -2032,7 +2032,7 @@ struct gsi_ctx *msm_gsi_init(struct platform_device *pdev, void *logbuf)
 
 	gsi_ctx->ipc_logbuf = logbuf;
 	if (!logbuf)
-		GSIERR("no IPC log, continue...\n");
+		ipa_err("no IPC log, continue...\n");
 
 	gsi_ctx->dev = dev;
 	init_completion(&gsi_ctx->gen_ee_cmd_compl);
