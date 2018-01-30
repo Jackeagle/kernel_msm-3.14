@@ -436,7 +436,7 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 
 };
 
-static struct msm_bus_vectors ipa_min_vectors_v3_0[] = {
+static struct msm_bus_vectors ipa_min_perf_vectors_v3_0[] = {
 	{
 		.src = MSM_BUS_MASTER_IPA,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
@@ -463,7 +463,7 @@ static struct msm_bus_vectors ipa_min_vectors_v3_0[] = {
 	},
 };
 
-static struct msm_bus_vectors ipa_svs2_vectors_v3_0[] = {
+static struct msm_bus_vectors ipa_svs2_perf_vectors_v3_0[] = {
 	{
 		.src = MSM_BUS_MASTER_IPA,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
@@ -490,7 +490,7 @@ static struct msm_bus_vectors ipa_svs2_vectors_v3_0[] = {
 	},
 };
 
-static struct msm_bus_vectors ipa_svs_vectors_v3_0[] = {
+static struct msm_bus_vectors ipa_svs_perf_vectors_v3_0[] = {
 	{
 		.src = MSM_BUS_MASTER_IPA,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
@@ -573,16 +573,16 @@ static struct msm_bus_vectors ipa_turbo_perf_vectors_v3_0[] = {
 
 static struct msm_bus_paths ipa_usecases_v3_0[]  = {
 	{
-		.num_paths = ARRAY_SIZE(ipa_min_vectors_v3_0),
-		.vectors = ipa_min_vectors_v3_0,
+		.num_paths = ARRAY_SIZE(ipa_min_perf_vectors_v3_0),
+		.vectors = ipa_min_perf_vectors_v3_0,
 	},
 	{
-		.num_paths = ARRAY_SIZE(ipa_svs2_vectors_v3_0),
-		.vectors = ipa_svs2_vectors_v3_0,
+		.num_paths = ARRAY_SIZE(ipa_svs2_perf_vectors_v3_0),
+		.vectors = ipa_svs2_perf_vectors_v3_0,
 	},
 	{
-		.num_paths = ARRAY_SIZE(ipa_svs_vectors_v3_0),
-		.vectors = ipa_svs_vectors_v3_0,
+		.num_paths = ARRAY_SIZE(ipa_svs_perf_vectors_v3_0),
+		.vectors = ipa_svs_perf_vectors_v3_0,
 	},
 	{
 		.num_paths = ARRAY_SIZE(ipa_nominal_perf_vectors_v3_0),
