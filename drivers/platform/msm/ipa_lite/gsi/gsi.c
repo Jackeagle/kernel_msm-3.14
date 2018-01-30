@@ -1124,7 +1124,7 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 	return 0;
 }
 
-long gsi_alloc_channel(struct gsi_chan_props *props, void *dev_hdl)
+long gsi_alloc_channel(struct gsi_chan_props *props)
 {
 	struct gsi_chan_ctx *ctx;
 	uint32_t val;

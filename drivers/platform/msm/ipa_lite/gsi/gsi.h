@@ -522,16 +522,15 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl);
 
 /**
  * gsi_alloc_channel - Peripheral should call this function to
- * allocate a channel
+ * allocate a channel once gsi_register_device() has been called
  *
  * @props:     Channel properties
- * @dev_hdl:   Client handle previously obtained from gsi_register_device
  *
  * This function can sleep
  *
  * @Return Channel handle populated by GSI, opaque to client, or negative errno
  */
-long gsi_alloc_channel(struct gsi_chan_props *props, void *dev_hdl);
+long gsi_alloc_channel(struct gsi_chan_props *props);
 
 /**
  * gsi_write_channel_scratch - Peripheral should call this function to

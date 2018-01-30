@@ -2826,7 +2826,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		gsi_channel_props.xfer_cb = ipa_gsi_irq_tx_notify_cb;
 	else
 		gsi_channel_props.xfer_cb = ipa_gsi_irq_rx_notify_cb;
-	result = gsi_alloc_channel(&gsi_channel_props, ipa3_ctx->gsi_dev_hdl);
+	result = gsi_alloc_channel(&gsi_channel_props);
 	if (result < 0)
 		goto fail_alloc_channel;
 	ep->gsi_chan_hdl = result;
