@@ -26,8 +26,7 @@
 
 #define GSI_IPC_LOGGING(buf, fmt, args...) \
 	do { \
-		if (buf) \
-			ipc_log_string((buf), fmt, ## args); \
+		ipc_log_string((buf), fmt, ## args); \
 	} while (0)
 
 #define GSIDBG(fmt, args...) \
