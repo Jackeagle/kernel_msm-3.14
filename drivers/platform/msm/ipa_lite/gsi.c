@@ -798,7 +798,7 @@ static void gsi_prime_evt_ring(struct gsi_evt_ctx *ctx)
 
 static int gsi_validate_evt_ring_props(struct gsi_evt_ring_props *props)
 {
-	uint64_t ra;
+	dma_addr_t ra;
 
 	if (props->ring_len % 16) {
 		ipa_err("bad params ring_len %u not a multiple of RE size %u\n",
