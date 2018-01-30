@@ -2553,26 +2553,6 @@ int ipa3_sys_update_gsi_hdls(u32 clnt_hdl, unsigned long gsi_ch_hdl,
 	return 0;
 }
 
-static void ipa_gsi_evt_ring_err_cb(struct gsi_evt_err_notify *notify)
-{
-	switch (notify->evt_id) {
-	case GSI_EVT_OUT_OF_BUFFERS_ERR:
-		ipa_err("Got GSI_EVT_OUT_OF_BUFFERS_ERR\n");
-		break;
-	case GSI_EVT_OUT_OF_RESOURCES_ERR:
-		ipa_err("Got GSI_EVT_OUT_OF_RESOURCES_ERR\n");
-		break;
-	case GSI_EVT_UNSUPPORTED_INTER_EE_OP_ERR:
-		ipa_err("Got GSI_EVT_UNSUPPORTED_INTER_EE_OP_ERR\n");
-		break;
-	case GSI_EVT_EVT_RING_EMPTY_ERR:
-		ipa_err("Got GSI_EVT_EVT_RING_EMPTY_ERR\n");
-		break;
-	default:
-		ipa_err("Unexpected err evt: %d\n", notify->evt_id);
-	}
-}
-
 static void ipa_gsi_chan_err_cb(struct gsi_chan_err_notify *notify)
 {
 	switch (notify->evt_id) {

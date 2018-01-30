@@ -981,5 +981,6 @@ void gsi_get_inst_ram_offset_and_size(unsigned long *base_offset,
  */
 int gsi_halt_channel_ee(unsigned int chan_idx, unsigned int ee, int *code);
 
+void ipa_gsi_evt_ring_err_cb(struct gsi_evt_err_notify *notify);
 
 #endif
