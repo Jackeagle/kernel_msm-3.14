@@ -20,8 +20,6 @@
 #include <linux/ipc_logging.h>
 #include <linux/platform_device.h>
 
-#include <linux/msm_gsi.h>
-
 #define GSI_CHAN_MAX      31
 #define GSI_EVT_RING_MAX  23
 #define GSI_NO_EVT_ERINDEX 31
@@ -174,6 +172,291 @@ struct gsi_chan_info {
 };
 
 /* msm_gsi.h */
+
+enum gsi_intr_type {
+	GSI_INTR_MSI = 0x0,
+	GSI_INTR_IRQ = 0x1
+};
+
+enum gsi_evt_err {
+	GSI_EVT_OUT_OF_BUFFERS_ERR = 0x0,
+	GSI_EVT_OUT_OF_RESOURCES_ERR = 0x1,
+	GSI_EVT_UNSUPPORTED_INTER_EE_OP_ERR = 0x2,
+	GSI_EVT_EVT_RING_EMPTY_ERR = 0x3,
+};
+
+/**
+ * gsi_evt_err_notify - event ring error callback info
+ *
+ * @user_data: cookie supplied in gsi_alloc_evt_ring
+ * @evt_id:    type of error
+ * @err_desc:  more info about the error
+ *
+ */
+struct gsi_evt_err_notify {
+	void *user_data;
+	enum gsi_evt_err evt_id;
+	uint16_t err_desc;
+};
+
+enum gsi_evt_chtype {
+	GSI_EVT_CHTYPE_MHI_EV = 0x0,
+	GSI_EVT_CHTYPE_XHCI_EV = 0x1,
+	GSI_EVT_CHTYPE_GPI_EV = 0x2,
+	GSI_EVT_CHTYPE_XDCI_EV = 0x3
+};
+
+enum gsi_evt_ring_elem_size {
+	GSI_EVT_RING_RE_SIZE_4B = 4,
+	GSI_EVT_RING_RE_SIZE_16B = 16,
+};
+
+/**
+ * gsi_evt_ring_props - Event ring related properties
+ *
+ * @re_size:         size of event ring element
+ * @ring_len:        length of ring in bytes (must be integral multiple of
+ *                   re_size)
+ * @ring_base_addr:  physical base address of ring. Address must be aligned to
+ *		     ring_len rounded to power of two
+ * @ring_base_vaddr: virtual base address of ring (set to NULL when not
+ *                   applicable)
+ * @int_modt:        cycles base interrupt moderation (32KHz clock)
+ * @int_modc:        interrupt moderation packet counter
+ * @exclusive:       if true, only one GSI channel can be associated with this
+ *                   event ring. if false, the event ring can be shared among
+ *                   multiple GSI channels but in that case no polling
+ *                   (GSI_CHAN_MODE_POLL) is supported on any of those channels
+ * @err_cb:          error notification callback
+ * @user_data:       cookie used for error notifications
+ */
+struct gsi_evt_ring_props {
+	uint16_t ring_len;
+	uint64_t ring_base_addr;
+	void *ring_base_vaddr;
+	uint16_t int_modt;
+	uint8_t int_modc;
+	bool exclusive;
+	void (*err_cb)(struct gsi_evt_err_notify *notify);
+	void *user_data;
+};
+
+enum gsi_chan_prot {
+	GSI_CHAN_PROT_MHI = 0x0,
+	GSI_CHAN_PROT_XHCI = 0x1,
+	GSI_CHAN_PROT_GPI = 0x2,
+	GSI_CHAN_PROT_XDCI = 0x3
+};
+
+enum gsi_chan_dir {
+	GSI_CHAN_DIR_FROM_GSI = 0x0,
+	GSI_CHAN_DIR_TO_GSI = 0x1
+};
+
+enum gsi_max_prefetch {
+	GSI_ONE_PREFETCH_SEG = 0x0,
+	GSI_TWO_PREFETCH_SEG = 0x1
+};
+
+enum gsi_chan_evt {
+	GSI_CHAN_EVT_INVALID = 0x0,
+	GSI_CHAN_EVT_SUCCESS = 0x1,
+	GSI_CHAN_EVT_EOT = 0x2,
+	GSI_CHAN_EVT_OVERFLOW = 0x3,
+	GSI_CHAN_EVT_EOB = 0x4,
+	GSI_CHAN_EVT_OOB = 0x5,
+	GSI_CHAN_EVT_DB_MODE = 0x6,
+	GSI_CHAN_EVT_UNDEFINED = 0x10,
+	GSI_CHAN_EVT_RE_ERROR = 0x11,
+};
+
+/**
+ * gsi_chan_xfer_notify - Channel callback info
+ *
+ * @chan_user_data: cookie supplied in gsi_alloc_channel
+ * @xfer_user_data: cookie of the gsi_xfer_elem that caused the
+ *                  event to be generated
+ * @evt_id:         type of event triggered by the associated TRE
+ *                  (corresponding to xfer_user_data)
+ * @bytes_xfered:   number of bytes transferred by the associated TRE
+ *                  (corresponding to xfer_user_data)
+ *
+ */
+struct gsi_chan_xfer_notify {
+	void *chan_user_data;
+	void *xfer_user_data;
+	enum gsi_chan_evt evt_id;
+	uint16_t bytes_xfered;
+};
+
+enum gsi_chan_err {
+	GSI_CHAN_INVALID_TRE_ERR = 0x0,
+	GSI_CHAN_NON_ALLOCATED_EVT_ACCESS_ERR = 0x1,
+	GSI_CHAN_OUT_OF_BUFFERS_ERR = 0x2,
+	GSI_CHAN_OUT_OF_RESOURCES_ERR = 0x3,
+	GSI_CHAN_UNSUPPORTED_INTER_EE_OP_ERR = 0x4,
+	GSI_CHAN_HWO_1_ERR = 0x5
+};
+
+/**
+ * gsi_chan_err_notify - Channel general callback info
+ *
+ * @chan_user_data: cookie supplied in gsi_alloc_channel
+ * @evt_id:         type of error
+ * @err_desc:  more info about the error
+ *
+ */
+struct gsi_chan_err_notify {
+	void *chan_user_data;
+	enum gsi_chan_err evt_id;
+	uint16_t err_desc;
+};
+
+enum gsi_chan_ring_elem_size {
+	GSI_CHAN_RE_SIZE_4B = 4,
+	GSI_CHAN_RE_SIZE_16B = 16,
+	GSI_CHAN_RE_SIZE_32B = 32,
+};
+
+enum gsi_chan_use_db_eng {
+	GSI_CHAN_DIRECT_MODE = 0x0,
+	GSI_CHAN_DB_MODE = 0x1,
+};
+
+/**
+ * gsi_chan_props - Channel related properties
+ *
+ * @dir:             channel direction
+ * @ch_id:           virtual channel ID
+ * @evt_ring_hdl:    handle of associated event ring. set to ~0 if no
+ *                   event ring associated
+ * @re_size:         size of channel ring element
+ * @ring_len:        length of ring in bytes (must be integral multiple of
+ *                   re_size)
+ * @max_re_expected: maximal number of ring elements expected to be queued.
+ *                   used for data path statistics gathering. if 0 provided
+ *                   ring_len / re_size will be used.
+ * @ring_base_addr:  physical base address of ring. Address must be aligned to
+ *                   ring_len rounded to power of two
+ * @ring_base_vaddr: virtual base address of ring (set to NULL when not
+ *                   applicable)
+ * @use_db_eng:      0 => direct mode (doorbells are written directly to RE
+ *                   engine)
+ *                   1 => DB mode (doorbells are written to DB engine)
+ * @max_prefetch:    limit number of pre-fetch segments for channel
+ * @low_weight:      low channel weight (priority of channel for RE engine
+ *                   round robin algorithm); must be >= 1
+ * @xfer_cb:         transfer notification callback, this callback happens
+ *                   on event boundaries
+ *
+ *                   e.g. 1
+ *
+ *                   out TD with 3 REs
+ *
+ *                   RE1: EOT=0, EOB=0, CHAIN=1;
+ *                   RE2: EOT=0, EOB=0, CHAIN=1;
+ *                   RE3: EOT=1, EOB=0, CHAIN=0;
+ *
+ *                   the callback will be triggered for RE3 using the
+ *                   xfer_user_data of that RE
+ *
+ *                   e.g. 2
+ *
+ *                   in REs
+ *
+ *                   RE1: EOT=1, EOB=0, CHAIN=0;
+ *                   RE2: EOT=1, EOB=0, CHAIN=0;
+ *                   RE3: EOT=1, EOB=0, CHAIN=0;
+ *
+ *	             received packet consumes all of RE1, RE2 and part of RE3
+ *	             for EOT condition. there will be three callbacks in below
+ *	             order
+ *
+ *	             callback for RE1 using GSI_CHAN_EVT_OVERFLOW
+ *	             callback for RE2 using GSI_CHAN_EVT_OVERFLOW
+ *	             callback for RE3 using GSI_CHAN_EVT_EOT
+ *
+ * @err_cb:          error notification callback
+ * @chan_user_data:  cookie used for notifications
+ *
+ * All the callbacks are in interrupt context
+ *
+ */
+struct gsi_chan_props {
+	enum gsi_chan_dir dir;
+	uint8_t ch_id;
+	unsigned long evt_ring_hdl;
+	enum gsi_chan_ring_elem_size re_size;
+	uint16_t ring_len;
+	uint16_t max_re_expected;
+	uint64_t ring_base_addr;
+	void *ring_base_vaddr;
+	enum gsi_chan_use_db_eng use_db_eng;
+	enum gsi_max_prefetch max_prefetch;
+	uint8_t low_weight;
+	void (*xfer_cb)(struct gsi_chan_xfer_notify *notify);
+	void (*err_cb)(struct gsi_chan_err_notify *notify);
+	void *chan_user_data;
+};
+
+enum gsi_xfer_elem_type {
+	GSI_XFER_ELEM_DATA,
+	GSI_XFER_ELEM_IMME_CMD,
+	GSI_XFER_ELEM_NOP,
+};
+
+/**
+ * gsi_xfer_elem - Metadata about a single transfer
+ *
+ * @addr:           physical address of buffer
+ * @len:            size of buffer for GSI_XFER_ELEM_DATA:
+ *		    for outbound transfers this is the number of bytes to
+ *		    transfer.
+ *		    for inbound transfers, this is the maximum number of
+ *		    bytes the host expects from device in this transfer
+ *
+ *                  immediate command opcode for GSI_XFER_ELEM_IMME_CMD
+ * @flags:          transfer flags, OR of all the applicable flags
+ *
+ *		    GSI_XFER_FLAG_BEI: Block event interrupt
+ *		    1: Event generated by this ring element must not assert
+ *		    an interrupt to the host
+ *		    0: Event generated by this ring element must assert an
+ *		    interrupt to the host
+ *
+ *		    GSI_XFER_FLAG_EOT: Interrupt on end of transfer
+ *		    1: If an EOT condition is encountered when processing
+ *		    this ring element, an event is generated by the device
+ *		    with its completion code set to EOT.
+ *		    0: If an EOT condition is encountered for this ring
+ *		    element, a completion event is not be generated by the
+ *		    device, unless IEOB is 1
+ *
+ *		    GSI_XFER_FLAG_EOB: Interrupt on end of block
+ *		    1: Device notifies host after processing this ring element
+ *		    by sending a completion event
+ *		    0: Completion event is not required after processing this
+ *		    ring element
+ *
+ *		    GSI_XFER_FLAG_CHAIN: Chain bit that identifies the ring
+ *		    elements in a TD
+ *
+ * @type:           transfer type
+ *
+ *		    GSI_XFER_ELEM_DATA: for all data transfers
+ *		    GSI_XFER_ELEM_IMME_CMD: for IPA immediate commands
+ *		    GSI_XFER_ELEM_NOP: for event generation only
+ *
+ * @xfer_user_data: cookie used in xfer_cb
+ *
+ */
+struct gsi_xfer_elem {
+	uint64_t addr;
+	uint16_t len;
+	uint16_t flags;
+	enum gsi_xfer_elem_type type;
+	void *xfer_user_data;
+};
 
 enum gsi_evt_ring_state {
 	GSI_EVT_RING_STATE_NOT_ALLOCATED = 0x0,
