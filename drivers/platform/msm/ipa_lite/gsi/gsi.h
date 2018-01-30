@@ -476,11 +476,9 @@ void *gsi_register_device(u32 ee);
  * gsi_deregister_device - Peripheral should call this function to
  * de-register itself with GSI
  *
- * @dev_hdl:  Client handle previously obtained from gsi_register_device
- *
  * @Return 0, or a negative errno
  */
-int gsi_deregister_device(void *dev_hdl);
+int gsi_deregister_device(void);
 
 /**
  * gsi_alloc_evt_ring - Peripheral should call this function to

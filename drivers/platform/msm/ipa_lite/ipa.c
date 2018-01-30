@@ -1745,7 +1745,7 @@ static int ipa3_post_init(struct device *ipa_dev)
 	return 0;
 
 fail_setup_apps_pipes:
-	gsi_deregister_device(ipa3_ctx->gsi_dev_hdl);
+	gsi_deregister_device();
 fail_register_device:
 	/* Maybe it'll work another time?  (Doubtful...) */
 	atomic_set(&ipa3_ctx->state, IPA_STATE_INITIAL);

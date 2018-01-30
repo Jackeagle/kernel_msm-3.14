@@ -675,7 +675,7 @@ void *gsi_register_device(u32 ee)
 	return gsi_ctx;
 }
 
-int gsi_deregister_device(void *dev_hdl)
+int gsi_deregister_device(void)
 {
 	if (atomic_read(&gsi_ctx->num_chan)) {
 		GSIERR("%u channels are allocated\n",
