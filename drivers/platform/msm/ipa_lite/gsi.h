@@ -196,7 +196,6 @@ struct gsi_evt_ring_props {
 	uint16_t int_modt;
 	uint8_t int_modc;
 	bool exclusive;
-	void (*err_cb)(struct gsi_evt_err_notify *notify);
 };
 
 enum gsi_chan_prot {
@@ -980,7 +979,5 @@ void gsi_get_inst_ram_offset_and_size(unsigned long *base_offset,
  * @Return gsi_status
  */
 int gsi_halt_channel_ee(unsigned int chan_idx, unsigned int ee, int *code);
-
-void ipa_gsi_evt_ring_err_cb(struct gsi_evt_err_notify *notify);
 
 #endif

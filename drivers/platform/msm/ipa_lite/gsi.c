@@ -130,7 +130,7 @@ static void gsi_handle_ev_ctrl(int ee)
 	}
 }
 
-void ipa_gsi_evt_ring_err_cb(struct gsi_evt_err_notify *notify)
+static void ipa_gsi_evt_ring_err_cb(struct gsi_evt_err_notify *notify)
 {
 	switch (notify->evt_id) {
 	case GSI_EVT_OUT_OF_BUFFERS_ERR:
@@ -241,10 +241,7 @@ static void gsi_handle_glob_err(uint32_t err)
 		} else {
 			BUG();
 		}
-		if (ev->props.err_cb)
-			ev->props.err_cb(&evt_notify);
-		else
-			WARN_ON(1);
+		ipa_gsi_evt_ring_err_cb(&evt_notify);
 		break;
 	default:
 		WARN_ON(1);
@@ -824,11 +821,6 @@ static int gsi_validate_evt_ring_props(struct gsi_evt_ring_props *props)
 
 	if (!props->ring_base_vaddr) {
 		ipa_err("GPI protocol requires ring base VA\n");
-		return -EINVAL;
-	}
-
-	if (!props->err_cb) {
-		ipa_err("err callback must be provided\n");
 		return -EINVAL;
 	}
 
