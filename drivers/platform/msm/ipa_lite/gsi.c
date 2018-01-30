@@ -130,25 +130,23 @@ static void gsi_handle_ev_ctrl(int ee)
 	}
 }
 
-static void ipa_gsi_evt_ring_err_cb(struct gsi_evt_err_notify *notify)
+#define CASE(x)						\
+	case GSI_EVT_ ## x ## _ERR:			\
+		ipa_err("Got GSI_EVT_ " #x "_ERR\n");	\
+		break
+
+static void gsi_evt_ring_err(enum gsi_evt_err evt_id)
 {
-	switch (notify->evt_id) {
-	case GSI_EVT_OUT_OF_BUFFERS_ERR:
-		ipa_err("Got GSI_EVT_OUT_OF_BUFFERS_ERR\n");
-		break;
-	case GSI_EVT_OUT_OF_RESOURCES_ERR:
-		ipa_err("Got GSI_EVT_OUT_OF_RESOURCES_ERR\n");
-		break;
-	case GSI_EVT_UNSUPPORTED_INTER_EE_OP_ERR:
-		ipa_err("Got GSI_EVT_UNSUPPORTED_INTER_EE_OP_ERR\n");
-		break;
-	case GSI_EVT_EVT_RING_EMPTY_ERR:
-		ipa_err("Got GSI_EVT_EVT_RING_EMPTY_ERR\n");
-		break;
+	switch (evt_id) {
+	CASE(OUT_OF_BUFFERS);
+	CASE(OUT_OF_RESOURCES);
+	CASE(UNSUPPORTED_INTER_EE_OP);
+	CASE(EVT_RING_EMPTY);
 	default:
-		ipa_err("Unexpected err evt: %d\n", notify->evt_id);
+		ipa_err("Unexpected err evt: %d\n", (int)evt_id);
 	}
 }
+#undef CASE
 
 static void gsi_handle_glob_err(uint32_t err)
 {
@@ -241,7 +239,7 @@ static void gsi_handle_glob_err(uint32_t err)
 		} else {
 			BUG();
 		}
-		ipa_gsi_evt_ring_err_cb(&evt_notify);
+		gsi_evt_ring_err(evt_notify.evt_id);
 		break;
 	default:
 		WARN_ON(1);
