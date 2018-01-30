@@ -1066,7 +1066,7 @@ static void gsi_init_chan_ring(struct gsi_chan_props *props,
 	ctx->wp_local = ctx->base;
 	ctx->rp_local = ctx->base;
 	ctx->len = props->ring_len;
-	ctx->elem_sz = props->re_size;
+	ctx->elem_sz = GSI_CHAN_RE_SIZE_16B;
 	ctx->max_num_elem = ctx->len / ctx->elem_sz - 1;
 	ctx->end = ctx->base + (ctx->max_num_elem + 1) *
 		ctx->elem_sz;
