@@ -32,6 +32,12 @@
 		__ipa_ipc_logging(false, pr_fmt(fmt), ## args); \
 	} while (0)
 
+#define GSIDBG_LOW(fmt, args...) \
+	do { \
+		pr_debug(fmt, ## args); \
+		__ipa_ipc_logging(true, pr_fmt(fmt), ## args); \
+	} while (0)
+
 #define GSIERR(fmt, args...) \
 	do { \
 		pr_err(fmt, ## args); \
