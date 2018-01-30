@@ -27,8 +27,7 @@
 #define GSI_IPC_LOGGING(buf, fmt, args...) \
 	do { \
 		if (buf) \
-			ipc_log_string((buf), fmt, __func__, __LINE__, \
-				## args); \
+			ipc_log_string((buf), fmt, ## args); \
 	} while (0)
 
 #define GSIDBG(fmt, args...) \
@@ -36,7 +35,7 @@
 		pr_debug(fmt, ## args); \
 		if (gsi_ctx) { \
 			GSI_IPC_LOGGING(gsi_ctx->ipc_logbuf, \
-				"%s:%d " fmt, ## args); \
+				"%s:%d " fmt, __func__, __LINE__, ## args); \
 		} \
 	} while (0)
 
@@ -45,7 +44,7 @@
 		pr_err(fmt, ## args); \
 		if (gsi_ctx) { \
 			GSI_IPC_LOGGING(gsi_ctx->ipc_logbuf, \
-				"%s:%d " fmt, ## args); \
+				"%s:%d " fmt, __func__, __LINE__, ## args); \
 		} \
 	} while (0)
 
