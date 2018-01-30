@@ -1082,14 +1082,9 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 		return -EINVAL;
 	}
 
-	if ((props->re_size == GSI_CHAN_RE_SIZE_4B &&
-				props->ring_len % 4) ||
-			(props->re_size == GSI_CHAN_RE_SIZE_16B &&
-				 props->ring_len % 16) ||
-			(props->re_size == GSI_CHAN_RE_SIZE_32B &&
-				 props->ring_len % 32)) {
+	if (props->ring_len % 16) {
 		GSIERR("bad params ring_len %u not a multiple of re size %u\n",
-				props->ring_len, props->re_size);
+				props->ring_len, GSI_CHAN_RE_SIZE_16B);
 		return -EINVAL;
 	}
 
@@ -1103,7 +1098,7 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 		return -EINVAL;
 	}
 
-	last = props->ring_base_addr + props->ring_len - props->re_size;
+	last = props->ring_base_addr + props->ring_len - GSI_CHAN_RE_SIZE_16B;
 
 	/* MSB should stay same within the ring */
 	if ((props->ring_base_addr & 0xFFFFFFFF00000000ULL) !=
