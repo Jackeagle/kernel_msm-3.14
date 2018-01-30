@@ -1228,7 +1228,7 @@ void ipa3_q6_handshake_complete(bool ssr_bootup)
 	}
 }
 
-int ipa3_wwan_init(void)
+static int __init ipa3_wwan_init(void)
 {
 	rmnet_ipa3_ctx = kzalloc(sizeof(*rmnet_ipa3_ctx), GFP_KERNEL);
 	if (!rmnet_ipa3_ctx) {
@@ -1287,6 +1287,7 @@ static int ipa3_rmnet_poll(struct napi_struct *napi, int budget)
 	return rcvd_pkts;
 }
 
+late_initcall(ipa3_wwan_init);
 module_exit(ipa3_wwan_cleanup);
 MODULE_DESCRIPTION("WWAN Network Interface");
 MODULE_LICENSE("GPL v2");

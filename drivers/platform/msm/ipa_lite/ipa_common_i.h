@@ -811,7 +811,7 @@ int ipa_inc_client_enable_clks_no_block(struct ipa_active_client_logging_info *i
 
 #define ipa_debug(fmt, args...) \
 	do { \
-		pr_err(fmt, ## args); \
+		pr_debug(fmt, ## args); \
 		__ipa_ipc_logging(false, pr_fmt(fmt), ## args); \
 	} while (0)
 

@@ -28,7 +28,7 @@
 #include "ipa_common_i.h"
 #include "ipahal/ipahal_reg.h"
 #include "ipahal/ipahal.h"
-#include "gsi/gsi.h"
+#include "gsi.h"
 #include "ipa_qmi_service.h"
 #include "ipa_qmi_service_v01.h"
 
