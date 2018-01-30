@@ -815,7 +815,7 @@ static int gsi_validate_evt_ring_props(struct gsi_evt_ring_props *props)
 }
 
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
-long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, void *dev_hdl)
+long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props)
 {
 	unsigned long evt_id;
 	enum gsi_evt_ch_cmd_opcode op = GSI_EVT_ALLOCATE;

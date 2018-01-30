@@ -2686,7 +2686,7 @@ long ipa3_alloc_common_event_ring(void)
 	gsi_evt_ring_props.err_cb = ipa_gsi_evt_ring_err_cb;
 	gsi_evt_ring_props.user_data = NULL;
 
-	result = gsi_alloc_evt_ring(&gsi_evt_ring_props, ipa3_ctx->gsi_dev_hdl);
+	result = gsi_alloc_evt_ring(&gsi_evt_ring_props);
 	if (result < 0) {
 		ipa_err("gsi_alloc_evt_ring failed %ld\n", result);
 		return result;
@@ -2759,8 +2759,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		gsi_evt_ring_props.err_cb = ipa_gsi_evt_ring_err_cb;
 		gsi_evt_ring_props.user_data = NULL;
 
-		result = gsi_alloc_evt_ring(&gsi_evt_ring_props,
-						ipa3_ctx->gsi_dev_hdl);
+		result = gsi_alloc_evt_ring(&gsi_evt_ring_props);
 		if (result < 0)
 			goto fail_alloc_evt_ring;
 		ep->gsi_evt_ring_hdl = result;

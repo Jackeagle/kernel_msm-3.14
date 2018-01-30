@@ -484,16 +484,15 @@ int gsi_deregister_device(void *dev_hdl);
 
 /**
  * gsi_alloc_evt_ring - Peripheral should call this function to
- * allocate an event ring
+ * allocate an event ring once gsi_register_device() has been called
  *
  * @props:	   Event ring properties
- * @dev_hdl:	   Client handle previously obtained from gsi_register_device
  *
  * This function can sleep
  *
  * @Return Client handle populated by GSI, or a negative errno
  */
-long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, void *dev_hdl);
+long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props);
 
 /**
  * gsi_dealloc_evt_ring - Peripheral should call this function to
