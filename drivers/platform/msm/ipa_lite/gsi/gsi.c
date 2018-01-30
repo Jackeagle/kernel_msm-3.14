@@ -963,11 +963,6 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 	struct gsi_evt_ctx *ctx;
 	int res;
 
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -ENODEV;
-	}
-
 	if (evt_ring_hdl >= gsi_ctx->max_ev) {
 		GSIERR("bad params evt_ring_hdl=%lu\n", evt_ring_hdl);
 		return -EINVAL;
@@ -1253,11 +1248,6 @@ int gsi_write_channel_scratch(unsigned long chan_hdl,
 {
 	struct gsi_chan_ctx *ctx;
 
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -ENODEV;
-	}
-
 	if (chan_hdl >= gsi_ctx->max_ch) {
 		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
 		return -EINVAL;
@@ -1286,11 +1276,6 @@ int gsi_start_channel(unsigned long chan_hdl)
 	int res;
 	uint32_t val;
 	struct gsi_chan_ctx *ctx;
-
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -ENODEV;
-	}
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
 		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
@@ -1337,11 +1322,6 @@ int gsi_stop_channel(unsigned long chan_hdl)
 	int res;
 	uint32_t val;
 	struct gsi_chan_ctx *ctx;
-
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -ENODEV;
-	}
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
 		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
@@ -1419,11 +1399,6 @@ int gsi_reset_channel(unsigned long chan_hdl)
 	uint32_t val;
 	struct gsi_chan_ctx *ctx;
 	bool reset_done = false;
-
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -ENODEV;
-	}
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
 		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
@@ -1630,11 +1605,6 @@ int gsi_queue_xfer(unsigned long chan_hdl, uint16_t num_xfers,
 	spinlock_t *slock;
 	unsigned long flags;
 
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -ENODEV;
-	}
-
 	if (chan_hdl >= gsi_ctx->max_ch || !num_xfers || !xfer) {
 		GSIERR("bad params chan_hdl=%lu num_xfers=%u xfer=%p\n",
 				chan_hdl, num_xfers, xfer);
@@ -1712,11 +1682,6 @@ int gsi_start_xfer(unsigned long chan_hdl)
 {
 	struct gsi_chan_ctx *ctx;
 
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -ENODEV;
-	}
-
 	if (chan_hdl >= gsi_ctx->max_ch) {
 		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
 		return -EINVAL;
@@ -1743,11 +1708,6 @@ int gsi_poll_channel(unsigned long chan_hdl,
 	uint64_t rp;
 	int ee = gsi_ctx->ee;
 	unsigned long flags;
-
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -ENODEV;
-	}
 
 	if (chan_hdl >= gsi_ctx->max_ch || !notify) {
 		GSIERR("bad params chan_hdl=%lu notify=%p\n", chan_hdl, notify);
@@ -1787,11 +1747,6 @@ int gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode)
 	struct gsi_chan_ctx *ctx;
 	enum gsi_chan_mode curr;
 	unsigned long flags;
-
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -ENODEV;
-	}
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
 		GSIERR("bad params chan_hdl=%lu mode=%u\n", chan_hdl, mode);
@@ -2012,11 +1967,6 @@ int gsi_halt_channel_ee(unsigned int chan_idx, unsigned int ee, int *code)
 	enum gsi_generic_ee_cmd_opcode op = GSI_GEN_EE_CMD_HALT_CHANNEL;
 	uint32_t val;
 	int res;
-
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -ENODEV;
-	}
 
 	if (chan_idx >= gsi_ctx->max_ch || !code) {
 		GSIERR("bad params chan_idx=%d\n", chan_idx);
