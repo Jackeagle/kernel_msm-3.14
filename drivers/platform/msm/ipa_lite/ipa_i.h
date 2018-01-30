@@ -1131,7 +1131,6 @@ struct ipa3_context {
 
 	struct ipa3_uc_ctx uc_ctx;
 
-	void *gsi_dev_hdl;
 	u32 ee;
 	struct wakeup_source w_lock;
 	struct ipa3_wakelock_ref_cnt wakelock_ref_cnt;

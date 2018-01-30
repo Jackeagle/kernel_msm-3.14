@@ -1708,10 +1708,9 @@ static int ipa3_post_init(struct device *ipa_dev)
 		goto fail_register_device;
 	}
 
-	ipa3_ctx->gsi_dev_hdl = gsi_register_device(ipa3_ctx->ee);
-	if (IS_ERR(ipa3_ctx->gsi_dev_hdl)) {
-		ipa_err(":gsi register error - %ld\n",
-				PTR_ERR(ipa3_ctx->gsi_dev_hdl));
+	result = gsi_register_device(ipa3_ctx->ee);
+	if (result) {
+		ipa_err(":gsi register error - %d\n", result);
 		result = -ENODEV;
 		goto fail_register_device;
 	}

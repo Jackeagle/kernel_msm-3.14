@@ -467,10 +467,9 @@ static inline void gsi_writel(u32 v, u32 offset)
  *
  * @ee:  AP execution environment (EE) number to use
  *
- * @Return -GSI_STATUS_AGAIN if request should be re-tried later
- *	   other error codes for failure
+ * @Return 0 if successful or a negative error code otherwise.
  */
-void *gsi_register_device(u32 ee);
+int gsi_register_device(u32 ee);
 
 /**
  * gsi_deregister_device - Peripheral should call this function to

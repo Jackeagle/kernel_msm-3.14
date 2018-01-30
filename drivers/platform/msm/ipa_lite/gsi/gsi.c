@@ -583,7 +583,7 @@ static uint32_t gsi_get_max_event_rings(void)
 	return reg;
 }
 
-void *gsi_register_device(u32 ee)
+int gsi_register_device(u32 ee)
 {
 	struct platform_device *ipa3_pdev = to_platform_device(gsi_ctx->dev);
 	struct resource *res;
@@ -593,7 +593,7 @@ void *gsi_register_device(u32 ee)
 
 	if (gsi_ctx->per_registered) {
 		GSIERR("per already registered\n");
-		return ERR_PTR(-ENOTSUPP);
+		return -ENOTSUPP;
 	}
 
 	gsi_ctx->ee = ee;
@@ -602,7 +602,7 @@ void *gsi_register_device(u32 ee)
 	ret = platform_get_irq_byname(ipa3_pdev, "gsi-irq");
 	if (ret < 0) {
 		GSIERR(":failed to get gsi-irq!\n");
-		return ERR_PTR(-ENODEV);
+		return -ENODEV;
 	}
 	gsi_ctx->irq = ret;
 	GSIDBG(": gsi-irq = %d\n", gsi_ctx->irq);
@@ -612,7 +612,7 @@ void *gsi_register_device(u32 ee)
 				IRQF_TRIGGER_HIGH, "gsi", gsi_ctx);
 	if (ret) {
 		GSIERR("failed to register isr for %u\n", gsi_ctx->irq);
-		return ERR_PTR(-EIO);
+		return -EIO;
 	}
 
 	ret = enable_irq_wake(gsi_ctx->irq);
@@ -626,7 +626,7 @@ void *gsi_register_device(u32 ee)
 			"gsi-base");
 	if (!res) {
 		GSIERR(":get resource failed for gsi-base!\n");
-		return ERR_PTR(-ENODEV);
+		return -ENODEV;
 	}
 	size = resource_size(res);
 	GSIDBG(": gsi-base = %pa, size = %pa\n", &res->start, &size);
@@ -634,14 +634,14 @@ void *gsi_register_device(u32 ee)
 	gsi_ctx->base = devm_ioremap_nocache(gsi_ctx->dev, res->start, size);
 	if (!gsi_ctx->base) {
 		GSIERR("failed to remap GSI HW\n");
-		return ERR_PTR(-ENOMEM);
+		return -ENOMEM;
 	}
 
 
 	val = gsi_readl(GSI_EE_n_GSI_STATUS_OFFS(gsi_ctx->ee));
 	if (!(val & GSI_EE_n_GSI_STATUS_ENABLED_BMSK)) {
 		GSIERR("Manager EE has not enabled GSI, GSI un-usable\n");
-		return ERR_PTR(-EIO);
+		return -EIO;
 	}
 
 	gsi_ctx->per_registered = true;
@@ -650,14 +650,14 @@ void *gsi_register_device(u32 ee)
 	atomic_set(&gsi_ctx->num_evt_ring, 0);
 
 	gsi_ctx->max_ch = gsi_get_max_channels();
-	if (gsi_ctx->max_ch == 0) {
+	if (!gsi_ctx->max_ch) {
 		GSIERR("failed to get max channels\n");
-		return ERR_PTR(-EIO);
+		return -EIO;
 	}
 	gsi_ctx->max_ev = gsi_get_max_event_rings();
-	if (gsi_ctx->max_ev == 0) {
+	if (!gsi_ctx->max_ev) {
 		GSIERR("failed to get max event rings\n");
-		return ERR_PTR(-EIO);
+		return -EIO;
 	}
 
 	/* bitmap is max events excludes reserved events */
@@ -672,7 +672,7 @@ void *gsi_register_device(u32 ee)
 
 	gsi_writel(0, GSI_EE_n_ERROR_LOG_OFFS(gsi_ctx->ee));
 
-	return gsi_ctx;
+	return 0;
 }
 
 int gsi_deregister_device(void)
