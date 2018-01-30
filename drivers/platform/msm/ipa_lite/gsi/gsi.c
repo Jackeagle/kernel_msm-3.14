@@ -1027,7 +1027,7 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, unsigned int ee,
 			 GSI_EE_n_GSI_CH_k_CNTXT_0_CHTYPE_DIR_BMSK) |
 		((erindex << GSI_EE_n_GSI_CH_k_CNTXT_0_ERINDEX_SHFT) &
 			 GSI_EE_n_GSI_CH_k_CNTXT_0_ERINDEX_BMSK) |
-		((props->re_size << GSI_EE_n_GSI_CH_k_CNTXT_0_ELEMENT_SIZE_SHFT)
+		((GSI_CHAN_RE_SIZE_16B << GSI_EE_n_GSI_CH_k_CNTXT_0_ELEMENT_SIZE_SHFT)
 			 & GSI_EE_n_GSI_CH_k_CNTXT_0_ELEMENT_SIZE_BMSK));
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(props->ch_id, ee));
 
