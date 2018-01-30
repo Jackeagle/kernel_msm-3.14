@@ -6,5 +6,4 @@ ipat-y := ipa.o ipa_debugfs.o ipa_dp.o ipa_client.o \
 	ipa_uc.o
 
 obj-$(CONFIG_IPA_LITE) += ipahal/
-
-obj-$(CONFIG_GSI_LITE) += gsi/
+obj-$(CONFIG_IPA_LITE) += gsi/

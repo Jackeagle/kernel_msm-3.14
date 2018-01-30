@@ -1697,6 +1697,7 @@ static void ipa3_register_panic_hdlr(void)
 static int ipa3_post_init(struct device *ipa_dev)
 {
 	int result;
+	extern int ipa3_wwan_init(void);
 
 	/* Assign resource limitation to each group */
 	ipa3_set_resorce_groups_min_max_limits();
@@ -1737,6 +1738,8 @@ static int ipa3_post_init(struct device *ipa_dev)
 	ipa3_ctx->q6_proxy_clk_vote_valid = true;
 
 	atomic_set(&ipa3_ctx->state, IPA_STATE_READY);
+	if (ipa3_wwan_init())
+		ipa_err("WWAN init failed (ignoring)\n");
 
 	complete_all(&ipa3_ctx->init_completion_obj);
 	ipa_info("IPA driver initialization was successful.\n");
