@@ -24,21 +24,16 @@
 #define GSI_EVT_RING_MAX  23
 #define GSI_NO_EVT_ERINDEX 31
 
-#define GSI_IPC_LOGGING(buf, fmt, args...) \
-	do { \
-		ipc_log_string((buf), fmt, ## args); \
-	} while (0)
-
 #define GSIDBG(fmt, args...) \
 	do { \
 		pr_debug(fmt, ## args); \
-		GSI_IPC_LOGGING(gsi_ctx->ipc_logbuf, pr_fmt(fmt), ## args); \
+		ipc_log_string(gsi_ctx->ipc_logbuf, pr_fmt(fmt), ## args); \
 	} while (0)
 
 #define GSIERR(fmt, args...) \
 	do { \
 		pr_err(fmt, ## args); \
-		GSI_IPC_LOGGING(gsi_ctx->ipc_logbuf, pr_fmt(fmt), ## args); \
+		ipc_log_string(gsi_ctx->ipc_logbuf, pr_fmt(fmt), ## args); \
 	} while (0)
 
 #define IPA_GSI_CHANNEL_STOP_SLEEP_MIN_USEC (1000)
