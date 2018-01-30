@@ -37,17 +37,6 @@
 		if (gsi_ctx) { \
 			GSI_IPC_LOGGING(gsi_ctx->ipc_logbuf, \
 				"%s:%d " fmt, ## args); \
-			GSI_IPC_LOGGING(gsi_ctx->ipc_logbuf_low, \
-				"ipa %s:%d " fmt, ## args); \
-		} \
-	} while (0)
-
-#define GSIDBG_LOW(fmt, args...) \
-	do { \
-		pr_debug(fmt, ## args); \
-		if (gsi_ctx) { \
-			GSI_IPC_LOGGING(gsi_ctx->ipc_logbuf_low, \
-				"ipa %s:%d " fmt, ## args); \
 		} \
 	} while (0)
 
@@ -56,8 +45,6 @@
 		pr_err(fmt, ## args); \
 		if (gsi_ctx) { \
 			GSI_IPC_LOGGING(gsi_ctx->ipc_logbuf, \
-				"%s:%d " fmt, ## args); \
-			GSI_IPC_LOGGING(gsi_ctx->ipc_logbuf_low, \
 				"%s:%d " fmt, ## args); \
 		} \
 	} while (0)
@@ -630,7 +617,6 @@ struct gsi_ctx {
 	u32 max_ev;
 	struct completion gen_ee_cmd_compl;
 	void *ipc_logbuf;
-	void *ipc_logbuf_low;
 };
 
 enum gsi_re_type {

@@ -510,7 +510,7 @@ static void gsi_handle_irq(void)
 		if (!type)
 			break;
 
-		GSIDBG_LOW("type %x\n", type);
+		/* GSIDBG_LOW("type %x\n", type); */
 
 		if (type & GSI_EE_n_CNTXT_TYPE_IRQ_CH_CTRL_BMSK)
 			gsi_handle_ch_ctrl(ee);

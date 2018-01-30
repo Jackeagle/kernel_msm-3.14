@@ -22,7 +22,6 @@
 #include "gsi.h"
 
 static char dbg_buff[4096];
-static void *gsi_ipc_logbuf_low;
 
 static void gsi_wq_print_dp_stats(struct work_struct *work);
 static DECLARE_DELAYED_WORK(gsi_print_dp_stats_work, gsi_wq_print_dp_stats);
@@ -667,43 +666,6 @@ error:
 	return -EFAULT;
 }
 
-static ssize_t gsi_enable_ipc_low(struct file *file,
-	const char __user *ubuf, size_t count, loff_t *ppos)
-{
-	unsigned long missing;
-	s8 option = 0;
-
-	if (sizeof(dbg_buff) < count + 1)
-		return -EFAULT;
-
-	missing = copy_from_user(dbg_buff, ubuf, count);
-	if (missing)
-		return -EFAULT;
-
-	dbg_buff[count] = '\0';
-	if (kstrtos8(dbg_buff, 0, &option))
-		return -EFAULT;
-
-	mutex_lock(&gsi_ctx->mlock);
-	if (option) {
-		if (!gsi_ipc_logbuf_low) {
-			gsi_ipc_logbuf_low =
-				ipc_log_context_create(GSI_IPC_LOG_PAGES,
-					"gsi_low", 0);
-			if (gsi_ipc_logbuf_low == NULL)
-				pr_err("failed to get ipc_logbuf_low\n");
-		}
-		gsi_ctx->ipc_logbuf_low = gsi_ipc_logbuf_low;
-	} else {
-		gsi_ctx->ipc_logbuf_low = NULL;
-	}
-	mutex_unlock(&gsi_ctx->mlock);
-
-	return count;
-}
-
-
-
 const struct file_operations gsi_ev_dump_ops = {
 	.write = gsi_dump_evt,
 };
@@ -738,10 +700,6 @@ const struct file_operations gsi_rst_stats_ops = {
 
 const struct file_operations gsi_print_dp_stats_ops = {
 	.write = gsi_print_dp_stats,
-};
-
-const struct file_operations gsi_ipc_low_ops = {
-	.write = gsi_enable_ipc_low,
 };
 
 void gsi_debugfs_init(void)
@@ -800,11 +758,6 @@ void gsi_debugfs_init(void)
 
 	dfile = debugfs_create_file("print_dp_stats",
 		write_only_mode, gsi_dir, NULL, &gsi_print_dp_stats_ops);
-	if (IS_ERR_OR_NULL(dfile))
-		goto fail;
-
-	dfile = debugfs_create_file("ipc_low", write_only_mode,
-		gsi_dir, NULL, &gsi_ipc_low_ops);
 	if (IS_ERR_OR_NULL(dfile))
 		goto fail;
 
