@@ -909,11 +909,6 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 	struct gsi_evt_ctx *ctx;
 	int res;
 
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -ENODEV;
-	}
-
 	if (evt_ring_hdl >= gsi_ctx->max_ev) {
 		GSIERR("bad params evt_ring_hdl=%lu\n", evt_ring_hdl);
 		return -EINVAL;
