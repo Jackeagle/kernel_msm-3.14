@@ -35,7 +35,7 @@
 		pr_debug(fmt, ## args); \
 		if (gsi_ctx) { \
 			GSI_IPC_LOGGING(gsi_ctx->ipc_logbuf, \
-				"%s:%d " fmt, __func__, __LINE__, ## args); \
+				pr_fmt(fmt), ## args); \
 		} \
 	} while (0)
 
@@ -44,7 +44,7 @@
 		pr_err(fmt, ## args); \
 		if (gsi_ctx) { \
 			GSI_IPC_LOGGING(gsi_ctx->ipc_logbuf, \
-				"%s:%d " fmt, __func__, __LINE__, ## args); \
+				pr_fmt(fmt), ## args); \
 		} \
 	} while (0)
 
