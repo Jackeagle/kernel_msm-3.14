@@ -49,7 +49,6 @@
 		} \
 	} while (0)
 
-#define GSI_IPC_LOG_PAGES 50
 #define IPA_GSI_CHANNEL_STOP_SLEEP_MIN_USEC (1000)
 #define IPA_GSI_CHANNEL_STOP_SLEEP_MAX_USEC (2000)
 
@@ -707,7 +706,7 @@ extern struct gsi_ctx *gsi_ctx;
 void gsi_debugfs_init(void);
 uint16_t gsi_find_idx_from_addr(struct gsi_ring_ctx *ctx, uint64_t addr);
 void gsi_update_ch_dp_stats(struct gsi_chan_ctx *ctx, uint16_t used);
-struct gsi_ctx *msm_gsi_init(struct platform_device *pdev);
+struct gsi_ctx *msm_gsi_init(struct platform_device *pdev, void *logbuf);
 
 /*
  * Read a value from the given offset into the I/O space defined in

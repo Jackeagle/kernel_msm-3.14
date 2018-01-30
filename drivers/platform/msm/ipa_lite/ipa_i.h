@@ -52,7 +52,7 @@
 
 #define IPA_MAX_STATUS_STAT_NUM 30
 
-#define IPA_IPC_LOG_PAGES 50
+#define IPA_IPC_LOG_PAGES 100
 
 #define IPA_MEM_CANARY_VAL 0xdeadbeef
 

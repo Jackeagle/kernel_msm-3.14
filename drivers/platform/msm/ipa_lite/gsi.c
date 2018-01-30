@@ -2019,7 +2019,7 @@ free_lock:
 }
 
 /* Initialize GSI driver */
-struct gsi_ctx *msm_gsi_init(struct platform_device *pdev)
+struct gsi_ctx *msm_gsi_init(struct platform_device *pdev, void *logbuf)
 {
 	struct device *dev = &pdev->dev;
 
@@ -2030,10 +2030,9 @@ struct gsi_ctx *msm_gsi_init(struct platform_device *pdev)
 		return ERR_PTR(-ENOMEM);
 	}
 
-	gsi_ctx->ipc_logbuf = ipc_log_context_create(GSI_IPC_LOG_PAGES,
-		"gsi", 0);
-	if (gsi_ctx->ipc_logbuf == NULL)
-		GSIERR("failed to create IPC log, continue...\n");
+	gsi_ctx->ipc_logbuf = logbuf;
+	if (!logbuf)
+		GSIERR("no IPC log, continue...\n");
 
 	gsi_ctx->dev = dev;
 	init_completion(&gsi_ctx->gen_ee_cmd_compl);
