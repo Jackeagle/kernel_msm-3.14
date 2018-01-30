@@ -354,8 +354,7 @@ static void gsi_process_evt_re(struct gsi_evt_ctx *ctx,
 	uint16_t idx;
 
 	idx = gsi_find_idx_from_addr(&ctx->ring, ctx->ring.rp_local);
-	evt = (struct gsi_xfer_compl_evt *)(ctx->ring.base_va +
-			idx * ctx->ring.elem_sz);
+	evt = ctx->ring.base_va + idx * ctx->ring.elem_sz;
 	gsi_process_chan(evt, notify, callback);
 	gsi_incr_ring_rp(&ctx->ring);
 	/* recycle this element */
@@ -773,7 +772,7 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 static void gsi_init_evt_ring(struct gsi_evt_ring_props *props,
 		struct gsi_ring_ctx *ctx)
 {
-	ctx->base_va = (uintptr_t)props->ring_base_vaddr;
+	ctx->base_va = props->ring_base_vaddr;
 	ctx->base = props->ring_base_addr;
 	ctx->wp = ctx->base;
 	ctx->rp = ctx->base;
@@ -790,7 +789,7 @@ static void gsi_prime_evt_ring(struct gsi_evt_ctx *ctx)
 	unsigned long flags;
 
 	spin_lock_irqsave(&ctx->ring.slock, flags);
-	memset((void *)ctx->ring.base_va, 0, ctx->ring.len);
+	memset(ctx->ring.base_va, 0, ctx->ring.len);
 	ctx->ring.wp_local = ctx->ring.base +
 		ctx->ring.max_num_elem * ctx->ring.elem_sz;
 	gsi_ring_evt_doorbell(ctx);
@@ -1061,7 +1060,7 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, unsigned int ee,
 static void gsi_init_chan_ring(struct gsi_chan_props *props,
 		struct gsi_ring_ctx *ctx)
 {
-	ctx->base_va = (uintptr_t)props->ring_base_vaddr;
+	ctx->base_va = props->ring_base_vaddr;
 	ctx->base = props->ring_base_addr;
 	ctx->wp = ctx->base;
 	ctx->rp = ctx->base;
@@ -1660,8 +1659,7 @@ int gsi_queue_xfer(unsigned long chan_hdl, uint16_t num_xfers,
 		tre.chain = (xfer[i].flags & GSI_XFER_FLAG_CHAIN) ? 1 : 0;
 
 		idx = gsi_find_idx_from_addr(&ctx->ring, ctx->ring.wp_local);
-		tre_ptr = (struct gsi_tre *)(ctx->ring.base_va +
-				idx * ctx->ring.elem_sz);
+		tre_ptr = ctx->ring.base_va + idx * ctx->ring.elem_sz;
 
 		/* write the TRE to ring */
 		*tre_ptr = tre;

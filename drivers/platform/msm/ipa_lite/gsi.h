@@ -432,7 +432,7 @@ enum gsi_chan_state {
 
 struct gsi_ring_ctx {
 	spinlock_t slock;
-	unsigned long base_va;
+	void *base_va;
 	uint64_t base;
 	uint64_t wp;
 	uint64_t rp;
