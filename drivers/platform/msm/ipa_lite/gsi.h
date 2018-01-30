@@ -198,7 +198,6 @@ struct gsi_evt_ring_props {
 	uint8_t int_modc;
 	bool exclusive;
 	void (*err_cb)(struct gsi_evt_err_notify *notify);
-	void *user_data;
 };
 
 enum gsi_chan_prot {

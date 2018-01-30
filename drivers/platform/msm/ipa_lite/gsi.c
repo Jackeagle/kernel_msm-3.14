@@ -205,7 +205,7 @@ static void gsi_handle_glob_err(uint32_t err)
 		}
 
 		ev = &gsi_ctx->evtr[log->virt_idx];
-		evt_notify.user_data = ev->props.user_data;
+		evt_notify.user_data = NULL;
 		evt_notify.err_desc = err & 0xFFFF;
 		if (log->code == GSI_OUT_OF_BUFFERS_ERR) {
 			BUG_ON(log->ee != gsi_ctx->ee);
