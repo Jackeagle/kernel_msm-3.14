@@ -33,30 +33,27 @@
 
 #define GSIDBG(fmt, args...) \
 	do { \
-		dev_dbg(gsi_ctx->dev, "%s:%d " fmt, __func__, __LINE__, \
-		## args);\
+		pr_debug("gsi %s:%d " fmt, __func__, __LINE__, ## args);\
 		if (gsi_ctx) { \
 			GSI_IPC_LOGGING(gsi_ctx->ipc_logbuf, \
 				"%s:%d " fmt, ## args); \
 			GSI_IPC_LOGGING(gsi_ctx->ipc_logbuf_low, \
-				"%s:%d " fmt, ## args); \
+				"ipa %s:%d " fmt, ## args); \
 		} \
 	} while (0)
 
 #define GSIDBG_LOW(fmt, args...) \
 	do { \
-		dev_dbg(gsi_ctx->dev, "%s:%d " fmt, __func__, __LINE__, \
-		## args);\
+		pr_debug("gsi %s:%d " fmt, __func__, __LINE__, ## args);\
 		if (gsi_ctx) { \
 			GSI_IPC_LOGGING(gsi_ctx->ipc_logbuf_low, \
-				"%s:%d " fmt, ## args); \
+				"ipa %s:%d " fmt, ## args); \
 		} \
 	} while (0)
 
 #define GSIERR(fmt, args...) \
 	do { \
-		dev_err(gsi_ctx->dev, "%s:%d " fmt, __func__, __LINE__, \
-		## args);\
+		pr_err("gsi %s:%d " fmt, __func__, __LINE__, ## args);\
 		if (gsi_ctx) { \
 			GSI_IPC_LOGGING(gsi_ctx->ipc_logbuf, \
 				"%s:%d " fmt, ## args); \
