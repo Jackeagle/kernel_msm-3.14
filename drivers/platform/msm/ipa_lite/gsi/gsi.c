@@ -1486,11 +1486,6 @@ int gsi_dealloc_channel(unsigned long chan_hdl)
 	uint32_t val;
 	struct gsi_chan_ctx *ctx;
 
-	if (!gsi_ctx) {
-		pr_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
-		return -ENODEV;
-	}
-
 	if (chan_hdl >= gsi_ctx->max_ch) {
 		GSIERR("bad params chan_hdl=%lu\n", chan_hdl);
 		return -EINVAL;
