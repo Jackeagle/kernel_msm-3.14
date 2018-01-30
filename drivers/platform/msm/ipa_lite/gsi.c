@@ -10,6 +10,8 @@
  * GNU General Public License for more details.
  */
 
+#define pr_fmt(fmt)    "gsi %s:%d " fmt, __func__, __LINE__
+
 #include <linux/of.h>
 #include <linux/interrupt.h>
 #include <linux/io.h>
