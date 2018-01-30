@@ -1173,7 +1173,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props, void *dev_hdl)
 
 	memset(ctx, 0, sizeof(*ctx));
 	user_data = devm_kzalloc(gsi_ctx->dev,
-		(props->ring_len / props->re_size) * sizeof(void *),
+		(props->ring_len / GSI_CHAN_RE_SIZE_16B) * sizeof(void *),
 		GFP_KERNEL);
 	if (user_data == NULL) {
 		GSIERR("%s:%d gsi context not allocated\n", __func__, __LINE__);
