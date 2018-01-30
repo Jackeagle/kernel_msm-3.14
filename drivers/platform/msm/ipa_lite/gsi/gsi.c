@@ -21,6 +21,7 @@
 #include "gsi_reg.h"
 
 #define GSI_EVT_RING_ELEMENT_SIZE	16	/* bytes */
+#define GSI_CHAN_RING_ELEMENT_SIZE	16	/* bytes */
 
 #define GSI_CMD_TIMEOUT (5*HZ)
 #define GSI_STOP_CMD_TIMEOUT_MS 20
@@ -1027,7 +1028,7 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, unsigned int ee,
 			 GSI_EE_n_GSI_CH_k_CNTXT_0_CHTYPE_DIR_BMSK) |
 		((erindex << GSI_EE_n_GSI_CH_k_CNTXT_0_ERINDEX_SHFT) &
 			 GSI_EE_n_GSI_CH_k_CNTXT_0_ERINDEX_BMSK) |
-		((GSI_CHAN_RE_SIZE_16B << GSI_EE_n_GSI_CH_k_CNTXT_0_ELEMENT_SIZE_SHFT)
+		((GSI_CHAN_RING_ELEMENT_SIZE << GSI_EE_n_GSI_CH_k_CNTXT_0_ELEMENT_SIZE_SHFT)
 			 & GSI_EE_n_GSI_CH_k_CNTXT_0_ELEMENT_SIZE_BMSK));
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(props->ch_id, ee));
 
@@ -1066,7 +1067,7 @@ static void gsi_init_chan_ring(struct gsi_chan_props *props,
 	ctx->wp_local = ctx->base;
 	ctx->rp_local = ctx->base;
 	ctx->len = props->ring_len;
-	ctx->elem_sz = GSI_CHAN_RE_SIZE_16B;
+	ctx->elem_sz = GSI_CHAN_RING_ELEMENT_SIZE;
 	ctx->max_num_elem = ctx->len / ctx->elem_sz - 1;
 	ctx->end = ctx->base + (ctx->max_num_elem + 1) *
 		ctx->elem_sz;
@@ -1084,7 +1085,7 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 
 	if (props->ring_len % 16) {
 		GSIERR("bad params ring_len %u not a multiple of re size %u\n",
-				props->ring_len, GSI_CHAN_RE_SIZE_16B);
+				props->ring_len, GSI_CHAN_RING_ELEMENT_SIZE);
 		return -EINVAL;
 	}
 
@@ -1098,7 +1099,8 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 		return -EINVAL;
 	}
 
-	last = props->ring_base_addr + props->ring_len - GSI_CHAN_RE_SIZE_16B;
+	last = props->ring_base_addr + props->ring_len -
+			GSI_CHAN_RING_ELEMENT_SIZE;
 
 	/* MSB should stay same within the ring */
 	if ((props->ring_base_addr & 0xFFFFFFFF00000000ULL) !=
@@ -1172,7 +1174,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props, void *dev_hdl)
 
 	memset(ctx, 0, sizeof(*ctx));
 	user_data = devm_kzalloc(gsi_ctx->dev,
-		(props->ring_len / GSI_CHAN_RE_SIZE_16B) * sizeof(void *),
+		(props->ring_len / GSI_CHAN_RING_ELEMENT_SIZE) * sizeof(void *),
 		GFP_KERNEL);
 	if (user_data == NULL) {
 		GSIERR("%s:%d gsi context not allocated\n", __func__, __LINE__);
