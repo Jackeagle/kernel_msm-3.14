@@ -33,19 +33,13 @@
 #define GSIDBG(fmt, args...) \
 	do { \
 		pr_debug(fmt, ## args); \
-		if (gsi_ctx) { \
-			GSI_IPC_LOGGING(gsi_ctx->ipc_logbuf, \
-				pr_fmt(fmt), ## args); \
-		} \
+		GSI_IPC_LOGGING(gsi_ctx->ipc_logbuf, pr_fmt(fmt), ## args); \
 	} while (0)
 
 #define GSIERR(fmt, args...) \
 	do { \
 		pr_err(fmt, ## args); \
-		if (gsi_ctx) { \
-			GSI_IPC_LOGGING(gsi_ctx->ipc_logbuf, \
-				pr_fmt(fmt), ## args); \
-		} \
+		GSI_IPC_LOGGING(gsi_ctx->ipc_logbuf, pr_fmt(fmt), ## args); \
 	} while (0)
 
 #define IPA_GSI_CHANNEL_STOP_SLEEP_MIN_USEC (1000)
