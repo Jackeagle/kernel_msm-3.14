@@ -154,7 +154,6 @@ enum gsi_evt_err {
  *
  */
 struct gsi_evt_err_notify {
-	void *user_data;
 	enum gsi_evt_err evt_id;
 	uint16_t err_desc;
 };
