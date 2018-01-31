@@ -735,6 +735,19 @@ static u32 evt_ring_ctx_0_val(enum gsi_evt_chtype chtype,
 	return val;
 }
 
+/* Compute the value to write to the event ring context 8 register */
+static u32 evt_ring_ctx_8_val(u32 int_modt, u32 int_modc)
+{
+	u32 val;
+
+	val = (int_modt << GSI_EE_n_EV_CH_k_CNTXT_8_INT_MODT_SHFT) &
+			GSI_EE_n_EV_CH_k_CNTXT_8_INT_MODT_BMSK;
+	val |= (int_modc << GSI_EE_n_EV_CH_k_CNTXT_8_INT_MODC_SHFT) &
+			GSI_EE_n_EV_CH_k_CNTXT_8_INT_MODC_BMSK;
+
+	return val;
+}
+
 static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 		uint8_t evt_id, unsigned int ee)
 {
@@ -762,10 +775,7 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 	val = props->mem.phys_base >> 32;
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_3_OFFS(evt_id, ee));
 
-	val = (((props->int_modt << GSI_EE_n_EV_CH_k_CNTXT_8_INT_MODT_SHFT) &
-		GSI_EE_n_EV_CH_k_CNTXT_8_INT_MODT_BMSK) |
-		((int_modc << GSI_EE_n_EV_CH_k_CNTXT_8_INT_MODC_SHFT) &
-		 GSI_EE_n_EV_CH_k_CNTXT_8_INT_MODC_BMSK));
+	val = evt_ring_ctx_8_val(props->int_modt, int_modc);
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_8_OFFS(evt_id, ee));
 
 	/* No MSI write data, and MSI address high and low address is 0 */
