@@ -2641,10 +2641,9 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 		queue_work(sys->wq, &sys->work);
 }
 
-long ipa3_alloc_common_event_ring(void)
+long ipa3_alloc_common_event_ring(u32 size)
 {
 	struct gsi_evt_ring_props gsi_evt_ring_props;
-	u32 size = IPA_COMMON_EVENT_RING_SIZE;
 	long result;
 
 	memset(&gsi_evt_ring_props, 0, sizeof(gsi_evt_ring_props));
