@@ -208,18 +208,6 @@ struct ipa_smmu_cb_ctx {
 	bool s1_bypass;
 };
 
-/**
- * struct ipa3_hdr_offset_entry - IPA header offset entry
- * @link: entry's link in global processing context header offset entries list
- * @offset: the offset
- * @bin: bin
- */
-struct ipa3_hdr_proc_ctx_offset_entry {
-	struct list_head link;
-	u32 offset;
-	u32 bin;
-};
-
 struct ipa3_status_stats {
 	struct ipahal_pkt_status status[IPA_MAX_STATUS_STAT_NUM];
 	unsigned int curr;
