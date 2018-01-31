@@ -1469,36 +1469,6 @@ void ipa3_dump_buff_internal(void *base, dma_addr_t phy_base, u32 size)
 	ipa_debug("END\n");
 }
 
-/**
- * ipa3_straddle_boundary() - Checks whether a memory buffer straddles a
- * boundary
- * @start: start address of the memory buffer
- * @end: end address of the memory buffer
- * @boundary: boundary
- *
- * Return value:
- * 1: if the interval [start, end] straddles boundary
- * 0: otherwise
- */
-int ipa3_straddle_boundary(u32 start, u32 end, u32 boundary)
-{
-	u32 next_start;
-	u32 prev_end;
-
-	ipa_debug("start=%u end=%u boundary=%u\n", start, end, boundary);
-
-	next_start = (start + (boundary - 1)) & ~(boundary - 1);
-	prev_end = ((end + (boundary - 1)) & ~(boundary - 1)) - boundary;
-
-	while (next_start < prev_end)
-		next_start += boundary;
-
-	if (next_start == prev_end)
-		return 1;
-	else
-		return 0;
-}
-
 #define IPA_MEM_OFST_START			0x280
 #define IPA_MEM_NAT_OFST			0x0
 #define IPA_MEM_NAT_SIZE			0x0
