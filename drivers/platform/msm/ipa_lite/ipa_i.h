@@ -439,28 +439,6 @@ struct ipa3_tx_pkt_wrapper {
 };
 
 /**
- * struct ipa3_dma_xfer_wrapper - IPADMA transfer descr wrapper
- * @phys_addr_src: physical address of the source data to copy
- * @phys_addr_dest: physical address to store the copied data
- * @len: len in bytes to copy
- * @link: linked to the wrappers list on the proper(sync/async) cons pipe
- * @xfer_done: completion object for sync_memcpy completion
- * @callback: IPADMA client provided completion callback
- * @user1: cookie1 for above callback
- *
- * This struct can wrap both sync and async memcpy transfers descriptors.
- */
-struct ipa3_dma_xfer_wrapper {
-	u64 phys_addr_src;
-	u64 phys_addr_dest;
-	u16 len;
-	struct list_head link;
-	struct completion xfer_done;
-	void (*callback)(void *user1);
-	void *user1;
-};
-
-/**
  * struct ipa3_desc - IPA descriptor
  * @type: skb or immediate command or plain old data
  * @pyld: points to skb
