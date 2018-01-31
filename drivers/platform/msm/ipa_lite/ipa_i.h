@@ -1144,7 +1144,6 @@ int _ipa_init_flt4_v3(void);
 int _ipa_init_flt6_v3(void);
 
 void ipa3_skb_recycle(struct sk_buff *skb);
-int ipa3_enable_data_path(u32 clnt_hdl);
 
 int ipa3_cfg_ep_status(u32 clnt_hdl,
 		const struct ipahal_reg_ep_cfg_status *ipa_ep_cfg);

@@ -28,48 +28,6 @@
 
 #define IPA_PKT_FLUSH_TO_US 100
 
-int ipa3_enable_data_path(u32 clnt_hdl)
-{
-	struct ipa3_ep_context *ep = &ipa3_ctx->ep[clnt_hdl];
-	struct ipa_ep_cfg_holb holb_cfg;
-	struct ipa_ep_cfg_ctrl ep_cfg_ctrl;
-	int res = 0;
-	struct ipahal_reg_endp_init_rsrc_grp rsrc_grp;
-
-	/* Assign the resource group for pipe */
-	memset(&rsrc_grp, 0, sizeof(rsrc_grp));
-	rsrc_grp.rsrc_grp = ipa_get_ep_group(ep->client);
-	if (rsrc_grp.rsrc_grp == -1) {
-		ipa_err("invalid group for client %d\n", ep->client);
-		WARN_ON(1);
-		return -EFAULT;
-	}
-
-	ipa_debug("Setting group %d for pipe %d\n",
-		rsrc_grp.rsrc_grp, clnt_hdl);
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_RSRC_GRP_n, clnt_hdl,
-		&rsrc_grp);
-
-	ipa_debug("Enabling data path\n");
-	if (IPA_CLIENT_IS_CONS(ep->client)) {
-		memset(&holb_cfg, 0, sizeof(holb_cfg));
-		holb_cfg.en = IPA_HOLB_TMR_DIS;
-		holb_cfg.tmr_val = 0;
-		res = ipa3_cfg_ep_holb(clnt_hdl, &holb_cfg);
-	}
-
-	/* Enable the pipe */
-	if (IPA_CLIENT_IS_CONS(ep->client) &&
-		(ep->keep_ipa_awake ||
-		!ipa3_should_pipe_be_suspended(ep->client))) {
-		memset(&ep_cfg_ctrl, 0, sizeof(ep_cfg_ctrl));
-		ep_cfg_ctrl.ipa_ep_suspend = false;
-		res = ipa3_cfg_ep_ctrl(clnt_hdl, &ep_cfg_ctrl);
-	}
-
-	return res;
-}
-
 static void ipa_xfer_cb(struct gsi_chan_xfer_notify *notify)
 {
 }
