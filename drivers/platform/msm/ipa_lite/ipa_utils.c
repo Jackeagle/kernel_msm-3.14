@@ -1470,26 +1470,6 @@ void ipa3_dump_buff_internal(void *base, dma_addr_t phy_base, u32 size)
 }
 
 /**
- * ipa3_set_aggr_mode() - Set the aggregation mode which is a global setting
- * @mode:	[in] the desired aggregation mode for e.g. straight MBIM, QCNCM,
- * etc
- *
- * Returns:	0 on success
- */
-int ipa3_set_aggr_mode(enum ipa_aggr_mode mode)
-{
-	struct ipahal_reg_qcncm qcncm;
-
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
-	ipahal_read_reg_fields(IPA_QCNCM, &qcncm);
-	qcncm.mode_en = mode;
-	ipahal_write_reg_fields(IPA_QCNCM, &qcncm);
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
-
-	return 0;
-}
-
-/**
  * ipa3_straddle_boundary() - Checks whether a memory buffer straddles a
  * boundary
  * @start: start address of the memory buffer

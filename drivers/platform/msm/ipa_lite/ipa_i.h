@@ -141,14 +141,6 @@ typedef void (*ipa_irq_handler_t)(enum ipa_irq_type interrupt,
                                 void *interrupt_data);
 
 /**
- * enum ipa_aggr_mode - global aggregation mode
- */
-enum ipa_aggr_mode {
-        IPA_MBIM_AGGR,
-        IPA_QCNCM_AGGR,
-};
-
-/**
  * struct ipa_sys_connect_params - information needed to setup an IPA end-point
  * in system-BAM mode
  * @ipa_ep_cfg: IPA EP configuration
@@ -1118,11 +1110,6 @@ int ipa3_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg);
 int ipa3_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ipa_ep_cfg);
 
 int ipa3_cfg_ep_ctrl(u32 clnt_hdl, const struct ipa_ep_cfg_ctrl *ep_ctrl);
-
-/*
- * Aggregation
- */
-int ipa3_set_aggr_mode(enum ipa_aggr_mode mode);
 
 /*
  * Data path
