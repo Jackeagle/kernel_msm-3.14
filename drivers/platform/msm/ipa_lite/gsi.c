@@ -794,27 +794,26 @@ static void gsi_prime_evt_ring(struct gsi_evt_ctx *ctx)
 	spin_unlock_irqrestore(&ctx->ring.slock, flags);
 }
 
-static int gsi_validate_evt_ring_props(struct gsi_evt_ring_props *props)
+static int gsi_validate_evt_ring_mem(struct ipa_mem_buffer *mem)
 {
 	dma_addr_t ra;
 
-	if (props->mem.size % 16) {
+	if (mem->size % 16) {
 		ipa_err("bad params mem.size %u not a multiple of RE size %u\n",
-				props->mem.size, GSI_EVT_RING_ELEMENT_SIZE);
+				mem->size, GSI_EVT_RING_ELEMENT_SIZE);
 		return -EINVAL;
 	}
 
-	ra = props->mem.phys_base;
-	do_div(ra, roundup_pow_of_two(props->mem.size));
+	ra = mem->phys_base;
+	do_div(ra, roundup_pow_of_two(mem->size));
 
-	if (props->mem.phys_base != ra * roundup_pow_of_two(props->mem.size)) {
+	if (mem->phys_base != ra * roundup_pow_of_two(mem->size)) {
 		ipa_err("bad params ring base not aligned 0x%llx align 0x%lx\n",
-				props->mem.phys_base,
-				roundup_pow_of_two(props->mem.size));
+				mem->phys_base, roundup_pow_of_two(mem->size));
 		return -EINVAL;
 	}
 
-	if (!props->mem.base) {
+	if (!mem->base) {
 		ipa_err("GPI protocol requires ring base VA\n");
 		return -EINVAL;
 	}
@@ -834,7 +833,7 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props)
 	unsigned long flags;
 	size_t bit_count;
 
-	if (gsi_validate_evt_ring_props(props)) {
+	if (gsi_validate_evt_ring_mem(&props->mem)) {
 		ipa_err("invalid params\n");
 		return -EINVAL;
 	}
