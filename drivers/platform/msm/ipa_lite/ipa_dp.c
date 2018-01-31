@@ -2641,7 +2641,7 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 		queue_work(sys->wq, &sys->work);
 }
 
-long ipa3_alloc_common_event_ring(u32 size, u16 int_modt)
+long ipa3_alloc_common_event_ring(u32 size, u16 int_modt, bool excl)
 {
 	struct gsi_evt_ring_props gsi_evt_ring_props;
 	long result;
@@ -2653,7 +2653,7 @@ long ipa3_alloc_common_event_ring(u32 size, u16 int_modt)
 	}
 	gsi_evt_ring_props.int_modt = int_modt;
 	gsi_evt_ring_props.int_modc = 1; /* moderation comes from channel*/
-	gsi_evt_ring_props.exclusive = false;
+	gsi_evt_ring_props.exclusive = excl;
 
 	result = gsi_alloc_evt_ring(&gsi_evt_ring_props);
 	if (result < 0) {
