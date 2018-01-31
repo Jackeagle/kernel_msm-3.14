@@ -79,7 +79,6 @@ struct ipa3_rmnet_plat_drv_res {
 	bool ipa_loaduC;
 	bool ipa_advertise_sg_support;
 	bool ipa_napi_enable;
-	u32 wan_rx_desc_size;
 };
 
 /**
@@ -424,7 +423,7 @@ static int handle3_ingress_format(struct net_device *dev,
 
 	ipa_wan_ep_cfg->napi_enabled = ipa3_rmnet_res.ipa_napi_enable;
 	ipa_wan_ep_cfg->desc_fifo_sz =
-		ipa3_rmnet_res.wan_rx_desc_size * IPA_FIFO_ELEMENT_SIZE;
+			IPA_WWAN_CONS_DESC_FIFO_SZ * IPA_FIFO_ELEMENT_SIZE;
 
 	mutex_lock(&rmnet_ipa3_ctx->pipe_handle_guard);
 
@@ -853,7 +852,6 @@ static struct notifier_block ipa3_ssr_notifier = {
 static int get_ipa_rmnet_dts_configuration(struct platform_device *pdev,
 		struct ipa3_rmnet_plat_drv_res *ipa_rmnet_drv_res)
 {
-	ipa_rmnet_drv_res->wan_rx_desc_size = IPA_WWAN_CONS_DESC_FIFO_SZ;
 	ipa_rmnet_drv_res->ipa_rmnet_ssr =
 			of_property_read_bool(pdev->dev.of_node,
 			"qcom,rmnet-ipa-ssr");
