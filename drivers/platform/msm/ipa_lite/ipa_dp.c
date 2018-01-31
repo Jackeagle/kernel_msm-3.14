@@ -2715,26 +2715,25 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 			ipa_err("fail to dma alloc %u bytes\n", size);
 			return -ENOMEM;
 		}
+		gsi_evt_ring_props.int_modt = IPA_GSI_EVT_RING_INT_MODT;
+		gsi_evt_ring_props.int_modc = 1;
+		gsi_evt_ring_props.exclusive = true;
+
+		ipa_debug("client=%d moderation threshold cycles=%u cnt=%u\n",
+			ep->client,
+			gsi_evt_ring_props.int_modt,
+			gsi_evt_ring_props.int_modc);
+
+		result = gsi_alloc_evt_ring(&gsi_evt_ring_props);
+		if (result < 0)
+			goto fail_alloc_evt_ring;
+		ep->gsi_evt_ring_hdl = result;
 
 		/* copy mem info */
 		ep->gsi_evt_ring_mem.size = gsi_evt_ring_props.mem.size;
 		ep->gsi_evt_ring_mem.phys_base =
 			gsi_evt_ring_props.mem.phys_base;
 		ep->gsi_evt_ring_mem.base = gsi_evt_ring_props.mem.base;
-
-		gsi_evt_ring_props.int_modt = IPA_GSI_EVT_RING_INT_MODT;
-		gsi_evt_ring_props.int_modc = 1;
-
-		ipa_debug("client=%d moderation threshold cycles=%u cnt=%u\n",
-			ep->client,
-			gsi_evt_ring_props.int_modt,
-			gsi_evt_ring_props.int_modc);
-		gsi_evt_ring_props.exclusive = true;
-
-		result = gsi_alloc_evt_ring(&gsi_evt_ring_props);
-		if (result < 0)
-			goto fail_alloc_evt_ring;
-		ep->gsi_evt_ring_hdl = result;
 	}
 
 	memset(&gsi_channel_props, 0, sizeof(gsi_channel_props));
