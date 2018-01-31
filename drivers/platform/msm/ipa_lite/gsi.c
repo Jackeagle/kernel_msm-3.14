@@ -769,8 +769,7 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 	gsi_writel(0, GSI_EE_n_EV_CH_k_CNTXT_13_OFFS(evt_id, ee));
 }
 
-static void
-gsi_init_evt_ring(struct gsi_ring_ctx *ctx, struct ipa_mem_buffer *mem)
+static void gsi_init_ring(struct gsi_ring_ctx *ctx, struct ipa_mem_buffer *mem)
 {
 	ctx->mem = *mem;
 	ctx->wp = mem->phys_base;
@@ -884,7 +883,7 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props)
 	gsi_program_evt_ring_ctx(props, evt_id, gsi_ctx->ee);
 
 	spin_lock_init(&ctx->ring.slock);
-	gsi_init_evt_ring(&ctx->ring, &props->mem);
+	gsi_init_ring(&ctx->ring, &props->mem);
 
 	ctx->id = evt_id;
 	atomic_inc(&gsi_ctx->num_evt_ring);
@@ -1004,7 +1003,7 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 	}
 
 	gsi_program_evt_ring_ctx(&ctx->props, evt_ring_hdl, gsi_ctx->ee);
-	gsi_init_evt_ring(&ctx->ring, &ctx->props.mem);
+	gsi_init_ring(&ctx->ring, &ctx->props.mem);
 
 	/* restore scratch */
 	__gsi_write_evt_ring_scratch(evt_ring_hdl, ctx->scratch);
@@ -1053,19 +1052,6 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, unsigned int ee,
 		((props->use_db_eng << GSI_EE_n_GSI_CH_k_QOS_USE_DB_ENG_SHFT) &
 			 GSI_EE_n_GSI_CH_k_QOS_USE_DB_ENG_BMSK));
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_QOS_OFFS(props->ch_id, ee));
-}
-
-static void
-gsi_init_chan_ring(struct gsi_ring_ctx *ctx, struct ipa_mem_buffer *mem)
-{
-	ctx->mem = *mem;
-	ctx->wp = mem->phys_base;
-	ctx->rp = mem->phys_base;
-	ctx->wp_local = mem->phys_base;
-	ctx->rp_local = mem->phys_base;
-	ctx->elem_sz = GSI_CHAN_RING_ELEMENT_SIZE;
-	ctx->max_num_elem = mem->size / ctx->elem_sz - 1;
-	ctx->end = mem->phys_base + (ctx->max_num_elem + 1) * ctx->elem_sz;
 }
 
 static int gsi_validate_channel_props(struct gsi_chan_props *props)
@@ -1215,7 +1201,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	gsi_program_chan_ctx(props, gsi_ctx->ee, erindex);
 
 	spin_lock_init(&ctx->ring.slock);
-	gsi_init_chan_ring(&ctx->ring, &props->mem);
+	gsi_init_ring(&ctx->ring, &props->mem);
 	if (!props->max_re_expected)
 		ctx->props.max_re_expected = ctx->ring.max_num_elem;
 	ctx->user_data = user_data;
@@ -1449,7 +1435,7 @@ reset:
 
 	gsi_program_chan_ctx(&ctx->props, gsi_ctx->ee,
 			ctx->evtr ? ctx->evtr->id : GSI_NO_EVT_ERINDEX);
-	gsi_init_chan_ring(&ctx->ring, &ctx->props.mem);
+	gsi_init_ring(&ctx->ring, &ctx->props.mem);
 
 	/* restore scratch */
 	__gsi_write_channel_scratch(chan_hdl, ctx->scratch);
@@ -1845,7 +1831,7 @@ int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
 		ctx->scratch = *scr;
 	gsi_program_chan_ctx(&ctx->props, gsi_ctx->ee,
 			ctx->evtr ? ctx->evtr->id : GSI_NO_EVT_ERINDEX);
-	gsi_init_chan_ring(&ctx->ring, &ctx->props.mem);
+	gsi_init_ring(&ctx->ring, &ctx->props.mem);
 
 	/* restore scratch */
 	__gsi_write_channel_scratch(chan_hdl, ctx->scratch);
