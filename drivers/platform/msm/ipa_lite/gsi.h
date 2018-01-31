@@ -338,14 +338,14 @@ enum gsi_chan_use_db_eng {
  *
  */
 struct gsi_chan_props {
+	void *ring_base_vaddr;
+	dma_addr_t ring_base_addr;
+	u32 ring_len;
 	enum gsi_chan_dir dir;
 	uint8_t ch_id;
 	unsigned long evt_ring_hdl;
 	enum gsi_chan_ring_elem_size re_size;
-	uint16_t ring_len;
 	uint16_t max_re_expected;
-	uint64_t ring_base_addr;
-	void *ring_base_vaddr;
 	enum gsi_chan_use_db_eng use_db_eng;
 	enum gsi_max_prefetch max_prefetch;
 	uint8_t low_weight;

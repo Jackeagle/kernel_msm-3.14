@@ -1073,8 +1073,8 @@ static void gsi_init_chan_ring(struct gsi_chan_props *props,
 
 static int gsi_validate_channel_props(struct gsi_chan_props *props)
 {
-	uint64_t ra;
-	uint64_t last;
+	dma_addr_t ra;
+	dma_addr_t last;
 
 	if (props->ch_id >= gsi_ctx->max_ch) {
 		ipa_err("ch_id %u invalid\n", props->ch_id);

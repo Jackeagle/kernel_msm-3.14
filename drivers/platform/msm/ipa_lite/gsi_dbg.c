@@ -134,7 +134,7 @@ static ssize_t gsi_dump_ch(struct file *file,
 	char *sptr, *token;
 	uint32_t val;
 	struct gsi_chan_ctx *ctx;
-	uint16_t i;
+	u32 i;
 
 	if (sizeof(dbg_buff) < count + 1)
 		return -EFAULT;
