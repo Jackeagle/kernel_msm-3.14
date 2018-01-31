@@ -2675,6 +2675,23 @@ long ipa3_alloc_common_event_ring(void)
 	return 0;
 }
 
+/*
+ * GSI ring length is calculated based on the desc_fifo_sz which
+ * defines the descriptor FIFO.  (GSI descriptors are 16 bytes.)
+ * For producer pipes there is also an additional descriptor
+ * for TAG STATUS immediate command.  An exception to this is the
+ * APPS_WAN_PROD pipe, which uses event ring rather than TAG STATUS
+ * based completions.
+ */
+static u32
+ipa_gsi_ring_mem_size(enum ipa_client_type client, u32 desc_fifo_sz)
+{
+	if (IPA_CLIENT_IS_PROD(client) && client != IPA_CLIENT_APPS_WAN_PROD)
+		return 4 * desc_fifo_sz;
+
+	return 2 * desc_fifo_sz;
+}
+
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	struct ipa3_ep_context *ep)
 {
@@ -2686,6 +2703,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	dma_addr_t dma_addr;
 	dma_addr_t evt_dma_addr;
 	int result;
+	u32 size;
 
 	evt_dma_addr = 0;
 	ep->gsi_evt_ring_hdl = GSI_NO_EVT_ERINDEX;
@@ -2703,12 +2721,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		ep->gsi_evt_ring_hdl = ipa3_ctx->gsi_evt_comm_hdl;
 	} else if (ep->sys->policy != IPA_POLICY_NOINTR_MODE ||
 	     IPA_CLIENT_IS_CONS(ep->client)) {
-		/*
-		 * GSI ring length is calculated based on the desc_fifo_sz
-		 * which was meant to define the BAM desc fifo. GSI descriptors
-		 * are 16B as opposed to 8B for BAM.
-		 */
-		gsi_evt_ring_props.mem.size = 2 * in->desc_fifo_sz;
+		size = ipa_gsi_ring_mem_size(ep->client, in->desc_fifo_sz);
 
 		gsi_evt_ring_props.mem.base =
 			dma_alloc_coherent(dev, gsi_evt_ring_props.mem.size,
@@ -2760,20 +2773,8 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 
 	gsi_channel_props.evt_ring_hdl = ep->gsi_evt_ring_hdl;
 
-	/*
-	 * GSI ring length is calculated based on the desc_fifo_sz which was
-	 * meant to define the BAM desc fifo. GSI descriptors are 16B as opposed
-	 * to 8B for BAM. For PROD pipes there is also an additional descriptor
-	 * for TAG STATUS immediate command. APPS_WAN_PROD pipe is an exception
-	 * as this pipe do not use TAG STATUS for completion. Instead it uses
-	 * event ring based completions.
-	 */
-	if (ep->client == IPA_CLIENT_APPS_WAN_PROD)
-		gsi_channel_props.mem.size = 2 * in->desc_fifo_sz;
-	else if (IPA_CLIENT_IS_PROD(ep->client))
-		gsi_channel_props.mem.size = 4 * in->desc_fifo_sz;
-	else
-		gsi_channel_props.mem.size = 2 * in->desc_fifo_sz;
+	gsi_channel_props.mem.size = ipa_gsi_ring_mem_size(ep->client,
+						in->desc_fifo_sz);
 	gsi_channel_props.mem.base =
 		dma_alloc_coherent(dev, gsi_channel_props.mem.size,
 			&dma_addr, GFP_KERNEL);
