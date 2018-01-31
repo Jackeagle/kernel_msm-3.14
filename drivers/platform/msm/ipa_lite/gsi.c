@@ -795,8 +795,7 @@ static int gsi_validate_evt_ring_mem(struct ipa_mem_buffer *mem)
 {
 	dma_addr_t ra = mem->phys_base;
 
-	do_div(ra, roundup_pow_of_two(mem->size));
-	if (mem->phys_base != ra * roundup_pow_of_two(mem->size)) {
+	if (do_div(ra, roundup_pow_of_two(mem->size))) {
 		ipa_err("bad params ring base not aligned 0x%llx align 0x%lx\n",
 				mem->phys_base, roundup_pow_of_two(mem->size));
 		return -EINVAL;
@@ -1074,9 +1073,7 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 	}
 
 	ra = props->mem.phys_base;
-	do_div(ra, roundup_pow_of_two(props->mem.size));
-
-	if (props->mem.phys_base != ra * roundup_pow_of_two(props->mem.size)) {
+	if (do_div(ra, roundup_pow_of_two(props->mem.size))) {
 		ipa_err("bad params ring base not aligned 0x%llx align 0x%lx\n",
 				props->mem.phys_base,
 				roundup_pow_of_two(props->mem.size));
