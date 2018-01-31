@@ -818,7 +818,6 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 {
 	unsigned long evt_id;
 	unsigned long required_alignment = roundup_pow_of_two(size);
-	enum gsi_evt_ch_cmd_opcode op = GSI_EVT_ALLOCATE;
 	uint32_t val;
 	struct gsi_evt_ctx *ctx;
 	int ret;
@@ -866,7 +865,7 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 	mutex_lock(&gsi_ctx->mlock);
 	val = (((evt_id << GSI_EE_n_EV_CH_CMD_CHID_SHFT) &
 			GSI_EE_n_EV_CH_CMD_CHID_BMSK) |
-		((op << GSI_EE_n_EV_CH_CMD_OPCODE_SHFT) &
+		((GSI_EVT_ALLOCATE << GSI_EE_n_EV_CH_CMD_OPCODE_SHFT) &
 			GSI_EE_n_EV_CH_CMD_OPCODE_BMSK));
 	gsi_writel(val, GSI_EE_n_EV_CH_CMD_OFFS(ee));
 	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
@@ -893,7 +892,8 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 	mutex_unlock(&gsi_ctx->mlock);
 
 	spin_lock_irqsave(&gsi_ctx->slock, flags);
-	gsi_writel(1 << evt_id, GSI_EE_n_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(ee));
+	val = 1 << evt_id;
+	gsi_writel(val, GSI_EE_n_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(ee));
 
 	/* enable ieob interrupts */
 	gsi_irq_control_event(gsi_ctx->ee, ctx->id, true);
@@ -923,7 +923,6 @@ static void __gsi_write_evt_ring_scratch(unsigned long evt_ring_hdl,
 int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 {
 	uint32_t val;
-	enum gsi_evt_ch_cmd_opcode op = GSI_EVT_DE_ALLOC;
 	struct gsi_evt_ctx *ctx;
 	int res;
 
@@ -950,7 +949,7 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 	reinit_completion(&ctx->compl);
 	val = (((evt_ring_hdl << GSI_EE_n_EV_CH_CMD_CHID_SHFT) &
 			GSI_EE_n_EV_CH_CMD_CHID_BMSK) |
-		((op << GSI_EE_n_EV_CH_CMD_OPCODE_SHFT) &
+		((GSI_EVT_DE_ALLOC << GSI_EE_n_EV_CH_CMD_OPCODE_SHFT) &
 			 GSI_EE_n_EV_CH_CMD_OPCODE_BMSK));
 	gsi_writel(val, GSI_EE_n_EV_CH_CMD_OFFS(gsi_ctx->ee));
 	res = wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT);
@@ -981,7 +980,6 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 {
 	uint32_t val;
-	enum gsi_evt_ch_cmd_opcode op = GSI_EVT_RESET;
 	struct gsi_evt_ctx *ctx;
 	int res;
 
@@ -1001,7 +999,7 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 	reinit_completion(&ctx->compl);
 	val = (((evt_ring_hdl << GSI_EE_n_EV_CH_CMD_CHID_SHFT) &
 			GSI_EE_n_EV_CH_CMD_CHID_BMSK) |
-		((op << GSI_EE_n_EV_CH_CMD_OPCODE_SHFT) &
+		((GSI_EVT_RESET << GSI_EE_n_EV_CH_CMD_OPCODE_SHFT) &
 			 GSI_EE_n_EV_CH_CMD_OPCODE_BMSK));
 	gsi_writel(val, GSI_EE_n_EV_CH_CMD_OFFS(gsi_ctx->ee));
 	res = wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT);
