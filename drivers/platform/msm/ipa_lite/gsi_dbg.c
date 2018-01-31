@@ -105,17 +105,17 @@ static ssize_t gsi_dump_evt(struct file *file,
 	if (arg2) {
 		ctx = &gsi_ctx->evtr[arg1];
 
-		if (ctx->props.mem.base) {
-			for (i = 0; i < ctx->props.mem.size / 16; i++)
+		if (ctx->mem.base) {
+			for (i = 0; i < ctx->mem.size / 16; i++)
 				pr_err("EV%2d (0x%08llx) %08x %08x %08x %08x\n",
-				arg1, ctx->props.mem.phys_base + i * 16,
-				*(u32 *)((u8 *)ctx->props.mem.base +
+				arg1, ctx->mem.phys_base + i * 16,
+				*(u32 *)((u8 *)ctx->mem.base +
 					i * 16 + 0),
-				*(u32 *)((u8 *)ctx->props.mem.base +
+				*(u32 *)((u8 *)ctx->mem.base +
 					i * 16 + 4),
-				*(u32 *)((u8 *)ctx->props.mem.base +
+				*(u32 *)((u8 *)ctx->mem.base +
 					i * 16 + 8),
-				*(u32 *)((u8 *)ctx->props.mem.base +
+				*(u32 *)((u8 *)ctx->mem.base +
 					i * 16 + 12));
 		} else {
 			pr_err("No VA supplied for event ring id %u\n", arg1);

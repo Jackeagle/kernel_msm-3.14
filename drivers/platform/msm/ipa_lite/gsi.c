@@ -873,7 +873,7 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 	mutex_init(&ctx->mlock);
 	init_completion(&ctx->compl);
 	atomic_set(&ctx->chan_ref_cnt, 0);
-	ctx->props.mem = *mem;
+	ctx->mem = *mem;
 
 	mutex_lock(&gsi_ctx->mlock);
 	val = evt_ring_cmd_val(evt_id, GSI_EVT_ALLOCATE);
@@ -976,7 +976,7 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 
 	ctx->exclusive = 0;
 	ctx->int_modt = 0;
-	ipahal_dma_free(&ctx->props.mem);
+	ipahal_dma_free(&ctx->mem);
 
 	atomic_dec(&gsi_ctx->num_evt_ring);
 
@@ -1017,8 +1017,8 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 		BUG();
 	}
 
-	gsi_program_evt_ring_ctx(&ctx->props.mem, evt_ring_hdl, ctx->int_modt);
-	gsi_init_ring(&ctx->ring, &ctx->props.mem);
+	gsi_program_evt_ring_ctx(&ctx->mem, evt_ring_hdl, ctx->int_modt);
+	gsi_init_ring(&ctx->ring, &ctx->mem);
 
 	/* restore scratch */
 	__gsi_write_evt_ring_scratch(evt_ring_hdl, ctx->scratch);

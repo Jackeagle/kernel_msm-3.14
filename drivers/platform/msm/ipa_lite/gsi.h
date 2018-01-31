@@ -521,7 +521,7 @@ struct gsi_evt_stats {
 };
 
 struct gsi_evt_ctx {
-	struct gsi_evt_ring_props props;
+	struct ipa_mem_buffer mem;
 	uint16_t int_modt;
 	bool exclusive;
 	enum gsi_evt_ring_state state;
