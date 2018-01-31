@@ -809,7 +809,8 @@ static int gsi_validate_evt_ring_mem(struct ipa_mem_buffer *mem)
 }
 
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
-long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size)
+long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
+		uint16_t int_modt, bool excl)
 {
 	unsigned long evt_id;
 	enum gsi_evt_ch_cmd_opcode op = GSI_EVT_ALLOCATE;
@@ -835,6 +836,8 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size)
 		ipa_err("invalid params\n");
 		return -EINVAL;
 	}
+	props->int_modt = int_modt;
+	props->exclusive = excl;
 
 	bit_count = sizeof(unsigned long) * BITS_PER_BYTE;
 	mutex_lock(&gsi_ctx->mlock);
