@@ -836,7 +836,6 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 	int ret;
 	int ee = gsi_ctx->ee;
 	unsigned long flags;
-	size_t bit_count;
 
 	/* ipa_assert(!(size % GSI_EVT_RING_ELEMENT_SIZE)); */
 
@@ -855,10 +854,9 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 	props->int_modt = int_modt;
 	props->exclusive = excl;
 
-	bit_count = sizeof(unsigned long) * BITS_PER_BYTE;
 	mutex_lock(&gsi_ctx->mlock);
-	evt_id = find_first_zero_bit(&gsi_ctx->evt_bmap, bit_count);
-	if (evt_id == bit_count) {
+	evt_id = find_first_zero_bit(&gsi_ctx->evt_bmap, BITS_PER_LONG);
+	if (evt_id == BITS_PER_LONG) {
 		ipa_err("failed to alloc event ID\n");
 		ret = -ENOMEM;
 		goto err_unlock;
