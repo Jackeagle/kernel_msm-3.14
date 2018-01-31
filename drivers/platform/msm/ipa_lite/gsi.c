@@ -738,7 +738,7 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_0_OFFS(evt_id, ee));
 
-	val = (props->ring_len & GSI_EE_n_EV_CH_k_CNTXT_1_R_LENGTH_BMSK) <<
+	val = (props->mem.size & GSI_EE_n_EV_CH_k_CNTXT_1_R_LENGTH_BMSK) <<
 		GSI_EE_n_EV_CH_k_CNTXT_1_R_LENGTH_SHFT;
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_1_OFFS(evt_id, ee));
 
@@ -747,10 +747,10 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 	 * high-order 32 bits of the address of the event ring,
 	 * respectively.
 	 */
-	val = props->ring_base_addr & GENMASK(31, 0);
+	val = props->mem.phys_base & GENMASK(31, 0);
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_2_OFFS(evt_id, ee));
 
-	val = props->ring_base_addr >> 32;
+	val = props->mem.phys_base >> 32;
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_3_OFFS(evt_id, ee));
 
 	val = (((props->int_modt << GSI_EE_n_EV_CH_k_CNTXT_8_INT_MODT_SHFT) &
@@ -772,9 +772,9 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 static void gsi_init_evt_ring(struct gsi_evt_ring_props *props,
 		struct gsi_ring_ctx *ctx)
 {
-	ctx->mem.base = props->ring_base_vaddr;
-	ctx->mem.phys_base = props->ring_base_addr;
-	ctx->mem.size = props->ring_len;
+	ctx->mem.base = props->mem.base;
+	ctx->mem.phys_base = props->mem.phys_base;
+	ctx->mem.size = props->mem.size;
 	ctx->wp = ctx->mem.phys_base;
 	ctx->rp = ctx->mem.phys_base;
 	ctx->wp_local = ctx->mem.phys_base;
@@ -800,23 +800,23 @@ static int gsi_validate_evt_ring_props(struct gsi_evt_ring_props *props)
 {
 	dma_addr_t ra;
 
-	if (props->ring_len % 16) {
+	if (props->mem.size % 16) {
 		ipa_err("bad params ring_len %u not a multiple of RE size %u\n",
-				props->ring_len, GSI_EVT_RING_ELEMENT_SIZE);
+				props->mem.size, GSI_EVT_RING_ELEMENT_SIZE);
 		return -EINVAL;
 	}
 
-	ra = props->ring_base_addr;
-	do_div(ra, roundup_pow_of_two(props->ring_len));
+	ra = props->mem.phys_base;
+	do_div(ra, roundup_pow_of_two(props->mem.size));
 
-	if (props->ring_base_addr != ra * roundup_pow_of_two(props->ring_len)) {
+	if (props->mem.phys_base != ra * roundup_pow_of_two(props->mem.size)) {
 		ipa_err("bad params ring base not aligned 0x%llx align 0x%lx\n",
-				props->ring_base_addr,
-				roundup_pow_of_two(props->ring_len));
+				props->mem.phys_base,
+				roundup_pow_of_two(props->mem.size));
 		return -EINVAL;
 	}
 
-	if (!props->ring_base_vaddr) {
+	if (!props->mem.base) {
 		ipa_err("GPI protocol requires ring base VA\n");
 		return -EINVAL;
 	}

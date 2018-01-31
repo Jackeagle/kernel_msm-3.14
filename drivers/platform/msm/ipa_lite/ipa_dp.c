@@ -2649,17 +2649,17 @@ long ipa3_alloc_common_event_ring(void)
 	long result;
 
 	memset(&gsi_evt_ring_props, 0, sizeof(gsi_evt_ring_props));
-	gsi_evt_ring_props.ring_len = IPA_COMMON_EVENT_RING_SIZE;
+	gsi_evt_ring_props.mem.size = IPA_COMMON_EVENT_RING_SIZE;
 
-	gsi_evt_ring_props.ring_base_vaddr =
-		dma_alloc_coherent(dev, gsi_evt_ring_props.ring_len,
+	gsi_evt_ring_props.mem.base =
+		dma_alloc_coherent(dev, gsi_evt_ring_props.mem.size,
 					&evt_dma_addr, GFP_KERNEL);
-	if (!gsi_evt_ring_props.ring_base_vaddr) {
+	if (!gsi_evt_ring_props.mem.base) {
 		ipa_err("fail to dma alloc %u bytes\n",
-			gsi_evt_ring_props.ring_len);
+			gsi_evt_ring_props.mem.size);
 		return -ENOMEM;
 	}
-	gsi_evt_ring_props.ring_base_addr = evt_dma_addr;
+	gsi_evt_ring_props.mem.phys_base = evt_dma_addr;
 	gsi_evt_ring_props.int_modt = 0;
 	gsi_evt_ring_props.int_modc = 1; /* moderation comes from channel*/
 	gsi_evt_ring_props.exclusive = false;
@@ -2708,23 +2708,23 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		 * which was meant to define the BAM desc fifo. GSI descriptors
 		 * are 16B as opposed to 8B for BAM.
 		 */
-		gsi_evt_ring_props.ring_len = 2 * in->desc_fifo_sz;
+		gsi_evt_ring_props.mem.size = 2 * in->desc_fifo_sz;
 
-		gsi_evt_ring_props.ring_base_vaddr =
-			dma_alloc_coherent(dev, gsi_evt_ring_props.ring_len,
+		gsi_evt_ring_props.mem.base =
+			dma_alloc_coherent(dev, gsi_evt_ring_props.mem.size,
 				&evt_dma_addr, GFP_KERNEL);
-		if (!gsi_evt_ring_props.ring_base_vaddr) {
+		if (!gsi_evt_ring_props.mem.base) {
 			ipa_err("fail to dma alloc %u bytes\n",
-				gsi_evt_ring_props.ring_len);
+				gsi_evt_ring_props.mem.size);
 			return -ENOMEM;
 		}
-		gsi_evt_ring_props.ring_base_addr = evt_dma_addr;
+		gsi_evt_ring_props.mem.phys_base = evt_dma_addr;
 
 		/* copy mem info */
-		ep->gsi_evt_ring_mem.size = gsi_evt_ring_props.ring_len;
+		ep->gsi_evt_ring_mem.size = gsi_evt_ring_props.mem.size;
 		ep->gsi_evt_ring_mem.phys_base =
-			gsi_evt_ring_props.ring_base_addr;
-		ep->gsi_evt_ring_mem.base = gsi_evt_ring_props.ring_base_vaddr;
+			gsi_evt_ring_props.mem.phys_base;
+		ep->gsi_evt_ring_mem.base = gsi_evt_ring_props.mem.base;
 
 		gsi_evt_ring_props.int_modt = IPA_GSI_EVT_RING_INT_MODT;
 		gsi_evt_ring_props.int_modc = 1;
@@ -2842,9 +2842,9 @@ fail_get_gsi_ep_info:
 		ep->gsi_evt_ring_hdl = GSI_NO_EVT_ERINDEX;
 	}
 fail_alloc_evt_ring:
-	if (gsi_evt_ring_props.ring_base_vaddr)
-		dma_free_coherent(dev, gsi_evt_ring_props.ring_len,
-			gsi_evt_ring_props.ring_base_vaddr, evt_dma_addr);
+	if (gsi_evt_ring_props.mem.base)
+		dma_free_coherent(dev, gsi_evt_ring_props.mem.size,
+			gsi_evt_ring_props.mem.base, evt_dma_addr);
 	ipa_err("Return with err: %d\n", result);
 	return result;
 }
