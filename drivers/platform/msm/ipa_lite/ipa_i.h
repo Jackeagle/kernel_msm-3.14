@@ -174,20 +174,6 @@ struct ipa_sys_connect_params {
 };
 
 /**
- * struct  ipa_tx_data_desc - information needed
- * to send data packet to HW link: link to data descriptors
- * priv: client specific private data
- * @pyld_buffer: pointer to the data buffer that holds frame
- * @pyld_len: length of the data packet
- */
-struct ipa_tx_data_desc {
-        struct list_head link;
-        void *priv;
-        void *pyld_buffer;
-        u16  pyld_len;
-};
-
-/**
  * struct ipa_tx_meta - meta-data for the TX packet
  * @dma_address: dma mapped address of TX packet
  * @dma_address_valid: is above field valid?
