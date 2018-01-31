@@ -1055,20 +1055,17 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, unsigned int ee,
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_QOS_OFFS(props->ch_id, ee));
 }
 
-static void gsi_init_chan_ring(struct gsi_chan_props *props,
-		struct gsi_ring_ctx *ctx)
+static void
+gsi_init_chan_ring(struct gsi_ring_ctx *ctx, struct ipa_mem_buffer *mem)
 {
-	ctx->mem.base = props->mem.base;
-	ctx->mem.phys_base = props->mem.phys_base;
-	ctx->mem.size = props->mem.size;
-	ctx->wp = props->mem.phys_base;
-	ctx->rp = props->mem.phys_base;
-	ctx->wp_local = props->mem.phys_base;
-	ctx->rp_local = props->mem.phys_base;
+	ctx->mem = *mem;
+	ctx->wp = mem->phys_base;
+	ctx->rp = mem->phys_base;
+	ctx->wp_local = mem->phys_base;
+	ctx->rp_local = mem->phys_base;
 	ctx->elem_sz = GSI_CHAN_RING_ELEMENT_SIZE;
-	ctx->max_num_elem = props->mem.size / ctx->elem_sz - 1;
-	ctx->end = props->mem.phys_base + (ctx->max_num_elem + 1) *
-		ctx->elem_sz;
+	ctx->max_num_elem = mem->size / ctx->elem_sz - 1;
+	ctx->end = mem->phys_base + (ctx->max_num_elem + 1) * ctx->elem_sz;
 }
 
 static int gsi_validate_channel_props(struct gsi_chan_props *props)
@@ -1218,7 +1215,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	gsi_program_chan_ctx(props, gsi_ctx->ee, erindex);
 
 	spin_lock_init(&ctx->ring.slock);
-	gsi_init_chan_ring(props, &ctx->ring);
+	gsi_init_chan_ring(&ctx->ring, &props->mem);
 	if (!props->max_re_expected)
 		ctx->props.max_re_expected = ctx->ring.max_num_elem;
 	ctx->user_data = user_data;
@@ -1452,7 +1449,7 @@ reset:
 
 	gsi_program_chan_ctx(&ctx->props, gsi_ctx->ee,
 			ctx->evtr ? ctx->evtr->id : GSI_NO_EVT_ERINDEX);
-	gsi_init_chan_ring(&ctx->props, &ctx->ring);
+	gsi_init_chan_ring(&ctx->ring, &ctx->props.mem);
 
 	/* restore scratch */
 	__gsi_write_channel_scratch(chan_hdl, ctx->scratch);
@@ -1848,7 +1845,7 @@ int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
 		ctx->scratch = *scr;
 	gsi_program_chan_ctx(&ctx->props, gsi_ctx->ee,
 			ctx->evtr ? ctx->evtr->id : GSI_NO_EVT_ERINDEX);
-	gsi_init_chan_ring(&ctx->props, &ctx->ring);
+	gsi_init_chan_ring(&ctx->ring, &ctx->props.mem);
 
 	/* restore scratch */
 	__gsi_write_channel_scratch(chan_hdl, ctx->scratch);
