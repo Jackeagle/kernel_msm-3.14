@@ -1026,18 +1026,20 @@ static void ipa3_setup_rt_hash_tuple(void)
 	}
 }
 
-static int ipa3_setup_apps_pipes(void)
+static long ipa3_setup_apps_pipes(void)
 {
 	struct ipa_sys_connect_params sys_in;
-	int result = 0;
+	long result = 0;
 
 	/* allocate the common PROD event ring */
-	if (ipa3_alloc_common_event_ring(IPA_COMMON_EVENT_RING_SIZE,
-				0, false)) {
+	result = ipa3_alloc_common_event_ring(IPA_COMMON_EVENT_RING_SIZE,
+						0, false);
+	if (result < 0) {
 		ipa_err("ipa3_alloc_common_event_ring failed.\n");
 		result = -EPERM;
 		goto fail_ch20_wa;
 	}
+	ipa3_ctx->gsi_evt_comm_hdl = result;
 	ipa3_ctx->gsi_evt_comm_ring_rem = IPA_COMMON_EVENT_RING_SIZE;
 
 	/* CMD OUT (AP->IPA) */

@@ -2644,7 +2644,6 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 long ipa3_alloc_common_event_ring(u32 size, u16 int_modt, bool excl)
 {
 	struct gsi_evt_ring_props gsi_evt_ring_props;
-	long result;
 
 	memset(&gsi_evt_ring_props, 0, sizeof(gsi_evt_ring_props));
 	if (ipahal_dma_alloc(&gsi_evt_ring_props.mem, size, GFP_KERNEL)) {
@@ -2655,14 +2654,7 @@ long ipa3_alloc_common_event_ring(u32 size, u16 int_modt, bool excl)
 	gsi_evt_ring_props.int_modc = 1; /* moderation comes from channel*/
 	gsi_evt_ring_props.exclusive = excl;
 
-	result = gsi_alloc_evt_ring(&gsi_evt_ring_props);
-	if (result < 0) {
-		ipa_err("gsi_alloc_evt_ring failed %ld\n", result);
-		return result;
-	}
-	ipa3_ctx->gsi_evt_comm_hdl = result;
-
-	return 0;
+	return gsi_alloc_evt_ring(&gsi_evt_ring_props);
 }
 
 /*
