@@ -805,11 +805,6 @@ static int gsi_validate_evt_ring_mem(struct ipa_mem_buffer *mem)
 		return -EINVAL;
 	}
 
-	if (!mem->base) {
-		ipa_err("GPI protocol requires ring base VA\n");
-		return -EINVAL;
-	}
-
 	return 0;
 }
 
