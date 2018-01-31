@@ -511,11 +511,6 @@ struct ipa3_rx_pkt_wrapper {
 	struct ipa3_sys_context *sys;
 };
 
-enum ipa3_config_this_ep {
-	IPA_CONFIGURE_THIS_EP,
-	IPA_DO_NOT_CONFIGURE_THIS_EP,
-};
-
 struct ipa3_stats {
 	u32 tx_sw_pkts;
 	u32 tx_hw_pkts;
