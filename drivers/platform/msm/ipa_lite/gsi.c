@@ -22,9 +22,6 @@
 #include "gsi.h"
 #include "gsi_reg.h"
 
-#define GSI_EVT_RING_ELEMENT_SIZE	16	/* bytes */
-#define GSI_CHAN_RING_ELEMENT_SIZE	16	/* bytes */
-
 #define GSI_CMD_TIMEOUT (5*HZ)
 #define GSI_STOP_CMD_TIMEOUT_MS 20
 #define GSI_MAX_CH_LOW_WEIGHT 15
@@ -821,11 +818,7 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 	unsigned long flags;
 	size_t bit_count;
 
-	if (size % 16) {
-		ipa_err("bad params size %u not a multiple of RE size %u\n",
-				size, GSI_EVT_RING_ELEMENT_SIZE);
-		return -EINVAL;
-	}
+	/* ipa_assert(!(size % GSI_EVT_RING_ELEMENT_SIZE)); */
 
 	if (ipahal_dma_alloc(&props->mem, size, GFP_KERNEL)) {
 		ipa_err("fail to dma alloc %u bytes\n", size);

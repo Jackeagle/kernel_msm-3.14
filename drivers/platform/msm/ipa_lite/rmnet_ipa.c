@@ -381,6 +381,14 @@ static int handle3_ingress_format(struct net_device *dev,
 	int ret = 0;
 	struct ipa_sys_connect_params *ipa_wan_ep_cfg;
 
+	/*
+	 * Memory size must be a multiple of the ring element size.
+	 * Note that ipa_gsi_chan_mem_size() assumes 2 times the
+	 * desc_fifo_sz set below (reproduced here).
+	 */
+	BUILD_BUG_ON((2 * IPA_WWAN_CONS_DESC_FIFO_SZ * IPA_FIFO_ELEMENT_SIZE) %
+						GSI_EVT_RING_ELEMENT_SIZE);
+
 	ipa_debug("Get RMNET_IOCTL_SET_INGRESS_DATA_FORMAT\n");
 	ipa_wan_ep_cfg = &rmnet_ipa3_ctx->ipa_to_apps_ep_cfg;
 	if ((in->u.data) & RMNET_IOCTL_INGRESS_FORMAT_CHECKSUM)
@@ -457,6 +465,14 @@ static int handle3_egress_format(struct net_device *dev,
 {
 	int rc;
 	struct ipa_sys_connect_params *ipa_wan_ep_cfg;
+
+	/*
+	 * Memory size must be a multiple of the ring element size.
+	 * Note that ipa_gsi_chan_mem_size() assumes 2 times the
+	 * desc_fifo_sz set below (reproduced here).
+	 */
+	BUILD_BUG_ON((2 * IPA_SYS_TX_DATA_DESC_FIFO_SZ) %
+					GSI_EVT_RING_ELEMENT_SIZE);
 
 	ipa_debug("get RMNET_IOCTL_SET_EGRESS_DATA_FORMAT\n");
 	ipa_wan_ep_cfg = &rmnet_ipa3_ctx->apps_to_ipa_ep_cfg;

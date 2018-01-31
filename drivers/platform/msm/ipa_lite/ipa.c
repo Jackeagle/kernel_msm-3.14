@@ -1031,6 +1031,14 @@ static long ipa3_setup_apps_pipes(void)
 	struct ipa_sys_connect_params sys_in;
 	long result = 0;
 
+	/*
+	 * Memory size must be a multiple of the ring element size.
+	 * Note that ipa_gsi_chan_mem_size() assumes a multipler
+	 * (4 for producer, 2 for consumer) times the desc_fifo_sz
+	 * set below (reproduced here; 2 is the more restrictive case).
+	 */
+	BUILD_BUG_ON((2 * IPA_SYS_DESC_FIFO_SZ) % GSI_EVT_RING_ELEMENT_SIZE);
+
 	/* allocate the common PROD event ring */
 	result = ipa3_alloc_common_event_ring(IPA_COMMON_EVENT_RING_SIZE,
 						0, false);
