@@ -2769,26 +2769,26 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	 * event ring based completions.
 	 */
 	if (ep->client == IPA_CLIENT_APPS_WAN_PROD)
-		gsi_channel_props.ring_len = 2 * in->desc_fifo_sz;
+		gsi_channel_props.mem.size = 2 * in->desc_fifo_sz;
 	else if (IPA_CLIENT_IS_PROD(ep->client))
-		gsi_channel_props.ring_len = 4 * in->desc_fifo_sz;
+		gsi_channel_props.mem.size = 4 * in->desc_fifo_sz;
 	else
-		gsi_channel_props.ring_len = 2 * in->desc_fifo_sz;
-	gsi_channel_props.ring_base_vaddr =
-		dma_alloc_coherent(dev, gsi_channel_props.ring_len,
+		gsi_channel_props.mem.size = 2 * in->desc_fifo_sz;
+	gsi_channel_props.mem.base =
+		dma_alloc_coherent(dev, gsi_channel_props.mem.size,
 			&dma_addr, GFP_KERNEL);
-	if (!gsi_channel_props.ring_base_vaddr) {
+	if (!gsi_channel_props.mem.base) {
 		ipa_err("fail to dma alloc %u bytes\n",
-			gsi_channel_props.ring_len);
+			gsi_channel_props.mem.size);
 		result = -ENOMEM;
 		goto fail_alloc_channel_ring;
 	}
-	gsi_channel_props.ring_base_addr = dma_addr;
+	gsi_channel_props.mem.phys_base = dma_addr;
 
 	/* copy mem info */
-	ep->gsi_chan_ring_mem.size = gsi_channel_props.ring_len;
-	ep->gsi_chan_ring_mem.phys_base = gsi_channel_props.ring_base_addr;
-	ep->gsi_chan_ring_mem.base = gsi_channel_props.ring_base_vaddr;
+	ep->gsi_chan_ring_mem.size = gsi_channel_props.mem.size;
+	ep->gsi_chan_ring_mem.phys_base = gsi_channel_props.mem.phys_base;
+	ep->gsi_chan_ring_mem.base = gsi_channel_props.mem.base;
 
 	gsi_channel_props.use_db_eng = GSI_CHAN_DB_MODE;
 	gsi_channel_props.max_prefetch = GSI_ONE_PREFETCH_SEG;
@@ -2833,8 +2833,8 @@ fail_write_channel_scratch:
 		BUG();
 	}
 fail_alloc_channel:
-	dma_free_coherent(dev, gsi_channel_props.ring_len,
-			gsi_channel_props.ring_base_vaddr, dma_addr);
+	dma_free_coherent(dev, gsi_channel_props.mem.size,
+			gsi_channel_props.mem.base, dma_addr);
 fail_alloc_channel_ring:
 fail_get_gsi_ep_info:
 	if (ep->gsi_evt_ring_hdl != GSI_NO_EVT_ERINDEX) {

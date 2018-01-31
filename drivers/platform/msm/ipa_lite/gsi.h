@@ -338,9 +338,7 @@ enum gsi_chan_use_db_eng {
  *
  */
 struct gsi_chan_props {
-	void *ring_base_vaddr;
-	dma_addr_t ring_base_addr;
-	u32 ring_len;
+	struct ipa_mem_buffer mem;
 	enum gsi_chan_dir dir;
 	uint8_t ch_id;
 	unsigned long evt_ring_hdl;

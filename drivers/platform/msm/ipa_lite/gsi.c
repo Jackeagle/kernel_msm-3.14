@@ -799,7 +799,7 @@ static int gsi_validate_evt_ring_props(struct gsi_evt_ring_props *props)
 	dma_addr_t ra;
 
 	if (props->mem.size % 16) {
-		ipa_err("bad params ring_len %u not a multiple of RE size %u\n",
+		ipa_err("bad params mem.size %u not a multiple of RE size %u\n",
 				props->mem.size, GSI_EVT_RING_ELEMENT_SIZE);
 		return -EINVAL;
 	}
@@ -1030,7 +1030,7 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, unsigned int ee,
 			 & GSI_EE_n_GSI_CH_k_CNTXT_0_ELEMENT_SIZE_BMSK));
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(props->ch_id, ee));
 
-	val = (props->ring_len & GSI_EE_n_GSI_CH_k_CNTXT_1_R_LENGTH_BMSK) <<
+	val = (props->mem.size & GSI_EE_n_GSI_CH_k_CNTXT_1_R_LENGTH_BMSK) <<
 		GSI_EE_n_GSI_CH_k_CNTXT_1_R_LENGTH_SHFT;
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_CNTXT_1_OFFS(props->ch_id, ee));
 
@@ -1039,10 +1039,10 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, unsigned int ee,
 	 * high-order 32 bits of the address of the channel ring,
 	 * respectively.
 	 */
-	val = props->ring_base_addr & GENMASK(31, 0);
+	val = props->mem.phys_base & GENMASK(31, 0);
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_CNTXT_2_OFFS(props->ch_id, ee));
 
-	val = props->ring_base_addr >> 32;
+	val = props->mem.phys_base >> 32;
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_CNTXT_3_OFFS(props->ch_id, ee));
 
 	val = (((props->low_weight << GSI_EE_n_GSI_CH_k_QOS_WRR_WEIGHT_SHFT) &
@@ -1058,9 +1058,9 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, unsigned int ee,
 static void gsi_init_chan_ring(struct gsi_chan_props *props,
 		struct gsi_ring_ctx *ctx)
 {
-	ctx->mem.base = props->ring_base_vaddr;
-	ctx->mem.phys_base = props->ring_base_addr;
-	ctx->mem.size = props->ring_len;
+	ctx->mem.base = props->mem.base;
+	ctx->mem.phys_base = props->mem.phys_base;
+	ctx->mem.size = props->mem.size;
 	ctx->wp = ctx->mem.phys_base;
 	ctx->rp = ctx->mem.phys_base;
 	ctx->wp_local = ctx->mem.phys_base;
@@ -1081,35 +1081,35 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 		return -EINVAL;
 	}
 
-	if (props->ring_len % 16) {
-		ipa_err("bad params ring_len %u not a multiple of re size %u\n",
-				props->ring_len, GSI_CHAN_RING_ELEMENT_SIZE);
+	if (props->mem.size % 16) {
+		ipa_err("bad params mem.size %u not a multiple of re size %u\n",
+				props->mem.size, GSI_CHAN_RING_ELEMENT_SIZE);
 		return -EINVAL;
 	}
 
-	ra = props->ring_base_addr;
-	do_div(ra, roundup_pow_of_two(props->ring_len));
+	ra = props->mem.phys_base;
+	do_div(ra, roundup_pow_of_two(props->mem.size));
 
-	if (props->ring_base_addr != ra * roundup_pow_of_two(props->ring_len)) {
+	if (props->mem.phys_base != ra * roundup_pow_of_two(props->mem.size)) {
 		ipa_err("bad params ring base not aligned 0x%llx align 0x%lx\n",
-				props->ring_base_addr,
-				roundup_pow_of_two(props->ring_len));
+				props->mem.phys_base,
+				roundup_pow_of_two(props->mem.size));
 		return -EINVAL;
 	}
 
-	last = props->ring_base_addr + props->ring_len -
+	last = props->mem.phys_base + props->mem.size -
 			GSI_CHAN_RING_ELEMENT_SIZE;
 
 	/* MSB should stay same within the ring */
-	if ((props->ring_base_addr & 0xFFFFFFFF00000000ULL) !=
+	if ((props->mem.phys_base & 0xFFFFFFFF00000000ULL) !=
 	    (last & 0xFFFFFFFF00000000ULL)) {
 		ipa_err("MSB is not fixed on ring base 0x%llx size 0x%x\n",
-			props->ring_base_addr,
-			props->ring_len);
+			props->mem.phys_base,
+			props->mem.size);
 		return -EINVAL;
 	}
 
-	if (!props->ring_base_vaddr) {
+	if (!props->mem.base) {
 		ipa_err("GPI protocol requires ring base VA\n");
 		return -EINVAL;
 	}
@@ -1172,7 +1172,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 
 	memset(ctx, 0, sizeof(*ctx));
 	user_data = devm_kzalloc(gsi_ctx->dev,
-		(props->ring_len / GSI_CHAN_RING_ELEMENT_SIZE) * sizeof(void *),
+		(props->mem.size / GSI_CHAN_RING_ELEMENT_SIZE) * sizeof(void *),
 		GFP_KERNEL);
 	if (user_data == NULL) {
 		ipa_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
