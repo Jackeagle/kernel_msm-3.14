@@ -796,17 +796,9 @@ static void gsi_prime_evt_ring(struct gsi_evt_ctx *ctx)
 
 static int gsi_validate_evt_ring_mem(struct ipa_mem_buffer *mem)
 {
-	dma_addr_t ra;
+	dma_addr_t ra = mem->phys_base;
 
-	if (mem->size % 16) {
-		ipa_err("bad params mem.size %u not a multiple of RE size %u\n",
-				mem->size, GSI_EVT_RING_ELEMENT_SIZE);
-		return -EINVAL;
-	}
-
-	ra = mem->phys_base;
 	do_div(ra, roundup_pow_of_two(mem->size));
-
 	if (mem->phys_base != ra * roundup_pow_of_two(mem->size)) {
 		ipa_err("bad params ring base not aligned 0x%llx align 0x%lx\n",
 				mem->phys_base, roundup_pow_of_two(mem->size));
@@ -832,6 +824,12 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size)
 	int ee = gsi_ctx->ee;
 	unsigned long flags;
 	size_t bit_count;
+
+	if (size % 16) {
+		ipa_err("bad params size %u not a multiple of RE size %u\n",
+				size, GSI_EVT_RING_ELEMENT_SIZE);
+		return -EINVAL;
+	}
 
 	if (ipahal_dma_alloc(&props->mem, size, GFP_KERNEL)) {
 		ipa_err("fail to dma alloc %u bytes\n", size);
