@@ -2646,14 +2646,10 @@ long ipa3_alloc_common_event_ring(u32 size, u16 int_modt, bool excl)
 	struct gsi_evt_ring_props gsi_evt_ring_props;
 
 	memset(&gsi_evt_ring_props, 0, sizeof(gsi_evt_ring_props));
-	if (ipahal_dma_alloc(&gsi_evt_ring_props.mem, size, GFP_KERNEL)) {
-		ipa_err("fail to dma alloc %u bytes\n", size);
-		return -ENOMEM;
-	}
 	gsi_evt_ring_props.int_modt = int_modt;
 	gsi_evt_ring_props.exclusive = excl;
 
-	return gsi_alloc_evt_ring(&gsi_evt_ring_props);
+	return gsi_alloc_evt_ring(&gsi_evt_ring_props, size);
 }
 
 /*
@@ -2699,18 +2695,13 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	} else if (ep->sys->policy != IPA_POLICY_NOINTR_MODE ||
 	     IPA_CLIENT_IS_CONS(ep->client)) {
 		size = ipa_gsi_ring_mem_size(ep->client, in->desc_fifo_sz);
-		if (ipahal_dma_alloc(&gsi_evt_ring_props.mem, size,
-					GFP_KERNEL)) {
-			ipa_err("fail to dma alloc %u bytes\n", size);
-			return -ENOMEM;
-		}
 		gsi_evt_ring_props.int_modt = IPA_GSI_EVT_RING_INT_MODT;
 		gsi_evt_ring_props.exclusive = true;
 
 		ipa_debug("client=%d moderation threshold cycles=%u cnt=1\n",
 			ep->client, gsi_evt_ring_props.int_modt);
 
-		result = gsi_alloc_evt_ring(&gsi_evt_ring_props);
+		result = gsi_alloc_evt_ring(&gsi_evt_ring_props, size);
 		if (result < 0)
 			goto fail_alloc_evt_ring;
 		ep->gsi_evt_ring_hdl = result;

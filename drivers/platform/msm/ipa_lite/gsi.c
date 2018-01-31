@@ -822,7 +822,7 @@ static int gsi_validate_evt_ring_mem(struct ipa_mem_buffer *mem)
 }
 
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
-long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props)
+long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size)
 {
 	unsigned long evt_id;
 	enum gsi_evt_ch_cmd_opcode op = GSI_EVT_ALLOCATE;
@@ -832,6 +832,11 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props)
 	int ee = gsi_ctx->ee;
 	unsigned long flags;
 	size_t bit_count;
+
+	if (ipahal_dma_alloc(&props->mem, size, GFP_KERNEL)) {
+		ipa_err("fail to dma alloc %u bytes\n", size);
+		return -ENOMEM;
+	}
 
 	if (gsi_validate_evt_ring_mem(&props->mem)) {
 		ipa_err("invalid params\n");
@@ -844,6 +849,7 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props)
 	if (evt_id == bit_count) {
 		ipa_err("failed to alloc event ID\n");
 		mutex_unlock(&gsi_ctx->mlock);
+		ipahal_dma_free(&props->mem);
 		return -ENOMEM;
 	}
 	set_bit(evt_id, &gsi_ctx->evt_bmap);
@@ -869,6 +875,8 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props)
 		ipa_err("evt_id=%lu timed out\n", evt_id);
 		clear_bit(evt_id, &gsi_ctx->evt_bmap);
 		mutex_unlock(&gsi_ctx->mlock);
+		ipahal_dma_free(&props->mem);
+
 		return -ETIMEDOUT;
 	}
 
@@ -877,6 +885,8 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props)
 				evt_id, ctx->state);
 		clear_bit(evt_id, &gsi_ctx->evt_bmap);
 		mutex_unlock(&gsi_ctx->mlock);
+		ipahal_dma_free(&props->mem);
+
 		return -ENOMEM;
 	}
 

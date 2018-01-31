@@ -21,6 +21,7 @@
 #include <linux/platform_device.h>
 
 #include "ipa_common_i.h"
+#include "ipahal/ipahal.h"
 
 #define GSI_CHAN_MAX      31
 #define GSI_EVT_RING_MAX  23
@@ -721,7 +722,7 @@ int gsi_deregister_device(void);
  *
  * @Return Client handle populated by GSI, or a negative errno
  */
-long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props);
+long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size);
 
 /**
  * gsi_dealloc_evt_ring - Peripheral should call this function to
