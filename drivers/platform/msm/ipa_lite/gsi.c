@@ -812,6 +812,19 @@ static void gsi_prime_evt_ring(struct gsi_evt_ctx *ctx)
 	spin_unlock_irqrestore(&ctx->ring.slock, flags);
 }
 
+/* Compute the value to write to the event ring command register */
+static u32 evt_ring_cmd_val(unsigned long evt_id, enum gsi_evt_ch_cmd_opcode op)
+{
+	u32 val;
+
+	val = ((u32)evt_id << GSI_EE_n_EV_CH_CMD_CHID_SHFT) &
+			GSI_EE_n_EV_CH_CMD_CHID_BMSK;
+	val |= ((u32)op << GSI_EE_n_EV_CH_CMD_OPCODE_SHFT) &
+			GSI_EE_n_EV_CH_CMD_OPCODE_BMSK;
+
+	return val;
+}
+
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
 long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 		uint16_t int_modt, bool excl)
@@ -863,10 +876,7 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 	ctx->props = *props;
 
 	mutex_lock(&gsi_ctx->mlock);
-	val = (((evt_id << GSI_EE_n_EV_CH_CMD_CHID_SHFT) &
-			GSI_EE_n_EV_CH_CMD_CHID_BMSK) |
-		((GSI_EVT_ALLOCATE << GSI_EE_n_EV_CH_CMD_OPCODE_SHFT) &
-			GSI_EE_n_EV_CH_CMD_OPCODE_BMSK));
+	val = evt_ring_cmd_val(evt_id, GSI_EVT_ALLOCATE);
 	gsi_writel(val, GSI_EE_n_EV_CH_CMD_OFFS(ee));
 	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
 		ipa_err("evt_id=%lu timed out\n", evt_id);
@@ -924,7 +934,6 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 {
 	uint32_t val;
 	struct gsi_evt_ctx *ctx;
-	int res;
 
 	if (evt_ring_hdl >= gsi_ctx->max_ev) {
 		ipa_err("bad params evt_ring_hdl=%lu\n", evt_ring_hdl);
@@ -947,13 +956,10 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 
 	mutex_lock(&gsi_ctx->mlock);
 	reinit_completion(&ctx->compl);
-	val = (((evt_ring_hdl << GSI_EE_n_EV_CH_CMD_CHID_SHFT) &
-			GSI_EE_n_EV_CH_CMD_CHID_BMSK) |
-		((GSI_EVT_DE_ALLOC << GSI_EE_n_EV_CH_CMD_OPCODE_SHFT) &
-			 GSI_EE_n_EV_CH_CMD_OPCODE_BMSK));
+
+	val = evt_ring_cmd_val(evt_ring_hdl, GSI_EVT_DE_ALLOC);
 	gsi_writel(val, GSI_EE_n_EV_CH_CMD_OFFS(gsi_ctx->ee));
-	res = wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT);
-	if (res == 0) {
+	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
 		ipa_err("evt_id=%lu timed out\n", evt_ring_hdl);
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
@@ -981,7 +987,6 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 {
 	uint32_t val;
 	struct gsi_evt_ctx *ctx;
-	int res;
 
 	if (evt_ring_hdl >= gsi_ctx->max_ev) {
 		ipa_err("bad params evt_ring_hdl=%lu\n", evt_ring_hdl);
@@ -997,13 +1002,10 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 
 	mutex_lock(&gsi_ctx->mlock);
 	reinit_completion(&ctx->compl);
-	val = (((evt_ring_hdl << GSI_EE_n_EV_CH_CMD_CHID_SHFT) &
-			GSI_EE_n_EV_CH_CMD_CHID_BMSK) |
-		((GSI_EVT_RESET << GSI_EE_n_EV_CH_CMD_OPCODE_SHFT) &
-			 GSI_EE_n_EV_CH_CMD_OPCODE_BMSK));
+
+	val = evt_ring_cmd_val(evt_ring_hdl, GSI_EVT_RESET);
 	gsi_writel(val, GSI_EE_n_EV_CH_CMD_OFFS(gsi_ctx->ee));
-	res = wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT);
-	if (res == 0) {
+	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
 		ipa_err("evt_id=%lu timed out\n", evt_ring_hdl);
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
