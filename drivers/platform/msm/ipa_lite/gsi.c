@@ -769,20 +769,17 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 	gsi_writel(0, GSI_EE_n_EV_CH_k_CNTXT_13_OFFS(evt_id, ee));
 }
 
-static void gsi_init_evt_ring(struct gsi_evt_ring_props *props,
-		struct gsi_ring_ctx *ctx)
+static void
+gsi_init_evt_ring(struct gsi_ring_ctx *ctx, struct ipa_mem_buffer *mem)
 {
-	ctx->mem.base = props->mem.base;
-	ctx->mem.phys_base = props->mem.phys_base;
-	ctx->mem.size = props->mem.size;
-	ctx->wp = props->mem.phys_base;
-	ctx->rp = props->mem.phys_base;
-	ctx->wp_local = props->mem.phys_base;
-	ctx->rp_local = props->mem.phys_base;
+	ctx->mem = *mem;
+	ctx->wp = mem->phys_base;
+	ctx->rp = mem->phys_base;
+	ctx->wp_local = mem->phys_base;
+	ctx->rp_local = mem->phys_base;
 	ctx->elem_sz = GSI_EVT_RING_ELEMENT_SIZE;
-	ctx->max_num_elem = props->mem.size / ctx->elem_sz - 1;
-	ctx->end = props->mem.phys_base +
-			(ctx->max_num_elem + 1) * ctx->elem_sz;
+	ctx->max_num_elem = mem->size / ctx->elem_sz - 1;
+	ctx->end = mem->phys_base + (ctx->max_num_elem + 1) * ctx->elem_sz;
 }
 
 static void gsi_prime_evt_ring(struct gsi_evt_ctx *ctx)
@@ -887,7 +884,7 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props)
 	gsi_program_evt_ring_ctx(props, evt_id, gsi_ctx->ee);
 
 	spin_lock_init(&ctx->ring.slock);
-	gsi_init_evt_ring(props, &ctx->ring);
+	gsi_init_evt_ring(&ctx->ring, &props->mem);
 
 	ctx->id = evt_id;
 	atomic_inc(&gsi_ctx->num_evt_ring);
@@ -1007,7 +1004,7 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 	}
 
 	gsi_program_evt_ring_ctx(&ctx->props, evt_ring_hdl, gsi_ctx->ee);
-	gsi_init_evt_ring(&ctx->props, &ctx->ring);
+	gsi_init_evt_ring(&ctx->ring, &ctx->props.mem);
 
 	/* restore scratch */
 	__gsi_write_evt_ring_scratch(evt_ring_hdl, ctx->scratch);
