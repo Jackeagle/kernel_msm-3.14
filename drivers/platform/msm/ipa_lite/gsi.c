@@ -791,22 +791,12 @@ static void gsi_prime_evt_ring(struct gsi_evt_ctx *ctx)
 	spin_unlock_irqrestore(&ctx->ring.slock, flags);
 }
 
-static int gsi_validate_evt_ring_mem(struct ipa_mem_buffer *mem)
-{
-	if (mem->phys_base % roundup_pow_of_two(mem->size)) {
-		ipa_err("bad params ring base not aligned 0x%llx align 0x%lx\n",
-				mem->phys_base, roundup_pow_of_two(mem->size));
-		return -EINVAL;
-	}
-
-	return 0;
-}
-
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
 long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 		uint16_t int_modt, bool excl)
 {
 	unsigned long evt_id;
+	unsigned long required_alignment = roundup_pow_of_two(size);
 	enum gsi_evt_ch_cmd_opcode op = GSI_EVT_ALLOCATE;
 	uint32_t val;
 	struct gsi_evt_ctx *ctx;
@@ -822,8 +812,11 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 		return -ENOMEM;
 	}
 
-	if (gsi_validate_evt_ring_mem(&props->mem)) {
-		ipa_err("invalid params\n");
+	/* Verify the result meets our alignment requirements */
+	if (props->mem.phys_base % required_alignment) {
+		ipa_err("ring base %pad not aligned to 0x%lx\n",
+				&props->mem.phys_base, required_alignment);
+		ipahal_dma_free(&props->mem);
 		return -EINVAL;
 	}
 	props->int_modt = int_modt;
