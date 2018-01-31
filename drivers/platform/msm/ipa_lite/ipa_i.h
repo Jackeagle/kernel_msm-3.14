@@ -95,8 +95,6 @@
 	(((start_ofst) + IPA_HDR_PROC_CTX_TABLE_ALIGNMENT_BYTE - 1) & \
 	~(IPA_HDR_PROC_CTX_TABLE_ALIGNMENT_BYTE - 1))
 
-#define MAX_RESOURCE_TO_CLIENTS (IPA_CLIENT_MAX)
-
 #define IPA_GSI_CHANNEL_STOP_MAX_RETRY 10
 #define IPA_GSI_CHANNEL_STOP_PKT_SIZE 1
 
@@ -200,11 +198,6 @@ struct ipa3_active_clients_log_ctx {
 	int log_tail;
 	bool log_rdy;
 	struct hlist_head htable[IPA3_ACTIVE_CLIENTS_LOG_HASHTABLE_SIZE];
-};
-
-struct ipa3_client_names {
-	enum ipa_client_type names[MAX_RESOURCE_TO_CLIENTS];
-	int length;
 };
 
 struct ipa_smmu_cb_ctx {
