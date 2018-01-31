@@ -719,6 +719,22 @@ int gsi_deregister_device(void)
 	return 0;
 }
 
+/* Compute the value to write to the event ring context 0 register */
+static u32 evt_ring_ctx_0_val(enum gsi_evt_chtype chtype,
+			enum gsi_intr_type intr_type, u32 re_size)
+{
+	u32 val;
+
+	val = ((u32)chtype << GSI_EE_n_EV_CH_k_CNTXT_0_CHTYPE_SHFT) &
+			GSI_EE_n_EV_CH_k_CNTXT_0_CHTYPE_BMSK;
+	val |= ((u32)intr_type << GSI_EE_n_EV_CH_k_CNTXT_0_INTYPE_SHFT) &
+			GSI_EE_n_EV_CH_k_CNTXT_0_INTYPE_BMSK;
+	val |= (re_size << GSI_EE_n_EV_CH_k_CNTXT_0_ELEMENT_SIZE_SHFT)
+			& GSI_EE_n_EV_CH_k_CNTXT_0_ELEMENT_SIZE_BMSK;
+
+	return val;
+}
+
 static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 		uint8_t evt_id, unsigned int ee)
 {
@@ -727,13 +743,8 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 
 	ipa_debug("intf=GPI intr=IRQ re=%u\n", GSI_EVT_RING_ELEMENT_SIZE);
 
-	val = (((GSI_EVT_CHTYPE_GPI_EV << GSI_EE_n_EV_CH_k_CNTXT_0_CHTYPE_SHFT) &
-			GSI_EE_n_EV_CH_k_CNTXT_0_CHTYPE_BMSK) |
-		((GSI_INTR_IRQ << GSI_EE_n_EV_CH_k_CNTXT_0_INTYPE_SHFT) &
-			GSI_EE_n_EV_CH_k_CNTXT_0_INTYPE_BMSK) |
-		((GSI_EVT_RING_ELEMENT_SIZE << GSI_EE_n_EV_CH_k_CNTXT_0_ELEMENT_SIZE_SHFT)
-			& GSI_EE_n_EV_CH_k_CNTXT_0_ELEMENT_SIZE_BMSK));
-
+	val = evt_ring_ctx_0_val(GSI_EVT_CHTYPE_GPI_EV, GSI_INTR_IRQ,
+					GSI_EVT_RING_ELEMENT_SIZE);
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_0_OFFS(evt_id, ee));
 
 	val = (props->mem.size & GSI_EE_n_EV_CH_k_CNTXT_1_R_LENGTH_BMSK) <<
