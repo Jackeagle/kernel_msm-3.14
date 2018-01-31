@@ -2651,7 +2651,6 @@ long ipa3_alloc_common_event_ring(u32 size, u16 int_modt, bool excl)
 		return -ENOMEM;
 	}
 	gsi_evt_ring_props.int_modt = int_modt;
-	gsi_evt_ring_props.int_modc = 1; /* moderation comes from channel*/
 	gsi_evt_ring_props.exclusive = excl;
 
 	return gsi_alloc_evt_ring(&gsi_evt_ring_props);
@@ -2706,13 +2705,10 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 			return -ENOMEM;
 		}
 		gsi_evt_ring_props.int_modt = IPA_GSI_EVT_RING_INT_MODT;
-		gsi_evt_ring_props.int_modc = 1;
 		gsi_evt_ring_props.exclusive = true;
 
-		ipa_debug("client=%d moderation threshold cycles=%u cnt=%u\n",
-			ep->client,
-			gsi_evt_ring_props.int_modt,
-			gsi_evt_ring_props.int_modc);
+		ipa_debug("client=%d moderation threshold cycles=%u cnt=1\n",
+			ep->client, gsi_evt_ring_props.int_modt);
 
 		result = gsi_alloc_evt_ring(&gsi_evt_ring_props);
 		if (result < 0)

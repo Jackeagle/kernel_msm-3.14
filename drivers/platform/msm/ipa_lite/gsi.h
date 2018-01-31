@@ -180,8 +180,8 @@ enum gsi_evt_ring_elem_size {
  *		     ring_len rounded to power of two
  * @ring_base_vaddr: virtual base address of ring (set to NULL when not
  *                   applicable)
- * @int_modt:        cycles base interrupt moderation (32KHz clock)
- * @int_modc:        interrupt moderation packet counter
+ * @int_modt:        cycles base interrupt moderation (32KHz clock);
+ * 		     (interrupt moderation packet counter is always 1)
  * @exclusive:       if true, only one GSI channel can be associated with this
  *                   event ring. if false, the event ring can be shared among
  *                   multiple GSI channels but in that case no polling
@@ -192,7 +192,6 @@ enum gsi_evt_ring_elem_size {
 struct gsi_evt_ring_props {
 	struct ipa_mem_buffer mem;
 	uint16_t int_modt;
-	uint8_t int_modc;
 	bool exclusive;
 };
 

@@ -725,6 +725,7 @@ int gsi_deregister_device(void)
 static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 		uint8_t evt_id, unsigned int ee)
 {
+	u32 int_modc = 1;	/* moderation always comes from channel*/
 	u32 val;
 
 	ipa_debug("intf=GPI intr=IRQ re=%u\n", GSI_EVT_RING_ELEMENT_SIZE);
@@ -755,7 +756,7 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 
 	val = (((props->int_modt << GSI_EE_n_EV_CH_k_CNTXT_8_INT_MODT_SHFT) &
 		GSI_EE_n_EV_CH_k_CNTXT_8_INT_MODT_BMSK) |
-		((props->int_modc << GSI_EE_n_EV_CH_k_CNTXT_8_INT_MODC_SHFT) &
+		((int_modc << GSI_EE_n_EV_CH_k_CNTXT_8_INT_MODC_SHFT) &
 		 GSI_EE_n_EV_CH_k_CNTXT_8_INT_MODC_BMSK));
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_8_OFFS(evt_id, ee));
 
