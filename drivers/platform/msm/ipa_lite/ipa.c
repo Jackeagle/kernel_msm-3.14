@@ -1299,7 +1299,8 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 
 	if (id->type != SIMPLE) {
 		t = local_clock();
-		nanosec_rem = do_div(t, 1000000000);
+		nanosec_rem = t % 1000000000;	/* nanoseconds */
+		t /= 1000000000;		/* whole seconds */
 		snprintf(temp_str, IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN,
 				"[%5llu.%06lu] %c %s, %s: %d",
 				t, nanosec_rem / 1000, inc ? '^' : 'v',
@@ -2491,6 +2492,9 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	enum ipa_hw_type ipa_version;
 	struct resource *res;
 	int result;
+
+	/* We assume we're working on 64-bit hardware */
+	BUILD_BUG_ON(!IS_ENABLED(CONFIG_64BIT));
 
 	ipa_debug("IPA driver probing started\n");
 	ipa_debug("dev->of_node->name = %s\n", node->name);

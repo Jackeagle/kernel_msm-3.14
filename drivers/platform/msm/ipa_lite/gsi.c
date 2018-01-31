@@ -793,9 +793,7 @@ static void gsi_prime_evt_ring(struct gsi_evt_ctx *ctx)
 
 static int gsi_validate_evt_ring_mem(struct ipa_mem_buffer *mem)
 {
-	dma_addr_t ra = mem->phys_base;
-
-	if (do_div(ra, roundup_pow_of_two(mem->size))) {
+	if (mem->phys_base % roundup_pow_of_two(mem->size)) {
 		ipa_err("bad params ring base not aligned 0x%llx align 0x%lx\n",
 				mem->phys_base, roundup_pow_of_two(mem->size));
 		return -EINVAL;
@@ -1058,7 +1056,6 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, unsigned int ee,
 
 static int gsi_validate_channel_props(struct gsi_chan_props *props)
 {
-	dma_addr_t ra;
 	dma_addr_t last;
 
 	if (props->ch_id >= gsi_ctx->max_ch) {
@@ -1072,8 +1069,7 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 		return -EINVAL;
 	}
 
-	ra = props->mem.phys_base;
-	if (do_div(ra, roundup_pow_of_two(props->mem.size))) {
+	if (props->mem.phys_base % roundup_pow_of_two(props->mem.size)) {
 		ipa_err("bad params ring base not aligned 0x%llx align 0x%lx\n",
 				props->mem.phys_base,
 				roundup_pow_of_two(props->mem.size));
