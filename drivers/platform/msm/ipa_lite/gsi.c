@@ -748,7 +748,7 @@ static u32 evt_ring_ctx_8_val(u32 int_modt, u32 int_modc)
 	return val;
 }
 
-static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
+static void gsi_program_evt_ring_ctx(struct ipa_mem_buffer *mem,
 		uint8_t evt_id, unsigned int ee, u16 int_modt)
 {
 	u32 int_modc = 1;	/* moderation always comes from channel*/
@@ -760,7 +760,7 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 					GSI_EVT_RING_ELEMENT_SIZE);
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_0_OFFS(evt_id, ee));
 
-	val = (props->mem.size & GSI_EE_n_EV_CH_k_CNTXT_1_R_LENGTH_BMSK) <<
+	val = (mem->size & GSI_EE_n_EV_CH_k_CNTXT_1_R_LENGTH_BMSK) <<
 		GSI_EE_n_EV_CH_k_CNTXT_1_R_LENGTH_SHFT;
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_1_OFFS(evt_id, ee));
 
@@ -769,10 +769,10 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 	 * high-order 32 bits of the address of the event ring,
 	 * respectively.
 	 */
-	val = props->mem.phys_base & GENMASK(31, 0);
+	val = mem->phys_base & GENMASK(31, 0);
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_2_OFFS(evt_id, ee));
 
-	val = props->mem.phys_base >> 32;
+	val = mem->phys_base >> 32;
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_3_OFFS(evt_id, ee));
 
 	val = evt_ring_ctx_8_val(int_modt, int_modc);
@@ -889,7 +889,7 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 		goto err_clear_bit;
 	}
 
-	gsi_program_evt_ring_ctx(props, evt_id, gsi_ctx->ee, props->int_modt);
+	gsi_program_evt_ring_ctx(&props->mem, evt_id, gsi_ctx->ee, props->int_modt);
 
 	spin_lock_init(&ctx->ring.slock);
 	gsi_init_ring(&ctx->ring, &props->mem);
@@ -1015,7 +1015,7 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 		BUG();
 	}
 
-	gsi_program_evt_ring_ctx(&ctx->props, evt_ring_hdl, gsi_ctx->ee,
+	gsi_program_evt_ring_ctx(&ctx->props.mem, evt_ring_hdl, gsi_ctx->ee,
 					ctx->props.int_modt);
 	gsi_init_ring(&ctx->ring, &ctx->props.mem);
 
