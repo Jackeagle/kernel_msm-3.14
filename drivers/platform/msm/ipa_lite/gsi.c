@@ -287,21 +287,21 @@ static void gsi_incr_ring_wp(struct gsi_ring_ctx *ctx)
 {
 	ctx->wp_local += ctx->elem_sz;
 	if (ctx->wp_local == ctx->end)
-		ctx->wp_local = ctx->base;
+		ctx->wp_local = ctx->mem.phys_base;
 }
 
 static void gsi_incr_ring_rp(struct gsi_ring_ctx *ctx)
 {
 	ctx->rp_local += ctx->elem_sz;
 	if (ctx->rp_local == ctx->end)
-		ctx->rp_local = ctx->base;
+		ctx->rp_local = ctx->mem.phys_base;
 }
 
 uint16_t gsi_find_idx_from_addr(struct gsi_ring_ctx *ctx, uint64_t addr)
 {
-	BUG_ON(addr < ctx->base || addr >= ctx->end);
+	BUG_ON(addr < ctx->mem.phys_base || addr >= ctx->end);
 
-	return (uint32_t)(addr - ctx->base)/ctx->elem_sz;
+	return (uint32_t)(addr - ctx->mem.phys_base)/ctx->elem_sz;
 }
 
 static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
@@ -354,7 +354,7 @@ static void gsi_process_evt_re(struct gsi_evt_ctx *ctx,
 	uint16_t idx;
 
 	idx = gsi_find_idx_from_addr(&ctx->ring, ctx->ring.rp_local);
-	evt = ctx->ring.base_va + idx * ctx->ring.elem_sz;
+	evt = ctx->ring.mem.base + idx * ctx->ring.elem_sz;
 	gsi_process_chan(evt, notify, callback);
 	gsi_incr_ring_rp(&ctx->ring);
 	/* recycle this element */
@@ -772,16 +772,16 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 static void gsi_init_evt_ring(struct gsi_evt_ring_props *props,
 		struct gsi_ring_ctx *ctx)
 {
-	ctx->base_va = props->ring_base_vaddr;
-	ctx->base = props->ring_base_addr;
-	ctx->wp = ctx->base;
-	ctx->rp = ctx->base;
-	ctx->wp_local = ctx->base;
-	ctx->rp_local = ctx->base;
-	ctx->len = props->ring_len;
+	ctx->mem.base = props->ring_base_vaddr;
+	ctx->mem.phys_base = props->ring_base_addr;
+	ctx->mem.size = props->ring_len;
+	ctx->wp = ctx->mem.phys_base;
+	ctx->rp = ctx->mem.phys_base;
+	ctx->wp_local = ctx->mem.phys_base;
+	ctx->rp_local = ctx->mem.phys_base;
 	ctx->elem_sz = GSI_EVT_RING_ELEMENT_SIZE;
-	ctx->max_num_elem = ctx->len / ctx->elem_sz - 1;
-	ctx->end = ctx->base + (ctx->max_num_elem + 1) * ctx->elem_sz;
+	ctx->max_num_elem = ctx->mem.size / ctx->elem_sz - 1;
+	ctx->end = ctx->mem.phys_base + (ctx->max_num_elem + 1) * ctx->elem_sz;
 }
 
 static void gsi_prime_evt_ring(struct gsi_evt_ctx *ctx)
@@ -789,8 +789,8 @@ static void gsi_prime_evt_ring(struct gsi_evt_ctx *ctx)
 	unsigned long flags;
 
 	spin_lock_irqsave(&ctx->ring.slock, flags);
-	memset(ctx->ring.base_va, 0, ctx->ring.len);
-	ctx->ring.wp_local = ctx->ring.base +
+	memset(ctx->ring.mem.base, 0, ctx->ring.mem.size);
+	ctx->ring.wp_local = ctx->ring.mem.phys_base +
 		ctx->ring.max_num_elem * ctx->ring.elem_sz;
 	gsi_ring_evt_doorbell(ctx);
 	spin_unlock_irqrestore(&ctx->ring.slock, flags);
@@ -1060,16 +1060,16 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, unsigned int ee,
 static void gsi_init_chan_ring(struct gsi_chan_props *props,
 		struct gsi_ring_ctx *ctx)
 {
-	ctx->base_va = props->ring_base_vaddr;
-	ctx->base = props->ring_base_addr;
-	ctx->wp = ctx->base;
-	ctx->rp = ctx->base;
-	ctx->wp_local = ctx->base;
-	ctx->rp_local = ctx->base;
-	ctx->len = props->ring_len;
+	ctx->mem.base = props->ring_base_vaddr;
+	ctx->mem.phys_base = props->ring_base_addr;
+	ctx->mem.size = props->ring_len;
+	ctx->wp = ctx->mem.phys_base;
+	ctx->rp = ctx->mem.phys_base;
+	ctx->wp_local = ctx->mem.phys_base;
+	ctx->rp_local = ctx->mem.phys_base;
 	ctx->elem_sz = GSI_CHAN_RING_ELEMENT_SIZE;
-	ctx->max_num_elem = ctx->len / ctx->elem_sz - 1;
-	ctx->end = ctx->base + (ctx->max_num_elem + 1) *
+	ctx->max_num_elem = ctx->mem.size / ctx->elem_sz - 1;
+	ctx->end = ctx->mem.phys_base + (ctx->max_num_elem + 1) *
 		ctx->elem_sz;
 }
 
@@ -1659,7 +1659,7 @@ int gsi_queue_xfer(unsigned long chan_hdl, uint16_t num_xfers,
 		tre.chain = (xfer[i].flags & GSI_XFER_FLAG_CHAIN) ? 1 : 0;
 
 		idx = gsi_find_idx_from_addr(&ctx->ring, ctx->ring.wp_local);
-		tre_ptr = ctx->ring.base_va + idx * ctx->ring.elem_sz;
+		tre_ptr = ctx->ring.mem.base + idx * ctx->ring.elem_sz;
 
 		/* write the TRE to ring */
 		*tre_ptr = tre;

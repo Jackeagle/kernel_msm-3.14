@@ -432,9 +432,7 @@ enum gsi_chan_state {
 
 struct gsi_ring_ctx {
 	spinlock_t slock;
-	void *base_va;
-	dma_addr_t base;
-	u32 len;
+	struct ipa_mem_buffer mem;
 	uint64_t wp;
 	uint64_t rp;
 	uint64_t wp_local;
