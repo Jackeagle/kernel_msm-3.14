@@ -1143,33 +1143,16 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb,
 		struct ipa_tx_meta *metadata);
 
 /*
- * To transfer multiple data packets
- * While passing the data descriptor list, the anchor node
- * should be of type struct ipa_tx_data_desc not list_head
-*/
-int ipa3_tx_dp_mul(enum ipa_client_type dst,
-			struct ipa_tx_data_desc *data_desc);
-
-void ipa3_free_skb(struct ipa_rx_data *);
-
-/*
  * System pipes
  */
 int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl);
 
 int ipa3_teardown_sys_pipe(u32 clnt_hdl);
 
-int ipa3_sys_setup(struct ipa_sys_connect_params *sys_in,
-	unsigned long *ipa_transport_hdl,
-	u32 *ipa_pipe_num, u32 *clnt_hdl, bool en_status);
-
-int ipa3_sys_teardown(u32 clnt_hdl);
-
 int ipa3_sys_update_gsi_hdls(u32 clnt_hdl, unsigned long gsi_ch_hdl,
 	unsigned long gsi_ev_hdl);
 
 u16 ipa3_get_smem_restr_bytes(void);
-int ipa3_tear_down_uc_offload_pipes(int ipa_ep_idx_ul, int ipa_ep_idx_dl);
 
 /*
  * interrupts
@@ -1193,8 +1176,6 @@ void ipa_init_ep_flt_bitmap(void);
 
 bool ipa_is_ep_support_flt(int pipe_idx);
 
-enum ipa_rm_resource_name ipa3_get_rm_resource_from_ep(int pipe_idx);
-
 u8 ipa3_get_qmb_master_sel(enum ipa_client_type client);
 
 /* internal functions */
@@ -1213,7 +1194,6 @@ struct ipa3_ep_context *ipa3_get_ep_context(enum ipa_client_type client);
 int ipa_get_ep_group(enum ipa_client_type client);
 
 int ipa3_init_hw(void);
-struct ipa3_rt_tbl *__ipa3_find_rt_tbl(enum ipa_ip_type ip, const char *name);
 void ipa3_debugfs_init(void);
 
 void ipa3_dump_buff_internal(void *base, dma_addr_t phy_base, u32 size);
@@ -1243,9 +1223,7 @@ int ipa3_active_clients_log_print_buffer(char *buf, int size);
 int ipa3_active_clients_log_print_table(char *buf, int size);
 void ipa3_active_clients_log_clear(void);
 int ipa3_interrupts_init(u32 ipa_irq, u32 ee, struct device *ipa_dev);
-int __ipa3_del_hdr(u32 hdr_hdl, bool by_user);
-int __ipa3_release_hdr(u32 hdr_hdl);
-int __ipa3_release_hdr_proc_ctx(u32 proc_ctx_hdl);
+
 int _ipa_read_ep_reg_v3_0(char *buf, int max_len, int pipe);
 int _ipa_read_ep_reg_v4_0(char *buf, int max_len, int pipe);
 void _ipa_enable_clks_v3_0(void);
@@ -1254,8 +1232,6 @@ void ipa3_suspend_active_aggr_wa(u32 clnt_hdl);
 void ipa3_suspend_handler(enum ipa_irq_type interrupt,
 				void *private_data,
 				void *interrupt_data);
-void wwan_cleanup(void);
-
 void ipa3_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data);
 
 int _ipa_init_sram_v3(void);
@@ -1266,24 +1242,14 @@ int _ipa_init_flt4_v3(void);
 int _ipa_init_flt6_v3(void);
 
 void ipa3_skb_recycle(struct sk_buff *skb);
-void ipa3_install_dflt_flt_rules(u32 ipa_ep_idx);
-void ipa3_delete_dflt_flt_rules(u32 ipa_ep_idx);
-
 int ipa3_enable_data_path(u32 clnt_hdl);
-int ipa3_alloc_rule_id(struct idr *rule_ids);
-int ipa3_id_alloc(void *ptr);
-void *ipa3_id_find(u32 id);
-void ipa3_id_remove(u32 id);
 
 int ipa3_cfg_ep_status(u32 clnt_hdl,
 		const struct ipahal_reg_ep_cfg_status *ipa_ep_cfg);
 
-int ipa3_suspend_resource_no_block(enum ipa_rm_resource_name name);
-int ipa3_suspend_resource_sync(enum ipa_rm_resource_name name);
 bool ipa3_should_pipe_be_suspended(enum ipa_client_type client);
 int ipa3_tag_aggr_force_close(int pipe_num);
 
-void ipa3_active_clients_unlock(void);
 int ipa3_tag_process(struct ipa3_desc *desc, int num_descs,
 		    unsigned long timeout);
 
@@ -1298,7 +1264,6 @@ void ipa3_tag_destroy_imm(void *user1, int user2);
 const struct ipa_gsi_ep_config *ipa3_get_gsi_ep_info
 	(enum ipa_client_type client);
 
-int ipa_reset_all_drop_stats(void);
 u32 ipa3_get_num_pipes(void);
 int ipa3_ap_suspend(struct device *dev);
 int ipa3_ap_resume(struct device *dev);
@@ -1313,13 +1278,11 @@ int ipa3_load_fws(const struct firmware *firmware, phys_addr_t gsi_mem_base);
 const char *ipa_hw_error_str(enum ipa_hw_errors err_type);
 int ipa3_rx_poll(u32 clnt_hdl, int budget);
 void ipa3_reset_freeze_vote(void);
-struct dentry *ipa_debugfs_get_root(void);
 void ipa3_enable_dcd(void);
 int ipa3_allocate_dma_task_for_gsi(void);
 void ipa3_free_dma_task_for_gsi(void);
 int ipa3_disable_apps_wan_cons_deaggr(uint32_t agg_size, uint32_t agg_count);
 int ipa3_plat_drv_probe(struct platform_device *pdev_p);
-int ipa3_add_hdr(struct ipa_ioc_add_hdr *hdrs);
 
 void ipa3_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple);
 void ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple);
