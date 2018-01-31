@@ -327,37 +327,6 @@ struct ipa3_ep_context {
 	struct ipa3_sys_context *sys;
 };
 
-/**
- * ipa_request_gsi_channel_params - gsi channel related properties
- *
- * @ipa_ep_cfg:          IPA EP configuration
- * @client:              type of "client"
- * @priv:                callback cookie
- * @notify:              callback
- *           priv - callback cookie evt - type of event data - data relevant
- *           to event.  May not be valid. See event_type enum for valid
- *           cases.
- * @skip_ep_cfg:         boolean field that determines if EP should be
- *                       configured by IPA driver
- * @keep_ipa_awake:      when true, IPA will not be clock gated
- * @evt_ring_params:     parameters for the channel's event ring
- * @evt_scratch:         parameters for the channel's event ring scratch
- * @chan_params:         parameters for the channel
- * @chan_scratch:        parameters for the channel's scratch
- *
- */
-struct ipa_request_gsi_channel_params {
-	struct ipa_ep_cfg ipa_ep_cfg;
-	enum ipa_client_type client;
-	void *priv;
-	ipa_notify_cb notify;
-	bool skip_ep_cfg;
-	bool keep_ipa_awake;
-	union __packed gsi_evt_scratch evt_scratch;
-	struct gsi_chan_props chan_params;
-	union __packed gsi_channel_scratch chan_scratch;
-};
-
 enum ipa3_sys_pipe_policy {
 	IPA_POLICY_INTR_MODE,
 	IPA_POLICY_NOINTR_MODE,
