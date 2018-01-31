@@ -1149,9 +1149,6 @@ int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl);
 
 int ipa3_teardown_sys_pipe(u32 clnt_hdl);
 
-int ipa3_sys_update_gsi_hdls(u32 clnt_hdl, unsigned long gsi_ch_hdl,
-	unsigned long gsi_ev_hdl);
-
 u16 ipa3_get_smem_restr_bytes(void);
 
 /*

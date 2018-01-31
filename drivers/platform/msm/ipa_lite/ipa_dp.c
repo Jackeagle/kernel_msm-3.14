@@ -2506,25 +2506,6 @@ static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 	return 0;
 }
 
-int ipa3_sys_update_gsi_hdls(u32 clnt_hdl, unsigned long gsi_ch_hdl,
-	unsigned long gsi_ev_hdl)
-{
-	struct ipa3_ep_context *ep;
-
-	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
-		ipa3_ctx->ep[clnt_hdl].valid == 0) {
-		ipa_err("bad parm(Either endpoint or client hdl invalid)\n");
-		return -EINVAL;
-	}
-
-	ep = &ipa3_ctx->ep[clnt_hdl];
-
-	ep->gsi_chan_hdl = gsi_ch_hdl;
-	ep->gsi_evt_ring_hdl = gsi_ev_hdl;
-
-	return 0;
-}
-
 static void ipa_gsi_irq_tx_notify_cb(struct gsi_chan_xfer_notify *notify)
 {
 	struct ipa3_tx_pkt_wrapper *tx_pkt;
