@@ -1128,7 +1128,6 @@ void ipa3_active_clients_log_clear(void);
 int ipa3_interrupts_init(u32 ipa_irq, u32 ee, struct device *ipa_dev);
 
 int _ipa_read_ep_reg_v3_0(char *buf, int max_len, int pipe);
-int _ipa_read_ep_reg_v4_0(char *buf, int max_len, int pipe);
 void _ipa_enable_clks_v3_0(void);
 void _ipa_disable_clks_v3_0(void);
 void ipa3_suspend_active_aggr_wa(u32 clnt_hdl);
