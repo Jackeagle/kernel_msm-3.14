@@ -1032,7 +1032,7 @@ static int ipa3_setup_apps_pipes(void)
 	int result = 0;
 
 	/* allocate the common PROD event ring */
-	if (ipa3_alloc_common_event_ring(IPA_COMMON_EVENT_RING_SIZE)) {
+	if (ipa3_alloc_common_event_ring(IPA_COMMON_EVENT_RING_SIZE, 0)) {
 		ipa_err("ipa3_alloc_common_event_ring failed.\n");
 		result = -EPERM;
 		goto fail_ch20_wa;
