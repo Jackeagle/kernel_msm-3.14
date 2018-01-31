@@ -435,7 +435,7 @@ check_again:
 			ctx->ring.rp = rp;
 			while (ctx->ring.rp_local != rp) {
 				++cntr;
-				if (ctx->props.exclusive &&
+				if (ctx->exclusive &&
 					atomic_read(&ctx->chan->poll_mode)) {
 					cntr = 0;
 					break;
@@ -852,7 +852,6 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 		goto err_free_dma;
 	}
 	props->int_modt = int_modt;
-	props->exclusive = excl;
 
 	mutex_lock(&gsi_ctx->mlock);
 	evt_id = find_first_zero_bit(&gsi_ctx->evt_bmap, BITS_PER_LONG);
@@ -868,6 +867,7 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 
 	ctx = &gsi_ctx->evtr[evt_id];
 	memset(ctx, 0, sizeof(*ctx));
+	ctx->exclusive = excl;
 	mutex_init(&ctx->mlock);
 	init_completion(&ctx->compl);
 	atomic_set(&ctx->chan_ref_cnt, 0);
@@ -972,7 +972,7 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 	clear_bit(evt_ring_hdl, &gsi_ctx->evt_bmap);
 	mutex_unlock(&gsi_ctx->mlock);
 
-	ctx->props.exclusive = 0;
+	ctx->exclusive = 0;
 	ctx->props.int_modt = 0;
 	ipahal_dma_free(&ctx->props.mem);
 
@@ -1148,7 +1148,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 
 		if (atomic_read(
 			&gsi_ctx->evtr[props->evt_ring_hdl].chan_ref_cnt) &&
-			gsi_ctx->evtr[props->evt_ring_hdl].props.exclusive) {
+			gsi_ctx->evtr[props->evt_ring_hdl].exclusive) {
 			ipa_err("evt ring=%lu exclusively in use\n",
 				props->evt_ring_hdl);
 			return -ENOTSUPP;
@@ -1203,7 +1203,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	if (erindex != GSI_NO_EVT_ERINDEX) {
 		ctx->evtr = &gsi_ctx->evtr[erindex];
 		atomic_inc(&ctx->evtr->chan_ref_cnt);
-		if (ctx->evtr->props.exclusive)
+		if (ctx->evtr->exclusive)
 			ctx->evtr->chan = ctx;
 	}
 
@@ -1753,7 +1753,7 @@ int gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode)
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
-	if (!ctx->evtr || !ctx->evtr->props.exclusive) {
+	if (!ctx->evtr || !ctx->evtr->exclusive) {
 		ipa_err("cannot configure mode on chan_hdl=%lu\n",
 				chan_hdl);
 		return -ENOTSUPP;

@@ -196,7 +196,6 @@ enum gsi_evt_ring_elem_size {
 struct gsi_evt_ring_props {
 	struct ipa_mem_buffer mem;
 	uint16_t int_modt;
-	bool exclusive;
 };
 
 enum gsi_chan_prot {
@@ -524,6 +523,7 @@ struct gsi_evt_stats {
 
 struct gsi_evt_ctx {
 	struct gsi_evt_ring_props props;
+	bool exclusive;
 	enum gsi_evt_ring_state state;
 	uint8_t id;
 	struct gsi_ring_ctx ring;
