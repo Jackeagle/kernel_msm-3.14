@@ -329,7 +329,6 @@ struct ipa3_ep_context {
 
 enum ipa3_sys_pipe_policy {
 	IPA_POLICY_INTR_MODE,
-	IPA_POLICY_NOINTR_MODE,
 	IPA_POLICY_INTR_POLL_MODE,
 };
 

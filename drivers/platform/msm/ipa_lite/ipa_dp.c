@@ -1236,16 +1236,6 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb,
 	if (dst_ep_idx != -1) {
 		/* SW data path */
 		data_idx = 0;
-		if (sys->policy == IPA_POLICY_NOINTR_MODE) {
-			/*
-			 * For non-interrupt mode channel (where there is no
-			 * event ring) TAG STATUS are used for completion
-			 * notification. IPA will generate a status packet with
-			 * tag info as a result of the TAG STATUS command.
-			 */
-			desc[data_idx].is_tag_status = true;
-			data_idx++;
-		}
 		desc[data_idx].opcode = ipa3_ctx->pkt_init_imm_opcode;
 		desc[data_idx].dma_address_valid = true;
 		desc[data_idx].dma_address = ipa3_ctx->pkt_init_imm[dst_ep_idx];
@@ -1290,16 +1280,6 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb,
 	} else {
 		/* HW data path */
 		data_idx = 0;
-		if (sys->policy == IPA_POLICY_NOINTR_MODE) {
-			/*
-			 * For non-interrupt mode channel (where there is no
-			 * event ring) TAG STATUS are used for completion
-			 * notification. IPA will generate a status packet with
-			 * tag info as a result of the TAG STATUS command.
-			 */
-			desc[data_idx].is_tag_status = true;
-			data_idx++;
-		}
 		desc[data_idx].pyld = skb->data;
 		desc[data_idx].len = skb_headlen(skb);
 		desc[data_idx].type = IPA_DATA_DESC_SKB;
@@ -2645,8 +2625,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		}
 		ipa3_ctx->gsi_evt_comm_ring_rem -= (2 * in->desc_fifo_sz);
 		ep->gsi_evt_ring_hdl = ipa3_ctx->gsi_evt_comm_hdl;
-	} else if (ep->sys->policy != IPA_POLICY_NOINTR_MODE ||
-	     IPA_CLIENT_IS_CONS(ep->client)) {
+	} else {
 		size = ipa_gsi_ring_mem_size(ep->client, in->desc_fifo_sz);
 
 		ipa_debug("client=%d moderation threshold cycles=%u cnt=1\n",
