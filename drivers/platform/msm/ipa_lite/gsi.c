@@ -749,8 +749,9 @@ static u32 evt_ring_ctx_8_val(u32 int_modt, u32 int_modc)
 }
 
 static void gsi_program_evt_ring_ctx(struct ipa_mem_buffer *mem,
-		uint8_t evt_id, unsigned int ee, u16 int_modt)
+		uint8_t evt_id, u16 int_modt)
 {
+	unsigned int ee = gsi_ctx->ee;
 	u32 int_modc = 1;	/* moderation always comes from channel*/
 	u32 val;
 
@@ -889,7 +890,7 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 		goto err_clear_bit;
 	}
 
-	gsi_program_evt_ring_ctx(&props->mem, evt_id, gsi_ctx->ee, props->int_modt);
+	gsi_program_evt_ring_ctx(&props->mem, evt_id, props->int_modt);
 
 	spin_lock_init(&ctx->ring.slock);
 	gsi_init_ring(&ctx->ring, &props->mem);
@@ -1015,7 +1016,7 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 		BUG();
 	}
 
-	gsi_program_evt_ring_ctx(&ctx->props.mem, evt_ring_hdl, gsi_ctx->ee,
+	gsi_program_evt_ring_ctx(&ctx->props.mem, evt_ring_hdl,
 					ctx->props.int_modt);
 	gsi_init_ring(&ctx->ring, &ctx->props.mem);
 
