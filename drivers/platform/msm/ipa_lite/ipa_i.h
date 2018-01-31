@@ -1088,8 +1088,6 @@ u8 ipa3_get_qmb_master_sel(enum ipa_client_type client);
 
 bool ipa_is_modem_pipe(int pipe_idx);
 
-int ipa3_send_one(struct ipa3_sys_context *sys, struct ipa3_desc *desc,
-		bool in_atomic);
 int ipa3_send(struct ipa3_sys_context *sys,
 		u32 num_desc,
 		struct ipa3_desc *desc,

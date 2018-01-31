@@ -494,25 +494,6 @@ failure:
 }
 
 /**
- * ipa3_send_one() - Send a single descriptor
- * @sys:	system pipe context
- * @desc:	descriptor to send
- * @in_atomic:  whether caller is in atomic context
- *
- * - Allocate tx_packet wrapper
- * - transfer data to the IPA
- * - after the transfer was done the SPS will
- *   notify the sending user via ipa_sps_irq_comp_tx()
- *
- * Return codes: 0: success, -EFAULT: failure
- */
-int ipa3_send_one(struct ipa3_sys_context *sys, struct ipa3_desc *desc,
-	bool in_atomic)
-{
-	return ipa3_send(sys, 1, desc, in_atomic);
-}
-
-/**
  * ipa3_transport_irq_cmd_ack - callback function which will be called by
  * the transport driver after an immediate command is complete.
  * @user1:	pointer to the descriptor of the transfer
