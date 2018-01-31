@@ -800,7 +800,7 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 	enum gsi_evt_ch_cmd_opcode op = GSI_EVT_ALLOCATE;
 	uint32_t val;
 	struct gsi_evt_ctx *ctx;
-	int res;
+	int ret;
 	int ee = gsi_ctx->ee;
 	unsigned long flags;
 	size_t bit_count;
@@ -816,8 +816,8 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 	if (props->mem.phys_base % required_alignment) {
 		ipa_err("ring base %pad not aligned to 0x%lx\n",
 				&props->mem.phys_base, required_alignment);
-		ipahal_dma_free(&props->mem);
-		return -EINVAL;
+		ret = -EINVAL;
+		goto err_free_dma;
 	}
 	props->int_modt = int_modt;
 	props->exclusive = excl;
@@ -827,12 +827,11 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 	evt_id = find_first_zero_bit(&gsi_ctx->evt_bmap, bit_count);
 	if (evt_id == bit_count) {
 		ipa_err("failed to alloc event ID\n");
-		mutex_unlock(&gsi_ctx->mlock);
-		ipahal_dma_free(&props->mem);
-		return -ENOMEM;
+		ret = -ENOMEM;
+		goto err_unlock;
 	}
 	set_bit(evt_id, &gsi_ctx->evt_bmap);
-	mutex_unlock(&gsi_ctx->mlock);
+	mutex_unlock(&gsi_ctx->mlock);	/* acquired again below */
 
 	ipa_debug("Using %lu as virt evt id\n", evt_id);
 
@@ -849,24 +848,17 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 		((op << GSI_EE_n_EV_CH_CMD_OPCODE_SHFT) &
 			GSI_EE_n_EV_CH_CMD_OPCODE_BMSK));
 	gsi_writel(val, GSI_EE_n_EV_CH_CMD_OFFS(ee));
-	res = wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT);
-	if (res == 0) {
+	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
 		ipa_err("evt_id=%lu timed out\n", evt_id);
-		clear_bit(evt_id, &gsi_ctx->evt_bmap);
-		mutex_unlock(&gsi_ctx->mlock);
-		ipahal_dma_free(&props->mem);
-
-		return -ETIMEDOUT;
+		ret = -ETIMEDOUT;
+		goto err_clear_bit;
 	}
 
 	if (ctx->state != GSI_EVT_RING_STATE_ALLOCATED) {
 		ipa_err("evt_id=%lu allocation failed state=%u\n",
 				evt_id, ctx->state);
-		clear_bit(evt_id, &gsi_ctx->evt_bmap);
-		mutex_unlock(&gsi_ctx->mlock);
-		ipahal_dma_free(&props->mem);
-
-		return -ENOMEM;
+		ret = -ENOMEM;
+		goto err_clear_bit;
 	}
 
 	gsi_program_evt_ring_ctx(props, evt_id, gsi_ctx->ee);
@@ -887,6 +879,15 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 	spin_unlock_irqrestore(&gsi_ctx->slock, flags);
 
 	return evt_id;
+
+err_clear_bit:
+	clear_bit(evt_id, &gsi_ctx->evt_bmap);
+err_unlock:
+	mutex_unlock(&gsi_ctx->mlock);
+err_free_dma:
+	ipahal_dma_free(&props->mem);
+
+	return ret;
 }
 
 static void __gsi_write_evt_ring_scratch(unsigned long evt_ring_hdl,
