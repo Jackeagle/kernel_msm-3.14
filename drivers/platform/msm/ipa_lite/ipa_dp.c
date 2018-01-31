@@ -2643,23 +2643,15 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 
 long ipa3_alloc_common_event_ring(void)
 {
-	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct gsi_evt_ring_props gsi_evt_ring_props;
-	dma_addr_t evt_dma_addr;
+	u32 size = IPA_COMMON_EVENT_RING_SIZE;
 	long result;
 
 	memset(&gsi_evt_ring_props, 0, sizeof(gsi_evt_ring_props));
-	gsi_evt_ring_props.mem.size = IPA_COMMON_EVENT_RING_SIZE;
-
-	gsi_evt_ring_props.mem.base =
-		dma_alloc_coherent(dev, gsi_evt_ring_props.mem.size,
-					&evt_dma_addr, GFP_KERNEL);
-	if (!gsi_evt_ring_props.mem.base) {
-		ipa_err("fail to dma alloc %u bytes\n",
-			gsi_evt_ring_props.mem.size);
+	if (ipahal_dma_alloc(&gsi_evt_ring_props.mem, size, GFP_KERNEL)) {
+		ipa_err("fail to dma alloc %u bytes\n", size);
 		return -ENOMEM;
 	}
-	gsi_evt_ring_props.mem.phys_base = evt_dma_addr;
 	gsi_evt_ring_props.int_modt = 0;
 	gsi_evt_ring_props.int_modc = 1; /* moderation comes from channel*/
 	gsi_evt_ring_props.exclusive = false;
@@ -2670,7 +2662,7 @@ long ipa3_alloc_common_event_ring(void)
 		return result;
 	}
 	ipa3_ctx->gsi_evt_comm_hdl = result;
-	ipa3_ctx->gsi_evt_comm_ring_rem = IPA_COMMON_EVENT_RING_SIZE;
+	ipa3_ctx->gsi_evt_comm_ring_rem = size;
 
 	return 0;
 }
@@ -2701,11 +2693,9 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	union __packed gsi_channel_scratch ch_scratch;
 	const struct ipa_gsi_ep_config *gsi_ep_info;
 	dma_addr_t dma_addr;
-	dma_addr_t evt_dma_addr;
 	int result;
 	u32 size;
 
-	evt_dma_addr = 0;
 	ep->gsi_evt_ring_hdl = GSI_NO_EVT_ERINDEX;
 	memset(&gsi_evt_ring_props, 0, sizeof(gsi_evt_ring_props));
 	if (ep->sys->use_comm_evt_ring) {
@@ -2722,16 +2712,11 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	} else if (ep->sys->policy != IPA_POLICY_NOINTR_MODE ||
 	     IPA_CLIENT_IS_CONS(ep->client)) {
 		size = ipa_gsi_ring_mem_size(ep->client, in->desc_fifo_sz);
-
-		gsi_evt_ring_props.mem.base =
-			dma_alloc_coherent(dev, gsi_evt_ring_props.mem.size,
-				&evt_dma_addr, GFP_KERNEL);
-		if (!gsi_evt_ring_props.mem.base) {
-			ipa_err("fail to dma alloc %u bytes\n",
-				gsi_evt_ring_props.mem.size);
+		if (ipahal_dma_alloc(&gsi_evt_ring_props.mem, size,
+					GFP_KERNEL)) {
+			ipa_err("fail to dma alloc %u bytes\n", size);
 			return -ENOMEM;
 		}
-		gsi_evt_ring_props.mem.phys_base = evt_dma_addr;
 
 		/* copy mem info */
 		ep->gsi_evt_ring_mem.size = gsi_evt_ring_props.mem.size;
@@ -2843,10 +2828,9 @@ fail_get_gsi_ep_info:
 		ep->gsi_evt_ring_hdl = GSI_NO_EVT_ERINDEX;
 	}
 fail_alloc_evt_ring:
-	if (gsi_evt_ring_props.mem.base)
-		dma_free_coherent(dev, gsi_evt_ring_props.mem.size,
-			gsi_evt_ring_props.mem.base, evt_dma_addr);
+	ipahal_dma_free(&gsi_evt_ring_props.mem);
 	ipa_err("Return with err: %d\n", result);
+
 	return result;
 }
 
