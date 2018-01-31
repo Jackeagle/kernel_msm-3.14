@@ -1061,13 +1061,13 @@ static void gsi_init_chan_ring(struct gsi_chan_props *props,
 	ctx->mem.base = props->mem.base;
 	ctx->mem.phys_base = props->mem.phys_base;
 	ctx->mem.size = props->mem.size;
-	ctx->wp = ctx->mem.phys_base;
-	ctx->rp = ctx->mem.phys_base;
-	ctx->wp_local = ctx->mem.phys_base;
-	ctx->rp_local = ctx->mem.phys_base;
+	ctx->wp = props->mem.phys_base;
+	ctx->rp = props->mem.phys_base;
+	ctx->wp_local = props->mem.phys_base;
+	ctx->rp_local = props->mem.phys_base;
 	ctx->elem_sz = GSI_CHAN_RING_ELEMENT_SIZE;
-	ctx->max_num_elem = ctx->mem.size / ctx->elem_sz - 1;
-	ctx->end = ctx->mem.phys_base + (ctx->max_num_elem + 1) *
+	ctx->max_num_elem = props->mem.size / ctx->elem_sz - 1;
+	ctx->end = props->mem.phys_base + (ctx->max_num_elem + 1) *
 		ctx->elem_sz;
 }
 
