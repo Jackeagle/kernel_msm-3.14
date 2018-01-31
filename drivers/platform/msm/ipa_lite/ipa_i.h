@@ -113,18 +113,6 @@
 #define IPA_WAN_MSG_IPv6_ADDR_GW_LEN 4
 
 /**
- * enum ipa_voltage_level - IPA Voltage levels
- */
-enum ipa_voltage_level {
-        IPA_VOLTAGE_UNSPECIFIED,
-        IPA_VOLTAGE_SVS2 = IPA_VOLTAGE_UNSPECIFIED,
-        IPA_VOLTAGE_SVS,
-        IPA_VOLTAGE_NOMINAL,
-        IPA_VOLTAGE_TURBO,
-        IPA_VOLTAGE_MAX,
-};
-
-/**
  * struct ipa_tx_suspend_irq_data - interrupt data for IPA_TX_SUSPEND_IRQ
  * @endpoints: bitmask of endpoints which case IPA_TX_SUSPEND_IRQ interrupt
  * @dma_addr: DMA address of this Rx packet
