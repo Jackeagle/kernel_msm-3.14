@@ -1299,11 +1299,10 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 
 	if (id->type != SIMPLE) {
 		t = local_clock();
-		nanosec_rem = do_div(t, 1000000000) / 1000;
+		nanosec_rem = do_div(t, 1000000000);
 		snprintf(temp_str, IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN,
-				inc ? "[%5lu.%06lu] ^ %s, %s: %d" :
-						"[%5lu.%06lu] v %s, %s: %d",
-				(unsigned long)t, nanosec_rem,
+				"[%5llu.%06lu] %c %s, %s: %d",
+				t, nanosec_rem / 1000, inc ? '^' : 'v',
 				id->id_string, id->file, id->line);
 		ipa3_active_clients_log_insert(temp_str);
 	}
