@@ -853,8 +853,6 @@ static struct notifier_block ipa3_ssr_notifier = {
 static int get_ipa_rmnet_dts_configuration(struct platform_device *pdev,
 		struct ipa3_rmnet_plat_drv_res *ipa_rmnet_drv_res)
 {
-	int result;
-
 	ipa_rmnet_drv_res->wan_rx_desc_size = IPA_WWAN_CONS_DESC_FIFO_SZ;
 	ipa_rmnet_drv_res->ipa_rmnet_ssr =
 			of_property_read_bool(pdev->dev.of_node,
@@ -878,17 +876,6 @@ static int get_ipa_rmnet_dts_configuration(struct platform_device *pdev,
 			"qcom,ipa-napi-enable");
 	ipa_info("IPA Napi Enable = %s\n",
 		ipa_rmnet_drv_res->ipa_napi_enable ? "True" : "False");
-
-	/* Get IPA WAN RX desc fifo size */
-	result = of_property_read_u32(pdev->dev.of_node,
-			"qcom,wan-rx-desc-size",
-			&ipa_rmnet_drv_res->wan_rx_desc_size);
-	if (result)
-		ipa_info("using default for wan-rx-desc-size = %u\n",
-				ipa_rmnet_drv_res->wan_rx_desc_size);
-	else
-		ipa_debug(": found ipa_drv_res->wan-rx-desc-size = %u\n",
-				ipa_rmnet_drv_res->wan_rx_desc_size);
 
 	return 0;
 }
