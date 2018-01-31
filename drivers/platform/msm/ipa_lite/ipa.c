@@ -1038,6 +1038,7 @@ static int ipa3_setup_apps_pipes(void)
 		result = -EPERM;
 		goto fail_ch20_wa;
 	}
+	ipa3_ctx->gsi_evt_comm_ring_rem = IPA_COMMON_EVENT_RING_SIZE;
 
 	/* CMD OUT (AP->IPA) */
 	memset(&sys_in, 0, sizeof(struct ipa_sys_connect_params));

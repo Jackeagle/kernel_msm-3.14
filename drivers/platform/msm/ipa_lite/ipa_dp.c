@@ -2661,7 +2661,6 @@ long ipa3_alloc_common_event_ring(u32 size, u16 int_modt, bool excl)
 		return result;
 	}
 	ipa3_ctx->gsi_evt_comm_hdl = result;
-	ipa3_ctx->gsi_evt_comm_ring_rem = size;
 
 	return 0;
 }
