@@ -190,8 +190,8 @@ enum gsi_evt_ring_elem_size {
  * @user_data:       cookie used for error notifications
  */
 struct gsi_evt_ring_props {
-	uint16_t ring_len;
-	uint64_t ring_base_addr;
+	u32 ring_len;
+	dma_addr_t ring_base_addr;
 	void *ring_base_vaddr;
 	uint16_t int_modt;
 	uint8_t int_modc;

@@ -37,7 +37,7 @@ static ssize_t gsi_dump_evt(struct file *file,
 	char *sptr, *token;
 	uint32_t val;
 	struct gsi_evt_ctx *ctx;
-	uint16_t i;
+	u32 i;
 
 	if (sizeof(dbg_buff) < count + 1)
 		return -EFAULT;

@@ -725,7 +725,7 @@ int gsi_deregister_device(void)
 static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 		uint8_t evt_id, unsigned int ee)
 {
-	uint32_t val;
+	u32 val;
 
 	ipa_debug("intf=GPI intr=IRQ re=%u\n", GSI_EVT_RING_ELEMENT_SIZE);
 
