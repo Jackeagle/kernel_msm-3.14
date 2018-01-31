@@ -2687,12 +2687,10 @@ ipa_gsi_ring_mem_size(enum ipa_client_type client, u32 desc_fifo_sz)
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	struct ipa3_ep_context *ep)
 {
-	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct gsi_evt_ring_props gsi_evt_ring_props;
 	struct gsi_chan_props gsi_channel_props;
 	union __packed gsi_channel_scratch ch_scratch;
 	const struct ipa_gsi_ep_config *gsi_ep_info;
-	dma_addr_t dma_addr;
 	int result;
 	u32 size;
 
@@ -2758,18 +2756,13 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 
 	gsi_channel_props.evt_ring_hdl = ep->gsi_evt_ring_hdl;
 
-	gsi_channel_props.mem.size = ipa_gsi_ring_mem_size(ep->client,
-						in->desc_fifo_sz);
-	gsi_channel_props.mem.base =
-		dma_alloc_coherent(dev, gsi_channel_props.mem.size,
-			&dma_addr, GFP_KERNEL);
-	if (!gsi_channel_props.mem.base) {
+	size = ipa_gsi_ring_mem_size(ep->client, in->desc_fifo_sz);
+	if (ipahal_dma_alloc(&gsi_channel_props.mem, size, GFP_KERNEL)) {
 		ipa_err("fail to dma alloc %u bytes\n",
 			gsi_channel_props.mem.size);
 		result = -ENOMEM;
 		goto fail_alloc_channel_ring;
 	}
-	gsi_channel_props.mem.phys_base = dma_addr;
 
 	/* copy mem info */
 	ep->gsi_chan_ring_mem.size = gsi_channel_props.mem.size;
@@ -2819,8 +2812,7 @@ fail_write_channel_scratch:
 		BUG();
 	}
 fail_alloc_channel:
-	dma_free_coherent(dev, gsi_channel_props.mem.size,
-			gsi_channel_props.mem.base, dma_addr);
+	ipahal_dma_free(&gsi_channel_props.mem);
 fail_alloc_channel_ring:
 fail_get_gsi_ep_info:
 	if (ep->gsi_evt_ring_hdl != GSI_NO_EVT_ERINDEX) {
