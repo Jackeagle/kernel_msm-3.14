@@ -749,7 +749,7 @@ static u32 evt_ring_ctx_8_val(u32 int_modt, u32 int_modc)
 }
 
 static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
-		uint8_t evt_id, unsigned int ee)
+		uint8_t evt_id, unsigned int ee, u16 int_modt)
 {
 	u32 int_modc = 1;	/* moderation always comes from channel*/
 	u32 val;
@@ -775,7 +775,7 @@ static void gsi_program_evt_ring_ctx(struct gsi_evt_ring_props *props,
 	val = props->mem.phys_base >> 32;
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_3_OFFS(evt_id, ee));
 
-	val = evt_ring_ctx_8_val(props->int_modt, int_modc);
+	val = evt_ring_ctx_8_val(int_modt, int_modc);
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_8_OFFS(evt_id, ee));
 
 	/* No MSI write data, and MSI address high and low address is 0 */
@@ -889,7 +889,7 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 		goto err_clear_bit;
 	}
 
-	gsi_program_evt_ring_ctx(props, evt_id, gsi_ctx->ee);
+	gsi_program_evt_ring_ctx(props, evt_id, gsi_ctx->ee, props->int_modt);
 
 	spin_lock_init(&ctx->ring.slock);
 	gsi_init_ring(&ctx->ring, &props->mem);
@@ -1015,7 +1015,8 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 		BUG();
 	}
 
-	gsi_program_evt_ring_ctx(&ctx->props, evt_ring_hdl, gsi_ctx->ee);
+	gsi_program_evt_ring_ctx(&ctx->props, evt_ring_hdl, gsi_ctx->ee,
+					ctx->props.int_modt);
 	gsi_init_ring(&ctx->ring, &ctx->props.mem);
 
 	/* restore scratch */
