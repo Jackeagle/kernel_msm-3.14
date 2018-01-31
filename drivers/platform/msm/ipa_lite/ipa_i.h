@@ -1029,12 +1029,6 @@ struct ipa3_context {
 
 extern struct ipa3_context *ipa3_ctx;
 
-struct ipa_req_chan_out_params {
-	u32 clnt_hdl;
-	u32 db_reg_phs_addr_lsb;
-	u32 db_reg_phs_addr_msb;
-};
-
 /* public APIs */
 /* Generic GSI channels functions */
 
