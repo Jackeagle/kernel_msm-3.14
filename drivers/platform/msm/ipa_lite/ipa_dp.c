@@ -993,7 +993,6 @@ fail_gen:
  */
 int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 {
-	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct ipa3_ep_context *ep;
 	int empty;
 	int result;
@@ -1049,10 +1048,7 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 		ipa_assert();
 		return result;
 	}
-	dma_free_coherent(dev,
-		ep->gsi_chan_ring_mem.size,
-		ep->gsi_chan_ring_mem.base,
-		ep->gsi_chan_ring_mem.phys_base);
+	ipahal_dma_free(&ep->gsi_chan_ring_mem);
 	result = gsi_dealloc_channel(ep->gsi_chan_hdl);
 	if (result) {
 		ipa_err("Failed to dealloc chan: %d.\n", result);
@@ -1072,10 +1068,7 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 			BUG();
 			return result;
 		}
-		dma_free_coherent(dev,
-			ep->gsi_evt_ring_mem.size,
-			ep->gsi_evt_ring_mem.base,
-			ep->gsi_evt_ring_mem.phys_base);
+		ipahal_dma_free(&ep->gsi_evt_ring_mem);
 		result = gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl);
 		if (result) {
 			ipa_err("Failed to dealloc evt ring: %d.\n",
