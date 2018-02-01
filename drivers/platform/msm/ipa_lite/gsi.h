@@ -169,11 +169,6 @@ enum gsi_evt_chtype {
 	GSI_EVT_CHTYPE_XDCI_EV = 0x3
 };
 
-enum gsi_evt_ring_elem_size {
-	GSI_EVT_RING_RE_SIZE_4B = 4,
-	GSI_EVT_RING_RE_SIZE_16B = 16,
-};
-
 enum gsi_chan_prot {
 	GSI_CHAN_PROT_MHI = 0x0,
 	GSI_CHAN_PROT_XHCI = 0x1,
