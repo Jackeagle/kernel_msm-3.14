@@ -839,11 +839,29 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 	int ee = gsi_ctx->ee;
 	unsigned long flags;
 
+	/* Start by allocating the event id to use */
+	mutex_lock(&gsi_ctx->mlock);
+	evt_id = find_first_zero_bit(&gsi_ctx->evt_bmap, BITS_PER_LONG);
+	if (evt_id == BITS_PER_LONG) {
+		ipa_err("failed to alloc event ID\n");
+		mutex_unlock(&gsi_ctx->mlock);
+		return -ENOMEM;
+	}
+	set_bit(evt_id, &gsi_ctx->evt_bmap);
+	mutex_unlock(&gsi_ctx->mlock);	/* acquired again below */
+
+	ipa_debug("Using %lu as virt evt id\n", evt_id);
+
+	ctx = &gsi_ctx->evtr[evt_id];
+	memset(ctx, 0, sizeof(*ctx));
+	ctx->id = evt_id;
+
 	/* ipa_assert(!(size % GSI_EVT_RING_ELEMENT_SIZE)); */
 
 	if (ipahal_dma_alloc(&mem, size, GFP_KERNEL)) {
 		ipa_err("fail to dma alloc %u bytes\n", size);
-		return -ENOMEM;
+		ret = -ENOMEM;
+		goto err_clear_bit;
 	}
 
 	/* Verify the result meets our alignment requirements */
@@ -853,27 +871,13 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 		ret = -EINVAL;
 		goto err_free_dma;
 	}
+	ctx->mem = mem;
 
-	mutex_lock(&gsi_ctx->mlock);
-	evt_id = find_first_zero_bit(&gsi_ctx->evt_bmap, BITS_PER_LONG);
-	if (evt_id == BITS_PER_LONG) {
-		ipa_err("failed to alloc event ID\n");
-		ret = -ENOMEM;
-		goto err_unlock;
-	}
-	set_bit(evt_id, &gsi_ctx->evt_bmap);
-	mutex_unlock(&gsi_ctx->mlock);	/* acquired again below */
-
-	ipa_debug("Using %lu as virt evt id\n", evt_id);
-
-	ctx = &gsi_ctx->evtr[evt_id];
-	memset(ctx, 0, sizeof(*ctx));
 	ctx->int_modt = int_modt;
 	ctx->exclusive = excl;
 	mutex_init(&ctx->mlock);
 	init_completion(&ctx->compl);
 	atomic_set(&ctx->chan_ref_cnt, 0);
-	ctx->mem = mem;
 
 	mutex_lock(&gsi_ctx->mlock);
 	val = evt_ring_cmd_val(evt_id, GSI_EVT_ALLOCATE);
@@ -881,14 +885,14 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
 		ipa_err("evt_id=%lu timed out\n", evt_id);
 		ret = -ETIMEDOUT;
-		goto err_clear_bit;
+		goto err_unlock;
 	}
 
 	if (ctx->state != GSI_EVT_RING_STATE_ALLOCATED) {
 		ipa_err("evt_id=%lu allocation failed state=%u\n",
 				evt_id, ctx->state);
 		ret = -ENOMEM;
-		goto err_clear_bit;
+		goto err_unlock;
 	}
 
 	gsi_program_evt_ring_ctx(&mem, evt_id, int_modt);
@@ -896,7 +900,6 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 	spin_lock_init(&ctx->ring.slock);
 	gsi_init_ring(&ctx->ring, &mem);
 
-	ctx->id = evt_id;
 	atomic_inc(&gsi_ctx->num_evt_ring);
 	gsi_prime_evt_ring(ctx);
 	mutex_unlock(&gsi_ctx->mlock);
@@ -911,12 +914,14 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 
 	return evt_id;
 
-err_clear_bit:
-	clear_bit(evt_id, &gsi_ctx->evt_bmap);
 err_unlock:
 	mutex_unlock(&gsi_ctx->mlock);
 err_free_dma:
 	ipahal_dma_free(&mem);
+err_clear_bit:
+	mutex_lock(&gsi_ctx->mlock);
+	clear_bit(evt_id, &gsi_ctx->evt_bmap);
+	mutex_unlock(&gsi_ctx->mlock);
 
 	return ret;
 }
