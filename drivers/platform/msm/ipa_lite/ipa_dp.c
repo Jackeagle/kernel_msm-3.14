@@ -2628,9 +2628,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	}
 
 	/* copy mem info */
-	ep->gsi_chan_ring_mem.size = gsi_channel_props.mem.size;
-	ep->gsi_chan_ring_mem.phys_base = gsi_channel_props.mem.phys_base;
-	ep->gsi_chan_ring_mem.base = gsi_channel_props.mem.base;
+	ep->gsi_chan_ring_mem = gsi_channel_props.mem;
 
 	gsi_channel_props.use_db_eng = GSI_CHAN_DB_MODE;
 	if (ep->client == IPA_CLIENT_APPS_CMD_PROD)
