@@ -269,8 +269,8 @@ enum gsi_chan_use_db_eng {
  * @max_prefetch:    limit number of pre-fetch segments for channel
  * @low_weight:      low channel weight (priority of channel for RE engine
  *                   round robin algorithm); must be >= 1
- * @xfer_cb:         transfer notification callback, this callback happens
- *                   on event boundaries
+ * @xfer_cb:         transfer notification callback (or NULL if not needed)
+ * 		     this callback happens on event boundaries
  *
  *                   e.g. 1
  *

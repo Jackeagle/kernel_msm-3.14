@@ -28,10 +28,6 @@
 
 #define IPA_PKT_FLUSH_TO_US 100
 
-static void ipa_xfer_cb(struct gsi_chan_xfer_notify *notify)
-{
-}
-
 static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 	struct gsi_chan_props *orig_chan_props,
 	struct ipa_mem_buffer *chan_dma)
@@ -51,7 +47,6 @@ static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 	chan_props.use_db_eng = GSI_CHAN_DIRECT_MODE;
 	chan_props.low_weight = 1;
 	chan_props.chan_user_data = NULL;
-	chan_props.xfer_cb = ipa_xfer_cb;
 
 	if (gsi_set_channel_cfg(ep->gsi_chan_hdl, &chan_props, NULL)) {
 		ipa_err("Error setting channel properties\n");

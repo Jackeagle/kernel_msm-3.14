@@ -361,7 +361,8 @@ static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 			ipa_err("Calling client callback in polling mode\n");
 			WARN_ON(1);
 		}
-		ch_ctx->props.xfer_cb(notify);
+		if (ch_ctx->props.xfer_cb)
+			ch_ctx->props.xfer_cb(notify);
 	}
 }
 
@@ -1133,11 +1134,6 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 
 	if (props->low_weight > GSI_MAX_CH_LOW_WEIGHT) {
 		ipa_err("invalid channel low weight %u\n", props->low_weight);
-		return -EINVAL;
-	}
-
-	if (!props->xfer_cb) {
-		ipa_err("xfer callback must be provided\n");
 		return -EINVAL;
 	}
 
