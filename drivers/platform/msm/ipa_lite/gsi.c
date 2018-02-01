@@ -832,7 +832,7 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 {
 	unsigned long evt_id;
 	unsigned long required_alignment = roundup_pow_of_two(size);
-	struct ipa_mem_buffer *mem = &props->mem;
+	struct ipa_mem_buffer mem;
 	uint32_t val;
 	struct gsi_evt_ctx *ctx;
 	int ret;
@@ -841,15 +841,15 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 
 	/* ipa_assert(!(size % GSI_EVT_RING_ELEMENT_SIZE)); */
 
-	if (ipahal_dma_alloc(mem, size, GFP_KERNEL)) {
+	if (ipahal_dma_alloc(&mem, size, GFP_KERNEL)) {
 		ipa_err("fail to dma alloc %u bytes\n", size);
 		return -ENOMEM;
 	}
 
 	/* Verify the result meets our alignment requirements */
-	if (mem->phys_base % required_alignment) {
+	if (mem.phys_base % required_alignment) {
 		ipa_err("ring base %pad not aligned to 0x%lx\n",
-				&mem->phys_base, required_alignment);
+				&mem.phys_base, required_alignment);
 		ret = -EINVAL;
 		goto err_free_dma;
 	}
@@ -873,7 +873,7 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 	mutex_init(&ctx->mlock);
 	init_completion(&ctx->compl);
 	atomic_set(&ctx->chan_ref_cnt, 0);
-	ctx->mem = *mem;
+	ctx->mem = mem;
 
 	mutex_lock(&gsi_ctx->mlock);
 	val = evt_ring_cmd_val(evt_id, GSI_EVT_ALLOCATE);
@@ -891,10 +891,10 @@ long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
 		goto err_clear_bit;
 	}
 
-	gsi_program_evt_ring_ctx(mem, evt_id, int_modt);
+	gsi_program_evt_ring_ctx(&mem, evt_id, int_modt);
 
 	spin_lock_init(&ctx->ring.slock);
-	gsi_init_ring(&ctx->ring, mem);
+	gsi_init_ring(&ctx->ring, &mem);
 
 	ctx->id = evt_id;
 	atomic_inc(&gsi_ctx->num_evt_ring);
@@ -916,7 +916,7 @@ err_clear_bit:
 err_unlock:
 	mutex_unlock(&gsi_ctx->mlock);
 err_free_dma:
-	ipahal_dma_free(mem);
+	ipahal_dma_free(&mem);
 
 	return ret;
 }
