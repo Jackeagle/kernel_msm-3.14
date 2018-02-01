@@ -919,9 +919,9 @@ err_unlock:
 err_free_dma:
 	ipahal_dma_free(&mem);
 err_clear_bit:
-	mutex_lock(&gsi_ctx->mlock);
+	smp_mb__before_atomic();
 	clear_bit(evt_id, &gsi_ctx->evt_bmap);
-	mutex_unlock(&gsi_ctx->mlock);
+	smp_mb__after_atomic();
 
 	return ret;
 }
