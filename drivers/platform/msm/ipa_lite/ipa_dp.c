@@ -2609,11 +2609,7 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 
 long ipa3_alloc_common_event_ring(u32 size, u16 int_modt, bool excl)
 {
-	struct gsi_evt_ring_props gsi_evt_ring_props;
-
-	memset(&gsi_evt_ring_props, 0, sizeof(gsi_evt_ring_props));
-
-	return gsi_alloc_evt_ring(&gsi_evt_ring_props, size, int_modt, excl);
+	return gsi_alloc_evt_ring(size, int_modt, excl);
 }
 
 /*
@@ -2636,7 +2632,6 @@ ipa_gsi_ring_mem_size(enum ipa_client_type client, u32 desc_fifo_sz)
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	struct ipa3_ep_context *ep)
 {
-	struct gsi_evt_ring_props gsi_evt_ring_props;
 	struct gsi_chan_props gsi_channel_props;
 	union __packed gsi_channel_scratch ch_scratch;
 	const struct ipa_gsi_ep_config *gsi_ep_info;
@@ -2644,7 +2639,6 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	u32 size;
 
 	ep->gsi_evt_ring_hdl = GSI_NO_EVT_ERINDEX;
-	memset(&gsi_evt_ring_props, 0, sizeof(gsi_evt_ring_props));
 	if (ep->sys->use_comm_evt_ring) {
 		if (ipa3_ctx->gsi_evt_comm_ring_rem < 2 * in->desc_fifo_sz) {
 			ipa_err("not enough space in common event ring\n");
@@ -2663,8 +2657,8 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		ipa_debug("client=%d moderation threshold cycles=%u cnt=1\n",
 			ep->client, IPA_GSI_EVT_RING_INT_MODT);
 
-		result = gsi_alloc_evt_ring(&gsi_evt_ring_props, size,
-				IPA_GSI_EVT_RING_INT_MODT, true);
+		result = gsi_alloc_evt_ring(size, IPA_GSI_EVT_RING_INT_MODT,
+						true);
 		if (result < 0)
 			goto fail_alloc_evt_ring;
 		ep->gsi_evt_ring_hdl = result;

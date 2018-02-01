@@ -846,8 +846,7 @@ static u32 evt_ring_cmd_val(unsigned long evt_id, enum gsi_evt_ch_cmd_opcode op)
 }
 
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
-long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props, u32 size,
-		uint16_t int_modt, bool excl)
+long gsi_alloc_evt_ring(u32 size, uint16_t int_modt, bool excl)
 {
 	unsigned long evt_id;
 	unsigned long required_alignment = roundup_pow_of_two(size);

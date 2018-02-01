@@ -174,29 +174,6 @@ enum gsi_evt_ring_elem_size {
 	GSI_EVT_RING_RE_SIZE_16B = 16,
 };
 
-/**
- * gsi_evt_ring_props - Event ring related properties
- *
- * @re_size:         size of event ring element
- * @ring_len:        length of ring in bytes (must be integral multiple of
- *                   re_size)
- * @ring_base_addr:  physical base address of ring. Address must be aligned to
- *		     ring_len rounded to power of two
- * @ring_base_vaddr: virtual base address of ring (set to NULL when not
- *                   applicable)
- * @int_modt:        cycles base interrupt moderation (32KHz clock);
- * 		     (interrupt moderation packet counter is always 1)
- * @exclusive:       if true, only one GSI channel can be associated with this
- *                   event ring. if false, the event ring can be shared among
- *                   multiple GSI channels but in that case no polling
- *                   (GSI_CHAN_MODE_POLL) is supported on any of those channels
- * @err_cb:          error notification callback
- * @user_data:       cookie used for error notifications
- */
-struct gsi_evt_ring_props {
-	struct ipa_mem_buffer mem;
-};
-
 enum gsi_chan_prot {
 	GSI_CHAN_PROT_MHI = 0x0,
 	GSI_CHAN_PROT_XHCI = 0x1,
@@ -717,14 +694,11 @@ int gsi_deregister_device(void);
  * gsi_alloc_evt_ring - Peripheral should call this function to
  * allocate an event ring once gsi_register_device() has been called
  *
- * @props:	   Event ring properties
- *
  * This function can sleep
  *
  * @Return Client handle populated by GSI, or a negative errno
  */
-long gsi_alloc_evt_ring(struct gsi_evt_ring_props *props,
-				u32 size, u16 int_modt, bool excl);
+long gsi_alloc_evt_ring(u32 size, u16 int_modt, bool excl);
 
 /**
  * gsi_dealloc_evt_ring - Peripheral should call this function to
