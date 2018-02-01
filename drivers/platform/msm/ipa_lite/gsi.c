@@ -127,7 +127,7 @@ static void gsi_handle_ev_ctrl(int ee)
 	}
 }
 
-void ipa_gsi_chan_err_cb(struct gsi_chan_err_notify *notify)
+static void ipa_gsi_chan_err_cb(struct gsi_chan_err_notify *notify)
 {
 	switch (notify->evt_id) {
 	case GSI_CHAN_INVALID_TRE_ERR:
@@ -235,10 +235,7 @@ static void gsi_handle_glob_err(uint32_t err)
 		} else {
 			BUG();
 		}
-		if (ch->props.err_cb)
-			ch->props.err_cb(&chan_notify);
-		else
-			WARN_ON(1);
+		ipa_gsi_chan_err_cb(&chan_notify);
 		break;
 	case GSI_ERR_TYPE_EVT:
 		if (log->virt_idx >= gsi_ctx->max_ev) {
@@ -1146,11 +1143,6 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 
 	if (!props->xfer_cb) {
 		ipa_err("xfer callback must be provided\n");
-		return -EINVAL;
-	}
-
-	if (!props->err_cb) {
-		ipa_err("err callback must be provided\n");
 		return -EINVAL;
 	}
 

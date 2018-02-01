@@ -96,7 +96,6 @@ static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 	chan_props.max_prefetch = GSI_ONE_PREFETCH_SEG;
 	chan_props.low_weight = 1;
 	chan_props.chan_user_data = NULL;
-	chan_props.err_cb = ipa_gsi_chan_err_cb;
 	chan_props.xfer_cb = ipa_xfer_cb;
 
 	if (gsi_set_channel_cfg(ep->gsi_chan_hdl, &chan_props, NULL)) {

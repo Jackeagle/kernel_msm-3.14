@@ -332,7 +332,6 @@ enum gsi_chan_use_db_eng {
  *	             callback for RE2 using GSI_CHAN_EVT_OVERFLOW
  *	             callback for RE3 using GSI_CHAN_EVT_EOT
  *
- * @err_cb:          error notification callback
  * @chan_user_data:  cookie used for notifications
  *
  * All the callbacks are in interrupt context
@@ -349,7 +348,6 @@ struct gsi_chan_props {
 	enum gsi_max_prefetch max_prefetch;
 	uint8_t low_weight;
 	void (*xfer_cb)(struct gsi_chan_xfer_notify *notify);
-	void (*err_cb)(struct gsi_chan_err_notify *notify);
 	void *chan_user_data;
 };
 
@@ -977,7 +975,5 @@ void gsi_get_inst_ram_offset_and_size(unsigned long *base_offset,
  * @Return gsi_status
  */
 int gsi_halt_channel_ee(unsigned int chan_idx, unsigned int ee, int *code);
-
-void ipa_gsi_chan_err_cb(struct gsi_chan_err_notify *notify);
 
 #endif

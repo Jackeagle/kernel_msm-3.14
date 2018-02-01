@@ -2709,7 +2709,6 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	else
 		gsi_channel_props.low_weight = 1;
 	gsi_channel_props.chan_user_data = ep->sys;
-	gsi_channel_props.err_cb = ipa_gsi_chan_err_cb;
 	if (IPA_CLIENT_IS_PROD(ep->client))
 		gsi_channel_props.xfer_cb = ipa_gsi_irq_tx_notify_cb;
 	else
