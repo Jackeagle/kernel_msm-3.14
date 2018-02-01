@@ -2569,6 +2569,8 @@ static void ipa_gsi_chan_err_cb(struct gsi_chan_err_notify *notify)
 	default:
 		ipa_err("Unexpected err evt: %d\n", notify->evt_id);
 	}
+	if (!notify->chan_user_data)
+		BUG();
 }
 
 static void ipa_gsi_irq_tx_notify_cb(struct gsi_chan_xfer_notify *notify)
