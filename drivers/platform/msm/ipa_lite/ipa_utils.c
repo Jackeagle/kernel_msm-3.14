@@ -35,13 +35,8 @@
 /* Offset past base of IPA "wrapper" space for register access */
 #define IPA_REG_BASE_OFFSET	0x00040000
 
-#define IPA_V4_0_CLK_RATE_SVS (125 * 1000 * 1000UL)
-#define IPA_V4_0_CLK_RATE_NOMINAL (220 * 1000 * 1000UL)
-#define IPA_V4_0_CLK_RATE_TURBO (250 * 1000 * 1000UL)
-
 #define IPA_V3_0_BW_THRESHOLD_TURBO_MBPS (1000)
 #define IPA_V3_0_BW_THRESHOLD_NOMINAL_MBPS (600)
-#define IPA_V3_0_BW_THRESHOLD_SVS_MBPS (310)
 
 /* Max pipes + ICs for TAG process */
 #define IPA_TAG_MAX_DESC (IPA3_MAX_NUM_PIPES + 6)
@@ -50,21 +45,8 @@
 #define IPA_TAG_SLEEP_MAX_USEC (2000)
 #define IPA_FORCE_CLOSE_TAG_PROCESS_TIMEOUT (10 * HZ)
 #define IPA_BCR_REG_VAL_v3_5 (0x0000003B)
-#define IPA_BCR_REG_VAL_v4_0 (0x00000039)
-#define IPA_CLKON_CFG_v4_0 (0x30000000)
-#define IPA_AGGR_GRAN_MIN (1)
-#define IPA_AGGR_GRAN_MAX (32)
-#define IPA_EOT_COAL_GRAN_MIN (1)
-#define IPA_EOT_COAL_GRAN_MAX (16)
 
 #define IPA_DMA_TASK_FOR_GSI_TIMEOUT_MSEC (15)
-
-#define IPA_AGGR_BYTE_LIMIT (\
-		IPA_ENDP_INIT_AGGR_N_AGGR_BYTE_LIMIT_BMSK >> \
-		IPA_ENDP_INIT_AGGR_N_AGGR_BYTE_LIMIT_SHFT)
-#define IPA_AGGR_PKT_LIMIT (\
-		IPA_ENDP_INIT_AGGR_n_AGGR_PKT_LIMIT_BMSK >> \
-		IPA_ENDP_INIT_AGGR_n_AGGR_PKT_LIMIT_SHFT)
 
 /* In IPAv3 only endpoints 0-3 can be configured to deaggregation */
 #define IPA_EP_SUPPORTS_DEAGGR(idx) ((idx) >= 0 && (idx) <= 3)
@@ -79,16 +61,8 @@
 #define IPA_DPS_HPS_SEQ_TYPE_DMA_DEC 0x00000011
 /* Packet Processing + no decipher + uCP (for Ethernet Bridging) */
 #define IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP 0x00000002
-/* Packet Processing + decipher + uCP */
-#define IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_DEC_UCP 0x00000013
 /* 2 Packet Processing pass + no decipher + uCP */
 #define IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP 0x00000004
-/* 2 Packet Processing pass + decipher + uCP */
-#define IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_DEC_UCP 0x00000015
-/* Packet Processing + no decipher + no uCP */
-#define IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_NO_UCP 0x00000006
-/* Packet Processing + no decipher + no uCP */
-#define IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_DEC_NO_UCP 0x00000017
 /* COMP/DECOMP */
 #define IPA_DPS_HPS_SEQ_TYPE_DMA_COMP_DECOMP 0x00000020
 /* Invalid sequencer type */
@@ -100,7 +74,6 @@
 	seq_type == IPA_DPS_HPS_SEQ_TYPE_DMA_COMP_DECOMP)
 
 #define QMB_MASTER_SELECT_DDR  (0)
-#define QMB_MASTER_SELECT_PCIE (1)
 
 /* Resource Group index*/
 #define IPA_v3_0_GROUP_UL               (0)
