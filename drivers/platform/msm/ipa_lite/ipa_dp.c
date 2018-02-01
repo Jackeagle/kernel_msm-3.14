@@ -2633,7 +2633,6 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	ep->gsi_chan_ring_mem.base = gsi_channel_props.mem.base;
 
 	gsi_channel_props.use_db_eng = GSI_CHAN_DB_MODE;
-	gsi_channel_props.max_prefetch = GSI_ONE_PREFETCH_SEG;
 	if (ep->client == IPA_CLIENT_APPS_CMD_PROD)
 		gsi_channel_props.low_weight = IPA_GSI_MAX_CH_LOW_WEIGHT;
 	else

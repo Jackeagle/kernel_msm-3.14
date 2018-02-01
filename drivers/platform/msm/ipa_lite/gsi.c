@@ -31,6 +31,8 @@
 #define GSI_RESET_WA_MIN_SLEEP 1000
 #define GSI_RESET_WA_MAX_SLEEP 2000
 
+#define GSI_MAX_PREFETCH 0	/* 0 means 1 segment; 1 means 2 segments */
+
 struct gsi_ctx *gsi_ctx;
 
 static void gsi_irq_set(uint32_t offset, uint32_t val)
@@ -1082,7 +1084,7 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, unsigned int ee,
 
 	val = (((props->low_weight << GSI_EE_n_GSI_CH_k_QOS_WRR_WEIGHT_SHFT) &
 				GSI_EE_n_GSI_CH_k_QOS_WRR_WEIGHT_BMSK) |
-		((props->max_prefetch <<
+		((GSI_MAX_PREFETCH <<
 			 GSI_EE_n_GSI_CH_k_QOS_MAX_PREFETCH_SHFT) &
 			 GSI_EE_n_GSI_CH_k_QOS_MAX_PREFETCH_BMSK) |
 		((props->use_db_eng << GSI_EE_n_GSI_CH_k_QOS_USE_DB_ENG_SHFT) &

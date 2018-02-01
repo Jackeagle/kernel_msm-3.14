@@ -51,7 +51,6 @@ static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 	chan_props.mem.phys_base = chan_dma->phys_base;
 	chan_props.mem.size = chan_dma->size;
 	chan_props.use_db_eng = GSI_CHAN_DIRECT_MODE;
-	chan_props.max_prefetch = GSI_ONE_PREFETCH_SEG;
 	chan_props.low_weight = 1;
 	chan_props.chan_user_data = NULL;
 	chan_props.xfer_cb = ipa_xfer_cb;

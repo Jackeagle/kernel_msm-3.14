@@ -181,11 +181,6 @@ enum gsi_chan_dir {
 	GSI_CHAN_DIR_TO_GSI = 0x1
 };
 
-enum gsi_max_prefetch {
-	GSI_ONE_PREFETCH_SEG = 0x0,
-	GSI_TWO_PREFETCH_SEG = 0x1
-};
-
 enum gsi_chan_evt {
 	GSI_CHAN_EVT_INVALID = 0x0,
 	GSI_CHAN_EVT_SUCCESS = 0x1,
@@ -317,7 +312,6 @@ struct gsi_chan_props {
 	enum gsi_chan_ring_elem_size re_size;
 	uint16_t max_re_expected;
 	enum gsi_chan_use_db_eng use_db_eng;
-	enum gsi_max_prefetch max_prefetch;
 	uint8_t low_weight;
 	void (*xfer_cb)(struct gsi_chan_xfer_notify *notify);
 	void *chan_user_data;
