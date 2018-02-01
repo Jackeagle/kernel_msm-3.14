@@ -2697,9 +2697,6 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		if (result < 0)
 			goto fail_alloc_evt_ring;
 		ep->gsi_evt_ring_hdl = result;
-
-		/* copy mem info */
-		ep->gsi_evt_ring_mem = gsi_evt_ring_props.mem;
 	}
 
 	memset(&gsi_channel_props, 0, sizeof(gsi_channel_props));

@@ -278,7 +278,6 @@ struct ipa3_status_stats {
  * @gsi_chan_hdl: EP's GSI channel handle
  * @gsi_chan_ring_mem: EP's GSI channel ring memory info
  * @gsi_evt_ring_hdl: EP's GSI channel event ring handle
- * @gsi_evt_ring_mem: EP's GSI event ring memory info
  * @chan_scratch: EP's GSI channel scratch info
  * @cfg: EP cionfiguration
  * @dst_pipe_index: destination pipe index
@@ -301,7 +300,6 @@ struct ipa3_ep_context {
 	unsigned long gsi_chan_hdl;
 	struct ipa_mem_buffer gsi_chan_ring_mem;
 	unsigned long gsi_evt_ring_hdl;
-	struct ipa_mem_buffer gsi_evt_ring_mem;
 	union __packed gsi_channel_scratch chan_scratch;
 	bool bytes_xfered_valid;
 	u16 bytes_xfered;
