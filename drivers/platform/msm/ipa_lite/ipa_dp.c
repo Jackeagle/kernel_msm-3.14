@@ -2716,10 +2716,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		ep->gsi_evt_ring_hdl = result;
 
 		/* copy mem info */
-		ep->gsi_evt_ring_mem.size = gsi_evt_ring_props.mem.size;
-		ep->gsi_evt_ring_mem.phys_base =
-			gsi_evt_ring_props.mem.phys_base;
-		ep->gsi_evt_ring_mem.base = gsi_evt_ring_props.mem.base;
+		ep->gsi_evt_ring_mem = gsi_evt_ring_props.mem;
 	}
 
 	memset(&gsi_channel_props, 0, sizeof(gsi_channel_props));
@@ -2805,7 +2802,7 @@ fail_get_gsi_ep_info:
 		ep->gsi_evt_ring_hdl = GSI_NO_EVT_ERINDEX;
 	}
 fail_alloc_evt_ring:
-	ipahal_dma_free(&gsi_evt_ring_props.mem);
+	ipahal_dma_free(&ep->gsi_evt_ring_mem);
 	ipa_err("Return with err: %d\n", result);
 
 	return result;
