@@ -1095,7 +1095,6 @@ int ipa3_send(struct ipa3_sys_context *sys,
 
 int ipa3_get_ep_mapping(enum ipa_client_type client);
 struct ipa3_ep_context *ipa3_get_ep_context(enum ipa_client_type client);
-int ipa_get_ep_group(enum ipa_client_type client);
 
 int ipa3_init_hw(void);
 void ipa3_debugfs_init(void);

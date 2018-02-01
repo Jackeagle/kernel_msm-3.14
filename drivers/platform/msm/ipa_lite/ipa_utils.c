@@ -658,23 +658,6 @@ struct ipa3_ep_context *ipa3_get_ep_context(enum ipa_client_type client)
 }
 
 /**
- * ipa_get_ep_group() - provide endpoint group by client
- * @client: client type
- *
- * Return value: endpoint group
- */
-int ipa_get_ep_group(enum ipa_client_type client)
-{
-	const struct ipa_ep_configuration *ep_config;
-
-	ep_config = ep_configuration(client);
-	if (ep_config && ep_config->valid)
-		return ep_config->group_num;
-
-	return -EINVAL;
-}
-
-/**
  * ipa3_get_qmb_master_sel() - provide QMB master selection for the client
  * @client: client type
  *
@@ -690,13 +673,6 @@ u8 ipa3_get_qmb_master_sel(enum ipa_client_type client)
 
 	return -EINVAL;
 }
-
-/* ipa3_set_client() - provide client mapping
- * @client: client type
- *
- * Return value: none
- */
-
 
 /**
  * ipa3_get_client_mapping() - provide client mapping
