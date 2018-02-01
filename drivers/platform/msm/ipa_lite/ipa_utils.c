@@ -43,9 +43,6 @@
 #define IPA_V3_0_BW_THRESHOLD_NOMINAL_MBPS (600)
 #define IPA_V3_0_BW_THRESHOLD_SVS_MBPS (310)
 
-#define IPA_ENDP_INIT_HDR_METADATA_n_MUX_ID_BMASK 0xFF0000
-#define IPA_ENDP_INIT_HDR_METADATA_n_MUX_ID_SHFT 0x10
-
 /* Max pipes + ICs for TAG process */
 #define IPA_TAG_MAX_DESC (IPA3_MAX_NUM_PIPES + 6)
 
@@ -1405,48 +1402,6 @@ int ipa3_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 
 	return 0;
 }
-
-/**
- * ipa3_cfg_ep_metadata() - IPA end-point metadata configuration
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg:	[in] IPA end-point configuration params
- *
- * Returns:	0 on success, negative on failure
- *
- * Note:	Should not be called from atomic context
- */
-int ipa3_cfg_ep_metadata(u32 clnt_hdl, const struct ipa_ep_cfg_metadata *ep_md)
-{
-	u32 qmap_id = 0;
-	struct ipa_ep_cfg_metadata ep_md_reg_wrt;
-
-	if (!client_handle_valid(clnt_hdl))
-		return -EINVAL;
-
-	ipa_debug("pipe=%d, mux id=%d\n", clnt_hdl, ep_md->qmap_id);
-
-	/* copy over EP cfg */
-	ipa3_ctx->ep[clnt_hdl].cfg.meta = *ep_md;
-
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
-
-	ep_md_reg_wrt = *ep_md;
-	qmap_id = (ep_md->qmap_id <<
-		IPA_ENDP_INIT_HDR_METADATA_n_MUX_ID_SHFT) &
-		IPA_ENDP_INIT_HDR_METADATA_n_MUX_ID_BMASK;
-
-	ep_md_reg_wrt.qmap_id = qmap_id;
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_n, clnt_hdl,
-		&ep_md_reg_wrt);
-	ipa3_ctx->ep[clnt_hdl].cfg.hdr.hdr_metadata_reg_valid = 1;
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_n, clnt_hdl,
-		&ipa3_ctx->ep[clnt_hdl].cfg.hdr);
-
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
-
-	return 0;
-}
-
 
 /**
  * ipa3_dump_buff_internal() - dumps buffer for debug purposes
