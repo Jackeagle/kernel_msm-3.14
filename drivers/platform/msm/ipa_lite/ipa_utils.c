@@ -164,8 +164,6 @@ struct rsrc_min_max {
 };
 
 enum ipa_ver {
-	IPA_3_0,
-	IPA_3_5,
 	IPA_3_5_1,
 	IPA_4_0,
 	IPA_VER_MAX,
