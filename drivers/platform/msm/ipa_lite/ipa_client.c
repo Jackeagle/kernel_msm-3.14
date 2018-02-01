@@ -74,22 +74,22 @@ static void ipa_chan_err_cb(struct gsi_chan_err_notify *notify)
 {
 	switch (notify->evt_id) {
 	case GSI_CHAN_INVALID_TRE_ERR:
-		ipa_err("Received GSI_CHAN_INVALID_TRE_ERR\n");
+		ipa_err("Got GSI_CHAN_INVALID_TRE_ERR\n");
 		break;
 	case GSI_CHAN_NON_ALLOCATED_EVT_ACCESS_ERR:
-		ipa_err("Received GSI_CHAN_NON_ALLOC_EVT_ACCESS_ERR\n");
+		ipa_err("Got GSI_CHAN_NON_ALLOCATED_EVT_ACCESS_ERR\n");
 		break;
 	case GSI_CHAN_OUT_OF_BUFFERS_ERR:
-		ipa_err("Received GSI_CHAN_OUT_OF_BUFFERS_ERR\n");
+		ipa_err("Got GSI_CHAN_OUT_OF_BUFFERS_ERR\n");
 		break;
 	case GSI_CHAN_OUT_OF_RESOURCES_ERR:
-		ipa_err("Received GSI_CHAN_OUT_OF_RESOURCES_ERR\n");
+		ipa_err("Got GSI_CHAN_OUT_OF_RESOURCES_ERR\n");
 		break;
 	case GSI_CHAN_UNSUPPORTED_INTER_EE_OP_ERR:
-		ipa_err("Received GSI_CHAN_UNSUPP_INTER_EE_OP_ERR\n");
+		ipa_err("Got GSI_CHAN_UNSUPPORTED_INTER_EE_OP_ERR\n");
 		break;
 	case GSI_CHAN_HWO_1_ERR:
-		ipa_err("Received GSI_CHAN_HWO_1_ERR\n");
+		ipa_err("Got GSI_CHAN_HWO_1_ERR\n");
 		break;
 	default:
 		ipa_err("Unexpected err evt: %d\n", notify->evt_id);
