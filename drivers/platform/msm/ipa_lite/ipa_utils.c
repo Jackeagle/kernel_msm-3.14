@@ -715,26 +715,6 @@ enum ipa_client_type ipa3_get_client_mapping(int pipe_idx)
 }
 
 /**
- * ipa3_should_pipe_be_suspended() - returns true when the client's pipe should
- * be suspended during a power save scenario. False otherwise.
- *
- * @client: [IN] IPA client
- */
-bool ipa3_should_pipe_be_suspended(enum ipa_client_type client)
-{
-	int ipa_ep_idx;
-
-	ipa_ep_idx = ipa3_get_ep_mapping(client);
-	if (ipa_ep_idx < 0) {
-		ipa_err("Invalid client.\n");
-		WARN_ON(1);
-		return false;
-	}
-
-	return false;
-}
-
- /**
  * _ipa_sram_settings_read_v3_0() - Read SRAM settings from HW
  *
  * Returns:	None

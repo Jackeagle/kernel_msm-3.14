@@ -1148,7 +1148,6 @@ void ipa3_skb_recycle(struct sk_buff *skb);
 int ipa3_cfg_ep_status(u32 clnt_hdl,
 		const struct ipahal_reg_ep_cfg_status *ipa_ep_cfg);
 
-bool ipa3_should_pipe_be_suspended(enum ipa_client_type client);
 int ipa3_tag_aggr_force_close(int pipe_num);
 
 int ipa3_tag_process(struct ipa3_desc *desc, int num_descs,
