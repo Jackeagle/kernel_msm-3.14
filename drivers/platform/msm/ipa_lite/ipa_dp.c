@@ -1068,7 +1068,6 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 			BUG();
 			return result;
 		}
-		ipahal_dma_free(&ep->gsi_evt_ring_mem);
 		result = gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl);
 		if (result) {
 			ipa_err("Failed to dealloc evt ring: %d.\n",
@@ -2786,7 +2785,6 @@ fail_get_gsi_ep_info:
 		ep->gsi_evt_ring_hdl = GSI_NO_EVT_ERINDEX;
 	}
 fail_alloc_evt_ring:
-	ipahal_dma_free(&ep->gsi_evt_ring_mem);
 	ipa_err("Return with err: %d\n", result);
 
 	return result;

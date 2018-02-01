@@ -968,6 +968,10 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 	clear_bit(evt_ring_hdl, &gsi_ctx->evt_bmap);
 	mutex_unlock(&gsi_ctx->mlock);
 
+	ctx->props.exclusive = 0;
+	ctx->props.int_modt = 0;
+	ipahal_dma_free(&ctx->props.mem);
+
 	atomic_dec(&gsi_ctx->num_evt_ring);
 
 	return 0;
