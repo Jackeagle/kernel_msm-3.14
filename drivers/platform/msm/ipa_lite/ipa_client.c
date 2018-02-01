@@ -70,33 +70,6 @@ int ipa3_enable_data_path(u32 clnt_hdl)
 	return res;
 }
 
-static void ipa_chan_err_cb(struct gsi_chan_err_notify *notify)
-{
-	switch (notify->evt_id) {
-	case GSI_CHAN_INVALID_TRE_ERR:
-		ipa_err("Got GSI_CHAN_INVALID_TRE_ERR\n");
-		break;
-	case GSI_CHAN_NON_ALLOCATED_EVT_ACCESS_ERR:
-		ipa_err("Got GSI_CHAN_NON_ALLOCATED_EVT_ACCESS_ERR\n");
-		break;
-	case GSI_CHAN_OUT_OF_BUFFERS_ERR:
-		ipa_err("Got GSI_CHAN_OUT_OF_BUFFERS_ERR\n");
-		break;
-	case GSI_CHAN_OUT_OF_RESOURCES_ERR:
-		ipa_err("Got GSI_CHAN_OUT_OF_RESOURCES_ERR\n");
-		break;
-	case GSI_CHAN_UNSUPPORTED_INTER_EE_OP_ERR:
-		ipa_err("Got GSI_CHAN_UNSUPPORTED_INTER_EE_OP_ERR\n");
-		break;
-	case GSI_CHAN_HWO_1_ERR:
-		ipa_err("Got GSI_CHAN_HWO_1_ERR\n");
-		break;
-	default:
-		ipa_err("Unexpected err evt: %d\n", notify->evt_id);
-	}
-	BUG();
-}
-
 static void ipa_xfer_cb(struct gsi_chan_xfer_notify *notify)
 {
 }
@@ -123,7 +96,7 @@ static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 	chan_props.max_prefetch = GSI_ONE_PREFETCH_SEG;
 	chan_props.low_weight = 1;
 	chan_props.chan_user_data = NULL;
-	chan_props.err_cb = ipa_chan_err_cb;
+	chan_props.err_cb = ipa_gsi_chan_err_cb;
 	chan_props.xfer_cb = ipa_xfer_cb;
 
 	if (gsi_set_channel_cfg(ep->gsi_chan_hdl, &chan_props, NULL)) {
