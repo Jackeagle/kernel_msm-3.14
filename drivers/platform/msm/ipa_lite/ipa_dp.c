@@ -2607,11 +2607,6 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 		queue_work(sys->wq, &sys->work);
 }
 
-long ipa3_alloc_common_event_ring(u32 size, u16 int_modt, bool excl)
-{
-	return gsi_alloc_evt_ring(size, int_modt, excl);
-}
-
 /*
  * GSI ring length is calculated based on the desc_fifo_sz which
  * defines the descriptor FIFO.  (GSI descriptors are 16 bytes.)

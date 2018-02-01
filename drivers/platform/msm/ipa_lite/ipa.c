@@ -1029,7 +1029,7 @@ static void ipa3_setup_rt_hash_tuple(void)
 static long ipa3_setup_apps_pipes(void)
 {
 	struct ipa_sys_connect_params sys_in;
-	long result = 0;
+	long result;
 
 	/*
 	 * Memory size must be a multiple of the ring element size.
@@ -1040,8 +1040,7 @@ static long ipa3_setup_apps_pipes(void)
 	BUILD_BUG_ON((2 * IPA_SYS_DESC_FIFO_SZ) % GSI_EVT_RING_ELEMENT_SIZE);
 
 	/* allocate the common PROD event ring */
-	result = ipa3_alloc_common_event_ring(IPA_COMMON_EVENT_RING_SIZE,
-						0, false);
+	result = gsi_alloc_evt_ring(IPA_COMMON_EVENT_RING_SIZE, 0, false);
 	if (result < 0) {
 		ipa_err("ipa3_alloc_common_event_ring failed.\n");
 		result = -EPERM;

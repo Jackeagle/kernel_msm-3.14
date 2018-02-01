@@ -353,7 +353,6 @@ struct ipa_request_gsi_channel_params {
 	ipa_notify_cb notify;
 	bool skip_ep_cfg;
 	bool keep_ipa_awake;
-	struct gsi_evt_ring_props evt_ring_params;
 	union __packed gsi_evt_scratch evt_scratch;
 	struct gsi_chan_props chan_params;
 	union __packed gsi_channel_scratch chan_scratch;
@@ -1348,7 +1347,6 @@ int ipa3_rx_poll(u32 clnt_hdl, int budget);
 void ipa3_reset_freeze_vote(void);
 struct dentry *ipa_debugfs_get_root(void);
 void ipa3_enable_dcd(void);
-long ipa3_alloc_common_event_ring(u32 size, u16 int_modt, bool excl);
 int ipa3_allocate_dma_task_for_gsi(void);
 void ipa3_free_dma_task_for_gsi(void);
 int ipa3_disable_apps_wan_cons_deaggr(uint32_t agg_size, uint32_t agg_count);
