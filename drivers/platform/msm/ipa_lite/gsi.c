@@ -127,33 +127,27 @@ static void gsi_handle_ev_ctrl(int ee)
 	}
 }
 
-static void ipa_gsi_chan_err_cb(struct gsi_chan_err_notify *notify)
+#define CASE(x)						\
+	case GSI_CHAN_ ## x ## _ERR:			\
+		ipa_err("Got GSI_CHAN_ " #x "_ERR\n");	\
+		break
+
+static void gsi_chan_err(struct gsi_chan_err_notify *notify)
 {
 	switch (notify->evt_id) {
-	case GSI_CHAN_INVALID_TRE_ERR:
-		ipa_err("Got GSI_CHAN_INVALID_TRE_ERR\n");
-		break;
-	case GSI_CHAN_NON_ALLOCATED_EVT_ACCESS_ERR:
-		ipa_err("Got GSI_CHAN_NON_ALLOCATED_EVT_ACCESS_ERR\n");
-		break;
-	case GSI_CHAN_OUT_OF_BUFFERS_ERR:
-		ipa_err("Got GSI_CHAN_OUT_OF_BUFFERS_ERR\n");
-		break;
-	case GSI_CHAN_OUT_OF_RESOURCES_ERR:
-		ipa_err("Got GSI_CHAN_OUT_OF_RESOURCES_ERR\n");
-		break;
-	case GSI_CHAN_UNSUPPORTED_INTER_EE_OP_ERR:
-		ipa_err("Got GSI_CHAN_UNSUPPORTED_INTER_EE_OP_ERR\n");
-		break;
-	case GSI_CHAN_HWO_1_ERR:
-		ipa_err("Got GSI_CHAN_HWO_1_ERR\n");
-		break;
+	CASE(INVALID_TRE);
+	CASE(NON_ALLOCATED_EVT_ACCESS);
+	CASE(OUT_OF_BUFFERS);
+	CASE(OUT_OF_RESOURCES);
+	CASE(UNSUPPORTED_INTER_EE_OP);
+	CASE(HWO_1);
 	default:
 		ipa_err("Unexpected err evt: %d\n", notify->evt_id);
 	}
 	if (!notify->chan_user_data)
 		BUG();
 }
+#undef CASE
 
 #define CASE(x)						\
 	case GSI_EVT_ ## x ## _ERR:			\
@@ -235,7 +229,7 @@ static void gsi_handle_glob_err(uint32_t err)
 		} else {
 			BUG();
 		}
-		ipa_gsi_chan_err_cb(&chan_notify);
+		gsi_chan_err(&chan_notify);
 		break;
 	case GSI_ERR_TYPE_EVT:
 		if (log->virt_idx >= gsi_ctx->max_ev) {
