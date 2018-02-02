@@ -152,7 +152,7 @@ enum ipa_ver {
 };
 
 static const struct rsrc_min_max ipa3_rsrc_src_grp_config
-	[IPA_VER_MAX][IPA_RSRC_GRP_TYPE_SRC_MAX][IPA_GROUP_MAX] = {
+	[][IPA_RSRC_GRP_TYPE_SRC_MAX][IPA_GROUP_MAX] = {
 	[IPA_3_5_1] = {
 		[IPA_v3_5_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS] = {
 			[IPA_v3_0_GROUP_UL]		= { 1, 63, },
@@ -198,7 +198,7 @@ static const struct rsrc_min_max ipa3_rsrc_src_grp_config
 };
 
 static const struct rsrc_min_max ipa3_rsrc_dst_grp_config
-	[IPA_VER_MAX][IPA_RSRC_GRP_TYPE_DST_MAX][IPA_GROUP_MAX] = {
+	[][IPA_RSRC_GRP_TYPE_DST_MAX][IPA_GROUP_MAX] = {
 	[IPA_3_5_1] = {
 		/* LWA_DL UL/DL/DPL unused N/A	 N/A	 N/A */
 		[IPA_v3_5_RSRC_GRP_TYPE_DST_DATA_SECTORS] = {
@@ -237,7 +237,7 @@ struct ipa_ep_configuration {
 
 /* clients not included in the list below are considered as invalid */
 static const struct ipa_ep_configuration ipa3_ep_configuration
-					[IPA_VER_MAX][IPA_CLIENT_MAX] = {
+					[][IPA_CLIENT_MAX] = {
 	/* IPA_3_5_1 */
 	[IPA_3_5_1] = {
 		[IPA_CLIENT_APPS_LAN_PROD] = {
