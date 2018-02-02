@@ -26,7 +26,6 @@
  * @empty_fltrt_tbl: Empty table to be used at tables init.
  */
 struct ipahal_context {
-	enum ipa_hw_type hw_type;
 	void __iomem *base;
 	struct device *ipa_pdev;
 	struct ipa_mem_buffer empty_fltrt_tbl;

@@ -1090,16 +1090,16 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
  * Note: As global variables are initialized with zero, any un-overridden
  *  register entry will be zero. By this we recognize them.
  */
-void ipahal_reg_init(void)
+void ipahal_reg_init(enum ipa_hw_type ipa_hw_type)
 {
 	int i;
 	int j;
 
-	ipa_debug_low("Entry - HW_TYPE=%d\n", ipahal_ctx->hw_type);
+	ipa_debug_low("Entry - HW_TYPE=%d\n", ipa_hw_type);
 
 	/* Build up the register descriptions we'll use */
 	for (i = 0; i < IPA_REG_MAX ; i++) {
-		for (j = ipahal_ctx->hw_type; j >= IPA_HW_MIN; j--) {
+		for (j = ipa_hw_type; j >= IPA_HW_MIN; j--) {
 			const struct ipahal_reg_obj *reg;
 
 			reg = &ipahal_reg_objs[j][i];

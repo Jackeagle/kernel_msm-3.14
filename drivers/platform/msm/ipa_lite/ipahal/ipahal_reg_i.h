@@ -13,7 +13,7 @@
 #ifndef _IPAHAL_REG_I_H_
 #define _IPAHAL_REG_I_H_
 
-void ipahal_reg_init(void);
+void ipahal_reg_init(enum ipa_hw_type ipa_hw_type);
 
 /* IPA_ROUTE register */
 #define ROUTE_DIS_BMSK				0x00000001
