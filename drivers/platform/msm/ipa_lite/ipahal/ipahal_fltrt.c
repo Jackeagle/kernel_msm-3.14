@@ -225,40 +225,7 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 
 	/* IPAv4 */
 	[IPA_HW_v4_0] = {
-		.tbl_width		= IPA3_0_HW_TBL_WIDTH,
-		.sysaddr_align		= IPA3_0_HW_TBL_SYSADDR_ALIGN,
-		.lcladdr_align		= IPA3_0_HW_TBL_LCLADDR_ALIGN,
-		.blk_sz_align		= IPA3_0_HW_TBL_BLK_SIZE_ALIGN,
-		.rule_start_align	= IPA3_0_HW_RULE_START_ALIGN,
-		.tbl_hdr_width		= IPA3_0_HW_TBL_HDR_WIDTH,
-		.tbl_addr_mask		= IPA3_0_HW_TBL_ADDR_MASK,
-		.rule_max_prio		= IPA3_0_RULE_MAX_PRIORITY,
-		.rule_min_prio		= IPA3_0_RULE_MIN_PRIORITY,
-		.low_rule_id		= IPA3_0_LOW_RULE_ID,
-		.rule_id_bit_len	= IPA3_0_RULE_ID_BIT_LEN,
-		.rule_buf_size		= IPA3_0_HW_RULE_BUF_SIZE,
-		.write_val_to_hdr	= ipa_write_64,
-		.create_flt_bitmap	= ipa_fltrt_create_flt_bitmap,
-		.create_tbl_addr	= ipa_fltrt_create_tbl_addr,
-		.parse_tbl_addr		= ipa_fltrt_parse_tbl_addr,
-		.eq_bitfield = {
-			[IPA_TOS_EQ]			= 0,
-			[IPA_PROTOCOL_EQ]		= 1,
-			[IPA_TC_EQ]			= 2,
-			[IPA_OFFSET_MEQ128_0]		= 3,
-			[IPA_OFFSET_MEQ128_1]		= 4,
-			[IPA_OFFSET_MEQ32_0]		= 5,
-			[IPA_OFFSET_MEQ32_1]		= 6,
-			[IPA_IHL_OFFSET_MEQ32_0]	= 7,
-			[IPA_IHL_OFFSET_MEQ32_1]	= 8,
-			[IPA_METADATA_COMPARE]		= 9,
-			[IPA_IHL_OFFSET_RANGE16_0]	= 10,
-			[IPA_IHL_OFFSET_RANGE16_1]	= 11,
-			[IPA_IHL_OFFSET_EQ_32]		= 12,
-			[IPA_IHL_OFFSET_EQ_16]		= 13,
-			[IPA_FL_EQ]			= 14,
-			[IPA_IS_FRAG]			= 15,
-		},
+		/* All inherited from IPA_HW_v3_5. */
 	},
 };
 
