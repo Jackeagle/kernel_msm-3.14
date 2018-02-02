@@ -803,15 +803,17 @@ ipareg_parse_hps_queue_weights(enum ipahal_reg reg, void *fields, u32 val)
  *
  * The following table consists of blocks of "register object"
  * definitions associated with versions of IPA hardware.  The first
- * version of IPA hardware supported by the "ipahal" layer is 3.0;
+ * version of IPA hardware supported by the "ipahal" layer is 3.1;
  * essentially all registers needed for IPA operation have a
- * register object associated with IPA_HW_v3_0.
+ * register object associated with IPA_HW_v3_1.
  *
- * Versions of IPA hardware newer than 3.0 do not need to specify
+ * Versions of IPA hardware newer than 3.1 do not need to specify
  * register object entries if they are accessed the same way as was
  * defined by an older version.  The only entries defined for newer
  * hardware are registers whose offset or data format has changed,
  * or registers that are new and not present in older hardware.
+ *
+ * XXX The rest of this will be fixed after other versions are removed
  *
  * IPA version 3.1, for example, has only three entries defined:
  * IPA_IRQ_SUSPEND_INFO_EE_n, which is located at a different
@@ -866,13 +868,15 @@ ipareg_parse_hps_queue_weights(enum ipahal_reg reg, void *fields, u32 val)
 	reg_obj_common(id, NULL, NULL, o, n)
 
 static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
-	/* IPAv3 */
-	[IPA_HW_v3_0] = {
+	/* IPAv3.1 */
+	[IPA_HW_v3_1] = {
 		reg_obj_cfunc(ROUTE, route,		0x00000048,	0x0000),
 		reg_obj_nofunc(IRQ_STTS_EE_n,		0x00003008,	0x1000),
 		reg_obj_nofunc(IRQ_EN_EE_n,		0x0000300c,	0x1000),
 		reg_obj_nofunc(IRQ_CLR_EE_n,		0x00003010,	0x1000),
-		reg_obj_nofunc(IRQ_SUSPEND_INFO_EE_n,	0x00003098,	0x1000),
+		reg_obj_nofunc(IRQ_SUSPEND_INFO_EE_n,	0x00003030,	0x1000),
+		reg_obj_nofunc(SUSPEND_IRQ_EN_EE_n,	0x00003034,	0x1000),
+		reg_obj_nofunc(SUSPEND_IRQ_CLR_EE_n,	0x00003038,	0x1000),
 		reg_obj_nofunc(BCR,			0x000001d0,	0x0000),
 		reg_obj_nofunc(ENABLED_PIPES,		0x00000038,	0x0000),
 		reg_obj_nofunc(COMP_SW_RESET,		0x00000040,	0x0000),
@@ -969,14 +973,6 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 		reg_obj_nofunc(DPS_SEQUENCER_FIRST,	0x0001e000,	0x0000),
 		reg_obj_nofunc(HPS_SEQUENCER_FIRST,	0x0001e080,	0x0000),
 	},
-
-	/* IPAv3.1 */
-	[IPA_HW_v3_1] = {
-		reg_obj_nofunc(IRQ_SUSPEND_INFO_EE_n,	0x00003030,	0x1000),
-		reg_obj_nofunc(SUSPEND_IRQ_EN_EE_n,	0x00003034,	0x1000),
-		reg_obj_nofunc(SUSPEND_IRQ_CLR_EE_n,	0x00003038,	0x1000),
-	},
-
 
 	/* IPAv3.5 */
 	[IPA_HW_v3_5] = {

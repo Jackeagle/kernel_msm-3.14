@@ -632,8 +632,8 @@ struct ipahal_imm_cmd_obj {
 	}
 static const struct ipahal_imm_cmd_obj
 		ipahal_imm_cmd_objs[][IPA_IMM_CMD_MAX] = {
-	/* IPAv3 */
-	[IPA_HW_v3_0] = {
+	/* IPAv3.1 */
+	[IPA_HW_v3_1] = {
 		imm_cmd_obj(IP_V4_FILTER_INIT,	ip_v4_filter_init,	3),
 		imm_cmd_obj(IP_V6_FILTER_INIT,	ip_v6_filter_init,	4),
 		imm_cmd_obj(IP_V4_NAT_INIT,	ip_v4_nat_init,		5),
@@ -647,11 +647,6 @@ static const struct ipahal_imm_cmd_obj
 		imm_cmd_obj(DMA_TASK_32B_ADDR,	dma_task_32b_addr,	17),
 		imm_cmd_obj(DMA_SHARED_MEM,	dma_shared_mem,		19),
 		imm_cmd_obj(IP_PACKET_TAG_STATUS, ip_packet_tag_status, 20),
-	},
-
-	/* IPAv3.1 */
-	[IPA_HW_v3_1] = {
-		/* All inherited from IPA_HW_v3_0. */
 	},
 
 	/* IPAv3.5 */
