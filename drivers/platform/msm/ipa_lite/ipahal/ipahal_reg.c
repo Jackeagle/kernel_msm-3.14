@@ -749,9 +749,9 @@ ipareg_parse_hps_queue_weights(enum ipahal_reg reg, void *fields, u32 val)
  *
  * The following table consists of blocks of "register object"
  * definitions associated with versions of IPA hardware.  The first
- * version of IPA hardware supported by the "ipahal" layer is 3.5;
+ * version of IPA hardware supported by the "ipahal" layer is 3.5.1;
  * essentially all registers needed for IPA operation have a
- * register object associated with IPA_HW_v3_5.
+ * register object associated with IPA_HW_v3_5_1.
  *
  * Versions of IPA hardware newer than 3.1 do not need to specify
  * register object entries if they are accessed the same way as was
@@ -814,8 +814,8 @@ ipareg_parse_hps_queue_weights(enum ipahal_reg reg, void *fields, u32 val)
 	reg_obj_common(id, NULL, NULL, o, n)
 
 static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
-	/* IPAv3.5 */
-	[IPA_HW_v3_5] = {
+	/* IPAv3.5.1 */
+	[IPA_HW_v3_5_1] = {
 		reg_obj_cfunc(ROUTE, route,		0x00000048,	0x0000),
 		reg_obj_nofunc(IRQ_STTS_EE_n,		0x00003008,	0x1000),
 		reg_obj_nofunc(IRQ_EN_EE_n,		0x0000300c,	0x1000),
@@ -926,12 +926,6 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 		reg_obj_nofunc(DPS_SEQUENCER_FIRST,	0x0001e000,	0x0000),
 		reg_obj_nofunc(HPS_SEQUENCER_FIRST,	0x0001e080,	0x0000),
 	},
-
-	/* IPAv3.5.1 */
-	[IPA_HW_v3_5_1] = {
-		/* All inherited from IPA_HW_v3_5. */
-	},
-
 
 	/* IPAv4.0 */
 	[IPA_HW_v4_0] = {
