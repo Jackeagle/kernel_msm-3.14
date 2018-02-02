@@ -285,15 +285,13 @@ enum ipa_dp_evt_type {
  * enum ipa_hw_type - IPA hardware version type
  * @IPA_HW_None: IPA hardware version not defined
  * @IPA_HW_v3_5_1: IPA hardware version 3.5.1
- * @IPA_HW_v4_0: IPA hardware version 4.0
  */
 enum ipa_hw_type {
 	IPA_HW_None = 0,
 	IPA_HW_v3_5_1 = 13,
-	IPA_HW_v4_0 = 14,
 };
 #define IPA_HW_MIN	IPA_HW_v3_5_1	/* minimum supported version */
-#define IPA_HW_MAX	(IPA_HW_v4_0 + 1)	/* number of versions */
+#define IPA_HW_MAX	(IPA_HW_v3_5_1 + 1)	/* number of versions */
 
 /**
  * enum ipa_mode_type - mode setting type in IPA end-point

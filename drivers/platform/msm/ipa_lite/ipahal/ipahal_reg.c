@@ -184,21 +184,6 @@ ipareg_construct_endp_status_n(enum ipahal_reg reg, const void *fields)
 }
 
 static u32
-ipareg_construct_endp_status_n_v4_0(enum ipahal_reg reg, const void *fields)
-{
-	const struct ipahal_reg_ep_cfg_status *ep_status = fields;
-	u32 val;
-
-	val = field_gen(ep_status->status_en, STATUS_EN_BMSK);
-	val |= field_gen(ep_status->status_ep, STATUS_ENDP_BMSK);
-	val |= field_gen(ep_status->status_location, STATUS_LOCATION_BMSK);
-	val |= field_gen(ep_status->status_pkt_suppress,
-			STATUS_PKT_SUPPRESS_BMSK);
-
-	return val;
-}
-
-static u32
 ipareg_construct_qcncm(enum ipahal_reg reg, const void *fields)
 {
 	const struct ipahal_reg_qcncm *qcncm = fields;
@@ -421,16 +406,6 @@ ipareg_parse_endp_init_ctrl_n(enum ipahal_reg reg,void *fields, u32 val)
 }
 
 static u32
-ipareg_construct_endp_init_ctrl_n_v4_0(enum ipahal_reg reg, const void *fields)
-{
-	const struct ipa_ep_cfg_ctrl *ep_ctrl = fields;
-
-	WARN_ON(ep_ctrl->ipa_ep_suspend);
-
-	return field_gen(ep_ctrl->ipa_ep_delay, ENDP_DELAY_BMSK);
-}
-
-static u32
 ipareg_construct_endp_init_ctrl_scnd_n(enum ipahal_reg reg, const void *fields)
 {
 	const struct ipahal_ep_cfg_ctrl_scnd *ep_ctrl_scnd = fields;
@@ -444,14 +419,6 @@ ipareg_construct_endp_init_nat_n(enum ipahal_reg reg, const void *fields)
 	const struct ipa_ep_cfg_nat *ep_nat = fields;
 
 	return field_gen(ep_nat->nat_en, NAT_EN_BMSK);
-}
-
-static u32
-ipareg_construct_endp_init_conn_track_n(enum ipahal_reg reg, const void *fields)
-{
-	const struct ipa_ep_cfg_conn_track *ep_ipv6ct = fields;
-
-	return field_gen(ep_ipv6ct->conn_track_en, CONN_TRACK_EN_BMSK);
 }
 
 static u32
@@ -598,22 +565,6 @@ ipareg_construct_qsb_max_reads(enum ipahal_reg reg, const void *fields)
 	return val;
 }
 
-static u32
-ipareg_construct_qsb_max_reads_v4_0(enum ipahal_reg reg, const void *fields)
-{
-	const struct ipahal_reg_qsb_max_reads *max_reads = fields;
-	u32 val;
-
-	val = field_gen(max_reads->qmb_0_max_reads, GEN_QMB_0_MAX_READS_BMSK);
-	val |= field_gen(max_reads->qmb_1_max_reads, GEN_QMB_1_MAX_READS_BMSK);
-	val |= field_gen(max_reads->qmb_0_max_read_beats,
-			GEN_QMB_0_MAX_READS_BEATS_BMSK_V4_0);
-	val |= field_gen(max_reads->qmb_1_max_read_beats,
-			GEN_QMB_1_MAX_READS_BEATS_BMSK_V4_0);
-
-	return val;
-}
-
 static void
 ipareg_parse_tx_cfg(enum ipahal_reg reg,void *fields, u32 val)
 {
@@ -631,26 +582,6 @@ ipareg_parse_tx_cfg(enum ipahal_reg reg,void *fields, u32 val)
 		tx_cfg->tx0_prefetch_almost_empty_size;
 }
 
-static void
-ipareg_parse_tx_cfg_v4_0(enum ipahal_reg reg,void *fields, u32 val)
-{
-	struct ipahal_reg_tx_cfg *tx_cfg = fields;
-
-	memset(tx_cfg, 0, sizeof(*tx_cfg));
-
-	tx_cfg->tx0_prefetch_almost_empty_size =
-		field_val(val, PREFETCH_ALMOST_EMPTY_SIZE_TX0_BMSK_V4_0);
-	tx_cfg->tx1_prefetch_almost_empty_size =
-		field_val(val, PREFETCH_ALMOST_EMPTY_SIZE_TX1_BMSK_V4_0);
-	tx_cfg->dmaw_scnd_outsd_pred_en =
-		field_val(val, DMAW_SCND_OUTSD_PRED_EN_BMSK_V4_0);
-	tx_cfg->dmaw_scnd_outsd_pred_threshold =
-		field_val(val, DMAW_SCND_OUTSD_PRED_THRESHOLD_BMSK_V4_0);
-	tx_cfg->dmaw_max_beats_256_dis =
-		field_val(val, DMAW_MAX_BEATS_256_DIS_BMSK_V4_0);
-	tx_cfg->pa_mask_en = field_val(val, PA_MASK_EN_BMSK_V4_0);
-}
-
 static u32
 ipareg_construct_tx_cfg(enum ipahal_reg reg, const void *fields)
 {
@@ -663,27 +594,6 @@ ipareg_construct_tx_cfg(enum ipahal_reg reg, const void *fields)
 			TX1_PREFETCH_DISABLE_BMSK_V3_5);
 	val |= field_gen(tx_cfg->tx0_prefetch_almost_empty_size,
 			PREFETCH_ALMOST_EMPTY_SIZE_BMSK_V3_5);
-
-	return val;
-}
-
-static u32
-ipareg_construct_tx_cfg_v4_0(enum ipahal_reg reg, const void *fields)
-{
-	const struct ipahal_reg_tx_cfg *tx_cfg = fields;
-	u32 val;
-
-	val = field_gen(tx_cfg->tx0_prefetch_almost_empty_size,
-			PREFETCH_ALMOST_EMPTY_SIZE_TX0_BMSK_V4_0);
-	val |= field_gen(tx_cfg->tx1_prefetch_almost_empty_size,
-			PREFETCH_ALMOST_EMPTY_SIZE_TX1_BMSK_V4_0);
-	val |= field_gen(tx_cfg->dmaw_scnd_outsd_pred_threshold,
-			DMAW_SCND_OUTSD_PRED_THRESHOLD_BMSK_V4_0);
-	val |= field_gen(tx_cfg->dmaw_max_beats_256_dis,
-			DMAW_MAX_BEATS_256_DIS_BMSK_V4_0);
-	val |= field_gen(tx_cfg->dmaw_scnd_outsd_pred_en,
-			DMAW_SCND_OUTSD_PRED_EN_BMSK_V4_0);
-	val |= field_gen(tx_cfg->pa_mask_en, PA_MASK_EN_BMSK_V4_0);
 
 	return val;
 }
@@ -925,56 +835,6 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 							0x00000220,	0x0000),
 		reg_obj_nofunc(DPS_SEQUENCER_FIRST,	0x0001e000,	0x0000),
 		reg_obj_nofunc(HPS_SEQUENCER_FIRST,	0x0001e080,	0x0000),
-	},
-
-	/* IPAv4.0 */
-	[IPA_HW_v4_0] = {
-		reg_obj_cfunc(ENDP_INIT_CTRL_n, endp_init_ctrl_n_v4_0,
-							0x00000800,	0x0070),
-		reg_obj_both(TX_CFG, tx_cfg_v4_0,	0x000001fc,	0x0000),
-		reg_obj_nofunc(DEBUG_CNT_REG_n,		OFFSET_INVAL,	0x0000),
-		reg_obj_cfunc(DEBUG_CNT_CTRL_n, debug_cnt_ctrl_n,
-							OFFSET_INVAL,	0x0000),
-		reg_obj_both(QCNCM, qcncm,		OFFSET_INVAL,	0x0000),
-		reg_obj_both(SINGLE_NDP_MODE, single_ndp_mode,
-							OFFSET_INVAL,	0x0000),
-		reg_obj_cfunc(QSB_MAX_READS, qsb_max_reads_v4_0,
-							0x00000078,	0x0000),
-		reg_obj_nofunc(FILT_ROUT_HASH_FLUSH,	0x0000014c,	0x0000),
-		reg_obj_nofunc(STATE_AGGR_ACTIVE,	0x000000b4,	0x0000),
-		reg_obj_cfunc(ENDP_INIT_ROUTE_n, endp_init_route_n,
-							OFFSET_INVAL,	0x0000),
-		reg_obj_cfunc(ENDP_STATUS_n, endp_status_n_v4_0,
-							0x00000840,	0x0070),
-		reg_obj_nofunc(CLKON_CFG,		0x00000044,	0x0000),
-		reg_obj_cfunc(ENDP_INIT_CONN_TRACK_n, endp_init_conn_track_n,
-							0x00000850,	0x0070),
-		reg_obj_nofunc(STAT_QUOTA_BASE_n,	0x00000700,	0x0004),
-		reg_obj_nofunc(STAT_QUOTA_MASK_n,	0x00000708,	0x0004),
-		reg_obj_nofunc(STAT_TETHERING_BASE_n,	0x00000710,	0x0004),
-		reg_obj_nofunc(STAT_TETHERING_MASK_n,	0x00000718,	0x0004),
-		reg_obj_nofunc(STAT_FILTER_IPV4_BASE,	0x00000720,	0x0000),
-		reg_obj_nofunc(STAT_FILTER_IPV6_BASE,	0x00000724,	0x0000),
-		reg_obj_nofunc(STAT_ROUTER_IPV4_BASE,	0x00000728,	0x0000),
-		reg_obj_nofunc(STAT_ROUTER_IPV6_BASE,	0x0000072c,	0x0000),
-		reg_obj_nofunc(STAT_FILTER_IPV4_START_ID,
-							0x00000730,	0x0000),
-		reg_obj_nofunc(STAT_FILTER_IPV6_START_ID,
-							0x00000734,	0x0000),
-		reg_obj_nofunc(STAT_ROUTER_IPV4_START_ID,
-							0x00000738,	0x0000),
-		reg_obj_nofunc(STAT_ROUTER_IPV6_START_ID,
-							0x0000073c,	0x0000),
-		reg_obj_nofunc(STAT_FILTER_IPV4_END_ID,
-							0x00000740,	0x0000),
-		reg_obj_nofunc(STAT_FILTER_IPV6_END_ID,
-							0x00000744,	0x0000),
-		reg_obj_nofunc(STAT_ROUTER_IPV4_END_ID,
-							0x00000748,	0x0000),
-		reg_obj_nofunc(STAT_ROUTER_IPV6_END_ID,
-							0x0000074c,	0x0000),
-		reg_obj_nofunc(STAT_DROP_CNT_BASE_n,	0x00000750,	0x0004),
-		reg_obj_nofunc(STAT_DROP_CNT_MASK_n,	0x00000758,	0x0004),
 	},
 };
 #undef reg_obj_nofunc

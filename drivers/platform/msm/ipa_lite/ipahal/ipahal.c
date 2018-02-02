@@ -180,38 +180,6 @@ ipa_imm_cmd_construct_dma_shared_mem(u16 opcode, const void *params)
 }
 
 static struct ipahal_imm_cmd_pyld *
-ipa_imm_cmd_construct_dma_shared_mem_v_4_0(u16 opcode, const void *params)
-{
-	struct ipahal_imm_cmd_pyld *pyld;
-	struct ipa_imm_cmd_hw_dma_shared_mem_v_4_0 *data;
-	const struct ipahal_imm_cmd_dma_shared_mem *mem_params = params;
-	u16 pipeline_clear_options = (u16)mem_params->pipeline_clear_options;
-
-	if (check_too_big("Size", mem_params->size, 16))
-		return NULL;
-	if (check_too_big("Lcl addr", mem_params->local_addr, 16))
-		return NULL;
-	if (pipeline_clear_options_bad(pipeline_clear_options))
-		return NULL;
-
-	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
-	if (!pyld)
-		return NULL;
-	data = ipahal_imm_cmd_pyld_data(pyld);
-
-	pyld->opcode |= (mem_params->skip_pipeline_clear ? 1 : 0) << 8;
-	pyld->opcode |= pipeline_clear_options << 9;
-
-	data->direction = mem_params->is_read ? 1 : 0;
-	data->clear_after_read = mem_params->clear_after_read;
-	data->size = mem_params->size;
-	data->local_addr = mem_params->local_addr;
-	data->system_addr = mem_params->system_addr;
-
-	return pyld;
-}
-
-static struct ipahal_imm_cmd_pyld *
 ipa_imm_cmd_construct_register_write(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
@@ -234,36 +202,6 @@ ipa_imm_cmd_construct_register_write(u16 opcode, const void *params)
 	data->value_mask = regwrt_params->value_mask;
 	data->skip_pipeline_clear = regwrt_params->skip_pipeline_clear ? 1 : 0;
 	data->pipeline_clear_options = pipeline_clear_options;
-
-	return pyld;
-}
-
-static struct ipahal_imm_cmd_pyld *
-ipa_imm_cmd_construct_register_write_v_4_0(u16 opcode, const void *params)
-{
-	struct ipahal_imm_cmd_pyld *pyld;
-	struct ipa_imm_cmd_hw_register_write_v_4_0 *data;
-	const struct ipahal_imm_cmd_register_write *regwrt_params = params;
-	u16 pipeline_clear_options = (u16)regwrt_params->pipeline_clear_options;
-
-	if (check_too_big("Offset", regwrt_params->offset, 16))
-		return NULL;
-	if (pipeline_clear_options_bad(pipeline_clear_options))
-		return NULL;
-
-	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
-	if (!pyld)
-		return NULL;
-	data = ipahal_imm_cmd_pyld_data(pyld);
-
-	if (regwrt_params->skip_pipeline_clear)
-		pyld->opcode |= BIT(8);
-	pyld->opcode |= pipeline_clear_options << 9;
-
-	data->offset = regwrt_params->offset & MASK(16);
-	data->offset_high = regwrt_params->offset >> 16;
-	data->value = regwrt_params->value;
-	data->value_mask = regwrt_params->value_mask;
 
 	return pyld;
 }
@@ -303,31 +241,6 @@ ipa_imm_cmd_construct_nat_dma(u16 opcode, const void *params)
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (unlikely(!pyld))
-		return NULL;
-	data = ipahal_imm_cmd_pyld_data(pyld);
-
-	data->table_index = nat_params->table_index;
-	data->base_addr = nat_params->base_addr;
-	data->offset = nat_params->offset;
-	data->data = nat_params->data;
-
-	return pyld;
-}
-
-static struct ipahal_imm_cmd_pyld *
-ipa_imm_cmd_construct_table_dma_ipav4(u16 opcode, const void *params)
-{
-	struct ipahal_imm_cmd_pyld *pyld;
-	struct ipa_imm_cmd_hw_table_dma_ipav4 *data;
-	const struct ipahal_imm_cmd_table_dma *nat_params = params;
-
-	if (check_too_big("Tble idx", nat_params->table_index, 3))
-		return NULL;
-	if (check_too_big("Base addr", nat_params->base_addr, 2))
-		return NULL;
-
-	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
-	if (!pyld)
 		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
@@ -647,15 +560,6 @@ static const struct ipahal_imm_cmd_obj
 		imm_cmd_obj(DMA_TASK_32B_ADDR,	dma_task_32b_addr,	17),
 		imm_cmd_obj(DMA_SHARED_MEM,	dma_shared_mem,		19),
 		imm_cmd_obj(IP_PACKET_TAG_STATUS, ip_packet_tag_status, 20),
-	},
-
-	/* IPAv4 */
-	[IPA_HW_v4_0] = {
-		imm_cmd_obj(REGISTER_WRITE,	register_write_v_4_0,	12),
-		/* NAT_DMA was renamed to TABLE_DMA for IPAv4 */
-		imm_cmd_obj_inval(NAT_DMA),
-		imm_cmd_obj(TABLE_DMA,		table_dma_ipav4,	14),
-		imm_cmd_obj(DMA_SHARED_MEM,	dma_shared_mem_v_4_0,	19),
 	},
 };
 #undef imm_cmd_obj

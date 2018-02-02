@@ -207,11 +207,6 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 			[IPA_IS_FRAG]			= 15,
 		},
 	},
-
-	/* IPAv4 */
-	[IPA_HW_v4_0] = {
-		/* All inherited from IPA_HW_v3_5. */
-	},
 };
 
 /*

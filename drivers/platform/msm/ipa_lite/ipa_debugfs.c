@@ -157,9 +157,10 @@ int _ipa_read_ep_reg_v3_0(char *buf, int max_len, int pipe)
 			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_MODE_n, pipe),
 			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_AGGR_n, pipe));
 	/*
-	 * Starting IPA_HW_v4_0 the following register will have to
-	 * be formatted into the buffer conditionally.  It will no
-	 * longer be supported and we shouldn't attempt to read it.
+	 * In hardawre newer than IPA_HW_v3_5_1 the following
+	 * register will have to be formatted into the buffer
+	 * conditionally.  It will no longer be supported and we
+	 * shouldn't attempt to read it.
 	 */
 	offset += scnprintf(dbg_buff + offset, IPA_MAX_MSG_LEN - offset,
 			"IPA_ENDP_INIT_ROUTE_%u=0x%x\n",
