@@ -298,7 +298,6 @@ enum ipa_hw_type {
 	IPA_HW_v3_5_1	= 0,
 	IPA_HW_None	= 0xffffffff,
 };
-#define IPA_HW_MIN	IPA_HW_v3_5_1	/* minimum supported version */
 #define IPA_HW_MAX	(IPA_HW_v3_5_1 + 1)	/* number of versions */
 
 /**

@@ -862,7 +862,7 @@ void ipahal_reg_init(enum ipa_hw_type ipa_hw_type)
 
 	/* Build up the register descriptions we'll use */
 	for (i = 0; i < IPA_REG_MAX ; i++) {
-		for (j = ipa_hw_type; j >= IPA_HW_MIN; j--) {
+		for (j = ipa_hw_type; j >= 0; j--) {
 			const struct ipahal_reg_obj *reg;
 
 			reg = &ipahal_reg_objs[j][i];

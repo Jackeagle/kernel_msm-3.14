@@ -581,7 +581,7 @@ static void ipahal_imm_cmd_init(enum ipa_hw_type ipa_hw_type)
 
 	/* Build up the immediate command descriptions we'll use */
 	for (i = 0; i < IPA_IMM_CMD_MAX ; i++) {
-		for (j = ipa_hw_type; j >= IPA_HW_MIN; j--) {
+		for (j = ipa_hw_type; j >= 0; j--) {
 			const struct ipahal_imm_cmd_obj *imm_cmd;
 
 			imm_cmd = &ipahal_imm_cmd_objs[j][i];
