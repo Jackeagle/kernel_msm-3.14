@@ -146,14 +146,9 @@ struct rsrc_min_max {
 	u32 max;
 };
 
-enum ipa_ver {
-	IPA_3_5_1,
-	IPA_VER_MAX,
-};
-
 static const struct rsrc_min_max ipa3_rsrc_src_grp_config
 	[][IPA_RSRC_GRP_TYPE_SRC_MAX][IPA_GROUP_MAX] = {
-	[IPA_3_5_1] = {
+	[IPA_HW_v3_5_1] = {
 		[IPA_v3_5_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS] = {
 			[IPA_v3_0_GROUP_UL]		= { 1, 63, },
 			[IPA_v3_0_GROUP_DL]		= { 1, 63, },
@@ -199,7 +194,7 @@ static const struct rsrc_min_max ipa3_rsrc_src_grp_config
 
 static const struct rsrc_min_max ipa3_rsrc_dst_grp_config
 	[][IPA_RSRC_GRP_TYPE_DST_MAX][IPA_GROUP_MAX] = {
-	[IPA_3_5_1] = {
+	[IPA_HW_v3_5_1] = {
 		/* LWA_DL UL/DL/DPL unused N/A	 N/A	 N/A */
 		[IPA_v3_5_RSRC_GRP_TYPE_DST_DATA_SECTORS] = {
 			[IPA_v3_0_GROUP_UL]		= { 4, 4, },
@@ -238,8 +233,8 @@ struct ipa_ep_configuration {
 /* clients not included in the list below are considered as invalid */
 static const struct ipa_ep_configuration ipa3_ep_configuration
 					[][IPA_CLIENT_MAX] = {
-	/* IPA_3_5_1 */
-	[IPA_3_5_1] = {
+	/* IPA_HW_v3_5_1 */
+	[IPA_HW_v3_5_1] = {
 		[IPA_CLIENT_APPS_LAN_PROD] = {
 			.valid		= true,
 			.group_num	= IPA_v3_5_GROUP_UL_DL,
@@ -575,7 +570,7 @@ ep_configuration(enum ipa_client_type client)
 		return NULL;
 	}
 
-	return &ipa3_ep_configuration[IPA_3_5_1][client];
+	return &ipa3_ep_configuration[IPA_HW_v3_5_1][client];
 }
 
 /**
@@ -2260,13 +2255,13 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 	for (i = 0; i < src_rsrc_type_max; i++) {
 		for (j = 0; j < src_grp_idx_max; j = j + 2) {
 			val.x_min =
-			ipa3_rsrc_src_grp_config[IPA_3_5_1][i][j].min;
+			ipa3_rsrc_src_grp_config[IPA_HW_v3_5_1][i][j].min;
 			val.x_max =
-			ipa3_rsrc_src_grp_config[IPA_3_5_1][i][j].max;
+			ipa3_rsrc_src_grp_config[IPA_HW_v3_5_1][i][j].max;
 			val.y_min =
-			ipa3_rsrc_src_grp_config[IPA_3_5_1][i][j + 1].min;
+			ipa3_rsrc_src_grp_config[IPA_HW_v3_5_1][i][j + 1].min;
 			val.y_max =
-			ipa3_rsrc_src_grp_config[IPA_3_5_1][i][j + 1].max;
+			ipa3_rsrc_src_grp_config[IPA_HW_v3_5_1][i][j + 1].max;
 			ipa3_write_rsrc_grp_type_reg(j, i, true, &val);
 		}
 	}
@@ -2276,13 +2271,13 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 	for (i = 0; i < dst_rsrc_type_max; i++) {
 		for (j = 0; j < dst_grp_idx_max; j = j + 2) {
 			val.x_min =
-			ipa3_rsrc_dst_grp_config[IPA_3_5_1][i][j].min;
+			ipa3_rsrc_dst_grp_config[IPA_HW_v3_5_1][i][j].min;
 			val.x_max =
-			ipa3_rsrc_dst_grp_config[IPA_3_5_1][i][j].max;
+			ipa3_rsrc_dst_grp_config[IPA_HW_v3_5_1][i][j].max;
 			val.y_min =
-			ipa3_rsrc_dst_grp_config[IPA_3_5_1][i][j + 1].min;
+			ipa3_rsrc_dst_grp_config[IPA_HW_v3_5_1][i][j + 1].min;
 			val.y_max =
-			ipa3_rsrc_dst_grp_config[IPA_3_5_1][i][j + 1].max;
+			ipa3_rsrc_dst_grp_config[IPA_HW_v3_5_1][i][j + 1].max;
 			ipa3_write_rsrc_grp_type_reg(j, i, false, &val);
 		}
 	}
