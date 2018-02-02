@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  */
 
@@ -32,7 +32,7 @@
 
 struct ipa3_rmnet_mux_val {
 	uint32_t  mux_id;
-	int8_t    vchannel_name[IFNAMSIZ];
+	int8_t	  vchannel_name[IFNAMSIZ];
 	bool mux_channel_set;
 	bool ul_flt_reg;
 	bool mux_hdr_set;

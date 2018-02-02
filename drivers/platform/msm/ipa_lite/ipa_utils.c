@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  */
 
@@ -76,80 +76,63 @@
 #define QMB_MASTER_SELECT_DDR  (0)
 
 /* Resource Group index*/
-#define IPA_v3_0_GROUP_UL               (0)
-#define IPA_v3_0_GROUP_DL               (1)
-#define IPA_v3_0_GROUP_DPL              IPA_v3_0_GROUP_DL
-#define IPA_v3_0_GROUP_DIAG             (2)
-#define IPA_v3_0_GROUP_DMA              (3)
-#define IPA_v3_0_GROUP_IMM_CMD          IPA_v3_0_GROUP_UL
-#define IPA_v3_0_GROUP_Q6ZIP            (4)
-#define IPA_v3_0_GROUP_Q6ZIP_GENERAL    IPA_v3_0_GROUP_Q6ZIP
-#define IPA_v3_0_GROUP_UC_RX_Q          (5)
-#define IPA_v3_0_GROUP_Q6ZIP_ENGINE     IPA_v3_0_GROUP_UC_RX_Q
-#define IPA_v3_0_GROUP_MAX              (6)
+#define IPA_v3_0_GROUP_UL		(0)
+#define IPA_v3_0_GROUP_DL		(1)
+#define IPA_v3_0_GROUP_DPL		IPA_v3_0_GROUP_DL
+#define IPA_v3_0_GROUP_DIAG		(2)
+#define IPA_v3_0_GROUP_DMA		(3)
+#define IPA_v3_0_GROUP_IMM_CMD		IPA_v3_0_GROUP_UL
+#define IPA_v3_0_GROUP_Q6ZIP		(4)
+#define IPA_v3_0_GROUP_Q6ZIP_GENERAL	IPA_v3_0_GROUP_Q6ZIP
+#define IPA_v3_0_GROUP_UC_RX_Q		(5)
+#define IPA_v3_0_GROUP_Q6ZIP_ENGINE	IPA_v3_0_GROUP_UC_RX_Q
+#define IPA_v3_0_GROUP_MAX		(6)
 
-#define IPA_v3_5_GROUP_LWA_DL           (0) /* currently not used */
+#define IPA_v3_5_GROUP_LWA_DL		(0) /* currently not used */
 #define IPA_v3_5_MHI_GROUP_PCIE IPA_v3_5_GROUP_LWA_DL
-#define IPA_v3_5_GROUP_UL_DL            (1)
-#define IPA_v3_5_MHI_GROUP_DDR          IPA_v3_5_GROUP_UL_DL
-#define IPA_v3_5_MHI_GROUP_DMA          (2)
-#define IPA_v3_5_GROUP_UC_RX_Q          (3) /* currently not used */
-#define IPA_v3_5_SRC_GROUP_MAX          (4)
-#define IPA_v3_5_DST_GROUP_MAX          (3)
-
-#define IPA_v4_0_GROUP_LWA_DL           (0)
-#define IPA_v4_0_MHI_GROUP_PCIE         (0)
-#define IPA_v4_0_ETHERNET               (0)
-#define IPA_v4_0_GROUP_UL_DL            (1)
-#define IPA_v4_0_MHI_GROUP_DDR          (1)
-#define IPA_v4_0_MHI_GROUP_DMA          (2)
-#define IPA_v4_0_GROUP_UC_RX_Q          (3)
-#define IPA_v4_0_SRC_GROUP_MAX          (4)
-#define IPA_v4_0_DST_GROUP_MAX          (4)
+#define IPA_v3_5_GROUP_UL_DL		(1)
+#define IPA_v3_5_MHI_GROUP_DDR		IPA_v3_5_GROUP_UL_DL
+#define IPA_v3_5_MHI_GROUP_DMA		(2)
+#define IPA_v3_5_GROUP_UC_RX_Q		(3) /* currently not used */
+#define IPA_v3_5_SRC_GROUP_MAX		(4)
+#define IPA_v3_5_DST_GROUP_MAX		(3)
 
 #define IPA_GROUP_MAX IPA_v3_0_GROUP_MAX
 
 enum ipa_rsrc_grp_type_src {
-        IPA_v3_0_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS,
-        IPA_v3_0_RSRC_GRP_TYPE_SRC_HDR_SECTORS,
-        IPA_v3_0_RSRC_GRP_TYPE_SRC_HDRI1_BUFFER,
-        IPA_v3_0_RSRC_GRP_TYPE_SRS_DESCRIPTOR_LISTS,
-        IPA_v3_0_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF,
-        IPA_v3_0_RSRC_GRP_TYPE_SRC_HDRI2_BUFFERS,
-        IPA_v3_0_RSRC_GRP_TYPE_SRC_HPS_DMARS,
-        IPA_v3_0_RSRC_GRP_TYPE_SRC_ACK_ENTRIES,
-        IPA_v3_0_RSRC_GRP_TYPE_SRC_MAX,
+	IPA_v3_0_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS,
+	IPA_v3_0_RSRC_GRP_TYPE_SRC_HDR_SECTORS,
+	IPA_v3_0_RSRC_GRP_TYPE_SRC_HDRI1_BUFFER,
+	IPA_v3_0_RSRC_GRP_TYPE_SRS_DESCRIPTOR_LISTS,
+	IPA_v3_0_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF,
+	IPA_v3_0_RSRC_GRP_TYPE_SRC_HDRI2_BUFFERS,
+	IPA_v3_0_RSRC_GRP_TYPE_SRC_HPS_DMARS,
+	IPA_v3_0_RSRC_GRP_TYPE_SRC_ACK_ENTRIES,
+	IPA_v3_0_RSRC_GRP_TYPE_SRC_MAX,
 
-        IPA_v3_5_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS = 0,
-        IPA_v3_5_RSRC_GRP_TYPE_SRS_DESCRIPTOR_LISTS,
-        IPA_v3_5_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF,
-        IPA_v3_5_RSRC_GRP_TYPE_SRC_HPS_DMARS,
-        IPA_v3_5_RSRC_GRP_TYPE_SRC_ACK_ENTRIES,
-        IPA_v3_5_RSRC_GRP_TYPE_SRC_MAX,
-
-        IPA_v4_0_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS = 0,
-        IPA_v4_0_RSRC_GRP_TYPE_SRS_DESCRIPTOR_LISTS,
-        IPA_v4_0_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF,
-        IPA_v4_0_RSRC_GRP_TYPE_SRC_HPS_DMARS,
-        IPA_v4_0_RSRC_GRP_TYPE_SRC_ACK_ENTRIES,
-        IPA_v4_0_RSRC_GRP_TYPE_SRC_MAX
+	IPA_v3_5_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS = 0,
+	IPA_v3_5_RSRC_GRP_TYPE_SRS_DESCRIPTOR_LISTS,
+	IPA_v3_5_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF,
+	IPA_v3_5_RSRC_GRP_TYPE_SRC_HPS_DMARS,
+	IPA_v3_5_RSRC_GRP_TYPE_SRC_ACK_ENTRIES,
+	IPA_v3_5_RSRC_GRP_TYPE_SRC_MAX,
 };
 
 #define IPA_RSRC_GRP_TYPE_SRC_MAX IPA_v3_0_RSRC_GRP_TYPE_SRC_MAX
 
 enum ipa_rsrc_grp_type_dst {
-        IPA_v3_0_RSRC_GRP_TYPE_DST_DATA_SECTORS,
-        IPA_v3_0_RSRC_GRP_TYPE_DST_DATA_SECTOR_LISTS,
-        IPA_v3_0_RSRC_GRP_TYPE_DST_DPS_DMARS,
-        IPA_v3_0_RSRC_GRP_TYPE_DST_MAX,
+	IPA_v3_0_RSRC_GRP_TYPE_DST_DATA_SECTORS,
+	IPA_v3_0_RSRC_GRP_TYPE_DST_DATA_SECTOR_LISTS,
+	IPA_v3_0_RSRC_GRP_TYPE_DST_DPS_DMARS,
+	IPA_v3_0_RSRC_GRP_TYPE_DST_MAX,
 
-        IPA_v3_5_RSRC_GRP_TYPE_DST_DATA_SECTORS = 0,
-        IPA_v3_5_RSRC_GRP_TYPE_DST_DPS_DMARS,
-        IPA_v3_5_RSRC_GRP_TYPE_DST_MAX,
+	IPA_v3_5_RSRC_GRP_TYPE_DST_DATA_SECTORS = 0,
+	IPA_v3_5_RSRC_GRP_TYPE_DST_DPS_DMARS,
+	IPA_v3_5_RSRC_GRP_TYPE_DST_MAX,
 
-        IPA_v4_0_RSRC_GRP_TYPE_DST_DATA_SECTORS = 0,
-        IPA_v4_0_RSRC_GRP_TYPE_DST_DPS_DMARS,
-        IPA_v4_0_RSRC_GRP_TYPE_DST_MAX,
+	IPA_v4_0_RSRC_GRP_TYPE_DST_DATA_SECTORS = 0,
+	IPA_v4_0_RSRC_GRP_TYPE_DST_DPS_DMARS,
+	IPA_v4_0_RSRC_GRP_TYPE_DST_MAX,
 };
 #define IPA_RSRC_GRP_TYPE_DST_MAX IPA_v3_0_RSRC_GRP_TYPE_DST_MAX
 
@@ -217,7 +200,7 @@ static const struct rsrc_min_max ipa3_rsrc_src_grp_config
 static const struct rsrc_min_max ipa3_rsrc_dst_grp_config
 	[IPA_VER_MAX][IPA_RSRC_GRP_TYPE_DST_MAX][IPA_GROUP_MAX] = {
 	[IPA_3_5_1] = {
-		/* LWA_DL UL/DL/DPL unused N/A   N/A     N/A */
+		/* LWA_DL UL/DL/DPL unused N/A	 N/A	 N/A */
 		[IPA_v3_5_RSRC_GRP_TYPE_DST_DATA_SECTORS] = {
 			[IPA_v3_0_GROUP_UL]		= { 4, 4, },
 			[IPA_v3_0_GROUP_DL]		= { 4, 4, },
@@ -261,9 +244,9 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 			.valid		= true,
 			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= false,
-			.sequencer_type	=
+			.sequencer_type =
 				IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
-			.qmb_master_sel	= QMB_MASTER_SELECT_DDR,
+			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 8,
 				.ipa_gsi_chan_num	= 7,
@@ -276,9 +259,9 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 			.valid		= true,
 			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= true,
-			.sequencer_type	=
+			.sequencer_type =
 				IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.qmb_master_sel	= QMB_MASTER_SELECT_DDR,
+			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 2,
 				.ipa_gsi_chan_num	= 3,
@@ -291,8 +274,8 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 			.valid		= true,
 			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= false,
-			.sequencer_type	= IPA_DPS_HPS_SEQ_TYPE_DMA_ONLY,
-			.qmb_master_sel	= QMB_MASTER_SELECT_DDR,
+			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_DMA_ONLY,
+			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 5,
 				.ipa_gsi_chan_num	= 4,
@@ -305,9 +288,9 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 			.valid		= true,
 			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= true,
-			.sequencer_type	=
+			.sequencer_type =
 				IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
-			.qmb_master_sel	= QMB_MASTER_SELECT_DDR,
+			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 3,
 				.ipa_gsi_chan_num	= 0,
@@ -320,9 +303,9 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 			.valid		= true,
 			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= true,
-			.sequencer_type	=
+			.sequencer_type =
 				IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
-			.qmb_master_sel	= QMB_MASTER_SELECT_DDR,
+			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 6,
 				.ipa_gsi_chan_num	= 4,
@@ -335,9 +318,9 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 			.valid		= true,
 			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= false,
-			.sequencer_type	=
+			.sequencer_type =
 				IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
-			.qmb_master_sel	= QMB_MASTER_SELECT_DDR,
+			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 4,
 				.ipa_gsi_chan_num	= 1,
@@ -350,8 +333,8 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 			.valid		= true,
 			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= false,
-			.sequencer_type	= IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.qmb_master_sel	= QMB_MASTER_SELECT_DDR,
+			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 9,
 				.ipa_gsi_chan_num	= 5,
@@ -364,8 +347,8 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 			.valid		= true,
 			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= false,
-			.sequencer_type	= IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.qmb_master_sel	= QMB_MASTER_SELECT_DDR,
+			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 10,
 				.ipa_gsi_chan_num	= 6,
@@ -378,8 +361,8 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 			.valid		= true,
 			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= false,
-			.sequencer_type	= IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.qmb_master_sel	= QMB_MASTER_SELECT_DDR,
+			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 13,
 				.ipa_gsi_chan_num	= 3,
@@ -392,8 +375,8 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 			.valid		= true,
 			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= false,
-			.sequencer_type	= IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.qmb_master_sel	= QMB_MASTER_SELECT_DDR,
+			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 12,
 				.ipa_gsi_chan_num	= 2,
@@ -407,8 +390,8 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 			.valid		= true,
 			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= false,
-			.sequencer_type	= IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.qmb_master_sel	= QMB_MASTER_SELECT_DDR,
+			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 31,
 				.ipa_gsi_chan_num	= 31,
@@ -555,7 +538,7 @@ static struct msm_bus_vectors ipa_turbo_perf_vectors_v3_0[] = {
 	},
 };
 
-static struct msm_bus_paths ipa_usecases_v3_0[]  = {
+static struct msm_bus_paths ipa_usecases_v3_0[]	 = {
 	{
 		.num_paths = ARRAY_SIZE(ipa_min_perf_vectors_v3_0),
 		.vectors = ipa_min_perf_vectors_v3_0,
@@ -848,9 +831,9 @@ static const char *ipa3_get_aggr_type_str(enum ipa_aggr_type aggr_type)
 }
 
 /**
- * ipa3_cfg_ep_hdr() -  IPA end-point header configuration
+ * ipa3_cfg_ep_hdr() -	IPA end-point header configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg:	[in] IPA end-point configuration params
+ * @ipa_ep_cfg: [in] IPA end-point configuration params
  *
  * Returns:	0 on success, negative on failure
  *
@@ -895,7 +878,7 @@ static int ipa3_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 /**
  * ipa3_cfg_ep_hdr_ext() -  IPA end-point extended header configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ep_hdr_ext:	[in] IPA end-point configuration params
+ * @ep_hdr_ext: [in] IPA end-point configuration params
  *
  * Returns:	0 on success, negative on failure
  *
@@ -939,7 +922,7 @@ static int ipa3_cfg_ep_hdr_ext(u32 clnt_hdl,
 /**
  * ipa3_cfg_ep_aggr() - IPA end-point aggregation configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg:	[in] IPA end-point configuration params
+ * @ipa_ep_cfg: [in] IPA end-point configuration params
  *
  * Returns:	0 on success, negative on failure
  *
@@ -981,7 +964,7 @@ static int ipa3_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 /**
  * ipa3_cfg_ep_cfg() - IPA end-point cfg configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg:	[in] IPA end-point configuration params
+ * @ipa_ep_cfg: [in] IPA end-point configuration params
  *
  * Returns:	0 on success, negative on failure
  *
@@ -1018,7 +1001,7 @@ static int ipa3_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 /**
  * ipa3_cfg_ep_mode() - IPA end-point mode configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg:	[in] IPA end-point configuration params
+ * @ipa_ep_cfg: [in] IPA end-point configuration params
  *
  * Returns:	0 on success, negative on failure
  *
@@ -1153,7 +1136,7 @@ static int ipa3_cfg_ep_deaggr(u32 clnt_hdl,
 /**
  * ipa3_cfg_ep_metadata_mask() - IPA end-point meta-data mask configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg:	[in] IPA end-point configuration params
+ * @ipa_ep_cfg: [in] IPA end-point configuration params
  *
  * Returns:	0 on success, negative on failure
  *
@@ -1183,7 +1166,7 @@ static int ipa3_cfg_ep_metadata_mask(u32 clnt_hdl,
 /**
  * ipa3_cfg_ep - IPA end-point configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg:	[in] IPA end-point configuration params
+ * @ipa_ep_cfg: [in] IPA end-point configuration params
  *
  * This includes nat, IPv6CT, header, mode, aggregation and route settings and
  * is a one shot API to configure the IPA end-point fully
@@ -1240,7 +1223,7 @@ int ipa3_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 /**
  * ipa3_cfg_ep_status() - IPA end-point status configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg:	[in] IPA end-point configuration params
+ * @ipa_ep_cfg: [in] IPA end-point configuration params
  *
  * Returns:	0 on success, negative on failure
  *
@@ -1271,7 +1254,7 @@ int ipa3_cfg_ep_status(u32 clnt_hdl,
 }
 
 /**
- * ipa3_cfg_ep_ctrl() -  IPA end-point Control configuration
+ * ipa3_cfg_ep_ctrl() -	 IPA end-point Control configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ipa_ep_cfg_ctrl:	[in] IPA end-point configuration params
  *
@@ -1308,7 +1291,7 @@ int ipa3_cfg_ep_ctrl(u32 clnt_hdl, const struct ipa_ep_cfg_ctrl *ep_ctrl)
  * and indefinite blocking is avoided.
  *
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg:	[in] IPA end-point configuration params
+ * @ipa_ep_cfg: [in] IPA end-point configuration params
  *
  * Returns:	0 on success, negative on failure
  */
@@ -1768,7 +1751,7 @@ static struct ipa3_controller ipa_controller_v3 = {
 				IPA_V3_0_BW_THRESHOLD_TURBO_MBPS,
 	.ipa_reg_base_ofst	= IPA_REG_BASE_OFFSET,
 	.ipa_init_sram		= _ipa_init_sram_v3,
-	.ipa_sram_read_settings	= _ipa_sram_settings_read_v3_0,
+	.ipa_sram_read_settings = _ipa_sram_settings_read_v3_0,
 	.ipa_init_hdr		= _ipa_init_hdr_v3_0,
 };
 
@@ -2482,7 +2465,7 @@ int ipa3_stop_gsi_channel(u32 clnt_hdl)
 			IPA_GSI_CHANNEL_STOP_SLEEP_MAX_USEC);
 	}
 
-	ipa_err("Failed  to stop GSI channel with retries\n");
+	ipa_err("Failed	 to stop GSI channel with retries\n");
 	res = -EFAULT;
 end_sequence:
 	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
@@ -2568,17 +2551,17 @@ void ipa_assert(void)
  *
  * @pipe_idx: filter pipe index to configure the tuple masking
  * @tuple: the tuple members masking
- * Returns:     0 on success, negative on failure
+ * Returns:	0 on success, negative on failure
  *
  */
 void ipa3_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple)
 {
-        struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
+	struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
 
-        ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n, pipe_idx,
+	ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n, pipe_idx,
 					&fltrt_tuple);
-        fltrt_tuple.flt = *tuple;
-        ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n, pipe_idx,
+	fltrt_tuple.flt = *tuple;
+	ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n, pipe_idx,
 					&fltrt_tuple);
 }
 

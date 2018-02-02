@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  */
 
@@ -408,7 +408,7 @@ struct ipahal_reg_tx_cfg {
 /*
  * struct ipahal_reg_idle_indication_cfg - IPA IDLE_INDICATION_CFG register
  * @const_non_idle_enable: enable the asserting of the IDLE value and DCD
- * @enter_idle_debounce_thresh:  configure the debounce threshold
+ * @enter_idle_debounce_thresh:	 configure the debounce threshold
  */
 struct ipahal_reg_idle_indication_cfg {
 	u16 enter_idle_debounce_thresh;

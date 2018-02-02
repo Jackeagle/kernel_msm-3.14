@@ -7,7 +7,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  */
 
@@ -161,7 +161,7 @@ static int ipa3_active_clients_panic_notifier(struct notifier_block *this,
 }
 
 static struct notifier_block ipa3_active_clients_panic_blk = {
-	.notifier_call  = ipa3_active_clients_panic_notifier,
+	.notifier_call	= ipa3_active_clients_panic_notifier,
 };
 
 static int ipa3_active_clients_log_insert(const char *string)
@@ -292,7 +292,7 @@ static int ipa3_init_smem_region(int memory_region_size,
 
 /**
 * ipa3_init_q6_smem() - Initialize Q6 general memory and
-*                      header memory regions in IPA.
+*		       header memory regions in IPA.
 *
 * Return codes:
 * 0: success
@@ -544,7 +544,7 @@ static int ipa3_q6_set_ex_path_to_apps(void)
 
 /**
 * ipa3_q6_pre_shutdown_cleanup() - A cleanup for all Q6 related configuration
-*                    in IPA HW. This is performed in case of SSR.
+*		     in IPA HW. This is performed in case of SSR.
 *
 * This is a mandatory procedure, in case one of the steps fails, the
 * AP needs to restart.
@@ -771,51 +771,51 @@ int _ipa_init_hdr_v3_0(void)
  */
 int _ipa_init_rt4_v3(void)
 {
-        struct ipa3_desc desc = { 0 };
-        struct ipa_mem_buffer mem;
-        struct ipahal_imm_cmd_ip_v4_routing_init v4_cmd;
-        struct ipahal_imm_cmd_pyld *cmd_pyld;
-        int rc = 0;
+	struct ipa3_desc desc = { 0 };
+	struct ipa_mem_buffer mem;
+	struct ipahal_imm_cmd_ip_v4_routing_init v4_cmd;
+	struct ipahal_imm_cmd_pyld *cmd_pyld;
+	int rc = 0;
 
-        rc = ipahal_rt_generate_empty_img(ipa3_mem(V4_RT_NUM_INDEX), &mem,
+	rc = ipahal_rt_generate_empty_img(ipa3_mem(V4_RT_NUM_INDEX), &mem,
 						GFP_KERNEL);
-        if (rc) {
-                ipa_err("fail generate empty v4 rt img\n");
-                return rc;
-        }
+	if (rc) {
+		ipa_err("fail generate empty v4 rt img\n");
+		return rc;
+	}
 
-        v4_cmd.hash_rules_addr = mem.phys_base;
-        v4_cmd.hash_rules_size = mem.size;
-        v4_cmd.hash_local_addr = ipa3_ctx->smem_restricted_bytes +
-                ipa3_mem(V4_RT_HASH_OFST);
-        v4_cmd.nhash_rules_addr = mem.phys_base;
-        v4_cmd.nhash_rules_size = mem.size;
-        v4_cmd.nhash_local_addr = ipa3_ctx->smem_restricted_bytes +
-                ipa3_mem(V4_RT_NHASH_OFST);
-        ipa_debug("putting hashable routing IPv4 rules to phys 0x%x\n",
-                                v4_cmd.hash_local_addr);
-        ipa_debug("putting non-hashable routing IPv4 rules to phys 0x%x\n",
-                                v4_cmd.nhash_local_addr);
-        cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_V4_ROUTING_INIT,
+	v4_cmd.hash_rules_addr = mem.phys_base;
+	v4_cmd.hash_rules_size = mem.size;
+	v4_cmd.hash_local_addr = ipa3_ctx->smem_restricted_bytes +
+		ipa3_mem(V4_RT_HASH_OFST);
+	v4_cmd.nhash_rules_addr = mem.phys_base;
+	v4_cmd.nhash_rules_size = mem.size;
+	v4_cmd.nhash_local_addr = ipa3_ctx->smem_restricted_bytes +
+		ipa3_mem(V4_RT_NHASH_OFST);
+	ipa_debug("putting hashable routing IPv4 rules to phys 0x%x\n",
+				v4_cmd.hash_local_addr);
+	ipa_debug("putting non-hashable routing IPv4 rules to phys 0x%x\n",
+				v4_cmd.nhash_local_addr);
+	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_V4_ROUTING_INIT,
 						&v4_cmd);
-        if (!cmd_pyld) {
-                ipa_err("fail construct ip_v4_rt_init imm cmd\n");
-                rc = -EPERM;
-                goto free_mem;
-        }
+	if (!cmd_pyld) {
+		ipa_err("fail construct ip_v4_rt_init imm cmd\n");
+		rc = -EPERM;
+		goto free_mem;
+	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
-        IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
+	IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
-        if (ipa3_send_cmd(1, &desc)) {
-                ipa_err("fail to send immediate command\n");
-                rc = -EFAULT;
-        }
+	if (ipa3_send_cmd(1, &desc)) {
+		ipa_err("fail to send immediate command\n");
+		rc = -EFAULT;
+	}
 
-        ipahal_destroy_imm_cmd(cmd_pyld);
+	ipahal_destroy_imm_cmd(cmd_pyld);
 
 free_mem:
-        ipahal_free_empty_img(&mem);
-        return rc;
+	ipahal_free_empty_img(&mem);
+	return rc;
 }
 
 /**
@@ -825,51 +825,51 @@ free_mem:
  */
 int _ipa_init_rt6_v3(void)
 {
-        struct ipa3_desc desc = { 0 };
-        struct ipa_mem_buffer mem;
-        struct ipahal_imm_cmd_ip_v6_routing_init v6_cmd;
-        struct ipahal_imm_cmd_pyld *cmd_pyld;
-        int rc = 0;
+	struct ipa3_desc desc = { 0 };
+	struct ipa_mem_buffer mem;
+	struct ipahal_imm_cmd_ip_v6_routing_init v6_cmd;
+	struct ipahal_imm_cmd_pyld *cmd_pyld;
+	int rc = 0;
 
-        rc = ipahal_rt_generate_empty_img(ipa3_mem(V6_RT_NUM_INDEX), &mem,
+	rc = ipahal_rt_generate_empty_img(ipa3_mem(V6_RT_NUM_INDEX), &mem,
 						GFP_KERNEL);
-        if (rc) {
-                ipa_err("fail generate empty v6 rt img\n");
-                return rc;
-        }
+	if (rc) {
+		ipa_err("fail generate empty v6 rt img\n");
+		return rc;
+	}
 
-        v6_cmd.hash_rules_addr = mem.phys_base;
-        v6_cmd.hash_rules_size = mem.size;
-        v6_cmd.hash_local_addr = ipa3_ctx->smem_restricted_bytes +
-                ipa3_mem(V6_RT_HASH_OFST);
-        v6_cmd.nhash_rules_addr = mem.phys_base;
-        v6_cmd.nhash_rules_size = mem.size;
-        v6_cmd.nhash_local_addr = ipa3_ctx->smem_restricted_bytes +
-                ipa3_mem(V6_RT_NHASH_OFST);
-        ipa_debug("putting hashable routing IPv6 rules to phys 0x%x\n",
-                                v6_cmd.hash_local_addr);
-        ipa_debug("putting non-hashable routing IPv6 rules to phys 0x%x\n",
-                                v6_cmd.nhash_local_addr);
-        cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_V6_ROUTING_INIT,
+	v6_cmd.hash_rules_addr = mem.phys_base;
+	v6_cmd.hash_rules_size = mem.size;
+	v6_cmd.hash_local_addr = ipa3_ctx->smem_restricted_bytes +
+		ipa3_mem(V6_RT_HASH_OFST);
+	v6_cmd.nhash_rules_addr = mem.phys_base;
+	v6_cmd.nhash_rules_size = mem.size;
+	v6_cmd.nhash_local_addr = ipa3_ctx->smem_restricted_bytes +
+		ipa3_mem(V6_RT_NHASH_OFST);
+	ipa_debug("putting hashable routing IPv6 rules to phys 0x%x\n",
+				v6_cmd.hash_local_addr);
+	ipa_debug("putting non-hashable routing IPv6 rules to phys 0x%x\n",
+				v6_cmd.nhash_local_addr);
+	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_V6_ROUTING_INIT,
 						&v6_cmd);
-        if (!cmd_pyld) {
-                ipa_err("fail construct ip_v6_rt_init imm cmd\n");
-                rc = -EPERM;
-                goto free_mem;
-        }
+	if (!cmd_pyld) {
+		ipa_err("fail construct ip_v6_rt_init imm cmd\n");
+		rc = -EPERM;
+		goto free_mem;
+	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
-        IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
+	IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
-        if (ipa3_send_cmd(1, &desc)) {
-                ipa_err("fail to send immediate command\n");
-                rc = -EFAULT;
-        }
+	if (ipa3_send_cmd(1, &desc)) {
+		ipa_err("fail to send immediate command\n");
+		rc = -EFAULT;
+	}
 
-        ipahal_destroy_imm_cmd(cmd_pyld);
+	ipahal_destroy_imm_cmd(cmd_pyld);
 
 free_mem:
-        ipahal_free_empty_img(&mem);
-        return rc;
+	ipahal_free_empty_img(&mem);
+	return rc;
 }
 
 /**
@@ -879,52 +879,52 @@ free_mem:
  */
 int _ipa_init_flt4_v3(void)
 {
-        struct ipa3_desc desc = { 0 };
-        struct ipa_mem_buffer mem;
-        struct ipahal_imm_cmd_ip_v4_filter_init v4_cmd;
-        struct ipahal_imm_cmd_pyld *cmd_pyld;
-        int rc;
+	struct ipa3_desc desc = { 0 };
+	struct ipa_mem_buffer mem;
+	struct ipahal_imm_cmd_ip_v4_filter_init v4_cmd;
+	struct ipahal_imm_cmd_pyld *cmd_pyld;
+	int rc;
 
-        rc = ipahal_flt_generate_empty_img(ipa3_ctx->ep_flt_num,
+	rc = ipahal_flt_generate_empty_img(ipa3_ctx->ep_flt_num,
 					ipa3_ctx->ep_flt_bitmap, &mem,
 					GFP_KERNEL);
-        if (rc) {
-                ipa_err("fail generate empty v4 flt img\n");
-                return rc;
-        }
+	if (rc) {
+		ipa_err("fail generate empty v4 flt img\n");
+		return rc;
+	}
 
-        v4_cmd.hash_rules_addr = mem.phys_base;
-        v4_cmd.hash_rules_size = mem.size;
-        v4_cmd.hash_local_addr = ipa3_ctx->smem_restricted_bytes +
-                ipa3_mem(V4_FLT_HASH_OFST);
-        v4_cmd.nhash_rules_addr = mem.phys_base;
-        v4_cmd.nhash_rules_size = mem.size;
-        v4_cmd.nhash_local_addr = ipa3_ctx->smem_restricted_bytes +
-                ipa3_mem(V4_FLT_NHASH_OFST);
-        ipa_debug("putting hashable filtering IPv4 rules to phys 0x%x\n",
-                                v4_cmd.hash_local_addr);
-        ipa_debug("putting non-hashable filtering IPv4 rules to phys 0x%x\n",
-                                v4_cmd.nhash_local_addr);
-        cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_V4_FILTER_INIT,
+	v4_cmd.hash_rules_addr = mem.phys_base;
+	v4_cmd.hash_rules_size = mem.size;
+	v4_cmd.hash_local_addr = ipa3_ctx->smem_restricted_bytes +
+		ipa3_mem(V4_FLT_HASH_OFST);
+	v4_cmd.nhash_rules_addr = mem.phys_base;
+	v4_cmd.nhash_rules_size = mem.size;
+	v4_cmd.nhash_local_addr = ipa3_ctx->smem_restricted_bytes +
+		ipa3_mem(V4_FLT_NHASH_OFST);
+	ipa_debug("putting hashable filtering IPv4 rules to phys 0x%x\n",
+				v4_cmd.hash_local_addr);
+	ipa_debug("putting non-hashable filtering IPv4 rules to phys 0x%x\n",
+				v4_cmd.nhash_local_addr);
+	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_V4_FILTER_INIT,
 						&v4_cmd);
-        if (!cmd_pyld) {
-                ipa_err("fail construct ip_v4_flt_init imm cmd\n");
-                rc = -EPERM;
-                goto free_mem;
-        }
+	if (!cmd_pyld) {
+		ipa_err("fail construct ip_v4_flt_init imm cmd\n");
+		rc = -EPERM;
+		goto free_mem;
+	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
-        IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
+	IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
-        if (ipa3_send_cmd(1, &desc)) {
-                ipa_err("fail to send immediate command\n");
-                rc = -EFAULT;
-        }
+	if (ipa3_send_cmd(1, &desc)) {
+		ipa_err("fail to send immediate command\n");
+		rc = -EFAULT;
+	}
 
-        ipahal_destroy_imm_cmd(cmd_pyld);
+	ipahal_destroy_imm_cmd(cmd_pyld);
 
 free_mem:
-        ipahal_free_empty_img(&mem);
-        return rc;
+	ipahal_free_empty_img(&mem);
+	return rc;
 }
 
 /**
@@ -934,53 +934,53 @@ free_mem:
  */
 int _ipa_init_flt6_v3(void)
 {
-        struct ipa3_desc desc = { 0 };
-        struct ipa_mem_buffer mem;
-        struct ipahal_imm_cmd_ip_v6_filter_init v6_cmd;
-        struct ipahal_imm_cmd_pyld *cmd_pyld;
-        int rc;
+	struct ipa3_desc desc = { 0 };
+	struct ipa_mem_buffer mem;
+	struct ipahal_imm_cmd_ip_v6_filter_init v6_cmd;
+	struct ipahal_imm_cmd_pyld *cmd_pyld;
+	int rc;
 
-        rc = ipahal_flt_generate_empty_img(ipa3_ctx->ep_flt_num,
+	rc = ipahal_flt_generate_empty_img(ipa3_ctx->ep_flt_num,
 					ipa3_ctx->ep_flt_bitmap, &mem,
 					GFP_KERNEL);
-        if (rc) {
-                ipa_err("fail generate empty v6 flt img\n");
-                return rc;
-        }
+	if (rc) {
+		ipa_err("fail generate empty v6 flt img\n");
+		return rc;
+	}
 
-        v6_cmd.hash_rules_addr = mem.phys_base;
-        v6_cmd.hash_rules_size = mem.size;
-        v6_cmd.hash_local_addr = ipa3_ctx->smem_restricted_bytes +
-                ipa3_mem(V6_FLT_HASH_OFST);
-        v6_cmd.nhash_rules_addr = mem.phys_base;
-        v6_cmd.nhash_rules_size = mem.size;
-        v6_cmd.nhash_local_addr = ipa3_ctx->smem_restricted_bytes +
-                ipa3_mem(V6_FLT_NHASH_OFST);
-        ipa_debug("putting hashable filtering IPv6 rules to phys 0x%x\n",
-                                v6_cmd.hash_local_addr);
-        ipa_debug("putting non-hashable filtering IPv6 rules to phys 0x%x\n",
-                                v6_cmd.nhash_local_addr);
+	v6_cmd.hash_rules_addr = mem.phys_base;
+	v6_cmd.hash_rules_size = mem.size;
+	v6_cmd.hash_local_addr = ipa3_ctx->smem_restricted_bytes +
+		ipa3_mem(V6_FLT_HASH_OFST);
+	v6_cmd.nhash_rules_addr = mem.phys_base;
+	v6_cmd.nhash_rules_size = mem.size;
+	v6_cmd.nhash_local_addr = ipa3_ctx->smem_restricted_bytes +
+		ipa3_mem(V6_FLT_NHASH_OFST);
+	ipa_debug("putting hashable filtering IPv6 rules to phys 0x%x\n",
+				v6_cmd.hash_local_addr);
+	ipa_debug("putting non-hashable filtering IPv6 rules to phys 0x%x\n",
+				v6_cmd.nhash_local_addr);
 
-        cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_V6_FILTER_INIT,
+	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_V6_FILTER_INIT,
 						&v6_cmd);
-        if (!cmd_pyld) {
-                ipa_err("fail construct ip_v6_flt_init imm cmd\n");
-                rc = -EPERM;
-                goto free_mem;
-        }
+	if (!cmd_pyld) {
+		ipa_err("fail construct ip_v6_flt_init imm cmd\n");
+		rc = -EPERM;
+		goto free_mem;
+	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
-        IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
+	IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
-        if (ipa3_send_cmd(1, &desc)) {
-                ipa_err("fail to send immediate command\n");
-                rc = -EFAULT;
-        }
+	if (ipa3_send_cmd(1, &desc)) {
+		ipa_err("fail to send immediate command\n");
+		rc = -EFAULT;
+	}
 
-        ipahal_destroy_imm_cmd(cmd_pyld);
+	ipahal_destroy_imm_cmd(cmd_pyld);
 
 free_mem:
-        ipahal_free_empty_img(&mem);
-        return rc;
+	ipahal_free_empty_img(&mem);
+	return rc;
 }
 
 
@@ -1069,16 +1069,16 @@ static long ipa3_setup_apps_pipes(void)
 	ipa_debug("HDR initialized\n");
 
 	ipa3_ctx->ctrl->ipa_init_rt4();
-        ipa_debug("V4 RT initialized\n");
+	ipa_debug("V4 RT initialized\n");
 
-        ipa3_ctx->ctrl->ipa_init_rt6();
-        ipa_debug("V6 RT initialized\n");
+	ipa3_ctx->ctrl->ipa_init_rt6();
+	ipa_debug("V6 RT initialized\n");
 
-        ipa3_ctx->ctrl->ipa_init_flt4();
-        ipa_debug("V4 FLT initialized\n");
+	ipa3_ctx->ctrl->ipa_init_flt4();
+	ipa_debug("V4 FLT initialized\n");
 
-        ipa3_ctx->ctrl->ipa_init_flt6();
-        ipa_debug("V6 FLT initialized\n");
+	ipa3_ctx->ctrl->ipa_init_flt6();
+	ipa_debug("V6 FLT initialized\n");
 
 	ipa3_setup_flt_hash_tuple();
 	ipa_debug("flt hash tuple is configured\n");
@@ -1797,17 +1797,17 @@ static int ipa3_pil_load_ipa_fws(void)
 
 static int ipa3_open(struct inode *inode, struct file *filp)
 {
-        struct ipa3_context *ctx = NULL;
+	struct ipa3_context *ctx = NULL;
 
-        ipa_debug_low("ENTER\n");
+	ipa_debug_low("ENTER\n");
 
-        ctx = container_of(inode->i_cdev, struct ipa3_context, cdev);
-        filp->private_data = ctx;
-        return 0;
+	ctx = container_of(inode->i_cdev, struct ipa3_context, cdev);
+	filp->private_data = ctx;
+	return 0;
 }
 
 static ssize_t ipa3_write(struct file *file, const char __user *buf,
-                          size_t count, loff_t *ppos)
+			  size_t count, loff_t *ppos)
 {
 	atomic_t *statep;
 	int result;
@@ -2269,7 +2269,7 @@ ipa_smmu_domain_attr_set(struct device *dev, struct iommu_domain *domain)
  * populates all of the fields of the SMMU CB context provided.
  *
  * If successful, this function returns a created mapping in
- * cb->mapping.  The mapping will have beeen attached to the device
+ * cb->mapping.	 The mapping will have beeen attached to the device
  * provided.  In the event of a subsequent error, the caller is
  * responsible for detaching the mapping from the device and
  * releasing mapping.
@@ -2592,7 +2592,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 
 	/* init active_clients_log */
 	if (ipa3_active_clients_log_init()) {
-		result  =-ENOMEM;
+		result	=-ENOMEM;
 		goto err_unregister_bus_handle;
 	}
 
@@ -2690,280 +2690,280 @@ int ipa3_ap_resume(struct device *dev)
 }
 
 static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
-        enum ipa_rule_type rlt)
+	enum ipa_rule_type rlt)
 {
-        struct ipa3_desc *desc;
-        struct ipahal_imm_cmd_dma_shared_mem cmd = {0};
-        struct ipahal_imm_cmd_pyld **cmd_pyld;
-        int retval = 0;
-        int pipe_idx;
-        int flt_idx = 0;
-        int num_cmds = 0;
-        int index;
-        u32 lcl_addr_mem_part;
-        struct ipa_mem_buffer mem;
+	struct ipa3_desc *desc;
+	struct ipahal_imm_cmd_dma_shared_mem cmd = {0};
+	struct ipahal_imm_cmd_pyld **cmd_pyld;
+	int retval = 0;
+	int pipe_idx;
+	int flt_idx = 0;
+	int num_cmds = 0;
+	int index;
+	u32 lcl_addr_mem_part;
+	struct ipa_mem_buffer mem;
 
-        ipa_debug("Entry\n");
+	ipa_debug("Entry\n");
 
-        if ((ip >= IPA_IP_MAX) || (rlt >= IPA_RULE_TYPE_MAX)) {
-                ipa_err("Input Err: ip=%d ; rlt=%d\n", ip, rlt);
-                return -EINVAL;
-        }
+	if ((ip >= IPA_IP_MAX) || (rlt >= IPA_RULE_TYPE_MAX)) {
+		ipa_err("Input Err: ip=%d ; rlt=%d\n", ip, rlt);
+		return -EINVAL;
+	}
 
-        /* Up to filtering pipes we have filtering tables */
-        desc = kcalloc(ipa3_ctx->ep_flt_num, sizeof(struct ipa3_desc),
-                GFP_KERNEL);
-        if (!desc) {
-                ipa_err("failed to allocate memory\n");
-                return -ENOMEM;
-        }
+	/* Up to filtering pipes we have filtering tables */
+	desc = kcalloc(ipa3_ctx->ep_flt_num, sizeof(struct ipa3_desc),
+		GFP_KERNEL);
+	if (!desc) {
+		ipa_err("failed to allocate memory\n");
+		return -ENOMEM;
+	}
 
-        cmd_pyld = kcalloc(ipa3_ctx->ep_flt_num,
-                sizeof(struct ipahal_imm_cmd_pyld *), GFP_KERNEL);
-        if (!cmd_pyld) {
-                ipa_err("failed to allocate memory\n");
-                retval = -ENOMEM;
-                goto free_desc;
-        }
+	cmd_pyld = kcalloc(ipa3_ctx->ep_flt_num,
+		sizeof(struct ipahal_imm_cmd_pyld *), GFP_KERNEL);
+	if (!cmd_pyld) {
+		ipa_err("failed to allocate memory\n");
+		retval = -ENOMEM;
+		goto free_desc;
+	}
 
-        if (ip == IPA_IP_v4) {
-                if (rlt == IPA_RULE_HASHABLE)
-                        lcl_addr_mem_part = ipa3_mem(V4_FLT_HASH_OFST);
-                else
-                        lcl_addr_mem_part = ipa3_mem(V4_FLT_NHASH_OFST);
-        } else {
-                if (rlt == IPA_RULE_HASHABLE)
-                        lcl_addr_mem_part = ipa3_mem(V6_FLT_HASH_OFST);
-                else
-                        lcl_addr_mem_part = ipa3_mem(V6_FLT_NHASH_OFST);
-        }
+	if (ip == IPA_IP_v4) {
+		if (rlt == IPA_RULE_HASHABLE)
+			lcl_addr_mem_part = ipa3_mem(V4_FLT_HASH_OFST);
+		else
+			lcl_addr_mem_part = ipa3_mem(V4_FLT_NHASH_OFST);
+	} else {
+		if (rlt == IPA_RULE_HASHABLE)
+			lcl_addr_mem_part = ipa3_mem(V6_FLT_HASH_OFST);
+		else
+			lcl_addr_mem_part = ipa3_mem(V6_FLT_NHASH_OFST);
+	}
 
-        retval = ipahal_flt_generate_empty_img(1, 0, &mem, GFP_ATOMIC);
-        if (retval) {
-                ipa_err("failed to generate flt single tbl empty img\n");
-                goto free_cmd_pyld;
-        }
+	retval = ipahal_flt_generate_empty_img(1, 0, &mem, GFP_ATOMIC);
+	if (retval) {
+		ipa_err("failed to generate flt single tbl empty img\n");
+		goto free_cmd_pyld;
+	}
 
-        for (pipe_idx = 0; pipe_idx < ipa3_ctx->ipa_num_pipes; pipe_idx++) {
-                if (!ipa_is_ep_support_flt(pipe_idx))
-                        continue;
+	for (pipe_idx = 0; pipe_idx < ipa3_ctx->ipa_num_pipes; pipe_idx++) {
+		if (!ipa_is_ep_support_flt(pipe_idx))
+			continue;
 
-                /*
-                 * Iterating over all the filtering pipes which are either
-                 * invalid but connected or connected but not configured by AP.
-                 */
+		/*
+		 * Iterating over all the filtering pipes which are either
+		 * invalid but connected or connected but not configured by AP.
+		 */
 		if (!ipa3_ctx->ep[pipe_idx].valid ||
-                    ipa3_ctx->ep[pipe_idx].skip_ep_cfg) {
+		    ipa3_ctx->ep[pipe_idx].skip_ep_cfg) {
 
-                        cmd.is_read = false;
-                        cmd.skip_pipeline_clear = false;
-                        cmd.pipeline_clear_options = IPAHAL_HPS_CLEAR;
-                        cmd.size = mem.size;
-                        cmd.system_addr = mem.phys_base;
-                        cmd.local_addr =
-                                ipa3_ctx->smem_restricted_bytes +
-                                lcl_addr_mem_part +
-                                ipahal_get_hw_tbl_hdr_width() +
-                                flt_idx * ipahal_get_hw_tbl_hdr_width();
-                        cmd_pyld[num_cmds] = ipahal_construct_imm_cmd(
+			cmd.is_read = false;
+			cmd.skip_pipeline_clear = false;
+			cmd.pipeline_clear_options = IPAHAL_HPS_CLEAR;
+			cmd.size = mem.size;
+			cmd.system_addr = mem.phys_base;
+			cmd.local_addr =
+				ipa3_ctx->smem_restricted_bytes +
+				lcl_addr_mem_part +
+				ipahal_get_hw_tbl_hdr_width() +
+				flt_idx * ipahal_get_hw_tbl_hdr_width();
+			cmd_pyld[num_cmds] = ipahal_construct_imm_cmd(
 						IPA_IMM_CMD_DMA_SHARED_MEM,
 						&cmd);
-                        if (!cmd_pyld[num_cmds]) {
-                                ipa_err("fail construct dma_shared_mem cmd\n");
-                                retval = -ENOMEM;
-                                goto free_empty_img;
-                        }
+			if (!cmd_pyld[num_cmds]) {
+				ipa_err("fail construct dma_shared_mem cmd\n");
+				retval = -ENOMEM;
+				goto free_empty_img;
+			}
 			ipa_desc_fill_imm_cmd(&desc[num_cmds],
 						cmd_pyld[num_cmds]);
-                        num_cmds++;
-                }
+			num_cmds++;
+		}
 
-                flt_idx++;
-        }
+		flt_idx++;
+	}
 
-        ipa_debug("Sending %d descriptors for flt tbl clearing\n", num_cmds);
-        retval = ipa3_send_cmd(num_cmds, desc);
-        if (retval) {
-                ipa_err("failed to send immediate command (err %d)\n", retval);
-                retval = -EFAULT;
-        }
+	ipa_debug("Sending %d descriptors for flt tbl clearing\n", num_cmds);
+	retval = ipa3_send_cmd(num_cmds, desc);
+	if (retval) {
+		ipa_err("failed to send immediate command (err %d)\n", retval);
+		retval = -EFAULT;
+	}
 
 free_empty_img:
-        ipahal_free_empty_img(&mem);
+	ipahal_free_empty_img(&mem);
 free_cmd_pyld:
-        for (index = 0; index < num_cmds; index++)
-                ipahal_destroy_imm_cmd(cmd_pyld[index]);
-        kfree(cmd_pyld);
+	for (index = 0; index < num_cmds; index++)
+		ipahal_destroy_imm_cmd(cmd_pyld[index]);
+	kfree(cmd_pyld);
 free_desc:
-        kfree(desc);
-        return retval;
+	kfree(desc);
+	return retval;
 }
 
 static int ipa3_q6_clean_q6_rt_tbls(enum ipa_ip_type ip,
-        enum ipa_rule_type rlt)
+	enum ipa_rule_type rlt)
 {
-        struct ipa3_desc *desc;
-        struct ipahal_imm_cmd_dma_shared_mem cmd = {0};
-        struct ipahal_imm_cmd_pyld *cmd_pyld = NULL;
-        int retval = 0;
-        u32 modem_rt_index_lo;
-        u32 modem_rt_index_hi;
-        u32 lcl_addr_mem_part;
-        struct ipa_mem_buffer mem;
+	struct ipa3_desc *desc;
+	struct ipahal_imm_cmd_dma_shared_mem cmd = {0};
+	struct ipahal_imm_cmd_pyld *cmd_pyld = NULL;
+	int retval = 0;
+	u32 modem_rt_index_lo;
+	u32 modem_rt_index_hi;
+	u32 lcl_addr_mem_part;
+	struct ipa_mem_buffer mem;
 
-        ipa_debug("Entry\n");
+	ipa_debug("Entry\n");
 
-        if ((ip >= IPA_IP_MAX) || (rlt >= IPA_RULE_TYPE_MAX)) {
-                ipa_err("Input Err: ip=%d ; rlt=%d\n", ip, rlt);
-                return -EINVAL;
-        }
+	if ((ip >= IPA_IP_MAX) || (rlt >= IPA_RULE_TYPE_MAX)) {
+		ipa_err("Input Err: ip=%d ; rlt=%d\n", ip, rlt);
+		return -EINVAL;
+	}
 
-        if (ip == IPA_IP_v4) {
-                modem_rt_index_lo = ipa3_mem(V4_MODEM_RT_INDEX_LO);
-                modem_rt_index_hi = ipa3_mem(V4_MODEM_RT_INDEX_HI);
-                if (rlt == IPA_RULE_HASHABLE)
-                        lcl_addr_mem_part = ipa3_mem(V4_RT_HASH_OFST);
-                else
-                        lcl_addr_mem_part = ipa3_mem(V4_RT_NHASH_OFST);
-        } else {
-                modem_rt_index_lo = ipa3_mem(V6_MODEM_RT_INDEX_LO);
-                modem_rt_index_hi = ipa3_mem(V6_MODEM_RT_INDEX_HI);
-                if (rlt == IPA_RULE_HASHABLE)
-                        lcl_addr_mem_part = ipa3_mem(V6_RT_HASH_OFST);
-                else
-                        lcl_addr_mem_part = ipa3_mem(V6_RT_NHASH_OFST);
-        }
+	if (ip == IPA_IP_v4) {
+		modem_rt_index_lo = ipa3_mem(V4_MODEM_RT_INDEX_LO);
+		modem_rt_index_hi = ipa3_mem(V4_MODEM_RT_INDEX_HI);
+		if (rlt == IPA_RULE_HASHABLE)
+			lcl_addr_mem_part = ipa3_mem(V4_RT_HASH_OFST);
+		else
+			lcl_addr_mem_part = ipa3_mem(V4_RT_NHASH_OFST);
+	} else {
+		modem_rt_index_lo = ipa3_mem(V6_MODEM_RT_INDEX_LO);
+		modem_rt_index_hi = ipa3_mem(V6_MODEM_RT_INDEX_HI);
+		if (rlt == IPA_RULE_HASHABLE)
+			lcl_addr_mem_part = ipa3_mem(V6_RT_HASH_OFST);
+		else
+			lcl_addr_mem_part = ipa3_mem(V6_RT_NHASH_OFST);
+	}
 
-        retval = ipahal_rt_generate_empty_img(
-                modem_rt_index_hi - modem_rt_index_lo + 1, &mem, GFP_ATOMIC);
-        if (retval) {
-                ipa_err("fail generate empty rt img\n");
-                return -ENOMEM;
-        }
+	retval = ipahal_rt_generate_empty_img(
+		modem_rt_index_hi - modem_rt_index_lo + 1, &mem, GFP_ATOMIC);
+	if (retval) {
+		ipa_err("fail generate empty rt img\n");
+		return -ENOMEM;
+	}
 
-        desc = kzalloc(sizeof(struct ipa3_desc), GFP_KERNEL);
-        if (!desc) {
-                ipa_err("failed to allocate memory\n");
-                goto free_empty_img;
-        }
+	desc = kzalloc(sizeof(struct ipa3_desc), GFP_KERNEL);
+	if (!desc) {
+		ipa_err("failed to allocate memory\n");
+		goto free_empty_img;
+	}
 
-        cmd.is_read = false;
-        cmd.skip_pipeline_clear = false;
-        cmd.pipeline_clear_options = IPAHAL_HPS_CLEAR;
-        cmd.size = mem.size;
-        cmd.system_addr =  mem.phys_base;
-        cmd.local_addr = ipa3_ctx->smem_restricted_bytes +
-                lcl_addr_mem_part +
-                modem_rt_index_lo * ipahal_get_hw_tbl_hdr_width();
-        cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_DMA_SHARED_MEM, &cmd);
-        if (!cmd_pyld) {
-                ipa_err("failed to construct dma_shared_mem imm cmd\n");
-                retval = -ENOMEM;
-                goto free_desc;
-        }
+	cmd.is_read = false;
+	cmd.skip_pipeline_clear = false;
+	cmd.pipeline_clear_options = IPAHAL_HPS_CLEAR;
+	cmd.size = mem.size;
+	cmd.system_addr =  mem.phys_base;
+	cmd.local_addr = ipa3_ctx->smem_restricted_bytes +
+		lcl_addr_mem_part +
+		modem_rt_index_lo * ipahal_get_hw_tbl_hdr_width();
+	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_DMA_SHARED_MEM, &cmd);
+	if (!cmd_pyld) {
+		ipa_err("failed to construct dma_shared_mem imm cmd\n");
+		retval = -ENOMEM;
+		goto free_desc;
+	}
 	ipa_desc_fill_imm_cmd(desc, cmd_pyld);
 
-        ipa_debug("Sending 1 descriptor for rt tbl clearing\n");
-        retval = ipa3_send_cmd(1, desc);
-        if (retval) {
-                ipa_err("failed to send immediate command (err %d)\n", retval);
-                retval = -EFAULT;
-        }
+	ipa_debug("Sending 1 descriptor for rt tbl clearing\n");
+	retval = ipa3_send_cmd(1, desc);
+	if (retval) {
+		ipa_err("failed to send immediate command (err %d)\n", retval);
+		retval = -EFAULT;
+	}
 
-        ipahal_destroy_imm_cmd(cmd_pyld);
+	ipahal_destroy_imm_cmd(cmd_pyld);
 free_desc:
-        kfree(desc);
+	kfree(desc);
 free_empty_img:
-        ipahal_free_empty_img(&mem);
-        return retval;
+	ipahal_free_empty_img(&mem);
+	return retval;
 }
 
 
 static int ipa3_q6_clean_q6_tables(void)
 {
-        struct ipa3_desc *desc;
-        struct ipahal_imm_cmd_pyld *cmd_pyld = NULL;
-        struct ipahal_imm_cmd_register_write reg_write_cmd = {0};
-        int retval;
-        struct ipahal_reg_fltrt_hash_flush flush;
-        struct ipahal_reg_valmask valmask;
+	struct ipa3_desc *desc;
+	struct ipahal_imm_cmd_pyld *cmd_pyld = NULL;
+	struct ipahal_imm_cmd_register_write reg_write_cmd = {0};
+	int retval;
+	struct ipahal_reg_fltrt_hash_flush flush;
+	struct ipahal_reg_valmask valmask;
 
-        ipa_debug("Entry\n");
+	ipa_debug("Entry\n");
 
 
-        if (ipa3_q6_clean_q6_flt_tbls(IPA_IP_v4, IPA_RULE_HASHABLE)) {
-                ipa_err("failed to clean q6 flt tbls (v4/hashable)\n");
-                return -EFAULT;
-        }
-        if (ipa3_q6_clean_q6_flt_tbls(IPA_IP_v6, IPA_RULE_HASHABLE)) {
-                ipa_err("failed to clean q6 flt tbls (v6/hashable)\n");
-                return -EFAULT;
-        }
-        if (ipa3_q6_clean_q6_flt_tbls(IPA_IP_v4, IPA_RULE_NON_HASHABLE)) {
-                ipa_err("failed to clean q6 flt tbls (v4/non-hashable)\n");
-                return -EFAULT;
-        }
-        if (ipa3_q6_clean_q6_flt_tbls(IPA_IP_v6, IPA_RULE_NON_HASHABLE)) {
-                ipa_err("failed to clean q6 flt tbls (v6/non-hashable)\n");
-                return -EFAULT;
-        }
+	if (ipa3_q6_clean_q6_flt_tbls(IPA_IP_v4, IPA_RULE_HASHABLE)) {
+		ipa_err("failed to clean q6 flt tbls (v4/hashable)\n");
+		return -EFAULT;
+	}
+	if (ipa3_q6_clean_q6_flt_tbls(IPA_IP_v6, IPA_RULE_HASHABLE)) {
+		ipa_err("failed to clean q6 flt tbls (v6/hashable)\n");
+		return -EFAULT;
+	}
+	if (ipa3_q6_clean_q6_flt_tbls(IPA_IP_v4, IPA_RULE_NON_HASHABLE)) {
+		ipa_err("failed to clean q6 flt tbls (v4/non-hashable)\n");
+		return -EFAULT;
+	}
+	if (ipa3_q6_clean_q6_flt_tbls(IPA_IP_v6, IPA_RULE_NON_HASHABLE)) {
+		ipa_err("failed to clean q6 flt tbls (v6/non-hashable)\n");
+		return -EFAULT;
+	}
 
-        if (ipa3_q6_clean_q6_rt_tbls(IPA_IP_v4, IPA_RULE_HASHABLE)) {
-                ipa_err("failed to clean q6 rt tbls (v4/hashable)\n");
-                return -EFAULT;
-        }
-        if (ipa3_q6_clean_q6_rt_tbls(IPA_IP_v6, IPA_RULE_HASHABLE)) {
-                ipa_err("failed to clean q6 rt tbls (v6/hashable)\n");
-                return -EFAULT;
-        }
-        if (ipa3_q6_clean_q6_rt_tbls(IPA_IP_v4, IPA_RULE_NON_HASHABLE)) {
-                ipa_err("failed to clean q6 rt tbls (v4/non-hashable)\n");
-                return -EFAULT;
-        }
-        if (ipa3_q6_clean_q6_rt_tbls(IPA_IP_v6, IPA_RULE_NON_HASHABLE)) {
-                ipa_err("failed to clean q6 rt tbls (v6/non-hashable)\n");
-                return -EFAULT;
-        }
+	if (ipa3_q6_clean_q6_rt_tbls(IPA_IP_v4, IPA_RULE_HASHABLE)) {
+		ipa_err("failed to clean q6 rt tbls (v4/hashable)\n");
+		return -EFAULT;
+	}
+	if (ipa3_q6_clean_q6_rt_tbls(IPA_IP_v6, IPA_RULE_HASHABLE)) {
+		ipa_err("failed to clean q6 rt tbls (v6/hashable)\n");
+		return -EFAULT;
+	}
+	if (ipa3_q6_clean_q6_rt_tbls(IPA_IP_v4, IPA_RULE_NON_HASHABLE)) {
+		ipa_err("failed to clean q6 rt tbls (v4/non-hashable)\n");
+		return -EFAULT;
+	}
+	if (ipa3_q6_clean_q6_rt_tbls(IPA_IP_v6, IPA_RULE_NON_HASHABLE)) {
+		ipa_err("failed to clean q6 rt tbls (v6/non-hashable)\n");
+		return -EFAULT;
+	}
 
-        /* Flush rules cache */
-        desc = kzalloc(sizeof(struct ipa3_desc), GFP_KERNEL);
-        if (!desc) {
-                ipa_err("failed to allocate memory\n");
-                return -ENOMEM;
-        }
+	/* Flush rules cache */
+	desc = kzalloc(sizeof(struct ipa3_desc), GFP_KERNEL);
+	if (!desc) {
+		ipa_err("failed to allocate memory\n");
+		return -ENOMEM;
+	}
 
-        flush.v4_flt = true;
-        flush.v4_rt = true;
-        flush.v6_flt = true;
-        flush.v6_rt = true;
-        ipahal_get_fltrt_hash_flush_valmask(&flush, &valmask);
-        reg_write_cmd.skip_pipeline_clear = false;
-        reg_write_cmd.pipeline_clear_options = IPAHAL_HPS_CLEAR;
-        reg_write_cmd.offset = ipahal_reg_offset(IPA_FILT_ROUT_HASH_FLUSH);
-        reg_write_cmd.value = valmask.val;
-        reg_write_cmd.value_mask = valmask.mask;
-        cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE,
+	flush.v4_flt = true;
+	flush.v4_rt = true;
+	flush.v6_flt = true;
+	flush.v6_rt = true;
+	ipahal_get_fltrt_hash_flush_valmask(&flush, &valmask);
+	reg_write_cmd.skip_pipeline_clear = false;
+	reg_write_cmd.pipeline_clear_options = IPAHAL_HPS_CLEAR;
+	reg_write_cmd.offset = ipahal_reg_offset(IPA_FILT_ROUT_HASH_FLUSH);
+	reg_write_cmd.value = valmask.val;
+	reg_write_cmd.value_mask = valmask.mask;
+	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE,
 						&reg_write_cmd);
-        if (!cmd_pyld) {
-                ipa_err("fail construct register_write imm cmd\n");
-                retval = -EFAULT;
-                goto bail_desc;
-        }
+	if (!cmd_pyld) {
+		ipa_err("fail construct register_write imm cmd\n");
+		retval = -EFAULT;
+		goto bail_desc;
+	}
 	ipa_desc_fill_imm_cmd(desc, cmd_pyld);
 
-        ipa_debug("Sending 1 descriptor for tbls flush\n");
-        retval = ipa3_send_cmd(1, desc);
-        if (retval) {
-                ipa_err("failed to send immediate command (err %d)\n", retval);
-                retval = -EFAULT;
-        }
+	ipa_debug("Sending 1 descriptor for tbls flush\n");
+	retval = ipa3_send_cmd(1, desc);
+	if (retval) {
+		ipa_err("failed to send immediate command (err %d)\n", retval);
+		retval = -EFAULT;
+	}
 
-        ipahal_destroy_imm_cmd(cmd_pyld);
+	ipahal_destroy_imm_cmd(cmd_pyld);
 
 bail_desc:
-        kfree(desc);
-        ipa_debug("Done - retval = %d\n", retval);
-        return retval;
+	kfree(desc);
+	ipa_debug("Done - retval = %d\n", retval);
+	return retval;
 }
 
 static const struct dev_pm_ops ipa_pm_ops = {

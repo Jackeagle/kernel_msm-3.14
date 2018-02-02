@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  */
 
@@ -32,7 +32,7 @@
  * uint8_t test_opaque[16];
 
  * If only 4 elements are added to test_opaque[] then test_opaque_len must be
- * set to 4 before sending the message.  When decoding, the _len value is set
+ * set to 4 before sending the message.	 When decoding, the _len value is set
  * by the decode routine and should be checked so that the correct number of
  * elements in the array will be accessed.
  */
@@ -83,7 +83,7 @@ struct ipa_qmi_response_type_v01 {
 
 enum ipa_platform_type_enum_v01 {
 	IPA_PLATFORM_TYPE_ENUM_MIN_ENUM_VAL_V01 =
-	-2147483647, /* To force a 32 bit signed enum.  Do not change or use */
+	-2147483647, /* To force a 32 bit signed enum.	Do not change or use */
 	QMI_IPA_PLATFORM_TYPE_INVALID_V01 = 0,
 	/*  Invalid platform identifier */
 	QMI_IPA_PLATFORM_TYPE_TN_V01 = 1,
@@ -596,7 +596,7 @@ struct ipa_filter_rule_type_v01 {
 
 	struct ipa_ipfltr_mask_eq_32_type_v01
 			metadata_meq32;
-	/* The metadata  32 bit masked comparison equation */
+	/* The metadata	 32 bit masked comparison equation */
 
 	uint8_t ipv4_frag_eq_present;
 	/* Specifies if the IPv4 Fragment equation is present in this rule */
@@ -1167,7 +1167,7 @@ struct ipa_config_req_msg_v01 {
 	 *	- QMI_IPA_PER_USB_FS (1) --  Full-speed USB connection
 	 *	- QMI_IPA_PER_USB_HS (2) --  High-speed USB connection
 	 *	- QMI_IPA_PER_USB_SS (3) --  Super-speed USB connection
-	 *  - QMI_IPA_PER_WLAN   (4) --  WLAN connection
+	 *  - QMI_IPA_PER_WLAN	 (4) --	 WLAN connection
 	 */
 
 	/* Optional */
@@ -1355,7 +1355,7 @@ struct ipa_stats_type_filter_rule_v01 {
  */
 struct ipa_get_data_stats_req_msg_v01 {
 	/* Mandatory */
-	/*  Stats Type  */
+	/*  Stats Type	*/
 	enum ipa_stats_type_enum_v01 ipa_stats_type;
 	/* Indicates the type of statistics to be retrieved. */
 
@@ -1379,7 +1379,7 @@ struct ipa_get_data_stats_resp_msg_v01 {
 	/* Standard response type. */
 
 	/* Optional */
-	/*  Stats Type  */
+	/*  Stats Type	*/
 	uint8_t ipa_stats_type_valid;
 	/* Must be set to true if ipa_stats_type is passed */
 	enum ipa_stats_type_enum_v01 ipa_stats_type;
@@ -1535,7 +1535,7 @@ struct ipa_data_usage_quota_reached_ind_msg_v01 {
  */
 struct ipa_stop_data_usage_quota_req_msg_v01 {
 	/* This element is a placeholder to prevent the declaration of
-     *  an empty struct.  DO NOT USE THIS FIELD UNDER ANY CIRCUMSTANCE
+     *	an empty struct.  DO NOT USE THIS FIELD UNDER ANY CIRCUMSTANCE
 	 */
 	char __placeholder;
 };  /* Message */

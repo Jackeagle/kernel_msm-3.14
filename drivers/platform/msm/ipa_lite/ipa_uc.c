@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  */
 
@@ -23,21 +23,21 @@
 #define IPA_UC_POLL_MAX_RETRY 10000
 
 /* How long to sleep (range) between microcontroller command retries */
-#define UC_CMD_RETRY_USLEEP_MIN	1000	/* 1 second */
-#define UC_CMD_RETRY_USLEEP_MAX	2000	/* 2 seconds */
+#define UC_CMD_RETRY_USLEEP_MIN 1000	/* 1 second */
+#define UC_CMD_RETRY_USLEEP_MAX 2000	/* 2 seconds */
 
 /**
  * enum ipa3_cpu_2_hw_commands - Values that represent the commands from the CPU
  * IPA_CPU_2_HW_CMD_ERR_FATAL : CPU instructs HW to perform error fatal
- *                              handling.
+ *				handling.
  * IPA_CPU_2_HW_CMD_CLK_GATE : CPU instructs HW to goto Clock Gated state.
  * IPA_CPU_2_HW_CMD_CLK_UNGATE : CPU instructs HW to goto Clock Ungated state.
  * IPA_CPU_2_HW_CMD_GSI_CH_EMPTY : Command to check for GSI channel emptiness.
  */
 enum ipa3_cpu_2_hw_commands {
-	IPA_CPU_2_HW_CMD_ERR_FATAL                 =
+	IPA_CPU_2_HW_CMD_ERR_FATAL		   =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 4),
-	IPA_CPU_2_HW_CMD_GSI_CH_EMPTY              =
+	IPA_CPU_2_HW_CMD_GSI_CH_EMPTY		   =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 10),
 };
 
@@ -138,14 +138,14 @@ static void ipa3_log_evt_hdlr(void)
 	if (offset == uc_ctx->uc_event_top_ofst)
 		return;
 
-	/* They differ.  If we set it before, reort that it changed. */
+	/* They differ.	 If we set it before, reort that it changed. */
 	if (uc_ctx->uc_event_top_ofst) {
 		ipa_err("uc top ofst changed new=%u cur=%u\n",
 			offset, uc_ctx->uc_event_top_ofst);
 		return;
 	}
 
-	/* First time.  Record the eventParams offset and map it. */
+	/* First time.	Record the eventParams offset and map it. */
 	uc_ctx->uc_event_top_ofst = offset;
 }
 
@@ -153,8 +153,8 @@ static void ipa3_log_evt_hdlr(void)
  * ipa3_uc_state_check() - Check the status of the uC interface
  *
  * Return value: 0 if the uC is loaded, interface is initialized
- *               and there was no recent failure in one of the commands.
- *               A negative value is returned otherwise.
+ *		 and there was no recent failure in one of the commands.
+ *		 A negative value is returned otherwise.
  */
 static int ipa3_uc_state_check(void)
 {
@@ -248,7 +248,7 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 
 	/*
 	 * An INIT_COMPLETED response message is sent to the AP by
-	 * the microcontroller when it is operational.  Other than
+	 * the microcontroller when it is operational.	Other than
 	 * this, the AP should only receive responses from the
 	 * microntroller when it has sent it a request message.
 	 */
@@ -375,16 +375,16 @@ static int try_send_uc_command(struct ipa3_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
  *	use the higher 32bit of the command parameter (set to zero).
  *
  * Note2: In case the operation times out (No response from the uC) or
- *       polling maximal amount of retries has reached, the logic
- *       considers it as an invalid state of the uC/IPA, and
- *       issues a kernel panic.
+ *	 polling maximal amount of retries has reached, the logic
+ *	 considers it as an invalid state of the uC/IPA, and
+ *	 issues a kernel panic.
  *
  * Returns: 0 on success.
- *          -EINVAL in case of invalid input.
- *          -EBADF in case uC interface is not initialized /
- *                 or the uC has failed previously.
- *          -EFAULT in case the received status doesn't match
- *                  the expected.
+ *	    -EINVAL in case of invalid input.
+ *	    -EBADF in case uC interface is not initialized /
+ *		   or the uC has failed previously.
+ *	    -EFAULT in case the received status doesn't match
+ *		    the expected.
  */
 static int ipa3_uc_send_cmd(u32 cmd, u32 opcode)
 {

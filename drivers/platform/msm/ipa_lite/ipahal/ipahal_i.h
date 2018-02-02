@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  */
 
@@ -534,18 +534,18 @@ struct ipa_pkt_status_hw {
  * struct ipa_hw_hdr_proc_ctx_tlv -
  * HW structure of IPA processing context header - TLV part
  * @type: 0 - end type
- *        1 - header addition type
- *        3 - processing command type
+ *	  1 - header addition type
+ *	  3 - processing command type
  * @length: number of bytes after tlv
- *        for type:
- *        0 - needs to be 0
- *        1 - header addition length
- *        3 - number of 32B including type and length.
+ *	  for type:
+ *	  0 - needs to be 0
+ *	  1 - header addition length
+ *	  3 - number of 32B including type and length.
  * @value: specific value for type
- *        for type:
- *        0 - needs to be 0
- *        1 - header length
- *        3 - command ID (see IPA_HDR_UCP_* definitions)
+ *	  for type:
+ *	  0 - needs to be 0
+ *	  1 - header length
+ *	  3 - command ID (see IPA_HDR_UCP_* definitions)
  */
 struct ipa_hw_hdr_proc_ctx_tlv {
 	u32 type:8;

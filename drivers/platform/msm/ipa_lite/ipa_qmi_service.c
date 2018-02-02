@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  *
  */
@@ -193,7 +193,7 @@ static int ipa3_handle_config_req(void *req_h, void *req)
 static int ipa3_install_filter_rule_req(void *req_h, void *req)
 {
 	struct msg_desc *desc = &ipa3_install_fltr_rule_resp_desc;
-        struct ipa_install_fltr_rule_resp_msg_v01 resp;
+	struct ipa_install_fltr_rule_resp_msg_v01 resp;
 	size_t size = sizeof(resp);
 	int rc;
 
@@ -343,7 +343,7 @@ static struct qmi_svc_ops_options ipa3_a5_svc_ops_options = {
 };
 
 /****************************************************/
-/*                 QMI A5 client ->Q6               */
+/*		   QMI A5 client ->Q6		    */
 /****************************************************/
 static void ipa3_q6_clnt_recv_msg(struct work_struct *work);
 static DECLARE_WORK(ipa3_work_recv_msg_client, ipa3_q6_clnt_recv_msg);

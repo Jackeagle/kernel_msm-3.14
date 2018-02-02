@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  *
  * RMNET Data config definition
@@ -24,15 +24,15 @@ struct rmnet_phys_ep_conf_s {
 
 struct rmnet_map_header_s {
 #ifndef RMNET_USE_BIG_ENDIAN_STRUCTS
-	uint8_t  pad_len:6;
-	uint8_t  reserved_bit:1;
-	uint8_t  cd_bit:1;
+	uint8_t	 pad_len:6;
+	uint8_t	 reserved_bit:1;
+	uint8_t	 cd_bit:1;
 #else
-	uint8_t  cd_bit:1;
-	uint8_t  reserved_bit:1;
-	uint8_t  pad_len:6;
+	uint8_t	 cd_bit:1;
+	uint8_t	 reserved_bit:1;
+	uint8_t	 pad_len:6;
 #endif /* RMNET_USE_BIG_ENDIAN_STRUCTS */
-	uint8_t  mux_id;
+	uint8_t	 mux_id;
 	uint16_t pkt_len;
 }  __aligned(1);
 

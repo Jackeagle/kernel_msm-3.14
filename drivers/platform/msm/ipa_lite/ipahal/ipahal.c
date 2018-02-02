@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  */
 
@@ -66,7 +66,7 @@ ipahal_imm_cmd_pyld_alloc_atomic(u16 opcode, size_t pyld_size)
 
 /*
  * Returns true if the value provided is too big to be represented
- * in the given number of bits.  In this case, WARN_ON() is called,
+ * in the given number of bits.	 In this case, WARN_ON() is called,
  * and a message is printed and using ipa_err().
  *
  * Returns false if the value is OK (not too big).
@@ -98,7 +98,7 @@ ipa_imm_cmd_construct_dma_task_32b_addr(u16 opcode, const void *params)
 		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
-	pyld->opcode += 1 << 8;	/* Currently supports only one packet */
+	pyld->opcode += 1 << 8; /* Currently supports only one packet */
 
 	data->cmplt = dma_params->cmplt ? 1 : 0;
 	data->eof = dma_params->eof ? 1 : 0;
@@ -610,7 +610,7 @@ struct ipahal_imm_cmd_obj {
  * calls are subject to these constraints:
  * - The command id supplied must be valid:
  *     - It must be a member of the ipahal_imm_cmd_name enumerated
- *       type less than IPA_IMM_CMD_MAX
+ *	 type less than IPA_IMM_CMD_MAX
  *     - It must be a command supported by the underlying hardware
  * - The parameter block must be a non-null pointer referring to
  *   parameter data that is formatted properly for the command.
@@ -637,8 +637,8 @@ static const struct ipahal_imm_cmd_obj
 		imm_cmd_obj(IP_V4_FILTER_INIT,	ip_v4_filter_init,	3),
 		imm_cmd_obj(IP_V6_FILTER_INIT,	ip_v6_filter_init,	4),
 		imm_cmd_obj(IP_V4_NAT_INIT,	ip_v4_nat_init,		5),
-		imm_cmd_obj(IP_V4_ROUTING_INIT,	ip_v4_routing_init,	7),
-		imm_cmd_obj(IP_V6_ROUTING_INIT,	ip_v6_routing_init,	8),
+		imm_cmd_obj(IP_V4_ROUTING_INIT, ip_v4_routing_init,	7),
+		imm_cmd_obj(IP_V6_ROUTING_INIT, ip_v6_routing_init,	8),
 		imm_cmd_obj(HDR_INIT_LOCAL,	hdr_init_local,		9),
 		imm_cmd_obj(HDR_INIT_SYSTEM,	hdr_init_system,	10),
 		imm_cmd_obj(REGISTER_WRITE,	register_write,		12),
@@ -646,7 +646,7 @@ static const struct ipahal_imm_cmd_obj
 		imm_cmd_obj(IP_PACKET_INIT,	ip_packet_init,		16),
 		imm_cmd_obj(DMA_TASK_32B_ADDR,	dma_task_32b_addr,	17),
 		imm_cmd_obj(DMA_SHARED_MEM,	dma_shared_mem,		19),
-		imm_cmd_obj(IP_PACKET_TAG_STATUS, ip_packet_tag_status,	20),
+		imm_cmd_obj(IP_PACKET_TAG_STATUS, ip_packet_tag_status, 20),
 	},
 
 	/* IPAv3.1 */
@@ -666,7 +666,7 @@ static const struct ipahal_imm_cmd_obj
 
 	/* IPAv4 */
 	[IPA_HW_v4_0] = {
-		imm_cmd_obj(REGISTER_WRITE, 	register_write_v_4_0,	12),
+		imm_cmd_obj(REGISTER_WRITE,	register_write_v_4_0,	12),
 		/* NAT_DMA was renamed to TABLE_DMA for IPAv4 */
 		imm_cmd_obj_inval(NAT_DMA),
 		imm_cmd_obj(TABLE_DMA,		table_dma_ipav4,	14),
@@ -975,7 +975,7 @@ void ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base)
 }
 
 /*
- * Assign the IPA HAL's device pointer.  Once it's assigned we can
+ * Assign the IPA HAL's device pointer.	 Once it's assigned we can
  * initialize the empty table entry.
  */
 int ipahal_dev_init(struct device *dev)

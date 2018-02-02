@@ -23,7 +23,7 @@
 #include "ipa_common_i.h"
 #include "ipahal/ipahal.h"
 
-#define GSI_CHAN_MAX      31
+#define GSI_CHAN_MAX	  31
 #define GSI_EVT_RING_MAX  23
 #define GSI_NO_EVT_ERINDEX 31
 
@@ -46,11 +46,11 @@
  * @ee: Execution environment
  */
 struct ipa_gsi_ep_config {
-        int ipa_ep_num;
-        int ipa_gsi_chan_num;
-        int ipa_if_tlv;
-        int ipa_if_aos;
-        int ee;
+	int ipa_ep_num;
+	int ipa_gsi_chan_num;
+	int ipa_if_tlv;
+	int ipa_if_aos;
+	int ee;
 };
 
 
@@ -60,8 +60,8 @@ struct ipa_gsi_ep_config {
  * event scratch
  */
 struct __packed gsi_mhi_evt_scratch {
-        uint32_t resvd1;
-        uint32_t resvd2;
+	uint32_t resvd1;
+	uint32_t resvd2;
 };
 
 /**
@@ -70,9 +70,9 @@ struct __packed gsi_mhi_evt_scratch {
  *
  */
 struct __packed gsi_xdci_evt_scratch {
-        uint32_t gevntcount_low_addr;
-        uint32_t gevntcount_hi_addr:8;
-        uint32_t resvd1:24;
+	uint32_t gevntcount_low_addr;
+	uint32_t gevntcount_hi_addr:8;
+	uint32_t resvd1:24;
 };
 
 /**
@@ -80,30 +80,30 @@ struct __packed gsi_xdci_evt_scratch {
  *
  */
 union __packed gsi_evt_scratch {
-        struct __packed gsi_mhi_evt_scratch mhi;
-        struct __packed gsi_xdci_evt_scratch xdci;
-        struct __packed {
-                uint32_t word1;
-                uint32_t word2;
-        } data;
+	struct __packed gsi_mhi_evt_scratch mhi;
+	struct __packed gsi_xdci_evt_scratch xdci;
+	struct __packed {
+		uint32_t word1;
+		uint32_t word2;
+	} data;
 };
 
 /**
  * gsi_device_scratch - EE scratch config parameters
  *
  * @mhi_base_chan_idx_valid: is mhi_base_chan_idx valid?
- * @mhi_base_chan_idx:       base index of IPA MHI channel indexes.
- *                           IPA MHI channel index = GSI channel ID +
- *                           MHI base channel index
+ * @mhi_base_chan_idx:	     base index of IPA MHI channel indexes.
+ *			     IPA MHI channel index = GSI channel ID +
+ *			     MHI base channel index
  * @max_usb_pkt_size_valid:  is max_usb_pkt_size valid?
- * @max_usb_pkt_size:        max USB packet size in bytes (valid values are
- *                           512 and 1024)
+ * @max_usb_pkt_size:	     max USB packet size in bytes (valid values are
+ *			     512 and 1024)
  */
 struct gsi_device_scratch {
-        bool mhi_base_chan_idx_valid;
-        uint8_t mhi_base_chan_idx;
-        bool max_usb_pkt_size_valid;
-        uint16_t max_usb_pkt_size;
+	bool mhi_base_chan_idx_valid;
+	uint8_t mhi_base_chan_idx;
+	bool max_usb_pkt_size_valid;
+	uint16_t max_usb_pkt_size;
 };
 
 enum gsi_chan_mode {
@@ -198,11 +198,11 @@ enum gsi_chan_evt {
  *
  * @chan_user_data: cookie supplied in gsi_alloc_channel
  * @xfer_user_data: cookie of the gsi_xfer_elem that caused the
- *                  event to be generated
- * @evt_id:         type of event triggered by the associated TRE
- *                  (corresponding to xfer_user_data)
+ *		    event to be generated
+ * @evt_id:	    type of event triggered by the associated TRE
+ *		    (corresponding to xfer_user_data)
  * @bytes_xfered:   number of bytes transferred by the associated TRE
- *                  (corresponding to xfer_user_data)
+ *		    (corresponding to xfer_user_data)
  *
  */
 struct gsi_chan_xfer_notify {
@@ -225,7 +225,7 @@ enum gsi_chan_err {
  * gsi_chan_err_notify - Channel general callback info
  *
  * @chan_user_data: cookie supplied in gsi_alloc_channel
- * @evt_id:         type of error
+ * @evt_id:	    type of error
  * @err_desc:  more info about the error
  *
  */
@@ -249,55 +249,55 @@ enum gsi_chan_use_db_eng {
 /**
  * gsi_chan_props - Channel related properties
  *
- * @dir:             channel direction
- * @ch_id:           virtual channel ID
+ * @dir:	     channel direction
+ * @ch_id:	     virtual channel ID
  * @evt_ring_hdl:    handle of associated event ring. set to ~0 if no
- *                   event ring associated
- * @re_size:         size of channel ring element
- * @ring_len:        length of ring in bytes (must be integral multiple of
- *                   re_size)
+ *		     event ring associated
+ * @re_size:	     size of channel ring element
+ * @ring_len:	     length of ring in bytes (must be integral multiple of
+ *		     re_size)
  * @max_re_expected: maximal number of ring elements expected to be queued.
- *                   used for data path statistics gathering. if 0 provided
- *                   ring_len / re_size will be used.
+ *		     used for data path statistics gathering. if 0 provided
+ *		     ring_len / re_size will be used.
  * @ring_base_addr:  physical base address of ring. Address must be aligned to
- *                   ring_len rounded to power of two
+ *		     ring_len rounded to power of two
  * @ring_base_vaddr: virtual base address of ring (set to NULL when not
- *                   applicable)
- * @use_db_eng:      0 => direct mode (doorbells are written directly to RE
- *                   engine)
- *                   1 => DB mode (doorbells are written to DB engine)
+ *		     applicable)
+ * @use_db_eng:	     0 => direct mode (doorbells are written directly to RE
+ *		     engine)
+ *		     1 => DB mode (doorbells are written to DB engine)
  * @max_prefetch:    limit number of pre-fetch segments for channel
- * @low_weight:      low channel weight (priority of channel for RE engine
- *                   round robin algorithm); must be >= 1
- * @xfer_cb:         transfer notification callback (or NULL if not needed)
- * 		     this callback happens on event boundaries
+ * @low_weight:	     low channel weight (priority of channel for RE engine
+ *		     round robin algorithm); must be >= 1
+ * @xfer_cb:	     transfer notification callback (or NULL if not needed)
+ *		     this callback happens on event boundaries
  *
- *                   e.g. 1
+ *		     e.g. 1
  *
- *                   out TD with 3 REs
+ *		     out TD with 3 REs
  *
- *                   RE1: EOT=0, EOB=0, CHAIN=1;
- *                   RE2: EOT=0, EOB=0, CHAIN=1;
- *                   RE3: EOT=1, EOB=0, CHAIN=0;
+ *		     RE1: EOT=0, EOB=0, CHAIN=1;
+ *		     RE2: EOT=0, EOB=0, CHAIN=1;
+ *		     RE3: EOT=1, EOB=0, CHAIN=0;
  *
- *                   the callback will be triggered for RE3 using the
- *                   xfer_user_data of that RE
+ *		     the callback will be triggered for RE3 using the
+ *		     xfer_user_data of that RE
  *
- *                   e.g. 2
+ *		     e.g. 2
  *
- *                   in REs
+ *		     in REs
  *
- *                   RE1: EOT=1, EOB=0, CHAIN=0;
- *                   RE2: EOT=1, EOB=0, CHAIN=0;
- *                   RE3: EOT=1, EOB=0, CHAIN=0;
+ *		     RE1: EOT=1, EOB=0, CHAIN=0;
+ *		     RE2: EOT=1, EOB=0, CHAIN=0;
+ *		     RE3: EOT=1, EOB=0, CHAIN=0;
  *
- *	             received packet consumes all of RE1, RE2 and part of RE3
- *	             for EOT condition. there will be three callbacks in below
- *	             order
+ *		     received packet consumes all of RE1, RE2 and part of RE3
+ *		     for EOT condition. there will be three callbacks in below
+ *		     order
  *
- *	             callback for RE1 using GSI_CHAN_EVT_OVERFLOW
- *	             callback for RE2 using GSI_CHAN_EVT_OVERFLOW
- *	             callback for RE3 using GSI_CHAN_EVT_EOT
+ *		     callback for RE1 using GSI_CHAN_EVT_OVERFLOW
+ *		     callback for RE2 using GSI_CHAN_EVT_OVERFLOW
+ *		     callback for RE3 using GSI_CHAN_EVT_EOT
  *
  * @chan_user_data:  cookie used for notifications
  *
@@ -326,15 +326,15 @@ enum gsi_xfer_elem_type {
 /**
  * gsi_xfer_elem - Metadata about a single transfer
  *
- * @addr:           physical address of buffer
- * @len:            size of buffer for GSI_XFER_ELEM_DATA:
+ * @addr:	    physical address of buffer
+ * @len:	    size of buffer for GSI_XFER_ELEM_DATA:
  *		    for outbound transfers this is the number of bytes to
  *		    transfer.
  *		    for inbound transfers, this is the maximum number of
  *		    bytes the host expects from device in this transfer
  *
- *                  immediate command opcode for GSI_XFER_ELEM_IMME_CMD
- * @flags:          transfer flags, OR of all the applicable flags
+ *		    immediate command opcode for GSI_XFER_ELEM_IMME_CMD
+ * @flags:	    transfer flags, OR of all the applicable flags
  *
  *		    GSI_XFER_FLAG_BEI: Block event interrupt
  *		    1: Event generated by this ring element must not assert
@@ -359,7 +359,7 @@ enum gsi_xfer_elem_type {
  *		    GSI_XFER_FLAG_CHAIN: Chain bit that identifies the ring
  *		    elements in a TD
  *
- * @type:           transfer type
+ * @type:	    transfer type
  *
  *		    GSI_XFER_ELEM_DATA: for all data transfers
  *		    GSI_XFER_ELEM_IMME_CMD: for IPA immediate commands
@@ -427,26 +427,26 @@ struct gsi_chan_stats {
  * channel scratch
  *
  * @max_outstanding_tre: Used for the prefetch management sequence by the
- *                       sequencer. Defines the maximum number of allowed
- *                       outstanding TREs in IPA/GSI (in Bytes). RE engine
- *                       prefetch will be limited by this configuration. It
- *                       is suggested to configure this value to IPA_IF
- *                       channel TLV queue size times element size. To disable
- *                       the feature in doorbell mode (DB Mode=1). Maximum
- *                       outstanding TREs should be set to 64KB
- *                       (or any value larger or equal to ring length . RLEN)
+ *			 sequencer. Defines the maximum number of allowed
+ *			 outstanding TREs in IPA/GSI (in Bytes). RE engine
+ *			 prefetch will be limited by this configuration. It
+ *			 is suggested to configure this value to IPA_IF
+ *			 channel TLV queue size times element size. To disable
+ *			 the feature in doorbell mode (DB Mode=1). Maximum
+ *			 outstanding TREs should be set to 64KB
+ *			 (or any value larger or equal to ring length . RLEN)
  * @outstanding_threshold: Used for the prefetch management sequence by the
- *                       sequencer. Defines the threshold (in Bytes) as to when
- *                       to update the channel doorbell. Should be smaller than
- *                       Maximum outstanding TREs. value. It is suggested to
- *                       configure this value to 2 * element size.
+ *			 sequencer. Defines the threshold (in Bytes) as to when
+ *			 to update the channel doorbell. Should be smaller than
+ *			 Maximum outstanding TREs. value. It is suggested to
+ *			 configure this value to 2 * element size.
  */
 struct __packed gsi_gpi_channel_scratch {
-        uint64_t resvd1;
-        uint32_t resvd2:16;
-        uint32_t max_outstanding_tre:16;
-        uint32_t resvd3:16;
-        uint32_t outstanding_threshold:16;
+	uint64_t resvd1;
+	uint32_t resvd2:16;
+	uint32_t max_outstanding_tre:16;
+	uint32_t resvd3:16;
+	uint32_t outstanding_threshold:16;
 };
 
 
@@ -455,13 +455,13 @@ struct __packed gsi_gpi_channel_scratch {
  *
  */
 union __packed gsi_channel_scratch {
-        struct __packed gsi_gpi_channel_scratch gpi;
-        struct __packed {
-                uint32_t word1;
-                uint32_t word2;
-                uint32_t word3;
-                uint32_t word4;
-        } data;
+	struct __packed gsi_gpi_channel_scratch gpi;
+	struct __packed {
+		uint32_t word1;
+		uint32_t word2;
+		uint32_t word3;
+		uint32_t word4;
+	} data;
 };
 
 struct gsi_chan_ctx {
@@ -665,7 +665,7 @@ static inline void gsi_writel(u32 v, u32 offset)
  * gsi_register_device - Peripheral should call this function to
  * register itself with GSI before invoking any other APIs
  *
- * @ee:  AP execution environment (EE) number to use
+ * @ee:	 AP execution environment (EE) number to use
  *
  * @Return 0 if successful or a negative error code otherwise.
  */
@@ -707,7 +707,7 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl);
  * reset an event ring to recover from error state
  *
  * @evt_ring_hdl:  Client handle previously obtained from
- *             gsi_alloc_evt_ring
+ *	       gsi_alloc_evt_ring
  *
  * This function can sleep
  *
@@ -732,7 +732,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props);
  * write to the scratch area of the channel context
  *
  * @chan_hdl:  Client handle previously obtained from
- *             gsi_alloc_channel
+ *	       gsi_alloc_channel
  * @val:       Value to write
  *
  * @Return gsi_status
@@ -745,7 +745,7 @@ int gsi_write_channel_scratch(unsigned long chan_hdl,
  * start a channel i.e put into running state
  *
  * @chan_hdl:  Client handle previously obtained from
- *             gsi_alloc_channel
+ *	       gsi_alloc_channel
  *
  * This function can sleep
  *
@@ -758,7 +758,7 @@ int gsi_start_channel(unsigned long chan_hdl);
  * stop a channel. Stop will happen on a packet boundary
  *
  * @chan_hdl:  Client handle previously obtained from
- *             gsi_alloc_channel
+ *	       gsi_alloc_channel
  *
  * This function can sleep
  *
@@ -772,7 +772,7 @@ int gsi_stop_channel(unsigned long chan_hdl);
  * reset a channel to recover from error state
  *
  * @chan_hdl:  Client handle previously obtained from
- *             gsi_alloc_channel
+ *	       gsi_alloc_channel
  *
  * This function can sleep
  *
@@ -785,7 +785,7 @@ int gsi_reset_channel(unsigned long chan_hdl);
  * de-allocate a channel
  *
  * @chan_hdl:  Client handle previously obtained from
- *             gsi_alloc_channel
+ *	       gsi_alloc_channel
  *
  * This function can sleep
  *
@@ -810,7 +810,7 @@ bool gsi_is_channel_empty(unsigned long chan_hdl);
  * of the specified channel
  *
  * @chan_hdl:  Client handle previously obtained from
- *             gsi_alloc_channel
+ *	       gsi_alloc_channel
  * @props:     where to copy properties to
  * @scr:       where to copy scratch info to
  *
@@ -827,7 +827,7 @@ int gsi_get_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
  * gsi_alloc_channel
  *
  * @chan_hdl:  Client handle previously obtained from
- *             gsi_alloc_channel
+ *	       gsi_alloc_channel
  * @props:     the properties to apply
  * @scr:       the scratch info to apply
  *
@@ -841,7 +841,7 @@ int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
  * completed transfer descriptors.
  *
  * @chan_hdl:  Client handle previously obtained from
- *             gsi_alloc_channel
+ *	       gsi_alloc_channel
  * @notify:    Information about the completed transfer if any
  *
  * @Return gsi_status (GSI_STATUS_POLL_EMPTY is returned if no transfers
@@ -855,7 +855,7 @@ int gsi_poll_channel(unsigned long chan_hdl,
  * to configure the channel mode.
  *
  * @chan_hdl:  Client handle previously obtained from
- *             gsi_alloc_channel
+ *	       gsi_alloc_channel
  * @mode:      Mode to move the channel into
  *
  * @Return gsi_status
@@ -867,11 +867,11 @@ int gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode);
  * to queue transfers on the given channel
  *
  * @chan_hdl:  Client handle previously obtained from
- *             gsi_alloc_channel
+ *	       gsi_alloc_channel
  * @num_xfers: Number of transfer in the array @ xfer
  * @xfer:      Array of num_xfers transfer descriptors
  * @ring_db:   If true, tell HW about these queued xfers
- *             If false, do not notify HW at this time
+ *	       If false, do not notify HW at this time
  *
  * @Return gsi_status
  */
@@ -883,7 +883,7 @@ int gsi_queue_xfer(unsigned long chan_hdl, uint16_t num_xfers,
  * inform HW about queued xfers
  *
  * @chan_hdl:  Client handle previously obtained from
- *             gsi_alloc_channel
+ *	       gsi_alloc_channel
  *
  * @Return gsi_status
  */

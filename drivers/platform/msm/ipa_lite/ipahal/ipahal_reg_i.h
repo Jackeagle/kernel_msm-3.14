@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  */
 
@@ -210,7 +210,7 @@ void ipahal_reg_init(void);
 /* IPA_TX_CFG register v4.0 */
 #define PREFETCH_ALMOST_EMPTY_SIZE_TX1_BMSK_V4_0 0x0001e000
 #define PA_MASK_EN_BMSK_V4_0			0x00001000
-#define DMAW_SCND_OUTSD_PRED_EN_BMSK_V4_0 	0x00000800
+#define DMAW_SCND_OUTSD_PRED_EN_BMSK_V4_0	0x00000800
 #define DMAW_MAX_BEATS_256_DIS_BMSK_V4_0	0x00000400
 #define DMAW_SCND_OUTSD_PRED_THRESHOLD_BMSK_V4_0 0x000003c0
 #define PREFETCH_ALMOST_EMPTY_SIZE_TX0_BMSK_V4_0 0x0000003c

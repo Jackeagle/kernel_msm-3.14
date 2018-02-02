@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  */
 
@@ -116,12 +116,12 @@
  * @dma_addr: DMA address of this Rx packet
  */
 struct ipa_tx_suspend_irq_data {
-        u32 endpoints;
+	u32 endpoints;
 };
 
 
 typedef void (*ipa_notify_cb)(void *priv, enum ipa_dp_evt_type evt,
-                       unsigned long data);
+		       unsigned long data);
 
 /**
  * typedef ipa_irq_handler_t - irq handler/callback type
@@ -135,40 +135,40 @@ typedef void (*ipa_notify_cb)(void *priv, enum ipa_dp_evt_type evt,
  * No return value
  */
 typedef void (*ipa_irq_handler_t)(enum ipa_irq_type interrupt,
-                                void *private_data,
-                                void *interrupt_data);
+				void *private_data,
+				void *interrupt_data);
 
 /**
  * struct ipa_sys_connect_params - information needed to setup an IPA end-point
  * in system-BAM mode
  * @ipa_ep_cfg: IPA EP configuration
- * @client:     the type of client who "owns" the EP
+ * @client:	the type of client who "owns" the EP
  * @desc_fifo_sz: size of desc FIFO. This number is used to allocate the desc
- *              fifo for BAM. For GSI, this size is used by IPA driver as a
- *              baseline to calculate the GSI ring size in the following way:
- *              For PROD pipes, GSI ring is 4 * desc_fifo_sz.
-                For PROD pipes, GSI ring is 2 * desc_fifo_sz.
- * @priv:       callback cookie
- * @notify:     callback
- *              priv - callback cookie
- *              evt - type of event
- *              data - data relevant to event.  May not be valid. See event_type
- *              enum for valid cases.
+ *		fifo for BAM. For GSI, this size is used by IPA driver as a
+ *		baseline to calculate the GSI ring size in the following way:
+ *		For PROD pipes, GSI ring is 4 * desc_fifo_sz.
+		For PROD pipes, GSI ring is 2 * desc_fifo_sz.
+ * @priv:	callback cookie
+ * @notify:	callback
+ *		priv - callback cookie
+ *		evt - type of event
+ *		data - data relevant to event.	May not be valid. See event_type
+ *		enum for valid cases.
  * @skip_ep_cfg: boolean field that determines if EP should be configured
  *  by IPA driver
  * @keep_ipa_awake: when true, IPA will not be clock gated
  * @napi_enabled: when true, IPA call client callback to start polling
  */
 struct ipa_sys_connect_params {
-        struct ipa_ep_cfg ipa_ep_cfg;
-        enum ipa_client_type client;
-        u32 desc_fifo_sz;
-        void *priv;
-        ipa_notify_cb notify;
-        bool skip_ep_cfg;
-        bool keep_ipa_awake;
-        bool napi_enabled;
-        bool recycle_enabled;
+	struct ipa_ep_cfg ipa_ep_cfg;
+	enum ipa_client_type client;
+	u32 desc_fifo_sz;
+	void *priv;
+	ipa_notify_cb notify;
+	bool skip_ep_cfg;
+	bool keep_ipa_awake;
+	bool napi_enabled;
+	bool recycle_enabled;
 };
 
 /**
@@ -177,11 +177,11 @@ struct ipa_sys_connect_params {
  * @dma_address_valid: is above field valid?
  */
 struct ipa_tx_meta {
-        u8 pkt_init_dst_ep;
-        bool pkt_init_dst_ep_valid;
-        bool pkt_init_dst_ep_remote;
-        dma_addr_t dma_address;
-        bool dma_address_valid;
+	u8 pkt_init_dst_ep;
+	bool pkt_init_dst_ep_valid;
+	bool pkt_init_dst_ep_remote;
+	dma_addr_t dma_address;
+	bool dma_address_valid;
 };
 
 struct ipa3_active_client_htable_entry {
@@ -230,9 +230,9 @@ struct ipa3_status_stats {
  * @dst_pipe_index: destination pipe index
  * @rt_tbl_idx: routing table index
  * @priv: user provided information which will forwarded once the user is
- *        notified for new data avail
+ *	  notified for new data avail
  * @client_notify: user provided CB for EP events notification, the event is
- *                 data revived.
+ *		   data revived.
  * @skip_ep_cfg: boolean field that determines if EP should be configured
  *  by IPA driver
  * @keep_ipa_awake: when true, IPA will not be clock gated
@@ -290,8 +290,8 @@ enum ipa3_sys_pipe_policy {
  *
  */
 enum ipa3_hw_features {
-        IPA_HW_FEATURE_COMMON           =       0x0,
-        IPA_HW_FEATURE_MAX              =       IPA_HW_NUM_FEATURES
+	IPA_HW_FEATURE_COMMON		=	0x0,
+	IPA_HW_FEATURE_MAX		=	IPA_HW_NUM_FEATURES
 };
 
 /**
@@ -302,12 +302,12 @@ enum ipa3_hw_features {
  * @IPA_HW_2_CPU_EVENT_LOG_INFO : Event providing logging specific information
  */
 enum ipa_hw_2_cpu_events {
-        IPA_HW_2_CPU_EVENT_NO_OP     =
-                FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 0),
-        IPA_HW_2_CPU_EVENT_ERROR     =
-                FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 1),
-        IPA_HW_2_CPU_EVENT_LOG_INFO  =
-                FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 2),
+	IPA_HW_2_CPU_EVENT_NO_OP     =
+		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 0),
+	IPA_HW_2_CPU_EVENT_ERROR     =
+		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 1),
+	IPA_HW_2_CPU_EVENT_LOG_INFO  =
+		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 2),
 };
 
 /**
@@ -321,24 +321,24 @@ enum ipa_hw_2_cpu_events {
  * @IPA_HW_GSI_CH_NOT_EMPTY_FAILURE : GSI channel emptiness validation failed
  */
 enum ipa_hw_errors {
-        IPA_HW_ERROR_NONE              =
-                FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 0),
-        IPA_HW_INVALID_DOORBELL_ERROR  =
-                FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 1),
-        IPA_HW_DMA_ERROR               =
-                FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 2),
-        IPA_HW_FATAL_SYSTEM_ERROR      =
-                FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 3),
-        IPA_HW_INVALID_OPCODE          =
-                FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 4),
-        IPA_HW_INVALID_PARAMS        =
-                FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 5),
-        IPA_HW_CONS_DISABLE_CMD_GSI_STOP_FAILURE =
-                FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 6),
-        IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE =
-                FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 7),
-        IPA_HW_GSI_CH_NOT_EMPTY_FAILURE =
-                FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 8)
+	IPA_HW_ERROR_NONE	       =
+		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 0),
+	IPA_HW_INVALID_DOORBELL_ERROR  =
+		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 1),
+	IPA_HW_DMA_ERROR	       =
+		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 2),
+	IPA_HW_FATAL_SYSTEM_ERROR      =
+		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 3),
+	IPA_HW_INVALID_OPCODE	       =
+		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 4),
+	IPA_HW_INVALID_PARAMS	     =
+		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 5),
+	IPA_HW_CONS_DISABLE_CMD_GSI_STOP_FAILURE =
+		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 6),
+	IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE =
+		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 7),
+	IPA_HW_GSI_CH_NOT_EMPTY_FAILURE =
+		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 8)
 };
 
 
@@ -492,8 +492,8 @@ ipa_desc_fill_imm_cmd(struct ipa3_desc *desc, struct ipahal_imm_cmd_pyld *pyld)
  * @dma_addr: DMA address of this Rx packet
  */
 struct ipa_rx_data {
-        struct sk_buff *skb;
-        dma_addr_t dma_addr;
+	struct sk_buff *skb;
+	dma_addr_t dma_addr;
 };
 
 /**
@@ -554,129 +554,129 @@ struct ipa3_tag_completion {
  *
  * IPA SRAM memory layout:
  * +-------------------------+
- * |    UC MEM               |
+ * |	UC MEM		     |
  * +-------------------------+
- * |    UC INFO              |
+ * |	UC INFO		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
  * | V4 FLT HDR HASHABLE     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
  * | V4 FLT HDR NON-HASHABLE |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
  * | V6 FLT HDR HASHABLE     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
  * | V6 FLT HDR NON-HASHABLE |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * | V4 RT HDR HASHABLE      |
+ * | V4 RT HDR HASHABLE	     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
  * | V4 RT HDR NON-HASHABLE  |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * | V6 RT HDR HASHABLE      |
+ * | V6 RT HDR HASHABLE	     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
  * | V6 RT HDR NON-HASHABLE  |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |  MODEM HDR              |
+ * |  MODEM HDR		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * | MODEM PROC CTX          |
+ * | MODEM PROC CTX	     |
  * +-------------------------+
- * | APPS PROC CTX           |
+ * | APPS PROC CTX	     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * | PDN CONFIG              |
+ * | PDN CONFIG		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * | QUOTA STATS             |
+ * | QUOTA STATS	     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * | TETH STATS              |
+ * | TETH STATS		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * | V4 FLT STATS            |
+ * | V4 FLT STATS	     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * | V6 FLT STATS            |
+ * | V6 FLT STATS	     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * | V4 RT STATS             |
+ * | V4 RT STATS	     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * | V6 RT STATS             |
+ * | V6 RT STATS	     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * | DROP STATS              |
+ * | DROP STATS		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |  MODEM MEM              |
+ * |  MODEM MEM		     |
  * +-------------------------+
- * |    CANARY               |
+ * |	CANARY		     |
  * +-------------------------+
- * |  UC EVENT RING          | From IPA 3.5
+ * |  UC EVENT RING	     | From IPA 3.5
  * +-------------------------+
  */
 enum ipa3_mem_partition {
@@ -789,8 +789,8 @@ struct ipa3_controller {
 	int (*ipa_init_flt6)(void);
 	int (*ipa3_read_ep_reg)(char *buff, int max_len, int pipe);
 	int (*ipa3_commit_flt)(enum ipa_ip_type ip);
-        int (*ipa3_commit_rt)(enum ipa_ip_type ip);
-        int (*ipa3_commit_hdr)(void);
+	int (*ipa3_commit_rt)(enum ipa_ip_type ip);
+	int (*ipa3_commit_hdr)(void);
 	void (*ipa3_enable_clks)(void);
 	void (*ipa3_disable_clks)(void);
 	struct msm_bus_scale_pdata *msm_bus_data_ptr;
@@ -803,11 +803,11 @@ struct ipa3_controller {
  * @reserved : Reserved
  */
 union IpaHwErrorEventData_t {
-        struct IpaHwErrorEventParams_t {
-                u32 errorType:8;
-                u32 reserved:24;
-        } __packed params;
-        u32 raw32b;
+	struct IpaHwErrorEventParams_t {
+		u32 errorType:8;
+		u32 reserved:24;
+	} __packed params;
+	u32 raw32b;
 } __packed;
 
 /**
@@ -825,37 +825,37 @@ union IpaHwErrorEventData_t {
  * memory
  * @eventOp : HW->CPU event opcode. See IPA_HW_2_CPU_EVENTS
  * @eventParams : HW->CPU event parameter. The parameter filed can hold 32
- *              bits of parameters (immediate parameters) and point on
- *              structure in system memory
+ *		bits of parameters (immediate parameters) and point on
+ *		structure in system memory
  * @firstErrorAddress : Contains the address of first error-source on SNOC
  * @hwState : State of HW. The state carries information regarding the
- *                              error type.
+ *				error type.
  * @warningCounter : The warnings counter. The counter carries information
- *                                              regarding non fatal errors in HW
+ *						regarding non fatal errors in HW
  * @interfaceVersionCommon : The Common interface version as reported by HW
  *
  * The shared memory is used for communication between IPA HW and CPU.
  */
 struct IpaHwSharedMemCommonMapping_t {
-        u8  cmdOp;
-        u8  reserved_01;
-        u16 reserved_03_02;
-        u32 cmdParams;
-        u32 cmdParams_hi;
-        u8  responseOp;
-        u8  reserved_0D;
-        u16 reserved_0F_0E;
-        u32 responseParams;
-        u8  eventOp;
-        u8  reserved_15;
-        u16 reserved_17_16;
-        u32 eventParams;
-        u32 firstErrorAddress;
-        u8  hwState;
-        u8  warningCounter;
-        u16 reserved_23_22;
-        u16 interfaceVersionCommon;
-        u16 reserved_27_26;
+	u8  cmdOp;
+	u8  reserved_01;
+	u16 reserved_03_02;
+	u32 cmdParams;
+	u32 cmdParams_hi;
+	u8  responseOp;
+	u8  reserved_0D;
+	u16 reserved_0F_0E;
+	u32 responseParams;
+	u8  eventOp;
+	u8  reserved_15;
+	u16 reserved_17_16;
+	u32 eventParams;
+	u32 firstErrorAddress;
+	u8  hwState;
+	u8  warningCounter;
+	u16 reserved_23_22;
+	u16 interfaceVersionCommon;
+	u16 reserved_27_26;
 } __packed;
 
 /**

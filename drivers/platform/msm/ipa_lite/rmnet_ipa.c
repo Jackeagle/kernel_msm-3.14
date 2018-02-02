@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  */
 
@@ -43,8 +43,8 @@
 #define WWAN_DATA_LEN 2000
 #define IPA_RM_INACTIVITY_TIMER 100 /* IPA_RM */
 #define HEADROOM_FOR_QMAP   8 /* for mux header */
-#define TAILROOM            0 /* for padding by mux layer */
-#define MAX_NUM_OF_MUX_CHANNEL  10 /* max mux channels */
+#define TAILROOM	    0 /* for padding by mux layer */
+#define MAX_NUM_OF_MUX_CHANNEL	10 /* max mux channels */
 #define UL_FILTER_RULE_HANDLE_START 69
 #define DEFAULT_OUTSTANDING_HIGH 128
 #define DEFAULT_OUTSTANDING_HIGH_CTL (DEFAULT_OUTSTANDING_HIGH+32)
@@ -579,7 +579,7 @@ static int ipa3_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	/*  Set Ethernet protocol  */
 	case RMNET_IOCTL_SET_LLP_ETHERNET:
 		break;
-	/*  Set RAWIP protocol  */
+	/*  Set RAWIP protocol	*/
 	case RMNET_IOCTL_SET_LLP_IP:
 		break;
 	/*  Get link protocol  */
@@ -609,13 +609,13 @@ static int ipa3_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			sizeof(struct rmnet_ioctl_data_s)))
 			rc = -EFAULT;
 		break;
-	/*  Open transport port  */
+	/*  Open transport port	 */
 	case RMNET_IOCTL_OPEN:
 		break;
 	/*  Close transport port  */
 	case RMNET_IOCTL_CLOSE:
 		break;
-	/*  Flow enable  */
+	/*  Flow enable	 */
 	case RMNET_IOCTL_FLOW_ENABLE:
 		ipa_err("RMNET_IOCTL_FLOW_ENABLE not supported\n");
 		rc = -EFAULT;
@@ -725,7 +725,7 @@ static int ipa3_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 					sizeof(struct rmnet_ioctl_extended_s)))
 				rc = -EFAULT;
 			break;
-		/*  Add MUX ID  */
+		/*  Add MUX ID	*/
 		case RMNET_IOCTL_ADD_MUX_CHANNEL:
 			mux_index = ipa3_find_mux_channel_index(
 				extend_ioctl_data.u.rmnet_mux_val.mux_id);
@@ -837,7 +837,7 @@ static void ipa3_wwan_setup(struct net_device *dev)
 {
 	dev->netdev_ops = &ipa3_wwan_ops_ip;
 	ether_setup(dev);
-	dev->header_ops = NULL;  /* No header (override ether_setup() value) */
+	dev->header_ops = NULL;	 /* No header (override ether_setup() value) */
 	dev->type = ARPHRD_RAWIP;
 	dev->hard_header_len = 0;
 	dev->mtu = WWAN_DATA_LEN;

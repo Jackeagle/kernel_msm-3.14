@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  */
 
@@ -147,7 +147,7 @@ static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr)
  * provide an entry in the following array if the constraints for
  * that version are the same as was defined by an older version;
  * it only requires an entry if one or more parameters differ from
- * what's used in the previous version.  If a slot below is empty
+ * what's used in the previous version.	 If a slot below is empty
  * (indicated by a 0 tbl_width field) the corresponding hardware
  * version's properties are taken from an older hardware version.
  *

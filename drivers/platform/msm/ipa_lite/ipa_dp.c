@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  */
 
@@ -234,48 +234,48 @@ static void ipa3_send_nop_desc(struct work_struct *work)
  */
 int ipa3_rx_poll(u32 clnt_hdl, int weight)
 {
-        struct ipa3_ep_context *ep;
-        int ret;
-        int cnt = 0;
-        static int total_cnt;
-        struct ipa_active_client_logging_info log;
+	struct ipa3_ep_context *ep;
+	int ret;
+	int cnt = 0;
+	static int total_cnt;
+	struct ipa_active_client_logging_info log;
 
-        IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log, "NAPI");
+	IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log, "NAPI");
 
-        if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
-                ipa3_ctx->ep[clnt_hdl].valid == 0) {
-                ipa_err("bad parm 0x%x\n", clnt_hdl);
-                return cnt;
-        }
+	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
+		ipa3_ctx->ep[clnt_hdl].valid == 0) {
+		ipa_err("bad parm 0x%x\n", clnt_hdl);
+		return cnt;
+	}
 
-        ep = &ipa3_ctx->ep[clnt_hdl];
+	ep = &ipa3_ctx->ep[clnt_hdl];
 
-        while (cnt < weight &&
-                   atomic_read(&ep->sys->curr_polling_state)) {
+	while (cnt < weight &&
+		   atomic_read(&ep->sys->curr_polling_state)) {
 
-                atomic_set(&ipa3_ctx->transport_pm.eot_activity, 1);
-                ret = ipa_poll_gsi_pkt(ep->sys);
-                if (ret < 0)
-                        break;
+		atomic_set(&ipa3_ctx->transport_pm.eot_activity, 1);
+		ret = ipa_poll_gsi_pkt(ep->sys);
+		if (ret < 0)
+			break;
 
-                ipa3_rx_common(ep->sys, (u32)ret);
-                cnt += IPA_WAN_AGGR_PKT_CNT;
-                total_cnt++;
+		ipa3_rx_common(ep->sys, (u32)ret);
+		cnt += IPA_WAN_AGGR_PKT_CNT;
+		total_cnt++;
 
-                if (ep->sys->len == 0 || total_cnt >= ep->sys->rx_pool_sz) {
-                        total_cnt = 0;
-                        cnt = cnt-1;
-                        break;
-                }
-        };
+		if (ep->sys->len == 0 || total_cnt >= ep->sys->rx_pool_sz) {
+			total_cnt = 0;
+			cnt = cnt-1;
+			break;
+		}
+	};
 
-        if (cnt < weight) {
-                ep->client_notify(ep->priv, IPA_CLIENT_COMP_NAPI, 0);
-                ipa3_rx_switch_to_intr_mode(ep->sys);
-                ipa3_dec_client_disable_clks_no_block(&log);
-        }
+	if (cnt < weight) {
+		ep->client_notify(ep->priv, IPA_CLIENT_COMP_NAPI, 0);
+		ipa3_rx_switch_to_intr_mode(ep->sys);
+		ipa3_dec_client_disable_clks_no_block(&log);
+	}
 
-        return cnt;
+	return cnt;
 }
 
 
@@ -284,7 +284,7 @@ int ipa3_rx_poll(u32 clnt_hdl, int weight)
  * @sys: system pipe context
  * @num_desc: number of packets
  * @desc: packets to send (may be immediate command or data)
- * @in_atomic:  whether caller is in atomic context
+ * @in_atomic:	whether caller is in atomic context
  *
  * This function is used for GPI connection.
  * - ipa3_tx_pkt_wrapper will be used for each ipa
@@ -2286,7 +2286,7 @@ void ipa3_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 
 	/* Metadata Info
 	 *  ------------------------------------------
-	 *  |   3     |   2     |    1        |  0   |
+	 *  |	3     |	  2	|    1	      |	 0   |
 	 *  | fw_desc | vdev_id | qmap mux id | Resv |
 	 *  ------------------------------------------
 	 */
@@ -2551,7 +2551,7 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 
 /*
  * GSI ring length is calculated based on the desc_fifo_sz which
- * defines the descriptor FIFO.  (GSI descriptors are 16 bytes.)
+ * defines the descriptor FIFO.	 (GSI descriptors are 16 bytes.)
  * For producer pipes there is also an additional descriptor
  * for TAG STATUS immediate command.  An exception to this is the
  * APPS_WAN_PROD pipe, which uses event ring rather than TAG STATUS
