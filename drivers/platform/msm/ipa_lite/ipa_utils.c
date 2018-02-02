@@ -215,63 +215,75 @@ struct ipa_ep_configuration {
 static const struct ipa_ep_configuration ipa3_ep_configuration
 					[IPA_VER_MAX][IPA_CLIENT_MAX] = {
 	/* IPA_3_5_1 */
-	[IPA_3_5_1][IPA_CLIENT_APPS_LAN_PROD] = {
+	[IPA_3_5_1] = {
+		[IPA_CLIENT_APPS_LAN_PROD] = {
 			true, IPA_v3_5_GROUP_UL_DL, false,
 			IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
 			QMB_MASTER_SELECT_DDR,
-			{ 8, 7, 8, 16, IPA_EE_AP } },
-	[IPA_3_5_1][IPA_CLIENT_APPS_WAN_PROD] = {
+			{ 8, 7, 8, 16, IPA_EE_AP }
+		},
+		[IPA_CLIENT_APPS_WAN_PROD] = {
 			true, IPA_v3_5_GROUP_UL_DL, true,
 			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 			QMB_MASTER_SELECT_DDR,
-			{ 2, 3, 16, 32, IPA_EE_AP } },
-	[IPA_3_5_1][IPA_CLIENT_APPS_CMD_PROD]		= {
+			{ 2, 3, 16, 32, IPA_EE_AP }
+		},
+		[IPA_CLIENT_APPS_CMD_PROD] = {
 			true, IPA_v3_5_GROUP_UL_DL, false,
 			IPA_DPS_HPS_SEQ_TYPE_DMA_ONLY,
 			QMB_MASTER_SELECT_DDR,
-			{ 5, 4, 20, 23, IPA_EE_AP } },
-	[IPA_3_5_1][IPA_CLIENT_Q6_LAN_PROD]         = {
+			{ 5, 4, 20, 23, IPA_EE_AP }
+		},
+		[IPA_CLIENT_Q6_LAN_PROD] = {
 			true, IPA_v3_5_GROUP_UL_DL, true,
 			IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
 			QMB_MASTER_SELECT_DDR,
-			{ 3, 0, 16, 32, IPA_EE_Q6 } },
-	[IPA_3_5_1][IPA_CLIENT_Q6_WAN_PROD]         = {
+			{ 3, 0, 16, 32, IPA_EE_Q6 }
+		},
+		[IPA_CLIENT_Q6_WAN_PROD] = {
 			true, IPA_v3_5_GROUP_UL_DL, true,
 			IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
 			QMB_MASTER_SELECT_DDR,
 			{ 6, 4, 12, 30, IPA_EE_Q6 } },
-	[IPA_3_5_1][IPA_CLIENT_Q6_CMD_PROD]	    = {
+		[IPA_CLIENT_Q6_CMD_PROD] = {
 			true, IPA_v3_5_GROUP_UL_DL, false,
 			IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
 			QMB_MASTER_SELECT_DDR,
-			{ 4, 1, 20, 23, IPA_EE_Q6 } },
-	[IPA_3_5_1][IPA_CLIENT_APPS_LAN_CONS]       = {
+			{ 4, 1, 20, 23, IPA_EE_Q6 }
+		},
+		[IPA_CLIENT_APPS_LAN_CONS] = {
 			true, IPA_v3_5_GROUP_UL_DL, false,
 			IPA_DPS_HPS_SEQ_TYPE_INVALID,
 			QMB_MASTER_SELECT_DDR,
-			{ 9, 5, 8, 12, IPA_EE_AP } },
-	[IPA_3_5_1][IPA_CLIENT_APPS_WAN_CONS]       = {
+			{ 9, 5, 8, 12, IPA_EE_AP }
+		},
+		[IPA_CLIENT_APPS_WAN_CONS] = {
 			true, IPA_v3_5_GROUP_UL_DL, false,
 			IPA_DPS_HPS_SEQ_TYPE_INVALID,
 			QMB_MASTER_SELECT_DDR,
-			{ 10, 6, 8, 12, IPA_EE_AP } },
-	[IPA_3_5_1][IPA_CLIENT_Q6_LAN_CONS]         = {
+			{ 10, 6, 8, 12, IPA_EE_AP }
+		},
+		[IPA_CLIENT_Q6_LAN_CONS] = {
 			true, IPA_v3_5_GROUP_UL_DL, false,
 			IPA_DPS_HPS_SEQ_TYPE_INVALID,
 			QMB_MASTER_SELECT_DDR,
-			{ 13, 3, 8, 12, IPA_EE_Q6 } },
-	[IPA_3_5_1][IPA_CLIENT_Q6_WAN_CONS]         = {
+			{ 13, 3, 8, 12, IPA_EE_Q6 }
+		},
+		[IPA_CLIENT_Q6_WAN_CONS] = {
 			true, IPA_v3_5_GROUP_UL_DL, false,
 			IPA_DPS_HPS_SEQ_TYPE_INVALID,
 			QMB_MASTER_SELECT_DDR,
-			{ 12, 2, 8, 12, IPA_EE_Q6 } },
+			{ 12, 2, 8, 12, IPA_EE_Q6 }
+		},
 	/* Dummy consumer (pipe 31) is used in L2TP rt rule */
-	[IPA_3_5_1][IPA_CLIENT_DUMMY_CONS]          = {
+		[IPA_CLIENT_DUMMY_CONS] = {
 			true, IPA_v3_5_GROUP_UL_DL,
 			false,
 			IPA_DPS_HPS_SEQ_TYPE_INVALID,
 			QMB_MASTER_SELECT_DDR,
-			{ 31, 31, 8, 8, IPA_EE_AP } },
+			{ 31, 31, 8, 8, IPA_EE_AP }
+		},
+	},
 };
 
 static struct msm_bus_vectors ipa_min_perf_vectors_v3_0[] = {
