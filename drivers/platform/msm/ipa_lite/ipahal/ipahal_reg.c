@@ -332,14 +332,7 @@ ipareg_construct_debug_cnt_ctrl_n(enum ipahal_reg reg, const void *fields)
 	val |= field_gen(type, DBG_CNT_TYPE_BMSK);
 	val |= field_gen(dbg_cnt_ctrl->product ? 1 : 0, PRODUCT_BMSK);
 	val |= field_gen(dbg_cnt_ctrl->src_pipe, SOURCE_PIPE_BMSK);
-
-	if (ipahal_ctx->hw_type <= IPA_HW_v3_1) {
-		val |= field_gen(dbg_cnt_ctrl->rule_idx, RULE_INDEX_BMSK);
-		val |= field_gen(dbg_cnt_ctrl->rule_idx_pipe_rule,
-				RULE_INDEX_PIPE_RULE_BMSK);
-	} else {
-		val |= field_gen(dbg_cnt_ctrl->rule_idx, RULE_INDEX_BMSK_V3_5);
-	}
+	val |= field_gen(dbg_cnt_ctrl->rule_idx, RULE_INDEX_BMSK_V3_5);
 
 	return val;
 }
@@ -1217,16 +1210,8 @@ void ipahal_get_aggr_force_close_valmask(int ep_idx,
 		return;
 	}
 
-	if (ipahal_ctx->hw_type <= IPA_HW_v3_1) {
-		valmask->val |= field_gen(1U << ep_idx, PIPE_BITMAP_BMSK);
-		valmask->mask = PIPE_BITMAP_BMSK;
-	} else if (ipahal_ctx->hw_type <= IPA_HW_v3_5_1) {
-		valmask->val |= field_gen(1U << ep_idx, PIPE_BITMAP_BMSK_V3_5);
-		valmask->mask = PIPE_BITMAP_BMSK_V3_5;
-	} else {
-		valmask->val |= field_gen(1U << ep_idx, PIPE_BITMAP_BMSK_V4_0);
-		valmask->mask = PIPE_BITMAP_BMSK_V4_0;
-	}
+	valmask->val |= field_gen(1U << ep_idx, PIPE_BITMAP_BMSK_V3_5);
+	valmask->mask = PIPE_BITMAP_BMSK_V3_5;
 }
 
 void ipahal_get_fltrt_hash_flush_valmask(
