@@ -692,7 +692,7 @@ static void ipahal_imm_cmd_init(void)
 
 	/* Build up the immediate command descriptions we'll use */
 	for (i = 0; i < IPA_IMM_CMD_MAX ; i++) {
-		for (j = ipahal_ctx->hw_type; j >= IPA_HW_v3_0; j--) {
+		for (j = ipahal_ctx->hw_type; j >= IPA_HW_MIN; j--) {
 			const struct ipahal_imm_cmd_obj *imm_cmd;
 
 			imm_cmd = &ipahal_imm_cmd_objs[j][i];

@@ -2196,10 +2196,12 @@ static enum ipa_hw_type ipa_version_get(struct platform_device *pdev)
 		return IPA_HW_None;
 
 	/* Make sure the value returned is in range */
-	if (ipa_version >= IPA_HW_MAX)
-		return IPA_HW_None;
+	if (ipa_version <= IPA_HW_MIN && ipa_version < IPA_HW_MAX)
+		return (enum ipa_hw_type)ipa_version;
 
-	return (enum ipa_hw_type)ipa_version;
+	ipa_err("unsupported IPA hardware version %u\n", ipa_version);
+
+	return IPA_HW_None;
 }
 
 static int ipa3_iommu_map(struct iommu_domain *domain,
@@ -2518,12 +2520,11 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 
 	/* Find out whether we're working with supported hardware */
 	ipa_version = ipa_version_get(pdev_p);
-	ipa_debug(": ipa_version = %d", ipa_version);
-	if (ipa_version != IPA_HW_v3_5_1) {
-		ipa_err(":only IPA version 3.5.1 supported!\n");
+	if (ipa_version == IPA_HW_None) {
 		result = -ENODEV;
 		goto err_destroy_logbuf;
 	}
+	ipa_debug(": ipa_version = %d", ipa_version);
 
 	result = of_property_read_u32(node, "qcom,ee", &ipa3_ctx->ee);
 	if (result)
@@ -2556,7 +2557,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_clear_ctrl;
 	}
 
-	ipahal_init(IPA_HW_v3_5_1, ipa3_ctx->mmio);
+	ipahal_init(ipa_version, ipa3_ctx->mmio);
 
 	result = ipa3_init_mem_partition(node);
 	if (result) {

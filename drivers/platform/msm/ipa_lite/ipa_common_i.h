@@ -312,10 +312,8 @@ enum ipa_hw_type {
 	IPA_HW_v3_5_1 = 13,
 	IPA_HW_v4_0 = 14,
 };
-#define IPA_HW_MAX (IPA_HW_v4_0 + 1)
-
-#define IPA_HW_v4_0 IPA_HW_v4_0
-
+#define IPA_HW_MIN	IPA_HW_v3_0	/* minimum supported version */
+#define IPA_HW_MAX	(IPA_HW_v4_0 + 1)	/* number of versions */
 
 /**
  * enum ipa_mode_type - mode setting type in IPA end-point

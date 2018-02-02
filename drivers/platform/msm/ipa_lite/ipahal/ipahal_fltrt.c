@@ -276,7 +276,7 @@ void ipahal_fltrt_init(void)
 	ipa_debug("Entry - HW_TYPE=%d\n", ipahal_ctx->hw_type);
 
        /* Build up a the filter/route table descriptions we'll use */
-	for (i = ipahal_ctx->hw_type; i >= IPA_HW_v3_0; i--) {
+	for (i = ipahal_ctx->hw_type; i >= IPA_HW_MIN; i--) {
 		const struct ipahal_fltrt_obj *fltrt;
 
 		fltrt = &ipahal_fltrt_objs[i];

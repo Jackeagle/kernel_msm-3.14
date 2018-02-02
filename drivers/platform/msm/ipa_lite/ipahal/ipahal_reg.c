@@ -1106,7 +1106,7 @@ void ipahal_reg_init(void)
 
 	/* Build up the register descriptions we'll use */
 	for (i = 0; i < IPA_REG_MAX ; i++) {
-		for (j = ipahal_ctx->hw_type; j >= IPA_HW_v3_0; j--) {
+		for (j = ipahal_ctx->hw_type; j >= IPA_HW_MIN; j--) {
 			const struct ipahal_reg_obj *reg;
 
 			reg = &ipahal_reg_objs[j][i];
