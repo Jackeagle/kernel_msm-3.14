@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  */
 
@@ -121,7 +121,7 @@ static int ipa3_handle_interrupt(int irq_num, bool isr_context)
 		ipa_debug_low("get interrupt %d\n", suspend_data);
 
 		/*
-		 * Clear L2 interrupts status.	Note the following
+		 * Clear L2 interrupts status.  Note the following
 		 * must not be executed for IPA hardware versions
 		 * prior to 3.1.
 		 */

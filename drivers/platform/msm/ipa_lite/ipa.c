@@ -7,7 +7,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  */
 
@@ -2269,7 +2269,7 @@ ipa_smmu_domain_attr_set(struct device *dev, struct iommu_domain *domain)
  * populates all of the fields of the SMMU CB context provided.
  *
  * If successful, this function returns a created mapping in
- * cb->mapping.	 The mapping will have beeen attached to the device
+ * cb->mapping.  The mapping will have beeen attached to the device
  * provided.  In the event of a subsequent error, the caller is
  * responsible for detaching the mapping from the device and
  * releasing mapping.

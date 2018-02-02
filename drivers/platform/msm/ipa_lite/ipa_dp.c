@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  */
 
@@ -2551,7 +2551,7 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 
 /*
  * GSI ring length is calculated based on the desc_fifo_sz which
- * defines the descriptor FIFO.	 (GSI descriptors are 16 bytes.)
+ * defines the descriptor FIFO.  (GSI descriptors are 16 bytes.)
  * For producer pipes there is also an additional descriptor
  * for TAG STATUS immediate command.  An exception to this is the
  * APPS_WAN_PROD pipe, which uses event ring rather than TAG STATUS

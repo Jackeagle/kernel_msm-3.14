@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  */
 
@@ -152,7 +152,7 @@ typedef void (*ipa_irq_handler_t)(enum ipa_irq_type interrupt,
  * @notify:	callback
  *		priv - callback cookie
  *		evt - type of event
- *		data - data relevant to event.	May not be valid. See event_type
+ *		data - data relevant to event.  May not be valid. See event_type
  *		enum for valid cases.
  * @skip_ep_cfg: boolean field that determines if EP should be configured
  *  by IPA driver

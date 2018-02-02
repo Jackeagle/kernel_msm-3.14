@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  */
 
@@ -27,12 +27,12 @@
 /*
  * A field_mask is a bitmask that defines both the width and
  * position of a field within in a 32-bit register.  Set bits in a
- * field_mask define which bits are considered part of a field.	 At
+ * field_mask define which bits are considered part of a field.  At
  * least one bit must be set, and all set bits in a field_mask must
  * be contiguous.
  *
  * The "width" of a field (1-32) can be determined by counting the
- * number of 1 bits in its field_mask.	The "shift" for a field
+ * number of 1 bits in its field_mask.  The "shift" for a field
  * (i.e. the position of its rightmost set bit, 0-31) is the same as
  * the number of low-order 0 bits in the field_mask.  For constant
  * field_mask, these values can be computed at compile time using
@@ -816,7 +816,7 @@ ipareg_parse_hps_queue_weights(enum ipahal_reg reg, void *fields, u32 val)
  *
  * Versions of IPA hardware newer than 3.0 do not need to specify
  * register object entries if they are accessed the same way as was
- * defined by an older version.	 The only entries defined for newer
+ * defined by an older version.  The only entries defined for newer
  * hardware are registers whose offset or data format has changed,
  * or registers that are new and not present in older hardware.
  *
@@ -828,7 +828,7 @@ ipareg_parse_hps_queue_weights(enum ipahal_reg reg, void *fields, u32 val)
  * version 3.0.
  *
  * The definitions used for each hardware version is based on the
- * definition used by the next earlier version.	 So IPA hardware
+ * definition used by the next earlier version.  So IPA hardware
  * version 3.5 uses definitions for version 3.1, and its block of
  * register objects will consist only of overrides, or registers
  * not defined prior to version 3.5.
@@ -847,7 +847,7 @@ ipareg_parse_hps_queue_weights(enum ipahal_reg reg, void *fields, u32 val)
  *   function ipahal_write_reg_fields()).
  * - Generally, if a parse function is supplied, the register should
  *   generally only be read using ipahal_read_reg_n_fields() (or
- *   ipahal_read_reg_fields()).	 (Currently some debug code reads
+ *   ipahal_read_reg_fields()).  (Currently some debug code reads
  *   some registers directly, without parsing.)
  */
 #define OFFSET_INVAL	((u32)0xffffffff)

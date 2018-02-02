@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  */
 
@@ -138,14 +138,14 @@ static void ipa3_log_evt_hdlr(void)
 	if (offset == uc_ctx->uc_event_top_ofst)
 		return;
 
-	/* They differ.	 If we set it before, reort that it changed. */
+	/* They differ.  If we set it before, reort that it changed. */
 	if (uc_ctx->uc_event_top_ofst) {
 		ipa_err("uc top ofst changed new=%u cur=%u\n",
 			offset, uc_ctx->uc_event_top_ofst);
 		return;
 	}
 
-	/* First time.	Record the eventParams offset and map it. */
+	/* First time.  Record the eventParams offset and map it. */
 	uc_ctx->uc_event_top_ofst = offset;
 }
 
@@ -248,7 +248,7 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 
 	/*
 	 * An INIT_COMPLETED response message is sent to the AP by
-	 * the microcontroller when it is operational.	Other than
+	 * the microcontroller when it is operational.  Other than
 	 * this, the AP should only receive responses from the
 	 * microntroller when it has sent it a request message.
 	 */

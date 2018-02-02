@@ -6,9 +6,8 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- *
  */
 
 #include <linux/qmi_encdec.h>
@@ -18,9 +17,9 @@
 
 /*
  * The following structures define the format of QMI messages
- * exchanged between the AP and modem.	Macros are used to condense
+ * exchanged between the AP and modem.  Macros are used to condense
  * the definitions for common field values to make it more obvious
- * what fields really do have differing values.	 Unless specified
+ * what fields really do have differing values.  Unless specified
  * the "tlv_type" field has value QMI_COMMON_TLV_TYPE (which is 0).
  */
 

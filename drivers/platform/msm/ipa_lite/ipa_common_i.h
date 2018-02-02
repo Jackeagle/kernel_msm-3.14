@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  */
 
@@ -614,7 +614,7 @@ struct ipa_ep_cfg_mode {
  *			independently according to the aggregation structure
  *			Valid for Output Pipes only (IPA Producer )
  * @aggr_time_limit:	Timer to close aggregated packet (<=32ms) When set to 0,
- *			there is no time limitation on the aggregation.	 When
+ *			there is no time limitation on the aggregation.  When
  *			both, Aggr_Byte_Limit and Aggr_Time_Limit are set to 0,
  *			there is no aggregation, every packet is sent
  *			independently according to the aggregation structure

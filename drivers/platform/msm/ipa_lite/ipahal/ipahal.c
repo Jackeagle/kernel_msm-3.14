@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  */
 
@@ -66,7 +66,7 @@ ipahal_imm_cmd_pyld_alloc_atomic(u16 opcode, size_t pyld_size)
 
 /*
  * Returns true if the value provided is too big to be represented
- * in the given number of bits.	 In this case, WARN_ON() is called,
+ * in the given number of bits.  In this case, WARN_ON() is called,
  * and a message is printed and using ipa_err().
  *
  * Returns false if the value is OK (not too big).
@@ -975,7 +975,7 @@ void ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base)
 }
 
 /*
- * Assign the IPA HAL's device pointer.	 Once it's assigned we can
+ * Assign the IPA HAL's device pointer.  Once it's assigned we can
  * initialize the empty table entry.
  */
 int ipahal_dev_init(struct device *dev)

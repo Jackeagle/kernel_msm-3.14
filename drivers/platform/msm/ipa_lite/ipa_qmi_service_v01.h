@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  */
 
@@ -32,7 +32,7 @@
  * uint8_t test_opaque[16];
 
  * If only 4 elements are added to test_opaque[] then test_opaque_len must be
- * set to 4 before sending the message.	 When decoding, the _len value is set
+ * set to 4 before sending the message.  When decoding, the _len value is set
  * by the decode routine and should be checked so that the correct number of
  * elements in the array will be accessed.
  */
@@ -83,7 +83,7 @@ struct ipa_qmi_response_type_v01 {
 
 enum ipa_platform_type_enum_v01 {
 	IPA_PLATFORM_TYPE_ENUM_MIN_ENUM_VAL_V01 =
-	-2147483647, /* To force a 32 bit signed enum.	Do not change or use */
+	-2147483647, /* To force a 32 bit signed enum.  Do not change or use */
 	QMI_IPA_PLATFORM_TYPE_INVALID_V01 = 0,
 	/*  Invalid platform identifier */
 	QMI_IPA_PLATFORM_TYPE_TN_V01 = 1,

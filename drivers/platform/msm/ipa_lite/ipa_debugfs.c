@@ -6,7 +6,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  */
 
@@ -158,7 +158,7 @@ int _ipa_read_ep_reg_v3_0(char *buf, int max_len, int pipe)
 			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_AGGR_n, pipe));
 	/*
 	 * Starting IPA_HW_v4_0 the following register will have to
-	 * be formatted into the buffer conditionally.	It will no
+	 * be formatted into the buffer conditionally.  It will no
 	 * longer be supported and we shouldn't attempt to read it.
 	 */
 	offset += scnprintf(dbg_buff + offset, IPA_MAX_MSG_LEN - offset,
@@ -615,7 +615,7 @@ void ipa3_debugfs_init(void)
 	 * Starting with IPA hardware 4.0, registers IPA_DEBUG_CNT_REG_n
 	 * and IPA_DEBUG_CNT_CTRL_n will no longer be supported.  These
 	 * registers are read and written (respectively) by debugfs
-	 * file "dbg_cnt" created here.	 Once we support newer
+	 * file "dbg_cnt" created here.  Once we support newer
 	 * versions of IPA hardware, creating "debug_cnt" should be
 	 * done conditionally to avoid accessing unsupported registers.
 	 */
