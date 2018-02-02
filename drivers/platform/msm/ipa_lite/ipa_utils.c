@@ -165,7 +165,6 @@ struct rsrc_min_max {
 
 enum ipa_ver {
 	IPA_3_5_1,
-	IPA_4_0,
 	IPA_VER_MAX,
 };
 
@@ -184,19 +183,6 @@ static const struct rsrc_min_max ipa3_rsrc_src_grp_config
 		[IPA_v3_5_RSRC_GRP_TYPE_SRC_ACK_ENTRIES] = {
 		{14, 14}, {20, 20}, {0, 0}, {14, 14}, {0, 0}, {0, 0} },
 	},
-	[IPA_4_0] = {
-		/* LWA_DL  UL_DL    not used  UC_RX_Q, other are invalid */
-		[IPA_v4_0_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS] = {
-		{1, 255}, {1, 255}, {0, 0}, {1, 255}, {0, 0}, {0, 0} },
-		[IPA_v4_0_RSRC_GRP_TYPE_SRS_DESCRIPTOR_LISTS] = {
-		{10, 10}, {10, 10}, {0, 0}, {8, 8}, {0, 0}, {0, 0} },
-		[IPA_v4_0_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF] = {
-		{12, 12}, {14, 14}, {0, 0}, {8, 8}, {0, 0}, {0, 0} },
-		[IPA_v4_0_RSRC_GRP_TYPE_SRC_HPS_DMARS] = {
-		{0, 255}, {0, 255}, {0, 255}, {0, 255},  {0, 0}, {0, 0} },
-		[IPA_v4_0_RSRC_GRP_TYPE_SRC_ACK_ENTRIES] = {
-		{14, 14}, {20, 20}, {0, 0}, {14, 14}, {0, 0}, {0, 0} },
-	}
 };
 
 static const struct rsrc_min_max ipa3_rsrc_dst_grp_config
@@ -208,13 +194,6 @@ static const struct rsrc_min_max ipa3_rsrc_dst_grp_config
 		[IPA_v3_5_RSRC_GRP_TYPE_DST_DPS_DMARS] = {
 		{2, 63}, {1, 63}, {1, 2}, {0, 0}, {0, 0}, {0, 0} },
 	},
-	[IPA_4_0] = {
-		/*LWA_DL UL/DL/DPL uC, other are invalid */
-		[IPA_v4_0_RSRC_GRP_TYPE_DST_DATA_SECTORS] = {
-		{4, 4}, {4, 4}, {3, 3}, {2, 2}, {0, 0}, {0, 0} },
-		[IPA_v4_0_RSRC_GRP_TYPE_DST_DPS_DMARS] = {
-		{2, 255}, {1, 255}, {1, 2}, {0, 2}, {0, 0}, {0, 0} },
-	}
 };
 
 enum ipa_ees {
@@ -293,84 +272,6 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 			IPA_DPS_HPS_SEQ_TYPE_INVALID,
 			QMB_MASTER_SELECT_DDR,
 			{ 31, 31, 8, 8, IPA_EE_AP } },
-
-	/* IPA_4_0 */
-	[IPA_4_0][IPA_CLIENT_APPS_LAN_PROD]   = {
-			true, IPA_v4_0_GROUP_UL_DL,
-			false,
-			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			QMB_MASTER_SELECT_DDR,
-			{ 8, 10, 8, 16, IPA_EE_AP } },
-	[IPA_4_0][IPA_CLIENT_APPS_WAN_PROD] = {
-			true, IPA_v4_0_GROUP_UL_DL,
-			true,
-			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			QMB_MASTER_SELECT_DDR,
-			{ 2, 3, 16, 32, IPA_EE_AP } },
-	[IPA_4_0][IPA_CLIENT_APPS_CMD_PROD]	  = {
-			true, IPA_v4_0_GROUP_UL_DL,
-			false,
-			IPA_DPS_HPS_SEQ_TYPE_DMA_ONLY,
-			QMB_MASTER_SELECT_DDR,
-			{ 5, 4, 20, 24, IPA_EE_AP } },
-	[IPA_4_0][IPA_CLIENT_Q6_LAN_PROD]         = {
-			true, IPA_v4_0_GROUP_UL_DL,
-			true,
-			IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
-			QMB_MASTER_SELECT_DDR,
-			{ 6, 2, 12, 24, IPA_EE_Q6 } },
-	[IPA_4_0][IPA_CLIENT_Q6_WAN_PROD]         = {
-			true, IPA_v4_0_GROUP_UL_DL,
-			true,
-			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			QMB_MASTER_SELECT_DDR,
-			{ 3, 0, 16, 32, IPA_EE_Q6 } },
-	[IPA_4_0][IPA_CLIENT_Q6_CMD_PROD]	  = {
-			true, IPA_v4_0_GROUP_UL_DL,
-			false,
-			IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
-			QMB_MASTER_SELECT_DDR,
-			{ 4, 1, 20, 24, IPA_EE_Q6 } },
-
-	[IPA_4_0][IPA_CLIENT_APPS_LAN_CONS]       = {
-			true, IPA_v4_0_GROUP_UL_DL,
-			false,
-			IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			QMB_MASTER_SELECT_DDR,
-			{ 10, 5, 9, 9, IPA_EE_AP } },
-	[IPA_4_0][IPA_CLIENT_APPS_WAN_CONS]       = {
-			true, IPA_v4_0_GROUP_UL_DL,
-			false,
-			IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			QMB_MASTER_SELECT_DDR,
-			{ 11, 6, 9, 9, IPA_EE_AP } },
-	[IPA_4_0][IPA_CLIENT_Q6_LAN_CONS]         = {
-			true, IPA_v4_0_GROUP_UL_DL,
-			false,
-			IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			QMB_MASTER_SELECT_DDR,
-			{ 14, 4, 9, 9, IPA_EE_Q6 } },
-	[IPA_4_0][IPA_CLIENT_Q6_WAN_CONS]         = {
-			true, IPA_v4_0_GROUP_UL_DL,
-			false,
-			IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			QMB_MASTER_SELECT_DDR,
-			{ 13, 3, 9, 9, IPA_EE_Q6 } },
-	[IPA_4_0][IPA_CLIENT_Q6_LTE_WIFI_AGGR_CONS] = {
-			true, IPA_v4_0_GROUP_UL_DL,
-			false,
-			IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			QMB_MASTER_SELECT_DDR,
-			{ 16, 5, 9, 9, IPA_EE_Q6 } },
-	/* Only for test purpose */
-	/* Dummy consumer (pipe 31) is used in L2TP rt rule */
-	[IPA_4_0][IPA_CLIENT_DUMMY_CONS]          = {
-			true, IPA_v4_0_GROUP_UL_DL,
-			false,
-			IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			QMB_MASTER_SELECT_DDR,
-			{ 31, 31, 8, 8, IPA_EE_AP } }
-
 };
 
 static struct msm_bus_vectors ipa_min_perf_vectors_v3_0[] = {
