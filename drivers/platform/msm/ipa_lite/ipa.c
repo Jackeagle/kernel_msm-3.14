@@ -2195,9 +2195,9 @@ static enum ipa_hw_type ipa_version_get(struct platform_device *pdev)
 	if (of_property_read_u32(node, "qcom,ipa-hw-ver", &ipa_version))
 		return IPA_HW_None;
 
-	/* Make sure the value returned is in range */
-	if (ipa_version <= IPA_HW_MIN && ipa_version < IPA_HW_MAX)
-		return (enum ipa_hw_type)ipa_version;
+	/* Translate the DTB value to the value we use internally */
+	if (ipa_version == QCOM_IPA_HW_VER_v3_5_1)
+		return IPA_HW_v3_5_1;
 
 	ipa_err("unsupported IPA hardware version %u\n", ipa_version);
 
