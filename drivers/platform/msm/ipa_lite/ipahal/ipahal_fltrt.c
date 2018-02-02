@@ -170,8 +170,8 @@ static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr)
  *   parse_tbl_addr must be non-null function pointers
  */
 static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
-	/* IPAv3.1 */
-	[IPA_HW_v3_1] = {
+	/* IPAv3.5 */
+	[IPA_HW_v3_5] = {
 		.tbl_width		= IPA3_0_HW_TBL_WIDTH,
 		.sysaddr_align		= IPA3_0_HW_TBL_SYSADDR_ALIGN,
 		.lcladdr_align		= IPA3_0_HW_TBL_LCLADDR_ALIGN,
@@ -207,11 +207,6 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 			[IPA_IS_FRAG]			= 15,
 		},
 	},
-
-	/* IPAv3.5 */
-	[IPA_HW_v3_5] = {
-	},
-		/* All inherited from IPA_HW_v3_1. */
 
 	/* IPAv3.5.1 */
 	[IPA_HW_v3_5_1] = {

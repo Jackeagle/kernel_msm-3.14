@@ -80,38 +80,6 @@ struct ipahal_reg_obj {
 static struct ipahal_reg_obj ipahal_regs[IPA_REG_MAX];
 
 static u32
-ipareg_construct_rx_hps_clients_depth1(enum ipahal_reg reg, const void *fields)
-{
-	const struct ipahal_reg_rx_hps_clients *clients = fields;
-	u32 val;
-
-	val = field_gen(clients->client_minmax[0],
-			MINMAX_DEPTH_X_CLIENT_n_BMSK(0));
-	val |= field_gen(clients->client_minmax[1],
-			MINMAX_DEPTH_X_CLIENT_n_BMSK(1));
-
-	return val;
-}
-
-static u32
-ipareg_construct_rx_hps_clients_depth0( enum ipahal_reg reg, const void *fields)
-{
-	const struct ipahal_reg_rx_hps_clients *clients = fields;
-	u32 val;
-
-	val = field_gen(clients->client_minmax[0],
-			MINMAX_DEPTH_X_CLIENT_n_BMSK(0));
-	val |= field_gen(clients->client_minmax[1],
-			MINMAX_DEPTH_X_CLIENT_n_BMSK(1));
-	val |= field_gen(clients->client_minmax[2],
-			MINMAX_DEPTH_X_CLIENT_n_BMSK(2));
-	val |= field_gen(clients->client_minmax[3],
-			MINMAX_DEPTH_X_CLIENT_n_BMSK(3));
-
-	return val;
-}
-
-static u32
 ipareg_construct_rx_hps_clients_depth0_v3_5(enum ipahal_reg reg,
 		const void *fields)
 {
@@ -126,20 +94,6 @@ ipareg_construct_rx_hps_clients_depth0_v3_5(enum ipahal_reg reg,
 			MINMAX_DEPTH_X_CLIENT_n_BMSK_V3_5(2));
 	val |= field_gen(clients->client_minmax[3],
 			MINMAX_DEPTH_X_CLIENT_n_BMSK_V3_5(3));
-
-	return val;
-}
-
-static u32
-ipareg_construct_rsrg_grp_xy(enum ipahal_reg reg, const void *fields)
-{
-	const struct ipahal_reg_rsrc_grp_cfg *grp = fields;
-	u32 val;
-
-	val = field_gen(grp->x_min, X_MIN_LIM_BMSK);
-	val |= field_gen(grp->x_max, X_MAX_LIM_BMSK);
-	val |= field_gen(grp->y_min, Y_MIN_LIM_BMSK);
-	val |= field_gen(grp->y_max, Y_MAX_LIM_BMSK);
 
 	return val;
 }
@@ -346,14 +300,6 @@ ipareg_parse_shared_mem_size(enum ipahal_reg reg, void *fields, u32 val)
 
 	smem_sz->shared_mem_sz = field_val(val, SHARED_MEM_SIZE_BMSK);
 	smem_sz->shared_mem_baddr = field_val(val, SHARED_MEM_BADDR_BMSK);
-}
-
-static u32
-ipareg_construct_endp_init_rsrc_grp_n(enum ipahal_reg reg, const void *fields)
-{
-	const struct ipahal_reg_endp_init_rsrc_grp *rsrc_grp = fields;
-
-	return field_gen(rsrc_grp->rsrc_grp, RSRC_GRP_BMSK);
 }
 
 static u32
@@ -803,9 +749,9 @@ ipareg_parse_hps_queue_weights(enum ipahal_reg reg, void *fields, u32 val)
  *
  * The following table consists of blocks of "register object"
  * definitions associated with versions of IPA hardware.  The first
- * version of IPA hardware supported by the "ipahal" layer is 3.1;
+ * version of IPA hardware supported by the "ipahal" layer is 3.5;
  * essentially all registers needed for IPA operation have a
- * register object associated with IPA_HW_v3_1.
+ * register object associated with IPA_HW_v3_5.
  *
  * Versions of IPA hardware newer than 3.1 do not need to specify
  * register object entries if they are accessed the same way as was
@@ -868,8 +814,8 @@ ipareg_parse_hps_queue_weights(enum ipahal_reg reg, void *fields, u32 val)
 	reg_obj_common(id, NULL, NULL, o, n)
 
 static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
-	/* IPAv3.1 */
-	[IPA_HW_v3_1] = {
+	/* IPAv3.5 */
+	[IPA_HW_v3_5] = {
 		reg_obj_cfunc(ROUTE, route,		0x00000048,	0x0000),
 		reg_obj_nofunc(IRQ_STTS_EE_n,		0x00003008,	0x1000),
 		reg_obj_nofunc(IRQ_EN_EE_n,		0x0000300c,	0x1000),
@@ -883,8 +829,8 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 		reg_obj_nofunc(VERSION,			0x00000034,	0x0000),
 		reg_obj_nofunc(TAG_TIMER,		0x00000060,	0x0000),
 		reg_obj_nofunc(COMP_HW_VERSION,		0x00000030,	0x0000),
-		reg_obj_nofunc(SPARE_REG_1,		0x00005090,	0x0000),
-		reg_obj_nofunc(SPARE_REG_2,		0x00005094,	0x0000),
+		reg_obj_nofunc(SPARE_REG_1,		0x00002780,	0x0000),
+		reg_obj_nofunc(SPARE_REG_2,		0x00002784,	0x0000),
 		reg_obj_nofunc(COMP_CFG,		0x0000003c,	0x0000),
 		reg_obj_nofunc(STATE_AGGR_ACTIVE,	0x0000010c,	0x0000),
 		reg_obj_cfunc(ENDP_INIT_HDR_n, endp_init_hdr_n,
@@ -923,7 +869,7 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 		reg_obj_cfunc(ENDP_INIT_HDR_METADATA_n,
 				endp_init_hdr_metadata_n,
 							0x0000081c,	0x0070),
-		reg_obj_cfunc(ENDP_INIT_RSRC_GRP_n, endp_init_rsrc_grp_n,
+		reg_obj_cfunc(ENDP_INIT_RSRC_GRP_n, endp_init_rsrc_grp_n_v3_5,
 							0x00000838,	0x0070),
 		reg_obj_pfunc(SHARED_MEM_SIZE, shared_mem_size,
 							0x00000054,	0x0000),
@@ -942,41 +888,6 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 							0x00000840,	0x0070),
 		reg_obj_both(ENDP_FILTER_ROUTER_HSH_CFG_n, hash_cfg_n,
 							0x0000085c,	0x0070),
-		reg_obj_cfunc(SRC_RSRC_GRP_01_RSRC_TYPE_n, rsrg_grp_xy,
-							0x00000400,	0x0020),
-		reg_obj_cfunc(SRC_RSRC_GRP_23_RSRC_TYPE_n, rsrg_grp_xy,
-							0x00000404,	0x0020),
-		reg_obj_cfunc(SRC_RSRC_GRP_45_RSRC_TYPE_n, rsrg_grp_xy,
-							0x00000408,	0x0020),
-		reg_obj_cfunc(SRC_RSRC_GRP_67_RSRC_TYPE_n, rsrg_grp_xy,
-							0x0000040c,	0x0020),
-		reg_obj_cfunc(DST_RSRC_GRP_01_RSRC_TYPE_n, rsrg_grp_xy,
-							0x00000500,	0x0020),
-		reg_obj_cfunc(DST_RSRC_GRP_23_RSRC_TYPE_n, rsrg_grp_xy,
-							0x00000504,	0x0020),
-		reg_obj_cfunc(DST_RSRC_GRP_45_RSRC_TYPE_n, rsrg_grp_xy,
-							0x00000508,	0x0020),
-		reg_obj_cfunc(DST_RSRC_GRP_67_RSRC_TYPE_n, rsrg_grp_xy,
-							0x0000050c,	0x0020),
-		reg_obj_cfunc(RX_HPS_CLIENTS_MIN_DEPTH_0, rx_hps_clients_depth0,
-							0x000023c4,	0x0000),
-		reg_obj_cfunc(RX_HPS_CLIENTS_MIN_DEPTH_1, rx_hps_clients_depth1,
-							0x000023c8,	0x0000),
-		reg_obj_cfunc(RX_HPS_CLIENTS_MAX_DEPTH_0, rx_hps_clients_depth0,
-							0x000023cc,	0x0000),
-		reg_obj_cfunc(RX_HPS_CLIENTS_MAX_DEPTH_1, rx_hps_clients_depth1,
-							0x000023d0,	0x0000),
-		reg_obj_cfunc(QSB_MAX_WRITES, qsb_max_writes,
-							0x00000074,	0x0000),
-		reg_obj_cfunc(QSB_MAX_READS, qsb_max_reads,
-							0x00000078,	0x0000),
-		reg_obj_nofunc(DPS_SEQUENCER_FIRST,	0x0001e000,	0x0000),
-		reg_obj_nofunc(HPS_SEQUENCER_FIRST,	0x0001e080,	0x0000),
-	},
-
-	/* IPAv3.5 */
-	[IPA_HW_v3_5] = {
-		reg_obj_both(TX_CFG, tx_cfg,		0x000001fc,	0x0000),
 		reg_obj_cfunc(SRC_RSRC_GRP_01_RSRC_TYPE_n, rsrg_grp_xy_v3_5,
 							0x00000400,	0x0020),
 		reg_obj_cfunc(SRC_RSRC_GRP_23_RSRC_TYPE_n, rsrg_grp_xy_v3_5,
@@ -993,8 +904,6 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 							OFFSET_INVAL,	0x0000),
 		reg_obj_nofunc(DST_RSRC_GRP_67_RSRC_TYPE_n,
 							OFFSET_INVAL,	0x0000),
-		reg_obj_cfunc(ENDP_INIT_RSRC_GRP_n, endp_init_rsrc_grp_n_v3_5,
-							0x00000838,	0x0070),
 		reg_obj_cfunc(RX_HPS_CLIENTS_MIN_DEPTH_0,
 				rx_hps_clients_depth0_v3_5,
 							0x000023c4,	0x0000),
@@ -1005,14 +914,18 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 							0x000023cc,	0x0000),
 		reg_obj_nofunc(RX_HPS_CLIENTS_MAX_DEPTH_1,
 							OFFSET_INVAL,	0x0000),
-		reg_obj_nofunc(SPARE_REG_1,		0x00002780,	0x0000),
-		reg_obj_nofunc(SPARE_REG_2,		0x00002784,	0x0000),
-		reg_obj_cfunc(IDLE_INDICATION_CFG, idle_indication_cfg,
-							0x00000220,	0x0000),
 		reg_obj_both(HPS_FTCH_ARB_QUEUE_WEIGHT, hps_queue_weights,
 							0x000005a4,	0x0000),
+		reg_obj_cfunc(QSB_MAX_WRITES, qsb_max_writes,
+							0x00000074,	0x0000),
+		reg_obj_cfunc(QSB_MAX_READS, qsb_max_reads,
+							0x00000078,	0x0000),
+		reg_obj_both(TX_CFG, tx_cfg,		0x000001fc,	0x0000),
+		reg_obj_cfunc(IDLE_INDICATION_CFG, idle_indication_cfg,
+							0x00000220,	0x0000),
+		reg_obj_nofunc(DPS_SEQUENCER_FIRST,	0x0001e000,	0x0000),
+		reg_obj_nofunc(HPS_SEQUENCER_FIRST,	0x0001e080,	0x0000),
 	},
-
 
 	/* IPAv3.5.1 */
 	[IPA_HW_v3_5_1] = {
