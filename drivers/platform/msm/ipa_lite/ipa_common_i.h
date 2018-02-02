@@ -15,6 +15,8 @@
 #include <linux/ipc_logging.h>
 #include <linux/slab.h>
 
+#include <dt-bindings/soc/qcom,ipa.h>
+
 #define __FILENAME__ \
 	(strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
@@ -287,8 +289,8 @@ enum ipa_dp_evt_type {
  * @IPA_HW_v3_5_1: IPA hardware version 3.5.1
  */
 enum ipa_hw_type {
-	IPA_HW_None = 0,
-	IPA_HW_v3_5_1 = 13,
+	IPA_HW_None	= 0,
+	IPA_HW_v3_5_1	= QCOM_IPA_HW_VER_v3_5_1,
 };
 #define IPA_HW_MIN	IPA_HW_v3_5_1	/* minimum supported version */
 #define IPA_HW_MAX	(IPA_HW_v3_5_1 + 1)	/* number of versions */
