@@ -284,13 +284,6 @@ enum ipa_dp_evt_type {
 /**
  * enum ipa_hw_type - IPA hardware version type
  * @IPA_HW_None: IPA hardware version not defined
- * @IPA_HW_v1_0: IPA hardware version 1.0
- * @IPA_HW_v1_1: IPA hardware version 1.1
- * @IPA_HW_v2_0: IPA hardware version 2.0
- * @IPA_HW_v2_1: IPA hardware version 2.1
- * @IPA_HW_v2_5: IPA hardware version 2.5
- * @IPA_HW_v2_6: IPA hardware version 2.6
- * @IPA_HW_v2_6L: IPA hardware version 2.6L
  * @IPA_HW_v3_0: IPA hardware version 3.0
  * @IPA_HW_v3_1: IPA hardware version 3.1
  * @IPA_HW_v3_5: IPA hardware version 3.5
@@ -299,13 +292,6 @@ enum ipa_dp_evt_type {
  */
 enum ipa_hw_type {
 	IPA_HW_None = 0,
-	IPA_HW_v1_0 = 1,
-	IPA_HW_v1_1 = 2,
-	IPA_HW_v2_0 = 3,
-	IPA_HW_v2_1 = 4,
-	IPA_HW_v2_5 = 5,
-	IPA_HW_v2_6 = IPA_HW_v2_5,
-	IPA_HW_v2_6L = 6,
 	IPA_HW_v3_0 = 10,
 	IPA_HW_v3_1 = 11,
 	IPA_HW_v3_5 = 12,
