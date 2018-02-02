@@ -246,20 +246,6 @@ static const struct rsrc_min_max ipa3_rsrc_dst_grp_config
 	}
 };
 
-static const struct rsrc_min_max ipa3_rsrc_rx_grp_config
-	[IPA_VER_MAX][IPA_RSRC_GRP_TYPE_RX_MAX][IPA_GROUP_MAX] = {
-	[IPA_3_5_1] = {
-		/* LWA_DL UL_DL	unused   UC_RX_Q N/A     N/A */
-		[IPA_RSRC_GRP_TYPE_RX_HPS_CMDQ] = {
-		{3, 3}, {7, 7}, {0, 0}, {2, 2}, {0, 0}, {0, 0} },
-	},
-	[IPA_4_0] = {
-		/* LWA_DL UL_DL	not used UC_RX_Q, other are invalid */
-		[IPA_RSRC_GRP_TYPE_RX_HPS_CMDQ] = {
-		{3, 3}, {7, 7}, {0, 0}, {2, 2}, {0, 0}, {0, 0} },
-	}
-};
-
 enum ipa_ees {
 	IPA_EE_AP = 0,
 	IPA_EE_Q6 = 1,
