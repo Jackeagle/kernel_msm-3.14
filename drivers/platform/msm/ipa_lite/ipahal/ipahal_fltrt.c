@@ -249,14 +249,14 @@ void ipahal_empty_fltrt_destroy(void)
  * ipahal_fltrt_init() - Build the FLT/RT information table
  *  See ipahal_fltrt_objs[] comments
  */
-void ipahal_fltrt_init(enum ipa_hw_type ipa_hw_type)
+void ipahal_fltrt_init(enum ipa_hw_version hw_version)
 {
 	int i;
 
-	ipa_debug("Entry - HW_TYPE=%d\n", ipa_hw_type);
+	ipa_debug("Entry - HW_TYPE=%d\n", hw_version);
 
        /* Build up a the filter/route table descriptions we'll use */
-	for (i = ipa_hw_type; i >= 0; i--) {
+	for (i = hw_version; i >= 0; i--) {
 		const struct ipahal_fltrt_obj *fltrt;
 
 		fltrt = &ipahal_fltrt_objs[i];

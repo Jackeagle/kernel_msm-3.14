@@ -572,16 +572,16 @@ static struct ipahal_imm_cmd_obj ipahal_imm_cmds[IPA_IMM_CMD_MAX];
  * ipahal_imm_cmd_init() - Build the Immediate command information table
  *  See ipahal_imm_cmd_objs[][] comments
  */
-static void ipahal_imm_cmd_init(enum ipa_hw_type ipa_hw_type)
+static void ipahal_imm_cmd_init(enum ipa_hw_version hw_version)
 {
 	int i;
 	int j;
 
-	ipa_debug_low("Entry - HW_TYPE=%d\n", ipa_hw_type);
+	ipa_debug_low("Entry - HW_TYPE=%d\n", hw_version);
 
 	/* Build up the immediate command descriptions we'll use */
 	for (i = 0; i < IPA_IMM_CMD_MAX ; i++) {
-		for (j = ipa_hw_type; j >= 0; j--) {
+		for (j = hw_version; j >= 0; j--) {
 			const struct ipahal_imm_cmd_obj *imm_cmd;
 
 			imm_cmd = &ipahal_imm_cmd_objs[j][i];
@@ -849,17 +849,17 @@ void ipahal_dma_free(struct ipa_mem_buffer *mem)
 	memset(mem, 0, sizeof(*mem));
 }
 
-void ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base)
+void ipahal_init(enum ipa_hw_version hw_version, void __iomem *base)
 {
-	ipa_debug("Entry - IPA HW TYPE=%d base=%p\n", ipa_hw_type, base);
+	ipa_debug("Entry - IPA HW TYPE=%d base=%p\n", hw_version, base);
 
 	ipahal_ctx->base = base;
 	/* ipahal_ctx->ipa_pdev must be set by a call to ipahal_dev_init() */
 
 	/* Packet status parsing code requires no initialization */
-	ipahal_reg_init(ipa_hw_type);
-	ipahal_imm_cmd_init(ipa_hw_type);
-	ipahal_fltrt_init(ipa_hw_type);
+	ipahal_reg_init(hw_version);
+	ipahal_imm_cmd_init(hw_version);
+	ipahal_fltrt_init(hw_version);
 }
 
 /*

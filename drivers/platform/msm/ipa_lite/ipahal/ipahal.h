@@ -641,7 +641,7 @@ int ipahal_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp);
  */
 void ipahal_dma_free(struct ipa_mem_buffer *mem);
 
-void ipahal_init(enum ipa_hw_type ipa_hw_type, void __iomem *base);
+void ipahal_init(enum ipa_hw_version hw_version, void __iomem *base);
 int ipahal_dev_init(struct device *ipa_pdev);
 void ipahal_dev_destroy(void);
 void ipahal_destroy(void);

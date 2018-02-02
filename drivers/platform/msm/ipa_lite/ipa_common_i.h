@@ -284,7 +284,7 @@ enum ipa_dp_evt_type {
 };
 
 /**
- * enum ipa_hw_type - IPA hardware version type
+ * enum ipa_hw_version - IPA hardware version
  * @IPA_HW_v3_5_1: IPA hardware version 3.5.1
  * @IPA_HW_None: IPA hardware version not defined
  *
@@ -294,7 +294,7 @@ enum ipa_dp_evt_type {
  * order is significant for ipa_hw_type values--higher numeric
  * values imply newer hardware versions.
  */
-enum ipa_hw_type {
+enum ipa_hw_version {
 	IPA_HW_v3_5_1	= 0,
 	IPA_HW_None	= 0xffffffff,
 };

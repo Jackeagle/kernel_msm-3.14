@@ -2187,7 +2187,7 @@ fail_init_hw:
 }
 
 /* Return the IPA hardware version, or IPA_HW_None for any error */
-static enum ipa_hw_type ipa_version_get(struct platform_device *pdev)
+static enum ipa_hw_version ipa_version_get(struct platform_device *pdev)
 {
 	struct device_node *node = pdev->dev.of_node;
 	u32 ipa_version = 0;
@@ -2490,7 +2490,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 {
 	struct device *dev = &pdev_p->dev;
 	struct device_node *node = dev->of_node;
-	enum ipa_hw_type ipa_version;
+	enum ipa_hw_version hw_version;
 	struct resource *res;
 	int result;
 
@@ -2519,12 +2519,12 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		ipa_err("failed to create IPC log, continue...\n");
 
 	/* Find out whether we're working with supported hardware */
-	ipa_version = ipa_version_get(pdev_p);
-	if (ipa_version == IPA_HW_None) {
+	hw_version = ipa_version_get(pdev_p);
+	if (hw_version == IPA_HW_None) {
 		result = -ENODEV;
 		goto err_destroy_logbuf;
 	}
-	ipa_debug(": ipa_version = %d", ipa_version);
+	ipa_debug(": ipa_version = %d", hw_version);
 
 	result = of_property_read_u32(node, "qcom,ee", &ipa3_ctx->ee);
 	if (result)
@@ -2557,7 +2557,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_clear_ctrl;
 	}
 
-	ipahal_init(ipa_version, ipa3_ctx->mmio);
+	ipahal_init(hw_version, ipa3_ctx->mmio);
 
 	result = ipa3_init_mem_partition(node);
 	if (result) {
