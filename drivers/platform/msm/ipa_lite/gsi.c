@@ -2032,7 +2032,7 @@ free_lock:
 }
 
 /* Initialize GSI driver */
-struct gsi_ctx *msm_gsi_init(struct platform_device *pdev, void *logbuf)
+struct gsi_ctx *msm_gsi_init(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 
@@ -2042,10 +2042,6 @@ struct gsi_ctx *msm_gsi_init(struct platform_device *pdev, void *logbuf)
 		dev_err(dev, "failed to allocated gsi context\n");
 		return ERR_PTR(-ENOMEM);
 	}
-
-	gsi_ctx->ipc_logbuf = logbuf;
-	if (!logbuf)
-		ipa_err("no IPC log, continue...\n");
 
 	gsi_ctx->dev = dev;
 	init_completion(&gsi_ctx->gen_ee_cmd_compl);
