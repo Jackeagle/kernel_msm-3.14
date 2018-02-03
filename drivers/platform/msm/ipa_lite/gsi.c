@@ -1144,7 +1144,6 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 {
 	struct gsi_chan_ctx *ctx;
 	uint32_t val;
-	int res;
 	int ee = gsi_ctx->ee;
 	enum gsi_ch_cmd_opcode op = GSI_CH_ALLOCATE;
 	uint8_t erindex;
@@ -1191,8 +1190,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 		((op << GSI_EE_n_GSI_CH_CMD_OPCODE_SHFT) &
 			 GSI_EE_n_GSI_CH_CMD_OPCODE_BMSK));
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(ee));
-	res = wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT);
-	if (res == 0) {
+	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
 		ipa_err("chan_id=%ld timed out\n", chan_id);
 		mutex_unlock(&gsi_ctx->mlock);
 		devm_kfree(gsi_ctx->dev, user_data);
