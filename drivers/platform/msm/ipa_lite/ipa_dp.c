@@ -2575,7 +2575,6 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	int result;
 	u32 size;
 
-	ep->gsi_evt_ring_hdl = GSI_NO_EVT_ERINDEX;
 	if (ep->sys->use_comm_evt_ring) {
 		if (ipa3_ctx->gsi_evt_comm_ring_rem < 2 * in->desc_fifo_sz) {
 			ipa_err("not enough space in common event ring\n");
