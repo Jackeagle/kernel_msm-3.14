@@ -861,8 +861,8 @@ long gsi_alloc_evt_ring(u32 size, uint16_t int_modt, bool excl)
 
 	/* Start by allocating the event id to use */
 	mutex_lock(&gsi_ctx->mlock);
-	evt_id = find_first_zero_bit(&gsi_ctx->evt_bmap, BITS_PER_LONG);
-	if (evt_id == BITS_PER_LONG) {
+	evt_id = find_first_zero_bit(&gsi_ctx->evt_bmap, GSI_EVT_RING_MAX);
+	if (evt_id == GSI_EVT_RING_MAX) {
 		ipa_err("failed to alloc event ID\n");
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ENOMEM;
