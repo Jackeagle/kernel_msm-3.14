@@ -1156,11 +1156,6 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 		return -EINVAL;
 	}
 
-	if (props->evt_ring_hdl >= GSI_EVT_RING_MAX) {
-		ipa_err("invalid evt ring=%lu\n", props->evt_ring_hdl);
-		return -EINVAL;
-	}
-
 	if (atomic_read(&gsi_ctx->evtr[props->evt_ring_hdl].chan_ref_cnt) &&
 		gsi_ctx->evtr[props->evt_ring_hdl].exclusive) {
 		ipa_err("evt ring=%lu exclusively in use\n",
