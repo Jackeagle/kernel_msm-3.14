@@ -1156,19 +1156,16 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 		return -EINVAL;
 	}
 
-	if (props->evt_ring_hdl != GSI_NO_EVT_ERINDEX) {
-		if (props->evt_ring_hdl >= GSI_EVT_RING_MAX) {
-			ipa_err("invalid evt ring=%lu\n", props->evt_ring_hdl);
-			return -EINVAL;
-		}
+	if (props->evt_ring_hdl >= GSI_EVT_RING_MAX) {
+		ipa_err("invalid evt ring=%lu\n", props->evt_ring_hdl);
+		return -EINVAL;
+	}
 
-		if (atomic_read(
-			&gsi_ctx->evtr[props->evt_ring_hdl].chan_ref_cnt) &&
-			gsi_ctx->evtr[props->evt_ring_hdl].exclusive) {
-			ipa_err("evt ring=%lu exclusively in use\n",
-				props->evt_ring_hdl);
-			return -ENOTSUPP;
-		}
+	if (atomic_read(&gsi_ctx->evtr[props->evt_ring_hdl].chan_ref_cnt) &&
+		gsi_ctx->evtr[props->evt_ring_hdl].exclusive) {
+		ipa_err("evt ring=%lu exclusively in use\n",
+			props->evt_ring_hdl);
+		return -ENOTSUPP;
 	}
 
 	chan_id = (long)props->ch_id;
@@ -1216,12 +1213,10 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	mutex_unlock(&gsi_ctx->mlock);
 
 	erindex = props->evt_ring_hdl;
-	if (erindex != GSI_NO_EVT_ERINDEX) {
-		ctx->evtr = &gsi_ctx->evtr[erindex];
-		atomic_inc(&ctx->evtr->chan_ref_cnt);
-		if (ctx->evtr->exclusive)
-			ctx->evtr->chan = ctx;
-	}
+	ctx->evtr = &gsi_ctx->evtr[erindex];
+	atomic_inc(&ctx->evtr->chan_ref_cnt);
+	if (ctx->evtr->exclusive)
+		ctx->evtr->chan = ctx;
 
 	gsi_program_chan_ctx(props, gsi_ctx->ee, erindex);
 
