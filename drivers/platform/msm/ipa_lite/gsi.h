@@ -896,17 +896,6 @@ int gsi_configure_regs(phys_addr_t gsi_base_addr, u32 gsi_size,
 		phys_addr_t per_base_addr);
 
 /**
- * gsi_enable_fw - Peripheral should call this function
- * to enable the GSI FW after the FW has been loaded to the SRAM.
- *
- * @gsi_base_addr: Base address of GSI register space
- * @gsi_size: Mapping size of the GSI register space
-
- * @Return gsi_status
- */
-int gsi_enable_fw(phys_addr_t gsi_base_addr, u32 gsi_size);
-
-/**
  * gsi_halt_channel_ee - Peripheral should call this function
  * to stop other EE's channel. This is usually used in SSR clean
  *
