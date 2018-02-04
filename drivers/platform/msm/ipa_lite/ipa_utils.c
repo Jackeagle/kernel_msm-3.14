@@ -2182,43 +2182,41 @@ bool ipa_is_modem_pipe(int pipe_idx)
 	return false;
 }
 
-static void ipa3_write_rsrc_grp_type_reg(int group_index,
-			enum ipa_rsrc_grp_type_src n, bool src,
+static void ipa3_write_src_rsrc_grp_type_reg(int group_index,
+			enum ipa_rsrc_grp_type_src n,
 			struct ipahal_reg_rsrc_grp_cfg *val)
 {
-	if (src) {
-		switch (group_index) {
-		case IPA_v3_5_GROUP_LWA_DL:
-		case IPA_v3_5_GROUP_UL_DL:
-			ipahal_write_reg_n_fields(
-				IPA_SRC_RSRC_GRP_01_RSRC_TYPE_n,
-				n, val);
-			break;
-		case IPA_v3_5_GROUP_UC_RX_Q:
-			ipahal_write_reg_n_fields(
-				IPA_SRC_RSRC_GRP_23_RSRC_TYPE_n,
-				n, val);
-			break;
-		default:
-			ipa_err(
-			" Invalid source resource group,index #%d\n",
-			group_index);
-			break;
-		}
-	} else {
-		switch (group_index) {
-		case IPA_v3_5_GROUP_LWA_DL:
-		case IPA_v3_5_GROUP_UL_DL:
-			ipahal_write_reg_n_fields(
-				IPA_DST_RSRC_GRP_01_RSRC_TYPE_n,
-				n, val);
-			break;
-		default:
-			ipa_err(
-			" Invalid destination resource group,index #%d\n",
-			group_index);
-			break;
-		}
+	switch (group_index) {
+	case IPA_v3_5_GROUP_LWA_DL:
+	case IPA_v3_5_GROUP_UL_DL:
+		ipahal_write_reg_n_fields(IPA_SRC_RSRC_GRP_01_RSRC_TYPE_n,
+			n, val);
+		break;
+	case IPA_v3_5_GROUP_UC_RX_Q:
+		ipahal_write_reg_n_fields(IPA_SRC_RSRC_GRP_23_RSRC_TYPE_n,
+			n, val);
+		break;
+	default:
+		ipa_err(" Invalid source resource group,index #%d\n",
+				group_index);
+		break;
+	}
+}
+
+static void ipa3_write_dst_rsrc_grp_type_reg(int group_index,
+			enum ipa_rsrc_grp_type_src n,
+			struct ipahal_reg_rsrc_grp_cfg *val)
+{
+	switch (group_index) {
+	case IPA_v3_5_GROUP_LWA_DL:
+	case IPA_v3_5_GROUP_UL_DL:
+		ipahal_write_reg_n_fields(IPA_DST_RSRC_GRP_01_RSRC_TYPE_n,
+			n, val);
+		break;
+	default:
+		ipa_err(" Invalid destination resource group,index #%d\n",
+				group_index);
+		break;
 	}
 }
 
@@ -2250,7 +2248,7 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 			ipa3_rsrc_src_grp_config[IPA_HW_v3_5_1][i][j + 1].min;
 			val.y_max =
 			ipa3_rsrc_src_grp_config[IPA_HW_v3_5_1][i][j + 1].max;
-			ipa3_write_rsrc_grp_type_reg(j, i, true, &val);
+			ipa3_write_src_rsrc_grp_type_reg(j, i, &val);
 		}
 	}
 
@@ -2266,7 +2264,7 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 			ipa3_rsrc_dst_grp_config[IPA_HW_v3_5_1][i][j + 1].min;
 			val.y_max =
 			ipa3_rsrc_dst_grp_config[IPA_HW_v3_5_1][i][j + 1].max;
-			ipa3_write_rsrc_grp_type_reg(j, i, false, &val);
+			ipa3_write_dst_rsrc_grp_type_reg(j, i, &val);
 		}
 	}
 
