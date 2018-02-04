@@ -882,20 +882,6 @@ int gsi_queue_xfer(unsigned long chan_hdl, uint16_t num_xfers,
 int gsi_start_xfer(unsigned long chan_hdl);
 
 /**
- * gsi_configure_regs - Peripheral should call this function
- * to configure the GSI registers before/after the FW is
- * loaded but before it is enabled.
- *
- * @gsi_base_addr: Base address of GSI register space
- * @gsi_size: Mapping size of the GSI register space
- * @per_base_addr: Base address of the peripheral using GSI
- *
- * @Return gsi_status
- */
-int gsi_configure_regs(phys_addr_t gsi_base_addr, u32 gsi_size,
-		phys_addr_t per_base_addr);
-
-/**
  * gsi_halt_channel_ee - Peripheral should call this function
  * to stop other EE's channel. This is usually used in SSR clean
  *
