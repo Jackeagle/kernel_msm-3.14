@@ -2186,38 +2186,43 @@ static void ipa3_write_src_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
 			int group_index, enum ipa_rsrc_grp_type_src n,
 			struct ipahal_reg_rsrc_grp_cfg *val)
 {
+	enum ipahal_reg reg;
+
 	switch (group_index) {
 	case IPA_v3_5_GROUP_LWA_DL:
 	case IPA_v3_5_GROUP_UL_DL:
-		ipahal_write_reg_n_fields(IPA_SRC_RSRC_GRP_01_RSRC_TYPE_n,
-			n, val);
+		reg = IPA_SRC_RSRC_GRP_01_RSRC_TYPE_n;
 		break;
 	case IPA_v3_5_GROUP_UC_RX_Q:
-		ipahal_write_reg_n_fields(IPA_SRC_RSRC_GRP_23_RSRC_TYPE_n,
-			n, val);
+		reg = IPA_SRC_RSRC_GRP_23_RSRC_TYPE_n;
 		break;
 	default:
 		ipa_err(" Invalid source resource group,index #%d\n",
 				group_index);
-		break;
+		return;
 	}
+
+	ipahal_write_reg_n_fields(reg, n, val);
 }
 
 static void ipa3_write_dst_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
 			int group_index, enum ipa_rsrc_grp_type_src n,
 			struct ipahal_reg_rsrc_grp_cfg *val)
 {
+	enum ipahal_reg reg;
+
 	switch (group_index) {
 	case IPA_v3_5_GROUP_LWA_DL:
 	case IPA_v3_5_GROUP_UL_DL:
-		ipahal_write_reg_n_fields(IPA_DST_RSRC_GRP_01_RSRC_TYPE_n,
-			n, val);
+		reg = IPA_DST_RSRC_GRP_01_RSRC_TYPE_n;
 		break;
 	default:
 		ipa_err(" Invalid destination resource group,index #%d\n",
 				group_index);
-		break;
+		return;
 	}
+
+	ipahal_write_reg_n_fields(reg, n, val);
 }
 
 void ipa3_set_resorce_groups_min_max_limits(void)
