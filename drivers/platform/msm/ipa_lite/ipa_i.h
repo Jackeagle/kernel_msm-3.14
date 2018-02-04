@@ -1166,7 +1166,7 @@ const struct ipa_gsi_ep_config *ipa3_get_gsi_ep_info
 u32 ipa3_get_num_pipes(void);
 int ipa3_ap_suspend(struct device *dev);
 int ipa3_ap_resume(struct device *dev);
-void ipa3_set_resorce_groups_min_max_limits(void);
+void ipa3_set_resource_groups_min_max_limits(void);
 void ipa3_suspend_apps_pipes(bool suspend);
 int ipa3_inject_dma_task_for_gsi(void);
 int ipa3_uc_panic_notifier(struct notifier_block *this,

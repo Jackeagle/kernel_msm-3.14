@@ -1709,7 +1709,7 @@ static int ipa3_post_init(struct device *ipa_dev)
 	int result;
 
 	/* Assign resource limitation to each group */
-	ipa3_set_resorce_groups_min_max_limits();
+	ipa3_set_resource_groups_min_max_limits();
 
 	result = ipa3_init_interrupts();
 	if (result) {
