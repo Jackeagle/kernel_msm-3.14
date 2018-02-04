@@ -35,7 +35,8 @@ static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 	struct gsi_chan_props chan_props;
 
 	/* Allocate the DMA space first; it can fail */
-	if (ipahal_dma_alloc(chan_dma, 2 * GSI_CHAN_RE_SIZE_16B, GFP_KERNEL))
+	if (ipahal_dma_alloc(chan_dma, 2 * GSI_CHAN_RING_ELEMENT_SIZE,
+				GFP_KERNEL))
 		return -ENOMEM;
 
 	/* Set up channel properties */

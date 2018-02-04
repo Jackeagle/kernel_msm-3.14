@@ -2645,9 +2645,10 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	ep->gsi_chan_hdl = result;
 
 	memset(&ch_scratch, 0, sizeof(ch_scratch));
-	ch_scratch.gpi.max_outstanding_tre = gsi_ep_info->ipa_if_tlv *
-		GSI_CHAN_RE_SIZE_16B;
-	ch_scratch.gpi.outstanding_threshold = 2 * GSI_CHAN_RE_SIZE_16B;
+	ch_scratch.gpi.max_outstanding_tre =
+			gsi_ep_info->ipa_if_tlv * GSI_CHAN_RING_ELEMENT_SIZE;
+	ch_scratch.gpi.outstanding_threshold =
+			2 * GSI_CHAN_RING_ELEMENT_SIZE;
 	result = gsi_write_channel_scratch(ep->gsi_chan_hdl, ch_scratch);
 	if (result) {
 		ipa_err("failed to write scratch %d\n", result);
