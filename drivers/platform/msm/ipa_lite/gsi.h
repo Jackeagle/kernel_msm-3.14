@@ -235,12 +235,6 @@ struct gsi_chan_err_notify {
 	uint16_t err_desc;
 };
 
-enum gsi_chan_ring_elem_size {
-	GSI_CHAN_RE_SIZE_4B = 4,
-	GSI_CHAN_RE_SIZE_16B = 16,
-	GSI_CHAN_RE_SIZE_32B = 32,
-};
-
 enum gsi_chan_use_db_eng {
 	GSI_CHAN_DIRECT_MODE = 0x0,
 	GSI_CHAN_DB_MODE = 0x1,
@@ -309,7 +303,6 @@ struct gsi_chan_props {
 	enum gsi_chan_dir dir;
 	uint8_t ch_id;
 	unsigned long evt_ring_hdl;
-	enum gsi_chan_ring_elem_size re_size;
 	uint16_t max_re_expected;
 	enum gsi_chan_use_db_eng use_db_eng;
 	uint8_t low_weight;
