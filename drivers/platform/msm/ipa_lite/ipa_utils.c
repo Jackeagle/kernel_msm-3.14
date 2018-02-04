@@ -2182,8 +2182,8 @@ bool ipa_is_modem_pipe(int pipe_idx)
 	return false;
 }
 
-static void ipa3_write_src_rsrc_grp_type_reg(int group_index,
-			enum ipa_rsrc_grp_type_src n,
+static void ipa3_write_src_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
+			int group_index, enum ipa_rsrc_grp_type_src n,
 			struct ipahal_reg_rsrc_grp_cfg *val)
 {
 	switch (group_index) {
@@ -2203,8 +2203,8 @@ static void ipa3_write_src_rsrc_grp_type_reg(int group_index,
 	}
 }
 
-static void ipa3_write_dst_rsrc_grp_type_reg(int group_index,
-			enum ipa_rsrc_grp_type_src n,
+static void ipa3_write_dst_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
+			int group_index, enum ipa_rsrc_grp_type_src n,
 			struct ipahal_reg_rsrc_grp_cfg *val)
 {
 	switch (group_index) {
@@ -2222,6 +2222,7 @@ static void ipa3_write_dst_rsrc_grp_type_reg(int group_index,
 
 void ipa3_set_resorce_groups_min_max_limits(void)
 {
+	enum ipa_hw_version hw_version = IPA_HW_v3_5_1;
 	int i;
 	int j;
 	int src_rsrc_type_max;
@@ -2241,14 +2242,15 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 	for (i = 0; i < src_rsrc_type_max; i++) {
 		for (j = 0; j < src_grp_idx_max; j = j + 2) {
 			val.x_min =
-			ipa3_rsrc_src_grp_config[IPA_HW_v3_5_1][i][j].min;
+			ipa3_rsrc_src_grp_config[hw_version][i][j].min;
 			val.x_max =
-			ipa3_rsrc_src_grp_config[IPA_HW_v3_5_1][i][j].max;
+			ipa3_rsrc_src_grp_config[hw_version][i][j].max;
 			val.y_min =
-			ipa3_rsrc_src_grp_config[IPA_HW_v3_5_1][i][j + 1].min;
+			ipa3_rsrc_src_grp_config[hw_version][i][j + 1].min;
 			val.y_max =
-			ipa3_rsrc_src_grp_config[IPA_HW_v3_5_1][i][j + 1].max;
-			ipa3_write_src_rsrc_grp_type_reg(j, i, &val);
+			ipa3_rsrc_src_grp_config[hw_version][i][j + 1].max;
+			ipa3_write_src_rsrc_grp_type_reg(hw_version,
+					j, i, &val);
 		}
 	}
 
@@ -2257,14 +2259,15 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 	for (i = 0; i < dst_rsrc_type_max; i++) {
 		for (j = 0; j < dst_grp_idx_max; j = j + 2) {
 			val.x_min =
-			ipa3_rsrc_dst_grp_config[IPA_HW_v3_5_1][i][j].min;
+			ipa3_rsrc_dst_grp_config[hw_version][i][j].min;
 			val.x_max =
-			ipa3_rsrc_dst_grp_config[IPA_HW_v3_5_1][i][j].max;
+			ipa3_rsrc_dst_grp_config[hw_version][i][j].max;
 			val.y_min =
-			ipa3_rsrc_dst_grp_config[IPA_HW_v3_5_1][i][j + 1].min;
+			ipa3_rsrc_dst_grp_config[hw_version][i][j + 1].min;
 			val.y_max =
-			ipa3_rsrc_dst_grp_config[IPA_HW_v3_5_1][i][j + 1].max;
-			ipa3_write_dst_rsrc_grp_type_reg(j, i, &val);
+			ipa3_rsrc_dst_grp_config[hw_version][i][j + 1].max;
+			ipa3_write_dst_rsrc_grp_type_reg(hw_version,
+					j, i, &val);
 		}
 	}
 
