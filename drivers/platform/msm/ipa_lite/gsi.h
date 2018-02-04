@@ -907,19 +907,6 @@ int gsi_configure_regs(phys_addr_t gsi_base_addr, u32 gsi_size,
 int gsi_enable_fw(phys_addr_t gsi_base_addr, u32 gsi_size);
 
 /**
- * gsi_get_inst_ram_offset_and_size - Peripheral should call this function
- * to get instruction RAM base address offset and size. Peripheral typically
- * uses this info to load GSI FW into the IRAM.
- *
- * @base_offset:[OUT] - IRAM base offset address
- * @size:	[OUT] - IRAM size
-
- * @Return none
- */
-void gsi_get_inst_ram_offset_and_size(unsigned long *base_offset,
-		unsigned long *size);
-
-/**
  * gsi_halt_channel_ee - Peripheral should call this function
  * to stop other EE's channel. This is usually used in SSR clean
  *

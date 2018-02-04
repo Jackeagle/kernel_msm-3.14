@@ -1955,16 +1955,6 @@ int gsi_enable_fw(phys_addr_t gsi_base_addr, u32 gsi_size)
 
 }
 
-void gsi_get_inst_ram_offset_and_size(unsigned long *base_offset,
-		unsigned long *size)
-{
-	if (base_offset)
-		*base_offset = GSI_GSI_INST_RAM_n_OFFS(0);
-	if (size)
-		*size = GSI_GSI_INST_RAM_n_WORD_SZ *
-			(GSI_GSI_INST_RAM_n_MAXn + 1);
-}
-
 int gsi_halt_channel_ee(unsigned int chan_idx, unsigned int ee, int *code)
 {
 	enum gsi_generic_ee_cmd_opcode op = GSI_GEN_EE_CMD_HALT_CHANNEL;
