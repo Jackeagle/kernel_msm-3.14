@@ -227,7 +227,7 @@ static ssize_t gsi_dump_ee(struct file *file,
 {
 	uint32_t val;
 
-	val = gsi_readl(GSI_GSI_MANAGER_EE_QOS_n_OFFS(gsi_ctx->ee));
+	val = gsi_readl(GSI_MANAGER_EE_QOS_n_OFFS(gsi_ctx->ee));
 	pr_err("EE%2d QOS 0x%x\n", gsi_ctx->ee, val);
 	val = gsi_readl(GSI_EE_n_GSI_STATUS_OFFS(gsi_ctx->ee));
 	pr_err("EE%2d STATUS 0x%x\n", gsi_ctx->ee, val);
@@ -287,17 +287,17 @@ static ssize_t gsi_dump_map(struct file *file,
 		if (ctx->allocated) {
 			pr_err("VIRT CH%2d -> VIRT EV%2d\n", ctx->props.ch_id,
 				ctx->evtr ? ctx->evtr->id : GSI_NO_EVT_ERINDEX);
-			val1 = gsi_readl(GSI_GSI_DEBUG_EE_n_CH_k_VP_TABLE_OFFS(i,
+			val1 = gsi_readl(GSI_DEBUG_EE_n_CH_k_VP_TABLE_OFFS(i,
 					gsi_ctx->ee));
 			pr_err("VIRT CH%2d -> PHYS CH%2d\n", ctx->props.ch_id,
 				val1 &
-				GSI_GSI_DEBUG_EE_n_CH_k_VP_TABLE_PHY_CH_BMSK);
+				GSI_DEBUG_EE_n_CH_k_VP_TABLE_PHY_CH_BMSK);
 			if (ctx->evtr) {
-				val2 = gsi_readl(GSI_GSI_DEBUG_EE_n_EV_k_VP_TABLE_OFFS(
+				val2 = gsi_readl(GSI_DEBUG_EE_n_EV_k_VP_TABLE_OFFS(
 					ctx->evtr->id, gsi_ctx->ee));
 				pr_err("VRT EV%2d -> PHYS EV%2d\n", ctx->evtr->id,
 				val2 &
-				GSI_GSI_DEBUG_EE_n_CH_k_VP_TABLE_PHY_CH_BMSK);
+				GSI_DEBUG_EE_n_CH_k_VP_TABLE_PHY_CH_BMSK);
 			}
 			pr_err("\n");
 		}
