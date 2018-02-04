@@ -290,14 +290,12 @@ static ssize_t gsi_dump_map(struct file *file,
 			val1 = gsi_readl(GSI_DEBUG_EE_n_CH_k_VP_TABLE_OFFS(i,
 					gsi_ctx->ee));
 			pr_err("VIRT CH%2d -> PHYS CH%2d\n", ctx->props.ch_id,
-				val1 &
-				GSI_DEBUG_EE_n_CH_k_VP_TABLE_PHY_CH_BMSK);
+				val1 & PHY_CH_BMSK);
 			if (ctx->evtr) {
 				val2 = gsi_readl(GSI_DEBUG_EE_n_EV_k_VP_TABLE_OFFS(
 					ctx->evtr->id, gsi_ctx->ee));
 				pr_err("VRT EV%2d -> PHYS EV%2d\n", ctx->evtr->id,
-				val2 &
-				GSI_DEBUG_EE_n_CH_k_VP_TABLE_PHY_CH_BMSK);
+				val2 & PHY_CH_BMSK);
 			}
 			pr_err("\n");
 		}
