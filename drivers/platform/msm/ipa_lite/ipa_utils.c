@@ -2484,31 +2484,35 @@ void ipa_write_64(u64 w, u8 *dest)
 	put_unaligned(w, dest);
 }
 
+#define prod_index(client)	IPA_CLIENT_ ## client ## _PROD
+#define prod_string(client) \
+		[prod_index(client)] = #client "_PROD"
+#define cons_index(client)	IPA_CLIENT_ ## client ## _CONS
+#define cons_string(client) \
+		[cons_index(client)] = #client "_CONS"
+#define both_strings(client) \
+		prod_string(client), cons_string(client)
 static const char *ipa_clients_strings[IPA_CLIENT_MAX] = {
-	[IPA_CLIENT_A2_EMBEDDED_PROD] = __stringify(IPA_CLIENT_A2_EMBEDDED_PROD),
-	[IPA_CLIENT_A2_EMBEDDED_CONS] = __stringify(IPA_CLIENT_A2_EMBEDDED_CONS),
-	[IPA_CLIENT_APPS_LAN_PROD] = __stringify(IPA_CLIENT_APPS_LAN_PROD),
-	[IPA_CLIENT_APPS_LAN_CONS] = __stringify(IPA_CLIENT_APPS_LAN_CONS),
-	[IPA_CLIENT_APPS_WAN_PROD] = __stringify(IPA_CLIENT_APPS_WAN_PROD),
-	[IPA_CLIENT_APPS_WAN_CONS] = __stringify(IPA_CLIENT_APPS_WAN_CONS),
-	[IPA_CLIENT_APPS_CMD_PROD] = __stringify(IPA_CLIENT_APPS_CMD_PROD),
-	[IPA_CLIENT_A5_LAN_WAN_CONS] = __stringify(IPA_CLIENT_A5_LAN_WAN_CONS),
-	[IPA_CLIENT_Q6_LAN_PROD] = __stringify(IPA_CLIENT_Q6_LAN_PROD),
-	[IPA_CLIENT_Q6_LAN_CONS] = __stringify(IPA_CLIENT_Q6_LAN_CONS),
-	[IPA_CLIENT_Q6_WAN_PROD] = __stringify(IPA_CLIENT_Q6_WAN_PROD),
-	[IPA_CLIENT_Q6_WAN_CONS] = __stringify(IPA_CLIENT_Q6_WAN_CONS),
-	[IPA_CLIENT_Q6_CMD_PROD] = __stringify(IPA_CLIENT_Q6_CMD_PROD),
-	[IPA_CLIENT_Q6_DUN_CONS] = __stringify(IPA_CLIENT_Q6_DUN_CONS),
-	[IPA_CLIENT_MEMCPY_DMA_SYNC_PROD] = __stringify(IPA_CLIENT_MEMCPY_DMA_SYNC_PROD),
-	[IPA_CLIENT_MEMCPY_DMA_SYNC_CONS] = __stringify(IPA_CLIENT_MEMCPY_DMA_SYNC_CONS),
-	[IPA_CLIENT_MEMCPY_DMA_ASYNC_PROD] = __stringify(IPA_CLIENT_MEMCPY_DMA_ASYNC_PROD),
-	[IPA_CLIENT_MEMCPY_DMA_ASYNC_CONS] = __stringify(IPA_CLIENT_MEMCPY_DMA_ASYNC_CONS),
-	[IPA_CLIENT_Q6_DECOMP_PROD] = __stringify(IPA_CLIENT_Q6_DECOMP_PROD),
-	[IPA_CLIENT_Q6_DECOMP_CONS] = __stringify(IPA_CLIENT_Q6_DECOMP_CONS),
-	[IPA_CLIENT_Q6_DECOMP2_PROD] = __stringify(IPA_CLIENT_Q6_DECOMP2_PROD),
-	[IPA_CLIENT_Q6_DECOMP2_CONS] = __stringify(IPA_CLIENT_Q6_DECOMP2_CONS),
-	[IPA_CLIENT_Q6_LTE_WIFI_AGGR_CONS] = __stringify(IPA_CLIENT_Q6_LTE_WIFI_AGGR_CONS),
+	both_strings(A2_EMBEDDED),
+	both_strings(APPS_LAN),
+	both_strings(APPS_WAN),
+	prod_string(APPS_CMD),
+	cons_string(A5_LAN_WAN),
+	both_strings(Q6_LAN),
+	both_strings(Q6_WAN),
+	prod_string(Q6_CMD),
+	cons_string(Q6_DUN),
+	both_strings(MEMCPY_DMA_SYNC),
+	both_strings(MEMCPY_DMA_ASYNC),
+	both_strings(Q6_DECOMP),
+	both_strings(Q6_DECOMP2),
+	cons_string(Q6_LTE_WIFI_AGGR),
 };
+#undef both_strings
+#undef cons_string
+#undef cons_index
+#undef prod_string
+#undef prod_index
 
 const char *ipa_client_string(enum ipa_client_type client)
 {
