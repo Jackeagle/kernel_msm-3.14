@@ -223,7 +223,6 @@ enum ipa_ees {
 
 struct ipa_ep_configuration {
 	bool valid;
-	int group_num;
 	bool support_flt;
 	int sequencer_type;
 	u8 qmb_master_sel;
@@ -237,7 +236,6 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 	[IPA_HW_v3_5_1] = {
 		[IPA_CLIENT_APPS_LAN_PROD] = {
 			.valid		= true,
-			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= false,
 			.sequencer_type =
 				IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
@@ -252,7 +250,6 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 		},
 		[IPA_CLIENT_APPS_WAN_PROD] = {
 			.valid		= true,
-			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= true,
 			.sequencer_type =
 				IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
@@ -267,7 +264,6 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 		},
 		[IPA_CLIENT_APPS_CMD_PROD] = {
 			.valid		= true,
-			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= false,
 			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_DMA_ONLY,
 			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
@@ -281,7 +277,6 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 		},
 		[IPA_CLIENT_Q6_LAN_PROD] = {
 			.valid		= true,
-			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= true,
 			.sequencer_type =
 				IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
@@ -296,7 +291,6 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 		},
 		[IPA_CLIENT_Q6_WAN_PROD] = {
 			.valid		= true,
-			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= true,
 			.sequencer_type =
 				IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
@@ -311,7 +305,6 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 		},
 		[IPA_CLIENT_Q6_CMD_PROD] = {
 			.valid		= true,
-			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= false,
 			.sequencer_type =
 				IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
@@ -326,7 +319,6 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 		},
 		[IPA_CLIENT_APPS_LAN_CONS] = {
 			.valid		= true,
-			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= false,
 			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
 			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
@@ -340,7 +332,6 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 		},
 		[IPA_CLIENT_APPS_WAN_CONS] = {
 			.valid		= true,
-			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= false,
 			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
 			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
@@ -354,7 +345,6 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 		},
 		[IPA_CLIENT_Q6_LAN_CONS] = {
 			.valid		= true,
-			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= false,
 			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
 			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
@@ -368,7 +358,6 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 		},
 		[IPA_CLIENT_Q6_WAN_CONS] = {
 			.valid		= true,
-			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= false,
 			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
 			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
@@ -383,7 +372,6 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 	/* Dummy consumer (pipe 31) is used in L2TP rt rule */
 		[IPA_CLIENT_DUMMY_CONS] = {
 			.valid		= true,
-			.group_num	= IPA_v3_5_GROUP_UL_DL,
 			.support_flt	= false,
 			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
 			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
