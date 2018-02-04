@@ -2230,6 +2230,8 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 	int src_grp_idx_max;
 	int dst_grp_idx_max;
 	struct ipahal_reg_rsrc_grp_cfg val;
+	const struct rsrc_min_max *x_limits;
+	const struct rsrc_min_max *y_limits;
 
 	ipa_debug("ENTER\n");
 	ipa_debug("Assign source rsrc groups min-max limits\n");
@@ -2241,14 +2243,13 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 
 	for (i = 0; i < src_rsrc_type_max; i++) {
 		for (j = 0; j < src_grp_idx_max; j = j + 2) {
-			val.x_min =
-			ipa3_rsrc_src_grp_config[hw_version][i][j].min;
-			val.x_max =
-			ipa3_rsrc_src_grp_config[hw_version][i][j].max;
-			val.y_min =
-			ipa3_rsrc_src_grp_config[hw_version][i][j + 1].min;
-			val.y_max =
-			ipa3_rsrc_src_grp_config[hw_version][i][j + 1].max;
+			x_limits = &ipa3_rsrc_src_grp_config[hw_version][i][j];
+			y_limits =
+				&ipa3_rsrc_src_grp_config[hw_version][i][j + 1];
+			val.x_min = x_limits->min;
+			val.x_max = x_limits->max;
+			val.y_min = y_limits->min;
+			val.y_max = y_limits->max;
 			ipa3_write_src_rsrc_grp_type_reg(hw_version,
 					j, i, &val);
 		}
@@ -2258,14 +2259,13 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 
 	for (i = 0; i < dst_rsrc_type_max; i++) {
 		for (j = 0; j < dst_grp_idx_max; j = j + 2) {
-			val.x_min =
-			ipa3_rsrc_dst_grp_config[hw_version][i][j].min;
-			val.x_max =
-			ipa3_rsrc_dst_grp_config[hw_version][i][j].max;
-			val.y_min =
-			ipa3_rsrc_dst_grp_config[hw_version][i][j + 1].min;
-			val.y_max =
-			ipa3_rsrc_dst_grp_config[hw_version][i][j + 1].max;
+			x_limits = &ipa3_rsrc_dst_grp_config[hw_version][i][j];
+			y_limits =
+				&ipa3_rsrc_dst_grp_config[hw_version][i][j + 1];
+			val.x_min = x_limits->min;
+			val.x_max = x_limits->max;
+			val.y_min = y_limits->min;
+			val.y_max = y_limits->max;
 			ipa3_write_dst_rsrc_grp_type_reg(hw_version,
 					j, i, &val);
 		}
