@@ -1438,24 +1438,15 @@ void ipa3_dump_buff_internal(void *base, dma_addr_t phy_base, u32 size)
 #define IPA_MEM_STATS_DROP_OFST			0x0
 #define IPA_MEM_STATS_DROP_SIZE			0x0
 
-#define ALIGN_CHECK(name)	({ BUILD_BUG_ON(name % name ## _ALIGN); name; })
-#define NONZERO_CHECK(name)	({ BUILD_BUG_ON(!name); name; })
-#define LO_HI_CHECK(name)	BUILD_BUG_ON(name ## _LO > name ## _HI)
-static int mem_partition_valid(void)
-{
-	/* Verify what we can at compile time */
-	LO_HI_CHECK(IPA_MEM_V4_MODEM_RT_INDEX);
-	LO_HI_CHECK(IPA_MEM_V6_MODEM_RT_INDEX);
-
-	return 0;
-}
-
 /**
  * ipa3_init_mem_partition() - Reads IPA memory map from DTS, performs alignment
  * checks and logs the fetched values.
  *
  * Returns:	0 on success
  */
+#define ALIGN_CHECK(name)	({ BUILD_BUG_ON(name % name ## _ALIGN); name; })
+#define NONZERO_CHECK(name)	({ BUILD_BUG_ON(!name); name; })
+#define LO_HI_CHECK(name)	BUILD_BUG_ON(name ## _LO > name ## _HI)
 int ipa3_init_mem_partition(struct device_node *node)
 {
 	u32 *mem = &ipa3_ctx->ctrl->mem_partition[0];
@@ -1503,6 +1494,7 @@ int ipa3_init_mem_partition(struct device_node *node)
 	mem[V4_RT_NUM_INDEX] = NONZERO_CHECK(IPA_MEM_V4_RT_NUM_INDEX);
 	ipa_debug("V4 RT NUM INDEX 0x%x\n", mem[V4_RT_NUM_INDEX]);
 
+	LO_HI_CHECK(IPA_MEM_V4_MODEM_RT_INDEX);
 	mem[V4_MODEM_RT_INDEX_LO] = IPA_MEM_V4_MODEM_RT_INDEX_LO;
 	mem[V4_MODEM_RT_INDEX_HI] = IPA_MEM_V4_MODEM_RT_INDEX_HI;
 	ipa_debug("V4 RT MODEM INDEXES 0x%x - 0x%x\n",
@@ -1534,6 +1526,7 @@ int ipa3_init_mem_partition(struct device_node *node)
 	mem[V6_RT_NUM_INDEX] = NONZERO_CHECK(IPA_MEM_V6_RT_NUM_INDEX);
 	ipa_debug("V6 RT NUM INDEX 0x%x\n", mem[V6_RT_NUM_INDEX]);
 
+	LO_HI_CHECK(IPA_MEM_V6_MODEM_RT_INDEX);
 	mem[V6_MODEM_RT_INDEX_LO] = IPA_MEM_V6_MODEM_RT_INDEX_LO;
 	mem[V6_MODEM_RT_INDEX_HI] = IPA_MEM_V6_MODEM_RT_INDEX_HI;
 	ipa_debug("V6 RT MODEM INDEXES 0x%x - 0x%x\n",
@@ -1688,7 +1681,7 @@ int ipa3_init_mem_partition(struct device_node *node)
 	mem[STATS_DROP_OFST] = IPA_MEM_STATS_RT_V6_SIZE;
 	mem[STATS_DROP_SIZE] = IPA_MEM_STATS_DROP_OFST;
 
-	return mem_partition_valid();
+	return 0;
 }
 #undef LO_HI_CHECK
 #undef NONZERO_CHECK
