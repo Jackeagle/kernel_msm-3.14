@@ -574,40 +574,42 @@ static irqreturn_t gsi_isr(int irq, void *ctxt)
 	return IRQ_HANDLED;
 }
 
-static uint32_t gsi_get_max_channels(void)
+static u32 gsi_get_max_channels(void)
 {
-	uint32_t reg;
+	u32 max_channels;
+	u32 val;
 
 	/* SDM845 uses GSI hardware version 1.3.0 */
-	reg = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->ee));
-	reg = (reg & GSI_NUM_CH_PER_EE_BMSK) >> GSI_NUM_CH_PER_EE_SHFT;
+	val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->ee));
+	max_channels = field_val(val, GSI_NUM_CH_PER_EE_BMSK);
 
-	if (WARN_ON(reg > GSI_CHAN_MAX)) {
-		ipa_err("bad gsi max channels %u\n", reg);
+	if (WARN_ON(max_channels > GSI_CHAN_MAX)) {
+		ipa_err("bad gsi max channels %u\n", max_channels);
 
 		return 0;
 	}
-	ipa_debug("max channels %d\n", reg);
+	ipa_debug("max channels %d\n", max_channels);
 
-	return reg;
+	return max_channels;
 }
 
-static uint32_t gsi_get_max_event_rings(void)
+static u32 gsi_get_max_event_rings(void)
 {
-	uint32_t reg;
+	u32 max_event_rings;
+	u32 val;
 
 	/* SDM845 uses GSI hardware version 1.3.0 */
-	reg = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->ee));
-	reg = (reg & GSI_NUM_EV_PER_EE_BMSK) >> GSI_NUM_EV_PER_EE_SHFT;
+	val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->ee));
+	max_event_rings = field_val(val, GSI_NUM_EV_PER_EE_BMSK);
 
-	if (WARN_ON(reg > GSI_EVT_RING_MAX)) {
-		ipa_err("bad gsi max event rings %u\n", reg);
+	if (WARN_ON(max_event_rings > GSI_EVT_RING_MAX)) {
+		ipa_err("bad gsi max event rings %u\n", max_event_rings);
 
 		return 0;
 	}
-	ipa_debug("max event rings %d\n", reg);
+	ipa_debug("max event rings %d\n", max_event_rings);
 
-	return reg;
+	return max_event_rings;
 }
 
 int gsi_register_device(u32 ee)
