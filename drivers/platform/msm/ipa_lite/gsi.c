@@ -1251,7 +1251,6 @@ int gsi_write_channel_scratch(unsigned long chan_hdl,
 int gsi_start_channel(unsigned long chan_hdl)
 {
 	enum gsi_ch_cmd_opcode op = GSI_CH_START;
-	int res;
 	uint32_t val;
 	struct gsi_chan_ctx *ctx;
 
@@ -1276,8 +1275,7 @@ int gsi_start_channel(unsigned long chan_hdl)
 	val = (((chan_hdl << CH_CHID_SHFT) & CH_CHID_BMSK) |
 		((op << CH_OPCODE_SHFT) & CH_OPCODE_BMSK));
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(gsi_ctx->ee));
-	res = wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT);
-	if (res == 0) {
+	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
 		ipa_err("chan_hdl=%lu timed out\n", chan_hdl);
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
@@ -1325,8 +1323,7 @@ int gsi_stop_channel(unsigned long chan_hdl)
 	val = (((chan_hdl << CH_CHID_SHFT) & CH_CHID_BMSK) |
 		((op << CH_OPCODE_SHFT) & CH_OPCODE_BMSK));
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(gsi_ctx->ee));
-	res = wait_for_completion_timeout(&ctx->compl, GSI_STOP_CMD_TIMEOUT);
-	if (res == 0) {
+	if (!wait_for_completion_timeout(&ctx->compl, GSI_STOP_CMD_TIMEOUT)) {
 		/*
 		 * check channel state here in case the channel is stopped but
 		 * the interrupt was not handled yet.
@@ -1366,7 +1363,6 @@ free_lock:
 int gsi_reset_channel(unsigned long chan_hdl)
 {
 	enum gsi_ch_cmd_opcode op = GSI_CH_RESET;
-	int res;
 	uint32_t val;
 	struct gsi_chan_ctx *ctx;
 	bool reset_done = false;
@@ -1391,8 +1387,7 @@ reset:
 	val = (((chan_hdl << CH_CHID_SHFT) & CH_CHID_BMSK) |
 		((op << CH_OPCODE_SHFT) & CH_OPCODE_BMSK));
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(gsi_ctx->ee));
-	res = wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT);
-	if (res == 0) {
+	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
 		ipa_err("chan_hdl=%lu timed out\n", chan_hdl);
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
@@ -1426,7 +1421,6 @@ reset:
 int gsi_dealloc_channel(unsigned long chan_hdl)
 {
 	enum gsi_ch_cmd_opcode op = GSI_CH_DE_ALLOC;
-	int res;
 	uint32_t val;
 	struct gsi_chan_ctx *ctx;
 
@@ -1449,8 +1443,7 @@ int gsi_dealloc_channel(unsigned long chan_hdl)
 	val = (((chan_hdl << CH_CHID_SHFT) & CH_CHID_BMSK) |
 		((op << CH_OPCODE_SHFT) & CH_OPCODE_BMSK));
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(gsi_ctx->ee));
-	res = wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT);
-	if (res == 0) {
+	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
 		ipa_err("chan_hdl=%lu timed out\n", chan_hdl);
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
