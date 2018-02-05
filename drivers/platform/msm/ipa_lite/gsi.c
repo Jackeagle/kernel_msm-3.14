@@ -91,14 +91,17 @@ static void gsi_handle_ch_ctrl(int ee)
 	}
 
 	for (i = 0; i < gsi_ctx->max_ch; i++) {
-		if (BIT(i) & ch_mask) {
-			ctx = &gsi_ctx->chan[i];
-			val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(i, ee));
-			ctx->state = field_val(val, CHSTATE_BMSK);
-			ipa_debug("ch %u state updated to %u\n", i, ctx->state);
-			complete(&ctx->compl);
-			gsi_ctx->ch_dbg[i].cmd_completed++;
-		}
+		if (!(BIT(i) & ch_mask))
+			continue;
+		ctx = &gsi_ctx->chan[i];
+
+		val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(i, ee));
+		ctx->state = field_val(val, CHSTATE_BMSK);
+		ipa_debug("ch %u state updated to %u\n", i, ctx->state);
+
+		complete(&ctx->compl);
+
+		gsi_ctx->ch_dbg[i].cmd_completed++;
 	}
 }
 
@@ -120,13 +123,15 @@ static void gsi_handle_ev_ctrl(int ee)
 	}
 
 	for (i = 0; i < gsi_ctx->max_ev; i++) {
-		if (BIT(i) & ev_mask) {
-			ctx = &gsi_ctx->evtr[i];
-			val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_0_OFFS(i, ee));
-			ctx->state = field_val(val, EV_CHSTATE_BMSK);
-			ipa_debug("evt %u state updated to %u\n", i, ctx->state);
-			complete(&ctx->compl);
-		}
+		if (!(BIT(i) & ev_mask))
+			continue;
+		ctx = &gsi_ctx->evtr[i];
+
+		val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_0_OFFS(i, ee));
+		ctx->state = field_val(val, EV_CHSTATE_BMSK);
+		ipa_debug("evt %u state updated to %u\n", i, ctx->state);
+
+		complete(&ctx->compl);
 	}
 }
 
@@ -445,30 +450,33 @@ static void gsi_handle_ieob(int ee)
 	}
 
 	for (i = 0; i < gsi_ctx->max_ev; i++) {
-		if (BIT(i) & ev_mask) {
-			ctx = &gsi_ctx->evtr[i];
+		if (!(BIT(i) & ev_mask))
+			continue;
+		ctx = &gsi_ctx->evtr[i];
 
-			spin_lock_irqsave(&ctx->ring.slock, flags);
+		spin_lock_irqsave(&ctx->ring.slock, flags);
 check_again:
-			cntr = 0;
-			rp = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(i, ee));
-			rp |= ctx->ring.rp & 0xFFFFFFFF00000000;
+		cntr = 0;
+		rp = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(i, ee));
+		rp |= ctx->ring.rp & 0xFFFFFFFF00000000;
 
-			ctx->ring.rp = rp;
-			while (ctx->ring.rp_local != rp) {
-				++cntr;
-				if (ctx->exclusive &&
-					atomic_read(&ctx->chan->poll_mode)) {
-					cntr = 0;
-					break;
-				}
-				gsi_process_evt_re(ctx, &notify, true);
+		ctx->ring.rp = rp;
+		while (ctx->ring.rp_local != rp) {
+			++cntr;
+			if (ctx->exclusive &&
+				atomic_read(&ctx->chan->poll_mode)) {
+				cntr = 0;
+				break;
 			}
-			gsi_ring_evt_doorbell(ctx);
-			if (cntr != 0)
-				goto check_again;
-			spin_unlock_irqrestore(&ctx->ring.slock, flags);
+			gsi_process_evt_re(ctx, &notify, true);
 		}
+
+		gsi_ring_evt_doorbell(ctx);
+
+		if (cntr != 0)
+			goto check_again;
+
+		spin_unlock_irqrestore(&ctx->ring.slock, flags);
 	}
 }
 
@@ -487,10 +495,10 @@ static void gsi_handle_inter_ee_ch_ctrl(int ee)
 	}
 
 	for (i = 0; i < gsi_ctx->max_ch; i++) {
-		if (BIT(i) & ch_mask) {
-			/* not currently expected */
-			ipa_err("ch %u was inter-EE changed\n", i);
-		}
+		if (!(BIT(i) & ch_mask))
+			continue;
+		/* not currently expected */
+		ipa_err("ch %u was inter-EE changed\n", i);
 	}
 }
 
@@ -509,10 +517,11 @@ static void gsi_handle_inter_ee_ev_ctrl(int ee)
 	}
 
 	for (i = 0; i < gsi_ctx->max_ev; i++) {
-		if (BIT(i) & ev_mask) {
-			/* not currently expected */
-			ipa_err("evt %u was inter-EE changed\n", i);
-		}
+		if (!(BIT(i) & ev_mask))
+			continue;
+
+		/* not currently expected */
+		ipa_err("evt %u was inter-EE changed\n", i);
 	}
 }
 
