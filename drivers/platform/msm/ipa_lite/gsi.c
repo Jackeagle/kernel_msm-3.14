@@ -77,8 +77,6 @@ static void gsi_handle_ch_ctrl(int ee)
 {
 	u32 valid_mask = GENMASK(gsi_ctx->max_ch - 1, 0);
 	u32 ch_mask;
-	u32 val;
-	struct gsi_chan_ctx *ctx;
 
 	ch_mask = gsi_readl(GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_OFFS(ee));
 	gsi_writel(ch_mask, GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_CLR_OFFS(ee));
@@ -91,8 +89,8 @@ static void gsi_handle_ch_ctrl(int ee)
 
 	while (ch_mask) {
 		int i = __ffs(ch_mask);
-
-		ctx = &gsi_ctx->chan[i];
+		struct gsi_chan_ctx *ctx = &gsi_ctx->chan[i];
+		u32 val;
 
 		val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(i, ee));
 		ctx->state = field_val(val, CHSTATE_BMSK);
@@ -110,8 +108,6 @@ static void gsi_handle_ev_ctrl(int ee)
 {
 	u32 valid_mask = GENMASK(gsi_ctx->max_ev - 1, 0);
 	u32 ev_mask;
-	u32 val;
-	struct gsi_evt_ctx *ctx;
 
 	ev_mask = gsi_readl(GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_OFFS(ee));
 	gsi_writel(ev_mask, GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_CLR_OFFS(ee));
@@ -124,8 +120,8 @@ static void gsi_handle_ev_ctrl(int ee)
 
 	while (ev_mask) {
 		int i = __ffs(ev_mask);
-
-		ctx = &gsi_ctx->evtr[i];
+		struct gsi_evt_ctx *ctx = &gsi_ctx->evtr[i];
+		u32 val;
 
 		val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_0_OFFS(i, ee));
 		ctx->state = field_val(val, EV_CHSTATE_BMSK);
@@ -434,12 +430,8 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *ctx)
 static void gsi_handle_ieob(int ee)
 {
 	u32 valid_mask = GENMASK(gsi_ctx->max_ev - 1, 0);
-	u32 ev_mask;
-	u64 rp;
-	struct gsi_evt_ctx *ctx;
 	struct gsi_chan_xfer_notify notify;
-	unsigned long flags;
-	unsigned long cntr;
+	u32 ev_mask;
 
 	ev_mask = gsi_readl(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_OFFS(ee));
 	ev_mask &= gsi_readl(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee));
@@ -452,8 +444,10 @@ static void gsi_handle_ieob(int ee)
 
 	while (ev_mask) {
 		int i = __ffs(ev_mask);
-
-		ctx = &gsi_ctx->evtr[i];
+		struct gsi_evt_ctx *ctx = &gsi_ctx->evtr[i];
+		unsigned long flags;
+		unsigned long cntr;
+		u64 rp;
 
 		spin_lock_irqsave(&ctx->ring.slock, flags);
 check_again:
