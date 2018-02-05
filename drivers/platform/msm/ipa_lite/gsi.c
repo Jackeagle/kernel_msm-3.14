@@ -22,8 +22,9 @@
 #include "gsi.h"
 #include "gsi_reg.h"
 
-#define GSI_CMD_TIMEOUT (5*HZ)
-#define GSI_STOP_CMD_TIMEOUT_MS 20
+#define GSI_CMD_TIMEOUT		msecs_to_jiffies(5000)
+#define GSI_STOP_CMD_TIMEOUT	msecs_to_jiffies(20)
+
 #define GSI_MAX_CH_LOW_WEIGHT 15
 #define GSI_MHI_ER_START 10
 #define GSI_MHI_ER_END 16
@@ -1324,8 +1325,7 @@ int gsi_stop_channel(unsigned long chan_hdl)
 	val = (((chan_hdl << CH_CHID_SHFT) & CH_CHID_BMSK) |
 		((op << CH_OPCODE_SHFT) & CH_OPCODE_BMSK));
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(gsi_ctx->ee));
-	res = wait_for_completion_timeout(&ctx->compl,
-			msecs_to_jiffies(GSI_STOP_CMD_TIMEOUT_MS));
+	res = wait_for_completion_timeout(&ctx->compl, GSI_STOP_CMD_TIMEOUT);
 	if (res == 0) {
 		/*
 		 * check channel state here in case the channel is stopped but
