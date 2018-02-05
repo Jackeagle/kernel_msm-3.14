@@ -92,7 +92,7 @@ static void gsi_handle_ch_ctrl(int ee)
 
 			ctx = &gsi_ctx->chan[i];
 			val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(i, ee));
-			ctx->state = (val & CHSTATE_BMSK) >> CHSTATE_SHFT;
+			ctx->state = field_val(val, CHSTATE_BMSK);
 			ipa_debug("ch %u state updated to %u\n", i, ctx->state);
 			complete(&ctx->compl);
 			gsi_ctx->ch_dbg[i].cmd_completed++;
@@ -119,7 +119,7 @@ static void gsi_handle_ev_ctrl(int ee)
 
 			ctx = &gsi_ctx->evtr[i];
 			val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_0_OFFS(i, ee));
-			ctx->state = (val & EV_CHSTATE_BMSK) >> EV_CHSTATE_SHFT;
+			ctx->state = field_val(val, EV_CHSTATE_BMSK);
 			ipa_debug("evt %u state updated to %u\n", i, ctx->state);
 			complete(&ctx->compl);
 		}
@@ -200,7 +200,7 @@ static void gsi_handle_glob_err(uint32_t err)
 			BUG_ON(log->ee != gsi_ctx->ee);
 			val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(log->virt_idx,
 					gsi_ctx->ee));
-			ch->state = (val & CHSTATE_BMSK) >> CHSTATE_SHFT;
+			ch->state = field_val(val, CHSTATE_BMSK);
 			ipa_debug("ch %u state updated to %u\n", log->virt_idx,
 					ch->state);
 			ch->stats.invalid_tre_error++;
@@ -1339,7 +1339,7 @@ int gsi_stop_channel(unsigned long chan_hdl)
 		 */
 		val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(chan_hdl,
 			gsi_ctx->ee));
-		ctx->state = (val & CHSTATE_BMSK) >> CHSTATE_SHFT;
+		ctx->state = field_val(val, CHSTATE_BMSK);
 		if (ctx->state == GSI_CHAN_STATE_STOPPED) {
 			res = 0;
 			goto free_lock;
