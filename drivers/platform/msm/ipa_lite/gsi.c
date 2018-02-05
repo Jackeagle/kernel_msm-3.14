@@ -75,16 +75,16 @@ static void gsi_irq_control_all(u32 ee, bool enable)
 
 static void gsi_handle_ch_ctrl(int ee)
 {
-	u32 ch;
+	u32 ch_mask;
 	int i;
 	u32 val;
 	struct gsi_chan_ctx *ctx;
 
-	ch = gsi_readl(GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_OFFS(ee));
-	gsi_writel(ch, GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_CLR_OFFS(ee));
-	ipa_debug("ch %x\n", ch);
+	ch_mask = gsi_readl(GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_OFFS(ee));
+	gsi_writel(ch_mask, GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_CLR_OFFS(ee));
+	ipa_debug("ch_mask %x\n", ch_mask);
 	for (i = 0; i < GSI_CHAN_MAX; i++) {
-		if (BIT(i) & ch) {
+		if (BIT(i) & ch_mask) {
 			if (i >= gsi_ctx->max_ch) {
 				ipa_err("invalid channel %d\n", i);
 				break;
@@ -102,16 +102,16 @@ static void gsi_handle_ch_ctrl(int ee)
 
 static void gsi_handle_ev_ctrl(int ee)
 {
-	u32 ch;
+	u32 ev_mask;
 	int i;
 	u32 val;
 	struct gsi_evt_ctx *ctx;
 
-	ch = gsi_readl(GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_OFFS(ee));
-	gsi_writel(ch, GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_CLR_OFFS(ee));
-	ipa_debug("ev %x\n", ch);
+	ev_mask = gsi_readl(GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_OFFS(ee));
+	gsi_writel(ev_mask, GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_CLR_OFFS(ee));
+	ipa_debug("ev_mask %x\n", ev_mask);
 	for (i = 0; i < GSI_EVT_RING_MAX; i++) {
-		if (BIT(i) & ch) {
+		if (BIT(i) & ev_mask) {
 			if (i >= gsi_ctx->max_ev) {
 				ipa_err("invalid event %d\n", i);
 				break;
@@ -422,7 +422,7 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *ctx)
 
 static void gsi_handle_ieob(int ee)
 {
-	u32 ch;
+	u32 ev_mask;
 	int i;
 	u64 rp;
 	struct gsi_evt_ctx *ctx;
@@ -431,12 +431,12 @@ static void gsi_handle_ieob(int ee)
 	unsigned long cntr;
 	u32 msk;
 
-	ch = gsi_readl(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_OFFS(ee));
+	ev_mask = gsi_readl(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_OFFS(ee));
 	msk = gsi_readl(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee));
-	gsi_writel(ch & msk, GSI_EE_n_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(ee));
+	gsi_writel(ev_mask & msk, GSI_EE_n_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(ee));
 
 	for (i = 0; i < GSI_EVT_RING_MAX; i++) {
-		if (BIT(i) & ch & msk) {
+		if (BIT(i) & ev_mask & msk) {
 			if (i >= gsi_ctx->max_ev) {
 				ipa_err("invalid event %d\n", i);
 				break;
@@ -469,13 +469,13 @@ check_again:
 
 static void gsi_handle_inter_ee_ch_ctrl(int ee)
 {
-	u32 ch;
+	u32 ch_mask;
 	int i;
 
-	ch = gsi_readl(GSI_INTER_EE_n_SRC_GSI_CH_IRQ_OFFS(ee));
-	gsi_writel(ch, GSI_INTER_EE_n_SRC_GSI_CH_IRQ_CLR_OFFS(ee));
+	ch_mask = gsi_readl(GSI_INTER_EE_n_SRC_GSI_CH_IRQ_OFFS(ee));
+	gsi_writel(ch_mask, GSI_INTER_EE_n_SRC_GSI_CH_IRQ_CLR_OFFS(ee));
 	for (i = 0; i < GSI_CHAN_MAX; i++) {
-		if (BIT(i) & ch) {
+		if (BIT(i) & ch_mask) {
 			/* not currently expected */
 			ipa_err("ch %u was inter-EE changed\n", i);
 		}
@@ -484,13 +484,13 @@ static void gsi_handle_inter_ee_ch_ctrl(int ee)
 
 static void gsi_handle_inter_ee_ev_ctrl(int ee)
 {
-	u32 ch;
+	u32 ev_mask;
 	int i;
 
-	ch = gsi_readl(GSI_INTER_EE_n_SRC_EV_CH_IRQ_OFFS(ee));
-	gsi_writel(ch, GSI_INTER_EE_n_SRC_EV_CH_IRQ_CLR_OFFS(ee));
+	ev_mask = gsi_readl(GSI_INTER_EE_n_SRC_EV_CH_IRQ_OFFS(ee));
+	gsi_writel(ev_mask, GSI_INTER_EE_n_SRC_EV_CH_IRQ_CLR_OFFS(ee));
 	for (i = 0; i < GSI_EVT_RING_MAX; i++) {
-		if (BIT(i) & ch) {
+		if (BIT(i) & ev_mask) {
 			/* not currently expected */
 			ipa_err("evt %u was inter-EE changed\n", i);
 		}
