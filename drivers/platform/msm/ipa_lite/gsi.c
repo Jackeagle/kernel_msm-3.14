@@ -52,7 +52,7 @@ static void gsi_irq_update(u32 offset, u32 mask, u32 val)
 
 static void gsi_irq_control_event(u32 ee, u8 evt_id, bool enable)
 {
-	u32 mask = 1U << evt_id;
+	u32 mask = BIT(evt_id);
 	u32 val = enable ? ~0 : 0;
 
 	gsi_irq_update(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee), mask, val);
@@ -84,7 +84,7 @@ static void gsi_handle_ch_ctrl(int ee)
 	gsi_writel(ch, GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_CLR_OFFS(ee));
 	ipa_debug("ch %x\n", ch);
 	for (i = 0; i < GSI_CHAN_MAX; i++) {
-		if ((1 << i) & ch) {
+		if (BIT(i) & ch) {
 			if (i >= gsi_ctx->max_ch) {
 				ipa_err("invalid channel %d\n", i);
 				break;
@@ -111,7 +111,7 @@ static void gsi_handle_ev_ctrl(int ee)
 	gsi_writel(ch, GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_CLR_OFFS(ee));
 	ipa_debug("ev %x\n", ch);
 	for (i = 0; i < GSI_EVT_RING_MAX; i++) {
-		if ((1 << i) & ch) {
+		if (BIT(i) & ch) {
 			if (i >= gsi_ctx->max_ev) {
 				ipa_err("invalid event %d\n", i);
 				break;
@@ -436,7 +436,7 @@ static void gsi_handle_ieob(int ee)
 	gsi_writel(ch & msk, GSI_EE_n_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(ee));
 
 	for (i = 0; i < GSI_EVT_RING_MAX; i++) {
-		if ((1 << i) & ch & msk) {
+		if (BIT(i) & ch & msk) {
 			if (i >= gsi_ctx->max_ev) {
 				ipa_err("invalid event %d\n", i);
 				break;
@@ -475,7 +475,7 @@ static void gsi_handle_inter_ee_ch_ctrl(int ee)
 	ch = gsi_readl(GSI_INTER_EE_n_SRC_GSI_CH_IRQ_OFFS(ee));
 	gsi_writel(ch, GSI_INTER_EE_n_SRC_GSI_CH_IRQ_CLR_OFFS(ee));
 	for (i = 0; i < GSI_CHAN_MAX; i++) {
-		if ((1 << i) & ch) {
+		if (BIT(i) & ch) {
 			/* not currently expected */
 			ipa_err("ch %u was inter-EE changed\n", i);
 		}
@@ -490,7 +490,7 @@ static void gsi_handle_inter_ee_ev_ctrl(int ee)
 	ch = gsi_readl(GSI_INTER_EE_n_SRC_EV_CH_IRQ_OFFS(ee));
 	gsi_writel(ch, GSI_INTER_EE_n_SRC_EV_CH_IRQ_CLR_OFFS(ee));
 	for (i = 0; i < GSI_EVT_RING_MAX; i++) {
-		if ((1 << i) & ch) {
+		if (BIT(i) & ch) {
 			/* not currently expected */
 			ipa_err("evt %u was inter-EE changed\n", i);
 		}
@@ -911,7 +911,7 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt, bool excl)
 	mutex_unlock(&gsi_ctx->mlock);
 
 	spin_lock_irqsave(&gsi_ctx->slock, flags);
-	val = 1 << evt_id;
+	val = BIT(evt_id);
 	gsi_writel(val, GSI_EE_n_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(ee));
 
 	/* enable ieob interrupts */
