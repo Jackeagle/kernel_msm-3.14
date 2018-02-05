@@ -1844,7 +1844,7 @@ int gsi_halt_channel_ee(unsigned int chan_idx, unsigned int ee, int *code)
 	gsi_writel(val, GSI_EE_n_GSI_EE_GENERIC_CMD_OFFS(gsi_ctx->ee));
 
 	res = wait_for_completion_timeout(&gsi_ctx->gen_ee_cmd_compl,
-		msecs_to_jiffies(GSI_CMD_TIMEOUT));
+			GSI_CMD_TIMEOUT);
 	if (res == 0) {
 		ipa_err("chan_idx=%u ee=%u timed out\n", chan_idx, ee);
 		res = -ETIMEDOUT;
