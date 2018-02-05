@@ -1202,15 +1202,15 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 }
 
 static void __gsi_write_channel_scratch(unsigned long chan_hdl,
-		union __packed gsi_channel_scratch val)
+		union __packed gsi_channel_scratch scr)
 {
 	uint32_t reg;
 
-	gsi_writel(val.data.word1, GSI_EE_n_GSI_CH_k_SCRATCH_0_OFFS(chan_hdl,
+	gsi_writel(scr.data.word1, GSI_EE_n_GSI_CH_k_SCRATCH_0_OFFS(chan_hdl,
 			gsi_ctx->ee));
-	gsi_writel(val.data.word2, GSI_EE_n_GSI_CH_k_SCRATCH_1_OFFS(chan_hdl,
+	gsi_writel(scr.data.word2, GSI_EE_n_GSI_CH_k_SCRATCH_1_OFFS(chan_hdl,
 			gsi_ctx->ee));
-	gsi_writel(val.data.word3, GSI_EE_n_GSI_CH_k_SCRATCH_2_OFFS(chan_hdl,
+	gsi_writel(scr.data.word3, GSI_EE_n_GSI_CH_k_SCRATCH_2_OFFS(chan_hdl,
 			gsi_ctx->ee));
 	/* below sequence is not atomic. assumption is sequencer specific fields
 	 * will remain unchanged across this sequence
@@ -1218,13 +1218,13 @@ static void __gsi_write_channel_scratch(unsigned long chan_hdl,
 	reg = gsi_readl(GSI_EE_n_GSI_CH_k_SCRATCH_3_OFFS(chan_hdl,
 			gsi_ctx->ee));
 	reg &= 0xFFFF;
-	reg |= (val.data.word4 & 0xFFFF0000);
+	reg |= (scr.data.word4 & 0xFFFF0000);
 	gsi_writel(reg, GSI_EE_n_GSI_CH_k_SCRATCH_3_OFFS(chan_hdl,
 			gsi_ctx->ee));
 }
 
 int gsi_write_channel_scratch(unsigned long chan_hdl,
-		union __packed gsi_channel_scratch val)
+		union __packed gsi_channel_scratch scr)
 {
 	struct gsi_chan_ctx *ctx;
 
@@ -1243,8 +1243,8 @@ int gsi_write_channel_scratch(unsigned long chan_hdl,
 	ctx = &gsi_ctx->chan[chan_hdl];
 
 	mutex_lock(&ctx->mlock);
-	ctx->scratch = val;
-	__gsi_write_channel_scratch(chan_hdl, val);
+	ctx->scratch = scr;
+	__gsi_write_channel_scratch(chan_hdl, scr);
 	mutex_unlock(&ctx->mlock);
 
 	return 0;
