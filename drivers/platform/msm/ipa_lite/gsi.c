@@ -1045,10 +1045,10 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, unsigned int ee,
 {
 	uint32_t val;
 
-	val = (((GSI_CHAN_PROT_GPI << CHTYPE_PROTOCOL_SHFT) & CHTYPE_PROTOCOL_BMSK) |
-		((props->dir << CHTYPE_DIR_SHFT) & CHTYPE_DIR_BMSK) |
-		((erindex << ERINDEX_SHFT) & ERINDEX_BMSK) |
-		((GSI_CHAN_RING_ELEMENT_SIZE << ELEMENT_SIZE_SHFT) & ELEMENT_SIZE_BMSK));
+	val = (GSI_CHAN_PROT_GPI << CHTYPE_PROTOCOL_SHFT) & CHTYPE_PROTOCOL_BMSK;
+	val |= (props->dir << CHTYPE_DIR_SHFT) & CHTYPE_DIR_BMSK;
+	val |= (erindex << ERINDEX_SHFT) & ERINDEX_BMSK;
+	val |= (GSI_CHAN_RING_ELEMENT_SIZE << ELEMENT_SIZE_SHFT) & ELEMENT_SIZE_BMSK;
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(props->ch_id, ee));
 
 	val = (props->mem.size << R_LENGTH_SHFT) & R_LENGTH_BMSK;
@@ -1065,9 +1065,9 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, unsigned int ee,
 	val = props->mem.phys_base >> 32;
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_CNTXT_3_OFFS(props->ch_id, ee));
 
-	val = (((props->low_weight << WRR_WEIGHT_SHFT) & WRR_WEIGHT_BMSK) |
-		((GSI_MAX_PREFETCH << MAX_PREFETCH_SHFT) & MAX_PREFETCH_BMSK) |
-		((props->use_db_eng << USE_DB_ENG_SHFT) & USE_DB_ENG_BMSK));
+	val = (props->low_weight << WRR_WEIGHT_SHFT) & WRR_WEIGHT_BMSK;
+	val |= (GSI_MAX_PREFETCH << MAX_PREFETCH_SHFT) & MAX_PREFETCH_BMSK;
+	val |= (props->use_db_eng << USE_DB_ENG_SHFT) & USE_DB_ENG_BMSK;
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_QOS_OFFS(props->ch_id, ee));
 }
 
@@ -1162,10 +1162,13 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	ctx->props = *props;
 
 	mutex_lock(&gsi_ctx->mlock);
+
 	gsi_ctx->ch_dbg[chan_id].ch_allocate++;
-	val = ((((uint32_t)chan_id << CH_CHID_SHFT) & CH_CHID_BMSK) |
-		((op << CH_OPCODE_SHFT) & CH_OPCODE_BMSK));
+
+	val = ((u32)chan_id << CH_CHID_SHFT) & CH_CHID_BMSK;
+	val |= (op << CH_OPCODE_SHFT) & CH_OPCODE_BMSK;
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(ee));
+
 	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
 		ipa_err("chan_id=%ld timed out\n", chan_id);
 		mutex_unlock(&gsi_ctx->mlock);
@@ -1274,9 +1277,11 @@ int gsi_start_channel(unsigned long chan_hdl)
 	reinit_completion(&ctx->compl);
 
 	gsi_ctx->ch_dbg[chan_hdl].ch_start++;
-	val = (((chan_hdl << CH_CHID_SHFT) & CH_CHID_BMSK) |
-		((op << CH_OPCODE_SHFT) & CH_OPCODE_BMSK));
+
+	val = (chan_hdl << CH_CHID_SHFT) & CH_CHID_BMSK;
+	val |= (op << CH_OPCODE_SHFT) & CH_OPCODE_BMSK;
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(gsi_ctx->ee));
+
 	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
 		ipa_err("chan_hdl=%lu timed out\n", chan_hdl);
 		mutex_unlock(&gsi_ctx->mlock);
@@ -1322,9 +1327,11 @@ int gsi_stop_channel(unsigned long chan_hdl)
 	reinit_completion(&ctx->compl);
 
 	gsi_ctx->ch_dbg[chan_hdl].ch_stop++;
-	val = (((chan_hdl << CH_CHID_SHFT) & CH_CHID_BMSK) |
-		((op << CH_OPCODE_SHFT) & CH_OPCODE_BMSK));
+
+	val = (chan_hdl << CH_CHID_SHFT) & CH_CHID_BMSK;
+	val |= (op << CH_OPCODE_SHFT) & CH_OPCODE_BMSK;
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(gsi_ctx->ee));
+
 	if (!wait_for_completion_timeout(&ctx->compl, GSI_STOP_CMD_TIMEOUT)) {
 		/*
 		 * check channel state here in case the channel is stopped but
@@ -1385,10 +1392,13 @@ int gsi_reset_channel(unsigned long chan_hdl)
 
 reset:
 	reinit_completion(&ctx->compl);
+
 	gsi_ctx->ch_dbg[chan_hdl].ch_reset++;
-	val = (((chan_hdl << CH_CHID_SHFT) & CH_CHID_BMSK) |
-		((op << CH_OPCODE_SHFT) & CH_OPCODE_BMSK));
+
+	val = (chan_hdl << CH_CHID_SHFT) & CH_CHID_BMSK;
+	val |= (op << CH_OPCODE_SHFT) & CH_OPCODE_BMSK;
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(gsi_ctx->ee));
+
 	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
 		ipa_err("chan_hdl=%lu timed out\n", chan_hdl);
 		mutex_unlock(&gsi_ctx->mlock);
@@ -1442,9 +1452,11 @@ int gsi_dealloc_channel(unsigned long chan_hdl)
 	reinit_completion(&ctx->compl);
 
 	gsi_ctx->ch_dbg[chan_hdl].ch_de_alloc++;
-	val = (((chan_hdl << CH_CHID_SHFT) & CH_CHID_BMSK) |
-		((op << CH_OPCODE_SHFT) & CH_OPCODE_BMSK));
+
+	val = (chan_hdl << CH_CHID_SHFT) & CH_CHID_BMSK;
+	val |= (op << CH_OPCODE_SHFT) & CH_OPCODE_BMSK;
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(gsi_ctx->ee));
+
 	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
 		ipa_err("chan_hdl=%lu timed out\n", chan_hdl);
 		mutex_unlock(&gsi_ctx->mlock);
@@ -1833,9 +1845,10 @@ int gsi_halt_channel_ee(unsigned int chan_idx, unsigned int ee, int *code)
 			GSI_EE_n_CNTXT_SCRATCH_0_OFFS(gsi_ctx->ee));
 
 	gsi_ctx->gen_ee_cmd_dbg.halt_channel++;
-	val = (((op << EE_OPCODE_SHFT) & EE_OPCODE_BMSK) |
-		((chan_idx << EE_VIRT_CHAN_IDX_SHFT) & EE_VIRT_CHAN_IDX_BMSK) |
-		((ee << EE_EE_SHFT) & EE_EE_BMSK));
+
+	val = (op << EE_OPCODE_SHFT) & EE_OPCODE_BMSK;
+	val |= (chan_idx << EE_VIRT_CHAN_IDX_SHFT) & EE_VIRT_CHAN_IDX_BMSK;
+	val |= (ee << EE_EE_SHFT) & EE_EE_BMSK;
 	gsi_writel(val, GSI_EE_n_GSI_EE_GENERIC_CMD_OFFS(gsi_ctx->ee));
 
 	res = wait_for_completion_timeout(&gsi_ctx->gen_ee_cmd_compl,
