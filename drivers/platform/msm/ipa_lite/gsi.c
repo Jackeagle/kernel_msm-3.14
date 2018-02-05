@@ -75,6 +75,7 @@ static void gsi_irq_control_all(u32 ee, bool enable)
 
 static void gsi_handle_ch_ctrl(int ee)
 {
+	u32 valid_mask = GENMASK(gsi_ctx->max_ch - 1, 0);
 	u32 ch_mask;
 	int i;
 	u32 val;
@@ -82,14 +83,13 @@ static void gsi_handle_ch_ctrl(int ee)
 
 	ch_mask = gsi_readl(GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_OFFS(ee));
 	gsi_writel(ch_mask, GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_CLR_OFFS(ee));
-	ipa_debug("ch_mask %x\n", ch_mask);
-	for (i = 0; i < GSI_CHAN_MAX; i++) {
-		if (BIT(i) & ch_mask) {
-			if (i >= gsi_ctx->max_ch) {
-				ipa_err("invalid channel %d\n", i);
-				break;
-			}
 
+	ipa_debug("ch_mask %x\n", ch_mask);
+	if (ch_mask & ~valid_mask)
+		ipa_err("invalid channels (> %u)\n", gsi_ctx->max_ch);
+
+	for (i = 0; i < gsi_ctx->max_ch; i++) {
+		if (BIT(i) & ch_mask) {
 			ctx = &gsi_ctx->chan[i];
 			val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(i, ee));
 			ctx->state = field_val(val, CHSTATE_BMSK);
@@ -102,6 +102,7 @@ static void gsi_handle_ch_ctrl(int ee)
 
 static void gsi_handle_ev_ctrl(int ee)
 {
+	u32 valid_mask = GENMASK(gsi_ctx->max_ev - 1, 0);
 	u32 ev_mask;
 	int i;
 	u32 val;
@@ -109,14 +110,13 @@ static void gsi_handle_ev_ctrl(int ee)
 
 	ev_mask = gsi_readl(GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_OFFS(ee));
 	gsi_writel(ev_mask, GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_CLR_OFFS(ee));
-	ipa_debug("ev_mask %x\n", ev_mask);
-	for (i = 0; i < GSI_EVT_RING_MAX; i++) {
-		if (BIT(i) & ev_mask) {
-			if (i >= gsi_ctx->max_ev) {
-				ipa_err("invalid event %d\n", i);
-				break;
-			}
 
+	ipa_debug("ev_mask %x\n", ev_mask);
+	if (ev_mask & ~valid_mask)
+		ipa_err("invalid events (> %u)\n", gsi_ctx->max_ev);
+
+	for (i = 0; i < gsi_ctx->max_ev; i++) {
+		if (BIT(i) & ev_mask) {
 			ctx = &gsi_ctx->evtr[i];
 			val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_0_OFFS(i, ee));
 			ctx->state = field_val(val, EV_CHSTATE_BMSK);
@@ -422,6 +422,7 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *ctx)
 
 static void gsi_handle_ieob(int ee)
 {
+	u32 valid_mask = GENMASK(gsi_ctx->max_ev - 1, 0);
 	u32 ev_mask;
 	int i;
 	u64 rp;
@@ -434,12 +435,11 @@ static void gsi_handle_ieob(int ee)
 	ev_mask &= gsi_readl(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee));
 	gsi_writel(ev_mask, GSI_EE_n_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(ee));
 
-	for (i = 0; i < GSI_EVT_RING_MAX; i++) {
+	if (ev_mask & ~valid_mask)
+		ipa_err("invalid events (> %u)\n", gsi_ctx->max_ev);
+
+	for (i = 0; i < gsi_ctx->max_ev; i++) {
 		if (BIT(i) & ev_mask) {
-			if (i >= gsi_ctx->max_ev) {
-				ipa_err("invalid event %d\n", i);
-				break;
-			}
 			ctx = &gsi_ctx->evtr[i];
 
 			spin_lock_irqsave(&ctx->ring.slock, flags);
@@ -468,12 +468,17 @@ check_again:
 
 static void gsi_handle_inter_ee_ch_ctrl(int ee)
 {
+	u32 valid_mask = GENMASK(gsi_ctx->max_ch - 1, 0);
 	u32 ch_mask;
 	int i;
 
 	ch_mask = gsi_readl(GSI_INTER_EE_n_SRC_GSI_CH_IRQ_OFFS(ee));
 	gsi_writel(ch_mask, GSI_INTER_EE_n_SRC_GSI_CH_IRQ_CLR_OFFS(ee));
-	for (i = 0; i < GSI_CHAN_MAX; i++) {
+
+	if (ch_mask & ~valid_mask)
+		ipa_err("invalid channels (> %u)\n", gsi_ctx->max_ch);
+
+	for (i = 0; i < gsi_ctx->max_ch; i++) {
 		if (BIT(i) & ch_mask) {
 			/* not currently expected */
 			ipa_err("ch %u was inter-EE changed\n", i);
@@ -483,12 +488,17 @@ static void gsi_handle_inter_ee_ch_ctrl(int ee)
 
 static void gsi_handle_inter_ee_ev_ctrl(int ee)
 {
+	u32 valid_mask = GENMASK(gsi_ctx->max_ev - 1, 0);
 	u32 ev_mask;
 	int i;
 
 	ev_mask = gsi_readl(GSI_INTER_EE_n_SRC_EV_CH_IRQ_OFFS(ee));
 	gsi_writel(ev_mask, GSI_INTER_EE_n_SRC_EV_CH_IRQ_CLR_OFFS(ee));
-	for (i = 0; i < GSI_EVT_RING_MAX; i++) {
+
+	if (ev_mask & ~valid_mask)
+		ipa_err("invalid events (> %u)\n", gsi_ctx->max_ev);
+
+	for (i = 0; i < gsi_ctx->max_ev; i++) {
 		if (BIT(i) & ev_mask) {
 			/* not currently expected */
 			ipa_err("evt %u was inter-EE changed\n", i);
