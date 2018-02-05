@@ -623,8 +623,8 @@ enum gsi_generic_ee_cmd_opcode {
 
 extern struct gsi_ctx *gsi_ctx;
 void gsi_debugfs_init(void);
-uint16_t gsi_find_idx_from_addr(struct gsi_ring_ctx *ctx, uint64_t addr);
-void gsi_update_ch_dp_stats(struct gsi_chan_ctx *ctx, uint16_t used);
+u16 gsi_find_idx_from_addr(struct gsi_ring_ctx *ctx, u64 addr);
+void gsi_update_ch_dp_stats(struct gsi_chan_ctx *ctx, u16 used);
 struct gsi_ctx *msm_gsi_init(struct platform_device *pdev);
 
 /*
@@ -859,7 +859,7 @@ int gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode);
  *
  * @Return gsi_status
  */
-int gsi_queue_xfer(unsigned long chan_hdl, uint16_t num_xfers,
+int gsi_queue_xfer(unsigned long chan_hdl, u16 num_xfers,
 		struct gsi_xfer_elem *xfer, bool ring_db);
 
 /**

@@ -36,31 +36,31 @@
 
 struct gsi_ctx *gsi_ctx;
 
-static void gsi_irq_set(uint32_t offset, uint32_t val)
+static void gsi_irq_set(u32 offset, u32 val)
 {
 	gsi_writel(val, offset);
 }
 
-static void gsi_irq_update(uint32_t offset, uint32_t mask, uint32_t val)
+static void gsi_irq_update(u32 offset, u32 mask, u32 val)
 {
-	uint32_t curr;
+	u32 curr;
 
 	curr = gsi_readl(offset);
 	val = (curr & ~mask) | (val & mask);
 	gsi_writel(val, offset);
 }
 
-static void gsi_irq_control_event(uint32_t ee, uint8_t evt_id, bool enable)
+static void gsi_irq_control_event(u32 ee, u8 evt_id, bool enable)
 {
-	uint32_t mask = 1U << evt_id;
-	uint32_t val = enable ? ~0 : 0;
+	u32 mask = 1U << evt_id;
+	u32 val = enable ? ~0 : 0;
 
 	gsi_irq_update(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee), mask, val);
 }
 
-static void gsi_irq_control_all(uint32_t ee, bool enable)
+static void gsi_irq_control_all(u32 ee, bool enable)
 {
-	uint32_t val = enable ? ~0 : 0;
+	u32 val = enable ? ~0 : 0;
 
 	/* Inter EE commands / interrupt are no supported. */
 	gsi_irq_set(GSI_EE_n_CNTXT_TYPE_IRQ_MSK_OFFS(ee), val);
@@ -75,9 +75,9 @@ static void gsi_irq_control_all(uint32_t ee, bool enable)
 
 static void gsi_handle_ch_ctrl(int ee)
 {
-	uint32_t ch;
+	u32 ch;
 	int i;
-	uint32_t val;
+	u32 val;
 	struct gsi_chan_ctx *ctx;
 
 	ch = gsi_readl(GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_OFFS(ee));
@@ -102,9 +102,9 @@ static void gsi_handle_ch_ctrl(int ee)
 
 static void gsi_handle_ev_ctrl(int ee)
 {
-	uint32_t ch;
+	u32 ch;
 	int i;
-	uint32_t val;
+	u32 val;
 	struct gsi_evt_ctx *ctx;
 
 	ch = gsi_readl(GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_OFFS(ee));
@@ -166,14 +166,14 @@ static void gsi_evt_ring_err(enum gsi_evt_err evt_id)
 }
 #undef CASE
 
-static void gsi_handle_glob_err(uint32_t err)
+static void gsi_handle_glob_err(u32 err)
 {
 	struct gsi_log_err *log;
 	struct gsi_chan_ctx *ch;
 	struct gsi_evt_ctx *ev;
 	struct gsi_chan_err_notify chan_notify;
 	struct gsi_evt_err_notify evt_notify;
-	uint32_t val;
+	u32 val;
 
 	log = (struct gsi_log_err *)&err;
 	ipa_err("log err_type=%u ee=%u idx=%u\n", log->err_type, log->ee,
@@ -266,9 +266,9 @@ static void gsi_handle_gp_int1(void)
 
 static void gsi_handle_glob_ee(int ee)
 {
-	uint32_t val;
-	uint32_t err;
-	uint32_t clr = ~0;
+	u32 val;
+	u32 err;
+	u32 clr = ~0;
 
 	val = gsi_readl(GSI_EE_n_CNTXT_GLOB_IRQ_STTS_OFFS(ee));
 
@@ -310,20 +310,20 @@ static void gsi_incr_ring_rp(struct gsi_ring_ctx *ctx)
 		ctx->rp_local = ctx->mem.phys_base;
 }
 
-uint16_t gsi_find_idx_from_addr(struct gsi_ring_ctx *ctx, uint64_t addr)
+u16 gsi_find_idx_from_addr(struct gsi_ring_ctx *ctx, u64 addr)
 {
 	BUG_ON(addr < ctx->mem.phys_base || addr >= ctx->end);
 
-	return (uint32_t)(addr - ctx->mem.phys_base)/ctx->elem_sz;
+	return (u32)(addr - ctx->mem.phys_base)/ctx->elem_sz;
 }
 
 static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 		struct gsi_chan_xfer_notify *notify, bool callback)
 {
-	uint32_t ch_id;
+	u32 ch_id;
 	struct gsi_chan_ctx *ch_ctx;
-	uint16_t rp_idx;
-	uint64_t rp;
+	u16 rp_idx;
+	u64 rp;
 
 	ch_id = evt->chid;
 	if (ch_id >= gsi_ctx->max_ch) {
@@ -365,7 +365,7 @@ static void gsi_process_evt_re(struct gsi_evt_ctx *ctx,
 		struct gsi_chan_xfer_notify *notify, bool callback)
 {
 	struct gsi_xfer_compl_evt *evt;
-	uint16_t idx;
+	u16 idx;
 
 	idx = gsi_find_idx_from_addr(&ctx->ring, ctx->ring.rp_local);
 	evt = ctx->ring.mem.base + idx * ctx->ring.elem_sz;
@@ -378,7 +378,7 @@ static void gsi_process_evt_re(struct gsi_evt_ctx *ctx,
 
 static void gsi_ring_evt_doorbell(struct gsi_evt_ctx *ctx)
 {
-	uint32_t val;
+	u32 val;
 
 	/*
 	 * The doorbell 0 and 1 registers store the low-order and
@@ -395,7 +395,7 @@ static void gsi_ring_evt_doorbell(struct gsi_evt_ctx *ctx)
 
 static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *ctx)
 {
-	uint32_t val;
+	u32 val;
 
 	/*
 	 * allocate new events for this channel first
@@ -422,14 +422,14 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *ctx)
 
 static void gsi_handle_ieob(int ee)
 {
-	uint32_t ch;
+	u32 ch;
 	int i;
-	uint64_t rp;
+	u64 rp;
 	struct gsi_evt_ctx *ctx;
 	struct gsi_chan_xfer_notify notify;
 	unsigned long flags;
 	unsigned long cntr;
-	uint32_t msk;
+	u32 msk;
 
 	ch = gsi_readl(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_OFFS(ee));
 	msk = gsi_readl(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee));
@@ -469,7 +469,7 @@ check_again:
 
 static void gsi_handle_inter_ee_ch_ctrl(int ee)
 {
-	uint32_t ch;
+	u32 ch;
 	int i;
 
 	ch = gsi_readl(GSI_INTER_EE_n_SRC_GSI_CH_IRQ_OFFS(ee));
@@ -484,7 +484,7 @@ static void gsi_handle_inter_ee_ch_ctrl(int ee)
 
 static void gsi_handle_inter_ee_ev_ctrl(int ee)
 {
-	uint32_t ch;
+	u32 ch;
 	int i;
 
 	ch = gsi_readl(GSI_INTER_EE_n_SRC_EV_CH_IRQ_OFFS(ee));
@@ -499,7 +499,7 @@ static void gsi_handle_inter_ee_ev_ctrl(int ee)
 
 static void gsi_handle_general(int ee)
 {
-	uint32_t val;
+	u32 val;
 
 	val = gsi_readl(GSI_EE_n_CNTXT_GSI_IRQ_STTS_OFFS(ee));
 
@@ -528,7 +528,7 @@ static void gsi_handle_general(int ee)
 
 static void gsi_handle_irq(void)
 {
-	uint32_t type;
+	u32 type;
 	int ee = gsi_ctx->ee;
 	unsigned long cnt = 0;
 
@@ -618,7 +618,7 @@ int gsi_register_device(u32 ee)
 	struct resource *res;
 	resource_size_t size;
 	int ret;
-	uint32_t val;
+	u32 val;
 
 	if (gsi_ctx->per_registered) {
 		ipa_err("per already registered\n");
@@ -761,7 +761,7 @@ static u32 evt_ring_ctx_8_val(u32 int_modt, u32 int_modc)
 }
 
 static void gsi_program_evt_ring_ctx(struct ipa_mem_buffer *mem,
-		uint8_t evt_id, u16 int_modt)
+		u8 evt_id, u16 int_modt)
 {
 	unsigned int ee = gsi_ctx->ee;
 	u32 int_modc = 1;	/* moderation always comes from channel*/
@@ -836,11 +836,11 @@ static u32 evt_ring_cmd_val(unsigned long evt_id, enum gsi_evt_ch_cmd_opcode op)
 }
 
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
-long gsi_alloc_evt_ring(u32 size, uint16_t int_modt, bool excl)
+long gsi_alloc_evt_ring(u32 size, u16 int_modt, bool excl)
 {
 	unsigned long evt_id;
 	unsigned long required_alignment = roundup_pow_of_two(size);
-	uint32_t val;
+	u32 val;
 	struct gsi_evt_ctx *ctx;
 	int ret;
 	int ee = gsi_ctx->ee;
@@ -943,7 +943,7 @@ static void __gsi_write_evt_ring_scratch(unsigned long evt_ring_hdl,
 
 int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 {
-	uint32_t val;
+	u32 val;
 	struct gsi_evt_ctx *ctx;
 
 	if (evt_ring_hdl >= gsi_ctx->max_ev) {
@@ -996,7 +996,7 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 
 int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 {
-	uint32_t val;
+	u32 val;
 	struct gsi_evt_ctx *ctx;
 
 	if (evt_ring_hdl >= gsi_ctx->max_ev) {
@@ -1041,9 +1041,9 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 }
 
 static void gsi_program_chan_ctx(struct gsi_chan_props *props, unsigned int ee,
-		uint8_t erindex)
+		u8 erindex)
 {
-	uint32_t val;
+	u32 val;
 
 	val = field_gen(GSI_CHAN_PROT_GPI, CHTYPE_PROTOCOL_BMSK);
 	val |= field_gen(props->dir, CHTYPE_DIR_BMSK);
@@ -1121,10 +1121,10 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 long gsi_alloc_channel(struct gsi_chan_props *props)
 {
 	struct gsi_chan_ctx *ctx;
-	uint32_t val;
+	u32 val;
 	int ee = gsi_ctx->ee;
 	enum gsi_ch_cmd_opcode op = GSI_CH_ALLOCATE;
-	uint8_t erindex;
+	u8 erindex;
 	void **user_data;
 	long chan_id;
 
@@ -1256,7 +1256,7 @@ int gsi_write_channel_scratch(unsigned long chan_hdl,
 int gsi_start_channel(unsigned long chan_hdl)
 {
 	enum gsi_ch_cmd_opcode op = GSI_CH_START;
-	uint32_t val;
+	u32 val;
 	struct gsi_chan_ctx *ctx;
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
@@ -1301,7 +1301,7 @@ int gsi_stop_channel(unsigned long chan_hdl)
 {
 	enum gsi_ch_cmd_opcode op = GSI_CH_STOP;
 	int res;
-	uint32_t val;
+	u32 val;
 	struct gsi_chan_ctx *ctx;
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
@@ -1372,7 +1372,7 @@ free_lock:
 int gsi_reset_channel(unsigned long chan_hdl)
 {
 	enum gsi_ch_cmd_opcode op = GSI_CH_RESET;
-	uint32_t val;
+	u32 val;
 	struct gsi_chan_ctx *ctx;
 	bool reset_done = false;
 
@@ -1433,7 +1433,7 @@ reset:
 int gsi_dealloc_channel(unsigned long chan_hdl)
 {
 	enum gsi_ch_cmd_opcode op = GSI_CH_DE_ALLOC;
-	uint32_t val;
+	u32 val;
 	struct gsi_chan_ctx *ctx;
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
@@ -1479,7 +1479,7 @@ int gsi_dealloc_channel(unsigned long chan_hdl)
 	return 0;
 }
 
-void gsi_update_ch_dp_stats(struct gsi_chan_ctx *ctx, uint16_t used)
+void gsi_update_ch_dp_stats(struct gsi_chan_ctx *ctx, u16 used)
 {
 	unsigned long now = jiffies_to_msecs(jiffies);
 	unsigned long elapsed;
@@ -1499,13 +1499,13 @@ void gsi_update_ch_dp_stats(struct gsi_chan_ctx *ctx, uint16_t used)
 	ctx->stats.dp.last_timestamp = now;
 }
 
-static uint16_t __gsi_query_channel_free_re(struct gsi_chan_ctx *ctx)
+static u16 __gsi_query_channel_free_re(struct gsi_chan_ctx *ctx)
 {
-	uint16_t start;
-	uint16_t end;
-	uint64_t rp;
+	u16 start;
+	u16 end;
+	u64 rp;
 	int ee = gsi_ctx->ee;
-	uint16_t used;
+	u16 used;
 
 	if (!ctx->evtr) {
 		rp = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_4_OFFS(ctx->props.ch_id, ee));
@@ -1532,8 +1532,8 @@ bool gsi_is_channel_empty(unsigned long chan_hdl)
 	struct gsi_chan_ctx *ctx;
 	spinlock_t *slock;
 	unsigned long flags;
-	uint64_t rp;
-	uint64_t wp;
+	u64 rp;
+	u64 wp;
 	int ee = gsi_ctx->ee;
 	bool is_empty;
 
@@ -1566,15 +1566,15 @@ bool gsi_is_channel_empty(unsigned long chan_hdl)
 	return is_empty;
 }
 
-int gsi_queue_xfer(unsigned long chan_hdl, uint16_t num_xfers,
+int gsi_queue_xfer(unsigned long chan_hdl, u16 num_xfers,
 		struct gsi_xfer_elem *xfer, bool ring_db)
 {
 	struct gsi_chan_ctx *ctx;
-	uint16_t free;
+	u16 free;
 	struct gsi_tre tre;
 	struct gsi_tre *tre_ptr;
-	uint16_t idx;
-	uint64_t wp_rollback;
+	u16 idx;
+	u64 wp_rollback;
 	int i;
 	spinlock_t *slock;
 	unsigned long flags;
@@ -1678,7 +1678,7 @@ int gsi_poll_channel(unsigned long chan_hdl,
 		struct gsi_chan_xfer_notify *notify)
 {
 	struct gsi_chan_ctx *ctx;
-	uint64_t rp;
+	u64 rp;
 	int ee = gsi_ctx->ee;
 	unsigned long flags;
 
@@ -1826,7 +1826,7 @@ int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
 int gsi_halt_channel_ee(unsigned int chan_idx, unsigned int ee, int *code)
 {
 	enum gsi_generic_ee_cmd_opcode op = GSI_GEN_EE_CMD_HALT_CHANNEL;
-	uint32_t val;
+	u32 val;
 	int res;
 
 	if (chan_idx >= gsi_ctx->max_ch || !code) {
