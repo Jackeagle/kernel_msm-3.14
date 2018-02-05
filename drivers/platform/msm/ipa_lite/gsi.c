@@ -1204,7 +1204,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 static void __gsi_write_channel_scratch(unsigned long chan_hdl,
 		union __packed gsi_channel_scratch scr)
 {
-	uint32_t reg;
+	u32 val;
 
 	gsi_writel(scr.data.word1, GSI_EE_n_GSI_CH_k_SCRATCH_0_OFFS(chan_hdl,
 			gsi_ctx->ee));
@@ -1215,11 +1215,11 @@ static void __gsi_write_channel_scratch(unsigned long chan_hdl,
 	/* below sequence is not atomic. assumption is sequencer specific fields
 	 * will remain unchanged across this sequence
 	 */
-	reg = gsi_readl(GSI_EE_n_GSI_CH_k_SCRATCH_3_OFFS(chan_hdl,
+	val = gsi_readl(GSI_EE_n_GSI_CH_k_SCRATCH_3_OFFS(chan_hdl,
 			gsi_ctx->ee));
-	reg &= 0xFFFF;
-	reg |= (scr.data.word4 & 0xFFFF0000);
-	gsi_writel(reg, GSI_EE_n_GSI_CH_k_SCRATCH_3_OFFS(chan_hdl,
+	val &= 0xFFFF;
+	val |= (scr.data.word4 & 0xFFFF0000);
+	gsi_writel(val, GSI_EE_n_GSI_CH_k_SCRATCH_3_OFFS(chan_hdl,
 			gsi_ctx->ee));
 }
 
