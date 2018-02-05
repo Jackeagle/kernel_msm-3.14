@@ -2183,9 +2183,11 @@ bool ipa_is_modem_pipe(int pipe_idx)
 }
 
 static void ipa3_write_src_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
-			int group_index, enum ipa_rsrc_grp_type_src n,
-			struct ipahal_reg_rsrc_grp_cfg *val)
+			int group_index, enum ipa_rsrc_grp_type_src n)
 {
+	const struct rsrc_min_max *x_limits;
+	const struct rsrc_min_max *y_limits;
+	struct ipahal_reg_rsrc_grp_cfg val;
 	enum ipahal_reg reg;
 
 	switch (group_index) {
@@ -2202,13 +2204,23 @@ static void ipa3_write_src_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
 		return;
 	}
 
-	ipahal_write_reg_n_fields(reg, n, val);
+	x_limits = &ipa3_rsrc_src_grp_config[hw_version][n][group_index];
+	y_limits = &ipa3_rsrc_src_grp_config[hw_version][n][group_index + 1];
+
+	val.x_min = x_limits->min;
+	val.x_max = x_limits->max;
+	val.y_min = y_limits->min;
+	val.y_max = y_limits->max;
+
+	ipahal_write_reg_n_fields(reg, n, &val);
 }
 
 static void ipa3_write_dst_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
-			int group_index, enum ipa_rsrc_grp_type_src n,
-			struct ipahal_reg_rsrc_grp_cfg *val)
+			int group_index, enum ipa_rsrc_grp_type_src n)
 {
+	const struct rsrc_min_max *x_limits;
+	const struct rsrc_min_max *y_limits;
+	struct ipahal_reg_rsrc_grp_cfg val;
 	enum ipahal_reg reg;
 
 	switch (group_index) {
@@ -2222,59 +2234,40 @@ static void ipa3_write_dst_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
 		return;
 	}
 
-	ipahal_write_reg_n_fields(reg, n, val);
+	x_limits = &ipa3_rsrc_dst_grp_config[hw_version][n][group_index];
+	y_limits = &ipa3_rsrc_dst_grp_config[hw_version][n][group_index + 1];
+
+	val.x_min = x_limits->min;
+	val.x_max = x_limits->max;
+	val.y_min = y_limits->min;
+	val.y_max = y_limits->max;
+
+	ipahal_write_reg_n_fields(reg, n, &val);
 }
 
 void ipa3_set_resorce_groups_min_max_limits(void)
 {
 	enum ipa_hw_version hw_version = IPA_HW_v3_5_1;
+	int src_rsrc_type_max = IPA_v3_5_RSRC_GRP_TYPE_SRC_MAX;
+	int dst_rsrc_type_max = IPA_v3_5_RSRC_GRP_TYPE_DST_MAX;
+	int src_grp_idx_max = IPA_v3_5_SRC_GROUP_MAX;
+	int dst_grp_idx_max = IPA_v3_5_DST_GROUP_MAX;
 	int i;
 	int j;
-	int src_rsrc_type_max;
-	int dst_rsrc_type_max;
-	int src_grp_idx_max;
-	int dst_grp_idx_max;
-	struct ipahal_reg_rsrc_grp_cfg val;
-	const struct rsrc_min_max *x_limits;
-	const struct rsrc_min_max *y_limits;
 
 	ipa_debug("ENTER\n");
 	ipa_debug("Assign source rsrc groups min-max limits\n");
 
-	src_rsrc_type_max = IPA_v3_5_RSRC_GRP_TYPE_SRC_MAX;
-	dst_rsrc_type_max = IPA_v3_5_RSRC_GRP_TYPE_DST_MAX;
-	src_grp_idx_max = IPA_v3_5_SRC_GROUP_MAX;
-	dst_grp_idx_max = IPA_v3_5_DST_GROUP_MAX;
 
-	for (i = 0; i < src_rsrc_type_max; i++) {
-		for (j = 0; j < src_grp_idx_max; j = j + 2) {
-			x_limits = &ipa3_rsrc_src_grp_config[hw_version][i][j];
-			y_limits =
-				&ipa3_rsrc_src_grp_config[hw_version][i][j + 1];
-			val.x_min = x_limits->min;
-			val.x_max = x_limits->max;
-			val.y_min = y_limits->min;
-			val.y_max = y_limits->max;
-			ipa3_write_src_rsrc_grp_type_reg(hw_version,
-					j, i, &val);
-		}
-	}
+	for (i = 0; i < src_rsrc_type_max; i++)
+		for (j = 0; j < src_grp_idx_max; j = j + 2)
+			ipa3_write_src_rsrc_grp_type_reg(hw_version, j, i);
 
 	ipa_debug("Assign destination rsrc groups min-max limits\n");
 
-	for (i = 0; i < dst_rsrc_type_max; i++) {
-		for (j = 0; j < dst_grp_idx_max; j = j + 2) {
-			x_limits = &ipa3_rsrc_dst_grp_config[hw_version][i][j];
-			y_limits =
-				&ipa3_rsrc_dst_grp_config[hw_version][i][j + 1];
-			val.x_min = x_limits->min;
-			val.x_max = x_limits->max;
-			val.y_min = y_limits->min;
-			val.y_max = y_limits->max;
-			ipa3_write_dst_rsrc_grp_type_reg(hw_version,
-					j, i, &val);
-		}
-	}
+	for (i = 0; i < dst_rsrc_type_max; i++)
+		for (j = 0; j < dst_grp_idx_max; j = j + 2)
+			ipa3_write_dst_rsrc_grp_type_reg(hw_version, j, i);
 
 	/* Resource group configuration is done by TZ */
 	ipa_err("skip configuring ipa_rx_hps_clients from HLOS\n");
