@@ -773,7 +773,7 @@ static void gsi_program_evt_ring_ctx(struct ipa_mem_buffer *mem,
 					GSI_EVT_RING_ELEMENT_SIZE);
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_0_OFFS(evt_id, ee));
 
-	val = (mem->size & EV_R_LENGTH_BMSK) << EV_R_LENGTH_SHFT;
+	val = (mem->size << EV_R_LENGTH_SHFT) & EV_R_LENGTH_BMSK;
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_1_OFFS(evt_id, ee));
 
 	/*
@@ -1051,7 +1051,7 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, unsigned int ee,
 		((GSI_CHAN_RING_ELEMENT_SIZE << ELEMENT_SIZE_SHFT) & ELEMENT_SIZE_BMSK));
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(props->ch_id, ee));
 
-	val = (props->mem.size & R_LENGTH_BMSK) << R_LENGTH_SHFT;
+	val = (props->mem.size << R_LENGTH_SHFT) & R_LENGTH_BMSK;
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_CNTXT_1_OFFS(props->ch_id, ee));
 
 	/*
