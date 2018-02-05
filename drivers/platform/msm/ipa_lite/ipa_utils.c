@@ -1410,6 +1410,7 @@ void ipa3_dump_buff_internal(void *base, dma_addr_t phy_base, u32 size)
 #define IPA_MEM_UC_INFO_SIZE			0x200
 #define IPA_MEM_END_OFST			0x2000
 #define IPA_MEM_APPS_V4_RT_HASH_OFST		0x2000
+#define IPA_MEM_APPS_V4_RT_HASH_SIZE		0x0
 #define IPA_MEM_APPS_V4_RT_NHASH_OFST		0x2000
 #define IPA_MEM_APPS_V4_RT_NHASH_SIZE		0x0
 #define IPA_MEM_APPS_V6_RT_HASH_OFST		0x2000
@@ -1665,6 +1666,7 @@ int ipa3_init_mem_partition(struct device_node *node)
 		mem[END_OFST]);
 
 	mem[APPS_V4_RT_HASH_OFST] = IPA_MEM_APPS_V4_RT_HASH_OFST;
+	mem[APPS_V4_RT_HASH_SIZE] = IPA_MEM_APPS_V4_RT_HASH_SIZE;
 	ipa_debug("V4 APPS HASHABLE RT OFST 0x%x SIZE 0x%x\n",
 		mem[APPS_V4_RT_HASH_OFST],
 		mem[APPS_V4_RT_HASH_SIZE]);
