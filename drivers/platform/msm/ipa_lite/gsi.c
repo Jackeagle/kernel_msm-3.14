@@ -25,14 +25,14 @@
 #define GSI_CMD_TIMEOUT		msecs_to_jiffies(5000)
 #define GSI_STOP_CMD_TIMEOUT	msecs_to_jiffies(20)
 
-#define GSI_MAX_CH_LOW_WEIGHT 15
-#define GSI_MHI_ER_START 10
-#define GSI_MHI_ER_END 16
+#define GSI_MAX_CH_LOW_WEIGHT	15
+#define GSI_MHI_ER_START	10
+#define GSI_MHI_ER_END		16
 
-#define GSI_RESET_WA_MIN_SLEEP 1000
-#define GSI_RESET_WA_MAX_SLEEP 2000
+#define GSI_RESET_WA_MIN_SLEEP	1000
+#define GSI_RESET_WA_MAX_SLEEP	2000
 
-#define GSI_MAX_PREFETCH 0	/* 0 means 1 segment; 1 means 2 segments */
+#define GSI_MAX_PREFETCH	0	/* 0 means 1 segment; 1 means 2 */
 
 struct gsi_ctx *gsi_ctx;
 
@@ -274,21 +274,20 @@ static void gsi_handle_gp_int1(void)
 static void gsi_handle_glob_ee(int ee)
 {
 	u32 val;
-	u32 err;
-	u32 clr = ~0;
 
 	val = gsi_readl(GSI_EE_n_CNTXT_GLOB_IRQ_STTS_OFFS(ee));
 
 	if (val & ERROR_INT_BMSK) {
-		err = gsi_readl(GSI_EE_n_ERROR_LOG_OFFS(ee));
+		u32 err = gsi_readl(GSI_EE_n_ERROR_LOG_OFFS(ee));
+
 		gsi_writel(0, GSI_EE_n_ERROR_LOG_OFFS(ee));
-		gsi_writel(clr, GSI_EE_n_ERROR_LOG_CLR_OFFS(ee));
+		gsi_writel(~0, GSI_EE_n_ERROR_LOG_CLR_OFFS(ee));
+
 		gsi_handle_glob_err(err);
 	}
 
-	if (val & EN_GP_INT1_BMSK) {
+	if (val & EN_GP_INT1_BMSK)
 		gsi_handle_gp_int1();
-	}
 
 	if (val & EN_GP_INT2_BMSK) {
 		ipa_err("Got global GP INT2\n");
@@ -321,18 +320,17 @@ u16 gsi_find_idx_from_addr(struct gsi_ring_ctx *ctx, u64 addr)
 {
 	BUG_ON(addr < ctx->mem.phys_base || addr >= ctx->end);
 
-	return (u32)(addr - ctx->mem.phys_base)/ctx->elem_sz;
+	return (u32)(addr - ctx->mem.phys_base) / ctx->elem_sz;
 }
 
 static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 		struct gsi_chan_xfer_notify *notify, bool callback)
 {
-	u32 ch_id;
 	struct gsi_chan_ctx *ch_ctx;
+	u32 ch_id = evt->chid;
 	u16 rp_idx;
 	u64 rp;
 
-	ch_id = evt->chid;
 	if (ch_id >= gsi_ctx->max_ch) {
 		ipa_err("Unexpected ch %d\n", ch_id);
 		WARN_ON(1);
@@ -354,15 +352,15 @@ static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 	ch_ctx->ring.rp = ch_ctx->ring.rp_local;
 
 	rp_idx = gsi_find_idx_from_addr(&ch_ctx->ring, rp);
+
 	notify->xfer_user_data = ch_ctx->user_data[rp_idx];
 	notify->chan_user_data = ch_ctx->props.chan_user_data;
 	notify->evt_id = evt->code;
 	notify->bytes_xfered = evt->len;
 	if (callback) {
-		if (atomic_read(&ch_ctx->poll_mode)) {
+		if (WARN_ON(atomic_read(&ch_ctx->poll_mode)))
 			ipa_err("Calling client callback in polling mode\n");
-			WARN_ON(1);
-		}
+
 		if (ch_ctx->props.xfer_cb)
 			ch_ctx->props.xfer_cb(notify);
 	}
@@ -375,9 +373,11 @@ static void gsi_process_evt_re(struct gsi_evt_ctx *ctx,
 	u16 idx;
 
 	idx = gsi_find_idx_from_addr(&ctx->ring, ctx->ring.rp_local);
+
 	evt = ctx->ring.mem.base + idx * ctx->ring.elem_sz;
 	gsi_process_chan(evt, notify, callback);
 	gsi_incr_ring_rp(&ctx->ring);
+
 	/* recycle this element */
 	gsi_incr_ring_wp(&ctx->ring);
 	ctx->stats.completed++;
@@ -393,11 +393,10 @@ static void gsi_ring_evt_doorbell(struct gsi_evt_ctx *ctx)
 	 * respectively.  LSB (doorbell 0) must be written last.
 	 */
 	val = ctx->ring.wp_local >> 32;
-	gsi_writel(val, GSI_EE_n_EV_CH_k_DOORBELL_1_OFFS(ctx->id,
-				gsi_ctx->ee));
+	gsi_writel(val, GSI_EE_n_EV_CH_k_DOORBELL_1_OFFS(ctx->id, gsi_ctx->ee));
+
 	val = ctx->ring.wp_local & GENMASK(31, 0);
-	gsi_writel(val, GSI_EE_n_EV_CH_k_DOORBELL_0_OFFS(ctx->id,
-				gsi_ctx->ee));
+	gsi_writel(val, GSI_EE_n_EV_CH_k_DOORBELL_0_OFFS(ctx->id, gsi_ctx->ee));
 }
 
 static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *ctx)
@@ -552,15 +551,11 @@ static void gsi_handle_general(int ee)
 
 static void gsi_handle_irq(void)
 {
+	u32 ee = gsi_ctx->ee;
+	u32 cnt = 0;
 	u32 type;
-	int ee = gsi_ctx->ee;
-	unsigned long cnt = 0;
 
-	while (1) {
-		type = gsi_readl(GSI_EE_n_CNTXT_TYPE_IRQ_OFFS(ee));
-		if (!type)
-			break;
-
+	while ((type = gsi_readl(GSI_EE_n_CNTXT_TYPE_IRQ_OFFS(ee)))) {
 		ipa_debug_low("type %x\n", type);
 
 		if (type & CH_CTRL_BMSK)
