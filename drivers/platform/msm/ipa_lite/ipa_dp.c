@@ -2556,20 +2556,8 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		gsi_channel_props.dir = GSI_CHAN_DIR_FROM_GSI;
 		gsi_channel_props.max_re_expected = ep->sys->rx_pool_sz;
 	}
-
 	gsi_channel_props.ch_id = gsi_ep_info->ipa_gsi_chan_num;
 	gsi_channel_props.evt_ring_hdl = ep->gsi_evt_ring_hdl;
-
-	size = ipa_gsi_ring_mem_size(ep->client, in->desc_fifo_sz);
-	if (ipahal_dma_alloc(&gsi_channel_props.mem, size, GFP_KERNEL)) {
-		ipa_err("fail to dma alloc %u bytes\n", size);
-		result = -ENOMEM;
-		goto fail_alloc_channel_ring;
-	}
-
-	/* copy mem info */
-	ep->gsi_chan_ring_mem = gsi_channel_props.mem;
-
 	gsi_channel_props.use_db_eng = GSI_CHAN_DB_MODE;
 	if (ep->client == IPA_CLIENT_APPS_CMD_PROD)
 		gsi_channel_props.low_weight = IPA_GSI_MAX_CH_LOW_WEIGHT;
@@ -2580,6 +2568,16 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		gsi_channel_props.xfer_cb = ipa_gsi_irq_tx_notify_cb;
 	else
 		gsi_channel_props.xfer_cb = ipa_gsi_irq_rx_notify_cb;
+
+	size = ipa_gsi_ring_mem_size(ep->client, in->desc_fifo_sz);
+	if (ipahal_dma_alloc(&gsi_channel_props.mem, size, GFP_KERNEL)) {
+		ipa_err("fail to dma alloc %u bytes\n", size);
+		result = -ENOMEM;
+		goto err_evt_ring_hdl_put;
+	}
+	/* copy mem info */
+	ep->gsi_chan_ring_mem = gsi_channel_props.mem;
+
 	result = gsi_alloc_channel(&gsi_channel_props);
 	if (result < 0)
 		goto fail_alloc_channel;
@@ -2609,7 +2607,6 @@ fail_write_channel_scratch:
 	}
 fail_alloc_channel:
 	ipahal_dma_free(&gsi_channel_props.mem);
-fail_alloc_channel_ring:
 err_evt_ring_hdl_put:
 	if (ep->gsi_evt_ring_hdl != ipa3_ctx->gsi_evt_comm_hdl) {
 		gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl);
