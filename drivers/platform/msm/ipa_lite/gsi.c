@@ -1183,8 +1183,6 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 
 	mutex_lock(&gsi_ctx->mlock);
 
-	gsi_ctx->ch_dbg[chan_id].ch_allocate++;
-
 	val = field_gen((u32)chan_id, CH_CHID_BMSK);
 	val |= field_gen(op, CH_OPCODE_BMSK);
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(ee));
@@ -1202,6 +1200,9 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 		devm_kfree(gsi_ctx->dev, user_data);
 		return -ENOMEM;
 	}
+
+	gsi_ctx->ch_dbg[chan_id].ch_allocate++;
+
 	mutex_unlock(&gsi_ctx->mlock);
 
 	ctx->evtr = evtr;
