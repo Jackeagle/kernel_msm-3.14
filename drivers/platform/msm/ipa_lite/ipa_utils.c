@@ -588,15 +588,13 @@ ipa3_get_gsi_ep_info(enum ipa_client_type client)
 int ipa3_get_ep_mapping(enum ipa_client_type client)
 {
 	const struct ipa_gsi_ep_config *ep_info;
-	int ipa_ep_idx;
+	u32 ipa_ep_idx;
 
 	ep_info = ipa3_get_gsi_ep_info(client);
 	if (!ep_info)
 		return -ESRCH;
 
 	ipa_ep_idx = ep_info->ipa_ep_num;
-	if (ipa_ep_idx < 0)
-		return -ENOENT;
 	if (ipa_ep_idx < IPA3_MAX_NUM_PIPES || client == IPA_CLIENT_DUMMY_CONS)
 		return ipa_ep_idx;
 

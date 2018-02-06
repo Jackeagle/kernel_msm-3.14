@@ -46,7 +46,7 @@
  * @ee: Execution environment
  */
 struct ipa_gsi_ep_config {
-	int ipa_ep_num;
+	u32 ipa_ep_num;
 	int ipa_gsi_chan_num;
 	int ipa_if_tlv;
 	int ipa_if_aos;
