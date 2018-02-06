@@ -78,7 +78,6 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 	int result;
 	int gsi_res;
 	struct gsi_chan_props orig_chan_props;
-	union gsi_channel_scratch orig_chan_scratch;
 	struct ipa_mem_buffer chan_dma;
 	struct ipa_mem_buffer dma_byte;
 	struct gsi_xfer_elem xfer_elem;
@@ -99,9 +98,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 
 	/* Reconfigure channel to dummy GPI channel */
 	memset(&orig_chan_props, 0, sizeof(struct gsi_chan_props));
-	memset(&orig_chan_scratch, 0, sizeof(union gsi_channel_scratch));
-	gsi_res = gsi_get_channel_cfg(ep->gsi_chan_hdl, &orig_chan_props,
-		&orig_chan_scratch);
+	gsi_res = gsi_get_channel_cfg(ep->gsi_chan_hdl, &orig_chan_props);
 	if (gsi_res) {
 		ipa_err("Error getting channel properties: %d\n", gsi_res);
 		return -EFAULT;

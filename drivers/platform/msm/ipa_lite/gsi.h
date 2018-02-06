@@ -800,8 +800,7 @@ bool gsi_is_channel_empty(unsigned long chan_hdl);
  *
  * @Return gsi_status
  */
-int gsi_get_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
-		union gsi_channel_scratch *scr);
+int gsi_get_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props);
 
 /**
  * gsi_set_channel_cfg - This function applies the supplied config
