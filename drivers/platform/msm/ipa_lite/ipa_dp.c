@@ -185,19 +185,20 @@ static void ipa3_wq_write_done(struct work_struct *work)
 }
 
 
+/* Work function for &sys->work for the APPS_WAN_PROD client */
 static void ipa3_send_nop_desc(struct work_struct *work)
 {
-	struct ipa3_sys_context *sys = container_of(work,
-		struct ipa3_sys_context, work);
+	struct ipa3_sys_context *sys;
 	struct gsi_xfer_elem nop_xfer;
 	struct ipa3_tx_pkt_wrapper *tx_pkt;
+
+	sys = container_of(work, struct ipa3_sys_context, work);
 
 	ipa_debug_low("gsi send NOP for ch: %lu\n", sys->ep->gsi_chan_hdl);
 	tx_pkt = kmem_cache_zalloc(ipa3_ctx->tx_pkt_wrapper_cache, GFP_KERNEL);
 	if (!tx_pkt) {
 		ipa_err("failed to alloc tx wrapper\n");
-		queue_work(sys->wq, &sys->work);
-		return;
+		goto try_again_later;
 	}
 
 	INIT_LIST_HEAD(&tx_pkt->link);
@@ -216,11 +217,13 @@ static void ipa3_send_nop_desc(struct work_struct *work)
 	if (gsi_queue_xfer(sys->ep->gsi_chan_hdl, 1, &nop_xfer, true)) {
 		ipa_err("gsi_queue_xfer for ch:%lu failed\n",
 			sys->ep->gsi_chan_hdl);
-		queue_work(sys->wq, &sys->work);
-		return;
+		goto try_again_later;
 	}
 	sys->len_pending_xfer = 0;
 
+	return;
+try_again_later:
+	queue_work(sys->wq, &sys->work);
 }
 
 /**
