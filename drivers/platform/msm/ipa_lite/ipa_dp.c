@@ -2344,6 +2344,7 @@ static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 
 	atomic_set(&sys->curr_polling_state, 0);
 	sys->rx_buff_sz = IPA_GENERIC_RX_BUFF_SZ(IPA_GENERIC_RX_BUFF_BASE_SZ);
+	sys->rx_pool_sz = IPA_GENERIC_RX_POOL_SZ;
 	sys->get_skb = ipa3_get_skb_ipa_rx;
 	sys->free_skb = ipa3_free_skb_rx;
 
@@ -2354,7 +2355,6 @@ static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 		sys->pyld_hdlr = ipa3_lan_rx_pyld_hdlr;
 		sys->repl_hdlr = ipa3_replenish_rx_cache_recycle;
 		sys->free_rx_wrapper = ipa3_recycle_rx_wrapper;
-		sys->rx_pool_sz = IPA_GENERIC_RX_POOL_SZ;
 		in->ipa_ep_cfg.aggr.aggr_byte_limit =
 				IPA_GENERIC_AGGR_BYTE_LIMIT;
 		in->ipa_ep_cfg.aggr.aggr_pkt_limit =
@@ -2362,7 +2362,6 @@ static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 	} else {	/* in->client == IPA_CLIENT_APPS_WAN_CONS */
 		sys->pyld_hdlr = ipa3_wan_rx_pyld_hdlr;
 		sys->free_rx_wrapper = ipa3_free_rx_wrapper;
-		sys->rx_pool_sz = IPA_GENERIC_RX_POOL_SZ;
 		if (nr_cpu_ids > 1)
 			sys->repl_hdlr = ipa3_fast_replenish_rx_cache;
 		else
