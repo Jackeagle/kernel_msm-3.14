@@ -154,8 +154,6 @@ typedef void (*ipa_irq_handler_t)(enum ipa_irq_type interrupt,
  *		evt - type of event
  *		data - data relevant to event.  May not be valid. See event_type
  *		enum for valid cases.
- * @skip_ep_cfg: boolean field that determines if EP should be configured
- *  by IPA driver
  * @keep_ipa_awake: when true, IPA will not be clock gated
  * @napi_enabled: when true, IPA call client callback to start polling
  */
@@ -165,7 +163,6 @@ struct ipa_sys_connect_params {
 	u32 desc_fifo_sz;
 	void *priv;
 	ipa_notify_cb notify;
-	bool skip_ep_cfg;
 	bool keep_ipa_awake;
 	bool napi_enabled;
 };

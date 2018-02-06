@@ -874,7 +874,7 @@ int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
 		memset(ep->sys, 0, offsetof(struct ipa3_sys_context, ep));
 	}
 
-	ep->skip_ep_cfg = sys_in->skip_ep_cfg;
+	ep->skip_ep_cfg = false;
 	if (ipa3_assign_policy(sys_in, ep->sys)) {
 		ipa_err("failed to sys ctx for client %d\n", sys_in->client);
 		result = -ENOMEM;
