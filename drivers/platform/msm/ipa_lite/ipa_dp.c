@@ -885,7 +885,7 @@ int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
 	ep->client_notify = sys_in->notify;
 	ep->napi_enabled = sys_in->napi_enabled;
 	ep->priv = sys_in->priv;
-	ep->keep_ipa_awake = sys_in->keep_ipa_awake;
+	ep->keep_ipa_awake = false;
 	atomic_set(&ep->avail_fifo_desc,
 		((sys_in->desc_fifo_sz / IPA_FIFO_ELEMENT_SIZE) - 1));
 
