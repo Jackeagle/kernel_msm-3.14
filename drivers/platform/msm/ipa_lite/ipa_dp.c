@@ -2489,7 +2489,7 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 static u32
 ipa_gsi_ring_mem_size(enum ipa_client_type client, u32 desc_fifo_sz)
 {
-	if (IPA_CLIENT_IS_PROD(client) && client != IPA_CLIENT_APPS_WAN_PROD)
+	if (client == IPA_CLIENT_APPS_CMD_PROD)
 		return 4 * desc_fifo_sz;
 
 	return 2 * desc_fifo_sz;
