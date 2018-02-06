@@ -2495,6 +2495,39 @@ ipa_gsi_ring_mem_size(enum ipa_client_type client, u32 desc_fifo_sz)
 	return 2 * desc_fifo_sz;
 }
 
+/*
+ * Returns the event ring handle to use for the given endpoint
+ * context, or a negative error code if an error occurs.
+ *
+ * If successful, the returned handle will be either the common
+ * event ring handle or a new handle.  Caller is responsible for
+ * deallocating the event ring *unless* it is the common one.
+ */
+static long evt_ring_hdl_get(struct ipa3_ep_context *ep, u32 desc_fifo_sz)
+{
+	u32 sz;
+
+	if (!ep->sys->use_comm_evt_ring) {
+		ipa_debug("client=%d moderation threshold cycles=%u cnt=1\n",
+				ep->client, IPA_GSI_EVT_RING_INT_MODT);
+
+		sz = ipa_gsi_ring_mem_size(ep->client, desc_fifo_sz);
+
+		return gsi_alloc_evt_ring(sz, IPA_GSI_EVT_RING_INT_MODT, true);
+	}
+
+	sz = 2 * desc_fifo_sz;
+	if (WARN_ON(ipa3_ctx->gsi_evt_comm_ring_rem < sz)) {
+		ipa_err("common ring exhausted (need %u avail %u)\n",
+			sz, ipa3_ctx->gsi_evt_comm_ring_rem);
+
+		return -EFAULT;
+	}
+	ipa3_ctx->gsi_evt_comm_ring_rem -= sz;
+
+	return ipa3_ctx->gsi_evt_comm_hdl;
+}
+
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	struct ipa3_ep_context *ep)
 {
@@ -2503,29 +2536,10 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	int result;
 	u32 size;
 
-	if (ep->sys->use_comm_evt_ring) {
-		if (ipa3_ctx->gsi_evt_comm_ring_rem < 2 * in->desc_fifo_sz) {
-			ipa_err("not enough space in common event ring\n");
-			ipa_err("available: %d needed: %d\n",
-				ipa3_ctx->gsi_evt_comm_ring_rem,
-				2 * in->desc_fifo_sz);
-			WARN_ON(1);
-			return -EFAULT;
-		}
-		ipa3_ctx->gsi_evt_comm_ring_rem -= (2 * in->desc_fifo_sz);
-		ep->gsi_evt_ring_hdl = ipa3_ctx->gsi_evt_comm_hdl;
-	} else {
-		size = ipa_gsi_ring_mem_size(ep->client, in->desc_fifo_sz);
-
-		ipa_debug("client=%d moderation threshold cycles=%u cnt=1\n",
-			ep->client, IPA_GSI_EVT_RING_INT_MODT);
-
-		result = gsi_alloc_evt_ring(size, IPA_GSI_EVT_RING_INT_MODT,
-						true);
-		if (result < 0)
-			goto fail_alloc_evt_ring;
-		ep->gsi_evt_ring_hdl = result;
-	}
+	result = evt_ring_hdl_get(ep, in->desc_fifo_sz);
+	if (result < 0)
+		return result;
+	ep->gsi_evt_ring_hdl = result;
 
 	memset(&gsi_channel_props, 0, sizeof(gsi_channel_props));
 	if (IPA_CLIENT_IS_PROD(ep->client)) {
@@ -2601,7 +2615,6 @@ fail_get_gsi_ep_info:
 		gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl);
 		ep->gsi_evt_ring_hdl = GSI_NO_EVT_ERINDEX;
 	}
-fail_alloc_evt_ring:
 	ipa_err("Return with err: %d\n", result);
 
 	return result;
