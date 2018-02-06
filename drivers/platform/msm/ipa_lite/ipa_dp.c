@@ -2598,7 +2598,7 @@ fail_alloc_channel:
 	ipahal_dma_free(&gsi_channel_props.mem);
 fail_alloc_channel_ring:
 fail_get_gsi_ep_info:
-	if (ep->gsi_evt_ring_hdl != GSI_NO_EVT_ERINDEX) {
+	if (ep->gsi_evt_ring_hdl != ipa3_ctx->gsi_evt_comm_hdl) {
 		gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl);
 		ep->gsi_evt_ring_hdl = GSI_NO_EVT_ERINDEX;
 	}
