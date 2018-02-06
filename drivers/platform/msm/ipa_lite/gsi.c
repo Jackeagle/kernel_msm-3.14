@@ -1226,25 +1226,28 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 static void __gsi_write_channel_scratch(unsigned long chan_hdl)
 {
 	union __packed gsi_channel_scratch *scr;
+	int ee = gsi_ctx->ee;
 	u32 val;
 
 	scr = &gsi_ctx->chan[chan_hdl].scratch;
 
-	gsi_writel(scr->data.word1, GSI_EE_n_GSI_CH_k_SCRATCH_0_OFFS(chan_hdl,
-			gsi_ctx->ee));
-	gsi_writel(scr->data.word2, GSI_EE_n_GSI_CH_k_SCRATCH_1_OFFS(chan_hdl,
-			gsi_ctx->ee));
-	gsi_writel(scr->data.word3, GSI_EE_n_GSI_CH_k_SCRATCH_2_OFFS(chan_hdl,
-			gsi_ctx->ee));
-	/* below sequence is not atomic. assumption is sequencer specific fields
-	 * will remain unchanged across this sequence
+	val = scr->data.word1;
+	gsi_writel(val, GSI_EE_n_GSI_CH_k_SCRATCH_0_OFFS(chan_hdl, ee));
+
+	val = scr->data.word2;
+	gsi_writel(val, GSI_EE_n_GSI_CH_k_SCRATCH_1_OFFS(chan_hdl, ee));
+
+	val = scr->data.word3;
+	gsi_writel(val, GSI_EE_n_GSI_CH_k_SCRATCH_2_OFFS(chan_hdl, ee));
+
+	/*
+	 * We must preserve the upper 16 bits of the last scratch
+	 * register.  The next sequence assumes those bits remain
+	 * unchanged between the read and the write.
 	 */
-	val = gsi_readl(GSI_EE_n_GSI_CH_k_SCRATCH_3_OFFS(chan_hdl,
-			gsi_ctx->ee));
-	val &= 0xFFFF;
-	val |= (scr->data.word4 & 0xFFFF0000);
-	gsi_writel(val, GSI_EE_n_GSI_CH_k_SCRATCH_3_OFFS(chan_hdl,
-			gsi_ctx->ee));
+	val = gsi_readl(GSI_EE_n_GSI_CH_k_SCRATCH_3_OFFS(chan_hdl, ee));
+	val = (scr->data.word4 & 0xffff0000) | (val & 0xffff);
+	gsi_writel(val, GSI_EE_n_GSI_CH_k_SCRATCH_3_OFFS(chan_hdl, ee));
 }
 
 int gsi_write_channel_scratch(unsigned long chan_hdl,
