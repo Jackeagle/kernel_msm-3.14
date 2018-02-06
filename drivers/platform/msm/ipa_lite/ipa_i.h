@@ -168,7 +168,6 @@ struct ipa_sys_connect_params {
 	bool skip_ep_cfg;
 	bool keep_ipa_awake;
 	bool napi_enabled;
-	bool recycle_enabled;
 };
 
 /**

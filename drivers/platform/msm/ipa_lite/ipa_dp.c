@@ -2376,8 +2376,6 @@ static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 		else
 			sys->repl_hdlr = ipa3_replenish_rx_cache;
 
-		if (in->napi_enabled && in->recycle_enabled)
-			sys->repl_hdlr = ipa3_replenish_rx_cache_recycle;
 		in->ipa_ep_cfg.aggr.aggr_sw_eof_active = true;
 		if (ipa3_ctx->ipa_client_apps_wan_cons_agg_gro) {
 			ipa_err("get close-by %u\n",
