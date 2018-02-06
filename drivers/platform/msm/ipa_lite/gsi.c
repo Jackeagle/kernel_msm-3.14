@@ -429,14 +429,13 @@ static void gsi_handle_ieob(int ee)
 	struct gsi_chan_xfer_notify notify;
 	unsigned long flags;
 	unsigned long cntr;
-	u32 msk;
 
 	ev_mask = gsi_readl(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_OFFS(ee));
-	msk = gsi_readl(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee));
-	gsi_writel(ev_mask & msk, GSI_EE_n_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(ee));
+	ev_mask &= gsi_readl(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee));
+	gsi_writel(ev_mask, GSI_EE_n_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(ee));
 
 	for (i = 0; i < GSI_EVT_RING_MAX; i++) {
-		if (BIT(i) & ev_mask & msk) {
+		if (BIT(i) & ev_mask) {
 			if (i >= gsi_ctx->max_ev) {
 				ipa_err("invalid event %d\n", i);
 				break;
