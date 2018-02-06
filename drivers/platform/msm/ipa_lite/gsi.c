@@ -1253,14 +1253,8 @@ static void __gsi_write_channel_scratch(unsigned long chan_hdl)
 int gsi_write_channel_scratch(unsigned long chan_hdl,
 		union __packed gsi_channel_scratch scr)
 {
-	struct gsi_chan_ctx *ctx;
+	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_hdl];
 
-	if (chan_hdl >= gsi_ctx->max_ch) {
-		ipa_err("bad params chan_hdl=%lu\n", chan_hdl);
-		return -EINVAL;
-	}
-
-	ctx = &gsi_ctx->chan[chan_hdl];
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED &&
 			ctx->state != GSI_CHAN_STATE_STOPPED) {
 		ipa_err("bad state %d\n", ctx->state);
