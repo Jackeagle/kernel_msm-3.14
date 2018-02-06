@@ -59,8 +59,7 @@ static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 }
 
 static int ipa3_restore_channel_properties(struct ipa3_ep_context *ep,
-	struct gsi_chan_props *chan_props,
-	union gsi_channel_scratch *chan_scratch)
+	struct gsi_chan_props *chan_props)
 {
 	int gsi_res;
 
@@ -192,8 +191,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 	}
 
 	/* Restore channels properties */
-	result = ipa3_restore_channel_properties(ep, &orig_chan_props,
-		&orig_chan_scratch);
+	result = ipa3_restore_channel_properties(ep, &orig_chan_props);
 	if (result)
 		goto restore_props_fail;
 	ipahal_dma_free(&chan_dma);
@@ -211,8 +209,7 @@ start_chan_fail:
 		ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n,
 			clnt_hdl, &ctrl);
 	}
-	ipa3_restore_channel_properties(ep, &orig_chan_props,
-		&orig_chan_scratch);
+	ipa3_restore_channel_properties(ep, &orig_chan_props);
 restore_props_fail:
 	ipahal_dma_free(&chan_dma);
 
