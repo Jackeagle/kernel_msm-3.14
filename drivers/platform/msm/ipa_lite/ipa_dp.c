@@ -2541,6 +2541,14 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		return result;
 	ep->gsi_evt_ring_hdl = result;
 
+	gsi_ep_info = ipa3_get_gsi_ep_info(ep->client);
+	if (!gsi_ep_info) {
+		ipa_err("Failed getting GSI EP info for client=%d\n",
+		       ep->client);
+		result = -EINVAL;
+		goto err_evt_ring_hdl_put;
+	}
+
 	memset(&gsi_channel_props, 0, sizeof(gsi_channel_props));
 	if (IPA_CLIENT_IS_PROD(ep->client)) {
 		gsi_channel_props.dir = GSI_CHAN_DIR_TO_GSI;
@@ -2549,15 +2557,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		gsi_channel_props.max_re_expected = ep->sys->rx_pool_sz;
 	}
 
-	gsi_ep_info = ipa3_get_gsi_ep_info(ep->client);
-	if (!gsi_ep_info) {
-		ipa_err("Failed getting GSI EP info for client=%d\n",
-		       ep->client);
-		result = -EINVAL;
-		goto fail_get_gsi_ep_info;
-	} else
-		gsi_channel_props.ch_id = gsi_ep_info->ipa_gsi_chan_num;
-
+	gsi_channel_props.ch_id = gsi_ep_info->ipa_gsi_chan_num;
 	gsi_channel_props.evt_ring_hdl = ep->gsi_evt_ring_hdl;
 
 	size = ipa_gsi_ring_mem_size(ep->client, in->desc_fifo_sz);
@@ -2610,7 +2610,7 @@ fail_write_channel_scratch:
 fail_alloc_channel:
 	ipahal_dma_free(&gsi_channel_props.mem);
 fail_alloc_channel_ring:
-fail_get_gsi_ep_info:
+err_evt_ring_hdl_put:
 	if (ep->gsi_evt_ring_hdl != ipa3_ctx->gsi_evt_comm_hdl) {
 		gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl);
 		ep->gsi_evt_ring_hdl = GSI_NO_EVT_ERINDEX;
