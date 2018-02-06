@@ -2548,8 +2548,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 
 	size = ipa_gsi_ring_mem_size(ep->client, in->desc_fifo_sz);
 	if (ipahal_dma_alloc(&gsi_channel_props.mem, size, GFP_KERNEL)) {
-		ipa_err("fail to dma alloc %u bytes\n",
-			gsi_channel_props.mem.size);
+		ipa_err("fail to dma alloc %u bytes\n", size);
 		result = -ENOMEM;
 		goto fail_alloc_channel_ring;
 	}
