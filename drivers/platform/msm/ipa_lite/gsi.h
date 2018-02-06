@@ -48,7 +48,7 @@
 struct ipa_gsi_ep_config {
 	u32 ipa_ep_num;
 	u32 ipa_gsi_chan_num;
-	int ipa_if_tlv;
+	u32 ipa_if_tlv;
 	int ipa_if_aos;
 	int ee;
 };

@@ -1133,7 +1133,8 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb,
 	struct ipahal_imm_cmd_pyld *cmd_pyld = NULL;
 	struct ipa3_sys_context *sys;
 	int src_ep_idx;
-	int num_frags, f;
+	u32 num_frags;
+	u32 f;
 	const struct ipa_gsi_ep_config *gsi_ep;
 	int data_idx;
 
