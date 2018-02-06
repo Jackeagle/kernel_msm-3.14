@@ -409,7 +409,7 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *ctx)
 	 * for TO_GSI channels the event ring doorbell is rang as part of
 	 * interrupt handling.
 	 */
-	if (ctx->evtr && ctx->props.dir == GSI_CHAN_DIR_FROM_GSI)
+	if (ctx->props.dir == GSI_CHAN_DIR_FROM_GSI)
 		gsi_ring_evt_doorbell(ctx->evtr);
 	ctx->ring.wp = ctx->ring.wp_local;
 
@@ -1444,8 +1444,7 @@ reset:
 		goto reset;
 	}
 
-	gsi_program_chan_ctx(&ctx->props, gsi_ctx->ee,
-			ctx->evtr ? ctx->evtr->id : GSI_NO_EVT_ERINDEX);
+	gsi_program_chan_ctx(&ctx->props, gsi_ctx->ee, ctx->evtr->id);
 	gsi_init_ring(&ctx->ring, &ctx->props.mem);
 
 	/* restore scratch */
@@ -1498,8 +1497,7 @@ int gsi_dealloc_channel(unsigned long chan_hdl)
 
 	devm_kfree(gsi_ctx->dev, ctx->user_data);
 	ctx->allocated = false;
-	if (ctx->evtr)
-		atomic_dec(&ctx->evtr->chan_ref_cnt);
+	atomic_dec(&ctx->evtr->chan_ref_cnt);
 	atomic_dec(&gsi_ctx->num_chan);
 
 	return 0;
@@ -1527,20 +1525,10 @@ void gsi_update_ch_dp_stats(struct gsi_chan_ctx *ctx, u16 used)
 
 static u16 __gsi_query_channel_free_re(struct gsi_chan_ctx *ctx)
 {
+	u64 rp = ctx->ring.rp_local;
 	u16 start;
 	u16 end;
-	u64 rp;
-	int ee = gsi_ctx->ee;
 	u16 used;
-
-	if (!ctx->evtr) {
-		rp = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_4_OFFS(ctx->props.ch_id, ee));
-		rp |= ctx->ring.rp & 0xFFFFFFFF00000000;
-
-		ctx->ring.rp = rp;
-	} else {
-		rp = ctx->ring.rp_local;
-	}
 
 	start = gsi_find_idx_from_addr(&ctx->ring, rp);
 	end = gsi_find_idx_from_addr(&ctx->ring, ctx->ring.wp_local);
@@ -1564,10 +1552,7 @@ bool gsi_is_channel_empty(unsigned long chan_hdl)
 	bool is_empty;
 
 	ctx = &gsi_ctx->chan[chan_hdl];
-	if (ctx->evtr)
-		slock = &ctx->evtr->ring.slock;
-	else
-		slock = &ctx->ring.slock;
+	slock = &ctx->evtr->ring.slock;
 
 	spin_lock_irqsave(slock, flags);
 
@@ -1612,10 +1597,7 @@ int gsi_queue_xfer(unsigned long chan_hdl, u16 num_xfers,
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
-	if (ctx->evtr)
-		slock = &ctx->evtr->ring.slock;
-	else
-		slock = &ctx->ring.slock;
+	slock = &ctx->evtr->ring.slock;
 
 	spin_lock_irqsave(slock, flags);
 	free = __gsi_query_channel_free_re(ctx);
@@ -1714,11 +1696,6 @@ int gsi_poll_channel(unsigned long chan_hdl,
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
-	if (!ctx->evtr) {
-		ipa_err("no event ring associated chan_hdl=%lu\n", chan_hdl);
-		return -ENOTSUPP;
-	}
-
 	spin_lock_irqsave(&ctx->evtr->ring.slock, flags);
 	if (ctx->evtr->ring.rp == ctx->evtr->ring.rp_local) {
 		/* update rp to see of we have anything new to process */
@@ -1753,7 +1730,7 @@ int gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode)
 	}
 
 	ctx = &gsi_ctx->chan[chan_hdl];
-	if (!ctx->evtr || !ctx->evtr->exclusive) {
+	if (!ctx->evtr->exclusive) {
 		ipa_err("cannot configure mode on chan_hdl=%lu\n",
 				chan_hdl);
 		return -ENOTSUPP;
@@ -1771,14 +1748,12 @@ int gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode)
 	}
 
 	spin_lock_irqsave(&gsi_ctx->slock, flags);
-	if (curr == GSI_CHAN_MODE_CALLBACK &&
-			mode == GSI_CHAN_MODE_POLL) {
+	if (curr == GSI_CHAN_MODE_CALLBACK && mode == GSI_CHAN_MODE_POLL) {
 		gsi_irq_control_event(gsi_ctx->ee, ctx->evtr->id, false);
 		ctx->stats.callback_to_poll++;
 	}
 
-	if (curr == GSI_CHAN_MODE_POLL &&
-			mode == GSI_CHAN_MODE_CALLBACK) {
+	if (curr == GSI_CHAN_MODE_POLL && mode == GSI_CHAN_MODE_CALLBACK) {
 		gsi_irq_control_event(gsi_ctx->ee, ctx->evtr->id, true);
 		ctx->stats.poll_to_callback++;
 	}
@@ -1833,8 +1808,7 @@ int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props)
 
 	mutex_lock(&ctx->mlock);
 	ctx->props = *props;
-	gsi_program_chan_ctx(&ctx->props, gsi_ctx->ee,
-			ctx->evtr ? ctx->evtr->id : GSI_NO_EVT_ERINDEX);
+	gsi_program_chan_ctx(&ctx->props, gsi_ctx->ee, ctx->evtr->id);
 	gsi_init_ring(&ctx->ring, &ctx->props.mem);
 
 	/* restore scratch */

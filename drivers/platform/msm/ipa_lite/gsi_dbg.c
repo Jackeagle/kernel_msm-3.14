@@ -286,17 +286,16 @@ static ssize_t gsi_dump_map(struct file *file,
 
 		if (ctx->allocated) {
 			pr_err("VIRT CH%2d -> VIRT EV%2d\n", ctx->props.ch_id,
-				ctx->evtr ? ctx->evtr->id : GSI_NO_EVT_ERINDEX);
+				ctx->evtr->id);
 			val1 = gsi_readl(GSI_DEBUG_EE_n_CH_k_VP_TABLE_OFFS(i,
 					gsi_ctx->ee));
 			pr_err("VIRT CH%2d -> PHYS CH%2d\n", ctx->props.ch_id,
 				val1 & PHY_CH_BMSK);
-			if (ctx->evtr) {
-				val2 = gsi_readl(GSI_DEBUG_EE_n_EV_k_VP_TABLE_OFFS(
-					ctx->evtr->id, gsi_ctx->ee));
-				pr_err("VRT EV%2d -> PHYS EV%2d\n", ctx->evtr->id,
-				val2 & PHY_CH_BMSK);
-			}
+			val2 = gsi_readl(GSI_DEBUG_EE_n_EV_k_VP_TABLE_OFFS(
+				ctx->evtr->id, gsi_ctx->ee));
+			pr_err("VRT EV%2d -> PHYS EV%2d\n",
+					ctx->evtr->id,
+			val2 & PHY_CH_BMSK);
 			pr_err("\n");
 		}
 	}
@@ -320,9 +319,8 @@ static void gsi_dump_ch_stats(struct gsi_chan_ctx *ctx)
 		ctx->stats.invalid_tre_error);
 	printk(KERN_ERR "poll_ok=%lu poll_empty=%lu\n",
 		ctx->stats.poll_ok, ctx->stats.poll_empty);
-	if (ctx->evtr)
-		printk(KERN_ERR "compl_evt=%lu\n",
-			ctx->evtr->stats.completed);
+	printk(KERN_ERR "compl_evt=%lu\n",
+		ctx->evtr->stats.completed);
 
 	printk(KERN_ERR "ch_below_lo=%lu\n", ctx->stats.dp.ch_below_lo);
 	printk(KERN_ERR "ch_below_hi=%lu\n", ctx->stats.dp.ch_below_hi);
