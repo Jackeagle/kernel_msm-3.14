@@ -1250,16 +1250,21 @@ static void __gsi_write_channel_scratch(unsigned long chan_hdl)
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_SCRATCH_3_OFFS(chan_hdl, ee));
 }
 
-int gsi_write_channel_scratch(unsigned long chan_hdl,
-		union __packed gsi_channel_scratch scr)
+int gsi_write_channel_scratch(unsigned long chan_hdl, u32 tlv_size)
 {
 	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_hdl];
+	union __packed gsi_channel_scratch scr;
 
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED &&
 			ctx->state != GSI_CHAN_STATE_STOPPED) {
 		ipa_err("bad state %d\n", ctx->state);
 		return -ENOTSUPP;
 	}
+
+	/* See comments above definition of gsi_gpi_channel_scratch */
+	memset(&scr, 0, sizeof(scr));
+	scr.gpi.max_outstanding_tre = tlv_size * GSI_CHAN_RING_ELEMENT_SIZE;
+	scr.gpi.outstanding_threshold = 2 * GSI_CHAN_RING_ELEMENT_SIZE;
 
 	mutex_lock(&ctx->mlock);
 	ctx->scratch = scr;

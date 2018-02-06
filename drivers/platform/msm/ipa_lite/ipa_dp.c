@@ -2499,7 +2499,6 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	struct ipa3_ep_context *ep)
 {
 	struct gsi_chan_props gsi_channel_props;
-	union __packed gsi_channel_scratch ch_scratch;
 	const struct ipa_gsi_ep_config *gsi_ep_info;
 	int result;
 	u32 size;
@@ -2573,12 +2572,8 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		goto fail_alloc_channel;
 	ep->gsi_chan_hdl = result;
 
-	memset(&ch_scratch, 0, sizeof(ch_scratch));
-	ch_scratch.gpi.max_outstanding_tre =
-			gsi_ep_info->ipa_if_tlv * GSI_CHAN_RING_ELEMENT_SIZE;
-	ch_scratch.gpi.outstanding_threshold =
-			2 * GSI_CHAN_RING_ELEMENT_SIZE;
-	result = gsi_write_channel_scratch(ep->gsi_chan_hdl, ch_scratch);
+	result = gsi_write_channel_scratch(ep->gsi_chan_hdl,
+					gsi_ep_info->ipa_if_tlv);
 	if (result) {
 		ipa_err("failed to write scratch %d\n", result);
 		goto fail_write_channel_scratch;
