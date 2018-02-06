@@ -1140,10 +1140,11 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 long gsi_alloc_channel(struct gsi_chan_props *props)
 {
 	struct gsi_chan_ctx *ctx;
+	struct gsi_evt_ctx *evtr;
 	u32 val;
 	int ee = gsi_ctx->ee;
 	enum gsi_ch_cmd_opcode op = GSI_CH_ALLOCATE;
-	u8 erindex;
+	u8 evt_id;
 	void **user_data;
 	long chan_id;
 
@@ -1152,10 +1153,10 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 		return -EINVAL;
 	}
 
-	if (atomic_read(&gsi_ctx->evtr[props->evt_ring_hdl].chan_ref_cnt) &&
-		gsi_ctx->evtr[props->evt_ring_hdl].exclusive) {
-		ipa_err("evt ring=%lu exclusively in use\n",
-			props->evt_ring_hdl);
+	evt_id = props->evt_ring_hdl;
+	evtr = &gsi_ctx->evtr[evt_id];
+	if (atomic_read(&evtr->chan_ref_cnt) && evtr->exclusive) {
+		ipa_err("evt ring=%hhu exclusively in use\n", evt_id);
 		return -ENOTSUPP;
 	}
 
@@ -1203,13 +1204,12 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	}
 	mutex_unlock(&gsi_ctx->mlock);
 
-	erindex = props->evt_ring_hdl;
-	ctx->evtr = &gsi_ctx->evtr[erindex];
-	atomic_inc(&ctx->evtr->chan_ref_cnt);
-	if (ctx->evtr->exclusive)
-		ctx->evtr->chan = ctx;
+	ctx->evtr = evtr;
+	atomic_inc(&evtr->chan_ref_cnt);
+	if (evtr->exclusive)
+		evtr->chan = ctx;
 
-	gsi_program_chan_ctx(props, gsi_ctx->ee, erindex);
+	gsi_program_chan_ctx(props, gsi_ctx->ee, evt_id);
 
 	spin_lock_init(&ctx->ring.slock);
 	gsi_init_ring(&ctx->ring, &props->mem);
