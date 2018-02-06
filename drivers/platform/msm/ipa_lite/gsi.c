@@ -1141,6 +1141,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 {
 	struct gsi_chan_ctx *ctx;
 	struct gsi_evt_ctx *evtr;
+	size_t size;
 	u32 val;
 	int ee = gsi_ctx->ee;
 	enum gsi_ch_cmd_opcode op = GSI_CH_ALLOCATE;
@@ -1168,11 +1169,10 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	}
 
 	memset(ctx, 0, sizeof(*ctx));
-	user_data = devm_kzalloc(gsi_ctx->dev,
-		(props->mem.size / GSI_CHAN_RING_ELEMENT_SIZE) * sizeof(void *),
-		GFP_KERNEL);
-	if (user_data == NULL) {
-		ipa_err("%s:%d gsi context not allocated\n", __func__, __LINE__);
+	size = props->mem.size / GSI_CHAN_RING_ELEMENT_SIZE * sizeof(void *);
+	user_data = devm_kzalloc(gsi_ctx->dev, size, GFP_KERNEL);
+	if (!user_data) {
+		ipa_err("error allocating user pointer array\n");
 		return -ENOMEM;
 	}
 
