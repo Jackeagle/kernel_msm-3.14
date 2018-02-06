@@ -227,7 +227,6 @@ struct ipa3_status_stats {
  *	  notified for new data avail
  * @client_notify: user provided CB for EP events notification, the event is
  *		   data revived.
- * @keep_ipa_awake: when true, IPA will not be clock gated
  * @disconnect_in_progress: Indicates client disconnect in progress.
  * @qmi_request_sent: Indicates whether QMI request to enable clear data path
  *					request is sent or not.
@@ -254,7 +253,6 @@ struct ipa3_ep_context {
 	atomic_t avail_fifo_desc;
 	u32 dflt_flt4_rule_hdl;
 	u32 dflt_flt6_rule_hdl;
-	bool keep_ipa_awake;
 	u32 uc_offload_state;
 	bool disconnect_in_progress;
 	u32 qmi_request_sent;

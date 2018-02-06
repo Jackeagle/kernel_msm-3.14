@@ -885,7 +885,6 @@ int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
 	ep->client_notify = sys_in->notify;
 	ep->napi_enabled = sys_in->napi_enabled;
 	ep->priv = sys_in->priv;
-	ep->keep_ipa_awake = false;
 	atomic_set(&ep->avail_fifo_desc,
 		((sys_in->desc_fifo_sz / IPA_FIFO_ELEMENT_SIZE) - 1));
 
@@ -940,8 +939,7 @@ int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
 			ipa_debug("modem cfg emb pipe flt\n");
 	}
 
-	if (!ep->keep_ipa_awake)
-		IPA_ACTIVE_CLIENTS_DEC_EP(sys_in->client);
+	IPA_ACTIVE_CLIENTS_DEC_EP(sys_in->client);
 
 	ipa_debug("client %d (ep: %d) connected sys=%p\n", sys_in->client,
 			ipa_ep_idx, ep->sys);
@@ -982,8 +980,7 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 
 	ep = &ipa3_ctx->ep[clnt_hdl];
 
-	if (!ep->keep_ipa_awake)
-		IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
 
 	if (ep->napi_enabled) {
 		do {
