@@ -1223,11 +1223,12 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	return chan_id;
 }
 
-static void __gsi_write_channel_scratch(unsigned long chan_hdl,
-		union __packed gsi_channel_scratch scratch)
+static void __gsi_write_channel_scratch(unsigned long chan_hdl)
 {
-	union __packed gsi_channel_scratch *scr = &scratch;
+	union __packed gsi_channel_scratch *scr;
 	u32 val;
+
+	scr = &gsi_ctx->chan[chan_hdl].scratch;
 
 	gsi_writel(scr->data.word1, GSI_EE_n_GSI_CH_k_SCRATCH_0_OFFS(chan_hdl,
 			gsi_ctx->ee));
@@ -1267,7 +1268,7 @@ int gsi_write_channel_scratch(unsigned long chan_hdl,
 
 	mutex_lock(&ctx->mlock);
 	ctx->scratch = scr;
-	__gsi_write_channel_scratch(chan_hdl, scr);
+	__gsi_write_channel_scratch(chan_hdl);
 	mutex_unlock(&ctx->mlock);
 
 	return 0;
@@ -1443,7 +1444,7 @@ reset:
 	gsi_init_ring(&ctx->ring, &ctx->props.mem);
 
 	/* restore scratch */
-	__gsi_write_channel_scratch(chan_hdl, ctx->scratch);
+	__gsi_write_channel_scratch(chan_hdl);
 
 	mutex_unlock(&gsi_ctx->mlock);
 
@@ -1837,7 +1838,7 @@ int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
 	gsi_init_ring(&ctx->ring, &ctx->props.mem);
 
 	/* restore scratch */
-	__gsi_write_channel_scratch(chan_hdl, ctx->scratch);
+	__gsi_write_channel_scratch(chan_hdl);
 	mutex_unlock(&ctx->mlock);
 
 	return 0;
