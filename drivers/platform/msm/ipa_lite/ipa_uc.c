@@ -549,7 +549,7 @@ int ipa3_uc_is_gsi_channel_empty(enum ipa_client_type ipa_client)
 	cmd.params.ee_n = gsi_ep_info->ee;
 	cmd.params.vir_ch_id = gsi_ep_info->ipa_gsi_chan_num;
 
-	ipa_debug("uC emptiness check for IPA GSI Channel %d\n",
+	ipa_debug("uC emptiness check for IPA GSI Channel %u\n",
 			gsi_ep_info->ipa_gsi_chan_num);
 
 	return ipa3_uc_send_cmd(cmd.raw32b, IPA_CPU_2_HW_CMD_GSI_CH_EMPTY);

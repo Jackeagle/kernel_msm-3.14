@@ -47,7 +47,7 @@
  */
 struct ipa_gsi_ep_config {
 	u32 ipa_ep_num;
-	int ipa_gsi_chan_num;
+	u32 ipa_gsi_chan_num;
 	int ipa_if_tlv;
 	int ipa_if_aos;
 	int ee;
@@ -879,6 +879,6 @@ int gsi_start_xfer(unsigned long chan_hdl);
 
  * @Return gsi_status
  */
-int gsi_halt_channel_ee(unsigned int chan_idx, unsigned int ee, int *code);
+int gsi_halt_channel_ee(u32 chan_idx, unsigned int ee, int *code);
 
 #endif

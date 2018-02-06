@@ -1834,7 +1834,7 @@ int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props)
 	return 0;
 }
 
-int gsi_halt_channel_ee(unsigned int chan_idx, unsigned int ee, int *code)
+int gsi_halt_channel_ee(u32 chan_idx, unsigned int ee, int *code)
 {
 	enum gsi_generic_ee_cmd_opcode op = GSI_GEN_EE_CMD_HALT_CHANNEL;
 	u32 val;

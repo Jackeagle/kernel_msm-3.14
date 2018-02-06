@@ -431,12 +431,12 @@ static void ipa3_halt_q6_cons_gsi_channels(void)
 				gsi_ep_cfg->ipa_gsi_chan_num, gsi_ep_cfg->ee,
 				&code);
 			if (!ret)
-				ipa_debug("halted gsi ch %d ee %d with code %d\n",
+				ipa_debug("halted gsi ch %u ee %d with code %d\n",
 				gsi_ep_cfg->ipa_gsi_chan_num,
 				gsi_ep_cfg->ee,
 				code);
 			else
-				ipa_err("failed to halt ch %d ee %d code %d\n",
+				ipa_err("failed to halt ch %u ee %d code %d\n",
 				gsi_ep_cfg->ipa_gsi_chan_num,
 				gsi_ep_cfg->ee,
 				code);
