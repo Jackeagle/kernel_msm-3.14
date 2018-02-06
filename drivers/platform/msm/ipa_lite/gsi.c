@@ -1260,14 +1260,12 @@ int gsi_write_channel_scratch(unsigned long chan_hdl,
 		return -EINVAL;
 	}
 
-	if (gsi_ctx->chan[chan_hdl].state != GSI_CHAN_STATE_ALLOCATED &&
-		gsi_ctx->chan[chan_hdl].state != GSI_CHAN_STATE_STOPPED) {
-		ipa_err("bad state %d\n",
-				gsi_ctx->chan[chan_hdl].state);
+	ctx = &gsi_ctx->chan[chan_hdl];
+	if (ctx->state != GSI_CHAN_STATE_ALLOCATED &&
+			ctx->state != GSI_CHAN_STATE_STOPPED) {
+		ipa_err("bad state %d\n", ctx->state);
 		return -ENOTSUPP;
 	}
-
-	ctx = &gsi_ctx->chan[chan_hdl];
 
 	mutex_lock(&ctx->mlock);
 	ctx->scratch = scr;
