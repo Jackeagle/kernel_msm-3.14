@@ -454,7 +454,6 @@ static int ipa3_q6_set_ex_path_to_apps(void)
 	struct ipahal_imm_cmd_register_write reg_write;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	int retval;
-	struct ipahal_reg_valmask valmask;
 
 	desc = kcalloc(ipa3_ctx->ipa_num_pipes, sizeof(struct ipa3_desc),
 			GFP_KERNEL);
@@ -468,33 +467,6 @@ static int ipa3_q6_set_ex_path_to_apps(void)
 		ep_idx = ipa3_get_ep_mapping(client_idx);
 		if (ep_idx < 0)
 			continue;
-
-		if (ipa3_ctx->ep[ep_idx].valid &&
-			ipa3_ctx->ep[ep_idx].skip_ep_cfg) {
-			BUG_ON(num_descs >= ipa3_ctx->ipa_num_pipes);
-
-			reg_write.skip_pipeline_clear = false;
-			reg_write.pipeline_clear_options =
-				IPAHAL_HPS_CLEAR;
-			reg_write.offset =
-				ipahal_reg_n_offset(IPA_ENDP_STATUS_n, ep_idx);
-			ipahal_get_status_ep_valmask(
-				ipa3_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS),
-				&valmask);
-			reg_write.value = valmask.val;
-			reg_write.value_mask = valmask.mask;
-			cmd_pyld = ipahal_construct_imm_cmd(
-					IPA_IMM_CMD_REGISTER_WRITE, &reg_write);
-			if (!cmd_pyld) {
-				ipa_err("fail construct register_write cmd\n");
-				BUG();
-			}
-			ipa_desc_fill_imm_cmd(&desc[num_descs], cmd_pyld);
-			desc[num_descs].callback = ipa3_destroy_imm;
-			desc[num_descs].user1 = cmd_pyld;
-
-			num_descs++;
-		}
 
 		/* disable statuses for modem producers */
 		if (IPA_CLIENT_IS_Q6_PROD(client_idx)) {
@@ -2750,12 +2722,10 @@ static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
 			continue;
 
 		/*
-		 * Iterating over all the filtering pipes which are either
-		 * invalid but connected or connected but not configured by AP.
+		 * Iterating over all the filtering pipes that are
+		 * invalid but connected.
 		 */
-		if (!ipa3_ctx->ep[pipe_idx].valid ||
-		    ipa3_ctx->ep[pipe_idx].skip_ep_cfg) {
-
+		if (!ipa3_ctx->ep[pipe_idx].valid) {
 			cmd.is_read = false;
 			cmd.skip_pipeline_clear = false;
 			cmd.pipeline_clear_options = IPAHAL_HPS_CLEAR;

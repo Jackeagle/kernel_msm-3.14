@@ -874,7 +874,6 @@ int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
 		memset(ep->sys, 0, offsetof(struct ipa3_sys_context, ep));
 	}
 
-	ep->skip_ep_cfg = false;
 	if (ipa3_assign_policy(sys_in, ep->sys)) {
 		ipa_err("failed to sys ctx for client %d\n", sys_in->client);
 		result = -ENOMEM;
@@ -900,19 +899,15 @@ int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
 		}
 	}
 
-	if (!ep->skip_ep_cfg) {
-		if (ipa3_cfg_ep(ipa_ep_idx, &sys_in->ipa_ep_cfg)) {
-			ipa_err("fail to configure EP.\n");
-			goto fail_gen2;
-		}
-		if (ipa3_cfg_ep_status(ipa_ep_idx, &ep->status)) {
-			ipa_err("fail to configure status of EP.\n");
-			goto fail_gen2;
-		}
-		ipa_debug("ep %d configuration successful\n", ipa_ep_idx);
-	} else {
-		ipa_debug("skipping ep %d configuration\n", ipa_ep_idx);
+	if (ipa3_cfg_ep(ipa_ep_idx, &sys_in->ipa_ep_cfg)) {
+		ipa_err("fail to configure EP.\n");
+		goto fail_gen2;
 	}
+	if (ipa3_cfg_ep_status(ipa_ep_idx, &ep->status)) {
+		ipa_err("fail to configure status of EP.\n");
+		goto fail_gen2;
+	}
+	ipa_debug("ep %d configuration successful\n", ipa_ep_idx);
 
 	result = ipa_gsi_setup_channel(sys_in, ep);
 	if (result) {
@@ -940,7 +935,7 @@ int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
 	if (IPA_CLIENT_IS_CONS(sys_in->client))
 		ipa3_replenish_rx_cache(ep->sys);
 
-	if (!ep->skip_ep_cfg && IPA_CLIENT_IS_PROD(sys_in->client)) {
+	if (IPA_CLIENT_IS_PROD(sys_in->client)) {
 		if (sys_in->client == IPA_CLIENT_APPS_WAN_PROD)
 			ipa_debug("modem cfg emb pipe flt\n");
 	}
@@ -1062,7 +1057,7 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 	if (IPA_CLIENT_IS_CONS(ep->client))
 		ipa3_cleanup_rx(ep->sys);
 
-	if (!ep->skip_ep_cfg && IPA_CLIENT_IS_PROD(ep->client)) {
+	if (IPA_CLIENT_IS_PROD(ep->client)) {
 		if (ep->client == IPA_CLIENT_APPS_WAN_PROD)
 			ipa_debug("modem cfg emb pipe flt\n");
 	}
