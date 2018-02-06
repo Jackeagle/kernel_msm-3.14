@@ -1189,16 +1189,14 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 
 	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
 		ipa_err("chan_id=%ld timed out\n", chan_id);
-		mutex_unlock(&gsi_ctx->mlock);
-		devm_kfree(gsi_ctx->dev, user_data);
-		return -ETIMEDOUT;
+		chan_id = -ETIMEDOUT;
+		goto err_mutex_unlock;
 	}
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED) {
 		ipa_err("chan_id=%ld allocation failed state=%d\n",
 				chan_id, ctx->state);
-		mutex_unlock(&gsi_ctx->mlock);
-		devm_kfree(gsi_ctx->dev, user_data);
-		return -ENOMEM;
+		chan_id = -ENOMEM;
+		goto err_mutex_unlock;
 	}
 
 	gsi_ctx->ch_dbg[chan_id].ch_allocate++;
@@ -1220,6 +1218,12 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	ctx->allocated = true;
 	ctx->stats.dp.last_timestamp = jiffies_to_msecs(jiffies);
 	atomic_inc(&gsi_ctx->num_chan);
+
+	return chan_id;
+
+err_mutex_unlock:
+	mutex_unlock(&gsi_ctx->mlock);
+	devm_kfree(gsi_ctx->dev, user_data);
 
 	return chan_id;
 }
