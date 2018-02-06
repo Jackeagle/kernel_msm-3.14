@@ -1407,6 +1407,37 @@ fail_kmem_cache_alloc:
 	}
 }
 
+static int
+queue_rx_cache(struct ipa3_sys_context *sys, struct ipa3_rx_pkt_wrapper *rx_pkt)
+{
+	struct gsi_xfer_elem gsi_xfer_elem;
+	int ret;
+
+	/* Don't bother zeroing this; we fill all fields */
+	gsi_xfer_elem.addr = rx_pkt->data.dma_addr;
+	gsi_xfer_elem.len = sys->rx_buff_sz;
+	gsi_xfer_elem.flags |= GSI_XFER_FLAG_EOT;
+	gsi_xfer_elem.flags |= GSI_XFER_FLAG_EOB;
+	gsi_xfer_elem.type = GSI_XFER_ELEM_DATA;
+	gsi_xfer_elem.xfer_user_data = rx_pkt;
+
+	ret = gsi_queue_xfer(sys->ep->gsi_chan_hdl, 1, &gsi_xfer_elem, false);
+	if (ret) {
+		ipa_err("failed to provide buffer: %d\n", ret);
+		return ret;
+	}
+	/*
+	 * As doorbell is a costly operation, notify to GSI
+	 * of new buffers if threshold is exceeded
+	 */
+	if (++sys->len_pending_xfer >= IPA_REPL_XFER_THRESH) {
+		sys->len_pending_xfer = 0;
+		gsi_start_xfer(sys->ep->gsi_chan_hdl);
+	}
+
+	return 0;
+}
+
 /**
  * ipa3_replenish_rx_cache() - Replenish the Rx packets cache.
  *
@@ -1427,7 +1458,6 @@ static void ipa3_replenish_rx_cache(struct ipa3_sys_context *sys)
 	struct ipa3_rx_pkt_wrapper *rx_pkt;
 	int ret;
 	int rx_len_cached = 0;
-	struct gsi_xfer_elem gsi_xfer_elem_one;
 	gfp_t flag = GFP_NOWAIT | __GFP_NOWARN;
 
 	rx_len_cached = sys->len;
@@ -1462,31 +1492,9 @@ static void ipa3_replenish_rx_cache(struct ipa3_sys_context *sys)
 		list_add_tail(&rx_pkt->link, &sys->head_desc_list);
 		rx_len_cached = ++sys->len;
 
-		memset(&gsi_xfer_elem_one, 0,
-			sizeof(gsi_xfer_elem_one));
-		gsi_xfer_elem_one.addr = rx_pkt->data.dma_addr;
-		gsi_xfer_elem_one.len = sys->rx_buff_sz;
-		gsi_xfer_elem_one.flags |= GSI_XFER_FLAG_EOT;
-		gsi_xfer_elem_one.flags |= GSI_XFER_FLAG_EOB;
-		gsi_xfer_elem_one.type = GSI_XFER_ELEM_DATA;
-		gsi_xfer_elem_one.xfer_user_data = rx_pkt;
-
-		ret = gsi_queue_xfer(sys->ep->gsi_chan_hdl,
-				1, &gsi_xfer_elem_one, false);
-		if (ret) {
-			ipa_err("failed to provide buffer: %d\n",
-				ret);
+		ret = queue_rx_cache(sys, rx_pkt);
+		if (ret)
 			goto fail_provide_rx_buffer;
-		}
-
-		/*
-		 * As doorbell is a costly operation, notify to GSI
-		 * of new buffers if threshold is exceeded
-		 */
-		if (++sys->len_pending_xfer >= IPA_REPL_XFER_THRESH) {
-			sys->len_pending_xfer = 0;
-			gsi_start_xfer(sys->ep->gsi_chan_hdl);
-		}
 	}
 
 	return;
@@ -1513,7 +1521,6 @@ static void ipa3_replenish_rx_cache_recycle(struct ipa3_sys_context *sys)
 	struct ipa3_rx_pkt_wrapper *rx_pkt;
 	int ret;
 	int rx_len_cached = 0;
-	struct gsi_xfer_elem gsi_xfer_elem_one;
 	gfp_t flag = GFP_NOWAIT | __GFP_NOWARN;
 
 	rx_len_cached = sys->len;
@@ -1566,31 +1573,10 @@ static void ipa3_replenish_rx_cache_recycle(struct ipa3_sys_context *sys)
 
 		list_add_tail(&rx_pkt->link, &sys->head_desc_list);
 		rx_len_cached = ++sys->len;
-		memset(&gsi_xfer_elem_one, 0,
-			sizeof(gsi_xfer_elem_one));
-		gsi_xfer_elem_one.addr = rx_pkt->data.dma_addr;
-		gsi_xfer_elem_one.len = sys->rx_buff_sz;
-		gsi_xfer_elem_one.flags |= GSI_XFER_FLAG_EOT;
-		gsi_xfer_elem_one.flags |= GSI_XFER_FLAG_EOB;
-		gsi_xfer_elem_one.type = GSI_XFER_ELEM_DATA;
-		gsi_xfer_elem_one.xfer_user_data = rx_pkt;
 
-		ret = gsi_queue_xfer(sys->ep->gsi_chan_hdl,
-				1, &gsi_xfer_elem_one, false);
-		if (ret) {
-			ipa_err("failed to provide buffer: %d\n",
-				ret);
+		ret = queue_rx_cache(sys, rx_pkt);
+		if (ret)
 			goto fail_provide_rx_buffer;
-		}
-
-		/*
-		 * As doorbell is a costly operation, notify to GSI
-		 * of new buffers if threshold is exceeded
-		 */
-		if (++sys->len_pending_xfer >= IPA_REPL_XFER_THRESH) {
-			sys->len_pending_xfer = 0;
-			gsi_start_xfer(sys->ep->gsi_chan_hdl);
-		}
 	}
 
 	return;
@@ -1616,7 +1602,6 @@ static void ipa3_fast_replenish_rx_cache(struct ipa3_sys_context *sys)
 	struct ipa3_rx_pkt_wrapper *rx_pkt;
 	int ret;
 	int rx_len_cached = 0;
-	struct gsi_xfer_elem gsi_xfer_elem_one;
 	u32 curr;
 
 	spin_lock_bh(&sys->spinlock);
@@ -1631,31 +1616,9 @@ static void ipa3_fast_replenish_rx_cache(struct ipa3_sys_context *sys)
 		rx_pkt = sys->repl.cache[curr];
 		list_add_tail(&rx_pkt->link, &sys->head_desc_list);
 
-		memset(&gsi_xfer_elem_one, 0,
-			sizeof(gsi_xfer_elem_one));
-		gsi_xfer_elem_one.addr = rx_pkt->data.dma_addr;
-		gsi_xfer_elem_one.len = sys->rx_buff_sz;
-		gsi_xfer_elem_one.flags |= GSI_XFER_FLAG_EOT;
-		gsi_xfer_elem_one.flags |= GSI_XFER_FLAG_EOB;
-		gsi_xfer_elem_one.type = GSI_XFER_ELEM_DATA;
-		gsi_xfer_elem_one.xfer_user_data = rx_pkt;
-
-		ret = gsi_queue_xfer(sys->ep->gsi_chan_hdl, 1,
-			&gsi_xfer_elem_one, false);
-		if (ret) {
-			ipa_err("failed to provide buffer: %d\n",
-				ret);
+		ret = queue_rx_cache(sys, rx_pkt);
+		if (ret)
 			break;
-		}
-
-		/*
-		 * As doorbell is a costly operation, notify to GSI
-		 * of new buffers if threshold is exceeded
-		 */
-		if (++sys->len_pending_xfer >= IPA_REPL_XFER_THRESH) {
-			sys->len_pending_xfer = 0;
-			gsi_start_xfer(sys->ep->gsi_chan_hdl);
-		}
 
 		rx_len_cached = ++sys->len;
 		curr = (curr + 1) % sys->repl.capacity;
