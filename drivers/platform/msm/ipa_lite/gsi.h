@@ -810,15 +810,12 @@ int gsi_get_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
  * ch_id and evt_ring_hdl of the channel cannot be changed after
  * gsi_alloc_channel
  *
- * @chan_hdl:  Client handle previously obtained from
- *	       gsi_alloc_channel
+ * @chan_hdl:  Client handle previously obtained from gsi_alloc_channel
  * @props:     the properties to apply
- * @scr:       the scratch info to apply
  *
  * @Return gsi_status
  */
-int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
-		union gsi_channel_scratch *scr);
+int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props);
 
 /**
  * gsi_poll_channel - Peripheral should call this function to query for

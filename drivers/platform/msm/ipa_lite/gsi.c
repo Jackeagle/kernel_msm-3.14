@@ -1804,8 +1804,7 @@ int gsi_get_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
 	return 0;
 }
 
-int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
-		union gsi_channel_scratch *scr)
+int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props)
 {
 	struct gsi_chan_ctx *ctx;
 
@@ -1834,8 +1833,6 @@ int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props,
 
 	mutex_lock(&ctx->mlock);
 	ctx->props = *props;
-	if (scr)
-		ctx->scratch = *scr;
 	gsi_program_chan_ctx(&ctx->props, gsi_ctx->ee,
 			ctx->evtr ? ctx->evtr->id : GSI_NO_EVT_ERINDEX);
 	gsi_init_ring(&ctx->ring, &ctx->props.mem);

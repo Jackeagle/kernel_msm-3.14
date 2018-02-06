@@ -49,7 +49,7 @@ static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 	chan_props.low_weight = 1;
 	chan_props.chan_user_data = NULL;
 
-	if (gsi_set_channel_cfg(ep->gsi_chan_hdl, &chan_props, NULL)) {
+	if (gsi_set_channel_cfg(ep->gsi_chan_hdl, &chan_props)) {
 		ipa_err("Error setting channel properties\n");
 		ipahal_dma_free(chan_dma);
 		return -EFAULT;
@@ -64,8 +64,7 @@ static int ipa3_restore_channel_properties(struct ipa3_ep_context *ep,
 {
 	int gsi_res;
 
-	gsi_res = gsi_set_channel_cfg(ep->gsi_chan_hdl, chan_props,
-		chan_scratch);
+	gsi_res = gsi_set_channel_cfg(ep->gsi_chan_hdl, chan_props);
 	if (gsi_res) {
 		ipa_err("Error restoring channel properties\n");
 		return -EFAULT;
