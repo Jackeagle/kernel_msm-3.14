@@ -446,16 +446,14 @@ static void gsi_handle_ieob(int ee)
 		struct gsi_evt_ctx *ctx = &gsi_ctx->evtr[i];
 		unsigned long flags;
 		unsigned long cntr;
-		u64 rp;
+		u32 val;
 
 		spin_lock_irqsave(&ctx->ring.slock, flags);
 check_again:
 		cntr = 0;
-		rp = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(i, ee));
-		rp |= ctx->ring.rp & 0xFFFFFFFF00000000;
-
-		ctx->ring.rp = rp;
-		while (ctx->ring.rp_local != rp) {
+		val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(i, ee));
+		ctx->ring.rp = (ctx->ring.rp & 0xffffffff00000000) | val;
+		while (ctx->ring.rp_local != ctx->ring.rp) {
 			++cntr;
 			if (ctx->exclusive &&
 				atomic_read(&ctx->chan->poll_mode)) {
