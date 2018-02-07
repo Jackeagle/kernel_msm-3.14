@@ -1661,11 +1661,6 @@ int gsi_poll_channel(unsigned long chan_hdl,
 	int ee = gsi_ctx->ee;
 	unsigned long flags;
 
-	if (!notify) {
-		ipa_err("bad params chan_hdl=%lu notify=%p\n", chan_hdl, notify);
-		return -EINVAL;
-	}
-
 	spin_lock_irqsave(&ctx->evtr->ring.slock, flags);
 	if (ctx->evtr->ring.rp == ctx->evtr->ring.rp_local) {
 		/* update rp to see of we have anything new to process */
