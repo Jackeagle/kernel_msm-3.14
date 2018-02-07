@@ -843,24 +843,51 @@ static void gsi_prime_evt_ring(struct gsi_evt_ctx *ctx)
 	spin_unlock_irqrestore(&ctx->ring.slock, flags);
 }
 
-/* Compute the value to write to the event ring command register */
-static u32 evt_ring_cmd_val(unsigned long evt_id, enum gsi_evt_ch_cmd_opcode op)
+/*
+ * Issue a GSI command by writing a value to a register, then wait
+ * for completion to be signaled.  Returns 0 if a timeout occurred,
+ * non-zero (positive) othwerwise.  Note that the register offset
+ * is first, value to write is second (reverse of writel() order).
+ */
+static u32 command(u32 reg, u32 val, struct completion *compl)
 {
+	BUILD_BUG_ON(GSI_CMD_TIMEOUT > (unsigned long)U32_MAX);
+
+	gsi_writel(val, reg);
+
+	return (u32)wait_for_completion_timeout(compl, GSI_CMD_TIMEOUT);
+}
+
+/* Issue an event ring command and wait for it to complete */
+static u32 evt_ring_command(unsigned long evt_id, enum gsi_evt_ch_cmd_opcode op)
+{
+	struct completion *compl = &gsi_ctx->evtr[evt_id].compl;
+	u32 ee = gsi_ctx->ee;
 	u32 val;
 
 	val = field_gen((u32)evt_id, EV_CHID_BMSK);
 	val |= field_gen((u32)op, EV_OPCODE_BMSK);
 
+	val = command(GSI_EE_n_EV_CH_CMD_OFFS(ee), val, compl);
+	if (!val)
+		ipa_err("evt_id=%lu timed out\n", evt_id);
+
 	return val;
 }
 
-/* Compute the value to write to the event ring command register */
-static u32 channel_cmd_val(unsigned long chan_id, enum gsi_ch_cmd_opcode op)
+/* Issue a channel command and wait for it to complete */
+static u32 channel_command(unsigned long chan_id, enum gsi_ch_cmd_opcode op)
 {
+	struct completion *compl = &gsi_ctx->chan[chan_id].compl;
+	u32 ee = gsi_ctx->ee;
 	u32 val;
 
 	val = field_gen((u32)chan_id, CH_CHID_BMSK);
 	val |= field_gen((u32)op, CH_OPCODE_BMSK);
+
+	val = command(GSI_EE_n_GSI_CH_CMD_OFFS(ee), val, compl);
+	if (!val)
+		ipa_err("chan_id=%lu timed out\n", chan_id);
 
 	return val;
 }
@@ -916,10 +943,8 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt, bool excl)
 	atomic_set(&ctx->chan_ref_cnt, 0);
 
 	mutex_lock(&gsi_ctx->mlock);
-	val = evt_ring_cmd_val(evt_id, GSI_EVT_ALLOCATE);
-	gsi_writel(val, GSI_EE_n_EV_CH_CMD_OFFS(ee));
-	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
-		ipa_err("evt_id=%lu timed out\n", evt_id);
+
+	if (!evt_ring_command(evt_id, GSI_EVT_ALLOCATE)) {
 		ret = -ETIMEDOUT;
 		goto err_unlock;
 	}
@@ -973,7 +998,6 @@ static void __gsi_write_evt_ring_scratch(unsigned long evt_ring_hdl,
 
 int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 {
-	u32 val;
 	struct gsi_evt_ctx *ctx;
 
 	if (evt_ring_hdl >= gsi_ctx->max_ev) {
@@ -998,10 +1022,7 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 	mutex_lock(&gsi_ctx->mlock);
 	reinit_completion(&ctx->compl);
 
-	val = evt_ring_cmd_val(evt_ring_hdl, GSI_EVT_DE_ALLOC);
-	gsi_writel(val, GSI_EE_n_EV_CH_CMD_OFFS(gsi_ctx->ee));
-	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
-		ipa_err("evt_id=%lu timed out\n", evt_ring_hdl);
+	if (!evt_ring_command(evt_ring_hdl, GSI_EVT_DE_ALLOC)) {
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
 	}
@@ -1026,7 +1047,6 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl)
 
 int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 {
-	u32 val;
 	struct gsi_evt_ctx *ctx;
 
 	if (evt_ring_hdl >= gsi_ctx->max_ev) {
@@ -1044,10 +1064,7 @@ int gsi_reset_evt_ring(unsigned long evt_ring_hdl)
 	mutex_lock(&gsi_ctx->mlock);
 	reinit_completion(&ctx->compl);
 
-	val = evt_ring_cmd_val(evt_ring_hdl, GSI_EVT_RESET);
-	gsi_writel(val, GSI_EE_n_EV_CH_CMD_OFFS(gsi_ctx->ee));
-	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
-		ipa_err("evt_id=%lu timed out\n", evt_ring_hdl);
+	if (!evt_ring_command(evt_ring_hdl, GSI_EVT_RESET)) {
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
 	}
@@ -1153,8 +1170,6 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	struct gsi_chan_ctx *ctx;
 	struct gsi_evt_ctx *evtr;
 	size_t size;
-	u32 val;
-	int ee = gsi_ctx->ee;
 	u8 evt_id;
 	void **user_data;
 	long chan_id;
@@ -1193,11 +1208,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 
 	mutex_lock(&gsi_ctx->mlock);
 
-	val = channel_cmd_val(chan_id, GSI_CH_ALLOCATE);
-	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(ee));
-
-	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
-		ipa_err("chan_id=%ld timed out\n", chan_id);
+	if (!channel_command(chan_id, GSI_CH_ALLOCATE)) {
 		chan_id = -ETIMEDOUT;
 		goto err_mutex_unlock;
 	}
@@ -1290,7 +1301,6 @@ int gsi_write_channel_scratch(unsigned long chan_hdl, u32 tlv_size)
 
 int gsi_start_channel(unsigned long chan_hdl)
 {
-	u32 val;
 	struct gsi_chan_ctx *ctx;
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
@@ -1312,11 +1322,7 @@ int gsi_start_channel(unsigned long chan_hdl)
 
 	gsi_ctx->ch_dbg[chan_hdl].ch_start++;
 
-	val = channel_cmd_val(chan_hdl, GSI_CH_START);
-	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(gsi_ctx->ee));
-
-	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
-		ipa_err("chan_hdl=%lu timed out\n", chan_hdl);
+	if (!channel_command(chan_hdl, GSI_CH_START)) {
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
 	}
@@ -1360,10 +1366,7 @@ int gsi_stop_channel(unsigned long chan_hdl)
 
 	gsi_ctx->ch_dbg[chan_hdl].ch_stop++;
 
-	val = channel_cmd_val(chan_hdl, GSI_CH_STOP);
-	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(gsi_ctx->ee));
-
-	if (!wait_for_completion_timeout(&ctx->compl, GSI_STOP_CMD_TIMEOUT)) {
+	if (!channel_command(chan_hdl, GSI_CH_STOP)) {
 		/*
 		 * check channel state here in case the channel is stopped but
 		 * the interrupt was not handled yet.
@@ -1375,7 +1378,6 @@ int gsi_stop_channel(unsigned long chan_hdl)
 			res = 0;
 			goto free_lock;
 		}
-		ipa_debug("chan_hdl=%lu timed out\n", chan_hdl);
 		res = -ETIMEDOUT;
 		goto free_lock;
 	}
@@ -1402,7 +1404,6 @@ free_lock:
 
 int gsi_reset_channel(unsigned long chan_hdl)
 {
-	u32 val;
 	struct gsi_chan_ctx *ctx;
 	bool reset_done = false;
 
@@ -1425,10 +1426,7 @@ reset:
 
 	gsi_ctx->ch_dbg[chan_hdl].ch_reset++;
 
-	val = channel_cmd_val(chan_hdl, GSI_CH_RESET);
-	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(gsi_ctx->ee));
-
-	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
+	if (!channel_command(chan_hdl, GSI_CH_RESET)) {
 		ipa_err("chan_hdl=%lu timed out\n", chan_hdl);
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
@@ -1460,7 +1458,6 @@ reset:
 
 int gsi_dealloc_channel(unsigned long chan_hdl)
 {
-	u32 val;
 	struct gsi_chan_ctx *ctx;
 
 	if (chan_hdl >= gsi_ctx->max_ch) {
@@ -1480,10 +1477,7 @@ int gsi_dealloc_channel(unsigned long chan_hdl)
 
 	gsi_ctx->ch_dbg[chan_hdl].ch_de_alloc++;
 
-	val = channel_cmd_val(chan_hdl, GSI_CH_DE_ALLOC);
-	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(gsi_ctx->ee));
-
-	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
+	if (!channel_command(chan_hdl, GSI_CH_DE_ALLOC)) {
 		ipa_err("chan_hdl=%lu timed out\n", chan_hdl);
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
