@@ -1776,7 +1776,7 @@ int gsi_halt_channel_ee(u32 chan_idx, unsigned int ee, int *code)
 {
 	int res = 0;
 
-	if (chan_idx >= gsi_ctx->max_ch || !code) {
+	if (chan_idx >= gsi_ctx->max_ch) {
 		ipa_err("bad params chan_idx=%d\n", chan_idx);
 		return -EINVAL;
 	}
