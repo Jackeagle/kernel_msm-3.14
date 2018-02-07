@@ -1788,13 +1788,7 @@ int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props)
 		return -EINVAL;
 	}
 
-	if (chan_hdl >= gsi_ctx->max_ch) {
-		ipa_err("bad params chan_hdl=%lu\n", chan_hdl);
-		return -EINVAL;
-	}
-
 	ctx = &gsi_ctx->chan[chan_hdl];
-
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED) {
 		ipa_err("bad state %d\n", ctx->state);
 		return -ENOTSUPP;
