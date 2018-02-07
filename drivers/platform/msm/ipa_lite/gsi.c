@@ -203,6 +203,7 @@ static void gsi_handle_glob_err(u32 err)
 		ch = &gsi_ctx->chan[log->virt_idx];
 		chan_notify.chan_user_data = ch->props.chan_user_data;
 		chan_notify.err_desc = err & GENMASK(15, 0);
+		chan_notify.evt_id = log->code;
 		if (log->code == GSI_INVALID_TRE_ERR) {
 			BUG_ON(log->ee != gsi_ctx->ee);
 			val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(log->virt_idx,
@@ -212,24 +213,16 @@ static void gsi_handle_glob_err(u32 err)
 					ch->state);
 			ch->stats.invalid_tre_error++;
 			BUG_ON(ch->state != GSI_CHAN_STATE_ERROR);
-			chan_notify.evt_id = GSI_CHAN_INVALID_TRE_ERR;
 		} else if (log->code == GSI_OUT_OF_BUFFERS_ERR) {
 			BUG_ON(log->ee != gsi_ctx->ee);
-			chan_notify.evt_id = GSI_CHAN_OUT_OF_BUFFERS_ERR;
 		} else if (log->code == GSI_OUT_OF_RESOURCES_ERR) {
 			BUG_ON(log->ee != gsi_ctx->ee);
-			chan_notify.evt_id = GSI_CHAN_OUT_OF_RESOURCES_ERR;
 			complete(&ch->compl);
 		} else if (log->code == GSI_UNSUPPORTED_INTER_EE_OP_ERR) {
-			chan_notify.evt_id =
-				GSI_CHAN_UNSUPPORTED_INTER_EE_OP_ERR;
 		} else if (log->code == GSI_NON_ALLOCATED_EVT_ACCESS_ERR) {
 			BUG_ON(log->ee != gsi_ctx->ee);
-			chan_notify.evt_id =
-				GSI_CHAN_NON_ALLOCATED_EVT_ACCESS_ERR;
 		} else if (log->code == GSI_HWO_1_ERR) {
 			BUG_ON(log->ee != gsi_ctx->ee);
-			chan_notify.evt_id = GSI_CHAN_HWO_1_ERR;
 		} else {
 			BUG();
 		}
@@ -244,18 +237,15 @@ static void gsi_handle_glob_err(u32 err)
 
 		ev = &gsi_ctx->evtr[log->virt_idx];
 		evt_notify.err_desc = err & GENMASK(15, 0);
+		evt_notify.evt_id = log->code;
 		if (log->code == GSI_OUT_OF_BUFFERS_ERR) {
 			BUG_ON(log->ee != gsi_ctx->ee);
-			evt_notify.evt_id = GSI_EVT_OUT_OF_BUFFERS_ERR;
 		} else if (log->code == GSI_OUT_OF_RESOURCES_ERR) {
 			BUG_ON(log->ee != gsi_ctx->ee);
-			evt_notify.evt_id = GSI_EVT_OUT_OF_RESOURCES_ERR;
 			complete(&ev->compl);
 		} else if (log->code == GSI_UNSUPPORTED_INTER_EE_OP_ERR) {
-			evt_notify.evt_id = GSI_EVT_UNSUPPORTED_INTER_EE_OP_ERR;
 		} else if (log->code == GSI_EVT_RING_EMPTY_ERR) {
 			BUG_ON(log->ee != gsi_ctx->ee);
-			evt_notify.evt_id = GSI_EVT_EVT_RING_EMPTY_ERR;
 		} else {
 			BUG();
 		}
