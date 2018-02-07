@@ -892,6 +892,25 @@ static u32 channel_command(unsigned long chan_id, enum gsi_ch_cmd_opcode op)
 	return val;
 }
 
+/* Issue a generic command and wait for it to complete */
+static u32 generic_command(u32 target_ee, unsigned long chan_id,
+		enum gsi_ch_cmd_opcode op)
+{
+	struct completion *compl = &gsi_ctx->gen_ee_cmd_compl;
+	u32 ee = gsi_ctx->ee;
+	u32 val;
+
+	val = field_gen((u32)op, EE_OPCODE_BMSK);
+	val |= field_gen((u32)chan_id, EE_VIRT_CHAN_IDX_BMSK);
+	val |= field_gen(target_ee, EE_EE_BMSK);
+
+	val = command(GSI_EE_n_GSI_EE_GENERIC_CMD_OFFS(ee), val, compl);
+	if (!val)
+		ipa_err("chan_id=%lu ee=%u timed out\n", chan_id, target_ee);
+
+	return val;
+}
+
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
 long gsi_alloc_evt_ring(u32 size, u16 int_modt, bool excl)
 {
@@ -1809,9 +1828,7 @@ int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props)
 
 int gsi_halt_channel_ee(u32 chan_idx, unsigned int ee, int *code)
 {
-	enum gsi_generic_ee_cmd_opcode op = GSI_GEN_EE_CMD_HALT_CHANNEL;
-	u32 val;
-	int res;
+	int res = 0;
 
 	if (chan_idx >= gsi_ctx->max_ch || !code) {
 		ipa_err("bad params chan_idx=%d\n", chan_idx);
@@ -1830,15 +1847,7 @@ int gsi_halt_channel_ee(u32 chan_idx, unsigned int ee, int *code)
 
 	gsi_ctx->gen_ee_cmd_dbg.halt_channel++;
 
-	val = field_gen(op, EE_OPCODE_BMSK);
-	val |= field_gen(chan_idx, EE_VIRT_CHAN_IDX_BMSK);
-	val |= field_gen(ee, EE_EE_BMSK);
-	gsi_writel(val, GSI_EE_n_GSI_EE_GENERIC_CMD_OFFS(gsi_ctx->ee));
-
-	res = wait_for_completion_timeout(&gsi_ctx->gen_ee_cmd_compl,
-			GSI_CMD_TIMEOUT);
-	if (res == 0) {
-		ipa_err("chan_idx=%u ee=%u timed out\n", chan_idx, ee);
+	if (!generic_command(ee, chan_idx, GSI_GEN_EE_CMD_HALT_CHANNEL)) {
 		res = -ETIMEDOUT;
 		goto free_lock;
 	}
