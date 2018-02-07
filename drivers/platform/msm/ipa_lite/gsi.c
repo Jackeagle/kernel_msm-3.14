@@ -1521,32 +1521,29 @@ bool gsi_is_channel_empty(unsigned long chan_hdl)
 {
 	struct gsi_chan_ctx *ctx;
 	unsigned long flags;
-	u64 rp;
-	u64 wp;
 	int ee = gsi_ctx->ee;
 	bool empty;
+	u32 val;
 
 	ctx = &gsi_ctx->chan[chan_hdl];
 
 	spin_lock_irqsave(&ctx->evtr->ring.slock, flags);
 
-	rp = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_4_OFFS(ctx->props.ch_id, ee));
-	rp |= ctx->ring.rp & 0xFFFFFFFF00000000;
-	ctx->ring.rp = rp;
+	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_4_OFFS(ctx->props.ch_id, ee));
+	ctx->ring.rp = (ctx->ring.rp & 0xffffffff00000000) | val;
 
-	wp = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_6_OFFS(ctx->props.ch_id, ee));
-	wp |= ctx->ring.wp & 0xFFFFFFFF00000000;
-	ctx->ring.wp = wp;
+	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_6_OFFS(ctx->props.ch_id, ee));
+	ctx->ring.wp = (ctx->ring.wp & 0xffffffff00000000) | val;
 
 	if (ctx->props.dir == GSI_CHAN_DIR_FROM_GSI)
-		empty = ctx->ring.rp_local == rp;
+		empty = ctx->ring.rp_local == ctx->ring.rp;
 	else
-		empty = wp == rp;
+		empty = ctx->ring.wp == ctx->ring.rp;
 
 	spin_unlock_irqrestore(&ctx->evtr->ring.slock, flags);
 
-	ipa_debug("ch=%lu RP=0x%llx WP=0x%llx RP_LOCAL=0x%llx\n",
-			chan_hdl, rp, wp, ctx->ring.rp_local);
+	ipa_debug("ch=%lu RP=0x%llx WP=0x%llx RP_LOCAL=0x%llx\n", chan_hdl,
+			ctx->ring.rp, ctx->ring.wp, ctx->ring.rp_local);
 
 	return empty;
 }
