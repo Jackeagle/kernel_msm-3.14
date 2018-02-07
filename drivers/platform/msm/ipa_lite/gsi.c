@@ -213,17 +213,16 @@ handle_glob_evt_err(u32 err_ee, u32 evt_id, u32 code)
 
 static void gsi_handle_glob_err(u32 err)
 {
-	struct gsi_log_err *log;
+	struct gsi_log_err *log = (struct gsi_log_err *)&err;
 
-	log = (struct gsi_log_err *)&err;
-	ipa_err("log err_type=%u ee=%u idx=%u\n", log->err_type, log->ee,
-			log->virt_idx);
-	ipa_err("code=%u arg1=%u arg2=%u arg3=%u\n", log->code, log->arg1,
-			log->arg2, log->arg3);
+	ipa_err("log err_type %u ee %u idx %u\n",
+			log->err_type, log->ee, log->virt_idx);
+	ipa_err("log code 0x%1x arg1 0x%1x arg2 0x%1x arg3 0x%1x\n",
+			log->code, log->arg1, log->arg2, log->arg3);
+
 	switch (log->err_type) {
 	case GSI_ERR_TYPE_GLOB:
-		ipa_err("Got global GP ERROR\n");
-		ipa_err("Err_desc = 0x%04lx\n", err & GENMASK(15, 0));
+		ipa_err("Got ERR_TYPE_GLOB\n");
 		BUG();
 		break;
 	case GSI_ERR_TYPE_CHAN:
