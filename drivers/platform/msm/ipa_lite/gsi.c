@@ -1656,17 +1656,16 @@ int gsi_start_xfer(unsigned long chan_hdl)
 int gsi_poll_channel(unsigned long chan_hdl,
 		struct gsi_chan_xfer_notify *notify)
 {
-	struct gsi_chan_ctx *ctx;
+	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_hdl];
 	u64 rp;
 	int ee = gsi_ctx->ee;
 	unsigned long flags;
 
-	if (chan_hdl >= gsi_ctx->max_ch || !notify) {
+	if (!notify) {
 		ipa_err("bad params chan_hdl=%lu notify=%p\n", chan_hdl, notify);
 		return -EINVAL;
 	}
 
-	ctx = &gsi_ctx->chan[chan_hdl];
 	spin_lock_irqsave(&ctx->evtr->ring.slock, flags);
 	if (ctx->evtr->ring.rp == ctx->evtr->ring.rp_local) {
 		/* update rp to see of we have anything new to process */
