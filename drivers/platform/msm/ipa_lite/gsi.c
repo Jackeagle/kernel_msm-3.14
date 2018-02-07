@@ -1558,7 +1558,7 @@ bool gsi_is_channel_empty(unsigned long chan_hdl)
 int gsi_queue_xfer(unsigned long chan_hdl, u16 num_xfers,
 		struct gsi_xfer_elem *xfer, bool ring_db)
 {
-	struct gsi_chan_ctx *ctx;
+	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_hdl];
 	u16 free;
 	struct gsi_tre tre;
 	struct gsi_tre *tre_ptr;
@@ -1568,13 +1568,12 @@ int gsi_queue_xfer(unsigned long chan_hdl, u16 num_xfers,
 	spinlock_t *slock;
 	unsigned long flags;
 
-	if (chan_hdl >= gsi_ctx->max_ch || !num_xfers || !xfer) {
+	if (!num_xfers || !xfer) {
 		ipa_err("bad params chan_hdl=%lu num_xfers=%u xfer=%p\n",
 				chan_hdl, num_xfers, xfer);
 		return -EINVAL;
 	}
 
-	ctx = &gsi_ctx->chan[chan_hdl];
 	slock = &ctx->evtr->ring.slock;
 
 	spin_lock_irqsave(slock, flags);
