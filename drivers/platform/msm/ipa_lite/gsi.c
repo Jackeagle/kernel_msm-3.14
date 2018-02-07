@@ -179,7 +179,7 @@ handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 code)
 }
 
 static void
-handle_glob_evt_err(u32 err_ee, u32 evt_id, u32 err, u32 code)
+handle_glob_evt_err(u32 err_ee, u32 evt_id, u32 code)
 {
 	struct gsi_evt_ctx *ctx = &gsi_ctx->evtr[evt_id];
 	u32 ee = gsi_ctx->ee;
@@ -230,7 +230,7 @@ static void gsi_handle_glob_err(u32 err)
 		handle_glob_chan_err(log->ee, log->virt_idx, log->code);
 		break;
 	case GSI_ERR_TYPE_EVT:
-		handle_glob_evt_err(log->ee, log->virt_idx, err, log->code);
+		handle_glob_evt_err(log->ee, log->virt_idx, log->code);
 		break;
 	default:
 		WARN_ON(1);
