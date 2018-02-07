@@ -159,19 +159,6 @@ enum gsi_evt_err {
 	GSI_EVT_EVT_RING_EMPTY_ERR		= GSI_EVT_RING_EMPTY_ERR,
 };
 
-/**
- * gsi_evt_err_notify - event ring error callback info
- *
- * @user_data: cookie supplied in gsi_alloc_evt_ring
- * @evt_id:    type of error
- * @err_desc:  more info about the error
- *
- */
-struct gsi_evt_err_notify {
-	enum gsi_evt_err evt_id;
-	uint16_t err_desc;
-};
-
 enum gsi_evt_chtype {
 	GSI_EVT_CHTYPE_MHI_EV = 0x0,
 	GSI_EVT_CHTYPE_XHCI_EV = 0x1,

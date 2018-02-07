@@ -181,7 +181,6 @@ handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 code)
 static void
 handle_glob_evt_err(u32 err_ee, u32 evt_id, u32 err, u32 code)
 {
-	struct gsi_evt_err_notify evt_notify;
 	struct gsi_evt_ctx *ctx = &gsi_ctx->evtr[evt_id];
 	u32 ee = gsi_ctx->ee;
 
@@ -191,9 +190,6 @@ handle_glob_evt_err(u32 err_ee, u32 evt_id, u32 err, u32 code)
 		return;
 	}
 	BUG_ON(err_ee != ee && code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
-
-	evt_notify.err_desc = err & GENMASK(15, 0);
-	evt_notify.evt_id = code;
 
 	switch (code) {
 	case GSI_OUT_OF_BUFFERS_ERR:
