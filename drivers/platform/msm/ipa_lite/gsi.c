@@ -190,24 +190,31 @@ handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 err, u32 code)
 	chan_notify.evt_id = code;
 	chan_notify.err_desc = err & GENMASK(15, 0);
 
-	if (code == GSI_INVALID_TRE_ERR) {
+	switch (code) {
+	case GSI_INVALID_TRE_ERR:
 		BUG_ON(err_ee != ee);
 		val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(chan_id, ee));
 		ctx->state = field_val(val, CHSTATE_BMSK);
 		ipa_debug("ch %u state updated to %u\n", chan_id, ctx->state);
 		ctx->stats.invalid_tre_error++;
 		BUG_ON(ctx->state != GSI_CHAN_STATE_ERROR);
-	} else if (code == GSI_OUT_OF_BUFFERS_ERR) {
+		break;
+	case GSI_OUT_OF_BUFFERS_ERR:
 		BUG_ON(err_ee != ee);
-	} else if (code == GSI_OUT_OF_RESOURCES_ERR) {
+		break;
+	case GSI_OUT_OF_RESOURCES_ERR:
 		BUG_ON(err_ee != ee);
 		complete(&ctx->compl);
-	} else if (code == GSI_UNSUPPORTED_INTER_EE_OP_ERR) {
-	} else if (code == GSI_NON_ALLOCATED_EVT_ACCESS_ERR) {
+		break;
+	case GSI_UNSUPPORTED_INTER_EE_OP_ERR:
+		break;
+	case GSI_NON_ALLOCATED_EVT_ACCESS_ERR:
 		BUG_ON(err_ee != ee);
-	} else if (code == GSI_HWO_1_ERR) {
+		break;
+	case GSI_HWO_1_ERR:
 		BUG_ON(err_ee != ee);
-	} else {
+		break;
+	default:
 		BUG();
 	}
 	gsi_chan_err(&chan_notify);
