@@ -1034,9 +1034,8 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 
 	/* free event ring only when it is present */
 	if (ep->sys->use_comm_evt_ring) {
-		ipa3_ctx->gsi_evt_comm_ring_rem +=
-			ep->gsi_chan_ring_mem.size;
-	} else if (ep->gsi_evt_ring_hdl != GSI_NO_EVT_ERINDEX) {
+		ipa3_ctx->gsi_evt_comm_ring_rem += ep->gsi_chan_ring_mem.size;
+	} else {
 		result = gsi_reset_evt_ring(ep->gsi_evt_ring_hdl);
 		if (result) {
 			ipa_err("Failed to reset evt ring: %d.\n",
