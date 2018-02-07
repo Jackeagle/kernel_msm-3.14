@@ -1664,12 +1664,10 @@ int gsi_poll_channel(unsigned long chan_hdl,
 
 	/* update rp to see of we have anything new to process */
 	if (evtr->ring.rp == evtr->ring.rp_local) {
-		u64 rp;
+		u32 val;
 
-		rp = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(evtr->id, ee));
-		rp |= ctx->ring.rp & 0xffffffff00000000;
-
-		evtr->ring.rp = rp;
+		val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(evtr->id, ee));
+		evtr->ring.rp = (ctx->ring.rp & 0xffffffff00000000) | val;
 	}
 
 	if (evtr->ring.rp == evtr->ring.rp_local) {
