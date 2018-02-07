@@ -231,20 +231,6 @@ enum gsi_chan_err {
 	GSI_CHAN_HWO_1_ERR			= GSI_HWO_1_ERR,
 };
 
-/**
- * gsi_chan_err_notify - Channel general callback info
- *
- * @chan_user_data: cookie supplied in gsi_alloc_channel
- * @evt_id:	    type of error
- * @err_desc:  more info about the error
- *
- */
-struct gsi_chan_err_notify {
-	void *chan_user_data;
-	enum gsi_chan_err evt_id;
-	uint16_t err_desc;
-};
-
 enum gsi_chan_use_db_eng {
 	GSI_CHAN_DIRECT_MODE = 0x0,
 	GSI_CHAN_DB_MODE = 0x1,

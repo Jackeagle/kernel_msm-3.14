@@ -154,7 +154,6 @@ static void gsi_evt_ring_err(enum gsi_evt_err evt_id)
 static void
 handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 err, u32 code)
 {
-	struct gsi_chan_err_notify chan_notify;
 	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_id];
 	u32 ee = gsi_ctx->ee;
 	u32 val;
@@ -164,10 +163,6 @@ handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 err, u32 code)
 		return;
 	}
 	BUG_ON(err_ee != ee && code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
-
-	chan_notify.chan_user_data = ctx->props.chan_user_data;
-	chan_notify.evt_id = code;
-	chan_notify.err_desc = err & GENMASK(15, 0);
 
 	switch (code) {
 	case GSI_INVALID_TRE_ERR:
