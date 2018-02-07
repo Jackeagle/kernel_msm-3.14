@@ -548,7 +548,7 @@ static void gsi_dbg_update_ch_dp_stats(struct gsi_chan_ctx *ctx)
 		used_hw = ctx->ring.max_num_elem + 1 - (start_hw - end_hw);
 
 	pr_debug("ch %d used %d\n", ctx->props.ch_id, used_hw);
-	gsi_update_ch_dp_stats(ctx, used_hw);
+	gsi_update_chan_dp_stats(ctx, used_hw);
 }
 
 static void gsi_wq_update_dp_stats(struct work_struct *work)
