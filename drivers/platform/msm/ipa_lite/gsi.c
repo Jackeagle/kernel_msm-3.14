@@ -1564,6 +1564,7 @@ int gsi_queue_xfer(unsigned long chan_hdl, u16 num_xfers,
 	u64 wp_rollback;
 	int i;
 	unsigned long flags;
+	int ret;
 
 	if (!num_xfers || !xfer) {
 		ipa_err("bad params chan_hdl=%lu num_xfers=%u xfer=%p\n",
@@ -1578,8 +1579,8 @@ int gsi_queue_xfer(unsigned long chan_hdl, u16 num_xfers,
 	if (num_xfers > free) {
 		ipa_err("chan_hdl=%lu num_xfers=%u free=%u\n",
 				chan_hdl, num_xfers, free);
-		spin_unlock_irqrestore(&ctx->evtr->ring.slock, flags);
-		return -ENOSPC;
+		ret = -ENOSPC;
+		goto out_unlock;
 	}
 
 	wp_rollback = ctx->ring.wp_local;
@@ -1615,8 +1616,8 @@ int gsi_queue_xfer(unsigned long chan_hdl, u16 num_xfers,
 	if (i != num_xfers) {
 		/* reject all the xfers */
 		ctx->ring.wp_local = wp_rollback;
-		spin_unlock_irqrestore(&ctx->evtr->ring.slock, flags);
-		return -EINVAL;
+		ret = -EINVAL;
+		goto out_unlock;
 	}
 
 	ctx->stats.queued += num_xfers;
@@ -1627,9 +1628,11 @@ int gsi_queue_xfer(unsigned long chan_hdl, u16 num_xfers,
 	if (ring_db)
 		gsi_ring_chan_doorbell(ctx);
 
+	ret = 0;
+out_unlock:
 	spin_unlock_irqrestore(&ctx->evtr->ring.slock, flags);
 
-	return 0;
+	return ret;
 }
 
 int gsi_start_xfer(unsigned long chan_hdl)
