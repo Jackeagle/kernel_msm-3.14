@@ -196,11 +196,39 @@ handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 code)
 	BUG_ON(!ctx->props.chan_user_data);
 }
 
+static void
+handle_glob_evt_err(u32 err_ee, u32 evt_id, u32 err, u32 code)
+{
+	struct gsi_evt_err_notify evt_notify;
+	struct gsi_evt_ctx *ctx = &gsi_ctx->evtr[evt_id];
+	u32 ee = gsi_ctx->ee;
+
+	if (evt_id >= gsi_ctx->max_ev) {
+		ipa_err("Unexpected ev %d\n", evt_id);
+		WARN_ON(1);
+		return;
+	}
+
+	evt_notify.err_desc = err & GENMASK(15, 0);
+	evt_notify.evt_id = code;
+
+	if (code == GSI_OUT_OF_BUFFERS_ERR) {
+		BUG_ON(err_ee != ee);
+	} else if (code == GSI_OUT_OF_RESOURCES_ERR) {
+		BUG_ON(err_ee != ee);
+		complete(&ctx->compl);
+	} else if (code == GSI_UNSUPPORTED_INTER_EE_OP_ERR) {
+	} else if (code == GSI_EVT_RING_EMPTY_ERR) {
+		BUG_ON(err_ee != ee);
+	} else {
+		BUG();
+	}
+	gsi_evt_ring_err(evt_id);
+}
+
 static void gsi_handle_glob_err(u32 err)
 {
 	struct gsi_log_err *log;
-	struct gsi_evt_ctx *ev;
-	struct gsi_evt_err_notify evt_notify;
 
 	log = (struct gsi_log_err *)&err;
 	ipa_err("log err_type=%u ee=%u idx=%u\n", log->err_type, log->ee,
@@ -217,27 +245,7 @@ static void gsi_handle_glob_err(u32 err)
 		handle_glob_chan_err(log->ee, log->virt_idx, log->code);
 		break;
 	case GSI_ERR_TYPE_EVT:
-		if (log->virt_idx >= gsi_ctx->max_ev) {
-			ipa_err("Unexpected ev %d\n", log->virt_idx);
-			WARN_ON(1);
-			return;
-		}
-
-		ev = &gsi_ctx->evtr[log->virt_idx];
-		evt_notify.err_desc = err & GENMASK(15, 0);
-		evt_notify.evt_id = log->code;
-		if (log->code == GSI_OUT_OF_BUFFERS_ERR) {
-			BUG_ON(log->ee != gsi_ctx->ee);
-		} else if (log->code == GSI_OUT_OF_RESOURCES_ERR) {
-			BUG_ON(log->ee != gsi_ctx->ee);
-			complete(&ev->compl);
-		} else if (log->code == GSI_UNSUPPORTED_INTER_EE_OP_ERR) {
-		} else if (log->code == GSI_EVT_RING_EMPTY_ERR) {
-			BUG_ON(log->ee != gsi_ctx->ee);
-		} else {
-			BUG();
-		}
-		gsi_evt_ring_err(evt_notify.evt_id);
+		handle_glob_evt_err(log->ee, log->virt_idx, err, log->code);
 		break;
 	default:
 		WARN_ON(1);
