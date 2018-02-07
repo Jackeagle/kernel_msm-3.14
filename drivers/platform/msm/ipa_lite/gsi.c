@@ -173,14 +173,51 @@ static void gsi_evt_ring_err(enum gsi_evt_err evt_id)
 }
 #undef CASE
 
+static void
+handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 err, u32 code)
+{
+	struct gsi_chan_err_notify chan_notify;
+	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_id];
+	u32 ee = gsi_ctx->ee;
+	u32 val;
+
+	if (WARN_ON(chan_id >= gsi_ctx->max_ch)) {
+		ipa_err("Unexpected ch %u\n", chan_id);
+		return;
+	}
+
+	chan_notify.chan_user_data = ctx->props.chan_user_data;
+	chan_notify.evt_id = code;
+	chan_notify.err_desc = err & GENMASK(15, 0);
+
+	if (code == GSI_INVALID_TRE_ERR) {
+		BUG_ON(err_ee != ee);
+		val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(chan_id, ee));
+		ctx->state = field_val(val, CHSTATE_BMSK);
+		ipa_debug("ch %u state updated to %u\n", chan_id, ctx->state);
+		ctx->stats.invalid_tre_error++;
+		BUG_ON(ctx->state != GSI_CHAN_STATE_ERROR);
+	} else if (code == GSI_OUT_OF_BUFFERS_ERR) {
+		BUG_ON(err_ee != ee);
+	} else if (code == GSI_OUT_OF_RESOURCES_ERR) {
+		BUG_ON(err_ee != ee);
+		complete(&ctx->compl);
+	} else if (code == GSI_UNSUPPORTED_INTER_EE_OP_ERR) {
+	} else if (code == GSI_NON_ALLOCATED_EVT_ACCESS_ERR) {
+		BUG_ON(err_ee != ee);
+	} else if (code == GSI_HWO_1_ERR) {
+		BUG_ON(err_ee != ee);
+	} else {
+		BUG();
+	}
+	gsi_chan_err(&chan_notify);
+}
+
 static void gsi_handle_glob_err(u32 err)
 {
 	struct gsi_log_err *log;
-	struct gsi_chan_ctx *ch;
 	struct gsi_evt_ctx *ev;
-	struct gsi_chan_err_notify chan_notify;
 	struct gsi_evt_err_notify evt_notify;
-	u32 val;
 
 	log = (struct gsi_log_err *)&err;
 	ipa_err("log err_type=%u ee=%u idx=%u\n", log->err_type, log->ee,
@@ -194,39 +231,7 @@ static void gsi_handle_glob_err(u32 err)
 		BUG();
 		break;
 	case GSI_ERR_TYPE_CHAN:
-		if (log->virt_idx >= gsi_ctx->max_ch) {
-			ipa_err("Unexpected ch %d\n", log->virt_idx);
-			WARN_ON(1);
-			return;
-		}
-
-		ch = &gsi_ctx->chan[log->virt_idx];
-		chan_notify.chan_user_data = ch->props.chan_user_data;
-		chan_notify.err_desc = err & GENMASK(15, 0);
-		chan_notify.evt_id = log->code;
-		if (log->code == GSI_INVALID_TRE_ERR) {
-			BUG_ON(log->ee != gsi_ctx->ee);
-			val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(log->virt_idx,
-					gsi_ctx->ee));
-			ch->state = field_val(val, CHSTATE_BMSK);
-			ipa_debug("ch %u state updated to %u\n", log->virt_idx,
-					ch->state);
-			ch->stats.invalid_tre_error++;
-			BUG_ON(ch->state != GSI_CHAN_STATE_ERROR);
-		} else if (log->code == GSI_OUT_OF_BUFFERS_ERR) {
-			BUG_ON(log->ee != gsi_ctx->ee);
-		} else if (log->code == GSI_OUT_OF_RESOURCES_ERR) {
-			BUG_ON(log->ee != gsi_ctx->ee);
-			complete(&ch->compl);
-		} else if (log->code == GSI_UNSUPPORTED_INTER_EE_OP_ERR) {
-		} else if (log->code == GSI_NON_ALLOCATED_EVT_ACCESS_ERR) {
-			BUG_ON(log->ee != gsi_ctx->ee);
-		} else if (log->code == GSI_HWO_1_ERR) {
-			BUG_ON(log->ee != gsi_ctx->ee);
-		} else {
-			BUG();
-		}
-		gsi_chan_err(&chan_notify);
+		handle_glob_chan_err(log->ee, log->virt_idx, err, log->code);
 		break;
 	case GSI_ERR_TYPE_EVT:
 		if (log->virt_idx >= gsi_ctx->max_ev) {
