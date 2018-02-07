@@ -821,6 +821,7 @@ static void gsi_program_evt_ring_ctx(struct ipa_mem_buffer *mem,
 
 static void gsi_init_ring(struct gsi_ring_ctx *ctx, struct ipa_mem_buffer *mem)
 {
+	spin_lock_init(&ctx->slock);
 	ctx->mem = *mem;
 	ctx->wp = mem->phys_base;
 	ctx->rp = mem->phys_base;
@@ -976,8 +977,6 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt, bool excl)
 	}
 
 	gsi_program_evt_ring_ctx(&ctx->mem, evt_id, int_modt);
-
-	spin_lock_init(&ctx->ring.slock);
 	gsi_init_ring(&ctx->ring, &ctx->mem);
 
 	atomic_inc(&gsi_ctx->num_evt_ring);
@@ -1248,9 +1247,8 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 		evtr->chan = ctx;
 
 	gsi_program_chan_ctx(props, gsi_ctx->ee, evt_id);
-
-	spin_lock_init(&ctx->ring.slock);
 	gsi_init_ring(&ctx->ring, &props->mem);
+
 	if (!props->max_re_expected)
 		ctx->props.max_re_expected = ctx->ring.max_num_elem;
 	ctx->user_data = user_data;
@@ -1816,6 +1814,7 @@ int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props)
 
 	mutex_lock(&ctx->mlock);
 	ctx->props = *props;
+
 	gsi_program_chan_ctx(&ctx->props, gsi_ctx->ee, ctx->evtr->id);
 	gsi_init_ring(&ctx->ring, &ctx->props.mem);
 
