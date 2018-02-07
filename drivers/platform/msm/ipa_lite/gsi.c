@@ -1174,7 +1174,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 
 	memset(ctx, 0, sizeof(*ctx));
 	size = props->mem.size / GSI_CHAN_RING_ELEMENT_SIZE * sizeof(void *);
-	user_data = devm_kzalloc(gsi_ctx->dev, size, GFP_KERNEL);
+	user_data = kzalloc(size, GFP_KERNEL);
 	if (!user_data) {
 		ipa_err("error allocating user pointer array\n");
 		return -ENOMEM;
@@ -1221,7 +1221,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 
 err_mutex_unlock:
 	mutex_unlock(&gsi_ctx->mlock);
-	devm_kfree(gsi_ctx->dev, user_data);
+	kfree(user_data);
 
 	return chan_id;
 }
@@ -1439,7 +1439,7 @@ int gsi_dealloc_channel(unsigned long chan_hdl)
 
 	mutex_unlock(&gsi_ctx->mlock);
 
-	devm_kfree(gsi_ctx->dev, ctx->user_data);
+	kfree(ctx->user_data);
 	ctx->allocated = false;
 	atomic_dec(&ctx->evtr->chan_ref_cnt);
 	atomic_dec(&gsi_ctx->num_chan);
