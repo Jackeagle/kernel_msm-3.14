@@ -1522,7 +1522,6 @@ static u16 __gsi_query_channel_free_re(struct gsi_chan_ctx *ctx)
 bool gsi_is_channel_empty(unsigned long chan_hdl)
 {
 	struct gsi_chan_ctx *ctx;
-	spinlock_t *slock;
 	unsigned long flags;
 	u64 rp;
 	u64 wp;
@@ -1530,9 +1529,8 @@ bool gsi_is_channel_empty(unsigned long chan_hdl)
 	bool is_empty;
 
 	ctx = &gsi_ctx->chan[chan_hdl];
-	slock = &ctx->evtr->ring.slock;
 
-	spin_lock_irqsave(slock, flags);
+	spin_lock_irqsave(&ctx->evtr->ring.slock, flags);
 
 	rp = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_4_OFFS(ctx->props.ch_id, ee));
 	rp |= ctx->ring.rp & 0xFFFFFFFF00000000;
@@ -1547,7 +1545,7 @@ bool gsi_is_channel_empty(unsigned long chan_hdl)
 	else
 		is_empty = (wp == rp) ? true : false;
 
-	spin_unlock_irqrestore(slock, flags);
+	spin_unlock_irqrestore(&ctx->evtr->ring.slock, flags);
 
 	ipa_debug("ch=%lu RP=0x%llx WP=0x%llx RP_LOCAL=0x%llx\n",
 			chan_hdl, rp, wp, ctx->ring.rp_local);
@@ -1565,7 +1563,6 @@ int gsi_queue_xfer(unsigned long chan_hdl, u16 num_xfers,
 	u16 idx;
 	u64 wp_rollback;
 	int i;
-	spinlock_t *slock;
 	unsigned long flags;
 
 	if (!num_xfers || !xfer) {
@@ -1574,15 +1571,14 @@ int gsi_queue_xfer(unsigned long chan_hdl, u16 num_xfers,
 		return -EINVAL;
 	}
 
-	slock = &ctx->evtr->ring.slock;
+	spin_lock_irqsave(&ctx->evtr->ring.slock, flags);
 
-	spin_lock_irqsave(slock, flags);
 	free = __gsi_query_channel_free_re(ctx);
 
 	if (num_xfers > free) {
 		ipa_err("chan_hdl=%lu num_xfers=%u free=%u\n",
 				chan_hdl, num_xfers, free);
-		spin_unlock_irqrestore(slock, flags);
+		spin_unlock_irqrestore(&ctx->evtr->ring.slock, flags);
 		return -ENOSPC;
 	}
 
@@ -1619,7 +1615,7 @@ int gsi_queue_xfer(unsigned long chan_hdl, u16 num_xfers,
 	if (i != num_xfers) {
 		/* reject all the xfers */
 		ctx->ring.wp_local = wp_rollback;
-		spin_unlock_irqrestore(slock, flags);
+		spin_unlock_irqrestore(&ctx->evtr->ring.slock, flags);
 		return -EINVAL;
 	}
 
@@ -1631,7 +1627,7 @@ int gsi_queue_xfer(unsigned long chan_hdl, u16 num_xfers,
 	if (ring_db)
 		gsi_ring_chan_doorbell(ctx);
 
-	spin_unlock_irqrestore(slock, flags);
+	spin_unlock_irqrestore(&ctx->evtr->ring.slock, flags);
 
 	return 0;
 }
