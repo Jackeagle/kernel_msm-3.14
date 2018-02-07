@@ -1140,11 +1140,6 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 {
 	dma_addr_t last;
 
-	if (props->ch_id >= gsi_ctx->max_ch) {
-		ipa_err("ch_id %u invalid\n", props->ch_id);
-		return -EINVAL;
-	}
-
 	if (props->mem.size % 16) {
 		ipa_err("bad params mem.size %u not a multiple of re size %u\n",
 				props->mem.size, GSI_CHAN_RING_ELEMENT_SIZE);
