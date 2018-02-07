@@ -1656,15 +1656,17 @@ int gsi_poll_channel(unsigned long chan_hdl,
 		struct gsi_chan_xfer_notify *notify)
 {
 	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_hdl];
-	u64 rp;
 	int ee = gsi_ctx->ee;
 	unsigned long flags;
 
 	spin_lock_irqsave(&ctx->evtr->ring.slock, flags);
+
+	/* update rp to see of we have anything new to process */
 	if (ctx->evtr->ring.rp == ctx->evtr->ring.rp_local) {
-		/* update rp to see of we have anything new to process */
+		u64 rp;
+
 		rp = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(ctx->evtr->id, ee));
-		rp |= ctx->ring.rp & 0xFFFFFFFF00000000;
+		rp |= ctx->ring.rp & 0xffffffff00000000;
 
 		ctx->evtr->ring.rp = rp;
 	}
