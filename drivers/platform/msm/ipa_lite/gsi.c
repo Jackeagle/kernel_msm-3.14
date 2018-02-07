@@ -1524,7 +1524,7 @@ bool gsi_is_channel_empty(unsigned long chan_hdl)
 	u64 rp;
 	u64 wp;
 	int ee = gsi_ctx->ee;
-	bool is_empty;
+	bool empty;
 
 	ctx = &gsi_ctx->chan[chan_hdl];
 
@@ -1539,16 +1539,16 @@ bool gsi_is_channel_empty(unsigned long chan_hdl)
 	ctx->ring.wp = wp;
 
 	if (ctx->props.dir == GSI_CHAN_DIR_FROM_GSI)
-		is_empty = (ctx->ring.rp_local == rp) ? true : false;
+		empty = ctx->ring.rp_local == rp;
 	else
-		is_empty = (wp == rp) ? true : false;
+		empty = wp == rp;
 
 	spin_unlock_irqrestore(&ctx->evtr->ring.slock, flags);
 
 	ipa_debug("ch=%lu RP=0x%llx WP=0x%llx RP_LOCAL=0x%llx\n",
 			chan_hdl, rp, wp, ctx->ring.rp_local);
 
-	return is_empty;
+	return empty;
 }
 
 int gsi_queue_xfer(unsigned long chan_hdl, u16 num_xfers,
