@@ -1402,15 +1402,8 @@ free_lock:
 
 int gsi_reset_channel(unsigned long chan_hdl)
 {
-	struct gsi_chan_ctx *ctx;
+	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_hdl];
 	bool reset_done = false;
-
-	if (chan_hdl >= gsi_ctx->max_ch) {
-		ipa_err("bad params chan_hdl=%lu\n", chan_hdl);
-		return -EINVAL;
-	}
-
-	ctx = &gsi_ctx->chan[chan_hdl];
 
 	if (ctx->state != GSI_CHAN_STATE_STOPPED) {
 		ipa_err("bad state %d\n", ctx->state);
@@ -1418,7 +1411,6 @@ int gsi_reset_channel(unsigned long chan_hdl)
 	}
 
 	mutex_lock(&gsi_ctx->mlock);
-
 reset:
 	reinit_completion(&ctx->compl);
 
