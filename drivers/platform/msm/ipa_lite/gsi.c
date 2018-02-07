@@ -152,7 +152,7 @@ static void gsi_evt_ring_err(enum gsi_evt_err evt_id)
 #undef CASE
 
 static void
-handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 err, u32 code)
+handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 code)
 {
 	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_id];
 	u32 ee = gsi_ctx->ee;
@@ -214,7 +214,7 @@ static void gsi_handle_glob_err(u32 err)
 		BUG();
 		break;
 	case GSI_ERR_TYPE_CHAN:
-		handle_glob_chan_err(log->ee, log->virt_idx, err, log->code);
+		handle_glob_chan_err(log->ee, log->virt_idx, log->code);
 		break;
 	case GSI_ERR_TYPE_EVT:
 		if (log->virt_idx >= gsi_ctx->max_ev) {
