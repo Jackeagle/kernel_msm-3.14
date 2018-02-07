@@ -1343,16 +1343,9 @@ int gsi_start_channel(unsigned long chan_hdl)
 
 int gsi_stop_channel(unsigned long chan_hdl)
 {
+	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_hdl];
 	int res;
 	u32 val;
-	struct gsi_chan_ctx *ctx;
-
-	if (chan_hdl >= gsi_ctx->max_ch) {
-		ipa_err("bad params chan_hdl=%lu\n", chan_hdl);
-		return -EINVAL;
-	}
-
-	ctx = &gsi_ctx->chan[chan_hdl];
 
 	if (ctx->state == GSI_CHAN_STATE_STOPPED) {
 		ipa_debug("chan_hdl=%lu already stopped\n", chan_hdl);
