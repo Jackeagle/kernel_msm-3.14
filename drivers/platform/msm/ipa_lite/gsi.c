@@ -1638,14 +1638,8 @@ int gsi_queue_xfer(unsigned long chan_hdl, u16 num_xfers,
 
 int gsi_start_xfer(unsigned long chan_hdl)
 {
-	struct gsi_chan_ctx *ctx;
+	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_hdl];
 
-	if (chan_hdl >= gsi_ctx->max_ch) {
-		ipa_err("bad params chan_hdl=%lu\n", chan_hdl);
-		return -EINVAL;
-	}
-
-	ctx = &gsi_ctx->chan[chan_hdl];
 	if (ctx->state != GSI_CHAN_STATE_STARTED) {
 		ipa_err("bad state %d\n", ctx->state);
 		return -ENOTSUPP;
