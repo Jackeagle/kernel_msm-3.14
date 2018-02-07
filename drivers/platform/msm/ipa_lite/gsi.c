@@ -854,6 +854,17 @@ static u32 evt_ring_cmd_val(unsigned long evt_id, enum gsi_evt_ch_cmd_opcode op)
 	return val;
 }
 
+/* Compute the value to write to the event ring command register */
+static u32 channel_cmd_val(unsigned long chan_id, enum gsi_ch_cmd_opcode op)
+{
+	u32 val;
+
+	val = field_gen((u32)chan_id, CH_CHID_BMSK);
+	val |= field_gen((u32)op, CH_OPCODE_BMSK);
+
+	return val;
+}
+
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
 long gsi_alloc_evt_ring(u32 size, u16 int_modt, bool excl)
 {
@@ -1144,7 +1155,6 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	size_t size;
 	u32 val;
 	int ee = gsi_ctx->ee;
-	enum gsi_ch_cmd_opcode op = GSI_CH_ALLOCATE;
 	u8 evt_id;
 	void **user_data;
 	long chan_id;
@@ -1183,8 +1193,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 
 	mutex_lock(&gsi_ctx->mlock);
 
-	val = field_gen((u32)chan_id, CH_CHID_BMSK);
-	val |= field_gen(op, CH_OPCODE_BMSK);
+	val = channel_cmd_val(chan_id, GSI_CH_ALLOCATE);
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(ee));
 
 	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
@@ -1281,7 +1290,6 @@ int gsi_write_channel_scratch(unsigned long chan_hdl, u32 tlv_size)
 
 int gsi_start_channel(unsigned long chan_hdl)
 {
-	enum gsi_ch_cmd_opcode op = GSI_CH_START;
 	u32 val;
 	struct gsi_chan_ctx *ctx;
 
@@ -1304,8 +1312,7 @@ int gsi_start_channel(unsigned long chan_hdl)
 
 	gsi_ctx->ch_dbg[chan_hdl].ch_start++;
 
-	val = field_gen(chan_hdl, CH_CHID_BMSK);
-	val |= field_gen(op, CH_OPCODE_BMSK);
+	val = channel_cmd_val(chan_hdl, GSI_CH_START);
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(gsi_ctx->ee));
 
 	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
@@ -1325,7 +1332,6 @@ int gsi_start_channel(unsigned long chan_hdl)
 
 int gsi_stop_channel(unsigned long chan_hdl)
 {
-	enum gsi_ch_cmd_opcode op = GSI_CH_STOP;
 	int res;
 	u32 val;
 	struct gsi_chan_ctx *ctx;
@@ -1354,8 +1360,7 @@ int gsi_stop_channel(unsigned long chan_hdl)
 
 	gsi_ctx->ch_dbg[chan_hdl].ch_stop++;
 
-	val = field_gen(chan_hdl, CH_CHID_BMSK);
-	val |= field_gen(op, CH_OPCODE_BMSK);
+	val = channel_cmd_val(chan_hdl, GSI_CH_STOP);
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(gsi_ctx->ee));
 
 	if (!wait_for_completion_timeout(&ctx->compl, GSI_STOP_CMD_TIMEOUT)) {
@@ -1397,7 +1402,6 @@ free_lock:
 
 int gsi_reset_channel(unsigned long chan_hdl)
 {
-	enum gsi_ch_cmd_opcode op = GSI_CH_RESET;
 	u32 val;
 	struct gsi_chan_ctx *ctx;
 	bool reset_done = false;
@@ -1421,8 +1425,7 @@ reset:
 
 	gsi_ctx->ch_dbg[chan_hdl].ch_reset++;
 
-	val = field_gen(chan_hdl, CH_CHID_BMSK);
-	val |= field_gen(op, CH_OPCODE_BMSK);
+	val = channel_cmd_val(chan_hdl, GSI_CH_RESET);
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(gsi_ctx->ee));
 
 	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
@@ -1457,7 +1460,6 @@ reset:
 
 int gsi_dealloc_channel(unsigned long chan_hdl)
 {
-	enum gsi_ch_cmd_opcode op = GSI_CH_DE_ALLOC;
 	u32 val;
 	struct gsi_chan_ctx *ctx;
 
@@ -1478,8 +1480,7 @@ int gsi_dealloc_channel(unsigned long chan_hdl)
 
 	gsi_ctx->ch_dbg[chan_hdl].ch_de_alloc++;
 
-	val = field_gen(chan_hdl, CH_CHID_BMSK);
-	val |= field_gen(op, CH_OPCODE_BMSK);
+	val = channel_cmd_val(chan_hdl, GSI_CH_DE_ALLOC);
 	gsi_writel(val, GSI_EE_n_GSI_CH_CMD_OFFS(gsi_ctx->ee));
 
 	if (!wait_for_completion_timeout(&ctx->compl, GSI_CMD_TIMEOUT)) {
