@@ -208,22 +208,20 @@ handle_glob_evt_err(u32 err_ee, u32 evt_id, u32 err, u32 code)
 		WARN_ON(1);
 		return;
 	}
+	BUG_ON(err_ee != ee && code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
 
 	evt_notify.err_desc = err & GENMASK(15, 0);
 	evt_notify.evt_id = code;
 
 	switch (code) {
 	case GSI_OUT_OF_BUFFERS_ERR:
-		BUG_ON(err_ee != ee);
 		break;
 	case GSI_OUT_OF_RESOURCES_ERR:
-		BUG_ON(err_ee != ee);
 		complete(&ctx->compl);
 		break;
 	case GSI_UNSUPPORTED_INTER_EE_OP_ERR:
 		break;
 	case GSI_EVT_RING_EMPTY_ERR:
-		BUG_ON(err_ee != ee);
 		break;
 	default:
 		BUG();
