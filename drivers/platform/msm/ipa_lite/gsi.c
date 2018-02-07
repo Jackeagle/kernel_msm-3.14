@@ -134,28 +134,6 @@ static void gsi_handle_ev_ctrl(int ee)
 }
 
 #define CASE(x)						\
-	case GSI_CHAN_ ## x ## _ERR:			\
-		ipa_err("Got GSI_CHAN_ " #x "_ERR\n");	\
-		break
-
-static void gsi_chan_err(struct gsi_chan_err_notify *notify)
-{
-	switch (notify->evt_id) {
-	CASE(INVALID_TRE);
-	CASE(NON_ALLOCATED_EVT_ACCESS);
-	CASE(OUT_OF_BUFFERS);
-	CASE(OUT_OF_RESOURCES);
-	CASE(UNSUPPORTED_INTER_EE_OP);
-	CASE(HWO_1);
-	default:
-		ipa_err("Unexpected err evt: %d\n", notify->evt_id);
-	}
-	if (!notify->chan_user_data)
-		BUG();
-}
-#undef CASE
-
-#define CASE(x)						\
 	case GSI_EVT_ ## x ## _ERR:			\
 		ipa_err("Got GSI_EVT_ " #x "_ERR\n");	\
 		break
@@ -193,6 +171,7 @@ handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 err, u32 code)
 
 	switch (code) {
 	case GSI_INVALID_TRE_ERR:
+		ipa_err("Got INVALID_TRE_ERR\n");
 		val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(chan_id, ee));
 		ctx->state = field_val(val, CHSTATE_BMSK);
 		ipa_debug("ch %u state updated to %u\n", chan_id, ctx->state);
@@ -200,20 +179,26 @@ handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 err, u32 code)
 		BUG_ON(ctx->state != GSI_CHAN_STATE_ERROR);
 		break;
 	case GSI_OUT_OF_BUFFERS_ERR:
+		ipa_err("Got OUT_OF_BUFFERS_ERR\n");
 		break;
 	case GSI_OUT_OF_RESOURCES_ERR:
+		ipa_err("Got OUT_OF_RESOURCES_ERR\n");
 		complete(&ctx->compl);
 		break;
 	case GSI_UNSUPPORTED_INTER_EE_OP_ERR:
+		ipa_err("Got UNSUPPORTED_INTER_EE_OP_ERR\n");
 		break;
 	case GSI_NON_ALLOCATED_EVT_ACCESS_ERR:
+		ipa_err("Got NON_ALLOCATED_EVT_ACCESS_ERR\n");
 		break;
 	case GSI_HWO_1_ERR:
+		ipa_err("Got HWO_1_ERR\n");
 		break;
 	default:
+		ipa_err("Unexpected err evt: %d\n", code);
 		BUG();
 	}
-	gsi_chan_err(&chan_notify);
+	BUG_ON(!ctx->props.chan_user_data);
 }
 
 static void gsi_handle_glob_err(u32 err)
