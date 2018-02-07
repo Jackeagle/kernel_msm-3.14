@@ -1585,6 +1585,7 @@ gsi_poll_channel(unsigned long chan_id, struct gsi_chan_xfer_notify *notify)
 	struct gsi_evt_ctx *evtr = ctx->evtr;
 	u32 ee = gsi_ctx->ee;
 	unsigned long flags;
+	bool empty;
 
 	spin_lock_irqsave(&evtr->ring.slock, flags);
 
@@ -1596,15 +1597,13 @@ gsi_poll_channel(unsigned long chan_id, struct gsi_chan_xfer_notify *notify)
 		evtr->ring.rp = (ctx->ring.rp & GENMASK_ULL(63, 32)) | val;
 	}
 
-	if (evtr->ring.rp == evtr->ring.rp_local) {
-		spin_unlock_irqrestore(&evtr->ring.slock, flags);
-		return -ENOENT;
-	}
+	empty = evtr->ring.rp == evtr->ring.rp_local;
+	if (!empty)
+		gsi_process_evt_re(evtr, notify, false);
 
-	gsi_process_evt_re(evtr, notify, false);
 	spin_unlock_irqrestore(&evtr->ring.slock, flags);
 
-	return 0;
+	return empty ? -ENOENT : 0;
 }
 
 int gsi_config_channel_mode(unsigned long chan_id, enum gsi_chan_mode mode)
