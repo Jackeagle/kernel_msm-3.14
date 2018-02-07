@@ -1136,6 +1136,7 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, unsigned int ee,
 
 static int gsi_validate_channel_props(struct gsi_chan_props *props)
 {
+	dma_addr_t phys_base;
 	dma_addr_t last;
 
 	if (props->mem.size % 16) {
@@ -1144,21 +1145,19 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 		return -EINVAL;
 	}
 
-	if (props->mem.phys_base % roundup_pow_of_two(props->mem.size)) {
+	phys_base = props->mem.phys_base;
+	if (phys_base % roundup_pow_of_two(props->mem.size)) {
 		ipa_err("bad params ring base not aligned 0x%llx align 0x%lx\n",
-				props->mem.phys_base,
-				roundup_pow_of_two(props->mem.size));
+				phys_base, roundup_pow_of_two(props->mem.size));
 		return -EINVAL;
 	}
 
-	last = props->mem.phys_base + props->mem.size -
-			GSI_CHAN_RING_ELEMENT_SIZE;
+	last = phys_base + props->mem.size - GSI_CHAN_RING_ELEMENT_SIZE;
 
 	/* MSB should stay same within the ring */
-	if ((props->mem.phys_base & GENMASK_ULL(63, 32)) !=
-			(last & GENMASK_ULL(63, 32))) {
+	if ((phys_base & GENMASK_ULL(63, 32)) != (last & GENMASK_ULL(63, 32))) {
 		ipa_err("MSB is not fixed on ring base 0x%llx size 0x%x\n",
-			props->mem.phys_base, props->mem.size);
+			phys_base, props->mem.size);
 		return -EINVAL;
 	}
 
