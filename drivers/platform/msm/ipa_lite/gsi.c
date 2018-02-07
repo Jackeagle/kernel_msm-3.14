@@ -1690,16 +1690,10 @@ int gsi_poll_channel(unsigned long chan_hdl,
 
 int gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode)
 {
-	struct gsi_chan_ctx *ctx;
+	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_hdl];
 	enum gsi_chan_mode curr;
 	unsigned long flags;
 
-	if (chan_hdl >= gsi_ctx->max_ch) {
-		ipa_err("bad params chan_hdl=%lu mode=%u\n", chan_hdl, mode);
-		return -EINVAL;
-	}
-
-	ctx = &gsi_ctx->chan[chan_hdl];
 	if (!ctx->evtr->exclusive) {
 		ipa_err("cannot configure mode on chan_hdl=%lu\n",
 				chan_hdl);
