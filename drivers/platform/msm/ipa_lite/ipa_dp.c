@@ -2535,18 +2535,23 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	int result;
 	u32 size;
 
-	result = evt_ring_hdl_get(ep, in->desc_fifo_sz);
-	if (result < 0)
-		return result;
-	ep->gsi_evt_ring_hdl = result;
-
 	gsi_ep_info = ipa3_get_gsi_ep_info(ep->client);
 	if (!gsi_ep_info) {
 		ipa_err("Failed getting GSI EP info for client=%d\n",
 		       ep->client);
-		result = -EINVAL;
-		goto err_evt_ring_hdl_put;
+		return -EINVAL;
 	}
+	if (gsi_ep_info->ipa_gsi_chan_num >= gsi_ctx->max_ch) {
+		ipa_err("channel number too big for client=%d (%u > %u)\n",
+		       ep->client, gsi_ep_info->ipa_gsi_chan_num,
+		       gsi_ctx->max_ch - 1);
+		return -EINVAL;
+	}
+
+	result = evt_ring_hdl_get(ep, in->desc_fifo_sz);
+	if (result < 0)
+		return result;
+	ep->gsi_evt_ring_hdl = result;
 
 	memset(&gsi_channel_props, 0, sizeof(gsi_channel_props));
 	if (IPA_CLIENT_IS_PROD(ep->client)) {
