@@ -190,7 +190,7 @@ static void gsi_handle_glob_err(u32 err)
 	switch (log->err_type) {
 	case GSI_ERR_TYPE_GLOB:
 		ipa_err("Got global GP ERROR\n");
-		ipa_err("Err_desc = 0x%04x\n", err & 0xffff);
+		ipa_err("Err_desc = 0x%04lx\n", err & GENMASK(15, 0));
 		BUG();
 		break;
 	case GSI_ERR_TYPE_CHAN:
@@ -202,7 +202,7 @@ static void gsi_handle_glob_err(u32 err)
 
 		ch = &gsi_ctx->chan[log->virt_idx];
 		chan_notify.chan_user_data = ch->props.chan_user_data;
-		chan_notify.err_desc = err & 0xFFFF;
+		chan_notify.err_desc = err & GENMASK(15, 0);
 		if (log->code == GSI_INVALID_TRE_ERR) {
 			BUG_ON(log->ee != gsi_ctx->ee);
 			val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(log->virt_idx,
@@ -243,7 +243,7 @@ static void gsi_handle_glob_err(u32 err)
 		}
 
 		ev = &gsi_ctx->evtr[log->virt_idx];
-		evt_notify.err_desc = err & 0xFFFF;
+		evt_notify.err_desc = err & GENMASK(15, 0);
 		if (log->code == GSI_OUT_OF_BUFFERS_ERR) {
 			BUG_ON(log->ee != gsi_ctx->ee);
 			evt_notify.evt_id = GSI_EVT_OUT_OF_BUFFERS_ERR;
@@ -452,7 +452,7 @@ static void gsi_handle_ieob(int ee)
 check_again:
 		cntr = 0;
 		val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(i, ee));
-		ctx->ring.rp = (ctx->ring.rp & 0xffffffff00000000) | val;
+		ctx->ring.rp = (ctx->ring.rp & GENMASK_ULL(63, 32)) | val;
 		while (ctx->ring.rp_local != ctx->ring.rp) {
 			++cntr;
 			if (ctx->exclusive &&
@@ -1155,11 +1155,10 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 			GSI_CHAN_RING_ELEMENT_SIZE;
 
 	/* MSB should stay same within the ring */
-	if ((props->mem.phys_base & 0xFFFFFFFF00000000ULL) !=
-	    (last & 0xFFFFFFFF00000000ULL)) {
+	if ((props->mem.phys_base & GENMASK_ULL(63, 32)) !=
+			(last & GENMASK_ULL(63, 32))) {
 		ipa_err("MSB is not fixed on ring base 0x%llx size 0x%x\n",
-			props->mem.phys_base,
-			props->mem.size);
+			props->mem.phys_base, props->mem.size);
 		return -EINVAL;
 	}
 
@@ -1281,7 +1280,7 @@ static void __gsi_write_channel_scratch(unsigned long chan_hdl)
 	 * unchanged between the read and the write.
 	 */
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_SCRATCH_3_OFFS(chan_hdl, ee));
-	val = (scr->data.word4 & 0xffff0000) | (val & 0xffff);
+	val = (scr->data.word4 & GENMASK(31, 16)) | (val & GENMASK(15, 0));
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_SCRATCH_3_OFFS(chan_hdl, ee));
 }
 
@@ -1530,10 +1529,10 @@ bool gsi_is_channel_empty(unsigned long chan_hdl)
 	spin_lock_irqsave(&ctx->evtr->ring.slock, flags);
 
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_4_OFFS(ctx->props.ch_id, ee));
-	ctx->ring.rp = (ctx->ring.rp & 0xffffffff00000000) | val;
+	ctx->ring.rp = (ctx->ring.rp & GENMASK_ULL(63, 32)) | val;
 
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_6_OFFS(ctx->props.ch_id, ee));
-	ctx->ring.wp = (ctx->ring.wp & 0xffffffff00000000) | val;
+	ctx->ring.wp = (ctx->ring.wp & GENMASK_ULL(63, 32)) | val;
 
 	if (ctx->props.dir == GSI_CHAN_DIR_FROM_GSI)
 		empty = ctx->ring.rp_local == ctx->ring.rp;
@@ -1662,7 +1661,7 @@ int gsi_poll_channel(unsigned long chan_hdl,
 		u32 val;
 
 		val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(evtr->id, ee));
-		evtr->ring.rp = (ctx->ring.rp & 0xffffffff00000000) | val;
+		evtr->ring.rp = (ctx->ring.rp & GENMASK_ULL(63, 32)) | val;
 	}
 
 	if (evtr->ring.rp == evtr->ring.rp_local) {
