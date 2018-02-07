@@ -1684,17 +1684,17 @@ int gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode)
 	enum gsi_chan_mode curr;
 	unsigned long flags;
 
+	/*
+	 * ipa_assert(mode == GSI_CHAN_MODE_POLL ||
+	 *		mode == GSI_CHAN_MODE_CALLBACK);
+	 */
 	if (!ctx->evtr->exclusive) {
 		ipa_err("cannot configure mode on chan_hdl=%lu\n",
 				chan_hdl);
 		return -ENOTSUPP;
 	}
 
-	if (atomic_read(&ctx->poll_mode))
-		curr = GSI_CHAN_MODE_POLL;
-	else
-		curr = GSI_CHAN_MODE_CALLBACK;
-
+	curr = atomic_read(&ctx->poll_mode);
 	if (mode == curr) {
 		ipa_err("already in requested mode %u chan_hdl=%lu\n",
 				curr, chan_hdl);
@@ -1702,12 +1702,11 @@ int gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode)
 	}
 
 	spin_lock_irqsave(&gsi_ctx->slock, flags);
-	if (curr == GSI_CHAN_MODE_CALLBACK && mode == GSI_CHAN_MODE_POLL) {
+	if (curr == GSI_CHAN_MODE_CALLBACK) {
 		gsi_irq_control_event(gsi_ctx->ee, ctx->evtr->id, false);
 		ctx->stats.callback_to_poll++;
-	}
-
-	if (curr == GSI_CHAN_MODE_POLL && mode == GSI_CHAN_MODE_CALLBACK) {
+	} else {
+		/* ipa_assert(curr == GSI_CHAN_MODE_POLL); */
 		gsi_irq_control_event(gsi_ctx->ee, ctx->evtr->id, true);
 		ctx->stats.poll_to_callback++;
 	}
