@@ -1203,8 +1203,6 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	gsi_program_chan_ctx(props, gsi_ctx->ee, evt_id);
 	gsi_init_ring(&ctx->ring, &props->mem);
 
-	if (!props->max_re_expected)
-		ctx->props.max_re_expected = ctx->ring.max_num_elem;
 	ctx->user_data = user_data;
 	ctx->allocated = true;
 	atomic_inc(&gsi_ctx->num_chan);

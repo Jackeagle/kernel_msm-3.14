@@ -82,76 +82,8 @@ error:
 	return -EFAULT;
 }
 
-static ssize_t gsi_set_max_elem_dp_stats(struct file *file,
-		const char __user *buf, size_t count, loff_t *ppos)
-{
-	u32 ch_id;
-	u32 max_elem;
-	unsigned long missing;
-	char *sptr, *token;
-
-
-	if (sizeof(dbg_buff) < count + 1)
-		goto error;
-
-	missing = copy_from_user(dbg_buff, buf, count);
-	if (missing)
-		goto error;
-
-	dbg_buff[count] = '\0';
-
-	sptr = dbg_buff;
-
-	token = strsep(&sptr, " ");
-	if (!token) {
-		pr_err("\n");
-		goto error;
-	}
-
-	if (kstrtou32(token, 0, &ch_id)) {
-		pr_err("\n");
-		goto error;
-	}
-
-	token = strsep(&sptr, " ");
-	if (!token) {
-		/* get */
-		if (kstrtou32(dbg_buff, 0, &ch_id))
-			goto error;
-		if (ch_id >= gsi_ctx->max_ch)
-			goto error;
-		printk(KERN_ERR "ch %d: max_re_expected=%d\n", ch_id,
-			gsi_ctx->chan[ch_id].props.max_re_expected);
-		return count;
-	}
-	if (kstrtou32(token, 0, &max_elem)) {
-		pr_err("\n");
-		goto error;
-	}
-
-	pr_debug("ch_id=%u max_elem=%u\n", ch_id, max_elem);
-
-	if (ch_id >= gsi_ctx->max_ch) {
-		pr_err("invalid chan id %u\n", ch_id);
-		goto error;
-	}
-
-	gsi_ctx->chan[ch_id].props.max_re_expected = max_elem;
-
-	return count;
-
-error:
-	pr_err("Usage: (set) echo <ch_id> <max_elem> > max_elem_dp_stats\n");
-	pr_err("Usage: (get) echo <ch_id> > max_elem_dp_stats\n");
-	return -EFAULT;
-}
-
 const struct file_operations gsi_stats_ops = {
 	.write = gsi_dump_stats,
-};
-
-const struct file_operations gsi_max_elem_dp_stats_ops = {
-	.write = gsi_set_max_elem_dp_stats,
 };
 
 void gsi_debugfs_init(void)
@@ -168,11 +100,6 @@ void gsi_debugfs_init(void)
 
 	dfile = debugfs_create_file("stats", write_only_mode,
 			gsi_dir, NULL, &gsi_stats_ops);
-	if (IS_ERR_OR_NULL(dfile))
-		goto fail;
-
-	dfile = debugfs_create_file("max_elem_dp_stats", write_only_mode,
-		gsi_dir, NULL, &gsi_max_elem_dp_stats_ops);
 	if (IS_ERR_OR_NULL(dfile))
 		goto fail;
 

@@ -233,9 +233,6 @@ enum gsi_chan_use_db_eng {
  * @re_size:	     size of channel ring element
  * @ring_len:	     length of ring in bytes (must be integral multiple of
  *		     re_size)
- * @max_re_expected: maximal number of ring elements expected to be queued.
- *		     used for data path statistics gathering. if 0 provided
- *		     ring_len / re_size will be used.
  * @ring_base_addr:  physical base address of ring. Address must be aligned to
  *		     ring_len rounded to power of two
  * @ring_base_vaddr: virtual base address of ring (set to NULL when not
@@ -286,7 +283,6 @@ struct gsi_chan_props {
 	enum gsi_chan_dir dir;
 	uint8_t ch_id;
 	unsigned long evt_ring_hdl;
-	uint16_t max_re_expected;
 	enum gsi_chan_use_db_eng use_db_eng;
 	uint8_t low_weight;
 	void (*xfer_cb)(struct gsi_chan_xfer_notify *notify);

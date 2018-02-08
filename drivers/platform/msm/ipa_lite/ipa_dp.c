@@ -2554,12 +2554,10 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	ep->gsi_evt_ring_hdl = result;
 
 	memset(&gsi_channel_props, 0, sizeof(gsi_channel_props));
-	if (IPA_CLIENT_IS_PROD(ep->client)) {
+	if (IPA_CLIENT_IS_PROD(ep->client))
 		gsi_channel_props.dir = GSI_CHAN_DIR_TO_GSI;
-	} else {
+	else
 		gsi_channel_props.dir = GSI_CHAN_DIR_FROM_GSI;
-		gsi_channel_props.max_re_expected = ep->sys->rx_pool_sz;
-	}
 	gsi_channel_props.ch_id = gsi_ep_info->ipa_gsi_chan_num;
 	gsi_channel_props.evt_ring_hdl = ep->gsi_evt_ring_hdl;
 	gsi_channel_props.use_db_eng = GSI_CHAN_DB_MODE;
