@@ -328,13 +328,11 @@ static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 	ctx->ring.rp = ctx->ring.rp_local;
 }
 
-static void gsi_process_evt_re(struct gsi_evt_ctx *ctx,
+static u16 gsi_process_evt_re(struct gsi_evt_ctx *ctx,
 		struct gsi_chan_xfer_notify *notify, bool callback)
 {
 	struct gsi_xfer_compl_evt *evt;
-	u16 idx;
-
-	idx = ring_rp_local_index(&ctx->ring);
+	u16 idx = ring_rp_local_index(&ctx->ring);
 
 	evt = ctx->ring.mem.base + idx * ctx->ring.elem_sz;
 	gsi_process_chan(evt, notify, callback);
@@ -342,6 +340,8 @@ static void gsi_process_evt_re(struct gsi_evt_ctx *ctx,
 
 	/* recycle this element */
 	ring_wp_local_inc(&ctx->ring);
+
+	return notify->bytes_xfered;
 }
 
 static void gsi_ring_evt_doorbell(struct gsi_evt_ctx *ctx)
@@ -390,7 +390,6 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *ctx)
 static void gsi_handle_ieob(u32 ee)
 {
 	u32 valid_mask = GENMASK(gsi_ctx->max_ev - 1, 0);
-	struct gsi_chan_xfer_notify notify;
 	u32 evt_mask;
 
 	evt_mask = gsi_readl(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_OFFS(ee));
@@ -415,13 +414,15 @@ check_again:
 		val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(i, ee));
 		ctx->ring.rp = (ctx->ring.rp & GENMASK_ULL(63, 32)) | val;
 		while (ctx->ring.rp_local != ctx->ring.rp) {
+			struct gsi_chan_xfer_notify notify = { 0 };
+
 			count++;
 			if (ctx->exclusive &&
 				atomic_read(&ctx->chan->poll_mode)) {
 				count = 0;
 				break;
 			}
-			gsi_process_evt_re(ctx, &notify, true);
+			(void)gsi_process_evt_re(ctx, &notify, true);
 		}
 
 		gsi_ring_evt_doorbell(ctx);
@@ -1584,10 +1585,10 @@ int gsi_poll_channel(unsigned long chan_id)
 {
 	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_id];
 	struct gsi_evt_ctx *evtr = ctx->evtr;
-	struct gsi_chan_xfer_notify notify = { 0 };
 	u32 ee = gsi_ctx->ee;
 	unsigned long flags;
 	bool empty;
+	int size = 0;
 
 	spin_lock_irqsave(&evtr->ring.slock, flags);
 
@@ -1600,12 +1601,15 @@ int gsi_poll_channel(unsigned long chan_id)
 	}
 
 	empty = evtr->ring.rp == evtr->ring.rp_local;
-	if (!empty)
-		gsi_process_evt_re(evtr, &notify, false);
+	if (!empty) {
+		struct gsi_chan_xfer_notify notify = { 0 };
+
+		size = gsi_process_evt_re(evtr, &notify, false);
+	}
 
 	spin_unlock_irqrestore(&evtr->ring.slock, flags);
 
-	return empty ? -ENOENT : (int)notify.bytes_xfered;
+	return empty ? -ENOENT : size;
 }
 
 int gsi_config_channel_mode(unsigned long chan_id, enum gsi_chan_mode mode)
