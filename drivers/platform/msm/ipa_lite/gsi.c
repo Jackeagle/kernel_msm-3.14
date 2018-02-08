@@ -94,8 +94,6 @@ static void gsi_handle_chan_ctrl(u32 ee)
 
 		complete(&ctx->compl);
 
-		gsi_ctx->ch_dbg[i].cmd_completed++;
-
 		chan_mask ^= BIT(i);
 	}
 }
@@ -149,7 +147,6 @@ handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 code)
 		ctx->state = field_val(val, CHSTATE_BMSK);
 		ipa_debug("chan_id %u state updated to %u\n",
 				chan_id, ctx->state);
-		ctx->stats.invalid_tre_error++;
 		BUG_ON(ctx->state != GSI_CHAN_STATE_ERROR);
 		break;
 	case GSI_OUT_OF_BUFFERS_ERR:
@@ -305,14 +302,11 @@ static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 	ctx = &gsi_ctx->chan[chan_id];
 	rp = evt->xfer_ptr;
 
-	while (ctx->ring.rp_local != rp) {
+	while (ctx->ring.rp_local != rp)
 		ring_rp_local_inc(&ctx->ring);
-		ctx->stats.completed++;
-	}
 
 	/* the element at RP is also processed */
 	ring_rp_local_inc(&ctx->ring);
-	ctx->stats.completed++;
 
 	ctx->ring.rp = ctx->ring.rp_local;
 
@@ -345,7 +339,6 @@ static void gsi_process_evt_re(struct gsi_evt_ctx *ctx,
 
 	/* recycle this element */
 	ring_wp_local_inc(&ctx->ring);
-	ctx->stats.completed++;
 }
 
 static void gsi_ring_evt_doorbell(struct gsi_evt_ctx *ctx)
@@ -1555,8 +1548,6 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 		goto out_unlock;
 	}
 
-	ctx->stats.queued += num_xfers;
-
 	/* ensure TRE is set before ringing doorbell */
 	wmb();
 
@@ -1607,13 +1598,11 @@ gsi_poll_channel(unsigned long chan_id, struct gsi_chan_xfer_notify *notify)
 
 	if (evtr->ring.rp == evtr->ring.rp_local) {
 		spin_unlock_irqrestore(&evtr->ring.slock, flags);
-		ctx->stats.poll_empty++;
 		return -ENOENT;
 	}
 
 	gsi_process_evt_re(evtr, notify, false);
 	spin_unlock_irqrestore(&evtr->ring.slock, flags);
-	ctx->stats.poll_ok++;
 
 	return 0;
 }
@@ -1641,14 +1630,10 @@ int gsi_config_channel_mode(unsigned long chan_id, enum gsi_chan_mode mode)
 	}
 
 	spin_lock_irqsave(&gsi_ctx->slock, flags);
-	if (curr == GSI_CHAN_MODE_CALLBACK) {
+	if (curr == GSI_CHAN_MODE_CALLBACK)
 		gsi_irq_control_event(gsi_ctx->ee, ctx->evtr->id, false);
-		ctx->stats.callback_to_poll++;
-	} else {
-		/* ipa_assert(curr == GSI_CHAN_MODE_POLL); */
+	else /* ipa_assert(curr == GSI_CHAN_MODE_POLL); */
 		gsi_irq_control_event(gsi_ctx->ee, ctx->evtr->id, true);
-		ctx->stats.poll_to_callback++;
-	}
 	atomic_set(&ctx->poll_mode, mode);
 	spin_unlock_irqrestore(&gsi_ctx->slock, flags);
 
