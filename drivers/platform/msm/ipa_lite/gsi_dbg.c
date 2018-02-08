@@ -23,103 +23,6 @@
 
 static char dbg_buff[4096];
 
-static ssize_t gsi_dump_evt(struct file *file,
-		const char __user *buf, size_t count, loff_t *ppos)
-{
-	u32 arg1;
-	u32 arg2;
-	unsigned long missing;
-	char *sptr, *token;
-	uint32_t val;
-	struct gsi_evt_ctx *ctx;
-	u32 i;
-
-	if (sizeof(dbg_buff) < count + 1)
-		return -EFAULT;
-
-	missing = copy_from_user(dbg_buff, buf, count);
-	if (missing)
-		return -EFAULT;
-
-	dbg_buff[count] = '\0';
-
-	sptr = dbg_buff;
-
-	token = strsep(&sptr, " ");
-	if (!token)
-		return -EINVAL;
-	if (kstrtou32(token, 0, &arg1))
-		return -EINVAL;
-
-	token = strsep(&sptr, " ");
-	if (!token)
-		return -EINVAL;
-	if (kstrtou32(token, 0, &arg2))
-		return -EINVAL;
-
-	pr_debug("arg1=%u arg2=%u\n", arg1, arg2);
-
-	if (arg1 >= gsi_ctx->max_ev) {
-		pr_err("invalid evt ring id %u\n", arg1);
-		return -EFAULT;
-	}
-
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_0_OFFS(arg1, gsi_ctx->ee));
-	pr_err("EV%2d CTX0  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_1_OFFS(arg1, gsi_ctx->ee));
-	pr_err("EV%2d CTX1  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_2_OFFS(arg1, gsi_ctx->ee));
-	pr_err("EV%2d CTX2  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_3_OFFS(arg1, gsi_ctx->ee));
-	pr_err("EV%2d CTX3  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(arg1, gsi_ctx->ee));
-	pr_err("EV%2d CTX4  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_5_OFFS(arg1, gsi_ctx->ee));
-	pr_err("EV%2d CTX5  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_6_OFFS(arg1, gsi_ctx->ee));
-	pr_err("EV%2d CTX6  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_7_OFFS(arg1, gsi_ctx->ee));
-	pr_err("EV%2d CTX7  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_8_OFFS(arg1, gsi_ctx->ee));
-	pr_err("EV%2d CTX8  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_9_OFFS(arg1, gsi_ctx->ee));
-	pr_err("EV%2d CTX9  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_10_OFFS(arg1, gsi_ctx->ee));
-	pr_err("EV%2d CTX10 0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_11_OFFS(arg1, gsi_ctx->ee));
-	pr_err("EV%2d CTX11 0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_12_OFFS(arg1, gsi_ctx->ee));
-	pr_err("EV%2d CTX12 0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_13_OFFS(arg1, gsi_ctx->ee));
-	pr_err("EV%2d CTX13 0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_SCRATCH_0_OFFS(arg1, gsi_ctx->ee));
-	pr_err("EV%2d SCR0  0x%x\n", arg1, val);
-	val = gsi_readl(GSI_EE_n_EV_CH_k_SCRATCH_1_OFFS(arg1, gsi_ctx->ee));
-	pr_err("EV%2d SCR1  0x%x\n", arg1, val);
-
-	if (arg2) {
-		ctx = &gsi_ctx->evtr[arg1];
-
-		if (ctx->mem.base) {
-			for (i = 0; i < ctx->mem.size / 16; i++)
-				pr_err("EV%2d (0x%08llx) %08x %08x %08x %08x\n",
-				arg1, ctx->mem.phys_base + i * 16,
-				*(u32 *)((u8 *)ctx->mem.base +
-					i * 16 + 0),
-				*(u32 *)((u8 *)ctx->mem.base +
-					i * 16 + 4),
-				*(u32 *)((u8 *)ctx->mem.base +
-					i * 16 + 8),
-				*(u32 *)((u8 *)ctx->mem.base +
-					i * 16 + 12));
-		} else {
-			pr_err("No VA supplied for event ring id %u\n", arg1);
-		}
-	}
-
-	return count;
-}
-
 static ssize_t gsi_dump_ch(struct file *file,
 		const char __user *buf, size_t count, loff_t *ppos)
 {
@@ -463,10 +366,6 @@ error:
 	return -EFAULT;
 }
 
-const struct file_operations gsi_ev_dump_ops = {
-	.write = gsi_dump_evt,
-};
-
 const struct file_operations gsi_ch_dump_ops = {
 	.write = gsi_dump_ch,
 };
@@ -502,11 +401,6 @@ void gsi_debugfs_init(void)
 
 	gsi_dir = debugfs_create_dir("gsi", NULL);
 	if (IS_ERR(gsi_dir))
-		goto fail;
-
-	dfile = debugfs_create_file("ev_dump", write_only_mode,
-			gsi_dir, NULL, &gsi_ev_dump_ops);
-	if (IS_ERR_OR_NULL(dfile))
 		goto fail;
 
 	dfile = debugfs_create_file("ch_dump", write_only_mode,
