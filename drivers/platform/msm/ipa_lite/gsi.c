@@ -291,10 +291,8 @@ static u16 ring_wp_local_index(struct gsi_ring_ctx *ctx)
 
 static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt, bool callback)
 {
-	struct gsi_chan_xfer_notify notify = { 0 };
 	struct gsi_chan_ctx *ctx;
 	u32 chan_id = evt->chid;
-	u16 rp_idx;
 
 	if (WARN_ON(chan_id >= gsi_ctx->max_ch)) {
 		ipa_err("unexpected chan_id %u\n", chan_id);
@@ -305,17 +303,14 @@ static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt, bool callback)
 	while (ctx->ring.rp_local != evt->xfer_ptr)
 		ring_rp_local_inc(&ctx->ring);
 
-	/*
-	 * The event tells us which channel ring element has
-	 * completed.  Get its index for the notify
-	 */
-	rp_idx = ring_rp_local_index(&ctx->ring);
-
-	notify.xfer_user_data = ctx->user_data[rp_idx];
-	notify.chan_user_data = ctx->props.chan_user_data;
-	notify.evt_id = evt->code;
-	notify.bytes_xfered = evt->len;
 	if (callback) {
+		struct gsi_chan_xfer_notify notify = { 0 };
+		u16 rp_idx = ring_rp_local_index(&ctx->ring);
+
+		notify.xfer_user_data = ctx->user_data[rp_idx];
+		notify.chan_user_data = ctx->props.chan_user_data;
+		notify.evt_id = evt->code;
+		notify.bytes_xfered = evt->len;
 		if (WARN_ON(atomic_read(&ctx->poll_mode)))
 			ipa_err("calling client callback in polling mode\n");
 
