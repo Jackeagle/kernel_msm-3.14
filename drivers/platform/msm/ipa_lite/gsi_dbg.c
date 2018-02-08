@@ -23,11 +23,6 @@
 
 static char dbg_buff[4096];
 
-static void gsi_wq_print_dp_stats(struct work_struct *work);
-static DECLARE_DELAYED_WORK(gsi_print_dp_stats_work, gsi_wq_print_dp_stats);
-static void gsi_wq_update_dp_stats(struct work_struct *work);
-static DECLARE_DELAYED_WORK(gsi_update_dp_stats_work, gsi_wq_update_dp_stats);
-
 static ssize_t gsi_dump_evt(struct file *file,
 		const char __user *buf, size_t count, loff_t *ppos)
 {
@@ -366,85 +361,6 @@ error:
 	return -EFAULT;
 }
 
-static int gsi_dbg_create_stats_wq(void)
-{
-	gsi_ctx->dp_stat_wq =
-		create_singlethread_workqueue("gsi_stat");
-	if (!gsi_ctx->dp_stat_wq) {
-		pr_err("failed create workqueue\n");
-		return -ENOMEM;
-	}
-
-	return 0;
-}
-
-static void gsi_dbg_destroy_stats_wq(void)
-{
-	cancel_delayed_work_sync(&gsi_update_dp_stats_work);
-	cancel_delayed_work_sync(&gsi_print_dp_stats_work);
-	flush_workqueue(gsi_ctx->dp_stat_wq);
-	destroy_workqueue(gsi_ctx->dp_stat_wq);
-	gsi_ctx->dp_stat_wq = NULL;
-}
-
-static ssize_t gsi_enable_dp_stats(struct file *file,
-	const char __user *buf, size_t count, loff_t *ppos)
-{
-	int ch_id;
-	bool enable;
-	int ret;
-
-	if (sizeof(dbg_buff) < count + 1)
-		goto error;
-
-	if (copy_from_user(dbg_buff, buf, count))
-		goto error;
-
-	dbg_buff[count] = '\0';
-
-	if (dbg_buff[0] != '+' && dbg_buff[0] != '-')
-		goto error;
-
-	enable = (dbg_buff[0] == '+');
-
-	if (kstrtos32(dbg_buff + 1, 0, &ch_id))
-		goto error;
-
-	if (ch_id < 0 || ch_id >= gsi_ctx->max_ch ||
-	    !gsi_ctx->chan[ch_id].allocated) {
-		goto error;
-	}
-
-	if (gsi_ctx->chan[ch_id].enable_dp_stats == enable) {
-		pr_err("ch_%d: already enabled/disabled\n", ch_id);
-		return -EFAULT;
-	}
-	gsi_ctx->chan[ch_id].enable_dp_stats = enable;
-
-	if (enable)
-		gsi_ctx->num_ch_dp_stats++;
-	else
-		gsi_ctx->num_ch_dp_stats--;
-
-	if (enable) {
-		if (gsi_ctx->num_ch_dp_stats == 1) {
-			ret = gsi_dbg_create_stats_wq();
-			if (ret)
-				return ret;
-		}
-		cancel_delayed_work_sync(&gsi_update_dp_stats_work);
-		queue_delayed_work(gsi_ctx->dp_stat_wq,
-			&gsi_update_dp_stats_work, msecs_to_jiffies(10));
-	} else if (!enable && gsi_ctx->num_ch_dp_stats == 0) {
-		gsi_dbg_destroy_stats_wq();
-	}
-
-	return count;
-error:
-	pr_err("Usage: echo [+-]ch_id > enable_dp_stats\n");
-	return -EFAULT;
-}
-
 static ssize_t gsi_set_max_elem_dp_stats(struct file *file,
 		const char __user *buf, size_t count, loff_t *ppos)
 {
@@ -509,63 +425,6 @@ error:
 	return -EFAULT;
 }
 
-static void gsi_wq_print_dp_stats(struct work_struct *work)
-{
-	int ch_id;
-
-	for (ch_id = 0; ch_id < gsi_ctx->max_ch; ch_id++) {
-		if (gsi_ctx->chan[ch_id].print_dp_stats)
-			gsi_dump_ch_stats(&gsi_ctx->chan[ch_id]);
-	}
-
-	queue_delayed_work(gsi_ctx->dp_stat_wq, &gsi_print_dp_stats_work,
-		msecs_to_jiffies(1000));
-}
-
-static void gsi_dbg_update_ch_dp_stats(struct gsi_chan_ctx *ctx)
-{
-	uint16_t start_hw;
-	uint16_t end_hw;
-	uint64_t rp_hw;
-	uint64_t wp_hw;
-	int ee = gsi_ctx->ee;
-	uint16_t used_hw;
-
-	rp_hw = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_4_OFFS(ctx->props.ch_id, ee));
-	rp_hw |= ((uint64_t)gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_5_OFFS(ctx->props.ch_id, ee)))
-		<< 32;
-
-	wp_hw = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_6_OFFS(ctx->props.ch_id, ee));
-	wp_hw |= ((uint64_t)gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_7_OFFS(ctx->props.ch_id, ee)))
-		<< 32;
-
-	start_hw = gsi_find_idx_from_addr(&ctx->ring, rp_hw);
-	end_hw = gsi_find_idx_from_addr(&ctx->ring, wp_hw);
-
-	if (end_hw >= start_hw)
-		used_hw = end_hw - start_hw;
-	else
-		used_hw = ctx->ring.max_num_elem + 1 - (start_hw - end_hw);
-
-	pr_debug("ch %d used %d\n", ctx->props.ch_id, used_hw);
-	gsi_update_chan_dp_stats(ctx, used_hw);
-}
-
-static void gsi_wq_update_dp_stats(struct work_struct *work)
-{
-	int ch_id;
-
-	for (ch_id = 0; ch_id < gsi_ctx->max_ch; ch_id++) {
-		if (gsi_ctx->chan[ch_id].allocated &&
-		    gsi_ctx->chan[ch_id].enable_dp_stats)
-			gsi_dbg_update_ch_dp_stats(&gsi_ctx->chan[ch_id]);
-	}
-
-	queue_delayed_work(gsi_ctx->dp_stat_wq, &gsi_update_dp_stats_work,
-		msecs_to_jiffies(10));
-}
-
-
 static ssize_t gsi_rst_stats(struct file *file,
 		const char __user *buf, size_t count, loff_t *ppos)
 {
@@ -604,64 +463,6 @@ error:
 	return -EFAULT;
 }
 
-static ssize_t gsi_print_dp_stats(struct file *file,
-	const char __user *buf, size_t count, loff_t *ppos)
-{
-	int ch_id;
-	bool enable;
-	int ret;
-
-	if (sizeof(dbg_buff) < count + 1)
-		goto error;
-
-	if (copy_from_user(dbg_buff, buf, count))
-		goto error;
-
-	dbg_buff[count] = '\0';
-
-	if (dbg_buff[0] != '+' && dbg_buff[0] != '-')
-		goto error;
-
-	enable = (dbg_buff[0] == '+');
-
-	if (kstrtos32(dbg_buff + 1, 0, &ch_id))
-		goto error;
-
-	if (ch_id < 0 || ch_id >= gsi_ctx->max_ch ||
-	    !gsi_ctx->chan[ch_id].allocated) {
-		goto error;
-	}
-
-	if (gsi_ctx->chan[ch_id].print_dp_stats == enable) {
-		pr_err("ch_%d: already enabled/disabled\n", ch_id);
-		return -EFAULT;
-	}
-	gsi_ctx->chan[ch_id].print_dp_stats = enable;
-
-	if (enable)
-		gsi_ctx->num_ch_dp_stats++;
-	else
-		gsi_ctx->num_ch_dp_stats--;
-
-	if (enable) {
-		if (gsi_ctx->num_ch_dp_stats == 1) {
-			ret = gsi_dbg_create_stats_wq();
-			if (ret)
-				return ret;
-		}
-		cancel_delayed_work_sync(&gsi_print_dp_stats_work);
-		queue_delayed_work(gsi_ctx->dp_stat_wq,
-			&gsi_print_dp_stats_work, msecs_to_jiffies(10));
-	} else if (!enable && gsi_ctx->num_ch_dp_stats == 0) {
-		gsi_dbg_destroy_stats_wq();
-	}
-
-	return count;
-error:
-	pr_err("Usage: echo [+-]ch_id > print_dp_stats\n");
-	return -EFAULT;
-}
-
 const struct file_operations gsi_ev_dump_ops = {
 	.write = gsi_dump_evt,
 };
@@ -682,20 +483,12 @@ const struct file_operations gsi_stats_ops = {
 	.write = gsi_dump_stats,
 };
 
-const struct file_operations gsi_enable_dp_stats_ops = {
-	.write = gsi_enable_dp_stats,
-};
-
 const struct file_operations gsi_max_elem_dp_stats_ops = {
 	.write = gsi_set_max_elem_dp_stats,
 };
 
 const struct file_operations gsi_rst_stats_ops = {
 	.write = gsi_rst_stats,
-};
-
-const struct file_operations gsi_print_dp_stats_ops = {
-	.write = gsi_print_dp_stats,
 };
 
 void gsi_debugfs_init(void)
@@ -736,12 +529,6 @@ void gsi_debugfs_init(void)
 	if (IS_ERR_OR_NULL(dfile))
 		goto fail;
 
-	dfile = debugfs_create_file("enable_dp_stats",
-			write_only_mode, gsi_dir,
-			NULL, &gsi_enable_dp_stats_ops);
-	if (IS_ERR_OR_NULL(dfile))
-		goto fail;
-
 	dfile = debugfs_create_file("max_elem_dp_stats", write_only_mode,
 		gsi_dir, NULL, &gsi_max_elem_dp_stats_ops);
 	if (IS_ERR_OR_NULL(dfile))
@@ -749,11 +536,6 @@ void gsi_debugfs_init(void)
 
 	dfile = debugfs_create_file("rst_stats", write_only_mode,
 		gsi_dir, NULL, &gsi_rst_stats_ops);
-	if (IS_ERR_OR_NULL(dfile))
-		goto fail;
-
-	dfile = debugfs_create_file("print_dp_stats",
-		write_only_mode, gsi_dir, NULL, &gsi_print_dp_stats_ops);
 	if (IS_ERR_OR_NULL(dfile))
 		goto fail;
 

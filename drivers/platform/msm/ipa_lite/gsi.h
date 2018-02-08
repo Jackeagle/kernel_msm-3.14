@@ -452,8 +452,6 @@ struct gsi_chan_ctx {
 	atomic_t poll_mode;
 	union __packed gsi_channel_scratch scratch;
 	struct gsi_chan_stats stats;
-	bool enable_dp_stats;
-	bool print_dp_stats;
 };
 
 struct gsi_evt_stats {
@@ -521,8 +519,6 @@ struct gsi_ctx {
 	atomic_t num_chan;
 	atomic_t num_evt_ring;
 	struct gsi_ee_scratch scratch;
-	int num_ch_dp_stats;
-	struct workqueue_struct *dp_stat_wq;
 	u32 max_ch;
 	u32 max_ev;
 	struct completion gen_ee_cmd_compl;
