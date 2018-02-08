@@ -72,7 +72,7 @@ static void ipa3_replenish_rx_cache(struct ipa3_sys_context *sys);
 static void ipa3_replenish_rx_work_func(struct work_struct *work);
 static void ipa3_fast_replenish_rx_cache(struct ipa3_sys_context *sys);
 static void ipa3_wq_handle_rx(struct work_struct *work);
-static void ipa3_rx_common(struct ipa3_sys_context *sys, u32 size);
+static void ipa3_rx_common(struct ipa3_sys_context *sys, u16 size);
 static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 		struct ipa3_sys_context *sys);
 static void ipa3_cleanup_rx(struct ipa3_sys_context *sys);
@@ -261,7 +261,7 @@ int ipa3_rx_poll(u32 clnt_hdl, int weight)
 		if (ret < 0)
 			break;
 
-		ipa3_rx_common(ep->sys, (u32)ret);
+		ipa3_rx_common(ep->sys, (u16)ret);
 		cnt += IPA_WAN_AGGR_PKT_CNT;
 		total_cnt++;
 
@@ -705,7 +705,7 @@ static int ipa3_handle_rx_core(struct ipa3_sys_context *sys)
 		if (ret < 0)
 			break;
 
-		ipa3_rx_common(sys, (u32)ret);
+		ipa3_rx_common(sys, (u16)ret);
 
 		++cnt;
 	}
@@ -2265,7 +2265,7 @@ static void ipa3_recycle_rx_wrapper(struct ipa3_rx_pkt_wrapper *rx_pkt)
 	spin_unlock_bh(&rx_pkt->sys->spinlock);
 }
 
-static void ipa3_rx_common(struct ipa3_sys_context *sys, u32 size)
+static void ipa3_rx_common(struct ipa3_sys_context *sys, u16 size)
 {
 	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct ipa3_rx_pkt_wrapper *rx_pkt_expected;
@@ -2284,7 +2284,7 @@ static void ipa3_rx_common(struct ipa3_sys_context *sys, u32 size)
 	spin_unlock_bh(&sys->spinlock);
 
 	if (size)
-		rx_pkt_expected->len = size;
+		rx_pkt_expected->len = (u32)size;
 	rx_skb = rx_pkt_expected->data.skb;
 	dma_unmap_single(dev, rx_pkt_expected->data.dma_addr,
 			sys->rx_buff_sz, DMA_FROM_DEVICE);
