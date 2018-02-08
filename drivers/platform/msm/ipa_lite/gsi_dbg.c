@@ -23,37 +23,6 @@
 
 static char dbg_buff[4096];
 
-static ssize_t gsi_dump_map(struct file *file,
-		const char __user *buf, size_t count, loff_t *ppos)
-{
-	struct gsi_chan_ctx *ctx;
-	uint32_t val1;
-	uint32_t val2;
-	int i;
-
-	pr_err("EVT bitmap 0x%lx\n", gsi_ctx->evt_bmap);
-	for (i = 0; i < gsi_ctx->max_ch; i++) {
-		ctx = &gsi_ctx->chan[i];
-
-		if (ctx->allocated) {
-			pr_err("VIRT CH%2d -> VIRT EV%2d\n", ctx->props.ch_id,
-				ctx->evtr->id);
-			val1 = gsi_readl(GSI_DEBUG_EE_n_CH_k_VP_TABLE_OFFS(i,
-					gsi_ctx->ee));
-			pr_err("VIRT CH%2d -> PHYS CH%2d\n", ctx->props.ch_id,
-				val1 & PHY_CH_BMSK);
-			val2 = gsi_readl(GSI_DEBUG_EE_n_EV_k_VP_TABLE_OFFS(
-				ctx->evtr->id, gsi_ctx->ee));
-			pr_err("VRT EV%2d -> PHYS EV%2d\n",
-					ctx->evtr->id,
-			val2 & PHY_CH_BMSK);
-			pr_err("\n");
-		}
-	}
-
-	return count;
-}
-
 static void gsi_dump_ch_stats(struct gsi_chan_ctx *ctx)
 {
 	if (!ctx->allocated)
@@ -219,10 +188,6 @@ error:
 	return -EFAULT;
 }
 
-const struct file_operations gsi_map_ops = {
-	.write = gsi_dump_map,
-};
-
 const struct file_operations gsi_stats_ops = {
 	.write = gsi_dump_stats,
 };
@@ -246,11 +211,6 @@ void gsi_debugfs_init(void)
 
 	gsi_dir = debugfs_create_dir("gsi", NULL);
 	if (IS_ERR(gsi_dir))
-		goto fail;
-
-	dfile = debugfs_create_file("map", read_only_mode, gsi_dir,
-			NULL, &gsi_map_ops);
-	if (IS_ERR_OR_NULL(dfile))
 		goto fail;
 
 	dfile = debugfs_create_file("stats", write_only_mode,
