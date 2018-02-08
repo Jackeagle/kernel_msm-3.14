@@ -289,9 +289,9 @@ static u16 ring_wp_local_index(struct gsi_ring_ctx *ctx)
 	return (u16)(ctx->wp_local - ctx->mem.phys_base) / ctx->elem_sz;
 }
 
-static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt,
-		struct gsi_chan_xfer_notify *notify, bool callback)
+static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt, bool callback)
 {
+	struct gsi_chan_xfer_notify notify = { 0 };
 	struct gsi_chan_ctx *ctx;
 	u32 chan_id = evt->chid;
 	u16 rp_idx;
@@ -311,16 +311,16 @@ static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 	 */
 	rp_idx = ring_rp_local_index(&ctx->ring);
 
-	notify->xfer_user_data = ctx->user_data[rp_idx];
-	notify->chan_user_data = ctx->props.chan_user_data;
-	notify->evt_id = evt->code;
-	notify->bytes_xfered = evt->len;
+	notify.xfer_user_data = ctx->user_data[rp_idx];
+	notify.chan_user_data = ctx->props.chan_user_data;
+	notify.evt_id = evt->code;
+	notify.bytes_xfered = evt->len;
 	if (callback) {
 		if (WARN_ON(atomic_read(&ctx->poll_mode)))
 			ipa_err("calling client callback in polling mode\n");
 
 		if (ctx->props.xfer_cb)
-			ctx->props.xfer_cb(notify);
+			ctx->props.xfer_cb(&notify);
 	}
 
 	/* Record that we've processed this channel ring element. */
@@ -334,11 +334,10 @@ static u16 gsi_process_evt_re(struct gsi_evt_ctx *ctx, bool callback)
 {
 	struct gsi_xfer_compl_evt *evt;
 	u16 idx = ring_rp_local_index(&ctx->ring);
-	struct gsi_chan_xfer_notify notify = { 0 };
 	u16 size;
 
 	evt = ctx->ring.mem.base + idx * ctx->ring.elem_sz;
-	size = gsi_process_chan(evt, &notify, callback);
+	size = gsi_process_chan(evt, callback);
 	ring_rp_local_inc(&ctx->ring);
 
 	/* recycle this element */
