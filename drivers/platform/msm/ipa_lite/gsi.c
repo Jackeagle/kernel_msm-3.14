@@ -279,11 +279,14 @@ static void ring_rp_local_inc(struct gsi_ring_ctx *ctx)
 		ctx->rp_local = ctx->mem.phys_base;
 }
 
-u16 gsi_find_idx_from_addr(struct gsi_ring_ctx *ctx, u64 addr)
+static u16 ring_rp_local_index(struct gsi_ring_ctx *ctx)
 {
-	BUG_ON(addr < ctx->mem.phys_base || addr >= ctx->end);
+	return (u16)(ctx->rp_local - ctx->mem.phys_base) / ctx->elem_sz;
+}
 
-	return (u16)(addr - ctx->mem.phys_base) / ctx->elem_sz;
+static u16 ring_wp_local_index(struct gsi_ring_ctx *ctx)
+{
+	return (u16)(ctx->wp_local - ctx->mem.phys_base) / ctx->elem_sz;
 }
 
 static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
@@ -292,7 +295,6 @@ static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 	struct gsi_chan_ctx *ctx;
 	u32 chan_id = evt->chid;
 	u16 rp_idx;
-	u64 rp;
 
 	if (WARN_ON(chan_id >= gsi_ctx->max_ch)) {
 		ipa_err("unexpected chan_id %u\n", chan_id);
@@ -300,16 +302,14 @@ static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 	}
 
 	ctx = &gsi_ctx->chan[chan_id];
-	rp = evt->xfer_ptr;
-
-	while (ctx->ring.rp_local != rp)
+	while (ctx->ring.rp_local != evt->xfer_ptr)
 		ring_rp_local_inc(&ctx->ring);
 
 	/*
 	 * The event tells us which channel ring element has
 	 * completed.  Get its index for the notify
 	 */
-	rp_idx = gsi_find_idx_from_addr(&ctx->ring, ctx->ring.rp_local);
+	rp_idx = ring_rp_local_index(&ctx->ring);
 
 	notify->xfer_user_data = ctx->user_data[rp_idx];
 	notify->chan_user_data = ctx->props.chan_user_data;
@@ -334,7 +334,7 @@ static void gsi_process_evt_re(struct gsi_evt_ctx *ctx,
 	struct gsi_xfer_compl_evt *evt;
 	u16 idx;
 
-	idx = gsi_find_idx_from_addr(&ctx->ring, ctx->ring.rp_local);
+	idx = ring_rp_local_index(&ctx->ring);
 
 	evt = ctx->ring.mem.base + idx * ctx->ring.elem_sz;
 	gsi_process_chan(evt, notify, callback);
@@ -1441,8 +1441,8 @@ static u16 __gsi_query_channel_free_re(struct gsi_chan_ctx *ctx)
 	u16 end;
 	u16 used;
 
-	start = gsi_find_idx_from_addr(&ctx->ring, ctx->ring.rp_local);
-	end = gsi_find_idx_from_addr(&ctx->ring, ctx->ring.wp_local);
+	start = ring_rp_local_index(&ctx->ring);
+	end = ring_wp_local_index(&ctx->ring);
 
 	if (end >= start)
 		used = end - start;
@@ -1534,7 +1534,7 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 		tre.ieob = (xfer[i].flags & GSI_XFER_FLAG_EOB) ? 1 : 0;
 		tre.chain = (xfer[i].flags & GSI_XFER_FLAG_CHAIN) ? 1 : 0;
 
-		idx = gsi_find_idx_from_addr(&ctx->ring, ctx->ring.wp_local);
+		idx = ring_wp_local_index(&ctx->ring);
 		tre_ptr = ctx->ring.mem.base + idx * ctx->ring.elem_sz;
 
 		/* write the TRE to ring */
