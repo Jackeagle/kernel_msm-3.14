@@ -268,14 +268,14 @@ static void gsi_handle_glob_ee(u32 ee)
 	gsi_writel(val, GSI_EE_n_CNTXT_GLOB_IRQ_CLR_OFFS(ee));
 }
 
-static void gsi_incr_ring_wp(struct gsi_ring_ctx *ctx)
+static void ring_wp_local_inc(struct gsi_ring_ctx *ctx)
 {
 	ctx->wp_local += ctx->elem_sz;
 	if (ctx->wp_local == ctx->end)
 		ctx->wp_local = ctx->mem.phys_base;
 }
 
-static void gsi_incr_ring_rp(struct gsi_ring_ctx *ctx)
+static void ring_rp_local_inc(struct gsi_ring_ctx *ctx)
 {
 	ctx->rp_local += ctx->elem_sz;
 	if (ctx->rp_local == ctx->end)
@@ -306,12 +306,12 @@ static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 	rp = evt->xfer_ptr;
 
 	while (ctx->ring.rp_local != rp) {
-		gsi_incr_ring_rp(&ctx->ring);
+		ring_rp_local_inc(&ctx->ring);
 		ctx->stats.completed++;
 	}
 
 	/* the element at RP is also processed */
-	gsi_incr_ring_rp(&ctx->ring);
+	ring_rp_local_inc(&ctx->ring);
 	ctx->stats.completed++;
 
 	ctx->ring.rp = ctx->ring.rp_local;
@@ -341,10 +341,10 @@ static void gsi_process_evt_re(struct gsi_evt_ctx *ctx,
 
 	evt = ctx->ring.mem.base + idx * ctx->ring.elem_sz;
 	gsi_process_chan(evt, notify, callback);
-	gsi_incr_ring_rp(&ctx->ring);
+	ring_rp_local_inc(&ctx->ring);
 
 	/* recycle this element */
-	gsi_incr_ring_wp(&ctx->ring);
+	ring_wp_local_inc(&ctx->ring);
 	ctx->stats.completed++;
 }
 
@@ -1568,7 +1568,7 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 		/* write the TRE to ring */
 		*tre_ptr = tre;
 		ctx->user_data[idx] = xfer[i].xfer_user_data;
-		gsi_incr_ring_wp(&ctx->ring);
+		ring_wp_local_inc(&ctx->ring);
 	}
 
 	if (i != num_xfers) {
