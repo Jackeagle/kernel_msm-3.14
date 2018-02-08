@@ -289,7 +289,7 @@ static u16 ring_wp_local_index(struct gsi_ring_ctx *ctx)
 	return (u16)(ctx->wp_local - ctx->mem.phys_base) / ctx->elem_sz;
 }
 
-static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
+static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 		struct gsi_chan_xfer_notify *notify, bool callback)
 {
 	struct gsi_chan_ctx *ctx;
@@ -298,7 +298,7 @@ static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 
 	if (WARN_ON(chan_id >= gsi_ctx->max_ch)) {
 		ipa_err("unexpected chan_id %u\n", chan_id);
-		return;
+		return 0;
 	}
 
 	ctx = &gsi_ctx->chan[chan_id];
@@ -326,6 +326,8 @@ static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 	/* Record that we've processed this channel ring element. */
 	ring_rp_local_inc(&ctx->ring);
 	ctx->ring.rp = ctx->ring.rp_local;
+
+	return evt->len;
 }
 
 static u16 gsi_process_evt_re(struct gsi_evt_ctx *ctx, bool callback)
@@ -333,15 +335,16 @@ static u16 gsi_process_evt_re(struct gsi_evt_ctx *ctx, bool callback)
 	struct gsi_xfer_compl_evt *evt;
 	u16 idx = ring_rp_local_index(&ctx->ring);
 	struct gsi_chan_xfer_notify notify = { 0 };
+	u16 size;
 
 	evt = ctx->ring.mem.base + idx * ctx->ring.elem_sz;
-	gsi_process_chan(evt, &notify, callback);
+	size = gsi_process_chan(evt, &notify, callback);
 	ring_rp_local_inc(&ctx->ring);
 
 	/* recycle this element */
 	ring_wp_local_inc(&ctx->ring);
 
-	return notify.bytes_xfered;
+	return size;
 }
 
 static void gsi_ring_evt_doorbell(struct gsi_evt_ctx *ctx)
