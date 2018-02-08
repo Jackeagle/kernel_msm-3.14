@@ -305,11 +305,10 @@ static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 	while (ctx->ring.rp_local != rp)
 		ring_rp_local_inc(&ctx->ring);
 
-	/* the element at RP is also processed */
-	ring_rp_local_inc(&ctx->ring);
-
-	ctx->ring.rp = ctx->ring.rp_local;
-
+	/*
+	 * The event tells us which channel ring element has
+	 * completed.  Get its index for the notify
+	 */
 	rp_idx = gsi_find_idx_from_addr(&ctx->ring, rp);
 
 	notify->xfer_user_data = ctx->user_data[rp_idx];
@@ -323,6 +322,10 @@ static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 		if (ctx->props.xfer_cb)
 			ctx->props.xfer_cb(notify);
 	}
+
+	/* Record that we've processed this channel ring element. */
+	ring_rp_local_inc(&ctx->ring);
+	ctx->ring.rp = ctx->ring.rp_local;
 }
 
 static void gsi_process_evt_re(struct gsi_evt_ctx *ctx,
