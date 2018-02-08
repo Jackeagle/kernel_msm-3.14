@@ -23,56 +23,6 @@
 
 static char dbg_buff[4096];
 
-static ssize_t gsi_dump_ee(struct file *file,
-		const char __user *buf, size_t count, loff_t *ppos)
-{
-	uint32_t val;
-
-	val = gsi_readl(GSI_MANAGER_EE_QOS_n_OFFS(gsi_ctx->ee));
-	pr_err("EE%2d QOS 0x%x\n", gsi_ctx->ee, val);
-	val = gsi_readl(GSI_EE_n_GSI_STATUS_OFFS(gsi_ctx->ee));
-	pr_err("EE%2d STATUS 0x%x\n", gsi_ctx->ee, val);
-
-	/* SDM845 uses GSI hardware version 1.3.0 */
-	val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_0_OFFS(gsi_ctx->ee));
-	pr_err("EE%2d HW_PARAM_0 0x%x\n", gsi_ctx->ee, val);
-	val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_1_OFFS(gsi_ctx->ee));
-	pr_err("EE%2d HW_PARAM_1 0x%x\n", gsi_ctx->ee, val);
-	val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->ee));
-	pr_err("EE%2d HW_PARAM_2 0x%x\n", gsi_ctx->ee, val);
-
-	val = gsi_readl(GSI_EE_n_GSI_SW_VERSION_OFFS(gsi_ctx->ee));
-	pr_err("EE%2d SW_VERSION 0x%x\n", gsi_ctx->ee, val);
-	val = gsi_readl(GSI_EE_n_GSI_MCS_CODE_VER_OFFS(gsi_ctx->ee));
-	pr_err("EE%2d MCS_CODE_VER 0x%x\n", gsi_ctx->ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_TYPE_IRQ_MSK_OFFS(gsi_ctx->ee));
-	pr_err("EE%2d TYPE_IRQ_MSK 0x%x\n", gsi_ctx->ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_SRC_GSI_CH_IRQ_MSK_OFFS(gsi_ctx->ee));
-	pr_err("EE%2d CH_IRQ_MSK 0x%x\n", gsi_ctx->ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_SRC_EV_CH_IRQ_MSK_OFFS(gsi_ctx->ee));
-	pr_err("EE%2d EV_IRQ_MSK 0x%x\n", gsi_ctx->ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(gsi_ctx->ee));
-	pr_err("EE%2d IEOB_IRQ_MSK 0x%x\n", gsi_ctx->ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_GLOB_IRQ_EN_OFFS(gsi_ctx->ee));
-	pr_err("EE%2d GLOB_IRQ_EN 0x%x\n", gsi_ctx->ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_GSI_IRQ_EN_OFFS(gsi_ctx->ee));
-	pr_err("EE%2d GSI_IRQ_EN 0x%x\n", gsi_ctx->ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_INTSET_OFFS(gsi_ctx->ee));
-	pr_err("EE%2d INTSET 0x%x\n", gsi_ctx->ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_MSI_BASE_LSB_OFFS(gsi_ctx->ee));
-	pr_err("EE%2d MSI_BASE_LSB 0x%x\n", gsi_ctx->ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_MSI_BASE_MSB_OFFS(gsi_ctx->ee));
-	pr_err("EE%2d MSI_BASE_MSB 0x%x\n", gsi_ctx->ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_INT_VEC_OFFS(gsi_ctx->ee));
-	pr_err("EE%2d INT_VEC 0x%x\n", gsi_ctx->ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_SCRATCH_0_OFFS(gsi_ctx->ee));
-	pr_err("EE%2d SCR0 0x%x\n", gsi_ctx->ee, val);
-	val = gsi_readl(GSI_EE_n_CNTXT_SCRATCH_1_OFFS(gsi_ctx->ee));
-	pr_err("EE%2d SCR1 0x%x\n", gsi_ctx->ee, val);
-
-	return count;
-}
-
 static ssize_t gsi_dump_map(struct file *file,
 		const char __user *buf, size_t count, loff_t *ppos)
 {
@@ -269,10 +219,6 @@ error:
 	return -EFAULT;
 }
 
-const struct file_operations gsi_ee_dump_ops = {
-	.write = gsi_dump_ee,
-};
-
 const struct file_operations gsi_map_ops = {
 	.write = gsi_dump_map,
 };
@@ -300,11 +246,6 @@ void gsi_debugfs_init(void)
 
 	gsi_dir = debugfs_create_dir("gsi", NULL);
 	if (IS_ERR(gsi_dir))
-		goto fail;
-
-	dfile = debugfs_create_file("ee_dump", read_only_mode,
-			gsi_dir, NULL, &gsi_ee_dump_ops);
-	if (IS_ERR_OR_NULL(dfile))
 		goto fail;
 
 	dfile = debugfs_create_file("map", read_only_mode, gsi_dir,
