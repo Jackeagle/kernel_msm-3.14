@@ -69,8 +69,9 @@ static void gsi_irq_control_all(u32 ee, bool enable)
 	gsi_irq_set(GSI_EE_n_CNTXT_GSI_IRQ_EN_OFFS(ee), val);
 }
 
-static void gsi_handle_chan_ctrl(u32 ee)
+static void gsi_handle_chan_ctrl(void)
 {
+	u32 ee = gsi_ctx->ee;
 	u32 valid_mask = GENMASK(gsi_ctx->max_ch - 1, 0);
 	u32 chan_mask;
 
@@ -98,8 +99,9 @@ static void gsi_handle_chan_ctrl(u32 ee)
 	}
 }
 
-static void gsi_handle_evt_ctrl(u32 ee)
+static void gsi_handle_evt_ctrl(void)
 {
+	u32 ee = gsi_ctx->ee;
 	u32 valid_mask = GENMASK(gsi_ctx->max_ev - 1, 0);
 	u32 evt_mask;
 
@@ -234,8 +236,9 @@ static void gsi_handle_gp_int1(void)
 	complete(&gsi_ctx->gen_ee_cmd_compl);
 }
 
-static void gsi_handle_glob_ee(u32 ee)
+static void gsi_handle_glob_ee(void)
 {
+	u32 ee = gsi_ctx->ee;
 	u32 val;
 
 	val = gsi_readl(GSI_EE_n_CNTXT_GLOB_IRQ_STTS_OFFS(ee));
@@ -390,8 +393,9 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *ctx)
 				gsi_ctx->ee));
 }
 
-static void gsi_handle_ieob(u32 ee)
+static void gsi_handle_ieob(void)
 {
+	u32 ee = gsi_ctx->ee;
 	u32 valid_mask = GENMASK(gsi_ctx->max_ev - 1, 0);
 	u32 evt_mask;
 
@@ -437,8 +441,9 @@ check_again:
 	}
 }
 
-static void gsi_handle_inter_ee_chan_ctrl(u32 ee)
+static void gsi_handle_inter_ee_chan_ctrl(void)
 {
+	u32 ee = gsi_ctx->ee;
 	u32 valid_mask = GENMASK(gsi_ctx->max_ch - 1, 0);
 	u32 chan_mask;
 
@@ -459,8 +464,9 @@ static void gsi_handle_inter_ee_chan_ctrl(u32 ee)
 	}
 }
 
-static void gsi_handle_inter_ee_evt_ctrl(u32 ee)
+static void gsi_handle_inter_ee_evt_ctrl(void)
 {
+	u32 ee = gsi_ctx->ee;
 	u32 valid_mask = GENMASK(gsi_ctx->max_ev - 1, 0);
 	u32 evt_mask;
 
@@ -481,8 +487,9 @@ static void gsi_handle_inter_ee_evt_ctrl(u32 ee)
 	}
 }
 
-static void gsi_handle_general(u32 ee)
+static void gsi_handle_general(void)
 {
+	u32 ee = gsi_ctx->ee;
 	u32 val;
 
 	val = gsi_readl(GSI_EE_n_CNTXT_GSI_IRQ_STTS_OFFS(ee));
@@ -520,25 +527,25 @@ static void gsi_handle_irq(void)
 		ipa_debug_low("type %x\n", type);
 
 		if (type & CH_CTRL_BMSK)
-			gsi_handle_chan_ctrl(ee);
+			gsi_handle_chan_ctrl();
 
 		if (type & EV_CTRL_BMSK)
-			gsi_handle_evt_ctrl(ee);
+			gsi_handle_evt_ctrl();
 
 		if (type & GLOB_EE_BMSK)
-			gsi_handle_glob_ee(ee);
+			gsi_handle_glob_ee();
 
 		if (type & IEOB_BMSK)
-			gsi_handle_ieob(ee);
+			gsi_handle_ieob();
 
 		if (type & INTER_EE_CH_CTRL_BMSK)
-			gsi_handle_inter_ee_chan_ctrl(ee);
+			gsi_handle_inter_ee_chan_ctrl();
 
 		if (type & INTER_EE_EV_CTRL_BMSK)
-			gsi_handle_inter_ee_evt_ctrl(ee);
+			gsi_handle_inter_ee_evt_ctrl();
 
 		if (type & GENERAL_BMSK)
-			gsi_handle_general(ee);
+			gsi_handle_general();
 
 		if (++cnt > GSI_ISR_MAX_ITER)
 			BUG();
