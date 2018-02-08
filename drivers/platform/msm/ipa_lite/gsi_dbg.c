@@ -150,44 +150,6 @@ error:
 	return -EFAULT;
 }
 
-static ssize_t gsi_rst_stats(struct file *file,
-		const char __user *buf, size_t count, loff_t *ppos)
-{
-	int ch_id;
-	int min, max;
-
-	if (sizeof(dbg_buff) < count + 1)
-		goto error;
-
-	if (copy_from_user(dbg_buff, buf, count))
-		goto error;
-
-	dbg_buff[count] = '\0';
-
-	if (kstrtos32(dbg_buff, 0, &ch_id))
-		goto error;
-
-	if (ch_id == -1) {
-		min = 0;
-		max = gsi_ctx->max_ch;
-	} else if (ch_id < 0 || ch_id >= gsi_ctx->max_ch ||
-		   !gsi_ctx->chan[ch_id].allocated) {
-		goto error;
-	} else {
-		min = ch_id;
-		max = ch_id + 1;
-	}
-
-	for (ch_id = min; ch_id < max; ch_id++)
-		memset(&gsi_ctx->chan[ch_id].stats, 0,
-			sizeof(gsi_ctx->chan[ch_id].stats));
-
-	return count;
-error:
-	pr_err("Usage: echo ch_id > rst_stats. Use -1 for all\n");
-	return -EFAULT;
-}
-
 const struct file_operations gsi_stats_ops = {
 	.write = gsi_dump_stats,
 };
@@ -196,15 +158,10 @@ const struct file_operations gsi_max_elem_dp_stats_ops = {
 	.write = gsi_set_max_elem_dp_stats,
 };
 
-const struct file_operations gsi_rst_stats_ops = {
-	.write = gsi_rst_stats,
-};
-
 void gsi_debugfs_init(void)
 {
 	struct dentry *gsi_dir;
 	struct dentry *dfile;
-	const mode_t read_only_mode = S_IRUSR | S_IRGRP | S_IROTH;
 	const mode_t write_only_mode = S_IWUSR | S_IWGRP;
 
 	pr_err("%s - \n", __func__);
@@ -220,11 +177,6 @@ void gsi_debugfs_init(void)
 
 	dfile = debugfs_create_file("max_elem_dp_stats", write_only_mode,
 		gsi_dir, NULL, &gsi_max_elem_dp_stats_ops);
-	if (IS_ERR_OR_NULL(dfile))
-		goto fail;
-
-	dfile = debugfs_create_file("rst_stats", write_only_mode,
-		gsi_dir, NULL, &gsi_rst_stats_ops);
 	if (IS_ERR_OR_NULL(dfile))
 		goto fail;
 
