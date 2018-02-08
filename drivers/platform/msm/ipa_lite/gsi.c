@@ -283,7 +283,7 @@ u16 gsi_find_idx_from_addr(struct gsi_ring_ctx *ctx, u64 addr)
 {
 	BUG_ON(addr < ctx->mem.phys_base || addr >= ctx->end);
 
-	return (u32)(addr - ctx->mem.phys_base) / ctx->elem_sz;
+	return (u16)(addr - ctx->mem.phys_base) / ctx->elem_sz;
 }
 
 static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
@@ -309,7 +309,7 @@ static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 	 * The event tells us which channel ring element has
 	 * completed.  Get its index for the notify
 	 */
-	rp_idx = gsi_find_idx_from_addr(&ctx->ring, rp);
+	rp_idx = gsi_find_idx_from_addr(&ctx->ring, ctx->ring.rp_local);
 
 	notify->xfer_user_data = ctx->user_data[rp_idx];
 	notify->chan_user_data = ctx->props.chan_user_data;
@@ -1437,12 +1437,11 @@ int gsi_dealloc_channel(unsigned long chan_id)
 
 static u16 __gsi_query_channel_free_re(struct gsi_chan_ctx *ctx)
 {
-	u64 rp = ctx->ring.rp_local;
 	u16 start;
 	u16 end;
 	u16 used;
 
-	start = gsi_find_idx_from_addr(&ctx->ring, rp);
+	start = gsi_find_idx_from_addr(&ctx->ring, ctx->ring.rp_local);
 	end = gsi_find_idx_from_addr(&ctx->ring, ctx->ring.wp_local);
 
 	if (end >= start)
