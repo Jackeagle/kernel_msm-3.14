@@ -1745,7 +1745,7 @@ struct gsi_ctx *msm_gsi_init(struct platform_device *pdev)
 
 	gsi_ctx->dev = dev;
 	init_completion(&gsi_ctx->gen_ee_cmd_compl);
-	gsi_debugfs_init();
+
 	pr_err("gsi_probe complete\n");
 
 	return gsi_ctx;

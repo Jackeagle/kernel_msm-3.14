@@ -375,16 +375,6 @@ struct gsi_ring_ctx {
 	uint64_t end;
 };
 
-struct gsi_chan_stats {
-	unsigned long queued;
-	unsigned long completed;
-	unsigned long callback_to_poll;
-	unsigned long poll_to_callback;
-	unsigned long invalid_tre_error;
-	unsigned long poll_ok;
-	unsigned long poll_empty;
-};
-
 /**
  * gsi_gpi_channel_scratch - GPI protocol SW config area of
  * channel scratch
@@ -438,7 +428,6 @@ struct gsi_chan_ctx {
 	bool allocated;
 	atomic_t poll_mode;
 	union __packed gsi_channel_scratch scratch;
-	struct gsi_chan_stats stats;
 };
 
 struct gsi_evt_stats {
