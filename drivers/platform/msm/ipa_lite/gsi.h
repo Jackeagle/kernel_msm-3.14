@@ -764,13 +764,10 @@ int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props);
  *
  * @chan_hdl:  Client handle previously obtained from
  *	       gsi_alloc_channel
- * @notify:    Information about the completed transfer if any
  *
- * @Return gsi_status (GSI_STATUS_POLL_EMPTY is returned if no transfers
- * completed)
+ * @Return number of bytes transferred, or a negative error code
  */
-int gsi_poll_channel(unsigned long chan_hdl,
-		struct gsi_chan_xfer_notify *notify);
+int gsi_poll_channel(unsigned long chan_hdl);
 
 /**
  * gsi_config_channel_mode - Peripheral should call this function

@@ -2657,7 +2657,7 @@ ipa_poll_gsi_pkt(struct ipa3_sys_context *sys)
 	}
 
 	ret = gsi_poll_channel(sys->ep->gsi_chan_hdl, &xfer_notify);
-	if (ret) {
+	if (ret < 0) {
 		if (ret != -ENOENT)
 			ipa_err("Poll channel err: %d\n", ret);
 		return ret;
