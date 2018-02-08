@@ -289,6 +289,24 @@ static u16 ring_wp_local_index(struct gsi_ring_ctx *ctx)
 	return (u16)(ctx->wp_local - ctx->mem.phys_base) / ctx->elem_sz;
 }
 
+static void chan_xfer_cb(struct gsi_chan_ctx *ctx, u8 evt_id, u16 count)
+{
+	struct gsi_chan_xfer_notify notify = { 0 };
+
+	if (!ctx->props.xfer_cb)
+		return;
+
+	if (WARN_ON(atomic_read(&ctx->poll_mode)))
+		ipa_err("calling client callback in polling mode\n");
+
+	notify.xfer_user_data = ctx->user_data[ring_rp_local_index(&ctx->ring)];
+	notify.chan_user_data = ctx->props.chan_user_data;
+	notify.evt_id = evt_id;
+	notify.bytes_xfered = count;
+
+	ctx->props.xfer_cb(&notify);
+}
+
 static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt, bool callback)
 {
 	struct gsi_chan_ctx *ctx;
@@ -303,20 +321,8 @@ static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt, bool callback)
 	while (ctx->ring.rp_local != evt->xfer_ptr)
 		ring_rp_local_inc(&ctx->ring);
 
-	if (callback) {
-		struct gsi_chan_xfer_notify notify = { 0 };
-		u16 rp_idx = ring_rp_local_index(&ctx->ring);
-
-		notify.xfer_user_data = ctx->user_data[rp_idx];
-		notify.chan_user_data = ctx->props.chan_user_data;
-		notify.evt_id = evt->code;
-		notify.bytes_xfered = evt->len;
-		if (WARN_ON(atomic_read(&ctx->poll_mode)))
-			ipa_err("calling client callback in polling mode\n");
-
-		if (ctx->props.xfer_cb)
-			ctx->props.xfer_cb(&notify);
-	}
+	if (callback)
+		chan_xfer_cb(ctx, evt->code, evt->len);
 
 	/* Record that we've processed this channel ring element. */
 	ring_rp_local_inc(&ctx->ring);
