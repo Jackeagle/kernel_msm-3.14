@@ -398,29 +398,29 @@ static void handle_event(int evt_id)
 	struct gsi_evt_ctx *ctx = &gsi_ctx->evtr[evt_id];
 	u32 ee = gsi_ctx->ee;
 	unsigned long flags;
-	unsigned long count;
-	u32 val;
+	bool check_again;
 
 	spin_lock_irqsave(&ctx->ring.slock, flags);
 
-check_again:
-	count = 0;
-	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(evt_id, ee));
-	ctx->ring.rp = (ctx->ring.rp & GENMASK_ULL(63, 32)) | val;
-	while (ctx->ring.rp_local != ctx->ring.rp) {
-		count++;
-		if (ctx->exclusive &&
-			atomic_read(&ctx->chan->poll_mode)) {
-			count = 0;
-			break;
+	do {
+		u32 val;
+
+		val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(evt_id, ee));
+		ctx->ring.rp = (ctx->ring.rp & GENMASK_ULL(63, 32)) | val;
+
+		check_again = false;
+		while (ctx->ring.rp_local != ctx->ring.rp) {
+			if (ctx->exclusive &&
+				atomic_read(&ctx->chan->poll_mode)) {
+				check_again = false;
+				break;
+			}
+			check_again = true;
+			(void)gsi_process_evt_re(ctx, true);
 		}
-		(void)gsi_process_evt_re(ctx, true);
-	}
 
-	gsi_ring_evt_doorbell(ctx);
-
-	if (count)
-		goto check_again;
+		gsi_ring_evt_doorbell(ctx);
+	} while (check_again);
 
 	spin_unlock_irqrestore(&ctx->ring.slock, flags);
 }
