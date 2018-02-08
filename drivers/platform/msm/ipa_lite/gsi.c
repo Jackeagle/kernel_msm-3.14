@@ -393,6 +393,38 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *ctx)
 				gsi_ctx->ee));
 }
 
+static void handle_event(int evt_id)
+{
+	struct gsi_evt_ctx *ctx = &gsi_ctx->evtr[evt_id];
+	u32 ee = gsi_ctx->ee;
+	unsigned long flags;
+	unsigned long count;
+	u32 val;
+
+	spin_lock_irqsave(&ctx->ring.slock, flags);
+
+check_again:
+	count = 0;
+	val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(evt_id, ee));
+	ctx->ring.rp = (ctx->ring.rp & GENMASK_ULL(63, 32)) | val;
+	while (ctx->ring.rp_local != ctx->ring.rp) {
+		count++;
+		if (ctx->exclusive &&
+			atomic_read(&ctx->chan->poll_mode)) {
+			count = 0;
+			break;
+		}
+		(void)gsi_process_evt_re(ctx, true);
+	}
+
+	gsi_ring_evt_doorbell(ctx);
+
+	if (count)
+		goto check_again;
+
+	spin_unlock_irqrestore(&ctx->ring.slock, flags);
+}
+
 static void gsi_handle_ieob(void)
 {
 	u32 ee = gsi_ctx->ee;
@@ -410,32 +442,8 @@ static void gsi_handle_ieob(void)
 
 	while (evt_mask) {
 		int i = __ffs(evt_mask);
-		struct gsi_evt_ctx *ctx = &gsi_ctx->evtr[i];
-		unsigned long flags;
-		unsigned long count;
-		u32 val;
 
-		spin_lock_irqsave(&ctx->ring.slock, flags);
-check_again:
-		count = 0;
-		val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(i, ee));
-		ctx->ring.rp = (ctx->ring.rp & GENMASK_ULL(63, 32)) | val;
-		while (ctx->ring.rp_local != ctx->ring.rp) {
-			count++;
-			if (ctx->exclusive &&
-				atomic_read(&ctx->chan->poll_mode)) {
-				count = 0;
-				break;
-			}
-			(void)gsi_process_evt_re(ctx, true);
-		}
-
-		gsi_ring_evt_doorbell(ctx);
-
-		if (count)
-			goto check_again;
-
-		spin_unlock_irqrestore(&ctx->ring.slock, flags);
+		handle_event(i);
 
 		evt_mask ^= BIT(i);
 	}
