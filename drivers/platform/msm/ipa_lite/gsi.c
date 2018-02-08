@@ -328,20 +328,20 @@ static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 	ctx->ring.rp = ctx->ring.rp_local;
 }
 
-static u16 gsi_process_evt_re(struct gsi_evt_ctx *ctx,
-		struct gsi_chan_xfer_notify *notify, bool callback)
+static u16 gsi_process_evt_re(struct gsi_evt_ctx *ctx, bool callback)
 {
 	struct gsi_xfer_compl_evt *evt;
 	u16 idx = ring_rp_local_index(&ctx->ring);
+	struct gsi_chan_xfer_notify notify = { 0 };
 
 	evt = ctx->ring.mem.base + idx * ctx->ring.elem_sz;
-	gsi_process_chan(evt, notify, callback);
+	gsi_process_chan(evt, &notify, callback);
 	ring_rp_local_inc(&ctx->ring);
 
 	/* recycle this element */
 	ring_wp_local_inc(&ctx->ring);
 
-	return notify->bytes_xfered;
+	return notify.bytes_xfered;
 }
 
 static void gsi_ring_evt_doorbell(struct gsi_evt_ctx *ctx)
@@ -414,15 +414,13 @@ check_again:
 		val = gsi_readl(GSI_EE_n_EV_CH_k_CNTXT_4_OFFS(i, ee));
 		ctx->ring.rp = (ctx->ring.rp & GENMASK_ULL(63, 32)) | val;
 		while (ctx->ring.rp_local != ctx->ring.rp) {
-			struct gsi_chan_xfer_notify notify = { 0 };
-
 			count++;
 			if (ctx->exclusive &&
 				atomic_read(&ctx->chan->poll_mode)) {
 				count = 0;
 				break;
 			}
-			(void)gsi_process_evt_re(ctx, &notify, true);
+			(void)gsi_process_evt_re(ctx, true);
 		}
 
 		gsi_ring_evt_doorbell(ctx);
@@ -1601,11 +1599,8 @@ int gsi_poll_channel(unsigned long chan_id)
 	}
 
 	empty = evtr->ring.rp == evtr->ring.rp_local;
-	if (!empty) {
-		struct gsi_chan_xfer_notify notify = { 0 };
-
-		size = gsi_process_evt_re(evtr, &notify, false);
-	}
+	if (!empty)
+		size = gsi_process_evt_re(evtr, false);
 
 	spin_unlock_irqrestore(&evtr->ring.slock, flags);
 
