@@ -1207,7 +1207,6 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 		ctx->props.max_re_expected = ctx->ring.max_num_elem;
 	ctx->user_data = user_data;
 	ctx->allocated = true;
-	ctx->stats.dp.last_timestamp = jiffies_to_msecs(jiffies);
 	atomic_inc(&gsi_ctx->num_chan);
 
 	return chan_id;
@@ -1440,26 +1439,6 @@ int gsi_dealloc_channel(unsigned long chan_id)
 	atomic_dec(&gsi_ctx->num_chan);
 
 	return 0;
-}
-
-void gsi_update_chan_dp_stats(struct gsi_chan_ctx *ctx, u16 used)
-{
-	unsigned long now = jiffies_to_msecs(jiffies);
-	unsigned long elapsed;
-
-	if (!used) {
-		elapsed = now - ctx->stats.dp.last_timestamp;
-		if (ctx->stats.dp.empty_time < elapsed)
-			ctx->stats.dp.empty_time = elapsed;
-	}
-
-	if (used <= ctx->props.max_re_expected / 3)
-		++ctx->stats.dp.ch_below_lo;
-	else if (used <= 2 * ctx->props.max_re_expected / 3)
-		++ctx->stats.dp.ch_below_hi;
-	else
-		++ctx->stats.dp.ch_above_hi;
-	ctx->stats.dp.last_timestamp = now;
 }
 
 static u16 __gsi_query_channel_free_re(struct gsi_chan_ctx *ctx)

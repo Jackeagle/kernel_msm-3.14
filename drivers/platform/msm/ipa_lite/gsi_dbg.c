@@ -42,10 +42,6 @@ static void gsi_dump_ch_stats(struct gsi_chan_ctx *ctx)
 	printk(KERN_ERR "compl_evt=%lu\n",
 		ctx->evtr->stats.completed);
 
-	printk(KERN_ERR "ch_below_lo=%lu\n", ctx->stats.dp.ch_below_lo);
-	printk(KERN_ERR "ch_below_hi=%lu\n", ctx->stats.dp.ch_below_hi);
-	printk(KERN_ERR "ch_above_hi=%lu\n", ctx->stats.dp.ch_above_hi);
-	printk(KERN_ERR "time_empty=%lums\n", ctx->stats.dp.empty_time);
 	printk(KERN_ERR "\n");
 }
 

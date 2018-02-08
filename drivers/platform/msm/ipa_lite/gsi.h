@@ -379,14 +379,6 @@ struct gsi_ring_ctx {
 	uint64_t end;
 };
 
-struct gsi_chan_dp_stats {
-	unsigned long ch_below_lo;
-	unsigned long ch_below_hi;
-	unsigned long ch_above_hi;
-	unsigned long empty_time;
-	unsigned long last_timestamp;
-};
-
 struct gsi_chan_stats {
 	unsigned long queued;
 	unsigned long completed;
@@ -395,7 +387,6 @@ struct gsi_chan_stats {
 	unsigned long invalid_tre_error;
 	unsigned long poll_ok;
 	unsigned long poll_empty;
-	struct gsi_chan_dp_stats dp;
 };
 
 /**
@@ -593,7 +584,6 @@ enum gsi_generic_ee_cmd_opcode {
 extern struct gsi_ctx *gsi_ctx;
 void gsi_debugfs_init(void);
 u16 gsi_find_idx_from_addr(struct gsi_ring_ctx *ctx, u64 addr);
-void gsi_update_chan_dp_stats(struct gsi_chan_ctx *ctx, u16 used);
 struct gsi_ctx *msm_gsi_init(struct platform_device *pdev);
 
 /*
