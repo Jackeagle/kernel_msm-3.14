@@ -1580,10 +1580,11 @@ int gsi_start_xfer(unsigned long chan_id)
 	return 0;
 }
 
-int gsi_poll_channel(unsigned long chan_id, struct gsi_chan_xfer_notify *notify)
+int gsi_poll_channel(unsigned long chan_id)
 {
 	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_id];
 	struct gsi_evt_ctx *evtr = ctx->evtr;
+	struct gsi_chan_xfer_notify notify = { 0 };
 	u32 ee = gsi_ctx->ee;
 	unsigned long flags;
 	bool empty;
@@ -1600,11 +1601,11 @@ int gsi_poll_channel(unsigned long chan_id, struct gsi_chan_xfer_notify *notify)
 
 	empty = evtr->ring.rp == evtr->ring.rp_local;
 	if (!empty)
-		gsi_process_evt_re(evtr, notify, false);
+		gsi_process_evt_re(evtr, &notify, false);
 
 	spin_unlock_irqrestore(&evtr->ring.slock, flags);
 
-	return empty ? -ENOENT : (int)notify->bytes_xfered;
+	return empty ? -ENOENT : (int)notify.bytes_xfered;
 }
 
 int gsi_config_channel_mode(unsigned long chan_id, enum gsi_chan_mode mode)

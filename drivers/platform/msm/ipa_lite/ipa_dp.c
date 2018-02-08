@@ -2647,7 +2647,6 @@ ipa_populate_tag_field(struct ipa3_desc *desc,
 static int
 ipa_poll_gsi_pkt(struct ipa3_sys_context *sys)
 {
-	struct gsi_chan_xfer_notify xfer_notify;
 	int ret;
 
 	if (sys->ep->bytes_xfered_valid) {
@@ -2656,14 +2655,14 @@ ipa_poll_gsi_pkt(struct ipa3_sys_context *sys)
 		return (int)sys->ep->bytes_xfered;
 	}
 
-	ret = gsi_poll_channel(sys->ep->gsi_chan_hdl, &xfer_notify);
+	ret = gsi_poll_channel(sys->ep->gsi_chan_hdl);
 	if (ret < 0) {
 		if (ret != -ENOENT)
 			ipa_err("Poll channel err: %d\n", ret);
 		return ret;
 	}
 
-	return (int)xfer_notify.bytes_xfered;
+	return ret;
 }
 
 static struct ipa3_tx_pkt_wrapper *tag_to_pointer_wa(u64 tag)
