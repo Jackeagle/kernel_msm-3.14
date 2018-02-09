@@ -1072,14 +1072,6 @@ static long ipa3_setup_apps_pipes(void)
 	sys_in.ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad_offset = 0;
 	sys_in.ipa_ep_cfg.hdr_ext.hdr_pad_to_alignment = 2;
 	sys_in.ipa_ep_cfg.cfg.cs_offload_en = IPA_ENABLE_CS_OFFLOAD_DL;
-
-	/**
-	 * ipa_lan_rx_cb() intended to notify the source EP about packet
-	 * being received on the LAN_CONS via calling the source EP call-back.
-	 * There could be a race condition with calling this call-back. Other
-	 * thread may nullify it - e.g. on EP disconnect.
-	 * This lock intended to protect the access to the source EP call-back
-	 */
 	if (ipa3_setup_sys_pipe(&sys_in, &ipa3_ctx->clnt_hdl_data_in)) {
 		ipa_err(":setup sys pipe (LAN_CONS) failed.\n");
 		result = -EPERM;
