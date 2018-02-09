@@ -95,11 +95,6 @@ static void ipa3_wq_write_done_common(struct ipa3_sys_context *sys,
 	struct ipa3_tx_pkt_wrapper *next_pkt;
 	int i, cnt;
 
-	if (unlikely(tx_pkt == NULL)) {
-		ipa_err("tx_pkt is NULL\n");
-		return;
-	}
-
 	cnt = tx_pkt->cnt;
 	ipa_debug_low("cnt: %d\n", cnt);
 	for (i = 0; i < cnt; i++) {
@@ -147,7 +142,10 @@ static void ipa3_wq_write_done_status(int src_pipe,
 	if (!sys)
 		return;
 
-	ipa3_wq_write_done_common(sys, tx_pkt);
+	if (likely(tx_pkt))
+		ipa3_wq_write_done_common(sys, tx_pkt);
+	else
+		ipa_err("tx_pkt is NULL\n");
 }
 
 /**
