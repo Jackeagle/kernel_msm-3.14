@@ -1076,11 +1076,8 @@ u8 ipa3_get_qmb_master_sel(enum ipa_client_type client);
 /* internal functions */
 
 bool ipa_is_modem_pipe(int pipe_idx);
-
-int ipa3_send(struct ipa3_sys_context *sys,
-		u32 num_desc,
-		struct ipa3_desc *desc,
-		bool in_atomic);
+int ipa3_send(struct ipa3_sys_context *sys, u32 num_desc,
+		struct ipa3_desc *desc);
 
 int ipa3_get_ep_mapping(enum ipa_client_type client);
 struct ipa3_ep_context *ipa3_get_ep_context(enum ipa_client_type client);

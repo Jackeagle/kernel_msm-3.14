@@ -287,7 +287,6 @@ int ipa3_rx_poll(u32 clnt_hdl, int weight)
  * @sys: system pipe context
  * @num_desc: number of packets
  * @desc: packets to send (may be immediate command or data)
- * @in_atomic:	whether caller is in atomic context
  *
  * This function is used for GPI connection.
  * - ipa3_tx_pkt_wrapper will be used for each ipa
@@ -299,10 +298,8 @@ int ipa3_rx_poll(u32 clnt_hdl, int weight)
  *
  * Return codes: 0: success, -EFAULT: failure
  */
-int ipa3_send(struct ipa3_sys_context *sys,
-		u32 num_desc,
-		struct ipa3_desc *desc,
-		bool in_atomic)
+int
+ipa3_send(struct ipa3_sys_context *sys, u32 num_desc, struct ipa3_desc *desc)
 {
 	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
 	struct ipa3_tx_pkt_wrapper *tx_pkt, *tx_pkt_first;
@@ -312,11 +309,7 @@ int ipa3_send(struct ipa3_sys_context *sys,
 	int i = 0;
 	int j;
 	int result;
-	u32 mem_flag = GFP_ATOMIC;
 	const struct ipa_gsi_ep_config *gsi_ep_cfg;
-
-	if (unlikely(!in_atomic))
-		mem_flag = GFP_KERNEL;
 
 	gsi_ep_cfg = ipa3_get_gsi_ep_info(sys->ep->client);
 	if (unlikely(!gsi_ep_cfg)) {
@@ -333,8 +326,7 @@ int ipa3_send(struct ipa3_sys_context *sys,
 	}
 
 	gsi_xfer_elem_array =
-		kzalloc(num_desc * sizeof(struct gsi_xfer_elem),
-		mem_flag);
+		kzalloc(num_desc * sizeof(struct gsi_xfer_elem), GFP_ATOMIC);
 	if (!gsi_xfer_elem_array) {
 		ipa_err("Failed to alloc mem for gsi xfer array.\n");
 		return -EFAULT;
@@ -344,7 +336,7 @@ int ipa3_send(struct ipa3_sys_context *sys,
 
 	for (i = 0; i < num_desc; i++) {
 		tx_pkt = kmem_cache_zalloc(ipa3_ctx->tx_pkt_wrapper_cache,
-					   mem_flag);
+					   GFP_ATOMIC);
 		if (!tx_pkt) {
 			ipa_err("failed to alloc tx wrapper\n");
 			goto failure;
@@ -587,7 +579,7 @@ int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr)
 	last_desc->user1 = last_desc;
 
 	/* Send the commands, and wait for completion if successful */
-	if (ipa3_send(sys, num_desc, descr, true)) {
+	if (ipa3_send(sys, num_desc, descr)) {
 		ipa_err("fail to send %hu immediate command%s\n",
 				num_desc, num_desc == 1 ? "" : "s");
 		result = -EFAULT;
@@ -656,7 +648,7 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout)
 	last_desc->callback = ipa3_transport_irq_cmd_ack_free;
 	last_desc->user1 = comp;
 
-	if (ipa3_send(sys, num_desc, descr, true)) {
+	if (ipa3_send(sys, num_desc, descr)) {
 		/* Callback won't run; drop reference on its behalf */
 		atomic_dec(&comp->cnt);
 		ipa_err("fail to send %hu immediate command%s\n",
@@ -1247,7 +1239,7 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb,
 			desc[data_idx - 1].callback = NULL;
 		}
 
-		if (ipa3_send(sys, num_frags + data_idx, desc, true)) {
+		if (ipa3_send(sys, num_frags + data_idx, desc)) {
 			ipa_err("fail to send skb %p num_frags %u SWP\n",
 				skb, num_frags);
 			goto fail_send;
@@ -1268,7 +1260,7 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb,
 			desc[data_idx].dma_address = meta->dma_address;
 		}
 		if (num_frags == 0) {
-			if (ipa3_send(sys, data_idx + 1, desc, true)) {
+			if (ipa3_send(sys, data_idx + 1, desc)) {
 				ipa_err("fail to send skb %p HWP\n", skb);
 				goto fail_mem;
 			}
@@ -1287,8 +1279,7 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb,
 			desc[data_idx+f].user2 = desc[data_idx].user2;
 			desc[data_idx].callback = NULL;
 
-			if (ipa3_send(sys, num_frags + data_idx + 1,
-				desc, true)) {
+			if (ipa3_send(sys, num_frags + data_idx + 1, desc)) {
 				ipa_err("fail to send skb %p num_frags %u HWP\n",
 					skb, num_frags);
 				goto fail_mem;

@@ -1868,7 +1868,7 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 	desc_idx++;
 
 	/* send all descriptors to IPA with single EOT */
-	res = ipa3_send(sys, desc_idx, tag_desc, true);
+	res = ipa3_send(sys, desc_idx, tag_desc);
 	if (res) {
 		ipa_err("failed to send TAG packets %d\n", res);
 		res = -ENOMEM;
