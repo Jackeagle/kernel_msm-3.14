@@ -1189,12 +1189,7 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb)
 	desc[data_idx].user1 = skb;
 	desc[data_idx].user2 = src_ep_idx;
 
-	if (num_frags == 0) {
-		if (ipa3_send(sys, data_idx + 1, desc)) {
-			ipa_err("fail to send skb %p HWP\n", skb);
-			goto fail_mem;
-		}
-	} else {
+	if (num_frags) {
 		for (f = 0; f < num_frags; f++) {
 			desc[data_idx+f+1].frag =
 				&skb_shinfo(skb)->frags[f];
@@ -1208,13 +1203,14 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb)
 		desc[data_idx+f].user1 = desc[data_idx].user1;
 		desc[data_idx+f].user2 = desc[data_idx].user2;
 		desc[data_idx].callback = NULL;
-
-		if (ipa3_send(sys, num_frags + data_idx + 1, desc)) {
-			ipa_err("fail to send skb %p num_frags %u HWP\n",
-				skb, num_frags);
-			goto fail_mem;
-		}
 	}
+
+	if (ipa3_send(sys, num_frags + data_idx + 1, desc)) {
+		ipa_err("fail to send skb %p num_frags %u HWP\n",
+			skb, num_frags);
+		goto fail_mem;
+	}
+
 	IPA_STATS_INC_CNT(ipa3_ctx->stats.tx_hw_pkts);
 
 	if (num_frags) {
