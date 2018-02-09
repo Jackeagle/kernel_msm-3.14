@@ -165,19 +165,6 @@ struct ipa_sys_connect_params {
 	bool napi_enabled;
 };
 
-/**
- * struct ipa_tx_meta - meta-data for the TX packet
- * @dma_address: dma mapped address of TX packet
- * @dma_address_valid: is above field valid?
- */
-struct ipa_tx_meta {
-	u8 pkt_init_dst_ep;
-	bool pkt_init_dst_ep_valid;
-	bool pkt_init_dst_ep_remote;
-	dma_addr_t dma_address;
-	bool dma_address_valid;
-};
-
 struct ipa3_active_client_htable_entry {
 	struct hlist_node list;
 	char id_string[IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN];
@@ -1037,8 +1024,7 @@ int ipa3_cfg_ep_ctrl(u32 clnt_hdl, const struct ipa_ep_cfg_ctrl *ep_ctrl);
 /*
  * Data path
  */
-int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb,
-		struct ipa_tx_meta *metadata);
+int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb);
 
 /*
  * System pipes

@@ -258,7 +258,7 @@ send:
 	 * both data packts and command will be routed to
 	 * IPA_CLIENT_Q6_WAN_CONS based on status configuration.
 	 */
-	ret = ipa3_tx_dp(IPA_CLIENT_APPS_WAN_PROD, skb, NULL);
+	ret = ipa3_tx_dp(IPA_CLIENT_APPS_WAN_PROD, skb);
 
 	if (ret) {
 		ret = NETDEV_TX_BUSY;

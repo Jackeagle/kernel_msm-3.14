@@ -1093,7 +1093,6 @@ void ipa3_tx_cmd_comp(void *user1, int user2)
  * ipa3_tx_dp() - Data-path tx handler
  * @dst:	[in] which IPA destination to route tx packets to
  * @skb:	[in] the packet to send
- * @metadata:	[in] TX packet meta-data
  *
  * Data-path tx handler, this is used for both SW data-path which by-passes most
  * IPA HW blocks AND the regular HW data-path for WLAN AMPDU traffic only. If
@@ -1113,8 +1112,7 @@ void ipa3_tx_cmd_comp(void *user1, int user2)
  *
  * Returns:	0 on success, negative on failure
  */
-int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb,
-		struct ipa_tx_meta *meta)
+int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb)
 {
 	struct ipa3_desc *desc;
 	struct ipa3_desc _desc[3];
@@ -1155,10 +1153,7 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb,
 			ipa_err("Client %u is not mapped\n", dst);
 			goto fail_gen;
 		}
-		if (meta && meta->pkt_init_dst_ep_valid)
-			dst_ep_idx = meta->pkt_init_dst_ep;
-		else
-			dst_ep_idx = -1;
+		dst_ep_idx = -1;
 	}
 
 	sys = ipa3_ctx->ep[src_ep_idx].sys;
@@ -1213,14 +1208,7 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb,
 		desc[data_idx].type = IPA_DATA_DESC_SKB;
 		desc[data_idx].callback = ipa3_tx_comp_usr_notify_release;
 		desc[data_idx].user1 = skb;
-		desc[data_idx].user2 = (meta && meta->pkt_init_dst_ep_valid &&
-				meta->pkt_init_dst_ep_remote) ?
-				src_ep_idx :
-				dst_ep_idx;
-		if (meta && meta->dma_address_valid) {
-			desc[data_idx].dma_address_valid = true;
-			desc[data_idx].dma_address = meta->dma_address;
-		}
+		desc[data_idx].user2 = dst_ep_idx;
 		data_idx++;
 
 		for (f = 0; f < num_frags; f++) {
@@ -1253,10 +1241,6 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb,
 		desc[data_idx].user1 = skb;
 		desc[data_idx].user2 = src_ep_idx;
 
-		if (meta && meta->dma_address_valid) {
-			desc[data_idx].dma_address_valid = true;
-			desc[data_idx].dma_address = meta->dma_address;
-		}
 		if (num_frags == 0) {
 			if (ipa3_send(sys, data_idx + 1, desc)) {
 				ipa_err("fail to send skb %p HWP\n", skb);
