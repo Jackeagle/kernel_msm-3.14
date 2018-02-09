@@ -217,9 +217,8 @@ static int ipa3_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 	struct ipa3_wwan_private *wwan_ptr = netdev_priv(dev);
 
 	if (skb->protocol != htons(ETH_P_MAP)) {
-		ipa_debug_low
-		("SW filtering out none QMAP packet received from %s",
-		current->comm);
+		ipa_debug_low("dropping %u bytes from %s (bad proto %hu)\n",
+				skb->len, current->comm, skb->protocol);
 		dev_kfree_skb_any(skb);
 		dev->stats.tx_dropped++;
 		return NETDEV_TX_OK;
@@ -227,15 +226,15 @@ static int ipa3_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 
 	qmap_check = RMNET_MAP_GET_CD_BIT(skb);
 	if (netif_queue_stopped(dev)) {
-		if (qmap_check &&
-			atomic_read(&wwan_ptr->outstanding_pkts) <
-					wwan_ptr->outstanding_high_ctl) {
-			ipa_err("[%s]Queue stop, send ctrl pkts\n", dev->name);
-			goto send;
-		} else {
+		if (!qmap_check) {
 			ipa_err("[%s]fatal: ipa3_wwan_xmit stopped\n",
 				  dev->name);
 			return NETDEV_TX_BUSY;
+		}
+		if (atomic_read(&wwan_ptr->outstanding_pkts) <
+				wwan_ptr->outstanding_high_ctl) {
+			ipa_err("[%s]Queue stop, send ctrl pkts\n", dev->name);
+			goto send;
 		}
 	}
 
@@ -252,26 +251,20 @@ static int ipa3_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 			return NETDEV_TX_BUSY;
 		}
 	}
-
 send:
 	/*
-	 * both data packts and command will be routed to
+	 * both data packets and commands will be routed to
 	 * IPA_CLIENT_Q6_WAN_CONS based on status configuration.
 	 */
 	ret = ipa3_tx_dp(IPA_CLIENT_APPS_WAN_PROD, skb);
-
-	if (ret) {
-		ret = NETDEV_TX_BUSY;
-		goto out;
-	}
+	if (ret)
+		return NETDEV_TX_BUSY;
 
 	atomic_inc(&wwan_ptr->outstanding_pkts);
 	dev->stats.tx_packets++;
 	dev->stats.tx_bytes += skb->len;
-	ret = NETDEV_TX_OK;
-out:
-	/* disable clock */
-	return ret;
+
+	return NETDEV_TX_OK;
 }
 
 static void ipa3_wwan_tx_timeout(struct net_device *dev)
