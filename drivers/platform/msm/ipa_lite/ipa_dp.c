@@ -1185,9 +1185,6 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb)
 	desc[data_idx].pyld = skb->data;
 	desc[data_idx].len = skb_headlen(skb);
 	desc[data_idx].type = IPA_DATA_DESC_SKB;
-	desc[data_idx].callback = ipa3_tx_comp_usr_notify_release;
-	desc[data_idx].user1 = skb;
-	desc[data_idx].user2 = src_ep_idx;
 
 	if (num_frags) {
 		for (f = 0; f < num_frags; f++) {
@@ -1198,12 +1195,11 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb)
 			desc[data_idx+f+1].len =
 				skb_frag_size(desc[data_idx+f+1].frag);
 		}
-		/* don't free skb till frag mappings are released */
-		desc[data_idx+f].callback = desc[data_idx].callback;
-		desc[data_idx+f].user1 = desc[data_idx].user1;
-		desc[data_idx+f].user2 = desc[data_idx].user2;
-		desc[data_idx].callback = NULL;
 	}
+	/* Have the skb be freed after the last descriptor completes. */
+	desc[data_idx + num_frags].callback = ipa3_tx_comp_usr_notify_release;
+	desc[data_idx + num_frags].user1 = skb;
+	desc[data_idx + num_frags].user2 = src_ep_idx;
 
 	if (ipa3_send(sys, num_frags + data_idx + 1, desc)) {
 		ipa_err("fail to send skb %p num_frags %u HWP\n",
