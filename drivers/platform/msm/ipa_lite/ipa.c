@@ -196,10 +196,10 @@ static int ipa3_active_clients_log_init(void)
 	spin_lock_init(&ipa3_ctx->ipa3_active_clients_logging.lock);
 	ipa3_ctx->ipa3_active_clients_logging.log_buffer[0] = kzalloc(
 			IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES *
-			sizeof(char[IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN]),
+				IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN,
 			GFP_KERNEL);
-	ipa3_ctx->active_clients_table_buf = kzalloc(sizeof(
-			char[IPA_ACTIVE_CLIENTS_TABLE_BUF_SIZE]), GFP_KERNEL);
+	ipa3_ctx->active_clients_table_buf =
+			kzalloc(IPA_ACTIVE_CLIENTS_TABLE_BUF_SIZE, GFP_KERNEL);
 	if (ipa3_ctx->ipa3_active_clients_logging.log_buffer == NULL) {
 		ipa_err("Active Clients Logging memory allocation failed");
 		goto bail;
@@ -455,8 +455,7 @@ static int ipa3_q6_set_ex_path_to_apps(void)
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	int retval;
 
-	desc = kcalloc(ipa3_ctx->ipa_num_pipes, sizeof(struct ipa3_desc),
-			GFP_KERNEL);
+	desc = kcalloc(ipa3_ctx->ipa_num_pipes, sizeof(*desc), GFP_KERNEL);
 	if (!desc) {
 		ipa_err("failed to allocate memory\n");
 		return -ENOMEM;
@@ -1221,7 +1220,6 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 	char str_to_hash[IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN];
 	unsigned long flags;
 
-
 	spin_lock_irqsave(&ipa3_ctx->ipa3_active_clients_logging.lock, flags);
 	int_ctx = true;
 	hfound = NULL;
@@ -1237,9 +1235,7 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 		}
 	}
 	if (hfound == NULL) {
-		hentry = NULL;
-		hentry = kzalloc(sizeof(
-				struct ipa3_active_client_htable_entry),
+		hentry = kzalloc(sizeof(*hentry),
 				int_ctx ? GFP_ATOMIC : GFP_KERNEL);
 		if (hentry == NULL) {
 			ipa_err("failed allocating active clients hash entry");
@@ -2676,15 +2672,13 @@ static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
 	}
 
 	/* Up to filtering pipes we have filtering tables */
-	desc = kcalloc(ipa3_ctx->ep_flt_num, sizeof(struct ipa3_desc),
-		GFP_KERNEL);
+	desc = kcalloc(ipa3_ctx->ep_flt_num, sizeof(*desc), GFP_KERNEL);
 	if (!desc) {
 		ipa_err("failed to allocate memory\n");
 		return -ENOMEM;
 	}
 
-	cmd_pyld = kcalloc(ipa3_ctx->ep_flt_num,
-		sizeof(struct ipahal_imm_cmd_pyld *), GFP_KERNEL);
+	cmd_pyld = kcalloc(ipa3_ctx->ep_flt_num, sizeof(*cmd_pyld), GFP_KERNEL);
 	if (!cmd_pyld) {
 		ipa_err("failed to allocate memory\n");
 		retval = -ENOMEM;
@@ -2804,7 +2798,7 @@ static int ipa3_q6_clean_q6_rt_tbls(enum ipa_ip_type ip,
 		return -ENOMEM;
 	}
 
-	desc = kzalloc(sizeof(struct ipa3_desc), GFP_KERNEL);
+	desc = kzalloc(sizeof(*desc), GFP_KERNEL);
 	if (!desc) {
 		ipa_err("failed to allocate memory\n");
 		goto free_empty_img;
@@ -2889,7 +2883,7 @@ static int ipa3_q6_clean_q6_tables(void)
 	}
 
 	/* Flush rules cache */
-	desc = kzalloc(sizeof(struct ipa3_desc), GFP_KERNEL);
+	desc = kzalloc(sizeof(*desc), GFP_KERNEL);
 	if (!desc) {
 		ipa_err("failed to allocate memory\n");
 		return -ENOMEM;
