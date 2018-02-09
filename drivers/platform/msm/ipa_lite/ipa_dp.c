@@ -1116,8 +1116,6 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb)
 {
 	struct ipa3_desc *desc;
 	struct ipa3_desc _desc[3];
-	int dst_ep_idx;
-	struct ipahal_imm_cmd_pyld *cmd_pyld = NULL;
 	struct ipa3_sys_context *sys;
 	int src_ep_idx;
 	u32 num_frags;
@@ -1139,25 +1137,13 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb)
 	 * WAN TX: PKT_INIT (cmd) + HW (data)
 	 *
 	 */
-	if (IPA_CLIENT_IS_CONS(dst)) {
-		src_ep_idx = ipa3_get_ep_mapping(IPA_CLIENT_APPS_LAN_PROD);
-		if (src_ep_idx < 0) {
-			ipa_err("Client %u is not mapped\n",
-				IPA_CLIENT_APPS_LAN_PROD);
-			goto fail_gen;
-		}
-		dst_ep_idx = ipa3_get_ep_mapping(dst);
-	} else {
-		src_ep_idx = ipa3_get_ep_mapping(dst);
-		if (src_ep_idx < 0) {
-			ipa_err("Client %u is not mapped\n", dst);
-			goto fail_gen;
-		}
-		dst_ep_idx = -1;
+	src_ep_idx = ipa3_get_ep_mapping(dst);
+	if (src_ep_idx < 0) {
+		ipa_err("Client %u is not mapped\n", dst);
+		goto fail_gen;
 	}
 
 	sys = ipa3_ctx->ep[src_ep_idx].sys;
-
 	if (!sys->ep->valid) {
 		ipa_err("pipe not valid\n");
 		goto fail_gen;
@@ -1194,90 +1180,49 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb)
 		desc = &_desc[0];
 	}
 
-	if (dst_ep_idx != -1) {
-		/* SW data path */
-		data_idx = 0;
-		desc[data_idx].opcode = ipa3_ctx->pkt_init_imm_opcode;
-		desc[data_idx].dma_address_valid = true;
-		desc[data_idx].dma_address = ipa3_ctx->pkt_init_imm[dst_ep_idx];
-		desc[data_idx].type = IPA_IMM_CMD_DESC;
-		desc[data_idx].callback = NULL;
-		data_idx++;
-		desc[data_idx].pyld = skb->data;
-		desc[data_idx].len = skb_headlen(skb);
-		desc[data_idx].type = IPA_DATA_DESC_SKB;
-		desc[data_idx].callback = ipa3_tx_comp_usr_notify_release;
-		desc[data_idx].user1 = skb;
-		desc[data_idx].user2 = dst_ep_idx;
-		data_idx++;
+	/* HW data path */
+	data_idx = 0;
+	desc[data_idx].pyld = skb->data;
+	desc[data_idx].len = skb_headlen(skb);
+	desc[data_idx].type = IPA_DATA_DESC_SKB;
+	desc[data_idx].callback = ipa3_tx_comp_usr_notify_release;
+	desc[data_idx].user1 = skb;
+	desc[data_idx].user2 = src_ep_idx;
 
+	if (num_frags == 0) {
+		if (ipa3_send(sys, data_idx + 1, desc)) {
+			ipa_err("fail to send skb %p HWP\n", skb);
+			goto fail_mem;
+		}
+	} else {
 		for (f = 0; f < num_frags; f++) {
-			desc[data_idx + f].frag = &skb_shinfo(skb)->frags[f];
-			desc[data_idx + f].type = IPA_DATA_DESC_SKB_PAGED;
-			desc[data_idx + f].len =
-				skb_frag_size(desc[data_idx + f].frag);
+			desc[data_idx+f+1].frag =
+				&skb_shinfo(skb)->frags[f];
+			desc[data_idx+f+1].type =
+				IPA_DATA_DESC_SKB_PAGED;
+			desc[data_idx+f+1].len =
+				skb_frag_size(desc[data_idx+f+1].frag);
 		}
 		/* don't free skb till frag mappings are released */
-		if (num_frags) {
-			desc[data_idx + f - 1].callback = desc[2].callback;
-			desc[data_idx + f - 1].user1 = desc[2].user1;
-			desc[data_idx + f - 1].user2 = desc[2].user2;
-			desc[data_idx - 1].callback = NULL;
-		}
+		desc[data_idx+f].callback = desc[data_idx].callback;
+		desc[data_idx+f].user1 = desc[data_idx].user1;
+		desc[data_idx+f].user2 = desc[data_idx].user2;
+		desc[data_idx].callback = NULL;
 
-		if (ipa3_send(sys, num_frags + data_idx, desc)) {
-			ipa_err("fail to send skb %p num_frags %u SWP\n",
+		if (ipa3_send(sys, num_frags + data_idx + 1, desc)) {
+			ipa_err("fail to send skb %p num_frags %u HWP\n",
 				skb, num_frags);
-			goto fail_send;
+			goto fail_mem;
 		}
-		IPA_STATS_INC_CNT(ipa3_ctx->stats.tx_sw_pkts);
-	} else {
-		/* HW data path */
-		data_idx = 0;
-		desc[data_idx].pyld = skb->data;
-		desc[data_idx].len = skb_headlen(skb);
-		desc[data_idx].type = IPA_DATA_DESC_SKB;
-		desc[data_idx].callback = ipa3_tx_comp_usr_notify_release;
-		desc[data_idx].user1 = skb;
-		desc[data_idx].user2 = src_ep_idx;
-
-		if (num_frags == 0) {
-			if (ipa3_send(sys, data_idx + 1, desc)) {
-				ipa_err("fail to send skb %p HWP\n", skb);
-				goto fail_mem;
-			}
-		} else {
-			for (f = 0; f < num_frags; f++) {
-				desc[data_idx+f+1].frag =
-					&skb_shinfo(skb)->frags[f];
-				desc[data_idx+f+1].type =
-					IPA_DATA_DESC_SKB_PAGED;
-				desc[data_idx+f+1].len =
-					skb_frag_size(desc[data_idx+f+1].frag);
-			}
-			/* don't free skb till frag mappings are released */
-			desc[data_idx+f].callback = desc[data_idx].callback;
-			desc[data_idx+f].user1 = desc[data_idx].user1;
-			desc[data_idx+f].user2 = desc[data_idx].user2;
-			desc[data_idx].callback = NULL;
-
-			if (ipa3_send(sys, num_frags + data_idx + 1, desc)) {
-				ipa_err("fail to send skb %p num_frags %u HWP\n",
-					skb, num_frags);
-				goto fail_mem;
-			}
-		}
-		IPA_STATS_INC_CNT(ipa3_ctx->stats.tx_hw_pkts);
 	}
+	IPA_STATS_INC_CNT(ipa3_ctx->stats.tx_hw_pkts);
 
 	if (num_frags) {
 		kfree(desc);
 		IPA_STATS_INC_CNT(ipa3_ctx->stats.tx_non_linear);
 	}
-	return 0;
 
-fail_send:
-	ipahal_destroy_imm_cmd(cmd_pyld);
+	return 0;
 fail_mem:
 	if (num_frags)
 		kfree(desc);
