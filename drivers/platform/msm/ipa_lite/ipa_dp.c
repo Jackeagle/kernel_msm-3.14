@@ -1186,16 +1186,11 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb)
 	desc[data_idx].len = skb_headlen(skb);
 	desc[data_idx].type = IPA_DATA_DESC_SKB;
 
-	if (num_frags) {
-		for (f = 0; f < num_frags; f++) {
-			data_idx++;
-			desc[data_idx].frag =
-				&skb_shinfo(skb)->frags[f];
-			desc[data_idx].type =
-				IPA_DATA_DESC_SKB_PAGED;
-			desc[data_idx].len =
-				skb_frag_size(desc[data_idx].frag);
-		}
+	for (f = 0; f < num_frags; f++) {
+		data_idx++;
+		desc[data_idx].frag = &skb_shinfo(skb)->frags[f];
+		desc[data_idx].type = IPA_DATA_DESC_SKB_PAGED;
+		desc[data_idx].len = skb_frag_size(desc[data_idx].frag);
 	}
 	/* Have the skb be freed after the last descriptor completes. */
 	desc[data_idx].callback = ipa3_tx_comp_usr_notify_release;
