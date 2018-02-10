@@ -1188,20 +1188,21 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb)
 
 	if (num_frags) {
 		for (f = 0; f < num_frags; f++) {
-			desc[data_idx+f+1].frag =
+			data_idx++;
+			desc[data_idx].frag =
 				&skb_shinfo(skb)->frags[f];
-			desc[data_idx+f+1].type =
+			desc[data_idx].type =
 				IPA_DATA_DESC_SKB_PAGED;
-			desc[data_idx+f+1].len =
-				skb_frag_size(desc[data_idx+f+1].frag);
+			desc[data_idx].len =
+				skb_frag_size(desc[data_idx].frag);
 		}
 	}
 	/* Have the skb be freed after the last descriptor completes. */
-	desc[data_idx + num_frags].callback = ipa3_tx_comp_usr_notify_release;
-	desc[data_idx + num_frags].user1 = skb;
-	desc[data_idx + num_frags].user2 = src_ep_idx;
+	desc[data_idx].callback = ipa3_tx_comp_usr_notify_release;
+	desc[data_idx].user1 = skb;
+	desc[data_idx].user2 = src_ep_idx;
 
-	if (ipa3_send(sys, num_frags + data_idx + 1, desc)) {
+	if (ipa3_send(sys, data_idx + 1, desc)) {
 		ipa_err("fail to send skb %p num_frags %u HWP\n",
 			skb, num_frags);
 		goto fail_mem;
