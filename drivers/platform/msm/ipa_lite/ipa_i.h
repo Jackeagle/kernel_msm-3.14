@@ -395,7 +395,6 @@ enum ipa3_desc_type {
  * @cnt: 1 for single transfers,
  * >1 and <0xFFFF for first of a "multiple" transfer,
  * 0xFFFF for last desc, 0 for rest of "multiple' transfer
- * @bounce: va of bounce buffer
  * @unmap_dma: in case this is true, the buffer will not be dma unmapped
  *
  * This struct can wrap both data packet and immediate command packet.
@@ -410,7 +409,6 @@ struct ipa3_tx_pkt_wrapper {
 	int user2;
 	struct ipa3_sys_context *sys;
 	u32 cnt;
-	void *bounce;
 	bool no_unmap_dma;
 };
 
