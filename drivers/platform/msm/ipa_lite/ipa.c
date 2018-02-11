@@ -243,13 +243,13 @@ static void ipa3_active_clients_log_destroy(void)
 		sizeof(ipa3_ctx->ipa3_active_clients_logging));
 }
 
-static int ipa3_init_smem_region(int memory_region_size,
-				int memory_region_offset)
+static int
+ipa3_init_smem_region(u32 memory_region_size, u32 memory_region_offset)
 {
-	struct ipahal_imm_cmd_dma_shared_mem cmd;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
-	struct ipa3_desc desc;
+	struct ipa3_desc desc = { 0 };
 	struct ipa_mem_buffer mem;
+	u32 offset;
 	int rc;
 
 	if (memory_region_size == 0)
@@ -260,22 +260,13 @@ static int ipa3_init_smem_region(int memory_region_size,
 		return -ENOMEM;
 	}
 
-	memset(&cmd, 0, sizeof(cmd));
-	cmd.is_read = false;
-	cmd.skip_pipeline_clear = false;
-	cmd.pipeline_clear_options = IPAHAL_HPS_CLEAR;
-	cmd.size = mem.size;
-	cmd.system_addr = mem.phys_base;
-	cmd.local_addr = ipa3_ctx->smem_restricted_bytes +
-		memory_region_offset;
-	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_DMA_SHARED_MEM, &cmd);
+	offset = ipa3_ctx->smem_restricted_bytes + memory_region_offset;
+	cmd_pyld = ipahal_dma_shared_mem_write_pyld(&mem, offset);
 	if (!cmd_pyld) {
 		ipa_err("failed to construct dma_shared_mem imm cmd\n");
 		ipahal_dma_free(&mem);
 		return -ENOMEM;
 	}
-
-	memset(&desc, 0, sizeof(desc));
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
 	rc = ipa3_send_cmd(1, &desc);
@@ -663,6 +654,7 @@ int _ipa_init_hdr_v3_0(void)
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	struct ipahal_imm_cmd_dma_shared_mem dma_cmd = { 0 };
 	u32 dma_size;
+	u32 offset;
 
 	dma_size = ipa3_mem(MODEM_HDR_SIZE) + ipa3_mem(APPS_HDR_SIZE);
 	if (ipahal_dma_alloc(&mem, dma_size, GFP_KERNEL)) {
@@ -699,17 +691,10 @@ int _ipa_init_hdr_v3_0(void)
 		ipa_err("fail to alloc DMA buff of size %u\n", dma_size);
 		return -ENOMEM;
 	}
-	memset(mem.base, 0, mem.size);
 
-	dma_cmd.is_read = false;
-	dma_cmd.skip_pipeline_clear = false;
-	dma_cmd.pipeline_clear_options = IPAHAL_HPS_CLEAR;
-	dma_cmd.system_addr = mem.phys_base;
-	dma_cmd.local_addr = ipa3_ctx->smem_restricted_bytes +
-		ipa3_mem(MODEM_HDR_PROC_CTX_OFST);
-	dma_cmd.size = mem.size;
-	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_DMA_SHARED_MEM,
-						&dma_cmd);
+	offset = ipa3_ctx->smem_restricted_bytes +
+			ipa3_mem(MODEM_HDR_PROC_CTX_OFST);
+	cmd_pyld = ipahal_dma_shared_mem_write_pyld(&mem, offset);
 	if (!cmd_pyld) {
 		ipa_err("fail to construct dma_shared_mem imm\n");
 		ipahal_dma_free(&mem);
@@ -2654,7 +2639,6 @@ static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
 	enum ipa_rule_type rlt)
 {
 	struct ipa3_desc *desc;
-	struct ipahal_imm_cmd_dma_shared_mem cmd = {0};
 	struct ipahal_imm_cmd_pyld **cmd_pyld;
 	int retval = 0;
 	int pipe_idx;
@@ -2663,6 +2647,7 @@ static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
 	int index;
 	u32 lcl_addr_mem_part;
 	struct ipa_mem_buffer mem;
+	u32 width = ipahal_get_hw_tbl_hdr_width();
 
 	ipa_debug("Entry\n");
 
@@ -2712,19 +2697,13 @@ static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
 		 * invalid but connected.
 		 */
 		if (!ipa3_ctx->ep[pipe_idx].valid) {
-			cmd.is_read = false;
-			cmd.skip_pipeline_clear = false;
-			cmd.pipeline_clear_options = IPAHAL_HPS_CLEAR;
-			cmd.size = mem.size;
-			cmd.system_addr = mem.phys_base;
-			cmd.local_addr =
-				ipa3_ctx->smem_restricted_bytes +
-				lcl_addr_mem_part +
-				ipahal_get_hw_tbl_hdr_width() +
-				flt_idx * ipahal_get_hw_tbl_hdr_width();
-			cmd_pyld[num_cmds] = ipahal_construct_imm_cmd(
-						IPA_IMM_CMD_DMA_SHARED_MEM,
-						&cmd);
+			u32 offset;
+
+			offset = ipa3_ctx->smem_restricted_bytes +
+					lcl_addr_mem_part +
+					flt_idx * (width + 1);
+			cmd_pyld[num_cmds] =
+				ipahal_dma_shared_mem_write_pyld(&mem, offset);
 			if (!cmd_pyld[num_cmds]) {
 				ipa_err("fail construct dma_shared_mem cmd\n");
 				retval = -ENOMEM;
@@ -2760,13 +2739,14 @@ static int ipa3_q6_clean_q6_rt_tbls(enum ipa_ip_type ip,
 	enum ipa_rule_type rlt)
 {
 	struct ipa3_desc *desc;
-	struct ipahal_imm_cmd_dma_shared_mem cmd = {0};
 	struct ipahal_imm_cmd_pyld *cmd_pyld = NULL;
 	int retval = 0;
 	u32 modem_rt_index_lo;
 	u32 modem_rt_index_hi;
 	u32 lcl_addr_mem_part;
 	struct ipa_mem_buffer mem;
+	u32 width = ipahal_get_hw_tbl_hdr_width();
+	u32 offset;
 
 	ipa_debug("Entry\n");
 
@@ -2804,15 +2784,9 @@ static int ipa3_q6_clean_q6_rt_tbls(enum ipa_ip_type ip,
 		goto free_empty_img;
 	}
 
-	cmd.is_read = false;
-	cmd.skip_pipeline_clear = false;
-	cmd.pipeline_clear_options = IPAHAL_HPS_CLEAR;
-	cmd.size = mem.size;
-	cmd.system_addr =  mem.phys_base;
-	cmd.local_addr = ipa3_ctx->smem_restricted_bytes +
-		lcl_addr_mem_part +
-		modem_rt_index_lo * ipahal_get_hw_tbl_hdr_width();
-	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_DMA_SHARED_MEM, &cmd);
+	offset = ipa3_ctx->smem_restricted_bytes + lcl_addr_mem_part +
+			modem_rt_index_lo * width;
+	cmd_pyld = ipahal_dma_shared_mem_write_pyld(&mem, offset);
 	if (!cmd_pyld) {
 		ipa_err("failed to construct dma_shared_mem imm cmd\n");
 		retval = -ENOMEM;

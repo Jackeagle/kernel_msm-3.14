@@ -313,6 +313,15 @@ struct ipahal_imm_cmd_pyld *ipahal_construct_imm_cmd(
 	enum ipahal_imm_cmd_name cmd, const void *params);
 
 /*
+ * Return a pointer to the payload for a DMA shared memory write immediate
+ * command, or null if one can't be allocated.  Result is dynamically
+ * allocated, and caller must ensure it gets released by providing it to
+ * ipahal_destroy_imm_cmd() when it is no longer needed.
+ */
+struct ipahal_imm_cmd_pyld *ipahal_dma_shared_mem_write_pyld(
+				struct ipa_mem_buffer *mem, u32 offset);
+
+/*
  * ipahal_construct_nop_imm_cmd() - Construct immediate comamnd for NO-Op
  * Core driver may want functionality to inject NOP commands to IPA
  *  to ensure e.g., PIPLINE clear before someother operation.
