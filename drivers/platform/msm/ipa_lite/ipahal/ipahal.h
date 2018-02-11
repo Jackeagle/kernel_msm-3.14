@@ -41,8 +41,8 @@ enum ipahal_imm_cmd_name {
 /* Immediate commands abstracted structures */
 
 /*
- * struct ipahal_imm_cmd_ip_filter_init - IP_V*_FILTER_INIT cmd payload
- * Inits IPv4/IPv6 filter block.
+ * struct ipahal_imm_cmd_ip_fltrt_init - IP filter/route cmd payload
+ * Inits IPv4/IPv6 filter or routing block.
  * @hash_rules_addr: Addr in sys mem where ipv4 hashable flt tbl starts
  * @hash_rules_size: Size in bytes of the hashable tbl to cpy to local mem
  * @hash_local_addr: Addr in shared mem where hashable flt tbl should
@@ -52,29 +52,7 @@ enum ipahal_imm_cmd_name {
  * @nhash_local_addr: Addr in shared mem where ipv4 non-hashable flt tbl should
  *  be copied to
  */
-struct ipahal_imm_cmd_ip_filter_init {
-	u64 hash_rules_addr;
-	u32 hash_rules_size;
-	u32 hash_local_addr;
-	u64 nhash_rules_addr;
-	u32 nhash_rules_size;
-	u32 nhash_local_addr;
-};
-
-/*
- * struct ipahal_imm_cmd_ip_routing_init - IP_V*_ROUTING_INIT cmd payload
- * Inits routing table/structure - with the rules and other related params
- * IPv4 and IPv6 use the same structure.
- * @hash_rules_addr: Addr in sys mem where ipv4 hashable rt tbl starts
- * @hash_rules_size: Size in bytes of the hashable tbl to cpy to local mem
- * @hash_local_addr: Addr in shared mem where hashable rt tbl should
- *  be copied to
- * @nhash_rules_addr: Addr in sys mem where non-hashable rt tbl starts
- * @nhash_rules_size: Size in bytes of the non-hashable tbl to cpy to local mem
- * @nhash_local_addr: Addr in shared mem where non-hashable rt tbl should
- *  be copied to
- */
-struct ipahal_imm_cmd_ip_routing_init {
+struct ipahal_imm_cmd_ip_fltrt_init {
 	u64 hash_rules_addr;
 	u32 hash_rules_size;
 	u32 hash_local_addr;
