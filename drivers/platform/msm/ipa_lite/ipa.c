@@ -647,7 +647,6 @@ int _ipa_init_hdr_v3_0(void)
 	struct ipa_mem_buffer mem;
 	struct ipahal_imm_cmd_hdr_init_local cmd = {0};
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
-	struct ipahal_imm_cmd_dma_shared_mem dma_cmd = { 0 };
 	u32 dma_size;
 	u32 offset;
 
@@ -708,7 +707,7 @@ int _ipa_init_hdr_v3_0(void)
 	}
 	ipahal_destroy_imm_cmd(cmd_pyld);
 
-	ipahal_write_reg(IPA_LOCAL_PKT_PROC_CNTXT_BASE, dma_cmd.local_addr);
+	ipahal_write_reg(IPA_LOCAL_PKT_PROC_CNTXT_BASE, 0);
 
 	ipahal_dma_free(&mem);
 
