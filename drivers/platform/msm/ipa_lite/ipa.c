@@ -442,7 +442,6 @@ static int ipa3_q6_set_ex_path_to_apps(void)
 	struct ipa3_desc *desc;
 	int num_descs = 0;
 	int index;
-	struct ipahal_imm_cmd_register_write reg_write;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	int retval;
 
@@ -460,17 +459,13 @@ static int ipa3_q6_set_ex_path_to_apps(void)
 
 		/* disable statuses for modem producers */
 		if (IPA_CLIENT_IS_Q6_PROD(client_idx)) {
+			u32 offset;
+
 			ipa_assert_on(num_descs >= ipa3_ctx->ipa_num_pipes);
 
-			reg_write.skip_pipeline_clear = false;
-			reg_write.pipeline_clear_options =
-				IPAHAL_HPS_CLEAR;
-			reg_write.offset =
-				ipahal_reg_n_offset(IPA_ENDP_STATUS_n, ep_idx);
-			reg_write.value = 0;
-			reg_write.value_mask = ~0;
-			cmd_pyld = ipahal_construct_imm_cmd(
-					IPA_IMM_CMD_REGISTER_WRITE, &reg_write);
+			offset = ipahal_reg_n_offset(IPA_ENDP_STATUS_n, ep_idx);
+			cmd_pyld = ipahal_register_write_pyld(0, ~0, offset,
+								false);
 			if (!cmd_pyld) {
 				ipa_err("fail construct register_write cmd\n");
 				ipa_assert();
@@ -2814,10 +2809,10 @@ static int ipa3_q6_clean_q6_tables(void)
 {
 	struct ipa3_desc *desc;
 	struct ipahal_imm_cmd_pyld *cmd_pyld = NULL;
-	struct ipahal_imm_cmd_register_write reg_write_cmd = {0};
-	int retval;
 	struct ipahal_reg_fltrt_hash_flush flush;
 	struct ipahal_reg_valmask valmask;
+	u32 offset;
+	int retval;
 
 	ipa_debug("Entry\n");
 
@@ -2868,13 +2863,9 @@ static int ipa3_q6_clean_q6_tables(void)
 	flush.v6_flt = true;
 	flush.v6_rt = true;
 	ipahal_get_fltrt_hash_flush_valmask(&flush, &valmask);
-	reg_write_cmd.skip_pipeline_clear = false;
-	reg_write_cmd.pipeline_clear_options = IPAHAL_HPS_CLEAR;
-	reg_write_cmd.offset = ipahal_reg_offset(IPA_FILT_ROUT_HASH_FLUSH);
-	reg_write_cmd.value = valmask.val;
-	reg_write_cmd.value_mask = valmask.mask;
-	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE,
-						&reg_write_cmd);
+	offset = ipahal_reg_offset(IPA_FILT_ROUT_HASH_FLUSH);
+	cmd_pyld = ipahal_register_write_pyld(offset, valmask.val, valmask.mask,
+						false);
 	if (!cmd_pyld) {
 		ipa_err("fail construct register_write imm cmd\n");
 		retval = -EFAULT;

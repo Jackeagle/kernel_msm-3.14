@@ -1936,11 +1936,12 @@ static int ipa3_tag_generate_force_close_desc(struct ipa3_desc desc[],
 	struct ipa_ep_cfg_aggr ep_aggr;
 	int desc_idx = 0;
 	int res;
-	struct ipahal_imm_cmd_register_write reg_write_agg_close;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
-	struct ipahal_reg_valmask valmask;
 
 	for (i = start_pipe; i < end_pipe; i++) {
+		struct ipahal_reg_valmask valmask;
+		u32 offset;
+
 		ipahal_read_reg_n_fields(IPA_ENDP_INIT_AGGR_n, i, &ep_aggr);
 		if (!ep_aggr.aggr_en)
 			continue;
@@ -1951,17 +1952,10 @@ static int ipa3_tag_generate_force_close_desc(struct ipa3_desc desc[],
 			goto fail_no_desc;
 		}
 
-		reg_write_agg_close.skip_pipeline_clear = false;
-		reg_write_agg_close.pipeline_clear_options =
-			IPAHAL_FULL_PIPELINE_CLEAR;
-		reg_write_agg_close.offset =
-			ipahal_reg_offset(IPA_AGGR_FORCE_CLOSE);
+		offset = ipahal_reg_offset(IPA_AGGR_FORCE_CLOSE);
 		ipahal_get_aggr_force_close_valmask(i, &valmask);
-		reg_write_agg_close.value = valmask.val;
-		reg_write_agg_close.value_mask = valmask.mask;
-		cmd_pyld = ipahal_construct_imm_cmd(
-				IPA_IMM_CMD_REGISTER_WRITE,
-				&reg_write_agg_close);
+		cmd_pyld = ipahal_register_write_pyld(offset, valmask.val,
+							valmask.mask, true);
 		if (!cmd_pyld) {
 			ipa_err("failed to construct register_write imm cmd\n");
 			res = -ENOMEM;

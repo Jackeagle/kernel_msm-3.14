@@ -540,6 +540,21 @@ ipahal_dma_shared_mem_write_pyld(struct ipa_mem_buffer *mem, u32 offset)
 	return ipahal_construct_imm_cmd(IPA_IMM_CMD_DMA_SHARED_MEM, &cmd);
 }
 
+struct ipahal_imm_cmd_pyld *
+ipahal_register_write_pyld(u32 offset, u32 value, u32 mask, bool clear)
+{
+	struct ipahal_imm_cmd_register_write cmd;
+
+	cmd.offset = offset;
+	cmd.value = value;
+	cmd.value_mask = mask;
+	cmd.skip_pipeline_clear = false;
+	cmd.pipeline_clear_options = clear ? IPAHAL_FULL_PIPELINE_CLEAR
+					   : IPAHAL_HPS_CLEAR;
+
+	return ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE, &cmd);
+}
+
 /*
  * ipahal_construct_nop_imm_cmd() - Construct immediate comamnd for NO-Op
  * Core driver may want functionality to inject NOP commands to IPA
@@ -550,22 +565,14 @@ ipahal_dma_shared_mem_write_pyld(struct ipa_mem_buffer *mem, u32 offset)
  */
 struct ipahal_imm_cmd_pyld *ipahal_construct_nop_imm_cmd(void)
 {
-	struct ipahal_imm_cmd_register_write cmd;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 
-	cmd.offset = 0;
-	cmd.value = 0;
-	cmd.value_mask = 0x0;
-	cmd.skip_pipeline_clear = false;
-	cmd.pipeline_clear_options = IPAHAL_FULL_PIPELINE_CLEAR;
-
-	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE, &cmd);
+	cmd_pyld = ipahal_register_write_pyld(0, 0, 0x0, true);
 	if (!cmd_pyld)
 		ipa_err("failed to construct register_write imm cmd\n");
 
 	return cmd_pyld;
 }
-
 
 /* IPA Packet Status Logic */
 
