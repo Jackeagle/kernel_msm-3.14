@@ -331,6 +331,15 @@ struct ipahal_imm_cmd_pyld *ipahal_register_write_pyld(u32 offset, u32 value,
 				u32 mask, bool clear);
 
 /*
+ * Return a pointer to the payload for a header init local immediate
+ * command, or null if one can't be allocated.  Caller must ensure result
+ * gets released by providing it to ipahal_destroy_imm_cmd().
+ */
+struct ipahal_imm_cmd_pyld *ipahal_hdr_init_local_pyld(
+				struct ipa_mem_buffer *mem, u32 offset);
+
+
+/*
  * ipahal_destroy_imm_cmd() - Destroy/Release bulk that was built
  *  by the construction functions
  */

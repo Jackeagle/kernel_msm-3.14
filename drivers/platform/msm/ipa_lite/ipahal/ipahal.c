@@ -555,6 +555,18 @@ ipahal_register_write_pyld(u32 offset, u32 value, u32 mask, bool clear)
 	return ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE, &cmd);
 }
 
+struct ipahal_imm_cmd_pyld *
+ipahal_hdr_init_local_pyld(struct ipa_mem_buffer *mem, u32 offset)
+{
+	struct ipahal_imm_cmd_hdr_init_local cmd = { 0 };
+
+	cmd.hdr_table_addr = mem->phys_base;
+	cmd.size_hdr_table = mem->size;
+	cmd.hdr_addr = offset;
+
+	return ipahal_construct_imm_cmd(IPA_IMM_CMD_HDR_INIT_LOCAL, &cmd);
+}
+
 /* IPA Packet Status Logic */
 
 static bool status_opcode_valid(u8 status_opcode)

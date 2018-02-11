@@ -645,7 +645,6 @@ int _ipa_init_hdr_v3_0(void)
 {
 	struct ipa3_desc desc = { 0 };
 	struct ipa_mem_buffer mem;
-	struct ipahal_imm_cmd_hdr_init_local cmd = {0};
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	u32 dma_size;
 	u32 offset;
@@ -656,11 +655,8 @@ int _ipa_init_hdr_v3_0(void)
 		return -ENOMEM;
 	}
 
-	cmd.hdr_table_addr = mem.phys_base;
-	cmd.size_hdr_table = mem.size;
-	cmd.hdr_addr = ipa3_ctx->smem_restricted_bytes +
-					ipa3_mem(MODEM_HDR_OFST);
-	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_HDR_INIT_LOCAL, &cmd);
+	offset = ipa3_ctx->smem_restricted_bytes + ipa3_mem(MODEM_HDR_OFST);
+	cmd_pyld = ipahal_hdr_init_local_pyld(&mem, offset);
 	if (!cmd_pyld) {
 		ipa_err("fail to construct hdr_init_local imm cmd\n");
 		ipahal_dma_free(&mem);
