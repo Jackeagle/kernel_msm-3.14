@@ -1791,11 +1791,8 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 	}
 
 	/* Copy the required descriptors from the client now */
-	if (desc) {
-		memcpy(&(tag_desc[0]), desc, descs_num *
-			sizeof(tag_desc[0]));
-		desc_idx += descs_num;
-	}
+	memcpy(tag_desc, desc, descs_num * sizeof(*tag_desc));
+	desc_idx += descs_num;
 
 	/* NO-OP IC for ensuring that IPA pipeline is empty */
 	cmd_pyld = ipahal_construct_nop_imm_cmd();
