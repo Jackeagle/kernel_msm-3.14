@@ -83,39 +83,19 @@ struct ipahal_imm_cmd_ip_v6_filter_init {
 };
 
 /*
- * struct ipahal_imm_cmd_ip_v4_routing_init - IP_V4_ROUTING_INIT cmd payload
- * Inits IPv4 routing table/structure - with the rules and other related params
+ * struct ipahal_imm_cmd_ip_routing_init - IP_V*_ROUTING_INIT cmd payload
+ * Inits routing table/structure - with the rules and other related params
+ * IPv4 and IPv6 use the same structure.
  * @hash_rules_addr: Addr in sys mem where ipv4 hashable rt tbl starts
  * @hash_rules_size: Size in bytes of the hashable tbl to cpy to local mem
- * @hash_local_addr: Addr in shared mem where ipv4 hashable rt tbl should
+ * @hash_local_addr: Addr in shared mem where hashable rt tbl should
  *  be copied to
- * @nhash_rules_addr: Addr in sys mem where ipv4 non-hashable rt tbl starts
+ * @nhash_rules_addr: Addr in sys mem where non-hashable rt tbl starts
  * @nhash_rules_size: Size in bytes of the non-hashable tbl to cpy to local mem
- * @nhash_local_addr: Addr in shared mem where ipv4 non-hashable rt tbl should
+ * @nhash_local_addr: Addr in shared mem where non-hashable rt tbl should
  *  be copied to
  */
-struct ipahal_imm_cmd_ip_v4_routing_init {
-	u64 hash_rules_addr;
-	u32 hash_rules_size;
-	u32 hash_local_addr;
-	u64 nhash_rules_addr;
-	u32 nhash_rules_size;
-	u32 nhash_local_addr;
-};
-
-/*
- * struct ipahal_imm_cmd_ip_v6_routing_init - IP_V6_ROUTING_INIT cmd payload
- * Inits IPv6 routing table/structure - with the rules and other related params
- * @hash_rules_addr: Addr in sys mem where ipv6 hashable rt tbl starts
- * @hash_rules_size: Size in bytes of the hashable tbl to cpy to local mem
- * @hash_local_addr: Addr in shared mem where ipv6 hashable rt tbl should
- *  be copied to
- * @nhash_rules_addr: Addr in sys mem where ipv6 non-hashable rt tbl starts
- * @nhash_rules_size: Size in bytes of the non-hashable tbl to cpy to local mem
- * @nhash_local_addr: Addr in shared mem where ipv6 non-hashable rt tbl should
- *  be copied to
- */
-struct ipahal_imm_cmd_ip_v6_routing_init {
+struct ipahal_imm_cmd_ip_routing_init {
 	u64 hash_rules_addr;
 	u32 hash_rules_size;
 	u32 hash_local_addr;
