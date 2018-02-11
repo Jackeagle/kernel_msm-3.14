@@ -619,6 +619,27 @@ ipahal_ip_v6_routing_init_pyld(struct ipa_mem_buffer *mem,
 	return ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_V6_ROUTING_INIT, &cmd);
 }
 
+struct ipahal_imm_cmd_pyld *
+ipahal_ip_v4_filter_init_pyld(struct ipa_mem_buffer *mem,
+		u32 hash_offset, u32 nhash_offset)
+{
+	struct ipahal_imm_cmd_ip_v4_filter_init cmd;
+
+	cmd.hash_rules_addr = (u64)mem->phys_base;
+	cmd.hash_rules_size = (u32)mem->size;
+	cmd.hash_local_addr = hash_offset;
+	cmd.nhash_rules_addr = (u64)mem->phys_base;
+	cmd.nhash_rules_size = (u32)mem->size;
+	cmd.nhash_local_addr = nhash_offset;
+
+	ipa_debug("putting hashable filtering IPv4 rules to phys 0x%x\n",
+			hash_offset);
+	ipa_debug("putting non-hashable filtering IPv4 rules to phys 0x%x\n",
+			nhash_offset);
+
+	return ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_V4_FILTER_INIT, &cmd);
+}
+
 /* IPA Packet Status Logic */
 
 static bool status_opcode_valid(u8 status_opcode)
