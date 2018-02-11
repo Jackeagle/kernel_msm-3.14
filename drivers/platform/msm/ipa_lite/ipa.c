@@ -1789,7 +1789,6 @@ static int ipa3_alloc_pkt_init(void)
 		ipa_err("failed to construct IMM cmd\n");
 		return -ENOMEM;
 	}
-	ipa3_ctx->pkt_init_imm_opcode = cmd_pyld->opcode;
 	dma_size = cmd_pyld->len * ipa3_ctx->ipa_num_pipes;
 	ipahal_destroy_imm_cmd(cmd_pyld);
 
@@ -1806,7 +1805,6 @@ static int ipa3_alloc_pkt_init(void)
 			ipa_err("failed to construct IMM cmd\n");
 			memset(&ipa3_ctx->pkt_init_imm[0], 0,
 					i * sizeof(ipa3_ctx->pkt_init_imm[0]));
-			ipa3_ctx->pkt_init_imm_opcode = 0;
 			ipahal_dma_free(mem);
 			return -ENOMEM;
 		}
@@ -1823,7 +1821,6 @@ static int ipa3_alloc_pkt_init(void)
 static void ipa3_free_pkt_init(void)
 {
 	memset(&ipa3_ctx->pkt_init_imm, 0, sizeof(ipa3_ctx->pkt_init_imm));
-	ipa3_ctx->pkt_init_imm_opcode = 0;
 	ipahal_dma_free(&ipa3_ctx->pkt_init_mem);
 }
 
