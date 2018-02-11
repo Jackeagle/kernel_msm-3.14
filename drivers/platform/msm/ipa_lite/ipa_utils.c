@@ -2290,19 +2290,13 @@ void ipa3_suspend_apps_pipes(bool suspend)
 int ipa3_allocate_dma_task_for_gsi(void)
 {
 	struct ipa_mem_buffer *mem = &ipa3_ctx->dma_task_info.mem;
-	struct ipahal_imm_cmd_dma_task_32b_addr cmd = { 0 };
 
 	ipa_debug("Allocate mem\n");
 
 	if (ipahal_dma_alloc(mem, IPA_GSI_CHANNEL_STOP_PKT_SIZE, GFP_KERNEL))
 		return -EFAULT;
 
-	cmd.flsh = 1;
-	cmd.size1 = ipa3_ctx->dma_task_info.mem.size;
-	cmd.addr1 = ipa3_ctx->dma_task_info.mem.phys_base;
-	cmd.packet_size = ipa3_ctx->dma_task_info.mem.size;
-	ipa3_ctx->dma_task_info.cmd_pyld = ipahal_construct_imm_cmd(
-			IPA_IMM_CMD_DMA_TASK_32B_ADDR, &cmd);
+	ipa3_ctx->dma_task_info.cmd_pyld = ipahal_dma_task_32b_addr_pyld(mem);
 	if (!ipa3_ctx->dma_task_info.cmd_pyld) {
 		ipa_err("failed to construct dma_task_32b_addr cmd\n");
 		ipahal_dma_free(mem);

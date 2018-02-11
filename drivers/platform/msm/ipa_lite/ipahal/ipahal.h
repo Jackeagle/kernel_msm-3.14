@@ -241,15 +241,6 @@ static inline void *ipahal_imm_cmd_pyld_data(struct ipahal_imm_cmd_pyld *pyld)
 /* Immediate command Function APIs */
 
 /*
- * ipahal_construct_imm_cmd() - Construct immdiate command
- * This function builds imm cmd bulk that can be be sent to IPA
- * The command will be allocated dynamically.
- * After done using it, call ipahal_destroy_imm_cmd() to release it
- */
-struct ipahal_imm_cmd_pyld *ipahal_construct_imm_cmd(
-	enum ipahal_imm_cmd_name cmd, const void *params);
-
-/*
  * Return a pointer to the payload for a DMA shared memory write immediate
  * command, or null if one can't be allocated.  Result is dynamically
  * allocated, and caller must ensure it gets released by providing it to
@@ -324,6 +315,14 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_v6_filter_init_pyld(
  * gets released by providing it to ipahal_destroy_imm_cmd().
  */
 struct ipahal_imm_cmd_pyld *ipahal_ip_packet_tag_status_pyld(u64 tag);
+
+/*
+ * Return a pointer to the payload for DMA task 32-bit address immediate
+ * command, or null if one can't be allocated.  Caller must ensure result
+ * gets released by providing it to ipahal_destroy_imm_cmd().
+ */
+struct ipahal_imm_cmd_pyld *ipahal_dma_task_32b_addr_pyld(
+				struct ipa_mem_buffer *mem);
 
 /*
  * ipahal_destroy_imm_cmd() - Destroy/Release bulk that was built

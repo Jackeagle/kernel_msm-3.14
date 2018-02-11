@@ -514,7 +514,7 @@ static void ipahal_imm_cmd_init(enum ipa_hw_version hw_version)
  * The command will be allocated dynamically.
  * After done using it, call ipahal_destroy_imm_cmd() to release it
  */
-struct ipahal_imm_cmd_pyld *
+static struct ipahal_imm_cmd_pyld *
 ipahal_construct_imm_cmd(enum ipahal_imm_cmd_name cmd, const void *params)
 
 {
@@ -659,6 +659,23 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_packet_tag_status_pyld(u64 tag)
 	cmd.tag = tag;
 
 	return ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_PACKET_TAG_STATUS, &cmd);
+}
+
+struct ipahal_imm_cmd_pyld *
+ipahal_dma_task_32b_addr_pyld(struct ipa_mem_buffer *mem)
+{
+	struct ipahal_imm_cmd_dma_task_32b_addr cmd = { 0 };
+
+	cmd.cmplt = false;
+	cmd.eof = false;
+	cmd.flsh = true;
+	cmd.lock = false;
+	cmd.unlock = false;
+	cmd.size1 = mem->size;
+	cmd.addr1 = mem->phys_base;
+	cmd.packet_size = mem->size;
+
+	return ipahal_construct_imm_cmd(IPA_IMM_CMD_DMA_TASK_32B_ADDR, &cmd);
 }
 
 /* IPA Packet Status Logic */
