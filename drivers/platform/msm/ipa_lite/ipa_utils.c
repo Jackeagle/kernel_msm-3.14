@@ -1760,7 +1760,6 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 	struct ipa3_sys_context *sys;
 	struct ipa3_desc *tag_desc;
 	int desc_idx = 0;
-	struct ipahal_imm_cmd_ip_packet_init pktinit_cmd;
 	struct ipahal_imm_cmd_pyld *cmd_pyld = NULL;
 	struct ipahal_imm_cmd_ip_packet_tag_status status;
 	int i;
@@ -1768,6 +1767,7 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 	int res;
 	struct ipa3_tag_completion *comp;
 	struct ipa3_ep_context *ep;
+	u32 dest_pipe_idx;
 
 	/* Not enough room for the required descriptors for the tag process */
 	if (IPA_TAG_MAX_DESC - descs_num < REQUIRED_TAG_PROCESS_DESCRIPTORS) {
@@ -1807,10 +1807,8 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 	desc_idx++;
 
 	/* IP_PACKET_INIT IC for tag status to be sent to apps */
-	pktinit_cmd.destination_pipe_index =
-		ipa3_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
-	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_PACKET_INIT,
-						&pktinit_cmd);
+	dest_pipe_idx = ipa3_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
+	cmd_pyld = ipahal_ip_packet_init_pyld(dest_pipe_idx);
 	if (!cmd_pyld) {
 		ipa_err("failed to construct ip_packet_init imm cmd\n");
 		res = -ENOMEM;

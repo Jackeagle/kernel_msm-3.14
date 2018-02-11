@@ -1780,13 +1780,13 @@ static int ipa3_alloc_pkt_init(void)
 {
 	struct ipa_mem_buffer *mem = &ipa3_ctx->pkt_init_mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
-	struct ipahal_imm_cmd_ip_packet_init cmd = {0};
 	dma_addr_t pyld_phys;
 	void *pyld_virt;
 	u32 size;
 	int i;
 
-	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_PACKET_INIT, &cmd);
+	/* First create a payload just to get its size */
+	cmd_pyld = ipahal_ip_packet_init_pyld(0);
 	if (!cmd_pyld) {
 		ipa_err("failed to construct IMM cmd\n");
 		return -ENOMEM;
@@ -1794,17 +1794,17 @@ static int ipa3_alloc_pkt_init(void)
 	size = cmd_pyld->len;
 	ipahal_destroy_imm_cmd(cmd_pyld);
 
+	/* Allocate enough DMA memory to hold a payload for each pipe */
 	if (ipahal_dma_alloc(mem, size * ipa3_ctx->ipa_num_pipes, GFP_KERNEL)) {
 		ipa_err("failed to alloc DMA buff of size %d\n", mem->size);
 		return -ENOMEM;
 	}
 
+	/* Fill in an IP packet init payload for each pipe */
 	pyld_phys = mem->phys_base;
 	pyld_virt = mem->base;
 	for (i = 0; i < ipa3_ctx->ipa_num_pipes; i++) {
-		cmd.destination_pipe_index = i;
-		cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_PACKET_INIT,
-							&cmd);
+		cmd_pyld = ipahal_ip_packet_init_pyld(i);
 		if (!cmd_pyld) {
 			ipa_err("failed to construct IMM cmd\n");
 			goto err_dma_free;

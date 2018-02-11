@@ -567,6 +567,16 @@ ipahal_hdr_init_local_pyld(struct ipa_mem_buffer *mem, u32 offset)
 	return ipahal_construct_imm_cmd(IPA_IMM_CMD_HDR_INIT_LOCAL, &cmd);
 }
 
+struct ipahal_imm_cmd_pyld *ipahal_ip_packet_init_pyld(u32 dest_pipe_idx)
+{
+	struct ipahal_imm_cmd_ip_packet_init cmd = { 0 };
+
+	cmd.destination_pipe_index = dest_pipe_idx;
+
+	return ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_PACKET_INIT, &cmd);
+
+}
+
 /* IPA Packet Status Logic */
 
 static bool status_opcode_valid(u8 status_opcode)
