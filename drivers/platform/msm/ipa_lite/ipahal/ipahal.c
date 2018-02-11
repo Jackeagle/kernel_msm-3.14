@@ -206,11 +206,6 @@ ipa_imm_cmd_construct_hdr_init_local(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_hdr_init_local *data;
 	const struct ipahal_imm_cmd_hdr_init_local *lclhdr_params = params;
 
-	if (check_too_big("Hdr tble sz", lclhdr_params->size_hdr_table, 12))
-		return NULL;
-	if (check_too_big("Hdr addr", lclhdr_params->hdr_addr, 16))
-		return NULL;
-
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
 		return NULL;
@@ -539,6 +534,11 @@ struct ipahal_imm_cmd_pyld *
 ipahal_hdr_init_local_pyld(struct ipa_mem_buffer *mem, u32 offset)
 {
 	struct ipahal_imm_cmd_hdr_init_local cmd = { 0 };
+
+	if (check_too_big("size", mem->size, 12))
+		return NULL;
+	if (check_too_big("offset", offset, 16))
+		return NULL;
 
 	cmd.hdr_table_addr = mem->phys_base;
 	cmd.size_hdr_table = mem->size;
