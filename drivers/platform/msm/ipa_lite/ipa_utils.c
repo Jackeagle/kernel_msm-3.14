@@ -1795,7 +1795,7 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 	desc_idx += descs_num;
 
 	/* NO-OP IC for ensuring that IPA pipeline is empty */
-	cmd_pyld = ipahal_construct_nop_imm_cmd();
+	cmd_pyld = ipahal_register_write_pyld(0, 0, 0x0, true);
 	if (!cmd_pyld) {
 		ipa_err("failed to construct NOP imm cmd\n");
 		res = -ENOMEM;

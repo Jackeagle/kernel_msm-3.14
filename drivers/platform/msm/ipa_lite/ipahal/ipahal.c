@@ -555,25 +555,6 @@ ipahal_register_write_pyld(u32 offset, u32 value, u32 mask, bool clear)
 	return ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE, &cmd);
 }
 
-/*
- * ipahal_construct_nop_imm_cmd() - Construct immediate comamnd for NO-Op
- * Core driver may want functionality to inject NOP commands to IPA
- *  to ensure e.g., PIPLINE clear before someother operation.
- * The functionality given by this function can be reached by
- *  ipahal_construct_imm_cmd(). This function is helper to the core driver
- *  to reach this NOP functionlity easily.
- */
-struct ipahal_imm_cmd_pyld *ipahal_construct_nop_imm_cmd(void)
-{
-	struct ipahal_imm_cmd_pyld *cmd_pyld;
-
-	cmd_pyld = ipahal_register_write_pyld(0, 0, 0x0, true);
-	if (!cmd_pyld)
-		ipa_err("failed to construct register_write imm cmd\n");
-
-	return cmd_pyld;
-}
-
 /* IPA Packet Status Logic */
 
 static bool status_opcode_valid(u8 status_opcode)

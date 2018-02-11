@@ -331,16 +331,6 @@ struct ipahal_imm_cmd_pyld *ipahal_register_write_pyld(u32 offset, u32 value,
 				u32 mask, bool clear);
 
 /*
- * ipahal_construct_nop_imm_cmd() - Construct immediate comamnd for NO-Op
- * Core driver may want functionality to inject NOP commands to IPA
- *  to ensure e.g., PIPLINE clear before someother operation.
- * The functionality given by this function can be reached by
- *  ipahal_construct_imm_cmd(). This function is helper to the core driver
- *  to reach this NOP functionlity easily.
- */
-struct ipahal_imm_cmd_pyld *ipahal_construct_nop_imm_cmd(void);
-
-/*
  * ipahal_destroy_imm_cmd() - Destroy/Release bulk that was built
  *  by the construction functions
  */
