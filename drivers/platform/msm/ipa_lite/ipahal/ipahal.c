@@ -133,22 +133,6 @@ ipa_imm_cmd_construct_ip_packet_tag_status(u16 opcode, const void *params)
 	return pyld;
 }
 
-static bool pipeline_clear_options_bad(u16 option)
-{
-	switch (option) {
-	case IPAHAL_HPS_CLEAR:
-	case IPAHAL_SRC_GRP_CLEAR:
-	case IPAHAL_FULL_PIPELINE_CLEAR:
-		return false;
-	default:
-		break;
-	}
-
-	ipa_err("unsupported pipeline clear option %hu\n", option);
-
-	return WARN_ON(true);
-}
-
 static struct ipahal_imm_cmd_pyld *
 ipa_imm_cmd_construct_dma_shared_mem(u16 opcode, const void *params)
 {
@@ -179,11 +163,6 @@ ipa_imm_cmd_construct_register_write(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_register_write *data;
 	const struct ipahal_imm_cmd_register_write *regwrt_params = params;
 	u16 pipeline_clear_options = (u16)regwrt_params->pipeline_clear_options;
-
-	if (check_too_big("Offset", regwrt_params->offset, 16))
-		return NULL;
-	if (pipeline_clear_options_bad(pipeline_clear_options))
-		return NULL;
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
@@ -542,6 +521,9 @@ struct ipahal_imm_cmd_pyld *
 ipahal_register_write_pyld(u32 offset, u32 value, u32 mask, bool clear)
 {
 	struct ipahal_imm_cmd_register_write cmd;
+
+	if (check_too_big("offset", offset, 16))
+		return NULL;
 
 	cmd.offset = offset;
 	cmd.value = value;
