@@ -221,15 +221,6 @@ ipa_imm_cmd_construct_ip_v6_routing_init(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_ip_v6_routing_init *data;
 	const struct ipahal_imm_cmd_ip_fltrt_init *rt6_params = params;
 
-	if (check_too_big("Hash rules sz", rt6_params->hash_rules_size, 12))
-		return NULL;
-	if (check_too_big("Hash lcl addr", rt6_params->hash_local_addr, 16))
-		return NULL;
-	if (check_too_big("NHash rules sz", rt6_params->nhash_rules_size, 12))
-		return NULL;
-	if (check_too_big("NHash lcl addr", rt6_params->nhash_local_addr, 16))
-		return NULL;
-
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
 		return NULL;
@@ -251,15 +242,6 @@ ipa_imm_cmd_construct_ip_v4_routing_init(u16 opcode, const void *params)
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v4_routing_init *data;
 	const struct ipahal_imm_cmd_ip_fltrt_init *rt4_params = params;
-
-	if (check_too_big("Hash rules sz", rt4_params->hash_rules_size, 12))
-		return NULL;
-	if (check_too_big("Hash lcl addr", rt4_params->hash_local_addr, 16))
-		return NULL;
-	if (check_too_big("NHash rules sz", rt4_params->nhash_rules_size, 12))
-		return NULL;
-	if (check_too_big("NHash lcl addr", rt4_params->nhash_local_addr, 16))
-		return NULL;
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
@@ -283,15 +265,6 @@ ipa_imm_cmd_construct_ip_v6_filter_init(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_ip_v6_filter_init *data;
 	const struct ipahal_imm_cmd_ip_fltrt_init *flt6_params = params;
 
-	if (check_too_big("Hash rules sz", flt6_params->hash_rules_size, 12))
-		return NULL;
-	if (check_too_big("Hash lcl addr", flt6_params->hash_local_addr, 16))
-		return NULL;
-	if (check_too_big("NHash rules sz", flt6_params->nhash_rules_size, 12))
-		return NULL;
-	if (check_too_big("NHash lcl addr", flt6_params->nhash_local_addr, 16))
-		return NULL;
-
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
 		return NULL;
@@ -313,15 +286,6 @@ ipa_imm_cmd_construct_ip_v4_filter_init(u16 opcode, const void *params)
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_v4_filter_init *data;
 	const struct ipahal_imm_cmd_ip_fltrt_init *flt4_params = params;
-
-	if (check_too_big("Hash rules sz", flt4_params->hash_rules_size, 12))
-		return NULL;
-	if (check_too_big("Hash lcl addr", flt4_params->hash_local_addr, 16))
-		return NULL;
-	if (check_too_big("NHash rules sz", flt4_params->nhash_rules_size, 12))
-		return NULL;
-	if (check_too_big("NHash lcl addr", flt4_params->nhash_local_addr, 16))
-		return NULL;
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
@@ -556,15 +520,26 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_packet_init_pyld(u32 dest_pipe_idx)
 
 }
 
-static void fltrt_init_common(struct ipahal_imm_cmd_ip_fltrt_init *cmd,
+static bool fltrt_init_common(struct ipahal_imm_cmd_ip_fltrt_init *cmd,
 		struct ipa_mem_buffer *mem, u32 hash_offset, u32 nhash_offset)
 {
+	if (check_too_big("hash_rules_size", mem->size, 12))
+		return false;
+	if (check_too_big("hash_local_addr", hash_offset, 16))
+		return false;
+	if (check_too_big("nhash_rules_size", mem->size, 12))
+		return false;
+	if (check_too_big("nhash_local_addr", nhash_offset, 16))
+		return false;
+
 	cmd->hash_rules_addr = (u64)mem->phys_base;
 	cmd->hash_rules_size = (u32)mem->size;
 	cmd->hash_local_addr = hash_offset;
 	cmd->nhash_rules_addr = (u64)mem->phys_base;
 	cmd->nhash_rules_size = (u32)mem->size;
 	cmd->nhash_local_addr = nhash_offset;
+
+	return true;
 }
 
 struct ipahal_imm_cmd_pyld *
@@ -573,7 +548,8 @@ ipahal_ip_v4_routing_init_pyld(struct ipa_mem_buffer *mem,
 {
 	struct ipahal_imm_cmd_ip_fltrt_init cmd;
 
-	fltrt_init_common(&cmd, mem, hash_offset, nhash_offset);
+	if (!fltrt_init_common(&cmd, mem, hash_offset, nhash_offset))
+		return NULL;
 
 	ipa_debug("putting hashable routing IPv4 rules to phys 0x%x\n",
 			hash_offset);
@@ -589,7 +565,8 @@ ipahal_ip_v6_routing_init_pyld(struct ipa_mem_buffer *mem,
 {
 	struct ipahal_imm_cmd_ip_fltrt_init cmd;
 
-	fltrt_init_common(&cmd, mem, hash_offset, nhash_offset);
+	if (!fltrt_init_common(&cmd, mem, hash_offset, nhash_offset))
+		return NULL;
 
 	ipa_debug("putting hashable routing IPv6 rules to phys 0x%x\n",
 			hash_offset);
@@ -605,7 +582,8 @@ ipahal_ip_v4_filter_init_pyld(struct ipa_mem_buffer *mem,
 {
 	struct ipahal_imm_cmd_ip_fltrt_init cmd;
 
-	fltrt_init_common(&cmd, mem, hash_offset, nhash_offset);
+	if (!fltrt_init_common(&cmd, mem, hash_offset, nhash_offset))
+		return NULL;
 
 	ipa_debug("putting hashable filtering IPv4 rules to phys 0x%x\n",
 			hash_offset);
@@ -621,7 +599,8 @@ ipahal_ip_v6_filter_init_pyld(struct ipa_mem_buffer *mem,
 {
 	struct ipahal_imm_cmd_ip_fltrt_init cmd;
 
-	fltrt_init_common(&cmd, mem, hash_offset, nhash_offset);
+	if (!fltrt_init_common(&cmd, mem, hash_offset, nhash_offset))
+		return NULL;
 
 	ipa_debug("putting hashable filtering IPv6 rules to phys 0x%x\n",
 			hash_offset);
