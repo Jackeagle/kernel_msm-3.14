@@ -435,7 +435,6 @@ struct ipa3_desc {
 	skb_frag_t *frag;
 	dma_addr_t dma_address;
 	bool dma_address_valid;
-	bool is_tag_status;
 	u16 len;
 	u16 opcode;
 	void (*callback)(void *user1, int user2);

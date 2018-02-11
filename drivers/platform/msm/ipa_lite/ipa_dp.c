@@ -80,11 +80,8 @@ static void ipa3_wq_rx_avail(struct work_struct *work);
 static void ipa3_wq_repl_rx(struct work_struct *work);
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	struct ipa3_ep_context *ep);
-static struct ipahal_imm_cmd_pyld *ipa_populate_tag_field(
-		struct ipa3_desc *desc, struct ipa3_tx_pkt_wrapper *tx_pkt);
 static int ipa_poll_gsi_pkt(struct ipa3_sys_context *sys);
 static struct ipa3_tx_pkt_wrapper *tag_to_pointer_wa(u64 tag);
-static u64 pointer_to_tag_wa(struct ipa3_tx_pkt_wrapper *tx_pkt);
 
 static u32 ipa_adjust_ra_buff_base_sz(u32 aggr_byte_limit);
 
@@ -346,15 +343,6 @@ ipa3_send(struct ipa3_sys_context *sys, u32 num_desc, struct ipa3_desc *desc)
 			tx_pkt_first = tx_pkt;
 			tx_pkt->cnt = num_desc;
 			INIT_WORK(&tx_pkt->work, ipa3_wq_write_done);
-		}
-
-		/* populate tag field if payload is null */
-		if (desc[i].is_tag_status && desc[i].pyld) {
-			tag_pyld_ret = ipa_populate_tag_field(&desc[i], tx_pkt);
-			if (!tag_pyld_ret) {
-				ipa_err("Failed to populate tag field\n");
-				goto failure_dma_map;
-			}
 		}
 
 		tx_pkt->type = desc[i].type;
@@ -2524,31 +2512,6 @@ err_evt_ring_hdl_put:
 	return result;
 }
 
-static struct ipahal_imm_cmd_pyld *
-ipa_populate_tag_field(struct ipa3_desc *desc,
-		struct ipa3_tx_pkt_wrapper *tx_pkt)
-{
-	struct ipahal_imm_cmd_pyld *tag_pyld;
-	struct ipahal_imm_cmd_ip_packet_tag_status tag_cmd;
-
-	/* ipa_assert(!desc->pyld); */
-	tag_cmd.tag = pointer_to_tag_wa(tx_pkt);
-	tag_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_PACKET_TAG_STATUS,
-						&tag_cmd);
-	if (unlikely(!tag_pyld)) {
-		ipa_err("Failed to construct ip_packet_tag_status\n");
-		return NULL;
-	}
-
-	ipa_desc_fill_imm_cmd(desc, tag_pyld);
-	desc->user1 = tag_pyld;
-	desc->callback = ipa3_tag_destroy_imm;
-
-	ipa_debug_low("tx_pkt sent in tag: 0x%p\n", tx_pkt);
-
-	return tag_pyld;
-}
-
 static int
 ipa_poll_gsi_pkt(struct ipa3_sys_context *sys)
 {
@@ -2575,19 +2538,6 @@ static struct ipa3_tx_pkt_wrapper *tag_to_pointer_wa(u64 tag)
 	u64 addr = GENMASK(63,48) | tag;
 
 	return (struct ipa3_tx_pkt_wrapper *)addr;
-}
-
-static u64 pointer_to_tag_wa(struct ipa3_tx_pkt_wrapper *tx_pkt)
-{
-	u64 addr = (u64)tx_pkt;
-
-	/* Add the check but it might have throughput issue */
-	if ((addr & GENMASK(63,48)) != GENMASK(63,48)) {
-		ipa_err("The 16 prefix is not all 1s (%p)\n", tx_pkt);
-		BUG();
-	}
-
-	return addr & GENMASK(47,0);
 }
 
 /**
