@@ -652,6 +652,15 @@ ipahal_ip_v6_filter_init_pyld(struct ipa_mem_buffer *mem,
 	return ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_V6_FILTER_INIT, &cmd);
 }
 
+struct ipahal_imm_cmd_pyld *ipahal_ip_packet_tag_status_pyld(u64 tag)
+{
+	struct ipahal_imm_cmd_ip_packet_tag_status cmd;
+
+	cmd.tag = tag;
+
+	return ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_PACKET_TAG_STATUS, &cmd);
+}
+
 /* IPA Packet Status Logic */
 
 static bool status_opcode_valid(u8 status_opcode)

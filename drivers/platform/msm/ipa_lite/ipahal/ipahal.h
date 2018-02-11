@@ -319,6 +319,13 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_v6_filter_init_pyld(
 				u32 hash_offset, u32 nhash_offset);
 
 /*
+ * Return a pointer to the payload for an IP packet tag status immediate
+ * command, or null if one can't be allocated.  Caller must ensure result
+ * gets released by providing it to ipahal_destroy_imm_cmd().
+ */
+struct ipahal_imm_cmd_pyld *ipahal_ip_packet_tag_status_pyld(u64 tag);
+
+/*
  * ipahal_destroy_imm_cmd() - Destroy/Release bulk that was built
  *  by the construction functions
  */

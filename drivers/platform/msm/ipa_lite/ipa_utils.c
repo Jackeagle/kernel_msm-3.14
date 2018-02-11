@@ -1761,7 +1761,6 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 	struct ipa3_desc *tag_desc;
 	int desc_idx = 0;
 	struct ipahal_imm_cmd_pyld *cmd_pyld = NULL;
-	struct ipahal_imm_cmd_ip_packet_tag_status status;
 	int i;
 	struct sk_buff *dummy_skb;
 	int res;
@@ -1820,10 +1819,7 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 	desc_idx++;
 
 	/* status IC */
-	status.tag = IPA_COOKIE;
-	cmd_pyld = ipahal_construct_imm_cmd(
-				IPA_IMM_CMD_IP_PACKET_TAG_STATUS,
-				&status);
+	cmd_pyld = ipahal_ip_packet_tag_status_pyld(IPA_COOKIE);
 	if (!cmd_pyld) {
 		ipa_err("failed to construct ip_packet_tag_status imm cmd\n");
 		res = -ENOMEM;
