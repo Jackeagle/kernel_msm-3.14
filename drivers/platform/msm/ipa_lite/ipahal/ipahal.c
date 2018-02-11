@@ -185,10 +185,6 @@ ipa_imm_cmd_construct_ip_packet_init(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_ip_packet_init *data;
 	const struct ipahal_imm_cmd_ip_packet_init *pktinit_params = params;
 
-	if (check_too_big("Dst pipe idx",
-				pktinit_params->destination_pipe_index, 5))
-		return NULL;
-
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
 		return NULL;
@@ -550,6 +546,9 @@ ipahal_hdr_init_local_pyld(struct ipa_mem_buffer *mem, u32 offset)
 struct ipahal_imm_cmd_pyld *ipahal_ip_packet_init_pyld(u32 dest_pipe_idx)
 {
 	struct ipahal_imm_cmd_ip_packet_init cmd = { 0 };
+
+	if (check_too_big("dest_pipe_idx", dest_pipe_idx, 5))
+		return NULL;
 
 	cmd.destination_pipe_index = dest_pipe_idx;
 
