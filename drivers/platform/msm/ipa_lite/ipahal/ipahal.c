@@ -447,21 +447,29 @@ ipahal_construct_imm_cmd(enum ipahal_imm_cmd_name cmd, const void *params)
 struct ipahal_imm_cmd_pyld *
 ipahal_dma_shared_mem_write_pyld(struct ipa_mem_buffer *mem, u32 offset)
 {
-	struct ipahal_imm_cmd_dma_shared_mem cmd = { 0 };
+	struct ipa_imm_cmd_hw_dma_shared_mem *data;
+	struct ipahal_imm_cmd_pyld *pyld;
+	u16 opcode;
 
 	if (check_too_big("size", mem->size, 16))
 		return NULL;
 	if (check_too_big("offset", offset, 16))
 		return NULL;
 
-	cmd.is_read = false;
-	cmd.skip_pipeline_clear = false;
-	cmd.pipeline_clear_options = IPAHAL_HPS_CLEAR;
-	cmd.size = mem->size;
-	cmd.system_addr = mem->phys_base;
-	cmd.local_addr = offset;
+	opcode = ipahal_imm_cmds[IPA_IMM_CMD_DMA_SHARED_MEM].opcode;
+	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
-	return ipahal_construct_imm_cmd(IPA_IMM_CMD_DMA_SHARED_MEM, &cmd);
+	data->size = mem->size;
+	data->local_addr = offset;
+	data->direction = 0;	/* 0 = write to IPA; 1 = read from IPA */
+	data->skip_pipeline_clear = 0;
+	data->pipeline_clear_options = IPAHAL_HPS_CLEAR;
+	data->system_addr = mem->phys_base;
+
+	return pyld;
 }
 
 struct ipahal_imm_cmd_pyld *
