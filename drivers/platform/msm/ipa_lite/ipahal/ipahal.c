@@ -88,11 +88,6 @@ ipa_imm_cmd_construct_dma_task_32b_addr(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_dma_task_32b_addr *data;
 	const struct ipahal_imm_cmd_dma_task_32b_addr *dma_params = params;
 
-	if (check_too_big("Size1", dma_params->size1, 16))
-		return NULL;
-	if (check_too_big("Pkt sz", dma_params->packet_size, 16))
-		return NULL;
-
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
 		return NULL;
@@ -623,6 +618,11 @@ struct ipahal_imm_cmd_pyld *
 ipahal_dma_task_32b_addr_pyld(struct ipa_mem_buffer *mem)
 {
 	struct ipahal_imm_cmd_dma_task_32b_addr cmd = { 0 };
+
+	if (check_too_big("size1", mem->size, 16))
+		return NULL;
+	if (check_too_big("packet_size", mem->size, 16))
+		return NULL;
 
 	cmd.cmplt = false;
 	cmd.eof = false;
