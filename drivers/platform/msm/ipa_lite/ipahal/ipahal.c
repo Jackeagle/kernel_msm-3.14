@@ -120,9 +120,6 @@ ipa_imm_cmd_construct_ip_packet_tag_status(u16 opcode, const void *params)
 	struct ipa_imm_cmd_hw_ip_packet_tag_status *data;
 	const struct ipahal_imm_cmd_ip_packet_tag_status *tag_params = params;
 
-	if (check_too_big("tag", tag_params->tag, 48))
-		return NULL;
-
 	pyld = ipahal_imm_cmd_pyld_alloc_atomic(opcode, sizeof(*data));
 	if (!pyld)
 		return NULL;
@@ -613,6 +610,9 @@ ipahal_ip_v6_filter_init_pyld(struct ipa_mem_buffer *mem,
 struct ipahal_imm_cmd_pyld *ipahal_ip_packet_tag_status_pyld(u64 tag)
 {
 	struct ipahal_imm_cmd_ip_packet_tag_status cmd;
+
+	if (check_too_big("tag", tag, 48))
+		return NULL;
 
 	cmd.tag = tag;
 
