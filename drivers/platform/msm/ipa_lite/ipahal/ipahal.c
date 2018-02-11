@@ -577,18 +577,24 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_packet_init_pyld(u32 dest_pipe_idx)
 
 }
 
+static void fltrt_init_common(struct ipahal_imm_cmd_ip_fltrt_init *cmd,
+		struct ipa_mem_buffer *mem, u32 hash_offset, u32 nhash_offset)
+{
+	cmd->hash_rules_addr = (u64)mem->phys_base;
+	cmd->hash_rules_size = (u32)mem->size;
+	cmd->hash_local_addr = hash_offset;
+	cmd->nhash_rules_addr = (u64)mem->phys_base;
+	cmd->nhash_rules_size = (u32)mem->size;
+	cmd->nhash_local_addr = nhash_offset;
+}
+
 struct ipahal_imm_cmd_pyld *
 ipahal_ip_v4_routing_init_pyld(struct ipa_mem_buffer *mem,
 		u32 hash_offset, u32 nhash_offset)
 {
 	struct ipahal_imm_cmd_ip_fltrt_init cmd;
 
-	cmd.hash_rules_addr = (u64)mem->phys_base;
-	cmd.hash_rules_size = (u32)mem->size;
-	cmd.hash_local_addr = hash_offset;
-	cmd.nhash_rules_addr = (u64)mem->phys_base;
-	cmd.nhash_rules_size = (u32)mem->size;
-	cmd.nhash_local_addr = nhash_offset;
+	fltrt_init_common(&cmd, mem, hash_offset, nhash_offset);
 
 	ipa_debug("putting hashable routing IPv4 rules to phys 0x%x\n",
 			hash_offset);
@@ -604,12 +610,7 @@ ipahal_ip_v6_routing_init_pyld(struct ipa_mem_buffer *mem,
 {
 	struct ipahal_imm_cmd_ip_fltrt_init cmd;
 
-	cmd.hash_rules_addr = (u64)mem->phys_base;
-	cmd.hash_rules_size = (u32)mem->size;
-	cmd.hash_local_addr = hash_offset;
-	cmd.nhash_rules_addr = (u64)mem->phys_base;
-	cmd.nhash_rules_size = (u32)mem->size;
-	cmd.nhash_local_addr = nhash_offset;
+	fltrt_init_common(&cmd, mem, hash_offset, nhash_offset);
 
 	ipa_debug("putting hashable routing IPv6 rules to phys 0x%x\n",
 			hash_offset);
@@ -625,12 +626,7 @@ ipahal_ip_v4_filter_init_pyld(struct ipa_mem_buffer *mem,
 {
 	struct ipahal_imm_cmd_ip_fltrt_init cmd;
 
-	cmd.hash_rules_addr = (u64)mem->phys_base;
-	cmd.hash_rules_size = (u32)mem->size;
-	cmd.hash_local_addr = hash_offset;
-	cmd.nhash_rules_addr = (u64)mem->phys_base;
-	cmd.nhash_rules_size = (u32)mem->size;
-	cmd.nhash_local_addr = nhash_offset;
+	fltrt_init_common(&cmd, mem, hash_offset, nhash_offset);
 
 	ipa_debug("putting hashable filtering IPv4 rules to phys 0x%x\n",
 			hash_offset);
@@ -646,12 +642,7 @@ ipahal_ip_v6_filter_init_pyld(struct ipa_mem_buffer *mem,
 {
 	struct ipahal_imm_cmd_ip_fltrt_init cmd;
 
-	cmd.hash_rules_addr = (u64)mem->phys_base;
-	cmd.hash_rules_size = (u32)mem->size;
-	cmd.hash_local_addr = hash_offset;
-	cmd.nhash_rules_addr = (u64)mem->phys_base;
-	cmd.nhash_rules_size = (u32)mem->size;
-	cmd.nhash_local_addr = nhash_offset;
+	fltrt_init_common(&cmd, mem, hash_offset, nhash_offset);
 
 	ipa_debug("putting hashable filtering IPv6 rules to phys 0x%x\n",
 			hash_offset);
