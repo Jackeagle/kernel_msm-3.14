@@ -157,13 +157,6 @@ ipa_imm_cmd_construct_dma_shared_mem(u16 opcode, const void *params)
 	const struct ipahal_imm_cmd_dma_shared_mem *mem_params = params;
 	u16 pipeline_clear_options = (u16)mem_params->pipeline_clear_options;
 
-	if (check_too_big("Size", mem_params->size, 16))
-		return NULL;
-	if (check_too_big("Lcl addr", mem_params->local_addr, 16))
-		return NULL;
-	if (pipeline_clear_options_bad(pipeline_clear_options))
-		return NULL;
-
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
 		return NULL;
@@ -529,6 +522,11 @@ struct ipahal_imm_cmd_pyld *
 ipahal_dma_shared_mem_write_pyld(struct ipa_mem_buffer *mem, u32 offset)
 {
 	struct ipahal_imm_cmd_dma_shared_mem cmd = { 0 };
+
+	if (check_too_big("size", mem->size, 16))
+		return NULL;
+	if (check_too_big("offset", offset, 16))
+		return NULL;
 
 	cmd.is_read = false;
 	cmd.skip_pipeline_clear = false;
