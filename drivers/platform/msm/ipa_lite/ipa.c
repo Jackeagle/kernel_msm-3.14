@@ -1781,6 +1781,8 @@ static int ipa3_alloc_pkt_init(void)
 	struct ipa_mem_buffer *mem = &ipa3_ctx->pkt_init_mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	struct ipahal_imm_cmd_ip_packet_init cmd = {0};
+	dma_addr_t pyld_phys;
+	void *pyld_virt;
 	u32 size;
 	int i;
 
@@ -1797,6 +1799,8 @@ static int ipa3_alloc_pkt_init(void)
 		return -ENOMEM;
 	}
 
+	pyld_phys = mem->phys_base;
+	pyld_virt = mem->base;
 	for (i = 0; i < ipa3_ctx->ipa_num_pipes; i++) {
 		cmd.destination_pipe_index = i;
 		cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_PACKET_INIT,
@@ -1805,10 +1809,14 @@ static int ipa3_alloc_pkt_init(void)
 			ipa_err("failed to construct IMM cmd\n");
 			goto err_dma_free;
 		}
-		memcpy(mem->base + i * size,
-				ipahal_imm_cmd_pyld_data(cmd_pyld), size);
-		ipa3_ctx->pkt_init_imm[i] = mem->phys_base + i * size;
+
+		memcpy(pyld_virt, ipahal_imm_cmd_pyld_data(cmd_pyld), size);
+		ipa3_ctx->pkt_init_imm[i] = pyld_phys;
+
 		ipahal_destroy_imm_cmd(cmd_pyld);
+
+		pyld_virt += size;
+		pyld_phys += size;
 	}
 
 	return 0;
