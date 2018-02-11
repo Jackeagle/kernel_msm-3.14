@@ -355,6 +355,15 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_v4_routing_init_pyld(
 				u32 hash_offset, u32 nhash_offset);
 
 /*
+ * Return a pointer to the payload for an IPv6 routing init immediate
+ * command, or null if one can't be allocated.  Caller must ensure result
+ * gets released by providing it to ipahal_destroy_imm_cmd().
+ */
+struct ipahal_imm_cmd_pyld *ipahal_ip_v6_routing_init_pyld(
+				struct ipa_mem_buffer *mem,
+				u32 hash_offset, u32 nhash_offset);
+
+/*
  * ipahal_destroy_imm_cmd() - Destroy/Release bulk that was built
  *  by the construction functions
  */

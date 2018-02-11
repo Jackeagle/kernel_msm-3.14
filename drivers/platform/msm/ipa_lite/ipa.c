@@ -766,9 +766,10 @@ int _ipa_init_rt6_v3(void)
 {
 	struct ipa3_desc desc = { 0 };
 	struct ipa_mem_buffer mem;
-	struct ipahal_imm_cmd_ip_v6_routing_init v6_cmd;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
-	int rc = 0;
+	u32 hash_offset;
+	u32 nhash_offset;
+	int rc;
 
 	rc = ipahal_rt_generate_empty_img(ipa3_mem(V6_RT_NUM_INDEX), &mem,
 						GFP_KERNEL);
@@ -777,20 +778,12 @@ int _ipa_init_rt6_v3(void)
 		return rc;
 	}
 
-	v6_cmd.hash_rules_addr = mem.phys_base;
-	v6_cmd.hash_rules_size = mem.size;
-	v6_cmd.hash_local_addr = ipa3_ctx->smem_restricted_bytes +
-		ipa3_mem(V6_RT_HASH_OFST);
-	v6_cmd.nhash_rules_addr = mem.phys_base;
-	v6_cmd.nhash_rules_size = mem.size;
-	v6_cmd.nhash_local_addr = ipa3_ctx->smem_restricted_bytes +
-		ipa3_mem(V6_RT_NHASH_OFST);
-	ipa_debug("putting hashable routing IPv6 rules to phys 0x%x\n",
-				v6_cmd.hash_local_addr);
-	ipa_debug("putting non-hashable routing IPv6 rules to phys 0x%x\n",
-				v6_cmd.nhash_local_addr);
-	cmd_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_V6_ROUTING_INIT,
-						&v6_cmd);
+	hash_offset = ipa3_ctx->smem_restricted_bytes +
+				ipa3_mem(V6_RT_HASH_OFST);
+	nhash_offset = ipa3_ctx->smem_restricted_bytes +
+				ipa3_mem(V6_RT_NHASH_OFST);
+	cmd_pyld =
+		ipahal_ip_v6_routing_init_pyld(&mem, hash_offset, nhash_offset);
 	if (!cmd_pyld) {
 		ipa_err("fail construct ip_v6_rt_init imm cmd\n");
 		rc = -EPERM;
