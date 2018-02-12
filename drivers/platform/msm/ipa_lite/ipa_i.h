@@ -439,7 +439,6 @@ struct ipa3_desc {
 	void *user1;
 	int user2;
 	struct completion xfer_done;
-	bool skip_db_ring;
 };
 
 /*
