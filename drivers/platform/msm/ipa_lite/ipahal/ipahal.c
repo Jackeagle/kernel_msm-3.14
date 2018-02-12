@@ -620,16 +620,24 @@ ipahal_ip_v6_filter_init_pyld(struct ipa_mem_buffer *mem,
 	return fltrt_init_common(opcode, mem, hash_offset, nhash_offset);
 }
 
+/* NOTE:  this function is called in atomic state */
 struct ipahal_imm_cmd_pyld *ipahal_ip_packet_tag_status_pyld(u64 tag)
 {
-	struct ipahal_imm_cmd_ip_packet_tag_status cmd;
+	struct ipahal_imm_cmd_pyld *pyld;
+	struct ipa_imm_cmd_hw_ip_packet_tag_status *data;
+	u16 opcode = ipahal_imm_cmds[IPA_IMM_CMD_IP_PACKET_TAG_STATUS].opcode;
 
 	if (check_too_big("tag", tag, 48))
 		return NULL;
 
-	cmd.tag = tag;
+	pyld = ipahal_imm_cmd_pyld_alloc_atomic(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
-	return ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_PACKET_TAG_STATUS, &cmd);
+	data->tag = tag;
+
+	return pyld;
 }
 
 struct ipahal_imm_cmd_pyld *
