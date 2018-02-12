@@ -2268,38 +2268,23 @@ static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 
 	in->ipa_ep_cfg.aggr.aggr_sw_eof_active = true;
 	if (ipa3_ctx->ipa_client_apps_wan_cons_agg_gro) {
-		ipa_err("get close-by %u\n",
-		ipa_adjust_ra_buff_base_sz(
-		in->ipa_ep_cfg.aggr.
-		aggr_byte_limit));
+		u32 limit;
+		u32 adjusted;
+
+		limit = in->ipa_ep_cfg.aggr.aggr_byte_limit;
+		adjusted = ipa_adjust_ra_buff_base_sz(limit);
+
+		ipa_err("get close-by %u\n", adjusted);
 		ipa_err("set rx_buff_sz %lu\n",
-		(unsigned long int)
-		IPA_GENERIC_RX_BUFF_SZ(
-		ipa_adjust_ra_buff_base_sz(
-		in->ipa_ep_cfg.
-			aggr.aggr_byte_limit)));
+				IPA_GENERIC_RX_BUFF_SZ(adjusted));
 		/* disable ipa_status */
-		sys->ep->status.
-			status_en = false;
-		sys->rx_buff_sz =
-		IPA_GENERIC_RX_BUFF_SZ(
-		ipa_adjust_ra_buff_base_sz(
-		in->ipa_ep_cfg.aggr.
-			aggr_byte_limit));
-		in->ipa_ep_cfg.aggr.
-			aggr_byte_limit =
-		sys->rx_buff_sz < in->
-		ipa_ep_cfg.aggr.
-		aggr_byte_limit ?
-		IPA_ADJUST_AGGR_BYTE_LIMIT(
-		sys->rx_buff_sz) :
-		IPA_ADJUST_AGGR_BYTE_LIMIT(
-		in->ipa_ep_cfg.
-		aggr.aggr_byte_limit);
-		ipa_err("set aggr_limit %lu\n",
-		(unsigned long int)
-		in->ipa_ep_cfg.aggr.
-		aggr_byte_limit);
+		sys->ep->status.status_en = false;
+		sys->rx_buff_sz = IPA_GENERIC_RX_BUFF_SZ(adjusted);
+		limit = sys->rx_buff_sz < limit ?
+			IPA_ADJUST_AGGR_BYTE_LIMIT(sys->rx_buff_sz) :
+			IPA_ADJUST_AGGR_BYTE_LIMIT(limit);
+		ipa_err("set aggr_limit %u\n", limit);
+		in->ipa_ep_cfg.aggr.aggr_byte_limit = limit;
 	} else {
 		in->ipa_ep_cfg.aggr.aggr_byte_limit =
 				IPA_GENERIC_AGGR_BYTE_LIMIT;
