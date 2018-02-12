@@ -26,13 +26,10 @@
 enum ipahal_imm_cmd_name {
 	IPA_IMM_CMD_IP_V4_FILTER_INIT,
 	IPA_IMM_CMD_IP_V6_FILTER_INIT,
-	IPA_IMM_CMD_IP_V4_NAT_INIT,
 	IPA_IMM_CMD_IP_V4_ROUTING_INIT,
 	IPA_IMM_CMD_IP_V6_ROUTING_INIT,
 	IPA_IMM_CMD_HDR_INIT_LOCAL,
-	IPA_IMM_CMD_HDR_INIT_SYSTEM,
 	IPA_IMM_CMD_REGISTER_WRITE,
-	IPA_IMM_CMD_NAT_DMA,
 	IPA_IMM_CMD_IP_PACKET_INIT,
 	IPA_IMM_CMD_DMA_SHARED_MEM,
 	IPA_IMM_CMD_IP_PACKET_TAG_STATUS,
@@ -83,45 +80,6 @@ struct ipahal_imm_cmd_ip_v6_filter_init {
 	u64 nhash_rules_addr;
 	u32 nhash_rules_size;
 	u32 nhash_local_addr;
-};
-
-/*
- * struct ipahal_imm_cmd_ip_v4_nat_init - IP_V4_NAT_INIT cmd payload
- * Inits IPv4 NAT block. Initiate NAT table with it dimensions, location
- *  cache address abd itger related parameters.
- * @table_index: For future support of multiple NAT tables
- * @ipv4_rules_addr: Addr in sys/shared mem where ipv4 NAT rules start
- * @ipv4_rules_addr_shared: ipv4_rules_addr in shared mem (if not, then sys)
- * @ipv4_expansion_rules_addr: Addr in sys/shared mem where expantion NAT
- *  table starts. IPv4 NAT rules that result in NAT collision are located
- *  in this table.
- * @ipv4_expansion_rules_addr_shared: ipv4_expansion_rules_addr in
- *  shared mem (if not, then sys)
- * @index_table_addr: Addr in sys/shared mem where index table, which points
- *  to NAT table starts
- * @index_table_addr_shared: index_table_addr in shared mem (if not, then sys)
- * @index_table_expansion_addr: Addr in sys/shared mem where expansion index
- *  table starts
- * @index_table_expansion_addr_shared: index_table_expansion_addr in
- *  shared mem (if not, then sys)
- * @size_base_tables: Num of entries in NAT tbl and idx tbl (each)
- * @size_expansion_tables: Num of entries in NAT expantion tbl and expantion
- *  idx tbl (each)
- * @public_ip_addr: public IP address
- */
-struct ipahal_imm_cmd_ip_v4_nat_init {
-	u8 table_index;
-	u64 ipv4_rules_addr;
-	bool ipv4_rules_addr_shared;
-	u64 ipv4_expansion_rules_addr;
-	bool ipv4_expansion_rules_addr_shared;
-	u64 index_table_addr;
-	bool index_table_addr_shared;
-	u64 index_table_expansion_addr;
-	bool index_table_expansion_addr_shared;
-	u16 size_base_tables;
-	u16 size_expansion_tables;
-	u32 public_ip_addr;
 };
 
 /*
@@ -178,31 +136,6 @@ struct ipahal_imm_cmd_hdr_init_local {
 	u64 hdr_table_addr;
 	u32 size_hdr_table;
 	u32 hdr_addr;
-};
-
-/*
- * struct ipahal_imm_cmd_hdr_init_system - HDR_INIT_SYSTEM cmd payload
- * Inits hdr table within sys mem with the hdrs and their length.
- * @hdr_table_addr: Word address in system memory where the hdrs tbl starts.
- */
-struct ipahal_imm_cmd_hdr_init_system {
-	u64 hdr_table_addr;
-};
-
-/*
- * struct ipahal_imm_cmd_nat_dma - NAT_DMA cmd payload
- * Perform DMA operation on NAT related mem addressess. Copy data into
- *  different locations within NAT associated tbls. (For add/remove NAT rules)
- * @table_index: NAT tbl index. Defines the NAT tbl on which to perform DMA op.
- * @base_addr: Base addr to which the DMA operation should be performed.
- * @offset: offset in bytes from base addr to write 'data' to
- * @data: data to be written
- */
-struct ipahal_imm_cmd_nat_dma {
-	u8 table_index;
-	u8 base_addr;
-	u32 offset;
-	u16 data;
 };
 
 /*
