@@ -529,8 +529,6 @@ int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr)
 
 	ep = ipa3_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
 	sys = ep->sys;
-	if(!sys)
-		return -EFAULT;
 
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
 
@@ -584,8 +582,6 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout)
 
 	ep = ipa3_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
 	sys = ep->sys;
-	if(!sys)
-		return -EFAULT;
 
 	comp = kzalloc(sizeof(*comp), GFP_ATOMIC);
 	if (!comp) {
