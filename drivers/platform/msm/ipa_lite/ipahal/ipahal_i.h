@@ -132,44 +132,20 @@ struct ipa_imm_cmd_hw_ip_v4_nat_init {
 };
 
 /*
- * struct ipa_imm_cmd_hw_ip_v4_routing_init - IP_V4_ROUTING_INIT command payload
+ * struct ipa_imm_cmd_hw_ip_routing_init - IP_V*_ROUTING_INIT command payload
  *  in H/W format.
- * Inits IPv4 routing table/structure - with the rules and other related params
- * @hash_rules_addr: Addr in system mem where ipv4 hashable rt rules starts
+ * Inits IPv4/v6 routing table with the rules and other related params
+ * @hash_rules_addr: Addr in system mem where hashable rt rules starts
  * @hash_rules_size: Size in bytes of the hashable tbl to cpy to local mem
- * @hash_local_addr: Addr in shared mem where ipv4 hashable rt tbl should
+ * @hash_local_addr: Addr in shared mem where hashable rt tbl should
  *  be copied to
  * @nhash_rules_size: Size in bytes of the non-hashable tbl to cpy to local mem
- * @nhash_local_addr: Addr in shared mem where ipv4 non-hashable rt tbl should
+ * @nhash_local_addr: Addr in shared mem where non-hashable rt tbl should
  *  be copied to
  * @rsvd: reserved
- * @nhash_rules_addr: Addr in sys mem where ipv4 non-hashable rt tbl starts
+ * @nhash_rules_addr: Addr in sys mem where non-hashable rt tbl starts
  */
-struct ipa_imm_cmd_hw_ip_v4_routing_init {
-	u64 hash_rules_addr:64;
-	u64 hash_rules_size:12;
-	u64 hash_local_addr:16;
-	u64 nhash_rules_size:12;
-	u64 nhash_local_addr:16;
-	u64 rsvd:8;
-	u64 nhash_rules_addr:64;
-};
-
-/*
- * struct ipa_imm_cmd_hw_ip_v6_routing_init - IP_V6_ROUTING_INIT command payload
- *  in H/W format.
- * Inits IPv6 routing table/structure - with the rules and other related params
- * @hash_rules_addr: Addr in system mem where ipv6 hashable rt rules starts
- * @hash_rules_size: Size in bytes of the hashable tbl to cpy to local mem
- * @hash_local_addr: Addr in shared mem where ipv6 hashable rt tbl should
- *  be copied to
- * @nhash_rules_size: Size in bytes of the non-hashable tbl to cpy to local mem
- * @nhash_local_addr: Addr in shared mem where ipv6 non-hashable rt tbl should
- *  be copied to
- * @rsvd: reserved
- * @nhash_rules_addr: Addr in sys mem where ipv6 non-hashable rt tbl starts
- */
-struct ipa_imm_cmd_hw_ip_v6_routing_init {
+struct ipa_imm_cmd_hw_ip_routing_init {
 	u64 hash_rules_addr:64;
 	u64 hash_rules_size:12;
 	u64 hash_local_addr:16;

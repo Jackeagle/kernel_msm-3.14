@@ -228,7 +228,7 @@ static struct ipahal_imm_cmd_pyld *
 ipa_imm_cmd_construct_ip_v6_routing_init(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
-	struct ipa_imm_cmd_hw_ip_v6_routing_init *data;
+	struct ipa_imm_cmd_hw_ip_routing_init *data;
 	const struct ipahal_imm_cmd_ip_fltrt_init *rt6_params = params;
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
@@ -250,7 +250,7 @@ static struct ipahal_imm_cmd_pyld *
 ipa_imm_cmd_construct_ip_v4_routing_init(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
-	struct ipa_imm_cmd_hw_ip_v4_routing_init *data;
+	struct ipa_imm_cmd_hw_ip_routing_init *data;
 	const struct ipahal_imm_cmd_ip_fltrt_init *rt4_params = params;
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
