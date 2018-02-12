@@ -1913,17 +1913,9 @@ fail_free_tag_desc:
 }
 
 /**
- * ipa3_tag_generate_force_close_desc() - generate descriptors for force close
- *					 immediate command
- *
- * @desc: descriptors for IC
- * @desc_size: desc array size
- * @start_pipe: first pipe to close aggregation
- * @end_pipe: last (non-inclusive) pipe to close aggregation
- *
- * Return: number of descriptors written or negative in case of failure
+ * ipa3_tag_aggr_force_close_all() - Force close aggregation
  */
-static int ipa3_tag_generate_force_close_desc(void)
+int ipa3_tag_aggr_force_close_all(void)
 {
 	struct ipa3_desc *desc;
 	int num_descs = ipa3_ctx->ipa_num_pipes;
@@ -1981,24 +1973,9 @@ fail_alloc_reg_write_agg_close:
 				desc[desc_idx].user2);
 fail_no_desc:
 	kfree(desc);
+	ipa_err("returning error %d\n", res);
 
 	return res;
-}
-
-/**
- * ipa3_tag_aggr_force_close_all() - Force close aggregation
- */
-int ipa3_tag_aggr_force_close_all(void)
-{
-	int num_aggr_descs;
-
-	/* Force close aggregation on all valid pipes with aggregation */
-	num_aggr_descs = ipa3_tag_generate_force_close_desc();
-	if (num_aggr_descs < 0)
-		ipa_err("ipa3_tag_generate_force_close_desc failed %d\n",
-			num_aggr_descs);
-
-	return num_aggr_descs;
 }
 
 /**
