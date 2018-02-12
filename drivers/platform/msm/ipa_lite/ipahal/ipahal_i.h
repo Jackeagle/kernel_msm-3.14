@@ -39,20 +39,20 @@ extern struct ipahal_context *ipahal_ctx;
 /* Immediate commands H/W structures */
 
 /*
- * struct ipa_imm_cmd_hw_ip_filter_init - IP_V*_FILTER_INIT command payload
- *  in H/W format.
- * Inits IPv4/v6 filter block.
- * @hash_rules_addr: Addr in system mem where hashable flt rules starts
+ * struct ipa_imm_cmd_hw_ip_fltrt_init - IP_V*_FILTER_INIT/IP_V*_ROUTING_INIT
+ * command payload in H/W format.
+ * Inits IPv4/v6 routing or filter block.
+ * @hash_rules_addr: Addr in system mem where hashable flt/rt rules starts
  * @hash_rules_size: Size in bytes of the hashable tbl to cpy to local mem
- * @hash_local_addr: Addr in shared mem where hashable flt tbl should
+ * @hash_local_addr: Addr in shared mem where hashable flt/rt tbl should
  *  be copied to
  * @nhash_rules_size: Size in bytes of the non-hashable tbl to cpy to local mem
- * @nhash_local_addr: Addr in shared mem where non-hashable flt tbl should
+ * @nhash_local_addr: Addr in shared mem where non-hashable flt/rt tbl should
  *  be copied to
  * @rsvd: reserved
- * @nhash_rules_addr: Addr in sys mem where non-hashable flt tbl starts
+ * @nhash_rules_addr: Addr in sys mem where non-hashable flt/rt tbl starts
  */
-struct ipa_imm_cmd_hw_ip_filter_init {
+struct ipa_imm_cmd_hw_ip_fltrt_init {
 	u64 hash_rules_addr:64;
 	u64 hash_rules_size:12;
 	u64 hash_local_addr:16;
@@ -105,30 +105,6 @@ struct ipa_imm_cmd_hw_ip_v4_nat_init {
 	u64 size_expansion_tables:10;
 	u64 rsvd2:2;
 	u64 public_ip_addr:32;
-};
-
-/*
- * struct ipa_imm_cmd_hw_ip_routing_init - IP_V*_ROUTING_INIT command payload
- *  in H/W format.
- * Inits IPv4/v6 routing table with the rules and other related params
- * @hash_rules_addr: Addr in system mem where hashable rt rules starts
- * @hash_rules_size: Size in bytes of the hashable tbl to cpy to local mem
- * @hash_local_addr: Addr in shared mem where hashable rt tbl should
- *  be copied to
- * @nhash_rules_size: Size in bytes of the non-hashable tbl to cpy to local mem
- * @nhash_local_addr: Addr in shared mem where non-hashable rt tbl should
- *  be copied to
- * @rsvd: reserved
- * @nhash_rules_addr: Addr in sys mem where non-hashable rt tbl starts
- */
-struct ipa_imm_cmd_hw_ip_routing_init {
-	u64 hash_rules_addr:64;
-	u64 hash_rules_size:12;
-	u64 hash_local_addr:16;
-	u64 nhash_rules_size:12;
-	u64 nhash_local_addr:16;
-	u64 rsvd:8;
-	u64 nhash_rules_addr:64;
 };
 
 /*
