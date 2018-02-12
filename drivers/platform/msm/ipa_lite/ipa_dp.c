@@ -519,16 +519,12 @@ int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr)
 	struct ipa3_ep_context *ep;
 	struct ipa3_desc *last_desc;
 	int i, result = 0;
-	struct ipa3_sys_context *sys;
 
 	if (!num_desc || !descr)
 		return -EFAULT;
 
 	for (i = 0; i < num_desc; i++)
 		ipa_debug("sending imm cmd %d\n", descr[i].opcode);
-
-	ep = ipa3_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
-	sys = ep->sys;
 
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
 
@@ -541,7 +537,8 @@ int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr)
 	last_desc->user1 = last_desc;
 
 	/* Send the commands, and wait for completion if successful */
-	if (ipa3_send(sys, num_desc, descr)) {
+	ep = ipa3_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
+	if (ipa3_send(ep->sys, num_desc, descr)) {
 		ipa_err("fail to send %hu immediate command%s\n",
 				num_desc, num_desc == 1 ? "" : "s");
 		result = -EFAULT;
@@ -571,7 +568,6 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout)
 	struct ipa3_desc *last_desc;
 	int i, result = 0;
 	struct ipa3_ep_context *ep;
-	struct ipa3_sys_context *sys;
 	struct ipa3_tag_completion *comp;
 
 	if (!num_desc || !descr || !timeout)
@@ -579,9 +575,6 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout)
 
 	for (i = 0; i < num_desc; i++)
 		ipa_debug("sending imm cmd %d\n", descr[i].opcode);
-
-	ep = ipa3_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
-	sys = ep->sys;
 
 	comp = kzalloc(sizeof(*comp), GFP_ATOMIC);
 	if (!comp) {
@@ -603,7 +596,8 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout)
 	last_desc->callback = ipa3_transport_irq_cmd_ack_free;
 	last_desc->user1 = comp;
 
-	if (ipa3_send(sys, num_desc, descr)) {
+	ep = ipa3_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
+	if (ipa3_send(ep->sys, num_desc, descr)) {
 		/* Callback won't run; drop reference on its behalf */
 		atomic_dec(&comp->cnt);
 		ipa_err("fail to send %hu immediate command%s\n",
