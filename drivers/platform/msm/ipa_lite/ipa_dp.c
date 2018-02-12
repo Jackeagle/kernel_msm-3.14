@@ -528,12 +528,6 @@ int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr)
 		ipa_debug("sending imm cmd %d\n", descr[i].opcode);
 
 	ep = ipa3_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
-	if (!ep) {
-		ipa_err("Client %u is not mapped\n",
-			IPA_CLIENT_APPS_CMD_PROD);
-		return -EFAULT;
-	}
-
 	sys = ep->sys;
 	if(!sys)
 		return -EFAULT;
@@ -589,11 +583,6 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout)
 		ipa_debug("sending imm cmd %d\n", descr[i].opcode);
 
 	ep = ipa3_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
-	if (!ep) {
-		ipa_err("Client %u is not mapped\n",
-			IPA_CLIENT_APPS_CMD_PROD);
-		return -EFAULT;
-	}
 	sys = ep->sys;
 	if(!sys)
 		return -EFAULT;

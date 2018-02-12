@@ -1772,10 +1772,6 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 	}
 
 	ep = ipa3_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
-	if (!ep) {
-		ipa_err("Client %u is not mapped\n", IPA_CLIENT_APPS_CMD_PROD);
-		return -EFAULT;
-	}
 	sys = ep->sys;
 
 	tag_desc = kzalloc(sizeof(*tag_desc) * IPA_TAG_MAX_DESC, GFP_KERNEL);
