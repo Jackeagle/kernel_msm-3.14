@@ -1923,16 +1923,23 @@ fail_free_tag_desc:
  *
  * Return: number of descriptors written or negative in case of failure
  */
-static int ipa3_tag_generate_force_close_desc(struct ipa3_desc desc[],
-	int desc_size, int start_pipe, int end_pipe)
+static int ipa3_tag_generate_force_close_desc(void)
 {
+	struct ipa3_desc *desc;
+	int num_descs = ipa3_ctx->ipa_num_pipes;
 	int i;
 	struct ipa_ep_cfg_aggr ep_aggr;
 	int desc_idx = 0;
 	int res;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 
-	for (i = start_pipe; i < end_pipe; i++) {
+	desc = kcalloc(num_descs, sizeof(*desc), GFP_KERNEL);
+	if (!desc) {
+		ipa_err("no mem\n");
+		return -ENOMEM;
+	}
+
+	for (i = 0; i < num_descs; i++) {
 		struct ipahal_reg_valmask valmask;
 		u32 offset;
 
@@ -1940,7 +1947,7 @@ static int ipa3_tag_generate_force_close_desc(struct ipa3_desc desc[],
 		if (!ep_aggr.aggr_en)
 			continue;
 		ipa_debug("Force close ep: %d\n", i);
-		if (desc_idx + 1 > desc_size) {
+		if (desc_idx + 1 > num_descs) {
 			ipa_err("Internal error - no descriptors\n");
 			res = -EFAULT;
 			goto fail_no_desc;
@@ -1961,8 +1968,11 @@ static int ipa3_tag_generate_force_close_desc(struct ipa3_desc desc[],
 		desc_idx++;
 	}
 
-	return ipa3_tag_process(desc, desc_idx,
+	res = ipa3_tag_process(desc, desc_idx,
 			      IPA_FORCE_CLOSE_TAG_PROCESS_TIMEOUT);
+	kfree(desc);
+
+	return res;
 
 fail_alloc_reg_write_agg_close:
 	for (i = 0; i < desc_idx; i++)
@@ -1970,6 +1980,8 @@ fail_alloc_reg_write_agg_close:
 			desc[desc_idx].callback(desc[desc_idx].user1,
 				desc[desc_idx].user2);
 fail_no_desc:
+	kfree(desc);
+
 	return res;
 }
 
@@ -1978,23 +1990,13 @@ fail_no_desc:
  */
 int ipa3_tag_aggr_force_close_all(void)
 {
-	struct ipa3_desc *desc;
-	int num_descs = ipa3_ctx->ipa_num_pipes;
 	int num_aggr_descs;
 
-	desc = kcalloc(num_descs, sizeof(*desc), GFP_KERNEL);
-	if (!desc) {
-		ipa_err("no mem\n");
-		return -ENOMEM;
-	}
-
 	/* Force close aggregation on all valid pipes with aggregation */
-	num_aggr_descs = ipa3_tag_generate_force_close_desc(desc, num_descs,
-						0, num_descs);
+	num_aggr_descs = ipa3_tag_generate_force_close_desc();
 	if (num_aggr_descs < 0)
 		ipa_err("ipa3_tag_generate_force_close_desc failed %d\n",
 			num_aggr_descs);
-	kfree(desc);
 
 	return num_aggr_descs;
 }
