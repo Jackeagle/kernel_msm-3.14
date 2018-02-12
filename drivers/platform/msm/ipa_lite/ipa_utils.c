@@ -1917,13 +1917,11 @@ fail_free_tag_desc:
  */
 int ipa3_tag_aggr_force_close_all(void)
 {
+	u32 num_descs = ipa3_ctx->ipa_num_pipes;
 	struct ipa3_desc *desc;
-	int num_descs = ipa3_ctx->ipa_num_pipes;
-	int i;
-	struct ipa_ep_cfg_aggr ep_aggr;
-	int desc_idx = 0;
+	u32 desc_idx = 0;
+	u32 i;
 	int res;
-	struct ipahal_imm_cmd_pyld *cmd_pyld;
 
 	desc = kcalloc(num_descs, sizeof(*desc), GFP_KERNEL);
 	if (!desc) {
@@ -1931,19 +1929,17 @@ int ipa3_tag_aggr_force_close_all(void)
 		return -ENOMEM;
 	}
 
+	/* Generate descriptors for all endpoints with aggregation enabled */
 	for (i = 0; i < num_descs; i++) {
+		struct ipa_ep_cfg_aggr ep_aggr;
 		struct ipahal_reg_valmask valmask;
+		struct ipahal_imm_cmd_pyld *cmd_pyld;
 		u32 offset;
 
 		ipahal_read_reg_n_fields(IPA_ENDP_INIT_AGGR_n, i, &ep_aggr);
 		if (!ep_aggr.aggr_en)
 			continue;
 		ipa_debug("Force close ep: %d\n", i);
-		if (desc_idx + 1 > num_descs) {
-			ipa_err("Internal error - no descriptors\n");
-			res = -EFAULT;
-			goto fail_no_desc;
-		}
 
 		offset = ipahal_reg_offset(IPA_AGGR_FORCE_CLOSE);
 		ipahal_get_aggr_force_close_valmask(i, &valmask);
@@ -1971,7 +1967,6 @@ fail_alloc_reg_write_agg_close:
 		if (desc[desc_idx].callback)
 			desc[desc_idx].callback(desc[desc_idx].user1,
 				desc[desc_idx].user2);
-fail_no_desc:
 	kfree(desc);
 	ipa_err("returning error %d\n", res);
 
