@@ -2206,6 +2206,8 @@ static void ipa3_free_rx_wrapper(struct ipa3_rx_pkt_wrapper *rk_pkt)
 static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 		struct ipa3_sys_context *sys)
 {
+	struct ipa_ep_cfg_aggr *ep_cfg_aggr;
+
 	if (in->client == IPA_CLIENT_APPS_CMD_PROD) {
 		sys->policy = IPA_POLICY_INTR_MODE;
 		sys->use_comm_evt_ring = false;
@@ -2244,20 +2246,20 @@ static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 	sys->get_skb = ipa3_get_skb_ipa_rx;
 	sys->free_skb = ipa3_free_skb_rx;
 
-	in->ipa_ep_cfg.aggr.aggr_en = IPA_ENABLE_AGGR;
-	in->ipa_ep_cfg.aggr.aggr = IPA_GENERIC;
-	in->ipa_ep_cfg.aggr.aggr_time_limit = IPA_GENERIC_AGGR_TIME_LIMIT;
+	ep_cfg_aggr = &in->ipa_ep_cfg.aggr;
+	ep_cfg_aggr->aggr_en = IPA_ENABLE_AGGR;
+	ep_cfg_aggr->aggr = IPA_GENERIC;
+	ep_cfg_aggr->aggr_time_limit = IPA_GENERIC_AGGR_TIME_LIMIT;
 	if (in->client == IPA_CLIENT_APPS_LAN_CONS) {
 		sys->pyld_hdlr = ipa3_lan_rx_pyld_hdlr;
 		sys->repl_hdlr = ipa3_replenish_rx_cache_recycle;
 		sys->free_rx_wrapper = ipa3_recycle_rx_wrapper;
-		in->ipa_ep_cfg.aggr.aggr_byte_limit =
-				IPA_GENERIC_AGGR_BYTE_LIMIT;
-		in->ipa_ep_cfg.aggr.aggr_pkt_limit =
-				IPA_GENERIC_AGGR_PKT_LIMIT;
+		ep_cfg_aggr->aggr_byte_limit = IPA_GENERIC_AGGR_BYTE_LIMIT;
+		ep_cfg_aggr->aggr_pkt_limit = IPA_GENERIC_AGGR_PKT_LIMIT;
 
 		return 0;
 	}
+
 	/* in->client == IPA_CLIENT_APPS_WAN_CONS */
 	sys->pyld_hdlr = ipa3_wan_rx_pyld_hdlr;
 	sys->free_rx_wrapper = ipa3_free_rx_wrapper;
@@ -2266,12 +2268,12 @@ static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 	else
 		sys->repl_hdlr = ipa3_replenish_rx_cache;
 
-	in->ipa_ep_cfg.aggr.aggr_sw_eof_active = true;
+	ep_cfg_aggr->aggr_sw_eof_active = true;
 	if (ipa3_ctx->ipa_client_apps_wan_cons_agg_gro) {
 		u32 limit;
 		u32 adjusted;
 
-		limit = in->ipa_ep_cfg.aggr.aggr_byte_limit;
+		limit = ep_cfg_aggr->aggr_byte_limit;
 		adjusted = ipa_adjust_ra_buff_base_sz(limit);
 
 		/* disable ipa_status */
@@ -2279,19 +2281,17 @@ static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 
 		ipa_err("get close-by %u\n", adjusted);
 		adjusted = IPA_GENERIC_RX_BUFF_SZ(adjusted);
-		ipa_err("set rx_buff_sz %lu\n", adjusted);
+		ipa_err("set rx_buff_sz %u\n", adjusted);
 		sys->rx_buff_sz = adjusted;
 
 		if (sys->rx_buff_sz < limit)
 			limit = sys->rx_buff_sz;
 		limit = IPA_ADJUST_AGGR_BYTE_LIMIT(limit);
 		ipa_err("set aggr_limit %u\n", limit);
-		in->ipa_ep_cfg.aggr.aggr_byte_limit = limit;
+		ep_cfg_aggr->aggr_byte_limit = limit;
 	} else {
-		in->ipa_ep_cfg.aggr.aggr_byte_limit =
-				IPA_GENERIC_AGGR_BYTE_LIMIT;
-		in->ipa_ep_cfg.aggr.aggr_pkt_limit =
-				IPA_GENERIC_AGGR_PKT_LIMIT;
+		ep_cfg_aggr->aggr_byte_limit = IPA_GENERIC_AGGR_BYTE_LIMIT;
+		ep_cfg_aggr->aggr_pkt_limit = IPA_GENERIC_AGGR_PKT_LIMIT;
 	}
 
 	return 0;
