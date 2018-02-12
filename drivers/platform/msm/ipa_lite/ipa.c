@@ -2696,10 +2696,10 @@ static int ipa3_q6_clean_q6_flt_tbls(enum ipa_ip_type ip,
 	}
 
 free_empty_img:
-	ipahal_free_empty_img(&mem);
-free_cmd_pyld:
 	for (index = 0; index < num_cmds; index++)
 		ipahal_destroy_imm_cmd(cmd_pyld[index]);
+	ipahal_free_empty_img(&mem);
+free_cmd_pyld:
 	kfree(cmd_pyld);
 free_desc:
 	kfree(desc);
