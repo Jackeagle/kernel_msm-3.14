@@ -429,21 +429,6 @@ static void ipahal_imm_cmd_init(enum ipa_hw_version hw_version)
 	}
 }
 
-/*
- * ipahal_construct_imm_cmd() - Construct immdiate command
- * This function builds imm cmd bulk that can be be sent to IPA
- * The command will be allocated dynamically.
- * After done using it, call ipahal_destroy_imm_cmd() to release it
- */
-static struct ipahal_imm_cmd_pyld *
-ipahal_construct_imm_cmd(enum ipahal_imm_cmd_name cmd, const void *params)
-
-{
-	const struct ipahal_imm_cmd_obj *imm_cmd = &ipahal_imm_cmds[cmd];
-
-	return imm_cmd->construct(imm_cmd->opcode, params);
-}
-
 struct ipahal_imm_cmd_pyld *
 ipahal_dma_shared_mem_write_pyld(struct ipa_mem_buffer *mem, u32 offset)
 {
@@ -643,23 +628,30 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_packet_tag_status_pyld(u64 tag)
 struct ipahal_imm_cmd_pyld *
 ipahal_dma_task_32b_addr_pyld(struct ipa_mem_buffer *mem)
 {
-	struct ipahal_imm_cmd_dma_task_32b_addr cmd = { 0 };
+	struct ipahal_imm_cmd_pyld *pyld;
+	struct ipa_imm_cmd_hw_dma_task_32b_addr *data;
+	u16 opcode = ipahal_imm_cmds[IPA_IMM_CMD_DMA_TASK_32B_ADDR].opcode;
 
 	if (check_too_big("size1", mem->size, 16))
 		return NULL;
 	if (check_too_big("packet_size", mem->size, 16))
 		return NULL;
 
-	cmd.cmplt = false;
-	cmd.eof = false;
-	cmd.flsh = true;
-	cmd.lock = false;
-	cmd.unlock = false;
-	cmd.size1 = mem->size;
-	cmd.addr1 = mem->phys_base;
-	cmd.packet_size = mem->size;
+	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
-	return ipahal_construct_imm_cmd(IPA_IMM_CMD_DMA_TASK_32B_ADDR, &cmd);
+	data->cmplt = 0;
+	data->eof = 0;
+	data->flsh = 1;
+	data->lock = 0;
+	data->unlock = 0;
+	data->size1 = mem->size;
+	data->addr1 = mem->phys_base;
+	data->packet_size = mem->size;
+
+	return pyld;
 }
 
 /* IPA Packet Status Logic */
