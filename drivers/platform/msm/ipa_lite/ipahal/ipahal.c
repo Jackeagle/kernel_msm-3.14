@@ -543,9 +543,13 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_packet_init_pyld(u32 dest_pipe_idx)
 	return pyld;
 }
 
-static bool fltrt_init_common(struct ipahal_imm_cmd_ip_fltrt_init *cmd,
-		struct ipa_mem_buffer *mem, u32 hash_offset, u32 nhash_offset)
+static struct ipahal_imm_cmd_pyld *
+fltrt_init_common(u16 opcode, struct ipa_mem_buffer *mem,
+		u32 hash_offset, u32 nhash_offset)
 {
+	struct ipa_imm_cmd_hw_ip_fltrt_init *data;
+	struct ipahal_imm_cmd_pyld *pyld;
+
 	if (check_too_big("hash_rules_size", mem->size, 12))
 		return false;
 	if (check_too_big("hash_local_addr", hash_offset, 16))
@@ -555,82 +559,65 @@ static bool fltrt_init_common(struct ipahal_imm_cmd_ip_fltrt_init *cmd,
 	if (check_too_big("nhash_local_addr", nhash_offset, 16))
 		return false;
 
-	cmd->hash_rules_addr = (u64)mem->phys_base;
-	cmd->hash_rules_size = (u32)mem->size;
-	cmd->hash_local_addr = hash_offset;
-	cmd->nhash_rules_addr = (u64)mem->phys_base;
-	cmd->nhash_rules_size = (u32)mem->size;
-	cmd->nhash_local_addr = nhash_offset;
+	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
-	return true;
+	ipa_debug("putting hashable rules to phys 0x%x\n", hash_offset);
+	ipa_debug("putting non-hashable rules to phys 0x%x\n", nhash_offset);
+
+	data->hash_rules_addr = (u64)mem->phys_base;
+	data->hash_rules_size = (u32)mem->size;
+	data->hash_local_addr = hash_offset;
+	data->nhash_rules_addr = (u64)mem->phys_base;
+	data->nhash_rules_size = (u32)mem->size;
+	data->nhash_local_addr = nhash_offset;
+
+	return pyld;
 }
 
 struct ipahal_imm_cmd_pyld *
 ipahal_ip_v4_routing_init_pyld(struct ipa_mem_buffer *mem,
 		u32 hash_offset, u32 nhash_offset)
 {
-	struct ipahal_imm_cmd_ip_fltrt_init cmd;
+	u16 opcode = ipahal_imm_cmds[IPA_IMM_CMD_IP_V4_ROUTING_INIT].opcode;
 
-	if (!fltrt_init_common(&cmd, mem, hash_offset, nhash_offset))
-		return NULL;
+	ipa_debug("IPv4 routing\n");
 
-	ipa_debug("putting hashable routing IPv4 rules to phys 0x%x\n",
-			hash_offset);
-	ipa_debug("putting non-hashable routing IPv4 rules to phys 0x%x\n",
-			nhash_offset);
-
-	return ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_V4_ROUTING_INIT, &cmd);
+	return fltrt_init_common(opcode, mem, hash_offset, nhash_offset);
 }
 
 struct ipahal_imm_cmd_pyld *
 ipahal_ip_v6_routing_init_pyld(struct ipa_mem_buffer *mem,
 		u32 hash_offset, u32 nhash_offset)
 {
-	struct ipahal_imm_cmd_ip_fltrt_init cmd;
+	u16 opcode = ipahal_imm_cmds[IPA_IMM_CMD_IP_V6_ROUTING_INIT].opcode;
 
-	if (!fltrt_init_common(&cmd, mem, hash_offset, nhash_offset))
-		return NULL;
+	ipa_debug("IPv6 routing\n");
 
-	ipa_debug("putting hashable routing IPv6 rules to phys 0x%x\n",
-			hash_offset);
-	ipa_debug("putting non-hashable routing IPv6 rules to phys 0x%x\n",
-			nhash_offset);
-
-	return ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_V6_ROUTING_INIT, &cmd);
+	return fltrt_init_common(opcode, mem, hash_offset, nhash_offset);
 }
 
 struct ipahal_imm_cmd_pyld *
 ipahal_ip_v4_filter_init_pyld(struct ipa_mem_buffer *mem,
 		u32 hash_offset, u32 nhash_offset)
 {
-	struct ipahal_imm_cmd_ip_fltrt_init cmd;
+	u16 opcode = ipahal_imm_cmds[IPA_IMM_CMD_IP_V4_FILTER_INIT].opcode;
+	ipa_debug("IPv4 filtering\n");
 
-	if (!fltrt_init_common(&cmd, mem, hash_offset, nhash_offset))
-		return NULL;
-
-	ipa_debug("putting hashable filtering IPv4 rules to phys 0x%x\n",
-			hash_offset);
-	ipa_debug("putting non-hashable filtering IPv4 rules to phys 0x%x\n",
-			nhash_offset);
-
-	return ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_V4_FILTER_INIT, &cmd);
+	return fltrt_init_common(opcode, mem, hash_offset, nhash_offset);
 }
 
 struct ipahal_imm_cmd_pyld *
 ipahal_ip_v6_filter_init_pyld(struct ipa_mem_buffer *mem,
 		u32 hash_offset, u32 nhash_offset)
 {
-	struct ipahal_imm_cmd_ip_fltrt_init cmd;
+	u16 opcode = ipahal_imm_cmds[IPA_IMM_CMD_IP_V6_FILTER_INIT].opcode;
 
-	if (!fltrt_init_common(&cmd, mem, hash_offset, nhash_offset))
-		return NULL;
+	ipa_debug("IPv6 filtering\n");
 
-	ipa_debug("putting hashable filtering IPv6 rules to phys 0x%x\n",
-			hash_offset);
-	ipa_debug("putting non-hashable filtering IPv6 rules to phys 0x%x\n",
-			nhash_offset);
-
-	return ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_V6_FILTER_INIT, &cmd);
+	return fltrt_init_common(opcode, mem, hash_offset, nhash_offset);
 }
 
 struct ipahal_imm_cmd_pyld *ipahal_ip_packet_tag_status_pyld(u64 tag)
