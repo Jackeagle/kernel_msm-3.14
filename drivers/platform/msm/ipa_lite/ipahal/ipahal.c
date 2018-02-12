@@ -525,15 +525,22 @@ ipahal_hdr_init_local_pyld(struct ipa_mem_buffer *mem, u32 offset)
 
 struct ipahal_imm_cmd_pyld *ipahal_ip_packet_init_pyld(u32 dest_pipe_idx)
 {
-	struct ipahal_imm_cmd_ip_packet_init cmd = { 0 };
+	struct ipahal_imm_cmd_pyld *pyld;
+	struct ipa_imm_cmd_hw_ip_packet_init *data;
+	u16 opcode;
 
 	if (check_too_big("dest_pipe_idx", dest_pipe_idx, 5))
 		return NULL;
 
-	cmd.destination_pipe_index = dest_pipe_idx;
+	opcode = ipahal_imm_cmds[IPA_IMM_CMD_IP_PACKET_INIT].opcode;
+	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
-	return ipahal_construct_imm_cmd(IPA_IMM_CMD_IP_PACKET_INIT, &cmd);
+	data->destination_pipe_index = dest_pipe_idx;
 
+	return pyld;
 }
 
 static bool fltrt_init_common(struct ipahal_imm_cmd_ip_fltrt_init *cmd,
