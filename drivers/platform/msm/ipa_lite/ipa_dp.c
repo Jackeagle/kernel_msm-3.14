@@ -2255,54 +2255,56 @@ static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 				IPA_GENERIC_AGGR_BYTE_LIMIT;
 		in->ipa_ep_cfg.aggr.aggr_pkt_limit =
 				IPA_GENERIC_AGGR_PKT_LIMIT;
-	} else {	/* in->client == IPA_CLIENT_APPS_WAN_CONS */
-		sys->pyld_hdlr = ipa3_wan_rx_pyld_hdlr;
-		sys->free_rx_wrapper = ipa3_free_rx_wrapper;
-		if (nr_cpu_ids > 1)
-			sys->repl_hdlr = ipa3_fast_replenish_rx_cache;
-		else
-			sys->repl_hdlr = ipa3_replenish_rx_cache;
 
-		in->ipa_ep_cfg.aggr.aggr_sw_eof_active = true;
-		if (ipa3_ctx->ipa_client_apps_wan_cons_agg_gro) {
-			ipa_err("get close-by %u\n",
-			ipa_adjust_ra_buff_base_sz(
-			in->ipa_ep_cfg.aggr.
+		return 0;
+	}
+	/* in->client == IPA_CLIENT_APPS_WAN_CONS */
+	sys->pyld_hdlr = ipa3_wan_rx_pyld_hdlr;
+	sys->free_rx_wrapper = ipa3_free_rx_wrapper;
+	if (nr_cpu_ids > 1)
+		sys->repl_hdlr = ipa3_fast_replenish_rx_cache;
+	else
+		sys->repl_hdlr = ipa3_replenish_rx_cache;
+
+	in->ipa_ep_cfg.aggr.aggr_sw_eof_active = true;
+	if (ipa3_ctx->ipa_client_apps_wan_cons_agg_gro) {
+		ipa_err("get close-by %u\n",
+		ipa_adjust_ra_buff_base_sz(
+		in->ipa_ep_cfg.aggr.
+		aggr_byte_limit));
+		ipa_err("set rx_buff_sz %lu\n",
+		(unsigned long int)
+		IPA_GENERIC_RX_BUFF_SZ(
+		ipa_adjust_ra_buff_base_sz(
+		in->ipa_ep_cfg.
+			aggr.aggr_byte_limit)));
+		/* disable ipa_status */
+		sys->ep->status.
+			status_en = false;
+		sys->rx_buff_sz =
+		IPA_GENERIC_RX_BUFF_SZ(
+		ipa_adjust_ra_buff_base_sz(
+		in->ipa_ep_cfg.aggr.
 			aggr_byte_limit));
-			ipa_err("set rx_buff_sz %lu\n",
-			(unsigned long int)
-			IPA_GENERIC_RX_BUFF_SZ(
-			ipa_adjust_ra_buff_base_sz(
-			in->ipa_ep_cfg.
-				aggr.aggr_byte_limit)));
-			/* disable ipa_status */
-			sys->ep->status.
-				status_en = false;
-			sys->rx_buff_sz =
-			IPA_GENERIC_RX_BUFF_SZ(
-			ipa_adjust_ra_buff_base_sz(
-			in->ipa_ep_cfg.aggr.
-				aggr_byte_limit));
-			in->ipa_ep_cfg.aggr.
-				aggr_byte_limit =
-			sys->rx_buff_sz < in->
-			ipa_ep_cfg.aggr.
-			aggr_byte_limit ?
-			IPA_ADJUST_AGGR_BYTE_LIMIT(
-			sys->rx_buff_sz) :
-			IPA_ADJUST_AGGR_BYTE_LIMIT(
-			in->ipa_ep_cfg.
-			aggr.aggr_byte_limit);
-			ipa_err("set aggr_limit %lu\n",
-			(unsigned long int)
-			in->ipa_ep_cfg.aggr.
-			aggr_byte_limit);
-		} else {
-			in->ipa_ep_cfg.aggr.aggr_byte_limit =
-					IPA_GENERIC_AGGR_BYTE_LIMIT;
-			in->ipa_ep_cfg.aggr.aggr_pkt_limit =
-					IPA_GENERIC_AGGR_PKT_LIMIT;
-		}
+		in->ipa_ep_cfg.aggr.
+			aggr_byte_limit =
+		sys->rx_buff_sz < in->
+		ipa_ep_cfg.aggr.
+		aggr_byte_limit ?
+		IPA_ADJUST_AGGR_BYTE_LIMIT(
+		sys->rx_buff_sz) :
+		IPA_ADJUST_AGGR_BYTE_LIMIT(
+		in->ipa_ep_cfg.
+		aggr.aggr_byte_limit);
+		ipa_err("set aggr_limit %lu\n",
+		(unsigned long int)
+		in->ipa_ep_cfg.aggr.
+		aggr_byte_limit);
+	} else {
+		in->ipa_ep_cfg.aggr.aggr_byte_limit =
+				IPA_GENERIC_AGGR_BYTE_LIMIT;
+		in->ipa_ep_cfg.aggr.aggr_pkt_limit =
+				IPA_GENERIC_AGGR_PKT_LIMIT;
 	}
 
 	return 0;
