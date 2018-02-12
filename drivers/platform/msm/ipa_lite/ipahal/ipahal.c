@@ -501,18 +501,26 @@ ipahal_register_write_pyld(u32 offset, u32 value, u32 mask, bool clear)
 struct ipahal_imm_cmd_pyld *
 ipahal_hdr_init_local_pyld(struct ipa_mem_buffer *mem, u32 offset)
 {
-	struct ipahal_imm_cmd_hdr_init_local cmd = { 0 };
+	struct ipahal_imm_cmd_pyld *pyld;
+	struct ipa_imm_cmd_hw_hdr_init_local *data;
+	u16 opcode;
 
 	if (check_too_big("size", mem->size, 12))
 		return NULL;
 	if (check_too_big("offset", offset, 16))
 		return NULL;
 
-	cmd.hdr_table_addr = mem->phys_base;
-	cmd.size_hdr_table = mem->size;
-	cmd.hdr_addr = offset;
+	opcode = ipahal_imm_cmds[IPA_IMM_CMD_HDR_INIT_LOCAL].opcode;
+	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
+	if (!pyld)
+		return NULL;
+	data = ipahal_imm_cmd_pyld_data(pyld);
 
-	return ipahal_construct_imm_cmd(IPA_IMM_CMD_HDR_INIT_LOCAL, &cmd);
+	data->hdr_table_addr = mem->phys_base;
+	data->size_hdr_table = mem->size;
+	data->hdr_addr = offset;
+
+	return pyld;
 }
 
 struct ipahal_imm_cmd_pyld *ipahal_ip_packet_init_pyld(u32 dest_pipe_idx)
