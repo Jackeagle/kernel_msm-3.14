@@ -273,48 +273,14 @@ enum ipahal_pkt_status_exception {
  * enum ipahal_pkt_status_mask - Packet Status bitmask values of
  *  the contained flags. This bitmask indicates flags on the properties of
  *  the packet as well as IPA processing it may had.
- * @FRAG_PROCESS: Frag block processing flag: Was pkt processed by frag block?
- *  Also means the frag info is valid unless exception or first frag
- * @FILT_PROCESS: Flt block processing flag: Was pkt processed by flt block?
- *  Also means that flt info is valid.
- * @NAT_PROCESS: NAT block processing flag: Was pkt processed by NAT block?
- *  Also means that NAT info is valid, unless exception.
- * @ROUTE_PROCESS: Rt block processing flag: Was pkt processed by rt block?
- *  Also means that rt info is valid, unless exception.
  * @TAG_VALID: Flag specifying if TAG and TAG info valid?
- * @FRAGMENT: Flag specifying if pkt is IP fragment.
- * @FIRST_FRAGMENT: Flag specifying if pkt is first fragment. In this case, frag
- *  info is invalid
- * @V4: Flag specifying pkt is IPv4 or IPv6
  * @CKSUM_PROCESS: CSUM block processing flag: Was pkt processed by csum block?
  *  If so, csum trailer exists
- * @AGGR_PROCESS: Aggr block processing flag: Was pkt processed by aggr block?
- * @DEST_EOT: Flag specifying if EOT was asserted for the pkt on dest endp
- * @DEAGGR_PROCESS: Deaggr block processing flag: Was pkt processed by deaggr
- *  block?
- * @DEAGG_FIRST: Flag specifying if this is the first pkt in deaggr frame
- * @SRC_EOT: Flag specifying if EOT asserted by src endp when sending the buffer
- * @PREV_EOT: Flag specifying if EOT was sent just before the pkt as part of
- *  aggr hard-byte-limit
- * @BYTE_LIMIT: Flag specifying if pkt is over a configured byte limit.
  */
 enum ipahal_pkt_status_mask {
-	IPAHAL_PKT_STATUS_MASK_FRAG_PROCESS	= 0x0001,
-	IPAHAL_PKT_STATUS_MASK_FILT_PROCESS	= 0x0002,
-	IPAHAL_PKT_STATUS_MASK_NAT_PROCESS	= 0x0004,
-	IPAHAL_PKT_STATUS_MASK_ROUTE_PROCESS	= 0x0008,
+	/* Other values are defined but are not specifically handed yet. */
 	IPAHAL_PKT_STATUS_MASK_TAG_VALID	= 0x0010,
-	IPAHAL_PKT_STATUS_MASK_FRAGMENT		= 0x0020,
-	IPAHAL_PKT_STATUS_MASK_FIRST_FRAGMENT	= 0x0040,
-	IPAHAL_PKT_STATUS_MASK_V4		= 0x0080,
 	IPAHAL_PKT_STATUS_MASK_CKSUM_PROCESS	= 0x0100,
-	IPAHAL_PKT_STATUS_MASK_AGGR_PROCESS	= 0x0200,
-	IPAHAL_PKT_STATUS_MASK_DEST_EOT		= 0x0400,
-	IPAHAL_PKT_STATUS_MASK_DEAGGR_PROCESS	= 0x0800,
-	IPAHAL_PKT_STATUS_MASK_DEAGG_FIRST	= 0x1000,
-	IPAHAL_PKT_STATUS_MASK_SRC_EOT		= 0x2000,
-	IPAHAL_PKT_STATUS_MASK_PREV_EOT		= 0x4000,
-	IPAHAL_PKT_STATUS_MASK_BYTE_LIMIT	= 0x8000,
 };
 
 /*
