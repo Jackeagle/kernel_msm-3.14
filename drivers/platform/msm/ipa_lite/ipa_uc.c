@@ -433,7 +433,7 @@ send_cmd:
 	 */
 	mutex_unlock(&uc_ctx->uc_lock);
 
-	ipa3_inject_dma_task_for_gsi();
+	ipa3_gsi_dma_task_inject();
 
 	/* Sleep for a short period to flush IPA before trying again. */
 	usleep_range(UC_CMD_RETRY_USLEEP_MIN, UC_CMD_RETRY_USLEEP_MAX);

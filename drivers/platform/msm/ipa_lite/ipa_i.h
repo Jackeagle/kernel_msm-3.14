@@ -1136,7 +1136,6 @@ int ipa3_ap_suspend(struct device *dev);
 int ipa3_ap_resume(struct device *dev);
 void ipa3_set_resource_groups_min_max_limits(void);
 void ipa3_suspend_apps_pipes(bool suspend);
-int ipa3_inject_dma_task_for_gsi(void);
 int ipa3_uc_panic_notifier(struct notifier_block *this,
 	unsigned long event, void *ptr);
 void ipa3_inc_acquire_wakelock(void);
@@ -1145,8 +1144,11 @@ const char *ipa_hw_error_str(enum ipa_hw_errors err_type);
 int ipa3_rx_poll(u32 clnt_hdl, int budget);
 void ipa3_reset_freeze_vote(void);
 void ipa3_enable_dcd(void);
-int ipa3_allocate_dma_task_for_gsi(void);
-void ipa3_free_dma_task_for_gsi(void);
+
+int ipa3_gsi_dma_task_alloc(void);
+void ipa3_gsi_dma_task_free(void);
+int ipa3_gsi_dma_task_inject(void);
+
 int ipa3_disable_apps_wan_cons_deaggr(uint32_t agg_size, uint32_t agg_count);
 int ipa3_plat_drv_probe(struct platform_device *pdev_p);
 

@@ -46,7 +46,7 @@
 #define IPA_FORCE_CLOSE_TAG_PROCESS_TIMEOUT (10 * HZ)
 #define IPA_BCR_REG_VAL_v3_5 (0x0000003B)
 
-#define IPA_DMA_TASK_FOR_GSI_TIMEOUT_MSEC (15)
+#define IPA_GSI_DMA_TASK_TIMEOUT	15	/* milliseconds */
 
 /* In IPAv3 only endpoints 0-3 can be configured to deaggregation */
 #define IPA_EP_SUPPORTS_DEAGGR(idx) ((idx) >= 0 && (idx) <= 3)
@@ -2235,11 +2235,18 @@ void ipa3_suspend_apps_pipes(bool suspend)
 	}
 }
 
-int ipa3_allocate_dma_task_for_gsi(void)
+/*
+ * In certain cases we need to issue a command to reliably clear the
+ * IPA pipeline.  Sending a 1-byte DMA task is sufficient, and this
+ * function preallocates a command to do just that.  There are
+ * conditions (process context in KILL state) where DMA allocations
+ * can fail, and we need to be able to issue this command to put the
+ * hardware in a known state.  By preallocating the command here we
+ * guarantee it can't fail for that reason.
+ */
+int ipa3_gsi_dma_task_alloc(void)
 {
 	struct ipa_mem_buffer *mem = &ipa3_ctx->dma_task_info.mem;
-
-	ipa_debug("Allocate mem\n");
 
 	if (ipahal_dma_alloc(mem, IPA_GSI_CHANNEL_STOP_PKT_SIZE, GFP_KERNEL))
 		return -EFAULT;
@@ -2248,13 +2255,14 @@ int ipa3_allocate_dma_task_for_gsi(void)
 	if (!ipa3_ctx->dma_task_info.cmd_pyld) {
 		ipa_err("failed to construct dma_task_32b_addr cmd\n");
 		ipahal_dma_free(mem);
+
 		return -EFAULT;
 	}
 
 	return 0;
 }
 
-void ipa3_free_dma_task_for_gsi(void)
+void ipa3_gsi_dma_task_free(void)
 {
 	struct ipa_mem_buffer *mem = &ipa3_ctx->dma_task_info.mem;
 
@@ -2264,21 +2272,21 @@ void ipa3_free_dma_task_for_gsi(void)
 }
 
 /**
- * ipa3_inject_dma_task_for_gsi()- Send DMA_TASK to IPA for GSI stop channel
+ * ipa3_gsi_dma_task_inject()- Send DMA_TASK to IPA for GSI stop channel
  *
  * Send a DMA_TASK of 1B to IPA to unblock GSI channel in STOP_IN_PROG.
  * Return value: 0 on success, negative otherwise
  */
-int ipa3_inject_dma_task_for_gsi(void)
+int ipa3_gsi_dma_task_inject(void)
 {
-	struct ipa3_desc desc = {0};
+	struct ipa3_desc desc = { 0 };
 
 	ipa_desc_fill_imm_cmd(&desc, ipa3_ctx->dma_task_info.cmd_pyld);
 
 	ipa_debug("sending 1B packet to IPA\n");
-	if (ipa3_send_cmd_timeout(1, &desc,
-		IPA_DMA_TASK_FOR_GSI_TIMEOUT_MSEC)) {
+	if (ipa3_send_cmd_timeout(1, &desc, IPA_GSI_DMA_TASK_TIMEOUT)) {
 		ipa_err("ipa3_send_cmd failed\n");
+
 		return -EFAULT;
 	}
 
@@ -2330,7 +2338,7 @@ int ipa3_stop_gsi_channel(u32 clnt_hdl)
 
 		ipa_debug("Inject a DMA_TASK with 1B packet to IPA\n");
 		/* Send a 1B packet DMA_TASK to IPA and try again */
-		res = ipa3_inject_dma_task_for_gsi();
+		res = ipa3_gsi_dma_task_inject();
 		if (res) {
 			ipa_err("Failed to inject DMA TASk for GSI\n");
 			goto end_sequence;

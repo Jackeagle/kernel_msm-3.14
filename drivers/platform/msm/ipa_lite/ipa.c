@@ -2019,7 +2019,7 @@ static int ipa3_pre_init(void)
 	}
 
 	/* allocate memory for DMA_TASK workaround */
-	result = ipa3_allocate_dma_task_for_gsi();
+	result = ipa3_gsi_dma_task_alloc();
 	if (result) {
 		ipa_err("failed to allocate dma task\n");
 		goto fail_dma_task;
@@ -2084,7 +2084,7 @@ fail_create_apps_resource:
 fail_device_create:
 	unregister_chrdev_region(ipa3_ctx->dev_num, 1);
 fail_alloc_chrdev_region:
-	ipa3_free_dma_task_for_gsi();
+	ipa3_gsi_dma_task_free();
 fail_dma_task:
 fail_rx_pkt_wrapper_cache:
 	kmem_cache_destroy(ipa3_ctx->rx_pkt_wrapper_cache);
