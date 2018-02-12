@@ -350,33 +350,17 @@ ipa3_send(struct ipa3_sys_context *sys, u32 num_desc, struct ipa3_desc *desc)
 		if (desc[i].type != IPA_DATA_DESC_SKB_PAGED) {
 			tx_pkt->mem.base = desc[i].pyld;
 			tx_pkt->mem.size = desc[i].len;
-
-			if (!desc[i].dma_address_valid) {
-				tx_pkt->mem.phys_base =
-					dma_map_single(dev,
-						tx_pkt->mem.base,
-						tx_pkt->mem.size,
-						DMA_TO_DEVICE);
-			} else {
-					tx_pkt->mem.phys_base =
-						desc[i].dma_address;
-					tx_pkt->no_unmap_dma = true;
-			}
+			tx_pkt->mem.phys_base = dma_map_single(dev,
+							tx_pkt->mem.base,
+							tx_pkt->mem.size,
+							DMA_TO_DEVICE);
 		} else {
 			tx_pkt->mem.base = desc[i].frag;
 			tx_pkt->mem.size = desc[i].len;
-
-			if (!desc[i].dma_address_valid) {
-				tx_pkt->mem.phys_base =
-					skb_frag_dma_map(dev,
-						desc[i].frag,
-						0, tx_pkt->mem.size,
-						DMA_TO_DEVICE);
-			} else {
-				tx_pkt->mem.phys_base =
-					desc[i].dma_address;
-				tx_pkt->no_unmap_dma = true;
-			}
+			tx_pkt->mem.phys_base = skb_frag_dma_map(dev,
+							desc[i].frag, 0,
+							tx_pkt->mem.size,
+							DMA_TO_DEVICE);
 		}
 		if (dma_mapping_error(dev, tx_pkt->mem.phys_base)) {
 			ipa_err("failed to do dma map.\n");
