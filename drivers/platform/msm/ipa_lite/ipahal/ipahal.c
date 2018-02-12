@@ -579,47 +579,6 @@ ipahal_pkt_status_exception_str(enum ipahal_pkt_status_exception exception)
 	return ipahal_pkt_status_exception_to_str[exception];
 }
 
-/*
- * ipahal_cp_hdr_to_hw_buff() - copy header to hardware buffer according to
- * base address and offset given.
- * @base: dma base address
- * @offset: offset from base address where the data will be copied
- * @hdr: the header to be copied
- * @hdr_len: the length of the header
- */
-void ipahal_cp_hdr_to_hw_buff(void *base, u32 offset, u8 *const hdr,
-		u32 hdr_len)
-{
-	ipa_debug_low("Entry\n");
-	ipa_debug("base %p, offset %d, hdr %p, hdr_len %d\n", base,
-			offset, hdr, hdr_len);
-	if (!base || !hdr_len || !hdr) {
-		ipa_err("failed on validating params");
-		return;
-	}
-
-	/* Copy the header to the hardware buffer */
-	memcpy(base + offset, hdr, hdr_len);
-
-	ipa_debug_low("Exit\n");
-}
-
-/*
- * Get IPA Data Processing Star image memory size at IPA SRAM
- */
-u32 ipahal_get_dps_img_mem_size(void)
-{
-	return IPA_HW_DPS_IMG_MEM_SIZE_V3_0;
-}
-
-/*
- * Get IPA Header Processing Star image memory size at IPA SRAM
- */
-u32 ipahal_get_hps_img_mem_size(void)
-{
-	return IPA_HW_HPS_IMG_MEM_SIZE_V3_0;
-}
-
 int ipahal_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp)
 {
 	dma_addr_t phys;
