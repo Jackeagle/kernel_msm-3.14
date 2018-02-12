@@ -433,7 +433,6 @@ struct ipa3_desc {
 	enum ipa3_desc_type type;
 	void *pyld;
 	skb_frag_t *frag;
-	dma_addr_t dma_address;
 	u16 len;
 	u16 opcode;
 	void (*callback)(void *user1, int user2);
