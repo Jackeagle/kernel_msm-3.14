@@ -272,7 +272,7 @@ static struct ipahal_imm_cmd_pyld *
 ipa_imm_cmd_construct_ip_v6_filter_init(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
-	struct ipa_imm_cmd_hw_ip_v6_filter_init *data;
+	struct ipa_imm_cmd_hw_ip_filter_init *data;
 	const struct ipahal_imm_cmd_ip_fltrt_init *flt6_params = params;
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
@@ -294,7 +294,7 @@ static struct ipahal_imm_cmd_pyld *
 ipa_imm_cmd_construct_ip_v4_filter_init(u16 opcode, const void *params)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
-	struct ipa_imm_cmd_hw_ip_v4_filter_init *data;
+	struct ipa_imm_cmd_hw_ip_filter_init *data;
 	const struct ipahal_imm_cmd_ip_fltrt_init *flt4_params = params;
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));

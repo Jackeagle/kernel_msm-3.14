@@ -39,44 +39,20 @@ extern struct ipahal_context *ipahal_ctx;
 /* Immediate commands H/W structures */
 
 /*
- * struct ipa_imm_cmd_hw_ip_v4_filter_init - IP_V4_FILTER_INIT command payload
+ * struct ipa_imm_cmd_hw_ip_filter_init - IP_V*_FILTER_INIT command payload
  *  in H/W format.
- * Inits IPv4 filter block.
- * @hash_rules_addr: Addr in system mem where ipv4 hashable flt rules starts
+ * Inits IPv4/v6 filter block.
+ * @hash_rules_addr: Addr in system mem where hashable flt rules starts
  * @hash_rules_size: Size in bytes of the hashable tbl to cpy to local mem
- * @hash_local_addr: Addr in shared mem where ipv4 hashable flt tbl should
+ * @hash_local_addr: Addr in shared mem where hashable flt tbl should
  *  be copied to
  * @nhash_rules_size: Size in bytes of the non-hashable tbl to cpy to local mem
- * @nhash_local_addr: Addr in shared mem where ipv4 non-hashable flt tbl should
+ * @nhash_local_addr: Addr in shared mem where non-hashable flt tbl should
  *  be copied to
  * @rsvd: reserved
- * @nhash_rules_addr: Addr in sys mem where ipv4 non-hashable flt tbl starts
+ * @nhash_rules_addr: Addr in sys mem where non-hashable flt tbl starts
  */
-struct ipa_imm_cmd_hw_ip_v4_filter_init {
-	u64 hash_rules_addr:64;
-	u64 hash_rules_size:12;
-	u64 hash_local_addr:16;
-	u64 nhash_rules_size:12;
-	u64 nhash_local_addr:16;
-	u64 rsvd:8;
-	u64 nhash_rules_addr:64;
-};
-
-/*
- * struct ipa_imm_cmd_hw_ip_v6_filter_init - IP_V6_FILTER_INIT command payload
- *  in H/W format.
- * Inits IPv6 filter block.
- * @hash_rules_addr: Addr in system mem where ipv6 hashable flt rules starts
- * @hash_rules_size: Size in bytes of the hashable tbl to cpy to local mem
- * @hash_local_addr: Addr in shared mem where ipv6 hashable flt tbl should
- *  be copied to
- * @nhash_rules_size: Size in bytes of the non-hashable tbl to cpy to local mem
- * @nhash_local_addr: Addr in shared mem where ipv6 non-hashable flt tbl should
- *  be copied to
- * @rsvd: reserved
- * @nhash_rules_addr: Addr in sys mem where ipv6 non-hashable flt tbl starts
- */
-struct ipa_imm_cmd_hw_ip_v6_filter_init {
+struct ipa_imm_cmd_hw_ip_filter_init {
 	u64 hash_rules_addr:64;
 	u64 hash_rules_size:12;
 	u64 hash_local_addr:16;
