@@ -1081,6 +1081,8 @@ struct ipa3_controller *ipa3_controller_init(void);
 int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout);
 int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr);
 
+void ipa3_destroy_imm(void *user1, int user2);
+
 void ipa3_enable_clks(void);
 void ipa3_disable_clks(void);
 void ipa3_inc_client_enable_clks(struct ipa_active_client_logging_info *id);
@@ -1127,7 +1129,6 @@ int ipa3_init_q6_smem(void);
 int ipa3_uc_interface_init(void);
 int ipa3_uc_is_gsi_channel_empty(enum ipa_client_type ipa_client);
 int ipa3_uc_loaded_check(void);
-void ipa3_tag_destroy_imm(void *user1, int user2);
 const struct ipa_gsi_ep_config *ipa3_get_gsi_ep_info
 	(enum ipa_client_type client);
 

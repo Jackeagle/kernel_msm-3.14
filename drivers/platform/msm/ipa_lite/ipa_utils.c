@@ -1730,11 +1730,6 @@ void ipa3_skb_recycle(struct sk_buff *skb)
 	skb_reset_tail_pointer(skb);
 }
 
-void ipa3_tag_destroy_imm(void *user1, int user2)
-{
-	ipahal_destroy_imm_cmd(user1);
-}
-
 static void ipa3_tag_free_skb(void *user1, int user2)
 {
 	dev_kfree_skb_any((struct sk_buff *)user1);
@@ -1801,7 +1796,7 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 		goto fail_free_tag_desc;
 	}
 	ipa_desc_fill_imm_cmd(&tag_desc[desc_idx], cmd_pyld);
-	tag_desc[desc_idx].callback = ipa3_tag_destroy_imm;
+	tag_desc[desc_idx].callback = ipa3_destroy_imm;
 	tag_desc[desc_idx].user1 = cmd_pyld;
 	desc_idx++;
 
@@ -1814,7 +1809,7 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 		goto fail_free_desc;
 	}
 	ipa_desc_fill_imm_cmd(&tag_desc[desc_idx], cmd_pyld);
-	tag_desc[desc_idx].callback = ipa3_tag_destroy_imm;
+	tag_desc[desc_idx].callback = ipa3_destroy_imm;
 	tag_desc[desc_idx].user1 = cmd_pyld;
 	desc_idx++;
 
@@ -1826,7 +1821,7 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 		goto fail_free_desc;
 	}
 	ipa_desc_fill_imm_cmd(&tag_desc[desc_idx], cmd_pyld);
-	tag_desc[desc_idx].callback = ipa3_tag_destroy_imm;
+	tag_desc[desc_idx].callback = ipa3_destroy_imm;
 	tag_desc[desc_idx].user1 = cmd_pyld;
 	desc_idx++;
 
@@ -1951,7 +1946,7 @@ int ipa3_tag_aggr_force_close_all(void)
 			goto fail_alloc_reg_write_agg_close;
 		}
 		ipa_desc_fill_imm_cmd(&desc[desc_idx], cmd_pyld);
-		desc[desc_idx].callback = ipa3_tag_destroy_imm;
+		desc[desc_idx].callback = ipa3_destroy_imm;
 		desc[desc_idx].user1 = cmd_pyld;
 		desc_idx++;
 	}

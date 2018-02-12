@@ -332,7 +332,11 @@ int ipa3_init_q6_smem(void)
 	return rc;
 }
 
-static void ipa3_destroy_imm(void *user1, int user2)
+/*
+ * Descriptor callback function to free an immediate command payload.
+ * Callbacks supply two arguments; we need to supply just one.
+ */
+void ipa3_destroy_imm(void *user1, int user2)
 {
 	ipahal_destroy_imm_cmd(user1);
 }
