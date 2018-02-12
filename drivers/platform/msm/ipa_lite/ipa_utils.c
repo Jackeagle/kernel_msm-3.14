@@ -1961,7 +1961,8 @@ static int ipa3_tag_generate_force_close_desc(struct ipa3_desc desc[],
 		desc_idx++;
 	}
 
-	return desc_idx;
+	return ipa3_tag_process(desc, desc_idx,
+			      IPA_FORCE_CLOSE_TAG_PROCESS_TIMEOUT);
 
 fail_alloc_reg_write_agg_close:
 	for (i = 0; i < desc_idx; i++)
@@ -1978,7 +1979,6 @@ fail_no_desc:
 int ipa3_tag_aggr_force_close_all(void)
 {
 	struct ipa3_desc *desc;
-	int res = -1;
 	int num_descs = ipa3_ctx->ipa_num_pipes;
 	int num_aggr_descs;
 
@@ -1991,19 +1991,12 @@ int ipa3_tag_aggr_force_close_all(void)
 	/* Force close aggregation on all valid pipes with aggregation */
 	num_aggr_descs = ipa3_tag_generate_force_close_desc(desc, num_descs,
 						0, num_descs);
-	if (num_aggr_descs < 0) {
+	if (num_aggr_descs < 0)
 		ipa_err("ipa3_tag_generate_force_close_desc failed %d\n",
 			num_aggr_descs);
-		goto fail_free_desc;
-	}
-
-	res = ipa3_tag_process(desc, num_aggr_descs,
-			      IPA_FORCE_CLOSE_TAG_PROCESS_TIMEOUT);
-
-fail_free_desc:
 	kfree(desc);
 
-	return res;
+	return num_aggr_descs;
 }
 
 /**
