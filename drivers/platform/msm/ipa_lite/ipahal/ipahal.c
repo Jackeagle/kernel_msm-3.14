@@ -56,6 +56,8 @@ ipahal_imm_cmd_pyld_alloc_common(u16 opcode, size_t pyld_size, gfp_t flags)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 
+	ipa_debug_low("immediate command: %s\n", ipahal_imm_cmds[opcode].name);
+
 	pyld = kzalloc(sizeof(*pyld) + pyld_size, flags);
 	if (unlikely(!pyld)) {
 		ipa_err("kzalloc err (opcode %hu pyld_size %zu)\n",
@@ -438,8 +440,6 @@ ipahal_construct_imm_cmd(enum ipahal_imm_cmd_name cmd, const void *params)
 
 {
 	const struct ipahal_imm_cmd_obj *imm_cmd = &ipahal_imm_cmds[cmd];
-
-	ipa_debug_low("construct IMM_CMD:%s\n", imm_cmd->name);
 
 	return imm_cmd->construct(imm_cmd->opcode, params);
 }
