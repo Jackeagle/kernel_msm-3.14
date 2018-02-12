@@ -2274,15 +2274,17 @@ static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 		limit = in->ipa_ep_cfg.aggr.aggr_byte_limit;
 		adjusted = ipa_adjust_ra_buff_base_sz(limit);
 
-		ipa_err("get close-by %u\n", adjusted);
-		ipa_err("set rx_buff_sz %lu\n",
-				IPA_GENERIC_RX_BUFF_SZ(adjusted));
 		/* disable ipa_status */
 		sys->ep->status.status_en = false;
-		sys->rx_buff_sz = IPA_GENERIC_RX_BUFF_SZ(adjusted);
-		limit = sys->rx_buff_sz < limit ?
-			IPA_ADJUST_AGGR_BYTE_LIMIT(sys->rx_buff_sz) :
-			IPA_ADJUST_AGGR_BYTE_LIMIT(limit);
+
+		ipa_err("get close-by %u\n", adjusted);
+		adjusted = IPA_GENERIC_RX_BUFF_SZ(adjusted);
+		ipa_err("set rx_buff_sz %lu\n", adjusted);
+		sys->rx_buff_sz = adjusted;
+
+		if (sys->rx_buff_sz < limit)
+			limit = sys->rx_buff_sz;
+		limit = IPA_ADJUST_AGGR_BYTE_LIMIT(limit);
 		ipa_err("set aggr_limit %u\n", limit);
 		in->ipa_ep_cfg.aggr.aggr_byte_limit = limit;
 	} else {
