@@ -1973,33 +1973,14 @@ fail_no_desc:
 }
 
 /**
- * ipa3_tag_aggr_force_close() - Force close aggregation
- *
- * @pipe_num: pipe number or -1 for all pipes
+ * ipa3_tag_aggr_force_close_all() - Force close aggregation
  */
-int ipa3_tag_aggr_force_close(int pipe_num)
+int ipa3_tag_aggr_force_close_all(void)
 {
 	struct ipa3_desc *desc;
 	int res = -1;
-	int start_pipe;
-	int end_pipe;
-	int num_descs;
+	int num_descs = ipa3_ctx->ipa_num_pipes;
 	int num_aggr_descs;
-
-	if (pipe_num < -1 || pipe_num >= (int)ipa3_ctx->ipa_num_pipes) {
-		ipa_err("Invalid pipe number %d\n", pipe_num);
-		return -EINVAL;
-	}
-
-	if (pipe_num == -1) {
-		start_pipe = 0;
-		end_pipe = ipa3_ctx->ipa_num_pipes;
-	} else {
-		start_pipe = pipe_num;
-		end_pipe = pipe_num + 1;
-	}
-
-	num_descs = end_pipe - start_pipe;
 
 	desc = kcalloc(num_descs, sizeof(*desc), GFP_KERNEL);
 	if (!desc) {
@@ -2009,7 +1990,7 @@ int ipa3_tag_aggr_force_close(int pipe_num)
 
 	/* Force close aggregation on all valid pipes with aggregation */
 	num_aggr_descs = ipa3_tag_generate_force_close_desc(desc, num_descs,
-						start_pipe, end_pipe);
+						0, num_descs);
 	if (num_aggr_descs < 0) {
 		ipa_err("ipa3_tag_generate_force_close_desc failed %d\n",
 			num_aggr_descs);

@@ -1122,7 +1122,7 @@ static void ipa3_start_tag_process(struct work_struct *work)
 
 	ipa_debug("starting TAG process\n");
 	/* close aggregation frames on all pipes */
-	res = ipa3_tag_aggr_force_close(-1);
+	res = ipa3_tag_aggr_force_close_all();
 	if (res)
 		ipa_err("ipa3_tag_aggr_force_close failed %d\n", res);
 	IPA_ACTIVE_CLIENTS_DEC_SPECIAL("TAG_PROCESS");
