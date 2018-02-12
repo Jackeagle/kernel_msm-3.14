@@ -35,6 +35,22 @@ static const char *ipahal_pkt_status_exception_to_str[] = {
 	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_IPV6CT),
 };
 
+/*
+ * struct ipahal_imm_cmd_obj - immediate command H/W information for
+ *  specific IPA version
+ * @construct - CB to construct imm command payload from abstracted structure
+ * @name - Command "name" (i.e., symbolic identifier)
+ * @opcode - Immediate command OpCode
+ */
+struct ipahal_imm_cmd_obj {
+	struct ipahal_imm_cmd_pyld *(*construct)(u16 opcode,
+		const void *params);
+	const char *name;
+	u16 opcode;
+};
+
+static struct ipahal_imm_cmd_obj ipahal_imm_cmds[IPA_IMM_CMD_MAX];
+
 static struct ipahal_imm_cmd_pyld *
 ipahal_imm_cmd_pyld_alloc_common(u16 opcode, size_t pyld_size, gfp_t flags)
 {
@@ -295,20 +311,6 @@ ipa_imm_cmd_construct_ip_v4_filter_init(u16 opcode, const void *params)
 }
 
 /*
- * struct ipahal_imm_cmd_obj - immediate command H/W information for
- *  specific IPA version
- * @construct - CB to construct imm command payload from abstracted structure
- * @name - Command "name" (i.e., symbolic identifier)
- * @opcode - Immediate command OpCode
- */
-struct ipahal_imm_cmd_obj {
-	struct ipahal_imm_cmd_pyld *(*construct)(u16 opcode,
-		const void *params);
-	const char *name;
-	u16 opcode;
-};
-
-/*
  * The The opcode used for certain immediate commands may change
  * between different versions of IPA hardare.  The format of the
  * command data passed to the IPA can change slightly with new
@@ -398,8 +400,6 @@ static const struct ipahal_imm_cmd_obj
 #undef imm_cmd_obj
 #undef idsym
 #undef cfunc
-
-static struct ipahal_imm_cmd_obj ipahal_imm_cmds[IPA_IMM_CMD_MAX];
 
 /*
  * ipahal_imm_cmd_init() - Build the Immediate command information table
