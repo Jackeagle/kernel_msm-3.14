@@ -41,69 +41,6 @@ enum ipahal_imm_cmd_name {
 /* Immediate commands abstracted structures */
 
 /*
- * struct ipahal_imm_cmd_ip_fltrt_init - IP filter/route cmd payload
- * Inits IPv4/IPv6 filter or routing block.
- * @hash_rules_addr: Addr in sys mem where ipv4 hashable flt tbl starts
- * @hash_rules_size: Size in bytes of the hashable tbl to cpy to local mem
- * @hash_local_addr: Addr in shared mem where hashable flt tbl should
- *  be copied to
- * @nhash_rules_addr: Addr in sys mem where non-hashable flt tbl starts
- * @nhash_rules_size: Size in bytes of the non-hashable tbl to cpy to local mem
- * @nhash_local_addr: Addr in shared mem where ipv4 non-hashable flt tbl should
- *  be copied to
- */
-struct ipahal_imm_cmd_ip_fltrt_init {
-	u64 hash_rules_addr;
-	u32 hash_rules_size;
-	u32 hash_local_addr;
-	u64 nhash_rules_addr;
-	u32 nhash_rules_size;
-	u32 nhash_local_addr;
-};
-
-/*
- * struct ipahal_imm_cmd_hdr_init_local - HDR_INIT_LOCAL cmd payload
- * Inits hdr table within local mem with the hdrs and their length.
- * @hdr_table_addr: Word address in sys mem where the table starts (SRC)
- * @size_hdr_table: Size of the above (in bytes)
- * @hdr_addr: header address in IPA sram (used as DST for memory copy)
- * @rsvd: reserved
- */
-struct ipahal_imm_cmd_hdr_init_local {
-	u64 hdr_table_addr;
-	u32 size_hdr_table;
-	u32 hdr_addr;
-};
-
-/*
- * struct ipahal_imm_cmd_table_dma - TABLE_DMA cmd payload
- * Perform DMA operation on NAT and IPV6 connection tracking related mem
- * addresses. Copy data into different locations within IPV6CT and NAT
- * associated tbls. (For add/remove NAT rules)
- * @table_index: NAT tbl index. Defines the tbl on which to perform DMA op.
- * @base_addr: Base addr to which the DMA operation should be performed.
- * @offset: offset in bytes from base addr to write 'data' to
- * @data: data to be written
- */
-struct ipahal_imm_cmd_table_dma {
-	u8 table_index;
-	u8 base_addr;
-	u32 offset;
-	u16 data;
-};
-
-/*
- * struct ipahal_imm_cmd_ip_packet_init - IP_PACKET_INIT cmd payload
- * Configuration for specific IP pkt. Shall be called prior to an IP pkt
- *  data. Pkt will not go through IP pkt processing.
- * @destination_pipe_index: Destination pipe index  (in case routing
- *  is enabled, this field will overwrite the rt  rule)
- */
-struct ipahal_imm_cmd_ip_packet_init {
-	u32 destination_pipe_index;
-};
-
-/*
  * enum ipa_pipeline_clear_option - Values for pipeline clear waiting options
  * @IPAHAL_HPS_CLEAR: Wait for HPS clear. All queues except high priority queue
  *  shall not be serviced until HPS is clear of packets or immediate commands.
@@ -129,92 +66,6 @@ enum ipahal_pipeline_clear_option {
 	IPAHAL_HPS_CLEAR		= 0,
 	IPAHAL_SRC_GRP_CLEAR		= 1,
 	IPAHAL_FULL_PIPELINE_CLEAR	= 2,
-};
-
-/*
- * struct ipahal_imm_cmd_register_write - REGISTER_WRITE cmd payload
- * Write value to register. Allows reg changes to be synced with data packet
- *  and other immediate commands. Can be used to access the sram
- * @offset: offset from IPA base address - Lower 16bit of the IPA reg addr
- * @value: value to write to register
- * @value_mask: mask specifying which value bits to write to the register
- * @skip_pipeline_clear: if to skip pipeline clear waiting (don't wait)
- * @pipeline_clear_option: options for pipeline clear waiting
- */
-struct ipahal_imm_cmd_register_write {
-	u32 offset;
-	u32 value;
-	u32 value_mask;
-	bool skip_pipeline_clear;
-	enum ipahal_pipeline_clear_option pipeline_clear_options;
-};
-
-/*
- * struct ipahal_imm_cmd_dma_shared_mem - DMA_SHARED_MEM cmd payload
- * Perform mem copy into or out of the SW area of IPA local mem
- * @size: Size in bytes of data to copy. Expected size is up to 2K bytes
- * @local_addr: Address in IPA local memory
- * @clear_after_read: Clear local memory at the end of a read operation allows
- *  atomic read and clear if HPS is clear. Ignore for writes.
- * @is_read: Read operation from local memory? If not, then write.
- * @skip_pipeline_clear: if to skip pipeline clear waiting (don't wait)
- * @pipeline_clear_option: options for pipeline clear waiting
- * @system_addr: Address in system memory
- */
-struct ipahal_imm_cmd_dma_shared_mem {
-	u32 size;
-	u32 local_addr;
-	bool clear_after_read;
-	bool is_read;
-	bool skip_pipeline_clear;
-	enum ipahal_pipeline_clear_option pipeline_clear_options;
-	u64 system_addr;
-};
-
-/*
- * struct ipahal_imm_cmd_ip_packet_tag_status - IP_PACKET_TAG_STATUS cmd payload
- * This cmd is used for to allow SW to track HW processing by setting a TAG
- *  value that is passed back to SW inside Packet Status information.
- *  TAG info will be provided as part of Packet Status info generated for
- *  the next pkt transferred over the pipe.
- *  This immediate command must be followed by a packet in the same transfer.
- * @tag: Tag that is provided back to SW
- */
-struct ipahal_imm_cmd_ip_packet_tag_status {
-	u64 tag;
-};
-
-/*
- * struct ipahal_imm_cmd_dma_task_32b_addr - IPA_DMA_TASK_32B_ADDR cmd payload
- * Used by clients using 32bit addresses. Used to perform DMA operation on
- *  multiple descriptors.
- *  The Opcode is dynamic, where it holds the number of buffer to process
- * @cmplt: Complete flag: If true, IPA interrupt SW when the entire
- *  DMA related data was completely xfered to its destination.
- * @eof: Enf Of Frame flag: If true, IPA assert the EOT to the
- *  dest client. This is used used for aggr sequence
- * @flsh: Flush flag: If true pkt will go through the IPA blocks but
- *  will not be xfered to dest client but rather will be discarded
- * @lock: Lock pipe flag: If true, IPA will stop processing descriptors
- *  from other EPs in the same src grp (RX queue)
- * @unlock: Unlock pipe flag: If true, IPA will stop exclusively
- *  servicing current EP out of the src EPs of the grp (RX queue)
- * @size1: Size of buffer1 data
- * @addr1: Pointer to buffer1 data
- * @packet_size: Total packet size. If a pkt send using multiple DMA_TASKs,
- *  only the first one needs to have this field set. It will be ignored
- *  in subsequent DMA_TASKs until the packet ends (EOT). First DMA_TASK
- *  must contain this field (2 or more buffers) or EOT.
- */
-struct ipahal_imm_cmd_dma_task_32b_addr {
-	bool cmplt;
-	bool eof;
-	bool flsh;
-	bool lock;
-	bool unlock;
-	u32 size1;
-	u32 addr1;
-	u32 packet_size;
 };
 
 /*
@@ -245,6 +96,9 @@ static inline void *ipahal_imm_cmd_pyld_data(struct ipahal_imm_cmd_pyld *pyld)
  * command, or null if one can't be allocated.  Result is dynamically
  * allocated, and caller must ensure it gets released by providing it to
  * ipahal_destroy_imm_cmd() when it is no longer needed.
+ *
+ * mem 		a DMA buffer containing data to be written (up to 2KB)
+ * offset	is where to write in IPA local memory
  */
 struct ipahal_imm_cmd_pyld *ipahal_dma_shared_mem_write_pyld(
 				struct ipa_mem_buffer *mem, u32 offset);
@@ -254,6 +108,11 @@ struct ipahal_imm_cmd_pyld *ipahal_dma_shared_mem_write_pyld(
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd() when it is no
  * longer needed.
+ *
+ * offset	is the location of the register in IPA local memory
+ * value	is the value to write
+ * mask		indicates which bits in register should be updated
+ * clear	if true means wait for full pipeline clear (HPS otherwise)
  */
 struct ipahal_imm_cmd_pyld *ipahal_register_write_pyld(u32 offset, u32 value,
 				u32 mask, bool clear);
@@ -262,6 +121,9 @@ struct ipahal_imm_cmd_pyld *ipahal_register_write_pyld(u32 offset, u32 value,
  * Return a pointer to the payload for a header init local immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
+ *
+ * mem 		a DMA buffer containing data to be written (up to 2KB)
+ * offset	is the location IPA local memory to write
  */
 struct ipahal_imm_cmd_pyld *ipahal_hdr_init_local_pyld(
 				struct ipa_mem_buffer *mem, u32 offset);
@@ -270,6 +132,8 @@ struct ipahal_imm_cmd_pyld *ipahal_hdr_init_local_pyld(
  * Return a pointer to the payload for an IP packet init immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
+ *
+ * dest_pipe_idx is the destination pipe
  */
 struct ipahal_imm_cmd_pyld *ipahal_ip_packet_init_pyld(u32 dest_pipe_idx);
 
@@ -277,6 +141,10 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_packet_init_pyld(u32 dest_pipe_idx);
  * Return a pointer to the payload for an IPv4 routing init immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
+ *
+ * mem		contains the IPv4 routing table data to be written
+ * hash_offset	is the locatin in IPA memory for hashed routing table
+ * nhash_offset	is the locatin in IPA memory for non-hashed routing table
  */
 struct ipahal_imm_cmd_pyld *ipahal_ip_v4_routing_init_pyld(
 				struct ipa_mem_buffer *mem,
@@ -286,6 +154,10 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_v4_routing_init_pyld(
  * Return a pointer to the payload for an IPv6 routing init immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
+ *
+ * mem		contains the IPv6 routing table data to be written
+ * hash_offset	is the locatin in IPA memory for hashed routing table
+ * nhash_offset	is the locatin in IPA memory for non-hashed routing table
  */
 struct ipahal_imm_cmd_pyld *ipahal_ip_v6_routing_init_pyld(
 				struct ipa_mem_buffer *mem,
@@ -295,6 +167,10 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_v6_routing_init_pyld(
  * Return a pointer to the payload for an IPv4 filter init immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
+ *
+ * mem		contains the IPv4 filter table data to be written
+ * hash_offset	is the locatin in IPA memory for hashed routing table
+ * nhash_offset	is the locatin in IPA memory for non-hashed routing table
  */
 struct ipahal_imm_cmd_pyld *ipahal_ip_v4_filter_init_pyld(
 				struct ipa_mem_buffer *mem,
@@ -304,6 +180,10 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_v4_filter_init_pyld(
  * Return a pointer to the payload for an IPv6 filter init immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
+ *
+ * mem		contains the IPv6 filter table data to be written
+ * hash_offset	is the locatin in IPA memory for hashed routing table
+ * nhash_offset	is the locatin in IPA memory for non-hashed routing table
  */
 struct ipahal_imm_cmd_pyld *ipahal_ip_v6_filter_init_pyld(
 				struct ipa_mem_buffer *mem,
@@ -313,6 +193,8 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_v6_filter_init_pyld(
  * Return a pointer to the payload for an IP packet tag status immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
+ *
+ * tag		is the tag value to apply to the next transfer
  */
 struct ipahal_imm_cmd_pyld *ipahal_ip_packet_tag_status_pyld(u64 tag);
 
@@ -320,6 +202,8 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_packet_tag_status_pyld(u64 tag);
  * Return a pointer to the payload for DMA task 32-bit address immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
+ *
+ * mem is the dat to transfer (it will be discarded)
  */
 struct ipahal_imm_cmd_pyld *ipahal_dma_task_32b_addr_pyld(
 				struct ipa_mem_buffer *mem);

@@ -38,15 +38,12 @@ static const char *ipahal_pkt_status_exception_to_str[] = {
 /*
  * struct ipahal_imm_cmd_obj - immediate command H/W information for
  *  specific IPA version
- * @construct - CB to construct imm command payload from abstracted structure
  * @name - Command "name" (i.e., symbolic identifier)
  * @opcode - Immediate command OpCode
  */
 struct ipahal_imm_cmd_obj {
-	struct ipahal_imm_cmd_pyld *(*construct)(u16 opcode,
-		const void *params);
-	const char *name;
-	u16 opcode;
+	const char	*name;
+	u16		opcode;
 };
 
 static struct ipahal_imm_cmd_obj ipahal_imm_cmds[IPA_IMM_CMD_MAX];
@@ -97,219 +94,6 @@ static bool check_too_big(char *name, u64 value, u8 bits)
 	ipa_err("%s is bigger than %hhubit width 0x%llx\n", name, bits, value);
 
 	return true;
-}
-
-static struct ipahal_imm_cmd_pyld *
-ipa_imm_cmd_construct_dma_task_32b_addr(u16 opcode, const void *params)
-{
-	struct ipahal_imm_cmd_pyld *pyld;
-	struct ipa_imm_cmd_hw_dma_task_32b_addr *data;
-	const struct ipahal_imm_cmd_dma_task_32b_addr *dma_params = params;
-
-	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
-	if (!pyld)
-		return NULL;
-	data = ipahal_imm_cmd_pyld_data(pyld);
-
-	pyld->opcode += 1 << 8; /* Currently supports only one packet */
-
-	data->cmplt = dma_params->cmplt ? 1 : 0;
-	data->eof = dma_params->eof ? 1 : 0;
-	data->flsh = dma_params->flsh ? 1 : 0;
-	data->lock = dma_params->lock ? 1 : 0;
-	data->unlock = dma_params->unlock ? 1 : 0;
-	data->size1 = dma_params->size1;
-	data->addr1 = dma_params->addr1;
-	data->packet_size = dma_params->packet_size;
-
-	return pyld;
-}
-
-/* NOTE:  this function is called in atomic state */
-static struct ipahal_imm_cmd_pyld *
-ipa_imm_cmd_construct_ip_packet_tag_status(u16 opcode, const void *params)
-{
-	struct ipahal_imm_cmd_pyld *pyld;
-	struct ipa_imm_cmd_hw_ip_packet_tag_status *data;
-	const struct ipahal_imm_cmd_ip_packet_tag_status *tag_params = params;
-
-	pyld = ipahal_imm_cmd_pyld_alloc_atomic(opcode, sizeof(*data));
-	if (!pyld)
-		return NULL;
-	data = ipahal_imm_cmd_pyld_data(pyld);
-
-	data->tag = tag_params->tag;
-
-	return pyld;
-}
-
-static struct ipahal_imm_cmd_pyld *
-ipa_imm_cmd_construct_dma_shared_mem(u16 opcode, const void *params)
-{
-	struct ipahal_imm_cmd_pyld *pyld;
-	struct ipa_imm_cmd_hw_dma_shared_mem *data;
-	const struct ipahal_imm_cmd_dma_shared_mem *mem_params = params;
-	u16 pipeline_clear_options = (u16)mem_params->pipeline_clear_options;
-
-	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
-	if (!pyld)
-		return NULL;
-	data = ipahal_imm_cmd_pyld_data(pyld);
-
-	data->direction = mem_params->is_read ? 1 : 0;
-	data->size = mem_params->size;
-	data->local_addr = mem_params->local_addr;
-	data->system_addr = mem_params->system_addr;
-	data->skip_pipeline_clear = mem_params->skip_pipeline_clear ? 1 : 0;
-	data->pipeline_clear_options = pipeline_clear_options;
-
-	return pyld;
-}
-
-static struct ipahal_imm_cmd_pyld *
-ipa_imm_cmd_construct_register_write(u16 opcode, const void *params)
-{
-	struct ipahal_imm_cmd_pyld *pyld;
-	struct ipa_imm_cmd_hw_register_write *data;
-	const struct ipahal_imm_cmd_register_write *regwrt_params = params;
-	u16 pipeline_clear_options = (u16)regwrt_params->pipeline_clear_options;
-
-	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
-	if (!pyld)
-		return NULL;
-	data = ipahal_imm_cmd_pyld_data(pyld);
-
-	data->offset = regwrt_params->offset;
-	data->value = regwrt_params->value;
-	data->value_mask = regwrt_params->value_mask;
-	data->skip_pipeline_clear = regwrt_params->skip_pipeline_clear ? 1 : 0;
-	data->pipeline_clear_options = pipeline_clear_options;
-
-	return pyld;
-}
-
-static struct ipahal_imm_cmd_pyld *
-ipa_imm_cmd_construct_ip_packet_init(u16 opcode, const void *params)
-{
-	struct ipahal_imm_cmd_pyld *pyld;
-	struct ipa_imm_cmd_hw_ip_packet_init *data;
-	const struct ipahal_imm_cmd_ip_packet_init *pktinit_params = params;
-
-	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
-	if (!pyld)
-		return NULL;
-	data = ipahal_imm_cmd_pyld_data(pyld);
-
-	data->destination_pipe_index = pktinit_params->destination_pipe_index;
-
-	return pyld;
-}
-
-static struct ipahal_imm_cmd_pyld *
-ipa_imm_cmd_construct_hdr_init_local(u16 opcode, const void *params)
-{
-	struct ipahal_imm_cmd_pyld *pyld;
-	struct ipa_imm_cmd_hw_hdr_init_local *data;
-	const struct ipahal_imm_cmd_hdr_init_local *lclhdr_params = params;
-
-	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
-	if (!pyld)
-		return NULL;
-	data = ipahal_imm_cmd_pyld_data(pyld);
-
-	data->hdr_table_addr = lclhdr_params->hdr_table_addr;
-	data->size_hdr_table = lclhdr_params->size_hdr_table;
-	data->hdr_addr = lclhdr_params->hdr_addr;
-
-	return pyld;
-}
-
-static struct ipahal_imm_cmd_pyld *
-ipa_imm_cmd_construct_ip_v6_routing_init(u16 opcode, const void *params)
-{
-	struct ipahal_imm_cmd_pyld *pyld;
-	struct ipa_imm_cmd_hw_ip_fltrt_init *data;
-	const struct ipahal_imm_cmd_ip_fltrt_init *rt6_params = params;
-
-	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
-	if (!pyld)
-		return NULL;
-	data = ipahal_imm_cmd_pyld_data(pyld);
-
-	data->hash_rules_addr = rt6_params->hash_rules_addr;
-	data->hash_rules_size = rt6_params->hash_rules_size;
-	data->hash_local_addr = rt6_params->hash_local_addr;
-	data->nhash_rules_addr = rt6_params->nhash_rules_addr;
-	data->nhash_rules_size = rt6_params->nhash_rules_size;
-	data->nhash_local_addr = rt6_params->nhash_local_addr;
-
-	return pyld;
-}
-
-static struct ipahal_imm_cmd_pyld *
-ipa_imm_cmd_construct_ip_v4_routing_init(u16 opcode, const void *params)
-{
-	struct ipahal_imm_cmd_pyld *pyld;
-	struct ipa_imm_cmd_hw_ip_fltrt_init *data;
-	const struct ipahal_imm_cmd_ip_fltrt_init *rt4_params = params;
-
-	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
-	if (!pyld)
-		return NULL;
-	data = ipahal_imm_cmd_pyld_data(pyld);
-
-	data->hash_rules_addr = rt4_params->hash_rules_addr;
-	data->hash_rules_size = rt4_params->hash_rules_size;
-	data->hash_local_addr = rt4_params->hash_local_addr;
-	data->nhash_rules_addr = rt4_params->nhash_rules_addr;
-	data->nhash_rules_size = rt4_params->nhash_rules_size;
-	data->nhash_local_addr = rt4_params->nhash_local_addr;
-
-	return pyld;
-}
-
-static struct ipahal_imm_cmd_pyld *
-ipa_imm_cmd_construct_ip_v6_filter_init(u16 opcode, const void *params)
-{
-	struct ipahal_imm_cmd_pyld *pyld;
-	struct ipa_imm_cmd_hw_ip_fltrt_init *data;
-	const struct ipahal_imm_cmd_ip_fltrt_init *flt6_params = params;
-
-	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
-	if (!pyld)
-		return NULL;
-	data = ipahal_imm_cmd_pyld_data(pyld);
-
-	data->hash_rules_addr = flt6_params->hash_rules_addr;
-	data->hash_rules_size = flt6_params->hash_rules_size;
-	data->hash_local_addr = flt6_params->hash_local_addr;
-	data->nhash_rules_addr = flt6_params->nhash_rules_addr;
-	data->nhash_rules_size = flt6_params->nhash_rules_size;
-	data->nhash_local_addr = flt6_params->nhash_local_addr;
-
-	return pyld;
-}
-
-static struct ipahal_imm_cmd_pyld *
-ipa_imm_cmd_construct_ip_v4_filter_init(u16 opcode, const void *params)
-{
-	struct ipahal_imm_cmd_pyld *pyld;
-	struct ipa_imm_cmd_hw_ip_fltrt_init *data;
-	const struct ipahal_imm_cmd_ip_fltrt_init *flt4_params = params;
-
-	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
-	if (!pyld)
-		return NULL;
-	data = ipahal_imm_cmd_pyld_data(pyld);
-
-	data->hash_rules_addr = flt4_params->hash_rules_addr;
-	data->hash_rules_size = flt4_params->hash_rules_size;
-	data->hash_local_addr = flt4_params->hash_local_addr;
-	data->nhash_rules_addr = flt4_params->nhash_rules_addr;
-	data->nhash_rules_size = flt4_params->nhash_rules_size;
-	data->nhash_local_addr = flt4_params->nhash_local_addr;
-
-	return pyld;
 }
 
 /*
@@ -369,17 +153,14 @@ ipa_imm_cmd_construct_ip_v4_filter_init(u16 opcode, const void *params)
  *   parameter data that is formatted properly for the command.
  */
 #define OPCODE_INVAL	((u16)0xffff)
-#define cfunc(f)	ipa_imm_cmd_construct_ ## f
 #define idsym(id)	IPA_IMM_CMD_ ## id
-#define imm_cmd_obj(id, f, o)			\
+#define imm_cmd_obj(id, o)			\
 	[idsym(id)] = {				\
-		.construct = cfunc(f),		\
 		.name = #id,			\
 		.opcode = o,			\
 	}
 #define imm_cmd_obj_inval(id)			\
 	[idsym(id)] = {				\
-		.construct = NULL,		\
 		.name = NULL,			\
 		.opcode = OPCODE_INVAL,		\
 	}
@@ -387,16 +168,16 @@ static const struct ipahal_imm_cmd_obj
 		ipahal_imm_cmd_objs[][IPA_IMM_CMD_MAX] = {
 	/* IPAv3.5.1 */
 	[IPA_HW_v3_5_1] = {
-		imm_cmd_obj(IP_V4_FILTER_INIT,	ip_v4_filter_init,	3),
-		imm_cmd_obj(IP_V6_FILTER_INIT,	ip_v6_filter_init,	4),
-		imm_cmd_obj(IP_V4_ROUTING_INIT, ip_v4_routing_init,	7),
-		imm_cmd_obj(IP_V6_ROUTING_INIT, ip_v6_routing_init,	8),
-		imm_cmd_obj(HDR_INIT_LOCAL,	hdr_init_local,		9),
-		imm_cmd_obj(REGISTER_WRITE,	register_write,		12),
-		imm_cmd_obj(IP_PACKET_INIT,	ip_packet_init,		16),
-		imm_cmd_obj(DMA_TASK_32B_ADDR,	dma_task_32b_addr,	17),
-		imm_cmd_obj(DMA_SHARED_MEM,	dma_shared_mem,		19),
-		imm_cmd_obj(IP_PACKET_TAG_STATUS, ip_packet_tag_status, 20),
+		imm_cmd_obj(IP_V4_FILTER_INIT,		3),
+		imm_cmd_obj(IP_V6_FILTER_INIT,		4),
+		imm_cmd_obj(IP_V4_ROUTING_INIT,		7),
+		imm_cmd_obj(IP_V6_ROUTING_INIT,		8),
+		imm_cmd_obj(HDR_INIT_LOCAL,		9),
+		imm_cmd_obj(REGISTER_WRITE,		12),
+		imm_cmd_obj(IP_PACKET_INIT,		16),
+		imm_cmd_obj(DMA_TASK_32B_ADDR,		17),
+		imm_cmd_obj(DMA_SHARED_MEM,		19),
+		imm_cmd_obj(IP_PACKET_TAG_STATUS,	20),
 	},
 };
 #undef imm_cmd_obj
@@ -421,7 +202,6 @@ static void ipahal_imm_cmd_init(enum ipa_hw_version hw_version)
 
 			imm_cmd = &ipahal_imm_cmd_objs[j][i];
 			if (imm_cmd->opcode) {
-				BUG_ON(!imm_cmd->construct);
 				ipahal_imm_cmds[i] = *imm_cmd;
 				break;
 			}
