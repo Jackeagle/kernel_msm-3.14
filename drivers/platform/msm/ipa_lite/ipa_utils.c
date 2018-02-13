@@ -765,13 +765,13 @@ static bool _client_handle_valid(const char *func, u32 clnt_hdl)
 static const char *ipa3_get_mode_type_str(enum ipa_mode_type mode)
 {
 	switch (mode) {
-	case (IPA_BASIC):
+	case IPA_BASIC:
 		return "Basic";
-	case (IPA_ENABLE_FRAMING_HDLC):
+	case IPA_ENABLE_FRAMING_HDLC:
 		return "HDLC framing";
-	case (IPA_ENABLE_DEFRAMING_HDLC):
+	case IPA_ENABLE_DEFRAMING_HDLC:
 		return "HDLC de-framing";
-	case (IPA_DMA):
+	case IPA_DMA:
 		return "DMA";
 	}
 
@@ -781,11 +781,11 @@ static const char *ipa3_get_mode_type_str(enum ipa_mode_type mode)
 static const char *ipa3_get_aggr_enable_str(enum ipa_aggr_en_type aggr_en)
 {
 	switch (aggr_en) {
-	case (IPA_BYPASS_AGGR):
-			return "no aggregation";
-	case (IPA_ENABLE_AGGR):
-			return "aggregation enabled";
-	case (IPA_ENABLE_DEAGGR):
+	case IPA_BYPASS_AGGR:
+		return "no aggregation";
+	case IPA_ENABLE_AGGR:
+		return "aggregation enabled";
+	case IPA_ENABLE_DEAGGR:
 		return "de-aggregation enabled";
 	}
 
@@ -795,18 +795,18 @@ static const char *ipa3_get_aggr_enable_str(enum ipa_aggr_en_type aggr_en)
 static const char *ipa3_get_aggr_type_str(enum ipa_aggr_type aggr_type)
 {
 	switch (aggr_type) {
-	case (IPA_MBIM_16):
-			return "MBIM_16";
-	case (IPA_HDLC):
+	case IPA_MBIM_16:
+		return "MBIM_16";
+	case IPA_HDLC:
 		return "HDLC";
-	case (IPA_TLP):
-			return "TLP";
-	case (IPA_RNDIS):
-			return "RNDIS";
-	case (IPA_GENERIC):
-			return "GENERIC";
-	case (IPA_QCMAP):
-			return "QCMAP";
+	case IPA_TLP:
+		return "TLP";
+	case IPA_RNDIS:
+		return "RNDIS";
+	case IPA_GENERIC:
+		return "GENERIC";
+	case IPA_QCMAP:
+		return "QCMAP";
 	}
 	return "undefined";
 }
