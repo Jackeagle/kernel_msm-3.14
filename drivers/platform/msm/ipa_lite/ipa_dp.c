@@ -1058,31 +1058,22 @@ int ipa3_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	const struct ipa_gsi_ep_config *gsi_ep;
 	int data_idx;
 
-	if (skb->len == 0) {
+	if (!skb->len) {
 		ipa_err("packet size is 0\n");
 		return -EINVAL;
 	}
 
 	src_ep_idx = ipa3_get_ep_mapping(client);
-	if (src_ep_idx < 0) {
-		ipa_err("Client %u is not mapped\n", client);
-		goto fail_gen;
-	}
-
 	sys = ipa3_ctx->ep[src_ep_idx].sys;
-	if (!sys->ep->valid) {
-		ipa_err("pipe not valid\n");
-		goto fail_gen;
-	}
+	gsi_ep = ipa3_get_gsi_ep_info(ipa3_ctx->ep[src_ep_idx].client);
 
-	num_frags = skb_shinfo(skb)->nr_frags;
 	/*
 	 * make sure TLV FIFO supports the needed frags.
 	 * 2 descriptors are needed for IP_PACKET_INIT and TAG_STATUS.
 	 * 1 descriptor needed for the linear portion of skb.
 	 */
-	gsi_ep = ipa3_get_gsi_ep_info(ipa3_ctx->ep[src_ep_idx].client);
-	if (gsi_ep && (num_frags + 3 > gsi_ep->ipa_if_tlv)) {
+	num_frags = skb_shinfo(skb)->nr_frags;
+	if (num_frags + 3 > gsi_ep->ipa_if_tlv) {
 		if (skb_linearize(skb)) {
 			ipa_err("Failed to linear skb with %d frags\n",
 				num_frags);
