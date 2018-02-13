@@ -1051,12 +1051,12 @@ int ipa3_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 {
 	struct ipa3_desc *desc;
 	struct ipa3_desc _desc;
-	struct ipa3_sys_context *sys;
 	const struct ipa_gsi_ep_config *gsi_ep;
 	int src_ep_idx;
 	int data_idx;
 	u32 nr_frags;
 	u32 f;
+	int ret;
 
 	if (!skb->len) {
 		ipa_err("packet size is 0\n");
@@ -1064,7 +1064,6 @@ int ipa3_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	}
 
 	src_ep_idx = ipa3_get_ep_mapping(client);
-	sys = ipa3_ctx->ep[src_ep_idx].sys;
 	gsi_ep = ipa3_get_gsi_ep_info(ipa3_ctx->ep[src_ep_idx].client);
 
 	/*
@@ -1077,7 +1076,8 @@ int ipa3_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 		if (skb_linearize(skb)) {
 			ipa_err("too many fragments (%u > %u)\n",
 				1 + nr_frags, gsi_ep->ipa_if_tlv);
-			goto fail_gen;
+
+			return -ENOMEM;
 		}
 		nr_frags = 0;
 	}
@@ -1085,7 +1085,8 @@ int ipa3_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 		desc = kzalloc((1 + nr_frags) * sizeof(*desc), GFP_ATOMIC);
 		if (!desc) {
 			ipa_err("failed to alloc desc array\n");
-			goto fail_gen;
+
+			return -ENOMEM;
 		}
 	} else {
 		/* Avoid allocation failure for the linear case */
@@ -1113,24 +1114,19 @@ int ipa3_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	desc[data_idx].user1 = skb;
 	desc[data_idx].user2 = src_ep_idx;
 
-	if (ipa3_send(sys, data_idx + 1, desc)) {
+	ret = ipa3_send(ipa3_ctx->ep[src_ep_idx].sys, data_idx + 1, desc);
+	if (!ret)
+		IPA_STATS_INC_CNT(ipa3_ctx->stats.tx_hw_pkts);
+	else
 		ipa_err("failed to send skb %p nr_frags %u\n", skb, nr_frags);
-		goto fail_mem;
-	}
-
-	IPA_STATS_INC_CNT(ipa3_ctx->stats.tx_hw_pkts);
 
 	if (nr_frags) {
+		if (!ret)
+			IPA_STATS_INC_CNT(ipa3_ctx->stats.tx_non_linear);
 		kfree(desc);
-		IPA_STATS_INC_CNT(ipa3_ctx->stats.tx_non_linear);
 	}
 
-	return 0;
-fail_mem:
-	if (nr_frags)
-		kfree(desc);
-fail_gen:
-	return -EFAULT;
+	return ret;
 }
 
 static void ipa3_wq_handle_rx(struct work_struct *work)
