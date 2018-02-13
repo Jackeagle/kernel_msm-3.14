@@ -1068,29 +1068,27 @@ int ipa3_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	gsi_ep = ipa3_get_gsi_ep_info(ipa3_ctx->ep[src_ep_idx].client);
 
 	/*
-	 * make sure TLV FIFO supports the needed frags.
-	 * 1 descriptor needed for the linear portion of skb.
+	 * Make sure source pipe's TLV FIFO has enough entries to
+	 * hold the linear portion of the skb and all its frags.
+	 * If not, see if we can linearize it before giving up.
 	 */
 	num_frags = skb_shinfo(skb)->nr_frags;
 	if (1 + num_frags > gsi_ep->ipa_if_tlv) {
 		if (skb_linearize(skb)) {
-			ipa_err("Failed to linear skb with %d frags\n",
-				num_frags);
+			ipa_err("too many fragments (%u > %u)\n",
+				1 + num_frags, gsi_ep->ipa_if_tlv);
 			goto fail_gen;
 		}
 		num_frags = 0;
 	}
 	if (num_frags) {
-		/*
-		 * 1 desc is needed for the linear portion of skb;
-		 * 1 desc for each frag
-		 */
 		desc = kzalloc(sizeof(*desc) * (1 + num_frags), GFP_ATOMIC);
 		if (!desc) {
 			ipa_err("failed to alloc desc array\n");
 			goto fail_gen;
 		}
 	} else {
+		/* Avoid allocation failure for the linear case */
 		memset(&_desc, 0, sizeof(_desc));
 		desc = &_desc;
 	}
@@ -1113,8 +1111,7 @@ int ipa3_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	desc[data_idx].user2 = src_ep_idx;
 
 	if (ipa3_send(sys, data_idx + 1, desc)) {
-		ipa_err("fail to send skb %p num_frags %u HWP\n",
-			skb, num_frags);
+		ipa_err("failed to send skb %p num_frags %u\n", skb, num_frags);
 		goto fail_mem;
 	}
 
