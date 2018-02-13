@@ -947,6 +947,20 @@ static void ipa3_setup_rt_hash_tuple(void)
 	}
 }
 
+static int setup_apps_cmd_prod_pipe(void)
+{
+	struct ipa_sys_connect_params sys_in;
+
+	memset(&sys_in, 0, sizeof(sys_in));
+
+	sys_in.client = IPA_CLIENT_APPS_CMD_PROD;
+	sys_in.desc_fifo_sz = IPA_SYS_DESC_FIFO_SZ;
+	sys_in.ipa_ep_cfg.mode.mode = IPA_DMA;
+	sys_in.ipa_ep_cfg.mode.dst = IPA_CLIENT_APPS_LAN_CONS;
+
+	return ipa3_setup_sys_pipe(&sys_in, &ipa3_ctx->clnt_hdl_cmd);
+}
+
 static long ipa3_setup_apps_pipes(void)
 {
 	struct ipa_sys_connect_params sys_in;
@@ -971,13 +985,7 @@ static long ipa3_setup_apps_pipes(void)
 	ipa3_ctx->gsi_evt_comm_ring_rem = IPA_COMMON_EVENT_RING_SIZE;
 
 	/* CMD OUT (AP->IPA) */
-	memset(&sys_in, 0, sizeof(struct ipa_sys_connect_params));
-	sys_in.client = IPA_CLIENT_APPS_CMD_PROD;
-	sys_in.desc_fifo_sz = IPA_SYS_DESC_FIFO_SZ;
-	sys_in.ipa_ep_cfg.mode.mode = IPA_DMA;
-	sys_in.ipa_ep_cfg.mode.dst = IPA_CLIENT_APPS_LAN_CONS;
-	if (ipa3_setup_sys_pipe(&sys_in, &ipa3_ctx->clnt_hdl_cmd)) {
-		ipa_err(":setup sys pipe (APPS_CMD_PROD) failed.\n");
+	if (setup_apps_cmd_prod_pipe()) {
 		result = -EPERM;
 		goto fail_ch20_wa;
 	}
