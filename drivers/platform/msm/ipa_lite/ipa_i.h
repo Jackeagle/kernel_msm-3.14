@@ -1022,7 +1022,7 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb);
 /*
  * System pipes
  */
-int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl);
+int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in);
 
 int ipa3_teardown_sys_pipe(u32 clnt_hdl);
 

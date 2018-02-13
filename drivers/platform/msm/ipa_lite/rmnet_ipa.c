@@ -371,7 +371,7 @@ static void apps_ipa_packet_receive_notify(void *priv,
 static int handle3_ingress_format(struct net_device *dev,
 			struct rmnet_ioctl_extended_s *in)
 {
-	int ret = 0;
+	int ret;
 	struct ipa_sys_connect_params *ipa_wan_ep_cfg;
 
 	/*
@@ -433,15 +433,17 @@ static int handle3_ingress_format(struct net_device *dev,
 		mutex_unlock(&rmnet_ipa3_ctx->pipe_handle_guard);
 		return -EFAULT;
 	}
-	ret = ipa3_setup_sys_pipe(ipa_wan_ep_cfg,
-			&rmnet_ipa3_ctx->ipa3_to_apps_hdl);
 
-	mutex_unlock(&rmnet_ipa3_ctx->pipe_handle_guard);
-
+	ret = ipa3_setup_sys_pipe(ipa_wan_ep_cfg);
 	if (ret < 0) {
 		ipa_err("failed to configure ingress\n");
+		mutex_unlock(&rmnet_ipa3_ctx->pipe_handle_guard);
+
 		return ret;
 	}
+	rmnet_ipa3_ctx->ipa3_to_apps_hdl = ret;
+
+	mutex_unlock(&rmnet_ipa3_ctx->pipe_handle_guard);
 
 	return 0;
 }
@@ -525,13 +527,16 @@ static int handle3_egress_format(struct net_device *dev,
 		mutex_unlock(&rmnet_ipa3_ctx->pipe_handle_guard);
 		return -EFAULT;
 	}
-	rc = ipa3_setup_sys_pipe(
-		ipa_wan_ep_cfg, &rmnet_ipa3_ctx->apps_to_ipa3_hdl);
+
+	rc = ipa3_setup_sys_pipe(ipa_wan_ep_cfg);
 	if (rc < 0) {
 		ipa_err("failed to config egress endpoint\n");
 		mutex_unlock(&rmnet_ipa3_ctx->pipe_handle_guard);
+
 		return rc;
 	}
+	rmnet_ipa3_ctx->apps_to_ipa3_hdl = rc;
+
 	mutex_unlock(&rmnet_ipa3_ctx->pipe_handle_guard);
 
 	if (rmnet_ipa3_ctx->num_q6_rules != 0) {

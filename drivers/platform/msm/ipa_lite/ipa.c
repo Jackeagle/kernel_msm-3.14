@@ -958,7 +958,7 @@ static int setup_apps_cmd_prod_pipe(void)
 	sys_in.ipa_ep_cfg.mode.mode = IPA_DMA;
 	sys_in.ipa_ep_cfg.mode.dst = IPA_CLIENT_APPS_LAN_CONS;
 
-	return ipa3_setup_sys_pipe(&sys_in, &ipa3_ctx->clnt_hdl_cmd);
+	return ipa3_setup_sys_pipe(&sys_in);
 }
 
 static int setup_apps_lan_cons_pipe(void)
@@ -983,7 +983,7 @@ static int setup_apps_lan_cons_pipe(void)
 
 	sys_in.ipa_ep_cfg.cfg.cs_offload_en = IPA_ENABLE_CS_OFFLOAD_DL;
 
-	return ipa3_setup_sys_pipe(&sys_in, &ipa3_ctx->clnt_hdl_data_in);
+	return ipa3_setup_sys_pipe(&sys_in);
 }
 
 static long ipa3_setup_apps_pipes(void)
@@ -1009,7 +1009,8 @@ static long ipa3_setup_apps_pipes(void)
 	ipa3_ctx->gsi_evt_comm_ring_rem = IPA_COMMON_EVENT_RING_SIZE;
 
 	/* CMD OUT (AP->IPA) */
-	if (setup_apps_cmd_prod_pipe() < 0) {
+	ipa3_ctx->clnt_hdl_cmd = setup_apps_cmd_prod_pipe();
+	if (ipa3_ctx->clnt_hdl_cmd < 0) {
 		result = -EPERM;
 		goto fail_ch20_wa;
 	}
@@ -1040,7 +1041,8 @@ static long ipa3_setup_apps_pipes(void)
 	ipa_debug("rt hash tuple is configured\n");
 
 	/* LAN IN (IPA->AP) */
-	if (setup_apps_lan_cons_pipe() < 0) {
+	ipa3_ctx->clnt_hdl_data_in = setup_apps_lan_cons_pipe();
+	if (ipa3_ctx->clnt_hdl_data_in < 0) {
 		result = -EPERM;
 		goto fail_flt_hash_tuple;
 	}

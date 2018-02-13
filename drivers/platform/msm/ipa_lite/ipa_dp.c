@@ -742,16 +742,15 @@ enum hrtimer_restart ipa3_ring_doorbell_timer_fn(struct hrtimer *param)
  * ipa3_setup_sys_pipe() - Setup an IPA GPI pipe and perform
  * IPA EP configuration
  * @sys_in:	[in] input needed to setup the pipe and configure EP
- * @clnt_hdl:	[out] client handle
  *
  *  - configure the end-point registers with the supplied
  *    parameters from the user.
  *  - Creates a GPI connection with IPA.
  *  - allocate descriptor FIFO
  *
- * Returns:	0 on success, negative on failure
+ * Returns:	client handle on success, negative on failure
  */
-int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
+int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 {
 	struct ipa3_ep_context *ep;
 	int ipa_ep_idx;
@@ -856,8 +855,6 @@ int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
 		ipa_err("Failed to setup GSI channel\n");
 		goto fail_gen2;
 	}
-
-	*clnt_hdl = ipa_ep_idx;
 
 	if (ep->sys->repl_hdlr == ipa3_fast_replenish_rx_cache) {
 		ep->sys->repl.capacity = ep->sys->rx_pool_sz + 1;
