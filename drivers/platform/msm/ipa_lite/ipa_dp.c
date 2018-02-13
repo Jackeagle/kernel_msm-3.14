@@ -1050,7 +1050,7 @@ void ipa3_tx_cmd_comp(void *user1, int user2)
 int ipa3_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 {
 	struct ipa3_desc *desc;
-	struct ipa3_desc _desc[3];
+	struct ipa3_desc _desc;
 	struct ipa3_sys_context *sys;
 	int src_ep_idx;
 	u32 num_frags;
@@ -1069,11 +1069,10 @@ int ipa3_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 
 	/*
 	 * make sure TLV FIFO supports the needed frags.
-	 * 2 descriptors are needed for IP_PACKET_INIT and TAG_STATUS.
 	 * 1 descriptor needed for the linear portion of skb.
 	 */
 	num_frags = skb_shinfo(skb)->nr_frags;
-	if (num_frags + 3 > gsi_ep->ipa_if_tlv) {
+	if (1 + num_frags > gsi_ep->ipa_if_tlv) {
 		if (skb_linearize(skb)) {
 			ipa_err("Failed to linear skb with %d frags\n",
 				num_frags);
@@ -1082,19 +1081,18 @@ int ipa3_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 		num_frags = 0;
 	}
 	if (num_frags) {
-		/* 1 desc for tag to resolve status out-of-order issue;
+		/*
 		 * 1 desc is needed for the linear portion of skb;
-		 * 1 desc may be needed for the PACKET_INIT;
 		 * 1 desc for each frag
 		 */
-		desc = kzalloc(sizeof(*desc) * (num_frags + 3), GFP_ATOMIC);
+		desc = kzalloc(sizeof(*desc) * (1 + num_frags), GFP_ATOMIC);
 		if (!desc) {
 			ipa_err("failed to alloc desc array\n");
 			goto fail_gen;
 		}
 	} else {
-		memset(_desc, 0, 3 * sizeof(struct ipa3_desc));
-		desc = &_desc[0];
+		memset(&_desc, 0, sizeof(_desc));
+		desc = &_desc;
 	}
 
 	/* HW data path */
