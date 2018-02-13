@@ -1037,29 +1037,17 @@ void ipa3_tx_cmd_comp(void *user1, int user2)
 }
 
 /**
- * ipa3_tx_dp() - Data-path tx handler
- * @dst:	[in] which IPA destination to route tx packets to
+ * ipa3_tx_dp() - Data-path tx handler for APPS_WAN_PROD client
+ *
+ * @client:	[in] which IPA client is sending packets (WAN producer)
  * @skb:	[in] the packet to send
  *
- * Data-path tx handler, this is used for both SW data-path which by-passes most
- * IPA HW blocks AND the regular HW data-path for WLAN AMPDU traffic only. If
- * dst is a "valid" CONS type, then SW data-path is used. If dst is the
- * WLAN_AMPDU PROD type, then HW data-path for WLAN AMPDU is used. Anything else
- * is an error. For errors, client needs to free the skb as needed. For success,
- * IPA driver will later invoke client callback if one was supplied. That
- * callback should free the skb. If no callback supplied, IPA driver will free
- * the skb internally
- *
- * The function will use two descriptors for this send command
- * (for A5_WLAN_AMPDU_PROD only one desciprtor will be sent),
- * the first descriptor will be used to inform the IPA hardware that
- * apps need to push data into the IPA (IP_PACKET_INIT immediate command).
- * Once this send was done from transport point-of-view the IPA driver will
- * get notified by the supplied callback.
+ * Data-path transmit handler.  This is currently used only for the
+ * for the WLAN hardware data-path.
  *
  * Returns:	0 on success, negative on failure
  */
-int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb)
+int ipa3_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 {
 	struct ipa3_desc *desc;
 	struct ipa3_desc _desc[3];
@@ -1075,18 +1063,9 @@ int ipa3_tx_dp(enum ipa_client_type dst, struct sk_buff *skb)
 		return -EINVAL;
 	}
 
-	/*
-	 * USB_CONS: PKT_INIT ep_idx = dst pipe
-	 * Q6_CONS: PKT_INIT ep_idx = sender pipe
-	 * A5_LAN_WAN_PROD: HW path ep_idx = sender pipe
-	 *
-	 * LAN TX: all PKT_INIT
-	 * WAN TX: PKT_INIT (cmd) + HW (data)
-	 *
-	 */
-	src_ep_idx = ipa3_get_ep_mapping(dst);
+	src_ep_idx = ipa3_get_ep_mapping(client);
 	if (src_ep_idx < 0) {
-		ipa_err("Client %u is not mapped\n", dst);
+		ipa_err("Client %u is not mapped\n", client);
 		goto fail_gen;
 	}
 
