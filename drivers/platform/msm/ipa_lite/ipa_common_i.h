@@ -148,14 +148,6 @@ do {\
 #define IPA_CLIENT_IS_CONS(x) \
 	(x < IPA_CLIENT_MAX && (x & 0x1) == 1)
 
-#define IPA_CLIENT_IS_TEST_PROD(client) \
-	((client) == IPA_CLIENT_TEST_PROD || \
-	(client) == IPA_CLIENT_TEST1_PROD || \
-	(client) == IPA_CLIENT_TEST2_PROD || \
-	(client) == IPA_CLIENT_TEST3_PROD || \
-	(client) == IPA_CLIENT_TEST4_PROD)
-
-
 #define EXTRACT_UC_FEATURE(value) (value >> 5)
 
 #define IPA_CLIENT_IS_Q6_CONS(client) \
@@ -206,11 +198,6 @@ enum ipa_irq_type {
 	IPA_GSI_IDLE_IRQ = IPA_BAM_IDLE_IRQ,
 	IPA_IRQ_MAX
 };
-
-
-
-
-
 
 enum ipa_active_client_log_type {
 	EP,
@@ -823,11 +810,6 @@ struct ipa_ep_cfg_ctrl {
 	bool ipa_ep_delay;
 };
 
-/* IPA_LITE */
-void ipa_inc_client_enable_clks(struct ipa_active_client_logging_info *id);
-void ipa_dec_client_disable_clks(struct ipa_active_client_logging_info *id);
-int ipa_inc_client_enable_clks_no_block(struct ipa_active_client_logging_info *id);
-
 #define ipa_debug(fmt, args...) \
 	do { \
 		pr_debug(fmt, ## args); \
@@ -854,18 +836,10 @@ int ipa_inc_client_enable_clks_no_block(struct ipa_active_client_logging_info *i
 
 void __ipa_ipc_logging(bool logbuf_low, const char *fmt, ...);
 void ipa_assert(void);
-int ipa_get_ep_mapping(enum ipa_client_type client);
-
-/* uC */
-int ipa_uc_state_check(void);
 
 /* general */
-void ipa_set_tag_process_before_gating(bool val);
 
-int ipa_tear_down_uc_offload_pipes(int ipa_ep_idx_ul, int ipa_ep_idx_dl);
 void ipa_write_64(u64 w, u8 *dest);
-int ipa_start_gsi_channel(u32 clnt_hdl);
-void *ipa_get_ipc_logbuf(void);
 
 const char *ipa_client_string(enum ipa_client_type client);
 
