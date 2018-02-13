@@ -961,9 +961,33 @@ static int setup_apps_cmd_prod_pipe(void)
 	return ipa3_setup_sys_pipe(&sys_in, &ipa3_ctx->clnt_hdl_cmd);
 }
 
-static long ipa3_setup_apps_pipes(void)
+static int setup_apps_lan_cons_pipe(void)
 {
 	struct ipa_sys_connect_params sys_in;
+
+	memset(&sys_in, 0, sizeof(sys_in));
+
+	sys_in.client = IPA_CLIENT_APPS_LAN_CONS;
+	sys_in.desc_fifo_sz = IPA_SYS_DESC_FIFO_SZ;
+	sys_in.notify = ipa3_lan_rx_cb;
+	sys_in.priv = NULL;
+
+	sys_in.ipa_ep_cfg.hdr.hdr_len = IPA_LAN_RX_HEADER_LENGTH;
+
+	sys_in.ipa_ep_cfg.hdr_ext.hdr_little_endian = false;
+	sys_in.ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad_valid = true;
+	sys_in.ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad = IPA_HDR_PAD;
+	sys_in.ipa_ep_cfg.hdr_ext.hdr_payload_len_inc_padding = false;
+	sys_in.ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad_offset = 0;
+	sys_in.ipa_ep_cfg.hdr_ext.hdr_pad_to_alignment = 2;
+
+	sys_in.ipa_ep_cfg.cfg.cs_offload_en = IPA_ENABLE_CS_OFFLOAD_DL;
+
+	return ipa3_setup_sys_pipe(&sys_in, &ipa3_ctx->clnt_hdl_data_in);
+}
+
+static long ipa3_setup_apps_pipes(void)
+{
 	long result;
 
 	/*
@@ -1016,21 +1040,7 @@ static long ipa3_setup_apps_pipes(void)
 	ipa_debug("rt hash tuple is configured\n");
 
 	/* LAN IN (IPA->AP) */
-	memset(&sys_in, 0, sizeof(struct ipa_sys_connect_params));
-	sys_in.client = IPA_CLIENT_APPS_LAN_CONS;
-	sys_in.desc_fifo_sz = IPA_SYS_DESC_FIFO_SZ;
-	sys_in.notify = ipa3_lan_rx_cb;
-	sys_in.priv = NULL;
-	sys_in.ipa_ep_cfg.hdr.hdr_len = IPA_LAN_RX_HEADER_LENGTH;
-	sys_in.ipa_ep_cfg.hdr_ext.hdr_little_endian = false;
-	sys_in.ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad_valid = true;
-	sys_in.ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad = IPA_HDR_PAD;
-	sys_in.ipa_ep_cfg.hdr_ext.hdr_payload_len_inc_padding = false;
-	sys_in.ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad_offset = 0;
-	sys_in.ipa_ep_cfg.hdr_ext.hdr_pad_to_alignment = 2;
-	sys_in.ipa_ep_cfg.cfg.cs_offload_en = IPA_ENABLE_CS_OFFLOAD_DL;
-	if (ipa3_setup_sys_pipe(&sys_in, &ipa3_ctx->clnt_hdl_data_in)) {
-		ipa_err(":setup sys pipe (LAN_CONS) failed.\n");
+	if (setup_apps_lan_cons_pipe()) {
 		result = -EPERM;
 		goto fail_flt_hash_tuple;
 	}
