@@ -887,7 +887,7 @@ int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
 	ipa_debug("client %d (ep: %d) connected sys=%p\n", sys_in->client,
 			ipa_ep_idx, ep->sys);
 
-	return 0;
+	return ipa_ep_idx;
 
 fail_gen2:
 	destroy_workqueue(ep->sys->repl_wq);

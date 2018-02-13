@@ -433,15 +433,17 @@ static int handle3_ingress_format(struct net_device *dev,
 		mutex_unlock(&rmnet_ipa3_ctx->pipe_handle_guard);
 		return -EFAULT;
 	}
-	ret = ipa3_setup_sys_pipe(&rmnet_ipa3_ctx->ipa_to_apps_ep_cfg,
-	   &rmnet_ipa3_ctx->ipa3_to_apps_hdl);
+	ret = ipa3_setup_sys_pipe(ipa_wan_ep_cfg,
+			&rmnet_ipa3_ctx->ipa3_to_apps_hdl);
 
 	mutex_unlock(&rmnet_ipa3_ctx->pipe_handle_guard);
 
-	if (ret)
+	if (ret < 0) {
 		ipa_err("failed to configure ingress\n");
+		return ret;
+	}
 
-	return ret;
+	return 0;
 }
 
 /**
@@ -525,7 +527,7 @@ static int handle3_egress_format(struct net_device *dev,
 	}
 	rc = ipa3_setup_sys_pipe(
 		ipa_wan_ep_cfg, &rmnet_ipa3_ctx->apps_to_ipa3_hdl);
-	if (rc) {
+	if (rc < 0) {
 		ipa_err("failed to config egress endpoint\n");
 		mutex_unlock(&rmnet_ipa3_ctx->pipe_handle_guard);
 		return rc;
@@ -540,7 +542,7 @@ static int handle3_egress_format(struct net_device *dev,
 	}
 	rmnet_ipa3_ctx->egress_set = true;
 
-	return rc;
+	return 0;
 }
 
 /**
