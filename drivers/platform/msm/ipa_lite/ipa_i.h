@@ -468,16 +468,14 @@ struct ipa_rx_data {
 
 /**
  * struct ipa3_rx_pkt_wrapper - IPA Rx packet wrapper
- * @skb: skb
- * @dma_address: DMA address of this Rx packet
  * @link: linked to the Rx packets on that pipe
+ * @data: skb and DMA address of the received packet
  * @len: how many bytes are copied into skb's flat buffer
  */
 struct ipa3_rx_pkt_wrapper {
 	struct list_head link;
 	struct ipa_rx_data data;
 	u32 len;
-	struct work_struct work;
 	struct ipa3_sys_context *sys;
 };
 

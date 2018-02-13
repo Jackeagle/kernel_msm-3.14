@@ -76,7 +76,6 @@ static void ipa3_rx_common(struct ipa3_sys_context *sys, u16 size);
 static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 		struct ipa3_sys_context *sys);
 static void ipa3_cleanup_rx(struct ipa3_sys_context *sys);
-static void ipa3_wq_rx_avail(struct work_struct *work);
 static void ipa3_wq_repl_rx(struct work_struct *work);
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	struct ipa3_ep_context *ep);
@@ -1162,7 +1161,6 @@ begin:
 		}
 
 		INIT_LIST_HEAD(&rx_pkt->link);
-		INIT_WORK(&rx_pkt->work, ipa3_wq_rx_avail);
 		rx_pkt->sys = sys;
 
 		rx_pkt->data.skb = sys->get_skb(sys->rx_buff_sz, flag);
@@ -1274,7 +1272,6 @@ static void ipa3_replenish_rx_cache(struct ipa3_sys_context *sys)
 		}
 
 		INIT_LIST_HEAD(&rx_pkt->link);
-		INIT_WORK(&rx_pkt->work, ipa3_wq_rx_avail);
 		rx_pkt->sys = sys;
 
 		rx_pkt->data.skb = sys->get_skb(sys->rx_buff_sz, flag);
@@ -1338,7 +1335,6 @@ static void ipa3_replenish_rx_cache_recycle(struct ipa3_sys_context *sys)
 			}
 
 			INIT_LIST_HEAD(&rx_pkt->link);
-			INIT_WORK(&rx_pkt->work, ipa3_wq_rx_avail);
 			rx_pkt->sys = sys;
 
 			rx_pkt->data.skb = sys->get_skb(sys->rx_buff_sz, flag);
@@ -2103,14 +2099,6 @@ static void ipa3_rx_common(struct ipa3_sys_context *sys, u16 size)
 	sys->pyld_hdlr(rx_skb, sys);
 	sys->free_rx_wrapper(rx_pkt_expected);
 	sys->repl_hdlr(sys);
-}
-
-static void ipa3_wq_rx_avail(struct work_struct *work)
-{
-	struct ipa3_rx_pkt_wrapper *rx_pkt;
-
-	rx_pkt = container_of(work, struct ipa3_rx_pkt_wrapper, work);
-	ipa3_rx_common(rx_pkt->sys, 0);
 }
 
 static void ipa3_free_rx_wrapper(struct ipa3_rx_pkt_wrapper *rk_pkt)
