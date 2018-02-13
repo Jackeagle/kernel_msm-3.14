@@ -232,7 +232,7 @@ try_again_later:
  */
 int ipa3_rx_poll(u32 clnt_hdl, int weight)
 {
-	struct ipa3_ep_context *ep;
+	struct ipa3_ep_context *ep = &ipa3_ctx->ep[clnt_hdl];
 	int ret;
 	int cnt = 0;
 	static int total_cnt;
@@ -240,16 +240,7 @@ int ipa3_rx_poll(u32 clnt_hdl, int weight)
 
 	IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log, "NAPI");
 
-	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
-		ipa3_ctx->ep[clnt_hdl].valid == 0) {
-		ipa_err("bad parm 0x%x\n", clnt_hdl);
-		return cnt;
-	}
-
-	ep = &ipa3_ctx->ep[clnt_hdl];
-
-	while (cnt < weight &&
-		   atomic_read(&ep->sys->curr_polling_state)) {
+	while (cnt < weight && atomic_read(&ep->sys->curr_polling_state)) {
 
 		atomic_set(&ipa3_ctx->transport_pm.eot_activity, 1);
 		ret = ipa_poll_gsi_pkt(ep->sys);
