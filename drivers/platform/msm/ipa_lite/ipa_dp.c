@@ -1052,11 +1052,11 @@ int ipa3_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	struct ipa3_desc *desc;
 	struct ipa3_desc _desc;
 	struct ipa3_sys_context *sys;
-	int src_ep_idx;
-	u32 num_frags;
-	u32 f;
 	const struct ipa_gsi_ep_config *gsi_ep;
+	int src_ep_idx;
 	int data_idx;
+	u32 nr_frags;
+	u32 f;
 
 	if (!skb->len) {
 		ipa_err("packet size is 0\n");
@@ -1072,17 +1072,17 @@ int ipa3_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	 * hold the linear portion of the skb and all its frags.
 	 * If not, see if we can linearize it before giving up.
 	 */
-	num_frags = skb_shinfo(skb)->nr_frags;
-	if (1 + num_frags > gsi_ep->ipa_if_tlv) {
+	nr_frags = skb_shinfo(skb)->nr_frags;
+	if (1 + nr_frags > gsi_ep->ipa_if_tlv) {
 		if (skb_linearize(skb)) {
 			ipa_err("too many fragments (%u > %u)\n",
-				1 + num_frags, gsi_ep->ipa_if_tlv);
+				1 + nr_frags, gsi_ep->ipa_if_tlv);
 			goto fail_gen;
 		}
-		num_frags = 0;
+		nr_frags = 0;
 	}
-	if (num_frags) {
-		desc = kzalloc(sizeof(*desc) * (1 + num_frags), GFP_ATOMIC);
+	if (nr_frags) {
+		desc = kzalloc((1 + nr_frags) * sizeof(*desc), GFP_ATOMIC);
 		if (!desc) {
 			ipa_err("failed to alloc desc array\n");
 			goto fail_gen;
@@ -1093,38 +1093,41 @@ int ipa3_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 		desc = &_desc;
 	}
 
-	/* HW data path */
+	/*
+	 * Fill in the IPA request descriptors--one for the linear
+	 * data in the skb, one each for each of its fragments.
+	 */
 	data_idx = 0;
 	desc[data_idx].pyld = skb->data;
 	desc[data_idx].len = skb_headlen(skb);
 	desc[data_idx].type = IPA_DATA_DESC_SKB;
-
-	for (f = 0; f < num_frags; f++) {
+	for (f = 0; f < nr_frags; f++) {
 		data_idx++;
 		desc[data_idx].frag = &skb_shinfo(skb)->frags[f];
 		desc[data_idx].type = IPA_DATA_DESC_SKB_PAGED;
 		desc[data_idx].len = skb_frag_size(desc[data_idx].frag);
 	}
+
 	/* Have the skb be freed after the last descriptor completes. */
 	desc[data_idx].callback = ipa3_tx_comp_usr_notify_release;
 	desc[data_idx].user1 = skb;
 	desc[data_idx].user2 = src_ep_idx;
 
 	if (ipa3_send(sys, data_idx + 1, desc)) {
-		ipa_err("failed to send skb %p num_frags %u\n", skb, num_frags);
+		ipa_err("failed to send skb %p nr_frags %u\n", skb, nr_frags);
 		goto fail_mem;
 	}
 
 	IPA_STATS_INC_CNT(ipa3_ctx->stats.tx_hw_pkts);
 
-	if (num_frags) {
+	if (nr_frags) {
 		kfree(desc);
 		IPA_STATS_INC_CNT(ipa3_ctx->stats.tx_non_linear);
 	}
 
 	return 0;
 fail_mem:
-	if (num_frags)
+	if (nr_frags)
 		kfree(desc);
 fail_gen:
 	return -EFAULT;
