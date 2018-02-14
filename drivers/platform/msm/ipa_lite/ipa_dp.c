@@ -221,18 +221,16 @@ try_again_later:
 }
 
 /**
- * ipa3_rx_poll() - Poll the rx packets from IPA HW. This
- * function is exectued in the softirq context
+ * ipa3_rx_poll() - Poll the rx packets from IPA HW.
  *
- * if input budget is zero, the driver switches back to
- * interrupt mode.
+ * This function is executed in softirq context.
  *
- * return number of polled packets, on error 0(zero)
+ * Returns the number of received packets, and switches to interrupt
+ * mode if that's less than weight.
  */
 int ipa3_rx_poll(u32 clnt_hdl, int weight)
 {
 	struct ipa3_ep_context *ep = &ipa3_ctx->ep[clnt_hdl];
-	int ret;
 	int cnt = 0;
 	static int total_cnt;
 	struct ipa_active_client_logging_info log;
@@ -240,6 +238,7 @@ int ipa3_rx_poll(u32 clnt_hdl, int weight)
 	IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log, "NAPI");
 
 	while (cnt < weight && atomic_read(&ep->sys->curr_polling_state)) {
+		int ret;
 
 		atomic_set(&ipa3_ctx->transport_pm.eot_activity, 1);
 		ret = ipa_poll_gsi_pkt(ep->sys);
@@ -250,9 +249,10 @@ int ipa3_rx_poll(u32 clnt_hdl, int weight)
 		cnt += IPA_WAN_AGGR_PKT_CNT;
 		total_cnt++;
 
-		if (ep->sys->len == 0 || total_cnt >= ep->sys->rx_pool_sz) {
+		/* Force switch back to interrupt mode if no more packets */
+		if (!ep->sys->len || total_cnt >= ep->sys->rx_pool_sz) {
 			total_cnt = 0;
-			cnt = cnt-1;
+			cnt--;
 			break;
 		}
 	};
