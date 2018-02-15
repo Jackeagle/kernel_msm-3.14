@@ -2345,10 +2345,6 @@ fail_write_channel_scratch:
 fail_alloc_channel:
 	ipahal_dma_free(&gsi_channel_props.mem);
 err_evt_ring_hdl_put:
-	if (ep->gsi_evt_ring_hdl != ipa3_ctx->gsi_evt_comm_hdl) {
-		gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl);
-		ep->gsi_evt_ring_hdl = GSI_NO_EVT_ERINDEX;
-	}
 	ipa_err("Return with err: %d\n", result);
 
 	return result;

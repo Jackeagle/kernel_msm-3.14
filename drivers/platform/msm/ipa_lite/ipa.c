@@ -998,16 +998,6 @@ static long ipa3_setup_apps_pipes(void)
 	 */
 	BUILD_BUG_ON((2 * IPA_SYS_DESC_FIFO_SZ) % GSI_EVT_RING_ELEMENT_SIZE);
 
-	/* allocate the common PROD event ring */
-	result = gsi_alloc_evt_ring(IPA_COMMON_EVENT_RING_SIZE, 0, false);
-	if (result < 0) {
-		ipa_err("ipa3_alloc_common_event_ring failed.\n");
-		result = -EPERM;
-		goto fail_ch20_wa;
-	}
-	ipa3_ctx->gsi_evt_comm_hdl = result;
-	ipa3_ctx->gsi_evt_comm_ring_rem = IPA_COMMON_EVENT_RING_SIZE;
-
 	/* CMD OUT (AP->IPA) */
 	ipa3_ctx->clnt_hdl_cmd = setup_apps_cmd_prod_pipe();
 	if (ipa3_ctx->clnt_hdl_cmd < 0) {
