@@ -28,11 +28,11 @@
  * number of 1 bits in its field_mask.  The "shift" for a field
  * (i.e. the position of its rightmost set bit, 0-31) is the same as
  * the number of low-order 0 bits in the field_mask.  For constant
- * field_mask, these values can be computed at compile time using
- * compiler builtins.  (We always inline this, and ensure we're
- * using non-zero constants, to ensure this happens.)
+ * field_mask, these values can be computed at compile time.  (We
+ * always inline this, and ensure we're using non-zero constants, to
+ * ensure this happens.)
  */
-#define field_width(field_mask)	       __builtin_popcount(field_mask)
+#define field_width(field_mask)	       hweight32(field_mask)
 #define field_shift(field_mask)	       __ffs(field_mask)
 
 /* Generate a field value--the given value shifted into the field's position */
