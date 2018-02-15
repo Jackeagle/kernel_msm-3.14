@@ -704,15 +704,6 @@ static void ipa3_switch_to_intr_rx_work_func(struct work_struct *work)
 		ipa3_handle_rx(sys);
 }
 
-enum hrtimer_restart ipa3_ring_doorbell_timer_fn(struct hrtimer *param)
-{
-	struct ipa3_sys_context *sys = container_of(param,
-		struct ipa3_sys_context, db_timer);
-
-	queue_work(sys->wq, &sys->work);
-	return HRTIMER_NORESTART;
-}
-
 /**
  * ipa3_setup_sys_pipe() - Setup an IPA GPI pipe and perform
  * IPA EP configuration
@@ -784,9 +775,6 @@ int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 		INIT_LIST_HEAD(&ep->sys->head_desc_list);
 		INIT_LIST_HEAD(&ep->sys->rcycl_list);
 		spin_lock_init(&ep->sys->spinlock);
-		hrtimer_init(&ep->sys->db_timer, CLOCK_MONOTONIC,
-			HRTIMER_MODE_REL);
-		ep->sys->db_timer.function = ipa3_ring_doorbell_timer_fn;
 	} else {
 		memset(ep->sys, 0, offsetof(struct ipa3_sys_context, ep));
 	}
