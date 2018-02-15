@@ -2119,7 +2119,7 @@ static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 
 	if (in->client == IPA_CLIENT_APPS_WAN_PROD) {
 		sys->policy = IPA_POLICY_INTR_MODE;
-		sys->use_comm_evt_ring = true;
+		sys->use_comm_evt_ring = false;
 		INIT_WORK(&sys->work, ipa3_send_nop_desc);
 
 		/*
