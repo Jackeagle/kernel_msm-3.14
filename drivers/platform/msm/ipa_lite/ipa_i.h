@@ -340,7 +340,6 @@ struct ipa3_sys_context {
 	atomic_t curr_polling_state;
 	struct delayed_work switch_to_intr_work;
 	enum ipa3_sys_pipe_policy policy;
-	bool use_comm_evt_ring;
 	int (*pyld_hdlr)(struct sk_buff *skb, struct ipa3_sys_context *sys);
 	struct sk_buff * (*get_skb)(unsigned int len, gfp_t flags);
 	void (*free_skb)(struct sk_buff *skb);

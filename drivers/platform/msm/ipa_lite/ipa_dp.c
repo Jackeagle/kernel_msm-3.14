@@ -381,17 +381,11 @@ ipa3_send(struct ipa3_sys_context *sys, u32 num_desc, struct ipa3_desc *desc)
 		}
 
 		if (i == (num_desc - 1)) {
-			if (!sys->use_comm_evt_ring) {
-				gsi_xfer_elem_array[i].flags |=
-					GSI_XFER_FLAG_EOT;
-				gsi_xfer_elem_array[i].flags |=
-					GSI_XFER_FLAG_BEI;
-			}
-			gsi_xfer_elem_array[i].xfer_user_data =
-				tx_pkt_first;
+			gsi_xfer_elem_array[i].flags |= GSI_XFER_FLAG_EOT;
+			gsi_xfer_elem_array[i].flags |= GSI_XFER_FLAG_BEI;
+			gsi_xfer_elem_array[i].xfer_user_data = tx_pkt_first;
 		} else {
-				gsi_xfer_elem_array[i].flags |=
-					GSI_XFER_FLAG_CHAIN;
+			gsi_xfer_elem_array[i].flags |= GSI_XFER_FLAG_CHAIN;
 		}
 	}
 
@@ -405,15 +399,6 @@ ipa3_send(struct ipa3_sys_context *sys, u32 num_desc, struct ipa3_desc *desc)
 	kfree(gsi_xfer_elem_array);
 
 	spin_unlock_bh(&sys->spinlock);
-
-	/* set the timer for sending the NOP descriptor */
-	if (sys->use_comm_evt_ring && !hrtimer_active(&sys->db_timer)) {
-		ktime_t time = ktime_set(0, IPA_TX_SEND_COMPL_NOP_DELAY_NS);
-
-		ipa_debug_low("scheduling timer for ch %lu\n",
-			sys->ep->gsi_chan_hdl);
-		hrtimer_start(&sys->db_timer, time, HRTIMER_MODE_REL);
-	}
 
 	return 0;
 
@@ -959,25 +944,19 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 		return result;
 	}
 
-	/* free event ring only when it is present */
-	if (ep->sys->use_comm_evt_ring) {
-		ipa3_ctx->gsi_evt_comm_ring_rem += ep->gsi_chan_ring_mem.size;
-	} else {
-		result = gsi_reset_evt_ring(ep->gsi_evt_ring_hdl);
-		if (result) {
-			ipa_err("Failed to reset evt ring: %d.\n",
-					result);
-			BUG();
-			return result;
-		}
-		result = gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl);
-		if (result) {
-			ipa_err("Failed to dealloc evt ring: %d.\n",
-					result);
-			BUG();
-			return result;
-		}
+	result = gsi_reset_evt_ring(ep->gsi_evt_ring_hdl);
+	if (result) {
+		ipa_err("Failed to reset evt ring: %d.\n", result);
+		BUG();
+		return result;
 	}
+	result = gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl);
+	if (result) {
+		ipa_err("Failed to dealloc evt ring: %d.\n", result);
+		BUG();
+		return result;
+	}
+
 	if (ep->sys->repl_wq)
 		flush_workqueue(ep->sys->repl_wq);
 	if (IPA_CLIENT_IS_CONS(ep->client))
@@ -2113,13 +2092,11 @@ static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 
 	if (in->client == IPA_CLIENT_APPS_CMD_PROD) {
 		sys->policy = IPA_POLICY_INTR_MODE;
-		sys->use_comm_evt_ring = false;
 		return 0;
 	}
 
 	if (in->client == IPA_CLIENT_APPS_WAN_PROD) {
 		sys->policy = IPA_POLICY_INTR_MODE;
-		sys->use_comm_evt_ring = false;
 		INIT_WORK(&sys->work, ipa3_send_nop_desc);
 
 		/*
@@ -2291,25 +2268,12 @@ static long evt_ring_hdl_get(struct ipa3_ep_context *ep, u32 desc_fifo_sz)
 {
 	u32 sz;
 
-	if (!ep->sys->use_comm_evt_ring) {
-		ipa_debug("client=%d moderation threshold cycles=%u cnt=1\n",
-				ep->client, IPA_GSI_EVT_RING_INT_MODT);
+	ipa_debug("client=%d moderation threshold cycles=%u cnt=1\n",
+			ep->client, IPA_GSI_EVT_RING_INT_MODT);
 
-		sz = ipa_gsi_ring_mem_size(ep->client, desc_fifo_sz);
+	sz = ipa_gsi_ring_mem_size(ep->client, desc_fifo_sz);
 
-		return gsi_alloc_evt_ring(sz, IPA_GSI_EVT_RING_INT_MODT, true);
-	}
-
-	sz = 2 * desc_fifo_sz;
-	if (WARN_ON(ipa3_ctx->gsi_evt_comm_ring_rem < sz)) {
-		ipa_err("common ring exhausted (need %u avail %u)\n",
-			sz, ipa3_ctx->gsi_evt_comm_ring_rem);
-
-		return -EFAULT;
-	}
-	ipa3_ctx->gsi_evt_comm_ring_rem -= sz;
-
-	return ipa3_ctx->gsi_evt_comm_hdl;
+	return gsi_alloc_evt_ring(sz, IPA_GSI_EVT_RING_INT_MODT, true);
 }
 
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
