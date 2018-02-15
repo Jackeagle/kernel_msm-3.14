@@ -709,7 +709,6 @@ int ipa3_init_hw(void)
 void ipa_init_ep_flt_bitmap(void)
 {
 	enum ipa_client_type cl;
-	u32 bitmap = 0;
 
 	BUG_ON(ipa3_ctx->ep_flt_bitmap);
 
@@ -720,13 +719,10 @@ void ipa_init_ep_flt_bitmap(void)
 		if (ep_config->support_flt) {
 			u32 pipe_num = ep_config->ipa_gsi_ep_info.ipa_ep_num;
 
-			bitmap |= BIT(pipe_num);
-			if (bitmap != ipa3_ctx->ep_flt_bitmap) {
-				ipa3_ctx->ep_flt_bitmap = bitmap;
-				ipa3_ctx->ep_flt_num++;
-			}
+			ipa3_ctx->ep_flt_bitmap |= BIT(pipe_num);
 		}
 	}
+	ipa3_ctx->ep_flt_num = hweight32(ipa3_ctx->ep_flt_bitmap);
 }
 
 /**
