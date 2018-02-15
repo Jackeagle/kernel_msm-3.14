@@ -2380,9 +2380,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	result = gsi_start_channel(ep->gsi_chan_hdl);
 	if (result)
 		goto fail_start_channel;
-	if (ep->client == IPA_CLIENT_MEMCPY_DMA_SYNC_CONS)
-		gsi_config_channel_mode(ep->gsi_chan_hdl,
-				GSI_CHAN_MODE_POLL);
+
 	return 0;
 
 fail_start_channel:
