@@ -178,48 +178,6 @@ static void ipa3_wq_write_done(struct work_struct *work)
 	ipa3_wq_write_done_common(sys, tx_pkt);
 }
 
-
-/* Work function for &sys->work for the APPS_WAN_PROD client */
-static void ipa3_send_nop_desc(struct work_struct *work)
-{
-	struct ipa3_sys_context *sys;
-	struct gsi_xfer_elem nop_xfer;
-	struct ipa3_tx_pkt_wrapper *tx_pkt;
-
-	sys = container_of(work, struct ipa3_sys_context, work);
-
-	ipa_debug_low("gsi send NOP for ch: %lu\n", sys->ep->gsi_chan_hdl);
-	tx_pkt = kmem_cache_zalloc(ipa3_ctx->tx_pkt_wrapper_cache, GFP_KERNEL);
-	if (!tx_pkt) {
-		ipa_err("failed to alloc tx wrapper\n");
-		goto try_again_later;
-	}
-
-	INIT_LIST_HEAD(&tx_pkt->link);
-	tx_pkt->cnt = 1;
-	INIT_WORK(&tx_pkt->work, ipa3_wq_write_done);
-	tx_pkt->no_unmap_dma = true;
-	tx_pkt->sys = sys;
-	spin_lock_bh(&sys->spinlock);
-	list_add_tail(&tx_pkt->link, &sys->head_desc_list);
-	spin_unlock_bh(&sys->spinlock);
-
-	memset(&nop_xfer, 0, sizeof(nop_xfer));
-	nop_xfer.type = GSI_XFER_ELEM_NOP;
-	nop_xfer.flags = GSI_XFER_FLAG_EOT;
-	nop_xfer.xfer_user_data = tx_pkt;
-	if (gsi_queue_xfer(sys->ep->gsi_chan_hdl, 1, &nop_xfer, true)) {
-		ipa_err("gsi_queue_xfer for ch:%lu failed\n",
-			sys->ep->gsi_chan_hdl);
-		goto try_again_later;
-	}
-	sys->len_pending_xfer = 0;
-
-	return;
-try_again_later:
-	queue_work(sys->wq, &sys->work);
-}
-
 /**
  * ipa3_rx_poll() - Poll the rx packets from IPA HW.
  *
@@ -2085,7 +2043,6 @@ static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 
 	if (in->client == IPA_CLIENT_APPS_WAN_PROD) {
 		sys->policy = IPA_POLICY_INTR_MODE;
-		INIT_WORK(&sys->work, ipa3_send_nop_desc);
 
 		/*
 		 * enable source notification status for exception packets

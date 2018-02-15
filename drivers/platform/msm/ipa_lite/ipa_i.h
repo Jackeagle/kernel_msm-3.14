@@ -350,7 +350,7 @@ struct ipa3_sys_context {
 	unsigned int len_pad;
 	unsigned int len_partial;
 	bool drop_packet;
-	struct work_struct work;
+	struct work_struct work;	/* Used for CONS pipes only */
 	struct delayed_work replenish_rx_work;
 	struct work_struct repl_work;
 	void (*repl_hdlr)(struct ipa3_sys_context *sys);
