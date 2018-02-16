@@ -697,6 +697,29 @@ static int shared_mem_size_show(struct seq_file *s, void *v)
 DEF_SEQ_RO(shared_mem_size);
 
 /*
+ * "ipa/regs/pipe-XX/" is a directory containing pipe registers
+ *
+ * Each pipe has its own directory, and the "XX" in the name is the
+ * hexidecimal number of the pipe.  Files within each directory
+ * show the values of registers associated with a pipe.
+ */
+static bool ipa_debugfs_regs_pipe_create(struct dentry *regs_dir, u32 pipe)
+{
+	static struct dentry *pipe_dir;
+	char name[8];	/* supports up to 256 pipes */
+
+	ipa_assert(pipe <= 0xff);
+
+	(void)snprintf(name, sizeof(name), "pipe-%02x", pipe);
+
+	pipe_dir = debugfs_create_dir(name, regs_dir);
+	if (IS_ERR(pipe_dir))
+		return false;
+
+	return true;
+}
+
+/*
  * "ipa/regs/" is a directory containing registers and their values.
  *
  * Most files in this directory are read-only.  All registers use a
@@ -708,6 +731,7 @@ static bool ipa_debugfs_regs_create(struct dentry *ipa_dir)
 {
 	static struct dentry *regs_dir;
 	bool success;
+	int i;
 
 	regs_dir = debugfs_create_dir("regs", ipa_dir);
 	if (IS_ERR(regs_dir))
@@ -719,7 +743,14 @@ static bool ipa_debugfs_regs_create(struct dentry *ipa_dir)
 
 	success = success && ADD_REG_FIELDS_RO(regs_dir, shared_mem_size);
 
-	return success;
+	if (!success)
+		return false;
+
+	for (i = 0; i < ipa3_ctx->ipa_num_pipes; i++)
+		if (!ipa_debugfs_regs_pipe_create(regs_dir, i))
+			return false;
+
+	return true;
 }
 
 void ipa3_debugfs_init(void)
