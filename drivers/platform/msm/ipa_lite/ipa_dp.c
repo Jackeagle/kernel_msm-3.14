@@ -651,11 +651,10 @@ static void ipa3_switch_to_intr_rx_work_func(struct work_struct *work)
 
 	sys = container_of(dwork, struct ipa3_sys_context, switch_to_intr_work);
 
-	if (sys->ep->napi_enabled) {
-		/* interrupt mode is done in ipa3_rx_poll context */
-		ipa_bug();
-	} else
-		ipa3_handle_rx(sys);
+	/* For NAPI, interrupt mode is done in ipa3_rx_poll context */
+	ipa_bug_on(sys->ep->napi_enabled);
+
+	ipa3_handle_rx(sys);
 }
 
 /**
@@ -867,24 +866,14 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 			break;
 	}
 
-	if (result) {
-		ipa_err("GSI stop chan err: %d.\n", result);
-		ipa_bug();
-		return result;
-	}
+	ipa_bug_on(result);
+
 	result = ipa3_reset_gsi_channel(clnt_hdl);
-	if (result) {
-		ipa_err("Failed to reset chan: %d.\n", result);
-		ipa_bug();
-		return result;
-	}
+	ipa_bug_on(result);
+
 	ipahal_dma_free(&ep->gsi_chan_ring_mem);
 	result = gsi_dealloc_channel(ep->gsi_chan_hdl);
-	if (result) {
-		ipa_err("Failed to dealloc chan: %d.\n", result);
-		ipa_bug();
-		return result;
-	}
+	ipa_bug_on(result);
 
 	result = gsi_reset_evt_ring(ep->gsi_evt_ring_hdl);
 	if (result) {
@@ -1792,10 +1781,8 @@ static int ipa3_wan_rx_pyld_hdlr(struct sk_buff *skb,
 		return rc;
 	}
 
-	if (sys->repl_hdlr == ipa3_replenish_rx_cache_recycle) {
-		ipa_err("Recycle should enable only with GRO Aggr\n");
-		ipa_bug();
-	}
+	/* Recycle should be enabled only with GRO aggr. (???) */
+	ipa_bug_on(sys->repl_hdlr == ipa3_replenish_rx_cache_recycle);
 
 	/*
 	 * payload splits across 2 buff or more,

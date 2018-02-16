@@ -416,11 +416,7 @@ static void ipa3_halt_q6_cons_gsi_channels(void)
 				continue;
 
 			gsi_ep_cfg = ipa3_get_gsi_ep_info(client_idx);
-			if (!gsi_ep_cfg) {
-				ipa_err("failed to get GSI config\n");
-				ipa_bug();
-				return;
-			}
+			ipa_bug_on(!gsi_ep_cfg);
 
 			ret = gsi_halt_channel_ee(
 				gsi_ep_cfg->ipa_gsi_chan_num, gsi_ep_cfg->ee,
@@ -470,11 +466,8 @@ static int ipa3_q6_set_ex_path_to_apps(void)
 			offset = ipahal_reg_n_offset(IPA_ENDP_STATUS_n, ep_idx);
 			cmd_pyld = ipahal_register_write_pyld(0, ~0, offset,
 								false);
-			if (!cmd_pyld) {
-				ipa_err("fail construct register_write cmd\n");
-				ipa_bug();
-				return -EFAULT;
-			}
+			ipa_bug_on(!cmd_pyld);
+
 			ipa_desc_fill_imm_cmd(&desc[num_descs], cmd_pyld);
 			desc[num_descs].callback = ipa3_destroy_imm;
 			desc[num_descs].user1 = cmd_pyld;
@@ -1310,11 +1303,7 @@ static void __ipa3_dec_client_disable_clks(void)
 {
 	int ret;
 
-	if (!atomic_read(&ipa3_ctx->ipa3_active_clients.cnt)) {
-		ipa_err("trying to disable clocks with refcnt is 0!\n");
-		ipa_bug();
-		return;
-	}
+	ipa_bug_on(!atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
 
 	ret = atomic_add_unless(&ipa3_ctx->ipa3_active_clients.cnt, -1, 1);
 	if (ret)
@@ -2142,21 +2131,17 @@ static int ipa3_iommu_map(struct iommu_domain *domain,
 	 * rounding.  Round the size up to a PAGE_SIZE multiple.
 	 */
 	iova = rounddown(iova, PAGE_SIZE);
+	paddr = rounddown(paddr, PAGE_SIZE);
 	size += paddr % PAGE_SIZE;
 	size = roundup(size, PAGE_SIZE);
-	paddr = rounddown(paddr, PAGE_SIZE);
 
 	ipa_debug("mapping 0x%lx to 0x%pa size %zu\n", iova, &paddr, size);
 
 	ipa_debug("domain =0x%p iova 0x%lx\n", domain, iova);
 	ipa_debug("paddr =0x%pa size 0x%x\n", &paddr, (u32)size);
 
-	/* make sure no overlapping */
-	if (iova >= ap_cb->va_start && iova < ap_cb->va_end) {
-		ipa_err("iommu AP overlap addr 0x%lx\n", iova);
-		ipa_bug();
-		return -EFAULT;
-	}
+	/* Overlapping the existing virtual address space is an error */
+	ipa_bug_on(iova >= ap_cb->va_start && iova < ap_cb->va_end);
 
 	return iommu_map(domain, iova, paddr, size, prot);
 }

@@ -2186,11 +2186,8 @@ void ipa3_suspend_apps_pipes(bool suspend)
 	cfg.ipa_ep_suspend = suspend;
 
 	ipa_ep_idx = ipa3_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
-	if (ipa_ep_idx < 0) {
-		ipa_err("IPA client mapping failed\n");
-		ipa_bug();
-		return;
-	}
+	ipa_bug_on(ipa_ep_idx < 0);
+
 	ep = &ipa3_ctx->ep[ipa_ep_idx];
 	if (ep->valid) {
 		ipa_debug("%s pipe %d\n", suspend ? "suspend" : "unsuspend",

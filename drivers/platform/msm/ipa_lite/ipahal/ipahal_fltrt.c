@@ -101,12 +101,7 @@ static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap)
 
 static u64 ipa_fltrt_create_tbl_addr(u64 addr)
 {
-	if (addr % ipahal_fltrt.sysaddr_align) {
-		ipa_err("sys addr is not aligned accordingly addr=0x%pad\n",
-			&addr);
-		ipa_bug();
-		return 0;
-	}
+	ipa_bug_on(addr % ipahal_fltrt.sysaddr_align);
 
 	return addr;
 }
@@ -116,11 +111,7 @@ static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr)
 	ipa_debug_low("Parsing hwaddr 0x%llx\n", hwaddr);
 
 	BUG_ON(hwaddr & 0x1);
-	if (hwaddr % ipahal_fltrt.sysaddr_align) {
-		ipa_err("sys addr is not aligned accordingly addr=0x%pad\n",
-			&hwaddr);
-		ipa_bug();
-	}
+	ipa_bug_on(hwaddr % ipahal_fltrt.sysaddr_align);
 
 	return hwaddr;
 }
