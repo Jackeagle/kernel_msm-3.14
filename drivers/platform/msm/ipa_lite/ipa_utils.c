@@ -2413,12 +2413,6 @@ const char *ipa_client_string(enum ipa_client_type client)
 	return "Undefined client";
 }
 
-void ipa_assert(void)
-{
-	ipa_err("IPA: unrecoverable error has occurred, asserting\n");
-	BUG();
-}
-
 /**
  * ipa3_set_flt_tuple_mask() - Sets the flt tuple masking for the given pipe
  *  Pipe must be for AP EP (not modem) and support filtering

@@ -830,7 +830,12 @@ struct ipa_ep_cfg_ctrl {
 
 void __ipa_ipc_logging(bool logbuf_low, const char *fmt, ...);
 
-void ipa_assert(void);
+#define ipa_assert() \
+	do {								\
+		ipa_err("an unrecoverable error has occurred\n");	\
+		BUG();							\
+	} while (0)
+
 #define ipa_bug_on(condition) 						\
 	do {								\
 		if (unlikely(condition)) {				\
