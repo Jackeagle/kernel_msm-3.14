@@ -878,13 +878,13 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 	result = gsi_reset_evt_ring(ep->gsi_evt_ring_hdl);
 	if (result) {
 		ipa_err("Failed to reset evt ring: %d.\n", result);
-		BUG();
+		ipa_bug();
 		return result;
 	}
 	result = gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl);
 	if (result) {
 		ipa_err("Failed to dealloc evt ring: %d.\n", result);
-		BUG();
+		ipa_bug();
 		return result;
 	}
 
@@ -1555,8 +1555,7 @@ begin:
 			ipa_err("STATUS opcode=%d src=%d dst=%d len=%d\n",
 				status.status_opcode, status.endp_src_idx,
 				status.endp_dest_idx, status.pkt_len);
-			WARN_ON(1);
-			BUG();
+			ipa_bug();
 		}
 		if (status.status_mask & IPAHAL_PKT_STATUS_MASK_TAG_VALID) {
 			struct ipa3_tag_completion *comp;
@@ -1655,7 +1654,7 @@ begin:
 							status.endp_src_idx,
 							status.endp_dest_idx,
 							status.pkt_len);
-						BUG();
+						ipa_bug();
 					} else {
 					skb2->truesize = skb2->len +
 						sizeof(struct sk_buff) +
@@ -2275,7 +2274,7 @@ fail_write_channel_scratch:
 	if (gsi_dealloc_channel(ep->gsi_chan_hdl)
 		!= 0) {
 		ipa_err("Failed to dealloc GSI chan.\n");
-		BUG();
+		ipa_bug();
 	}
 fail_alloc_channel:
 	ipahal_dma_free(&gsi_channel_props.mem);

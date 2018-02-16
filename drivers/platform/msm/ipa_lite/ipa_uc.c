@@ -216,7 +216,7 @@ static void ipa3_uc_event_handler(enum ipa_irq_type interrupt,
 		ipa3_ctx->uc_ctx.uc_error_type = evt.params.errorType;
 		ipa3_ctx->uc_ctx.uc_error_timestamp =
 			ipahal_read_reg(IPA_TAG_TIMER);
-		BUG();
+		ipa_bug();
 	} else if (event_op == IPA_HW_2_CPU_EVENT_LOG_INFO) {
 		ipa_debug("uC evt log info ofst=0x%x\n", mmio->eventParams);
 		ipa3_log_evt_hdlr();
@@ -441,7 +441,7 @@ send_cmd:
 out:
 	mutex_unlock(&uc_ctx->uc_lock);
 	if (ret == -EIO)
-		BUG();
+		ipa_bug();
 
 	return ret;
 }

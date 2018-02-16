@@ -572,7 +572,7 @@ static void ipa3_q6_clnt_svc_arrive(struct work_struct *work)
 		 * This is a very unexpected scenario, which requires a kernel
 		 * panic in order to force dumps for QMI/Q6 side analysis.
 		 */
-		BUG();
+		ipa_bug();
 		return;
 	}
 	ipa3_qmi_modem_init_fin = true;

@@ -710,7 +710,7 @@ void ipa_init_ep_flt_bitmap(void)
 {
 	enum ipa_client_type cl;
 
-	BUG_ON(ipa3_ctx->ep_flt_bitmap);
+	ipa_bug_on(ipa3_ctx->ep_flt_bitmap);
 
 	for (cl = 0; cl < IPA_CLIENT_MAX ; cl++) {
 		const struct ipa_ep_configuration *ep_config;
@@ -1053,7 +1053,7 @@ static int ipa3_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 		if (ipa3_ctx->ep[clnt_hdl].cfg.mode.mode == IPA_DMA &&
 			!IPA_DPS_HPS_SEQ_TYPE_IS_DMA(type)) {
 			ipa_err("Configuring non-DMA SEQ type to DMA pipe\n");
-			BUG();
+			ipa_bug();
 		}
 		IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
 		/* Configure sequencers type*/

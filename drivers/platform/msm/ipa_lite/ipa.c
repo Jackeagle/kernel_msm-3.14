@@ -514,11 +514,11 @@ void ipa3_q6_pre_shutdown_cleanup(void)
 
 	if (ipa3_q6_clean_q6_tables()) {
 		ipa_err("Failed to clean Q6 tables\n");
-		BUG();
+		ipa_bug();
 	}
 	if (ipa3_q6_set_ex_path_to_apps()) {
 		ipa_err("Failed to redirect exceptions to APPS\n");
-		BUG();
+		ipa_bug();
 	}
 	/* Remove delay from Q6 PRODs to avoid pending descriptors
 	  * on pipe reset procedure
@@ -563,7 +563,7 @@ void ipa3_q6_post_shutdown_cleanup(void)
 			if (ipa3_uc_is_gsi_channel_empty(client_idx)) {
 				ipa_err("fail to validate Q6 ch emptiness %d\n",
 					client_idx);
-				BUG();
+				ipa_bug();
 				return;
 			}
 		}

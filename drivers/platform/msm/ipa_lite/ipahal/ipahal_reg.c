@@ -846,7 +846,7 @@ u32 ipahal_reg_n_offset(enum ipahal_reg reg, u32 n)
 
 	ipa_debug_low("get offset of %s n=%u\n", ipahal_regs[reg].name, n);
 	offset = ipahal_regs[reg].offset;
-	BUG_ON(offset == OFFSET_INVAL);
+	ipa_bug_on(offset == OFFSET_INVAL);
 	offset += ipahal_regs[reg].n_ofst * n;
 
 	return offset;

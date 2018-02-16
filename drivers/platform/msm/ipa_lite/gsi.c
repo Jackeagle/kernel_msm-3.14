@@ -140,7 +140,7 @@ handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 code)
 		ipa_err("unexpected chan_id %u\n", chan_id);
 		return;
 	}
-	BUG_ON(err_ee != ee && code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
+	ipa_bug_on(err_ee != ee && code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
 
 	switch (code) {
 	case GSI_INVALID_TRE_ERR:
@@ -149,7 +149,7 @@ handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 code)
 		ctx->state = field_val(val, CHSTATE_BMSK);
 		ipa_debug("chan_id %u state updated to %u\n",
 				chan_id, ctx->state);
-		BUG_ON(ctx->state != GSI_CHAN_STATE_ERROR);
+		ipa_bug_on(ctx->state != GSI_CHAN_STATE_ERROR);
 		break;
 	case GSI_OUT_OF_BUFFERS_ERR:
 		ipa_err("got OUT_OF_BUFFERS_ERR\n");
@@ -169,9 +169,9 @@ handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 code)
 		break;
 	default:
 		ipa_err("unexpected channel error code %u\n", code);
-		BUG();
+		ipa_bug();
 	}
-	BUG_ON(!ctx->props.chan_user_data);
+	ipa_bug_on(!ctx->props.chan_user_data);
 }
 
 static void
@@ -184,7 +184,7 @@ handle_glob_evt_err(u32 err_ee, u32 evt_id, u32 code)
 		ipa_err("unexpected evt_id %u\n", evt_id);
 		return;
 	}
-	BUG_ON(err_ee != ee && code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
+	ipa_bug_on(err_ee != ee && code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
 
 	switch (code) {
 	case GSI_OUT_OF_BUFFERS_ERR:
@@ -202,7 +202,7 @@ handle_glob_evt_err(u32 err_ee, u32 evt_id, u32 code)
 		break;
 	default:
 		ipa_err("unexpected event error code %u\n", code);
-		BUG();
+		ipa_bug();
 	}
 }
 
@@ -218,7 +218,7 @@ static void gsi_handle_glob_err(u32 err)
 	switch (log->err_type) {
 	case GSI_ERR_TYPE_GLOB:
 		ipa_err("got ERR_TYPE_GLOB\n");
-		BUG();
+		ipa_bug();
 		break;
 	case GSI_ERR_TYPE_CHAN:
 		handle_glob_chan_err(log->ee, log->virt_idx, log->code);
@@ -257,12 +257,12 @@ static void gsi_handle_glob_ee(void)
 
 	if (val & EN_GP_INT2_BMSK) {
 		ipa_err("got global GP INT2\n");
-		BUG();
+		ipa_bug();
 	}
 
 	if (val & EN_GP_INT3_BMSK) {
 		ipa_err("got global GP INT3\n");
-		BUG();
+		ipa_bug();
 	}
 
 	gsi_writel(val, GSI_EE_n_CNTXT_GLOB_IRQ_CLR_OFFS(ee));
@@ -504,17 +504,17 @@ static void gsi_handle_general(void)
 
 	if (val & CLR_GSI_MCS_STACK_OVRFLOW_BMSK) {
 		ipa_err("got MCS stack overflow\n");
-		BUG();
+		ipa_bug();
 	}
 
 	if (val & CLR_GSI_CMD_FIFO_OVRFLOW_BMSK) {
 		ipa_err("got command FIFO overflow\n");
-		BUG();
+		ipa_bug();
 	}
 
 	if (val & CLR_GSI_BUS_ERROR_BMSK) {
 		ipa_err("got bus error\n");
-		BUG();
+		ipa_bug();
 	}
 
 	if (val & CLR_GSI_BREAK_POINT_BMSK)
@@ -556,13 +556,13 @@ static void gsi_handle_irq(void)
 			gsi_handle_general();
 
 		if (++cnt > GSI_ISR_MAX_ITER)
-			BUG();
+			ipa_bug();
 	}
 }
 
 static irqreturn_t gsi_isr(int irq, void *ctxt)
 {
-	BUG_ON(ctxt != gsi_ctx);
+	ipa_bug_on(ctxt != gsi_ctx);
 
 	gsi_handle_irq();
 
@@ -1023,7 +1023,7 @@ int gsi_dealloc_evt_ring(unsigned long evt_id)
 
 	if (ctx->state != GSI_EVT_RING_STATE_NOT_ALLOCATED) {
 		ipa_err("evt_id %lu unexpected state %u\n", evt_id, ctx->state);
-		BUG();
+		ipa_bug();
 	}
 
 	clear_bit(evt_id, &gsi_ctx->evt_bmap);
@@ -1064,7 +1064,7 @@ int gsi_reset_evt_ring(unsigned long evt_id)
 
 	if (ctx->state != GSI_EVT_RING_STATE_ALLOCATED) {
 		ipa_err("evt_id %lu unexpected state %u\n", evt_id, ctx->state);
-		BUG();
+		ipa_bug();
 	}
 
 	gsi_program_evt_ring_ctx(&ctx->mem, evt_id, ctx->int_modt);
@@ -1302,7 +1302,7 @@ int gsi_start_channel(unsigned long chan_id)
 	}
 	if (ctx->state != GSI_CHAN_STATE_STARTED) {
 		ipa_err("chan %lu unexpected state %u\n", chan_id, ctx->state);
-		BUG();
+		ipa_bug();
 	}
 
 	mutex_unlock(&gsi_ctx->mlock);
@@ -1396,7 +1396,7 @@ reset:
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED) {
 		ipa_err("chan_id %lu unexpected state %u\n",
 				chan_id, ctx->state);
-		BUG();
+		ipa_bug();
 	}
 
 	/* workaround: reset GSI producers again */
@@ -1439,7 +1439,7 @@ int gsi_dealloc_channel(unsigned long chan_id)
 	if (ctx->state != GSI_CHAN_STATE_NOT_ALLOCATED) {
 		ipa_err("chan_id %lu unexpected state %u\n",
 				chan_id, ctx->state);
-		BUG();
+		ipa_bug();
 	}
 
 	mutex_unlock(&gsi_ctx->mlock);

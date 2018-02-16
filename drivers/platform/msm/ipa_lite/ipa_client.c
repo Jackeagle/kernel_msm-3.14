@@ -155,7 +155,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 	if (aggr_active_bitmap & (1 << clnt_hdl)) {
 		ipa_err("Failed closing aggr frame for client: %d\n",
 			clnt_hdl);
-		BUG();
+		ipa_bug();
 	}
 
 	ipahal_dma_free(&dma_byte);
