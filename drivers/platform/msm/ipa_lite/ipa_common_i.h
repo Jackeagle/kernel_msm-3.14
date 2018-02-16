@@ -844,6 +844,31 @@ void __ipa_ipc_logging(bool logbuf_low, const char *fmt, ...);
 		}							\
 	} while (0)
 
+#ifdef CONFIG_IPA_ASSERT
+
+/*
+ * Communicate a condition assumed by the code.  This is intended as
+ * an informative statement about something that should always be true.
+ *
+ * N.B.:  Conditions asserted must not incorporate code with side-effects
+ *	  that are necessary for correct execution.  And an assertion
+ *	  failure should not be expected to force a crash (because all
+ *	  assertion code is optionally compiled out).
+ */
+#define ipa_assert(cond) \
+	do {								\
+		if (unlikely(!(cond))) {				\
+			ipa_err("ipa_assert(%s) failed!\n", #cond);	\
+			ipa_bug();					\
+		}							\
+	} while (0)
+#else	/* !CONFIG_IPA_ASSERT */
+
+#define ipa_assert(expr)	((void) 0)
+
+#endif	/* !CONFIG_IPA_ASSERT */
+
+
 /* general */
 
 void ipa_write_64(u64 w, u8 *dest);
