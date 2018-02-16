@@ -249,12 +249,6 @@ struct ipa3_ep_context {
 	struct ipa3_sys_context *sys;
 };
 
-enum ipa3_sys_pipe_policy {
-	IPA_POLICY_INTR_MODE,
-	IPA_POLICY_INTR_POLL_MODE,
-};
-
-
 #define IPA_HW_NUM_FEATURES 0x8
 #define FEATURE_ENUM_VAL(feature, opcode) ((feature << 5) | opcode)
 
@@ -338,7 +332,6 @@ struct ipa3_sys_context {
 	u32 len_pending_xfer;
 	atomic_t curr_polling_state;
 	struct delayed_work switch_to_intr_work;
-	enum ipa3_sys_pipe_policy policy;
 	int (*pyld_hdlr)(struct sk_buff *skb, struct ipa3_sys_context *sys);
 	struct sk_buff * (*get_skb)(unsigned int len, gfp_t flags);
 	void (*free_skb)(struct sk_buff *skb);

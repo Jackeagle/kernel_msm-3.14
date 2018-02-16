@@ -2032,14 +2032,10 @@ static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 {
 	struct ipa_ep_cfg_aggr *ep_cfg_aggr;
 
-	if (in->client == IPA_CLIENT_APPS_CMD_PROD) {
-		sys->policy = IPA_POLICY_INTR_MODE;
+	if (in->client == IPA_CLIENT_APPS_CMD_PROD)
 		return 0;
-	}
 
 	if (in->client == IPA_CLIENT_APPS_WAN_PROD) {
-		sys->policy = IPA_POLICY_INTR_MODE;
-
 		/*
 		 * enable source notification status for exception packets
 		 * (i.e. QMAP commands) to be routed to modem.
@@ -2052,7 +2048,6 @@ static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 
 	/* Client is a consumer (APPS_LAN_CONS or APPS_WAN_CONS) */
 	sys->ep->status.status_en = true;
-	sys->policy = IPA_POLICY_INTR_POLL_MODE;
 
 	INIT_WORK(&sys->work, ipa3_wq_handle_rx);
 	INIT_DELAYED_WORK(&sys->switch_to_intr_work,
