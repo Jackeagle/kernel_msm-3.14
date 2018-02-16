@@ -465,7 +465,7 @@ static int ipa3_q6_set_ex_path_to_apps(void)
 		if (IPA_CLIENT_IS_Q6_PROD(client_idx)) {
 			u32 offset;
 
-			ipa_assert_on(num_descs >= ipa3_ctx->ipa_num_pipes);
+			ipa_bug_on(num_descs >= ipa3_ctx->ipa_num_pipes);
 
 			offset = ipahal_reg_n_offset(IPA_ENDP_STATUS_n, ep_idx);
 			cmd_pyld = ipahal_register_write_pyld(0, ~0, offset,

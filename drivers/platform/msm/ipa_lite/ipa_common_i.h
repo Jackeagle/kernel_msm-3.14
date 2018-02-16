@@ -137,12 +137,6 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 		ipa3_dec_client_disable_clks(&log_info); \
 	} while (0)
 
-#define ipa_assert_on(condition)\
-do {\
-	if (unlikely(condition))\
-		ipa_assert();\
-} while (0)
-
 #define IPA_CLIENT_IS_PROD(x) \
 	(x < IPA_CLIENT_MAX && (x & 0x1) == 0)
 #define IPA_CLIENT_IS_CONS(x) \
@@ -835,7 +829,15 @@ struct ipa_ep_cfg_ctrl {
 	} while (0)
 
 void __ipa_ipc_logging(bool logbuf_low, const char *fmt, ...);
+
 void ipa_assert(void);
+#define ipa_bug_on(condition) 						\
+	do {								\
+		if (unlikely(condition)) {				\
+			ipa_err("ipa_bug_on(%s) failed!\n", #condition); \
+			ipa_assert();					\
+		}							\
+	} while (0)
 
 /* general */
 
