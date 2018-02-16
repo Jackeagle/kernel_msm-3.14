@@ -229,64 +229,6 @@ static ssize_t ipa3_read_keep_awake(struct file *file, char __user *ubuf,
 	return simple_read_from_buffer(ubuf, count, ppos, dbg_buff, nbytes);
 }
 
-static ssize_t ipa3_read_stats(struct file *file, char __user *ubuf,
-		size_t count, loff_t *ppos)
-{
-	int nbytes;
-	int i;
-	int cnt = 0;
-	uint connect = 0;
-
-	for (i = 0; i < ipa3_ctx->ipa_num_pipes; i++)
-		connect |= (ipa3_ctx->ep[i].valid << i);
-
-	nbytes = scnprintf(dbg_buff, IPA_MAX_MSG_LEN,
-		"sw_tx=%u\n"
-		"hw_tx=%u\n"
-		"tx_non_linear=%u\n"
-		"tx_compl=%u\n"
-		"wan_rx=%u\n"
-		"stat_compl=%u\n"
-		"lan_aggr_close=%u\n"
-		"wan_aggr_close=%u\n"
-		"act_clnt=%u\n"
-		"con_clnt_bmap=0x%x\n"
-		"wan_rx_empty=%u\n"
-		"wan_repl_rx_empty=%u\n"
-		"lan_rx_empty=%u\n"
-		"lan_repl_rx_empty=%u\n"
-		"flow_enable=%u\n"
-		"flow_disable=%u\n",
-		ipa3_ctx->stats.tx_sw_pkts,
-		ipa3_ctx->stats.tx_hw_pkts,
-		ipa3_ctx->stats.tx_non_linear,
-		ipa3_ctx->stats.tx_pkts_compl,
-		ipa3_ctx->stats.rx_pkts,
-		ipa3_ctx->stats.stat_compl,
-		ipa3_ctx->stats.aggr_close,
-		ipa3_ctx->stats.wan_aggr_close,
-		atomic_read(&ipa3_ctx->ipa3_active_clients.cnt),
-		connect,
-		ipa3_ctx->stats.wan_rx_empty,
-		ipa3_ctx->stats.wan_repl_rx_empty,
-		ipa3_ctx->stats.lan_rx_empty,
-		ipa3_ctx->stats.lan_repl_rx_empty,
-		ipa3_ctx->stats.flow_enable,
-		ipa3_ctx->stats.flow_disable);
-	cnt += nbytes;
-
-	for (i = 0; i < IPAHAL_PKT_STATUS_EXCEPTION_MAX; i++) {
-		nbytes = scnprintf(dbg_buff + cnt,
-			IPA_MAX_MSG_LEN - cnt,
-			"lan_rx_excp[%u:%20s]=%u\n", i,
-			ipahal_pkt_status_exception_str(i),
-			ipa3_ctx->stats.rx_excp_pkts[i]);
-		cnt += nbytes;
-	}
-
-	return simple_read_from_buffer(ubuf, count, ppos, dbg_buff, cnt);
-}
-
 static ssize_t ipa3_write_dbg_cnt(struct file *file, const char __user *buf,
 		size_t count, loff_t *ppos)
 {
@@ -454,10 +396,6 @@ const struct file_operations ipa3_keep_awake_ops = {
 
 const struct file_operations ipa3_ep_holb_ops = {
 	.write = ipa3_write_ep_holb,
-};
-
-const struct file_operations ipa3_stats_ops = {
-	.read = ipa3_read_stats,
 };
 
 const struct file_operations ipa3_dbg_cnt_ops = {
@@ -737,7 +675,7 @@ static bool ipa_debugfs_stats_create(struct dentry *ipa_dir)
 	bool success;
 	u32 i;
 
-	stats_dir = debugfs_create_dir("stats_dir", ipa_dir);
+	stats_dir = debugfs_create_dir("stats", ipa_dir);
 	if (IS_ERR(stats_dir))
 		return false;
 
@@ -811,12 +749,6 @@ void ipa3_debugfs_init(void)
 	file = debugfs_create_file("holb", write_only_mode,
 			ipa_dir,
 			0, &ipa3_ep_holb_ops);
-	if (IS_ERR_OR_NULL(file))
-		goto fail;
-
-	file = debugfs_create_file("stats", S_IRUGO,
-			ipa_dir, 0,
-			&ipa3_stats_ops);
 	if (IS_ERR_OR_NULL(file))
 		goto fail;
 
