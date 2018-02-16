@@ -104,7 +104,7 @@ static u64 ipa_fltrt_create_tbl_addr(u64 addr)
 	if (addr % ipahal_fltrt.sysaddr_align) {
 		ipa_err("sys addr is not aligned accordingly addr=0x%pad\n",
 			&addr);
-		ipa_assert();
+		ipa_bug();
 		return 0;
 	}
 
@@ -119,7 +119,7 @@ static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr)
 	if (hwaddr % ipahal_fltrt.sysaddr_align) {
 		ipa_err("sys addr is not aligned accordingly addr=0x%pad\n",
 			&hwaddr);
-		ipa_assert();
+		ipa_bug();
 	}
 
 	return hwaddr;

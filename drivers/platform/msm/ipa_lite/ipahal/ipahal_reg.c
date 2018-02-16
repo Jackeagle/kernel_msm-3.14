@@ -932,7 +932,7 @@ void ipahal_get_aggr_force_close_valmask(int ep_idx,
 {
 	if (ep_idx > (sizeof(valmask->val) * 8 - 1)) {
 		ipa_err("too big ep_idx %d\n", ep_idx);
-		ipa_assert();
+		ipa_bug();
 		return;
 	}
 
