@@ -878,6 +878,8 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt, bool excl)
 	u32 val;
 	int ret;
 
+	ipa_assert(!(size % GSI_EVT_RING_ELEMENT_SIZE));
+
 	/* Start by allocating the event id to use */
 	mutex_lock(&gsi_ctx->mlock);
 	evt_id = find_first_zero_bit(&gsi_ctx->evt_bmap, GSI_EVT_RING_MAX);
@@ -894,8 +896,6 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt, bool excl)
 	ctx = &gsi_ctx->evtr[evt_id];
 	memset(ctx, 0, sizeof(*ctx));
 	ctx->id = evt_id;
-
-	/* ipa_assert(!(size % GSI_EVT_RING_ELEMENT_SIZE)); */
 
 	if (ipahal_dma_alloc(&ctx->mem, size, GFP_KERNEL)) {
 		ipa_err("fail to dma alloc %u bytes\n", size);
@@ -1610,10 +1610,9 @@ int gsi_config_channel_mode(unsigned long chan_id, enum gsi_chan_mode mode)
 	enum gsi_chan_mode curr;
 	unsigned long flags;
 
-	/*
-	 * ipa_assert(mode == GSI_CHAN_MODE_POLL ||
-	 *		mode == GSI_CHAN_MODE_CALLBACK);
-	 */
+	ipa_assert(mode == GSI_CHAN_MODE_POLL ||
+			mode == GSI_CHAN_MODE_CALLBACK);
+
 	if (!ctx->evtr->exclusive) {
 		ipa_err("cannot configure mode on chan_id %lu\n", chan_id);
 		return -ENOTSUPP;
@@ -1629,7 +1628,7 @@ int gsi_config_channel_mode(unsigned long chan_id, enum gsi_chan_mode mode)
 	spin_lock_irqsave(&gsi_ctx->slock, flags);
 	if (curr == GSI_CHAN_MODE_CALLBACK)
 		gsi_irq_control_event(gsi_ctx->ee, ctx->evtr->id, false);
-	else /* ipa_assert(curr == GSI_CHAN_MODE_POLL); */
+	else
 		gsi_irq_control_event(gsi_ctx->ee, ctx->evtr->id, true);
 	atomic_set(&ctx->poll_mode, mode);
 	spin_unlock_irqrestore(&gsi_ctx->slock, flags);
