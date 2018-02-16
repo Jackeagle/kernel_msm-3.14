@@ -185,7 +185,7 @@ static void ipa3_enable_tx_suspend_wa(struct work_struct *work)
 	ipa_debug_low("Enter\n");
 
 	irq_num = ipa3_irq_mapping[IPA_TX_SUSPEND_IRQ];
-	ipa_bug_on(irq_num == -1);
+	ipa_assert(irq_num != -1);
 
 	/* make sure ipa hw is clocked on*/
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
@@ -211,7 +211,7 @@ static void ipa3_tx_suspend_interrupt_wa(void)
 
 	ipa_debug_low("Enter\n");
 	irq_num = ipa3_irq_mapping[IPA_TX_SUSPEND_IRQ];
-	ipa_bug_on(irq_num == -1);
+	ipa_assert(irq_num != -1);
 
 	/*disable TX_SUSPEND_IRQ*/
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, ipa_ee);

@@ -136,11 +136,12 @@ handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 code)
 	u32 ee = gsi_ctx->ee;
 	u32 val;
 
+	ipa_bug_on(err_ee != ee && code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
+
 	if (WARN_ON(chan_id >= gsi_ctx->max_ch)) {
 		ipa_err("unexpected chan_id %u\n", chan_id);
 		return;
 	}
-	ipa_bug_on(err_ee != ee && code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
 
 	switch (code) {
 	case GSI_INVALID_TRE_ERR:
@@ -171,7 +172,7 @@ handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 code)
 		ipa_err("unexpected channel error code %u\n", code);
 		ipa_bug();
 	}
-	ipa_bug_on(!ctx->props.chan_user_data);
+	ipa_assert(ctx->props.chan_user_data != NULL);
 }
 
 static void
@@ -180,11 +181,12 @@ handle_glob_evt_err(u32 err_ee, u32 evt_id, u32 code)
 	struct gsi_evt_ctx *ctx = &gsi_ctx->evtr[evt_id];
 	u32 ee = gsi_ctx->ee;
 
+	ipa_bug_on(err_ee != ee && code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
+
 	if (WARN_ON(evt_id >= gsi_ctx->max_ev)) {
 		ipa_err("unexpected evt_id %u\n", evt_id);
 		return;
 	}
-	ipa_bug_on(err_ee != ee && code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
 
 	switch (code) {
 	case GSI_OUT_OF_BUFFERS_ERR:
@@ -541,7 +543,7 @@ static void gsi_handle_irq(void)
 
 static irqreturn_t gsi_isr(int irq, void *ctxt)
 {
-	ipa_bug_on(ctxt != gsi_ctx);
+	ipa_assert(ctxt == gsi_ctx);
 
 	gsi_handle_irq();
 

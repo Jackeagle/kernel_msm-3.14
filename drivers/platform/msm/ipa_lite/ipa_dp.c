@@ -652,7 +652,7 @@ static void ipa3_switch_to_intr_rx_work_func(struct work_struct *work)
 	sys = container_of(dwork, struct ipa3_sys_context, switch_to_intr_work);
 
 	/* For NAPI, interrupt mode is done in ipa3_rx_poll context */
-	ipa_bug_on(sys->ep->napi_enabled);
+	ipa_assert(!sys->ep->napi_enabled);
 
 	ipa3_handle_rx(sys);
 }
@@ -1768,7 +1768,7 @@ static int ipa3_wan_rx_pyld_hdlr(struct sk_buff *skb,
 	}
 
 	/* Recycle should be enabled only with GRO aggr. (???) */
-	ipa_bug_on(sys->repl_hdlr == ipa3_replenish_rx_cache_recycle);
+	ipa_assert(sys->repl_hdlr != ipa3_replenish_rx_cache_recycle);
 
 	/*
 	 * payload splits across 2 buff or more,

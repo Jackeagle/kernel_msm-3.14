@@ -710,7 +710,7 @@ void ipa_init_ep_flt_bitmap(void)
 {
 	enum ipa_client_type cl;
 
-	ipa_bug_on(ipa3_ctx->ep_flt_bitmap);
+	ipa_assert(!ipa3_ctx->ep_flt_bitmap);
 
 	for (cl = 0; cl < IPA_CLIENT_MAX ; cl++) {
 		const struct ipa_ep_configuration *ep_config;
@@ -1051,7 +1051,7 @@ static int ipa3_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 
 	if (type != IPA_DPS_HPS_SEQ_TYPE_INVALID) {
 		if (ipa3_ctx->ep[clnt_hdl].cfg.mode.mode == IPA_DMA)
-			ipa_bug_on(!IPA_DPS_HPS_SEQ_TYPE_IS_DMA(type));
+			ipa_assert(IPA_DPS_HPS_SEQ_TYPE_IS_DMA(type));
 
 		IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
 		/* Configure sequencers type*/
@@ -2184,7 +2184,7 @@ void ipa3_suspend_apps_pipes(bool suspend)
 	cfg.ipa_ep_suspend = suspend;
 
 	ipa_ep_idx = ipa3_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
-	ipa_bug_on(ipa_ep_idx < 0);
+	ipa_assert(ipa_ep_idx >= 0);
 
 	ep = &ipa3_ctx->ep[ipa_ep_idx];
 	if (ep->valid) {

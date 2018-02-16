@@ -101,7 +101,7 @@ static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap)
 
 static u64 ipa_fltrt_create_tbl_addr(u64 addr)
 {
-	ipa_bug_on(addr % ipahal_fltrt.sysaddr_align);
+	ipa_assert(!(addr % ipahal_fltrt.sysaddr_align));
 
 	return addr;
 }
@@ -110,8 +110,8 @@ static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr)
 {
 	ipa_debug_low("Parsing hwaddr 0x%llx\n", hwaddr);
 
-	ipa_bug_on(hwaddr & 0x1);
-	ipa_bug_on(hwaddr % ipahal_fltrt.sysaddr_align);
+	ipa_assert(!(hwaddr & 0x1));
+	ipa_assert(!(hwaddr % ipahal_fltrt.sysaddr_align));
 
 	return hwaddr;
 }

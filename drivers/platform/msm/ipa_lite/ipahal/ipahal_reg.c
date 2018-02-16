@@ -846,7 +846,7 @@ u32 ipahal_reg_n_offset(enum ipahal_reg reg, u32 n)
 
 	ipa_debug_low("get offset of %s n=%u\n", ipahal_regs[reg].name, n);
 	offset = ipahal_regs[reg].offset;
-	ipa_bug_on(offset == OFFSET_INVAL);
+	ipa_assert(offset != OFFSET_INVAL);
 	offset += ipahal_regs[reg].n_ofst * n;
 
 	return offset;
@@ -930,7 +930,7 @@ u32 ipahal_aggr_get_max_pkt_limit(void)
 void ipahal_get_aggr_force_close_valmask(int ep_idx,
 	struct ipahal_reg_valmask *valmask)
 {
-	ipa_bug_on(ep_idx > (sizeof(valmask->val) * 8 - 1));
+	ipa_assert(ep_idx < sizeof(valmask->val) * 8);
 
 	valmask->val |= field_gen(1U << ep_idx, PIPE_BITMAP_BMSK_V3_5);
 	valmask->mask = PIPE_BITMAP_BMSK_V3_5;
