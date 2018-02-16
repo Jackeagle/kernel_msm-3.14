@@ -561,18 +561,10 @@ static void ipa3_q6_clnt_svc_arrive(struct work_struct *work)
 	/* Initialize modem IPA-driver */
 	ipa_debug("send ipa3_qmi_init_modem_send_sync_msg to modem\n");
 	rc = ipa3_qmi_init_modem_send_sync_msg();
-	if (rc == -ENETRESET || rc == -ENODEV) {
+	ipa_bug_on(rc && rc != -ENETRESET && rc == -ENODEV);
+	if (rc) {
 		ipa_err("qmi_init_modem_send_sync_msg failed due to SSR!\n");
 		/* Cleanup will take place when ipa3_wwan_remove is called */
-		return;
-	}
-	if (rc != 0) {
-		ipa_err("ipa3_qmi_init_modem_send_sync_msg failed\n");
-		/*
-		 * This is a very unexpected scenario, which requires a kernel
-		 * panic in order to force dumps for QMI/Q6 side analysis.
-		 */
-		ipa_bug();
 		return;
 	}
 	ipa3_qmi_modem_init_fin = true;

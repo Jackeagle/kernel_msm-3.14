@@ -152,11 +152,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 		msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
 	}
 
-	if (aggr_active_bitmap & (1 << clnt_hdl)) {
-		ipa_err("Failed closing aggr frame for client: %d\n",
-			clnt_hdl);
-		ipa_bug();
-	}
+	ipa_bug_on(aggr_active_bitmap & (1 << clnt_hdl));
 
 	ipahal_dma_free(&dma_byte);
 

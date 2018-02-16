@@ -440,8 +440,7 @@ send_cmd:
 	goto send_cmd_lock;
 out:
 	mutex_unlock(&uc_ctx->uc_lock);
-	if (ret == -EIO)
-		ipa_bug();
+	ipa_bug_on(ret == -EIO);
 
 	return ret;
 }

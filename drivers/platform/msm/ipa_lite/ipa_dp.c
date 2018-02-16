@@ -862,31 +862,18 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 	/* channel stop might fail on timeout if IPA is busy */
 	for (i = 0; i < IPA_GSI_CHANNEL_STOP_MAX_RETRY; i++) {
 		result = ipa3_stop_gsi_channel(clnt_hdl);
-		if (result != -EAGAIN && result != -ETIMEDOUT)
+		if (!result)
 			break;
+		ipa_bug_on(result != -EAGAIN && result != -ETIMEDOUT);
 	}
 
-	ipa_bug_on(result);
-
-	result = ipa3_reset_gsi_channel(clnt_hdl);
-	ipa_bug_on(result);
+	ipa_bug_on(ipa3_reset_gsi_channel(clnt_hdl) != 0);
 
 	ipahal_dma_free(&ep->gsi_chan_ring_mem);
-	result = gsi_dealloc_channel(ep->gsi_chan_hdl);
-	ipa_bug_on(result);
 
-	result = gsi_reset_evt_ring(ep->gsi_evt_ring_hdl);
-	if (result) {
-		ipa_err("Failed to reset evt ring: %d.\n", result);
-		ipa_bug();
-		return result;
-	}
-	result = gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl);
-	if (result) {
-		ipa_err("Failed to dealloc evt ring: %d.\n", result);
-		ipa_bug();
-		return result;
-	}
+	ipa_bug_on(gsi_dealloc_channel(ep->gsi_chan_hdl) != 0);
+	ipa_bug_on(gsi_reset_evt_ring(ep->gsi_evt_ring_hdl) != 0);
+	ipa_bug_on(gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl) != 0);
 
 	if (ep->sys->repl_wq)
 		flush_workqueue(ep->sys->repl_wq);
@@ -2271,11 +2258,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 
 fail_start_channel:
 fail_write_channel_scratch:
-	if (gsi_dealloc_channel(ep->gsi_chan_hdl)
-		!= 0) {
-		ipa_err("Failed to dealloc GSI chan.\n");
-		ipa_bug();
-	}
+	ipa_bug_on(gsi_dealloc_channel(ep->gsi_chan_hdl) != 0);
 fail_alloc_channel:
 	ipahal_dma_free(&gsi_channel_props.mem);
 err_evt_ring_hdl_put:

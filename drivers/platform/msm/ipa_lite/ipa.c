@@ -512,17 +512,13 @@ void ipa3_q6_pre_shutdown_cleanup(void)
 	ipa3_q6_pipe_delay(true);
 	ipa3_q6_avoid_holb();
 
-	if (ipa3_q6_clean_q6_tables()) {
-		ipa_err("Failed to clean Q6 tables\n");
-		ipa_bug();
-	}
-	if (ipa3_q6_set_ex_path_to_apps()) {
-		ipa_err("Failed to redirect exceptions to APPS\n");
-		ipa_bug();
-	}
-	/* Remove delay from Q6 PRODs to avoid pending descriptors
-	  * on pipe reset procedure
-	  */
+	ipa_bug_on(ipa3_q6_clean_q6_tables() != 0);
+	ipa_bug_on(ipa3_q6_set_ex_path_to_apps() != 0);
+
+	/*
+	 * Remove delay from Q6 PRODs to avoid pending descriptors
+	 * on pipe reset procedure
+	 */
 	ipa3_q6_pipe_delay(false);
 
 	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
@@ -560,12 +556,7 @@ void ipa3_q6_post_shutdown_cleanup(void)
 			if (ep_idx < 0)
 				continue;
 
-			if (ipa3_uc_is_gsi_channel_empty(client_idx)) {
-				ipa_err("fail to validate Q6 ch emptiness %d\n",
-					client_idx);
-				ipa_bug();
-				return;
-			}
+			ipa_bug_on(ipa3_uc_is_gsi_channel_empty(client_idx));
 		}
 
 	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();

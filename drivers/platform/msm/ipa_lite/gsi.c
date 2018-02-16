@@ -215,11 +215,9 @@ static void gsi_handle_glob_err(u32 err)
 	ipa_err("log code 0x%1x arg1 0x%1x arg2 0x%1x arg3 0x%1x\n",
 			log->code, log->arg1, log->arg2, log->arg3);
 
+	ipa_bug_on(log->err_type == GSI_ERR_TYPE_GLOB);
+
 	switch (log->err_type) {
-	case GSI_ERR_TYPE_GLOB:
-		ipa_err("got ERR_TYPE_GLOB\n");
-		ipa_bug();
-		break;
 	case GSI_ERR_TYPE_CHAN:
 		handle_glob_chan_err(log->ee, log->virt_idx, log->code);
 		break;
@@ -255,15 +253,8 @@ static void gsi_handle_glob_ee(void)
 	if (val & EN_GP_INT1_BMSK)
 		gsi_handle_gp_int1();
 
-	if (val & EN_GP_INT2_BMSK) {
-		ipa_err("got global GP INT2\n");
-		ipa_bug();
-	}
-
-	if (val & EN_GP_INT3_BMSK) {
-		ipa_err("got global GP INT3\n");
-		ipa_bug();
-	}
+	ipa_bug_on(val & EN_GP_INT2_BMSK);
+	ipa_bug_on(val & EN_GP_INT3_BMSK);
 
 	gsi_writel(val, GSI_EE_n_CNTXT_GLOB_IRQ_CLR_OFFS(ee));
 }
@@ -502,20 +493,9 @@ static void gsi_handle_general(void)
 
 	val = gsi_readl(GSI_EE_n_CNTXT_GSI_IRQ_STTS_OFFS(ee));
 
-	if (val & CLR_GSI_MCS_STACK_OVRFLOW_BMSK) {
-		ipa_err("got MCS stack overflow\n");
-		ipa_bug();
-	}
-
-	if (val & CLR_GSI_CMD_FIFO_OVRFLOW_BMSK) {
-		ipa_err("got command FIFO overflow\n");
-		ipa_bug();
-	}
-
-	if (val & CLR_GSI_BUS_ERROR_BMSK) {
-		ipa_err("got bus error\n");
-		ipa_bug();
-	}
+	ipa_bug_on(val & CLR_GSI_MCS_STACK_OVRFLOW_BMSK);
+	ipa_bug_on(val & CLR_GSI_CMD_FIFO_OVRFLOW_BMSK);
+	ipa_bug_on(val & CLR_GSI_BUS_ERROR_BMSK);
 
 	if (val & CLR_GSI_BREAK_POINT_BMSK)
 		ipa_err("got breakpoint\n");
@@ -555,8 +535,7 @@ static void gsi_handle_irq(void)
 		if (type & GENERAL_BMSK)
 			gsi_handle_general();
 
-		if (++cnt > GSI_ISR_MAX_ITER)
-			ipa_bug();
+		ipa_bug_on(++cnt > GSI_ISR_MAX_ITER);
 	}
 }
 

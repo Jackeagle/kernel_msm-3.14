@@ -1050,11 +1050,9 @@ static int ipa3_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 		type = ep_configuration(client)->sequencer_type;
 
 	if (type != IPA_DPS_HPS_SEQ_TYPE_INVALID) {
-		if (ipa3_ctx->ep[clnt_hdl].cfg.mode.mode == IPA_DMA &&
-			!IPA_DPS_HPS_SEQ_TYPE_IS_DMA(type)) {
-			ipa_err("Configuring non-DMA SEQ type to DMA pipe\n");
-			ipa_bug();
-		}
+		if (ipa3_ctx->ep[clnt_hdl].cfg.mode.mode == IPA_DMA)
+			ipa_bug_on(!IPA_DPS_HPS_SEQ_TYPE_IS_DMA(type));
+
 		IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
 		/* Configure sequencers type*/
 
