@@ -134,6 +134,10 @@ static const struct file_operations name ## _fops = {			\
 #define ADD_REG_FIELDS_RW(dir, reg)					\
 		_ADD_SEQ(dir, #reg, reg, S_IFREG|S_IRUGO|S_IWUSR, NULL)
 
+/* Statistics use a common ipa_stat_show() function and supply their address */
+#define _ADD_STAT(dir, stat, val)					\
+		_ADD_SEQ(dir, stat, ipa_stat, S_IFREG|S_IRUGO, val)
+
 static ssize_t ipa3_write_ep_holb(struct file *file,
 		const char __user *buf, size_t count, loff_t *ppos)
 {
@@ -632,6 +636,17 @@ static int shared_mem_size_show(struct seq_file *s, void *v)
 }
 DEF_SEQ_RO(shared_mem_size);
 
+/* Common file show operation for statistics */
+static int ipa_stat_show(struct seq_file *s, void *v)
+{
+	u32 *stat = s->private;
+
+	seq_printf(s, "0x%08x\n", *stat);
+
+	return 0;
+}
+DEF_SEQ_RO(ipa_stat);
+
 /*
  * "ipa/regs/pipe-XX/" is a directory containing pipe registers
  *
@@ -707,6 +722,62 @@ static bool ipa_debugfs_regs_create(struct dentry *ipa_dir)
 	return true;
 }
 
+/*
+ * "ipa/stats/" is a directory containing statistical values.
+ *
+ * Files in this directory are read-only.  Each shows a 32-bit
+ * unsigned value representing an accumulated statistic.  The
+ * address of the statistic to be shown is held in the sequential
+ * file private field.
+ */
+static bool ipa_debugfs_stats_create(struct dentry *ipa_dir)
+{
+	static struct dentry *stats_dir;
+	static struct dentry *excp_dir;
+	bool success;
+	u32 i;
+
+	stats_dir = debugfs_create_dir("stats_dir", ipa_dir);
+	if (IS_ERR(stats_dir))
+		return false;
+
+#define ADD_STAT(f)	_ADD_STAT(stats_dir, #f, &ipa3_ctx->stats.f)
+	success = ADD_STAT(tx_sw_pkts);
+	success = success && ADD_STAT(tx_hw_pkts);
+	success = success && ADD_STAT(rx_pkts);
+	success = success && ADD_STAT(rx_repl_repost);
+	success = success && ADD_STAT(tx_pkts_compl);
+	success = success && ADD_STAT(rx_q_len);
+	success = success && ADD_STAT(stat_compl);
+	success = success && ADD_STAT(aggr_close);
+	success = success && ADD_STAT(wan_aggr_close);
+	success = success && ADD_STAT(wan_rx_empty);
+	success = success && ADD_STAT(wan_repl_rx_empty);
+	success = success && ADD_STAT(lan_rx_empty);
+	success = success && ADD_STAT(lan_repl_rx_empty);
+	success = success && ADD_STAT(flow_enable);
+	success = success && ADD_STAT(flow_disable);
+	success = success && ADD_STAT(tx_non_linear);
+#undef ADD_STAT
+
+	if (!success)
+		return false;
+
+	excp_dir = debugfs_create_dir("rx_excp_pkts", stats_dir);
+	if (IS_ERR(excp_dir))
+		return false;
+
+#define ADD_STAT(i)	_ADD_STAT(excp_dir,				\
+				ipahal_pkt_status_exception_str(i),	\
+				&ipa3_ctx->stats.rx_excp_pkts[i])
+	for (i = 0; i < IPAHAL_PKT_STATUS_EXCEPTION_MAX; i++)
+		if (!ADD_STAT(i))
+			return false;
+#undef ADD_STAT
+
+	return true;
+}
+
 void ipa3_debugfs_init(void)
 {
 	static struct dentry *ipa_dir;
@@ -722,6 +793,9 @@ void ipa3_debugfs_init(void)
 		goto fail;
 
 	if (!ipa_debugfs_regs_create(ipa_dir))
+		goto fail;
+
+	if (!ipa_debugfs_stats_create(ipa_dir))
 		goto fail;
 
 	file = debugfs_create_file("active_clients",
