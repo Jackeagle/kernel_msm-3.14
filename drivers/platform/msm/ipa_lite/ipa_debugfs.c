@@ -123,34 +123,6 @@ static const struct file_operations name ## _fops = {			\
 #define ADD_REG_FIELDS_RW(dir, reg)					\
 		_ADD_SEQ(dir, #reg, reg, S_IFREG|S_IRUGO|S_IWUSR, NULL)
 
-static ssize_t ipa3_read_gen_reg(struct file *file, char __user *ubuf,
-		size_t count, loff_t *ppos)
-{
-	int nbytes;
-	struct ipahal_reg_shared_mem_size smem_sz;
-
-	memset(&smem_sz, 0, sizeof(smem_sz));
-
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
-
-	ipahal_read_reg_fields(IPA_SHARED_MEM_SIZE, &smem_sz);
-	nbytes = scnprintf(dbg_buff, IPA_MAX_MSG_LEN,
-			"IPA_VERSION=0x%x\n"
-			"IPA_COMP_HW_VERSION=0x%x\n"
-			"IPA_ROUTE=0x%x\n"
-			"IPA_SHARED_MEM_RESTRICTED=0x%x\n"
-			"IPA_SHARED_MEM_SIZE=0x%x\n",
-			ipahal_read_reg(IPA_VERSION),
-			ipahal_read_reg(IPA_COMP_HW_VERSION),
-			ipahal_read_reg(IPA_ROUTE),
-			smem_sz.shared_mem_baddr,
-			smem_sz.shared_mem_sz);
-
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
-
-	return simple_read_from_buffer(ubuf, count, ppos, dbg_buff, nbytes);
-}
-
 static ssize_t ipa3_write_ep_holb(struct file *file,
 		const char __user *buf, size_t count, loff_t *ppos)
 {
@@ -577,10 +549,6 @@ const_string_read_fop(struct file *file, char __user *buf, size_t len,
 	return simple_read_from_buffer(buf, len, ppos, string, size);
 }
 
-const struct file_operations ipa3_gen_reg_ops = {
-	.read = ipa3_read_gen_reg,
-};
-
 const struct file_operations ipa3_ep_reg_ops = {
 	.read = ipa3_read_ep_reg,
 	.write = ipa3_write_ep_reg,
@@ -769,12 +737,6 @@ void ipa3_debugfs_init(void)
 		goto fail;
 
 	if (!ipa_debugfs_regs_create(ipa_dir))
-		goto fail;
-
-	file = debugfs_create_file("gen_reg",
-			S_IRUGO, ipa_dir, 0,
-			&ipa3_gen_reg_ops);
-	if (IS_ERR_OR_NULL(file))
 		goto fail;
 
 	file = debugfs_create_file("active_clients",
