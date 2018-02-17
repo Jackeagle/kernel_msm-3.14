@@ -645,6 +645,56 @@ static const struct file_operations const_string_fops = {
 	.read = const_string_read_fop,
 };
 
+/*
+ * "ipa/ipc_low_enabled" indicates whether low-level IPC logging is enabled.
+ *
+ * Any write starting with "y" or "1" or "on" requests that IPC logging
+ * be enabled; "n" or "0" or "off" disables.  Enable requests when
+ * already enabled or disabling when disabled are silently ignored.
+ */
+static int ipc_low_enabled_show(struct seq_file *s, void *v)
+{
+	seq_printf(s, "%d\n", ipa3_ctx->logbuf_low ? 1 : 0);
+
+	return 0;
+}
+
+static ssize_t ipc_low_enabled_write(struct file *s, const char __user *buf,
+		size_t count, loff_t *ppos)
+{
+	bool enable;
+	int ret;
+
+	ret = kstrtobool_from_user(buf, count, &enable);
+	if (ret)
+		return ret;
+
+	mutex_lock(&ipa3_ctx->lock);
+
+	if (enable) {
+		if (ipa3_ctx->logbuf_low)
+			goto out_unlock;	/* already enabled */
+		ipa3_ctx->logbuf_low = ipc_log_context_create(IPA_IPC_LOG_PAGES,
+							"ipa_low", 0);
+		if (!ipa3_ctx->logbuf_low)
+			ret = -ENOMEM;
+	} else if (ipa3_ctx->logbuf_low) {
+		/*
+		 * Sadly, a bug which I gave up trying to resolve causes
+		 * ipc_log_context_destroy() to hang, at least sometimes.
+		 * Rather than fix it I'll just leak the log context, as
+		 * was done in the code I started with.
+		 */
+		/* (void)ipc_log_context_destroy(ipa3_ctx->logbuf_low); */
+		ipa3_ctx->logbuf_low = NULL;
+	}	/* else already disabled */
+out_unlock:
+	mutex_unlock(&ipa3_ctx->lock);
+
+	return ret ? ret : count;
+}
+DEF_SEQ_RW(ipc_low_enabled);
+
 void ipa3_debugfs_init(void)
 {
 	static struct dentry *ipa_dir;
@@ -652,8 +702,11 @@ void ipa3_debugfs_init(void)
 	const mode_t read_write_mode = S_IRUGO | write_only_mode;
 	struct dentry *file;
 
-	ipa_dir = debugfs_create_dir("ipa", 0);
+	ipa_dir = debugfs_create_dir("ipa", NULL);
 	if (IS_ERR(ipa_dir))
+		goto fail;
+
+	if (!ADD_SEQ_RW(ipa_dir, ipc_low_enabled))
 		goto fail;
 
 	file = debugfs_create_file("gen_reg",
