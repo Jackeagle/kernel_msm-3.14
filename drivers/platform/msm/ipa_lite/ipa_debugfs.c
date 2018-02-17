@@ -111,6 +111,12 @@ static const struct file_operations name ## _fops = {			\
 #define ADD_SEQ_RO(dir, name)	_ADD_SEQ_RO(dir, name, NULL)
 #define ADD_SEQ_RW(dir, name)	_ADD_SEQ_RW(dir, name, NULL)
 
+/* Registers use common ipa_reg_show() function and ipa_reg_write() */
+#define ADD_REG_RO(dir, reg)						\
+		_ADD_SEQ(dir, #reg, ipa_reg, S_IFREG|S_IRUGO, reg)
+#define ADD_REG_RW(dir, reg)						\
+		_ADD_SEQ(dir, #reg, ipa_reg, S_IFREG|S_IRUGO|S_IWUSR, reg)
+
 static ssize_t ipa3_read_gen_reg(struct file *file, char __user *ubuf,
 		size_t count, loff_t *ppos)
 {
@@ -655,6 +661,69 @@ out_unlock:
 }
 DEF_SEQ_RW(ipc_low_enabled);
 
+/* Common file show operation for registers */
+static int ipa_reg_show(struct seq_file *s, void *v)
+{
+	u64 reg = (u64)s->private;
+
+	ipa_bug_on(reg >= (u64)IPA_REG_MAX);
+
+	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+
+	seq_printf(s, "0x%08x\n", ipahal_read_reg((enum ipahal_reg)reg));
+
+	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+
+	return 0;
+}
+
+static ssize_t ipa_reg_write(struct file *file, const char __user *buf,
+		size_t count, loff_t *ppos)
+{
+	u64 reg = (u64)file_inode(file)->i_private;
+	u32 input;
+	int ret;
+
+	ipa_bug_on(reg >= (u32)IPA_REG_MAX);
+
+	ret = kstrtouint_from_user(buf, count, 0, &input);
+	if (ret)
+		return ret;
+
+	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+
+	ipahal_write_reg((enum ipahal_reg)reg, input);
+
+	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+
+	return count;
+}
+DEF_SEQ_RW(ipa_reg);
+
+/*
+ * "ipa/regs/" is a directory containing registers and their values.
+ *
+ * Most files in this directory are read-only.  All registers use a
+ * common sequential file show function and write file operation.
+ * The register number is recorded in private fields associated
+ * with the sequential file and (for writable files) inode.
+ */
+static bool ipa_debugfs_regs_create(struct dentry *ipa_dir)
+{
+	static struct dentry *regs_dir;
+	bool success;
+
+	regs_dir = debugfs_create_dir("regs", ipa_dir);
+	if (IS_ERR(regs_dir))
+		return false;
+
+	success = ADD_REG_RO(regs_dir, IPA_VERSION);
+	success = success && ADD_REG_RO(regs_dir, IPA_COMP_HW_VERSION);
+	success = success && ADD_REG_RO(regs_dir, IPA_ROUTE);
+
+	return success;
+}
+
 void ipa3_debugfs_init(void)
 {
 	static struct dentry *ipa_dir;
@@ -667,6 +736,9 @@ void ipa3_debugfs_init(void)
 		goto fail;
 
 	if (!ADD_SEQ_RW(ipa_dir, ipc_low_enabled))
+		goto fail;
+
+	if (!ipa_debugfs_regs_create(ipa_dir))
 		goto fail;
 
 	file = debugfs_create_file("gen_reg",
