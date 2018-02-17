@@ -117,6 +117,12 @@ static const struct file_operations name ## _fops = {			\
 #define ADD_REG_RW(dir, reg)						\
 		_ADD_SEQ(dir, #reg, ipa_reg, S_IFREG|S_IRUGO|S_IWUSR, reg)
 
+/* Registers with fields must supply their own "show" and "write functions */
+#define ADD_REG_FIELDS_RO(dir, reg)					\
+		_ADD_SEQ(dir, #reg, reg, S_IFREG|S_IRUGO, NULL)
+#define ADD_REG_FIELDS_RW(dir, reg)					\
+		_ADD_SEQ(dir, #reg, reg, S_IFREG|S_IRUGO|S_IWUSR, NULL)
+
 static ssize_t ipa3_read_gen_reg(struct file *file, char __user *ubuf,
 		size_t count, loff_t *ppos)
 {
@@ -701,6 +707,28 @@ static ssize_t ipa_reg_write(struct file *file, const char __user *buf,
 DEF_SEQ_RW(ipa_reg);
 
 /*
+ * "ipa/regs/shared_mem_size" shows the SHARED_MEM_SIZE register.
+ *
+ * This shows the values of both fields associated with this register.
+ */
+static int shared_mem_size_show(struct seq_file *s, void *v)
+{
+	struct ipahal_reg_shared_mem_size reg = { 0 };
+
+	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+
+	ipahal_read_reg_fields(IPA_SHARED_MEM_SIZE, &reg);
+
+	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+
+	seq_printf(s, "shared_mem_sz:    0x%08x\n", reg.shared_mem_sz);
+	seq_printf(s, "shared_mem_baddr: 0x%08x\n", reg.shared_mem_baddr);
+
+	return 0;
+}
+DEF_SEQ_RO(shared_mem_size);
+
+/*
  * "ipa/regs/" is a directory containing registers and their values.
  *
  * Most files in this directory are read-only.  All registers use a
@@ -720,6 +748,8 @@ static bool ipa_debugfs_regs_create(struct dentry *ipa_dir)
 	success = ADD_REG_RO(regs_dir, IPA_VERSION);
 	success = success && ADD_REG_RO(regs_dir, IPA_COMP_HW_VERSION);
 	success = success && ADD_REG_RO(regs_dir, IPA_ROUTE);
+
+	success = success && ADD_REG_FIELDS_RO(regs_dir, shared_mem_size);
 
 	return success;
 }
