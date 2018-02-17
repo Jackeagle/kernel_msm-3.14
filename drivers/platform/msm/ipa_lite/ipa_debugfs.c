@@ -31,7 +31,6 @@ static char dbg_buff[IPA_MAX_MSG_LEN];
 static char *active_clients_buf;
 
 static s8 ep_reg_idx;
-static void *ipa_ipc_low_buff;
 
 /*
  * Macros to help in defining simple sequential debugfs files.
@@ -550,41 +549,6 @@ static ssize_t ipa3_clear_active_clients_log(struct file *file,
 	return count;
 }
 
-static ssize_t ipa3_enable_ipc_low(struct file *file,
-	const char __user *ubuf, size_t count, loff_t *ppos)
-{
-	unsigned long missing;
-	s8 option = 0;
-
-	if (sizeof(dbg_buff) < count + 1)
-		return -EFAULT;
-
-	missing = copy_from_user(dbg_buff, ubuf, count);
-	if (missing)
-		return -EFAULT;
-
-	dbg_buff[count] = '\0';
-	if (kstrtos8(dbg_buff, 0, &option))
-		return -EFAULT;
-
-	mutex_lock(&ipa3_ctx->lock);
-	if (option) {
-		if (!ipa_ipc_low_buff) {
-			ipa_ipc_low_buff =
-				ipc_log_context_create(IPA_IPC_LOG_PAGES,
-					"ipa_low", 0);
-		}
-			if (ipa_ipc_low_buff == NULL)
-				ipa_err("failed to get logbuf_low\n");
-		ipa3_ctx->logbuf_low = ipa_ipc_low_buff;
-	} else {
-		ipa3_ctx->logbuf_low = NULL;
-	}
-	mutex_unlock(&ipa3_ctx->lock);
-
-	return count;
-}
-
 /*
  * File operation to implement a read for a file whose content
  * is a constant string.  Pass constant string as data parameter
@@ -635,10 +599,6 @@ const struct file_operations ipa3_status_stats_ops = {
 const struct file_operations ipa3_active_clients = {
 	.read = ipa3_print_active_clients_log,
 	.write = ipa3_clear_active_clients_log,
-};
-
-const struct file_operations ipa3_ipc_low_ops = {
-	.write = ipa3_enable_ipc_low,
 };
 
 static const struct file_operations const_string_fops = {
@@ -777,11 +737,6 @@ void ipa3_debugfs_init(void)
 		read_write_mode, ipa_dir,
 		&ipa3_ctx->ctrl->clock_scaling_bw_threshold_turbo);
 	if (!file)
-		goto fail;
-
-	file = debugfs_create_file("enable_low_prio_print", write_only_mode,
-		ipa_dir, 0, &ipa3_ipc_low_ops);
-	if (IS_ERR_OR_NULL(file))
 		goto fail;
 
 	active_clients_buf = kzalloc(IPA_DBG_ACTIVE_CLIENT_BUF_SIZE,
