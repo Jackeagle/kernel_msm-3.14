@@ -185,50 +185,6 @@ static ssize_t ipa3_write_ep_holb(struct file *file,
 	return count;
 }
 
-static ssize_t ipa3_write_keep_awake(struct file *file, const char __user *buf,
-	size_t count, loff_t *ppos)
-{
-	unsigned long missing;
-	s8 option = 0;
-
-	if (sizeof(dbg_buff) < count + 1)
-		return -EFAULT;
-
-	missing = copy_from_user(dbg_buff, buf, count);
-	if (missing)
-		return -EFAULT;
-
-	dbg_buff[count] = '\0';
-	if (kstrtos8(dbg_buff, 0, &option))
-		return -EFAULT;
-
-	if (option == 1)
-		IPA_ACTIVE_CLIENTS_INC_SIMPLE();
-	else if (option == 0)
-		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
-	else
-		return -EFAULT;
-
-	return count;
-}
-
-static ssize_t ipa3_read_keep_awake(struct file *file, char __user *ubuf,
-	size_t count, loff_t *ppos)
-{
-	int nbytes;
-
-	mutex_lock(&ipa3_ctx->ipa3_active_clients.mutex);
-	if (atomic_read(&ipa3_ctx->ipa3_active_clients.cnt))
-		nbytes = scnprintf(dbg_buff, IPA_MAX_MSG_LEN,
-				"IPA APPS power state is ON\n");
-	else
-		nbytes = scnprintf(dbg_buff, IPA_MAX_MSG_LEN,
-				"IPA APPS power state is OFF\n");
-	mutex_unlock(&ipa3_ctx->ipa3_active_clients.mutex);
-
-	return simple_read_from_buffer(ubuf, count, ppos, dbg_buff, nbytes);
-}
-
 static ssize_t ipa3_write_dbg_cnt(struct file *file, const char __user *buf,
 		size_t count, loff_t *ppos)
 {
@@ -388,11 +344,6 @@ const_string_read_fop(struct file *file, char __user *buf, size_t len,
 
 	return simple_read_from_buffer(buf, len, ppos, string, size);
 }
-
-const struct file_operations ipa3_keep_awake_ops = {
-	.read = ipa3_read_keep_awake,
-	.write = ipa3_write_keep_awake,
-};
 
 const struct file_operations ipa3_ep_holb_ops = {
 	.write = ipa3_write_ep_holb,
@@ -817,11 +768,6 @@ void ipa3_debugfs_init(void)
 
 	file = debugfs_create_file("active_clients",
 			read_write_mode, ipa_dir, 0, &ipa3_active_clients);
-	if (IS_ERR_OR_NULL(file))
-		goto fail;
-
-	file = debugfs_create_file("keep_awake", read_write_mode,
-			ipa_dir, 0, &ipa3_keep_awake_ops);
 	if (IS_ERR_OR_NULL(file))
 		goto fail;
 
