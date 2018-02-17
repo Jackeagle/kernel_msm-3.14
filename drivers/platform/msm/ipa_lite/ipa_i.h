@@ -743,7 +743,6 @@ struct ipa3_controller {
 	int (*ipa_init_rt6)(void);
 	int (*ipa_init_flt4)(void);
 	int (*ipa_init_flt6)(void);
-	int (*ipa3_read_ep_reg)(char *buff, int max_len, int pipe);
 	int (*ipa3_commit_flt)(enum ipa_ip_type ip);
 	int (*ipa3_commit_rt)(enum ipa_ip_type ip);
 	int (*ipa3_commit_hdr)(void);
@@ -1077,7 +1076,6 @@ int ipa3_active_clients_log_print_table(char *buf, int size);
 void ipa3_active_clients_log_clear(void);
 int ipa3_interrupts_init(u32 ipa_irq, u32 ee, struct device *ipa_dev);
 
-int _ipa_read_ep_reg_v3_0(char *buf, int max_len, int pipe);
 void _ipa_enable_clks_v3_0(void);
 void _ipa_disable_clks_v3_0(void);
 void ipa3_suspend_active_aggr_wa(u32 clnt_hdl);

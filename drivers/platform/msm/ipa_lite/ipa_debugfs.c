@@ -30,8 +30,6 @@
 static char dbg_buff[IPA_MAX_MSG_LEN];
 static char *active_clients_buf;
 
-static s8 ep_reg_idx;
-
 /*
  * Macros to help in defining simple sequential debugfs files.
  *
@@ -181,123 +179,6 @@ static ssize_t ipa3_write_ep_holb(struct file *file,
 	ipa3_cfg_ep_holb(ep_idx, &holb);
 
 	return count;
-}
-
-static ssize_t ipa3_write_ep_reg(struct file *file, const char __user *buf,
-		size_t count, loff_t *ppos)
-{
-	unsigned long missing;
-	s8 option = 0;
-
-	if (sizeof(dbg_buff) < count + 1)
-		return -EFAULT;
-
-	missing = copy_from_user(dbg_buff, buf, count);
-	if (missing)
-		return -EFAULT;
-
-	dbg_buff[count] = '\0';
-	if (kstrtos8(dbg_buff, 0, &option))
-		return -EFAULT;
-
-	if (option >= ipa3_ctx->ipa_num_pipes) {
-		ipa_err("bad pipe specified %u\n", option);
-		return count;
-	}
-
-	ep_reg_idx = option;
-
-	return count;
-}
-
-/**
- * _ipa_read_ep_reg_v3_0() - Reads and prints endpoint configuration registers
- *
- * Returns the number of characters printed (excluding terminating '\0').
- */
-int _ipa_read_ep_reg_v3_0(char *buf, int max_len, int pipe)
-{
-	ssize_t offset = 0;
-
-	offset += scnprintf(dbg_buff + offset, IPA_MAX_MSG_LEN - offset,
-			"IPA_ENDP_INIT_NAT_%u=0x%x\n"
-			"IPA_ENDP_INIT_HDR_%u=0x%x\n"
-			"IPA_ENDP_INIT_HDR_EXT_%u=0x%x\n"
-			"IPA_ENDP_INIT_MODE_%u=0x%x\n"
-			"IPA_ENDP_INIT_AGGR_%u=0x%x\n",
-			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_NAT_n, pipe),
-			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_HDR_n, pipe),
-			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_HDR_EXT_n, pipe),
-			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_MODE_n, pipe),
-			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_AGGR_n, pipe));
-	/*
-	 * In hardawre newer than IPA_HW_v3_5_1 the following
-	 * register will have to be formatted into the buffer
-	 * conditionally.  It will no longer be supported and we
-	 * shouldn't attempt to read it.
-	 */
-	offset += scnprintf(dbg_buff + offset, IPA_MAX_MSG_LEN - offset,
-			"IPA_ENDP_INIT_ROUTE_%u=0x%x\n",
-			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_ROUTE_n, pipe));
-	offset += scnprintf(dbg_buff + offset, IPA_MAX_MSG_LEN - offset,
-			"IPA_ENDP_INIT_CTRL_%u=0x%x\n"
-			"IPA_ENDP_INIT_HOL_EN_%u=0x%x\n"
-			"IPA_ENDP_INIT_HOL_TIMER_%u=0x%x\n"
-			"IPA_ENDP_INIT_DEAGGR_%u=0x%x\n"
-			"IPA_ENDP_INIT_CFG_%u=0x%x\n",
-			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_CTRL_n, pipe),
-			pipe,
-			ipahal_read_reg_n(IPA_ENDP_INIT_HOL_BLOCK_EN_n, pipe),
-			pipe,
-			ipahal_read_reg_n(IPA_ENDP_INIT_HOL_BLOCK_TIMER_n, pipe),
-			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_DEAGGR_n, pipe),
-			pipe, ipahal_read_reg_n(IPA_ENDP_INIT_CFG_n, pipe));
-
-	return offset;
-}
-
-static ssize_t ipa3_read_ep_reg(struct file *file, char __user *ubuf,
-		size_t count, loff_t *ppos)
-{
-	int nbytes;
-	int i;
-	int start_idx;
-	int end_idx;
-	int size = 0;
-	int ret;
-	loff_t pos;
-
-	/* negative ep_reg_idx means all registers */
-	if (ep_reg_idx < 0) {
-		start_idx = 0;
-		end_idx = ipa3_ctx->ipa_num_pipes;
-	} else {
-		start_idx = ep_reg_idx;
-		end_idx = start_idx + 1;
-	}
-	pos = *ppos;
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
-	for (i = start_idx; i < end_idx; i++) {
-
-		nbytes = ipa3_ctx->ctrl->ipa3_read_ep_reg(dbg_buff,
-				IPA_MAX_MSG_LEN, i);
-
-		*ppos = pos;
-		ret = simple_read_from_buffer(ubuf, count, ppos, dbg_buff,
-					      nbytes);
-		if (ret < 0) {
-			IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
-			return ret;
-		}
-
-		size += ret;
-		ubuf += nbytes;
-		count -= nbytes;
-	}
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
-
-	*ppos = pos + size;
-	return size;
 }
 
 static ssize_t ipa3_write_keep_awake(struct file *file, const char __user *buf,
@@ -561,11 +442,6 @@ const_string_read_fop(struct file *file, char __user *buf, size_t len,
 
 	return simple_read_from_buffer(buf, len, ppos, string, size);
 }
-
-const struct file_operations ipa3_ep_reg_ops = {
-	.read = ipa3_read_ep_reg,
-	.write = ipa3_write_ep_reg,
-};
 
 const struct file_operations ipa3_keep_awake_ops = {
 	.read = ipa3_read_keep_awake,
@@ -850,12 +726,6 @@ void ipa3_debugfs_init(void)
 
 	file = debugfs_create_file("active_clients",
 			read_write_mode, ipa_dir, 0, &ipa3_active_clients);
-	if (IS_ERR_OR_NULL(file))
-		goto fail;
-
-	file = debugfs_create_file("ep_reg",
-			read_write_mode, ipa_dir, 0,
-			&ipa3_ep_reg_ops);
 	if (IS_ERR_OR_NULL(file))
 		goto fail;
 
