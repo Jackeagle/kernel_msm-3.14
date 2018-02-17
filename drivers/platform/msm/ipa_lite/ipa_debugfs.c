@@ -117,6 +117,19 @@ static const struct file_operations name ## _fops = {			\
 #define ADD_REG_RW(dir, reg)						\
 		_ADD_SEQ(dir, #reg, ipa_reg, S_IFREG|S_IRUGO|S_IWUSR, reg)
 
+/*
+ * N-parameterized registers use common ipa_reg_n_show() and
+ * ipa_reg_n_write() functions.  The register and n value are
+ * encoded in the 64-bit value (IPA only supports 64-bit builds,
+ * so pointers are 64 bits).
+ */
+#define ADD_REG_N_RO(dir, reg, n)					\
+		_ADD_SEQ(dir, #reg, ipa_reg_n, S_IFREG|S_IRUGO,		\
+					(u64)(reg) << 32 | (u64)n)
+#define ADD_REG_N_RW(dir, reg, n)					\
+		_ADD_SEQ(dir, #reg, ipa_reg_n, S_IFREG|S_IRUGO|S_IWUSR,	\
+					(u64)(reg) << 32 | (u64)n)
+
 /* Registers with fields must supply their own "show" and "write functions */
 #define ADD_REG_FIELDS_RO(dir, reg)					\
 		_ADD_SEQ(dir, #reg, reg, S_IFREG|S_IRUGO, NULL)
@@ -675,6 +688,53 @@ static ssize_t ipa_reg_write(struct file *file, const char __user *buf,
 DEF_SEQ_RW(ipa_reg);
 
 /*
+ * Common file show operation for n-parameterized registers.  The
+ * 32-bit offset and 32-bit n value are encoded in the data argument
+ * (a pointer) by interpreting it as two consecutive 32-bit values.
+ */
+static int ipa_reg_n_show(struct seq_file *s, void *v)
+{
+	u64 val = (u64)s->private;
+	u64 reg = val >> 32;
+	u32 n = (u32)(val & GENMASK(31,0));
+
+	ipa_bug_on(reg >= (u32)IPA_REG_MAX);
+
+	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+
+	seq_printf(s, "0x%08x\n", ipahal_read_reg_n((enum ipahal_reg)reg, n));
+
+	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+
+	return 0;
+}
+
+static ssize_t ipa_reg_n_write(struct file *file, const char __user *buf,
+		size_t count, loff_t *ppos)
+{
+	u64 val = (u64)file_inode(file)->i_private;
+	u64 reg = val >> 32;
+	u32 n = (u32)(val & GENMASK(31,0));
+	u32 input;
+	int ret;
+
+	ipa_bug_on(reg >= (u32)IPA_REG_MAX);
+
+	ret = kstrtouint_from_user(buf, count, 0, &input);
+	if (ret)
+		return ret;
+
+	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+
+	ipahal_write_reg_n((enum ipahal_reg)reg, n, input);
+
+	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+
+	return count;
+}
+DEF_SEQ_RW(ipa_reg_n);
+
+/*
  * "ipa/regs/shared_mem_size" shows the SHARED_MEM_SIZE register.
  *
  * This shows the values of both fields associated with this register.
@@ -707,6 +767,7 @@ static bool ipa_debugfs_regs_pipe_create(struct dentry *regs_dir, u32 pipe)
 {
 	static struct dentry *pipe_dir;
 	char name[8];	/* supports up to 256 pipes */
+	bool success;
 
 	ipa_assert(pipe <= 0xff);
 
@@ -716,7 +777,24 @@ static bool ipa_debugfs_regs_pipe_create(struct dentry *regs_dir, u32 pipe)
 	if (IS_ERR(pipe_dir))
 		return false;
 
-	return true;
+	success = ADD_REG_N_RO(pipe_dir, IPA_ENDP_INIT_NAT_n, pipe);
+	success = success && ADD_REG_N_RO(pipe_dir, IPA_ENDP_INIT_HDR_n, pipe);
+	success = success && ADD_REG_N_RO(pipe_dir,
+					IPA_ENDP_INIT_HDR_EXT_n, pipe);
+	success = success && ADD_REG_N_RO(pipe_dir, IPA_ENDP_INIT_MODE_n, pipe);
+	success = success && ADD_REG_N_RO(pipe_dir, IPA_ENDP_INIT_AGGR_n, pipe);
+	/* ENDP_INIT_ROUTE_n won't exist after IPA v3.5.1 */
+	success = success && ADD_REG_N_RO(pipe_dir, IPA_ENDP_INIT_ROUTE_n, pipe);
+	success = success && ADD_REG_N_RO(pipe_dir, IPA_ENDP_INIT_CTRL_n, pipe);
+	success = success && ADD_REG_N_RO(pipe_dir,
+					IPA_ENDP_INIT_HOL_BLOCK_EN_n, pipe);
+	success = success && ADD_REG_N_RO(pipe_dir,
+					IPA_ENDP_INIT_HOL_BLOCK_TIMER_n, pipe);
+	success = success && ADD_REG_N_RO(pipe_dir,
+					IPA_ENDP_INIT_DEAGGR_n, pipe);
+	success = success && ADD_REG_N_RO(pipe_dir, IPA_ENDP_INIT_CFG_n, pipe);
+
+	return success;
 }
 
 /*
