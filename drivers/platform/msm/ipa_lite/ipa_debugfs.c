@@ -726,6 +726,119 @@ static ssize_t active_count_write(struct file *file,
 DEF_SEQ_RW(active_count);
 
 /*
+ * "ipa/clients/log" shows the log of recent IPA client.
+ *
+ * The active clients log is an array of formatted string pointers
+ * treated as a circular buffer.  When we show it we show the oldest
+ * entry, then the next oldest, and so on until the most recent
+ * entry in the array has been shown.  The iterator value returned
+ * is an index cast as a pointer; we add 1 to avoid index 0 being
+ * represented as a null pointer.  Index value 1 represents the
+ * first logged entry (which is determined by the log tail).
+ */
+static void *clients_log_start(struct seq_file *s, loff_t *pos)
+{
+	struct ipa3_active_clients_log_ctx *log;
+	unsigned long flags;
+	uintptr_t log_tail;
+	u32 log_size;
+
+	log = &ipa3_ctx->ipa3_active_clients_logging;
+	log_size = ARRAY_SIZE(log->log_buffer);
+
+	/* Limit output to the currently used entries in the log */
+	spin_lock_irqsave(&log->lock, flags);
+	log_tail = log->log_tail;
+	log_size = (log_size + log->log_head - (log_tail + 1)) % log_size;
+	spin_unlock_irqrestore(&log->lock, flags);
+
+	if (*pos >= log_size)
+		return NULL;
+
+	s->private = (void *)log_tail;
+
+	return (void *)(*pos + 1);
+}
+
+static void *clients_log_next(struct seq_file *s, void *v, loff_t *pos)
+{
+	struct ipa3_active_clients_log_ctx *log;
+	unsigned long flags;
+	uintptr_t log_tail;
+	u32 log_size;
+
+	log = &ipa3_ctx->ipa3_active_clients_logging;
+	log_size = ARRAY_SIZE(log->log_buffer);
+
+	/* Make sure tail hasn't moved, and compute number of used slots */
+	spin_lock_irqsave(&log->lock, flags);
+	log_tail = log->log_tail;
+	log_size = (log_size + log->log_head - (log_tail + 1)) % log_size;
+	spin_unlock_irqrestore(&log->lock, flags);
+
+	if (s->private != (void *)log_tail) {
+		ipa_info("active client log has changed (try again)\n");
+		return NULL;
+	}
+
+	if ((uintptr_t)v < log_size)
+		return (void *)(++*pos + 1);
+
+	return NULL;
+}
+
+static void clients_log_stop(struct seq_file *s, void *v)
+{
+	/* Nothing to do */
+}
+
+static int clients_log_show(struct seq_file *s, void *v)
+{
+	struct ipa3_active_clients_log_ctx *log;
+	unsigned long flags;
+	uintptr_t index = (uintptr_t)v;	/* index provided starts at 1 */
+	u32 lines;
+
+	log = &ipa3_ctx->ipa3_active_clients_logging;
+	lines = ARRAY_SIZE(log->log_buffer);
+
+	if (index > lines)
+		return -EINVAL;
+
+	/*
+	 * Convert index to the position in the circular log, then
+	 * show that slot in the log.
+	 */
+	spin_lock_irqsave(&log->lock, flags);
+	index = (log->log_tail + index) % lines;
+	if (log->log_buffer[index])
+		seq_printf(s, "%s\n", log->log_buffer[index]);
+	spin_unlock_irqrestore(&log->lock, flags);
+
+	return 0;
+}
+
+static const struct seq_operations clients_log_seq_ops = {
+	.start	= clients_log_start,
+	.next	= clients_log_next,
+	.stop	= clients_log_stop,
+	.show	= clients_log_show,
+};
+
+static int clients_log_open(struct inode *inode, struct file *file)
+{
+	return seq_open(file, &clients_log_seq_ops);
+}
+
+static const struct file_operations clients_log_fops = {
+	.owner		= THIS_MODULE,
+	.open		= clients_log_open,
+	.read		= seq_read,
+	.llseek		= seq_lseek,
+	.release	= seq_release,
+};
+
+/*
  * "ipa/clients/" contains files related to the current and
  * recently-active IPA clients.
  */
@@ -740,7 +853,12 @@ static bool ipa_debugfs_clients_create(struct dentry *ipa_dir)
 	if (!ADD_SEQ_RW(clients_dir, active_count))
 		return false;
 
-	return true;
+	/* There's no log to show if the log buffer array has no entries */
+	if (!ARRAY_SIZE(ipa3_ctx->ipa3_active_clients_logging.log_buffer))
+		return true;
+
+	return debugfs_create_file("log", S_IFREG|S_IRUGO, clients_dir,
+					NULL, &clients_log_fops);
 }
 
 void ipa3_debugfs_init(void)
