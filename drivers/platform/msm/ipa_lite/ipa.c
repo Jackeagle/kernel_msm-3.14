@@ -53,11 +53,6 @@
 
 #define IPA_ACTIVE_CLIENTS_TABLE_BUF_SIZE 2048
 
-#define IPA3_ACTIVE_CLIENT_LOG_TYPE_EP 0
-#define IPA3_ACTIVE_CLIENT_LOG_TYPE_SIMPLE 1
-#define IPA3_ACTIVE_CLIENT_LOG_TYPE_RESOURCE 2
-#define IPA3_ACTIVE_CLIENT_LOG_TYPE_SPECIAL 3
-
 #define IPA_SMEM_SIZE (8 * 1024)
 
 static int ipa3_q6_clean_q6_tables(void);
@@ -78,11 +73,11 @@ static const char *
 active_client_type_string(enum ipa_active_client_log_type type)
 {
 	switch (type) {
-	case IPA3_ACTIVE_CLIENT_LOG_TYPE_EP:		return "ENDPOINT";
-	case IPA3_ACTIVE_CLIENT_LOG_TYPE_SIMPLE:	return "SIMPLE";
-	case IPA3_ACTIVE_CLIENT_LOG_TYPE_RESOURCE:	return "RESOURCE";
-	case IPA3_ACTIVE_CLIENT_LOG_TYPE_SPECIAL:	return "ENDPOINT";
-	default:					return NULL;
+	case EP:	return "ENDPOINT";
+	case SIMPLE:	return "SIMPLE";
+	case RESOURCE:	return "RESOURCE";
+	case SPECIAL:	return "ENDPOINT";
+	default:	return NULL;
 	}
 }
 
