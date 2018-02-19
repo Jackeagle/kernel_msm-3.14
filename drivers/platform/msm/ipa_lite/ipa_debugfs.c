@@ -304,28 +304,6 @@ static ssize_t ipa3_print_active_clients_log(struct file *file,
 			active_clients_buf, table_size);
 }
 
-static ssize_t ipa3_clear_active_clients_log(struct file *file,
-		const char __user *ubuf, size_t count, loff_t *ppos)
-{
-	unsigned long missing;
-		s8 option = 0;
-
-	if (sizeof(dbg_buff) < count + 1)
-		return -EFAULT;
-
-	missing = copy_from_user(dbg_buff, ubuf, count);
-	if (missing)
-		return -EFAULT;
-
-	dbg_buff[count] = '\0';
-	if (kstrtos8(dbg_buff, 0, &option))
-		return -EFAULT;
-
-	ipa3_active_clients_log_clear();
-
-	return count;
-}
-
 /*
  * File operation to implement a read for a file whose content
  * is a constant string.  Pass constant string as data parameter
@@ -357,7 +335,6 @@ const struct file_operations ipa3_status_stats_ops = {
 
 const struct file_operations ipa3_active_clients = {
 	.read = ipa3_print_active_clients_log,
-	.write = ipa3_clear_active_clients_log,
 };
 
 static const struct file_operations const_string_fops = {
@@ -903,8 +880,8 @@ void ipa3_debugfs_init(void)
 	if (!ipa_debugfs_clients_create(ipa_dir))
 		goto fail;
 
-	file = debugfs_create_file("active_clients",
-			read_write_mode, ipa_dir, 0, &ipa3_active_clients);
+	file = debugfs_create_file("active_clients", S_IFREG|S_IRUGO,
+			ipa_dir, 0, &ipa3_active_clients);
 	if (IS_ERR_OR_NULL(file))
 		goto fail;
 

@@ -197,18 +197,6 @@ bail:
 	return -ENOMEM;
 }
 
-void ipa3_active_clients_log_clear(void)
-{
-	unsigned long flags;
-
-	spin_lock_irqsave(&ipa3_ctx->ipa3_active_clients_logging.lock, flags);
-	ipa3_ctx->ipa3_active_clients_logging.log_head = 0;
-	ipa3_ctx->ipa3_active_clients_logging.log_tail =
-			IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES - 1;
-	spin_unlock_irqrestore(&ipa3_ctx->ipa3_active_clients_logging.lock,
-		flags);
-}
-
 static void ipa3_active_clients_log_destroy(void)
 {
 	kfree(ipa3_ctx->active_clients_table_buf);

@@ -1072,7 +1072,6 @@ void ipa3_dec_client_disable_clks(struct ipa_active_client_logging_info *id);
 void ipa3_dec_client_disable_clks_no_block(
 	struct ipa_active_client_logging_info *id);
 int ipa3_active_clients_log_print_table(char *buf, int size);
-void ipa3_active_clients_log_clear(void);
 int ipa3_interrupts_init(u32 ipa_irq, u32 ee, struct device *ipa_dev);
 
 void _ipa_enable_clks_v3_0(void);
