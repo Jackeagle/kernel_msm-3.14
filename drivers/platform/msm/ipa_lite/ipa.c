@@ -139,8 +139,8 @@ static struct notifier_block ipa3_active_clients_panic_blk = {
 static int ipa3_active_clients_log_insert(const char *string)
 {
 	struct ipa3_active_clients_log_ctx *log;
+	size_t count = ARRAY_SIZE(log->log_buffer);
 	int head;
-	int tail;
 
 	log = &ipa3_ctx->ipa3_active_clients_logging;
 
@@ -148,17 +148,15 @@ static int ipa3_active_clients_log_insert(const char *string)
 		return -EPERM;
 
 	head = log->log_head;
-	tail = log->log_tail;
 
 	memset(log->log_buffer[head], '_', IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN);
 	strlcpy(log->log_buffer[head], string,
 			(size_t)IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN);
-	head = (head + 1) % IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES;
-	if (tail == head)
-		tail = (tail + 1) % IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES;
 
-	log->log_tail = tail;
-	log->log_head = head;
+	/* Consume this entry.  If hit the end, drop the oldest */
+	log->log_head = (head + 1) % count;
+	if (log->log_head == log->log_tail)
+		log->log_tail = (log->log_tail + 1) % count;
 
 	return 0;
 }
