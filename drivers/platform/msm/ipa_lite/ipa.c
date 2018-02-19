@@ -74,47 +74,45 @@ static DECLARE_WORK(ipa_dec_clients_disable_clks_on_wq_work,
 static struct ipa3_context ipa3_ctx_struct;
 struct ipa3_context *ipa3_ctx = &ipa3_ctx_struct;
 
+static const char *
+active_client_type_string(enum ipa_active_client_log_type type)
+{
+	switch (type) {
+	case IPA3_ACTIVE_CLIENT_LOG_TYPE_EP:		return "ENDPOINT";
+	case IPA3_ACTIVE_CLIENT_LOG_TYPE_SIMPLE:	return "SIMPLE";
+	case IPA3_ACTIVE_CLIENT_LOG_TYPE_RESOURCE:	return "RESOURCE";
+	case IPA3_ACTIVE_CLIENT_LOG_TYPE_SPECIAL:	return "ENDPOINT";
+	default:					return NULL;
+	}
+}
+
 int ipa3_active_clients_log_print_table(char *buf, int size)
 {
 	struct ipa3_active_clients_log_ctx *log;
 	struct ipa_active_client *entry;
-	int cnt = 0;
 	unsigned long flags;
+	int cnt;
 
 	log = &ipa3_ctx->ipa3_active_clients_logging;
 
 	spin_lock_irqsave(&log->lock, flags);
+
 	cnt = scnprintf(buf, size, "\n---- Active Clients Table ----\n");
 	list_for_each_entry(entry, &log->active, links) {
-		switch (entry->type) {
-		case IPA3_ACTIVE_CLIENT_LOG_TYPE_EP:
-			cnt += scnprintf(buf + cnt, size - cnt,
-					"%-40s %-3d ENDPOINT\n",
-					entry->id_string, entry->count);
-			break;
-		case IPA3_ACTIVE_CLIENT_LOG_TYPE_SIMPLE:
-			cnt += scnprintf(buf + cnt, size - cnt,
-					"%-40s %-3d SIMPLE\n",
-					entry->id_string, entry->count);
-			break;
-		case IPA3_ACTIVE_CLIENT_LOG_TYPE_RESOURCE:
-			cnt += scnprintf(buf + cnt, size - cnt,
-					"%-40s %-3d RESOURCE\n",
-					entry->id_string, entry->count);
-			break;
-		case IPA3_ACTIVE_CLIENT_LOG_TYPE_SPECIAL:
-			cnt += scnprintf(buf + cnt, size - cnt,
-					"%-40s %-3d SPECIAL\n",
-					entry->id_string, entry->count);
-			break;
-		default:
-			ipa_err("Trying to print illegal active_clients type");
-			break;
+		const char *type = active_client_type_string(entry->type);
+
+		if (!type) {
+			ipa_err("(unrecognized type %u)\n", (u32)entry->type);
+			continue;
 		}
+
+		cnt += scnprintf(buf + cnt, size - cnt, "%-40s %-3d %s\n",
+				entry->id_string, entry->count, type);
 	}
 	cnt += scnprintf(buf + cnt, size - cnt,
 			"\nTotal active clients count: %d\n",
 			atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
+
 	spin_unlock_irqrestore(&log->lock, flags);
 
 	return cnt;
