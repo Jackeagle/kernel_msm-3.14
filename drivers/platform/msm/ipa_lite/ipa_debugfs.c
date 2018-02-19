@@ -288,7 +288,6 @@ static ssize_t ipa_status_stats_read(struct file *file, char __user *ubuf,
 static ssize_t ipa3_print_active_clients_log(struct file *file,
 		char __user *ubuf, size_t count, loff_t *ppos)
 {
-	int cnt;
 	int table_size;
 
 	if (active_clients_buf == NULL) {
@@ -297,14 +296,12 @@ static ssize_t ipa3_print_active_clients_log(struct file *file,
 	}
 	memset(active_clients_buf, 0, IPA_DBG_ACTIVE_CLIENT_BUF_SIZE);
 	mutex_lock(&ipa3_ctx->ipa3_active_clients.mutex);
-	cnt = ipa3_active_clients_log_print_buffer(active_clients_buf,
-			IPA_DBG_ACTIVE_CLIENT_BUF_SIZE - IPA_MAX_MSG_LEN);
-	table_size = ipa3_active_clients_log_print_table(active_clients_buf
-			+ cnt, IPA_MAX_MSG_LEN);
+	table_size = ipa3_active_clients_log_print_table(active_clients_buf,
+			IPA_MAX_MSG_LEN);
 	mutex_unlock(&ipa3_ctx->ipa3_active_clients.mutex);
 
 	return simple_read_from_buffer(ubuf, count, ppos,
-			active_clients_buf, cnt + table_size);
+			active_clients_buf, table_size);
 }
 
 static ssize_t ipa3_clear_active_clients_log(struct file *file,

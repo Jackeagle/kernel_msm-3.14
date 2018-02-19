@@ -76,32 +76,6 @@ static DECLARE_WORK(ipa_dec_clients_disable_clks_on_wq_work,
 static struct ipa3_context ipa3_ctx_struct;
 struct ipa3_context *ipa3_ctx = &ipa3_ctx_struct;
 
-int ipa3_active_clients_log_print_buffer(char *buf, int size)
-{
-	int i;
-	int nbytes;
-	int cnt = 0;
-	int start_idx;
-	int end_idx;
-	unsigned long flags;
-
-	spin_lock_irqsave(&ipa3_ctx->ipa3_active_clients_logging.lock, flags);
-	start_idx = (ipa3_ctx->ipa3_active_clients_logging.log_tail + 1) %
-			IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES;
-	end_idx = ipa3_ctx->ipa3_active_clients_logging.log_head;
-	for (i = start_idx; i != end_idx;
-		i = (i + 1) % IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES) {
-		nbytes = scnprintf(buf + cnt, size - cnt, "%s\n",
-				ipa3_ctx->ipa3_active_clients_logging
-				.log_buffer[i]);
-		cnt += nbytes;
-	}
-	spin_unlock_irqrestore(&ipa3_ctx->ipa3_active_clients_logging.lock,
-		flags);
-
-	return cnt;
-}
-
 int ipa3_active_clients_log_print_table(char *buf, int size)
 {
 	int i;
