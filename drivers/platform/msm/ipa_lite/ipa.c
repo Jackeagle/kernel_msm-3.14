@@ -188,6 +188,7 @@ static int ipa3_active_clients_log_init(void)
 	}
 	log->log_head = 0;
 	log->log_tail = IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES - 1;
+	INIT_LIST_HEAD(&log->active);
 	hash_init(log->htable);
 	atomic_notifier_chain_register(&panic_notifier_list,
 			&ipa3_active_clients_panic_blk);
@@ -1161,7 +1162,9 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 		INIT_HLIST_NODE(&hentry->list);
 		hentry->count = inc ? 1 : -1;
 		hash_add(log->htable, &hentry->list, hkey);
+		list_add_tail(&hentry->links, &log->active);
 	} else if (hfound->count == 0) {
+		list_del(&hfound->links);
 		hash_del(&hfound->list);
 		kfree(hfound);
 	}

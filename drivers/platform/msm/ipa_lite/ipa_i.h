@@ -165,6 +165,7 @@ struct ipa_sys_connect_params {
 };
 
 struct ipa3_active_client_htable_entry {
+	struct list_head links;
 	struct hlist_node list;
 	char id_string[IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN];
 	int count;
@@ -177,6 +178,7 @@ struct ipa3_active_clients_log_ctx {
 	int log_head;
 	int log_tail;
 	bool log_rdy;
+	struct list_head active;
 	struct hlist_head htable[IPA3_ACTIVE_CLIENTS_LOG_HASHTABLE_SIZE];
 };
 
