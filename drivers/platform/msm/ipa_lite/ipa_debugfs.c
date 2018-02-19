@@ -716,6 +716,82 @@ static bool ipa_debugfs_stats_create(struct dentry *ipa_dir)
 	return true;
 }
 
+/*
+ * "ipa/clients/active_count" shows the current active client
+ * count.  If it is non-zero the IPA clock will remain active.
+ *
+ * The count can be incremented or decremented by writing a "+" or "-"
+ * to this file.  Only the first character written is significant; all
+ * characters past the first are ignored, and any other first character
+ * value has no effect (and returns -EINVAL).
+ *
+ * Attempts to decrement the clock below zero (or above INT_MAX) are
+ * also treated as errors and ignored.  The number of increments and
+ * decrements made via this interface are tracked. the net effect
+ * on the count cannot be negative.  In other words, the number of
+ * decrements made this way cannot exceed the number of increments.
+ */
+static u32 sysfs_count;	/* Net changes via this interface */
+static int active_count_show(struct seq_file *s, void *v)
+{
+	int active = atomic_read(&ipa3_ctx->ipa3_active_clients.cnt);
+
+	seq_printf(s, "%d (including %u via sysfs)\n", active, sysfs_count);
+
+	return 0;
+}
+
+static ssize_t active_count_write(struct file *file,
+		const char __user *buf, size_t count, loff_t *ppos)
+{
+	int active;
+	char byte;
+	bool increment;
+
+	if (get_user(byte, buf))
+		return -EFAULT;
+
+	if (byte != '+' && byte != '-')
+		return -EINVAL;
+	increment = byte == '+';
+
+	/* We could race, but this is an informal interface */
+	active = atomic_read(&ipa3_ctx->ipa3_active_clients.cnt);
+	if (increment && (sysfs_count == U32_MAX || active == INT_MAX))
+		return -ERANGE;
+	else if (!increment && (!sysfs_count || !active))
+		return -EPERM;
+
+	if (increment) {
+		sysfs_count++;
+		IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	} else {
+		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+		--sysfs_count;
+	}
+
+	return count;
+}
+DEF_SEQ_RW(active_count);
+
+/*
+ * "ipa/clients/" contains files related to the current and
+ * recently-active IPA clients.
+ */
+static bool ipa_debugfs_clients_create(struct dentry *ipa_dir)
+{
+	static struct dentry *clients_dir;
+
+	clients_dir = debugfs_create_dir("clients", ipa_dir);
+	if (IS_ERR(clients_dir))
+		return false;
+
+	if (!ADD_SEQ_RW(clients_dir, active_count))
+		return false;
+
+	return true;
+}
+
 void ipa3_debugfs_init(void)
 {
 	static struct dentry *ipa_dir;
@@ -734,6 +810,9 @@ void ipa3_debugfs_init(void)
 		goto fail;
 
 	if (!ipa_debugfs_stats_create(ipa_dir))
+		goto fail;
+
+	if (!ipa_debugfs_clients_create(ipa_dir))
 		goto fail;
 
 	file = debugfs_create_file("active_clients",
