@@ -136,10 +136,14 @@ static struct notifier_block ipa3_active_clients_panic_blk = {
 	.notifier_call	= ipa3_active_clients_panic_notifier,
 };
 
-static int ipa3_active_clients_log_insert(const char *string)
+static int
+ipa3_active_clients_log_insert(struct ipa_active_client_logging_info *id,
+		bool inc)
 {
 	struct ipa3_active_clients_log_ctx *log;
 	size_t count = ARRAY_SIZE(log->log_buffer);
+	unsigned long long t;
+	unsigned long nsec;
 	int head;
 
 	log = &ipa3_ctx->ipa3_active_clients_logging;
@@ -149,9 +153,14 @@ static int ipa3_active_clients_log_insert(const char *string)
 
 	head = log->log_head;
 
+	t = local_clock();	/* for seconds */
+	nsec = t % 1000000000;	/* nanoseconds */
+
 	memset(log->log_buffer[head], '_', IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN);
-	strlcpy(log->log_buffer[head], string,
-			(size_t)IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN);
+	(void)snprintf(log->log_buffer[head], IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN,
+			"[%5llu.%06lu] %c %s, %s: %d",
+			t / 1000000000, nsec / 1000, inc ? '^' : 'v',
+			id->id_string, id->file, id->line);
 
 	/* Consume this entry.  If hit the end, drop the oldest */
 	log->log_head = (head + 1) % count;
@@ -1120,9 +1129,6 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 	struct ipa3_active_clients_log_ctx *log;
 	struct ipa_active_client *entry;
 	struct ipa_active_client *found;
-	char temp_str[IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN];
-	unsigned long long t;
-	unsigned long nanosec_rem;
 	unsigned long flags;
 
 	log = &ipa3_ctx->ipa3_active_clients_logging;
@@ -1155,16 +1161,9 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 		kfree(found);
 	}
 
-	if (id->type != SIMPLE) {
-		t = local_clock();
-		nanosec_rem = t % 1000000000;	/* nanoseconds */
-		t /= 1000000000;		/* whole seconds */
-		snprintf(temp_str, IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN,
-				"[%5llu.%06lu] %c %s, %s: %d",
-				t, nanosec_rem / 1000, inc ? '^' : 'v',
-				id->id_string, id->file, id->line);
-		ipa3_active_clients_log_insert(temp_str);
-	}
+	if (id->type != SIMPLE)
+		ipa3_active_clients_log_insert(id, inc);
+
 	spin_unlock_irqrestore(&log->lock, flags);
 }
 
