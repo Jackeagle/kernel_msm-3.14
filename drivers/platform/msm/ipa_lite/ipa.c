@@ -35,8 +35,6 @@
 #include <linux/netdevice.h>
 #include <linux/delay.h>
 #include <linux/time.h>
-#include <linux/hashtable.h>
-#include <linux/jhash.h>
 #include <soc/qcom/subsystem_restart.h>
 #include <soc/qcom/smem.h>
 #include <soc/qcom/scm.h>
@@ -188,7 +186,6 @@ static int ipa3_active_clients_log_init(void)
 	log->log_head = 0;
 	log->log_tail = IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES - 1;
 	INIT_LIST_HEAD(&log->active);
-	hash_init(log->htable);
 	atomic_notifier_chain_register(&panic_notifier_list,
 			&ipa3_active_clients_panic_blk);
 	log->log_rdy = 1;
@@ -1128,8 +1125,6 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 	unsigned long long t;
 	unsigned long nanosec_rem;
 	struct ipa3_active_client_htable_entry *hfound;
-	u32 hkey;
-	char str_to_hash[IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN];
 	unsigned long flags;
 
 	log = &ipa3_ctx->ipa3_active_clients_logging;
@@ -1137,10 +1132,6 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 	spin_lock_irqsave(&log->lock, flags);
 	int_ctx = true;
 	hfound = NULL;
-	memset(str_to_hash, 0, IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN);
-	strlcpy(str_to_hash, id->id_string, IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN);
-	hkey = jhash(str_to_hash, IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN,
-			0);
 	list_for_each_entry(entry, &log->active, links) {
 		if (!strcmp(entry->id_string, id->id_string)) {
 			entry->count = entry->count + (inc ? 1 : -1);
@@ -1158,13 +1149,10 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 		entry->type = id->type;
 		strlcpy(entry->id_string, id->id_string,
 				IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN);
-		INIT_HLIST_NODE(&entry->list);
 		entry->count = inc ? 1 : -1;
-		hash_add(log->htable, &entry->list, hkey);
 		list_add_tail(&entry->links, &log->active);
 	} else if (hfound->count == 0) {
 		list_del(&hfound->links);
-		hash_del(&hfound->list);
 		kfree(hfound);
 	}
 

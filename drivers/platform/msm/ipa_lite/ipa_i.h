@@ -103,7 +103,6 @@
 
 #define IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES 120
 #define IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN 96
-#define IPA3_ACTIVE_CLIENTS_LOG_HASHTABLE_SIZE 50
 #define IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN 40
 #define FEATURE_ENUM_VAL(feature, opcode) ((feature << 5) | opcode)
 #define IPA_HW_NUM_FEATURES 0x8
@@ -166,7 +165,6 @@ struct ipa_sys_connect_params {
 
 struct ipa3_active_client_htable_entry {
 	struct list_head links;
-	struct hlist_node list;
 	char id_string[IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN];
 	int count;
 	enum ipa_active_client_log_type type;
@@ -179,7 +177,6 @@ struct ipa3_active_clients_log_ctx {
 	int log_tail;
 	bool log_rdy;
 	struct list_head active;
-	struct hlist_head htable[IPA3_ACTIVE_CLIENTS_LOG_HASHTABLE_SIZE];
 };
 
 struct ipa_smmu_cb_ctx {
