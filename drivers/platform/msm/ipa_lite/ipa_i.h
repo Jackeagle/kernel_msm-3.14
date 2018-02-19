@@ -103,7 +103,6 @@
 
 #define IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES 120
 #define IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN 96
-#define IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN 40
 #define FEATURE_ENUM_VAL(feature, opcode) ((feature << 5) | opcode)
 #define IPA_HW_NUM_FEATURES 0x8
 #define IPA_WAN_MSG_IPv6_ADDR_GW_LEN 4
@@ -165,9 +164,9 @@ struct ipa_sys_connect_params {
 
 struct ipa_active_client {
 	struct list_head links;
-	char id_string[IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN];
 	int count;
 	enum ipa_active_client_log_type type;
+	char id_string[];
 };
 
 struct ipa3_active_clients_log_ctx {

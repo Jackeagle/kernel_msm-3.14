@@ -1139,16 +1139,17 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 		}
 	}
 	if (found == NULL) {
-		entry = kzalloc(sizeof(*entry),
+		size_t id_size = strlen(id->id_string) + 1;
+
+		entry = kzalloc(sizeof(*entry) + id_size,
 				int_ctx ? GFP_ATOMIC : GFP_KERNEL);
-		if (entry == NULL) {
+		if (!entry) {
 			ipa_err("failed allocating active clients hash entry");
 			spin_unlock_irqrestore(&log->lock, flags);
 			return;
 		}
 		entry->type = id->type;
-		strlcpy(entry->id_string, id->id_string,
-				IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN);
+		memcpy(entry->id_string, id->id_string, id_size);
 		entry->count = inc ? 1 : -1;
 		list_add_tail(&entry->links, &log->active);
 	} else if (found->count == 0) {
