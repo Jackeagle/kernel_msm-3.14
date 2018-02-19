@@ -156,7 +156,6 @@ ipa3_active_clients_log_insert(struct ipa_active_client_logging_info *id,
 	t = local_clock();	/* for seconds */
 	nsec = t % 1000000000;	/* nanoseconds */
 
-	memset(log->log_buffer[head], '_', IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN);
 	(void)snprintf(log->log_buffer[head], IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN,
 			"[%5llu.%06lu] %c %s, %s: %d",
 			t / 1000000000, nsec / 1000, inc ? '^' : 'v',
