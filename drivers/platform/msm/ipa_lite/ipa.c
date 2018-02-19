@@ -79,8 +79,7 @@ struct ipa3_context *ipa3_ctx = &ipa3_ctx_struct;
 int ipa3_active_clients_log_print_table(char *buf, int size)
 {
 	struct ipa3_active_clients_log_ctx *log;
-	int i;
-	struct ipa3_active_client_htable_entry *iterator;
+	struct ipa3_active_client_htable_entry *entry;
 	int cnt = 0;
 	unsigned long flags;
 
@@ -88,27 +87,27 @@ int ipa3_active_clients_log_print_table(char *buf, int size)
 
 	spin_lock_irqsave(&log->lock, flags);
 	cnt = scnprintf(buf, size, "\n---- Active Clients Table ----\n");
-	hash_for_each(log->htable, i, iterator, list) {
-		switch (iterator->type) {
+	list_for_each_entry(entry, &log->active, links) {
+		switch (entry->type) {
 		case IPA3_ACTIVE_CLIENT_LOG_TYPE_EP:
 			cnt += scnprintf(buf + cnt, size - cnt,
 					"%-40s %-3d ENDPOINT\n",
-					iterator->id_string, iterator->count);
+					entry->id_string, entry->count);
 			break;
 		case IPA3_ACTIVE_CLIENT_LOG_TYPE_SIMPLE:
 			cnt += scnprintf(buf + cnt, size - cnt,
 					"%-40s %-3d SIMPLE\n",
-					iterator->id_string, iterator->count);
+					entry->id_string, entry->count);
 			break;
 		case IPA3_ACTIVE_CLIENT_LOG_TYPE_RESOURCE:
 			cnt += scnprintf(buf + cnt, size - cnt,
 					"%-40s %-3d RESOURCE\n",
-					iterator->id_string, iterator->count);
+					entry->id_string, entry->count);
 			break;
 		case IPA3_ACTIVE_CLIENT_LOG_TYPE_SPECIAL:
 			cnt += scnprintf(buf + cnt, size - cnt,
 					"%-40s %-3d SPECIAL\n",
-					iterator->id_string, iterator->count);
+					entry->id_string, entry->count);
 			break;
 		default:
 			ipa_err("Trying to print illegal active_clients type");
@@ -1124,10 +1123,10 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 		bool inc, bool int_ctx)
 {
 	struct ipa3_active_clients_log_ctx *log;
+	struct ipa3_active_client_htable_entry *entry;
 	char temp_str[IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN];
 	unsigned long long t;
 	unsigned long nanosec_rem;
-	struct ipa3_active_client_htable_entry *hentry;
 	struct ipa3_active_client_htable_entry *hfound;
 	u32 hkey;
 	char str_to_hash[IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN];
@@ -1142,27 +1141,27 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 	strlcpy(str_to_hash, id->id_string, IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN);
 	hkey = jhash(str_to_hash, IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN,
 			0);
-	hash_for_each_possible(log->htable, hentry, list, hkey) {
-		if (!strcmp(hentry->id_string, id->id_string)) {
-			hentry->count = hentry->count + (inc ? 1 : -1);
-			hfound = hentry;
+	list_for_each_entry(entry, &log->active, links) {
+		if (!strcmp(entry->id_string, id->id_string)) {
+			entry->count = entry->count + (inc ? 1 : -1);
+			hfound = entry;
 		}
 	}
 	if (hfound == NULL) {
-		hentry = kzalloc(sizeof(*hentry),
+		entry = kzalloc(sizeof(*entry),
 				int_ctx ? GFP_ATOMIC : GFP_KERNEL);
-		if (hentry == NULL) {
+		if (entry == NULL) {
 			ipa_err("failed allocating active clients hash entry");
 			spin_unlock_irqrestore(&log->lock, flags);
 			return;
 		}
-		hentry->type = id->type;
-		strlcpy(hentry->id_string, id->id_string,
+		entry->type = id->type;
+		strlcpy(entry->id_string, id->id_string,
 				IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN);
-		INIT_HLIST_NODE(&hentry->list);
-		hentry->count = inc ? 1 : -1;
-		hash_add(log->htable, &hentry->list, hkey);
-		list_add_tail(&hentry->links, &log->active);
+		INIT_HLIST_NODE(&entry->list);
+		entry->count = inc ? 1 : -1;
+		hash_add(log->htable, &entry->list, hkey);
+		list_add_tail(&entry->links, &log->active);
 	} else if (hfound->count == 0) {
 		list_del(&hfound->links);
 		hash_del(&hfound->list);
