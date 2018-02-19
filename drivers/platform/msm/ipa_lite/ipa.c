@@ -77,7 +77,7 @@ struct ipa3_context *ipa3_ctx = &ipa3_ctx_struct;
 int ipa3_active_clients_log_print_table(char *buf, int size)
 {
 	struct ipa3_active_clients_log_ctx *log;
-	struct ipa3_active_client_htable_entry *entry;
+	struct ipa_active_client *entry;
 	int cnt = 0;
 	unsigned long flags;
 
@@ -1120,25 +1120,25 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 		bool inc, bool int_ctx)
 {
 	struct ipa3_active_clients_log_ctx *log;
-	struct ipa3_active_client_htable_entry *entry;
+	struct ipa_active_client *entry;
+	struct ipa_active_client *found;
 	char temp_str[IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN];
 	unsigned long long t;
 	unsigned long nanosec_rem;
-	struct ipa3_active_client_htable_entry *hfound;
 	unsigned long flags;
 
 	log = &ipa3_ctx->ipa3_active_clients_logging;
 
 	spin_lock_irqsave(&log->lock, flags);
 	int_ctx = true;
-	hfound = NULL;
+	found = NULL;
 	list_for_each_entry(entry, &log->active, links) {
 		if (!strcmp(entry->id_string, id->id_string)) {
 			entry->count = entry->count + (inc ? 1 : -1);
-			hfound = entry;
+			found = entry;
 		}
 	}
-	if (hfound == NULL) {
+	if (found == NULL) {
 		entry = kzalloc(sizeof(*entry),
 				int_ctx ? GFP_ATOMIC : GFP_KERNEL);
 		if (entry == NULL) {
@@ -1151,9 +1151,9 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 				IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN);
 		entry->count = inc ? 1 : -1;
 		list_add_tail(&entry->links, &log->active);
-	} else if (hfound->count == 0) {
-		list_del(&hfound->links);
-		kfree(hfound);
+	} else if (found->count == 0) {
+		list_del(&found->links);
+		kfree(found);
 	}
 
 	if (id->type != SIMPLE) {

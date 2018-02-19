@@ -163,7 +163,7 @@ struct ipa_sys_connect_params {
 	bool napi_enabled;
 };
 
-struct ipa3_active_client_htable_entry {
+struct ipa_active_client {
 	struct list_head links;
 	char id_string[IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN];
 	int count;
