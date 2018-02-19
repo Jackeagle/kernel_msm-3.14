@@ -172,34 +172,40 @@ ipa3_active_clients_log_insert(struct ipa_active_client_logging_info *id,
 static int ipa3_active_clients_log_init(void)
 {
 	struct ipa3_active_clients_log_ctx *log;
+	size_t count = ARRAY_SIZE(log->log_buffer);
+	size_t size = IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN;
+	char *bufp;
 	int i;
 
 	log = &ipa3_ctx->ipa3_active_clients_logging;
 
-	spin_lock_init(&log->lock);
-	log->log_buffer[0] = kzalloc(IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES *
-				IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN, GFP_KERNEL);
+	bufp = kzalloc(count * size, GFP_KERNEL);
+	if (!bufp) {
+		ipa_err("Active Clients Logging memory allocation failed");
+		return -ENOMEM;
+	}
+
+	/* OK to fail allocating the active clients table buffer */
 	ipa3_ctx->active_clients_table_buf =
 			kzalloc(IPA_ACTIVE_CLIENTS_TABLE_BUF_SIZE, GFP_KERNEL);
-	if (log->log_buffer == NULL) {
-		ipa_err("Active Clients Logging memory allocation failed");
-		goto bail;
+
+	/* Freeing the first log buffer frees them all */
+	for (i = 0; i < count; i++) {
+		log->log_buffer[i] = bufp;
+		bufp += size;
 	}
-	for (i = 0; i < IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES; i++) {
-		log->log_buffer[i] = log->log_buffer[0] +
-			(IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN * i);
-	}
+
+	spin_lock_init(&log->lock);
 	log->log_head = 0;
-	log->log_tail = IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES - 1;
+	log->log_tail = count - 1;
 	INIT_LIST_HEAD(&log->active);
+
 	atomic_notifier_chain_register(&panic_notifier_list,
-			&ipa3_active_clients_panic_blk);
+					&ipa3_active_clients_panic_blk);
+
 	log->log_rdy = 1;
 
 	return 0;
-
-bail:
-	return -ENOMEM;
 }
 
 static void ipa3_active_clients_log_destroy(void)
