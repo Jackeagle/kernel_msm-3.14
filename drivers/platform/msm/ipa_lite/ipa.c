@@ -78,15 +78,17 @@ struct ipa3_context *ipa3_ctx = &ipa3_ctx_struct;
 
 int ipa3_active_clients_log_print_table(char *buf, int size)
 {
+	struct ipa3_active_clients_log_ctx *log;
 	int i;
 	struct ipa3_active_client_htable_entry *iterator;
 	int cnt = 0;
 	unsigned long flags;
 
-	spin_lock_irqsave(&ipa3_ctx->ipa3_active_clients_logging.lock, flags);
+	log = &ipa3_ctx->ipa3_active_clients_logging;
+
+	spin_lock_irqsave(&log->lock, flags);
 	cnt = scnprintf(buf, size, "\n---- Active Clients Table ----\n");
-	hash_for_each(ipa3_ctx->ipa3_active_clients_logging.htable, i,
-			iterator, list) {
+	hash_for_each(log->htable, i, iterator, list) {
 		switch (iterator->type) {
 		case IPA3_ACTIVE_CLIENT_LOG_TYPE_EP:
 			cnt += scnprintf(buf + cnt, size - cnt,
@@ -116,8 +118,7 @@ int ipa3_active_clients_log_print_table(char *buf, int size)
 	cnt += scnprintf(buf + cnt, size - cnt,
 			"\nTotal active clients count: %d\n",
 			atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
-	spin_unlock_irqrestore(&ipa3_ctx->ipa3_active_clients_logging.lock,
-		flags);
+	spin_unlock_irqrestore(&log->lock, flags);
 
 	return cnt;
 }
@@ -140,56 +141,57 @@ static struct notifier_block ipa3_active_clients_panic_blk = {
 
 static int ipa3_active_clients_log_insert(const char *string)
 {
+	struct ipa3_active_clients_log_ctx *log;
 	int head;
 	int tail;
 
-	if (!ipa3_ctx->ipa3_active_clients_logging.log_rdy)
+	log = &ipa3_ctx->ipa3_active_clients_logging;
+
+	if (!log->log_rdy)
 		return -EPERM;
 
-	head = ipa3_ctx->ipa3_active_clients_logging.log_head;
-	tail = ipa3_ctx->ipa3_active_clients_logging.log_tail;
+	head = log->log_head;
+	tail = log->log_tail;
 
-	memset(ipa3_ctx->ipa3_active_clients_logging.log_buffer[head], '_',
-			IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN);
-	strlcpy(ipa3_ctx->ipa3_active_clients_logging.log_buffer[head], string,
+	memset(log->log_buffer[head], '_', IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN);
+	strlcpy(log->log_buffer[head], string,
 			(size_t)IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN);
 	head = (head + 1) % IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES;
 	if (tail == head)
 		tail = (tail + 1) % IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES;
 
-	ipa3_ctx->ipa3_active_clients_logging.log_tail = tail;
-	ipa3_ctx->ipa3_active_clients_logging.log_head = head;
+	log->log_tail = tail;
+	log->log_head = head;
 
 	return 0;
 }
 
 static int ipa3_active_clients_log_init(void)
 {
+	struct ipa3_active_clients_log_ctx *log;
 	int i;
 
-	spin_lock_init(&ipa3_ctx->ipa3_active_clients_logging.lock);
-	ipa3_ctx->ipa3_active_clients_logging.log_buffer[0] = kzalloc(
-			IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES *
-				IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN,
-			GFP_KERNEL);
+	log = &ipa3_ctx->ipa3_active_clients_logging;
+
+	spin_lock_init(&log->lock);
+	log->log_buffer[0] = kzalloc(IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES *
+				IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN, GFP_KERNEL);
 	ipa3_ctx->active_clients_table_buf =
 			kzalloc(IPA_ACTIVE_CLIENTS_TABLE_BUF_SIZE, GFP_KERNEL);
-	if (ipa3_ctx->ipa3_active_clients_logging.log_buffer == NULL) {
+	if (log->log_buffer == NULL) {
 		ipa_err("Active Clients Logging memory allocation failed");
 		goto bail;
 	}
 	for (i = 0; i < IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES; i++) {
-		ipa3_ctx->ipa3_active_clients_logging.log_buffer[i] =
-			ipa3_ctx->ipa3_active_clients_logging.log_buffer[0] +
+		log->log_buffer[i] = log->log_buffer[0] +
 			(IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN * i);
 	}
-	ipa3_ctx->ipa3_active_clients_logging.log_head = 0;
-	ipa3_ctx->ipa3_active_clients_logging.log_tail =
-			IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES - 1;
-	hash_init(ipa3_ctx->ipa3_active_clients_logging.htable);
+	log->log_head = 0;
+	log->log_tail = IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES - 1;
+	hash_init(log->htable);
 	atomic_notifier_chain_register(&panic_notifier_list,
 			&ipa3_active_clients_panic_blk);
-	ipa3_ctx->ipa3_active_clients_logging.log_rdy = 1;
+	log->log_rdy = 1;
 
 	return 0;
 
@@ -199,10 +201,13 @@ bail:
 
 static void ipa3_active_clients_log_destroy(void)
 {
+	struct ipa3_active_clients_log_ctx *log;
+
+	log = &ipa3_ctx->ipa3_active_clients_logging;
+
 	kfree(ipa3_ctx->active_clients_table_buf);
-	kfree(ipa3_ctx->ipa3_active_clients_logging.log_buffer[0]);
-	memset(&ipa3_ctx->ipa3_active_clients_logging, 0,
-		sizeof(ipa3_ctx->ipa3_active_clients_logging));
+	kfree(log->log_buffer[0]);
+	memset(log, 0, sizeof(*log));
 }
 
 static int
@@ -1117,6 +1122,7 @@ static void
 ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 		bool inc, bool int_ctx)
 {
+	struct ipa3_active_clients_log_ctx *log;
 	char temp_str[IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN];
 	unsigned long long t;
 	unsigned long nanosec_rem;
@@ -1126,15 +1132,16 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 	char str_to_hash[IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN];
 	unsigned long flags;
 
-	spin_lock_irqsave(&ipa3_ctx->ipa3_active_clients_logging.lock, flags);
+	log = &ipa3_ctx->ipa3_active_clients_logging;
+
+	spin_lock_irqsave(&log->lock, flags);
 	int_ctx = true;
 	hfound = NULL;
 	memset(str_to_hash, 0, IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN);
 	strlcpy(str_to_hash, id->id_string, IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN);
 	hkey = jhash(str_to_hash, IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN,
 			0);
-	hash_for_each_possible(ipa3_ctx->ipa3_active_clients_logging.htable,
-			hentry, list, hkey) {
+	hash_for_each_possible(log->htable, hentry, list, hkey) {
 		if (!strcmp(hentry->id_string, id->id_string)) {
 			hentry->count = hentry->count + (inc ? 1 : -1);
 			hfound = hentry;
@@ -1145,9 +1152,7 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 				int_ctx ? GFP_ATOMIC : GFP_KERNEL);
 		if (hentry == NULL) {
 			ipa_err("failed allocating active clients hash entry");
-			spin_unlock_irqrestore(
-				&ipa3_ctx->ipa3_active_clients_logging.lock,
-				flags);
+			spin_unlock_irqrestore(&log->lock, flags);
 			return;
 		}
 		hentry->type = id->type;
@@ -1155,8 +1160,7 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 				IPA3_ACTIVE_CLIENTS_LOG_NAME_LEN);
 		INIT_HLIST_NODE(&hentry->list);
 		hentry->count = inc ? 1 : -1;
-		hash_add(ipa3_ctx->ipa3_active_clients_logging.htable,
-				&hentry->list, hkey);
+		hash_add(log->htable, &hentry->list, hkey);
 	} else if (hfound->count == 0) {
 		hash_del(&hfound->list);
 		kfree(hfound);
@@ -1172,8 +1176,7 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 				id->id_string, id->file, id->line);
 		ipa3_active_clients_log_insert(temp_str);
 	}
-	spin_unlock_irqrestore(&ipa3_ctx->ipa3_active_clients_logging.lock,
-		flags);
+	spin_unlock_irqrestore(&log->lock, flags);
 }
 
 static void
