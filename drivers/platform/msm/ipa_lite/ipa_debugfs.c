@@ -827,10 +827,32 @@ static int clients_log_open(struct inode *inode, struct file *file)
 	return seq_open(file, &clients_log_seq_ops);
 }
 
+/* Anything written to "log" causes it to be cleared */
+static ssize_t clients_log_write(struct file *file,
+		const char __user *buf, size_t count, loff_t *ppos)
+{
+	struct ipa3_active_clients_log_ctx *log;
+	unsigned long flags;
+	u32 lines;
+
+	log = &ipa3_ctx->ipa3_active_clients_logging;
+	lines = ARRAY_SIZE(log->log_buffer);
+
+	spin_lock_irqsave(&log->lock, flags);
+
+	log->log_head = 0;
+	log->log_tail = lines - 1;
+
+	spin_unlock_irqrestore(&log->lock, flags);
+
+	return count;
+}
+
 static const struct file_operations clients_log_fops = {
 	.owner		= THIS_MODULE,
 	.open		= clients_log_open,
 	.read		= seq_read,
+	.write		= clients_log_write,
 	.llseek		= seq_lseek,
 	.release	= seq_release,
 };
@@ -854,7 +876,7 @@ static bool ipa_debugfs_clients_create(struct dentry *ipa_dir)
 	if (!ARRAY_SIZE(ipa3_ctx->ipa3_active_clients_logging.log_buffer))
 		return true;
 
-	return debugfs_create_file("log", S_IFREG|S_IRUGO, clients_dir,
+	return debugfs_create_file("log", S_IFREG|S_IRUGO|S_IWUSR, clients_dir,
 					NULL, &clients_log_fops);
 }
 
