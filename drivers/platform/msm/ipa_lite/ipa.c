@@ -1995,7 +1995,6 @@ fail_tx_pkt_wrapper_cache:
 fail_create_transport_wq:
 	destroy_workqueue(ipa3_ctx->power_mgmt_wq);
 fail_init_hw:
-	ipa3_suspend_apps_pipes(true);
 	ipa3_disable_clks();
 
 	return result;
