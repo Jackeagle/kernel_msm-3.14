@@ -1203,7 +1203,7 @@ ipa3_inc_client_enable_clks_no_block(struct ipa_active_client_logging_info *id)
 	return 0;
 }
 
-static void __ipa3_dec_client_disable_clks(void)
+static void ipa_dec_clients_disable_clks_on_wq(struct work_struct *work)
 {
 	int ret;
 
@@ -1248,11 +1248,6 @@ out:
 void ipa3_dec_client_disable_clks(struct ipa_active_client_logging_info *id)
 {
 	ipa3_dec_client_disable_clks_no_block(id);
-}
-
-static void ipa_dec_clients_disable_clks_on_wq(struct work_struct *work)
-{
-	__ipa3_dec_client_disable_clks();
 }
 
 /**
