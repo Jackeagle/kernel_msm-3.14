@@ -1225,28 +1225,22 @@ void ipa3_inc_client_enable_clks(struct ipa_active_client_logging_info *id)
 	mutex_unlock(&ipa3_ctx->ipa3_active_clients.mutex);
 }
 
-/**
-* ipa3_inc_client_enable_clks_no_block() - Only increment the number of active
-* clients if no asynchronous actions should be done. Asynchronous actions are
-* locking a mutex and waking up IPA HW.
-*
-* Return codes: 0 for success
-*		-EPERM if an asynchronous action should have been done
-*/
-int ipa3_inc_client_enable_clks_no_block(struct ipa_active_client_logging_info
-		*id)
+/*
+ * ipa3_inc_client_enable_clks_no_block() - Increment the active
+ * client count unless doing so could block.  Returns 0 if the
+ * increment occurred, -EPERM otherwise.
+ */
+int
+ipa3_inc_client_enable_clks_no_block(struct ipa_active_client_logging_info *id)
 {
-	int ret;
+	if (!atomic_inc_not_zero(&ipa3_ctx->ipa3_active_clients.cnt))
+		return -EPERM;
 
-	ret = atomic_inc_not_zero(&ipa3_ctx->ipa3_active_clients.cnt);
-	if (ret) {
-		ipa3_active_clients_log_mod(id, true, true);
-		ipa_debug_low("active clients = %d\n",
-			atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
-		return 0;
-	}
+	ipa3_active_clients_log_mod(id, true, true);
+	ipa_debug_low("active clients = %d\n",
+		atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
 
-	return -EPERM;
+	return 0;
 }
 
 static void __ipa3_dec_client_disable_clks(void)
