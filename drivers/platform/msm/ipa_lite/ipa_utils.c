@@ -2112,47 +2112,46 @@ static void ipa3_gsi_poll_after_suspend(struct ipa3_ep_context *ep)
 	}
 }
 
-void ipa3_suspend_apps_pipes(bool suspend)
+static int suspend_pipe(enum ipa_client_type client, bool suspend)
 {
-	struct ipa_ep_cfg_ctrl cfg;
+	struct ipa_ep_cfg_ctrl cfg = { 0 };
 	int ipa_ep_idx;
 	struct ipa3_ep_context *ep;
 
-	memset(&cfg, 0, sizeof(cfg));
 	cfg.ipa_ep_suspend = suspend;
 
-	ipa_ep_idx = ipa3_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
-	ipa_assert(ipa_ep_idx >= 0);
+	ipa_ep_idx = ipa3_get_ep_mapping(client);
+	if (ipa_ep_idx < 0)
+		return ipa_ep_idx;
 
 	ep = &ipa3_ctx->ep[ipa_ep_idx];
-	if (ep->valid) {
-		ipa_debug("%s pipe %d\n", suspend ? "suspend" : "unsuspend",
-			ipa_ep_idx);
-		ipa3_cfg_ep_ctrl(ipa_ep_idx, &cfg);
-		if (suspend)
-			ipa3_gsi_poll_after_suspend(ep);
-		else if (!atomic_read(&ep->sys->curr_polling_state))
-			gsi_config_channel_mode(ep->gsi_chan_hdl,
-				GSI_CHAN_MODE_CALLBACK);
-	}
+	if (!ep->valid)
+		return 0;
 
-	ipa_ep_idx = ipa3_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
+	ipa_debug("%s pipe %d\n", suspend ? "suspend" : "unsuspend",
+		ipa_ep_idx);
+
+	ipa3_cfg_ep_ctrl(ipa_ep_idx, &cfg);
+	if (suspend)
+		ipa3_gsi_poll_after_suspend(ep);
+	else if (!atomic_read(&ep->sys->curr_polling_state))
+		gsi_config_channel_mode(ep->gsi_chan_hdl,
+			GSI_CHAN_MODE_CALLBACK);
+
+	return 0;
+}
+
+void ipa3_suspend_apps_pipes(bool suspend)
+{
+	int ret;
+
+	ret = suspend_pipe(IPA_CLIENT_APPS_LAN_CONS, suspend);
+	ipa_assert(!ret);
+
 	/* Considering the case for SSR. */
-	if (ipa_ep_idx == -1) {
-		ipa_debug("Invalid client.\n");
-		return;
-	}
-	ep = &ipa3_ctx->ep[ipa_ep_idx];
-	if (ep->valid) {
-		ipa_debug("%s pipe %d\n", suspend ? "suspend" : "unsuspend",
-			ipa_ep_idx);
-		ipa3_cfg_ep_ctrl(ipa_ep_idx, &cfg);
-		if (suspend)
-			ipa3_gsi_poll_after_suspend(ep);
-		else if (!atomic_read(&ep->sys->curr_polling_state))
-			gsi_config_channel_mode(ep->gsi_chan_hdl,
-				GSI_CHAN_MODE_CALLBACK);
-	}
+	ret = suspend_pipe(IPA_CLIENT_APPS_WAN_CONS, suspend);
+	if (ret < 0)
+		ipa_debug("error suspending WAN consumer\n");
 }
 
 /*
