@@ -1260,9 +1260,7 @@ static void __ipa3_dec_client_disable_clks(void)
 
 	/* seems like this is the only client holding the clocks */
 	mutex_lock(&ipa3_ctx->ipa3_active_clients.mutex);
-	if (atomic_read(&ipa3_ctx->ipa3_active_clients.cnt) == 1 &&
-	    ipa3_ctx->tag_process_before_gating) {
-		ipa3_ctx->tag_process_before_gating = false;
+	if (false) {
 		/*
 		 * When TAG process ends, active clients will be
 		 * decreased

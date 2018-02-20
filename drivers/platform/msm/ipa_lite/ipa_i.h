@@ -947,7 +947,6 @@ struct ipa3_context {
 	char *active_clients_table_buf;
 	struct workqueue_struct *power_mgmt_wq;
 	struct workqueue_struct *transport_power_mgmt_wq;
-	bool tag_process_before_gating;
 	struct ipa3_transport_pm transport_pm;
 	u32 clnt_hdl_cmd;
 	u32 clnt_hdl_data_in;
