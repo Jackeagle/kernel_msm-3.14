@@ -1187,18 +1187,10 @@ out_unlock:
 	spin_unlock_irqrestore(&log->lock, flags);
 }
 
-/**
-* ipa3_inc_client_enable_clks() - Increase active clients counter, and
-* enable ipa clocks if necessary
-*
-* Return codes:
-* None
-*/
-void ipa3_inc_client_enable_clks(struct ipa_active_client_logging_info *id)
+static void __ipa3_inc_client_enable_clks(void)
 {
 	int ret;
 
-	ipa3_active_clients_log_mod(id, true, false);
 	ret = atomic_inc_not_zero(&ipa3_ctx->ipa3_active_clients.cnt);
 	if (ret) {
 		ipa_debug_low("active clients = %d\n",
@@ -1223,6 +1215,19 @@ void ipa3_inc_client_enable_clks(struct ipa_active_client_logging_info *id)
 		atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
 	ipa3_suspend_apps_pipes(false);
 	mutex_unlock(&ipa3_ctx->ipa3_active_clients.mutex);
+}
+
+/**
+* ipa3_inc_client_enable_clks() - Increase active clients counter, and
+* enable ipa clocks if necessary
+*
+* Return codes:
+* None
+*/
+void ipa3_inc_client_enable_clks(struct ipa_active_client_logging_info *id)
+{
+	ipa3_active_clients_log_mod(id, true, false);
+	__ipa3_inc_client_enable_clks();
 }
 
 /*
