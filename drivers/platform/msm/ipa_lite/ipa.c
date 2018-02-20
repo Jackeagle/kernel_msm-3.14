@@ -56,8 +56,6 @@
 #define IPA_SMEM_SIZE (8 * 1024)
 
 static int ipa3_q6_clean_q6_tables(void);
-static void ipa3_start_tag_process(struct work_struct *work);
-static DECLARE_WORK(ipa3_tag_work, ipa3_start_tag_process);
 
 static void ipa3_post_init_wq(struct work_struct *work);
 static DECLARE_WORK(ipa3_post_init_work, ipa3_post_init_wq);
@@ -1072,31 +1070,6 @@ void ipa3_disable_clks(void)
 		WARN_ON(1);
 }
 
-/**
- * ipa3_start_tag_process() - Send TAG packet and wait for it to come back
- *
- * This function is called prior to clock gating when active client counter
- * is 1. TAG process ensures that there are no packets inside IPA HW that
- * were not submitted to the IPA client via the transport. During TAG process
- * all aggregation frames are (force) closed.
- *
- * Return codes:
- * None
- */
-static void ipa3_start_tag_process(struct work_struct *work)
-{
-	int res;
-
-	ipa_debug("starting TAG process\n");
-	/* close aggregation frames on all pipes */
-	res = ipa3_tag_aggr_force_close_all();
-	if (res)
-		ipa_err("ipa3_tag_aggr_force_close failed %d\n", res);
-	IPA_ACTIVE_CLIENTS_DEC_SPECIAL("TAG_PROCESS");
-
-	ipa_debug("TAG process done\n");
-}
-
 /* log->lock is assumed held by the caller */
 static struct ipa_active_client *active_client_find(const char *id)
 {
@@ -1260,14 +1233,6 @@ static void __ipa3_dec_client_disable_clks(void)
 
 	/* seems like this is the only client holding the clocks */
 	mutex_lock(&ipa3_ctx->ipa3_active_clients.mutex);
-	if (false) {
-		/*
-		 * When TAG process ends, active clients will be
-		 * decreased
-		 */
-		queue_work(ipa3_ctx->power_mgmt_wq, &ipa3_tag_work);
-		goto unlock_mutex;
-	}
 
 	/* a different context might increase the clock reference meanwhile */
 	ret = atomic_sub_return(1, &ipa3_ctx->ipa3_active_clients.cnt);
