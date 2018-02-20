@@ -1144,29 +1144,17 @@ active_client_get(struct ipa_active_client_logging_info *id)
 	return entry;
 }
 
-/**
-* ipa3_active_clients_log_mod() - Log a modification in the active clients
-* reference count
-*
-* This method logs any modification in the active clients reference count:
-* It logs the modification in the circular history buffer
-* It logs the modification in the hash table - looking for an entry,
-* creating one if needed and deleting one if needed.
-*
-* @id: ipa3_active client logging info struct to hold the log information
-* @inc: a boolean variable to indicate whether the modification is an increase
-* or decrease
-* @int_ctx: a boolean variable to indicate whether this call is being made from
-* an interrupt context and therefore should allocate GFP_ATOMIC memory
-*
-* Method process:
-* - Hash the unique identifier string
-* - Find the hash in the table
-*    1)If found, increase or decrease the reference count
-*    2)If not found, allocate a new hash table entry struct and initialize it
-* - Remove and deallocate unneeded data structure
-* - Log the call in the circular history buffer (unless it is a simple call)
-*/
+/*
+ * ipa3_active_clients_log_mod() - Log a modification to active clients
+ *
+ * If an existing entry represents the activity being logged, its
+ * reference count is updated (incremented or decremented) according
+ * to the "inc" argument.  Otherwise a new entry in the active list
+ * is created.  When an entry's reference count reaches 0 it is
+ * released from the list.
+ *
+ * A circular history buffer records reference count updates.
+ */
 static void
 ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 		bool inc, bool int_ctx)
