@@ -1247,8 +1247,7 @@ out:
  */
 void ipa3_dec_client_disable_clks(struct ipa_active_client_logging_info *id)
 {
-	ipa3_active_clients_log_mod(id, false);
-	__ipa3_dec_client_disable_clks();
+	ipa3_dec_client_disable_clks_no_block(id);
 }
 
 static void ipa_dec_clients_disable_clks_on_wq(struct work_struct *work)
@@ -1267,19 +1266,14 @@ static void ipa_dec_clients_disable_clks_on_wq(struct work_struct *work)
 void ipa3_dec_client_disable_clks_no_block(
 	struct ipa_active_client_logging_info *id)
 {
-	int ret;
-
 	ipa3_active_clients_log_mod(id, false);
-	ret = atomic_add_unless(&ipa3_ctx->ipa3_active_clients.cnt, -1, 1);
-	if (ret) {
+
+	if (atomic_add_unless(&ipa3_ctx->ipa3_active_clients.cnt, -1, 1))
 		ipa_debug_low("active clients = %d\n",
 			atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
-		return;
-	}
-
-	/* seems like this is the only client holding the clocks */
-	queue_work(ipa3_ctx->power_mgmt_wq,
-		&ipa_dec_clients_disable_clks_on_wq_work);
+	else
+		queue_work(ipa3_ctx->power_mgmt_wq,
+				&ipa_dec_clients_disable_clks_on_wq_work);
 }
 
 /**
