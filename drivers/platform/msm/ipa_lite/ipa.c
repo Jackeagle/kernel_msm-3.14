@@ -1112,6 +1112,38 @@ static struct ipa_active_client *active_client_find(const char *id)
 	return NULL;
 }
 
+/* XXX Used GFP_ATOMIC for now; can probably be changed to use GFP_KERNEL */
+/* log->lock is assumed held by the caller */
+static struct ipa_active_client *
+active_client_get(struct ipa_active_client_logging_info *id)
+{
+	struct ipa3_active_clients_log_ctx *log;
+	struct ipa_active_client *entry;
+	size_t id_string_size;
+
+	log = &ipa3_ctx->ipa3_active_clients_logging;
+
+	entry = active_client_find(id->id_string);
+	if (entry) {
+		ipa_assert(entry->type == id->type);
+		return entry;
+	}
+
+	id_string_size = strlen(id->id_string) + 1;
+	entry = kzalloc(sizeof(*entry) + id_string_size, GFP_ATOMIC);
+	if (!entry) {
+		ipa_err("failed allocating active clients hash entry");
+		return NULL;
+	}
+
+	entry->type = id->type;
+	memcpy(entry->id_string, id->id_string, id_string_size);
+	entry->count = 0;
+	list_add_tail(&entry->links, &log->active);
+
+	return entry;
+}
+
 /**
 * ipa3_active_clients_log_mod() - Log a modification in the active clients
 * reference count
@@ -1146,33 +1178,20 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 	log = &ipa3_ctx->ipa3_active_clients_logging;
 
 	spin_lock_irqsave(&log->lock, flags);
-	int_ctx = true;
 
-	entry = active_client_find(id->id_string);
-	if (entry)
-		entry->count = entry->count + inc ? 1 : -1;
-	if (!entry) {
-		size_t id_size = strlen(id->id_string) + 1;
+	entry = active_client_get(id);
+	if (!entry)
+		goto out_unlock;
 
-		entry = kzalloc(sizeof(*entry) + id_size,
-				int_ctx ? GFP_ATOMIC : GFP_KERNEL);
-		if (!entry) {
-			ipa_err("failed allocating active clients hash entry");
-			spin_unlock_irqrestore(&log->lock, flags);
-			return;
-		}
-		entry->type = id->type;
-		memcpy(entry->id_string, id->id_string, id_size);
-		entry->count = inc ? 1 : -1;
-		list_add_tail(&entry->links, &log->active);
-	} else if (!entry->count) {
+	entry->count += inc ? 1 : -1;
+	if (!entry->count) {
 		list_del(&entry->links);
 		kfree(entry);
 	}
 
 	if (id->type != SIMPLE)
 		ipa3_active_clients_log_insert(id, inc);
-
+out_unlock:
 	spin_unlock_irqrestore(&log->lock, flags);
 }
 
