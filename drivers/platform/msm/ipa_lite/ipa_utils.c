@@ -1235,7 +1235,7 @@ int ipa3_cfg_ep_status(u32 clnt_hdl,
  *
  * Returns:	0 on success, negative on failure
  */
-int ipa3_cfg_ep_ctrl(u32 clnt_hdl, const struct ipa_ep_cfg_ctrl *ep_ctrl)
+static int ipa3_cfg_ep_ctrl(u32 clnt_hdl, const struct ipa_ep_cfg_ctrl *ep_ctrl)
 {
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes) {
 		ipa_err("bad parm, clnt_hdl = %d\n", clnt_hdl);
