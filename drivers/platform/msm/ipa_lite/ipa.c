@@ -1175,6 +1175,10 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 	if (!entry->count) {
 		list_del(&entry->links);
 		kfree(entry);
+	} else if (entry->count < 0) {
+		ipa_err("negative count for %s %s\n",
+				active_client_type_string(id->type),
+				id->id_string);
 	}
 
 	if (id->type != SIMPLE)
