@@ -322,7 +322,8 @@ static irqreturn_t ipa3_isr(int irq, void *ctxt)
 	ipa3_process_interrupts(true);
 	ipa_debug_low("Exit\n");
 
-	ipa3_dec_client_disable_clks(&log_info);
+	ipa3_active_clients_log_mod(&log_info, false);
+	ipa3_dec_client_disable_clks();
 
 	return IRQ_HANDLED;
 }

@@ -1109,7 +1109,7 @@ active_client_get(struct ipa_active_client_logging_info *id)
  *
  * A circular history buffer records reference count updates.
  */
-static void
+void
 ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 		bool inc)
 {
@@ -1237,10 +1237,8 @@ static void ipa_dec_clients_disable_clks_on_wq(struct work_struct *work)
  * Return codes:
  * None
  */
-void ipa3_dec_client_disable_clks(struct ipa_active_client_logging_info *id)
+void ipa3_dec_client_disable_clks(void)
 {
-	ipa3_active_clients_log_mod(id, false);
-
 	if (atomic_add_unless(&ipa3_ctx->ipa3_active_clients.cnt, -1, 1))
 		ipa_debug_low("active clients = %d\n",
 			atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
