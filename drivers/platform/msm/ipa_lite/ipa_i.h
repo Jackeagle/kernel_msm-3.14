@@ -744,8 +744,6 @@ struct ipa3_controller {
 	int (*ipa3_commit_flt)(enum ipa_ip_type ip);
 	int (*ipa3_commit_rt)(enum ipa_ip_type ip);
 	int (*ipa3_commit_hdr)(void);
-	void (*ipa3_enable_clks)(void);
-	void (*ipa3_disable_clks)(void);
 	struct msm_bus_scale_pdata *msm_bus_data_ptr;
 };
 
@@ -1069,8 +1067,6 @@ void ipa3_dec_client_disable_clks_no_block(
 int ipa3_active_clients_log_print_table(char *buf, int size);
 int ipa3_interrupts_init(u32 ipa_irq, u32 ee, struct device *ipa_dev);
 
-void _ipa_enable_clks_v3_0(void);
-void _ipa_disable_clks_v3_0(void);
 void ipa3_suspend_active_aggr_wa(u32 clnt_hdl);
 void ipa3_suspend_handler(enum ipa_irq_type interrupt,
 				void *private_data,

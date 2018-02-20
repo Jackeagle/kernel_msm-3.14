@@ -996,13 +996,6 @@ fail_ch20_wa:
 	return result;
 }
 
-/**
- * _ipa_enable_clks_v3_0() - Enable IPA clocks.
- */
-void _ipa_enable_clks_v3_0(void)
-{
-}
-
 static unsigned int ipa3_get_bus_vote(void)
 {
 	unsigned int idx = 1;
@@ -1041,17 +1034,7 @@ void ipa3_enable_clks(void)
 	    ipa3_get_bus_vote()))
 		WARN_ON(1);
 
-	ipa3_ctx->ctrl->ipa3_enable_clks();
-
 	ipa_debug_low("curr_ipa_clk_rate=%d", ipa3_ctx->curr_ipa_clk_rate);
-}
-
-
-/**
- * _ipa_disable_clks_v3_0() - Disable IPA clocks.
- */
-void _ipa_disable_clks_v3_0(void)
-{
 }
 
 /**
@@ -1063,8 +1046,6 @@ void _ipa_disable_clks_v3_0(void)
 void ipa3_disable_clks(void)
 {
 	ipa_debug("disabling IPA clocks and bus voting\n");
-
-	ipa3_ctx->ctrl->ipa3_disable_clks();
 
 	ipa3_suspend_apps_pipes(true);
 
