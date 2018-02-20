@@ -1111,7 +1111,7 @@ active_client_get(struct ipa_active_client_logging_info *id)
  */
 static void
 ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
-		bool inc, bool int_ctx)
+		bool inc)
 {
 	struct ipa3_active_clients_log_ctx *log;
 	struct ipa_active_client *entry;
@@ -1181,7 +1181,7 @@ out:
 */
 void ipa3_inc_client_enable_clks(struct ipa_active_client_logging_info *id)
 {
-	ipa3_active_clients_log_mod(id, true, false);
+	ipa3_active_clients_log_mod(id, true);
 	__ipa3_inc_client_enable_clks();
 }
 
@@ -1196,7 +1196,7 @@ ipa3_inc_client_enable_clks_no_block(struct ipa_active_client_logging_info *id)
 	if (!atomic_inc_not_zero(&ipa3_ctx->ipa3_active_clients.cnt))
 		return -EPERM;
 
-	ipa3_active_clients_log_mod(id, true, true);
+	ipa3_active_clients_log_mod(id, true);
 	ipa_debug_low("active clients = %d\n",
 		atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
 
@@ -1247,7 +1247,7 @@ out:
  */
 void ipa3_dec_client_disable_clks(struct ipa_active_client_logging_info *id)
 {
-	ipa3_active_clients_log_mod(id, false, false);
+	ipa3_active_clients_log_mod(id, false);
 	__ipa3_dec_client_disable_clks();
 }
 
@@ -1269,7 +1269,7 @@ void ipa3_dec_client_disable_clks_no_block(
 {
 	int ret;
 
-	ipa3_active_clients_log_mod(id, false, true);
+	ipa3_active_clients_log_mod(id, false);
 	ret = atomic_add_unless(&ipa3_ctx->ipa3_active_clients.cnt, -1, 1);
 	if (ret) {
 		ipa_debug_low("active clients = %d\n",
@@ -1879,7 +1879,7 @@ static int ipa3_pre_init(void)
 
 	mutex_init(&ipa3_ctx->ipa3_active_clients.mutex);
 	IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log_info, "PROXY_CLK_VOTE");
-	ipa3_active_clients_log_mod(&log_info, true, false);
+	ipa3_active_clients_log_mod(&log_info, true);
 	atomic_set(&ipa3_ctx->ipa3_active_clients.cnt, 1);
 
 	/* Create workqueues for power management */
