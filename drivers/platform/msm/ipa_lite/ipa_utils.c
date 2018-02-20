@@ -1897,67 +1897,6 @@ fail_free_tag_desc:
 }
 
 /**
- * ipa3_tag_aggr_force_close_all() - Force close aggregation
- */
-int ipa3_tag_aggr_force_close_all(void)
-{
-	u32 num_descs = ipa3_ctx->ipa_num_pipes;
-	struct ipa3_desc *desc;
-	u32 desc_idx = 0;
-	u32 i;
-	int res;
-
-	desc = kcalloc(num_descs, sizeof(*desc), GFP_KERNEL);
-	if (!desc) {
-		ipa_err("no mem\n");
-		return -ENOMEM;
-	}
-
-	/* Generate descriptors for all endpoints with aggregation enabled */
-	for (i = 0; i < num_descs; i++) {
-		struct ipa_ep_cfg_aggr ep_aggr;
-		struct ipahal_reg_valmask valmask;
-		struct ipahal_imm_cmd_pyld *cmd_pyld;
-		u32 offset;
-
-		ipahal_read_reg_n_fields(IPA_ENDP_INIT_AGGR_n, i, &ep_aggr);
-		if (!ep_aggr.aggr_en)
-			continue;
-		ipa_debug("Force close ep: %d\n", i);
-
-		offset = ipahal_reg_offset(IPA_AGGR_FORCE_CLOSE);
-		ipahal_get_aggr_force_close_valmask(i, &valmask);
-		cmd_pyld = ipahal_register_write_pyld(offset, valmask.val,
-							valmask.mask, true);
-		if (!cmd_pyld) {
-			ipa_err("failed to construct register_write imm cmd\n");
-			res = -ENOMEM;
-			goto fail_alloc_reg_write_agg_close;
-		}
-		ipa_desc_fill_imm_cmd(&desc[desc_idx], cmd_pyld);
-		desc[desc_idx].callback = ipa3_destroy_imm;
-		desc[desc_idx].user1 = cmd_pyld;
-		desc_idx++;
-	}
-
-	res = ipa3_tag_process(desc, desc_idx,
-			      IPA_FORCE_CLOSE_TAG_PROCESS_TIMEOUT);
-	kfree(desc);
-
-	return res;
-
-fail_alloc_reg_write_agg_close:
-	for (i = 0; i < desc_idx; i++)
-		if (desc[desc_idx].callback)
-			desc[desc_idx].callback(desc[desc_idx].user1,
-				desc[desc_idx].user2);
-	kfree(desc);
-	ipa_err("returning error %d\n", res);
-
-	return res;
-}
-
-/**
  * ipa3_proxy_clk_unvote() - called to remove IPA clock proxy vote
  *
  * Return value: none
