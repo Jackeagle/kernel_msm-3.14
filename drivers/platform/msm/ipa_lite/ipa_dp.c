@@ -189,9 +189,6 @@ int ipa3_rx_poll(u32 clnt_hdl, int weight)
 	struct ipa3_ep_context *ep = &ipa3_ctx->ep[clnt_hdl];
 	int cnt = 0;
 	static int total_cnt;
-	struct ipa_active_client_logging_info log;
-
-	IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log, "NAPI");
 
 	while (cnt < weight && atomic_read(&ep->sys->curr_polling_state)) {
 		int ret;
@@ -214,8 +211,13 @@ int ipa3_rx_poll(u32 clnt_hdl, int weight)
 	};
 
 	if (cnt < weight) {
+		struct ipa_active_client_logging_info log;
+
 		ep->client_notify(ep->priv, IPA_CLIENT_COMP_NAPI, 0);
 		ipa3_rx_switch_to_intr_mode(ep->sys);
+
+		/* Matching enable is in ipa_gsi_irq_rx_notify_cb() */
+		IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log, "NAPI");
 		ipa3_dec_client_disable_clks_no_block(&log);
 	}
 
@@ -2140,6 +2142,7 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 		return;
 	}
 
+	/* Matching disable is in ipa3_rx_poll() */
 	IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log, "NAPI");
 	clk_off = ipa3_inc_client_enable_clks_no_block(&log);
 	if (!clk_off)
