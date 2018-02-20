@@ -1228,30 +1228,19 @@ int ipa3_cfg_ep_status(u32 clnt_hdl,
 	return 0;
 }
 
-/**
- * ipa3_cfg_ep_ctrl() -	 IPA end-point Control configuration
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg_ctrl:	[in] IPA end-point configuration params
- *
- * Returns:	0 on success, negative on failure
- */
-static int ipa3_cfg_ep_ctrl(u32 clnt_hdl, const struct ipa_ep_cfg_ctrl *ep_ctrl)
+static int ipa3_cfg_ep_ctrl(int ipa_ep_idx, bool suspend)
 {
-	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes) {
-		ipa_err("bad parm, clnt_hdl = %d\n", clnt_hdl);
-		return -EINVAL;
-	}
+	struct ipa_ep_cfg_ctrl cfg = { 0 };
 
-	ipa_debug("pipe=%d ep_suspend=%d, ep_delay=%d\n",
-		clnt_hdl,
-		ep_ctrl->ipa_ep_suspend,
-		ep_ctrl->ipa_ep_delay);
+	cfg.ipa_ep_suspend = suspend;
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n, clnt_hdl, ep_ctrl);
+	ipa_debug("pipe=%d ep_suspend=%d, ep_delay=0\n",
+		ipa_ep_idx, suspend ? 1 : 0);
 
-	if (ep_ctrl->ipa_ep_suspend == true &&
-			IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client))
-		ipa3_suspend_active_aggr_wa(clnt_hdl);
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n, ipa_ep_idx, &cfg);
+
+	if (suspend && IPA_CLIENT_IS_CONS(ipa3_ctx->ep[ipa_ep_idx].client))
+		ipa3_suspend_active_aggr_wa(ipa_ep_idx);
 
 	return 0;
 }
@@ -2114,11 +2103,8 @@ static void ipa3_gsi_poll_after_suspend(struct ipa3_ep_context *ep)
 
 static int suspend_pipe(enum ipa_client_type client, bool suspend)
 {
-	struct ipa_ep_cfg_ctrl cfg = { 0 };
 	int ipa_ep_idx;
 	struct ipa3_ep_context *ep;
-
-	cfg.ipa_ep_suspend = suspend;
 
 	ipa_ep_idx = ipa3_get_ep_mapping(client);
 	if (ipa_ep_idx < 0)
@@ -2131,7 +2117,7 @@ static int suspend_pipe(enum ipa_client_type client, bool suspend)
 	ipa_debug("%s pipe %d\n", suspend ? "suspend" : "unsuspend",
 		ipa_ep_idx);
 
-	ipa3_cfg_ep_ctrl(ipa_ep_idx, &cfg);
+	ipa3_cfg_ep_ctrl(ipa_ep_idx, suspend);
 	if (suspend)
 		ipa3_gsi_poll_after_suspend(ep);
 	else if (!atomic_read(&ep->sys->curr_polling_state))
