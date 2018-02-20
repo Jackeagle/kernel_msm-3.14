@@ -1203,35 +1203,30 @@ ipa3_inc_client_enable_clks_no_block(struct ipa_active_client_logging_info *id)
 	return 0;
 }
 
+/*
+ * Decrement the active clients reference count, and if the result
+ * is 0, suspend the pipes and disable clocks.
+ *
+ * This function runs in work queue context, scheduled to run whenever
+ * the last reference would be dropped in ipa3_dec_client_disable_clks().
+ */
 static void ipa_dec_clients_disable_clks_on_wq(struct work_struct *work)
 {
 	int ret;
 
-	ipa_assert(atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
-
-	/* There's nothing more to do if this isn't the last reference */
-	ret = atomic_add_unless(&ipa3_ctx->ipa3_active_clients.cnt, -1, 1);
-	if (ret)
-		goto out;
-
 	mutex_lock(&ipa3_ctx->ipa3_active_clients.mutex);
 
-	/*
-	 * A reference might have been added while awaiting the mutex.
-	 * Drop the reference, and if it has reached 0, disable clocks.
-	 */
 	ret = atomic_sub_return(1, &ipa3_ctx->ipa3_active_clients.cnt);
-	if (ret > 0)
-		goto out_unlock;
+	if (!ret) {
+		ipa3_suspend_apps_pipes(true);
+		ipa3_disable_clks();
+	} else {
+		ipa_assert(ret > 0);
+	}
 
-	ipa3_suspend_apps_pipes(true);
-
-	ipa3_disable_clks();
-out_unlock:
 	mutex_unlock(&ipa3_ctx->ipa3_active_clients.mutex);
-out:
-	ipa_debug_low("active clients = %d\n",
-		atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
+
+	ipa_debug_low("active clients = %d\n", ret);
 }
 
 /**
