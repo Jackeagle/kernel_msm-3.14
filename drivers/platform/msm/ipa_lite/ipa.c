@@ -1183,20 +1183,6 @@ out_unlock:
 	spin_unlock_irqrestore(&log->lock, flags);
 }
 
-static void
-ipa3_active_clients_log_dec(struct ipa_active_client_logging_info *id,
-		bool int_ctx)
-{
-	ipa3_active_clients_log_mod(id, false, int_ctx);
-}
-
-static void
-ipa3_active_clients_log_inc(struct ipa_active_client_logging_info *id,
-		bool int_ctx)
-{
-	ipa3_active_clients_log_mod(id, true, int_ctx);
-}
-
 /**
 * ipa3_inc_client_enable_clks() - Increase active clients counter, and
 * enable ipa clocks if necessary
@@ -1208,7 +1194,7 @@ void ipa3_inc_client_enable_clks(struct ipa_active_client_logging_info *id)
 {
 	int ret;
 
-	ipa3_active_clients_log_inc(id, false);
+	ipa3_active_clients_log_mod(id, true, false);
 	ret = atomic_inc_not_zero(&ipa3_ctx->ipa3_active_clients.cnt);
 	if (ret) {
 		ipa_debug_low("active clients = %d\n",
@@ -1250,7 +1236,7 @@ int ipa3_inc_client_enable_clks_no_block(struct ipa_active_client_logging_info
 
 	ret = atomic_inc_not_zero(&ipa3_ctx->ipa3_active_clients.cnt);
 	if (ret) {
-		ipa3_active_clients_log_inc(id, true);
+		ipa3_active_clients_log_mod(id, true, true);
 		ipa_debug_low("active clients = %d\n",
 			atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
 		return 0;
@@ -1308,7 +1294,7 @@ bail:
  */
 void ipa3_dec_client_disable_clks(struct ipa_active_client_logging_info *id)
 {
-	ipa3_active_clients_log_dec(id, false);
+	ipa3_active_clients_log_mod(id, false, false);
 	__ipa3_dec_client_disable_clks();
 }
 
@@ -1330,7 +1316,7 @@ void ipa3_dec_client_disable_clks_no_block(
 {
 	int ret;
 
-	ipa3_active_clients_log_dec(id, true);
+	ipa3_active_clients_log_mod(id, false, true);
 	ret = atomic_add_unless(&ipa3_ctx->ipa3_active_clients.cnt, -1, 1);
 	if (ret) {
 		ipa_debug_low("active clients = %d\n",
@@ -1940,7 +1926,7 @@ static int ipa3_pre_init(void)
 
 	mutex_init(&ipa3_ctx->ipa3_active_clients.mutex);
 	IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log_info, "PROXY_CLK_VOTE");
-	ipa3_active_clients_log_inc(&log_info, false);
+	ipa3_active_clients_log_mod(&log_info, true, false);
 	atomic_set(&ipa3_ctx->ipa3_active_clients.cnt, 1);
 
 	/* Create workqueues for power management */
