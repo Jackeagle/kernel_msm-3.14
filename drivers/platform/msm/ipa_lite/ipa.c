@@ -1047,8 +1047,6 @@ void ipa3_disable_clks(void)
 {
 	ipa_debug("disabling IPA clocks and bus voting\n");
 
-	ipa3_suspend_apps_pipes(true);
-
 	if (msm_bus_scale_client_update_request(ipa3_ctx->ipa_bus_hdl, 0))
 		WARN_ON(1);
 }
@@ -1225,6 +1223,8 @@ static void __ipa3_dec_client_disable_clks(void)
 	ret = atomic_sub_return(1, &ipa3_ctx->ipa3_active_clients.cnt);
 	if (ret > 0)
 		goto out_unlock;
+
+	ipa3_suspend_apps_pipes(true);
 
 	ipa3_disable_clks();
 out_unlock:
@@ -1995,6 +1995,7 @@ fail_tx_pkt_wrapper_cache:
 fail_create_transport_wq:
 	destroy_workqueue(ipa3_ctx->power_mgmt_wq);
 fail_init_hw:
+	ipa3_suspend_apps_pipes(true);
 	ipa3_disable_clks();
 
 	return result;
