@@ -1236,30 +1236,13 @@ out:
 
 /**
  * ipa3_dec_client_disable_clks() - Decrease active clients counter
- *
- * In case that there are no active clients this function also starts
- * TAG process. When TAG progress ends ipa clocks will be gated.
- * start_tag_process_again flag is set during this function to signal TAG
- * process to start again as there was another client that may send data to ipa
- *
- * Return codes:
- * None
- */
-void ipa3_dec_client_disable_clks(struct ipa_active_client_logging_info *id)
-{
-	ipa3_dec_client_disable_clks_no_block(id);
-}
-
-/**
- * ipa3_dec_client_disable_clks_no_block() - Decrease active clients counter
  * if possible without blocking. If this is the last client then the desrease
  * will happen from work queue context.
  *
  * Return codes:
  * None
  */
-void ipa3_dec_client_disable_clks_no_block(
-	struct ipa_active_client_logging_info *id)
+void ipa3_dec_client_disable_clks(struct ipa_active_client_logging_info *id)
 {
 	ipa3_active_clients_log_mod(id, false);
 
