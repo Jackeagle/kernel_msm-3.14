@@ -1164,30 +1164,31 @@ static void __ipa3_inc_client_enable_clks(void)
 {
 	int ret;
 
+	/* There's nothing more to do if this isn't the first reference */
 	ret = atomic_inc_not_zero(&ipa3_ctx->ipa3_active_clients.cnt);
-	if (ret) {
-		ipa_debug_low("active clients = %d\n",
-			atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
-		return;
-	}
+	if (ret)
+		goto out;
 
 	mutex_lock(&ipa3_ctx->ipa3_active_clients.mutex);
 
-	/* somebody might voted to clocks meanwhile */
+	/*
+	 * A reference might have been added while awaiting the mutex.
+	 * Check, but don't increment it until after clocks are enabled.
+	 */
 	ret = atomic_inc_not_zero(&ipa3_ctx->ipa3_active_clients.cnt);
-	if (ret) {
-		mutex_unlock(&ipa3_ctx->ipa3_active_clients.mutex);
-		ipa_debug_low("active clients = %d\n",
-			atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
-		return;
-	}
+	if (ret)
+		goto out_unlock;
 
 	ipa3_enable_clks();
+
 	atomic_inc(&ipa3_ctx->ipa3_active_clients.cnt);
+
+	ipa3_suspend_apps_pipes(false);
+out_unlock:
+	mutex_unlock(&ipa3_ctx->ipa3_active_clients.mutex);
+out:
 	ipa_debug_low("active clients = %d\n",
 		atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
-	ipa3_suspend_apps_pipes(false);
-	mutex_unlock(&ipa3_ctx->ipa3_active_clients.mutex);
 }
 
 /**
@@ -1227,22 +1228,25 @@ static void __ipa3_dec_client_disable_clks(void)
 
 	ipa_assert(atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
 
+	/* There's nothing more to do if this isn't the last reference */
 	ret = atomic_add_unless(&ipa3_ctx->ipa3_active_clients.cnt, -1, 1);
 	if (ret)
-		goto bail;
+		goto out;
 
-	/* seems like this is the only client holding the clocks */
 	mutex_lock(&ipa3_ctx->ipa3_active_clients.mutex);
 
-	/* a different context might increase the clock reference meanwhile */
+	/*
+	 * A reference might have been added while awaiting the mutex.
+	 * Drop the reference, and if it has reached 0, disable clocks.
+	 */
 	ret = atomic_sub_return(1, &ipa3_ctx->ipa3_active_clients.cnt);
 	if (ret > 0)
-		goto unlock_mutex;
-	ipa3_disable_clks();
+		goto out_unlock;
 
-unlock_mutex:
+	ipa3_disable_clks();
+out_unlock:
 	mutex_unlock(&ipa3_ctx->ipa3_active_clients.mutex);
-bail:
+out:
 	ipa_debug_low("active clients = %d\n",
 		atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
 }
