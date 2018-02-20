@@ -1001,7 +1001,6 @@ fail_ch20_wa:
  */
 void _ipa_enable_clks_v3_0(void)
 {
-	ipa_debug_low("curr_ipa_clk_rate=%d", ipa3_ctx->curr_ipa_clk_rate);
 }
 
 static unsigned int ipa3_get_bus_vote(void)
@@ -1043,6 +1042,8 @@ void ipa3_enable_clks(void)
 		WARN_ON(1);
 
 	ipa3_ctx->ctrl->ipa3_enable_clks();
+
+	ipa_debug_low("curr_ipa_clk_rate=%d", ipa3_ctx->curr_ipa_clk_rate);
 }
 
 
@@ -1051,7 +1052,6 @@ void ipa3_enable_clks(void)
  */
 void _ipa_disable_clks_v3_0(void)
 {
-	ipa3_suspend_apps_pipes(true);
 }
 
 /**
@@ -1065,6 +1065,8 @@ void ipa3_disable_clks(void)
 	ipa_debug("disabling IPA clocks and bus voting\n");
 
 	ipa3_ctx->ctrl->ipa3_disable_clks();
+
+	ipa3_suspend_apps_pipes(true);
 
 	if (msm_bus_scale_client_update_request(ipa3_ctx->ipa_bus_hdl, 0))
 		WARN_ON(1);
