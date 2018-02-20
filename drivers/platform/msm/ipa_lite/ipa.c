@@ -1097,6 +1097,21 @@ static void ipa3_start_tag_process(struct work_struct *work)
 	ipa_debug("TAG process done\n");
 }
 
+/* log->lock is assumed held by the caller */
+static struct ipa_active_client *active_client_find(const char *id)
+{
+	struct ipa3_active_clients_log_ctx *log;
+	struct ipa_active_client *entry;
+
+	log = &ipa3_ctx->ipa3_active_clients_logging;
+
+	list_for_each_entry(entry, &log->active, links)
+		if (!strcmp(entry->id_string, id))
+			return entry;
+
+	return NULL;
+}
+
 /**
 * ipa3_active_clients_log_mod() - Log a modification in the active clients
 * reference count
@@ -1126,21 +1141,17 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 {
 	struct ipa3_active_clients_log_ctx *log;
 	struct ipa_active_client *entry;
-	struct ipa_active_client *found;
 	unsigned long flags;
 
 	log = &ipa3_ctx->ipa3_active_clients_logging;
 
 	spin_lock_irqsave(&log->lock, flags);
 	int_ctx = true;
-	found = NULL;
-	list_for_each_entry(entry, &log->active, links) {
-		if (!strcmp(entry->id_string, id->id_string)) {
-			entry->count = entry->count + (inc ? 1 : -1);
-			found = entry;
-		}
-	}
-	if (found == NULL) {
+
+	entry = active_client_find(id->id_string);
+	if (entry)
+		entry->count = entry->count + inc ? 1 : -1;
+	if (!entry) {
 		size_t id_size = strlen(id->id_string) + 1;
 
 		entry = kzalloc(sizeof(*entry) + id_size,
@@ -1154,9 +1165,9 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 		memcpy(entry->id_string, id->id_string, id_size);
 		entry->count = inc ? 1 : -1;
 		list_add_tail(&entry->links, &log->active);
-	} else if (found->count == 0) {
-		list_del(&found->links);
-		kfree(found);
+	} else if (!entry->count) {
+		list_del(&entry->links);
+		kfree(entry);
 	}
 
 	if (id->type != SIMPLE)
