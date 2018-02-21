@@ -1179,9 +1179,8 @@ out:
 * Return codes:
 * None
 */
-void ipa3_inc_client_enable_clks(struct ipa_active_client_logging_info *id)
+void ipa3_inc_client_enable_clks(void)
 {
-	ipa3_active_clients_log_mod(id, true);
 	__ipa3_inc_client_enable_clks();
 }
 

@@ -85,7 +85,8 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 	do { \
 		struct ipa_active_client_logging_info log_info; \
 		IPA_ACTIVE_CLIENTS_PREP_EP(log_info, client); \
-		ipa3_inc_client_enable_clks(&log_info); \
+		ipa3_active_clients_log_mod(&log_info, true); \
+		ipa3_inc_client_enable_clks(); \
 	} while (0)
 
 #define IPA_ACTIVE_CLIENTS_DEC_EP(client) \
@@ -100,7 +101,8 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 	do { \
 		struct ipa_active_client_logging_info log_info; \
 		IPA_ACTIVE_CLIENTS_PREP_SIMPLE(log_info); \
-		ipa3_inc_client_enable_clks(&log_info); \
+		ipa3_active_clients_log_mod(&log_info, true); \
+		ipa3_inc_client_enable_clks(); \
 	} while (0)
 
 #define IPA_ACTIVE_CLIENTS_DEC_SIMPLE() \
@@ -115,7 +117,8 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 	do { \
 		struct ipa_active_client_logging_info log_info; \
 		IPA_ACTIVE_CLIENTS_PREP_RESOURCE(log_info, resource_name); \
-		ipa3_inc_client_enable_clks(&log_info); \
+		ipa3_active_clients_log_mod(&log_info, true); \
+		ipa3_inc_client_enable_clks(); \
 	} while (0)
 
 #define IPA_ACTIVE_CLIENTS_DEC_RESOURCE(resource_name) \
@@ -130,7 +133,8 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 	do { \
 		struct ipa_active_client_logging_info log_info; \
 		IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log_info, id_str); \
-		ipa3_inc_client_enable_clks(&log_info); \
+		ipa3_active_clients_log_mod(&log_info, true); \
+		ipa3_inc_client_enable_clks(); \
 	} while (0)
 
 #define IPA_ACTIVE_CLIENTS_DEC_SPECIAL(id_str) \
