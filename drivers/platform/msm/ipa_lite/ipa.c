@@ -1190,12 +1190,11 @@ void ipa3_inc_client_enable_clks(void)
  * increment occurred, -EPERM otherwise.
  */
 int
-ipa3_inc_client_enable_clks_no_block(struct ipa_active_client_logging_info *id)
+ipa3_inc_client_enable_clks_no_block(void)
 {
 	if (!atomic_inc_not_zero(&ipa3_ctx->ipa3_active_clients.cnt))
 		return -EPERM;
 
-	ipa3_active_clients_log_mod(id, true);
 	ipa_debug_low("active clients = %d\n",
 		atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
 
@@ -1382,7 +1381,6 @@ fail_add_interrupt_handler:
 static void ipa3_freeze_clock_vote_and_notify_modem(void)
 {
 	int res;
-	struct ipa_active_client_logging_info log_info;
 
 	if (ipa3_ctx->smp2p_info.res_sent)
 		return;
@@ -1392,12 +1390,17 @@ static void ipa3_freeze_clock_vote_and_notify_modem(void)
 		return;
 	}
 
-	IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log_info, "FREEZE_VOTE");
-	res = ipa3_inc_client_enable_clks_no_block(&log_info);
-	if (res)
-		ipa3_ctx->smp2p_info.ipa_clk_on = false;
-	else
+	res = ipa3_inc_client_enable_clks_no_block();
+	if (!res) {
+		struct ipa_active_client_logging_info log_info;
+
+		IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log_info, "FREEZE_VOTE");
+		ipa3_active_clients_log_mod(&log_info, true);
+
 		ipa3_ctx->smp2p_info.ipa_clk_on = true;
+	} else {
+		ipa3_ctx->smp2p_info.ipa_clk_on = false;
+	}
 
 	gpio_set_value(ipa3_ctx->smp2p_info.out_base_id +
 		IPA_GPIO_OUT_CLK_VOTE_IDX,

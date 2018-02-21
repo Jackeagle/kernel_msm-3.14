@@ -2107,7 +2107,6 @@ static void ipa_gsi_irq_tx_notify_cb(struct gsi_chan_xfer_notify *notify)
 
 static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 {
-	struct ipa_active_client_logging_info log;
 	struct ipa3_sys_context *sys = notify->chan_user_data;
 	struct ipa3_rx_pkt_wrapper *rx_pkt_rcvd = notify->xfer_user_data;
 	struct ipa3_rx_pkt_wrapper *rx_pkt_expected;
@@ -2144,12 +2143,17 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 	}
 
 	/* Matching disable is in ipa3_rx_poll() */
-	IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log, "NAPI");
-	clk_off = ipa3_inc_client_enable_clks_no_block(&log);
-	if (!clk_off)
+	clk_off = ipa3_inc_client_enable_clks_no_block();
+	if (!clk_off) {
+		struct ipa_active_client_logging_info log_info;
+
+		IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log_info, "NAPI");
+		ipa3_active_clients_log_mod(&log_info, true);
+
 		sys->ep->client_notify(sys->ep->priv, IPA_CLIENT_START_POLL, 0);
-	else
+	} else {
 		queue_work(sys->wq, &sys->work);
+	}
 }
 
 /*

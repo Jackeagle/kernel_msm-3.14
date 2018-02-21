@@ -310,14 +310,16 @@ static irqreturn_t ipa3_isr(int irq, void *ctxt)
 {
 	struct ipa_active_client_logging_info log_info;
 
-	IPA_ACTIVE_CLIENTS_PREP_SIMPLE(log_info);
 	ipa_debug_low("Enter\n");
 	/* defer interrupt handling in case IPA is not clocked on */
-	if (ipa3_inc_client_enable_clks_no_block(&log_info)) {
+	if (ipa3_inc_client_enable_clks_no_block()) {
 		ipa_debug("defer interrupt processing\n");
 		queue_work(ipa3_ctx->power_mgmt_wq, &ipa3_interrupt_defer_work);
 		return IRQ_HANDLED;
 	}
+
+	IPA_ACTIVE_CLIENTS_PREP_SIMPLE(log_info);
+	ipa3_active_clients_log_mod(&log_info, true);
 
 	ipa3_process_interrupts(true);
 	ipa_debug_low("Exit\n");
