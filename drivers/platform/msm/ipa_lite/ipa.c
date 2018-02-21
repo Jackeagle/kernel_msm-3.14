@@ -1153,6 +1153,31 @@ out_unlock:
 	spin_unlock_irqrestore(&log->lock, flags);
 }
 
+/*
+ * Add an IPA client under protection of the mutex.  This is called
+ * for the first client, but a race could mean another caller gets
+ * the first reference.  When the first reference is taken, IPA
+ * clocks are enabled pipes are resumed.
+ */
+static void ipa_client_add_first(void)
+{
+	mutex_lock(&ipa3_ctx->ipa3_active_clients.mutex);
+
+	/* A reference might have been added while awaiting the mutex. */
+	if (!atomic_inc_not_zero(&ipa3_ctx->ipa3_active_clients.cnt)) {
+		ipa3_enable_clks();
+		ipa3_suspend_apps_pipes(false);
+		atomic_inc(&ipa3_ctx->ipa3_active_clients.cnt);
+	} else {
+		ipa_assert(atomic_read(&ipa3_ctx->ipa3_active_clients.cnt) > 1);
+	}
+
+	mutex_unlock(&ipa3_ctx->ipa3_active_clients.mutex);
+
+	ipa_debug_low("active clients = %d\n",
+		atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
+}
+
 /**
 * ipa3_inc_client_enable_clks() - Increase active clients counter, and
 * enable ipa clocks if necessary
@@ -1162,33 +1187,12 @@ out_unlock:
 */
 void ipa3_inc_client_enable_clks(void)
 {
-	int ret;
-
 	/* There's nothing more to do if this isn't the first reference */
-	ret = atomic_inc_not_zero(&ipa3_ctx->ipa3_active_clients.cnt);
-	if (ret)
-		goto out;
-
-	mutex_lock(&ipa3_ctx->ipa3_active_clients.mutex);
-
-	/*
-	 * A reference might have been added while awaiting the mutex.
-	 * Check, but don't increment it until after clocks are enabled.
-	 */
-	ret = atomic_inc_not_zero(&ipa3_ctx->ipa3_active_clients.cnt);
-	if (ret)
-		goto out_unlock;
-
-	ipa3_enable_clks();
-
-	atomic_inc(&ipa3_ctx->ipa3_active_clients.cnt);
-
-	ipa3_suspend_apps_pipes(false);
-out_unlock:
-	mutex_unlock(&ipa3_ctx->ipa3_active_clients.mutex);
-out:
-	ipa_debug_low("active clients = %d\n",
-		atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
+	if (!atomic_inc_not_zero(&ipa3_ctx->ipa3_active_clients.cnt))
+		ipa_client_add_first();
+	else
+		ipa_debug_low("active clients = %d\n",
+			atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
 }
 
 /*
