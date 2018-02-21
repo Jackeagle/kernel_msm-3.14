@@ -1153,7 +1153,14 @@ out_unlock:
 	spin_unlock_irqrestore(&log->lock, flags);
 }
 
-static void __ipa3_inc_client_enable_clks(void)
+/**
+* ipa3_inc_client_enable_clks() - Increase active clients counter, and
+* enable ipa clocks if necessary
+*
+* Return codes:
+* None
+*/
+void ipa3_inc_client_enable_clks(void)
 {
 	int ret;
 
@@ -1182,18 +1189,6 @@ out_unlock:
 out:
 	ipa_debug_low("active clients = %d\n",
 		atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
-}
-
-/**
-* ipa3_inc_client_enable_clks() - Increase active clients counter, and
-* enable ipa clocks if necessary
-*
-* Return codes:
-* None
-*/
-void ipa3_inc_client_enable_clks(void)
-{
-	__ipa3_inc_client_enable_clks();
 }
 
 /*
