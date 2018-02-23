@@ -2144,32 +2144,27 @@ void ipa3_suspend_apps_pipes(bool suspend)
  * Return codes:
  * 0: success
  */
-int ipa3_cfg_route(struct ipahal_reg_route *route)
+void ipa_cfg_default_route(enum ipa_client_type client)
 {
+	struct ipahal_reg_route route = { 0 };
+	int ipa_ep_idx;
 
-	ipa_debug("disable_route_block=%d, default_pipe=%d, default_hdr_tbl=%d\n",
-		route->route_dis,
-		route->route_def_pipe,
-		route->route_def_hdr_table);
-	ipa_debug("default_hdr_ofst=%d, default_frag_pipe=%d\n",
-		route->route_def_hdr_ofst,
-		route->route_frag_def_pipe);
+	ipa_ep_idx = ipa3_get_ep_mapping(client);
+	ipa_assert(ipa_ep_idx >= 0);
 
-	ipa_debug("default_retain_hdr=%d\n",
-		route->route_def_retain_hdr);
+	ipa_debug("dis=0, def_pipe=%d, hdr_tbl=1 hdr_ofst=0\n", ipa_ep_idx);
+	ipa_debug("frag_def_pipe=%d def_retain_hdr=1\n", ipa_ep_idx);
 
-	if (route->route_dis) {
-		ipa_err("Route disable is not supported!\n");
-		return -EPERM;
-	}
+	route.route_def_pipe = ipa_ep_idx;
+	route.route_def_hdr_table = 1;
+	route.route_frag_def_pipe = ipa_ep_idx;
+	route.route_def_retain_hdr = 1;
 
 	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
 
-	ipahal_write_reg_fields(IPA_ROUTE, route);
+	ipahal_write_reg_fields(IPA_ROUTE, &route);
 
 	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
-
-	return 0;
 }
 
 /*

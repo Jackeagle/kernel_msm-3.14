@@ -937,28 +937,6 @@ static int setup_apps_lan_cons_pipe(void)
 	return ipa3_setup_sys_pipe(&sys_in);
 }
 
-static int setup_default_route(enum ipa_client_type client)
-{
-	struct ipahal_reg_route route;
-	int ipa_ep_idx;
-
-	ipa_ep_idx = ipa3_get_ep_mapping(client);
-	ipa_assert(ipa_ep_idx >= 0);
-
-	/* Set up the LAN consumer pipe as the IPA default route */
-	route.route_def_pipe = ipa_ep_idx;
-	route.route_frag_def_pipe = ipa_ep_idx;
-	route.route_def_hdr_table = 1;
-	route.route_def_retain_hdr = 1;
-
-	if (!ipa3_cfg_route(&route))
-		return 0;
-
-	ipa_err("fail to add default route\n");
-
-	return -EPERM;
-}
-
 static long ipa3_setup_apps_pipes(void)
 {
 	long result;
@@ -1020,10 +998,10 @@ static long ipa3_setup_apps_pipes(void)
 		goto fail_flt_hash_tuple;
 	}
 
-	if (!setup_default_route(IPA_CLIENT_APPS_LAN_CONS))
-		return 0;
+	ipa_cfg_default_route(IPA_CLIENT_APPS_LAN_CONS);
 
-	ipa3_teardown_sys_pipe(ipa3_ctx->clnt_hdl_data_in);
+	return 0;
+
 fail_flt_hash_tuple:
 	ipa3_teardown_sys_pipe(ipa3_ctx->clnt_hdl_cmd);
 fail_ch20_wa:
