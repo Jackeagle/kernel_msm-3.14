@@ -981,7 +981,14 @@ static long ipa3_setup_apps_pipes(void)
 	ipa3_setup_rt_hash_tuple();
 	ipa_debug("rt hash tuple is configured\n");
 
-	/* LAN IN (IPA->AP) */
+	/*
+	 * LAN IN (IPA->AP)
+	 *
+	 * Even without supporting LAN traffic, we use the LAN consumer
+	 * pipe for receiving some information from the IPA.  If we issue
+	 * a tagged command, we arrange to be notified of its completion
+	 * through this pipe.
+	 */
 	ipa3_ctx->clnt_hdl_data_in = setup_apps_lan_cons_pipe();
 	if (ipa3_ctx->clnt_hdl_data_in < 0) {
 		result = -EPERM;
