@@ -98,7 +98,7 @@ static bool check_too_big(char *name, u64 value, u8 bits)
 
 /*
  * The The opcode used for certain immediate commands may change
- * between different versions of IPA hardare.  The format of the
+ * between different versions of IPA hardware.  The format of the
  * command data passed to the IPA can change slightly with new
  * hardware.  The "ipahal" layer uses the ipahal_imm_cmd_obj[][]
  * table to hide the version-specific details of creating immediate
@@ -115,8 +115,8 @@ static bool check_too_big(char *name, u64 value, u8 bits)
  * immediate command object entries if they are accessed the same
  * way as was defined by an older version.  The only entries defined
  * for newer hardware are for immediate commands whose opcode or
- * command format has changed, or immediate commands that are new
- * and not present in older hardware.
+ * command format has changed or are deprecated, or immediate
+ * commands that are new and not present in older hardware.
  *
  * The construct function for an immediate command is given an IPA
  * opcode, plus a non-null pointer to a command-specific parameter
