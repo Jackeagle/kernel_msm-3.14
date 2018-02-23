@@ -22,6 +22,8 @@
 #define IPA_UC_POLL_SLEEP_USEC 100
 #define IPA_UC_POLL_MAX_RETRY 10000
 
+#define UC_CMD_TIMEOUT	msecs_to_jiffies(10000)	/* 10 seconds */
+
 /* How long to sleep (range) between microcontroller command retries */
 #define UC_CMD_RETRY_USLEEP_MIN 1000	/* 1 second */
 #define UC_CMD_RETRY_USLEEP_MAX 2000	/* 2 seconds */
@@ -327,7 +329,8 @@ static bool send_uc_command(struct ipa3_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
 
 	send_uc_command_nowait(uc_ctx, cmd, opcode);
 
-	ret = wait_for_completion_timeout(&uc_ctx->uc_completion, 10 * HZ);
+	ret = wait_for_completion_timeout(&uc_ctx->uc_completion,
+						UC_CMD_TIMEOUT);
 	if (!ret)
 		return -ETIMEDOUT;
 

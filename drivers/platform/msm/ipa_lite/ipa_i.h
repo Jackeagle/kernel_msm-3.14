@@ -99,8 +99,6 @@
 
 #define IPA_GSI_CHANNEL_EMPTY_MAX_RETRY 15
 
-#define IPA_SLEEP_CLK_RATE_KHZ (32)
-
 #define IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES 120
 #define IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN 96
 #define FEATURE_ENUM_VAL(feature, opcode) ((feature << 5) | opcode)
