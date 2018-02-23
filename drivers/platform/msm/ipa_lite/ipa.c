@@ -937,6 +937,28 @@ static int setup_apps_lan_cons_pipe(void)
 	return ipa3_setup_sys_pipe(&sys_in);
 }
 
+static int setup_default_route(enum ipa_client_type client)
+{
+	struct ipahal_reg_route route;
+	int ipa_ep_idx;
+
+	ipa_ep_idx = ipa3_get_ep_mapping(client);
+	ipa_assert(ipa_ep_idx >= 0);
+
+	/* Set up the LAN consumer pipe as the IPA default route */
+	route.route_def_pipe = ipa_ep_idx;
+	route.route_frag_def_pipe = ipa_ep_idx;
+	route.route_def_hdr_table = 1;
+	route.route_def_retain_hdr = 1;
+
+	if (!ipa3_cfg_route(&route))
+		return 0;
+
+	ipa_err("fail to add default route\n");
+
+	return -EPERM;
+}
+
 static long ipa3_setup_apps_pipes(void)
 {
 	long result;
@@ -987,6 +1009,9 @@ static long ipa3_setup_apps_pipes(void)
 	 * Even without supporting LAN traffic, we use the LAN consumer
 	 * pipe for receiving some information from the IPA.  If we issue
 	 * a tagged command, we arrange to be notified of its completion
+	 * through this pipe.  In addition, we arrange for this pipe to
+	 * be used as the IPA's default route; the IPA will notify the AP
+	 * of exceptions (unroutable packets, but other events as well)
 	 * through this pipe.
 	 */
 	ipa3_ctx->clnt_hdl_data_in = setup_apps_lan_cons_pipe();
@@ -995,8 +1020,10 @@ static long ipa3_setup_apps_pipes(void)
 		goto fail_flt_hash_tuple;
 	}
 
-	return 0;
+	if (!setup_default_route(IPA_CLIENT_APPS_LAN_CONS))
+		return 0;
 
+	ipa3_teardown_sys_pipe(ipa3_ctx->clnt_hdl_data_in);
 fail_flt_hash_tuple:
 	ipa3_teardown_sys_pipe(ipa3_ctx->clnt_hdl_cmd);
 fail_ch20_wa:
