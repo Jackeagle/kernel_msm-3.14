@@ -2137,6 +2137,41 @@ void ipa3_suspend_apps_pipes(bool suspend)
 		ipa_debug("error suspending WAN consumer\n");
 }
 
+/**
+ * ipa3_cfg_route() - configure IPA route
+ * @route: IPA route
+ *
+ * Return codes:
+ * 0: success
+ */
+int ipa3_cfg_route(struct ipahal_reg_route *route)
+{
+
+	ipa_debug("disable_route_block=%d, default_pipe=%d, default_hdr_tbl=%d\n",
+		route->route_dis,
+		route->route_def_pipe,
+		route->route_def_hdr_table);
+	ipa_debug("default_hdr_ofst=%d, default_frag_pipe=%d\n",
+		route->route_def_hdr_ofst,
+		route->route_frag_def_pipe);
+
+	ipa_debug("default_retain_hdr=%d\n",
+		route->route_def_retain_hdr);
+
+	if (route->route_dis) {
+		ipa_err("Route disable is not supported!\n");
+		return -EPERM;
+	}
+
+	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+
+	ipahal_write_reg_fields(IPA_ROUTE, route);
+
+	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+
+	return 0;
+}
+
 /*
  * In certain cases we need to issue a command to reliably clear the
  * IPA pipeline.  Sending a 1-byte DMA task is sufficient, and this
