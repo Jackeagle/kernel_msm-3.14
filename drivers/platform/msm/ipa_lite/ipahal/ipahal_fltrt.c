@@ -244,6 +244,8 @@ void ipahal_fltrt_init(enum ipa_hw_version hw_version)
 {
 	int i;
 
+	ipa_assert(hw_version < ARRAY_SIZE(ipahal_fltrt_objs));
+
 	ipa_debug("Entry - HW_TYPE=%d\n", hw_version);
 
        /* Build up a the filter/route table descriptions we'll use */

@@ -821,6 +821,8 @@ void ipahal_reg_init(enum ipa_hw_version hw_version)
 	int i;
 	int j;
 
+	ipa_assert(hw_version < ARRAY_SIZE(ipahal_reg_objs));
+
 	ipa_debug_low("Entry - HW_TYPE=%d\n", hw_version);
 
 	/* Build up the register descriptions we'll use */
