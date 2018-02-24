@@ -1177,6 +1177,21 @@ static void ipa_client_add_first(void)
 	ipa_debug_low("active clients = %d\n",
 		atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
 }
+/*
+ * Attempt to add an IPA client reference, but only if this does not
+ * represent the initiaal reference.  Returns true if the reference
+ * was taken, false otherwise.
+ */
+static bool ipa_client_add_not_first(void)
+{
+	if (!atomic_inc_not_zero(&ipa3_ctx->ipa3_active_clients.cnt))
+		return false;
+
+	ipa_debug_low("active clients = %d\n",
+		atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
+
+	return true;
+}
 
 /**
 * ipa3_inc_client_enable_clks() - Increase active clients counter, and
@@ -1188,11 +1203,8 @@ static void ipa_client_add_first(void)
 void ipa3_inc_client_enable_clks(void)
 {
 	/* There's nothing more to do if this isn't the first reference */
-	if (!atomic_inc_not_zero(&ipa3_ctx->ipa3_active_clients.cnt))
+	if (!ipa_client_add_not_first())
 		ipa_client_add_first();
-	else
-		ipa_debug_low("active clients = %d\n",
-			atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
 }
 
 /*
