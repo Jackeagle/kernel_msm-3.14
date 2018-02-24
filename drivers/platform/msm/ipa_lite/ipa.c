@@ -1193,14 +1193,13 @@ static bool ipa_client_add_not_first(void)
 	return true;
 }
 
-/**
-* ipa3_inc_client_enable_clks() - Increase active clients counter, and
-* enable ipa clocks if necessary
-*
-* Return codes:
-* None
-*/
-void ipa3_inc_client_enable_clks(void)
+/*
+ * Add an IPA client.  If this is not the first client, the
+ * reference count is updated and return is immediate.  Otherwise
+ * ipa_client_add_first() will safely add the first client, enabling
+ * clocks and setting up (resuming) pipes before returning.
+ */
+void ipa_client_add(void)
 {
 	/* There's nothing more to do if this isn't the first reference */
 	if (!ipa_client_add_not_first())
