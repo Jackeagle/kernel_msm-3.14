@@ -115,6 +115,7 @@ ipa3_active_clients_log_insert(struct ipa_active_client_logging_info *id,
 	size_t count = ARRAY_SIZE(log->log_buffer);
 	unsigned long long t;
 	unsigned long nsec;
+	const char *basename;
 	int head;
 
 	log = &ipa3_ctx->ipa3_active_clients_logging;
@@ -127,10 +128,16 @@ ipa3_active_clients_log_insert(struct ipa_active_client_logging_info *id,
 	t = local_clock();	/* for seconds */
 	nsec = t % 1000000000;	/* nanoseconds */
 
+	basename = strrchr(id->file, '/');
+	if (basename)
+		basename++;
+	else
+		basename = id->file;
+
 	(void)snprintf(log->log_buffer[head], IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN,
 			"[%5llu.%06lu] %c %s, %s: %d",
 			t / 1000000000, nsec / 1000, inc ? '^' : 'v',
-			id->id_string, id->file, id->line);
+			id->id_string, basename, id->line);
 
 	/* Consume this entry.  If hit the end, drop the oldest */
 	log->log_head = (head + 1) % count;

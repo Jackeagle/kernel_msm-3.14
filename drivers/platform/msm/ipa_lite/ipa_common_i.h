@@ -54,26 +54,23 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 	return (reg & field_mask) >> field_shift(field_mask);
 }
 
-#define __FILENAME__ \
-	(strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
-
 #define IPA_ACTIVE_CLIENTS_PREP_EP(log_info, client) \
-		log_info.file = __FILENAME__; \
+		log_info.file = __FILE__; \
 		log_info.line = __LINE__; \
 		log_info.id_string = ipa_client_string(client)
 
 #define IPA_ACTIVE_CLIENTS_PREP_SIMPLE(log_info) \
-		log_info.file = __FILENAME__; \
+		log_info.file = __FILE__; \
 		log_info.line = __LINE__; \
 		log_info.id_string = __func__
 
 #define IPA_ACTIVE_CLIENTS_PREP_RESOURCE(log_info, resource_name) \
-		log_info.file = __FILENAME__; \
+		log_info.file = __FILE__; \
 		log_info.line = __LINE__; \
 		log_info.id_string = resource_name
 
 #define IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log_info, id_str) \
-		log_info.file = __FILENAME__; \
+		log_info.file = __FILE__; \
 		log_info.line = __LINE__; \
 		log_info.id_string = id_str
 
