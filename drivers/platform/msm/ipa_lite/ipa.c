@@ -91,15 +91,8 @@ int ipa3_active_clients_log_print_table(char *buf, int size)
 
 	cnt = scnprintf(buf, size, "\n---- Active Clients Table ----\n");
 	list_for_each_entry(entry, &log->active, links) {
-		const char *type = active_client_type_string(entry->type);
-
-		if (!type) {
-			ipa_err("(unrecognized type %u)\n", (u32)entry->type);
-			continue;
-		}
-
-		cnt += scnprintf(buf + cnt, size - cnt, "%-40s %-3d %s\n",
-				entry->id_string, entry->count, type);
+		cnt += scnprintf(buf + cnt, size - cnt, "%-40s %-3d\n",
+				entry->id_string, entry->count);
 	}
 	cnt += scnprintf(buf + cnt, size - cnt,
 			"\nTotal active clients count: %d\n",
