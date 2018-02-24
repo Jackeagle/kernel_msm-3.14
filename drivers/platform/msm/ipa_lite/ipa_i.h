@@ -1054,8 +1054,6 @@ int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr);
 
 void ipa3_destroy_imm(void *user1, int user2);
 
-void ipa3_enable_clks(void);
-void ipa3_disable_clks(void);
 void ipa_client_add(void);
 bool ipa_client_add_additional(void);
 void ipa_client_remove(void);

@@ -1037,7 +1037,7 @@ static unsigned int ipa3_get_bus_vote(void)
 * Return codes:
 * None
 */
-void ipa3_enable_clks(void)
+static void ipa3_enable_clks(void)
 {
 	ipa_debug("enabling IPA clocks and bus voting\n");
 
@@ -1054,7 +1054,7 @@ void ipa3_enable_clks(void)
 * Return codes:
 * None
 */
-void ipa3_disable_clks(void)
+static void ipa3_disable_clks(void)
 {
 	ipa_debug("disabling IPA clocks and bus voting\n");
 
@@ -2497,7 +2497,6 @@ int ipa3_ap_suspend(struct device *dev)
 	 * Release transport IPA resource without waiting for inactivity timer
 	 */
 	atomic_set(&ipa3_ctx->transport_pm.eot_activity, 0);
-	//ipa3_disable_clks();
 	ipa_debug("Exit\n");
 
 	return 0;
@@ -2514,7 +2513,6 @@ int ipa3_ap_suspend(struct device *dev)
 */
 int ipa3_ap_resume(struct device *dev)
 {
-	//ipa3_enable_clks();
 	return 0;
 }
 
