@@ -219,7 +219,7 @@ int ipa3_rx_poll(u32 clnt_hdl, int weight)
 		/* Matching enable is in ipa_gsi_irq_rx_notify_cb() */
 		IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log, "NAPI");
 		ipa3_active_clients_log_mod(&log, false);
-		ipa3_dec_client_disable_clks();
+		ipa_client_remove();
 	}
 
 	return cnt;

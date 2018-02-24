@@ -1246,22 +1246,20 @@ static void ipa_client_remove_final(void)
  * is 0, suspend the pipes and disable clocks.
  *
  * This function runs in work queue context, scheduled to run whenever
- * the last reference would be dropped in ipa3_dec_client_disable_clks().
+ * the last reference would be dropped in ipa_client_remove().
  */
 static void ipa_client_remove_deferred(struct work_struct *work)
 {
 	ipa_client_remove_final();
 }
 
-/**
- * ipa3_dec_client_disable_clks() - Decrease active clients counter
- * if possible without blocking. If this is the last client then the desrease
- * will happen from work queue context.
- *
- * Return codes:
- * None
+/*
+ * Attempt to remove an IPA client reference.  If this represents
+ * the last reference arrange for ipa_client_remove_final() to be
+ * called in workqueue context, dropping the last reference under
+ * protection of the mutex.
  */
-void ipa3_dec_client_disable_clks(void)
+void ipa_client_remove(void)
 {
 	if (atomic_add_unless(&ipa3_ctx->ipa3_active_clients.cnt, -1, 1))
 		ipa_debug_low("active clients = %d\n",
