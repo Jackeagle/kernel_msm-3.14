@@ -1059,6 +1059,7 @@ void ipa3_disable_clks(void);
 void ipa_client_add(void);
 bool ipa_client_add_additional(void);
 void ipa_client_remove(void);
+void ipa_client_remove_wait(void);
 
 void ipa_cfg_default_route(enum ipa_client_type client);
 
