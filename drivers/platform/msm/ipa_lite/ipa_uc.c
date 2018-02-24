@@ -515,7 +515,7 @@ int ipa3_uc_panic_notifier(struct notifier_block *this,
 	if (ipa3_uc_state_check())
 		goto fail;
 
-	if (ipa3_inc_client_enable_clks_no_block())
+	if (!ipa_client_add_additional())
 		goto fail;
 
 	IPA_ACTIVE_CLIENTS_PREP_SIMPLE(log_info);

@@ -1194,6 +1194,16 @@ static bool ipa_client_add_not_first(void)
 }
 
 /*
+ * Add an IPA client, but only if the reference count is already
+ * non-zero.  (This is used to avoid blocking.)  Returns true if the
+ * additional reference was added successfully, or false otherwise.
+ */
+bool ipa_client_add_additional(void)
+{
+	return ipa_client_add_not_first();
+}
+
+/*
  * Add an IPA client.  If this is not the first client, the
  * reference count is updated and return is immediate.  Otherwise
  * ipa_client_add_first() will safely add the first client, enabling
@@ -1204,23 +1214,6 @@ void ipa_client_add(void)
 	/* There's nothing more to do if this isn't the first reference */
 	if (!ipa_client_add_not_first())
 		ipa_client_add_first();
-}
-
-/*
- * ipa3_inc_client_enable_clks_no_block() - Increment the active
- * client count unless doing so could block.  Returns 0 if the
- * increment occurred, -EPERM otherwise.
- */
-int
-ipa3_inc_client_enable_clks_no_block(void)
-{
-	if (!atomic_inc_not_zero(&ipa3_ctx->ipa3_active_clients.cnt))
-		return -EPERM;
-
-	ipa_debug_low("active clients = %d\n",
-		atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
-
-	return 0;
 }
 
 /*
@@ -1412,8 +1405,8 @@ static void ipa3_freeze_clock_vote_and_notify_modem(void)
 		return;
 	}
 
-	res = ipa3_inc_client_enable_clks_no_block();
-	if (!res) {
+	res = ipa_client_add_additional();
+	if (res) {
 		struct ipa_active_client_logging_info log_info;
 
 		IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log_info, "FREEZE_VOTE");
