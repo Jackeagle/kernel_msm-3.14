@@ -1254,6 +1254,23 @@ static void ipa_client_remove_deferred(struct work_struct *work)
 }
 
 /*
+ * Attempt to remove a client reference, but only if this is not the
+ * only reference remaining.  Returns true if the reference was
+ * removed, or false if doing so would produce a zero reference
+ * count.
+ */
+static bool ipa_client_remove_not_final(void)
+{
+	if (!atomic_add_unless(&ipa3_ctx->ipa3_active_clients.cnt, -1, 1))
+		return false;
+
+	ipa_debug_low("active clients = %d\n",
+			atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
+
+	return true;
+}
+
+/*
  * Attempt to remove an IPA client reference.  If this represents
  * the last reference arrange for ipa_client_remove_final() to be
  * called in workqueue context, dropping the last reference under
@@ -1261,10 +1278,7 @@ static void ipa_client_remove_deferred(struct work_struct *work)
  */
 void ipa_client_remove(void)
 {
-	if (atomic_add_unless(&ipa3_ctx->ipa3_active_clients.cnt, -1, 1))
-		ipa_debug_low("active clients = %d\n",
-			atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
-	else
+	if (!ipa_client_remove_not_final())
 		queue_work(ipa3_ctx->power_mgmt_wq, &ipa_client_remove_work);
 }
 
