@@ -1217,13 +1217,13 @@ void ipa_client_add(void)
 }
 
 /*
- * Decrement the active clients reference count, and if the result
- * is 0, suspend the pipes and disable clocks.
- *
- * This function runs in work queue context, scheduled to run whenever
- * the last reference would be dropped in ipa3_dec_client_disable_clks().
+ * Remove an IPA client under protection of the mutex.  This is
+ * called for the last remaining client, but a race could mean
+ * another caller gets an additional reference before the mutex
+ * is acquired.  When the final reference is dropped, pipes are
+ * suspended and IPA clocks disabled.
  */
-static void ipa_dec_clients_disable_clks_on_wq(struct work_struct *work)
+static void ipa_client_remove_final(void)
 {
 	int ret;
 
@@ -1240,6 +1240,18 @@ static void ipa_dec_clients_disable_clks_on_wq(struct work_struct *work)
 	mutex_unlock(&ipa3_ctx->ipa3_active_clients.mutex);
 
 	ipa_debug_low("active clients = %d\n", ret);
+}
+
+/*
+ * Decrement the active clients reference count, and if the result
+ * is 0, suspend the pipes and disable clocks.
+ *
+ * This function runs in work queue context, scheduled to run whenever
+ * the last reference would be dropped in ipa3_dec_client_disable_clks().
+ */
+static void ipa_dec_clients_disable_clks_on_wq(struct work_struct *work)
+{
+	ipa_client_remove_final();
 }
 
 /**
