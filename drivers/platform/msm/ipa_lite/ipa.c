@@ -60,9 +60,8 @@ static int ipa3_q6_clean_q6_tables(void);
 static void ipa3_post_init_wq(struct work_struct *work);
 static DECLARE_WORK(ipa3_post_init_work, ipa3_post_init_wq);
 
-static void ipa_dec_clients_disable_clks_on_wq(struct work_struct *work);
-static DECLARE_WORK(ipa_dec_clients_disable_clks_on_wq_work,
-	ipa_dec_clients_disable_clks_on_wq);
+static void ipa_client_remove_deferred(struct work_struct *work);
+static DECLARE_WORK(ipa_client_remove_work, ipa_client_remove_deferred);
 
 static struct ipa3_context ipa3_ctx_struct;
 struct ipa3_context *ipa3_ctx = &ipa3_ctx_struct;
@@ -1249,7 +1248,7 @@ static void ipa_client_remove_final(void)
  * This function runs in work queue context, scheduled to run whenever
  * the last reference would be dropped in ipa3_dec_client_disable_clks().
  */
-static void ipa_dec_clients_disable_clks_on_wq(struct work_struct *work)
+static void ipa_client_remove_deferred(struct work_struct *work)
 {
 	ipa_client_remove_final();
 }
@@ -1268,8 +1267,7 @@ void ipa3_dec_client_disable_clks(void)
 		ipa_debug_low("active clients = %d\n",
 			atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
 	else
-		queue_work(ipa3_ctx->power_mgmt_wq,
-				&ipa_dec_clients_disable_clks_on_wq_work);
+		queue_work(ipa3_ctx->power_mgmt_wq, &ipa_client_remove_work);
 }
 
 /**
