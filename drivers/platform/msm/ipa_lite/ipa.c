@@ -66,18 +66,6 @@ static DECLARE_WORK(ipa_client_remove_work, ipa_client_remove_deferred);
 static struct ipa3_context ipa3_ctx_struct;
 struct ipa3_context *ipa3_ctx = &ipa3_ctx_struct;
 
-static const char *
-active_client_type_string(enum ipa_active_client_log_type type)
-{
-	switch (type) {
-	case EP:	return "ENDPOINT";
-	case SIMPLE:	return "SIMPLE";
-	case RESOURCE:	return "RESOURCE";
-	case SPECIAL:	return "ENDPOINT";
-	default:	return NULL;
-	}
-}
-
 int ipa3_active_clients_log_print_table(char *buf, int size)
 {
 	struct ipa3_active_clients_log_ctx *log;
@@ -1134,9 +1122,7 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 		list_del(&entry->links);
 		kfree(entry);
 	} else if (entry->count < 0) {
-		ipa_err("negative count for %s %s\n",
-				active_client_type_string(id->type),
-				id->id_string);
+		ipa_err("negative count for %s\n", id->id_string);
 	}
 
 	if (id->type != SIMPLE)
