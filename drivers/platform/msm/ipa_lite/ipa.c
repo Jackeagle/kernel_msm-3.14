@@ -1122,7 +1122,6 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 		ipa_err("negative count for %s\n", id->id_string);
 	}
 
-	entry->type = id->type;
 	if (id->type != SIMPLE)
 		ipa3_active_clients_log_insert(id, inc);
 out_unlock:

@@ -163,7 +163,6 @@ struct ipa_sys_connect_params {
 struct ipa_active_client {
 	struct list_head links;
 	int count;
-	enum ipa_active_client_log_type type;
 	char id_string[];
 };
 
