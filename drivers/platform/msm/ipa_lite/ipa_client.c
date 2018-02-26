@@ -254,12 +254,12 @@ int ipa3_reset_gsi_channel(u32 clnt_hdl)
 	}
 
 finish_reset:
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_remove(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	ipa_debug("exit\n");
 	return 0;
 
 reset_chan_fail:
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_remove(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 	return result;
 }

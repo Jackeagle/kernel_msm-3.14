@@ -846,7 +846,7 @@ static int ipa3_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_n, clnt_hdl, &ep->cfg.hdr);
 
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_remove(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	return 0;
 }
@@ -890,7 +890,7 @@ static int ipa3_cfg_ep_hdr_ext(u32 clnt_hdl,
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_n, clnt_hdl,
 		&ep->cfg.hdr_ext);
 
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_remove(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	return 0;
 }
@@ -932,7 +932,7 @@ static int ipa3_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_AGGR_n, clnt_hdl, ep_aggr);
 
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_remove(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	return 0;
 }
@@ -969,7 +969,7 @@ static int ipa3_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CFG_n, clnt_hdl,
 				  &ipa3_ctx->ep[clnt_hdl].cfg.cfg);
 
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_remove(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	return 0;
 }
@@ -1020,7 +1020,7 @@ static int ipa3_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 	init_mode.ep_mode = *ep_mode;
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_MODE_n, clnt_hdl, &init_mode);
 
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_remove(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	return 0;
 }
@@ -1059,7 +1059,7 @@ static int ipa3_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 				clnt_hdl);
 		ipahal_write_reg_n(IPA_ENDP_INIT_SEQ_n, clnt_hdl, type);
 
-		IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+		ipa_client_remove(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 	} else {
 		ipa_debug("should not set sequencer type of ep = %d\n", clnt_hdl);
 	}
@@ -1102,7 +1102,7 @@ static int ipa3_cfg_ep_deaggr(u32 clnt_hdl,
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_n, clnt_hdl,
 		&ep->cfg.deaggr);
 
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_remove(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	return 0;
 }
@@ -1132,7 +1132,7 @@ static int ipa3_cfg_ep_metadata_mask(u32 clnt_hdl,
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_n,
 		clnt_hdl, metadata_mask);
 
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_remove(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	return 0;
 }
@@ -2284,7 +2284,7 @@ int ipa3_stop_gsi_channel(u32 clnt_hdl)
 	ipa_err("Failed	 to stop GSI channel with retries\n");
 	res = -EFAULT;
 end_sequence:
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_remove(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	return res;
 }

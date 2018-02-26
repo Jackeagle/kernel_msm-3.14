@@ -794,7 +794,7 @@ int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 			ipa_debug("modem cfg emb pipe flt\n");
 	}
 
-	IPA_ACTIVE_CLIENTS_DEC_EP(sys_in->client);
+	ipa_client_remove(ipa_client_string(sys_in->client), true);
 
 	ipa_debug("client %d (ep: %d) connected sys=%p\n", sys_in->client,
 			ipa_ep_idx, ep->sys);
@@ -809,7 +809,7 @@ fail_wq:
 	kfree(ep->sys);
 	memset(&ipa3_ctx->ep[ipa_ep_idx], 0, sizeof(struct ipa3_ep_context));
 fail_and_disable_clocks:
-	IPA_ACTIVE_CLIENTS_DEC_EP(sys_in->client);
+	ipa_client_remove(ipa_client_string(sys_in->client), true);
 fail_gen:
 	return result;
 }
@@ -885,7 +885,7 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 	}
 
 	ep->valid = 0;
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_remove(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	ipa_debug("client (ep: %d) disconnected\n", clnt_hdl);
 
