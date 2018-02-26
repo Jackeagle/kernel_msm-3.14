@@ -508,8 +508,6 @@ remap_fail:
 int ipa3_uc_panic_notifier(struct notifier_block *this,
 		unsigned long event, void *ptr)
 {
-	struct ipa_active_client_logging_info log_info;
-
 	ipa_debug("this=%p evt=%lu ptr=%p\n", this, event, ptr);
 
 	if (ipa3_uc_state_check())
@@ -517,11 +515,6 @@ int ipa3_uc_panic_notifier(struct notifier_block *this,
 
 	if (!ipa_client_add_additional(__func__, false))
 		goto fail;
-
-	log_info.file = __FILE__;
-	log_info.line = __LINE__;
-	log_info.id_string = __func__;
-	ipa3_active_clients_log_mod(&log_info, false, true);
 
 	send_uc_command_nowait(&ipa3_ctx->uc_ctx, 0,
 				IPA_CPU_2_HW_CMD_ERR_FATAL);

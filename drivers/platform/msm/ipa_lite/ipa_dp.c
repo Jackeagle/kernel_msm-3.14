@@ -2138,18 +2138,10 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 	}
 
 	/* Matching disable is in ipa3_rx_poll() */
-	if (ipa_client_add_additional("NAPI", true)) {
-		struct ipa_active_client_logging_info log_info;
-
-		log_info.file = __FILE__;
-		log_info.line = __LINE__;
-		log_info.id_string = "NAPI";
-		ipa3_active_clients_log_mod(&log_info, true, true);
-
+	if (ipa_client_add_additional("NAPI", true))
 		sys->ep->client_notify(sys->ep->priv, IPA_CLIENT_START_POLL, 0);
-	} else {
+	else
 		queue_work(sys->wq, &sys->work);
-	}
 }
 
 /*

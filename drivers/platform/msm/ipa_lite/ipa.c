@@ -1184,7 +1184,19 @@ static bool ipa_client_add_not_first(void)
 bool _ipa_client_add_additional(const char *id, bool log_it,
 		const char *file, int line)
 {
-	return ipa_client_add_not_first();
+	struct ipa_active_client_logging_info log_info;
+	bool ret;
+
+	ret = ipa_client_add_not_first();
+	if (!ret)
+		return false;
+
+	log_info.id_string = id;
+	log_info.file = file;
+	log_info.line = line;
+	ipa3_active_clients_log_mod(&log_info, log_it, true);
+
+	return true;
 }
 
 /*
@@ -1431,8 +1443,6 @@ fail_add_interrupt_handler:
 
 static void ipa3_freeze_clock_vote_and_notify_modem(void)
 {
-	int res;
-
 	if (ipa3_ctx->smp2p_info.res_sent)
 		return;
 
@@ -1441,19 +1451,8 @@ static void ipa3_freeze_clock_vote_and_notify_modem(void)
 		return;
 	}
 
-	res = ipa_client_add_additional("FREEZE_VOTE", true);
-	if (res) {
-		struct ipa_active_client_logging_info log_info;
-
-		log_info.file = __FILE__;
-		log_info.line = __LINE__;
-		log_info.id_string = "FREEZE_VOTE";
-		ipa3_active_clients_log_mod(&log_info, true, true);
-
-		ipa3_ctx->smp2p_info.ipa_clk_on = true;
-	} else {
-		ipa3_ctx->smp2p_info.ipa_clk_on = false;
-	}
+	ipa3_ctx->smp2p_info.ipa_clk_on =
+			ipa_client_add_additional("FREEZE_VOTE", true);
 
 	gpio_set_value(ipa3_ctx->smp2p_info.out_base_id +
 		IPA_GPIO_OUT_CLK_VOTE_IDX,

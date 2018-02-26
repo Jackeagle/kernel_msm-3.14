@@ -308,8 +308,6 @@ static void ipa3_interrupt_defer(struct work_struct *work)
 
 static irqreturn_t ipa3_isr(int irq, void *ctxt)
 {
-	struct ipa_active_client_logging_info log_info;
-
 	ipa_debug_low("Enter\n");
 	/* defer interrupt handling in case IPA is not clocked on */
 	if (!ipa_client_add_additional(__func__, false)) {
@@ -317,11 +315,6 @@ static irqreturn_t ipa3_isr(int irq, void *ctxt)
 		queue_work(ipa3_ctx->power_mgmt_wq, &ipa3_interrupt_defer_work);
 		return IRQ_HANDLED;
 	}
-
-	log_info.file = __FILE__;
-	log_info.line = __LINE__;
-	log_info.id_string = __func__;
-	ipa3_active_clients_log_mod(&log_info, false, true);
 
 	ipa3_process_interrupts(true);
 	ipa_debug_low("Exit\n");
