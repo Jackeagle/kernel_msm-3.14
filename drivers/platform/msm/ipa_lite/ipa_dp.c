@@ -1022,7 +1022,7 @@ static void ipa3_wq_handle_rx(struct work_struct *work)
 	sys = container_of(work, struct ipa3_sys_context, work);
 
 	if (sys->ep->napi_enabled) {
-		IPA_ACTIVE_CLIENTS_INC_SPECIAL("NAPI");
+		ipa_client_add("NAPI", true);
 		sys->ep->client_notify(sys->ep->priv,
 				IPA_CLIENT_START_POLL, 0);
 	} else

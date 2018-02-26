@@ -54,16 +54,6 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 	return (reg & field_mask) >> field_shift(field_mask);
 }
 
-#define IPA_ACTIVE_CLIENTS_INC_SPECIAL(id_str) \
-	do { \
-		ipa_client_add(id_str, true); \
-	} while (0)
-
-#define IPA_ACTIVE_CLIENTS_DEC_SPECIAL(id_str) \
-	do { \
-		ipa_client_remove(id_str, true); \
-	} while (0)
-
 #define IPA_CLIENT_IS_PROD(x) \
 	(x < IPA_CLIENT_MAX && (x & 0x1) == 0)
 #define IPA_CLIENT_IS_CONS(x) \

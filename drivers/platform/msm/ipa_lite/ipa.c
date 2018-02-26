@@ -1478,7 +1478,7 @@ void ipa3_reset_freeze_vote(void)
 		return;
 
 	if (ipa3_ctx->smp2p_info.ipa_clk_on)
-		IPA_ACTIVE_CLIENTS_DEC_SPECIAL("FREEZE_VOTE");
+		ipa_client_remove("FREEZE_VOTE", true);
 
 	gpio_set_value(ipa3_ctx->smp2p_info.out_base_id +
 		IPA_GPIO_OUT_CLK_VOTE_IDX, 0);

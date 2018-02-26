@@ -1890,7 +1890,7 @@ fail_free_tag_desc:
 void ipa3_proxy_clk_unvote(void)
 {
 	if (ipa3_ctx->q6_proxy_clk_vote_valid) {
-		IPA_ACTIVE_CLIENTS_DEC_SPECIAL("PROXY_CLK_VOTE");
+		ipa_client_remove("PROXY_CLK_VOTE", true);
 		ipa3_ctx->q6_proxy_clk_vote_valid = false;
 	}
 }
@@ -1903,7 +1903,7 @@ void ipa3_proxy_clk_unvote(void)
 void ipa3_proxy_clk_vote(void)
 {
 	if (!ipa3_ctx->q6_proxy_clk_vote_valid) {
-		IPA_ACTIVE_CLIENTS_INC_SPECIAL("PROXY_CLK_VOTE");
+		ipa_client_add("PROXY_CLK_VOTE", true);
 		ipa3_ctx->q6_proxy_clk_vote_valid = true;
 	}
 }
