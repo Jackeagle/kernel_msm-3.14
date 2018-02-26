@@ -1304,6 +1304,13 @@ void _ipa_client_remove(const char *id, bool log_it, const char *file, int line)
 void
 _ipa_client_remove_wait(const char *id, bool log_it, const char *file, int line)
 {
+	struct ipa_active_client_logging_info log_info;
+
+	log_info.id_string = id;
+	log_info.file = file;
+	log_info.line = line;
+	ipa3_active_clients_log_mod(&log_info, log_it, false);
+
 	if (!ipa_client_remove_not_final())
 		ipa_client_remove_final();
 }
