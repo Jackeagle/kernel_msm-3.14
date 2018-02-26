@@ -60,25 +60,21 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 #define IPA_ACTIVE_CLIENTS_PREP_EP(log_info, client) \
 		log_info.file = __FILENAME__; \
 		log_info.line = __LINE__; \
-		log_info.type = EP; \
 		log_info.id_string = ipa_client_string(client)
 
 #define IPA_ACTIVE_CLIENTS_PREP_SIMPLE(log_info) \
 		log_info.file = __FILENAME__; \
 		log_info.line = __LINE__; \
-		log_info.type = SIMPLE; \
 		log_info.id_string = __func__
 
 #define IPA_ACTIVE_CLIENTS_PREP_RESOURCE(log_info, resource_name) \
 		log_info.file = __FILENAME__; \
 		log_info.line = __LINE__; \
-		log_info.type = RESOURCE; \
 		log_info.id_string = resource_name
 
 #define IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log_info, id_str) \
 		log_info.file = __FILENAME__; \
 		log_info.line = __LINE__; \
-		log_info.type = SPECIAL; \
 		log_info.id_string = id_str
 
 #define IPA_ACTIVE_CLIENTS_INC_EP(client) \
@@ -201,14 +197,6 @@ enum ipa_irq_type {
 	IPA_IRQ_MAX
 };
 
-enum ipa_active_client_log_type {
-	EP,
-	SIMPLE,
-	RESOURCE,
-	SPECIAL,
-	INVALID
-};
-
 /**
  * enum ipa_client_type - names for the various IPA "clients"
  * these are from the perspective of the clients, for e.g.
@@ -264,7 +252,6 @@ struct ipa_active_client_logging_info {
 	const char *id_string;
 	const char *file;
 	int line;
-	enum ipa_active_client_log_type type;
 };
 
 /**
