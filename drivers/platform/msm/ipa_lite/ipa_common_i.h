@@ -262,7 +262,7 @@ enum ipa_client_type {
 
 struct ipa_active_client_logging_info {
 	const char *id_string;
-	char *file;
+	const char *file;
 	int line;
 	enum ipa_active_client_log_type type;
 };
