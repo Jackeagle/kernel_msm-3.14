@@ -1053,10 +1053,22 @@ int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr);
 
 void ipa3_destroy_imm(void *user1, int user2);
 
-void ipa_client_add(const char *id, bool log_it);
-bool ipa_client_add_additional(const char *id, bool log_it);
-void ipa_client_remove(const char *id, bool log_it);
-void ipa_client_remove_wait(const char *id, bool log_it);
+#define ipa_client_add(id, log_it) \
+	_ipa_client_add((id), (log_it), __FILE__, __LINE__)
+#define ipa_client_add_additional(id, log_it) \
+	_ipa_client_add_additional((id), (log_it), __FILE__, __LINE__)
+#define ipa_client_remove(id, log_it) \
+	_ipa_client_remove((id), (log_it), __FILE__, __LINE__)
+#define ipa_client_remove_wait(id, log_it) \
+	_ipa_client_remove_wait((id), (log_it), __FILE__, __LINE__)
+
+void _ipa_client_add(const char *id, bool log_it, const char *file, int line);
+bool _ipa_client_add_additional(const char *id, bool log_it,
+				const char *file, int line);
+void _ipa_client_remove(const char *id, bool log_it,
+				const char *file, int line);
+void _ipa_client_remove_wait(const char *id, bool log_it,
+				const char *file, int line);
 
 void ipa_cfg_default_route(enum ipa_client_type client);
 
