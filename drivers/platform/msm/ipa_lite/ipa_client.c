@@ -225,7 +225,7 @@ int ipa3_reset_gsi_channel(u32 clnt_hdl)
 
 	ep = &ipa3_ctx->ep[clnt_hdl];
 
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_add(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 	/*
 	 * Check for open aggregation frame on Consumer EP -
 	 * reset with open aggregation frame WA

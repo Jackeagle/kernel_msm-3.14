@@ -688,7 +688,7 @@ int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 	}
 
 
-	IPA_ACTIVE_CLIENTS_INC_EP(sys_in->client);
+	ipa_client_add(ipa_client_string(sys_in->client), true);
 	memset(ep, 0, offsetof(struct ipa3_ep_context, sys));
 
 	if (!ep->sys) {
@@ -835,7 +835,7 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 
 	ep = &ipa3_ctx->ep[clnt_hdl];
 
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_add(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	if (ep->napi_enabled) {
 		do {

@@ -1391,8 +1391,8 @@ void ipa3_suspend_handler(enum ipa_irq_type interrupt,
 				if (!atomic_read(
 					&ipa3_ctx->transport_pm.dec_clients)
 					) {
-					IPA_ACTIVE_CLIENTS_INC_EP(
-						ipa3_ctx->ep[i].client);
+						ipa_client_add(
+							ipa_client_string(ipa3_ctx->ep[i].client), true);
 					ipa_debug_low("Pipes un-suspended.\n");
 					ipa_debug_low("Enter poll mode.\n");
 					atomic_set(

@@ -842,7 +842,7 @@ static int ipa3_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 	/* copy over EP cfg */
 	ep->cfg.hdr = *ep_hdr;
 
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_add(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_n, clnt_hdl, &ep->cfg.hdr);
 
@@ -885,7 +885,7 @@ static int ipa3_cfg_ep_hdr_ext(u32 clnt_hdl,
 	/* copy over EP cfg */
 	ep->cfg.hdr_ext = *ep_hdr_ext;
 
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_add(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_n, clnt_hdl,
 		&ep->cfg.hdr_ext);
@@ -928,7 +928,7 @@ static int ipa3_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 	/* copy over EP cfg */
 	ipa3_ctx->ep[clnt_hdl].cfg.aggr = *ep_aggr;
 
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_add(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_AGGR_n, clnt_hdl, ep_aggr);
 
@@ -964,7 +964,7 @@ static int ipa3_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 			ipa3_ctx->ep[clnt_hdl].cfg.cfg.cs_metadata_hdr_offset,
 			ipa3_ctx->ep[clnt_hdl].cfg.cfg.gen_qmb_master_sel);
 
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_add(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CFG_n, clnt_hdl,
 				  &ipa3_ctx->ep[clnt_hdl].cfg.cfg);
@@ -1014,7 +1014,7 @@ static int ipa3_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 	ipa3_ctx->ep[clnt_hdl].cfg.mode = *ep_mode;
 	ipa3_ctx->ep[clnt_hdl].dst_pipe_index = ipa_ep_idx;
 
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_add(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	init_mode.dst_pipe_number = ipa3_ctx->ep[clnt_hdl].dst_pipe_index;
 	init_mode.ep_mode = *ep_mode;
@@ -1052,7 +1052,7 @@ static int ipa3_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 		if (ipa3_ctx->ep[clnt_hdl].cfg.mode.mode == IPA_DMA)
 			ipa_assert(IPA_DPS_HPS_SEQ_TYPE_IS_DMA(type));
 
-		IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+		ipa_client_add(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 		/* Configure sequencers type*/
 
 		ipa_debug("set sequencers to sequence 0x%x, ep = %d\n", type,
@@ -1097,7 +1097,7 @@ static int ipa3_cfg_ep_deaggr(u32 clnt_hdl,
 	/* copy over EP cfg */
 	ep->cfg.deaggr = *ep_deaggr;
 
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_add(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_n, clnt_hdl,
 		&ep->cfg.deaggr);
@@ -1127,7 +1127,7 @@ static int ipa3_cfg_ep_metadata_mask(u32 clnt_hdl,
 	/* copy over EP cfg */
 	ipa3_ctx->ep[clnt_hdl].cfg.metadata_mask = *metadata_mask;
 
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_add(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_n,
 		clnt_hdl, metadata_mask);
@@ -1218,11 +1218,11 @@ int ipa3_cfg_ep_status(u32 clnt_hdl,
 	/* copy over EP cfg */
 	ipa3_ctx->ep[clnt_hdl].status = *ep_status;
 
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_add(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_STATUS_n, clnt_hdl, ep_status);
 
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_remove(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	return 0;
 }
@@ -1276,7 +1276,7 @@ int ipa3_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 
 	ipa3_ctx->ep[clnt_hdl].holb = *ep_holb;
 
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_add(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HOL_BLOCK_EN_n, clnt_hdl,
 		ep_holb);
@@ -1284,7 +1284,7 @@ int ipa3_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HOL_BLOCK_TIMER_n, clnt_hdl,
 		ep_holb);
 
-	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_remove(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	ipa_debug("cfg holb %u ep=%d tmr=%d\n", ep_holb->en, clnt_hdl,
 				ep_holb->tmr_val);
@@ -2246,7 +2246,7 @@ int ipa3_stop_gsi_channel(u32 clnt_hdl)
 
 	ep = &ipa3_ctx->ep[clnt_hdl];
 
-	IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
+	ipa_client_add(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	memset(&mem, 0, sizeof(mem));
 
