@@ -518,7 +518,9 @@ int ipa3_uc_panic_notifier(struct notifier_block *this,
 	if (!ipa_client_add_additional())
 		goto fail;
 
-	IPA_ACTIVE_CLIENTS_PREP_SIMPLE(log_info);
+	log_info.file = __FILE__;
+	log_info.line = __LINE__;
+	log_info.id_string = __func__;
 	ipa3_active_clients_log_mod(&log_info, false, true);
 
 	send_uc_command_nowait(&ipa3_ctx->uc_ctx, 0,

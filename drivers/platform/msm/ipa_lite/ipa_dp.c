@@ -211,14 +211,16 @@ int ipa3_rx_poll(u32 clnt_hdl, int weight)
 	};
 
 	if (cnt < weight) {
-		struct ipa_active_client_logging_info log;
+		struct ipa_active_client_logging_info log_info;
 
 		ep->client_notify(ep->priv, IPA_CLIENT_COMP_NAPI, 0);
 		ipa3_rx_switch_to_intr_mode(ep->sys);
 
 		/* Matching enable is in ipa_gsi_irq_rx_notify_cb() */
-		IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log, "NAPI");
-		ipa3_active_clients_log_mod(&log, true, false);
+		log_info.file = __FILE__;
+		log_info.line = __LINE__;
+		log_info.id_string = "NAPI";
+		ipa3_active_clients_log_mod(&log_info, true, false);
 		ipa_client_remove();
 	}
 
@@ -2145,7 +2147,9 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 	if (ipa_client_add_additional()) {
 		struct ipa_active_client_logging_info log_info;
 
-		IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log_info, "NAPI");
+		log_info.file = __FILE__;
+		log_info.line = __LINE__;
+		log_info.id_string = "NAPI";
 		ipa3_active_clients_log_mod(&log_info, true, true);
 
 		sys->ep->client_notify(sys->ep->priv, IPA_CLIENT_START_POLL, 0);

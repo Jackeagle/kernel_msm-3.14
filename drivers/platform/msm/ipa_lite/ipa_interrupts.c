@@ -318,7 +318,9 @@ static irqreturn_t ipa3_isr(int irq, void *ctxt)
 		return IRQ_HANDLED;
 	}
 
-	IPA_ACTIVE_CLIENTS_PREP_SIMPLE(log_info);
+	log_info.file = __FILE__;
+	log_info.line = __LINE__;
+	log_info.id_string = __func__;
 	ipa3_active_clients_log_mod(&log_info, false, true);
 
 	ipa3_process_interrupts(true);

@@ -1428,7 +1428,9 @@ static void ipa3_freeze_clock_vote_and_notify_modem(void)
 	if (res) {
 		struct ipa_active_client_logging_info log_info;
 
-		IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log_info, "FREEZE_VOTE");
+		log_info.file = __FILE__;
+		log_info.line = __LINE__;
+		log_info.id_string = "FREEZE_VOTE";
 		ipa3_active_clients_log_mod(&log_info, true, true);
 
 		ipa3_ctx->smp2p_info.ipa_clk_on = true;
@@ -1879,7 +1881,9 @@ static int ipa3_pre_init(void)
 	}
 
 	mutex_init(&ipa3_ctx->ipa3_active_clients.mutex);
-	IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log_info, "PROXY_CLK_VOTE");
+	log_info.file = __FILE__;
+	log_info.line = __LINE__;
+	log_info.id_string = "PROXY_CLK_VOTE";
 	ipa3_active_clients_log_mod(&log_info, true, true);
 	atomic_set(&ipa3_ctx->ipa3_active_clients.cnt, 1);
 
