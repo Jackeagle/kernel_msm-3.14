@@ -61,11 +61,6 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 
 #define IPA_ACTIVE_CLIENTS_DEC_EP(client) \
 	do { \
-		struct ipa_active_client_logging_info log_info; \
-		log_info.file = __FILE__; \
-		log_info.line = __LINE__; \
-		log_info.id_string = ipa_client_string(client); \
-		ipa3_active_clients_log_mod(&log_info, true, false); \
 		ipa_client_remove(ipa_client_string(client), true); \
 	} while (0)
 
@@ -76,11 +71,6 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 
 #define IPA_ACTIVE_CLIENTS_DEC_SIMPLE() \
 	do { \
-		struct ipa_active_client_logging_info log_info; \
-		log_info.file = __FILE__; \
-		log_info.line = __LINE__; \
-		log_info.id_string = __func__; \
-		ipa3_active_clients_log_mod(&log_info, false, false); \
 		ipa_client_remove(__func__, false); \
 	} while (0)
 
@@ -91,11 +81,6 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 
 #define IPA_ACTIVE_CLIENTS_DEC_RESOURCE(resource_name) \
 	do { \
-		struct ipa_active_client_logging_info log_info; \
-		log_info.file = __FILE__; \
-		log_info.line = __LINE__; \
-		log_info.id_string = resource_name; \
-		ipa3_active_clients_log_mod(&log_info, true, false); \
 		ipa_client_remove(resource_name, true); \
 	} while (0)
 
@@ -106,11 +91,6 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 
 #define IPA_ACTIVE_CLIENTS_DEC_SPECIAL(id_str) \
 	do { \
-		struct ipa_active_client_logging_info log_info; \
-		log_info.file = __FILE__; \
-		log_info.line = __LINE__; \
-		log_info.id_string = id_str; \
-		ipa3_active_clients_log_mod(&log_info, true, false); \
 		ipa_client_remove(id_str, true); \
 	} while (0)
 
