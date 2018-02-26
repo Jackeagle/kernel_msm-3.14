@@ -1105,7 +1105,7 @@ active_client_get(struct ipa_active_client_logging_info *id)
  *
  * A circular history buffer records reference count updates.
  */
-void
+static void
 ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 		bool log_it, bool inc)
 {

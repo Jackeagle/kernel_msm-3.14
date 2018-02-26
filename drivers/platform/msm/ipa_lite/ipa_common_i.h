@@ -783,7 +783,4 @@ void ipa_write_64(u64 w, u8 *dest);
 
 const char *ipa_client_string(enum ipa_client_type client);
 
-void ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
-		bool log_it, bool inc);
-
 #endif /* _IPA_COMMON_I_H_ */
