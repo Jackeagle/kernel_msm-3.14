@@ -515,7 +515,7 @@ int ipa3_uc_panic_notifier(struct notifier_block *this,
 	if (ipa3_uc_state_check())
 		goto fail;
 
-	if (!ipa_client_add_additional(false))
+	if (!ipa_client_add_additional(__func__, false))
 		goto fail;
 
 	log_info.file = __FILE__;

@@ -1053,10 +1053,10 @@ int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr);
 
 void ipa3_destroy_imm(void *user1, int user2);
 
-void ipa_client_add(bool log_it);
-bool ipa_client_add_additional(bool log_it);
-void ipa_client_remove(bool log_it);
-void ipa_client_remove_wait(bool log_it);
+void ipa_client_add(const char *id, bool log_it);
+bool ipa_client_add_additional(const char *id, bool log_it);
+void ipa_client_remove(const char *id, bool log_it);
+void ipa_client_remove_wait(const char *id, bool log_it);
 
 void ipa_cfg_default_route(enum ipa_client_type client);
 
