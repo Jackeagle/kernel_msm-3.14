@@ -1070,10 +1070,8 @@ active_client_get(struct ipa_active_client_logging_info *id)
 	log = &ipa3_ctx->ipa3_active_clients_logging;
 
 	entry = active_client_find(id->id_string);
-	if (entry) {
-		ipa_assert(entry->type == id->type);
+	if (entry)
 		return entry;
-	}
 
 	id_string_size = strlen(id->id_string) + 1;
 	entry = kzalloc(sizeof(*entry) + id_string_size, GFP_ATOMIC);
@@ -1082,7 +1080,6 @@ active_client_get(struct ipa_active_client_logging_info *id)
 		return NULL;
 	}
 
-	entry->type = id->type;
 	memcpy(entry->id_string, id->id_string, id_string_size);
 	entry->count = 0;
 	list_add_tail(&entry->links, &log->active);
@@ -1125,6 +1122,7 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 		ipa_err("negative count for %s\n", id->id_string);
 	}
 
+	entry->type = id->type;
 	if (id->type != SIMPLE)
 		ipa3_active_clients_log_insert(id, inc);
 out_unlock:
