@@ -312,7 +312,7 @@ static irqreturn_t ipa3_isr(int irq, void *ctxt)
 
 	ipa_debug_low("Enter\n");
 	/* defer interrupt handling in case IPA is not clocked on */
-	if (!ipa_client_add_additional()) {
+	if (!ipa_client_add_additional(false)) {
 		ipa_debug("defer interrupt processing\n");
 		queue_work(ipa3_ctx->power_mgmt_wq, &ipa3_interrupt_defer_work);
 		return IRQ_HANDLED;
@@ -327,7 +327,7 @@ static irqreturn_t ipa3_isr(int irq, void *ctxt)
 	ipa_debug_low("Exit\n");
 
 	ipa3_active_clients_log_mod(&log_info, false, false);
-	ipa_client_remove();
+	ipa_client_remove(false);
 
 	return IRQ_HANDLED;
 }

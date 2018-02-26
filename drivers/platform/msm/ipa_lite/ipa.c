@@ -1159,6 +1159,7 @@ static void ipa_client_add_first(void)
 	ipa_debug_low("active clients = %d\n",
 		atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
 }
+
 /*
  * Attempt to add an IPA client reference, but only if this does not
  * represent the initiaal reference.  Returns true if the reference
@@ -1180,7 +1181,7 @@ static bool ipa_client_add_not_first(void)
  * non-zero.  (This is used to avoid blocking.)  Returns true if the
  * additional reference was added successfully, or false otherwise.
  */
-bool ipa_client_add_additional(void)
+bool ipa_client_add_additional(bool log_it)
 {
 	return ipa_client_add_not_first();
 }
@@ -1191,7 +1192,7 @@ bool ipa_client_add_additional(void)
  * ipa_client_add_first() will safely add the first client, enabling
  * clocks and setting up (resuming) pipes before returning.
  */
-void ipa_client_add(void)
+void ipa_client_add(bool log_it)
 {
 	/* There's nothing more to do if this isn't the first reference */
 	if (!ipa_client_add_not_first())
@@ -1259,7 +1260,7 @@ static bool ipa_client_remove_not_final(void)
  * called in workqueue context, dropping the last reference under
  * protection of the mutex.
  */
-void ipa_client_remove(void)
+void ipa_client_remove(bool log_it)
 {
 	if (!ipa_client_remove_not_final())
 		queue_work(ipa3_ctx->power_mgmt_wq, &ipa_client_remove_work);
@@ -1273,7 +1274,7 @@ void ipa_client_remove(void)
  * count will be 0 (and pipes will be suspended and clocks stopped)
  * upon return for the final reference.
  */
-void ipa_client_remove_wait(void)
+void ipa_client_remove_wait(bool log_it)
 {
 	if (!ipa_client_remove_not_final())
 		ipa_client_remove_final();
@@ -1424,7 +1425,7 @@ static void ipa3_freeze_clock_vote_and_notify_modem(void)
 		return;
 	}
 
-	res = ipa_client_add_additional();
+	res = ipa_client_add_additional(true);
 	if (res) {
 		struct ipa_active_client_logging_info log_info;
 

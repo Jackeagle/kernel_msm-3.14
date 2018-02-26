@@ -61,7 +61,7 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 		log_info.line = __LINE__; \
 		log_info.id_string = ipa_client_string(client); \
 		ipa3_active_clients_log_mod(&log_info, true, true); \
-		ipa_client_add(); \
+		ipa_client_add(true); \
 	} while (0)
 
 #define IPA_ACTIVE_CLIENTS_DEC_EP(client) \
@@ -71,7 +71,7 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 		log_info.line = __LINE__; \
 		log_info.id_string = ipa_client_string(client); \
 		ipa3_active_clients_log_mod(&log_info, true, false); \
-		ipa_client_remove(); \
+		ipa_client_remove(true); \
 	} while (0)
 
 #define IPA_ACTIVE_CLIENTS_INC_SIMPLE() \
@@ -81,7 +81,7 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 		log_info.line = __LINE__; \
 		log_info.id_string = __func__; \
 		ipa3_active_clients_log_mod(&log_info, false, true); \
-		ipa_client_add(); \
+		ipa_client_add(false); \
 	} while (0)
 
 #define IPA_ACTIVE_CLIENTS_DEC_SIMPLE() \
@@ -91,7 +91,7 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 		log_info.line = __LINE__; \
 		log_info.id_string = __func__; \
 		ipa3_active_clients_log_mod(&log_info, false, false); \
-		ipa_client_remove(); \
+		ipa_client_remove(false); \
 	} while (0)
 
 #define IPA_ACTIVE_CLIENTS_INC_RESOURCE(resource_name) \
@@ -101,7 +101,7 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 		log_info.line = __LINE__; \
 		log_info.id_string = resource_name; \
 		ipa3_active_clients_log_mod(&log_info, true, true); \
-		ipa_client_add(); \
+		ipa_client_add(true); \
 	} while (0)
 
 #define IPA_ACTIVE_CLIENTS_DEC_RESOURCE(resource_name) \
@@ -111,7 +111,7 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 		log_info.line = __LINE__; \
 		log_info.id_string = resource_name; \
 		ipa3_active_clients_log_mod(&log_info, true, false); \
-		ipa_client_remove(); \
+		ipa_client_remove(true); \
 	} while (0)
 
 #define IPA_ACTIVE_CLIENTS_INC_SPECIAL(id_str) \
@@ -121,7 +121,7 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 		log_info.line = __LINE__; \
 		log_info.id_string = id_str; \
 		ipa3_active_clients_log_mod(&log_info, true, true); \
-		ipa_client_add(); \
+		ipa_client_add(true); \
 	} while (0)
 
 #define IPA_ACTIVE_CLIENTS_DEC_SPECIAL(id_str) \
@@ -131,7 +131,7 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 		log_info.line = __LINE__; \
 		log_info.id_string = id_str; \
 		ipa3_active_clients_log_mod(&log_info, true, false); \
-		ipa_client_remove(); \
+		ipa_client_remove(true); \
 	} while (0)
 
 #define IPA_CLIENT_IS_PROD(x) \
