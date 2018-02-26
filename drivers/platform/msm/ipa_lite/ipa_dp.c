@@ -454,7 +454,7 @@ int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr)
 	for (i = 0; i < num_desc; i++)
 		ipa_debug("sending imm cmd %d\n", descr[i].opcode);
 
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 
 	last_desc = &descr[num_desc - 1];
 	init_completion(&last_desc->xfer_done);
@@ -474,7 +474,7 @@ int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr)
 		wait_for_completion(&last_desc->xfer_done);
 	}
 
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 
 	return result;
 }
@@ -514,7 +514,7 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout)
 	/* completion needs to be released from both here and in ack callback */
 	atomic_set(&comp->cnt, 2);
 
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 
 	last_desc = &descr[num_desc - 1];
 	init_completion(&last_desc->xfer_done);
@@ -544,7 +544,7 @@ int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout)
 	if (!atomic_dec_return(&comp->cnt))
 		kfree(comp);
 
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 
 	return result;
 }
@@ -619,7 +619,7 @@ static void ipa3_handle_rx(struct ipa3_sys_context *sys)
 	int inactive_cycles = 0;
 	int cnt;
 
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 	do {
 		cnt = ipa3_handle_rx_core(sys);
 		if (cnt == 0)
@@ -640,7 +640,7 @@ static void ipa3_handle_rx(struct ipa3_sys_context *sys)
 	} while (inactive_cycles <= POLLING_INACTIVITY_RX);
 
 	ipa3_rx_switch_to_intr_mode(sys);
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 }
 
 static void ipa3_switch_to_intr_rx_work_func(struct work_struct *work)
@@ -1344,9 +1344,9 @@ static void ipa3_replenish_rx_work_func(struct work_struct *work)
 	struct ipa3_sys_context *sys;
 
 	sys = container_of(dwork, struct ipa3_sys_context, replenish_rx_work);
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 	sys->repl_hdlr(sys);
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 }
 
 /**

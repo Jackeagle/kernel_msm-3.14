@@ -994,7 +994,7 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 	atomic_set(&rmnet_ipa3_ctx->is_ssr, 0);
 
 	/* Till the system is suspended, we keep the clock open */
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 	ipa_err("rmnet_ipa completed initialization\n");
 	return 0;
 config_err:
@@ -1086,7 +1086,7 @@ static int rmnet_ipa_ap_suspend(struct device *dev)
 	netif_stop_queue(netdev);
 
 	ret = 0;
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 	ipa_debug("IPA clocks disabled\n");
 
 unlock_and_bail:
@@ -1111,7 +1111,7 @@ static int rmnet_ipa_ap_resume(struct device *dev)
 {
 	struct net_device *netdev = IPA_NETDEV();
 
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 	ipa_debug("IPA clocks enabled\n");
 	if (netdev)
 		netif_wake_queue(netdev);

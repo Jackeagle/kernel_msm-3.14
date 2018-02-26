@@ -2160,11 +2160,11 @@ void ipa_cfg_default_route(enum ipa_client_type client)
 	route.route_frag_def_pipe = ipa_ep_idx;
 	route.route_def_retain_hdr = 1;
 
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 
 	ipahal_write_reg_fields(IPA_ROUTE, &route);
 
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 }
 
 /*

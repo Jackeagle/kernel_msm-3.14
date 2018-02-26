@@ -188,7 +188,7 @@ static void ipa3_enable_tx_suspend_wa(struct work_struct *work)
 	ipa_assert(irq_num != -1);
 
 	/* make sure ipa hw is clocked on*/
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 
 	en = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, ipa_ee);
 	suspend_bmask = 1 << irq_num;
@@ -198,7 +198,7 @@ static void ipa3_enable_tx_suspend_wa(struct work_struct *work)
 		, en);
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, ipa_ee, en);
 	ipa3_process_interrupts(false);
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 
 	ipa_debug_low("Exit\n");
 }
@@ -300,9 +300,9 @@ static void ipa3_process_interrupts(bool isr_context)
 static void ipa3_interrupt_defer(struct work_struct *work)
 {
 	ipa_debug("processing interrupts in wq\n");
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 	ipa3_process_interrupts(false);
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 	ipa_debug("Done\n");
 }
 

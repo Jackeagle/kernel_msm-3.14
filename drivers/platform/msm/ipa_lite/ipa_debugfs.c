@@ -214,9 +214,9 @@ static ssize_t ipa3_write_dbg_cnt(struct file *file, const char __user *buf,
 	else
 		dbg_cnt_ctrl.en = false;
 
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 	ipahal_write_reg_n_fields(IPA_DEBUG_CNT_CTRL_n, 0, &dbg_cnt_ctrl);
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 
 	return count;
 }
@@ -227,12 +227,12 @@ static ssize_t ipa3_read_dbg_cnt(struct file *file, char __user *ubuf,
 	int nbytes;
 	u32 regval;
 
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 	regval =
 		ipahal_read_reg_n(IPA_DEBUG_CNT_REG_n, 0);
 	nbytes = scnprintf(dbg_buff, IPA_MAX_MSG_LEN,
 			"IPA_DEBUG_CNT_REG_0=0x%x\n", regval);
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 
 	return simple_read_from_buffer(ubuf, count, ppos, dbg_buff, nbytes);
 }
@@ -398,11 +398,11 @@ static int ipa_reg_show(struct seq_file *s, void *v)
 
 	ipa_bug_on(reg >= (u64)IPA_REG_MAX);
 
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 
 	seq_printf(s, "0x%08x\n", ipahal_read_reg((enum ipahal_reg)reg));
 
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 
 	return 0;
 }
@@ -420,11 +420,11 @@ static ssize_t ipa_reg_write(struct file *file, const char __user *buf,
 	if (ret)
 		return ret;
 
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 
 	ipahal_write_reg((enum ipahal_reg)reg, input);
 
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 
 	return count;
 }
@@ -443,11 +443,11 @@ static int ipa_reg_n_show(struct seq_file *s, void *v)
 
 	ipa_bug_on(reg >= (u32)IPA_REG_MAX);
 
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 
 	seq_printf(s, "0x%08x\n", ipahal_read_reg_n((enum ipahal_reg)reg, n));
 
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 
 	return 0;
 }
@@ -467,11 +467,11 @@ static ssize_t ipa_reg_n_write(struct file *file, const char __user *buf,
 	if (ret)
 		return ret;
 
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 
 	ipahal_write_reg_n((enum ipahal_reg)reg, n, input);
 
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 
 	return count;
 }
@@ -486,11 +486,11 @@ static int shared_mem_size_show(struct seq_file *s, void *v)
 {
 	struct ipahal_reg_shared_mem_size reg = { 0 };
 
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 
 	ipahal_read_reg_fields(IPA_SHARED_MEM_SIZE, &reg);
 
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 
 	seq_printf(s, "shared_mem_sz:    0x%08x\n", reg.shared_mem_sz);
 	seq_printf(s, "shared_mem_baddr: 0x%08x\n", reg.shared_mem_baddr);
@@ -689,9 +689,9 @@ static ssize_t active_count_write(struct file *file,
 
 	if (increment) {
 		sysfs_count++;
-		IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+		ipa_client_add(__func__, false);
 	} else {
-		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+		ipa_client_remove(__func__, false);
 		--sysfs_count;
 	}
 

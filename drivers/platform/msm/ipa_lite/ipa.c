@@ -248,13 +248,13 @@ int ipa3_init_q6_smem(void)
 {
 	int rc;
 
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 
 	rc = ipa3_init_smem_region(ipa3_mem(MODEM_SIZE),
 		ipa3_mem(MODEM_OFST));
 	if (rc) {
 		ipa_err("failed to initialize Modem RAM memory\n");
-		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+		ipa_client_remove(__func__, false);
 		return rc;
 	}
 
@@ -262,7 +262,7 @@ int ipa3_init_q6_smem(void)
 		ipa3_mem(MODEM_HDR_OFST));
 	if (rc) {
 		ipa_err("failed to initialize Modem HDRs RAM memory\n");
-		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+		ipa_client_remove(__func__, false);
 		return rc;
 	}
 
@@ -270,7 +270,7 @@ int ipa3_init_q6_smem(void)
 		ipa3_mem(MODEM_HDR_PROC_CTX_OFST));
 	if (rc) {
 		ipa_err("failed to initialize Modem proc ctx RAM memory\n");
-		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+		ipa_client_remove(__func__, false);
 		return rc;
 	}
 
@@ -278,10 +278,10 @@ int ipa3_init_q6_smem(void)
 		ipa3_mem(MODEM_COMP_DECOMP_OFST));
 	if (rc) {
 		ipa_err("failed to initialize Modem Comp/Decomp RAM memory\n");
-		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+		ipa_client_remove(__func__, false);
 		return rc;
 	}
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 
 	return rc;
 }
@@ -461,7 +461,7 @@ void ipa3_q6_pre_shutdown_cleanup(void)
 {
 	ipa_debug_low("ENTER\n");
 
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 
 	ipa3_q6_pipe_delay(true);
 	ipa3_q6_avoid_holb();
@@ -475,7 +475,7 @@ void ipa3_q6_pre_shutdown_cleanup(void)
 	 */
 	ipa3_q6_pipe_delay(false);
 
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 	ipa_debug_low("Exit with success\n");
 }
 
@@ -498,7 +498,7 @@ void ipa3_q6_post_shutdown_cleanup(void)
 		return;
 	}
 
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 
 	/* Handle the issue where SUSPEND was removed for some reason */
 	ipa3_q6_avoid_holb();
@@ -513,7 +513,7 @@ void ipa3_q6_post_shutdown_cleanup(void)
 			ipa_bug_on(ipa3_uc_is_gsi_channel_empty(client_idx));
 		}
 
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 	ipa_debug_low("Exit with success\n");
 }
 
@@ -1655,11 +1655,11 @@ static ssize_t ipa3_write(struct file *file, const char __user *buf,
 	if (result != IPA_STATE_INITIAL)
 		return count;
 
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 
 	result = ipa3_pil_load_ipa_fws();
 
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 
 	if (result) {
 		ipa_err("IPA FW loading process has failed\n");

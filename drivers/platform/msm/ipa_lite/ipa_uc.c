@@ -197,7 +197,7 @@ static void ipa3_uc_event_handler(enum ipa_irq_type interrupt,
 	union IpaHwErrorEventData_t evt;
 	u8 event_op;
 
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 	mmio = ipa3_ctx->uc_ctx.uc_sram_mmio;
 	event_op = mmio->eventOp;
 	ipa_debug("uC evt opcode=%u\n", event_op);
@@ -205,7 +205,7 @@ static void ipa3_uc_event_handler(enum ipa_irq_type interrupt,
 	if (EXTRACT_UC_FEATURE(event_op) >= IPA_HW_FEATURE_MAX) {
 		ipa_err("Invalid feature %u for event %u\n",
 			EXTRACT_UC_FEATURE(event_op), event_op);
-		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+		ipa_client_remove(__func__, false);
 		return;
 	}
 
@@ -225,7 +225,7 @@ static void ipa3_uc_event_handler(enum ipa_irq_type interrupt,
 	} else {
 		ipa_debug("unsupported uC evt opcode=%u\n", event_op);
 	}
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 }
 
 static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
@@ -236,7 +236,7 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 	struct IpaHwSharedMemCommonMapping_t *mmio;
 	u8 response_op;
 
-	IPA_ACTIVE_CLIENTS_INC_SIMPLE();
+	ipa_client_add(__func__, false);
 	mmio = ipa3_ctx->uc_ctx.uc_sram_mmio;
 	response_op = mmio->responseOp;
 	ipa_debug("uC rsp opcode=%hhu\n", response_op);
@@ -244,7 +244,7 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 	if (EXTRACT_UC_FEATURE(response_op) >= IPA_HW_FEATURE_MAX) {
 		ipa_err("Invalid feature %hhu for event %u\n",
 			EXTRACT_UC_FEATURE(response_op), mmio->eventOp);
-		IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+		ipa_client_remove(__func__, false);
 		return;
 	}
 
@@ -285,7 +285,7 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 	} else {
 		ipa_err("Unsupported uC rsp opcode = %u\n", response_op);
 	}
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 }
 
 /* Send a command to the microcontroller */
@@ -522,7 +522,7 @@ int ipa3_uc_panic_notifier(struct notifier_block *this,
 	/* give uc enough time to save state */
 	udelay(IPA_PKT_FLUSH_TO_US);
 
-	IPA_ACTIVE_CLIENTS_DEC_SIMPLE();
+	ipa_client_remove(__func__, false);
 	ipa_debug("err_fatal issued\n");
 fail:
 	return NOTIFY_DONE;

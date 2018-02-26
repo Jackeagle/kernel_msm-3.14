@@ -54,16 +54,6 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 	return (reg & field_mask) >> field_shift(field_mask);
 }
 
-#define IPA_ACTIVE_CLIENTS_INC_SIMPLE() \
-	do { \
-		ipa_client_add(__func__, false); \
-	} while (0)
-
-#define IPA_ACTIVE_CLIENTS_DEC_SIMPLE() \
-	do { \
-		ipa_client_remove(__func__, false); \
-	} while (0)
-
 #define IPA_ACTIVE_CLIENTS_INC_RESOURCE(resource_name) \
 	do { \
 		ipa_client_add(resource_name, true); \
