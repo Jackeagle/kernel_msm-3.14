@@ -1195,6 +1195,13 @@ bool _ipa_client_add_additional(const char *id, bool log_it,
  */
 void _ipa_client_add(const char *id, bool log_it, const char *file, int line)
 {
+	struct ipa_active_client_logging_info log_info;
+
+	log_info.id_string = id;
+	log_info.file = file;
+	log_info.line = line;
+	ipa3_active_clients_log_mod(&log_info, log_it, true);
+
 	/* There's nothing more to do if this isn't the first reference */
 	if (!ipa_client_add_not_first())
 		ipa_client_add_first();
