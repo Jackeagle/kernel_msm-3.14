@@ -1100,7 +1100,7 @@ active_client_get(struct ipa_active_client_logging_info *id)
  */
 void
 ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
-		bool inc)
+		bool log_it, bool inc)
 {
 	struct ipa3_active_clients_log_ctx *log;
 	struct ipa_active_client *entry;
@@ -1122,7 +1122,7 @@ ipa3_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 		ipa_err("negative count for %s\n", id->id_string);
 	}
 
-	if (id->type != SIMPLE)
+	if (log_it)
 		ipa3_active_clients_log_insert(id, inc);
 out_unlock:
 	spin_unlock_irqrestore(&log->lock, flags);
@@ -1422,7 +1422,7 @@ static void ipa3_freeze_clock_vote_and_notify_modem(void)
 		struct ipa_active_client_logging_info log_info;
 
 		IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log_info, "FREEZE_VOTE");
-		ipa3_active_clients_log_mod(&log_info, true);
+		ipa3_active_clients_log_mod(&log_info, true, true);
 
 		ipa3_ctx->smp2p_info.ipa_clk_on = true;
 	} else {
@@ -1873,7 +1873,7 @@ static int ipa3_pre_init(void)
 
 	mutex_init(&ipa3_ctx->ipa3_active_clients.mutex);
 	IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log_info, "PROXY_CLK_VOTE");
-	ipa3_active_clients_log_mod(&log_info, true);
+	ipa3_active_clients_log_mod(&log_info, true, true);
 	atomic_set(&ipa3_ctx->ipa3_active_clients.cnt, 1);
 
 	/* Create workqueues for power management */

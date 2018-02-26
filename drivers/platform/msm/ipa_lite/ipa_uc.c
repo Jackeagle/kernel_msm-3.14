@@ -519,7 +519,7 @@ int ipa3_uc_panic_notifier(struct notifier_block *this,
 		goto fail;
 
 	IPA_ACTIVE_CLIENTS_PREP_SIMPLE(log_info);
-	ipa3_active_clients_log_mod(&log_info, true);
+	ipa3_active_clients_log_mod(&log_info, false, true);
 
 	send_uc_command_nowait(&ipa3_ctx->uc_ctx, 0,
 				IPA_CPU_2_HW_CMD_ERR_FATAL);

@@ -218,7 +218,7 @@ int ipa3_rx_poll(u32 clnt_hdl, int weight)
 
 		/* Matching enable is in ipa_gsi_irq_rx_notify_cb() */
 		IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log, "NAPI");
-		ipa3_active_clients_log_mod(&log, false);
+		ipa3_active_clients_log_mod(&log, true, false);
 		ipa_client_remove();
 	}
 
@@ -2146,7 +2146,7 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 		struct ipa_active_client_logging_info log_info;
 
 		IPA_ACTIVE_CLIENTS_PREP_SPECIAL(log_info, "NAPI");
-		ipa3_active_clients_log_mod(&log_info, true);
+		ipa3_active_clients_log_mod(&log_info, true, true);
 
 		sys->ep->client_notify(sys->ep->priv, IPA_CLIENT_START_POLL, 0);
 	} else {
