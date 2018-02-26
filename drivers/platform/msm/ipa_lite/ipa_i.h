@@ -163,7 +163,7 @@ struct ipa_sys_connect_params {
 struct ipa_active_client {
 	struct list_head links;
 	int count;
-	char id_string[];
+	const char *id_string;
 };
 
 struct ipa3_active_clients_log_ctx {

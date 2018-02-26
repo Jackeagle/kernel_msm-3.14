@@ -1072,7 +1072,6 @@ active_client_get(struct ipa_active_client_logging_info *id)
 {
 	struct ipa3_active_clients_log_ctx *log;
 	struct ipa_active_client *entry;
-	size_t id_string_size;
 
 	log = &ipa3_ctx->ipa3_active_clients_logging;
 
@@ -1080,14 +1079,13 @@ active_client_get(struct ipa_active_client_logging_info *id)
 	if (entry)
 		return entry;
 
-	id_string_size = strlen(id->id_string) + 1;
-	entry = kzalloc(sizeof(*entry) + id_string_size, GFP_ATOMIC);
+	entry = kzalloc(sizeof(*entry), GFP_ATOMIC);
 	if (!entry) {
 		ipa_err("failed allocating active clients hash entry");
 		return NULL;
 	}
 
-	memcpy(entry->id_string, id->id_string, id_string_size);
+	entry->id_string = id->id_string;
 	entry->count = 0;
 	list_add_tail(&entry->links, &log->active);
 
