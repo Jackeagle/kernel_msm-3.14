@@ -724,7 +724,6 @@ enum ipa3_mem_partition {
 
 struct ipa3_controller {
 	u32 mem_partition[IPA_MEM_MAX];
-	u32 ipa_clk_rate_nominal;
 	u32 ipa_clk_rate_svs;
 	u32 clock_scaling_bw_threshold_turbo;
 	u32 clock_scaling_bw_threshold_nominal;
