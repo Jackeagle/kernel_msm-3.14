@@ -916,18 +916,6 @@ void ipa3_debugfs_init(void)
 
 	file = debugfs_create_file("enable_clock_scaling", S_IRUGO, ipa_dir,
 			"1\n", &const_string_fops);
-	if (!file)
-		goto fail;
-
-	file = debugfs_create_u32("clock_scaling_bw_threshold_nominal_mbps",
-		read_write_mode, ipa_dir,
-		&ipa3_ctx->ctrl->clock_scaling_bw_threshold_nominal);
-	if (!file)
-		goto fail;
-
-	file = debugfs_create_u32("clock_scaling_bw_threshold_turbo_mbps",
-		read_write_mode, ipa_dir,
-		&ipa3_ctx->ctrl->clock_scaling_bw_threshold_turbo);
 	if (file)
 		return;
 fail:
