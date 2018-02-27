@@ -28,7 +28,6 @@
 	ipa_err(#f "=0x%x\n", status->f)
 
 static char dbg_buff[IPA_MAX_MSG_LEN];
-static char *active_clients_buf;
 
 /*
  * Macros to help in defining simple sequential debugfs files.
@@ -285,25 +284,6 @@ static ssize_t ipa_status_stats_read(struct file *file, char __user *ubuf,
 	return 0;
 }
 
-static ssize_t ipa3_print_active_clients_log(struct file *file,
-		char __user *ubuf, size_t count, loff_t *ppos)
-{
-	int table_size;
-
-	if (active_clients_buf == NULL) {
-		ipa_err("Active Clients buffer is not allocated");
-		return 0;
-	}
-	memset(active_clients_buf, 0, IPA_DBG_ACTIVE_CLIENT_BUF_SIZE);
-	mutex_lock(&ipa3_ctx->ipa3_active_clients.mutex);
-	table_size = ipa3_active_clients_log_print_table(active_clients_buf,
-			IPA_MAX_MSG_LEN);
-	mutex_unlock(&ipa3_ctx->ipa3_active_clients.mutex);
-
-	return simple_read_from_buffer(ubuf, count, ppos,
-			active_clients_buf, table_size);
-}
-
 /*
  * File operation to implement a read for a file whose content
  * is a constant string.  Pass constant string as data parameter
@@ -331,10 +311,6 @@ const struct file_operations ipa3_dbg_cnt_ops = {
 
 const struct file_operations ipa3_status_stats_ops = {
 	.read = ipa_status_stats_read,
-};
-
-const struct file_operations ipa3_active_clients = {
-	.read = ipa3_print_active_clients_log,
 };
 
 static const struct file_operations const_string_fops = {
@@ -913,11 +889,6 @@ void ipa3_debugfs_init(void)
 	if (!ipa_debugfs_clients_create(ipa_dir))
 		goto fail;
 
-	file = debugfs_create_file("active_clients", S_IFREG|S_IRUGO,
-			ipa_dir, 0, &ipa3_active_clients);
-	if (IS_ERR_OR_NULL(file))
-		goto fail;
-
 	file = debugfs_create_file("holb", write_only_mode,
 			ipa_dir,
 			0, &ipa3_ep_holb_ops);
@@ -957,12 +928,7 @@ void ipa3_debugfs_init(void)
 	file = debugfs_create_u32("clock_scaling_bw_threshold_turbo_mbps",
 		read_write_mode, ipa_dir,
 		&ipa3_ctx->ctrl->clock_scaling_bw_threshold_turbo);
-	if (!file)
-		goto fail;
-
-	active_clients_buf = kzalloc(IPA_DBG_ACTIVE_CLIENT_BUF_SIZE,
-			GFP_KERNEL);
-	if (active_clients_buf)
+	if (file)
 		return;
 fail:
 	ipa_err("error while creating ipa debugfs hierarchy\n");
