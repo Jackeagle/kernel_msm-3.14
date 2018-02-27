@@ -2360,9 +2360,9 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 
 	ipahal_init(hw_version, ipa3_ctx->mmio);
 
-	result = ipa3_init_mem_partition(node);
+	result = ipa_init_mem_info(node);
 	if (result) {
-		ipa_err(":ipa3_init_mem_partition failed!\n");
+		ipa_err("ipa_init_mem_info failed!\n");
 		result = -ENODEV;
 		goto err_hal_destroy;
 	}

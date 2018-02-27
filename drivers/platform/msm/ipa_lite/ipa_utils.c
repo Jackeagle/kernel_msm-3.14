@@ -1415,7 +1415,7 @@ void ipa3_dump_buff_internal(void *base, dma_addr_t phy_base, u32 size)
 #define IPA_MEM_STATS_DROP_SIZE			0x0
 
 /**
- * ipa3_init_mem_partition() - Reads IPA memory map from DTS, performs alignment
+ * ipa_init_mem_info() - Reads IPA memory map from DTS, performs alignment
  * checks and logs the fetched values.
  *
  * Returns:	0 on success
@@ -1423,11 +1423,11 @@ void ipa3_dump_buff_internal(void *base, dma_addr_t phy_base, u32 size)
 #define ALIGN_CHECK(name)	({ BUILD_BUG_ON(name % name ## _ALIGN); name; })
 #define NONZERO_CHECK(name)	({ BUILD_BUG_ON(!name); name; })
 #define LO_HI_CHECK(name)	BUILD_BUG_ON(name ## _LO > name ## _HI)
-int ipa3_init_mem_partition(struct device_node *node)
+int ipa_init_mem_info(struct device_node *node)
 {
-	u32 *mem = &ipa3_ctx->ctrl->mem_partition[0];
+	u32 *mem = &ipa3_ctx->mem_info[0];
 
-	memset(mem, 0, sizeof(ipa3_ctx->ctrl->mem_partition));
+	memset(mem, 0, sizeof(ipa3_ctx->mem_info));
 
 	mem[OFST_START] = IPA_MEM_OFST_START;
 	ipa_debug("RAM OFST 0x%x\n", mem[OFST_START]);
@@ -1669,7 +1669,7 @@ static struct ipa3_controller ipa_controller_v3 = {
 
 u32 ipa3_mem(enum ipa3_mem_partition index)
 {
-	return ipa3_ctx->ctrl->mem_partition[index];
+	return ipa3_ctx->mem_info[index];
 }
 
 /**

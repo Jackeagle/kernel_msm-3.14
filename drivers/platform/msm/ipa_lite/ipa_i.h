@@ -726,7 +726,6 @@ enum ipa3_mem_partition {
 };
 
 struct ipa3_controller {
-	u32 mem_partition[IPA_MEM_MAX];
 	struct msm_bus_scale_pdata *msm_bus_data_ptr;
 };
 
@@ -937,6 +936,7 @@ struct ipa3_context {
 	void *logbuf_low;
 	u32 ipa_bus_hdl;
 	struct ipa3_controller *ctrl;
+	u32 mem_info[IPA_MEM_MAX];
 	bool q6_proxy_clk_vote_valid;
 	u32 ipa_num_pipes;
 	dma_addr_t pkt_init_imm[IPA3_MAX_NUM_PIPES];
@@ -1028,7 +1028,7 @@ void ipa3_dump_buff_internal(void *base, dma_addr_t phy_base, u32 size);
 #else
 #define IPA_DUMP_BUFF(base, phy_base, size)
 #endif
-int ipa3_init_mem_partition(struct device_node *dev_node);
+int ipa_init_mem_info(struct device_node *dev_node);
 u32 ipa3_mem(enum ipa3_mem_partition index);
 
 struct ipa3_controller *ipa3_controller_init(void);
