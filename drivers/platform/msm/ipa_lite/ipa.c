@@ -1007,8 +1007,7 @@ static unsigned int ipa3_get_bus_vote(void)
 			idx = 1;
 		else
 			idx = 2;
-	} else if (ipa3_ctx->curr_ipa_clk_rate ==
-			ipa3_ctx->ctrl->ipa_clk_rate_turbo) {
+	} else if (ipa3_ctx->curr_ipa_clk_rate == 0) {
 		idx = ipa3_ctx->ctrl->msm_bus_data_ptr->num_usecases - 1;
 	} else {
 		WARN_ON(1);
@@ -1863,7 +1862,7 @@ static int ipa3_pre_init(void)
 	ipa_debug("IPA Driver initialization started\n");
 
 	/* Clock scaling is enabled */
-	ipa3_ctx->curr_ipa_clk_rate = ipa3_ctx->ctrl->ipa_clk_rate_turbo;
+	ipa3_ctx->curr_ipa_clk_rate = 0;
 
 	/* enable IPA clocks explicitly to allow the initialization */
 	ipa3_enable_clks();
