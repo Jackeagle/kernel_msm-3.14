@@ -999,7 +999,7 @@ static unsigned int ipa3_get_bus_vote(void)
 {
 	unsigned int idx = 1;
 
-	if (ipa3_ctx->curr_ipa_clk_rate == ipa3_ctx->ctrl->ipa_clk_rate_svs) {
+	if (ipa3_ctx->curr_ipa_clk_rate == 0) {
 		idx = 1;
 	} else if (ipa3_ctx->curr_ipa_clk_rate == 0) {
 		if (ipa3_ctx->ctrl->msm_bus_data_ptr->num_usecases <= 2)
