@@ -700,6 +700,36 @@ static ssize_t active_count_write(struct file *file,
 DEF_SEQ_RW(active_count);
 
 /*
+ * "ipa/clients/active" shows the currently IPA clients
+ *
+ * The active clients table is a list of active client entries.  The
+ * entries are shown in the order they became active.  Each entry
+ * provides its identifying string, along with a current reference
+ * count.
+ */
+static int active_show(struct seq_file *s, void *v)
+{
+	struct ipa3_active_clients_log_ctx *log;
+	struct ipa_active_client *entry;
+	unsigned long flags;
+
+	log = &ipa3_ctx->ipa3_active_clients_logging;
+
+	spin_lock_irqsave(&log->lock, flags);
+
+	seq_printf(s, "\n---- Active Clients Table ----\n");
+	list_for_each_entry(entry, &log->active, links)
+		seq_printf(s, "%-40s %-3d\n", entry->id_string, entry->count);
+	seq_printf(s, "\nTotal active clients count: %d\n",
+			atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
+
+	spin_unlock_irqrestore(&log->lock, flags);
+
+	return 0;
+}
+DEF_SEQ_RO(active);
+
+/*
  * "ipa/clients/log" shows the log of recent IPA client.
  *
  * The active clients log is an array of formatted string pointers
@@ -847,6 +877,9 @@ static bool ipa_debugfs_clients_create(struct dentry *ipa_dir)
 		return false;
 
 	if (!ADD_SEQ_RW(clients_dir, active_count))
+		return false;
+
+	if (!ADD_SEQ_RO(clients_dir, active))
 		return false;
 
 	/* There's no log to show if the log buffer array has no entries */
