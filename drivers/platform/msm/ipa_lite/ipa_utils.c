@@ -638,11 +638,11 @@ enum ipa_client_type ipa3_get_client_mapping(int pipe_idx)
 }
 
 /**
- * _ipa_sram_settings_read_v3_0() - Read SRAM settings from HW
+ * ipa_sram_settings_read() - Read SRAM settings from HW
  *
  * Returns:	None
  */
-void _ipa_sram_settings_read_v3_0(void)
+void ipa_sram_settings_read(void)
 {
 	struct ipahal_reg_shared_mem_size smem_sz;
 

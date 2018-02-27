@@ -538,11 +538,11 @@ static inline void ipa3_sram_set_canary(u32 *sram_mmio, int offset)
 }
 
 /**
- * _ipa_init_sram_v3() - Initialize IPA local SRAM.
+ * ipa_init_sram() - Initialize IPA local SRAM.
  *
  * Return codes: 0 for success, negative value for failure
  */
-int _ipa_init_sram_v3(void)
+static int ipa_init_sram(void)
 {
 	u32 *ipa_sram_mmio;
 	unsigned long phys_addr;
@@ -592,11 +592,11 @@ int _ipa_init_sram_v3(void)
 }
 
 /**
- * _ipa_init_hdr_v3_0() - Initialize IPA header block.
+ * ipa_init_hdr() - Initialize IPA header block.
  *
  * Return codes: 0 for success, negative value for failure
  */
-int _ipa_init_hdr_v3_0(void)
+static int ipa_init_hdr(void)
 {
 	struct ipa3_desc desc = { 0 };
 	struct ipa_mem_buffer mem;
@@ -666,11 +666,11 @@ int _ipa_init_hdr_v3_0(void)
 }
 
 /**
- * _ipa_init_rt4_v3() - Initialize IPA routing block for IPv4.
+ * ipa_init_rt4() - Initialize IPA routing block for IPv4.
  *
  * Return codes: 0 for success, negative value for failure
  */
-int _ipa_init_rt4_v3(void)
+static int ipa_init_rt4(void)
 {
 	struct ipa3_desc desc = { 0 };
 	struct ipa_mem_buffer mem;
@@ -713,11 +713,11 @@ free_mem:
 }
 
 /**
- * _ipa_init_rt6_v3() - Initialize IPA routing block for IPv6.
+ * ipa_init_rt6() - Initialize IPA routing block for IPv6.
  *
  * Return codes: 0 for success, negative value for failure
  */
-int _ipa_init_rt6_v3(void)
+static int ipa_init_rt6(void)
 {
 	struct ipa3_desc desc = { 0 };
 	struct ipa_mem_buffer mem;
@@ -760,11 +760,11 @@ free_mem:
 }
 
 /**
- * _ipa_init_flt4_v3() - Initialize IPA filtering block for IPv4.
+ * ipa_init_flt4() - Initialize IPA filtering block for IPv4.
  *
  * Return codes: 0 for success, negative value for failure
  */
-int _ipa_init_flt4_v3(void)
+static int ipa_init_flt4(void)
 {
 	struct ipa3_desc desc = { 0 };
 	struct ipa_mem_buffer mem;
@@ -808,11 +808,11 @@ free_mem:
 }
 
 /**
- * _ipa_init_flt6_v3() - Initialize IPA filtering block for IPv6.
+ * ipa_init_flt6() - Initialize IPA filtering block for IPv6.
  *
  * Return codes: 0 for success, negative value for failure
  */
-int _ipa_init_flt6_v3(void)
+static int ipa_init_flt6(void)
 {
 	struct ipa3_desc desc = { 0 };
 	struct ipa_mem_buffer mem;
@@ -942,22 +942,22 @@ static long ipa3_setup_apps_pipes(void)
 	}
 	ipa_debug("Apps to IPA cmd pipe is connected\n");
 
-	_ipa_init_sram_v3();
+	ipa_init_sram();
 	ipa_debug("SRAM initialized\n");
 
-	_ipa_init_hdr_v3_0();
+	ipa_init_hdr();
 	ipa_debug("HDR initialized\n");
 
-	_ipa_init_rt4_v3();
+	ipa_init_rt4();
 	ipa_debug("V4 RT initialized\n");
 
-	_ipa_init_rt6_v3();
+	ipa_init_rt6();
 	ipa_debug("V6 RT initialized\n");
 
-	_ipa_init_flt4_v3();
+	ipa_init_flt4();
 	ipa_debug("V4 FLT initialized\n");
 
-	_ipa_init_flt6_v3();
+	ipa_init_flt6();
 	ipa_debug("V6 FLT initialized\n");
 
 	ipa3_setup_flt_hash_tuple();
@@ -1851,7 +1851,7 @@ static int ipa3_pre_init(void)
 		goto fail_init_hw;
 	}
 
-	_ipa_sram_settings_read_v3_0();
+	ipa_sram_settings_read();
 	ipa_debug("SRAM, size: 0x%x, restricted bytes: 0x%x\n",
 		ipa3_ctx->smem_sz, ipa3_ctx->smem_restricted_bytes);
 

@@ -1065,14 +1065,7 @@ void ipa3_suspend_handler(enum ipa_irq_type interrupt,
 				void *interrupt_data);
 void ipa3_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data);
 
-void _ipa_sram_settings_read_v3_0(void);
-
-int _ipa_init_sram_v3(void);
-int _ipa_init_hdr_v3_0(void);
-int _ipa_init_rt4_v3(void);
-int _ipa_init_rt6_v3(void);
-int _ipa_init_flt4_v3(void);
-int _ipa_init_flt6_v3(void);
+void ipa_sram_settings_read(void);
 
 void ipa3_skb_recycle(struct sk_buff *skb);
 
