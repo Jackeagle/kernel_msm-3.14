@@ -36,6 +36,9 @@
 #define DRV_NAME "ipa"
 #define IPA_COOKIE 0x57831603
 
+/* Offset past base of IPA "wrapper" space for register access */
+#define IPA_REG_BASE_OFFSET	0x00040000
+
 #define IPA3_MAX_NUM_PIPES 31
 #define IPA_SYS_DESC_FIFO_SZ 0x800
 #define IPA_SYS_TX_DATA_DESC_FIFO_SZ 0x1000
@@ -724,7 +727,6 @@ enum ipa3_mem_partition {
 
 struct ipa3_controller {
 	u32 mem_partition[IPA_MEM_MAX];
-	u32 ipa_reg_base_ofst;
 	void (*ipa_sram_read_settings)(void);
 	int (*ipa_init_sram)(void);
 	int (*ipa_init_hdr)(void);

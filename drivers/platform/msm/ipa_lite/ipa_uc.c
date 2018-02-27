@@ -464,9 +464,8 @@ int ipa3_uc_interface_init(void)
 		return 0;
 	}
 
-	phys_addr = ipa3_ctx->ipa_wrapper_base +
-			ipa3_ctx->ctrl->ipa_reg_base_ofst +
-			ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_n, 0);
+	phys_addr = ipa3_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
+	phys_addr += ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_n, 0);
 	mmio = ioremap(phys_addr, IPA_RAM_UC_SMEM_SIZE);
 	if (!mmio) {
 		ipa_err("Fail to ioremap IPA uC SRAM\n");

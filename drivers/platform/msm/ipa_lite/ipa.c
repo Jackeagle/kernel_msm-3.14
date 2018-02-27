@@ -533,10 +533,9 @@ int _ipa_init_sram_v3(void)
 	u32 *ipa_sram_mmio;
 	unsigned long phys_addr;
 
-	phys_addr = ipa3_ctx->ipa_wrapper_base +
-		ipa3_ctx->ctrl->ipa_reg_base_ofst +
-		ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_n,
-			ipa3_ctx->smem_restricted_bytes / 4);
+	phys_addr = ipa3_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
+	phys_addr += ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_n,
+				ipa3_ctx->smem_restricted_bytes / 4);
 
 	ipa_sram_mmio = ioremap(phys_addr, ipa3_ctx->smem_sz);
 	if (!ipa_sram_mmio) {
@@ -2295,6 +2294,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	struct device *dev = &pdev_p->dev;
 	struct device_node *node = dev->of_node;
 	enum ipa_hw_version hw_version;
+	unsigned long phys_addr;
 	struct resource *res;
 	int result;
 
@@ -2350,11 +2350,9 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	ipa3_ctx->ctrl = ipa3_controller_init();
 
 	/* setup IPA register access */
-	ipa_debug("Mapping 0x%x\n", ipa3_ctx->ipa_wrapper_base +
-		ipa3_ctx->ctrl->ipa_reg_base_ofst);
-	ipa3_ctx->mmio = ioremap(ipa3_ctx->ipa_wrapper_base +
-				ipa3_ctx->ctrl->ipa_reg_base_ofst,
-				ipa3_ctx->ipa_wrapper_size);
+	phys_addr = ipa3_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
+	ipa_debug("Mapping 0x%lx\n", phys_addr);
+	ipa3_ctx->mmio = ioremap(phys_addr, ipa3_ctx->ipa_wrapper_size);
 	if (!ipa3_ctx->mmio) {
 		ipa_err(":ipa-base ioremap err.\n");
 		result = -EFAULT;

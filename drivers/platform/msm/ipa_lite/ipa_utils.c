@@ -1669,7 +1669,6 @@ static struct ipa3_controller ipa_controller_v3 = {
 	.ipa_init_flt4		= _ipa_init_flt4_v3,
 	.ipa_init_flt6		= _ipa_init_flt6_v3,
 	.msm_bus_data_ptr	= &ipa_bus_client_pdata_v3_0,
-	.ipa_reg_base_ofst	= IPA_REG_BASE_OFFSET,
 	.ipa_init_sram		= _ipa_init_sram_v3,
 	.ipa_sram_read_settings = _ipa_sram_settings_read_v3_0,
 	.ipa_init_hdr		= _ipa_init_hdr_v3_0,
