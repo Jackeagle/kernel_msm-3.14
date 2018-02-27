@@ -1664,14 +1664,7 @@ int ipa3_init_mem_partition(struct device_node *node)
 #undef ALIGN_CHECK
 
 static struct ipa3_controller ipa_controller_v3 = {
-	.ipa_init_rt4		= _ipa_init_rt4_v3,
-	.ipa_init_rt6		= _ipa_init_rt6_v3,
-	.ipa_init_flt4		= _ipa_init_flt4_v3,
-	.ipa_init_flt6		= _ipa_init_flt6_v3,
 	.msm_bus_data_ptr	= &ipa_bus_client_pdata_v3_0,
-	.ipa_init_sram		= _ipa_init_sram_v3,
-	.ipa_sram_read_settings = _ipa_sram_settings_read_v3_0,
-	.ipa_init_hdr		= _ipa_init_hdr_v3_0,
 };
 
 u32 ipa3_mem(enum ipa3_mem_partition index)

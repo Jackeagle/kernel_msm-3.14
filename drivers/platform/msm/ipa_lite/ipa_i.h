@@ -727,13 +727,6 @@ enum ipa3_mem_partition {
 
 struct ipa3_controller {
 	u32 mem_partition[IPA_MEM_MAX];
-	void (*ipa_sram_read_settings)(void);
-	int (*ipa_init_sram)(void);
-	int (*ipa_init_hdr)(void);
-	int (*ipa_init_rt4)(void);
-	int (*ipa_init_rt6)(void);
-	int (*ipa_init_flt4)(void);
-	int (*ipa_init_flt6)(void);
 	struct msm_bus_scale_pdata *msm_bus_data_ptr;
 };
 
@@ -1071,6 +1064,8 @@ void ipa3_suspend_handler(enum ipa_irq_type interrupt,
 				void *private_data,
 				void *interrupt_data);
 void ipa3_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data);
+
+void _ipa_sram_settings_read_v3_0(void);
 
 int _ipa_init_sram_v3(void);
 int _ipa_init_hdr_v3_0(void);

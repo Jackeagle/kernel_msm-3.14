@@ -943,22 +943,22 @@ static long ipa3_setup_apps_pipes(void)
 	}
 	ipa_debug("Apps to IPA cmd pipe is connected\n");
 
-	ipa3_ctx->ctrl->ipa_init_sram();
+	_ipa_init_sram_v3();
 	ipa_debug("SRAM initialized\n");
 
-	ipa3_ctx->ctrl->ipa_init_hdr();
+	_ipa_init_hdr_v3_0();
 	ipa_debug("HDR initialized\n");
 
-	ipa3_ctx->ctrl->ipa_init_rt4();
+	_ipa_init_rt4_v3();
 	ipa_debug("V4 RT initialized\n");
 
-	ipa3_ctx->ctrl->ipa_init_rt6();
+	_ipa_init_rt6_v3();
 	ipa_debug("V6 RT initialized\n");
 
-	ipa3_ctx->ctrl->ipa_init_flt4();
+	_ipa_init_flt4_v3();
 	ipa_debug("V4 FLT initialized\n");
 
-	ipa3_ctx->ctrl->ipa_init_flt6();
+	_ipa_init_flt6_v3();
 	ipa_debug("V6 FLT initialized\n");
 
 	ipa3_setup_flt_hash_tuple();
@@ -1852,7 +1852,7 @@ static int ipa3_pre_init(void)
 		goto fail_init_hw;
 	}
 
-	ipa3_ctx->ctrl->ipa_sram_read_settings();
+	_ipa_sram_settings_read_v3_0();
 	ipa_debug("SRAM, size: 0x%x, restricted bytes: 0x%x\n",
 		ipa3_ctx->smem_sz, ipa3_ctx->smem_restricted_bytes);
 
