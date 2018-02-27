@@ -2349,8 +2349,6 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 			ipa3_ctx->ipa_wrapper_base,
 			ipa3_ctx->ipa_wrapper_size);
 
-	ipa3_ctx->ctrl = ipa3_controller_init();
-
 	/* setup IPA register access */
 	phys_addr = ipa3_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
 	ipa_debug("Mapping 0x%lx\n", phys_addr);
@@ -2358,7 +2356,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	if (!ipa3_ctx->mmio) {
 		ipa_err(":ipa-base ioremap err.\n");
 		result = -EFAULT;
-		goto err_clear_ctrl;
+		goto err_clear_wrapper;
 	}
 
 	ipahal_init(hw_version, ipa3_ctx->mmio);
@@ -2387,8 +2385,9 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	}
 
 	/* get BUS handle */
-	ipa3_ctx->ipa_bus_hdl = msm_bus_scale_register_client(
-					ipa3_ctx->ctrl->msm_bus_data_ptr);
+	ipa3_ctx->bus_scale_tbl = ipa_bus_scale_table_init();
+	ipa3_ctx->ipa_bus_hdl =
+			msm_bus_scale_register_client(ipa3_ctx->bus_scale_tbl);
 	if (!ipa3_ctx->ipa_bus_hdl) {
 		ipa_err("fail to register with bus mgr!\n");
 		result = -ENODEV;
@@ -2422,12 +2421,12 @@ err_clear_gsi_ctx:
 err_unregister_bus_handle:
 	msm_bus_scale_unregister_client(ipa3_ctx->ipa_bus_hdl);
 	ipa3_ctx->ipa_bus_hdl = 0;
+	ipa3_ctx->bus_scale_tbl = NULL;
 err_hal_destroy:
 	ipahal_destroy();
 	iounmap(ipa3_ctx->mmio);
 	ipa3_ctx->mmio = NULL;
-err_clear_ctrl:
-	ipa3_ctx->ctrl = NULL;
+err_clear_wrapper:
 	ipa3_ctx->ipa_wrapper_size = 0;
 	ipa3_ctx->ipa_wrapper_base = 0;
 err_clear_ee:

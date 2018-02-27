@@ -725,10 +725,6 @@ enum ipa3_mem_partition {
 	IPA_MEM_MAX,
 };
 
-struct ipa3_controller {
-	struct msm_bus_scale_pdata *msm_bus_data_ptr;
-};
-
 /**
  * union IpaHwErrorEventData_t - HW->CPU Common Events
  * @errorType : Entered when a system error is detected by the HW. Type of
@@ -935,7 +931,7 @@ struct ipa3_context {
 	void *logbuf;
 	void *logbuf_low;
 	u32 ipa_bus_hdl;
-	struct ipa3_controller *ctrl;
+	struct msm_bus_scale_pdata *bus_scale_tbl;
 	u32 mem_info[IPA_MEM_MAX];
 	bool q6_proxy_clk_vote_valid;
 	u32 ipa_num_pipes;
@@ -1030,7 +1026,7 @@ void ipa3_dump_buff_internal(void *base, dma_addr_t phy_base, u32 size);
 #endif
 int ipa_init_mem_info(struct device_node *dev_node);
 
-struct ipa3_controller *ipa3_controller_init(void);
+struct msm_bus_scale_pdata *ipa_bus_scale_table_init(void);
 int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout);
 int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr);
 

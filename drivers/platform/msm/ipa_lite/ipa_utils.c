@@ -1665,16 +1665,9 @@ int ipa_init_mem_info(struct device_node *node)
 #undef NONZERO_CHECK
 #undef ALIGN_CHECK
 
-static struct ipa3_controller ipa_controller_v3 = {
-	.msm_bus_data_ptr	= &ipa_bus_client_pdata_v3_0,
-};
-
-/**
- * ipa_controller_init() - return the appropriate methods for IPA Driver
- */
-struct ipa3_controller *ipa3_controller_init(void)
+struct msm_bus_scale_pdata *ipa_bus_scale_table_init(void)
 {
-	return &ipa_controller_v3;
+	return &ipa_bus_client_pdata_v3_0;
 }
 
 void ipa3_skb_recycle(struct sk_buff *skb)
