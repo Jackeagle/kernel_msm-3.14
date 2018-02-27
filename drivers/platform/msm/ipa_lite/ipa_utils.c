@@ -652,7 +652,7 @@ void ipa_sram_settings_read(void)
 	ipa3_ctx->smem_restricted_bytes = smem_sz.shared_mem_baddr * 8;
 	ipa3_ctx->smem_sz = smem_sz.shared_mem_sz * 8;
 
-	ipa3_ctx->smem_reqd_sz = ipa3_mem(END_OFST);
+	ipa3_ctx->smem_reqd_sz = ipa3_ctx->mem_info[END_OFST];
 }
 
 /**
@@ -1666,11 +1666,6 @@ int ipa_init_mem_info(struct device_node *node)
 static struct ipa3_controller ipa_controller_v3 = {
 	.msm_bus_data_ptr	= &ipa_bus_client_pdata_v3_0,
 };
-
-u32 ipa3_mem(enum ipa3_mem_partition index)
-{
-	return ipa3_ctx->mem_info[index];
-}
 
 /**
  * ipa_controller_init() - return the appropriate methods for IPA Driver

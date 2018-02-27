@@ -1029,7 +1029,6 @@ void ipa3_dump_buff_internal(void *base, dma_addr_t phy_base, u32 size);
 #define IPA_DUMP_BUFF(base, phy_base, size)
 #endif
 int ipa_init_mem_info(struct device_node *dev_node);
-u32 ipa3_mem(enum ipa3_mem_partition index);
 
 struct ipa3_controller *ipa3_controller_init(void);
 int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout);
