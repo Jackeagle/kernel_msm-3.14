@@ -544,6 +544,7 @@ static inline void ipa3_sram_set_canary(u32 *sram_mmio, int offset)
  */
 static int ipa_init_sram(void)
 {
+	u32 *mem_info = &ipa3_ctx->mem_info[0];
 	u32 *ipa_sram_mmio;
 	unsigned long phys_addr;
 
@@ -558,33 +559,30 @@ static int ipa_init_sram(void)
 	}
 
 	/* Consult with ipa_i.h on the location of the CANARY values */
-	ipa3_sram_set_canary(ipa_sram_mmio, ipa3_ctx->mem_info[V4_FLT_HASH_OFST] - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio, ipa3_ctx->mem_info[V4_FLT_HASH_OFST]);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[V4_FLT_HASH_OFST] - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[V4_FLT_HASH_OFST]);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[V4_FLT_NHASH_OFST] - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[V4_FLT_NHASH_OFST]);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[V6_FLT_HASH_OFST] - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[V6_FLT_HASH_OFST]);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[V6_FLT_NHASH_OFST] - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[V6_FLT_NHASH_OFST]);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[V4_RT_HASH_OFST] - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[V4_RT_HASH_OFST]);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[V4_RT_NHASH_OFST] - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[V4_RT_NHASH_OFST]);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[V6_RT_HASH_OFST] - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[V6_RT_HASH_OFST]);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[V6_RT_NHASH_OFST] - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[V6_RT_NHASH_OFST]);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[MODEM_HDR_OFST] - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[MODEM_HDR_OFST]);
 	ipa3_sram_set_canary(ipa_sram_mmio,
-		ipa3_ctx->mem_info[V4_FLT_NHASH_OFST] - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio, ipa3_ctx->mem_info[V4_FLT_NHASH_OFST]);
-	ipa3_sram_set_canary(ipa_sram_mmio, ipa3_ctx->mem_info[V6_FLT_HASH_OFST] - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio, ipa3_ctx->mem_info[V6_FLT_HASH_OFST]);
-	ipa3_sram_set_canary(ipa_sram_mmio,
-		ipa3_ctx->mem_info[V6_FLT_NHASH_OFST] - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio, ipa3_ctx->mem_info[V6_FLT_NHASH_OFST]);
-	ipa3_sram_set_canary(ipa_sram_mmio, ipa3_ctx->mem_info[V4_RT_HASH_OFST] - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio, ipa3_ctx->mem_info[V4_RT_HASH_OFST]);
-	ipa3_sram_set_canary(ipa_sram_mmio, ipa3_ctx->mem_info[V4_RT_NHASH_OFST] - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio, ipa3_ctx->mem_info[V4_RT_NHASH_OFST]);
-	ipa3_sram_set_canary(ipa_sram_mmio, ipa3_ctx->mem_info[V6_RT_HASH_OFST] - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio, ipa3_ctx->mem_info[V6_RT_HASH_OFST]);
-	ipa3_sram_set_canary(ipa_sram_mmio, ipa3_ctx->mem_info[V6_RT_NHASH_OFST] - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio, ipa3_ctx->mem_info[V6_RT_NHASH_OFST]);
-	ipa3_sram_set_canary(ipa_sram_mmio, ipa3_ctx->mem_info[MODEM_HDR_OFST] - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio, ipa3_ctx->mem_info[MODEM_HDR_OFST]);
-	ipa3_sram_set_canary(ipa_sram_mmio,
-		ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_OFST] - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio,
-		ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_OFST]);
-	ipa3_sram_set_canary(ipa_sram_mmio, ipa3_ctx->mem_info[MODEM_OFST] - 4);
-	ipa3_sram_set_canary(ipa_sram_mmio, ipa3_ctx->mem_info[MODEM_OFST]);
-	ipa3_sram_set_canary(ipa_sram_mmio, ipa3_ctx->mem_info[UC_EVENT_RING_OFST]);
+		mem_info[MODEM_HDR_PROC_CTX_OFST] - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[MODEM_HDR_PROC_CTX_OFST]);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[MODEM_OFST] - 4);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[MODEM_OFST]);
+	ipa3_sram_set_canary(ipa_sram_mmio, mem_info[UC_EVENT_RING_OFST]);
 
 	iounmap(ipa_sram_mmio);
 
