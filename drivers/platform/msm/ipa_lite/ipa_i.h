@@ -734,9 +734,6 @@ struct ipa3_controller {
 	int (*ipa_init_rt6)(void);
 	int (*ipa_init_flt4)(void);
 	int (*ipa_init_flt6)(void);
-	int (*ipa3_commit_flt)(enum ipa_ip_type ip);
-	int (*ipa3_commit_rt)(enum ipa_ip_type ip);
-	int (*ipa3_commit_hdr)(void);
 	struct msm_bus_scale_pdata *msm_bus_data_ptr;
 };
 
