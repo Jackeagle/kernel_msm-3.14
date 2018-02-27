@@ -725,7 +725,6 @@ enum ipa3_mem_partition {
 struct ipa3_controller {
 	u32 mem_partition[IPA_MEM_MAX];
 	u32 ipa_reg_base_ofst;
-	u32 max_holb_tmr_val;
 	void (*ipa_sram_read_settings)(void);
 	int (*ipa_init_sram)(void);
 	int (*ipa_init_hdr)(void);

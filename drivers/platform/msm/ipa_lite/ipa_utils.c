@@ -1260,8 +1260,7 @@ int ipa3_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 	if (!client_handle_valid(clnt_hdl))
 		return -EINVAL;
 
-	if (ep_holb->tmr_val > ipa3_ctx->ctrl->max_holb_tmr_val ||
-	    ep_holb->en > 1) {
+	if (ep_holb->tmr_val > 0 || ep_holb->en > 1) {
 		ipa_err("bad parm.\n");
 		return -EINVAL;
 	}
