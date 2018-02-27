@@ -35,9 +35,6 @@
 /* Offset past base of IPA "wrapper" space for register access */
 #define IPA_REG_BASE_OFFSET	0x00040000
 
-#define IPA_V3_0_BW_THRESHOLD_TURBO_MBPS (1000)
-#define IPA_V3_0_BW_THRESHOLD_NOMINAL_MBPS (600)
-
 /* Max pipes + ICs for TAG process */
 #define IPA_TAG_MAX_DESC (IPA3_MAX_NUM_PIPES + 6)
 
@@ -1673,10 +1670,6 @@ static struct ipa3_controller ipa_controller_v3 = {
 	.ipa_init_flt4		= _ipa_init_flt4_v3,
 	.ipa_init_flt6		= _ipa_init_flt6_v3,
 	.msm_bus_data_ptr	= &ipa_bus_client_pdata_v3_0,
-	.clock_scaling_bw_threshold_nominal =
-				IPA_V3_0_BW_THRESHOLD_NOMINAL_MBPS,
-	.clock_scaling_bw_threshold_turbo =
-				IPA_V3_0_BW_THRESHOLD_TURBO_MBPS,
 	.ipa_reg_base_ofst	= IPA_REG_BASE_OFFSET,
 	.ipa_init_sram		= _ipa_init_sram_v3,
 	.ipa_sram_read_settings = _ipa_sram_settings_read_v3_0,
