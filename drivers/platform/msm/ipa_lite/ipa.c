@@ -517,6 +517,20 @@ void ipa3_q6_post_shutdown_cleanup(void)
 	ipa_debug_low("Exit with success\n");
 }
 
+static int setup_apps_cmd_prod_pipe(void)
+{
+	struct ipa_sys_connect_params sys_in;
+
+	memset(&sys_in, 0, sizeof(sys_in));
+
+	sys_in.client = IPA_CLIENT_APPS_CMD_PROD;
+	sys_in.desc_fifo_sz = IPA_SYS_DESC_FIFO_SZ;
+	sys_in.ipa_ep_cfg.mode.mode = IPA_DMA;
+	sys_in.ipa_ep_cfg.mode.dst = IPA_CLIENT_APPS_LAN_CONS;
+
+	return ipa3_setup_sys_pipe(&sys_in);
+}
+
 static inline void ipa3_sram_set_canary(u32 *sram_mmio, int offset)
 {
 	/* Set 4 bytes of CANARY before the offset */
@@ -841,7 +855,6 @@ free_mem:
 	return rc;
 }
 
-
 static void ipa3_setup_flt_hash_tuple(void)
 {
 	int pipe_idx;
@@ -882,20 +895,6 @@ static void ipa3_setup_rt_hash_tuple(void)
 
 		ipa3_set_rt_tuple_mask(tbl_idx, &tuple);
 	}
-}
-
-static int setup_apps_cmd_prod_pipe(void)
-{
-	struct ipa_sys_connect_params sys_in;
-
-	memset(&sys_in, 0, sizeof(sys_in));
-
-	sys_in.client = IPA_CLIENT_APPS_CMD_PROD;
-	sys_in.desc_fifo_sz = IPA_SYS_DESC_FIFO_SZ;
-	sys_in.ipa_ep_cfg.mode.mode = IPA_DMA;
-	sys_in.ipa_ep_cfg.mode.dst = IPA_CLIENT_APPS_LAN_CONS;
-
-	return ipa3_setup_sys_pipe(&sys_in);
 }
 
 static int setup_apps_lan_cons_pipe(void)
