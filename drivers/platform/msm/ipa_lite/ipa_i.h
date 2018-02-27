@@ -897,7 +897,6 @@ struct ipa_dma_task_info {
  * @ctrl: holds the core specific operations based on
  *  core version (vtable like)
  * @pkt_init_imm_opcode: opcode for IP_PACKET_INIT imm cmd
- * @curr_ipa_clk_rate: IPA current clock rate
  * @wcstats: wlan common buffer stats
  * @uc_ctx: uC interface context
  * @uc_wdi_ctx: WDI specific fields for uC interface
@@ -949,7 +948,6 @@ struct ipa3_context {
 	void *logbuf_low;
 	u32 ipa_bus_hdl;
 	struct ipa3_controller *ctrl;
-	u32 curr_ipa_clk_rate;
 	bool q6_proxy_clk_vote_valid;
 	u32 ipa_num_pipes;
 	dma_addr_t pkt_init_imm[IPA3_MAX_NUM_PIPES];

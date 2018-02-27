@@ -1006,8 +1006,6 @@ static void ipa3_enable_clks(void)
 	ipa_debug("enabling IPA clocks and bus voting\n");
 
 	WARN_ON(msm_bus_scale_client_update_request(ipa3_ctx->ipa_bus_hdl, 1));
-
-	ipa_debug_low("curr_ipa_clk_rate=%d", ipa3_ctx->curr_ipa_clk_rate);
 }
 
 /**
@@ -1834,9 +1832,6 @@ static int ipa3_pre_init(void)
 	struct ipa_active_client_logging_info log_info;
 
 	ipa_debug("IPA Driver initialization started\n");
-
-	/* Clock scaling is enabled */
-	ipa3_ctx->curr_ipa_clk_rate = 0;
 
 	/* enable IPA clocks explicitly to allow the initialization */
 	ipa3_enable_clks();
