@@ -995,15 +995,6 @@ fail_ch20_wa:
 	return result;
 }
 
-static unsigned int ipa3_get_bus_vote(void)
-{
-	WARN_ON(ipa3_ctx->curr_ipa_clk_rate);
-
-	ipa_debug("curr %d idx 1\n", ipa3_ctx->curr_ipa_clk_rate);
-
-	return 1;
-}
-
 /**
 * ipa3_enable_clks() - Turn on IPA clocks
 *
@@ -1014,9 +1005,7 @@ static void ipa3_enable_clks(void)
 {
 	ipa_debug("enabling IPA clocks and bus voting\n");
 
-	if (msm_bus_scale_client_update_request(ipa3_ctx->ipa_bus_hdl,
-	    ipa3_get_bus_vote()))
-		WARN_ON(1);
+	WARN_ON(msm_bus_scale_client_update_request(ipa3_ctx->ipa_bus_hdl, 1));
 
 	ipa_debug_low("curr_ipa_clk_rate=%d", ipa3_ctx->curr_ipa_clk_rate);
 }
@@ -1031,8 +1020,7 @@ static void ipa3_disable_clks(void)
 {
 	ipa_debug("disabling IPA clocks and bus voting\n");
 
-	if (msm_bus_scale_client_update_request(ipa3_ctx->ipa_bus_hdl, 0))
-		WARN_ON(1);
+	WARN_ON(msm_bus_scale_client_update_request(ipa3_ctx->ipa_bus_hdl, 0));
 }
 
 /* log->lock is assumed held by the caller */
