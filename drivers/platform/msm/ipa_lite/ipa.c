@@ -997,24 +997,11 @@ fail_ch20_wa:
 
 static unsigned int ipa3_get_bus_vote(void)
 {
-	unsigned int idx = 1;
+	WARN_ON(ipa3_ctx->curr_ipa_clk_rate);
 
-	if (ipa3_ctx->curr_ipa_clk_rate == 0) {
-		idx = 1;
-	} else if (ipa3_ctx->curr_ipa_clk_rate == 0) {
-		if (ipa3_ctx->ctrl->msm_bus_data_ptr->num_usecases <= 2)
-			idx = 1;
-		else
-			idx = 2;
-	} else if (ipa3_ctx->curr_ipa_clk_rate == 0) {
-		idx = ipa3_ctx->ctrl->msm_bus_data_ptr->num_usecases - 1;
-	} else {
-		WARN_ON(1);
-	}
+	ipa_debug("curr %d idx 1\n", ipa3_ctx->curr_ipa_clk_rate);
 
-	ipa_debug("curr %d idx %d\n", ipa3_ctx->curr_ipa_clk_rate, idx);
-
-	return idx;
+	return 1;
 }
 
 /**
