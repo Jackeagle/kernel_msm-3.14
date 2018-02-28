@@ -51,19 +51,6 @@ extern struct elem_info ipa3_config_resp_msg_data_v01_ei[];
 extern struct elem_info ipa3_init_modem_driver_cmplt_req_msg_data_v01_ei[];
 extern struct elem_info ipa3_init_modem_driver_cmplt_resp_msg_data_v01_ei[];
 
-/**
- * struct ipa3_rmnet_context - IPA rmnet context
- * @ipa_rmnet_ssr: support modem SSR
- * @polling_interval: Requested interval for polling tethered statistics
- * @metered_mux_id: The mux ID on which quota has been set
- */
-struct ipa3_rmnet_context {
-	u64 polling_interval;
-	u32 metered_mux_id;
-};
-
-extern struct ipa3_rmnet_context ipa3_rmnet_ctx;
-
 int ipa3_qmi_service_init(uint32_t wan_platform_type);
 
 void ipa3_qmi_service_exit(void);

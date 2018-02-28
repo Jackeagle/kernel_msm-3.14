@@ -864,8 +864,6 @@ static int get_ipa_rmnet_dts_configuration(struct platform_device *pdev,
 	return 0;
 }
 
-struct ipa3_rmnet_context ipa3_rmnet_ctx;
-
 /**
  * ipa3_wwan_probe() - Initialized the module and registers as a
  * network interface to the network stack
