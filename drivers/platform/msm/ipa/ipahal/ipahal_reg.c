@@ -938,27 +938,6 @@ void ipahal_get_aggr_force_close_valmask(int ep_idx,
 	valmask->mask = PIPE_BITMAP_BMSK_V3_5;
 }
 
-void ipahal_get_fltrt_hash_flush_valmask(
-	struct ipahal_reg_fltrt_hash_flush *flush,
-	struct ipahal_reg_valmask *valmask)
-{
-	u32 val;
-
-	val = field_gen(flush->v6_rt ? 1 : 0, IPv6_ROUT_BMSK);
-	val |= field_gen(flush->v6_flt ? 1 : 0, IPv6_FILT_BMSK);
-	val |= field_gen(flush->v4_rt ? 1 : 0, IPv4_ROUT_BMSK);
-	val |= field_gen(flush->v4_flt ? 1 : 0, IPv4_FILT_BMSK);
-
-	/*
-	 * The mask indicates which bits in the value are valid.
-	 * Technically we should set all four bits in the mask,
-	 * but in this case setting just the bits set in the value
-	 * has the same effect.
-	 */
-	valmask->val = val;
-	valmask->mask = val;
-}
-
 void
 ipahal_get_status_ep_valmask(int pipe_num, struct ipahal_reg_valmask *valmask)
 {

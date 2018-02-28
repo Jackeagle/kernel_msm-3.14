@@ -505,9 +505,6 @@ u32 ipahal_aggr_get_max_byte_limit(void);
 u32 ipahal_aggr_get_max_pkt_limit(void);
 void ipahal_get_aggr_force_close_valmask(int ep_idx,
 	struct ipahal_reg_valmask *valmask);
-void ipahal_get_fltrt_hash_flush_valmask(
-	struct ipahal_reg_fltrt_hash_flush *flush,
-	struct ipahal_reg_valmask *valmask);
 void ipahal_get_status_ep_valmask(int pipe_num,
 	struct ipahal_reg_valmask *valmask);
 
