@@ -146,15 +146,13 @@ static ssize_t ipa3_write_ep_holb(struct file *file,
 	u32 ep_idx;
 	unsigned long missing;
 	char *sptr, *token;
+	size_t copy_max = min(sizeof(dbg_buff) - 1, count);
 
-	if (sizeof(dbg_buff) < count + 1)
-		return -EFAULT;
-
-	missing = copy_from_user(dbg_buff, buf, count);
+	missing = copy_from_user(dbg_buff, buf, copy_max);
 	if (missing)
 		return -EFAULT;
 
-	dbg_buff[count] = '\0';
+	dbg_buff[copy_max] = '\0';
 
 	sptr = dbg_buff;
 
@@ -190,15 +188,13 @@ static ssize_t ipa3_write_dbg_cnt(struct file *file, const char __user *buf,
 	unsigned long missing;
 	u32 option = 0;
 	struct ipahal_reg_debug_cnt_ctrl dbg_cnt_ctrl;
+	size_t copy_max = min(sizeof(dbg_buff) - 1, count);
 
-	if (sizeof(dbg_buff) < count + 1)
-		return -EFAULT;
-
-	missing = copy_from_user(dbg_buff, buf, count);
+	missing = copy_from_user(dbg_buff, buf, copy_max);
 	if (missing)
 		return -EFAULT;
 
-	dbg_buff[count] = '\0';
+	dbg_buff[copy_max] = '\0';
 	if (kstrtou32(dbg_buff, 0, &option))
 		return -EFAULT;
 
