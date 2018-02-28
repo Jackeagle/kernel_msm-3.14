@@ -119,7 +119,6 @@ struct rmnet_ipa3_context {
 	bool a7_ul_flt_set;
 	struct workqueue_struct *rm_q6_wq;
 	atomic_t is_initialized;
-	atomic_t is_ssr;
 	u32 apps_to_ipa3_hdl;
 	u32 ipa3_to_apps_hdl;
 	struct mutex pipe_handle_guard;
@@ -303,8 +302,7 @@ static void apps_ipa_tx_complete_notify(void *priv,
 	wwan_ptr = netdev_priv(dev);
 	atomic_dec(&wwan_ptr->outstanding_pkts);
 	__netif_tx_lock_bh(netdev_get_tx_queue(dev, 0));
-	if (!atomic_read(&rmnet_ipa3_ctx->is_ssr) &&
-		netif_queue_stopped(wwan_ptr->net) &&
+	if (netif_queue_stopped(wwan_ptr->net) &&
 		atomic_read(&wwan_ptr->outstanding_pkts) <
 					(wwan_ptr->outstanding_low)) {
 		ipa_debug_low("Outstanding low (%d) - waking up queue\n",
@@ -425,12 +423,6 @@ static int handle3_ingress_format(struct net_device *dev,
 
 	mutex_lock(&rmnet_ipa3_ctx->pipe_handle_guard);
 
-	if (atomic_read(&rmnet_ipa3_ctx->is_ssr)) {
-		ipa_debug("In SSR sequence/recovery\n");
-		mutex_unlock(&rmnet_ipa3_ctx->pipe_handle_guard);
-		return -EFAULT;
-	}
-
 	ret = ipa3_setup_sys_pipe(ipa_wan_ep_cfg);
 	if (ret < 0) {
 		ipa_err("failed to configure ingress\n");
@@ -519,11 +511,6 @@ static int handle3_egress_format(struct net_device *dev,
 	ipa_wan_ep_cfg->priv = dev;
 
 	mutex_lock(&rmnet_ipa3_ctx->pipe_handle_guard);
-	if (atomic_read(&rmnet_ipa3_ctx->is_ssr)) {
-		ipa_debug("In SSR sequence/recovery\n");
-		mutex_unlock(&rmnet_ipa3_ctx->pipe_handle_guard);
-		return -EFAULT;
-	}
 
 	rc = ipa3_setup_sys_pipe(ipa_wan_ep_cfg);
 	if (rc < 0) {
@@ -950,8 +937,7 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 			   ipa3_wwan_setup);
 	if (!dev) {
 		ipa_err("no memory for netdev\n");
-		ret = -ENOMEM;
-		goto alloc_netdev_err;
+		return -ENOMEM;
 	}
 	rmnet_ipa3_ctx->wwan_priv = netdev_priv(dev);
 	ipa_debug("wwan_ptr (private) = %p", rmnet_ipa3_ctx->wwan_priv);
@@ -976,11 +962,8 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 
 	ipa_debug("IPA-WWAN devices (%s) initialization ok :>>>>\n", dev->name);
 	atomic_set(&rmnet_ipa3_ctx->is_initialized, 1);
-	if (!atomic_read(&rmnet_ipa3_ctx->is_ssr)) {
-		/* offline charging mode */
-		ipa3_proxy_clk_unvote();
-	}
-	atomic_set(&rmnet_ipa3_ctx->is_ssr, 0);
+	/* offline charging mode */
+	ipa3_proxy_clk_unvote();
 
 	/* Till the system is suspended, we keep the clock open */
 	ipa_client_add(__func__, false);
@@ -990,9 +973,6 @@ config_err:
 	if (ipa3_rmnet_res.ipa_napi_enable)
 		netif_napi_del(&(rmnet_ipa3_ctx->wwan_priv->napi));
 	unregister_netdev(dev);
-
-alloc_netdev_err:
-	atomic_set(&rmnet_ipa3_ctx->is_ssr, 0);
 
 	return ret;
 }
@@ -1164,7 +1144,6 @@ static int __init ipa3_wwan_init(void)
 	}
 
 	atomic_set(&rmnet_ipa3_ctx->is_initialized, 0);
-	atomic_set(&rmnet_ipa3_ctx->is_ssr, 0);
 
 	mutex_init(&rmnet_ipa3_ctx->pipe_handle_guard);
 	mutex_init(&rmnet_ipa3_ctx->add_mux_channel_lock);
