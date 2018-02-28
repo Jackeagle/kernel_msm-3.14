@@ -31,8 +31,6 @@
 #include <linux/workqueue.h>
 #include <linux/ipc_logging.h>
 #include <net/pkt_sched.h>
-#include <soc/qcom/subsystem_restart.h>
-#include <soc/qcom/subsystem_notif.h>
 #include "net_map.h"
 #include "msm_rmnet.h"
 #include "rmnet_config.h"
@@ -122,7 +120,6 @@ struct rmnet_ipa3_context {
 	struct workqueue_struct *rm_q6_wq;
 	atomic_t is_initialized;
 	atomic_t is_ssr;
-	void *subsys_notify_handle;
 	u32 apps_to_ipa3_hdl;
 	u32 ipa3_to_apps_hdl;
 	struct mutex pipe_handle_guard;
@@ -857,14 +854,6 @@ static void ipa3_wake_tx_queue(struct work_struct *work)
 	}
 }
 
-static int ipa3_ssr_notifier_cb(struct notifier_block *this,
-			   unsigned long code,
-			   void *data);
-
-static struct notifier_block ipa3_ssr_notifier = {
-	.notifier_call = ipa3_ssr_notifier_cb,
-};
-
 static int get_ipa_rmnet_dts_configuration(struct platform_device *pdev,
 		struct ipa3_rmnet_plat_drv_res *ipa_rmnet_drv_res)
 {
@@ -1120,11 +1109,6 @@ static int rmnet_ipa_ap_resume(struct device *dev)
 	return 0;
 }
 
-static void ipa_stop_polling_stats(void)
-{
-	ipa3_rmnet_ctx.polling_interval = 0;
-}
-
 static const struct of_device_id rmnet_ipa_dt_match[] = {
 	{.compatible = "qcom,rmnet-ipa3"},
 	{},
@@ -1146,64 +1130,6 @@ static struct platform_driver rmnet_ipa_driver = {
 	.probe = ipa3_wwan_probe,
 	.remove = ipa3_wwan_remove,
 };
-
-static int ipa3_ssr_notifier_cb(struct notifier_block *this,
-			   unsigned long code,
-			   void *data)
-{
-	if (!ipa3_rmnet_ctx.ipa_rmnet_ssr)
-		return NOTIFY_DONE;
-
-	switch (code) {
-	case SUBSYS_BEFORE_SHUTDOWN:
-		ipa_info("IPA received MPSS BEFORE_SHUTDOWN\n");
-		atomic_set(&rmnet_ipa3_ctx->is_ssr, 1);
-		ipa3_q6_pre_shutdown_cleanup();
-		if (IPA_NETDEV())
-			netif_stop_queue(IPA_NETDEV());
-
-		ipa3_qmi_stop_workqueues();
-		ipa_stop_polling_stats();
-		if (atomic_read(&rmnet_ipa3_ctx->is_initialized))
-			platform_driver_unregister(&rmnet_ipa_driver);
-		ipa_info("IPA BEFORE_SHUTDOWN handling is complete\n");
-		break;
-	case SUBSYS_AFTER_SHUTDOWN:
-		ipa_info("IPA Received MPSS AFTER_SHUTDOWN\n");
-		if (atomic_read(&rmnet_ipa3_ctx->is_ssr))
-			ipa3_q6_post_shutdown_cleanup();
-		ipa_info("IPA AFTER_SHUTDOWN handling is complete\n");
-		break;
-	case SUBSYS_BEFORE_POWERUP:
-		ipa_info("IPA received MPSS BEFORE_POWERUP\n");
-		if (atomic_read(&rmnet_ipa3_ctx->is_ssr))
-			/* clean up cached QMI msg/handlers */
-			ipa3_qmi_service_exit();
-
-		/*hold a proxy vote for the modem*/
-		ipa3_proxy_clk_vote();
-		ipa3_reset_freeze_vote();
-		ipa_info("IPA BEFORE_POWERUP handling is complete\n");
-		break;
-	case SUBSYS_AFTER_POWERUP:
-		ipa_info("%s:%d IPA received MPSS AFTER_POWERUP\n",
-			__func__, __LINE__);
-		if (!atomic_read(&rmnet_ipa3_ctx->is_initialized) &&
-		       atomic_read(&rmnet_ipa3_ctx->is_ssr))
-			platform_driver_register(&rmnet_ipa_driver);
-
-		ipa_info("IPA AFTER_POWERUP handling is complete\n");
-		break;
-	default:
-		ipa_debug("Unsupported subsys notification, IPA received: %lu",
-			code);
-		break;
-	}
-
-	ipa_debug_low("Exit\n");
-	return NOTIFY_DONE;
-}
-
 
 /**
  * ipa3_q6_handshake_complete() - Perform operations once Q6 is up
@@ -1245,28 +1171,13 @@ static int __init ipa3_wwan_init(void)
 	rmnet_ipa3_ctx->ipa3_to_apps_hdl = -1;
 	rmnet_ipa3_ctx->apps_to_ipa3_hdl = -1;
 
-	/* Register for Modem SSR */
-	rmnet_ipa3_ctx->subsys_notify_handle = subsys_notif_register_notifier(
-			SUBSYS_MODEM,
-			&ipa3_ssr_notifier);
-	if (!IS_ERR(rmnet_ipa3_ctx->subsys_notify_handle))
-		return platform_driver_register(&rmnet_ipa_driver);
-	else
-		return (int)PTR_ERR(rmnet_ipa3_ctx->subsys_notify_handle);
+	return platform_driver_register(&rmnet_ipa_driver);
 }
 
 static void __exit ipa3_wwan_cleanup(void)
 {
-	int ret;
-
 	mutex_destroy(&rmnet_ipa3_ctx->pipe_handle_guard);
 	mutex_destroy(&rmnet_ipa3_ctx->add_mux_channel_lock);
-	ret = subsys_notif_unregister_notifier(
-		rmnet_ipa3_ctx->subsys_notify_handle, &ipa3_ssr_notifier);
-	if (ret)
-		ipa_err(
-		"Error subsys_notif_unregister_notifier system %s, ret=%d\n",
-		SUBSYS_MODEM, ret);
 	platform_driver_unregister(&rmnet_ipa_driver);
 	kfree(rmnet_ipa3_ctx);
 	rmnet_ipa3_ctx = NULL;
