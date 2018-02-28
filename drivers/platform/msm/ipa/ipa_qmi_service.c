@@ -21,7 +21,6 @@
 #include <linux/delay.h>
 #include <linux/uaccess.h>
 #include <soc/qcom/subsystem_restart.h>
-#include <linux/ipc_logging.h>
 #include <linux/vmalloc.h>
 
 #include "ipa_qmi_service.h"

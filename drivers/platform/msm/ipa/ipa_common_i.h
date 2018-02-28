@@ -12,7 +12,7 @@
 
 #ifndef _IPA_COMMON_I_H_
 #define _IPA_COMMON_I_H_
-#include <linux/ipc_logging.h>
+
 #include <linux/slab.h>
 
 #include <dt-bindings/soc/qcom,ipa.h>

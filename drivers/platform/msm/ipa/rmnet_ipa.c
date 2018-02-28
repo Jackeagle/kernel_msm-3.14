@@ -29,7 +29,6 @@
 #include <linux/skbuff.h>
 #include <linux/version.h>
 #include <linux/workqueue.h>
-#include <linux/ipc_logging.h>
 #include <net/pkt_sched.h>
 #include "net_map.h"
 #include "msm_rmnet.h"

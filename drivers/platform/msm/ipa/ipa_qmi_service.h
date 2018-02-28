@@ -13,7 +13,6 @@
 #ifndef IPA_QMI_SERVICE_H
 #define IPA_QMI_SERVICE_H
 
-#include <linux/ipc_logging.h>
 #include "ipa_qmi_service_v01.h"
 #include <soc/qcom/msm_qmi_interface.h>
 #include "ipa_i.h"

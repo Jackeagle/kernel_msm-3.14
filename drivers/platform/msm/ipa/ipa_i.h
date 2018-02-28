@@ -25,13 +25,15 @@
 #include <linux/iommu.h>
 #include <linux/platform_device.h>
 #include <linux/firmware.h>
+
+#include <linux/ipc_logging.h>
+
 #include "ipa_common_i.h"
 #include "ipahal/ipahal_reg.h"
 #include "ipahal/ipahal.h"
 #include "gsi.h"
 #include "ipa_qmi_service.h"
 #include "ipa_qmi_service_v01.h"
-
 
 #define DRV_NAME "ipa"
 #define IPA_COOKIE 0x57831603

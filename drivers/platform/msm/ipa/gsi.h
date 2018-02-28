@@ -17,10 +17,8 @@
 #include <linux/completion.h>
 #include <linux/mutex.h>
 #include <linux/spinlock.h>
-#include <linux/ipc_logging.h>
 #include <linux/platform_device.h>
 
-#include "ipa_common_i.h"
 #include "ipahal/ipahal.h"
 
 #define GSI_CHAN_MAX	  31

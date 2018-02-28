@@ -12,7 +12,6 @@
 
 #define pr_fmt(fmt)	"ipahal %s:%d " fmt, __func__, __LINE__
 
-#include <linux/ipc_logging.h>
 #include <linux/debugfs.h>
 #include "ipahal.h"
 #include "ipahal_fltrt.h"
