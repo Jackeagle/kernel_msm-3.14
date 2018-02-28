@@ -884,11 +884,6 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 
 	ipa_info("rmnet_ipa3 started initialization\n");
 
-	if (atomic_read(&ipa3_ctx->state) != IPA_STATE_READY) {
-		ipa_debug("IPA driver not ready, deferring\n");
-		return -EPROBE_DEFER;
-	}
-
 	ret = get_ipa_rmnet_dts_configuration(pdev, &ipa3_rmnet_res);
 
 	ret = ipa3_init_q6_smem();
@@ -1126,7 +1121,7 @@ void ipa3_q6_handshake_complete(bool ssr_bootup)
 	}
 }
 
-static int __init ipa3_wwan_init(void)
+int ipa3_wwan_init(void)
 {
 	rmnet_ipa3_ctx = kzalloc(sizeof(*rmnet_ipa3_ctx), GFP_KERNEL);
 	if (!rmnet_ipa3_ctx) {
@@ -1144,7 +1139,7 @@ static int __init ipa3_wwan_init(void)
 	return platform_driver_register(&rmnet_ipa_driver);
 }
 
-static void __exit ipa3_wwan_cleanup(void)
+void ipa3_wwan_cleanup(void)
 {
 	mutex_destroy(&rmnet_ipa3_ctx->pipe_handle_guard);
 	mutex_destroy(&rmnet_ipa3_ctx->add_mux_channel_lock);
@@ -1169,7 +1164,5 @@ static int ipa3_rmnet_poll(struct napi_struct *napi, int budget)
 	return rcvd_pkts;
 }
 
-late_initcall(ipa3_wwan_init);
-module_exit(ipa3_wwan_cleanup);
 MODULE_DESCRIPTION("WWAN Network Interface");
 MODULE_LICENSE("GPL v2");

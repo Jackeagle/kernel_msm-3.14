@@ -954,6 +954,10 @@ struct ipa3_context {
 extern struct ipa3_context *ipa3_ctx;
 
 /* public APIs */
+
+int ipa3_wwan_init(void);
+void ipa3_wwan_cleanup(void);
+
 /* Generic GSI channels functions */
 
 int ipa3_stop_gsi_channel(u32 clnt_hdl);
