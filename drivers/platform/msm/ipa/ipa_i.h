@@ -1030,8 +1030,6 @@ struct msm_bus_scale_pdata *ipa_bus_scale_table_init(void);
 int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout);
 int ipa3_send_cmd(u16 num_desc, struct ipa3_desc *descr);
 
-void ipa3_destroy_imm(void *user1, int user2);
-
 #define ipa_client_add(id, log_it) \
 	_ipa_client_add((id), (log_it), __FILE__, __LINE__)
 #define ipa_client_add_additional(id, log_it) \
@@ -1066,9 +1064,6 @@ void ipa3_skb_recycle(struct sk_buff *skb);
 
 int ipa3_cfg_ep_status(u32 clnt_hdl,
 		const struct ipahal_reg_ep_cfg_status *ipa_ep_cfg);
-
-int ipa3_tag_process(struct ipa3_desc *desc, int num_descs,
-		    unsigned long timeout);
 
 int ipa3_init_q6_smem(void);
 
