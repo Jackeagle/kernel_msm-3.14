@@ -58,7 +58,6 @@ extern struct elem_info ipa3_init_modem_driver_cmplt_resp_msg_data_v01_ei[];
  * @metered_mux_id: The mux ID on which quota has been set
  */
 struct ipa3_rmnet_context {
-	bool ipa_rmnet_ssr;
 	u64 polling_interval;
 	u32 metered_mux_id;
 };

@@ -491,18 +491,13 @@ static int ipa3_qmi_init_modem_send_sync_msg(void)
 	ipa_info("QMI_IPA_INIT_MODEM_DRIVER_REQ_V01 response received\n");
 
 	if (rc) {
-		if (rc == -ETIMEDOUT && ipa3_rmnet_ctx.ipa_rmnet_ssr)
-			ipa_err("Timeout on qmi INIT_MODEM_DRIVER\n");
-		else
-			ipa_err("Error %d on qmi INIT_MODEM_DRIVER\n", rc);
+		ipa_err("Error %d on qmi INIT_MODEM_DRIVER\n", rc);
 		return rc;
 	}
 
 	if (resp.resp.result == IPA_QMI_RESULT_SUCCESS_V01)
 		ipa_debug_low("Received init_modem_driver successfully\n");
-	else if (ipa3_rmnet_ctx.ipa_rmnet_ssr)
-		ipa_err("Got bad response %d on init_modem_driver\n",
-				resp.resp.result);
+
 	return 0;
 }
 

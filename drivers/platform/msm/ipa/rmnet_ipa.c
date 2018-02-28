@@ -73,7 +73,6 @@ static void ipa3_wake_tx_queue(struct work_struct *work);
 static DECLARE_WORK(ipa3_tx_wakequeue_work, ipa3_wake_tx_queue);
 
 struct ipa3_rmnet_plat_drv_res {
-	bool ipa_rmnet_ssr;
 	bool ipa_loaduC;
 	bool ipa_advertise_sg_support;
 	bool ipa_napi_enable;
@@ -844,11 +843,6 @@ static void ipa3_wake_tx_queue(struct work_struct *work)
 static int get_ipa_rmnet_dts_configuration(struct platform_device *pdev,
 		struct ipa3_rmnet_plat_drv_res *ipa_rmnet_drv_res)
 {
-	ipa_rmnet_drv_res->ipa_rmnet_ssr =
-			of_property_read_bool(pdev->dev.of_node,
-			"qcom,rmnet-ipa-ssr");
-	ipa_info("IPA SSR support = %s\n",
-		ipa_rmnet_drv_res->ipa_rmnet_ssr ? "True" : "False");
 	ipa_rmnet_drv_res->ipa_loaduC =
 			of_property_read_bool(pdev->dev.of_node,
 			"qcom,ipa-loaduC");
@@ -898,7 +892,6 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 	}
 
 	ret = get_ipa_rmnet_dts_configuration(pdev, &ipa3_rmnet_res);
-	ipa3_rmnet_ctx.ipa_rmnet_ssr = ipa3_rmnet_res.ipa_rmnet_ssr;
 
 	ret = ipa3_init_q6_smem();
 	if (ret) {
