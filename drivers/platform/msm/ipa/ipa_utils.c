@@ -1745,6 +1745,7 @@ int ipa3_disable_apps_wan_cons_deaggr(uint32_t agg_size, uint32_t agg_count)
 	return 0;
 }
 
+#ifdef CONFIG_IPC_LOGGING
 void __ipa_ipc_logging(bool only_low, const char *fmt, ...)
 {
 	va_list arg_list;
@@ -1755,6 +1756,7 @@ void __ipa_ipc_logging(bool only_low, const char *fmt, ...)
 	(void)ipc_log_va_list(ipa3_ctx->logbuf_low, fmt, arg_list);
 	va_end(arg_list);
 }
+#endif /* CONFIG_IPC_LOGGING */
 
 /**
  * ipa_is_modem_pipe()- Checks if pipe is owned by the modem

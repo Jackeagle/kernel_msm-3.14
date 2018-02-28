@@ -313,6 +313,7 @@ static const struct file_operations const_string_fops = {
 	.read = const_string_read_fop,
 };
 
+#ifdef CONFIG_IPC_LOGGING
 /*
  * "ipa/ipc_low_enabled" indicates whether low-level IPC logging is enabled.
  *
@@ -362,6 +363,7 @@ out_unlock:
 	return ret ? ret : count;
 }
 DEF_SEQ_RW(ipc_low_enabled);
+#endif /* CONFIG_IPC_LOGGING */
 
 /* Common file show operation for registers */
 static int ipa_reg_show(struct seq_file *s, void *v)
@@ -873,8 +875,10 @@ void ipa3_debugfs_init(void)
 	if (IS_ERR(ipa_dir))
 		goto fail;
 
+#ifdef CONFIG_IPC_LOGGING
 	if (!ADD_SEQ_RW(ipa_dir, ipc_low_enabled))
 		goto fail;
+#endif /* CONFIG_IPC_LOGGING */
 
 	if (!ipa_debugfs_regs_create(ipa_dir))
 		goto fail;
