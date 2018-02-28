@@ -900,25 +900,6 @@ void ipahal_write_reg_n_fields(enum ipahal_reg reg, u32 n,
 	ipahal_write_reg_n(reg, n, val);
 }
 
-/*
- * Specific functions
- * These functions supply specific register values for specific operations
- *  that cannot be reached by generic functions.
- * E.g. To disable aggregation, need to write to specific bits of the AGGR
- *  register. The other bits should be untouched. This oeprate is very specific
- *  and cannot be generically defined. For such operations we define these
- *  specific functions.
- */
-
-void ipahal_get_disable_aggr_valmask(struct ipahal_reg_valmask *valmask)
-{
-	valmask->val = field_val(0xffffffff, AGGR_FORCE_CLOSE_BMSK);
-	valmask->mask = AGGR_FORCE_CLOSE_BMSK;
-
-	valmask->val |= field_val(0x00000000, AGGR_EN_BMSK);
-	valmask->mask |= AGGR_EN_BMSK;
-}
-
 u32 ipahal_aggr_get_max_byte_limit(void)
 {
 	return field_val(0xffffffff, AGGR_BYTE_LIMIT_BMSK);
@@ -927,20 +908,4 @@ u32 ipahal_aggr_get_max_byte_limit(void)
 u32 ipahal_aggr_get_max_pkt_limit(void)
 {
 	return field_val(0xffffffff, AGGR_PKT_LIMIT_BMSK);
-}
-
-void ipahal_get_aggr_force_close_valmask(int ep_idx,
-	struct ipahal_reg_valmask *valmask)
-{
-	ipa_assert(ep_idx < sizeof(valmask->val) * 8);
-
-	valmask->val |= field_gen(1U << ep_idx, PIPE_BITMAP_BMSK_V3_5);
-	valmask->mask = PIPE_BITMAP_BMSK_V3_5;
-}
-
-void
-ipahal_get_status_ep_valmask(int pipe_num, struct ipahal_reg_valmask *valmask)
-{
-	valmask->val = field_gen(pipe_num, STATUS_ENDP_BMSK);
-	valmask->mask = STATUS_ENDP_BMSK;
 }

@@ -490,22 +490,7 @@ static inline void ipahal_write_reg_fields(enum ipahal_reg reg,
 {
 	ipahal_write_reg_n_fields(reg, 0, fields);
 }
-
-/*
- * Specific functions
- * These functions supply specific register values for specific operations
- *  that cannot be reached by generic functions.
- * E.g. To disable aggregation, need to write to specific bits of the AGGR
- *  register. The other bits should be untouched. This oeprate is very specific
- *  and cannot be generically defined. For such operations we define these
- *  specific functions.
- */
-void ipahal_get_disable_aggr_valmask(struct ipahal_reg_valmask *valmask);
 u32 ipahal_aggr_get_max_byte_limit(void);
 u32 ipahal_aggr_get_max_pkt_limit(void);
-void ipahal_get_aggr_force_close_valmask(int ep_idx,
-	struct ipahal_reg_valmask *valmask);
-void ipahal_get_status_ep_valmask(int pipe_num,
-	struct ipahal_reg_valmask *valmask);
 
 #endif /* _IPAHAL_REG_H_ */
