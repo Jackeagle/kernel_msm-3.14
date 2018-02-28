@@ -1070,8 +1070,6 @@ int ipa3_cfg_ep_status(u32 clnt_hdl,
 int ipa3_tag_process(struct ipa3_desc *desc, int num_descs,
 		    unsigned long timeout);
 
-void ipa3_q6_pre_shutdown_cleanup(void);
-void ipa3_q6_post_shutdown_cleanup(void);
 int ipa3_init_q6_smem(void);
 
 int ipa3_uc_interface_init(void);
