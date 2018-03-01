@@ -195,11 +195,6 @@ struct ipa3_status_stats {
 	unsigned int curr;
 };
 
-/* Possible values for the ipa3_ctx->state field */
-#define IPA_STATE_INITIAL	0	/* Initial state (assumed 0) */
-#define IPA_STATE_STARTING	1	/* Starting up, not ready */
-#define IPA_STATE_READY		2	/* Ready to use */
-
 /**
  * struct ipa3_ep_context - IPA end point context
  * @valid: flag indicating id EP context is valid
@@ -905,7 +900,6 @@ struct ipa3_context {
 
 	struct class *class;
 	dev_t dev_num;
-	atomic_t state;
 	struct device *dev;
 	struct cdev cdev;
 

@@ -1298,23 +1298,21 @@ static int ipa3_post_init(struct device *ipa_dev)
 	result = ipa3_init_interrupts();
 	if (result) {
 		ipa_err("ipa initialization of interrupts failed\n");
-		result = -ENODEV;
-		goto fail_register_device;
+		return -ENODEV;
 	}
 
 	result = gsi_register_device(ipa3_ctx->ee);
 	if (result) {
 		ipa_err(":gsi register error - %d\n", result);
-		result = -ENODEV;
-		goto fail_register_device;
+		return -ENODEV;
 	}
 	ipa_debug("IPA gsi is registered\n");
 
 	/* setup the AP-IPA pipes */
 	if (ipa3_setup_apps_pipes()) {
 		ipa_err(":failed to setup IPA-Apps pipes\n");
-		result = -ENODEV;
-		goto fail_setup_apps_pipes;
+		gsi_deregister_device();
+		return -ENODEV;
 	}
 	ipa_debug("IPA GPI pipes were connected\n");
 
@@ -1330,8 +1328,6 @@ static int ipa3_post_init(struct device *ipa_dev)
 
 	ipa3_ctx->q6_proxy_clk_vote_valid = true;
 
-	atomic_set(&ipa3_ctx->state, IPA_STATE_READY);
-
 	if (ipa3_wwan_init())
 		ipa_err("WWAN init failed (ignoring)\n");
 
@@ -1339,14 +1335,6 @@ static int ipa3_post_init(struct device *ipa_dev)
 	ipa_info("IPA driver initialization was successful.\n");
 
 	return 0;
-
-fail_setup_apps_pipes:
-	gsi_deregister_device();
-fail_register_device:
-	/* Maybe it'll work another time?  (Doubtful...) */
-	atomic_set(&ipa3_ctx->state, IPA_STATE_INITIAL);
-
-	return result;
 }
 
 static void ipa3_post_init_wq(struct work_struct *work)
@@ -1396,17 +1384,10 @@ static int ipa3_open(struct inode *inode, struct file *filp)
 static ssize_t ipa3_write(struct file *file, const char __user *buf,
 			  size_t count, loff_t *ppos)
 {
-	atomic_t *statep;
 	int result;
 
 	if (!count)
 		return 0;
-
-	/* Only proceed if we're in initial state; ignore otherwise */
-	statep = &ipa3_ctx->state;
-	result = atomic_cmpxchg(statep, IPA_STATE_INITIAL, IPA_STATE_STARTING);
-	if (result != IPA_STATE_INITIAL)
-		return count;
 
 	ipa_client_add(__func__, false);
 
@@ -1416,9 +1397,6 @@ static ssize_t ipa3_write(struct file *file, const char __user *buf,
 
 	if (result) {
 		ipa_err("IPA FW loading process has failed\n");
-		/* Maybe it'll work another time?  (Doubtful...) */
-		atomic_set(statep, IPA_STATE_INITIAL);
-
 		return result;
 	}
 	ipa_info("IPA FW loaded successfully\n");
