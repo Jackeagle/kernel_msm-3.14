@@ -13,6 +13,11 @@
 
 #define pr_fmt(fmt)    "ipa %s:%d " fmt, __func__, __LINE__
 
+#include <linux/version.h>
+#define UPSTREAM	(LINUX_VERSION_CODE >= KERNEL_VERSION(4, 16, 0))
+
+#define UPSTREAM_SMEM	UPSTREAM
+
 #include <linux/clk.h>
 #include <linux/compat.h>
 #include <linux/device.h>
@@ -36,7 +41,11 @@
 #include <linux/delay.h>
 #include <linux/time.h>
 #include <soc/qcom/subsystem_restart.h>
+#if UPSTREAM_SMEM
+#include <linux/soc/qcom/smem.h>
+#else /* UPSTREAM_SMEM */
 #include <soc/qcom/smem.h>
+#endif /* UPSTREAM_SMEM */
 #include <soc/qcom/scm.h>
 #include <asm/cacheflush.h>
 
@@ -1933,7 +1942,9 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	int result;
 	u32 add_map_size;
 	const u32 *add_map;
+#if !UPSTREAM_SMEM
 	void *smem_addr;
+#endif /* !UPSTREAM_SMEM */
 	int i;
 
 	ipa_debug("AP CB probe: sub pdev=%p\n", dev);
@@ -1969,6 +1980,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		}
 	}
 
+#if !UPSTREAM_SMEM
 	/* map SMEM memory for IPA table accesses */
 	smem_addr = smem_alloc(SMEM_IPA_FILTER_TABLE, IPA_SMEM_SIZE,
 		SMEM_MODEM, 0);
@@ -1978,6 +1990,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 
 		ipa3_iommu_map(cb->mapping->domain, iova, pa, IPA_SMEM_SIZE);
 	}
+#endif /* !UPSTREAM_SMEM */
 
 	/* Proceed to real initialization */
 	result = ipa3_pre_init();
