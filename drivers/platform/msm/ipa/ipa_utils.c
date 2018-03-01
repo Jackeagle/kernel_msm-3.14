@@ -16,8 +16,10 @@
 #include <linux/genalloc.h>	/* gen_pool_alloc() */
 #include <linux/io.h>
 #include <linux/ratelimit.h>
+#ifdef CONFIG_QCOM_BUS_SCALING
 #include <linux/msm-bus.h>
 #include <linux/msm-bus-board.h>
+#endif /* CONFIG_QCOM_BUS_SCALING */
 #include <linux/elf.h>
 #include <linux/device.h>
 #include <linux/init.h>
@@ -373,6 +375,7 @@ static const struct ipa_ep_configuration ipa3_ep_configuration
 	},
 };
 
+#ifdef CONFIG_QCOM_BUS_SCALING
 static struct msm_bus_vectors ipa_min_perf_vectors_v3_0[] = {
 	{
 		.src = MSM_BUS_MASTER_IPA,
@@ -536,6 +539,7 @@ static struct msm_bus_scale_pdata ipa_bus_client_pdata_v3_0 = {
 	.num_usecases = ARRAY_SIZE(ipa_usecases_v3_0),
 	.name = "ipa",
 };
+#endif /* CONFIG_QCOM_BUS_SCALING */
 
 static const struct ipa_ep_configuration *
 ep_configuration(enum ipa_client_type client)
@@ -1658,7 +1662,12 @@ int ipa_init_mem_info(struct device_node *node)
 
 struct msm_bus_scale_pdata *ipa_bus_scale_table_init(void)
 {
+
+#ifdef CONFIG_QCOM_BUS_SCALING
 	return &ipa_bus_client_pdata_v3_0;
+#else /* CONFIG_QCOM_BUS_SCALING */
+	return NULL;
+#endif /* CONFIG_QCOM_BUS_SCALING */
 }
 
 void ipa3_skb_recycle(struct sk_buff *skb)
