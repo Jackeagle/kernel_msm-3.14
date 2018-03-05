@@ -48,7 +48,6 @@
 #else /* UPSTREAM_SMEM */
 #include <soc/qcom/smem.h>
 #endif /* UPSTREAM_SMEM */
-#include <soc/qcom/scm.h>
 #include <asm/cacheflush.h>
 
 #define IPA_SUBSYSTEM_NAME "ipa_fws"
