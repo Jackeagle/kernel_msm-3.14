@@ -103,18 +103,16 @@ static void ipa3_wq_write_done_common(struct ipa3_sys_context *sys,
 		list_del(&tx_pkt->link);
 		sys->len--;
 		spin_unlock_bh(&sys->spinlock);
-		if (!tx_pkt->no_unmap_dma) {
-			if (tx_pkt->type != IPA_DATA_DESC_SKB_PAGED) {
-				dma_unmap_single(dev,
-					tx_pkt->mem.phys_base,
-					tx_pkt->mem.size,
-					DMA_TO_DEVICE);
-			} else {
-				dma_unmap_page(dev,
-					next_pkt->mem.phys_base,
-					next_pkt->mem.size,
-					DMA_TO_DEVICE);
-			}
+		if (tx_pkt->type != IPA_DATA_DESC_SKB_PAGED) {
+			dma_unmap_single(dev,
+				tx_pkt->mem.phys_base,
+				tx_pkt->mem.size,
+				DMA_TO_DEVICE);
+		} else {
+			dma_unmap_page(dev,
+				next_pkt->mem.phys_base,
+				next_pkt->mem.size,
+				DMA_TO_DEVICE);
 		}
 		if (tx_pkt->callback)
 			tx_pkt->callback(tx_pkt->user1, tx_pkt->user2);
@@ -370,17 +368,15 @@ failure:
 		next_pkt = list_next_entry(tx_pkt, link);
 		list_del(&tx_pkt->link);
 
-		if (!tx_pkt->no_unmap_dma) {
-			if (desc[j].type != IPA_DATA_DESC_SKB_PAGED) {
-				dma_unmap_single(dev,
-					tx_pkt->mem.phys_base,
-					tx_pkt->mem.size, DMA_TO_DEVICE);
-			} else {
-				dma_unmap_page(dev,
-					tx_pkt->mem.phys_base,
-					tx_pkt->mem.size,
-					DMA_TO_DEVICE);
-			}
+		if (desc[j].type != IPA_DATA_DESC_SKB_PAGED) {
+			dma_unmap_single(dev,
+				tx_pkt->mem.phys_base,
+				tx_pkt->mem.size, DMA_TO_DEVICE);
+		} else {
+			dma_unmap_page(dev,
+				tx_pkt->mem.phys_base,
+				tx_pkt->mem.size,
+				DMA_TO_DEVICE);
 		}
 		kmem_cache_free(ipa3_ctx->tx_pkt_wrapper_cache, tx_pkt);
 		tx_pkt = next_pkt;
