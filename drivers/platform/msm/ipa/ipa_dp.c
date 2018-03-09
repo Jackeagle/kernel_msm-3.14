@@ -273,6 +273,18 @@ static bool ipa_send_nop(struct ipa3_sys_context *sys)
 	return false;
 }
 
+/* Try to send the no-op request.  If it fails, arrange to try again. */
+static void ipa_send_nop_work(struct work_struct *work)
+{
+	struct ipa3_sys_context *sys;
+
+	sys = container_of(work, struct ipa3_sys_context, work);
+
+	/* If sending a no-op request fails, schedule another try */
+	if (!ipa_send_nop(sys))
+		queue_work(sys->wq, work);
+}
+
 /**
  * ipa3_send() - Send multiple descriptors in one HW transaction
  * @sys: system pipe context
@@ -302,7 +314,7 @@ ipa3_send(struct ipa3_sys_context *sys, u32 num_desc, struct ipa3_desc *desc)
 	int result;
 	const struct ipa_gsi_ep_config *gsi_ep_cfg;
 
-	(void)ipa_send_nop;	/* Avoid a compiler error */
+	(void)ipa_send_nop_work;	/* Avoid a compiler error */
 	gsi_ep_cfg = ipa3_get_gsi_ep_info(sys->ep->client);
 	if (unlikely(!gsi_ep_cfg)) {
 		ipa_err("failed to get gsi EP config for client=%d\n",
