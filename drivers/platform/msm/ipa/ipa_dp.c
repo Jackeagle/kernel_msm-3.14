@@ -226,6 +226,52 @@ int ipa3_rx_poll(u32 clnt_hdl, int weight)
 	return cnt;
 }
 
+/*
+ * Send an interrupting no-op request to a producer pipe.  Normally
+ * an interrupt is generated upon completion of every transfer
+ * performed by a pipe, but a producer pipe can be configured to
+ * avoid getting these interrupts.  Instead, once a transfer has
+ * been initiated, a no-op is scheduled to be sent after a short
+ * delay.  This no-op request will interrupt when it is complete,
+ * and in handling that interrupt, previously-completed transfers
+ * will be handled as well.  If a no-op is already scheduled,
+ * another is not initiated (there's only one pending at a time).
+ */
+static bool ipa_send_nop(struct ipa3_sys_context *sys)
+{
+	unsigned long chan_id = sys->ep->gsi_chan_hdl;
+	struct ipa3_tx_pkt_wrapper *nop_pkt;
+	struct gsi_xfer_elem nop_xfer = { 0 };
+
+	nop_pkt = kmem_cache_zalloc(ipa3_ctx->tx_pkt_wrapper_cache, GFP_KERNEL);
+	if (!nop_pkt)
+		return false;
+
+	nop_pkt->type = IPA_DATA_DESC;
+	/* No-op packet uses no memory for data */
+	INIT_WORK(&nop_pkt->work, ipa3_wq_write_done);
+	nop_pkt->sys = sys;
+	nop_pkt->cnt = 1;
+
+	nop_xfer.type = GSI_XFER_ELEM_NOP;
+	nop_xfer.flags = GSI_XFER_FLAG_EOT;
+	nop_xfer.xfer_user_data = nop_pkt;
+
+	spin_lock_bh(&sys->spinlock);
+	list_add_tail(&nop_pkt->link, &sys->head_desc_list);
+	spin_unlock_bh(&sys->spinlock);
+
+	if (!gsi_queue_xfer(chan_id, 1, &nop_xfer, true))
+		return true;	/* Success */
+
+	spin_lock_bh(&sys->spinlock);
+	list_del(&nop_pkt->link);
+	spin_unlock_bh(&sys->spinlock);
+
+	kmem_cache_free(ipa3_ctx->tx_pkt_wrapper_cache, nop_pkt);
+
+	return false;
+}
 
 /**
  * ipa3_send() - Send multiple descriptors in one HW transaction
@@ -256,6 +302,7 @@ ipa3_send(struct ipa3_sys_context *sys, u32 num_desc, struct ipa3_desc *desc)
 	int result;
 	const struct ipa_gsi_ep_config *gsi_ep_cfg;
 
+	(void)ipa_send_nop;	/* Avoid a compiler error */
 	gsi_ep_cfg = ipa3_get_gsi_ep_info(sys->ep->client);
 	if (unlikely(!gsi_ep_cfg)) {
 		ipa_err("failed to get gsi EP config for client=%d\n",
