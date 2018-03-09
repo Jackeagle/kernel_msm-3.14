@@ -341,6 +341,7 @@ struct ipa3_sys_context {
 	unsigned int len_partial;
 	bool drop_packet;
 
+	bool no_intr;			/* Transmit requests won't interrupt */
 	struct work_struct work;
 
 	struct delayed_work replenish_rx_work;

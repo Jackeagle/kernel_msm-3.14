@@ -2236,13 +2236,14 @@ ipa_gsi_ring_mem_size(enum ipa_client_type client, u32 desc_fifo_sz)
 static long evt_ring_hdl_get(struct ipa3_ep_context *ep, u32 desc_fifo_sz)
 {
 	u32 sz;
+	u16 modt = ep->sys->no_intr ? 0 : IPA_GSI_EVT_RING_INT_MODT;
 
 	ipa_debug("client=%d moderation threshold cycles=%u cnt=1\n",
-			ep->client, IPA_GSI_EVT_RING_INT_MODT);
+			ep->client, modt);
 
 	sz = ipa_gsi_ring_mem_size(ep->client, desc_fifo_sz);
 
-	return gsi_alloc_evt_ring(sz, IPA_GSI_EVT_RING_INT_MODT, true);
+	return gsi_alloc_evt_ring(sz, modt, true);
 }
 
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
