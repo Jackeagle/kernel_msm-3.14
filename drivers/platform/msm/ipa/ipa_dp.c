@@ -344,7 +344,7 @@ ipa3_send(struct ipa3_sys_context *sys, u32 num_desc, struct ipa3_desc *desc)
 	struct ipa3_tx_pkt_wrapper *tx_pkt, *tx_pkt_first;
 	struct ipahal_imm_cmd_pyld *tag_pyld_ret = NULL;
 	struct ipa3_tx_pkt_wrapper *next_pkt;
-	struct gsi_xfer_elem *gsi_xfer_elem_array = NULL;
+	struct gsi_xfer_elem *xfer_elem = NULL;
 	int i = 0;
 	int j;
 	int result;
@@ -364,9 +364,8 @@ ipa3_send(struct ipa3_sys_context *sys, u32 num_desc, struct ipa3_desc *desc)
 		return -EPERM;
 	}
 
-	gsi_xfer_elem_array =
-		kzalloc(num_desc * sizeof(struct gsi_xfer_elem), GFP_ATOMIC);
-	if (!gsi_xfer_elem_array) {
+	xfer_elem = kzalloc(num_desc * sizeof(*xfer_elem), GFP_ATOMIC);
+	if (!xfer_elem) {
 		ipa_err("Failed to alloc mem for gsi xfer array.\n");
 		return -EFAULT;
 	}
@@ -418,39 +417,37 @@ ipa3_send(struct ipa3_sys_context *sys, u32 num_desc, struct ipa3_desc *desc)
 
 		list_add_tail(&tx_pkt->link, &sys->head_desc_list);
 
-		gsi_xfer_elem_array[i].addr = tx_pkt->mem.phys_base;
+		xfer_elem[i].addr = tx_pkt->mem.phys_base;
 
 		/*
 		 * Special treatment for immediate commands, where
 		 * the structure of the descriptor is different
 		 */
 		if (desc[i].type == IPA_IMM_CMD_DESC) {
-			gsi_xfer_elem_array[i].len = desc[i].opcode;
-			gsi_xfer_elem_array[i].type =
-				GSI_XFER_ELEM_IMME_CMD;
+			xfer_elem[i].len = desc[i].opcode;
+			xfer_elem[i].type = GSI_XFER_ELEM_IMME_CMD;
 		} else {
-			gsi_xfer_elem_array[i].len = desc[i].len;
-			gsi_xfer_elem_array[i].type =
-				GSI_XFER_ELEM_DATA;
+			xfer_elem[i].len = desc[i].len;
+			xfer_elem[i].type = GSI_XFER_ELEM_DATA;
 		}
 
 		if (i == (num_desc - 1)) {
-			gsi_xfer_elem_array[i].flags |= GSI_XFER_FLAG_EOT;
-			gsi_xfer_elem_array[i].flags |= GSI_XFER_FLAG_BEI;
-			gsi_xfer_elem_array[i].xfer_user_data = tx_pkt_first;
+			xfer_elem[i].flags |= GSI_XFER_FLAG_EOT;
+			xfer_elem[i].flags |= GSI_XFER_FLAG_BEI;
+			xfer_elem[i].xfer_user_data = tx_pkt_first;
 		} else {
-			gsi_xfer_elem_array[i].flags |= GSI_XFER_FLAG_CHAIN;
+			xfer_elem[i].flags |= GSI_XFER_FLAG_CHAIN;
 		}
 	}
 
 	ipa_debug_low("ch:%lu queue xfer\n", sys->ep->gsi_chan_hdl);
 	result = gsi_queue_xfer(sys->ep->gsi_chan_hdl, num_desc,
-			gsi_xfer_elem_array, true);
+			xfer_elem, true);
 	if (result) {
 		ipa_err("GSI xfer failed.\n");
 		goto failure;
 	}
-	kfree(gsi_xfer_elem_array);
+	kfree(xfer_elem);
 
 	spin_unlock_bh(&sys->spinlock);
 
@@ -483,7 +480,7 @@ failure:
 		tx_pkt = next_pkt;
 	}
 
-	kfree(gsi_xfer_elem_array);
+	kfree(xfer_elem);
 	spin_unlock_bh(&sys->spinlock);
 	return -EFAULT;
 }
