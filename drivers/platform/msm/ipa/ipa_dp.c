@@ -103,17 +103,22 @@ static void ipa3_wq_write_done_common(struct ipa3_sys_context *sys,
 		list_del(&tx_pkt->link);
 		sys->len--;
 		spin_unlock_bh(&sys->spinlock);
-		if (tx_pkt->type != IPA_DATA_DESC_SKB_PAGED) {
-			dma_unmap_single(dev,
-				tx_pkt->mem.phys_base,
-				tx_pkt->mem.size,
-				DMA_TO_DEVICE);
-		} else {
-			dma_unmap_page(dev,
-				next_pkt->mem.phys_base,
-				next_pkt->mem.size,
-				DMA_TO_DEVICE);
+
+		/* If DMA memory was mapped, unmap it */
+		if (tx_pkt->mem.base) {
+			if (tx_pkt->type != IPA_DATA_DESC_SKB_PAGED) {
+				dma_unmap_single(dev,
+					tx_pkt->mem.phys_base,
+					tx_pkt->mem.size,
+					DMA_TO_DEVICE);
+			} else {
+				dma_unmap_page(dev,
+					next_pkt->mem.phys_base,
+					next_pkt->mem.size,
+					DMA_TO_DEVICE);
+			}
 		}
+
 		if (tx_pkt->callback)
 			tx_pkt->callback(tx_pkt->user1, tx_pkt->user2);
 
