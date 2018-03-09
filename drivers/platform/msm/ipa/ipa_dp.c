@@ -2119,6 +2119,14 @@ static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 		sys->ep->status.status_en = true;
 		sys->ep->status.status_ep =
 			ipa3_get_ep_mapping(IPA_CLIENT_Q6_WAN_CONS);
+
+		/*
+		 * For the WAN producer, use a deferred interrupting
+		 * no-op to handle completions rather than having
+		 * every transfer interrupt when complete.
+		 */
+		sys->no_intr = true;
+
 		return 0;
 	}
 
