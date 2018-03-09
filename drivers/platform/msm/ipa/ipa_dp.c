@@ -63,7 +63,8 @@
 #define IPA_DEFAULT_SYS_YELLOW_WM 32
 #define IPA_REPL_XFER_THRESH 10
 
-#define IPA_TX_SEND_COMPL_NOP_DELAY_NS (2 * 1000 * 1000)
+/* How long before sending an interrupting no-op to handle TX completions */
+#define IPA_TX_NOP_DELAY_NS (2 * 1000 * 1000)	/* 2 msec */
 
 static void ipa3_rx_switch_to_intr_mode(struct ipa3_sys_context *sys);
 
@@ -285,6 +286,41 @@ static void ipa_send_nop_work(struct work_struct *work)
 		queue_work(sys->wq, work);
 }
 
+/*
+ * The delay before sending the no-op request is implemented by a
+ * high resolution timer, which will call this in interrupt context.
+ * Arrange to send the no-op in workqueue context when it expires.
+ */
+static enum hrtimer_restart ipa_nop_timer_expiry(struct hrtimer *timer)
+{
+	struct ipa3_sys_context *sys;
+
+	sys = container_of(timer, struct ipa3_sys_context, nop_timer);
+	atomic_set(&sys->nop_pending, 0);
+	queue_work(sys->wq, &sys->work);
+
+	return HRTIMER_NORESTART;
+}
+
+static void ipa_nop_timer_schedule(struct ipa3_sys_context *sys)
+{
+	ktime_t time;
+
+	if (atomic_xchg(&sys->nop_pending, 1))
+		return;
+
+	time = ktime_set(0, IPA_TX_NOP_DELAY_NS);
+	hrtimer_start(&sys->nop_timer, time, HRTIMER_MODE_REL);
+}
+
+static void ipa_nop_timer_init(struct ipa3_sys_context *sys)
+{
+	INIT_WORK(&sys->work, ipa_send_nop_work);
+	atomic_set(&sys->nop_pending, 0);
+	hrtimer_init(&sys->nop_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+	sys->nop_timer.function = ipa_nop_timer_expiry;
+}
+
 /**
  * ipa3_send() - Send multiple descriptors in one HW transaction
  * @sys: system pipe context
@@ -314,7 +350,6 @@ ipa3_send(struct ipa3_sys_context *sys, u32 num_desc, struct ipa3_desc *desc)
 	int result;
 	const struct ipa_gsi_ep_config *gsi_ep_cfg;
 
-	(void)ipa_send_nop_work;	/* Avoid a compiler error */
 	gsi_ep_cfg = ipa3_get_gsi_ep_info(sys->ep->client);
 	if (unlikely(!gsi_ep_cfg)) {
 		ipa_err("failed to get gsi EP config for client=%d\n",
@@ -418,6 +453,9 @@ ipa3_send(struct ipa3_sys_context *sys, u32 num_desc, struct ipa3_desc *desc)
 	kfree(gsi_xfer_elem_array);
 
 	spin_unlock_bh(&sys->spinlock);
+
+	if (sys->no_intr)
+		ipa_nop_timer_schedule(sys);
 
 	return 0;
 
@@ -800,6 +838,9 @@ int ipa3_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 		result = -ENOMEM;
 		goto fail_gen2;
 	}
+
+	if (ep->sys->no_intr)
+		ipa_nop_timer_init(ep->sys);
 
 	ep->valid = 1;
 	ep->client = sys_in->client;
