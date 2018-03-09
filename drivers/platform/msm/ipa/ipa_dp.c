@@ -432,8 +432,10 @@ ipa3_send(struct ipa3_sys_context *sys, u32 num_desc, struct ipa3_desc *desc)
 		}
 
 		if (i == (num_desc - 1)) {
-			xfer_elem[i].flags |= GSI_XFER_FLAG_EOT;
-			xfer_elem[i].flags |= GSI_XFER_FLAG_BEI;
+			if (!sys->no_intr) {
+				xfer_elem[i].flags |= GSI_XFER_FLAG_EOT;
+				xfer_elem[i].flags |= GSI_XFER_FLAG_BEI;
+			}
 			xfer_elem[i].xfer_user_data = tx_pkt_first;
 		} else {
 			xfer_elem[i].flags |= GSI_XFER_FLAG_CHAIN;
