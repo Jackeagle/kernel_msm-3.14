@@ -1,6 +1,7 @@
 /*
  * Qualcomm Peripheral Image Loader
  *
+ * Copyright (C) 2018 The Linux Foundation. All rights reserved.
  * Copyright (C) 2016 Linaro Ltd.
  * Copyright (C) 2014 Sony Mobile Communications AB
  * Copyright (c) 2012-2013, The Linux Foundation. All rights reserved.
@@ -65,6 +66,7 @@
 
 /* QDSP6SS Register Offsets */
 #define QDSP6SS_RESET_REG		0x014
+#define QDSP6SS_DBG_CFG			0x018
 #define QDSP6SS_GFMUX_CTL_REG		0x020
 #define QDSP6SS_PWR_CTL_REG		0x030
 #define QDSP6SS_MEM_PWR_CTL		0x0B0
@@ -112,6 +114,9 @@
 #define QDSP6SS_BOOT_CMD                0x404
 #define SLEEP_CHECK_MAX_LOOPS           200
 #define BOOT_FSM_TIMEOUT                10000
+
+/* Debug Timeout Timeout */
+#define QDSP6SS_COMPLETION_TIMEOUT	((is_timeout_disabled()) ? -1 : 5000)
 
 struct reg_info {
 	struct regulator *reg;
@@ -173,6 +178,7 @@ struct q6v5 {
 	struct completion start_done;
 	struct completion stop_done;
 	bool running;
+	bool coredump_pending;
 
 	phys_addr_t mba_phys;
 	void *mba_region;
@@ -352,6 +358,8 @@ static int q6v5_load(struct rproc *rproc, const struct firmware *fw)
 	struct q6v5 *qproc = rproc->priv;
 
 	memcpy(qproc->mba_region, fw->data, fw->size);
+	qcom_mdt_write_image_info(qproc->dev, NULL,
+			QCOM_MDT_IMAGE_ID_MODEM);
 
 	return 0;
 }
@@ -373,12 +381,16 @@ static int q6v5_alt_reset_assert(struct q6v5 *qproc)
 
 static int q6v5_alt_reset_deassert(struct q6v5 *qproc)
 {
+	u32 debug_val = 0;
+
+	debug_val = readl(qproc->reg_base + QDSP6SS_DBG_CFG);
 	/* Ensure alt reset is written before restart reg */
 	writel(1, qproc->rmb_base + RMB_MBA_ALT_RESET);
 
 	reset_control_reset(qproc->mss_restart);
 
 	writel(0, qproc->rmb_base + RMB_MBA_ALT_RESET);
+	writel(debug_val, qproc->reg_base + QDSP6SS_DBG_CFG);
 	return 0;
 }
 
@@ -393,7 +405,7 @@ static int q6v5_rmb_pbl_wait(struct q6v5 *qproc, int ms)
 		if (val)
 			break;
 
-		if (time_after(jiffies, timeout))
+		if (time_after(jiffies, timeout) && (!is_timeout_disabled()))
 			return -ETIMEDOUT;
 
 		msleep(1);
@@ -419,7 +431,7 @@ static int q6v5_rmb_mba_wait(struct q6v5 *qproc, u32 status, int ms)
 		else if (status && val == status)
 			break;
 
-		if (time_after(jiffies, timeout))
+		if (time_after(jiffies, timeout) && (!is_timeout_disabled()))
 			return -ETIMEDOUT;
 
 		msleep(1);
@@ -703,6 +715,8 @@ static int q6v5_mpss_load(struct q6v5 *qproc)
 	void *ptr;
 	int ret;
 	int i;
+	char mpss_dev_name[8] = "modem";
+	struct qcom_mdt_image_info mpss_info;
 
 	ret = request_firmware(&fw, "modem.mdt", qproc->dev);
 	if (ret < 0) {
@@ -737,6 +751,7 @@ static int q6v5_mpss_load(struct q6v5 *qproc)
 	}
 
 	mpss_reloc = relocate ? min_addr : qproc->mpss_phys;
+	qproc->mpss_reloc = mpss_reloc;
 	/* Load firmware segments */
 	for (i = 0; i < ehdr->e_phnum; i++) {
 		phdr = &phdrs[i];
@@ -794,6 +809,12 @@ static int q6v5_mpss_load(struct q6v5 *qproc)
 	else if (ret < 0)
 		dev_err(qproc->dev, "MPSS authentication failed: %d\n", ret);
 
+	strcpy(mpss_info.name, mpss_dev_name);
+	mpss_info.start = qproc->mpss_phys;
+	mpss_info.size =  size;
+	qcom_mdt_write_image_info(qproc->dev, &mpss_info,
+			QCOM_MDT_IMAGE_ID_MODEM);
+
 release_firmware:
 	release_firmware(fw);
 
@@ -811,7 +832,7 @@ static int q6v5_start(struct rproc *rproc)
 				    qproc->proxy_reg_count);
 	if (ret) {
 		dev_err(qproc->dev, "failed to enable proxy supplies\n");
-		return ret;
+		goto clear_coredump_pending;
 	}
 
 	ret = q6v5_clk_enable(qproc->dev, qproc->proxy_clks,
@@ -876,6 +897,21 @@ static int q6v5_start(struct rproc *rproc)
 		goto halt_axi_ports;
 	}
 
+	if (qproc->coredump_pending) {
+		dev_info(qproc->dev, "MBA booted, skipping mpss for coredump\n");
+		qproc->coredump_pending = false;
+		enable_irq(qproc->handover_interrupt);
+		enable_irq(qproc->wdog_interrupt);
+		enable_irq(qproc->fatal_interrupt);
+		xfermemop_ret = q6v5_xfer_mem_ownership(qproc,
+							&qproc->mba_perm, false,
+							qproc->mba_phys,
+							qproc->mba_size);
+		if (xfermemop_ret)
+			dev_err(qproc->dev, "Failed to reclaim mba buffer\n");
+		return 0;
+	}
+
 	dev_info(qproc->dev, "MBA booted, loading mpss\n");
 
 	ret = q6v5_mpss_load(qproc);
@@ -887,7 +923,7 @@ static int q6v5_start(struct rproc *rproc)
 	enable_irq(qproc->fatal_interrupt);
 
 	ret = wait_for_completion_timeout(&qproc->start_done,
-					  msecs_to_jiffies(5000));
+				msecs_to_jiffies(QDSP6SS_COMPLETION_TIMEOUT));
 	if (ret == 0) {
 		disable_irq(qproc->handover_interrupt);
 		disable_irq(qproc->wdog_interrupt);
@@ -945,6 +981,8 @@ disable_proxy_clk:
 disable_proxy_reg:
 	q6v5_regulator_disable(qproc, qproc->proxy_regs,
 			       qproc->proxy_reg_count);
+clear_coredump_pending:
+	qproc->coredump_pending = false;
 
 	return ret;
 }
@@ -955,17 +993,19 @@ static int q6v5_stop(struct rproc *rproc)
 	int ret;
 	u32 val;
 
-	qproc->running = false;
+	if (qproc->running) {
+		qproc->running = false;
+		qcom_smem_state_update_bits(qproc->state,
+				BIT(qproc->stop_bit), BIT(qproc->stop_bit));
 
-	qcom_smem_state_update_bits(qproc->state,
-				    BIT(qproc->stop_bit), BIT(qproc->stop_bit));
+		ret = wait_for_completion_timeout(&qproc->stop_done,
+				msecs_to_jiffies(5000));
+		if (ret == 0)
+			dev_err(qproc->dev, "timed out on wait\n");
 
-	ret = wait_for_completion_timeout(&qproc->stop_done,
-					  msecs_to_jiffies(5000));
-	if (ret == 0)
-		dev_err(qproc->dev, "timed out on wait\n");
-
-	qcom_smem_state_update_bits(qproc->state, BIT(qproc->stop_bit), 0);
+		qcom_smem_state_update_bits(qproc->state,
+				BIT(qproc->stop_bit), 0);
+	}
 
 	q6v5proc_halt_axi_port(qproc, qproc->halt_map, qproc->halt_q6);
 	q6v5proc_halt_axi_port(qproc, qproc->halt_map, qproc->halt_modem);
@@ -1018,10 +1058,31 @@ static void *q6v5_da_to_va(struct rproc *rproc, u64 da, int len)
 	return qproc->mpss_region + offset;
 }
 
+static int qcom_mpss_register_dump_segments(struct rproc *rproc,
+				const struct firmware *fw_unused)
+{
+	const struct firmware *fw;
+	struct q6v5 *qproc = (struct q6v5 *)rproc->priv;
+	int ret;
+
+	ret = request_firmware(&fw, "modem.mdt", qproc->dev);
+	if (ret < 0) {
+		dev_err(qproc->dev, "unable to load modem.mdt\n");
+		return ret;
+	}
+	ret = qcom_register_dump_segments(rproc, fw);
+
+	release_firmware(fw);
+	return ret;
+}
+
 static const struct rproc_ops q6v5_ops = {
 	.start = q6v5_start,
 	.stop = q6v5_stop,
 	.da_to_va = q6v5_da_to_va,
+	.parse_fw = qcom_mpss_register_dump_segments,
+	.prepare_coredump = q6v5_start,
+	.unprepare_coredump = q6v5_stop,
 	.load = q6v5_load,
 };
 
@@ -1037,6 +1098,7 @@ static irqreturn_t q6v5_wdog_interrupt(int irq, void *dev)
 		return IRQ_HANDLED;
 	}
 
+	qproc->coredump_pending = true;
 	msg = qcom_smem_get(QCOM_SMEM_HOST_ANY, MPSS_CRASH_REASON_SMEM, &len);
 	if (!IS_ERR(msg) && len > 0 && msg[0])
 		dev_err(qproc->dev, "watchdog received: %s\n", msg);
@@ -1054,6 +1116,7 @@ static irqreturn_t q6v5_fatal_interrupt(int irq, void *dev)
 	size_t len;
 	char *msg;
 
+	qproc->coredump_pending = true;
 	msg = qcom_smem_get(QCOM_SMEM_HOST_ANY, MPSS_CRASH_REASON_SMEM, &len);
 	if (!IS_ERR(msg) && len > 0 && msg[0])
 		dev_err(qproc->dev, "fatal error received: %s\n", msg);
@@ -1399,6 +1462,23 @@ static const struct rproc_hexagon_res sdm845_mss = {
 			"axis2",
 			"prng",
 			NULL
+	},
+	.proxy_supply = (struct qcom_mss_reg_res[]) {
+		{
+			.supply = "mx",
+			.uV = 385,
+		},
+		{
+			.supply = "mss",
+			.uV = 385,
+			.uA = 100000,
+		},
+		{
+			.supply = "cx",
+			.uV = 385,
+			.uA = 100000,
+		},
+		{}
 	},
 	.reset_clk_names = (char*[]){
 			"iface",
