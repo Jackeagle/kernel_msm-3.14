@@ -1990,6 +1990,11 @@
 				compatible = "qcom,msm-imem-restart_reason";
 				reg = <0x65c 4>;
 			};
+
+			pil@94c {
+				compatible = "qcom,msm-imem-pil";
+				reg = <0x94c 4>;
+			};
 		};
 
 		apps_smmu: apps-smmu@15000000 {
