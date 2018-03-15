@@ -1997,6 +1997,24 @@
 			cell-index = <0>;
 		};
 
+		qcom,msm-imem@146bf000 {
+			compatible = "qcom,msm-imem";
+			reg = <0x146bf000 0x1000>;
+			ranges = <0x0 0x146bf000 0x1000>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			restart_reason@65c {
+				compatible = "qcom,msm-imem-restart_reason";
+				reg = <0x65c 4>;
+			};
+
+			pil@94c {
+				compatible = "qcom,msm-imem-pil";
+				reg = <0x94c 4>;
+			};
+		};
+
 		apps_smmu: apps-smmu@15000000 {
 			compatible = "arm,mmu-500";
 			reg = <0x15000000 0x80000>;
