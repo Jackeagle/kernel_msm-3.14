@@ -219,9 +219,10 @@ int phy_init(struct phy *phy)
 {
 	int ret;
 
-	if (!phy)
+	if (!phy) {
+		pr_err("%s: No Phy !!\n", __func__);
 		return 0;
-
+	}
 	ret = phy_pm_runtime_get_sync(phy);
 	if (ret < 0 && ret != -ENOTSUPP)
 		return ret;
@@ -277,9 +278,10 @@ int phy_power_on(struct phy *phy)
 {
 	int ret = 0;
 
-	if (!phy)
+	if (!phy) {
+		pr_err("%s: No Phy!!\n", __func__);
 		goto out;
-
+	}
 	if (phy->pwr) {
 		ret = regulator_enable(phy->pwr);
 		if (ret)
@@ -998,6 +1000,24 @@ void devm_of_phy_provider_unregister(struct device *dev,
 	dev_WARN_ONCE(dev, r, "couldn't find PHY provider device resource\n");
 }
 EXPORT_SYMBOL_GPL(devm_of_phy_provider_unregister);
+
+void phy_dump_regs(struct phy *p)
+{
+	if (p->ops->dump_phy_regs)
+		p->ops->dump_phy_regs(p);
+	else
+		dev_err(&p->dev, "%s Undefined!\n", __func__);
+}
+EXPORT_SYMBOL(phy_dump_regs);
+
+void phy_dump_lane_regs(struct phy *p)
+{
+	if (p->ops->dump_lane_regs)
+		p->ops->dump_lane_regs(p);
+	else
+		dev_err(&p->dev, "%s Undefined!\n", __func__);
+}
+EXPORT_SYMBOL(phy_dump_lane_regs);
 
 /**
  * phy_release() - release the phy
