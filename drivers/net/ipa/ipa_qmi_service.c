@@ -756,8 +756,8 @@ void ipa3_qmi_stop_workqueues(void)
 	workqueues_stopped = true;
 
 	/* Making sure that the current scheduled work won't be executed */
-	cancel_work(&work_recv_msg);
-	cancel_work(&ipa3_work_recv_msg_client);
-	cancel_work(&ipa3_work_svc_arrive);
-	cancel_work(&ipa3_work_svc_exit);
+	cancel_work_sync(&work_recv_msg);
+	cancel_work_sync(&ipa3_work_recv_msg_client);
+	cancel_work_sync(&ipa3_work_svc_arrive);
+	cancel_work_sync(&ipa3_work_svc_exit);
 }
