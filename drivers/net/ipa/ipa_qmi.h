@@ -5,7 +5,7 @@
 #ifndef _IPA_QMI_H_
 #define _IPA_QMI_H_
 
-int ipa3_qmi_service_init(u32 wan_platform_type);
-void ipa3_qmi_service_exit(void);
+int ipa_qmi_init(void);
+void ipa_qmi_exit(void);
 
 #endif /* !_IPA_QMI_H_ */

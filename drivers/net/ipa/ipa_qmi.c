@@ -428,10 +428,8 @@ err_release_server_handle:
  * subsystem restart occurs.  This function can therefore be called
  * more than once.
  */
-int ipa3_qmi_service_init(u32 wan_platform_type)
+int ipa_qmi_init(void)
 {
-	ipa_assert(wan_platform_type == IPA_QMI_PLATFORM_TYPE_MSM_ANDROID);
-
 	driver_init_complete_received = false;
 	indication_register_received = false;
 
@@ -441,7 +439,7 @@ int ipa3_qmi_service_init(u32 wan_platform_type)
 	return 0;
 }
 
-void ipa3_qmi_service_exit(void)
+void ipa_qmi_exit(void)
 {
 	if (!ipa_qmi_initialized)
 		return;

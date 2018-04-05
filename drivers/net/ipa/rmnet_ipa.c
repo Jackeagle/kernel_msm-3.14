@@ -35,6 +35,7 @@
 #include "rmnet_config.h"
 #include "ipa_qmi.h"
 #include "ipa_qmi_service.h"
+#include "ipa_i.h"
 
 #define WWAN_METADATA_SHFT 24
 #define WWAN_METADATA_MASK 0xFF000000
@@ -100,6 +101,15 @@ struct ipa3_wwan_private {
 	spinlock_t lock;
 	bool device_active;
 	struct napi_struct napi;
+};
+
+struct ipa3_rmnet_mux_val {
+	uint32_t  mux_id;
+	int8_t	  vchannel_name[IFNAMSIZ];
+	bool mux_channel_set;
+	bool ul_flt_reg;
+	bool mux_hdr_set;
+	uint32_t  hdr_hdl;
 };
 
 struct rmnet_ipa3_context {
@@ -902,12 +912,7 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 				sizeof(struct ipa3_rmnet_mux_val));
 
 	/* start A7 QMI service/client */
-	if (ipa3_rmnet_res.ipa_loaduC)
-		/* Android platform loads uC */
-		ipa3_qmi_service_init(QMI_IPA_PLATFORM_TYPE_MSM_ANDROID_V01);
-	else
-		/* LE platform not loads uC */
-		ipa3_qmi_service_init(QMI_IPA_PLATFORM_TYPE_LE_V01);
+	ipa_qmi_init();
 
 	/* initialize wan-driver netdev */
 	dev = alloc_netdev(sizeof(struct ipa3_wwan_private),
