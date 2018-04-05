@@ -1,6 +1,6 @@
 config IPA
 	tristate "Qualcomm IPA support"
-	depends on NET
+	depends on NET && QCOM_QMI_HELPERS
 	default n
 	help
 	  Choose Y here to include support for the Qualcomm IP
