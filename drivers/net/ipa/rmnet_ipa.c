@@ -33,6 +33,7 @@
 #include "net_map.h"
 #include "msm_rmnet.h"
 #include "rmnet_config.h"
+#include "ipa_qmi.h"
 #include "ipa_qmi_service.h"
 
 #define WWAN_METADATA_SHFT 24
