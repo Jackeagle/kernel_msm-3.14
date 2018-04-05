@@ -42,7 +42,6 @@
 #include <linux/netdevice.h>
 #include <linux/delay.h>
 #include <linux/time.h>
-#include <soc/qcom/subsystem_restart.h>
 #if UPSTREAM_SMEM
 #include <linux/soc/qcom/smem.h>
 #else /* UPSTREAM_SMEM */
@@ -1349,6 +1348,7 @@ static const struct file_operations ipa3_drv_fops = {
 
 static int ipa3_pil_load_ipa_fws(void)
 {
+#if 0
 	void *subsystem_get_retval = NULL;
 
 	ipa_debug("PIL FW loading process initiated\n");
@@ -1360,6 +1360,7 @@ static int ipa3_pil_load_ipa_fws(void)
 	}
 
 	ipa_debug("PIL FW loading process is complete\n");
+#endif
 	return 0;
 }
 
