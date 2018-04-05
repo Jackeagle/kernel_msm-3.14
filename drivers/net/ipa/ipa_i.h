@@ -33,8 +33,6 @@
 #include "ipahal/ipahal_reg.h"
 #include "ipahal/ipahal.h"
 #include "gsi.h"
-#include "ipa_qmi_service.h"
-#include "ipa_qmi_service_v01.h"
 
 #define DRV_NAME "ipa"
 #define IPA_COOKIE 0x57831603
