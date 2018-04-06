@@ -1849,7 +1849,6 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 	dma_addr_t va_start;
 	size_t va_size;
 	int ret;
-	bool s1_bypass;
 
 	ret = of_property_read_u32_array(node, "qcom,iova-mapping",
 						iova_mapping, 2);
@@ -1874,7 +1873,6 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 		ret = -EIO;
 		goto err_release_mapping;
 	}
-	s1_bypass = !!ret;
 
 	if (dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64))) {
 		ipa_err("DMA set 64bit mask failed\n");
@@ -1893,7 +1891,6 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 	cb->mapping = mapping;
 	cb->va_start = va_start;
 	cb->va_end = va_start + va_size;
-	cb->s1_bypass = s1_bypass;
 
 	return 0;
 
