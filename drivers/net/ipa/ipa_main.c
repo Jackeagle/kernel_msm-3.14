@@ -1908,13 +1908,6 @@ static void ipa_smmu_detach(struct ipa_smmu_cb_ctx *cb)
 	memset(cb, 0, sizeof(*cb));
 }
 
-static int ipa_smmu_uc_cb_probe(struct device *dev)
-{
-	ipa_debug("UC CB PROBE sub pdev=%p\n", dev);
-
-	return ipa_smmu_attach(dev, &ipa3_ctx->uc_smmu_cb);
-}
-
 static int ipa_smmu_ap_cb_probe(struct device *dev)
 {
 	struct ipa_smmu_cb_ctx *cb = &ipa3_ctx->ap_smmu_cb;
@@ -2068,9 +2061,6 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 
 	if (of_device_is_compatible(node, "qcom,ipa-smmu-ap-cb"))
 		return ipa_smmu_ap_cb_probe(dev);
-
-	if (of_device_is_compatible(node, "qcom,ipa-smmu-uc-cb"))
-		return ipa_smmu_uc_cb_probe(dev);
 
 	if (of_device_is_compatible(node, "qcom,smp2pgpio-map-ipa-1-in"))
 		return ipa3_smp2p_probe(dev);

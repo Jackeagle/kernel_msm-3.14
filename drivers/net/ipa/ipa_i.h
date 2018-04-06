@@ -900,7 +900,6 @@ struct ipa3_context {
 	struct gsi_ctx *gsi_ctx;
 
 	struct ipa_smmu_cb_ctx ap_smmu_cb;
-	struct ipa_smmu_cb_ctx uc_smmu_cb;
 
 	struct class *class;
 	dev_t dev_num;
