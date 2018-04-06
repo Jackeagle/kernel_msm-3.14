@@ -1773,8 +1773,7 @@ static enum ipa_hw_version ipa_version_get(struct platform_device *pdev)
 	return IPA_HW_None;
 }
 
-static int ipa3_iommu_map(struct iommu_domain *domain,
-	unsigned long iova, phys_addr_t paddr, size_t size)
+static int ipa3_iommu_map(unsigned long iova, phys_addr_t paddr, size_t size)
 {
 	struct ipa_smmu_cb_ctx *ap_cb = &ipa3_ctx->ap_smmu_cb;
 	int prot = IOMMU_READ | IOMMU_WRITE | IOMMU_MMIO;
@@ -1791,13 +1790,13 @@ static int ipa3_iommu_map(struct iommu_domain *domain,
 
 	ipa_debug("mapping 0x%lx to 0x%pa size %zu\n", iova, &paddr, size);
 
-	ipa_debug("domain =0x%p iova 0x%lx\n", domain, iova);
+	ipa_debug("domain =0x%p iova 0x%lx\n", ap_cb->mapping->domain, iova);
 	ipa_debug("paddr =0x%pa size 0x%x\n", &paddr, (u32)size);
 
 	/* Overlapping the existing virtual address space is an error */
 	ipa_assert(iova < ap_cb->va_start || iova >= ap_cb->va_end);
 
-	return iommu_map(domain, iova, paddr, size, prot);
+	return iommu_map(ap_cb->mapping->domain, iova, paddr, size, prot);
 }
 
 /* Returns negative on error, 1 if S1 bypass, 0 otherwise. */
@@ -1956,7 +1955,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 			u32 pa = be32_to_cpu(add_map[i + 1]);
 			u32 size = be32_to_cpu(add_map[i + 2]);
 
-			ipa3_iommu_map(cb->mapping->domain, iova, pa, size);
+			ipa3_iommu_map(iova, pa, size);
 		}
 	}
 
@@ -1968,7 +1967,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		phys_addr_t iova = smem_virt_to_phys(smem_addr);
 		phys_addr_t pa = iova;
 
-		ipa3_iommu_map(cb->mapping->domain, iova, pa, IPA_SMEM_SIZE);
+		ipa3_iommu_map(iova, pa, IPA_SMEM_SIZE);
 	}
 #endif /* !UPSTREAM_SMEM */
 
