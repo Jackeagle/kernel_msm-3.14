@@ -1022,7 +1022,7 @@ struct ipa3_ep_context *ipa3_get_ep_context(enum ipa_client_type client);
 int ipa3_init_hw(void);
 void ipa3_debugfs_init(void);
 
-int ipa_init_mem_info(struct device_node *dev_node);
+void ipa_init_mem_info(struct device_node *dev_node);
 
 struct msm_bus_scale_pdata *ipa_bus_scale_table_init(void);
 int ipa3_send_cmd_timeout(u16 num_desc, struct ipa3_desc *descr, u32 timeout);

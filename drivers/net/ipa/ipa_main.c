@@ -2107,12 +2107,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 
 	ipahal_init(hw_version, ipa3_ctx->mmio);
 
-	result = ipa_init_mem_info(node);
-	if (result) {
-		ipa_err("ipa_init_mem_info failed!\n");
-		result = -ENODEV;
-		goto err_hal_destroy;
-	}
+	ipa_init_mem_info(node);
 
 	ipa_init_ep_flt_bitmap();
 	if (!ipa3_ctx->ep_flt_num) {

@@ -1397,7 +1397,7 @@ int ipa3_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 #define ALIGN_CHECK(name)	({ BUILD_BUG_ON(name % name ## _ALIGN); name; })
 #define NONZERO_CHECK(name)	({ BUILD_BUG_ON(!name); name; })
 #define LO_HI_CHECK(name)	BUILD_BUG_ON(name ## _LO > name ## _HI)
-int ipa_init_mem_info(struct device_node *node)
+void ipa_init_mem_info(struct device_node *node)
 {
 	u32 *mem_info = &ipa3_ctx->mem_info[0];
 
@@ -1632,8 +1632,6 @@ int ipa_init_mem_info(struct device_node *node)
 	mem_info[STATS_RT_V6_SIZE] = IPA_MEM_STATS_RT_V6_OFST;
 	mem_info[STATS_DROP_OFST] = IPA_MEM_STATS_RT_V6_SIZE;
 	mem_info[STATS_DROP_SIZE] = IPA_MEM_STATS_DROP_OFST;
-
-	return 0;
 }
 #undef LO_HI_CHECK
 #undef NONZERO_CHECK
