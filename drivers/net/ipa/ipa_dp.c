@@ -1530,8 +1530,6 @@ static int ipa3_lan_rx_pyld_hdlr(struct sk_buff *skb,
 	unsigned long unused = IPA_GENERIC_RX_BUFF_BASE_SZ - used;
 	struct ipa3_tx_pkt_wrapper *tx_pkt = NULL;
 
-	IPA_DUMP_BUFF(skb->data, 0, skb->len);
-
 	if (skb->len == 0) {
 		ipa_err("ZLT\n");
 		return rc;

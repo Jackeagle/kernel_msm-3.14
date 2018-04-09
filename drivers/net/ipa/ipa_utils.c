@@ -1283,27 +1283,6 @@ int ipa3_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 	return 0;
 }
 
-/**
- * ipa3_dump_buff_internal() - dumps buffer for debug purposes
- * @base: buffer base address
- * @phy_base: buffer physical base address
- * @size: size of the buffer
- */
-void ipa3_dump_buff_internal(void *base, dma_addr_t phy_base, u32 size)
-{
-	int i;
-	u32 *cur = (u32 *)base;
-	u8 *byt;
-
-	ipa_debug("system phys addr=%pa len=%u\n", &phy_base, size);
-	for (i = 0; i < size / 4; i++) {
-		byt = (u8 *)(cur + i);
-		ipa_debug("%2d %08x   %02x %02x %02x %02x\n", i, *(cur + i),
-				byt[0], byt[1], byt[2], byt[3]);
-	}
-	ipa_debug("END\n");
-}
-
 #define IPA_MEM_OFST_START			0x280
 #define IPA_MEM_NAT_OFST			0x0
 #define IPA_MEM_NAT_SIZE			0x0

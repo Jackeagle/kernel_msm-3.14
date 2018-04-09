@@ -396,7 +396,6 @@ static int ipa_init_hdr(void)
 		return -EFAULT;
 	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
-	IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
 	if (ipa3_send_cmd(1, &desc)) {
 		ipa_err("fail to send immediate command\n");
@@ -426,7 +425,6 @@ static int ipa_init_hdr(void)
 
 	memset(&desc, 0, sizeof(desc));
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
-	IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
 	if (ipa3_send_cmd(1, &desc)) {
 		ipa_err("fail to send immediate command\n");
@@ -476,7 +474,6 @@ static int ipa_init_rt4(void)
 		goto free_mem;
 	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
-	IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
 	if (ipa3_send_cmd(1, &desc)) {
 		ipa_err("fail to send immediate command\n");
@@ -523,7 +520,6 @@ static int ipa_init_rt6(void)
 		goto free_mem;
 	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
-	IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
 	if (ipa3_send_cmd(1, &desc)) {
 		ipa_err("fail to send immediate command\n");
@@ -571,7 +567,6 @@ static int ipa_init_flt4(void)
 		goto free_mem;
 	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
-	IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
 	if (ipa3_send_cmd(1, &desc)) {
 		ipa_err("fail to send immediate command\n");
@@ -619,7 +614,6 @@ static int ipa_init_flt6(void)
 		goto free_mem;
 	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
-	IPA_DUMP_BUFF(mem.base, mem.phys_base, mem.size);
 
 	if (ipa3_send_cmd(1, &desc)) {
 		ipa_err("fail to send immediate command\n");

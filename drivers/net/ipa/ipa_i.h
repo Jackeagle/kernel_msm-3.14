@@ -1022,13 +1022,6 @@ struct ipa3_ep_context *ipa3_get_ep_context(enum ipa_client_type client);
 int ipa3_init_hw(void);
 void ipa3_debugfs_init(void);
 
-void ipa3_dump_buff_internal(void *base, dma_addr_t phy_base, u32 size);
-#ifdef IPA_DEBUG
-#define IPA_DUMP_BUFF(base, phy_base, size) \
-	ipa3_dump_buff_internal(base, phy_base, size)
-#else
-#define IPA_DUMP_BUFF(base, phy_base, size)
-#endif
 int ipa_init_mem_info(struct device_node *dev_node);
 
 struct msm_bus_scale_pdata *ipa_bus_scale_table_init(void);
