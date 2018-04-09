@@ -1784,8 +1784,8 @@ static int ipa3_iommu_map(unsigned long iova, phys_addr_t paddr, size_t size)
 	 * rounding.  Round the size up to a PAGE_SIZE multiple.
 	 */
 	iova = rounddown(iova, PAGE_SIZE);
-	paddr = rounddown(paddr, PAGE_SIZE);
 	size += paddr % PAGE_SIZE;
+	paddr = rounddown(paddr, PAGE_SIZE);
 	size = roundup(size, PAGE_SIZE);
 
 	ipa_debug("mapping 0x%lx to 0x%pa size %zu\n", iova, &paddr, size);
