@@ -21,7 +21,6 @@
 #include <linux/mutex.h>
 #include <linux/skbuff.h>
 #include <linux/slab.h>
-#include <asm/dma-iommu.h>
 #include <linux/iommu.h>
 #include <linux/platform_device.h>
 #include <linux/firmware.h>
@@ -184,7 +183,7 @@ struct ipa3_active_clients_log_ctx {
 
 struct ipa_smmu_cb_ctx {
 	struct device *dev;
-	struct dma_iommu_mapping *mapping;
+	struct iommu_domain *domain;
 	dma_addr_t va_start;
 	dma_addr_t va_end;
 };

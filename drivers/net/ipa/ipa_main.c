@@ -1784,66 +1784,38 @@ static int ipa3_iommu_map(unsigned long iova, phys_addr_t paddr, size_t size)
 
 	ipa_debug("mapping 0x%lx to 0x%pa size %zu\n", iova, &paddr, size);
 
-	ipa_debug("domain =0x%p iova 0x%lx\n", ap_cb->mapping->domain, iova);
+	ipa_debug("domain =0x%p iova 0x%lx\n", ap_cb->domain, iova);
 	ipa_debug("paddr =0x%pa size 0x%x\n", &paddr, (u32)size);
 
 	/* Overlapping the existing virtual address space is an error */
 	ipa_assert(iova < ap_cb->va_start || iova >= ap_cb->va_end);
 
-	return iommu_map(ap_cb->mapping->domain, iova, paddr, size, prot);
-}
-
-/* Returns negative on error, 1 if S1 bypass, 0 otherwise. */
-static int
-ipa_smmu_domain_attr_set(struct device *dev, struct iommu_domain *domain)
-{
-	struct device_node *node = dev->of_node;
-	enum iommu_attr attr;
-	char *attr_string;
-	int data = 1;
-	int ret;
-
-	if (of_property_read_bool(node, "qcom,qcom,smmu-s1-bypass")) {
-		attr = DOMAIN_ATTR_S1_BYPASS;
-		attr_string = "S1 bypass";
-	} else {
-		attr = DOMAIN_ATTR_ATOMIC;
-		attr_string = "atomic";
-	}
-
-	ipa_debug("CB PROBE pdev=%p set attribute %s\n", dev, attr_string);
-
-	ret = iommu_domain_set_attr(domain, attr, &data);
-	if (ret) {
-		ipa_err("couldn't set %s\n", attr_string);
-		return ret;
-	}
-
-	ipa_debug("SMMU %s\n", attr_string);
-
-	return attr == DOMAIN_ATTR_S1_BYPASS ? 1 : 0;
+	return iommu_map(ap_cb->domain, iova, paddr, size, prot);
 }
 
 /*
  * Common probe processing for SMMU context blocks.  This function
  * populates all of the fields of the SMMU CB context provided.
  *
- * If successful, this function returns a created mapping in
- * cb->mapping.  The mapping will have beeen attached to the device
+ * If successful, this function returns an allocated domain in
+ * cb->domain.  The domain will have been attached to the device
  * provided.  In the event of a subsequent error, the caller is
- * responsible for detaching the mapping from the device and
- * releasing mapping.
+ * responsible for releasing the domain from the device and freeing
+ * the domain.
  */
 static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 {
-	struct device_node *node = dev->of_node;
-	struct dma_iommu_mapping *mapping;
+	struct iommu_domain *domain;
 	u32 iova_mapping[2];
 	dma_addr_t va_start;
 	size_t va_size;
 	int ret;
 
-	ret = of_property_read_u32_array(node, "qcom,iova-mapping",
+	ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
+	if (ret)
+		return ret;
+
+	ret = of_property_read_u32_array(dev->of_node, "qcom,iova-mapping",
 						iova_mapping, 2);
 	if (ret) {
 		ipa_err("Fail to read start/size iova addresses\n");
@@ -1853,42 +1825,40 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 	va_size = (size_t)iova_mapping[1];
 	ipa_debug("va_start=%pad va_size=0x%zx\n", &va_start, va_size);
 
-	mapping = arm_iommu_create_mapping(dev->bus, va_start, va_size);
-	if (IS_ERR_OR_NULL(mapping)) {
-		ipa_debug("Fail to create mapping\n");
-		/* assume this failure is because iommu driver is not ready */
-		return -EPROBE_DEFER;
-	}
-	ipa_debug("SMMU mapping created\n");
+	domain = iommu_domain_alloc(dev->bus);
+	if (!domain)
+		return -ENOMEM;
 
-	ret = ipa_smmu_domain_attr_set(dev, mapping->domain);
-	if (ret < 0) {
-		ret = -EIO;
-		goto err_release_mapping;
-	}
+#ifdef DOMAIN_ATTR_FAST
+{
+	int fast = 1;
 
-	if (dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64))) {
-		ipa_err("DMA set 64bit mask failed\n");
-		ret = -EOPNOTSUPP;
-		goto err_release_mapping;
-	}
+	ret = iommu_domain_set_attr(domain, DOMAIN_ATTR_FAST, &fast);
+	if (ret)
+		goto err_domain_free;
+}
+#endif /* DOMAIN_ATTR_FAST */
+	domain->geometry.aperture_start = va_start;
+	domain->geometry.aperture_end = va_start + va_size - 1;
 
 	ipa_debug("CB PROBE pdev=%p attaching IOMMU device\n", dev);
-	ret = arm_iommu_attach_device(dev, mapping);
-	if (ret) {
-		ipa_err("could not attach device ret=%d\n", ret);
-		goto err_release_mapping;
-	}
+	ret = iommu_attach_device(domain, dev);
+	if (ret)
+		goto err_domain_free;
+
+#ifdef DOMAIN_ATTR_FAST
+	arch_setup_dma_ops(dev, va_start, va_size, domain->ops, false);
+#endif /* DOMAIN_ATTR_FAST */
 
 	cb->dev = dev;
-	cb->mapping = mapping;
+	cb->domain = domain;
 	cb->va_start = va_start;
 	cb->va_end = va_start + va_size;
 
 	return 0;
 
-err_release_mapping:
-	arm_iommu_release_mapping(mapping);
+err_domain_free:
+	iommu_domain_free(domain);
 
 	return ret;
 }
@@ -1896,9 +1866,8 @@ err_release_mapping:
 /* Un-do the side-effects of a successful call to ipa_smmu_attach(). */
 static void ipa_smmu_detach(struct ipa_smmu_cb_ctx *cb)
 {
-	arm_iommu_detach_device(cb->dev);
-	arm_iommu_release_mapping(cb->mapping);
-
+	iommu_detach_device(cb->domain, cb->dev);
+	iommu_domain_free(cb->domain);
 	memset(cb, 0, sizeof(*cb));
 }
 
