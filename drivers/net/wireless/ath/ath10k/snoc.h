@@ -20,10 +20,12 @@
 #include "hw.h"
 #include "ce.h"
 #include "pci.h"
+#include "qmi.h"
 
 struct ath10k_snoc_drv_priv {
 	enum ath10k_hw_rev hw_rev;
 	u64 dma_mask;
+	u32 msa_size;
 };
 
 struct snoc_state {
@@ -82,6 +84,7 @@ struct ath10k_snoc {
 	struct timer_list rx_post_retry;
 	struct ath10k_wcn3990_vreg_info *vreg;
 	struct ath10k_wcn3990_clk_info *clk;
+	struct ath10k_qmi *qmi;
 };
 
 static inline struct ath10k_snoc *ath10k_snoc_priv(struct ath10k *ar)
@@ -91,5 +94,6 @@ static inline struct ath10k_snoc *ath10k_snoc_priv(struct ath10k *ar)
 
 void ath10k_snoc_write32(struct ath10k *ar, u32 offset, u32 value);
 u32 ath10k_snoc_read32(struct ath10k *ar, u32 offset);
+int ath10k_snoc_fw_indication(struct ath10k *ar, u64 type);
 
 #endif /* _SNOC_H_ */

@@ -101,6 +101,11 @@
 			no-map;
 			reg = <0 0x96500000 0 0x200000>;
 		};
+
+		wlan_msa_mem: wlan_msa_region@96700000 {
+			no-map;
+			reg = <0 0x96700000 0 0x100000>;
+		};
 	};
 
 	cpus {
@@ -2459,6 +2464,28 @@
 
 			operating-points-v2 = <&gmu_opp_table>;
 		};
+
+		qcom,wifi {
+			compatible = "qcom,wcn3990-wifi";
+			reg = <0x18800000 0x800000>;
+			reg-names = "membase";
+			qcom,msa-fixed-region = <&wlan_msa_mem>;
+			iommus = <&apps_smmu 0x0040 0x1>;
+			interrupts =
+				<0 413 0 /* CE0 */ >,
+				<0 414 0 /* CE1 */ >,
+				<0 415 0 /* CE2 */ >,
+				<0 416 0 /* CE3 */ >,
+				<0 417 0 /* CE4 */ >,
+				<0 418 0 /* CE5 */ >,
+				<0 420 0 /* CE6 */ >,
+				<0 421 0 /* CE7 */ >,
+				<0 422 0 /* CE8 */ >,
+				<0 423 0 /* CE9 */ >,
+				<0 424 0 /* CE10 */ >,
+				<0 425 0 /* CE11 */ >;
+		};
+
 	};
 };
 
