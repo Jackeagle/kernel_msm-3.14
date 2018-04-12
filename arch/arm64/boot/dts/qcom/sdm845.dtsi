@@ -1972,6 +1972,14 @@
 			};
 		};
 
+		qcom,rmtfs_sharedmem@0 {
+			compatible = "qcom,sharedmem-uio";
+			reg = <0x0 0x200000>;
+			reg-names = "rmtfs";
+			qcom,client-id = <0x00000001>;
+			qcom,guard-memory;
+		};
+
 		clock_dispcc: qcom,dispcc@af00000 {
 			compatible = "qcom,dispcc-sdm845", "syscon";
 			reg = <0xaf00000 0x10000>;
