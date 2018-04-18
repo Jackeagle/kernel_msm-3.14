@@ -7,6 +7,10 @@
 
 #include "ipa_qmi_msg.h"
 
+#ifndef sizeof_field
+#define sizeof_field(TYPE, MEMBER)	sizeof(((TYPE *)0)->MEMBER)
+#endif /* !sizeof_field */
+
 /* QMI message structure definition for struct ipa_indication_register_req */
 struct qmi_elem_info ipa_indication_register_req_ei[] = {
 	{
