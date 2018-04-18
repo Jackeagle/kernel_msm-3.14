@@ -947,6 +947,8 @@ static int qcom_smem_probe(struct platform_device *pdev)
 
 	__smem = smem;
 
+	qcom_socinfo_init(&pdev->dev);
+
 	return 0;
 }
 
