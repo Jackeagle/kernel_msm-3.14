@@ -88,6 +88,7 @@ config QCOM_SMEM
 	tristate "Qualcomm Shared Memory Manager (SMEM)"
 	depends on ARCH_QCOM
 	depends on HWSPINLOCK
+	select SOC_BUS
 	help
 	  Say y here to enable support for the Qualcomm Shared Memory Manager.
 	  The driver provides an interface to items in a heap shared among all
@@ -152,5 +153,9 @@ config QCOM_BUS_SCALING
 	  allows devices to request the clocks be set to rates sufficient
 	  for the active devices needs without keeping the clocks at max
 	  frequency when a slower speed is sufficient.
+
+config QCOM_SCM
+	bool "Secure Channel Manager (SCM) support"
+	default n
 
 endmenu

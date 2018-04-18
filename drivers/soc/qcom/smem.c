@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Sony Mobile Communications AB.
- * Copyright (c) 2012-2013, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -92,6 +92,7 @@
 
 /* Max number of processors/hosts in a system */
 #define SMEM_HOST_COUNT		10
+
 
 /**
   * struct smem_proc_comm - proc_comm communication struct (legacy)
@@ -945,6 +946,8 @@ static int qcom_smem_probe(struct platform_device *pdev)
 		return -ENXIO;
 
 	__smem = smem;
+
+	qcom_socinfo_init(&pdev->dev);
 
 	return 0;
 }

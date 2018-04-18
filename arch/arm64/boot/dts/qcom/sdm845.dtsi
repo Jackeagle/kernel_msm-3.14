@@ -2048,6 +2048,26 @@
 			#reset-cells = <1>;
 		};
 
+		restart@10ac000 {
+			compatible = "qcom,pshold";
+			reg = <0xC264000 0x4>,
+			      <0x1fd3000 0x4>;
+			reg-names = "pshold-base", "tcsr-boot-misc-detect";
+		};
+
+		qcom,msm-imem@146bf000 {
+			compatible = "qcom,msm-imem";
+			reg = <0x146bf000 0x1000>;
+			ranges = <0x0 0x146bf000 0x1000>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			restart_reason@65c {
+				compatible = "qcom,msm-imem-restart_reason";
+				reg = <0x65c 4>;
+			};
+		};
+
 		spmi_bus: spmi@c440000 {
 			compatible = "qcom,spmi-pmic-arb";
 			reg = <0xc440000 0x1100>,
