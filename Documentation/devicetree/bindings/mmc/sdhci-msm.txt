@@ -4,7 +4,10 @@ This file documents differences between the core properties in mmc.txt
 and the properties used by the sdhci-msm driver.
 
 Required properties:
-- compatible: Should contain "qcom,sdhci-msm-v4".
+- compatible: Should contain "qcom,sdhci-msm-v4" or "qcom,sdhci-msm-v5".
+		 For SDCC version 5.0.0, MCI registers are removed from SDCC
+		 interface and some registers are moved to HC. New compatible
+		 string is added to support this change - "qcom,sdhci-msm-v5".
 - reg: Base address and length of the register in the following order:
 	- Host controller register map (required)
 	- SD Core register map (required)
@@ -20,6 +23,22 @@ Required properties:
 	"xo"	- TCXO clock (optional)
 	"cal"	- reference clock for RCLK delay calibration (optional)
 	"sleep"	- sleep clock for RCLK delay calibration (optional)
+- <supply-name>-supply: phandle to the regulator device tree node if voltage
+		regulators needs to be handled from within sdhci-msm layer.
+		Supported "supply-name" are "vdd" and "vdd-io".
+
+Optional Properties:
+	- qcom,<supply>-always-on - specifies whether supply should be kept
+		"on" always.
+	- qcom,<supply>-lpm_sup - specifies whether supply can be kept in low
+		power mode (lpm).
+	- qcom,<supply>-voltage_level - specifies voltage levels for supply.
+		Should be specified in pairs (min, max), units uV.
+	- qcom,<supply>-current_level - specifies load levels for supply in lpm
+		or high power mode (hpm). Should be specified in
+		pairs (lpm, hpm), units uA.
+
+
 
 Example:
 
@@ -30,8 +49,15 @@ Example:
 		bus-width = <8>;
 		non-removable;
 
-		vmmc-supply = <&pm8941_l20>;
-		vqmmc-supply = <&pm8941_s3>;
+		vdd-supply = <&pm8941_l20>;
+		qcom,vdd-voltage-level = <2950000 2950000>;
+		qcom,vdd-current-level = <9000 800000>;
+
+		vdd-io-supply = <&pm8941_s3>;
+		qcom,vdd-io-always-on;
+		qcom,vdd-io-lpm-sup;
+		qcom,vdd-io-voltage-level = <1800000 2950000>;
+		qcom,vdd-io-current-level = <6 22000>;
 
 		pinctrl-names = "default";
 		pinctrl-0 = <&sdc1_clk &sdc1_cmd &sdc1_data>;

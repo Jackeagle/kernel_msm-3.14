@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2014 Red Hat
  * Author: Rob Clark <robdclark@gmail.com>
  *
@@ -20,7 +21,7 @@
 #include "msm_kms.h"
 
 static void msm_atomic_wait_for_commit_done(struct drm_device *dev,
-		struct drm_atomic_state *old_state)
+					    struct drm_atomic_state *old_state)
 {
 	struct drm_crtc *crtc;
 	struct drm_crtc_state *new_crtc_state;
@@ -71,11 +72,14 @@ void msm_atomic_commit_tail(struct drm_atomic_state *state)
 
 	drm_atomic_helper_commit_modeset_enables(dev, state);
 
+	if (kms->funcs->commit) {
+		DRM_DEBUG_ATOMIC("triggering commit\n");
+		kms->funcs->commit(kms, state);
+	}
+
 	msm_atomic_wait_for_commit_done(dev, state);
 
 	kms->funcs->complete_commit(kms, state);
-
-	drm_atomic_helper_wait_for_vblanks(dev, state);
 
 	drm_atomic_helper_commit_hw_done(state);
 

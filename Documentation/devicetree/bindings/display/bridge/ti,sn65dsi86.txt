@@ -1,0 +1,53 @@
+SN65DSI86 DSItoeDP bridge chip
+------------------------------
+
+This is the binding for Texas Instruments SN65DSI86 bridge.
+
+Required properties:
+
+- compatible: Must be "ti,sn65dsi86"
+- reg:					Main I2C slave ID (for I2C host driver)
+- sn,irq-gpio:				Main IRQ gpio mapping
+- sn,enable-gpio			Main reset gpio mapping
+
+Required nodes:
+
+This device has two video ports. Their connections are modelled using the OF
+graph bindings specified in Documentation/devicetree/bindings/graph.txt.
+
+- Video port 0 for DSI input
+- Video port 1 for eDP output
+
+Example
+-------
+
+vga-bridge {
+	compatible = "ti,sn65dsi86";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	reg = <0x39>;
+
+	sn,irq-gpio = <&msmgpio 32 0>;
+	sn,enable-gpio = <&msmgpio 33 0>;
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@0 {
+			reg = <0>;
+
+			vga_bridge_in: endpoint {
+				remote-endpoint = <&dsi_out>;
+			};
+		};
+
+		port@1 {
+			reg = <1>;
+
+			vga_bridge_out: endpoint {
+				remote-endpoint = <&edp_in>;
+			};
+		};
+	};
+}

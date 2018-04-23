@@ -60,6 +60,8 @@ struct phy_ops {
 	int	(*set_mode)(struct phy *phy, enum phy_mode mode);
 	int	(*reset)(struct phy *phy);
 	int	(*calibrate)(struct phy *phy);
+	void	(*dump_phy_regs)(struct phy *);
+	void	(*dump_lane_regs)(struct phy *);
 	struct module *owner;
 };
 
@@ -153,6 +155,8 @@ int phy_exit(struct phy *phy);
 int phy_power_on(struct phy *phy);
 int phy_power_off(struct phy *phy);
 int phy_set_mode(struct phy *phy, enum phy_mode mode);
+void phy_dump_regs(struct phy *p);
+void phy_dump_lane_regs(struct phy *p);
 static inline enum phy_mode phy_get_mode(struct phy *phy)
 {
 	return phy->attrs.mode;

@@ -14,6 +14,60 @@
 	compatible = "google,cheza-rev0", "google,cheza", "qcom,sdm845";
 };
 
+&sn65dsi86_bridge {
+	pinctrl-0 = <&ap_edp_bklten &edp_bkltctl &edp_brij_en
+		     &en_pp3300_dx_edp>;
+	sn,enable-gpio = <&tlmm 43 0>;  /* TODO: model as regulator? */
+	sn,panel-bklt-ctrl = <&tlmm 9 0>;
+	/delete-property/clocks;
+	/delete-property/clock-names;
+};
+
+/*
+ * NOTE: spi0 is supposed to be for FP and spi10 is supposed to be for
+ * EC.  ...but spi10 was wired incorrectly in -rev0 so we've bluewired
+ * things to spi0 (and still left spi10 connected).  Hence a strange
+ * pinctrl and the fact that having the EC here doesn't match original
+ * schematics.
+ */
+&spi0 {
+	pinctrl-0 = <&qup_spi0_default>, <&qup_spi10_neuter>;
+	ec@0 {
+		compatible = "google,cros-ec-spi";
+		reg = <0>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <122 IRQ_TYPE_LEVEL_LOW>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&ec_ap_int_l>;
+		spi-max-frequency = <3000000>;
+	};
+};
+
+&spi10 {
+	status = "disabled";
+};
+
+&sn65dsi86_mode0 {
+	sn,mode-clock-in-khz = <128000>;
+};
+
+/* PINCTRL - additions to nodes defined in sdm845.dtsi */
+
+&qup_i2c11_default {
+	pinconf {
+		/* External pull missing on rev0 */
+		/delete-property/bias-disable;
+		bias-pull-up;
+	};
+};
+
+&qup_spi0_default {
+	pinconf {
+		/* Extra strong since there's a rework (TODO: verify?) */
+		drive-strength = <8>;
+	};
+};
+
 /* PINCTRL - board-specific pinctrl */
 
 &tlmm {
@@ -167,4 +221,30 @@
 			  "AP_RAM_ID2",
 			  "RFFE1_DATA",
 			  "RFFE1_CLK";
+
+	edp_bkltctl: edp-bkltctl {
+		pinmux {
+			pins = "gpio9";
+			function = "gpio";
+		};
+
+		pinconf {
+			pins = "gpio9";
+			drive-strength = <8>; /* TODO: why? */
+			bias-disable;
+		};
+	};
+
+	qup_spi10_neuter: qup-spi10-neuter {
+		pinmux {
+			pins = "gpio53", "gpio54", "gpio55", "gpio56";
+			function = "gpio";
+			input-enable; /* ? */
+		};
+
+		pinconf {
+			pins = "gpio53", "gpio54", "gpio55", "gpio56";
+			bias-disable;
+		};
+	};
 };

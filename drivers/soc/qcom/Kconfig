@@ -74,6 +74,16 @@ config QCOM_RMTFS_MEM
 
 	  Say y here if you intend to boot the modem remoteproc.
 
+config QCOM_RPMH
+	bool "Qualcomm RPM-Hardened (RPMH) Communication"
+	depends on ARCH_QCOM && ARM64 && OF || COMPILE_TEST
+	help
+	  Support for communication with the hardened-RPM blocks in
+	  Qualcomm Technologies Inc (QTI) SoCs. RPMH communication uses an
+	  internal bus to transmit state requests for shared resources. A set
+	  of hardware components aggregate requests for these resources and
+	  help apply the aggregated state on the resource.
+
 config QCOM_SMEM
 	tristate "Qualcomm Shared Memory Manager (SMEM)"
 	depends on ARCH_QCOM
@@ -134,4 +144,13 @@ config QCOM_APR
           application processor and QDSP6. APR is
           used by audio driver to configure QDSP6
           ASM, ADM and AFE modules.
+
+config QCOM_BUS_SCALING
+	bool "Bus scaling driver"
+	help
+	  This option enables bus scaling on MSM devices.  Bus scaling
+	  allows devices to request the clocks be set to rates sufficient
+	  for the active devices needs without keeping the clocks at max
+	  frequency when a slower speed is sufficient.
+
 endmenu

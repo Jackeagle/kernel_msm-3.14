@@ -108,9 +108,13 @@ struct msm_rd_state {
 
 static void rd_write(struct msm_rd_state *rd, const void *buf, int sz)
 {
-	struct circ_buf *fifo = &rd->fifo;
+	struct circ_buf *fifo;
 	const char *ptr = buf;
 
+	if (!rd || !buf)
+		return;
+
+	fifo = &rd->fifo;
 	while (sz > 0) {
 		char *fptr = &fifo->buf[fifo->head];
 		int n;
@@ -143,10 +147,17 @@ static void rd_write_section(struct msm_rd_state *rd,
 static ssize_t rd_read(struct file *file, char __user *buf,
 		size_t sz, loff_t *ppos)
 {
-	struct msm_rd_state *rd = file->private_data;
-	struct circ_buf *fifo = &rd->fifo;
-	const char *fptr = &fifo->buf[fifo->tail];
+	struct msm_rd_state *rd;
+	struct circ_buf *fifo;
+	const char *fptr;
 	int n = 0, ret = 0;
+
+	if (!file || !file->private_data || !buf || !ppos)
+		return -EINVAL;
+
+	rd = file->private_data;
+	fifo = &rd->fifo;
+	fptr = &fifo->buf[fifo->tail];
 
 	mutex_lock(&rd->read_lock);
 
@@ -179,18 +190,33 @@ out:
 
 static int rd_open(struct inode *inode, struct file *file)
 {
-	struct msm_rd_state *rd = inode->i_private;
-	struct drm_device *dev = rd->dev;
-	struct msm_drm_private *priv = dev->dev_private;
-	struct msm_gpu *gpu = priv->gpu;
+	struct msm_rd_state *rd;
+	struct drm_device *dev;
+	struct msm_drm_private *priv;
+	struct msm_gpu *gpu;
 	uint64_t val;
 	uint32_t gpu_id;
 	int ret = 0;
+
+	if (!file || !inode || !inode->i_private)
+		return -EINVAL;
+
+	rd = inode->i_private;
+	dev = rd->dev;
+
+	if (!dev || !dev->dev_private)
+		return -EINVAL;
+
+	priv = dev->dev_private;
+	gpu = priv->gpu;
 
 	mutex_lock(&dev->struct_mutex);
 
 	if (rd->open || !gpu) {
 		ret = -EBUSY;
+		goto out;
+	} else if (!gpu->funcs || !gpu->funcs->get_param) {
+		ret = -EINVAL;
 		goto out;
 	}
 
@@ -212,7 +238,12 @@ out:
 
 static int rd_release(struct inode *inode, struct file *file)
 {
-	struct msm_rd_state *rd = inode->i_private;
+	struct msm_rd_state *rd;
+
+	if (!inode || !inode->i_private)
+		return -EINVAL;
+
+	rd = inode->i_private;
 	rd->open = false;
 	return 0;
 }
@@ -349,12 +380,17 @@ static void snapshot_buf(struct msm_rd_state *rd,
 void msm_rd_dump_submit(struct msm_rd_state *rd, struct msm_gem_submit *submit,
 		const char *fmt, ...)
 {
-	struct drm_device *dev = submit->dev;
+	struct drm_device *dev;
 	struct task_struct *task;
 	char msg[256];
 	int i, n;
 
-	if (!rd->open)
+	if (!submit || !submit->dev || !submit->dev->dev_private)
+		return;
+
+	dev = submit->dev;
+
+	if (!rd || !rd->open)
 		return;
 
 	/* writing into fifo is serialized by caller, and

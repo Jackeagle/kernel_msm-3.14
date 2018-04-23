@@ -32,6 +32,7 @@
 #define SW_COLLAPSE_MASK	BIT(0)
 #define GMEM_CLAMP_IO_MASK	BIT(0)
 #define GMEM_RESET_MASK		BIT(4)
+#define ROOT_EN_MASK		BIT(1)
 
 /* CFG_GDSCR */
 #define GDSC_POWER_UP_COMPLETE		BIT(16)
@@ -208,10 +209,23 @@ static inline void gdsc_assert_reset_aon(struct gdsc *sc)
 	regmap_update_bits(sc->regmap, sc->clamp_io_ctrl,
 			   GMEM_RESET_MASK, 0);
 }
+
+static inline void gdsc_rcg_root_enable_set_clear(struct gdsc *sc, bool en)
+{
+	int i;
+	u32 val = en ? ROOT_EN_MASK : 0;
+
+	for (i = 0; i < sc->rcg_count; i++)
+		regmap_update_bits(sc->regmap, sc->rcgs[i], ROOT_EN_MASK, val);
+}
+
 static int gdsc_enable(struct generic_pm_domain *domain)
 {
 	struct gdsc *sc = domain_to_gdsc(domain);
 	int ret;
+
+	if (sc->flags & FORCE_ROOT_ENABLE)
+		gdsc_rcg_root_enable_set_clear(sc, true);
 
 	if (sc->pwrsts == PWRSTS_ON)
 		return gdsc_deassert_reset(sc);
@@ -260,6 +274,9 @@ static int gdsc_enable(struct generic_pm_domain *domain)
 		udelay(1);
 	}
 
+	if (sc->flags & FORCE_ROOT_ENABLE)
+		gdsc_rcg_root_enable_set_clear(sc, false);
+
 	return 0;
 }
 
@@ -267,6 +284,9 @@ static int gdsc_disable(struct generic_pm_domain *domain)
 {
 	struct gdsc *sc = domain_to_gdsc(domain);
 	int ret;
+
+	if (sc->flags & FORCE_ROOT_ENABLE)
+		gdsc_rcg_root_enable_set_clear(sc, true);
 
 	if (sc->pwrsts == PWRSTS_ON)
 		return gdsc_assert_reset(sc);
@@ -298,6 +318,9 @@ static int gdsc_disable(struct generic_pm_domain *domain)
 
 	if (sc->flags & CLAMP_IO)
 		gdsc_assert_clamp_io(sc);
+
+	if (sc->flags & FORCE_ROOT_ENABLE)
+		gdsc_rcg_root_enable_set_clear(sc, false);
 
 	return 0;
 }

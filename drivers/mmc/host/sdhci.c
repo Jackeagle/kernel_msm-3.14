@@ -2777,6 +2777,17 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
 	do {
 		DBG("IRQ status 0x%08x\n", intmask);
 
+		if (intmask & (SDHCI_INT_TIMEOUT | SDHCI_INT_DATA_TIMEOUT)) {
+		      	pr_err("%s: %s: Interrupt: 0x%08x, CMD: 0x%08x, Resp: 0x%08x, clock: %d\n",
+					mmc_hostname(host->mmc), __func__,
+					sdhci_readl(host, SDHCI_INT_STATUS),
+					sdhci_readw(host, SDHCI_COMMAND),
+					sdhci_readl(host, SDHCI_RESPONSE),
+					host->mmc->ios.clock);
+			if (host->mmc->dflag)
+				sdhci_dumpregs(host);
+		}
+
 		if (host->ops->irq) {
 			intmask = host->ops->irq(host, intmask);
 			if (!intmask)
@@ -2880,6 +2891,8 @@ static irqreturn_t sdhci_thread_irq(int irq, void *dev_id)
 		struct mmc_host *mmc = host->mmc;
 
 		mmc->ops->card_event(mmc);
+		pr_err("%s: Received card insert/remove irq. Irq: %d",
+				mmc_hostname(mmc), irq);
 		mmc_detect_change(mmc, msecs_to_jiffies(200));
 	}
 
@@ -3631,8 +3644,10 @@ int sdhci_setup_host(struct sdhci_host *host)
 
 	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
 	    mmc_card_is_removable(mmc) &&
-	    mmc_gpio_get_cd(host->mmc) < 0)
+	    mmc_gpio_get_cd(host->mmc) < 0) {
+		pr_err("%s: Setting Polling\n", mmc_hostname(mmc));
 		mmc->caps |= MMC_CAP_NEEDS_POLL;
+	}
 
 	/* If vqmmc regulator and no 1.8V signalling, then there's no UHS */
 	if (!IS_ERR(mmc->supply.vqmmc)) {
@@ -3722,10 +3737,15 @@ int sdhci_setup_host(struct sdhci_host *host)
 	 * value.
 	 */
 	max_current_caps = sdhci_readl(host, SDHCI_MAX_CURRENT);
-	if (!max_current_caps && !IS_ERR(mmc->supply.vmmc)) {
-		int curr = regulator_get_current_limit(mmc->supply.vmmc);
-		if (curr > 0) {
+	if (!max_current_caps) {
+		u32 curr = 0;
 
+		if (!IS_ERR(mmc->supply.vmmc))
+			curr = regulator_get_current_limit(mmc->supply.vmmc);
+		else if (host->ops->get_current_limit)
+			curr = host->ops->get_current_limit(host);
+
+		if (curr > 0) {
 			/* convert to SDHCI_MAX_CURRENT format */
 			curr = curr/1000;  /* convert to mA */
 			curr = curr/SDHCI_MAX_CURRENT_MULTIPLIER;

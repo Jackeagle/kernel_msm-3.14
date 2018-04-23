@@ -84,6 +84,7 @@ extern "C" {
 #define  DRM_MODE_FLAG_3D_L_DEPTH_GFX_GFX_DEPTH	(6<<14)
 #define  DRM_MODE_FLAG_3D_TOP_AND_BOTTOM	(7<<14)
 #define  DRM_MODE_FLAG_3D_SIDE_BY_SIDE_HALF	(8<<14)
+#define  DRM_MODE_FLAG_SEAMLESS			(1<<19)
 
 /* Picture aspect ratio options */
 #define DRM_MODE_PICTURE_ASPECT_NONE		0

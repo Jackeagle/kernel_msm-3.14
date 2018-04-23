@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2013 Red Hat
  * Author: Rob Clark <robdclark@gmail.com>
  *
@@ -14,15 +15,41 @@
  * You should have received a copy of the GNU General Public License along with
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/*
+ * Copyright (c) 2016 Intel Corporation
+ *
+ * Permission to use, copy, modify, distribute, and sell this software and its
+ * documentation for any purpose is hereby granted without fee, provided that
+ * the above copyright notice appear in all copies and that both that copyright
+ * notice and this permission notice appear in supporting documentation, and
+ * that the name of the copyright holders not be used in advertising or
+ * publicity pertaining to distribution of the software without specific,
+ * written prior permission. The copyright holders make no representations
+ * about the suitability of this software for any purpose. It is provided "as
+ * is" without express or implied warranty.
+ *
+ * THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+ * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+ * EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+ * CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+ * DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+ * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+ * OF THIS SOFTWARE.
+ */
 
+#include <linux/debugfs.h>
+#include <linux/of_address.h>
+#include <linux/kthread.h>
+#include <uapi/linux/sched/types.h>
 #include <drm/drm_of.h>
-
 #include "msm_drv.h"
 #include "msm_debugfs.h"
 #include "msm_fence.h"
 #include "msm_gpu.h"
 #include "msm_kms.h"
-
+#ifdef CONFIG_DRM_MSM_DPU
+#include "dpu_dbg.h"
+#endif
 
 /*
  * MSM driver version:
@@ -36,6 +63,8 @@
 #define MSM_VERSION_MAJOR	1
 #define MSM_VERSION_MINOR	3
 #define MSM_VERSION_PATCHLEVEL	0
+
+#define TEARDOWN_DEADLOCK_RETRY_MAX 5
 
 static void msm_fb_output_poll_changed(struct drm_device *dev)
 {
@@ -117,7 +146,8 @@ void __iomem *msm_ioremap(struct platform_device *pdev, const char *name,
 		res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 
 	if (!res) {
-		dev_err(&pdev->dev, "failed to get memory resource: %s\n", name);
+		dev_warn(&pdev->dev, "memory resource: %s not available\n",
+				name);
 		return ERR_PTR(-EINVAL);
 	}
 
@@ -135,6 +165,29 @@ void __iomem *msm_ioremap(struct platform_device *pdev, const char *name,
 	return ptr;
 }
 
+unsigned long msm_iomap_size(struct platform_device *pdev, const char *name)
+{
+	struct resource *res;
+
+	if (name)
+		res = platform_get_resource_byname(pdev, IORESOURCE_MEM, name);
+	else
+		res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+
+	if (!res) {
+		dev_err(&pdev->dev, "failed to get memory resource: %s\n",
+									name);
+		return 0;
+	}
+
+	return resource_size(res);
+}
+
+void msm_iounmap(struct platform_device *pdev, void __iomem *addr)
+{
+	devm_iounmap(&pdev->dev, addr);
+}
+
 void msm_writel(u32 data, void __iomem *addr)
 {
 	if (reglog)
@@ -145,6 +198,7 @@ void msm_writel(u32 data, void __iomem *addr)
 u32 msm_readl(const void __iomem *addr)
 {
 	u32 val = readl(addr);
+
 	if (reglog)
 		pr_err("IO:R %p %08x\n", addr, val);
 	return val;
@@ -156,7 +210,7 @@ struct vblank_event {
 	bool enable;
 };
 
-static void vblank_ctrl_worker(struct work_struct *work)
+static void vblank_ctrl_worker(struct kthread_work *work)
 {
 	struct msm_vblank_ctrl *vbl_ctrl = container_of(work,
 						struct msm_vblank_ctrl, work);
@@ -204,7 +258,8 @@ static int vblank_ctrl_queue_work(struct msm_drm_private *priv,
 	list_add_tail(&vbl_ev->node, &vbl_ctrl->event_list);
 	spin_unlock_irqrestore(&vbl_ctrl->lock, flags);
 
-	queue_work(priv->wq, &vbl_ctrl->work);
+	kthread_queue_work(&priv->disp_thread[crtc_id].worker,
+			&vbl_ctrl->work);
 
 	return 0;
 }
@@ -217,22 +272,43 @@ static int msm_drm_uninit(struct device *dev)
 	struct msm_kms *kms = priv->kms;
 	struct msm_vblank_ctrl *vbl_ctrl = &priv->vblank_ctrl;
 	struct vblank_event *vbl_ev, *tmp;
+	int i;
 
 	/* We must cancel and cleanup any pending vblank enable/disable
 	 * work before drm_irq_uninstall() to avoid work re-enabling an
 	 * irq after uninstall has disabled it.
 	 */
-	cancel_work_sync(&vbl_ctrl->work);
+	kthread_flush_work(&vbl_ctrl->work);
 	list_for_each_entry_safe(vbl_ev, tmp, &vbl_ctrl->event_list, node) {
 		list_del(&vbl_ev->node);
 		kfree(vbl_ev);
+	}
+
+	/* clean up display commit/event worker threads */
+	for (i = 0; i < priv->num_crtcs; i++) {
+		if (priv->disp_thread[i].thread) {
+			kthread_flush_worker(&priv->disp_thread[i].worker);
+			kthread_stop(priv->disp_thread[i].thread);
+			priv->disp_thread[i].thread = NULL;
+		}
+
+		if (priv->event_thread[i].thread) {
+			kthread_flush_worker(&priv->event_thread[i].worker);
+			kthread_stop(priv->event_thread[i].thread);
+			priv->event_thread[i].thread = NULL;
+		}
 	}
 
 	msm_gem_shrinker_cleanup(ddev);
 
 	drm_kms_helper_poll_fini(ddev);
 
-	drm_dev_unregister(ddev);
+	drm_mode_config_cleanup(ddev);
+
+	if (priv->registered) {
+		drm_dev_unregister(ddev);
+		priv->registered = false;
+	}
 
 	msm_perf_debugfs_cleanup(priv);
 	msm_rd_debugfs_cleanup(priv);
@@ -250,9 +326,6 @@ static int msm_drm_uninit(struct device *dev)
 	flush_workqueue(priv->wq);
 	destroy_workqueue(priv->wq);
 
-	flush_workqueue(priv->atomic_wq);
-	destroy_workqueue(priv->atomic_wq);
-
 	if (kms && kms->funcs)
 		kms->funcs->destroy(kms);
 
@@ -265,15 +338,28 @@ static int msm_drm_uninit(struct device *dev)
 
 	component_unbind_all(dev, ddev);
 
+#ifdef CONFIG_DRM_MSM_DPU
+	dpu_power_client_destroy(&priv->phandle, priv->pclient);
+	dpu_power_resource_deinit(pdev, &priv->phandle);
+	dpu_dbg_destroy();
+#endif
+
+	debugfs_remove_recursive(priv->debug_root);
+
 	msm_mdss_destroy(ddev);
 
-	ddev->dev_private = NULL;
-	drm_dev_unref(ddev);
 
+	ddev->dev_private = NULL;
 	kfree(priv);
+
+	drm_dev_unref(ddev);
 
 	return 0;
 }
+
+#define KMS_MDP4 4
+#define KMS_MDP5 5
+#define KMS_DPU  3
 
 static int get_mdp_ver(struct platform_device *pdev)
 {
@@ -281,8 +367,6 @@ static int get_mdp_ver(struct platform_device *pdev)
 
 	return (int) (unsigned long) of_device_get_match_data(dev);
 }
-
-#include <linux/of_address.h>
 
 static int msm_init_vram(struct drm_device *dev)
 {
@@ -311,6 +395,7 @@ static int msm_init_vram(struct drm_device *dev)
 	node = of_parse_phandle(dev->dev->of_node, "memory-region", 0);
 	if (node) {
 		struct resource r;
+
 		ret = of_address_to_resource(node, 0, &r);
 		of_node_put(node);
 		if (ret)
@@ -358,71 +443,126 @@ static int msm_init_vram(struct drm_device *dev)
 	return ret;
 }
 
+#ifdef CONFIG_OF
+static int msm_component_bind_all(struct device *dev,
+				struct drm_device *drm_dev)
+{
+	int ret;
+
+	ret = component_bind_all(dev, drm_dev);
+	if (ret)
+		DRM_ERROR("component_bind_all failed: %d\n", ret);
+
+	return ret;
+}
+#else
+static int msm_component_bind_all(struct device *dev,
+				struct drm_device *drm_dev)
+{
+	return 0;
+}
+#endif
+
+#ifdef CONFIG_DRM_MSM_DPU
+static int msm_power_enable_wrapper(void *handle, void *client, bool enable)
+{
+	return dpu_power_resource_enable(handle, client, enable);
+}
+#endif
+
 static int msm_drm_init(struct device *dev, struct drm_driver *drv)
 {
 	struct platform_device *pdev = to_platform_device(dev);
 	struct drm_device *ddev;
 	struct msm_drm_private *priv;
 	struct msm_kms *kms;
-	int ret;
+
+#ifdef CONFIG_DRM_MSM_DPU
+	struct dpu_dbg_power_ctrl dbg_power_ctrl = { 0 };
+#endif
+
+	int ret, i;
+	struct sched_param param;
 
 	ddev = drm_dev_alloc(drv, dev);
-	if (IS_ERR(ddev)) {
+	if (!ddev) {
 		dev_err(dev, "failed to allocate drm_device\n");
-		return PTR_ERR(ddev);
+		return -ENOMEM;
 	}
 
 	platform_set_drvdata(pdev, ddev);
 
 	priv = kzalloc(sizeof(*priv), GFP_KERNEL);
 	if (!priv) {
-		drm_dev_unref(ddev);
-		return -ENOMEM;
+		ret = -ENOMEM;
+		goto priv_alloc_fail;
 	}
 
 	ddev->dev_private = priv;
 	priv->dev = ddev;
 
 	ret = msm_mdss_init(ddev);
-	if (ret) {
-		kfree(priv);
-		drm_dev_unref(ddev);
-		return ret;
-	}
+	if (ret)
+		goto mdss_init_fail;
 
 	priv->wq = alloc_ordered_workqueue("msm", 0);
-	priv->atomic_wq = alloc_ordered_workqueue("msm:atomic", 0);
 
+	INIT_LIST_HEAD(&priv->client_event_list);
 	INIT_LIST_HEAD(&priv->inactive_list);
 	INIT_LIST_HEAD(&priv->vblank_ctrl.event_list);
-	INIT_WORK(&priv->vblank_ctrl.work, vblank_ctrl_worker);
+	kthread_init_work(&priv->vblank_ctrl.work, vblank_ctrl_worker);
 	spin_lock_init(&priv->vblank_ctrl.lock);
 
 	drm_mode_config_init(ddev);
 
-	/* Bind all our sub-components: */
-	ret = component_bind_all(dev, ddev);
+#ifdef CONFIG_DRM_MSM_DPU
+	ret = dpu_power_resource_init(pdev, &priv->phandle);
 	if (ret) {
-		msm_mdss_destroy(ddev);
-		kfree(priv);
-		drm_dev_unref(ddev);
-		return ret;
+		pr_err("dpu power resource init failed\n");
+		goto power_init_fail;
 	}
 
-	ret = msm_init_vram(ddev);
-	if (ret)
-		goto fail;
+	priv->pclient = dpu_power_client_create(&priv->phandle, "dpu");
+	if (IS_ERR_OR_NULL(priv->pclient)) {
+		pr_err("dpu power client create failed\n");
+		ret = -EINVAL;
+		goto power_client_fail;
+	}
+
+	dbg_power_ctrl.handle = &priv->phandle;
+	dbg_power_ctrl.client = priv->pclient;
+	dbg_power_ctrl.enable_fn = msm_power_enable_wrapper;
+
+	ret = dpu_dbg_init(&pdev->dev, &dbg_power_ctrl);
+	if (ret) {
+		dev_err(dev, "failed to init dpu dbg: %d\n", ret);
+		goto dbg_init_fail;
+	}
+#endif
 
 	msm_gem_shrinker_init(ddev);
 
+	ret = msm_init_vram(ddev);
+	if (ret)
+		goto init_vram_fail;
+
+	/* Bind all our sub-components: */
+	ret = msm_component_bind_all(dev, ddev);
+	if (ret)
+		goto bind_fail;
+
 	switch (get_mdp_ver(pdev)) {
-	case 4:
+	case KMS_MDP4:
 		kms = mdp4_kms_init(ddev);
-		priv->kms = kms;
 		break;
-	case 5:
+	case KMS_MDP5:
 		kms = mdp5_kms_init(ddev);
 		break;
+#ifdef CONFIG_DRM_MSM_DPU
+	case KMS_DPU:
+		kms = dpu_kms_init(ddev);
+		break;
+#endif
 	default:
 		kms = ERR_PTR(-ENODEV);
 		break;
@@ -435,10 +575,22 @@ static int msm_drm_init(struct device *dev, struct drm_driver *drv)
 		 * and (for example) use dmabuf/prime to share buffers with
 		 * imx drm driver on iMX5
 		 */
+		priv->kms = NULL;
 		dev_err(dev, "failed to load kms\n");
 		ret = PTR_ERR(kms);
 		goto fail;
 	}
+	priv->kms = kms;
+	pm_runtime_enable(dev);
+
+	/**
+	 * Since kms->funcs->hw_init(kms) might call
+	 * drm_object_property_set_value we need to make sure
+	 * mode_config.funcs is initialized first to avoid dereferencing
+	 * an unset value during call to drm_drv_uses_atomic_modeset()
+	 */
+	ddev->mode_config.funcs = &mode_config_funcs;
+	ddev->mode_config.helper_private = &mode_config_helper_funcs;
 
 	if (kms) {
 		ret = kms->funcs->hw_init(kms);
@@ -448,8 +600,78 @@ static int msm_drm_init(struct device *dev, struct drm_driver *drv)
 		}
 	}
 
-	ddev->mode_config.funcs = &mode_config_funcs;
-	ddev->mode_config.helper_private = &mode_config_helper_funcs;
+	/**
+	 * this priority was found during empiric testing to have appropriate
+	 * realtime scheduling to process display updates and interact with
+	 * other real time and normal priority task
+	 */
+	param.sched_priority = 16;
+	for (i = 0; i < priv->num_crtcs; i++) {
+
+		/* initialize display thread */
+		priv->disp_thread[i].crtc_id = priv->crtcs[i]->base.id;
+		kthread_init_worker(&priv->disp_thread[i].worker);
+		priv->disp_thread[i].dev = ddev;
+		priv->disp_thread[i].thread =
+			kthread_run(kthread_worker_fn,
+				&priv->disp_thread[i].worker,
+				"crtc_commit:%d", priv->disp_thread[i].crtc_id);
+		ret = sched_setscheduler(priv->disp_thread[i].thread,
+							SCHED_FIFO, &param);
+		if (ret)
+			pr_warn("display thread priority update failed: %d\n",
+									ret);
+
+		if (IS_ERR(priv->disp_thread[i].thread)) {
+			dev_err(dev, "failed to create crtc_commit kthread\n");
+			priv->disp_thread[i].thread = NULL;
+		}
+
+		/* initialize event thread */
+		priv->event_thread[i].crtc_id = priv->crtcs[i]->base.id;
+		kthread_init_worker(&priv->event_thread[i].worker);
+		priv->event_thread[i].dev = ddev;
+		priv->event_thread[i].thread =
+			kthread_run(kthread_worker_fn,
+				&priv->event_thread[i].worker,
+				"crtc_event:%d", priv->event_thread[i].crtc_id);
+		/**
+		 * event thread should also run at same priority as disp_thread
+		 * because it is handling frame_done events. A lower priority
+		 * event thread and higher priority disp_thread can causes
+		 * frame_pending counters beyond 2. This can lead to commit
+		 * failure at crtc commit level.
+		 */
+		ret = sched_setscheduler(priv->event_thread[i].thread,
+							SCHED_FIFO, &param);
+		if (ret)
+			pr_warn("display event thread priority update failed: %d\n",
+									ret);
+
+		if (IS_ERR(priv->event_thread[i].thread)) {
+			dev_err(dev, "failed to create crtc_event kthread\n");
+			priv->event_thread[i].thread = NULL;
+		}
+
+		if ((!priv->disp_thread[i].thread) ||
+				!priv->event_thread[i].thread) {
+			/* clean up previously created threads if any */
+			for ( ; i >= 0; i--) {
+				if (priv->disp_thread[i].thread) {
+					kthread_stop(
+						priv->disp_thread[i].thread);
+					priv->disp_thread[i].thread = NULL;
+				}
+
+				if (priv->event_thread[i].thread) {
+					kthread_stop(
+						priv->event_thread[i].thread);
+					priv->event_thread[i].thread = NULL;
+				}
+			}
+			goto fail;
+		}
+	}
 
 	ret = drm_vblank_init(ddev, priv->num_crtcs);
 	if (ret < 0) {
@@ -470,6 +692,7 @@ static int msm_drm_init(struct device *dev, struct drm_driver *drv)
 	ret = drm_dev_register(ddev, 0);
 	if (ret)
 		goto fail;
+	priv->registered = true;
 
 	drm_mode_config_reset(ddev);
 
@@ -482,6 +705,32 @@ static int msm_drm_init(struct device *dev, struct drm_driver *drv)
 	if (ret)
 		goto fail;
 
+	priv->debug_root = debugfs_create_dir("debug",
+					ddev->primary->debugfs_root);
+	if (IS_ERR_OR_NULL(priv->debug_root)) {
+		pr_err("debugfs_root create_dir fail, error %ld\n",
+		       PTR_ERR(priv->debug_root));
+		priv->debug_root = NULL;
+		goto fail;
+	}
+
+#ifdef CONFIG_DRM_MSM_DPU
+	ret = dpu_dbg_debugfs_register(priv->debug_root);
+	if (ret) {
+		dev_err(dev, "failed to reg dpu dbg debugfs: %d\n", ret);
+		goto fail;
+	}
+#endif
+
+	/* perform subdriver post initialization */
+	if (kms && kms->funcs && kms->funcs->postinit) {
+		ret = kms->funcs->postinit(kms);
+		if (ret) {
+			pr_err("kms post init failed: %d\n", ret);
+			goto fail;
+		}
+	}
+
 	drm_kms_helper_poll_init(ddev);
 
 	return 0;
@@ -489,12 +738,35 @@ static int msm_drm_init(struct device *dev, struct drm_driver *drv)
 fail:
 	msm_drm_uninit(dev);
 	return ret;
+bind_fail:
+	/* TODO: undo msm_init_vram()? */
+init_vram_fail:
+	msm_gem_shrinker_cleanup(ddev);
+#ifdef CONFIG_DRM_MSM_DPU
+	dpu_dbg_destroy();
+dbg_init_fail:
+	dpu_power_client_destroy(&priv->phandle, priv->pclient);
+power_client_fail:
+	dpu_power_resource_deinit(pdev, &priv->phandle);
+power_init_fail:
+#endif
+	msm_mdss_destroy(ddev);
+mdss_init_fail:
+	kfree(priv);
+priv_alloc_fail:
+	drm_dev_unref(ddev);
+	return ret;
 }
 
 /*
  * DRM operations:
  */
 
+#ifdef CONFIG_QCOM_KGSL
+static void load_gpu(struct drm_device *dev)
+{
+}
+#else
 static void load_gpu(struct drm_device *dev)
 {
 	static DEFINE_MUTEX(init_lock);
@@ -507,6 +779,7 @@ static void load_gpu(struct drm_device *dev)
 
 	mutex_unlock(&init_lock);
 }
+#endif
 
 static int context_init(struct drm_device *dev, struct drm_file *file)
 {
@@ -520,6 +793,14 @@ static int context_init(struct drm_device *dev, struct drm_file *file)
 
 	file->driver_priv = ctx;
 
+	if (dev && dev->dev_private) {
+		struct msm_drm_private *priv = dev->dev_private;
+		struct msm_kms *kms;
+
+		kms = priv->kms;
+		if (kms && kms->funcs && kms->funcs->postopen)
+			kms->funcs->postopen(kms, file);
+	}
 	return 0;
 }
 
@@ -539,10 +820,22 @@ static void context_close(struct msm_file_private *ctx)
 	kfree(ctx);
 }
 
+static void msm_preclose(struct drm_device *dev, struct drm_file *file)
+{
+	struct msm_drm_private *priv = dev->dev_private;
+	struct msm_kms *kms = priv->kms;
+
+	if (kms && kms->funcs && kms->funcs->preclose)
+		kms->funcs->preclose(kms, file);
+}
 static void msm_postclose(struct drm_device *dev, struct drm_file *file)
 {
 	struct msm_drm_private *priv = dev->dev_private;
 	struct msm_file_private *ctx = file->driver_priv;
+	struct msm_kms *kms = priv->kms;
+
+	if (kms && kms->funcs && kms->funcs->postclose)
+		kms->funcs->postclose(kms, file);
 
 	mutex_lock(&dev->struct_mutex);
 	if (ctx == priv->lastctx)
@@ -564,6 +857,7 @@ static irqreturn_t msm_irq(int irq, void *arg)
 	struct drm_device *dev = arg;
 	struct msm_drm_private *priv = dev->dev_private;
 	struct msm_kms *kms = priv->kms;
+
 	BUG_ON(!kms);
 	return kms->funcs->irq(kms);
 }
@@ -572,6 +866,7 @@ static void msm_irq_preinstall(struct drm_device *dev)
 {
 	struct msm_drm_private *priv = dev->dev_private;
 	struct msm_kms *kms = priv->kms;
+
 	BUG_ON(!kms);
 	kms->funcs->irq_preinstall(kms);
 }
@@ -580,6 +875,7 @@ static int msm_irq_postinstall(struct drm_device *dev)
 {
 	struct msm_drm_private *priv = dev->dev_private;
 	struct msm_kms *kms = priv->kms;
+
 	BUG_ON(!kms);
 	return kms->funcs->irq_postinstall(kms);
 }
@@ -588,6 +884,7 @@ static void msm_irq_uninstall(struct drm_device *dev)
 {
 	struct msm_drm_private *priv = dev->dev_private;
 	struct msm_kms *kms = priv->kms;
+
 	BUG_ON(!kms);
 	kms->funcs->irq_uninstall(kms);
 }
@@ -596,6 +893,7 @@ static int msm_enable_vblank(struct drm_device *dev, unsigned int pipe)
 {
 	struct msm_drm_private *priv = dev->dev_private;
 	struct msm_kms *kms = priv->kms;
+
 	if (!kms)
 		return -ENXIO;
 	DBG("dev=%p, crtc=%u", dev, pipe);
@@ -606,6 +904,7 @@ static void msm_disable_vblank(struct drm_device *dev, unsigned int pipe)
 {
 	struct msm_drm_private *priv = dev->dev_private;
 	struct msm_kms *kms = priv->kms;
+
 	if (!kms)
 		return;
 	DBG("dev=%p, crtc=%u", dev, pipe);
@@ -827,6 +1126,164 @@ static int msm_ioctl_submitqueue_close(struct drm_device *dev, void *data,
 	return msm_submitqueue_remove(file->driver_priv, id);
 }
 
+void msm_mode_object_event_notify(struct drm_mode_object *obj,
+		struct drm_device *dev, struct drm_event *event, u8 *payload)
+{
+	struct msm_drm_private *priv = NULL;
+	unsigned long flags;
+	struct msm_drm_event *notify, *node;
+	int len = 0, ret;
+
+	if (!obj || !event || !event->length || !payload) {
+		DRM_ERROR("err param obj %pK event %pK len %d payload %pK\n",
+			obj, event, ((event) ? (event->length) : -1),
+			payload);
+		return;
+	}
+	priv = (dev) ? dev->dev_private : NULL;
+	if (!dev || !priv) {
+		DRM_ERROR("invalid dev %pK priv %pK\n", dev, priv);
+		return;
+	}
+
+	spin_lock_irqsave(&dev->event_lock, flags);
+	list_for_each_entry(node, &priv->client_event_list, base.link) {
+		if (node->event.type != event->type ||
+			obj->id != node->info.object_id)
+			continue;
+		len = event->length + sizeof(struct drm_msm_event_resp);
+		if (node->base.file_priv->event_space < len) {
+			DRM_ERROR("Insufficient space to notify\n");
+			continue;
+		}
+		notify = kzalloc(len, GFP_ATOMIC);
+		if (!notify)
+			continue;
+		notify->base.file_priv = node->base.file_priv;
+		notify->base.event = &notify->event;
+		notify->event.type = node->event.type;
+		notify->event.length = len;
+		memcpy(&notify->info, &node->info, sizeof(notify->info));
+		memcpy(notify->data, payload, event->length);
+		ret = drm_event_reserve_init_locked(dev, node->base.file_priv,
+			&notify->base, &notify->event);
+		if (ret) {
+			kfree(notify);
+			continue;
+		}
+		drm_send_event_locked(dev, &notify->base);
+	}
+	spin_unlock_irqrestore(&dev->event_lock, flags);
+}
+
+static int msm_release(struct inode *inode, struct file *filp)
+{
+	return drm_release(inode, filp);
+}
+
+/**
+ * msm_drv_framebuffer_remove - remove and unreference a framebuffer object
+ * @fb: framebuffer to remove
+ */
+void msm_drv_framebuffer_remove(struct drm_framebuffer *fb)
+{
+	struct drm_device *dev;
+
+	if (!fb)
+		return;
+
+	dev = fb->dev;
+
+	WARN_ON(!list_empty(&fb->filp_head));
+
+	drm_framebuffer_unreference(fb);
+}
+
+struct msm_drv_rmfb2_work {
+	struct work_struct work;
+	struct list_head fbs;
+};
+
+static void msm_drv_rmfb2_work_fn(struct work_struct *w)
+{
+	struct msm_drv_rmfb2_work *arg = container_of(w, typeof(*arg), work);
+
+	while (!list_empty(&arg->fbs)) {
+		struct drm_framebuffer *fb =
+			list_first_entry(&arg->fbs, typeof(*fb), filp_head);
+
+		list_del_init(&fb->filp_head);
+		msm_drv_framebuffer_remove(fb);
+	}
+}
+
+/**
+ * msm_ioctl_rmfb2 - remove an FB from the configuration
+ * @dev: drm device for the ioctl
+ * @data: data pointer for the ioctl
+ * @file_priv: drm file for the ioctl call
+ *
+ * Remove the FB specified by the user.
+ *
+ * Called by the user via ioctl.
+ *
+ * Returns:
+ * Zero on success, negative errno on failure.
+ */
+int msm_ioctl_rmfb2(struct drm_device *dev, void *data,
+		    struct drm_file *file_priv)
+{
+	struct drm_framebuffer *fb = NULL;
+	struct drm_framebuffer *fbl = NULL;
+	uint32_t *id = data;
+	int found = 0;
+
+	if (!drm_core_check_feature(dev, DRIVER_MODESET))
+		return -EINVAL;
+
+	fb = drm_framebuffer_lookup(dev, file_priv, *id);
+	if (!fb)
+		return -ENOENT;
+
+	/* drop extra ref from traversing drm_framebuffer_lookup */
+	drm_framebuffer_unreference(fb);
+
+	mutex_lock(&file_priv->fbs_lock);
+	list_for_each_entry(fbl, &file_priv->fbs, filp_head)
+		if (fb == fbl)
+			found = 1;
+	if (!found) {
+		mutex_unlock(&file_priv->fbs_lock);
+		return -ENOENT;
+	}
+
+	list_del_init(&fb->filp_head);
+	mutex_unlock(&file_priv->fbs_lock);
+
+	/*
+	 * we now own the reference that was stored in the fbs list
+	 *
+	 * drm_framebuffer_remove may fail with -EINTR on pending signals,
+	 * so run this in a separate stack as there's no way to correctly
+	 * handle this after the fb is already removed from the lookup table.
+	 */
+	if (drm_framebuffer_read_refcount(fb) > 1) {
+		struct msm_drv_rmfb2_work arg;
+
+		INIT_WORK_ONSTACK(&arg.work, msm_drv_rmfb2_work_fn);
+		INIT_LIST_HEAD(&arg.fbs);
+		list_add_tail(&fb->filp_head, &arg.fbs);
+
+		schedule_work(&arg.work);
+		flush_work(&arg.work);
+		destroy_work_on_stack(&arg.work);
+	} else
+		drm_framebuffer_unreference(fb);
+
+	return 0;
+}
+EXPORT_SYMBOL(msm_ioctl_rmfb2);
+
 static const struct drm_ioctl_desc msm_ioctls[] = {
 	DRM_IOCTL_DEF_DRV(MSM_GET_PARAM,    msm_ioctl_get_param,    DRM_AUTH|DRM_RENDER_ALLOW),
 	DRM_IOCTL_DEF_DRV(MSM_GEM_NEW,      msm_ioctl_gem_new,      DRM_AUTH|DRM_RENDER_ALLOW),
@@ -838,6 +1295,8 @@ static const struct drm_ioctl_desc msm_ioctls[] = {
 	DRM_IOCTL_DEF_DRV(MSM_GEM_MADVISE,  msm_ioctl_gem_madvise,  DRM_AUTH|DRM_RENDER_ALLOW),
 	DRM_IOCTL_DEF_DRV(MSM_SUBMITQUEUE_NEW,   msm_ioctl_submitqueue_new,   DRM_AUTH|DRM_RENDER_ALLOW),
 	DRM_IOCTL_DEF_DRV(MSM_SUBMITQUEUE_CLOSE, msm_ioctl_submitqueue_close, DRM_AUTH|DRM_RENDER_ALLOW),
+	DRM_IOCTL_DEF_DRV(MSM_RMFB2, msm_ioctl_rmfb2,
+			  DRM_CONTROL_ALLOW|DRM_UNLOCKED),
 };
 
 static const struct vm_operations_struct vm_ops = {
@@ -849,7 +1308,7 @@ static const struct vm_operations_struct vm_ops = {
 static const struct file_operations fops = {
 	.owner              = THIS_MODULE,
 	.open               = drm_open,
-	.release            = drm_release,
+	.release            = msm_release,
 	.unlocked_ioctl     = drm_ioctl,
 	.compat_ioctl       = drm_compat_ioctl,
 	.poll               = drm_poll,
@@ -866,7 +1325,8 @@ static struct drm_driver msm_driver = {
 				DRIVER_ATOMIC |
 				DRIVER_MODESET,
 	.open               = msm_open,
-	.postclose           = msm_postclose,
+	.preclose           = msm_preclose,
+	.postclose	    = msm_postclose,
 	.lastclose          = msm_lastclose,
 	.irq_handler        = msm_irq,
 	.irq_preinstall     = msm_irq_preinstall,
@@ -907,8 +1367,24 @@ static struct drm_driver msm_driver = {
 #ifdef CONFIG_PM_SLEEP
 static int msm_pm_suspend(struct device *dev)
 {
-	struct drm_device *ddev = dev_get_drvdata(dev);
+	struct drm_device *ddev;
+	struct msm_drm_private *priv;
+	struct msm_kms *kms;
 
+	if (!dev)
+		return -EINVAL;
+
+	ddev = dev_get_drvdata(dev);
+	if (!ddev || !ddev->dev_private)
+		return -EINVAL;
+
+	priv = ddev->dev_private;
+	kms = priv->kms;
+
+	if (kms && kms->funcs && kms->funcs->pm_suspend)
+		return kms->funcs->pm_suspend(dev);
+
+	/* disable hot-plug polling */
 	drm_kms_helper_poll_disable(ddev);
 
 	return 0;
@@ -916,8 +1392,24 @@ static int msm_pm_suspend(struct device *dev)
 
 static int msm_pm_resume(struct device *dev)
 {
-	struct drm_device *ddev = dev_get_drvdata(dev);
+	struct drm_device *ddev;
+	struct msm_drm_private *priv;
+	struct msm_kms *kms;
 
+	if (!dev)
+		return -EINVAL;
+
+	ddev = dev_get_drvdata(dev);
+	if (!ddev || !ddev->dev_private)
+		return -EINVAL;
+
+	priv = ddev->dev_private;
+	kms = priv->kms;
+
+	if (kms && kms->funcs && kms->funcs->pm_resume)
+		return kms->funcs->pm_resume(dev);
+
+	/* enable hot-plug polling */
 	drm_kms_helper_poll_enable(ddev);
 
 	return 0;
@@ -933,7 +1425,7 @@ static int msm_runtime_suspend(struct device *dev)
 	DBG("");
 
 	if (priv->mdss)
-		return msm_mdss_disable(priv->mdss);
+		return 0; // msm_mdss_disable(priv->mdss);
 
 	return 0;
 }
@@ -946,7 +1438,7 @@ static int msm_runtime_resume(struct device *dev)
 	DBG("");
 
 	if (priv->mdss)
-		return msm_mdss_enable(priv->mdss);
+		return 0;//msm_mdss_enable(priv->mdss);
 
 	return 0;
 }
@@ -1041,7 +1533,7 @@ static int compare_name_mdp(struct device *dev, void *data)
 static int add_display_components(struct device *dev,
 				  struct component_match **matchptr)
 {
-	struct device *mdp_dev;
+	struct device *mdp_dev = NULL;
 	int ret;
 
 	/*
@@ -1068,7 +1560,7 @@ static int add_display_components(struct device *dev,
 
 		/* add the MDP component itself */
 		drm_of_component_match_add(dev, matchptr, compare_of,
-					   mdp_dev->of_node);
+				   mdp_dev->of_node);
 	} else {
 		/* MDP4 */
 		mdp_dev = dev;
@@ -1079,6 +1571,30 @@ static int add_display_components(struct device *dev,
 		of_platform_depopulate(dev);
 
 	return ret;
+}
+
+struct msm_gem_address_space *
+msm_gem_smmu_address_space_get(struct drm_device *dev,
+		unsigned int domain)
+{
+	struct msm_drm_private *priv = NULL;
+	struct msm_kms *kms;
+	const struct msm_kms_funcs *funcs;
+
+	if ((!dev) || (!dev->dev_private))
+		return NULL;
+
+	priv = dev->dev_private;
+	kms = priv->kms;
+	if (!kms)
+		return NULL;
+
+	funcs = kms->funcs;
+
+	if ((!funcs) || (!funcs->get_address_space))
+		return NULL;
+
+	return funcs->get_address_space(priv->kms, domain);
 }
 
 /*
@@ -1093,6 +1609,13 @@ static const struct of_device_id msm_gpu_match[] = {
 	{ },
 };
 
+#ifdef CONFIG_QCOM_KGSL
+static int add_gpu_components(struct device *dev,
+			      struct component_match **matchptr)
+{
+	return 0;
+}
+#else
 static int add_gpu_components(struct device *dev,
 			      struct component_match **matchptr)
 {
@@ -1108,6 +1631,7 @@ static int add_gpu_components(struct device *dev,
 
 	return 0;
 }
+#endif
 
 static int msm_drm_bind(struct device *dev)
 {
@@ -1130,8 +1654,8 @@ static const struct component_master_ops msm_drm_ops = {
 
 static int msm_pdev_probe(struct platform_device *pdev)
 {
-	struct component_match *match = NULL;
 	int ret;
+	struct component_match *match = NULL;
 
 	ret = add_display_components(&pdev->dev, &match);
 	if (ret)
@@ -1141,12 +1665,12 @@ static int msm_pdev_probe(struct platform_device *pdev)
 	if (ret)
 		return ret;
 
-	/* on all devices that I am aware of, iommu's which can map
-	 * any address the cpu can see are used:
-	 */
-	ret = dma_set_mask_and_coherent(&pdev->dev, ~0);
-	if (ret)
-		return ret;
+	if (match == NULL) {
+		dev_warn(&pdev->dev, "No components matched\n");
+		return -EINVAL;
+	}
+
+	pdev->dev.coherent_dma_mask = DMA_BIT_MASK(32);
 
 	return component_master_add_with_match(&pdev->dev, &msm_drm_ops, match);
 }
@@ -1156,12 +1680,17 @@ static int msm_pdev_remove(struct platform_device *pdev)
 	component_master_del(&pdev->dev, &msm_drm_ops);
 	of_platform_depopulate(&pdev->dev);
 
+	msm_drm_unbind(&pdev->dev);
+	component_master_del(&pdev->dev, &msm_drm_ops);
 	return 0;
 }
 
 static const struct of_device_id dt_match[] = {
-	{ .compatible = "qcom,mdp4", .data = (void *)4 },	/* MDP4 */
-	{ .compatible = "qcom,mdss", .data = (void *)5 },	/* MDP5 MDSS */
+	{ .compatible = "qcom,mdp4", .data = (void *)KMS_MDP4 },
+	{ .compatible = "qcom,mdss", .data = (void *)KMS_MDP5 },
+#ifdef CONFIG_DRM_MSM_DPU
+	{ .compatible = "qcom,dpu-kms", .data = (void *)KMS_DPU },
+#endif
 	{}
 };
 MODULE_DEVICE_TABLE(of, dt_match);
@@ -1175,6 +1704,16 @@ static struct platform_driver msm_platform_driver = {
 		.pm     = &msm_pm_ops,
 	},
 };
+
+#ifdef CONFIG_QCOM_KGSL
+void __init adreno_register(void)
+{
+}
+
+void __exit adreno_unregister(void)
+{
+}
+#endif
 
 static int __init msm_drm_register(void)
 {

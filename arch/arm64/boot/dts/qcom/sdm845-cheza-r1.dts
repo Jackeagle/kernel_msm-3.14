@@ -21,6 +21,24 @@
 		     "google,cheza-rev1", "google,cheza", "qcom,sdm845";
 };
 
+/* TODO: move this to main dtsi once -rev0 is gone */
+&spi10 {
+	ec@0 {
+		compatible = "google,cros-ec-spi";
+		reg = <0>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <122 IRQ_TYPE_LEVEL_LOW>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&ec_ap_int_l>;
+		spi-max-frequency = <3000000>;
+
+		cros_ec_pwm: ec-pwm {
+			compatible = "google,cros-ec-pwm";
+			#pwm-cells = <1>;
+		};
+	};
+};
+
 /* PINCTRL - board-specific pinctrl */
 
 &tlmm {

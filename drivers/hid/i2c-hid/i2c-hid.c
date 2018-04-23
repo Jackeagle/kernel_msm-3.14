@@ -1003,12 +1003,29 @@ static int i2c_hid_probe(struct i2c_client *client,
 		goto err;
 	}
 
+	ihid->pdata.supply_l = devm_regulator_get(&client->dev, "vddl");
+	if (IS_ERR(ihid->pdata.supply_l)) {
+		ret = PTR_ERR(ihid->pdata.supply_l);
+		if (ret != -EPROBE_DEFER)
+			dev_err(&client->dev, "Failed to get regulator: %d\n",
+				ret);
+		goto err;
+	}
+
 	ret = regulator_enable(ihid->pdata.supply);
 	if (ret < 0) {
 		dev_err(&client->dev, "Failed to enable regulator: %d\n",
 			ret);
 		goto err;
 	}
+
+	ret = regulator_enable(ihid->pdata.supply_l);
+	if (ret < 0) {
+		dev_err(&client->dev, "Failed to enable low regulator: %d\n",
+			ret);
+		goto err_regulator_l;
+	}
+
 	if (ihid->pdata.post_power_delay_ms)
 		msleep(ihid->pdata.post_power_delay_ms);
 
@@ -1095,6 +1112,8 @@ err_pm:
 	pm_runtime_disable(&client->dev);
 
 err_regulator:
+	regulator_disable(ihid->pdata.supply_l);
+err_regulator_l:
 	regulator_disable(ihid->pdata.supply);
 
 err:
