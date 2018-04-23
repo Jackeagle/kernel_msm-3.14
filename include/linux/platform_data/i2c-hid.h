@@ -20,6 +20,7 @@ struct regulator;
  * struct i2chid_platform_data - used by hid over i2c implementation.
  * @hid_descriptor_address: i2c register where the HID descriptor is stored.
  * @supply: regulator for powering on the device.
+ * @supply_l: regulator for powering on the low voltage supply for device.
  * @post_power_delay_ms: delay after powering on before device is usable.
  *
  * Note that it is the responsibility of the platform driver (or the acpi 5.0
@@ -36,6 +37,7 @@ struct regulator;
 struct i2c_hid_platform_data {
 	u16 hid_descriptor_address;
 	struct regulator *supply;
+	struct regulator *supply_l;
 	int post_power_delay_ms;
 };
 

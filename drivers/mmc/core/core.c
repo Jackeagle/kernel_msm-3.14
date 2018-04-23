@@ -2445,7 +2445,7 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
 {
 	host->f_init = freq;
 
-	pr_debug("%s: %s: trying to init card at %u Hz\n",
+	pr_err("%s: %s: trying to init card at %u Hz\n",
 		mmc_hostname(host), __func__, host->f_init);
 
 	mmc_power_up(host, host->ocr_avail);
@@ -2494,7 +2494,9 @@ int _mmc_detect_card_removed(struct mmc_host *host)
 	if (!host->card || mmc_card_removed(host->card))
 		return 1;
 
+	host->dflag = 1;
 	ret = host->bus_ops->alive(host);
+	host->dflag = 0;
 
 	/*
 	 * Card detect status and alive check may be out of sync if card is
@@ -2505,10 +2507,12 @@ int _mmc_detect_card_removed(struct mmc_host *host)
 	 */
 	if (!ret && host->ops->get_cd && !host->ops->get_cd(host)) {
 		mmc_detect_change(host, msecs_to_jiffies(200));
-		pr_debug("%s: card removed too slowly\n", mmc_hostname(host));
+		pr_err("%s: card removed too slowly\n", mmc_hostname(host));
 	}
 
 	if (ret) {
+		pr_err("%s: %s: Card removal detected!\n", mmc_hostname(host),
+				__func__);
 		mmc_card_set_removed(host->card);
 		pr_debug("%s: card remove detected\n", mmc_hostname(host));
 	}
@@ -2545,6 +2549,7 @@ int mmc_detect_card_removed(struct mmc_host *host)
 			 * Schedule a detect work as soon as possible to let a
 			 * rescan handle the card removal.
 			 */
+			pr_err("%s: Polling enabled\n", mmc_hostname(host));
 			cancel_delayed_work(&host->detect);
 			_mmc_detect_change(host, 0, false);
 		}
