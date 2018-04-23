@@ -100,6 +100,7 @@ bool msm_dsi_manager_cmd_xfer_trigger(int id, u32 dma_base, u32 len);
 void msm_dsi_manager_attach_dsi_device(int id, u32 device_flags);
 int msm_dsi_manager_register(struct msm_dsi *msm_dsi);
 void msm_dsi_manager_unregister(struct msm_dsi *msm_dsi);
+bool msm_dsi_manager_validate_current_config(u8 id);
 
 /* msm dsi */
 static inline bool msm_dsi_device_connected(struct msm_dsi *msm_dsi)
@@ -162,7 +163,8 @@ void msm_dsi_host_cmd_xfer_commit(struct mipi_dsi_host *host,
 int msm_dsi_host_enable(struct mipi_dsi_host *host);
 int msm_dsi_host_disable(struct mipi_dsi_host *host);
 int msm_dsi_host_power_on(struct mipi_dsi_host *host,
-			struct msm_dsi_phy_shared_timings *phy_shared_timings);
+			struct msm_dsi_phy_shared_timings *phy_shared_timings,
+			bool is_dual_dsi);
 int msm_dsi_host_power_off(struct mipi_dsi_host *host);
 int msm_dsi_host_set_display_mode(struct mipi_dsi_host *host,
 					struct drm_display_mode *mode);
@@ -175,11 +177,14 @@ int msm_dsi_host_set_src_pll(struct mipi_dsi_host *host,
 			struct msm_dsi_pll *src_pll);
 void msm_dsi_host_reset_phy(struct mipi_dsi_host *host);
 void msm_dsi_host_get_phy_clk_req(struct mipi_dsi_host *host,
-	struct msm_dsi_phy_clk_request *clk_req);
+	struct msm_dsi_phy_clk_request *clk_req,
+	bool is_dual_dsi);
 void msm_dsi_host_destroy(struct mipi_dsi_host *host);
 int msm_dsi_host_modeset_init(struct mipi_dsi_host *host,
 					struct drm_device *dev);
 int msm_dsi_host_init(struct msm_dsi *msm_dsi);
+bool msm_dsi_has_valid_device(struct mipi_dsi_host *host);
+bool msm_dsi_has_valid_device(struct mipi_dsi_host *host);
 int msm_dsi_runtime_suspend(struct device *dev);
 int msm_dsi_runtime_resume(struct device *dev);
 

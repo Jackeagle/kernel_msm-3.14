@@ -298,6 +298,38 @@ extern "C" {
  */
 #define DRM_FORMAT_MOD_SAMSUNG_64_32_TILE	fourcc_mod_code(SAMSUNG, 1)
 
+/*
+ * Qualcomm Compressed Format
+ *
+ * Refers to a compressed variant of the base format that is compressed.
+ * Implementation may be platform and base-format specific.
+ */
+#define DRM_FORMAT_MOD_QCOM_COMPRESSED	fourcc_mod_code(QCOM, 1)
+
+/*
+ * QTI DX Format
+ *
+ * Refers to a DX variant of the base format.
+ * Implementation may be platform and base-format specific.
+ */
+#define DRM_FORMAT_MOD_QCOM_DX	fourcc_mod_code(QCOM, 0x2)
+
+/*
+ * QTI Tight Format
+ *
+ * Refers to a tightly packed variant of the base format.
+ * Implementation may be platform and base-format specific.
+ */
+#define DRM_FORMAT_MOD_QCOM_TIGHT	fourcc_mod_code(QCOM, 0x4)
+
+/*
+ * QTI Tile Format
+ *
+ * Refers to a tile variant of the base format.
+ * Implementation may be platform and base-format specific.
+ */
+#define DRM_FORMAT_MOD_QCOM_TILE	fourcc_mod_code(QCOM, 0x8)
+
 /* Vivante framebuffer modifiers */
 
 /*
@@ -402,6 +434,19 @@ extern "C" {
  *   tiles) or right-to-left (odd rows of 4k tiles).
  */
 #define DRM_FORMAT_MOD_BROADCOM_VC4_T_TILED fourcc_mod_code(BROADCOM, 1)
+
+/*
+ * MSM compressed format
+ *
+ * Refers to the compressed variant of a base format.
+ * Implementation may be platform and base-format specific.
+ *
+ * Each macrotile consists of m x n (mostly 4 x 4) tiles.
+ * Pixel data pitch/stride is aligned with macrotile width.
+ * Pixel data height is aligned with macrotile height.
+ * Entire pixel data buffer is aligned with 4k(bytes).
+ */
+#define DRM_FORMAT_MOD_QCOM_COMPRESSED fourcc_mod_code(QCOM, 1)
 
 #if defined(__cplusplus)
 }
