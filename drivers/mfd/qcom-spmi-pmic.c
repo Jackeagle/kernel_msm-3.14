@@ -114,6 +114,20 @@ static void pmic_spmi_show_revid(struct regmap *map, struct device *dev)
 	if (subtype == PM8110_SUBTYPE)
 		minor = rev2;
 
+	/* USID is 0 */
+	if (subtype == PM8998_SUBTYPE) {
+		regmap_write(map, 0x874, 0x2);
+		regmap_write(map, 0x875, 0x0);
+		regmap_write(map, 0x844, 0x0);
+		regmap_write(map, 0x845, 0x0);
+		regmap_write(map, 0x846, 0x1);
+		regmap_write(map, 0x847, BIT(7));
+		regmap_write(map, 0x848, 0x0);
+		regmap_write(map, 0x849, 0x0);
+		regmap_write(map, 0x84a, 0x4);
+		regmap_write(map, 0x84b, BIT(7));
+	}
+
 	dev_dbg(dev, "%x: %s v%d.%d\n", subtype, name, major, minor);
 }
 

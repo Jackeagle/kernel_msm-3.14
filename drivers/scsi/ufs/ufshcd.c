@@ -3004,22 +3004,24 @@ int ufshcd_map_desc_id_to_length(struct ufs_hba *hba,
 EXPORT_SYMBOL(ufshcd_map_desc_id_to_length);
 
 /**
- * ufshcd_read_desc_param - read the specified descriptor parameter
+ * ufshcd_rw_desc_param - read or write the specified descriptor parameter
  * @hba: Pointer to adapter instance
+ * @opcode: indicates whether to read or write
  * @desc_id: descriptor idn value
  * @desc_index: descriptor index
- * @param_offset: offset of the parameter to read
- * @param_read_buf: pointer to buffer where parameter would be read
- * @param_size: sizeof(param_read_buf)
+ * @param_offset: offset of the parameter to read or write
+ * @param_buf: pointer to buffer to be read or written
+ * @param_size: sizeof(param_buf)
  *
  * Return 0 in case of success, non-zero otherwise
  */
-int ufshcd_read_desc_param(struct ufs_hba *hba,
-			   enum desc_idn desc_id,
-			   int desc_index,
-			   u8 param_offset,
-			   u8 *param_read_buf,
-			   u8 param_size)
+int ufshcd_rw_desc_param(struct ufs_hba *hba,
+			 enum query_opcode opcode,
+			 enum desc_idn desc_id,
+			 int desc_index,
+			 u8 param_offset,
+			 u8 *param_buf,
+			 u8 param_size)
 {
 	int ret;
 	u8 *desc_buf;
@@ -3044,16 +3046,22 @@ int ufshcd_read_desc_param(struct ufs_hba *hba,
 
 	/* Check whether we need temp memory */
 	if (param_offset != 0 || param_size < buff_len) {
-		desc_buf = kmalloc(buff_len, GFP_KERNEL);
+		desc_buf = kzalloc(buff_len, GFP_KERNEL);
 		if (!desc_buf)
 			return -ENOMEM;
+
+		if (opcode == UPIU_QUERY_OPCODE_WRITE_DESC) {
+			memcpy(desc_buf, param_buf, param_size);
+			mmiowb();
+		}
+
 	} else {
-		desc_buf = param_read_buf;
+		desc_buf = param_buf;
 		is_kmalloc = false;
 	}
 
 	/* Request for full descriptor */
-	ret = ufshcd_query_descriptor_retry(hba, UPIU_QUERY_OPCODE_READ_DESC,
+	ret = ufshcd_query_descriptor_retry(hba, opcode,
 					desc_id, desc_index, 0,
 					desc_buf, &buff_len);
 
@@ -3075,8 +3083,8 @@ int ufshcd_read_desc_param(struct ufs_hba *hba,
 	if (is_kmalloc && param_size > buff_len)
 		param_size = buff_len;
 
-	if (is_kmalloc)
-		memcpy(param_read_buf, &desc_buf[param_offset], param_size);
+	if (is_kmalloc && (opcode == UPIU_QUERY_OPCODE_READ_DESC))
+		memcpy(param_buf, &desc_buf[param_offset], param_size);
 out:
 	if (is_kmalloc)
 		kfree(desc_buf);
@@ -3089,7 +3097,8 @@ static inline int ufshcd_read_desc(struct ufs_hba *hba,
 				   u8 *buf,
 				   u32 size)
 {
-	return ufshcd_read_desc_param(hba, desc_id, desc_index, 0, buf, size);
+	return ufshcd_rw_desc_param(hba, UPIU_QUERY_OPCODE_READ_DESC, desc_id,
+					desc_index, 0, buf, size);
 }
 
 static inline int ufshcd_read_power_desc(struct ufs_hba *hba,
@@ -3195,8 +3204,9 @@ static inline int ufshcd_read_unit_desc_param(struct ufs_hba *hba,
 	if (!ufs_is_valid_unit_desc_lun(lun))
 		return -EOPNOTSUPP;
 
-	return ufshcd_read_desc_param(hba, QUERY_DESC_IDN_UNIT, lun,
-				      param_offset, param_read_buf, param_size);
+	return ufshcd_rw_desc_param(hba, UPIU_QUERY_OPCODE_READ_DESC,
+				    QUERY_DESC_IDN_UNIT, lun, param_offset,
+				    param_read_buf, param_size);
 }
 
 /**
@@ -5985,6 +5995,306 @@ static void ufshcd_init_icc_levels(struct ufs_hba *hba)
 
 }
 
+u8 cros_configuration_descriptor[0x90] = {
+	// Header
+	0x90, // 0, bLength
+	0x01, // 1, bDescriptorType (Configuration Descriptor)
+	0x00, // 2, bNumberLU (Number of LUs)
+	0x01, // 3, bBootEnable
+	0x00, // 4, bDescrAccessEn
+	0x01, // 5, bInitPowerMode
+	0x7F, // 6, bHighPriorityLUN
+	0x00, // 7, bSecureRemovalType
+	0x00, // 8, bInitActiveICCLevel
+	0x00, 0x00, // 9, wPeriodicRTCUpdate
+	0x00, 0x00, 0x00, 0x00, 0x00, // B, Reserved
+
+	// LUN 0
+	0x01, // 0, bLUEnable
+	0x01, // 1, bBootLunID
+	0x00, // 2, bLUWriteProtect
+	0x00, // 3, bMemoryType
+	0x00, 0x00, 0x01, 0x00, // 4, # of Allocation Blocks
+	0x00, // 8, bDataReliability
+	0x0C, // 9, bLogicalBlockSize
+	0x00, // a, bProvisioningType
+	0x00, 0x00, // b wContextCapabilities
+	0x00, 0x00, 0x00, // Reserved
+
+	// LUN 1
+	0x00, // 0, bLUEnable
+	0x00, // 1, bBootLunID
+	0x00, // 2, bLUWriteProtect
+	0x00, // 3, bMemoryType
+	0x00, 0x00, 0x00, 0x00, // 4, # of Allocation Blocks
+	0x00, // 8, bDataReliability
+	0x0C, // 9, bLogicalBlockSize
+	0x00, // a, bProvisioningType
+	0x00, 0x00, // b wContextCapabilities
+	0x00, 0x00, 0x00, // Reserved
+
+	// LUN 2
+	0x00, // 0, bLUEnable
+	0x00, // 1, bBootLunID
+	0x00, // 2, bLUWriteProtect
+	0x00, // 3, bMemoryType
+	0x00, 0x00, 0x00, 0x00, // 4, # of Allocation Blocks
+	0x00, // 8, bDataReliability
+	0x0C, // 9, bLogicalBlockSize
+	0x00, // a, bProvisioningType
+	0x00, 0x00, // b wContextCapabilities
+	0x00, 0x00, 0x00, // Reserved
+
+	// LUN 3
+	0x00, // 0, bLUEnable
+	0x00, // 1, bBootLunID
+	0x00, // 2, bLUWriteProtect
+	0x00, // 3, bMemoryType
+	0x00, 0x00, 0x00, 0x00, // 4, # of Allocation Blocks
+	0x00, // 8, bDataReliability
+	0x0C, // 9, bLogicalBlockSize
+	0x00, // a, bProvisioningType
+	0x00, 0x00, // b wContextCapabilities
+	0x00, 0x00, 0x00, // Reserved
+
+	// LUN 4
+	0x00, // 0, bLUEnable
+	0x00, // 1, bBootLunID
+	0x00, // 2, bLUWriteProtect
+	0x00, // 3, bMemoryType
+	0x00, 0x00, 0x00, 0x00, // 4, # of Allocation Blocks
+	0x00, // 8, bDataReliability
+	0x0C, // 9, bLogicalBlockSize
+	0x00, // a, bProvisioningType
+	0x00, 0x00, // b wContextCapabilities
+	0x00, 0x00, 0x00, // Reserved
+
+	// LUN 5
+	0x00, // 0, bLUEnable
+	0x00, // 1, bBootLunID
+	0x00, // 2, bLUWriteProtect
+	0x00, // 3, bMemoryType
+	0x00, 0x00, 0x00, 0x00, // 4, # of Allocation Blocks
+	0x00, // 8, bDataReliability
+	0x0C, // 9, bLogicalBlockSize
+	0x00, // a, bProvisioningType
+	0x00, 0x00, // b wContextCapabilities
+	0x00, 0x00, 0x00, // Reserved
+
+	// LUN 6
+	0x00, // 0, bLUEnable
+	0x00, // 1, bBootLunID
+	0x00, // 2, bLUWriteProtect
+	0x00, // 3, bMemoryType
+	0x00, 0x00, 0x00, 0x00, // 4, # of Allocation Blocks
+	0x00, // 8, bDataReliability
+	0x0C, // 9, bLogicalBlockSize
+	0x00, // a, bProvisioningType
+	0x00, 0x00, // b wContextCapabilities
+	0x00, 0x00, 0x00, // Reserved
+
+	// LUN 7
+	0x00, // 0, bLUEnable
+	0x00, // 1, bBootLunID
+	0x00, // 2, bLUWriteProtect
+	0x00, // 3, bMemoryType
+	0x00, 0x00, 0x00, 0x00, // 4, # of Allocation Blocks
+	0x00, // 8, bDataReliability
+	0x0C, // 9, bLogicalBlockSize
+	0x00, // a, bProvisioningType
+	0x00, 0x00, // b wContextCapabilities
+	0x00, 0x00, 0x00, // Reserved
+};
+
+int provision_that_puppy(struct ufs_hba *hba) {
+	int rc;
+	uint8_t allocation_unit_size;
+	u8 cros_geometry_desc[0x48];
+	uint32_t boot_lun_en;
+	uint64_t raw_capacity;
+	uint32_t ref_clk_freq;
+	uint32_t segment_size;
+	u8 scratch[QUERY_DESC_MAX_SIZE + 1];
+	uint32_t whole_disk_units;
+	u8 verified_config[0x90];
+
+	rc = ufshcd_read_device_desc(hba, scratch, hba->desc_size.dev_desc);
+	if (rc) {
+		dev_err(hba->dev, "Failed to read configuration descriptor: %d\n", rc);
+		goto out;
+	}
+
+	/* Don't clobber anything if the device already looks provisioned. */
+	if (scratch[0x6] != 0) {
+		dev_err(hba->dev, "Skipping the pirate sauce.\n");
+		goto out;
+	}
+
+	/* If reference clock frequency is not set to 19.2MHz, set it to that.
+	 * This is important.
+	 */
+	rc = ufshcd_query_attr_retry(hba, UPIU_QUERY_OPCODE_READ_ATTR,
+		QUERY_ATTR_IDN_REF_CLK_FREQ, 0, 0,
+		&ref_clk_freq);
+
+	if (rc) {
+		dev_err(hba->dev, "Failed to get bRefClkFreq: %d\n", rc);
+		goto out;
+	}
+
+	/* Zero corresponds to 19.2MHz. The default is 1 (26MHz).*/
+	if (ref_clk_freq != 0) {
+		ref_clk_freq = 0;
+		rc = ufshcd_query_attr_retry(hba, UPIU_QUERY_OPCODE_WRITE_ATTR,
+			QUERY_ATTR_IDN_REF_CLK_FREQ, 0, 0,
+			&ref_clk_freq);
+
+		if (rc) {
+			dev_err(hba->dev, "Failed to set bRefClkFreq: %d\n", rc);
+			goto out;
+		}
+	}
+
+	print_hex_dump(KERN_ERR, "Device ", DUMP_PREFIX_OFFSET, 16, 1,
+			scratch, hba->desc_size.dev_desc, false);
+
+	rc = ufshcd_read_desc(hba, QUERY_DESC_IDN_UNIT, 0,
+				scratch,
+				hba->desc_size.unit_desc);
+
+	if (rc) {
+		dev_err(hba->dev, "Failed to read unit descriptor: %d\n", rc);
+		goto out;
+	}
+
+	print_hex_dump(KERN_ERR, "Unit 0 ", DUMP_PREFIX_OFFSET, 16, 1,
+			scratch, hba->desc_size.unit_desc, false);
+
+	rc = ufshcd_read_desc(hba, QUERY_DESC_IDN_CONFIGURATION, 0,
+				verified_config,
+				sizeof(verified_config));
+
+	if (rc) {
+		dev_err(hba->dev, "Failed to read configuration descriptor: %d\n", rc);
+		goto out;
+	}
+
+	rc = ufshcd_read_desc(hba, QUERY_DESC_IDN_GEOMETRY, 0,
+				cros_geometry_desc, sizeof(cros_geometry_desc));
+
+	if (rc) {
+		dev_err(hba->dev, "Failed to read geometry descriptor: %d\n", rc);
+		goto out;
+	}
+
+	/* Raw capacity in 512B sectors */
+	memcpy(&raw_capacity, &cros_geometry_desc[0x4], sizeof(uint64_t));
+	raw_capacity = be64_to_cpu(raw_capacity);
+
+	/* 512B sectors per segment */
+	memcpy(&segment_size, &cros_geometry_desc[0xD], sizeof(uint32_t));
+	segment_size = be32_to_cpu(segment_size);
+
+	/* Segments per allocation unit */
+	allocation_unit_size = cros_geometry_desc[0x11];
+
+	/* Compute the number of allocation units that covers the whole disk */
+	whole_disk_units = raw_capacity / (segment_size * allocation_unit_size);
+	print_hex_dump(KERN_ERR, "Geometry ", DUMP_PREFIX_OFFSET, 16, 1,
+			cros_geometry_desc, sizeof(cros_geometry_desc), false);
+
+	print_hex_dump(KERN_ERR, "Old Configuration ", DUMP_PREFIX_OFFSET,
+			16, 1, verified_config,
+			sizeof(verified_config), false);
+
+	dev_err(hba->dev,
+		"Segment size: %u Allocation Unit Size: %u Raw Capacity %llu. Total allocation units: 0x%x\n",
+		segment_size,
+		allocation_unit_size,
+		raw_capacity,
+		whole_disk_units);
+
+	whole_disk_units = cpu_to_be32(whole_disk_units);
+	memcpy(&cros_configuration_descriptor[0x10 + 0x4],
+		&whole_disk_units,
+		sizeof(uint32_t));
+
+	print_hex_dump(KERN_ERR, "New Configuration ", DUMP_PREFIX_OFFSET,
+			16, 1, cros_configuration_descriptor,
+			sizeof(cros_configuration_descriptor), false);
+
+	mmiowb();
+	rc = ufshcd_rw_desc_param(hba, UPIU_QUERY_OPCODE_WRITE_DESC,
+					QUERY_DESC_IDN_CONFIGURATION, 0, 0,
+					cros_configuration_descriptor,
+					sizeof(cros_configuration_descriptor));
+
+	if (rc) {
+		dev_err(hba->dev,
+			"Failed to write configuration descriptor: %d\n", rc);
+
+		goto out;
+	}
+
+	rc = ufshcd_read_desc(hba, QUERY_DESC_IDN_CONFIGURATION, 0,
+				verified_config, sizeof(verified_config));
+
+	print_hex_dump(KERN_ERR, "Verified Config ", DUMP_PREFIX_OFFSET,
+			16, 1, verified_config,
+			sizeof(verified_config), false);
+	if (rc) {
+		dev_err(hba->dev, "Failed to verify configuration descriptor: %d\n", rc);
+		goto out;
+	}
+
+	if (memcmp(verified_config, cros_configuration_descriptor, sizeof(verified_config))) {
+		dev_err(hba->dev, "Provisioning verification failed\n");
+		goto out;
+	}
+
+	/* Set the boot lun enable flag, as Linux fails enumeration entirely
+	 * if it can't find the boot LUN.
+	 */
+	rc = ufshcd_query_attr_retry(hba, UPIU_QUERY_OPCODE_READ_ATTR,
+		QUERY_ATTR_IDN_BOOT_LU_EN, 0, 0,
+		&boot_lun_en);
+
+	if (rc) {
+		dev_err(hba->dev, "Failed to get bBootLunEn: %d\n", rc);
+		goto out;
+	}
+
+	if (boot_lun_en != 1) {
+		boot_lun_en = 1;
+		rc = ufshcd_query_attr_retry(hba, UPIU_QUERY_OPCODE_WRITE_ATTR,
+			QUERY_ATTR_IDN_BOOT_LU_EN, 0, 0,
+			&boot_lun_en);
+
+		if (rc) {
+			dev_err(hba->dev, "Failed to set bBootLunEn: %d\n", rc);
+			goto out;
+		}
+
+		rc = ufshcd_query_attr_retry(hba, UPIU_QUERY_OPCODE_READ_ATTR,
+			QUERY_ATTR_IDN_BOOT_LU_EN, 0, 0,
+			&boot_lun_en);
+
+		if (rc) {
+			dev_err(hba->dev, "Failed to get bBootLunEn: %d\n", rc);
+			goto out;
+		}
+
+		if (boot_lun_en != 1) {
+			dev_err(hba->dev, "bBootLun was %d, expected %d\n", boot_lun_en, 1);
+		}
+	}
+
+	dev_err(hba->dev, "Successfully provisioned your UFS for ChromeOS!\n");
+
+out:
+	return rc;
+}
+
 /**
  * ufshcd_scsi_add_wlus - Adds required W-LUs
  * @hba: per-adapter instance
@@ -6011,6 +6321,7 @@ static void ufshcd_init_icc_levels(struct ufs_hba *hba)
  * Returns zero on success (all required W-LUs are added successfully),
  * non-zero error value on failure (if failed to add any of the required W-LU).
  */
+
 static int ufshcd_scsi_add_wlus(struct ufs_hba *hba)
 {
 	int ret = 0;
@@ -6019,11 +6330,13 @@ static int ufshcd_scsi_add_wlus(struct ufs_hba *hba)
 
 	hba->sdev_ufs_device = __scsi_add_device(hba->host, 0, 0,
 		ufshcd_upiu_wlun_to_scsi_wlun(UFS_UPIU_UFS_DEVICE_WLUN), NULL);
+
 	if (IS_ERR(hba->sdev_ufs_device)) {
 		ret = PTR_ERR(hba->sdev_ufs_device);
 		hba->sdev_ufs_device = NULL;
 		goto out;
 	}
+
 	scsi_device_put(hba->sdev_ufs_device);
 
 	sdev_rpmb = __scsi_add_device(hba->host, 0, 0,
@@ -6375,6 +6688,11 @@ static int ufshcd_probe_hba(struct ufs_hba *hba)
 
 	/* Init check for device descriptor sizes */
 	ufshcd_init_desc_sizes(hba);
+
+	/* Run the Cheza Proto0 provisioning hack. This should be removed when
+	 * our provisioning story is worked out.
+	 */
+	provision_that_puppy(hba);
 
 	ret = ufs_get_device_desc(hba, &card);
 	if (ret) {
