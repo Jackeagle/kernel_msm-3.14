@@ -900,7 +900,7 @@ struct ipa3_context {
 
 	struct class *class;
 	dev_t dev_num;
-	struct device *dev;
+	struct device *chrdev;
 	struct cdev cdev;
 
 	struct ipa3_ep_context ep[IPA3_MAX_NUM_PIPES];

@@ -1681,9 +1681,9 @@ static int ipa3_pre_init(void)
 		goto fail_alloc_chrdev_region;
 	}
 
-	ipa3_ctx->dev = device_create(ipa3_ctx->class, NULL, ipa3_ctx->dev_num,
-			ipa3_ctx, DRV_NAME);
-	if (IS_ERR(ipa3_ctx->dev)) {
+	ipa3_ctx->chrdev = device_create(ipa3_ctx->class, NULL,
+				ipa3_ctx->dev_num, ipa3_ctx, DRV_NAME);
+	if (IS_ERR(ipa3_ctx->chrdev)) {
 		ipa_err(":device_create err.\n");
 		result = -ENODEV;
 		goto fail_device_create;
