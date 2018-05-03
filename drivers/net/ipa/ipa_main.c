@@ -1844,7 +1844,6 @@ static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
 	arch_setup_dma_ops(dev, va_start, va_size, domain->ops, false);
 #endif /* DOMAIN_ATTR_FAST */
 
-	cb->dev = dev;
 	cb->domain = domain;
 	cb->va_start = va_start;
 	cb->va_end = va_start + va_size;
@@ -1860,7 +1859,7 @@ err_domain_free:
 /* Un-do the side-effects of a successful call to ipa_smmu_attach(). */
 static void ipa_smmu_detach(struct ipa_smmu_cb_ctx *cb)
 {
-	iommu_detach_device(cb->domain, cb->dev);
+	iommu_detach_device(cb->domain, ipa3_ctx->dev);
 	iommu_domain_free(cb->domain);
 	memset(cb, 0, sizeof(*cb));
 }
@@ -1878,6 +1877,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	result = ipa_smmu_attach(dev, cb);
 	if (result)
 		return result;
+	ipa3_ctx->dev = dev;
 
 	if (ipahal_dev_init(dev)) {
 		ipa_smmu_detach(cb);
@@ -1912,6 +1912,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		ipa_err("ipa_init failed\n");
 		ipahal_dev_destroy();
 		ipa_smmu_detach(cb);
+		ipa3_ctx->dev = NULL;
 	}
 
 	return result;

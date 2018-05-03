@@ -180,7 +180,6 @@ struct ipa3_active_clients_log_ctx {
 };
 
 struct ipa_smmu_cb_ctx {
-	struct device *dev;
 	struct iommu_domain *domain;
 	dma_addr_t va_start;
 	dma_addr_t va_end;
@@ -896,6 +895,7 @@ struct ipa3_context {
 	struct platform_device *ipa3_pdev;
 	struct gsi_ctx *gsi_ctx;
 
+	struct device *dev;
 	struct ipa_smmu_cb_ctx ap_smmu_cb;
 
 	struct class *class;

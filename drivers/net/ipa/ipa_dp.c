@@ -88,7 +88,7 @@ static u32 ipa_adjust_ra_buff_base_sz(u32 aggr_byte_limit);
 static void ipa3_wq_write_done_common(struct ipa3_sys_context *sys,
 				struct ipa3_tx_pkt_wrapper *tx_pkt)
 {
-	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
+	struct device *dev = ipa3_ctx->dev;
 	struct ipa3_tx_pkt_wrapper *next_pkt;
 	int i, cnt;
 
@@ -340,7 +340,7 @@ static void ipa_nop_timer_init(struct ipa3_sys_context *sys)
 int
 ipa3_send(struct ipa3_sys_context *sys, u32 num_desc, struct ipa3_desc *desc)
 {
-	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
+	struct device *dev = ipa3_ctx->dev;
 	struct ipa3_tx_pkt_wrapper *tx_pkt, *tx_pkt_first;
 	struct ipahal_imm_cmd_pyld *tag_pyld_ret = NULL;
 	struct ipa3_tx_pkt_wrapper *next_pkt;
@@ -1135,7 +1135,7 @@ static void ipa3_wq_handle_rx(struct work_struct *work)
 
 static void ipa3_wq_repl_rx(struct work_struct *work)
 {
-	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
+	struct device *dev = ipa3_ctx->dev;
 	struct ipa3_sys_context *sys;
 	void *ptr;
 	struct ipa3_rx_pkt_wrapper *rx_pkt;
@@ -1254,7 +1254,7 @@ queue_rx_cache(struct ipa3_sys_context *sys, struct ipa3_rx_pkt_wrapper *rx_pkt)
  */
 static void ipa3_replenish_rx_cache(struct ipa3_sys_context *sys)
 {
-	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
+	struct device *dev = ipa3_ctx->dev;
 	void *ptr;
 	struct ipa3_rx_pkt_wrapper *rx_pkt;
 	int ret;
@@ -1316,7 +1316,7 @@ fail_kmem_cache_alloc:
 
 static void ipa3_replenish_rx_cache_recycle(struct ipa3_sys_context *sys)
 {
-	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
+	struct device *dev = ipa3_ctx->dev;
 	void *ptr;
 	struct ipa3_rx_pkt_wrapper *rx_pkt;
 	int ret;
@@ -1459,7 +1459,7 @@ static void ipa3_replenish_rx_work_func(struct work_struct *work)
  */
 static void ipa3_cleanup_rx(struct ipa3_sys_context *sys)
 {
-	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
+	struct device *dev = ipa3_ctx->dev;
 	struct ipa3_rx_pkt_wrapper *rx_pkt;
 	struct ipa3_rx_pkt_wrapper *r;
 	u32 head;
@@ -2066,7 +2066,7 @@ static void ipa3_recycle_rx_wrapper(struct ipa3_rx_pkt_wrapper *rx_pkt)
 
 static void ipa3_rx_common(struct ipa3_sys_context *sys, u16 size)
 {
-	struct device *dev = ipa3_ctx->ap_smmu_cb.dev;
+	struct device *dev = ipa3_ctx->dev;
 	struct ipa3_rx_pkt_wrapper *rx_pkt_expected;
 	struct sk_buff *rx_skb;
 
