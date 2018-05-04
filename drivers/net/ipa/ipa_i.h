@@ -25,10 +25,6 @@
 #include <linux/platform_device.h>
 #include <linux/firmware.h>
 
-#ifdef CONFIG_IPC_LOGGING
-#include <linux/ipc_logging.h>
-#endif /* CONFIG_IPC_LOGGING */
-
 #include "ipa_common_i.h"
 #include "ipahal_reg.h"
 #include "ipahal.h"

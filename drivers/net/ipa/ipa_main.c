@@ -1936,12 +1936,6 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		return ipa3_smp2p_probe(dev);
 
 	ipa3_ctx->ipa3_pdev = pdev_p;
-#ifdef CONFIG_IPC_LOGGING
-	/* Initialize the log buffer right away, to capture all messages */
-	ipa3_ctx->logbuf = ipc_log_context_create(IPA_IPC_LOG_PAGES, "ipa", 0);
-	if (!ipa3_ctx->logbuf)
-		ipa_err("failed to create IPC log, continue...\n");
-#endif /* CONFIG_IPC_LOGGING */
 
 	/* Find out whether we're working with supported hardware */
 	hw_version = ipa_version_get(pdev_p);
@@ -2065,12 +2059,6 @@ err_clear_wrapper:
 err_clear_ee:
 	ipa3_ctx->ee = 0;
 err_destroy_logbuf:
-#ifdef CONFIG_IPC_LOGGING
-	if (ipa3_ctx->logbuf) {
-		(void)ipc_log_context_destroy(ipa3_ctx->logbuf);
-		ipa3_ctx->logbuf = NULL;
-	}
-#endif /* CONFIG_IPC_LOGGING */
 	ipa3_ctx->ipa3_pdev = NULL;
 
 	return result;
