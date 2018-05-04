@@ -736,11 +736,7 @@ struct ipa_ep_cfg_ctrl {
 		__ipa_ipc_logging(false, pr_fmt(fmt), ## args); \
 	} while (0)
 
-#ifdef CONFIG_IPC_LOGGING
-
-void __ipa_ipc_logging(bool logbuf_low, const char *fmt, ...);
-
-#else /* CONFIG_IPC_LOGGING */
+#ifndef CONFIG_IPC_LOGGING
 
 #define __ipa_ipc_logging(logbuf_low, fmt, args...)    ((void)0)
 
