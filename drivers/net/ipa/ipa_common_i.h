@@ -715,32 +715,22 @@ struct ipa_ep_cfg_ctrl {
 #define ipa_debug(fmt, args...) \
 	do { \
 		pr_debug(fmt, ## args); \
-		__ipa_ipc_logging(false, pr_fmt(fmt), ## args); \
 	} while (0)
 
 #define ipa_debug_low(fmt, args...) \
 	do { \
 		pr_debug(fmt, ## args); \
-		__ipa_ipc_logging(true, pr_fmt(fmt), ## args); \
 	} while (0)
 
 #define ipa_err(fmt, args...) \
 	do { \
 		pr_err(fmt, ## args); \
-		__ipa_ipc_logging(false, pr_fmt(fmt), ## args); \
 	} while (0)
 
 #define ipa_info(fmt, args...) \
 	do { \
 		pr_info(fmt, ## args); \
-		__ipa_ipc_logging(false, pr_fmt(fmt), ## args); \
 	} while (0)
-
-#ifndef CONFIG_IPC_LOGGING
-
-#define __ipa_ipc_logging(logbuf_low, fmt, args...)    ((void)0)
-
-#endif /* CONFIG_IPC_LOGGING */
 
 #define ipa_bug() \
 	do {								\
