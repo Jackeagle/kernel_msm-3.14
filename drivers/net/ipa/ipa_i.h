@@ -179,12 +179,6 @@ struct ipa3_active_clients_log_ctx {
 	struct list_head active;
 };
 
-struct ipa_smmu_cb_ctx {
-	struct iommu_domain *domain;
-	dma_addr_t va_start;
-	dma_addr_t va_end;
-};
-
 struct ipa3_status_stats {
 	struct ipahal_pkt_status status[IPA_MAX_STATUS_STAT_NUM];
 	unsigned int curr;
@@ -896,7 +890,6 @@ struct ipa3_context {
 	struct gsi_ctx *gsi_ctx;
 
 	struct device *dev;
-	struct ipa_smmu_cb_ctx ap_smmu_cb;
 
 	struct class *class;
 	dev_t dev_num;

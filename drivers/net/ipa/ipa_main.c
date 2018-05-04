@@ -1857,189 +1857,6 @@ static enum ipa_hw_version ipa_version_get(struct platform_device *pdev)
 	return IPA_HW_None;
 }
 
-static int ipa3_iommu_map(unsigned long iova, phys_addr_t paddr, size_t size)
-{
-	struct ipa_smmu_cb_ctx *ap_cb = &ipa3_ctx->ap_smmu_cb;
-	int prot = IOMMU_READ | IOMMU_WRITE | IOMMU_MMIO;
-
-	/*
-	 * Round physical and I/O virtual addresses down to PAGE_SIZE
-	 * boundaries, and extend the size to reflect the effect of
-	 * rounding.  Round the size up to a PAGE_SIZE multiple.
-	 */
-	iova = rounddown(iova, PAGE_SIZE);
-	size += paddr % PAGE_SIZE;
-	paddr = rounddown(paddr, PAGE_SIZE);
-	size = roundup(size, PAGE_SIZE);
-
-	ipa_debug("mapping 0x%lx to 0x%pa size %zu\n", iova, &paddr, size);
-
-	ipa_debug("domain =0x%p iova 0x%lx\n", ap_cb->domain, iova);
-	ipa_debug("paddr =0x%pa size 0x%x\n", &paddr, (u32)size);
-
-	/* Overlapping the existing virtual address space is an error */
-	ipa_assert(iova < ap_cb->va_start || iova >= ap_cb->va_end);
-
-	return iommu_map(ap_cb->domain, iova, paddr, size, prot);
-}
-
-/*
- * Common probe processing for SMMU context blocks.  This function
- * populates all of the fields of the SMMU CB context provided.
- *
- * If successful, this function returns an allocated domain in
- * cb->domain.  The domain will have been attached to the device
- * provided.  In the event of a subsequent error, the caller is
- * responsible for releasing the domain from the device and freeing
- * the domain.
- */
-static int ipa_smmu_attach(struct device *dev, struct ipa_smmu_cb_ctx *cb)
-{
-	struct iommu_domain *domain;
-	u32 iova_mapping[2];
-	dma_addr_t va_start;
-	size_t va_size;
-	int ret;
-
-	ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
-	if (ret)
-		return ret;
-
-	ret = of_property_read_u32_array(dev->of_node, "qcom,iova-mapping",
-						iova_mapping, 2);
-	if (ret) {
-		ipa_err("Fail to read start/size iova addresses\n");
-		return ret;
-	}
-	va_start = (dma_addr_t)iova_mapping[0];
-	va_size = (size_t)iova_mapping[1];
-	ipa_debug("va_start=%pad va_size=0x%zx\n", &va_start, va_size);
-
-	domain = iommu_domain_alloc(dev->bus);
-	if (!domain)
-		return -ENOMEM;
-
-#ifdef DOMAIN_ATTR_FAST
-{
-	int fast = 1;
-
-	ret = iommu_domain_set_attr(domain, DOMAIN_ATTR_FAST, &fast);
-	if (ret)
-		goto err_domain_free;
-}
-#endif /* DOMAIN_ATTR_FAST */
-	domain->geometry.aperture_start = va_start;
-	domain->geometry.aperture_end = va_start + va_size - 1;
-
-	ipa_debug("CB PROBE pdev=%p attaching IOMMU device\n", dev);
-	ret = iommu_attach_device(domain, dev);
-	if (ret)
-		goto err_domain_free;
-
-#ifdef DOMAIN_ATTR_FAST
-	arch_setup_dma_ops(dev, va_start, va_size, domain->ops, false);
-#endif /* DOMAIN_ATTR_FAST */
-
-	cb->domain = domain;
-	cb->va_start = va_start;
-	cb->va_end = va_start + va_size;
-
-	return 0;
-
-err_domain_free:
-	iommu_domain_free(domain);
-
-	return ret;
-}
-
-/* Un-do the side-effects of a successful call to ipa_smmu_attach(). */
-static void ipa_smmu_detach(struct ipa_smmu_cb_ctx *cb)
-{
-	iommu_detach_device(cb->domain, ipa3_ctx->dev);
-	iommu_domain_free(cb->domain);
-	memset(cb, 0, sizeof(*cb));
-}
-
-static int ipa_smmu_ap_cb_probe(struct device *dev)
-{
-	struct device_node *main_node = ipa3_ctx->ipa3_pdev->dev.of_node;
-	struct ipa_smmu_cb_ctx *cb = &ipa3_ctx->ap_smmu_cb;
-	int result;
-	u32 add_map_size;
-	const u32 *add_map;
-	void *smem_addr;
-	int i;
-
-	ipa_debug("AP CB probe: sub pdev=%p\n", dev);
-
-	/* Skip the probe if we're not using the SMMU */
-	if (!of_property_read_bool(main_node, "qcom,arm-smmu"))
-		return 0;
-
-	result = ipa_smmu_attach(dev, cb);
-	if (result)
-		return result;
-	ipa3_ctx->dev = dev;
-
-	if (ipahal_dev_init(dev)) {
-		ipa_err("failed to assign IPA HAL dev pointer\n");
-		result = -EFAULT;
-		goto err_smmu_detach;
-	}
-
-	add_map = of_get_property(dev->of_node, "qcom,additional-mapping",
-					&add_map_size);
-	if (add_map) {
-		/* mapping size is an array of 3-tuple of u32 */
-		if (add_map_size % (3 * sizeof(u32))) {
-			ipa_err("wrong additional mapping format\n");
-			result = -EFAULT;
-			goto err_dev_destroy;
-		}
-
-		/* iterate of each entry of the additional mapping array */
-		for (i = 0; i < add_map_size / sizeof(u32); i += 3) {
-			unsigned long iova = be32_to_cpu(add_map[i]);
-			phys_addr_t pa = be32_to_cpu(add_map[i + 1]);
-			size_t size = be32_to_cpu(add_map[i + 2]);
-
-			ipa3_iommu_map(iova, pa, size);
-		}
-	}
-
-	result = qcom_smem_alloc(SMEM_MODEM, SMEM_IPA_FILTER_TABLE,
-					IPA_SMEM_SIZE);
-	if (result && result != -EEXIST) {
-		ipa_err("failed to allocate filter table\n");
-		goto err_dev_destroy;
-	}
-	smem_addr = qcom_smem_get(SMEM_MODEM, SMEM_IPA_FILTER_TABLE, NULL);
-	if (!IS_ERR(smem_addr)) {
-#define qcom_smem_virt_to_phys(x)	((phys_addr_t)x)
-		phys_addr_t pa = qcom_smem_virt_to_phys(smem_addr);
-		unsigned long iova = pa;
-
-		ipa3_iommu_map(iova, pa, IPA_SMEM_SIZE);
-	} else {
-		ipa_err("failed to get filter table\n");
-		result = PTR_ERR(smem_addr);
-		goto err_dev_destroy;
-	}
-
-	/* Proceed to real initialization */
-	result = ipa3_pre_init();
-	if (!result)
-		return 0;
-
-err_dev_destroy:
-	ipahal_dev_destroy();
-err_smmu_detach:
-	ipa_smmu_detach(cb);
-	ipa3_ctx->dev = NULL;
-
-	return result;
-}
-
 static irqreturn_t ipa3_smp2p_modem_clk_query_isr(int irq, void *ctxt)
 {
 	ipa3_freeze_clock_vote_and_notify_modem();
@@ -2098,8 +1915,6 @@ static int ipa3_smp2p_probe(struct device *dev)
 
 static const struct of_device_id ipa_plat_drv_match[] = {
 	{ .compatible = "qcom,ipa", },
-	{ .compatible = "qcom,ipa-smmu-ap-cb", },
-	{ .compatible = "qcom,ipa-smmu-uc-cb", },
 	{ .compatible = "qcom,smp2pgpio-map-ipa-1-in", },
 	{ .compatible = "qcom,smp2pgpio-map-ipa-1-out", },
 	{}
@@ -2119,9 +1934,6 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 
 	ipa_debug("IPA driver probing started\n");
 	ipa_debug("dev->of_node->name = %s\n", node->name);
-
-	if (of_device_is_compatible(node, "qcom,ipa-smmu-ap-cb"))
-		return ipa_smmu_ap_cb_probe(dev);
 
 	if (of_device_is_compatible(node, "qcom,smp2pgpio-map-ipa-1-in"))
 		return ipa3_smp2p_probe(dev);
@@ -2215,29 +2027,21 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_clear_gsi_ctx;
 	}
 
-	/*
-	 * If we're using an SMMU, DMA mappings, etc. are associated
-	 * with the AP SMMU device, and we have to wait for that to
-	 * get probed to do further setup.  If we are not using an
-	 * SMMU, finish the remining early initialization now.
-	 */
-	if (!of_property_read_bool(node, "qcom,arm-smmu")) {
-		result = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
-		if (result)
-			goto err_clear_gsi_ctx;
+	result = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
+	if (result)
+		goto err_clear_gsi_ctx;
 
-		if (ipahal_dev_init(dev)) {
-			ipa_err("failed to assign IPA HAL dev pointer\n");
-			result = -EFAULT;
-			goto err_clear_gsi_ctx;
-		}
-		ipa3_ctx->dev = dev;
-
-		/* Proceed to real initialization */
-		result = ipa3_pre_init();
-		if (result)
-			goto err_ipahal_dev_destroy;
+	if (ipahal_dev_init(dev)) {
+		ipa_err("failed to assign IPA HAL dev pointer\n");
+		result = -EFAULT;
+		goto err_clear_gsi_ctx;
 	}
+	ipa3_ctx->dev = dev;
+
+	/* Proceed to real initialization */
+	result = ipa3_pre_init();
+	if (result)
+		goto err_ipahal_dev_destroy;
 
 	result = of_platform_populate(node, ipa_plat_drv_match, NULL, dev);
 	if (result) {
