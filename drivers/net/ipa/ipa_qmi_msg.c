@@ -210,6 +210,7 @@ struct qmi_elem_info ipa_init_modem_driver_req_ei[] = {
 		.elem_size	=
 			sizeof_field(struct ipa_init_modem_driver_req,
 					platform_type),
+		.tlv_type	= 0x10,
 		.offset		= offsetof(struct ipa_init_modem_driver_req,
 					platform_type),
 	},
