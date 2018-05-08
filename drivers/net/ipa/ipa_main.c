@@ -278,15 +278,8 @@ int ipa3_init_q6_smem(void)
 
 	rc = ipa3_init_smem_region(ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE],
 		ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_OFST]);
-	if (rc) {
-		what = "Modem proc ctx RAM";
-		goto out_client_remove;
-	}
-
-	rc = ipa3_init_smem_region(ipa3_ctx->mem_info[MODEM_COMP_DECOMP_SIZE],
-		ipa3_ctx->mem_info[MODEM_COMP_DECOMP_OFST]);
 	if (rc)
-		what = "Modem Comp/Decomp RAM";
+		what = "Modem proc ctx RAM";
 out_client_remove:
 	ipa_client_remove(__func__, false);
 	if (rc)
