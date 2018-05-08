@@ -1349,9 +1349,6 @@ int ipa3_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 #define IPA_MEM_APPS_V6_FLT_HASH_SIZE		0x0
 #define IPA_MEM_APPS_V6_FLT_NHASH_OFST		0x2000
 #define IPA_MEM_APPS_V6_FLT_NHASH_SIZE		0x0
-#define IPA_MEM_UC_INFO_OFST			0x80
-#define IPA_MEM_UC_INFO_OFST_ALIGN		4
-#define IPA_MEM_UC_INFO_SIZE			0x200
 #define IPA_MEM_END_OFST			0x2000
 #define IPA_MEM_UC_EVENT_RING_OFST		0x1c00
 #define IPA_MEM_UC_EVENT_RING_OFST_ALIGN	1024
@@ -1531,12 +1528,6 @@ void ipa_init_mem_info(struct device_node *node)
 	ipa_debug("V6 APPS NON-HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
 			mem_info[APPS_V6_FLT_NHASH_OFST],
 			mem_info[APPS_V6_FLT_NHASH_SIZE]);
-
-	mem_info[UC_INFO_OFST] = ALIGN_CHECK(IPA_MEM_UC_INFO_OFST);
-	mem_info[UC_INFO_SIZE] = IPA_MEM_UC_INFO_SIZE;
-	ipa_debug("UC INFO OFST 0x%x SIZE 0x%x\n",
-			mem_info[UC_INFO_OFST],
-			mem_info[UC_INFO_SIZE]);
 
 	mem_info[END_OFST] = IPA_MEM_END_OFST;
 	ipa_debug("RAM END OFST 0x%x\n", mem_info[END_OFST]);
