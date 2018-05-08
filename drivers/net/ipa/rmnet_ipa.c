@@ -72,7 +72,6 @@ static void ipa3_wake_tx_queue(struct work_struct *work);
 static DECLARE_WORK(ipa3_tx_wakequeue_work, ipa3_wake_tx_queue);
 
 struct ipa3_rmnet_plat_drv_res {
-	bool ipa_advertise_sg_support;
 	bool ipa_napi_enable;
 };
 
@@ -655,8 +654,8 @@ static int ipa3_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			break;
 		/* GET SG support */
 		case RMNET_IOCTL_GET_SG_SUPPORT:
-			extend_ioctl_data.u.data =
-				ipa3_rmnet_res.ipa_advertise_sg_support;
+			/* We always advertise scatter/gather support */
+			extend_ioctl_data.u.data = 1;
 			if (copy_to_user((u8 *)ifr->ifr_ifru.ifru_data,
 				&extend_ioctl_data,
 				sizeof(struct rmnet_ioctl_extended_s)))
@@ -847,12 +846,6 @@ static void ipa3_wake_tx_queue(struct work_struct *work)
 static int get_ipa_rmnet_dts_configuration(struct platform_device *pdev,
 		struct ipa3_rmnet_plat_drv_res *ipa_rmnet_drv_res)
 {
-	ipa_rmnet_drv_res->ipa_advertise_sg_support =
-		of_property_read_bool(pdev->dev.of_node,
-		"qcom,ipa-advertise-sg-support");
-	ipa_info("IPA SG support = %s\n",
-		ipa_rmnet_drv_res->ipa_advertise_sg_support ? "True" : "False");
-
 	ipa_rmnet_drv_res->ipa_napi_enable =
 		of_property_read_bool(pdev->dev.of_node,
 			"qcom,ipa-napi-enable");
@@ -927,8 +920,7 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 	spin_lock_init(&rmnet_ipa3_ctx->wwan_priv->lock);
 
 	/* Enable SG support in netdevice. */
-	if (ipa3_rmnet_res.ipa_advertise_sg_support)
-		dev->hw_features |= NETIF_F_SG;
+	dev->hw_features |= NETIF_F_SG;
 
 	if (ipa3_rmnet_res.ipa_napi_enable)
 		netif_napi_add(dev, &(rmnet_ipa3_ctx->wwan_priv->napi),
