@@ -115,16 +115,12 @@ struct rmnet_ipa3_context {
 	struct ipa3_wwan_private *wwan_priv;
 	struct ipa_sys_connect_params apps_to_ipa_ep_cfg;
 	struct ipa_sys_connect_params ipa_to_apps_ep_cfg;
-	u32 qmap_hdr_hdl;
-	u32 dflt_v4_wan_rt_hdl;
-	u32 dflt_v6_wan_rt_hdl;
 	struct ipa3_rmnet_mux_val mux_channel[MAX_NUM_OF_MUX_CHANNEL];
 	int num_q6_rules;
 	int old_num_q6_rules;
 	int rmnet_index;
 	bool egress_set;
 	bool a7_ul_flt_set;
-	struct workqueue_struct *rm_q6_wq;
 	atomic_t is_initialized;
 	u32 apps_to_ipa3_hdl;
 	u32 ipa3_to_apps_hdl;
