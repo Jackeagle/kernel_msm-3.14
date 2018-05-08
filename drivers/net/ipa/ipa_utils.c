@@ -1364,9 +1364,6 @@ int ipa3_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 #define IPA_MEM_UC_EVENT_RING_OFST		0x1c00
 #define IPA_MEM_UC_EVENT_RING_OFST_ALIGN	1024
 #define IPA_MEM_UC_EVENT_RING_SIZE		0x400
-#define IPA_MEM_PDN_CONFIG_OFST			0x0
-#define IPA_MEM_PDN_CONFIG_OFST_ALIGN		8
-#define IPA_MEM_PDN_CONFIG_SIZE			0x0
 
 /**
  * ipa_init_mem_info() - Reads IPA memory map from DTS, performs alignment
@@ -1581,14 +1578,6 @@ void ipa_init_mem_info(struct device_node *node)
 	ipa_debug("UC EVENT RING OFST 0x%x SIZE 0x%x\n",
 			mem_info[UC_EVENT_RING_OFST],
 			mem_info[UC_EVENT_RING_SIZE]);
-
-	/* End of fields supported for SDM670 and SDM845 */
-
-	mem_info[PDN_CONFIG_OFST] = ALIGN_CHECK(IPA_MEM_PDN_CONFIG_OFST);
-	mem_info[PDN_CONFIG_SIZE] = IPA_MEM_PDN_CONFIG_SIZE;
-	ipa_debug("PDN CONFIG OFST 0x%x SIZE 0x%x\n",
-			mem_info[PDN_CONFIG_OFST],
-			mem_info[PDN_CONFIG_SIZE]);
 }
 #undef LO_HI_CHECK
 #undef NONZERO_CHECK

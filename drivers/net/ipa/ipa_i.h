@@ -567,12 +567,6 @@ struct ipa3_tag_completion {
  * +-------------------------+
  * |	CANARY		     |
  * +-------------------------+
- * | PDN CONFIG		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
  * |  MODEM MEM		     |
  * +-------------------------+
  * |	CANARY		     |
@@ -649,8 +643,6 @@ enum ipa3_mem_partition {
 	APPS_V6_RT_NHASH_SIZE,
 	UC_EVENT_RING_OFST,
 	UC_EVENT_RING_SIZE,
-	PDN_CONFIG_OFST,
-	PDN_CONFIG_SIZE,
 	IPA_MEM_MAX,
 };
 
