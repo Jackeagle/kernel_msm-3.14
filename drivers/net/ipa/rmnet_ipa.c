@@ -71,10 +71,6 @@ static int ipa3_rmnet_poll(struct napi_struct *napi, int budget);
 static void ipa3_wake_tx_queue(struct work_struct *work);
 static DECLARE_WORK(ipa3_tx_wakequeue_work, ipa3_wake_tx_queue);
 
-struct ipa3_rmnet_plat_drv_res {
-	bool ipa_napi_enable;
-};
-
 /**
  * struct ipa3_wwan_private - WWAN private data
  * @net: network interface struct implemented by this driver
@@ -128,7 +124,6 @@ struct rmnet_ipa3_context {
 
 static struct rmnet_ipa3_context rmnet_ipa3_ctx_struct;
 static struct rmnet_ipa3_context *rmnet_ipa3_ctx = &rmnet_ipa3_ctx_struct;
-static struct ipa3_rmnet_plat_drv_res ipa3_rmnet_res;
 
 static int ipa3_find_mux_channel_index(uint32_t mux_id)
 {
@@ -156,8 +151,7 @@ static int ipa3_wwan_open(struct net_device *dev)
 
 	ipa_debug("[%s] wwan_open()\n", dev->name);
 	wwan_ptr->device_active = true;
-	if (ipa3_rmnet_res.ipa_napi_enable)
-		napi_enable(&wwan_ptr->napi);
+	napi_enable(&wwan_ptr->napi);
 	netif_start_queue(dev);
 
 	return 0;
@@ -340,17 +334,8 @@ static void apps_ipa_packet_receive_notify(void *priv,
 		skb->dev = IPA_NETDEV();
 		skb->protocol = htons(ETH_P_MAP);
 
-		if (ipa3_rmnet_res.ipa_napi_enable) {
-			result = netif_receive_skb(skb);
-		} else {
-			if (dev->stats.rx_packets % IPA_WWAN_RX_SOFTIRQ_THRESH
-					== 0) {
-				result = netif_rx_ni(skb);
-			} else
-				result = netif_rx(skb);
-		}
-
-		if (result)	{
+		result = netif_receive_skb(skb);
+		if (result) {
 			pr_err_ratelimited("fail on netif_receive_skb\n");
 			dev->stats.rx_dropped++;
 		}
@@ -359,8 +344,7 @@ static void apps_ipa_packet_receive_notify(void *priv,
 	} else if (evt == IPA_CLIENT_START_POLL)
 		ipa3_rmnet_rx_cb(priv);
 	else if (evt == IPA_CLIENT_COMP_NAPI) {
-		if (ipa3_rmnet_res.ipa_napi_enable)
-			napi_complete(&(rmnet_ipa3_ctx->wwan_priv->napi));
+		napi_complete(&rmnet_ipa3_ctx->wwan_priv->napi);
 	} else
 		ipa_err("Invalid evt %d received in wan_ipa_receive\n", evt);
 }
@@ -419,7 +403,7 @@ static int handle3_ingress_format(struct net_device *dev,
 	ipa_wan_ep_cfg->notify = apps_ipa_packet_receive_notify;
 	ipa_wan_ep_cfg->priv = dev;
 
-	ipa_wan_ep_cfg->napi_enabled = ipa3_rmnet_res.ipa_napi_enable;
+	ipa_wan_ep_cfg->napi_enabled = true;
 	ipa_wan_ep_cfg->desc_fifo_sz =
 			IPA_WWAN_CONS_DESC_FIFO_SZ * IPA_FIFO_ELEMENT_SIZE;
 
@@ -843,18 +827,6 @@ static void ipa3_wake_tx_queue(struct work_struct *work)
 	}
 }
 
-static int get_ipa_rmnet_dts_configuration(struct platform_device *pdev,
-		struct ipa3_rmnet_plat_drv_res *ipa_rmnet_drv_res)
-{
-	ipa_rmnet_drv_res->ipa_napi_enable =
-		of_property_read_bool(pdev->dev.of_node,
-			"qcom,ipa-napi-enable");
-	ipa_info("IPA Napi Enable = %s\n",
-		ipa_rmnet_drv_res->ipa_napi_enable ? "True" : "False");
-
-	return 0;
-}
-
 /**
  * ipa3_wwan_probe() - Initialized the module and registers as a
  * network interface to the network stack
@@ -874,8 +846,6 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 	struct net_device *dev;
 
 	ipa_info("rmnet_ipa3 started initialization\n");
-
-	ret = get_ipa_rmnet_dts_configuration(pdev, &ipa3_rmnet_res);
 
 	ret = ipa3_init_q6_smem();
 	if (ret) {
@@ -922,8 +892,7 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 	/* Enable SG support in netdevice. */
 	dev->hw_features |= NETIF_F_SG;
 
-	if (ipa3_rmnet_res.ipa_napi_enable)
-		netif_napi_add(dev, &(rmnet_ipa3_ctx->wwan_priv->napi),
+	netif_napi_add(dev, &rmnet_ipa3_ctx->wwan_priv->napi,
 		       ipa3_rmnet_poll, NAPI_WEIGHT);
 	ret = register_netdev(dev);
 	if (ret) {
@@ -941,8 +910,7 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 	ipa_err("rmnet_ipa completed initialization\n");
 	return 0;
 config_err:
-	if (ipa3_rmnet_res.ipa_napi_enable)
-		netif_napi_del(&(rmnet_ipa3_ctx->wwan_priv->napi));
+	netif_napi_del(&rmnet_ipa3_ctx->wwan_priv->napi);
 	unregister_netdev(dev);
 
 	return ret;
@@ -964,8 +932,7 @@ static int ipa3_wwan_remove(struct platform_device *pdev)
 		ipa_err("Failed to teardown APPS->IPA pipe\n");
 	else
 		rmnet_ipa3_ctx->apps_to_ipa3_hdl = -1;
-	if (ipa3_rmnet_res.ipa_napi_enable)
-		netif_napi_del(&(rmnet_ipa3_ctx->wwan_priv->napi));
+	netif_napi_del(&rmnet_ipa3_ctx->wwan_priv->napi);
 	mutex_unlock(&rmnet_ipa3_ctx->pipe_handle_guard);
 	unregister_netdev(IPA_NETDEV());
 
