@@ -208,6 +208,37 @@ static void ipa3_active_clients_log_destroy(void)
 	memset(log, 0, sizeof(*log));
 }
 
+static int hdr_init_local_cmd(u32 offset, u32 size)
+{
+	struct ipa_mem_buffer mem;
+	struct ipahal_imm_cmd_pyld *cmd_pyld;
+	struct ipa3_desc desc = { 0 };
+	int ret;
+
+	if (ipahal_dma_alloc(&mem, size, GFP_KERNEL))
+		return -ENOMEM;
+
+	offset += ipa3_ctx->smem_restricted_bytes;
+
+	cmd_pyld = ipahal_hdr_init_local_pyld(&mem, offset);
+	if (!cmd_pyld) {
+		ipa_err("error allocating command payload\n");
+		ret = -ENOMEM;
+		goto err_dma_free;
+	}
+	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
+
+	ret = ipa3_send_cmd(1, &desc);
+	if (ret)
+		ipa_err("error sending command\n");
+
+	ipahal_destroy_imm_cmd(cmd_pyld);
+err_dma_free:
+	ipahal_dma_free(&mem);
+
+	return ret;
+}
+
 static int
 ipa3_init_smem_region(u32 memory_region_size, u32 memory_region_offset)
 {
@@ -376,32 +407,14 @@ static int ipa_init_hdr(void)
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	u32 dma_size;
 	u32 offset;
+	int ret;
 
 	dma_size = ipa3_ctx->mem_info[MODEM_HDR_SIZE] + ipa3_ctx->mem_info[APPS_HDR_SIZE];
 	if (dma_size) {
-		if (ipahal_dma_alloc(&mem, dma_size, GFP_KERNEL)) {
-			ipa_err("fail to alloc DMA buff of size %u\n", dma_size);
-			return -ENOMEM;
-		}
-
-		offset = ipa3_ctx->smem_restricted_bytes + ipa3_ctx->mem_info[MODEM_HDR_OFST];
-		cmd_pyld = ipahal_hdr_init_local_pyld(&mem, offset);
-		if (!cmd_pyld) {
-			ipa_err("fail to construct hdr_init_local imm cmd\n");
-			ipahal_dma_free(&mem);
-			return -EFAULT;
-		}
-		ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
-
-		if (ipa3_send_cmd(1, &desc)) {
-			ipa_err("fail to send immediate command\n");
-			ipahal_destroy_imm_cmd(cmd_pyld);
-			ipahal_dma_free(&mem);
-			return -EFAULT;
-		}
-
-		ipahal_destroy_imm_cmd(cmd_pyld);
-		ipahal_dma_free(&mem);
+		offset = ipa3_ctx->mem_info[MODEM_HDR_OFST];
+		ret = hdr_init_local_cmd(offset, dma_size);
+		if (ret)
+			return ret;
 	}
 
 	dma_size = ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE] +
