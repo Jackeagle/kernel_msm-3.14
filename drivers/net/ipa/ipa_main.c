@@ -258,36 +258,39 @@ ipa3_init_smem_region(u32 memory_region_size, u32 memory_region_offset)
 int ipa3_init_q6_smem(void)
 {
 	int rc;
+	char *what;
 
 	ipa_client_add(__func__, false);
 
 	rc = ipa3_init_smem_region(ipa3_ctx->mem_info[MODEM_SIZE],
 		ipa3_ctx->mem_info[MODEM_OFST]);
 	if (rc) {
-		ipa_err("failed to initialize Modem RAM memory\n");
+		what = "Modem RAM";
 		goto out_client_remove;
 	}
 
 	rc = ipa3_init_smem_region(ipa3_ctx->mem_info[MODEM_HDR_SIZE],
 		ipa3_ctx->mem_info[MODEM_HDR_OFST]);
 	if (rc) {
-		ipa_err("failed to initialize Modem HDRs RAM memory\n");
+		what = "Modem HDRs RAM";
 		goto out_client_remove;
 	}
 
 	rc = ipa3_init_smem_region(ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE],
 		ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_OFST]);
 	if (rc) {
-		ipa_err("failed to initialize Modem proc ctx RAM memory\n");
+		what = "Modem proc ctx RAM";
 		goto out_client_remove;
 	}
 
 	rc = ipa3_init_smem_region(ipa3_ctx->mem_info[MODEM_COMP_DECOMP_SIZE],
 		ipa3_ctx->mem_info[MODEM_COMP_DECOMP_OFST]);
 	if (rc)
-		ipa_err("failed to initialize Modem Comp/Decomp RAM memory\n");
+		what = "Modem Comp/Decomp RAM";
 out_client_remove:
 	ipa_client_remove(__func__, false);
+	if (rc)
+		ipa_err("failed to initialize modem %s memory\n", what);
 
 	return rc;
 }
