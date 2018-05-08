@@ -296,13 +296,6 @@ static const struct ipa_init_modem_driver_req *init_modem_driver_req(void)
 	req.hdr_proc_ctx_tbl_info.end = req.hdr_proc_ctx_tbl_info.start +
 			ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE] - 1;
 
-	req.zip_tbl_info_valid =
-			ipa3_ctx->mem_info[MODEM_COMP_DECOMP_SIZE] ? 1 : 0;
-	req.zip_tbl_info.start =
-			base + ipa3_ctx->mem_info[MODEM_COMP_DECOMP_OFST];
-	req.zip_tbl_info.end = req.zip_tbl_info.start +
-			ipa3_ctx->mem_info[MODEM_COMP_DECOMP_SIZE] - 1;
-
 	req.v4_hash_route_tbl_info_valid = true;
 	req.v4_hash_route_tbl_info.start =
 			base + ipa3_ctx->mem_info[V4_RT_HASH_OFST];
