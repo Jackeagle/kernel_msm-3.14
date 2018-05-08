@@ -1341,14 +1341,6 @@ int ipa3_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 #define IPA_MEM_MODEM_OFST			0xbd8
 #define IPA_MEM_MODEM_OFST_ALIGN		8
 #define IPA_MEM_MODEM_SIZE			0x1024
-#define IPA_MEM_APPS_V4_FLT_HASH_OFST		0x2000
-#define IPA_MEM_APPS_V4_FLT_HASH_SIZE		0x0
-#define IPA_MEM_APPS_V4_FLT_NHASH_OFST		0x2000
-#define IPA_MEM_APPS_V4_FLT_NHASH_SIZE		0x0
-#define IPA_MEM_APPS_V6_FLT_HASH_OFST		0x2000
-#define IPA_MEM_APPS_V6_FLT_HASH_SIZE		0x0
-#define IPA_MEM_APPS_V6_FLT_NHASH_OFST		0x2000
-#define IPA_MEM_APPS_V6_FLT_NHASH_SIZE		0x0
 #define IPA_MEM_END_OFST			0x2000
 #define IPA_MEM_UC_EVENT_RING_OFST		0x1c00
 #define IPA_MEM_UC_EVENT_RING_OFST_ALIGN	1024
@@ -1504,30 +1496,6 @@ void ipa_init_mem_info(struct device_node *node)
 	ipa_debug("MODEM OFST 0x%x SIZE 0x%x\n",
 			mem_info[MODEM_OFST],
 			mem_info[MODEM_SIZE]);
-
-	mem_info[APPS_V4_FLT_HASH_OFST] = IPA_MEM_APPS_V4_FLT_HASH_OFST;
-	mem_info[APPS_V4_FLT_HASH_SIZE] = IPA_MEM_APPS_V4_FLT_HASH_SIZE;
-	ipa_debug("V4 APPS HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
-			mem_info[APPS_V4_FLT_HASH_OFST],
-			mem_info[APPS_V4_FLT_HASH_SIZE]);
-
-	mem_info[APPS_V4_FLT_NHASH_OFST] = IPA_MEM_APPS_V4_FLT_NHASH_OFST;
-	mem_info[APPS_V4_FLT_NHASH_SIZE] = IPA_MEM_APPS_V4_FLT_NHASH_SIZE;
-	ipa_debug("V4 APPS NON-HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
-			mem_info[APPS_V4_FLT_NHASH_OFST],
-			mem_info[APPS_V4_FLT_NHASH_SIZE]);
-
-	mem_info[APPS_V6_FLT_HASH_OFST] = IPA_MEM_APPS_V6_FLT_HASH_OFST;
-	mem_info[APPS_V6_FLT_HASH_SIZE] = IPA_MEM_APPS_V6_FLT_HASH_SIZE;
-	ipa_debug("V6 APPS HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
-			mem_info[APPS_V6_FLT_HASH_OFST],
-			mem_info[APPS_V6_FLT_HASH_SIZE]);
-
-	mem_info[APPS_V6_FLT_NHASH_OFST] = IPA_MEM_APPS_V6_FLT_NHASH_OFST;
-	mem_info[APPS_V6_FLT_NHASH_SIZE] = IPA_MEM_APPS_V6_FLT_NHASH_SIZE;
-	ipa_debug("V6 APPS NON-HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
-			mem_info[APPS_V6_FLT_NHASH_OFST],
-			mem_info[APPS_V6_FLT_NHASH_SIZE]);
 
 	mem_info[END_OFST] = IPA_MEM_END_OFST;
 	ipa_debug("RAM END OFST 0x%x\n", mem_info[END_OFST]);
