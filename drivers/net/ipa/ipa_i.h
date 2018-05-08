@@ -573,48 +573,6 @@ struct ipa3_tag_completion {
  * +-------------------------+
  * |	CANARY		     |
  * +-------------------------+
- * | QUOTA STATS	     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | TETH STATS		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | V4 FLT STATS	     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | V6 FLT STATS	     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | V4 RT STATS	     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | V6 RT STATS	     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | DROP STATS		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
  * |  MODEM MEM		     |
  * +-------------------------+
  * |	CANARY		     |
@@ -693,20 +651,6 @@ enum ipa3_mem_partition {
 	UC_EVENT_RING_SIZE,
 	PDN_CONFIG_OFST,
 	PDN_CONFIG_SIZE,
-	STATS_QUOTA_OFST,
-	STATS_QUOTA_SIZE,
-	STATS_TETHERING_OFST,
-	STATS_TETHERING_SIZE,
-	STATS_FLT_V4_OFST,
-	STATS_FLT_V4_SIZE,
-	STATS_FLT_V6_OFST,
-	STATS_FLT_V6_SIZE,
-	STATS_RT_V4_OFST,
-	STATS_RT_V4_SIZE,
-	STATS_RT_V6_OFST,
-	STATS_RT_V6_SIZE,
-	STATS_DROP_OFST,
-	STATS_DROP_SIZE,
 	IPA_MEM_MAX,
 };
 
