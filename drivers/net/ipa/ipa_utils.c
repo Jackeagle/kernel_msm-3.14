@@ -1534,9 +1534,6 @@ void ipa_init_mem_info(struct device_node *node)
 			mem_info[APPS_HDR_PROC_CTX_SIZE],
 			mem_info[APPS_HDR_PROC_CTX_SIZE_DDR]);
 
-	mem_info[MODEM_COMP_DECOMP_OFST] = 0;
-	mem_info[MODEM_COMP_DECOMP_SIZE] = 0;
-
 	mem_info[MODEM_OFST] = ALIGN_CHECK(IPA_MEM_MODEM_OFST);
 	mem_info[MODEM_SIZE] = IPA_MEM_MODEM_SIZE;
 	ipa_debug("MODEM OFST 0x%x SIZE 0x%x\n",
