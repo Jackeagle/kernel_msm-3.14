@@ -217,8 +217,7 @@ ipa3_init_smem_region(u32 memory_region_size, u32 memory_region_offset)
 	u32 offset;
 	int rc;
 
-	if (memory_region_size == 0)
-		return 0;
+	ipa_assert(memory_region_size != 0);
 
 	if (ipahal_dma_alloc(&mem, memory_region_size, GFP_KERNEL)) {
 		ipa_err("failed to alloc DMA buff of size %d\n", mem.size);
