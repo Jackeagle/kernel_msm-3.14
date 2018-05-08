@@ -409,9 +409,17 @@ static int ipa_init_hdr(void)
 	u32 offset;
 	int ret;
 
-	dma_size = ipa3_ctx->mem_info[MODEM_HDR_SIZE] + ipa3_ctx->mem_info[APPS_HDR_SIZE];
+	dma_size = ipa3_ctx->mem_info[MODEM_HDR_SIZE];
 	if (dma_size) {
 		offset = ipa3_ctx->mem_info[MODEM_HDR_OFST];
+		ret = hdr_init_local_cmd(offset, dma_size);
+		if (ret)
+			return ret;
+	}
+
+	dma_size = ipa3_ctx->mem_info[APPS_HDR_SIZE];
+	if (dma_size) {
+		offset = ipa3_ctx->mem_info[APPS_HDR_OFST];
 		ret = hdr_init_local_cmd(offset, dma_size);
 		if (ret)
 			return ret;
