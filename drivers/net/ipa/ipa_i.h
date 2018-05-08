@@ -624,8 +624,6 @@ struct ipa3_tag_completion {
  */
 enum ipa3_mem_partition {
 	OFST_START,
-	NAT_OFST,
-	NAT_SIZE,
 	V4_FLT_HASH_OFST,
 	V4_FLT_HASH_SIZE,
 	V4_FLT_HASH_SIZE_DDR,

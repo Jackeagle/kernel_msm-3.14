@@ -1282,8 +1282,6 @@ int ipa3_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 }
 
 #define IPA_MEM_OFST_START			0x280
-#define IPA_MEM_NAT_OFST			0x0
-#define IPA_MEM_NAT_SIZE			0x0
 #define IPA_MEM_V4_FLT_HASH_OFST		0x288
 #define IPA_MEM_V4_FLT_HASH_OFST_ALIGN		8
 #define IPA_MEM_V4_FLT_HASH_SIZE		0x78
@@ -1401,11 +1399,6 @@ void ipa_init_mem_info(struct device_node *node)
 
 	mem_info[OFST_START] = IPA_MEM_OFST_START;
 	ipa_debug("RAM OFST 0x%x\n", mem_info[OFST_START]);
-
-	mem_info[NAT_OFST] = IPA_MEM_NAT_OFST;
-	mem_info[NAT_SIZE] = IPA_MEM_NAT_SIZE;
-	ipa_debug("NAT OFST 0x%x SIZE 0x%x\n",
-			mem_info[NAT_OFST], mem_info[NAT_SIZE]);
 
 	mem_info[V4_FLT_HASH_OFST] = ALIGN_CHECK(IPA_MEM_V4_FLT_HASH_OFST);
 	mem_info[V4_FLT_HASH_SIZE] = NONZERO_CHECK(IPA_MEM_V4_FLT_HASH_SIZE);
