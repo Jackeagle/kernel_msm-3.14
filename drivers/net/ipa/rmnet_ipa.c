@@ -61,8 +61,7 @@
 #define DRIVER_NAME "wwan_ioctl"
 
 #define IPA_NETDEV() \
-	((rmnet_ipa3_ctx && rmnet_ipa3_ctx->wwan_priv) ? \
-	  rmnet_ipa3_ctx->wwan_priv->net : NULL)
+	(rmnet_ipa3_ctx->wwan_priv ? rmnet_ipa3_ctx->wwan_priv->net : NULL)
 
 #define IPA_WWAN_CONS_DESC_FIFO_SZ 256
 
@@ -128,7 +127,8 @@ struct rmnet_ipa3_context {
 	struct mutex add_mux_channel_lock;
 };
 
-static struct rmnet_ipa3_context *rmnet_ipa3_ctx;
+static struct rmnet_ipa3_context rmnet_ipa3_ctx_struct;
+static struct rmnet_ipa3_context *rmnet_ipa3_ctx = &rmnet_ipa3_ctx_struct;
 static struct ipa3_rmnet_plat_drv_res ipa3_rmnet_res;
 
 static int ipa3_find_mux_channel_index(uint32_t mux_id)
@@ -1116,12 +1116,6 @@ void ipa3_q6_handshake_complete(bool ssr_bootup)
 
 int ipa3_wwan_init(void)
 {
-	rmnet_ipa3_ctx = kzalloc(sizeof(*rmnet_ipa3_ctx), GFP_KERNEL);
-	if (!rmnet_ipa3_ctx) {
-		ipa_err("no memory\n");
-		return -ENOMEM;
-	}
-
 	atomic_set(&rmnet_ipa3_ctx->is_initialized, 0);
 
 	mutex_init(&rmnet_ipa3_ctx->pipe_handle_guard);
@@ -1137,8 +1131,7 @@ void ipa3_wwan_cleanup(void)
 	mutex_destroy(&rmnet_ipa3_ctx->pipe_handle_guard);
 	mutex_destroy(&rmnet_ipa3_ctx->add_mux_channel_lock);
 	platform_driver_unregister(&rmnet_ipa_driver);
-	kfree(rmnet_ipa3_ctx);
-	rmnet_ipa3_ctx = NULL;
+	memset(&rmnet_ipa3_ctx_struct, 0, sizeof(rmnet_ipa3_ctx_struct));
 }
 
 static void ipa3_rmnet_rx_cb(void *priv)
