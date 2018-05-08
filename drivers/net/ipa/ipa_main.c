@@ -453,10 +453,17 @@ static int ipa_init_hdr(void)
 			return ret;
 	}
 
-	dma_size = ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE] +
-			ipa3_ctx->mem_info[APPS_HDR_PROC_CTX_SIZE];
+	dma_size = ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE];
 	if (dma_size) {
 		offset = ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_OFST];
+		ret = dma_shared_mem_zero_cmd(offset, dma_size);
+		if (ret)
+			return ret;
+	}
+
+	dma_size = ipa3_ctx->mem_info[APPS_HDR_PROC_CTX_SIZE];
+	if (dma_size) {
+		offset = ipa3_ctx->mem_info[APPS_HDR_PROC_CTX_OFST];
 		ret = dma_shared_mem_zero_cmd(offset, dma_size);
 		if (ret)
 			return ret;
