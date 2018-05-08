@@ -239,6 +239,37 @@ err_dma_free:
 	return ret;
 }
 
+static int dma_shared_mem_zero_cmd(u32 offset, u32 size)
+{
+	struct ipa_mem_buffer mem;
+	struct ipahal_imm_cmd_pyld *cmd_pyld;
+	struct ipa3_desc desc = { 0 };
+	int ret;
+
+	if (ipahal_dma_alloc(&mem, size, GFP_KERNEL))
+		return -ENOMEM;
+
+	offset += ipa3_ctx->smem_restricted_bytes;
+
+	cmd_pyld = ipahal_dma_shared_mem_write_pyld(&mem, offset);
+	if (!cmd_pyld) {
+		ipa_err("error allocating command payload\n");
+		ret = -ENOMEM;
+		goto err_dma_free;
+	}
+	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
+
+	ret = ipa3_send_cmd(1, &desc);
+	if (ret)
+		ipa_err("error sending command\n");
+
+	ipahal_destroy_imm_cmd(cmd_pyld);
+err_dma_free:
+	ipahal_dma_free(&mem);
+
+	return ret;
+}
+
 static int
 ipa3_init_smem_region(u32 memory_region_size, u32 memory_region_offset)
 {
@@ -402,9 +433,6 @@ static int ipa_init_sram(void)
  */
 static int ipa_init_hdr(void)
 {
-	struct ipa3_desc desc = { 0 };
-	struct ipa_mem_buffer mem;
-	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	u32 dma_size;
 	u32 offset;
 	int ret;
@@ -428,31 +456,10 @@ static int ipa_init_hdr(void)
 	dma_size = ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE] +
 			ipa3_ctx->mem_info[APPS_HDR_PROC_CTX_SIZE];
 	if (dma_size) {
-		if (ipahal_dma_alloc(&mem, dma_size, GFP_KERNEL)) {
-			ipa_err("fail to alloc DMA buff of size %u\n", dma_size);
-			return -ENOMEM;
-		}
-
-		offset = ipa3_ctx->smem_restricted_bytes +
-				ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_OFST];
-		cmd_pyld = ipahal_dma_shared_mem_write_pyld(&mem, offset);
-		if (!cmd_pyld) {
-			ipa_err("fail to construct dma_shared_mem imm\n");
-			ipahal_dma_free(&mem);
-			return -EFAULT;
-		}
-
-		memset(&desc, 0, sizeof(desc));
-		ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
-
-		if (ipa3_send_cmd(1, &desc)) {
-			ipa_err("fail to send immediate command\n");
-			ipahal_destroy_imm_cmd(cmd_pyld);
-			ipahal_dma_free(&mem);
-			return -EFAULT;
-		}
-		ipahal_destroy_imm_cmd(cmd_pyld);
-		ipahal_dma_free(&mem);
+		offset = ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_OFST];
+		ret = dma_shared_mem_zero_cmd(offset, dma_size);
+		if (ret)
+			return ret;
 	}
 
 	ipahal_write_reg(IPA_LOCAL_PKT_PROC_CNTXT_BASE, 0);
