@@ -273,38 +273,9 @@ err_dma_free:
 static int
 ipa3_init_smem_region(u32 memory_region_size, u32 memory_region_offset)
 {
-	struct ipahal_imm_cmd_pyld *cmd_pyld;
-	struct ipa3_desc desc = { 0 };
-	struct ipa_mem_buffer mem;
-	u32 offset;
-	int rc;
-
 	ipa_assert(memory_region_size != 0);
 
-	if (ipahal_dma_alloc(&mem, memory_region_size, GFP_KERNEL)) {
-		ipa_err("failed to alloc DMA buff of size %d\n", mem.size);
-		return -ENOMEM;
-	}
-
-	offset = ipa3_ctx->smem_restricted_bytes + memory_region_offset;
-	cmd_pyld = ipahal_dma_shared_mem_write_pyld(&mem, offset);
-	if (!cmd_pyld) {
-		ipa_err("failed to construct dma_shared_mem imm cmd\n");
-		ipahal_dma_free(&mem);
-		return -ENOMEM;
-	}
-	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
-
-	rc = ipa3_send_cmd(1, &desc);
-	if (rc) {
-		ipa_err("failed to send immediate command (error %d)\n", rc);
-		rc = -EFAULT;
-	}
-
-	ipahal_destroy_imm_cmd(cmd_pyld);
-	ipahal_dma_free(&mem);
-
-	return rc;
+	return dma_shared_mem_zero_cmd(memory_region_offset, memory_region_size);
 }
 
 /**
