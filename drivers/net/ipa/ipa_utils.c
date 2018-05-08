@@ -1340,8 +1340,6 @@ int ipa3_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 #define IPA_MEM_APPS_HDR_PROC_CTX_OFST_ALIGN	8
 #define IPA_MEM_APPS_HDR_PROC_CTX_SIZE		0x200
 #define IPA_MEM_APPS_HDR_PROC_CTX_SIZE_DDR	0x0
-#define IPA_MEM_MODEM_COMP_DECOMP_OFST		0x0
-#define IPA_MEM_MODEM_COMP_DECOMP_SIZE		0x0
 #define IPA_MEM_MODEM_OFST			0xbd8
 #define IPA_MEM_MODEM_OFST_ALIGN		8
 #define IPA_MEM_MODEM_SIZE			0x1024
@@ -1536,8 +1534,8 @@ void ipa_init_mem_info(struct device_node *node)
 			mem_info[APPS_HDR_PROC_CTX_SIZE],
 			mem_info[APPS_HDR_PROC_CTX_SIZE_DDR]);
 
-	mem_info[MODEM_COMP_DECOMP_OFST] = IPA_MEM_MODEM_COMP_DECOMP_OFST;
-	mem_info[MODEM_COMP_DECOMP_SIZE] = IPA_MEM_MODEM_COMP_DECOMP_SIZE;
+	mem_info[MODEM_COMP_DECOMP_OFST] = 0;
+	mem_info[MODEM_COMP_DECOMP_SIZE] = 0;
 
 	mem_info[MODEM_OFST] = ALIGN_CHECK(IPA_MEM_MODEM_OFST);
 	mem_info[MODEM_SIZE] = IPA_MEM_MODEM_SIZE;
