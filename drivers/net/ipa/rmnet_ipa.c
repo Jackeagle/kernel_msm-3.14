@@ -856,7 +856,7 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 	ret = ipa3_init_q6_smem();
 	if (ret) {
 		ipa_err("ipa3_init_q6_smem failed!\n");
-		return ret;
+		goto err_clear_ctx;
 	}
 
 	/* initialize tx/rx endpoint setup */
@@ -885,7 +885,8 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 			   ipa3_wwan_setup);
 	if (!dev) {
 		ipa_err("no memory for netdev\n");
-		return -ENOMEM;
+		ret = -ENOMEM;
+		goto err_clear_ctx;
 	}
 	rmnet_ipa3_ctx->wwan_priv = netdev_priv(dev);
 	ipa_debug("wwan_ptr (private) = %p", rmnet_ipa3_ctx->wwan_priv);
@@ -921,6 +922,8 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 err_napi_del:
 	netif_napi_del(&rmnet_ipa3_ctx->wwan_priv->napi);
 	free_netdev(dev);
+err_clear_ctx:
+	memset(&rmnet_ipa3_ctx_struct, 0, sizeof(rmnet_ipa3_ctx_struct));
 
 	return ret;
 }
