@@ -103,7 +103,6 @@ struct ipa3_rmnet_mux_val {
 
 struct rmnet_ipa3_context {
 	struct net_device *dev;
-	struct ipa3_wwan_private *wwan_priv;
 	struct ipa_sys_connect_params apps_to_ipa_ep_cfg;
 	struct ipa_sys_connect_params ipa_to_apps_ep_cfg;
 	struct ipa3_rmnet_mux_val mux_channel[MAX_NUM_OF_MUX_CHANNEL];
@@ -874,7 +873,6 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 	}
 	rmnet_ipa3_ctx->dev = dev;
 	wwan_ptr = netdev_priv(dev);
-	rmnet_ipa3_ctx->wwan_priv = wwan_ptr;
 	ipa_debug("wwan_ptr (private) = %p", wwan_ptr);
 	wwan_ptr->outstanding_high = DEFAULT_OUTSTANDING_HIGH;
 	wwan_ptr->outstanding_low = DEFAULT_OUTSTANDING_LOW;
@@ -937,7 +935,6 @@ static int ipa3_wwan_remove(struct platform_device *pdev)
 	cancel_work_sync(&ipa3_tx_wakequeue_work);
 	if (rmnet_ipa3_ctx->dev)
 		free_netdev(rmnet_ipa3_ctx->dev);
-	rmnet_ipa3_ctx->wwan_priv = NULL;
 	rmnet_ipa3_ctx->dev = NULL;
 
 	mutex_destroy(&rmnet_ipa3_ctx->add_mux_channel_lock);
