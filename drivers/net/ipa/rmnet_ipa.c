@@ -342,7 +342,9 @@ static void apps_ipa_packet_receive_notify(void *priv,
 	} else if (evt == IPA_CLIENT_START_POLL)
 		ipa3_rmnet_rx_cb(dev);
 	else if (evt == IPA_CLIENT_COMP_NAPI) {
-		napi_complete(&rmnet_ipa3_ctx->wwan_priv->napi);
+		struct ipa3_wwan_private *wwan_ptr = netdev_priv(dev);
+
+		napi_complete(&wwan_ptr->napi);
 	} else
 		ipa_err("Invalid evt %d received in wan_ipa_receive\n", evt);
 }
@@ -842,6 +844,7 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 {
 	int ret;
 	struct net_device *dev;
+	struct ipa3_wwan_private *wwan_ptr;
 
 	ipa_info("rmnet_ipa3 started initialization\n");
 
@@ -870,17 +873,18 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 		goto err_clear_ctx;
 	}
 	rmnet_ipa3_ctx->dev = dev;
-	rmnet_ipa3_ctx->wwan_priv = netdev_priv(dev);
-	ipa_debug("wwan_ptr (private) = %p", rmnet_ipa3_ctx->wwan_priv);
-	rmnet_ipa3_ctx->wwan_priv->outstanding_high = DEFAULT_OUTSTANDING_HIGH;
-	rmnet_ipa3_ctx->wwan_priv->outstanding_low = DEFAULT_OUTSTANDING_LOW;
-	atomic_set(&rmnet_ipa3_ctx->wwan_priv->outstanding_pkts, 0);
-	spin_lock_init(&rmnet_ipa3_ctx->wwan_priv->lock);
+	wwan_ptr = netdev_priv(dev);
+	rmnet_ipa3_ctx->wwan_priv = wwan_ptr;
+	ipa_debug("wwan_ptr (private) = %p", wwan_ptr);
+	wwan_ptr->outstanding_high = DEFAULT_OUTSTANDING_HIGH;
+	wwan_ptr->outstanding_low = DEFAULT_OUTSTANDING_LOW;
+	atomic_set(&wwan_ptr->outstanding_pkts, 0);
+	spin_lock_init(&wwan_ptr->lock);
 
 	/* Enable SG support in netdevice. */
 	dev->hw_features |= NETIF_F_SG;
 
-	netif_napi_add(dev, &rmnet_ipa3_ctx->wwan_priv->napi,
+	netif_napi_add(dev, &wwan_ptr->napi,
 		       ipa3_rmnet_poll, NAPI_WEIGHT);
 	ret = register_netdev(dev);
 	if (ret) {
@@ -901,7 +905,7 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 	return 0;
 
 err_napi_del:
-	netif_napi_del(&rmnet_ipa3_ctx->wwan_priv->napi);
+	netif_napi_del(&wwan_ptr->napi);
 	free_netdev(dev);
 err_clear_ctx:
 	memset(&rmnet_ipa3_ctx_struct, 0, sizeof(rmnet_ipa3_ctx_struct));
@@ -911,6 +915,7 @@ err_clear_ctx:
 
 static int ipa3_wwan_remove(struct platform_device *pdev)
 {
+	struct ipa3_wwan_private *wwan_ptr = netdev_priv(rmnet_ipa3_ctx->dev);
 	int ret;
 
 	ipa_info("rmnet_ipa started deinitialization\n");
@@ -925,7 +930,7 @@ static int ipa3_wwan_remove(struct platform_device *pdev)
 		ipa_err("Failed to teardown APPS->IPA pipe\n");
 	else
 		rmnet_ipa3_ctx->apps_to_ipa3_hdl = -1;
-	netif_napi_del(&rmnet_ipa3_ctx->wwan_priv->napi);
+	netif_napi_del(&wwan_ptr->napi);
 	mutex_unlock(&rmnet_ipa3_ctx->pipe_handle_guard);
 	unregister_netdev(rmnet_ipa3_ctx->dev);
 
@@ -1087,8 +1092,10 @@ void ipa3_wwan_cleanup(void)
 
 static void ipa3_rmnet_rx_cb(const struct net_device *dev)
 {
+	struct ipa3_wwan_private *wwan_ptr = netdev_priv(dev);
+
 	ipa_debug_low("\n");
-	napi_schedule(&(rmnet_ipa3_ctx->wwan_priv->napi));
+	napi_schedule(&wwan_ptr->napi);
 }
 
 static int ipa3_rmnet_poll(struct napi_struct *napi, int budget)
