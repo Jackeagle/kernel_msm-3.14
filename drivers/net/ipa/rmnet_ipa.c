@@ -106,6 +106,7 @@ struct ipa3_rmnet_mux_val {
 };
 
 struct rmnet_ipa3_context {
+	struct net_device *dev;
 	struct ipa3_wwan_private *wwan_priv;
 	struct ipa_sys_connect_params apps_to_ipa_ep_cfg;
 	struct ipa_sys_connect_params ipa_to_apps_ep_cfg;
@@ -872,6 +873,7 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 		ret = -ENOMEM;
 		goto err_clear_ctx;
 	}
+	rmnet_ipa3_ctx->dev = dev;
 	rmnet_ipa3_ctx->wwan_priv = netdev_priv(dev);
 	ipa_debug("wwan_ptr (private) = %p", rmnet_ipa3_ctx->wwan_priv);
 	rmnet_ipa3_ctx->wwan_priv->net = dev;
@@ -936,6 +938,7 @@ static int ipa3_wwan_remove(struct platform_device *pdev)
 	if (IPA_NETDEV())
 		free_netdev(IPA_NETDEV());
 	rmnet_ipa3_ctx->wwan_priv = NULL;
+	rmnet_ipa3_ctx->dev = NULL;
 
 	mutex_destroy(&rmnet_ipa3_ctx->add_mux_channel_lock);
 	mutex_destroy(&rmnet_ipa3_ctx->pipe_handle_guard);
