@@ -62,7 +62,7 @@
 
 #define IPA_WWAN_CONS_DESC_FIFO_SZ 256
 
-static void ipa3_rmnet_rx_cb(void *priv);
+static void ipa3_rmnet_rx_cb(const struct net_device *dev);
 static int ipa3_rmnet_poll(struct napi_struct *napi, int budget);
 
 static void ipa3_wake_tx_queue(struct work_struct *work);
@@ -321,7 +321,7 @@ static void apps_ipa_packet_receive_notify(void *priv,
 		enum ipa_dp_evt_type evt,
 		unsigned long data)
 {
-	struct net_device *dev = (struct net_device *)priv;
+	struct net_device *dev = priv;
 
 	if (evt == IPA_RECEIVE) {
 		struct sk_buff *skb = (struct sk_buff *)data;
@@ -340,7 +340,7 @@ static void apps_ipa_packet_receive_notify(void *priv,
 		dev->stats.rx_packets++;
 		dev->stats.rx_bytes += packet_len;
 	} else if (evt == IPA_CLIENT_START_POLL)
-		ipa3_rmnet_rx_cb(priv);
+		ipa3_rmnet_rx_cb(dev);
 	else if (evt == IPA_CLIENT_COMP_NAPI) {
 		napi_complete(&rmnet_ipa3_ctx->wwan_priv->napi);
 	} else
@@ -1085,7 +1085,7 @@ void ipa3_wwan_cleanup(void)
 	memset(&rmnet_ipa3_ctx_struct, 0, sizeof(rmnet_ipa3_ctx_struct));
 }
 
-static void ipa3_rmnet_rx_cb(void *priv)
+static void ipa3_rmnet_rx_cb(const struct net_device *dev)
 {
 	ipa_debug_low("\n");
 	napi_schedule(&(rmnet_ipa3_ctx->wwan_priv->napi));
