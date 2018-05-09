@@ -784,14 +784,12 @@ static int ipa3_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 }
 
 static const struct net_device_ops ipa3_wwan_ops_ip = {
-	.ndo_open = ipa3_wwan_open,
-	.ndo_stop = ipa3_wwan_stop,
-	.ndo_start_xmit = ipa3_wwan_xmit,
-	.ndo_tx_timeout = ipa3_wwan_tx_timeout,
-	.ndo_do_ioctl = ipa3_wwan_ioctl,
-	.ndo_change_mtu = ipa3_wwan_change_mtu,
-	.ndo_set_mac_address = 0,
-	.ndo_validate_addr = 0,
+	.ndo_open	= ipa3_wwan_open,
+	.ndo_stop	= ipa3_wwan_stop,
+	.ndo_start_xmit	= ipa3_wwan_xmit,
+	.ndo_tx_timeout	= ipa3_wwan_tx_timeout,
+	.ndo_do_ioctl	= ipa3_wwan_ioctl,
+	.ndo_change_mtu	= ipa3_wwan_change_mtu,
 };
 
 /**
