@@ -115,12 +115,13 @@ struct rmnet_ipa3_context {
 	int rmnet_index;
 	bool egress_set;
 	bool a7_ul_flt_set;
-	atomic_t is_initialized;
 	u32 apps_to_ipa3_hdl;
 	u32 ipa3_to_apps_hdl;
 	struct mutex pipe_handle_guard;
 	struct mutex add_mux_channel_lock;
 };
+
+static bool initialized;	/* Avoid duplicate initialization */
 
 static struct rmnet_ipa3_context rmnet_ipa3_ctx_struct;
 static struct rmnet_ipa3_context *rmnet_ipa3_ctx = &rmnet_ipa3_ctx_struct;
@@ -901,13 +902,15 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 	}
 
 	ipa_debug("IPA-WWAN devices (%s) initialization ok :>>>>\n", dev->name);
-	atomic_set(&rmnet_ipa3_ctx->is_initialized, 1);
 	/* offline charging mode */
 	ipa3_proxy_clk_unvote();
 
 	/* Till the system is suspended, we keep the clock open */
 	ipa_client_add(__func__, false);
+
+	initialized = true;
 	ipa_err("rmnet_ipa completed initialization\n");
+
 	return 0;
 config_err:
 	netif_napi_del(&rmnet_ipa3_ctx->wwan_priv->napi);
@@ -941,8 +944,9 @@ static int ipa3_wwan_remove(struct platform_device *pdev)
 		free_netdev(IPA_NETDEV());
 	rmnet_ipa3_ctx->wwan_priv = NULL;
 
-	atomic_set(&rmnet_ipa3_ctx->is_initialized, 0);
+	initialized = false;
 	ipa_info("rmnet_ipa completed deinitialization\n");
+
 	return 0;
 }
 
@@ -1075,7 +1079,8 @@ void ipa3_q6_handshake_complete(bool ssr_bootup)
 
 int ipa3_wwan_init(void)
 {
-	atomic_set(&rmnet_ipa3_ctx->is_initialized, 0);
+	if (initialized)
+		return 0;
 
 	mutex_init(&rmnet_ipa3_ctx->pipe_handle_guard);
 	mutex_init(&rmnet_ipa3_ctx->add_mux_channel_lock);
