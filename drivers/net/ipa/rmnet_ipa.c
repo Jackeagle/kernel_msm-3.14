@@ -880,8 +880,7 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 	/* Enable SG support in netdevice. */
 	dev->hw_features |= NETIF_F_SG;
 
-	netif_napi_add(dev, &wwan_ptr->napi,
-		       ipa3_rmnet_poll, NAPI_WEIGHT);
+	netif_napi_add(dev, &wwan_ptr->napi, ipa3_rmnet_poll, NAPI_WEIGHT);
 	ret = register_netdev(dev);
 	if (ret) {
 		ipa_err("unable to register ipa_netdev %d rc=%d\n", 0, ret);
@@ -1087,11 +1086,11 @@ void ipa3_wwan_cleanup(void)
 
 static int ipa3_rmnet_poll(struct napi_struct *napi, int budget)
 {
-	int rcvd_pkts = 0;
+	int rcvd_pkts;
 
-	rcvd_pkts = ipa3_rx_poll(rmnet_ipa3_ctx->ipa3_to_apps_hdl,
-					NAPI_WEIGHT);
+	rcvd_pkts = ipa3_rx_poll(rmnet_ipa3_ctx->ipa3_to_apps_hdl, budget);
 	ipa_debug_low("rcvd packets: %d\n", rcvd_pkts);
+
 	return rcvd_pkts;
 }
 
