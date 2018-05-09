@@ -843,7 +843,7 @@ static void ipa3_wake_tx_queue(struct work_struct *work)
  */
 static int ipa3_wwan_probe(struct platform_device *pdev)
 {
-	int ret, i;
+	int ret;
 	struct net_device *dev;
 
 	ipa_info("rmnet_ipa3 started initialization\n");
@@ -858,22 +858,6 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 		ipa_err("ipa3_init_q6_smem failed!\n");
 		goto err_clear_ctx;
 	}
-
-	/* initialize tx/rx endpoint setup */
-	memset(&rmnet_ipa3_ctx->apps_to_ipa_ep_cfg, 0,
-		sizeof(struct ipa_sys_connect_params));
-	memset(&rmnet_ipa3_ctx->ipa_to_apps_ep_cfg, 0,
-		sizeof(struct ipa_sys_connect_params));
-
-	/* initialize ex property setup */
-	rmnet_ipa3_ctx->num_q6_rules = 0;
-	rmnet_ipa3_ctx->old_num_q6_rules = 0;
-	rmnet_ipa3_ctx->rmnet_index = 0;
-	rmnet_ipa3_ctx->egress_set = false;
-	rmnet_ipa3_ctx->a7_ul_flt_set = false;
-	for (i = 0; i < MAX_NUM_OF_MUX_CHANNEL; i++)
-		memset(&rmnet_ipa3_ctx->mux_channel[i], 0,
-				sizeof(struct ipa3_rmnet_mux_val));
 
 	/* start A7 QMI service/client */
 	ipa_qmi_init();
