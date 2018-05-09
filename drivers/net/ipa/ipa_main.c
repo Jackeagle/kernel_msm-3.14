@@ -246,6 +246,8 @@ static int dma_shared_mem_zero_cmd(u32 offset, u32 size)
 	struct ipa3_desc desc = { 0 };
 	int ret;
 
+	ipa_assert(size > 0);
+
 	if (ipahal_dma_alloc(&mem, size, GFP_KERNEL))
 		return -ENOMEM;
 
@@ -270,14 +272,6 @@ err_dma_free:
 	return ret;
 }
 
-static int
-ipa3_init_smem_region(u32 memory_region_size, u32 memory_region_offset)
-{
-	ipa_assert(memory_region_size != 0);
-
-	return dma_shared_mem_zero_cmd(memory_region_offset, memory_region_size);
-}
-
 /**
 * ipa3_init_q6_smem() - Initialize Q6 general memory and
 *		       header memory regions in IPA.
@@ -294,22 +288,22 @@ int ipa3_init_q6_smem(void)
 
 	ipa_client_add(__func__, false);
 
-	rc = ipa3_init_smem_region(ipa3_ctx->mem_info[MODEM_SIZE],
-		ipa3_ctx->mem_info[MODEM_OFST]);
+	rc = dma_shared_mem_zero_cmd(ipa3_ctx->mem_info[MODEM_OFST],
+			ipa3_ctx->mem_info[MODEM_SIZE]);
 	if (rc) {
 		what = "Modem RAM";
 		goto out_client_remove;
 	}
 
-	rc = ipa3_init_smem_region(ipa3_ctx->mem_info[MODEM_HDR_SIZE],
-		ipa3_ctx->mem_info[MODEM_HDR_OFST]);
+	rc = dma_shared_mem_zero_cmd(ipa3_ctx->mem_info[MODEM_HDR_OFST],
+			ipa3_ctx->mem_info[MODEM_HDR_SIZE]);
 	if (rc) {
 		what = "Modem HDRs RAM";
 		goto out_client_remove;
 	}
 
-	rc = ipa3_init_smem_region(ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE],
-		ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_OFST]);
+	rc = dma_shared_mem_zero_cmd(ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_OFST],
+			ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE]);
 	if (rc)
 		what = "Modem proc ctx RAM";
 out_client_remove:
