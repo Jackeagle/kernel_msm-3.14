@@ -903,7 +903,7 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 	ret = register_netdev(dev);
 	if (ret) {
 		ipa_err("unable to register ipa_netdev %d rc=%d\n", 0, ret);
-		goto config_err;
+		goto err_napi_del;
 	}
 
 	ipa_debug("IPA-WWAN devices (%s) initialization ok :>>>>\n", dev->name);
@@ -917,9 +917,10 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 	ipa_err("rmnet_ipa completed initialization\n");
 
 	return 0;
-config_err:
+
+err_napi_del:
 	netif_napi_del(&rmnet_ipa3_ctx->wwan_priv->napi);
-	unregister_netdev(dev);
+	free_netdev(dev);
 
 	return ret;
 }
