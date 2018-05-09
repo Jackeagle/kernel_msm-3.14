@@ -60,8 +60,7 @@
 #define NAPI_WEIGHT 60
 #define DRIVER_NAME "wwan_ioctl"
 
-#define IPA_NETDEV() \
-	(rmnet_ipa3_ctx->wwan_priv ? rmnet_ipa3_ctx->wwan_priv->net : NULL)
+#define IPA_NETDEV()	rmnet_ipa3_ctx->dev
 
 #define IPA_WWAN_CONS_DESC_FIFO_SZ 256
 
