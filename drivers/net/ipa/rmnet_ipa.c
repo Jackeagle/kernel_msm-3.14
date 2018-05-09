@@ -62,7 +62,6 @@
 
 #define IPA_WWAN_CONS_DESC_FIFO_SZ 256
 
-static void ipa3_rmnet_rx_cb(const struct net_device *dev);
 static int ipa3_rmnet_poll(struct napi_struct *napi, int budget);
 
 static void ipa3_wake_tx_queue(struct work_struct *work);
@@ -321,6 +320,7 @@ static void apps_ipa_packet_receive_notify(void *priv,
 		unsigned long data)
 {
 	struct net_device *dev = priv;
+	struct ipa3_wwan_private *wwan_ptr = netdev_priv(dev);
 
 	if (evt == IPA_RECEIVE) {
 		struct sk_buff *skb = (struct sk_buff *)data;
@@ -338,15 +338,15 @@ static void apps_ipa_packet_receive_notify(void *priv,
 		}
 		dev->stats.rx_packets++;
 		dev->stats.rx_bytes += packet_len;
-	} else if (evt == IPA_CLIENT_START_POLL)
-		ipa3_rmnet_rx_cb(dev);
-	else if (evt == IPA_CLIENT_COMP_NAPI) {
-		struct ipa3_wwan_private *wwan_ptr = netdev_priv(dev);
-
+	} else if (evt == IPA_CLIENT_START_POLL) {
+		napi_schedule(&wwan_ptr->napi);
+	} else if (evt == IPA_CLIENT_COMP_NAPI) {
 		napi_complete(&wwan_ptr->napi);
-	} else
+	} else {
 		ipa_err("Invalid evt %d received in wan_ipa_receive\n", evt);
+	}
 }
+
 
 static int handle3_ingress_format(struct net_device *dev,
 			struct rmnet_ioctl_extended_s *in)
@@ -1085,14 +1085,6 @@ void ipa3_wwan_cleanup(void)
 {
 	platform_driver_unregister(&rmnet_ipa_driver);
 	memset(&rmnet_ipa3_ctx_struct, 0, sizeof(rmnet_ipa3_ctx_struct));
-}
-
-static void ipa3_rmnet_rx_cb(const struct net_device *dev)
-{
-	struct ipa3_wwan_private *wwan_ptr = netdev_priv(dev);
-
-	ipa_debug_low("\n");
-	napi_schedule(&wwan_ptr->napi);
 }
 
 static int ipa3_rmnet_poll(struct napi_struct *napi, int budget)
