@@ -300,12 +300,12 @@ static void apps_ipa_tx_complete_notify(void *priv,
 	wwan_ptr = netdev_priv(dev);
 	atomic_dec(&wwan_ptr->outstanding_pkts);
 	__netif_tx_lock_bh(netdev_get_tx_queue(dev, 0));
-	if (netif_queue_stopped(wwan_ptr->net) &&
+	if (netif_queue_stopped(dev) &&
 		atomic_read(&wwan_ptr->outstanding_pkts) <
 					(wwan_ptr->outstanding_low)) {
 		ipa_debug_low("Outstanding low (%d) - waking up queue\n",
 				wwan_ptr->outstanding_low);
-		netif_wake_queue(wwan_ptr->net);
+		netif_wake_queue(dev);
 	}
 
 	__netif_tx_unlock_bh(netdev_get_tx_queue(dev, 0));
