@@ -848,6 +848,11 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 
 	ipa_info("rmnet_ipa3 started initialization\n");
 
+	mutex_init(&rmnet_ipa3_ctx->pipe_handle_guard);
+	mutex_init(&rmnet_ipa3_ctx->add_mux_channel_lock);
+	rmnet_ipa3_ctx->ipa3_to_apps_hdl = -1;
+	rmnet_ipa3_ctx->apps_to_ipa3_hdl = -1;
+
 	ret = ipa3_init_q6_smem();
 	if (ret) {
 		ipa_err("ipa3_init_q6_smem failed!\n");
@@ -943,6 +948,9 @@ static int ipa3_wwan_remove(struct platform_device *pdev)
 	if (IPA_NETDEV())
 		free_netdev(IPA_NETDEV());
 	rmnet_ipa3_ctx->wwan_priv = NULL;
+
+	mutex_destroy(&rmnet_ipa3_ctx->add_mux_channel_lock);
+	mutex_destroy(&rmnet_ipa3_ctx->pipe_handle_guard);
 
 	initialized = false;
 	ipa_info("rmnet_ipa completed deinitialization\n");
@@ -1082,18 +1090,11 @@ int ipa3_wwan_init(void)
 	if (initialized)
 		return 0;
 
-	mutex_init(&rmnet_ipa3_ctx->pipe_handle_guard);
-	mutex_init(&rmnet_ipa3_ctx->add_mux_channel_lock);
-	rmnet_ipa3_ctx->ipa3_to_apps_hdl = -1;
-	rmnet_ipa3_ctx->apps_to_ipa3_hdl = -1;
-
 	return platform_driver_register(&rmnet_ipa_driver);
 }
 
 void ipa3_wwan_cleanup(void)
 {
-	mutex_destroy(&rmnet_ipa3_ctx->pipe_handle_guard);
-	mutex_destroy(&rmnet_ipa3_ctx->add_mux_channel_lock);
 	platform_driver_unregister(&rmnet_ipa_driver);
 	memset(&rmnet_ipa3_ctx_struct, 0, sizeof(rmnet_ipa3_ctx_struct));
 }
