@@ -60,8 +60,6 @@
 #define NAPI_WEIGHT 60
 #define DRIVER_NAME "wwan_ioctl"
 
-#define IPA_NETDEV()	rmnet_ipa3_ctx->dev
-
 #define IPA_WWAN_CONS_DESC_FIFO_SZ 256
 
 static void ipa3_rmnet_rx_cb(void *priv);
@@ -84,7 +82,6 @@ static DECLARE_WORK(ipa3_tx_wakequeue_work, ipa3_wake_tx_queue);
  * WWAN private - holds all relevant info about WWAN driver
  */
 struct ipa3_wwan_private {
-	struct net_device *net;
 	struct net_device_stats stats;
 	atomic_t outstanding_pkts;
 	int outstanding_high_ctl;
@@ -283,7 +280,7 @@ static void apps_ipa_tx_complete_notify(void *priv,
 	struct net_device *dev = (struct net_device *)priv;
 	struct ipa3_wwan_private *wwan_ptr;
 
-	if (dev != IPA_NETDEV()) {
+	if (dev != rmnet_ipa3_ctx->dev) {
 		ipa_debug("Received pre-SSR packet completion\n");
 		dev_kfree_skb_any(skb);
 		return;
@@ -332,7 +329,7 @@ static void apps_ipa_packet_receive_notify(void *priv,
 		unsigned int packet_len = skb->len;
 
 		ipa_debug("Rx packet was received\n");
-		skb->dev = IPA_NETDEV();
+		skb->dev = rmnet_ipa3_ctx->dev;
 		skb->protocol = htons(ETH_P_MAP);
 
 		result = netif_receive_skb(skb);
@@ -689,7 +686,7 @@ static int ipa3_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 		/*  Get driver name  */
 		case RMNET_IOCTL_GET_DRIVER_NAME:
 			memcpy(&extend_ioctl_data.u.if_name,
-				IPA_NETDEV()->name,
+				rmnet_ipa3_ctx->dev->name,
 							sizeof(IFNAMSIZ));
 			if (copy_to_user((u8 *)ifr->ifr_ifru.ifru_data,
 					&extend_ioctl_data,
@@ -821,10 +818,10 @@ static void ipa3_wwan_setup(struct net_device *dev)
 
 static void ipa3_wake_tx_queue(struct work_struct *work)
 {
-	if (IPA_NETDEV()) {
-		__netif_tx_lock_bh(netdev_get_tx_queue(IPA_NETDEV(), 0));
-		netif_wake_queue(IPA_NETDEV());
-		__netif_tx_unlock_bh(netdev_get_tx_queue(IPA_NETDEV(), 0));
+	if (rmnet_ipa3_ctx->dev) {
+		__netif_tx_lock_bh(netdev_get_tx_queue(rmnet_ipa3_ctx->dev, 0));
+		netif_wake_queue(rmnet_ipa3_ctx->dev);
+		__netif_tx_unlock_bh(netdev_get_tx_queue(rmnet_ipa3_ctx->dev, 0));
 	}
 }
 
@@ -875,7 +872,6 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 	rmnet_ipa3_ctx->dev = dev;
 	rmnet_ipa3_ctx->wwan_priv = netdev_priv(dev);
 	ipa_debug("wwan_ptr (private) = %p", rmnet_ipa3_ctx->wwan_priv);
-	rmnet_ipa3_ctx->wwan_priv->net = dev;
 	rmnet_ipa3_ctx->wwan_priv->outstanding_high = DEFAULT_OUTSTANDING_HIGH;
 	rmnet_ipa3_ctx->wwan_priv->outstanding_low = DEFAULT_OUTSTANDING_LOW;
 	atomic_set(&rmnet_ipa3_ctx->wwan_priv->outstanding_pkts, 0);
@@ -931,11 +927,11 @@ static int ipa3_wwan_remove(struct platform_device *pdev)
 		rmnet_ipa3_ctx->apps_to_ipa3_hdl = -1;
 	netif_napi_del(&rmnet_ipa3_ctx->wwan_priv->napi);
 	mutex_unlock(&rmnet_ipa3_ctx->pipe_handle_guard);
-	unregister_netdev(IPA_NETDEV());
+	unregister_netdev(rmnet_ipa3_ctx->dev);
 
 	cancel_work_sync(&ipa3_tx_wakequeue_work);
-	if (IPA_NETDEV())
-		free_netdev(IPA_NETDEV());
+	if (rmnet_ipa3_ctx->dev)
+		free_netdev(rmnet_ipa3_ctx->dev);
 	rmnet_ipa3_ctx->wwan_priv = NULL;
 	rmnet_ipa3_ctx->dev = NULL;
 
@@ -965,7 +961,7 @@ static int ipa3_wwan_remove(struct platform_device *pdev)
 */
 static int rmnet_ipa_ap_suspend(struct device *dev)
 {
-	struct net_device *netdev = IPA_NETDEV();
+	struct net_device *netdev = rmnet_ipa3_ctx->dev;
 	struct ipa3_wwan_private *wwan_ptr;
 	int ret;
 
@@ -1018,7 +1014,7 @@ bail:
 */
 static int rmnet_ipa_ap_resume(struct device *dev)
 {
-	struct net_device *netdev = IPA_NETDEV();
+	struct net_device *netdev = rmnet_ipa3_ctx->dev;
 
 	ipa_client_add(__func__, false);
 	ipa_debug("IPA clocks enabled\n");
