@@ -1721,7 +1721,6 @@ static void ipa3_gsi_poll_after_suspend(struct ipa3_ep_context *ep)
 	if (!gsi_is_channel_empty(ep->gsi_chan_hdl)) {
 		ipa_debug("ch %ld not empty\n", ep->gsi_chan_hdl);
 		/* queue a work to start polling if don't have one */
-		atomic_set(&ipa3_ctx->transport_pm.eot_activity, 1);
 		if (!atomic_read(&ep->sys->curr_polling_state)) {
 			ipa3_inc_acquire_wakelock();
 			atomic_set(&ep->sys->curr_polling_state, 1);

@@ -2105,10 +2105,6 @@ int ipa3_ap_suspend(struct device *dev)
 		}
 	}
 
-	/*
-	 * Release transport IPA resource without waiting for inactivity timer
-	 */
-	atomic_set(&ipa3_ctx->transport_pm.eot_activity, 0);
 	ipa_debug("Exit\n");
 
 	return 0;

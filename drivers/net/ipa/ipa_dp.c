@@ -199,7 +199,6 @@ int ipa3_rx_poll(u32 clnt_hdl, int weight)
 	while (cnt < weight && atomic_read(&ep->sys->curr_polling_state)) {
 		int ret;
 
-		atomic_set(&ipa3_ctx->transport_pm.eot_activity, 1);
 		ret = ipa_poll_gsi_pkt(ep->sys);
 		if (ret < 0)
 			break;
@@ -2206,7 +2205,6 @@ static void ipa_gsi_irq_tx_notify_cb(struct gsi_chan_xfer_notify *notify)
 		return;
 	}
 
-	atomic_set(&ipa3_ctx->transport_pm.eot_activity, 1);
 	tx_pkt = notify->xfer_user_data;
 	queue_work(tx_pkt->sys->wq, &tx_pkt->work);
 }
@@ -2234,7 +2232,6 @@ static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 		return;
 	}
 
-	atomic_set(&ipa3_ctx->transport_pm.eot_activity, 1);
 	if (atomic_read(&sys->curr_polling_state))
 		return;
 

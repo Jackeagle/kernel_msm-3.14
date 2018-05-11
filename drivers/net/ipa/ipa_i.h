@@ -730,7 +730,6 @@ struct ipa3_uc_ctx {
  */
 struct ipa3_transport_pm {
 	atomic_t dec_clients;
-	atomic_t eot_activity;
 	struct mutex transport_pm_mutex;
 };
 
