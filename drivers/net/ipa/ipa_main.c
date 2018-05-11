@@ -1114,31 +1114,26 @@ void ipa3_suspend_handler(enum ipa_irq_type interrupt,
 		u32 i = __ffs(endpoint_mask);
 
 		endpoint_mask ^= BIT(i);
-		if (ipa3_ctx->ep[i].valid) {
-			if (IPA_CLIENT_IS_APPS_CONS(ipa3_ctx->ep[i].client)) {
-				/*
-				 * pipe will be unsuspended as part of
-				 * enabling IPA clocks
-				 */
-				mutex_lock(&ipa3_ctx->transport_pm.
-					transport_pm_mutex);
-				if (!atomic_read(
-					&ipa3_ctx->transport_pm.dec_clients)
-					) {
-						ipa_client_add(
-							ipa_client_string(ipa3_ctx->ep[i].client), true);
-					ipa_debug_low("Pipes un-suspended.\n");
-					ipa_debug_low("Enter poll mode.\n");
-					atomic_set(
-					&ipa3_ctx->transport_pm.dec_clients,
-					1);
-				}
-				mutex_unlock(&ipa3_ctx->transport_pm.
-					transport_pm_mutex);
-				}
+
+		if (!ipa3_ctx->ep[i].valid)
+			continue;
+		if (!IPA_CLIENT_IS_APPS_CONS(ipa3_ctx->ep[i].client))
+			continue;
+		/*
+		 * pipe will be unsuspended as part of
+		 * enabling IPA clocks
+		 */
+		mutex_lock(&ipa3_ctx->transport_pm.transport_pm_mutex);
+		if (!atomic_read(&ipa3_ctx->transport_pm.dec_clients)) {
+			ipa_client_add(ipa_client_string(ipa3_ctx->ep[i].client), true);
+			ipa_debug_low("Pipes un-suspended.\n");
+			ipa_debug_low("Enter poll mode.\n");
+			atomic_set(&ipa3_ctx->transport_pm.dec_clients, 1);
 		}
+		mutex_unlock(&ipa3_ctx->transport_pm.transport_pm_mutex);
 	}
 }
+
 /**
  * ipa3_init_interrupts() - Register to IPA IRQs
  *
