@@ -1109,12 +1109,9 @@ void ipa3_suspend_handler(enum ipa_irq_type interrupt,
 		((struct ipa_tx_suspend_irq_data *)interrupt_data)->endpoints;
 	u32 bmsk = 1;
 	u32 i = 0;
-	struct ipa_ep_cfg_holb holb_cfg;
 
 	ipa_debug("interrupt=%d, interrupt_data=%u\n",
 		interrupt, suspend_data);
-	memset(&holb_cfg, 0, sizeof(holb_cfg));
-	holb_cfg.tmr_val = 0;
 
 	for (i = 0; i < ipa3_ctx->ipa_num_pipes; i++) {
 		if ((suspend_data & bmsk) && (ipa3_ctx->ep[i].valid)) {
