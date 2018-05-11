@@ -1104,17 +1104,16 @@ void ipa3_suspend_handler(enum ipa_irq_type interrupt,
 				void *private_data,
 				void *interrupt_data)
 {
-	/*enum ipa_rm_resource_name resource;*/
-	u32 suspend_data =
-		((struct ipa_tx_suspend_irq_data *)interrupt_data)->endpoints;
+	struct ipa_tx_suspend_irq_data *suspend_data = interrupt_data;
+	u32 endpoint_mask = suspend_data->endpoints;
 	u32 bmsk = 1;
-	u32 i = 0;
+	u32 i;
 
-	ipa_debug("interrupt=%d, interrupt_data=%u\n",
-		interrupt, suspend_data);
+	ipa_debug("interrupt=%d, endpoint_mask=0x%08x\n",
+		interrupt, endpoint_mask);
 
 	for (i = 0; i < ipa3_ctx->ipa_num_pipes; i++) {
-		if ((suspend_data & bmsk) && (ipa3_ctx->ep[i].valid)) {
+		if ((endpoint_mask & bmsk) && ipa3_ctx->ep[i].valid) {
 			if (IPA_CLIENT_IS_APPS_CONS(ipa3_ctx->ep[i].client)) {
 				/*
 				 * pipe will be unsuspended as part of
