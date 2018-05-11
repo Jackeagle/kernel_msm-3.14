@@ -1106,14 +1106,15 @@ void ipa3_suspend_handler(enum ipa_irq_type interrupt,
 {
 	struct ipa_tx_suspend_irq_data *suspend_data = interrupt_data;
 	u32 endpoint_mask = suspend_data->endpoints;
-	u32 bmsk = 1;
-	u32 i;
 
 	ipa_debug("interrupt=%d, endpoint_mask=0x%08x\n",
 		interrupt, endpoint_mask);
 
-	for (i = 0; i < ipa3_ctx->ipa_num_pipes; i++) {
-		if ((endpoint_mask & bmsk) && ipa3_ctx->ep[i].valid) {
+	while (endpoint_mask) {
+		u32 i = __ffs(endpoint_mask);
+
+		endpoint_mask ^= BIT(i);
+		if (ipa3_ctx->ep[i].valid) {
 			if (IPA_CLIENT_IS_APPS_CONS(ipa3_ctx->ep[i].client)) {
 				/*
 				 * pipe will be unsuspended as part of
@@ -1136,7 +1137,6 @@ void ipa3_suspend_handler(enum ipa_irq_type interrupt,
 					transport_pm_mutex);
 				}
 		}
-		bmsk = bmsk << 1;
 	}
 }
 /**
