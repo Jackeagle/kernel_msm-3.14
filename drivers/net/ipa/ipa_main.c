@@ -1184,7 +1184,7 @@ static void ipa3_freeze_clock_vote_and_notify_modem(void)
 	if (ipa3_ctx->smp2p_info.res_sent)
 		return;
 
-	if (!ipa3_ctx->smp2p_info.smem_state) {
+	if (!ipa3_ctx->smp2p_info.enabled_state) {
 		ipa_err("smp2p out gpio not assigned\n");
 		return;
 	}
@@ -1193,13 +1193,13 @@ static void ipa3_freeze_clock_vote_and_notify_modem(void)
 			ipa_client_add_additional("FREEZE_VOTE", true);
 
 	/* Signal whether the clock is enabled */
-	mask = 1 << ipa3_ctx->smp2p_info.smem_bit;
+	mask = 1 << ipa3_ctx->smp2p_info.enabled_bit;
 	value = ipa3_ctx->smp2p_info.ipa_clk_on ? mask : 0;
-	qcom_smem_state_update_bits(ipa3_ctx->smp2p_info.smem_state,
+	qcom_smem_state_update_bits(ipa3_ctx->smp2p_info.enabled_state,
 					mask, value);
 
 	/* Now indicate that the enabled flag is valid */
-	qcom_smem_state_update_bits(ipa3_ctx->smp2p_info.smem_state, 1, 1);
+	qcom_smem_state_update_bits(ipa3_ctx->smp2p_info.enabled_state, 1, 1);
 
 	ipa3_ctx->smp2p_info.res_sent = true;
 	ipa_debug("IPA clocks are %s\n",
@@ -1217,11 +1217,11 @@ void ipa3_reset_freeze_vote(void)
 		ipa_client_remove("FREEZE_VOTE", true);
 
 	/* Reset the clock enabled valid flag */
-	qcom_smem_state_update_bits(ipa3_ctx->smp2p_info.smem_state, 1, 0);
+	qcom_smem_state_update_bits(ipa3_ctx->smp2p_info.enabled_state, 1, 0);
 
 	/* Mark the clock disabled for good measure... */
-	mask = 1 << ipa3_ctx->smp2p_info.smem_bit;
-	qcom_smem_state_update_bits(ipa3_ctx->smp2p_info.smem_state,
+	mask = 1 << ipa3_ctx->smp2p_info.enabled_bit;
+	qcom_smem_state_update_bits(ipa3_ctx->smp2p_info.enabled_state,
 					mask, 0);
 
 	ipa3_ctx->smp2p_info.res_sent = false;
@@ -1868,21 +1868,22 @@ static irqreturn_t ipa3_smp2p_modem_clk_query_isr(int irq, void *ctxt)
 static int ipa_smp2p_init(struct device *dev)
 {
 	struct device_node *node = dev->of_node;
-	struct qcom_smem_state *state;
-	unsigned int bit;
+	struct qcom_smem_state *enabled_state;
+	unsigned int enabled_bit;
 	int irq;
 	int res;
 
 	ipa_debug("node->name=%s\n", node->name);
-	state = qcom_smem_state_get(dev, "ipa-clock-enabled", &bit);
-	if (IS_ERR(state)) {
-		res = PTR_ERR(state);
+	enabled_state = qcom_smem_state_get(dev, "ipa-clock-enabled",
+						&enabled_bit);
+	if (IS_ERR(enabled_state)) {
+		res = PTR_ERR(enabled_state);
 		ipa_debug("of_get_gpio returned %d\n", res);
 
 		return res;
 	}
-	ipa3_ctx->smp2p_info.smem_state = state;
-	ipa3_ctx->smp2p_info.smem_bit = bit;
+	ipa3_ctx->smp2p_info.enabled_state = enabled_state;
+	ipa3_ctx->smp2p_info.enabled_bit = enabled_bit;
 
 	res = of_irq_get_byname(node, "ipa-clock-query");
 	if (res < 0) {

@@ -735,8 +735,8 @@ struct ipa3_transport_pm {
 };
 
 struct ipa3_smp2p_info {
-	struct qcom_smem_state *smem_state;
-	unsigned int smem_bit;
+	struct qcom_smem_state *enabled_state;
+	unsigned int enabled_bit;
 	bool ipa_clk_on;
 	bool res_sent;
 };
