@@ -1884,38 +1884,40 @@ static int ipa_smp2p_init(struct device *dev)
 						&valid_bit);
 	if (IS_ERR(valid_state)) {
 		res = PTR_ERR(valid_state);
-		ipa_debug("of_get_gpio returned %d\n", res);
+		ipa_err("error %d getting ipa-clock-enabled-valid state\n", res);
 
 		return res;
 	}
-	ipa3_ctx->smp2p_info.valid_state = valid_state;
-	ipa3_ctx->smp2p_info.valid_bit = valid_bit;
 
 	enabled_state = qcom_smem_state_get(dev, "ipa-clock-enabled",
 						&enabled_bit);
 	if (IS_ERR(enabled_state)) {
 		res = PTR_ERR(enabled_state);
-		ipa_debug("of_get_gpio returned %d\n", res);
+		ipa_err("error %d getting ipa-clock-enabled state\n", res);
 
 		return res;
 	}
-	ipa3_ctx->smp2p_info.enabled_state = enabled_state;
-	ipa3_ctx->smp2p_info.enabled_bit = enabled_bit;
 
 	res = of_irq_get_byname(node, "ipa-clock-query");
 	if (res < 0) {
-		ipa_debug("of_get_gpio returned %d\n", res);
+		ipa_err("error %d getting ipa-clock-query irq\n", res);
 		return res;
 	}
 	irq = res;
 
 	res = devm_request_threaded_irq(dev, irq, NULL,
-		(irq_handler_t)ipa3_smp2p_modem_clk_query_isr,
-		IRQF_TRIGGER_RISING, "ipa_smp2p_clk_vote", dev);
+		ipa3_smp2p_modem_clk_query_isr, IRQF_TRIGGER_RISING,
+		"ipa_smp2p_clk_vote", dev);
 	if (res) {
-		ipa_err("fail to register smp2p irq=%d\n", irq);
+		ipa_err("error %d requesting threaded irq\n", res);
 		return -ENODEV;
 	}
+
+	/* Success.  Record in our smp2p information */
+	ipa3_ctx->smp2p_info.valid_state = valid_state;
+	ipa3_ctx->smp2p_info.valid_bit = valid_bit;
+	ipa3_ctx->smp2p_info.enabled_state = enabled_state;
+	ipa3_ctx->smp2p_info.enabled_bit = enabled_bit;
 
 	return 0;
 }
