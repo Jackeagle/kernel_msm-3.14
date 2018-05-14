@@ -1178,6 +1178,9 @@ fail_add_interrupt_handler:
 
 static void ipa3_freeze_clock_vote_and_notify_modem(void)
 {
+	u32 mask;
+	u32 value;
+
 	if (ipa3_ctx->smp2p_info.res_sent)
 		return;
 
@@ -1189,8 +1192,11 @@ static void ipa3_freeze_clock_vote_and_notify_modem(void)
 	ipa3_ctx->smp2p_info.ipa_clk_on =
 			ipa_client_add_additional("FREEZE_VOTE", true);
 
-	qcom_smem_state_update_bits(ipa3_ctx->smp2p_info.smem_state, BIT(3),
-			(ipa3_ctx->smp2p_info.ipa_clk_on ? 1 : 0) << 1 | 1);
+	mask = 1 << ipa3_ctx->smp2p_info.smem_bit;
+	value = ipa3_ctx->smp2p_info.ipa_clk_on ? mask : 0;
+
+	qcom_smem_state_update_bits(ipa3_ctx->smp2p_info.smem_state,
+					mask | 1, value | 1);
 	ipa3_ctx->smp2p_info.res_sent = true;
 	ipa_debug("IPA clocks are %s\n",
 		ipa3_ctx->smp2p_info.ipa_clk_on ? "ON" : "OFF");
@@ -1198,14 +1204,17 @@ static void ipa3_freeze_clock_vote_and_notify_modem(void)
 
 void ipa3_reset_freeze_vote(void)
 {
+	u32 mask;
+
 	if (ipa3_ctx->smp2p_info.res_sent == false)
 		return;
 
 	if (ipa3_ctx->smp2p_info.ipa_clk_on)
 		ipa_client_remove("FREEZE_VOTE", true);
 
+	mask = 1 << ipa3_ctx->smp2p_info.smem_bit;
 	qcom_smem_state_update_bits(ipa3_ctx->smp2p_info.smem_state,
-			BIT(3), 0);
+					mask | 1, 0);
 
 	ipa3_ctx->smp2p_info.res_sent = false;
 	ipa3_ctx->smp2p_info.ipa_clk_on = false;
