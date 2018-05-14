@@ -1851,39 +1851,35 @@ static irqreturn_t ipa3_smp2p_modem_clk_query_isr(int irq, void *ctxt)
 static int ipa3_smp2p_probe(struct device *dev)
 {
 	struct device_node *node = dev->of_node;
+	struct qcom_smem_state *state;
+	unsigned int bit;
+	int irq;
 	int res;
 
 	ipa_debug("node->name=%s\n", node->name);
-	if (strcmp("qcom,smp2p_map_ipa_1_out", node->name) == 0) {
-		struct qcom_smem_state *state;
-		unsigned int bit;
+	state = qcom_smem_state_get(dev, "ipa-smp2p-out", &bit);
+	if (IS_ERR(state)) {
+		res = PTR_ERR(state);
+		ipa_debug("of_get_gpio returned %d\n", res);
 
-		state = qcom_smem_state_get(dev, "ipa-smp2p-out", &bit);
-		if (IS_ERR(state)) {
-			res = PTR_ERR(state);
-			ipa_debug("of_get_gpio returned %d\n", res);
+		return res;
+	}
+	ipa3_ctx->smp2p_info.smem_state = state;
+	ipa3_ctx->smp2p_info.smem_bit = bit;
 
-			return res;
-		}
-		ipa3_ctx->smp2p_info.smem_state = state;
-		ipa3_ctx->smp2p_info.smem_bit = bit;
-	} else if (strcmp("qcom,smp2p_map_ipa_1_in", node->name) == 0) {
-		int irq;
+	res = of_irq_get_byname(node, "ipa-smp2p-in");
+	if (res < 0) {
+		ipa_debug("of_get_gpio returned %d\n", res);
+		return res;
+	}
+	irq = res;
 
-		res = of_irq_get_byname(node, "ipa-smp2p-in");
-		if (res < 0) {
-			ipa_debug("of_get_gpio returned %d\n", res);
-			return res;
-		}
-		irq = res;
-
-		res = devm_request_threaded_irq(dev, irq, NULL,
-			(irq_handler_t)ipa3_smp2p_modem_clk_query_isr,
-			IRQF_TRIGGER_RISING, "ipa_smp2p_clk_vote", dev);
-		if (res) {
-			ipa_err("fail to register smp2p irq=%d\n", irq);
-			return -ENODEV;
-		}
+	res = devm_request_threaded_irq(dev, irq, NULL,
+		(irq_handler_t)ipa3_smp2p_modem_clk_query_isr,
+		IRQF_TRIGGER_RISING, "ipa_smp2p_clk_vote", dev);
+	if (res) {
+		ipa_err("fail to register smp2p irq=%d\n", irq);
+		return -ENODEV;
 	}
 
 	return 0;
@@ -1891,8 +1887,7 @@ static int ipa3_smp2p_probe(struct device *dev)
 
 static const struct of_device_id ipa_plat_drv_match[] = {
 	{ .compatible = "qcom,ipa", },
-	{ .compatible = "qcom,smp2p-map-ipa-1-in", },
-	{ .compatible = "qcom,smp2p-map-ipa-1-out", },
+	{ .compatible = "qcom,smp2p-map-ipa-1", },
 	{}
 };
 
@@ -1911,10 +1906,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	ipa_debug("IPA driver probing started\n");
 	ipa_debug("dev->of_node->name = %s\n", node->name);
 
-	if (of_device_is_compatible(node, "qcom,smp2p-map-ipa-1-in"))
-		return ipa3_smp2p_probe(dev);
-
-	if (of_device_is_compatible(node, "qcom,smp2p-map-ipa-1-out"))
+	if (of_device_is_compatible(node, "qcom,smp2p-map-ipa-1"))
 		return ipa3_smp2p_probe(dev);
 
 	ipa3_ctx->ipa3_pdev = pdev_p;
