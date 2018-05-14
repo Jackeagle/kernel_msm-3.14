@@ -1857,7 +1857,7 @@ static int ipa_smp2p_init(struct device *dev)
 	int res;
 
 	ipa_debug("node->name=%s\n", node->name);
-	state = qcom_smem_state_get(dev, "ipa-smp2p-out", &bit);
+	state = qcom_smem_state_get(dev, "ipa-clock-enabled", &bit);
 	if (IS_ERR(state)) {
 		res = PTR_ERR(state);
 		ipa_debug("of_get_gpio returned %d\n", res);
@@ -1867,7 +1867,7 @@ static int ipa_smp2p_init(struct device *dev)
 	ipa3_ctx->smp2p_info.smem_state = state;
 	ipa3_ctx->smp2p_info.smem_bit = bit;
 
-	res = of_irq_get_byname(node, "ipa-smp2p-in");
+	res = of_irq_get_byname(node, "ipa-clock-query");
 	if (res < 0) {
 		ipa_debug("of_get_gpio returned %d\n", res);
 		return res;
