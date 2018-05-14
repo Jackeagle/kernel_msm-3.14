@@ -1848,7 +1848,7 @@ static irqreturn_t ipa3_smp2p_modem_clk_query_isr(int irq, void *ctxt)
 	return IRQ_HANDLED;
 }
 
-static int ipa3_smp2p_probe(struct device *dev)
+static int ipa_smp2p_init(struct device *dev)
 {
 	struct device_node *node = dev->of_node;
 	struct qcom_smem_state *state;
@@ -1885,9 +1885,13 @@ static int ipa3_smp2p_probe(struct device *dev)
 	return 0;
 }
 
+static void ipa_smp2p_exit(void)
+{
+	memset(&ipa3_ctx->smp2p_info, 0, sizeof(ipa3_ctx->smp2p_info));
+}
+
 static const struct of_device_id ipa_plat_drv_match[] = {
 	{ .compatible = "qcom,ipa", },
-	{ .compatible = "qcom,smp2p-map-ipa-1", },
 	{}
 };
 
@@ -1906,8 +1910,16 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	ipa_debug("IPA driver probing started\n");
 	ipa_debug("dev->of_node->name = %s\n", node->name);
 
-	if (of_device_is_compatible(node, "qcom,smp2p-map-ipa-1"))
-		return ipa3_smp2p_probe(dev);
+	/*
+	 * Initialize smp2p first.  It depends on another driver
+	 * that might not be ready when we're probed, so it might
+	 * return -EPROBE_DEFER (meaning we'll get called again).
+	 */
+	result = ipa_smp2p_init(dev);
+	if (result) {
+		ipa_err("error %d initializing smp2p\n", result);
+		return result;
+	}
 
 	ipa3_ctx->ipa3_pdev = pdev_p;
 
@@ -1915,7 +1927,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 	hw_version = ipa_version_get(pdev_p);
 	if (hw_version == IPA_HW_None) {
 		result = -ENODEV;
-		goto err_destroy_logbuf;
+		goto err_clear_pdev;
 	}
 	ipa_debug(": ipa_version = %d", hw_version);
 
@@ -2002,18 +2014,9 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 
 	/* Proceed to real initialization */
 	result = ipa3_pre_init();
-	if (result)
-		goto err_ipahal_dev_destroy;
+	if (!result)
+		return 0;	/* Success */
 
-	result = of_platform_populate(node, ipa_plat_drv_match, NULL, dev);
-	if (result) {
-		ipa_err("failed to populate platform\n");
-		goto err_clear_gsi_ctx;
-	}
-
-	return 0;
-
-err_ipahal_dev_destroy:
 	ipahal_dev_destroy();
 	ipa3_ctx->dev = NULL;
 err_clear_gsi_ctx:
@@ -2032,11 +2035,11 @@ err_clear_wrapper:
 	ipa3_ctx->ipa_wrapper_base = 0;
 err_clear_ee:
 	ipa3_ctx->ee = 0;
-err_destroy_logbuf:
+err_clear_pdev:
 	ipa3_ctx->ipa3_pdev = NULL;
+	ipa_smp2p_exit();
 
 	return result;
-
 }
 
 /**
