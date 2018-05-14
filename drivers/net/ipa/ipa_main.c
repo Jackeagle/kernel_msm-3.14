@@ -1855,20 +1855,18 @@ static int ipa3_smp2p_probe(struct device *dev)
 
 	ipa_debug("node->name=%s\n", node->name);
 	if (strcmp("qcom,smp2p_map_ipa_1_out", node->name) == 0) {
-		if (of_find_property(node, "qcom,smem-states", NULL)) {
-			struct qcom_smem_state *state;
-			unsigned int bit;
+		struct qcom_smem_state *state;
+		unsigned int bit;
 
-			state = qcom_smem_state_get(dev, "ipa-smp2p-out", &bit);
-			if (IS_ERR(state)) {
-				res = PTR_ERR(state);
-				ipa_debug("of_get_gpio returned %d\n", res);
+		state = qcom_smem_state_get(dev, "ipa-smp2p-out", &bit);
+		if (IS_ERR(state)) {
+			res = PTR_ERR(state);
+			ipa_debug("of_get_gpio returned %d\n", res);
 
-				return res;
-			}
-			ipa3_ctx->smp2p_info.smem_state = state;
-			ipa3_ctx->smp2p_info.smem_bit = bit;
+			return res;
 		}
+		ipa3_ctx->smp2p_info.smem_state = state;
+		ipa3_ctx->smp2p_info.smem_bit = bit;
 	} else if (strcmp("qcom,smp2p_map_ipa_1_in", node->name) == 0) {
 		int irq;
 
