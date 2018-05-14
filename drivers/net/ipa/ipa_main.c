@@ -1190,7 +1190,7 @@ static void ipa3_freeze_clock_vote_and_notify_modem(void)
 			ipa_client_add_additional("FREEZE_VOTE", true);
 
 	qcom_smem_state_update_bits(ipa3_ctx->smp2p_info.smem_state, BIT(3),
-			BIT(ipa3_ctx->smp2p_info.ipa_clk_on | 1 << 1));
+			(ipa3_ctx->smp2p_info.ipa_clk_on ? 1 : 0) << 1 | 1);
 	ipa3_ctx->smp2p_info.res_sent = true;
 	ipa_debug("IPA clocks are %s\n",
 		ipa3_ctx->smp2p_info.ipa_clk_on ? "ON" : "OFF");
