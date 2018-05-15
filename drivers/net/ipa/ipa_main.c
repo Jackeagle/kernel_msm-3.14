@@ -2143,15 +2143,7 @@ static struct platform_driver ipa_plat_drv = {
 	},
 };
 
-static int __init ipa_module_init(void)
-{
-	ipa_debug("IPA module init\n");
-
-	/* Register as a platform device driver */
-
-	return platform_driver_register(&ipa_plat_drv);
-}
-subsys_initcall(ipa_module_init);
+builtin_platform_driver(ipa_plat_drv);
 
 MODULE_LICENSE("GPL v2");
 MODULE_DESCRIPTION("IPA HW device driver");
