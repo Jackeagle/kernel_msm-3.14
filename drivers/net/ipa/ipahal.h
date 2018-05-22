@@ -13,7 +13,7 @@
 #ifndef _IPAHAL_H_
 #define _IPAHAL_H_
 #include <linux/if_ether.h>
-#include "../ipa_common_i.h"
+#include "ipa_common_i.h"
 #include "ipahal_fltrt_i.h"
 
 

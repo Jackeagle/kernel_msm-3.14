@@ -18,8 +18,8 @@
 #include <linux/list.h>
 #include <linux/netdevice.h>
 #include "ipa_i.h"
-#include "ipahal/ipahal.h"
-#include "ipahal/ipahal_fltrt.h"
+#include "ipahal.h"
+#include "ipahal_fltrt.h"
 
 #define IPA_WAN_AGGR_PKT_CNT 5
 #define IPA_LAST_DESC_CNT 0xFFFF

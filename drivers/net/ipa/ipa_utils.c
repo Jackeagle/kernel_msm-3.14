@@ -30,8 +30,8 @@
 #include <linux/platform_device.h>
 #include <asm/unaligned.h>
 #include "ipa_i.h"
-#include "ipahal/ipahal.h"
-#include "ipahal/ipahal_fltrt.h"
+#include "ipahal.h"
+#include "ipahal_fltrt.h"
 
 #define IPA_BCR_REG_VAL_v3_5 (0x0000003B)
 

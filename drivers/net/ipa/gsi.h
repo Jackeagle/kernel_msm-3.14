@@ -19,7 +19,7 @@
 #include <linux/spinlock.h>
 #include <linux/platform_device.h>
 
-#include "ipahal/ipahal.h"
+#include "ipahal.h"
 
 #define GSI_CHAN_MAX	  31
 #define GSI_EVT_RING_MAX  23

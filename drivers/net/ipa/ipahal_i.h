@@ -14,7 +14,7 @@
 #define _IPAHAL_I_H_
 
 #include <linux/if_ether.h>
-#include "../ipa_common_i.h"
+#include "ipa_common_i.h"
 
 /*
  * struct ipahal_context - HAL global context data

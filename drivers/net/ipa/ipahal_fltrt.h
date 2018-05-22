@@ -13,7 +13,7 @@
 #ifndef _IPAHAL_FLTRT_H_
 #define _IPAHAL_FLTRT_H_
 
-#include "../ipa_common_i.h"
+#include "ipa_common_i.h"
 
 /*
  * struct ipahal_fltrt_alloc_imgs_params - Params for tbls imgs allocations

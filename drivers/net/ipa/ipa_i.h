@@ -30,8 +30,8 @@
 #endif /* CONFIG_IPC_LOGGING */
 
 #include "ipa_common_i.h"
-#include "ipahal/ipahal_reg.h"
-#include "ipahal/ipahal.h"
+#include "ipahal_reg.h"
+#include "ipahal.h"
 #include "gsi.h"
 
 #define DRV_NAME "ipa"
