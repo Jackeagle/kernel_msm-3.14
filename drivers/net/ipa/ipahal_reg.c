@@ -798,6 +798,11 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 							0x00000220,	0x0000),
 		reg_obj_nofunc(DPS_SEQUENCER_FIRST,	0x0001e000,	0x0000),
 		reg_obj_nofunc(HPS_SEQUENCER_FIRST,	0x0001e080,	0x0000),
+		reg_obj_nofunc(ENABLE_GSI,		0x00002790,	0x0000),
+		reg_obj_nofunc(ENDP_GSI_CFG_TLV_n,	0x00002924,	0x0004),
+		reg_obj_nofunc(ENDP_GSI_CFG_AOS_n,	0x000029a8,	0x0004),
+		reg_obj_nofunc(ENDP_GSI_CFG1_n,		0x00002794,	0x0004),
+		reg_obj_nofunc(ENDP_GSI_CFG2_n,		0x00002a2c,	0x0004),
 	},
 };
 #undef reg_obj_nofunc
