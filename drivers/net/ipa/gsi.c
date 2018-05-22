@@ -15,6 +15,7 @@
 #include <linux/platform_device.h>
 #include <linux/delay.h>
 
+#include "ipa_i.h"
 #include "gsi.h"
 #include "gsi_reg.h"
 
@@ -706,16 +707,154 @@ bool gsi_firmware_size_ok(u32 base, u32 size)
 	return base == load_address && size <= 4 * (GSI_INST_RAM_n_MAXn + 1);
 }
 
+/* Return the endpoint config info for the given pipe, or NULL */
+static const struct ipa_gsi_ep_config *ipa_pipe_ep_config(u32 pipe_idx)
+{
+	enum ipa_client_type client;
+
+	for (client = 0; client < IPA_CLIENT_MAX; client++) {
+		const struct ipa_gsi_ep_config *ep_config;
+
+		ep_config = ipa3_get_gsi_ep_info(client);
+		if (ep_config && ep_config->ipa_ep_num == pipe_idx)
+			return ep_config;
+	}
+
+	return NULL;
+}
+
+/* Enable configuration of pipes */
+static void gsi_tz_pipe_config_enable(bool enable)
+{
+	u32 val = 0x80000805;		/* Config enabled value */
+
+	if (!enable)
+		val |= 0x40000000;	/* Set the config locked bit */
+	ipahal_write_reg(IPA_SPARE_REG_1, val);
+}
+
+/* Perform initialization normally done by TZ */
+static void gsi_tz_pipe_setup(void)
+{
+	u32 tlv_offset = 0;	/* TLV FIFO (GSI->IPA) offset */
+	u32 aos_offset = 0;	/* AOS FIFO (IPA->GSI) offset */
+	u32 val;
+	u32 i;
+
+	ipahal_write_reg(IPA_ENABLE_GSI, 1);
+
+	gsi_tz_pipe_config_enable(true);
+
+	for (i = 0; i < IPA3_MAX_NUM_PIPES; i++) {
+		const struct ipa_gsi_ep_config *ep_config;
+
+		ep_config = ipa_pipe_ep_config(i);
+		if (!ep_config)
+			continue;
+
+		/* Write TLV, AOS, and CFG1 for enabled pipes only */
+		if (i < ipa3_ctx->ipa_num_pipes) {
+			val = tlv_offset;
+			val |= ep_config->ipa_if_tlv << 16;
+			ipahal_write_reg_n(IPA_ENDP_GSI_CFG_TLV_n, i, val);
+			tlv_offset += ep_config->ipa_if_tlv;
+
+			val = aos_offset;
+			val |= ep_config->ipa_if_aos << 16;
+			ipahal_write_reg_n(IPA_ENDP_GSI_CFG_AOS_n, i, val);
+			aos_offset += ep_config->ipa_if_aos;
+
+			val = ep_config->ee;
+			val |= ep_config->ipa_gsi_chan_num << 8;
+			val |= 1 << 16;
+			ipahal_write_reg_n(IPA_ENDP_GSI_CFG1_n, i, val);
+		}
+
+		/* Toggle the high bit on and off on CFG2 for all pipes */
+		ipahal_write_reg_n(IPA_ENDP_GSI_CFG2_n, i, 1 << 31);
+		ipahal_write_reg_n(IPA_ENDP_GSI_CFG2_n, i, 0);
+	}
+
+	gsi_tz_pipe_config_enable(false);
+}
+
+static void gsi_write_ieps(void)
+{
+	gsi_writel(1, GSI_IRAM_PTR_CH_CMD_OFFS);
+	gsi_writel(2, GSI_IRAM_PTR_CH_DB_OFFS);
+	gsi_writel(3, GSI_IRAM_PTR_CH_DIS_COMP_OFFS);
+	gsi_writel(4, GSI_IRAM_PTR_CH_EMPTY_OFFS);
+	gsi_writel(5, GSI_IRAM_PTR_EE_GENERIC_CMD_OFFS);
+	gsi_writel(6, GSI_IRAM_PTR_EVENT_GEN_COMP_OFFS);
+	gsi_writel(7, GSI_IRAM_PTR_INT_MOD_STOPED_OFFS);
+	gsi_writel(8, GSI_IRAM_PTR_PERIPH_IF_TLV_IN_0_OFFS);
+	gsi_writel(9, GSI_IRAM_PTR_PERIPH_IF_TLV_IN_2_OFFS);
+	gsi_writel(10, GSI_IRAM_PTR_PERIPH_IF_TLV_IN_1_OFFS);
+	gsi_writel(11, GSI_IRAM_PTR_NEW_RE_OFFS);
+	gsi_writel(12, GSI_IRAM_PTR_READ_ENG_COMP_OFFS);
+	gsi_writel(13, GSI_IRAM_PTR_TIMER_EXPIRED_OFFS);
+	gsi_writel(14, GSI_IRAM_PTR_EV_DB_OFFS);
+	gsi_writel(15, GSI_IRAM_PTR_UC_GP_INT_OFFS);
+	gsi_writel(16, GSI_IRAM_PTR_WRITE_ENG_COMP_OFFS);
+}
+
+static void gsi_config_backpressure(void)
+{
+	gsi_writel(0xfffffffe, GSI_IC_DISABLE_CHNL_BCK_PRS_LSB_OFFS);
+	gsi_writel(0xffffffff, GSI_IC_DISABLE_CHNL_BCK_PRS_MSB_OFFS);
+	gsi_writel(0xffffffbf, GSI_IC_GEN_EVNT_BCK_PRS_LSB_OFFS);
+	gsi_writel(0xffffffff, GSI_IC_GEN_EVNT_BCK_PRS_MSB_OFFS);
+	gsi_writel(0xffffefff, GSI_IC_GEN_INT_BCK_PRS_LSB_OFFS);
+	gsi_writel(0xffffffff, GSI_IC_GEN_INT_BCK_PRS_MSB_OFFS);
+	gsi_writel(0xffffefff, GSI_IC_STOP_INT_MOD_BCK_PRS_LSB_OFFS);
+	gsi_writel(0xffffffff, GSI_IC_STOP_INT_MOD_BCK_PRS_MSB_OFFS);
+	gsi_writel(0x00000000, GSI_IC_PROCESS_DESC_BCK_PRS_LSB_OFFS);
+	gsi_writel(0x00000000, GSI_IC_PROCESS_DESC_BCK_PRS_MSB_OFFS);
+	gsi_writel(0x00ffffff, GSI_IC_TLV_STOP_BCK_PRS_LSB_OFFS);
+	gsi_writel(0xffffffff, GSI_IC_TLV_STOP_BCK_PRS_MSB_OFFS);
+	gsi_writel(0xfdffffff, GSI_IC_TLV_RESET_BCK_PRS_LSB_OFFS);
+	gsi_writel(0xffffffff, GSI_IC_TLV_RESET_BCK_PRS_MSB_OFFS);
+	gsi_writel(0xffffffff, GSI_IC_RGSTR_TIMER_BCK_PRS_LSB_OFFS);
+	gsi_writel(0xfffffffe, GSI_IC_RGSTR_TIMER_BCK_PRS_MSB_OFFS);
+	gsi_writel(0xffffffff, GSI_IC_READ_BCK_PRS_LSB_OFFS);
+	gsi_writel(0xffffefff, GSI_IC_READ_BCK_PRS_MSB_OFFS);
+	gsi_writel(0xffffffff, GSI_IC_WRITE_BCK_PRS_LSB_OFFS);
+	gsi_writel(0xffffdfff, GSI_IC_WRITE_BCK_PRS_MSB_OFFS);
+	gsi_writel(0xffffffff, GSI_IC_UCONTROLLER_GPR_BCK_PRS_LSB_OFFS);
+	gsi_writel(0xff03ffff, GSI_IC_UCONTROLLER_GPR_BCK_PRS_MSB_OFFS);
+}
+
 void gsi_firmware_enable(void)
 {
 	u32 val;
+
+	/* ------- TZ code ------- */
+	gsi_tz_pipe_config_enable(false);	/* Shouldn't be needed */
+	gsi_tz_pipe_setup();
+
+	val = gsi_readl(GSI_EE_n_GSI_SW_VERSION_OFFS(IPA_EE_UC));
+	ipa_debug("GSI SW version 0x%08x\n", val);
+
+	gsi_writel(0, GSI_PERIPH_BASE_ADDR_MSB_OFFS);
+	gsi_writel(ipa3_ctx->ipa_wrapper_base, GSI_PERIPH_BASE_ADDR_MSB_OFFS);
+
+	gsi_write_ieps();
+	/* ------- */
 
 	val = field_gen(1, MCS_CFG_ENABLE_BMSK);
 	gsi_writel(val, GSI_MCS_CFG_OFFS);
 
 	val = field_gen(1, GSI_ENABLE_BMSK);
+	val |= field_gen(1, MCS_ENABLE_BMSK);		/* TZ code */
 	val |= field_gen(1, DOUBLE_MCS_CLK_FREQ_BMSK);
 	gsi_writel(val, GSI_CFG_OFFS);
+
+	/* ------- TZ code ------- */
+	val = gsi_readl(GSI_EE_n_GSI_MCS_CODE_VER_OFFS(IPA_EE_UC));
+	ipa_debug("GSI MCS CODE version 0x%08x\n", val);
+
+	gsi_config_backpressure();
+	/* ------- */
 }
 
 /* Compute the value to write to the event ring context 0 register */

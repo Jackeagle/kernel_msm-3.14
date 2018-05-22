@@ -202,12 +202,6 @@ static const struct rsrc_min_max ipa3_rsrc_dst_grp_config
 	},
 };
 
-enum ipa_ees {
-	IPA_EE_AP = 0,
-	IPA_EE_Q6 = 1,
-	IPA_EE_UC = 2,
-};
-
 struct ipa_ep_configuration {
 	bool valid;
 	bool support_flt;

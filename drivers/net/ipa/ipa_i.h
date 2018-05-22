@@ -105,6 +105,12 @@
 #define IPA_HW_NUM_FEATURES 0x8
 #define IPA_WAN_MSG_IPv6_ADDR_GW_LEN 4
 
+enum ipa_ees {
+	IPA_EE_AP = 0,
+	IPA_EE_Q6 = 1,
+	IPA_EE_UC = 2,
+};
+
 /**
  * struct ipa_tx_suspend_irq_data - interrupt data for IPA_TX_SUSPEND_IRQ
  * @endpoints: bitmask of endpoints which case IPA_TX_SUSPEND_IRQ interrupt
