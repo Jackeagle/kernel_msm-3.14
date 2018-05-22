@@ -32,10 +32,8 @@
 #include <linux/of_gpio.h>
 #include <linux/uaccess.h>
 #include <linux/interrupt.h>
-#ifdef CONFIG_QCOM_BUS_SCALING
 #include <linux/msm-bus.h>
 #include <linux/msm-bus-board.h>
-#endif /* CONFIG_QCOM_BUS_SCALING */
 #include <linux/netdevice.h>
 #include <linux/delay.h>
 #include <linux/time.h>
@@ -775,9 +773,7 @@ static void ipa3_enable_clks(void)
 {
 	ipa_debug("enabling IPA clocks and bus voting\n");
 
-#ifdef CONFIG_QCOM_BUS_SCALING
 	WARN_ON(msm_bus_scale_client_update_request(ipa3_ctx->ipa_bus_hdl, 1));
-#endif /* CONFIG_QCOM_BUS_SCALING */
 }
 
 /**
@@ -790,9 +786,7 @@ static void ipa3_disable_clks(void)
 {
 	ipa_debug("disabling IPA clocks and bus voting\n");
 
-#ifdef CONFIG_QCOM_BUS_SCALING
 	WARN_ON(msm_bus_scale_client_update_request(ipa3_ctx->ipa_bus_hdl, 0));
-#endif /* CONFIG_QCOM_BUS_SCALING */
 }
 
 /* log->lock is assumed held by the caller */
@@ -2175,7 +2169,6 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_hal_destroy;
 	}
 
-#ifdef CONFIG_QCOM_BUS_SCALING
 	/* get BUS handle */
 	ipa3_ctx->bus_scale_tbl = ipa_bus_scale_table_init();
 	ipa3_ctx->ipa_bus_hdl =
@@ -2185,7 +2178,6 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		result = -ENODEV;
 		goto err_hal_destroy;
 	}
-#endif /* CONFIG_QCOM_BUS_SCALING */
 
 	/* init active_clients_log */
 	if (ipa3_active_clients_log_init()) {
@@ -2212,11 +2204,9 @@ err_clear_gsi_ctx:
 	ipa3_ctx->gsi_ctx = NULL;
 	ipa3_active_clients_log_destroy();
 err_unregister_bus_handle:
-#ifdef CONFIG_QCOM_BUS_SCALING
 	msm_bus_scale_unregister_client(ipa3_ctx->ipa_bus_hdl);
 	ipa3_ctx->ipa_bus_hdl = 0;
 	ipa3_ctx->bus_scale_tbl = NULL;
-#endif /* CONFIG_QCOM_BUS_SCALING */
 err_hal_destroy:
 	ipahal_destroy();
 	iounmap(ipa3_ctx->mmio);
