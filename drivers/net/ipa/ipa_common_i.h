@@ -119,8 +119,53 @@ enum ipa_irq_type {
  * Add new clients in the end of the list and update IPA_CLIENT_MAX
  */
 enum ipa_client_type {
-		IPA_CLIENT_A2_EMBEDDED_PROD				= 28,
-		IPA_CLIENT_A2_EMBEDDED_CONS				= 29,
+        IPA_CLIENT_HSIC1_PROD                   = 0,
+        IPA_CLIENT_HSIC1_CONS                   = 1,
+
+        IPA_CLIENT_HSIC2_PROD                   = 2,
+        IPA_CLIENT_HSIC2_CONS                   = 3,
+
+        IPA_CLIENT_HSIC3_PROD                   = 4,
+        IPA_CLIENT_HSIC3_CONS                   = 5,
+
+        IPA_CLIENT_HSIC4_PROD                   = 6,
+        IPA_CLIENT_HSIC4_CONS                   = 7,
+
+        IPA_CLIENT_HSIC5_PROD                   = 8,
+        IPA_CLIENT_HSIC5_CONS                   = 9,
+
+        IPA_CLIENT_WLAN1_PROD                   = 10,
+        IPA_CLIENT_WLAN1_CONS                   = 11,
+
+        IPA_CLIENT_A5_WLAN_AMPDU_PROD           = 12,
+        IPA_CLIENT_WLAN2_CONS                   = 13,
+
+        /* RESERVERD PROD                       = 14, */
+        IPA_CLIENT_WLAN3_CONS                   = 15,
+
+        /* RESERVERD PROD                       = 16, */
+        IPA_CLIENT_WLAN4_CONS                   = 17,
+
+        IPA_CLIENT_USB_PROD                     = 18,
+        IPA_CLIENT_USB_CONS                     = 19,
+
+        IPA_CLIENT_USB2_PROD                    = 20,
+        IPA_CLIENT_USB2_CONS                    = 21,
+
+        IPA_CLIENT_USB3_PROD                    = 22,
+        IPA_CLIENT_USB3_CONS                    = 23,
+
+        IPA_CLIENT_USB4_PROD                    = 24,
+        IPA_CLIENT_USB4_CONS                    = 25,
+
+        IPA_CLIENT_UC_USB_PROD                  = 26,
+        IPA_CLIENT_USB_DPL_CONS                 = 27,
+
+	IPA_CLIENT_A2_EMBEDDED_PROD		= 28,
+	IPA_CLIENT_A2_EMBEDDED_CONS		= 29,
+
+        IPA_CLIENT_A2_TETHERED_PROD             = 30,
+        IPA_CLIENT_A2_TETHERED_CONS             = 31,
 
 	IPA_CLIENT_APPS_LAN_PROD		= 32,
 	IPA_CLIENT_APPS_LAN_CONS		= 33,
@@ -132,11 +177,23 @@ enum ipa_client_type {
 	IPA_CLIENT_APPS_CMD_PROD		= 36,
 	IPA_CLIENT_A5_LAN_WAN_CONS		= 37,
 
+        IPA_CLIENT_ODU_PROD                     = 38,
+        IPA_CLIENT_ODU_EMB_CONS                 = 39,
+
+        /* RESERVERD PROD                       = 40, */
+        IPA_CLIENT_ODU_TETH_CONS                = 41,
+
+        IPA_CLIENT_MHI_PROD                     = 42,
+        IPA_CLIENT_MHI_CONS                     = 43,
+
 	IPA_CLIENT_MEMCPY_DMA_SYNC_PROD		= 44,
 	IPA_CLIENT_MEMCPY_DMA_SYNC_CONS		= 45,
 
 	IPA_CLIENT_MEMCPY_DMA_ASYNC_PROD	= 46,
 	IPA_CLIENT_MEMCPY_DMA_ASYNC_CONS	= 47,
+
+        IPA_CLIENT_ETHERNET_PROD                = 48,
+        IPA_CLIENT_ETHERNET_CONS                = 49,
 
 	IPA_CLIENT_Q6_LAN_PROD			= 50,
 	IPA_CLIENT_Q6_LAN_CONS			= 51,
@@ -155,7 +212,23 @@ enum ipa_client_type {
 
 	/* RESERVERD PROD			= 60, */
 	IPA_CLIENT_Q6_LTE_WIFI_AGGR_CONS	= 61,
-	/* RESERVERD PROD				= 72, */
+
+        IPA_CLIENT_TEST_PROD                    = 62,
+        IPA_CLIENT_TEST_CONS                    = 63,
+
+        IPA_CLIENT_TEST1_PROD                   = 64,
+        IPA_CLIENT_TEST1_CONS                   = 65,
+
+        IPA_CLIENT_TEST2_PROD                   = 66,
+        IPA_CLIENT_TEST2_CONS                   = 67,
+
+        IPA_CLIENT_TEST3_PROD                   = 68,
+        IPA_CLIENT_TEST3_CONS                   = 69,
+
+        IPA_CLIENT_TEST4_PROD                   = 70,
+        IPA_CLIENT_TEST4_CONS                   = 71,
+
+	/* RESERVERD PROD			= 72, */
 	IPA_CLIENT_DUMMY_CONS			= 73
 };
 
