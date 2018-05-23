@@ -440,6 +440,30 @@
 				status = "disabled";
 			};
 
+			geniqup@8c0000 {
+				compatible = "qcom,geni-se-qup";
+				reg = <0x8c0000 0x6000>;
+				clock-names = "m-ahb", "s-ahb";
+				clocks = <&gcc GCC_QUPV3_WRAP_0_M_AHB_CLK>,
+				<&gcc GCC_QUPV3_WRAP_0_S_AHB_CLK>;
+				#address-cells = <1>;
+				#size-cells = <1>;
+				ranges;
+				status = "disabled";
+
+				uart6: serial@898000 {
+					compatible = "qcom,geni-uart";
+					reg = <0x898000 0x4000>;
+					clock-names = "se";
+					clocks = <&gcc GCC_QUPV3_WRAP0_S6_CLK>;
+					interrupts = <GIC_SPI 607 IRQ_TYPE_LEVEL_HIGH>;
+					pinctrl-names = "default", "sleep";
+					pinctrl-0 = <&qup_uart6_default>;
+					pinctrl-1 = <&qup_uart6_sleep>;
+					status = "disabled";
+				};
+			};
+
 			i2c2: i2c@888000 {
 				compatible = "qcom,geni-i2c";
 				reg = <0x888000 0x4000>;
@@ -505,6 +529,35 @@
 				#address-cells = <1>;
 				#size-cells = <0>;
 				status = "disabled";
+			};
+
+			qup_uart6_default: qup-uart6-default {
+				pinmux {
+					function = "qup6";
+					pins = "gpio45", "gpio46",
+							"gpio47", "gpio48";
+				};
+
+				pinconf {
+					pins = "gpio45", "gpio46",
+							"gpio47", "gpio48";
+					drive-strength = <2>;
+					bias-no-pull;
+				};
+			};
+
+			qup_uart6_sleep: qup-uart6-sleep {
+				pinmux {
+					function = "gpio";
+					pins = "gpio45", "gpio46",
+							"gpio47", "gpio48";
+				};
+
+				pinconf_ctsrx {
+					pins = "gpio45", "gpio46",
+							"gpio47", "gpio48";
+					bias-no-pull;
+				};
 			};
 
 			spi4: spi@890000 {

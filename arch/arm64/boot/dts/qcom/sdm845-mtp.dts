@@ -16,6 +16,7 @@
 
 	aliases {
 		serial0 = &uart9;
+		hsuart0 = &uart6;
 	};
 
 	chosen {
@@ -454,6 +455,32 @@
 			regulator-max-microvolt = <3600000>;
 			regulator-initial-mode = <RPMH_REGULATOR_MODE_AUTO>;
 			regulator-allow-bypass;
+		};
+	};
+	geniqup@8c0000 {
+		status = "okay";
+
+		serial@898000 {
+			status = "okay";
+			bluetooth: bt_wcn3990 {
+				compatible = "qcom,wcn3990-bt";
+				vddio-supply = <&vreg_s3a_1p35>;
+				vddxtal-supply = <&vreg_s5a_2p04>;
+				vddcore-supply = <&vreg_l7a_1p8>;
+				vddpa-supply = <&vreg_l17a_1p3>;
+				vddldo-supply = <&vreg_l25a_3p3>;
+				max-speed = <3200000>;
+			};
+		};
+	};
+
+	pinctrl@3400000 {
+		qup-i2c10-default {
+			pinconf {
+				pins = "gpio55", "gpio56";
+				drive-strength = <2>;
+				bias-disable;
+			};
 		};
 	};
 
