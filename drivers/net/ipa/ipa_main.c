@@ -378,60 +378,63 @@ static int ipa_init_hdr(void)
 	u32 offset;
 
 	dma_size = ipa3_ctx->mem_info[MODEM_HDR_SIZE] + ipa3_ctx->mem_info[APPS_HDR_SIZE];
-	if (ipahal_dma_alloc(&mem, dma_size, GFP_KERNEL)) {
-		ipa_err("fail to alloc DMA buff of size %u\n", dma_size);
-		return -ENOMEM;
-	}
+	if (dma_size) {
+		if (ipahal_dma_alloc(&mem, dma_size, GFP_KERNEL)) {
+			ipa_err("fail to alloc DMA buff of size %u\n", dma_size);
+			return -ENOMEM;
+		}
 
-	offset = ipa3_ctx->smem_restricted_bytes + ipa3_ctx->mem_info[MODEM_HDR_OFST];
-	cmd_pyld = ipahal_hdr_init_local_pyld(&mem, offset);
-	if (!cmd_pyld) {
-		ipa_err("fail to construct hdr_init_local imm cmd\n");
-		ipahal_dma_free(&mem);
-		return -EFAULT;
-	}
-	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
+		offset = ipa3_ctx->smem_restricted_bytes + ipa3_ctx->mem_info[MODEM_HDR_OFST];
+		cmd_pyld = ipahal_hdr_init_local_pyld(&mem, offset);
+		if (!cmd_pyld) {
+			ipa_err("fail to construct hdr_init_local imm cmd\n");
+			ipahal_dma_free(&mem);
+			return -EFAULT;
+		}
+		ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
-	if (ipa3_send_cmd(1, &desc)) {
-		ipa_err("fail to send immediate command\n");
+		if (ipa3_send_cmd(1, &desc)) {
+			ipa_err("fail to send immediate command\n");
+			ipahal_destroy_imm_cmd(cmd_pyld);
+			ipahal_dma_free(&mem);
+			return -EFAULT;
+		}
+
 		ipahal_destroy_imm_cmd(cmd_pyld);
 		ipahal_dma_free(&mem);
-		return -EFAULT;
 	}
-
-	ipahal_destroy_imm_cmd(cmd_pyld);
-	ipahal_dma_free(&mem);
 
 	dma_size = ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE] +
 			ipa3_ctx->mem_info[APPS_HDR_PROC_CTX_SIZE];
-	if (ipahal_dma_alloc(&mem, dma_size, GFP_KERNEL)) {
-		ipa_err("fail to alloc DMA buff of size %u\n", dma_size);
-		return -ENOMEM;
-	}
+	if (dma_size) {
+		if (ipahal_dma_alloc(&mem, dma_size, GFP_KERNEL)) {
+			ipa_err("fail to alloc DMA buff of size %u\n", dma_size);
+			return -ENOMEM;
+		}
 
-	offset = ipa3_ctx->smem_restricted_bytes +
-			ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_OFST];
-	cmd_pyld = ipahal_dma_shared_mem_write_pyld(&mem, offset);
-	if (!cmd_pyld) {
-		ipa_err("fail to construct dma_shared_mem imm\n");
-		ipahal_dma_free(&mem);
-		return -EFAULT;
-	}
+		offset = ipa3_ctx->smem_restricted_bytes +
+				ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_OFST];
+		cmd_pyld = ipahal_dma_shared_mem_write_pyld(&mem, offset);
+		if (!cmd_pyld) {
+			ipa_err("fail to construct dma_shared_mem imm\n");
+			ipahal_dma_free(&mem);
+			return -EFAULT;
+		}
 
-	memset(&desc, 0, sizeof(desc));
-	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
+		memset(&desc, 0, sizeof(desc));
+		ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
-	if (ipa3_send_cmd(1, &desc)) {
-		ipa_err("fail to send immediate command\n");
+		if (ipa3_send_cmd(1, &desc)) {
+			ipa_err("fail to send immediate command\n");
+			ipahal_destroy_imm_cmd(cmd_pyld);
+			ipahal_dma_free(&mem);
+			return -EFAULT;
+		}
 		ipahal_destroy_imm_cmd(cmd_pyld);
 		ipahal_dma_free(&mem);
-		return -EFAULT;
 	}
-	ipahal_destroy_imm_cmd(cmd_pyld);
 
 	ipahal_write_reg(IPA_LOCAL_PKT_PROC_CNTXT_BASE, 0);
-
-	ipahal_dma_free(&mem);
 
 	return 0;
 }
