@@ -567,7 +567,7 @@ enum gsi_generic_ee_cmd_opcode {
 extern struct gsi_ctx *gsi_ctx;
 void gsi_debugfs_init(void);
 u16 gsi_find_idx_from_addr(struct gsi_ring_ctx *ctx, u64 addr);
-struct gsi_ctx *gsi_init(struct platform_device *pdev);
+struct gsi_ctx *gsi_init(struct platform_device *pdev, u32 ee);
 
 /*
  * Read a value from the given offset into the I/O space defined in
@@ -591,11 +591,9 @@ static inline void gsi_writel(u32 v, u32 offset)
  * gsi_register_device - Peripheral should call this function to
  * register itself with GSI before invoking any other APIs
  *
- * @ee:	 AP execution environment (EE) number to use
- *
  * @Return 0 if successful or a negative error code otherwise.
  */
-int gsi_register_device(u32 ee);
+int gsi_register_device(void);
 
 /**
  * gsi_deregister_device - Peripheral should call this function to

@@ -1286,7 +1286,7 @@ static int ipa3_post_init(struct device *ipa_dev)
 		return -ENODEV;
 	}
 
-	result = gsi_register_device(ipa3_ctx->ee);
+	result = gsi_register_device();
 	if (result) {
 		ipa_err(":gsi register error - %d\n", result);
 		return -ENODEV;
@@ -2092,7 +2092,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_unregister_bus_handle;
 	}
 
-	ipa3_ctx->gsi_ctx = gsi_init(pdev_p);
+	ipa3_ctx->gsi_ctx = gsi_init(pdev_p, ipa3_ctx->ee);
 	if (IS_ERR(ipa3_ctx->gsi_ctx)) {
 		ipa_err("ipa: error initializing gsi driver.\n");
 		result = PTR_ERR(ipa3_ctx->gsi_ctx);

@@ -588,7 +588,7 @@ static u32 gsi_get_max_event_rings(void)
 	return max_event_rings;
 }
 
-int gsi_register_device(u32 ee)
+int gsi_register_device(void)
 {
 	struct platform_device *ipa3_pdev = to_platform_device(gsi_ctx->dev);
 	struct resource *res;
@@ -600,8 +600,6 @@ int gsi_register_device(u32 ee)
 		ipa_err("per already registered\n");
 		return -ENOTSUPP;
 	}
-
-	gsi_ctx->ee = ee;
 
 	/* Get IPA GSI IRQ number */
 	ret = platform_get_irq_byname(ipa3_pdev, "gsi-irq");
@@ -1731,7 +1729,7 @@ free_lock:
 }
 
 /* Initialize GSI driver */
-struct gsi_ctx *gsi_init(struct platform_device *pdev)
+struct gsi_ctx *gsi_init(struct platform_device *pdev, u32 ee)
 {
 	struct device *dev = &pdev->dev;
 
@@ -1743,6 +1741,7 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev)
 	}
 
 	gsi_ctx->dev = dev;
+	gsi_ctx->ee = ee;
 	init_completion(&gsi_ctx->gen_ee_cmd_compl);
 
 	pr_err("gsi_probe complete\n");
