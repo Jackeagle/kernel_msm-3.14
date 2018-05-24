@@ -32,7 +32,7 @@
 #define IPA_GSI_CHANNEL_STOP_SLEEP_MAX_USEC (2000)
 
 
-/* msm_gsi.h */
+/* gsi.h */
 
 /**
  * struct ipa_gsi_ep_config - IPA GSI endpoint configurations
@@ -133,7 +133,7 @@ struct gsi_chan_info {
 	uint64_t evt_rp;
 };
 
-/* msm_gsi.h */
+/* gsi.h */
 
 enum gsi_intr_type {
 	GSI_INTR_MSI = 0x0,
@@ -567,7 +567,7 @@ enum gsi_generic_ee_cmd_opcode {
 extern struct gsi_ctx *gsi_ctx;
 void gsi_debugfs_init(void);
 u16 gsi_find_idx_from_addr(struct gsi_ring_ctx *ctx, u64 addr);
-struct gsi_ctx *msm_gsi_init(struct platform_device *pdev);
+struct gsi_ctx *gsi_init(struct platform_device *pdev);
 
 /*
  * Read a value from the given offset into the I/O space defined in

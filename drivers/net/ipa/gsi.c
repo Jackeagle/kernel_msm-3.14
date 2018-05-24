@@ -1731,7 +1731,7 @@ free_lock:
 }
 
 /* Initialize GSI driver */
-struct gsi_ctx *msm_gsi_init(struct platform_device *pdev)
+struct gsi_ctx *gsi_init(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 
