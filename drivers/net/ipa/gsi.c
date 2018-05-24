@@ -591,8 +591,6 @@ static u32 gsi_get_max_event_rings(void)
 int gsi_register_device(void)
 {
 	struct platform_device *ipa3_pdev = to_platform_device(gsi_ctx->dev);
-	struct resource *res;
-	resource_size_t size;
 	u32 val;
 	int ret;
 
@@ -623,23 +621,6 @@ int gsi_register_device(void)
 		ipa_err("failed to enable wake irq %u\n", gsi_ctx->irq);
 	else
 		ipa_err("GSI irq is wake enabled %u\n", gsi_ctx->irq);
-
-	/* Get IPA GSI address */
-	res = platform_get_resource_byname(ipa3_pdev, IORESOURCE_MEM,
-			"gsi-base");
-	if (!res) {
-		ipa_err(":get resource failed for gsi-base!\n");
-		return -ENODEV;
-	}
-	size = resource_size(res);
-	ipa_debug("GSI base %pa size %pa\n", &res->start, &size);
-
-	gsi_ctx->base = devm_ioremap_nocache(gsi_ctx->dev, res->start, size);
-	if (!gsi_ctx->base) {
-		ipa_err("failed to remap GSI hardware\n");
-		return -ENOMEM;
-	}
-
 
 	val = gsi_readl(GSI_EE_n_GSI_STATUS_OFFS(gsi_ctx->ee));
 	if (!(val & ENABLED_BMSK)) {
@@ -1732,19 +1713,33 @@ free_lock:
 struct gsi_ctx *gsi_init(struct platform_device *pdev, u32 ee)
 {
 	struct device *dev = &pdev->dev;
+	struct resource *res;
+	resource_size_t size;
 
-	pr_err("gsi_probe\n");
 	gsi_ctx = devm_kzalloc(dev, sizeof(*gsi_ctx), GFP_KERNEL);
-	if (!gsi_ctx) {
-		dev_err(dev, "failed to allocated GSI context\n");
+	if (!gsi_ctx)
+		return ERR_PTR(-ENOMEM);
+
+	/* Get GSI memory range and map it */
+	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "gsi-base");
+	if (!res) {
+		ipa_err("missing \"gsi-base\" property in DTB\n");
+		return ERR_PTR(-EINVAL);
+	}
+
+	size = resource_size(res);
+	gsi_ctx->base = devm_ioremap_nocache(dev, res->start, size);
+	if (!gsi_ctx->base) {
+		ipa_err("failed to remap GSI memory\n");
 		return ERR_PTR(-ENOMEM);
 	}
 
 	gsi_ctx->dev = dev;
 	gsi_ctx->ee = ee;
-	init_completion(&gsi_ctx->gen_ee_cmd_compl);
+	ipa_assert(res->start <= (resource_size_t)U32_MAX);
+	gsi_ctx->phys_base = (u32)res->start;
 
-	pr_err("gsi_probe complete\n");
+	init_completion(&gsi_ctx->gen_ee_cmd_compl);
 
 	return gsi_ctx;
 }

@@ -481,6 +481,7 @@ struct gsi_ctx {
 	void __iomem *base;
 	struct device *dev;
 	u32 ee;
+	u32 phys_base;
 	unsigned int irq;
 	bool per_registered;
 	struct gsi_chan_ctx chan[GSI_CHAN_MAX];
