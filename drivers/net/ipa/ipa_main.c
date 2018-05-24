@@ -14,10 +14,6 @@
 #define pr_fmt(fmt)    "ipa %s:%d " fmt, __func__, __LINE__
 
 #include <linux/version.h>
-#define UPSTREAM	(LINUX_VERSION_CODE >= KERNEL_VERSION(4, 16, 0))
-
-#define UPSTREAM_SMEM	UPSTREAM
-
 #include <linux/clk.h>
 #include <linux/compat.h>
 #include <linux/device.h>
@@ -42,11 +38,8 @@
 #include <linux/netdevice.h>
 #include <linux/delay.h>
 #include <linux/time.h>
-#if UPSTREAM_SMEM
 #include <linux/soc/qcom/smem.h>
-#else /* UPSTREAM_SMEM */
-#include <soc/qcom/smem.h>
-#endif /* UPSTREAM_SMEM */
+#include <linux/soc/qcom/smem_state.h>
 #include <asm/cacheflush.h>
 
 #define IPA_SUBSYSTEM_NAME "ipa_fws"
@@ -1878,9 +1871,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	int result;
 	u32 add_map_size;
 	const u32 *add_map;
-#if !UPSTREAM_SMEM
-	void *smem_addr;
-#endif /* !UPSTREAM_SMEM */
 	int i;
 
 	ipa_debug("AP CB probe: sub pdev=%p\n", dev);
@@ -1915,18 +1905,6 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 			ipa3_iommu_map(iova, pa, size);
 		}
 	}
-
-#if !UPSTREAM_SMEM
-	/* map SMEM memory for IPA table accesses */
-	smem_addr = smem_alloc(SMEM_IPA_FILTER_TABLE, IPA_SMEM_SIZE,
-		SMEM_MODEM, 0);
-	if (smem_addr) {
-		phys_addr_t iova = smem_virt_to_phys(smem_addr);
-		phys_addr_t pa = iova;
-
-		ipa3_iommu_map(iova, pa, IPA_SMEM_SIZE);
-	}
-#endif /* !UPSTREAM_SMEM */
 
 	/* Proceed to real initialization */
 	result = ipa3_pre_init();
