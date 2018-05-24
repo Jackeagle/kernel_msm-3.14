@@ -605,6 +605,19 @@ int gsi_register_device(void);
 int gsi_deregister_device(void);
 
 /**
+ * gsi_firmware_size_ok - Verify that a firmware image having the
+ * given base address and size is suitable
+ *
+ * @Return true if values are OK, false otherise
+ */
+bool gsi_firmware_size_ok(u32 base, u32 size);
+
+/**
+ * gsi_firmware_enable - Enable firmware after loading
+ */
+void gsi_firmware_enable(void);
+
+/**
  * gsi_alloc_evt_ring - Peripheral should call this function to
  * allocate an event ring once gsi_register_device() has been called
  *
