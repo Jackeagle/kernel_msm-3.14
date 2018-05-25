@@ -51,7 +51,13 @@
 
 #define IPA_ACTIVE_CLIENTS_TABLE_BUF_SIZE 2048
 
+/* Shared memory */
+
 #define IPA_SMEM_SIZE (8 * 1024)
+/* The host we're sharing memory with (could be "qcom,remote-pid") */
+#define SMEM_MODEM		1
+/* Item number in shared memory of the IPA filter table */
+#define SMEM_IPA_FILTER_TABLE	497
 
 /* The relative location in /lib/firmware where firmware will reside */
 #define IPA_FWS_PATH		"ipa_fws.elf"
@@ -1965,6 +1971,7 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	int result;
 	u32 add_map_size;
 	const u32 *add_map;
+	void *smem_addr;
 	int i;
 
 	ipa_debug("AP CB probe: sub pdev=%p\n", dev);
@@ -1998,6 +2005,25 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 
 			ipa3_iommu_map(iova, pa, size);
 		}
+	}
+
+	result = qcom_smem_alloc(SMEM_MODEM, SMEM_IPA_FILTER_TABLE,
+					IPA_SMEM_SIZE);
+	if (result && result != -EEXIST) {
+		ipa_err("failed to allocate filter table\n");
+		goto err_dev_destroy;
+	}
+	smem_addr = qcom_smem_get(SMEM_MODEM, SMEM_IPA_FILTER_TABLE, NULL);
+	if (!IS_ERR(smem_addr)) {
+#define qcom_smem_virt_to_phys(x)	((phys_addr_t)x)
+		phys_addr_t pa = qcom_smem_virt_to_phys(smem_addr);
+		unsigned long iova = pa;
+
+		ipa3_iommu_map(iova, pa, IPA_SMEM_SIZE);
+	} else {
+		ipa_err("failed to get filter table\n");
+		result = PTR_ERR(smem_addr);
+		goto err_dev_destroy;
 	}
 
 	/* Proceed to real initialization */
