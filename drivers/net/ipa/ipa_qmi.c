@@ -67,9 +67,9 @@ static struct qmi_handle client_handle;
  */
 static struct qmi_handle server_handle;
 
-/* These track what we have learned from the modem during the handshake */
+/* These track state during the handshake */
 static bool indication_register_received = false;
-static bool driver_init_complete_received = false;
+static bool init_driver_response_received = false;
 
 /* Send an INIT_COMPLETE_IND indication message to the modem */
 static int ipa_send_master_driver_init_complete_ind(struct qmi_handle *qmi,
@@ -89,23 +89,24 @@ static int ipa_send_master_driver_init_complete_ind(struct qmi_handle *qmi,
 /*
  * This function is called to determine whether to complete the
  * handshake by sending an INIT_COMPLETE_IND indication message to
- * the modem.  The "driver" parameter is false when we've received
- * an INDICATION_REGISTER request message from the modem, or true
- * when we've received a DRIVER_INIT_COMPLETE request message.  If
- * this function decides the message should be sent, it calls
- * ipa_send_master_driver_init_complete_ind() to send it.
+ * the modem.  The "init_driver" parameter is false when we've
+ * received an INDICATION_REGISTER request message from the modem,
+ * or true when we've received the response from the INIT_DRIVER
+ * request message we send.  If this function decides the message
+ * should be sent, it calls ipa_send_master_driver_init_complete_ind()
+ * to send it.
  */
 static int ipa_handshake_complete(struct qmi_handle *qmi,
-		struct sockaddr_qrtr *sq, bool driver)
+		struct sockaddr_qrtr *sq, bool init_driver)
 {
 	bool send_it;
 
-	if (driver) {
-		driver_init_complete_received = true;
+	if (init_driver) {
+		init_driver_response_received = true;
 		send_it = indication_register_received;
 	} else {
 		indication_register_received = true;
-		send_it = driver_init_complete_received;
+		send_it = init_driver_response_received;
 	}
 	if (!send_it)
 		return 0;
@@ -179,14 +180,8 @@ static void ipa_driver_init_complete_fn(struct qmi_handle *qmi,
 	ret = qmi_send_response(qmi, sq, txn, IPA_QMI_DRIVER_INIT_COMPLETE,
 				IPA_QMI_DRIVER_INIT_COMPLETE_RSP_SZ,
 				ipa_driver_init_complete_rsp_ei, &rsp);
-	if (ret) {
-		ipa_err("error %d sending response\n", ret);
-		return;
-	}
-
-	ret = ipa_handshake_complete(qmi, sq, true);
 	if (ret)
-		ipa_err("error %d completing handshake\n", ret);
+		ipa_err("error %d sending response\n", ret);
 }
 
 /* The server handles two request message types sent by the modem. */
@@ -204,6 +199,36 @@ static struct qmi_msg_handler ipa_server_msg_handlers[] = {
 		.ei		= ipa_driver_init_complete_req_ei,
 		.decoded_size	= IPA_QMI_DRIVER_INIT_COMPLETE_REQ_SZ,
 		.fn		= ipa_driver_init_complete_fn,
+	},
+};
+
+/*
+ * Callback function to handle an IPA_QMI_INIT_DRIVER response message
+ * from the modem.  This only acknowledges that the modem received the
+ * request.  The modem will eventually report that it has completed its
+ * modem initialization by sending a IPA_QMI_DRIVER_INIT_COMPLETE request.
+ */
+static void ipa_init_driver_rsp_fn(struct qmi_handle *qmi,
+		struct sockaddr_qrtr *sq, struct qmi_txn *txn,
+		const void *decoded)
+{
+	int ret;
+
+	kfree(txn);
+
+	ret = ipa_handshake_complete(qmi, sq, true);
+	if (ret)
+		ipa_err("error %d completing handshake\n", ret);
+}
+
+/* The client handles one response message type sent by the modem. */
+static struct qmi_msg_handler ipa_client_msg_handlers[] = {
+	{
+		.type		= QMI_RESPONSE,
+		.msg_id		= IPA_QMI_INIT_DRIVER,
+		.ei		= ipa_init_modem_driver_rsp_ei,
+		.decoded_size	= IPA_QMI_INIT_DRIVER_RSP_SZ,
+		.fn		= ipa_init_driver_rsp_fn,
 	},
 };
 
@@ -302,61 +327,40 @@ static const struct ipa_init_modem_driver_req *init_modem_driver_req(void)
 }
 
 /*
- * Perform an INIT_DRIVER transaction--issue the request to the
- * modem and wait for its response.
- */
-static int
-ipa_init_driver_txn(struct qmi_handle *qmi, struct sockaddr_qrtr *sq)
-{
-	const struct ipa_init_modem_driver_req *req = init_modem_driver_req();
-	struct ipa_init_modem_driver_rsp rsp;
-	struct qmi_txn txn;
-	int ret;
-
-	ret = qmi_txn_init(qmi, &txn, ipa_init_modem_driver_rsp_ei, &rsp);
-	if (ret)
-		return ret;
-
-	ret = qmi_send_request(qmi, sq, &txn, IPA_QMI_INIT_DRIVER,
-				IPA_QMI_INIT_DRIVER_REQ_SZ,
-				ipa_init_modem_driver_req_ei, &req);
-	if (ret)
-		qmi_txn_cancel(&txn);
-	else
-		ret = qmi_txn_wait(&txn, QMI_INIT_DRIVER_TIMEOUT);
-
-	return ret;
-}
-
-/*
- * The service we requested is now available via the client handle.
- * Formulate a socket address using the service information supplied,
- * and connect the socket to that address.  Although the socket is
- * connectionless, doing this records the address in the socket so
- * we don't have to remember it.
- *
- * If the server goes away, or the network is reset, the socket will
- * be closed.  Either way this function will be called again before
- * we receive any more server requests.
+ * The modem service we requested is now available via the client
+ * handle.  Send an INIT_DRIVER request to the modem.
  */
 static int
 ipa_client_new_server(struct qmi_handle *qmi, struct qmi_service *svc)
 {
+	const struct ipa_init_modem_driver_req *req = init_modem_driver_req();
 	struct sockaddr_qrtr sq;
+	struct qmi_txn *txn;
 	int ret;
+
+	txn = kzalloc(sizeof(*txn), GFP_KERNEL);
+	if (!txn)
+		return -ENOMEM;
+
+	ret = qmi_txn_init(qmi, txn, NULL, NULL);
+	if (ret) {
+		kfree(txn);
+		return ret;
+	}
 
 	sq.sq_family = AF_QIPCRTR;
 	sq.sq_node = svc->node;
 	sq.sq_port = svc->port;
 
-	/* Connect the client handle to the server */
-	ret = kernel_connect(qmi->sock, (struct sockaddr *)&sq, sizeof(sq), 0);
-	if (ret)
-		return ret;
+	ret = qmi_send_request(qmi, &sq, txn, IPA_QMI_INIT_DRIVER,
+				IPA_QMI_INIT_DRIVER_REQ_SZ,
+				ipa_init_modem_driver_req_ei, req);
+	if (ret) {
+		qmi_txn_cancel(txn);
+		kfree(txn);
+	}
 
-	/* Now perform the INIT_DRIVER transaction to the modem */
-
-	return ipa_init_driver_txn(qmi, &sq);
+	return ret;
 }
 
 /*
@@ -391,12 +395,10 @@ static int ipa_qmi_initialize(void)
 
 	/*
 	 * The client handle is only used for sending an INIT_DRIVER
-	 * request to the modem, and we synchronously await its
-	 * completion.  We do not expect to receive any messages
-	 * through this handle, so we pass a null handlers pointer.
+	 * request to the modem, and receiving its response message.
 	 */
 	ret = qmi_handle_init(&client_handle, IPA_QMI_CLIENT_MAX_RCV_SZ,
-			&ipa_client_ops, NULL);
+			&ipa_client_ops, ipa_client_msg_handlers);
 	if (ret < 0)
 		goto err_release_server_handle;
 
@@ -430,7 +432,7 @@ err_release_server_handle:
  */
 int ipa_qmi_init(void)
 {
-	driver_init_complete_received = false;
+	init_driver_response_received = false;
 	indication_register_received = false;
 
 	if (!ipa_qmi_initialized)
