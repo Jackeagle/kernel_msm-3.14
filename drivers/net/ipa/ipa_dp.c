@@ -1961,7 +1961,7 @@ static int ipa3_wan_rx_pyld_hdlr(struct sk_buff *skb,
 			frame_len += IPA_DL_CHECKSUM_LENGTH;
 		ipa_debug_low("frame_len %d\n", frame_len);
 
-		skb2 = skb_clone(skb, GFP_KERNEL);
+		skb2 = skb_clone(skb, GFP_ATOMIC);
 		if (likely(skb2)) {
 			/*
 			 * the len of actual data is smaller than expected
