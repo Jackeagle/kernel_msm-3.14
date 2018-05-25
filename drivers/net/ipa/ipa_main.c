@@ -1279,7 +1279,7 @@ static void ipa3_register_panic_hdlr(void)
  * - Trigger IPA ready callbacks (to all subscribers)
  * - Trigger IPA completion object (to all who wait on it)
  */
-static int ipa3_post_init(struct device *ipa_dev)
+static int ipa3_post_init(void)
 {
 	int result;
 
@@ -1330,7 +1330,7 @@ static int ipa3_post_init(struct device *ipa_dev)
 
 static void ipa3_post_init_wq(struct work_struct *work)
 {
-	ipa3_post_init(ipa3_ctx->dev);
+	ipa3_post_init();
 }
 
 
