@@ -195,14 +195,14 @@ static struct qmi_msg_handler ipa_server_msg_handlers[] = {
 		.type		= QMI_REQUEST,
 		.msg_id		= IPA_QMI_INDICATION_REGISTER,
 		.ei		= ipa_indication_register_req_ei,
-		.decoded_size	= sizeof(struct ipa_indication_register_req),
+		.decoded_size	= IPA_QMI_INDICATION_REGISTER_REQ_SZ,
 		.fn		= ipa_indication_register_fn,
 	},
 	{
 		.type		= QMI_REQUEST,
 		.msg_id		= IPA_QMI_DRIVER_INIT_COMPLETE,
 		.ei		= ipa_driver_init_complete_req_ei,
-		.decoded_size	= sizeof(struct ipa_driver_init_complete_req),
+		.decoded_size	= IPA_QMI_DRIVER_INIT_COMPLETE_REQ_SZ,
 		.fn		= ipa_driver_init_complete_fn,
 	},
 };
