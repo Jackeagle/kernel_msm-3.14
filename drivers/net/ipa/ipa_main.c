@@ -1967,6 +1967,7 @@ static void ipa_smmu_detach(struct ipa_smmu_cb_ctx *cb)
 
 static int ipa_smmu_ap_cb_probe(struct device *dev)
 {
+	struct device_node *main_node = ipa3_ctx->ipa3_pdev->dev.of_node;
 	struct ipa_smmu_cb_ctx *cb = &ipa3_ctx->ap_smmu_cb;
 	int result;
 	u32 add_map_size;
@@ -1975,6 +1976,10 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 	int i;
 
 	ipa_debug("AP CB probe: sub pdev=%p\n", dev);
+
+	/* Skip the probe if we're not using the SMMU */
+	if (!of_property_read_bool(main_node, "qcom,arm-smmu"))
+		return 0;
 
 	result = ipa_smmu_attach(dev, cb);
 	if (result)
@@ -2221,6 +2226,30 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_clear_gsi_ctx;
 	}
 
+	/*
+	 * If we're using an SMMU, DMA mappings, etc. are associated
+	 * with the AP SMMU device, and we have to wait for that to
+	 * get probed to do further setup.  If we are not using an
+	 * SMMU, finish the remining early initialization now.
+	 */
+	if (!of_property_read_bool(node, "qcom,arm-smmu")) {
+		result = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
+		if (result)
+			goto err_clear_gsi_ctx;
+
+		if (ipahal_dev_init(dev)) {
+			ipa_err("failed to assign IPA HAL dev pointer\n");
+			result = -EFAULT;
+			goto err_clear_gsi_ctx;
+		}
+		ipa3_ctx->dev = dev;
+
+		/* Proceed to real initialization */
+		result = ipa3_pre_init();
+		if (result)
+			goto err_ipahal_dev_destroy;
+	}
+
 	result = of_platform_populate(node, ipa_plat_drv_match, NULL, dev);
 	if (result) {
 		ipa_err("failed to populate platform\n");
@@ -2229,6 +2258,9 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p)
 
 	return 0;
 
+err_ipahal_dev_destroy:
+	ipahal_dev_destroy();
+	ipa3_ctx->dev = NULL;
 err_clear_gsi_ctx:
 	ipa3_ctx->gsi_ctx = NULL;
 	ipa3_active_clients_log_destroy();
