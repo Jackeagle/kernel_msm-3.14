@@ -14,6 +14,7 @@
 #define pr_fmt(fmt)    "ipa %s:%d " fmt, __func__, __LINE__
 
 #include <linux/version.h>
+
 #include <linux/clk.h>
 #include <linux/compat.h>
 #include <linux/device.h>
@@ -42,7 +43,6 @@
 #include <linux/soc/qcom/smem_state.h>
 #include <asm/cacheflush.h>
 
-#define IPA_SUBSYSTEM_NAME "ipa_fws"
 #include "ipa_i.h"
 #include "ipahal.h"
 #include "ipahal_fltrt.h"
@@ -1264,8 +1264,6 @@ static void ipa3_register_panic_hdlr(void)
  * This part contains all initialization which requires interaction with
  * IPA HW (via GSI).
  *
- * @pdev:	The platform device structure representing the IPA driver
- *
  * Function initialization process:
  * - Initialize endpoints bitmaps
  * - Initialize resource groups min and max values
@@ -1988,8 +1986,8 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 		return -EFAULT;
 	}
 
-	add_map = of_get_property(dev->of_node,
-		"qcom,additional-mapping", &add_map_size);
+	add_map = of_get_property(dev->of_node, "qcom,additional-mapping",
+					&add_map_size);
 	if (add_map) {
 		/* mapping size is an array of 3-tuple of u32 */
 		if (add_map_size % (3 * sizeof(u32))) {
