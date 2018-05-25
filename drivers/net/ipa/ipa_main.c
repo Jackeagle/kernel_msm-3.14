@@ -2064,10 +2064,12 @@ static int ipa3_smp2p_probe(struct device *dev)
 			ipa_err("fail to register smp2p irq=%d\n", irq);
 			return -ENODEV;
 		}
+#if 0
 		res = enable_irq_wake(ipa3_ctx->smp2p_info.in_base_id +
 			IPA_GPIO_IN_QUERY_CLK_IDX);
 		if (res)
 			ipa_err("failed to enable irq wake\n");
+#endif
 	}
 
 	return 0;

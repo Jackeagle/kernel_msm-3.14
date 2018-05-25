@@ -484,12 +484,14 @@ int ipa3_interrupts_init(u32 ipa_irq, u32 ee, struct device *ipa_dev)
 	}
 	ipa_debug("IPA IRQ handler irq=%d registered\n", ipa_irq);
 
+#if 0
 	res = enable_irq_wake(ipa_irq);
 	if (res)
 		ipa_err("fail to enable IPA IRQ wakeup irq=%d res=%d\n",
 				ipa_irq, res);
 	else
 		ipa_debug("IPA IRQ wakeup enabled irq=%d\n", ipa_irq);
+#endif
 
 	spin_lock_init(&suspend_wa_lock);
 	return 0;
