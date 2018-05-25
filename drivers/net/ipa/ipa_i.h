@@ -832,8 +832,8 @@ struct ipa3_transport_pm {
 };
 
 struct ipa3_smp2p_info {
-	u32 out_base_id;
-	u32 in_base_id;
+	struct qcom_smem_state *smem_state;
+	unsigned int smem_bit;
 	bool ipa_clk_on;
 	bool res_sent;
 };

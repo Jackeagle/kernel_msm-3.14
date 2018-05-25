@@ -30,6 +30,7 @@
 #include <linux/platform_device.h>
 #include <linux/rbtree.h>
 #include <linux/of_gpio.h>
+#include <linux/of_irq.h>
 #include <linux/uaccess.h>
 #include <linux/interrupt.h>
 #include <linux/msm-bus.h>
@@ -1196,7 +1197,7 @@ static void ipa3_freeze_clock_vote_and_notify_modem(void)
 	if (ipa3_ctx->smp2p_info.res_sent)
 		return;
 
-	if (ipa3_ctx->smp2p_info.out_base_id == 0) {
+	if (!ipa3_ctx->smp2p_info.smem_state) {
 		ipa_err("smp2p out gpio not assigned\n");
 		return;
 	}
@@ -1204,12 +1205,8 @@ static void ipa3_freeze_clock_vote_and_notify_modem(void)
 	ipa3_ctx->smp2p_info.ipa_clk_on =
 			ipa_client_add_additional("FREEZE_VOTE", true);
 
-	gpio_set_value(ipa3_ctx->smp2p_info.out_base_id +
-		IPA_GPIO_OUT_CLK_VOTE_IDX,
-		ipa3_ctx->smp2p_info.ipa_clk_on);
-	gpio_set_value(ipa3_ctx->smp2p_info.out_base_id +
-		IPA_GPIO_OUT_CLK_RSP_CMPLT_IDX, 1);
-
+	qcom_smem_state_update_bits(ipa3_ctx->smp2p_info.smem_state, BIT(3),
+			BIT(ipa3_ctx->smp2p_info.ipa_clk_on | 1 << 1));
 	ipa3_ctx->smp2p_info.res_sent = true;
 	ipa_debug("IPA clocks are %s\n",
 		ipa3_ctx->smp2p_info.ipa_clk_on ? "ON" : "OFF");
@@ -1223,10 +1220,8 @@ void ipa3_reset_freeze_vote(void)
 	if (ipa3_ctx->smp2p_info.ipa_clk_on)
 		ipa_client_remove("FREEZE_VOTE", true);
 
-	gpio_set_value(ipa3_ctx->smp2p_info.out_base_id +
-		IPA_GPIO_OUT_CLK_VOTE_IDX, 0);
-	gpio_set_value(ipa3_ctx->smp2p_info.out_base_id +
-		IPA_GPIO_OUT_CLK_RSP_CMPLT_IDX, 0);
+	qcom_smem_state_update_bits(ipa3_ctx->smp2p_info.smem_state,
+			BIT(3), 0);
 
 	ipa3_ctx->smp2p_info.res_sent = false;
 	ipa3_ctx->smp2p_info.ipa_clk_on = false;
@@ -2059,37 +2054,31 @@ static int ipa3_smp2p_probe(struct device *dev)
 
 	ipa_debug("node->name=%s\n", node->name);
 	if (strcmp("qcom,smp2pgpio_map_ipa_1_out", node->name) == 0) {
-		res = of_get_gpio(node, 0);
-		if (res < 0) {
-			ipa_debug("of_get_gpio returned %d\n", res);
-			return res;
-		}
+		if (of_find_property(node, "qcom,smem-states", NULL)) {
+			struct qcom_smem_state *state;
+			unsigned int bit;
 
-		ipa3_ctx->smp2p_info.out_base_id = res;
-		ipa_debug("smp2p out_base_id=%d\n",
-			ipa3_ctx->smp2p_info.out_base_id);
+			state = qcom_smem_state_get(dev, "ipa-smp2p-out", &bit);
+			if (IS_ERR(state)) {
+				res = PTR_ERR(state);
+				ipa_debug("of_get_gpio returned %d\n", res);
+
+				return res;
+			}
+			ipa3_ctx->smp2p_info.smem_state = state;
+			ipa3_ctx->smp2p_info.smem_bit = bit;
+		}
 	} else if (strcmp("qcom,smp2pgpio_map_ipa_1_in", node->name) == 0) {
 		int irq;
 
-		res = of_get_gpio(node, 0);
+		res = of_irq_get_byname(node, "ipa-smp2p-in");
 		if (res < 0) {
 			ipa_debug("of_get_gpio returned %d\n", res);
 			return res;
 		}
+		irq = res;
 
-		ipa3_ctx->smp2p_info.in_base_id = res;
-		ipa_debug("smp2p in_base_id=%d\n",
-			ipa3_ctx->smp2p_info.in_base_id);
-
-		/* register for modem clk query */
-		irq = gpio_to_irq(ipa3_ctx->smp2p_info.in_base_id +
-			IPA_GPIO_IN_QUERY_CLK_IDX);
-		if (irq < 0) {
-			ipa_err("gpio_to_irq failed %d\n", irq);
-			return -ENODEV;
-		}
-		ipa_debug("smp2p irq#=%d\n", irq);
-		res = request_irq(irq,
+		res = devm_request_threaded_irq(dev, irq, NULL,
 			(irq_handler_t)ipa3_smp2p_modem_clk_query_isr,
 			IRQF_TRIGGER_RISING, "ipa_smp2p_clk_vote", dev);
 		if (res) {
