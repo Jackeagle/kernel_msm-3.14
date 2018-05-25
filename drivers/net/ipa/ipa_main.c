@@ -1999,9 +1999,9 @@ static int ipa_smmu_ap_cb_probe(struct device *dev)
 
 		/* iterate of each entry of the additional mapping array */
 		for (i = 0; i < add_map_size / sizeof(u32); i += 3) {
-			u32 iova = be32_to_cpu(add_map[i]);
-			u32 pa = be32_to_cpu(add_map[i + 1]);
-			u32 size = be32_to_cpu(add_map[i + 2]);
+			unsigned long iova = be32_to_cpu(add_map[i]);
+			phys_addr_t pa = be32_to_cpu(add_map[i + 1]);
+			size_t size = be32_to_cpu(add_map[i + 2]);
 
 			ipa3_iommu_map(iova, pa, size);
 		}
