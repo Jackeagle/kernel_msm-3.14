@@ -790,7 +790,6 @@ struct ipa_dma_task_info {
  * @ipa_client_apps_wan_cons_agg_gro: RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA
  * @w_lock: Indicates the wakeup source.
  * @wakelock_ref_cnt: Indicates the number of times wakelock is acquired
- * @init_completion_obj: Completion object to be used in case IPA driver hasn't
  *  finished initializing. Example of use - IOCTLs to /dev/ipa
  * IPA context - holds all relevant info about IPA driver and its state
  */
@@ -845,7 +844,6 @@ struct ipa3_context {
 	/* RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA */
 	bool ipa_client_apps_wan_cons_agg_gro;
 	/* M-release support to know client pipes */
-	struct completion init_completion_obj;
 	struct ipa3_smp2p_info smp2p_info;
 	struct ipa_dma_task_info dma_task_info;
 };

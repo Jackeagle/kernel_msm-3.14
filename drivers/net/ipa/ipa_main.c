@@ -1312,7 +1312,6 @@ static int ipa3_post_init(void)
 	if (ipa3_wwan_init())
 		ipa_err("WWAN init failed (ignoring)\n");
 
-	complete_all(&ipa3_ctx->init_completion_obj);
 	ipa_info("IPA driver initialization was successful.\n");
 
 	return 0;
@@ -1782,8 +1781,6 @@ static int ipa3_pre_init(void)
 	 * attempted for IPA hardware versions prior to 3.5.
 	 */
 	ipa3_enable_dcd();
-
-	init_completion(&ipa3_ctx->init_completion_obj);
 
 	cdev_init(&ipa3_ctx->cdev, &ipa3_drv_fops);
 	ipa3_ctx->cdev.owner = THIS_MODULE;
