@@ -1405,7 +1405,7 @@ static int ipa_firmware_load(void)
 	const struct firmware *fw;
 	int ret;
 
-	ret = request_firmware(&fw, IPA_FWS_PATH, ipa3_ctx->chrdev);
+	ret = request_firmware(&fw, IPA_FWS_PATH, ipa3_ctx->dev);
 	if (ret)
 		return ret;
 
