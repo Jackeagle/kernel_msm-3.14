@@ -61,9 +61,6 @@
 /* IPA Header Processing Star firmware image memory size in IPA SRAM */
 #define IPA_HPS_IMG_MEM_SIZE	320	/* bytes */
 
-static void ipa3_post_init_wq(struct work_struct *work);
-static DECLARE_WORK(ipa3_post_init_work, ipa3_post_init_wq);
-
 static void ipa_client_remove_deferred(struct work_struct *work);
 static DECLARE_WORK(ipa_client_remove_work, ipa_client_remove_deferred);
 
@@ -1321,12 +1318,6 @@ static int ipa3_post_init(void)
 	return 0;
 }
 
-static void ipa3_post_init_wq(struct work_struct *work)
-{
-	ipa3_post_init();
-}
-
-
 static ssize_t ipa3_write(struct file *file, const char __user *buf,
 	 size_t count, loff_t *ppos);
 
@@ -1482,7 +1473,7 @@ static ssize_t ipa3_write(struct file *file, const char __user *buf,
 	}
 	ipa_info("IPA FW loaded successfully\n");
 
-	queue_work(ipa3_ctx->transport_power_mgmt_wq, &ipa3_post_init_work);
+	ipa3_post_init();
 
 	return count;
 }
