@@ -1683,7 +1683,7 @@ static int ipa3_pre_init(void)
 	if (result) {
 		ipa_err(":error initializing HW.\n");
 		result = -ENODEV;
-		goto fail_init_hw;
+		goto err_disable_clks;
 	}
 
 	ipa_debug("IPA HW initialization sequence completed");
@@ -1693,7 +1693,7 @@ static int ipa3_pre_init(void)
 		ipa_err("IPA has more pipes then supported! has %d, max %d\n",
 			ipa3_ctx->ipa_num_pipes, IPA3_MAX_NUM_PIPES);
 		result = -ENODEV;
-		goto fail_init_hw;
+		goto err_disable_clks;
 	}
 
 	ipa_sram_settings_read();
@@ -1709,7 +1709,7 @@ static int ipa3_pre_init(void)
 		ipa_err("SW expect more core memory, needed %d, avail %d\n",
 			ipa3_ctx->smem_reqd_sz, ipa3_ctx->smem_sz);
 		result = -ENOMEM;
-		goto fail_init_hw;
+		goto err_disable_clks;
 	}
 
 	mutex_init(&ipa3_ctx->ipa3_active_clients.mutex);
@@ -1725,7 +1725,7 @@ static int ipa3_pre_init(void)
 	if (!ipa3_ctx->power_mgmt_wq) {
 		ipa_err("failed to create power mgmt wq\n");
 		result = -ENOMEM;
-		goto fail_init_hw;
+		goto err_disable_clks;
 	}
 
 	ipa3_ctx->transport_power_mgmt_wq =
@@ -1733,7 +1733,7 @@ static int ipa3_pre_init(void)
 	if (!ipa3_ctx->transport_power_mgmt_wq) {
 		ipa_err("failed to create transport power mgmt wq\n");
 		result = -ENOMEM;
-		goto fail_create_transport_wq;
+		goto err_destroy_pm_wq;
 	}
 
 	mutex_init(&ipa3_ctx->transport_pm.transport_pm_mutex);
@@ -1746,7 +1746,7 @@ static int ipa3_pre_init(void)
 	if (!ipa3_ctx->tx_pkt_wrapper_cache) {
 		ipa_err(":ipa tx pkt wrapper cache create failed\n");
 		result = -ENOMEM;
-		goto fail_tx_pkt_wrapper_cache;
+		goto err_destroy_transport_wq;
 	}
 	ipa3_ctx->rx_pkt_wrapper_cache =
 	   kmem_cache_create("IPA_RX_PKT_WRAPPER",
@@ -1754,14 +1754,14 @@ static int ipa3_pre_init(void)
 	if (!ipa3_ctx->rx_pkt_wrapper_cache) {
 		ipa_err(":ipa rx pkt wrapper cache create failed\n");
 		result = -ENOMEM;
-		goto fail_rx_pkt_wrapper_cache;
+		goto err_destroy_tx_cache;
 	}
 
 	/* allocate memory for DMA_TASK workaround */
 	result = ipa3_gsi_dma_task_alloc();
 	if (result) {
 		ipa_err("failed to allocate dma task\n");
-		goto fail_dma_task;
+		goto err_destroy_rx_cache;
 	}
 
 	mutex_init(&ipa3_ctx->lock);
@@ -1772,7 +1772,7 @@ static int ipa3_pre_init(void)
 	if (result) {
 		ipa_err("alloc_chrdev_region err.\n");
 		result = -ENODEV;
-		goto fail_alloc_chrdev_region;
+		goto err_gsi_dma_task_free;
 	}
 
 	ipa3_ctx->chrdev = device_create(ipa3_ctx->class, NULL,
@@ -1780,7 +1780,7 @@ static int ipa3_pre_init(void)
 	if (IS_ERR(ipa3_ctx->chrdev)) {
 		ipa_err(":device_create err.\n");
 		result = -ENODEV;
-		goto fail_device_create;
+		goto err_unregister_chrdev_region;
 	}
 
 	/* Create a wakeup source. */
@@ -1791,7 +1791,7 @@ static int ipa3_pre_init(void)
 	if (result) {
 		ipa_err("Failed to alloc pkt_init payload\n");
 		result = -ENODEV;
-		goto fail_create_apps_resource;
+		goto err_device_destroy;
 	}
 
 	/*
@@ -1818,20 +1818,21 @@ static int ipa3_pre_init(void)
 
 err_free_pkt_init:
 	ipa3_free_pkt_init();
-fail_create_apps_resource:
+err_device_destroy:
 	device_destroy(ipa3_ctx->class, ipa3_ctx->dev_num);
-fail_device_create:
+err_unregister_chrdev_region:
 	unregister_chrdev_region(ipa3_ctx->dev_num, 1);
-fail_alloc_chrdev_region:
+err_gsi_dma_task_free:
 	ipa3_gsi_dma_task_free();
-fail_dma_task:
-fail_rx_pkt_wrapper_cache:
+err_destroy_rx_cache:
 	kmem_cache_destroy(ipa3_ctx->rx_pkt_wrapper_cache);
-fail_tx_pkt_wrapper_cache:
+err_destroy_tx_cache:
 	kmem_cache_destroy(ipa3_ctx->tx_pkt_wrapper_cache);
-fail_create_transport_wq:
+err_destroy_transport_wq:
+	destroy_workqueue(ipa3_ctx->transport_power_mgmt_wq);
+err_destroy_pm_wq:
 	destroy_workqueue(ipa3_ctx->power_mgmt_wq);
-fail_init_hw:
+err_disable_clks:
 	ipa3_disable_clks();
 
 	return result;
