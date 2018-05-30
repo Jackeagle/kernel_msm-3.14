@@ -1719,14 +1719,6 @@ static int ipa3_pre_init(void)
 		goto err_disable_clks;
 	}
 
-	ipa3_ctx->transport_power_mgmt_wq =
-		create_singlethread_workqueue("transport_power_mgmt");
-	if (!ipa3_ctx->transport_power_mgmt_wq) {
-		ipa_err("failed to create transport power mgmt wq\n");
-		result = -ENOMEM;
-		goto err_destroy_pm_wq;
-	}
-
 	mutex_init(&ipa3_ctx->transport_pm.transport_pm_mutex);
 
 	/* init the lookaside cache */
@@ -1737,7 +1729,7 @@ static int ipa3_pre_init(void)
 	if (!ipa3_ctx->tx_pkt_wrapper_cache) {
 		ipa_err(":ipa tx pkt wrapper cache create failed\n");
 		result = -ENOMEM;
-		goto err_destroy_transport_wq;
+		goto err_destroy_pm_wq;
 	}
 	ipa3_ctx->rx_pkt_wrapper_cache =
 	   kmem_cache_create("IPA_RX_PKT_WRAPPER",
@@ -1819,8 +1811,6 @@ err_destroy_rx_cache:
 	kmem_cache_destroy(ipa3_ctx->rx_pkt_wrapper_cache);
 err_destroy_tx_cache:
 	kmem_cache_destroy(ipa3_ctx->tx_pkt_wrapper_cache);
-err_destroy_transport_wq:
-	destroy_workqueue(ipa3_ctx->transport_power_mgmt_wq);
 err_destroy_pm_wq:
 	destroy_workqueue(ipa3_ctx->power_mgmt_wq);
 err_disable_clks:

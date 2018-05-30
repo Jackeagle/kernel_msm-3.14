@@ -773,7 +773,6 @@ struct ipa_dma_task_info {
  * @hdr_mem: header memory
  * @hdr_proc_ctx_mem: processing context memory
  * @power_mgmt_wq: workqueue for power management
- * @transport_power_mgmt_wq: workqueue transport related power management
  * @tag_process_before_gating: indicates whether to start tag process before
  *  gating IPA clocks
  * @transport_pm: transport power management related information
@@ -822,7 +821,6 @@ struct ipa3_context {
 	struct ipa3_active_clients_log_ctx ipa3_active_clients_logging;
 	char *active_clients_table_buf;
 	struct workqueue_struct *power_mgmt_wq;
-	struct workqueue_struct *transport_power_mgmt_wq;
 	struct ipa3_transport_pm transport_pm;
 	u32 clnt_hdl_cmd;
 	u32 clnt_hdl_data_in;
