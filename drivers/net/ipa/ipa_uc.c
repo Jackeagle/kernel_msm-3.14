@@ -16,12 +16,6 @@
 #define IPA_UC_POLL_SLEEP_USEC 100
 #define IPA_UC_POLL_MAX_RETRY 10000
 
-#define UC_CMD_TIMEOUT	msecs_to_jiffies(10000)	/* 10 seconds */
-
-/* How long to sleep (range) between microcontroller command retries */
-#define UC_CMD_RETRY_USLEEP_MIN 1000	/* 1 second */
-#define UC_CMD_RETRY_USLEEP_MAX 2000	/* 2 seconds */
-
 /**
  * enum ipa3_cpu_2_hw_commands - Values that represent the commands from the CPU
  * IPA_CPU_2_HW_CMD_ERR_FATAL : CPU instructs HW to perform error fatal
@@ -270,7 +264,6 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 		/* Make sure we were expecting the command that completed */
 		if (params->originalCmdOp == ipa3_ctx->uc_ctx.pending_cmd) {
 			ipa3_ctx->uc_ctx.uc_status = params->status;
-			complete_all(&ipa3_ctx->uc_ctx.uc_completion);
 		} else {
 			ipa_err("Expected cmd=%u rcvd cmd=%u\n",
 				ipa3_ctx->uc_ctx.pending_cmd,
@@ -301,145 +294,6 @@ send_uc_command_nowait(struct ipa3_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
 
 	ipahal_write_reg_n(IPA_IRQ_EE_UC_n, 0, 0x1);
 
-}
-
-static bool uc_cmd_should_retry(u32 status)
-{
-	return status == IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE ||
-		status == IPA_HW_CONS_DISABLE_CMD_GSI_STOP_FAILURE ||
-		status == IPA_HW_GSI_CH_NOT_EMPTY_FAILURE;
-}
-
-/*
- * Send a command to the microcontroller and wait for it to complete.
- * Returns 0 if command completed, -ETIMEDOUT if it timed out.
- * Assumes caller holds uc_ctx->uc_lock mutex.
- */
-static bool send_uc_command(struct ipa3_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
-{
-	int ret;
-
-	init_completion(&uc_ctx->uc_completion);
-
-	send_uc_command_nowait(uc_ctx, cmd, opcode);
-
-	ret = wait_for_completion_timeout(&uc_ctx->uc_completion,
-						UC_CMD_TIMEOUT);
-	if (!ret)
-		return -ETIMEDOUT;
-
-	if (!uc_ctx->uc_status)
-		return 0;		/* Success! */
-
-	if (uc_cmd_should_retry(uc_ctx->uc_status))
-		return -EAGAIN;
-
-	return -EFAULT;
-}
-
-/*
- * Try to send a microcontroller command.  Returns 0 if successful,
- * -EIO if an unrecoverable error occurs.  Returns -EAGAIN if an
- * error occurred but the command should be retried, or -EFAULT for
- * any other error.
- */
-static int try_send_uc_command(struct ipa3_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
-{
-	int ret;
-
-	ret = send_uc_command(uc_ctx, cmd, opcode);
-	if (!ret) {
-		ipa_debug("uC cmd %u send succeeded\n", opcode);
-		return 0;
-	}
-
-	if (ret == -ETIMEDOUT) {
-		ipa_err("uC timed out\n");
-		return -EIO;
-	}
-
-	/* Didn't time out, but we got an error; if not retrying, report it. */
-	if (ret != -EAGAIN)
-		ipa_err("Received status %u\n", uc_ctx->uc_status);
-
-	return ret;
-}
-
-/**
- * ipa3_uc_send_cmd() - Send a command to the uC
- *
- * Note1: This function sends command with 32bit parameter and do not
- *	use the higher 32bit of the command parameter (set to zero).
- *
- * Note2: In case the operation times out (No response from the uC) or
- *	 polling maximal amount of retries has reached, the logic
- *	 considers it as an invalid state of the uC/IPA, and
- *	 issues a kernel panic.
- *
- * Returns: 0 on success.
- *	    -EINVAL in case of invalid input.
- *	    -EBADF in case uC interface is not initialized /
- *		   or the uC has failed previously.
- *	    -EFAULT in case the received status doesn't match
- *		    the expected.
- */
-static int ipa3_uc_send_cmd(u32 cmd, u32 opcode)
-{
-	struct ipa3_uc_ctx *uc_ctx = &ipa3_ctx->uc_ctx;
-	u32 retries = 0;
-	u32 last_try;
-	int ret;
-
-send_cmd_lock:
-	mutex_lock(&uc_ctx->uc_lock);
-
-	if (ipa3_uc_state_check()) {
-		ipa_debug("uC send command aborted\n");
-		ret = -EBADF;
-		goto out;
-	}
-send_cmd:
-	ret = try_send_uc_command(uc_ctx, cmd, opcode);
-	if (ret != -EAGAIN)
-		goto out;
-
-	/* The command is retryable.  Record some retry parameters. */
-	if (uc_ctx->uc_status == IPA_HW_GSI_CH_NOT_EMPTY_FAILURE) {
-		last_try = IPA_GSI_CHANNEL_EMPTY_MAX_RETRY;
-		ret = -EFAULT;
-	} else {
-		last_try = IPA_GSI_CHANNEL_STOP_MAX_RETRY;
-		ret = -EIO;
-	}
-
-	if (retries++ >= last_try) {
-		ipa_err("Failed after %d tries\n", retries);
-		goto out;
-	}
-
-	/* Normally we just delay for a bit and try again. */
-	if (uc_ctx->uc_status != IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE) {
-		usleep_range(UC_CMD_RETRY_USLEEP_MIN, UC_CMD_RETRY_USLEEP_MAX);
-		goto send_cmd;
-	}
-
-	/*
-	 * If the microcontroller reports a producer disable stop failure
-	 * we try to unblock the GSI channel by sending a 1-byte DMA.
-	 * In this case we need to drop and re-acquire the mutex.
-	 */
-	mutex_unlock(&uc_ctx->uc_lock);
-
-	ipa3_gsi_dma_task_inject();
-
-	/* Sleep for a short period to flush IPA before trying again. */
-	usleep_range(UC_CMD_RETRY_USLEEP_MIN, UC_CMD_RETRY_USLEEP_MAX);
-	goto send_cmd_lock;
-out:
-	mutex_unlock(&uc_ctx->uc_lock);
-	ipa_bug_on(ret == -EIO);
-
-	return ret;
 }
 
 /**
@@ -483,7 +337,6 @@ int ipa3_uc_interface_init(void)
 		goto irq_fail1;
 	}
 
-	mutex_init(&ipa3_ctx->uc_ctx.uc_lock);
 	ipa3_ctx->uc_ctx.uc_sram_mmio = mmio;
 	ipa3_ctx->uc_ctx.uc_inited = true;
 
@@ -519,30 +372,4 @@ int ipa3_uc_panic_notifier(struct notifier_block *this,
 	ipa_debug("err_fatal issued\n");
 fail:
 	return NOTIFY_DONE;
-}
-
-int ipa3_uc_is_gsi_channel_empty(enum ipa_client_type ipa_client)
-{
-	const struct ipa_gsi_ep_config *gsi_ep_info;
-	union IpaHwChkChEmptyCmdData_t cmd;
-
-	gsi_ep_info = ipa3_get_gsi_ep_info(ipa_client);
-	if (!gsi_ep_info) {
-		ipa_err("GSI EP info unavailable, client=%d\n", ipa_client);
-		return 0;
-	}
-
-	if (ipa3_uc_state_check()) {
-		ipa_debug("uC unavailable, client=%d\n"
-			, ipa_client);
-		return 0;
-	}
-
-	cmd.params.ee_n = gsi_ep_info->ee;
-	cmd.params.vir_ch_id = gsi_ep_info->ipa_gsi_chan_num;
-
-	ipa_debug("uC emptiness check for IPA GSI Channel %u\n",
-			gsi_ep_info->ipa_gsi_chan_num);
-
-	return ipa3_uc_send_cmd(cmd.raw32b, IPA_CPU_2_HW_CMD_GSI_CH_EMPTY);
 }

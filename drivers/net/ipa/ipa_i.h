@@ -706,8 +706,6 @@ struct ipa3_uc_ctx {
 	bool uc_inited;
 	bool uc_loaded;
 	bool uc_failed;
-	struct mutex uc_lock;
-	struct completion uc_completion;
 	struct IpaHwSharedMemCommonMapping_t *uc_sram_mmio;
 	u32 uc_event_top_ofst;
 	u32 pending_cmd;
@@ -962,7 +960,6 @@ int ipa3_cfg_ep_status(u32 clnt_hdl,
 int ipa3_init_q6_smem(void);
 
 int ipa3_uc_interface_init(void);
-int ipa3_uc_is_gsi_channel_empty(enum ipa_client_type ipa_client);
 int ipa3_uc_loaded_check(void);
 const struct ipa_gsi_ep_config *ipa3_get_gsi_ep_info
 	(enum ipa_client_type client);
