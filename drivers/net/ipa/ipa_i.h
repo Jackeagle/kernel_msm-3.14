@@ -712,14 +712,6 @@ struct ipa3_uc_ctx {
 	u32 uc_status;
 	u32 uc_error_type;
 	u32 uc_error_timestamp;
-	phys_addr_t rdy_ring_base_pa;
-	phys_addr_t rdy_ring_rp_pa;
-	u32 rdy_ring_size;
-	phys_addr_t rdy_comp_ring_base_pa;
-	phys_addr_t rdy_comp_ring_wp_pa;
-	u32 rdy_comp_ring_size;
-	u32 *rdy_ring_rp_va;
-	u32 *rdy_comp_ring_wp_va;
 };
 
 /**
