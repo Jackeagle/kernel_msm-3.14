@@ -110,7 +110,7 @@ static void gsi_irq_control_all(u32 ee, bool enable)
 	gsi_irq_set(GSI_EE_n_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee), val);
 	gsi_irq_set(GSI_EE_n_CNTXT_GLOB_IRQ_EN_OFFS(ee), val);
 	/* Never enable GSI_BREAK_POINT */
-	val &= ~field_gen(1, EV_CHTYPE_BMSK);
+	val &= ~field_gen(1, EN_GSI_BREAK_POINT_BMSK);
 	gsi_irq_set(GSI_EE_n_CNTXT_GSI_IRQ_EN_OFFS(ee), val);
 }
 
