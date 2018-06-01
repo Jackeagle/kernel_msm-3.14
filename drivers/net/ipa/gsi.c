@@ -552,11 +552,13 @@ static void gsi_handle_general(void)
 
 #define GSI_ISR_MAX_ITER 50
 
-static void gsi_handle_irq(void)
+static irqreturn_t gsi_isr(int irq, void *ctxt)
 {
 	u32 ee = gsi_ctx->ee;
 	u32 cnt = 0;
 	u32 type;
+
+	ipa_assert(ctxt == gsi_ctx);
 
 	while ((type = gsi_readl(GSI_EE_n_CNTXT_TYPE_IRQ_OFFS(ee)))) {
 		ipa_debug_low("type %x\n", type);
@@ -584,13 +586,6 @@ static void gsi_handle_irq(void)
 
 		ipa_bug_on(++cnt > GSI_ISR_MAX_ITER);
 	}
-}
-
-static irqreturn_t gsi_isr(int irq, void *ctxt)
-{
-	ipa_assert(ctxt == gsi_ctx);
-
-	gsi_handle_irq();
 
 	return IRQ_HANDLED;
 }
