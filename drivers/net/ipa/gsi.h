@@ -577,7 +577,7 @@ void gsi_firmware_enable(void);
  *
  * @Return Client handle populated by GSI, or a negative errno
  */
-long gsi_alloc_evt_ring(u32 size, u16 int_modt, bool excl);
+long gsi_alloc_evt_ring(u32 size, u16 int_modt);
 
 /**
  * gsi_dealloc_evt_ring - Peripheral should call this function to

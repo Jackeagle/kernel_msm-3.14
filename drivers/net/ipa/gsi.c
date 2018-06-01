@@ -1066,7 +1066,7 @@ static u32 generic_command(u32 target_ee, unsigned long chan_id,
 }
 
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
-long gsi_alloc_evt_ring(u32 size, u16 int_modt, bool excl)
+long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 {
 	unsigned long required_alignment = roundup_pow_of_two(size);
 	u32 ee = gsi_ctx->ee;
@@ -1110,7 +1110,7 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt, bool excl)
 	}
 
 	ctx->int_modt = int_modt;
-	ctx->exclusive = excl;
+	ctx->exclusive = true;
 	mutex_init(&ctx->mlock);
 	init_completion(&ctx->compl);
 	atomic_set(&ctx->chan_ref_cnt, 0);

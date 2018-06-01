@@ -2280,7 +2280,7 @@ static long evt_ring_hdl_get(struct ipa3_ep_context *ep, u32 desc_fifo_sz)
 
 	sz = ipa_gsi_ring_mem_size(ep->client, desc_fifo_sz);
 
-	return gsi_alloc_evt_ring(sz, modt, true);
+	return gsi_alloc_evt_ring(sz, modt);
 }
 
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
