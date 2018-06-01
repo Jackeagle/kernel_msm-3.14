@@ -2368,19 +2368,13 @@ err_evt_ring_hdl_put:
 static int
 ipa_poll_gsi_pkt(struct ipa3_sys_context *sys)
 {
-	int ret;
-
 	if (sys->ep->bytes_xfered_valid) {
 		sys->ep->bytes_xfered_valid = false;
 
 		return (int)sys->ep->bytes_xfered;
 	}
 
-	ret = gsi_poll_channel(sys->ep->gsi_chan_hdl);
-	if (ret < 0)
-		return ret;
-
-	return ret;
+	return gsi_poll_channel(sys->ep->gsi_chan_hdl);
 }
 
 static struct ipa3_tx_pkt_wrapper *tag_to_pointer_wa(u64 tag)
