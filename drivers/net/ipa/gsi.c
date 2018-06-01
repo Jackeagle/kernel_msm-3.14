@@ -563,26 +563,38 @@ static irqreturn_t gsi_isr(int irq, void *ctxt)
 	while ((type = gsi_readl(GSI_EE_n_CNTXT_TYPE_IRQ_OFFS(ee)))) {
 		ipa_debug_low("type %x\n", type);
 
-		if (type & CH_CTRL_BMSK)
-			gsi_handle_chan_ctrl();
+		do {
+			u32 single = BIT(__ffs(type));
 
-		if (type & EV_CTRL_BMSK)
-			gsi_handle_evt_ctrl();
-
-		if (type & GLOB_EE_BMSK)
-			gsi_handle_glob_ee();
-
-		if (type & IEOB_BMSK)
-			gsi_handle_ieob();
-
-		if (type & INTER_EE_CH_CTRL_BMSK)
-			gsi_handle_inter_ee_chan_ctrl();
-
-		if (type & INTER_EE_EV_CTRL_BMSK)
-			gsi_handle_inter_ee_evt_ctrl();
-
-		if (type & GENERAL_BMSK)
-			gsi_handle_general();
+			switch (single) {
+			case CH_CTRL_BMSK:
+				gsi_handle_chan_ctrl();
+				break;
+			case EV_CTRL_BMSK:
+				gsi_handle_evt_ctrl();
+				break;
+			case GLOB_EE_BMSK:
+				gsi_handle_glob_ee();
+				break;
+			case IEOB_BMSK:
+				gsi_handle_ieob();
+				break;
+			case INTER_EE_CH_CTRL_BMSK:
+				gsi_handle_inter_ee_chan_ctrl();
+				break;
+			case INTER_EE_EV_CTRL_BMSK:
+				gsi_handle_inter_ee_evt_ctrl();
+				break;
+			case GENERAL_BMSK:
+				gsi_handle_general();
+				break;
+			default:
+				WARN(true, "%s: unrecognized type 0x%08x\n",
+						__func__, single);
+				break;
+			}
+			type ^= single;
+		} while (type);
 
 		ipa_bug_on(++cnt > GSI_ISR_MAX_ITER);
 	}
