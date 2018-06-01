@@ -448,8 +448,7 @@ static void handle_event(int evt_id)
 
 		check_again = false;
 		while (ctx->ring.rp_local != ctx->ring.rp) {
-			if (ctx->exclusive &&
-				atomic_read(&ctx->chan->poll_mode)) {
+			if (atomic_read(&ctx->chan->poll_mode)) {
 				check_again = false;
 				break;
 			}
@@ -1110,7 +1109,6 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 	}
 
 	ctx->int_modt = int_modt;
-	ctx->exclusive = true;
 	mutex_init(&ctx->mlock);
 	init_completion(&ctx->compl);
 	atomic_set(&ctx->chan_ref_cnt, 0);
@@ -1206,7 +1204,6 @@ int gsi_dealloc_evt_ring(unsigned long evt_id)
 	clear_bit(evt_id, &gsi_ctx->evt_bmap);
 	mutex_unlock(&gsi_ctx->mlock);
 
-	ctx->exclusive = 0;
 	ctx->int_modt = 0;
 	ipahal_dma_free(&ctx->mem);
 
@@ -1343,8 +1340,8 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 
 	evt_id = props->evt_ring_hdl;
 	evtr = &gsi_ctx->evtr[evt_id];
-	if (atomic_read(&evtr->chan_ref_cnt) && evtr->exclusive) {
-		ipa_err("evt ring %hhu exclusively in use\n", evt_id);
+	if (atomic_read(&evtr->chan_ref_cnt)) {
+		ipa_err("evt ring %hhu in use\n", evt_id);
 		return -ENOTSUPP;
 	}
 
@@ -1387,8 +1384,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 
 	ctx->evtr = evtr;
 	atomic_inc(&evtr->chan_ref_cnt);
-	if (evtr->exclusive)
-		evtr->chan = ctx;
+	evtr->chan = ctx;
 
 	gsi_program_chan_ctx(props, gsi_ctx->ee, evt_id);
 	gsi_init_ring(&ctx->ring, &props->mem);
@@ -1810,11 +1806,6 @@ int gsi_config_channel_mode(unsigned long chan_id, enum gsi_chan_mode mode)
 
 	ipa_assert(mode == GSI_CHAN_MODE_POLL ||
 			mode == GSI_CHAN_MODE_CALLBACK);
-
-	if (!ctx->evtr->exclusive) {
-		ipa_err("cannot configure mode on chan_id %lu\n", chan_id);
-		return -ENOTSUPP;
-	}
 
 	curr = atomic_read(&ctx->poll_mode);
 	if (mode == curr) {
