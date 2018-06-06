@@ -2289,7 +2289,6 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	struct gsi_chan_props gsi_channel_props;
 	const struct ipa_gsi_ep_config *gsi_ep_info;
 	int result;
-	u32 size;
 
 	gsi_ep_info = ipa3_get_gsi_ep_info(ep->client);
 	if (!gsi_ep_info) {
@@ -2323,9 +2322,12 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		gsi_channel_props.low_weight = 1;
 	gsi_channel_props.chan_user_data = ep->sys;
 
-	size = ipa_gsi_ring_mem_size(ep->client, in->desc_fifo_sz);
-	if (ipahal_dma_alloc(&gsi_channel_props.mem, size, GFP_KERNEL)) {
-		ipa_err("fail to dma alloc %u bytes\n", size);
+	gsi_channel_props.ring_size = ipa_gsi_ring_mem_size(ep->client,
+							in->desc_fifo_sz);
+	if (ipahal_dma_alloc(&gsi_channel_props.mem,
+				gsi_channel_props.ring_size, GFP_KERNEL)) {
+		ipa_err("fail to dma alloc %u bytes\n",
+				gsi_channel_props.ring_size);
 		result = -ENOMEM;
 		goto err_evt_ring_hdl_put;
 	}

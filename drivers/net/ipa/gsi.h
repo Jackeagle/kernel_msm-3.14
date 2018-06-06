@@ -268,6 +268,7 @@ enum gsi_chan_use_db_eng {
  */
 struct gsi_chan_props {
 	struct ipa_mem_buffer mem;
+	u32 ring_size;			/* bytes */
 	enum gsi_chan_dir dir;
 	uint8_t ch_id;
 	unsigned long evt_ring_hdl;
