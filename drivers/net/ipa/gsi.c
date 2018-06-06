@@ -1613,15 +1613,12 @@ reset:
 	return 0;
 }
 
-int gsi_dealloc_channel(unsigned long chan_id)
+void gsi_dealloc_channel(unsigned long chan_id)
 {
 	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_id];
 	u32 completed;
 
-	if (ctx->state != GSI_CHAN_STATE_ALLOCATED) {
-		ipa_err("bad state %d\n", ctx->state);
-		return -ENOTSUPP;
-	}
+	ipa_bug_on(ctx->state != GSI_CHAN_STATE_ALLOCATED);
 
 	mutex_lock(&gsi_ctx->mlock);
 	reinit_completion(&ctx->compl);
@@ -1629,15 +1626,9 @@ int gsi_dealloc_channel(unsigned long chan_id)
 	gsi_ctx->ch_dbg[chan_id].ch_de_alloc++;
 
 	completed = channel_command(chan_id, GSI_CH_DE_ALLOC);
-	if (!completed) {
-		mutex_unlock(&gsi_ctx->mlock);
-		return -ETIMEDOUT;
-	}
-	if (ctx->state != GSI_CHAN_STATE_NOT_ALLOCATED) {
-		ipa_err("chan_id %lu unexpected state %u\n",
-				chan_id, ctx->state);
-		ipa_bug();
-	}
+	ipa_bug_on(!completed);
+
+	ipa_bug_on(ctx->state != GSI_CHAN_STATE_NOT_ALLOCATED);
 
 	mutex_unlock(&gsi_ctx->mlock);
 
@@ -1646,8 +1637,6 @@ int gsi_dealloc_channel(unsigned long chan_id)
 	ctx->allocated = false;
 	atomic_dec(&ctx->evtr->chan_ref_cnt);
 	atomic_dec(&gsi_ctx->num_chan);
-
-	return 0;
 }
 
 static u16 __gsi_query_channel_free_re(struct gsi_chan_ctx *ctx)

@@ -599,8 +599,6 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl);
  *	       gsi_alloc_evt_ring
  *
  * This function can sleep
- *
- * @Return gsi_status
  */
 int gsi_reset_evt_ring(unsigned long evt_ring_hdl);
 
@@ -675,10 +673,8 @@ int gsi_reset_channel(unsigned long chan_hdl);
  *	       gsi_alloc_channel
  *
  * This function can sleep
- *
- * @Return 0, or a negative errno
  */
-int gsi_dealloc_channel(unsigned long chan_hdl);
+void gsi_dealloc_channel(unsigned long chan_hdl);
 
 /**
  * gsi_is_channel_empty - Peripheral can call this function to query if

@@ -964,7 +964,7 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 	}
 
 	ipa3_reset_gsi_channel(clnt_hdl);
-	ipa_bug_on(gsi_dealloc_channel(ep->gsi_chan_hdl) != 0);
+	gsi_dealloc_channel(ep->gsi_chan_hdl);
 	ipa_bug_on(gsi_reset_evt_ring(ep->gsi_evt_ring_hdl) != 0);
 	ipa_bug_on(gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl) != 0);
 
@@ -2338,7 +2338,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		return 0;	/* Success */
 
 fail_write_channel_scratch:
-	ipa_bug_on(gsi_dealloc_channel(ep->gsi_chan_hdl) != 0);
+	gsi_dealloc_channel(ep->gsi_chan_hdl);
 fail_alloc_channel:
 	ipa_err("Return with err: %d\n", result);
 
