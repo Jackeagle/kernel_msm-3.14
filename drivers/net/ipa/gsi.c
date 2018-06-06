@@ -359,8 +359,7 @@ static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt, bool callback)
 	}
 
 	ctx = &gsi_ctx->chan[chan_id];
-	while (ctx->ring.rp_local != evt->xfer_ptr)
-		ring_rp_local_inc(&ctx->ring);
+	ctx->ring.rp_local = evt->xfer_ptr;
 
 	if (callback)
 		chan_xfer_cb(ctx, evt->code, evt->len);
