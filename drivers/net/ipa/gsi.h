@@ -273,7 +273,6 @@ struct gsi_chan_props {
 	unsigned long evt_ring_hdl;
 	enum gsi_chan_use_db_eng use_db_eng;
 	uint8_t low_weight;
-	void (*xfer_cb)(struct gsi_chan_xfer_notify *notify);
 	void *chan_user_data;
 };
 

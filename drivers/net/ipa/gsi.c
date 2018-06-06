@@ -334,9 +334,6 @@ static void chan_xfer_cb(struct gsi_chan_ctx *ctx, u8 evt_id, u16 count)
 {
 	struct gsi_chan_xfer_notify notify = { 0 };
 
-	if (!ctx->props.xfer_cb)
-		return;
-
 	if (WARN_ON(atomic_read(&ctx->poll_mode)))
 		ipa_err("calling client callback in polling mode\n");
 
@@ -345,7 +342,10 @@ static void chan_xfer_cb(struct gsi_chan_ctx *ctx, u8 evt_id, u16 count)
 	notify.evt_id = evt_id;
 	notify.bytes_xfered = count;
 
-	ctx->props.xfer_cb(&notify);
+	if (ctx->props.dir == GSI_CHAN_DIR_FROM_GSI)
+		ipa_gsi_irq_rx_notify_cb(&notify);
+	else
+		ipa_gsi_irq_tx_notify_cb(&notify);
 }
 
 static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt, bool callback)

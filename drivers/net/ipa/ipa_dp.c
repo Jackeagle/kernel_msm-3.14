@@ -2188,7 +2188,7 @@ static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 	return 0;
 }
 
-static void ipa_gsi_irq_tx_notify_cb(struct gsi_chan_xfer_notify *notify)
+void ipa_gsi_irq_tx_notify_cb(struct gsi_chan_xfer_notify *notify)
 {
 	struct ipa3_tx_pkt_wrapper *tx_pkt;
 
@@ -2203,7 +2203,7 @@ static void ipa_gsi_irq_tx_notify_cb(struct gsi_chan_xfer_notify *notify)
 	queue_work(tx_pkt->sys->wq, &tx_pkt->work);
 }
 
-static void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
+void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 {
 	struct ipa3_sys_context *sys = notify->chan_user_data;
 	struct ipa3_rx_pkt_wrapper *rx_pkt_rcvd = notify->xfer_user_data;
@@ -2322,10 +2322,6 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	else
 		gsi_channel_props.low_weight = 1;
 	gsi_channel_props.chan_user_data = ep->sys;
-	if (IPA_CLIENT_IS_PROD(ep->client))
-		gsi_channel_props.xfer_cb = ipa_gsi_irq_tx_notify_cb;
-	else
-		gsi_channel_props.xfer_cb = ipa_gsi_irq_rx_notify_cb;
 
 	size = ipa_gsi_ring_mem_size(ep->client, in->desc_fifo_sz);
 	if (ipahal_dma_alloc(&gsi_channel_props.mem, size, GFP_KERNEL)) {

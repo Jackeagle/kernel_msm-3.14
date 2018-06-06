@@ -980,4 +980,7 @@ int ipa3_plat_drv_probe(struct platform_device *pdev_p);
 void ipa3_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple);
 void ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple);
 
+extern void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify);
+extern void ipa_gsi_irq_tx_notify_cb(struct gsi_chan_xfer_notify *notify);
+
 #endif /* _IPA3_I_H_ */
