@@ -1166,43 +1166,27 @@ static void __gsi_write_evt_ring_scratch(unsigned long evt_id,
 	gsi_writel(val.data.word2, GSI_EE_n_EV_CH_k_SCRATCH_1_OFFS(evt_id, ee));
 }
 
-int gsi_dealloc_evt_ring(unsigned long evt_id)
+void gsi_dealloc_evt_ring(unsigned long evt_id)
 {
 	struct gsi_evt_ctx *ctx;
 	u32 completed;
 
-	if (evt_id >= gsi_ctx->max_ev) {
-		ipa_err("bad params evt_id %lu\n", evt_id);
-		return -EINVAL;
-	}
+	ipa_bug_on(evt_id >= gsi_ctx->max_ev);
 
 	ctx = &gsi_ctx->evtr[evt_id];
 
-	if (atomic_read(&ctx->chan_ref_cnt)) {
-		ipa_err("%d channels still using this event ring\n",
-			atomic_read(&ctx->chan_ref_cnt));
-		return -ENOTSUPP;
-	}
+	ipa_bug_on(atomic_read(&ctx->chan_ref_cnt));
 
 	/* TODO: add check for ERROR state */
-	if (ctx->state != GSI_EVT_RING_STATE_ALLOCATED) {
-		ipa_err("bad state %d\n", ctx->state);
-		return -ENOTSUPP;
-	}
+	ipa_bug_on(ctx->state != GSI_EVT_RING_STATE_ALLOCATED);
 
 	mutex_lock(&gsi_ctx->mlock);
 	reinit_completion(&ctx->compl);
 
 	completed = evt_ring_command(evt_id, GSI_EVT_DE_ALLOC);
-	if (!completed) {
-		mutex_unlock(&gsi_ctx->mlock);
-		return -ETIMEDOUT;
-	}
+	ipa_bug_on(!completed);
 
-	if (ctx->state != GSI_EVT_RING_STATE_NOT_ALLOCATED) {
-		ipa_err("evt_id %lu unexpected state %u\n", evt_id, ctx->state);
-		ipa_bug();
-	}
+	ipa_bug_on(ctx->state != GSI_EVT_RING_STATE_NOT_ALLOCATED);
 
 	clear_bit(evt_id, &gsi_ctx->evt_bmap);
 	mutex_unlock(&gsi_ctx->mlock);

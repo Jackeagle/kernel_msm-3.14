@@ -586,10 +586,8 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt);
  * @evt_ring_hdl:  Client handle previously obtained from gsi_alloc_evt_ring
  *
  * This function can sleep
- *
- * @Return 0, or a negative errno
  */
-int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl);
+void gsi_dealloc_evt_ring(unsigned long evt_ring_hdl);
 
 /**
  * gsi_reset_evt_ring - Peripheral should call this function to
