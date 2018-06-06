@@ -1,3 +1,9 @@
+// SPDX-License-Identifier: GPL-2.0
+
+/*
+ * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2018 Linaro Ltd.
+ */
 #ifndef _IPALITE_MSM_RMNET_H_
 #define _IPALITE_MSM_RMNET_H_
 

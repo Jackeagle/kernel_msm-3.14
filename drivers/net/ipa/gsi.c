@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0
 
 /*
- * Copyright (c) 2015-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
-
 #define pr_fmt(fmt)    "gsi %s:%d " fmt, __func__, __LINE__
 
 #include <linux/of.h>
