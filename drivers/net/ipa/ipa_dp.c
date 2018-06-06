@@ -965,8 +965,6 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 
 	ipa_bug_on(ipa3_reset_gsi_channel(clnt_hdl) != 0);
 
-	ipahal_dma_free(&ep->gsi_chan_ring_mem);
-
 	ipa_bug_on(gsi_dealloc_channel(ep->gsi_chan_hdl) != 0);
 	ipa_bug_on(gsi_reset_evt_ring(ep->gsi_evt_ring_hdl) != 0);
 	ipa_bug_on(gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl) != 0);
@@ -2324,16 +2322,6 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 
 	gsi_channel_props.ring_size = ipa_gsi_ring_mem_size(ep->client,
 							in->desc_fifo_sz);
-	if (ipahal_dma_alloc(&gsi_channel_props.mem,
-				gsi_channel_props.ring_size, GFP_KERNEL)) {
-		ipa_err("fail to dma alloc %u bytes\n",
-				gsi_channel_props.ring_size);
-		result = -ENOMEM;
-		goto err_evt_ring_hdl_put;
-	}
-	/* copy mem info */
-	ep->gsi_chan_ring_mem = gsi_channel_props.mem;
-
 	result = gsi_alloc_channel(&gsi_channel_props);
 	if (result < 0)
 		goto fail_alloc_channel;
@@ -2347,17 +2335,12 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	}
 
 	result = gsi_start_channel(ep->gsi_chan_hdl);
-	if (result)
-		goto fail_start_channel;
+	if (!result)
+		return 0;	/* Success */
 
-	return 0;
-
-fail_start_channel:
 fail_write_channel_scratch:
 	ipa_bug_on(gsi_dealloc_channel(ep->gsi_chan_hdl) != 0);
 fail_alloc_channel:
-	ipahal_dma_free(&gsi_channel_props.mem);
-err_evt_ring_hdl_put:
 	ipa_err("Return with err: %d\n", result);
 
 	return result;

@@ -1332,8 +1332,14 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	void **user_data;
 	long chan_id;
 
+	if (ipahal_dma_alloc(&props->mem, props->ring_size, GFP_KERNEL)) {
+		ipa_err("fail to dma alloc %u bytes\n", props->ring_size);
+		return -ENOMEM;
+	}
+
 	if (gsi_validate_channel_props(props)) {
 		ipa_err("bad params\n");
+		ipahal_dma_free(&props->mem);
 		return -EINVAL;
 	}
 
@@ -1341,6 +1347,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	evtr = &gsi_ctx->evtr[evt_id];
 	if (atomic_read(&evtr->chan_ref_cnt)) {
 		ipa_err("evt ring %hhu in use\n", evt_id);
+		ipahal_dma_free(&props->mem);
 		return -ENOTSUPP;
 	}
 
@@ -1348,6 +1355,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	ctx = &gsi_ctx->chan[chan_id];
 	if (ctx->allocated) {
 		ipa_err("chan %ld already allocated\n", chan_id);
+		ipahal_dma_free(&props->mem);
 		return -ENODEV;
 	}
 
@@ -1356,6 +1364,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	user_data = kzalloc(size, GFP_KERNEL);
 	if (!user_data) {
 		ipa_err("error allocating user pointer array\n");
+		ipahal_dma_free(&props->mem);
 		return -ENOMEM;
 	}
 
@@ -1397,6 +1406,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 err_mutex_unlock:
 	mutex_unlock(&gsi_ctx->mlock);
 	kfree(user_data);
+	ipahal_dma_free(&ctx->props.mem);
 
 	return chan_id;
 }
@@ -1617,6 +1627,7 @@ int gsi_dealloc_channel(unsigned long chan_id)
 	mutex_unlock(&gsi_ctx->mlock);
 
 	kfree(ctx->user_data);
+	ipahal_dma_free(&ctx->props.mem);
 	ctx->allocated = false;
 	atomic_dec(&ctx->evtr->chan_ref_cnt);
 	atomic_dec(&gsi_ctx->num_chan);
