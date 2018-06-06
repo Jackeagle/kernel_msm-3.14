@@ -1071,6 +1071,7 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 	unsigned long evt_id;
 	struct gsi_evt_ctx *ctx;
 	unsigned long flags;
+	u32 completed;
 	u32 val;
 	int ret;
 
@@ -1114,7 +1115,8 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 
 	mutex_lock(&gsi_ctx->mlock);
 
-	if (!evt_ring_command(evt_id, GSI_EVT_ALLOCATE)) {
+	completed = evt_ring_command(evt_id, GSI_EVT_ALLOCATE);
+	if (!completed) {
 		ret = -ETIMEDOUT;
 		goto err_unlock;
 	}
@@ -1167,6 +1169,7 @@ static void __gsi_write_evt_ring_scratch(unsigned long evt_id,
 int gsi_dealloc_evt_ring(unsigned long evt_id)
 {
 	struct gsi_evt_ctx *ctx;
+	u32 completed;
 
 	if (evt_id >= gsi_ctx->max_ev) {
 		ipa_err("bad params evt_id %lu\n", evt_id);
@@ -1190,7 +1193,8 @@ int gsi_dealloc_evt_ring(unsigned long evt_id)
 	mutex_lock(&gsi_ctx->mlock);
 	reinit_completion(&ctx->compl);
 
-	if (!evt_ring_command(evt_id, GSI_EVT_DE_ALLOC)) {
+	completed = evt_ring_command(evt_id, GSI_EVT_DE_ALLOC);
+	if (!completed) {
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
 	}
@@ -1214,6 +1218,7 @@ int gsi_dealloc_evt_ring(unsigned long evt_id)
 int gsi_reset_evt_ring(unsigned long evt_id)
 {
 	struct gsi_evt_ctx *ctx;
+	u32 completed;
 
 	if (evt_id >= gsi_ctx->max_ev) {
 		ipa_err("bad params evt_id %lu\n", evt_id);
@@ -1230,7 +1235,8 @@ int gsi_reset_evt_ring(unsigned long evt_id)
 	mutex_lock(&gsi_ctx->mlock);
 	reinit_completion(&ctx->compl);
 
-	if (!evt_ring_command(evt_id, GSI_EVT_RESET)) {
+	completed = evt_ring_command(evt_id, GSI_EVT_RESET);
+	if (!completed) {
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
 	}
@@ -1331,6 +1337,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	u8 evt_id;
 	void **user_data;
 	long chan_id;
+	u32 completed;
 
 	if (ipahal_dma_alloc(&props->mem, props->ring_size, GFP_KERNEL)) {
 		ipa_err("fail to dma alloc %u bytes\n", props->ring_size);
@@ -1375,7 +1382,8 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 
 	mutex_lock(&gsi_ctx->mlock);
 
-	if (!channel_command(chan_id, GSI_CH_ALLOCATE)) {
+	completed = channel_command(chan_id, GSI_CH_ALLOCATE);
+	if (!completed) {
 		chan_id = -ETIMEDOUT;
 		goto err_mutex_unlock;
 	}
@@ -1465,6 +1473,7 @@ int gsi_write_channel_scratch(unsigned long chan_id, u32 tlv_size)
 int gsi_start_channel(unsigned long chan_id)
 {
 	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_id];
+	u32 completed;
 
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED &&
 		ctx->state != GSI_CHAN_STATE_STOP_IN_PROC &&
@@ -1478,7 +1487,8 @@ int gsi_start_channel(unsigned long chan_id)
 
 	gsi_ctx->ch_dbg[chan_id].ch_start++;
 
-	if (!channel_command(chan_id, GSI_CH_START)) {
+	completed = channel_command(chan_id, GSI_CH_START);
+	if (!completed) {
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
 	}
@@ -1495,6 +1505,7 @@ int gsi_start_channel(unsigned long chan_id)
 int gsi_stop_channel(unsigned long chan_id)
 {
 	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_id];
+	u32 completed;
 	u32 val;
 	int ret;
 
@@ -1515,7 +1526,8 @@ int gsi_stop_channel(unsigned long chan_id)
 
 	gsi_ctx->ch_dbg[chan_id].ch_stop++;
 
-	if (!channel_command(chan_id, GSI_CH_STOP)) {
+	completed = channel_command(chan_id, GSI_CH_STOP);
+	if (!completed) {
 		u32 ee = gsi_ctx->ee;
 
 		/*
@@ -1557,6 +1569,7 @@ int gsi_reset_channel(unsigned long chan_id)
 {
 	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_id];
 	bool reset_done = false;
+	u32 completed;
 
 	if (ctx->state != GSI_CHAN_STATE_STOPPED) {
 		ipa_err("bad state %d\n", ctx->state);
@@ -1569,7 +1582,8 @@ reset:
 
 	gsi_ctx->ch_dbg[chan_id].ch_reset++;
 
-	if (!channel_command(chan_id, GSI_CH_RESET)) {
+	completed = channel_command(chan_id, GSI_CH_RESET);
+	if (!completed) {
 		ipa_err("chan_id %lu timed out\n", chan_id);
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
@@ -1602,6 +1616,7 @@ reset:
 int gsi_dealloc_channel(unsigned long chan_id)
 {
 	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_id];
+	u32 completed;
 
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED) {
 		ipa_err("bad state %d\n", ctx->state);
@@ -1613,8 +1628,8 @@ int gsi_dealloc_channel(unsigned long chan_id)
 
 	gsi_ctx->ch_dbg[chan_id].ch_de_alloc++;
 
-	if (!channel_command(chan_id, GSI_CH_DE_ALLOC)) {
-		ipa_err("chan_id %lu timed out\n", chan_id);
+	completed = channel_command(chan_id, GSI_CH_DE_ALLOC);
+	if (!completed) {
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
 	}
@@ -1887,6 +1902,7 @@ int gsi_set_channel_cfg(unsigned long chan_id, struct gsi_chan_props *props)
 
 int gsi_halt_channel_ee(u32 chan_id, u32 ee, int *code)
 {
+	u32 completed;
 	int ret = 0;
 
 	if (chan_id >= gsi_ctx->max_ch) {
@@ -1906,7 +1922,8 @@ int gsi_halt_channel_ee(u32 chan_id, u32 ee, int *code)
 
 	gsi_ctx->gen_ee_cmd_dbg.halt_channel++;
 
-	if (!generic_command(ee, chan_id, GSI_GEN_EE_CMD_HALT_CHANNEL)) {
+	completed = generic_command(ee, chan_id, GSI_GEN_EE_CMD_HALT_CHANNEL);
+	if (!completed) {
 		ret = -ETIMEDOUT;
 		goto free_lock;
 	}
