@@ -600,7 +600,7 @@ int gsi_dealloc_evt_ring(unsigned long evt_ring_hdl);
  *
  * This function can sleep
  */
-int gsi_reset_evt_ring(unsigned long evt_ring_hdl);
+void gsi_reset_evt_ring(unsigned long evt_ring_hdl);
 
 /**
  * gsi_alloc_channel - Peripheral should call this function to

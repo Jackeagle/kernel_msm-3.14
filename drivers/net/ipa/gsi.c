@@ -1211,40 +1211,26 @@ int gsi_dealloc_evt_ring(unsigned long evt_id)
 	ipahal_dma_free(&ctx->mem);
 
 	atomic_dec(&gsi_ctx->num_evt_ring);
-
-	return 0;
 }
 
-int gsi_reset_evt_ring(unsigned long evt_id)
+void gsi_reset_evt_ring(unsigned long evt_id)
 {
 	struct gsi_evt_ctx *ctx;
 	u32 completed;
 
-	if (evt_id >= gsi_ctx->max_ev) {
-		ipa_err("bad params evt_id %lu\n", evt_id);
-		return -EINVAL;
-	}
+	ipa_bug_on(evt_id >= gsi_ctx->max_ev);
 
 	ctx = &gsi_ctx->evtr[evt_id];
 
-	if (ctx->state != GSI_EVT_RING_STATE_ALLOCATED) {
-		ipa_err("bad state %d\n", ctx->state);
-		return -ENOTSUPP;
-	}
+	ipa_bug_on(ctx->state != GSI_EVT_RING_STATE_ALLOCATED);
 
 	mutex_lock(&gsi_ctx->mlock);
 	reinit_completion(&ctx->compl);
 
 	completed = evt_ring_command(evt_id, GSI_EVT_RESET);
-	if (!completed) {
-		mutex_unlock(&gsi_ctx->mlock);
-		return -ETIMEDOUT;
-	}
+	ipa_bug_on(!completed);
 
-	if (ctx->state != GSI_EVT_RING_STATE_ALLOCATED) {
-		ipa_err("evt_id %lu unexpected state %u\n", evt_id, ctx->state);
-		ipa_bug();
-	}
+	ipa_bug_on(ctx->state != GSI_EVT_RING_STATE_ALLOCATED);
 
 	gsi_program_evt_ring_ctx(&ctx->mem, evt_id, ctx->int_modt);
 	gsi_init_ring(&ctx->ring, &ctx->mem);
@@ -1254,8 +1240,6 @@ int gsi_reset_evt_ring(unsigned long evt_id)
 
 	gsi_prime_evt_ring(ctx);
 	mutex_unlock(&gsi_ctx->mlock);
-
-	return 0;
 }
 
 static void
