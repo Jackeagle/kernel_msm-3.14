@@ -380,7 +380,8 @@ static int handle3_ingress_format(struct net_device *dev,
 		}
 	}
 
-	ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_len = 4;
+	ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_len =
+					sizeof(struct rmnet_map_header_s);
 	ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_ofst_metadata_valid = 1;
 	ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_ofst_metadata = 1;
 	ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_ofst_pkt_size_valid = 1;
@@ -442,13 +443,13 @@ static int handle3_egress_format(struct net_device *dev,
 
 	ipa_debug("get RMNET_IOCTL_SET_EGRESS_DATA_FORMAT\n");
 	ipa_wan_ep_cfg = &rmnet_ipa3_ctx->apps_to_ipa_ep_cfg;
+	ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_len =
+					sizeof(struct rmnet_map_header_s);
 	if ((e->u.data) & RMNET_IOCTL_EGRESS_FORMAT_CHECKSUM) {
-		ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_len = 8;
+		ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_len += sizeof(u32);
 		ipa_wan_ep_cfg->ipa_ep_cfg.cfg.cs_offload_en =
 			IPA_ENABLE_CS_OFFLOAD_UL;
 		ipa_wan_ep_cfg->ipa_ep_cfg.cfg.cs_metadata_hdr_offset = 1;
-	} else {
-		ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_len = 4;
 	}
 
 	if ((e->u.data) & RMNET_IOCTL_EGRESS_FORMAT_AGGREGATION) {
