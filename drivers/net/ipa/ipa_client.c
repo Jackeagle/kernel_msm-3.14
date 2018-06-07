@@ -207,7 +207,6 @@ int ipa3_reset_gsi_channel(u32 clnt_hdl)
 {
 	struct ipa3_ep_context *ep;
 	int result = -EFAULT;
-	int gsi_res;
 	u32 aggr_active_bitmap;
 
 	ipa_debug("entry\n");
@@ -231,28 +230,20 @@ int ipa3_reset_gsi_channel(u32 clnt_hdl)
 
 	if (aggr_active_bitmap & (1 << clnt_hdl)) {
 		result = ipa3_reset_with_open_aggr_frame_wa(clnt_hdl, ep);
-		if (result)
-			goto reset_chan_fail;
 	} else {
 		/*
 		 * Reset channel
 		 * If the reset called after stop, need to wait 1ms
 		 */
 		msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
-		gsi_res = gsi_reset_channel(ep->gsi_chan_hdl);
-		if (gsi_res) {
-			ipa_err("Error resetting channel: %d\n", gsi_res);
-			result = -EFAULT;
-			goto reset_chan_fail;
-		}
+		result = gsi_reset_channel(ep->gsi_chan_hdl);
+		if (result)
+			ipa_err("Error resetting channel: %d\n", result);
 	}
 
 	ipa_client_remove(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	ipa_debug("exit\n");
-	return 0;
 
-reset_chan_fail:
-	ipa_client_remove(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 	return result;
 }
