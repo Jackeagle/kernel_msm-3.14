@@ -203,20 +203,18 @@ restore_props_fail:
 	return result;
 }
 
-int ipa3_reset_gsi_channel(u32 clnt_hdl)
+void ipa3_reset_gsi_channel(u32 clnt_hdl)
 {
 	struct ipa3_ep_context *ep;
-	int result = -EFAULT;
 	u32 aggr_active_bitmap;
 
 	ipa_debug("entry\n");
-	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
-		ipa3_ctx->ep[clnt_hdl].valid == 0) {
-		ipa_err("Bad parameter.\n");
-		return -EINVAL;
-	}
+
+	ipa_bug_on(clnt_hdl >= ipa3_ctx->ipa_num_pipes);
 
 	ep = &ipa3_ctx->ep[clnt_hdl];
+	ipa_bug_on(!ep->valid);
+
 
 	ipa_client_add(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 	/*
@@ -229,21 +227,17 @@ int ipa3_reset_gsi_channel(u32 clnt_hdl)
 		aggr_active_bitmap = 0;
 
 	if (aggr_active_bitmap & (1 << clnt_hdl)) {
-		result = ipa3_reset_with_open_aggr_frame_wa(clnt_hdl, ep);
+		ipa_bug_on(ipa3_reset_with_open_aggr_frame_wa(clnt_hdl, ep));
 	} else {
 		/*
 		 * Reset channel
 		 * If the reset called after stop, need to wait 1ms
 		 */
 		msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
-		result = gsi_reset_channel(ep->gsi_chan_hdl);
-		if (result)
-			ipa_err("Error resetting channel: %d\n", result);
+		ipa_bug_on(gsi_reset_channel(ep->gsi_chan_hdl));
 	}
 
 	ipa_client_remove(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
 
 	ipa_debug("exit\n");
-
-	return result;
 }

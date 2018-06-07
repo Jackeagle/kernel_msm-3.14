@@ -847,7 +847,7 @@ void ipa3_wwan_cleanup(void);
 
 int ipa3_stop_gsi_channel(u32 clnt_hdl);
 
-int ipa3_reset_gsi_channel(u32 clnt_hdl);
+void ipa3_reset_gsi_channel(u32 clnt_hdl);
 
 /*
  * Configuration

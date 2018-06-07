@@ -963,8 +963,7 @@ int ipa3_teardown_sys_pipe(u32 clnt_hdl)
 		ipa_bug_on(result != -EAGAIN && result != -ETIMEDOUT);
 	}
 
-	ipa_bug_on(ipa3_reset_gsi_channel(clnt_hdl) != 0);
-
+	ipa3_reset_gsi_channel(clnt_hdl);
 	ipa_bug_on(gsi_dealloc_channel(ep->gsi_chan_hdl) != 0);
 	ipa_bug_on(gsi_reset_evt_ring(ep->gsi_evt_ring_hdl) != 0);
 	ipa_bug_on(gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl) != 0);
