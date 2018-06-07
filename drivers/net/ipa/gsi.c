@@ -32,6 +32,24 @@
 
 struct gsi_ctx *gsi_ctx;
 
+/*
+ * Read a value from the given offset into the I/O space defined in
+ * the GSI context.
+ */
+u32 gsi_readl(u32 offset)
+{
+	return readl(gsi_ctx->base + offset);
+}
+
+/*
+ * Write the provided value to the given offset into the I/O space
+ * defined in the GSI context.
+ */
+void gsi_writel(u32 v, u32 offset)
+{
+	writel(v, gsi_ctx->base + offset);
+}
+
 u32 gsi_max_channel_get(void)
 {
 	return gsi_ctx->max_ch;

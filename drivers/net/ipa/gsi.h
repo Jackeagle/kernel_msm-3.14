@@ -565,23 +565,8 @@ void gsi_debugfs_init(void);
 u16 gsi_find_idx_from_addr(struct gsi_ring_ctx *ctx, u64 addr);
 struct gsi_ctx *gsi_init(struct platform_device *pdev, u32 ee);
 
-/*
- * Read a value from the given offset into the I/O space defined in
- * the GSI context.
- */
-static inline u32 gsi_readl(u32 offset)
-{
-	return readl(gsi_ctx->base + offset);
-}
-
-/*
- * Write the provided value to the given offset into the I/O space
- * defined in the GSI context.
- */
-static inline void gsi_writel(u32 v, u32 offset)
-{
-	writel(v, gsi_ctx->base + offset);
-}
+u32 gsi_readl(u32 offset);
+void gsi_writel(u32 v, u32 offset);
 u32 gsi_max_channel_get(void);
 
 /**
