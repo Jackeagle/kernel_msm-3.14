@@ -582,6 +582,7 @@ static inline void gsi_writel(u32 v, u32 offset)
 {
 	writel(v, gsi_ctx->base + offset);
 }
+u32 gsi_max_channel_get(void);
 
 /**
  * gsi_register_device - Peripheral should call this function to

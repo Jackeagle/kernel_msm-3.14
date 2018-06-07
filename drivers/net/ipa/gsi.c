@@ -32,6 +32,11 @@
 
 struct gsi_ctx *gsi_ctx;
 
+u32 gsi_max_channel_get(void)
+{
+	return gsi_ctx->max_ch;
+}
+
 static void gsi_irq_set(u32 offset, u32 val)
 {
 	gsi_writel(val, offset);

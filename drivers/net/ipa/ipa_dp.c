@@ -2297,10 +2297,10 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		       ep->client);
 		return -EINVAL;
 	}
-	if (gsi_ep_info->ipa_gsi_chan_num >= gsi_ctx->max_ch) {
+	if (gsi_ep_info->ipa_gsi_chan_num >= gsi_max_channel_get()) {
 		ipa_err("channel number too big for client=%d (%u > %u)\n",
 		       ep->client, gsi_ep_info->ipa_gsi_chan_num,
-		       gsi_ctx->max_ch - 1);
+		       gsi_max_channel_get() - 1);
 		return -EINVAL;
 	}
 
