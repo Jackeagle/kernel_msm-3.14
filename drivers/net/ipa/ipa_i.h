@@ -207,7 +207,6 @@ struct ipa3_ep_context {
 	union __packed gsi_channel_scratch chan_scratch;
 	bool bytes_xfered_valid;
 	u16 bytes_xfered;
-	dma_addr_t phys_base;
 	struct ipa_ep_cfg cfg;
 	struct ipa_ep_cfg_holb holb;
 	struct ipahal_reg_ep_cfg_status status;

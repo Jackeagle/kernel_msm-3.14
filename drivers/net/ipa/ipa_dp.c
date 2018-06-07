@@ -2216,7 +2216,6 @@ void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 	}
 	sys->ep->bytes_xfered_valid = true;
 	sys->ep->bytes_xfered = notify->bytes_xfered;
-	sys->ep->phys_base = rx_pkt_rcvd->data.dma_addr;
 
 	if (evt_id != GSI_CHAN_EVT_EOT && evt_id != GSI_CHAN_EVT_EOB) {
 		ipa_err("received unexpected event id %d\n", evt_id);
