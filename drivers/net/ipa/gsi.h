@@ -472,28 +472,6 @@ struct gsi_generic_ee_cmd_debug_stats {
 	unsigned long halt_channel;
 };
 
-struct gsi_ctx {
-	void __iomem *base;
-	struct device *dev;
-	u32 ee;
-	u32 phys_base;
-	unsigned int irq;
-	bool per_registered;
-	struct gsi_chan_ctx chan[GSI_CHAN_MAX];
-	struct ch_debug_stats ch_dbg[GSI_CHAN_MAX];
-	struct gsi_evt_ctx evtr[GSI_EVT_RING_MAX];
-	struct gsi_generic_ee_cmd_debug_stats gen_ee_cmd_dbg;
-	struct mutex mlock;
-	spinlock_t slock;
-	unsigned long evt_bmap;
-	atomic_t num_chan;
-	atomic_t num_evt_ring;
-	struct gsi_ee_scratch scratch;
-	u32 max_ch;
-	u32 max_ev;
-	struct completion gen_ee_cmd_compl;
-};
-
 enum gsi_re_type {
 	GSI_RE_XFER = 0x2,
 	GSI_RE_IMMD_CMD = 0x3,
@@ -560,7 +538,7 @@ enum gsi_generic_ee_cmd_opcode {
 	GSI_GEN_EE_CMD_HALT_CHANNEL = 0x1,
 };
 
-extern struct gsi_ctx *gsi_ctx;
+struct gsi_ctx;
 void gsi_debugfs_init(void);
 u16 gsi_find_idx_from_addr(struct gsi_ring_ctx *ctx, u64 addr);
 struct gsi_ctx *gsi_init(struct platform_device *pdev, u32 ee);
