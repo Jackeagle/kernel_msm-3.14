@@ -4,8 +4,8 @@
  * Copyright (c) 2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
-#ifndef _IPALITE_MSM_RMNET_H_
-#define _IPALITE_MSM_RMNET_H_
+#ifndef _MSM_RMNET_H_
+#define _MSM_RMNET_H_
 
 /* Bitmap macros for RmNET driver operation mode. */
 #define RMNET_MODE_NONE	    (0x00)
@@ -155,4 +155,4 @@ struct qmi_qos_hdr8_s {
 	uint8_t		       reserved[2];
 } __attribute((__packed__));
 
-#endif /* _IPALITE_MSM_RMNET_H_ */
+#endif /* _MSM_RMNET_H_ */

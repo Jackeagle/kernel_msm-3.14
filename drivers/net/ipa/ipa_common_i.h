@@ -246,8 +246,6 @@ struct ipa_mem_buffer {
 	u32 size;
 };
 
-/* IPA_LITE */
-
 /**
  * max size of the header to be inserted
  */
