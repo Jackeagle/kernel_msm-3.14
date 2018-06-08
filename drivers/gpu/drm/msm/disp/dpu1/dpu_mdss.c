@@ -3,6 +3,8 @@
  * Copyright (c) 2018, The Linux Foundation
  */
 
+#include <linux/dpu_io_util.h>
+
 #include "dpu_kms.h"
 
 #define to_dpu_mdss(x) container_of(x, struct dpu_mdss, base)

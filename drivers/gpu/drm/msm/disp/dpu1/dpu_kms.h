@@ -115,6 +115,13 @@ struct dpu_kms {
 
 	struct dpu_power_handle phandle;
 	struct dpu_power_client *core_client;
+
+	struct msm_gem_address_space *aspace[MSM_SMMU_DOMAIN_MAX];
+#ifdef CONFIG_ION
+	struct ion_client *iclient;
+#else
+	void *iclient;
+#endif
 	struct dpu_power_event *power_event;
 
 	/* directory entry for debugfs */
@@ -275,6 +282,15 @@ void *dpu_debugfs_get_root(struct dpu_kms *dpu_kms);
  */
 int dpu_enable_vblank(struct msm_kms *kms, struct drm_crtc *crtc);
 void dpu_disable_vblank(struct msm_kms *kms, struct drm_crtc *crtc);
+
+/**
+ * smmu attach/detach functions
+ * @dpu_kms: poiner to dpu_kms structure
+ * @secure_only: if true only secure contexts are attached/detached, else
+ * all contexts are attached/detached/
+ */
+int dpu_kms_mmu_attach(struct dpu_kms *dpu_kms, bool secure_only);
+int dpu_kms_mmu_detach(struct dpu_kms *dpu_kms, bool secure_only);
 
 void dpu_kms_encoder_enable(struct drm_encoder *encoder);
 

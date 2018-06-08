@@ -17,6 +17,7 @@
 #include <linux/arm-smccc.h>
 #include <linux/cpuidle.h>
 #include <linux/errno.h>
+#include <linux/io.h>
 #include <linux/linkage.h>
 #include <linux/of.h>
 #include <linux/pm.h>
@@ -258,6 +259,10 @@ static void psci_sys_reset(enum reboot_mode reboot_mode, const char *cmd)
 
 static void psci_sys_poweroff(void)
 {
+	// HACK!
+	void __iomem *pshold = ioremap(0xC264000, 4);
+	writel(0, pshold);
+
 	invoke_psci_fn(PSCI_0_2_FN_SYSTEM_OFF, 0, 0, 0);
 }
 
@@ -559,7 +564,8 @@ static void __init psci_0_2_set_functions(void)
 
 	psci_ops.migrate_info_type = psci_migrate_info_type;
 
-	arm_pm_restart = psci_sys_reset;
+	if (false)
+		arm_pm_restart = psci_sys_reset;
 
 	pm_power_off = psci_sys_poweroff;
 }

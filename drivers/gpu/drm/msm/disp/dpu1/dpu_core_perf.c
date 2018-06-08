@@ -221,6 +221,7 @@ int dpu_core_perf_crtc_check(struct drm_crtc *crtc,
 static int _dpu_core_perf_crtc_update_bus(struct dpu_kms *kms,
 		struct drm_crtc *crtc, u32 bus_id)
 {
+	u64 bw_sum_of_intfs = 0, bus_ab_quota, bus_ib_quota;
 	struct dpu_core_perf_params perf = { { 0 } };
 	enum dpu_crtc_client_type curr_client_type
 					= dpu_crtc_get_client_type(crtc);
@@ -238,10 +239,44 @@ static int _dpu_core_perf_crtc_update_bus(struct dpu_kms *kms,
 				max(perf.max_per_pipe_ib[bus_id],
 				dpu_cstate->new_perf.max_per_pipe_ib[bus_id]);
 
+			bw_sum_of_intfs += dpu_cstate->new_perf.bw_ctl[bus_id];
+
 			DPU_DEBUG("crtc=%d bus_id=%d bw=%llu\n",
 				tmp_crtc->base.id, bus_id,
 				dpu_cstate->new_perf.bw_ctl[bus_id]);
 		}
+	}
+
+	bus_ab_quota = max(bw_sum_of_intfs, kms->perf.perf_tune.min_bus_vote);
+	bus_ib_quota = perf.max_per_pipe_ib[bus_id];
+
+	if (kms->perf.perf_tune.mode == DPU_PERF_MODE_FIXED) {
+		bus_ab_quota = kms->perf.fix_core_ab_vote;
+		bus_ib_quota = kms->perf.fix_core_ib_vote;
+	}
+
+	switch (curr_client_type) {
+	case NRT_CLIENT:
+		ret = dpu_power_data_bus_set_quota(
+				&kms->phandle, kms->core_client,
+				DPU_POWER_HANDLE_DATA_BUS_CLIENT_NRT,
+				bus_id, bus_ab_quota, bus_ib_quota);
+		DPU_DEBUG("client:%s bus_id=%d ab=%llu ib=%llu\n", "nrt",
+			  bus_id, bus_ab_quota, bus_ib_quota);
+		break;
+
+	case RT_CLIENT:
+		ret = dpu_power_data_bus_set_quota(
+				&kms->phandle, kms->core_client,
+				DPU_POWER_HANDLE_DATA_BUS_CLIENT_RT,
+				bus_id, bus_ab_quota, bus_ib_quota);
+		DPU_DEBUG("client:%s bus_id=%d ab=%llu ib=%llu\n", "rt",
+			  bus_id, bus_ab_quota, bus_ib_quota);
+		break;
+
+	default:
+		DPU_ERROR("invalid client type:%d\n", curr_client_type);
+		break;
 	}
 	return ret;
 }

@@ -21,7 +21,7 @@
 #define DPU_POWER_HANDLE_ENABLE_BUS_IB_QUOTA	1600000000
 #define DPU_POWER_HANDLE_DISABLE_BUS_IB_QUOTA	0
 
-#include "dpu_io_util.h"
+#include <linux/dpu_io_util.h>
 
 /* event will be triggered before power handler disable */
 #define DPU_POWER_EVENT_PRE_DISABLE	0x1
@@ -97,6 +97,36 @@ struct dpu_power_client {
 	bool active;
 };
 
+/**
+ * struct dpu_power_data_handle: power handle struct for data bus
+ * @data_bus_scale_table: pointer to bus scaling table
+ * @data_bus_hdl: current data bus handle
+ * @axi_port_cnt: number of rt axi ports
+ * @nrt_axi_port_cnt: number of nrt axi ports
+ * @bus_channels: number of memory bus channels
+ * @curr_bw_uc_idx: current use case index of data bus
+ * @ao_bw_uc_idx: active only use case index of data bus
+ * @ab_rt: realtime ab quota
+ * @ib_rt: realtime ib quota
+ * @ab_nrt: non-realtime ab quota
+ * @ib_nrt: non-realtime ib quota
+ * @enable: true if bus is enabled
+ */
+struct dpu_power_data_bus_handle {
+	struct msm_bus_scale_pdata *data_bus_scale_table;
+	u32 data_bus_hdl;
+	u32 axi_port_cnt;
+	u32 nrt_axi_port_cnt;
+	u32 bus_channels;
+	u32 curr_bw_uc_idx;
+	u32 ao_bw_uc_idx;
+	u64 ab_rt;
+	u64 ib_rt;
+	u64 ab_nrt;
+	u64 ib_nrt;
+	bool enable;
+};
+
 /*
  * struct dpu_power_event - local event registration structure
  * @client_name: name of the client registering
@@ -121,6 +151,8 @@ struct dpu_power_event {
  * @phandle_lock: lock to synchronize the enable/disable
  * @dev: pointer to device structure
  * @usecase_ndx: current usecase index
+ * @reg_bus_hdl: current register bus handle
+ * @data_bus_handle: context structure for data bus control
  * @event_list: current power handle event list
  */
 struct dpu_power_handle {
@@ -128,6 +160,9 @@ struct dpu_power_handle {
 	struct mutex phandle_lock;
 	struct device *dev;
 	u32 current_usecase_ndx;
+	u32 reg_bus_hdl;
+	struct dpu_power_data_bus_handle data_bus_handle
+		[DPU_POWER_HANDLE_DBUS_ID_MAX];
 	struct list_head event_list;
 };
 
@@ -135,8 +170,10 @@ struct dpu_power_handle {
  * dpu_power_resource_init() - initializes the dpu power handle
  * @pdev:   platform device to search the power resources
  * @pdata:  power handle to store the power resources
+ *
+ * Return: error code.
  */
-void dpu_power_resource_init(struct platform_device *pdev,
+int dpu_power_resource_init(struct platform_device *pdev,
 	struct dpu_power_handle *pdata);
 
 /**
@@ -179,6 +216,32 @@ void dpu_power_client_destroy(struct dpu_power_handle *phandle,
  */
 int dpu_power_resource_enable(struct dpu_power_handle *pdata,
 	struct dpu_power_client *pclient, bool enable);
+
+/**
+ * dpu_power_data_bus_state_update() - update data bus state
+ * @pdata:  power handle containing the resources
+ * @enable: take enable vs disable path
+ *
+ * Return: error code.
+ */
+int dpu_power_data_bus_state_update(struct dpu_power_handle *phandle,
+							bool enable);
+
+/**
+ * dpu_power_data_bus_set_quota() - set data bus quota for power client
+ * @phandle:  power handle containing the resources
+ * @client: client information to set quota
+ * @bus_client: real-time or non-real-time bus client
+ * @bus_id: identifier of data bus, see DPU_POWER_HANDLE_DBUS_ID
+ * @ab_quota: arbitrated bus bandwidth
+ * @ib_quota: instantaneous bus bandwidth
+ *
+ * Return: zero if success, or error code otherwise
+ */
+int dpu_power_data_bus_set_quota(struct dpu_power_handle *phandle,
+		struct dpu_power_client *pclient,
+		int bus_client, u32 bus_id,
+		u64 ab_quota, u64 ib_quota);
 
 /**
  * dpu_power_data_bus_bandwidth_ctrl() - control data bus bandwidth enable

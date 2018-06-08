@@ -10,16 +10,47 @@
 #include "sdm845-cheza.dtsi"
 
 / {
-	model = "Google Cheza";
-	compatible = "google,cheza-rev15", "google,cheza-rev14",
-		     "google,cheza-rev13", "google,cheza-rev12",
-		     "google,cheza-rev11", "google,cheza-rev10",
-		     "google,cheza-rev9", "google,cheza-rev8",
-		     "google,cheza-rev7", "google,cheza-rev6",
-		     "google,cheza-rev5", "google,cheza-rev4",
-		     "google,cheza-rev3", "google,cheza-rev2",
-		     "google,cheza-rev1", "google,cheza", "qcom,sdm845";
+	model = "Google Cheza (rev1)";
+	compatible = "google,cheza-rev1", "google,cheza", "qcom,sdm845";
+
+/* TODO: move this to main dtsi once -rev0 is gone */
+	backlight: backlight {
+		compatible = "pwm-backlight";
+		pwms = <&cros_ec_pwm 0>;
+		enable-gpios = <&tlmm 37 GPIO_ACTIVE_HIGH>;
+		power-supply = <&ppvar_sys>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&ap_edp_bklten>;
+	};
 };
+
+/* TODO: move this to main dtsi once -rev0 is gone */
+&spi10 {
+	cros_ec: ec@0 {
+		compatible = "google,cros-ec-spi";
+		reg = <0>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <122 IRQ_TYPE_LEVEL_LOW>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&ec_ap_int_l>;
+		spi-max-frequency = <3000000>;
+
+		cros_ec_pwm: ec-pwm {
+			compatible = "google,cros-ec-pwm";
+			#pwm-cells = <1>;
+		};
+
+		i2c_tunnel: i2c-tunnel {
+			compatible = "google,cros-ec-i2c-tunnel";
+			google,remote-bus = <0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+		};
+	};
+};
+
+#include <arm/cros-ec-keyboard.dtsi>
+#include <arm/cros-ec-sbs.dtsi>
 
 /* PINCTRL - board-specific pinctrl */
 

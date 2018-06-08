@@ -185,11 +185,11 @@ static const struct dpu_sspp_sub_blks sdm845_dma_sblk_3 = _DMA_SBLK("11", 4);
 	.clk_ctrl = _clkctrl \
 	}
 
-#define SSPP_DMA_BLK(_name, _id, _base, _sblk, _xinid, _clkctrl) \
+#define SSPP_DMA_BLK(_name, _id, _base, _sblk, _xinid, _clkctrl, _features) \
 	{ \
 	.name = _name, .id = _id, \
 	.base = _base, .len = 0x1c8, \
-	.features = DMA_SDM845_MASK, \
+	.features = (DMA_SDM845_MASK | _features), \
 	.sblk = &_sblk, \
 	.xin_id = _xinid, \
 	.type = SSPP_TYPE_DMA, \
@@ -206,13 +206,15 @@ static struct dpu_sspp_cfg sdm845_sspp[] = {
 	SSPP_VIG_BLK("sspp_3", SSPP_VIG3, 0xa000,
 		sdm845_vig_sblk_3, 12, DPU_CLK_CTRL_VIG3),
 	SSPP_DMA_BLK("sspp_8", SSPP_DMA0, 0x24000,
-		sdm845_dma_sblk_0, 1, DPU_CLK_CTRL_DMA0),
+		sdm845_dma_sblk_0, 1, DPU_CLK_CTRL_DMA0, 0),
 	SSPP_DMA_BLK("sspp_9", SSPP_DMA1, 0x26000,
-		sdm845_dma_sblk_1, 5, DPU_CLK_CTRL_DMA1),
+		sdm845_dma_sblk_1, 5, DPU_CLK_CTRL_DMA1, 0),
 	SSPP_DMA_BLK("sspp_10", SSPP_DMA2, 0x28000,
-		sdm845_dma_sblk_2, 9, DPU_CLK_CTRL_CURSOR0),
+		sdm845_dma_sblk_2, 9, DPU_CLK_CTRL_CURSOR0,
+		BIT(DPU_SSPP_CURSOR)),
 	SSPP_DMA_BLK("sspp_11", SSPP_DMA3, 0x2a000,
-		sdm845_dma_sblk_3, 13, DPU_CLK_CTRL_CURSOR1),
+		sdm845_dma_sblk_3, 13, DPU_CLK_CTRL_CURSOR1,
+		BIT(DPU_SSPP_CURSOR)),
 };
 
 /*************************************************************

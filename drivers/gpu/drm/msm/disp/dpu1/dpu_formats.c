@@ -874,7 +874,7 @@ static int _dpu_format_populate_addrs_ubwc(
 		struct drm_framebuffer *fb,
 		struct dpu_hw_fmt_layout *layout)
 {
-	uint32_t base_addr = 0;
+	uint32_t base_addr;
 	bool meta;
 
 	if (!fb || !layout) {
@@ -884,6 +884,8 @@ static int _dpu_format_populate_addrs_ubwc(
 
 	if (aspace)
 		base_addr = msm_framebuffer_iova(fb, aspace, 0);
+	else
+		base_addr = msm_framebuffer_phys(fb, 0);
 	if (!base_addr) {
 		DRM_ERROR("failed to retrieve base addr\n");
 		return -EFAULT;
@@ -982,6 +984,8 @@ static int _dpu_format_populate_addrs_linear(
 		if (aspace)
 			layout->plane_addr[i] =
 				msm_framebuffer_iova(fb, aspace, i);
+		else
+			layout->plane_addr[i] = msm_framebuffer_phys(fb, i);
 		if (!layout->plane_addr[i]) {
 			DRM_ERROR("failed to retrieve base addr\n");
 			return -EFAULT;

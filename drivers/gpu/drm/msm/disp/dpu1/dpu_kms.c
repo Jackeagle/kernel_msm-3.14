@@ -311,6 +311,7 @@ static int dpu_kms_enable_vblank(struct msm_kms *kms, struct drm_crtc *crtc)
 
 static void dpu_kms_disable_vblank(struct msm_kms *kms, struct drm_crtc *crtc)
 {
+	pm_runtime_get_sync(crtc->dev->dev);
 	dpu_crtc_vblank(crtc, false);
 }
 
@@ -425,6 +426,9 @@ static void dpu_kms_wait_for_commit_done(struct msm_kms *kms,
 		return;
 	}
 
+	ret = drm_crtc_vblank_get(crtc);
+	if (ret)
+		return;
 	list_for_each_entry(encoder, &dev->mode_config.encoder_list, head) {
 		if (encoder->crtc != crtc)
 			continue;
@@ -440,6 +444,8 @@ static void dpu_kms_wait_for_commit_done(struct msm_kms *kms,
 			break;
 		}
 	}
+
+	drm_crtc_vblank_put(crtc);
 }
 
 static void _dpu_kms_initialize_dsi(struct drm_device *dev,
@@ -531,13 +537,14 @@ static int _dpu_kms_drm_obj_init(struct dpu_kms *dpu_kms)
 {
 	struct drm_device *dev;
 	struct drm_plane *primary_planes[MAX_PLANES], *plane;
+	struct drm_plane *cursor_planes[MAX_PLANES];
 	struct drm_crtc *crtc;
 
 	struct msm_drm_private *priv;
 	struct dpu_mdss_cfg *catalog;
 
-	int primary_planes_idx = 0, i, ret;
-	int max_crtc_count;
+	int primary_planes_idx = 0, cursor_planes_idx = 0, i, ret;
+	int max_crtc_count, max_cursor_planes;
 
 	if (!dpu_kms || !dpu_kms->dev || !dpu_kms->dev->dev) {
 		DPU_ERROR("invalid dpu_kms\n");
@@ -556,16 +563,21 @@ static int _dpu_kms_drm_obj_init(struct dpu_kms *dpu_kms)
 
 	max_crtc_count = min(catalog->mixer_count, priv->num_encoders);
 
-	/* Create the planes */
+	/* Create the planes, keeping track of one primary/cursor per crtc */
 	for (i = 0; i < catalog->sspp_count; i++) {
-		bool primary = true;
+		bool primary = true, cursor = false;
 
-		if (catalog->sspp[i].features & BIT(DPU_SSPP_CURSOR)
-			|| primary_planes_idx >= max_crtc_count)
+		if (catalog->sspp[i].features & BIT(DPU_SSPP_CURSOR))
+			cursor = true;
+		else if (primary_planes_idx >= max_crtc_count)
 			primary = false;
 
+		DRM_ERROR("Create plane with features %lx (cur %lx)\n",
+			  catalog->sspp[i].features,
+			  catalog->sspp[i].features & BIT(DPU_SSPP_CURSOR));
+
 		plane = dpu_plane_init(dev, catalog->sspp[i].id, primary,
-				(1UL << max_crtc_count) - 1, 0);
+				       cursor, (1UL << max_crtc_count) - 1, 0);
 		if (IS_ERR(plane)) {
 			DPU_ERROR("dpu_plane_init failed\n");
 			ret = PTR_ERR(plane);
@@ -573,15 +585,24 @@ static int _dpu_kms_drm_obj_init(struct dpu_kms *dpu_kms)
 		}
 		priv->planes[priv->num_planes++] = plane;
 
-		if (primary)
+		if (cursor)
+			cursor_planes[cursor_planes_idx++] = plane;
+		else if (primary)
 			primary_planes[primary_planes_idx++] = plane;
 	}
 
 	max_crtc_count = min(max_crtc_count, primary_planes_idx);
+	max_cursor_planes = cursor_planes_idx + 1;
+	cursor_planes_idx = 0;
 
 	/* Create one CRTC per encoder */
 	for (i = 0; i < max_crtc_count; i++) {
-		crtc = dpu_crtc_init(dev, primary_planes[i]);
+		struct drm_plane *cursor = NULL;
+
+		if (cursor_planes_idx < max_cursor_planes)
+			cursor = cursor_planes[cursor_planes_idx++];
+
+		crtc = dpu_crtc_init(dev, primary_planes[i], cursor);
 		if (IS_ERR(crtc)) {
 			ret = PTR_ERR(crtc);
 			goto fail;
@@ -648,6 +669,13 @@ static void _dpu_kms_hw_destroy(struct dpu_kms *dpu_kms)
 	_dpu_debugfs_destroy(dpu_kms);
 	_dpu_kms_mmu_destroy(dpu_kms);
 
+	if (dpu_kms->iclient) {
+#ifdef CONFIG_ION
+		ion_client_destroy(dpu_kms->iclient);
+#endif
+		dpu_kms->iclient = NULL;
+	}
+
 	if (dpu_kms->catalog) {
 		for (i = 0; i < dpu_kms->catalog->vbif_count; i++) {
 			u32 vbif_idx = dpu_kms->catalog->vbif[i].id;
@@ -681,6 +709,70 @@ static void _dpu_kms_hw_destroy(struct dpu_kms *dpu_kms)
 	if (dpu_kms->mmio)
 		devm_iounmap(&dpu_kms->pdev->dev, dpu_kms->mmio);
 	dpu_kms->mmio = NULL;
+}
+
+int dpu_kms_mmu_detach(struct dpu_kms *dpu_kms, bool secure_only)
+{
+	int i;
+
+	if (!dpu_kms)
+		return -EINVAL;
+
+	for (i = 0; i < MSM_SMMU_DOMAIN_MAX; i++) {
+		struct msm_mmu *mmu;
+		struct msm_gem_address_space *aspace = dpu_kms->aspace[i];
+
+		if (!aspace)
+			continue;
+
+		mmu = dpu_kms->aspace[i]->mmu;
+
+		if (secure_only &&
+			!aspace->mmu->funcs->is_domain_secure(mmu))
+			continue;
+
+		/* cleanup aspace before detaching */
+		msm_gem_aspace_domain_attach_detach_update(aspace, true);
+
+		DPU_DEBUG("Detaching domain:%d\n", i);
+		aspace->mmu->funcs->detach(mmu, (const char **)iommu_ports,
+			ARRAY_SIZE(iommu_ports));
+
+		aspace->domain_attached = false;
+	}
+
+	return 0;
+}
+
+int dpu_kms_mmu_attach(struct dpu_kms *dpu_kms, bool secure_only)
+{
+	int i;
+
+	if (!dpu_kms)
+		return -EINVAL;
+
+	for (i = 0; i < MSM_SMMU_DOMAIN_MAX; i++) {
+		struct msm_mmu *mmu;
+		struct msm_gem_address_space *aspace = dpu_kms->aspace[i];
+
+		if (!aspace)
+			continue;
+
+		mmu = dpu_kms->aspace[i]->mmu;
+
+		if (secure_only &&
+			!aspace->mmu->funcs->is_domain_secure(mmu))
+			continue;
+
+		DPU_DEBUG("Attaching domain:%d\n", i);
+		aspace->mmu->funcs->attach(mmu, (const char **)iommu_ports,
+			ARRAY_SIZE(iommu_ports));
+
+		msm_gem_aspace_domain_attach_detach_update(aspace, false);
+		aspace->domain_attached = true;
+	}
+
+	return 0;
 }
 
 static void dpu_kms_destroy(struct msm_kms *kms)
@@ -880,12 +972,20 @@ static inline void _dpu_kms_core_hw_rev_init(struct dpu_kms *dpu_kms)
 static int _dpu_kms_mmu_destroy(struct dpu_kms *dpu_kms)
 {
 	struct msm_mmu *mmu;
+	int i;
 
-	mmu = dpu_kms->base.aspace->mmu;
+	for (i = ARRAY_SIZE(dpu_kms->aspace) - 1; i >= 0; i--) {
+		if (!dpu_kms->aspace[i])
+			continue;
 
-	mmu->funcs->detach(mmu, (const char **)iommu_ports,
-			ARRAY_SIZE(iommu_ports));
-	msm_gem_address_space_put(dpu_kms->base.aspace);
+		mmu = dpu_kms->aspace[i]->mmu;
+
+		mmu->funcs->detach(mmu, (const char **)iommu_ports,
+				ARRAY_SIZE(iommu_ports));
+		msm_gem_address_space_put(dpu_kms->aspace[i]);
+
+		dpu_kms->aspace[i] = NULL;
+	}
 
 	return 0;
 }
@@ -896,26 +996,34 @@ static int _dpu_kms_mmu_init(struct dpu_kms *dpu_kms)
 	struct msm_gem_address_space *aspace;
 	int ret;
 
-	domain = iommu_domain_alloc(&platform_bus_type);
-	if (!domain)
-		return 0;
+	domain = iommu_get_domain_for_dev(dpu_kms->dev->dev);
+	if (!domain) {
+		DPU_ERROR("failed to get iommu domain for DPU\n");
+		return PTR_ERR(domain);
+	}
+
+	domain->geometry.aperture_start = 0x1000;
+	domain->geometry.aperture_end = 0xffffffff;
 
 	aspace = msm_gem_address_space_create(dpu_kms->dev->dev,
-			domain, "dpu1");
+			domain, "dpu");
 	if (IS_ERR(aspace)) {
 		ret = PTR_ERR(aspace);
 		goto fail;
 	}
 
+	dpu_kms->aspace[0] = aspace;
 	dpu_kms->base.aspace = aspace;
 
-	ret = aspace->mmu->funcs->attach(aspace->mmu, iommu_ports,
-			ARRAY_SIZE(iommu_ports));
+	ret = aspace->mmu->funcs->attach(aspace->mmu,
+				(const char **)iommu_ports,
+				ARRAY_SIZE(iommu_ports));
 	if (ret) {
 		DPU_ERROR("failed to attach iommu %d\n", ret);
 		msm_gem_address_space_put(aspace);
 		goto fail;
 	}
+	aspace->domain_attached = true;
 
 	return 0;
 fail:
@@ -1018,6 +1126,7 @@ static int dpu_kms_hw_init(struct msm_kms *kms)
 							     "vbif_nrt");
 	}
 
+#ifdef CONFIG_CHROME_REGDMA
 	dpu_kms->reg_dma = msm_ioremap(dpu_kms->pdev, "regdma", "regdma");
 	if (IS_ERR(dpu_kms->reg_dma)) {
 		dpu_kms->reg_dma = NULL;
@@ -1025,6 +1134,7 @@ static int dpu_kms_hw_init(struct msm_kms *kms)
 	} else {
 		dpu_kms->reg_dma_len = dpu_iomap_size(dpu_kms->pdev, "regdma");
 	}
+#endif
 
 	dpu_kms->core_client = dpu_power_client_create(&dpu_kms->phandle,
 					"core");
@@ -1065,6 +1175,16 @@ static int dpu_kms_hw_init(struct msm_kms *kms)
 		goto power_error;
 	}
 
+#ifdef CONFIG_CHROME_REGDMA
+	/* Initialize reg dma block which is a singleton */
+	rc = dpu_reg_dma_init(dpu_kms->reg_dma, dpu_kms->catalog,
+			dpu_kms->dev);
+	if (rc) {
+		DPU_ERROR("failed: reg dma init failed\n");
+		goto power_error;
+	}
+#endif
+
 	rc = dpu_rm_init(&dpu_kms->rm, dpu_kms->catalog, dpu_kms->mmio,
 			dpu_kms->dev);
 	if (rc) {
@@ -1098,6 +1218,17 @@ static int dpu_kms_hw_init(struct msm_kms *kms)
 			goto power_error;
 		}
 	}
+
+#ifdef CONFIG_ION
+	dpu_kms->iclient = msm_ion_client_create(dev->unique);
+	if (IS_ERR(dpu_kms->iclient)) {
+		rc = PTR_ERR(dpu_kms->iclient);
+		DPU_DEBUG("msm_ion_client not available: %d\n", rc);
+		dpu_kms->iclient = NULL;
+	}
+#else
+	dpu_kms->iclient = NULL;
+#endif
 
 	rc = dpu_core_perf_init(&dpu_kms->perf, dev, dpu_kms->catalog,
 			&dpu_kms->phandle,
@@ -1212,7 +1343,12 @@ static int dpu_bind(struct device *dev, struct device *master, void *data)
 		return ret;
 	}
 
-	dpu_power_resource_init(pdev, &dpu_kms->phandle);
+	ret = dpu_power_resource_init(pdev, &dpu_kms->phandle);
+	if (ret) {
+		pr_err("dpu power resource init failed\n");
+		msm_dss_put_clk(mp->clk_config, mp->num_clk);
+		return ret;
+	}
 
 	platform_set_drvdata(pdev, dpu_kms);
 

@@ -150,9 +150,53 @@ connector_to_ti_sn_bridge(struct drm_connector *connector)
 	return container_of(connector, struct ti_sn_bridge, connector);
 }
 
+static const struct drm_display_mode r0_mode = {
+	.clock = 128000, /* Actual clock rate should be 206016 */
+	.hdisplay = 2160,
+	.hsync_start = 2160 + 48,
+	.hsync_end = 2160 + 48 + 32,
+	.htotal = 2160 + 48 + 32 + 80,
+	.vdisplay = 1440,
+	.vsync_start = 1440 + 3,
+	.vsync_end = 1440 + 3 + 10,
+	.vtotal = 1440 + 3 + 10 + 27,
+	.vrefresh = 60,
+	.flags = DRM_MODE_FLAG_PHSYNC | DRM_MODE_FLAG_PVSYNC,
+};
+
+static int ti_sn_bridge_add_custom_mode(struct ti_sn_bridge *pdata)
+{
+	const struct drm_display_mode *m = &r0_mode;
+	struct drm_connector *connector = &(pdata->connector);
+	struct drm_display_mode *mode;
+
+	mode = drm_mode_duplicate(connector->dev, m);
+	if (!mode) {
+		DRM_ERROR("failed to add custom mode %d\n", m->clock);
+		return 0;
+	}
+
+	mode->type |= DRM_MODE_TYPE_DRIVER;
+	mode->type |= DRM_MODE_TYPE_PREFERRED;
+
+	drm_mode_set_name(mode);
+
+	drm_mode_probed_add(connector, mode);
+
+	connector->display_info.bpc = 8;
+	connector->display_info.width_mm = 259;
+	connector->display_info.height_mm = 173;
+
+	return 1;
+}
+
 static int ti_sn_bridge_connector_get_modes(struct drm_connector *connector)
 {
 	struct ti_sn_bridge *pdata = connector_to_ti_sn_bridge(connector);
+
+	/* HACK: adding custom clock rate for proto-0 board */
+	if (!pdata->refclk)
+		return ti_sn_bridge_add_custom_mode(pdata);
 
 	return drm_panel_get_modes(pdata->panel);
 }
