@@ -2179,12 +2179,7 @@ void ipa_gsi_irq_tx_notify_cb(struct gsi_chan_xfer_notify *notify)
 {
 	struct ipa3_tx_pkt_wrapper *tx_pkt;
 
-	ipa_debug_low("event %d notified\n", notify->evt_id);
-
-	if (notify->evt_id != GSI_CHAN_EVT_EOT) {
-		ipa_err("received unexpected event id %d\n", notify->evt_id);
-		return;
-	}
+	ipa_debug_low("event EOT notified\n");
 
 	tx_pkt = notify->xfer_user_data;
 	queue_work(tx_pkt->sys->wq, &tx_pkt->work);
@@ -2195,12 +2190,6 @@ void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 	struct ipa3_sys_context *sys = notify->chan_user_data;
 	struct ipa3_rx_pkt_wrapper *rx_pkt_rcvd = notify->xfer_user_data;
 	struct ipa3_rx_pkt_wrapper *rx_pkt_expected;
-	enum gsi_chan_evt evt_id = notify->evt_id;
-
-	if (evt_id != GSI_CHAN_EVT_EOT) {
-		ipa_err("received unexpected event id %d\n", evt_id);
-		return;
-	}
 
 	rx_pkt_expected = list_first_entry(&sys->head_desc_list,
 					   struct ipa3_rx_pkt_wrapper, link);
