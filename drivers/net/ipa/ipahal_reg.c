@@ -427,39 +427,6 @@ ipareg_construct_qsb_max_reads(enum ipahal_reg reg, const void *fields)
 	return val;
 }
 
-static void
-ipareg_parse_tx_cfg(enum ipahal_reg reg,void *fields, u32 val)
-{
-	struct ipahal_reg_tx_cfg *tx_cfg = fields;
-
-	memset(tx_cfg, 0, sizeof(*tx_cfg));
-
-	tx_cfg->tx0_prefetch_disable =
-		field_val(val, TX0_PREFETCH_DISABLE_BMSK_V3_5);
-	tx_cfg->tx1_prefetch_disable =
-		field_val(val, TX1_PREFETCH_DISABLE_BMSK_V3_5);
-	tx_cfg->tx0_prefetch_almost_empty_size =
-		field_val(val, PREFETCH_ALMOST_EMPTY_SIZE_BMSK_V3_5);
-	tx_cfg->tx1_prefetch_almost_empty_size =
-		tx_cfg->tx0_prefetch_almost_empty_size;
-}
-
-static u32
-ipareg_construct_tx_cfg(enum ipahal_reg reg, const void *fields)
-{
-	const struct ipahal_reg_tx_cfg *tx_cfg = fields;
-	u32 val;
-
-	val = field_gen(tx_cfg->tx0_prefetch_disable,
-			TX0_PREFETCH_DISABLE_BMSK_V3_5);
-	val |= field_gen(tx_cfg->tx1_prefetch_disable,
-			TX1_PREFETCH_DISABLE_BMSK_V3_5);
-	val |= field_gen(tx_cfg->tx0_prefetch_almost_empty_size,
-			PREFETCH_ALMOST_EMPTY_SIZE_BMSK_V3_5);
-
-	return val;
-}
-
 static u32
 ipareg_construct_idle_indication_cfg(enum ipahal_reg reg, const void *fields)
 {
@@ -621,7 +588,6 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 							0x00000074,	0x0000),
 		reg_obj_cfunc(QSB_MAX_READS, qsb_max_reads,
 							0x00000078,	0x0000),
-		reg_obj_both(TX_CFG, tx_cfg,		0x000001fc,	0x0000),
 		reg_obj_cfunc(IDLE_INDICATION_CFG, idle_indication_cfg,
 							0x00000220,	0x0000),
 		reg_obj_nofunc(DPS_SEQUENCER_FIRST,	0x0001e000,	0x0000),

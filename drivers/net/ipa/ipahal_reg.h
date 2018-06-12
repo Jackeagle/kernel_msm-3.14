@@ -56,7 +56,6 @@ enum ipahal_reg {
 	IPA_DST_RSRC_GRP_23_RSRC_TYPE_n,
 	IPA_QSB_MAX_WRITES,
 	IPA_QSB_MAX_READS,
-	IPA_TX_CFG,
 	IPA_IDLE_INDICATION_CFG,
 	IPA_DPS_SEQUENCER_FIRST,
 	IPA_HPS_SEQUENCER_FIRST,
@@ -254,29 +253,6 @@ struct ipahal_reg_qsb_max_reads {
 	u32 qmb_1_max_reads;
 	u32 qmb_0_max_read_beats;
 	u32 qmb_1_max_read_beats;
-};
-
-/*
- * struct ipahal_reg_tx_cfg - IPA TX_CFG register
- * @tx0_prefetch_disable: Disable prefetch on TX0
- * @tx1_prefetch_disable: Disable prefetch on TX1
- * @tx0_prefetch_almost_empty_size: Prefetch almost empty size on TX0
- * @tx1_prefetch_almost_empty_size: Prefetch almost empty size on TX1
- * @dmaw_scnd_outsd_pred_threshold:
- * @dmaw_max_beats_256_dis:
- * @dmaw_scnd_outsd_pred_en:
- * @pa_mask_en:
- */
-struct ipahal_reg_tx_cfg {
-	bool tx0_prefetch_disable;
-	bool tx1_prefetch_disable;
-	u32 tx0_prefetch_almost_empty_size;
-	u32 tx1_prefetch_almost_empty_size;
-	u32 dmaw_scnd_outsd_pred_threshold;
-	u32 dmaw_max_beats_256_dis;
-	u32 dmaw_scnd_outsd_pred_en;
-	u32 pa_mask_en;
-
 };
 
 /*
