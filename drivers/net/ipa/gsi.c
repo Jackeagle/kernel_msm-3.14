@@ -45,7 +45,6 @@ struct gsi_ctx {
 	unsigned long evt_bmap;
 	atomic_t num_chan;
 	atomic_t num_evt_ring;
-	struct gsi_ee_scratch scratch;
 	u32 max_ch;
 	u32 max_ev;
 };

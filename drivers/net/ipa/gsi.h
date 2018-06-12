@@ -392,23 +392,6 @@ struct gsi_evt_ctx {
 	struct gsi_chan_ctx *chan;
 	atomic_t chan_ref_cnt;
 	union __packed gsi_evt_scratch scratch;
-	struct gsi_evt_stats stats;
-};
-
-struct gsi_ee_scratch {
-	union __packed {
-		struct {
-			uint32_t inter_ee_cmd_return_code:3;
-			uint32_t resvd1:2;
-			uint32_t generic_ee_cmd_return_code:3;
-			uint32_t resvd2:7;
-			uint32_t max_usb_pkt_size:1;
-			uint32_t resvd3:8;
-			uint32_t mhi_base_chan_idx:8;
-		} s;
-		uint32_t val;
-	} word0;
-	uint32_t word1;
 };
 
 struct ch_debug_stats {
