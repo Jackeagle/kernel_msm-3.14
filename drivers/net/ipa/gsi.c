@@ -51,6 +51,48 @@ struct gsi_ctx {
 
 static struct gsi_ctx *gsi_ctx;
 
+/**
+ * gsi_gpi_channel_scratch - GPI protocol SW config area of
+ * channel scratch
+ *
+ * @max_outstanding_tre: Used for the prefetch management sequence by the
+ *			 sequencer. Defines the maximum number of allowed
+ *			 outstanding TREs in IPA/GSI (in Bytes). RE engine
+ *			 prefetch will be limited by this configuration. It
+ *			 is suggested to configure this value to IPA_IF
+ *			 channel TLV queue size times element size. To disable
+ *			 the feature in doorbell mode (DB Mode=1). Maximum
+ *			 outstanding TREs should be set to 64KB
+ *			 (or any value larger or equal to ring length . RLEN)
+ * @outstanding_threshold: Used for the prefetch management sequence by the
+ *			 sequencer. Defines the threshold (in Bytes) as to when
+ *			 to update the channel doorbell. Should be smaller than
+ *			 Maximum outstanding TREs. value. It is suggested to
+ *			 configure this value to 2 * element size.
+ */
+struct __packed gsi_gpi_channel_scratch {
+	uint64_t resvd1;
+	uint32_t resvd2:16;
+	uint32_t max_outstanding_tre:16;
+	uint32_t resvd3:16;
+	uint32_t outstanding_threshold:16;
+};
+
+
+/**
+ * gsi_channel_scratch - channel scratch SW config area
+ *
+ */
+union __packed gsi_channel_scratch {
+	struct __packed gsi_gpi_channel_scratch gpi;
+	struct __packed {
+		uint32_t word1;
+		uint32_t word2;
+		uint32_t word3;
+		uint32_t word4;
+	} data;
+};
+
 /*
  * Read a value from the given offset into the I/O space defined in
  * the GSI context.
