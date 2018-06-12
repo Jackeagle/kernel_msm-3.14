@@ -121,33 +121,6 @@ ipareg_construct_endp_status_n(enum ipahal_reg reg, const void *fields)
 	return val;
 }
 
-static u32
-ipareg_construct_qcncm(enum ipahal_reg reg, const void *fields)
-{
-	const struct ipahal_reg_qcncm *qcncm = fields;
-	u32 val;
-
-	val = field_gen(qcncm->mode_en ? 1 : 0, MODE_EN_BMSK);
-	val |= field_gen(qcncm->mode_val, MODE_VAL_BMSK);
-	val |= field_gen(qcncm->undef1, QCNCM_UNDEFINED1_BMSK);
-	val |= field_gen(qcncm->undef2, MODE_UNDEFINED2_BMSK);
-
-	return val;
-}
-
-static void
-ipareg_parse_qcncm(enum ipahal_reg reg, void *fields, u32 val)
-{
-	struct ipahal_reg_qcncm *qcncm = fields;
-
-	memset(qcncm, 0, sizeof(*qcncm));
-
-	qcncm->mode_en = field_val(val, MODE_EN_BMSK);
-	qcncm->mode_val = field_val(val, MODE_VAL_BMSK);
-	qcncm->undef1 = field_val(val, QCNCM_UNDEFINED1_BMSK);
-	qcncm->undef2 = field_val(val, MODE_UNDEFINED2_BMSK);
-}
-
 static bool
 debug_cnt_ctrl_type_valid(u8 dbg_cnt_ctrl_type, enum ipahal_reg reg)
 {
@@ -665,7 +638,6 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 		reg_obj_nofunc(SRAM_DIRECT_ACCESS_n,	0x00007000,	0x0004),
 		reg_obj_cfunc(DEBUG_CNT_CTRL_n, debug_cnt_ctrl_n,
 							0x00000640,	0x0004),
-		reg_obj_both(QCNCM, qcncm,		0x00000064,	0x0000),
 		reg_obj_nofunc(LOCAL_PKT_PROC_CNTXT_BASE,
 							0x000001e8,	0x0000),
 		reg_obj_cfunc(ENDP_STATUS_n, endp_status_n,

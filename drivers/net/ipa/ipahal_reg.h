@@ -47,7 +47,6 @@ enum ipahal_reg {
 	IPA_SHARED_MEM_SIZE,
 	IPA_SRAM_DIRECT_ACCESS_n,
 	IPA_DEBUG_CNT_CTRL_n,
-	IPA_QCNCM,
 	IPA_LOCAL_PKT_PROC_CNTXT_BASE,
 	IPA_ENDP_STATUS_n,
 	IPA_ENDP_FILTER_ROUTER_HSH_CFG_n,
@@ -258,35 +257,6 @@ struct ipahal_reg_rx_hps_weights {
 struct ipahal_reg_valmask {
 	u32 val;
 	u32 mask;
-};
-
-/*
- * struct ipahal_reg_fltrt_hash_flush - Flt/Rt flush configuration
- * @v6_rt - Flush IPv6 Routing cache
- * @v6_flt - Flush IPv6 Filtering cache
- * @v4_rt - Flush IPv4 Routing cache
- * @v4_flt - Flush IPv4 Filtering cache
- */
-struct ipahal_reg_fltrt_hash_flush {
-	bool v6_rt;
-	bool v6_flt;
-	bool v4_rt;
-	bool v4_flt;
-};
-
-/*
- * struct ipahal_reg_qcncm - IPA QCNCM register
- * @mode_en: When QCNCM_MODE_EN=1, IPA will use QCNCM signature.
- * @mode_val: Used only when QCNCM_MODE_EN=1 and sets SW Signature in
- *	the NDP header.
- * @undef1: unused bits in the low-order byte of the register
- * @undef2: unused bits in the high-order byte of the register
- */
-struct ipahal_reg_qcncm {
-	bool mode_en;
-	u32 mode_val;
-	u32 undef1;
-	u32 undef2;
 };
 
 /*
