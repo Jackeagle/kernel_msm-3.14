@@ -476,41 +476,6 @@ ipareg_construct_idle_indication_cfg(enum ipahal_reg reg, const void *fields)
 	return val;
 }
 
-static u32
-ipareg_construct_hps_queue_weights(enum ipahal_reg reg, const void *fields)
-{
-	const struct ipahal_reg_rx_hps_weights *hps_weights = fields;
-	u32 val;
-
-	val = field_gen(hps_weights->hps_queue_weight_0,
-			RX_HPS_QUEUE_WEIGHT_0_BMSK);
-	val |= field_gen(hps_weights->hps_queue_weight_1,
-			RX_HPS_QUEUE_WEIGHT_1_BMSK);
-	val |= field_gen(hps_weights->hps_queue_weight_2,
-			RX_HPS_QUEUE_WEIGHT_2_BMSK);
-	val |= field_gen(hps_weights->hps_queue_weight_3,
-			RX_HPS_QUEUE_WEIGHT_3_BMSK);
-
-	return val;
-}
-
-static void
-ipareg_parse_hps_queue_weights(enum ipahal_reg reg, void *fields, u32 val)
-{
-	struct ipahal_reg_rx_hps_weights *hps_weights = fields;
-
-	memset(hps_weights, 0, sizeof(*hps_weights));
-
-	hps_weights->hps_queue_weight_0 =
-		field_val(val, RX_HPS_QUEUE_WEIGHT_0_BMSK);
-	hps_weights->hps_queue_weight_1 =
-		field_val(val, RX_HPS_QUEUE_WEIGHT_1_BMSK);
-	hps_weights->hps_queue_weight_2 =
-		field_val(val, RX_HPS_QUEUE_WEIGHT_2_BMSK);
-	hps_weights->hps_queue_weight_3 =
-		field_val(val, RX_HPS_QUEUE_WEIGHT_3_BMSK);
-}
-
 /*
  * The offsets of certain registers may change between different
  * versions of IPA hardware.  In addition, the format of information
@@ -652,8 +617,6 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 							0x00000500,	0x0020),
 		reg_obj_cfunc(DST_RSRC_GRP_23_RSRC_TYPE_n, rsrg_grp_xy_v3_5,
 							0x00000504,	0x0020),
-		reg_obj_both(HPS_FTCH_ARB_QUEUE_WEIGHT, hps_queue_weights,
-							0x000005a4,	0x0000),
 		reg_obj_cfunc(QSB_MAX_WRITES, qsb_max_writes,
 							0x00000074,	0x0000),
 		reg_obj_cfunc(QSB_MAX_READS, qsb_max_reads,

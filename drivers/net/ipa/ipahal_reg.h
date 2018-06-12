@@ -54,7 +54,6 @@ enum ipahal_reg {
 	IPA_SRC_RSRC_GRP_23_RSRC_TYPE_n,
 	IPA_DST_RSRC_GRP_01_RSRC_TYPE_n,
 	IPA_DST_RSRC_GRP_23_RSRC_TYPE_n,
-	IPA_HPS_FTCH_ARB_QUEUE_WEIGHT,
 	IPA_QSB_MAX_WRITES,
 	IPA_QSB_MAX_READS,
 	IPA_TX_CFG,
@@ -231,32 +230,6 @@ struct ipahal_reg_rsrc_grp_cfg {
 	u32 x_max;
 	u32 y_min;
 	u32 y_max;
-};
-
-/*
-* struct ipahal_reg_rx_hps_weights - weight values for RX HPS clients
-* @hps_queue_weight_0 - 4 bit Weight for RX_HPS_CMDQ #0 (3:0)
-* @hps_queue_weight_1 - 4 bit Weight for RX_HPS_CMDQ #1 (7:4)
-* @hps_queue_weight_2 - 4 bit Weight for RX_HPS_CMDQ #2 (11:8)
-* @hps_queue_weight_3 - 4 bit Weight for RX_HPS_CMDQ #3 (15:12)
-*/
-struct ipahal_reg_rx_hps_weights {
-	u32 hps_queue_weight_0;
-	u32 hps_queue_weight_1;
-	u32 hps_queue_weight_2;
-	u32 hps_queue_weight_3;
-};
-
-/*
- * struct ipahal_reg_valmask - holding values and masking for registers
- *	HAL application may require only value and mask of it for some
- *	register fields.
- * @val - The value
- * @mask - Tha mask of the value
- */
-struct ipahal_reg_valmask {
-	u32 val;
-	u32 mask;
 };
 
 /*

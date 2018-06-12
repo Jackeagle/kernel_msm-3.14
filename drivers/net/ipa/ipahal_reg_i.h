@@ -180,10 +180,4 @@ void ipahal_reg_init(enum ipa_hw_version hw_version);
 #define ENTER_IDLE_DEBOUNCE_THRESH_BMSK_V3_5	0x0000ffff
 #define CONST_NON_IDLE_ENABLE_BMSK_V3_5		0x00010000
 
-/* IPA_HPS_FTCH_ARB_QUEUE_WEIGHT register */
-#define RX_HPS_QUEUE_WEIGHT_0_BMSK		0x0000000f
-#define RX_HPS_QUEUE_WEIGHT_1_BMSK		0x000000f0
-#define RX_HPS_QUEUE_WEIGHT_2_BMSK		0x00000f00
-#define RX_HPS_QUEUE_WEIGHT_3_BMSK		0x0000f000
-
 #endif /* _IPAHAL_REG_I_H_ */
