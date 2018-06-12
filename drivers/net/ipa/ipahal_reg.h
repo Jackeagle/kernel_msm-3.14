@@ -44,7 +44,6 @@ enum ipahal_reg {
 	IPA_ENDP_INIT_CFG_n,
 	IPA_IRQ_EE_UC_n,
 	IPA_ENDP_INIT_HDR_METADATA_MASK_n,
-	IPA_ENDP_INIT_RSRC_GRP_n,
 	IPA_SHARED_MEM_SIZE,
 	IPA_SRAM_DIRECT_ACCESS_n,
 	IPA_DEBUG_CNT_CTRL_n,
@@ -101,16 +100,6 @@ struct ipahal_reg_route {
  */
 struct ipahal_reg_endp_init_route {
 	u32 route_table_index;
-};
-
-/*
- * struct ipahal_reg_endp_init_rsrc_grp - IPA_ENDP_INIT_RSRC_GRP_n register
- * @rsrc_grp: Index of group for this ENDP. If this ENDP is a source-ENDP,
- *	index is for source-resource-group. If destination ENPD, index is
- *	for destination-resoruce-group.
- */
-struct ipahal_reg_endp_init_rsrc_grp {
-	u32 rsrc_grp;
 };
 
 /*

@@ -245,15 +245,6 @@ ipareg_parse_shared_mem_size(enum ipahal_reg reg, void *fields, u32 val)
 }
 
 static u32
-ipareg_construct_endp_init_rsrc_grp_n_v3_5(enum ipahal_reg reg,
-		const void *fields)
-{
-	const struct ipahal_reg_endp_init_rsrc_grp *rsrc_grp = fields;
-
-	return field_gen(rsrc_grp->rsrc_grp, RSRC_GRP_BMSK_v3_5);
-}
-
-static u32
 ipareg_construct_endp_init_hdr_metadata_mask_n(enum ipahal_reg reg,
 		const void *fields)
 {
@@ -711,8 +702,6 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 		reg_obj_cfunc(ENDP_INIT_HDR_METADATA_MASK_n,
 				endp_init_hdr_metadata_mask_n,
 							0x00000818,	0x0070),
-		reg_obj_cfunc(ENDP_INIT_RSRC_GRP_n, endp_init_rsrc_grp_n_v3_5,
-							0x00000838,	0x0070),
 		reg_obj_pfunc(SHARED_MEM_SIZE, shared_mem_size,
 							0x00000054,	0x0000),
 		reg_obj_nofunc(SRAM_DIRECT_ACCESS_n,	0x00007000,	0x0004),
