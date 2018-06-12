@@ -14,6 +14,7 @@
 #include <linux/types.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
+#include <linux/io.h>
 #include "ipahal_i.h"
 #include "ipahal_reg.h"
 #include "ipahal_reg_i.h"

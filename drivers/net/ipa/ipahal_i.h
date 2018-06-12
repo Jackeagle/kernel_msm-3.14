@@ -7,7 +7,6 @@
 #ifndef _IPAHAL_I_H_
 #define _IPAHAL_I_H_
 
-#include <linux/if_ether.h>
 #include "ipa_common_i.h"
 
 /*
