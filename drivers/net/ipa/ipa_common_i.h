@@ -714,15 +714,6 @@ struct ipa_ep_cfg_metadata_mask {
 };
 
 /**
- * struct ipa_ep_cfg_metadata - Meta Data configuration in IPA end-point
- * @md: This defines the meta data from tx data descriptor
- * @qmap_id: qmap id
- */
-struct ipa_ep_cfg_metadata {
-	u32 qmap_id;
-};
-
-/**
  * struct ipa_ep_cfg_seq - HPS/DPS sequencer type configuration in IPA end-point
  * @set_dynamic:  0 - HPS/DPS seq type is configured statically,
  *		   1 - HPS/DPS seq type is set to seq_type
@@ -759,7 +750,6 @@ struct ipa_ep_cfg {
 	struct ipa_ep_cfg_route route;
 	struct ipa_ep_cfg_cfg cfg;
 	struct ipa_ep_cfg_metadata_mask metadata_mask;
-	struct ipa_ep_cfg_metadata meta;
 	struct ipa_ep_cfg_seq seq;
 };
 

@@ -254,15 +254,6 @@ ipareg_construct_endp_init_rsrc_grp_n_v3_5(enum ipahal_reg reg,
 }
 
 static u32
-ipareg_construct_endp_init_hdr_metadata_n(enum ipahal_reg reg,
-		const void *fields)
-{
-	const struct ipa_ep_cfg_metadata *metadata = fields;
-
-	return field_gen(metadata->qmap_id, METADATA_BMSK);
-}
-
-static u32
 ipareg_construct_endp_init_hdr_metadata_mask_n(enum ipahal_reg reg,
 		const void *fields)
 {
@@ -720,9 +711,6 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 		reg_obj_cfunc(ENDP_INIT_HDR_METADATA_MASK_n,
 				endp_init_hdr_metadata_mask_n,
 							0x00000818,	0x0070),
-		reg_obj_cfunc(ENDP_INIT_HDR_METADATA_n,
-				endp_init_hdr_metadata_n,
-							0x0000081c,	0x0070),
 		reg_obj_cfunc(ENDP_INIT_RSRC_GRP_n, endp_init_rsrc_grp_n_v3_5,
 							0x00000838,	0x0070),
 		reg_obj_pfunc(SHARED_MEM_SIZE, shared_mem_size,

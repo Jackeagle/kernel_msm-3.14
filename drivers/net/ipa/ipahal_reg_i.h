@@ -104,9 +104,6 @@ void ipahal_reg_init(enum ipa_hw_version hw_version);
 /* IPA_ENDP_INIT_HDR_METADATA_MASK_n register */
 #define METADATA_MASK_BMSK			0xffffffff
 
-/* IPA_ENDP_INIT_HDR_METADATA_n register */
-#define METADATA_BMSK				0xffffffff
-
 /* IPA_ENDP_INIT_RSRC_GRP_n register */
 #define RSRC_GRP_BMSK				0x00000007
 #define RSRC_GRP_BMSK_v3_5			0x00000003
