@@ -117,10 +117,6 @@ void ipahal_reg_init(enum ipa_hw_version hw_version);
 #define DBG_CNT_TYPE_BMSK			0x00000070
 #define DBG_CNT_EN_BMSK				0x00000001
 
-/* IPA_SINGLE_NDP_MODE register */
-#define SINGLE_NDP_UNDEFINED_BMSK		0xfffffffe
-#define SINGLE_NDP_EN_BMSK			0x00000001
-
 /* IPA_QCNCM register */
 #define MODE_UNDEFINED2_BMSK			0xf0000000
 #define MODE_VAL_BMSK				0x0ffffff0

@@ -47,7 +47,6 @@ enum ipahal_reg {
 	IPA_SHARED_MEM_SIZE,
 	IPA_SRAM_DIRECT_ACCESS_n,
 	IPA_DEBUG_CNT_CTRL_n,
-	IPA_SINGLE_NDP_MODE,
 	IPA_QCNCM,
 	IPA_LOCAL_PKT_PROC_CNTXT_BASE,
 	IPA_ENDP_STATUS_n,
@@ -273,17 +272,6 @@ struct ipahal_reg_fltrt_hash_flush {
 	bool v6_flt;
 	bool v4_rt;
 	bool v4_flt;
-};
-
-/*
- * struct ipahal_reg_single_ndp_mode - IPA SINGLE_NDP_MODE register
- * @single_ndp_en: When set to '1', IPA builds MBIM frames with up to 1
- *	NDP-header.
- * @unused: undefined bits of the register
- */
-struct ipahal_reg_single_ndp_mode {
-	bool single_ndp_en;
-	u32 undefined;
 };
 
 /*

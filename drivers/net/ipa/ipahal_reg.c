@@ -148,29 +148,6 @@ ipareg_parse_qcncm(enum ipahal_reg reg, void *fields, u32 val)
 	qcncm->undef2 = field_val(val, MODE_UNDEFINED2_BMSK);
 }
 
-static u32
-ipareg_construct_single_ndp_mode(enum ipahal_reg reg, const void *fields)
-{
-	const struct ipahal_reg_single_ndp_mode *mode = fields;
-	u32 val;
-
-	val = field_gen(mode->single_ndp_en ? 1 : 0, SINGLE_NDP_EN_BMSK);
-	val |= field_gen(mode->undefined, SINGLE_NDP_UNDEFINED_BMSK);
-
-	return val;
-}
-
-static void
-ipareg_parse_single_ndp_mode(enum ipahal_reg reg, void *fields, u32 val)
-{
-	struct ipahal_reg_single_ndp_mode *mode = fields;
-
-	memset(mode, 0, sizeof(*mode));
-
-	mode->single_ndp_en = field_val(val, SINGLE_NDP_EN_BMSK);
-	mode->undefined = field_val(val, SINGLE_NDP_UNDEFINED_BMSK);
-}
-
 static bool
 debug_cnt_ctrl_type_valid(u8 dbg_cnt_ctrl_type, enum ipahal_reg reg)
 {
@@ -688,8 +665,6 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 		reg_obj_nofunc(SRAM_DIRECT_ACCESS_n,	0x00007000,	0x0004),
 		reg_obj_cfunc(DEBUG_CNT_CTRL_n, debug_cnt_ctrl_n,
 							0x00000640,	0x0004),
-		reg_obj_both(SINGLE_NDP_MODE, single_ndp_mode,
-							0x00000068,	0x0000),
 		reg_obj_both(QCNCM, qcncm,		0x00000064,	0x0000),
 		reg_obj_nofunc(LOCAL_PKT_PROC_CNTXT_BASE,
 							0x000001e8,	0x0000),
