@@ -127,12 +127,6 @@ void ipahal_reg_init(enum ipa_hw_version hw_version);
 #define DBG_CNT_TYPE_BMSK			0x00000070
 #define DBG_CNT_EN_BMSK				0x00000001
 
-/* IPA_FILT_ROUT_HASH_FLUSH register */
-#define IPv4_FILT_BMSK				0x00001000
-#define IPv4_ROUT_BMSK				0x00000100
-#define IPv6_FILT_BMSK				0x00000010
-#define IPv6_ROUT_BMSK				0x00000001
-
 /* IPA_SINGLE_NDP_MODE register */
 #define SINGLE_NDP_UNDEFINED_BMSK		0xfffffffe
 #define SINGLE_NDP_EN_BMSK			0x00000001
