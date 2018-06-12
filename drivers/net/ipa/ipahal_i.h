@@ -57,51 +57,6 @@ struct ipa_imm_cmd_hw_ip_fltrt_init {
 };
 
 /*
- * struct ipa_imm_cmd_hw_ip_v4_nat_init - IP_V4_NAT_INIT command payload
- *  in H/W format.
- * Inits IPv4 NAT block. Initiate NAT table with it dimensions, location
- *  cache address abd itger related parameters.
- * @ipv4_rules_addr: Addr in sys/shared mem where ipv4 NAT rules start
- * @ipv4_expansion_rules_addr: Addr in sys/shared mem where expantion NAT
- *  table starts. IPv4 NAT rules that result in NAT collision are located
- *  in this table.
- * @index_table_addr: Addr in sys/shared mem where index table, which points
- *  to NAT table starts
- * @index_table_expansion_addr: Addr in sys/shared mem where expansion index
- *  table starts
- * @table_index: For future support of multiple NAT tables
- * @rsvd1: reserved
- * @ipv4_rules_addr_type: ipv4_rules_addr in sys or shared mem
- * @ipv4_expansion_rules_addr_type: ipv4_expansion_rules_addr in
- *  sys or shared mem
- * @index_table_addr_type: index_table_addr in sys or shared mem
- * @index_table_expansion_addr_type: index_table_expansion_addr in
- *  sys or shared mem
- * @size_base_tables: Num of entries in NAT tbl and idx tbl (each)
- * @size_expansion_tables: Num of entries in NAT expantion tbl and expantion
- *  idx tbl (each)
- * @rsvd2: reserved
- * @public_ip_addr: public IP address. for IPAv4 this is the PDN config table
- *  offset in SMEM
- */
-struct ipa_imm_cmd_hw_ip_v4_nat_init {
-	u64 ipv4_rules_addr:64;
-	u64 ipv4_expansion_rules_addr:64;
-	u64 index_table_addr:64;
-	u64 index_table_expansion_addr:64;
-	u64 table_index:3;
-	u64 rsvd1:1;
-	u64 ipv4_rules_addr_type:1;
-	u64 ipv4_expansion_rules_addr_type:1;
-	u64 index_table_addr_type:1;
-	u64 index_table_expansion_addr_type:1;
-	u64 size_base_tables:12;
-	u64 size_expansion_tables:10;
-	u64 rsvd2:2;
-	u64 public_ip_addr:32;
-};
-
-/*
  * struct ipa_imm_cmd_hw_hdr_init_local - HDR_INIT_LOCAL command payload
  *  in H/W format.
  * Inits hdr table within local mem with the hdrs and their length.
@@ -115,63 +70,6 @@ struct ipa_imm_cmd_hw_hdr_init_local {
 	u64 size_hdr_table:12;
 	u64 hdr_addr:16;
 	u64 rsvd:4;
-};
-
-/*
- * struct ipa_imm_cmd_hw_nat_dma - NAT_DMA command payload
- *  in H/W format
- * Perform DMA operation on NAT related mem addressess. Copy data into
- *  different locations within NAT associated tbls. (For add/remove NAT rules)
- * @table_index: NAT tbl index. Defines the NAT tbl on which to perform DMA op.
- * @rsvd1: reserved
- * @base_addr: Base addr to which the DMA operation should be performed.
- * @rsvd2: reserved
- * @offset: offset in bytes from base addr to write 'data' to
- * @data: data to be written
- * @rsvd3: reserved
- */
-struct ipa_imm_cmd_hw_nat_dma {
-	u64 table_index:3;
-	u64 rsvd1:1;
-	u64 base_addr:2;
-	u64 rsvd2:2;
-	u64 offset:32;
-	u64 data:16;
-	u64 rsvd3:8;
-};
-
-/*
- * struct ipa_imm_cmd_hw_table_dma_ipav4 - TABLE_DMA command payload
- *  in H/W format
- * Perform DMA operation on NAT and ipv6 connection tracking related mem
- * addresses. Copy data into different locations within NAT associated tbls
- * (For add/remove NAT rules)
- * @table_index: NAT tbl index. Defines the NAT tbl on which to perform DMA op.
- * @rsvd1: reserved
- * @base_addr: Base addr to which the DMA operation should be performed.
- * @rsvd2: reserved
- * @offset: offset in bytes from base addr to write 'data' to
- * @data: data to be written
- * @rsvd3: reserved
- */
-struct ipa_imm_cmd_hw_table_dma_ipav4 {
-	u64 table_index : 3;
-	u64 rsvd1 : 1;
-	u64 base_addr : 3;
-	u64 rsvd2 : 1;
-	u64 offset : 32;
-	u64 data : 16;
-	u64 rsvd3 : 8;
-};
-
-/*
- * struct ipa_imm_cmd_hw_hdr_init_system - HDR_INIT_SYSTEM command payload
- *  in H/W format.
- * Inits hdr table within sys mem with the hdrs and their length.
- * @hdr_table_addr: Word address in system memory where the hdrs tbl starts.
- */
-struct ipa_imm_cmd_hw_hdr_init_system {
-	u64 hdr_table_addr:64;
 };
 
 /*
@@ -216,29 +114,6 @@ struct ipa_imm_cmd_hw_register_write {
 };
 
 /*
- * struct ipa_imm_cmd_hw_register_write - REGISTER_WRITE command payload
- *  in H/W format.
- * Write value to register. Allows reg changes to be synced with data packet
- *  and other immediate command. Can be used to access the sram
- * @sw_rsvd: Ignored by H/W. May be used by S/W
- * @offset_high: high bits of the Offset field - bits 17-20
- * @rsvd: reserved - should be set to zero
- * @offset: offset from IPA base address - Lower 16bit of the IPA reg addr
- * @value: value to write to register
- * @value_mask: mask specifying which value bits to write to the register
- * @rsvd2: reserved - should be set to zero
- */
-struct ipa_imm_cmd_hw_register_write_v_4_0 {
-	u64 sw_rsvd:11;
-	u64 offset_high:4;
-	u64 rsvd:1;
-	u64 offset:16;
-	u64 value:32;
-	u64 value_mask:32;
-	u64 rsvd2:32;
-};
-
-/*
  * struct ipa_imm_cmd_hw_dma_shared_mem - DMA_SHARED_MEM command payload
  *  in H/W format.
  * Perform mem copy into or out of the SW area of IPA local mem
@@ -265,31 +140,6 @@ struct ipa_imm_cmd_hw_dma_shared_mem {
 	u64 skip_pipeline_clear:1;
 	u64 pipeline_clear_options:2;
 	u64 rsvd:12;
-	u64 system_addr:64;
-};
-
-/*
- * struct ipa_imm_cmd_hw_dma_shared_mem - DMA_SHARED_MEM command payload
- *  in H/W format.
- * Perform mem copy into or out of the SW area of IPA local mem
- * @sw_rsvd: Ignored by H/W. My be used by S/W
- * @size: Size in bytes of data to copy. Expected size is up to 2K bytes
- * @clear_after_read: Clear local memory at the end of a read operation allows
- *  atomic read and clear if HPS is clear. Ignore for writes.
- * @local_addr: Address in IPA local memory
- * @direction: Read or write?
- *	0: IPA write, Write to local address from system address
- *	1: IPA read, Read from local address to system address
- * @rsvd: reserved - should be set to zero
- * @system_addr: Address in system memory
- */
-struct ipa_imm_cmd_hw_dma_shared_mem_v_4_0 {
-	u64 sw_rsvd:15;
-	u64 clear_after_read:1;
-	u64 size:16;
-	u64 local_addr:16;
-	u64 direction:1;
-	u64 rsvd:15;
 	u64 system_addr:64;
 };
 
@@ -344,8 +194,6 @@ struct ipa_imm_cmd_hw_dma_task_32b_addr {
 	u64 addr1:32;
 	u64 packet_size:16;
 };
-
-
 
 /* IPA Status packet H/W structures and info */
 
@@ -437,99 +285,5 @@ struct ipa_pkt_status_hw {
 
 /* Size of H/W Packet Status */
 #define IPA3_0_PKT_STATUS_SIZE 32
-
-/* Headers and processing context H/W structures and definitions */
-
-/* uCP command numbers */
-#define IPA_HDR_UCP_802_3_TO_802_3 6
-#define IPA_HDR_UCP_802_3_TO_ETHII 7
-#define IPA_HDR_UCP_ETHII_TO_802_3 8
-#define IPA_HDR_UCP_ETHII_TO_ETHII 9
-
-/* Processing context TLV type */
-#define IPA_PROC_CTX_TLV_TYPE_END 0
-#define IPA_PROC_CTX_TLV_TYPE_HDR_ADD 1
-#define IPA_PROC_CTX_TLV_TYPE_PROC_CMD 3
-
-/**
- * struct ipa_hw_hdr_proc_ctx_tlv -
- * HW structure of IPA processing context header - TLV part
- * @type: 0 - end type
- *	  1 - header addition type
- *	  3 - processing command type
- * @length: number of bytes after tlv
- *	  for type:
- *	  0 - needs to be 0
- *	  1 - header addition length
- *	  3 - number of 32B including type and length.
- * @value: specific value for type
- *	  for type:
- *	  0 - needs to be 0
- *	  1 - header length
- *	  3 - command ID (see IPA_HDR_UCP_* definitions)
- */
-struct ipa_hw_hdr_proc_ctx_tlv {
-	u32 type:8;
-	u32 length:8;
-	u32 value:16;
-};
-
-/**
- * struct ipa_hw_hdr_proc_ctx_hdr_add -
- * HW structure of IPA processing context - add header tlv
- * @tlv: IPA processing context TLV
- * @hdr_addr: processing context header address
- */
-struct ipa_hw_hdr_proc_ctx_hdr_add {
-	struct ipa_hw_hdr_proc_ctx_tlv tlv;
-	u32 hdr_addr;
-};
-
-
-/**
- * struct ipa_hw_hdr_proc_ctx_add_hdr_seq -
- * IPA processing context header - add header sequence
- * @hdr_add: add header command
- * @end: tlv end command (cmd.type must be 0)
- */
-struct ipa_hw_hdr_proc_ctx_add_hdr_seq {
-	struct ipa_hw_hdr_proc_ctx_hdr_add hdr_add;
-	struct ipa_hw_hdr_proc_ctx_tlv end;
-};
-
-/**
- * struct ipa_hw_hdr_proc_ctx_add_hdr_cmd_seq -
- * IPA processing context header - process command sequence
- * @hdr_add: add header command
- * @cmd: tlv processing command (cmd.type must be 3)
- * @end: tlv end command (cmd.type must be 0)
- */
-struct ipa_hw_hdr_proc_ctx_add_hdr_cmd_seq {
-	struct ipa_hw_hdr_proc_ctx_hdr_add hdr_add;
-	struct ipa_hw_hdr_proc_ctx_tlv cmd;
-	struct ipa_hw_hdr_proc_ctx_tlv end;
-};
-
-/**
- * struct ipa_hw_hdr_proc_ctx_add_l2tp_hdr_cmd_seq -
- * IPA processing context header - process command sequence
- * @hdr_add: add header command
- * @end: tlv end command (cmd.type must be 0)
- */
-struct ipa_hw_hdr_proc_ctx_add_l2tp_hdr_cmd_seq {
-	struct ipa_hw_hdr_proc_ctx_hdr_add hdr_add;
-	struct ipa_hw_hdr_proc_ctx_tlv end;
-};
-
-/**
- * struct ipa_hw_hdr_proc_ctx_remove_l2tp_hdr_cmd_seq -
- * IPA processing context header - process command sequence
- * @hdr_add: add header command
- * @end: tlv end command (cmd.type must be 0)
- */
-struct ipa_hw_hdr_proc_ctx_remove_l2tp_hdr_cmd_seq {
-	struct ipa_hw_hdr_proc_ctx_hdr_add hdr_add;
-	struct ipa_hw_hdr_proc_ctx_tlv end;
-};
 
 #endif /* _IPAHAL_I_H_ */
