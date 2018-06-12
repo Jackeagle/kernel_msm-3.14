@@ -43,39 +43,6 @@ struct ipa_gsi_ep_config {
 	u32 ee;
 };
 
-/**
- * gsi_mhi_evt_scratch - MHI protocol SW config area of
- * event scratch
- */
-struct __packed gsi_mhi_evt_scratch {
-	uint32_t resvd1;
-	uint32_t resvd2;
-};
-
-/**
- * gsi_xdci_evt_scratch - xDCI protocol SW config area of
- * event scratch
- *
- */
-struct __packed gsi_xdci_evt_scratch {
-	uint32_t gevntcount_low_addr;
-	uint32_t gevntcount_hi_addr:8;
-	uint32_t resvd1:24;
-};
-
-/**
- * gsi_evt_scratch - event scratch SW config area
- *
- */
-union __packed gsi_evt_scratch {
-	struct __packed gsi_mhi_evt_scratch mhi;
-	struct __packed gsi_xdci_evt_scratch xdci;
-	struct __packed {
-		uint32_t word1;
-		uint32_t word2;
-	} data;
-};
-
 enum gsi_chan_mode {
 	GSI_CHAN_MODE_CALLBACK = 0x0,
 	GSI_CHAN_MODE_POLL = 0x1,
@@ -391,7 +358,6 @@ struct gsi_evt_ctx {
 	struct completion compl;
 	struct gsi_chan_ctx *chan;
 	atomic_t chan_ref_cnt;
-	union __packed gsi_evt_scratch scratch;
 };
 
 struct ch_debug_stats {

@@ -1130,13 +1130,12 @@ err_clear_bit:
 	return ret;
 }
 
-static void __gsi_write_evt_ring_scratch(unsigned long evt_id,
-		union __packed gsi_evt_scratch val)
+static void __gsi_zero_evt_ring_scratch(unsigned long evt_id)
 {
 	u32 ee = gsi_ctx->ee;
 
-	gsi_writel(val.data.word1, GSI_EE_n_EV_CH_k_SCRATCH_0_OFFS(evt_id, ee));
-	gsi_writel(val.data.word2, GSI_EE_n_EV_CH_k_SCRATCH_1_OFFS(evt_id, ee));
+	gsi_writel(0, GSI_EE_n_EV_CH_k_SCRATCH_0_OFFS(evt_id, ee));
+	gsi_writel(0, GSI_EE_n_EV_CH_k_SCRATCH_1_OFFS(evt_id, ee));
 }
 
 void gsi_dealloc_evt_ring(unsigned long evt_id)
@@ -1192,8 +1191,7 @@ void gsi_reset_evt_ring(unsigned long evt_id)
 	gsi_program_evt_ring_ctx(&ctx->mem, evt_id, ctx->int_modt);
 	gsi_init_ring(&ctx->ring, &ctx->mem);
 
-	/* restore scratch */
-	__gsi_write_evt_ring_scratch(evt_id, ctx->scratch);
+	__gsi_zero_evt_ring_scratch(evt_id);
 
 	gsi_prime_evt_ring(ctx);
 	mutex_unlock(&gsi_ctx->mlock);
