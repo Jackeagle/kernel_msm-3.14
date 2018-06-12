@@ -1388,16 +1388,17 @@ static void __gsi_write_channel_scratch(unsigned long chan_id)
 int gsi_write_channel_scratch(unsigned long chan_id, u32 tlv_size)
 {
 	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_id];
-	union __packed gsi_channel_scratch scr;
-
-	/* See comments above definition of gsi_gpi_channel_scratch */
-	memset(&scr, 0, sizeof(scr));
-	scr.gpi.max_outstanding_tre = tlv_size * GSI_CHAN_RING_ELEMENT_SIZE;
-	scr.gpi.outstanding_threshold = 2 * GSI_CHAN_RING_ELEMENT_SIZE;
+	struct __packed gsi_gpi_channel_scratch *gpi = &ctx->scratch.gpi;
 
 	mutex_lock(&ctx->mlock);
-	ctx->scratch = scr;
+
+	memset(&ctx->scratch, 0, sizeof(ctx->scratch));
+	/* See comments above definition of gsi_gpi_channel_scratch */
+	gpi->max_outstanding_tre = tlv_size * GSI_CHAN_RING_ELEMENT_SIZE;
+	gpi->outstanding_threshold = 2 * GSI_CHAN_RING_ELEMENT_SIZE;
+
 	__gsi_write_channel_scratch(chan_id);
+
 	mutex_unlock(&ctx->mlock);
 
 	return 0;
