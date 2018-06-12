@@ -1360,11 +1360,19 @@ err_mutex_unlock:
 
 static void __gsi_write_channel_scratch(unsigned long chan_id)
 {
+	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_id];
 	union __packed gsi_channel_scratch *scr;
+	struct __packed gsi_gpi_channel_scratch *gpi;
 	u32 ee = gsi_ctx->ee;
 	u32 val;
 
-	scr = &gsi_ctx->chan[chan_id].scratch;
+	scr = &ctx->scratch;
+	memset(scr, 0, sizeof(*scr));
+
+	gpi = &scr->gpi;
+	/* See comments above definition of gsi_gpi_channel_scratch */
+	gpi->max_outstanding_tre = ctx->tlv_size * GSI_CHAN_RING_ELEMENT_SIZE;
+	gpi->outstanding_threshold = 2 * GSI_CHAN_RING_ELEMENT_SIZE;
 
 	val = scr->data.word1;
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_SCRATCH_0_OFFS(chan_id, ee));
@@ -1388,16 +1396,10 @@ static void __gsi_write_channel_scratch(unsigned long chan_id)
 int gsi_write_channel_scratch(unsigned long chan_id, u32 tlv_size)
 {
 	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_id];
-	struct __packed gsi_gpi_channel_scratch *gpi = &ctx->scratch.gpi;
 
 	ctx->tlv_size = tlv_size;
 
 	mutex_lock(&ctx->mlock);
-
-	memset(&ctx->scratch, 0, sizeof(ctx->scratch));
-	/* See comments above definition of gsi_gpi_channel_scratch */
-	gpi->max_outstanding_tre = tlv_size * GSI_CHAN_RING_ELEMENT_SIZE;
-	gpi->outstanding_threshold = 2 * GSI_CHAN_RING_ELEMENT_SIZE;
 
 	__gsi_write_channel_scratch(chan_id);
 
