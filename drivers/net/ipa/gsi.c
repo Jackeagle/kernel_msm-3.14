@@ -1390,6 +1390,8 @@ int gsi_write_channel_scratch(unsigned long chan_id, u32 tlv_size)
 	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_id];
 	struct __packed gsi_gpi_channel_scratch *gpi = &ctx->scratch.gpi;
 
+	ctx->tlv_size = tlv_size;
+
 	mutex_lock(&ctx->mlock);
 
 	memset(&ctx->scratch, 0, sizeof(ctx->scratch));
