@@ -713,12 +713,6 @@
 #define EV_OPCODE_BMSK				0xff000000
 #define EV_CHID_BMSK				0x000000ff
 
-#define GSI_EE_n_GSI_EE_GENERIC_CMD_OFFS(n)	(0x0001f018 + 0x4000 * (n))
-#define GSI_EE_n_GSI_EE_GENERIC_CMD_MAXn	3
-#define EE_OPCODE_BMSK				0x0000001f
-#define EE_VIRT_CHAN_IDX_BMSK			0x000003e0
-#define EE_EE_BMSK				0x00003c00
-
 /* v1.3 */
 #define GSI_V1_3_EE_n_GSI_HW_PARAM_0_OFFS(n)	(0x0001f038 + 0x4000 * (n))
 #define GSI_V1_3_EE_n_GSI_HW_PARAM_0_MAXn	2

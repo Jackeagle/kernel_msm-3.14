@@ -40,7 +40,6 @@ struct gsi_ctx {
 	struct gsi_chan_ctx chan[GSI_CHAN_MAX];
 	struct ch_debug_stats ch_dbg[GSI_CHAN_MAX];
 	struct gsi_evt_ctx evtr[GSI_EVT_RING_MAX];
-	struct gsi_generic_ee_cmd_debug_stats gen_ee_cmd_dbg;
 	struct mutex mlock;
 	spinlock_t slock;
 	unsigned long evt_bmap;
@@ -49,7 +48,6 @@ struct gsi_ctx {
 	struct gsi_ee_scratch scratch;
 	u32 max_ch;
 	u32 max_ev;
-	struct completion gen_ee_cmd_compl;
 };
 
 static struct gsi_ctx *gsi_ctx;
@@ -276,11 +274,6 @@ static void gsi_handle_glob_err(u32 err)
 	}
 }
 
-static void gsi_handle_gp_int1(void)
-{
-	complete(&gsi_ctx->gen_ee_cmd_compl);
-}
-
 static void gsi_handle_glob_ee(void)
 {
 	u32 ee = gsi_ctx->ee;
@@ -298,7 +291,7 @@ static void gsi_handle_glob_ee(void)
 	}
 
 	if (val & EN_GP_INT1_BMSK)
-		gsi_handle_gp_int1();
+		ipa_err("unexpected GP INT1 received\n");
 
 	ipa_bug_on(val & EN_GP_INT2_BMSK);
 	ipa_bug_on(val & EN_GP_INT3_BMSK);
@@ -1867,8 +1860,6 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev, u32 ee)
 	gsi_ctx->ee = ee;
 	ipa_assert(res->start <= (resource_size_t)U32_MAX);
 	gsi_ctx->phys_base = (u32)res->start;
-
-	init_completion(&gsi_ctx->gen_ee_cmd_compl);
 
 	return gsi_ctx;
 }

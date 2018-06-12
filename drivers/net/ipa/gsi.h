@@ -462,10 +462,6 @@ struct ch_debug_stats {
 	unsigned long cmd_completed;
 };
 
-struct gsi_generic_ee_cmd_debug_stats {
-	unsigned long halt_channel;
-};
-
 enum gsi_re_type {
 	GSI_RE_XFER = 0x2,
 	GSI_RE_IMMD_CMD = 0x3,
@@ -526,10 +522,6 @@ enum gsi_evt_ch_cmd_opcode {
 	GSI_EVT_ALLOCATE = 0x0,
 	GSI_EVT_RESET = 0x9,  /* TODO: is this valid? */
 	GSI_EVT_DE_ALLOC = 0xa,
-};
-
-enum gsi_generic_ee_cmd_opcode {
-	GSI_GEN_EE_CMD_HALT_CHANNEL = 0x1,
 };
 
 struct gsi_ctx;
