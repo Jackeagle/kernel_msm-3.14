@@ -16,28 +16,28 @@
  * Width and alignment values for H/W structures.  Values could
  * differ for different versions of IPA hardware.
  */
-#define IPA3_0_HW_TBL_WIDTH		8
-#define IPA3_0_HW_TBL_SYSADDR_ALIGN	128
-#define IPA3_0_HW_TBL_LCLADDR_ALIGN	8
-#define IPA3_0_HW_TBL_BLK_SIZE_ALIGN	128
-#define IPA3_0_HW_RULE_START_ALIGN	8
-#define IPA3_0_HW_TBL_HDR_WIDTH		8
-#define IPA3_0_HW_TBL_ADDR_MASK		127
-#define IPA3_0_HW_RULE_BUF_SIZE		256
+#define IPA_HW_TBL_WIDTH		8
+#define IPA_HW_TBL_SYSADDR_ALIGN	128
+#define IPA_HW_TBL_LCLADDR_ALIGN	8
+#define IPA_HW_TBL_BLK_SIZE_ALIGN	128
+#define IPA_HW_RULE_START_ALIGN	8
+#define IPA_HW_TBL_HDR_WIDTH		8
+#define IPA_HW_TBL_ADDR_MASK		127
+#define IPA_HW_RULE_BUF_SIZE		256
 
 /*
  * Rules Priority.
  * Needed due to rules classification to hashable and non-hashable.
  * Higher priority is lower in number. i.e. 0 is highest priority
  */
-#define IPA3_0_RULE_MAX_PRIORITY	0
-#define IPA3_0_RULE_MIN_PRIORITY	1023
+#define IPA_RULE_MAX_PRIORITY	0
+#define IPA_RULE_MIN_PRIORITY	1023
 
 /*
  * RULE ID, bit length (e.g. 10 bits).
  */
-#define IPA3_0_RULE_ID_BIT_LEN		10
-#define IPA3_0_LOW_RULE_ID		1
+#define IPA_RULE_ID_BIT_LEN		10
+#define IPA_LOW_RULE_ID		1
 
 /*
  * struct ipahal_fltrt_obj - Flt/Rt H/W information for specific IPA version
@@ -88,7 +88,7 @@ static struct ipahal_fltrt_obj ipahal_fltrt;
 
 static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap)
 {
-	/* At IPA3, there global configuration is possible but not used */
+	/* At IPA3, global configuration is possible but not used */
 	return ep_bitmap << 1;
 }
 
@@ -156,18 +156,18 @@ static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr)
 static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 	/* IPAv3.5.1 */
 	[IPA_HW_v3_5_1] = {
-		.tbl_width		= IPA3_0_HW_TBL_WIDTH,
-		.sysaddr_align		= IPA3_0_HW_TBL_SYSADDR_ALIGN,
-		.lcladdr_align		= IPA3_0_HW_TBL_LCLADDR_ALIGN,
-		.blk_sz_align		= IPA3_0_HW_TBL_BLK_SIZE_ALIGN,
-		.rule_start_align	= IPA3_0_HW_RULE_START_ALIGN,
-		.tbl_hdr_width		= IPA3_0_HW_TBL_HDR_WIDTH,
-		.tbl_addr_mask		= IPA3_0_HW_TBL_ADDR_MASK,
-		.rule_max_prio		= IPA3_0_RULE_MAX_PRIORITY,
-		.rule_min_prio		= IPA3_0_RULE_MIN_PRIORITY,
-		.low_rule_id		= IPA3_0_LOW_RULE_ID,
-		.rule_id_bit_len	= IPA3_0_RULE_ID_BIT_LEN,
-		.rule_buf_size		= IPA3_0_HW_RULE_BUF_SIZE,
+		.tbl_width		= IPA_HW_TBL_WIDTH,
+		.sysaddr_align		= IPA_HW_TBL_SYSADDR_ALIGN,
+		.lcladdr_align		= IPA_HW_TBL_LCLADDR_ALIGN,
+		.blk_sz_align		= IPA_HW_TBL_BLK_SIZE_ALIGN,
+		.rule_start_align	= IPA_HW_RULE_START_ALIGN,
+		.tbl_hdr_width		= IPA_HW_TBL_HDR_WIDTH,
+		.tbl_addr_mask		= IPA_HW_TBL_ADDR_MASK,
+		.rule_max_prio		= IPA_RULE_MAX_PRIORITY,
+		.rule_min_prio		= IPA_RULE_MIN_PRIORITY,
+		.low_rule_id		= IPA_LOW_RULE_ID,
+		.rule_id_bit_len	= IPA_RULE_ID_BIT_LEN,
+		.rule_buf_size		= IPA_HW_RULE_BUF_SIZE,
 		.write_val_to_hdr	= ipa_write_64,
 		.create_flt_bitmap	= ipa_fltrt_create_flt_bitmap,
 		.create_tbl_addr	= ipa_fltrt_create_tbl_addr,

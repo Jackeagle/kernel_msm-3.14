@@ -988,7 +988,7 @@ static void gsi_tz_pipe_setup(void)
 
 	gsi_tz_pipe_config_enable(true);
 
-	for (i = 0; i < IPA3_MAX_NUM_PIPES; i++) {
+	for (i = 0; i < IPA_MAX_NUM_PIPES; i++) {
 		const struct ipa_gsi_ep_config *ep_config;
 
 		ep_config = ipa_pipe_ep_config(i);

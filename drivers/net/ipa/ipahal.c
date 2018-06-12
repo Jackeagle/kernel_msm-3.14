@@ -493,7 +493,7 @@ static void ipa_pkt_status_parse(
 
 	/* Our packet status struct has to match what hardware supplies */
 	BUILD_BUG_ON(sizeof(struct ipa_pkt_status_hw) !=
-		IPA3_0_PKT_STATUS_SIZE);
+		IPA_PKT_STATUS_SIZE);
 
 	is_ipv6 = (hw_status->status_mask & 0x80) ? false : true;
 
@@ -549,7 +549,7 @@ static void ipa_pkt_status_parse(
  */
 u32 ipahal_pkt_status_get_size(void)
 {
-	return IPA3_0_PKT_STATUS_SIZE;
+	return IPA_PKT_STATUS_SIZE;
 }
 
 /*

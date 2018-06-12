@@ -4,8 +4,8 @@
  * Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
-#ifndef _IPA3_I_H_
-#define _IPA3_I_H_
+#ifndef _IPA_I_H_
+#define _IPA_I_H_
 
 #include <linux/bitops.h>
 #include <linux/cdev.h>
@@ -30,7 +30,7 @@
 /* Offset past base of IPA "wrapper" space for register access */
 #define IPA_REG_BASE_OFFSET	0x00040000
 
-#define IPA3_MAX_NUM_PIPES 31
+#define IPA_MAX_NUM_PIPES 31
 #define IPA_SYS_DESC_FIFO_SZ 0x800
 #define IPA_SYS_TX_DATA_DESC_FIFO_SZ 0x1000
 #define IPA_LAN_RX_HEADER_LENGTH (2)
@@ -93,8 +93,8 @@
 
 #define IPA_GSI_CHANNEL_EMPTY_MAX_RETRY 15
 
-#define IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES 120
-#define IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN 96
+#define IPA_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES 120
+#define IPA_ACTIVE_CLIENTS_LOG_LINE_LEN 96
 #define FEATURE_ENUM_VAL(feature, opcode) ((feature << 5) | opcode)
 #define IPA_HW_NUM_FEATURES 0x8
 #define IPA_WAN_MSG_IPv6_ADDR_GW_LEN 4
@@ -168,7 +168,7 @@ struct ipa_active_client {
 
 struct ipa_active_clients_log_ctx {
 	spinlock_t lock;
-	char *log_buffer[IPA3_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES];
+	char *log_buffer[IPA_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES];
 	int log_head;
 	int log_tail;
 	bool log_rdy;
@@ -790,7 +790,7 @@ struct ipa_context {
 	struct device *chrdev;
 	struct cdev cdev;
 
-	struct ipa_ep_context ep[IPA3_MAX_NUM_PIPES];
+	struct ipa_ep_context ep[IPA_MAX_NUM_PIPES];
 	u32 ep_flt_bitmap;
 	u32 ep_flt_num;
 	void __iomem *mmio;
@@ -819,7 +819,7 @@ struct ipa_context {
 	u32 mem_info[IPA_MEM_MAX];
 	bool q6_proxy_clk_vote_valid;
 	u32 ipa_num_pipes;
-	dma_addr_t pkt_init_imm[IPA3_MAX_NUM_PIPES];
+	dma_addr_t pkt_init_imm[IPA_MAX_NUM_PIPES];
 	struct ipa_mem_buffer pkt_init_mem;
 
 	struct ipa_uc_ctx uc_ctx;
@@ -979,4 +979,4 @@ void ipa_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple);
 void ipa_gsi_irq_rx_notify_cb(void *chan_data, void *xfer_data, uint16_t count);
 void ipa_gsi_irq_tx_notify_cb(void *chan_data, void *xfer_data, uint16_t count);
 
-#endif /* _IPA3_I_H_ */
+#endif /* _IPA_I_H_ */

@@ -135,7 +135,7 @@ ipa_active_clients_log_insert(struct ipa_active_client_logging_info *id,
 	else
 		basename = id->file;
 
-	(void)snprintf(log->log_buffer[head], IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN,
+	(void)snprintf(log->log_buffer[head], IPA_ACTIVE_CLIENTS_LOG_LINE_LEN,
 			"[%5llu.%06lu] %c %s, %s: %d",
 			t / 1000000000, nsec / 1000, inc ? '^' : 'v',
 			id->id_string, basename, id->line);
@@ -152,7 +152,7 @@ static int ipa_active_clients_log_init(void)
 {
 	struct ipa_active_clients_log_ctx *log;
 	size_t count = ARRAY_SIZE(log->log_buffer);
-	size_t size = IPA3_ACTIVE_CLIENTS_LOG_LINE_LEN;
+	size_t size = IPA_ACTIVE_CLIENTS_LOG_LINE_LEN;
 	char *bufp;
 	int i;
 
@@ -1679,9 +1679,9 @@ static int ipa_pre_init(void)
 	ipa_debug("IPA HW initialization sequence completed");
 
 	ipa_ctx->ipa_num_pipes = ipa_get_num_pipes();
-	if (ipa_ctx->ipa_num_pipes > IPA3_MAX_NUM_PIPES) {
+	if (ipa_ctx->ipa_num_pipes > IPA_MAX_NUM_PIPES) {
 		ipa_err("IPA has more pipes then supported! has %d, max %d\n",
-			ipa_ctx->ipa_num_pipes, IPA3_MAX_NUM_PIPES);
+			ipa_ctx->ipa_num_pipes, IPA_MAX_NUM_PIPES);
 		result = -ENODEV;
 		goto err_disable_clks;
 	}

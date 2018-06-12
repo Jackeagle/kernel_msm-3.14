@@ -283,6 +283,6 @@ struct ipa_pkt_status_hw {
 };
 
 /* Size of H/W Packet Status */
-#define IPA3_0_PKT_STATUS_SIZE 32
+#define IPA_PKT_STATUS_SIZE 32
 
 #endif /* _IPAHAL_I_H_ */

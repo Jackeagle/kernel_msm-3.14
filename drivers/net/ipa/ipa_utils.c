@@ -805,7 +805,7 @@ int ipa_get_ep_mapping(enum ipa_client_type client)
 		return -ESRCH;
 
 	ipa_ep_idx = ep_info->ipa_ep_num;
-	if (ipa_ep_idx < IPA3_MAX_NUM_PIPES || client == IPA_CLIENT_DUMMY_CONS)
+	if (ipa_ep_idx < IPA_MAX_NUM_PIPES || client == IPA_CLIENT_DUMMY_CONS)
 		return ipa_ep_idx;
 
 	return -ENOENT;
