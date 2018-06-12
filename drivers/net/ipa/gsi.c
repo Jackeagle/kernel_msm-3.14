@@ -1044,25 +1044,6 @@ static u32 channel_command(unsigned long chan_id, enum gsi_ch_cmd_opcode op)
 	return val;
 }
 
-/* Issue a generic command and wait for it to complete */
-static u32 generic_command(u32 target_ee, unsigned long chan_id,
-		enum gsi_ch_cmd_opcode op)
-{
-	struct completion *compl = &gsi_ctx->gen_ee_cmd_compl;
-	u32 ee = gsi_ctx->ee;
-	u32 val;
-
-	val = field_gen((u32)op, EE_OPCODE_BMSK);
-	val |= field_gen((u32)chan_id, EE_VIRT_CHAN_IDX_BMSK);
-	val |= field_gen(target_ee, EE_EE_BMSK);
-
-	val = command(GSI_EE_n_GSI_EE_GENERIC_CMD_OFFS(ee), val, compl);
-	if (!val)
-		ipa_err("chan_id %lu ee %u timed out\n", chan_id, target_ee);
-
-	return val;
-}
-
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
 long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 {
@@ -1855,50 +1836,6 @@ int gsi_set_channel_cfg(unsigned long chan_id, struct gsi_chan_props *props)
 	mutex_unlock(&ctx->mlock);
 
 	return 0;
-}
-
-int gsi_halt_channel_ee(u32 chan_id, u32 ee, int *code)
-{
-	u32 completed;
-	int ret = 0;
-
-	if (chan_id >= gsi_ctx->max_ch) {
-		ipa_err("bad params chan_id %d\n", chan_id);
-		return -EINVAL;
-	}
-
-	mutex_lock(&gsi_ctx->mlock);
-	reinit_completion(&gsi_ctx->gen_ee_cmd_compl);
-
-	/* invalidate the response */
-	gsi_ctx->scratch.word0.val =
-		gsi_readl(GSI_EE_n_CNTXT_SCRATCH_0_OFFS(gsi_ctx->ee));
-	gsi_ctx->scratch.word0.s.generic_ee_cmd_return_code = 0;
-	gsi_writel(gsi_ctx->scratch.word0.val,
-			GSI_EE_n_CNTXT_SCRATCH_0_OFFS(gsi_ctx->ee));
-
-	gsi_ctx->gen_ee_cmd_dbg.halt_channel++;
-
-	completed = generic_command(ee, chan_id, GSI_GEN_EE_CMD_HALT_CHANNEL);
-	if (!completed) {
-		ret = -ETIMEDOUT;
-		goto free_lock;
-	}
-
-	gsi_ctx->scratch.word0.val =
-		gsi_readl(GSI_EE_n_CNTXT_SCRATCH_0_OFFS(gsi_ctx->ee));
-	if (gsi_ctx->scratch.word0.s.generic_ee_cmd_return_code == 0) {
-		ipa_err("No response received\n");
-		ret = -EIO;
-		goto free_lock;
-	}
-
-	ret = 0;
-	*code = gsi_ctx->scratch.word0.s.generic_ee_cmd_return_code;
-free_lock:
-	mutex_unlock(&gsi_ctx->mlock);
-
-	return ret;
 }
 
 /* Initialize GSI driver */

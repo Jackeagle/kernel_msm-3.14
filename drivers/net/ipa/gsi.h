@@ -763,16 +763,4 @@ int gsi_queue_xfer(unsigned long chan_hdl, u16 num_xfers,
  */
 int gsi_start_xfer(unsigned long chan_hdl);
 
-/**
- * gsi_halt_channel_ee - Peripheral should call this function
- * to stop other EE's channel. This is usually used in SSR clean
- *
- * @chan_idx: Virtual channel index
- * @ee: EE
- * @code: [out] response code for operation
-
- * @Return gsi_status
- */
-int gsi_halt_channel_ee(u32 chan_idx, unsigned int ee, int *code);
-
 #endif /* _GSI_H_ */
