@@ -363,14 +363,6 @@ ipareg_parse_endp_init_ctrl_n(enum ipahal_reg reg,void *fields, u32 val)
 }
 
 static u32
-ipareg_construct_endp_init_ctrl_scnd_n(enum ipahal_reg reg, const void *fields)
-{
-	const struct ipahal_ep_cfg_ctrl_scnd *ep_ctrl_scnd = fields;
-
-	return field_gen(ep_ctrl_scnd->endp_delay, ENDP_DELAY_BMSK);
-}
-
-static u32
 ipareg_construct_endp_init_nat_n(enum ipahal_reg reg, const void *fields)
 {
 	const struct ipa_ep_cfg_nat *ep_nat = fields;
@@ -712,8 +704,6 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 							0x0000080c,	0x0070),
 		reg_obj_both(ENDP_INIT_CTRL_n, endp_init_ctrl_n,
 							0x00000800,	0x0070),
-		reg_obj_cfunc(ENDP_INIT_CTRL_SCND_n, endp_init_ctrl_scnd_n,
-							0x00000804,	0x0070),
 		reg_obj_cfunc(ENDP_INIT_HOL_BLOCK_EN_n,
 				endp_init_hol_block_en_n,
 							0x0000082c,	0x0070),

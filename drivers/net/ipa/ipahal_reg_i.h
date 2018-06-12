@@ -69,9 +69,6 @@ void ipahal_reg_init(enum ipa_hw_version hw_version);
 #define ENDP_SUSPEND_BMSK			0x00000001
 #define ENDP_DELAY_BMSK				0x00000002
 
-/* IPA_ENDP_INIT_CTRL_SCND_n register */
-#define ENDP_DELAY_BMSK				0x00000002
-
 /* IPA_ENDP_INIT_HOL_BLOCK_EN_n register */
 #define HOL_BLOCK_EN_RMSK			0x00000001
 #define HOL_BLOCK_EN_MAX			19
