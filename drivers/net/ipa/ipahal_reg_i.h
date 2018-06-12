@@ -65,9 +65,6 @@ void ipahal_reg_init(enum ipa_hw_version hw_version);
 /* IPA_ENDP_INIT_NAT_n register */
 #define NAT_EN_BMSK				0x00000003
 
-/* IPA_ENDP_INIT_CONN_TRACK_n register */
-#define CONN_TRACK_EN_BMSK			0x00000001
-
 /* IPA_ENDP_INIT_CTRL_n register */
 #define ENDP_SUSPEND_BMSK			0x00000001
 #define ENDP_DELAY_BMSK				0x00000002
