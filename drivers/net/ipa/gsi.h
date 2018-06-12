@@ -346,7 +346,6 @@ struct gsi_chan_ctx {
 	bool allocated;
 	atomic_t poll_mode;
 	u32 tlv_size;		/* slots in TLV */
-	union __packed gsi_channel_scratch scratch;
 };
 
 struct gsi_evt_ctx {

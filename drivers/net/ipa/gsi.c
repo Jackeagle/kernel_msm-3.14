@@ -1361,26 +1361,22 @@ err_mutex_unlock:
 static void __gsi_write_channel_scratch(unsigned long chan_id)
 {
 	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_id];
-	union __packed gsi_channel_scratch *scr;
-	struct __packed gsi_gpi_channel_scratch *gpi;
+	union __packed gsi_channel_scratch scr = { };
+	struct __packed gsi_gpi_channel_scratch *gpi = &scr.gpi;
 	u32 ee = gsi_ctx->ee;
 	u32 val;
 
-	scr = &ctx->scratch;
-	memset(scr, 0, sizeof(*scr));
-
-	gpi = &scr->gpi;
 	/* See comments above definition of gsi_gpi_channel_scratch */
 	gpi->max_outstanding_tre = ctx->tlv_size * GSI_CHAN_RING_ELEMENT_SIZE;
 	gpi->outstanding_threshold = 2 * GSI_CHAN_RING_ELEMENT_SIZE;
 
-	val = scr->data.word1;
+	val = scr.data.word1;
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_SCRATCH_0_OFFS(chan_id, ee));
 
-	val = scr->data.word2;
+	val = scr.data.word2;
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_SCRATCH_1_OFFS(chan_id, ee));
 
-	val = scr->data.word3;
+	val = scr.data.word3;
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_SCRATCH_2_OFFS(chan_id, ee));
 
 	/*
@@ -1389,7 +1385,7 @@ static void __gsi_write_channel_scratch(unsigned long chan_id)
 	 * unchanged between the read and the write.
 	 */
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_SCRATCH_3_OFFS(chan_id, ee));
-	val = (scr->data.word4 & GENMASK(31, 16)) | (val & GENMASK(15, 0));
+	val = (scr.data.word4 & GENMASK(31, 16)) | (val & GENMASK(15, 0));
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_SCRATCH_3_OFFS(chan_id, ee));
 }
 
