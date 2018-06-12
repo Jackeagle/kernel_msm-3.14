@@ -49,7 +49,6 @@ void ipahal_reg_init(enum ipa_hw_version hw_version);
 /* IPA_AGGR_FORCE_CLOSE register */
 #define PIPE_BITMAP_BMSK			0x3fffffff
 #define PIPE_BITMAP_BMSK_V3_5			0x000fffff
-#define PIPE_BITMAP_BMSK_V4_0			0x007fffff
 
 /* IPA_ENDP_INIT_ROUTE_n register */
 #define ROUTE_TABLE_INDEX_BMSK			0x0000001f
@@ -60,7 +59,7 @@ void ipahal_reg_init(enum ipa_hw_version hw_version);
 #define PIPE_REPLICATION_EN_BMSK		0x10000000
 #define BYTE_THRESHOLD_BMSK			0x0ffff000
 #define DEST_PIPE_INDEX_BMSK			0x000001f0
-#define MODE_BMSK				0x7
+#define MODE_BMSK				0x00000007
 
 /* IPA_ENDP_INIT_NAT_n register */
 #define NAT_EN_BMSK				0x00000003
@@ -71,8 +70,7 @@ void ipahal_reg_init(enum ipa_hw_version hw_version);
 
 /* IPA_ENDP_INIT_HOL_BLOCK_EN_n register */
 #define HOL_BLOCK_EN_RMSK			0x00000001
-#define HOL_BLOCK_EN_MAX			19
-#define HOL_BLOCK_EN_MAX_V_4_0			22
+#define HOL_BLOCK_EN_MAX			0x00000013
 #define HOL_BLOCK_EN_BMSK			0x00000001
 
 /* IPA_ENDP_INIT_HOL_BLOCK_TIMER_n register */
@@ -92,7 +90,7 @@ void ipahal_reg_init(enum ipa_hw_version hw_version);
 
 /* IPA_DEBUG_CNT_REG_n register */
 #define DBG_CNT_RMSK				0xffffffff
-#define DBG_CNT_MAX				15
+#define DBG_CNT_MAX				0x0000000f
 #define DBG_CNT_REG_BMSK			0xffffffff
 
 /* IPA_ENDP_INIT_CFG_n register */
@@ -142,10 +140,6 @@ void ipahal_reg_init(enum ipa_hw_version hw_version);
 #define ROUTER_HASH_UNDEFINED2_BMSK		0xff800000
 
 /* IPA_RSRC_GRP_XY_RSRC_TYPE_n register */
-#define Y_MAX_LIM_BMSK				0xff000000
-#define Y_MIN_LIM_BMSK				0x00ff0000
-#define X_MAX_LIM_BMSK				0x0000ff00
-#define X_MIN_LIM_BMSK				0x000000ff
 #define Y_MAX_LIM_BMSK_V3_5			0x3f000000
 #define Y_MIN_LIM_BMSK_V3_5			0x003f0000
 #define X_MAX_LIM_BMSK_V3_5			0x00003f00
@@ -158,10 +152,6 @@ void ipahal_reg_init(enum ipa_hw_version hw_version);
 /* IPA_QSB_MAX_READS register */
 #define GEN_QMB_0_MAX_READS_BMSK		0x0000000f
 #define GEN_QMB_1_MAX_READS_BMSK		0x000000f0
-
-/* IPA_QSB_MAX_READS_BEATS register */
-#define GEN_QMB_0_MAX_READS_BEATS_BMSK_V4_0	0x00ff0000
-#define GEN_QMB_1_MAX_READS_BEATS_BMSK_V4_0	0xff000000
 
 /* IPA_IDLE_INDICATION_CFG regiser */
 #define ENTER_IDLE_DEBOUNCE_THRESH_BMSK_V3_5	0x0000ffff
