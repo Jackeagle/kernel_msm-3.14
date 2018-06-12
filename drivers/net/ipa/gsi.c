@@ -885,7 +885,7 @@ void gsi_firmware_enable(void)
 	ipa_debug("GSI SW version 0x%08x\n", val);
 
 	gsi_writel(0, GSI_PERIPH_BASE_ADDR_MSB_OFFS);
-	gsi_writel(ipa3_ctx->ipa_wrapper_base, GSI_PERIPH_BASE_ADDR_MSB_OFFS);
+	gsi_writel(ipa3_ctx->ipa_wrapper_base, GSI_PERIPH_BASE_ADDR_LSB_OFFS);
 
 	gsi_write_ieps();
 	/* ------- */
