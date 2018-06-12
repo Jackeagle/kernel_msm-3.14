@@ -76,24 +76,6 @@ union __packed gsi_evt_scratch {
 	} data;
 };
 
-/**
- * gsi_device_scratch - EE scratch config parameters
- *
- * @mhi_base_chan_idx_valid: is mhi_base_chan_idx valid?
- * @mhi_base_chan_idx:	     base index of IPA MHI channel indexes.
- *			     IPA MHI channel index = GSI channel ID +
- *			     MHI base channel index
- * @max_usb_pkt_size_valid:  is max_usb_pkt_size valid?
- * @max_usb_pkt_size:	     max USB packet size in bytes (valid values are
- *			     512 and 1024)
- */
-struct gsi_device_scratch {
-	bool mhi_base_chan_idx_valid;
-	uint8_t mhi_base_chan_idx;
-	bool max_usb_pkt_size_valid;
-	uint16_t max_usb_pkt_size;
-};
-
 enum gsi_chan_mode {
 	GSI_CHAN_MODE_CALLBACK = 0x0,
 	GSI_CHAN_MODE_POLL = 0x1,
@@ -105,25 +87,6 @@ enum gsi_xfer_flag {
 	GSI_XFER_FLAG_EOT = 0x200,
 	GSI_XFER_FLAG_BEI = 0x400
 };
-
-/**
- * gsi_chan_info - information about channel occupancy
- *
- * @wp: channel write pointer (physical address)
- * @rp: channel read pointer (physical address)
- * @evt_valid: is evt* info valid?
- * @evt_wp: event ring write pointer (physical address)
- * @evt_rp: event ring read pointer (physical address)
- */
-struct gsi_chan_info {
-	uint64_t wp;
-	uint64_t rp;
-	bool evt_valid;
-	uint64_t evt_wp;
-	uint64_t evt_rp;
-};
-
-/* gsi.h */
 
 enum gsi_intr_type {
 	GSI_INTR_MSI = 0x0,
@@ -416,10 +379,6 @@ struct gsi_chan_ctx {
 	bool allocated;
 	atomic_t poll_mode;
 	union __packed gsi_channel_scratch scratch;
-};
-
-struct gsi_evt_stats {
-	unsigned long completed;
 };
 
 struct gsi_evt_ctx {
