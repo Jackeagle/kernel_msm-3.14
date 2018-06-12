@@ -12,7 +12,7 @@
 
 #include "ipa_qmi_msg.h"
 
-#include "ipa_i.h" /* For ipa_err(), ipa3_context, and ipa3_mem_partition */
+#include "ipa_i.h" /* For ipa_err(), ipa_context, and ipa_mem_partition */
 
 #define QMI_INIT_DRIVER_TIMEOUT	60000	/* A minute in milliseconds */
 
@@ -246,7 +246,7 @@ static const struct ipa_init_modem_driver_req *init_modem_driver_req(void)
 	u32 base;
 
 	/* This is not the first boot if the microcontroller is loaded */
-	req.skip_uc_load_valid = ipa3_ctx->uc_ctx.uc_loaded ? 1 : 0;
+	req.skip_uc_load_valid = ipa_ctx->uc_ctx.uc_loaded ? 1 : 0;
 	req.skip_uc_load = req.skip_uc_load_valid;
 
 	/* We only have to initialize most of it once */
@@ -254,66 +254,66 @@ static const struct ipa_init_modem_driver_req *init_modem_driver_req(void)
 		return &req;
 
 	/* All offsets are relative to the start of IPA shared memory */
-	base = (u32)ipa3_ctx->smem_restricted_bytes;
+	base = (u32)ipa_ctx->smem_restricted_bytes;
 
 	req.platform_type_valid = true;
 	req.platform_type = IPA_QMI_PLATFORM_TYPE_MSM_ANDROID;
 
-	req.hdr_tbl_info_valid = ipa3_ctx->mem_info[MODEM_HDR_SIZE] ? 1 : 0;
-	req.hdr_tbl_info.start = base + ipa3_ctx->mem_info[MODEM_HDR_OFST];
+	req.hdr_tbl_info_valid = ipa_ctx->mem_info[MODEM_HDR_SIZE] ? 1 : 0;
+	req.hdr_tbl_info.start = base + ipa_ctx->mem_info[MODEM_HDR_OFST];
 	req.hdr_tbl_info.end = req.hdr_tbl_info.start +
-					ipa3_ctx->mem_info[MODEM_HDR_SIZE] - 1;
+					ipa_ctx->mem_info[MODEM_HDR_SIZE] - 1;
 
 	req.v4_route_tbl_info_valid = true;
 	req.v4_route_tbl_info.start =
-			base + ipa3_ctx->mem_info[V4_RT_NHASH_OFST];
-	req.v4_route_tbl_info.count = ipa3_ctx->mem_info[V4_MODEM_RT_INDEX_HI];
+			base + ipa_ctx->mem_info[V4_RT_NHASH_OFST];
+	req.v4_route_tbl_info.count = ipa_ctx->mem_info[V4_MODEM_RT_INDEX_HI];
 
 	req.v6_route_tbl_info_valid = true;
 	req.v6_route_tbl_info.start =
-			base + ipa3_ctx->mem_info[V6_RT_NHASH_OFST];
-	req.v6_route_tbl_info.count = ipa3_ctx->mem_info[V6_MODEM_RT_INDEX_HI];
+			base + ipa_ctx->mem_info[V6_RT_NHASH_OFST];
+	req.v6_route_tbl_info.count = ipa_ctx->mem_info[V6_MODEM_RT_INDEX_HI];
 
 	req.v4_filter_tbl_start_valid = true;
-	req.v4_filter_tbl_start = base + ipa3_ctx->mem_info[V4_FLT_NHASH_OFST];
+	req.v4_filter_tbl_start = base + ipa_ctx->mem_info[V4_FLT_NHASH_OFST];
 
 	req.v6_filter_tbl_start_valid = true;
-	req.v6_filter_tbl_start = base + ipa3_ctx->mem_info[V6_FLT_NHASH_OFST];
+	req.v6_filter_tbl_start = base + ipa_ctx->mem_info[V6_FLT_NHASH_OFST];
 
-	req.modem_mem_info_valid = ipa3_ctx->mem_info[MODEM_SIZE] ? 1 : 0;
-	req.modem_mem_info.start = base + ipa3_ctx->mem_info[MODEM_OFST];
-	req.modem_mem_info.size = ipa3_ctx->mem_info[MODEM_SIZE];
+	req.modem_mem_info_valid = ipa_ctx->mem_info[MODEM_SIZE] ? 1 : 0;
+	req.modem_mem_info.start = base + ipa_ctx->mem_info[MODEM_OFST];
+	req.modem_mem_info.size = ipa_ctx->mem_info[MODEM_SIZE];
 
 	req.ctrl_comm_dest_end_pt_valid = true;
 	req.ctrl_comm_dest_end_pt =
-			ipa3_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
+			ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
 
 	req.hdr_proc_ctx_tbl_info_valid =
-			ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE] ? 1 : 0;
+			ipa_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE] ? 1 : 0;
 	req.hdr_proc_ctx_tbl_info.start =
-			base + ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_OFST];
+			base + ipa_ctx->mem_info[MODEM_HDR_PROC_CTX_OFST];
 	req.hdr_proc_ctx_tbl_info.end = req.hdr_proc_ctx_tbl_info.start +
-			ipa3_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE] - 1;
+			ipa_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE] - 1;
 
 	req.v4_hash_route_tbl_info_valid = true;
 	req.v4_hash_route_tbl_info.start =
-			base + ipa3_ctx->mem_info[V4_RT_HASH_OFST];
+			base + ipa_ctx->mem_info[V4_RT_HASH_OFST];
 	req.v4_hash_route_tbl_info.count =
-			ipa3_ctx->mem_info[V4_MODEM_RT_INDEX_HI];
+			ipa_ctx->mem_info[V4_MODEM_RT_INDEX_HI];
 
 	req.v6_hash_route_tbl_info_valid = true;
 	req.v6_hash_route_tbl_info.start =
-			base + ipa3_ctx->mem_info[V6_RT_HASH_OFST];
+			base + ipa_ctx->mem_info[V6_RT_HASH_OFST];
 	req.v6_hash_route_tbl_info.count =
-			ipa3_ctx->mem_info[V6_MODEM_RT_INDEX_HI];
+			ipa_ctx->mem_info[V6_MODEM_RT_INDEX_HI];
 
 	req.v4_hash_filter_tbl_start_valid = true;
 	req.v4_hash_filter_tbl_start =
-			base + ipa3_ctx->mem_info[V4_FLT_HASH_OFST];
+			base + ipa_ctx->mem_info[V4_FLT_HASH_OFST];
 
 	req.v6_hash_filter_tbl_start_valid = true;
 	req.v6_hash_filter_tbl_start =
-			base + ipa3_ctx->mem_info[V6_FLT_HASH_OFST];
+			base + ipa_ctx->mem_info[V6_FLT_HASH_OFST];
 
 	return &req;
 }

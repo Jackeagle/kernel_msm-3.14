@@ -57,13 +57,13 @@
 
 #define IPA_WWAN_CONS_DESC_FIFO_SZ 256
 
-static int ipa3_rmnet_poll(struct napi_struct *napi, int budget);
+static int ipa_rmnet_poll(struct napi_struct *napi, int budget);
 
-static void ipa3_wake_tx_queue(struct work_struct *work);
-static DECLARE_WORK(ipa3_tx_wakequeue_work, ipa3_wake_tx_queue);
+static void ipa_wake_tx_queue(struct work_struct *work);
+static DECLARE_WORK(ipa_tx_wakequeue_work, ipa_wake_tx_queue);
 
 /**
- * struct ipa3_wwan_private - WWAN private data
+ * struct ipa_wwan_private - WWAN private data
  * @net: network interface struct implemented by this driver
  * @stats: iface statistics
  * @outstanding_pkts: number of packets sent to IPA without TX complete ACKed
@@ -75,7 +75,7 @@ static DECLARE_WORK(ipa3_tx_wakequeue_work, ipa3_wake_tx_queue);
  *
  * WWAN private - holds all relevant info about WWAN driver
  */
-struct ipa3_wwan_private {
+struct ipa_wwan_private {
 	struct net_device_stats stats;
 	atomic_t outstanding_pkts;
 	int outstanding_high_ctl;
@@ -86,7 +86,7 @@ struct ipa3_wwan_private {
 	struct napi_struct napi;
 };
 
-struct ipa3_rmnet_mux_val {
+struct ipa_rmnet_mux_val {
 	uint32_t  mux_id;
 	int8_t	  vchannel_name[IFNAMSIZ];
 	bool mux_channel_set;
@@ -95,33 +95,33 @@ struct ipa3_rmnet_mux_val {
 	uint32_t  hdr_hdl;
 };
 
-struct rmnet_ipa3_context {
+struct rmnet_ipa_context {
 	struct net_device *dev;
 	struct ipa_sys_connect_params apps_to_ipa_ep_cfg;
 	struct ipa_sys_connect_params ipa_to_apps_ep_cfg;
-	struct ipa3_rmnet_mux_val mux_channel[MAX_NUM_OF_MUX_CHANNEL];
+	struct ipa_rmnet_mux_val mux_channel[MAX_NUM_OF_MUX_CHANNEL];
 	int num_q6_rules;
 	int old_num_q6_rules;
 	int rmnet_index;
 	bool egress_set;
 	bool a7_ul_flt_set;
-	u32 apps_to_ipa3_hdl;
-	u32 ipa3_to_apps_hdl;
+	u32 apps_to_ipa_hdl;
+	u32 ipa_to_apps_hdl;
 	struct mutex pipe_handle_guard;
 	struct mutex add_mux_channel_lock;
 };
 
 static bool initialized;	/* Avoid duplicate initialization */
 
-static struct rmnet_ipa3_context rmnet_ipa3_ctx_struct;
-static struct rmnet_ipa3_context *rmnet_ipa3_ctx = &rmnet_ipa3_ctx_struct;
+static struct rmnet_ipa_context rmnet_ipa_ctx_struct;
+static struct rmnet_ipa_context *rmnet_ipa_ctx = &rmnet_ipa_ctx_struct;
 
-static int ipa3_find_mux_channel_index(uint32_t mux_id)
+static int ipa_find_mux_channel_index(uint32_t mux_id)
 {
 	int i;
 
 	for (i = 0; i < MAX_NUM_OF_MUX_CHANNEL; i++) {
-		if (mux_id == rmnet_ipa3_ctx->mux_channel[i].mux_id)
+		if (mux_id == rmnet_ipa_ctx->mux_channel[i].mux_id)
 			return i;
 	}
 	return MAX_NUM_OF_MUX_CHANNEL;
@@ -136,9 +136,9 @@ static int ipa3_find_mux_channel_index(uint32_t mux_id)
  * Return codes:
  * 0: success
  */
-static int ipa3_wwan_open(struct net_device *dev)
+static int ipa_wwan_open(struct net_device *dev)
 {
-	struct ipa3_wwan_private *wwan_ptr = netdev_priv(dev);
+	struct ipa_wwan_private *wwan_ptr = netdev_priv(dev);
 
 	ipa_debug("[%s] wwan_open()\n", dev->name);
 	wwan_ptr->device_active = true;
@@ -149,7 +149,7 @@ static int ipa3_wwan_open(struct net_device *dev)
 }
 
 /**
- * ipa3_wwan_stop() - Stops the wwan network interface. Closes
+ * ipa_wwan_stop() - Stops the wwan network interface. Closes
  * logical channel on A2 MUX driver and stops the network stack
  * queue
  *
@@ -158,18 +158,18 @@ static int ipa3_wwan_open(struct net_device *dev)
  * Return codes:
  * 0: success
  */
-static int ipa3_wwan_stop(struct net_device *dev)
+static int ipa_wwan_stop(struct net_device *dev)
 {
-	struct ipa3_wwan_private *wwan_ptr = netdev_priv(dev);
+	struct ipa_wwan_private *wwan_ptr = netdev_priv(dev);
 
-	ipa_debug("[%s] ipa3_wwan_stop()\n", dev->name);
+	ipa_debug("[%s] ipa_wwan_stop()\n", dev->name);
 	wwan_ptr->device_active = false;
 	netif_stop_queue(dev);
 
 	return 0;
 }
 
-static int ipa3_wwan_change_mtu(struct net_device *dev, int new_mtu)
+static int ipa_wwan_change_mtu(struct net_device *dev, int new_mtu)
 {
 	if (new_mtu > WWAN_DATA_LEN)
 		return -EINVAL;
@@ -182,7 +182,7 @@ static int ipa3_wwan_change_mtu(struct net_device *dev, int new_mtu)
 }
 
 /**
- * ipa3_wwan_xmit() - Transmits an skb.
+ * ipa_wwan_xmit() - Transmits an skb.
  *
  * @skb: skb to be transmitted
  * @dev: network device
@@ -193,11 +193,11 @@ static int ipa3_wwan_change_mtu(struct net_device *dev, int new_mtu)
  * later
  * -EFAULT: Error while transmitting the skb
  */
-static int ipa3_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
+static int ipa_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 {
 	int ret = 0;
 	bool qmap_check;
-	struct ipa3_wwan_private *wwan_ptr = netdev_priv(dev);
+	struct ipa_wwan_private *wwan_ptr = netdev_priv(dev);
 
 	if (skb->protocol != htons(ETH_P_MAP)) {
 		ipa_debug_low("dropping %u bytes from %s (bad proto %hu)\n",
@@ -210,7 +210,7 @@ static int ipa3_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 	qmap_check = RMNET_MAP_GET_CD_BIT(skb);
 	if (netif_queue_stopped(dev)) {
 		if (!qmap_check) {
-			ipa_err("[%s]fatal: ipa3_wwan_xmit stopped\n",
+			ipa_err("[%s]fatal: ipa_wwan_xmit stopped\n",
 				  dev->name);
 			return NETDEV_TX_BUSY;
 		}
@@ -239,7 +239,7 @@ send:
 	 * both data packets and commands will be routed to
 	 * IPA_CLIENT_Q6_WAN_CONS based on status configuration.
 	 */
-	ret = ipa3_tx_dp(IPA_CLIENT_APPS_WAN_PROD, skb);
+	ret = ipa_tx_dp(IPA_CLIENT_APPS_WAN_PROD, skb);
 	if (ret)
 		return NETDEV_TX_BUSY;
 
@@ -250,9 +250,9 @@ send:
 	return NETDEV_TX_OK;
 }
 
-static void ipa3_wwan_tx_timeout(struct net_device *dev)
+static void ipa_wwan_tx_timeout(struct net_device *dev)
 {
-	ipa_err("[%s] ipa3_wwan_tx_timeout(), data stall in UL\n", dev->name);
+	ipa_err("[%s] ipa_wwan_tx_timeout(), data stall in UL\n", dev->name);
 }
 
 /**
@@ -271,9 +271,9 @@ static void apps_ipa_tx_complete_notify(void *priv,
 {
 	struct sk_buff *skb = (struct sk_buff *)data;
 	struct net_device *dev = (struct net_device *)priv;
-	struct ipa3_wwan_private *wwan_ptr;
+	struct ipa_wwan_private *wwan_ptr;
 
-	if (dev != rmnet_ipa3_ctx->dev) {
+	if (dev != rmnet_ipa_ctx->dev) {
 		ipa_debug("Received pre-SSR packet completion\n");
 		dev_kfree_skb_any(skb);
 		return;
@@ -315,7 +315,7 @@ static void apps_ipa_packet_receive_notify(void *priv,
 		unsigned long data)
 {
 	struct net_device *dev = priv;
-	struct ipa3_wwan_private *wwan_ptr = netdev_priv(dev);
+	struct ipa_wwan_private *wwan_ptr = netdev_priv(dev);
 
 	if (evt == IPA_RECEIVE) {
 		struct sk_buff *skb = (struct sk_buff *)data;
@@ -323,7 +323,7 @@ static void apps_ipa_packet_receive_notify(void *priv,
 		unsigned int packet_len = skb->len;
 
 		ipa_debug("Rx packet was received\n");
-		skb->dev = rmnet_ipa3_ctx->dev;
+		skb->dev = rmnet_ipa_ctx->dev;
 		skb->protocol = htons(ETH_P_MAP);
 
 		result = netif_receive_skb(skb);
@@ -358,7 +358,7 @@ static int handle3_ingress_format(struct net_device *dev,
 						GSI_EVT_RING_ELEMENT_SIZE);
 
 	ipa_debug("Get RMNET_IOCTL_SET_INGRESS_DATA_FORMAT\n");
-	ipa_wan_ep_cfg = &rmnet_ipa3_ctx->ipa_to_apps_ep_cfg;
+	ipa_wan_ep_cfg = &rmnet_ipa_ctx->ipa_to_apps_ep_cfg;
 	if ((in->u.data) & RMNET_IOCTL_INGRESS_FORMAT_CHECKSUM)
 		ipa_wan_ep_cfg->ipa_ep_cfg.cfg.cs_offload_en =
 		   IPA_ENABLE_CS_OFFLOAD_DL;
@@ -368,7 +368,7 @@ static int handle3_ingress_format(struct net_device *dev,
 				  in->u.ingress_format.agg_size,
 				  in->u.ingress_format.agg_count);
 
-		ret = ipa3_disable_apps_wan_cons_deaggr(
+		ret = ipa_disable_apps_wan_cons_deaggr(
 			  in->u.ingress_format.agg_size,
 			  in->u.ingress_format.agg_count);
 
@@ -402,18 +402,18 @@ static int handle3_ingress_format(struct net_device *dev,
 	ipa_wan_ep_cfg->desc_fifo_sz =
 			IPA_WWAN_CONS_DESC_FIFO_SZ * IPA_FIFO_ELEMENT_SIZE;
 
-	mutex_lock(&rmnet_ipa3_ctx->pipe_handle_guard);
+	mutex_lock(&rmnet_ipa_ctx->pipe_handle_guard);
 
-	ret = ipa3_setup_sys_pipe(ipa_wan_ep_cfg);
+	ret = ipa_setup_sys_pipe(ipa_wan_ep_cfg);
 	if (ret < 0) {
 		ipa_err("failed to configure ingress\n");
-		mutex_unlock(&rmnet_ipa3_ctx->pipe_handle_guard);
+		mutex_unlock(&rmnet_ipa_ctx->pipe_handle_guard);
 
 		return ret;
 	}
-	rmnet_ipa3_ctx->ipa3_to_apps_hdl = ret;
+	rmnet_ipa_ctx->ipa_to_apps_hdl = ret;
 
-	mutex_unlock(&rmnet_ipa3_ctx->pipe_handle_guard);
+	mutex_unlock(&rmnet_ipa_ctx->pipe_handle_guard);
 
 	return 0;
 }
@@ -442,7 +442,7 @@ static int handle3_egress_format(struct net_device *dev,
 					GSI_EVT_RING_ELEMENT_SIZE);
 
 	ipa_debug("get RMNET_IOCTL_SET_EGRESS_DATA_FORMAT\n");
-	ipa_wan_ep_cfg = &rmnet_ipa3_ctx->apps_to_ipa_ep_cfg;
+	ipa_wan_ep_cfg = &rmnet_ipa_ctx->apps_to_ipa_ep_cfg;
 	ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_len =
 					sizeof(struct rmnet_map_header_s);
 	if ((e->u.data) & RMNET_IOCTL_EGRESS_FORMAT_CHECKSUM) {
@@ -491,32 +491,32 @@ static int handle3_egress_format(struct net_device *dev,
 	ipa_wan_ep_cfg->desc_fifo_sz = IPA_SYS_TX_DATA_DESC_FIFO_SZ;
 	ipa_wan_ep_cfg->priv = dev;
 
-	mutex_lock(&rmnet_ipa3_ctx->pipe_handle_guard);
+	mutex_lock(&rmnet_ipa_ctx->pipe_handle_guard);
 
-	rc = ipa3_setup_sys_pipe(ipa_wan_ep_cfg);
+	rc = ipa_setup_sys_pipe(ipa_wan_ep_cfg);
 	if (rc < 0) {
 		ipa_err("failed to config egress endpoint\n");
-		mutex_unlock(&rmnet_ipa3_ctx->pipe_handle_guard);
+		mutex_unlock(&rmnet_ipa_ctx->pipe_handle_guard);
 
 		return rc;
 	}
-	rmnet_ipa3_ctx->apps_to_ipa3_hdl = rc;
+	rmnet_ipa_ctx->apps_to_ipa_hdl = rc;
 
-	mutex_unlock(&rmnet_ipa3_ctx->pipe_handle_guard);
+	mutex_unlock(&rmnet_ipa_ctx->pipe_handle_guard);
 
-	if (rmnet_ipa3_ctx->num_q6_rules != 0) {
-		rmnet_ipa3_ctx->a7_ul_flt_set = true;
+	if (rmnet_ipa_ctx->num_q6_rules != 0) {
+		rmnet_ipa_ctx->a7_ul_flt_set = true;
 	} else {
 		/* wait Q6 UL filter rules*/
 		ipa_debug("no UL-rules\n");
 	}
-	rmnet_ipa3_ctx->egress_set = true;
+	rmnet_ipa_ctx->egress_set = true;
 
 	return 0;
 }
 
 /**
- * ipa3_wwan_ioctl() - I/O control for wwan network driver.
+ * ipa_wwan_ioctl() - I/O control for wwan network driver.
  *
  * @dev: network device
  * @ifr: ignored
@@ -530,13 +530,13 @@ static int handle3_egress_format(struct net_device *dev,
  * later
  * -EFAULT: Error while transmitting the skb
  */
-static int ipa3_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
+static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 {
 	int rc = 0;
 	int mru = 1000, epid = 1, mux_index;
 	struct rmnet_ioctl_extended_s extend_ioctl_data;
 	struct rmnet_ioctl_data_s ioctl_data;
-	struct ipa3_rmnet_mux_val *mux_channel;
+	struct ipa_rmnet_mux_val *mux_channel;
 	int rmnet_index;
 
 	ipa_debug("rmnet_ipa got ioctl number 0x%08x", cmd);
@@ -662,9 +662,9 @@ static int ipa3_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 		case RMNET_IOCTL_GET_EP_PAIR:
 			ipa_debug("get ioctl: RMNET_IOCTL_GET_EP_PAIR\n");
 			extend_ioctl_data.u.ipa_ep_pair.consumer_pipe_num =
-			ipa3_get_ep_mapping(IPA_CLIENT_APPS_WAN_PROD);
+			ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_PROD);
 			extend_ioctl_data.u.ipa_ep_pair.producer_pipe_num =
-			ipa3_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
+			ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
 			if (copy_to_user((u8 *)ifr->ifr_ifru.ifru_data,
 				&extend_ioctl_data,
 				sizeof(struct rmnet_ioctl_extended_s)))
@@ -683,7 +683,7 @@ static int ipa3_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 		/*  Get driver name  */
 		case RMNET_IOCTL_GET_DRIVER_NAME:
 			memcpy(&extend_ioctl_data.u.if_name,
-				rmnet_ipa3_ctx->dev->name,
+				rmnet_ipa_ctx->dev->name,
 							sizeof(IFNAMSIZ));
 			if (copy_to_user((u8 *)ifr->ifr_ifru.ifru_data,
 					&extend_ioctl_data,
@@ -692,7 +692,7 @@ static int ipa3_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			break;
 		/*  Add MUX ID	*/
 		case RMNET_IOCTL_ADD_MUX_CHANNEL:
-			mux_index = ipa3_find_mux_channel_index(
+			mux_index = ipa_find_mux_channel_index(
 				extend_ioctl_data.u.rmnet_mux_val.mux_id);
 			if (mux_index < MAX_NUM_OF_MUX_CHANNEL) {
 				ipa_debug("already setup mux(%d)\n",
@@ -700,12 +700,12 @@ static int ipa3_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 					rmnet_mux_val.mux_id);
 				return rc;
 			}
-			mutex_lock(&rmnet_ipa3_ctx->add_mux_channel_lock);
-			if (rmnet_ipa3_ctx->rmnet_index
+			mutex_lock(&rmnet_ipa_ctx->add_mux_channel_lock);
+			if (rmnet_ipa_ctx->rmnet_index
 				>= MAX_NUM_OF_MUX_CHANNEL) {
 				ipa_err("Exceed mux_channel limit(%d)\n",
-				rmnet_ipa3_ctx->rmnet_index);
-				mutex_unlock(&rmnet_ipa3_ctx->
+				rmnet_ipa_ctx->rmnet_index);
+				mutex_unlock(&rmnet_ipa_ctx->
 					add_mux_channel_lock);
 				return -EFAULT;
 			}
@@ -713,8 +713,8 @@ static int ipa3_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			extend_ioctl_data.u.rmnet_mux_val.mux_id,
 			extend_ioctl_data.u.rmnet_mux_val.vchannel_name);
 			/* cache the mux name and id */
-			mux_channel = rmnet_ipa3_ctx->mux_channel;
-			rmnet_index = rmnet_ipa3_ctx->rmnet_index;
+			mux_channel = rmnet_ipa_ctx->mux_channel;
+			rmnet_index = rmnet_ipa_ctx->rmnet_index;
 
 			mux_channel[rmnet_index].mux_id =
 				extend_ioctl_data.u.rmnet_mux_val.mux_id;
@@ -729,8 +729,8 @@ static int ipa3_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 				mux_channel[rmnet_index].vchannel_name,
 				mux_channel[rmnet_index].mux_id,
 				rmnet_index);
-			rmnet_ipa3_ctx->rmnet_index++;
-			mutex_unlock(&rmnet_ipa3_ctx->add_mux_channel_lock);
+			rmnet_ipa_ctx->rmnet_index++;
+			mutex_unlock(&rmnet_ipa_ctx->add_mux_channel_lock);
 			break;
 		case RMNET_IOCTL_SET_EGRESS_DATA_FORMAT:
 			if (handle3_egress_format(dev, &extend_ioctl_data))
@@ -779,13 +779,13 @@ static int ipa3_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	return rc;
 }
 
-static const struct net_device_ops ipa3_wwan_ops_ip = {
-	.ndo_open	= ipa3_wwan_open,
-	.ndo_stop	= ipa3_wwan_stop,
-	.ndo_start_xmit	= ipa3_wwan_xmit,
-	.ndo_tx_timeout	= ipa3_wwan_tx_timeout,
-	.ndo_do_ioctl	= ipa3_wwan_ioctl,
-	.ndo_change_mtu	= ipa3_wwan_change_mtu,
+static const struct net_device_ops ipa_wwan_ops_ip = {
+	.ndo_open	= ipa_wwan_open,
+	.ndo_stop	= ipa_wwan_stop,
+	.ndo_start_xmit	= ipa_wwan_xmit,
+	.ndo_tx_timeout	= ipa_wwan_tx_timeout,
+	.ndo_do_ioctl	= ipa_wwan_ioctl,
+	.ndo_change_mtu	= ipa_wwan_change_mtu,
 };
 
 /**
@@ -796,9 +796,9 @@ static const struct net_device_ops ipa3_wwan_ops_ip = {
  * Return codes:
  * None
  */
-static void ipa3_wwan_setup(struct net_device *dev)
+static void ipa_wwan_setup(struct net_device *dev)
 {
-	dev->netdev_ops = &ipa3_wwan_ops_ip;
+	dev->netdev_ops = &ipa_wwan_ops_ip;
 	ether_setup(dev);
 	dev->header_ops = NULL;	 /* No header (override ether_setup() value) */
 	dev->type = ARPHRD_RAWIP;
@@ -811,17 +811,17 @@ static void ipa3_wwan_setup(struct net_device *dev)
 	dev->watchdog_timeo = msecs_to_jiffies(10000);
 }
 
-static void ipa3_wake_tx_queue(struct work_struct *work)
+static void ipa_wake_tx_queue(struct work_struct *work)
 {
-	if (rmnet_ipa3_ctx->dev) {
-		__netif_tx_lock_bh(netdev_get_tx_queue(rmnet_ipa3_ctx->dev, 0));
-		netif_wake_queue(rmnet_ipa3_ctx->dev);
-		__netif_tx_unlock_bh(netdev_get_tx_queue(rmnet_ipa3_ctx->dev, 0));
+	if (rmnet_ipa_ctx->dev) {
+		__netif_tx_lock_bh(netdev_get_tx_queue(rmnet_ipa_ctx->dev, 0));
+		netif_wake_queue(rmnet_ipa_ctx->dev);
+		__netif_tx_unlock_bh(netdev_get_tx_queue(rmnet_ipa_ctx->dev, 0));
 	}
 }
 
 /**
- * ipa3_wwan_probe() - Initialized the module and registers as a
+ * ipa_wwan_probe() - Initialized the module and registers as a
  * network interface to the network stack
  *
  * Note: In case IPA driver hasn't initialized already, the probe function
@@ -833,22 +833,22 @@ static void ipa3_wake_tx_queue(struct work_struct *work)
  * -ENOMEM: No memory available
  * -EFAULT: Internal error
  */
-static int ipa3_wwan_probe(struct platform_device *pdev)
+static int ipa_wwan_probe(struct platform_device *pdev)
 {
 	int ret;
 	struct net_device *dev;
-	struct ipa3_wwan_private *wwan_ptr;
+	struct ipa_wwan_private *wwan_ptr;
 
-	ipa_info("rmnet_ipa3 started initialization\n");
+	ipa_info("rmnet_ipa started initialization\n");
 
-	mutex_init(&rmnet_ipa3_ctx->pipe_handle_guard);
-	mutex_init(&rmnet_ipa3_ctx->add_mux_channel_lock);
-	rmnet_ipa3_ctx->ipa3_to_apps_hdl = -1;
-	rmnet_ipa3_ctx->apps_to_ipa3_hdl = -1;
+	mutex_init(&rmnet_ipa_ctx->pipe_handle_guard);
+	mutex_init(&rmnet_ipa_ctx->add_mux_channel_lock);
+	rmnet_ipa_ctx->ipa_to_apps_hdl = -1;
+	rmnet_ipa_ctx->apps_to_ipa_hdl = -1;
 
-	ret = ipa3_init_q6_smem();
+	ret = ipa_init_q6_smem();
 	if (ret) {
-		ipa_err("ipa3_init_q6_smem failed!\n");
+		ipa_err("ipa_init_q6_smem failed!\n");
 		goto err_clear_ctx;
 	}
 
@@ -856,16 +856,16 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 	ipa_qmi_init();
 
 	/* initialize wan-driver netdev */
-	dev = alloc_netdev(sizeof(struct ipa3_wwan_private),
+	dev = alloc_netdev(sizeof(struct ipa_wwan_private),
 			   IPA_WWAN_DEV_NAME,
 			   NET_NAME_UNKNOWN,
-			   ipa3_wwan_setup);
+			   ipa_wwan_setup);
 	if (!dev) {
 		ipa_err("no memory for netdev\n");
 		ret = -ENOMEM;
 		goto err_clear_ctx;
 	}
-	rmnet_ipa3_ctx->dev = dev;
+	rmnet_ipa_ctx->dev = dev;
 	wwan_ptr = netdev_priv(dev);
 	ipa_debug("wwan_ptr (private) = %p", wwan_ptr);
 	wwan_ptr->outstanding_high = DEFAULT_OUTSTANDING_HIGH;
@@ -876,7 +876,7 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 	/* Enable SG support in netdevice. */
 	dev->hw_features |= NETIF_F_SG;
 
-	netif_napi_add(dev, &wwan_ptr->napi, ipa3_rmnet_poll, NAPI_WEIGHT);
+	netif_napi_add(dev, &wwan_ptr->napi, ipa_rmnet_poll, NAPI_WEIGHT);
 	ret = register_netdev(dev);
 	if (ret) {
 		ipa_err("unable to register ipa_netdev %d rc=%d\n", 0, ret);
@@ -885,7 +885,7 @@ static int ipa3_wwan_probe(struct platform_device *pdev)
 
 	ipa_debug("IPA-WWAN devices (%s) initialization ok :>>>>\n", dev->name);
 	/* offline charging mode */
-	ipa3_proxy_clk_unvote();
+	ipa_proxy_clk_unvote();
 
 	/* Till the system is suspended, we keep the clock open */
 	ipa_client_add(__func__, false);
@@ -899,39 +899,39 @@ err_napi_del:
 	netif_napi_del(&wwan_ptr->napi);
 	free_netdev(dev);
 err_clear_ctx:
-	memset(&rmnet_ipa3_ctx_struct, 0, sizeof(rmnet_ipa3_ctx_struct));
+	memset(&rmnet_ipa_ctx_struct, 0, sizeof(rmnet_ipa_ctx_struct));
 
 	return ret;
 }
 
-static int ipa3_wwan_remove(struct platform_device *pdev)
+static int ipa_wwan_remove(struct platform_device *pdev)
 {
-	struct ipa3_wwan_private *wwan_ptr = netdev_priv(rmnet_ipa3_ctx->dev);
+	struct ipa_wwan_private *wwan_ptr = netdev_priv(rmnet_ipa_ctx->dev);
 	int ret;
 
 	ipa_info("rmnet_ipa started deinitialization\n");
-	mutex_lock(&rmnet_ipa3_ctx->pipe_handle_guard);
-	ret = ipa3_teardown_sys_pipe(rmnet_ipa3_ctx->ipa3_to_apps_hdl);
+	mutex_lock(&rmnet_ipa_ctx->pipe_handle_guard);
+	ret = ipa_teardown_sys_pipe(rmnet_ipa_ctx->ipa_to_apps_hdl);
 	if (ret < 0)
 		ipa_err("Failed to teardown IPA->APPS pipe\n");
 	else
-		rmnet_ipa3_ctx->ipa3_to_apps_hdl = -1;
-	ret = ipa3_teardown_sys_pipe(rmnet_ipa3_ctx->apps_to_ipa3_hdl);
+		rmnet_ipa_ctx->ipa_to_apps_hdl = -1;
+	ret = ipa_teardown_sys_pipe(rmnet_ipa_ctx->apps_to_ipa_hdl);
 	if (ret < 0)
 		ipa_err("Failed to teardown APPS->IPA pipe\n");
 	else
-		rmnet_ipa3_ctx->apps_to_ipa3_hdl = -1;
+		rmnet_ipa_ctx->apps_to_ipa_hdl = -1;
 	netif_napi_del(&wwan_ptr->napi);
-	mutex_unlock(&rmnet_ipa3_ctx->pipe_handle_guard);
-	unregister_netdev(rmnet_ipa3_ctx->dev);
+	mutex_unlock(&rmnet_ipa_ctx->pipe_handle_guard);
+	unregister_netdev(rmnet_ipa_ctx->dev);
 
-	cancel_work_sync(&ipa3_tx_wakequeue_work);
-	if (rmnet_ipa3_ctx->dev)
-		free_netdev(rmnet_ipa3_ctx->dev);
-	rmnet_ipa3_ctx->dev = NULL;
+	cancel_work_sync(&ipa_tx_wakequeue_work);
+	if (rmnet_ipa_ctx->dev)
+		free_netdev(rmnet_ipa_ctx->dev);
+	rmnet_ipa_ctx->dev = NULL;
 
-	mutex_destroy(&rmnet_ipa3_ctx->add_mux_channel_lock);
-	mutex_destroy(&rmnet_ipa3_ctx->pipe_handle_guard);
+	mutex_destroy(&rmnet_ipa_ctx->add_mux_channel_lock);
+	mutex_destroy(&rmnet_ipa_ctx->pipe_handle_guard);
 
 	initialized = false;
 	ipa_info("rmnet_ipa completed deinitialization\n");
@@ -956,8 +956,8 @@ static int ipa3_wwan_remove(struct platform_device *pdev)
 */
 static int rmnet_ipa_ap_suspend(struct device *dev)
 {
-	struct net_device *netdev = rmnet_ipa3_ctx->dev;
-	struct ipa3_wwan_private *wwan_ptr;
+	struct net_device *netdev = rmnet_ipa_ctx->dev;
+	struct ipa_wwan_private *wwan_ptr;
 	int ret;
 
 	ipa_debug("Enter...\n");
@@ -1009,7 +1009,7 @@ bail:
 */
 static int rmnet_ipa_ap_resume(struct device *dev)
 {
-	struct net_device *netdev = rmnet_ipa3_ctx->dev;
+	struct net_device *netdev = rmnet_ipa_ctx->dev;
 
 	ipa_client_add(__func__, false);
 	ipa_debug("IPA clocks enabled\n");
@@ -1021,7 +1021,7 @@ static int rmnet_ipa_ap_resume(struct device *dev)
 }
 
 static const struct of_device_id rmnet_ipa_dt_match[] = {
-	{.compatible = "qcom,rmnet-ipa3"},
+	{.compatible = "qcom,rmnet-ipa"},
 	{},
 };
 MODULE_DEVICE_TABLE(of, rmnet_ipa_dt_match);
@@ -1033,17 +1033,17 @@ static const struct dev_pm_ops rmnet_ipa_pm_ops = {
 
 static struct platform_driver rmnet_ipa_driver = {
 	.driver = {
-		.name = "rmnet_ipa3",
+		.name = "rmnet_ipa",
 		.owner = THIS_MODULE,
 		.pm = &rmnet_ipa_pm_ops,
 		.of_match_table = rmnet_ipa_dt_match,
 	},
-	.probe = ipa3_wwan_probe,
-	.remove = ipa3_wwan_remove,
+	.probe = ipa_wwan_probe,
+	.remove = ipa_wwan_remove,
 };
 
 /**
- * ipa3_q6_handshake_complete() - Perform operations once Q6 is up
+ * ipa_q6_handshake_complete() - Perform operations once Q6 is up
  * @ssr_bootup - Indicates whether this is a cold boot-up or post-SSR.
  *
  * This function is invoked once the handshake between the IPA AP driver
@@ -1051,7 +1051,7 @@ static struct platform_driver rmnet_ipa_driver = {
  * operations which can't be performed until IPA Q6 driver is up.
  *
  */
-void ipa3_q6_handshake_complete(bool ssr_bootup)
+void ipa_q6_handshake_complete(bool ssr_bootup)
 {
 	/* It is required to recover the network stats after SSR recovery */
 	if (ssr_bootup) {
@@ -1062,11 +1062,11 @@ void ipa3_q6_handshake_complete(bool ssr_bootup)
 		 * uC is already loaded. Therefore, proxy vote can be removed
 		 * once Modem init is complete.
 		 */
-		ipa3_proxy_clk_unvote();
+		ipa_proxy_clk_unvote();
 	}
 }
 
-int ipa3_wwan_init(void)
+int ipa_wwan_init(void)
 {
 	if (initialized)
 		return 0;
@@ -1074,17 +1074,17 @@ int ipa3_wwan_init(void)
 	return platform_driver_register(&rmnet_ipa_driver);
 }
 
-void ipa3_wwan_cleanup(void)
+void ipa_wwan_cleanup(void)
 {
 	platform_driver_unregister(&rmnet_ipa_driver);
-	memset(&rmnet_ipa3_ctx_struct, 0, sizeof(rmnet_ipa3_ctx_struct));
+	memset(&rmnet_ipa_ctx_struct, 0, sizeof(rmnet_ipa_ctx_struct));
 }
 
-static int ipa3_rmnet_poll(struct napi_struct *napi, int budget)
+static int ipa_rmnet_poll(struct napi_struct *napi, int budget)
 {
 	int rcvd_pkts;
 
-	rcvd_pkts = ipa3_rx_poll(rmnet_ipa3_ctx->ipa3_to_apps_hdl, budget);
+	rcvd_pkts = ipa_rx_poll(rmnet_ipa_ctx->ipa_to_apps_hdl, budget);
 	ipa_debug_low("rcvd packets: %d\n", rcvd_pkts);
 
 	return rcvd_pkts;

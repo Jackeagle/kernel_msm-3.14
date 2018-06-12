@@ -833,7 +833,7 @@ static u32 gsi_get_max_event_rings(void)
 
 int gsi_register_device(void)
 {
-	struct platform_device *ipa3_pdev = to_platform_device(gsi_ctx->dev);
+	struct platform_device *ipa_pdev = to_platform_device(gsi_ctx->dev);
 	u32 val;
 	int ret;
 
@@ -843,7 +843,7 @@ int gsi_register_device(void)
 	}
 
 	/* Get IPA GSI IRQ number */
-	ret = platform_get_irq_byname(ipa3_pdev, "gsi-irq");
+	ret = platform_get_irq_byname(ipa_pdev, "gsi-irq");
 	if (ret < 0) {
 		ipa_err("failed to get gsi-irq!\n");
 		return -ENODEV;
@@ -958,7 +958,7 @@ static const struct ipa_gsi_ep_config *ipa_pipe_ep_config(u32 pipe_idx)
 	for (client = 0; client < IPA_CLIENT_MAX; client++) {
 		const struct ipa_gsi_ep_config *ep_config;
 
-		ep_config = ipa3_get_gsi_ep_info(client);
+		ep_config = ipa_get_gsi_ep_info(client);
 		if (ep_config && ep_config->ipa_ep_num == pipe_idx)
 			return ep_config;
 	}
@@ -996,7 +996,7 @@ static void gsi_tz_pipe_setup(void)
 			continue;
 
 		/* Write TLV, AOS, and CFG1 for enabled pipes only */
-		if (i < ipa3_ctx->ipa_num_pipes) {
+		if (i < ipa_ctx->ipa_num_pipes) {
 			val = tlv_offset;
 			val |= ep_config->ipa_if_tlv << 16;
 			ipahal_write_reg_n(IPA_ENDP_GSI_CFG_TLV_n, i, val);
@@ -1079,7 +1079,7 @@ void gsi_firmware_enable(void)
 	ipa_debug("GSI SW version 0x%08x\n", val);
 
 	gsi_writel(0, GSI_PERIPH_BASE_ADDR_MSB_OFFS);
-	gsi_writel(ipa3_ctx->ipa_wrapper_base, GSI_PERIPH_BASE_ADDR_LSB_OFFS);
+	gsi_writel(ipa_ctx->ipa_wrapper_base, GSI_PERIPH_BASE_ADDR_LSB_OFFS);
 
 	gsi_write_ieps();
 	/* ------- */

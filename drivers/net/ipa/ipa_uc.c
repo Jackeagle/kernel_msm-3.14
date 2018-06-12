@@ -17,14 +17,14 @@
 #define IPA_UC_POLL_MAX_RETRY 10000
 
 /**
- * enum ipa3_cpu_2_hw_commands - Values that represent the commands from the CPU
+ * enum ipa_cpu_2_hw_commands - Values that represent the commands from the CPU
  * IPA_CPU_2_HW_CMD_ERR_FATAL : CPU instructs HW to perform error fatal
  *				handling.
  * IPA_CPU_2_HW_CMD_CLK_GATE : CPU instructs HW to goto Clock Gated state.
  * IPA_CPU_2_HW_CMD_CLK_UNGATE : CPU instructs HW to goto Clock Ungated state.
  * IPA_CPU_2_HW_CMD_GSI_CH_EMPTY : Command to check for GSI channel emptiness.
  */
-enum ipa3_cpu_2_hw_commands {
+enum ipa_cpu_2_hw_commands {
 	IPA_CPU_2_HW_CMD_ERR_FATAL		   =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 4),
 	IPA_CPU_2_HW_CMD_GSI_CH_EMPTY		   =
@@ -32,13 +32,13 @@ enum ipa3_cpu_2_hw_commands {
 };
 
 /**
- * enum ipa3_hw_2_cpu_responses -  Values that represent common HW responses
+ * enum ipa_hw_2_cpu_responses -  Values that represent common HW responses
  *  to CPU commands.
  * @IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED : HW shall send this command once
  *  boot sequence is completed and HW is ready to serve commands from CPU
  * @IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED: Response to CPU commands
  */
-enum ipa3_hw_2_cpu_responses {
+enum ipa_hw_2_cpu_responses {
 	IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 1),
 	IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED  =
@@ -119,9 +119,9 @@ const char *ipa_hw_error_str(enum ipa_hw_errors err_type)
 	return str;
 }
 
-static void ipa3_log_evt_hdlr(void)
+static void ipa_log_evt_hdlr(void)
 {
-	struct ipa3_uc_ctx *uc_ctx = &ipa3_ctx->uc_ctx;
+	struct ipa_uc_ctx *uc_ctx = &ipa_ctx->uc_ctx;
 	u32 offset = uc_ctx->uc_sram_mmio->eventParams;
 
 	/* If the the event top offset is what we set it to, we're done */
@@ -140,25 +140,25 @@ static void ipa3_log_evt_hdlr(void)
 }
 
 /**
- * ipa3_uc_state_check() - Check the status of the uC interface
+ * ipa_uc_state_check() - Check the status of the uC interface
  *
  * Return value: 0 if the uC is loaded, interface is initialized
  *		 and there was no recent failure in one of the commands.
  *		 A negative value is returned otherwise.
  */
-static int ipa3_uc_state_check(void)
+static int ipa_uc_state_check(void)
 {
-	if (!ipa3_ctx->uc_ctx.uc_inited) {
+	if (!ipa_ctx->uc_ctx.uc_inited) {
 		ipa_err("uC interface not initialized\n");
 		return -EFAULT;
 	}
 
-	if (!ipa3_ctx->uc_ctx.uc_loaded) {
+	if (!ipa_ctx->uc_ctx.uc_loaded) {
 		ipa_err("uC is not loaded\n");
 		return -EFAULT;
 	}
 
-	if (ipa3_ctx->uc_ctx.uc_failed) {
+	if (ipa_ctx->uc_ctx.uc_failed) {
 		ipa_err("uC has failed its last command\n");
 		return -EFAULT;
 	}
@@ -167,17 +167,17 @@ static int ipa3_uc_state_check(void)
 }
 
 /**
- * ipa3_uc_loaded_check() - Check the uC has been loaded
+ * ipa_uc_loaded_check() - Check the uC has been loaded
  *
  * Return value: 1 if the uC is loaded, 0 otherwise
  */
-int ipa3_uc_loaded_check(void)
+int ipa_uc_loaded_check(void)
 {
-	return ipa3_ctx->uc_ctx.uc_loaded;
+	return ipa_ctx->uc_ctx.uc_loaded;
 }
-EXPORT_SYMBOL(ipa3_uc_loaded_check);
+EXPORT_SYMBOL(ipa_uc_loaded_check);
 
-static void ipa3_uc_event_handler(enum ipa_irq_type interrupt,
+static void ipa_uc_event_handler(enum ipa_irq_type interrupt,
 				 void *private_data,
 				 void *interrupt_data)
 {
@@ -186,7 +186,7 @@ static void ipa3_uc_event_handler(enum ipa_irq_type interrupt,
 	u8 event_op;
 
 	ipa_client_add(__func__, false);
-	mmio = ipa3_ctx->uc_ctx.uc_sram_mmio;
+	mmio = ipa_ctx->uc_ctx.uc_sram_mmio;
 	event_op = mmio->eventOp;
 	ipa_debug("uC evt opcode=%u\n", event_op);
 
@@ -202,21 +202,21 @@ static void ipa3_uc_event_handler(enum ipa_irq_type interrupt,
 		evt.raw32b = mmio->eventParams;
 		ipa_err("uC Error, evt errorType = %s\n",
 			ipa_hw_error_str(evt.params.errorType));
-		ipa3_ctx->uc_ctx.uc_failed = true;
-		ipa3_ctx->uc_ctx.uc_error_type = evt.params.errorType;
-		ipa3_ctx->uc_ctx.uc_error_timestamp =
+		ipa_ctx->uc_ctx.uc_failed = true;
+		ipa_ctx->uc_ctx.uc_error_type = evt.params.errorType;
+		ipa_ctx->uc_ctx.uc_error_timestamp =
 			ipahal_read_reg(IPA_TAG_TIMER);
 		ipa_bug();
 	} else if (event_op == IPA_HW_2_CPU_EVENT_LOG_INFO) {
 		ipa_debug("uC evt log info ofst=0x%x\n", mmio->eventParams);
-		ipa3_log_evt_hdlr();
+		ipa_log_evt_hdlr();
 	} else {
 		ipa_debug("unsupported uC evt opcode=%u\n", event_op);
 	}
 	ipa_client_remove(__func__, false);
 }
 
-static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
+static void ipa_uc_response_hdlr(enum ipa_irq_type interrupt,
 				void *private_data,
 				void *interrupt_data)
 {
@@ -225,7 +225,7 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 	u8 response_op;
 
 	ipa_client_add(__func__, false);
-	mmio = ipa3_ctx->uc_ctx.uc_sram_mmio;
+	mmio = ipa_ctx->uc_ctx.uc_sram_mmio;
 	response_op = mmio->responseOp;
 	ipa_debug("uC rsp opcode=%hhu\n", response_op);
 
@@ -243,14 +243,14 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 	 * microntroller when it has sent it a request message.
 	 */
 	if (response_op == IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED) {
-		ipa3_ctx->uc_ctx.uc_loaded = true;
+		ipa_ctx->uc_ctx.uc_loaded = true;
 
 		ipa_debug("IPA uC loaded\n");
 		/*
 		 * The proxy vote is held until uC is loaded to ensure that
 		 * IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED is received.
 		 */
-		ipa3_proxy_clk_unvote();
+		ipa_proxy_clk_unvote();
 	} else if (response_op == IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED) {
 		struct IpaHwCpuCmdCompletedResponseParams_t *params;
 
@@ -262,11 +262,11 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 		       params->originalCmdOp, params->status);
 
 		/* Make sure we were expecting the command that completed */
-		if (params->originalCmdOp == ipa3_ctx->uc_ctx.pending_cmd) {
-			ipa3_ctx->uc_ctx.uc_status = params->status;
+		if (params->originalCmdOp == ipa_ctx->uc_ctx.pending_cmd) {
+			ipa_ctx->uc_ctx.uc_status = params->status;
 		} else {
 			ipa_err("Expected cmd=%u rcvd cmd=%u\n",
-				ipa3_ctx->uc_ctx.pending_cmd,
+				ipa_ctx->uc_ctx.pending_cmd,
 				params->originalCmdOp);
 		}
 	} else {
@@ -277,7 +277,7 @@ static void ipa3_uc_response_hdlr(enum ipa_irq_type interrupt,
 
 /* Send a command to the microcontroller */
 static void
-send_uc_command_nowait(struct ipa3_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
+send_uc_command_nowait(struct ipa_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
 {
 	struct IpaHwSharedMemCommonMapping_t *mmio = uc_ctx->uc_sram_mmio;
 
@@ -297,22 +297,22 @@ send_uc_command_nowait(struct ipa3_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
 }
 
 /**
- * ipa3_uc_interface_init() - Initialize the interface with the uC
+ * ipa_uc_interface_init() - Initialize the interface with the uC
  *
  * Return value: 0 on success, negative value otherwise
  */
-int ipa3_uc_interface_init(void)
+int ipa_uc_interface_init(void)
 {
 	unsigned long phys_addr;
 	void *mmio;
 	int result;
 
-	if (ipa3_ctx->uc_ctx.uc_inited) {
+	if (ipa_ctx->uc_ctx.uc_inited) {
 		ipa_debug("uC interface already initialized\n");
 		return 0;
 	}
 
-	phys_addr = ipa3_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
+	phys_addr = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
 	phys_addr += ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_n, 0);
 	mmio = ioremap(phys_addr, IPA_RAM_UC_SMEM_SIZE);
 	if (!mmio) {
@@ -321,48 +321,48 @@ int ipa3_uc_interface_init(void)
 		goto remap_fail;
 	}
 
-	result = ipa3_add_interrupt_handler(IPA_UC_IRQ_0,
-			ipa3_uc_event_handler, true, ipa3_ctx);
+	result = ipa_add_interrupt_handler(IPA_UC_IRQ_0,
+			ipa_uc_event_handler, true, ipa_ctx);
 	if (result) {
 		ipa_err("Fail to register for UC_IRQ0 rsp interrupt\n");
 		result = -EFAULT;
 		goto irq_fail0;
 	}
 
-	result = ipa3_add_interrupt_handler(IPA_UC_IRQ_1,
-			ipa3_uc_response_hdlr, true, ipa3_ctx);
+	result = ipa_add_interrupt_handler(IPA_UC_IRQ_1,
+			ipa_uc_response_hdlr, true, ipa_ctx);
 	if (result) {
 		ipa_err("fail to register for UC_IRQ1 rsp interrupt\n");
 		result = -EFAULT;
 		goto irq_fail1;
 	}
 
-	ipa3_ctx->uc_ctx.uc_sram_mmio = mmio;
-	ipa3_ctx->uc_ctx.uc_inited = true;
+	ipa_ctx->uc_ctx.uc_sram_mmio = mmio;
+	ipa_ctx->uc_ctx.uc_inited = true;
 
 	ipa_debug("IPA uC interface is initialized\n");
 	return 0;
 
 irq_fail1:
-	ipa3_remove_interrupt_handler(IPA_UC_IRQ_0);
+	ipa_remove_interrupt_handler(IPA_UC_IRQ_0);
 irq_fail0:
 	iounmap(mmio);
 remap_fail:
 	return result;
 }
 
-int ipa3_uc_panic_notifier(struct notifier_block *this,
+int ipa_uc_panic_notifier(struct notifier_block *this,
 		unsigned long event, void *ptr)
 {
 	ipa_debug("this=%p evt=%lu ptr=%p\n", this, event, ptr);
 
-	if (ipa3_uc_state_check())
+	if (ipa_uc_state_check())
 		goto fail;
 
 	if (!ipa_client_add_additional(__func__, false))
 		goto fail;
 
-	send_uc_command_nowait(&ipa3_ctx->uc_ctx, 0,
+	send_uc_command_nowait(&ipa_ctx->uc_ctx, 0,
 				IPA_CPU_2_HW_CMD_ERR_FATAL);
 
 	/* give uc enough time to save state */

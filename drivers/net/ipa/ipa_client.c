@@ -22,7 +22,7 @@
 
 #define IPA_PKT_FLUSH_TO_US 100
 
-static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
+static int ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep,
 	struct gsi_chan_props *orig_chan_props,
 	struct ipa_mem_buffer *chan_dma)
 {
@@ -52,7 +52,7 @@ static int ipa3_reconfigure_channel_to_gpi(struct ipa3_ep_context *ep,
 	return 0;
 }
 
-static int ipa3_restore_channel_properties(struct ipa3_ep_context *ep,
+static int ipa_restore_channel_properties(struct ipa_ep_context *ep,
 	struct gsi_chan_props *chan_props)
 {
 	int gsi_res;
@@ -66,8 +66,8 @@ static int ipa3_restore_channel_properties(struct ipa3_ep_context *ep,
 	return 0;
 }
 
-static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
-	struct ipa3_ep_context *ep)
+static int ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
+	struct ipa_ep_context *ep)
 {
 	int result;
 	int gsi_res;
@@ -97,7 +97,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 		ipa_err("Error getting channel properties: %d\n", gsi_res);
 		return -EFAULT;
 	}
-	result = ipa3_reconfigure_channel_to_gpi(ep, &orig_chan_props,
+	result = ipa_reconfigure_channel_to_gpi(ep, &orig_chan_props,
 			&chan_dma);
 	if (result)
 		return -EFAULT;
@@ -150,7 +150,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 
 	ipahal_dma_free(&dma_byte);
 
-	result = ipa3_stop_gsi_channel(clnt_hdl);
+	result = ipa_stop_gsi_channel(clnt_hdl);
 	if (result) {
 		ipa_err("Error stopping channel: %d\n", result);
 		goto start_chan_fail;
@@ -178,7 +178,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 	}
 
 	/* Restore channels properties */
-	result = ipa3_restore_channel_properties(ep, &orig_chan_props);
+	result = ipa_restore_channel_properties(ep, &orig_chan_props);
 	if (result)
 		goto restore_props_fail;
 	ipahal_dma_free(&chan_dma);
@@ -188,7 +188,7 @@ static int ipa3_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 queue_xfer_fail:
 	ipahal_dma_free(&dma_byte);
 dma_alloc_fail:
-	ipa3_stop_gsi_channel(clnt_hdl);
+	ipa_stop_gsi_channel(clnt_hdl);
 start_chan_fail:
 	if (pipe_suspended) {
 		ipa_debug("suspend the pipe again\n");
@@ -196,27 +196,27 @@ start_chan_fail:
 		ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n,
 			clnt_hdl, &ctrl);
 	}
-	ipa3_restore_channel_properties(ep, &orig_chan_props);
+	ipa_restore_channel_properties(ep, &orig_chan_props);
 restore_props_fail:
 	ipahal_dma_free(&chan_dma);
 
 	return result;
 }
 
-void ipa3_reset_gsi_channel(u32 clnt_hdl)
+void ipa_reset_gsi_channel(u32 clnt_hdl)
 {
-	struct ipa3_ep_context *ep;
+	struct ipa_ep_context *ep;
 	u32 aggr_active_bitmap;
 
 	ipa_debug("entry\n");
 
-	ipa_bug_on(clnt_hdl >= ipa3_ctx->ipa_num_pipes);
+	ipa_bug_on(clnt_hdl >= ipa_ctx->ipa_num_pipes);
 
-	ep = &ipa3_ctx->ep[clnt_hdl];
+	ep = &ipa_ctx->ep[clnt_hdl];
 	ipa_bug_on(!ep->valid);
 
 
-	ipa_client_add(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
+	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
 	/*
 	 * Check for open aggregation frame on Consumer EP -
 	 * reset with open aggregation frame WA
@@ -227,7 +227,7 @@ void ipa3_reset_gsi_channel(u32 clnt_hdl)
 		aggr_active_bitmap = 0;
 
 	if (aggr_active_bitmap & (1 << clnt_hdl)) {
-		ipa_bug_on(ipa3_reset_with_open_aggr_frame_wa(clnt_hdl, ep));
+		ipa_bug_on(ipa_reset_with_open_aggr_frame_wa(clnt_hdl, ep));
 	} else {
 		/*
 		 * Reset channel
@@ -237,7 +237,7 @@ void ipa3_reset_gsi_channel(u32 clnt_hdl)
 		ipa_bug_on(gsi_reset_channel(ep->gsi_chan_hdl));
 	}
 
-	ipa_client_remove(ipa_client_string(ipa3_get_client_mapping(clnt_hdl)), true);
+	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
 
 	ipa_debug("exit\n");
 }

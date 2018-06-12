@@ -131,7 +131,7 @@ static const struct file_operations name ## _fops = {			\
 #define _ADD_STAT(dir, stat, val)					\
 		_ADD_SEQ(dir, stat, ipa_stat, S_IFREG|S_IRUGO, val)
 
-static ssize_t ipa3_write_ep_holb(struct file *file,
+static ssize_t ipa_write_ep_holb(struct file *file,
 		const char __user *buf, size_t count, loff_t *ppos)
 {
 	struct ipa_ep_cfg_holb holb;
@@ -171,12 +171,12 @@ static ssize_t ipa3_write_ep_holb(struct file *file,
 	holb.en = en;
 	holb.tmr_val = tmr_val;
 
-	ipa3_cfg_ep_holb(ep_idx, &holb);
+	ipa_cfg_ep_holb(ep_idx, &holb);
 
 	return count;
 }
 
-static ssize_t ipa3_write_dbg_cnt(struct file *file, const char __user *buf,
+static ssize_t ipa_write_dbg_cnt(struct file *file, const char __user *buf,
 		size_t count, loff_t *ppos)
 {
 	unsigned long missing;
@@ -210,7 +210,7 @@ static ssize_t ipa3_write_dbg_cnt(struct file *file, const char __user *buf,
 	return count;
 }
 
-static ssize_t ipa3_read_dbg_cnt(struct file *file, char __user *ubuf,
+static ssize_t ipa_read_dbg_cnt(struct file *file, char __user *ubuf,
 		size_t count, loff_t *ppos)
 {
 	int nbytes;
@@ -248,18 +248,18 @@ static void ipa_dump_status(struct ipahal_pkt_status *status)
 static ssize_t ipa_status_stats_read(struct file *file, char __user *ubuf,
 		size_t count, loff_t *ppos)
 {
-	struct ipa3_status_stats *stats;
+	struct ipa_status_stats *stats;
 	int i, j;
 
 	stats = kzalloc(sizeof(*stats), GFP_KERNEL);
 	if (!stats)
 		return -EFAULT;
 
-	for (i = 0; i < ipa3_ctx->ipa_num_pipes; i++) {
-		if (!ipa3_ctx->ep[i].sys || !ipa3_ctx->ep[i].sys->status_stat)
+	for (i = 0; i < ipa_ctx->ipa_num_pipes; i++) {
+		if (!ipa_ctx->ep[i].sys || !ipa_ctx->ep[i].sys->status_stat)
 			continue;
 
-		memcpy(stats, ipa3_ctx->ep[i].sys->status_stat, sizeof(*stats));
+		memcpy(stats, ipa_ctx->ep[i].sys->status_stat, sizeof(*stats));
 		ipa_err("Statuses for pipe %d\n", i);
 		for (j = 0; j < IPA_MAX_STATUS_STAT_NUM; j++) {
 			ipa_err("curr=%d\n", stats->curr);
@@ -290,16 +290,16 @@ const_string_read_fop(struct file *file, char __user *buf, size_t len,
 	return simple_read_from_buffer(buf, len, ppos, string, size);
 }
 
-const struct file_operations ipa3_ep_holb_ops = {
-	.write = ipa3_write_ep_holb,
+const struct file_operations ipa_ep_holb_ops = {
+	.write = ipa_write_ep_holb,
 };
 
-const struct file_operations ipa3_dbg_cnt_ops = {
-	.read = ipa3_read_dbg_cnt,
-	.write = ipa3_write_dbg_cnt,
+const struct file_operations ipa_dbg_cnt_ops = {
+	.read = ipa_read_dbg_cnt,
+	.write = ipa_write_dbg_cnt,
 };
 
-const struct file_operations ipa3_status_stats_ops = {
+const struct file_operations ipa_status_stats_ops = {
 	.read = ipa_status_stats_read,
 };
 
@@ -494,7 +494,7 @@ static bool ipa_debugfs_regs_create(struct dentry *ipa_dir)
 	if (!success)
 		return false;
 
-	for (i = 0; i < ipa3_ctx->ipa_num_pipes; i++)
+	for (i = 0; i < ipa_ctx->ipa_num_pipes; i++)
 		if (!ipa_debugfs_regs_pipe_create(regs_dir, i))
 			return false;
 
@@ -520,7 +520,7 @@ static bool ipa_debugfs_stats_create(struct dentry *ipa_dir)
 	if (IS_ERR(stats_dir))
 		return false;
 
-#define ADD_STAT(f)	_ADD_STAT(stats_dir, #f, &ipa3_ctx->stats.f)
+#define ADD_STAT(f)	_ADD_STAT(stats_dir, #f, &ipa_ctx->stats.f)
 	success = ADD_STAT(tx_sw_pkts);
 	success = success && ADD_STAT(tx_hw_pkts);
 	success = success && ADD_STAT(rx_pkts);
@@ -548,7 +548,7 @@ static bool ipa_debugfs_stats_create(struct dentry *ipa_dir)
 
 #define ADD_STAT(i)	_ADD_STAT(excp_dir,				\
 				ipahal_pkt_status_exception_str(i),	\
-				&ipa3_ctx->stats.rx_excp_pkts[i])
+				&ipa_ctx->stats.rx_excp_pkts[i])
 	for (i = 0; i < IPAHAL_PKT_STATUS_EXCEPTION_MAX; i++)
 		if (!ADD_STAT(i))
 			return false;
@@ -575,7 +575,7 @@ static bool ipa_debugfs_stats_create(struct dentry *ipa_dir)
 static u32 sysfs_count;	/* Net changes via this interface */
 static int active_count_show(struct seq_file *s, void *v)
 {
-	int active = atomic_read(&ipa3_ctx->ipa3_active_clients.cnt);
+	int active = atomic_read(&ipa_ctx->ipa_active_clients.cnt);
 
 	seq_printf(s, "%d (including %u via sysfs)\n", active, sysfs_count);
 
@@ -597,7 +597,7 @@ static ssize_t active_count_write(struct file *file,
 	increment = byte == '+';
 
 	/* We could race, but this is an informal interface */
-	active = atomic_read(&ipa3_ctx->ipa3_active_clients.cnt);
+	active = atomic_read(&ipa_ctx->ipa_active_clients.cnt);
 	if (increment && (sysfs_count == U32_MAX || active == INT_MAX))
 		return -ERANGE;
 	else if (!increment && (!sysfs_count || !active))
@@ -625,11 +625,11 @@ DEF_SEQ_RW(active_count);
  */
 static int active_show(struct seq_file *s, void *v)
 {
-	struct ipa3_active_clients_log_ctx *log;
+	struct ipa_active_clients_log_ctx *log;
 	struct ipa_active_client *entry;
 	unsigned long flags;
 
-	log = &ipa3_ctx->ipa3_active_clients_logging;
+	log = &ipa_ctx->ipa_active_clients_logging;
 
 	spin_lock_irqsave(&log->lock, flags);
 
@@ -637,7 +637,7 @@ static int active_show(struct seq_file *s, void *v)
 	list_for_each_entry(entry, &log->active, links)
 		seq_printf(s, "%-40s %-3d\n", entry->id_string, entry->count);
 	seq_printf(s, "\nTotal active clients count: %d\n",
-			atomic_read(&ipa3_ctx->ipa3_active_clients.cnt));
+			atomic_read(&ipa_ctx->ipa_active_clients.cnt));
 
 	spin_unlock_irqrestore(&log->lock, flags);
 
@@ -658,12 +658,12 @@ DEF_SEQ_RO(active);
  */
 static void *clients_log_start(struct seq_file *s, loff_t *pos)
 {
-	struct ipa3_active_clients_log_ctx *log;
+	struct ipa_active_clients_log_ctx *log;
 	unsigned long flags;
 	uintptr_t log_tail;
 	u32 log_size;
 
-	log = &ipa3_ctx->ipa3_active_clients_logging;
+	log = &ipa_ctx->ipa_active_clients_logging;
 	log_size = ARRAY_SIZE(log->log_buffer);
 
 	/* Limit output to the currently used entries in the log */
@@ -682,12 +682,12 @@ static void *clients_log_start(struct seq_file *s, loff_t *pos)
 
 static void *clients_log_next(struct seq_file *s, void *v, loff_t *pos)
 {
-	struct ipa3_active_clients_log_ctx *log;
+	struct ipa_active_clients_log_ctx *log;
 	unsigned long flags;
 	uintptr_t log_tail;
 	u32 log_size;
 
-	log = &ipa3_ctx->ipa3_active_clients_logging;
+	log = &ipa_ctx->ipa_active_clients_logging;
 	log_size = ARRAY_SIZE(log->log_buffer);
 
 	/* Make sure tail hasn't moved, and compute number of used slots */
@@ -714,12 +714,12 @@ static void clients_log_stop(struct seq_file *s, void *v)
 
 static int clients_log_show(struct seq_file *s, void *v)
 {
-	struct ipa3_active_clients_log_ctx *log;
+	struct ipa_active_clients_log_ctx *log;
 	unsigned long flags;
 	uintptr_t index = (uintptr_t)v;	/* index provided starts at 1 */
 	u32 lines;
 
-	log = &ipa3_ctx->ipa3_active_clients_logging;
+	log = &ipa_ctx->ipa_active_clients_logging;
 	lines = ARRAY_SIZE(log->log_buffer);
 
 	if (index > lines)
@@ -754,11 +754,11 @@ static int clients_log_open(struct inode *inode, struct file *file)
 static ssize_t clients_log_write(struct file *file,
 		const char __user *buf, size_t count, loff_t *ppos)
 {
-	struct ipa3_active_clients_log_ctx *log;
+	struct ipa_active_clients_log_ctx *log;
 	unsigned long flags;
 	u32 lines;
 
-	log = &ipa3_ctx->ipa3_active_clients_logging;
+	log = &ipa_ctx->ipa_active_clients_logging;
 	lines = ARRAY_SIZE(log->log_buffer);
 
 	spin_lock_irqsave(&log->lock, flags);
@@ -799,14 +799,14 @@ static bool ipa_debugfs_clients_create(struct dentry *ipa_dir)
 		return false;
 
 	/* There's no log to show if the log buffer array has no entries */
-	if (!ARRAY_SIZE(ipa3_ctx->ipa3_active_clients_logging.log_buffer))
+	if (!ARRAY_SIZE(ipa_ctx->ipa_active_clients_logging.log_buffer))
 		return true;
 
 	return debugfs_create_file("log", S_IFREG|S_IRUGO|S_IWUSR, clients_dir,
 					NULL, &clients_log_fops);
 }
 
-void ipa3_debugfs_init(void)
+void ipa_debugfs_init(void)
 {
 	static struct dentry *ipa_dir;
 	const mode_t write_only_mode = S_IWUSR | S_IWGRP;
@@ -828,7 +828,7 @@ void ipa3_debugfs_init(void)
 
 	file = debugfs_create_file("holb", write_only_mode,
 			ipa_dir,
-			0, &ipa3_ep_holb_ops);
+			0, &ipa_ep_holb_ops);
 	if (IS_ERR_OR_NULL(file))
 		goto fail;
 
@@ -842,12 +842,12 @@ void ipa3_debugfs_init(void)
 	 */
 	file = debugfs_create_file("dbg_cnt",
 			read_write_mode, ipa_dir, 0,
-			&ipa3_dbg_cnt_ops);
+			&ipa_dbg_cnt_ops);
 	if (IS_ERR_OR_NULL(file))
 		goto fail;
 
 	file = debugfs_create_file("status_stats",
-			S_IRUGO, ipa_dir, 0, &ipa3_status_stats_ops);
+			S_IRUGO, ipa_dir, 0, &ipa_status_stats_ops);
 	if (IS_ERR_OR_NULL(file))
 		goto fail;
 
@@ -861,5 +861,5 @@ fail:
 }
 
 #else /* !CONFIG_DEBUG_FS */
-void ipa3_debugfs_init(void) {}
+void ipa_debugfs_init(void) {}
 #endif
