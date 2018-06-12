@@ -37,25 +37,6 @@ struct ipahal_reg_obj {
 static struct ipahal_reg_obj ipahal_regs[IPA_REG_MAX];
 
 static u32
-ipareg_construct_rx_hps_clients_depth0_v3_5(enum ipahal_reg reg,
-		const void *fields)
-{
-	const struct ipahal_reg_rx_hps_clients *clients = fields;
-	u32 val;
-
-	val = field_gen(clients->client_minmax[0],
-			MINMAX_DEPTH_X_CLIENT_n_BMSK_V3_5(0));
-	val |= field_gen(clients->client_minmax[1],
-			MINMAX_DEPTH_X_CLIENT_n_BMSK_V3_5(1));
-	val |= field_gen(clients->client_minmax[2],
-			MINMAX_DEPTH_X_CLIENT_n_BMSK_V3_5(2));
-	val |= field_gen(clients->client_minmax[3],
-			MINMAX_DEPTH_X_CLIENT_n_BMSK_V3_5(3));
-
-	return val;
-}
-
-static u32
 ipareg_construct_rsrg_grp_xy_v3_5(enum ipahal_reg reg, const void *fields)
 {
 	const struct ipahal_reg_rsrc_grp_cfg *grp = fields;
@@ -724,12 +705,6 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 							0x00000500,	0x0020),
 		reg_obj_cfunc(DST_RSRC_GRP_23_RSRC_TYPE_n, rsrg_grp_xy_v3_5,
 							0x00000504,	0x0020),
-		reg_obj_cfunc(RX_HPS_CLIENTS_MIN_DEPTH_0,
-				rx_hps_clients_depth0_v3_5,
-							0x000023c4,	0x0000),
-		reg_obj_cfunc(RX_HPS_CLIENTS_MAX_DEPTH_0,
-				rx_hps_clients_depth0_v3_5,
-							0x000023cc,	0x0000),
 		reg_obj_both(HPS_FTCH_ARB_QUEUE_WEIGHT, hps_queue_weights,
 							0x000005a4,	0x0000),
 		reg_obj_cfunc(QSB_MAX_WRITES, qsb_max_writes,

@@ -161,10 +161,6 @@ void ipahal_reg_init(enum ipa_hw_version hw_version);
 #define X_MAX_LIM_BMSK_V3_5			0x00003f00
 #define X_MIN_LIM_BMSK_V3_5			0x0000003f
 
-/* IPA_RX_HPS_CLIENTS_MIN/MAX_DEPTH_0/1 registers */
-#define MINMAX_DEPTH_X_CLIENT_n_BMSK(n)		(0x7f << (8 * (n)))
-#define MINMAX_DEPTH_X_CLIENT_n_BMSK_V3_5(n)	(0x0f << (8 * (n)))
-
 /* IPA_QSB_MAX_WRITES register */
 #define GEN_QMB_0_MAX_WRITES_BMSK		0x0000000f
 #define GEN_QMB_1_MAX_WRITES_BMSK		0x000000f0

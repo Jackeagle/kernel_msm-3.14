@@ -56,8 +56,6 @@ enum ipahal_reg {
 	IPA_SRC_RSRC_GRP_23_RSRC_TYPE_n,
 	IPA_DST_RSRC_GRP_01_RSRC_TYPE_n,
 	IPA_DST_RSRC_GRP_23_RSRC_TYPE_n,
-	IPA_RX_HPS_CLIENTS_MIN_DEPTH_0,
-	IPA_RX_HPS_CLIENTS_MAX_DEPTH_0,
 	IPA_HPS_FTCH_ARB_QUEUE_WEIGHT,
 	IPA_QSB_MAX_WRITES,
 	IPA_QSB_MAX_READS,
@@ -235,15 +233,6 @@ struct ipahal_reg_rsrc_grp_cfg {
 	u32 x_max;
 	u32 y_min;
 	u32 y_max;
-};
-
-/*
- * struct ipahal_reg_rx_hps_clients - Min or Max values for RX HPS clients
- * @client_minmax - Min or Max values. In case of depth 0 the 4 values
- *	are used. In case of depth 1, only the first 2 values are used
- */
-struct ipahal_reg_rx_hps_clients {
-	u32 client_minmax[4];
 };
 
 /*
