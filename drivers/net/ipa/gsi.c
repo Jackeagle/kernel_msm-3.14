@@ -739,7 +739,8 @@ int gsi_register_device(void)
 	/* Enable all interrupts */
 	gsi_irq_control_all(gsi_ctx->ee, true);
 
-	gsi_writel(GSI_INTR_IRQ, GSI_EE_n_CNTXT_INTSET_OFFS(gsi_ctx->ee));
+	/* Writing 1 indicates IRQ interrupts; 0 would be MSI */
+	gsi_writel(1, GSI_EE_n_CNTXT_INTSET_OFFS(gsi_ctx->ee));
 
 	gsi_writel(0, GSI_EE_n_ERROR_LOG_OFFS(gsi_ctx->ee));
 
@@ -944,13 +945,13 @@ void gsi_firmware_enable(void)
 }
 
 /* Compute the value to write to the event ring context 0 register */
-static u32 evt_ring_ctx_0_val(enum gsi_evt_chtype chtype,
-			enum gsi_intr_type intr_type, u32 re_size)
+static u32
+evt_ring_ctx_0_val(enum gsi_evt_chtype chtype, bool intr_irq, u32 re_size)
 {
 	u32 val;
 
 	val = field_gen((u32)chtype, EV_CHTYPE_BMSK);
-	val |= field_gen((u32)intr_type, EV_INTYPE_BMSK);
+	val |= field_gen(intr_irq ? 1 : 0, EV_INTYPE_BMSK);
 	val |= field_gen(re_size, EV_ELEMENT_SIZE_BMSK);
 
 	return val;
@@ -976,7 +977,7 @@ static void gsi_program_evt_ring_ctx(struct ipa_mem_buffer *mem,
 
 	ipa_debug("intf GPI intr IRQ RE size %u\n", GSI_EVT_RING_ELEMENT_SIZE);
 
-	val = evt_ring_ctx_0_val(GSI_EVT_CHTYPE_GPI_EV, GSI_INTR_IRQ,
+	val = evt_ring_ctx_0_val(GSI_EVT_CHTYPE_GPI_EV, true,
 					GSI_EVT_RING_ELEMENT_SIZE);
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_0_OFFS(evt_id, ee));
 

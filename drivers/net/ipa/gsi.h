@@ -43,11 +43,6 @@ enum gsi_xfer_flag {
 	GSI_XFER_FLAG_BEI = 0x400
 };
 
-enum gsi_intr_type {
-	GSI_INTR_MSI = 0x0,
-	GSI_INTR_IRQ = 0x1
-};
-
 enum gsi_err_code {
 	GSI_INVALID_TRE_ERR = 0x1,
 	GSI_OUT_OF_BUFFERS_ERR = 0x2,
