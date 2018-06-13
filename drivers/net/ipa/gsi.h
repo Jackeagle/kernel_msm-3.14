@@ -566,10 +566,8 @@ int gsi_poll_channel(unsigned long chan_hdl);
  * @chan_hdl:  Client handle previously obtained from
  *	       gsi_alloc_channel
  * @mode:      Mode to move the channel into
- *
- * @Return gsi_status
  */
-int gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode);
+void gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode);
 
 /**
  * gsi_queue_xfer - Peripheral should call this function

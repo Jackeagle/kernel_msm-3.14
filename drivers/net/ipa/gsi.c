@@ -1791,31 +1791,21 @@ int gsi_poll_channel(unsigned long chan_id)
 	return empty ? -ENOENT : size;
 }
 
-int gsi_config_channel_mode(unsigned long chan_id, enum gsi_chan_mode mode)
+void gsi_config_channel_mode(unsigned long chan_id, enum gsi_chan_mode mode)
 {
 	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_id];
-	enum gsi_chan_mode curr;
 	unsigned long flags;
 
 	ipa_assert(mode == GSI_CHAN_MODE_POLL ||
 			mode == GSI_CHAN_MODE_CALLBACK);
 
-	curr = atomic_read(&ctx->poll_mode);
-	if (mode == curr) {
-		ipa_err("already in requested mode %u chan_id %lu\n",
-				curr, chan_id);
-		return -ENOTSUPP;
-	}
-
 	spin_lock_irqsave(&gsi_ctx->slock, flags);
-	if (curr == GSI_CHAN_MODE_CALLBACK)
+	if (mode != GSI_CHAN_MODE_CALLBACK)
 		gsi_irq_control_event(gsi_ctx->ee, ctx->evtr->id, false);
 	else
 		gsi_irq_control_event(gsi_ctx->ee, ctx->evtr->id, true);
 	atomic_set(&ctx->poll_mode, mode);
 	spin_unlock_irqrestore(&gsi_ctx->slock, flags);
-
-	return 0;
 }
 
 int gsi_get_channel_cfg(unsigned long chan_id, struct gsi_chan_props *props)
