@@ -85,8 +85,6 @@ enum gsi_chan_evt {
  * @chan_user_data: cookie supplied in gsi_alloc_channel
  * @xfer_user_data: cookie of the gsi_xfer_elem that caused the
  *		    event to be generated
- * @evt_id:	    type of event triggered by the associated TRE
- *		    (corresponding to xfer_user_data)
  * @bytes_xfered:   number of bytes transferred by the associated TRE
  *		    (corresponding to xfer_user_data)
  *
@@ -94,7 +92,6 @@ enum gsi_chan_evt {
 struct gsi_chan_xfer_notify {
 	void *chan_user_data;
 	void *xfer_user_data;
-	enum gsi_chan_evt evt_id;
 	uint16_t bytes_xfered;
 };
 

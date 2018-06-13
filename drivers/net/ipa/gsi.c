@@ -384,7 +384,6 @@ static void chan_xfer_cb(struct gsi_chan_ctx *ctx, u8 evt_id, u16 count)
 
 	notify.xfer_user_data = ctx->user_data[ring_rp_local_index(&ctx->ring)];
 	notify.chan_user_data = ctx->props.chan_user_data;
-	notify.evt_id = evt_id;
 	notify.bytes_xfered = count;
 
 	if (ctx->props.from_gsi)
