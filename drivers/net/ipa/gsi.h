@@ -36,13 +36,6 @@ struct ipa_gsi_ep_config {
 	u32 ee;
 };
 
-enum gsi_xfer_flag {
-	GSI_XFER_FLAG_CHAIN = 0x1,
-	GSI_XFER_FLAG_EOB = 0x100,
-	GSI_XFER_FLAG_EOT = 0x200,
-	GSI_XFER_FLAG_BEI = 0x400
-};
-
 /**
  * gsi_chan_props - Channel related properties
  *
@@ -107,6 +100,13 @@ struct gsi_chan_props {
 	uint8_t ch_id;
 	unsigned long evt_ring_hdl;
 	void *chan_user_data;
+};
+
+enum gsi_xfer_flag {
+	GSI_XFER_FLAG_CHAIN = 0x1,
+	GSI_XFER_FLAG_EOB = 0x100,
+	GSI_XFER_FLAG_EOT = 0x200,
+	GSI_XFER_FLAG_BEI = 0x400
 };
 
 enum gsi_xfer_elem_type {
