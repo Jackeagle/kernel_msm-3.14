@@ -33,6 +33,104 @@
 
 #define GSI_MAX_PREFETCH	0	/* 0 means 1 segment; 1 means 2 */
 
+enum gsi_err_code {
+	GSI_INVALID_TRE_ERR = 0x1,
+	GSI_OUT_OF_BUFFERS_ERR = 0x2,
+	GSI_OUT_OF_RESOURCES_ERR = 0x3,
+	GSI_UNSUPPORTED_INTER_EE_OP_ERR = 0x4,
+	GSI_EVT_RING_EMPTY_ERR = 0x5,
+	GSI_NON_ALLOCATED_EVT_ACCESS_ERR = 0x6,
+	GSI_HWO_1_ERR = 0x8
+};
+
+enum gsi_evt_chtype {
+	GSI_EVT_CHTYPE_MHI_EV = 0x0,
+	GSI_EVT_CHTYPE_XHCI_EV = 0x1,
+	GSI_EVT_CHTYPE_GPI_EV = 0x2,
+	GSI_EVT_CHTYPE_XDCI_EV = 0x3
+};
+
+enum gsi_chan_prot {
+	GSI_CHAN_PROT_MHI = 0x0,
+	GSI_CHAN_PROT_XHCI = 0x1,
+	GSI_CHAN_PROT_GPI = 0x2,
+	GSI_CHAN_PROT_XDCI = 0x3
+};
+
+enum gsi_chan_evt {
+	GSI_CHAN_EVT_INVALID = 0x0,
+	GSI_CHAN_EVT_SUCCESS = 0x1,
+	GSI_CHAN_EVT_EOT = 0x2,
+	GSI_CHAN_EVT_OVERFLOW = 0x3,
+	GSI_CHAN_EVT_EOB = 0x4,
+	GSI_CHAN_EVT_OOB = 0x5,
+	GSI_CHAN_EVT_DB_MODE = 0x6,
+	GSI_CHAN_EVT_UNDEFINED = 0x10,
+	GSI_CHAN_EVT_RE_ERROR = 0x11,
+};
+
+enum gsi_evt_ring_state {
+	GSI_EVT_RING_STATE_NOT_ALLOCATED = 0x0,
+	GSI_EVT_RING_STATE_ALLOCATED = 0x1,
+	GSI_EVT_RING_STATE_ERROR = 0xf
+};
+
+enum gsi_chan_state {
+	GSI_CHAN_STATE_NOT_ALLOCATED = 0x0,
+	GSI_CHAN_STATE_ALLOCATED = 0x1,
+	GSI_CHAN_STATE_STARTED = 0x2,
+	GSI_CHAN_STATE_STOPPED = 0x3,
+	GSI_CHAN_STATE_STOP_IN_PROC = 0x4,
+	GSI_CHAN_STATE_ERROR = 0xf
+};
+
+struct gsi_ring_ctx {
+	spinlock_t slock;
+	struct ipa_mem_buffer mem;
+	uint64_t wp;
+	uint64_t rp;
+	uint64_t wp_local;
+	uint64_t rp_local;
+	uint8_t elem_sz;
+	uint16_t max_num_elem;
+	uint64_t end;
+};
+
+struct gsi_chan_ctx {
+	struct gsi_chan_props props;
+	enum gsi_chan_state state;
+	struct gsi_ring_ctx ring;
+	void **user_data;
+	struct gsi_evt_ctx *evtr;
+	struct mutex mlock;
+	struct completion compl;
+	bool allocated;
+	atomic_t poll_mode;
+	u32 tlv_size;		/* slots in TLV */
+};
+
+struct gsi_evt_ctx {
+	struct ipa_mem_buffer mem;
+	uint16_t int_modt;
+	enum gsi_evt_ring_state state;
+	uint8_t id;
+	struct gsi_ring_ctx ring;
+	struct mutex mlock;
+	struct completion compl;
+	struct gsi_chan_ctx *chan;
+	atomic_t chan_ref_cnt;
+};
+
+struct ch_debug_stats {
+	unsigned long ch_allocate;
+	unsigned long ch_start;
+	unsigned long ch_stop;
+	unsigned long ch_reset;
+	unsigned long ch_de_alloc;
+	unsigned long ch_db_stop;
+	unsigned long cmd_completed;
+};
+
 struct gsi_ctx {
 	void __iomem *base;
 	struct device *dev;
@@ -53,6 +151,68 @@ struct gsi_ctx {
 };
 
 static struct gsi_ctx *gsi_ctx;
+
+enum gsi_re_type {
+	GSI_RE_XFER = 0x2,
+	GSI_RE_IMMD_CMD = 0x3,
+	GSI_RE_NOP = 0x4,
+};
+
+struct __packed gsi_tre {
+	uint64_t buffer_ptr;
+	uint16_t buf_len;
+	uint16_t resvd1;
+	uint16_t chain:1;
+	uint16_t resvd4:7;
+	uint16_t ieob:1;
+	uint16_t ieot:1;
+	uint16_t bei:1;
+	uint16_t resvd3:5;
+	uint8_t re_type;
+	uint8_t resvd2;
+};
+
+struct __packed gsi_xfer_compl_evt {
+	uint64_t xfer_ptr;
+	uint16_t len;
+	uint8_t resvd1;
+	uint8_t code;  /* see gsi_chan_evt */
+	uint16_t resvd;
+	uint8_t type;
+	uint8_t chid;
+};
+
+enum gsi_err_type {
+	GSI_ERR_TYPE_GLOB = 0x1,
+	GSI_ERR_TYPE_CHAN = 0x2,
+	GSI_ERR_TYPE_EVT = 0x3,
+};
+
+struct __packed gsi_log_err {
+	uint32_t arg3:4;
+	uint32_t arg2:4;
+	uint32_t arg1:4;
+	uint32_t code:4;
+	uint32_t resvd:3;
+	uint32_t virt_idx:5;
+	uint32_t err_type:4;
+	uint32_t ee:4;
+};
+
+enum gsi_ch_cmd_opcode {
+	GSI_CH_ALLOCATE = 0x0,
+	GSI_CH_START = 0x1,
+	GSI_CH_STOP = 0x2,
+	GSI_CH_RESET = 0x9,
+	GSI_CH_DE_ALLOC = 0xa,
+	GSI_CH_DB_STOP = 0xb,
+};
+
+enum gsi_evt_ch_cmd_opcode {
+	GSI_EVT_ALLOCATE = 0x0,
+	GSI_EVT_RESET = 0x9,  /* TODO: is this valid? */
+	GSI_EVT_DE_ALLOC = 0xa,
+};
 
 /**
  * gsi_gpi_channel_scratch - GPI protocol SW config area of
@@ -80,7 +240,6 @@ struct __packed gsi_gpi_channel_scratch {
 	uint32_t resvd3:16;
 	uint32_t outstanding_threshold:16;
 };
-
 
 /**
  * gsi_channel_scratch - channel scratch SW config area
