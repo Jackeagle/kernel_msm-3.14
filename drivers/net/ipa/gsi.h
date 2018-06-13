@@ -67,11 +67,6 @@ enum gsi_chan_prot {
 	GSI_CHAN_PROT_XDCI = 0x3
 };
 
-enum gsi_chan_dir {
-	GSI_CHAN_DIR_FROM_GSI = 0x0,
-	GSI_CHAN_DIR_TO_GSI = 0x1
-};
-
 enum gsi_chan_evt {
 	GSI_CHAN_EVT_INVALID = 0x0,
 	GSI_CHAN_EVT_SUCCESS = 0x1,
@@ -166,7 +161,7 @@ enum gsi_chan_use_db_eng {
 struct gsi_chan_props {
 	struct ipa_mem_buffer mem;
 	u32 ring_size;			/* bytes */
-	enum gsi_chan_dir dir;
+	bool from_gsi;
 	uint8_t ch_id;
 	unsigned long evt_ring_hdl;
 	enum gsi_chan_use_db_eng use_db_eng;

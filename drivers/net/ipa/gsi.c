@@ -379,7 +379,7 @@ static void chan_xfer_cb(struct gsi_chan_ctx *ctx, u8 evt_id, u16 count)
 	notify.evt_id = evt_id;
 	notify.bytes_xfered = count;
 
-	if (ctx->props.dir == GSI_CHAN_DIR_FROM_GSI)
+	if (ctx->props.from_gsi)
 		ipa_gsi_irq_rx_notify_cb(&notify);
 	else
 		ipa_gsi_irq_tx_notify_cb(&notify);
@@ -450,7 +450,7 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *ctx)
 	 * for TO_GSI channels the event ring doorbell is rang as part of
 	 * interrupt handling.
 	 */
-	if (ctx->props.dir == GSI_CHAN_DIR_FROM_GSI)
+	if (ctx->props.from_gsi)
 		gsi_ring_evt_doorbell(ctx->evtr);
 	ctx->ring.wp = ctx->ring.wp_local;
 
@@ -1249,7 +1249,7 @@ gsi_program_chan_ctx(struct gsi_chan_props *props, u32 ee, u8 erindex)
 	u32 val;
 
 	val = field_gen(GSI_CHAN_PROT_GPI, CHTYPE_PROTOCOL_BMSK);
-	val |= field_gen(props->dir, CHTYPE_DIR_BMSK);
+	val |= field_gen(props->from_gsi ? 0 : 1, CHTYPE_DIR_BMSK);
 	val |= field_gen(erindex, ERINDEX_BMSK);
 	val |= field_gen(GSI_CHAN_RING_ELEMENT_SIZE, ELEMENT_SIZE_BMSK);
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(props->ch_id, ee));
@@ -1576,7 +1576,7 @@ reset:
 	}
 
 	/* workaround: reset GSI producers again */
-	if (ctx->props.dir == GSI_CHAN_DIR_FROM_GSI && !reset_done) {
+	if (ctx->props.from_gsi && !reset_done) {
 		usleep_range(GSI_RESET_WA_MIN_SLEEP, GSI_RESET_WA_MAX_SLEEP);
 		reset_done = true;
 		goto reset;
@@ -1654,7 +1654,7 @@ bool gsi_is_channel_empty(unsigned long chan_id)
 	val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_6_OFFS(ctx->props.ch_id, ee));
 	ctx->ring.wp = (ctx->ring.wp & GENMASK_ULL(63, 32)) | val;
 
-	if (ctx->props.dir == GSI_CHAN_DIR_FROM_GSI)
+	if (ctx->props.from_gsi)
 		empty = ctx->ring.rp_local == ctx->ring.rp;
 	else
 		empty = ctx->ring.wp == ctx->ring.rp;
