@@ -1270,7 +1270,7 @@ gsi_program_chan_ctx(struct gsi_chan_props *props, u32 ee, u8 erindex)
 
 	val = field_gen(props->low_weight, WRR_WEIGHT_BMSK);
 	val |= field_gen(GSI_MAX_PREFETCH, MAX_PREFETCH_BMSK);
-	val |= field_gen(props->use_db_eng, USE_DB_ENG_BMSK);
+	val |= field_gen(props->use_db_engine ? 1 : 0, USE_DB_ENG_BMSK);
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_QOS_OFFS(props->ch_id, ee));
 }
 

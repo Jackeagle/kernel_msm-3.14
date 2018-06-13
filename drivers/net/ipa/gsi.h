@@ -98,11 +98,6 @@ struct gsi_chan_xfer_notify {
 	uint16_t bytes_xfered;
 };
 
-enum gsi_chan_use_db_eng {
-	GSI_CHAN_DIRECT_MODE = 0x0,
-	GSI_CHAN_DB_MODE = 0x1,
-};
-
 /**
  * gsi_chan_props - Channel related properties
  *
@@ -117,9 +112,9 @@ enum gsi_chan_use_db_eng {
  *		     ring_len rounded to power of two
  * @ring_base_vaddr: virtual base address of ring (set to NULL when not
  *		     applicable)
- * @use_db_eng:	     0 => direct mode (doorbells are written directly to RE
- *		     engine)
- *		     1 => DB mode (doorbells are written to DB engine)
+ * @use_db_engine:   false => direct mode (doorbells are written directly to
+ *		     RE engine)
+ *		     true => DB mode (doorbells are written to DB engine)
  * @max_prefetch:    limit number of pre-fetch segments for channel
  * @low_weight:	     low channel weight (priority of channel for RE engine
  *		     round robin algorithm); must be >= 1
@@ -162,10 +157,10 @@ struct gsi_chan_props {
 	struct ipa_mem_buffer mem;
 	u32 ring_size;			/* bytes */
 	bool from_gsi;
+	bool use_db_engine;
+	uint8_t low_weight;
 	uint8_t ch_id;
 	unsigned long evt_ring_hdl;
-	enum gsi_chan_use_db_eng use_db_eng;
-	uint8_t low_weight;
 	void *chan_user_data;
 };
 

@@ -2298,7 +2298,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	gsi_channel_props.from_gsi = IPA_CLIENT_IS_CONS(ep->client);
 	gsi_channel_props.ch_id = gsi_ep_info->ipa_gsi_chan_num;
 	gsi_channel_props.evt_ring_hdl = ep->gsi_evt_ring_hdl;
-	gsi_channel_props.use_db_eng = GSI_CHAN_DB_MODE;
+	gsi_channel_props.use_db_engine = true;
 	if (ep->client == IPA_CLIENT_APPS_CMD_PROD)
 		gsi_channel_props.low_weight = IPA_GSI_MAX_CH_LOW_WEIGHT;
 	else
