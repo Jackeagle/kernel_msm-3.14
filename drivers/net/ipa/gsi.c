@@ -1791,13 +1791,11 @@ int gsi_poll_channel(unsigned long chan_id)
 	return empty ? -ENOENT : size;
 }
 
-void gsi_config_channel_mode(unsigned long chan_id, enum gsi_chan_mode mode)
+static void
+gsi_config_channel_mode(unsigned long chan_id, enum gsi_chan_mode mode)
 {
 	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_id];
 	unsigned long flags;
-
-	ipa_assert(mode == GSI_CHAN_MODE_POLL ||
-			mode == GSI_CHAN_MODE_CALLBACK);
 
 	spin_lock_irqsave(&gsi_ctx->slock, flags);
 	if (mode != GSI_CHAN_MODE_CALLBACK)
@@ -1806,6 +1804,16 @@ void gsi_config_channel_mode(unsigned long chan_id, enum gsi_chan_mode mode)
 		gsi_irq_control_event(gsi_ctx->ee, ctx->evtr->id, true);
 	atomic_set(&ctx->poll_mode, mode);
 	spin_unlock_irqrestore(&gsi_ctx->slock, flags);
+}
+
+void gsi_channel_intr_enable(unsigned long chan_id)
+{
+	gsi_config_channel_mode(chan_id, GSI_CHAN_MODE_CALLBACK);
+}
+
+void gsi_channel_intr_disable(unsigned long chan_id)
+{
+	gsi_config_channel_mode(chan_id, GSI_CHAN_MODE_POLL);
 }
 
 int gsi_get_channel_cfg(unsigned long chan_id, struct gsi_chan_props *props)

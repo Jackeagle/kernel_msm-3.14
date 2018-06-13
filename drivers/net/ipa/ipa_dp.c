@@ -687,7 +687,7 @@ static void ipa3_rx_switch_to_intr_mode(struct ipa3_sys_context *sys)
 		return;
 	}
 	ipa3_dec_release_wakelock();
-	gsi_config_channel_mode(sys->ep->gsi_chan_hdl, GSI_CHAN_MODE_CALLBACK);
+	gsi_channel_intr_enable(sys->ep->gsi_chan_hdl);
 }
 
 /**
@@ -2216,7 +2216,7 @@ void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 		return;
 
 	/* put the gsi channel into polling mode */
-	gsi_config_channel_mode(sys->ep->gsi_chan_hdl, GSI_CHAN_MODE_POLL);
+	gsi_channel_intr_disable(sys->ep->gsi_chan_hdl);
 	ipa3_inc_acquire_wakelock();
 	atomic_set(&sys->curr_polling_state, 1);
 	if (!sys->ep->napi_enabled) {

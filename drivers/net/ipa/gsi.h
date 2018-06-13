@@ -560,14 +560,13 @@ int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props);
 int gsi_poll_channel(unsigned long chan_hdl);
 
 /**
- * gsi_config_channel_mode - Peripheral should call this function
- * to configure the channel mode.
+ * gsi_channel_intr_enable/disable - control channel interrupts
  *
  * @chan_hdl:  Client handle previously obtained from
  *	       gsi_alloc_channel
- * @mode:      Mode to move the channel into
  */
-void gsi_config_channel_mode(unsigned long chan_hdl, enum gsi_chan_mode mode);
+void gsi_channel_intr_enable(unsigned long chan_hdl);
+void gsi_channel_intr_disable(unsigned long chan_hdl);
 
 /**
  * gsi_queue_xfer - Peripheral should call this function

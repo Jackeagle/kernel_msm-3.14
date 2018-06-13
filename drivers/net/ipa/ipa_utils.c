@@ -1940,7 +1940,7 @@ void ipa3_set_resource_groups_min_max_limits(void)
 static void ipa3_gsi_poll_after_suspend(struct ipa3_ep_context *ep)
 {
 	ipa_debug("switch ch %ld to poll\n", ep->gsi_chan_hdl);
-	gsi_config_channel_mode(ep->gsi_chan_hdl, GSI_CHAN_MODE_POLL);
+	gsi_channel_intr_disable(ep->gsi_chan_hdl);
 	if (!gsi_is_channel_empty(ep->gsi_chan_hdl)) {
 		ipa_debug("ch %ld not empty\n", ep->gsi_chan_hdl);
 		/* queue a work to start polling if don't have one */
@@ -1972,8 +1972,7 @@ static int suspend_pipe(enum ipa_client_type client, bool suspend)
 	if (suspend)
 		ipa3_gsi_poll_after_suspend(ep);
 	else if (!atomic_read(&ep->sys->curr_polling_state))
-		gsi_config_channel_mode(ep->gsi_chan_hdl,
-			GSI_CHAN_MODE_CALLBACK);
+		gsi_channel_intr_enable(ep->gsi_chan_hdl);
 
 	return 0;
 }
