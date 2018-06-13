@@ -523,7 +523,8 @@ static u16 ring_wp_local_index(struct gsi_ring_ctx *ctx)
 
 static void chan_xfer_cb(struct gsi_chan_ctx *ctx, u8 evt_id, u16 count)
 {
-	struct gsi_chan_xfer_notify notify = { 0 };
+	void *chan_data;
+	void *xfer_data;
 
 	if (evt_id != GSI_CHAN_EVT_EOT) {
 		ipa_err("ch %hhu unexpected %sX event id %hhu\n",
@@ -532,14 +533,12 @@ static void chan_xfer_cb(struct gsi_chan_ctx *ctx, u8 evt_id, u16 count)
 		return;
 	}
 
-	notify.xfer_user_data = ctx->user_data[ring_rp_local_index(&ctx->ring)];
-	notify.chan_user_data = ctx->props.chan_user_data;
-	notify.bytes_xfered = count;
-
+	chan_data = ctx->props.chan_user_data;
+	xfer_data = ctx->user_data[ring_rp_local_index(&ctx->ring)];
 	if (ctx->props.from_gsi)
-		ipa_gsi_irq_rx_notify_cb(&notify);
+		ipa_gsi_irq_rx_notify_cb(chan_data, xfer_data, count);
 	else
-		ipa_gsi_irq_tx_notify_cb(&notify);
+		ipa_gsi_irq_tx_notify_cb(chan_data, xfer_data, count);
 }
 
 static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt, bool callback)

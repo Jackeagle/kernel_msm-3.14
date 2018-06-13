@@ -44,22 +44,6 @@ enum gsi_xfer_flag {
 };
 
 /**
- * gsi_chan_xfer_notify - Channel callback info
- *
- * @chan_user_data: cookie supplied in gsi_alloc_channel
- * @xfer_user_data: cookie of the gsi_xfer_elem that caused the
- *		    event to be generated
- * @bytes_xfered:   number of bytes transferred by the associated TRE
- *		    (corresponding to xfer_user_data)
- *
- */
-struct gsi_chan_xfer_notify {
-	void *chan_user_data;
-	void *xfer_user_data;
-	uint16_t bytes_xfered;
-};
-
-/**
  * gsi_chan_props - Channel related properties
  *
  * @dir:	     channel direction

@@ -2175,20 +2175,19 @@ static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 	return 0;
 }
 
-void ipa_gsi_irq_tx_notify_cb(struct gsi_chan_xfer_notify *notify)
+void ipa_gsi_irq_tx_notify_cb(void *chan_data, void *xfer_data, uint16_t count)
 {
-	struct ipa3_tx_pkt_wrapper *tx_pkt;
+	struct ipa3_tx_pkt_wrapper *tx_pkt = xfer_data;
 
 	ipa_debug_low("event EOT notified\n");
 
-	tx_pkt = notify->xfer_user_data;
 	queue_work(tx_pkt->sys->wq, &tx_pkt->work);
 }
 
-void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
+void ipa_gsi_irq_rx_notify_cb(void *chan_data, void *xfer_data, uint16_t count)
 {
-	struct ipa3_sys_context *sys = notify->chan_user_data;
-	struct ipa3_rx_pkt_wrapper *rx_pkt_rcvd = notify->xfer_user_data;
+	struct ipa3_sys_context *sys = chan_data;
+	struct ipa3_rx_pkt_wrapper *rx_pkt_rcvd = xfer_data;
 	struct ipa3_rx_pkt_wrapper *rx_pkt_expected;
 
 	rx_pkt_expected = list_first_entry(&sys->head_desc_list,
@@ -2199,7 +2198,7 @@ void ipa_gsi_irq_rx_notify_cb(struct gsi_chan_xfer_notify *notify)
 		return;
 	}
 	sys->ep->bytes_xfered_valid = true;
-	sys->ep->bytes_xfered = notify->bytes_xfered;
+	sys->ep->bytes_xfered = count;
 
 	if (atomic_read(&sys->curr_polling_state))
 		return;
