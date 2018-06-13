@@ -680,24 +680,14 @@ static int ipa3_handle_rx_core(struct ipa3_sys_context *sys)
  */
 static void ipa3_rx_switch_to_intr_mode(struct ipa3_sys_context *sys)
 {
-	int ret;
-
 	if (!atomic_xchg(&sys->curr_polling_state, 0)) {
 		ipa_err("already in intr mode\n");
-		goto fail;
+		queue_delayed_work(sys->wq, &sys->switch_to_intr_work,
+			msecs_to_jiffies(1));
+		return;
 	}
 	ipa3_dec_release_wakelock();
-	ret = gsi_config_channel_mode(sys->ep->gsi_chan_hdl,
-		GSI_CHAN_MODE_CALLBACK);
-	if (ret) {
-		ipa_err("Failed to switch to intr mode.\n");
-		goto fail;
-	}
-	return;
-
-fail:
-	queue_delayed_work(sys->wq, &sys->switch_to_intr_work,
-			msecs_to_jiffies(1));
+	gsi_config_channel_mode(sys->ep->gsi_chan_hdl, GSI_CHAN_MODE_CALLBACK);
 }
 
 /**
