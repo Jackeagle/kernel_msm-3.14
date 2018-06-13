@@ -273,11 +273,6 @@ static void gsi_writel(u32 v, u32 offset)
 	writel(v, gsi_ctx->base + offset);
 }
 
-u32 gsi_max_channel_get(void)
-{
-	return gsi_ctx->max_ch;
-}
-
 static void gsi_irq_set(u32 offset, u32 val)
 {
 	gsi_writel(val, offset);
@@ -1493,6 +1488,12 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	if (ipahal_dma_alloc(&props->mem, props->ring_size, GFP_KERNEL)) {
 		ipa_err("fail to dma alloc %u bytes\n", props->ring_size);
 		return -ENOMEM;
+	}
+
+	if (props->ch_id >= gsi_ctx->max_ch) {
+		ipa_err("chan_id %hhu too large (must be < %u)\n",
+			props->ch_id, gsi_ctx->max_ch);
+		return -EINVAL;
 	}
 
 	if (gsi_validate_channel_props(props)) {

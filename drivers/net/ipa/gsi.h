@@ -187,8 +187,6 @@ struct gsi_xfer_elem {
 struct gsi_ctx;
 struct gsi_ctx *gsi_init(struct platform_device *pdev, u32 ee);
 
-u32 gsi_max_channel_get(void);
-
 /**
  * gsi_register_device - Peripheral should call this function to
  * register itself with GSI before invoking any other APIs
