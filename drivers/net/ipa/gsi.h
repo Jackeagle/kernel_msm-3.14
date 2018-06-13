@@ -187,8 +187,6 @@ struct gsi_xfer_elem {
 struct gsi_ctx;
 struct gsi_ctx *gsi_init(struct platform_device *pdev, u32 ee);
 
-u32 gsi_readl(u32 offset);
-void gsi_writel(u32 v, u32 offset);
 u32 gsi_max_channel_get(void);
 
 /**
