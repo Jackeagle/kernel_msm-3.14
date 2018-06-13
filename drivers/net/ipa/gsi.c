@@ -1361,7 +1361,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 
 	mutex_init(&ctx->mlock);
 	init_completion(&ctx->compl);
-	atomic_set(&ctx->poll_mode, GSI_CHAN_MODE_CALLBACK);
+	atomic_set(&ctx->poll_mode, 0);	/* Initially in callback mode */
 	ctx->props = *props;
 
 	mutex_lock(&gsi_ctx->mlock);

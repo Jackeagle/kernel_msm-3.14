@@ -36,11 +36,6 @@ struct ipa_gsi_ep_config {
 	u32 ee;
 };
 
-enum gsi_chan_mode {
-	GSI_CHAN_MODE_CALLBACK = 0x0,
-	GSI_CHAN_MODE_POLL = 0x1,
-};
-
 enum gsi_xfer_flag {
 	GSI_XFER_FLAG_CHAIN = 0x1,
 	GSI_XFER_FLAG_EOB = 0x100,
