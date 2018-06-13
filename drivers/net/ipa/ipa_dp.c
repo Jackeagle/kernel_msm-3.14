@@ -1207,7 +1207,7 @@ queue_rx_cache(struct ipa3_sys_context *sys, struct ipa3_rx_pkt_wrapper *rx_pkt)
 	/* Don't bother zeroing this; we fill all fields */
 	gsi_xfer_elem.addr = rx_pkt->data.dma_addr;
 	gsi_xfer_elem.len = sys->rx_buff_sz;
-	gsi_xfer_elem.flags |= GSI_XFER_FLAG_EOT;
+	gsi_xfer_elem.flags = GSI_XFER_FLAG_EOT;
 	gsi_xfer_elem.flags |= GSI_XFER_FLAG_EOB;
 	gsi_xfer_elem.type = GSI_XFER_ELEM_DATA;
 	gsi_xfer_elem.xfer_user_data = rx_pkt;
