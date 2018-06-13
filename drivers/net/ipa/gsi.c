@@ -525,10 +525,6 @@ static void chan_xfer_cb(struct gsi_chan_ctx *ctx, u8 evt_id, u16 count)
 {
 	struct gsi_chan_xfer_notify notify = { 0 };
 
-	if (WARN_ON(atomic_read(&ctx->poll_mode)))
-		ipa_err("ch %hhu calling client callback in polling mode\n",
-				ctx->props.ch_id);
-
 	if (evt_id != GSI_CHAN_EVT_EOT) {
 		ipa_err("ch %hhu unexpected %sX event id %hhu\n",
 			ctx->props.ch_id, ctx->props.from_gsi ? "R" : "T",
