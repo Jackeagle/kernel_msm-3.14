@@ -306,19 +306,6 @@ enum ipa_mode_type {
 };
 
 /**
- * enum ipa_hdr_l2_type - L2 header type
- * IPA_HDR_L2_NONE: L2 header which isn't Ethernet II and isn't 802_3
- * IPA_HDR_L2_ETHERNET_II: L2 header of type Ethernet II
- * IPA_HDR_L2_802_3: L2 header of type 802_3
- */
-enum ipa_hdr_l2_type {
-	IPA_HDR_L2_NONE,
-	IPA_HDR_L2_ETHERNET_II,
-	IPA_HDR_L2_802_3,
-};
-#define IPA_HDR_L2_MAX (IPA_HDR_L2_802_3 + 1)
-
-/**
  * enum ipa_nat_en_type - NAT setting type in IPA end-point
  */
 enum ipa_nat_en_type {
@@ -368,12 +355,6 @@ enum hdr_total_len_or_pad_type {
 	IPA_HDR_TOTAL_LEN = 1,
 };
 
-enum ipa_upstream_type {
-	IPA_UPSTEAM_MODEM = 1,
-	IPA_UPSTEAM_WLAN,
-	IPA_UPSTEAM_MAX
-};
-
 /**
  * max size of the name of the resource (routing table, header)
  */
@@ -386,71 +367,6 @@ enum ipa_ip_type {
 	IPA_IP_v4,
 	IPA_IP_v6,
 	IPA_IP_MAX
-};
-
-/**
- * enum ipa_rule_type - Type of routing or filtering rule
- * Hashable: Rule will be located at the hashable tables
- * Non_Hashable: Rule will be located at the non-hashable tables
- */
-enum ipa_rule_type {
-	IPA_RULE_HASHABLE,
-	IPA_RULE_NON_HASHABLE,
-};
-#define IPA_RULE_TYPE_MAX (IPA_RULE_NON_HASHABLE + 1)
-
-
-/**
- * struct ipa_hdr_offset_entry - IPA header offset entry
- * @link: entry's link in global header offset entries list
- * @offset: the offset
- * @bin: bin
- */
-struct ipa_hdr_offset_entry {
-	struct list_head link;
-	u32 offset;
-	u32 bin;
-};
-
-/**
- * struct ipa_hdr_add - header descriptor includes in and out
- * parameters
- * @name: name of the header
- * @hdr: actual header to be inserted
- * @hdr_len: size of above header
- * @type: l2 header type
- * @is_partial: header not fully specified
- * @hdr_hdl: out parameter, handle to header, valid when status is 0
- * @status:	out parameter, status of header add operation,
- *		0 for success,
- *		-1 for failure
- * @is_eth2_ofst_valid: is eth2_ofst field valid?
- * @eth2_ofst: offset to start of Ethernet-II/802.3 header
- */
-struct ipa_hdr_add {
-	char name[IPA_RESOURCE_NAME_MAX];
-	uint8_t hdr[IPA_HDR_MAX_SIZE];
-	uint8_t hdr_len;
-	enum ipa_hdr_l2_type type;
-	uint8_t is_partial;
-	uint32_t hdr_hdl;
-	int status;
-	uint8_t is_eth2_ofst_valid;
-	uint16_t eth2_ofst;
-};
-
-/**
- * struct ipa_ioc_add_hdr - header addition parameters (support
- * multiple headers and commit)
- * @commit: should headers be written to IPA HW also?
- * @num_hdrs: num of headers that follow
- * @ipa_hdr_add hdr:	all headers need to go here back to
- *			back, no pointers
- */
-struct ipa_ioc_add_hdr {
-	uint8_t commit;
-	uint8_t num_hdrs;
-	struct ipa_hdr_add hdr[0];
 };
 
 /**
