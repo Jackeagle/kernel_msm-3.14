@@ -29,6 +29,9 @@
 
 #define IPA_GSI_DMA_TASK_TIMEOUT	15	/* milliseconds */
 
+#define IPA_GSI_CHANNEL_STOP_SLEEP_MIN_USEC (1000)
+#define IPA_GSI_CHANNEL_STOP_SLEEP_MAX_USEC (2000)
+
 /* In IPAv3 only endpoints 0-3 can be configured to deaggregation */
 #define IPA_EP_SUPPORTS_DEAGGR(idx) ((idx) >= 0 && (idx) <= 3)
 

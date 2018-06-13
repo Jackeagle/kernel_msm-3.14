@@ -18,6 +18,9 @@
 #include "gsi.h"
 #include "gsi_reg.h"
 
+#define GSI_CHAN_MAX	  31
+#define GSI_EVT_RING_MAX  23
+
 #define GSI_CMD_TIMEOUT		msecs_to_jiffies(5000)
 #define GSI_STOP_CMD_TIMEOUT	msecs_to_jiffies(20)
 

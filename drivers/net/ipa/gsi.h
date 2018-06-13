@@ -16,15 +16,8 @@
 
 #include "ipahal.h"
 
-#define GSI_CHAN_MAX	  31
-#define GSI_EVT_RING_MAX  23
-
 #define GSI_EVT_RING_ELEMENT_SIZE	16	/* bytes */
 #define GSI_CHAN_RING_ELEMENT_SIZE	16	/* bytes */
-
-#define IPA_GSI_CHANNEL_STOP_SLEEP_MIN_USEC (1000)
-#define IPA_GSI_CHANNEL_STOP_SLEEP_MAX_USEC (2000)
-
 
 /**
  * struct ipa_gsi_ep_config - IPA GSI endpoint configurations
