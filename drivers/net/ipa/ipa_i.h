@@ -937,13 +937,13 @@ int ipa_gsi_dma_task_alloc(void);
 void ipa_gsi_dma_task_free(void);
 int ipa_gsi_dma_task_inject(void);
 
-int ipa_disable_apps_wan_cons_deaggr(uint32_t agg_size, uint32_t agg_count);
+int ipa_disable_apps_wan_cons_deaggr(u32 agg_size, u32 agg_count);
 int ipa_plat_drv_probe(struct platform_device *pdev_p);
 
 void ipa_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple);
 void ipa_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple);
 
-void ipa_gsi_irq_rx_notify_cb(void *chan_data, void *xfer_data, uint16_t count);
-void ipa_gsi_irq_tx_notify_cb(void *chan_data, void *xfer_data, uint16_t count);
+void ipa_gsi_irq_rx_notify_cb(void *chan_data, void *xfer_data, u16 count);
+void ipa_gsi_irq_tx_notify_cb(void *chan_data, void *xfer_data, u16 count);
 
 #endif /* _IPA_I_H_ */

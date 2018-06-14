@@ -95,46 +95,46 @@
 #endif
 
 struct rmnet_ioctl_extended_s {
-	uint32_t   extended_ioctl;
+	u32	extended_ioctl;
 	union {
-		uint32_t data; /* Generic data field for most extended IOCTLs */
+		u32	data; /* Generic data field for most extended IOCTLs */
 
 		/* Return values for
 		 *    RMNET_IOCTL_GET_DRIVER_NAME
 		 *    RMNET_IOCTL_GET_DFLT_CONTROL_CHANNEL
 		 */
-		int8_t if_name[IFNAMSIZ];
+		char	if_name[IFNAMSIZ];
 
 		/* Input values for the RMNET_IOCTL_ADD_MUX_CHANNEL IOCTL */
 		struct {
-			uint32_t  mux_id;
-			int8_t	  vchannel_name[IFNAMSIZ];
+			u32	mux_id;
+			char	vchannel_name[IFNAMSIZ];
 		} rmnet_mux_val;
 
 		/* Input values for the RMNET_IOCTL_FLOW_CONTROL IOCTL */
 		struct {
-			uint8_t	  flow_mode;
-			uint8_t	  mux_id;
+			u8	flow_mode;
+			u8	mux_id;
 		} flow_control_prop;
 
 		/* Return values for RMNET_IOCTL_GET_EP_PAIR */
 		struct {
-			uint32_t   consumer_pipe_num;
-			uint32_t   producer_pipe_num;
+			u32	consumer_pipe_num;
+			u32	producer_pipe_num;
 		} ipa_ep_pair;
 
 		struct {
-			uint32_t __data; /* Placeholder for legacy data*/
-			uint32_t agg_size;
-			uint32_t agg_count;
+			u32	__data; /* Placeholder for legacy data*/
+			u32	agg_size;
+			u32	agg_count;
 		} ingress_format;
 	} u;
 };
 
 struct rmnet_ioctl_data_s {
 	union {
-		uint32_t	operation_mode;
-		uint32_t	tcm_handle;
+		u32	operation_mode;
+		u32	tcm_handle;
 	} u;
 };
 
@@ -143,15 +143,15 @@ struct rmnet_ioctl_data_s {
 
 /* QMI QoS header definition */
 struct QMI_QOS_HDR_S {
-	unsigned char	 version;
-	unsigned char	 flags;
-	uint32_t	 flow_id;
+	unsigned char	version;
+	unsigned char	flags;
+	u32		flow_id;
 } __attribute((__packed__));
 
 /* QMI QoS 8-byte header. */
 struct qmi_qos_hdr8_s {
-	struct QMI_QOS_HDR_S   hdr;
-	uint8_t		       reserved[2];
+	struct QMI_QOS_HDR_S	hdr;
+	u8			reserved[2];
 } __attribute((__packed__));
 
 #endif /* _MSM_RMNET_H_ */

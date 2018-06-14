@@ -92,8 +92,8 @@ struct gsi_chan_props {
 	u32 ring_size;			/* bytes */
 	bool from_gsi;
 	bool use_db_engine;
-	uint8_t low_weight;
-	uint8_t ch_id;
+	u8 low_weight;
+	u8 ch_id;
 	unsigned long evt_ring_hdl;
 	void *chan_user_data;
 };
@@ -155,9 +155,9 @@ enum gsi_xfer_elem_type {
  * @xfer_user_data: cookie used in xfer_cb
  */
 struct gsi_xfer_elem {
-	uint64_t addr;
-	uint16_t len;
-	uint16_t flags;
+	u64 addr;
+	u16 len;
+	u16 flags;
 	enum gsi_xfer_elem_type type;
 	void *xfer_user_data;
 };

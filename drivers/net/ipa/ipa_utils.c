@@ -1713,7 +1713,7 @@ u32 ipa_get_num_pipes(void)
  *
  * Return value: 0 or negative in case of failure
  */
-int ipa_disable_apps_wan_cons_deaggr(uint32_t agg_size, uint32_t agg_count)
+int ipa_disable_apps_wan_cons_deaggr(u32 agg_size, u32 agg_count)
 {
 	u32 limit;
 

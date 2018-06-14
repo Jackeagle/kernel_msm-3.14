@@ -86,13 +86,13 @@ enum gsi_chan_state {
 struct gsi_ring_ctx {
 	spinlock_t slock;
 	struct ipa_mem_buffer mem;
-	uint64_t wp;
-	uint64_t rp;
-	uint64_t wp_local;
-	uint64_t rp_local;
-	uint8_t elem_sz;
-	uint16_t max_num_elem;
-	uint64_t end;
+	u64 wp;
+	u64 rp;
+	u64 wp_local;
+	u64 rp_local;
+	u8 elem_sz;
+	u16 max_num_elem;
+	u64 end;
 };
 
 struct gsi_chan_ctx {
@@ -110,9 +110,9 @@ struct gsi_chan_ctx {
 
 struct gsi_evt_ctx {
 	struct ipa_mem_buffer mem;
-	uint16_t int_modt;
+	u16 int_modt;
 	enum gsi_evt_ring_state state;
-	uint8_t id;
+	u8 id;
 	struct gsi_ring_ctx ring;
 	struct mutex mlock;
 	struct completion compl;
@@ -158,27 +158,27 @@ enum gsi_re_type {
 };
 
 struct __packed gsi_tre {
-	uint64_t buffer_ptr;
-	uint16_t buf_len;
-	uint16_t resvd1;
-	uint16_t chain:1;
-	uint16_t resvd4:7;
-	uint16_t ieob:1;
-	uint16_t ieot:1;
-	uint16_t bei:1;
-	uint16_t resvd3:5;
-	uint8_t re_type;
-	uint8_t resvd2;
+	u64 buffer_ptr;
+	u16 buf_len;
+	u16 resvd1;
+	u16 chain:1;
+	u16 resvd4:7;
+	u16 ieob:1;
+	u16 ieot:1;
+	u16 bei:1;
+	u16 resvd3:5;
+	u8 re_type;
+	u8 resvd2;
 };
 
 struct __packed gsi_xfer_compl_evt {
-	uint64_t xfer_ptr;
-	uint16_t len;
-	uint8_t resvd1;
-	uint8_t code;  /* see gsi_chan_evt */
-	uint16_t resvd;
-	uint8_t type;
-	uint8_t chid;
+	u64 xfer_ptr;
+	u16 len;
+	u8 resvd1;
+	u8 code;  /* see gsi_chan_evt */
+	u16 resvd;
+	u8 type;
+	u8 chid;
 };
 
 enum gsi_err_type {
@@ -188,14 +188,14 @@ enum gsi_err_type {
 };
 
 struct __packed gsi_log_err {
-	uint32_t arg3:4;
-	uint32_t arg2:4;
-	uint32_t arg1:4;
-	uint32_t code:4;
-	uint32_t resvd:3;
-	uint32_t virt_idx:5;
-	uint32_t err_type:4;
-	uint32_t ee:4;
+	u32 arg3:4;
+	u32 arg2:4;
+	u32 arg1:4;
+	u32 code:4;
+	u32 resvd:3;
+	u32 virt_idx:5;
+	u32 err_type:4;
+	u32 ee:4;
 };
 
 enum gsi_ch_cmd_opcode {
@@ -231,21 +231,21 @@ enum gsi_evt_ch_cmd_opcode {
  *			 configure this value to 2 * element size.
  */
 struct __packed gsi_gpi_channel_scratch {
-	uint64_t resvd1;
-	uint32_t resvd2:16;
-	uint32_t max_outstanding_tre:16;
-	uint32_t resvd3:16;
-	uint32_t outstanding_threshold:16;
+	u64 resvd1;
+	u32 resvd2:16;
+	u32 max_outstanding_tre:16;
+	u32 resvd3:16;
+	u32 outstanding_threshold:16;
 };
 
 /** gsi_channel_scratch - channel scratch SW config area */
 union __packed gsi_channel_scratch {
 	struct __packed gsi_gpi_channel_scratch gpi;
 	struct __packed {
-		uint32_t word1;
-		uint32_t word2;
-		uint32_t word3;
-		uint32_t word4;
+		u32 word1;
+		u32 word2;
+		u32 word3;
+		u32 word4;
 	} data;
 };
 

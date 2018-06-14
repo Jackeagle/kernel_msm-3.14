@@ -9,22 +9,22 @@
 #include <linux/skbuff.h>
 
 struct rmnet_phys_ep_conf_s {
-	void (*recycle)(struct sk_buff *); /* Destruct function */
-	void *config;
+	void	(*recycle)(struct sk_buff *); /* Destruct function */
+	void	*config;
 };
 
 struct rmnet_map_header_s {
 #ifndef RMNET_USE_BIG_ENDIAN_STRUCTS
-	uint8_t	 pad_len:6;
-	uint8_t	 reserved_bit:1;
-	uint8_t	 cd_bit:1;
+	u8	pad_len:6;
+	u8	reserved_bit:1;
+	u8	cd_bit:1;
 #else
-	uint8_t	 cd_bit:1;
-	uint8_t	 reserved_bit:1;
-	uint8_t	 pad_len:6;
+	u8	cd_bit:1;
+	u8	reserved_bit:1;
+	u8	pad_len:6;
 #endif /* RMNET_USE_BIG_ENDIAN_STRUCTS */
-	uint8_t	 mux_id;
-	uint16_t pkt_len;
+	u8	mux_id;
+	u16	pkt_len;
 }  __aligned(1);
 
 #define RMNET_MAP_GET_MUX_ID(Y) (((struct rmnet_map_header_s *)Y->data)->mux_id)

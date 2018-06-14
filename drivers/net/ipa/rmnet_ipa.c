@@ -83,12 +83,12 @@ struct ipa_wwan_private {
 };
 
 struct ipa_rmnet_mux_val {
-	uint32_t  mux_id;
-	int8_t	  vchannel_name[IFNAMSIZ];
+	u32  mux_id;
+	char	  vchannel_name[IFNAMSIZ];
 	bool mux_channel_set;
 	bool ul_flt_reg;
 	bool mux_hdr_set;
-	uint32_t  hdr_hdl;
+	u32  hdr_hdl;
 };
 
 struct rmnet_ipa_context {
@@ -112,7 +112,7 @@ static bool initialized;	/* Avoid duplicate initialization */
 static struct rmnet_ipa_context rmnet_ipa_ctx_struct;
 static struct rmnet_ipa_context *rmnet_ipa_ctx = &rmnet_ipa_ctx_struct;
 
-static int ipa_find_mux_channel_index(uint32_t mux_id)
+static int ipa_find_mux_channel_index(u32 mux_id)
 {
 	int i;
 
