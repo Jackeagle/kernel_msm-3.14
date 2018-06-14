@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/*
- * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
 #ifndef _IPAHAL_I_H_
@@ -9,8 +8,7 @@
 
 #include "ipa_common_i.h"
 
-/*
- * struct ipahal_context - HAL global context data
+/* struct ipahal_context - HAL global context data
  * @hw_type: IPA H/W type/version.
  * @base: Base address to be used for accessing IPA memory. This is
  *  I/O memory mapped address.
@@ -31,8 +29,7 @@ extern struct ipahal_context *ipahal_ctx;
 
 /* Immediate commands H/W structures */
 
-/*
- * struct ipa_imm_cmd_hw_ip_fltrt_init - IP_V*_FILTER_INIT/IP_V*_ROUTING_INIT
+/* struct ipa_imm_cmd_hw_ip_fltrt_init - IP_V*_FILTER_INIT/IP_V*_ROUTING_INIT
  * command payload in H/W format.
  * Inits IPv4/v6 routing or filter block.
  * @hash_rules_addr: Addr in system mem where hashable flt/rt rules starts
@@ -55,8 +52,7 @@ struct ipa_imm_cmd_hw_ip_fltrt_init {
 	u64 nhash_rules_addr:64;
 };
 
-/*
- * struct ipa_imm_cmd_hw_hdr_init_local - HDR_INIT_LOCAL command payload
+/* struct ipa_imm_cmd_hw_hdr_init_local - HDR_INIT_LOCAL command payload
  *  in H/W format.
  * Inits hdr table within local mem with the hdrs and their length.
  * @hdr_table_addr: Word address in sys mem where the table starts (SRC)
@@ -71,8 +67,7 @@ struct ipa_imm_cmd_hw_hdr_init_local {
 	u64 rsvd:4;
 };
 
-/*
- * struct ipa_imm_cmd_hw_ip_packet_init - IP_PACKET_INIT command payload
+/* struct ipa_imm_cmd_hw_ip_packet_init - IP_PACKET_INIT command payload
  *  in H/W format.
  * Configuration for specific IP pkt. Shall be called prior to an IP pkt
  *  data. Pkt will not go through IP pkt processing.
@@ -85,8 +80,7 @@ struct ipa_imm_cmd_hw_ip_packet_init {
 	u64 rsv1:59;
 };
 
-/*
- * struct ipa_imm_cmd_hw_register_write - REGISTER_WRITE command payload
+/* struct ipa_imm_cmd_hw_register_write - REGISTER_WRITE command payload
  *  in H/W format.
  * Write value to register. Allows reg changes to be synced with data packet
  *  and other immediate command. Can be used to access the sram
@@ -112,8 +106,7 @@ struct ipa_imm_cmd_hw_register_write {
 	u64 rsvd:30;
 };
 
-/*
- * struct ipa_imm_cmd_hw_dma_shared_mem - DMA_SHARED_MEM command payload
+/* struct ipa_imm_cmd_hw_dma_shared_mem - DMA_SHARED_MEM command payload
  *  in H/W format.
  * Perform mem copy into or out of the SW area of IPA local mem
  * @sw_rsvd: Ignored by H/W. My be used by S/W
@@ -142,8 +135,7 @@ struct ipa_imm_cmd_hw_dma_shared_mem {
 	u64 system_addr:64;
 };
 
-/*
- * struct ipa_imm_cmd_hw_ip_packet_tag_status -
+/* struct ipa_imm_cmd_hw_ip_packet_tag_status -
  *  IP_PACKET_TAG_STATUS command payload in H/W format.
  * This cmd is used for to allow SW to track HW processing by setting a TAG
  *  value that is passed back to SW inside Packet Status information.
@@ -158,8 +150,7 @@ struct ipa_imm_cmd_hw_ip_packet_tag_status {
 	u64 tag:48;
 };
 
-/*
- * struct ipa_imm_cmd_hw_dma_task_32b_addr -
+/* struct ipa_imm_cmd_hw_dma_task_32b_addr -
  *	IPA_DMA_TASK_32B_ADDR command payload in H/W format.
  * Used by clients using 32bit addresses. Used to perform DMA operation on
  *  multiple descriptors.
@@ -196,8 +187,7 @@ struct ipa_imm_cmd_hw_dma_task_32b_addr {
 
 /* IPA Status packet H/W structures and info */
 
-/*
- * struct ipa_status_pkt_hw - IPA status packet payload in H/W format.
+/* struct ipa_status_pkt_hw - IPA status packet payload in H/W format.
  *  This structure describes the status packet H/W structure for the
  *   following statuses: IPA_STATUS_PACKET, IPA_STATUS_DROPPED_PACKET,
  *   IPA_STATUS_SUSPENDED_PACKET.

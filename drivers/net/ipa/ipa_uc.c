@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/*
- * Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
 #define pr_fmt(fmt)    "ipa %s:%d " fmt, __func__, __LINE__
@@ -16,8 +15,7 @@
 #define IPA_UC_POLL_SLEEP_USEC 100
 #define IPA_UC_POLL_MAX_RETRY 10000
 
-/**
- * enum ipa_cpu_2_hw_commands - Values that represent the commands from the CPU
+/** enum ipa_cpu_2_hw_commands - Values that represent the commands from the CPU
  * IPA_CPU_2_HW_CMD_ERR_FATAL : CPU instructs HW to perform error fatal
  *				handling.
  * IPA_CPU_2_HW_CMD_CLK_GATE : CPU instructs HW to goto Clock Gated state.
@@ -31,8 +29,7 @@ enum ipa_cpu_2_hw_commands {
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 10),
 };
 
-/**
- * enum ipa_hw_2_cpu_responses -  Values that represent common HW responses
+/** enum ipa_hw_2_cpu_responses -  Values that represent common HW responses
  *  to CPU commands.
  * @IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED : HW shall send this command once
  *  boot sequence is completed and HW is ready to serve commands from CPU
@@ -45,8 +42,7 @@ enum ipa_hw_2_cpu_responses {
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 2),
 };
 
-/**
- * union IpaHwCpuCmdCompletedResponseData_t - Structure holding the parameters
+/** union IpaHwCpuCmdCompletedResponseData_t - Structure holding the parameters
  * for IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED response.
  * @originalCmdOp : The original command opcode
  * @status : 0 for success indication, otherwise failure
@@ -63,8 +59,7 @@ union IpaHwCpuCmdCompletedResponseData_t {
 	u32 raw32b;
 } __packed;
 
-/**
- * union IpaHwChkChEmptyCmdData_t -  Structure holding the parameters for
+/** union IpaHwChkChEmptyCmdData_t -  Structure holding the parameters for
  *  IPA_CPU_2_HW_CMD_GSI_CH_EMPTY command. Parameters are sent as 32b
  *  immediate parameters.
  * @ee_n : EE owner of the channel
@@ -139,8 +134,7 @@ static void ipa_log_evt_hdlr(void)
 	uc_ctx->uc_event_top_ofst = offset;
 }
 
-/**
- * ipa_uc_state_check() - Check the status of the uC interface
+/** ipa_uc_state_check() - Check the status of the uC interface
  *
  * Return value: 0 if the uC is loaded, interface is initialized
  *		 and there was no recent failure in one of the commands.
@@ -166,8 +160,7 @@ static int ipa_uc_state_check(void)
 	return 0;
 }
 
-/**
- * ipa_uc_loaded_check() - Check the uC has been loaded
+/** ipa_uc_loaded_check() - Check the uC has been loaded
  *
  * Return value: 1 if the uC is loaded, 0 otherwise
  */
@@ -236,8 +229,7 @@ static void ipa_uc_response_hdlr(enum ipa_irq_type interrupt,
 		return;
 	}
 
-	/*
-	 * An INIT_COMPLETED response message is sent to the AP by
+	/* An INIT_COMPLETED response message is sent to the AP by
 	 * the microcontroller when it is operational.  Other than
 	 * this, the AP should only receive responses from the
 	 * microntroller when it has sent it a request message.
@@ -246,8 +238,7 @@ static void ipa_uc_response_hdlr(enum ipa_irq_type interrupt,
 		ipa_ctx->uc_ctx.uc_loaded = true;
 
 		ipa_debug("IPA uC loaded\n");
-		/*
-		 * The proxy vote is held until uC is loaded to ensure that
+		/* The proxy vote is held until uC is loaded to ensure that
 		 * IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED is received.
 		 */
 		ipa_proxy_clk_unvote();
@@ -296,8 +287,7 @@ send_uc_command_nowait(struct ipa_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
 
 }
 
-/**
- * ipa_uc_interface_init() - Initialize the interface with the uC
+/** ipa_uc_interface_init() - Initialize the interface with the uC
  *
  * Return value: 0 on success, negative value otherwise
  */

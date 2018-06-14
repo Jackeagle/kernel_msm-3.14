@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/*
- * Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
 #define pr_fmt(fmt)	"ipahal %s:%d " fmt, __func__, __LINE__
@@ -19,8 +18,7 @@
 #include "ipahal_reg.h"
 #include "ipahal_reg_i.h"
 
-/*
- * struct ipahal_reg_obj - Register H/W information for specific IPA version
+/* struct ipahal_reg_obj - Register H/W information for specific IPA version
  * @construct - CB to construct register value from abstracted structure
  * @parse - CB to parse register value to abstracted structure
  * @name - register "name" (i.e., symbolic identifier)
@@ -444,8 +442,7 @@ ipareg_construct_idle_indication_cfg(enum ipahal_reg reg, const void *fields)
 	return val;
 }
 
-/*
- * The offsets of certain registers may change between different
+/* The offsets of certain registers may change between different
  * versions of IPA hardware.  In addition, the format of information
  * read or written for a particular register change slightly for new
  * hardware.  The "ipahal" layer hides this by abstracting register
@@ -609,8 +606,7 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 #undef pfunc
 #undef cfunc
 
-/*
- * ipahal_reg_init() - Build the registers information table
+/* ipahal_reg_init() - Build the registers information table
  *  See ipahal_reg_objs[][] comments
  *
  * Note: As global variables are initialized with zero, any un-overridden
@@ -639,8 +635,7 @@ void ipahal_reg_init(enum ipa_hw_version hw_version)
 	}
 }
 
-/*
- * Get the offset of a n parameterized register
+/* Get the offset of a n parameterized register
  */
 u32 ipahal_reg_n_offset(enum ipahal_reg reg, u32 n)
 {
@@ -654,24 +649,21 @@ u32 ipahal_reg_n_offset(enum ipahal_reg reg, u32 n)
 	return offset;
 }
 
-/*
- * ipahal_read_reg_n() - Get n parameterized reg value
+/* ipahal_read_reg_n() - Get n parameterized reg value
  */
 u32 ipahal_read_reg_n(enum ipahal_reg reg, u32 n)
 {
 	return ioread32(ipahal_ctx->base + ipahal_reg_n_offset(reg, n));
 }
 
-/*
- * ipahal_write_reg_n() - Write to n parameterized reg a raw value
+/* ipahal_write_reg_n() - Write to n parameterized reg a raw value
  */
 void ipahal_write_reg_n(enum ipahal_reg reg, u32 n, u32 val)
 {
 	iowrite32(val, ipahal_ctx->base + ipahal_reg_n_offset(reg, n));
 }
 
-/*
- * ipahal_read_reg_n_fields() - Get the parsed value of n parameterized reg
+/* ipahal_read_reg_n_fields() - Get the parsed value of n parameterized reg
  */
 void ipahal_read_reg_n_fields(enum ipahal_reg reg, u32 n, void *fields)
 {
@@ -683,8 +675,7 @@ void ipahal_read_reg_n_fields(enum ipahal_reg reg, u32 n, void *fields)
 		ipahal_regs[reg].parse(reg, fields, val);
 }
 
-/*
- * ipahal_write_reg_n_fields() - Write to n parameterized reg a parsed value
+/* ipahal_write_reg_n_fields() - Write to n parameterized reg a parsed value
  */
 void ipahal_write_reg_n_fields(enum ipahal_reg reg, u32 n,
 		const void *fields)

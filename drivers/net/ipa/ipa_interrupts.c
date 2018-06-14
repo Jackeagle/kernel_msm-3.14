@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/*
- * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
 #define pr_fmt(fmt)    "ipa %s:%d " fmt, __func__, __LINE__
@@ -114,8 +113,7 @@ static int ipa_handle_interrupt(int irq_num, bool isr_context)
 			ipa_ee);
 		ipa_debug_low("get interrupt %d\n", suspend_data);
 
-		/*
-		 * Clear L2 interrupts status.  Note the following
+		/* Clear L2 interrupts status.  Note the following
 		 * must not be executed for IPA hardware versions
 		 * prior to 3.1.
 		 */
@@ -251,16 +249,14 @@ static void ipa_process_interrupts(bool isr_context)
 			if (en & reg & bmsk) {
 				uc_irq = is_uc_irq(i);
 
-				/*
-				 * Clear uC interrupt before processing to avoid
+				/* Clear uC interrupt before processing to avoid
 				 * clearing unhandled interrupts
 				 */
 				if (uc_irq)
 					ipahal_write_reg_n(IPA_IRQ_CLR_EE_n,
 							ipa_ee, bmsk);
 
-				/*
-				 * handle the interrupt with spin_lock
+				/* handle the interrupt with spin_lock
 				 * unlocked to avoid calling client in atomic
 				 * context. mutual exclusion still preserved
 				 * as the read/clr is done with spin_lock
@@ -270,8 +266,7 @@ static void ipa_process_interrupts(bool isr_context)
 				ipa_handle_interrupt(i, isr_context);
 				spin_lock_irqsave(&suspend_wa_lock, flags);
 
-				/*
-				 * Clear non uC interrupt after processing
+				/* Clear non uC interrupt after processing
 				 * to avoid clearing interrupt data
 				 */
 				if (!uc_irq)
@@ -317,8 +312,7 @@ static irqreturn_t ipa_isr(int irq, void *ctxt)
 
 	return IRQ_HANDLED;
 }
-/**
-* ipa_add_interrupt_handler() - Adds handler to an interrupt type
+/** ipa_add_interrupt_handler() - Adds handler to an interrupt type
 * @interrupt:		Interrupt type
 * @handler:		The handler to be added
 * @deferred_flag:	whether the handler processing should be deferred in
@@ -365,8 +359,7 @@ int ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, ipa_ee, val);
 	ipa_debug("wrote IPA_IRQ_EN_EE_n register. reg = %d\n", val);
 
-	/*
-	 * Register SUSPEND_IRQ_EN_EE_n_ADDR for L2 interrupt.
+	/* Register SUSPEND_IRQ_EN_EE_n_ADDR for L2 interrupt.
 	 * Note the following must not be executed for IPA hardware
 	 * versions prior to 3.1.
 	 */
@@ -390,8 +383,7 @@ int ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 	return 0;
 }
 
-/**
-* ipa_remove_interrupt_handler() - Removes handler to an interrupt type
+/** ipa_remove_interrupt_handler() - Removes handler to an interrupt type
 * @interrupt:		Interrupt type
 *
 * Removes the handler and disable the specific bit in IRQ_EN register
@@ -421,8 +413,7 @@ int ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 	ipa_interrupt_to_cb[irq_num].private_data = NULL;
 	ipa_interrupt_to_cb[irq_num].interrupt = -1;
 
-	/*
-	 * Unregister SUSPEND_IRQ_EN_EE_n_ADDR for L2 interrupt.
+	/* Unregister SUSPEND_IRQ_EN_EE_n_ADDR for L2 interrupt.
 	 * Note the following must not be executed for IPA hardware
 	 * versions prior to 3.1.
 	 */
@@ -439,8 +430,7 @@ int ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 	return 0;
 }
 
-/**
-* ipa_interrupts_init() - Initialize the IPA interrupts framework
+/** ipa_interrupts_init() - Initialize the IPA interrupts framework
 * @ipa_irq:	The interrupt number to allocate
 * @ee:		Execution environment
 * @ipa_dev:	The basic device structure representing the IPA driver
@@ -491,8 +481,7 @@ int ipa_interrupts_init(u32 ipa_irq, u32 ee, struct device *ipa_dev)
 	return 0;
 }
 
-/**
-* ipa_suspend_active_aggr_wa() - Emulate suspend IRQ
+/** ipa_suspend_active_aggr_wa() - Emulate suspend IRQ
 * @clnt_hndl:		suspended client handle, IRQ is emulated for this pipe
 *
 *  Emulate suspend IRQ to unsuspend client which was suspended with an open

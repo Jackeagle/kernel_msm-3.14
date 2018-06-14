@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/*
- * Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
 #define pr_fmt(fmt)    "ipa %s:%d " fmt, __func__, __LINE__
@@ -11,8 +10,7 @@
 #include <linux/device.h>
 #include "ipa_i.h"
 
-/*
- * These values were determined empirically and shows good E2E bi-
+/* These values were determined empirically and shows good E2E bi-
  * directional throughputs
  */
 #define IPA_HOLB_TMR_EN 0x1
@@ -164,8 +162,7 @@ static int ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 		goto start_chan_fail;
 	}
 
-	/*
-	 * Need to sleep for 1ms as required by H/W verified
+	/* Need to sleep for 1ms as required by H/W verified
 	 * sequence for resetting GSI channel
 	 */
 	msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
@@ -217,8 +214,7 @@ void ipa_reset_gsi_channel(u32 clnt_hdl)
 
 
 	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
-	/*
-	 * Check for open aggregation frame on Consumer EP -
+	/* Check for open aggregation frame on Consumer EP -
 	 * reset with open aggregation frame WA
 	 */
 	if (IPA_CLIENT_IS_CONS(ep->client))
@@ -229,10 +225,7 @@ void ipa_reset_gsi_channel(u32 clnt_hdl)
 	if (aggr_active_bitmap & (1 << clnt_hdl)) {
 		ipa_bug_on(ipa_reset_with_open_aggr_frame_wa(clnt_hdl, ep));
 	} else {
-		/*
-		 * Reset channel
-		 * If the reset called after stop, need to wait 1ms
-		 */
+		/* If the reset called after stop, need to wait 1ms */
 		msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
 		ipa_bug_on(gsi_reset_channel(ep->gsi_chan_hdl));
 	}

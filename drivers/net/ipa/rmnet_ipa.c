@@ -1,13 +1,10 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/*
- * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
 
-/*
- * WWAN Transport Network Driver.
- */
+/* WWAN Transport Network Driver. */
 
 #define pr_fmt(fmt)    "ipa-wan %s:%d " fmt, __func__, __LINE__
 
@@ -62,8 +59,7 @@ static int ipa_rmnet_poll(struct napi_struct *napi, int budget);
 static void ipa_wake_tx_queue(struct work_struct *work);
 static DECLARE_WORK(ipa_tx_wakequeue_work, ipa_wake_tx_queue);
 
-/**
- * struct ipa_wwan_private - WWAN private data
+/** struct ipa_wwan_private - WWAN private data
  * @net: network interface struct implemented by this driver
  * @stats: iface statistics
  * @outstanding_pkts: number of packets sent to IPA without TX complete ACKed
@@ -127,8 +123,7 @@ static int ipa_find_mux_channel_index(uint32_t mux_id)
 	return MAX_NUM_OF_MUX_CHANNEL;
 }
 
-/**
- * wwan_open() - Opens the wwan network interface. Opens logical
+/** wwan_open() - Opens the wwan network interface. Opens logical
  * channel on A2 MUX driver and starts the network stack queue
  *
  * @dev: network device
@@ -148,8 +143,7 @@ static int ipa_wwan_open(struct net_device *dev)
 	return 0;
 }
 
-/**
- * ipa_wwan_stop() - Stops the wwan network interface. Closes
+/** ipa_wwan_stop() - Stops the wwan network interface. Closes
  * logical channel on A2 MUX driver and stops the network stack
  * queue
  *
@@ -181,8 +175,7 @@ static int ipa_wwan_change_mtu(struct net_device *dev, int new_mtu)
 	return 0;
 }
 
-/**
- * ipa_wwan_xmit() - Transmits an skb.
+/** ipa_wwan_xmit() - Transmits an skb.
  *
  * @skb: skb to be transmitted
  * @dev: network device
@@ -235,8 +228,7 @@ static int ipa_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 		}
 	}
 send:
-	/*
-	 * both data packets and commands will be routed to
+	/* both data packets and commands will be routed to
 	 * IPA_CLIENT_Q6_WAN_CONS based on status configuration.
 	 */
 	ret = ipa_tx_dp(IPA_CLIENT_APPS_WAN_PROD, skb);
@@ -255,8 +247,7 @@ static void ipa_wwan_tx_timeout(struct net_device *dev)
 	ipa_err("[%s] ipa_wwan_tx_timeout(), data stall in UL\n", dev->name);
 }
 
-/**
- * apps_ipa_tx_complete_notify() - Rx notify
+/** apps_ipa_tx_complete_notify() - Rx notify
  *
  * @priv: driver context
  * @evt: event type
@@ -301,8 +292,7 @@ static void apps_ipa_tx_complete_notify(void *priv,
 	dev_kfree_skb_any(skb);
 }
 
-/**
- * apps_ipa_packet_receive_notify() - Rx notify
+/** apps_ipa_packet_receive_notify() - Rx notify
  *
  * @priv: driver context
  * @evt: event type
@@ -349,8 +339,7 @@ static int handle3_ingress_format(struct net_device *dev,
 	int ret;
 	struct ipa_sys_connect_params *ipa_wan_ep_cfg;
 
-	/*
-	 * Memory size must be a multiple of the ring element size.
+	/* Memory size must be a multiple of the ring element size.
 	 * Note that ipa_gsi_chan_mem_size() assumes 2 times the
 	 * desc_fifo_sz set below (reproduced here).
 	 */
@@ -418,8 +407,7 @@ static int handle3_ingress_format(struct net_device *dev,
 	return 0;
 }
 
-/**
- * handle3_egress_format() - Egress data format configuration
+/** handle3_egress_format() - Egress data format configuration
  *
  * Setup IPA egress system pipe and Configure:
  *	header handling, checksum, de-aggregation and fifo size
@@ -433,8 +421,7 @@ static int handle3_egress_format(struct net_device *dev,
 	int rc;
 	struct ipa_sys_connect_params *ipa_wan_ep_cfg;
 
-	/*
-	 * Memory size must be a multiple of the ring element size.
+	/* Memory size must be a multiple of the ring element size.
 	 * Note that ipa_gsi_chan_mem_size() assumes 2 times the
 	 * desc_fifo_sz set below (reproduced here).
 	 */
@@ -515,8 +502,7 @@ static int handle3_egress_format(struct net_device *dev,
 	return 0;
 }
 
-/**
- * ipa_wwan_ioctl() - I/O control for wwan network driver.
+/** ipa_wwan_ioctl() - I/O control for wwan network driver.
  *
  * @dev: network device
  * @ifr: ignored
@@ -788,8 +774,7 @@ static const struct net_device_ops ipa_wwan_ops_ip = {
 	.ndo_change_mtu	= ipa_wwan_change_mtu,
 };
 
-/**
- * wwan_setup() - Setups the wwan network driver.
+/** wwan_setup() - Setups the wwan network driver.
  *
  * @dev: network device
  *
@@ -820,8 +805,7 @@ static void ipa_wake_tx_queue(struct work_struct *work)
 	}
 }
 
-/**
- * ipa_wwan_probe() - Initialized the module and registers as a
+/** ipa_wwan_probe() - Initialized the module and registers as a
  * network interface to the network stack
  *
  * Note: In case IPA driver hasn't initialized already, the probe function
@@ -939,8 +923,7 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 	return 0;
 }
 
-/**
-* rmnet_ipa_ap_suspend() - suspend callback for runtime_pm
+/** rmnet_ipa_ap_suspend() - suspend callback for runtime_pm
 * @dev: pointer to device
 *
 * This callback will be invoked by the runtime_pm framework when an AP suspend
@@ -997,8 +980,7 @@ bail:
 	return ret;
 }
 
-/**
-* rmnet_ipa_ap_resume() - resume callback for runtime_pm
+/** rmnet_ipa_ap_resume() - resume callback for runtime_pm
 * @dev: pointer to device
 *
 * This callback will be invoked by the runtime_pm framework when an AP resume
@@ -1042,8 +1024,7 @@ static struct platform_driver rmnet_ipa_driver = {
 	.remove = ipa_wwan_remove,
 };
 
-/**
- * ipa_q6_handshake_complete() - Perform operations once Q6 is up
+/** ipa_q6_handshake_complete() - Perform operations once Q6 is up
  * @ssr_bootup - Indicates whether this is a cold boot-up or post-SSR.
  *
  * This function is invoked once the handshake between the IPA AP driver
@@ -1055,8 +1036,7 @@ void ipa_q6_handshake_complete(bool ssr_bootup)
 {
 	/* It is required to recover the network stats after SSR recovery */
 	if (ssr_bootup) {
-		/*
-		 * In case the uC is required to be loaded by the Modem,
+		/* In case the uC is required to be loaded by the Modem,
 		 * the proxy vote will be removed only when uC loading is
 		 * complete and indication is received by the AP. After SSR,
 		 * uC is already loaded. Therefore, proxy vote can be removed

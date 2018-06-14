@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/*
- * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
 #ifndef _IPAHAL_FLTRT_H_
@@ -9,8 +8,7 @@
 
 #include "ipa_common_i.h"
 
-/*
- * struct ipahal_fltrt_alloc_imgs_params - Params for tbls imgs allocations
+/* struct ipahal_fltrt_alloc_imgs_params - Params for tbls imgs allocations
  *  The allocation logic will allocate DMA memory representing the header.
  *  If the bodies are local (SRAM) the allocation will allocate
  *  a DMA buffers that would contain the content of these local tables in raw
@@ -38,8 +36,7 @@ struct ipahal_fltrt_alloc_imgs_params {
 	struct ipa_mem_buffer nhash_bdy;
 };
 
-/*
- * enum ipahal_rt_rule_hdr_type - Header type used in rt rules
+/* enum ipahal_rt_rule_hdr_type - Header type used in rt rules
  * @IPAHAL_RT_RULE_HDR_NONE: No header is used
  * @IPAHAL_RT_RULE_HDR_RAW: Raw header is used
  * @IPAHAL_RT_RULE_HDR_PROC_CTX: Header Processing context is used
@@ -50,8 +47,7 @@ enum ipahal_rt_rule_hdr_type {
 	IPAHAL_RT_RULE_HDR_PROC_CTX,
 };
 
-/*
- * struct ipahal_rt_rule_gen_params - Params for generating rt rule
+/* struct ipahal_rt_rule_gen_params - Params for generating rt rule
  * @ipt: IP family version
  * @dst_pipe_idx: Destination pipe index
  * @hdr_type: Header type to be used
@@ -72,8 +68,7 @@ struct ipahal_rt_rule_gen_params {
 	const struct ipa_rt_rule *rule;
 };
 
-/*
- * struct ipahal_rt_rule_entry - Rt rule info parsed from H/W
+/* struct ipahal_rt_rule_entry - Rt rule info parsed from H/W
  * @dst_pipe_idx: Destination pipe index
  * @hdr_lcl: Does the references header located in sram or system mem?
  * @hdr_ofst: Offset of the header in the header table
@@ -94,8 +89,7 @@ struct ipahal_rt_rule_entry {
 	u32 rule_size;
 };
 
-/*
- * struct ipahal_flt_rule_gen_params - Params for generating flt rule
+/* struct ipahal_flt_rule_gen_params - Params for generating flt rule
  * @ipt: IP family version
  * @rt_tbl_idx: Routing table the rule pointing to
  * @priority: Rule priority
@@ -120,8 +114,7 @@ u32 ipahal_get_hw_tbl_hdr_width(void);
  */
 u32 ipahal_get_lcl_tbl_addr_alignment(void);
 
-/*
- * Rule priority is used to distinguish rules order
+/* Rule priority is used to distinguish rules order
  * at the integrated table consisting from hashable and
  * non-hashable tables. Max priority are rules that once are
  * scanned by IPA, IPA will not look for further rules and use it.
@@ -144,8 +137,7 @@ u32 ipahal_get_rule_id_hi_bit(void);
 /* Get the low value possible to be used for rule-id */
 u32 ipahal_get_low_rule_id(void);
 
-/*
- * ipahal_rt_generate_empty_img() - Generate empty route image
+/* ipahal_rt_generate_empty_img() - Generate empty route image
  *  Creates routing header buffer for the given tables number.
  * For each table, make it point to the empty table on DDR.
  * @tbls_num: Number of tables. For each will have an entry in the header
@@ -155,8 +147,7 @@ u32 ipahal_get_low_rule_id(void);
 int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
 		gfp_t gfp);
 
-/*
- * ipahal_flt_generate_empty_img() - Generate empty filter image
+/* ipahal_flt_generate_empty_img() - Generate empty filter image
  *  Creates filter header buffer for the given tables number.
  *  For each table, make it point to the empty table on DDR.
  * @tbls_num: Number of tables. For each will have an entry in the header
@@ -168,8 +159,7 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
 int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
 		struct ipa_mem_buffer *mem, gfp_t gfp);
 
-/*
- * ipahal_free_empty_img() - free empty filter or route image
+/* ipahal_free_empty_img() - free empty filter or route image
  */
 void ipahal_free_empty_img(struct ipa_mem_buffer *mem);
 

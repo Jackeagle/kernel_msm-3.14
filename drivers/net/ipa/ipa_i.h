@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/*
- * Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
 #ifndef _IPA_I_H_
@@ -37,8 +36,7 @@
 #define IPA_QMAP_HEADER_LENGTH (4)
 #define IPA_DL_CHECKSUM_LENGTH (8)
 #define IPA_GENERIC_RX_POOL_SZ 192
-/*
- * The transport descriptor size was changed to GSI_CHAN_RE_SIZE_16B, but
+/* The transport descriptor size was changed to GSI_CHAN_RE_SIZE_16B, but
  * IPA users still use sps_iovec size as FIFO element size.
  */
 #define IPA_FIFO_ELEMENT_SIZE 8
@@ -105,8 +103,7 @@ enum ipa_ees {
 	IPA_EE_UC = 2,
 };
 
-/**
- * struct ipa_tx_suspend_irq_data - interrupt data for IPA_TX_SUSPEND_IRQ
+/** struct ipa_tx_suspend_irq_data - interrupt data for IPA_TX_SUSPEND_IRQ
  * @endpoints: bitmask of endpoints which case IPA_TX_SUSPEND_IRQ interrupt
  * @dma_addr: DMA address of this Rx packet
  */
@@ -118,8 +115,7 @@ struct ipa_tx_suspend_irq_data {
 typedef void (*ipa_notify_cb)(void *priv, enum ipa_dp_evt_type evt,
 		       unsigned long data);
 
-/**
- * typedef ipa_irq_handler_t - irq handler/callback type
+/** typedef ipa_irq_handler_t - irq handler/callback type
  * @param ipa_irq_type - [in] interrupt type
  * @param private_data - [in, out] the client private data
  * @param interrupt_data - [out] interrupt information data
@@ -133,8 +129,7 @@ typedef void (*ipa_irq_handler_t)(enum ipa_irq_type interrupt,
 				void *private_data,
 				void *interrupt_data);
 
-/**
- * struct ipa_sys_connect_params - information needed to setup an IPA end-point
+/** struct ipa_sys_connect_params - information needed to setup an IPA end-point
  * in system-BAM mode
  * @ipa_ep_cfg: IPA EP configuration
  * @client:	the type of client who "owns" the EP
@@ -180,8 +175,7 @@ struct ipa_status_stats {
 	unsigned int curr;
 };
 
-/**
- * struct ipa_ep_context - IPA end point context
+/** struct ipa_ep_context - IPA end point context
  * @valid: flag indicating id EP context is valid
  * @client: EP client type
  * @gsi_chan_hdl: EP's GSI channel handle
@@ -230,8 +224,7 @@ struct ipa_ep_context {
 #define IPA_HW_NUM_FEATURES 0x8
 #define FEATURE_ENUM_VAL(feature, opcode) ((feature << 5) | opcode)
 
-/**
- * enum ipa_hw_features - Values that represent the features supported
+/** enum ipa_hw_features - Values that represent the features supported
  * in IPA HW
  * @IPA_HW_FEATURE_COMMON : Feature related to common operation of IPA HW
  *
@@ -241,8 +234,7 @@ enum ipa_hw_features {
 	IPA_HW_FEATURE_MAX		=	IPA_HW_NUM_FEATURES
 };
 
-/**
- * enum ipa_hw_2_cpu_events - Values that represent HW event to be sent to CPU.
+/** enum ipa_hw_2_cpu_events - Values that represent HW event to be sent to CPU.
  * @IPA_HW_2_CPU_EVENT_NO_OP : No event present
  * @IPA_HW_2_CPU_EVENT_ERROR : Event specify a system error is detected by the
  *  device
@@ -257,8 +249,7 @@ enum ipa_hw_2_cpu_events {
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 2),
 };
 
-/**
- * enum ipa_hw_errors - Common error types.
+/** enum ipa_hw_errors - Common error types.
  * @IPA_HW_ERROR_NONE : No error persists
  * @IPA_HW_INVALID_DOORBELL_ERROR : Invalid data read from doorbell
  * @IPA_HW_DMA_ERROR : Unexpected DMA error
@@ -296,8 +287,7 @@ struct ipa_repl_ctx {
 	u32 capacity;
 };
 
-/**
- * struct ipa_sys_context - IPA GPI pipes context
+/** struct ipa_sys_context - IPA GPI pipes context
  * @head_desc_list: header descriptors list
  * @len: the size of the above list
  * @spinlock: protects the list and its size
@@ -343,8 +333,7 @@ struct ipa_sys_context {
 	/* ordering is important - other immutable fields go below */
 };
 
-/**
- * enum ipa_desc_type - IPA decriptors type
+/** enum ipa_desc_type - IPA decriptors type
  *
  * IPA decriptors type, IPA supports DD and ICD but no CD
  */
@@ -355,8 +344,7 @@ enum ipa_desc_type {
 	IPA_IMM_CMD_DESC,
 };
 
-/**
- * struct ipa_tx_pkt_wrapper - IPA Tx packet wrapper
+/** struct ipa_tx_pkt_wrapper - IPA Tx packet wrapper
  * @type: specify if this packet is for the skb or immediate command
  * @mem: memory buffer used by this Tx packet
  * @work: work struct for current Tx packet
@@ -383,8 +371,7 @@ struct ipa_tx_pkt_wrapper {
 	u32 cnt;
 };
 
-/**
- * struct ipa_desc - IPA descriptor
+/** struct ipa_desc - IPA descriptor
  * @type: skb or immediate command or plain old data
  * @pyld: points to skb
  * @frag: points to paged fragment
@@ -412,8 +399,7 @@ struct ipa_desc {
 	struct completion xfer_done;
 };
 
-/*
- * Helper function to fill in some IPA descriptor fields for an
+/* Helper function to fill in some IPA descriptor fields for an
  * immediate command using an immediate command payload returned by
  * ipahal_construct_imm_cmd().
  */
@@ -426,8 +412,7 @@ ipa_desc_fill_imm_cmd(struct ipa_desc *desc, struct ipahal_imm_cmd_pyld *pyld)
 	desc->opcode = pyld->opcode;
 }
 
-/**
- * struct  ipa_rx_data - information needed
+/** struct  ipa_rx_data - information needed
  * to send to wlan driver on receiving data from ipa hw
  * @skb: skb
  * @dma_addr: DMA address of this Rx packet
@@ -437,8 +422,7 @@ struct ipa_rx_data {
 	dma_addr_t dma_addr;
 };
 
-/**
- * struct ipa_rx_pkt_wrapper - IPA Rx packet wrapper
+/** struct ipa_rx_pkt_wrapper - IPA Rx packet wrapper
  * @link: linked to the Rx packets on that pipe
  * @data: skb and DMA address of the received packet
  * @len: how many bytes are copied into skb's flat buffer
@@ -485,8 +469,7 @@ struct ipa_tag_completion {
 	atomic_t cnt;
 };
 
-/**
- * enum ipa_mem_partition - IPA RAM Map is defined as an array of
+/** enum ipa_mem_partition - IPA RAM Map is defined as an array of
  * 32-bit values read from DTS whose order is defined by this type.
  * Order and type of members should not be changed without a suitable change
  * to DTS file or the code that reads it.
@@ -623,8 +606,7 @@ enum ipa_mem_partition {
 	IPA_MEM_MAX,
 };
 
-/**
- * union IpaHwErrorEventData_t - HW->CPU Common Events
+/** union IpaHwErrorEventData_t - HW->CPU Common Events
  * @errorType : Entered when a system error is detected by the HW. Type of
  * error is specified by IPA_HW_ERRORS
  * @reserved : Reserved
@@ -637,8 +619,7 @@ union IpaHwErrorEventData_t {
 	u32 raw32b;
 } __packed;
 
-/**
- * struct IpaHwSharedMemCommonMapping_t - Structure referring to the common
+/** struct IpaHwSharedMemCommonMapping_t - Structure referring to the common
  * section in 128B shared memory located in offset zero of SW Partition in IPA
  * SRAM.
  * @cmdOp : CPU->HW command opcode. See IPA_CPU_2_HW_COMMANDS
@@ -685,8 +666,7 @@ struct IpaHwSharedMemCommonMapping_t {
 	u16 reserved_27_26;
 } __packed;
 
-/**
- * struct ipa_uc_ctx - IPA uC context
+/** struct ipa_uc_ctx - IPA uC context
  * @uc_inited: Indicates if uC interface has been initialized
  * @uc_loaded: Indicates if uC has loaded
  * @uc_failed: Indicates if uC has failed / returned an error
@@ -710,8 +690,7 @@ struct ipa_uc_ctx {
 	u32 uc_error_timestamp;
 };
 
-/**
- * struct ipa_transport_pm - transport power management related members
+/** struct ipa_transport_pm - transport power management related members
  * @transport_pm_mutex: Mutex to protect the transport_pm functionality.
  */
 struct ipa_transport_pm {
@@ -733,8 +712,7 @@ struct ipa_dma_task_info {
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 };
 
-/**
- * struct ipa_context - IPA context
+/** struct ipa_context - IPA context
  * @class: pointer to the struct class
  * @dev_num: device number
  * @dev: the dev_t of the device
@@ -847,30 +825,22 @@ int ipa_stop_gsi_channel(u32 clnt_hdl);
 
 void ipa_reset_gsi_channel(u32 clnt_hdl);
 
-/*
- * Configuration
- */
+/* Configuration */
 int ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg);
 
 int ipa_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ipa_ep_cfg);
 
-/*
- * Data path
- */
+/* Data path */
 int ipa_tx_dp(enum ipa_client_type dst, struct sk_buff *skb);
 
-/*
- * System pipes
- */
+/* System pipes */
 int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in);
 
 int ipa_teardown_sys_pipe(u32 clnt_hdl);
 
 u16 ipa_get_smem_restr_bytes(void);
 
-/*
- * interrupts
- */
+/* interrupts */
 int ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 		ipa_irq_handler_t handler,
 		bool deferred_flag,
@@ -878,9 +848,7 @@ int ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 
 int ipa_remove_interrupt_handler(enum ipa_irq_type interrupt);
 
-/*
- * Miscellaneous
- */
+/* Miscellaneous */
 void ipa_proxy_clk_vote(void);
 void ipa_proxy_clk_unvote(void);
 

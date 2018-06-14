@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/*
- * Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
 #ifndef _IPAHAL_FLTRT_I_H_
 #define _IPAHAL_FLTRT_I_H_
 
-/*
- * enum ipa_fltrt_equations - RULE equations
+/* enum ipa_fltrt_equations - RULE equations
  *  These are names values to the equations that can be used
  *  The HAL layer holds mapping between these names and H/W
  *  presentation.

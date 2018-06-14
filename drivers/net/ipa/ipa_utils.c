@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/*
- * Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
 #define pr_fmt(fmt)    "ipa %s:%d " fmt, __func__, __LINE__
@@ -718,8 +717,7 @@ ep_configuration(enum ipa_client_type client)
 	return &ipa_ep_configuration[IPA_HW_v3_5_1][client];
 }
 
-/**
- * ipa_get_gsi_ep_info() - provide gsi ep information
+/** ipa_get_gsi_ep_info() - provide gsi ep information
  * @client: IPA client value
  *
  * Return value: pointer to ipa_gsi_ep_info
@@ -736,8 +734,7 @@ ipa_get_gsi_ep_info(enum ipa_client_type client)
 	return NULL;
 }
 
-/**
- * ipa_get_ep_mapping() - provide endpoint mapping
+/** ipa_get_ep_mapping() - provide endpoint mapping
  * @client: client type
  *
  * Return value: endpoint mapping
@@ -765,8 +762,7 @@ struct ipa_ep_context *ipa_get_ep_context(enum ipa_client_type client)
 	return ipa_ep_idx < 0 ? NULL : &ipa_ctx->ep[ipa_ep_idx];
 }
 
-/**
- * ipa_get_qmb_master_sel() - provide QMB master selection for the client
+/** ipa_get_qmb_master_sel() - provide QMB master selection for the client
  * @client: client type
  *
  * Return value: QMB master index
@@ -782,8 +778,7 @@ u8 ipa_get_qmb_master_sel(enum ipa_client_type client)
 	return -EINVAL;
 }
 
-/**
- * ipa_get_client_mapping() - provide client mapping
+/** ipa_get_client_mapping() - provide client mapping
  * @pipe_idx: IPA end-point number
  *
  * Return value: client mapping
@@ -798,8 +793,7 @@ enum ipa_client_type ipa_get_client_mapping(int pipe_idx)
 	return ipa_ctx->ep[pipe_idx].client;
 }
 
-/**
- * ipa_sram_settings_read() - Read SRAM settings from HW
+/** ipa_sram_settings_read() - Read SRAM settings from HW
  *
  * Returns:	None
  */
@@ -816,8 +810,7 @@ void ipa_sram_settings_read(void)
 	ipa_ctx->smem_reqd_sz = ipa_ctx->mem_info[END_OFST];
 }
 
-/**
- * ipa_cfg_qsb() - Configure IPA QSB maximal reads and writes
+/** ipa_cfg_qsb() - Configure IPA QSB maximal reads and writes
  *
  * Returns:	None
  */
@@ -836,8 +829,7 @@ void ipa_cfg_qsb(void)
 	ipahal_write_reg_fields(IPA_QSB_MAX_READS, &max_reads);
 }
 
-/**
- * ipa_init_hw() - initialize HW
+/** ipa_init_hw() - initialize HW
  *
  * Return codes:
  * 0: success
@@ -861,8 +853,7 @@ int ipa_init_hw(void)
 	return 0;
 }
 
-/**
- * ipa_init_ep_flt_bitmap() - Initialize the bitmap
+/** ipa_init_ep_flt_bitmap() - Initialize the bitmap
  * that represents the End-points that supports filtering
  */
 void ipa_init_ep_flt_bitmap(void)
@@ -884,8 +875,7 @@ void ipa_init_ep_flt_bitmap(void)
 	ipa_ctx->ep_flt_num = hweight32(ipa_ctx->ep_flt_bitmap);
 }
 
-/**
- * ipa_is_ep_support_flt() - Given an End-point check
+/** ipa_is_ep_support_flt() - Given an End-point check
  * whether it supports filtering or not.
  *
  * @pipe_idx:
@@ -966,8 +956,7 @@ static const char *ipa_get_aggr_type_str(enum ipa_aggr_type aggr_type)
 	return "undefined";
 }
 
-/**
- * ipa_cfg_ep_hdr() -	IPA end-point header configuration
+/** ipa_cfg_ep_hdr() -	IPA end-point header configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ipa_ep_cfg: [in] IPA end-point configuration params
  *
@@ -1011,8 +1000,7 @@ static int ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 	return 0;
 }
 
-/**
- * ipa_cfg_ep_hdr_ext() -  IPA end-point extended header configuration
+/** ipa_cfg_ep_hdr_ext() -  IPA end-point extended header configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ep_hdr_ext: [in] IPA end-point configuration params
  *
@@ -1055,8 +1043,7 @@ static int ipa_cfg_ep_hdr_ext(u32 clnt_hdl,
 	return 0;
 }
 
-/**
- * ipa_cfg_ep_aggr() - IPA end-point aggregation configuration
+/** ipa_cfg_ep_aggr() - IPA end-point aggregation configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ipa_ep_cfg: [in] IPA end-point configuration params
  *
@@ -1097,8 +1084,7 @@ static int ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 	return 0;
 }
 
-/**
- * ipa_cfg_ep_cfg() - IPA end-point cfg configuration
+/** ipa_cfg_ep_cfg() - IPA end-point cfg configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ipa_ep_cfg: [in] IPA end-point configuration params
  *
@@ -1134,8 +1120,7 @@ static int ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 	return 0;
 }
 
-/**
- * ipa_cfg_ep_mode() - IPA end-point mode configuration
+/** ipa_cfg_ep_mode() - IPA end-point mode configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ipa_ep_cfg: [in] IPA end-point configuration params
  *
@@ -1185,8 +1170,7 @@ static int ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 	return 0;
 }
 
-/**
- * ipa_cfg_ep_seq() - IPA end-point HPS/DPS sequencer type configuration
+/** ipa_cfg_ep_seq() - IPA end-point HPS/DPS sequencer type configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  *
  * Returns:	0 on success, negative on failure
@@ -1227,8 +1211,7 @@ static int ipa_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 	return 0;
 }
 
-/**
- * ipa_cfg_ep_deaggr() -  IPA end-point deaggregation configuration
+/** ipa_cfg_ep_deaggr() -  IPA end-point deaggregation configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ep_deaggr:	[in] IPA end-point configuration params
  *
@@ -1267,8 +1250,7 @@ static int ipa_cfg_ep_deaggr(u32 clnt_hdl,
 	return 0;
 }
 
-/**
- * ipa_cfg_ep_metadata_mask() - IPA end-point meta-data mask configuration
+/** ipa_cfg_ep_metadata_mask() - IPA end-point meta-data mask configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ipa_ep_cfg: [in] IPA end-point configuration params
  *
@@ -1297,8 +1279,7 @@ static int ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
 	return 0;
 }
 
-/**
- * ipa_cfg_ep - IPA end-point configuration
+/** ipa_cfg_ep - IPA end-point configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ipa_ep_cfg: [in] IPA end-point configuration params
  *
@@ -1354,8 +1335,7 @@ int ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 	return 0;
 }
 
-/**
- * ipa_cfg_ep_status() - IPA end-point status configuration
+/** ipa_cfg_ep_status() - IPA end-point status configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ipa_ep_cfg: [in] IPA end-point configuration params
  *
@@ -1404,8 +1384,7 @@ static int ipa_cfg_ep_ctrl(int ipa_ep_idx, bool suspend)
 	return 0;
 }
 
-/**
- * ipa_cfg_ep_holb() - IPA end-point holb configuration
+/** ipa_cfg_ep_holb() - IPA end-point holb configuration
  *
  * If an IPA producer pipe is full, IPA HW by default will block
  * indefinitely till space opens up. During this time no packets
@@ -1515,8 +1494,7 @@ int ipa_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 #define IPA_MEM_UC_EVENT_RING_OFST_ALIGN	1024
 #define IPA_MEM_UC_EVENT_RING_SIZE		0x400
 
-/**
- * ipa_init_mem_info() - Reads IPA memory map from DTS, performs alignment
+/** ipa_init_mem_info() - Reads IPA memory map from DTS, performs alignment
  * checks and logs the fetched values.
  */
 #define ALIGN_CHECK(name)	({ BUILD_BUG_ON(name % name ## _ALIGN); name; })
@@ -1692,8 +1670,7 @@ void ipa_skb_recycle(struct sk_buff *skb)
 	skb_reset_tail_pointer(skb);
 }
 
-/**
- * ipa_proxy_clk_unvote() - called to remove IPA clock proxy vote
+/** ipa_proxy_clk_unvote() - called to remove IPA clock proxy vote
  *
  * Return value: none
  */
@@ -1705,8 +1682,7 @@ void ipa_proxy_clk_unvote(void)
 	}
 }
 
-/**
- * ipa_proxy_clk_vote() - called to add IPA clock proxy vote
+/** ipa_proxy_clk_vote() - called to add IPA clock proxy vote
  *
  * Return value: none
  */
@@ -1718,8 +1694,7 @@ void ipa_proxy_clk_vote(void)
 	}
 }
 
-/**
- * ipa_get_smem_restr_bytes()- Return IPA smem restricted bytes
+/** ipa_get_smem_restr_bytes()- Return IPA smem restricted bytes
  *
  * Return value: u16 - number of IPA smem restricted bytes
  */
@@ -1733,8 +1708,7 @@ u32 ipa_get_num_pipes(void)
 	return ipahal_read_reg(IPA_ENABLED_PIPES);
 }
 
-/**
- * ipa_disable_apps_wan_cons_deaggr()-
+/** ipa_disable_apps_wan_cons_deaggr()-
  * set ipa_ctx->ipa_client_apps_wan_cons_agg_gro
  *
  * Return value: 0 or negative in case of failure
@@ -1763,8 +1737,7 @@ int ipa_disable_apps_wan_cons_deaggr(uint32_t agg_size, uint32_t agg_count)
 	return 0;
 }
 
-/**
- * ipa_is_modem_pipe()- Checks if pipe is owned by the modem
+/** ipa_is_modem_pipe()- Checks if pipe is owned by the modem
  *
  * @pipe_idx: pipe number
  * Return value: true if owned by modem, false otherwize
@@ -1934,8 +1907,7 @@ void ipa_suspend_apps_pipes(bool suspend)
 		ipa_debug("error suspending WAN consumer\n");
 }
 
-/**
- * ipa_cfg_route() - configure IPA route
+/** ipa_cfg_route() - configure IPA route
  * @route: IPA route
  *
  * Return codes:
@@ -1964,8 +1936,7 @@ void ipa_cfg_default_route(enum ipa_client_type client)
 	ipa_client_remove(__func__, false);
 }
 
-/*
- * In certain cases we need to issue a command to reliably clear the
+/* In certain cases we need to issue a command to reliably clear the
  * IPA pipeline.  Sending a 1-byte DMA task is sufficient, and this
  * function preallocates a command to do just that.  There are
  * conditions (process context in KILL state) where DMA allocations
@@ -2000,8 +1971,7 @@ void ipa_gsi_dma_task_free(void)
 	ipahal_dma_free(mem);
 }
 
-/**
- * ipa_gsi_dma_task_inject()- Send DMA_TASK to IPA for GSI stop channel
+/** ipa_gsi_dma_task_inject()- Send DMA_TASK to IPA for GSI stop channel
  *
  * Send a DMA_TASK of 1B to IPA to unblock GSI channel in STOP_IN_PROG.
  * Return value: 0 on success, negative otherwise
@@ -2022,8 +1992,7 @@ int ipa_gsi_dma_task_inject(void)
 	return 0;
 }
 
-/**
- * ipa_stop_gsi_channel()- Stops a GSI channel in IPA
+/** ipa_stop_gsi_channel()- Stops a GSI channel in IPA
  * @chan_hdl: GSI channel handle
  *
  * This function implements the sequence to stop a GSI channel
@@ -2086,8 +2055,7 @@ end_sequence:
 	return res;
 }
 
-/**
- * ipa_enable_dcd() - enable dynamic clock division on IPA
+/** ipa_enable_dcd() - enable dynamic clock division on IPA
  *
  * Return value: Non applicable
  *
@@ -2104,8 +2072,7 @@ void ipa_enable_dcd(void)
 			&idle_indication_cfg);
 }
 
-/**
- * ipa_write_64() - convert 64 bit value to byte array
+/** ipa_write_64() - convert 64 bit value to byte array
  * @w: 64 bit integer
  * @dest: byte array
  */
@@ -2155,8 +2122,7 @@ const char *ipa_client_string(enum ipa_client_type client)
 	return "Undefined client";
 }
 
-/**
- * ipa_set_flt_tuple_mask() - Sets the flt tuple masking for the given pipe
+/** ipa_set_flt_tuple_mask() - Sets the flt tuple masking for the given pipe
  *  Pipe must be for AP EP (not modem) and support filtering
  *  updates the the filtering masking values without changing the rt ones.
  *
@@ -2176,8 +2142,7 @@ void ipa_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple)
 					&fltrt_tuple);
 }
 
-/**
- * ipa_set_rt_tuple_mask() - Sets the rt tuple masking for the given tbl
+/** ipa_set_rt_tuple_mask() - Sets the rt tuple masking for the given tbl
  *  table index must be for AP EP (not modem)
  *  updates the the routing masking values without changing the flt ones.
  *

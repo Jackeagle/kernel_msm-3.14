@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/*
- * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
 #define pr_fmt(fmt)    "ipa-qmi %s:%d " fmt, __func__, __LINE__
@@ -18,8 +17,7 @@
 
 static bool ipa_qmi_initialized = false;
 
-/*
- * The AP and modem perform a "handshake" at initialization time to
+/* The AP and modem perform a "handshake" at initialization time to
  * ensure each side knows the other side is ready.  Two pairs of QMI
  * handles (endpoints) are used for this; one provides service on
  * the modem for AP requests, and the other is on the AP to service
@@ -58,8 +56,7 @@ static bool ipa_qmi_initialized = false;
 /* Used to send an INIT_DRIVER request to the modem */
 static struct qmi_handle client_handle;
 
-/*
- * Requests from the modem arrive on the server handle to tell us
+/* Requests from the modem arrive on the server handle to tell us
  * when it is prepared to receive an INIT_COMPLETE indication, and
  * when its driver initialization is complete.  The AP sends the
  * indication after it has received and responded to both requests.
@@ -85,8 +82,7 @@ static int ipa_send_master_driver_init_complete_ind(struct qmi_handle *qmi,
 				ipa_init_complete_ind_ei, &ind);
 }
 
-/*
- * This function is called to determine whether to complete the
+/* This function is called to determine whether to complete the
  * handshake by sending an INIT_COMPLETE_IND indication message to
  * the modem.  The "init_driver" parameter is false when we've
  * received an INDICATION_REGISTER request message from the modem,
@@ -113,8 +109,7 @@ static int ipa_handshake_complete(struct qmi_handle *qmi,
 	return ipa_send_master_driver_init_complete_ind(qmi, sq);
 }
 
-/*
- * Callback function to handle an INDICATION_REGISTER request message
+/* Callback function to handle an INDICATION_REGISTER request message
  * from the modem.  This informs the AP that the modem is now ready to
  * receive the INIT_COMPLETE_IND indication message.
  */
@@ -126,8 +121,7 @@ static void ipa_indication_register_fn(struct qmi_handle *qmi,
 	struct ipa_indication_register_rsp rsp;
 	int ret;
 
-	/*
-	 * Both of these should be true (1), but we ignore them.
+	/* Both of these should be true (1), but we ignore them.
 	 * Supposedly we're supposed to only send the master
 	 * driver init complete indication if this is true.
 	 */
@@ -153,8 +147,7 @@ static void ipa_indication_register_fn(struct qmi_handle *qmi,
 		ipa_err("error %d completing handshake\n", ret);
 }
 
-/*
- * Callback function to handle a DRIVER_INIT_COMPLETE request message
+/* Callback function to handle a DRIVER_INIT_COMPLETE request message
  * from the modem.  This informs the AP that the modem has completed
  * the initializion of its driver.
  */
@@ -166,8 +159,7 @@ static void ipa_driver_init_complete_fn(struct qmi_handle *qmi,
 	struct ipa_driver_init_complete_rsp rsp;
 	int ret;
 
-	/*
-	 * I'm not sure what value is provided in the status field
+	/* I'm not sure what value is provided in the status field
 	 * (presumably it indicates success).  We ignore it though...
 	 */
 	ipa_debug("req->status = %hhu\n", req->status);
@@ -201,8 +193,7 @@ static struct qmi_msg_handler ipa_server_msg_handlers[] = {
 	},
 };
 
-/*
- * Callback function to handle an IPA_QMI_INIT_DRIVER response message
+/* Callback function to handle an IPA_QMI_INIT_DRIVER response message
  * from the modem.  This only acknowledges that the modem received the
  * request.  The modem will eventually report that it has completed its
  * modem initialization by sending a IPA_QMI_DRIVER_INIT_COMPLETE request.
@@ -231,8 +222,7 @@ static struct qmi_msg_handler ipa_client_msg_handlers[] = {
 	},
 };
 
-/*
- * Return a pointer to an init modem driver request structure, which
+/* Return a pointer to an init modem driver request structure, which
  * contains configuration parameters for the modem.  The modem may
  * be started multiple times, but generally these parameters don't
  * change so we can reuse the request structure once it's initialized.
@@ -318,8 +308,7 @@ static const struct ipa_init_modem_driver_req *init_modem_driver_req(void)
 	return &req;
 }
 
-/*
- * The modem service we requested is now available via the client
+/* The modem service we requested is now available via the client
  * handle.  Send an INIT_DRIVER request to the modem.
  */
 static int
@@ -355,8 +344,7 @@ ipa_client_new_server(struct qmi_handle *qmi, struct qmi_service *svc)
 	return ret;
 }
 
-/*
- * The only callback we supply for the client handle is notification
+/* The only callback we supply for the client handle is notification
  * that the service on the modem has become available.
  */
 static struct qmi_ops ipa_client_ops = {
@@ -367,8 +355,7 @@ static int ipa_qmi_initialize(void)
 {
 	int ret;
 
-	/*
-	 * The only handle operation that might be interesting for the
+	/* The only handle operation that might be interesting for the
 	 * server would be del_client, to find out when the modem side
 	 * client has disappeared.  But other than reporting the event,
 	 * we wouldn't do anything about that.  So we just pass a null
@@ -385,8 +372,7 @@ static int ipa_qmi_initialize(void)
 	if (ret < 0)
 		goto err_release_server_handle;
 
-	/*
-	 * The client handle is only used for sending an INIT_DRIVER
+	/* The client handle is only used for sending an INIT_DRIVER
 	 * request to the modem, and receiving its response message.
 	 */
 	ret = qmi_handle_init(&client_handle, IPA_QMI_CLIENT_MAX_RCV_SZ,
@@ -415,8 +401,7 @@ err_release_server_handle:
 	return ret;
 }
 
-/*
- * This is called by the rmnet probe routine.  The rmnet driver can
+/* This is called by the rmnet probe routine.  The rmnet driver can
  * be unregistered after it has been initialized as a result of a
  * subsystem shutdown; it can later be registered again if a
  * subsystem restart occurs.  This function can therefore be called

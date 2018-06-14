@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/*
- * Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
 #define pr_fmt(fmt)    "ipa %s:%d " fmt, __func__, __LINE__
@@ -262,8 +261,7 @@ err_dma_free:
 	return ret;
 }
 
-/**
-* ipa_init_q6_smem() - Initialize Q6 general memory and
+/** ipa_init_q6_smem() - Initialize Q6 general memory and
 *		       header memory regions in IPA.
 *
 * Return codes:
@@ -341,8 +339,7 @@ static void sram_set_canaries(u32 *sram_mmio, enum ipa_mem_partition which)
 	sram_set_canary_common(sram_mmio, which, true);
 }
 
-/**
- * ipa_init_sram() - Initialize IPA local SRAM.
+/** ipa_init_sram() - Initialize IPA local SRAM.
  *
  * Return codes: 0 for success, negative value for failure
  */
@@ -381,8 +378,7 @@ static int ipa_init_sram(void)
 	return 0;
 }
 
-/**
- * ipa_init_hdr() - Initialize IPA header block.
+/** ipa_init_hdr() - Initialize IPA header block.
  *
  * Return codes: 0 for success, negative value for failure
  */
@@ -429,8 +425,7 @@ static int ipa_init_hdr(void)
 	return 0;
 }
 
-/**
- * ipa_init_rt4() - Initialize IPA routing block for IPv4.
+/** ipa_init_rt4() - Initialize IPA routing block for IPv4.
  *
  * Return codes: 0 for success, negative value for failure
  */
@@ -475,8 +470,7 @@ free_mem:
 	return rc;
 }
 
-/**
- * ipa_init_rt6() - Initialize IPA routing block for IPv6.
+/** ipa_init_rt6() - Initialize IPA routing block for IPv6.
  *
  * Return codes: 0 for success, negative value for failure
  */
@@ -521,8 +515,7 @@ free_mem:
 	return rc;
 }
 
-/**
- * ipa_init_flt4() - Initialize IPA filtering block for IPv4.
+/** ipa_init_flt4() - Initialize IPA filtering block for IPv4.
  *
  * Return codes: 0 for success, negative value for failure
  */
@@ -568,8 +561,7 @@ free_mem:
 	return rc;
 }
 
-/**
- * ipa_init_flt6() - Initialize IPA filtering block for IPv6.
+/** ipa_init_flt6() - Initialize IPA filtering block for IPv6.
  *
  * Return codes: 0 for success, negative value for failure
  */
@@ -686,8 +678,7 @@ static long ipa_setup_apps_pipes(void)
 {
 	long result;
 
-	/*
-	 * Memory size must be a multiple of the ring element size.
+	/* Memory size must be a multiple of the ring element size.
 	 * Note that ipa_gsi_chan_mem_size() assumes a multipler
 	 * (4 for producer, 2 for consumer) times the desc_fifo_sz
 	 * set below (reproduced here; 2 is the more restrictive case).
@@ -726,8 +717,7 @@ static long ipa_setup_apps_pipes(void)
 	ipa_setup_rt_hash_tuple();
 	ipa_debug("rt hash tuple is configured\n");
 
-	/*
-	 * LAN IN (IPA->AP)
+	/* LAN IN (IPA->AP)
 	 *
 	 * Even without supporting LAN traffic, we use the LAN consumer
 	 * pipe for receiving some information from the IPA.  If we issue
@@ -753,8 +743,7 @@ fail_ch20_wa:
 	return result;
 }
 
-/**
-* ipa_enable_clks() - Turn on IPA clocks
+/** ipa_enable_clks() - Turn on IPA clocks
 *
 * Return codes:
 * None
@@ -766,8 +755,7 @@ static void ipa_enable_clks(void)
 	WARN_ON(msm_bus_scale_client_update_request(ipa_ctx->ipa_bus_hdl, 1));
 }
 
-/**
-* ipa_disable_clks() - Turn off IPA clocks
+/** ipa_disable_clks() - Turn off IPA clocks
 *
 * Return codes:
 * None
@@ -821,8 +809,7 @@ active_client_get(struct ipa_active_client_logging_info *id)
 	return entry;
 }
 
-/*
- * ipa_active_clients_log_mod() - Log a modification to active clients
+/* ipa_active_clients_log_mod() - Log a modification to active clients
  *
  * If an existing entry represents the activity being logged, its
  * reference count is updated (incremented or decremented) according
@@ -862,8 +849,7 @@ out_unlock:
 	spin_unlock_irqrestore(&log->lock, flags);
 }
 
-/*
- * Add an IPA client under protection of the mutex.  This is called
+/* Add an IPA client under protection of the mutex.  This is called
  * for the first client, but a race could mean another caller gets
  * the first reference.  When the first reference is taken, IPA
  * clocks are enabled pipes are resumed.
@@ -887,8 +873,7 @@ static void ipa_client_add_first(void)
 		atomic_read(&ipa_ctx->ipa_active_clients.cnt));
 }
 
-/*
- * Attempt to add an IPA client reference, but only if this does not
+/* Attempt to add an IPA client reference, but only if this does not
  * represent the initiaal reference.  Returns true if the reference
  * was taken, false otherwise.
  */
@@ -903,8 +888,7 @@ static bool ipa_client_add_not_first(void)
 	return true;
 }
 
-/*
- * Add an IPA client, but only if the reference count is already
+/* Add an IPA client, but only if the reference count is already
  * non-zero.  (This is used to avoid blocking.)  Returns true if the
  * additional reference was added successfully, or false otherwise.
  */
@@ -926,8 +910,7 @@ bool _ipa_client_add_additional(const char *id, bool log_it,
 	return true;
 }
 
-/*
- * Add an IPA client.  If this is not the first client, the
+/* Add an IPA client.  If this is not the first client, the
  * reference count is updated and return is immediate.  Otherwise
  * ipa_client_add_first() will safely add the first client, enabling
  * clocks and setting up (resuming) pipes before returning.
@@ -946,8 +929,7 @@ void _ipa_client_add(const char *id, bool log_it, const char *file, int line)
 		ipa_client_add_first();
 }
 
-/*
- * Remove an IPA client under protection of the mutex.  This is
+/* Remove an IPA client under protection of the mutex.  This is
  * called for the last remaining client, but a race could mean
  * another caller gets an additional reference before the mutex
  * is acquired.  When the final reference is dropped, pipes are
@@ -972,8 +954,7 @@ static void ipa_client_remove_final(void)
 	ipa_debug_low("active clients = %d\n", ret);
 }
 
-/*
- * Decrement the active clients reference count, and if the result
+/* Decrement the active clients reference count, and if the result
  * is 0, suspend the pipes and disable clocks.
  *
  * This function runs in work queue context, scheduled to run whenever
@@ -984,8 +965,7 @@ static void ipa_client_remove_deferred(struct work_struct *work)
 	ipa_client_remove_final();
 }
 
-/*
- * Attempt to remove a client reference, but only if this is not the
+/* Attempt to remove a client reference, but only if this is not the
  * only reference remaining.  Returns true if the reference was
  * removed, or false if doing so would produce a zero reference
  * count.
@@ -1001,8 +981,7 @@ static bool ipa_client_remove_not_final(void)
 	return true;
 }
 
-/*
- * Attempt to remove an IPA client reference.  If this represents
+/* Attempt to remove an IPA client reference.  If this represents
  * the last reference arrange for ipa_client_remove_final() to be
  * called in workqueue context, dropping the last reference under
  * protection of the mutex.
@@ -1020,8 +999,7 @@ void _ipa_client_remove(const char *id, bool log_it, const char *file, int line)
 		queue_work(ipa_ctx->power_mgmt_wq, &ipa_client_remove_work);
 }
 
-/*
- * Remove an IPA client reference.  If other references remain
+/* Remove an IPA client reference.  If other references remain
  * return is immediate.  For the last reference, this function
  * blocks until it can be safely removed under mutex protection.
  * Unless another client can be added concurrently, the reference
@@ -1042,8 +1020,7 @@ _ipa_client_remove_wait(const char *id, bool log_it, const char *file, int line)
 		ipa_client_remove_final();
 }
 
-/**
-* ipa_inc_acquire_wakelock() - Increase active clients counter, and
+/** ipa_inc_acquire_wakelock() - Increase active clients counter, and
 * acquire wakelock if necessary
 *
 * Return codes:
@@ -1062,8 +1039,7 @@ void ipa_inc_acquire_wakelock(void)
 	spin_unlock_irqrestore(&ipa_ctx->wakelock_ref_cnt.spinlock, flags);
 }
 
-/**
- * ipa_dec_release_wakelock() - Decrease active clients counter
+/** ipa_dec_release_wakelock() - Decrease active clients counter
  *
  * In case if the ref count is 0, release the wakelock.
  *
@@ -1083,8 +1059,7 @@ void ipa_dec_release_wakelock(void)
 	spin_unlock_irqrestore(&ipa_ctx->wakelock_ref_cnt.spinlock, flags);
 }
 
-/**
-* ipa_suspend_handler() - Handles the suspend interrupt:
+/** ipa_suspend_handler() - Handles the suspend interrupt:
 * wakes up the suspended peripheral by requesting its consumer
 * @interrupt:		Interrupt type
 * @private_data:	The client's private data
@@ -1109,8 +1084,7 @@ void ipa_suspend_handler(enum ipa_irq_type interrupt,
 			continue;
 		if (!IPA_CLIENT_IS_APPS_CONS(ipa_ctx->ep[i].client))
 			continue;
-		/*
-		 * pipe will be unsuspended as part of
+		/* pipe will be unsuspended as part of
 		 * enabling IPA clocks
 		 */
 		mutex_lock(&ipa_ctx->transport_pm.transport_pm_mutex);
@@ -1124,8 +1098,7 @@ void ipa_suspend_handler(enum ipa_irq_type interrupt,
 	}
 }
 
-/**
- * ipa_init_interrupts() - Register to IPA IRQs
+/** ipa_init_interrupts() - Register to IPA IRQs
  *
  * Return codes: 0 in success, negative in failure
  *
@@ -1249,8 +1222,7 @@ static void ipa_register_panic_hdlr(void)
 		&ipa_panic_blk);
 }
 
-/**
- * ipa_post_init() - Initialize the IPA Driver (Part II).
+/** ipa_post_init() - Initialize the IPA Driver (Part II).
  * This part contains all initialization which requires interaction with
  * IPA HW (via GSI).
  *
@@ -1348,8 +1320,7 @@ static bool ipa_hps_firmware_size_ok(u32 base, u32 size)
 	return base == load_address && size <= IPA_HPS_IMG_MEM_SIZE;
 }
 
-/*
- * Load a single blob of firmware based on its description in the
+/* Load a single blob of firmware based on its description in the
  * given ELF program header.
  */
 static int ipa_firmware_load_one(const struct firmware *firmware,
@@ -1397,8 +1368,7 @@ static int ipa_firmware_load(void)
 	if (ret)
 		return ret;
 
-	/*
-	 * Make sure we have at least a header, and that it
+	/* Make sure we have at least a header, and that it
 	 * indicates we have three segments (GSI, DPS, HPS).
 	 * Segment sizes will be checked when loaded.
 	 */
@@ -1626,8 +1596,7 @@ static bool config_valid(void)
 	return true;
 }
 
-/**
-* ipa_pre_init() - Initialize the IPA Driver.
+/** ipa_pre_init() - Initialize the IPA Driver.
 * This part contains all initialization which doesn't require IPA HW, such
 * as structure allocations and initializations, register writes, etc.
 *
@@ -1774,8 +1743,7 @@ static int ipa_pre_init(void)
 		goto err_device_destroy;
 	}
 
-	/*
-	 * Note enabling dynamic clock division must not be
+	/* Note enabling dynamic clock division must not be
 	 * attempted for IPA hardware versions prior to 3.5.
 	 */
 	ipa_enable_dcd();
@@ -1917,8 +1885,7 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 	ipa_debug("IPA driver probing started\n");
 	ipa_debug("dev->of_node->name = %s\n", node->name);
 
-	/*
-	 * Initialize smp2p first.  It depends on another driver
+	/* Initialize smp2p first.  It depends on another driver
 	 * that might not be ready when we're probed, so it might
 	 * return -EPROBE_DEFER (meaning we'll get called again).
 	 */
@@ -2049,8 +2016,7 @@ err_clear_pdev:
 	return result;
 }
 
-/**
- * ipa_ap_suspend() - suspend callback for runtime_pm
+/** ipa_ap_suspend() - suspend callback for runtime_pm
  * @dev: pointer to device
  *
  * This callback will be invoked by the runtime_pm framework when an AP suspend
@@ -2080,8 +2046,7 @@ int ipa_ap_suspend(struct device *dev)
 	return 0;
 }
 
-/**
-* ipa_ap_resume() - resume callback for runtime_pm
+/** ipa_ap_resume() - resume callback for runtime_pm
 * @dev: pointer to device
 *
 * This callback will be invoked by the runtime_pm framework when an AP resume

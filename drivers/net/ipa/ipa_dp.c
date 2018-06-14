@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/*
- * Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
 #define pr_fmt(fmt)    "ipa %s:%d " fmt, __func__, __LINE__
@@ -142,8 +141,7 @@ static void ipa_wq_write_done_status(int src_pipe,
 		ipa_err("tx_pkt is NULL\n");
 }
 
-/**
- * ipa_write_done() - this function will be (eventually) called when a Tx
+/** ipa_write_done() - this function will be (eventually) called when a Tx
  * operation is complete
  * * @work:	work_struct used by the work queue
  *
@@ -176,8 +174,7 @@ static void ipa_wq_write_done(struct work_struct *work)
 	ipa_wq_write_done_common(sys, tx_pkt);
 }
 
-/**
- * ipa_rx_poll() - Poll the rx packets from IPA HW.
+/** ipa_rx_poll() - Poll the rx packets from IPA HW.
  *
  * This function is executed in softirq context.
  *
@@ -220,8 +217,7 @@ int ipa_rx_poll(u32 clnt_hdl, int weight)
 	return cnt;
 }
 
-/*
- * Send an interrupting no-op request to a producer pipe.  Normally
+/* Send an interrupting no-op request to a producer pipe.  Normally
  * an interrupt is generated upon completion of every transfer
  * performed by a pipe, but a producer pipe can be configured to
  * avoid getting these interrupts.  Instead, once a transfer has
@@ -279,8 +275,7 @@ static void ipa_send_nop_work(struct work_struct *work)
 		queue_work(sys->wq, work);
 }
 
-/*
- * The delay before sending the no-op request is implemented by a
+/* The delay before sending the no-op request is implemented by a
  * high resolution timer, which will call this in interrupt context.
  * Arrange to send the no-op in workqueue context when it expires.
  */
@@ -314,8 +309,7 @@ static void ipa_nop_timer_init(struct ipa_sys_context *sys)
 	sys->nop_timer.function = ipa_nop_timer_expiry;
 }
 
-/**
- * ipa_send() - Send multiple descriptors in one HW transaction
+/** ipa_send() - Send multiple descriptors in one HW transaction
  * @sys: system pipe context
  * @num_desc: number of packets
  * @desc: packets to send (may be immediate command or data)
@@ -412,8 +406,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 
 		xfer_elem[i].addr = tx_pkt->mem.phys_base;
 
-		/*
-		 * Special treatment for immediate commands, where
+		/* Special treatment for immediate commands, where
 		 * the structure of the descriptor is different
 		 */
 		if (desc[i].type == IPA_IMM_CMD_DESC) {
@@ -480,8 +473,7 @@ failure:
 	return -EFAULT;
 }
 
-/**
- * ipa_transport_irq_cmd_ack - callback function which will be called by
+/** ipa_transport_irq_cmd_ack - callback function which will be called by
  * the transport driver after an immediate command is complete.
  * @user1:	pointer to the descriptor of the transfer
  * @user2:
@@ -502,8 +494,7 @@ static void ipa_transport_irq_cmd_ack(void *user1, int user2)
 	complete(&desc->xfer_done);
 }
 
-/**
- * ipa_transport_irq_cmd_ack_free - callback function which will be
+/** ipa_transport_irq_cmd_ack_free - callback function which will be
  * called by the transport driver after an immediate command is complete.
  * This function will also free the completion object once it is done.
  * @tag_comp: pointer to the completion object
@@ -526,8 +517,7 @@ static void ipa_transport_irq_cmd_ack_free(void *tag_comp, int ignored)
 		kfree(comp);
 }
 
-/**
- * ipa_send_cmd - send immediate commands
+/** ipa_send_cmd - send immediate commands
  * @num_desc:	number of descriptors within the desc struct
  * @descr:	descriptor structure
  *
@@ -573,8 +563,7 @@ int ipa_send_cmd(u16 num_desc, struct ipa_desc *descr)
 	return result;
 }
 
-/**
- * ipa_send_cmd_timeout - send immediate commands with limited time
+/** ipa_send_cmd_timeout - send immediate commands with limited time
  *	waiting for ACK from IPA HW
  * @num_desc:	number of descriptors within the desc struct
  * @descr:	descriptor structure
@@ -643,8 +632,7 @@ int ipa_send_cmd_timeout(u16 num_desc, struct ipa_desc *descr, u32 timeout)
 	return result;
 }
 
-/**
- * ipa_handle_rx_core() - The core functionality of packet reception. This
+/** ipa_handle_rx_core() - The core functionality of packet reception. This
  * function is read from multiple code paths.
  *
  * All the packets on the Rx data path are received on the IPA_A5_LAN_WAN_IN
@@ -675,9 +663,7 @@ static int ipa_handle_rx_core(struct ipa_sys_context *sys)
 	return cnt;
 }
 
-/**
- * ipa_rx_switch_to_intr_mode() - Operate the Rx data path in interrupt mode
- */
+/** ipa_rx_switch_to_intr_mode() - Operate the Rx data path in interrupt mode */
 static void ipa_rx_switch_to_intr_mode(struct ipa_sys_context *sys)
 {
 	if (!atomic_xchg(&sys->curr_polling_state, 0)) {
@@ -690,8 +676,7 @@ static void ipa_rx_switch_to_intr_mode(struct ipa_sys_context *sys)
 	gsi_channel_intr_enable(sys->ep->gsi_chan_hdl);
 }
 
-/**
- * ipa_handle_rx() - handle packet reception. This function is executed in the
+/** ipa_handle_rx() - handle packet reception. This function is executed in the
  * context of a work queue.
  * @work: work struct needed by the work queue
  *
@@ -713,8 +698,7 @@ static void ipa_handle_rx(struct ipa_sys_context *sys)
 
 		usleep_range(POLLING_MIN_SLEEP_RX, POLLING_MAX_SLEEP_RX);
 
-		/*
-		 * if pipe is out of buffers there is no point polling for
+		/* if pipe is out of buffers there is no point polling for
 		 * completed descs; release the worker so delayed work can
 		 * run in a timely manner
 		 */
@@ -740,8 +724,7 @@ static void ipa_switch_to_intr_rx_work_func(struct work_struct *work)
 	ipa_handle_rx(sys);
 }
 
-/**
- * ipa_setup_sys_pipe() - Setup an IPA GPI pipe and perform
+/** ipa_setup_sys_pipe() - Setup an IPA GPI pipe and perform
  * IPA EP configuration
  * @sys_in:	[in] input needed to setup the pipe and configure EP
  *
@@ -901,8 +884,7 @@ fail_gen:
 	return result;
 }
 
-/**
- * ipa_teardown_sys_pipe() - Teardown the GPI pipe and cleanup IPA EP
+/** ipa_teardown_sys_pipe() - Teardown the GPI pipe and cleanup IPA EP
  * @clnt_hdl:	[in] the handle obtained from ipa_setup_sys_pipe
  *
  * Returns:	0 on success, negative on failure
@@ -976,8 +958,7 @@ int ipa_teardown_sys_pipe(u32 clnt_hdl)
 	return 0;
 }
 
-/**
- * ipa_tx_comp_usr_notify_release() - Callback function which will call the
+/** ipa_tx_comp_usr_notify_release() - Callback function which will call the
  * user supplied callback function to release the skb, or release it on
  * its own if no callback function was supplied.
  * @user1
@@ -1006,8 +987,7 @@ void ipa_tx_cmd_comp(void *user1, int user2)
 	ipahal_destroy_imm_cmd(user1);
 }
 
-/**
- * ipa_tx_dp() - Data-path tx handler for APPS_WAN_PROD client
+/** ipa_tx_dp() - Data-path tx handler for APPS_WAN_PROD client
  *
  * @client:	[in] which IPA client is sending packets (WAN producer)
  * @skb:	[in] the packet to send
@@ -1036,8 +1016,7 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	src_ep_idx = ipa_get_ep_mapping(client);
 	gsi_ep = ipa_get_gsi_ep_info(ipa_ctx->ep[src_ep_idx].client);
 
-	/*
-	 * Make sure source pipe's TLV FIFO has enough entries to
+	/* Make sure source pipe's TLV FIFO has enough entries to
 	 * hold the linear portion of the skb and all its frags.
 	 * If not, see if we can linearize it before giving up.
 	 */
@@ -1064,8 +1043,7 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 		desc = &_desc;
 	}
 
-	/*
-	 * Fill in the IPA request descriptors--one for the linear
+	/* Fill in the IPA request descriptors--one for the linear
 	 * data in the skb, one each for each of its fragments.
 	 */
 	data_idx = 0;
@@ -1207,8 +1185,7 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
 		ipa_err("failed to provide buffer: %d\n", ret);
 		return ret;
 	}
-	/*
-	 * As doorbell is a costly operation, notify to GSI
+	/* As doorbell is a costly operation, notify to GSI
 	 * of new buffers if threshold is exceeded
 	 */
 	if (++sys->len_pending_xfer >= IPA_REPL_XFER_THRESH) {
@@ -1219,8 +1196,7 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
 	return 0;
 }
 
-/**
- * ipa_replenish_rx_cache() - Replenish the Rx packets cache.
+/** ipa_replenish_rx_cache() - Replenish the Rx packets cache.
  *
  * The function allocates buffers in the rx_pkt_wrapper_cache cache until there
  * are IPA_RX_POOL_CEIL buffers in the cache.
@@ -1433,10 +1409,7 @@ static void ipa_replenish_rx_work_func(struct work_struct *work)
 	ipa_client_remove(__func__, false);
 }
 
-/**
- * ipa_cleanup_rx() - release RX queue resources
- *
- */
+/** ipa_cleanup_rx() - release RX queue resources */
 static void ipa_cleanup_rx(struct ipa_sys_context *sys)
 {
 	struct device *dev = ipa_ctx->dev;
@@ -1660,8 +1633,7 @@ begin:
 			/* RX data */
 			src_pipe = status.endp_src_idx;
 
-			/*
-			 * A packet which is received back to the AP after
+			/* A packet which is received back to the AP after
 			 * there was no route match.
 			 */
 
@@ -1851,8 +1823,7 @@ static int ipa_wan_rx_pyld_hdlr(struct sk_buff *skb,
 	/* Recycle should be enabled only with GRO aggr. (???) */
 	ipa_assert(sys->repl_hdlr != ipa_replenish_rx_cache_recycle);
 
-	/*
-	 * payload splits across 2 buff or more,
+	/* payload splits across 2 buff or more,
 	 * take the start of the payload from prev_skb
 	 */
 	if (sys->len_rem)
@@ -1923,11 +1894,10 @@ static int ipa_wan_rx_pyld_hdlr(struct sk_buff *skb,
 			goto bail;
 		}
 		qmap_hdr = *(u32 *)(skb_data + pkt_status_sz);
-		/*
-		 * Take the pkt_len_with_pad from the last 2 bytes of the QMAP
+
+		/* Take the pkt_len_with_pad from the last 2 bytes of the QMAP
 		 * header
 		 */
-
 		/*QMAP is BE: convert the pkt_len field from BE to LE*/
 		pkt_len_with_pad = ntohs((qmap_hdr>>16) & 0xffff);
 		ipa_debug_low("pkt_len with pad %d\n", pkt_len_with_pad);
@@ -1944,8 +1914,7 @@ static int ipa_wan_rx_pyld_hdlr(struct sk_buff *skb,
 
 		skb2 = skb_clone(skb, GFP_ATOMIC);
 		if (likely(skb2)) {
-			/*
-			 * the len of actual data is smaller than expected
+			/* the len of actual data is smaller than expected
 			 * payload split across 2 buff
 			 */
 			if (skb->len < frame_len) {
@@ -2090,16 +2059,14 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 		return 0;
 
 	if (in->client == IPA_CLIENT_APPS_WAN_PROD) {
-		/*
-		 * enable source notification status for exception packets
+		/* enable source notification status for exception packets
 		 * (i.e. QMAP commands) to be routed to modem.
 		 */
 		sys->ep->status.status_en = true;
 		sys->ep->status.status_ep =
 			ipa_get_ep_mapping(IPA_CLIENT_Q6_WAN_CONS);
 
-		/*
-		 * For the WAN producer, use a deferred interrupting
+		/* For the WAN producer, use a deferred interrupting
 		 * no-op to handle completions rather than having
 		 * every transfer interrupt when complete.
 		 */
@@ -2219,8 +2186,7 @@ void ipa_gsi_irq_rx_notify_cb(void *chan_data, void *xfer_data, uint16_t count)
 		queue_work(sys->wq, &sys->work);
 }
 
-/*
- * GSI ring length is calculated based on the desc_fifo_sz which
+/* GSI ring length is calculated based on the desc_fifo_sz which
  * defines the descriptor FIFO.  (GSI descriptors are 16 bytes.)
  * For producer pipes there is also an additional descriptor
  * for TAG STATUS immediate command.  An exception to this is the
@@ -2236,8 +2202,7 @@ ipa_gsi_ring_mem_size(enum ipa_client_type client, u32 desc_fifo_sz)
 	return 2 * desc_fifo_sz;
 }
 
-/*
- * Returns the event ring handle to use for the given endpoint
+/* Returns the event ring handle to use for the given endpoint
  * context, or a negative error code if an error occurs.
  *
  * If successful, the returned handle will be either the common
@@ -2332,8 +2297,7 @@ static struct ipa_tx_pkt_wrapper *tag_to_pointer_wa(u64 tag)
 	return (struct ipa_tx_pkt_wrapper *)addr;
 }
 
-/**
- * ipa_adjust_ra_buff_base_sz()
+/** ipa_adjust_ra_buff_base_sz()
  *
  * Return value: the largest power of two which is smaller
  * than the input value
@@ -2345,8 +2309,7 @@ static u32 ipa_adjust_ra_buff_base_sz(u32 aggr_byte_limit)
 
 	BUILD_BUG_ON(IPA_MTU + IPA_GENERIC_RX_BUFF_LIMIT == 0);
 
-	/*
-	 * We want a power-of-2 that's *less than* the value, so we
+	/* We want a power-of-2 that's *less than* the value, so we
 	 * start by subracting 1.  We find the highest set bit in
 	 * that, and use that to compute a power of 2.
 	 */

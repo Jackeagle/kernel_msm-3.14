@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/*
- * Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
 #ifndef _IPA_COMMON_I_H_
@@ -11,8 +10,7 @@
 
 #include <dt-bindings/soc/qcom,ipa.h>
 
-/*
- * A field_mask is a bitmask that defines both the width and
+/* A field_mask is a bitmask that defines both the width and
  * position of a field within in a 32-bit register.  Set bits in a
  * field_mask define which bits are considered part of a field.  At
  * least one bit must be set, and all set bits in a field_mask must
@@ -74,8 +72,7 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 	((client) == IPA_CLIENT_APPS_LAN_CONS || \
 	(client) == IPA_CLIENT_APPS_WAN_CONS)
 
-/**
- * enum ipa_irq_type - IPA Interrupt Type
+/** enum ipa_irq_type - IPA Interrupt Type
  * Used to register handlers for IPA interrupts
  *
  * Below enum is a logical mapping and not the actual interrupt bit in HW
@@ -104,8 +101,7 @@ enum ipa_irq_type {
 	IPA_IRQ_MAX
 };
 
-/**
- * enum ipa_client_type - names for the various IPA "clients"
+/** enum ipa_client_type - names for the various IPA "clients"
  * these are from the perspective of the clients, for e.g.
  * HSIC1_PROD means HSIC client is the producer and IPA is the
  * consumer.
@@ -234,8 +230,7 @@ struct ipa_active_client_logging_info {
 	int line;
 };
 
-/**
- * struct ipa_mem_buffer - IPA memory buffer
+/** struct ipa_mem_buffer - IPA memory buffer
  * @base: base
  * @phys_base: physical base address
  * @size: size of memory buffer
@@ -246,14 +241,10 @@ struct ipa_mem_buffer {
 	u32 size;
 };
 
-/**
- * max size of the header to be inserted
- */
+/** max size of the header to be inserted */
 #define IPA_HDR_MAX_SIZE 64
 
-/**
- * enum ipa_cs_offload - checksum offload setting
- */
+/** enum ipa_cs_offload - checksum offload setting */
 enum ipa_cs_offload {
 	IPA_DISABLE_CS_OFFLOAD		= 0,
 	IPA_ENABLE_CS_OFFLOAD_UL	= 1,
@@ -261,8 +252,7 @@ enum ipa_cs_offload {
 	IPA_CS_RSVD
 };
 
-/**
- * enum ipa_dp_evt_type - type of event client callback is
+/** enum ipa_dp_evt_type - type of event client callback is
  * invoked for on data path
  * @IPA_RECEIVE: data is struct sk_buff
  * @IPA_WRITE_DONE: data is struct sk_buff
@@ -274,8 +264,7 @@ enum ipa_dp_evt_type {
 	IPA_CLIENT_COMP_NAPI,
 };
 
-/**
- * enum ipa_hw_version - IPA hardware version
+/** enum ipa_hw_version - IPA hardware version
  * @IPA_HW_v3_5_1: IPA hardware version 3.5.1
  * @IPA_HW_None: IPA hardware version not defined
  *
@@ -290,8 +279,7 @@ enum ipa_hw_version {
 	IPA_HW_None	= 0xffffffff,
 };
 
-/**
- * enum ipa_mode_type - mode setting type in IPA end-point
+/** enum ipa_mode_type - mode setting type in IPA end-point
  * @BASIC: basic mode
  * @ENABLE_FRAMING_HDLC: not currently supported
  * @ENABLE_DEFRAMING_HDLC: not currently supported
@@ -305,36 +293,27 @@ enum ipa_mode_type {
 	IPA_DMA,
 };
 
-/**
- * enum ipa_nat_en_type - NAT setting type in IPA end-point
- */
+/** enum ipa_nat_en_type - NAT setting type in IPA end-point */
 enum ipa_nat_en_type {
 	IPA_BYPASS_NAT,
 	IPA_SRC_NAT,
 	IPA_DST_NAT,
 };
 
-/**
-* enum ipa_ipv6ct_en_type - IPv6CT setting type in IPA end-point
-*/
+/** enum ipa_ipv6ct_en_type - IPv6CT setting type in IPA end-point */
 enum ipa_ipv6ct_en_type {
 	IPA_BYPASS_IPV6CT,
 	IPA_ENABLE_IPV6CT,
 };
 
-/**
- *  enum ipa_aggr_en_type - aggregation setting type in IPA
- *  end-point
- */
+/** enum ipa_aggr_en_type - aggregation setting type in IPA end-point */
 enum ipa_aggr_en_type {
 	IPA_BYPASS_AGGR,
 	IPA_ENABLE_AGGR,
 	IPA_ENABLE_DEAGGR,
 };
 
-/**
- *  enum ipa_aggr_type - type of aggregation in IPA end-point
- */
+/** enum ipa_aggr_type - type of aggregation in IPA end-point */
 enum ipa_aggr_type {
 	IPA_MBIM_16 = 0,
 	IPA_HDLC    = 1,
@@ -344,8 +323,7 @@ enum ipa_aggr_type {
 	IPA_QCMAP   = 6,
 };
 
-/**
- * enum hdr_total_len_or_pad_type - type of value held by TOTAL_LEN_OR_PAD
+/** enum hdr_total_len_or_pad_type - type of value held by TOTAL_LEN_OR_PAD
  * field in header configuration register.
  * @IPA_HDR_PAD: field is used as padding length
  * @IPA_HDR_TOTAL_LEN: field is used as total length
@@ -355,22 +333,17 @@ enum hdr_total_len_or_pad_type {
 	IPA_HDR_TOTAL_LEN = 1,
 };
 
-/**
- * max size of the name of the resource (routing table, header)
- */
+/** max size of the name of the resource (routing table, header) */
 #define IPA_RESOURCE_NAME_MAX 32
 
-/**
- * enum ipa_ip_type - Address family: IPv4 or IPv6
- */
+/** enum ipa_ip_type - Address family: IPv4 or IPv6 */
 enum ipa_ip_type {
 	IPA_IP_v4,
 	IPA_IP_v6,
 	IPA_IP_MAX
 };
 
-/**
- * struct ipa_ep_cfg_nat - NAT configuration in IPA end-point
+/** struct ipa_ep_cfg_nat - NAT configuration in IPA end-point
  * @nat_en:	This defines the default NAT mode for the pipe: in case of
  *		filter miss - the default NAT mode defines the NATing operation
  *		on the packet. Valid for Input Pipes only (IPA consumer)
@@ -379,8 +352,7 @@ struct ipa_ep_cfg_nat {
 	enum ipa_nat_en_type nat_en;
 };
 
-/**
- * struct ipa_ep_cfg_conn_track - IPv6 Connection tracking configuration in
+/** struct ipa_ep_cfg_conn_track - IPv6 Connection tracking configuration in
  *	IPA end-point
  * @conn_track_en: Defines speculative conn_track action, means if specific
  *		   pipe needs to have UL/DL IPv6 Connection Tracking or Bybass
@@ -392,8 +364,7 @@ struct ipa_ep_cfg_conn_track {
 	enum ipa_ipv6ct_en_type conn_track_en;
 };
 
-/**
- * struct ipa_ep_cfg_hdr - header configuration in IPA end-point
+/** struct ipa_ep_cfg_hdr - header configuration in IPA end-point
  *
  * @hdr_len:Header length in bytes to be added/removed. Assuming
  *			header len is constant per endpoint. Valid for
@@ -449,8 +420,7 @@ struct ipa_ep_cfg_hdr {
 	u32  hdr_metadata_reg_valid;
 };
 
-/**
- * struct ipa_ep_cfg_hdr_ext - extended header configuration in IPA end-point
+/** struct ipa_ep_cfg_hdr_ext - extended header configuration in IPA end-point
  * @hdr_pad_to_alignment: Pad packet to specified alignment
  *	(2^pad to alignment value), i.e. value of 3 means pad to 2^3 = 8 bytes
  *	alignment. Alignment is to 0,2 up to 32 bytes (IPAv2 does not support 64
@@ -477,8 +447,7 @@ struct ipa_ep_cfg_hdr_ext {
 	bool hdr_little_endian;
 };
 
-/**
- * struct ipa_ep_cfg_mode - mode configuration in IPA end-point
+/** struct ipa_ep_cfg_mode - mode configuration in IPA end-point
  * @mode:	Valid for Input Pipes only (IPA Consumer)
  * @dst:	This parameter specifies the output pipe to which the packets
  *		will be routed to.
@@ -491,8 +460,7 @@ struct ipa_ep_cfg_mode {
 	enum ipa_client_type dst;
 };
 
-/**
- * struct ipa_ep_cfg_aggr - aggregation configuration in IPA end-point
+/** struct ipa_ep_cfg_aggr - aggregation configuration in IPA end-point
  *
  * @aggr_en:	Valid for both Input and Output Pipes
  * @aggr:	aggregation type (Valid for both Input and Output Pipes)
@@ -540,8 +508,7 @@ struct ipa_ep_cfg_aggr {
 	bool aggr_sw_eof_active;
 };
 
-/**
- * struct ipa_ep_cfg_route - route configuration in IPA end-point
+/** struct ipa_ep_cfg_route - route configuration in IPA end-point
  * @rt_tbl_hdl: Defines the default routing table index to be used in case there
  *		is no filter rule matching, valid for Input Pipes only (IPA
  *		Consumer). Clients should set this to 0 which will cause default
@@ -552,8 +519,7 @@ struct ipa_ep_cfg_route {
 	u32 rt_tbl_hdl;
 };
 
-/**
- * struct ipa_ep_cfg_holb - head of line blocking configuration in IPA end-point
+/** struct ipa_ep_cfg_holb - head of line blocking configuration in IPA end-point
  * @en: enable(1 => ok to drop pkt)/disable(0 => never drop pkt)
  * @tmr_val: duration in units of 128 IPA clk clock cyles [0,511], 1 clk=1.28us
  *	     IPAv2.5 support 32 bit HOLB timeout value, previous versions
@@ -564,8 +530,7 @@ struct ipa_ep_cfg_holb {
 	u32 tmr_val;
 };
 
-/**
- * struct ipa_ep_cfg_deaggr - deaggregation configuration in IPA end-point
+/** struct ipa_ep_cfg_deaggr - deaggregation configuration in IPA end-point
  * @deaggr_hdr_len: Deaggregation Header length in bytes. Valid only for Input
  *	Pipes, which are configured for 'Generic' deaggregation.
  * @packet_offset_valid: - 0: PACKET_OFFSET is not used, 1: PACKET_OFFSET is
@@ -584,8 +549,7 @@ struct ipa_ep_cfg_deaggr {
 };
 
 
-/**
- * struct ipa_ep_cfg_cfg - IPA ENDP_INIT Configuration register
+/** struct ipa_ep_cfg_cfg - IPA ENDP_INIT Configuration register
  * @frag_offload_en: - 0 - IP packet fragment handling is disabled. IP packet
  *	fragments should be sent to SW. SW is responsible for
  *	configuring filter rules, and IP packet filter exception should be
@@ -618,8 +582,7 @@ struct ipa_ep_cfg_cfg {
 	u8 gen_qmb_master_sel;
 };
 
-/**
- * struct ipa_ep_cfg_metadata_mask - Endpoint initialization hdr metadata mask
+/** struct ipa_ep_cfg_metadata_mask - Endpoint initialization hdr metadata mask
  * @metadata_mask: Mask specifying which metadata bits to write to
  *	IPA_ENDP_INIT_HDR_n.s HDR_OFST_METADATA. Only
  *	masked metadata bits (set to 1) will be written. Valid for Output
@@ -629,8 +592,7 @@ struct ipa_ep_cfg_metadata_mask {
 	u32 metadata_mask;
 };
 
-/**
- * struct ipa_ep_cfg_seq - HPS/DPS sequencer type configuration in IPA end-point
+/** struct ipa_ep_cfg_seq - HPS/DPS sequencer type configuration in IPA end-point
  * @set_dynamic:  0 - HPS/DPS seq type is configured statically,
  *		   1 - HPS/DPS seq type is set to seq_type
  * @seq_type: HPS/DPS sequencer type configuration
@@ -640,8 +602,7 @@ struct ipa_ep_cfg_seq {
 	int seq_type;
 };
 
-/**
- * struct ipa_ep_cfg - configuration of IPA end-point
+/** struct ipa_ep_cfg - configuration of IPA end-point
  * @nat:		NAT parmeters
  * @conn_track:		IPv6CT parmeters
  * @hdr:		Header parameters
@@ -670,8 +631,7 @@ struct ipa_ep_cfg {
 };
 
 
-/**
- * struct ipa_ep_cfg_ctrl - Control configuration in IPA end-point
+/** struct ipa_ep_cfg_ctrl - Control configuration in IPA end-point
  * @ipa_ep_suspend: 0 - ENDP is enabled, 1 - ENDP is suspended (disabled).
  *			Valid for PROD Endpoints
  * @ipa_ep_delay:   0 - ENDP is free-running, 1 - ENDP is delayed.
@@ -719,8 +679,7 @@ struct ipa_ep_cfg_ctrl {
 
 #ifdef CONFIG_IPA_ASSERT
 
-/*
- * Communicate a condition assumed by the code.  This is intended as
+/* Communicate a condition assumed by the code.  This is intended as
  * an informative statement about something that should always be true.
  *
  * N.B.:  Conditions asserted must not incorporate code with side-effects

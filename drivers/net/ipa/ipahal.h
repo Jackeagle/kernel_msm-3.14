@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/*
- * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
 #ifndef _IPAHAL_H_
@@ -11,8 +10,7 @@
 #include "ipahal_fltrt_i.h"
 
 
-/*
- * Immediate command names
+/* Immediate command names
  *
  * NOTE:: Any change to this enum, need to change to ipahal_imm_cmd_name_to_str
  *	array as well.
@@ -34,8 +32,7 @@ enum ipahal_imm_cmd_name {
 
 /* Immediate commands abstracted structures */
 
-/*
- * enum ipa_pipeline_clear_option - Values for pipeline clear waiting options
+/* enum ipa_pipeline_clear_option - Values for pipeline clear waiting options
  * @IPAHAL_HPS_CLEAR: Wait for HPS clear. All queues except high priority queue
  *  shall not be serviced until HPS is clear of packets or immediate commands.
  *  The high priority Rx queue / Q6ZIP group shall still be serviced normally.
@@ -62,8 +59,7 @@ enum ipahal_pipeline_clear_option {
 	IPAHAL_FULL_PIPELINE_CLEAR	= 2,
 };
 
-/*
- * struct ipahal_imm_cmd_pyld - Immediate cmd payload information
+/* struct ipahal_imm_cmd_pyld - Immediate cmd payload information
  * @len: length of the buffer
  * @opcode: opcode of the immediate command
  * The immediate command type-specific payload implicitly follows these
@@ -74,8 +70,7 @@ struct ipahal_imm_cmd_pyld {
 	u16 opcode;
 };
 
-/*
- * Return the address of type-specific data portion of an immediate
+/* Return the address of type-specific data portion of an immediate
  * command payload.
  */
 static inline void *ipahal_imm_cmd_pyld_data(struct ipahal_imm_cmd_pyld *pyld)
@@ -85,8 +80,7 @@ static inline void *ipahal_imm_cmd_pyld_data(struct ipahal_imm_cmd_pyld *pyld)
 
 /* Immediate command Function APIs */
 
-/*
- * Return a pointer to the payload for a DMA shared memory write immediate
+/* Return a pointer to the payload for a DMA shared memory write immediate
  * command, or null if one can't be allocated.  Result is dynamically
  * allocated, and caller must ensure it gets released by providing it to
  * ipahal_destroy_imm_cmd() when it is no longer needed.
@@ -97,8 +91,7 @@ static inline void *ipahal_imm_cmd_pyld_data(struct ipahal_imm_cmd_pyld *pyld)
 struct ipahal_imm_cmd_pyld *ipahal_dma_shared_mem_write_pyld(
 				struct ipa_mem_buffer *mem, u32 offset);
 
-/*
- * Return a pointer to the payload for a DMA register write immediate
+/* Return a pointer to the payload for a DMA register write immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd() when it is no
  * longer needed.
@@ -111,8 +104,7 @@ struct ipahal_imm_cmd_pyld *ipahal_dma_shared_mem_write_pyld(
 struct ipahal_imm_cmd_pyld *ipahal_register_write_pyld(u32 offset, u32 value,
 				u32 mask, bool clear);
 
-/*
- * Return a pointer to the payload for a header init local immediate
+/* Return a pointer to the payload for a header init local immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
  *
@@ -122,8 +114,7 @@ struct ipahal_imm_cmd_pyld *ipahal_register_write_pyld(u32 offset, u32 value,
 struct ipahal_imm_cmd_pyld *ipahal_hdr_init_local_pyld(
 				struct ipa_mem_buffer *mem, u32 offset);
 
-/*
- * Return a pointer to the payload for an IP packet init immediate
+/* Return a pointer to the payload for an IP packet init immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
  *
@@ -131,8 +122,7 @@ struct ipahal_imm_cmd_pyld *ipahal_hdr_init_local_pyld(
  */
 struct ipahal_imm_cmd_pyld *ipahal_ip_packet_init_pyld(u32 dest_pipe_idx);
 
-/*
- * Return a pointer to the payload for an IPv4 routing init immediate
+/* Return a pointer to the payload for an IPv4 routing init immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
  *
@@ -144,8 +134,7 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_v4_routing_init_pyld(
 				struct ipa_mem_buffer *mem,
 				u32 hash_offset, u32 nhash_offset);
 
-/*
- * Return a pointer to the payload for an IPv6 routing init immediate
+/* Return a pointer to the payload for an IPv6 routing init immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
  *
@@ -157,8 +146,7 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_v6_routing_init_pyld(
 				struct ipa_mem_buffer *mem,
 				u32 hash_offset, u32 nhash_offset);
 
-/*
- * Return a pointer to the payload for an IPv4 filter init immediate
+/* Return a pointer to the payload for an IPv4 filter init immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
  *
@@ -170,8 +158,7 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_v4_filter_init_pyld(
 				struct ipa_mem_buffer *mem,
 				u32 hash_offset, u32 nhash_offset);
 
-/*
- * Return a pointer to the payload for an IPv6 filter init immediate
+/* Return a pointer to the payload for an IPv6 filter init immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
  *
@@ -183,8 +170,7 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_v6_filter_init_pyld(
 				struct ipa_mem_buffer *mem,
 				u32 hash_offset, u32 nhash_offset);
 
-/*
- * Return a pointer to the payload for an IP packet tag status immediate
+/* Return a pointer to the payload for an IP packet tag status immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
  *
@@ -192,8 +178,7 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_v6_filter_init_pyld(
  */
 struct ipahal_imm_cmd_pyld *ipahal_ip_packet_tag_status_pyld(u64 tag);
 
-/*
- * Return a pointer to the payload for DMA task 32-bit address immediate
+/* Return a pointer to the payload for DMA task 32-bit address immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
  *
@@ -202,8 +187,7 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_packet_tag_status_pyld(u64 tag);
 struct ipahal_imm_cmd_pyld *ipahal_dma_task_32b_addr_pyld(
 				struct ipa_mem_buffer *mem);
 
-/*
- * ipahal_destroy_imm_cmd() - Destroy/Release bulk that was built
+/* ipahal_destroy_imm_cmd() - Destroy/Release bulk that was built
  *  by the construction functions
  */
 static inline void ipahal_destroy_imm_cmd(struct ipahal_imm_cmd_pyld *pyld)
@@ -214,8 +198,7 @@ static inline void ipahal_destroy_imm_cmd(struct ipahal_imm_cmd_pyld *pyld)
 
 /* IPA Status packet Structures and Function APIs */
 
-/*
- * enum ipahal_pkt_status_opcode - Packet Status Opcode
+/* enum ipahal_pkt_status_opcode - Packet Status Opcode
  * @IPAHAL_STATUS_OPCODE_PACKET_2ND_PASS: Packet Status generated as part of
  *  IPA second processing pass for a packet (i.e. IPA XLAT processing for
  *  the translated packet).
@@ -235,8 +218,7 @@ enum ipahal_pkt_status_opcode {
 	IPAHAL_PKT_STATUS_OPCODE_PACKET_2ND_PASS	= 0x40,
 };
 
-/*
- * enum ipahal_pkt_status_exception - Packet Status exception type
+/* enum ipahal_pkt_status_exception - Packet Status exception type
  * @IPAHAL_PKT_STATUS_EXCEPTION_PACKET_LENGTH: formerly IHL exception.
  *
  * Note: IPTYPE, PACKET_LENGTH and PACKET_THRESHOLD exceptions means that
@@ -254,8 +236,7 @@ enum ipahal_pkt_status_exception {
 	IPAHAL_PKT_STATUS_EXCEPTION_PACKET_THRESHOLD,
 	IPAHAL_PKT_STATUS_EXCEPTION_FRAG_RULE_MISS,
 	IPAHAL_PKT_STATUS_EXCEPTION_SW_FILT,
-	/*
-	 * NAT and IPv6CT have the same value at HW.
+	/* NAT and IPv6CT have the same value at HW.
 	 * NAT for IPv4 and IPv6CT for IPv6 exceptions
 	 */
 	IPAHAL_PKT_STATUS_EXCEPTION_NAT,
@@ -263,8 +244,7 @@ enum ipahal_pkt_status_exception {
 	IPAHAL_PKT_STATUS_EXCEPTION_MAX,
 };
 
-/*
- * enum ipahal_pkt_status_mask - Packet Status bitmask values of
+/* enum ipahal_pkt_status_mask - Packet Status bitmask values of
  *  the contained flags. This bitmask indicates flags on the properties of
  *  the packet as well as IPA processing it may had.
  * @TAG_VALID: Flag specifying if TAG and TAG info valid?
@@ -277,8 +257,7 @@ enum ipahal_pkt_status_mask {
 	IPAHAL_PKT_STATUS_MASK_CKSUM_PROCESS	= 0x0100,
 };
 
-/*
- * enum ipahal_pkt_status_nat_type - Type of NAT
+/* enum ipahal_pkt_status_nat_type - Type of NAT
  *
  *  The values assigned here are assumed by ipa_pkt_status_parse() to
  *  match values returned in the nat_type field of a ipa_pkt_status_hw
@@ -290,8 +269,7 @@ enum ipahal_pkt_status_nat_type {
 	IPAHAL_PKT_STATUS_NAT_DST	= 2,
 };
 
-/*
- * struct ipahal_pkt_status - IPA status packet abstracted payload.
+/* struct ipahal_pkt_status - IPA status packet abstracted payload.
  *  This structure describes the status packet fields for the
  *   following statuses: IPA_STATUS_PACKET, IPA_STATUS_DROPPED_PACKET,
  *   IPA_STATUS_SUSPENDED_PACKET.
@@ -370,33 +348,28 @@ struct ipahal_pkt_status {
 	u8 frag_rule;
 };
 
-/*
- * ipahal_pkt_status_get_size() - Get H/W size of packet status
+/* ipahal_pkt_status_get_size() - Get H/W size of packet status
  */
 u32 ipahal_pkt_status_get_size(void);
 
-/*
- * ipahal_pkt_status_parse() - Parse Packet Status payload to abstracted form
+/* ipahal_pkt_status_parse() - Parse Packet Status payload to abstracted form
  * @unparsed_status: Pointer to H/W format of the packet status as read from H/W
  * @status: Pointer to pre-allocated buffer where the parsed info will be stored
  */
 void ipahal_pkt_status_parse(const void *unparsed_status,
 	struct ipahal_pkt_status *status);
 
-/*
- * ipahal_pkt_status_exception_str() - returns string represents exception type
+/* ipahal_pkt_status_exception_str() - returns string represents exception type
  * @exception: [in] The exception type
  */
 const char *ipahal_pkt_status_exception_str(
 	enum ipahal_pkt_status_exception exception);
 
-/*
- * ipahal_dma_alloc() - allocate a DMA buffer, describe it in mem struct
+/* ipahal_dma_alloc() - allocate a DMA buffer, describe it in mem struct
  */
 int ipahal_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp);
 
-/*
- * ipahal_dma_free() - free a previously-allocated DMA buffer described by mem
+/* ipahal_dma_free() - free a previously-allocated DMA buffer described by mem
  */
 void ipahal_dma_free(struct ipa_mem_buffer *mem);
 

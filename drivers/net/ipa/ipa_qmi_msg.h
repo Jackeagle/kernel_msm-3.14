@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/*
- * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
 #ifndef _IPA_QMI_MSG_H_
 #define _IPA_QMI_MSG_H_
 
-/*
- * Request/response/indication QMI message ids used for IPA.  Receiving
+/* Request/response/indication QMI message ids used for IPA.  Receiving
  * end issues a response for requests; indications require no response.
  */
 #define IPA_QMI_INDICATION_REGISTER	0x20	/* modem -> AP request */
@@ -16,8 +14,7 @@
 #define IPA_QMI_INIT_COMPLETE_IND	0x22	/* AP -> modem indication */
 #define IPA_QMI_DRIVER_INIT_COMPLETE	0x35	/* modem -> AP request */
 
-/*
- * The maximum size required for message types.  These sizes include
+/* The maximum size required for message types.  These sizes include
  * the message data, along with type (1 byte) and length (2 byte)
  * information for each field.  The qmi_send_*() interfaces require
  * the message size to be provided.
@@ -42,8 +39,7 @@ struct ipa_indication_register_req {
 	u8 data_usage_quota_reached;
 };
 
-/*
- * The response to a IPA_QMI_INDICATION_REGISTER request consists only of
+/* The response to a IPA_QMI_INDICATION_REGISTER request consists only of
  * a standard QMI response.
  */
 struct ipa_indication_register_rsp {
@@ -55,16 +51,14 @@ struct ipa_driver_init_complete_req {
 	u8 status;
 };
 
-/*
- * The response to a IPA_QMI_DRIVER_INIT_COMPLETE request consists only
+/* The response to a IPA_QMI_DRIVER_INIT_COMPLETE request consists only
  * of a standard QMI response.
  */
 struct ipa_driver_init_complete_rsp {
 	struct qmi_response_type_v01 rsp;
 };
 
-/*
- * The message for the IPA_QMI_INIT_COMPLETE_IND indication consists
+/* The message for the IPA_QMI_INIT_COMPLETE_IND indication consists
  * only of a standard QMI response.
  */
 struct ipa_init_complete_ind {
@@ -81,8 +75,7 @@ enum ipa_platform_type {
 	IPA_QMI_PLATFORM_TYPE_MSM_QNX_V01	= 5,	/* QNX MSM */
 };
 
-/*
- * This defines the start and end offset of a range of memory.  Both
+/* This defines the start and end offset of a range of memory.  Both
  * fields are offsets relative to the start of IPA shared memory.
  * The end value is the last addressable byte *within* the range.
  */
@@ -91,8 +84,7 @@ struct ipa_mem_bounds {
 	u32 end;
 };
 
-/*
- * This defines the location and size of an array.  The start value
+/* This defines the location and size of an array.  The start value
  * is an offset relative to the start of IPA shared memory.  The
  * size of the array is implied by the number of entries (the entry
  * size is assumed to be known).
@@ -102,8 +94,7 @@ struct ipa_mem_array {
 	u32 count;
 };
 
-/*
- * This defines the location and size of a range of memory.  The
+/* This defines the location and size of a range of memory.  The
  * start is an offset relative to the start of IPA shared memory.
  * This differs from the ipa_mem_bounds structure in that the size
  * (in bytes) of the memory region is specified rather than the
@@ -114,23 +105,20 @@ struct ipa_mem_range {
 	u32 size;
 };
 
-/*
- * The message for the IPA_QMI_INIT_DRIVER request contains information
+/* The message for the IPA_QMI_INIT_DRIVER request contains information
  * from the AP that affects modem initialization.
  */
 struct ipa_init_modem_driver_req {
 	u8			platform_type_valid;
 	u32			platform_type;	/* enum ipa_platform_type */
 
-	/*
-	 * Modem header table information.  This defines the IPA shared
+	/* Modem header table information.  This defines the IPA shared
 	 * memory in which the modem may insert header table entries.
 	 */
 	u8			hdr_tbl_info_valid;
 	struct ipa_mem_bounds	hdr_tbl_info;
 
-	/*
-	 * Routing table information.  These define the location and size of
+	/* Routing table information.  These define the location and size of
 	 * non-hashable IPv4 and IPv6 filter tables.  The start values are
 	 * offsets relative to the start of IPA shared memory.
 	 */
@@ -139,8 +127,7 @@ struct ipa_init_modem_driver_req {
 	u8			v6_route_tbl_info_valid;
 	struct ipa_mem_array	v6_route_tbl_info;
 
-	/*
-	 * Filter table information.  These define the location and size of
+	/* Filter table information.  These define the location and size of
 	 * non-hashable IPv4 and IPv6 filter tables.  The start values are
 	 * offsets relative to the start of IPA shared memory.
 	 */
@@ -149,23 +136,20 @@ struct ipa_init_modem_driver_req {
 	u8			v6_filter_tbl_start_valid;
 	u32			v6_filter_tbl_start;
 
-	/*
-	 * Modem memory information.  This defines the location and
+	/* Modem memory information.  This defines the location and
 	 * size of memory available for the modem to use.
 	 */
 	u8			modem_mem_info_valid;
 	struct ipa_mem_range	modem_mem_info;
 
-	/*
-	 * This defines the destination endpoint on the AP to which
+	/* This defines the destination endpoint on the AP to which
 	 * the modem driver can send control commands.  IPA supports
 	 * 20 endpoints, so this must be 19 or less.
 	 */
 	u8			ctrl_comm_dest_end_pt_valid;
 	u32			ctrl_comm_dest_end_pt;
 
-	/*
-	 * This defines whether the modem should load the microcontroller
+	/* This defines whether the modem should load the microcontroller
 	 * or not.  It is unnecessary to reload it if the modem is being
 	 * restarted.
 	 *
@@ -174,22 +158,19 @@ struct ipa_init_modem_driver_req {
 	u8			skip_uc_load_valid;
 	u8			skip_uc_load;
 
-	/*
-	 * Processing context memory information.  This defines the memory in
+	/* Processing context memory information.  This defines the memory in
 	 * which the modem may insert header processing context table entries.
 	 */
 	u8			hdr_proc_ctx_tbl_info_valid;
 	struct ipa_mem_bounds	hdr_proc_ctx_tbl_info;
 
-	/*
-	 * Compression command memory information.  This defines the memory
+	/* Compression command memory information.  This defines the memory
 	 * in which the modem may insert compression/decompression commands.
 	 */
 	u8			zip_tbl_info_valid;
 	struct ipa_mem_bounds	zip_tbl_info;
 
-	/*
-	 * Routing table information.  These define the location and size
+	/* Routing table information.  These define the location and size
 	 * of hashable IPv4 and IPv6 filter tables.  The start values are
 	 * offsets relative to the start of IPA shared memory.
 	 */
@@ -198,8 +179,7 @@ struct ipa_init_modem_driver_req {
 	u8			v6_hash_route_tbl_info_valid;
 	struct ipa_mem_array	v6_hash_route_tbl_info;
 
-	/*
-	 * Filter table information.  These define the location and size
+	/* Filter table information.  These define the location and size
 	 * of hashable IPv4 and IPv6 filter tables.  The start values are
 	 * offsets relative to the start of IPA shared memory.
 	 */
@@ -209,8 +189,7 @@ struct ipa_init_modem_driver_req {
 	u32			v6_hash_filter_tbl_start;
 };
 
-/*
- * The response to a IPA_QMI_INIT_DRIVER request begins with a standard
+/* The response to a IPA_QMI_INIT_DRIVER request begins with a standard
  * QMI response, but contains other information as well.  Currently we
  * simply wait for the the INIT_DRIVER transaction to complete and
  * ignore any other data that might be returned.
@@ -218,24 +197,21 @@ struct ipa_init_modem_driver_req {
 struct ipa_init_modem_driver_rsp {
 	struct qmi_response_type_v01	rsp;
 
-	/*
-	 * This defines the destination endpoint on the modem to which
+	/* This defines the destination endpoint on the modem to which
 	 * the AP driver can send control commands.  IPA supports
 	 * 20 endpoints, so this must be 19 or less.
 	 */
 	u8				ctrl_comm_dest_end_pt_valid;
 	u32				ctrl_comm_dest_end_pt;
 
-	/*
-	 * This defines the default endpoint.  The AP driver is not
+	/* This defines the default endpoint.  The AP driver is not
 	 * required to configure the hardware with this value.  IPA
 	 * supports 20 endpoints, so this must be 19 or less.
 	 */
 	u8				default_end_pt_valid;
 	u32				default_end_pt;
 
-	/*
-	 * This defines whether a second handshake is required to complete
+	/* This defines whether a second handshake is required to complete
 	 * initialization.
 	 */
 	u8				modem_driver_init_pending_valid;

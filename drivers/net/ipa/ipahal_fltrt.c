@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/*
- * Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
 #define pr_fmt(fmt)	"ipahal %s:%d " fmt, __func__, __LINE__
@@ -12,8 +11,7 @@
 #include "ipahal_fltrt_i.h"
 #include "ipahal_i.h"
 
-/*
- * Width and alignment values for H/W structures.  Values could
+/* Width and alignment values for H/W structures.  Values could
  * differ for different versions of IPA hardware.
  */
 #define IPA_HW_TBL_WIDTH		8
@@ -25,22 +23,18 @@
 #define IPA_HW_TBL_ADDR_MASK		127
 #define IPA_HW_RULE_BUF_SIZE		256
 
-/*
- * Rules Priority.
+/* Rules Priority.
  * Needed due to rules classification to hashable and non-hashable.
  * Higher priority is lower in number. i.e. 0 is highest priority
  */
 #define IPA_RULE_MAX_PRIORITY	0
 #define IPA_RULE_MIN_PRIORITY	1023
 
-/*
- * RULE ID, bit length (e.g. 10 bits).
- */
+/* RULE ID, bit length (e.g. 10 bits).  */
 #define IPA_RULE_ID_BIT_LEN		10
 #define IPA_LOW_RULE_ID		1
 
-/*
- * struct ipahal_fltrt_obj - Flt/Rt H/W information for specific IPA version
+/* struct ipahal_fltrt_obj - Flt/Rt H/W information for specific IPA version
  * @tbl_width: Width of table in bytes
  * @sysaddr_align: System table address alignment
  * @lcladdr_align: Local table offset alignment
@@ -109,8 +103,7 @@ static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr)
 	return hwaddr;
 }
 
-/*
- * The IPA implements offloaded packet filtering and routing
+/* The IPA implements offloaded packet filtering and routing
  * capabilities.  This is managed by programming IPA-resident
  * tables of rules that define the processing that should be
  * performed by the IPA and the conditions under which they
@@ -193,8 +186,7 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
 	},
 };
 
-/*
- * Set up an empty table in system memory.  This will be used, for
+/* Set up an empty table in system memory.  This will be used, for
  * example, to delete a route table safely.  If successful, record
  * the table and also the dev pointer in the IPA HAL context.
  */
@@ -229,8 +221,7 @@ void ipahal_empty_fltrt_destroy(void)
 	ipahal_dma_free(&ipahal_ctx->empty_fltrt_tbl);
 }
 
-/*
- * ipahal_fltrt_init() - Build the FLT/RT information table
+/* ipahal_fltrt_init() - Build the FLT/RT information table
  *  See ipahal_fltrt_objs[] comments
  */
 void ipahal_fltrt_init(enum ipa_hw_version hw_version)
@@ -268,8 +259,7 @@ u32 ipahal_get_lcl_tbl_addr_alignment(void)
 	return ipahal_fltrt.lcladdr_align - 1;
 }
 
-/*
- * Rule priority is used to distinguish rules order
+/* Rule priority is used to distinguish rules order
  * at the integrated table consisting from hashable and
  * non-hashable tables. Max priority are rules that once are
  * scanned by IPA, IPA will not look for further rules and use it.
@@ -334,8 +324,7 @@ void ipahal_free_empty_img(struct ipa_mem_buffer *mem)
 	ipahal_dma_free(mem);
 }
 
-/*
- * ipahal_rt_generate_empty_img() - Generate empty route image
+/* ipahal_rt_generate_empty_img() - Generate empty route image
  *  Creates routing header buffer for the given tables number.
  *  For each table, make it point to the empty table on DDR.
  * @tbls_num: Number of tables. For each will have an entry in the header
@@ -361,8 +350,7 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
 	return 0;
 }
 
-/*
- * ipahal_flt_generate_empty_img() - Generate empty filter image
+/* ipahal_flt_generate_empty_img() - Generate empty filter image
  *  Creates filter header buffer for the given tables number.
  *  For each table, make it point to the empty table on DDR.
  * @tbls_num: Number of tables. For each will have an entry in the header

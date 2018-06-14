@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/*
- * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
 #define pr_fmt(fmt)	"ipahal %s:%d " fmt, __func__, __LINE__
@@ -29,8 +28,7 @@ static const char *ipahal_pkt_status_exception_to_str[] = {
 	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_IPV6CT),
 };
 
-/*
- * struct ipahal_imm_cmd_obj - immediate command H/W information for
+/* struct ipahal_imm_cmd_obj - immediate command H/W information for
  *  specific IPA version
  * @name - Command "name" (i.e., symbolic identifier)
  * @opcode - Immediate command OpCode
@@ -73,8 +71,7 @@ ipahal_imm_cmd_pyld_alloc_atomic(u16 opcode, size_t pyld_size)
 	return ipahal_imm_cmd_pyld_alloc_common(opcode, pyld_size, GFP_ATOMIC);
 }
 
-/*
- * Returns true if the value provided is too big to be represented
+/* Returns true if the value provided is too big to be represented
  * in the given number of bits.  In this case, WARN_ON() is called,
  * and a message is printed and using ipa_err().
  *
@@ -90,8 +87,7 @@ static bool check_too_big(char *name, u64 value, u8 bits)
 	return true;
 }
 
-/*
- * The The opcode used for certain immediate commands may change
+/* The The opcode used for certain immediate commands may change
  * between different versions of IPA hardware.  The format of the
  * command data passed to the IPA can change slightly with new
  * hardware.  The "ipahal" layer uses the ipahal_imm_cmd_obj[][]
@@ -178,8 +174,7 @@ static const struct ipahal_imm_cmd_obj
 #undef idsym
 #undef cfunc
 
-/*
- * ipahal_imm_cmd_init() - Build the Immediate command information table
+/* ipahal_imm_cmd_init() - Build the Immediate command information table
  *  See ipahal_imm_cmd_objs[][] comments
  */
 static void ipahal_imm_cmd_init(enum ipa_hw_version hw_version)
@@ -460,8 +455,7 @@ static bool nat_type_valid(u8 nat_type)
 	}
 }
 
-/*
- * Maps an exception type returned in a ipa_pkt_status_hw structure
+/* Maps an exception type returned in a ipa_pkt_status_hw structure
  * to the ipahal_pkt_status_exception value that represents it in
  * the exception field of a ipahal_pkt_status structure.  Returns
  * IPAHAL_PKT_STATUS_EXCEPTION_MAX for an unrecognized value.
@@ -540,16 +534,13 @@ static void ipa_pkt_status_parse(
 	status->status_mask = hw_status->status_mask;
 }
 
-/*
- * ipahal_pkt_status_get_size() - Get H/W size of packet status
- */
+/* ipahal_pkt_status_get_size() - Get H/W size of packet status */
 u32 ipahal_pkt_status_get_size(void)
 {
 	return sizeof(struct ipa_pkt_status_hw);
 }
 
-/*
- * ipahal_pkt_status_parse() - Parse Packet Status payload to abstracted form
+/* ipahal_pkt_status_parse() - Parse Packet Status payload to abstracted form
  * @unparsed_status: Pointer to H/W format of the packet status as read from H/W
  * @status: Pointer to pre-allocated buffer where the parsed info will be stored
  */
@@ -561,8 +552,7 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 	ipa_pkt_status_parse(unparsed_status, status);
 }
 
-/*
- * ipahal_pkt_status_exception_str() - returns string represents exception type
+/* ipahal_pkt_status_exception_str() - returns string represents exception type
  * @exception: [in] The exception type
  */
 const char *
@@ -609,8 +599,7 @@ void ipahal_init(enum ipa_hw_version hw_version, void __iomem *base)
 	ipahal_fltrt_init(hw_version);
 }
 
-/*
- * Assign the IPA HAL's device pointer.  Once it's assigned we can
+/* Assign the IPA HAL's device pointer.  Once it's assigned we can
  * initialize the empty table entry.
  */
 int ipahal_dev_init(struct device *dev)

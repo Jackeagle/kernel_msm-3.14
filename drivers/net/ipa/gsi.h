@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/*
- * Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
 #ifndef _GSI_H_
@@ -19,8 +18,7 @@
 #define GSI_EVT_RING_ELEMENT_SIZE	16	/* bytes */
 #define GSI_CHAN_RING_ELEMENT_SIZE	16	/* bytes */
 
-/**
- * struct ipa_gsi_ep_config - IPA GSI endpoint configurations
+/** struct ipa_gsi_ep_config - IPA GSI endpoint configurations
  *
  * @ipa_ep_num: IPA EP pipe number
  * @ipa_gsi_chan_num: GSI channel number
@@ -36,8 +34,7 @@ struct ipa_gsi_ep_config {
 	u32 ee;
 };
 
-/**
- * gsi_chan_props - Channel related properties
+/** gsi_chan_props - Channel related properties
  *
  * @dir:	     channel direction
  * @ch_id:	     virtual channel ID
@@ -89,7 +86,6 @@ struct ipa_gsi_ep_config {
  * @chan_user_data:  cookie used for notifications
  *
  * All the callbacks are in interrupt context
- *
  */
 struct gsi_chan_props {
 	struct ipa_mem_buffer mem;
@@ -115,8 +111,7 @@ enum gsi_xfer_elem_type {
 	GSI_XFER_ELEM_NOP,
 };
 
-/**
- * gsi_xfer_elem - Metadata about a single transfer
+/** gsi_xfer_elem - Metadata about a single transfer
  *
  * @addr:	    physical address of buffer
  * @len:	    size of buffer for GSI_XFER_ELEM_DATA:
@@ -158,7 +153,6 @@ enum gsi_xfer_elem_type {
  *		    GSI_XFER_ELEM_NOP: for event generation only
  *
  * @xfer_user_data: cookie used in xfer_cb
- *
  */
 struct gsi_xfer_elem {
 	uint64_t addr;
@@ -171,37 +165,31 @@ struct gsi_xfer_elem {
 struct gsi_ctx;
 struct gsi_ctx *gsi_init(struct platform_device *pdev, u32 ee);
 
-/**
- * gsi_register_device - Peripheral should call this function to
+/** gsi_register_device - Peripheral should call this function to
  * register itself with GSI before invoking any other APIs
  *
  * @Return 0 if successful or a negative error code otherwise.
  */
 int gsi_register_device(void);
 
-/**
- * gsi_deregister_device - Peripheral should call this function to
+/** gsi_deregister_device - Peripheral should call this function to
  * de-register itself with GSI
  *
  * @Return 0, or a negative errno
  */
 int gsi_deregister_device(void);
 
-/**
- * gsi_firmware_size_ok - Verify that a firmware image having the
+/** gsi_firmware_size_ok - Verify that a firmware image having the
  * given base address and size is suitable
  *
  * @Return true if values are OK, false otherise
  */
 bool gsi_firmware_size_ok(u32 base, u32 size);
 
-/**
- * gsi_firmware_enable - Enable firmware after loading
- */
+/** gsi_firmware_enable - Enable firmware after loading */
 void gsi_firmware_enable(void);
 
-/**
- * gsi_alloc_evt_ring - Peripheral should call this function to
+/** gsi_alloc_evt_ring - Peripheral should call this function to
  * allocate an event ring once gsi_register_device() has been called
  *
  * This function can sleep
@@ -210,8 +198,7 @@ void gsi_firmware_enable(void);
  */
 long gsi_alloc_evt_ring(u32 size, u16 int_modt);
 
-/**
- * gsi_dealloc_evt_ring - Peripheral should call this function to
+/** gsi_dealloc_evt_ring - Peripheral should call this function to
  * de-allocate an event ring. There should not exist any active
  * channels using this event ring
  *
@@ -221,8 +208,7 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt);
  */
 void gsi_dealloc_evt_ring(unsigned long evt_ring_hdl);
 
-/**
- * gsi_reset_evt_ring - Peripheral should call this function to
+/** gsi_reset_evt_ring - Peripheral should call this function to
  * reset an event ring to recover from error state
  *
  * @evt_ring_hdl:  Client handle previously obtained from
@@ -232,8 +218,7 @@ void gsi_dealloc_evt_ring(unsigned long evt_ring_hdl);
  */
 void gsi_reset_evt_ring(unsigned long evt_ring_hdl);
 
-/**
- * gsi_alloc_channel - Peripheral should call this function to
+/** gsi_alloc_channel - Peripheral should call this function to
  * allocate a channel once gsi_register_device() has been called
  *
  * @props:     Channel properties
@@ -244,8 +229,7 @@ void gsi_reset_evt_ring(unsigned long evt_ring_hdl);
  */
 long gsi_alloc_channel(struct gsi_chan_props *props);
 
-/**
- * gsi_write_channel_scratch - Peripheral should call this function to
+/** gsi_write_channel_scratch - Peripheral should call this function to
  * write to the scratch area of the channel context
  *
  * @chan_hdl:  Client handle previously obtained from gsi_alloc_channel
@@ -255,8 +239,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props);
  */
 int gsi_write_channel_scratch(unsigned long chan_hdl, u32 tlv_size);
 
-/**
- * gsi_start_channel - Peripheral should call this function to
+/** gsi_start_channel - Peripheral should call this function to
  * start a channel i.e put into running state
  *
  * @chan_hdl:  Client handle previously obtained from
@@ -268,8 +251,7 @@ int gsi_write_channel_scratch(unsigned long chan_hdl, u32 tlv_size);
  */
 int gsi_start_channel(unsigned long chan_hdl);
 
-/**
- * gsi_stop_channel - Peripheral should call this function to
+/** gsi_stop_channel - Peripheral should call this function to
  * stop a channel. Stop will happen on a packet boundary
  *
  * @chan_hdl:  Client handle previously obtained from
@@ -282,8 +264,7 @@ int gsi_start_channel(unsigned long chan_hdl);
  */
 int gsi_stop_channel(unsigned long chan_hdl);
 
-/**
- * gsi_reset_channel - Peripheral should call this function to
+/** gsi_reset_channel - Peripheral should call this function to
  * reset a channel to recover from error state
  *
  * @chan_hdl:  Client handle previously obtained from
@@ -295,8 +276,7 @@ int gsi_stop_channel(unsigned long chan_hdl);
  */
 int gsi_reset_channel(unsigned long chan_hdl);
 
-/**
- * gsi_dealloc_channel - Peripheral should call this function to
+/** gsi_dealloc_channel - Peripheral should call this function to
  * de-allocate a channel
  *
  * @chan_hdl:  Client handle previously obtained from
@@ -306,8 +286,7 @@ int gsi_reset_channel(unsigned long chan_hdl);
  */
 void gsi_dealloc_channel(unsigned long chan_hdl);
 
-/**
- * gsi_is_channel_empty - Peripheral can call this function to query if
+/** gsi_is_channel_empty - Peripheral can call this function to query if
  * the channel is empty. This is only applicable to GPI. "Empty" means
  * GSI has consumed all descriptors for a TO_GSI channel and SW has
  * processed all completed descriptors for a FROM_GSI channel.
@@ -318,8 +297,7 @@ void gsi_dealloc_channel(unsigned long chan_hdl);
  */
 bool gsi_is_channel_empty(unsigned long chan_hdl);
 
-/**
- * gsi_get_channel_cfg - This function returns the current config
+/** gsi_get_channel_cfg - This function returns the current config
  * of the specified channel
  *
  * @chan_hdl:  Client handle previously obtained from
@@ -331,8 +309,7 @@ bool gsi_is_channel_empty(unsigned long chan_hdl);
  */
 int gsi_get_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props);
 
-/**
- * gsi_set_channel_cfg - This function applies the supplied config
+/** gsi_set_channel_cfg - This function applies the supplied config
  * to the specified channel
  *
  * ch_id and evt_ring_hdl of the channel cannot be changed after
@@ -345,8 +322,7 @@ int gsi_get_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props);
  */
 int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props);
 
-/**
- * gsi_poll_channel - Peripheral should call this function to query for
+/** gsi_poll_channel - Peripheral should call this function to query for
  * completed transfer descriptors.
  *
  * @chan_hdl:  Client handle previously obtained from
@@ -356,8 +332,7 @@ int gsi_set_channel_cfg(unsigned long chan_hdl, struct gsi_chan_props *props);
  */
 int gsi_poll_channel(unsigned long chan_hdl);
 
-/**
- * gsi_channel_intr_enable/disable - control channel interrupts
+/** gsi_channel_intr_enable/disable - control channel interrupts
  *
  * @chan_hdl:  Client handle previously obtained from
  *	       gsi_alloc_channel
@@ -365,8 +340,7 @@ int gsi_poll_channel(unsigned long chan_hdl);
 void gsi_channel_intr_enable(unsigned long chan_hdl);
 void gsi_channel_intr_disable(unsigned long chan_hdl);
 
-/**
- * gsi_queue_xfer - Peripheral should call this function
+/** gsi_queue_xfer - Peripheral should call this function
  * to queue transfers on the given channel
  *
  * @chan_hdl:  Client handle previously obtained from
@@ -381,8 +355,7 @@ void gsi_channel_intr_disable(unsigned long chan_hdl);
 int gsi_queue_xfer(unsigned long chan_hdl, u16 num_xfers,
 		struct gsi_xfer_elem *xfer, bool ring_db);
 
-/**
- * gsi_start_xfer - Peripheral should call this function to
+/** gsi_start_xfer - Peripheral should call this function to
  * inform HW about queued xfers
  *
  * @chan_hdl:  Client handle previously obtained from

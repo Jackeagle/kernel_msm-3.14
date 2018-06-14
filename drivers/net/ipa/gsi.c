@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/*
- * Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
 #define pr_fmt(fmt)    "gsi %s:%d " fmt, __func__, __LINE__
@@ -214,9 +213,7 @@ enum gsi_evt_ch_cmd_opcode {
 	GSI_EVT_DE_ALLOC = 0xa,
 };
 
-/**
- * gsi_gpi_channel_scratch - GPI protocol SW config area of
- * channel scratch
+/** gsi_gpi_channel_scratch - GPI protocol SW config area of channel scratch
  *
  * @max_outstanding_tre: Used for the prefetch management sequence by the
  *			 sequencer. Defines the maximum number of allowed
@@ -241,10 +238,7 @@ struct __packed gsi_gpi_channel_scratch {
 	uint32_t outstanding_threshold:16;
 };
 
-/**
- * gsi_channel_scratch - channel scratch SW config area
- *
- */
+/** gsi_channel_scratch - channel scratch SW config area */
 union __packed gsi_channel_scratch {
 	struct __packed gsi_gpi_channel_scratch gpi;
 	struct __packed {
@@ -255,8 +249,7 @@ union __packed gsi_channel_scratch {
 	} data;
 };
 
-/*
- * Read a value from the given offset into the I/O space defined in
+/* Read a value from the given offset into the I/O space defined in
  * the GSI context.
  */
 static u32 gsi_readl(u32 offset)
@@ -264,8 +257,7 @@ static u32 gsi_readl(u32 offset)
 	return readl(gsi_ctx->base + offset);
 }
 
-/*
- * Write the provided value to the given offset into the I/O space
+/* Write the provided value to the given offset into the I/O space
  * defined in the GSI context.
  */
 static void gsi_writel(u32 v, u32 offset)
@@ -584,8 +576,7 @@ static void gsi_ring_evt_doorbell(struct gsi_evt_ctx *ctx)
 {
 	u32 val;
 
-	/*
-	 * The doorbell 0 and 1 registers store the low-order and
+	/* The doorbell 0 and 1 registers store the low-order and
 	 * high-order 32 bits of the event ring doorbell register,
 	 * respectively.  LSB (doorbell 0) must be written last.
 	 */
@@ -600,8 +591,7 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *ctx)
 {
 	u32 val;
 
-	/*
-	 * allocate new events for this channel first
+	/* allocate new events for this channel first
 	 * before submitting the new TREs.
 	 * for TO_GSI channels the event ring doorbell is rang as part of
 	 * interrupt handling.
@@ -610,8 +600,7 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *ctx)
 		gsi_ring_evt_doorbell(ctx->evtr);
 	ctx->ring.wp = ctx->ring.wp_local;
 
-	/*
-	 * The doorbell 0 and 1 registers store the low-order and
+	/* The doorbell 0 and 1 registers store the low-order and
 	 * high-order 32 bits of the channel ring doorbell register,
 	 * respectively.  LSB (doorbell 0) must be written last.
 	 */
@@ -917,8 +906,7 @@ int gsi_deregister_device(void)
 		return -ENOTSUPP;
 	}
 
-	/*
-	 * Don't bother clearing the error log again (ERROR_LOG) or
+	/* Don't bother clearing the error log again (ERROR_LOG) or
 	 * setting the interrupt type again (INTSET).  Disable all
 	 * interrupts.
 	 */
@@ -940,8 +928,7 @@ bool gsi_firmware_size_ok(u32 base, u32 size)
 {
 	u32 load_address;
 
-	/*
-	 * The base has to match the first instruction address.  And
+	/* The base has to match the first instruction address.  And
 	 * the size can't exceed the number of 4-byte instructions
 	 * we have room for.
 	 */
@@ -1140,8 +1127,7 @@ static void gsi_program_evt_ring_ctx(struct ipa_mem_buffer *mem,
 	val = field_gen(mem->size, EV_R_LENGTH_BMSK);
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_1_OFFS(evt_id, ee));
 
-	/*
-	 * The context 2 and 3 registers store the low-order and
+	/* The context 2 and 3 registers store the low-order and
 	 * high-order 32 bits of the address of the event ring,
 	 * respectively.
 	 */
@@ -1189,8 +1175,7 @@ static void gsi_prime_evt_ring(struct gsi_evt_ctx *ctx)
 	spin_unlock_irqrestore(&ctx->ring.slock, flags);
 }
 
-/*
- * Issue a GSI command by writing a value to a register, then wait
+/* Issue a GSI command by writing a value to a register, then wait
  * for completion to be signaled.  Returns 0 if a timeout occurred,
  * non-zero (positive) othwerwise.  Note that the register offset
  * is first, value to write is second (reverse of writel() order).
@@ -1413,8 +1398,7 @@ gsi_program_chan_ctx(struct gsi_chan_props *props, u32 ee, u8 erindex)
 	val = field_gen(props->mem.size, R_LENGTH_BMSK);
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_CNTXT_1_OFFS(props->ch_id, ee));
 
-	/*
-	 * The context 2 and 3 registers store the low-order and
+	/* The context 2 and 3 registers store the low-order and
 	 * high-order 32 bits of the address of the channel ring,
 	 * respectively.
 	 */
@@ -1587,8 +1571,7 @@ static void __gsi_write_channel_scratch(unsigned long chan_id)
 	val = scr.data.word3;
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_SCRATCH_2_OFFS(chan_id, ee));
 
-	/*
-	 * We must preserve the upper 16 bits of the last scratch
+	/* We must preserve the upper 16 bits of the last scratch
 	 * register.  The next sequence assumes those bits remain
 	 * unchanged between the read and the write.
 	 */
@@ -1672,8 +1655,7 @@ int gsi_stop_channel(unsigned long chan_id)
 	if (!completed) {
 		u32 ee = gsi_ctx->ee;
 
-		/*
-		 * check channel state here in case the channel is stopped but
+		/* check channel state here in case the channel is stopped but
 		 * the interrupt was not handled yet.
 		 */
 		val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(chan_id, ee));
