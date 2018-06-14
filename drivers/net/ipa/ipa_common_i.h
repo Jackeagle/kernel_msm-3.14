@@ -223,10 +223,10 @@ enum ipa_client_type {
         IPA_CLIENT_TEST4_CONS                   = 71,
 
 	/* RESERVERD PROD			= 72, */
-	IPA_CLIENT_DUMMY_CONS			= 73
-};
+	IPA_CLIENT_DUMMY_CONS			= 73,
 
-#define IPA_CLIENT_MAX (IPA_CLIENT_DUMMY_CONS + 1)
+	IPA_CLIENT_MAX,
+};
 
 struct ipa_active_client_logging_info {
 	const char *id_string;
