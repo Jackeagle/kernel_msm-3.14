@@ -15,10 +15,10 @@ config IPA
 	  If unsure, say N.
 
 config IPA_ASSERT
-       bool "Enable IPA assertions"
-       depends on IPA
-       default y
-       help
+	bool "Enable IPA assertions"
+	depends on IPA
+	default y
+	help
 	 Incorporate IPA assertion verification in the build.  This
 	 cause various design assumptions to be checked at runtime,
 	 generating a report (and a crash) if any assumed condition

@@ -1648,6 +1648,7 @@ void ipa_init_mem_info(struct device_node *node)
 			mem_info[UC_EVENT_RING_OFST],
 			mem_info[UC_EVENT_RING_SIZE]);
 }
+
 #undef LO_HI_CHECK
 #undef NONZERO_CHECK
 #undef ALIGN_CHECK
@@ -2105,6 +2106,7 @@ static const char *ipa_clients_strings[IPA_CLIENT_MAX] = {
 	both_strings(Q6_DECOMP2),
 	cons_string(Q6_LTE_WIFI_AGGR),
 };
+
 #undef both_strings
 #undef cons_string
 #undef cons_index

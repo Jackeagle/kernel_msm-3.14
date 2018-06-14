@@ -232,7 +232,7 @@ void ipahal_fltrt_init(enum ipa_hw_version hw_version)
 
 	ipa_debug("Entry - HW_TYPE=%d\n", hw_version);
 
-       /* Build up a the filter/route table descriptions we'll use */
+	/* Build up a the filter/route table descriptions we'll use */
 	for (i = hw_version; i >= 0; i--) {
 		const struct ipahal_fltrt_obj *fltrt;
 

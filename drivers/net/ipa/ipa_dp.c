@@ -621,7 +621,6 @@ int ipa_send_cmd_timeout(u16 num_desc, struct ipa_desc *descr, u32 timeout)
 						msecs_to_jiffies(timeout));
 		if (!completed)
 			ipa_debug("timeout waiting for imm-cmd ACK\n");
-
 	}
 
 	if (!atomic_dec_return(&comp->cnt))
@@ -753,7 +752,6 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 		ipa_err("EP %d already allocated.\n", ipa_ep_idx);
 		goto fail_gen;
 	}
-
 
 	ipa_client_add(ipa_client_string(sys_in->client), true);
 	memset(ep, 0, offsetof(struct ipa_ep_context, sys));
@@ -2292,7 +2290,7 @@ ipa_poll_gsi_pkt(struct ipa_sys_context *sys)
 
 static struct ipa_tx_pkt_wrapper *tag_to_pointer_wa(u64 tag)
 {
-	u64 addr = GENMASK(63,48) | tag;
+	u64 addr = GENMASK(63, 48) | tag;
 
 	return (struct ipa_tx_pkt_wrapper *)addr;
 }

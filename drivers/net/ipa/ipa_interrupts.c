@@ -277,8 +277,8 @@ static void ipa_process_interrupts(bool isr_context)
 		}
 		reg = ipahal_read_reg_n(IPA_IRQ_STTS_EE_n, ipa_ee);
 		/* since the suspend interrupt HW bug we must
-		  * read again the EN register, otherwise the while is endless
-		  */
+		 * read again the EN register, otherwise the while is endless
+		 */
 		en = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, ipa_ee);
 	}
 
@@ -312,16 +312,17 @@ static irqreturn_t ipa_isr(int irq, void *ctxt)
 
 	return IRQ_HANDLED;
 }
+
 /** ipa_add_interrupt_handler() - Adds handler to an interrupt type
-* @interrupt:		Interrupt type
-* @handler:		The handler to be added
-* @deferred_flag:	whether the handler processing should be deferred in
-*			a workqueue
-* @private_data:	the client's private data
-*
-* Adds handler to an interrupt type and enable the specific bit
-* in IRQ_EN register, associated interrupt in IRQ_STTS register will be enabled
-*/
+ * @interrupt:		Interrupt type
+ * @handler:		The handler to be added
+ * @deferred_flag:	whether the handler processing should be deferred in
+ *			a workqueue
+ * @private_data:	the client's private data
+ *
+ * Adds handler to an interrupt type and enable the specific bit
+ * in IRQ_EN register, associated interrupt in IRQ_STTS register will be enabled
+ */
 int ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 		ipa_irq_handler_t handler,
 		bool deferred_flag,
@@ -384,10 +385,10 @@ int ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 }
 
 /** ipa_remove_interrupt_handler() - Removes handler to an interrupt type
-* @interrupt:		Interrupt type
-*
-* Removes the handler and disable the specific bit in IRQ_EN register
-*/
+ * @interrupt:		Interrupt type
+ *
+ * Removes the handler and disable the specific bit in IRQ_EN register
+ */
 int ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 {
 	u32 val;
@@ -431,15 +432,15 @@ int ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 }
 
 /** ipa_interrupts_init() - Initialize the IPA interrupts framework
-* @ipa_irq:	The interrupt number to allocate
-* @ee:		Execution environment
-* @ipa_dev:	The basic device structure representing the IPA driver
-*
-* - Initialize the ipa_interrupt_to_cb array
-* - Clear interrupts status
-* - Register the ipa interrupt handler - ipa_isr
-* - Enable apps processor wakeup by IPA interrupts
-*/
+ * @ipa_irq:	The interrupt number to allocate
+ * @ee:		Execution environment
+ * @ipa_dev:	The basic device structure representing the IPA driver
+ *
+ * - Initialize the ipa_interrupt_to_cb array
+ * - Clear interrupts status
+ * - Register the ipa interrupt handler - ipa_isr
+ * - Enable apps processor wakeup by IPA interrupts
+ */
 int ipa_interrupts_init(u32 ipa_irq, u32 ee, struct device *ipa_dev)
 {
 	int idx;
@@ -460,8 +461,8 @@ int ipa_interrupts_init(u32 ipa_irq, u32 ee, struct device *ipa_dev)
 		return -ENOMEM;
 	}
 
-	res = request_irq(ipa_irq, (irq_handler_t) ipa_isr,
-				IRQF_TRIGGER_RISING, "ipa", ipa_dev);
+	res = request_irq(ipa_irq, ipa_isr, IRQF_TRIGGER_RISING, "ipa",
+			  ipa_dev);
 	if (res) {
 		ipa_err("fail to register IPA IRQ handler irq=%d\n", ipa_irq);
 		return -ENODEV;
@@ -482,12 +483,12 @@ int ipa_interrupts_init(u32 ipa_irq, u32 ee, struct device *ipa_dev)
 }
 
 /** ipa_suspend_active_aggr_wa() - Emulate suspend IRQ
-* @clnt_hndl:		suspended client handle, IRQ is emulated for this pipe
-*
-*  Emulate suspend IRQ to unsuspend client which was suspended with an open
-*  aggregation frame in order to bypass HW bug of IRQ not generated when
-*  endpoint is suspended during an open aggregation.
-*/
+ * @clnt_hndl:		suspended client handle, IRQ is emulated for this pipe
+ *
+ *  Emulate suspend IRQ to unsuspend client which was suspended with an open
+ *  aggregation frame in order to bypass HW bug of IRQ not generated when
+ *  endpoint is suspended during an open aggregation.
+ */
 void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 {
 	struct ipa_interrupt_info interrupt_info;

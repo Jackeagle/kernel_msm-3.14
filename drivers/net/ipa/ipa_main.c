@@ -262,13 +262,13 @@ err_dma_free:
 }
 
 /** ipa_init_q6_smem() - Initialize Q6 general memory and
-*		       header memory regions in IPA.
-*
-* Return codes:
-* 0: success
-* -ENOMEM: failed to allocate dma memory
-* -EFAULT: failed to send IPA command to initialize the memory
-*/
+ *		       header memory regions in IPA.
+ *
+ * Return codes:
+ * 0: success
+ * -ENOMEM: failed to allocate dma memory
+ * -EFAULT: failed to send IPA command to initialize the memory
+ */
 int ipa_init_q6_smem(void)
 {
 	int rc;
@@ -744,10 +744,10 @@ fail_ch20_wa:
 }
 
 /** ipa_enable_clks() - Turn on IPA clocks
-*
-* Return codes:
-* None
-*/
+ *
+ * Return codes:
+ * None
+ */
 static void ipa_enable_clks(void)
 {
 	ipa_debug("enabling IPA clocks and bus voting\n");
@@ -756,10 +756,10 @@ static void ipa_enable_clks(void)
 }
 
 /** ipa_disable_clks() - Turn off IPA clocks
-*
-* Return codes:
-* None
-*/
+ *
+ * Return codes:
+ * None
+ */
 static void ipa_disable_clks(void)
 {
 	ipa_debug("disabling IPA clocks and bus voting\n");
@@ -1021,11 +1021,11 @@ _ipa_client_remove_wait(const char *id, bool log_it, const char *file, int line)
 }
 
 /** ipa_inc_acquire_wakelock() - Increase active clients counter, and
-* acquire wakelock if necessary
-*
-* Return codes:
-* None
-*/
+ * acquire wakelock if necessary
+ *
+ * Return codes:
+ * None
+ */
 void ipa_inc_acquire_wakelock(void)
 {
 	unsigned long flags;
@@ -1060,11 +1060,11 @@ void ipa_dec_release_wakelock(void)
 }
 
 /** ipa_suspend_handler() - Handles the suspend interrupt:
-* wakes up the suspended peripheral by requesting its consumer
-* @interrupt:		Interrupt type
-* @private_data:	The client's private data
-* @interrupt_data:	Interrupt specific information data
-*/
+ * wakes up the suspended peripheral by requesting its consumer
+ * @interrupt:		Interrupt type
+ * @private_data:	The client's private data
+ * @interrupt_data:	Interrupt specific information data
+ */
 void ipa_suspend_handler(enum ipa_irq_type interrupt,
 				void *private_data,
 				void *interrupt_data)
@@ -1291,7 +1291,6 @@ static ssize_t ipa_write(struct file *file, const char __user *buf,
 	 size_t count, loff_t *ppos);
 
 static int ipa_open(struct inode *inode, struct file *filp);
-
 
 static const struct file_operations ipa_drv_fops = {
 	.write = ipa_write,
@@ -1597,35 +1596,35 @@ static bool config_valid(void)
 }
 
 /** ipa_pre_init() - Initialize the IPA Driver.
-* This part contains all initialization which doesn't require IPA HW, such
-* as structure allocations and initializations, register writes, etc.
-*
-* @pdev:	The platform device structure representing the IPA driver
-*
-* Function initialization process:
-* Allocate memory for the driver context data struct
-* Initializing the ipa_ctx with :
-*    1)parsed values from the dts file
-*    2)parameters passed to the module initialization
-*    3)read HW values(such as core memory size)
-* Map IPA core registers to CPU memory
-* Restart IPA core(HW reset)
-* Initialize the look-aside caches(kmem_cache/slab) for filter,
-*   routing and IPA-tree
-* Create memory pool with 4 objects for DMA operations(each object
-*   is 512Bytes long), this object will be use for tx(A5->IPA)
-* Initialize lists head(routing, hdr, system pipes)
-* Initialize mutexes (for ipa_ctx and NAT memory mutexes)
-* Initialize spinlocks (for list related to A5<->IPA pipes)
-* Initialize 2 single-threaded work-queue named "ipa rx wq" and "ipa tx wq"
-* Initialize Red-Black-Tree(s) for handles of header,routing rule,
-*  routing table ,filtering rule
-* Initialize the filter block by committing IPV4 and IPV6 default rules
-* Create empty routing table in system memory(no committing)
-* Create a char-device for IPA
-* Initialize IPA RM (resource manager)
-* Configure GSI registers (in GSI case)
-*/
+ * This part contains all initialization which doesn't require IPA HW, such
+ * as structure allocations and initializations, register writes, etc.
+ *
+ * @pdev:	The platform device structure representing the IPA driver
+ *
+ * Function initialization process:
+ * Allocate memory for the driver context data struct
+ * Initializing the ipa_ctx with :
+ *    1)parsed values from the dts file
+ *    2)parameters passed to the module initialization
+ *    3)read HW values(such as core memory size)
+ * Map IPA core registers to CPU memory
+ * Restart IPA core(HW reset)
+ * Initialize the look-aside caches(kmem_cache/slab) for filter,
+ *   routing and IPA-tree
+ * Create memory pool with 4 objects for DMA operations(each object
+ *   is 512Bytes long), this object will be use for tx(A5->IPA)
+ * Initialize lists head(routing, hdr, system pipes)
+ * Initialize mutexes (for ipa_ctx and NAT memory mutexes)
+ * Initialize spinlocks (for list related to A5<->IPA pipes)
+ * Initialize 2 single-threaded work-queue named "ipa rx wq" and "ipa tx wq"
+ * Initialize Red-Black-Tree(s) for handles of header,routing rule,
+ *  routing table ,filtering rule
+ * Initialize the filter block by committing IPV4 and IPV6 default rules
+ * Create empty routing table in system memory(no committing)
+ * Create a char-device for IPA
+ * Initialize IPA RM (resource manager)
+ * Configure GSI registers (in GSI case)
+ */
 static int ipa_pre_init(void)
 {
 	int result = 0;
@@ -2047,13 +2046,13 @@ int ipa_ap_suspend(struct device *dev)
 }
 
 /** ipa_ap_resume() - resume callback for runtime_pm
-* @dev: pointer to device
-*
-* This callback will be invoked by the runtime_pm framework when an AP resume
-* operation is invoked.
-*
-* Always returns 0 since resume should always succeed.
-*/
+ * @dev: pointer to device
+ *
+ * This callback will be invoked by the runtime_pm framework when an AP resume
+ * operation is invoked.
+ *
+ * Always returns 0 since resume should always succeed.
+ */
 int ipa_ap_resume(struct device *dev)
 {
 	return 0;

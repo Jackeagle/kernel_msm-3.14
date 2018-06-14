@@ -332,7 +332,6 @@ static void apps_ipa_packet_receive_notify(void *priv,
 	}
 }
 
-
 static int handle3_ingress_format(struct net_device *dev,
 			struct rmnet_ioctl_extended_s *in)
 {
@@ -924,19 +923,19 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 }
 
 /** rmnet_ipa_ap_suspend() - suspend callback for runtime_pm
-* @dev: pointer to device
-*
-* This callback will be invoked by the runtime_pm framework when an AP suspend
-* operation is invoked, usually by pressing a suspend button.
-*
-* Returns -EAGAIN to runtime_pm framework in case there are pending packets
-* in the Tx queue. This will postpone the suspend operation until all the
-* pending packets will be transmitted.
-*
-* In case there are no packets to send, releases the WWAN0_PROD entity.
-* As an outcome, the number of IPA active clients should be decremented
-* until IPA clocks can be gated.
-*/
+ * @dev: pointer to device
+ *
+ * This callback will be invoked by the runtime_pm framework when an AP suspend
+ * operation is invoked, usually by pressing a suspend button.
+ *
+ * Returns -EAGAIN to runtime_pm framework in case there are pending packets
+ * in the Tx queue. This will postpone the suspend operation until all the
+ * pending packets will be transmitted.
+ *
+ * In case there are no packets to send, releases the WWAN0_PROD entity.
+ * As an outcome, the number of IPA active clients should be decremented
+ * until IPA clocks can be gated.
+ */
 static int rmnet_ipa_ap_suspend(struct device *dev)
 {
 	struct net_device *netdev = rmnet_ipa_ctx->dev;
@@ -981,14 +980,14 @@ bail:
 }
 
 /** rmnet_ipa_ap_resume() - resume callback for runtime_pm
-* @dev: pointer to device
-*
-* This callback will be invoked by the runtime_pm framework when an AP resume
-* operation is invoked.
-*
-* Enables the network interface queue and returns success to the
-* runtime_pm framework.
-*/
+ * @dev: pointer to device
+ *
+ * This callback will be invoked by the runtime_pm framework when an AP resume
+ * operation is invoked.
+ *
+ * Enables the network interface queue and returns success to the
+ * runtime_pm framework.
+ */
 static int rmnet_ipa_ap_resume(struct device *dev)
 {
 	struct net_device *netdev = rmnet_ipa_ctx->dev;

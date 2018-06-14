@@ -297,6 +297,7 @@ static inline void ipahal_write_reg_fields(enum ipahal_reg reg,
 {
 	ipahal_write_reg_n_fields(reg, 0, fields);
 }
+
 u32 ipahal_aggr_get_max_byte_limit(void);
 u32 ipahal_aggr_get_max_pkt_limit(void);
 

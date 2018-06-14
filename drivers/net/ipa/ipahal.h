@@ -9,7 +9,6 @@
 #include "ipa_common_i.h"
 #include "ipahal_fltrt_i.h"
 
-
 /* Immediate command names
  *
  * NOTE:: Any change to this enum, need to change to ipahal_imm_cmd_name_to_str
@@ -85,7 +84,7 @@ static inline void *ipahal_imm_cmd_pyld_data(struct ipahal_imm_cmd_pyld *pyld)
  * allocated, and caller must ensure it gets released by providing it to
  * ipahal_destroy_imm_cmd() when it is no longer needed.
  *
- * mem 		a DMA buffer containing data to be written (up to 2KB)
+ * mem		a DMA buffer containing data to be written (up to 2KB)
  * offset	is where to write in IPA local memory
  */
 struct ipahal_imm_cmd_pyld *ipahal_dma_shared_mem_write_pyld(
@@ -108,7 +107,7 @@ struct ipahal_imm_cmd_pyld *ipahal_register_write_pyld(u32 offset, u32 value,
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
  *
- * mem 		a DMA buffer containing data to be written (up to 2KB)
+ * mem		a DMA buffer containing data to be written (up to 2KB)
  * offset	is the location IPA local memory to write
  */
 struct ipahal_imm_cmd_pyld *ipahal_hdr_init_local_pyld(
@@ -194,7 +193,6 @@ static inline void ipahal_destroy_imm_cmd(struct ipahal_imm_cmd_pyld *pyld)
 {
 	kfree(pyld);
 }
-
 
 /* IPA Status packet Structures and Function APIs */
 

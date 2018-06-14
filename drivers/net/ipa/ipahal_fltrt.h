@@ -104,7 +104,6 @@ struct ipahal_flt_rule_gen_params {
 	const struct ipa_flt_rule *rule;
 };
 
-
 /* Get the H/W table (flt/rt) header width */
 u32 ipahal_get_hw_tbl_hdr_width(void);
 

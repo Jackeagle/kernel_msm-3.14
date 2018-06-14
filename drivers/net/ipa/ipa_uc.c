@@ -284,7 +284,6 @@ send_uc_command_nowait(struct ipa_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
 	wmb();	/* ensure write to shared memory is done before triggering uc */
 
 	ipahal_write_reg_n(IPA_IRQ_EE_UC_n, 0, 0x1);
-
 }
 
 /** ipa_uc_interface_init() - Initialize the interface with the uC

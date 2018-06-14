@@ -25,8 +25,6 @@ struct ipahal_context {
 
 extern struct ipahal_context *ipahal_ctx;
 
-
-
 /* Immediate commands H/W structures */
 
 /* struct ipa_imm_cmd_hw_ip_fltrt_init - IP_V*_FILTER_INIT/IP_V*_ROUTING_INIT

@@ -170,6 +170,7 @@ static const struct ipahal_imm_cmd_obj
 		imm_cmd_obj(IP_PACKET_TAG_STATUS,	20),
 	},
 };
+
 #undef imm_cmd_obj
 #undef idsym
 #undef cfunc
@@ -360,6 +361,7 @@ ipahal_ip_v4_filter_init_pyld(struct ipa_mem_buffer *mem,
 		u32 hash_offset, u32 nhash_offset)
 {
 	u16 opcode = ipahal_imm_cmds[IPA_IMM_CMD_IP_V4_FILTER_INIT].opcode;
+
 	ipa_debug("IPv4 filtering\n");
 
 	return fltrt_init_common(opcode, mem, hash_offset, nhash_offset);

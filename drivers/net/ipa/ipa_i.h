@@ -111,7 +111,6 @@ struct ipa_tx_suspend_irq_data {
 	u32 endpoints;
 };
 
-
 typedef void (*ipa_notify_cb)(void *priv, enum ipa_dp_evt_type evt,
 		       unsigned long data);
 
@@ -278,7 +277,6 @@ enum ipa_hw_errors {
 	IPA_HW_GSI_CH_NOT_EMPTY_FAILURE =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 8)
 };
-
 
 struct ipa_repl_ctx {
 	struct ipa_rx_pkt_wrapper **cache;
@@ -718,7 +716,6 @@ struct ipa_dma_task_info {
  * @dev: the dev_t of the device
  * @cdev: cdev of the device
  * @ep: list of all end points
-  power-save
  * @ep_flt_bitmap: End-points supporting filtering bitmap
  * @ep_flt_num: End-points supporting filtering number
  * @flt_tbl: list of all IPA filter tables
