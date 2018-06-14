@@ -968,23 +968,20 @@ static int ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 {
 	struct ipa_ep_context *ep;
 
-	ipa_debug("pipe=%d metadata_reg_valid=%d\n",
-		clnt_hdl,
-		ep_hdr->hdr_metadata_reg_valid);
+	ipa_debug("pipe=%d metadata_reg_valid=%d\n", clnt_hdl,
+		  ep_hdr->hdr_metadata_reg_valid);
 
 	ipa_debug("remove_additional=%d, a5_mux=%d, ofst_pkt_size=0x%x\n",
-		ep_hdr->hdr_remove_additional,
-		ep_hdr->hdr_a5_mux,
-		ep_hdr->hdr_ofst_pkt_size);
+		  ep_hdr->hdr_remove_additional, ep_hdr->hdr_a5_mux,
+		  ep_hdr->hdr_ofst_pkt_size);
 
 	ipa_debug("ofst_pkt_size_valid=%d, additional_const_len=0x%x\n",
-		ep_hdr->hdr_ofst_pkt_size_valid,
-		ep_hdr->hdr_additional_const_len);
+		  ep_hdr->hdr_ofst_pkt_size_valid,
+		  ep_hdr->hdr_additional_const_len);
 
 	ipa_debug("ofst_metadata=0x%x, ofst_metadata_valid=%d, len=0x%x",
-		ep_hdr->hdr_ofst_metadata,
-		ep_hdr->hdr_ofst_metadata_valid,
-		ep_hdr->hdr_len);
+		  ep_hdr->hdr_ofst_metadata, ep_hdr->hdr_ofst_metadata_valid,
+		  ep_hdr->hdr_len);
 
 	ep = &ipa_ctx->ep[clnt_hdl];
 
@@ -1008,25 +1005,24 @@ static int ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
  *
  * Note:	Should not be called from atomic context
  */
-static int ipa_cfg_ep_hdr_ext(u32 clnt_hdl,
-		       const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
+static int
+ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
 {
 	struct ipa_ep_context *ep;
 
-	ipa_debug("pipe=%d hdr_pad_to_alignment=%d\n",
-		clnt_hdl,
-		ep_hdr_ext->hdr_pad_to_alignment);
+	ipa_debug("pipe=%d hdr_pad_to_alignment=%d\n", clnt_hdl,
+		  ep_hdr_ext->hdr_pad_to_alignment);
 
 	ipa_debug("hdr_total_len_or_pad_offset=%d\n",
-		ep_hdr_ext->hdr_total_len_or_pad_offset);
+		  ep_hdr_ext->hdr_total_len_or_pad_offset);
 
 	ipa_debug("hdr_payload_len_inc_padding=%d hdr_total_len_or_pad=%d\n",
-		ep_hdr_ext->hdr_payload_len_inc_padding,
-		ep_hdr_ext->hdr_total_len_or_pad);
+		  ep_hdr_ext->hdr_payload_len_inc_padding,
+		  ep_hdr_ext->hdr_total_len_or_pad);
 
 	ipa_debug("hdr_total_len_or_pad_valid=%d hdr_little_endian=%d\n",
-		ep_hdr_ext->hdr_total_len_or_pad_valid,
-		ep_hdr_ext->hdr_little_endian);
+		  ep_hdr_ext->hdr_total_len_or_pad_valid,
+		  ep_hdr_ext->hdr_little_endian);
 
 	ep = &ipa_ctx->ep[clnt_hdl];
 
@@ -1036,7 +1032,7 @@ static int ipa_cfg_ep_hdr_ext(u32 clnt_hdl,
 	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_n, clnt_hdl,
-		&ep->cfg.hdr_ext);
+				  &ep->cfg.hdr_ext);
 
 	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
 
@@ -1060,17 +1056,14 @@ static int ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 		return -EINVAL;
 	}
 
-	ipa_debug("pipe=%d en=%d(%s), type=%d(%s), byte_limit=%d, time_limit=%d\n",
-			clnt_hdl,
-			ep_aggr->aggr_en,
-			ipa_get_aggr_enable_str(ep_aggr->aggr_en),
-			ep_aggr->aggr,
-			ipa_get_aggr_type_str(ep_aggr->aggr),
-			ep_aggr->aggr_byte_limit,
-			ep_aggr->aggr_time_limit);
+	ipa_debug("pipe=%d en=%d(%s), type=%d(%s)\n", clnt_hdl,
+		  ep_aggr->aggr_en, ipa_get_aggr_enable_str(ep_aggr->aggr_en),
+		  ep_aggr->aggr, ipa_get_aggr_type_str(ep_aggr->aggr));
+	ipa_debug("byte_limit=%d, time_limit=%d\n", ep_aggr->aggr_byte_limit,
+		  ep_aggr->aggr_time_limit);
 	ipa_debug("hard_byte_limit_en=%d aggr_sw_eof_active=%d\n",
-		ep_aggr->aggr_hard_byte_limit_en,
-		ep_aggr->aggr_sw_eof_active);
+		  ep_aggr->aggr_hard_byte_limit_en,
+		  ep_aggr->aggr_sw_eof_active);
 
 	/* copy over EP cfg */
 	ipa_ctx->ep[clnt_hdl].cfg.aggr = *ep_aggr;
@@ -1149,11 +1142,9 @@ static int ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 	if (!IPA_CLIENT_IS_CONS(ep_mode->dst))
 		ipa_ep_idx = ipa_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
 
-	ipa_debug("pipe=%d mode=%d(%s), dst_client_number=%d",
-			clnt_hdl,
-			ep_mode->mode,
-			ipa_get_mode_type_str(ep_mode->mode),
-			ep_mode->dst);
+	ipa_debug("pipe=%d mode=%d(%s), dst_client_number=%d", clnt_hdl,
+		  ep_mode->mode, ipa_get_mode_type_str(ep_mode->mode),
+		  ep_mode->dst);
 
 	/* copy over EP cfg */
 	ipa_ctx->ep[clnt_hdl].cfg.mode = *ep_mode;
@@ -1200,7 +1191,7 @@ static int ipa_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 		/* Configure sequencers type*/
 
 		ipa_debug("set sequencers to sequence 0x%x, ep = %d\n", type,
-				clnt_hdl);
+			  clnt_hdl);
 		ipahal_write_reg_n(IPA_ENDP_INIT_SEQ_n, clnt_hdl, type);
 
 		ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
@@ -1219,21 +1210,18 @@ static int ipa_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
  *
  * Note:	Should not be called from atomic context
  */
-static int ipa_cfg_ep_deaggr(u32 clnt_hdl,
-			const struct ipa_ep_cfg_deaggr *ep_deaggr)
+static int
+ipa_cfg_ep_deaggr(u32 clnt_hdl, const struct ipa_ep_cfg_deaggr *ep_deaggr)
 {
 	struct ipa_ep_context *ep;
 
-	ipa_debug("pipe=%d deaggr_hdr_len=%d\n",
-		clnt_hdl,
-		ep_deaggr->deaggr_hdr_len);
+	ipa_debug("pipe=%d deaggr_hdr_len=%d\n", clnt_hdl,
+		  ep_deaggr->deaggr_hdr_len);
 
-	ipa_debug("packet_offset_valid=%d\n",
-		ep_deaggr->packet_offset_valid);
+	ipa_debug("packet_offset_valid=%d\n", ep_deaggr->packet_offset_valid);
 
 	ipa_debug("packet_offset_location=%d max_packet_len=%d\n",
-		ep_deaggr->packet_offset_location,
-		ep_deaggr->max_packet_len);
+		  ep_deaggr->packet_offset_location, ep_deaggr->max_packet_len);
 
 	ep = &ipa_ctx->ep[clnt_hdl];
 
@@ -1243,7 +1231,7 @@ static int ipa_cfg_ep_deaggr(u32 clnt_hdl,
 	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_n, clnt_hdl,
-		&ep->cfg.deaggr);
+				  &ep->cfg.deaggr);
 
 	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
 
@@ -1259,12 +1247,11 @@ static int ipa_cfg_ep_deaggr(u32 clnt_hdl,
  * Note:	Should not be called from atomic context
  */
 static int ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
-		const struct ipa_ep_cfg_metadata_mask
-		*metadata_mask)
+				    const struct ipa_ep_cfg_metadata_mask
+				    *metadata_mask)
 {
-	ipa_debug("pipe=%d, metadata_mask=0x%x\n",
-			clnt_hdl,
-			metadata_mask->metadata_mask);
+	ipa_debug("pipe=%d, metadata_mask=0x%x\n", clnt_hdl,
+		  metadata_mask->metadata_mask);
 
 	/* copy over EP cfg */
 	ipa_ctx->ep[clnt_hdl].cfg.metadata_mask = *metadata_mask;
@@ -1272,7 +1259,7 @@ static int ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
 	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_n,
-		clnt_hdl, metadata_mask);
+				  clnt_hdl, metadata_mask);
 
 	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
 
@@ -1327,7 +1314,7 @@ int ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 			return result;
 	} else {
 		result = ipa_cfg_ep_metadata_mask(clnt_hdl,
-				&ipa_ep_cfg->metadata_mask);
+						  &ipa_ep_cfg->metadata_mask);
 		if (result)
 			return result;
 	}
@@ -1344,16 +1331,14 @@ int ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
  * Note:	Should not be called from atomic context
  */
 int ipa_cfg_ep_status(u32 clnt_hdl,
-	const struct ipahal_reg_ep_cfg_status *ep_status)
+		      const struct ipahal_reg_ep_cfg_status *ep_status)
 {
 	if (!client_handle_valid(clnt_hdl))
 		return -EINVAL;
 
 	ipa_debug("pipe=%d, status_en=%d status_ep=%d status_location=%d\n",
-			clnt_hdl,
-			ep_status->status_en,
-			ep_status->status_ep,
-			ep_status->status_location);
+		  clnt_hdl, ep_status->status_en, ep_status->status_ep,
+		  ep_status->status_location);
 
 	/* copy over EP cfg */
 	ipa_ctx->ep[clnt_hdl].status = *ep_status;
@@ -1373,8 +1358,8 @@ static int ipa_cfg_ep_ctrl(int ipa_ep_idx, bool suspend)
 
 	cfg.ipa_ep_suspend = suspend;
 
-	ipa_debug("pipe=%d ep_suspend=%d, ep_delay=0\n",
-		ipa_ep_idx, suspend ? 1 : 0);
+	ipa_debug("pipe=%d ep_suspend=%d, ep_delay=0\n", ipa_ep_idx,
+		  suspend ? 1 : 0);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n, ipa_ep_idx, &cfg);
 
@@ -1417,15 +1402,15 @@ int ipa_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HOL_BLOCK_EN_n, clnt_hdl,
-		ep_holb);
+				  ep_holb);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HOL_BLOCK_TIMER_n, clnt_hdl,
-		ep_holb);
+				  ep_holb);
 
 	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
 
 	ipa_debug("cfg holb %u ep=%d tmr=%d\n", ep_holb->en, clnt_hdl,
-				ep_holb->tmr_val);
+		  ep_holb->tmr_val);
 
 	return 0;
 }
@@ -1513,33 +1498,33 @@ void ipa_init_mem_info(struct device_node *node)
 	mem_info[V4_FLT_HASH_SIZE] = NONZERO_CHECK(IPA_MEM_V4_FLT_HASH_SIZE);
 	mem_info[V4_FLT_HASH_SIZE_DDR] = IPA_MEM_V4_FLT_HASH_SIZE_DDR;
 	ipa_debug("V4 FLT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-			mem_info[V4_FLT_HASH_OFST],
-			mem_info[V4_FLT_HASH_SIZE],
-			mem_info[V4_FLT_HASH_SIZE_DDR]);
+		  mem_info[V4_FLT_HASH_OFST],
+		  mem_info[V4_FLT_HASH_SIZE],
+		  mem_info[V4_FLT_HASH_SIZE_DDR]);
 
 	mem_info[V4_FLT_NHASH_OFST] = ALIGN_CHECK(IPA_MEM_V4_FLT_NHASH_OFST);
 	mem_info[V4_FLT_NHASH_SIZE] = NONZERO_CHECK(IPA_MEM_V4_FLT_NHASH_SIZE);
 	mem_info[V4_FLT_NHASH_SIZE_DDR] = IPA_MEM_V4_FLT_NHASH_SIZE_DDR;
 	ipa_debug("V4 FLT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-			mem_info[V4_FLT_NHASH_OFST],
-			mem_info[V4_FLT_NHASH_SIZE],
-			mem_info[V4_FLT_NHASH_SIZE_DDR]);
+		  mem_info[V4_FLT_NHASH_OFST],
+		  mem_info[V4_FLT_NHASH_SIZE],
+		  mem_info[V4_FLT_NHASH_SIZE_DDR]);
 
 	mem_info[V6_FLT_HASH_OFST] = ALIGN_CHECK(IPA_MEM_V6_FLT_HASH_OFST);
 	mem_info[V6_FLT_HASH_SIZE] = NONZERO_CHECK(IPA_MEM_V6_FLT_HASH_SIZE);
 	mem_info[V6_FLT_HASH_SIZE_DDR] = IPA_MEM_V6_FLT_HASH_SIZE_DDR;
 	ipa_debug("V6 FLT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-			mem_info[V6_FLT_HASH_OFST],
-			mem_info[V6_FLT_HASH_SIZE],
-			mem_info[V6_FLT_HASH_SIZE_DDR]);
+		  mem_info[V6_FLT_HASH_OFST],
+		  mem_info[V6_FLT_HASH_SIZE],
+		  mem_info[V6_FLT_HASH_SIZE_DDR]);
 
 	mem_info[V6_FLT_NHASH_OFST] = ALIGN_CHECK(IPA_MEM_V6_FLT_NHASH_OFST);
 	mem_info[V6_FLT_NHASH_SIZE] = NONZERO_CHECK(IPA_MEM_V6_FLT_NHASH_SIZE);
 	mem_info[V6_FLT_NHASH_SIZE_DDR] = IPA_MEM_V6_FLT_NHASH_SIZE_DDR;
 	ipa_debug("V6 FLT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-			mem_info[V6_FLT_NHASH_OFST],
-			mem_info[V6_FLT_NHASH_SIZE],
-			mem_info[V6_FLT_NHASH_SIZE_DDR]);
+		  mem_info[V6_FLT_NHASH_OFST],
+		  mem_info[V6_FLT_NHASH_SIZE],
+		  mem_info[V6_FLT_NHASH_SIZE_DDR]);
 
 	mem_info[V4_RT_NUM_INDEX] = NONZERO_CHECK(IPA_MEM_V4_RT_NUM_INDEX);
 	ipa_debug("V4 RT NUM INDEX 0x%x\n", mem_info[V4_RT_NUM_INDEX]);
@@ -1548,30 +1533,30 @@ void ipa_init_mem_info(struct device_node *node)
 	mem_info[V4_MODEM_RT_INDEX_LO] = IPA_MEM_V4_MODEM_RT_INDEX_LO;
 	mem_info[V4_MODEM_RT_INDEX_HI] = IPA_MEM_V4_MODEM_RT_INDEX_HI;
 	ipa_debug("V4 RT MODEM INDEXES 0x%x - 0x%x\n",
-			mem_info[V4_MODEM_RT_INDEX_LO],
-			mem_info[V4_MODEM_RT_INDEX_HI]);
+		  mem_info[V4_MODEM_RT_INDEX_LO],
+		  mem_info[V4_MODEM_RT_INDEX_HI]);
 
 	mem_info[V4_APPS_RT_INDEX_LO] = IPA_MEM_V4_APPS_RT_INDEX_LO;
 	mem_info[V4_APPS_RT_INDEX_HI] = IPA_MEM_V4_APPS_RT_INDEX_HI;
 	ipa_debug("V4 RT APPS INDEXES 0x%x - 0x%x\n",
-			mem_info[V4_APPS_RT_INDEX_LO],
-			mem_info[V4_APPS_RT_INDEX_HI]);
+		  mem_info[V4_APPS_RT_INDEX_LO],
+		  mem_info[V4_APPS_RT_INDEX_HI]);
 
 	mem_info[V4_RT_HASH_OFST] = ALIGN_CHECK(IPA_MEM_V4_RT_HASH_OFST);
 	mem_info[V4_RT_HASH_SIZE] = NONZERO_CHECK(IPA_MEM_V4_RT_HASH_SIZE);
 	mem_info[V4_RT_HASH_SIZE_DDR] = IPA_MEM_V4_RT_HASH_SIZE_DDR;
 	ipa_debug("V4 RT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-			mem_info[V4_RT_HASH_OFST],
-			mem_info[V4_RT_HASH_SIZE],
-			mem_info[V4_RT_HASH_SIZE_DDR]);
+		  mem_info[V4_RT_HASH_OFST],
+		  mem_info[V4_RT_HASH_SIZE],
+		  mem_info[V4_RT_HASH_SIZE_DDR]);
 
 	mem_info[V4_RT_NHASH_OFST] = ALIGN_CHECK(IPA_MEM_V4_RT_NHASH_OFST);
 	mem_info[V4_RT_NHASH_SIZE] = NONZERO_CHECK(IPA_MEM_V4_RT_NHASH_SIZE);
 	mem_info[V4_RT_NHASH_SIZE_DDR] = IPA_MEM_V4_RT_NHASH_SIZE_DDR;
 	ipa_debug("V4 RT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-			mem_info[V4_RT_NHASH_OFST],
-			mem_info[V4_RT_NHASH_SIZE],
-			mem_info[V4_RT_NHASH_SIZE_DDR]);
+		  mem_info[V4_RT_NHASH_OFST],
+		  mem_info[V4_RT_NHASH_SIZE],
+		  mem_info[V4_RT_NHASH_SIZE_DDR]);
 
 	mem_info[V6_RT_NUM_INDEX] = NONZERO_CHECK(IPA_MEM_V6_RT_NUM_INDEX);
 	ipa_debug("V6 RT NUM INDEX 0x%x\n", mem_info[V6_RT_NUM_INDEX]);
@@ -1580,64 +1565,64 @@ void ipa_init_mem_info(struct device_node *node)
 	mem_info[V6_MODEM_RT_INDEX_LO] = IPA_MEM_V6_MODEM_RT_INDEX_LO;
 	mem_info[V6_MODEM_RT_INDEX_HI] = IPA_MEM_V6_MODEM_RT_INDEX_HI;
 	ipa_debug("V6 RT MODEM INDEXES 0x%x - 0x%x\n",
-			mem_info[V6_MODEM_RT_INDEX_LO],
-			mem_info[V6_MODEM_RT_INDEX_HI]);
+		  mem_info[V6_MODEM_RT_INDEX_LO],
+		  mem_info[V6_MODEM_RT_INDEX_HI]);
 
 	mem_info[V6_APPS_RT_INDEX_LO] = IPA_MEM_V6_APPS_RT_INDEX_LO;
 	mem_info[V6_APPS_RT_INDEX_HI] = IPA_MEM_V6_APPS_RT_INDEX_HI;
 	ipa_debug("V6 RT APPS INDEXES 0x%x - 0x%x\n",
-			mem_info[V6_APPS_RT_INDEX_LO],
-			mem_info[V6_APPS_RT_INDEX_HI]);
+		  mem_info[V6_APPS_RT_INDEX_LO],
+		  mem_info[V6_APPS_RT_INDEX_HI]);
 
 	mem_info[V6_RT_HASH_OFST] = ALIGN_CHECK(IPA_MEM_V6_RT_HASH_OFST);
 	mem_info[V6_RT_HASH_SIZE] = NONZERO_CHECK(IPA_MEM_V6_RT_HASH_SIZE);
 	mem_info[V6_RT_HASH_SIZE_DDR] = IPA_MEM_V6_RT_HASH_SIZE_DDR;
 	ipa_debug("V6 RT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-			mem_info[V6_RT_HASH_OFST],
-			mem_info[V6_RT_HASH_SIZE],
-			mem_info[V6_RT_HASH_SIZE_DDR]);
+		  mem_info[V6_RT_HASH_OFST],
+		  mem_info[V6_RT_HASH_SIZE],
+		  mem_info[V6_RT_HASH_SIZE_DDR]);
 
 	mem_info[V6_RT_NHASH_OFST] = ALIGN_CHECK(IPA_MEM_V6_RT_NHASH_OFST);
 	mem_info[V6_RT_NHASH_SIZE] = NONZERO_CHECK(IPA_MEM_V6_RT_NHASH_SIZE);
 	mem_info[V6_RT_NHASH_SIZE_DDR] = IPA_MEM_V6_RT_NHASH_SIZE_DDR;
 	ipa_debug("V6 RT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-			mem_info[V6_RT_NHASH_OFST],
-			mem_info[V6_RT_NHASH_SIZE],
-			mem_info[V6_RT_NHASH_SIZE_DDR]);
+		  mem_info[V6_RT_NHASH_OFST],
+		  mem_info[V6_RT_NHASH_SIZE],
+		  mem_info[V6_RT_NHASH_SIZE_DDR]);
 
 	mem_info[MODEM_HDR_OFST] = ALIGN_CHECK(IPA_MEM_MODEM_HDR_OFST);
 	mem_info[MODEM_HDR_SIZE] = IPA_MEM_MODEM_HDR_SIZE;
 	ipa_debug("MODEM HDR OFST 0x%x SIZE 0x%x\n",
-			mem_info[MODEM_HDR_OFST],
-			mem_info[MODEM_HDR_SIZE]);
+		  mem_info[MODEM_HDR_OFST],
+		  mem_info[MODEM_HDR_SIZE]);
 
 	mem_info[APPS_HDR_OFST] = ALIGN_CHECK(IPA_MEM_APPS_HDR_OFST);
 	mem_info[APPS_HDR_SIZE] = IPA_MEM_APPS_HDR_SIZE;
 	mem_info[APPS_HDR_SIZE_DDR] = IPA_MEM_APPS_HDR_SIZE_DDR;
 	ipa_debug("APPS HDR OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-			mem_info[APPS_HDR_OFST],
-			mem_info[APPS_HDR_SIZE],
-			mem_info[APPS_HDR_SIZE_DDR]);
+		  mem_info[APPS_HDR_OFST],
+		  mem_info[APPS_HDR_SIZE],
+		  mem_info[APPS_HDR_SIZE_DDR]);
 
 	mem_info[MODEM_HDR_PROC_CTX_OFST] =
 			ALIGN_CHECK(IPA_MEM_MODEM_HDR_PROC_CTX_OFST);
 	mem_info[MODEM_HDR_PROC_CTX_SIZE] = IPA_MEM_MODEM_HDR_PROC_CTX_SIZE;
 	ipa_debug("MODEM HDR PROC CTX OFST 0x%x SIZE 0x%x\n",
-			mem_info[MODEM_HDR_PROC_CTX_OFST],
-			mem_info[MODEM_HDR_PROC_CTX_SIZE]);
+		  mem_info[MODEM_HDR_PROC_CTX_OFST],
+		  mem_info[MODEM_HDR_PROC_CTX_SIZE]);
 
 	mem_info[APPS_HDR_PROC_CTX_OFST] =
 			ALIGN_CHECK(IPA_MEM_APPS_HDR_PROC_CTX_OFST);
 	mem_info[APPS_HDR_PROC_CTX_SIZE] = IPA_MEM_APPS_HDR_PROC_CTX_SIZE;
 	ipa_debug("APPS HDR PROC CTX OFST 0x%x SIZE 0x%x\n",
-			mem_info[APPS_HDR_PROC_CTX_OFST],
-			mem_info[APPS_HDR_PROC_CTX_SIZE]);
+		  mem_info[APPS_HDR_PROC_CTX_OFST],
+		  mem_info[APPS_HDR_PROC_CTX_SIZE]);
 
 	mem_info[MODEM_OFST] = ALIGN_CHECK(IPA_MEM_MODEM_OFST);
 	mem_info[MODEM_SIZE] = IPA_MEM_MODEM_SIZE;
 	ipa_debug("MODEM OFST 0x%x SIZE 0x%x\n",
-			mem_info[MODEM_OFST],
-			mem_info[MODEM_SIZE]);
+		  mem_info[MODEM_OFST],
+		  mem_info[MODEM_SIZE]);
 
 	mem_info[END_OFST] = IPA_MEM_END_OFST;
 	ipa_debug("RAM END OFST 0x%x\n", mem_info[END_OFST]);
@@ -1645,8 +1630,8 @@ void ipa_init_mem_info(struct device_node *node)
 	mem_info[UC_EVENT_RING_OFST] = ALIGN_CHECK(IPA_MEM_UC_EVENT_RING_OFST);
 	mem_info[UC_EVENT_RING_SIZE] = IPA_MEM_UC_EVENT_RING_SIZE;
 	ipa_debug("UC EVENT RING OFST 0x%x SIZE 0x%x\n",
-			mem_info[UC_EVENT_RING_OFST],
-			mem_info[UC_EVENT_RING_SIZE]);
+		  mem_info[UC_EVENT_RING_OFST],
+		  mem_info[UC_EVENT_RING_SIZE]);
 }
 
 #undef LO_HI_CHECK
@@ -1754,7 +1739,7 @@ bool ipa_is_modem_pipe(int pipe_idx)
 
 	for (client_idx = 0; client_idx < IPA_CLIENT_MAX; client_idx++) {
 		if (!IPA_CLIENT_IS_Q6_CONS(client_idx) &&
-			!IPA_CLIENT_IS_Q6_PROD(client_idx))
+		    !IPA_CLIENT_IS_Q6_PROD(client_idx))
 			continue;
 		if (ipa_get_ep_mapping(client_idx) == pipe_idx)
 			return true;
@@ -1764,9 +1749,9 @@ bool ipa_is_modem_pipe(int pipe_idx)
 }
 
 static void write_src_rsrc_grp_limits(enum ipahal_reg reg,
-		enum ipa_rsrc_grp_type_src n,
-		const struct rsrc_min_max *x_limits,
-		const struct rsrc_min_max *y_limits)
+				      enum ipa_rsrc_grp_type_src n,
+				      const struct rsrc_min_max *x_limits,
+				      const struct rsrc_min_max *y_limits)
 {
 	struct ipahal_reg_rsrc_grp_cfg val;
 
@@ -1779,7 +1764,8 @@ static void write_src_rsrc_grp_limits(enum ipahal_reg reg,
 }
 
 static void ipa_write_src_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
-			int group_index, enum ipa_rsrc_grp_type_src n)
+					    int group_index,
+					    enum ipa_rsrc_grp_type_src n)
 {
 	const struct rsrc_min_max *x_limits;
 	const struct rsrc_min_max *y_limits;
@@ -1795,7 +1781,7 @@ static void ipa_write_src_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
 		break;
 	default:
 		ipa_err(" Invalid source resource group,index #%d\n",
-				group_index);
+			group_index);
 		return;
 	}
 
@@ -1806,7 +1792,8 @@ static void ipa_write_src_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
 }
 
 static void ipa_write_dst_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
-			int group_index, enum ipa_rsrc_grp_type_src n)
+					    int group_index,
+					    enum ipa_rsrc_grp_type_src n)
 {
 	const struct rsrc_min_max *x_limits;
 	const struct rsrc_min_max *y_limits;
@@ -1819,7 +1806,7 @@ static void ipa_write_dst_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
 		break;
 	default:
 		ipa_err(" Invalid destination resource group,index #%d\n",
-				group_index);
+			group_index);
 		return;
 	}
 
@@ -1884,7 +1871,7 @@ static int suspend_pipe(enum ipa_client_type client, bool suspend)
 		return 0;
 
 	ipa_debug("%s pipe %d\n", suspend ? "suspend" : "unsuspend",
-		ipa_ep_idx);
+		  ipa_ep_idx);
 
 	ipa_cfg_ep_ctrl(ipa_ep_idx, suspend);
 	if (suspend)
@@ -2019,19 +2006,19 @@ int ipa_stop_gsi_channel(u32 clnt_hdl)
 
 	if (IPA_CLIENT_IS_PROD(ep->client)) {
 		ipa_debug("Calling gsi_stop_channel ch:%lu\n",
-			ep->gsi_chan_hdl);
+			  ep->gsi_chan_hdl);
 		res = gsi_stop_channel(ep->gsi_chan_hdl);
 		ipa_debug("gsi_stop_channel ch: %lu returned %d\n",
-			ep->gsi_chan_hdl, res);
+			  ep->gsi_chan_hdl, res);
 		goto end_sequence;
 	}
 
 	for (i = 0; i < IPA_GSI_CHANNEL_STOP_MAX_RETRY; i++) {
 		ipa_debug("Calling gsi_stop_channel ch:%lu\n",
-			ep->gsi_chan_hdl);
+			  ep->gsi_chan_hdl);
 		res = gsi_stop_channel(ep->gsi_chan_hdl);
 		ipa_debug("gsi_stop_channel ch: %lu returned %d\n",
-			ep->gsi_chan_hdl, res);
+			  ep->gsi_chan_hdl, res);
 		if (res != -EAGAIN && res != -ETIMEDOUT)
 			goto end_sequence;
 
@@ -2045,7 +2032,7 @@ int ipa_stop_gsi_channel(u32 clnt_hdl)
 
 		/* sleep for short period to flush IPA */
 		usleep_range(IPA_GSI_CHANNEL_STOP_SLEEP_MIN_USEC,
-			IPA_GSI_CHANNEL_STOP_SLEEP_MAX_USEC);
+			     IPA_GSI_CHANNEL_STOP_SLEEP_MAX_USEC);
 	}
 
 	ipa_err("Failed	 to stop GSI channel with retries\n");
@@ -2069,8 +2056,7 @@ void ipa_enable_dcd(void)
 	idle_indication_cfg.const_non_idle_enable = 0;
 	idle_indication_cfg.enter_idle_debounce_thresh = 256;
 
-	ipahal_write_reg_fields(IPA_IDLE_INDICATION_CFG,
-			&idle_indication_cfg);
+	ipahal_write_reg_fields(IPA_IDLE_INDICATION_CFG, &idle_indication_cfg);
 }
 
 /** ipa_write_64() - convert 64 bit value to byte array
@@ -2138,10 +2124,10 @@ void ipa_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple)
 	struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
 
 	ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n, pipe_idx,
-					&fltrt_tuple);
+				 &fltrt_tuple);
 	fltrt_tuple.flt = *tuple;
 	ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n, pipe_idx,
-					&fltrt_tuple);
+				  &fltrt_tuple);
 }
 
 /** ipa_set_rt_tuple_mask() - Sets the rt tuple masking for the given tbl
@@ -2158,10 +2144,10 @@ void ipa_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple)
 	struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
 
 	ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n, tbl_idx,
-					&fltrt_tuple);
+				 &fltrt_tuple);
 	fltrt_tuple.rt = *tuple;
 	ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n, tbl_idx,
-					&fltrt_tuple);
+				  &fltrt_tuple);
 }
 
 MODULE_LICENSE("GPL v2");

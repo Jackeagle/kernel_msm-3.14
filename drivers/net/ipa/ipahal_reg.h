@@ -269,8 +269,7 @@ void ipahal_write_reg_n(enum ipahal_reg reg, u32 n, u32 val);
 void ipahal_read_reg_n_fields(enum ipahal_reg reg, u32 n, void *fields);
 
 /* ipahal_write_reg_n_fields() - Write to n parameterized reg a parsed value */
-void ipahal_write_reg_n_fields(enum ipahal_reg reg, u32 n,
-	const void *fields);
+void ipahal_write_reg_n_fields(enum ipahal_reg reg, u32 n, const void *fields);
 
 /* ipahal_read_reg() - Get the raw value of a reg */
 static inline u32 ipahal_read_reg(enum ipahal_reg reg)
@@ -293,7 +292,7 @@ ipahal_read_reg_fields(enum ipahal_reg reg, void *fields)
 
 /* ipahal_write_reg_fields() - Write to reg a parsed value */
 static inline void ipahal_write_reg_fields(enum ipahal_reg reg,
-	const void *fields)
+					   const void *fields)
 {
 	ipahal_write_reg_n_fields(reg, 0, fields);
 }

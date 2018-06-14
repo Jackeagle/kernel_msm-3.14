@@ -381,8 +381,8 @@ handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 code)
 		ipa_err("got INVALID_TRE_ERR\n");
 		val = gsi_readl(GSI_EE_n_GSI_CH_k_CNTXT_0_OFFS(chan_id, ee));
 		ctx->state = field_val(val, CHSTATE_BMSK);
-		ipa_debug("chan_id %u state updated to %u\n",
-				chan_id, ctx->state);
+		ipa_debug("chan_id %u state updated to %u\n", chan_id,
+			  ctx->state);
 		ipa_bug_on(ctx->state != GSI_CHAN_STATE_ERROR);
 		break;
 	case GSI_OUT_OF_BUFFERS_ERR:
@@ -445,10 +445,10 @@ static void gsi_handle_glob_err(u32 err)
 {
 	struct gsi_log_err *log = (struct gsi_log_err *)&err;
 
-	ipa_err("log err_type %u ee %u idx %u\n",
-			log->err_type, log->ee, log->virt_idx);
-	ipa_err("log code 0x%1x arg1 0x%1x arg2 0x%1x arg3 0x%1x\n",
-			log->code, log->arg1, log->arg2, log->arg3);
+	ipa_err("log err_type %u ee %u idx %u\n", log->err_type, log->ee,
+		log->virt_idx);
+	ipa_err("log code 0x%1x arg1 0x%1x arg2 0x%1x arg3 0x%1x\n", log->code,
+		log->arg1, log->arg2, log->arg3);
 
 	ipa_bug_on(log->err_type == GSI_ERR_TYPE_GLOB);
 
@@ -606,10 +606,10 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *ctx)
 	 */
 	val = ctx->ring.wp_local >> 32;
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_DOORBELL_1_OFFS(ctx->props.ch_id,
-				gsi_ctx->ee));
+							  gsi_ctx->ee));
 	val = ctx->ring.wp_local & GENMASK(31, 0);
 	gsi_writel(val, GSI_EE_n_GSI_CH_k_DOORBELL_0_OFFS(ctx->props.ch_id,
-				gsi_ctx->ee));
+							  gsi_ctx->ee));
 }
 
 static void handle_event(int evt_id)
@@ -770,7 +770,7 @@ static irqreturn_t gsi_isr(int irq, void *ctxt)
 				break;
 			default:
 				WARN(true, "%s: unrecognized type 0x%08x\n",
-						__func__, single);
+				     __func__, single);
 				break;
 			}
 			type ^= single;
@@ -842,7 +842,7 @@ int gsi_register_device(void)
 
 	spin_lock_init(&gsi_ctx->slock);
 	ret = devm_request_irq(gsi_ctx->dev, gsi_ctx->irq, gsi_isr,
-				IRQF_TRIGGER_HIGH, "gsi", gsi_ctx);
+			       IRQF_TRIGGER_HIGH, "gsi", gsi_ctx);
 	if (ret) {
 		ipa_err("failed to register isr for %u\n", gsi_ctx->irq);
 		return -EIO;
@@ -896,13 +896,13 @@ int gsi_deregister_device(void)
 {
 	if (atomic_read(&gsi_ctx->num_chan)) {
 		ipa_err("%u channels are allocated\n",
-				atomic_read(&gsi_ctx->num_chan));
+			atomic_read(&gsi_ctx->num_chan));
 		return -ENOTSUPP;
 	}
 
 	if (atomic_read(&gsi_ctx->num_evt_ring)) {
 		ipa_err("%u evt rings are allocated\n",
-				atomic_read(&gsi_ctx->num_evt_ring));
+			atomic_read(&gsi_ctx->num_evt_ring));
 		return -ENOTSUPP;
 	}
 
@@ -1111,8 +1111,8 @@ static u32 evt_ring_ctx_8_val(u32 int_modt, u32 int_modc)
 	return val;
 }
 
-static void gsi_program_evt_ring_ctx(struct ipa_mem_buffer *mem,
-		u8 evt_id, u16 int_modt)
+static void
+gsi_program_evt_ring_ctx(struct ipa_mem_buffer *mem, u8 evt_id, u16 int_modt)
 {
 	u32 ee = gsi_ctx->ee;
 	u32 int_modc = 1;	/* moderation always comes from channel*/
@@ -1121,7 +1121,7 @@ static void gsi_program_evt_ring_ctx(struct ipa_mem_buffer *mem,
 	ipa_debug("intf GPI intr IRQ RE size %u\n", GSI_EVT_RING_ELEMENT_SIZE);
 
 	val = evt_ring_ctx_0_val(GSI_EVT_CHTYPE_GPI_EV, true,
-					GSI_EVT_RING_ELEMENT_SIZE);
+				 GSI_EVT_RING_ELEMENT_SIZE);
 	gsi_writel(val, GSI_EE_n_EV_CH_k_CNTXT_0_OFFS(evt_id, ee));
 
 	val = field_gen(mem->size, EV_R_LENGTH_BMSK);
@@ -1263,7 +1263,7 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 	/* Verify the result meets our alignment requirements */
 	if (ctx->mem.phys_base % required_alignment) {
 		ipa_err("ring base %pad not aligned to 0x%lx\n",
-				&ctx->mem.phys_base, required_alignment);
+			&ctx->mem.phys_base, required_alignment);
 		ret = -EINVAL;
 		goto err_free_dma;
 	}
@@ -1283,7 +1283,7 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 
 	if (ctx->state != GSI_EVT_RING_STATE_ALLOCATED) {
 		ipa_err("evt_id %lu allocation failed state %u\n",
-				evt_id, ctx->state);
+			evt_id, ctx->state);
 		ret = -ENOMEM;
 		goto err_unlock;
 	}
@@ -1421,14 +1421,14 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 
 	if (props->mem.size % 16) {
 		ipa_err("bad params mem.size %u not a multiple of re size %u\n",
-				props->mem.size, GSI_CHAN_RING_ELEMENT_SIZE);
+			props->mem.size, GSI_CHAN_RING_ELEMENT_SIZE);
 		return -EINVAL;
 	}
 
 	phys_base = props->mem.phys_base;
 	if (phys_base % roundup_pow_of_two(props->mem.size)) {
 		ipa_err("bad params ring base not aligned 0x%llx align 0x%lx\n",
-				phys_base, roundup_pow_of_two(props->mem.size));
+			phys_base, roundup_pow_of_two(props->mem.size));
 		return -EINVAL;
 	}
 
@@ -1520,7 +1520,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	}
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED) {
 		ipa_err("chan_id %ld allocation failed state %d\n",
-				chan_id, ctx->state);
+			chan_id, ctx->state);
 		chan_id = -ENOMEM;
 		goto err_mutex_unlock;
 	}
@@ -1601,8 +1601,8 @@ int gsi_start_channel(unsigned long chan_id)
 	u32 completed;
 
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED &&
-		ctx->state != GSI_CHAN_STATE_STOP_IN_PROC &&
-		ctx->state != GSI_CHAN_STATE_STOPPED) {
+	    ctx->state != GSI_CHAN_STATE_STOP_IN_PROC &&
+	    ctx->state != GSI_CHAN_STATE_STOPPED) {
 		ipa_err("bad state %d\n", ctx->state);
 		return -ENOTSUPP;
 	}
@@ -1640,8 +1640,8 @@ int gsi_stop_channel(unsigned long chan_id)
 	}
 
 	if (ctx->state != GSI_CHAN_STATE_STARTED &&
-		ctx->state != GSI_CHAN_STATE_STOP_IN_PROC &&
-		ctx->state != GSI_CHAN_STATE_ERROR) {
+	    ctx->state != GSI_CHAN_STATE_STOP_IN_PROC &&
+	    ctx->state != GSI_CHAN_STATE_ERROR) {
 		ipa_err("bad state %d\n", ctx->state);
 		return -ENOTSUPP;
 	}
@@ -1669,7 +1669,7 @@ int gsi_stop_channel(unsigned long chan_id)
 	}
 
 	if (ctx->state != GSI_CHAN_STATE_STOPPED &&
-		ctx->state != GSI_CHAN_STATE_STOP_IN_PROC) {
+	    ctx->state != GSI_CHAN_STATE_STOP_IN_PROC) {
 		ipa_err("chan %lu unexpected state %u\n", chan_id, ctx->state);
 		ret = -EBUSY;
 		goto free_lock;
@@ -1714,8 +1714,8 @@ reset:
 	}
 
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED) {
-		ipa_err("chan_id %lu unexpected state %u\n",
-				chan_id, ctx->state);
+		ipa_err("chan_id %lu unexpected state %u\n", chan_id,
+			ctx->state);
 		ipa_bug();
 	}
 
@@ -1806,13 +1806,13 @@ bool gsi_is_channel_empty(unsigned long chan_id)
 	spin_unlock_irqrestore(&ctx->evtr->ring.slock, flags);
 
 	ipa_debug("chan_id %lu RP 0x%llx WP 0x%llx RP_LOCAL 0x%llx\n", chan_id,
-			ctx->ring.rp, ctx->ring.wp, ctx->ring.rp_local);
+		  ctx->ring.rp, ctx->ring.wp, ctx->ring.rp_local);
 
 	return empty;
 }
 
 int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
-		struct gsi_xfer_elem *xfer, bool ring_db)
+		   struct gsi_xfer_elem *xfer, bool ring_db)
 {
 	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_id];
 	u16 free;
@@ -1826,7 +1826,7 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 
 	if (!num_xfers || !xfer) {
 		ipa_err("bad params chan_id %lu num_xfers %u xfer %p\n",
-				chan_id, num_xfers, xfer);
+			chan_id, num_xfers, xfer);
 		return -EINVAL;
 	}
 
@@ -1835,8 +1835,8 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 	free = __gsi_query_channel_free_re(ctx);
 
 	if (num_xfers > free) {
-		ipa_err("chan_id %lu num_xfers %u free %u\n",
-				chan_id, num_xfers, free);
+		ipa_err("chan_id %lu num_xfers %u free %u\n", chan_id,
+			num_xfers, free);
 		ret = -ENOSPC;
 		goto out_unlock;
 	}
@@ -1992,7 +1992,7 @@ int gsi_set_channel_cfg(unsigned long chan_id, struct gsi_chan_props *props)
 	}
 
 	if (ctx->props.ch_id != props->ch_id ||
-		ctx->props.evt_ring_hdl != props->evt_ring_hdl) {
+	    ctx->props.evt_ring_hdl != props->evt_ring_hdl) {
 		ipa_err("changing immutable fields not supported\n");
 		return -ENOTSUPP;
 	}

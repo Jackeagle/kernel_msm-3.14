@@ -20,15 +20,16 @@
 
 #define IPA_PKT_FLUSH_TO_US 100
 
-static int ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep,
-	struct gsi_chan_props *orig_chan_props,
-	struct ipa_mem_buffer *chan_dma)
+static int
+ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep,
+			       struct gsi_chan_props *orig_chan_props,
+			       struct ipa_mem_buffer *chan_dma)
 {
 	struct gsi_chan_props chan_props;
 
 	/* Allocate the DMA space first; it can fail */
 	if (ipahal_dma_alloc(chan_dma, 2 * GSI_CHAN_RING_ELEMENT_SIZE,
-				GFP_KERNEL))
+			     GFP_KERNEL))
 		return -ENOMEM;
 
 	/* Set up channel properties */
@@ -50,8 +51,9 @@ static int ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep,
 	return 0;
 }
 
-static int ipa_restore_channel_properties(struct ipa_ep_context *ep,
-	struct gsi_chan_props *chan_props)
+static int
+ipa_restore_channel_properties(struct ipa_ep_context *ep,
+			       struct gsi_chan_props *chan_props)
 {
 	int gsi_res;
 
@@ -64,8 +66,8 @@ static int ipa_restore_channel_properties(struct ipa_ep_context *ep,
 	return 0;
 }
 
-static int ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
-	struct ipa_ep_context *ep)
+static int
+ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 {
 	int result;
 	int gsi_res;
@@ -96,7 +98,7 @@ static int ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 		return -EFAULT;
 	}
 	result = ipa_reconfigure_channel_to_gpi(ep, &orig_chan_props,
-			&chan_dma);
+						&chan_dma);
 	if (result)
 		return -EFAULT;
 
@@ -105,8 +107,8 @@ static int ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 		ipa_debug("pipe is suspended, remove suspend\n");
 		pipe_suspended = true;
 		ctrl.ipa_ep_suspend = false;
-		ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n,
-			clnt_hdl, &ctrl);
+		ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n, clnt_hdl,
+					  &ctrl);
 	}
 
 	/* Start channel and put 1 Byte descriptor on it */
@@ -170,8 +172,8 @@ static int ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl,
 	if (pipe_suspended) {
 		ipa_debug("suspend the pipe again\n");
 		ctrl.ipa_ep_suspend = true;
-		ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n,
-			clnt_hdl, &ctrl);
+		ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n, clnt_hdl,
+					  &ctrl);
 	}
 
 	/* Restore channels properties */
@@ -190,8 +192,8 @@ start_chan_fail:
 	if (pipe_suspended) {
 		ipa_debug("suspend the pipe again\n");
 		ctrl.ipa_ep_suspend = true;
-		ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n,
-			clnt_hdl, &ctrl);
+		ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n, clnt_hdl,
+					  &ctrl);
 	}
 	ipa_restore_channel_properties(ep, &orig_chan_props);
 restore_props_fail:

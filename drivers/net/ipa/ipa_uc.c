@@ -210,8 +210,7 @@ static void ipa_uc_event_handler(enum ipa_irq_type interrupt,
 }
 
 static void ipa_uc_response_hdlr(enum ipa_irq_type interrupt,
-				void *private_data,
-				void *interrupt_data)
+				 void *private_data, void *interrupt_data)
 {
 	union IpaHwCpuCmdCompletedResponseData_t uc_rsp;
 	struct IpaHwSharedMemCommonMapping_t *mmio;
@@ -250,7 +249,7 @@ static void ipa_uc_response_hdlr(enum ipa_irq_type interrupt,
 		params = &uc_rsp.params;
 
 		ipa_debug("uC cmd response opcode=%u status=%u\n",
-		       params->originalCmdOp, params->status);
+		          params->originalCmdOp, params->status);
 
 		/* Make sure we were expecting the command that completed */
 		if (params->originalCmdOp == ipa_ctx->uc_ctx.pending_cmd) {
@@ -310,16 +309,16 @@ int ipa_uc_interface_init(void)
 		goto remap_fail;
 	}
 
-	result = ipa_add_interrupt_handler(IPA_UC_IRQ_0,
-			ipa_uc_event_handler, true, ipa_ctx);
+	result = ipa_add_interrupt_handler(IPA_UC_IRQ_0, ipa_uc_event_handler,
+					   true, ipa_ctx);
 	if (result) {
 		ipa_err("Fail to register for UC_IRQ0 rsp interrupt\n");
 		result = -EFAULT;
 		goto irq_fail0;
 	}
 
-	result = ipa_add_interrupt_handler(IPA_UC_IRQ_1,
-			ipa_uc_response_hdlr, true, ipa_ctx);
+	result = ipa_add_interrupt_handler(IPA_UC_IRQ_1, ipa_uc_response_hdlr,
+					   true, ipa_ctx);
 	if (result) {
 		ipa_err("fail to register for UC_IRQ1 rsp interrupt\n");
 		result = -EFAULT;
@@ -341,7 +340,7 @@ remap_fail:
 }
 
 int ipa_uc_panic_notifier(struct notifier_block *this,
-		unsigned long event, void *ptr)
+			  unsigned long event, void *ptr)
 {
 	ipa_debug("this=%p evt=%lu ptr=%p\n", this, event, ptr);
 
@@ -351,8 +350,7 @@ int ipa_uc_panic_notifier(struct notifier_block *this,
 	if (!ipa_client_add_additional(__func__, false))
 		goto fail;
 
-	send_uc_command_nowait(&ipa_ctx->uc_ctx, 0,
-				IPA_CPU_2_HW_CMD_ERR_FATAL);
+	send_uc_command_nowait(&ipa_ctx->uc_ctx, 0, IPA_CPU_2_HW_CMD_ERR_FATAL);
 
 	/* give uc enough time to save state */
 	udelay(IPA_PKT_FLUSH_TO_US);

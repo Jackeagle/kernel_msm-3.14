@@ -281,7 +281,7 @@ int ipahal_rule_decrease_priority(int *prio)
 
 	/* Priority logic is reverse. 0 priority considred max priority */
 	if (*prio > ipahal_fltrt.rule_min_prio ||
-			*prio < ipahal_fltrt.rule_max_prio) {
+	    *prio < ipahal_fltrt.rule_max_prio) {
 		ipa_err("Invalid given priority %d\n", *prio);
 		return -EINVAL;
 	}
@@ -332,7 +332,7 @@ void ipahal_free_empty_img(struct ipa_mem_buffer *mem)
  * @gfp: GFP flag to supply with DMA allocation request
  */
 int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
-		gfp_t gfp)
+				 gfp_t gfp)
 {
 	u32 width = ipahal_fltrt.tbl_hdr_width;
 	int i = 0;
@@ -361,7 +361,7 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
  * @gfp: GFP flag to supply with DMA allocation request
  */
 int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
-		struct ipa_mem_buffer *mem, gfp_t gfp)
+				  struct ipa_mem_buffer *mem, gfp_t gfp)
 {
 	u32 width = ipahal_fltrt.tbl_hdr_width;
 	int i = 0;

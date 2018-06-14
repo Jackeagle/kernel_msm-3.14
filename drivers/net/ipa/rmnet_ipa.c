@@ -168,8 +168,8 @@ static int ipa_wwan_change_mtu(struct net_device *dev, int new_mtu)
 	if (new_mtu > WWAN_DATA_LEN)
 		return -EINVAL;
 
-	ipa_debug("[%s] MTU change: old=%d new=%d\n",
-		dev->name, dev->mtu, new_mtu);
+	ipa_debug("[%s] MTU change: old=%d new=%d\n", dev->name, dev->mtu,
+		  new_mtu);
 	dev->mtu = new_mtu;
 
 	return 0;
@@ -194,7 +194,7 @@ static int ipa_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 
 	if (skb->protocol != htons(ETH_P_MAP)) {
 		ipa_debug_low("dropping %u bytes from %s (bad proto %hu)\n",
-				skb->len, current->comm, skb->protocol);
+			      skb->len, current->comm, skb->protocol);
 		dev_kfree_skb_any(skb);
 		dev->stats.tx_dropped++;
 		return NETDEV_TX_OK;
@@ -204,7 +204,7 @@ static int ipa_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 	if (netif_queue_stopped(dev)) {
 		if (!qmap_check) {
 			ipa_err("[%s]fatal: ipa_wwan_xmit stopped\n",
-				  dev->name);
+				dev->name);
 			return NETDEV_TX_BUSY;
 		}
 		if (atomic_read(&wwan_ptr->outstanding_pkts) <
@@ -219,9 +219,9 @@ static int ipa_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 					wwan_ptr->outstanding_high) {
 		if (!qmap_check) {
 			ipa_debug_low("pending(%d)/(%d)- stop(%d)\n",
-				atomic_read(&wwan_ptr->outstanding_pkts),
-				wwan_ptr->outstanding_high,
-				netif_queue_stopped(dev));
+				      atomic_read(&wwan_ptr->outstanding_pkts),
+				      wwan_ptr->outstanding_high,
+				      netif_queue_stopped(dev));
 			ipa_debug_low("qmap_chk(%d)\n", qmap_check);
 			netif_stop_queue(dev);
 			return NETDEV_TX_BUSY;
@@ -256,9 +256,8 @@ static void ipa_wwan_tx_timeout(struct net_device *dev)
  * Check that the packet is the one we sent and release it
  * This function will be called in defered context in IPA wq.
  */
-static void apps_ipa_tx_complete_notify(void *priv,
-		enum ipa_dp_evt_type evt,
-		unsigned long data)
+static void apps_ipa_tx_complete_notify(void *priv, enum ipa_dp_evt_type evt,
+					unsigned long data)
 {
 	struct sk_buff *skb = (struct sk_buff *)data;
 	struct net_device *dev = (struct net_device *)priv;
@@ -281,10 +280,10 @@ static void apps_ipa_tx_complete_notify(void *priv,
 	atomic_dec(&wwan_ptr->outstanding_pkts);
 	__netif_tx_lock_bh(netdev_get_tx_queue(dev, 0));
 	if (netif_queue_stopped(dev) &&
-		atomic_read(&wwan_ptr->outstanding_pkts) <
-					(wwan_ptr->outstanding_low)) {
+	    atomic_read(&wwan_ptr->outstanding_pkts) <
+				(wwan_ptr->outstanding_low)) {
 		ipa_debug_low("Outstanding low (%d) - waking up queue\n",
-				wwan_ptr->outstanding_low);
+			      wwan_ptr->outstanding_low);
 		netif_wake_queue(dev);
 	}
 
@@ -300,9 +299,8 @@ static void apps_ipa_tx_complete_notify(void *priv,
  *
  * IPA will pass a packet to the Linux network stack with skb->data
  */
-static void apps_ipa_packet_receive_notify(void *priv,
-		enum ipa_dp_evt_type evt,
-		unsigned long data)
+static void apps_ipa_packet_receive_notify(void *priv, enum ipa_dp_evt_type evt,
+					   unsigned long data)
 {
 	struct net_device *dev = priv;
 	struct ipa_wwan_private *wwan_ptr = netdev_priv(dev);
@@ -333,7 +331,7 @@ static void apps_ipa_packet_receive_notify(void *priv,
 }
 
 static int handle3_ingress_format(struct net_device *dev,
-			struct rmnet_ioctl_extended_s *in)
+				  struct rmnet_ioctl_extended_s *in)
 {
 	int ret;
 	struct ipa_sys_connect_params *ipa_wan_ep_cfg;
@@ -353,8 +351,8 @@ static int handle3_ingress_format(struct net_device *dev,
 
 	if ((in->u.data) & RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA) {
 		ipa_debug("get AGG size %d count %d\n",
-				  in->u.ingress_format.agg_size,
-				  in->u.ingress_format.agg_count);
+			  in->u.ingress_format.agg_size,
+			  in->u.ingress_format.agg_count);
 
 		ret = ipa_disable_apps_wan_cons_deaggr(
 			  in->u.ingress_format.agg_size,
@@ -415,7 +413,7 @@ static int handle3_ingress_format(struct net_device *dev,
  * @e: egress configuration
  */
 static int handle3_egress_format(struct net_device *dev,
-			struct rmnet_ioctl_extended_s *e)
+				 struct rmnet_ioctl_extended_s *e)
 {
 	int rc;
 	struct ipa_sys_connect_params *ipa_wan_ep_cfg;
@@ -536,7 +534,7 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	case RMNET_IOCTL_GET_LLP:
 		ioctl_data.u.operation_mode = RMNET_MODE_LLP_IP;
 		if (copy_to_user(ifr->ifr_ifru.ifru_data, &ioctl_data,
-			sizeof(struct rmnet_ioctl_data_s)))
+				 sizeof(struct rmnet_ioctl_data_s)))
 			rc = -EFAULT;
 		break;
 	/*  Set QoS header enabled  */
@@ -549,14 +547,14 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	case RMNET_IOCTL_GET_QOS:
 		ioctl_data.u.operation_mode = RMNET_MODE_NONE;
 		if (copy_to_user(ifr->ifr_ifru.ifru_data, &ioctl_data,
-			sizeof(struct rmnet_ioctl_data_s)))
+				 sizeof(struct rmnet_ioctl_data_s)))
 			rc = -EFAULT;
 		break;
 	/*  Get operation mode */
 	case RMNET_IOCTL_GET_OPMODE:
 		ioctl_data.u.operation_mode = RMNET_MODE_LLP_IP;
 		if (copy_to_user(ifr->ifr_ifru.ifru_data, &ioctl_data,
-			sizeof(struct rmnet_ioctl_data_s)))
+				 sizeof(struct rmnet_ioctl_data_s)))
 			rc = -EFAULT;
 		break;
 	/*  Open transport port	 */
@@ -583,8 +581,8 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	case RMNET_IOCTL_EXTENDED:
 		ipa_debug("get ioctl: RMNET_IOCTL_EXTENDED\n");
 		if (copy_from_user(&extend_ioctl_data,
-			(u8 *)ifr->ifr_ifru.ifru_data,
-			sizeof(struct rmnet_ioctl_extended_s))) {
+				   (u8 *)ifr->ifr_ifru.ifru_data,
+				   sizeof(struct rmnet_ioctl_extended_s))) {
 			ipa_err("failed to copy extended ioctl data\n");
 			rc = -EFAULT;
 			break;
@@ -598,22 +596,22 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 				RMNET_IOCTL_FEAT_SET_EGRESS_DATA_FORMAT |
 				RMNET_IOCTL_FEAT_SET_INGRESS_DATA_FORMAT);
 			if (copy_to_user((u8 *)ifr->ifr_ifru.ifru_data,
-				&extend_ioctl_data,
-				sizeof(struct rmnet_ioctl_extended_s)))
+					 &extend_ioctl_data,
+					 sizeof(struct rmnet_ioctl_extended_s)))
 				rc = -EFAULT;
 			break;
 		/*  Set MRU  */
 		case RMNET_IOCTL_SET_MRU:
 			mru = extend_ioctl_data.u.data;
 			ipa_debug("get MRU size %d\n",
-				extend_ioctl_data.u.data);
+				  extend_ioctl_data.u.data);
 			break;
 		/*  Get MRU  */
 		case RMNET_IOCTL_GET_MRU:
 			extend_ioctl_data.u.data = mru;
 			if (copy_to_user((u8 *)ifr->ifr_ifru.ifru_data,
-				&extend_ioctl_data,
-				sizeof(struct rmnet_ioctl_extended_s)))
+					 &extend_ioctl_data,
+					 sizeof(struct rmnet_ioctl_extended_s)))
 				rc = -EFAULT;
 			break;
 		/* GET SG support */
@@ -621,8 +619,8 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			/* We always advertise scatter/gather support */
 			extend_ioctl_data.u.data = 1;
 			if (copy_to_user((u8 *)ifr->ifr_ifru.ifru_data,
-				&extend_ioctl_data,
-				sizeof(struct rmnet_ioctl_extended_s)))
+					 &extend_ioctl_data,
+					 sizeof(struct rmnet_ioctl_extended_s)))
 				rc = -EFAULT;
 			break;
 		/*  Get endpoint ID  */
@@ -630,18 +628,18 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			ipa_debug("get ioctl: RMNET_IOCTL_GET_EPID\n");
 			extend_ioctl_data.u.data = epid;
 			if (copy_to_user((u8 *)ifr->ifr_ifru.ifru_data,
-				&extend_ioctl_data,
-				sizeof(struct rmnet_ioctl_extended_s)))
+					 &extend_ioctl_data,
+					 sizeof(struct rmnet_ioctl_extended_s)))
 				rc = -EFAULT;
 			if (copy_from_user(&extend_ioctl_data,
-				(u8 *)ifr->ifr_ifru.ifru_data,
-				sizeof(struct rmnet_ioctl_extended_s))) {
+					   (u8 *)ifr->ifr_ifru.ifru_data,
+					   sizeof(struct rmnet_ioctl_extended_s))) {
 				ipa_err("copy extended ioctl data failed\n");
 				rc = -EFAULT;
-			break;
+				break;
 			}
 			ipa_debug("RMNET_IOCTL_GET_EPID return %d\n",
-					extend_ioctl_data.u.data);
+				  extend_ioctl_data.u.data);
 			break;
 		/*  Endpoint pair  */
 		case RMNET_IOCTL_GET_EP_PAIR:
@@ -651,52 +649,48 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			extend_ioctl_data.u.ipa_ep_pair.producer_pipe_num =
 			ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
 			if (copy_to_user((u8 *)ifr->ifr_ifru.ifru_data,
-				&extend_ioctl_data,
-				sizeof(struct rmnet_ioctl_extended_s)))
+					 &extend_ioctl_data,
+					 sizeof(struct rmnet_ioctl_extended_s)))
 				rc = -EFAULT;
 			if (copy_from_user(&extend_ioctl_data,
-				(u8 *)ifr->ifr_ifru.ifru_data,
-				sizeof(struct rmnet_ioctl_extended_s))) {
+					   (u8 *)ifr->ifr_ifru.ifru_data,
+					   sizeof(struct rmnet_ioctl_extended_s))) {
 				ipa_err("copy extended ioctl data failed\n");
 				rc = -EFAULT;
 			break;
 		}
 			ipa_debug("RMNET_IOCTL_GET_EP_PAIR c: %d p: %d\n",
-			extend_ioctl_data.u.ipa_ep_pair.consumer_pipe_num,
-			extend_ioctl_data.u.ipa_ep_pair.producer_pipe_num);
+				  extend_ioctl_data.u.ipa_ep_pair.consumer_pipe_num,
+				  extend_ioctl_data.u.ipa_ep_pair.producer_pipe_num);
 			break;
 		/*  Get driver name  */
 		case RMNET_IOCTL_GET_DRIVER_NAME:
 			memcpy(&extend_ioctl_data.u.if_name,
-				rmnet_ipa_ctx->dev->name,
-							sizeof(IFNAMSIZ));
+			       rmnet_ipa_ctx->dev->name, sizeof(IFNAMSIZ));
 			if (copy_to_user((u8 *)ifr->ifr_ifru.ifru_data,
-					&extend_ioctl_data,
-					sizeof(struct rmnet_ioctl_extended_s)))
+					 &extend_ioctl_data,
+					 sizeof(struct rmnet_ioctl_extended_s)))
 				rc = -EFAULT;
 			break;
 		/*  Add MUX ID	*/
 		case RMNET_IOCTL_ADD_MUX_CHANNEL:
 			mux_index = ipa_find_mux_channel_index(
-				extend_ioctl_data.u.rmnet_mux_val.mux_id);
+					extend_ioctl_data.u.rmnet_mux_val.mux_id);
 			if (mux_index < MAX_NUM_OF_MUX_CHANNEL) {
 				ipa_debug("already setup mux(%d)\n",
-					extend_ioctl_data.u.
-					rmnet_mux_val.mux_id);
+					  extend_ioctl_data.u.rmnet_mux_val.mux_id);
 				return rc;
 			}
 			mutex_lock(&rmnet_ipa_ctx->add_mux_channel_lock);
-			if (rmnet_ipa_ctx->rmnet_index
-				>= MAX_NUM_OF_MUX_CHANNEL) {
+			if (rmnet_ipa_ctx->rmnet_index >= MAX_NUM_OF_MUX_CHANNEL) {
 				ipa_err("Exceed mux_channel limit(%d)\n",
-				rmnet_ipa_ctx->rmnet_index);
-				mutex_unlock(&rmnet_ipa_ctx->
-					add_mux_channel_lock);
+					rmnet_ipa_ctx->rmnet_index);
+				mutex_unlock(&rmnet_ipa_ctx->add_mux_channel_lock);
 				return -EFAULT;
 			}
 			ipa_debug("ADD_MUX_CHANNEL(%d, name: %s)\n",
-			extend_ioctl_data.u.rmnet_mux_val.mux_id,
-			extend_ioctl_data.u.rmnet_mux_val.vchannel_name);
+				  extend_ioctl_data.u.rmnet_mux_val.mux_id,
+				  extend_ioctl_data.u.rmnet_mux_val.vchannel_name);
 			/* cache the mux name and id */
 			mux_channel = rmnet_ipa_ctx->mux_channel;
 			rmnet_index = rmnet_ipa_ctx->rmnet_index;
@@ -704,16 +698,14 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			mux_channel[rmnet_index].mux_id =
 				extend_ioctl_data.u.rmnet_mux_val.mux_id;
 			memcpy(mux_channel[rmnet_index].vchannel_name,
-				extend_ioctl_data.u.rmnet_mux_val.vchannel_name,
-				sizeof(mux_channel[rmnet_index]
-					.vchannel_name));
+			       extend_ioctl_data.u.rmnet_mux_val.vchannel_name,
+			       sizeof(mux_channel[rmnet_index].vchannel_name));
 			mux_channel[rmnet_index].vchannel_name[
 				IFNAMSIZ - 1] = '\0';
 
 			ipa_debug("cashe device[%s:%d] in IPA_wan[%d]\n",
-				mux_channel[rmnet_index].vchannel_name,
-				mux_channel[rmnet_index].mux_id,
-				rmnet_index);
+				  mux_channel[rmnet_index].vchannel_name,
+				  mux_channel[rmnet_index].mux_id, rmnet_index);
 			rmnet_ipa_ctx->rmnet_index++;
 			mutex_unlock(&rmnet_ipa_ctx->add_mux_channel_lock);
 			break;

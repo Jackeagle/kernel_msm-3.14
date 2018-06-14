@@ -69,7 +69,7 @@ static bool init_driver_response_received = false;
 
 /* Send an INIT_COMPLETE_IND indication message to the modem */
 static int ipa_send_master_driver_init_complete_ind(struct qmi_handle *qmi,
-		struct sockaddr_qrtr *sq)
+						    struct sockaddr_qrtr *sq)
 {
 	struct ipa_init_complete_ind ind;
 
@@ -92,7 +92,7 @@ static int ipa_send_master_driver_init_complete_ind(struct qmi_handle *qmi,
  * to send it.
  */
 static int ipa_handshake_complete(struct qmi_handle *qmi,
-		struct sockaddr_qrtr *sq, bool init_driver)
+				  struct sockaddr_qrtr *sq, bool init_driver)
 {
 	bool send_it;
 
@@ -114,8 +114,9 @@ static int ipa_handshake_complete(struct qmi_handle *qmi,
  * receive the INIT_COMPLETE_IND indication message.
  */
 static void ipa_indication_register_fn(struct qmi_handle *qmi,
-		struct sockaddr_qrtr *sq, struct qmi_txn *txn,
-		const void *decoded)
+				       struct sockaddr_qrtr *sq,
+				       struct qmi_txn *txn,
+				       const void *decoded)
 {
 	const struct ipa_indication_register_req *req = decoded;
 	struct ipa_indication_register_rsp rsp;
@@ -126,9 +127,9 @@ static void ipa_indication_register_fn(struct qmi_handle *qmi,
 	 * driver init complete indication if this is true.
 	 */
 	ipa_debug("req->master_driver_init_complete_valid = %hhu\n",
-		req->master_driver_init_complete_valid);
+		  req->master_driver_init_complete_valid);
 	ipa_debug("req->master_driver_init_complete = %hhu\n",
-		req->master_driver_init_complete);
+		  req->master_driver_init_complete);
 
 	memset(&rsp, 0, sizeof(rsp));
 	rsp.rsp.result = QMI_RESULT_SUCCESS_V01;
@@ -152,8 +153,9 @@ static void ipa_indication_register_fn(struct qmi_handle *qmi,
  * the initializion of its driver.
  */
 static void ipa_driver_init_complete_fn(struct qmi_handle *qmi,
-		struct sockaddr_qrtr *sq, struct qmi_txn *txn,
-		const void *decoded)
+					struct sockaddr_qrtr *sq,
+					struct qmi_txn *txn,
+					const void *decoded)
 {
 	const struct ipa_driver_init_complete_req *req = decoded;
 	struct ipa_driver_init_complete_rsp rsp;
@@ -199,8 +201,9 @@ static struct qmi_msg_handler ipa_server_msg_handlers[] = {
  * modem initialization by sending a IPA_QMI_DRIVER_INIT_COMPLETE request.
  */
 static void ipa_init_driver_rsp_fn(struct qmi_handle *qmi,
-		struct sockaddr_qrtr *sq, struct qmi_txn *txn,
-		const void *decoded)
+				   struct sockaddr_qrtr *sq,
+				   struct qmi_txn *txn,
+				   const void *decoded)
 {
 	int ret;
 
@@ -334,8 +337,8 @@ ipa_client_new_server(struct qmi_handle *qmi, struct qmi_service *svc)
 	sq.sq_port = svc->port;
 
 	ret = qmi_send_request(qmi, &sq, txn, IPA_QMI_INIT_DRIVER,
-				IPA_QMI_INIT_DRIVER_REQ_SZ,
-				ipa_init_modem_driver_req_ei, req);
+			       IPA_QMI_INIT_DRIVER_REQ_SZ,
+			       ipa_init_modem_driver_req_ei, req);
 	if (ret) {
 		qmi_txn_cancel(txn);
 		kfree(txn);
@@ -363,12 +366,12 @@ static int ipa_qmi_initialize(void)
 	 * done by the message handlers.
 	 */
 	ret = qmi_handle_init(&server_handle, IPA_QMI_SERVER_MAX_RCV_SZ,
-			NULL, ipa_server_msg_handlers);
+			      NULL, ipa_server_msg_handlers);
 	if (ret < 0)
 		return ret;
 
 	ret = qmi_add_server(&server_handle, IPA_HOST_SERVICE_SVC_ID,
-			IPA_HOST_SVC_VERS, IPA_HOST_SERVICE_INS_ID);
+			     IPA_HOST_SVC_VERS, IPA_HOST_SERVICE_INS_ID);
 	if (ret < 0)
 		goto err_release_server_handle;
 
@@ -376,12 +379,12 @@ static int ipa_qmi_initialize(void)
 	 * request to the modem, and receiving its response message.
 	 */
 	ret = qmi_handle_init(&client_handle, IPA_QMI_CLIENT_MAX_RCV_SZ,
-			&ipa_client_ops, ipa_client_msg_handlers);
+			      &ipa_client_ops, ipa_client_msg_handlers);
 	if (ret < 0)
 		goto err_release_server_handle;
 
 	ret = qmi_add_lookup(&client_handle, IPA_MODEM_SERVICE_SVC_ID,
-			IPA_MODEM_SVC_VERS, IPA_MODEM_SERVICE_INS_ID);
+			     IPA_MODEM_SVC_VERS, IPA_MODEM_SERVICE_INS_ID);
 	if (ret < 0)
 		goto err_release_client_handle;
 

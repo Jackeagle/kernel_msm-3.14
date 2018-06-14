@@ -353,7 +353,7 @@ void gsi_channel_intr_disable(unsigned long chan_hdl);
  * @Return gsi_status
  */
 int gsi_queue_xfer(unsigned long chan_hdl, u16 num_xfers,
-		struct gsi_xfer_elem *xfer, bool ring_db);
+		   struct gsi_xfer_elem *xfer, bool ring_db);
 
 /** gsi_start_xfer - Peripheral should call this function to
  * inform HW about queued xfers

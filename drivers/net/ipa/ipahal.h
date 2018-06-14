@@ -101,7 +101,7 @@ struct ipahal_imm_cmd_pyld *ipahal_dma_shared_mem_write_pyld(
  * clear	if true means wait for full pipeline clear (HPS otherwise)
  */
 struct ipahal_imm_cmd_pyld *ipahal_register_write_pyld(u32 offset, u32 value,
-				u32 mask, bool clear);
+						       u32 mask, bool clear);
 
 /* Return a pointer to the payload for a header init local immediate
  * command, or null if one can't be allocated.  Caller must ensure result
@@ -355,7 +355,7 @@ u32 ipahal_pkt_status_get_size(void);
  * @status: Pointer to pre-allocated buffer where the parsed info will be stored
  */
 void ipahal_pkt_status_parse(const void *unparsed_status,
-	struct ipahal_pkt_status *status);
+			     struct ipahal_pkt_status *status);
 
 /* ipahal_pkt_status_exception_str() - returns string represents exception type
  * @exception: [in] The exception type

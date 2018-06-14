@@ -135,7 +135,7 @@ debug_cnt_ctrl_type_valid(u8 dbg_cnt_ctrl_type, enum ipahal_reg reg)
 	}
 
 	ipa_err("Invalid dbg_cnt_ctrl type (%hhu) for %s\n",
-			dbg_cnt_ctrl_type, ipahal_regs[reg].name);
+		dbg_cnt_ctrl_type, ipahal_regs[reg].name);
 
 	return false;
 }
@@ -176,7 +176,7 @@ ipareg_parse_shared_mem_size(enum ipahal_reg reg, void *fields, u32 val)
 
 static u32
 ipareg_construct_endp_init_hdr_metadata_mask_n(enum ipahal_reg reg,
-		const void *fields)
+					       const void *fields)
 {
 	const struct ipa_ep_cfg_metadata_mask *metadata_mask = fields;
 
@@ -235,7 +235,7 @@ ipareg_construct_endp_init_deaggr_n(enum ipahal_reg reg, const void *fields)
 
 static u32
 ipareg_construct_endp_init_hol_block_en_n(enum ipahal_reg reg,
-		const void *fields)
+					  const void *fields)
 {
 	const struct ipa_ep_cfg_holb *ep_holb = fields;
 
@@ -244,7 +244,7 @@ ipareg_construct_endp_init_hol_block_en_n(enum ipahal_reg reg,
 
 static u32
 ipareg_construct_endp_init_hol_block_timer_n(enum ipahal_reg reg,
-		const void *fields)
+					     const void *fields)
 {
 	const struct ipa_ep_cfg_holb *ep_holb = fields;
 
@@ -407,9 +407,9 @@ ipareg_construct_qsb_max_writes(enum ipahal_reg reg, const void *fields)
 	u32 val;
 
 	val = field_gen(max_writes->qmb_0_max_writes,
-			    GEN_QMB_0_MAX_WRITES_BMSK);
+			GEN_QMB_0_MAX_WRITES_BMSK);
 	val |= field_gen(max_writes->qmb_1_max_writes,
-			    GEN_QMB_1_MAX_WRITES_BMSK);
+			 GEN_QMB_1_MAX_WRITES_BMSK);
 
 	return val;
 }
@@ -532,62 +532,59 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 		reg_obj_nofunc(COMP_HW_VERSION,		0x00000030,	0x0000),
 		reg_obj_nofunc(SPARE_REG_1,		0x00002780,	0x0000),
 		reg_obj_nofunc(STATE_AGGR_ACTIVE,	0x0000010c,	0x0000),
-		reg_obj_cfunc(ENDP_INIT_HDR_n, endp_init_hdr_n,
-							0x00000810,	0x0070),
-		reg_obj_cfunc(ENDP_INIT_HDR_EXT_n, endp_init_hdr_ext_n,
-							0x00000814,	0x0070),
-		reg_obj_both(ENDP_INIT_AGGR_n, endp_init_aggr_n,
-							0x00000824,	0x0070),
+		reg_obj_cfunc(ENDP_INIT_HDR_n,
+			      endp_init_hdr_n,		0x00000810,	0x0070),
+		reg_obj_cfunc(ENDP_INIT_HDR_EXT_n,
+			      endp_init_hdr_ext_n,	0x00000814,	0x0070),
+		reg_obj_both(ENDP_INIT_AGGR_n,
+			     endp_init_aggr_n,		0x00000824,	0x0070),
 		reg_obj_nofunc(AGGR_FORCE_CLOSE,	0x000001ec,	0x0000),
-		reg_obj_cfunc(ENDP_INIT_ROUTE_n, endp_init_route_n,
-							0x00000828,	0x0070),
-		reg_obj_cfunc(ENDP_INIT_MODE_n, endp_init_mode_n,
-							0x00000820,	0x0070),
-		reg_obj_cfunc(ENDP_INIT_NAT_n, endp_init_nat_n,
-							0x0000080c,	0x0070),
-		reg_obj_both(ENDP_INIT_CTRL_n, endp_init_ctrl_n,
-							0x00000800,	0x0070),
+		reg_obj_cfunc(ENDP_INIT_ROUTE_n,
+			      endp_init_route_n,	0x00000828,	0x0070),
+		reg_obj_cfunc(ENDP_INIT_MODE_n,
+			      endp_init_mode_n,		0x00000820,	0x0070),
+		reg_obj_cfunc(ENDP_INIT_NAT_n,
+			      endp_init_nat_n,		0x0000080c,	0x0070),
+		reg_obj_both(ENDP_INIT_CTRL_n,
+			     endp_init_ctrl_n,		0x00000800,	0x0070),
 		reg_obj_cfunc(ENDP_INIT_HOL_BLOCK_EN_n,
-				endp_init_hol_block_en_n,
-							0x0000082c,	0x0070),
+			      endp_init_hol_block_en_n, 0x0000082c,	0x0070),
 		reg_obj_cfunc(ENDP_INIT_HOL_BLOCK_TIMER_n,
-				endp_init_hol_block_timer_n,
-							0x00000830,	0x0070),
-		reg_obj_cfunc(ENDP_INIT_DEAGGR_n, endp_init_deaggr_n,
-							0x00000834,	0x0070),
+			      endp_init_hol_block_timer_n, 0x00000830, 0x0070),
+		reg_obj_cfunc(ENDP_INIT_DEAGGR_n,
+			      endp_init_deaggr_n,	0x00000834,	0x0070),
 		reg_obj_nofunc(ENDP_INIT_SEQ_n,		0x0000083c,	0x0070),
 		reg_obj_nofunc(DEBUG_CNT_REG_n,		0x00000600,	0x0004),
-		reg_obj_cfunc(ENDP_INIT_CFG_n, endp_init_cfg_n,
-							0x00000808,	0x0070),
+		reg_obj_cfunc(ENDP_INIT_CFG_n,
+			      endp_init_cfg_n,		0x00000808,	0x0070),
 		reg_obj_nofunc(IRQ_EE_UC_n,		0x0000301c,	0x1000),
 		reg_obj_cfunc(ENDP_INIT_HDR_METADATA_MASK_n,
-				endp_init_hdr_metadata_mask_n,
-							0x00000818,	0x0070),
-		reg_obj_pfunc(SHARED_MEM_SIZE, shared_mem_size,
-							0x00000054,	0x0000),
+			      endp_init_hdr_metadata_mask_n, 0x00000818, 0x0070),
+		reg_obj_pfunc(SHARED_MEM_SIZE,
+			      shared_mem_size,		0x00000054,	0x0000),
 		reg_obj_nofunc(SRAM_DIRECT_ACCESS_n,	0x00007000,	0x0004),
-		reg_obj_cfunc(DEBUG_CNT_CTRL_n, debug_cnt_ctrl_n,
-							0x00000640,	0x0004),
+		reg_obj_cfunc(DEBUG_CNT_CTRL_n,
+			      debug_cnt_ctrl_n,		0x00000640,	0x0004),
 		reg_obj_nofunc(LOCAL_PKT_PROC_CNTXT_BASE,
-							0x000001e8,	0x0000),
-		reg_obj_cfunc(ENDP_STATUS_n, endp_status_n,
-							0x00000840,	0x0070),
-		reg_obj_both(ENDP_FILTER_ROUTER_HSH_CFG_n, hash_cfg_n,
-							0x0000085c,	0x0070),
-		reg_obj_cfunc(SRC_RSRC_GRP_01_RSRC_TYPE_n, rsrg_grp_xy,
-							0x00000400,	0x0020),
-		reg_obj_cfunc(SRC_RSRC_GRP_23_RSRC_TYPE_n, rsrg_grp_xy,
-							0x00000404,	0x0020),
-		reg_obj_cfunc(DST_RSRC_GRP_01_RSRC_TYPE_n, rsrg_grp_xy,
-							0x00000500,	0x0020),
-		reg_obj_cfunc(DST_RSRC_GRP_23_RSRC_TYPE_n, rsrg_grp_xy,
-							0x00000504,	0x0020),
-		reg_obj_cfunc(QSB_MAX_WRITES, qsb_max_writes,
-							0x00000074,	0x0000),
-		reg_obj_cfunc(QSB_MAX_READS, qsb_max_reads,
-							0x00000078,	0x0000),
-		reg_obj_cfunc(IDLE_INDICATION_CFG, idle_indication_cfg,
-							0x00000220,	0x0000),
+			       /* checkpatch! */	0x000001e8,	0x0000),
+		reg_obj_cfunc(ENDP_STATUS_n,
+			      endp_status_n,		0x00000840,	0x0070),
+		reg_obj_both(ENDP_FILTER_ROUTER_HSH_CFG_n,
+			     hash_cfg_n,		0x0000085c,	0x0070),
+		reg_obj_cfunc(SRC_RSRC_GRP_01_RSRC_TYPE_n,
+			      rsrg_grp_xy,		0x00000400,	0x0020),
+		reg_obj_cfunc(SRC_RSRC_GRP_23_RSRC_TYPE_n,
+			      rsrg_grp_xy,		0x00000404,	0x0020),
+		reg_obj_cfunc(DST_RSRC_GRP_01_RSRC_TYPE_n,
+			      rsrg_grp_xy,		0x00000500,	0x0020),
+		reg_obj_cfunc(DST_RSRC_GRP_23_RSRC_TYPE_n,
+			      rsrg_grp_xy,		0x00000504,	0x0020),
+		reg_obj_cfunc(QSB_MAX_WRITES,
+			      qsb_max_writes,		0x00000074,	0x0000),
+		reg_obj_cfunc(QSB_MAX_READS,
+			      qsb_max_reads,		0x00000078,	0x0000),
+		reg_obj_cfunc(IDLE_INDICATION_CFG,
+			      idle_indication_cfg,	0x00000220,	0x0000),
 		reg_obj_nofunc(DPS_SEQUENCER_FIRST,	0x0001e000,	0x0000),
 		reg_obj_nofunc(HPS_SEQUENCER_FIRST,	0x0001e080,	0x0000),
 		reg_obj_nofunc(ENABLE_GSI,		0x00002790,	0x0000),
@@ -678,8 +675,7 @@ void ipahal_read_reg_n_fields(enum ipahal_reg reg, u32 n, void *fields)
 
 /* ipahal_write_reg_n_fields() - Write to n parameterized reg a parsed value
  */
-void ipahal_write_reg_n_fields(enum ipahal_reg reg, u32 n,
-		const void *fields)
+void ipahal_write_reg_n_fields(enum ipahal_reg reg, u32 n, const void *fields)
 {
 	u32 val = 0;
 

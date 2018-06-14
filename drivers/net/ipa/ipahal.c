@@ -49,8 +49,8 @@ ipahal_imm_cmd_pyld_alloc_common(u16 opcode, size_t pyld_size, gfp_t flags)
 
 	pyld = kzalloc(sizeof(*pyld) + pyld_size, flags);
 	if (unlikely(!pyld)) {
-		ipa_err("kzalloc err (opcode %hu pyld_size %zu)\n",
-				opcode, pyld_size);
+		ipa_err("kzalloc err (opcode %hu pyld_size %zu)\n", opcode,
+			pyld_size);
 		return NULL;
 	}
 	pyld->opcode = opcode;
@@ -301,8 +301,8 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_packet_init_pyld(u32 dest_pipe_idx)
 }
 
 static struct ipahal_imm_cmd_pyld *
-fltrt_init_common(u16 opcode, struct ipa_mem_buffer *mem,
-		u32 hash_offset, u32 nhash_offset)
+fltrt_init_common(u16 opcode, struct ipa_mem_buffer *mem, u32 hash_offset,
+		  u32 nhash_offset)
 {
 	struct ipa_imm_cmd_hw_ip_fltrt_init *data;
 	struct ipahal_imm_cmd_pyld *pyld;
@@ -335,8 +335,8 @@ fltrt_init_common(u16 opcode, struct ipa_mem_buffer *mem,
 }
 
 struct ipahal_imm_cmd_pyld *
-ipahal_ip_v4_routing_init_pyld(struct ipa_mem_buffer *mem,
-		u32 hash_offset, u32 nhash_offset)
+ipahal_ip_v4_routing_init_pyld(struct ipa_mem_buffer *mem, u32 hash_offset,
+			       u32 nhash_offset)
 {
 	u16 opcode = ipahal_imm_cmds[IPA_IMM_CMD_IP_V4_ROUTING_INIT].opcode;
 
@@ -346,8 +346,8 @@ ipahal_ip_v4_routing_init_pyld(struct ipa_mem_buffer *mem,
 }
 
 struct ipahal_imm_cmd_pyld *
-ipahal_ip_v6_routing_init_pyld(struct ipa_mem_buffer *mem,
-		u32 hash_offset, u32 nhash_offset)
+ipahal_ip_v6_routing_init_pyld(struct ipa_mem_buffer *mem, u32 hash_offset,
+			       u32 nhash_offset)
 {
 	u16 opcode = ipahal_imm_cmds[IPA_IMM_CMD_IP_V6_ROUTING_INIT].opcode;
 
@@ -357,8 +357,8 @@ ipahal_ip_v6_routing_init_pyld(struct ipa_mem_buffer *mem,
 }
 
 struct ipahal_imm_cmd_pyld *
-ipahal_ip_v4_filter_init_pyld(struct ipa_mem_buffer *mem,
-		u32 hash_offset, u32 nhash_offset)
+ipahal_ip_v4_filter_init_pyld(struct ipa_mem_buffer *mem, u32 hash_offset,
+			      u32 nhash_offset)
 {
 	u16 opcode = ipahal_imm_cmds[IPA_IMM_CMD_IP_V4_FILTER_INIT].opcode;
 
@@ -368,8 +368,8 @@ ipahal_ip_v4_filter_init_pyld(struct ipa_mem_buffer *mem,
 }
 
 struct ipahal_imm_cmd_pyld *
-ipahal_ip_v6_filter_init_pyld(struct ipa_mem_buffer *mem,
-		u32 hash_offset, u32 nhash_offset)
+ipahal_ip_v6_filter_init_pyld(struct ipa_mem_buffer *mem, u32 hash_offset,
+			      u32 nhash_offset)
 {
 	u16 opcode = ipahal_imm_cmds[IPA_IMM_CMD_IP_V6_FILTER_INIT].opcode;
 
@@ -528,7 +528,7 @@ static void ipa_pkt_status_parse(
 	exception = exception_map((u8)hw_status->exception, is_ipv6);
 	if (WARN_ON(exception == IPAHAL_PKT_STATUS_EXCEPTION_MAX))
 		ipa_err("unsupported Status Exception type 0x%x\n",
-				hw_status->exception);
+			hw_status->exception);
 	else
 		status->exception = exception;
 
@@ -547,7 +547,7 @@ u32 ipahal_pkt_status_get_size(void)
  * @status: Pointer to pre-allocated buffer where the parsed info will be stored
  */
 void ipahal_pkt_status_parse(const void *unparsed_status,
-	struct ipahal_pkt_status *status)
+			     struct ipahal_pkt_status *status)
 {
 	ipa_debug_low("Parse Status Packet\n");
 	memset(status, 0, sizeof(*status));
@@ -584,7 +584,7 @@ int ipahal_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp)
 void ipahal_dma_free(struct ipa_mem_buffer *mem)
 {
 	dma_free_coherent(ipahal_ctx->ipa_pdev, mem->size, mem->base,
-		mem->phys_base);
+			  mem->phys_base);
 	memset(mem, 0, sizeof(*mem));
 }
 

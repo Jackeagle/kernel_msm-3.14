@@ -80,7 +80,7 @@ int ipa_active_clients_log_print_table(char *buf, int size)
 	cnt = scnprintf(buf, size, "\n---- Active Clients Table ----\n");
 	list_for_each_entry(entry, &log->active, links) {
 		cnt += scnprintf(buf + cnt, size - cnt, "%-40s %-3d\n",
-				entry->id_string, entry->count);
+				 entry->id_string, entry->count);
 	}
 	cnt += scnprintf(buf + cnt, size - cnt,
 			"\nTotal active clients count: %d\n",
@@ -92,11 +92,11 @@ int ipa_active_clients_log_print_table(char *buf, int size)
 }
 
 static int ipa_active_clients_panic_notifier(struct notifier_block *this,
-		unsigned long event, void *ptr)
+					     unsigned long event, void *ptr)
 {
 	mutex_lock(&ipa_ctx->ipa_active_clients.mutex);
 	ipa_active_clients_log_print_table(ipa_ctx->active_clients_table_buf,
-			IPA_ACTIVE_CLIENTS_TABLE_BUF_SIZE);
+					   IPA_ACTIVE_CLIENTS_TABLE_BUF_SIZE);
 	ipa_err("%s", ipa_ctx->active_clients_table_buf);
 	mutex_unlock(&ipa_ctx->ipa_active_clients.mutex);
 
@@ -109,7 +109,7 @@ static struct notifier_block ipa_active_clients_panic_blk = {
 
 static int
 ipa_active_clients_log_insert(struct ipa_active_client_logging_info *id,
-		bool inc)
+			      bool inc)
 {
 	struct ipa_active_clients_log_ctx *log;
 	size_t count = ARRAY_SIZE(log->log_buffer);
@@ -135,9 +135,9 @@ ipa_active_clients_log_insert(struct ipa_active_client_logging_info *id,
 		basename = id->file;
 
 	(void)snprintf(log->log_buffer[head], IPA_ACTIVE_CLIENTS_LOG_LINE_LEN,
-			"[%5llu.%06lu] %c %s, %s: %d",
-			t / 1000000000, nsec / 1000, inc ? '^' : 'v',
-			id->id_string, basename, id->line);
+		       "[%5llu.%06lu] %c %s, %s: %d",
+		       t / 1000000000, nsec / 1000, inc ? '^' : 'v',
+		       id->id_string, basename, id->line);
 
 	/* Consume this entry.  If hit the end, drop the oldest */
 	log->log_head = (head + 1) % count;
@@ -179,7 +179,7 @@ static int ipa_active_clients_log_init(void)
 	INIT_LIST_HEAD(&log->active);
 
 	atomic_notifier_chain_register(&panic_notifier_list,
-					&ipa_active_clients_panic_blk);
+				       &ipa_active_clients_panic_blk);
 
 	log->log_rdy = 1;
 
@@ -277,21 +277,21 @@ int ipa_init_q6_smem(void)
 	ipa_client_add(__func__, false);
 
 	rc = dma_shared_mem_zero_cmd(ipa_ctx->mem_info[MODEM_OFST],
-			ipa_ctx->mem_info[MODEM_SIZE]);
+				     ipa_ctx->mem_info[MODEM_SIZE]);
 	if (rc) {
 		what = "Modem RAM";
 		goto out_client_remove;
 	}
 
 	rc = dma_shared_mem_zero_cmd(ipa_ctx->mem_info[MODEM_HDR_OFST],
-			ipa_ctx->mem_info[MODEM_HDR_SIZE]);
+				     ipa_ctx->mem_info[MODEM_HDR_SIZE]);
 	if (rc) {
 		what = "Modem HDRs RAM";
 		goto out_client_remove;
 	}
 
 	rc = dma_shared_mem_zero_cmd(ipa_ctx->mem_info[MODEM_HDR_PROC_CTX_OFST],
-			ipa_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE]);
+				     ipa_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE]);
 	if (rc)
 		what = "Modem proc ctx RAM";
 out_client_remove:
@@ -350,7 +350,7 @@ static int ipa_init_sram(void)
 
 	phys_addr = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
 	phys_addr += ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_n,
-				ipa_ctx->smem_restricted_bytes / 4);
+					 ipa_ctx->smem_restricted_bytes / 4);
 
 	ipa_sram_mmio = ioremap(phys_addr, ipa_ctx->smem_sz);
 	if (!ipa_sram_mmio) {
@@ -438,8 +438,8 @@ static int ipa_init_rt4(void)
 	u32 nhash_offset;
 	int rc;
 
-	rc = ipahal_rt_generate_empty_img(ipa_ctx->mem_info[V4_RT_NUM_INDEX], &mem,
-						GFP_KERNEL);
+	rc = ipahal_rt_generate_empty_img(ipa_ctx->mem_info[V4_RT_NUM_INDEX],
+					  &mem, GFP_KERNEL);
 	if (rc) {
 		ipa_err("fail generate empty v4 rt img\n");
 		return rc;
@@ -483,8 +483,8 @@ static int ipa_init_rt6(void)
 	u32 nhash_offset;
 	int rc;
 
-	rc = ipahal_rt_generate_empty_img(ipa_ctx->mem_info[V6_RT_NUM_INDEX], &mem,
-						GFP_KERNEL);
+	rc = ipahal_rt_generate_empty_img(ipa_ctx->mem_info[V6_RT_NUM_INDEX],
+					  &mem, GFP_KERNEL);
 	if (rc) {
 		ipa_err("fail generate empty v6 rt img\n");
 		return rc;
@@ -529,8 +529,8 @@ static int ipa_init_flt4(void)
 	int rc;
 
 	rc = ipahal_flt_generate_empty_img(ipa_ctx->ep_flt_num,
-					ipa_ctx->ep_flt_bitmap, &mem,
-					GFP_KERNEL);
+					   ipa_ctx->ep_flt_bitmap, &mem,
+					   GFP_KERNEL);
 	if (rc) {
 		ipa_err("fail generate empty v4 flt img\n");
 		return rc;
@@ -540,8 +540,8 @@ static int ipa_init_flt4(void)
 					ipa_ctx->mem_info[V4_FLT_HASH_OFST];
 	nhash_offset = ipa_ctx->smem_restricted_bytes +
 					ipa_ctx->mem_info[V4_FLT_NHASH_OFST];
-	cmd_pyld = ipahal_ip_v4_filter_init_pyld(&mem,
-					hash_offset, nhash_offset);
+	cmd_pyld = ipahal_ip_v4_filter_init_pyld(&mem, hash_offset,
+						 nhash_offset);
 	if (!cmd_pyld) {
 		ipa_err("fail construct ip_v4_flt_init imm cmd\n");
 		rc = -EPERM;
@@ -575,8 +575,8 @@ static int ipa_init_flt6(void)
 	int rc;
 
 	rc = ipahal_flt_generate_empty_img(ipa_ctx->ep_flt_num,
-					ipa_ctx->ep_flt_bitmap, &mem,
-					GFP_KERNEL);
+					   ipa_ctx->ep_flt_bitmap, &mem,
+					   GFP_KERNEL);
 	if (rc) {
 		ipa_err("fail generate empty v6 flt img\n");
 		return rc;
@@ -586,8 +586,8 @@ static int ipa_init_flt6(void)
 					ipa_ctx->mem_info[V6_FLT_HASH_OFST];
 	nhash_offset = ipa_ctx->smem_restricted_bytes +
 					ipa_ctx->mem_info[V6_FLT_NHASH_OFST];
-	cmd_pyld = ipahal_ip_v6_filter_init_pyld(&mem,
-					hash_offset, nhash_offset);
+	cmd_pyld = ipahal_ip_v6_filter_init_pyld(&mem, hash_offset,
+						 nhash_offset);
 	if (!cmd_pyld) {
 		ipa_err("fail construct ip_v6_flt_init imm cmd\n");
 		rc = -EPERM;
@@ -633,16 +633,15 @@ static void ipa_setup_rt_hash_tuple(void)
 	memset(&tuple, 0, sizeof(struct ipahal_reg_hash_tuple));
 
 	for (tbl_idx = 0;
-		tbl_idx < max(ipa_ctx->mem_info[V6_RT_NUM_INDEX],
-		ipa_ctx->mem_info[V4_RT_NUM_INDEX]);
-		tbl_idx++) {
-
+	     tbl_idx < max(ipa_ctx->mem_info[V6_RT_NUM_INDEX],
+			   ipa_ctx->mem_info[V4_RT_NUM_INDEX]);
+	     tbl_idx++) {
 		if (tbl_idx >= ipa_ctx->mem_info[V4_MODEM_RT_INDEX_LO] &&
-			tbl_idx <= ipa_ctx->mem_info[V4_MODEM_RT_INDEX_HI])
+		    tbl_idx <= ipa_ctx->mem_info[V4_MODEM_RT_INDEX_HI])
 			continue;
 
 		if (tbl_idx >= ipa_ctx->mem_info[V6_MODEM_RT_INDEX_LO] &&
-			tbl_idx <= ipa_ctx->mem_info[V6_MODEM_RT_INDEX_HI])
+		    tbl_idx <= ipa_ctx->mem_info[V6_MODEM_RT_INDEX_HI])
 			continue;
 
 		ipa_set_rt_tuple_mask(tbl_idx, &tuple);
@@ -821,7 +820,7 @@ active_client_get(struct ipa_active_client_logging_info *id)
  */
 static void
 ipa_active_clients_log_mod(struct ipa_active_client_logging_info *id,
-		bool log_it, bool inc)
+			   bool log_it, bool inc)
 {
 	struct ipa_active_clients_log_ctx *log;
 	struct ipa_active_client *entry;
@@ -870,7 +869,7 @@ static void ipa_client_add_first(void)
 	mutex_unlock(&ipa_ctx->ipa_active_clients.mutex);
 
 	ipa_debug_low("active clients = %d\n",
-		atomic_read(&ipa_ctx->ipa_active_clients.cnt));
+		      atomic_read(&ipa_ctx->ipa_active_clients.cnt));
 }
 
 /* Attempt to add an IPA client reference, but only if this does not
@@ -883,7 +882,7 @@ static bool ipa_client_add_not_first(void)
 		return false;
 
 	ipa_debug_low("active clients = %d\n",
-		atomic_read(&ipa_ctx->ipa_active_clients.cnt));
+		      atomic_read(&ipa_ctx->ipa_active_clients.cnt));
 
 	return true;
 }
@@ -893,7 +892,7 @@ static bool ipa_client_add_not_first(void)
  * additional reference was added successfully, or false otherwise.
  */
 bool _ipa_client_add_additional(const char *id, bool log_it,
-		const char *file, int line)
+				const char *file, int line)
 {
 	struct ipa_active_client_logging_info log_info;
 	bool ret;
@@ -976,7 +975,7 @@ static bool ipa_client_remove_not_final(void)
 		return false;
 
 	ipa_debug_low("active clients = %d\n",
-			atomic_read(&ipa_ctx->ipa_active_clients.cnt));
+		      atomic_read(&ipa_ctx->ipa_active_clients.cnt));
 
 	return true;
 }
@@ -1035,7 +1034,7 @@ void ipa_inc_acquire_wakelock(void)
 	if (ipa_ctx->wakelock_ref_cnt.cnt == 1)
 		__pm_stay_awake(&ipa_ctx->w_lock);
 	ipa_debug_low("active wakelock ref cnt = %d\n",
-		ipa_ctx->wakelock_ref_cnt.cnt);
+		      ipa_ctx->wakelock_ref_cnt.cnt);
 	spin_unlock_irqrestore(&ipa_ctx->wakelock_ref_cnt.spinlock, flags);
 }
 
@@ -1053,7 +1052,7 @@ void ipa_dec_release_wakelock(void)
 	spin_lock_irqsave(&ipa_ctx->wakelock_ref_cnt.spinlock, flags);
 	ipa_ctx->wakelock_ref_cnt.cnt--;
 	ipa_debug_low("active wakelock ref cnt = %d\n",
-		ipa_ctx->wakelock_ref_cnt.cnt);
+		      ipa_ctx->wakelock_ref_cnt.cnt);
 	if (ipa_ctx->wakelock_ref_cnt.cnt == 0)
 		__pm_relax(&ipa_ctx->w_lock);
 	spin_unlock_irqrestore(&ipa_ctx->wakelock_ref_cnt.spinlock, flags);
@@ -1065,15 +1064,14 @@ void ipa_dec_release_wakelock(void)
  * @private_data:	The client's private data
  * @interrupt_data:	Interrupt specific information data
  */
-void ipa_suspend_handler(enum ipa_irq_type interrupt,
-				void *private_data,
-				void *interrupt_data)
+void ipa_suspend_handler(enum ipa_irq_type interrupt, void *private_data,
+			 void *interrupt_data)
 {
 	struct ipa_tx_suspend_irq_data *suspend_data = interrupt_data;
 	u32 endpoint_mask = suspend_data->endpoints;
 
 	ipa_debug("interrupt=%d, endpoint_mask=0x%08x\n",
-		interrupt, endpoint_mask);
+		  interrupt, endpoint_mask);
 
 	while (endpoint_mask) {
 		u32 i = __ffs(endpoint_mask);
@@ -1125,7 +1123,7 @@ static int ipa_init_interrupts(void)
 
 	/*add handler for suspend interrupt*/
 	result = ipa_add_interrupt_handler(IPA_TX_SUSPEND_IRQ,
-			ipa_suspend_handler, false, NULL);
+					   ipa_suspend_handler, false, NULL);
 	if (result) {
 		ipa_err("register handler for suspend interrupt failed\n");
 		result = -ENODEV;
@@ -1158,18 +1156,18 @@ static void ipa_freeze_clock_vote_and_notify_modem(void)
 	/* Signal whether the clock is enabled */
 	mask = 1 << ipa_ctx->smp2p_info.enabled_bit;
 	value = ipa_ctx->smp2p_info.ipa_clk_on ? mask : 0;
-	qcom_smem_state_update_bits(ipa_ctx->smp2p_info.enabled_state,
-					mask, value);
+	qcom_smem_state_update_bits(ipa_ctx->smp2p_info.enabled_state, mask,
+				    value);
 
 	/* Now indicate that the enabled flag is valid */
 	mask = 1 << ipa_ctx->smp2p_info.valid_bit;
 	value = mask;
-	qcom_smem_state_update_bits(ipa_ctx->smp2p_info.valid_state,
-					mask, value);
+	qcom_smem_state_update_bits(ipa_ctx->smp2p_info.valid_state, mask,
+				    value);
 
 	ipa_ctx->smp2p_info.res_sent = true;
 	ipa_debug("IPA clocks are %s\n",
-		ipa_ctx->smp2p_info.ipa_clk_on ? "ON" : "OFF");
+		  ipa_ctx->smp2p_info.ipa_clk_on ? "ON" : "OFF");
 }
 
 void ipa_reset_freeze_vote(void)
@@ -1188,15 +1186,14 @@ void ipa_reset_freeze_vote(void)
 
 	/* Mark the clock disabled for good measure... */
 	mask = 1 << ipa_ctx->smp2p_info.enabled_bit;
-	qcom_smem_state_update_bits(ipa_ctx->smp2p_info.enabled_state,
-					mask, 0);
+	qcom_smem_state_update_bits(ipa_ctx->smp2p_info.enabled_state, mask, 0);
 
 	ipa_ctx->smp2p_info.res_sent = false;
 	ipa_ctx->smp2p_info.ipa_clk_on = false;
 }
 
-static int ipa_panic_notifier(struct notifier_block *this,
-	unsigned long event, void *ptr)
+static int
+ipa_panic_notifier(struct notifier_block *this, unsigned long event, void *ptr)
 {
 	int res;
 
@@ -1218,8 +1215,7 @@ static struct notifier_block ipa_panic_blk = {
 
 static void ipa_register_panic_hdlr(void)
 {
-	atomic_notifier_chain_register(&panic_notifier_list,
-		&ipa_panic_blk);
+	atomic_notifier_chain_register(&panic_notifier_list, &ipa_panic_blk);
 }
 
 /** ipa_post_init() - Initialize the IPA Driver (Part II).
@@ -1288,7 +1284,7 @@ static int ipa_post_init(void)
 }
 
 static ssize_t ipa_write(struct file *file, const char __user *buf,
-	 size_t count, loff_t *ppos);
+			 size_t count, loff_t *ppos);
 
 static int ipa_open(struct inode *inode, struct file *filp);
 
@@ -1323,7 +1319,7 @@ static bool ipa_hps_firmware_size_ok(u32 base, u32 size)
  * given ELF program header.
  */
 static int ipa_firmware_load_one(const struct firmware *firmware,
-				const struct elf32_phdr *phdr)
+				 const struct elf32_phdr *phdr)
 {
 	void __iomem *dest;
 	const void *src;
@@ -1418,7 +1414,7 @@ static int ipa_open(struct inode *inode, struct file *filp)
 }
 
 static ssize_t ipa_write(struct file *file, const char __user *buf,
-			  size_t count, loff_t *ppos)
+			 size_t count, loff_t *ppos)
 {
 	int result;
 
@@ -1512,28 +1508,28 @@ static bool config_valid(void)
 	required_size = ipa_ctx->mem_info[V4_RT_NUM_INDEX] * width;
 	if (ipa_ctx->mem_info[V4_RT_HASH_SIZE] < required_size) {
 		ipa_err("V4_RT_HASH_SIZE too small (%u < %u * %u)\n",
-			ipa_ctx->mem_info[V4_RT_HASH_SIZE], ipa_ctx->mem_info[V4_RT_NUM_INDEX],
-			width);
+			ipa_ctx->mem_info[V4_RT_HASH_SIZE],
+			ipa_ctx->mem_info[V4_RT_NUM_INDEX], width);
 		return false;
 	}
 	if (ipa_ctx->mem_info[V4_RT_NHASH_SIZE] < required_size) {
 		ipa_err("V4_RT_NHASH_SIZE too small (%u < %u * %u)\n",
-			ipa_ctx->mem_info[V4_RT_NHASH_SIZE], ipa_ctx->mem_info[V4_RT_NUM_INDEX],
-			width);
+			ipa_ctx->mem_info[V4_RT_NHASH_SIZE],
+			ipa_ctx->mem_info[V4_RT_NUM_INDEX], width);
 		return false;
 	}
 
 	required_size = ipa_ctx->mem_info[V6_RT_NUM_INDEX] * width;
 	if (ipa_ctx->mem_info[V6_RT_HASH_SIZE] < required_size) {
 		ipa_err("V6_RT_HASH_SIZE too small (%u < %u * %u)\n",
-			ipa_ctx->mem_info[V6_RT_HASH_SIZE], ipa_ctx->mem_info[V6_RT_NUM_INDEX],
-			width);
+			ipa_ctx->mem_info[V6_RT_HASH_SIZE],
+			ipa_ctx->mem_info[V6_RT_NUM_INDEX], width);
 		return false;
 	}
 	if (ipa_ctx->mem_info[V6_RT_NHASH_SIZE] < required_size) {
 		ipa_err("V6_RT_NHASH_SIZE too small (%u < %u * %u)\n",
-			ipa_ctx->mem_info[V6_RT_NHASH_SIZE], ipa_ctx->mem_info[V6_RT_NUM_INDEX],
-			width);
+			ipa_ctx->mem_info[V6_RT_NHASH_SIZE],
+			ipa_ctx->mem_info[V6_RT_NUM_INDEX], width);
 		return false;
 	}
 
@@ -1548,7 +1544,8 @@ static bool config_valid(void)
 	}
 	if (ipa_ctx->mem_info[V4_RT_NHASH_SIZE] < required_size) {
 		ipa_err("V4_RT_NHASH_SIZE too small for modem (%u < %u * %u)\n",
-			ipa_ctx->mem_info[V4_RT_NHASH_SIZE], table_count, width);
+			ipa_ctx->mem_info[V4_RT_NHASH_SIZE], table_count,
+			width);
 		return false;
 	}
 
@@ -1654,7 +1651,7 @@ static int ipa_pre_init(void)
 
 	ipa_sram_settings_read();
 	ipa_debug("SRAM, size: 0x%x, restricted bytes: 0x%x\n",
-		ipa_ctx->smem_sz, ipa_ctx->smem_restricted_bytes);
+		  ipa_ctx->smem_sz, ipa_ctx->smem_restricted_bytes);
 
 	ipa_debug("hdr_lcl=0 ip4_rt_hash=0 ip4_rt_nonhash=0\n");
 	ipa_debug("ip6_rt_hash=0 ip6_rt_nonhash=0\n");
@@ -1690,7 +1687,7 @@ static int ipa_pre_init(void)
 
 	ipa_ctx->tx_pkt_wrapper_cache =
 	   kmem_cache_create("IPA_TX_PKT_WRAPPER",
-			   sizeof(struct ipa_tx_pkt_wrapper), 0, 0, NULL);
+			     sizeof(struct ipa_tx_pkt_wrapper), 0, 0, NULL);
 	if (!ipa_ctx->tx_pkt_wrapper_cache) {
 		ipa_err(":ipa tx pkt wrapper cache create failed\n");
 		result = -ENOMEM;
@@ -1698,7 +1695,7 @@ static int ipa_pre_init(void)
 	}
 	ipa_ctx->rx_pkt_wrapper_cache =
 	   kmem_cache_create("IPA_RX_PKT_WRAPPER",
-			   sizeof(struct ipa_rx_pkt_wrapper), 0, 0, NULL);
+			     sizeof(struct ipa_rx_pkt_wrapper), 0, 0, NULL);
 	if (!ipa_ctx->rx_pkt_wrapper_cache) {
 		ipa_err(":ipa rx pkt wrapper cache create failed\n");
 		result = -ENOMEM;
@@ -1723,8 +1720,8 @@ static int ipa_pre_init(void)
 		goto err_gsi_dma_task_free;
 	}
 
-	ipa_ctx->chrdev = device_create(ipa_ctx->class, NULL,
-				ipa_ctx->dev_num, ipa_ctx, DRV_NAME);
+	ipa_ctx->chrdev = device_create(ipa_ctx->class, NULL, ipa_ctx->dev_num,
+					ipa_ctx, DRV_NAME);
 	if (IS_ERR(ipa_ctx->chrdev)) {
 		ipa_err(":device_create err.\n");
 		result = -ENODEV;
@@ -1756,8 +1753,7 @@ static int ipa_pre_init(void)
 		goto err_free_pkt_init;
 	}
 	ipa_debug("ipa cdev added successful. major:%d minor:%d\n",
-			MAJOR(ipa_ctx->dev_num),
-			MINOR(ipa_ctx->dev_num));
+		  MAJOR(ipa_ctx->dev_num), MINOR(ipa_ctx->dev_num));
 
 	return 0;
 
@@ -1818,7 +1814,7 @@ static int ipa_smp2p_init(struct device *dev)
 
 	ipa_debug("node->name=%s\n", node->name);
 	valid_state = qcom_smem_state_get(dev, "ipa-clock-enabled-valid",
-						&valid_bit);
+					  &valid_bit);
 	if (IS_ERR(valid_state)) {
 		res = PTR_ERR(valid_state);
 		ipa_err("error %d getting ipa-clock-enabled-valid state\n", res);
@@ -1827,7 +1823,7 @@ static int ipa_smp2p_init(struct device *dev)
 	}
 
 	enabled_state = qcom_smem_state_get(dev, "ipa-clock-enabled",
-						&enabled_bit);
+					    &enabled_bit);
 	if (IS_ERR(enabled_state)) {
 		res = PTR_ERR(enabled_state);
 		ipa_err("error %d getting ipa-clock-enabled state\n", res);
@@ -1843,8 +1839,9 @@ static int ipa_smp2p_init(struct device *dev)
 	irq = res;
 
 	res = devm_request_threaded_irq(dev, irq, NULL,
-		ipa_smp2p_modem_clk_query_isr, IRQF_TRIGGER_RISING,
-		"ipa_smp2p_clk_vote", dev);
+					ipa_smp2p_modem_clk_query_isr,
+					IRQF_TRIGGER_RISING,
+					"ipa_smp2p_clk_vote", dev);
 	if (res) {
 		ipa_err("error %d requesting threaded irq\n", res);
 		return -ENODEV;
@@ -1918,8 +1915,7 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 	ipa_ctx->ipa_wrapper_base = res->start;
 	ipa_ctx->ipa_wrapper_size = resource_size(res);
 	ipa_debug(": ipa-base = 0x%x, size = 0x%x\n",
-			ipa_ctx->ipa_wrapper_base,
-			ipa_ctx->ipa_wrapper_size);
+		  ipa_ctx->ipa_wrapper_base, ipa_ctx->ipa_wrapper_size);
 
 	/* setup IPA register access */
 	phys_addr = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
@@ -1942,7 +1938,7 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_hal_destroy;
 	}
 	ipa_debug("EP with flt support bitmap 0x%x (%u pipes)\n",
-		ipa_ctx->ep_flt_bitmap, ipa_ctx->ep_flt_num);
+		  ipa_ctx->ep_flt_bitmap, ipa_ctx->ep_flt_num);
 
 	/* Make sure we have a valid configuration before proceeding */
 	if (!config_valid()) {
@@ -2033,7 +2029,7 @@ int ipa_ap_suspend(struct device *dev)
 	/* In case there is a tx/rx handler in polling mode fail to suspend */
 	for (i = 0; i < ipa_ctx->ipa_num_pipes; i++) {
 		if (ipa_ctx->ep[i].sys &&
-			atomic_read(&ipa_ctx->ep[i].sys->curr_polling_state)) {
+		    atomic_read(&ipa_ctx->ep[i].sys->curr_polling_state)) {
 			ipa_err("EP %d is in polling state, do not suspend\n",
 				i);
 			return -EAGAIN;

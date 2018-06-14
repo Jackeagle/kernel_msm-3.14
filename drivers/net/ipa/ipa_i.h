@@ -206,7 +206,7 @@ struct ipa_ep_context {
 	u32 rt_tbl_idx;
 	void *priv;
 	void (*client_notify)(void *priv, enum ipa_dp_evt_type evt,
-		       unsigned long data);
+			      unsigned long data);
 	atomic_t avail_fifo_desc;
 	u32 dflt_flt4_rule_hdl;
 	u32 dflt_flt6_rule_hdl;
@@ -839,9 +839,8 @@ u16 ipa_get_smem_restr_bytes(void);
 
 /* interrupts */
 int ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
-		ipa_irq_handler_t handler,
-		bool deferred_flag,
-		void *private_data);
+			      ipa_irq_handler_t handler, bool deferred_flag,
+			      void *private_data);
 
 int ipa_remove_interrupt_handler(enum ipa_irq_type interrupt);
 
@@ -860,8 +859,7 @@ u8 ipa_get_qmb_master_sel(enum ipa_client_type client);
 /* internal functions */
 
 bool ipa_is_modem_pipe(int pipe_idx);
-int ipa_send(struct ipa_sys_context *sys, u32 num_desc,
-		struct ipa_desc *desc);
+int ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc);
 
 int ipa_get_ep_mapping(enum ipa_client_type client);
 struct ipa_ep_context *ipa_get_ep_context(enum ipa_client_type client);
@@ -886,10 +884,10 @@ int ipa_send_cmd(u16 num_desc, struct ipa_desc *descr);
 void _ipa_client_add(const char *id, bool log_it, const char *file, int line);
 bool _ipa_client_add_additional(const char *id, bool log_it,
 				const char *file, int line);
-void _ipa_client_remove(const char *id, bool log_it,
-				const char *file, int line);
-void _ipa_client_remove_wait(const char *id, bool log_it,
-				const char *file, int line);
+void _ipa_client_remove(const char *id, bool log_it, const char *file,
+			int line);
+void _ipa_client_remove_wait(const char *id, bool log_it, const char *file,
+			     int line);
 
 void ipa_cfg_default_route(enum ipa_client_type client);
 
@@ -897,9 +895,8 @@ int ipa_active_clients_log_print_table(char *buf, int size);
 int ipa_interrupts_init(u32 ipa_irq, u32 ee, struct device *ipa_dev);
 
 void ipa_suspend_active_aggr_wa(u32 clnt_hdl);
-void ipa_suspend_handler(enum ipa_irq_type interrupt,
-				void *private_data,
-				void *interrupt_data);
+void ipa_suspend_handler(enum ipa_irq_type interrupt, void *private_data,
+			 void *interrupt_data);
 void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data);
 
 void ipa_sram_settings_read(void);
@@ -907,7 +904,7 @@ void ipa_sram_settings_read(void);
 void ipa_skb_recycle(struct sk_buff *skb);
 
 int ipa_cfg_ep_status(u32 clnt_hdl,
-		const struct ipahal_reg_ep_cfg_status *ipa_ep_cfg);
+		      const struct ipahal_reg_ep_cfg_status *ipa_ep_cfg);
 
 int ipa_init_q6_smem(void);
 
@@ -921,8 +918,8 @@ int ipa_ap_suspend(struct device *dev);
 int ipa_ap_resume(struct device *dev);
 void ipa_set_resource_groups_min_max_limits(void);
 void ipa_suspend_apps_pipes(bool suspend);
-int ipa_uc_panic_notifier(struct notifier_block *this,
-	unsigned long event, void *ptr);
+int ipa_uc_panic_notifier(struct notifier_block *this, unsigned long event,
+			  void *ptr);
 void ipa_inc_acquire_wakelock(void);
 void ipa_dec_release_wakelock(void);
 const char *ipa_hw_error_str(enum ipa_hw_errors err_type);
