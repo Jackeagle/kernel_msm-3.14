@@ -60,40 +60,15 @@
 #define QMB_MASTER_SELECT_DDR  (0)
 
 /* Resource Group index*/
-#define IPA_v3_0_GROUP_UL		(0)
-#define IPA_v3_0_GROUP_DL		(1)
-#define IPA_v3_0_GROUP_DPL		IPA_v3_0_GROUP_DL
-#define IPA_v3_0_GROUP_DIAG		(2)
-#define IPA_v3_0_GROUP_DMA		(3)
-#define IPA_v3_0_GROUP_IMM_CMD		IPA_v3_0_GROUP_UL
-#define IPA_v3_0_GROUP_Q6ZIP		(4)
-#define IPA_v3_0_GROUP_Q6ZIP_GENERAL	IPA_v3_0_GROUP_Q6ZIP
-#define IPA_v3_0_GROUP_UC_RX_Q		(5)
-#define IPA_v3_0_GROUP_Q6ZIP_ENGINE	IPA_v3_0_GROUP_UC_RX_Q
-#define IPA_v3_0_GROUP_MAX		(6)
-
 #define IPA_v3_5_GROUP_LWA_DL		(0) /* currently not used */
-#define IPA_v3_5_MHI_GROUP_PCIE IPA_v3_5_GROUP_LWA_DL
 #define IPA_v3_5_GROUP_UL_DL		(1)
-#define IPA_v3_5_MHI_GROUP_DDR		IPA_v3_5_GROUP_UL_DL
 #define IPA_v3_5_MHI_GROUP_DMA		(2)
 #define IPA_v3_5_GROUP_UC_RX_Q		(3) /* currently not used */
+
 #define IPA_v3_5_SRC_GROUP_MAX		(4)
 #define IPA_v3_5_DST_GROUP_MAX		(3)
 
-#define IPA_GROUP_MAX IPA_v3_0_GROUP_MAX
-
 enum ipa_rsrc_grp_type_src {
-	IPA_v3_0_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS,
-	IPA_v3_0_RSRC_GRP_TYPE_SRC_HDR_SECTORS,
-	IPA_v3_0_RSRC_GRP_TYPE_SRC_HDRI1_BUFFER,
-	IPA_v3_0_RSRC_GRP_TYPE_SRS_DESCRIPTOR_LISTS,
-	IPA_v3_0_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF,
-	IPA_v3_0_RSRC_GRP_TYPE_SRC_HDRI2_BUFFERS,
-	IPA_v3_0_RSRC_GRP_TYPE_SRC_HPS_DMARS,
-	IPA_v3_0_RSRC_GRP_TYPE_SRC_ACK_ENTRIES,
-	IPA_v3_0_RSRC_GRP_TYPE_SRC_MAX,
-
 	IPA_v3_5_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS = 0,
 	IPA_v3_5_RSRC_GRP_TYPE_SRS_DESCRIPTOR_LISTS,
 	IPA_v3_5_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF,
@@ -102,23 +77,11 @@ enum ipa_rsrc_grp_type_src {
 	IPA_v3_5_RSRC_GRP_TYPE_SRC_MAX,
 };
 
-#define IPA_RSRC_GRP_TYPE_SRC_MAX IPA_v3_0_RSRC_GRP_TYPE_SRC_MAX
-
 enum ipa_rsrc_grp_type_dst {
-	IPA_v3_0_RSRC_GRP_TYPE_DST_DATA_SECTORS,
-	IPA_v3_0_RSRC_GRP_TYPE_DST_DATA_SECTOR_LISTS,
-	IPA_v3_0_RSRC_GRP_TYPE_DST_DPS_DMARS,
-	IPA_v3_0_RSRC_GRP_TYPE_DST_MAX,
-
 	IPA_v3_5_RSRC_GRP_TYPE_DST_DATA_SECTORS = 0,
 	IPA_v3_5_RSRC_GRP_TYPE_DST_DPS_DMARS,
 	IPA_v3_5_RSRC_GRP_TYPE_DST_MAX,
-
-	IPA_v4_0_RSRC_GRP_TYPE_DST_DATA_SECTORS = 0,
-	IPA_v4_0_RSRC_GRP_TYPE_DST_DPS_DMARS,
-	IPA_v4_0_RSRC_GRP_TYPE_DST_MAX,
 };
-#define IPA_RSRC_GRP_TYPE_DST_MAX IPA_v3_0_RSRC_GRP_TYPE_DST_MAX
 
 enum ipa_rsrc_grp_type_rx {
 	IPA_RSRC_GRP_TYPE_RX_HPS_CMDQ,
@@ -131,70 +94,54 @@ struct rsrc_min_max {
 };
 
 static const struct rsrc_min_max ipa_rsrc_src_grp_config
-	[][IPA_RSRC_GRP_TYPE_SRC_MAX][IPA_GROUP_MAX] = {
+	[][IPA_v3_5_RSRC_GRP_TYPE_SRC_MAX][IPA_v3_5_SRC_GROUP_MAX] = {
 	[IPA_HW_v3_5_1] = {
 		[IPA_v3_5_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS] = {
-			[IPA_v3_0_GROUP_UL]		= { 1, 63, },
-			[IPA_v3_0_GROUP_DL]		= { 1, 63, },
-			[IPA_v3_0_GROUP_DIAG]		= { 0, 0, },
-			[IPA_v3_0_GROUP_DMA]		= { 1, 63, },
-			[IPA_v3_0_GROUP_Q6ZIP]		= { 0, 0, },
-			[IPA_v3_0_GROUP_UC_RX_Q]	= { 0, 0, },
+			[IPA_v3_5_GROUP_LWA_DL]		= { 1, 63, },
+			[IPA_v3_5_GROUP_UL_DL]		= { 1, 63, },
+			[IPA_v3_5_MHI_GROUP_DMA]	= { 0, 0, },
+			[IPA_v3_5_GROUP_UC_RX_Q]	= { 1, 63, },
 		},
 		[IPA_v3_5_RSRC_GRP_TYPE_SRS_DESCRIPTOR_LISTS] = {
-			[IPA_v3_0_GROUP_UL]		= { 10, 10, },
-			[IPA_v3_0_GROUP_DL]		= { 10, 10, },
-			[IPA_v3_0_GROUP_DIAG]		= { 0, 0, },
-			[IPA_v3_0_GROUP_DMA]		= { 8, 8, },
-			[IPA_v3_0_GROUP_Q6ZIP]		= { 0, 0, },
-			[IPA_v3_0_GROUP_UC_RX_Q]	= { 0, 0, },
+			[IPA_v3_5_GROUP_LWA_DL]		= { 10, 10, },
+			[IPA_v3_5_GROUP_UL_DL]		= { 10, 10, },
+			[IPA_v3_5_MHI_GROUP_DMA]	= { 0, 0, },
+			[IPA_v3_5_GROUP_UC_RX_Q]	= { 8, 8, },
 		},
 		[IPA_v3_5_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF] = {
-			[IPA_v3_0_GROUP_UL]		= { 12, 12, },
-			[IPA_v3_0_GROUP_DL]		= { 14, 14, },
-			[IPA_v3_0_GROUP_DIAG]		= { 0, 0, },
-			[IPA_v3_0_GROUP_DMA]		= { 8, 8, },
-			[IPA_v3_0_GROUP_Q6ZIP]		= { 0, 0, },
-			[IPA_v3_0_GROUP_UC_RX_Q]	= { 0, 0, },
+			[IPA_v3_5_GROUP_LWA_DL]		= { 12, 12, },
+			[IPA_v3_5_GROUP_UL_DL]		= { 14, 14, },
+			[IPA_v3_5_MHI_GROUP_DMA]	= { 0, 0, },
+			[IPA_v3_5_GROUP_UC_RX_Q]	= { 8, 8, },
 		},
 		[IPA_v3_5_RSRC_GRP_TYPE_SRC_HPS_DMARS] = {
-			[IPA_v3_0_GROUP_UL]		= { 0, 63, },
-			[IPA_v3_0_GROUP_DL]		= { 0, 63, },
-			[IPA_v3_0_GROUP_DIAG]		= { 0, 255, },
-			[IPA_v3_0_GROUP_DMA]		= { 0, 255, },
-			[IPA_v3_0_GROUP_Q6ZIP]		= { 0, 0, },
-			[IPA_v3_0_GROUP_UC_RX_Q]	= { 0, 0, },
+			[IPA_v3_5_GROUP_LWA_DL]		= { 0, 63, },
+			[IPA_v3_5_GROUP_UL_DL]		= { 0, 63, },
+			[IPA_v3_5_MHI_GROUP_DMA]	= { 0, 255, },
+			[IPA_v3_5_GROUP_UC_RX_Q]	= { 0, 255, },
 		},
 		[IPA_v3_5_RSRC_GRP_TYPE_SRC_ACK_ENTRIES] = {
-			[IPA_v3_0_GROUP_UL]		= { 14, 14, },
-			[IPA_v3_0_GROUP_DL]		= { 20, 20, },
-			[IPA_v3_0_GROUP_DIAG]		= { 0, 0, },
-			[IPA_v3_0_GROUP_DMA]		= { 14, 14, },
-			[IPA_v3_0_GROUP_Q6ZIP]		= { 0, 0, },
-			[IPA_v3_0_GROUP_UC_RX_Q]	= { 0, 0, },
+			[IPA_v3_5_GROUP_LWA_DL]		= { 14, 14, },
+			[IPA_v3_5_GROUP_UL_DL]		= { 20, 20, },
+			[IPA_v3_5_MHI_GROUP_DMA]	= { 0, 0, },
+			[IPA_v3_5_GROUP_UC_RX_Q]	= { 14, 14, },
 		},
 	},
 };
 
 static const struct rsrc_min_max ipa_rsrc_dst_grp_config
-	[][IPA_RSRC_GRP_TYPE_DST_MAX][IPA_GROUP_MAX] = {
+	[][IPA_v3_5_RSRC_GRP_TYPE_DST_MAX][IPA_v3_5_DST_GROUP_MAX] = {
 	[IPA_HW_v3_5_1] = {
 		/* LWA_DL UL/DL/DPL unused N/A	 N/A	 N/A */
 		[IPA_v3_5_RSRC_GRP_TYPE_DST_DATA_SECTORS] = {
-			[IPA_v3_0_GROUP_UL]		= { 4, 4, },
-			[IPA_v3_0_GROUP_DL]		= { 4, 4, },
-			[IPA_v3_0_GROUP_DIAG]		= { 3, 3, },
-			[IPA_v3_0_GROUP_DMA]		= { 0, 0, },
-			[IPA_v3_0_GROUP_Q6ZIP]		= { 0, 0, },
-			[IPA_v3_0_GROUP_UC_RX_Q]	= { 0, 0, },
+			[IPA_v3_5_GROUP_LWA_DL]		= { 4, 4, },
+			[IPA_v3_5_GROUP_UL_DL]		= { 4, 4, },
+			[IPA_v3_5_MHI_GROUP_DMA]	= { 3, 3, },
 		},
 		[IPA_v3_5_RSRC_GRP_TYPE_DST_DPS_DMARS] = {
-			[IPA_v3_0_GROUP_UL]		= { 2, 63, },
-			[IPA_v3_0_GROUP_DL]		= { 1, 63, },
-			[IPA_v3_0_GROUP_DIAG]		= { 1, 2, },
-			[IPA_v3_0_GROUP_DMA]		= { 0, 0, },
-			[IPA_v3_0_GROUP_Q6ZIP]		= { 0, 0, },
-			[IPA_v3_0_GROUP_UC_RX_Q]	= { 0, 0, },
+			[IPA_v3_5_GROUP_LWA_DL]		= { 2, 63, },
+			[IPA_v3_5_GROUP_UL_DL]		= { 1, 63, },
+			[IPA_v3_5_MHI_GROUP_DMA]	= { 1, 2, },
 		},
 	},
 };
