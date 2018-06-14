@@ -282,7 +282,4 @@ struct ipa_pkt_status_hw {
 	u64 hw_specific:16;
 };
 
-/* Size of H/W Packet Status */
-#define IPA_PKT_STATUS_SIZE 32
-
 #endif /* _IPAHAL_I_H_ */
