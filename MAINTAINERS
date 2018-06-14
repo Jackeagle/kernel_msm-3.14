@@ -11051,6 +11051,7 @@ QCOM IPA DRIVER
 M:	Alex Elder <elder@kernel.org>
 L:	netdev@vger.kernel.org
 S:	Supported
+F:	drivers/net/ipa/
 F:	include/dt-bindings/soc/qcom,ipa.h
 
 QCOM AUDIO (ASoC) DRIVERS
