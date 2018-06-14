@@ -1297,8 +1297,6 @@ static int ipa_post_init(void)
 	}
 	ipa_debug("IPA GPI pipes were connected\n");
 
-	ipa_debugfs_init();
-
 	result = ipa_uc_interface_init();
 	if (result)
 		ipa_err(":ipa Uc interface init failed (%d)\n", -result);

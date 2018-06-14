@@ -902,7 +902,6 @@ int ipa_get_ep_mapping(enum ipa_client_type client);
 struct ipa_ep_context *ipa_get_ep_context(enum ipa_client_type client);
 
 int ipa_init_hw(void);
-void ipa_debugfs_init(void);
 
 void ipa_init_mem_info(struct device_node *dev_node);
 
