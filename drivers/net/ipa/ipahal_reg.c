@@ -38,20 +38,20 @@ struct ipahal_reg_obj {
 static struct ipahal_reg_obj ipahal_regs[IPA_REG_MAX];
 
 static u32
-ipareg_construct_rsrg_grp_xy_v3_5(enum ipahal_reg reg, const void *fields)
+ipareg_construct_rsrg_grp_xy(enum ipahal_reg reg, const void *fields)
 {
 	const struct ipahal_reg_rsrc_grp_cfg *grp = fields;
 	u32 val;
 
-	val = field_gen(grp->x_min, X_MIN_LIM_BMSK_V3_5);
-	val |= field_gen(grp->x_max, X_MAX_LIM_BMSK_V3_5);
+	val = field_gen(grp->x_min, X_MIN_LIM_BMSK);
+	val |= field_gen(grp->x_max, X_MAX_LIM_BMSK);
 
 	/* DST_23 register has only X fields at ipa V3_5 */
 	if (reg == IPA_DST_RSRC_GRP_23_RSRC_TYPE_n)
 		return val;
 
-	val |= field_gen(grp->y_min, Y_MIN_LIM_BMSK_V3_5);
-	val |= field_gen(grp->y_max, Y_MAX_LIM_BMSK_V3_5);
+	val |= field_gen(grp->y_min, Y_MIN_LIM_BMSK);
+	val |= field_gen(grp->y_max, Y_MAX_LIM_BMSK);
 
 	return val;
 }
@@ -160,7 +160,7 @@ ipareg_construct_debug_cnt_ctrl_n(enum ipahal_reg reg, const void *fields)
 	val |= field_gen(type, DBG_CNT_TYPE_BMSK);
 	val |= field_gen(dbg_cnt_ctrl->product ? 1 : 0, PRODUCT_BMSK);
 	val |= field_gen(dbg_cnt_ctrl->src_pipe, SOURCE_PIPE_BMSK);
-	val |= field_gen(dbg_cnt_ctrl->rule_idx, RULE_INDEX_BMSK_V3_5);
+	val |= field_gen(dbg_cnt_ctrl->rule_idx, RULE_INDEX_BMSK);
 
 	return val;
 }
@@ -347,7 +347,7 @@ ipareg_construct_endp_init_hdr_ext_n(enum ipahal_reg reg, const void *fields)
 	u32 val;
 
 	val = field_gen(ep_hdr_ext->hdr_pad_to_alignment,
-			HDR_PAD_TO_ALIGNMENT_BMSK_v3_0);
+			HDR_PAD_TO_ALIGNMENT_BMSK);
 	val |= field_gen(ep_hdr_ext->hdr_total_len_or_pad_offset,
 			HDR_TOTAL_LEN_OR_PAD_OFFSET_BMSK);
 	val |= field_gen(ep_hdr_ext->hdr_payload_len_inc_padding,
@@ -368,9 +368,9 @@ ipareg_construct_endp_init_hdr_n(enum ipahal_reg reg, const void *fields)
 	u32 val;
 
 	val = field_gen(ep_hdr->hdr_metadata_reg_valid,
-			HDR_METADATA_REG_VALID_BMSK_v2);
+			HDR_METADATA_REG_VALID_BMSK);
 	val |= field_gen(ep_hdr->hdr_remove_additional,
-			HDR_LEN_INC_DEAGG_HDR_BMSK_v2);
+			HDR_LEN_INC_DEAGG_HDR_BMSK);
 	val |= field_gen(ep_hdr->hdr_a5_mux, HDR_A5_MUX_BMSK);
 	val |= field_gen(ep_hdr->hdr_ofst_pkt_size, HDR_OFST_PKT_SIZE_BMSK);
 	val |= field_gen(ep_hdr->hdr_ofst_pkt_size_valid,
@@ -437,9 +437,9 @@ ipareg_construct_idle_indication_cfg(enum ipahal_reg reg, const void *fields)
 	idle_indication_cfg = fields;
 
 	val = field_gen(idle_indication_cfg->enter_idle_debounce_thresh,
-			ENTER_IDLE_DEBOUNCE_THRESH_BMSK_V3_5);
+			ENTER_IDLE_DEBOUNCE_THRESH_BMSK);
 	val |= field_gen(idle_indication_cfg->const_non_idle_enable,
-			CONST_NON_IDLE_ENABLE_BMSK_V3_5);
+			CONST_NON_IDLE_ENABLE_BMSK);
 
 	return val;
 }
@@ -577,13 +577,13 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 							0x00000840,	0x0070),
 		reg_obj_both(ENDP_FILTER_ROUTER_HSH_CFG_n, hash_cfg_n,
 							0x0000085c,	0x0070),
-		reg_obj_cfunc(SRC_RSRC_GRP_01_RSRC_TYPE_n, rsrg_grp_xy_v3_5,
+		reg_obj_cfunc(SRC_RSRC_GRP_01_RSRC_TYPE_n, rsrg_grp_xy,
 							0x00000400,	0x0020),
-		reg_obj_cfunc(SRC_RSRC_GRP_23_RSRC_TYPE_n, rsrg_grp_xy_v3_5,
+		reg_obj_cfunc(SRC_RSRC_GRP_23_RSRC_TYPE_n, rsrg_grp_xy,
 							0x00000404,	0x0020),
-		reg_obj_cfunc(DST_RSRC_GRP_01_RSRC_TYPE_n, rsrg_grp_xy_v3_5,
+		reg_obj_cfunc(DST_RSRC_GRP_01_RSRC_TYPE_n, rsrg_grp_xy,
 							0x00000500,	0x0020),
-		reg_obj_cfunc(DST_RSRC_GRP_23_RSRC_TYPE_n, rsrg_grp_xy_v3_5,
+		reg_obj_cfunc(DST_RSRC_GRP_23_RSRC_TYPE_n, rsrg_grp_xy,
 							0x00000504,	0x0020),
 		reg_obj_cfunc(QSB_MAX_WRITES, qsb_max_writes,
 							0x00000074,	0x0000),

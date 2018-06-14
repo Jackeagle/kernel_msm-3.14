@@ -799,7 +799,7 @@ static u32 gsi_get_max_channels(void)
 	u32 val;
 
 	/* SDM845 uses GSI hardware version 1.3.0 */
-	val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->ee));
+	val = gsi_readl(GSI_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->ee));
 	max_channels = field_val(val, GSI_NUM_CH_PER_EE_BMSK);
 
 	if (WARN_ON(max_channels > GSI_CHAN_MAX)) {
@@ -818,7 +818,7 @@ static u32 gsi_get_max_event_rings(void)
 	u32 val;
 
 	/* SDM845 uses GSI hardware version 1.3.0 */
-	val = gsi_readl(GSI_V1_3_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->ee));
+	val = gsi_readl(GSI_EE_n_GSI_HW_PARAM_2_OFFS(gsi_ctx->ee));
 	max_event_rings = field_val(val, GSI_NUM_EV_PER_EE_BMSK);
 
 	if (WARN_ON(max_event_rings > GSI_EVT_RING_MAX)) {

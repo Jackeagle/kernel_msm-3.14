@@ -25,8 +25,8 @@ void ipahal_reg_init(enum ipa_hw_version hw_version);
 #define HDR_OFST_PKT_SIZE_VALID_BMSK		0x00080000
 #define HDR_OFST_PKT_SIZE_BMSK			0x03f00000
 #define HDR_A5_MUX_BMSK				0x04000000
-#define HDR_LEN_INC_DEAGG_HDR_BMSK_v2		0x08000000
-#define HDR_METADATA_REG_VALID_BMSK_v2		0x10000000
+#define HDR_LEN_INC_DEAGG_HDR_BMSK		0x08000000
+#define HDR_METADATA_REG_VALID_BMSK		0x10000000
 
 /* IPA_ENDP_INIT_HDR_EXT_n register */
 #define HDR_ENDIANNESS_BMSK			0x00000001
@@ -34,7 +34,7 @@ void ipahal_reg_init(enum ipa_hw_version hw_version);
 #define HDR_TOTAL_LEN_OR_PAD_BMSK		0x00000004
 #define HDR_PAYLOAD_LEN_INC_PADDING_BMSK	0x00000008
 #define HDR_TOTAL_LEN_OR_PAD_OFFSET_BMSK	0x000003f0
-#define HDR_PAD_TO_ALIGNMENT_BMSK_v3_0		0x00003c00
+#define HDR_PAD_TO_ALIGNMENT_BMSK		0x00003c00
 
 /* IPA_ENDP_INIT_AGGR_n register */
 #define AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK	0x01000000
@@ -47,8 +47,7 @@ void ipahal_reg_init(enum ipa_hw_version hw_version);
 #define AGGR_EN_BMSK				0x00000003
 
 /* IPA_AGGR_FORCE_CLOSE register */
-#define PIPE_BITMAP_BMSK			0x3fffffff
-#define PIPE_BITMAP_BMSK_V3_5			0x000fffff
+#define PIPE_BITMAP_BMSK			0x000fffff
 
 /* IPA_ENDP_INIT_ROUTE_n register */
 #define ROUTE_TABLE_INDEX_BMSK			0x0000001f
@@ -108,8 +107,7 @@ void ipahal_reg_init(enum ipa_hw_version hw_version);
 
 /* IPA_DEBUG_CNT_CTRL_n register */
 #define RULE_INDEX_PIPE_RULE_BMSK		0x10000000
-#define RULE_INDEX_BMSK				0x0ff00000
-#define RULE_INDEX_BMSK_V3_5			0x1ff00000
+#define RULE_INDEX_BMSK				0x1ff00000
 #define SOURCE_PIPE_BMSK			0x0001f000
 #define PRODUCT_BMSK				0x00000100
 #define DBG_CNT_TYPE_BMSK			0x00000070
@@ -140,10 +138,10 @@ void ipahal_reg_init(enum ipa_hw_version hw_version);
 #define ROUTER_HASH_UNDEFINED2_BMSK		0xff800000
 
 /* IPA_RSRC_GRP_XY_RSRC_TYPE_n register */
-#define Y_MAX_LIM_BMSK_V3_5			0x3f000000
-#define Y_MIN_LIM_BMSK_V3_5			0x003f0000
-#define X_MAX_LIM_BMSK_V3_5			0x00003f00
-#define X_MIN_LIM_BMSK_V3_5			0x0000003f
+#define Y_MAX_LIM_BMSK				0x3f000000
+#define Y_MIN_LIM_BMSK				0x003f0000
+#define X_MAX_LIM_BMSK				0x00003f00
+#define X_MIN_LIM_BMSK				0x0000003f
 
 /* IPA_QSB_MAX_WRITES register */
 #define GEN_QMB_0_MAX_WRITES_BMSK		0x0000000f
@@ -154,7 +152,7 @@ void ipahal_reg_init(enum ipa_hw_version hw_version);
 #define GEN_QMB_1_MAX_READS_BMSK		0x000000f0
 
 /* IPA_IDLE_INDICATION_CFG regiser */
-#define ENTER_IDLE_DEBOUNCE_THRESH_BMSK_V3_5	0x0000ffff
-#define CONST_NON_IDLE_ENABLE_BMSK_V3_5		0x00010000
+#define ENTER_IDLE_DEBOUNCE_THRESH_BMSK		0x0000ffff
+#define CONST_NON_IDLE_ENABLE_BMSK		0x00010000
 
 #endif /* _IPAHAL_REG_I_H_ */

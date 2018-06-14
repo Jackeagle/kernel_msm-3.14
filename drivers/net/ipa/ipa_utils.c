@@ -25,7 +25,7 @@
 #include "ipahal.h"
 #include "ipahal_fltrt.h"
 
-#define IPA_BCR_REG_VAL_v3_5 (0x0000003B)
+#define IPA_BCR_REG_VAL			0x0000003B
 
 #define IPA_GSI_DMA_TASK_TIMEOUT	15	/* milliseconds */
 
@@ -57,30 +57,30 @@
 	seq_type == IPA_DPS_HPS_SEQ_TYPE_DMA_DEC || \
 	seq_type == IPA_DPS_HPS_SEQ_TYPE_DMA_COMP_DECOMP)
 
-#define QMB_MASTER_SELECT_DDR  (0)
+#define QMB_MASTER_SELECT_DDR		(0)
 
 /* Resource Group index*/
-#define IPA_v3_5_GROUP_LWA_DL		(0) /* currently not used */
-#define IPA_v3_5_GROUP_UL_DL		(1)
-#define IPA_v3_5_MHI_GROUP_DMA		(2)
-#define IPA_v3_5_GROUP_UC_RX_Q		(3) /* currently not used */
+#define IPA_GROUP_LWA_DL		(0) /* currently not used */
+#define IPA_GROUP_UL_DL			(1)
+#define IPA_MHI_GROUP_DMA		(2)
+#define IPA_GROUP_UC_RX_Q		(3) /* currently not used */
 
-#define IPA_v3_5_SRC_GROUP_MAX		(4)
-#define IPA_v3_5_DST_GROUP_MAX		(3)
+#define IPA_SRC_GROUP_MAX		(4)
+#define IPA_DST_GROUP_MAX		(3)
 
 enum ipa_rsrc_grp_type_src {
-	IPA_v3_5_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS = 0,
-	IPA_v3_5_RSRC_GRP_TYPE_SRS_DESCRIPTOR_LISTS,
-	IPA_v3_5_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF,
-	IPA_v3_5_RSRC_GRP_TYPE_SRC_HPS_DMARS,
-	IPA_v3_5_RSRC_GRP_TYPE_SRC_ACK_ENTRIES,
-	IPA_v3_5_RSRC_GRP_TYPE_SRC_MAX,
+	IPA_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS,
+	IPA_RSRC_GRP_TYPE_SRS_DESCRIPTOR_LISTS,
+	IPA_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF,
+	IPA_RSRC_GRP_TYPE_SRC_HPS_DMARS,
+	IPA_RSRC_GRP_TYPE_SRC_ACK_ENTRIES,
+	IPA_RSRC_GRP_TYPE_SRC_MAX,
 };
 
 enum ipa_rsrc_grp_type_dst {
-	IPA_v3_5_RSRC_GRP_TYPE_DST_DATA_SECTORS = 0,
-	IPA_v3_5_RSRC_GRP_TYPE_DST_DPS_DMARS,
-	IPA_v3_5_RSRC_GRP_TYPE_DST_MAX,
+	IPA_RSRC_GRP_TYPE_DST_DATA_SECTORS,
+	IPA_RSRC_GRP_TYPE_DST_DPS_DMARS,
+	IPA_RSRC_GRP_TYPE_DST_MAX,
 };
 
 enum ipa_rsrc_grp_type_rx {
@@ -94,54 +94,54 @@ struct rsrc_min_max {
 };
 
 static const struct rsrc_min_max ipa_rsrc_src_grp_config
-	[][IPA_v3_5_RSRC_GRP_TYPE_SRC_MAX][IPA_v3_5_SRC_GROUP_MAX] = {
+	[][IPA_RSRC_GRP_TYPE_SRC_MAX][IPA_SRC_GROUP_MAX] = {
 	[IPA_HW_v3_5_1] = {
-		[IPA_v3_5_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS] = {
-			[IPA_v3_5_GROUP_LWA_DL]		= { 1, 63, },
-			[IPA_v3_5_GROUP_UL_DL]		= { 1, 63, },
-			[IPA_v3_5_MHI_GROUP_DMA]	= { 0, 0, },
-			[IPA_v3_5_GROUP_UC_RX_Q]	= { 1, 63, },
+		[IPA_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS] = {
+			[IPA_GROUP_LWA_DL]	= { 1, 63, },
+			[IPA_GROUP_UL_DL]	= { 1, 63, },
+			[IPA_MHI_GROUP_DMA]	= { 0, 0, },
+			[IPA_GROUP_UC_RX_Q]	= { 1, 63, },
 		},
-		[IPA_v3_5_RSRC_GRP_TYPE_SRS_DESCRIPTOR_LISTS] = {
-			[IPA_v3_5_GROUP_LWA_DL]		= { 10, 10, },
-			[IPA_v3_5_GROUP_UL_DL]		= { 10, 10, },
-			[IPA_v3_5_MHI_GROUP_DMA]	= { 0, 0, },
-			[IPA_v3_5_GROUP_UC_RX_Q]	= { 8, 8, },
+		[IPA_RSRC_GRP_TYPE_SRS_DESCRIPTOR_LISTS] = {
+			[IPA_GROUP_LWA_DL]	= { 10, 10, },
+			[IPA_GROUP_UL_DL]	= { 10, 10, },
+			[IPA_MHI_GROUP_DMA]	= { 0, 0, },
+			[IPA_GROUP_UC_RX_Q]	= { 8, 8, },
 		},
-		[IPA_v3_5_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF] = {
-			[IPA_v3_5_GROUP_LWA_DL]		= { 12, 12, },
-			[IPA_v3_5_GROUP_UL_DL]		= { 14, 14, },
-			[IPA_v3_5_MHI_GROUP_DMA]	= { 0, 0, },
-			[IPA_v3_5_GROUP_UC_RX_Q]	= { 8, 8, },
+		[IPA_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF] = {
+			[IPA_GROUP_LWA_DL]	= { 12, 12, },
+			[IPA_GROUP_UL_DL]	= { 14, 14, },
+			[IPA_MHI_GROUP_DMA]	= { 0, 0, },
+			[IPA_GROUP_UC_RX_Q]	= { 8, 8, },
 		},
-		[IPA_v3_5_RSRC_GRP_TYPE_SRC_HPS_DMARS] = {
-			[IPA_v3_5_GROUP_LWA_DL]		= { 0, 63, },
-			[IPA_v3_5_GROUP_UL_DL]		= { 0, 63, },
-			[IPA_v3_5_MHI_GROUP_DMA]	= { 0, 255, },
-			[IPA_v3_5_GROUP_UC_RX_Q]	= { 0, 255, },
+		[IPA_RSRC_GRP_TYPE_SRC_HPS_DMARS] = {
+			[IPA_GROUP_LWA_DL]	= { 0, 63, },
+			[IPA_GROUP_UL_DL]	= { 0, 63, },
+			[IPA_MHI_GROUP_DMA]	= { 0, 255, },
+			[IPA_GROUP_UC_RX_Q]	= { 0, 255, },
 		},
-		[IPA_v3_5_RSRC_GRP_TYPE_SRC_ACK_ENTRIES] = {
-			[IPA_v3_5_GROUP_LWA_DL]		= { 14, 14, },
-			[IPA_v3_5_GROUP_UL_DL]		= { 20, 20, },
-			[IPA_v3_5_MHI_GROUP_DMA]	= { 0, 0, },
-			[IPA_v3_5_GROUP_UC_RX_Q]	= { 14, 14, },
+		[IPA_RSRC_GRP_TYPE_SRC_ACK_ENTRIES] = {
+			[IPA_GROUP_LWA_DL]	= { 14, 14, },
+			[IPA_GROUP_UL_DL]	= { 20, 20, },
+			[IPA_MHI_GROUP_DMA]	= { 0, 0, },
+			[IPA_GROUP_UC_RX_Q]	= { 14, 14, },
 		},
 	},
 };
 
 static const struct rsrc_min_max ipa_rsrc_dst_grp_config
-	[][IPA_v3_5_RSRC_GRP_TYPE_DST_MAX][IPA_v3_5_DST_GROUP_MAX] = {
+	[][IPA_RSRC_GRP_TYPE_DST_MAX][IPA_DST_GROUP_MAX] = {
 	[IPA_HW_v3_5_1] = {
 		/* LWA_DL UL/DL/DPL unused N/A	 N/A	 N/A */
-		[IPA_v3_5_RSRC_GRP_TYPE_DST_DATA_SECTORS] = {
-			[IPA_v3_5_GROUP_LWA_DL]		= { 4, 4, },
-			[IPA_v3_5_GROUP_UL_DL]		= { 4, 4, },
-			[IPA_v3_5_MHI_GROUP_DMA]	= { 3, 3, },
+		[IPA_RSRC_GRP_TYPE_DST_DATA_SECTORS] = {
+			[IPA_GROUP_LWA_DL]	= { 4, 4, },
+			[IPA_GROUP_UL_DL]	= { 4, 4, },
+			[IPA_MHI_GROUP_DMA]	= { 3, 3, },
 		},
-		[IPA_v3_5_RSRC_GRP_TYPE_DST_DPS_DMARS] = {
-			[IPA_v3_5_GROUP_LWA_DL]		= { 2, 63, },
-			[IPA_v3_5_GROUP_UL_DL]		= { 1, 63, },
-			[IPA_v3_5_MHI_GROUP_DMA]	= { 1, 2, },
+		[IPA_RSRC_GRP_TYPE_DST_DPS_DMARS] = {
+			[IPA_GROUP_LWA_DL]	= { 2, 63, },
+			[IPA_GROUP_UL_DL]	= { 1, 63, },
+			[IPA_MHI_GROUP_DMA]	= { 1, 2, },
 		},
 	},
 };
@@ -543,7 +543,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 	},
 };
 
-static struct msm_bus_vectors ipa_min_perf_vectors_v3_0[] = {
+static struct msm_bus_vectors ipa_min_perf_vectors[] = {
 	{
 		.src = MSM_BUS_MASTER_IPA,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
@@ -570,7 +570,7 @@ static struct msm_bus_vectors ipa_min_perf_vectors_v3_0[] = {
 	},
 };
 
-static struct msm_bus_vectors ipa_svs2_perf_vectors_v3_0[] = {
+static struct msm_bus_vectors ipa_svs2_perf_vectors[] = {
 	{
 		.src = MSM_BUS_MASTER_IPA,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
@@ -597,7 +597,7 @@ static struct msm_bus_vectors ipa_svs2_perf_vectors_v3_0[] = {
 	},
 };
 
-static struct msm_bus_vectors ipa_svs_perf_vectors_v3_0[] = {
+static struct msm_bus_vectors ipa_svs_perf_vectors[] = {
 	{
 		.src = MSM_BUS_MASTER_IPA,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
@@ -624,7 +624,7 @@ static struct msm_bus_vectors ipa_svs_perf_vectors_v3_0[] = {
 	},
 };
 
-static struct msm_bus_vectors ipa_nominal_perf_vectors_v3_0[] = {
+static struct msm_bus_vectors ipa_nominal_perf_vectors[] = {
 	{
 		.src = MSM_BUS_MASTER_IPA,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
@@ -651,7 +651,7 @@ static struct msm_bus_vectors ipa_nominal_perf_vectors_v3_0[] = {
 	},
 };
 
-static struct msm_bus_vectors ipa_turbo_perf_vectors_v3_0[] = {
+static struct msm_bus_vectors ipa_turbo_perf_vectors[] = {
 	{
 		.src = MSM_BUS_MASTER_IPA,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
@@ -678,33 +678,33 @@ static struct msm_bus_vectors ipa_turbo_perf_vectors_v3_0[] = {
 	},
 };
 
-static struct msm_bus_paths ipa_usecases_v3_0[]	 = {
+static struct msm_bus_paths ipa_usecases[]	 = {
 	{
-		.num_paths = ARRAY_SIZE(ipa_min_perf_vectors_v3_0),
-		.vectors = ipa_min_perf_vectors_v3_0,
+		.num_paths = ARRAY_SIZE(ipa_min_perf_vectors),
+		.vectors = ipa_min_perf_vectors,
 	},
 	{
-		.num_paths = ARRAY_SIZE(ipa_svs2_perf_vectors_v3_0),
-		.vectors = ipa_svs2_perf_vectors_v3_0,
+		.num_paths = ARRAY_SIZE(ipa_svs2_perf_vectors),
+		.vectors = ipa_svs2_perf_vectors,
 	},
 	{
-		.num_paths = ARRAY_SIZE(ipa_svs_perf_vectors_v3_0),
-		.vectors = ipa_svs_perf_vectors_v3_0,
+		.num_paths = ARRAY_SIZE(ipa_svs_perf_vectors),
+		.vectors = ipa_svs_perf_vectors,
 	},
 	{
-		.num_paths = ARRAY_SIZE(ipa_nominal_perf_vectors_v3_0),
-		.vectors = ipa_nominal_perf_vectors_v3_0,
+		.num_paths = ARRAY_SIZE(ipa_nominal_perf_vectors),
+		.vectors = ipa_nominal_perf_vectors,
 	},
 	{
-		.num_paths = ARRAY_SIZE(ipa_turbo_perf_vectors_v3_0),
-		.vectors = ipa_turbo_perf_vectors_v3_0,
+		.num_paths = ARRAY_SIZE(ipa_turbo_perf_vectors),
+		.vectors = ipa_turbo_perf_vectors,
 	},
 };
 
-static struct msm_bus_scale_pdata ipa_bus_client_pdata_v3_0 = {
-	.usecase = ipa_usecases_v3_0,
-	.num_usecases = ARRAY_SIZE(ipa_usecases_v3_0),
-	.name = "ipa",
+static struct msm_bus_scale_pdata ipa_bus_client_pdata = {
+	.usecase	= ipa_usecases,
+	.num_usecases	= ARRAY_SIZE(ipa_usecases),
+	.name		= "ipa",
 };
 
 static const struct ipa_ep_configuration *
@@ -854,7 +854,7 @@ int ipa_init_hw(void)
 #endif
 
 	/* SDM845 has IPA version 3.5.1 */
-	ipahal_write_reg(IPA_BCR, IPA_BCR_REG_VAL_v3_5);
+	ipahal_write_reg(IPA_BCR, IPA_BCR_REG_VAL);
 
 	ipa_cfg_qsb();
 
@@ -1518,8 +1518,6 @@ int ipa_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 /**
  * ipa_init_mem_info() - Reads IPA memory map from DTS, performs alignment
  * checks and logs the fetched values.
- *
- * Returns:	0 on success
  */
 #define ALIGN_CHECK(name)	({ BUILD_BUG_ON(name % name ## _ALIGN); name; })
 #define NONZERO_CHECK(name)	({ BUILD_BUG_ON(!name); name; })
@@ -1678,8 +1676,7 @@ void ipa_init_mem_info(struct device_node *node)
 
 struct msm_bus_scale_pdata *ipa_bus_scale_table_init(void)
 {
-
-	return &ipa_bus_client_pdata_v3_0;
+	return &ipa_bus_client_pdata;
 }
 
 void ipa_skb_recycle(struct sk_buff *skb)
@@ -1815,11 +1812,11 @@ static void ipa_write_src_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
 	enum ipahal_reg reg;
 
 	switch (group_index) {
-	case IPA_v3_5_GROUP_LWA_DL:
-	case IPA_v3_5_GROUP_UL_DL:
+	case IPA_GROUP_LWA_DL:
+	case IPA_GROUP_UL_DL:
 		reg = IPA_SRC_RSRC_GRP_01_RSRC_TYPE_n;
 		break;
-	case IPA_v3_5_GROUP_UC_RX_Q:
+	case IPA_GROUP_UC_RX_Q:
 		reg = IPA_SRC_RSRC_GRP_23_RSRC_TYPE_n;
 		break;
 	default:
@@ -1842,8 +1839,8 @@ static void ipa_write_dst_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
 	enum ipahal_reg reg;
 
 	switch (group_index) {
-	case IPA_v3_5_GROUP_LWA_DL:
-	case IPA_v3_5_GROUP_UL_DL:
+	case IPA_GROUP_LWA_DL:
+	case IPA_GROUP_UL_DL:
 		reg = IPA_DST_RSRC_GRP_01_RSRC_TYPE_n;
 		break;
 	default:
@@ -1861,10 +1858,10 @@ static void ipa_write_dst_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
 void ipa_set_resource_groups_min_max_limits(void)
 {
 	enum ipa_hw_version hw_version = IPA_HW_v3_5_1;
-	int src_rsrc_type_max = IPA_v3_5_RSRC_GRP_TYPE_SRC_MAX;
-	int dst_rsrc_type_max = IPA_v3_5_RSRC_GRP_TYPE_DST_MAX;
-	int src_grp_idx_max = IPA_v3_5_SRC_GROUP_MAX;
-	int dst_grp_idx_max = IPA_v3_5_DST_GROUP_MAX;
+	int src_rsrc_type_max = IPA_RSRC_GRP_TYPE_SRC_MAX;
+	int dst_rsrc_type_max = IPA_RSRC_GRP_TYPE_DST_MAX;
+	int src_grp_idx_max = IPA_SRC_GROUP_MAX;
+	int dst_grp_idx_max = IPA_DST_GROUP_MAX;
 	int i;
 	int j;
 
