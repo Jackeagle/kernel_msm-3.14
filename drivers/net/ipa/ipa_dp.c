@@ -351,10 +351,8 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	}
 
 	xfer_elem = kzalloc(num_desc * sizeof(*xfer_elem), GFP_ATOMIC);
-	if (!xfer_elem) {
-		ipa_err("Failed to alloc mem for gsi xfer array.\n");
+	if (!xfer_elem)
 		return -EFAULT;
-	}
 
 	spin_lock_bh(&sys->spinlock);
 
@@ -584,10 +582,9 @@ int ipa_send_cmd_timeout(u16 num_desc, struct ipa_desc *descr, u32 timeout)
 		ipa_debug("sending imm cmd %d\n", descr[i].opcode);
 
 	comp = kzalloc(sizeof(*comp), GFP_ATOMIC);
-	if (!comp) {
-		ipa_err("no mem\n");
+	if (!comp)
 		return -ENOMEM;
-	}
+
 	init_completion(&comp->comp);
 
 	/* completion needs to be released from both here and in ack callback */
@@ -758,8 +755,6 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 
 		ep->sys = kzalloc(sizeof(*ep->sys), GFP_KERNEL);
 		if (!ep->sys) {
-			ipa_err("failed to sys ctx for client %d\n",
-				sys_in->client);
 			result = -ENOMEM;
 			goto fail_and_disable_clocks;
 		}
@@ -842,7 +837,6 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 		ep->sys->repl.cache = kcalloc(ep->sys->repl.capacity,
 					      sizeof(void *), GFP_KERNEL);
 		if (!ep->sys->repl.cache) {
-			ipa_err("ep=%d fail to alloc repl cache\n", ipa_ep_idx);
 			ep->sys->repl_hdlr = ipa_replenish_rx_cache;
 			ep->sys->repl.capacity = 0;
 		} else {
@@ -1033,11 +1027,8 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	}
 	if (nr_frags) {
 		desc = kzalloc((1 + nr_frags) * sizeof(*desc), GFP_ATOMIC);
-		if (!desc) {
-			ipa_err("failed to alloc desc array\n");
-
+		if (!desc)
 			return -ENOMEM;
-		}
 	} else {
 		/* Avoid allocation failure for the linear case */
 		memset(&_desc, 0, sizeof(_desc));

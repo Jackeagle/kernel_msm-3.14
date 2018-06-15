@@ -158,10 +158,8 @@ static int ipa_active_clients_log_init(void)
 	log = &ipa_ctx->ipa_active_clients_logging;
 
 	bufp = kzalloc(count * size, GFP_KERNEL);
-	if (!bufp) {
-		ipa_err("Active Clients Logging memory allocation failed");
+	if (!bufp)
 		return -ENOMEM;
-	}
 
 	/* OK to fail allocating the active clients table buffer */
 	ipa_ctx->active_clients_table_buf =
@@ -797,10 +795,8 @@ active_client_get(struct ipa_active_client_logging_info *id)
 		return entry;
 
 	entry = kzalloc(sizeof(*entry), GFP_ATOMIC);
-	if (!entry) {
-		ipa_err("failed allocating active clients hash entry");
+	if (!entry)
 		return NULL;
-	}
 
 	entry->id_string = id->id_string;
 	entry->count = 0;

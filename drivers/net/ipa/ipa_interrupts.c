@@ -139,7 +139,6 @@ static int ipa_handle_interrupt(int irq_num, bool isr_context)
 	if (interrupt_info.deferred_flag || isr_context) {
 		work_data = kzalloc(sizeof(*work_data), GFP_ATOMIC);
 		if (!work_data) {
-			ipa_err("failed allocating ipa_interrupt_work_wrap\n");
 			res = -ENOMEM;
 			goto fail_alloc_work;
 		}
@@ -511,10 +510,9 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 		suspend_interrupt_data->endpoints = 1 << clnt_hdl;
 
 		work_data = kzalloc(sizeof(*work_data), GFP_ATOMIC);
-		if (!work_data) {
-			ipa_err("failed allocating ipa_interrupt_work_wrap\n");
+		if (!work_data)
 			goto fail_alloc_work;
-		}
+
 		INIT_WORK(&work_data->interrupt_work,
 			  ipa_deferred_interrupt_work);
 		work_data->handler = interrupt_info.handler;
