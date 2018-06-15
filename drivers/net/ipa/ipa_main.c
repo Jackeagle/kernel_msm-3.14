@@ -1172,7 +1172,7 @@ void ipa_reset_freeze_vote(void)
 {
 	u32 mask;
 
-	if (ipa_ctx->smp2p_info.res_sent == false)
+	if (!ipa_ctx->smp2p_info.res_sent)
 		return;
 
 	if (ipa_ctx->smp2p_info.ipa_clk_on)

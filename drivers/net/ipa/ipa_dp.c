@@ -1078,8 +1078,9 @@ static void ipa_wq_handle_rx(struct work_struct *work)
 	if (sys->ep->napi_enabled) {
 		ipa_client_add("NAPI", true);
 		sys->ep->client_notify(sys->ep->priv, IPA_CLIENT_START_POLL, 0);
-	} else
+	} else {
 		ipa_handle_rx(sys);
+	}
 }
 
 static void ipa_wq_repl_rx(struct work_struct *work)
@@ -1689,11 +1690,12 @@ begin:
 							status.pkt_len);
 						ipa_bug();
 					} else {
-					skb2->truesize = skb2->len +
-						sizeof(struct sk_buff) +
-						(ALIGN(len +
-						pkt_status_sz, 32) *
-						unused / used_align);
+						skb2->truesize =
+							skb2->len +
+							sizeof(struct sk_buff) +
+							(ALIGN(len +
+							pkt_status_sz, 32) *
+							unused / used_align);
 						sys->ep->client_notify(
 							sys->ep->priv,
 							IPA_RECEIVE,

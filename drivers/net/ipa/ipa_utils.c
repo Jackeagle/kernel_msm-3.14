@@ -838,15 +838,6 @@ void ipa_cfg_qsb(void)
  */
 int ipa_init_hw(void)
 {
-#if 0
-	u32 ipa_version = 0;
-
-	/* Read IPA version and make sure we have access to the registers */
-	ipa_version = ipahal_read_reg(IPA_VERSION);
-	if (ipa_version == 0)
-		return -EFAULT;
-#endif
-
 	/* SDM845 has IPA version 3.5.1 */
 	ipahal_write_reg(IPA_BCR, IPA_BCR_REG_VAL);
 

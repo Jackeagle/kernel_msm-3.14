@@ -16,7 +16,7 @@
 static struct ipahal_context ipahal_ctx_struct;
 struct ipahal_context *ipahal_ctx = &ipahal_ctx_struct;
 
-static const char *ipahal_pkt_status_exception_to_str[] = {
+static const char * const ipahal_pkt_status_exception_to_str[] = {
 	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_NONE),
 	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_DEAGGR),
 	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_IPTYPE),

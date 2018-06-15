@@ -15,7 +15,7 @@
 
 #define QMI_INIT_DRIVER_TIMEOUT	60000	/* A minute in milliseconds */
 
-static bool ipa_qmi_initialized = false;
+static bool ipa_qmi_initialized;
 
 /* The AP and modem perform a "handshake" at initialization time to
  * ensure each side knows the other side is ready.  Two pairs of QMI
@@ -64,8 +64,8 @@ static struct qmi_handle client_handle;
 static struct qmi_handle server_handle;
 
 /* These track state during the handshake */
-static bool indication_register_received = false;
-static bool init_driver_response_received = false;
+static bool indication_register_received;
+static bool init_driver_response_received;
 
 /* Send an INIT_COMPLETE_IND indication message to the modem */
 static int ipa_send_master_driver_init_complete_ind(struct qmi_handle *qmi,
