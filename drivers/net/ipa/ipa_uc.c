@@ -42,32 +42,32 @@ enum ipa_hw_2_cpu_responses {
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 2),
 };
 
-/** union IpaHwCpuCmdCompletedResponseData_t - Structure holding the parameters
- * for IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED response.
- * @originalCmdOp : The original command opcode
+/** union ipa_hw_cpu_cmd_completed_response_data - Structure holding the
+ * parameters for IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED response.
+ * @original_cmd_op : The original command opcode
  * @status : 0 for success indication, otherwise failure
  * @reserved : Reserved
  *
  * Parameters are sent as 32b immediate parameters.
  */
-union IpaHwCpuCmdCompletedResponseData_t {
-	struct IpaHwCpuCmdCompletedResponseParams_t {
-		u32 originalCmdOp:8;
+union ipa_hw_cpu_cmd_completed_response_data {
+	struct ipa_hw_cpu_cmd_completed_response_params {
+		u32 original_cmd_op:8;
 		u32 status:8;
 		u32 reserved:16;
 	} __packed params;
 	u32 raw32b;
 } __packed;
 
-/** union IpaHwChkChEmptyCmdData_t -  Structure holding the parameters for
+/** union ipa_hw_chk_ch_empty_cmd_data -  Structure holding the parameters for
  *  IPA_CPU_2_HW_CMD_GSI_CH_EMPTY command. Parameters are sent as 32b
  *  immediate parameters.
  * @ee_n : EE owner of the channel
  * @vir_ch_id : GSI virtual channel ID of the channel to checked of emptiness
  * @reserved_02_04 : Reserved
  */
-union IpaHwChkChEmptyCmdData_t {
-	struct IpaHwChkChEmptyCmdParams_t {
+union ipa_hw_chk_ch_empty_cmd_data {
+	struct ipa_hw_chk_ch_empty_cmd_params {
 		u8 ee_n;
 		u8 vir_ch_id;
 		u16 reserved_02_04;
@@ -117,7 +117,7 @@ const char *ipa_hw_error_str(enum ipa_hw_errors err_type)
 static void ipa_log_evt_hdlr(void)
 {
 	struct ipa_uc_ctx *uc_ctx = &ipa_ctx->uc_ctx;
-	u32 offset = uc_ctx->uc_sram_mmio->eventParams;
+	u32 offset = uc_ctx->uc_sram_mmio->event_params;
 
 	/* If the the event top offset is what we set it to, we're done */
 	if (offset == uc_ctx->uc_event_top_ofst)
@@ -130,7 +130,7 @@ static void ipa_log_evt_hdlr(void)
 		return;
 	}
 
-	/* First time.  Record the eventParams offset and map it. */
+	/* First time.  Record the event_params offset and map it. */
 	uc_ctx->uc_event_top_ofst = offset;
 }
 
@@ -174,13 +174,13 @@ static void ipa_uc_event_handler(enum ipa_irq_type interrupt,
 				 void *private_data,
 				 void *interrupt_data)
 {
-	struct IpaHwSharedMemCommonMapping_t *mmio;
-	union IpaHwErrorEventData_t evt;
+	struct ipa_hw_shared_mem_common_mapping *mmio;
+	union ipa_hw_error_event_data evt;
 	u8 event_op;
 
 	ipa_client_add(__func__, false);
 	mmio = ipa_ctx->uc_ctx.uc_sram_mmio;
-	event_op = mmio->eventOp;
+	event_op = mmio->event_op;
 	ipa_debug("uC evt opcode=%u\n", event_op);
 
 	if (EXTRACT_UC_FEATURE(event_op) >= IPA_HW_FEATURE_MAX) {
@@ -192,16 +192,16 @@ static void ipa_uc_event_handler(enum ipa_irq_type interrupt,
 
 	/* General handling */
 	if (event_op == IPA_HW_2_CPU_EVENT_ERROR) {
-		evt.raw32b = mmio->eventParams;
-		ipa_err("uC Error, evt errorType = %s\n",
-			ipa_hw_error_str(evt.params.errorType));
+		evt.raw32b = mmio->event_params;
+		ipa_err("uC Error, evt error_type = %s\n",
+			ipa_hw_error_str(evt.params.error_type));
 		ipa_ctx->uc_ctx.uc_failed = true;
-		ipa_ctx->uc_ctx.uc_error_type = evt.params.errorType;
+		ipa_ctx->uc_ctx.uc_error_type = evt.params.error_type;
 		ipa_ctx->uc_ctx.uc_error_timestamp =
 			ipahal_read_reg(IPA_TAG_TIMER);
 		ipa_bug();
 	} else if (event_op == IPA_HW_2_CPU_EVENT_LOG_INFO) {
-		ipa_debug("uC evt log info ofst=0x%x\n", mmio->eventParams);
+		ipa_debug("uC evt log info ofst=0x%x\n", mmio->event_params);
 		ipa_log_evt_hdlr();
 	} else {
 		ipa_debug("unsupported uC evt opcode=%u\n", event_op);
@@ -212,18 +212,18 @@ static void ipa_uc_event_handler(enum ipa_irq_type interrupt,
 static void ipa_uc_response_hdlr(enum ipa_irq_type interrupt,
 				 void *private_data, void *interrupt_data)
 {
-	union IpaHwCpuCmdCompletedResponseData_t uc_rsp;
-	struct IpaHwSharedMemCommonMapping_t *mmio;
+	union ipa_hw_cpu_cmd_completed_response_data uc_rsp;
+	struct ipa_hw_shared_mem_common_mapping *mmio;
 	u8 response_op;
 
 	ipa_client_add(__func__, false);
 	mmio = ipa_ctx->uc_ctx.uc_sram_mmio;
-	response_op = mmio->responseOp;
+	response_op = mmio->response_op;
 	ipa_debug("uC rsp opcode=%hhu\n", response_op);
 
 	if (EXTRACT_UC_FEATURE(response_op) >= IPA_HW_FEATURE_MAX) {
 		ipa_err("Invalid feature %hhu for event %u\n",
-			EXTRACT_UC_FEATURE(response_op), mmio->eventOp);
+			EXTRACT_UC_FEATURE(response_op), mmio->event_op);
 		ipa_client_remove(__func__, false);
 		return;
 	}
@@ -242,22 +242,22 @@ static void ipa_uc_response_hdlr(enum ipa_irq_type interrupt,
 		 */
 		ipa_proxy_clk_unvote();
 	} else if (response_op == IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED) {
-		struct IpaHwCpuCmdCompletedResponseParams_t *params;
+		struct ipa_hw_cpu_cmd_completed_response_params *params;
 
 		/* Grab the response data so we can extract its parameters */
-		uc_rsp.raw32b = mmio->responseParams;
+		uc_rsp.raw32b = mmio->response_params;
 		params = &uc_rsp.params;
 
 		ipa_debug("uC cmd response opcode=%u status=%u\n",
-		          params->originalCmdOp, params->status);
+			  params->original_cmd_op, params->status);
 
 		/* Make sure we were expecting the command that completed */
-		if (params->originalCmdOp == ipa_ctx->uc_ctx.pending_cmd) {
+		if (params->original_cmd_op == ipa_ctx->uc_ctx.pending_cmd) {
 			ipa_ctx->uc_ctx.uc_status = params->status;
 		} else {
 			ipa_err("Expected cmd=%u rcvd cmd=%u\n",
 				ipa_ctx->uc_ctx.pending_cmd,
-				params->originalCmdOp);
+				params->original_cmd_op);
 		}
 	} else {
 		ipa_err("Unsupported uC rsp opcode = %u\n", response_op);
@@ -269,16 +269,16 @@ static void ipa_uc_response_hdlr(enum ipa_irq_type interrupt,
 static void
 send_uc_command_nowait(struct ipa_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
 {
-	struct IpaHwSharedMemCommonMapping_t *mmio = uc_ctx->uc_sram_mmio;
+	struct ipa_hw_shared_mem_common_mapping *mmio = uc_ctx->uc_sram_mmio;
 
 	uc_ctx->pending_cmd = opcode;
 	uc_ctx->uc_status = 0;
 
-	mmio->cmdOp = opcode;
-	mmio->cmdParams = cmd;
-	mmio->cmdParams_hi = 0;
-	mmio->responseOp = 0;
-	mmio->responseParams = 0;
+	mmio->cmd_op = opcode;
+	mmio->cmd_params = cmd;
+	mmio->cmd_params_hi = 0;
+	mmio->response_op = 0;
+	mmio->response_params = 0;
 
 	wmb();	/* ensure write to shared memory is done before triggering uc */
 

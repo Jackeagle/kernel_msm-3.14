@@ -276,7 +276,7 @@ enum ipa_dp_evt_type {
  */
 enum ipa_hw_version {
 	IPA_HW_v3_5_1	= 0,
-	IPA_HW_None	= 0xffffffff,
+	IPA_HW_NONE	= 0xffffffff,
 };
 
 /** enum ipa_mode_type - mode setting type in IPA end-point

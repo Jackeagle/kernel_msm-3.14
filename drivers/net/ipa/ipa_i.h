@@ -95,7 +95,7 @@
 #define IPA_ACTIVE_CLIENTS_LOG_LINE_LEN 96
 #define FEATURE_ENUM_VAL(feature, opcode) ((feature << 5) | opcode)
 #define IPA_HW_NUM_FEATURES 0x8
-#define IPA_WAN_MSG_IPv6_ADDR_GW_LEN 4
+#define IPA_WAN_MSG_IPV6_ADDR_GW_LEN 4
 
 enum ipa_ees {
 	IPA_EE_AP = 0,
@@ -604,63 +604,63 @@ enum ipa_mem_partition {
 	IPA_MEM_MAX,
 };
 
-/** union IpaHwErrorEventData_t - HW->CPU Common Events
- * @errorType : Entered when a system error is detected by the HW. Type of
+/** union ipa_hw_error_event_data - HW->CPU Common Events
+ * @error_type : Entered when a system error is detected by the HW. Type of
  * error is specified by IPA_HW_ERRORS
  * @reserved : Reserved
  */
-union IpaHwErrorEventData_t {
-	struct IpaHwErrorEventParams_t {
-		u32 errorType:8;
+union ipa_hw_error_event_data {
+	struct ipa_hw_error_event_params {
+		u32 error_type:8;
 		u32 reserved:24;
 	} __packed params;
 	u32 raw32b;
 } __packed;
 
-/** struct IpaHwSharedMemCommonMapping_t - Structure referring to the common
+/** struct ipa_hw_shared_mem_common_mapping - Structure referring to the common
  * section in 128B shared memory located in offset zero of SW Partition in IPA
  * SRAM.
- * @cmdOp : CPU->HW command opcode. See IPA_CPU_2_HW_COMMANDS
- * @cmdParams : CPU->HW command parameter lower 32bit.
- * @cmdParams_hi : CPU->HW command parameter higher 32bit.
+ * @cmd_op : CPU->HW command opcode. See IPA_CPU_2_HW_COMMANDS
+ * @cmd_params : CPU->HW command parameter lower 32bit.
+ * @cmd_params_hi : CPU->HW command parameter higher 32bit.
  * of parameters (immediate parameters) and point on structure in system memory
  * (in such case the address must be accessible for HW)
- * @responseOp : HW->CPU response opcode. See IPA_HW_2_CPU_RESPONSES
- * @responseParams : HW->CPU response parameter. The parameter filed can hold 32
- * bits of parameters (immediate parameters) and point on structure in system
+ * @response_op : HW->CPU response opcode. See IPA_HW_2_CPU_RESPONSES
+ * @response_params : HW->CPU response parameter. The parameter filed can hold
+ * 32 bits of parameters (immediate parameters) and point on structure in system
  * memory
- * @eventOp : HW->CPU event opcode. See IPA_HW_2_CPU_EVENTS
- * @eventParams : HW->CPU event parameter. The parameter filed can hold 32
+ * @event_op : HW->CPU event opcode. See IPA_HW_2_CPU_EVENTS
+ * @event_params : HW->CPU event parameter. The parameter filed can hold 32
  *		bits of parameters (immediate parameters) and point on
  *		structure in system memory
- * @firstErrorAddress : Contains the address of first error-source on SNOC
- * @hwState : State of HW. The state carries information regarding the
+ * @first_error_address : Contains the address of first error-source on SNOC
+ * @hw_state : State of HW. The state carries information regarding the
  *				error type.
- * @warningCounter : The warnings counter. The counter carries information
+ * @warning_counter : The warnings counter. The counter carries information
  *						regarding non fatal errors in HW
- * @interfaceVersionCommon : The Common interface version as reported by HW
+ * @interface_version_common : The Common interface version as reported by HW
  *
  * The shared memory is used for communication between IPA HW and CPU.
  */
-struct IpaHwSharedMemCommonMapping_t {
-	u8  cmdOp;
+struct ipa_hw_shared_mem_common_mapping {
+	u8  cmd_op;
 	u8  reserved_01;
 	u16 reserved_03_02;
-	u32 cmdParams;
-	u32 cmdParams_hi;
-	u8  responseOp;
+	u32 cmd_params;
+	u32 cmd_params_hi;
+	u8  response_op;
 	u8  reserved_0D;
 	u16 reserved_0F_0E;
-	u32 responseParams;
-	u8  eventOp;
+	u32 response_params;
+	u8  event_op;
 	u8  reserved_15;
 	u16 reserved_17_16;
-	u32 eventParams;
-	u32 firstErrorAddress;
-	u8  hwState;
-	u8  warningCounter;
+	u32 event_params;
+	u32 first_error_address;
+	u8  hw_state;
+	u8  warning_counter;
 	u16 reserved_23_22;
-	u16 interfaceVersionCommon;
+	u16 interface_version_common;
 	u16 reserved_27_26;
 } __packed;
 
@@ -680,7 +680,7 @@ struct ipa_uc_ctx {
 	bool uc_inited;
 	bool uc_loaded;
 	bool uc_failed;
-	struct IpaHwSharedMemCommonMapping_t *uc_sram_mmio;
+	struct ipa_hw_shared_mem_common_mapping *uc_sram_mmio;
 	u32 uc_event_top_ofst;
 	u32 pending_cmd;
 	u32 uc_status;

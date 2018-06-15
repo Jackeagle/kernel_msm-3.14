@@ -1783,14 +1783,14 @@ err_disable_clks:
 	return result;
 }
 
-/* Return the IPA hardware version, or IPA_HW_None for any error */
+/* Return the IPA hardware version, or IPA_HW_NONE for any error */
 static enum ipa_hw_version ipa_version_get(struct platform_device *pdev)
 {
 	struct device_node *node = pdev->dev.of_node;
 	u32 ipa_version = 0;
 
 	if (of_property_read_u32(node, "qcom,ipa-hw-ver", &ipa_version))
-		return IPA_HW_None;
+		return IPA_HW_NONE;
 
 	/* Translate the DTB value to the value we use internally */
 	if (ipa_version == QCOM_IPA_HW_VER_v3_5_1)
@@ -1798,7 +1798,7 @@ static enum ipa_hw_version ipa_version_get(struct platform_device *pdev)
 
 	ipa_err("unsupported IPA hardware version %u\n", ipa_version);
 
-	return IPA_HW_None;
+	return IPA_HW_NONE;
 }
 
 static irqreturn_t ipa_smp2p_modem_clk_query_isr(int irq, void *ctxt)
@@ -1902,7 +1902,7 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 
 	/* Find out whether we're working with supported hardware */
 	hw_version = ipa_version_get(pdev_p);
-	if (hw_version == IPA_HW_None) {
+	if (hw_version == IPA_HW_NONE) {
 		result = -ENODEV;
 		goto err_clear_pdev;
 	}

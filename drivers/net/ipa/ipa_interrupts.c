@@ -356,7 +356,7 @@ int ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, ipa_ee, val);
 	ipa_debug("wrote IPA_IRQ_EN_EE_n register. reg = %d\n", val);
 
-	/* Register SUSPEND_IRQ_EN_EE_n_ADDR for L2 interrupt.
+	/* Register SUSPEND_IRQ_EN_EE_N_ADDR for L2 interrupt.
 	 * Note the following must not be executed for IPA hardware
 	 * versions prior to 3.1.
 	 */
@@ -409,7 +409,7 @@ int ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 	ipa_interrupt_to_cb[irq_num].private_data = NULL;
 	ipa_interrupt_to_cb[irq_num].interrupt = -1;
 
-	/* Unregister SUSPEND_IRQ_EN_EE_n_ADDR for L2 interrupt.
+	/* Unregister SUSPEND_IRQ_EN_EE_N_ADDR for L2 interrupt.
 	 * Note the following must not be executed for IPA hardware
 	 * versions prior to 3.1.
 	 */
