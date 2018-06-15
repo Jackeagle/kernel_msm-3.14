@@ -1959,7 +1959,7 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 
 	/* init active_clients_log */
 	if (ipa_active_clients_log_init()) {
-		result	=-ENOMEM;
+		result = -ENOMEM;
 		goto err_unregister_bus_handle;
 	}
 

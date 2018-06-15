@@ -40,7 +40,7 @@
 		IPA_GENERIC_RX_BUFF_BASE_SZ)
 
 /* less 1 nominal MTU (1500 bytes) rounded to units of KB */
-#define IPA_ADJUST_AGGR_BYTE_LIMIT(X) (((X) - IPA_MTU)/1000)
+#define IPA_ADJUST_AGGR_BYTE_LIMIT(X) (((X) - IPA_MTU) / 1000)
 
 #define IPA_RX_BUFF_CLIENT_HEADROOM 256
 
@@ -1896,7 +1896,7 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 		 * header
 		 */
 		/*QMAP is BE: convert the pkt_len field from BE to LE*/
-		pkt_len_with_pad = ntohs((qmap_hdr>>16) & 0xffff);
+		pkt_len_with_pad = ntohs((qmap_hdr >> 16) & 0xffff);
 		ipa_debug_low("pkt_len with pad %d\n", pkt_len_with_pad);
 		/*get the CHECKSUM_PROCESS bit*/
 		status_mask = status.status_mask;
