@@ -53,9 +53,10 @@
 #define IPA_STATS_INC_CNT(val) (++val)
 #define IPA_STATS_DEC_CNT(val) (--val)
 #define IPA_STATS_EXCP_CNT(__excp, __base) do {				\
-	if (__excp < 0 || __excp >= IPAHAL_PKT_STATUS_EXCEPTION_MAX)	\
-		break;							\
-	++__base[__excp];						\
+		enum ipahal_pkt_status_exception _e = (__excp);		\
+		if (_e < 0 || _e >= IPAHAL_PKT_STATUS_EXCEPTION_MAX)	\
+			break;						\
+		++__base[_e];						\
 	} while (0)
 #else
 #define IPA_STATS_INC_CNT(x) do { } while (0)

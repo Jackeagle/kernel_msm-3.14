@@ -46,31 +46,7 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 	return (reg & field_mask) >> field_shift(field_mask);
 }
 
-#define IPA_CLIENT_IS_PROD(x) \
-	(x < IPA_CLIENT_MAX && (x & 0x1) == 0)
-#define IPA_CLIENT_IS_CONS(x) \
-	(x < IPA_CLIENT_MAX && (x & 0x1) == 1)
-
 #define EXTRACT_UC_FEATURE(value) (value >> 5)
-
-#define IPA_CLIENT_IS_Q6_CONS(client) \
-	((client) == IPA_CLIENT_Q6_LAN_CONS || \
-	(client) == IPA_CLIENT_Q6_WAN_CONS || \
-	(client) == IPA_CLIENT_Q6_DUN_CONS || \
-	(client) == IPA_CLIENT_Q6_DECOMP_CONS || \
-	(client) == IPA_CLIENT_Q6_DECOMP2_CONS || \
-	(client) == IPA_CLIENT_Q6_LTE_WIFI_AGGR_CONS)
-
-#define IPA_CLIENT_IS_Q6_PROD(client) \
-	((client) == IPA_CLIENT_Q6_LAN_PROD || \
-	(client) == IPA_CLIENT_Q6_WAN_PROD || \
-	(client) == IPA_CLIENT_Q6_CMD_PROD || \
-	(client) == IPA_CLIENT_Q6_DECOMP_PROD || \
-	(client) == IPA_CLIENT_Q6_DECOMP2_PROD)
-
-#define IPA_CLIENT_IS_APPS_CONS(client) \
-	((client) == IPA_CLIENT_APPS_LAN_CONS || \
-	(client) == IPA_CLIENT_APPS_WAN_CONS)
 
 /** enum ipa_irq_type - IPA Interrupt Type
  * Used to register handlers for IPA interrupts
@@ -223,6 +199,34 @@ enum ipa_client_type {
 
 	IPA_CLIENT_MAX,
 };
+
+#define IPA_CLIENT_IS_PROD(x)	(!((x) & 1))
+#define IPA_CLIENT_IS_CONS(x)	(!IPA_CLIENT_IS_PROD(x))
+
+static inline bool IPA_CLIENT_IS_Q6_CONS(enum ipa_client_type client)
+{
+	return client == IPA_CLIENT_Q6_LAN_CONS ||
+		client == IPA_CLIENT_Q6_WAN_CONS ||
+		client == IPA_CLIENT_Q6_DUN_CONS ||
+		client == IPA_CLIENT_Q6_DECOMP_CONS ||
+		client == IPA_CLIENT_Q6_DECOMP2_CONS ||
+		client == IPA_CLIENT_Q6_LTE_WIFI_AGGR_CONS;
+}
+
+static inline bool IPA_CLIENT_IS_Q6_PROD(enum ipa_client_type client)
+{
+	return client == IPA_CLIENT_Q6_LAN_PROD ||
+		client == IPA_CLIENT_Q6_WAN_PROD ||
+		client == IPA_CLIENT_Q6_CMD_PROD ||
+		client == IPA_CLIENT_Q6_DECOMP_PROD ||
+		client == IPA_CLIENT_Q6_DECOMP2_PROD;
+}
+
+static inline bool IPA_CLIENT_IS_APPS_CONS(enum ipa_client_type client)
+{
+	return client == IPA_CLIENT_APPS_LAN_CONS ||
+		client == IPA_CLIENT_APPS_WAN_CONS;
+}
 
 struct ipa_active_client_logging_info {
 	const char *id_string;

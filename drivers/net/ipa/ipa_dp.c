@@ -32,8 +32,8 @@
 #define IPA_REAL_GENERIC_RX_BUFF_SZ(X) (SKB_DATA_ALIGN(\
 		(X) + NET_SKB_PAD) +\
 		SKB_DATA_ALIGN(sizeof(struct skb_shared_info)))
-#define IPA_GENERIC_RX_BUFF_SZ(X) ((X) -\
-		(IPA_REAL_GENERIC_RX_BUFF_SZ(X) - (X)))
+#define IPA_GENERIC_RX_BUFF_SZ(X) \
+	({ typeof(X) _x = (X); (_x - (IPA_REAL_GENERIC_RX_BUFF_SZ(_x) - _x)); })
 #define IPA_GENERIC_RX_BUFF_LIMIT (\
 		IPA_REAL_GENERIC_RX_BUFF_SZ(\
 		IPA_GENERIC_RX_BUFF_BASE_SZ) -\

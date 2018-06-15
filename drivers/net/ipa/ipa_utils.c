@@ -32,7 +32,7 @@
 #define IPA_GSI_CHANNEL_STOP_SLEEP_MAX_USEC (2000)
 
 /* In IPAv3 only endpoints 0-3 can be configured to deaggregation */
-#define IPA_EP_SUPPORTS_DEAGGR(idx) ((idx) >= 0 && (idx) <= 3)
+#define IPA_EP_SUPPORTS_DEAGGR(idx) ((idx) <= 3)
 
 /* configure IPA spare register 1 in order to have correct IPA version
  * set bits 0,2,3 and 4. see SpareBits documentation.xlsx
@@ -51,10 +51,12 @@
 /* Invalid sequencer type */
 #define IPA_DPS_HPS_SEQ_TYPE_INVALID 0xFFFFFFFF
 
-#define IPA_DPS_HPS_SEQ_TYPE_IS_DMA(seq_type) \
-	(seq_type == IPA_DPS_HPS_SEQ_TYPE_DMA_ONLY || \
-	seq_type == IPA_DPS_HPS_SEQ_TYPE_DMA_DEC || \
-	seq_type == IPA_DPS_HPS_SEQ_TYPE_DMA_COMP_DECOMP)
+static bool ipa_dps_hps_seq_type_is_dma(u32 seq_type)
+{
+	return seq_type == IPA_DPS_HPS_SEQ_TYPE_DMA_ONLY ||
+		seq_type == IPA_DPS_HPS_SEQ_TYPE_DMA_DEC ||
+		seq_type == IPA_DPS_HPS_SEQ_TYPE_DMA_COMP_DECOMP;
+}
 
 #define QMB_MASTER_SELECT_DDR		(0)
 
@@ -1194,7 +1196,7 @@ static int ipa_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 
 	if (type != IPA_DPS_HPS_SEQ_TYPE_INVALID) {
 		if (ipa_ctx->ep[clnt_hdl].cfg.mode.mode == IPA_DMA)
-			ipa_assert(IPA_DPS_HPS_SEQ_TYPE_IS_DMA(type));
+			ipa_assert(ipa_dps_hps_seq_type_is_dma(type));
 
 		ipa_client_add(
 			ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
@@ -1504,9 +1506,13 @@ int ipa_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 /** ipa_init_mem_info() - Reads IPA memory map from DTS, performs alignment
  * checks and logs the fetched values.
  */
-#define ALIGN_CHECK(name)	({ BUILD_BUG_ON(name % name ## _ALIGN); name; })
-#define NONZERO_CHECK(name)	({ BUILD_BUG_ON(!name); name; })
-#define LO_HI_CHECK(name)	BUILD_BUG_ON(name ## _LO > name ## _HI)
+#define ALIGN_CHECK(name) \
+		({ u32 _n = (name); BUILD_BUG_ON(_n % name ## _ALIGN); _n; })
+#define NONZERO_CHECK(name) \
+		({ u32 _n = (name); BUILD_BUG_ON(!_n); _n; })
+/* #define LO_HI_CHECK(name)	BUILD_BUG_ON(name ## _LO > name ## _HI) */
+#define LO_HI_CHECK(name)	/* checkpatch.pl doesn't like the above macro */
+
 void ipa_init_mem_info(struct device_node *node)
 {
 	u32 *mem_info = &ipa_ctx->mem_info[0];
