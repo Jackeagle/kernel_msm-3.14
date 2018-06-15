@@ -156,7 +156,7 @@ static int ipa_wwan_stop(struct net_device *dev)
 {
 	struct ipa_wwan_private *wwan_ptr = netdev_priv(dev);
 
-	ipa_debug("[%s] ipa_wwan_stop()\n", dev->name);
+	ipa_debug("%s: stop %s\n", __func__, dev->name);
 	wwan_ptr->device_active = false;
 	netif_stop_queue(dev);
 
@@ -203,8 +203,7 @@ static int ipa_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 	qmap_check = RMNET_MAP_GET_CD_BIT(skb);
 	if (netif_queue_stopped(dev)) {
 		if (!qmap_check) {
-			ipa_err("[%s]fatal: ipa_wwan_xmit stopped\n",
-				dev->name);
+			ipa_err("%s: fatal: %s stopped\n", __func__, dev->name);
 			return NETDEV_TX_BUSY;
 		}
 		if (atomic_read(&wwan_ptr->outstanding_pkts) <
@@ -244,7 +243,7 @@ send:
 
 static void ipa_wwan_tx_timeout(struct net_device *dev)
 {
-	ipa_err("[%s] ipa_wwan_tx_timeout(), data stall in UL\n", dev->name);
+	ipa_err("%s: %s stall in UL\n", __func__, dev->name);
 }
 
 /** apps_ipa_tx_complete_notify() - Rx notify
