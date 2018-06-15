@@ -281,7 +281,7 @@ static void apps_ipa_tx_complete_notify(void *priv, enum ipa_dp_evt_type evt,
 	__netif_tx_lock_bh(netdev_get_tx_queue(dev, 0));
 	if (netif_queue_stopped(dev) &&
 	    atomic_read(&wwan_ptr->outstanding_pkts) <
-				(wwan_ptr->outstanding_low)) {
+				wwan_ptr->outstanding_low) {
 		ipa_debug_low("Outstanding low (%d) - waking up queue\n",
 			      wwan_ptr->outstanding_low);
 		netif_wake_queue(dev);
@@ -345,11 +345,11 @@ static int handle3_ingress_format(struct net_device *dev,
 
 	ipa_debug("Get RMNET_IOCTL_SET_INGRESS_DATA_FORMAT\n");
 	ipa_wan_ep_cfg = &rmnet_ipa_ctx->ipa_to_apps_ep_cfg;
-	if ((in->u.data) & RMNET_IOCTL_INGRESS_FORMAT_CHECKSUM)
+	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_CHECKSUM)
 		ipa_wan_ep_cfg->ipa_ep_cfg.cfg.cs_offload_en =
 		   IPA_ENABLE_CS_OFFLOAD_DL;
 
-	if ((in->u.data) & RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA) {
+	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA) {
 		ipa_debug("get AGG size %d count %d\n",
 			  in->u.ingress_format.agg_size,
 			  in->u.ingress_format.agg_count);
@@ -429,14 +429,14 @@ static int handle3_egress_format(struct net_device *dev,
 	ipa_wan_ep_cfg = &rmnet_ipa_ctx->apps_to_ipa_ep_cfg;
 	ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_len =
 					sizeof(struct rmnet_map_header_s);
-	if ((e->u.data) & RMNET_IOCTL_EGRESS_FORMAT_CHECKSUM) {
+	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_CHECKSUM) {
 		ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_len += sizeof(u32);
 		ipa_wan_ep_cfg->ipa_ep_cfg.cfg.cs_offload_en =
 			IPA_ENABLE_CS_OFFLOAD_UL;
 		ipa_wan_ep_cfg->ipa_ep_cfg.cfg.cs_metadata_hdr_offset = 1;
 	}
 
-	if ((e->u.data) & RMNET_IOCTL_EGRESS_FORMAT_AGGREGATION) {
+	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_AGGREGATION) {
 		ipa_err("WAN UL Aggregation enabled\n");
 
 		ipa_wan_ep_cfg->ipa_ep_cfg.aggr.aggr_en = IPA_ENABLE_DEAGGR;

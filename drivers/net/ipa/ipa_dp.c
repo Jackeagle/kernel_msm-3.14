@@ -1578,14 +1578,13 @@ begin:
 				sys->status_stat->curr = 0;
 		}
 
-		if ((status.status_opcode !=
-			IPAHAL_PKT_STATUS_OPCODE_DROPPED_PACKET) &&
-			(status.status_opcode !=
-			IPAHAL_PKT_STATUS_OPCODE_PACKET) &&
-			(status.status_opcode !=
-			IPAHAL_PKT_STATUS_OPCODE_SUSPENDED_PACKET) &&
-			(status.status_opcode !=
-			IPAHAL_PKT_STATUS_OPCODE_PACKET_2ND_PASS)) {
+		if (status.status_opcode !=
+			IPAHAL_PKT_STATUS_OPCODE_DROPPED_PACKET &&
+		    status.status_opcode != IPAHAL_PKT_STATUS_OPCODE_PACKET &&
+		    status.status_opcode !=
+			IPAHAL_PKT_STATUS_OPCODE_SUSPENDED_PACKET &&
+		    status.status_opcode !=
+			IPAHAL_PKT_STATUS_OPCODE_PACKET_2ND_PASS) {
 			ipa_err("unsupported opcode(%d)\n",
 				status.status_opcode);
 			skb_pull(skb, pkt_status_sz);
@@ -1853,12 +1852,12 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 				sys->status_stat->curr = 0;
 		}
 
-		if ((status.status_opcode !=
-			IPAHAL_PKT_STATUS_OPCODE_DROPPED_PACKET) &&
-			(status.status_opcode !=
-			IPAHAL_PKT_STATUS_OPCODE_PACKET) &&
-			(status.status_opcode !=
-			IPAHAL_PKT_STATUS_OPCODE_PACKET_2ND_PASS)) {
+		if (status.status_opcode !=
+			IPAHAL_PKT_STATUS_OPCODE_DROPPED_PACKET &&
+		    status.status_opcode !=
+			IPAHAL_PKT_STATUS_OPCODE_PACKET &&
+		    status.status_opcode !=
+			IPAHAL_PKT_STATUS_OPCODE_PACKET_2ND_PASS) {
 			ipa_err("unsupported opcode(%d)\n",
 				status.status_opcode);
 			skb_pull(skb, pkt_status_sz);

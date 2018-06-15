@@ -80,7 +80,7 @@ static bool ipa_is_valid_ep(u32 ep_suspend_data)
 	u32 i = 0;
 
 	for (i = 0; i < ipa_ctx->ipa_num_pipes; i++) {
-		if ((ep_suspend_data & bmsk) && (ipa_ctx->ep[i].valid))
+		if ((ep_suspend_data & bmsk) && ipa_ctx->ep[i].valid)
 			return true;
 		bmsk = bmsk << 1;
 	}
