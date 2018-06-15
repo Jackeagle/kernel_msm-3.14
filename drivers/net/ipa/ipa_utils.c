@@ -162,7 +162,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= true,
 			.sequencer_type =
-				IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+			   IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 7,
@@ -176,7 +176,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= true,
 			.sequencer_type =
-				IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 0,
@@ -204,7 +204,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= true,
 			.sequencer_type =
-				IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 2,
@@ -273,7 +273,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= true,
 			.sequencer_type =
-				IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 14,
@@ -287,7 +287,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= true,
 			.sequencer_type =
-				IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 15,
@@ -302,7 +302,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= true,
 			.sequencer_type =
-				IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 0,
@@ -316,7 +316,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= true,
 			.sequencer_type =
-				IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 0,
@@ -330,7 +330,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= true,
 			.sequencer_type =
-				IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 2,
@@ -344,7 +344,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= true,
 			.sequencer_type =
-				IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 4,
@@ -358,7 +358,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= true,
 			.sequencer_type =
-				IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 1,
@@ -988,11 +988,13 @@ static int ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 	/* copy over EP cfg */
 	ep->cfg.hdr = *ep_hdr;
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+		       true);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_n, clnt_hdl, &ep->cfg.hdr);
 
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			  true);
 
 	return 0;
 }
@@ -1029,12 +1031,14 @@ ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
 	/* copy over EP cfg */
 	ep->cfg.hdr_ext = *ep_hdr_ext;
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+		       true);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_n, clnt_hdl,
 				  &ep->cfg.hdr_ext);
 
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			  true);
 
 	return 0;
 }
@@ -1068,11 +1072,13 @@ static int ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 	/* copy over EP cfg */
 	ipa_ctx->ep[clnt_hdl].cfg.aggr = *ep_aggr;
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+		       true);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_AGGR_n, clnt_hdl, ep_aggr);
 
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			  true);
 
 	return 0;
 }
@@ -1095,20 +1101,21 @@ static int ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 	/* Override QMB master selection */
 	qmb_master_sel = ipa_get_qmb_master_sel(ipa_ctx->ep[clnt_hdl].client);
 	ipa_ctx->ep[clnt_hdl].cfg.cfg.gen_qmb_master_sel = qmb_master_sel;
-	ipa_debug(
-	       "pipe=%d, frag_ofld_en=%d cs_ofld_en=%d mdata_hdr_ofst=%d gen_qmb_master_sel=%d\n",
-			clnt_hdl,
-			ipa_ctx->ep[clnt_hdl].cfg.cfg.frag_offload_en,
-			ipa_ctx->ep[clnt_hdl].cfg.cfg.cs_offload_en,
-			ipa_ctx->ep[clnt_hdl].cfg.cfg.cs_metadata_hdr_offset,
-			ipa_ctx->ep[clnt_hdl].cfg.cfg.gen_qmb_master_sel);
+	ipa_debug("pipe=%d, frag_ofld_en=%d cs_ofld_en=%d\n",
+		  clnt_hdl, ipa_ctx->ep[clnt_hdl].cfg.cfg.frag_offload_en,
+		  ipa_ctx->ep[clnt_hdl].cfg.cfg.cs_offload_en);
+	ipa_debug("mdata_hdr_ofst=%d gen_qmb_master_sel=%d\n",
+		  ipa_ctx->ep[clnt_hdl].cfg.cfg.cs_metadata_hdr_offset,
+		  ipa_ctx->ep[clnt_hdl].cfg.cfg.gen_qmb_master_sel);
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+		       true);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CFG_n, clnt_hdl,
 				  &ipa_ctx->ep[clnt_hdl].cfg.cfg);
 
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			  true);
 
 	return 0;
 }
@@ -1150,13 +1157,15 @@ static int ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 	ipa_ctx->ep[clnt_hdl].cfg.mode = *ep_mode;
 	ipa_ctx->ep[clnt_hdl].dst_pipe_index = ipa_ep_idx;
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+		       true);
 
 	init_mode.dst_pipe_number = ipa_ctx->ep[clnt_hdl].dst_pipe_index;
 	init_mode.ep_mode = *ep_mode;
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_MODE_n, clnt_hdl, &init_mode);
 
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			  true);
 
 	return 0;
 }
@@ -1187,16 +1196,21 @@ static int ipa_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 		if (ipa_ctx->ep[clnt_hdl].cfg.mode.mode == IPA_DMA)
 			ipa_assert(IPA_DPS_HPS_SEQ_TYPE_IS_DMA(type));
 
-		ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+		ipa_client_add(
+			ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			true);
 		/* Configure sequencers type*/
 
 		ipa_debug("set sequencers to sequence 0x%x, ep = %d\n", type,
 			  clnt_hdl);
 		ipahal_write_reg_n(IPA_ENDP_INIT_SEQ_n, clnt_hdl, type);
 
-		ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+		ipa_client_remove(
+			ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			true);
 	} else {
-		ipa_debug("should not set sequencer type of ep = %d\n", clnt_hdl);
+		ipa_debug("should not set sequencer type of ep = %d\n",
+			  clnt_hdl);
 	}
 
 	return 0;
@@ -1228,12 +1242,14 @@ ipa_cfg_ep_deaggr(u32 clnt_hdl, const struct ipa_ep_cfg_deaggr *ep_deaggr)
 	/* copy over EP cfg */
 	ep->cfg.deaggr = *ep_deaggr;
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+		       true);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_n, clnt_hdl,
 				  &ep->cfg.deaggr);
 
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			  true);
 
 	return 0;
 }
@@ -1256,12 +1272,14 @@ static int ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
 	/* copy over EP cfg */
 	ipa_ctx->ep[clnt_hdl].cfg.metadata_mask = *metadata_mask;
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+		       true);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_n,
 				  clnt_hdl, metadata_mask);
 
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			  true);
 
 	return 0;
 }
@@ -1343,11 +1361,13 @@ int ipa_cfg_ep_status(u32 clnt_hdl,
 	/* copy over EP cfg */
 	ipa_ctx->ep[clnt_hdl].status = *ep_status;
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+		       true);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_STATUS_n, clnt_hdl, ep_status);
 
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			  true);
 
 	return 0;
 }
@@ -1399,7 +1419,8 @@ int ipa_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 
 	ipa_ctx->ep[clnt_hdl].holb = *ep_holb;
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+		       true);
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HOL_BLOCK_EN_n, clnt_hdl,
 				  ep_holb);
@@ -1407,7 +1428,8 @@ int ipa_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HOL_BLOCK_TIMER_n, clnt_hdl,
 				  ep_holb);
 
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			  true);
 
 	ipa_debug("cfg holb %u ep=%d tmr=%d\n", ep_holb->en, clnt_hdl,
 		  ep_holb->tmr_val);
@@ -2000,7 +2022,8 @@ int ipa_stop_gsi_channel(u32 clnt_hdl)
 
 	ep = &ipa_ctx->ep[clnt_hdl];
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+		       true);
 
 	memset(&mem, 0, sizeof(mem));
 
@@ -2038,7 +2061,8 @@ int ipa_stop_gsi_channel(u32 clnt_hdl)
 	ipa_err("Failed	 to stop GSI channel with retries\n");
 	res = -EFAULT;
 end_sequence:
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			  true);
 
 	return res;
 }

@@ -290,8 +290,9 @@ int ipa_init_q6_smem(void)
 		goto out_client_remove;
 	}
 
-	rc = dma_shared_mem_zero_cmd(ipa_ctx->mem_info[MODEM_HDR_PROC_CTX_OFST],
-				     ipa_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE]);
+	rc = dma_shared_mem_zero_cmd(
+			ipa_ctx->mem_info[MODEM_HDR_PROC_CTX_OFST],
+			ipa_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE]);
 	if (rc)
 		what = "Modem proc ctx RAM";
 out_client_remove:
@@ -1087,7 +1088,8 @@ void ipa_suspend_handler(enum ipa_irq_type interrupt, void *private_data,
 		 */
 		mutex_lock(&ipa_ctx->transport_pm.transport_pm_mutex);
 		if (!atomic_read(&ipa_ctx->transport_pm.dec_clients)) {
-			ipa_client_add(ipa_client_string(ipa_ctx->ep[i].client), true);
+			ipa_client_add(ipa_client_string(ipa_ctx->ep[i].client),
+				       true);
 			ipa_debug_low("Pipes un-suspended.\n");
 			ipa_debug_low("Enter poll mode.\n");
 			atomic_set(&ipa_ctx->transport_pm.dec_clients, 1);
@@ -1560,7 +1562,8 @@ static bool config_valid(void)
 	}
 	if (ipa_ctx->mem_info[V6_RT_NHASH_SIZE] < required_size) {
 		ipa_err("V6_RT_NHASH_SIZE too small for modem (%u < %u * %u)\n",
-			ipa_ctx->mem_info[V6_RT_NHASH_SIZE], table_count, width);
+			ipa_ctx->mem_info[V6_RT_NHASH_SIZE], table_count,
+			width);
 		return false;
 	}
 
@@ -1574,18 +1577,21 @@ static bool config_valid(void)
 	}
 	if (ipa_ctx->mem_info[V4_FLT_NHASH_SIZE] < required_size) {
 		ipa_err("V4_FLT_NHASH_SIZE too small (%u < %u * %u)\n",
-			ipa_ctx->mem_info[V4_FLT_NHASH_SIZE], table_count, width);
+			ipa_ctx->mem_info[V4_FLT_NHASH_SIZE], table_count,
+			width);
 		return false;
 	}
 
 	if (ipa_ctx->mem_info[V6_FLT_HASH_SIZE] < required_size) {
 		ipa_err("V6_FLT_HASH_SIZE too small  (%u < %u * %u)\n",
-			ipa_ctx->mem_info[V6_FLT_HASH_SIZE], table_count, width);
+			ipa_ctx->mem_info[V6_FLT_HASH_SIZE], table_count,
+			width);
 		return false;
 	}
 	if (ipa_ctx->mem_info[V6_FLT_NHASH_SIZE] < required_size) {
 		ipa_err("V6_FLT_NHASH_SIZE too small (%u < %u * %u)\n",
-			ipa_ctx->mem_info[V6_FLT_NHASH_SIZE], table_count, width);
+			ipa_ctx->mem_info[V6_FLT_NHASH_SIZE], table_count,
+			width);
 		return false;
 	}
 
@@ -1817,7 +1823,8 @@ static int ipa_smp2p_init(struct device *dev)
 					  &valid_bit);
 	if (IS_ERR(valid_state)) {
 		res = PTR_ERR(valid_state);
-		ipa_err("error %d getting ipa-clock-enabled-valid state\n", res);
+		ipa_err("error %d getting ipa-clock-enabled-valid state\n",
+			res);
 
 		return res;
 	}

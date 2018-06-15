@@ -329,7 +329,8 @@ int ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 	int irq_num;
 	int client_idx, ep_idx;
 
-	ipa_debug("in ipa_add_interrupt_handler interrupt_enum(%d)\n", interrupt);
+	ipa_debug("in ipa_add_interrupt_handler interrupt_enum(%d)\n",
+		  interrupt);
 	if (interrupt < IPA_BAD_SNOC_ACCESS_IRQ || interrupt >= IPA_IRQ_MAX) {
 		ipa_err("invalid interrupt number %d\n", interrupt);
 		return -EINVAL;

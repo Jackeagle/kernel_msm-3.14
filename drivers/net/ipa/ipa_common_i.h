@@ -519,7 +519,7 @@ struct ipa_ep_cfg_route {
 	u32 rt_tbl_hdl;
 };
 
-/** struct ipa_ep_cfg_holb - head of line blocking configuration in IPA end-point
+/** struct ipa_ep_cfg_holb - head of line blocking config in IPA end-point
  * @en: enable(1 => ok to drop pkt)/disable(0 => never drop pkt)
  * @tmr_val: duration in units of 128 IPA clk clock cyles [0,511], 1 clk=1.28us
  *	     IPAv2.5 support 32 bit HOLB timeout value, previous versions
@@ -591,7 +591,7 @@ struct ipa_ep_cfg_metadata_mask {
 	u32 metadata_mask;
 };
 
-/** struct ipa_ep_cfg_seq - HPS/DPS sequencer type configuration in IPA end-point
+/** struct ipa_ep_cfg_seq - HPS/DPS sequencer type config in IPA end-point
  * @set_dynamic:  0 - HPS/DPS seq type is configured statically,
  *		   1 - HPS/DPS seq type is set to seq_type
  * @seq_type: HPS/DPS sequencer type configuration

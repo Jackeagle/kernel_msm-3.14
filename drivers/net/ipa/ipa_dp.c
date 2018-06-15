@@ -900,7 +900,8 @@ int ipa_teardown_sys_pipe(u32 clnt_hdl)
 
 	ep = &ipa_ctx->ep[clnt_hdl];
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+		       true);
 
 	if (ep->napi_enabled) {
 		do {
@@ -947,7 +948,8 @@ int ipa_teardown_sys_pipe(u32 clnt_hdl)
 	}
 
 	ep->valid = 0;
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)), true);
+	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			  true);
 
 	ipa_debug("client (ep: %d) disconnected\n", clnt_hdl);
 
@@ -1767,7 +1769,8 @@ ipa_wan_rx_handle_splt_pyld(struct sk_buff *skb, struct ipa_sys_context *sys)
 			skb2 = ipa_join_prev_skb(sys->prev_skb, skb,
 						 sys->len_rem);
 			if (likely(skb2)) {
-				ipa_debug_low("removing Status element from skb and sending to WAN client");
+				ipa_debug_low(
+					"removing Status element from skb and sending to WAN client");
 				skb_pull(skb2, ipahal_pkt_status_get_size());
 				skb2->truesize = skb2->len +
 					sizeof(struct sk_buff);
@@ -1924,7 +1927,8 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 				skb_trim(skb2, frame_len);
 				ipa_debug_low("rx avail for %d\n",
 					      status.endp_dest_idx);
-				ipa_debug_low("removing Status element from skb and sending to WAN client");
+				ipa_debug_low(
+					"removing Status element from skb and sending to WAN client");
 				skb_pull(skb2, pkt_status_sz);
 				skb2->truesize = skb2->len +
 					sizeof(struct sk_buff) +

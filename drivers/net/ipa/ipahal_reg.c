@@ -559,7 +559,7 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 			      endp_init_cfg_n,		0x00000808,	0x0070),
 		reg_obj_nofunc(IRQ_EE_UC_n,		0x0000301c,	0x1000),
 		reg_obj_cfunc(ENDP_INIT_HDR_METADATA_MASK_n,
-			      endp_init_hdr_metadata_mask_n, 0x00000818, 0x0070),
+			      endp_init_hdr_metadata_mask_n, 0x00000818, 0x070),
 		reg_obj_pfunc(SHARED_MEM_SIZE,
 			      shared_mem_size,		0x00000054,	0x0000),
 		reg_obj_nofunc(SRAM_DIRECT_ACCESS_n,	0x00007000,	0x0004),
