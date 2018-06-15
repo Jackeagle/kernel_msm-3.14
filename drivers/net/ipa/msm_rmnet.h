@@ -146,12 +146,12 @@ struct QMI_QOS_HDR_S {
 	unsigned char	version;
 	unsigned char	flags;
 	u32		flow_id;
-} __attribute((__packed__));
+} __packed;
 
 /* QMI QoS 8-byte header. */
 struct qmi_qos_hdr8_s {
 	struct QMI_QOS_HDR_S	hdr;
 	u8			reserved[2];
-} __attribute((__packed__));
+} __packed;
 
 #endif /* _MSM_RMNET_H_ */

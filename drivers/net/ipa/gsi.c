@@ -157,7 +157,7 @@ enum gsi_re_type {
 	GSI_RE_NOP = 0x4,
 };
 
-struct __packed gsi_tre {
+struct gsi_tre {
 	u64 buffer_ptr;
 	u16 buf_len;
 	u16 resvd1;
@@ -169,9 +169,9 @@ struct __packed gsi_tre {
 	u16 resvd3:5;
 	u8 re_type;
 	u8 resvd2;
-};
+} __packed;
 
-struct __packed gsi_xfer_compl_evt {
+struct gsi_xfer_compl_evt {
 	u64 xfer_ptr;
 	u16 len;
 	u8 resvd1;
@@ -179,7 +179,7 @@ struct __packed gsi_xfer_compl_evt {
 	u16 resvd;
 	u8 type;
 	u8 chid;
-};
+} __packed;
 
 enum gsi_err_type {
 	GSI_ERR_TYPE_GLOB = 0x1,
@@ -187,7 +187,7 @@ enum gsi_err_type {
 	GSI_ERR_TYPE_EVT = 0x3,
 };
 
-struct __packed gsi_log_err {
+struct gsi_log_err {
 	u32 arg3:4;
 	u32 arg2:4;
 	u32 arg1:4;
@@ -196,7 +196,7 @@ struct __packed gsi_log_err {
 	u32 virt_idx:5;
 	u32 err_type:4;
 	u32 ee:4;
-};
+} __packed;
 
 enum gsi_ch_cmd_opcode {
 	GSI_CH_ALLOCATE = 0x0,
@@ -230,24 +230,24 @@ enum gsi_evt_ch_cmd_opcode {
  *			 Maximum outstanding TREs. value. It is suggested to
  *			 configure this value to 2 * element size.
  */
-struct __packed gsi_gpi_channel_scratch {
+struct gsi_gpi_channel_scratch {
 	u64 resvd1;
 	u32 resvd2:16;
 	u32 max_outstanding_tre:16;
 	u32 resvd3:16;
 	u32 outstanding_threshold:16;
-};
+} __packed;
 
 /** gsi_channel_scratch - channel scratch SW config area */
-union __packed gsi_channel_scratch {
-	struct __packed gsi_gpi_channel_scratch gpi;
-	struct __packed {
+union gsi_channel_scratch {
+	struct gsi_gpi_channel_scratch gpi;
+	struct {
 		u32 word1;
 		u32 word2;
 		u32 word3;
 		u32 word4;
-	} data;
-};
+	} data __packed;
+} __packed;
 
 /* Read a value from the given offset into the I/O space defined in
  * the GSI context.
@@ -1553,8 +1553,8 @@ err_mutex_unlock:
 static void __gsi_write_channel_scratch(unsigned long chan_id)
 {
 	struct gsi_chan_ctx *ctx = &gsi_ctx->chan[chan_id];
-	union __packed gsi_channel_scratch scr = { };
-	struct __packed gsi_gpi_channel_scratch *gpi = &scr.gpi;
+	union gsi_channel_scratch scr = { };
+	struct gsi_gpi_channel_scratch *gpi = &scr.gpi;
 	u32 ee = gsi_ctx->ee;
 	u32 val;
 
