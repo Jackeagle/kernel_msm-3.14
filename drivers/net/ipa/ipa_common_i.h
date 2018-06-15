@@ -646,24 +646,16 @@ struct ipa_ep_cfg_ctrl {
 };
 
 #define ipa_debug(fmt, args...) \
-	do { \
-		pr_debug(fmt, ## args); \
-	} while (0)
+		pr_debug(fmt, ## args)
 
 #define ipa_debug_low(fmt, args...) \
-	do { \
-		pr_debug(fmt, ## args); \
-	} while (0)
+		pr_debug(fmt, ## args)
 
 #define ipa_err(fmt, args...) \
-	do { \
-		pr_err(fmt, ## args); \
-	} while (0)
+		pr_err(fmt, ## args)
 
 #define ipa_info(fmt, args...) \
-	do { \
-		pr_info(fmt, ## args); \
-	} while (0)
+		pr_info(fmt, ## args)
 
 #define ipa_bug() \
 	do {								\
