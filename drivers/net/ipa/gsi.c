@@ -1016,7 +1016,7 @@ static void gsi_write_ieps(void)
 	gsi_writel(4, GSI_IRAM_PTR_CH_EMPTY_OFFS);
 	gsi_writel(5, GSI_IRAM_PTR_EE_GENERIC_CMD_OFFS);
 	gsi_writel(6, GSI_IRAM_PTR_EVENT_GEN_COMP_OFFS);
-	gsi_writel(7, GSI_IRAM_PTR_INT_MOD_STOPED_OFFS);
+	gsi_writel(7, GSI_IRAM_PTR_INT_MOD_STOPPED_OFFS);
 	gsi_writel(8, GSI_IRAM_PTR_PERIPH_IF_TLV_IN_0_OFFS);
 	gsi_writel(9, GSI_IRAM_PTR_PERIPH_IF_TLV_IN_2_OFFS);
 	gsi_writel(10, GSI_IRAM_PTR_PERIPH_IF_TLV_IN_1_OFFS);

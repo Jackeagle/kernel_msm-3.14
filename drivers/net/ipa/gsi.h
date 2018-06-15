@@ -182,7 +182,7 @@ int gsi_deregister_device(void);
 /** gsi_firmware_size_ok - Verify that a firmware image having the
  * given base address and size is suitable
  *
- * @Return true if values are OK, false otherise
+ * @Return true if values are OK, false otherwise
  */
 bool gsi_firmware_size_ok(u32 base, u32 size);
 

@@ -947,7 +947,7 @@ static int rmnet_ipa_ap_suspend(struct device *dev)
 		goto unlock_and_bail;
 	}
 
-	/* Do not allow A7 to suspend in case there are oustanding packets */
+	/* Do not allow A7 to suspend in case there are outstanding packets */
 	if (atomic_read(&wwan_ptr->outstanding_pkts) != 0) {
 		ipa_debug("Outstanding packets, postponing AP suspend.\n");
 		ret = -EAGAIN;
