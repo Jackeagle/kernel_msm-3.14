@@ -933,7 +933,7 @@ static int rmnet_ipa_ap_suspend(struct device *dev)
 	int ret;
 
 	ipa_debug("Enter...\n");
-	if (netdev == NULL) {
+	if (!netdev) {
 		ipa_err("netdev is NULL.\n");
 		ret = 0;
 		goto bail;
@@ -941,7 +941,7 @@ static int rmnet_ipa_ap_suspend(struct device *dev)
 
 	netif_tx_lock_bh(netdev);
 	wwan_ptr = netdev_priv(netdev);
-	if (wwan_ptr == NULL) {
+	if (!wwan_ptr) {
 		ipa_err("wwan_ptr is NULL.\n");
 		ret = 0;
 		goto unlock_and_bail;

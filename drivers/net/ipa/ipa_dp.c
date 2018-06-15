@@ -812,7 +812,7 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 	atomic_set(&ep->avail_fifo_desc, count);
 
 	if (ep->status.status_en && IPA_CLIENT_IS_CONS(ep->client) &&
-	    ep->sys->status_stat == NULL) {
+	    !ep->sys->status_stat) {
 		ep->sys->status_stat =
 			kzalloc(sizeof(struct ipa_status_stats), GFP_KERNEL);
 		if (!ep->sys->status_stat) {
@@ -1121,7 +1121,7 @@ begin:
 		rx_pkt->sys = sys;
 
 		rx_pkt->data.skb = sys->get_skb(sys->rx_buff_sz, flag);
-		if (rx_pkt->data.skb == NULL) {
+		if (!rx_pkt->data.skb) {
 			pr_err_ratelimited("%s fail alloc skb sys=%p\n",
 					   __func__, sys);
 			goto fail_skb_alloc;
@@ -1230,7 +1230,7 @@ static void ipa_replenish_rx_cache(struct ipa_sys_context *sys)
 		rx_pkt->sys = sys;
 
 		rx_pkt->data.skb = sys->get_skb(sys->rx_buff_sz, flag);
-		if (rx_pkt->data.skb == NULL) {
+		if (!rx_pkt->data.skb) {
 			ipa_err("failed to alloc skb\n");
 			goto fail_skb_alloc;
 		}
@@ -1293,7 +1293,7 @@ static void ipa_replenish_rx_cache_recycle(struct ipa_sys_context *sys)
 			rx_pkt->sys = sys;
 
 			rx_pkt->data.skb = sys->get_skb(sys->rx_buff_sz, flag);
-			if (rx_pkt->data.skb == NULL) {
+			if (!rx_pkt->data.skb) {
 				ipa_err("failed to alloc skb\n");
 				kmem_cache_free(ipa_ctx->rx_pkt_wrapper_cache,
 						rx_pkt);
@@ -1559,7 +1559,7 @@ begin:
 		ipa_debug_low("LEN_REM %d\n", skb->len);
 
 		if (skb->len < pkt_status_sz) {
-			WARN_ON(sys->prev_skb != NULL);
+			WARN_ON(sys->prev_skb);
 			ipa_debug_low("status straddles buffer\n");
 			sys->prev_skb = skb_copy(skb, GFP_KERNEL);
 			sys->len_partial = skb->len;
@@ -1646,7 +1646,7 @@ begin:
 			if (skb->len == pkt_status_sz &&
 			    status.exception ==
 					IPAHAL_PKT_STATUS_EXCEPTION_NONE) {
-				WARN_ON(sys->prev_skb != NULL);
+				WARN_ON(sys->prev_skb);
 				ipa_debug_low("Ins header in next buffer\n");
 				sys->prev_skb = skb_copy(skb, GFP_KERNEL);
 				sys->len_partial = skb->len;

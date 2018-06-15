@@ -405,7 +405,7 @@ handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 code)
 		ipa_err("unexpected channel error code %u\n", code);
 		ipa_bug();
 	}
-	ipa_assert(ctx->props.chan_user_data != NULL);
+	ipa_assert(ctx->props.chan_user_data);
 }
 
 static void

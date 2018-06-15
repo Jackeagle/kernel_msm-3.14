@@ -97,7 +97,7 @@ static int ipa_handle_interrupt(int irq_num, bool isr_context)
 	int res;
 
 	interrupt_info = ipa_interrupt_to_cb[irq_num];
-	if (interrupt_info.handler == NULL) {
+	if (!interrupt_info.handler) {
 		ipa_err("A callback function wasn't set for interrupt num %d\n",
 			irq_num);
 		return -EINVAL;
@@ -497,7 +497,7 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 		/* simulate suspend IRQ */
 		irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
 		interrupt_info = ipa_interrupt_to_cb[irq_num];
-		if (interrupt_info.handler == NULL) {
+		if (!interrupt_info.handler) {
 			ipa_err("no CB function for IPA_TX_SUSPEND_IRQ!\n");
 			return;
 		}
