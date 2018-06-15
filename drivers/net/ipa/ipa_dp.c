@@ -756,7 +756,7 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 	if (!ep->sys) {
 		unsigned int wq_flags;
 
-		ep->sys = kzalloc(sizeof(struct ipa_sys_context), GFP_KERNEL);
+		ep->sys = kzalloc(sizeof(*ep->sys), GFP_KERNEL);
 		if (!ep->sys) {
 			ipa_err("failed to sys ctx for client %d\n",
 				sys_in->client);
@@ -839,8 +839,8 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 
 	if (ep->sys->repl_hdlr == ipa_fast_replenish_rx_cache) {
 		ep->sys->repl.capacity = ep->sys->rx_pool_sz + 1;
-		ep->sys->repl.cache = kzalloc(ep->sys->repl.capacity *
-				sizeof(void *), GFP_KERNEL);
+		ep->sys->repl.cache = kcalloc(ep->sys->repl.capacity,
+					      sizeof(void *), GFP_KERNEL);
 		if (!ep->sys->repl.cache) {
 			ipa_err("ep=%d fail to alloc repl cache\n", ipa_ep_idx);
 			ep->sys->repl_hdlr = ipa_replenish_rx_cache;
