@@ -494,6 +494,8 @@ u32 mdp_ctl_flush_mask_lm(int lm)
 	case 0:  return MDP5_CTL_FLUSH_LM0;
 	case 1:  return MDP5_CTL_FLUSH_LM1;
 	case 2:  return MDP5_CTL_FLUSH_LM2;
+	case 3:  return MDP5_CTL_FLUSH_LM3;
+	case 4:  return MDP5_CTL_FLUSH_LM4;
 	case 5:  return MDP5_CTL_FLUSH_LM5;
 	default: return 0;
 	}
@@ -711,6 +713,7 @@ struct mdp5_ctl_manager *mdp5_ctlm_init(struct drm_device *dev,
 	struct mdp5_ctl_manager *ctl_mgr;
 	const struct mdp5_cfg_hw *hw_cfg = mdp5_cfg_get_hw_config(cfg_hnd);
 	int rev = mdp5_cfg_get_hw_rev(cfg_hnd);
+	unsigned dsi_cnt = 0;
 	const struct mdp5_ctl_block *ctl_cfg = &hw_cfg->ctl;
 	unsigned long flags;
 	int c, ret;
@@ -760,7 +763,10 @@ struct mdp5_ctl_manager *mdp5_ctlm_init(struct drm_device *dev,
 	 * only write into CTL0's FLUSH register) to keep two DSI pipes in sync.
 	 * Single FLUSH is supported from hw rev v3.0.
 	 */
-	if (rev >= 3) {
+	for (c = 0; c < ARRAY_SIZE(hw_cfg->intf.connect); c++)
+		if (hw_cfg->intf.connect[c] == INTF_DSI)
+			dsi_cnt++;
+	if ((rev >= 3) && (dsi_cnt > 1)) {
 		ctl_mgr->single_flush_supported = true;
 		/* Reserve CTL0/1 for INTF1/2 */
 		ctl_mgr->ctls[0].status |= CTL_STAT_BOOKED;

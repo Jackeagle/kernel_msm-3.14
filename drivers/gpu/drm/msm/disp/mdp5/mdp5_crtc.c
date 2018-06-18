@@ -170,7 +170,7 @@ static void unref_cursor_worker(struct drm_flip_work *work, void *val)
 	struct msm_kms *kms = &mdp5_kms->base.base;
 
 	msm_gem_put_iova(val, kms->aspace);
-	drm_gem_object_unreference_unlocked(val);
+	drm_gem_object_put_unlocked(val);
 }
 
 static void mdp5_crtc_destroy(struct drm_crtc *crtc)
@@ -426,6 +426,7 @@ static void mdp5_crtc_atomic_disable(struct drm_crtc *crtc,
 	struct mdp5_crtc_state *mdp5_cstate = to_mdp5_crtc_state(crtc->state);
 	struct mdp5_kms *mdp5_kms = get_kms(crtc);
 	struct device *dev = &mdp5_kms->pdev->dev;
+	unsigned long flags;
 
 	DBG("%s", crtc->name);
 
@@ -440,6 +441,14 @@ static void mdp5_crtc_atomic_disable(struct drm_crtc *crtc,
 
 	mdp_irq_unregister(&mdp5_kms->base, &mdp5_crtc->err);
 	pm_runtime_put_sync(dev);
+
+	if (crtc->state->event && !crtc->state->active) {
+		WARN_ON(mdp5_crtc->event);
+		spin_lock_irqsave(&mdp5_kms->dev->event_lock, flags);
+		drm_crtc_send_vblank_event(crtc, crtc->state->event);
+		crtc->state->event = NULL;
+		spin_unlock_irqrestore(&mdp5_kms->dev->event_lock, flags);
+	}
 
 	mdp5_crtc->enabled = false;
 }
@@ -704,6 +713,7 @@ static void mdp5_crtc_atomic_flush(struct drm_crtc *crtc,
 
 	spin_lock_irqsave(&dev->event_lock, flags);
 	mdp5_crtc->event = crtc->state->event;
+	crtc->state->event = NULL;
 	spin_unlock_irqrestore(&dev->event_lock, flags);
 
 	/*
@@ -947,12 +957,17 @@ mdp5_crtc_atomic_print_state(struct drm_printer *p,
 	if (WARN_ON(!pipeline))
 		return;
 
+	if (mdp5_cstate->ctl)
+		drm_printf(p, "\tctl=%d\n", mdp5_ctl_get_ctl_id(mdp5_cstate->ctl));
+
 	drm_printf(p, "\thwmixer=%s\n", pipeline->mixer ?
 			pipeline->mixer->name : "(null)");
 
 	if (mdp5_kms->caps & MDP_CAP_SRC_SPLIT)
 		drm_printf(p, "\tright hwmixer=%s\n", pipeline->r_mixer ?
 			   pipeline->r_mixer->name : "(null)");
+
+	drm_printf(p, "\tcmd_mode=%d\n", mdp5_cstate->cmd_mode);
 }
 
 static void mdp5_crtc_reset(struct drm_crtc *crtc)
