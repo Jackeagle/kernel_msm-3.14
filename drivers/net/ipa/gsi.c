@@ -20,15 +20,15 @@
 #define GSI_CHAN_MAX	  31
 #define GSI_EVT_RING_MAX  23
 
-#define GSI_CMD_TIMEOUT		msecs_to_jiffies(5000)
+#define GSI_CMD_TIMEOUT		msecs_to_jiffies(5 * MSEC_PER_SEC)
 #define GSI_STOP_CMD_TIMEOUT	msecs_to_jiffies(20)
 
 #define GSI_MAX_CH_LOW_WEIGHT	15
 #define GSI_MHI_ER_START	10
 #define GSI_MHI_ER_END		16
 
-#define GSI_RESET_WA_MIN_SLEEP	1000
-#define GSI_RESET_WA_MAX_SLEEP	2000
+#define GSI_RESET_WA_MIN_SLEEP	1000	/* microseconds */
+#define GSI_RESET_WA_MAX_SLEEP	2000	/* microseconds */
 
 #define GSI_MAX_PREFETCH	0	/* 0 means 1 segment; 1 means 2 */
 

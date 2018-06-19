@@ -9,7 +9,7 @@
 #include "ipa_i.h"
 
 #define INTERRUPT_WORKQUEUE_NAME "ipa_interrupt_wq"
-#define DIS_SUSPEND_INTERRUPT_TIMEOUT 5
+#define DIS_SUSPEND_INTERRUPT_TIMEOUT 5		/* msec */
 #define IPA_IRQ_NUM_MAX 32
 
 struct ipa_interrupt_info {

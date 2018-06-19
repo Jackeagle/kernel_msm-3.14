@@ -28,8 +28,8 @@
 
 #define IPA_GSI_DMA_TASK_TIMEOUT	15	/* milliseconds */
 
-#define IPA_GSI_CHANNEL_STOP_SLEEP_MIN_USEC (1000)
-#define IPA_GSI_CHANNEL_STOP_SLEEP_MAX_USEC (2000)
+#define IPA_GSI_CHANNEL_STOP_SLEEP_MIN 1000	/* microseconds */
+#define IPA_GSI_CHANNEL_STOP_SLEEP_MAX 2000	/* microseconds */
 
 /* In IPAv3 only endpoints 0-3 can be configured to deaggregation */
 #define IPA_EP_SUPPORTS_DEAGGR(idx) ((idx) <= 3)
@@ -2051,8 +2051,8 @@ int ipa_stop_gsi_channel(u32 clnt_hdl)
 		}
 
 		/* sleep for short period to flush IPA */
-		usleep_range(IPA_GSI_CHANNEL_STOP_SLEEP_MIN_USEC,
-			     IPA_GSI_CHANNEL_STOP_SLEEP_MAX_USEC);
+		usleep_range(IPA_GSI_CHANNEL_STOP_SLEEP_MIN,
+			     IPA_GSI_CHANNEL_STOP_SLEEP_MAX);
 	}
 
 	ipa_err("Failed	 to stop GSI channel with retries\n");

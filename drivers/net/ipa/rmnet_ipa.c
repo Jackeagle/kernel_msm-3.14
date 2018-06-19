@@ -779,7 +779,7 @@ static void ipa_wwan_setup(struct net_device *dev)
 	dev->flags &= ~(IFF_BROADCAST | IFF_MULTICAST);
 	dev->needed_headroom = HEADROOM_FOR_QMAP;
 	dev->needed_tailroom = TAILROOM;
-	dev->watchdog_timeo = msecs_to_jiffies(10000);
+	dev->watchdog_timeo = msecs_to_jiffies(10 * MSEC_PER_SEC);
 }
 
 static void ipa_wake_tx_queue(struct work_struct *work)
