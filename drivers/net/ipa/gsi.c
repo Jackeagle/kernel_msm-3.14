@@ -84,7 +84,7 @@ enum gsi_chan_state {
 };
 
 struct gsi_ring_ctx {
-	spinlock_t slock;
+	spinlock_t slock;			/* XXX comment this */
 	struct ipa_mem_buffer mem;
 	u64 wp;
 	u64 rp;
@@ -101,7 +101,7 @@ struct gsi_chan_ctx {
 	struct gsi_ring_ctx ring;
 	void **user_data;
 	struct gsi_evt_ctx *evtr;
-	struct mutex mlock;
+	struct mutex mlock;			/* XXX comment this */
 	struct completion compl;
 	bool allocated;
 	atomic_t poll_mode;
@@ -114,7 +114,7 @@ struct gsi_evt_ctx {
 	enum gsi_evt_ring_state state;
 	u8 id;
 	struct gsi_ring_ctx ring;
-	struct mutex mlock;
+	struct mutex mlock;			/* XXX comment this */
 	struct completion compl;
 	struct gsi_chan_ctx *chan;
 	atomic_t chan_ref_cnt;
@@ -140,8 +140,8 @@ struct gsi_ctx {
 	struct gsi_chan_ctx chan[GSI_CHAN_MAX];
 	struct ch_debug_stats ch_dbg[GSI_CHAN_MAX];
 	struct gsi_evt_ctx evtr[GSI_EVT_RING_MAX];
-	struct mutex mlock;
-	spinlock_t slock;
+	struct mutex mlock;			/* XXX comment this */
+	spinlock_t slock;			/* XXX comment this */
 	unsigned long evt_bmap;
 	atomic_t num_chan;
 	atomic_t num_evt_ring;
@@ -1310,9 +1310,9 @@ err_unlock:
 err_free_dma:
 	ipahal_dma_free(&ctx->mem);
 err_clear_bit:
-	smp_mb__before_atomic();
+	smp_mb__before_atomic();		/* XXX comment this */
 	clear_bit(evt_id, &gsi_ctx->evt_bmap);
-	smp_mb__after_atomic();
+	smp_mb__after_atomic();			/* XXX comment this */
 
 	return ret;
 }

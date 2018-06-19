@@ -162,7 +162,7 @@ struct ipa_active_client {
 };
 
 struct ipa_active_clients_log_ctx {
-	spinlock_t lock;
+	spinlock_t lock;			/* XXX comment this */
 	char *log_buffer[IPA_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES];
 	int log_head;
 	int log_tail;
@@ -325,7 +325,7 @@ struct ipa_sys_context {
 	struct ipa_ep_context *ep;
 	struct list_head head_desc_list;
 	struct list_head rcycl_list;
-	spinlock_t spinlock;
+	spinlock_t spinlock;			/* XXX comment this */
 	struct workqueue_struct *wq;
 	struct workqueue_struct *repl_wq;
 	struct ipa_status_stats *status_stat;
@@ -454,12 +454,12 @@ struct ipa_stats {
 };
 
 struct ipa_active_clients {
-	struct mutex mutex;
+	struct mutex mutex;			/* XXX comment this */
 	atomic_t cnt;
 };
 
 struct ipa_wakelock_ref_cnt {
-	spinlock_t spinlock;
+	spinlock_t spinlock;			/* XXX comment this */
 	int cnt;
 };
 
@@ -694,7 +694,7 @@ struct ipa_uc_ctx {
  */
 struct ipa_transport_pm {
 	atomic_t dec_clients;
-	struct mutex transport_pm_mutex;
+	struct mutex transport_pm_mutex;	/* XXX comment this */
 };
 
 struct ipa_smp2p_info {
@@ -774,7 +774,7 @@ struct ipa_context {
 	u32 ipa_wrapper_size;
 	struct kmem_cache *tx_pkt_wrapper_cache;
 	struct kmem_cache *rx_pkt_wrapper_cache;
-	struct mutex lock;
+	struct mutex lock;			/* XXX comment this */
 	u16 smem_sz;
 	u16 smem_restricted_bytes;
 	u16 smem_reqd_sz;

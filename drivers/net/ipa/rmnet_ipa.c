@@ -77,7 +77,7 @@ struct ipa_wwan_private {
 	int outstanding_high_ctl;
 	int outstanding_high;
 	int outstanding_low;
-	spinlock_t lock;
+	spinlock_t lock;			/* XXX comment this */
 	bool device_active;
 	struct napi_struct napi;
 };
@@ -103,8 +103,8 @@ struct rmnet_ipa_context {
 	bool a7_ul_flt_set;
 	u32 apps_to_ipa_hdl;
 	u32 ipa_to_apps_hdl;
-	struct mutex pipe_handle_guard;
-	struct mutex add_mux_channel_lock;
+	struct mutex pipe_handle_guard;		/* XXX comment this */
+	struct mutex add_mux_channel_lock;	/* XXX comment this */
 };
 
 static bool initialized;	/* Avoid duplicate initialization */
