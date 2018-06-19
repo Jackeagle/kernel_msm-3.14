@@ -1,0 +1,134 @@
+Qualcomm IPA (IP Accelerator) Driver
+
+This binding describes the Qualcomm IPA.  The IPA is capable of offloading
+certain network processing tasks (e.g. filtering, routing, and NAT) from
+the main processor.  The IPA currently serves only as a network interface,
+providing access to an LTE network available via a modem.
+
+See also:
+  bindings/interrupt-controller/interrupts.txt
+  bindings/interconnect/interconnect.txt
+  bindings/soc/qcom/qcom,smp2p.txt
+  bindings/reserved-memory/reserved-memory.txt
+
+- compatible:
+	Usage: required
+	Value type: <stringlist>
+	Definition: Must be one of:
+			"qcom,ipa-sdm845-modem_init"
+			"qcom,ipa-sdm845-tz_init"
+
+-reg:
+	Usage: required
+	Value type: <prop-encoded-array>
+	Definition: Specifies the physical address spaces of the IPA and GSI.
+
+-reg-names:
+	Usage: required
+	Value type: <stringlist>
+	Definition: The names of the address space ranges defined by the "reg"
+		    property.  Must be "ipa" and "gsi".
+
+- interrupts-extended:
+	Usage: required
+	Value type: <prop-encoded-array>
+	Definition: Specifies the IRQs used by the IPA.  Four cells are
+		    required, specifying: the IPA IRQ; the GSI IRQ; the
+		    clock query interrupt from the modem; and the "ready
+		    for stage 2 initialization" interrupt from the modem.
+		    The first two are hardware IRQs; the third and fourth
+		    are SMP2P input interrupts.
+
+- interrupt-names:
+	Usage: required
+	Value type: <stringlist>
+	Definition: The names of the interrupts defined by the
+		    "interrupts-extended" property.  Must be "ipa", "gsi",
+		    "ipa-clock-query", and "ipa-post-init".
+
+- interconnects:
+	Usage: required
+	Value type: <prop-encoded-array>
+	Definition: Specifies the interconnects used by the IPA.  Three
+		    cells are required, specifying: the path from the IPA
+		    to memory, from IPA to internal (SoC resident) memory,
+		    and between the AP subsystem and IPA for register access.
+
+- interconnect-names:
+	Value type: <stringlist>
+	Definition: The names of the interconnects defined by the
+		    "interconnects" property.  Must be "memory", "imem",
+		    and "config".
+
+- qcom,smem-states
+	Usage: required
+	Value type: <prop-encoded-array>
+	Definition: The state bits used for SMP2P output.  Two cells must
+		    be specified.  The first indicates whether the value
+		    in the second bit is valid (1 means valid).  The second,
+		    if valid, defines whether the IPA clock is enabled
+		    (1 means enabled).
+
+- qcom,smem-state-names
+	Usage: required
+	Value type: <stringlist>
+	Definition: The names of the state bits used for SMP2P output.
+		    These must be "ipa-clock-enabled-valid" and
+		    "ipa-clock-enabled".
+
+- memory-region
+	Usage: required for "qcom,ipa-sdm845-tz_init".
+	Value type: <prop-encoded-array>
+	Definition: A phandle for a reserved memory area that holds the
+		    firmware passed to Trust Zone for authentication.
+
+= EXAMPLE
+
+The following example represents the IPA present in the SDM845 SoC.  It
+shows portions of the "modem-smp2p" node to indicate its relationship
+with the interrupts and SMEM states used by the IPA.
+
+	modem-smp2p {
+		compatible = "qcom,smp2p";
+		. . .
+		ipa_smp2p_out: ipa-ap-to-modem {
+			qcom,entry-name = "ipa";
+			#qcom,smem-state-cells = <1>;
+		};
+
+		ipa_smp2p_in: ipa-modem-to-ap {
+			qcom,entry-name = "ipa";
+			interrupt-controller;
+			#interrupt-cells = <2>;
+		};
+	};
+
+	ipa@1e00000 {
+		compatible = "qcom,ipa-sdm845-modem_init";
+
+		reg = <0x1e40000 0x34000>,
+		      <0x1e04000 0x2c000>;
+		reg-names = "ipa",
+			    "gsi";
+
+		interrupts-extended = <&intc 0 311 IRQ_TYPE_LEVEL_HIGH>,
+				      <&intc 0 432 IRQ_TYPE_LEVEL_HIGH>,
+				      <&ipa_smp2p_in 0 IRQ_TYPE_EDGE_RISING>,
+				      <&ipa_smp2p_in 1 IRQ_TYPE_EDGE_RISING>;
+		interrupt-names = "ipa",
+				  "gsi",
+				  "ipa-clock-query",
+				  "ipa-post-init";
+
+		interconnects = <&qnoc MASTER_IPA &qnoc SLAVE_EBI1>,
+			        <&qnoc MASTER_IPA &qnoc SLAVE_IMEM>,
+			        <&qnoc MASTER_APPSS_PROC &qnoc SLAVE_IPA_CFG>;
+		interconnect-names = "memory",
+				     "imem",
+				     "config";
+
+		qcom,smem-states = <&ipa_smp2p_out 0>,
+				   <&ipa_smp2p_out 1>;
+		qcom,smem-state-names = "ipa-clock-enabled-valid",
+					"ipa-clock-enabled";
+	};
