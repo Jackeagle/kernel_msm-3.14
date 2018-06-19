@@ -6,9 +6,7 @@ the IPA.  Other than the compatible string there are no properties
 associated with this device.
 
 - compatible:
-	Usage: required
-	Value type: <string>
-	Definition: must be "qcom,rmnet-ipa"`
+	Must be "qcom,rmnet-ipa".
 
 = EXAMPLE
 

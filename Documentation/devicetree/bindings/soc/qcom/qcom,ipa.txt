@@ -5,82 +5,81 @@ certain network processing tasks (e.g. filtering, routing, and NAT) from
 the main processor.  The IPA currently serves only as a network interface,
 providing access to an LTE network available via a modem.
 
+The IPA sits between multiple independent "execution environments,"
+including the AP subsystem (APSS) and the modem.  The IPA presents
+a Generic Software Interface (GSI) to each execution environment.
+The GSI is an integral part of the IPA, but it is logically isolated
+and has a distinct interrupt and a separately-defined address space.
+
+    ----------   -------------   ---------
+    |        |   |G|       |G|   |       |
+    |  APSS  |===|S|  IPA  |S|===| Modem |
+    |        |   |I|       |I|   |       |
+    ----------   -------------   ---------
+
 See also:
   bindings/interrupt-controller/interrupts.txt
   bindings/interconnect/interconnect.txt
   bindings/soc/qcom/qcom,smp2p.txt
   bindings/reserved-memory/reserved-memory.txt
+  bindings/clock/clock-bindings.txt
+
+All properties defined below are required.
 
 - compatible:
-	Usage: required
-	Value type: <stringlist>
-	Definition: Must be one of:
-			"qcom,ipa-sdm845-modem_init"
-			"qcom,ipa-sdm845-tz_init"
+	Must be one of the following compatible strings:
+		"qcom,ipa-sdm845-modem_init"
+		"qcom,ipa-sdm845-tz_init"
 
 -reg:
-	Usage: required
-	Value type: <prop-encoded-array>
-	Definition: Specifies the physical address spaces of the IPA and GSI.
+	Resources specyfing the physical address spaces of the IPA and GSI.
 
 -reg-names:
-	Usage: required
-	Value type: <stringlist>
-	Definition: The names of the address space ranges defined by the "reg"
-		    property.  Must be "ipa" and "gsi".
+	The names of the address space ranges defined by the "reg" property.
+	Must be "ipa" and "gsi".
 
 - interrupts-extended:
-	Usage: required
-	Value type: <prop-encoded-array>
-	Definition: Specifies the IRQs used by the IPA.  Four cells are
-		    required, specifying: the IPA IRQ; the GSI IRQ; the
-		    clock query interrupt from the modem; and the "ready
-		    for stage 2 initialization" interrupt from the modem.
-		    The first two are hardware IRQs; the third and fourth
-		    are SMP2P input interrupts.
+	Specifies the IRQs used by the IPA.  Four cells are required,
+	specifying: the IPA IRQ; the GSI IRQ; the clock query interrupt
+	from the modem; and the "ready for stage 2 initialization"
+	interrupt from the modem.  The first two are hardware IRQs; the
+	third and fourth are SMP2P input interrupts.
 
 - interrupt-names:
-	Usage: required
-	Value type: <stringlist>
-	Definition: The names of the interrupts defined by the
-		    "interrupts-extended" property.  Must be "ipa", "gsi",
-		    "ipa-clock-query", and "ipa-post-init".
+	The names of the interrupts defined by the "interrupts-extended"
+	property.  Must be "ipa", "gsi", "ipa-clock-query", and
+	"ipa-post-init".
+
+- clocks:
+	Resource that defines the IPA core clock.
+
+- clock-names:
+	The name used for the IPA core clock.  Must be "core".
 
 - interconnects:
-	Usage: required
-	Value type: <prop-encoded-array>
-	Definition: Specifies the interconnects used by the IPA.  Three
-		    cells are required, specifying: the path from the IPA
-		    to memory, from IPA to internal (SoC resident) memory,
-		    and between the AP subsystem and IPA for register access.
+	Specifies the interconnects used by the IPA.  Three cells are
+	required, specifying:  the path from the IPA to memory; from
+	IPA to internal (SoC resident) memory; and between the AP
+	subsystem and IPA for register access.
 
 - interconnect-names:
-	Value type: <stringlist>
-	Definition: The names of the interconnects defined by the
-		    "interconnects" property.  Must be "memory", "imem",
-		    and "config".
+	The names of the interconnects defined by the "interconnects"
+	property.  Must be "memory", "imem", and "config".
 
 - qcom,smem-states
-	Usage: required
-	Value type: <prop-encoded-array>
-	Definition: The state bits used for SMP2P output.  Two cells must
-		    be specified.  The first indicates whether the value
-		    in the second bit is valid (1 means valid).  The second,
-		    if valid, defines whether the IPA clock is enabled
-		    (1 means enabled).
+	The state bits used for SMP2P output.  Two cells must be specified.
+	The first indicates whether the value in the second bit is valid
+	(1 means valid).  The second, if valid, defines whether the IPA
+	clock is enabled (1 means enabled).
 
 - qcom,smem-state-names
-	Usage: required
-	Value type: <stringlist>
-	Definition: The names of the state bits used for SMP2P output.
-		    These must be "ipa-clock-enabled-valid" and
-		    "ipa-clock-enabled".
+	The names of the state bits used for SMP2P output.  These must be
+	"ipa-clock-enabled-valid" and "ipa-clock-enabled".
 
 - memory-region
-	Usage: required for "qcom,ipa-sdm845-tz_init".
-	Value type: <prop-encoded-array>
-	Definition: A phandle for a reserved memory area that holds the
-		    firmware passed to Trust Zone for authentication.
+	A phandle for a reserved memory area that holds the firmware passed
+	to Trust Zone for authentication.  (Note, this is required
+	only for "qcom,ipa-sdm845-tz_init".)
 
 = EXAMPLE
 
@@ -119,6 +118,9 @@ with the interrupts and SMEM states used by the IPA.
 				  "gsi",
 				  "ipa-clock-query",
 				  "ipa-post-init";
+
+		clocks = <&rpmhcc RPMH_IPA_CLK>;
+		clock-names = "core";
 
 		interconnects = <&qnoc MASTER_IPA &qnoc SLAVE_EBI1>,
 			        <&qnoc MASTER_IPA &qnoc SLAVE_IMEM>,
