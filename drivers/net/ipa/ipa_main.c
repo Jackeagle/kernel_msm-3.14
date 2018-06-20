@@ -782,15 +782,14 @@ static struct ipa_active_client *active_client_find(const char *id)
 
 /* XXX Used GFP_ATOMIC for now; can probably be changed to use GFP_KERNEL */
 /* log->lock is assumed held by the caller */
-static struct ipa_active_client *
-active_client_get(struct ipa_active_client_logging_info *id)
+static struct ipa_active_client *active_client_get(const char *id_string)
 {
 	struct ipa_active_clients_log_ctx *log;
 	struct ipa_active_client *entry;
 
 	log = &ipa_ctx->ipa_active_clients_logging;
 
-	entry = active_client_find(id->id_string);
+	entry = active_client_find(id_string);
 	if (entry)
 		return entry;
 
@@ -798,7 +797,7 @@ active_client_get(struct ipa_active_client_logging_info *id)
 	if (!entry)
 		return NULL;
 
-	entry->id_string = id->id_string;
+	entry->id_string = id_string;
 	entry->count = 0;
 	list_add_tail(&entry->links, &log->active);
 
@@ -827,7 +826,7 @@ ipa_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 
 	spin_lock_irqsave(&log->lock, flags);
 
-	entry = active_client_get(id);
+	entry = active_client_get(id->id_string);
 	if (!entry)
 		goto out_unlock;
 
