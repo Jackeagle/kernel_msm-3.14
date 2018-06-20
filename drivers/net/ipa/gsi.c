@@ -1320,9 +1320,9 @@ err_unlock:
 err_free_dma:
 	ipahal_dma_free(&evtr->mem);
 err_clear_bit:
-	smp_mb__before_atomic();		/* XXX comment this */
+	/* clear_bit() is atomic but has but does not have barrier semantics */
 	clear_bit(evt_id, &gsi_ctx->evt_bmap);
-	smp_mb__after_atomic();			/* XXX comment this */
+	smp_mb__after_atomic();	/* Make cleared bit visible elsewhere */
 
 	return ret;
 }
