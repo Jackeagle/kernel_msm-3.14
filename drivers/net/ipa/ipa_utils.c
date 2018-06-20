@@ -1221,67 +1221,41 @@ int ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 
 	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
 		       true);
+
 	result = ipa_cfg_ep_hdr(clnt_hdl, &ipa_ep_cfg->hdr);
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			  true);
 	if (result)
 		goto out;
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-		       true);
 	result = ipa_cfg_ep_hdr_ext(clnt_hdl, &ipa_ep_cfg->hdr_ext);
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			  true);
 	if (result)
 		goto out;
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-		       true);
 	result = ipa_cfg_ep_aggr(clnt_hdl, &ipa_ep_cfg->aggr);
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			  true);
 	if (result)
 		goto out;
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-		       true);
 	result = ipa_cfg_ep_cfg(clnt_hdl, &ipa_ep_cfg->cfg);
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			  true);
 	if (result)
 		goto out;
 
 	if (IPA_CLIENT_IS_PROD(ipa_ctx->ep[clnt_hdl].client)) {
-		ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			       true);
 		result = ipa_cfg_ep_mode(clnt_hdl, &ipa_ep_cfg->mode);
-		ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-				  true);
 		if (result)
 			goto out;
 
-		ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-		               true);
 		result = ipa_cfg_ep_seq(clnt_hdl);
-		ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			          true);
 		if (result)
 			goto out;
 
-		ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			       true);
 		result = ipa_cfg_ep_deaggr(clnt_hdl, &ipa_ep_cfg->deaggr);
-		ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-				  true);
 	} else {
-		ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			       true);
 		result = ipa_cfg_ep_metadata_mask(clnt_hdl,
 						  &ipa_ep_cfg->metadata_mask);
-		ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-				  true);
 	}
 out:
+	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			  true);
+
 	return result;
 }
 
