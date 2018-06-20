@@ -1219,9 +1219,6 @@ int ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 	if (!client_handle_valid(clnt_hdl))
 		return -EINVAL;
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-		       true);
-
 	result = ipa_cfg_ep_hdr(clnt_hdl, &ipa_ep_cfg->hdr);
 	if (result)
 		goto out;
@@ -1253,9 +1250,6 @@ int ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 						  &ipa_ep_cfg->metadata_mask);
 	}
 out:
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			  true);
-
 	return result;
 }
 
@@ -1280,13 +1274,7 @@ int ipa_cfg_ep_status(u32 clnt_hdl,
 	/* copy over EP cfg */
 	ipa_ctx->ep[clnt_hdl].status = *ep_status;
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-		       true);
-
 	ipahal_write_reg_n_fields(IPA_ENDP_STATUS_n, clnt_hdl, ep_status);
-
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			  true);
 
 	return 0;
 }
