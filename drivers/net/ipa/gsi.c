@@ -499,28 +499,28 @@ static void gsi_handle_glob_ee(void)
 	gsi_writel(val, GSI_EE_N_CNTXT_GLOB_IRQ_CLR_OFFS(ee));
 }
 
-static void ring_wp_local_inc(struct gsi_ring_ctx *ctx)
+static void ring_wp_local_inc(struct gsi_ring_ctx *ring)
 {
-	ctx->wp_local += ctx->elem_sz;
-	if (ctx->wp_local == ctx->end)
-		ctx->wp_local = ctx->mem.phys_base;
+	ring->wp_local += ring->elem_sz;
+	if (ring->wp_local == ring->end)
+		ring->wp_local = ring->mem.phys_base;
 }
 
-static void ring_rp_local_inc(struct gsi_ring_ctx *ctx)
+static void ring_rp_local_inc(struct gsi_ring_ctx *ring)
 {
-	ctx->rp_local += ctx->elem_sz;
-	if (ctx->rp_local == ctx->end)
-		ctx->rp_local = ctx->mem.phys_base;
+	ring->rp_local += ring->elem_sz;
+	if (ring->rp_local == ring->end)
+		ring->rp_local = ring->mem.phys_base;
 }
 
-static u16 ring_rp_local_index(struct gsi_ring_ctx *ctx)
+static u16 ring_rp_local_index(struct gsi_ring_ctx *ring)
 {
-	return (u16)(ctx->rp_local - ctx->mem.phys_base) / ctx->elem_sz;
+	return (u16)(ring->rp_local - ring->mem.phys_base) / ring->elem_sz;
 }
 
-static u16 ring_wp_local_index(struct gsi_ring_ctx *ctx)
+static u16 ring_wp_local_index(struct gsi_ring_ctx *ring)
 {
-	return (u16)(ctx->wp_local - ctx->mem.phys_base) / ctx->elem_sz;
+	return (u16)(ring->wp_local - ring->mem.phys_base) / ring->elem_sz;
 }
 
 static void chan_xfer_cb(struct gsi_chan_ctx *chan, u8 evt_id, u16 count)
@@ -1162,17 +1162,17 @@ gsi_program_evt_ring_ctx(struct ipa_mem_buffer *mem, u8 evt_id, u16 int_modt)
 	gsi_writel(0, GSI_EE_N_EV_CH_K_CNTXT_13_OFFS(evt_id, ee));
 }
 
-static void gsi_init_ring(struct gsi_ring_ctx *ctx, struct ipa_mem_buffer *mem)
+static void gsi_init_ring(struct gsi_ring_ctx *ring, struct ipa_mem_buffer *mem)
 {
-	spin_lock_init(&ctx->slock);
-	ctx->mem = *mem;
-	ctx->wp = mem->phys_base;
-	ctx->rp = mem->phys_base;
-	ctx->wp_local = mem->phys_base;
-	ctx->rp_local = mem->phys_base;
-	ctx->elem_sz = GSI_EVT_RING_ELEMENT_SIZE;
-	ctx->max_num_elem = mem->size / ctx->elem_sz - 1;
-	ctx->end = mem->phys_base + (ctx->max_num_elem + 1) * ctx->elem_sz;
+	spin_lock_init(&ring->slock);
+	ring->mem = *mem;
+	ring->wp = mem->phys_base;
+	ring->rp = mem->phys_base;
+	ring->wp_local = mem->phys_base;
+	ring->rp_local = mem->phys_base;
+	ring->elem_sz = GSI_EVT_RING_ELEMENT_SIZE;
+	ring->max_num_elem = mem->size / ring->elem_sz - 1;
+	ring->end = mem->phys_base + (ring->max_num_elem + 1) * ring->elem_sz;
 }
 
 static void gsi_prime_evt_ring(struct gsi_evt_ctx *evtr)
