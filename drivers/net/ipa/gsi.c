@@ -359,14 +359,14 @@ static void gsi_handle_evt_ctrl(void)
 
 	while (evt_mask) {
 		int i = __ffs(evt_mask);
-		struct gsi_evt_ctx *ctx = &gsi_ctx->evtr[i];
+		struct gsi_evt_ctx *evtr = &gsi_ctx->evtr[i];
 		u32 val;
 
 		val = gsi_readl(GSI_EE_N_EV_CH_K_CNTXT_0_OFFS(i, ee));
-		ctx->state = field_val(val, EV_CHSTATE_BMSK);
-		ipa_debug("evt %d state updated to %u\n", i, ctx->state);
+		evtr->state = field_val(val, EV_CHSTATE_BMSK);
+		ipa_debug("evt %d state updated to %u\n", i, evtr->state);
 
-		complete(&ctx->compl);
+		complete(&evtr->compl);
 
 		evt_mask ^= BIT(i);
 	}
@@ -421,7 +421,7 @@ handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 code)
 static void
 handle_glob_evt_err(u32 err_ee, u32 evt_id, u32 code)
 {
-	struct gsi_evt_ctx *ctx = &gsi_ctx->evtr[evt_id];
+	struct gsi_evt_ctx *evtr = &gsi_ctx->evtr[evt_id];
 	u32 ee = gsi_ctx->ee;
 
 	ipa_bug_on(err_ee != ee && code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
@@ -437,7 +437,7 @@ handle_glob_evt_err(u32 err_ee, u32 evt_id, u32 code)
 		break;
 	case GSI_OUT_OF_RESOURCES_ERR:
 		ipa_err("got OUT_OF_RESOURCES_ERR\n");
-		complete(&ctx->compl);
+		complete(&evtr->compl);
 		break;
 	case GSI_UNSUPPORTED_INTER_EE_OP_ERR:
 		ipa_err("got UNSUPPORTED_INTER_EE_OP_ERR\n");
@@ -566,23 +566,23 @@ static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt, bool callback)
 	return evt->len;
 }
 
-static u16 gsi_process_evt_re(struct gsi_evt_ctx *ctx, bool callback)
+static u16 gsi_process_evt_re(struct gsi_evt_ctx *evtr, bool callback)
 {
 	struct gsi_xfer_compl_evt *evt;
-	u16 idx = ring_rp_local_index(&ctx->ring);
+	u16 idx = ring_rp_local_index(&evtr->ring);
 	u16 size;
 
-	evt = ctx->ring.mem.base + idx * ctx->ring.elem_sz;
+	evt = evtr->ring.mem.base + idx * evtr->ring.elem_sz;
 	size = gsi_process_chan(evt, callback);
-	ring_rp_local_inc(&ctx->ring);
+	ring_rp_local_inc(&evtr->ring);
 
 	/* recycle this element */
-	ring_wp_local_inc(&ctx->ring);
+	ring_wp_local_inc(&evtr->ring);
 
 	return size;
 }
 
-static void gsi_ring_evt_doorbell(struct gsi_evt_ctx *ctx)
+static void gsi_ring_evt_doorbell(struct gsi_evt_ctx *evtr)
 {
 	u32 val;
 
@@ -590,11 +590,13 @@ static void gsi_ring_evt_doorbell(struct gsi_evt_ctx *ctx)
 	 * high-order 32 bits of the event ring doorbell register,
 	 * respectively.  LSB (doorbell 0) must be written last.
 	 */
-	val = ctx->ring.wp_local >> 32;
-	gsi_writel(val, GSI_EE_N_EV_CH_K_DOORBELL_1_OFFS(ctx->id, gsi_ctx->ee));
+	val = evtr->ring.wp_local >> 32;
+	gsi_writel(val, GSI_EE_N_EV_CH_K_DOORBELL_1_OFFS(evtr->id,
+							 gsi_ctx->ee));
 
-	val = ctx->ring.wp_local & GENMASK(31, 0);
-	gsi_writel(val, GSI_EE_N_EV_CH_K_DOORBELL_0_OFFS(ctx->id, gsi_ctx->ee));
+	val = evtr->ring.wp_local & GENMASK(31, 0);
+	gsi_writel(val, GSI_EE_N_EV_CH_K_DOORBELL_0_OFFS(evtr->id,
+							 gsi_ctx->ee));
 }
 
 static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *chan)
@@ -624,33 +626,33 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *chan)
 
 static void handle_event(int evt_id)
 {
-	struct gsi_evt_ctx *ctx = &gsi_ctx->evtr[evt_id];
+	struct gsi_evt_ctx *evtr = &gsi_ctx->evtr[evt_id];
 	u32 ee = gsi_ctx->ee;
 	unsigned long flags;
 	bool check_again;
 
-	spin_lock_irqsave(&ctx->ring.slock, flags);
+	spin_lock_irqsave(&evtr->ring.slock, flags);
 
 	do {
 		u32 val;
 
 		val = gsi_readl(GSI_EE_N_EV_CH_K_CNTXT_4_OFFS(evt_id, ee));
-		ctx->ring.rp = (ctx->ring.rp & GENMASK_ULL(63, 32)) | val;
+		evtr->ring.rp = (evtr->ring.rp & GENMASK_ULL(63, 32)) | val;
 
 		check_again = false;
-		while (ctx->ring.rp_local != ctx->ring.rp) {
-			if (atomic_read(&ctx->chan->poll_mode)) {
+		while (evtr->ring.rp_local != evtr->ring.rp) {
+			if (atomic_read(&evtr->chan->poll_mode)) {
 				check_again = false;
 				break;
 			}
 			check_again = true;
-			(void)gsi_process_evt_re(ctx, true);
+			(void)gsi_process_evt_re(evtr, true);
 		}
 
-		gsi_ring_evt_doorbell(ctx);
+		gsi_ring_evt_doorbell(evtr);
 	} while (check_again);
 
-	spin_unlock_irqrestore(&ctx->ring.slock, flags);
+	spin_unlock_irqrestore(&evtr->ring.slock, flags);
 }
 
 static void gsi_handle_ieob(void)
@@ -1173,16 +1175,16 @@ static void gsi_init_ring(struct gsi_ring_ctx *ctx, struct ipa_mem_buffer *mem)
 	ctx->end = mem->phys_base + (ctx->max_num_elem + 1) * ctx->elem_sz;
 }
 
-static void gsi_prime_evt_ring(struct gsi_evt_ctx *ctx)
+static void gsi_prime_evt_ring(struct gsi_evt_ctx *evtr)
 {
 	unsigned long flags;
 
-	spin_lock_irqsave(&ctx->ring.slock, flags);
-	memset(ctx->ring.mem.base, 0, ctx->ring.mem.size);
-	ctx->ring.wp_local = ctx->ring.mem.phys_base +
-		ctx->ring.max_num_elem * ctx->ring.elem_sz;
-	gsi_ring_evt_doorbell(ctx);
-	spin_unlock_irqrestore(&ctx->ring.slock, flags);
+	spin_lock_irqsave(&evtr->ring.slock, flags);
+	memset(evtr->ring.mem.base, 0, evtr->ring.mem.size);
+	evtr->ring.wp_local = evtr->ring.mem.phys_base +
+		evtr->ring.max_num_elem * evtr->ring.elem_sz;
+	gsi_ring_evt_doorbell(evtr);
+	spin_unlock_irqrestore(&evtr->ring.slock, flags);
 }
 
 /* Issue a GSI command by writing a value to a register, then wait
@@ -1239,7 +1241,7 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 	unsigned long required_alignment = roundup_pow_of_two(size);
 	u32 ee = gsi_ctx->ee;
 	unsigned long evt_id;
-	struct gsi_evt_ctx *ctx;
+	struct gsi_evt_ctx *evtr;
 	unsigned long flags;
 	u32 completed;
 	u32 val;
@@ -1260,28 +1262,28 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 
 	ipa_debug("Using %lu as virt evt id\n", evt_id);
 
-	ctx = &gsi_ctx->evtr[evt_id];
-	memset(ctx, 0, sizeof(*ctx));
-	ctx->id = evt_id;
+	evtr = &gsi_ctx->evtr[evt_id];
+	memset(evtr, 0, sizeof(*evtr));
+	evtr->id = evt_id;
 
-	if (ipahal_dma_alloc(&ctx->mem, size, GFP_KERNEL)) {
+	if (ipahal_dma_alloc(&evtr->mem, size, GFP_KERNEL)) {
 		ipa_err("fail to dma alloc %u bytes\n", size);
 		ret = -ENOMEM;
 		goto err_clear_bit;
 	}
 
 	/* Verify the result meets our alignment requirements */
-	if (ctx->mem.phys_base % required_alignment) {
+	if (evtr->mem.phys_base % required_alignment) {
 		ipa_err("ring base %pad not aligned to 0x%lx\n",
-			&ctx->mem.phys_base, required_alignment);
+			&evtr->mem.phys_base, required_alignment);
 		ret = -EINVAL;
 		goto err_free_dma;
 	}
 
-	ctx->int_modt = int_modt;
-	mutex_init(&ctx->mlock);
-	init_completion(&ctx->compl);
-	atomic_set(&ctx->chan_ref_cnt, 0);
+	evtr->int_modt = int_modt;
+	mutex_init(&evtr->mlock);
+	init_completion(&evtr->compl);
+	atomic_set(&evtr->chan_ref_cnt, 0);
 
 	mutex_lock(&gsi_ctx->mlock);
 
@@ -1291,18 +1293,18 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 		goto err_unlock;
 	}
 
-	if (ctx->state != GSI_EVT_RING_STATE_ALLOCATED) {
+	if (evtr->state != GSI_EVT_RING_STATE_ALLOCATED) {
 		ipa_err("evt_id %lu allocation failed state %u\n",
-			evt_id, ctx->state);
+			evt_id, evtr->state);
 		ret = -ENOMEM;
 		goto err_unlock;
 	}
 
-	gsi_program_evt_ring_ctx(&ctx->mem, evt_id, int_modt);
-	gsi_init_ring(&ctx->ring, &ctx->mem);
+	gsi_program_evt_ring_ctx(&evtr->mem, evt_id, int_modt);
+	gsi_init_ring(&evtr->ring, &evtr->mem);
 
 	atomic_inc(&gsi_ctx->num_evt_ring);
-	gsi_prime_evt_ring(ctx);
+	gsi_prime_evt_ring(evtr);
 	mutex_unlock(&gsi_ctx->mlock);
 
 	spin_lock_irqsave(&gsi_ctx->slock, flags);
@@ -1310,7 +1312,7 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 	gsi_writel(val, GSI_EE_N_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(ee));
 
 	/* enable ieob interrupts */
-	gsi_irq_control_event(gsi_ctx->ee, ctx->id, true);
+	gsi_irq_control_event(gsi_ctx->ee, evtr->id, true);
 	spin_unlock_irqrestore(&gsi_ctx->slock, flags);
 
 	return evt_id;
@@ -1318,7 +1320,7 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 err_unlock:
 	mutex_unlock(&gsi_ctx->mlock);
 err_free_dma:
-	ipahal_dma_free(&ctx->mem);
+	ipahal_dma_free(&evtr->mem);
 err_clear_bit:
 	smp_mb__before_atomic();		/* XXX comment this */
 	clear_bit(evt_id, &gsi_ctx->evt_bmap);
@@ -1337,60 +1339,60 @@ static void __gsi_zero_evt_ring_scratch(unsigned long evt_id)
 
 void gsi_dealloc_evt_ring(unsigned long evt_id)
 {
-	struct gsi_evt_ctx *ctx;
+	struct gsi_evt_ctx *evtr;
 	u32 completed;
 
 	ipa_bug_on(evt_id >= gsi_ctx->max_ev);
 
-	ctx = &gsi_ctx->evtr[evt_id];
+	evtr = &gsi_ctx->evtr[evt_id];
 
-	ipa_bug_on(atomic_read(&ctx->chan_ref_cnt));
+	ipa_bug_on(atomic_read(&evtr->chan_ref_cnt));
 
 	/* TODO: add check for ERROR state */
-	ipa_bug_on(ctx->state != GSI_EVT_RING_STATE_ALLOCATED);
+	ipa_bug_on(evtr->state != GSI_EVT_RING_STATE_ALLOCATED);
 
 	mutex_lock(&gsi_ctx->mlock);
-	reinit_completion(&ctx->compl);
+	reinit_completion(&evtr->compl);
 
 	completed = evt_ring_command(evt_id, GSI_EVT_DE_ALLOC);
 	ipa_bug_on(!completed);
 
-	ipa_bug_on(ctx->state != GSI_EVT_RING_STATE_NOT_ALLOCATED);
+	ipa_bug_on(evtr->state != GSI_EVT_RING_STATE_NOT_ALLOCATED);
 
 	clear_bit(evt_id, &gsi_ctx->evt_bmap);
 	mutex_unlock(&gsi_ctx->mlock);
 
-	ctx->int_modt = 0;
-	ipahal_dma_free(&ctx->mem);
+	evtr->int_modt = 0;
+	ipahal_dma_free(&evtr->mem);
 
 	atomic_dec(&gsi_ctx->num_evt_ring);
 }
 
 void gsi_reset_evt_ring(unsigned long evt_id)
 {
-	struct gsi_evt_ctx *ctx;
+	struct gsi_evt_ctx *evtr;
 	u32 completed;
 
 	ipa_bug_on(evt_id >= gsi_ctx->max_ev);
 
-	ctx = &gsi_ctx->evtr[evt_id];
+	evtr = &gsi_ctx->evtr[evt_id];
 
-	ipa_bug_on(ctx->state != GSI_EVT_RING_STATE_ALLOCATED);
+	ipa_bug_on(evtr->state != GSI_EVT_RING_STATE_ALLOCATED);
 
 	mutex_lock(&gsi_ctx->mlock);
-	reinit_completion(&ctx->compl);
+	reinit_completion(&evtr->compl);
 
 	completed = evt_ring_command(evt_id, GSI_EVT_RESET);
 	ipa_bug_on(!completed);
 
-	ipa_bug_on(ctx->state != GSI_EVT_RING_STATE_ALLOCATED);
+	ipa_bug_on(evtr->state != GSI_EVT_RING_STATE_ALLOCATED);
 
-	gsi_program_evt_ring_ctx(&ctx->mem, evt_id, ctx->int_modt);
-	gsi_init_ring(&ctx->ring, &ctx->mem);
+	gsi_program_evt_ring_ctx(&evtr->mem, evt_id, evtr->int_modt);
+	gsi_init_ring(&evtr->ring, &evtr->mem);
 
 	__gsi_zero_evt_ring_scratch(evt_id);
 
-	gsi_prime_evt_ring(ctx);
+	gsi_prime_evt_ring(evtr);
 	mutex_unlock(&gsi_ctx->mlock);
 }
 
@@ -1927,21 +1929,21 @@ int gsi_poll_channel(unsigned long chan_id)
 	bool empty;
 	int size = 0;
 
-	spin_lock_irqsave(&evt->ring.slock, flags);
+	spin_lock_irqsave(&evtr->ring.slock, flags);
 
 	/* update rp to see of we have anything new to process */
-	if (evt->ring.rp == evt->ring.rp_local) {
+	if (evtr->ring.rp == evtr->ring.rp_local) {
 		u32 val;
 
-		val = gsi_readl(GSI_EE_N_EV_CH_K_CNTXT_4_OFFS(evt->id, ee));
-		evt->ring.rp = (chan->ring.rp & GENMASK_ULL(63, 32)) | val;
+		val = gsi_readl(GSI_EE_N_EV_CH_K_CNTXT_4_OFFS(evtr->id, ee));
+		evtr->ring.rp = (chan->ring.rp & GENMASK_ULL(63, 32)) | val;
 	}
 
-	empty = evt->ring.rp == evt->ring.rp_local;
+	empty = evtr->ring.rp == evtr->ring.rp_local;
 	if (!empty)
-		size = gsi_process_evt_re(evt, false);
+		size = gsi_process_evt_re(evtr, false);
 
-	spin_unlock_irqrestore(&evt->ring.slock, flags);
+	spin_unlock_irqrestore(&evtr->ring.slock, flags);
 
 	return empty ? -ENOENT : size;
 }
