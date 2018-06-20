@@ -51,13 +51,6 @@
 /* Invalid sequencer type */
 #define IPA_DPS_HPS_SEQ_TYPE_INVALID 0xFFFFFFFF
 
-static bool ipa_dps_hps_seq_type_is_dma(u32 seq_type)
-{
-	return seq_type == IPA_DPS_HPS_SEQ_TYPE_DMA_ONLY ||
-		seq_type == IPA_DPS_HPS_SEQ_TYPE_DMA_DEC ||
-		seq_type == IPA_DPS_HPS_SEQ_TYPE_DMA_COMP_DECOMP;
-}
-
 #define QMB_MASTER_SELECT_DDR		(0)
 
 /* Resource Group index*/
@@ -1174,9 +1167,6 @@ static int ipa_cfg_ep_seq(u32 clnt_hdl)
 {
 	enum ipa_client_type client = ipa_ctx->ep[clnt_hdl].client;
 	int type = ep_configuration(client)->sequencer_type;
-
-	if (ipa_ctx->ep[clnt_hdl].cfg.mode.mode == IPA_DMA)
-		ipa_assert(ipa_dps_hps_seq_type_is_dma(type));
 
 	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
 		       true);
