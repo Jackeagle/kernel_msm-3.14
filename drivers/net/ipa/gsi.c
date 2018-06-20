@@ -17,8 +17,8 @@
 #include "gsi.h"
 #include "gsi_reg.h"
 
-#define GSI_CHAN_MAX	  31
-#define GSI_EVT_RING_MAX  23
+#define GSI_CHAN_MAX	  	31
+#define GSI_EVT_RING_MAX	23
 
 #define GSI_CMD_TIMEOUT		msecs_to_jiffies(5 * MSEC_PER_SEC)
 #define GSI_STOP_CMD_TIMEOUT	msecs_to_jiffies(20)
@@ -2052,6 +2052,3 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev, u32 ee)
 
 	return gsi_ctx;
 }
-
-MODULE_LICENSE("GPL v2");
-MODULE_DESCRIPTION("Generic Software Interface (GSI)");
