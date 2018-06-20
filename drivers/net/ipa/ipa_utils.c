@@ -1170,15 +1170,10 @@ static int ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
  *
  * Note:	Should not be called from atomic context
  */
-static int ipa_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
+static int ipa_cfg_ep_seq(u32 clnt_hdl)
 {
 	enum ipa_client_type client = ipa_ctx->ep[clnt_hdl].client;
-	int type;
-
-	if (seq_cfg->set_dynamic)
-		type = seq_cfg->seq_type;
-	else
-		type = ep_configuration(client)->sequencer_type;
+	int type = ep_configuration(client)->sequencer_type;
 
 	if (type != IPA_DPS_HPS_SEQ_TYPE_INVALID) {
 		if (ipa_ctx->ep[clnt_hdl].cfg.mode.mode == IPA_DMA)
@@ -1311,7 +1306,7 @@ int ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 		if (result)
 			return result;
 
-		result = ipa_cfg_ep_seq(clnt_hdl, &ipa_ep_cfg->seq);
+		result = ipa_cfg_ep_seq(clnt_hdl);
 		if (result)
 			return result;
 

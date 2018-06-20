@@ -595,16 +595,6 @@ struct ipa_ep_cfg_metadata_mask {
 	u32 metadata_mask;
 };
 
-/** struct ipa_ep_cfg_seq - HPS/DPS sequencer type config in IPA end-point
- * @set_dynamic:  0 - HPS/DPS seq type is configured statically,
- *		   1 - HPS/DPS seq type is set to seq_type
- * @seq_type: HPS/DPS sequencer type configuration
- */
-struct ipa_ep_cfg_seq {
-	bool set_dynamic;
-	int seq_type;
-};
-
 /** struct ipa_ep_cfg - configuration of IPA end-point
  * @nat:		NAT parmeters
  * @conn_track:		IPv6CT parmeters
@@ -630,7 +620,6 @@ struct ipa_ep_cfg {
 	struct ipa_ep_cfg_route route;
 	struct ipa_ep_cfg_cfg cfg;
 	struct ipa_ep_cfg_metadata_mask metadata_mask;
-	struct ipa_ep_cfg_seq seq;
 };
 
 /** struct ipa_ep_cfg_ctrl - Control configuration in IPA end-point
