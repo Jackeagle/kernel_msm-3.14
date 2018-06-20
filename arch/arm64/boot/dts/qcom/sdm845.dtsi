@@ -2526,6 +2526,12 @@
 				<0 425 0 /* CE11 */ >;
 		};
 
+		rng@793000 {
+			compatible = "qcom,prng-v2";
+			reg = <0x00793000 0x1000>;
+			clocks = <&gcc GCC_PRNG_AHB_CLK>;
+			clock-names = "core";
+		};
 	};
 };
 
