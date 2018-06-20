@@ -1271,40 +1271,36 @@ int ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 
 	result = ipa_cfg_ep_hdr(clnt_hdl, &ipa_ep_cfg->hdr);
 	if (result)
-		return result;
+		goto out;
 
 	result = ipa_cfg_ep_hdr_ext(clnt_hdl, &ipa_ep_cfg->hdr_ext);
 	if (result)
-		return result;
+		goto out;
 
 	result = ipa_cfg_ep_aggr(clnt_hdl, &ipa_ep_cfg->aggr);
 	if (result)
-		return result;
+		goto out;
 
 	result = ipa_cfg_ep_cfg(clnt_hdl, &ipa_ep_cfg->cfg);
 	if (result)
-		return result;
+		goto out;
 
 	if (IPA_CLIENT_IS_PROD(ipa_ctx->ep[clnt_hdl].client)) {
 		result = ipa_cfg_ep_mode(clnt_hdl, &ipa_ep_cfg->mode);
 		if (result)
-			return result;
+			goto out;
 
 		result = ipa_cfg_ep_seq(clnt_hdl);
 		if (result)
-			return result;
+			goto out;
 
 		result = ipa_cfg_ep_deaggr(clnt_hdl, &ipa_ep_cfg->deaggr);
-		if (result)
-			return result;
 	} else {
 		result = ipa_cfg_ep_metadata_mask(clnt_hdl,
 						  &ipa_ep_cfg->metadata_mask);
-		if (result)
-			return result;
 	}
-
-	return 0;
+out:
+	return result;
 }
 
 /** ipa_cfg_ep_status() - IPA end-point status configuration
