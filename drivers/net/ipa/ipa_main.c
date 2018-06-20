@@ -1711,8 +1711,6 @@ static int ipa_pre_init(void)
 		goto err_destroy_rx_cache;
 	}
 
-	mutex_init(&ipa_ctx->lock);
-
 	ipa_ctx->class = class_create(THIS_MODULE, DRV_NAME);
 
 	result = alloc_chrdev_region(&ipa_ctx->dev_num, 0, 1, DRV_NAME);

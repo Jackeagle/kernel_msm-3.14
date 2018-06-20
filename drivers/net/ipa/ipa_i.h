@@ -774,7 +774,6 @@ struct ipa_context {
 	u32 ipa_wrapper_size;
 	struct kmem_cache *tx_pkt_wrapper_cache;
 	struct kmem_cache *rx_pkt_wrapper_cache;
-	struct mutex lock;			/* XXX comment this */
 	u16 smem_sz;
 	u16 smem_restricted_bytes;
 	u16 smem_reqd_sz;
