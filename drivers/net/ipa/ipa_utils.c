@@ -1175,26 +1175,20 @@ static int ipa_cfg_ep_seq(u32 clnt_hdl)
 	enum ipa_client_type client = ipa_ctx->ep[clnt_hdl].client;
 	int type = ep_configuration(client)->sequencer_type;
 
-	if (type != IPA_DPS_HPS_SEQ_TYPE_INVALID) {
-		if (ipa_ctx->ep[clnt_hdl].cfg.mode.mode == IPA_DMA)
-			ipa_assert(ipa_dps_hps_seq_type_is_dma(type));
+	if (ipa_ctx->ep[clnt_hdl].cfg.mode.mode == IPA_DMA)
+		ipa_assert(ipa_dps_hps_seq_type_is_dma(type));
 
-		ipa_client_add(
-			ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			true);
-		/* Configure sequencers type*/
+	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+		       true);
+	/* Configure sequencers type*/
 
-		ipa_debug("set sequencers to sequence 0x%x, ep = %d\n", type,
-			  clnt_hdl);
-		ipahal_write_reg_n(IPA_ENDP_INIT_SEQ_n, clnt_hdl, type);
+	ipa_debug("set sequencers to sequence 0x%x, ep = %d\n", type,
+			clnt_hdl);
+	ipahal_write_reg_n(IPA_ENDP_INIT_SEQ_n, clnt_hdl, type);
 
-		ipa_client_remove(
-			ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			true);
-	} else {
-		ipa_debug("should not set sequencer type of ep = %d\n",
-			  clnt_hdl);
-	}
+	ipa_client_remove(
+		ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+		true);
 
 	return 0;
 }
