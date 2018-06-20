@@ -77,7 +77,6 @@ struct ipa_wwan_private {
 	int outstanding_high_ctl;
 	int outstanding_high;
 	int outstanding_low;
-	spinlock_t lock;			/* XXX comment this */
 	bool device_active;
 	struct napi_struct napi;
 };
@@ -844,7 +843,6 @@ static int ipa_wwan_probe(struct platform_device *pdev)
 	wwan_ptr->outstanding_high = DEFAULT_OUTSTANDING_HIGH;
 	wwan_ptr->outstanding_low = DEFAULT_OUTSTANDING_LOW;
 	atomic_set(&wwan_ptr->outstanding_pkts, 0);
-	spin_lock_init(&wwan_ptr->lock);
 
 	/* Enable SG support in netdevice. */
 	dev->hw_features |= NETIF_F_SG;
