@@ -168,12 +168,12 @@ struct gsi_tre {
 	u64 buffer_ptr;
 	u16 buf_len;
 	u16 resvd1;
-	u16 chain:1;
-	u16 resvd4:7;
-	u16 ieob:1;
-	u16 ieot:1;
-	u16 bei:1;
-	u16 resvd3:5;
+	u16 chain	: 1,
+	    resvd4	: 7,
+	    ieob	: 1,
+	    ieot	: 1,
+	    bei		: 1,
+	    resvd3	: 5;
 	u8 re_type;
 	u8 resvd2;
 } __packed;
@@ -196,14 +196,14 @@ enum gsi_err_type {
 };
 
 struct gsi_log_err {
-	u32 arg3:4;
-	u32 arg2:4;
-	u32 arg1:4;
-	u32 code:4;
-	u32 resvd:3;
-	u32 virt_idx:5;
-	u32 err_type:4;
-	u32 ee:4;
+	u32 arg3	: 4,
+	    arg2	: 4,
+	    arg1	: 4,
+	    code	: 4,
+	    resvd	: 3,
+	    virt_idx	: 5,
+	    err_type	: 4,
+	    ee		: 4;
 } __packed;
 
 /* Hardware values repreasenting a channel immediate command opcode */
@@ -242,10 +242,10 @@ enum gsi_evt_ch_cmd_opcode {
  */
 struct gsi_gpi_channel_scratch {
 	u64 resvd1;
-	u32 resvd2:16;
-	u32 max_outstanding_tre:16;
-	u32 resvd3:16;
-	u32 outstanding_threshold:16;
+	u32 resvd2			: 16,
+	    max_outstanding_tre		: 16;
+	u32 resvd3			: 16,
+	    outstanding_threshold	: 16;
 } __packed;
 
 /** gsi_channel_scratch - channel scratch SW config area */
