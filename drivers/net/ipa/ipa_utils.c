@@ -974,13 +974,7 @@ static int ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 	/* copy over EP cfg */
 	ep->cfg.hdr = *ep_hdr;
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-		       true);
-
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_n, clnt_hdl, &ep->cfg.hdr);
-
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			  true);
 
 	return 0;
 }
@@ -1017,14 +1011,8 @@ ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
 	/* copy over EP cfg */
 	ep->cfg.hdr_ext = *ep_hdr_ext;
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-		       true);
-
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_n, clnt_hdl,
 				  &ep->cfg.hdr_ext);
-
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			  true);
 
 	return 0;
 }
@@ -1058,13 +1046,7 @@ static int ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 	/* copy over EP cfg */
 	ipa_ctx->ep[clnt_hdl].cfg.aggr = *ep_aggr;
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-		       true);
-
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_AGGR_n, clnt_hdl, ep_aggr);
-
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			  true);
 
 	return 0;
 }
@@ -1094,14 +1076,8 @@ static int ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 		  ipa_ctx->ep[clnt_hdl].cfg.cfg.cs_metadata_hdr_offset,
 		  ipa_ctx->ep[clnt_hdl].cfg.cfg.gen_qmb_master_sel);
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-		       true);
-
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CFG_n, clnt_hdl,
 				  &ipa_ctx->ep[clnt_hdl].cfg.cfg);
-
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			  true);
 
 	return 0;
 }
@@ -1143,15 +1119,9 @@ static int ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 	ipa_ctx->ep[clnt_hdl].cfg.mode = *ep_mode;
 	ipa_ctx->ep[clnt_hdl].dst_pipe_index = ipa_ep_idx;
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-		       true);
-
 	init_mode.dst_pipe_number = ipa_ctx->ep[clnt_hdl].dst_pipe_index;
 	init_mode.ep_mode = *ep_mode;
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_MODE_n, clnt_hdl, &init_mode);
-
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			  true);
 
 	return 0;
 }
@@ -1168,17 +1138,9 @@ static int ipa_cfg_ep_seq(u32 clnt_hdl)
 	enum ipa_client_type client = ipa_ctx->ep[clnt_hdl].client;
 	int type = ep_configuration(client)->sequencer_type;
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-		       true);
-	/* Configure sequencers type*/
-
 	ipa_debug("set sequencers to sequence 0x%x, ep = %d\n", type,
 			clnt_hdl);
 	ipahal_write_reg_n(IPA_ENDP_INIT_SEQ_n, clnt_hdl, type);
-
-	ipa_client_remove(
-		ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-		true);
 
 	return 0;
 }
@@ -1209,14 +1171,8 @@ ipa_cfg_ep_deaggr(u32 clnt_hdl, const struct ipa_ep_cfg_deaggr *ep_deaggr)
 	/* copy over EP cfg */
 	ep->cfg.deaggr = *ep_deaggr;
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-		       true);
-
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_n, clnt_hdl,
 				  &ep->cfg.deaggr);
-
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			  true);
 
 	return 0;
 }
@@ -1239,14 +1195,8 @@ static int ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
 	/* copy over EP cfg */
 	ipa_ctx->ep[clnt_hdl].cfg.metadata_mask = *metadata_mask;
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-		       true);
-
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_n,
 				  clnt_hdl, metadata_mask);
-
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			  true);
 
 	return 0;
 }
@@ -1269,35 +1219,67 @@ int ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 	if (!client_handle_valid(clnt_hdl))
 		return -EINVAL;
 
+	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+		       true);
 	result = ipa_cfg_ep_hdr(clnt_hdl, &ipa_ep_cfg->hdr);
+	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			  true);
 	if (result)
 		goto out;
 
+	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+		       true);
 	result = ipa_cfg_ep_hdr_ext(clnt_hdl, &ipa_ep_cfg->hdr_ext);
+	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			  true);
 	if (result)
 		goto out;
 
+	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+		       true);
 	result = ipa_cfg_ep_aggr(clnt_hdl, &ipa_ep_cfg->aggr);
+	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			  true);
 	if (result)
 		goto out;
 
+	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+		       true);
 	result = ipa_cfg_ep_cfg(clnt_hdl, &ipa_ep_cfg->cfg);
+	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			  true);
 	if (result)
 		goto out;
 
 	if (IPA_CLIENT_IS_PROD(ipa_ctx->ep[clnt_hdl].client)) {
+		ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			       true);
 		result = ipa_cfg_ep_mode(clnt_hdl, &ipa_ep_cfg->mode);
+		ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+				  true);
 		if (result)
 			goto out;
 
+		ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+		               true);
 		result = ipa_cfg_ep_seq(clnt_hdl);
+		ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			          true);
 		if (result)
 			goto out;
 
+		ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			       true);
 		result = ipa_cfg_ep_deaggr(clnt_hdl, &ipa_ep_cfg->deaggr);
+		ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+				  true);
 	} else {
+		ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+			       true);
 		result = ipa_cfg_ep_metadata_mask(clnt_hdl,
 						  &ipa_ep_cfg->metadata_mask);
+		ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
+				  true);
 	}
 out:
 	return result;
