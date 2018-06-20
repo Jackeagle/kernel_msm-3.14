@@ -97,13 +97,13 @@ struct rmnet_ipa_context {
 	struct ipa_rmnet_mux_val mux_channel[MAX_NUM_OF_MUX_CHANNEL];
 	int num_q6_rules;
 	int old_num_q6_rules;
-	int rmnet_index;
+	int rmnet_index;	/* updates protected by add_mux_channel_lock */
 	bool egress_set;
 	bool a7_ul_flt_set;
 	u32 apps_to_ipa_hdl;
 	u32 ipa_to_apps_hdl;
-	struct mutex pipe_handle_guard;		/* XXX comment this */
-	struct mutex add_mux_channel_lock;	/* XXX comment this */
+	struct mutex pipe_handle_guard;		/* pipe setup/teardown */
+	struct mutex add_mux_channel_lock;	/* updates to mux_channel[] */
 };
 
 static bool initialized;	/* Avoid duplicate initialization */

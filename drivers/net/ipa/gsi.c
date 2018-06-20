@@ -90,7 +90,7 @@ enum gsi_chan_state {
 };
 
 struct gsi_ring_ctx {
-	spinlock_t slock;			/* XXX comment this */
+	spinlock_t slock;		/* protects wp, rp updates */
 	struct ipa_mem_buffer mem;
 	u64 wp;
 	u64 rp;
@@ -107,11 +107,11 @@ struct gsi_chan_ctx {
 	struct gsi_ring_ctx ring;
 	void **user_data;
 	struct gsi_evt_ctx *evtr;
-	struct mutex mlock;			/* XXX comment this */
+	struct mutex mlock;		/* protects chan_scratch updates */
 	struct completion compl;
 	bool allocated;
 	atomic_t poll_mode;
-	u32 tlv_size;		/* slots in TLV */
+	u32 tlv_size;			/* # slots in TLV */
 };
 
 struct gsi_evt_ctx {
@@ -145,8 +145,8 @@ struct gsi_ctx {
 	struct gsi_chan_ctx chan[GSI_CHAN_MAX];
 	struct ch_debug_stats ch_dbg[GSI_CHAN_MAX];
 	struct gsi_evt_ctx evtr[GSI_EVT_RING_MAX];
-	struct mutex mlock;			/* XXX comment this */
-	spinlock_t slock;			/* XXX comment this */
+	struct mutex mlock;	/* protects 1-at-a-time commands, evt_bmap */
+	spinlock_t slock;	/* protects global register updates */
 	unsigned long evt_bmap;
 	atomic_t num_chan;
 	atomic_t num_evt_ring;

@@ -162,7 +162,7 @@ struct ipa_active_client {
 };
 
 struct ipa_active_clients_log_ctx {
-	spinlock_t lock;			/* XXX comment this */
+	spinlock_t lock;	/* protects active list */
 	char *log_buffer[IPA_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES];
 	int log_head;
 	int log_tail;
@@ -323,9 +323,9 @@ struct ipa_sys_context {
 
 	/* ordering is important - mutable fields go above */
 	struct ipa_ep_context *ep;
-	struct list_head head_desc_list;
+	struct list_head head_desc_list; /* contains len entries */
 	struct list_head rcycl_list;
-	spinlock_t spinlock;			/* XXX comment this */
+	spinlock_t spinlock;		/* protects head_desc and rcycl lists */
 	struct workqueue_struct *wq;
 	struct workqueue_struct *repl_wq;
 	struct ipa_status_stats *status_stat;
@@ -454,12 +454,12 @@ struct ipa_stats {
 };
 
 struct ipa_active_clients {
-	struct mutex mutex;			/* XXX comment this */
+	struct mutex mutex;	/* protects when cnt changes from/to 0 */
 	atomic_t cnt;
 };
 
 struct ipa_wakelock_ref_cnt {
-	spinlock_t spinlock;			/* XXX comment this */
+	spinlock_t spinlock;	/* protects updates to cnt */
 	int cnt;
 };
 
