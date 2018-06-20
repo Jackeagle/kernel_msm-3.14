@@ -1175,11 +1175,6 @@ static int ipa_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 	enum ipa_client_type client = ipa_ctx->ep[clnt_hdl].client;
 	int type;
 
-	if (IPA_CLIENT_IS_CONS(client)) {
-		ipa_err("SEQ does not apply to IPA consumer EP %d\n", clnt_hdl);
-		return -EINVAL;
-	}
-
 	if (seq_cfg->set_dynamic)
 		type = seq_cfg->seq_type;
 	else
