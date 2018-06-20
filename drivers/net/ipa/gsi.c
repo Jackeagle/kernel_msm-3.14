@@ -120,7 +120,6 @@ struct gsi_evt_ctx {
 	enum gsi_evt_ring_state state;
 	u8 id;
 	struct gsi_ring_ctx ring;
-	struct mutex mlock;			/* XXX comment this */
 	struct completion compl;
 	struct gsi_chan_ctx *chan;
 	atomic_t chan_ref_cnt;
@@ -1281,7 +1280,6 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 	}
 
 	evtr->int_modt = int_modt;
-	mutex_init(&evtr->mlock);
 	init_completion(&evtr->compl);
 	atomic_set(&evtr->chan_ref_cnt, 0);
 
