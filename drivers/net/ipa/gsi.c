@@ -24,8 +24,8 @@
 #define GSI_STOP_CMD_TIMEOUT	msecs_to_jiffies(20)
 
 #define GSI_MAX_CH_LOW_WEIGHT	15
-#define GSI_MHI_ER_START	10
-#define GSI_MHI_ER_END		16
+#define GSI_MHI_ER_START	10	/* First reserved event number */
+#define GSI_MHI_ER_END		16	/* Last reserved event number */
 
 #define GSI_RESET_WA_MIN_SLEEP	1000	/* microseconds */
 #define GSI_RESET_WA_MAX_SLEEP	2000	/* microseconds */
@@ -863,9 +863,15 @@ int gsi_register_device(void)
 	ipa_debug("max event rings %d\n", gsi_ctx->max_ev);
 
 	/* bitmap is max events excludes reserved events */
-	gsi_ctx->evt_bmap = ~((1 << gsi_ctx->max_ev) - 1);
-	gsi_ctx->evt_bmap |= ((1 << (GSI_MHI_ER_END + 1)) - 1) ^
-		((1 << GSI_MHI_ER_START) - 1);
+
+	/*
+	 * Zero bits in the event bitmap represent event numbers available
+	 * for allocation.  Initialize the map so all events supported by
+	 * the hardware are available; then preclude any reserved events
+	 * from allocation.
+	 */
+	gsi_ctx->evt_bmap = GENMASK(31, gsi_ctx->max_ev);
+	gsi_ctx->evt_bmap |= GENMASK(GSI_MHI_ER_END, GSI_MHI_ER_START);
 
 	/* Enable all interrupts */
 	gsi_irq_control_all(gsi_ctx->ee, true);
