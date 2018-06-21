@@ -279,7 +279,7 @@ static void gsi_irq_set(u32 offset, u32 val)
 	gsi_writel(val, offset);
 }
 
-static void gsi_irq_control_event(u32 ee, u8 evt_id, bool enable)
+static void _gsi_event_irq_control(u32 ee, u8 evt_id, bool enable)
 {
 	u32 offset = GSI_EE_N_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee);
 	u32 mask = BIT(evt_id);
@@ -291,6 +291,16 @@ static void gsi_irq_control_event(u32 ee, u8 evt_id, bool enable)
 	else
 		val &= ~mask;
 	gsi_writel(val, offset);
+}
+
+static void gsi_event_irq_disable(u32 ee, u8 evt_id)
+{
+	_gsi_event_irq_control(ee, evt_id, false);
+}
+
+static void gsi_event_irq_enable(u32 ee, u8 evt_id)
+{
+	_gsi_event_irq_control(ee, evt_id, true);
 }
 
 static void gsi_irq_control_all(u32 ee, bool enable)
@@ -1288,7 +1298,7 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 	gsi_writel(val, GSI_EE_N_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(ee));
 
 	/* enable ieob interrupts */
-	gsi_irq_control_event(gsi_ctx->ee, evtr->id, true);
+	gsi_event_irq_enable(gsi_ctx->ee, evtr->id);
 	spin_unlock_irqrestore(&gsi_ctx->slock, flags);
 
 	return evt_id;
@@ -1931,9 +1941,9 @@ static void gsi_config_channel_mode(unsigned long chan_id, bool polling)
 
 	spin_lock_irqsave(&gsi_ctx->slock, flags);
 	if (polling)
-		gsi_irq_control_event(gsi_ctx->ee, chan->evtr->id, false);
+		gsi_event_irq_disable(gsi_ctx->ee, chan->evtr->id);
 	else
-		gsi_irq_control_event(gsi_ctx->ee, chan->evtr->id, true);
+		gsi_event_irq_enable(gsi_ctx->ee, chan->evtr->id);
 	atomic_set(&chan->poll_mode, polling ? 1 : 0);
 	spin_unlock_irqrestore(&gsi_ctx->slock, flags);
 }
