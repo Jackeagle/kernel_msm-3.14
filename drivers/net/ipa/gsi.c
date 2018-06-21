@@ -279,21 +279,18 @@ static void gsi_irq_set(u32 offset, u32 val)
 	gsi_writel(val, offset);
 }
 
-static void gsi_irq_update(u32 offset, u32 mask, u32 val)
-{
-	u32 curr;
-
-	curr = gsi_readl(offset);
-	val = (curr & ~mask) | (val & mask);
-	gsi_writel(val, offset);
-}
-
 static void gsi_irq_control_event(u32 ee, u8 evt_id, bool enable)
 {
+	u32 offset = GSI_EE_N_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee);
 	u32 mask = BIT(evt_id);
-	u32 val = enable ? ~0 : 0;
+	u32 val;
 
-	gsi_irq_update(GSI_EE_N_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee), mask, val);
+	val = gsi_readl(offset);
+	if (enable)
+		val |= mask;
+	else
+		val &= ~mask;
+	gsi_writel(val, offset);
 }
 
 static void gsi_irq_control_all(u32 ee, bool enable)
