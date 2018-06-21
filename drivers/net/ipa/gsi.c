@@ -793,42 +793,18 @@ static irqreturn_t gsi_isr(int irq, void *ctxt)
 	return IRQ_HANDLED;
 }
 
-static u32 gsi_get_max_channels(void)
+static u32 gsi_get_max_channels(u32 ee)
 {
-	u32 max_channels;
-	u32 val;
+	u32 val = gsi_readl(GSI_EE_N_GSI_HW_PARAM_2_OFFS(ee));
 
-	/* SDM845 uses GSI hardware version 1.3.0 */
-	val = gsi_readl(GSI_EE_N_GSI_HW_PARAM_2_OFFS(gsi_ctx->ee));
-	max_channels = field_val(val, GSI_NUM_CH_PER_EE_BMSK);
-
-	if (WARN_ON(max_channels > GSI_CHAN_MAX)) {
-		ipa_err("bad GSI max channels %u\n", max_channels);
-
-		return 0;
-	}
-	ipa_debug("max channels %d\n", max_channels);
-
-	return max_channels;
+	return field_val(val, GSI_NUM_CH_PER_EE_BMSK);
 }
 
-static u32 gsi_get_max_event_rings(void)
+static u32 gsi_get_max_event_rings(u32 ee)
 {
-	u32 max_event_rings;
-	u32 val;
+	u32 val = gsi_readl(GSI_EE_N_GSI_HW_PARAM_2_OFFS(ee));
 
-	/* SDM845 uses GSI hardware version 1.3.0 */
-	val = gsi_readl(GSI_EE_N_GSI_HW_PARAM_2_OFFS(gsi_ctx->ee));
-	max_event_rings = field_val(val, GSI_NUM_EV_PER_EE_BMSK);
-
-	if (WARN_ON(max_event_rings > GSI_EVT_RING_MAX)) {
-		ipa_err("bad GSI max event rings %u\n", max_event_rings);
-
-		return 0;
-	}
-	ipa_debug("max event rings %d\n", max_event_rings);
-
-	return max_event_rings;
+	return field_val(val, GSI_NUM_EV_PER_EE_BMSK);
 }
 
 int gsi_register_device(void)
@@ -876,16 +852,15 @@ int gsi_register_device(void)
 	atomic_set(&gsi_ctx->num_chan, 0);
 	atomic_set(&gsi_ctx->num_evt_ring, 0);
 
-	gsi_ctx->max_ch = gsi_get_max_channels();
-	if (!gsi_ctx->max_ch) {
-		ipa_err("failed to get max channels\n");
+	gsi_ctx->max_ch = gsi_get_max_channels(gsi_ctx->ee);
+	if (WARN_ON(gsi_ctx->max_ch > GSI_CHAN_MAX))
 		return -EIO;
-	}
-	gsi_ctx->max_ev = gsi_get_max_event_rings();
-	if (!gsi_ctx->max_ev) {
-		ipa_err("failed to get max event rings\n");
+	ipa_debug("max channels %d\n", gsi_ctx->max_ch);
+
+	gsi_ctx->max_ev = gsi_get_max_event_rings(gsi_ctx->ee);
+	if (WARN_ON(gsi_ctx->max_ev > GSI_EVT_RING_MAX))
 		return -EIO;
-	}
+	ipa_debug("max event rings %d\n", gsi_ctx->max_ev);
 
 	/* bitmap is max events excludes reserved events */
 	gsi_ctx->evt_bmap = ~((1 << gsi_ctx->max_ev) - 1);
