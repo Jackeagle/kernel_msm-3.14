@@ -1795,8 +1795,7 @@ static void suspend_pipe(enum ipa_client_type client, bool suspend)
 	int ipa_ep_idx = ipa_get_ep_mapping(client);
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 
-	ipa_debug("%s pipe %d\n", suspend ? "suspend" : "unsuspend",
-		  ipa_ep_idx);
+	ipa_debug("%ssuspend pipe %d\n", suspend ? "" : "un", ipa_ep_idx);
 
 	ipa_cfg_ep_ctrl(ipa_ep_idx, suspend);
 	if (suspend)

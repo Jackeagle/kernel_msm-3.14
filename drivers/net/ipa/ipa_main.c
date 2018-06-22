@@ -847,7 +847,10 @@ out_unlock:
 /* Add an IPA client under protection of the mutex.  This is called
  * for the first client, but a race could mean another caller gets
  * the first reference.  When the first reference is taken, IPA
- * clocks are enabled pipes are resumed.
+ * clocks are enabled pipes are resumed.  A positive reference count
+ * means the pipes are active; this doesn't set the first reference
+ * until after this is complete (and the mutex, not the atomic
+ * count, is what protects this).
  */
 static void ipa_client_add_first(void)
 {
@@ -935,7 +938,8 @@ static void ipa_client_remove_final(void)
 
 	mutex_lock(&ipa_ctx->ipa_active_clients.mutex);
 
-	ret = atomic_sub_return(1, &ipa_ctx->ipa_active_clients.cnt);
+	/* A reference might have been removed while awaiting the mutex. */
+	ret = atomic_dec_return(&ipa_ctx->ipa_active_clients.cnt);
 	if (!ret)
 		ipa_suspend_apps_pipes(true);
 	else
