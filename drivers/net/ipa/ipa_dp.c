@@ -668,6 +668,15 @@ static void ipa_rx_switch_to_intr_mode(struct ipa_sys_context *sys)
 	gsi_channel_intr_enable(sys->ep->gsi_chan_hdl);
 }
 
+void ipa_rx_switch_to_poll_mode(struct ipa_sys_context *sys)
+{
+	if (atomic_xchg(&sys->curr_polling_state, 1))
+		return;
+	gsi_channel_intr_disable(sys->ep->gsi_chan_hdl);
+	ipa_inc_acquire_wakelock();
+	queue_work(sys->wq, &sys->work);
+}
+
 /** ipa_handle_rx() - handle packet reception. This function is executed in the
  * context of a work queue.
  * @work: work struct needed by the work queue
@@ -2159,12 +2168,7 @@ void ipa_gsi_irq_rx_notify_cb(void *chan_data, void *xfer_data, u16 count)
 	sys->ep->bytes_xfered_valid = true;
 	sys->ep->bytes_xfered = count;
 
-	if (atomic_xchg(&sys->curr_polling_state, 1))
-		return;
-	/* put the gsi channel into polling mode */
-	gsi_channel_intr_disable(sys->ep->gsi_chan_hdl);
-	ipa_inc_acquire_wakelock();
-	queue_work(sys->wq, &sys->work);
+	ipa_rx_switch_to_poll_mode(sys);
 }
 
 /* GSI ring length is calculated based on the desc_fifo_sz which

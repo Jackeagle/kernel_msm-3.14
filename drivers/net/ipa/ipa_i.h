@@ -837,6 +837,8 @@ int ipa_teardown_sys_pipe(u32 clnt_hdl);
 
 u16 ipa_get_smem_restr_bytes(void);
 
+void ipa_rx_switch_to_poll_mode(struct ipa_sys_context *sys);
+
 /* interrupts */
 int ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 			      ipa_irq_handler_t handler, bool deferred_flag,
