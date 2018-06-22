@@ -2152,7 +2152,7 @@ void ipa_gsi_irq_tx_notify_cb(void *xfer_data)
 	queue_work(tx_pkt->sys->wq, &tx_pkt->work);
 }
 
-void ipa_gsi_irq_rx_notify_cb(void *chan_data, void *xfer_data, u16 count)
+void ipa_gsi_irq_rx_notify_cb(void *chan_data, u16 count)
 {
 	struct ipa_sys_context *sys = chan_data;
 

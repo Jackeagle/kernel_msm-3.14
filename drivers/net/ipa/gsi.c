@@ -526,13 +526,14 @@ static u16 ring_wp_local_index(struct gsi_ring_ctx *ring)
 
 static void chan_xfer_cb(struct gsi_chan_ctx *chan, u8 evt_id, u16 count)
 {
-	void *chan_data = chan->props.chan_user_data;
-	void *xfer_data = chan->user_data[ring_rp_local_index(&chan->ring)];
+	void *xfer_data;
 
-	if (chan->props.from_gsi)
-		ipa_gsi_irq_rx_notify_cb(chan_data, xfer_data, count);
-	else
+	if (!chan->props.from_gsi) {
+		xfer_data = chan->user_data[ring_rp_local_index(&chan->ring)];
 		ipa_gsi_irq_tx_notify_cb(xfer_data);
+	} else {
+		ipa_gsi_irq_rx_notify_cb(chan->props.chan_user_data, count);
+	}
 }
 
 static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt, bool callback)
