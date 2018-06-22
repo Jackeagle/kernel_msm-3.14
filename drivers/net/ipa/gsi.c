@@ -570,9 +570,9 @@ static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt, bool callback)
 static u16 gsi_process_evt_re(struct gsi_evt_ctx *evtr, bool callback)
 {
 	struct gsi_xfer_compl_evt *evt;
-	u16 idx = ring_rp_local_index(&evtr->ring);
 
-	evt = evtr->ring.mem.base + idx * evtr->ring.elem_sz;
+	evt = ipahal_dma_phys_to_virt(&evtr->ring.mem,
+				      evtr->ring.rp_local);
 
 	return gsi_process_chan(evt, callback);
 }
