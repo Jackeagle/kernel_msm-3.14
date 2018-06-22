@@ -1899,8 +1899,7 @@ int gsi_poll_channel(unsigned long chan_id)
 	struct gsi_evt_ctx *evtr = chan->evtr;
 	u32 ee = gsi_ctx->ee;
 	unsigned long flags;
-	bool empty;
-	int size = 0;
+	int size;
 
 	spin_lock_irqsave(&evtr->ring.slock, flags);
 
@@ -1912,8 +1911,7 @@ int gsi_poll_channel(unsigned long chan_id)
 		evtr->ring.rp = (chan->ring.rp & GENMASK_ULL(63, 32)) | val;
 	}
 
-	empty = evtr->ring.rp == evtr->ring.rp_local;
-	if (!empty) {
+	if (evtr->ring.rp != evtr->ring.rp_local) {
 		struct gsi_xfer_compl_evt *evt;
 
 		evt = ipahal_dma_phys_to_virt(&evtr->ring.mem,
@@ -1922,11 +1920,13 @@ int gsi_poll_channel(unsigned long chan_id)
 
 		ring_rp_local_inc(&evtr->ring);
 		ring_wp_local_inc(&evtr->ring); /* recycle element */
+	} else {
+		size = -ENOENT;
 	}
 
 	spin_unlock_irqrestore(&evtr->ring.slock, flags);
 
-	return empty ? -ENOENT : size;
+	return size;
 }
 
 static void gsi_config_channel_mode(unsigned long chan_id, bool polling)
