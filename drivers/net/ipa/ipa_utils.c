@@ -1792,16 +1792,8 @@ static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
 
 static int suspend_pipe(enum ipa_client_type client, bool suspend)
 {
-	int ipa_ep_idx;
-	struct ipa_ep_context *ep;
-
-	ipa_ep_idx = ipa_get_ep_mapping(client);
-	if (ipa_ep_idx < 0)
-		return ipa_ep_idx;
-
-	ep = &ipa_ctx->ep[ipa_ep_idx];
-	if (!ep->valid)
-		return 0;
+	int ipa_ep_idx = ipa_get_ep_mapping(client);
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 
 	ipa_debug("%s pipe %d\n", suspend ? "suspend" : "unsuspend",
 		  ipa_ep_idx);
