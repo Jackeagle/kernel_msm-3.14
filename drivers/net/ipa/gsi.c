@@ -274,11 +274,6 @@ static void gsi_writel(u32 v, u32 offset)
 	writel(v, gsi_ctx->base + offset);
 }
 
-static void gsi_irq_set(u32 offset, u32 val)
-{
-	gsi_writel(val, offset);
-}
-
 static void _gsi_event_irq_control(u32 ee, u8 evt_id, bool enable)
 {
 	u32 offset = GSI_EE_N_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee);
@@ -308,14 +303,14 @@ static void gsi_irq_control_all(u32 ee, bool enable)
 	u32 val = enable ? ~0 : 0;
 
 	/* Inter EE commands / interrupt are no supported. */
-	gsi_irq_set(GSI_EE_N_CNTXT_TYPE_IRQ_MSK_OFFS(ee), val);
-	gsi_irq_set(GSI_EE_N_CNTXT_SRC_GSI_CH_IRQ_MSK_OFFS(ee), val);
-	gsi_irq_set(GSI_EE_N_CNTXT_SRC_EV_CH_IRQ_MSK_OFFS(ee), val);
-	gsi_irq_set(GSI_EE_N_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee), val);
-	gsi_irq_set(GSI_EE_N_CNTXT_GLOB_IRQ_EN_OFFS(ee), val);
+	gsi_writel(val, GSI_EE_N_CNTXT_TYPE_IRQ_MSK_OFFS(ee));
+	gsi_writel(val, GSI_EE_N_CNTXT_SRC_GSI_CH_IRQ_MSK_OFFS(ee));
+	gsi_writel(val, GSI_EE_N_CNTXT_SRC_EV_CH_IRQ_MSK_OFFS(ee));
+	gsi_writel(val, GSI_EE_N_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee));
+	gsi_writel(val, GSI_EE_N_CNTXT_GLOB_IRQ_EN_OFFS(ee));
 	/* Never enable GSI_BREAK_POINT */
 	val &= ~field_gen(1, EN_GSI_BREAK_POINT_BMSK);
-	gsi_irq_set(GSI_EE_N_CNTXT_GSI_IRQ_EN_OFFS(ee), val);
+	gsi_writel(val, GSI_EE_N_CNTXT_GSI_IRQ_EN_OFFS(ee));
 }
 
 static void gsi_handle_chan_ctrl(void)
