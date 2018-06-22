@@ -540,10 +540,7 @@ static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt, bool callback)
 	struct gsi_chan_ctx *chan;
 	u32 chan_id = evt->chid;
 
-	if (WARN_ON(chan_id >= gsi_ctx->max_ch)) {
-		ipa_err("unexpected chan_id %u\n", chan_id);
-		return 0;
-	}
+	ipa_assert(chan_id < gsi_ctx->max_ch);
 
 	/* Event tells us the last completed channel ring element */
 	chan = &gsi_ctx->chan[chan_id];
