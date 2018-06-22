@@ -1279,18 +1279,19 @@ int ipa_cfg_ep_status(u32 clnt_hdl,
 	return 0;
 }
 
+/* Suspend a consumer endpoint */
 static void ipa_cfg_ep_ctrl(int ipa_ep_idx, bool suspend)
 {
 	struct ipa_ep_cfg_ctrl cfg = { };
 
-	cfg.ipa_ep_suspend = suspend;
-
 	ipa_debug("pipe=%d ep_suspend=%d, ep_delay=0\n", ipa_ep_idx,
 		  suspend ? 1 : 0);
 
+	cfg.ipa_ep_suspend = suspend;
+
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n, ipa_ep_idx, &cfg);
 
-	if (suspend && IPA_CLIENT_IS_CONS(ipa_ctx->ep[ipa_ep_idx].client))
+	if (suspend)
 		ipa_suspend_active_aggr_wa(ipa_ep_idx);
 }
 
@@ -1788,6 +1789,7 @@ static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
 	}
 }
 
+/* Suspend a consumer pipe */
 static void suspend_pipe(enum ipa_client_type client, bool suspend)
 {
 	int ipa_ep_idx = ipa_get_ep_mapping(client);
