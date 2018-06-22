@@ -541,7 +541,7 @@ static void chan_xfer_cb(struct gsi_chan_ctx *chan, u8 evt_id, u16 count)
 	if (chan->props.from_gsi)
 		ipa_gsi_irq_rx_notify_cb(chan_data, xfer_data, count);
 	else
-		ipa_gsi_irq_tx_notify_cb(chan_data, xfer_data, count);
+		ipa_gsi_irq_tx_notify_cb(xfer_data);
 }
 
 static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt, bool callback)

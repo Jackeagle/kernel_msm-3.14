@@ -2143,7 +2143,7 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 	return 0;
 }
 
-void ipa_gsi_irq_tx_notify_cb(void *chan_data, void *xfer_data, u16 count)
+void ipa_gsi_irq_tx_notify_cb(void *xfer_data)
 {
 	struct ipa_tx_pkt_wrapper *tx_pkt = xfer_data;
 

@@ -943,6 +943,6 @@ void ipa_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple);
 void ipa_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple);
 
 void ipa_gsi_irq_rx_notify_cb(void *chan_data, void *xfer_data, u16 count);
-void ipa_gsi_irq_tx_notify_cb(void *chan_data, void *xfer_data, u16 count);
+void ipa_gsi_irq_tx_notify_cb(void *xfer_data);
 
 #endif /* _IPA_I_H_ */
