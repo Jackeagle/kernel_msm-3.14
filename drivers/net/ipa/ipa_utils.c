@@ -1279,9 +1279,9 @@ int ipa_cfg_ep_status(u32 clnt_hdl,
 	return 0;
 }
 
-static int ipa_cfg_ep_ctrl(int ipa_ep_idx, bool suspend)
+static void ipa_cfg_ep_ctrl(int ipa_ep_idx, bool suspend)
 {
-	struct ipa_ep_cfg_ctrl cfg = { 0 };
+	struct ipa_ep_cfg_ctrl cfg = { };
 
 	cfg.ipa_ep_suspend = suspend;
 
@@ -1292,8 +1292,6 @@ static int ipa_cfg_ep_ctrl(int ipa_ep_idx, bool suspend)
 
 	if (suspend && IPA_CLIENT_IS_CONS(ipa_ctx->ep[ipa_ep_idx].client))
 		ipa_suspend_active_aggr_wa(ipa_ep_idx);
-
-	return 0;
 }
 
 /** ipa_cfg_ep_holb() - IPA end-point holb configuration
