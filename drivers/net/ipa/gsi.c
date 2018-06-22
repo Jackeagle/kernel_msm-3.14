@@ -571,16 +571,10 @@ static u16 gsi_process_evt_re(struct gsi_evt_ctx *evtr, bool callback)
 {
 	struct gsi_xfer_compl_evt *evt;
 	u16 idx = ring_rp_local_index(&evtr->ring);
-	u16 size;
 
 	evt = evtr->ring.mem.base + idx * evtr->ring.elem_sz;
-	size = gsi_process_chan(evt, callback);
-	ring_rp_local_inc(&evtr->ring);
 
-	/* recycle this element */
-	ring_wp_local_inc(&evtr->ring);
-
-	return size;
+	return gsi_process_chan(evt, callback);
 }
 
 static void gsi_ring_evt_doorbell(struct gsi_evt_ctx *evtr)
@@ -647,7 +641,11 @@ static void handle_event(int evt_id)
 				break;
 			}
 			check_again = true;
+
 			(void)gsi_process_evt_re(evtr, true);
+
+			ring_rp_local_inc(&evtr->ring);
+			ring_wp_local_inc(&evtr->ring); /* recycle element */
 		}
 
 		gsi_ring_evt_doorbell(evtr);
@@ -1921,8 +1919,12 @@ int gsi_poll_channel(unsigned long chan_id)
 	}
 
 	empty = evtr->ring.rp == evtr->ring.rp_local;
-	if (!empty)
+	if (!empty) {
 		size = gsi_process_evt_re(evtr, false);
+
+		ring_rp_local_inc(&evtr->ring);
+		ring_wp_local_inc(&evtr->ring); /* recycle element */
+	}
 
 	spin_unlock_irqrestore(&evtr->ring.slock, flags);
 
