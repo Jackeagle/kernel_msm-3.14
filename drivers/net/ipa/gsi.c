@@ -526,18 +526,9 @@ static u16 ring_wp_local_index(struct gsi_ring_ctx *ring)
 
 static void chan_xfer_cb(struct gsi_chan_ctx *chan, u8 evt_id, u16 count)
 {
-	void *chan_data;
-	void *xfer_data;
+	void *chan_data = chan->props.chan_user_data;
+	void *xfer_data = chan->user_data[ring_rp_local_index(&chan->ring)];
 
-	if (evt_id != GSI_CHAN_EVT_EOT) {
-		ipa_err("ch %hhu unexpected %sX event id %hhu\n",
-			chan->props.ch_id, chan->props.from_gsi ? "R" : "T",
-			evt_id);
-		return;
-	}
-
-	chan_data = chan->props.chan_user_data;
-	xfer_data = chan->user_data[ring_rp_local_index(&chan->ring)];
 	if (chan->props.from_gsi)
 		ipa_gsi_irq_rx_notify_cb(chan_data, xfer_data, count);
 	else
@@ -554,11 +545,18 @@ static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt, bool callback)
 		return 0;
 	}
 
+	/* Event tells us the last completed channel ring element */
 	chan = &gsi_ctx->chan[chan_id];
 	chan->ring.rp_local = evt->xfer_ptr;
 
-	if (callback)
-		chan_xfer_cb(chan, evt->code, evt->len);
+	if (callback) {
+		if (evt->code == GSI_CHAN_EVT_EOT)
+			chan_xfer_cb(chan, evt->code, evt->len);
+		else
+			ipa_err("ch %hhu unexpected %sX event id %hhu\n",
+				chan_id, chan->props.from_gsi ? "R" : "T",
+				evt->code);
+	}
 
 	/* Record that we've processed this channel ring element. */
 	ring_rp_local_inc(&chan->ring);
