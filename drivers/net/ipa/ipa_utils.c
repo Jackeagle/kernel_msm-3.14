@@ -1777,10 +1777,10 @@ void ipa_set_resource_groups_min_max_limits(void)
 static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
 {
 	ipa_debug("switch ch %ld to poll\n", ep->gsi_chan_hdl);
-	gsi_channel_intr_disable(ep->gsi_chan_hdl);
 	/* queue a work to start polling if don't have one */
 	if (atomic_xchg(&ep->sys->curr_polling_state, 1))
 		return;
+	gsi_channel_intr_disable(ep->gsi_chan_hdl);
 	ipa_inc_acquire_wakelock();
 	queue_work(ep->sys->wq, &ep->sys->work);
 }
