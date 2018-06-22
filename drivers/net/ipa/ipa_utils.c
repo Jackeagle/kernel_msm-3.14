@@ -1778,14 +1778,11 @@ static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
 {
 	ipa_debug("switch ch %ld to poll\n", ep->gsi_chan_hdl);
 	gsi_channel_intr_disable(ep->gsi_chan_hdl);
-	if (!gsi_is_channel_empty(ep->gsi_chan_hdl)) {
-		ipa_debug("ch %ld not empty\n", ep->gsi_chan_hdl);
-		/* queue a work to start polling if don't have one */
-		if (atomic_xchg(&ep->sys->curr_polling_state, 1))
-			return;
-		ipa_inc_acquire_wakelock();
-		queue_work(ep->sys->wq, &ep->sys->work);
-	}
+	/* queue a work to start polling if don't have one */
+	if (atomic_xchg(&ep->sys->curr_polling_state, 1))
+		return;
+	ipa_inc_acquire_wakelock();
+	queue_work(ep->sys->wq, &ep->sys->work);
 }
 
 /* Suspend a consumer pipe */
