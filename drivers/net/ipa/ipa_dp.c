@@ -2155,16 +2155,7 @@ void ipa_gsi_irq_tx_notify_cb(void *xfer_data)
 void ipa_gsi_irq_rx_notify_cb(void *chan_data, void *xfer_data, u16 count)
 {
 	struct ipa_sys_context *sys = chan_data;
-	struct ipa_rx_pkt_wrapper *rx_pkt_rcvd = xfer_data;
-	struct ipa_rx_pkt_wrapper *rx_pkt_expected;
 
-	rx_pkt_expected = list_first_entry(&sys->head_desc_list,
-					   struct ipa_rx_pkt_wrapper, link);
-	if (rx_pkt_expected != rx_pkt_rcvd) {
-		ipa_err("Pkt was not filled in head of rx buffer.\n");
-		WARN_ON(1);
-		return;
-	}
 	sys->ep->bytes_xfered_valid = true;
 	sys->ep->bytes_xfered = count;
 
