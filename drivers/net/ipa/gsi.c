@@ -567,16 +567,6 @@ static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt, bool callback)
 	return evt->len;
 }
 
-static u16 gsi_process_evt_re(struct gsi_evt_ctx *evtr, bool callback)
-{
-	struct gsi_xfer_compl_evt *evt;
-
-	evt = ipahal_dma_phys_to_virt(&evtr->ring.mem,
-				      evtr->ring.rp_local);
-
-	return gsi_process_chan(evt, callback);
-}
-
 static void gsi_ring_evt_doorbell(struct gsi_evt_ctx *evtr)
 {
 	u32 val;
@@ -636,13 +626,17 @@ static void handle_event(int evt_id)
 
 		check_again = false;
 		while (evtr->ring.rp_local != evtr->ring.rp) {
+			struct gsi_xfer_compl_evt *evt;
+
 			if (atomic_read(&evtr->chan->poll_mode)) {
 				check_again = false;
 				break;
 			}
 			check_again = true;
 
-			(void)gsi_process_evt_re(evtr, true);
+			evt = ipahal_dma_phys_to_virt(&evtr->ring.mem,
+						      evtr->ring.rp_local);
+			(void)gsi_process_chan(evt, true);
 
 			ring_rp_local_inc(&evtr->ring);
 			ring_wp_local_inc(&evtr->ring); /* recycle element */
@@ -1920,7 +1914,11 @@ int gsi_poll_channel(unsigned long chan_id)
 
 	empty = evtr->ring.rp == evtr->ring.rp_local;
 	if (!empty) {
-		size = gsi_process_evt_re(evtr, false);
+		struct gsi_xfer_compl_evt *evt;
+
+		evt = ipahal_dma_phys_to_virt(&evtr->ring.mem,
+					      evtr->ring.rp_local);
+		size = gsi_process_chan(evt, false);
 
 		ring_rp_local_inc(&evtr->ring);
 		ring_wp_local_inc(&evtr->ring); /* recycle element */
