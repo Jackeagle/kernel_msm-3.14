@@ -2159,13 +2159,12 @@ void ipa_gsi_irq_rx_notify_cb(void *chan_data, void *xfer_data, u16 count)
 	sys->ep->bytes_xfered_valid = true;
 	sys->ep->bytes_xfered = count;
 
-	if (atomic_read(&sys->curr_polling_state))
+	if (atomic_xchg(&sys->curr_polling_state, 1))
 		return;
-
 	/* put the gsi channel into polling mode */
 	gsi_channel_intr_disable(sys->ep->gsi_chan_hdl);
 	ipa_inc_acquire_wakelock();
-	atomic_set(&sys->curr_polling_state, 1);
+
 	if (!sys->ep->napi_enabled) {
 		queue_work(sys->wq, &sys->work);
 		return;
