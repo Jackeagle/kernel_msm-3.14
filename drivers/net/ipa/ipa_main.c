@@ -746,7 +746,7 @@ fail_ch20_wa:
  * Return codes:
  * None
  */
-static void ipa_enable_clks(void)
+void ipa_enable_clks(void)
 {
 	ipa_debug("enabling IPA clocks and bus voting\n");
 
@@ -758,7 +758,7 @@ static void ipa_enable_clks(void)
  * Return codes:
  * None
  */
-static void ipa_disable_clks(void)
+void ipa_disable_clks(void)
 {
 	ipa_debug("disabling IPA clocks and bus voting\n");
 
@@ -855,7 +855,6 @@ static void ipa_client_add_first(void)
 
 	/* A reference might have been added while awaiting the mutex. */
 	if (!atomic_inc_not_zero(&ipa_ctx->ipa_active_clients.cnt)) {
-		ipa_enable_clks();
 		ipa_suspend_apps_pipes(false);
 		atomic_inc(&ipa_ctx->ipa_active_clients.cnt);
 	} else {
@@ -937,12 +936,10 @@ static void ipa_client_remove_final(void)
 	mutex_lock(&ipa_ctx->ipa_active_clients.mutex);
 
 	ret = atomic_sub_return(1, &ipa_ctx->ipa_active_clients.cnt);
-	if (!ret) {
+	if (!ret)
 		ipa_suspend_apps_pipes(true);
-		ipa_disable_clks();
-	} else {
+	else
 		ipa_assert(ret > 0);
-	}
 
 	mutex_unlock(&ipa_ctx->ipa_active_clients.mutex);
 

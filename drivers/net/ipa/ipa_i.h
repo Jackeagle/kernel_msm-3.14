@@ -881,6 +881,9 @@ int ipa_send_cmd(u16 num_desc, struct ipa_desc *descr);
 #define ipa_client_remove_wait(id, log_it) \
 	_ipa_client_remove_wait((id), (log_it), __FILE__, __LINE__)
 
+void ipa_enable_clks(void);
+void ipa_disable_clks(void);
+
 void _ipa_client_add(const char *id, bool log_it, const char *file, int line);
 bool _ipa_client_add_additional(const char *id, bool log_it,
 				const char *file, int line);
