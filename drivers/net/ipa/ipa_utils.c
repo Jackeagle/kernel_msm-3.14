@@ -1790,7 +1790,7 @@ static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
 	}
 }
 
-static int suspend_pipe(enum ipa_client_type client, bool suspend)
+static void suspend_pipe(enum ipa_client_type client, bool suspend)
 {
 	int ipa_ep_idx = ipa_get_ep_mapping(client);
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
@@ -1803,21 +1803,12 @@ static int suspend_pipe(enum ipa_client_type client, bool suspend)
 		ipa_gsi_poll_after_suspend(ep);
 	else if (!atomic_read(&ep->sys->curr_polling_state))
 		gsi_channel_intr_enable(ep->gsi_chan_hdl);
-
-	return 0;
 }
 
 void ipa_suspend_apps_pipes(bool suspend)
 {
-	int ret;
-
-	ret = suspend_pipe(IPA_CLIENT_APPS_LAN_CONS, suspend);
-	ipa_assert(!ret);
-
-	/* Considering the case for SSR. */
-	ret = suspend_pipe(IPA_CLIENT_APPS_WAN_CONS, suspend);
-	if (ret < 0)
-		ipa_debug("error suspending WAN consumer\n");
+	suspend_pipe(IPA_CLIENT_APPS_LAN_CONS, suspend);
+	suspend_pipe(IPA_CLIENT_APPS_WAN_CONS, suspend);
 }
 
 /** ipa_cfg_route() - configure IPA route
