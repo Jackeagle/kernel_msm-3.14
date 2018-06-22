@@ -2164,17 +2164,7 @@ void ipa_gsi_irq_rx_notify_cb(void *chan_data, void *xfer_data, u16 count)
 	/* put the gsi channel into polling mode */
 	gsi_channel_intr_disable(sys->ep->gsi_chan_hdl);
 	ipa_inc_acquire_wakelock();
-
-	if (!sys->ep->napi_enabled) {
-		queue_work(sys->wq, &sys->work);
-		return;
-	}
-
-	/* Matching disable is in ipa_rx_poll() */
-	if (ipa_client_add_additional("NAPI", true))
-		sys->ep->client_notify(sys->ep->priv, IPA_CLIENT_START_POLL, 0);
-	else
-		queue_work(sys->wq, &sys->work);
+	queue_work(sys->wq, &sys->work);
 }
 
 /* GSI ring length is calculated based on the desc_fifo_sz which
