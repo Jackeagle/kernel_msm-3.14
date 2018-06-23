@@ -524,7 +524,7 @@ static u16 ring_wp_local_index(struct gsi_ring_ctx *ring)
 	return (u16)(ring->wp_local - ring->mem.phys_base) / ring->elem_sz;
 }
 
-static void chan_xfer_cb(struct gsi_chan_ctx *chan, u8 evt_id, u16 count)
+static void chan_xfer_cb(struct gsi_chan_ctx *chan, u16 count)
 {
 	void *xfer_data;
 
@@ -549,7 +549,7 @@ static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt, bool callback)
 
 	if (callback) {
 		if (evt->code == GSI_CHAN_EVT_EOT)
-			chan_xfer_cb(chan, evt->code, evt->len);
+			chan_xfer_cb(chan, evt->len);
 		else
 			ipa_err("ch %hhu unexpected %sX event id %hhu\n",
 				chan_id, chan->props.from_gsi ? "R" : "T",
