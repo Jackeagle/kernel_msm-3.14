@@ -245,9 +245,6 @@ struct ipa_mem_buffer {
 	u32 size;
 };
 
-/** max size of the header to be inserted */
-#define IPA_HDR_MAX_SIZE 64
-
 /** enum ipa_cs_offload - checksum offload setting */
 enum ipa_cs_offload {
 	IPA_DISABLE_CS_OFFLOAD		= 0,
