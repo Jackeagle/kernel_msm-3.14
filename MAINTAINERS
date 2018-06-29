@@ -11040,13 +11040,6 @@ L:	qat-linux@intel.com
 S:	Supported
 F:	drivers/crypto/qat/
 
-QCOM IPA DRIVER
-M:	Alex Elder <elder@kernel.org>
-L:	netdev@vger.kernel.org
-S:	Supported
-F:	drivers/net/ipa/
-F:	include/dt-bindings/soc/qcom,ipa.h
-
 QCOM AUDIO (ASoC) DRIVERS
 M:	Patrick Lai <plai@codeaurora.org>
 M:	Banajit Goswami <bgoswami@codeaurora.org>

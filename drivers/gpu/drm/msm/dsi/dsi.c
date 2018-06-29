@@ -120,16 +120,7 @@ static int dsi_bind(struct device *dev, struct device *master, void *data)
 	if (IS_ERR(msm_dsi))
 		return PTR_ERR(msm_dsi);
 
-	/* Add only the host which has a device attached to it */
-	if (msm_dsi_has_valid_device(msm_dsi->host)) {
-		pr_info("id = %d has valid device\n", msm_dsi->id);
-		priv->dsi[msm_dsi->id] = msm_dsi;
-	} else {
-		dev_info(dev, "id = %d has no valid device\n",
-			 msm_dsi->id);
-		//dsi_destroy(msm_dsi);
-		//return -EINVAL;
-	}
+	priv->dsi[msm_dsi->id] = msm_dsi;
 
 	return 0;
 }
@@ -216,9 +207,6 @@ int msm_dsi_modeset_init(struct msm_dsi *msm_dsi, struct drm_device *dev,
 		dev_err(dev->dev, "failed to modeset init host: %d\n", ret);
 		goto fail;
 	}
-
-	if (!msm_dsi_manager_validate_current_config(msm_dsi->id))
-		goto fail;
 
 	msm_dsi->encoder = encoder;
 

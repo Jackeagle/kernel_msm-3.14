@@ -28,8 +28,6 @@ struct reset_controller_dev;
  * @gds_hw_ctrl: gds_hw_ctrl register
  * @cxcs: offsets of branch registers to toggle mem/periph bits in
  * @cxc_count: number of @cxcs
- * @cxcs: offsets of rcg cmd registers to force enable the ROOT_EN bit
- * @cxc_count: number of @rcgs
  * @pwrsts: Possible powerdomain power states
  * @resets: ids of resets associated with this gdsc
  * @reset_count: number of @resets
@@ -44,8 +42,6 @@ struct gdsc {
 	unsigned int			clamp_io_ctrl;
 	unsigned int			*cxcs;
 	unsigned int			cxc_count;
-	unsigned int			*rcgs;
-	unsigned int			rcg_count;
 	const u8			pwrsts;
 /* Powerdomain allowable state bitfields */
 #define PWRSTS_OFF		BIT(0)
@@ -60,7 +56,6 @@ struct gdsc {
 #define SW_RESET	BIT(3)
 #define AON_RESET	BIT(4)
 #define POLL_CFG_GDSCR	BIT(5)
-#define FORCE_ROOT_ENABLE	BIT(6)
 	struct reset_controller_dev	*rcdev;
 	unsigned int			*resets;
 	unsigned int			reset_count;

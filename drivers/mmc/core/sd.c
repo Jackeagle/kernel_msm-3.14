@@ -769,8 +769,6 @@ try_again:
 		ocr |= SD_OCR_XPC;
 
 	err = mmc_send_app_op_cond(host, ocr, rocr);
-	pr_err("%s: Got card response for CMD41. ROCR supported: 0x%08x err:%d",
-			       mmc_hostname(host), *rocr, err);
 	if (err)
 		return err;
 
