@@ -17,6 +17,7 @@
 / {
 	aliases {
 		serial0 = &uart9;
+		hsuart0 = &uart6;
 	};
 
 	chosen {
@@ -753,6 +754,19 @@ ap_ts_i2c: &i2c14 {
 	};
 };
 
+&uart6 {
+	status = "okay";
+	bluetooth: bt_wcn3990 {
+		compatible = "qcom,wcn3990-bt";
+		vddio-supply = <&src_pp1350_s3a>;
+		vddxtal-supply = <&src_pp2040_s5a>;
+		vddcore-supply = <&pp1800_l7a_wcn3990>;
+		vddpa-supply = <&src_pp1300_l17a>;
+		vddldo-supply = <&pp3300_l25a_ch0_wcn3990>;
+		max-speed = <3200000>;
+	};
+};
+
 &uart9 {
 	status = "okay";
 };
@@ -924,6 +938,19 @@ ap_ts_i2c: &i2c14 {
 		pins = "gpio53", "gpio54", "gpio55", "gpio56";
 		drive-strength = <2>;
 		bias-disable;
+	};
+};
+
+&qup_uart6_default {
+	pinconf-tx {
+		pins = "gpio46", "gpio47";
+		drive-strength = <2>;
+		bias-disable;
+	};
+	pinconf-rx {
+		pins = "gpio45", "gpio48";
+		drive-strength = <2>;
+		bias-pull-up;
 	};
 };
 
