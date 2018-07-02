@@ -361,6 +361,14 @@
 		ranges = <0 0 0 0xffffffff>;
 		compatible = "simple-bus";
 
+		qcom,rmtfs_sharedmem@0 {
+			compatible = "qcom,sharedmem-uio";
+			reg = <0x0 0x200000>;
+			reg-names = "rmtfs";
+			qcom,client-id = <0x00000001>;
+			qcom,guard-memory;
+		};
+
 		gcc: clock-controller@100000 {
 			compatible = "qcom,gcc-sdm845";
 			reg = <0x100000 0x1f0000>;
