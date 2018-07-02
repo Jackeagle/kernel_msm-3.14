@@ -138,7 +138,7 @@ adreno_request_fw(struct adreno_gpu *adreno_gpu, const char *fwname)
 	return ERR_PTR(-ENOENT);
 }
 
-static int adreno_load_fw(struct adreno_gpu *adreno_gpu)
+int adreno_load_fw(struct adreno_gpu *adreno_gpu)
 {
 	int i;
 
