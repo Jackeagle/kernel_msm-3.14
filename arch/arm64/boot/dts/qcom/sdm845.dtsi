@@ -1612,13 +1612,13 @@
 				     <GIC_SPI 305 IRQ_TYPE_LEVEL_HIGH>;
 			interrupt-names = "hfi", "gmu";
 
-			clocks = <&clock_gpucc GPU_CC_CX_GMU_CLK>,
-				<&clock_gpucc GPU_CC_CXO_CLK>,
+			clocks = <&gpucc GPU_CC_CX_GMU_CLK>,
+				<&gpucc GPU_CC_CXO_CLK>,
 				<&gcc GCC_DDRSS_GPU_AXI_CLK>,
 				<&gcc GCC_GPU_MEMNOC_GFX_CLK>;
 			clock-names = "gmu", "cxo", "axi", "memnoc";
 
-			power-domains = <&clock_gpucc GPU_CX_GDSC>;
+			power-domains = <&gpucc GPU_CX_GDSC>;
 			iommus = <&kgsl_smmu 5>;
 
 			operating-points-v2 = <&gmu_opp_table>;
