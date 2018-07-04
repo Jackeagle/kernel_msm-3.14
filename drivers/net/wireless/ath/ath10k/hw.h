@@ -571,6 +571,11 @@ struct ath10k_hw_params {
 
 	/* target supporting per ce IRQ */
 	bool per_ce_irq;
+
+	/* targets which require hw filter reset during boot up,
+	 * to avoid it sending spurious acks.
+	 */
+	bool hw_filter_reset_required;
 };
 
 struct htt_rx_desc;
