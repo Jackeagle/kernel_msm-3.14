@@ -467,6 +467,16 @@
 			regulator-max-microvolt = <600000>;
 		};
 	};
+
+	pinctrl@3400000 {
+		qup-i2c10-default {
+			pinconf {
+				pins = "gpio55", "gpio56";
+				drive-strength = <2>;
+				bias-disable;
+			};
+		};
+	};
 };
 
 &dsi0 {
@@ -700,19 +710,6 @@
 		pins = "gpio55", "gpio56";
 		drive-strength = <2>;
 		bias-disable;
-	};
-};
-
-&qup_uart6_default {
-	pinconf-tx {
-		pins = "gpio46", "gpio47";
-		drive-strength = <2>;
-		bias-disable;
-	};
-	pinconf-rx {
-		pins = "gpio45", "gpio48";
-		drive-strength = <2>;
-		bias-pull-up;
 	};
 };
 
