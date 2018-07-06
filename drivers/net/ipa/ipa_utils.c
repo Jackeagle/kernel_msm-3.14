@@ -1417,10 +1417,8 @@ int ipa_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 /* #define LO_HI_CHECK(name)	BUILD_BUG_ON(name ## _LO > name ## _HI) */
 #define LO_HI_CHECK(name)	/* checkpatch.pl doesn't like the above macro */
 
-void ipa_init_mem_info(void)
+void ipa_init_mem_info(u32 *mem_info)
 {
-	u32 *mem_info = &ipa_ctx->mem_info[0];
-
 	memset(mem_info, 0, sizeof(ipa_ctx->mem_info));
 
 	mem_info[OFST_START] = IPA_MEM_OFST_START;
