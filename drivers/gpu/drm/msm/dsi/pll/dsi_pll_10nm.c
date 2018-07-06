@@ -316,7 +316,7 @@ static int dsi_pll_10nm_vco_set_rate(struct clk_hw *hw, unsigned long rate,
 	    parent_rate);
 
 	pll_10nm->vco_current_rate = rate;
-	pll_10nm->vco_ref_clk_rate = 19200000;
+	pll_10nm->vco_ref_clk_rate = parent_rate;
 
 	dsi_pll_setup_config(pll_10nm);
 
@@ -797,8 +797,6 @@ struct msm_dsi_pll *msm_dsi_pll_10nm_init(struct platform_device *pdev, int id)
 		dev_err(&pdev->dev, "failed to map PLL base\n");
 		return ERR_PTR(-ENOMEM);
 	}
-
-	spin_lock_init(&pll_10nm->postdiv_lock);
 
 	pll = &pll_10nm->base;
 	pll->min_rate = 1000000000UL;

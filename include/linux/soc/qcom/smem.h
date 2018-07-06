@@ -9,5 +9,4 @@ void *qcom_smem_get(unsigned host, unsigned item, size_t *size);
 
 int qcom_smem_get_free_space(unsigned host);
 
-extern void qcom_socinfo_init(struct device *device);
 #endif

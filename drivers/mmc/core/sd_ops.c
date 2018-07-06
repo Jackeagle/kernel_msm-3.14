@@ -177,11 +177,8 @@ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
 	if (!i)
 		pr_err("%s: card never left busy state\n", mmc_hostname(host));
 
-	if (rocr && !mmc_host_is_spi(host)) {
-		pr_err("%s: Got card response for CMD41. ROCR supported: 0x%08x",
-			       mmc_hostname(host), cmd.resp[0]);
+	if (rocr && !mmc_host_is_spi(host))
 		*rocr = cmd.resp[0];
-	}
 
 	return err;
 }

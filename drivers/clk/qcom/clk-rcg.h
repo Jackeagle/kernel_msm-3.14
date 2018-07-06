@@ -7,8 +7,6 @@
 #include <linux/clk-provider.h>
 #include "clk-regmap.h"
 
-#define F(f, s, h, m, n) { (f), (s), (2 * (h) - 1), (m), (n) }
-
 struct freq_tbl {
 	unsigned long freq;
 	u8 src;
@@ -162,6 +160,5 @@ extern const struct clk_ops clk_byte2_ops;
 extern const struct clk_ops clk_pixel_ops;
 extern const struct clk_ops clk_gfx3d_ops;
 extern const struct clk_ops clk_rcg2_shared_ops;
-extern const struct clk_ops clk_rcg2_gfx3d_ops;
 
 #endif

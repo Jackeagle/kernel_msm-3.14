@@ -17,7 +17,6 @@
 #include <linux/err.h>
 #include <linux/pm_domain.h>
 
-struct clk_hw;
 struct regmap;
 struct reset_controller_dev;
 
@@ -33,8 +32,6 @@ struct reset_controller_dev;
  * @resets: ids of resets associated with this gdsc
  * @reset_count: number of @resets
  * @rcdev: reset controller
- * @clk_count: number of associated clocks
- * @clk_hws: clk_hw pointers for associated clocks with gdsc
  */
 struct gdsc {
 	struct generic_pm_domain	pd;
@@ -62,8 +59,6 @@ struct gdsc {
 	struct reset_controller_dev	*rcdev;
 	unsigned int			*resets;
 	unsigned int			reset_count;
-	unsigned int			clk_count;
-	struct clk_hw			*clk_hws[];
 };
 
 struct gdsc_desc {

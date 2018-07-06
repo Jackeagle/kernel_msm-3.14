@@ -72,7 +72,7 @@ config QCOM_PM
 	  low power modes.
 
 config QCOM_QMI_HELPERS
-	tristate "Qualcomm QMI Helpers"
+	tristate
 	depends on ARCH_QCOM && NET
 	help
 	  Helper library for handling QMI encoded messages.  QMI encoded
@@ -106,7 +106,6 @@ config QCOM_SMEM
 	tristate "Qualcomm Shared Memory Manager (SMEM)"
 	depends on ARCH_QCOM
 	depends on HWSPINLOCK
-	select SOC_BUS
 	help
 	  Say y here to enable support for the Qualcomm Shared Memory Manager.
 	  The driver provides an interface to items in a heap shared among all
@@ -163,17 +162,4 @@ config QCOM_APR
           application processor and QDSP6. APR is
           used by audio driver to configure QDSP6
           ASM, ADM and AFE modules.
-
-config QCOM_BUS_SCALING
-	bool "Bus scaling driver"
-	help
-	  This option enables bus scaling on MSM devices.  Bus scaling
-	  allows devices to request the clocks be set to rates sufficient
-	  for the active devices needs without keeping the clocks at max
-	  frequency when a slower speed is sufficient.
-
-config QCOM_SCM
-	bool "Secure Channel Manager (SCM) support"
-	default n
-
 endmenu

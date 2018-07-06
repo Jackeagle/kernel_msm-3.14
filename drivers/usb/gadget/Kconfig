@@ -227,12 +227,6 @@ config USB_F_AUDIO_SRC
 config USB_F_ACC
 	tristate
 
-config USB_F_DIAG
-	tristate
-
-config USB_F_CDEV
-	 tristate
-
 # this first set of drivers all depend on bulk-capable hardware.
 
 config USB_CONFIGFS
@@ -406,26 +400,6 @@ config USB_CONFIGFS_F_ACC
 	select USB_F_ACC
 	help
 	  USB gadget Accessory support
-
-config USB_CONFIGFS_F_DIAG
-	bool "USB Diag function"
-	select USB_F_DIAG
-	depends on USB_CONFIGFS
-	help
-	  Diag function driver enables support for
-	  Qualcomm diagnostics port over USB. Enable
-	  this by choosing "Y" here. If in doubt,
-	  or to conserve kernel memory, say "N".
-
-config USB_CONFIGFS_F_CDEV
-	bool "USB Serial Character function"
-	select USB_F_CDEV
-	depends on USB_CONFIGFS
-	help
-	  Generic USB serial character function
-	  driver to support DUN/NMEA. Enable
-	  this by choosing "Y" here. If in doubt,
-	  or to conserve kernel memory, say "N".
 
 config USB_CONFIGFS_F_AUDIO_SRC
 	boolean "Audio Source gadget"
