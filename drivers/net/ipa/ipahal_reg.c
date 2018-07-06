@@ -275,14 +275,6 @@ ipareg_parse_endp_init_ctrl_n(enum ipahal_reg reg, void *fields, u32 val)
 }
 
 static u32
-ipareg_construct_endp_init_nat_n(enum ipahal_reg reg, const void *fields)
-{
-	const struct ipa_ep_cfg_nat *ep_nat = fields;
-
-	return field_gen(ep_nat->nat_en, NAT_EN_BMSK);
-}
-
-static u32
 ipareg_construct_endp_init_mode_n(enum ipahal_reg reg, const void *fields)
 {
 	const struct ipahal_reg_endp_init_mode *init_mode = fields;
@@ -543,8 +535,6 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
 			      endp_init_route_n,	0x00000828,	0x0070),
 		reg_obj_cfunc(ENDP_INIT_MODE_n,
 			      endp_init_mode_n,		0x00000820,	0x0070),
-		reg_obj_cfunc(ENDP_INIT_NAT_n,
-			      endp_init_nat_n,		0x0000080c,	0x0070),
 		reg_obj_both(ENDP_INIT_CTRL_n,
 			     endp_init_ctrl_n,		0x00000800,	0x0070),
 		reg_obj_cfunc(ENDP_INIT_HOL_BLOCK_EN_n,

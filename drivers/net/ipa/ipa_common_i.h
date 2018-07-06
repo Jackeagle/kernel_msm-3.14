@@ -294,13 +294,6 @@ enum ipa_mode_type {
 	IPA_DMA,
 };
 
-/** enum ipa_nat_en_type - NAT setting type in IPA end-point */
-enum ipa_nat_en_type {
-	IPA_BYPASS_NAT,
-	IPA_SRC_NAT,
-	IPA_DST_NAT,
-};
-
 /** enum ipa_aggr_en_type - aggregation setting type in IPA end-point */
 enum ipa_aggr_en_type {
 	IPA_BYPASS_AGGR,
@@ -336,15 +329,6 @@ enum ipa_ip_type {
 	IPA_IP_v4,
 	IPA_IP_v6,
 	IPA_IP_MAX
-};
-
-/** struct ipa_ep_cfg_nat - NAT configuration in IPA end-point
- * @nat_en:	This defines the default NAT mode for the pipe: in case of
- *		filter miss - the default NAT mode defines the NATing operation
- *		on the packet. Valid for Input Pipes only (IPA consumer)
- */
-struct ipa_ep_cfg_nat {
-	enum ipa_nat_en_type nat_en;
 };
 
 /** struct ipa_ep_cfg_hdr - header configuration in IPA end-point
@@ -575,7 +559,6 @@ struct ipa_ep_cfg_metadata_mask {
 };
 
 /** struct ipa_ep_cfg - configuration of IPA end-point
- * @nat:		NAT parmeters
  * @hdr:		Header parameters
  * @hdr_ext:		Extended header parameters
  * @mode:		Mode parameters
@@ -588,7 +571,6 @@ struct ipa_ep_cfg_metadata_mask {
  * @seq:		HPS/DPS sequencers configuration
  */
 struct ipa_ep_cfg {
-	struct ipa_ep_cfg_nat nat;
 	struct ipa_ep_cfg_hdr hdr;
 	struct ipa_ep_cfg_hdr_ext hdr_ext;
 	struct ipa_ep_cfg_mode mode;
