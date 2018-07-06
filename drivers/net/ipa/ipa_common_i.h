@@ -301,12 +301,6 @@ enum ipa_nat_en_type {
 	IPA_DST_NAT,
 };
 
-/** enum ipa_ipv6ct_en_type - IPv6CT setting type in IPA end-point */
-enum ipa_ipv6ct_en_type {
-	IPA_BYPASS_IPV6CT,
-	IPA_ENABLE_IPV6CT,
-};
-
 /** enum ipa_aggr_en_type - aggregation setting type in IPA end-point */
 enum ipa_aggr_en_type {
 	IPA_BYPASS_AGGR,
@@ -351,18 +345,6 @@ enum ipa_ip_type {
  */
 struct ipa_ep_cfg_nat {
 	enum ipa_nat_en_type nat_en;
-};
-
-/** struct ipa_ep_cfg_conn_track - IPv6 Connection tracking configuration in
- *	IPA end-point
- * @conn_track_en: Defines speculative conn_track action, means if specific
- *		   pipe needs to have UL/DL IPv6 Connection Tracking or Bybass
- *		   IPv6 Connection Tracking. 0: Bypass IPv6 Connection Tracking
- *					     1: IPv6 UL/DL Connection Tracking.
- *		  Valid for Input Pipes only (IPA consumer)
- */
-struct ipa_ep_cfg_conn_track {
-	enum ipa_ipv6ct_en_type conn_track_en;
 };
 
 /** struct ipa_ep_cfg_hdr - header configuration in IPA end-point
@@ -594,7 +576,6 @@ struct ipa_ep_cfg_metadata_mask {
 
 /** struct ipa_ep_cfg - configuration of IPA end-point
  * @nat:		NAT parmeters
- * @conn_track:		IPv6CT parmeters
  * @hdr:		Header parameters
  * @hdr_ext:		Extended header parameters
  * @mode:		Mode parameters
@@ -608,7 +589,6 @@ struct ipa_ep_cfg_metadata_mask {
  */
 struct ipa_ep_cfg {
 	struct ipa_ep_cfg_nat nat;
-	struct ipa_ep_cfg_conn_track conn_track;
 	struct ipa_ep_cfg_hdr hdr;
 	struct ipa_ep_cfg_hdr_ext hdr_ext;
 	struct ipa_ep_cfg_mode mode;
