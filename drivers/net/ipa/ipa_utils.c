@@ -1419,8 +1419,6 @@ int ipa_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 
 void ipa_init_mem_info(u32 *mem_info)
 {
-	memset(mem_info, 0, sizeof(ipa_ctx->mem_info));
-
 	mem_info[OFST_START] = IPA_MEM_OFST_START;
 	ipa_debug("RAM OFST 0x%x\n", mem_info[OFST_START]);
 
