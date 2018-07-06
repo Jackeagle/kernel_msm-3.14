@@ -1840,7 +1840,7 @@ static int ipa_smp2p_init(struct device *dev)
 		return -ENODEV;
 	}
 
-	/* Success.  Record in our smp2p information */
+	/* Success.  Record our smp2p information */
 	ipa_ctx->smp2p_info.valid_state = valid_state;
 	ipa_ctx->smp2p_info.valid_bit = valid_bit;
 	ipa_ctx->smp2p_info.enabled_state = enabled_state;
@@ -1852,6 +1852,7 @@ static int ipa_smp2p_init(struct device *dev)
 static void ipa_smp2p_exit(void)
 {
 	memset(&ipa_ctx->smp2p_info, 0, sizeof(ipa_ctx->smp2p_info));
+	/* IRQ will be released when device goes away */
 }
 
 static const struct of_device_id ipa_plat_drv_match[] = {
