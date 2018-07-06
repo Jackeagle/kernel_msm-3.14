@@ -475,17 +475,6 @@ struct ipa_ep_cfg_aggr {
 	bool aggr_sw_eof_active;
 };
 
-/** struct ipa_ep_cfg_route - route configuration in IPA end-point
- * @rt_tbl_hdl: Defines the default routing table index to be used in case there
- *		is no filter rule matching, valid for Input Pipes only (IPA
- *		Consumer). Clients should set this to 0 which will cause default
- *		v4 and v6 routes setup internally by IPA driver to be used for
- *		this end-point
- */
-struct ipa_ep_cfg_route {
-	u32 rt_tbl_hdl;
-};
-
 /** struct ipa_ep_cfg_holb - head of line blocking config in IPA end-point
  * @en: enable(1 => ok to drop pkt)/disable(0 => never drop pkt)
  * @tmr_val: duration in units of 128 IPA clk clock cyles [0,511], 1 clk=1.28us
@@ -564,7 +553,6 @@ struct ipa_ep_cfg_metadata_mask {
  * @mode:		Mode parameters
  * @aggr:		Aggregation parameters
  * @deaggr:		Deaggregation params
- * @route:		Routing parameters
  * @cfg:		Configuration register data
  * @metadata_mask:	Hdr metadata mask
  * @meta:		Meta Data
@@ -576,7 +564,6 @@ struct ipa_ep_cfg {
 	struct ipa_ep_cfg_mode mode;
 	struct ipa_ep_cfg_aggr aggr;
 	struct ipa_ep_cfg_deaggr deaggr;
-	struct ipa_ep_cfg_route route;
 	struct ipa_ep_cfg_cfg cfg;
 	struct ipa_ep_cfg_metadata_mask metadata_mask;
 };
