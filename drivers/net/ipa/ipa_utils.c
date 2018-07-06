@@ -1407,8 +1407,8 @@ int ipa_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 #define IPA_MEM_UC_EVENT_RING_OFST_ALIGN	1024
 #define IPA_MEM_UC_EVENT_RING_SIZE		0x400
 
-/** ipa_init_mem_info() - Reads IPA memory map from DTS, performs alignment
- * checks and logs the fetched values.
+/** ipa_init_mem_info() - record memory offsets and sizes, and perform some
+ * compile-time sanity checks of the values used.
  */
 #define ALIGN_CHECK(name) \
 		({ u32 _n = (name); BUILD_BUG_ON(_n % name ## _ALIGN); _n; })
@@ -1417,7 +1417,7 @@ int ipa_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 /* #define LO_HI_CHECK(name)	BUILD_BUG_ON(name ## _LO > name ## _HI) */
 #define LO_HI_CHECK(name)	/* checkpatch.pl doesn't like the above macro */
 
-void ipa_init_mem_info(struct device_node *node)
+void ipa_init_mem_info(void)
 {
 	u32 *mem_info = &ipa_ctx->mem_info[0];
 

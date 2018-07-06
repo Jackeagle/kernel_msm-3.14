@@ -1919,7 +1919,7 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 
 	ipahal_init(hw_version, ipa_ctx->mmio);
 
-	ipa_init_mem_info(node);
+	ipa_init_mem_info();
 
 	ipa_init_ep_flt_bitmap();
 	if (!ipa_ctx->ep_flt_num) {
