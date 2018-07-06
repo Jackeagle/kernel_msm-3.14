@@ -555,8 +555,6 @@ struct ipa_ep_cfg_metadata_mask {
  * @deaggr:		Deaggregation params
  * @cfg:		Configuration register data
  * @metadata_mask:	Hdr metadata mask
- * @meta:		Meta Data
- * @seq:		HPS/DPS sequencers configuration
  */
 struct ipa_ep_cfg {
 	struct ipa_ep_cfg_hdr hdr;
