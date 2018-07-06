@@ -1932,146 +1932,79 @@ static enum ipa_hw_version ipa_version_get(struct platform_device *pdev)
 static void ipa_init_mem_info(u32 *mem_info)
 {
 	mem_info[OFST_START] = IPA_MEM_OFST_START;
-	ipa_debug("RAM OFST 0x%x\n", mem_info[OFST_START]);
 
 	mem_info[V4_FLT_HASH_OFST] = ALIGN_CHECK(IPA_MEM_V4_FLT_HASH_OFST);
 	mem_info[V4_FLT_HASH_SIZE] = NONZERO_CHECK(IPA_MEM_V4_FLT_HASH_SIZE);
 	mem_info[V4_FLT_HASH_SIZE_DDR] = IPA_MEM_V4_FLT_HASH_SIZE_DDR;
-	ipa_debug("V4 FLT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-		  mem_info[V4_FLT_HASH_OFST],
-		  mem_info[V4_FLT_HASH_SIZE],
-		  mem_info[V4_FLT_HASH_SIZE_DDR]);
 
 	mem_info[V4_FLT_NHASH_OFST] = ALIGN_CHECK(IPA_MEM_V4_FLT_NHASH_OFST);
 	mem_info[V4_FLT_NHASH_SIZE] = NONZERO_CHECK(IPA_MEM_V4_FLT_NHASH_SIZE);
 	mem_info[V4_FLT_NHASH_SIZE_DDR] = IPA_MEM_V4_FLT_NHASH_SIZE_DDR;
-	ipa_debug("V4 FLT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-		  mem_info[V4_FLT_NHASH_OFST],
-		  mem_info[V4_FLT_NHASH_SIZE],
-		  mem_info[V4_FLT_NHASH_SIZE_DDR]);
 
 	mem_info[V6_FLT_HASH_OFST] = ALIGN_CHECK(IPA_MEM_V6_FLT_HASH_OFST);
 	mem_info[V6_FLT_HASH_SIZE] = NONZERO_CHECK(IPA_MEM_V6_FLT_HASH_SIZE);
 	mem_info[V6_FLT_HASH_SIZE_DDR] = IPA_MEM_V6_FLT_HASH_SIZE_DDR;
-	ipa_debug("V6 FLT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-		  mem_info[V6_FLT_HASH_OFST],
-		  mem_info[V6_FLT_HASH_SIZE],
-		  mem_info[V6_FLT_HASH_SIZE_DDR]);
 
 	mem_info[V6_FLT_NHASH_OFST] = ALIGN_CHECK(IPA_MEM_V6_FLT_NHASH_OFST);
 	mem_info[V6_FLT_NHASH_SIZE] = NONZERO_CHECK(IPA_MEM_V6_FLT_NHASH_SIZE);
 	mem_info[V6_FLT_NHASH_SIZE_DDR] = IPA_MEM_V6_FLT_NHASH_SIZE_DDR;
-	ipa_debug("V6 FLT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-		  mem_info[V6_FLT_NHASH_OFST],
-		  mem_info[V6_FLT_NHASH_SIZE],
-		  mem_info[V6_FLT_NHASH_SIZE_DDR]);
 
 	mem_info[V4_RT_NUM_INDEX] = NONZERO_CHECK(IPA_MEM_V4_RT_NUM_INDEX);
-	ipa_debug("V4 RT NUM INDEX 0x%x\n", mem_info[V4_RT_NUM_INDEX]);
 
 	LO_HI_CHECK(IPA_MEM_V4_MODEM_RT_INDEX);
 	mem_info[V4_MODEM_RT_INDEX_LO] = IPA_MEM_V4_MODEM_RT_INDEX_LO;
 	mem_info[V4_MODEM_RT_INDEX_HI] = IPA_MEM_V4_MODEM_RT_INDEX_HI;
-	ipa_debug("V4 RT MODEM INDEXES 0x%x - 0x%x\n",
-		  mem_info[V4_MODEM_RT_INDEX_LO],
-		  mem_info[V4_MODEM_RT_INDEX_HI]);
 
 	mem_info[V4_APPS_RT_INDEX_LO] = IPA_MEM_V4_APPS_RT_INDEX_LO;
 	mem_info[V4_APPS_RT_INDEX_HI] = IPA_MEM_V4_APPS_RT_INDEX_HI;
-	ipa_debug("V4 RT APPS INDEXES 0x%x - 0x%x\n",
-		  mem_info[V4_APPS_RT_INDEX_LO],
-		  mem_info[V4_APPS_RT_INDEX_HI]);
 
 	mem_info[V4_RT_HASH_OFST] = ALIGN_CHECK(IPA_MEM_V4_RT_HASH_OFST);
 	mem_info[V4_RT_HASH_SIZE] = NONZERO_CHECK(IPA_MEM_V4_RT_HASH_SIZE);
 	mem_info[V4_RT_HASH_SIZE_DDR] = IPA_MEM_V4_RT_HASH_SIZE_DDR;
-	ipa_debug("V4 RT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-		  mem_info[V4_RT_HASH_OFST],
-		  mem_info[V4_RT_HASH_SIZE],
-		  mem_info[V4_RT_HASH_SIZE_DDR]);
 
 	mem_info[V4_RT_NHASH_OFST] = ALIGN_CHECK(IPA_MEM_V4_RT_NHASH_OFST);
 	mem_info[V4_RT_NHASH_SIZE] = NONZERO_CHECK(IPA_MEM_V4_RT_NHASH_SIZE);
 	mem_info[V4_RT_NHASH_SIZE_DDR] = IPA_MEM_V4_RT_NHASH_SIZE_DDR;
-	ipa_debug("V4 RT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-		  mem_info[V4_RT_NHASH_OFST],
-		  mem_info[V4_RT_NHASH_SIZE],
-		  mem_info[V4_RT_NHASH_SIZE_DDR]);
 
 	mem_info[V6_RT_NUM_INDEX] = NONZERO_CHECK(IPA_MEM_V6_RT_NUM_INDEX);
-	ipa_debug("V6 RT NUM INDEX 0x%x\n", mem_info[V6_RT_NUM_INDEX]);
 
 	LO_HI_CHECK(IPA_MEM_V6_MODEM_RT_INDEX);
 	mem_info[V6_MODEM_RT_INDEX_LO] = IPA_MEM_V6_MODEM_RT_INDEX_LO;
 	mem_info[V6_MODEM_RT_INDEX_HI] = IPA_MEM_V6_MODEM_RT_INDEX_HI;
-	ipa_debug("V6 RT MODEM INDEXES 0x%x - 0x%x\n",
-		  mem_info[V6_MODEM_RT_INDEX_LO],
-		  mem_info[V6_MODEM_RT_INDEX_HI]);
 
 	mem_info[V6_APPS_RT_INDEX_LO] = IPA_MEM_V6_APPS_RT_INDEX_LO;
 	mem_info[V6_APPS_RT_INDEX_HI] = IPA_MEM_V6_APPS_RT_INDEX_HI;
-	ipa_debug("V6 RT APPS INDEXES 0x%x - 0x%x\n",
-		  mem_info[V6_APPS_RT_INDEX_LO],
-		  mem_info[V6_APPS_RT_INDEX_HI]);
 
 	mem_info[V6_RT_HASH_OFST] = ALIGN_CHECK(IPA_MEM_V6_RT_HASH_OFST);
 	mem_info[V6_RT_HASH_SIZE] = NONZERO_CHECK(IPA_MEM_V6_RT_HASH_SIZE);
 	mem_info[V6_RT_HASH_SIZE_DDR] = IPA_MEM_V6_RT_HASH_SIZE_DDR;
-	ipa_debug("V6 RT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-		  mem_info[V6_RT_HASH_OFST],
-		  mem_info[V6_RT_HASH_SIZE],
-		  mem_info[V6_RT_HASH_SIZE_DDR]);
 
 	mem_info[V6_RT_NHASH_OFST] = ALIGN_CHECK(IPA_MEM_V6_RT_NHASH_OFST);
 	mem_info[V6_RT_NHASH_SIZE] = NONZERO_CHECK(IPA_MEM_V6_RT_NHASH_SIZE);
 	mem_info[V6_RT_NHASH_SIZE_DDR] = IPA_MEM_V6_RT_NHASH_SIZE_DDR;
-	ipa_debug("V6 RT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-		  mem_info[V6_RT_NHASH_OFST],
-		  mem_info[V6_RT_NHASH_SIZE],
-		  mem_info[V6_RT_NHASH_SIZE_DDR]);
 
 	mem_info[MODEM_HDR_OFST] = ALIGN_CHECK(IPA_MEM_MODEM_HDR_OFST);
 	mem_info[MODEM_HDR_SIZE] = IPA_MEM_MODEM_HDR_SIZE;
-	ipa_debug("MODEM HDR OFST 0x%x SIZE 0x%x\n",
-		  mem_info[MODEM_HDR_OFST],
-		  mem_info[MODEM_HDR_SIZE]);
 
 	mem_info[APPS_HDR_OFST] = ALIGN_CHECK(IPA_MEM_APPS_HDR_OFST);
 	mem_info[APPS_HDR_SIZE] = IPA_MEM_APPS_HDR_SIZE;
 	mem_info[APPS_HDR_SIZE_DDR] = IPA_MEM_APPS_HDR_SIZE_DDR;
-	ipa_debug("APPS HDR OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
-		  mem_info[APPS_HDR_OFST],
-		  mem_info[APPS_HDR_SIZE],
-		  mem_info[APPS_HDR_SIZE_DDR]);
 
 	mem_info[MODEM_HDR_PROC_CTX_OFST] =
 			ALIGN_CHECK(IPA_MEM_MODEM_HDR_PROC_CTX_OFST);
 	mem_info[MODEM_HDR_PROC_CTX_SIZE] = IPA_MEM_MODEM_HDR_PROC_CTX_SIZE;
-	ipa_debug("MODEM HDR PROC CTX OFST 0x%x SIZE 0x%x\n",
-		  mem_info[MODEM_HDR_PROC_CTX_OFST],
-		  mem_info[MODEM_HDR_PROC_CTX_SIZE]);
 
 	mem_info[APPS_HDR_PROC_CTX_OFST] =
 			ALIGN_CHECK(IPA_MEM_APPS_HDR_PROC_CTX_OFST);
 	mem_info[APPS_HDR_PROC_CTX_SIZE] = IPA_MEM_APPS_HDR_PROC_CTX_SIZE;
-	ipa_debug("APPS HDR PROC CTX OFST 0x%x SIZE 0x%x\n",
-		  mem_info[APPS_HDR_PROC_CTX_OFST],
-		  mem_info[APPS_HDR_PROC_CTX_SIZE]);
 
 	mem_info[MODEM_OFST] = ALIGN_CHECK(IPA_MEM_MODEM_OFST);
 	mem_info[MODEM_SIZE] = IPA_MEM_MODEM_SIZE;
-	ipa_debug("MODEM OFST 0x%x SIZE 0x%x\n",
-		  mem_info[MODEM_OFST],
-		  mem_info[MODEM_SIZE]);
 
 	mem_info[END_OFST] = IPA_MEM_END_OFST;
-	ipa_debug("RAM END OFST 0x%x\n", mem_info[END_OFST]);
 
 	mem_info[UC_EVENT_RING_OFST] = ALIGN_CHECK(IPA_MEM_UC_EVENT_RING_OFST);
 	mem_info[UC_EVENT_RING_SIZE] = IPA_MEM_UC_EVENT_RING_SIZE;
-	ipa_debug("UC EVENT RING OFST 0x%x SIZE 0x%x\n",
-		  mem_info[UC_EVENT_RING_OFST],
-		  mem_info[UC_EVENT_RING_SIZE]);
 }
 
 #undef LO_HI_CHECK
