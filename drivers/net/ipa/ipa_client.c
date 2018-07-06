@@ -25,7 +25,7 @@ ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep,
 			       struct gsi_chan_props *orig_chan_props,
 			       struct ipa_mem_buffer *chan_dma)
 {
-	struct gsi_chan_props chan_props;
+	struct gsi_chan_props chan_props = { };
 
 	/* Allocate the DMA space first; it can fail */
 	if (ipahal_dma_alloc(chan_dma, 2 * GSI_CHAN_RING_ELEMENT_SIZE,
@@ -33,7 +33,6 @@ ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep,
 		return -ENOMEM;
 
 	/* Set up channel properties */
-	memset(&chan_props, 0, sizeof(struct gsi_chan_props));
 	chan_props.from_gsi = true;
 	chan_props.ch_id = orig_chan_props->ch_id;
 	chan_props.evt_ring_hdl = orig_chan_props->evt_ring_hdl;
@@ -71,10 +70,10 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 {
 	int result;
 	int gsi_res;
-	struct gsi_chan_props orig_chan_props;
+	struct gsi_chan_props orig_chan_props = { };
 	struct ipa_mem_buffer chan_dma;
 	struct ipa_mem_buffer dma_byte;
-	struct gsi_xfer_elem xfer_elem;
+	struct gsi_xfer_elem xfer_elem = { };
 	int i;
 	int aggr_active_bitmap = 0;
 	bool pipe_suspended = false;
@@ -91,7 +90,6 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	}
 
 	/* Reconfigure channel to dummy GPI channel */
-	memset(&orig_chan_props, 0, sizeof(struct gsi_chan_props));
 	gsi_res = gsi_get_channel_cfg(ep->gsi_chan_hdl, &orig_chan_props);
 	if (gsi_res) {
 		ipa_err("Error getting channel properties: %d\n", gsi_res);
@@ -125,7 +123,6 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 		goto dma_alloc_fail;
 	}
 
-	memset(&xfer_elem, 0, sizeof(struct gsi_xfer_elem));
 	xfer_elem.addr = dma_byte.phys_base;
 	xfer_elem.len = 1;	/* = dma_byte.size; */
 	xfer_elem.flags = GSI_XFER_FLAG_EOT;

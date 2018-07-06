@@ -230,7 +230,7 @@ static bool ipa_send_nop(struct ipa_sys_context *sys)
 {
 	unsigned long chan_id = sys->ep->gsi_chan_hdl;
 	struct ipa_tx_pkt_wrapper *nop_pkt;
-	struct gsi_xfer_elem nop_xfer = { 0 };
+	struct gsi_xfer_elem nop_xfer = { };
 
 	nop_pkt = kmem_cache_zalloc(ipa_ctx->tx_pkt_wrapper_cache, GFP_KERNEL);
 	if (!nop_pkt)
@@ -1003,8 +1003,8 @@ void ipa_tx_cmd_comp(void *user1, int user2)
  */
 int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 {
-	struct ipa_desc *desc;
-	struct ipa_desc _desc;
+	struct ipa_desc _desc = { };
+	struct ipa_desc *desc = &_desc;	/* Default, linear case */
 	const struct ipa_gsi_ep_config *gsi_ep;
 	int src_ep_idx;
 	int data_idx;
@@ -1038,10 +1038,6 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 		desc = kzalloc((1 + nr_frags) * sizeof(*desc), GFP_ATOMIC);
 		if (!desc)
 			return -ENOMEM;
-	} else {
-		/* Avoid allocation failure for the linear case */
-		memset(&_desc, 0, sizeof(_desc));
-		desc = &_desc;
 	}
 
 	/* Fill in the IPA request descriptors--one for the linear
@@ -2201,7 +2197,7 @@ static long evt_ring_hdl_get(struct ipa_ep_context *ep, u32 desc_fifo_sz)
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 				 struct ipa_ep_context *ep)
 {
-	struct gsi_chan_props gsi_channel_props;
+	struct gsi_chan_props gsi_channel_props = { };
 	const struct ipa_gsi_ep_config *gsi_ep_info;
 	int result;
 
@@ -2217,7 +2213,6 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		return result;
 	ep->gsi_evt_ring_hdl = result;
 
-	memset(&gsi_channel_props, 0, sizeof(gsi_channel_props));
 	gsi_channel_props.from_gsi = IPA_CLIENT_IS_CONS(ep->client);
 	gsi_channel_props.ch_id = gsi_ep_info->ipa_gsi_chan_num;
 	gsi_channel_props.evt_ring_hdl = ep->gsi_evt_ring_hdl;

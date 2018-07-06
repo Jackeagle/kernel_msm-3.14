@@ -71,9 +71,8 @@ static bool init_driver_response_received;
 static int ipa_send_master_driver_init_complete_ind(struct qmi_handle *qmi,
 						    struct sockaddr_qrtr *sq)
 {
-	struct ipa_init_complete_ind ind;
+	struct ipa_init_complete_ind ind = { };
 
-	memset(&ind, 0, sizeof(ind));
 	ind.status.result = QMI_RESULT_SUCCESS_V01;
 	ind.status.error = QMI_ERR_NONE_V01;
 
@@ -119,7 +118,7 @@ static void ipa_indication_register_fn(struct qmi_handle *qmi,
 				       const void *decoded)
 {
 	const struct ipa_indication_register_req *req = decoded;
-	struct ipa_indication_register_rsp rsp;
+	struct ipa_indication_register_rsp rsp = { };
 	int ret;
 
 	/* Both of these should be true (1), but we ignore them.
@@ -131,7 +130,6 @@ static void ipa_indication_register_fn(struct qmi_handle *qmi,
 	ipa_debug("req->master_driver_init_complete = %hhu\n",
 		  req->master_driver_init_complete);
 
-	memset(&rsp, 0, sizeof(rsp));
 	rsp.rsp.result = QMI_RESULT_SUCCESS_V01;
 	rsp.rsp.error = QMI_ERR_NONE_V01;
 
@@ -158,7 +156,7 @@ static void ipa_driver_init_complete_fn(struct qmi_handle *qmi,
 					const void *decoded)
 {
 	const struct ipa_driver_init_complete_req *req = decoded;
-	struct ipa_driver_init_complete_rsp rsp;
+	struct ipa_driver_init_complete_rsp rsp = { };
 	int ret;
 
 	/* I'm not sure what value is provided in the status field
@@ -166,7 +164,6 @@ static void ipa_driver_init_complete_fn(struct qmi_handle *qmi,
 	 */
 	ipa_debug("req->status = %hhu\n", req->status);
 
-	memset(&rsp, 0, sizeof(rsp));
 	rsp.rsp.result = QMI_RESULT_SUCCESS_V01;
 	rsp.rsp.error = QMI_ERR_NONE_V01;
 

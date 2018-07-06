@@ -199,7 +199,7 @@ static int hdr_init_local_cmd(u32 offset, u32 size)
 {
 	struct ipa_mem_buffer mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
-	struct ipa_desc desc = { 0 };
+	struct ipa_desc desc = { };
 	int ret;
 
 	if (ipahal_dma_alloc(&mem, size, GFP_KERNEL))
@@ -230,7 +230,7 @@ static int dma_shared_mem_zero_cmd(u32 offset, u32 size)
 {
 	struct ipa_mem_buffer mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
-	struct ipa_desc desc = { 0 };
+	struct ipa_desc desc = { };
 	int ret;
 
 	ipa_assert(size > 0);
@@ -303,9 +303,7 @@ out_client_remove:
 
 static int setup_apps_cmd_prod_pipe(void)
 {
-	struct ipa_sys_connect_params sys_in;
-
-	memset(&sys_in, 0, sizeof(sys_in));
+	struct ipa_sys_connect_params sys_in = { };
 
 	sys_in.client = IPA_CLIENT_APPS_CMD_PROD;
 	sys_in.desc_fifo_sz = IPA_SYS_DESC_FIFO_SZ;
@@ -430,7 +428,7 @@ static int ipa_init_hdr(void)
  */
 static int ipa_init_rt4(void)
 {
-	struct ipa_desc desc = { 0 };
+	struct ipa_desc desc = { };
 	struct ipa_mem_buffer mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	u32 hash_offset;
@@ -475,7 +473,7 @@ free_mem:
  */
 static int ipa_init_rt6(void)
 {
-	struct ipa_desc desc = { 0 };
+	struct ipa_desc desc = { };
 	struct ipa_mem_buffer mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	u32 hash_offset;
@@ -520,7 +518,7 @@ free_mem:
  */
 static int ipa_init_flt4(void)
 {
-	struct ipa_desc desc = { 0 };
+	struct ipa_desc desc = { };
 	struct ipa_mem_buffer mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	u32 hash_offset;
@@ -566,7 +564,7 @@ free_mem:
  */
 static int ipa_init_flt6(void)
 {
-	struct ipa_desc desc = { 0 };
+	struct ipa_desc desc = { };
 	struct ipa_mem_buffer mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	u32 hash_offset;
@@ -608,10 +606,8 @@ free_mem:
 
 static void ipa_setup_flt_hash_tuple(void)
 {
+	struct ipahal_reg_hash_tuple tuple = { };
 	int pipe_idx;
-	struct ipahal_reg_hash_tuple tuple;
-
-	memset(&tuple, 0, sizeof(struct ipahal_reg_hash_tuple));
 
 	for (pipe_idx = 0; pipe_idx < ipa_ctx->ipa_num_pipes ; pipe_idx++) {
 		if (!ipa_is_ep_support_flt(pipe_idx))
@@ -626,10 +622,8 @@ static void ipa_setup_flt_hash_tuple(void)
 
 static void ipa_setup_rt_hash_tuple(void)
 {
+	struct ipahal_reg_hash_tuple tuple = { };
 	int tbl_idx;
-	struct ipahal_reg_hash_tuple tuple;
-
-	memset(&tuple, 0, sizeof(struct ipahal_reg_hash_tuple));
 
 	for (tbl_idx = 0;
 	     tbl_idx < max(ipa_ctx->mem_info[V6_RT_NUM_INDEX],
@@ -649,9 +643,7 @@ static void ipa_setup_rt_hash_tuple(void)
 
 static int setup_apps_lan_cons_pipe(void)
 {
-	struct ipa_sys_connect_params sys_in;
-
-	memset(&sys_in, 0, sizeof(sys_in));
+	struct ipa_sys_connect_params sys_in = { };
 
 	sys_in.client = IPA_CLIENT_APPS_LAN_CONS;
 	sys_in.desc_fifo_sz = IPA_SYS_DESC_FIFO_SZ;

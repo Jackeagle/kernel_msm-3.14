@@ -811,8 +811,8 @@ void ipa_sram_settings_read(void)
  */
 void ipa_cfg_qsb(void)
 {
-	struct ipahal_reg_qsb_max_reads max_reads = { 0 };
-	struct ipahal_reg_qsb_max_writes max_writes = { 0 };
+	struct ipahal_reg_qsb_max_reads max_reads = { };
+	struct ipahal_reg_qsb_max_writes max_writes = { };
 
 	max_reads.qmb_0_max_reads = 8,
 	max_reads.qmb_1_max_reads = 12;
@@ -1815,7 +1815,7 @@ void ipa_suspend_apps_pipes(bool suspend)
  */
 void ipa_cfg_default_route(enum ipa_client_type client)
 {
-	struct ipahal_reg_route route = { 0 };
+	struct ipahal_reg_route route = { };
 	int ipa_ep_idx;
 
 	ipa_ep_idx = ipa_get_ep_mapping(client);
@@ -1878,7 +1878,7 @@ void ipa_gsi_dma_task_free(void)
  */
 int ipa_gsi_dma_task_inject(void)
 {
-	struct ipa_desc desc = { 0 };
+	struct ipa_desc desc = { };
 
 	ipa_desc_fill_imm_cmd(&desc, ipa_ctx->dma_task_info.cmd_pyld);
 
@@ -1902,7 +1902,6 @@ int ipa_gsi_dma_task_inject(void)
  */
 int ipa_stop_gsi_channel(u32 clnt_hdl)
 {
-	struct ipa_mem_buffer mem;
 	int res = 0;
 	int i;
 	struct ipa_ep_context *ep;
@@ -1914,8 +1913,6 @@ int ipa_stop_gsi_channel(u32 clnt_hdl)
 
 	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
 		       true);
-
-	memset(&mem, 0, sizeof(mem));
 
 	if (IPA_CLIENT_IS_PROD(ep->client)) {
 		ipa_debug("Calling gsi_stop_channel ch:%lu\n",
