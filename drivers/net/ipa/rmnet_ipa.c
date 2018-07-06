@@ -328,7 +328,7 @@ static void apps_ipa_packet_receive_notify(void *priv, enum ipa_dp_evt_type evt,
 	}
 }
 
-static int handle3_ingress_format(struct net_device *dev,
+static int handle_ingress_format(struct net_device *dev,
 				  struct rmnet_ioctl_extended_s *in)
 {
 	int ret;
@@ -402,7 +402,7 @@ static int handle3_ingress_format(struct net_device *dev,
 	return 0;
 }
 
-/** handle3_egress_format() - Egress data format configuration
+/** handle_egress_format() - Egress data format configuration
  *
  * Setup IPA egress system pipe and Configure:
  *	header handling, checksum, de-aggregation and fifo size
@@ -410,7 +410,7 @@ static int handle3_ingress_format(struct net_device *dev,
  * @dev: network device
  * @e: egress configuration
  */
-static int handle3_egress_format(struct net_device *dev,
+static int handle_egress_format(struct net_device *dev,
 				 struct rmnet_ioctl_extended_s *e)
 {
 	int rc;
@@ -705,11 +705,11 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			mutex_unlock(&rmnet_ipa_ctx->add_mux_channel_lock);
 			break;
 		case RMNET_IOCTL_SET_EGRESS_DATA_FORMAT:
-			if (handle3_egress_format(dev, &edata))
+			if (handle_egress_format(dev, &edata))
 				rc = -EFAULT;
 			break;
 		case RMNET_IOCTL_SET_INGRESS_DATA_FORMAT:/*  Set IDF  */
-			if (handle3_ingress_format(dev, &edata))
+			if (handle_ingress_format(dev, &edata))
 				rc = -EFAULT;
 			break;
 		/*  Get agg count  */
