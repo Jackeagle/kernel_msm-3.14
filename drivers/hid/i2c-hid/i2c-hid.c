@@ -869,13 +869,15 @@ static int i2c_hid_acpi_pdata(struct i2c_client *client,
 	acpi_handle handle;
 
 	handle = ACPI_HANDLE(&client->dev);
-	if (!handle || acpi_bus_get_device(handle, &adev))
+	if (!handle || acpi_bus_get_device(handle, &adev)) {
+		dev_err(&client->dev, "Error could not get ACPI device\n");
 		return -ENODEV;
+	}
 
 	obj = acpi_evaluate_dsm_typed(handle, &i2c_hid_guid, 1, 1, NULL,
 				      ACPI_TYPE_INTEGER);
 	if (!obj) {
-		dev_err(&client->dev, "device _DSM execution failed\n");
+		dev_err(&client->dev, "Error _DSM call to get HID descriptor address failed\n");
 		return -ENODEV;
 	}
 
@@ -930,11 +932,6 @@ static int i2c_hid_of_probe(struct i2c_client *client,
 	}
 	pdata->hid_descriptor_address = val;
 
-	ret = of_property_read_u32(dev->of_node, "post-power-on-delay-ms",
-				   &val);
-	if (!ret)
-		pdata->post_power_delay_ms = val;
-
 	return 0;
 }
 
@@ -950,6 +947,16 @@ static inline int i2c_hid_of_probe(struct i2c_client *client,
 	return -ENODEV;
 }
 #endif
+
+static void i2c_hid_fwnode_probe(struct i2c_client *client,
+				 struct i2c_hid_platform_data *pdata)
+{
+	u32 val;
+
+	if (!device_property_read_u32(&client->dev, "post-power-on-delay-ms",
+				      &val))
+		pdata->post_power_delay_ms = val;
+}
 
 static int i2c_hid_probe(struct i2c_client *client,
 			 const struct i2c_device_id *dev_id)
@@ -975,40 +982,39 @@ static int i2c_hid_probe(struct i2c_client *client,
 		return client->irq;
 	}
 
-	ihid = kzalloc(sizeof(struct i2c_hid), GFP_KERNEL);
+	ihid = devm_kzalloc(&client->dev, sizeof(*ihid), GFP_KERNEL);
 	if (!ihid)
 		return -ENOMEM;
 
 	if (client->dev.of_node) {
 		ret = i2c_hid_of_probe(client, &ihid->pdata);
 		if (ret)
-			goto err;
+			return ret;
 	} else if (!platform_data) {
 		ret = i2c_hid_acpi_pdata(client, &ihid->pdata);
-		if (ret) {
-			dev_err(&client->dev,
-				"HID register address not provided\n");
-			goto err;
-		}
+		if (ret)
+			return ret;
 	} else {
 		ihid->pdata = *platform_data;
 	}
 
-	ihid->pdata.supply = devm_regulator_get(&client->dev, "vdd");
-	if (IS_ERR(ihid->pdata.supply)) {
-		ret = PTR_ERR(ihid->pdata.supply);
-		if (ret != -EPROBE_DEFER)
-			dev_err(&client->dev, "Failed to get regulator: %d\n",
-				ret);
-		goto err;
-	}
+	/* Parse platform agnostic common properties from ACPI / device tree */
+	i2c_hid_fwnode_probe(client, &ihid->pdata);
 
-	ret = regulator_enable(ihid->pdata.supply);
-	if (ret < 0) {
-		dev_err(&client->dev, "Failed to enable regulator: %d\n",
-			ret);
-		goto err;
-	}
+	ihid->pdata.supplies[0].supply = "vdd";
+	ihid->pdata.supplies[1].supply = "vddl";
+
+	ret = devm_regulator_bulk_get(&client->dev,
+				      ARRAY_SIZE(ihid->pdata.supplies),
+				      ihid->pdata.supplies);
+	if (ret)
+		return ret;
+
+	ret = regulator_bulk_enable(ARRAY_SIZE(ihid->pdata.supplies),
+				    ihid->pdata.supplies);
+	if (ret < 0)
+		return ret;
+
 	if (ihid->pdata.post_power_delay_ms)
 		msleep(ihid->pdata.post_power_delay_ms);
 
@@ -1095,11 +1101,9 @@ err_pm:
 	pm_runtime_disable(&client->dev);
 
 err_regulator:
-	regulator_disable(ihid->pdata.supply);
-
-err:
+	regulator_bulk_disable(ARRAY_SIZE(ihid->pdata.supplies),
+			       ihid->pdata.supplies);
 	i2c_hid_free_buffers(ihid);
-	kfree(ihid);
 	return ret;
 }
 
@@ -1121,9 +1125,8 @@ static int i2c_hid_remove(struct i2c_client *client)
 	if (ihid->bufsize)
 		i2c_hid_free_buffers(ihid);
 
-	regulator_disable(ihid->pdata.supply);
-
-	kfree(ihid);
+	regulator_bulk_disable(ARRAY_SIZE(ihid->pdata.supplies),
+			       ihid->pdata.supplies);
 
 	return 0;
 }
@@ -1174,9 +1177,8 @@ static int i2c_hid_suspend(struct device *dev)
 			hid_warn(hid, "Failed to enable irq wake: %d\n",
 				wake_status);
 	} else {
-		ret = regulator_disable(ihid->pdata.supply);
-		if (ret < 0)
-			hid_warn(hid, "Failed to disable supply: %d\n", ret);
+		regulator_bulk_disable(ARRAY_SIZE(ihid->pdata.supplies),
+				       ihid->pdata.supplies);
 	}
 
 	return 0;
@@ -1191,9 +1193,11 @@ static int i2c_hid_resume(struct device *dev)
 	int wake_status;
 
 	if (!device_may_wakeup(&client->dev)) {
-		ret = regulator_enable(ihid->pdata.supply);
-		if (ret < 0)
-			hid_warn(hid, "Failed to enable supply: %d\n", ret);
+		ret = regulator_bulk_enable(ARRAY_SIZE(ihid->pdata.supplies),
+					    ihid->pdata.supplies);
+		if (ret)
+			hid_warn(hid, "Failed to enable supplies: %d\n", ret);
+
 		if (ihid->pdata.post_power_delay_ms)
 			msleep(ihid->pdata.post_power_delay_ms);
 	} else if (ihid->irq_wake_enabled) {

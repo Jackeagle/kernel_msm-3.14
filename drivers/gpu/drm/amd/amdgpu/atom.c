@@ -1221,7 +1221,7 @@ static int amdgpu_atom_execute_table_locked(struct atom_context *ctx, int index,
 	ectx.abort = false;
 	ectx.last_jump = 0;
 	if (ws)
-		ectx.ws = kzalloc(4 * ws, GFP_ATOMIC);
+		ectx.ws = kzalloc(4 * ws, GFP_KERNEL);
 	else
 		ectx.ws = NULL;
 
@@ -1261,7 +1261,7 @@ int amdgpu_atom_execute_table(struct atom_context *ctx, int index, uint32_t * pa
 {
 	int r;
 
-	spin_lock(&ctx->lock);
+	mutex_lock(&ctx->mutex);
 	/* reset data block */
 	ctx->data_block = 0;
 	/* reset reg block */
@@ -1274,7 +1274,7 @@ int amdgpu_atom_execute_table(struct atom_context *ctx, int index, uint32_t * pa
 	ctx->divmul[0] = 0;
 	ctx->divmul[1] = 0;
 	r = amdgpu_atom_execute_table_locked(ctx, index, params);
-	spin_unlock(&ctx->lock);
+	mutex_unlock(&ctx->mutex);
 	return r;
 }
 
