@@ -1895,8 +1895,6 @@ static enum ipa_hw_version ipa_version_get(struct platform_device *pdev)
 /** ipa_init_mem_info() - record memory offsets and sizes, and perform some
  * compile-time sanity checks of the values used.
  */
-#define NONZERO_CHECK(name) \
-		({ u32 _n = (name); BUILD_BUG_ON(!_n); _n; })
 /* #define LO_HI_CHECK(name)	BUILD_BUG_ON(name ## _LO > name ## _HI) */
 #define LO_HI_CHECK(name)	/* checkpatch.pl doesn't like the above macro */
 
@@ -1904,21 +1902,26 @@ static void ipa_init_mem_info(u32 *mem_info)
 {
 	BUILD_BUG_ON(IPA_MEM_V4_FLT_HASH_OFST % 8);
 	mem_info[V4_FLT_HASH_OFST] = IPA_MEM_V4_FLT_HASH_OFST;
-	mem_info[V4_FLT_HASH_SIZE] = NONZERO_CHECK(IPA_MEM_V4_FLT_HASH_SIZE);
+	BUILD_BUG_ON(!IPA_MEM_V4_FLT_HASH_SIZE);
+	mem_info[V4_FLT_HASH_SIZE] = IPA_MEM_V4_FLT_HASH_SIZE;
 
 	BUILD_BUG_ON(IPA_MEM_V4_FLT_NHASH_OFST % 8);
 	mem_info[V4_FLT_NHASH_OFST] = IPA_MEM_V4_FLT_NHASH_OFST;
-	mem_info[V4_FLT_NHASH_SIZE] = NONZERO_CHECK(IPA_MEM_V4_FLT_NHASH_SIZE);
+	BUILD_BUG_ON(!IPA_MEM_V4_FLT_NHASH_SIZE);
+	mem_info[V4_FLT_NHASH_SIZE] = IPA_MEM_V4_FLT_NHASH_SIZE;
 
 	BUILD_BUG_ON(IPA_MEM_V6_FLT_HASH_OFST % 8);
 	mem_info[V6_FLT_HASH_OFST] = IPA_MEM_V6_FLT_HASH_OFST;
-	mem_info[V6_FLT_HASH_SIZE] = NONZERO_CHECK(IPA_MEM_V6_FLT_HASH_SIZE);
+	BUILD_BUG_ON(!IPA_MEM_V6_FLT_HASH_SIZE);
+	mem_info[V6_FLT_HASH_SIZE] = IPA_MEM_V6_FLT_HASH_SIZE;
 
 	BUILD_BUG_ON(IPA_MEM_V6_FLT_NHASH_OFST % 8);
 	mem_info[V6_FLT_NHASH_OFST] = IPA_MEM_V6_FLT_NHASH_OFST;
-	mem_info[V6_FLT_NHASH_SIZE] = NONZERO_CHECK(IPA_MEM_V6_FLT_NHASH_SIZE);
+	BUILD_BUG_ON(!IPA_MEM_V6_FLT_NHASH_SIZE);
+	mem_info[V6_FLT_NHASH_SIZE] = IPA_MEM_V6_FLT_NHASH_SIZE;
 
-	mem_info[V4_RT_NUM_INDEX] = NONZERO_CHECK(IPA_MEM_V4_RT_NUM_INDEX);
+	BUILD_BUG_ON(!IPA_MEM_V4_RT_NUM_INDEX);
+	mem_info[V4_RT_NUM_INDEX] = IPA_MEM_V4_RT_NUM_INDEX;
 
 	LO_HI_CHECK(IPA_MEM_V4_MODEM_RT_INDEX);
 	mem_info[V4_MODEM_RT_INDEX_LO] = IPA_MEM_V4_MODEM_RT_INDEX_LO;
@@ -1926,13 +1929,16 @@ static void ipa_init_mem_info(u32 *mem_info)
 
 	BUILD_BUG_ON(IPA_MEM_V4_RT_HASH_OFST % 8);
 	mem_info[V4_RT_HASH_OFST] = IPA_MEM_V4_RT_HASH_OFST;
-	mem_info[V4_RT_HASH_SIZE] = NONZERO_CHECK(IPA_MEM_V4_RT_HASH_SIZE);
+	BUILD_BUG_ON(!IPA_MEM_V4_RT_HASH_SIZE);
+	mem_info[V4_RT_HASH_SIZE] = IPA_MEM_V4_RT_HASH_SIZE;
 
 	BUILD_BUG_ON(IPA_MEM_V4_RT_NHASH_OFST % 8);
 	mem_info[V4_RT_NHASH_OFST] = IPA_MEM_V4_RT_NHASH_OFST;
-	mem_info[V4_RT_NHASH_SIZE] = NONZERO_CHECK(IPA_MEM_V4_RT_NHASH_SIZE);
+	BUILD_BUG_ON(!IPA_MEM_V4_RT_NHASH_SIZE);
+	mem_info[V4_RT_NHASH_SIZE] = IPA_MEM_V4_RT_NHASH_SIZE;
 
-	mem_info[V6_RT_NUM_INDEX] = NONZERO_CHECK(IPA_MEM_V6_RT_NUM_INDEX);
+	BUILD_BUG_ON(!IPA_MEM_V6_RT_NUM_INDEX);
+	mem_info[V6_RT_NUM_INDEX] = IPA_MEM_V6_RT_NUM_INDEX;
 
 	LO_HI_CHECK(IPA_MEM_V6_MODEM_RT_INDEX);
 	mem_info[V6_MODEM_RT_INDEX_LO] = IPA_MEM_V6_MODEM_RT_INDEX_LO;
@@ -1943,11 +1949,13 @@ static void ipa_init_mem_info(u32 *mem_info)
 
 	BUILD_BUG_ON(IPA_MEM_V6_RT_HASH_OFST % 8);
 	mem_info[V6_RT_HASH_OFST] = IPA_MEM_V6_RT_HASH_OFST;
-	mem_info[V6_RT_HASH_SIZE] = NONZERO_CHECK(IPA_MEM_V6_RT_HASH_SIZE);
+	BUILD_BUG_ON(!IPA_MEM_V6_RT_HASH_SIZE);
+	mem_info[V6_RT_HASH_SIZE] = IPA_MEM_V6_RT_HASH_SIZE;
 
 	BUILD_BUG_ON(IPA_MEM_V6_RT_NHASH_OFST % 8);
 	mem_info[V6_RT_NHASH_OFST] = IPA_MEM_V6_RT_NHASH_OFST;
-	mem_info[V6_RT_NHASH_SIZE] = NONZERO_CHECK(IPA_MEM_V6_RT_NHASH_SIZE);
+	BUILD_BUG_ON(!IPA_MEM_V6_RT_NHASH_SIZE);
+	mem_info[V6_RT_NHASH_SIZE] = IPA_MEM_V6_RT_NHASH_SIZE;
 
 	BUILD_BUG_ON(IPA_MEM_MODEM_HDR_OFST % 8);
 	mem_info[MODEM_HDR_OFST] = IPA_MEM_MODEM_HDR_OFST;
@@ -1976,7 +1984,6 @@ static void ipa_init_mem_info(u32 *mem_info)
 }
 
 #undef LO_HI_CHECK
-#undef NONZERO_CHECK
 
 static const struct of_device_id ipa_plat_drv_match[] = {
 	{ .compatible = "qcom,ipa", },
