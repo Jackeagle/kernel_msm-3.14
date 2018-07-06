@@ -1769,24 +1769,6 @@ err_disable_clks:
 	return result;
 }
 
-/* Return the IPA hardware version, or IPA_HW_NONE for any error */
-static enum ipa_hw_version ipa_version_get(struct platform_device *pdev)
-{
-	struct device_node *node = pdev->dev.of_node;
-	u32 ipa_version = 0;
-
-	if (of_property_read_u32(node, "qcom,ipa-hw-ver", &ipa_version))
-		return IPA_HW_NONE;
-
-	/* Translate the DTB value to the value we use internally */
-	if (ipa_version == QCOM_IPA_HW_VER_v3_5_1)
-		return IPA_HW_v3_5_1;
-
-	ipa_err("unsupported IPA hardware version %u\n", ipa_version);
-
-	return IPA_HW_NONE;
-}
-
 static irqreturn_t ipa_smp2p_modem_clk_query_isr(int irq, void *ctxt)
 {
 	ipa_freeze_clock_vote_and_notify_modem();
@@ -1853,6 +1835,24 @@ static void ipa_smp2p_exit(void)
 {
 	memset(&ipa_ctx->smp2p_info, 0, sizeof(ipa_ctx->smp2p_info));
 	/* IRQ will be released when device goes away */
+}
+
+/* Return the IPA hardware version, or IPA_HW_NONE for any error */
+static enum ipa_hw_version ipa_version_get(struct platform_device *pdev)
+{
+	struct device_node *node = pdev->dev.of_node;
+	u32 ipa_version = 0;
+
+	if (of_property_read_u32(node, "qcom,ipa-hw-ver", &ipa_version))
+		return IPA_HW_NONE;
+
+	/* Translate the DTB value to the value we use internally */
+	if (ipa_version == QCOM_IPA_HW_VER_v3_5_1)
+		return IPA_HW_v3_5_1;
+
+	ipa_err("unsupported IPA hardware version %u\n", ipa_version);
+
+	return IPA_HW_NONE;
 }
 
 static const struct of_device_id ipa_plat_drv_match[] = {
