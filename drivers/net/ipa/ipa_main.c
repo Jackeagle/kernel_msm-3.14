@@ -326,17 +326,13 @@ sram_set_canary_common(u32 *sram_mmio, u32 offset, bool two)
 	sram_mmio[index - 1] = IPA_MEM_CANARY_VAL;
 }
 
-static void sram_set_canary(u32 *sram_mmio, enum ipa_mem_partition which)
+static void sram_set_canary(u32 *sram_mmio, u32 offset)
 {
-	u32 offset = ipa_ctx->mem_info[which];
-
 	sram_set_canary_common(sram_mmio, offset, false);
 }
 
-static void sram_set_canaries(u32 *sram_mmio, enum ipa_mem_partition which)
+static void sram_set_canaries(u32 *sram_mmio, u32 offset)
 {
-	u32 offset = ipa_ctx->mem_info[which];
-
 	sram_set_canary_common(sram_mmio, offset, true);
 }
 
@@ -346,6 +342,7 @@ static void sram_set_canaries(u32 *sram_mmio, enum ipa_mem_partition which)
  */
 static int ipa_init_sram(void)
 {
+	u32 *mem_info = &ipa_ctx->mem_info[0];
 	u32 *ipa_sram_mmio;
 	unsigned long phys_addr;
 
@@ -360,19 +357,19 @@ static int ipa_init_sram(void)
 	}
 
 	/* Consult with ipa_i.h on the location of the CANARY values */
-	sram_set_canaries(ipa_sram_mmio, V4_FLT_HASH_OFST);
-	sram_set_canaries(ipa_sram_mmio, V4_FLT_NHASH_OFST);
-	sram_set_canaries(ipa_sram_mmio, V6_FLT_HASH_OFST);
-	sram_set_canaries(ipa_sram_mmio, V6_FLT_NHASH_OFST);
-	sram_set_canaries(ipa_sram_mmio, V4_RT_HASH_OFST);
-	sram_set_canaries(ipa_sram_mmio, V4_RT_NHASH_OFST);
-	sram_set_canaries(ipa_sram_mmio, V6_RT_HASH_OFST);
-	sram_set_canaries(ipa_sram_mmio, V6_RT_NHASH_OFST);
-	sram_set_canaries(ipa_sram_mmio, MODEM_HDR_OFST);
-	sram_set_canaries(ipa_sram_mmio, MODEM_HDR_PROC_CTX_OFST);
-	sram_set_canaries(ipa_sram_mmio, MODEM_OFST);
+	sram_set_canaries(ipa_sram_mmio, mem_info[V4_FLT_HASH_OFST]);
+	sram_set_canaries(ipa_sram_mmio, mem_info[V4_FLT_NHASH_OFST]);
+	sram_set_canaries(ipa_sram_mmio, mem_info[V6_FLT_HASH_OFST]);
+	sram_set_canaries(ipa_sram_mmio, mem_info[V6_FLT_NHASH_OFST]);
+	sram_set_canaries(ipa_sram_mmio, mem_info[V4_RT_HASH_OFST]);
+	sram_set_canaries(ipa_sram_mmio, mem_info[V4_RT_NHASH_OFST]);
+	sram_set_canaries(ipa_sram_mmio, mem_info[V6_RT_HASH_OFST]);
+	sram_set_canaries(ipa_sram_mmio, mem_info[V6_RT_NHASH_OFST]);
+	sram_set_canaries(ipa_sram_mmio, mem_info[MODEM_HDR_OFST]);
+	sram_set_canaries(ipa_sram_mmio, mem_info[MODEM_HDR_PROC_CTX_OFST]);
+	sram_set_canaries(ipa_sram_mmio, mem_info[MODEM_OFST]);
 	/* Only one canary precedes for the microcontroller ring */
-	sram_set_canary(ipa_sram_mmio, UC_EVENT_RING_OFST);
+	sram_set_canary(ipa_sram_mmio, mem_info[UC_EVENT_RING_OFST]);
 
 	iounmap(ipa_sram_mmio);
 
