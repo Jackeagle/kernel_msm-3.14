@@ -98,6 +98,128 @@
 #define IPA_HW_NUM_FEATURES 0x8
 #define IPA_WAN_MSG_IPV6_ADDR_GW_LEN 4
 
+/** The IPA has a block of shared memory, divided into regions used for
+ * specific purposes.  The following values define this layout (i.e.,
+ * the sizes and locations of all these regions).  One or two "canary"
+ * values sit between some regions, as a check for erroneous writes
+ * outside a region.
+ *
+ * IPA SRAM memory layout:
+ * +-------------------------+
+ * |	UC MEM		     |
+ * +-------------------------+
+ * |	UC INFO		     |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * | V4 FLT HDR HASHABLE     |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * | V4 FLT HDR NON-HASHABLE |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * | V6 FLT HDR HASHABLE     |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * | V6 FLT HDR NON-HASHABLE |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * | V4 RT HDR HASHABLE	     |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * | V4 RT HDR NON-HASHABLE  |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * | V6 RT HDR HASHABLE	     |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * | V6 RT HDR NON-HASHABLE  |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * |  MODEM HDR		     |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * | MODEM PROC CTX	     |
+ * +-------------------------+
+ * | APPS PROC CTX	     |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * |  MODEM MEM		     |
+ * +-------------------------+
+ * |	CANARY		     |
+ * +-------------------------+
+ * |  UC EVENT RING	     | From IPA 3.5
+ * +-------------------------+
+ */
+#define IPA_MEM_V4_FLT_HASH_OFST		0x288
+#define IPA_MEM_V4_FLT_HASH_SIZE		0x78
+#define IPA_MEM_V4_FLT_NHASH_OFST		0x308
+#define IPA_MEM_V4_FLT_NHASH_SIZE		0x78
+#define IPA_MEM_V6_FLT_HASH_OFST		0x388
+#define IPA_MEM_V6_FLT_HASH_SIZE		0x78
+#define IPA_MEM_V6_FLT_NHASH_OFST		0x408
+#define IPA_MEM_V6_FLT_NHASH_SIZE		0x78
+#define IPA_MEM_V4_RT_NUM_INDEX			0xf
+#define IPA_MEM_V4_MODEM_RT_INDEX_LO		0x0
+#define IPA_MEM_V4_MODEM_RT_INDEX_HI		0x7
+#define IPA_MEM_V4_RT_HASH_OFST			0x488
+#define IPA_MEM_V4_RT_HASH_SIZE			0x78
+#define IPA_MEM_V4_RT_NHASH_OFST		0x508
+#define IPA_MEM_V4_RT_NHASH_SIZE		0x78
+#define IPA_MEM_V6_RT_NUM_INDEX			0xf
+#define IPA_MEM_V6_MODEM_RT_INDEX_LO		0x0
+#define IPA_MEM_V6_MODEM_RT_INDEX_HI		0x7
+#define IPA_MEM_V6_APPS_RT_INDEX_LO		0x8
+#define IPA_MEM_V6_APPS_RT_INDEX_HI		0xe
+#define IPA_MEM_V6_RT_HASH_OFST			0x588
+#define IPA_MEM_V6_RT_HASH_SIZE			0x78
+#define IPA_MEM_V6_RT_NHASH_OFST		0x608
+#define IPA_MEM_V6_RT_NHASH_SIZE		0x78
+#define IPA_MEM_MODEM_HDR_OFST			0x688
+#define IPA_MEM_MODEM_HDR_SIZE			140
+#define IPA_MEM_APPS_HDR_OFST			0x7c8
+#define IPA_MEM_APPS_HDR_SIZE			0x0
+#define IPA_MEM_MODEM_HDR_PROC_CTX_OFST		0x7d0
+#define IPA_MEM_MODEM_HDR_PROC_CTX_SIZE		0x200
+#define IPA_MEM_APPS_HDR_PROC_CTX_OFST		0x9d0
+#define IPA_MEM_APPS_HDR_PROC_CTX_SIZE		0x200
+#define IPA_MEM_MODEM_OFST			0xbd8
+#define IPA_MEM_MODEM_SIZE			0x1024
+#define IPA_MEM_END_OFST			0x2000
+#define IPA_MEM_UC_EVENT_RING_OFST		0x1c00
+
 enum ipa_ees {
 	IPA_EE_AP = 0,
 	IPA_EE_Q6 = 1,
@@ -468,90 +590,7 @@ struct ipa_tag_completion {
 	atomic_t cnt;
 };
 
-/** enum ipa_mem_partition - IPA RAM Map is defined as an array of
- * 32-bit values read from DTS whose order is defined by this type.
- * Order and type of members should not be changed without a suitable change
- * to DTS file or the code that reads it.
- *
- * IPA SRAM memory layout:
- * +-------------------------+
- * |	UC MEM		     |
- * +-------------------------+
- * |	UC INFO		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | V4 FLT HDR HASHABLE     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | V4 FLT HDR NON-HASHABLE |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | V6 FLT HDR HASHABLE     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | V6 FLT HDR NON-HASHABLE |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | V4 RT HDR HASHABLE	     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | V4 RT HDR NON-HASHABLE  |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | V6 RT HDR HASHABLE	     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | V6 RT HDR NON-HASHABLE  |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |  MODEM HDR		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | MODEM PROC CTX	     |
- * +-------------------------+
- * | APPS PROC CTX	     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |  MODEM MEM		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |  UC EVENT RING	     | From IPA 3.5
- * +-------------------------+
- */
+/** enum ipa_mem_partition - IPA RAM Map */
 enum ipa_mem_partition {
 	V4_FLT_HASH_OFST,
 	V4_FLT_HASH_SIZE,

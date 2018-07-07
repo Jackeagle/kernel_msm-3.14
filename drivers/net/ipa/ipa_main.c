@@ -1856,43 +1856,6 @@ static enum ipa_hw_version ipa_version_get(struct platform_device *pdev)
 	return IPA_HW_NONE;
 }
 
-#define IPA_MEM_V4_FLT_HASH_OFST		0x288
-#define IPA_MEM_V4_FLT_HASH_SIZE		0x78
-#define IPA_MEM_V4_FLT_NHASH_OFST		0x308
-#define IPA_MEM_V4_FLT_NHASH_SIZE		0x78
-#define IPA_MEM_V6_FLT_HASH_OFST		0x388
-#define IPA_MEM_V6_FLT_HASH_SIZE		0x78
-#define IPA_MEM_V6_FLT_NHASH_OFST		0x408
-#define IPA_MEM_V6_FLT_NHASH_SIZE		0x78
-#define IPA_MEM_V4_RT_NUM_INDEX			0xf
-#define IPA_MEM_V4_MODEM_RT_INDEX_LO		0x0
-#define IPA_MEM_V4_MODEM_RT_INDEX_HI		0x7
-#define IPA_MEM_V4_RT_HASH_OFST			0x488
-#define IPA_MEM_V4_RT_HASH_SIZE			0x78
-#define IPA_MEM_V4_RT_NHASH_OFST		0x508
-#define IPA_MEM_V4_RT_NHASH_SIZE		0x78
-#define IPA_MEM_V6_RT_NUM_INDEX			0xf
-#define IPA_MEM_V6_MODEM_RT_INDEX_LO		0x0
-#define IPA_MEM_V6_MODEM_RT_INDEX_HI		0x7
-#define IPA_MEM_V6_APPS_RT_INDEX_LO		0x8
-#define IPA_MEM_V6_APPS_RT_INDEX_HI		0xe
-#define IPA_MEM_V6_RT_HASH_OFST			0x588
-#define IPA_MEM_V6_RT_HASH_SIZE			0x78
-#define IPA_MEM_V6_RT_NHASH_OFST		0x608
-#define IPA_MEM_V6_RT_NHASH_SIZE		0x78
-#define IPA_MEM_MODEM_HDR_OFST			0x688
-#define IPA_MEM_MODEM_HDR_SIZE			140
-#define IPA_MEM_APPS_HDR_OFST			0x7c8
-#define IPA_MEM_APPS_HDR_SIZE			0x0
-#define IPA_MEM_MODEM_HDR_PROC_CTX_OFST		0x7d0
-#define IPA_MEM_MODEM_HDR_PROC_CTX_SIZE		0x200
-#define IPA_MEM_APPS_HDR_PROC_CTX_OFST		0x9d0
-#define IPA_MEM_APPS_HDR_PROC_CTX_SIZE		0x200
-#define IPA_MEM_MODEM_OFST			0xbd8
-#define IPA_MEM_MODEM_SIZE			0x1024
-#define IPA_MEM_END_OFST			0x2000
-#define IPA_MEM_UC_EVENT_RING_OFST		0x1c00
-
 /** ipa_init_mem_info() - record memory offsets and sizes, and perform some
  * compile-time sanity checks of the values used.
  */
