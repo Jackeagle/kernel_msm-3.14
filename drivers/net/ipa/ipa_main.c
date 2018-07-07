@@ -342,7 +342,6 @@ static void sram_set_canaries(u32 *sram_mmio, u32 offset)
  */
 static int ipa_init_sram(void)
 {
-	u32 *mem_info = &ipa_ctx->mem_info[0];
 	u32 *ipa_sram_mmio;
 	unsigned long phys_addr;
 
@@ -356,20 +355,19 @@ static int ipa_init_sram(void)
 		return -ENOMEM;
 	}
 
-	/* Consult with ipa_i.h on the location of the CANARY values */
-	sram_set_canaries(ipa_sram_mmio, mem_info[V4_FLT_HASH_OFST]);
-	sram_set_canaries(ipa_sram_mmio, mem_info[V4_FLT_NHASH_OFST]);
-	sram_set_canaries(ipa_sram_mmio, mem_info[V6_FLT_HASH_OFST]);
-	sram_set_canaries(ipa_sram_mmio, mem_info[V6_FLT_NHASH_OFST]);
-	sram_set_canaries(ipa_sram_mmio, mem_info[V4_RT_HASH_OFST]);
-	sram_set_canaries(ipa_sram_mmio, mem_info[V4_RT_NHASH_OFST]);
-	sram_set_canaries(ipa_sram_mmio, mem_info[V6_RT_HASH_OFST]);
-	sram_set_canaries(ipa_sram_mmio, mem_info[V6_RT_NHASH_OFST]);
-	sram_set_canaries(ipa_sram_mmio, mem_info[MODEM_HDR_OFST]);
-	sram_set_canaries(ipa_sram_mmio, mem_info[MODEM_HDR_PROC_CTX_OFST]);
-	sram_set_canaries(ipa_sram_mmio, mem_info[MODEM_OFST]);
+	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V4_FLT_HASH_OFST);
+	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V4_FLT_NHASH_OFST);
+	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V6_FLT_HASH_OFST);
+	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V6_FLT_NHASH_OFST);
+	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V4_RT_HASH_OFST);
+	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V4_RT_NHASH_OFST);
+	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V6_RT_HASH_OFST);
+	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V6_RT_NHASH_OFST);
+	sram_set_canaries(ipa_sram_mmio, IPA_MEM_MODEM_HDR_OFST);
+	sram_set_canaries(ipa_sram_mmio, IPA_MEM_MODEM_HDR_PROC_CTX_OFST);
+	sram_set_canaries(ipa_sram_mmio, IPA_MEM_MODEM_OFST);
 	/* Only one canary precedes for the microcontroller ring */
-	sram_set_canary(ipa_sram_mmio, mem_info[UC_EVENT_RING_OFST]);
+	sram_set_canary(ipa_sram_mmio, IPA_MEM_UC_EVENT_RING_OFST);
 
 	iounmap(ipa_sram_mmio);
 
