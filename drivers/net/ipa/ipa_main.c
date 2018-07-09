@@ -434,17 +434,16 @@ static int ipa_init_rt4(void)
 	u32 nhash_offset;
 	int rc;
 
-	rc = ipahal_rt_generate_empty_img(ipa_ctx->mem_info[V4_RT_NUM_INDEX],
+	rc = ipahal_rt_generate_empty_img(IPA_MEM_V4_RT_NUM_INDEX,
 					  &mem, GFP_KERNEL);
 	if (rc) {
 		ipa_err("fail generate empty v4 rt img\n");
 		return rc;
 	}
 
-	hash_offset = ipa_ctx->smem_restricted_bytes +
-				ipa_ctx->mem_info[V4_RT_HASH_OFST];
+	hash_offset = ipa_ctx->smem_restricted_bytes + IPA_MEM_V4_RT_HASH_OFST;
 	nhash_offset = ipa_ctx->smem_restricted_bytes +
-				ipa_ctx->mem_info[V4_RT_NHASH_OFST];
+				IPA_MEM_V4_RT_NHASH_OFST;
 	cmd_pyld =
 		ipahal_ip_v4_routing_init_pyld(&mem, hash_offset, nhash_offset);
 	if (!cmd_pyld) {
@@ -479,17 +478,16 @@ static int ipa_init_rt6(void)
 	u32 nhash_offset;
 	int rc;
 
-	rc = ipahal_rt_generate_empty_img(ipa_ctx->mem_info[V6_RT_NUM_INDEX],
+	rc = ipahal_rt_generate_empty_img(IPA_MEM_V6_RT_NUM_INDEX,
 					  &mem, GFP_KERNEL);
 	if (rc) {
 		ipa_err("fail generate empty v6 rt img\n");
 		return rc;
 	}
 
-	hash_offset = ipa_ctx->smem_restricted_bytes +
-				ipa_ctx->mem_info[V6_RT_HASH_OFST];
+	hash_offset = ipa_ctx->smem_restricted_bytes + IPA_MEM_V6_RT_HASH_OFST;
 	nhash_offset = ipa_ctx->smem_restricted_bytes +
-				ipa_ctx->mem_info[V6_RT_NHASH_OFST];
+				IPA_MEM_V6_RT_NHASH_OFST;
 	cmd_pyld =
 		ipahal_ip_v6_routing_init_pyld(&mem, hash_offset, nhash_offset);
 	if (!cmd_pyld) {
@@ -623,15 +621,14 @@ static void ipa_setup_rt_hash_tuple(void)
 	int tbl_idx;
 
 	for (tbl_idx = 0;
-	     tbl_idx < max(ipa_ctx->mem_info[V6_RT_NUM_INDEX],
-			   ipa_ctx->mem_info[V4_RT_NUM_INDEX]);
+	     tbl_idx < max(IPA_MEM_V6_RT_NUM_INDEX, IPA_MEM_V4_RT_NUM_INDEX);
 	     tbl_idx++) {
-		if (tbl_idx >= ipa_ctx->mem_info[V4_MODEM_RT_INDEX_LO] &&
-		    tbl_idx <= ipa_ctx->mem_info[V4_MODEM_RT_INDEX_HI])
+		if (tbl_idx >= IPA_MEM_V4_MODEM_RT_INDEX_LO &&
+		    tbl_idx <= IPA_MEM_V4_MODEM_RT_INDEX_HI)
 			continue;
 
-		if (tbl_idx >= ipa_ctx->mem_info[V6_MODEM_RT_INDEX_LO] &&
-		    tbl_idx <= ipa_ctx->mem_info[V6_MODEM_RT_INDEX_HI])
+		if (tbl_idx >= IPA_MEM_V6_MODEM_RT_INDEX_LO &&
+		    tbl_idx <= IPA_MEM_V6_MODEM_RT_INDEX_HI)
 			continue;
 
 		ipa_set_rt_tuple_mask(tbl_idx, &tuple);
@@ -1492,62 +1489,62 @@ static bool config_valid(void)
 	u32 lo_index;
 	u32 table_count;
 
-	required_size = ipa_ctx->mem_info[V4_RT_NUM_INDEX] * width;
-	if (ipa_ctx->mem_info[V4_RT_HASH_SIZE] < required_size) {
+	required_size = IPA_MEM_V4_RT_NUM_INDEX * width;
+	if (IPA_MEM_V4_RT_HASH_SIZE < required_size) {
 		ipa_err("V4_RT_HASH_SIZE too small (%u < %u * %u)\n",
-			ipa_ctx->mem_info[V4_RT_HASH_SIZE],
-			ipa_ctx->mem_info[V4_RT_NUM_INDEX], width);
+			IPA_MEM_V4_RT_HASH_SIZE, IPA_MEM_V4_RT_NUM_INDEX,
+			width);
 		return false;
 	}
-	if (ipa_ctx->mem_info[V4_RT_NHASH_SIZE] < required_size) {
+	if (IPA_MEM_V4_RT_NHASH_SIZE < required_size) {
 		ipa_err("V4_RT_NHASH_SIZE too small (%u < %u * %u)\n",
-			ipa_ctx->mem_info[V4_RT_NHASH_SIZE],
-			ipa_ctx->mem_info[V4_RT_NUM_INDEX], width);
-		return false;
-	}
-
-	required_size = ipa_ctx->mem_info[V6_RT_NUM_INDEX] * width;
-	if (ipa_ctx->mem_info[V6_RT_HASH_SIZE] < required_size) {
-		ipa_err("V6_RT_HASH_SIZE too small (%u < %u * %u)\n",
-			ipa_ctx->mem_info[V6_RT_HASH_SIZE],
-			ipa_ctx->mem_info[V6_RT_NUM_INDEX], width);
-		return false;
-	}
-	if (ipa_ctx->mem_info[V6_RT_NHASH_SIZE] < required_size) {
-		ipa_err("V6_RT_NHASH_SIZE too small (%u < %u * %u)\n",
-			ipa_ctx->mem_info[V6_RT_NHASH_SIZE],
-			ipa_ctx->mem_info[V6_RT_NUM_INDEX], width);
-		return false;
-	}
-
-	hi_index = ipa_ctx->mem_info[V4_MODEM_RT_INDEX_HI];
-	lo_index = ipa_ctx->mem_info[V4_MODEM_RT_INDEX_LO];
-	table_count = hi_index - lo_index + 1;
-	required_size = table_count * width;
-	if (ipa_ctx->mem_info[V4_RT_HASH_SIZE] < required_size) {
-		ipa_err("V4_RT_HASH_SIZE too small for modem (%u < %u * %u)\n",
-			ipa_ctx->mem_info[V4_RT_HASH_SIZE], table_count, width);
-		return false;
-	}
-	if (ipa_ctx->mem_info[V4_RT_NHASH_SIZE] < required_size) {
-		ipa_err("V4_RT_NHASH_SIZE too small for modem (%u < %u * %u)\n",
-			ipa_ctx->mem_info[V4_RT_NHASH_SIZE], table_count,
+			IPA_MEM_V4_RT_NHASH_SIZE, IPA_MEM_V4_RT_NUM_INDEX,
 			width);
 		return false;
 	}
 
-	hi_index = ipa_ctx->mem_info[V6_MODEM_RT_INDEX_HI];
-	lo_index = ipa_ctx->mem_info[V6_MODEM_RT_INDEX_LO];
-	table_count = hi_index - lo_index + 1;
-	required_size = table_count * width;
-	if (ipa_ctx->mem_info[V6_RT_HASH_SIZE] < required_size) {
-		ipa_err("V6_RT_HASH_SIZE too small for modem (%u < %u * %u)\n",
-			ipa_ctx->mem_info[V6_RT_HASH_SIZE], table_count, width);
+	required_size = IPA_MEM_V6_RT_NUM_INDEX * width;
+	if (IPA_MEM_V6_RT_HASH_SIZE < required_size) {
+		ipa_err("V6_RT_HASH_SIZE too small (%u < %u * %u)\n",
+			IPA_MEM_V6_RT_HASH_SIZE, IPA_MEM_V6_RT_NUM_INDEX,
+			width);
 		return false;
 	}
-	if (ipa_ctx->mem_info[V6_RT_NHASH_SIZE] < required_size) {
+	if (IPA_MEM_V6_RT_NHASH_SIZE < required_size) {
+		ipa_err("V6_RT_NHASH_SIZE too small (%u < %u * %u)\n",
+			IPA_MEM_V6_RT_NHASH_SIZE, IPA_MEM_V6_RT_NUM_INDEX,
+			width);
+		return false;
+	}
+
+	hi_index = IPA_MEM_V4_MODEM_RT_INDEX_HI;
+	lo_index = IPA_MEM_V4_MODEM_RT_INDEX_LO;
+	table_count = hi_index - lo_index + 1;
+	required_size = table_count * width;
+	if (IPA_MEM_V4_RT_HASH_SIZE < required_size) {
+		ipa_err("V4_RT_HASH_SIZE too small for modem (%u < %u * %u)\n",
+			IPA_MEM_V4_RT_HASH_SIZE, table_count, width);
+		return false;
+	}
+	if (IPA_MEM_V4_RT_NHASH_SIZE < required_size) {
+		ipa_err("V4_RT_NHASH_SIZE too small for modem (%u < %u * %u)\n",
+			IPA_MEM_V4_RT_NHASH_SIZE, table_count,
+			width);
+		return false;
+	}
+
+	hi_index = IPA_MEM_V6_MODEM_RT_INDEX_HI;
+	lo_index = IPA_MEM_V6_MODEM_RT_INDEX_LO;
+	table_count = hi_index - lo_index + 1;
+	required_size = table_count * width;
+	if (IPA_MEM_V6_RT_HASH_SIZE < required_size) {
+		ipa_err("V6_RT_HASH_SIZE too small for modem (%u < %u * %u)\n",
+			IPA_MEM_V6_RT_HASH_SIZE, table_count, width);
+		return false;
+	}
+	if (IPA_MEM_V6_RT_NHASH_SIZE < required_size) {
 		ipa_err("V6_RT_NHASH_SIZE too small for modem (%u < %u * %u)\n",
-			ipa_ctx->mem_info[V6_RT_NHASH_SIZE], table_count,
+			IPA_MEM_V6_RT_NHASH_SIZE, table_count,
 			width);
 		return false;
 	}
@@ -1895,22 +1892,6 @@ static void ipa_init_mem_info(u32 *mem_info)
 	BUILD_BUG_ON(IPA_MEM_MODEM_OFST % 8);
 	BUILD_BUG_ON(IPA_MEM_UC_EVENT_RING_OFST % 1024);
 
-	mem_info[V4_RT_NUM_INDEX] = IPA_MEM_V4_RT_NUM_INDEX;
-	mem_info[V4_MODEM_RT_INDEX_LO] = IPA_MEM_V4_MODEM_RT_INDEX_LO;
-	mem_info[V4_MODEM_RT_INDEX_HI] = IPA_MEM_V4_MODEM_RT_INDEX_HI;
-	mem_info[V4_RT_HASH_OFST] = IPA_MEM_V4_RT_HASH_OFST;
-	mem_info[V4_RT_HASH_SIZE] = IPA_MEM_V4_RT_HASH_SIZE;
-	mem_info[V4_RT_NHASH_OFST] = IPA_MEM_V4_RT_NHASH_OFST;
-	mem_info[V4_RT_NHASH_SIZE] = IPA_MEM_V4_RT_NHASH_SIZE;
-	mem_info[V6_RT_NUM_INDEX] = IPA_MEM_V6_RT_NUM_INDEX;
-	mem_info[V6_MODEM_RT_INDEX_LO] = IPA_MEM_V6_MODEM_RT_INDEX_LO;
-	mem_info[V6_MODEM_RT_INDEX_HI] = IPA_MEM_V6_MODEM_RT_INDEX_HI;
-	mem_info[V6_APPS_RT_INDEX_LO] = IPA_MEM_V6_APPS_RT_INDEX_LO;
-	mem_info[V6_APPS_RT_INDEX_HI] = IPA_MEM_V6_APPS_RT_INDEX_HI;
-	mem_info[V6_RT_HASH_OFST] = IPA_MEM_V6_RT_HASH_OFST;
-	mem_info[V6_RT_HASH_SIZE] = IPA_MEM_V6_RT_HASH_SIZE;
-	mem_info[V6_RT_NHASH_OFST] = IPA_MEM_V6_RT_NHASH_OFST;
-	mem_info[V6_RT_NHASH_SIZE] = IPA_MEM_V6_RT_NHASH_SIZE;
 	mem_info[MODEM_HDR_OFST] = IPA_MEM_MODEM_HDR_OFST;
 	mem_info[MODEM_HDR_SIZE] = IPA_MEM_MODEM_HDR_SIZE;
 	mem_info[APPS_HDR_OFST] = IPA_MEM_APPS_HDR_OFST;
