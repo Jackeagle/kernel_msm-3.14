@@ -313,19 +313,17 @@ static int setup_apps_cmd_prod_pipe(void)
 
 static void sram_set_canary(u32 *sram_mmio, u32 offset)
 {
-	u32 index = offset / sizeof(*sram_mmio);
-
-	ipa_assert(index > 0);
-	sram_mmio[--index] = IPA_MEM_CANARY_VAL;
+	ipa_assert(offset >= sizeof(*sram_mmio));
+	sram_mmio += offset / sizeof(*sram_mmio);
+	*--sram_mmio = IPA_MEM_CANARY_VAL;
 }
 
 static void sram_set_canaries(u32 *sram_mmio, u32 offset)
 {
-	u32 index = offset / sizeof(*sram_mmio);
-
-	ipa_assert(index > 1);
-	sram_mmio[--index] = IPA_MEM_CANARY_VAL;
-	sram_mmio[--index] = IPA_MEM_CANARY_VAL;
+	ipa_assert(offset >= 2 * sizeof(*sram_mmio));
+	sram_mmio += offset / sizeof(*sram_mmio);
+	*--sram_mmio = IPA_MEM_CANARY_VAL;
+	*--sram_mmio = IPA_MEM_CANARY_VAL;
 }
 
 /** ipa_init_sram() - Initialize IPA local SRAM.
