@@ -353,18 +353,30 @@ static int ipa_init_sram(void)
 		return -ENOMEM;
 	}
 
+	BUILD_BUG_ON(IPA_MEM_V4_FLT_HASH_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V4_FLT_HASH_OFST);
+	BUILD_BUG_ON(IPA_MEM_V4_FLT_NHASH_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V4_FLT_NHASH_OFST);
+	BUILD_BUG_ON(IPA_MEM_V6_FLT_HASH_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V6_FLT_HASH_OFST);
+	BUILD_BUG_ON(IPA_MEM_V6_FLT_NHASH_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V6_FLT_NHASH_OFST);
+	BUILD_BUG_ON(IPA_MEM_V4_RT_HASH_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V4_RT_HASH_OFST);
+	BUILD_BUG_ON(IPA_MEM_V4_RT_NHASH_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V4_RT_NHASH_OFST);
+	BUILD_BUG_ON(IPA_MEM_V6_RT_HASH_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V6_RT_HASH_OFST);
+	BUILD_BUG_ON(IPA_MEM_V6_RT_NHASH_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V6_RT_NHASH_OFST);
+	BUILD_BUG_ON(IPA_MEM_MODEM_HDR_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_MODEM_HDR_OFST);
+	BUILD_BUG_ON(IPA_MEM_MODEM_HDR_PROC_CTX_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_MODEM_HDR_PROC_CTX_OFST);
+	BUILD_BUG_ON(IPA_MEM_MODEM_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_MODEM_OFST);
 	/* Only one canary precedes for the microcontroller ring */
+	BUILD_BUG_ON(IPA_MEM_UC_EVENT_RING_OFST % 1024);
 	sram_set_canary(ipa_sram_mmio, IPA_MEM_UC_EVENT_RING_OFST);
 
 	iounmap(ipa_sram_mmio);
@@ -1865,20 +1877,8 @@ static enum ipa_hw_version ipa_version_get(struct platform_device *pdev)
  */
 static void ipa_init_mem_info(void)
 {
-	BUILD_BUG_ON(IPA_MEM_V4_FLT_HASH_OFST % 8);
-	BUILD_BUG_ON(IPA_MEM_V4_FLT_NHASH_OFST % 8);
-	BUILD_BUG_ON(IPA_MEM_V6_FLT_HASH_OFST % 8);
-	BUILD_BUG_ON(IPA_MEM_V6_FLT_NHASH_OFST % 8);
-	BUILD_BUG_ON(IPA_MEM_V4_RT_HASH_OFST % 8);
-	BUILD_BUG_ON(IPA_MEM_V4_RT_NHASH_OFST % 8);
-	BUILD_BUG_ON(IPA_MEM_V6_RT_HASH_OFST % 8);
-	BUILD_BUG_ON(IPA_MEM_V6_RT_NHASH_OFST % 8);
-	BUILD_BUG_ON(IPA_MEM_MODEM_HDR_OFST % 8);
 	BUILD_BUG_ON(IPA_MEM_APPS_HDR_OFST % 8);
-	BUILD_BUG_ON(IPA_MEM_MODEM_HDR_PROC_CTX_OFST % 8);
 	BUILD_BUG_ON(IPA_MEM_APPS_HDR_PROC_CTX_OFST % 8);
-	BUILD_BUG_ON(IPA_MEM_MODEM_OFST % 8);
-	BUILD_BUG_ON(IPA_MEM_UC_EVENT_RING_OFST % 1024);
 }
 
 static const struct of_device_id ipa_plat_drv_match[] = {
