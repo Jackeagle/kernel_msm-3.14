@@ -1487,13 +1487,16 @@ static bool config_valid(void)
 	u32 lo_index;
 	u32 table_count;
 
+	BUILD_BUG_ON(!IPA_MEM_V4_RT_NUM_INDEX);
 	required_size = IPA_MEM_V4_RT_NUM_INDEX * width;
+	BUILD_BUG_ON(!IPA_MEM_V4_RT_HASH_SIZE);
 	if (IPA_MEM_V4_RT_HASH_SIZE < required_size) {
 		ipa_err("V4_RT_HASH_SIZE too small (%u < %u * %u)\n",
 			IPA_MEM_V4_RT_HASH_SIZE, IPA_MEM_V4_RT_NUM_INDEX,
 			width);
 		return false;
 	}
+	BUILD_BUG_ON(!IPA_MEM_V4_RT_NHASH_SIZE);
 	if (IPA_MEM_V4_RT_NHASH_SIZE < required_size) {
 		ipa_err("V4_RT_NHASH_SIZE too small (%u < %u * %u)\n",
 			IPA_MEM_V4_RT_NHASH_SIZE, IPA_MEM_V4_RT_NUM_INDEX,
@@ -1501,13 +1504,16 @@ static bool config_valid(void)
 		return false;
 	}
 
+	BUILD_BUG_ON(!IPA_MEM_V6_RT_NUM_INDEX);
 	required_size = IPA_MEM_V6_RT_NUM_INDEX * width;
+	BUILD_BUG_ON(!IPA_MEM_V6_RT_HASH_SIZE);
 	if (IPA_MEM_V6_RT_HASH_SIZE < required_size) {
 		ipa_err("V6_RT_HASH_SIZE too small (%u < %u * %u)\n",
 			IPA_MEM_V6_RT_HASH_SIZE, IPA_MEM_V6_RT_NUM_INDEX,
 			width);
 		return false;
 	}
+	BUILD_BUG_ON(!IPA_MEM_V6_RT_NHASH_SIZE);
 	if (IPA_MEM_V6_RT_NHASH_SIZE < required_size) {
 		ipa_err("V6_RT_NHASH_SIZE too small (%u < %u * %u)\n",
 			IPA_MEM_V6_RT_NHASH_SIZE, IPA_MEM_V6_RT_NUM_INDEX,
@@ -1515,6 +1521,8 @@ static bool config_valid(void)
 		return false;
 	}
 
+	BUILD_BUG_ON(IPA_MEM_V4_MODEM_RT_INDEX_LO >
+		     IPA_MEM_V4_MODEM_RT_INDEX_HI);
 	hi_index = IPA_MEM_V4_MODEM_RT_INDEX_HI;
 	lo_index = IPA_MEM_V4_MODEM_RT_INDEX_LO;
 	table_count = hi_index - lo_index + 1;
@@ -1531,6 +1539,8 @@ static bool config_valid(void)
 		return false;
 	}
 
+	BUILD_BUG_ON(IPA_MEM_V6_MODEM_RT_INDEX_LO >
+		     IPA_MEM_V6_MODEM_RT_INDEX_HI);
 	hi_index = IPA_MEM_V6_MODEM_RT_INDEX_HI;
 	lo_index = IPA_MEM_V6_MODEM_RT_INDEX_LO;
 	table_count = hi_index - lo_index + 1;
@@ -1550,11 +1560,13 @@ static bool config_valid(void)
 	/* Filter tables need an extra slot to hold an endpoint bitmap */
 	table_count = ipa_ctx->ep_flt_num + 1;
 	required_size = table_count * width;
+	BUILD_BUG_ON(!IPA_MEM_V4_FLT_HASH_SIZE);
 	if (IPA_MEM_V4_FLT_HASH_SIZE < required_size) {
 		ipa_err("V4_FLT_HASH_SIZE too small  (%u < %u * %u)\n",
 			IPA_MEM_V4_FLT_HASH_SIZE, table_count, width);
 		return false;
 	}
+	BUILD_BUG_ON(!IPA_MEM_V4_FLT_NHASH_SIZE);
 	if (IPA_MEM_V4_FLT_NHASH_SIZE < required_size) {
 		ipa_err("V4_FLT_NHASH_SIZE too small (%u < %u * %u)\n",
 			IPA_MEM_V4_FLT_NHASH_SIZE, table_count,
@@ -1562,12 +1574,14 @@ static bool config_valid(void)
 		return false;
 	}
 
+	BUILD_BUG_ON(!IPA_MEM_V6_FLT_HASH_SIZE);
 	if (IPA_MEM_V6_FLT_HASH_SIZE < required_size) {
 		ipa_err("V6_FLT_HASH_SIZE too small  (%u < %u * %u)\n",
 			IPA_MEM_V6_FLT_HASH_SIZE, table_count,
 			width);
 		return false;
 	}
+	BUILD_BUG_ON(!IPA_MEM_V6_FLT_NHASH_SIZE);
 	if (IPA_MEM_V6_FLT_NHASH_SIZE < required_size) {
 		ipa_err("V6_FLT_NHASH_SIZE too small (%u < %u * %u)\n",
 			IPA_MEM_V6_FLT_NHASH_SIZE, table_count, width);
@@ -1852,37 +1866,13 @@ static enum ipa_hw_version ipa_version_get(struct platform_device *pdev)
 static void ipa_init_mem_info(void)
 {
 	BUILD_BUG_ON(IPA_MEM_V4_FLT_HASH_OFST % 8);
-	BUILD_BUG_ON(!IPA_MEM_V4_FLT_HASH_SIZE);
-
 	BUILD_BUG_ON(IPA_MEM_V4_FLT_NHASH_OFST % 8);
-	BUILD_BUG_ON(!IPA_MEM_V4_FLT_NHASH_SIZE);
-
 	BUILD_BUG_ON(IPA_MEM_V6_FLT_HASH_OFST % 8);
-	BUILD_BUG_ON(!IPA_MEM_V6_FLT_HASH_SIZE);
-
 	BUILD_BUG_ON(IPA_MEM_V6_FLT_NHASH_OFST % 8);
-	BUILD_BUG_ON(!IPA_MEM_V6_FLT_NHASH_SIZE);
-
-	BUILD_BUG_ON(!IPA_MEM_V4_RT_NUM_INDEX);
-	BUILD_BUG_ON(IPA_MEM_V4_MODEM_RT_INDEX_LO >
-		     IPA_MEM_V4_MODEM_RT_INDEX_HI);
-
 	BUILD_BUG_ON(IPA_MEM_V4_RT_HASH_OFST % 8);
-	BUILD_BUG_ON(!IPA_MEM_V4_RT_HASH_SIZE);
-
 	BUILD_BUG_ON(IPA_MEM_V4_RT_NHASH_OFST % 8);
-	BUILD_BUG_ON(!IPA_MEM_V4_RT_NHASH_SIZE);
-
-	BUILD_BUG_ON(!IPA_MEM_V6_RT_NUM_INDEX);
-	BUILD_BUG_ON(IPA_MEM_V6_MODEM_RT_INDEX_LO >
-		     IPA_MEM_V6_MODEM_RT_INDEX_HI);
-
 	BUILD_BUG_ON(IPA_MEM_V6_RT_HASH_OFST % 8);
-	BUILD_BUG_ON(!IPA_MEM_V6_RT_HASH_SIZE);
-
 	BUILD_BUG_ON(IPA_MEM_V6_RT_NHASH_OFST % 8);
-	BUILD_BUG_ON(!IPA_MEM_V6_RT_NHASH_SIZE);
-
 	BUILD_BUG_ON(IPA_MEM_MODEM_HDR_OFST % 8);
 	BUILD_BUG_ON(IPA_MEM_APPS_HDR_OFST % 8);
 	BUILD_BUG_ON(IPA_MEM_MODEM_HDR_PROC_CTX_OFST % 8);
