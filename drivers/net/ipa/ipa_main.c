@@ -1559,7 +1559,8 @@ static bool config_valid(void)
 	required_size = table_count * width;
 	if (ipa_ctx->mem_info[V4_FLT_HASH_SIZE] < required_size) {
 		ipa_err("V4_FLT_HASH_SIZE too small  (%u < %u * %u)\n",
-			ipa_ctx->mem_info[V4_RT_HASH_SIZE], table_count, width);
+			ipa_ctx->mem_info[V4_FLT_HASH_SIZE], table_count,
+			width);
 		return false;
 	}
 	if (ipa_ctx->mem_info[V4_FLT_NHASH_SIZE] < required_size) {
