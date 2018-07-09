@@ -2022,7 +2022,6 @@ err_unregister_bus_handle:
 	ipa_ctx->ipa_bus_hdl = 0;
 	ipa_ctx->bus_scale_tbl = NULL;
 err_hal_destroy:
-	memset(&ipa_ctx->mem_info, 0, sizeof(ipa_ctx->mem_info));
 	ipahal_destroy();
 	iounmap(ipa_ctx->mmio);
 	ipa_ctx->mmio = NULL;

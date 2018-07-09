@@ -590,11 +590,6 @@ struct ipa_tag_completion {
 	atomic_t cnt;
 };
 
-/** enum ipa_mem_partition - IPA RAM Map */
-enum ipa_mem_partition {
-	IPA_MEM_MAX,
-};
-
 /** union ipa_hw_error_event_data - HW->CPU Common Events
  * @error_type : Entered when a system error is detected by the HW. Type of
  * error is specified by IPA_HW_ERRORS
@@ -781,7 +776,6 @@ struct ipa_context {
 	void *logbuf_low;
 	u32 ipa_bus_hdl;
 	struct msm_bus_scale_pdata *bus_scale_tbl;
-	u32 mem_info[IPA_MEM_MAX];
 	bool q6_proxy_clk_vote_valid;
 	u32 ipa_num_pipes;
 	dma_addr_t pkt_init_imm[IPA_MAX_NUM_PIPES];
