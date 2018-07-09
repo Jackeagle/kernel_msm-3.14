@@ -297,7 +297,7 @@ static void gsi_irq_enable_event(u8 evt_id)
 	_gsi_irq_control_event(evt_id, true);
 }
 
-static void gsi_irq_control_all(bool enable)
+static void _gsi_irq_control_all(bool enable)
 {
 	u32 val = enable ? ~0 : 0;
 
@@ -310,6 +310,16 @@ static void gsi_irq_control_all(bool enable)
 	/* Never enable GSI_BREAK_POINT */
 	val &= ~field_gen(1, EN_GSI_BREAK_POINT_BMSK);
 	gsi_writel(val, GSI_EE_N_CNTXT_GSI_IRQ_EN_OFFS(IPA_EE_AP));
+}
+
+static void gsi_irq_disable_all(void)
+{
+	_gsi_irq_control_all(false);
+}
+
+static void gsi_irq_enable_all(void)
+{
+	_gsi_irq_control_all(true);
 }
 
 static void gsi_handle_chan_ctrl(void)
@@ -856,8 +866,7 @@ int gsi_register_device(void)
 	gsi_ctx->evt_bmap = GENMASK(31, gsi_ctx->max_ev);
 	gsi_ctx->evt_bmap |= GENMASK(GSI_MHI_ER_END, GSI_MHI_ER_START);
 
-	/* Enable all interrupts */
-	gsi_irq_control_all(true);
+	gsi_irq_enable_all();
 
 	/* Writing 1 indicates IRQ interrupts; 0 would be MSI */
 	gsi_writel(1, GSI_EE_N_CNTXT_INTSET_OFFS(IPA_EE_AP));
@@ -882,10 +891,9 @@ int gsi_deregister_device(void)
 	}
 
 	/* Don't bother clearing the error log again (ERROR_LOG) or
-	 * setting the interrupt type again (INTSET).  Disable all
-	 * interrupts.
+	 * setting the interrupt type again (INTSET).
 	 */
-	gsi_irq_control_all(false);
+	gsi_irq_disable_all();
 
 	/* Clean up everything else set up by gsi_register_device() */
 	gsi_ctx->evt_bmap = 0;
