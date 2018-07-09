@@ -337,8 +337,8 @@ static void __always_inline sram_set_canaries(u32 *sram_mmio, u32 offset)
  */
 static int ipa_init_sram(void)
 {
+	phys_addr_t phys_addr;
 	u32 *ipa_sram_mmio;
-	unsigned long phys_addr;
 
 	phys_addr = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
 	phys_addr += ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_n,
