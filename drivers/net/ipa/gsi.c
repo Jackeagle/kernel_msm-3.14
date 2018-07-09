@@ -786,16 +786,16 @@ static irqreturn_t gsi_isr(int irq, void *ctxt)
 	return IRQ_HANDLED;
 }
 
-static u32 gsi_get_max_channels(u32 ee)
+static u32 gsi_get_max_channels(void)
 {
-	u32 val = gsi_readl(GSI_EE_N_GSI_HW_PARAM_2_OFFS(ee));
+	u32 val = gsi_readl(GSI_EE_N_GSI_HW_PARAM_2_OFFS(IPA_EE_AP));
 
 	return field_val(val, GSI_NUM_CH_PER_EE_BMSK);
 }
 
-static u32 gsi_get_max_event_rings(u32 ee)
+static u32 gsi_get_max_event_rings(void)
 {
-	u32 val = gsi_readl(GSI_EE_N_GSI_HW_PARAM_2_OFFS(ee));
+	u32 val = gsi_readl(GSI_EE_N_GSI_HW_PARAM_2_OFFS(IPA_EE_AP));
 
 	return field_val(val, GSI_NUM_EV_PER_EE_BMSK);
 }
@@ -845,12 +845,12 @@ int gsi_register_device(void)
 	atomic_set(&gsi_ctx->num_chan, 0);
 	atomic_set(&gsi_ctx->num_evt_ring, 0);
 
-	gsi_ctx->max_ch = gsi_get_max_channels(IPA_EE_AP);
+	gsi_ctx->max_ch = gsi_get_max_channels();
 	if (WARN_ON(gsi_ctx->max_ch > GSI_CHAN_MAX))
 		return -EIO;
 	ipa_debug("max channels %d\n", gsi_ctx->max_ch);
 
-	gsi_ctx->max_ev = gsi_get_max_event_rings(IPA_EE_AP);
+	gsi_ctx->max_ev = gsi_get_max_event_rings();
 	if (WARN_ON(gsi_ctx->max_ev > GSI_EVT_RING_MAX))
 		return -EIO;
 	ipa_debug("max event rings %d\n", gsi_ctx->max_ev);
