@@ -1874,13 +1874,6 @@ static enum ipa_hw_version ipa_version_get(struct platform_device *pdev)
 	return IPA_HW_NONE;
 }
 
-/** ipa_init_mem_info() - record memory offsets and sizes, and perform some
- * compile-time sanity checks of the values used.
- */
-static void ipa_init_mem_info(void)
-{
-}
-
 static const struct of_device_id ipa_plat_drv_match[] = {
 	{ .compatible = "qcom,ipa", },
 	{}
@@ -1944,8 +1937,6 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 	}
 
 	ipahal_init(hw_version, ipa_ctx->mmio);
-
-	ipa_init_mem_info();
 
 	ipa_init_ep_flt_bitmap();
 	if (!ipa_ctx->ep_flt_num) {
