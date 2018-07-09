@@ -376,40 +376,34 @@ static int ipa_init_sram(void)
  */
 static int ipa_init_hdr(void)
 {
-	u32 dma_size;
-	u32 offset;
 	int ret;
 
-	dma_size = IPA_MEM_MODEM_HDR_SIZE;
-	if (dma_size) {
-		offset = IPA_MEM_MODEM_HDR_OFST;
-		ret = hdr_init_local_cmd(offset, dma_size);
+	if (IPA_MEM_MODEM_HDR_SIZE) {
+		ret = hdr_init_local_cmd(IPA_MEM_MODEM_HDR_OFST,
+					 IPA_MEM_MODEM_HDR_SIZE);
 		if (ret)
 			return ret;
 	}
 
-	dma_size = IPA_MEM_APPS_HDR_SIZE;
-	if (dma_size) {
+	if (IPA_MEM_APPS_HDR_SIZE) {
 		BUILD_BUG_ON(IPA_MEM_APPS_HDR_OFST % 8);
-		offset = IPA_MEM_APPS_HDR_OFST;
-		ret = hdr_init_local_cmd(offset, dma_size);
+		ret = hdr_init_local_cmd(IPA_MEM_APPS_HDR_OFST,
+					 IPA_MEM_APPS_HDR_SIZE);
 		if (ret)
 			return ret;
 	}
 
-	dma_size = IPA_MEM_MODEM_HDR_PROC_CTX_SIZE;
-	if (dma_size) {
-		offset = IPA_MEM_MODEM_HDR_PROC_CTX_OFST;
-		ret = dma_shared_mem_zero_cmd(offset, dma_size);
+	if (IPA_MEM_MODEM_HDR_PROC_CTX_SIZE) {
+		ret = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_HDR_PROC_CTX_OFST,
+					      IPA_MEM_MODEM_HDR_PROC_CTX_SIZE);
 		if (ret)
 			return ret;
 	}
 
-	dma_size = IPA_MEM_APPS_HDR_PROC_CTX_SIZE;
-	if (dma_size) {
+	if (IPA_MEM_APPS_HDR_PROC_CTX_SIZE) {
 		BUILD_BUG_ON(IPA_MEM_APPS_HDR_PROC_CTX_OFST % 8);
-		offset = IPA_MEM_APPS_HDR_PROC_CTX_OFST;
-		ret = dma_shared_mem_zero_cmd(offset, dma_size);
+		ret = dma_shared_mem_zero_cmd(IPA_MEM_APPS_HDR_PROC_CTX_OFST,
+					      IPA_MEM_APPS_HDR_PROC_CTX_SIZE);
 		if (ret)
 			return ret;
 	}
