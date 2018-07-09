@@ -1849,7 +1849,7 @@ static enum ipa_hw_version ipa_version_get(struct platform_device *pdev)
 /** ipa_init_mem_info() - record memory offsets and sizes, and perform some
  * compile-time sanity checks of the values used.
  */
-static void ipa_init_mem_info(u32 *mem_info)
+static void ipa_init_mem_info(void)
 {
 	BUILD_BUG_ON(IPA_MEM_V4_FLT_HASH_OFST % 8);
 	BUILD_BUG_ON(!IPA_MEM_V4_FLT_HASH_SIZE);
@@ -1955,7 +1955,7 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 
 	ipahal_init(hw_version, ipa_ctx->mmio);
 
-	ipa_init_mem_info(&ipa_ctx->mem_info[0]);
+	ipa_init_mem_info();
 
 	ipa_init_ep_flt_bitmap();
 	if (!ipa_ctx->ep_flt_num) {
