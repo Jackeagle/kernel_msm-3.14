@@ -592,8 +592,6 @@ struct ipa_tag_completion {
 
 /** enum ipa_mem_partition - IPA RAM Map */
 enum ipa_mem_partition {
-	V6_FLT_NHASH_OFST,
-	V6_FLT_NHASH_SIZE,
 	V4_RT_NUM_INDEX,
 	V4_MODEM_RT_INDEX_LO,
 	V4_MODEM_RT_INDEX_HI,

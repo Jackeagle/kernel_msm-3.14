@@ -268,7 +268,7 @@ static const struct ipa_init_modem_driver_req *init_modem_driver_req(void)
 	req.v4_filter_tbl_start = base + IPA_MEM_V4_FLT_NHASH_OFST;
 
 	req.v6_filter_tbl_start_valid = true;
-	req.v6_filter_tbl_start = base + ipa_ctx->mem_info[V6_FLT_NHASH_OFST];
+	req.v6_filter_tbl_start = base + IPA_MEM_V6_FLT_NHASH_OFST;
 
 	req.modem_mem_info_valid = ipa_ctx->mem_info[MODEM_SIZE] ? 1 : 0;
 	req.modem_mem_info.start = base + ipa_ctx->mem_info[MODEM_OFST];
