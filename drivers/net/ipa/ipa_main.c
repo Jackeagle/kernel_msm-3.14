@@ -315,9 +315,9 @@ static void
 sram_set_canary_common(u32 *sram_mmio, u32 index, bool two)
 {
 	/* Set 4 or 8 bytes of CANARY before the offset */
+	sram_mmio[--index] = IPA_MEM_CANARY_VAL;
 	if (two)
-		sram_mmio[index - 2] = IPA_MEM_CANARY_VAL;
-	sram_mmio[index - 1] = IPA_MEM_CANARY_VAL;
+		sram_mmio[--index] = IPA_MEM_CANARY_VAL;
 }
 
 static void sram_set_canary(u32 *sram_mmio, u32 offset)
