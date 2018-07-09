@@ -328,8 +328,7 @@ static void gsi_handle_chan_ctrl(void)
 	u32 ch_mask;
 
 	ch_mask = gsi_readl(GSI_EE_N_CNTXT_SRC_GSI_CH_IRQ_OFFS(IPA_EE_AP));
-	gsi_writel(ch_mask,
-			GSI_EE_N_CNTXT_SRC_GSI_CH_IRQ_CLR_OFFS(IPA_EE_AP));
+	gsi_writel(ch_mask, GSI_EE_N_CNTXT_SRC_GSI_CH_IRQ_CLR_OFFS(IPA_EE_AP));
 
 	ipa_debug("ch_mask %x\n", ch_mask);
 	if (ch_mask & ~valid_mask) {
@@ -581,17 +580,16 @@ static void gsi_ring_evt_doorbell(struct gsi_evt_ctx *evtr)
 	 * respectively.  LSB (doorbell 0) must be written last.
 	 */
 	val = evtr->ring.wp_local >> 32;
-	gsi_writel(val, GSI_EE_N_EV_CH_K_DOORBELL_1_OFFS(evtr->id,
-							 IPA_EE_AP));
+	gsi_writel(val, GSI_EE_N_EV_CH_K_DOORBELL_1_OFFS(evtr->id, IPA_EE_AP));
 
 	val = evtr->ring.wp_local & GENMASK(31, 0);
-	gsi_writel(val, GSI_EE_N_EV_CH_K_DOORBELL_0_OFFS(evtr->id,
-							 IPA_EE_AP));
+	gsi_writel(val, GSI_EE_N_EV_CH_K_DOORBELL_0_OFFS(evtr->id, IPA_EE_AP));
 }
 
 static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *chan)
 {
 	u32 val;
+	u8 ch_id = chan->props.ch_id;
 
 	/* allocate new events for this channel first
 	 * before submitting the new TREs.
@@ -607,11 +605,9 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *chan)
 	 * respectively.  LSB (doorbell 0) must be written last.
 	 */
 	val = chan->ring.wp_local >> 32;
-	gsi_writel(val, GSI_EE_N_GSI_CH_K_DOORBELL_1_OFFS(chan->props.ch_id,
-							  IPA_EE_AP));
+	gsi_writel(val, GSI_EE_N_GSI_CH_K_DOORBELL_1_OFFS(ch_id, IPA_EE_AP));
 	val = chan->ring.wp_local & GENMASK(31, 0);
-	gsi_writel(val, GSI_EE_N_GSI_CH_K_DOORBELL_0_OFFS(chan->props.ch_id,
-							  IPA_EE_AP));
+	gsi_writel(val, GSI_EE_N_GSI_CH_K_DOORBELL_0_OFFS(ch_id, IPA_EE_AP));
 }
 
 static void handle_event(int evt_id)
