@@ -301,8 +301,7 @@ static const struct ipa_init_modem_driver_req *init_modem_driver_req(void)
 	req.v4_hash_filter_tbl_start = base + IPA_MEM_V4_FLT_HASH_OFST;
 
 	req.v6_hash_filter_tbl_start_valid = true;
-	req.v6_hash_filter_tbl_start =
-			base + ipa_ctx->mem_info[V6_FLT_HASH_OFST];
+	req.v6_hash_filter_tbl_start = base + IPA_MEM_V6_FLT_HASH_OFST;
 
 	return &req;
 }
