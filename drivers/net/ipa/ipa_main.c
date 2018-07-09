@@ -1902,9 +1902,7 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 	}
 	ipa_debug(": ipa_version = %d", hw_version);
 
-	result = of_property_read_u32(node, "qcom,ee", &ipa_ctx->ee);
-	if (result)
-		ipa_ctx->ee = 0;	/* Default to 0 if not found */
+	ipa_ctx->ee = IPA_EE_AP;
 
 	/* Get IPA wrapper address */
 	res = platform_get_resource_byname(pdev_p, IORESOURCE_MEM, "ipa-base");
