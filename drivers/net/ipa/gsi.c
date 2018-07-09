@@ -297,19 +297,19 @@ static void gsi_irq_enable_event(u8 evt_id)
 	_gsi_irq_control_event(evt_id, true);
 }
 
-static void gsi_irq_control_all(u32 ee, bool enable)
+static void gsi_irq_control_all(bool enable)
 {
 	u32 val = enable ? ~0 : 0;
 
 	/* Inter EE commands / interrupt are no supported. */
-	gsi_writel(val, GSI_EE_N_CNTXT_TYPE_IRQ_MSK_OFFS(ee));
-	gsi_writel(val, GSI_EE_N_CNTXT_SRC_GSI_CH_IRQ_MSK_OFFS(ee));
-	gsi_writel(val, GSI_EE_N_CNTXT_SRC_EV_CH_IRQ_MSK_OFFS(ee));
-	gsi_writel(val, GSI_EE_N_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(ee));
-	gsi_writel(val, GSI_EE_N_CNTXT_GLOB_IRQ_EN_OFFS(ee));
+	gsi_writel(val, GSI_EE_N_CNTXT_TYPE_IRQ_MSK_OFFS(IPA_EE_AP));
+	gsi_writel(val, GSI_EE_N_CNTXT_SRC_GSI_CH_IRQ_MSK_OFFS(IPA_EE_AP));
+	gsi_writel(val, GSI_EE_N_CNTXT_SRC_EV_CH_IRQ_MSK_OFFS(IPA_EE_AP));
+	gsi_writel(val, GSI_EE_N_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(IPA_EE_AP));
+	gsi_writel(val, GSI_EE_N_CNTXT_GLOB_IRQ_EN_OFFS(IPA_EE_AP));
 	/* Never enable GSI_BREAK_POINT */
 	val &= ~field_gen(1, EN_GSI_BREAK_POINT_BMSK);
-	gsi_writel(val, GSI_EE_N_CNTXT_GSI_IRQ_EN_OFFS(ee));
+	gsi_writel(val, GSI_EE_N_CNTXT_GSI_IRQ_EN_OFFS(IPA_EE_AP));
 }
 
 static void gsi_handle_chan_ctrl(void)
@@ -857,7 +857,7 @@ int gsi_register_device(void)
 	gsi_ctx->evt_bmap |= GENMASK(GSI_MHI_ER_END, GSI_MHI_ER_START);
 
 	/* Enable all interrupts */
-	gsi_irq_control_all(IPA_EE_AP, true);
+	gsi_irq_control_all(true);
 
 	/* Writing 1 indicates IRQ interrupts; 0 would be MSI */
 	gsi_writel(1, GSI_EE_N_CNTXT_INTSET_OFFS(IPA_EE_AP));
@@ -885,7 +885,7 @@ int gsi_deregister_device(void)
 	 * setting the interrupt type again (INTSET).  Disable all
 	 * interrupts.
 	 */
-	gsi_irq_control_all(IPA_EE_AP, false);
+	gsi_irq_control_all(false);
 
 	/* Clean up everything else set up by gsi_register_device() */
 	gsi_ctx->evt_bmap = 0;
