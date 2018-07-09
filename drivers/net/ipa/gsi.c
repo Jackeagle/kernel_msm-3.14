@@ -138,7 +138,6 @@ struct ch_debug_stats {
 struct gsi_ctx {
 	void __iomem *base;
 	struct device *dev;
-	u32 ee;
 	u32 phys_base;
 	unsigned int irq;
 	bool per_registered;
@@ -315,7 +314,7 @@ static void gsi_irq_control_all(u32 ee, bool enable)
 
 static void gsi_handle_chan_ctrl(void)
 {
-	u32 ee = gsi_ctx->ee;
+	u32 ee = IPA_EE_AP;
 	u32 valid_mask = GENMASK(gsi_ctx->max_ch - 1, 0);
 	u32 chan_mask;
 
@@ -345,7 +344,7 @@ static void gsi_handle_chan_ctrl(void)
 
 static void gsi_handle_evt_ctrl(void)
 {
-	u32 ee = gsi_ctx->ee;
+	u32 ee = IPA_EE_AP;
 	u32 valid_mask = GENMASK(gsi_ctx->max_ev - 1, 0);
 	u32 evt_mask;
 
@@ -377,7 +376,7 @@ static void
 handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 code)
 {
 	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
-	u32 ee = gsi_ctx->ee;
+	u32 ee = IPA_EE_AP;
 	u32 val;
 
 	ipa_bug_on(err_ee != ee && code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
@@ -423,7 +422,7 @@ static void
 handle_glob_evt_err(u32 err_ee, u32 evt_id, u32 code)
 {
 	struct gsi_evt_ctx *evtr = &gsi_ctx->evtr[evt_id];
-	u32 ee = gsi_ctx->ee;
+	u32 ee = IPA_EE_AP;
 
 	ipa_bug_on(err_ee != ee && code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
 
@@ -477,7 +476,7 @@ static void gsi_handle_glob_err(u32 err)
 
 static void gsi_handle_glob_ee(void)
 {
-	u32 ee = gsi_ctx->ee;
+	u32 ee = IPA_EE_AP;
 	u32 val;
 
 	val = gsi_readl(GSI_EE_N_CNTXT_GLOB_IRQ_STTS_OFFS(ee));
@@ -573,11 +572,11 @@ static void gsi_ring_evt_doorbell(struct gsi_evt_ctx *evtr)
 	 */
 	val = evtr->ring.wp_local >> 32;
 	gsi_writel(val, GSI_EE_N_EV_CH_K_DOORBELL_1_OFFS(evtr->id,
-							 gsi_ctx->ee));
+							 IPA_EE_AP));
 
 	val = evtr->ring.wp_local & GENMASK(31, 0);
 	gsi_writel(val, GSI_EE_N_EV_CH_K_DOORBELL_0_OFFS(evtr->id,
-							 gsi_ctx->ee));
+							 IPA_EE_AP));
 }
 
 static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *chan)
@@ -599,16 +598,16 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *chan)
 	 */
 	val = chan->ring.wp_local >> 32;
 	gsi_writel(val, GSI_EE_N_GSI_CH_K_DOORBELL_1_OFFS(chan->props.ch_id,
-							  gsi_ctx->ee));
+							  IPA_EE_AP));
 	val = chan->ring.wp_local & GENMASK(31, 0);
 	gsi_writel(val, GSI_EE_N_GSI_CH_K_DOORBELL_0_OFFS(chan->props.ch_id,
-							  gsi_ctx->ee));
+							  IPA_EE_AP));
 }
 
 static void handle_event(int evt_id)
 {
 	struct gsi_evt_ctx *evtr = &gsi_ctx->evtr[evt_id];
-	u32 ee = gsi_ctx->ee;
+	u32 ee = IPA_EE_AP;
 	unsigned long flags;
 	bool check_again;
 
@@ -646,7 +645,7 @@ static void handle_event(int evt_id)
 
 static void gsi_handle_ieob(void)
 {
-	u32 ee = gsi_ctx->ee;
+	u32 ee = IPA_EE_AP;
 	u32 valid_mask = GENMASK(gsi_ctx->max_ev - 1, 0);
 	u32 evt_mask;
 
@@ -670,7 +669,7 @@ static void gsi_handle_ieob(void)
 
 static void gsi_handle_inter_ee_chan_ctrl(void)
 {
-	u32 ee = gsi_ctx->ee;
+	u32 ee = IPA_EE_AP;
 	u32 valid_mask = GENMASK(gsi_ctx->max_ch - 1, 0);
 	u32 chan_mask;
 
@@ -693,7 +692,7 @@ static void gsi_handle_inter_ee_chan_ctrl(void)
 
 static void gsi_handle_inter_ee_evt_ctrl(void)
 {
-	u32 ee = gsi_ctx->ee;
+	u32 ee = IPA_EE_AP;
 	u32 valid_mask = GENMASK(gsi_ctx->max_ev - 1, 0);
 	u32 evt_mask;
 
@@ -716,7 +715,7 @@ static void gsi_handle_inter_ee_evt_ctrl(void)
 
 static void gsi_handle_general(void)
 {
-	u32 ee = gsi_ctx->ee;
+	u32 ee = IPA_EE_AP;
 	u32 val;
 
 	val = gsi_readl(GSI_EE_N_CNTXT_GSI_IRQ_STTS_OFFS(ee));
@@ -735,7 +734,7 @@ static void gsi_handle_general(void)
 
 static irqreturn_t gsi_isr(int irq, void *ctxt)
 {
-	u32 ee = gsi_ctx->ee;
+	u32 ee = IPA_EE_AP;
 	u32 cnt = 0;
 	u32 type;
 
@@ -831,7 +830,7 @@ int gsi_register_device(void)
 	else
 		ipa_err("GSI irq is wake enabled %u\n", gsi_ctx->irq);
 
-	val = gsi_readl(GSI_EE_N_GSI_STATUS_OFFS(gsi_ctx->ee));
+	val = gsi_readl(GSI_EE_N_GSI_STATUS_OFFS(IPA_EE_AP));
 	if (!(val & ENABLED_BMSK)) {
 		ipa_err("manager EE has not enabled GSI, GSI un-usable\n");
 		return -EIO;
@@ -842,12 +841,12 @@ int gsi_register_device(void)
 	atomic_set(&gsi_ctx->num_chan, 0);
 	atomic_set(&gsi_ctx->num_evt_ring, 0);
 
-	gsi_ctx->max_ch = gsi_get_max_channels(gsi_ctx->ee);
+	gsi_ctx->max_ch = gsi_get_max_channels(IPA_EE_AP);
 	if (WARN_ON(gsi_ctx->max_ch > GSI_CHAN_MAX))
 		return -EIO;
 	ipa_debug("max channels %d\n", gsi_ctx->max_ch);
 
-	gsi_ctx->max_ev = gsi_get_max_event_rings(gsi_ctx->ee);
+	gsi_ctx->max_ev = gsi_get_max_event_rings(IPA_EE_AP);
 	if (WARN_ON(gsi_ctx->max_ev > GSI_EVT_RING_MAX))
 		return -EIO;
 	ipa_debug("max event rings %d\n", gsi_ctx->max_ev);
@@ -864,12 +863,12 @@ int gsi_register_device(void)
 	gsi_ctx->evt_bmap |= GENMASK(GSI_MHI_ER_END, GSI_MHI_ER_START);
 
 	/* Enable all interrupts */
-	gsi_irq_control_all(gsi_ctx->ee, true);
+	gsi_irq_control_all(IPA_EE_AP, true);
 
 	/* Writing 1 indicates IRQ interrupts; 0 would be MSI */
-	gsi_writel(1, GSI_EE_N_CNTXT_INTSET_OFFS(gsi_ctx->ee));
+	gsi_writel(1, GSI_EE_N_CNTXT_INTSET_OFFS(IPA_EE_AP));
 
-	gsi_writel(0, GSI_EE_N_ERROR_LOG_OFFS(gsi_ctx->ee));
+	gsi_writel(0, GSI_EE_N_ERROR_LOG_OFFS(IPA_EE_AP));
 
 	return 0;
 }
@@ -892,7 +891,7 @@ int gsi_deregister_device(void)
 	 * setting the interrupt type again (INTSET).  Disable all
 	 * interrupts.
 	 */
-	gsi_irq_control_all(gsi_ctx->ee, false);
+	gsi_irq_control_all(IPA_EE_AP, false);
 
 	/* Clean up everything else set up by gsi_register_device() */
 	gsi_ctx->evt_bmap = 0;
@@ -1096,7 +1095,7 @@ static u32 evt_ring_ctx_8_val(u32 int_modt, u32 int_modc)
 static void
 gsi_program_evt_ring_ctx(struct ipa_mem_buffer *mem, u8 evt_id, u16 int_modt)
 {
-	u32 ee = gsi_ctx->ee;
+	u32 ee = IPA_EE_AP;
 	u32 int_modc = 1;	/* moderation always comes from channel*/
 	u32 val;
 
@@ -1175,7 +1174,7 @@ static u32 command(u32 reg, u32 val, struct completion *compl)
 static u32 evt_ring_command(unsigned long evt_id, enum gsi_evt_ch_cmd_opcode op)
 {
 	struct completion *compl = &gsi_ctx->evtr[evt_id].compl;
-	u32 ee = gsi_ctx->ee;
+	u32 ee = IPA_EE_AP;
 	u32 val;
 
 	val = field_gen((u32)evt_id, EV_CHID_BMSK);
@@ -1192,7 +1191,7 @@ static u32 evt_ring_command(unsigned long evt_id, enum gsi_evt_ch_cmd_opcode op)
 static u32 channel_command(unsigned long chan_id, enum gsi_ch_cmd_opcode op)
 {
 	struct completion *compl = &gsi_ctx->chan[chan_id].compl;
-	u32 ee = gsi_ctx->ee;
+	u32 ee = IPA_EE_AP;
 	u32 val;
 
 	val = field_gen((u32)chan_id, CH_CHID_BMSK);
@@ -1209,7 +1208,7 @@ static u32 channel_command(unsigned long chan_id, enum gsi_ch_cmd_opcode op)
 long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 {
 	unsigned long required_alignment = roundup_pow_of_two(size);
-	u32 ee = gsi_ctx->ee;
+	u32 ee = IPA_EE_AP;
 	unsigned long evt_id;
 	struct gsi_evt_ctx *evtr;
 	unsigned long flags;
@@ -1281,7 +1280,7 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 	gsi_writel(val, GSI_EE_N_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(ee));
 
 	/* enable ieob interrupts */
-	gsi_event_irq_enable(gsi_ctx->ee, evtr->id);
+	gsi_event_irq_enable(IPA_EE_AP, evtr->id);
 	spin_unlock_irqrestore(&gsi_ctx->slock, flags);
 
 	return evt_id;
@@ -1300,7 +1299,7 @@ err_clear_bit:
 
 static void __gsi_zero_evt_ring_scratch(unsigned long evt_id)
 {
-	u32 ee = gsi_ctx->ee;
+	u32 ee = IPA_EE_AP;
 
 	gsi_writel(0, GSI_EE_N_EV_CH_K_SCRATCH_0_OFFS(evt_id, ee));
 	gsi_writel(0, GSI_EE_N_EV_CH_K_SCRATCH_1_OFFS(evt_id, ee));
@@ -1514,7 +1513,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	atomic_inc(&evtr->chan_ref_cnt);
 	evtr->chan = chan;
 
-	gsi_program_chan_ctx(props, gsi_ctx->ee, evt_id);
+	gsi_program_chan_ctx(props, IPA_EE_AP, evt_id);
 	gsi_init_ring(&chan->ring, &props->mem);
 
 	chan->user_data = user_data;
@@ -1536,7 +1535,7 @@ static void __gsi_write_channel_scratch(unsigned long chan_id)
 	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
 	union gsi_channel_scratch scr = { };
 	struct gsi_gpi_channel_scratch *gpi = &scr.gpi;
-	u32 ee = gsi_ctx->ee;
+	u32 ee = IPA_EE_AP;
 	u32 val;
 
 	/* See comments above definition of gsi_gpi_channel_scratch */
@@ -1634,7 +1633,7 @@ int gsi_stop_channel(unsigned long chan_id)
 
 	completed = channel_command(chan_id, GSI_CH_STOP);
 	if (!completed) {
-		u32 ee = gsi_ctx->ee;
+		u32 ee = IPA_EE_AP;
 
 		/* check channel state here in case the channel is stopped but
 		 * the interrupt was not handled yet.
@@ -1707,7 +1706,7 @@ reset:
 		goto reset;
 	}
 
-	gsi_program_chan_ctx(&chan->props, gsi_ctx->ee, chan->evtr->id);
+	gsi_program_chan_ctx(&chan->props, IPA_EE_AP, chan->evtr->id);
 	gsi_init_ring(&chan->ring, &chan->props.mem);
 
 	/* restore scratch */
@@ -1765,7 +1764,7 @@ bool gsi_is_channel_empty(unsigned long chan_id)
 {
 	struct gsi_chan_ctx *chan;
 	unsigned long flags;
-	u32 ee = gsi_ctx->ee;
+	u32 ee = IPA_EE_AP;
 	bool empty;
 	u32 val;
 
@@ -1893,7 +1892,7 @@ int gsi_poll_channel(unsigned long chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
 	struct gsi_evt_ctx *evtr = chan->evtr;
-	u32 ee = gsi_ctx->ee;
+	u32 ee = IPA_EE_AP;
 	unsigned long flags;
 	int size;
 
@@ -1932,9 +1931,9 @@ static void gsi_config_channel_mode(unsigned long chan_id, bool polling)
 
 	spin_lock_irqsave(&gsi_ctx->slock, flags);
 	if (polling)
-		gsi_event_irq_disable(gsi_ctx->ee, chan->evtr->id);
+		gsi_event_irq_disable(IPA_EE_AP, chan->evtr->id);
 	else
-		gsi_event_irq_enable(gsi_ctx->ee, chan->evtr->id);
+		gsi_event_irq_enable(IPA_EE_AP, chan->evtr->id);
 	atomic_set(&chan->poll_mode, polling ? 1 : 0);
 	spin_unlock_irqrestore(&gsi_ctx->slock, flags);
 }
@@ -1989,7 +1988,7 @@ int gsi_set_channel_cfg(unsigned long chan_id, struct gsi_chan_props *props)
 	mutex_lock(&chan->mlock);
 	chan->props = *props;
 
-	gsi_program_chan_ctx(&chan->props, gsi_ctx->ee, chan->evtr->id);
+	gsi_program_chan_ctx(&chan->props, IPA_EE_AP, chan->evtr->id);
 	gsi_init_ring(&chan->ring, &chan->props.mem);
 
 	/* restore scratch */
@@ -2025,7 +2024,6 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev)
 	}
 
 	gsi_ctx->dev = dev;
-	gsi_ctx->ee = IPA_EE_AP;
 	ipa_assert(res->start <= (resource_size_t)U32_MAX);
 	gsi_ctx->phys_base = (u32)res->start;
 
