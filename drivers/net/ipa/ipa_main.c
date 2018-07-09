@@ -404,6 +404,7 @@ static int ipa_init_hdr(void)
 
 	dma_size = IPA_MEM_APPS_HDR_SIZE;
 	if (dma_size) {
+		BUILD_BUG_ON(IPA_MEM_APPS_HDR_OFST % 8);
 		offset = IPA_MEM_APPS_HDR_OFST;
 		ret = hdr_init_local_cmd(offset, dma_size);
 		if (ret)
@@ -420,6 +421,7 @@ static int ipa_init_hdr(void)
 
 	dma_size = IPA_MEM_APPS_HDR_PROC_CTX_SIZE;
 	if (dma_size) {
+		BUILD_BUG_ON(IPA_MEM_APPS_HDR_PROC_CTX_OFST % 8);
 		offset = IPA_MEM_APPS_HDR_PROC_CTX_OFST;
 		ret = dma_shared_mem_zero_cmd(offset, dma_size);
 		if (ret)
@@ -1877,8 +1879,6 @@ static enum ipa_hw_version ipa_version_get(struct platform_device *pdev)
  */
 static void ipa_init_mem_info(void)
 {
-	BUILD_BUG_ON(IPA_MEM_APPS_HDR_OFST % 8);
-	BUILD_BUG_ON(IPA_MEM_APPS_HDR_PROC_CTX_OFST % 8);
 }
 
 static const struct of_device_id ipa_plat_drv_match[] = {
