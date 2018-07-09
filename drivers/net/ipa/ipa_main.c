@@ -274,23 +274,21 @@ int ipa_init_q6_smem(void)
 
 	ipa_client_add(__func__, false);
 
-	rc = dma_shared_mem_zero_cmd(ipa_ctx->mem_info[MODEM_OFST],
-				     ipa_ctx->mem_info[MODEM_SIZE]);
+	rc = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_OFST, IPA_MEM_MODEM_SIZE);
 	if (rc) {
 		what = "Modem RAM";
 		goto out_client_remove;
 	}
 
-	rc = dma_shared_mem_zero_cmd(ipa_ctx->mem_info[MODEM_HDR_OFST],
-				     ipa_ctx->mem_info[MODEM_HDR_SIZE]);
+	rc = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_HDR_OFST,
+				     IPA_MEM_MODEM_HDR_SIZE);
 	if (rc) {
 		what = "Modem HDRs RAM";
 		goto out_client_remove;
 	}
 
-	rc = dma_shared_mem_zero_cmd(
-			ipa_ctx->mem_info[MODEM_HDR_PROC_CTX_OFST],
-			ipa_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE]);
+	rc = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_HDR_PROC_CTX_OFST,
+				     IPA_MEM_MODEM_HDR_PROC_CTX_SIZE);
 	if (rc)
 		what = "Modem proc ctx RAM";
 out_client_remove:
@@ -384,33 +382,33 @@ static int ipa_init_hdr(void)
 	u32 offset;
 	int ret;
 
-	dma_size = ipa_ctx->mem_info[MODEM_HDR_SIZE];
+	dma_size = IPA_MEM_MODEM_HDR_SIZE;
 	if (dma_size) {
-		offset = ipa_ctx->mem_info[MODEM_HDR_OFST];
+		offset = IPA_MEM_MODEM_HDR_OFST;
 		ret = hdr_init_local_cmd(offset, dma_size);
 		if (ret)
 			return ret;
 	}
 
-	dma_size = ipa_ctx->mem_info[APPS_HDR_SIZE];
+	dma_size = IPA_MEM_APPS_HDR_SIZE;
 	if (dma_size) {
-		offset = ipa_ctx->mem_info[APPS_HDR_OFST];
+		offset = IPA_MEM_APPS_HDR_OFST;
 		ret = hdr_init_local_cmd(offset, dma_size);
 		if (ret)
 			return ret;
 	}
 
-	dma_size = ipa_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE];
+	dma_size = IPA_MEM_MODEM_HDR_PROC_CTX_SIZE;
 	if (dma_size) {
-		offset = ipa_ctx->mem_info[MODEM_HDR_PROC_CTX_OFST];
+		offset = IPA_MEM_MODEM_HDR_PROC_CTX_OFST;
 		ret = dma_shared_mem_zero_cmd(offset, dma_size);
 		if (ret)
 			return ret;
 	}
 
-	dma_size = ipa_ctx->mem_info[APPS_HDR_PROC_CTX_SIZE];
+	dma_size = IPA_MEM_APPS_HDR_PROC_CTX_SIZE;
 	if (dma_size) {
-		offset = ipa_ctx->mem_info[APPS_HDR_PROC_CTX_OFST];
+		offset = IPA_MEM_APPS_HDR_PROC_CTX_OFST;
 		ret = dma_shared_mem_zero_cmd(offset, dma_size);
 		if (ret)
 			return ret;
@@ -1891,20 +1889,6 @@ static void ipa_init_mem_info(u32 *mem_info)
 	BUILD_BUG_ON(IPA_MEM_APPS_HDR_PROC_CTX_OFST % 8);
 	BUILD_BUG_ON(IPA_MEM_MODEM_OFST % 8);
 	BUILD_BUG_ON(IPA_MEM_UC_EVENT_RING_OFST % 1024);
-
-	mem_info[MODEM_HDR_OFST] = IPA_MEM_MODEM_HDR_OFST;
-	mem_info[MODEM_HDR_SIZE] = IPA_MEM_MODEM_HDR_SIZE;
-	mem_info[APPS_HDR_OFST] = IPA_MEM_APPS_HDR_OFST;
-	mem_info[APPS_HDR_SIZE] = IPA_MEM_APPS_HDR_SIZE;
-	mem_info[MODEM_HDR_PROC_CTX_OFST] = IPA_MEM_MODEM_HDR_PROC_CTX_OFST;
-	mem_info[MODEM_HDR_PROC_CTX_SIZE] = IPA_MEM_MODEM_HDR_PROC_CTX_SIZE;
-	mem_info[APPS_HDR_PROC_CTX_OFST] = IPA_MEM_APPS_HDR_PROC_CTX_OFST;
-	mem_info[APPS_HDR_PROC_CTX_SIZE] = IPA_MEM_APPS_HDR_PROC_CTX_SIZE;
-	mem_info[MODEM_OFST] = IPA_MEM_MODEM_OFST;
-	mem_info[MODEM_OFST] = IPA_MEM_MODEM_OFST;
-	mem_info[MODEM_SIZE] = IPA_MEM_MODEM_SIZE;
-	mem_info[END_OFST] = IPA_MEM_END_OFST;
-	mem_info[UC_EVENT_RING_OFST] = IPA_MEM_UC_EVENT_RING_OFST;
 }
 
 static const struct of_device_id ipa_plat_drv_match[] = {

@@ -249,10 +249,10 @@ static const struct ipa_init_modem_driver_req *init_modem_driver_req(void)
 	req.platform_type_valid = true;
 	req.platform_type = IPA_QMI_PLATFORM_TYPE_MSM_ANDROID;
 
-	req.hdr_tbl_info_valid = ipa_ctx->mem_info[MODEM_HDR_SIZE] ? 1 : 0;
-	req.hdr_tbl_info.start = base + ipa_ctx->mem_info[MODEM_HDR_OFST];
+	req.hdr_tbl_info_valid = IPA_MEM_MODEM_HDR_SIZE ? 1 : 0;
+	req.hdr_tbl_info.start = base + IPA_MEM_MODEM_HDR_OFST;
 	req.hdr_tbl_info.end = req.hdr_tbl_info.start +
-					ipa_ctx->mem_info[MODEM_HDR_SIZE] - 1;
+					IPA_MEM_MODEM_HDR_SIZE - 1;
 
 	req.v4_route_tbl_info_valid = true;
 	req.v4_route_tbl_info.start = base + IPA_MEM_V4_RT_NHASH_OFST;
@@ -268,20 +268,20 @@ static const struct ipa_init_modem_driver_req *init_modem_driver_req(void)
 	req.v6_filter_tbl_start_valid = true;
 	req.v6_filter_tbl_start = base + IPA_MEM_V6_FLT_NHASH_OFST;
 
-	req.modem_mem_info_valid = ipa_ctx->mem_info[MODEM_SIZE] ? 1 : 0;
-	req.modem_mem_info.start = base + ipa_ctx->mem_info[MODEM_OFST];
-	req.modem_mem_info.size = ipa_ctx->mem_info[MODEM_SIZE];
+	req.modem_mem_info_valid = IPA_MEM_MODEM_SIZE ? 1 : 0;
+	req.modem_mem_info.start = base + IPA_MEM_MODEM_OFST;
+	req.modem_mem_info.size = IPA_MEM_MODEM_SIZE;
 
 	req.ctrl_comm_dest_end_pt_valid = true;
 	req.ctrl_comm_dest_end_pt =
 			ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
 
 	req.hdr_proc_ctx_tbl_info_valid =
-			ipa_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE] ? 1 : 0;
+			IPA_MEM_MODEM_HDR_PROC_CTX_SIZE ? 1 : 0;
 	req.hdr_proc_ctx_tbl_info.start =
-			base + ipa_ctx->mem_info[MODEM_HDR_PROC_CTX_OFST];
+			base + IPA_MEM_MODEM_HDR_PROC_CTX_OFST;
 	req.hdr_proc_ctx_tbl_info.end = req.hdr_proc_ctx_tbl_info.start +
-			ipa_ctx->mem_info[MODEM_HDR_PROC_CTX_SIZE] - 1;
+			IPA_MEM_MODEM_HDR_PROC_CTX_SIZE - 1;
 
 	req.v4_hash_route_tbl_info_valid = true;
 	req.v4_hash_route_tbl_info.start = base + IPA_MEM_V4_RT_HASH_OFST;

@@ -592,18 +592,6 @@ struct ipa_tag_completion {
 
 /** enum ipa_mem_partition - IPA RAM Map */
 enum ipa_mem_partition {
-	MODEM_HDR_OFST,
-	MODEM_HDR_SIZE,
-	APPS_HDR_OFST,
-	APPS_HDR_SIZE,
-	MODEM_HDR_PROC_CTX_OFST,
-	MODEM_HDR_PROC_CTX_SIZE,
-	APPS_HDR_PROC_CTX_OFST,
-	APPS_HDR_PROC_CTX_SIZE,
-	MODEM_OFST,
-	MODEM_SIZE,
-	END_OFST,
-	UC_EVENT_RING_OFST,
 	IPA_MEM_MAX,
 };
 
