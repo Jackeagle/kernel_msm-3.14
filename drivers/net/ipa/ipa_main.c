@@ -311,9 +311,12 @@ static int setup_apps_cmd_prod_pipe(void)
 	return ipa_setup_sys_pipe(&sys_in);
 }
 
+/* Only used for IPA_MEM_UC_EVENT_RING_OFST, which must be 1KB aligned */
 static void __always_inline sram_set_canary(u32 *sram_mmio, u32 offset)
 {
 	BUILD_BUG_ON(offset < sizeof(*sram_mmio));
+	BUILD_BUG_ON(offset % 1024);
+
 	sram_mmio += offset / sizeof(*sram_mmio);
 	*--sram_mmio = IPA_MEM_CANARY_VAL;
 }
@@ -367,8 +370,8 @@ static int ipa_init_sram(void)
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_MODEM_HDR_PROC_CTX_OFST);
 	BUILD_BUG_ON(IPA_MEM_MODEM_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_MODEM_OFST);
-	/* Only one canary precedes for the microcontroller ring */
-	BUILD_BUG_ON(IPA_MEM_UC_EVENT_RING_OFST % 1024);
+
+	/* Only one canary precedes the microcontroller ring */
 	sram_set_canary(ipa_sram_mmio, IPA_MEM_UC_EVENT_RING_OFST);
 
 	iounmap(ipa_sram_mmio);
