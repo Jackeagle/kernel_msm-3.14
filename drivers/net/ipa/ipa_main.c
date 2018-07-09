@@ -1902,14 +1902,12 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 	}
 	ipa_debug(": ipa_version = %d", hw_version);
 
-	ipa_ctx->ee = IPA_EE_AP;
-
 	/* Get IPA wrapper address */
 	res = platform_get_resource_byname(pdev_p, IORESOURCE_MEM, "ipa-base");
 	if (!res) {
 		ipa_err(":get resource failed for ipa-base!\n");
 		result = -ENODEV;
-		goto err_clear_ee;
+		goto err_clear_pdev;
 	}
 	ipa_ctx->ipa_wrapper_base = res->start;
 	ipa_ctx->ipa_wrapper_size = resource_size(res);
@@ -1962,7 +1960,7 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_unregister_bus_handle;
 	}
 
-	ipa_ctx->gsi_ctx = gsi_init(pdev_p, ipa_ctx->ee);
+	ipa_ctx->gsi_ctx = gsi_init(pdev_p, IPA_EE_AP);
 	if (IS_ERR(ipa_ctx->gsi_ctx)) {
 		ipa_err("ipa: error initializing gsi driver.\n");
 		result = PTR_ERR(ipa_ctx->gsi_ctx);
@@ -2001,8 +1999,6 @@ err_hal_destroy:
 err_clear_wrapper:
 	ipa_ctx->ipa_wrapper_size = 0;
 	ipa_ctx->ipa_wrapper_base = 0;
-err_clear_ee:
-	ipa_ctx->ee = 0;
 err_clear_pdev:
 	ipa_ctx->ipa_pdev = NULL;
 	ipa_smp2p_exit();

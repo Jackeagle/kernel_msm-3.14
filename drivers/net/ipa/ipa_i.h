@@ -799,7 +799,6 @@ struct ipa_context {
 
 	struct ipa_uc_ctx uc_ctx;
 
-	u32 ee;
 	struct wakeup_source w_lock;
 	struct ipa_wakelock_ref_cnt wakelock_ref_cnt;
 	/* RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA */
