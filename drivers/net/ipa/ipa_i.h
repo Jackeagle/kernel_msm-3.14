@@ -759,7 +759,6 @@ struct ipa_context {
 	struct kmem_cache *rx_pkt_wrapper_cache;
 	u16 smem_sz;
 	u16 smem_restricted_bytes;
-	u16 smem_reqd_sz;
 	struct ipa_active_clients ipa_active_clients;
 	struct ipa_active_clients_log_ctx ipa_active_clients_logging;
 	char *active_clients_table_buf;

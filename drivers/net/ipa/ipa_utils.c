@@ -801,8 +801,6 @@ void ipa_sram_settings_read(void)
 	/* reg fields are in 8B units */
 	ipa_ctx->smem_restricted_bytes = smem_sz.shared_mem_baddr * 8;
 	ipa_ctx->smem_sz = smem_sz.shared_mem_sz * 8;
-
-	ipa_ctx->smem_reqd_sz = IPA_MEM_END_OFST;
 }
 
 /** ipa_cfg_qsb() - Configure IPA QSB maximal reads and writes

@@ -1651,9 +1651,9 @@ static int ipa_pre_init(void)
 	ipa_debug("ip4_flt_hash=0 ip4_flt_nonhash=0\n");
 	ipa_debug("ip6_flt_hash=0 ip6_flt_nonhash=0\n");
 
-	if (ipa_ctx->smem_reqd_sz > ipa_ctx->smem_sz) {
-		ipa_err("SW expect more core memory, needed %d, avail %d\n",
-			ipa_ctx->smem_reqd_sz, ipa_ctx->smem_sz);
+	if (ipa_ctx->smem_sz < IPA_MEM_END_OFST) {
+		ipa_err("insufficient memory: %hu bytes available, need %u\n",
+			ipa_ctx->smem_sz, IPA_MEM_END_OFST);
 		result = -ENOMEM;
 		goto err_disable_clks;
 	}
