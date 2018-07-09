@@ -2000,7 +2000,7 @@ int gsi_set_channel_cfg(unsigned long chan_id, struct gsi_chan_props *props)
 }
 
 /* Initialize GSI driver */
-struct gsi_ctx *gsi_init(struct platform_device *pdev, u32 ee)
+struct gsi_ctx *gsi_init(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	struct resource *res;
@@ -2025,7 +2025,7 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev, u32 ee)
 	}
 
 	gsi_ctx->dev = dev;
-	gsi_ctx->ee = ee;
+	gsi_ctx->ee = IPA_EE_AP;
 	ipa_assert(res->start <= (resource_size_t)U32_MAX);
 	gsi_ctx->phys_base = (u32)res->start;
 

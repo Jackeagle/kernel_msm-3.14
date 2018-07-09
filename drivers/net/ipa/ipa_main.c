@@ -1950,7 +1950,7 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_unregister_bus_handle;
 	}
 
-	ipa_ctx->gsi_ctx = gsi_init(pdev_p, IPA_EE_AP);
+	ipa_ctx->gsi_ctx = gsi_init(pdev_p);
 	if (IS_ERR(ipa_ctx->gsi_ctx)) {
 		ipa_err("ipa: error initializing gsi driver.\n");
 		result = PTR_ERR(ipa_ctx->gsi_ctx);
