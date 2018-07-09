@@ -312,12 +312,8 @@ static int setup_apps_cmd_prod_pipe(void)
 }
 
 static void
-sram_set_canary_common(u32 *sram_mmio, u32 offset, bool two)
+sram_set_canary_common(u32 *sram_mmio, u32 index, bool two)
 {
-	u32 index = offset / sizeof(u32);
-
-	ipa_assert(index > two ? 1 : 0);
-
 	/* Set 4 or 8 bytes of CANARY before the offset */
 	if (two)
 		sram_mmio[index - 2] = IPA_MEM_CANARY_VAL;
@@ -326,12 +322,18 @@ sram_set_canary_common(u32 *sram_mmio, u32 offset, bool two)
 
 static void sram_set_canary(u32 *sram_mmio, u32 offset)
 {
-	sram_set_canary_common(sram_mmio, offset, false);
+	u32 index = offset / sizeof(*sram_mmio);
+
+	ipa_assert(index > 0);
+	sram_set_canary_common(sram_mmio, index, false);
 }
 
 static void sram_set_canaries(u32 *sram_mmio, u32 offset)
 {
-	sram_set_canary_common(sram_mmio, offset, true);
+	u32 index = offset / sizeof(*sram_mmio);
+
+	ipa_assert(index > 1);
+	sram_set_canary_common(sram_mmio, index, true);
 }
 
 /** ipa_init_sram() - Initialize IPA local SRAM.
