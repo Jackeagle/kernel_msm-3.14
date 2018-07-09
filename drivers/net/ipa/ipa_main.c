@@ -534,7 +534,7 @@ static int ipa_init_flt4(void)
 
 	hash_offset = ipa_ctx->smem_restricted_bytes + IPA_MEM_V4_FLT_HASH_OFST;
 	nhash_offset = ipa_ctx->smem_restricted_bytes +
-					ipa_ctx->mem_info[V4_FLT_NHASH_OFST];
+					IPA_MEM_V4_FLT_NHASH_OFST;
 	cmd_pyld = ipahal_ip_v4_filter_init_pyld(&mem, hash_offset,
 						 nhash_offset);
 	if (!cmd_pyld) {
@@ -1561,9 +1561,9 @@ static bool config_valid(void)
 			IPA_MEM_V4_FLT_HASH_SIZE, table_count, width);
 		return false;
 	}
-	if (ipa_ctx->mem_info[V4_FLT_NHASH_SIZE] < required_size) {
+	if (IPA_MEM_V4_FLT_NHASH_SIZE < required_size) {
 		ipa_err("V4_FLT_NHASH_SIZE too small (%u < %u * %u)\n",
-			ipa_ctx->mem_info[V4_FLT_NHASH_SIZE], table_count,
+			IPA_MEM_V4_FLT_NHASH_SIZE, table_count,
 			width);
 		return false;
 	}
@@ -1897,8 +1897,6 @@ static void ipa_init_mem_info(u32 *mem_info)
 	BUILD_BUG_ON(IPA_MEM_MODEM_OFST % 8);
 	BUILD_BUG_ON(IPA_MEM_UC_EVENT_RING_OFST % 1024);
 
-	mem_info[V4_FLT_NHASH_OFST] = IPA_MEM_V4_FLT_NHASH_OFST;
-	mem_info[V4_FLT_NHASH_SIZE] = IPA_MEM_V4_FLT_NHASH_SIZE;
 	mem_info[V6_FLT_HASH_OFST] = IPA_MEM_V6_FLT_HASH_OFST;
 	mem_info[V6_FLT_HASH_SIZE] = IPA_MEM_V6_FLT_HASH_SIZE;
 	mem_info[V6_FLT_NHASH_OFST] = IPA_MEM_V6_FLT_NHASH_OFST;

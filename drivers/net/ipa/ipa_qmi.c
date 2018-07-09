@@ -265,7 +265,7 @@ static const struct ipa_init_modem_driver_req *init_modem_driver_req(void)
 	req.v6_route_tbl_info.count = ipa_ctx->mem_info[V6_MODEM_RT_INDEX_HI];
 
 	req.v4_filter_tbl_start_valid = true;
-	req.v4_filter_tbl_start = base + ipa_ctx->mem_info[V4_FLT_NHASH_OFST];
+	req.v4_filter_tbl_start = base + IPA_MEM_V4_FLT_NHASH_OFST;
 
 	req.v6_filter_tbl_start_valid = true;
 	req.v6_filter_tbl_start = base + ipa_ctx->mem_info[V6_FLT_NHASH_OFST];
