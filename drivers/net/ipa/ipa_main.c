@@ -311,16 +311,16 @@ static int setup_apps_cmd_prod_pipe(void)
 	return ipa_setup_sys_pipe(&sys_in);
 }
 
-static void sram_set_canary(u32 *sram_mmio, u32 offset)
+static void __always_inline sram_set_canary(u32 *sram_mmio, u32 offset)
 {
-	ipa_assert(offset >= sizeof(*sram_mmio));
+	BUILD_BUG_ON(offset < sizeof(*sram_mmio));
 	sram_mmio += offset / sizeof(*sram_mmio);
 	*--sram_mmio = IPA_MEM_CANARY_VAL;
 }
 
-static void sram_set_canaries(u32 *sram_mmio, u32 offset)
+static void __always_inline sram_set_canaries(u32 *sram_mmio, u32 offset)
 {
-	ipa_assert(offset >= 2 * sizeof(*sram_mmio));
+	BUILD_BUG_ON(offset < 2 * sizeof(*sram_mmio));
 	sram_mmio += offset / sizeof(*sram_mmio);
 	*--sram_mmio = IPA_MEM_CANARY_VAL;
 	*--sram_mmio = IPA_MEM_CANARY_VAL;
