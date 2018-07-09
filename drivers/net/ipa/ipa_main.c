@@ -324,6 +324,8 @@ static void __always_inline sram_set_canary(u32 *sram_mmio, u32 offset)
 static void __always_inline sram_set_canaries(u32 *sram_mmio, u32 offset)
 {
 	BUILD_BUG_ON(offset < 2 * sizeof(*sram_mmio));
+	BUILD_BUG_ON(offset % 8);
+
 	sram_mmio += offset / sizeof(*sram_mmio);
 	*--sram_mmio = IPA_MEM_CANARY_VAL;
 	*--sram_mmio = IPA_MEM_CANARY_VAL;
@@ -348,27 +350,16 @@ static int ipa_init_sram(void)
 		return -ENOMEM;
 	}
 
-	BUILD_BUG_ON(IPA_MEM_V4_FLT_HASH_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V4_FLT_HASH_OFST);
-	BUILD_BUG_ON(IPA_MEM_V4_FLT_NHASH_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V4_FLT_NHASH_OFST);
-	BUILD_BUG_ON(IPA_MEM_V6_FLT_HASH_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V6_FLT_HASH_OFST);
-	BUILD_BUG_ON(IPA_MEM_V6_FLT_NHASH_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V6_FLT_NHASH_OFST);
-	BUILD_BUG_ON(IPA_MEM_V4_RT_HASH_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V4_RT_HASH_OFST);
-	BUILD_BUG_ON(IPA_MEM_V4_RT_NHASH_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V4_RT_NHASH_OFST);
-	BUILD_BUG_ON(IPA_MEM_V6_RT_HASH_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V6_RT_HASH_OFST);
-	BUILD_BUG_ON(IPA_MEM_V6_RT_NHASH_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V6_RT_NHASH_OFST);
-	BUILD_BUG_ON(IPA_MEM_MODEM_HDR_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_MODEM_HDR_OFST);
-	BUILD_BUG_ON(IPA_MEM_MODEM_HDR_PROC_CTX_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_MODEM_HDR_PROC_CTX_OFST);
-	BUILD_BUG_ON(IPA_MEM_MODEM_OFST % 8);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_MODEM_OFST);
 
 	/* Only one canary precedes the microcontroller ring */
