@@ -1556,10 +1556,9 @@ static bool config_valid(void)
 	/* Filter tables need an extra slot to hold an endpoint bitmap */
 	table_count = ipa_ctx->ep_flt_num + 1;
 	required_size = table_count * width;
-	if (ipa_ctx->mem_info[V4_FLT_HASH_SIZE] < required_size) {
+	if (IPA_MEM_V4_FLT_HASH_SIZE < required_size) {
 		ipa_err("V4_FLT_HASH_SIZE too small  (%u < %u * %u)\n",
-			ipa_ctx->mem_info[V4_FLT_HASH_SIZE], table_count,
-			width);
+			IPA_MEM_V4_FLT_HASH_SIZE, table_count, width);
 		return false;
 	}
 	if (ipa_ctx->mem_info[V4_FLT_NHASH_SIZE] < required_size) {
@@ -1898,7 +1897,6 @@ static void ipa_init_mem_info(u32 *mem_info)
 	BUILD_BUG_ON(IPA_MEM_MODEM_OFST % 8);
 	BUILD_BUG_ON(IPA_MEM_UC_EVENT_RING_OFST % 1024);
 
-	mem_info[V4_FLT_HASH_SIZE] = IPA_MEM_V4_FLT_HASH_SIZE;
 	mem_info[V4_FLT_NHASH_OFST] = IPA_MEM_V4_FLT_NHASH_OFST;
 	mem_info[V4_FLT_NHASH_SIZE] = IPA_MEM_V4_FLT_NHASH_SIZE;
 	mem_info[V6_FLT_HASH_OFST] = IPA_MEM_V6_FLT_HASH_OFST;
