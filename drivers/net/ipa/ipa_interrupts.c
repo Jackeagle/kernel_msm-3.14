@@ -359,10 +359,8 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 			ep_idx = ipa_get_ep_mapping(client_idx);
 			ipa_debug("modem ep_idx(%d) client_idx = %d\n",
 					ep_idx, client_idx);
-			if (ep_idx < 0)
-				ipa_debug("Invalid IPA client\n");
-			else
-				val &= ~BIT(ep_idx);
+			ipa_assert(ep_idx >= 0);
+			val &= ~BIT(ep_idx);
 		}
 
 	ipahal_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_n, IPA_EE_AP, val);
