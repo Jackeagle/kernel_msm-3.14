@@ -1216,13 +1216,14 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 	mutex_lock(&gsi_ctx->mlock);
 
 	/* Start by allocating the event id to use */
-	evt_id = find_first_zero_bit(&gsi_ctx->evt_bmap, GSI_EVT_RING_MAX);
-	if (evt_id == GSI_EVT_RING_MAX) {
-		ipa_err("failed to alloc event ID\n");
+	if (gsi_ctx->evt_bmap == ~0UL) {
+		ipa_err("all event ids in use\n");
 		ret = -ENOMEM;
 		goto err_unlock;
 	}
-	set_bit(evt_id, &gsi_ctx->evt_bmap);
+
+	evt_id = ffz(gsi_ctx->evt_bmap);
+	gsi_ctx->evt_bmap |= BIT(evt_id);
 
 	ipa_debug("Using %lu as virt evt id\n", evt_id);
 
@@ -1282,7 +1283,7 @@ err_free_dma:
 	ipahal_dma_free(&evtr->mem);
 err_clear_bit:
 	memset(evtr, 0, sizeof(*evtr));
-	clear_bit(evt_id, &gsi_ctx->evt_bmap);
+	gsi_ctx->evt_bmap &= ~BIT(evt_id);
 err_unlock:
 	mutex_unlock(&gsi_ctx->mlock);	/* acquired again below */
 
@@ -1317,7 +1318,8 @@ void gsi_dealloc_evt_ring(unsigned long evt_id)
 
 	ipa_bug_on(evtr->state != GSI_EVT_RING_STATE_NOT_ALLOCATED);
 
-	clear_bit(evt_id, &gsi_ctx->evt_bmap);
+	gsi_ctx->evt_bmap &= ~BIT(evtr->id);
+
 	mutex_unlock(&gsi_ctx->mlock);
 
 	evtr->int_modt = 0;
