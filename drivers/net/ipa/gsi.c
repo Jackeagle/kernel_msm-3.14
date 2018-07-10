@@ -859,7 +859,7 @@ int gsi_register_device(void)
 	 * the hardware are available; then preclude any reserved events
 	 * from allocation.
 	 */
-	gsi_ctx->evt_bmap = GENMASK(31, gsi_ctx->max_ev);
+	gsi_ctx->evt_bmap = GENMASK(BITS_PER_LONG - 1, gsi_ctx->max_ev);
 	gsi_ctx->evt_bmap |= GENMASK(GSI_MHI_ER_END, GSI_MHI_ER_START);
 
 	gsi_irq_enable_all();
