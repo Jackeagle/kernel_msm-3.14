@@ -773,11 +773,6 @@ u8 ipa_get_qmb_master_sel(enum ipa_client_type client)
  */
 enum ipa_client_type ipa_get_client_mapping(u32 pipe_idx)
 {
-	if (pipe_idx >= ipa_ctx->ipa_num_pipes || pipe_idx < 0) {
-		ipa_err("Bad pipe index!\n");
-		return -EINVAL;
-	}
-
 	return ipa_ctx->ep[pipe_idx].client;
 }
 
