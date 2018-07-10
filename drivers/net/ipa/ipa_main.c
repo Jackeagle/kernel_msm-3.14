@@ -1615,12 +1615,7 @@ static int ipa_pre_init(void)
 	/* enable IPA clocks explicitly to allow the initialization */
 	ipa_enable_clks();
 
-	result = ipa_init_hw();
-	if (result) {
-		ipa_err(":error initializing HW.\n");
-		result = -ENODEV;
-		goto err_disable_clks;
-	}
+	ipa_init_hw();
 
 	ipa_debug("IPA HW initialization sequence completed");
 

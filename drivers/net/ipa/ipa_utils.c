@@ -815,19 +815,13 @@ void ipa_cfg_qsb(void)
 	ipahal_write_reg_fields(IPA_QSB_MAX_READS, &max_reads);
 }
 
-/** ipa_init_hw() - initialize HW
- *
- * Return codes:
- * 0: success
- */
-int ipa_init_hw(void)
+/** ipa_init_hw() - initialize HW */
+void ipa_init_hw(void)
 {
 	/* SDM845 has IPA version 3.5.1 */
 	ipahal_write_reg(IPA_BCR, IPA_BCR_REG_VAL);
 
 	ipa_cfg_qsb();
-
-	return 0;
 }
 
 /** ipa_init_ep_flt_bitmap() - Initialize the bitmap
