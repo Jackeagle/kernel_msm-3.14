@@ -203,23 +203,21 @@ enum ipa_client_type {
 #define IPA_CLIENT_IS_PROD(x)	(!((x) & 1))
 #define IPA_CLIENT_IS_CONS(x)	(!IPA_CLIENT_IS_PROD(x))
 
+/*
+ * Note a client must have a valid entry in the ipa_ep_configuration[]
+ * array to be are considered a modem consumer or producer client.
+ */
 static inline bool IPA_CLIENT_IS_Q6_CONS(enum ipa_client_type client)
 {
 	return client == IPA_CLIENT_Q6_LAN_CONS ||
-		client == IPA_CLIENT_Q6_WAN_CONS ||
-		client == IPA_CLIENT_Q6_DUN_CONS ||
-		client == IPA_CLIENT_Q6_DECOMP_CONS ||
-		client == IPA_CLIENT_Q6_DECOMP2_CONS ||
-		client == IPA_CLIENT_Q6_LTE_WIFI_AGGR_CONS;
+		client == IPA_CLIENT_Q6_WAN_CONS;
 }
 
 static inline bool IPA_CLIENT_IS_Q6_PROD(enum ipa_client_type client)
 {
 	return client == IPA_CLIENT_Q6_LAN_PROD ||
 		client == IPA_CLIENT_Q6_WAN_PROD ||
-		client == IPA_CLIENT_Q6_CMD_PROD ||
-		client == IPA_CLIENT_Q6_DECOMP_PROD ||
-		client == IPA_CLIENT_Q6_DECOMP2_PROD;
+		client == IPA_CLIENT_Q6_CMD_PROD;
 }
 
 static inline bool IPA_CLIENT_IS_APPS_CONS(enum ipa_client_type client)
