@@ -846,19 +846,6 @@ void ipa_init_ep_flt_bitmap(void)
 	ipa_ctx->ep_flt_num = hweight32(ipa_ctx->ep_flt_bitmap);
 }
 
-/** ipa_is_ep_support_flt() - Given an End-point check
- * whether it supports filtering or not.
- *
- * @pipe_idx:
- *
- * Return values:
- * true if supports and false if not
- */
-bool ipa_is_ep_support_flt(u32 pipe_idx)
-{
-	return ipa_ctx->ep_flt_bitmap & BIT(pipe_idx);
-}
-
 #define client_handle_valid(clnt_hdl) \
 	_client_handle_valid(__func__, (clnt_hdl))
 static bool _client_handle_valid(const char *func, u32 clnt_hdl)

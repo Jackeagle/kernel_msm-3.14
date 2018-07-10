@@ -597,13 +597,10 @@ static void ipa_setup_flt_hash_tuple(void)
 	u32 pipe_idx;
 
 	for (pipe_idx = 0; pipe_idx < ipa_ctx->ipa_num_pipes ; pipe_idx++) {
-		if (!ipa_is_ep_support_flt(pipe_idx))
-			continue;
-
 		if (ipa_is_modem_pipe(pipe_idx))
 			continue;
-
-		ipa_set_flt_tuple_mask(pipe_idx, &tuple);
+		if (ipa_ctx->ep_flt_bitmap & BIT(pipe_idx))
+			ipa_set_flt_tuple_mask(pipe_idx, &tuple);
 	}
 }
 

@@ -832,8 +832,6 @@ enum ipa_client_type ipa_get_client_mapping(u32 pipe_idx);
 
 void ipa_init_ep_flt_bitmap(void);
 
-bool ipa_is_ep_support_flt(u32 pipe_idx);
-
 u8 ipa_get_qmb_master_sel(enum ipa_client_type client);
 
 /* internal functions */
