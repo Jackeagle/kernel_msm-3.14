@@ -836,20 +836,6 @@ void ipa_init_ep_flt_bitmap(void)
 	ipa_ctx->ep_flt_num = hweight32(ipa_ctx->ep_flt_bitmap);
 }
 
-#define client_handle_valid(clnt_hdl) \
-	_client_handle_valid(__func__, (clnt_hdl))
-static bool _client_handle_valid(const char *func, u32 clnt_hdl)
-{
-	if (clnt_hdl >= ipa_ctx->ipa_num_pipes)
-		ipa_err("%s: bad clnt_hdl %u", func, clnt_hdl);
-	else if (!ipa_ctx->ep[clnt_hdl].valid)
-		ipa_err("%s: clnt_hdl %u not valid", func, clnt_hdl);
-	else
-		return true;
-
-	return false;
-}
-
 static const char *ipa_get_mode_type_str(enum ipa_mode_type mode)
 {
 	switch (mode) {
@@ -1525,9 +1511,6 @@ int ipa_stop_gsi_channel(u32 clnt_hdl)
 	int res = 0;
 	int i;
 	struct ipa_ep_context *ep;
-
-	if (!client_handle_valid(clnt_hdl))
-		return -EINVAL;
 
 	ep = &ipa_ctx->ep[clnt_hdl];
 
