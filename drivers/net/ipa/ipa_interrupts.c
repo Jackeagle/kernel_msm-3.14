@@ -217,11 +217,8 @@ static void ipa_tx_suspend_interrupt_wa(void)
 
 static inline bool is_uc_irq(int irq_num)
 {
-	if (ipa_interrupt_to_cb[irq_num].interrupt >= IPA_UC_IRQ_0 &&
-	    ipa_interrupt_to_cb[irq_num].interrupt <= IPA_UC_IRQ_3)
-		return true;
-	else
-		return false;
+	return ipa_interrupt_to_cb[irq_num].interrupt >= IPA_UC_IRQ_0 &&
+		ipa_interrupt_to_cb[irq_num].interrupt <= IPA_UC_IRQ_3;
 }
 
 static void ipa_process_interrupts(bool isr_context)
