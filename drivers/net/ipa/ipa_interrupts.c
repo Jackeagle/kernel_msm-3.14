@@ -325,7 +325,7 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 {
 	u32 val;
 	int irq_num;
-	int client_idx, ep_idx;
+	int client_idx;
 
 	ipa_debug("%s: interrupt_enum %d\n", __func__, interrupt);
 
@@ -356,10 +356,11 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 	for (client_idx = 0; client_idx < IPA_CLIENT_MAX; client_idx++)
 		if (IPA_CLIENT_IS_Q6_CONS(client_idx) ||
 				IPA_CLIENT_IS_Q6_PROD(client_idx)) {
-			ep_idx = ipa_get_ep_mapping(client_idx);
-			ipa_debug("modem ep_idx(%d) client_idx = %d\n",
+			u32 ep_idx = ipa_get_ep_mapping(client_idx);
+
+			ipa_debug("modem ep_idx(%u) client_idx = %d\n",
 					ep_idx, client_idx);
-			ipa_assert(ep_idx >= 0);
+
 			val &= ~BIT(ep_idx);
 		}
 

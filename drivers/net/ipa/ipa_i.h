@@ -843,7 +843,7 @@ u8 ipa_get_qmb_master_sel(enum ipa_client_type client);
 bool ipa_is_modem_pipe(int pipe_idx);
 int ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc);
 
-int ipa_get_ep_mapping(enum ipa_client_type client);
+u32 ipa_get_ep_mapping(enum ipa_client_type client);
 struct ipa_ep_context *ipa_get_ep_context(enum ipa_client_type client);
 
 int ipa_init_hw(void);

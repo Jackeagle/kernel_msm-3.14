@@ -739,20 +739,16 @@ static void ipa_switch_to_intr_rx_work_func(struct work_struct *work)
 int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 {
 	struct ipa_ep_context *ep;
-	int ipa_ep_idx;
+	u32 ipa_ep_idx;
 	int count;
 	int result = -EINVAL;
 	char buff[IPA_RESOURCE_NAME_MAX];
 
 	ipa_ep_idx = ipa_get_ep_mapping(sys_in->client);
-	if (ipa_ep_idx < 0) {
-		ipa_err("Invalid client.\n");
-		goto fail_gen;
-	}
 
 	ep = &ipa_ctx->ep[ipa_ep_idx];
 	if (ep->valid == 1) {
-		ipa_err("EP %d already allocated.\n", ipa_ep_idx);
+		ipa_err("EP %u already allocated.\n", ipa_ep_idx);
 		goto fail_gen;
 	}
 
@@ -833,7 +829,7 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 		ipa_err("fail to configure status of EP.\n");
 		goto fail_gen2;
 	}
-	ipa_debug("ep %d configuration successful\n", ipa_ep_idx);
+	ipa_debug("ep %u configuration successful\n", ipa_ep_idx);
 
 	result = ipa_gsi_setup_channel(sys_in, ep);
 	if (result) {
@@ -865,7 +861,7 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 
 	ipa_client_remove(ipa_client_string(sys_in->client), true);
 
-	ipa_debug("client %d (ep: %d) connected sys=%p\n", sys_in->client,
+	ipa_debug("client %d (ep: %u) connected sys=%p\n", sys_in->client,
 		  ipa_ep_idx, ep->sys);
 
 	return ipa_ep_idx;
@@ -1006,7 +1002,7 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	struct ipa_desc _desc = { };
 	struct ipa_desc *desc = &_desc;	/* Default, linear case */
 	const struct ipa_gsi_ep_config *gsi_ep;
-	int src_ep_idx;
+	u32 src_ep_idx;
 	int data_idx;
 	u32 nr_frags;
 	u32 f;

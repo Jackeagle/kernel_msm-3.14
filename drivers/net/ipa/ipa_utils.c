@@ -734,7 +734,7 @@ ipa_get_gsi_ep_info(enum ipa_client_type client)
  *
  * Return value: endpoint mapping
  */
-int ipa_get_ep_mapping(enum ipa_client_type client)
+u32 ipa_get_ep_mapping(enum ipa_client_type client)
 {
 	const struct ipa_gsi_ep_config *ep_info = ipa_get_gsi_ep_info(client);
 
@@ -745,9 +745,7 @@ int ipa_get_ep_mapping(enum ipa_client_type client)
 
 struct ipa_ep_context *ipa_get_ep_context(enum ipa_client_type client)
 {
-	int ipa_ep_idx = ipa_get_ep_mapping(client);
-
-	ipa_assert(ipa_ep_idx >= 0);
+	u32 ipa_ep_idx = ipa_get_ep_mapping(client);
 
 	return &ipa_ctx->ep[ipa_ep_idx];
 }
@@ -1086,7 +1084,7 @@ static int ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 static int ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 {
 	struct ipahal_reg_endp_init_mode init_mode;
-	int ipa_ep_idx;
+	u32 ipa_ep_idx;
 
 	if (IPA_CLIENT_IS_CONS(ipa_ctx->ep[clnt_hdl].client)) {
 		ipa_err("MODE does not apply to IPA out EP %d\n", clnt_hdl);
@@ -1094,10 +1092,6 @@ static int ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 	}
 
 	ipa_ep_idx = ipa_get_ep_mapping(ep_mode->dst);
-	if (ipa_ep_idx < 0 && ep_mode->mode == IPA_DMA) {
-		ipa_err("dst %d does not exist in DMA mode\n", ep_mode->dst);
-		return -EINVAL;
-	}
 
 	WARN_ON(ep_mode->mode == IPA_DMA && IPA_CLIENT_IS_PROD(ep_mode->dst));
 
@@ -1549,10 +1543,10 @@ static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
 /* Suspend a consumer pipe */
 static void suspend_pipe(enum ipa_client_type client, bool suspend)
 {
-	int ipa_ep_idx = ipa_get_ep_mapping(client);
+	u32 ipa_ep_idx = ipa_get_ep_mapping(client);
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 
-	ipa_debug("%ssuspend pipe %d\n", suspend ? "" : "un", ipa_ep_idx);
+	ipa_debug("%ssuspend pipe %u\n", suspend ? "" : "un", ipa_ep_idx);
 
 	ipa_cfg_ep_ctrl(ipa_ep_idx, suspend);
 	if (suspend)
@@ -1582,13 +1576,12 @@ void ipa_suspend_apps_pipes(bool suspend)
 void ipa_cfg_default_route(enum ipa_client_type client)
 {
 	struct ipahal_reg_route route = { };
-	int ipa_ep_idx;
+	u32 ipa_ep_idx;
 
 	ipa_ep_idx = ipa_get_ep_mapping(client);
-	ipa_assert(ipa_ep_idx >= 0);
 
-	ipa_debug("dis=0, def_pipe=%d, hdr_tbl=1 hdr_ofst=0\n", ipa_ep_idx);
-	ipa_debug("frag_def_pipe=%d def_retain_hdr=1\n", ipa_ep_idx);
+	ipa_debug("dis=0, def_pipe=%u, hdr_tbl=1 hdr_ofst=0\n", ipa_ep_idx);
+	ipa_debug("frag_def_pipe=%u def_retain_hdr=1\n", ipa_ep_idx);
 
 	route.route_def_pipe = ipa_ep_idx;
 	route.route_def_hdr_table = 1;
