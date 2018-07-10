@@ -1153,11 +1153,9 @@ ipa_cfg_ep_deaggr(u32 clnt_hdl, const struct ipa_ep_cfg_deaggr *ep_deaggr)
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ipa_ep_cfg: [in] IPA end-point configuration params
  *
- * Returns:	0 on success, negative on failure
- *
  * Note:	Should not be called from atomic context
  */
-static int ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
+static void ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
 				    const struct ipa_ep_cfg_metadata_mask
 				    *metadata_mask)
 {
@@ -1169,8 +1167,6 @@ static int ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_n,
 				  clnt_hdl, metadata_mask);
-
-	return 0;
 }
 
 /** ipa_cfg_ep - IPA end-point configuration
@@ -1213,8 +1209,7 @@ int ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 
 		ipa_cfg_ep_deaggr(clnt_hdl, &ipa_ep_cfg->deaggr);
 	} else {
-		result = ipa_cfg_ep_metadata_mask(clnt_hdl,
-						  &ipa_ep_cfg->metadata_mask);
+		ipa_cfg_ep_metadata_mask(clnt_hdl, &ipa_ep_cfg->metadata_mask);
 	}
 out:
 	return result;
