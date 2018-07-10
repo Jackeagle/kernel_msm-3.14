@@ -750,7 +750,7 @@ struct ipa_ep_context *ipa_get_ep_context(enum ipa_client_type client)
  *
  * Return value: QMB master index
  */
-u8 ipa_get_qmb_master_sel(enum ipa_client_type client)
+static u8 ipa_get_qmb_master_sel(enum ipa_client_type client)
 {
 	const struct ipa_ep_configuration *ep_config;
 
