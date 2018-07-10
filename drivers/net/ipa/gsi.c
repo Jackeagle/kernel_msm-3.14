@@ -1212,16 +1212,17 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 
 	ipa_assert(!(size % GSI_EVT_RING_ELEMENT_SIZE));
 
-	/* Start by allocating the event id to use */
+	/* Get the mutex to allocate from the bitmap and issue a command */
 	mutex_lock(&gsi_ctx->mlock);
+
+	/* Start by allocating the event id to use */
 	evt_id = find_first_zero_bit(&gsi_ctx->evt_bmap, GSI_EVT_RING_MAX);
 	if (evt_id == GSI_EVT_RING_MAX) {
 		ipa_err("failed to alloc event ID\n");
-		mutex_unlock(&gsi_ctx->mlock);
-		return -ENOMEM;
+		ret = -ENOMEM;
+		goto err_unlock;
 	}
 	set_bit(evt_id, &gsi_ctx->evt_bmap);
-	mutex_unlock(&gsi_ctx->mlock);	/* acquired again below */
 
 	ipa_debug("Using %lu as virt evt id\n", evt_id);
 
@@ -1247,19 +1248,17 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 	init_completion(&evtr->compl);
 	atomic_set(&evtr->chan_ref_cnt, 0);
 
-	mutex_lock(&gsi_ctx->mlock);
-
 	completed = evt_ring_command(evt_id, GSI_EVT_ALLOCATE);
 	if (!completed) {
 		ret = -ETIMEDOUT;
-		goto err_unlock;
+		goto err_free_dma;
 	}
 
 	if (evtr->state != GSI_EVT_RING_STATE_ALLOCATED) {
 		ipa_err("evt_id %lu allocation failed state %u\n",
 			evt_id, evtr->state);
 		ret = -ENOMEM;
-		goto err_unlock;
+		goto err_free_dma;
 	}
 
 	gsi_program_evt_ring_ctx(&evtr->mem, evt_id, int_modt);
@@ -1279,14 +1278,13 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 
 	return evt_id;
 
-err_unlock:
-	mutex_unlock(&gsi_ctx->mlock);
 err_free_dma:
 	ipahal_dma_free(&evtr->mem);
 err_clear_bit:
-	/* clear_bit() is atomic but has but does not have barrier semantics */
+	memset(evtr, 0, sizeof(*evtr));
 	clear_bit(evt_id, &gsi_ctx->evt_bmap);
-	smp_mb__after_atomic();	/* Make cleared bit visible elsewhere */
+err_unlock:
+	mutex_unlock(&gsi_ctx->mlock);	/* acquired again below */
 
 	return ret;
 }
