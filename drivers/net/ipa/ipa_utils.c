@@ -736,11 +736,9 @@ ipa_get_gsi_ep_info(enum ipa_client_type client)
  */
 int ipa_get_ep_mapping(enum ipa_client_type client)
 {
-	const struct ipa_gsi_ep_config *ep_info;
+	const struct ipa_gsi_ep_config *ep_info = ipa_get_gsi_ep_info(client);
 
-	ep_info = ipa_get_gsi_ep_info(client);
-	if (!ep_info)
-		return -ESRCH;
+	ipa_assert(ep_info);
 
 	return ep_info->ipa_ep_num;
 }
