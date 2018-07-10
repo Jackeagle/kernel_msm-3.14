@@ -856,11 +856,6 @@ void ipa_init_ep_flt_bitmap(void)
  */
 bool ipa_is_ep_support_flt(u32 pipe_idx)
 {
-	if (pipe_idx >= ipa_ctx->ipa_num_pipes) {
-		ipa_err("Bad pipe index!\n");
-		return false;
-	}
-
 	return ipa_ctx->ep_flt_bitmap & BIT(pipe_idx);
 }
 
