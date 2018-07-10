@@ -1228,7 +1228,6 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 	ipa_debug("Using %lu as virt evt id\n", evt_id);
 
 	evtr = &gsi_ctx->evtr[evt_id];
-	memset(evtr, 0, sizeof(*evtr));
 	evtr->id = evt_id;
 
 	if (ipahal_dma_alloc(&evtr->mem, size, GFP_KERNEL)) {
@@ -1324,6 +1323,7 @@ void gsi_dealloc_evt_ring(unsigned long evt_id)
 
 	evtr->int_modt = 0;
 	ipahal_dma_free(&evtr->mem);
+	memset(evtr, 0, sizeof(*evtr));
 
 	atomic_dec(&gsi_ctx->num_evt_ring);
 }
