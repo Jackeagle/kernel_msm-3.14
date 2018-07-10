@@ -425,7 +425,6 @@ int ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 
 /** ipa_interrupts_init() - Initialize the IPA interrupts framework
  * @ipa_irq:	The interrupt number to allocate
- * @ee:		Execution environment
  * @ipa_dev:	The basic device structure representing the IPA driver
  *
  * - Initialize the ipa_interrupt_to_cb array
@@ -433,12 +432,12 @@ int ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
  * - Register the ipa interrupt handler - ipa_isr
  * - Enable apps processor wakeup by IPA interrupts
  */
-int ipa_interrupts_init(u32 ipa_irq, u32 ee, struct device *ipa_dev)
+int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
 {
 	int idx;
 	int res = 0;
 
-	ipa_ee = ee;
+	ipa_ee = IPA_EE_AP;
 	for (idx = 0; idx < IPA_IRQ_NUM_MAX; idx++) {
 		ipa_interrupt_to_cb[idx].deferred_flag = false;
 		ipa_interrupt_to_cb[idx].handler = NULL;

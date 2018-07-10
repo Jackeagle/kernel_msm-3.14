@@ -875,7 +875,7 @@ void _ipa_client_remove_wait(const char *id, bool log_it, const char *file,
 void ipa_cfg_default_route(enum ipa_client_type client);
 
 int ipa_active_clients_log_print_table(char *buf, int size);
-int ipa_interrupts_init(u32 ipa_irq, u32 ee, struct device *ipa_dev);
+int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev);
 
 void ipa_suspend_active_aggr_wa(u32 clnt_hdl);
 void ipa_suspend_handler(enum ipa_irq_type interrupt, void *private_data,

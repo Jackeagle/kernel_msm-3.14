@@ -1091,8 +1091,7 @@ static int ipa_init_interrupts(void)
 	ipa_debug(":ipa-irq = %d\n", ipa_irq);
 
 	/*register IPA IRQ handler*/
-	result = ipa_interrupts_init(ipa_irq, IPA_EE_AP,
-				     &ipa_ctx->ipa_pdev->dev);
+	result = ipa_interrupts_init(ipa_irq, &ipa_ctx->ipa_pdev->dev);
 	if (result) {
 		ipa_err("ipa interrupts initialization failed\n");
 		return -ENODEV;
