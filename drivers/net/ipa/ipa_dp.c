@@ -825,10 +825,8 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 		ipa_err("fail to configure EP.\n");
 		goto fail_gen2;
 	}
-	if (ipa_cfg_ep_status(ipa_ep_idx, &ep->status)) {
-		ipa_err("fail to configure status of EP.\n");
-		goto fail_gen2;
-	}
+	ipa_cfg_ep_status(ipa_ep_idx, &ep->status);
+
 	ipa_debug("ep %u configuration successful\n", ipa_ep_idx);
 
 	result = ipa_gsi_setup_channel(sys_in, ep);

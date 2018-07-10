@@ -886,7 +886,7 @@ void ipa_sram_settings_read(void);
 
 void ipa_skb_recycle(struct sk_buff *skb);
 
-int ipa_cfg_ep_status(u32 clnt_hdl,
+void ipa_cfg_ep_status(u32 clnt_hdl,
 		      const struct ipahal_reg_ep_cfg_status *ipa_ep_cfg);
 
 int ipa_init_q6_smem(void);

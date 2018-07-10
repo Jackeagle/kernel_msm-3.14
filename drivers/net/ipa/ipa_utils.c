@@ -1201,12 +1201,9 @@ int ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
  *
  * Note:	Should not be called from atomic context
  */
-int ipa_cfg_ep_status(u32 clnt_hdl,
+void ipa_cfg_ep_status(u32 clnt_hdl,
 		      const struct ipahal_reg_ep_cfg_status *ep_status)
 {
-	if (!client_handle_valid(clnt_hdl))
-		return -EINVAL;
-
 	ipa_debug("pipe=%d, status_en=%d status_ep=%d status_location=%d\n",
 		  clnt_hdl, ep_status->status_en, ep_status->status_ep,
 		  ep_status->status_location);
@@ -1215,8 +1212,6 @@ int ipa_cfg_ep_status(u32 clnt_hdl,
 	ipa_ctx->ep[clnt_hdl].status = *ep_status;
 
 	ipahal_write_reg_n_fields(IPA_ENDP_STATUS_n, clnt_hdl, ep_status);
-
-	return 0;
 }
 
 /* Suspend a consumer endpoint */
