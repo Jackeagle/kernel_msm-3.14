@@ -1098,19 +1098,9 @@ static int ipa_init_interrupts(void)
 	}
 
 	/*add handler for suspend interrupt*/
-	result = ipa_add_interrupt_handler(IPA_TX_SUSPEND_IRQ,
-					   ipa_suspend_handler, false, NULL);
-	if (result) {
-		ipa_err("register handler for suspend interrupt failed\n");
-		result = -ENODEV;
-		goto fail_add_interrupt_handler;
-	}
-
+	ipa_add_interrupt_handler(IPA_TX_SUSPEND_IRQ, ipa_suspend_handler,
+				  false, NULL);
 	return 0;
-
-fail_add_interrupt_handler:
-	free_irq(ipa_irq, &ipa_ctx->ipa_pdev->dev);
-	return result;
 }
 
 static void ipa_freeze_clock_vote_and_notify_modem(void)

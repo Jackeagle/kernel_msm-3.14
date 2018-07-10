@@ -293,7 +293,6 @@ int ipa_uc_interface_init(void)
 {
 	unsigned long phys_addr;
 	void *mmio;
-	int result;
 
 	if (ipa_ctx->uc_ctx.uc_inited) {
 		ipa_debug("uC interface already initialized\n");
@@ -305,38 +304,19 @@ int ipa_uc_interface_init(void)
 	mmio = ioremap(phys_addr, IPA_RAM_UC_SMEM_SIZE);
 	if (!mmio) {
 		ipa_err("Fail to ioremap IPA uC SRAM\n");
-		result = -ENOMEM;
-		goto remap_fail;
+		return -ENOMEM;
 	}
 
-	result = ipa_add_interrupt_handler(IPA_UC_IRQ_0, ipa_uc_event_handler,
-					   true, ipa_ctx);
-	if (result) {
-		ipa_err("Fail to register for UC_IRQ0 rsp interrupt\n");
-		result = -EFAULT;
-		goto irq_fail0;
-	}
-
-	result = ipa_add_interrupt_handler(IPA_UC_IRQ_1, ipa_uc_response_hdlr,
-					   true, ipa_ctx);
-	if (result) {
-		ipa_err("fail to register for UC_IRQ1 rsp interrupt\n");
-		result = -EFAULT;
-		goto irq_fail1;
-	}
-
+	ipa_add_interrupt_handler(IPA_UC_IRQ_0, ipa_uc_event_handler, true,
+				  ipa_ctx);
+	ipa_add_interrupt_handler(IPA_UC_IRQ_1, ipa_uc_response_hdlr, true,
+				  ipa_ctx);
 	ipa_ctx->uc_ctx.uc_sram_mmio = mmio;
 	ipa_ctx->uc_ctx.uc_inited = true;
 
 	ipa_debug("IPA uC interface is initialized\n");
-	return 0;
 
-irq_fail1:
-	ipa_remove_interrupt_handler(IPA_UC_IRQ_0);
-irq_fail0:
-	iounmap(mmio);
-remap_fail:
-	return result;
+	return 0;
 }
 
 int ipa_uc_panic_notifier(struct notifier_block *this,

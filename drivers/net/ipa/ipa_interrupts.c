@@ -319,7 +319,7 @@ static irqreturn_t ipa_isr(int irq, void *ctxt)
  * Adds handler to an interrupt type and enable the specific bit
  * in IRQ_EN register, associated interrupt in IRQ_STTS register will be enabled
  */
-int ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
+void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 			      ipa_irq_handler_t handler, bool deferred_flag,
 			      void *private_data)
 {
@@ -366,7 +366,6 @@ int ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 		ipahal_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_n, IPA_EE_AP, val);
 		ipa_debug("wrote IPA_SUSPEND_IRQ_EN_EE_n reg = %d\n", val);
 	}
-	return 0;
 }
 
 /** ipa_remove_interrupt_handler() - Removes handler to an interrupt type
