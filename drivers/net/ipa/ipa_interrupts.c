@@ -355,15 +355,15 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 	val = ~0;
 	for (client_idx = 0; client_idx < IPA_CLIENT_MAX; client_idx++)
 		if (IPA_CLIENT_IS_Q6_CONS(client_idx) ||
-			IPA_CLIENT_IS_Q6_PROD(client_idx)) {
+				IPA_CLIENT_IS_Q6_PROD(client_idx)) {
 			ep_idx = ipa_get_ep_mapping(client_idx);
 			ipa_debug("modem ep_idx(%d) client_idx = %d\n",
 					ep_idx, client_idx);
-		if (ep_idx < 0)
-			ipa_debug("Invalid IPA client\n");
-		else
-			val &= ~BIT(ep_idx);
-	}
+			if (ep_idx < 0)
+				ipa_debug("Invalid IPA client\n");
+			else
+				val &= ~BIT(ep_idx);
+		}
 
 	ipahal_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_n, IPA_EE_AP, val);
 	ipa_debug("wrote IPA_SUSPEND_IRQ_EN_EE_n reg = %d\n", val);
