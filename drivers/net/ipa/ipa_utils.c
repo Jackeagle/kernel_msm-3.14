@@ -1046,11 +1046,9 @@ static int ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ipa_ep_cfg: [in] IPA end-point configuration params
  *
- * Returns:	0 on success, negative on failure
- *
  * Note:	Should not be called from atomic context
  */
-static int ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
+static void ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 {
 	u8 qmb_master_sel;
 
@@ -1069,8 +1067,6 @@ static int ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CFG_n, clnt_hdl,
 				  &ipa_ctx->ep[clnt_hdl].cfg.cfg);
-
-	return 0;
 }
 
 /** ipa_cfg_ep_mode() - IPA end-point mode configuration
@@ -1199,9 +1195,7 @@ int ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 	if (result)
 		goto out;
 
-	result = ipa_cfg_ep_cfg(clnt_hdl, &ipa_ep_cfg->cfg);
-	if (result)
-		goto out;
+	ipa_cfg_ep_cfg(clnt_hdl, &ipa_ep_cfg->cfg);
 
 	if (IPA_CLIENT_IS_PROD(ipa_ctx->ep[clnt_hdl].client)) {
 		ipa_cfg_ep_mode(clnt_hdl, &ipa_ep_cfg->mode);
