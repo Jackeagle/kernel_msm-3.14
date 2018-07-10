@@ -974,11 +974,9 @@ static int ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ep_hdr_ext: [in] IPA end-point configuration params
  *
- * Returns:	0 on success, negative on failure
- *
  * Note:	Should not be called from atomic context
  */
-static int
+static void
 ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
 {
 	struct ipa_ep_context *ep;
@@ -1004,8 +1002,6 @@ ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_n, clnt_hdl,
 				  &ep->cfg.hdr_ext);
-
-	return 0;
 }
 
 /** ipa_cfg_ep_aggr() - IPA end-point aggregation configuration
@@ -1187,9 +1183,7 @@ int ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 	if (result)
 		goto out;
 
-	result = ipa_cfg_ep_hdr_ext(clnt_hdl, &ipa_ep_cfg->hdr_ext);
-	if (result)
-		goto out;
+	ipa_cfg_ep_hdr_ext(clnt_hdl, &ipa_ep_cfg->hdr_ext);
 
 	result = ipa_cfg_ep_aggr(clnt_hdl, &ipa_ep_cfg->aggr);
 	if (result)
