@@ -704,11 +704,6 @@ static struct msm_bus_scale_pdata ipa_bus_client_pdata = {
 static const struct ipa_ep_configuration *
 ep_configuration(enum ipa_client_type client)
 {
-	if (client >= IPA_CLIENT_MAX || client < 0) {
-		pr_err_ratelimited("Bad client number! client =%d\n", client);
-		return NULL;
-	}
-
 	return &ipa_ep_configuration[IPA_HW_v3_5_1][client];
 }
 
