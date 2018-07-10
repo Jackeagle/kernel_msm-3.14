@@ -718,7 +718,7 @@ ipa_get_gsi_ep_info(enum ipa_client_type client)
 	const struct ipa_ep_configuration *ep_config;
 
 	ep_config = ep_configuration(client);
-	if (ep_config && ep_config->valid)
+	if (ep_config->valid)
 		return &ep_config->ipa_gsi_ep_info;
 
 	return NULL;
@@ -755,7 +755,7 @@ u8 ipa_get_qmb_master_sel(enum ipa_client_type client)
 	const struct ipa_ep_configuration *ep_config;
 
 	ep_config = ep_configuration(client);
-	if (ep_config && ep_config->valid)
+	if (ep_config->valid)
 		return ep_config->qmb_master_sel;
 
 	return -EINVAL;
