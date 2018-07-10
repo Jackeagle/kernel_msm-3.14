@@ -1267,11 +1267,11 @@ int ipa_cfg_ep_status(u32 clnt_hdl,
 }
 
 /* Suspend a consumer endpoint */
-static void ipa_cfg_ep_ctrl(int ipa_ep_idx, bool suspend)
+static void ipa_cfg_ep_ctrl(u32 ipa_ep_idx, bool suspend)
 {
 	struct ipa_ep_cfg_ctrl cfg = { };
 
-	ipa_debug("pipe=%d ep_suspend=%d, ep_delay=0\n", ipa_ep_idx,
+	ipa_debug("pipe=%u ep_suspend=%d, ep_delay=0\n", ipa_ep_idx,
 		  suspend ? 1 : 0);
 
 	cfg.ipa_ep_suspend = suspend;
