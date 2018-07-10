@@ -75,14 +75,15 @@ static void ipa_deferred_interrupt_work(struct work_struct *work)
 
 static bool ipa_is_valid_ep(u32 ep_suspend_data)
 {
-	u32 bmsk = 1;
-	u32 i = 0;
+	while (ep_suspend_data) {
+		int i = __ffs(ep_suspend_data);
 
-	for (i = 0; i < ipa_ctx->ipa_num_pipes; i++) {
-		if ((ep_suspend_data & bmsk) && ipa_ctx->ep[i].valid)
+		if (ipa_ctx->ep[i].valid)
 			return true;
-		bmsk = bmsk << 1;
+
+		ep_suspend_data ^= BIT(i);
 	}
+
 	return false;
 }
 
