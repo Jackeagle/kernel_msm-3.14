@@ -771,7 +771,7 @@ u8 ipa_get_qmb_master_sel(enum ipa_client_type client)
  *
  * Return value: client mapping
  */
-enum ipa_client_type ipa_get_client_mapping(int pipe_idx)
+enum ipa_client_type ipa_get_client_mapping(u32 pipe_idx)
 {
 	if (pipe_idx >= ipa_ctx->ipa_num_pipes || pipe_idx < 0) {
 		ipa_err("Bad pipe index!\n");
@@ -860,9 +860,9 @@ void ipa_init_ep_flt_bitmap(void)
  * Return values:
  * true if supports and false if not
  */
-bool ipa_is_ep_support_flt(int pipe_idx)
+bool ipa_is_ep_support_flt(u32 pipe_idx)
 {
-	if (pipe_idx >= ipa_ctx->ipa_num_pipes || pipe_idx < 0) {
+	if (pipe_idx >= ipa_ctx->ipa_num_pipes) {
 		ipa_err("Bad pipe index!\n");
 		return false;
 	}
@@ -1420,7 +1420,7 @@ int ipa_disable_apps_wan_cons_deaggr(u32 agg_size, u32 agg_count)
  * @pipe_idx: pipe number
  * Return value: true if owned by modem, false otherwize
  */
-bool ipa_is_modem_pipe(int pipe_idx)
+bool ipa_is_modem_pipe(u32 pipe_idx)
 {
 	int client_idx;
 
@@ -1789,7 +1789,7 @@ const char *ipa_client_string(enum ipa_client_type client)
  * Returns:	0 on success, negative on failure
  *
  */
-void ipa_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple)
+void ipa_set_flt_tuple_mask(u32 pipe_idx, struct ipahal_reg_hash_tuple *tuple)
 {
 	struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
 

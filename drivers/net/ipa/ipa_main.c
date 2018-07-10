@@ -594,7 +594,7 @@ free_mem:
 static void ipa_setup_flt_hash_tuple(void)
 {
 	struct ipahal_reg_hash_tuple tuple = { };
-	int pipe_idx;
+	u32 pipe_idx;
 
 	for (pipe_idx = 0; pipe_idx < ipa_ctx->ipa_num_pipes ; pipe_idx++) {
 		if (!ipa_is_ep_support_flt(pipe_idx))

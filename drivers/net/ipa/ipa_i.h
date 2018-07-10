@@ -830,17 +830,17 @@ int ipa_remove_interrupt_handler(enum ipa_irq_type interrupt);
 void ipa_proxy_clk_vote(void);
 void ipa_proxy_clk_unvote(void);
 
-enum ipa_client_type ipa_get_client_mapping(int pipe_idx);
+enum ipa_client_type ipa_get_client_mapping(u32 pipe_idx);
 
 void ipa_init_ep_flt_bitmap(void);
 
-bool ipa_is_ep_support_flt(int pipe_idx);
+bool ipa_is_ep_support_flt(u32 pipe_idx);
 
 u8 ipa_get_qmb_master_sel(enum ipa_client_type client);
 
 /* internal functions */
 
-bool ipa_is_modem_pipe(int pipe_idx);
+bool ipa_is_modem_pipe(u32 pipe_idx);
 int ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc);
 
 u32 ipa_get_ep_mapping(enum ipa_client_type client);
@@ -917,7 +917,7 @@ int ipa_gsi_dma_task_inject(void);
 int ipa_disable_apps_wan_cons_deaggr(u32 agg_size, u32 agg_count);
 int ipa_plat_drv_probe(struct platform_device *pdev_p);
 
-void ipa_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple);
+void ipa_set_flt_tuple_mask(u32 pipe_idx, struct ipahal_reg_hash_tuple *tuple);
 void ipa_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple);
 
 void ipa_gsi_irq_rx_notify_cb(void *chan_data, u16 count);
