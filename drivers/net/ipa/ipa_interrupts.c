@@ -29,7 +29,6 @@ struct ipa_interrupt_work_wrap {
 
 static struct ipa_interrupt_info ipa_interrupt_to_cb[IPA_IRQ_NUM_MAX];
 static struct workqueue_struct *ipa_interrupt_wq;
-static u32 ipa_ee;
 
 static void ipa_tx_suspend_interrupt_wa(void);
 static void ipa_enable_tx_suspend_wa(struct work_struct *work);
@@ -108,7 +107,7 @@ static int ipa_handle_interrupt(int irq_num, bool isr_context)
 		ipa_debug_low("processing TX_SUSPEND interrupt work-around\n");
 		ipa_tx_suspend_interrupt_wa();
 		suspend_data = ipahal_read_reg_n(IPA_IRQ_SUSPEND_INFO_EE_n,
-						 ipa_ee);
+						 IPA_EE_AP);
 		ipa_debug_low("get interrupt %d\n", suspend_data);
 
 		/* Clear L2 interrupts status.  Note the following
@@ -116,7 +115,7 @@ static int ipa_handle_interrupt(int irq_num, bool isr_context)
 		 * prior to 3.1.
 		 */
 		ipahal_write_reg_n(IPA_SUSPEND_IRQ_CLR_EE_n,
-				   ipa_ee, suspend_data);
+				   IPA_EE_AP, suspend_data);
 		if (!ipa_is_valid_ep(suspend_data))
 			return 0;
 
@@ -178,13 +177,13 @@ static void ipa_enable_tx_suspend_wa(struct work_struct *work)
 	/* make sure ipa hw is clocked on*/
 	ipa_client_add(__func__, false);
 
-	en = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, ipa_ee);
+	en = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
 	suspend_bmask = 1 << irq_num;
 	/*enable  TX_SUSPEND_IRQ*/
 	en |= suspend_bmask;
 	ipa_debug("enable TX_SUSPEND_IRQ, IPA_IRQ_EN_EE reg, write val = %u\n"
 		, en);
-	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, ipa_ee, en);
+	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, en);
 	ipa_process_interrupts(false);
 	ipa_client_remove(__func__, false);
 
@@ -202,11 +201,11 @@ static void ipa_tx_suspend_interrupt_wa(void)
 	ipa_assert(irq_num != -1);
 
 	/*disable TX_SUSPEND_IRQ*/
-	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, ipa_ee);
+	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
 	suspend_bmask = 1 << irq_num;
 	val &= ~suspend_bmask;
 	ipa_debug("Disable TX_SUSPEND_IRQ write %u to IPA_IRQ_EN_EE\n", val);
-	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, ipa_ee, val);
+	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
 
 	ipa_debug_low("processing suspend interrupt WA delayed work\n");
 	queue_delayed_work(ipa_interrupt_wq, &dwork_en_suspend_int,
@@ -236,8 +235,8 @@ static void ipa_process_interrupts(bool isr_context)
 	ipa_debug_low("Enter\n");
 
 	spin_lock_irqsave(&suspend_wa_lock, flags);
-	en = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, ipa_ee);
-	reg = ipahal_read_reg_n(IPA_IRQ_STTS_EE_n, ipa_ee);
+	en = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
+	reg = ipahal_read_reg_n(IPA_IRQ_STTS_EE_n, IPA_EE_AP);
 	while (en & reg) {
 		bmsk = 1;
 		for (i = 0; i < IPA_IRQ_NUM_MAX; i++) {
@@ -249,7 +248,7 @@ static void ipa_process_interrupts(bool isr_context)
 				 */
 				if (uc_irq)
 					ipahal_write_reg_n(IPA_IRQ_CLR_EE_n,
-							   ipa_ee, bmsk);
+							   IPA_EE_AP, bmsk);
 
 				/* handle the interrupt with spin_lock
 				 * unlocked to avoid calling client in atomic
@@ -266,15 +265,15 @@ static void ipa_process_interrupts(bool isr_context)
 				 */
 				if (!uc_irq)
 					ipahal_write_reg_n(IPA_IRQ_CLR_EE_n,
-							   ipa_ee, bmsk);
+							   IPA_EE_AP, bmsk);
 			}
 			bmsk = bmsk << 1;
 		}
-		reg = ipahal_read_reg_n(IPA_IRQ_STTS_EE_n, ipa_ee);
+		reg = ipahal_read_reg_n(IPA_IRQ_STTS_EE_n, IPA_EE_AP);
 		/* since the suspend interrupt HW bug we must
 		 * read again the EN register, otherwise the while is endless
 		 */
-		en = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, ipa_ee);
+		en = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
 	}
 
 	spin_unlock_irqrestore(&suspend_wa_lock, flags);
@@ -346,11 +345,11 @@ int ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 	ipa_interrupt_to_cb[irq_num].private_data = private_data;
 	ipa_interrupt_to_cb[irq_num].interrupt = interrupt;
 
-	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, ipa_ee);
+	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
 	ipa_debug("read IPA_IRQ_EN_EE_n register. reg = %d\n", val);
 	bmsk = 1 << irq_num;
 	val |= bmsk;
-	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, ipa_ee, val);
+	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
 	ipa_debug("wrote IPA_IRQ_EN_EE_n register. reg = %d\n", val);
 
 	/* Register SUSPEND_IRQ_EN_EE_N_ADDR for L2 interrupt.
@@ -371,7 +370,7 @@ int ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 				val &= ~(1 << ep_idx);
 		}
 
-		ipahal_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_n, ipa_ee, val);
+		ipahal_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_n, IPA_EE_AP, val);
 		ipa_debug("wrote IPA_SUSPEND_IRQ_EN_EE_n reg = %d\n", val);
 	}
 	return 0;
@@ -411,14 +410,14 @@ int ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 	 * versions prior to 3.1.
 	 */
 	if (interrupt == IPA_TX_SUSPEND_IRQ) {
-		ipahal_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_n, ipa_ee, 0);
+		ipahal_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_n, IPA_EE_AP, 0);
 		ipa_debug("wrote IPA_SUSPEND_IRQ_EN_EE_n reg = %d\n", 0);
 	}
 
-	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, ipa_ee);
+	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
 	bmsk = 1 << irq_num;
 	val &= ~bmsk;
-	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, ipa_ee, val);
+	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
 
 	return 0;
 }
@@ -437,7 +436,6 @@ int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
 	int idx;
 	int res = 0;
 
-	ipa_ee = IPA_EE_AP;
 	for (idx = 0; idx < IPA_IRQ_NUM_MAX; idx++) {
 		ipa_interrupt_to_cb[idx].deferred_flag = false;
 		ipa_interrupt_to_cb[idx].handler = NULL;
