@@ -226,55 +226,59 @@ static inline bool is_uc_irq(int irq_num)
 
 static void ipa_process_interrupts(bool isr_context)
 {
-	u32 reg;
-	u32 bmsk;
-	u32 i = 0;
-	u32 en;
 	unsigned long flags;
-	bool uc_irq;
 
 	ipa_debug_low("Enter\n");
 
 	spin_lock_irqsave(&suspend_wa_lock, flags);
-	en = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
-	reg = ipahal_read_reg_n(IPA_IRQ_STTS_EE_n, IPA_EE_AP);
-	while (en & reg) {
-		bmsk = 1;
-		for (i = 0; i < IPA_IRQ_NUM_MAX; i++) {
-			if (en & reg & bmsk) {
-				uc_irq = is_uc_irq(i);
 
-				/* Clear uC interrupt before processing to avoid
-				 * clearing unhandled interrupts
-				 */
-				if (uc_irq)
-					ipahal_write_reg_n(IPA_IRQ_CLR_EE_n,
-							   IPA_EE_AP, bmsk);
+	while (true) {
+		u32 ipa_intr_mask;
+		u32 imask;	/* one set bit */
 
-				/* handle the interrupt with spin_lock
-				 * unlocked to avoid calling client in atomic
-				 * context. mutual exclusion still preserved
-				 * as the read/clr is done with spin_lock
-				 * locked.
-				 */
-				spin_unlock_irqrestore(&suspend_wa_lock, flags);
-				ipa_handle_interrupt(i, isr_context);
-				spin_lock_irqsave(&suspend_wa_lock, flags);
-
-				/* Clear non uC interrupt after processing
-				 * to avoid clearing interrupt data
-				 */
-				if (!uc_irq)
-					ipahal_write_reg_n(IPA_IRQ_CLR_EE_n,
-							   IPA_EE_AP, bmsk);
-			}
-			bmsk = bmsk << 1;
-		}
-		reg = ipahal_read_reg_n(IPA_IRQ_STTS_EE_n, IPA_EE_AP);
-		/* since the suspend interrupt HW bug we must
-		 * read again the EN register, otherwise the while is endless
+		/*
+		 * Determine which interrupts have fired, then examine only
+		 * those that are enabled.  Note that a suspend interrupt
+		 * bug forces us to re-read the enabled mask every time to
+		 * avoid an endless loop.
 		 */
-		en = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
+		ipa_intr_mask = ipahal_read_reg_n(IPA_IRQ_STTS_EE_n, IPA_EE_AP);
+		ipa_intr_mask &= ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
+
+		if (!ipa_intr_mask)
+			break;
+
+		do {
+			int i = __ffs(ipa_intr_mask);
+			bool uc_irq = is_uc_irq(i);
+
+			imask = BIT(i);
+
+			/* Clear uC interrupt before processing to avoid
+			 * clearing unhandled interrupts
+			 */
+			if (uc_irq)
+				ipahal_write_reg_n(IPA_IRQ_CLR_EE_n, IPA_EE_AP,
+						   imask);
+
+			/* Handle the interrupt with spin_lock unlocked to
+			 * avoid calling client in atomic context.  Mutual
+			 * exclusion still preserved as the read/clr is done
+			 * with spin_lock locked.
+			 */
+			spin_unlock_irqrestore(&suspend_wa_lock, flags);
+
+			ipa_handle_interrupt(i, isr_context);
+
+			spin_lock_irqsave(&suspend_wa_lock, flags);
+
+			/* Clear non uC interrupt after processing
+			 * to avoid clearing interrupt data
+			 * */
+			if (!uc_irq)
+				ipahal_write_reg_n(IPA_IRQ_CLR_EE_n, IPA_EE_AP,
+						   imask);
+		} while ((ipa_intr_mask ^= imask));
 	}
 
 	spin_unlock_irqrestore(&suspend_wa_lock, flags);
