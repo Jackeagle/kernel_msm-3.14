@@ -1109,11 +1109,9 @@ static void ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 /** ipa_cfg_ep_seq() - IPA end-point HPS/DPS sequencer type configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  *
- * Returns:	0 on success, negative on failure
- *
  * Note:	Should not be called from atomic context
  */
-static int ipa_cfg_ep_seq(u32 clnt_hdl)
+static void ipa_cfg_ep_seq(u32 clnt_hdl)
 {
 	enum ipa_client_type client = ipa_ctx->ep[clnt_hdl].client;
 	int type = ep_configuration(client)->sequencer_type;
@@ -1121,8 +1119,6 @@ static int ipa_cfg_ep_seq(u32 clnt_hdl)
 	ipa_debug("set sequencers to sequence 0x%x, ep = %d\n", type,
 			clnt_hdl);
 	ipahal_write_reg_n(IPA_ENDP_INIT_SEQ_n, clnt_hdl, type);
-
-	return 0;
 }
 
 /** ipa_cfg_ep_deaggr() -  IPA end-point deaggregation configuration
@@ -1217,10 +1213,7 @@ int ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 
 	if (IPA_CLIENT_IS_PROD(ipa_ctx->ep[clnt_hdl].client)) {
 		ipa_cfg_ep_mode(clnt_hdl, &ipa_ep_cfg->mode);
-
-		result = ipa_cfg_ep_seq(clnt_hdl);
-		if (result)
-			goto out;
+		ipa_cfg_ep_seq(clnt_hdl);
 
 		result = ipa_cfg_ep_deaggr(clnt_hdl, &ipa_ep_cfg->deaggr);
 	} else {
