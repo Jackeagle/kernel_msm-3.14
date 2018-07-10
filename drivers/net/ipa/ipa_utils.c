@@ -1077,11 +1077,9 @@ static int ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ipa_ep_cfg: [in] IPA end-point configuration params
  *
- * Returns:	0 on success, negative on failure
- *
  * Note:	Should not be called from atomic context
  */
-static int ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
+static void ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 {
 	struct ipahal_reg_endp_init_mode init_mode;
 	u32 ipa_ep_idx;
@@ -1106,8 +1104,6 @@ static int ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 	init_mode.dst_pipe_number = ipa_ctx->ep[clnt_hdl].dst_pipe_index;
 	init_mode.ep_mode = *ep_mode;
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_MODE_n, clnt_hdl, &init_mode);
-
-	return 0;
 }
 
 /** ipa_cfg_ep_seq() - IPA end-point HPS/DPS sequencer type configuration
@@ -1220,9 +1216,7 @@ int ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 		goto out;
 
 	if (IPA_CLIENT_IS_PROD(ipa_ctx->ep[clnt_hdl].client)) {
-		result = ipa_cfg_ep_mode(clnt_hdl, &ipa_ep_cfg->mode);
-		if (result)
-			goto out;
+		ipa_cfg_ep_mode(clnt_hdl, &ipa_ep_cfg->mode);
 
 		result = ipa_cfg_ep_seq(clnt_hdl);
 		if (result)
