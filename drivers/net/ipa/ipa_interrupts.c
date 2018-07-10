@@ -324,7 +324,6 @@ int ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 			      void *private_data)
 {
 	u32 val;
-	u32 bmsk;
 	int irq_num;
 	int client_idx, ep_idx;
 
@@ -349,8 +348,7 @@ int ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
 	ipa_debug("read IPA_IRQ_EN_EE_n register. reg = %d\n", val);
-	bmsk = BIT(irq_num);
-	val |= bmsk;
+	val |= BIT(irq_num);
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
 	ipa_debug("wrote IPA_IRQ_EN_EE_n register. reg = %d\n", val);
 
@@ -386,7 +384,6 @@ int ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 int ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 {
 	u32 val;
-	u32 bmsk;
 	int irq_num;
 
 	if (interrupt < IPA_BAD_SNOC_ACCESS_IRQ || interrupt >= IPA_IRQ_MAX) {
@@ -417,8 +414,7 @@ int ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 	}
 
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
-	bmsk = BIT(irq_num);
-	val &= ~bmsk;
+	val &= ~BIT(irq_num);
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
 
 	return 0;
