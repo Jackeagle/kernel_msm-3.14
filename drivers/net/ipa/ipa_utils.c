@@ -1230,54 +1230,6 @@ static void ipa_cfg_ep_ctrl(u32 ipa_ep_idx, bool suspend)
 		ipa_suspend_active_aggr_wa(ipa_ep_idx);
 }
 
-/** ipa_cfg_ep_holb() - IPA end-point holb configuration
- *
- * If an IPA producer pipe is full, IPA HW by default will block
- * indefinitely till space opens up. During this time no packets
- * including those from unrelated pipes will be processed. Enabling
- * HOLB means IPA HW will be allowed to drop packets as/when needed
- * and indefinite blocking is avoided.
- *
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg: [in] IPA end-point configuration params
- *
- * Returns:	0 on success, negative on failure
- */
-int ipa_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
-{
-	if (!client_handle_valid(clnt_hdl))
-		return -EINVAL;
-
-	if (ep_holb->tmr_val > 0 || ep_holb->en > 1) {
-		ipa_err("bad parm.\n");
-		return -EINVAL;
-	}
-
-	if (IPA_CLIENT_IS_PROD(ipa_ctx->ep[clnt_hdl].client)) {
-		ipa_err("HOLB does not apply to IPA in EP %d\n", clnt_hdl);
-		return -EINVAL;
-	}
-
-	ipa_ctx->ep[clnt_hdl].holb = *ep_holb;
-
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-		       true);
-
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HOL_BLOCK_EN_n, clnt_hdl,
-				  ep_holb);
-
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HOL_BLOCK_TIMER_n, clnt_hdl,
-				  ep_holb);
-
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			  true);
-
-	ipa_debug("cfg holb %u ep=%d tmr=%d\n", ep_holb->en, clnt_hdl,
-		  ep_holb->tmr_val);
-
-	return 0;
-}
-
 struct msm_bus_scale_pdata *ipa_bus_scale_table_init(void)
 {
 	return &ipa_bus_client_pdata;
