@@ -754,7 +754,9 @@ struct ipa_ep_context *ipa_get_ep_context(enum ipa_client_type client)
 {
 	int ipa_ep_idx = ipa_get_ep_mapping(client);
 
-	return ipa_ep_idx < 0 ? NULL : &ipa_ctx->ep[ipa_ep_idx];
+	ipa_assert(ipa_ep_idx >= 0);
+
+	return &ipa_ctx->ep[ipa_ep_idx];
 }
 
 /** ipa_get_qmb_master_sel() - provide QMB master selection for the client
