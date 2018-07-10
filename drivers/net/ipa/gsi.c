@@ -975,12 +975,12 @@ static void gsi_tz_pipe_setup(void)
 
 			val = ep_config->ee;
 			val |= ep_config->ipa_gsi_chan_num << 8;
-			val |= 1 << 16;
+			val |= BIT(16);
 			ipahal_write_reg_n(IPA_ENDP_GSI_CFG1_n, i, val);
 		}
 
 		/* Toggle the high bit on and off on CFG2 for all pipes */
-		ipahal_write_reg_n(IPA_ENDP_GSI_CFG2_n, i, 1 << 31);
+		ipahal_write_reg_n(IPA_ENDP_GSI_CFG2_n, i, BIT(31));
 		ipahal_write_reg_n(IPA_ENDP_GSI_CFG2_n, i, 0);
 	}
 

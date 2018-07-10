@@ -179,7 +179,7 @@ static void ipa_enable_tx_suspend_wa(struct work_struct *work)
 	ipa_client_add(__func__, false);
 
 	en = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
-	suspend_bmask = 1 << irq_num;
+	suspend_bmask = BIT(irq_num);
 	/*enable  TX_SUSPEND_IRQ*/
 	en |= suspend_bmask;
 	ipa_debug("enable TX_SUSPEND_IRQ, IPA_IRQ_EN_EE reg, write val = %u\n"
@@ -203,7 +203,7 @@ static void ipa_tx_suspend_interrupt_wa(void)
 
 	/*disable TX_SUSPEND_IRQ*/
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
-	suspend_bmask = 1 << irq_num;
+	suspend_bmask = BIT(irq_num);
 	val &= ~suspend_bmask;
 	ipa_debug("Disable TX_SUSPEND_IRQ write %u to IPA_IRQ_EN_EE\n", val);
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
@@ -349,7 +349,7 @@ int ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
 	ipa_debug("read IPA_IRQ_EN_EE_n register. reg = %d\n", val);
-	bmsk = 1 << irq_num;
+	bmsk = BIT(irq_num);
 	val |= bmsk;
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
 	ipa_debug("wrote IPA_IRQ_EN_EE_n register. reg = %d\n", val);
@@ -369,7 +369,7 @@ int ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 			if (ep_idx < 0)
 				ipa_debug("Invalid IPA client\n");
 			else
-				val &= ~(1 << ep_idx);
+				val &= ~BIT(ep_idx);
 		}
 
 		ipahal_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_n, IPA_EE_AP, val);
@@ -417,7 +417,7 @@ int ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 	}
 
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
-	bmsk = 1 << irq_num;
+	bmsk = BIT(irq_num);
 	val &= ~bmsk;
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
 
@@ -479,9 +479,9 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 	int irq_num;
 	int aggr_active_bitmap = ipahal_read_reg(IPA_STATE_AGGR_ACTIVE);
 
-	if (aggr_active_bitmap & (1 << clnt_hdl)) {
+	if (aggr_active_bitmap & BIT(clnt_hdl)) {
 		/* force close aggregation */
-		ipahal_write_reg(IPA_AGGR_FORCE_CLOSE, (1 << clnt_hdl));
+		ipahal_write_reg(IPA_AGGR_FORCE_CLOSE, BIT(clnt_hdl));
 
 		/* simulate suspend IRQ */
 		irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
@@ -497,7 +497,7 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 			ipa_err("failed allocating suspend_interrupt_data\n");
 			return;
 		}
-		suspend_interrupt_data->endpoints = 1 << clnt_hdl;
+		suspend_interrupt_data->endpoints = BIT(clnt_hdl);
 
 		work_data = kzalloc(sizeof(*work_data), GFP_ATOMIC);
 		if (!work_data)

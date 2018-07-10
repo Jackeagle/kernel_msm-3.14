@@ -80,7 +80,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	struct ipa_ep_cfg_ctrl ctrl;
 
 	ipa_debug("Applying reset channel with open aggregation frame WA\n");
-	ipahal_write_reg(IPA_AGGR_FORCE_CLOSE, (1 << clnt_hdl));
+	ipahal_write_reg(IPA_AGGR_FORCE_CLOSE, BIT(clnt_hdl));
 
 	/* Reset channel */
 	gsi_res = gsi_reset_channel(ep->gsi_chan_hdl);
@@ -138,12 +138,12 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	/* Wait for aggregation frame to be closed and stop channel*/
 	for (i = 0; i < IPA_POLL_AGGR_STATE_RETRIES_NUM; i++) {
 		aggr_active_bitmap = ipahal_read_reg(IPA_STATE_AGGR_ACTIVE);
-		if (!(aggr_active_bitmap & (1 << clnt_hdl)))
+		if (!(aggr_active_bitmap & BIT(clnt_hdl)))
 			break;
 		msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
 	}
 
-	ipa_bug_on(aggr_active_bitmap & (1 << clnt_hdl));
+	ipa_bug_on(aggr_active_bitmap & BIT(clnt_hdl));
 
 	ipahal_dma_free(&dma_byte);
 
@@ -221,7 +221,7 @@ void ipa_reset_gsi_channel(u32 clnt_hdl)
 	else
 		aggr_active_bitmap = 0;
 
-	if (aggr_active_bitmap & (1 << clnt_hdl)) {
+	if (aggr_active_bitmap & BIT(clnt_hdl)) {
 		ipa_bug_on(ipa_reset_with_open_aggr_frame_wa(clnt_hdl, ep));
 	} else {
 		/* If the reset called after stop, need to wait 1ms */

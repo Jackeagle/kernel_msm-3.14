@@ -1130,13 +1130,13 @@ static void ipa_freeze_clock_vote_and_notify_modem(void)
 			ipa_client_add_additional("FREEZE_VOTE", true);
 
 	/* Signal whether the clock is enabled */
-	mask = 1 << ipa_ctx->smp2p_info.enabled_bit;
+	mask = BIT(ipa_ctx->smp2p_info.enabled_bit);
 	value = ipa_ctx->smp2p_info.ipa_clk_on ? mask : 0;
 	qcom_smem_state_update_bits(ipa_ctx->smp2p_info.enabled_state, mask,
 				    value);
 
 	/* Now indicate that the enabled flag is valid */
-	mask = 1 << ipa_ctx->smp2p_info.valid_bit;
+	mask = BIT(ipa_ctx->smp2p_info.valid_bit);
 	value = mask;
 	qcom_smem_state_update_bits(ipa_ctx->smp2p_info.valid_state, mask,
 				    value);
@@ -1157,11 +1157,11 @@ void ipa_reset_freeze_vote(void)
 		ipa_client_remove("FREEZE_VOTE", true);
 
 	/* Reset the clock enabled valid flag */
-	mask = 1 << ipa_ctx->smp2p_info.valid_bit;
+	mask = BIT(ipa_ctx->smp2p_info.valid_bit);
 	qcom_smem_state_update_bits(ipa_ctx->smp2p_info.valid_state, mask, 0);
 
 	/* Mark the clock disabled for good measure... */
-	mask = 1 << ipa_ctx->smp2p_info.enabled_bit;
+	mask = BIT(ipa_ctx->smp2p_info.enabled_bit);
 	qcom_smem_state_update_bits(ipa_ctx->smp2p_info.enabled_state, mask, 0);
 
 	ipa_ctx->smp2p_info.res_sent = false;
