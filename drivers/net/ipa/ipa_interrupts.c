@@ -330,11 +330,8 @@ int ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 	ipa_debug("%s: interrupt_enum %d\n", __func__, interrupt);
 
 	irq_num = ipa_irq_mapping[interrupt];
-	if (irq_num < 0 || irq_num >= IPA_IRQ_NUM_MAX) {
-		ipa_err("interrupt %d not supported\n", interrupt);
-		WARN_ON(1);
-		return -EFAULT;
-	}
+	ipa_assert(irq_num >= 0);
+
 	ipa_debug("ipa_interrupt_to_cb irq_num(%d)\n", irq_num);
 
 	ipa_interrupt_to_cb[irq_num].deferred_flag = deferred_flag;
