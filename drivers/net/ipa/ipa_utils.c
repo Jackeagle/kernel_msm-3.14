@@ -1614,13 +1614,7 @@ static const char *ipa_clients_strings[IPA_CLIENT_MAX] = {
 
 const char *ipa_client_string(enum ipa_client_type client)
 {
-	if (client < 0 || client >= IPA_CLIENT_MAX)
-		return "Invalid client";
-
-	if (ipa_clients_strings[client])
-		return ipa_clients_strings[client];
-
-	return "Undefined client";
+	return ipa_clients_strings[client];
 }
 
 /** ipa_set_flt_tuple_mask() - Sets the flt tuple masking for the given pipe
