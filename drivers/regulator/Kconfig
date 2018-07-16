@@ -662,15 +662,6 @@ config REGULATOR_QCOM_RPM
 	  Qualcomm RPM as a module. The module will be named
 	  "qcom_rpm-regulator".
 
-config REGULATOR_QCOM_RPMH
-	tristate "Qualcomm Technologies, Inc. RPMh regulator driver"
-	depends on QCOM_RPMH || COMPILE_TEST
-	help
-	  This driver supports control of PMIC regulators via the RPMh hardware
-	  block found on Qualcomm Technologies Inc. SoCs.  RPMh regulator
-	  control allows for voting on regulator state between multiple
-	  processors within the SoC.
-
 config REGULATOR_QCOM_SMD_RPM
 	tristate "Qualcomm SMD based RPM regulator driver"
 	depends on QCOM_SMD_RPM
@@ -693,16 +684,6 @@ config REGULATOR_QCOM_SPMI
 	  Say M here if you want to include support for the regulators on the
 	  Qualcomm SPMI PMICs as a module. The module will be named
 	  "qcom_spmi-regulator".
-
-config REGULATOR_RPMH
-	tristate "Qualcomm Technologies, Inc. RPMh regulator driver"
-	depends on OF
-	depends on QCOM_RPMH
-	help
-	  This driver supports control of PMIC regulators via the RPMh hardware
-	  block found on Qualcomm Technologies Inc. SoCs.  RPMh regulator
-	  control allows for voting on regulator state between multiple
-	  processors within the SoC.
 
 config REGULATOR_RC5T583
 	tristate "RICOH RC5T583 Power regulators"
@@ -976,17 +957,6 @@ config REGULATOR_WM8994
 	help
 	  This driver provides support for the voltage regulators on the
 	  WM8994 CODEC.
-
-config REGULATOR_QPNP_LABIBB
-	tristate "Qualcomm Technologies, Inc. QPNP LAB/IBB regulator support"
-	depends on SPMI
-	help
-	  This driver supports voltage regulators in Qualcomm Technologies, Inc.
-	  PMIC chips which comply with QPNP LAB/IBB regulators. QPNP LAB and IBB
-	  are SPMI based PMIC implementations. LAB regulator can be used as a
-	  regular positive boost regulator. IBB can be used as a regular
-	  negative boost regulator. LAB/IBB regulators can also be used
-	  together for LCD or AMOLED.
 
 endif
 
