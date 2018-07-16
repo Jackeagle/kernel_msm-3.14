@@ -91,34 +91,34 @@ static const struct rsrc_min_max ipa_rsrc_src_grp_config
 	[][IPA_RSRC_GRP_TYPE_SRC_MAX][IPA_SRC_GROUP_MAX] = {
 	[IPA_HW_v3_5_1] = {
 		[IPA_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS] = {
-			[IPA_GROUP_LWA_DL]	= { 1, 63, },
-			[IPA_GROUP_UL_DL]	= { 1, 63, },
-			[IPA_MHI_GROUP_DMA]	= { 0, 0, },
-			[IPA_GROUP_UC_RX_Q]	= { 1, 63, },
+			[IPA_GROUP_LWA_DL]	= { .min = 1,	.max = 63, },
+			[IPA_GROUP_UL_DL]	= { .min = 1,	.max = 63, },
+			[IPA_MHI_GROUP_DMA]	= { .min = 0,	.max = 0, },
+			[IPA_GROUP_UC_RX_Q]	= { .min = 1,	.max = 63, },
 		},
 		[IPA_RSRC_GRP_TYPE_SRS_DESCRIPTOR_LISTS] = {
-			[IPA_GROUP_LWA_DL]	= { 10, 10, },
-			[IPA_GROUP_UL_DL]	= { 10, 10, },
-			[IPA_MHI_GROUP_DMA]	= { 0, 0, },
-			[IPA_GROUP_UC_RX_Q]	= { 8, 8, },
+			[IPA_GROUP_LWA_DL]	= { .min = 10,	.max =10, },
+			[IPA_GROUP_UL_DL]	= { .min = 10,	.max =10, },
+			[IPA_MHI_GROUP_DMA]	= { .min = 0,	.max = 0, },
+			[IPA_GROUP_UC_RX_Q]	= { .min = 8,	.max = 8, },
 		},
 		[IPA_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF] = {
-			[IPA_GROUP_LWA_DL]	= { 12, 12, },
-			[IPA_GROUP_UL_DL]	= { 14, 14, },
-			[IPA_MHI_GROUP_DMA]	= { 0, 0, },
-			[IPA_GROUP_UC_RX_Q]	= { 8, 8, },
+			[IPA_GROUP_LWA_DL]	= { .min = 12,	.max =12, },
+			[IPA_GROUP_UL_DL]	= { .min = 14,	.max =14, },
+			[IPA_MHI_GROUP_DMA]	= { .min = 0,	.max = 0, },
+			[IPA_GROUP_UC_RX_Q]	= { .min = 8,	.max = 8, },
 		},
 		[IPA_RSRC_GRP_TYPE_SRC_HPS_DMARS] = {
-			[IPA_GROUP_LWA_DL]	= { 0, 63, },
-			[IPA_GROUP_UL_DL]	= { 0, 63, },
-			[IPA_MHI_GROUP_DMA]	= { 0, 255, },
-			[IPA_GROUP_UC_RX_Q]	= { 0, 255, },
+			[IPA_GROUP_LWA_DL]	= { .min = 0,	.max = 63, },
+			[IPA_GROUP_UL_DL]	= { .min = 0,	.max = 63, },
+			[IPA_MHI_GROUP_DMA]	= { .min = 0,	.max = 255, },
+			[IPA_GROUP_UC_RX_Q]	= { .min = 0,	.max = 255, },
 		},
 		[IPA_RSRC_GRP_TYPE_SRC_ACK_ENTRIES] = {
-			[IPA_GROUP_LWA_DL]	= { 14, 14, },
-			[IPA_GROUP_UL_DL]	= { 20, 20, },
-			[IPA_MHI_GROUP_DMA]	= { 0, 0, },
-			[IPA_GROUP_UC_RX_Q]	= { 14, 14, },
+			[IPA_GROUP_LWA_DL]	= { .min = 14,	.max =14, },
+			[IPA_GROUP_UL_DL]	= { .min = 20,	.max =20, },
+			[IPA_MHI_GROUP_DMA]	= { .min = 0,	.max = 0, },
+			[IPA_GROUP_UC_RX_Q]	= { .min = 14,	.max =14, },
 		},
 	},
 };
@@ -128,14 +128,14 @@ static const struct rsrc_min_max ipa_rsrc_dst_grp_config
 	[IPA_HW_v3_5_1] = {
 		/* LWA_DL UL/DL/DPL unused N/A	 N/A	 N/A */
 		[IPA_RSRC_GRP_TYPE_DST_DATA_SECTORS] = {
-			[IPA_GROUP_LWA_DL]	= { 4, 4, },
-			[IPA_GROUP_UL_DL]	= { 4, 4, },
-			[IPA_MHI_GROUP_DMA]	= { 3, 3, },
+			[IPA_GROUP_LWA_DL]	= { .min = 4,	.max = 4, },
+			[IPA_GROUP_UL_DL]	= { .min = 4,	.max = 4, },
+			[IPA_MHI_GROUP_DMA]	= { .min = 3,	.max = 3, },
 		},
 		[IPA_RSRC_GRP_TYPE_DST_DPS_DMARS] = {
-			[IPA_GROUP_LWA_DL]	= { 2, 63, },
-			[IPA_GROUP_UL_DL]	= { 1, 63, },
-			[IPA_MHI_GROUP_DMA]	= { 1, 2, },
+			[IPA_GROUP_LWA_DL]	= { .min = 2,	.max = 63, },
+			[IPA_GROUP_UL_DL]	= { .min = 1,	.max = 63, },
+			[IPA_MHI_GROUP_DMA]	= { .min = 1,	.max = 2, },
 		},
 	},
 };
