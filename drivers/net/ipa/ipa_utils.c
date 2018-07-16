@@ -34,10 +34,6 @@
 /* In IPAv3 only endpoints 0-3 can be configured to deaggregation */
 #define IPA_EP_SUPPORTS_DEAGGR(idx) ((idx) <= 3)
 
-/* configure IPA spare register 1 in order to have correct IPA version
- * set bits 0,2,3 and 4. see SpareBits documentation.xlsx
- */
-
 /* HPS, DPS sequencers Types*/
 #define IPA_DPS_HPS_SEQ_TYPE_DMA_ONLY  0x00000000
 /* DMA + DECIPHER/CIPHER */
