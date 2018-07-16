@@ -239,7 +239,7 @@ ipahal_register_write_pyld(u32 offset, u32 value, u32 mask, bool clear)
 	if (check_too_big("offset", offset, 16))
 		return NULL;
 
-	opcode = ipahal_imm_cmds[IPA_IMM_CMD_DMA_SHARED_MEM].opcode;
+	opcode = ipahal_imm_cmds[IPA_IMM_CMD_REGISTER_WRITE].opcode;
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
 		return NULL;
