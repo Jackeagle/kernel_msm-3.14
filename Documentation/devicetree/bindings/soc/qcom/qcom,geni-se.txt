@@ -52,6 +52,15 @@ Required properties:
 - clock-names:		Must contain "se".
 - clocks:		Serial engine core clock needed by the device.
 
+Qualcomm Technologies Inc. GENI Serial Engine based High speed UART Controller
+
+Required properties:
+- compatible:		Must be "qcom,geni-uart".
+- reg:			Must contain UART register location and length.
+- interrupts: 		Must contain UART core interrupts.
+- clock-names:		Must contain "se".
+- clocks:		Serial engine core clock needed by the device.
+
 Qualcomm Technologies Inc. GENI Serial Engine based SPI Controller
 
 Required properties:
@@ -101,6 +110,17 @@ Example:
 			pinctrl-names = "default", "sleep";
 			pinctrl-0 = <&qup_1_uart_3_active>;
 			pinctrl-1 = <&qup_1_uart_3_sleep>;
+		};
+
+		uart1: serial@898000 {
+			compatible = "qcom,geni-uart";
+			reg = <0x898000 0x4000>;
+			clock-names = "se";
+			clocks = <&clock_gcc GCC_QUPV3_WRAP0_S6_CLK>;
+			interrupts = <GIC_SPI 607 IRQ_TYPE_LEVEL_HIGH>;
+			pinctrl-names = "default", "sleep";
+			pinctrl-0 = <&qup_uart6_default>;
+			pinctrl-1 = <&qup_uart6_sleep>;
 		};
 
 		spi0: spi@a84000 {

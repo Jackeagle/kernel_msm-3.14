@@ -17,6 +17,7 @@
 / {
 	aliases {
 		serial0 = &uart9;
+		hsuart0 = &uart6;
 	};
 
 	chosen {
@@ -580,6 +581,16 @@
 			regulator-max-microvolt = <600000>;
 		};
 	};
+
+	pinctrl@3400000 {
+		qup-i2c10-default {
+			pinconf {
+				pins = "gpio55", "gpio56";
+				drive-strength = <2>;
+				bias-disable;
+			};
+		};
+	};
 };
 
 &dsi0 {
@@ -743,6 +754,19 @@ ap_ts_i2c: &i2c14 {
 		spi-max-frequency = <800000>;
 		interrupt-parent = <&tlmm>;
 		interrupts = <129 IRQ_TYPE_EDGE_RISING>;
+	};
+};
+
+&uart6 {
+	status = "okay";
+	bluetooth: bt_wcn3990 {
+		compatible = "qcom,wcn3990-bt";
+		vddio-supply = <&src_pp1350_s3a>;
+		vddxtal-supply = <&src_pp2040_s5a>;
+		vddcore-supply = <&pp1800_l7a_wcn3990>;
+		vddpa-supply = <&src_pp1300_l17a>;
+		vddldo-supply = <&pp3300_l25a_ch0_wcn3990>;
+		max-speed = <3200000>;
 	};
 };
 
