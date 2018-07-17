@@ -37,6 +37,9 @@
 #define EDL_TAG_ID_HCI			(17)
 #define EDL_TAG_ID_DEEP_SLEEP		(27)
 
+#define CHEROKEE_POWERON_PULSE          0xFC
+#define CHEROKEE_POWEROFF_PULSE         0xC0
+
 enum qca_bardrate {
 	QCA_BAUDRATE_115200 	= 0,
 	QCA_BAUDRATE_57600,
@@ -128,6 +131,9 @@ struct tlv_type_hdr {
 
 int qca_set_bdaddr_rome(struct hci_dev *hdev, const bdaddr_t *bdaddr);
 int qca_uart_setup_rome(struct hci_dev *hdev, uint8_t baudrate);
+int qca_patch_ver_req(struct hci_dev *hdev, u32 *rome_version);
+int qca_uart_setup_cherokee(struct hci_dev *hdev, uint8_t baudrate,
+			    u32 *soc_ver);
 
 #else
 
@@ -137,6 +143,17 @@ static inline int qca_set_bdaddr_rome(struct hci_dev *hdev, const bdaddr_t *bdad
 }
 
 static inline int qca_uart_setup_rome(struct hci_dev *hdev, int speed)
+{
+	return -EOPNOTSUPP;
+}
+
+static inline int qca_patch_ver_req(struct hci_dev *hdev, u32 *rome_version)
+{
+	return -EOPNOTSUPP;
+}
+
+static int qca_uart_setup_cherokee(struct hci_dev *hdev, uint8_t baudrate,
+				   u32 *soc_ver)
 {
 	return -EOPNOTSUPP;
 }
