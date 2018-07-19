@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012-2016, The Linux Foundation. All rights reserved.
- * Copyright (C) 2017 Linaro Ltd.
+ * Copyright (C) 2017-2018, Linaro Ltd.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -24,32 +24,10 @@
 #include <media/videobuf2-dma-sg.h>
 
 #include "hfi_venus_io.h"
+#include "hfi_parser.h"
 #include "core.h"
 #include "helpers.h"
 #include "vdec.h"
-
-static u32 get_framesize_uncompressed(unsigned int plane, u32 width, u32 height)
-{
-	u32 y_stride, uv_stride, y_plane;
-	u32 y_sclines, uv_sclines, uv_plane;
-	u32 size;
-
-	y_stride = ALIGN(width, 128);
-	uv_stride = ALIGN(width, 128);
-	y_sclines = ALIGN(height, 32);
-	uv_sclines = ALIGN(((height + 1) >> 1), 16);
-
-	y_plane = y_stride * y_sclines;
-	uv_plane = uv_stride * uv_sclines + SZ_4K;
-	size = y_plane + uv_plane + SZ_8K;
-
-	return ALIGN(size, SZ_4K);
-}
-
-static u32 get_framesize_compressed(unsigned int width, unsigned int height)
-{
-	return ((width * height * 3 / 2) / 2) + 128;
-}
 
 /*
  * Three resons to keep MPLANE formats (despite that the number of planes
@@ -97,6 +75,10 @@ static const struct venus_format vdec_formats[] = {
 		.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE,
 	}, {
 		.pixfmt = V4L2_PIX_FMT_XVID,
+		.num_planes = 1,
+		.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE,
+	}, {
+		.pixfmt = V4L2_PIX_FMT_HEVC,
 		.num_planes = 1,
 		.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE,
 	},
@@ -159,7 +141,6 @@ vdec_try_fmt_common(struct venus_inst *inst, struct v4l2_format *f)
 	struct v4l2_pix_format_mplane *pixmp = &f->fmt.pix_mp;
 	struct v4l2_plane_pix_format *pfmt = pixmp->plane_fmt;
 	const struct venus_format *fmt;
-	unsigned int p;
 
 	memset(pfmt[0].reserved, 0, sizeof(pfmt[0].reserved));
 	memset(pixmp->reserved, 0, sizeof(pixmp->reserved));
@@ -173,14 +154,12 @@ vdec_try_fmt_common(struct venus_inst *inst, struct v4l2_format *f)
 		else
 			return NULL;
 		fmt = find_format(inst, pixmp->pixelformat, f->type);
-		pixmp->width = 1280;
-		pixmp->height = 720;
 	}
 
-	pixmp->width = clamp(pixmp->width, inst->cap_width.min,
-			     inst->cap_width.max);
-	pixmp->height = clamp(pixmp->height, inst->cap_height.min,
-			      inst->cap_height.max);
+	pixmp->width = clamp(pixmp->width, FRAME_WIDTH_MIN(inst),
+			     FRAME_WIDTH_MAX(inst));
+	pixmp->height = clamp(pixmp->height, FRAME_HEIGHT_MIN(inst),
+			      FRAME_HEIGHT_MAX(inst));
 
 	if (f->type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE)
 		pixmp->height = ALIGN(pixmp->height, 32);
@@ -190,18 +169,14 @@ vdec_try_fmt_common(struct venus_inst *inst, struct v4l2_format *f)
 	pixmp->num_planes = fmt->num_planes;
 	pixmp->flags = 0;
 
-	if (f->type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE) {
-		for (p = 0; p < pixmp->num_planes; p++) {
-			pfmt[p].sizeimage =
-				get_framesize_uncompressed(p, pixmp->width,
-							   pixmp->height);
-			pfmt[p].bytesperline = ALIGN(pixmp->width, 128);
-		}
-	} else {
-		pfmt[0].sizeimage = get_framesize_compressed(pixmp->width,
-							     pixmp->height);
+	pfmt[0].sizeimage = venus_helper_get_framesz(pixmp->pixelformat,
+						     pixmp->width,
+						     pixmp->height);
+
+	if (f->type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE)
+		pfmt[0].bytesperline = ALIGN(pixmp->width, 128);
+	else
 		pfmt[0].bytesperline = 0;
-	}
 
 	return fmt;
 }
@@ -231,7 +206,6 @@ static int vdec_g_fmt(struct file *file, void *fh, struct v4l2_format *f)
 
 		inst->out_width = inst->reconfig_width;
 		inst->out_height = inst->reconfig_height;
-		inst->reconfig = false;
 
 		format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
 		format.fmt.pix_mp.pixelformat = inst->fmt_cap->pixfmt;
@@ -247,6 +221,10 @@ static int vdec_g_fmt(struct file *file, void *fh, struct v4l2_format *f)
 	pixmp->pixelformat = fmt->pixfmt;
 
 	if (f->type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE) {
+
+		if (!(inst->reconfig))
+			return -EINVAL;
+
 		pixmp->width = inst->width;
 		pixmp->height = inst->height;
 		pixmp->colorspace = inst->colorspace;
@@ -442,12 +420,12 @@ static int vdec_enum_framesizes(struct file *file, void *fh,
 
 	fsize->type = V4L2_FRMSIZE_TYPE_STEPWISE;
 
-	fsize->stepwise.min_width = inst->cap_width.min;
-	fsize->stepwise.max_width = inst->cap_width.max;
-	fsize->stepwise.step_width = inst->cap_width.step_size;
-	fsize->stepwise.min_height = inst->cap_height.min;
-	fsize->stepwise.max_height = inst->cap_height.max;
-	fsize->stepwise.step_height = inst->cap_height.step_size;
+	fsize->stepwise.min_width = FRAME_WIDTH_MIN(inst);
+	fsize->stepwise.max_width = FRAME_WIDTH_MAX(inst);
+	fsize->stepwise.step_width = FRAME_WIDTH_STEP(inst);
+	fsize->stepwise.min_height = FRAME_HEIGHT_MIN(inst);
+	fsize->stepwise.max_height = FRAME_HEIGHT_MAX(inst);
+	fsize->stepwise.step_height = FRAME_HEIGHT_STEP(inst);
 
 	return 0;
 }
@@ -475,6 +453,8 @@ vdec_try_decoder_cmd(struct file *file, void *fh, struct v4l2_decoder_cmd *cmd)
 		if (cmd->flags & V4L2_DEC_CMD_STOP_TO_BLACK)
 			return -EINVAL;
 		break;
+	case V4L2_DEC_CMD_START:
+		return 0;
 	default:
 		return -EINVAL;
 	}
@@ -488,6 +468,9 @@ vdec_decoder_cmd(struct file *file, void *fh, struct v4l2_decoder_cmd *cmd)
 	struct venus_inst *inst = to_inst(file);
 	struct hfi_frame_data fdata = {0};
 	int ret;
+
+	if (cmd->cmd != V4L2_DEC_CMD_STOP)	// srinu :: TBD
+		return 0;
 
 	ret = vdec_try_decoder_cmd(file, fh, cmd);
 	if (ret)
@@ -549,22 +532,17 @@ static int vdec_set_properties(struct venus_inst *inst)
 	u32 ptype;
 	int ret;
 
+	ret = venus_helper_set_work_mode(inst, VIDC_WORK_MODE_2);
+	if (ret)
+		return ret;
+
+	ret = venus_helper_set_core_usage(inst, VIDC_CORE_ID_1);
+	if (ret)
+		return ret;
+
 	if (core->res->hfi_version == HFI_VERSION_1XX) {
 		ptype = HFI_PROPERTY_PARAM_VDEC_CONTINUE_DATA_TRANSFER;
 		ret = hfi_session_set_property(inst, ptype, &en);
-		if (ret)
-			return ret;
-	}
-
-	if (core->res->hfi_version == HFI_VERSION_3XX ||
-	    inst->cap_bufs_mode_dynamic) {
-		struct hfi_buffer_alloc_mode mode;
-
-		ptype = HFI_PROPERTY_PARAM_BUFFER_ALLOC_MODE;
-		mode.type = HFI_BUFFER_OUTPUT;
-		mode.mode = HFI_BUFFER_MODE_DYNAMIC;
-
-		ret = hfi_session_set_property(inst, ptype, &mode);
 		if (ret)
 			return ret;
 	}
@@ -576,6 +554,97 @@ static int vdec_set_properties(struct venus_inst *inst)
 		if (ret)
 			return ret;
 	}
+	pr_err("VTAG: %s, %d", __func__, __LINE__);
+
+	return 0;
+}
+
+#define is_ubwc_fmt(fmt) (!!((fmt) & HFI_COLOR_FORMAT_UBWC_BASE))
+
+static int vdec_output_conf(struct venus_inst *inst)
+{
+	struct venus_core *core = inst->core;
+	u32 width = inst->out_width;
+	u32 height = inst->out_height;
+	u32 out_fmt, out2_fmt;
+	bool ubwc = false;
+	int ret;
+
+	if (width > 1920 && height > ALIGN(1080, 32))
+		ubwc = true;
+
+	if (IS_V4(core))
+		ubwc = true;
+
+	ret = venus_helper_get_out_fmts(inst, inst->fmt_cap->pixfmt, &out_fmt,
+					&out2_fmt, ubwc);
+	if (ret)
+		return ret;
+
+	inst->output_buf_size =
+			venus_helper_get_framesz_raw(out_fmt, width, height);
+	inst->output2_buf_size =
+			venus_helper_get_framesz_raw(out2_fmt, width, height);
+
+	if (is_ubwc_fmt(out_fmt)) {
+		inst->opb_buftype = HFI_BUFFER_OUTPUT2;
+		inst->opb_fmt = out2_fmt;
+		inst->dpb_buftype = HFI_BUFFER_OUTPUT;
+		inst->dpb_fmt = out_fmt;
+	} else if (is_ubwc_fmt(out2_fmt)) {
+		inst->opb_buftype = HFI_BUFFER_OUTPUT;
+		inst->opb_fmt = out_fmt;
+		inst->dpb_buftype = HFI_BUFFER_OUTPUT2;
+		inst->dpb_fmt = out2_fmt;
+	} else {
+		inst->opb_buftype = HFI_BUFFER_OUTPUT;
+		inst->opb_fmt = out_fmt;
+		inst->dpb_buftype = 0;
+		inst->dpb_fmt = 0;
+	}
+
+	ret = venus_helper_set_raw_format(inst, inst->opb_fmt,
+					  inst->opb_buftype);
+	if (ret)
+		return ret;
+
+	if (inst->dpb_fmt) {
+		ret = venus_helper_set_multistream(inst, false, true);
+		if (ret)
+			return ret;
+
+		ret = venus_helper_set_raw_format(inst, inst->dpb_fmt,
+						  inst->dpb_buftype);
+		if (ret)
+			return ret;
+
+		ret = venus_helper_set_output_resolution(inst, width, height,
+							 HFI_BUFFER_OUTPUT2);
+		if (ret)
+			return ret;
+	}
+
+	if (IS_V3(core) || IS_V4(core)) {
+		if (inst->output2_buf_size) {
+			ret = venus_helper_set_bufsize(inst,
+						       inst->output2_buf_size,
+						       HFI_BUFFER_OUTPUT2);
+			if (ret)
+				return ret;
+		}
+
+		if (inst->output_buf_size) {
+			ret = venus_helper_set_bufsize(inst,
+						       inst->output_buf_size,
+						       HFI_BUFFER_OUTPUT);
+			if (ret)
+				return ret;
+		}
+	}
+
+	ret = venus_helper_set_dyn_bufmode(inst);
+	if (ret)
+		return ret;
 
 	return 0;
 }
@@ -603,19 +672,33 @@ deinit:
 	return ret;
 }
 
-static int vdec_cap_num_buffers(struct venus_inst *inst, unsigned int *num)
+static int vdec_num_buffers(struct venus_inst *inst, unsigned int *in_num,
+			    unsigned int *out_num)
 {
+	enum hfi_version ver = inst->core->res->hfi_version;
 	struct hfi_buffer_requirements bufreq;
 	int ret;
+
+	*in_num = *out_num = 0;
 
 	ret = vdec_init_session(inst);
 	if (ret)
 		return ret;
 
+	ret = venus_helper_get_bufreq(inst, HFI_BUFFER_INPUT, &bufreq);
+	if (ret)
+		goto deinit;
+
+	*in_num = HFI_BUFREQ_COUNT_MIN(&bufreq, ver);
+
 	ret = venus_helper_get_bufreq(inst, HFI_BUFFER_OUTPUT, &bufreq);
+	if (ret)
+		goto deinit;
 
-	*num = bufreq.count_actual;
+	*out_num = HFI_BUFREQ_COUNT_MIN(&bufreq, ver);
+	return 0;
 
+deinit:
 	hfi_session_deinit(inst);
 
 	return ret;
@@ -626,10 +709,12 @@ static int vdec_queue_setup(struct vb2_queue *q,
 			    unsigned int sizes[], struct device *alloc_devs[])
 {
 	struct venus_inst *inst = vb2_get_drv_priv(q);
-	unsigned int p, num;
+	unsigned int in_num, out_num;
 	int ret = 0;
 
 	if (*num_planes) {
+		unsigned int output_buf_size = venus_helper_get_opb_size(inst);
+
 		if (q->type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE &&
 		    *num_planes != inst->fmt_out->num_planes)
 			return -EINVAL;
@@ -643,41 +728,35 @@ static int vdec_queue_setup(struct vb2_queue *q,
 			return -EINVAL;
 
 		if (q->type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE &&
-		    sizes[0] < inst->output_buf_size)
+		    sizes[0] < output_buf_size)
 			return -EINVAL;
 
 		return 0;
 	}
 
+	ret = vdec_num_buffers(inst, &in_num, &out_num);
+	if (ret)
+		return ret;
+
 	switch (q->type) {
 	case V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE:
 		*num_planes = inst->fmt_out->num_planes;
-		sizes[0] = get_framesize_compressed(inst->out_width,
+		sizes[0] = venus_helper_get_framesz(inst->fmt_out->pixfmt,
+						    inst->out_width,
 						    inst->out_height);
 		inst->input_buf_size = sizes[0];
+		*num_buffers = max(*num_buffers, in_num);
 		inst->num_input_bufs = *num_buffers;
-
-		ret = vdec_cap_num_buffers(inst, &num);
-		if (ret)
-			break;
-
-		inst->num_output_bufs = num;
+		inst->num_output_bufs = out_num;
 		break;
 	case V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE:
 		*num_planes = inst->fmt_cap->num_planes;
-
-		ret = vdec_cap_num_buffers(inst, &num);
-		if (ret)
-			break;
-
-		*num_buffers = max(*num_buffers, num);
-
-		for (p = 0; p < *num_planes; p++)
-			sizes[p] = get_framesize_uncompressed(p, inst->width,
-							      inst->height);
-
-		inst->num_output_bufs = *num_buffers;
+		sizes[0] = venus_helper_get_framesz(inst->fmt_cap->pixfmt,
+						    inst->width,
+						    inst->height);
 		inst->output_buf_size = sizes[0];
+		*num_buffers = max(*num_buffers, out_num);
+		inst->num_output_bufs = *num_buffers;
 		break;
 	default:
 		ret = -EINVAL;
@@ -689,6 +768,7 @@ static int vdec_queue_setup(struct vb2_queue *q,
 
 static int vdec_verify_conf(struct venus_inst *inst)
 {
+	enum hfi_version ver = inst->core->res->hfi_version;
 	struct hfi_buffer_requirements bufreq;
 	int ret;
 
@@ -700,14 +780,14 @@ static int vdec_verify_conf(struct venus_inst *inst)
 		return ret;
 
 	if (inst->num_output_bufs < bufreq.count_actual ||
-	    inst->num_output_bufs < bufreq.count_min)
+	    inst->num_output_bufs < HFI_BUFREQ_COUNT_MIN(&bufreq, ver))
 		return -EINVAL;
 
 	ret = venus_helper_get_bufreq(inst, HFI_BUFFER_INPUT, &bufreq);
 	if (ret)
 		return ret;
 
-	if (inst->num_input_bufs < bufreq.count_min)
+	if (inst->num_input_bufs < HFI_BUFREQ_COUNT_MIN(&bufreq, ver))
 		return -EINVAL;
 
 	return 0;
@@ -716,25 +796,61 @@ static int vdec_verify_conf(struct venus_inst *inst)
 static int vdec_start_streaming(struct vb2_queue *q, unsigned int count)
 {
 	struct venus_inst *inst = vb2_get_drv_priv(q);
-	struct venus_core *core = inst->core;
-	u32 ptype;
 	int ret;
+	struct hfi_buffer_requirements bufreq;
 
 	mutex_lock(&inst->lock);
 
-	if (q->type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE)
-		inst->streamon_out = 1;
-	else
-		inst->streamon_cap = 1;
+	if ((q->type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE
+			&& inst->streamon_cap) ||
+		(q->type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE
+			&& inst->streamon_out)) {
+			mutex_unlock(&inst->lock);
+			return 0;
+	}
 
-	if (!(inst->streamon_out & inst->streamon_cap)) {
-		mutex_unlock(&inst->lock);
-		return 0;
+	if (q->type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE
+				&& !inst->streamon_out) {
+			mutex_unlock(&inst->lock);
+			return 0;
+	}
+
+	if (inst->streamon_out && !inst->streamon_cap &&
+		(q->type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE)) {
+		venus_helper_get_bufreq(inst, HFI_BUFFER_OUTPUT, &bufreq);
+		venus_helper_get_bufreq(inst, HFI_BUFFER_OUTPUT2, &bufreq);
+
+		ret = vdec_output_conf(inst);
+		if (ret)
+			goto deinit_sess;
+
+		ret = venus_helper_set_num_bufs(inst, inst->num_input_bufs,
+			inst->num_output_bufs, inst->num_output_bufs);
+
+		if (ret)
+			goto deinit_sess;
+
+		ret = vdec_verify_conf(inst);
+		if (ret)
+			goto deinit_sess;
+
+		ret = venus_helper_alloc_intbufs(inst);
+		if (ret)
+			goto deinit_sess;
+
+		ret = venus_helper_alloc_dpb_bufs(inst);
+		if (ret)
+			goto deinit_sess;
+
+		if (inst->reconfig) {
+			hfi_session_continue(inst);
+			inst->reconfig = false;
+		}
+		goto enableport;
 	}
 
 	venus_helper_init_instance(inst);
 
-	inst->reconfig = false;
 	inst->sequence_cap = 0;
 	inst->sequence_out = 0;
 
@@ -746,30 +862,31 @@ static int vdec_start_streaming(struct vb2_queue *q, unsigned int count)
 	if (ret)
 		goto deinit_sess;
 
-	if (core->res->hfi_version == HFI_VERSION_3XX) {
-		struct hfi_buffer_size_actual buf_sz;
-
-		ptype = HFI_PROPERTY_PARAM_BUFFER_SIZE_ACTUAL;
-		buf_sz.type = HFI_BUFFER_OUTPUT;
-		buf_sz.size = inst->output_buf_size;
-
-		ret = hfi_session_set_property(inst, ptype, &buf_sz);
-		if (ret)
-			goto deinit_sess;
-	}
+	ret = vdec_output_conf(inst);
+	if (ret)
+		goto deinit_sess;
 
 	ret = vdec_verify_conf(inst);
 	if (ret)
 		goto deinit_sess;
 
 	ret = venus_helper_set_num_bufs(inst, inst->num_input_bufs,
-					VB2_MAX_FRAME);
+					VB2_MAX_FRAME, VB2_MAX_FRAME);
 	if (ret)
 		goto deinit_sess;
 
 	ret = venus_helper_vb2_start_streaming(inst);
 	if (ret)
 		goto deinit_sess;
+
+enableport:
+
+	if (q->type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE)
+		inst->streamon_out = 1;
+	else if (q->type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE)
+		inst->streamon_cap = 1;
+
+	ret = venus_helper_queue_initial_bufs(inst, q->type);
 
 	mutex_unlock(&inst->lock);
 
@@ -778,7 +895,7 @@ static int vdec_start_streaming(struct vb2_queue *q, unsigned int count)
 deinit_sess:
 	hfi_session_deinit(inst);
 bufs_done:
-	venus_helper_buffers_done(inst, VB2_BUF_STATE_QUEUED);
+	venus_helper_buffers_done(inst, q->type, VB2_BUF_STATE_QUEUED);
 	if (q->type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE)
 		inst->streamon_out = 0;
 	else
@@ -807,8 +924,10 @@ static void vdec_buf_done(struct venus_inst *inst, unsigned int buf_type,
 
 	if (buf_type == HFI_BUFFER_INPUT)
 		type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
-	else
+	else if (buf_type == HFI_BUFFER_OUTPUT2)
 		type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+	else
+		return;
 
 	vbuf = venus_helper_find_buf(inst, type, tag);
 	if (!vbuf)
@@ -818,16 +937,18 @@ static void vdec_buf_done(struct venus_inst *inst, unsigned int buf_type,
 	vbuf->field = V4L2_FIELD_NONE;
 
 	if (type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE) {
+		unsigned int opb_sz = venus_helper_get_opb_size(inst);
+
 		vb = &vbuf->vb2_buf;
 		vb->planes[0].bytesused =
-			max_t(unsigned int, inst->output_buf_size, bytesused);
+			max_t(unsigned int, opb_sz, bytesused);
 		vb->planes[0].data_offset = data_offset;
 		vb->timestamp = timestamp_us * NSEC_PER_USEC;
 		vbuf->sequence = inst->sequence_cap++;
-
 		if (vbuf->flags & V4L2_BUF_FLAG_LAST) {
 			const struct v4l2_event ev = { .type = V4L2_EVENT_EOS };
 
+			vb->planes[0].bytesused = bytesused;
 			v4l2_event_queue_fh(&inst->fh, &ev);
 		}
 	} else {
@@ -901,22 +1022,7 @@ static void vdec_inst_init(struct venus_inst *inst)
 	inst->fps = 30;
 	inst->timeperframe.numerator = 1;
 	inst->timeperframe.denominator = 30;
-
-	inst->cap_width.min = 64;
-	inst->cap_width.max = 1920;
-	if (inst->core->res->hfi_version == HFI_VERSION_3XX)
-		inst->cap_width.max = 3840;
-	inst->cap_width.step_size = 1;
-	inst->cap_height.min = 64;
-	inst->cap_height.max = ALIGN(1080, 32);
-	if (inst->core->res->hfi_version == HFI_VERSION_3XX)
-		inst->cap_height.max = ALIGN(2160, 32);
-	inst->cap_height.step_size = 1;
-	inst->cap_framerate.min = 1;
-	inst->cap_framerate.max = 30;
-	inst->cap_framerate.step_size = 1;
-	inst->cap_mbs_per_frame.min = 16;
-	inst->cap_mbs_per_frame.max = 8160;
+	inst->hfi_codec = HFI_VIDEO_CODEC_H264;
 }
 
 static const struct v4l2_m2m_ops vdec_m2m_ops = {
@@ -931,7 +1037,7 @@ static int m2m_queue_init(void *priv, struct vb2_queue *src_vq,
 	int ret;
 
 	src_vq->type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
-	src_vq->io_modes = VB2_MMAP | VB2_DMABUF;
+	src_vq->io_modes = VB2_MMAP | VB2_USERPTR | VB2_DMABUF;
 	src_vq->timestamp_flags = V4L2_BUF_FLAG_TIMESTAMP_COPY;
 	src_vq->ops = &vdec_vb2_ops;
 	src_vq->mem_ops = &vb2_dma_sg_memops;
@@ -940,12 +1046,13 @@ static int m2m_queue_init(void *priv, struct vb2_queue *src_vq,
 	src_vq->allow_zero_bytesused = 1;
 	src_vq->min_buffers_needed = 1;
 	src_vq->dev = inst->core->dev;
+	src_vq->dma_attrs |= DMA_ATTR_NON_CONSISTENT;
 	ret = vb2_queue_init(src_vq);
 	if (ret)
 		return ret;
 
 	dst_vq->type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
-	dst_vq->io_modes = VB2_MMAP | VB2_DMABUF;
+	dst_vq->io_modes = VB2_MMAP | VB2_USERPTR | VB2_DMABUF;
 	dst_vq->timestamp_flags = V4L2_BUF_FLAG_TIMESTAMP_COPY;
 	dst_vq->ops = &vdec_vb2_ops;
 	dst_vq->mem_ops = &vb2_dma_sg_memops;
@@ -954,6 +1061,7 @@ static int m2m_queue_init(void *priv, struct vb2_queue *src_vq,
 	dst_vq->allow_zero_bytesused = 1;
 	dst_vq->min_buffers_needed = 1;
 	dst_vq->dev = inst->core->dev;
+	dst_vq->dma_attrs |= DMA_ATTR_NON_CONSISTENT;
 	ret = vb2_queue_init(dst_vq);
 	if (ret) {
 		vb2_queue_release(src_vq);
@@ -973,6 +1081,7 @@ static int vdec_open(struct file *file)
 	if (!inst)
 		return -ENOMEM;
 
+	INIT_LIST_HEAD(&inst->dpbbufs);
 	INIT_LIST_HEAD(&inst->registeredbufs);
 	INIT_LIST_HEAD(&inst->internalbufs);
 	INIT_LIST_HEAD(&inst->list);
@@ -1061,9 +1170,6 @@ static const struct v4l2_file_operations vdec_fops = {
 	.unlocked_ioctl = video_ioctl2,
 	.poll = v4l2_m2m_fop_poll,
 	.mmap = v4l2_m2m_fop_mmap,
-#ifdef CONFIG_COMPAT
-	.compat_ioctl32 = v4l2_compat_ioctl32,
-#endif
 };
 
 static int vdec_probe(struct platform_device *pdev)
@@ -1080,10 +1186,16 @@ static int vdec_probe(struct platform_device *pdev)
 	if (!core)
 		return -EPROBE_DEFER;
 
-	if (core->res->hfi_version == HFI_VERSION_3XX) {
+	if (IS_V3(core) || IS_V4(core)) {
 		core->core0_clk = devm_clk_get(dev, "core");
 		if (IS_ERR(core->core0_clk))
 			return PTR_ERR(core->core0_clk);
+	}
+
+	if (IS_V4(core)) {
+		core->core0_bus_clk = devm_clk_get(dev, "bus");
+		if (IS_ERR(core->core0_bus_clk))
+			return PTR_ERR(core->core0_bus_clk);
 	}
 
 	platform_set_drvdata(pdev, core);
@@ -1130,15 +1242,21 @@ static int vdec_remove(struct platform_device *pdev)
 static __maybe_unused int vdec_runtime_suspend(struct device *dev)
 {
 	struct venus_core *core = dev_get_drvdata(dev);
+	int ret;
 
-	if (core->res->hfi_version == HFI_VERSION_1XX)
+	if (IS_V1(core))
 		return 0;
 
-	writel(0, core->base + WRAPPER_VDEC_VCODEC_POWER_CONTROL);
-	clk_disable_unprepare(core->core0_clk);
-	writel(1, core->base + WRAPPER_VDEC_VCODEC_POWER_CONTROL);
+	ret = venus_helper_power_enable(core, VIDC_SESSION_TYPE_DEC, true);
 
-	return 0;
+	if (IS_V4(core))
+		clk_disable_unprepare(core->core0_bus_clk);
+
+	clk_disable_unprepare(core->core0_clk);
+
+	ret |= venus_helper_power_enable(core, VIDC_SESSION_TYPE_DEC, false);
+
+	return ret;
 }
 
 static __maybe_unused int vdec_runtime_resume(struct device *dev)
@@ -1146,12 +1264,18 @@ static __maybe_unused int vdec_runtime_resume(struct device *dev)
 	struct venus_core *core = dev_get_drvdata(dev);
 	int ret;
 
-	if (core->res->hfi_version == HFI_VERSION_1XX)
+	if (IS_V1(core))
 		return 0;
 
-	writel(0, core->base + WRAPPER_VDEC_VCODEC_POWER_CONTROL);
-	ret = clk_prepare_enable(core->core0_clk);
-	writel(1, core->base + WRAPPER_VDEC_VCODEC_POWER_CONTROL);
+	ret = venus_helper_power_enable(core, VIDC_SESSION_TYPE_DEC, true);
+
+	ret |= clk_prepare_enable(core->core0_clk);
+
+	if (IS_V4(core))
+		ret |= clk_prepare_enable(core->core0_bus_clk);
+
+	ret |= venus_helper_power_enable(core, VIDC_SESSION_TYPE_DEC, false);
+
 
 	return ret;
 }
