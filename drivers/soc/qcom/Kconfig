@@ -172,8 +172,4 @@ config QCOM_BUS_SCALING
 	  for the active devices needs without keeping the clocks at max
 	  frequency when a slower speed is sufficient.
 
-config QCOM_SCM
-	bool "Secure Channel Manager (SCM) support"
-	default n
-
 endmenu
