@@ -73,7 +73,7 @@ struct pwl_result_data {
 
 struct pwl_params {
 	struct gamma_curve arr_curve_points[34];
-	struct curve_points arr_points[3];
+	struct curve_points arr_points[2];
 	struct pwl_result_data rgb_resulted[256 + 3];
 	uint32_t hw_points_num;
 };
@@ -136,6 +136,20 @@ enum opp_regamma {
 	OPP_REGAMMA_SRGB,
 	OPP_REGAMMA_3_6,
 	OPP_REGAMMA_USER
+};
+
+struct csc_transform {
+	uint16_t matrix[12];
+	bool enable_adjustment;
+};
+
+struct dc_bias_and_scale {
+	uint16_t scale_red;
+	uint16_t bias_red;
+	uint16_t scale_green;
+	uint16_t bias_green;
+	uint16_t scale_blue;
+	uint16_t bias_blue;
 };
 
 #endif /* __DAL_HW_SHARED_H__ */

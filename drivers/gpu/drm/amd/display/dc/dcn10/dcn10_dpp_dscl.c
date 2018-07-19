@@ -648,6 +648,11 @@ void dpp1_dscl_set_scaler_manual_scale(
 	bool ycbcr = scl_data->format >= PIXEL_FORMAT_VIDEO_BEGIN
 				&& scl_data->format <= PIXEL_FORMAT_VIDEO_END;
 
+	if (memcmp(&dpp->scl_data, scl_data, sizeof(*scl_data)) == 0)
+		return;
+
+	dpp->scl_data = *scl_data;
+
 	/* Recout */
 	dpp1_dscl_set_recout(dpp, &scl_data->recout);
 

@@ -139,12 +139,13 @@ int amdgpu_job_submit(struct amdgpu_job *job, struct amdgpu_ring *ring,
 	*f = dma_fence_get(&job->base.s_fence->finished);
 	amdgpu_job_free_resources(job);
 	amdgpu_ring_priority_get(job->ring, job->base.s_priority);
-	amd_sched_entity_push_job(&job->base);
+	amd_sched_entity_push_job(&job->base, entity);
 
 	return 0;
 }
 
-static struct dma_fence *amdgpu_job_dependency(struct amd_sched_job *sched_job)
+static struct dma_fence *amdgpu_job_dependency(struct amd_sched_job *sched_job,
+					       struct amd_sched_entity *s_entity)
 {
 	struct amdgpu_job *job = to_amdgpu_job(sched_job);
 	struct amdgpu_vm *vm = job->vm;
@@ -152,7 +153,7 @@ static struct dma_fence *amdgpu_job_dependency(struct amd_sched_job *sched_job)
 	struct dma_fence *fence = amdgpu_sync_get_fence(&job->dep_sync);
 	int r;
 
-	if (amd_sched_dependency_optimized(fence, sched_job->s_entity)) {
+	if (amd_sched_dependency_optimized(fence, s_entity)) {
 		r = amdgpu_sync_fence(job->adev, &job->sched_sync, fence);
 		if (r)
 			DRM_ERROR("Error adding fence to sync (%d)\n", r);
@@ -176,7 +177,7 @@ static struct dma_fence *amdgpu_job_dependency(struct amd_sched_job *sched_job)
 
 static struct dma_fence *amdgpu_job_run(struct amd_sched_job *sched_job)
 {
-	struct dma_fence *fence = NULL;
+	struct dma_fence *fence = NULL, *finished;
 	struct amdgpu_device *adev;
 	struct amdgpu_job *job;
 	int r;
@@ -186,15 +187,18 @@ static struct dma_fence *amdgpu_job_run(struct amd_sched_job *sched_job)
 		return NULL;
 	}
 	job = to_amdgpu_job(sched_job);
+	finished = &job->base.s_fence->finished;
 	adev = job->adev;
 
 	BUG_ON(amdgpu_sync_peek_fence(&job->sync, NULL));
 
 	trace_amdgpu_sched_run_job(job);
-	/* skip ib schedule when vram is lost */
-	if (job->vram_lost_counter != atomic_read(&adev->vram_lost_counter)) {
-		dma_fence_set_error(&job->base.s_fence->finished, -ECANCELED);
-		DRM_ERROR("Skip scheduling IBs!\n");
+
+	if (job->vram_lost_counter != atomic_read(&adev->vram_lost_counter))
+		dma_fence_set_error(finished, -ECANCELED);/* skip IB as well if VRAM lost */
+
+	if (finished->error < 0) {
+		DRM_INFO("Skip scheduling IBs!\n");
 	} else {
 		r = amdgpu_ib_schedule(job->ring, job->num_ibs, job->ibs, job,
 				       &fence);

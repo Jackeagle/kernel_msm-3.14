@@ -26,6 +26,7 @@
 
 #include <linux/kfifo.h>
 #include <linux/dma-fence.h>
+#include "spsc_queue.h"
 
 struct amd_gpu_scheduler;
 struct amd_sched_rq;
@@ -56,7 +57,7 @@ struct amd_sched_entity {
 	struct amd_gpu_scheduler	*sched;
 
 	spinlock_t			queue_lock;
-	struct kfifo                    job_queue;
+	struct spsc_queue	job_queue;
 
 	atomic_t			fence_seq;
 	uint64_t                        fence_context;
@@ -88,8 +89,8 @@ struct amd_sched_fence {
 };
 
 struct amd_sched_job {
+	struct spsc_node queue_node;
 	struct amd_gpu_scheduler        *sched;
-	struct amd_sched_entity         *s_entity;
 	struct amd_sched_fence          *s_fence;
 	struct dma_fence_cb		finish_cb;
 	struct work_struct		finish_work;
@@ -123,7 +124,8 @@ static inline bool amd_sched_invalidate_job(struct amd_sched_job *s_job, int thr
  * these functions should be implemented in driver side
 */
 struct amd_sched_backend_ops {
-	struct dma_fence *(*dependency)(struct amd_sched_job *sched_job);
+	struct dma_fence *(*dependency)(struct amd_sched_job *sched_job,
+					struct amd_sched_entity *s_entity);
 	struct dma_fence *(*run_job)(struct amd_sched_job *sched_job);
 	void (*timedout_job)(struct amd_sched_job *sched_job);
 	void (*free_job)(struct amd_sched_job *sched_job);
@@ -159,7 +161,8 @@ int amd_sched_entity_init(struct amd_gpu_scheduler *sched,
 			  uint32_t jobs, atomic_t* guilty);
 void amd_sched_entity_fini(struct amd_gpu_scheduler *sched,
 			   struct amd_sched_entity *entity);
-void amd_sched_entity_push_job(struct amd_sched_job *sched_job);
+void amd_sched_entity_push_job(struct amd_sched_job *sched_job,
+			       struct amd_sched_entity *entity);
 void amd_sched_entity_set_rq(struct amd_sched_entity *entity,
 			     struct amd_sched_rq *rq);
 

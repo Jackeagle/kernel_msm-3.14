@@ -74,40 +74,6 @@
 	OPP_MASK_SH_LIST_DCN(mask_sh)
 
 #define OPP_DCN10_REG_FIELD_LIST(type) \
-	type DPG_EN; \
-	type DPG_MODE; \
-	type DPG_VRES; \
-	type DPG_HRES; \
-	type DPG_COLOUR0_R_CR; \
-	type DPG_COLOUR1_R_CR; \
-	type DPG_COLOUR0_B_CB; \
-	type DPG_COLOUR1_B_CB; \
-	type DPG_COLOUR0_G_Y; \
-	type DPG_COLOUR1_G_Y; \
-	type CM_OCSC_C11; \
-	type CM_OCSC_C12; \
-	type CM_OCSC_C13; \
-	type CM_OCSC_C14; \
-	type CM_OCSC_C21; \
-	type CM_OCSC_C22; \
-	type CM_OCSC_C23; \
-	type CM_OCSC_C24; \
-	type CM_OCSC_C31; \
-	type CM_OCSC_C32; \
-	type CM_OCSC_C33; \
-	type CM_OCSC_C34; \
-	type CM_COMB_C11; \
-	type CM_COMB_C12; \
-	type CM_COMB_C13; \
-	type CM_COMB_C14; \
-	type CM_COMB_C21; \
-	type CM_COMB_C22; \
-	type CM_COMB_C23; \
-	type CM_COMB_C24; \
-	type CM_COMB_C31; \
-	type CM_COMB_C32; \
-	type CM_COMB_C33; \
-	type CM_COMB_C34; \
 	type FMT_TRUNCATE_EN; \
 	type FMT_TRUNCATE_DEPTH; \
 	type FMT_TRUNCATE_MODE; \
@@ -129,33 +95,17 @@
 	type FMT_DYNAMIC_EXP_EN; \
 	type FMT_DYNAMIC_EXP_MODE; \
 	type FMT_MAP420MEM_PWR_FORCE; \
-	type FMT_STEREOSYNC_OVERRIDE
+	type FMT_STEREOSYNC_OVERRIDE;
 
 struct dcn10_opp_shift {
-	OPP_DCN10_REG_FIELD_LIST(uint8_t);
+	OPP_DCN10_REG_FIELD_LIST(uint8_t)
 };
 
 struct dcn10_opp_mask {
-	OPP_DCN10_REG_FIELD_LIST(uint32_t);
+	OPP_DCN10_REG_FIELD_LIST(uint32_t)
 };
 
 struct dcn10_opp_registers {
-	uint32_t DPG_CONTROL;
-	uint32_t DPG_COLOUR_B_CB;
-	uint32_t DPG_COLOUR_G_Y;
-	uint32_t DPG_COLOUR_R_CR;
-	uint32_t CM_OCSC_C11_C12;
-	uint32_t CM_OCSC_C13_C14;
-	uint32_t CM_OCSC_C21_C22;
-	uint32_t CM_OCSC_C23_C24;
-	uint32_t CM_OCSC_C31_C32;
-	uint32_t CM_OCSC_C33_C34;
-	uint32_t CM_COMB_C11_C12;
-	uint32_t CM_COMB_C13_C14;
-	uint32_t CM_COMB_C21_C22;
-	uint32_t CM_COMB_C23_C24;
-	uint32_t CM_COMB_C31_C32;
-	uint32_t CM_COMB_C33_C34;
 	uint32_t FMT_BIT_DEPTH_CONTROL;
 	uint32_t FMT_CONTROL;
 	uint32_t FMT_DITHER_RAND_R_SEED;
@@ -182,5 +132,26 @@ void dcn10_opp_construct(struct dcn10_opp *oppn10,
 	const struct dcn10_opp_registers *regs,
 	const struct dcn10_opp_shift *opp_shift,
 	const struct dcn10_opp_mask *opp_mask);
+
+void opp1_set_dyn_expansion(
+	struct output_pixel_processor *opp,
+	enum dc_color_space color_sp,
+	enum dc_color_depth color_dpth,
+	enum signal_type signal);
+
+void opp1_program_fmt(
+	struct output_pixel_processor *opp,
+	struct bit_depth_reduction_params *fmt_bit_depth,
+	struct clamping_and_pixel_encoding_params *clamping);
+
+void opp1_program_bit_depth_reduction(
+	struct output_pixel_processor *opp,
+	const struct bit_depth_reduction_params *params);
+
+void opp1_set_stereo_polarity(
+		struct output_pixel_processor *opp,
+		bool enable, bool rightEyePolarity);
+
+void opp1_destroy(struct output_pixel_processor **opp);
 
 #endif

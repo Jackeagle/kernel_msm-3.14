@@ -410,6 +410,9 @@ static int amdgpu_doorbell_init(struct amdgpu_device *adev)
 		return 0;
 	}
 
+	if (pci_resource_flags(adev->pdev, 2) & IORESOURCE_UNSET)
+		return -EINVAL;
+
 	/* doorbell bar mapping */
 	adev->doorbell.base = pci_resource_start(adev->pdev, 2);
 	adev->doorbell.size = pci_resource_len(adev->pdev, 2);
@@ -680,8 +683,12 @@ void amdgpu_fw_reserve_vram_fini(struct amdgpu_device *adev)
 int amdgpu_fw_reserve_vram_init(struct amdgpu_device *adev)
 {
 	int r = 0;
+	int i;
 	u64 gpu_addr;
 	u64 vram_size = adev->mc.visible_vram_size;
+	u64 offset = adev->fw_vram_usage.start_offset;
+	u64 size = adev->fw_vram_usage.size;
+	struct amdgpu_bo *bo;
 
 	adev->fw_vram_usage.va = NULL;
 	adev->fw_vram_usage.reserved_bo = NULL;
@@ -690,7 +697,7 @@ int amdgpu_fw_reserve_vram_init(struct amdgpu_device *adev)
 		adev->fw_vram_usage.size <= vram_size) {
 
 		r = amdgpu_bo_create(adev, adev->fw_vram_usage.size,
-			PAGE_SIZE, true, 0,
+			PAGE_SIZE, true, AMDGPU_GEM_DOMAIN_VRAM,
 			AMDGPU_GEM_CREATE_CPU_ACCESS_REQUIRED |
 			AMDGPU_GEM_CREATE_VRAM_CONTIGUOUS, NULL, NULL, 0,
 			&adev->fw_vram_usage.reserved_bo);
@@ -700,6 +707,23 @@ int amdgpu_fw_reserve_vram_init(struct amdgpu_device *adev)
 		r = amdgpu_bo_reserve(adev->fw_vram_usage.reserved_bo, false);
 		if (r)
 			goto error_reserve;
+
+		/* remove the original mem node and create a new one at the
+		 * request position
+		 */
+		bo = adev->fw_vram_usage.reserved_bo;
+		offset = ALIGN(offset, PAGE_SIZE);
+		for (i = 0; i < bo->placement.num_placement; ++i) {
+			bo->placements[i].fpfn = offset >> PAGE_SHIFT;
+			bo->placements[i].lpfn = (offset + size) >> PAGE_SHIFT;
+		}
+
+		ttm_bo_mem_put(&bo->tbo, &bo->tbo.mem);
+		r = ttm_bo_mem_space(&bo->tbo, &bo->placement, &bo->tbo.mem,
+				     false, false);
+		if (r)
+			goto error_pin;
+
 		r = amdgpu_bo_pin_restricted(adev->fw_vram_usage.reserved_bo,
 			AMDGPU_GEM_DOMAIN_VRAM,
 			adev->fw_vram_usage.start_offset,
@@ -728,6 +752,57 @@ error_create:
 	return r;
 }
 
+/**
+ * amdgpu_device_resize_fb_bar - try to resize FB BAR
+ *
+ * @adev: amdgpu_device pointer
+ *
+ * Try to resize FB BAR to make all VRAM CPU accessible. We try very hard not
+ * to fail, but if any of the BARs is not accessible after the size we abort
+ * driver loading by returning -ENODEV.
+ */
+int amdgpu_device_resize_fb_bar(struct amdgpu_device *adev)
+{
+	u64 space_needed = roundup_pow_of_two(adev->mc.real_vram_size);
+	u32 rbar_size = order_base_2(((space_needed >> 20) | 1)) - 1;
+	u16 cmd;
+	int r;
+
+	/* Bypass for VF */
+	if (amdgpu_sriov_vf(adev))
+		return 0;
+
+	/* Disable memory decoding while we change the BAR addresses and size */
+	pci_read_config_word(adev->pdev, PCI_COMMAND, &cmd);
+	pci_write_config_word(adev->pdev, PCI_COMMAND,
+			      cmd & ~PCI_COMMAND_MEMORY);
+
+	/* Free the VRAM and doorbell BAR, we most likely need to move both. */
+	amdgpu_doorbell_fini(adev);
+	if (adev->asic_type >= CHIP_BONAIRE)
+		pci_release_resource(adev->pdev, 2);
+
+	pci_release_resource(adev->pdev, 0);
+
+	r = pci_resize_resource(adev->pdev, 0, rbar_size);
+	if (r == -ENOSPC)
+		DRM_INFO("Not enough PCI address space for a large BAR.");
+	else if (r && r != -ENOTSUPP)
+		DRM_ERROR("Problem resizing BAR0 (%d).", r);
+
+	pci_assign_unassigned_bus_resources(adev->pdev->bus);
+
+	/* When the doorbell or fb BAR isn't available we have no chance of
+	 * using the device.
+	 */
+	r = amdgpu_doorbell_init(adev);
+	if (r || (pci_resource_flags(adev->pdev, 0) & IORESOURCE_UNSET))
+		return -ENODEV;
+
+	pci_write_config_word(adev->pdev, PCI_COMMAND, cmd);
+
+	return 0;
+}
 
 /*
  * GPU helpers function.
@@ -1391,10 +1466,12 @@ static int amdgpu_early_init(struct amdgpu_device *adev)
 	if (r)
 		return r;
 
+	amdgpu_amdkfd_device_probe(adev);
+
 	if (amdgpu_sriov_vf(adev)) {
 		r = amdgpu_virt_request_full_gpu(adev, true);
 		if (r)
-			return r;
+			return -EAGAIN;
 	}
 
 	for (i = 0; i < adev->num_ip_blocks; i++) {
@@ -1485,6 +1562,11 @@ static int amdgpu_init(struct amdgpu_device *adev)
 		adev->ip_blocks[i].status.hw = true;
 	}
 
+	amdgpu_amdkfd_device_init(adev);
+
+	if (amdgpu_sriov_vf(adev))
+		amdgpu_virt_release_full_gpu(adev, true);
+
 	return 0;
 }
 
@@ -1556,6 +1638,7 @@ static int amdgpu_fini(struct amdgpu_device *adev)
 {
 	int i, r;
 
+	amdgpu_amdkfd_device_fini(adev);
 	/* need to disable SMC first */
 	for (i = 0; i < adev->num_ip_blocks; i++) {
 		if (!adev->ip_blocks[i].status.hw)
@@ -1581,6 +1664,9 @@ static int amdgpu_fini(struct amdgpu_device *adev)
 	}
 
 	for (i = adev->num_ip_blocks - 1; i >= 0; i--) {
+		if (adev->ip_blocks[i].version->type == AMD_IP_BLOCK_TYPE_SMC &&
+			adev->firmware.load_type == AMDGPU_FW_LOAD_SMU)
+			amdgpu_ucode_fini_bo(adev);
 		if (!adev->ip_blocks[i].status.hw)
 			continue;
 		if (adev->ip_blocks[i].version->type == AMD_IP_BLOCK_TYPE_GMC) {
@@ -1936,6 +2022,7 @@ int amdgpu_device_init(struct amdgpu_device *adev,
 	mutex_init(&adev->mn_lock);
 	mutex_init(&adev->virt.vf_errors.lock);
 	hash_init(adev->mn_hash);
+	mutex_init(&adev->lock_reset);
 
 	amdgpu_check_arguments(adev);
 
@@ -1951,9 +2038,6 @@ int amdgpu_device_init(struct amdgpu_device *adev,
 
 	INIT_LIST_HEAD(&adev->shadow_list);
 	mutex_init(&adev->shadow_list_lock);
-
-	INIT_LIST_HEAD(&adev->gtt_list);
-	spin_lock_init(&adev->gtt_list_lock);
 
 	INIT_LIST_HEAD(&adev->ring_lru_list);
 	spin_lock_init(&adev->ring_lru_list_lock);
@@ -2038,8 +2122,6 @@ int amdgpu_device_init(struct amdgpu_device *adev,
 			dev_err(adev->dev, "gpu post error!\n");
 			goto failed;
 		}
-	} else {
-		DRM_INFO("GPU post is not needed\n");
 	}
 
 	if (adev->is_atom_fw) {
@@ -2076,6 +2158,18 @@ int amdgpu_device_init(struct amdgpu_device *adev,
 
 	r = amdgpu_init(adev);
 	if (r) {
+		/* failed in exclusive mode due to timeout */
+		if (amdgpu_sriov_vf(adev) &&
+		    !amdgpu_sriov_runtime(adev) &&
+		    amdgpu_virt_mmio_blocked(adev) &&
+		    !amdgpu_virt_wait_reset(adev)) {
+			dev_err(adev->dev, "VF exclusive mode timeout\n");
+			/* Don't send request since VF is inactive. */
+			adev->virt.caps &= ~AMDGPU_SRIOV_CAPS_RUNTIME;
+			adev->virt.ops = NULL;
+			r = -EAGAIN;
+			goto failed;
+		}
 		dev_err(adev->dev, "amdgpu_init failed\n");
 		amdgpu_vf_error_put(adev, AMDGIM_ERROR_VF_AMDGPU_INIT_FAIL, 0, 0);
 		amdgpu_fini(adev);
@@ -2159,6 +2253,7 @@ failed:
 	amdgpu_vf_error_trans_all(adev);
 	if (runtime)
 		vga_switcheroo_fini_domain_pm_ops(adev->dev);
+
 	return r;
 }
 
@@ -2626,7 +2721,8 @@ retry:
 				atomic_inc(&adev->vram_lost_counter);
 			}
 
-			r = amdgpu_ttm_recover_gart(adev);
+			r = amdgpu_gtt_mgr_recover(
+				&adev->mman.bdev.man[TTM_PL_TT]);
 			if (r)
 				goto out;
 
@@ -2688,7 +2784,7 @@ static int amdgpu_reset_sriov(struct amdgpu_device *adev, uint64_t *reset_flags,
 		goto error;
 
 	/* we need recover gart prior to run SMC/CP/SDMA resume */
-	amdgpu_ttm_recover_gart(adev);
+	amdgpu_gtt_mgr_recover(&adev->mman.bdev.man[TTM_PL_TT]);
 
 	/* now we are okay to resume SMC/CP/SDMA */
 	r = amdgpu_sriov_reinit_late(adev);
@@ -2705,11 +2801,10 @@ error:
 	amdgpu_virt_release_full_gpu(adev, true);
 
 	if (reset_flags) {
-		/* will get vram_lost from GIM in future, now all
-		 * reset request considered VRAM LOST
-		 */
-		(*reset_flags) |= ~AMDGPU_RESET_INFO_VRAM_LOST;
-		atomic_inc(&adev->vram_lost_counter);
+		if (adev->virt.gim_feature & AMDGIM_FEATURE_GIM_FLR_VRAMLOST) {
+			(*reset_flags) |= AMDGPU_RESET_INFO_VRAM_LOST;
+			atomic_inc(&adev->vram_lost_counter);
+		}
 
 		/* VF FLR or hotlink reset is always full-reset */
 		(*reset_flags) |= AMDGPU_RESET_INFO_FULLRESET;
@@ -2740,9 +2835,9 @@ int amdgpu_gpu_recover(struct amdgpu_device *adev, struct amdgpu_job *job)
 
 	dev_info(adev->dev, "GPU reset begin!\n");
 
-	mutex_lock(&adev->virt.lock_reset);
+	mutex_lock(&adev->lock_reset);
 	atomic_inc(&adev->gpu_reset_counter);
-	adev->in_sriov_reset = 1;
+	adev->in_gpu_reset = 1;
 
 	/* block TTM */
 	resched = ttm_bo_lock_delayed_workqueue(&adev->mman.bdev);
@@ -2852,8 +2947,8 @@ int amdgpu_gpu_recover(struct amdgpu_device *adev, struct amdgpu_job *job)
 	}
 
 	amdgpu_vf_error_trans_all(adev);
-	adev->in_sriov_reset = 0;
-	mutex_unlock(&adev->virt.lock_reset);
+	adev->in_gpu_reset = 0;
+	mutex_unlock(&adev->lock_reset);
 	return r;
 }
 

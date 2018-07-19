@@ -69,10 +69,10 @@ static void gmc_v7_0_init_golden_registers(struct amdgpu_device *adev)
 	case CHIP_TOPAZ:
 		amdgpu_program_register_sequence(adev,
 						 iceland_mgcg_cgcg_init,
-						 (const u32)ARRAY_SIZE(iceland_mgcg_cgcg_init));
+						 ARRAY_SIZE(iceland_mgcg_cgcg_init));
 		amdgpu_program_register_sequence(adev,
 						 golden_settings_iceland_a11,
-						 (const u32)ARRAY_SIZE(golden_settings_iceland_a11));
+						 ARRAY_SIZE(golden_settings_iceland_a11));
 		break;
 	default:
 		break;
@@ -322,6 +322,8 @@ static void gmc_v7_0_mc_program(struct amdgpu_device *adev)
  */
 static int gmc_v7_0_mc_init(struct amdgpu_device *adev)
 {
+	int r;
+
 	adev->mc.vram_width = amdgpu_atombios_get_vram_width(adev);
 	if (!adev->mc.vram_width) {
 		u32 tmp;
@@ -367,12 +369,17 @@ static int gmc_v7_0_mc_init(struct amdgpu_device *adev)
 		}
 		adev->mc.vram_width = numchan * chansize;
 	}
-	/* Could aper size report 0 ? */
-	adev->mc.aper_base = pci_resource_start(adev->pdev, 0);
-	adev->mc.aper_size = pci_resource_len(adev->pdev, 0);
 	/* size in MB on si */
 	adev->mc.mc_vram_size = RREG32(mmCONFIG_MEMSIZE) * 1024ULL * 1024ULL;
 	adev->mc.real_vram_size = RREG32(mmCONFIG_MEMSIZE) * 1024ULL * 1024ULL;
+
+	if (!(adev->flags & AMD_IS_APU)) {
+		r = amdgpu_device_resize_fb_bar(adev);
+		if (r)
+			return r;
+	}
+	adev->mc.aper_base = pci_resource_start(adev->pdev, 0);
+	adev->mc.aper_size = pci_resource_len(adev->pdev, 0);
 
 #ifdef CONFIG_X86_64
 	if (adev->flags & AMD_IS_APU) {
@@ -971,7 +978,6 @@ static int gmc_v7_0_sw_init(void *handle)
 	 * Max GPUVM size for cayman and SI is 40 bits.
 	 */
 	amdgpu_vm_adjust_size(adev, 64, 9);
-	adev->vm_manager.max_pfn = adev->vm_manager.vm_size << 18;
 
 	/* Set the internal MC address mask
 	 * This is the max address of the GPU's

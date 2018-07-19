@@ -283,6 +283,44 @@ void amdgpu_bo_free_kernel(struct amdgpu_bo **bo, u64 *gpu_addr,
 		*cpu_addr = NULL;
 }
 
+/* Validate bo size is bit bigger then the request domain */
+static bool amdgpu_bo_validate_size(struct amdgpu_device *adev,
+					  unsigned long size, u32 domain)
+{
+	struct ttm_mem_type_manager *man = NULL;
+
+	/*
+	 * If GTT is part of requested domains the check must succeed to
+	 * allow fall back to GTT
+	 */
+	if (domain & AMDGPU_GEM_DOMAIN_GTT) {
+		man = &adev->mman.bdev.man[TTM_PL_TT];
+
+		if (size < (man->size << PAGE_SHIFT))
+			return true;
+		else
+			goto fail;
+	}
+
+	if (domain & AMDGPU_GEM_DOMAIN_VRAM) {
+		man = &adev->mman.bdev.man[TTM_PL_VRAM];
+
+		if (size < (man->size << PAGE_SHIFT))
+			return true;
+		else
+			goto fail;
+	}
+
+
+	/* TODO add more domains checks, such as AMDGPU_GEM_DOMAIN_CPU */
+	return true;
+
+fail:
+	DRM_ERROR("BO size %lu > total memory in domain: %llu\n", size,
+					      man->size << PAGE_SHIFT);
+	return false;
+}
+
 static int amdgpu_bo_do_create(struct amdgpu_device *adev,
 			       unsigned long size, int byte_align,
 			       bool kernel, u32 domain, u64 flags,
@@ -300,6 +338,9 @@ static int amdgpu_bo_do_create(struct amdgpu_device *adev,
 
 	page_align = roundup(byte_align, PAGE_SIZE) >> PAGE_SHIFT;
 	size = ALIGN(size, PAGE_SIZE);
+
+	if (!amdgpu_bo_validate_size(adev, size, domain))
+		return -ENOMEM;
 
 	if (kernel) {
 		type = ttm_bo_type_kernel;
@@ -658,7 +699,7 @@ int amdgpu_bo_pin_restricted(struct amdgpu_bo *bo, u32 domain,
 	if (bo->pin_count) {
 		uint32_t mem_type = bo->tbo.mem.mem_type;
 
-		if (domain != amdgpu_mem_type_to_domain(mem_type))
+		if (!(domain & amdgpu_mem_type_to_domain(mem_type)))
 			return -EINVAL;
 
 		bo->pin_count++;
@@ -699,19 +740,20 @@ int amdgpu_bo_pin_restricted(struct amdgpu_bo *bo, u32 domain,
 		goto error;
 	}
 
-	bo->pin_count = 1;
-	if (gpu_addr != NULL) {
-		r = amdgpu_ttm_bind(&bo->tbo, &bo->tbo.mem);
-		if (unlikely(r)) {
-			dev_err(adev->dev, "%p bind failed\n", bo);
-			goto error;
-		}
-		*gpu_addr = amdgpu_bo_gpu_offset(bo);
+	r = amdgpu_ttm_alloc_gart(&bo->tbo);
+	if (unlikely(r)) {
+		dev_err(adev->dev, "%p bind failed\n", bo);
+		goto error;
 	}
+
+	bo->pin_count = 1;
+	if (gpu_addr != NULL)
+		*gpu_addr = amdgpu_bo_gpu_offset(bo);
+
+	domain = amdgpu_mem_type_to_domain(bo->tbo.mem.mem_type);
 	if (domain == AMDGPU_GEM_DOMAIN_VRAM) {
 		adev->vram_pin_size += amdgpu_bo_size(bo);
-		if (bo->flags & AMDGPU_GEM_CREATE_NO_CPU_ACCESS)
-			adev->invisible_pin_size += amdgpu_bo_size(bo);
+		adev->invisible_pin_size += amdgpu_vram_mgr_bo_invisible_size(bo);
 	} else if (domain == AMDGPU_GEM_DOMAIN_GTT) {
 		adev->gart_pin_size += amdgpu_bo_size(bo);
 	}
@@ -749,8 +791,7 @@ int amdgpu_bo_unpin(struct amdgpu_bo *bo)
 
 	if (bo->tbo.mem.mem_type == TTM_PL_VRAM) {
 		adev->vram_pin_size -= amdgpu_bo_size(bo);
-		if (bo->flags & AMDGPU_GEM_CREATE_NO_CPU_ACCESS)
-			adev->invisible_pin_size -= amdgpu_bo_size(bo);
+		adev->invisible_pin_size -= amdgpu_vram_mgr_bo_invisible_size(bo);
 	} else if (bo->tbo.mem.mem_type == TTM_PL_TT) {
 		adev->gart_pin_size -= amdgpu_bo_size(bo);
 	}
@@ -790,8 +831,8 @@ int amdgpu_bo_init(struct amdgpu_device *adev)
 	adev->mc.vram_mtrr = arch_phys_wc_add(adev->mc.aper_base,
 					      adev->mc.aper_size);
 	DRM_INFO("Detected VRAM RAM=%lluM, BAR=%lluM\n",
-		adev->mc.mc_vram_size >> 20,
-		(unsigned long long)adev->mc.aper_size >> 20);
+		 adev->mc.mc_vram_size >> 20,
+		 (unsigned long long)adev->mc.aper_size >> 20);
 	DRM_INFO("RAM width %dbits %s\n",
 		 adev->mc.vram_width, amdgpu_vram_names[adev->mc.vram_type]);
 	return amdgpu_ttm_init(adev);
@@ -991,7 +1032,7 @@ u64 amdgpu_bo_gpu_offset(struct amdgpu_bo *bo)
 {
 	WARN_ON_ONCE(bo->tbo.mem.mem_type == TTM_PL_SYSTEM);
 	WARN_ON_ONCE(bo->tbo.mem.mem_type == TTM_PL_TT &&
-		     !amdgpu_ttm_is_bound(bo->tbo.ttm));
+		     !amdgpu_gtt_mgr_has_gart_addr(&bo->tbo.mem));
 	WARN_ON_ONCE(!ww_mutex_is_locked(&bo->tbo.resv->lock) &&
 		     !bo->pin_count);
 	WARN_ON_ONCE(bo->tbo.mem.start == AMDGPU_BO_INVALID_OFFSET);

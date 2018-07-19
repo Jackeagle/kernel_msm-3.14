@@ -836,14 +836,14 @@ static inline int __ttm_bo_reserve(struct ttm_buffer_object *bo,
 		if (WARN_ON(ticket))
 			return -EBUSY;
 
-		success = ww_mutex_trylock(&bo->resv->lock);
+		success = reservation_object_trylock(bo->resv);
 		return success ? 0 : -EBUSY;
 	}
 
 	if (interruptible)
-		ret = ww_mutex_lock_interruptible(&bo->resv->lock, ticket);
+		ret = reservation_object_lock_interruptible(bo->resv, ticket);
 	else
-		ret = ww_mutex_lock(&bo->resv->lock, ticket);
+		ret = reservation_object_lock(bo->resv, ticket);
 	if (ret == -EINTR)
 		return -ERESTARTSYS;
 	return ret;
@@ -941,18 +941,6 @@ static inline int ttm_bo_reserve_slowpath(struct ttm_buffer_object *bo,
 }
 
 /**
- * __ttm_bo_unreserve
- * @bo: A pointer to a struct ttm_buffer_object.
- *
- * Unreserve a previous reservation of @bo where the buffer object is
- * already on lru lists.
- */
-static inline void __ttm_bo_unreserve(struct ttm_buffer_object *bo)
-{
-	ww_mutex_unlock(&bo->resv->lock);
-}
-
-/**
  * ttm_bo_unreserve
  *
  * @bo: A pointer to a struct ttm_buffer_object.
@@ -966,20 +954,7 @@ static inline void ttm_bo_unreserve(struct ttm_buffer_object *bo)
 		ttm_bo_add_to_lru(bo);
 		spin_unlock(&bo->glob->lru_lock);
 	}
-	__ttm_bo_unreserve(bo);
-}
-
-/**
- * ttm_bo_unreserve_ticket
- * @bo: A pointer to a struct ttm_buffer_object.
- * @ticket: ww_acquire_ctx used for reserving
- *
- * Unreserve a previous reservation of @bo made with @ticket.
- */
-static inline void ttm_bo_unreserve_ticket(struct ttm_buffer_object *bo,
-					   struct ww_acquire_ctx *t)
-{
-	ttm_bo_unreserve(bo);
+	reservation_object_unlock(bo->resv);
 }
 
 /*

@@ -90,6 +90,12 @@ static int amdgpu_cs_parser_init(struct amdgpu_cs_parser *p, void *data)
 		goto free_chunk;
 	}
 
+	/* skip guilty context job */
+	if (atomic_read(&p->ctx->guilty) == 1) {
+		ret = -ECANCELED;
+		goto free_chunk;
+	}
+
 	mutex_lock(&p->ctx->lock);
 
 	/* get chunks */
@@ -679,7 +685,7 @@ static int amdgpu_cs_parser_bos(struct amdgpu_cs_parser *p,
 	if (!r && p->uf_entry.robj) {
 		struct amdgpu_bo *uf = p->uf_entry.robj;
 
-		r = amdgpu_ttm_bind(&uf->tbo, &uf->tbo.mem);
+		r = amdgpu_ttm_alloc_gart(&uf->tbo);
 		p->job->uf_addr += amdgpu_bo_gpu_offset(uf);
 	}
 
@@ -1035,7 +1041,7 @@ static int amdgpu_cs_process_fence_dep(struct amdgpu_cs_parser *p,
 			amdgpu_ctx_put(ctx);
 			return r;
 		} else if (fence) {
-			r = amdgpu_sync_fence(p->adev, &p->job->sync,
+			r = amdgpu_sync_fence(p->adev, &p->job->dep_sync,
 					      fence);
 			dma_fence_put(fence);
 			amdgpu_ctx_put(ctx);
@@ -1055,7 +1061,7 @@ static int amdgpu_syncobj_lookup_and_add_to_sync(struct amdgpu_cs_parser *p,
 	if (r)
 		return r;
 
-	r = amdgpu_sync_fence(p->adev, &p->job->sync, fence);
+	r = amdgpu_sync_fence(p->adev, &p->job->dep_sync, fence);
 	dma_fence_put(fence);
 
 	return r;
@@ -1199,7 +1205,7 @@ static int amdgpu_cs_submit(struct amdgpu_cs_parser *p,
 	amdgpu_ring_priority_get(job->ring, job->base.s_priority);
 
 	trace_amdgpu_cs_ioctl(job);
-	amd_sched_entity_push_job(&job->base);
+	amd_sched_entity_push_job(&job->base, entity);
 
 	ttm_eu_fence_buffer_objects(&p->ticket, &p->validated, p->fence);
 	amdgpu_mn_unlock(p->mn);
@@ -1597,5 +1603,5 @@ int amdgpu_cs_find_mapping(struct amdgpu_cs_parser *parser,
 			return r;
 	}
 
-	return amdgpu_ttm_bind(&(*bo)->tbo, &(*bo)->tbo.mem);
+	return amdgpu_ttm_alloc_gart(&(*bo)->tbo);
 }

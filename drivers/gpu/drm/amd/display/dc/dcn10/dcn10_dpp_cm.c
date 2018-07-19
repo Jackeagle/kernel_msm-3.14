@@ -365,34 +365,31 @@ void dpp1_cm_set_output_csc_adjustment(
 	dpp1_cm_program_color_matrix(dpp, tbl_entry);
 }
 
-void dpp1_cm_power_on_regamma_lut(
-	struct dpp *dpp_base,
-	bool power_on)
+void dpp1_cm_power_on_regamma_lut(struct dpp *dpp_base,
+				  bool power_on)
 {
 	struct dcn10_dpp *dpp = TO_DCN10_DPP(dpp_base);
+
 	REG_SET(CM_MEM_PWR_CTRL, 0,
-			RGAM_MEM_PWR_FORCE, power_on == true ? 0:1);
+		RGAM_MEM_PWR_FORCE, power_on == true ? 0:1);
 
 }
 
-void dpp1_cm_program_regamma_lut(
-		struct dpp *dpp_base,
-		const struct pwl_result_data *rgb,
-		uint32_t num)
+void dpp1_cm_program_regamma_lut(struct dpp *dpp_base,
+				 const struct pwl_result_data *rgb,
+				 uint32_t num)
 {
 	uint32_t i;
 	struct dcn10_dpp *dpp = TO_DCN10_DPP(dpp_base);
+
 	for (i = 0 ; i < num; i++) {
 		REG_SET(CM_RGAM_LUT_DATA, 0, CM_RGAM_LUT_DATA, rgb[i].red_reg);
 		REG_SET(CM_RGAM_LUT_DATA, 0, CM_RGAM_LUT_DATA, rgb[i].green_reg);
 		REG_SET(CM_RGAM_LUT_DATA, 0, CM_RGAM_LUT_DATA, rgb[i].blue_reg);
 
-		REG_SET(CM_RGAM_LUT_DATA, 0,
-				CM_RGAM_LUT_DATA, rgb[i].delta_red_reg);
-		REG_SET(CM_RGAM_LUT_DATA, 0,
-				CM_RGAM_LUT_DATA, rgb[i].delta_green_reg);
-		REG_SET(CM_RGAM_LUT_DATA, 0,
-				CM_RGAM_LUT_DATA, rgb[i].delta_blue_reg);
+		REG_SET(CM_RGAM_LUT_DATA, 0, CM_RGAM_LUT_DATA, rgb[i].delta_red_reg);
+		REG_SET(CM_RGAM_LUT_DATA, 0, CM_RGAM_LUT_DATA, rgb[i].delta_green_reg);
+		REG_SET(CM_RGAM_LUT_DATA, 0, CM_RGAM_LUT_DATA, rgb[i].delta_blue_reg);
 
 	}
 
@@ -471,7 +468,8 @@ void dpp1_cm_program_regamma_lutb_settings(
 void dpp1_program_input_csc(
 		struct dpp *dpp_base,
 		enum dc_color_space color_space,
-		enum dcn10_input_csc_select select)
+		enum dcn10_input_csc_select select,
+		const struct out_csc_color_matrix *tbl_entry)
 {
 	struct dcn10_dpp *dpp = TO_DCN10_DPP(dpp_base);
 	int i;
@@ -485,15 +483,19 @@ void dpp1_program_input_csc(
 		return;
 	}
 
-	for (i = 0; i < arr_size; i++)
-		if (dcn10_input_csc_matrix[i].color_space == color_space) {
-			regval = dcn10_input_csc_matrix[i].regval;
-			break;
-		}
+	if (tbl_entry == NULL) {
+		for (i = 0; i < arr_size; i++)
+			if (dcn10_input_csc_matrix[i].color_space == color_space) {
+				regval = dcn10_input_csc_matrix[i].regval;
+				break;
+			}
 
-	if (regval == NULL) {
-		BREAK_TO_DEBUGGER();
-		return;
+		if (regval == NULL) {
+			BREAK_TO_DEBUGGER();
+			return;
+		}
+	} else {
+		regval = tbl_entry->regval;
 	}
 
 	if (select == INPUT_CSC_SELECT_COMA)
@@ -526,6 +528,27 @@ void dpp1_program_input_csc(
 				regval,
 				&gam_regs);
 	}
+}
+
+//keep here for now, decide multi dce support later
+void dpp1_program_bias_and_scale(
+	struct dpp *dpp_base,
+	struct dc_bias_and_scale *params)
+{
+	struct dcn10_dpp *dpp = TO_DCN10_DPP(dpp_base);
+
+	REG_SET_2(CM_BNS_VALUES_R, 0,
+		CM_BNS_SCALE_R, params->scale_red,
+		CM_BNS_BIAS_R, params->bias_red);
+
+	REG_SET_2(CM_BNS_VALUES_G, 0,
+		CM_BNS_SCALE_G, params->scale_green,
+		CM_BNS_BIAS_G, params->bias_green);
+
+	REG_SET_2(CM_BNS_VALUES_B, 0,
+		CM_BNS_SCALE_B, params->scale_blue,
+		CM_BNS_BIAS_B, params->bias_blue);
+
 }
 
 /*program de gamma RAM B*/

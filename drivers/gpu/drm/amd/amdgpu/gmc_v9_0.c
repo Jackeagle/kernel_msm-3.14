@@ -449,6 +449,7 @@ static int gmc_v9_0_mc_init(struct amdgpu_device *adev)
 {
 	u32 tmp;
 	int chansize, numchan;
+	int r;
 
 	adev->mc.vram_width = amdgpu_atomfirmware_get_vram_width(adev);
 	if (!adev->mc.vram_width) {
@@ -494,17 +495,22 @@ static int gmc_v9_0_mc_init(struct amdgpu_device *adev)
 		adev->mc.vram_width = numchan * chansize;
 	}
 
-	/* Could aper size report 0 ? */
-	adev->mc.aper_base = pci_resource_start(adev->pdev, 0);
-	adev->mc.aper_size = pci_resource_len(adev->pdev, 0);
 	/* size in MB on si */
 	adev->mc.mc_vram_size =
 		((adev->flags & AMD_IS_APU) ? nbio_v7_0_get_memsize(adev) :
 		 nbio_v6_1_get_memsize(adev)) * 1024ULL * 1024ULL;
 	adev->mc.real_vram_size = adev->mc.mc_vram_size;
-	adev->mc.visible_vram_size = adev->mc.aper_size;
+
+	if (!(adev->flags & AMD_IS_APU)) {
+		r = amdgpu_device_resize_fb_bar(adev);
+		if (r)
+			return r;
+	}
+	adev->mc.aper_base = pci_resource_start(adev->pdev, 0);
+	adev->mc.aper_size = pci_resource_len(adev->pdev, 0);
 
 	/* In case the PCI BAR is larger than the actual amount of vram */
+	adev->mc.visible_vram_size = adev->mc.aper_size;
 	if (adev->mc.visible_vram_size > adev->mc.real_vram_size)
 		adev->mc.visible_vram_size = adev->mc.real_vram_size;
 
@@ -561,7 +567,7 @@ static int gmc_v9_0_sw_init(void *handle)
 	case CHIP_RAVEN:
 		adev->mc.vram_type = AMDGPU_VRAM_TYPE_UNKNOWN;
 		if (adev->rev_id == 0x0 || adev->rev_id == 0x1) {
-			adev->vm_manager.vm_size = 1U << 18;
+			adev->vm_manager.max_pfn = 1ULL << 36;
 			adev->vm_manager.block_size = 9;
 			adev->vm_manager.num_level = 3;
 			amdgpu_vm_set_fragment_size(adev, 9);
@@ -579,7 +585,7 @@ static int gmc_v9_0_sw_init(void *handle)
 		 * vm size is 256TB (48bit), maximum size of Vega10,
 		 * block size 512 (9bit)
 		 */
-		adev->vm_manager.vm_size = 1U << 18;
+		adev->vm_manager.max_pfn = 1ULL << 36;
 		adev->vm_manager.block_size = 9;
 		adev->vm_manager.num_level = 3;
 		amdgpu_vm_set_fragment_size(adev, 9);
@@ -588,10 +594,9 @@ static int gmc_v9_0_sw_init(void *handle)
 		break;
 	}
 
-	DRM_INFO("vm size is %llu GB, block size is %u-bit,fragment size is %u-bit\n",
-			adev->vm_manager.vm_size,
-			adev->vm_manager.block_size,
-			adev->vm_manager.fragment_size);
+	DRM_INFO("vm size is %llu GB, block size is %u-bit, fragment size is %u-bit\n",
+		 adev->vm_manager.max_pfn >> 18, adev->vm_manager.block_size,
+		 adev->vm_manager.fragment_size);
 
 	/* This interrupt is VMC page fault.*/
 	r = amdgpu_irq_add_id(adev, AMDGPU_IH_CLIENTID_VMC, 0,
@@ -601,8 +606,6 @@ static int gmc_v9_0_sw_init(void *handle)
 
 	if (r)
 		return r;
-
-	adev->vm_manager.max_pfn = adev->vm_manager.vm_size << 18;
 
 	/* Set the internal MC address mask
 	 * This is the max address of the GPU's
@@ -693,15 +696,15 @@ static void gmc_v9_0_init_golden_registers(struct amdgpu_device *adev)
 	case CHIP_VEGA10:
 		amdgpu_program_register_sequence(adev,
 						golden_settings_mmhub_1_0_0,
-						(const u32)ARRAY_SIZE(golden_settings_mmhub_1_0_0));
+						ARRAY_SIZE(golden_settings_mmhub_1_0_0));
 		amdgpu_program_register_sequence(adev,
 						golden_settings_athub_1_0_0,
-						(const u32)ARRAY_SIZE(golden_settings_athub_1_0_0));
+						ARRAY_SIZE(golden_settings_athub_1_0_0));
 		break;
 	case CHIP_RAVEN:
 		amdgpu_program_register_sequence(adev,
 						golden_settings_athub_1_0_0,
-						(const u32)ARRAY_SIZE(golden_settings_athub_1_0_0));
+						ARRAY_SIZE(golden_settings_athub_1_0_0));
 		break;
 	default:
 		break;
@@ -721,7 +724,7 @@ static int gmc_v9_0_gart_enable(struct amdgpu_device *adev)
 
 	amdgpu_program_register_sequence(adev,
 		golden_settings_vega10_hdp,
-		(const u32)ARRAY_SIZE(golden_settings_vega10_hdp));
+		ARRAY_SIZE(golden_settings_vega10_hdp));
 
 	if (adev->gart.robj == NULL) {
 		dev_err(adev->dev, "No VRAM object for PCIE GART.\n");
