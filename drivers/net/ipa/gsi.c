@@ -1435,7 +1435,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 {
 	struct gsi_chan_ctx *chan;
 	struct gsi_evt_ctx *evtr;
-	size_t size;
+	size_t count;
 	u8 evt_id;
 	void **user_data;
 	long chan_id;
@@ -1475,8 +1475,8 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	}
 
 	memset(chan, 0, sizeof(*chan));
-	size = props->mem.size / GSI_CHAN_RING_ELEMENT_SIZE * sizeof(void *);
-	user_data = kzalloc(size, GFP_KERNEL);
+	count = props->mem.size / GSI_CHAN_RING_ELEMENT_SIZE;
+	user_data = kcalloc(count, sizeof(void *), GFP_KERNEL);
 	if (!user_data) {
 		ipa_err("error allocating user pointer array\n");
 		ipahal_dma_free(&props->mem);
