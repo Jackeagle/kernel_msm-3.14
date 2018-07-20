@@ -340,10 +340,12 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 
 	xfer_elem = kzalloc(num_desc * sizeof(*xfer_elem), GFP_ATOMIC);
 	if (!xfer_elem)
-		return -EFAULT;
+		return -ENOMEM;
 
 	spin_lock_bh(&sys->spinlock);
 
+	/* Within loop, all errors are allocation or DMA mapping */
+	result = -ENOMEM;
 	for (i = 0; i < num_desc; i++) {
 		tx_pkt = kmem_cache_zalloc(ipa_ctx->tx_pkt_wrapper_cache,
 					   GFP_ATOMIC);
@@ -452,7 +454,8 @@ failure:
 
 	kfree(xfer_elem);
 	spin_unlock_bh(&sys->spinlock);
-	return -EFAULT;
+
+	return result;
 }
 
 /** ipa_transport_irq_cmd_ack - callback function which will be called by
