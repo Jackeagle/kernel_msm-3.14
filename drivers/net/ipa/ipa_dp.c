@@ -327,6 +327,7 @@ static int
 ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 {
 	struct device *dev = ipa_ctx->dev;
+	struct ipa_ep_context *ep = sys->ep;
 	struct ipa_tx_pkt_wrapper *tx_pkt, *tx_pkt_first;
 	struct ipahal_imm_cmd_pyld *tag_pyld_ret = NULL;
 	struct ipa_tx_pkt_wrapper *next_pkt;
@@ -336,7 +337,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	int result;
 	const struct ipa_gsi_ep_config *gsi_ep_cfg;
 
-	gsi_ep_cfg = ipa_get_gsi_ep_info(sys->ep->client);
+	gsi_ep_cfg = ipa_get_gsi_ep_info(ep->client);
 
 	if (unlikely(num_desc > gsi_ep_cfg->ipa_if_tlv)) {
 		ipa_err("Too many chained descriptors need=%d max=%d\n",
@@ -420,8 +421,8 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 		}
 	}
 
-	ipa_debug_low("ch:%lu queue xfer\n", sys->ep->gsi_chan_hdl);
-	result = gsi_queue_xfer(sys->ep->gsi_chan_hdl, num_desc, xfer_elem,
+	ipa_debug_low("ch:%lu queue xfer\n", ep->gsi_chan_hdl);
+	result = gsi_queue_xfer(ep->gsi_chan_hdl, num_desc, xfer_elem,
 				true);
 	if (result) {
 		ipa_err("GSI xfer failed.\n");
