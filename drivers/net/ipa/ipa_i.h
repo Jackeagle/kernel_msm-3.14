@@ -328,7 +328,6 @@ struct ipa_ep_context {
 	void *priv;
 	void (*client_notify)(void *priv, enum ipa_dp_evt_type evt,
 			      unsigned long data);
-	atomic_t avail_fifo_desc;
 	u32 dflt_flt4_rule_hdl;
 	u32 dflt_flt6_rule_hdl;
 	u32 uc_offload_state;

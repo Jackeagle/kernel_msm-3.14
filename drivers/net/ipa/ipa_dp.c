@@ -727,7 +727,6 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 {
 	struct ipa_ep_context *ep;
 	u32 ipa_ep_idx;
-	int count;
 	int result = -EINVAL;
 	char buff[IPA_RESOURCE_NAME_MAX];
 
@@ -795,8 +794,6 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 	ep->client_notify = sys_in->notify;
 	ep->napi_enabled = sys_in->napi_enabled;
 	ep->priv = sys_in->priv;
-	count = (sys_in->desc_fifo_sz / IPA_FIFO_ELEMENT_SIZE) - 1;
-	atomic_set(&ep->avail_fifo_desc, count);
 
 	if (ep->status.status_en && IPA_CLIENT_IS_CONS(ep->client) &&
 	    !ep->sys->status_stat) {
