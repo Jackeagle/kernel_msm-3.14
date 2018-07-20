@@ -1441,15 +1441,11 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	long chan_id;
 	u32 completed;
 
+	ipa_bug_on(props->ch_id >= gsi_ctx->max_ch);
+
 	if (ipahal_dma_alloc(&props->mem, props->ring_size, GFP_KERNEL)) {
 		ipa_err("fail to dma alloc %u bytes\n", props->ring_size);
 		return -ENOMEM;
-	}
-
-	if (props->ch_id >= gsi_ctx->max_ch) {
-		ipa_err("chan_id %hhu too large (must be < %u)\n",
-			props->ch_id, gsi_ctx->max_ch);
-		return -EINVAL;
 	}
 
 	if (gsi_validate_channel_props(props)) {
