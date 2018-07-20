@@ -1016,7 +1016,7 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 		nr_frags = 0;
 	}
 	if (nr_frags) {
-		desc = kzalloc((1 + nr_frags) * sizeof(*desc), GFP_ATOMIC);
+		desc = kcalloc(1 + nr_frags, sizeof(*desc), GFP_ATOMIC);
 		if (!desc)
 			return -ENOMEM;
 	}
