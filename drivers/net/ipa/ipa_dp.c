@@ -2195,17 +2195,12 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	const struct ipa_gsi_ep_config *gsi_ep_info;
 	int result;
 
-	gsi_ep_info = ipa_get_gsi_ep_info(ep->client);
-	if (!gsi_ep_info) {
-		ipa_err("Failed getting GSI EP info for client=%d\n",
-			ep->client);
-		return -EINVAL;
-	}
-
 	result = evt_ring_hdl_get(ep, in->desc_fifo_sz);
 	if (result < 0)
 		return result;
 	ep->gsi_evt_ring_hdl = result;
+
+	gsi_ep_info = ipa_get_gsi_ep_info(ep->client);
 
 	gsi_channel_props.from_gsi = IPA_CLIENT_IS_CONS(ep->client);
 	gsi_channel_props.ch_id = gsi_ep_info->ipa_gsi_chan_num;
