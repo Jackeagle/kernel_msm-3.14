@@ -1898,6 +1898,10 @@
 
 				interrupts = <0 IRQ_TYPE_LEVEL_HIGH>;
 
+				interconnects = <&qnoc 38 &qnoc 512>,
+						<&qnoc 39 &qnoc 512>;
+				interconnect-names = "port0", "port1";
+
 				ports {
 					#address-cells = <1>;
 					#size-cells = <0>;
