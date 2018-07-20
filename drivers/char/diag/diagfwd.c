@@ -27,7 +27,9 @@
 #include <linux/usb/usbdiag.h>
 #endif
 #include <soc/qcom/socinfo.h>
+#if 0
 #include <soc/qcom/restart.h>
+#endif
 #include "diagmem.h"
 #include "diagchar.h"
 #include "diagfwd.h"
@@ -1091,7 +1093,9 @@ int diag_process_apps_pkt(unsigned char *buf, int len, int pid)
 		diag_send_rsp(driver->apps_rsp_buf, 1, pid);
 		msleep(5000);
 		/* call download API */
+		#if 0
 		msm_set_restart_mode(RESTART_DLOAD);
+		#endif
 		pr_crit("diag: download mode set, Rebooting SoC..\n");
 		kernel_restart(NULL);
 		/* Not required, represents that command isn't sent to modem */
