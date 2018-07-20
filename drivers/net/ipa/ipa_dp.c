@@ -349,10 +349,8 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	for (i = 0; i < num_desc; i++) {
 		tx_pkt = kmem_cache_zalloc(ipa_ctx->tx_pkt_wrapper_cache,
 					   GFP_ATOMIC);
-		if (!tx_pkt) {
-			ipa_err("failed to alloc tx wrapper\n");
+		if (!tx_pkt)
 			goto failure;
-		}
 
 		INIT_LIST_HEAD(&tx_pkt->link);
 
@@ -1093,11 +1091,8 @@ begin:
 			goto fail_kmem_cache_alloc;
 
 		rx_pkt = kmem_cache_zalloc(ipa_ctx->rx_pkt_wrapper_cache, flag);
-		if (!rx_pkt) {
-			pr_err_ratelimited("%s fail alloc rx wrapper sys=%p\n",
-					   __func__, sys);
+		if (!rx_pkt)
 			goto fail_kmem_cache_alloc;
-		}
 
 		INIT_LIST_HEAD(&rx_pkt->link);
 		rx_pkt->sys = sys;
@@ -1203,10 +1198,8 @@ static void ipa_replenish_rx_cache(struct ipa_sys_context *sys)
 
 	while (rx_len_cached < sys->rx_pool_sz) {
 		rx_pkt = kmem_cache_zalloc(ipa_ctx->rx_pkt_wrapper_cache, flag);
-		if (!rx_pkt) {
-			ipa_err("failed to alloc rx wrapper\n");
+		if (!rx_pkt)
 			goto fail_kmem_cache_alloc;
-		}
 
 		INIT_LIST_HEAD(&rx_pkt->link);
 		rx_pkt->sys = sys;
@@ -1266,10 +1259,8 @@ static void ipa_replenish_rx_cache_recycle(struct ipa_sys_context *sys)
 		if (list_empty(&sys->rcycl_list)) {
 			rx_pkt = kmem_cache_zalloc(
 				ipa_ctx->rx_pkt_wrapper_cache, flag);
-			if (!rx_pkt) {
-				ipa_err("failed to alloc rx wrapper\n");
+			if (!rx_pkt)
 				goto fail_kmem_cache_alloc;
-			}
 
 			INIT_LIST_HEAD(&rx_pkt->link);
 			rx_pkt->sys = sys;
