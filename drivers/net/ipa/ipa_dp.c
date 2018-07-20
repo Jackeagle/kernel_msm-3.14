@@ -338,7 +338,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 
 	ipa_assert(num_desc <= ipa_get_gsi_ep_info(ep->client)->ipa_if_tlv);
 
-	xfer_elem = kzalloc(num_desc * sizeof(*xfer_elem), GFP_ATOMIC);
+	xfer_elem = kcalloc(num_desc, sizeof(*xfer_elem), GFP_ATOMIC);
 	if (!xfer_elem)
 		return -ENOMEM;
 
