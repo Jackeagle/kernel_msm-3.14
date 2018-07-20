@@ -87,20 +87,19 @@ static bool ipa_is_valid_ep(u32 ep_suspend_data)
 	return false;
 }
 
-static int ipa_handle_interrupt(int irq_num, bool isr_context)
+static void ipa_handle_interrupt(int irq_num, bool isr_context)
 {
 	struct ipa_interrupt_info interrupt_info;
 	struct ipa_interrupt_work_wrap *work_data;
 	u32 suspend_data;
 	void *interrupt_data = NULL;
 	struct ipa_tx_suspend_irq_data *suspend_interrupt_data = NULL;
-	int res;
 
 	interrupt_info = ipa_interrupt_to_cb[irq_num];
 	if (!interrupt_info.handler) {
 		ipa_err("A callback function wasn't set for interrupt num %d\n",
 			irq_num);
-		return -EINVAL;
+		return;
 	}
 
 	switch (interrupt_info.interrupt) {
@@ -118,13 +117,13 @@ static int ipa_handle_interrupt(int irq_num, bool isr_context)
 		ipahal_write_reg_n(IPA_SUSPEND_IRQ_CLR_EE_n,
 				   IPA_EE_AP, suspend_data);
 		if (!ipa_is_valid_ep(suspend_data))
-			return 0;
+			return;
 
 		suspend_interrupt_data =
 			kzalloc(sizeof(*suspend_interrupt_data), GFP_ATOMIC);
 		if (!suspend_interrupt_data) {
 			ipa_err("failed allocating suspend_interrupt_data\n");
-			return -ENOMEM;
+			return;
 		}
 		suspend_interrupt_data->endpoints = suspend_data;
 		interrupt_data = suspend_interrupt_data;
@@ -139,8 +138,8 @@ static int ipa_handle_interrupt(int irq_num, bool isr_context)
 	if (interrupt_info.deferred_flag || isr_context) {
 		work_data = kzalloc(sizeof(*work_data), GFP_ATOMIC);
 		if (!work_data) {
-			res = -ENOMEM;
-			goto fail_alloc_work;
+			kfree(interrupt_data);
+			return;
 		}
 		INIT_WORK(&work_data->interrupt_work,
 			  ipa_deferred_interrupt_work);
@@ -156,12 +155,6 @@ static int ipa_handle_interrupt(int irq_num, bool isr_context)
 				       interrupt_data);
 		kfree(interrupt_data);
 	}
-
-	return 0;
-
-fail_alloc_work:
-	kfree(interrupt_data);
-	return res;
 }
 
 static void ipa_enable_tx_suspend_wa(struct work_struct *work)
