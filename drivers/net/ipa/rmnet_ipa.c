@@ -28,6 +28,11 @@
 #include "ipa_qmi.h"
 #include "ipa_i.h"
 
+/* The transport descriptor size was changed to GSI_CHAN_RE_SIZE_16B, but
+ * IPA users still use sps_iovec size as FIFO element size.
+ */
+#define IPA_FIFO_ELEMENT_SIZE 8
+
 #define WWAN_METADATA_SHFT 24
 #define WWAN_METADATA_MASK 0xFF000000
 #define WWAN_DATA_LEN 2000

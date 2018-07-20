@@ -36,10 +36,6 @@
 #define IPA_QMAP_HEADER_LENGTH (4)
 #define IPA_DL_CHECKSUM_LENGTH (8)
 #define IPA_GENERIC_RX_POOL_SZ 192
-/* The transport descriptor size was changed to GSI_CHAN_RE_SIZE_16B, but
- * IPA users still use sps_iovec size as FIFO element size.
- */
-#define IPA_FIFO_ELEMENT_SIZE 8
 
 #define IPA_MAX_STATUS_STAT_NUM 30
 
