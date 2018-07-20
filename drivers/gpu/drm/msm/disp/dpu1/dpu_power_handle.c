@@ -24,18 +24,176 @@
 #include "dpu_power_handle.h"
 #include "dpu_trace.h"
 
-static const char *data_bus_name[DPU_POWER_HANDLE_DBUS_ID_MAX] = {
-	[DPU_POWER_HANDLE_DBUS_ID_MNOC] = "qcom,dpu-data-bus",
-	[DPU_POWER_HANDLE_DBUS_ID_LLCC] = "qcom,dpu-llcc-bus",
-	[DPU_POWER_HANDLE_DBUS_ID_EBI] = "qcom,dpu-ebi-bus",
-};
-
-const char *dpu_power_handle_get_dbus_name(u32 bus_id)
+static int dpu_power_set_data_bus_icc_path(struct dpu_power_handle *phandle)
 {
-	if (bus_id < DPU_POWER_HANDLE_DBUS_ID_MAX)
-		return data_bus_name[bus_id];
+	struct dpu_power_data_bus_handle *pdbus = &phandle->data_bus_handle;
+	struct icc_path *path0 = of_icc_get(phandle->dev, "port0");
+	struct icc_path *path1 = of_icc_get(phandle->dev, "port1");
+	int total_num_paths = 0;
 
-	return NULL;
+	if (IS_ERR(path0))
+		return PTR_ERR(path0);
+
+	total_num_paths = 1;
+	pdbus->path[0] = path0;
+
+	if (!IS_ERR(path1)) {
+		pdbus->path[1] = path1;
+		total_num_paths++;
+	}
+
+	if (total_num_paths > MAX_AXI_PORT_COUNT)
+		return -EINVAL;
+
+	pdbus->num_paths = total_num_paths;
+	pdbus->nrt_num_paths = 0;
+
+	return 0;
+}
+
+static void dpu_power_put_data_bus_icc_path(
+	struct dpu_power_data_bus_handle *pdbus)
+{
+	int i;
+
+	for (i = 0; i < pdbus->num_paths; i++) {
+		if (pdbus->path[i])
+			icc_put(pdbus->path[i]);
+	}
+}
+
+static int _dpu_power_data_bus_set_quota(
+	struct dpu_power_data_bus_handle *pdbus,
+	u64 ab_quota_rt, u64 ab_quota_nrt,
+	u64 ib_quota_rt, u64 ib_quota_nrt)
+{
+	u64 ab_quota[MAX_AXI_PORT_COUNT] = {0, 0};
+	u64 ib_quota[MAX_AXI_PORT_COUNT] = {0, 0};
+	u32 nrt_num_paths = pdbus->nrt_num_paths;
+	u32 total_num_paths = pdbus->num_paths;
+	u32 rt_num_paths = total_num_paths - nrt_num_paths;
+	int i, rc = 0;
+
+	pdbus->ab_rt = ab_quota_rt;
+	pdbus->ib_rt = ib_quota_rt;
+	pdbus->ab_nrt = ab_quota_nrt;
+	pdbus->ib_nrt = ib_quota_nrt;
+
+	if (pdbus->enable) {
+		ab_quota_rt = max_t(u64, ab_quota_rt,
+				DPU_POWER_HANDLE_ENABLE_BUS_AB_QUOTA);
+		ib_quota_rt = max_t(u64, ib_quota_rt,
+				DPU_POWER_HANDLE_ENABLE_BUS_IB_QUOTA);
+		ab_quota_nrt = max_t(u64, ab_quota_nrt,
+				DPU_POWER_HANDLE_ENABLE_BUS_AB_QUOTA);
+		ib_quota_nrt = max_t(u64, ib_quota_nrt,
+				DPU_POWER_HANDLE_ENABLE_BUS_IB_QUOTA);
+	} else {
+		ab_quota_rt = min_t(u64, ab_quota_rt,
+				DPU_POWER_HANDLE_DISABLE_BUS_AB_QUOTA);
+		ib_quota_rt = min_t(u64, ib_quota_rt,
+				DPU_POWER_HANDLE_DISABLE_BUS_IB_QUOTA);
+		ab_quota_nrt = min_t(u64, ab_quota_nrt,
+				DPU_POWER_HANDLE_DISABLE_BUS_AB_QUOTA);
+		ib_quota_nrt = min_t(u64, ib_quota_nrt,
+				DPU_POWER_HANDLE_DISABLE_BUS_IB_QUOTA);
+	}
+
+	if (nrt_num_paths) {
+		ab_quota_rt = div_u64(ab_quota_rt, rt_num_paths);
+		ab_quota_nrt = div_u64(ab_quota_nrt, nrt_num_paths);
+
+		for (i = 0; i < total_num_paths; i++) {
+			if (i < rt_num_paths) {
+				ab_quota[i] = ab_quota_rt;
+				ib_quota[i] = ib_quota_rt;
+			} else {
+				ab_quota[i] = ab_quota_nrt;
+				ib_quota[i] = ib_quota_nrt;
+			}
+		}
+	} else {
+		ab_quota[0] = div_u64(ab_quota_rt + ab_quota_nrt,
+					total_num_paths);
+		ib_quota[0] = ib_quota_rt + ib_quota_nrt;
+
+		for (i = 1; i < total_num_paths; i++) {
+			ab_quota[i] = ab_quota[0];
+			ib_quota[i] = ib_quota[0];
+		}
+	}
+
+	for (i = 0; i < total_num_paths; i++) {
+		if (pdbus->path[i]) {
+			rc = icc_set(pdbus->path[i], ab_quota[i], ib_quota[i]);
+			if (rc) {
+				DPU_ERROR("failed to set on path %d\n", i);
+				break;
+			}
+		}
+
+	}
+
+	return rc;
+}
+
+int dpu_power_data_bus_set_quota(struct dpu_power_handle *phandle,
+		struct dpu_power_client *pclient, int bus_client,
+		u64 ab_quota, u64 ib_quota)
+{
+	int rc = 0;
+	int i;
+	u64 total_ab_rt = 0, total_ib_rt = 0;
+	u64 total_ab_nrt = 0, total_ib_nrt = 0;
+	struct dpu_power_client *client;
+
+	if (!phandle || !pclient ||
+			bus_client >= DPU_POWER_HANDLE_DATA_BUS_CLIENT_MAX) {
+		pr_err("invalid parameters\n");
+		return -EINVAL;
+	}
+
+	mutex_lock(&phandle->phandle_lock);
+
+	pclient->ab[bus_client] = ab_quota;
+	pclient->ib[bus_client] = ib_quota;
+	trace_dpu_perf_update_bus(bus_client, ab_quota, ib_quota);
+
+	list_for_each_entry(client, &phandle->power_client_clist, list) {
+		for (i = 0; i < DPU_POWER_HANDLE_DATA_BUS_CLIENT_MAX; i++) {
+			if (i == DPU_POWER_HANDLE_DATA_BUS_CLIENT_NRT) {
+				total_ab_nrt += client->ab[i];
+				total_ib_nrt += client->ib[i];
+			} else {
+				total_ab_rt += client->ab[i];
+				total_ib_rt = max(total_ib_rt, client->ib[i]);
+			}
+		}
+	}
+
+	rc = _dpu_power_data_bus_set_quota(&phandle->data_bus_handle,
+			total_ab_rt, total_ab_nrt, total_ib_rt, total_ib_nrt);
+
+	mutex_unlock(&phandle->phandle_lock);
+
+	return rc;
+}
+
+
+static int dpu_power_data_bus_update(
+	struct dpu_power_data_bus_handle *pdbus, bool enable)
+{
+	int rc = 0;
+
+	pdbus->enable = enable;
+	rc = _dpu_power_data_bus_set_quota(pdbus, pdbus->ab_rt,
+			pdbus->ab_nrt, pdbus->ib_rt, pdbus->ib_nrt);
+
+	if (rc)
+		pr_err("failed to set data bus vote rc=%d enable:%d\n",
+			rc, enable);
+
+	return rc;
 }
 
 static void dpu_power_event_trigger_locked(struct dpu_power_handle *phandle,
@@ -96,15 +254,23 @@ void dpu_power_client_destroy(struct dpu_power_handle *phandle,
 	}
 }
 
-void dpu_power_resource_init(struct platform_device *pdev,
+int dpu_power_resource_init(struct platform_device *pdev,
 	struct dpu_power_handle *phandle)
 {
+	int rc = 0;
+
 	phandle->dev = &pdev->dev;
+	rc = dpu_power_set_data_bus_icc_path(phandle);
+	if (rc)
+		goto end;
 
 	INIT_LIST_HEAD(&phandle->power_client_clist);
 	INIT_LIST_HEAD(&phandle->event_list);
 
 	mutex_init(&phandle->phandle_lock);
+
+end:
+	return rc;
 }
 
 void dpu_power_resource_deinit(struct platform_device *pdev,
@@ -136,6 +302,8 @@ void dpu_power_resource_deinit(struct platform_device *pdev,
 		curr_event->active = false;
 		list_del(&curr_event->list);
 	}
+
+	dpu_power_put_data_bus_icc_path(&phandle->data_bus_handle);
 	mutex_unlock(&phandle->phandle_lock);
 }
 
@@ -144,6 +312,7 @@ int dpu_power_resource_enable(struct dpu_power_handle *phandle,
 {
 	bool changed = false;
 	u32 max_usecase_ndx = VOTE_INDEX_DISABLE, prev_usecase_ndx;
+	int rc = 0;
 	struct dpu_power_client *client;
 
 	if (!phandle || !pclient) {
@@ -184,19 +353,36 @@ int dpu_power_resource_enable(struct dpu_power_handle *phandle,
 	if (enable) {
 		dpu_power_event_trigger_locked(phandle,
 				DPU_POWER_EVENT_PRE_ENABLE);
+
+		rc = dpu_power_data_bus_update(&phandle->data_bus_handle,
+						enable);
+		if (rc) {
+			pr_err("failed to set bus vote rc=%d\n", rc);
+			goto bus_update_err;
+		}
+
 		dpu_power_event_trigger_locked(phandle,
 				DPU_POWER_EVENT_POST_ENABLE);
 
 	} else {
 		dpu_power_event_trigger_locked(phandle,
 				DPU_POWER_EVENT_PRE_DISABLE);
+
+		dpu_power_data_bus_update(&phandle->data_bus_handle,
+					enable);
+
 		dpu_power_event_trigger_locked(phandle,
 				DPU_POWER_EVENT_POST_DISABLE);
 	}
 
 end:
 	mutex_unlock(&phandle->phandle_lock);
-	return 0;
+	return rc;
+
+bus_update_err:
+	phandle->current_usecase_ndx = prev_usecase_ndx;
+	mutex_unlock(&phandle->phandle_lock);
+	return rc;
 }
 
 struct dpu_power_event *dpu_power_handle_register_event(
