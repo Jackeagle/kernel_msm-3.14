@@ -323,7 +323,7 @@ static void ipa_nop_timer_init(struct ipa_sys_context *sys)
  *
  * Return codes: 0: success, -EFAULT: failure
  */
-int
+static int
 ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 {
 	struct device *dev = ipa_ctx->dev;

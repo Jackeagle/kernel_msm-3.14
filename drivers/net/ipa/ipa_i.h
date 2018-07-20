@@ -835,7 +835,6 @@ void ipa_init_ep_flt_bitmap(void);
 /* internal functions */
 
 bool ipa_is_modem_pipe(u32 pipe_idx);
-int ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc);
 
 u32 ipa_get_ep_mapping(enum ipa_client_type client);
 struct ipa_ep_context *ipa_get_ep_context(enum ipa_client_type client);
