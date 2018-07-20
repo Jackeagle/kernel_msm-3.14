@@ -14,6 +14,8 @@
 #include "ipahal.h"
 #include "ipahal_fltrt.h"
 
+#define IPA_QMAP_HEADER_LENGTH 4
+
 #define IPA_WAN_AGGR_PKT_CNT 5
 #define IPA_LAST_DESC_CNT 0xFFFF
 #define POLLING_INACTIVITY_RX 40
