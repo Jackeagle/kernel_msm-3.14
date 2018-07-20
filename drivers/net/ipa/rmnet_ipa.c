@@ -58,6 +58,7 @@
 #define DRIVER_NAME "wwan_ioctl"
 
 #define IPA_WWAN_CONS_DESC_FIFO_SZ 256
+#define IPA_SYS_TX_DATA_DESC_FIFO_SZ 0x1000
 
 static int ipa_rmnet_poll(struct napi_struct *napi, int budget);
 
