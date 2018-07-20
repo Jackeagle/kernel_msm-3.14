@@ -337,11 +337,6 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	const struct ipa_gsi_ep_config *gsi_ep_cfg;
 
 	gsi_ep_cfg = ipa_get_gsi_ep_info(sys->ep->client);
-	if (unlikely(!gsi_ep_cfg)) {
-		ipa_err("failed to get gsi EP config for client=%d\n",
-			sys->ep->client);
-		return -EFAULT;
-	}
 
 	if (unlikely(num_desc > gsi_ep_cfg->ipa_if_tlv)) {
 		ipa_err("Too many chained descriptors need=%d max=%d\n",
