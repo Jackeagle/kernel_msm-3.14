@@ -345,7 +345,7 @@ static int handle_ingress_format(struct net_device *dev,
 	 * desc_fifo_sz set below (reproduced here).
 	 */
 	BUILD_BUG_ON((2 * IPA_WWAN_CONS_DESC_FIFO_SZ * IPA_FIFO_ELEMENT_SIZE) %
-						GSI_EVT_RING_ELEMENT_SIZE);
+						GSI_RING_ELEMENT_SIZE);
 
 	ipa_debug("Get RMNET_IOCTL_SET_INGRESS_DATA_FORMAT\n");
 	ipa_wan_ep_cfg = &rmnet_ipa_ctx->ipa_to_apps_ep_cfg;
@@ -427,7 +427,7 @@ static int handle_egress_format(struct net_device *dev,
 	 * desc_fifo_sz set below (reproduced here).
 	 */
 	BUILD_BUG_ON((2 * IPA_SYS_TX_DATA_DESC_FIFO_SZ) %
-					GSI_EVT_RING_ELEMENT_SIZE);
+					GSI_RING_ELEMENT_SIZE);
 
 	ipa_debug("get RMNET_IOCTL_SET_EGRESS_DATA_FORMAT\n");
 	ipa_wan_ep_cfg = &rmnet_ipa_ctx->apps_to_ipa_ep_cfg;

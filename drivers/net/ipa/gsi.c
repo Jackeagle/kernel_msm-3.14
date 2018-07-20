@@ -1096,10 +1096,10 @@ gsi_program_evt_ring_ctx(struct ipa_mem_buffer *mem, u8 evt_id, u16 int_modt)
 	u32 int_modc = 1;	/* moderation always comes from channel*/
 	u32 val;
 
-	ipa_debug("intf GPI intr IRQ RE size %u\n", GSI_EVT_RING_ELEMENT_SIZE);
+	ipa_debug("intf GPI intr IRQ RE size %u\n", GSI_RING_ELEMENT_SIZE);
 
 	val = evt_ring_ctx_0_val(GSI_EVT_CHTYPE_GPI_EV, true,
-				 GSI_EVT_RING_ELEMENT_SIZE);
+				 GSI_RING_ELEMENT_SIZE);
 	gsi_writel(val, GSI_EE_N_EV_CH_K_CNTXT_0_OFFS(evt_id, IPA_EE_AP));
 
 	val = field_gen(mem->size, EV_R_LENGTH_BMSK);
@@ -1136,7 +1136,7 @@ static void gsi_init_ring(struct gsi_ring_ctx *ring, struct ipa_mem_buffer *mem)
 	ring->rp = mem->phys_base;
 	ring->wp_local = mem->phys_base;
 	ring->rp_local = mem->phys_base;
-	ring->elem_sz = GSI_EVT_RING_ELEMENT_SIZE;
+	ring->elem_sz = GSI_RING_ELEMENT_SIZE;
 	ring->max_num_elem = mem->size / ring->elem_sz - 1;
 	ring->end = mem->phys_base + (ring->max_num_elem + 1) * ring->elem_sz;
 }
@@ -1210,7 +1210,7 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 	u32 val;
 	int ret;
 
-	ipa_assert(!(size % GSI_EVT_RING_ELEMENT_SIZE));
+	ipa_assert(!(size % GSI_RING_ELEMENT_SIZE));
 
 	/* Get the mutex to allocate from the bitmap and issue a command */
 	mutex_lock(&gsi_ctx->mlock);
@@ -1365,7 +1365,7 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, u8 evt_id)
 	val = field_gen(GSI_CHAN_PROT_GPI, CHTYPE_PROTOCOL_BMSK);
 	val |= field_gen(props->from_gsi ? 0 : 1, CHTYPE_DIR_BMSK);
 	val |= field_gen(evt_id, ERINDEX_BMSK);
-	val |= field_gen(GSI_CHAN_RING_ELEMENT_SIZE, ELEMENT_SIZE_BMSK);
+	val |= field_gen(GSI_RING_ELEMENT_SIZE, ELEMENT_SIZE_BMSK);
 	gsi_writel(val, offset);
 
 	offset = GSI_EE_N_GSI_CH_K_CNTXT_1_OFFS(props->ch_id, IPA_EE_AP);
@@ -1398,7 +1398,7 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 
 	if (props->mem.size % 16) {
 		ipa_err("bad params mem.size %u not a multiple of re size %u\n",
-			props->mem.size, GSI_CHAN_RING_ELEMENT_SIZE);
+			props->mem.size, GSI_RING_ELEMENT_SIZE);
 		return -EINVAL;
 	}
 
@@ -1409,7 +1409,7 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 		return -EINVAL;
 	}
 
-	last = phys_base + props->mem.size - GSI_CHAN_RING_ELEMENT_SIZE;
+	last = phys_base + props->mem.size - GSI_RING_ELEMENT_SIZE;
 
 	/* MSB should stay same within the ring */
 	if ((phys_base & GENMASK_ULL(63, 32)) != (last & GENMASK_ULL(63, 32))) {
@@ -1471,7 +1471,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	}
 
 	memset(chan, 0, sizeof(*chan));
-	count = props->mem.size / GSI_CHAN_RING_ELEMENT_SIZE;
+	count = props->mem.size / GSI_RING_ELEMENT_SIZE;
 	user_data = kcalloc(count, sizeof(void *), GFP_KERNEL);
 	if (!user_data) {
 		ipa_err("error allocating user pointer array\n");
@@ -1531,8 +1531,8 @@ static void __gsi_write_channel_scratch(unsigned long chan_id)
 	u32 val;
 
 	/* See comments above definition of gsi_gpi_channel_scratch */
-	gpi->max_outstanding_tre = chan->tlv_size * GSI_CHAN_RING_ELEMENT_SIZE;
-	gpi->outstanding_threshold = 2 * GSI_CHAN_RING_ELEMENT_SIZE;
+	gpi->max_outstanding_tre = chan->tlv_size * GSI_RING_ELEMENT_SIZE;
+	gpi->outstanding_threshold = 2 * GSI_RING_ELEMENT_SIZE;
 
 	val = scr.data.word1;
 	gsi_writel(val, GSI_EE_N_GSI_CH_K_SCRATCH_0_OFFS(chan_id, IPA_EE_AP));

@@ -658,7 +658,7 @@ static long ipa_setup_apps_pipes(void)
 	 * (4 for producer, 2 for consumer) times the desc_fifo_sz
 	 * set below (reproduced here; 2 is the more restrictive case).
 	 */
-	BUILD_BUG_ON((2 * IPA_SYS_DESC_FIFO_SZ) % GSI_EVT_RING_ELEMENT_SIZE);
+	BUILD_BUG_ON((2 * IPA_SYS_DESC_FIFO_SZ) % GSI_RING_ELEMENT_SIZE);
 
 	/* CMD OUT (AP->IPA) */
 	ipa_ctx->clnt_hdl_cmd = setup_apps_cmd_prod_pipe();

@@ -15,8 +15,7 @@
 
 #include "ipahal.h"
 
-#define GSI_EVT_RING_ELEMENT_SIZE	16	/* bytes */
-#define GSI_CHAN_RING_ELEMENT_SIZE	16	/* bytes */
+#define GSI_RING_ELEMENT_SIZE	16	/* bytes (channel or event ring) */
 
 /** struct ipa_gsi_ep_config - IPA GSI endpoint configurations
  *
