@@ -416,10 +416,8 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	ipa_debug_low("ch:%lu queue xfer\n", ep->gsi_chan_hdl);
 	result = gsi_queue_xfer(ep->gsi_chan_hdl, num_desc, xfer_elem,
 				true);
-	if (result) {
-		ipa_err("GSI xfer failed.\n");
+	if (result)
 		goto failure;
-	}
 	kfree(xfer_elem);
 
 	spin_unlock_bh(&sys->spinlock);
@@ -1158,10 +1156,9 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
 	gsi_xfer_elem.xfer_user_data = rx_pkt;
 
 	ret = gsi_queue_xfer(sys->ep->gsi_chan_hdl, 1, &gsi_xfer_elem, false);
-	if (ret) {
-		ipa_err("failed to provide buffer: %d\n", ret);
+	if (ret)
 		return ret;
-	}
+
 	/* As doorbell is a costly operation, notify to GSI
 	 * of new buffers if threshold is exceeded
 	 */

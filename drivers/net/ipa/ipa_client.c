@@ -130,7 +130,6 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 
 	gsi_res = gsi_queue_xfer(ep->gsi_chan_hdl, 1, &xfer_elem, true);
 	if (gsi_res) {
-		ipa_err("Error queueing xfer: %d\n", gsi_res);
 		result = -EFAULT;
 		goto queue_xfer_fail;
 	}
