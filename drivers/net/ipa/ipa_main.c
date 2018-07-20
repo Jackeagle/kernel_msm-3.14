@@ -157,7 +157,7 @@ static int ipa_active_clients_log_init(void)
 
 	log = &ipa_ctx->ipa_active_clients_logging;
 
-	bufp = kzalloc(count * size, GFP_KERNEL);
+	bufp = kcalloc(count, size, GFP_KERNEL);
 	if (!bufp)
 		return -ENOMEM;
 
