@@ -1441,6 +1441,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	long chan_id;
 	u32 completed;
 
+	ipa_assert(!(props->ring_size % GSI_RING_ELEMENT_SIZE));
 	ipa_bug_on(props->ch_id >= gsi_ctx->max_ch);
 
 	if (ipahal_dma_alloc(&props->mem, props->ring_size, GFP_KERNEL)) {
