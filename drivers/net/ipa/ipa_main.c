@@ -44,6 +44,8 @@
 
 #define IPA_ACTIVE_CLIENTS_TABLE_BUF_SIZE 2048
 
+#define IPA_SYS_DESC_FIFO_SZ 0x800
+
 /* Shared memory */
 
 #define IPA_SMEM_SIZE (8 * 1024)
