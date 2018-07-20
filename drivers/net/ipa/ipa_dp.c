@@ -335,16 +335,8 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	int i = 0;
 	int j;
 	int result;
-	const struct ipa_gsi_ep_config *gsi_ep_cfg;
 
-	gsi_ep_cfg = ipa_get_gsi_ep_info(ep->client);
-
-	if (unlikely(num_desc > gsi_ep_cfg->ipa_if_tlv)) {
-		ipa_err("Too many chained descriptors need=%d max=%d\n",
-			num_desc, gsi_ep_cfg->ipa_if_tlv);
-		WARN_ON(1);
-		return -EPERM;
-	}
+	ipa_assert(num_desc <= ipa_get_gsi_ep_info(ep->client)->ipa_if_tlv);
 
 	xfer_elem = kzalloc(num_desc * sizeof(*xfer_elem), GFP_ATOMIC);
 	if (!xfer_elem)
