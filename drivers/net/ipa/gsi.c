@@ -1203,7 +1203,6 @@ static u32 channel_command(unsigned long chan_id, enum gsi_ch_cmd_opcode op)
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
 long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 {
-	unsigned long required_alignment = roundup_pow_of_two(size);
 	unsigned long evt_id;
 	struct gsi_evt_ctx *evtr;
 	unsigned long flags;
@@ -1238,9 +1237,9 @@ long gsi_alloc_evt_ring(u32 size, u16 int_modt)
 	}
 
 	/* Verify the result meets our alignment requirements */
-	if (evtr->mem.phys_base % required_alignment) {
+	if (evtr->mem.phys_base % roundup_pow_of_two(size)) {
 		ipa_err("ring base %pad not aligned to 0x%lx\n",
-			&evtr->mem.phys_base, required_alignment);
+			&evtr->mem.phys_base, roundup_pow_of_two(size));
 		ret = -EINVAL;
 		goto err_free_dma;
 	}
