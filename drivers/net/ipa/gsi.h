@@ -88,7 +88,7 @@ struct ipa_gsi_ep_config {
  */
 struct gsi_chan_props {
 	struct ipa_mem_buffer mem;
-	u32 ring_size;			/* bytes */
+	u32 ring_count;
 	bool from_gsi;
 	bool use_db_engine;
 	u8 low_weight;

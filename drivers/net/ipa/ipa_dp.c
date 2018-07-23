@@ -2190,9 +2190,8 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		gsi_channel_props.low_weight = 1;
 	gsi_channel_props.chan_user_data = ep->sys;
 
-	gsi_channel_props.ring_size = ipa_gsi_ring_count(ep->client,
+	gsi_channel_props.ring_count = ipa_gsi_ring_count(ep->client,
 							    in->fifo_count);
-	gsi_channel_props.ring_size *= GSI_RING_ELEMENT_SIZE;
 
 	result = gsi_alloc_channel(&gsi_channel_props);
 	if (result < 0)

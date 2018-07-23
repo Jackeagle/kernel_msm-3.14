@@ -1432,6 +1432,7 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 
 long gsi_alloc_channel(struct gsi_chan_props *props)
 {
+	u32 size = props->ring_count * GSI_RING_ELEMENT_SIZE;
 	struct gsi_chan_ctx *chan;
 	struct gsi_evt_ctx *evtr;
 	size_t count;
@@ -1440,11 +1441,10 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	long chan_id;
 	u32 completed;
 
-	ipa_assert(!(props->ring_size % GSI_RING_ELEMENT_SIZE));
 	ipa_bug_on(props->ch_id >= gsi_ctx->max_ch);
 
-	if (ipahal_dma_alloc(&props->mem, props->ring_size, GFP_KERNEL)) {
-		ipa_err("fail to dma alloc %u bytes\n", props->ring_size);
+	if (ipahal_dma_alloc(&props->mem, size, GFP_KERNEL)) {
+		ipa_err("fail to dma alloc %u bytes\n", size);
 		return -ENOMEM;
 	}
 
