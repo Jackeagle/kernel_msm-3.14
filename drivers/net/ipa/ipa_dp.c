@@ -2171,9 +2171,10 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 {
 	struct gsi_chan_props gsi_channel_props = { };
 	const struct ipa_gsi_ep_config *gsi_ep_info;
+	u32 desc_fifo_sz = in->fifo_count * GSI_RING_ELEMENT_SIZE;
 	int result;
 
-	result = evt_ring_hdl_get(ep, in->desc_fifo_sz);
+	result = evt_ring_hdl_get(ep, desc_fifo_sz);
 	if (result < 0)
 		return result;
 	ep->gsi_evt_ring_hdl = result;
@@ -2191,7 +2192,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	gsi_channel_props.chan_user_data = ep->sys;
 
 	gsi_channel_props.ring_size = ipa_gsi_ring_mem_size(ep->client,
-							    in->desc_fifo_sz);
+							    desc_fifo_sz);
 	result = gsi_alloc_channel(&gsi_channel_props);
 	if (result < 0)
 		goto fail_alloc_channel;

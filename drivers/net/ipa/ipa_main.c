@@ -307,8 +307,7 @@ static int setup_apps_cmd_prod_pipe(void)
 	struct ipa_sys_connect_params sys_in = { };
 
 	sys_in.client = IPA_CLIENT_APPS_CMD_PROD;
-	sys_in.desc_fifo_sz =
-			IPA_APPS_CMD_PROD_RING_COUNT * GSI_RING_ELEMENT_SIZE;
+	sys_in.fifo_count = IPA_APPS_CMD_PROD_RING_COUNT;
 	sys_in.ipa_ep_cfg.mode.mode = IPA_DMA;
 	sys_in.ipa_ep_cfg.mode.dst = IPA_CLIENT_APPS_LAN_CONS;
 
@@ -633,8 +632,7 @@ static int setup_apps_lan_cons_pipe(void)
 	struct ipa_sys_connect_params sys_in = { };
 
 	sys_in.client = IPA_CLIENT_APPS_LAN_CONS;
-	sys_in.desc_fifo_sz =
-			IPA_APPS_LAN_CONS_RING_COUNT * GSI_RING_ELEMENT_SIZE;
+	sys_in.fifo_count = IPA_APPS_LAN_CONS_RING_COUNT;
 	sys_in.notify = ipa_lan_rx_cb;
 	sys_in.priv = NULL;
 
