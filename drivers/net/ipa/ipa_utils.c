@@ -816,8 +816,6 @@ void ipa_init_ep_flt_bitmap(void)
 {
 	enum ipa_client_type cl;
 
-	ipa_assert(!ipa_ctx->ep_flt_bitmap);
-
 	for (cl = 0; cl < IPA_CLIENT_MAX ; cl++) {
 		const struct ipa_ep_configuration *ep_config;
 
