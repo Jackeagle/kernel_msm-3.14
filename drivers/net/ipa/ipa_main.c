@@ -44,7 +44,8 @@
 
 #define IPA_ACTIVE_CLIENTS_TABLE_BUF_SIZE 2048
 
-#define IPA_SYS_DESC_FIFO_SZ 0x800
+#define IPA_APPS_CMD_PROD_RING_COUNT	128
+#define IPA_APPS_LAN_CONS_RING_COUNT	128
 
 /* Shared memory */
 
@@ -306,7 +307,8 @@ static int setup_apps_cmd_prod_pipe(void)
 	struct ipa_sys_connect_params sys_in = { };
 
 	sys_in.client = IPA_CLIENT_APPS_CMD_PROD;
-	sys_in.desc_fifo_sz = IPA_SYS_DESC_FIFO_SZ;
+	sys_in.desc_fifo_sz =
+			IPA_APPS_CMD_PROD_RING_COUNT * GSI_RING_ELEMENT_SIZE;
 	sys_in.ipa_ep_cfg.mode.mode = IPA_DMA;
 	sys_in.ipa_ep_cfg.mode.dst = IPA_CLIENT_APPS_LAN_CONS;
 
@@ -631,7 +633,8 @@ static int setup_apps_lan_cons_pipe(void)
 	struct ipa_sys_connect_params sys_in = { };
 
 	sys_in.client = IPA_CLIENT_APPS_LAN_CONS;
-	sys_in.desc_fifo_sz = IPA_SYS_DESC_FIFO_SZ;
+	sys_in.desc_fifo_sz =
+			IPA_APPS_LAN_CONS_RING_COUNT * GSI_RING_ELEMENT_SIZE;
 	sys_in.notify = ipa_lan_rx_cb;
 	sys_in.priv = NULL;
 
@@ -652,13 +655,6 @@ static int setup_apps_lan_cons_pipe(void)
 static long ipa_setup_apps_pipes(void)
 {
 	long result;
-
-	/* Memory size must be a multiple of the ring element size.
-	 * Note that ipa_gsi_chan_mem_size() assumes a multipler
-	 * (4 for producer, 2 for consumer) times the desc_fifo_sz
-	 * set below (reproduced here; 2 is the more restrictive case).
-	 */
-	BUILD_BUG_ON((2 * IPA_SYS_DESC_FIFO_SZ) % GSI_RING_ELEMENT_SIZE);
 
 	/* CMD OUT (AP->IPA) */
 	ipa_ctx->clnt_hdl_cmd = setup_apps_cmd_prod_pipe();
