@@ -1231,14 +1231,14 @@ int ipa_disable_apps_wan_cons_deaggr(u32 agg_size, u32 agg_count)
 	if ((agg_size >> 10) > limit) {
 		ipa_err("IPA-AGG byte limit %d\n", limit);
 		ipa_err("exceed aggr_byte_limit\n");
-		return -1;
+		return -EINVAL;
 	}
 
 	limit = ipahal_aggr_get_max_pkt_limit();
 	if (agg_count > limit) {
 		ipa_err("IPA-AGG pkt limit %d\n", limit);
 		ipa_err("exceed aggr_pkt_limit\n");
-		return -1;
+		return -EINVAL;
 	}
 
 	ipa_ctx->ipa_client_apps_wan_cons_agg_gro = true;
