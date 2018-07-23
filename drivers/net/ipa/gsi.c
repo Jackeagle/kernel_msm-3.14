@@ -96,7 +96,6 @@ struct gsi_ring_ctx {
 	u64 rp;
 	u64 wp_local;
 	u64 rp_local;
-	u8 elem_sz;
 	u16 max_num_elem;
 	u64 end;
 };
@@ -510,26 +509,28 @@ static void gsi_handle_glob_ee(void)
 
 static void ring_wp_local_inc(struct gsi_ring_ctx *ring)
 {
-	ring->wp_local += ring->elem_sz;
+	ring->wp_local += GSI_RING_ELEMENT_SIZE;
 	if (ring->wp_local == ring->end)
 		ring->wp_local = ring->mem.phys_base;
 }
 
 static void ring_rp_local_inc(struct gsi_ring_ctx *ring)
 {
-	ring->rp_local += ring->elem_sz;
+	ring->rp_local += GSI_RING_ELEMENT_SIZE;
 	if (ring->rp_local == ring->end)
 		ring->rp_local = ring->mem.phys_base;
 }
 
 static u16 ring_rp_local_index(struct gsi_ring_ctx *ring)
 {
-	return (u16)(ring->rp_local - ring->mem.phys_base) / ring->elem_sz;
+	return (u16)(ring->rp_local - ring->mem.phys_base) /
+			GSI_RING_ELEMENT_SIZE;
 }
 
 static u16 ring_wp_local_index(struct gsi_ring_ctx *ring)
 {
-	return (u16)(ring->wp_local - ring->mem.phys_base) / ring->elem_sz;
+	return (u16)(ring->wp_local - ring->mem.phys_base) /
+			GSI_RING_ELEMENT_SIZE;
 }
 
 static void chan_xfer_cb(struct gsi_chan_ctx *chan, u16 count)
@@ -1136,9 +1137,9 @@ static void gsi_init_ring(struct gsi_ring_ctx *ring, struct ipa_mem_buffer *mem)
 	ring->rp = mem->phys_base;
 	ring->wp_local = mem->phys_base;
 	ring->rp_local = mem->phys_base;
-	ring->elem_sz = GSI_RING_ELEMENT_SIZE;
-	ring->max_num_elem = mem->size / ring->elem_sz - 1;
-	ring->end = mem->phys_base + (ring->max_num_elem + 1) * ring->elem_sz;
+	ring->max_num_elem = mem->size / GSI_RING_ELEMENT_SIZE - 1;
+	ring->end = mem->phys_base + (ring->max_num_elem + 1) *
+			GSI_RING_ELEMENT_SIZE;
 }
 
 static void gsi_prime_evt_ring(struct gsi_evt_ctx *evtr)
@@ -1148,7 +1149,7 @@ static void gsi_prime_evt_ring(struct gsi_evt_ctx *evtr)
 	spin_lock_irqsave(&evtr->ring.slock, flags);
 	memset(evtr->ring.mem.base, 0, evtr->ring.mem.size);
 	evtr->ring.wp_local = evtr->ring.mem.phys_base +
-		evtr->ring.max_num_elem * evtr->ring.elem_sz;
+				evtr->ring.max_num_elem * GSI_RING_ELEMENT_SIZE;
 	gsi_ring_evt_doorbell(evtr);
 	spin_unlock_irqrestore(&evtr->ring.slock, flags);
 }
@@ -1837,7 +1838,8 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 		tre.chain = (xfer[i].flags & GSI_XFER_FLAG_CHAIN) ? 1 : 0;
 
 		idx = ring_wp_local_index(&chan->ring);
-		tre_ptr = chan->ring.mem.base + idx * chan->ring.elem_sz;
+		tre_ptr = chan->ring.mem.base + idx *
+				GSI_RING_ELEMENT_SIZE;
 
 		/* write the TRE to ring */
 		*tre_ptr = tre;
