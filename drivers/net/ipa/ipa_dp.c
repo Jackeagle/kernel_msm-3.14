@@ -2163,7 +2163,7 @@ static long evt_ring_hdl_get(struct ipa_ep_context *ep, u32 fifo_count)
 
 	ring_count = ipa_gsi_ring_count(ep->client, fifo_count);
 
-	return gsi_alloc_evt_ring(ring_count * GSI_RING_ELEMENT_SIZE, modt);
+	return gsi_alloc_evt_ring(ring_count, modt);
 }
 
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,

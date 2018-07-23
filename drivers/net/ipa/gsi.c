@@ -1201,16 +1201,15 @@ static u32 channel_command(unsigned long chan_id, enum gsi_ch_cmd_opcode op)
 }
 
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
-long gsi_alloc_evt_ring(u32 size, u16 int_modt)
+long gsi_alloc_evt_ring(u32 ring_count, u16 int_modt)
 {
+	u32 size = ring_count * GSI_RING_ELEMENT_SIZE;
 	unsigned long evt_id;
 	struct gsi_evt_ctx *evtr;
 	unsigned long flags;
 	u32 completed;
 	u32 val;
 	int ret;
-
-	ipa_assert(!(size % GSI_RING_ELEMENT_SIZE));
 
 	/* Get the mutex to allocate from the bitmap and issue a command */
 	mutex_lock(&gsi_ctx->mlock);
