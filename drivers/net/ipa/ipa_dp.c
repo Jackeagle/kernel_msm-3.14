@@ -2130,7 +2130,7 @@ void ipa_gsi_irq_rx_notify_cb(void *chan_data, u16 count)
 	ipa_rx_switch_to_poll_mode(sys);
 }
 
-/* GSI ring length is calculated based on the desc_fifo_sz which
+/* GSI ring length is calculated based on the fifo_count which
  * defines the descriptor FIFO.  (GSI descriptors are 16 bytes.)
  * For producer pipes there is also an additional descriptor
  * for TAG STATUS immediate command.  An exception to this is the
@@ -2138,12 +2138,12 @@ void ipa_gsi_irq_rx_notify_cb(void *chan_data, u16 count)
  * based completions.
  */
 static u32
-ipa_gsi_ring_mem_size(enum ipa_client_type client, u32 desc_fifo_sz)
+ipa_gsi_ring_mem_size(enum ipa_client_type client, u32 fifo_count)
 {
 	if (client == IPA_CLIENT_APPS_CMD_PROD)
-		return 4 * desc_fifo_sz;
+		return 4 * fifo_count * GSI_RING_ELEMENT_SIZE;
 
-	return 2 * desc_fifo_sz;
+	return 2 * fifo_count * GSI_RING_ELEMENT_SIZE;
 }
 
 /* Returns the event ring handle to use for the given endpoint
@@ -2156,13 +2156,12 @@ ipa_gsi_ring_mem_size(enum ipa_client_type client, u32 desc_fifo_sz)
 static long evt_ring_hdl_get(struct ipa_ep_context *ep, u32 fifo_count)
 {
 	u32 sz;
-	u32 desc_fifo_sz = fifo_count * GSI_RING_ELEMENT_SIZE;
 	u16 modt = ep->sys->no_intr ? 0 : IPA_GSI_EVT_RING_INT_MODT;
 
 	ipa_debug("client=%d moderation threshold cycles=%u cnt=1\n",
 		  ep->client, modt);
 
-	sz = ipa_gsi_ring_mem_size(ep->client, desc_fifo_sz);
+	sz = ipa_gsi_ring_mem_size(ep->client, fifo_count);
 
 	return gsi_alloc_evt_ring(sz, modt);
 }
@@ -2172,7 +2171,6 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 {
 	struct gsi_chan_props gsi_channel_props = { };
 	const struct ipa_gsi_ep_config *gsi_ep_info;
-	u32 desc_fifo_sz = in->fifo_count * GSI_RING_ELEMENT_SIZE;
 	int result;
 
 	result = evt_ring_hdl_get(ep, in->fifo_count);
@@ -2193,7 +2191,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	gsi_channel_props.chan_user_data = ep->sys;
 
 	gsi_channel_props.ring_size = ipa_gsi_ring_mem_size(ep->client,
-							    desc_fifo_sz);
+							    in->fifo_count);
 	result = gsi_alloc_channel(&gsi_channel_props);
 	if (result < 0)
 		goto fail_alloc_channel;
