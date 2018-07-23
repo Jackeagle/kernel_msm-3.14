@@ -1912,7 +1912,7 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 	if (!config_valid()) {
 		ipa_err("invalid configuration\n");
 		result = -EFAULT;
-		goto err_hal_destroy;
+		goto err_clear_flt;
 	}
 
 	/* get BUS handle */
@@ -1922,7 +1922,7 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 	if (!ipa_ctx->ipa_bus_hdl) {
 		ipa_err("fail to register with bus mgr!\n");
 		result = -ENODEV;
-		goto err_hal_destroy;
+		goto err_clear_bus_scale_tbl;
 	}
 
 	/* init active_clients_log */
@@ -1962,7 +1962,11 @@ err_clear_gsi_ctx:
 err_unregister_bus_handle:
 	msm_bus_scale_unregister_client(ipa_ctx->ipa_bus_hdl);
 	ipa_ctx->ipa_bus_hdl = 0;
+err_clear_bus_scale_tbl:
 	ipa_ctx->bus_scale_tbl = NULL;
+err_clear_flt:
+	ipa_ctx->ep_flt_num = 0;
+	ipa_ctx->ep_flt_bitmap = 0;
 err_hal_destroy:
 	ipahal_destroy();
 	iounmap(ipa_ctx->mmio);
