@@ -607,11 +607,6 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			edata.u.data = epid;
 			if (copy_to_user(user_data, &edata, size))
 				rc = -EFAULT;
-			if (copy_from_user(&edata, user_data, size)) {
-				ipa_err("copy extended ioctl data failed\n");
-				rc = -EFAULT;
-				break;
-			}
 			ipa_debug("RMNET_IOCTL_GET_EPID return %d\n",
 				  edata.u.data);
 			break;
@@ -624,11 +619,6 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
 			if (copy_to_user(user_data, &edata, size))
 				rc = -EFAULT;
-			if (copy_from_user(&edata, user_data, size)) {
-				ipa_err("copy extended ioctl data failed\n");
-				rc = -EFAULT;
-			break;
-		}
 			ipa_debug("RMNET_IOCTL_GET_EP_PAIR c: %d p: %d\n",
 				  edata.u.ipa_ep_pair.consumer_pipe_num,
 				  edata.u.ipa_ep_pair.producer_pipe_num);
