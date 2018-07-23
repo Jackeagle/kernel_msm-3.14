@@ -53,7 +53,7 @@
 #define DRIVER_NAME "wwan_ioctl"
 
 #define IPA_APPS_WWAN_CONS_RING_COUNT	128
-#define IPA_SYS_TX_DATA_DESC_FIFO_SZ 0x1000
+#define IPA_APPS_WWAN_PROD_RING_COUNT	256
 
 static int ipa_rmnet_poll(struct napi_struct *napi, int budget);
 
@@ -457,7 +457,8 @@ static int handle_egress_format(struct net_device *dev,
 
 	ipa_wan_ep_cfg->client = IPA_CLIENT_APPS_WAN_PROD;
 	ipa_wan_ep_cfg->notify = apps_ipa_tx_complete_notify;
-	ipa_wan_ep_cfg->desc_fifo_sz = IPA_SYS_TX_DATA_DESC_FIFO_SZ;
+	ipa_wan_ep_cfg->desc_fifo_sz =
+			IPA_APPS_WWAN_PROD_RING_COUNT * GSI_RING_ELEMENT_SIZE;
 	ipa_wan_ep_cfg->priv = dev;
 
 	mutex_lock(&rmnet_ipa_ctx->pipe_handle_guard);
