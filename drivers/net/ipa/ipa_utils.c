@@ -957,12 +957,8 @@ ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
  */
 static int ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 {
-	if (ep_aggr->aggr_en == IPA_ENABLE_DEAGGR &&
-	    !IPA_EP_SUPPORTS_DEAGGR(clnt_hdl)) {
-		ipa_err("pipe=%d cannot be configured to DEAGGR\n", clnt_hdl);
-		WARN_ON(1);
-		return -EINVAL;
-	}
+	if (ep_aggr->aggr_en == IPA_ENABLE_DEAGGR)
+		ipa_assert(IPA_EP_SUPPORTS_DEAGGR(clnt_hdl));
 
 	ipa_debug("pipe=%d en=%d(%s), type=%d(%s)\n", clnt_hdl,
 		  ep_aggr->aggr_en, ipa_get_aggr_enable_str(ep_aggr->aggr_en),
