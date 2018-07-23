@@ -28,11 +28,6 @@
 #include "ipa_qmi.h"
 #include "ipa_i.h"
 
-/* The transport descriptor size was changed to GSI_CHAN_RE_SIZE_16B, but
- * IPA users still use sps_iovec size as FIFO element size.
- */
-#define IPA_FIFO_ELEMENT_SIZE 8
-
 #define WWAN_METADATA_SHFT 24
 #define WWAN_METADATA_MASK 0xFF000000
 #define WWAN_DATA_LEN 2000
@@ -57,7 +52,7 @@
 #define NAPI_WEIGHT 60
 #define DRIVER_NAME "wwan_ioctl"
 
-#define IPA_WWAN_CONS_DESC_FIFO_SZ 256
+#define IPA_APPS_WWAN_CONS_RING_COUNT	128
 #define IPA_SYS_TX_DATA_DESC_FIFO_SZ 0x1000
 
 static int ipa_rmnet_poll(struct napi_struct *napi, int budget);
@@ -383,7 +378,7 @@ static int handle_ingress_format(struct net_device *dev,
 
 	ipa_wan_ep_cfg->napi_enabled = true;
 	ipa_wan_ep_cfg->desc_fifo_sz =
-			IPA_WWAN_CONS_DESC_FIFO_SZ * IPA_FIFO_ELEMENT_SIZE;
+			IPA_APPS_WWAN_CONS_RING_COUNT * GSI_RING_ELEMENT_SIZE;
 
 	mutex_lock(&rmnet_ipa_ctx->pipe_handle_guard);
 
