@@ -807,10 +807,8 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 		}
 	}
 
-	if (ipa_cfg_ep(ipa_ep_idx, &sys_in->ipa_ep_cfg)) {
-		ipa_err("fail to configure EP.\n");
-		goto fail_gen2;
-	}
+	ipa_cfg_ep(ipa_ep_idx, &sys_in->ipa_ep_cfg);
+
 	ipa_cfg_ep_status(ipa_ep_idx, &ep->status);
 
 	ipa_debug("ep %u configuration successful\n", ipa_ep_idx);

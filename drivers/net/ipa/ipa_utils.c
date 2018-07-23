@@ -1107,7 +1107,7 @@ static void ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
  *
  * Note:	Should not be called from atomic context
  */
-int ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
+void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 {
 	ipa_cfg_ep_hdr(clnt_hdl, &ipa_ep_cfg->hdr);
 	ipa_cfg_ep_hdr_ext(clnt_hdl, &ipa_ep_cfg->hdr_ext);
@@ -1124,8 +1124,6 @@ int ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 	} else {
 		ipa_cfg_ep_metadata_mask(clnt_hdl, &ipa_ep_cfg->metadata_mask);
 	}
-
-	return 0;
 }
 
 /** ipa_cfg_ep_status() - IPA end-point status configuration
