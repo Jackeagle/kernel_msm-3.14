@@ -566,8 +566,7 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	case RMNET_IOCTL_EXTENDED:
 		size = sizeof(struct rmnet_ioctl_extended_s);
 		ipa_debug("get ioctl: RMNET_IOCTL_EXTENDED\n");
-		if (copy_from_user(&edata,
-				   (u8 *)ifr->ifr_ifru.ifru_data, size)) {
+		if (copy_from_user(&edata, ifr->ifr_ifru.ifru_data, size)) {
 			ipa_err("failed to copy extended ioctl data\n");
 			rc = -EFAULT;
 			break;
@@ -580,8 +579,7 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 				(RMNET_IOCTL_FEAT_NOTIFY_MUX_CHANNEL |
 				RMNET_IOCTL_FEAT_SET_EGRESS_DATA_FORMAT |
 				RMNET_IOCTL_FEAT_SET_INGRESS_DATA_FORMAT);
-			if (copy_to_user((u8 *)ifr->ifr_ifru.ifru_data,
-					 &edata, size))
+			if (copy_to_user(ifr->ifr_ifru.ifru_data, &edata, size))
 				rc = -EFAULT;
 			break;
 		/*  Set MRU  */
@@ -593,27 +591,23 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 		/*  Get MRU  */
 		case RMNET_IOCTL_GET_MRU:
 			edata.u.data = mru;
-			if (copy_to_user((u8 *)ifr->ifr_ifru.ifru_data,
-					 &edata, size))
+			if (copy_to_user(ifr->ifr_ifru.ifru_data, &edata, size))
 				rc = -EFAULT;
 			break;
 		/* GET SG support */
 		case RMNET_IOCTL_GET_SG_SUPPORT:
 			/* We always advertise scatter/gather support */
 			edata.u.data = 1;
-			if (copy_to_user((u8 *)ifr->ifr_ifru.ifru_data,
-					 &edata, size))
+			if (copy_to_user(ifr->ifr_ifru.ifru_data, &edata, size))
 				rc = -EFAULT;
 			break;
 		/*  Get endpoint ID  */
 		case RMNET_IOCTL_GET_EPID:
 			ipa_debug("get ioctl: RMNET_IOCTL_GET_EPID\n");
 			edata.u.data = epid;
-			if (copy_to_user((u8 *)ifr->ifr_ifru.ifru_data,
-					 &edata, size))
+			if (copy_to_user(ifr->ifr_ifru.ifru_data, &edata, size))
 				rc = -EFAULT;
-			if (copy_from_user(&edata,
-					   (u8 *)ifr->ifr_ifru.ifru_data,
+			if (copy_from_user(&edata, ifr->ifr_ifru.ifru_data,
 					   size)) {
 				ipa_err("copy extended ioctl data failed\n");
 				rc = -EFAULT;
@@ -629,11 +623,9 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_PROD);
 			edata.u.ipa_ep_pair.producer_pipe_num =
 			ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
-			if (copy_to_user((u8 *)ifr->ifr_ifru.ifru_data,
-					 &edata, size))
+			if (copy_to_user(ifr->ifr_ifru.ifru_data, &edata, size))
 				rc = -EFAULT;
-			if (copy_from_user(&edata,
-					   (u8 *)ifr->ifr_ifru.ifru_data,
+			if (copy_from_user(&edata, ifr->ifr_ifru.ifru_data,
 					   size)) {
 				ipa_err("copy extended ioctl data failed\n");
 				rc = -EFAULT;
@@ -647,8 +639,7 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 		case RMNET_IOCTL_GET_DRIVER_NAME:
 			memcpy(&edata.u.if_name,
 			       rmnet_ipa_ctx->dev->name, sizeof(IFNAMSIZ));
-			if (copy_to_user((u8 *)ifr->ifr_ifru.ifru_data,
-					 &edata, size))
+			if (copy_to_user(ifr->ifr_ifru.ifru_data, &edata, size))
 				rc = -EFAULT;
 			break;
 		/*  Add MUX ID	*/
