@@ -349,13 +349,13 @@ static int handle_ingress_format(struct net_device *dev,
 		ret = ipa_disable_apps_wan_cons_deaggr(
 			  in->u.ingress_format.agg_size,
 			  in->u.ingress_format.agg_count);
+		if (ret)
+			return ret;
 
-		if (!ret) {
-			ipa_wan_ep_cfg->ipa_ep_cfg.aggr.aggr_byte_limit =
-			   in->u.ingress_format.agg_size;
-			ipa_wan_ep_cfg->ipa_ep_cfg.aggr.aggr_pkt_limit =
-			   in->u.ingress_format.agg_count;
-		}
+		ipa_wan_ep_cfg->ipa_ep_cfg.aggr.aggr_byte_limit =
+			in->u.ingress_format.agg_size;
+		ipa_wan_ep_cfg->ipa_ep_cfg.aggr.aggr_pkt_limit =
+			in->u.ingress_format.agg_count;
 	}
 
 	ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_len =
