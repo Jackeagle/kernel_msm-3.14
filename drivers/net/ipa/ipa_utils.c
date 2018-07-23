@@ -1428,14 +1428,14 @@ int ipa_gsi_dma_task_alloc(void)
 	struct ipa_mem_buffer *mem = &ipa_ctx->dma_task_info.mem;
 
 	if (ipahal_dma_alloc(mem, IPA_GSI_CHANNEL_STOP_PKT_SIZE, GFP_KERNEL))
-		return -EFAULT;
+		return -ENOMEM;
 
 	ipa_ctx->dma_task_info.cmd_pyld = ipahal_dma_task_32b_addr_pyld(mem);
 	if (!ipa_ctx->dma_task_info.cmd_pyld) {
 		ipa_err("failed to construct dma_task_32b_addr cmd\n");
 		ipahal_dma_free(mem);
 
-		return -EFAULT;
+		return -ENOMEM;
 	}
 
 	return 0;
