@@ -2131,19 +2131,19 @@ void ipa_gsi_irq_rx_notify_cb(void *chan_data, u16 count)
 }
 
 /* GSI ring length is calculated based on the fifo_count which
- * defines the descriptor FIFO.  (GSI descriptors are 16 bytes.)
+ * defines the descriptor FIFO.
  * For producer pipes there is also an additional descriptor
  * for TAG STATUS immediate command.  An exception to this is the
  * APPS_WAN_PROD pipe, which uses event ring rather than TAG STATUS
  * based completions.
  */
 static u32
-ipa_gsi_ring_mem_size(enum ipa_client_type client, u32 fifo_count)
+ipa_gsi_ring_count(enum ipa_client_type client, u32 fifo_count)
 {
 	if (client == IPA_CLIENT_APPS_CMD_PROD)
-		return 4 * fifo_count * GSI_RING_ELEMENT_SIZE;
+		return 4 * fifo_count;
 
-	return 2 * fifo_count * GSI_RING_ELEMENT_SIZE;
+	return 2 * fifo_count;
 }
 
 /* Returns the event ring handle to use for the given endpoint
@@ -2155,15 +2155,15 @@ ipa_gsi_ring_mem_size(enum ipa_client_type client, u32 fifo_count)
  */
 static long evt_ring_hdl_get(struct ipa_ep_context *ep, u32 fifo_count)
 {
-	u32 sz;
+	u32 ring_count;
 	u16 modt = ep->sys->no_intr ? 0 : IPA_GSI_EVT_RING_INT_MODT;
 
 	ipa_debug("client=%d moderation threshold cycles=%u cnt=1\n",
 		  ep->client, modt);
 
-	sz = ipa_gsi_ring_mem_size(ep->client, fifo_count);
+	ring_count = ipa_gsi_ring_count(ep->client, fifo_count);
 
-	return gsi_alloc_evt_ring(sz, modt);
+	return gsi_alloc_evt_ring(ring_count * GSI_RING_ELEMENT_SIZE, modt);
 }
 
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
@@ -2190,8 +2190,10 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		gsi_channel_props.low_weight = 1;
 	gsi_channel_props.chan_user_data = ep->sys;
 
-	gsi_channel_props.ring_size = ipa_gsi_ring_mem_size(ep->client,
+	gsi_channel_props.ring_size = ipa_gsi_ring_count(ep->client,
 							    in->fifo_count);
+	gsi_channel_props.ring_size *= GSI_RING_ELEMENT_SIZE;
+
 	result = gsi_alloc_channel(&gsi_channel_props);
 	if (result < 0)
 		goto fail_alloc_channel;
