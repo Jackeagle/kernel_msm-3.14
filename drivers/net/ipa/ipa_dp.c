@@ -2153,9 +2153,10 @@ ipa_gsi_ring_mem_size(enum ipa_client_type client, u32 desc_fifo_sz)
  * event ring handle or a new handle.  Caller is responsible for
  * deallocating the event ring *unless* it is the common one.
  */
-static long evt_ring_hdl_get(struct ipa_ep_context *ep, u32 desc_fifo_sz)
+static long evt_ring_hdl_get(struct ipa_ep_context *ep, u32 fifo_count)
 {
 	u32 sz;
+	u32 desc_fifo_sz = fifo_count * GSI_RING_ELEMENT_SIZE;
 	u16 modt = ep->sys->no_intr ? 0 : IPA_GSI_EVT_RING_INT_MODT;
 
 	ipa_debug("client=%d moderation threshold cycles=%u cnt=1\n",
@@ -2174,7 +2175,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	u32 desc_fifo_sz = in->fifo_count * GSI_RING_ELEMENT_SIZE;
 	int result;
 
-	result = evt_ring_hdl_get(ep, desc_fifo_sz);
+	result = evt_ring_hdl_get(ep, in->fifo_count);
 	if (result < 0)
 		return result;
 	ep->gsi_evt_ring_hdl = result;
