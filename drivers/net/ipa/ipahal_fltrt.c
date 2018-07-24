@@ -78,30 +78,12 @@ struct ipahal_fltrt_obj {
 	u8 eq_bitfield[IPA_EQ_MAX];
 };
 
+/* We have some forward references */
+static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap);
+static u64 ipa_fltrt_create_tbl_addr(u64 addr);
+static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr);
+
 static struct ipahal_fltrt_obj ipahal_fltrt;
-
-static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap)
-{
-	/* At IPA3, global configuration is possible but not used */
-	return ep_bitmap << 1;
-}
-
-static u64 ipa_fltrt_create_tbl_addr(u64 addr)
-{
-	ipa_assert(!(addr % ipahal_fltrt.sysaddr_align));
-
-	return addr;
-}
-
-static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr)
-{
-	ipa_debug_low("Parsing hwaddr 0x%llx\n", hwaddr);
-
-	ipa_assert(!(hwaddr & 0x1));
-	ipa_assert(!(hwaddr % ipahal_fltrt.sysaddr_align));
-
-	return hwaddr;
-}
 
 /* The IPA implements offloaded packet filtering and routing
  * capabilities.  This is managed by programming IPA-resident
@@ -183,6 +165,29 @@ static const struct ipahal_fltrt_obj ipahal_fltrt_objs = {
 		[IPA_IS_FRAG]			= 15,
 	},
 };
+
+static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap)
+{
+	/* At IPA3, global configuration is possible but not used */
+	return ep_bitmap << 1;
+}
+
+static u64 ipa_fltrt_create_tbl_addr(u64 addr)
+{
+	ipa_assert(!(addr % ipahal_fltrt.sysaddr_align));
+
+	return addr;
+}
+
+static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr)
+{
+	ipa_debug_low("Parsing hwaddr 0x%llx\n", hwaddr);
+
+	ipa_assert(!(hwaddr & 0x1));
+	ipa_assert(!(hwaddr % ipahal_fltrt.sysaddr_align));
+
+	return hwaddr;
+}
 
 /* Set up an empty table in system memory.  This will be used, for
  * example, to delete a route table safely.  If successful, record
