@@ -105,21 +105,19 @@ struct ipahal_imm_cmd_obj {
 		.name = NULL,			\
 		.opcode = OPCODE_INVAL,		\
 	}
-static const struct ipahal_imm_cmd_obj
-		ipahal_imm_cmd_objs[][IPA_IMM_CMD_MAX] = {
-	/* IPAv3.5.1 */
-	[IPA_HW_v3_5_1] = {
-		imm_cmd_obj(IP_V4_FILTER_INIT,		3),
-		imm_cmd_obj(IP_V6_FILTER_INIT,		4),
-		imm_cmd_obj(IP_V4_ROUTING_INIT,		7),
-		imm_cmd_obj(IP_V6_ROUTING_INIT,		8),
-		imm_cmd_obj(HDR_INIT_LOCAL,		9),
-		imm_cmd_obj(REGISTER_WRITE,		12),
-		imm_cmd_obj(IP_PACKET_INIT,		16),
-		imm_cmd_obj(DMA_TASK_32B_ADDR,		17),
-		imm_cmd_obj(DMA_SHARED_MEM,		19),
-		imm_cmd_obj(IP_PACKET_TAG_STATUS,	20),
-	},
+
+/* IPAv3.5.1 */
+static const struct ipahal_imm_cmd_obj ipahal_imm_cmd_objs[] = {
+	imm_cmd_obj(IP_V4_FILTER_INIT,		3),
+	imm_cmd_obj(IP_V6_FILTER_INIT,		4),
+	imm_cmd_obj(IP_V4_ROUTING_INIT,		7),
+	imm_cmd_obj(IP_V6_ROUTING_INIT,		8),
+	imm_cmd_obj(HDR_INIT_LOCAL,		9),
+	imm_cmd_obj(REGISTER_WRITE,		12),
+	imm_cmd_obj(IP_PACKET_INIT,		16),
+	imm_cmd_obj(DMA_TASK_32B_ADDR,		17),
+	imm_cmd_obj(DMA_SHARED_MEM,		19),
+	imm_cmd_obj(IP_PACKET_TAG_STATUS,	20),
 };
 
 #undef imm_cmd_obj
@@ -176,16 +174,13 @@ static bool check_too_big(char *name, u64 value, u8 bits)
 }
 
 /* ipahal_imm_cmd_init() - Build the Immediate command information table
- *  See ipahal_imm_cmd_objs[][] comments
+ *  See ipahal_imm_cmd_objs[] comments
  */
 static void ipahal_imm_cmd_init(enum ipa_hw_version hw_version)
 {
-	ipa_assert(hw_version < ARRAY_SIZE(ipahal_imm_cmd_objs));
-
 	ipa_debug_low("Entry - HW_TYPE=%d\n", hw_version);
 
-	memcpy(&ipahal_imm_cmds, &ipahal_imm_cmd_objs[hw_version],
-	       sizeof(ipahal_imm_cmds));
+	memcpy(&ipahal_imm_cmds, &ipahal_imm_cmd_objs, sizeof(ipahal_imm_cmds));
 }
 
 struct ipahal_imm_cmd_pyld *
