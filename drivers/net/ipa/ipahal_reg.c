@@ -590,16 +590,6 @@ static const struct ipahal_reg_obj ipahal_regs[] = {
 #undef pfunc
 #undef cfunc
 
-/* ipahal_reg_init() - Build the registers information table
- *
- * Note: As global variables are initialized with zero, any un-overridden
- *  register entry will be zero. By this we recognize them.
- */
-void ipahal_reg_init(enum ipa_hw_version hw_version)
-{
-	ipa_debug_low("Entry - HW_TYPE=%d\n", hw_version);
-}
-
 /* Get the offset of a n parameterized register
  */
 u32 ipahal_reg_n_offset(enum ipahal_reg reg, u32 n)

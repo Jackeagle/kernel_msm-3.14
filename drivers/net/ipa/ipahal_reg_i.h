@@ -6,8 +6,6 @@
 #ifndef _IPAHAL_REG_I_H_
 #define _IPAHAL_REG_I_H_
 
-void ipahal_reg_init(enum ipa_hw_version hw_version);
-
 /* IPA_ROUTE register */
 #define ROUTE_DIS_BMSK				0x00000001
 #define ROUTE_DEF_PIPE_BMSK			0x0000003e
