@@ -57,13 +57,11 @@ struct ipahal_fltrt_obj {
 	int rule_min_prio;
 	u32 low_rule_id;
 	u32 rule_id_bit_len;
-	u64 (*create_tbl_addr)(u64 addr);
 	u64 (*parse_tbl_addr)(u64 hwaddr);
 	u8 eq_bitfield[IPA_EQ_MAX];
 };
 
 /* We have some forward references */
-static u64 ipa_fltrt_create_tbl_addr(u64 addr);
 static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr);
 
 /* The IPA implements offloaded packet filtering and routing
@@ -101,7 +99,6 @@ static const struct ipahal_fltrt_obj ipahal_fltrt = {
 	.rule_min_prio		= IPA_RULE_MIN_PRIORITY,
 	.low_rule_id		= IPA_LOW_RULE_ID,
 	.rule_id_bit_len	= IPA_RULE_ID_BIT_LEN,
-	.create_tbl_addr	= ipa_fltrt_create_tbl_addr,
 	.parse_tbl_addr		= ipa_fltrt_parse_tbl_addr,
 	.eq_bitfield = {
 		[IPA_TOS_EQ]			= 0,
@@ -168,7 +165,7 @@ int ipahal_empty_fltrt_init(void)
 		return -EFAULT;
 	}
 	ipahal_ctx->empty_fltrt_tbl_addr =
-			ipahal_fltrt.create_tbl_addr(mem->phys_base);
+			ipa_fltrt_create_tbl_addr(mem->phys_base);
 
 	ipa_debug("empty table allocated in system memory");
 
