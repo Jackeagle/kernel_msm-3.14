@@ -37,17 +37,11 @@ struct ipahal_imm_cmd_obj {
 	u16		opcode;
 };
 
-#define OPCODE_INVAL	((u16)0xffff)
 #define idsym(id)	IPA_IMM_CMD_ ## id
 #define imm_cmd_obj(id, o)			\
 	[idsym(id)] = {				\
 		.name = #id,			\
 		.opcode = o,			\
-	}
-#define imm_cmd_obj_inval(id)			\
-	[idsym(id)] = {				\
-		.name = NULL,			\
-		.opcode = OPCODE_INVAL,		\
 	}
 
 /* IPAv3.5.1 */
