@@ -381,14 +381,27 @@ exception_map(u8 exception, bool is_ipv6)
 	}
 }
 
-static void ipa_pkt_status_parse(
-	const void *unparsed_status, struct ipahal_pkt_status *status)
+/* ipahal_pkt_status_get_size() - Get H/W size of packet status */
+u32 ipahal_pkt_status_get_size(void)
+{
+	return sizeof(struct ipa_pkt_status_hw);
+}
+
+/* ipahal_pkt_status_parse() - Parse Packet Status payload to abstracted form
+ * @unparsed_status: Pointer to H/W format of the packet status as read from H/W
+ * @status: Pointer to pre-allocated buffer where the parsed info will be stored
+ */
+void ipahal_pkt_status_parse(const void *unparsed_status,
+			     struct ipahal_pkt_status *status)
 {
 	const struct ipa_pkt_status_hw *hw_status = unparsed_status;
 	u8 status_opcode = (u8)hw_status->status_opcode;
 	u8 nat_type = (u8)hw_status->nat_type;
 	enum ipahal_pkt_status_exception exception;
 	bool is_ipv6;
+
+	ipa_debug_low("Parse Status Packet\n");
+	memset(status, 0, sizeof(*status));
 
 	is_ipv6 = (hw_status->status_mask & 0x80) ? false : true;
 
@@ -437,24 +450,6 @@ static void ipa_pkt_status_parse(
 
 	/* If hardware status values change we may have to re-map this */
 	status->status_mask = hw_status->status_mask;
-}
-
-/* ipahal_pkt_status_get_size() - Get H/W size of packet status */
-u32 ipahal_pkt_status_get_size(void)
-{
-	return sizeof(struct ipa_pkt_status_hw);
-}
-
-/* ipahal_pkt_status_parse() - Parse Packet Status payload to abstracted form
- * @unparsed_status: Pointer to H/W format of the packet status as read from H/W
- * @status: Pointer to pre-allocated buffer where the parsed info will be stored
- */
-void ipahal_pkt_status_parse(const void *unparsed_status,
-			     struct ipahal_pkt_status *status)
-{
-	ipa_debug_low("Parse Status Packet\n");
-	memset(status, 0, sizeof(*status));
-	ipa_pkt_status_parse(unparsed_status, status);
 }
 
 int ipahal_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp)
