@@ -7,10 +7,10 @@
 #define _MSM_RMNET_H_
 
 /* Bitmap macros for RmNET driver operation mode. */
-#define RMNET_MODE_NONE	    (0x00)
-#define RMNET_MODE_LLP_ETH  (0x01)
-#define RMNET_MODE_LLP_IP   (0x02)
-#define RMNET_MODE_QOS	    (0x04)
+#define RMNET_MODE_NONE	    0x00
+#define RMNET_MODE_LLP_ETH  0x01
+#define RMNET_MODE_LLP_IP   0x02
+#define RMNET_MODE_QOS	    0x04
 #define RMNET_MODE_MASK	    (RMNET_MODE_LLP_ETH | \
 			     RMNET_MODE_LLP_IP	| \
 			     RMNET_MODE_QOS)

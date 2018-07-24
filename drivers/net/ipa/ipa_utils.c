@@ -47,16 +47,16 @@
 /* Invalid sequencer type */
 #define IPA_DPS_HPS_SEQ_TYPE_INVALID 0xFFFFFFFF
 
-#define QMB_MASTER_SELECT_DDR		(0)
+#define QMB_MASTER_SELECT_DDR		0
 
 /* Resource Group index*/
-#define IPA_GROUP_LWA_DL		(0) /* currently not used */
-#define IPA_GROUP_UL_DL			(1)
-#define IPA_MHI_GROUP_DMA		(2)
-#define IPA_GROUP_UC_RX_Q		(3) /* currently not used */
+#define IPA_GROUP_LWA_DL		0 /* currently not used */
+#define IPA_GROUP_UL_DL			1
+#define IPA_MHI_GROUP_DMA		2
+#define IPA_GROUP_UC_RX_Q		3 /* currently not used */
 
-#define IPA_SRC_GROUP_MAX		(4)
-#define IPA_DST_GROUP_MAX		(3)
+#define IPA_SRC_GROUP_MAX		4
+#define IPA_DST_GROUP_MAX		3
 
 enum ipa_rsrc_grp_type_src {
 	IPA_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS,
