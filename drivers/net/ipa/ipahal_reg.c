@@ -21,7 +21,7 @@
 /* struct ipahal_reg_obj - Register H/W information for specific IPA version
  * @construct - CB to construct register value from abstracted structure
  * @parse - CB to parse register value to abstracted structure
- * @offset - register offset relative to base address (or OFFSET_INVAL)
+ * @offset - register offset relative to base address
  * @n_ofst - N parameterized register sub-offset
  */
 struct ipahal_reg_obj {
@@ -359,9 +359,6 @@ ipareg_construct_idle_indication_cfg(enum ipahal_reg reg, const void *fields)
  *   defined for an earlier hardware version.  It is a bug for code
  *   to attempt to access a register which has an undefined (zero)
  *   offset value.
- * - An offset of OFFSET_INVAL indicates that a register is not
- *   supported for a particular hardware version.  It is a bug for
- *   code to attempt to access an unsupported register.
  * - If a construct function is supplied, the register must be
  *   written using ipahal_write_reg_n_fields() (or its wrapper
  *   function ipahal_write_reg_fields()).
@@ -369,7 +366,6 @@ ipareg_construct_idle_indication_cfg(enum ipahal_reg reg, const void *fields)
  *   read using ipahal_read_reg_n_fields() (or ipahal_read_reg_fields()).
  *   (Currently some debug code reads some registers directly, without parsing.)
  */
-#define OFFSET_INVAL	((u32)0xffffffff)
 
 #define cfunc(f)	ipareg_construct_ ## f
 #define pfunc(f)	ipareg_parse_ ## f
@@ -471,7 +467,6 @@ u32 ipahal_reg_n_offset(enum ipahal_reg reg, u32 n)
 	u32 offset;
 
 	offset = ipahal_regs[reg].offset;
-	ipa_assert(offset != OFFSET_INVAL);
 	offset += ipahal_regs[reg].n_ofst * n;
 
 	return offset;
