@@ -38,55 +38,6 @@ struct ipahal_imm_cmd_obj {
 	u16		opcode;
 };
 
-static struct ipahal_imm_cmd_obj ipahal_imm_cmds[IPA_IMM_CMD_MAX];
-
-static struct ipahal_imm_cmd_pyld *
-ipahal_imm_cmd_pyld_alloc_common(u16 opcode, size_t pyld_size, gfp_t flags)
-{
-	struct ipahal_imm_cmd_pyld *pyld;
-
-	ipa_debug_low("immediate command: %s\n", ipahal_imm_cmds[opcode].name);
-
-	pyld = kzalloc(sizeof(*pyld) + pyld_size, flags);
-	if (unlikely(!pyld)) {
-		ipa_err("kzalloc err (opcode %hu pyld_size %zu)\n", opcode,
-			pyld_size);
-		return NULL;
-	}
-	pyld->opcode = opcode;
-	pyld->len = pyld_size;
-
-	return pyld;
-}
-
-static struct ipahal_imm_cmd_pyld *
-ipahal_imm_cmd_pyld_alloc(u16 opcode, size_t pyld_size)
-{
-	return ipahal_imm_cmd_pyld_alloc_common(opcode, pyld_size, GFP_KERNEL);
-}
-
-static struct ipahal_imm_cmd_pyld *
-ipahal_imm_cmd_pyld_alloc_atomic(u16 opcode, size_t pyld_size)
-{
-	return ipahal_imm_cmd_pyld_alloc_common(opcode, pyld_size, GFP_ATOMIC);
-}
-
-/* Returns true if the value provided is too big to be represented
- * in the given number of bits.  In this case, WARN_ON() is called,
- * and a message is printed and using ipa_err().
- *
- * Returns false if the value is OK (not too big).
- */
-static bool check_too_big(char *name, u64 value, u8 bits)
-{
-	if (!WARN_ON(value & ~MASK(bits)))
-		return false;
-
-	ipa_err("%s is bigger than %hhubit width 0x%llx\n", name, bits, value);
-
-	return true;
-}
-
 /* The The opcode used for certain immediate commands may change
  * between different versions of IPA hardware.  The format of the
  * command data passed to the IPA can change slightly with new
@@ -174,6 +125,55 @@ static const struct ipahal_imm_cmd_obj
 #undef imm_cmd_obj
 #undef idsym
 #undef cfunc
+
+static struct ipahal_imm_cmd_obj ipahal_imm_cmds[IPA_IMM_CMD_MAX];
+
+static struct ipahal_imm_cmd_pyld *
+ipahal_imm_cmd_pyld_alloc_common(u16 opcode, size_t pyld_size, gfp_t flags)
+{
+	struct ipahal_imm_cmd_pyld *pyld;
+
+	ipa_debug_low("immediate command: %s\n", ipahal_imm_cmds[opcode].name);
+
+	pyld = kzalloc(sizeof(*pyld) + pyld_size, flags);
+	if (unlikely(!pyld)) {
+		ipa_err("kzalloc err (opcode %hu pyld_size %zu)\n", opcode,
+			pyld_size);
+		return NULL;
+	}
+	pyld->opcode = opcode;
+	pyld->len = pyld_size;
+
+	return pyld;
+}
+
+static struct ipahal_imm_cmd_pyld *
+ipahal_imm_cmd_pyld_alloc(u16 opcode, size_t pyld_size)
+{
+	return ipahal_imm_cmd_pyld_alloc_common(opcode, pyld_size, GFP_KERNEL);
+}
+
+static struct ipahal_imm_cmd_pyld *
+ipahal_imm_cmd_pyld_alloc_atomic(u16 opcode, size_t pyld_size)
+{
+	return ipahal_imm_cmd_pyld_alloc_common(opcode, pyld_size, GFP_ATOMIC);
+}
+
+/* Returns true if the value provided is too big to be represented
+ * in the given number of bits.  In this case, WARN_ON() is called,
+ * and a message is printed and using ipa_err().
+ *
+ * Returns false if the value is OK (not too big).
+ */
+static bool check_too_big(char *name, u64 value, u8 bits)
+{
+	if (!WARN_ON(value & ~MASK(bits)))
+		return false;
+
+	ipa_err("%s is bigger than %hhubit width 0x%llx\n", name, bits, value);
+
+	return true;
+}
 
 /* ipahal_imm_cmd_init() - Build the Immediate command information table
  *  See ipahal_imm_cmd_objs[][] comments
