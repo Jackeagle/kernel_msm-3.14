@@ -96,7 +96,7 @@ struct gsi_ring_ctx {
 	u64 rp;
 	u64 wp_local;
 	u64 rp_local;
-	u16 max_num_elem;
+	u16 count;			/* number of elements in ring */
 	u64 end;
 };
 
@@ -1137,9 +1137,8 @@ static void gsi_init_ring(struct gsi_ring_ctx *ring, struct ipa_mem_buffer *mem)
 	ring->rp = mem->phys_base;
 	ring->wp_local = mem->phys_base;
 	ring->rp_local = mem->phys_base;
-	ring->max_num_elem = mem->size / GSI_RING_ELEMENT_SIZE - 1;
-	ring->end = mem->phys_base + (ring->max_num_elem + 1) *
-			GSI_RING_ELEMENT_SIZE;
+	ring->count = mem->size / GSI_RING_ELEMENT_SIZE;
+	ring->end = mem->phys_base + ring->count * GSI_RING_ELEMENT_SIZE;
 }
 
 static void gsi_prime_evt_ring(struct gsi_evt_ctx *evtr)
@@ -1149,7 +1148,7 @@ static void gsi_prime_evt_ring(struct gsi_evt_ctx *evtr)
 	spin_lock_irqsave(&evtr->ring.slock, flags);
 	memset(evtr->ring.mem.base, 0, evtr->ring.mem.size);
 	evtr->ring.wp_local = evtr->ring.mem.phys_base +
-				evtr->ring.max_num_elem * GSI_RING_ELEMENT_SIZE;
+				(evtr->ring.count - 1) * GSI_RING_ELEMENT_SIZE;
 	gsi_ring_evt_doorbell(evtr);
 	spin_unlock_irqrestore(&evtr->ring.slock, flags);
 }
@@ -1746,9 +1745,9 @@ static u16 __gsi_query_channel_free_re(struct gsi_chan_ctx *chan)
 	if (end >= start)
 		used = end - start;
 	else
-		used = chan->ring.max_num_elem + 1 - (start - end);
+		used = chan->ring.count - (start - end);
 
-	return chan->ring.max_num_elem - used;
+	return chan->ring.count - used - 1;
 }
 
 bool gsi_is_channel_empty(unsigned long chan_id)
