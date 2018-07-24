@@ -440,8 +440,7 @@ ipareg_construct_idle_indication_cfg(enum ipahal_reg reg, const void *fields)
  *   function ipahal_write_reg_fields()).
  * - Generally, if a parse function is supplied, the register should
  *   read using ipahal_read_reg_n_fields() (or ipahal_read_reg_fields()).
- *   (Currently some debug code reads some registers directly, without
- *   parsing.)
+ *   (Currently some debug code reads some registers directly, without parsing.)
  */
 #define OFFSET_INVAL	((u32)0xffffffff)
 
@@ -475,7 +474,6 @@ static const struct ipahal_reg_obj ipahal_regs[] = {
 	reg_obj_nofunc(SUSPEND_IRQ_CLR_EE_n,	0x00003038,	0x1000),
 	reg_obj_nofunc(BCR,			0x000001d0,	0x0000),
 	reg_obj_nofunc(ENABLED_PIPES,		0x00000038,	0x0000),
-	reg_obj_nofunc(VERSION,			0x00000034,	0x0000),
 	reg_obj_nofunc(TAG_TIMER,		0x00000060,	0x0000),
 	reg_obj_nofunc(COMP_HW_VERSION,		0x00000030,	0x0000),
 	reg_obj_nofunc(SPARE_REG_1,		0x00002780,	0x0000),
