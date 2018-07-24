@@ -634,14 +634,11 @@ void ipahal_read_reg_n_fields(enum ipahal_reg reg, u32 n, void *fields)
  */
 void ipahal_write_reg_n_fields(enum ipahal_reg reg, u32 n, const void *fields)
 {
-	u32 val = 0;
+	u32 val;
 
-	if (WARN_ON(!ipahal_regs[reg].construct))
-		ipa_err("No construct function for %s\n",
-			ipahal_regs[reg].name);
-	else
-		val = ipahal_regs[reg].construct(reg, fields);
+	ipa_assert(ipahal_regs[reg].construct);
 
+	val = ipahal_regs[reg].construct(reg, fields);
 	ipahal_write_reg_n(reg, n, val);
 }
 
