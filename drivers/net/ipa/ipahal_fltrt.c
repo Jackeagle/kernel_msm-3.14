@@ -83,8 +83,6 @@ static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap);
 static u64 ipa_fltrt_create_tbl_addr(u64 addr);
 static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr);
 
-static struct ipahal_fltrt_obj ipahal_fltrt;
-
 /* The IPA implements offloaded packet filtering and routing
  * capabilities.  This is managed by programming IPA-resident
  * tables of rules that define the processing that should be
@@ -129,7 +127,7 @@ static struct ipahal_fltrt_obj ipahal_fltrt;
  *   parse_tbl_addr must be non-null function pointers
  */
 /* IPAv3.5.1 */
-static const struct ipahal_fltrt_obj ipahal_fltrt_objs = {
+static const struct ipahal_fltrt_obj ipahal_fltrt = {
 	.tbl_width		= IPA_HW_TBL_WIDTH,
 	.sysaddr_align		= IPA_HW_TBL_SYSADDR_ALIGN,
 	.lcladdr_align		= IPA_HW_TBL_LCLADDR_ALIGN,
@@ -229,8 +227,6 @@ void ipahal_empty_fltrt_destroy(void)
 void ipahal_fltrt_init(enum ipa_hw_version hw_version)
 {
 	ipa_debug("Entry - HW_TYPE=%d\n", hw_version);
-
-	memcpy(&ipahal_fltrt, &ipahal_fltrt_objs, sizeof(ipahal_fltrt));
 }
 
 /* Get the H/W table (flt/rt) header width */
