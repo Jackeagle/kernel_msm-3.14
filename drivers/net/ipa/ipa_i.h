@@ -453,8 +453,10 @@ struct ipa_tx_pkt_wrapper {
  */
 struct ipa_desc {
 	enum ipa_desc_type type;
-	void *pyld;
-	skb_frag_t *frag;
+	union {
+		void *pyld;
+		skb_frag_t *frag;
+	};
 	u16 len;
 	u16 opcode;
 	void (*callback)(void *user1, int user2);
