@@ -17,7 +17,6 @@
 #define IPA_HW_TBL_WIDTH		8
 #define IPA_HW_TBL_SYSADDR_ALIGN	128
 #define IPA_HW_TBL_LCLADDR_ALIGN	8
-#define IPA_HW_TBL_BLK_SIZE_ALIGN	128
 #define IPA_HW_RULE_START_ALIGN		8
 #define IPA_HW_TBL_HDR_WIDTH		8
 #define IPA_HW_TBL_ADDR_MASK		127
@@ -38,7 +37,6 @@
  * @tbl_width: Width of table in bytes
  * @sysaddr_align: System table address alignment
  * @lcladdr_align: Local table offset alignment
- * @blk_sz_align: Rules block size alignment
  * @rule_start_align: Rule start address alignment
  * @tbl_hdr_width: Width of the header structure in bytes
  * @tbl_addr_mask: Masking for Table address
@@ -62,7 +60,6 @@ struct ipahal_fltrt_obj {
 	u32 tbl_width;
 	u32 sysaddr_align;
 	u32 lcladdr_align;
-	u32 blk_sz_align;
 	u32 rule_start_align;
 	u32 tbl_hdr_width;
 	u32 tbl_addr_mask;
@@ -103,7 +100,6 @@ static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr);
  *   entry indicates the entry contains no definitions
  * - sysaddr_align is non-zero, and is a power of 2
  * - lcladdr_align is non-zero, and is a power of 2.
- * - blk_sz_align is non-zero, and is a power of 2.
  * - rule_start_align is non-zero, and is a power of 2.
  * - tbl_hdr_width is non-zero
  * - tbl_addr_mask is non-zero and is one less than a power of 2
@@ -117,7 +113,6 @@ static const struct ipahal_fltrt_obj ipahal_fltrt = {
 	.tbl_width		= IPA_HW_TBL_WIDTH,
 	.sysaddr_align		= IPA_HW_TBL_SYSADDR_ALIGN,
 	.lcladdr_align		= IPA_HW_TBL_LCLADDR_ALIGN,
-	.blk_sz_align		= IPA_HW_TBL_BLK_SIZE_ALIGN,
 	.rule_start_align	= IPA_HW_RULE_START_ALIGN,
 	.tbl_hdr_width		= IPA_HW_TBL_HDR_WIDTH,
 	.tbl_addr_mask		= IPA_HW_TBL_ADDR_MASK,
