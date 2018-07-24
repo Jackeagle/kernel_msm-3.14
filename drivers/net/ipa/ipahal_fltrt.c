@@ -226,22 +226,12 @@ void ipahal_empty_fltrt_destroy(void)
  */
 void ipahal_fltrt_init(enum ipa_hw_version hw_version)
 {
-	int i;
-
 	ipa_assert(hw_version < ARRAY_SIZE(ipahal_fltrt_objs));
 
 	ipa_debug("Entry - HW_TYPE=%d\n", hw_version);
 
-	/* Build up a the filter/route table descriptions we'll use */
-	for (i = hw_version; i >= 0; i--) {
-		const struct ipahal_fltrt_obj *fltrt;
-
-		fltrt = &ipahal_fltrt_objs[i];
-		if (fltrt->tbl_width) {
-			ipahal_fltrt = *fltrt;
-			break;
-		}
-	}
+	memcpy(&ipahal_fltrt, &ipahal_fltrt_objs[IPA_HW_v3_5_1],
+	       sizeof(ipahal_fltrt));
 }
 
 /* Get the H/W table (flt/rt) header width */
