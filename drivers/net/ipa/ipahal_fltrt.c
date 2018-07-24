@@ -146,43 +146,41 @@ static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr)
  * - write_val_to_hdr, create_flt_bitmap, create_tbl_addr, and
  *   parse_tbl_addr must be non-null function pointers
  */
-static const struct ipahal_fltrt_obj ipahal_fltrt_objs[] = {
-	/* IPAv3.5.1 */
-	[IPA_HW_v3_5_1] = {
-		.tbl_width		= IPA_HW_TBL_WIDTH,
-		.sysaddr_align		= IPA_HW_TBL_SYSADDR_ALIGN,
-		.lcladdr_align		= IPA_HW_TBL_LCLADDR_ALIGN,
-		.blk_sz_align		= IPA_HW_TBL_BLK_SIZE_ALIGN,
-		.rule_start_align	= IPA_HW_RULE_START_ALIGN,
-		.tbl_hdr_width		= IPA_HW_TBL_HDR_WIDTH,
-		.tbl_addr_mask		= IPA_HW_TBL_ADDR_MASK,
-		.rule_max_prio		= IPA_RULE_MAX_PRIORITY,
-		.rule_min_prio		= IPA_RULE_MIN_PRIORITY,
-		.low_rule_id		= IPA_LOW_RULE_ID,
-		.rule_id_bit_len	= IPA_RULE_ID_BIT_LEN,
-		.rule_buf_size		= IPA_HW_RULE_BUF_SIZE,
-		.write_val_to_hdr	= ipa_write_64,
-		.create_flt_bitmap	= ipa_fltrt_create_flt_bitmap,
-		.create_tbl_addr	= ipa_fltrt_create_tbl_addr,
-		.parse_tbl_addr		= ipa_fltrt_parse_tbl_addr,
-		.eq_bitfield = {
-			[IPA_TOS_EQ]			= 0,
-			[IPA_PROTOCOL_EQ]		= 1,
-			[IPA_TC_EQ]			= 2,
-			[IPA_OFFSET_MEQ128_0]		= 3,
-			[IPA_OFFSET_MEQ128_1]		= 4,
-			[IPA_OFFSET_MEQ32_0]		= 5,
-			[IPA_OFFSET_MEQ32_1]		= 6,
-			[IPA_IHL_OFFSET_MEQ32_0]	= 7,
-			[IPA_IHL_OFFSET_MEQ32_1]	= 8,
-			[IPA_METADATA_COMPARE]		= 9,
-			[IPA_IHL_OFFSET_RANGE16_0]	= 10,
-			[IPA_IHL_OFFSET_RANGE16_1]	= 11,
-			[IPA_IHL_OFFSET_EQ_32]		= 12,
-			[IPA_IHL_OFFSET_EQ_16]		= 13,
-			[IPA_FL_EQ]			= 14,
-			[IPA_IS_FRAG]			= 15,
-		},
+/* IPAv3.5.1 */
+static const struct ipahal_fltrt_obj ipahal_fltrt_objs = {
+	.tbl_width		= IPA_HW_TBL_WIDTH,
+	.sysaddr_align		= IPA_HW_TBL_SYSADDR_ALIGN,
+	.lcladdr_align		= IPA_HW_TBL_LCLADDR_ALIGN,
+	.blk_sz_align		= IPA_HW_TBL_BLK_SIZE_ALIGN,
+	.rule_start_align	= IPA_HW_RULE_START_ALIGN,
+	.tbl_hdr_width		= IPA_HW_TBL_HDR_WIDTH,
+	.tbl_addr_mask		= IPA_HW_TBL_ADDR_MASK,
+	.rule_max_prio		= IPA_RULE_MAX_PRIORITY,
+	.rule_min_prio		= IPA_RULE_MIN_PRIORITY,
+	.low_rule_id		= IPA_LOW_RULE_ID,
+	.rule_id_bit_len	= IPA_RULE_ID_BIT_LEN,
+	.rule_buf_size		= IPA_HW_RULE_BUF_SIZE,
+	.write_val_to_hdr	= ipa_write_64,
+	.create_flt_bitmap	= ipa_fltrt_create_flt_bitmap,
+	.create_tbl_addr	= ipa_fltrt_create_tbl_addr,
+	.parse_tbl_addr		= ipa_fltrt_parse_tbl_addr,
+	.eq_bitfield = {
+		[IPA_TOS_EQ]			= 0,
+		[IPA_PROTOCOL_EQ]		= 1,
+		[IPA_TC_EQ]			= 2,
+		[IPA_OFFSET_MEQ128_0]		= 3,
+		[IPA_OFFSET_MEQ128_1]		= 4,
+		[IPA_OFFSET_MEQ32_0]		= 5,
+		[IPA_OFFSET_MEQ32_1]		= 6,
+		[IPA_IHL_OFFSET_MEQ32_0]	= 7,
+		[IPA_IHL_OFFSET_MEQ32_1]	= 8,
+		[IPA_METADATA_COMPARE]		= 9,
+		[IPA_IHL_OFFSET_RANGE16_0]	= 10,
+		[IPA_IHL_OFFSET_RANGE16_1]	= 11,
+		[IPA_IHL_OFFSET_EQ_32]		= 12,
+		[IPA_IHL_OFFSET_EQ_16]		= 13,
+		[IPA_FL_EQ]			= 14,
+		[IPA_IS_FRAG]			= 15,
 	},
 };
 
@@ -222,16 +220,12 @@ void ipahal_empty_fltrt_destroy(void)
 }
 
 /* ipahal_fltrt_init() - Build the FLT/RT information table
- *  See ipahal_fltrt_objs[] comments
  */
 void ipahal_fltrt_init(enum ipa_hw_version hw_version)
 {
-	ipa_assert(hw_version < ARRAY_SIZE(ipahal_fltrt_objs));
-
 	ipa_debug("Entry - HW_TYPE=%d\n", hw_version);
 
-	memcpy(&ipahal_fltrt, &ipahal_fltrt_objs[IPA_HW_v3_5_1],
-	       sizeof(ipahal_fltrt));
+	memcpy(&ipahal_fltrt, &ipahal_fltrt_objs, sizeof(ipahal_fltrt));
 }
 
 /* Get the H/W table (flt/rt) header width */
