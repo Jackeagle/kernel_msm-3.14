@@ -16,6 +16,26 @@
 static struct ipahal_context ipahal_ctx_struct;
 struct ipahal_context *ipahal_ctx = &ipahal_ctx_struct;
 
+/* Immediate command names
+ *
+ * NOTE:: Any change to this enum, need to change to ipahal_imm_cmd_name_to_str
+ *	array as well.
+ */
+enum ipahal_imm_cmd_name {
+	IPA_IMM_CMD_IP_V4_FILTER_INIT,
+	IPA_IMM_CMD_IP_V6_FILTER_INIT,
+	IPA_IMM_CMD_IP_V4_ROUTING_INIT,
+	IPA_IMM_CMD_IP_V6_ROUTING_INIT,
+	IPA_IMM_CMD_HDR_INIT_LOCAL,
+	IPA_IMM_CMD_REGISTER_WRITE,
+	IPA_IMM_CMD_IP_PACKET_INIT,
+	IPA_IMM_CMD_DMA_SHARED_MEM,
+	IPA_IMM_CMD_IP_PACKET_TAG_STATUS,
+	IPA_IMM_CMD_DMA_TASK_32B_ADDR,
+	IPA_IMM_CMD_TABLE_DMA,
+	IPA_IMM_CMD_MAX,
+};
+
 static const char * const ipahal_pkt_status_exception_to_str[] = {
 	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_NONE),
 	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_DEAGGR),

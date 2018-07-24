@@ -9,26 +9,6 @@
 #include "ipa_common_i.h"
 #include "ipahal_fltrt_i.h"
 
-/* Immediate command names
- *
- * NOTE:: Any change to this enum, need to change to ipahal_imm_cmd_name_to_str
- *	array as well.
- */
-enum ipahal_imm_cmd_name {
-	IPA_IMM_CMD_IP_V4_FILTER_INIT,
-	IPA_IMM_CMD_IP_V6_FILTER_INIT,
-	IPA_IMM_CMD_IP_V4_ROUTING_INIT,
-	IPA_IMM_CMD_IP_V6_ROUTING_INIT,
-	IPA_IMM_CMD_HDR_INIT_LOCAL,
-	IPA_IMM_CMD_REGISTER_WRITE,
-	IPA_IMM_CMD_IP_PACKET_INIT,
-	IPA_IMM_CMD_DMA_SHARED_MEM,
-	IPA_IMM_CMD_IP_PACKET_TAG_STATUS,
-	IPA_IMM_CMD_DMA_TASK_32B_ADDR,
-	IPA_IMM_CMD_TABLE_DMA,
-	IPA_IMM_CMD_MAX,
-};
-
 /* Immediate commands abstracted structures */
 
 /* enum ipa_pipeline_clear_option - Values for pipeline clear waiting options
