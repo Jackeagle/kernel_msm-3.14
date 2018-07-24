@@ -527,26 +527,6 @@ struct ipa_rx_pkt_wrapper {
 	struct ipa_sys_context *sys;
 };
 
-struct ipa_stats {
-	u32 tx_sw_pkts;
-	u32 tx_hw_pkts;
-	u32 rx_pkts;
-	u32 rx_excp_pkts[IPAHAL_PKT_STATUS_EXCEPTION_MAX];
-	u32 rx_repl_repost;
-	u32 tx_pkts_compl;
-	u32 rx_q_len;
-	u32 stat_compl;
-	u32 aggr_close;
-	u32 wan_aggr_close;
-	u32 wan_rx_empty;
-	u32 wan_repl_rx_empty;
-	u32 lan_rx_empty;
-	u32 lan_repl_rx_empty;
-	u32 flow_enable;
-	u32 flow_disable;
-	u32 tx_non_linear;
-};
-
 struct ipa_active_clients {
 	struct mutex mutex;	/* protects when cnt changes from/to 0 */
 	atomic_t cnt;
@@ -742,7 +722,6 @@ struct ipa_context {
 	u32 clnt_hdl_data_in;
 	u32 clnt_hdl_data_out;
 	/* featurize if memory footprint becomes a concern */
-	struct ipa_stats stats;
 	void *logbuf;
 	void *logbuf_low;
 	u32 ipa_bus_hdl;
