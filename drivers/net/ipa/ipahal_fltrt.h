@@ -11,13 +11,6 @@
 /* Get the H/W table (flt/rt) header width */
 u32 ipahal_get_hw_tbl_hdr_width(void);
 
-/* Rule priority is used to distinguish rules order
- * at the integrated table consisting from hashable and
- * non-hashable tables. Max priority are rules that once are
- * scanned by IPA, IPA will not look for further rules and use it.
- */
-int ipahal_get_rule_max_priority(void);
-
 /* Does the given ID represents rule miss? */
 bool ipahal_is_rule_miss_id(u32 id);
 

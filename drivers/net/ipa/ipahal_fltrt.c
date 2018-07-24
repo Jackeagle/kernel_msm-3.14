@@ -142,16 +142,6 @@ u32 ipahal_get_hw_tbl_hdr_width(void)
 	return ipahal_fltrt.tbl_hdr_width;
 }
 
-/* Rule priority is used to distinguish rules order
- * at the integrated table consisting from hashable and
- * non-hashable tables. Max priority are rules that once are
- * scanned by IPA, IPA will not look for further rules and use it.
- */
-int ipahal_get_rule_max_priority(void)
-{
-	return ipahal_fltrt.rule_max_prio;
-}
-
 /* Does the given ID represents rule miss?
  * Rule miss ID, is always the max ID possible in the bit-pattern
  */
