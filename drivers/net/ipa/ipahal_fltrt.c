@@ -18,7 +18,6 @@
 #define IPA_HW_TBL_SYSADDR_ALIGN	128
 #define IPA_HW_TBL_LCLADDR_ALIGN	8
 #define IPA_HW_TBL_HDR_WIDTH		8
-#define IPA_HW_RULE_BUF_SIZE		256
 
 /* Rules Priority.
  * Needed due to rules classification to hashable and non-hashable.
@@ -40,7 +39,6 @@
  * @rule_min_prio: Min possible priority of a rule
  * @low_rule_id: Low value of Rule ID that can be used
  * @rule_id_bit_len: Rule is high (MSB) bit len
- * @rule_buf_size: Max size rule may utilize.
  * @write_val_to_hdr: Write address or offset to header entry
  * @create_flt_bitmap: Create bitmap in H/W format using given bitmap
  * @create_tbl_addr: Given raw table address, create H/W formated one
@@ -61,7 +59,6 @@ struct ipahal_fltrt_obj {
 	int rule_min_prio;
 	u32 low_rule_id;
 	u32 rule_id_bit_len;
-	u32 rule_buf_size;
 	void (*write_val_to_hdr)(u64 val, u8 *hdr);
 	u64 (*create_flt_bitmap)(u64 ep_bitmap);
 	u64 (*create_tbl_addr)(u64 addr);
@@ -110,7 +107,6 @@ static const struct ipahal_fltrt_obj ipahal_fltrt = {
 	.rule_min_prio		= IPA_RULE_MIN_PRIORITY,
 	.low_rule_id		= IPA_LOW_RULE_ID,
 	.rule_id_bit_len	= IPA_RULE_ID_BIT_LEN,
-	.rule_buf_size		= IPA_HW_RULE_BUF_SIZE,
 	.write_val_to_hdr	= ipa_write_64,
 	.create_flt_bitmap	= ipa_fltrt_create_flt_bitmap,
 	.create_tbl_addr	= ipa_fltrt_create_tbl_addr,
