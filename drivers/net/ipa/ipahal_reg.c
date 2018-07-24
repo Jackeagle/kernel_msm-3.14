@@ -134,8 +134,8 @@ debug_cnt_ctrl_type_valid(u8 dbg_cnt_ctrl_type, enum ipahal_reg reg)
 		break;
 	}
 
-	ipa_err("Invalid dbg_cnt_ctrl type (%hhu) for %s\n",
-		dbg_cnt_ctrl_type, ipahal_regs[reg].name);
+	ipa_err("Invalid dbg_cnt_ctrl type (%hhu) for reg %u\n",
+		dbg_cnt_ctrl_type, reg);
 
 	return false;
 }
@@ -194,7 +194,7 @@ static bool cs_offload_en_valid(u8 cs_offload_en, enum ipahal_reg reg)
 		break;
 	}
 
-	ipa_err("Invalid cs_offload_en value for %s\n", ipahal_regs[reg].name);
+	ipa_err("Invalid cs_offload_en value for reg %u\n", reg);
 
 	return false;
 }
