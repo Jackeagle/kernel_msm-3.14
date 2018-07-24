@@ -310,12 +310,6 @@ u32 ipahal_pkt_status_get_size(void);
 void ipahal_pkt_status_parse(const void *unparsed_status,
 			     struct ipahal_pkt_status *status);
 
-/* ipahal_pkt_status_exception_str() - returns string represents exception type
- * @exception: [in] The exception type
- */
-const char *ipahal_pkt_status_exception_str(
-	enum ipahal_pkt_status_exception exception);
-
 /* ipahal_dma_alloc() - allocate a DMA buffer, describe it in mem struct
  */
 int ipahal_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp);

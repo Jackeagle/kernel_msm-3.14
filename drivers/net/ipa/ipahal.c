@@ -457,29 +457,6 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 	ipa_pkt_status_parse(unparsed_status, status);
 }
 
-/* ipahal_pkt_status_exception_str() - returns string represents exception type
- * @exception: [in] The exception type
- */
-const char *
-ipahal_pkt_status_exception_str(enum ipahal_pkt_status_exception exception)
-{
-#define CASE(x)	case IPAHAL_PKT_STATUS_ ## x: return #x
-	switch (exception) {
-	CASE(EXCEPTION_NONE);
-	CASE(EXCEPTION_DEAGGR);
-	CASE(EXCEPTION_IPTYPE);
-	CASE(EXCEPTION_PACKET_LENGTH);
-	CASE(EXCEPTION_PACKET_THRESHOLD);
-	CASE(EXCEPTION_FRAG_RULE_MISS);
-	CASE(EXCEPTION_SW_FILT);
-	CASE(EXCEPTION_NAT);
-	CASE(EXCEPTION_IPV6CT);
-	default:
-		return "(unrecognized exception)";
-	}
-#undef CASE
-}
-
 int ipahal_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp)
 {
 	dma_addr_t phys;
