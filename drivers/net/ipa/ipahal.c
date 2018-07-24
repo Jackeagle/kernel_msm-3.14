@@ -488,8 +488,6 @@ void ipahal_init(enum ipa_hw_version hw_version, void __iomem *base)
 
 	ipahal_ctx->base = base;
 	/* ipahal_ctx->ipa_pdev must be set by a call to ipahal_dev_init() */
-
-	ipahal_fltrt_init(hw_version);
 }
 
 /* Assign the IPA HAL's device pointer.  Once it's assigned we can

@@ -222,13 +222,6 @@ void ipahal_empty_fltrt_destroy(void)
 	ipahal_dma_free(&ipahal_ctx->empty_fltrt_tbl);
 }
 
-/* ipahal_fltrt_init() - Build the FLT/RT information table
- */
-void ipahal_fltrt_init(enum ipa_hw_version hw_version)
-{
-	ipa_debug("Entry - HW_TYPE=%d\n", hw_version);
-}
-
 /* Get the H/W table (flt/rt) header width */
 u32 ipahal_get_hw_tbl_hdr_width(void)
 {

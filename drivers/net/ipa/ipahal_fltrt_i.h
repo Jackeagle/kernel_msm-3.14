@@ -31,7 +31,6 @@ enum ipa_fltrt_equations {
 	IPA_EQ_MAX,
 };
 
-void ipahal_fltrt_init(enum ipa_hw_version hw_version);
 int ipahal_empty_fltrt_init(void);
 void ipahal_empty_fltrt_destroy(void);
 
