@@ -80,14 +80,12 @@ static const char * const ipahal_pkt_status_exception_to_str[] = {
  * @opcode - Immediate command OpCode
  */
 struct ipahal_imm_cmd_obj {
-	const char	*name;
 	u16		opcode;
 };
 
 #define idsym(id)	IPA_IMM_CMD_ ## id
 #define imm_cmd_obj(id, o)			\
 	[idsym(id)] = {				\
-		.name = #id,			\
 		.opcode = o,			\
 	}
 
