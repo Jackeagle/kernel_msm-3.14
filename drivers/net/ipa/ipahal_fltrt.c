@@ -136,20 +136,6 @@ bool ipahal_is_rule_miss_id(u32 id)
 	return id == ((1U << ipahal_fltrt.rule_id_bit_len) - 1);
 }
 
-/* Get rule ID with high bit only asserted
- * Used e.g. to create groups of IDs according to this bit
- */
-u32 ipahal_get_rule_id_hi_bit(void)
-{
-	return BIT(ipahal_fltrt.rule_id_bit_len - 1);
-}
-
-/* Get the low value possible to be used for rule-id */
-u32 ipahal_get_low_rule_id(void)
-{
-	return ipahal_fltrt.low_rule_id;
-}
-
 void ipahal_free_empty_img(struct ipa_mem_buffer *mem)
 {
 	ipahal_dma_free(mem);

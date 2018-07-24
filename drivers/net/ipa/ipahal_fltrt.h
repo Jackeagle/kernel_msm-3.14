@@ -14,14 +14,6 @@ u32 ipahal_get_hw_tbl_hdr_width(void);
 /* Does the given ID represents rule miss? */
 bool ipahal_is_rule_miss_id(u32 id);
 
-/* Get rule ID with high bit only asserted
- * Used e.g. to create groups of IDs according to this bit
- */
-u32 ipahal_get_rule_id_hi_bit(void);
-
-/* Get the low value possible to be used for rule-id */
-u32 ipahal_get_low_rule_id(void);
-
 /* ipahal_rt_generate_empty_img() - Generate empty route image
  *  Creates routing header buffer for the given tables number.
  * For each table, make it point to the empty table on DDR.
