@@ -28,7 +28,6 @@ enum ipahal_reg {
 	IPA_ENDP_INIT_HDR_EXT_n,
 	IPA_ENDP_INIT_AGGR_n,
 	IPA_AGGR_FORCE_CLOSE,
-	IPA_ENDP_INIT_ROUTE_n,
 	IPA_ENDP_INIT_MODE_n,
 	IPA_ENDP_INIT_CTRL_n,
 	IPA_ENDP_INIT_HOL_BLOCK_EN_n,
@@ -80,13 +79,6 @@ struct ipahal_reg_route {
 	u32 route_def_hdr_ofst;
 	u8  route_frag_def_pipe;
 	u32 route_def_retain_hdr;
-};
-
-/* struct ipahal_reg_endp_init_route - IPA ENDP_INIT_ROUTE_n register
- * @route_table_index: Default index of routing table (IPA Consumer).
- */
-struct ipahal_reg_endp_init_route {
-	u32 route_table_index;
 };
 
 /* struct ipahal_reg_endp_init_mode - IPA ENDP_INIT_MODE_n register

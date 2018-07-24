@@ -278,14 +278,6 @@ ipareg_construct_endp_init_mode_n(enum ipahal_reg reg, const void *fields)
 	return val;
 }
 
-static u32
-ipareg_construct_endp_init_route_n(enum ipahal_reg reg, const void *fields)
-{
-	const struct ipahal_reg_endp_init_route *ep_init_rt = fields;
-
-	return field_gen(ep_init_rt->route_table_index, ROUTE_TABLE_INDEX_BMSK);
-}
-
 static void
 ipareg_parse_endp_init_aggr_n(enum ipahal_reg reg, void *fields, u32 val)
 {
@@ -484,8 +476,6 @@ static const struct ipahal_reg_obj ipahal_regs[] = {
 	reg_obj_both(ENDP_INIT_AGGR_n,
 			endp_init_aggr_n,	0x00000824,	0x0070),
 	reg_obj_nofunc(AGGR_FORCE_CLOSE,	0x000001ec,	0x0000),
-	reg_obj_cfunc(ENDP_INIT_ROUTE_n,
-			endp_init_route_n,	0x00000828,	0x0070),
 	reg_obj_cfunc(ENDP_INIT_MODE_n,
 			endp_init_mode_n,	0x00000820,	0x0070),
 	reg_obj_both(ENDP_INIT_CTRL_n,

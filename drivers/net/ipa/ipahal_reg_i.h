@@ -46,9 +46,6 @@
 /* IPA_AGGR_FORCE_CLOSE register */
 #define PIPE_BITMAP_BMSK			0x000fffff
 
-/* IPA_ENDP_INIT_ROUTE_n register */
-#define ROUTE_TABLE_INDEX_BMSK			0x0000001f
-
 /* IPA_ENDP_INIT_MODE_n register */
 #define HDR_FTCH_DISABLE_BMSK			0x40000000
 #define PAD_EN_BMSK				0x20000000
