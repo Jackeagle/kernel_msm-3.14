@@ -21,14 +21,12 @@
 /* struct ipahal_reg_obj - Register H/W information for specific IPA version
  * @construct - CB to construct register value from abstracted structure
  * @parse - CB to parse register value to abstracted structure
- * @name - register "name" (i.e., symbolic identifier)
  * @offset - register offset relative to base address (or OFFSET_INVAL)
  * @n_ofst - N parameterized register sub-offset
  */
 struct ipahal_reg_obj {
 	u32 (*construct)(enum ipahal_reg reg, const void *fields);
 	void (*parse)(enum ipahal_reg reg, void *fields, u32 val);
-	const char *name;
 	u32 offset;
 	u16 n_ofst;
 };
@@ -492,7 +490,6 @@ ipareg_construct_idle_indication_cfg(enum ipahal_reg reg, const void *fields)
 	[idsym(id)] = {				\
 		.construct = cf,		\
 		.parse = pf,			\
-		.name = #id,			\
 		.offset = o,			\
 		.n_ofst = n,			\
 	}
