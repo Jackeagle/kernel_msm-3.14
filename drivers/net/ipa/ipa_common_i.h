@@ -16,33 +16,50 @@
  * least one bit must be set, and all set bits in a field_mask must
  * be contiguous.
  *
- * The "width" of a field (1-32) can be determined by counting the
- * number of 1 bits in its field_mask.  The "shift" for a field
- * (i.e. the position of its rightmost set bit, 0-31) is the same as
- * the number of low-order 0 bits in the field_mask.  For constant
- * field_mask, these values can be computed at compile time.  (We
- * always inline this, and ensure we're using non-zero constants, to
- * ensure this happens.)
+ * The "width" of a field (1-32) can be determined by counting the number
+ * of 1 bits in its field_mask.  The "shift" for a field (i.e. the position
+ * of its rightmost set bit, 0-31) is the same as the number of low-order
+ * 0 bits in the field_mask.
+ *
+ * For constant field_mask, these values can be computed at compile time.
  */
-#define field_width(field_mask)	       hweight32(field_mask)
-#define field_shift(field_mask)	       __ffs(field_mask)
+static __always_inline u32 __field_mask_check(u32 field_mask)
+{
+	BUILD_BUG_ON(!__builtin_constant_p(field_mask));
+	BUILD_BUG_ON(!field_mask);
+	if (field_mask == ~0)
+		return ~0;	/* Valid, but won't pass next test */
+
+	BUILD_BUG_ON(!is_power_of_2((field_mask >> __ffs(field_mask)) + 1));
+
+	return field_mask;
+}
+
+/* Compute the number of set bits in the field mask */
+static __always_inline u32 field_width(u32 field_mask)
+{
+	return hweight32(__field_mask_check(field_mask));
+}
+
+/* Compute the position of the rightmost set bit in the field mask */
+static __always_inline u32 field_shift(u32 field_mask)
+{
+	return __ffs(__field_mask_check(field_mask));
+}
 
 /* Generate a field value--the given value shifted into the field's position */
 static __always_inline u32 field_gen(u32 val, u32 field_mask)
 {
-	BUILD_BUG_ON(!__builtin_constant_p(field_mask));
-	BUILD_BUG_ON(!field_mask);
-	WARN_ON(val > field_mask >> field_shift(field_mask));
+	u32 shift = field_shift(field_mask);
 
-	return val << field_shift(field_mask) & field_mask;
+	WARN_ON(val > field_mask >> shift);
+
+	return val << shift & field_mask;
 }
 
 /* Extract the value of a field from the given register */
 static __always_inline u32 field_val(u32 reg, u32 field_mask)
 {
-	BUILD_BUG_ON(!__builtin_constant_p(field_mask));
-	BUILD_BUG_ON(!field_mask);
-
 	return (reg & field_mask) >> field_shift(field_mask);
 }
 
