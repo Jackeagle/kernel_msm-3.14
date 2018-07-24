@@ -107,7 +107,7 @@ struct ipahal_imm_cmd_obj {
 	}
 
 /* IPAv3.5.1 */
-static const struct ipahal_imm_cmd_obj ipahal_imm_cmd_objs[] = {
+static struct ipahal_imm_cmd_obj ipahal_imm_cmds[] = {
 	imm_cmd_obj(IP_V4_FILTER_INIT,		3),
 	imm_cmd_obj(IP_V6_FILTER_INIT,		4),
 	imm_cmd_obj(IP_V4_ROUTING_INIT,		7),
@@ -123,8 +123,6 @@ static const struct ipahal_imm_cmd_obj ipahal_imm_cmd_objs[] = {
 #undef imm_cmd_obj
 #undef idsym
 #undef cfunc
-
-static struct ipahal_imm_cmd_obj ipahal_imm_cmds[IPA_IMM_CMD_MAX];
 
 static struct ipahal_imm_cmd_pyld *
 ipahal_imm_cmd_pyld_alloc_common(u16 opcode, size_t pyld_size, gfp_t flags)
@@ -173,14 +171,11 @@ static bool check_too_big(char *name, u64 value, u8 bits)
 	return true;
 }
 
-/* ipahal_imm_cmd_init() - Build the Immediate command information table
- *  See ipahal_imm_cmd_objs[] comments
+/* ipahal_imm_cmd_init()
  */
 static void ipahal_imm_cmd_init(enum ipa_hw_version hw_version)
 {
 	ipa_debug_low("Entry - HW_TYPE=%d\n", hw_version);
-
-	memcpy(&ipahal_imm_cmds, &ipahal_imm_cmd_objs, sizeof(ipahal_imm_cmds));
 }
 
 struct ipahal_imm_cmd_pyld *
