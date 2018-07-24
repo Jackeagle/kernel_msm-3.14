@@ -36,43 +36,15 @@
 
 #define IPA_MAX_STATUS_STAT_NUM 30
 
-#define IPA_IPC_LOG_PAGES 100
-
 #define IPA_MEM_CANARY_VAL 0xdeadbeef
-
-#define IPA_HDR_BIN0 0
-#define IPA_HDR_BIN1 1
-#define IPA_HDR_BIN2 2
-#define IPA_HDR_BIN3 3
-#define IPA_HDR_BIN4 4
-#define IPA_HDR_BIN_MAX 5
-
-#define IPA_HDR_PROC_CTX_BIN0 0
-#define IPA_HDR_PROC_CTX_BIN1 1
-#define IPA_HDR_PROC_CTX_BIN_MAX 2
-
-#define IPA_RX_POOL_CEIL 32
-#define IPA_RX_SKB_SIZE 1792
-
-#define IPA_A5_MUX_HDR_NAME "ipa_excp_hdr"
-#define IPA_LAN_RX_HDR_NAME "ipa_lan_hdr"
-#define IPA_INVALID_L4_PROTOCOL 0xFF
-
-#define IPA_HDR_PROC_CTX_TABLE_ALIGNMENT_BYTE 8
-#define IPA_HDR_PROC_CTX_TABLE_ALIGNMENT(start_ofst) \
-	(((start_ofst) + IPA_HDR_PROC_CTX_TABLE_ALIGNMENT_BYTE - 1) & \
-	~(IPA_HDR_PROC_CTX_TABLE_ALIGNMENT_BYTE - 1))
 
 #define IPA_GSI_CHANNEL_STOP_MAX_RETRY 10
 #define IPA_GSI_CHANNEL_STOP_PKT_SIZE 1
-
-#define IPA_GSI_CHANNEL_EMPTY_MAX_RETRY 15
 
 #define IPA_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES 120
 #define IPA_ACTIVE_CLIENTS_LOG_LINE_LEN 96
 #define FEATURE_ENUM_VAL(feature, opcode) ((feature << 5) | opcode)
 #define IPA_HW_NUM_FEATURES 0x8
-#define IPA_WAN_MSG_IPV6_ADDR_GW_LEN 4
 
 /** The IPA has a block of shared memory, divided into regions used for
  * specific purposes.  The following values define this layout (i.e.,
