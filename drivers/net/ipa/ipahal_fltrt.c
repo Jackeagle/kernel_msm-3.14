@@ -16,7 +16,6 @@
  */
 #define IPA_HW_TBL_WIDTH		8
 #define IPA_HW_TBL_SYSADDR_ALIGN	128
-#define IPA_HW_TBL_LCLADDR_ALIGN	8
 #define IPA_HW_TBL_HDR_WIDTH		8
 
 /* Rules Priority.
@@ -33,7 +32,6 @@
 /* struct ipahal_fltrt_obj - Flt/Rt H/W information for specific IPA version
  * @tbl_width: Width of table in bytes
  * @sysaddr_align: System table address alignment
- * @lcladdr_align: Local table offset alignment
  * @tbl_hdr_width: Width of the header structure in bytes
  * @rule_max_prio: Max possible priority of a rule
  * @rule_min_prio: Min possible priority of a rule
@@ -49,7 +47,6 @@
 struct ipahal_fltrt_obj {
 	u32 tbl_width;
 	u32 sysaddr_align;
-	u32 lcladdr_align;
 	u32 tbl_hdr_width;
 	int rule_max_prio;
 	int rule_min_prio;
@@ -76,7 +73,6 @@ struct ipahal_fltrt_obj {
  * - 0 is not a valid table width; a 0 tbl_width value in an
  *   entry indicates the entry contains no definitions
  * - sysaddr_align is non-zero, and is a power of 2
- * - lcladdr_align is non-zero, and is a power of 2.
  * - tbl_hdr_width is non-zero
  * - rule_min_prio is not less than rule_max_prio (0 is max prio)
  * - rule_id_bit_len is 2 or more
@@ -85,7 +81,6 @@ struct ipahal_fltrt_obj {
 static const struct ipahal_fltrt_obj ipahal_fltrt = {
 	.tbl_width		= IPA_HW_TBL_WIDTH,
 	.sysaddr_align		= IPA_HW_TBL_SYSADDR_ALIGN,
-	.lcladdr_align		= IPA_HW_TBL_LCLADDR_ALIGN,
 	.tbl_hdr_width		= IPA_HW_TBL_HDR_WIDTH,
 	.rule_max_prio		= IPA_RULE_MAX_PRIORITY,
 	.rule_min_prio		= IPA_RULE_MIN_PRIORITY,
@@ -145,15 +140,6 @@ void ipahal_empty_fltrt_destroy(void)
 u32 ipahal_get_hw_tbl_hdr_width(void)
 {
 	return ipahal_fltrt.tbl_hdr_width;
-}
-
-/* Get the H/W local table (SRAM) address alignment
- * Tables headers references to local tables via offsets in SRAM
- * This function return the alignment of the offset that IPA expects
- */
-u32 ipahal_get_lcl_tbl_addr_alignment(void)
-{
-	return ipahal_fltrt.lcladdr_align - 1;
 }
 
 /* Rule priority is used to distinguish rules order

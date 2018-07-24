@@ -11,12 +11,6 @@
 /* Get the H/W table (flt/rt) header width */
 u32 ipahal_get_hw_tbl_hdr_width(void);
 
-/* Get the H/W local table (SRAM) address alignment
- * Tables headers references to local tables via offsets in SRAM
- * This function return the alignment of the offset that IPA expects
- */
-u32 ipahal_get_lcl_tbl_addr_alignment(void);
-
 /* Rule priority is used to distinguish rules order
  * at the integrated table consisting from hashable and
  * non-hashable tables. Max priority are rules that once are
