@@ -952,8 +952,6 @@ static void ipa_tx_comp_usr_notify_release(void *user1, int user2)
 
 	ipa_debug_low("skb=%p ep=%d\n", skb, ep_idx);
 
-	IPA_STATS_INC_CNT(ipa_ctx->stats.tx_pkts_compl);
-
 	if (ipa_ctx->ep[ep_idx].client_notify) {
 		void *priv = ipa_ctx->ep[ep_idx].priv;
 		unsigned long data = (unsigned long)skb;
@@ -1038,16 +1036,11 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	desc[data_idx].user2 = src_ep_idx;
 
 	ret = ipa_send(ipa_ctx->ep[src_ep_idx].sys, data_idx + 1, desc);
-	if (!ret)
-		IPA_STATS_INC_CNT(ipa_ctx->stats.tx_hw_pkts);
-	else
+	if (ret)
 		ipa_err("failed to send skb %p nr_frags %u\n", skb, nr_frags);
 
-	if (nr_frags) {
-		if (!ret)
-			IPA_STATS_INC_CNT(ipa_ctx->stats.tx_non_linear);
+	if (nr_frags)
 		kfree(desc);
-	}
 
 	return ret;
 }
@@ -1126,12 +1119,6 @@ fail_skb_alloc:
 fail_kmem_cache_alloc:
 	if (atomic_read(&sys->repl.tail_idx) ==
 			atomic_read(&sys->repl.head_idx)) {
-		if (sys->ep->client == IPA_CLIENT_APPS_WAN_CONS)
-			IPA_STATS_INC_CNT(ipa_ctx->stats.wan_repl_rx_empty);
-		else if (sys->ep->client == IPA_CLIENT_APPS_LAN_CONS)
-			IPA_STATS_INC_CNT(ipa_ctx->stats.lan_repl_rx_empty);
-		else
-			WARN_ON(1);
 		pr_err_ratelimited("%s sys=%p repl ring empty\n", __func__,
 				   sys);
 		goto begin;
@@ -1356,12 +1343,6 @@ static void ipa_fast_replenish_rx_cache(struct ipa_sys_context *sys)
 
 	if (rx_len_cached - sys->len_pending_xfer
 		<= IPA_DEFAULT_SYS_YELLOW_WM) {
-		if (sys->ep->client == IPA_CLIENT_APPS_WAN_CONS)
-			IPA_STATS_INC_CNT(ipa_ctx->stats.wan_rx_empty);
-		else if (sys->ep->client == IPA_CLIENT_APPS_LAN_CONS)
-			IPA_STATS_INC_CNT(ipa_ctx->stats.lan_rx_empty);
-		else
-			WARN_ON(1);
 		queue_delayed_work(sys->wq, &sys->replenish_rx_work,
 				   msecs_to_jiffies(1));
 	}
@@ -1557,8 +1538,6 @@ begin:
 			skb_pull(skb, pkt_status_sz);
 			continue;
 		}
-		IPA_STATS_EXCP_CNT(status.exception,
-				   ipa_ctx->stats.rx_excp_pkts);
 		if (status.endp_dest_idx >= ipa_ctx->ipa_num_pipes ||
 		    status.endp_src_idx >= ipa_ctx->ipa_num_pipes) {
 			ipa_err("status fields invalid\n");
@@ -1592,9 +1571,6 @@ begin:
 		if (status.pkt_len == 0) {
 			ipa_debug_low("Skip aggr close status\n");
 			skb_pull(skb, pkt_status_sz);
-			IPA_STATS_INC_CNT(ipa_ctx->stats.aggr_close);
-			IPA_STATS_DEC_CNT(ipa_ctx->stats.rx_excp_pkts
-				[IPAHAL_PKT_STATUS_EXCEPTION_NONE]);
 			continue;
 		}
 
@@ -1699,9 +1675,6 @@ begin:
 			ipa_debug_low("tx comp exp for %d\n",
 				      status.endp_src_idx);
 			skb_pull(skb, pkt_status_sz);
-			IPA_STATS_INC_CNT(ipa_ctx->stats.stat_compl);
-			IPA_STATS_DEC_CNT(ipa_ctx->stats.rx_excp_pkts
-				[IPAHAL_PKT_STATUS_EXCEPTION_NONE]);
 		}
 	};
 
@@ -1832,7 +1805,6 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 			continue;
 		}
 
-		IPA_STATS_INC_CNT(ipa_ctx->stats.rx_pkts);
 		if (status.endp_dest_idx >= ipa_ctx->ipa_num_pipes ||
 		    status.endp_src_idx >= ipa_ctx->ipa_num_pipes ||
 		    status.pkt_len > IPA_GENERIC_AGGR_BYTE_LIMIT * 1024) {
@@ -1843,8 +1815,6 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 		if (status.pkt_len == 0) {
 			ipa_debug_low("Skip aggr close status\n");
 			skb_pull(skb, pkt_status_sz);
-			IPA_STATS_DEC_CNT(ipa_ctx->stats.rx_pkts);
-			IPA_STATS_INC_CNT(ipa_ctx->stats.wan_aggr_close);
 			continue;
 		}
 		ep_idx = ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);

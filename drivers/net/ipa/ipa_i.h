@@ -40,23 +40,6 @@
 
 #define IPA_MEM_CANARY_VAL 0xdeadbeef
 
-#define IPA_STATS
-
-#ifdef IPA_STATS
-#define IPA_STATS_INC_CNT(val) (++val)
-#define IPA_STATS_DEC_CNT(val) (--val)
-#define IPA_STATS_EXCP_CNT(__excp, __base) do {				\
-		enum ipahal_pkt_status_exception _e = (__excp);		\
-		if (_e < 0 || _e >= IPAHAL_PKT_STATUS_EXCEPTION_MAX)	\
-			break;						\
-		++__base[_e];						\
-	} while (0)
-#else
-#define IPA_STATS_INC_CNT(x) do { } while (0)
-#define IPA_STATS_DEC_CNT(x)
-#define IPA_STATS_EXCP_CNT(__excp, __base) do { } while (0)
-#endif
-
 #define IPA_HDR_BIN0 0
 #define IPA_HDR_BIN1 1
 #define IPA_HDR_BIN2 2
