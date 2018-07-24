@@ -475,7 +475,6 @@ static const struct ipahal_reg_obj ipahal_regs[] = {
 	reg_obj_nofunc(BCR,			0x000001d0,	0x0000),
 	reg_obj_nofunc(ENABLED_PIPES,		0x00000038,	0x0000),
 	reg_obj_nofunc(TAG_TIMER,		0x00000060,	0x0000),
-	reg_obj_nofunc(COMP_HW_VERSION,		0x00000030,	0x0000),
 	reg_obj_nofunc(SPARE_REG_1,		0x00002780,	0x0000),
 	reg_obj_nofunc(STATE_AGGR_ACTIVE,	0x0000010c,	0x0000),
 	reg_obj_cfunc(ENDP_INIT_HDR_n,
