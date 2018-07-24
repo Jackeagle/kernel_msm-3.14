@@ -80,11 +80,6 @@ static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap)
 	return ep_bitmap << 1;
 }
 
-static u64 ipa_fltrt_create_tbl_addr(u64 addr)
-{
-	return addr;
-}
-
 /* Set up an empty table in system memory.  This will be used, for
  * example, to delete a route table safely.  If successful, record
  * the table and also the dev pointer in the IPA HAL context.
@@ -106,8 +101,7 @@ int ipahal_empty_fltrt_init(void)
 
 		return -EFAULT;
 	}
-	ipahal_ctx->empty_fltrt_tbl_addr =
-			ipa_fltrt_create_tbl_addr(mem->phys_base);
+	ipahal_ctx->empty_fltrt_tbl_addr = (u64)mem->phys_base;
 
 	ipa_debug("empty table allocated in system memory");
 
