@@ -120,13 +120,6 @@ static bool check_too_big(char *name, u64 value, u8 bits)
 	return true;
 }
 
-/* ipahal_imm_cmd_init()
- */
-static void ipahal_imm_cmd_init(enum ipa_hw_version hw_version)
-{
-	ipa_debug_low("Entry - HW_TYPE=%d\n", hw_version);
-}
-
 struct ipahal_imm_cmd_pyld *
 ipahal_dma_shared_mem_write_pyld(struct ipa_mem_buffer *mem, u32 offset)
 {
@@ -528,7 +521,6 @@ void ipahal_init(enum ipa_hw_version hw_version, void __iomem *base)
 
 	/* Packet status parsing code requires no initialization */
 	ipahal_reg_init(hw_version);
-	ipahal_imm_cmd_init(hw_version);
 	ipahal_fltrt_init(hw_version);
 }
 
