@@ -39,7 +39,6 @@
  * @rule_min_prio: Min possible priority of a rule
  * @low_rule_id: Low value of Rule ID that can be used
  * @rule_id_bit_len: Rule is high (MSB) bit len
- * @create_flt_bitmap: Create bitmap in H/W format using given bitmap
  * @create_tbl_addr: Given raw table address, create H/W formated one
  * @parse_tbl_addr: Parse the given H/W address (hdr format)
  * @rt_generate_hw_rule: Generate RT rule in H/W format
@@ -58,14 +57,12 @@ struct ipahal_fltrt_obj {
 	int rule_min_prio;
 	u32 low_rule_id;
 	u32 rule_id_bit_len;
-	u64 (*create_flt_bitmap)(u64 ep_bitmap);
 	u64 (*create_tbl_addr)(u64 addr);
 	u64 (*parse_tbl_addr)(u64 hwaddr);
 	u8 eq_bitfield[IPA_EQ_MAX];
 };
 
 /* We have some forward references */
-static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap);
 static u64 ipa_fltrt_create_tbl_addr(u64 addr);
 static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr);
 
@@ -104,7 +101,6 @@ static const struct ipahal_fltrt_obj ipahal_fltrt = {
 	.rule_min_prio		= IPA_RULE_MIN_PRIORITY,
 	.low_rule_id		= IPA_LOW_RULE_ID,
 	.rule_id_bit_len	= IPA_RULE_ID_BIT_LEN,
-	.create_flt_bitmap	= ipa_fltrt_create_flt_bitmap,
 	.create_tbl_addr	= ipa_fltrt_create_tbl_addr,
 	.parse_tbl_addr		= ipa_fltrt_parse_tbl_addr,
 	.eq_bitfield = {
@@ -317,7 +313,7 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
 		return -ENOMEM;
 
 	if (ep_bitmap) {
-		u64 flt_bitmap = ipahal_fltrt.create_flt_bitmap(ep_bitmap);
+		u64 flt_bitmap = ipa_fltrt_create_flt_bitmap(ep_bitmap);
 
 		ipa_debug("flt bitmap 0x%llx\n", flt_bitmap);
 		ipa_write_64(flt_bitmap, mem->base);
