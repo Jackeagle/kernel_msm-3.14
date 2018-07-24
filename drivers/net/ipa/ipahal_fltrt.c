@@ -18,7 +18,7 @@
 #define IPA_HW_TBL_SYSADDR_ALIGN	128
 #define IPA_HW_TBL_LCLADDR_ALIGN	8
 #define IPA_HW_TBL_BLK_SIZE_ALIGN	128
-#define IPA_HW_RULE_START_ALIGN	8
+#define IPA_HW_RULE_START_ALIGN		8
 #define IPA_HW_TBL_HDR_WIDTH		8
 #define IPA_HW_TBL_ADDR_MASK		127
 #define IPA_HW_RULE_BUF_SIZE		256
@@ -27,12 +27,12 @@
  * Needed due to rules classification to hashable and non-hashable.
  * Higher priority is lower in number. i.e. 0 is highest priority
  */
-#define IPA_RULE_MAX_PRIORITY	0
-#define IPA_RULE_MIN_PRIORITY	1023
+#define IPA_RULE_MAX_PRIORITY		0
+#define IPA_RULE_MIN_PRIORITY		1023
 
 /* RULE ID, bit length (e.g. 10 bits).  */
 #define IPA_RULE_ID_BIT_LEN		10
-#define IPA_LOW_RULE_ID		1
+#define IPA_LOW_RULE_ID			1
 
 /* struct ipahal_fltrt_obj - Flt/Rt H/W information for specific IPA version
  * @tbl_width: Width of table in bytes
@@ -89,32 +89,18 @@ static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr);
  * performed by the IPA and the conditions under which they
  * should be applied.  Aspects of these rules are constrained
  * by things like table entry sizes and alignment requirements.
- * As IPA technology evolves, some of these constraints may
- * change, and the following table specifies the parameters
- * that should be used for particular versions of IPA hardware.
  *
- * The table consists of a set of "filter/route objects", each of
- * which is a structure that defines the constraints that must be
- * used for a particular version of IPA hardware.  There are also a
- * few functions that format data related to these tables to be sent
- * to the IPA, or parse an address coming from it.  The first
- * version of IPA hardware supported by the "ipahal" layer is 3.0.
- *
- * A version of IPA hardware newer than 3.0 does not need to
- * provide an entry in the following array if the constraints for
- * that version are the same as was defined by an older version;
- * it only requires an entry if one or more parameters differ from
- * what's used in the previous version.  If a slot below is empty
- * (indicated by a 0 tbl_width field) the corresponding hardware
- * version's properties are taken from an older hardware version.
+ * The table consists of a set of "filter/route objects", which is a
+ * structure that defines the constraints that must be used for the
+ * IPA hardware.  There are also a few functions that format data
+ * related to these tables to be sent to the IPA, or parse an
+ * address coming from it.
  *
  * The entries in this table have the following constraints.  Much
  * of this will be dictated by the hardware; the following statements
  * document assumptions of the code:
  * - 0 is not a valid table width; a 0 tbl_width value in an
- *   entry indicates the entry contains no definitions, and
- *   the definitions for that corresponding hardware version
- *   are inherited from an earlier version's entry.
+ *   entry indicates the entry contains no definitions
  * - sysaddr_align is non-zero, and is a power of 2
  * - lcladdr_align is non-zero, and is a power of 2.
  * - blk_sz_align is non-zero, and is a power of 2.
