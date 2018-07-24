@@ -18,11 +18,6 @@ u32 ipahal_get_hw_tbl_hdr_width(void);
  */
 int ipahal_get_rule_max_priority(void);
 
-/* Given a priority, calc and return the next lower one if it is in
- * legal range.
- */
-int ipahal_rule_decrease_priority(int *prio);
-
 /* Does the given ID represents rule miss? */
 bool ipahal_is_rule_miss_id(u32 id);
 

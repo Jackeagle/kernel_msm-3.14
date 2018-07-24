@@ -152,34 +152,6 @@ int ipahal_get_rule_max_priority(void)
 	return ipahal_fltrt.rule_max_prio;
 }
 
-/* Given a priority, calc and return the next lower one if it is in
- * legal range.
- */
-int ipahal_rule_decrease_priority(int *prio)
-{
-	if (!prio) {
-		ipa_err("Invalid Input\n");
-		return -EINVAL;
-	}
-
-	/* Priority logic is reverse. 0 priority considred max priority */
-	if (*prio > ipahal_fltrt.rule_min_prio ||
-	    *prio < ipahal_fltrt.rule_max_prio) {
-		ipa_err("Invalid given priority %d\n", *prio);
-		return -EINVAL;
-	}
-
-	*prio += 1;
-
-	if (*prio > ipahal_fltrt.rule_min_prio) {
-		ipa_err("Cannot decrease priority. Already on min\n");
-		*prio -= 1;
-		return -EFAULT;
-	}
-
-	return 0;
-}
-
 /* Does the given ID represents rule miss?
  * Rule miss ID, is always the max ID possible in the bit-pattern
  */
