@@ -82,23 +82,23 @@ struct ipahal_imm_cmd_obj {
 };
 
 #define idsym(id)	IPA_IMM_CMD_ ## id
-#define imm_cmd_obj(id, o)			\
+#define imm_cmd_obj(id)				\
 	[idsym(id)] = {				\
-		.opcode = o,			\
+		.opcode = idsym(id),		\
 	}
 
 /* IPAv3.5.1 */
 static struct ipahal_imm_cmd_obj ipahal_imm_cmds[] = {
-	imm_cmd_obj(IP_V4_FILTER_INIT,		3),
-	imm_cmd_obj(IP_V6_FILTER_INIT,		4),
-	imm_cmd_obj(IP_V4_ROUTING_INIT,		7),
-	imm_cmd_obj(IP_V6_ROUTING_INIT,		8),
-	imm_cmd_obj(HDR_INIT_LOCAL,		9),
-	imm_cmd_obj(REGISTER_WRITE,		12),
-	imm_cmd_obj(IP_PACKET_INIT,		16),
-	imm_cmd_obj(DMA_TASK_32B_ADDR,		17),
-	imm_cmd_obj(DMA_SHARED_MEM,		19),
-	imm_cmd_obj(IP_PACKET_TAG_STATUS,	20),
+	imm_cmd_obj(IP_V4_FILTER_INIT),
+	imm_cmd_obj(IP_V6_FILTER_INIT),
+	imm_cmd_obj(IP_V4_ROUTING_INIT),
+	imm_cmd_obj(IP_V6_ROUTING_INIT),
+	imm_cmd_obj(HDR_INIT_LOCAL),
+	imm_cmd_obj(REGISTER_WRITE),
+	imm_cmd_obj(IP_PACKET_INIT),
+	imm_cmd_obj(DMA_TASK_32B_ADDR),
+	imm_cmd_obj(DMA_SHARED_MEM),
+	imm_cmd_obj(IP_PACKET_TAG_STATUS),
 };
 
 #undef imm_cmd_obj
