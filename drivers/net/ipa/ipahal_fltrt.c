@@ -39,7 +39,6 @@
  * @rule_min_prio: Min possible priority of a rule
  * @low_rule_id: Low value of Rule ID that can be used
  * @rule_id_bit_len: Rule is high (MSB) bit len
- * @write_val_to_hdr: Write address or offset to header entry
  * @create_flt_bitmap: Create bitmap in H/W format using given bitmap
  * @create_tbl_addr: Given raw table address, create H/W formated one
  * @parse_tbl_addr: Parse the given H/W address (hdr format)
@@ -59,7 +58,6 @@ struct ipahal_fltrt_obj {
 	int rule_min_prio;
 	u32 low_rule_id;
 	u32 rule_id_bit_len;
-	void (*write_val_to_hdr)(u64 val, u8 *hdr);
 	u64 (*create_flt_bitmap)(u64 ep_bitmap);
 	u64 (*create_tbl_addr)(u64 addr);
 	u64 (*parse_tbl_addr)(u64 hwaddr);
@@ -94,7 +92,6 @@ static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr);
  * - tbl_hdr_width is non-zero
  * - rule_min_prio is not less than rule_max_prio (0 is max prio)
  * - rule_id_bit_len is 2 or more
- * - write_val_to_hdr, create_flt_bitmap, create_tbl_addr, and
  *   parse_tbl_addr must be non-null function pointers
  */
 /* IPAv3.5.1 */
@@ -107,7 +104,6 @@ static const struct ipahal_fltrt_obj ipahal_fltrt = {
 	.rule_min_prio		= IPA_RULE_MIN_PRIORITY,
 	.low_rule_id		= IPA_LOW_RULE_ID,
 	.rule_id_bit_len	= IPA_RULE_ID_BIT_LEN,
-	.write_val_to_hdr	= ipa_write_64,
 	.create_flt_bitmap	= ipa_fltrt_create_flt_bitmap,
 	.create_tbl_addr	= ipa_fltrt_create_tbl_addr,
 	.parse_tbl_addr		= ipa_fltrt_parse_tbl_addr,
@@ -290,7 +286,7 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
 
 	addr = ipahal_ctx->empty_fltrt_tbl_addr;
 	while (i < tbls_num)
-		ipahal_fltrt.write_val_to_hdr(addr, mem->base + i++ * width);
+		ipa_write_64(addr, mem->base + i++ * width);
 
 	return 0;
 }
@@ -324,13 +320,13 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
 		u64 flt_bitmap = ipahal_fltrt.create_flt_bitmap(ep_bitmap);
 
 		ipa_debug("flt bitmap 0x%llx\n", flt_bitmap);
-		ipahal_fltrt.write_val_to_hdr(flt_bitmap, mem->base);
+		ipa_write_64(flt_bitmap, mem->base);
 		i++;
 	}
 
 	addr = ipahal_ctx->empty_fltrt_tbl_addr;
 	while (i < tbls_num)
-		ipahal_fltrt.write_val_to_hdr(addr, mem->base + i++ * width);
+		ipa_write_64(addr, mem->base + i++ * width);
 
 	return 0;
 }
