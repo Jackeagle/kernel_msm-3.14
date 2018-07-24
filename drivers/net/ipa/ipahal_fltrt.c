@@ -45,7 +45,6 @@
  * @flt_generate_eq: Generate flt equation attributes from rule attributes
  * @rt_parse_hw_rule: Parse rt rule read from H/W
  * @flt_parse_hw_rule: Parse flt rule read from H/W
- * @eq_bitfield: Array of the bit fields of the support equations
  */
 struct ipahal_fltrt_obj {
 	u32 tbl_width;
@@ -56,7 +55,6 @@ struct ipahal_fltrt_obj {
 	int rule_min_prio;
 	u32 low_rule_id;
 	u32 rule_id_bit_len;
-	u8 eq_bitfield[IPA_EQ_MAX];
 };
 
 /* The IPA implements offloaded packet filtering and routing
@@ -93,24 +91,6 @@ static const struct ipahal_fltrt_obj ipahal_fltrt = {
 	.rule_min_prio		= IPA_RULE_MIN_PRIORITY,
 	.low_rule_id		= IPA_LOW_RULE_ID,
 	.rule_id_bit_len	= IPA_RULE_ID_BIT_LEN,
-	.eq_bitfield = {
-		[IPA_TOS_EQ]			= 0,
-		[IPA_PROTOCOL_EQ]		= 1,
-		[IPA_TC_EQ]			= 2,
-		[IPA_OFFSET_MEQ128_0]		= 3,
-		[IPA_OFFSET_MEQ128_1]		= 4,
-		[IPA_OFFSET_MEQ32_0]		= 5,
-		[IPA_OFFSET_MEQ32_1]		= 6,
-		[IPA_IHL_OFFSET_MEQ32_0]	= 7,
-		[IPA_IHL_OFFSET_MEQ32_1]	= 8,
-		[IPA_METADATA_COMPARE]		= 9,
-		[IPA_IHL_OFFSET_RANGE16_0]	= 10,
-		[IPA_IHL_OFFSET_RANGE16_1]	= 11,
-		[IPA_IHL_OFFSET_EQ_32]		= 12,
-		[IPA_IHL_OFFSET_EQ_16]		= 13,
-		[IPA_FL_EQ]			= 14,
-		[IPA_IS_FRAG]			= 15,
-	},
 };
 
 static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap)
