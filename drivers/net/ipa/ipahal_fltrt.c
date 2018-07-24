@@ -28,12 +28,6 @@
  * @tbl_hdr_width: Width of the header structure in bytes
  * @low_rule_id: Low value of Rule ID that can be used
  * @rule_id_bit_len: Rule is high (MSB) bit len
- * @create_tbl_addr: Given raw table address, create H/W formated one
- * @rt_generate_hw_rule: Generate RT rule in H/W format
- * @flt_generate_hw_rule: Generate FLT rule in H/W format
- * @flt_generate_eq: Generate flt equation attributes from rule attributes
- * @rt_parse_hw_rule: Parse rt rule read from H/W
- * @flt_parse_hw_rule: Parse flt rule read from H/W
  */
 struct ipahal_fltrt_obj {
 	u32 tbl_width;
@@ -48,13 +42,8 @@ struct ipahal_fltrt_obj {
  * tables of rules that define the processing that should be
  * performed by the IPA and the conditions under which they
  * should be applied.  Aspects of these rules are constrained
- * by things like table entry sizes and alignment requirements.
- *
- * The table consists of a set of "filter/route objects", which is a
- * structure that defines the constraints that must be used for the
- * IPA hardware.  There are also a few functions that format data
- * related to these tables to be sent to the IPA, or parse an
- * address coming from it.
+ * by things like table entry sizes and alignment requirements,
+ * and these constraints are defined here.
  *
  * The entries in this table have the following constraints.  Much
  * of this will be dictated by the hardware; the following statements
@@ -126,11 +115,6 @@ bool ipahal_is_rule_miss_id(u32 id)
 	return id == ((1U << ipahal_fltrt.rule_id_bit_len) - 1);
 }
 
-void ipahal_free_empty_img(struct ipa_mem_buffer *mem)
-{
-	ipahal_dma_free(mem);
-}
-
 /* ipahal_rt_generate_empty_img() - Generate empty route image
  *  Creates routing header buffer for the given tables number.
  *  For each table, make it point to the empty table on DDR.
@@ -195,4 +179,9 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
 		ipa_write_64(addr, mem->base + i++ * width);
 
 	return 0;
+}
+
+void ipahal_free_empty_img(struct ipa_mem_buffer *mem)
+{
+	ipahal_dma_free(mem);
 }
