@@ -113,48 +113,6 @@ ipareg_construct_endp_status_n(enum ipahal_reg reg, const void *fields)
 	return val;
 }
 
-static bool debug_cnt_ctrl_type_valid(u8 dbg_cnt_ctrl_type, enum ipahal_reg reg)
-{
-	switch (dbg_cnt_ctrl_type) {
-	case DBG_CNT_TYPE_IPV4_FLTR:
-	case DBG_CNT_TYPE_IPV4_ROUT:
-	case DBG_CNT_TYPE_GENERAL:
-	case DBG_CNT_TYPE_IPV6_FLTR:
-	case DBG_CNT_TYPE_IPV6_ROUT:
-		return true;
-	default:
-		break;
-	}
-
-	ipa_err("Invalid dbg_cnt_ctrl type (%hhu) for reg %u\n",
-		dbg_cnt_ctrl_type, reg);
-
-	return false;
-}
-
-static u32
-ipareg_construct_debug_cnt_ctrl_n(enum ipahal_reg reg, const void *fields)
-{
-	const struct ipahal_reg_debug_cnt_ctrl *dbg_cnt_ctrl = fields;
-	u32 val;
-	u8 type = (u8)dbg_cnt_ctrl->type;
-
-	if (WARN_ON(!debug_cnt_ctrl_type_valid(type, reg)))
-		return 0;
-
-	if (type == DBG_CNT_TYPE_IPV4_FLTR || type == DBG_CNT_TYPE_IPV6_FLTR)
-		if (WARN_ON(!dbg_cnt_ctrl->rule_idx_pipe_rule))
-			ipa_err("No FLT global rules\n");
-
-	val = field_gen(dbg_cnt_ctrl->en ? 1 : 0, DBG_CNT_EN_BMSK);
-	val |= field_gen(type, DBG_CNT_TYPE_BMSK);
-	val |= field_gen(dbg_cnt_ctrl->product ? 1 : 0, PRODUCT_BMSK);
-	val |= field_gen(dbg_cnt_ctrl->src_pipe, SOURCE_PIPE_BMSK);
-	val |= field_gen(dbg_cnt_ctrl->rule_idx, RULE_INDEX_BMSK);
-
-	return val;
-}
-
 static void
 ipareg_parse_shared_mem_size(enum ipahal_reg reg, void *fields, u32 val)
 {
@@ -473,8 +431,6 @@ static const struct ipahal_reg_obj ipahal_regs[] = {
 	reg_obj_pfunc(SHARED_MEM_SIZE,
 			shared_mem_size,	0x00000054,	0x0000),
 	reg_obj_nofunc(SRAM_DIRECT_ACCESS_n,	0x00007000,	0x0004),
-	reg_obj_cfunc(DEBUG_CNT_CTRL_n,
-			debug_cnt_ctrl_n,	0x00000640,	0x0004),
 	reg_obj_nofunc(LOCAL_PKT_PROC_CNTXT_BASE,
 			/* checkpatch! */	0x000001e8,	0x0000),
 	reg_obj_cfunc(ENDP_STATUS_n,

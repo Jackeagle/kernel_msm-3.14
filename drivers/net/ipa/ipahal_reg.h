@@ -37,7 +37,6 @@ enum ipahal_reg {
 	IPA_ENDP_INIT_HDR_METADATA_MASK_n,
 	IPA_SHARED_MEM_SIZE,
 	IPA_SRAM_DIRECT_ACCESS_n,
-	IPA_DEBUG_CNT_CTRL_n,
 	IPA_LOCAL_PKT_PROC_CNTXT_BASE,
 	IPA_ENDP_STATUS_n,
 	IPA_ENDP_FILTER_ROUTER_HSH_CFG_n,
@@ -155,41 +154,6 @@ struct ipahal_reg_fltrt_hash_tuple {
 	struct ipahal_reg_hash_tuple rt;
 	u32 undefined1;
 	u32 undefined2;
-};
-
-/* enum ipahal_reg_dbg_cnt_type - Debug Counter Type
- * DBG_CNT_TYPE_IPV4_FLTR - Count IPv4 filtering rules
- * DBG_CNT_TYPE_IPV4_ROUT - Count IPv4 routing rules
- * DBG_CNT_TYPE_GENERAL - General counter
- * DBG_CNT_TYPE_IPV6_FLTR - Count IPv6 filtering rules
- * DBG_CNT_TYPE_IPV4_ROUT - Count IPv6 routing rules
- */
-enum ipahal_reg_dbg_cnt_type {
-	DBG_CNT_TYPE_IPV4_FLTR	= 0,
-	DBG_CNT_TYPE_IPV4_ROUT	= 1,
-	DBG_CNT_TYPE_GENERAL	= 2,
-	DBG_CNT_TYPE_IPV6_FLTR	= 4,
-	DBG_CNT_TYPE_IPV6_ROUT	= 5,
-};
-
-/* struct ipahal_reg_debug_cnt_ctrl - IPA_DEBUG_CNT_CTRL_n register
- * @en - Enable debug counter
- * @type - Type of debugging couting
- * @product - False->Count Bytes . True->Count #packets
- * @src_pipe - Specific Pipe to match. If FF, no need to match
- *	specific pipe
- * @rule_idx_pipe_rule - Global Rule or Pipe Rule. If pipe, then indicated by
- *	src_pipe. Starting at IPA V3_5,
- *	no support on Global Rule. This field will be ignored.
- * @rule_idx - Rule index. Irrelevant for type General
- */
-struct ipahal_reg_debug_cnt_ctrl {
-	bool en;
-	enum ipahal_reg_dbg_cnt_type type;
-	bool product;
-	u8 src_pipe;
-	bool rule_idx_pipe_rule;
-	u16 rule_idx;
 };
 
 /* struct ipahal_reg_rsrc_grp_cfg - Mix/Max values for two rsrc groups
