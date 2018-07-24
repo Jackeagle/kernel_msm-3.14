@@ -40,7 +40,6 @@
  * @low_rule_id: Low value of Rule ID that can be used
  * @rule_id_bit_len: Rule is high (MSB) bit len
  * @create_tbl_addr: Given raw table address, create H/W formated one
- * @parse_tbl_addr: Parse the given H/W address (hdr format)
  * @rt_generate_hw_rule: Generate RT rule in H/W format
  * @flt_generate_hw_rule: Generate FLT rule in H/W format
  * @flt_generate_eq: Generate flt equation attributes from rule attributes
@@ -57,12 +56,8 @@ struct ipahal_fltrt_obj {
 	int rule_min_prio;
 	u32 low_rule_id;
 	u32 rule_id_bit_len;
-	u64 (*parse_tbl_addr)(u64 hwaddr);
 	u8 eq_bitfield[IPA_EQ_MAX];
 };
-
-/* We have some forward references */
-static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr);
 
 /* The IPA implements offloaded packet filtering and routing
  * capabilities.  This is managed by programming IPA-resident
@@ -87,7 +82,6 @@ static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr);
  * - tbl_hdr_width is non-zero
  * - rule_min_prio is not less than rule_max_prio (0 is max prio)
  * - rule_id_bit_len is 2 or more
- *   parse_tbl_addr must be non-null function pointers
  */
 /* IPAv3.5.1 */
 static const struct ipahal_fltrt_obj ipahal_fltrt = {
@@ -99,7 +93,6 @@ static const struct ipahal_fltrt_obj ipahal_fltrt = {
 	.rule_min_prio		= IPA_RULE_MIN_PRIORITY,
 	.low_rule_id		= IPA_LOW_RULE_ID,
 	.rule_id_bit_len	= IPA_RULE_ID_BIT_LEN,
-	.parse_tbl_addr		= ipa_fltrt_parse_tbl_addr,
 	.eq_bitfield = {
 		[IPA_TOS_EQ]			= 0,
 		[IPA_PROTOCOL_EQ]		= 1,
@@ -131,16 +124,6 @@ static u64 ipa_fltrt_create_tbl_addr(u64 addr)
 	ipa_assert(!(addr % ipahal_fltrt.sysaddr_align));
 
 	return addr;
-}
-
-static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr)
-{
-	ipa_debug_low("Parsing hwaddr 0x%llx\n", hwaddr);
-
-	ipa_assert(!(hwaddr & 0x1));
-	ipa_assert(!(hwaddr % ipahal_fltrt.sysaddr_align));
-
-	return hwaddr;
 }
 
 /* Set up an empty table in system memory.  This will be used, for
