@@ -354,19 +354,17 @@ ipareg_construct_idle_indication_cfg(enum ipahal_reg reg, const void *fields)
 }
 
 /* The entries in the following table have the following constraints:
- * - 0 is not a valid offset; an entry with a 0 offset indicates the
- *   corresponding register is accessed according to a register object
- *   defined for an earlier hardware version.  It is a bug for code
- *   to attempt to access a register which has an undefined (zero)
- *   offset value.
+ * - 0 is not a valid offset (it represents an unused entry).  It is
+ *   a bug for code to attempt to access a register which has an
+ *   undefined (zero) offset value.
  * - If a construct function is supplied, the register must be
  *   written using ipahal_write_reg_n_fields() (or its wrapper
  *   function ipahal_write_reg_fields()).
  * - Generally, if a parse function is supplied, the register should
  *   read using ipahal_read_reg_n_fields() (or ipahal_read_reg_fields()).
- *   (Currently some debug code reads some registers directly, without parsing.)
+ *   (Currently some debug code reads some registers directly, without
+ *   parsing.)
  */
-
 #define cfunc(f)	ipareg_construct_ ## f
 #define pfunc(f)	ipareg_parse_ ## f
 #define idsym(id)	IPA_ ## id
@@ -460,8 +458,7 @@ static const struct ipahal_reg_obj ipahal_regs[] = {
 #undef pfunc
 #undef cfunc
 
-/* Get the offset of a n parameterized register
- */
+/* Get the offset of an "n parameterized" register */
 u32 ipahal_reg_n_offset(enum ipahal_reg reg, u32 n)
 {
 	u32 offset;
@@ -472,22 +469,19 @@ u32 ipahal_reg_n_offset(enum ipahal_reg reg, u32 n)
 	return offset;
 }
 
-/* ipahal_read_reg_n() - Get n parameterized reg value
- */
+/* ipahal_read_reg_n() - Get an "n parameterized" register's value */
 u32 ipahal_read_reg_n(enum ipahal_reg reg, u32 n)
 {
 	return ioread32(ipahal_ctx->base + ipahal_reg_n_offset(reg, n));
 }
 
-/* ipahal_write_reg_n() - Write to n parameterized reg a raw value
- */
+/* ipahal_write_reg_n() - Write a raw value to an "n parameterized" register */
 void ipahal_write_reg_n(enum ipahal_reg reg, u32 n, u32 val)
 {
 	iowrite32(val, ipahal_ctx->base + ipahal_reg_n_offset(reg, n));
 }
 
-/* ipahal_read_reg_n_fields() - Get the parsed value of n parameterized reg
- */
+/* ipahal_read_reg_n_fields() - Parse value of an "n parameterized" register */
 void ipahal_read_reg_n_fields(enum ipahal_reg reg, u32 n, void *fields)
 {
 	u32 val = ipahal_read_reg_n(reg, n);
@@ -497,7 +491,8 @@ void ipahal_read_reg_n_fields(enum ipahal_reg reg, u32 n, void *fields)
 	ipahal_regs[reg].parse(reg, fields, val);
 }
 
-/* ipahal_write_reg_n_fields() - Write to n parameterized reg a parsed value
+/* ipahal_write_reg_n_fields() - Construct a vlaue to write to an "n
+ * parameterized" register
  */
 void ipahal_write_reg_n_fields(enum ipahal_reg reg, u32 n, const void *fields)
 {
