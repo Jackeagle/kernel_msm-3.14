@@ -114,7 +114,7 @@ ipahal_imm_cmd_pyld_alloc_common(u16 opcode, size_t pyld_size, gfp_t flags)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 
-	ipa_debug_low("immediate command: %s\n", ipahal_imm_cmds[opcode].name);
+	ipa_debug_low("immediate command: %u\n", ipahal_imm_cmds[opcode].opcode);
 
 	pyld = kzalloc(sizeof(*pyld) + pyld_size, flags);
 	if (unlikely(!pyld)) {
