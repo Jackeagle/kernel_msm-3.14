@@ -1897,7 +1897,7 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_clear_wrapper;
 	}
 
-	ipahal_init(hw_version, ipa_ctx->mmio);
+	ipahal_init(ipa_ctx->mmio);
 
 	ipa_init_ep_flt_bitmap();
 	if (!ipa_ctx->ep_flt_num) {

@@ -482,9 +482,9 @@ void *ipahal_dma_phys_to_virt(struct ipa_mem_buffer *mem, dma_addr_t phys)
 	return mem->base + (phys - mem->phys_base);
 }
 
-void ipahal_init(enum ipa_hw_version hw_version, void __iomem *base)
+void ipahal_init(void __iomem *base)
 {
-	ipa_debug("Entry - IPA HW TYPE=%d base=%p\n", hw_version, base);
+	ipa_debug("Entry - base=%p\n", base);
 
 	ipahal_ctx->base = base;
 	/* ipahal_ctx->ipa_pdev must be set by a call to ipahal_dev_init() */
