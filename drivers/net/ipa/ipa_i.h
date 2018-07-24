@@ -268,7 +268,6 @@ struct ipa_ep_context {
 	bool bytes_xfered_valid;
 	u16 bytes_xfered;
 	struct ipa_ep_cfg cfg;
-	struct ipa_ep_cfg_holb holb;
 	struct ipahal_reg_ep_cfg_status status;
 	u32 dst_pipe_index;
 	u32 rt_tbl_idx;

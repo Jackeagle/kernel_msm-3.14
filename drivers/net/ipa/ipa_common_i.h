@@ -497,17 +497,6 @@ struct ipa_ep_cfg_aggr {
 	bool aggr_sw_eof_active;
 };
 
-/** struct ipa_ep_cfg_holb - head of line blocking config in IPA end-point
- * @en: enable(1 => ok to drop pkt)/disable(0 => never drop pkt)
- * @tmr_val: duration in units of 128 IPA clk clock cyles [0,511], 1 clk=1.28us
- *	     IPAv2.5 support 32 bit HOLB timeout value, previous versions
- *	     supports 16 bit
- */
-struct ipa_ep_cfg_holb {
-	u16 en;
-	u32 tmr_val;
-};
-
 /** struct ipa_ep_cfg_deaggr - deaggregation configuration in IPA end-point
  * @deaggr_hdr_len: Deaggregation Header length in bytes. Valid only for Input
  *	Pipes, which are configured for 'Generic' deaggregation.

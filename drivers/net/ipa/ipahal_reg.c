@@ -226,24 +226,6 @@ ipareg_construct_endp_init_deaggr_n(enum ipahal_reg reg, const void *fields)
 }
 
 static u32
-ipareg_construct_endp_init_hol_block_en_n(enum ipahal_reg reg,
-					  const void *fields)
-{
-	const struct ipa_ep_cfg_holb *ep_holb = fields;
-
-	return field_gen(ep_holb->en, HOL_BLOCK_EN_BMSK);
-}
-
-static u32
-ipareg_construct_endp_init_hol_block_timer_n(enum ipahal_reg reg,
-					     const void *fields)
-{
-	const struct ipa_ep_cfg_holb *ep_holb = fields;
-
-	return field_gen(ep_holb->tmr_val, TIMER_BMSK);
-}
-
-static u32
 ipareg_construct_endp_init_ctrl_n(enum ipahal_reg reg, const void *fields)
 {
 	const struct ipa_ep_cfg_ctrl *ep_ctrl = fields;
@@ -480,10 +462,6 @@ static const struct ipahal_reg_obj ipahal_regs[] = {
 			endp_init_mode_n,	0x00000820,	0x0070),
 	reg_obj_both(ENDP_INIT_CTRL_n,
 			endp_init_ctrl_n,	0x00000800,	0x0070),
-	reg_obj_cfunc(ENDP_INIT_HOL_BLOCK_EN_n,
-			endp_init_hol_block_en_n, 0x0000082c,	0x0070),
-	reg_obj_cfunc(ENDP_INIT_HOL_BLOCK_TIMER_n,
-			endp_init_hol_block_timer_n, 0x00000830, 0x0070),
 	reg_obj_cfunc(ENDP_INIT_DEAGGR_n,
 			endp_init_deaggr_n,	0x00000834,	0x0070),
 	reg_obj_nofunc(ENDP_INIT_SEQ_n,		0x0000083c,	0x0070),
