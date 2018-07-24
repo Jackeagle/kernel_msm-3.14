@@ -18,7 +18,6 @@
 #define IPA_HW_TBL_SYSADDR_ALIGN	128
 #define IPA_HW_TBL_LCLADDR_ALIGN	8
 #define IPA_HW_TBL_HDR_WIDTH		8
-#define IPA_HW_TBL_ADDR_MASK		127
 #define IPA_HW_RULE_BUF_SIZE		256
 
 /* Rules Priority.
@@ -37,7 +36,6 @@
  * @sysaddr_align: System table address alignment
  * @lcladdr_align: Local table offset alignment
  * @tbl_hdr_width: Width of the header structure in bytes
- * @tbl_addr_mask: Masking for Table address
  * @rule_max_prio: Max possible priority of a rule
  * @rule_min_prio: Min possible priority of a rule
  * @low_rule_id: Low value of Rule ID that can be used
@@ -59,7 +57,6 @@ struct ipahal_fltrt_obj {
 	u32 sysaddr_align;
 	u32 lcladdr_align;
 	u32 tbl_hdr_width;
-	u32 tbl_addr_mask;
 	int rule_max_prio;
 	int rule_min_prio;
 	u32 low_rule_id;
@@ -98,7 +95,6 @@ static u64 ipa_fltrt_parse_tbl_addr(u64 hwaddr);
  * - sysaddr_align is non-zero, and is a power of 2
  * - lcladdr_align is non-zero, and is a power of 2.
  * - tbl_hdr_width is non-zero
- * - tbl_addr_mask is non-zero and is one less than a power of 2
  * - rule_min_prio is not less than rule_max_prio (0 is max prio)
  * - rule_id_bit_len is 2 or more
  * - write_val_to_hdr, create_flt_bitmap, create_tbl_addr, and
@@ -110,7 +106,6 @@ static const struct ipahal_fltrt_obj ipahal_fltrt = {
 	.sysaddr_align		= IPA_HW_TBL_SYSADDR_ALIGN,
 	.lcladdr_align		= IPA_HW_TBL_LCLADDR_ALIGN,
 	.tbl_hdr_width		= IPA_HW_TBL_HDR_WIDTH,
-	.tbl_addr_mask		= IPA_HW_TBL_ADDR_MASK,
 	.rule_max_prio		= IPA_RULE_MAX_PRIORITY,
 	.rule_min_prio		= IPA_RULE_MIN_PRIORITY,
 	.low_rule_id		= IPA_LOW_RULE_ID,
