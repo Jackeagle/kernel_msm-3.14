@@ -73,11 +73,6 @@
 #define DPS_SEQ_TYPE_BMSK			0x000000f0
 #define HPS_SEQ_TYPE_BMSK			0x0000000f
 
-/* IPA_DEBUG_CNT_REG_n register */
-#define DBG_CNT_RMSK				0xffffffff
-#define DBG_CNT_MAX				0x0000000f
-#define DBG_CNT_REG_BMSK			0xffffffff
-
 /* IPA_ENDP_INIT_CFG_n register */
 #define CS_GEN_QMB_MASTER_SEL_BMSK		0x00000100
 #define CS_METADATA_HDR_OFFSET_BMSK		0x00000078

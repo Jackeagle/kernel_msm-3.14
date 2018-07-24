@@ -465,7 +465,6 @@ static const struct ipahal_reg_obj ipahal_regs[] = {
 	reg_obj_cfunc(ENDP_INIT_DEAGGR_n,
 			endp_init_deaggr_n,	0x00000834,	0x0070),
 	reg_obj_nofunc(ENDP_INIT_SEQ_n,		0x0000083c,	0x0070),
-	reg_obj_nofunc(DEBUG_CNT_REG_n,		0x00000600,	0x0004),
 	reg_obj_cfunc(ENDP_INIT_CFG_n,
 			endp_init_cfg_n,	0x00000808,	0x0070),
 	reg_obj_nofunc(IRQ_EE_UC_n,		0x0000301c,	0x1000),
