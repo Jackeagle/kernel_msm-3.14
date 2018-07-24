@@ -57,18 +57,6 @@ enum ipahal_pipeline_clear_option {
 	IPAHAL_FULL_PIPELINE_CLEAR	= 2,
 };
 
-static const char * const ipahal_pkt_status_exception_to_str[] = {
-	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_NONE),
-	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_DEAGGR),
-	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_IPTYPE),
-	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_PACKET_LENGTH),
-	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_PACKET_THRESHOLD),
-	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_FRAG_RULE_MISS),
-	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_SW_FILT),
-	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_NAT),
-	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_IPV6CT),
-};
-
 static struct ipahal_imm_cmd_pyld *
 ipahal_imm_cmd_pyld_alloc_common(u16 opcode, size_t pyld_size, gfp_t flags)
 {
@@ -475,7 +463,21 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 const char *
 ipahal_pkt_status_exception_str(enum ipahal_pkt_status_exception exception)
 {
-	return ipahal_pkt_status_exception_to_str[exception];
+#define CASE(x)	case IPAHAL_PKT_STATUS_ ## x: return #x
+	switch (exception) {
+	CASE(EXCEPTION_NONE);
+	CASE(EXCEPTION_DEAGGR);
+	CASE(EXCEPTION_IPTYPE);
+	CASE(EXCEPTION_PACKET_LENGTH);
+	CASE(EXCEPTION_PACKET_THRESHOLD);
+	CASE(EXCEPTION_FRAG_RULE_MISS);
+	CASE(EXCEPTION_SW_FILT);
+	CASE(EXCEPTION_NAT);
+	CASE(EXCEPTION_IPV6CT);
+	default:
+		return "(unrecognized exception)";
+	}
+#undef CASE
 }
 
 int ipahal_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp)
