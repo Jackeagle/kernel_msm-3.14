@@ -18,13 +18,6 @@
 #define IPA_HW_TBL_SYSADDR_ALIGN	128
 #define IPA_HW_TBL_HDR_WIDTH		8
 
-/* Rules Priority.
- * Needed due to rules classification to hashable and non-hashable.
- * Higher priority is lower in number. i.e. 0 is highest priority
- */
-#define IPA_RULE_MAX_PRIORITY		0
-#define IPA_RULE_MIN_PRIORITY		1023
-
 /* RULE ID, bit length (e.g. 10 bits).  */
 #define IPA_RULE_ID_BIT_LEN		10
 #define IPA_LOW_RULE_ID			1
@@ -33,8 +26,6 @@
  * @tbl_width: Width of table in bytes
  * @sysaddr_align: System table address alignment
  * @tbl_hdr_width: Width of the header structure in bytes
- * @rule_max_prio: Max possible priority of a rule
- * @rule_min_prio: Min possible priority of a rule
  * @low_rule_id: Low value of Rule ID that can be used
  * @rule_id_bit_len: Rule is high (MSB) bit len
  * @create_tbl_addr: Given raw table address, create H/W formated one
@@ -48,8 +39,6 @@ struct ipahal_fltrt_obj {
 	u32 tbl_width;
 	u32 sysaddr_align;
 	u32 tbl_hdr_width;
-	int rule_max_prio;
-	int rule_min_prio;
 	u32 low_rule_id;
 	u32 rule_id_bit_len;
 };
@@ -74,7 +63,6 @@ struct ipahal_fltrt_obj {
  *   entry indicates the entry contains no definitions
  * - sysaddr_align is non-zero, and is a power of 2
  * - tbl_hdr_width is non-zero
- * - rule_min_prio is not less than rule_max_prio (0 is max prio)
  * - rule_id_bit_len is 2 or more
  */
 /* IPAv3.5.1 */
@@ -82,8 +70,6 @@ static const struct ipahal_fltrt_obj ipahal_fltrt = {
 	.tbl_width		= IPA_HW_TBL_WIDTH,
 	.sysaddr_align		= IPA_HW_TBL_SYSADDR_ALIGN,
 	.tbl_hdr_width		= IPA_HW_TBL_HDR_WIDTH,
-	.rule_max_prio		= IPA_RULE_MAX_PRIORITY,
-	.rule_min_prio		= IPA_RULE_MIN_PRIORITY,
 	.low_rule_id		= IPA_LOW_RULE_ID,
 	.rule_id_bit_len	= IPA_RULE_ID_BIT_LEN,
 };
