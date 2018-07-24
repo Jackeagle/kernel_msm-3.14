@@ -20,7 +20,6 @@ struct ipahal_context {
 	void __iomem *base;
 	struct device *ipa_pdev;
 	struct ipa_mem_buffer empty_fltrt_tbl;
-	u64 empty_fltrt_tbl_addr;
 };
 
 extern struct ipahal_context *ipahal_ctx;

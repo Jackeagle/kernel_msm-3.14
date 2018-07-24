@@ -101,7 +101,6 @@ int ipahal_empty_fltrt_init(void)
 
 		return -EFAULT;
 	}
-	ipahal_ctx->empty_fltrt_tbl_addr = (u64)mem->phys_base;
 
 	ipa_debug("empty table allocated in system memory");
 
@@ -110,7 +109,6 @@ int ipahal_empty_fltrt_init(void)
 
 void ipahal_empty_fltrt_destroy(void)
 {
-	ipahal_ctx->empty_fltrt_tbl_addr = 0;
 	ipahal_dma_free(&ipahal_ctx->empty_fltrt_tbl);
 }
 
@@ -152,7 +150,7 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
 	if (ipahal_dma_alloc(mem, tbls_num * width, gfp))
 		return -ENOMEM;
 
-	addr = ipahal_ctx->empty_fltrt_tbl_addr;
+	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys_base;
 	while (i < tbls_num)
 		ipa_write_64(addr, mem->base + i++ * width);
 
@@ -192,7 +190,7 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
 		i++;
 	}
 
-	addr = ipahal_ctx->empty_fltrt_tbl_addr;
+	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys_base;
 	while (i < tbls_num)
 		ipa_write_64(addr, mem->base + i++ * width);
 
