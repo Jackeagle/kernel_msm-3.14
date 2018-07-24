@@ -31,8 +31,7 @@ struct ipahal_reg_obj {
 	u16 n_ofst;
 };
 
-static u32
-ipareg_construct_rsrg_grp_xy(enum ipahal_reg reg, const void *fields)
+static u32 ipareg_construct_rsrg_grp_xy(enum ipahal_reg reg, const void *fields)
 {
 	const struct ipahal_reg_rsrc_grp_cfg *grp = fields;
 	u32 val;
@@ -50,8 +49,7 @@ ipareg_construct_rsrg_grp_xy(enum ipahal_reg reg, const void *fields)
 	return val;
 }
 
-static u32
-ipareg_construct_hash_cfg_n(enum ipahal_reg reg, const void *fields)
+static u32 ipareg_construct_hash_cfg_n(enum ipahal_reg reg, const void *fields)
 {
 	const struct ipahal_reg_fltrt_hash_tuple *tuple = fields;
 	u32 val;
@@ -77,8 +75,7 @@ ipareg_construct_hash_cfg_n(enum ipahal_reg reg, const void *fields)
 	return val;
 }
 
-static void
-ipareg_parse_hash_cfg_n(enum ipahal_reg reg, void *fields, u32 val)
+static void ipareg_parse_hash_cfg_n(enum ipahal_reg reg, void *fields, u32 val)
 {
 	struct ipahal_reg_fltrt_hash_tuple *tuple = fields;
 
@@ -116,8 +113,7 @@ ipareg_construct_endp_status_n(enum ipahal_reg reg, const void *fields)
 	return val;
 }
 
-static bool
-debug_cnt_ctrl_type_valid(u8 dbg_cnt_ctrl_type, enum ipahal_reg reg)
+static bool debug_cnt_ctrl_type_valid(u8 dbg_cnt_ctrl_type, enum ipahal_reg reg)
 {
 	switch (dbg_cnt_ctrl_type) {
 	case DBG_CNT_TYPE_IPV4_FLTR:
@@ -430,46 +426,12 @@ ipareg_construct_idle_indication_cfg(enum ipahal_reg reg, const void *fields)
 	return val;
 }
 
-/* The offsets of certain registers may change between different
- * versions of IPA hardware.  In addition, the format of information
- * read or written for a particular register change slightly for new
- * hardware.  The "ipahal" layer hides this by abstracting register
- * access, allowing access to each register to be performed using a
- * symbolic name.
- *
- * The following table consists of blocks of "register object"
- * definitions associated with versions of IPA hardware.  The first
- * version of IPA hardware supported by the "ipahal" layer is 3.5.1;
- * essentially all registers needed for IPA operation have a
- * register object associated with IPA_HW_v3_5_1.
- *
- * Versions of IPA hardware newer than 3.1 do not need to specify
- * register object entries if they are accessed the same way as was
- * defined by an older version.  The only entries defined for newer
- * hardware are registers whose offset or data format has changed,
- * or registers that are new and not present in older hardware.
- *
- * XXX The rest of this will be fixed after other versions are removed
- *
- * IPA version 3.1, for example, has only three entries defined:
- * IPA_IRQ_SUSPEND_INFO_EE_n, which is located at a different
- * offset than in IPA version 3.0; and IPA_SUSPEND_IRQ_EN_EE_n
- * and IPA_SUSPEND_IRQ_CLR_EE_n, which were not previously defined.
- * All other registers will use the access method defined for IPA
- * version 3.0.
- *
- * The definitions used for each hardware version is based on the
- * definition used by the next earlier version.  So IPA hardware
- * version 3.5 uses definitions for version 3.1, and its block of
- * register objects will consist only of overrides, or registers
- * not defined prior to version 3.5.
- *
- * The entries in this table have the following constraints:
- * - 0 is not a valid offset; an entry having a 0 offset is
- *   indicates the corresponding register is accessed according
- *   to a register object defined for an earlier hardware version.
- *   It is a bug for code to attempt to access a register which
- *   has an undefined (zero) offset value.
+/* The entries in the following table have the following constraints:
+ * - 0 is not a valid offset; an entry with a 0 offset indicates the
+ *   corresponding register is accessed according to a register object
+ *   defined for an earlier hardware version.  It is a bug for code
+ *   to attempt to access a register which has an undefined (zero)
+ *   offset value.
  * - An offset of OFFSET_INVAL indicates that a register is not
  *   supported for a particular hardware version.  It is a bug for
  *   code to attempt to access an unsupported register.
@@ -477,9 +439,9 @@ ipareg_construct_idle_indication_cfg(enum ipahal_reg reg, const void *fields)
  *   written using ipahal_write_reg_n_fields() (or its wrapper
  *   function ipahal_write_reg_fields()).
  * - Generally, if a parse function is supplied, the register should
- *   generally only be read using ipahal_read_reg_n_fields() (or
- *   ipahal_read_reg_fields()).  (Currently some debug code reads
- *   some registers directly, without parsing.)
+ *   read using ipahal_read_reg_n_fields() (or ipahal_read_reg_fields()).
+ *   (Currently some debug code reads some registers directly, without
+ *   parsing.)
  */
 #define OFFSET_INVAL	((u32)0xffffffff)
 
