@@ -32,8 +32,6 @@ enum ipahal_imm_cmd_name {
 	IPA_IMM_CMD_DMA_SHARED_MEM,
 	IPA_IMM_CMD_IP_PACKET_TAG_STATUS,
 	IPA_IMM_CMD_DMA_TASK_32B_ADDR,
-	IPA_IMM_CMD_TABLE_DMA,
-	IPA_IMM_CMD_MAX,
 };
 
 /* enum ipa_pipeline_clear_option - Values for pipeline clear waiting options
