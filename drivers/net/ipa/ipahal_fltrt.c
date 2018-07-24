@@ -82,8 +82,6 @@ static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap)
 
 static u64 ipa_fltrt_create_tbl_addr(u64 addr)
 {
-	ipa_assert(!(addr % ipahal_fltrt.sysaddr_align));
-
 	return addr;
 }
 
