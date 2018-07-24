@@ -1009,7 +1009,7 @@ static void ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 	struct ipahal_reg_endp_init_mode init_mode;
 	u32 ipa_ep_idx;
 
-	ipa_assert(IPA_CLIENT_IS_PROD(ipa_ctx->ep[clnt_hdl].client));
+	ipa_assert(ipa_producer(ipa_ctx->ep[clnt_hdl].client));
 	if (ep_mode->mode == IPA_DMA)
 		ipa_assert(IPA_CLIENT_IS_CONS(ep_mode->dst));
 
@@ -1114,7 +1114,7 @@ void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 
 	ipa_cfg_ep_cfg(clnt_hdl, &ipa_ep_cfg->cfg);
 
-	if (IPA_CLIENT_IS_PROD(ipa_ctx->ep[clnt_hdl].client)) {
+	if (ipa_producer(ipa_ctx->ep[clnt_hdl].client)) {
 		ipa_cfg_ep_mode(clnt_hdl, &ipa_ep_cfg->mode);
 		ipa_cfg_ep_seq(clnt_hdl);
 
@@ -1490,7 +1490,7 @@ int ipa_stop_gsi_channel(u32 clnt_hdl)
 	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
 		       true);
 
-	if (IPA_CLIENT_IS_PROD(ep->client)) {
+	if (ipa_producer(ep->client)) {
 		ipa_debug("Calling gsi_stop_channel ch:%lu\n",
 			  ep->gsi_chan_hdl);
 		res = gsi_stop_channel(ep->gsi_chan_hdl);

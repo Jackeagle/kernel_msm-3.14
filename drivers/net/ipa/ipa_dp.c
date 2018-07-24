@@ -836,7 +836,7 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 	if (IPA_CLIENT_IS_CONS(sys_in->client))
 		ipa_replenish_rx_cache(ep->sys);
 
-	if (IPA_CLIENT_IS_PROD(sys_in->client)) {
+	if (ipa_producer(sys_in->client)) {
 		if (sys_in->client == IPA_CLIENT_APPS_WAN_PROD)
 			ipa_debug("modem cfg emb pipe flt\n");
 	}
@@ -890,7 +890,7 @@ int ipa_teardown_sys_pipe(u32 clnt_hdl)
 		} while (atomic_read(&ep->sys->curr_polling_state));
 	}
 
-	if (IPA_CLIENT_IS_PROD(ep->client)) {
+	if (ipa_producer(ep->client)) {
 		do {
 			spin_lock_bh(&ep->sys->spinlock);
 			empty = list_empty(&ep->sys->head_desc_list);
@@ -923,7 +923,7 @@ int ipa_teardown_sys_pipe(u32 clnt_hdl)
 	if (IPA_CLIENT_IS_CONS(ep->client))
 		ipa_cleanup_rx(ep->sys);
 
-	if (IPA_CLIENT_IS_PROD(ep->client)) {
+	if (ipa_producer(ep->client)) {
 		if (ep->client == IPA_CLIENT_APPS_WAN_PROD)
 			ipa_debug("modem cfg emb pipe flt\n");
 	}
