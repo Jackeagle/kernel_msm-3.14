@@ -33,8 +33,6 @@ struct ipahal_reg_obj {
 	u16 n_ofst;
 };
 
-static struct ipahal_reg_obj ipahal_regs[IPA_REG_MAX];
-
 static u32
 ipareg_construct_rsrg_grp_xy(enum ipahal_reg reg, const void *fields)
 {
@@ -508,7 +506,7 @@ ipareg_construct_idle_indication_cfg(enum ipahal_reg reg, const void *fields)
 	reg_obj_common(id, NULL, NULL, o, n)
 
 /* IPAv3.5.1 */
-static const struct ipahal_reg_obj ipahal_reg_objs[] = {
+static const struct ipahal_reg_obj ipahal_regs[] = {
 	reg_obj_cfunc(ROUTE, route,		0x00000048,	0x0000),
 	reg_obj_nofunc(IRQ_STTS_EE_n,		0x00003008,	0x1000),
 	reg_obj_nofunc(IRQ_EN_EE_n,		0x0000300c,	0x1000),
@@ -593,7 +591,6 @@ static const struct ipahal_reg_obj ipahal_reg_objs[] = {
 #undef cfunc
 
 /* ipahal_reg_init() - Build the registers information table
- *  See ipahal_reg_objs[][] comments
  *
  * Note: As global variables are initialized with zero, any un-overridden
  *  register entry will be zero. By this we recognize them.
@@ -601,8 +598,6 @@ static const struct ipahal_reg_obj ipahal_reg_objs[] = {
 void ipahal_reg_init(enum ipa_hw_version hw_version)
 {
 	ipa_debug_low("Entry - HW_TYPE=%d\n", hw_version);
-
-	memcpy(&ipahal_regs, &ipahal_reg_objs, sizeof(ipahal_regs));
 }
 
 /* Get the offset of a n parameterized register
