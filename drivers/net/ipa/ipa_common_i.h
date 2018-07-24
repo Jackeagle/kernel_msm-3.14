@@ -222,7 +222,7 @@ static inline bool ipa_producer(enum ipa_client_type client)
 	return !((u32)client & 1);	/* Even numbers are producers */
 }
 
-static inline bool IPA_CLIENT_IS_CONS(enum ipa_client_type client)
+static inline bool ipa_consumer(enum ipa_client_type client)
 {
 	return !ipa_producer(client);
 }

@@ -214,7 +214,7 @@ void ipa_reset_gsi_channel(u32 clnt_hdl)
 	/* Check for open aggregation frame on Consumer EP -
 	 * reset with open aggregation frame WA
 	 */
-	if (IPA_CLIENT_IS_CONS(ep->client))
+	if (ipa_consumer(ep->client))
 		aggr_active_bitmap = ipahal_read_reg(IPA_STATE_AGGR_ACTIVE);
 	else
 		aggr_active_bitmap = 0;

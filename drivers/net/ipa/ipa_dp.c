@@ -797,7 +797,7 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 	ep->napi_enabled = sys_in->napi_enabled;
 	ep->priv = sys_in->priv;
 
-	if (ep->status.status_en && IPA_CLIENT_IS_CONS(ep->client) &&
+	if (ep->status.status_en && ipa_consumer(ep->client) &&
 	    !ep->sys->status_stat) {
 		ep->sys->status_stat =
 			kzalloc(sizeof(struct ipa_status_stats), GFP_KERNEL);
@@ -833,7 +833,7 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 		}
 	}
 
-	if (IPA_CLIENT_IS_CONS(sys_in->client))
+	if (ipa_consumer(sys_in->client))
 		ipa_replenish_rx_cache(ep->sys);
 
 	if (ipa_producer(sys_in->client)) {
@@ -902,7 +902,7 @@ int ipa_teardown_sys_pipe(u32 clnt_hdl)
 		} while (1);
 	}
 
-	if (IPA_CLIENT_IS_CONS(ep->client))
+	if (ipa_consumer(ep->client))
 		cancel_delayed_work_sync(&ep->sys->replenish_rx_work);
 	flush_workqueue(ep->sys->wq);
 	/* channel stop might fail on timeout if IPA is busy */
@@ -920,7 +920,7 @@ int ipa_teardown_sys_pipe(u32 clnt_hdl)
 
 	if (ep->sys->repl_wq)
 		flush_workqueue(ep->sys->repl_wq);
-	if (IPA_CLIENT_IS_CONS(ep->client))
+	if (ipa_consumer(ep->client))
 		ipa_cleanup_rx(ep->sys);
 
 	if (ipa_producer(ep->client)) {
@@ -2148,7 +2148,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 
 	gsi_ep_info = ipa_get_gsi_ep_info(ep->client);
 
-	gsi_channel_props.from_gsi = IPA_CLIENT_IS_CONS(ep->client);
+	gsi_channel_props.from_gsi = ipa_consumer(ep->client);
 	gsi_channel_props.ch_id = gsi_ep_info->ipa_gsi_chan_num;
 	gsi_channel_props.evt_ring_hdl = ep->gsi_evt_ring_hdl;
 	gsi_channel_props.use_db_engine = true;

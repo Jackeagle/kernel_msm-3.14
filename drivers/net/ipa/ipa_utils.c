@@ -1011,9 +1011,9 @@ static void ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 
 	ipa_assert(ipa_producer(ipa_ctx->ep[clnt_hdl].client));
 	if (ep_mode->mode == IPA_DMA)
-		ipa_assert(IPA_CLIENT_IS_CONS(ep_mode->dst));
+		ipa_assert(ipa_consumer(ep_mode->dst));
 
-	if (IPA_CLIENT_IS_CONS(ep_mode->dst))
+	if (ipa_consumer(ep_mode->dst))
 		ipa_ep_idx = ipa_get_ep_mapping(ep_mode->dst);
 	else
 		ipa_ep_idx = ipa_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
