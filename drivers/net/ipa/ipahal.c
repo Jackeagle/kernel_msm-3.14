@@ -21,17 +21,17 @@ struct ipahal_context *ipahal_ctx = &ipahal_ctx_struct;
  * NOTE:: Any change to this enum, need to change to ipahal_imm_cmd_name_to_str
  *	array as well.
  */
-enum ipahal_imm_cmd_name {
-	IPA_IMM_CMD_IP_V4_FILTER_INIT,
-	IPA_IMM_CMD_IP_V6_FILTER_INIT,
-	IPA_IMM_CMD_IP_V4_ROUTING_INIT,
-	IPA_IMM_CMD_IP_V6_ROUTING_INIT,
-	IPA_IMM_CMD_HDR_INIT_LOCAL,
-	IPA_IMM_CMD_REGISTER_WRITE,
-	IPA_IMM_CMD_IP_PACKET_INIT,
-	IPA_IMM_CMD_DMA_SHARED_MEM,
-	IPA_IMM_CMD_IP_PACKET_TAG_STATUS,
-	IPA_IMM_CMD_DMA_TASK_32B_ADDR,
+enum ipahal_imm_cmd {
+	IPA_IMM_CMD_IP_V4_FILTER_INIT		= 3,
+	IPA_IMM_CMD_IP_V6_FILTER_INIT		= 4,
+	IPA_IMM_CMD_IP_V4_ROUTING_INIT		= 7,
+	IPA_IMM_CMD_IP_V6_ROUTING_INIT		= 8,
+	IPA_IMM_CMD_HDR_INIT_LOCAL		= 9,
+	IPA_IMM_CMD_REGISTER_WRITE		= 12,
+	IPA_IMM_CMD_IP_PACKET_INIT		= 16,
+	IPA_IMM_CMD_DMA_TASK_32B_ADDR		= 17,
+	IPA_IMM_CMD_DMA_SHARED_MEM		= 19,
+	IPA_IMM_CMD_IP_PACKET_TAG_STATUS	= 20,
 };
 
 /* enum ipa_pipeline_clear_option - Values for pipeline clear waiting options
