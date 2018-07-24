@@ -8,34 +8,6 @@
 
 #include "ipa_common_i.h"
 
-/* struct ipahal_fltrt_alloc_imgs_params - Params for tbls imgs allocations
- *  The allocation logic will allocate DMA memory representing the header.
- *  If the bodies are local (SRAM) the allocation will allocate
- *  a DMA buffers that would contain the content of these local tables in raw
- * @ipt: IP version type
- * @tbls_num: Number of tables to represent by the header
- * @num_lcl_hash_tbls: Number of local (sram) hashable tables
- * @num_lcl_nhash_tbls: Number of local (sram) non-hashable tables
- * @total_sz_lcl_hash_tbls: Total size of local hashable tables
- * @total_sz_lcl_nhash_tbls: Total size of local non-hashable tables
- * @hash_hdr/nhash_hdr: OUT params for the header structures
- * @hash_bdy/nhash_bdy: OUT params for the local body structures
- */
-struct ipahal_fltrt_alloc_imgs_params {
-	enum ipa_ip_type ipt;
-	u32 tbls_num;
-	u32 num_lcl_hash_tbls;
-	u32 num_lcl_nhash_tbls;
-	u32 total_sz_lcl_hash_tbls;
-	u32 total_sz_lcl_nhash_tbls;
-
-	/* OUT PARAMS */
-	struct ipa_mem_buffer hash_hdr;
-	struct ipa_mem_buffer nhash_hdr;
-	struct ipa_mem_buffer hash_bdy;
-	struct ipa_mem_buffer nhash_bdy;
-};
-
 /* enum ipahal_rt_rule_hdr_type - Header type used in rt rules
  * @IPAHAL_RT_RULE_HDR_NONE: No header is used
  * @IPAHAL_RT_RULE_HDR_RAW: Raw header is used
