@@ -54,9 +54,6 @@
 #define DEST_PIPE_INDEX_BMSK			0x000001f0
 #define MODE_BMSK				0x00000007
 
-/* IPA_ENDP_INIT_NAT_n register */
-#define NAT_EN_BMSK				0x00000003
-
 /* IPA_ENDP_INIT_CTRL_n register */
 #define ENDP_SUSPEND_BMSK			0x00000001
 #define ENDP_DELAY_BMSK				0x00000002
