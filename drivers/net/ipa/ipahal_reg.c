@@ -602,25 +602,12 @@ static const struct ipahal_reg_obj ipahal_reg_objs[][IPA_REG_MAX] = {
  */
 void ipahal_reg_init(enum ipa_hw_version hw_version)
 {
-	int i;
-	int j;
-
 	ipa_assert(hw_version < ARRAY_SIZE(ipahal_reg_objs));
 
 	ipa_debug_low("Entry - HW_TYPE=%d\n", hw_version);
 
-	/* Build up the register descriptions we'll use */
-	for (i = 0; i < IPA_REG_MAX ; i++) {
-		for (j = hw_version; j >= 0; j--) {
-			const struct ipahal_reg_obj *reg;
-
-			reg = &ipahal_reg_objs[j][i];
-			if (reg->offset) {
-				ipahal_regs[i] = *reg;
-				break;
-			}
-		}
-	}
+	memcpy(&ipahal_regs, &ipahal_reg_objs[IPA_HW_v3_5_1],
+	       sizeof(ipahal_regs));
 }
 
 /* Get the offset of a n parameterized register
