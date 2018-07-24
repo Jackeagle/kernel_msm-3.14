@@ -347,8 +347,8 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 	 */
 	val = ~0;
 	for (client_idx = 0; client_idx < IPA_CLIENT_MAX; client_idx++)
-		if (IPA_CLIENT_IS_Q6_CONS(client_idx) ||
-				IPA_CLIENT_IS_Q6_PROD(client_idx)) {
+		if (ipa_modem_consumer(client_idx) ||
+				ipa_modem_producer(client_idx)) {
 			u32 ep_idx = ipa_get_ep_mapping(client_idx);
 
 			ipa_debug("modem ep_idx(%u) client_idx = %d\n",

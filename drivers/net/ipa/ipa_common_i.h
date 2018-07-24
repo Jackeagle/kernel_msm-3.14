@@ -231,13 +231,13 @@ static inline bool ipa_consumer(enum ipa_client_type client)
  * Note a client must have a valid entry in the ipa_ep_configuration[]
  * array to be are considered a modem consumer or producer client.
  */
-static inline bool IPA_CLIENT_IS_Q6_CONS(enum ipa_client_type client)
+static inline bool ipa_modem_consumer(enum ipa_client_type client)
 {
 	return client == IPA_CLIENT_Q6_LAN_CONS ||
 		client == IPA_CLIENT_Q6_WAN_CONS;
 }
 
-static inline bool IPA_CLIENT_IS_Q6_PROD(enum ipa_client_type client)
+static inline bool ipa_modem_producer(enum ipa_client_type client)
 {
 	return client == IPA_CLIENT_Q6_LAN_PROD ||
 		client == IPA_CLIENT_Q6_WAN_PROD ||

@@ -1256,8 +1256,8 @@ bool ipa_is_modem_pipe(u32 pipe_idx)
 	int client_idx;
 
 	for (client_idx = 0; client_idx < IPA_CLIENT_MAX; client_idx++) {
-		if (!IPA_CLIENT_IS_Q6_CONS(client_idx) &&
-		    !IPA_CLIENT_IS_Q6_PROD(client_idx))
+		if (!ipa_modem_consumer(client_idx) &&
+		    !ipa_modem_producer(client_idx))
 			continue;
 		if (ipa_get_ep_mapping(client_idx) == pipe_idx)
 			return true;
