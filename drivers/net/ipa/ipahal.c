@@ -36,6 +36,33 @@ enum ipahal_imm_cmd_name {
 	IPA_IMM_CMD_MAX,
 };
 
+/* enum ipa_pipeline_clear_option - Values for pipeline clear waiting options
+ * @IPAHAL_HPS_CLEAR: Wait for HPS clear. All queues except high priority queue
+ *  shall not be serviced until HPS is clear of packets or immediate commands.
+ *  The high priority Rx queue / Q6ZIP group shall still be serviced normally.
+ *
+ * @IPAHAL_SRC_GRP_CLEAR: Wait for originating source group to be clear
+ *  (for no packet contexts allocated to the originating source group).
+ *  The source group / Rx queue shall not be serviced until all previously
+ *  allocated packet contexts are released. All other source groups/queues shall
+ *  be serviced normally.
+ *
+ * @IPAHAL_FULL_PIPELINE_CLEAR: Wait for full pipeline to be clear.
+ *  All groups / Rx queues shall not be serviced until IPA pipeline is fully
+ *  clear. This should be used for debug only.
+ *
+ *  The values assigned to these are assumed by the REGISTER_WRITE
+ *  (struct ipa_imm_cmd_hw_register_write) and the DMA_SHARED_MEM
+ *  (struct ipa_imm_cmd_hw_dma_shared_mem) immediate commands for
+ *  IPA version 3 hardware.  They are also used to modify the opcode
+ *  used to implement these commands for IPA version 4 hardware.
+ */
+enum ipahal_pipeline_clear_option {
+	IPAHAL_HPS_CLEAR		= 0,
+	IPAHAL_SRC_GRP_CLEAR		= 1,
+	IPAHAL_FULL_PIPELINE_CLEAR	= 2,
+};
+
 static const char * const ipahal_pkt_status_exception_to_str[] = {
 	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_NONE),
 	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_DEAGGR),
