@@ -73,44 +73,12 @@ static const char * const ipahal_pkt_status_exception_to_str[] = {
 	__stringify(IPAHAL_PKT_STATUS_EXCEPTION_IPV6CT),
 };
 
-/* struct ipahal_imm_cmd_obj - immediate command H/W information
- * @name - Command "name" (i.e., symbolic identifier)
- * @opcode - Immediate command OpCode
- */
-struct ipahal_imm_cmd_obj {
-	u16		opcode;
-};
-
-#define idsym(id)	IPA_IMM_CMD_ ## id
-#define imm_cmd_obj(id)				\
-	[idsym(id)] = {				\
-		.opcode = idsym(id),		\
-	}
-
-/* IPAv3.5.1 */
-static struct ipahal_imm_cmd_obj ipahal_imm_cmds[] = {
-	imm_cmd_obj(IP_V4_FILTER_INIT),
-	imm_cmd_obj(IP_V6_FILTER_INIT),
-	imm_cmd_obj(IP_V4_ROUTING_INIT),
-	imm_cmd_obj(IP_V6_ROUTING_INIT),
-	imm_cmd_obj(HDR_INIT_LOCAL),
-	imm_cmd_obj(REGISTER_WRITE),
-	imm_cmd_obj(IP_PACKET_INIT),
-	imm_cmd_obj(DMA_TASK_32B_ADDR),
-	imm_cmd_obj(DMA_SHARED_MEM),
-	imm_cmd_obj(IP_PACKET_TAG_STATUS),
-};
-
-#undef imm_cmd_obj
-#undef idsym
-#undef cfunc
-
 static struct ipahal_imm_cmd_pyld *
 ipahal_imm_cmd_pyld_alloc_common(u16 opcode, size_t pyld_size, gfp_t flags)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 
-	ipa_debug_low("immediate command: %u\n", ipahal_imm_cmds[opcode].opcode);
+	ipa_debug_low("immediate command: %u\n", opcode);
 
 	pyld = kzalloc(sizeof(*pyld) + pyld_size, flags);
 	if (unlikely(!pyld)) {
@@ -171,7 +139,7 @@ ipahal_dma_shared_mem_write_pyld(struct ipa_mem_buffer *mem, u32 offset)
 	if (check_too_big("offset", offset, 16))
 		return NULL;
 
-	opcode = ipahal_imm_cmds[IPA_IMM_CMD_DMA_SHARED_MEM].opcode;
+	opcode = IPA_IMM_CMD_DMA_SHARED_MEM;
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
 		return NULL;
@@ -197,7 +165,7 @@ ipahal_register_write_pyld(u32 offset, u32 value, u32 mask, bool clear)
 	if (check_too_big("offset", offset, 16))
 		return NULL;
 
-	opcode = ipahal_imm_cmds[IPA_IMM_CMD_REGISTER_WRITE].opcode;
+	opcode = IPA_IMM_CMD_REGISTER_WRITE;
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
 		return NULL;
@@ -225,7 +193,7 @@ ipahal_hdr_init_local_pyld(struct ipa_mem_buffer *mem, u32 offset)
 	if (check_too_big("offset", offset, 16))
 		return NULL;
 
-	opcode = ipahal_imm_cmds[IPA_IMM_CMD_HDR_INIT_LOCAL].opcode;
+	opcode = IPA_IMM_CMD_HDR_INIT_LOCAL;
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
 		return NULL;
@@ -247,7 +215,7 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_packet_init_pyld(u32 dest_pipe_idx)
 	if (check_too_big("dest_pipe_idx", dest_pipe_idx, 5))
 		return NULL;
 
-	opcode = ipahal_imm_cmds[IPA_IMM_CMD_IP_PACKET_INIT].opcode;
+	opcode = IPA_IMM_CMD_IP_PACKET_INIT;
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
 		return NULL;
@@ -296,7 +264,7 @@ struct ipahal_imm_cmd_pyld *
 ipahal_ip_v4_routing_init_pyld(struct ipa_mem_buffer *mem, u32 hash_offset,
 			       u32 nhash_offset)
 {
-	u16 opcode = ipahal_imm_cmds[IPA_IMM_CMD_IP_V4_ROUTING_INIT].opcode;
+	u16 opcode = IPA_IMM_CMD_IP_V4_ROUTING_INIT;
 
 	ipa_debug("IPv4 routing\n");
 
@@ -307,7 +275,7 @@ struct ipahal_imm_cmd_pyld *
 ipahal_ip_v6_routing_init_pyld(struct ipa_mem_buffer *mem, u32 hash_offset,
 			       u32 nhash_offset)
 {
-	u16 opcode = ipahal_imm_cmds[IPA_IMM_CMD_IP_V6_ROUTING_INIT].opcode;
+	u16 opcode = IPA_IMM_CMD_IP_V6_ROUTING_INIT;
 
 	ipa_debug("IPv6 routing\n");
 
@@ -318,7 +286,7 @@ struct ipahal_imm_cmd_pyld *
 ipahal_ip_v4_filter_init_pyld(struct ipa_mem_buffer *mem, u32 hash_offset,
 			      u32 nhash_offset)
 {
-	u16 opcode = ipahal_imm_cmds[IPA_IMM_CMD_IP_V4_FILTER_INIT].opcode;
+	u16 opcode = IPA_IMM_CMD_IP_V4_FILTER_INIT;
 
 	ipa_debug("IPv4 filtering\n");
 
@@ -329,7 +297,7 @@ struct ipahal_imm_cmd_pyld *
 ipahal_ip_v6_filter_init_pyld(struct ipa_mem_buffer *mem, u32 hash_offset,
 			      u32 nhash_offset)
 {
-	u16 opcode = ipahal_imm_cmds[IPA_IMM_CMD_IP_V6_FILTER_INIT].opcode;
+	u16 opcode = IPA_IMM_CMD_IP_V6_FILTER_INIT;
 
 	ipa_debug("IPv6 filtering\n");
 
@@ -341,7 +309,7 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_packet_tag_status_pyld(u64 tag)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_ip_packet_tag_status *data;
-	u16 opcode = ipahal_imm_cmds[IPA_IMM_CMD_IP_PACKET_TAG_STATUS].opcode;
+	u16 opcode = IPA_IMM_CMD_IP_PACKET_TAG_STATUS;
 
 	if (check_too_big("tag", tag, 48))
 		return NULL;
@@ -361,7 +329,7 @@ ipahal_dma_task_32b_addr_pyld(struct ipa_mem_buffer *mem)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_dma_task_32b_addr *data;
-	u16 opcode = ipahal_imm_cmds[IPA_IMM_CMD_DMA_TASK_32B_ADDR].opcode;
+	u16 opcode = IPA_IMM_CMD_DMA_TASK_32B_ADDR;
 
 	if (check_too_big("size1", mem->size, 16))
 		return NULL;
