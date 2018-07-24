@@ -16,11 +16,7 @@
 static struct ipahal_context ipahal_ctx_struct;
 struct ipahal_context *ipahal_ctx = &ipahal_ctx_struct;
 
-/* Immediate command names
- *
- * NOTE:: Any change to this enum, need to change to ipahal_imm_cmd_name_to_str
- *	array as well.
- */
+/* Immediate commands; value is the opcode for IPA v3.5.1 hardware */
 enum ipahal_imm_cmd {
 	IPA_IMM_CMD_IP_V4_FILTER_INIT		= 3,
 	IPA_IMM_CMD_IP_V6_FILTER_INIT		= 4,
@@ -106,7 +102,7 @@ ipahal_imm_cmd_pyld_alloc_atomic(u16 opcode, size_t pyld_size)
 
 /* Returns true if the value provided is too big to be represented
  * in the given number of bits.  In this case, WARN_ON() is called,
- * and a message is printed and using ipa_err().
+ * and a message is printed using ipa_err().
  *
  * Returns false if the value is OK (not too big).
  */
@@ -324,7 +320,7 @@ ipahal_dma_task_32b_addr_pyld(struct ipa_mem_buffer *mem)
 	struct ipa_imm_cmd_hw_dma_task_32b_addr *data;
 	u16 opcode = IPA_IMM_CMD_DMA_TASK_32B_ADDR;
 
-	if (check_too_big("size1", mem->size, 16))
+	if (check_too_big("size", mem->size, 16))
 		return NULL;
 	if (check_too_big("packet_size", mem->size, 16))
 		return NULL;
