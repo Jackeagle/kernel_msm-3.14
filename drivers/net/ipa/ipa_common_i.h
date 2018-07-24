@@ -346,13 +346,6 @@ enum hdr_total_len_or_pad_type {
 /** max size of the name of the resource (routing table, header) */
 #define IPA_RESOURCE_NAME_MAX 32
 
-/** enum ipa_ip_type - Address family: IPv4 or IPv6 */
-enum ipa_ip_type {
-	IPA_IP_v4,
-	IPA_IP_v6,
-	IPA_IP_MAX
-};
-
 /** struct ipa_ep_cfg_hdr - header configuration in IPA end-point
  *
  * @hdr_len:Header length in bytes to be added/removed. Assuming
