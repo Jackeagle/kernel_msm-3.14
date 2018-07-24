@@ -1051,7 +1051,7 @@ void ipa_suspend_handler(enum ipa_irq_type interrupt, void *private_data,
 
 		if (!ipa_ctx->ep[i].valid)
 			continue;
-		if (!IPA_CLIENT_IS_APPS_CONS(ipa_ctx->ep[i].client))
+		if (!ipa_ap_consumer(ipa_ctx->ep[i].client))
 			continue;
 		/* pipe will be unsuspended as part of
 		 * enabling IPA clocks

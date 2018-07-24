@@ -244,7 +244,7 @@ static inline bool IPA_CLIENT_IS_Q6_PROD(enum ipa_client_type client)
 		client == IPA_CLIENT_Q6_CMD_PROD;
 }
 
-static inline bool IPA_CLIENT_IS_APPS_CONS(enum ipa_client_type client)
+static inline bool ipa_ap_consumer(enum ipa_client_type client)
 {
 	return client == IPA_CLIENT_APPS_LAN_CONS ||
 		client == IPA_CLIENT_APPS_WAN_CONS;
