@@ -217,8 +217,15 @@ enum ipa_client_type {
 	IPA_CLIENT_MAX,
 };
 
-#define IPA_CLIENT_IS_PROD(x)	(!((x) & 1))
-#define IPA_CLIENT_IS_CONS(x)	(!IPA_CLIENT_IS_PROD(x))
+static inline bool IPA_CLIENT_IS_PROD(enum ipa_client_type client)
+{
+	return !((u32)client & 1);	/* Even numbers are producers */
+}
+
+static inline bool IPA_CLIENT_IS_CONS(enum ipa_client_type client)
+{
+	return !IPA_CLIENT_IS_PROD(client);
+}
 
 /*
  * Note a client must have a valid entry in the ipa_ep_configuration[]
