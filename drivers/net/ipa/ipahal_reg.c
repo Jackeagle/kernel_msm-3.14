@@ -141,12 +141,8 @@ static bool cs_offload_en_valid(u8 cs_offload_en, enum ipahal_reg reg)
 	case IPA_ENABLE_CS_OFFLOAD_DL:
 		return true;
 	default:
-		break;
+		return false;
 	}
-
-	ipa_err("Invalid cs_offload_en value for reg %u\n", reg);
-
-	return false;
 }
 
 static u32
@@ -155,8 +151,7 @@ ipareg_construct_endp_init_cfg_n(enum ipahal_reg reg, const void *fields)
 	const struct ipa_ep_cfg_cfg *cfg = fields;
 	u32 val;
 
-	if (WARN_ON(!cs_offload_en_valid(cfg->cs_offload_en, reg)))
-		return 0;
+	ipa_assert(cs_offload_en_valid(cfg->cs_offload_en, reg));
 
 	val = field_gen(cfg->frag_offload_en ? 1 : 0, FRAG_OFFLOAD_EN_BMSK);
 	val |= field_gen(cfg->cs_offload_en, CS_OFFLOAD_EN_BMSK);
