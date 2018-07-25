@@ -371,6 +371,10 @@ int ipahal_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp);
  */
 void ipahal_dma_free(struct ipa_mem_buffer *mem);
 
+/* ipahal_dma_phys_to_virt() - convert a DMA address to its virtual equivalent
+ */
+void *ipahal_dma_phys_to_virt(struct ipa_mem_buffer *mem, dma_addr_t phys);
+
 void ipahal_init(enum ipa_hw_version hw_version, void __iomem *base);
 int ipahal_dev_init(struct device *ipa_pdev);
 void ipahal_dev_destroy(void);

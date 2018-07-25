@@ -588,6 +588,11 @@ void ipahal_dma_free(struct ipa_mem_buffer *mem)
 	memset(mem, 0, sizeof(*mem));
 }
 
+void *ipahal_dma_phys_to_virt(struct ipa_mem_buffer *mem, dma_addr_t phys)
+{
+	return mem->base + (phys - mem->phys_base);
+}
+
 void ipahal_init(enum ipa_hw_version hw_version, void __iomem *base)
 {
 	ipa_debug("Entry - IPA HW TYPE=%d base=%p\n", hw_version, base);
