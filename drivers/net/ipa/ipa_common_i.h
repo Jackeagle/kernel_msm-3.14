@@ -465,12 +465,9 @@ struct ipa_ep_cfg_aggr {
 };
 
 /** struct ipa_ep_cfg_deaggr - deaggregation configuration in IPA end-point
- * @max_packet_len: DEAGGR Max Packet Length in Bytes. A Packet with higher
- *	size wil be treated as an error. 0 - Packet Length is not Bound,
- *	IPA should not check for a Max Packet Length.
  */
 struct ipa_ep_cfg_deaggr {
-	u32 max_packet_len;
+	/* All endpoints configure this the same way (all 0) */
 };
 
 /** struct ipa_ep_cfg_cfg - IPA ENDP_INIT Configuration register
