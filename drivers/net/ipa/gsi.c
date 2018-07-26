@@ -1827,12 +1827,12 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 		tre.ieob = (xfer[i].flags & GSI_XFER_FLAG_EOB) ? 1 : 0;
 		tre.chain = (xfer[i].flags & GSI_XFER_FLAG_CHAIN) ? 1 : 0;
 
-		idx = ring_wp_local_index(&chan->ring);
-		tre_ptr = chan->ring.mem.base + idx *
-				GSI_RING_ELEMENT_SIZE;
+		tre_ptr = ipahal_dma_phys_to_virt(&chan->ring.mem,
+						  chan->ring.wp_local);
 
 		/* write the TRE to ring */
 		*tre_ptr = tre;
+		idx = ring_wp_local_index(&chan->ring);
 		chan->user_data[idx] = xfer[i].xfer_user_data;
 		ring_wp_local_inc(&chan->ring);
 	}
