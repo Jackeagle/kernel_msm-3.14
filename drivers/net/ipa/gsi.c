@@ -1138,7 +1138,7 @@ static void gsi_init_ring(struct gsi_ring_ctx *ring, struct ipa_mem_buffer *mem)
 	ring->wp_local = mem->phys_base;
 	ring->rp_local = mem->phys_base;
 	ring->count = mem->size / GSI_RING_ELEMENT_SIZE;
-	ring->end = mem->phys_base + ring->count * GSI_RING_ELEMENT_SIZE;
+	ring->end = mem->phys_base + mem->size;
 }
 
 static void gsi_prime_evt_ring(struct gsi_evt_ctx *evtr)
