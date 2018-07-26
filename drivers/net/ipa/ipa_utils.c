@@ -1214,18 +1214,12 @@ static void ipa_write_src_rsrc_grp_type_reg(int group_index,
 	const struct rsrc_min_max *y_limits;
 	enum ipahal_reg reg;
 
-	switch (group_index) {
-	case IPA_GROUP_LWA_DL:
-	case IPA_GROUP_UL_DL:
-		reg = IPA_SRC_RSRC_GRP_01_RSRC_TYPE_n;
-		break;
-	case IPA_GROUP_UC_RX_Q:
+	if (group_index == IPA_GROUP_UC_RX_Q) {
 		reg = IPA_SRC_RSRC_GRP_23_RSRC_TYPE_n;
-		break;
-	default:
-		ipa_err(" Invalid source resource group,index #%d\n",
-			group_index);
-		return;
+	} else {
+		ipa_assert(group_index == IPA_GROUP_LWA_DL ||
+			   group_index == IPA_GROUP_UL_DL);
+		reg = IPA_SRC_RSRC_GRP_01_RSRC_TYPE_n;
 	}
 
 	x_limits = &ipa_rsrc_src_grp_config[n][group_index];
@@ -1237,20 +1231,12 @@ static void ipa_write_src_rsrc_grp_type_reg(int group_index,
 static void ipa_write_dst_rsrc_grp_type_reg(int group_index,
 					    enum ipa_rsrc_grp_type_src n)
 {
+	enum ipahal_reg reg = IPA_DST_RSRC_GRP_01_RSRC_TYPE_n;
 	const struct rsrc_min_max *x_limits;
 	const struct rsrc_min_max *y_limits;
-	enum ipahal_reg reg;
 
-	switch (group_index) {
-	case IPA_GROUP_LWA_DL:
-	case IPA_GROUP_UL_DL:
-		reg = IPA_DST_RSRC_GRP_01_RSRC_TYPE_n;
-		break;
-	default:
-		ipa_err(" Invalid destination resource group,index #%d\n",
-			group_index);
-		return;
-	}
+	ipa_assert(group_index == IPA_GROUP_LWA_DL ||
+		   group_index == IPA_GROUP_UL_DL);
 
 	x_limits = &ipa_rsrc_dst_grp_config[n][group_index];
 	y_limits = &ipa_rsrc_dst_grp_config[n][group_index + 1];
