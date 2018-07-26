@@ -1207,8 +1207,7 @@ static void write_src_rsrc_grp_limits(enum ipahal_reg reg,
 	ipahal_write_reg_n_fields(reg, n, &val);
 }
 
-static void ipa_write_src_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
-					    int group_index,
+static void ipa_write_src_rsrc_grp_type_reg(int group_index,
 					    enum ipa_rsrc_grp_type_src n)
 {
 	const struct rsrc_min_max *x_limits;
@@ -1235,8 +1234,7 @@ static void ipa_write_src_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
 	write_src_rsrc_grp_limits(reg, n, x_limits, y_limits);
 }
 
-static void ipa_write_dst_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
-					    int group_index,
+static void ipa_write_dst_rsrc_grp_type_reg(int group_index,
 					    enum ipa_rsrc_grp_type_src n)
 {
 	const struct rsrc_min_max *x_limits;
@@ -1262,7 +1260,6 @@ static void ipa_write_dst_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
 
 void ipa_set_resource_groups_min_max_limits(void)
 {
-	enum ipa_hw_version hw_version = IPA_HW_v3_5_1;
 	int src_rsrc_type_max = IPA_RSRC_GRP_TYPE_SRC_MAX;
 	int dst_rsrc_type_max = IPA_RSRC_GRP_TYPE_DST_MAX;
 	int src_grp_idx_max = IPA_SRC_GROUP_MAX;
@@ -1275,12 +1272,12 @@ void ipa_set_resource_groups_min_max_limits(void)
 	ipa_debug("Assign source rsrc groups min-max limits\n");
 	for (i = 0; i < src_rsrc_type_max; i++)
 		for (j = 0; j < src_grp_idx_max; j = j + 2)
-			ipa_write_src_rsrc_grp_type_reg(hw_version, j, i);
+			ipa_write_src_rsrc_grp_type_reg(j, i);
 
 	ipa_debug("Assign destination rsrc groups min-max limits\n");
 	for (i = 0; i < dst_rsrc_type_max; i++)
 		for (j = 0; j < dst_grp_idx_max; j = j + 2)
-			ipa_write_dst_rsrc_grp_type_reg(hw_version, j, i);
+			ipa_write_dst_rsrc_grp_type_reg(j, i);
 
 	/* Resource group configuration is done by TZ */
 	ipa_err("skip configuring ipa_rx_hps_clients from HLOS\n");
