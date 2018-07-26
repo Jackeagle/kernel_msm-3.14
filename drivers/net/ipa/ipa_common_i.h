@@ -362,11 +362,6 @@ enum hdr_total_len_or_pad_type {
  *			Example -  Stream ID/SSID/mux ID.
  *			Valid for  Input Pipes only (IPA Consumer) (for output
  *			pipes, metadata already set within the header)
- * @hdr_additional_const_len:	Defines the constant length that should be added
- *			to the payload length in order for IPA to update
- *			correctly the length field within the header
- *			(valid only in case Hdr_Ofst_Pkt_Size_Valid=1)
- *			Valid for Output Pipes (IPA Producer)
  * @hdr_ofst_pkt_size_valid:	0: Hdr_Ofst_Pkt_Size  value is invalid, i.e., no
  *			length field within the inserted header
  *			1: Hdr_Ofst_Pkt_Size  value is valid, i.e., a
@@ -394,7 +389,6 @@ struct ipa_ep_cfg_hdr {
 	u32  hdr_len;
 	u32  hdr_ofst_metadata_valid;
 	u32  hdr_ofst_metadata;
-	u32  hdr_additional_const_len;
 	u32  hdr_ofst_pkt_size_valid;
 	u32  hdr_ofst_pkt_size;
 	u32  hdr_a5_mux;

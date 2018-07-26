@@ -895,9 +895,8 @@ static void ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 		  ep_hdr->hdr_remove_additional, ep_hdr->hdr_a5_mux,
 		  ep_hdr->hdr_ofst_pkt_size);
 
-	ipa_debug("ofst_pkt_size_valid=%d, additional_const_len=0x%x\n",
-		  ep_hdr->hdr_ofst_pkt_size_valid,
-		  ep_hdr->hdr_additional_const_len);
+	ipa_debug("ofst_pkt_size_valid=%d, additional_const_len=0x0\n",
+		  ep_hdr->hdr_ofst_pkt_size_valid);
 
 	ipa_debug("ofst_metadata=0x%x, ofst_metadata_valid=%d, len=0x%x",
 		  ep_hdr->hdr_ofst_metadata, ep_hdr->hdr_ofst_metadata_valid,

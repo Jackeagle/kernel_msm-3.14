@@ -284,8 +284,7 @@ ipareg_construct_endp_init_hdr_n(enum ipahal_reg reg, const void *fields)
 	val |= field_gen(ep_hdr->hdr_ofst_pkt_size, HDR_OFST_PKT_SIZE_BMSK);
 	val |= field_gen(ep_hdr->hdr_ofst_pkt_size_valid,
 			HDR_OFST_PKT_SIZE_VALID_BMSK);
-	val |= field_gen(ep_hdr->hdr_additional_const_len,
-			HDR_ADDITIONAL_CONST_LEN_BMSK);
+	val |= field_gen(0, HDR_ADDITIONAL_CONST_LEN_BMSK);
 	val |= field_gen(ep_hdr->hdr_ofst_metadata, HDR_OFST_METADATA_BMSK);
 	val |= field_gen(ep_hdr->hdr_ofst_metadata_valid,
 			HDR_OFST_METADATA_VALID_BMSK);
