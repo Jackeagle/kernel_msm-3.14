@@ -464,11 +464,6 @@ struct ipa_ep_cfg_aggr {
 	bool aggr_sw_eof_active;
 };
 
-/** struct ipa_ep_cfg_deaggr - deaggregation configuration in IPA end-point
- */
-struct ipa_ep_cfg_deaggr {
-	/* All endpoints configure this the same way (all 0) */
-};
 
 /** struct ipa_ep_cfg_cfg - IPA ENDP_INIT Configuration register
  * @frag_offload_en: - 0 - IP packet fragment handling is disabled. IP packet
@@ -527,7 +522,6 @@ struct ipa_ep_cfg {
 	struct ipa_ep_cfg_hdr_ext hdr_ext;
 	struct ipa_ep_cfg_mode mode;
 	struct ipa_ep_cfg_aggr aggr;
-	struct ipa_ep_cfg_deaggr deaggr;
 	struct ipa_ep_cfg_cfg cfg;
 	struct ipa_ep_cfg_metadata_mask metadata_mask;
 };

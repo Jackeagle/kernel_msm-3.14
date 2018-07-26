@@ -1043,25 +1043,14 @@ static void ipa_cfg_ep_seq(u32 clnt_hdl)
 
 /** ipa_cfg_ep_deaggr() -  IPA end-point deaggregation configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ep_deaggr:	[in] IPA end-point configuration params
- *
- * Note:	Should not be called from atomic context
  */
-static void
-ipa_cfg_ep_deaggr(u32 clnt_hdl, const struct ipa_ep_cfg_deaggr *ep_deaggr)
+static void ipa_cfg_ep_deaggr(u32 clnt_hdl)
 {
-	struct ipa_ep_context *ep;
-
 	ipa_debug("pipe=%d deaggr_hdr_len=0\n", clnt_hdl);
-
 	ipa_debug("packet_offset_valid=0\n");
-
 	ipa_debug("packet_offset_location=0 max_packet_len=0\n");
 
-	ep = &ipa_ctx->ep[clnt_hdl];
-
-	/* copy over EP cfg */
-	ep->cfg.deaggr = *ep_deaggr;
+	/* All fields are 0 for all pipes */
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_n, clnt_hdl, NULL);
 }
@@ -1110,7 +1099,7 @@ void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 		ipa_cfg_ep_mode(clnt_hdl, &ipa_ep_cfg->mode);
 		ipa_cfg_ep_seq(clnt_hdl);
 
-		ipa_cfg_ep_deaggr(clnt_hdl, &ipa_ep_cfg->deaggr);
+		ipa_cfg_ep_deaggr(clnt_hdl);
 	} else {
 		ipa_cfg_ep_metadata_mask(clnt_hdl, &ipa_ep_cfg->metadata_mask);
 	}
