@@ -395,14 +395,12 @@ struct ipa_ep_cfg_hdr {
  *	(header + packet + padding)
  * @hdr_total_len_or_pad_valid: 0-Ignore TOTAL_LEN_OR_PAD field, 1-Process
  *	TOTAL_LEN_OR_PAD field
- * @hdr_little_endian: 0-Big Endian, 1-Little Endian
  */
 struct ipa_ep_cfg_hdr_ext {
 	u32 hdr_pad_to_alignment;
 	bool hdr_payload_len_inc_padding;
 	enum hdr_total_len_or_pad_type hdr_total_len_or_pad;
 	bool hdr_total_len_or_pad_valid;
-	bool hdr_little_endian;
 };
 
 /** struct ipa_ep_cfg_mode - mode configuration in IPA end-point

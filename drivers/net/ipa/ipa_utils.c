@@ -928,9 +928,8 @@ ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
 		  ep_hdr_ext->hdr_payload_len_inc_padding,
 		  ep_hdr_ext->hdr_total_len_or_pad);
 
-	ipa_debug("hdr_total_len_or_pad_valid=%d hdr_little_endian=%d\n",
-		  ep_hdr_ext->hdr_total_len_or_pad_valid,
-		  ep_hdr_ext->hdr_little_endian);
+	ipa_debug("hdr_total_len_or_pad_valid=%d hdr_little_endian=0\n",
+		  ep_hdr_ext->hdr_total_len_or_pad_valid);
 
 	ep = &ipa_ctx->ep[clnt_hdl];
 

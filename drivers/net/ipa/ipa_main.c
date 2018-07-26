@@ -638,7 +638,6 @@ static int setup_apps_lan_cons_pipe(void)
 
 	sys_in.ipa_ep_cfg.hdr.hdr_len = IPA_LAN_RX_HEADER_LENGTH;
 
-	sys_in.ipa_ep_cfg.hdr_ext.hdr_little_endian = false;
 	sys_in.ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad_valid = true;
 	sys_in.ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad = IPA_HDR_PAD;
 	sys_in.ipa_ep_cfg.hdr_ext.hdr_payload_len_inc_padding = false;
