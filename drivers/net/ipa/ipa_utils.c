@@ -1266,9 +1266,6 @@ void ipa_set_resource_groups_min_max_limits(void)
 		for (j = 0; j < dst_grp_idx_max; j = j + 2)
 			if (j != IPA_MHI_GROUP_DMA)
 				ipa_write_dst_rsrc_grp_type_reg(j, i);
-
-	/* Resource group configuration is done by TZ */
-	ipa_err("skip configuring ipa_rx_hps_clients from HLOS\n");
 }
 
 static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
