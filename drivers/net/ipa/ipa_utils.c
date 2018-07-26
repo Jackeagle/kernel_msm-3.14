@@ -83,56 +83,54 @@ struct rsrc_min_max {
 	u32 max;
 };
 
+/* IPA_HW_v3_5_1 */
 static const struct rsrc_min_max ipa_rsrc_src_grp_config
-	[][IPA_RSRC_GRP_TYPE_SRC_MAX][IPA_SRC_GROUP_MAX] = {
-	[IPA_HW_v3_5_1] = {
-		[IPA_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS] = {
-			[IPA_GROUP_LWA_DL]	= { .min = 1,	.max = 63, },
-			[IPA_GROUP_UL_DL]	= { .min = 1,	.max = 63, },
-			[IPA_MHI_GROUP_DMA]	= { .min = 0,	.max = 0, },
-			[IPA_GROUP_UC_RX_Q]	= { .min = 1,	.max = 63, },
-		},
-		[IPA_RSRC_GRP_TYPE_SRS_DESCRIPTOR_LISTS] = {
-			[IPA_GROUP_LWA_DL]	= { .min = 10,	.max =10, },
-			[IPA_GROUP_UL_DL]	= { .min = 10,	.max =10, },
-			[IPA_MHI_GROUP_DMA]	= { .min = 0,	.max = 0, },
-			[IPA_GROUP_UC_RX_Q]	= { .min = 8,	.max = 8, },
-		},
-		[IPA_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF] = {
-			[IPA_GROUP_LWA_DL]	= { .min = 12,	.max =12, },
-			[IPA_GROUP_UL_DL]	= { .min = 14,	.max =14, },
-			[IPA_MHI_GROUP_DMA]	= { .min = 0,	.max = 0, },
-			[IPA_GROUP_UC_RX_Q]	= { .min = 8,	.max = 8, },
-		},
-		[IPA_RSRC_GRP_TYPE_SRC_HPS_DMARS] = {
-			[IPA_GROUP_LWA_DL]	= { .min = 0,	.max = 63, },
-			[IPA_GROUP_UL_DL]	= { .min = 0,	.max = 63, },
-			[IPA_MHI_GROUP_DMA]	= { .min = 0,	.max = 255, },
-			[IPA_GROUP_UC_RX_Q]	= { .min = 0,	.max = 255, },
-		},
-		[IPA_RSRC_GRP_TYPE_SRC_ACK_ENTRIES] = {
-			[IPA_GROUP_LWA_DL]	= { .min = 14,	.max =14, },
-			[IPA_GROUP_UL_DL]	= { .min = 20,	.max =20, },
-			[IPA_MHI_GROUP_DMA]	= { .min = 0,	.max = 0, },
-			[IPA_GROUP_UC_RX_Q]	= { .min = 14,	.max =14, },
-		},
+	[IPA_RSRC_GRP_TYPE_SRC_MAX][IPA_SRC_GROUP_MAX] = {
+	[IPA_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS] = {
+		[IPA_GROUP_LWA_DL]	= { .min = 1,	.max = 63, },
+		[IPA_GROUP_UL_DL]	= { .min = 1,	.max = 63, },
+		[IPA_MHI_GROUP_DMA]	= { .min = 0,	.max = 0, },
+		[IPA_GROUP_UC_RX_Q]	= { .min = 1,	.max = 63, },
+	},
+	[IPA_RSRC_GRP_TYPE_SRS_DESCRIPTOR_LISTS] = {
+		[IPA_GROUP_LWA_DL]	= { .min = 10,	.max =10, },
+		[IPA_GROUP_UL_DL]	= { .min = 10,	.max =10, },
+		[IPA_MHI_GROUP_DMA]	= { .min = 0,	.max = 0, },
+		[IPA_GROUP_UC_RX_Q]	= { .min = 8,	.max = 8, },
+	},
+	[IPA_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF] = {
+		[IPA_GROUP_LWA_DL]	= { .min = 12,	.max =12, },
+		[IPA_GROUP_UL_DL]	= { .min = 14,	.max =14, },
+		[IPA_MHI_GROUP_DMA]	= { .min = 0,	.max = 0, },
+		[IPA_GROUP_UC_RX_Q]	= { .min = 8,	.max = 8, },
+	},
+	[IPA_RSRC_GRP_TYPE_SRC_HPS_DMARS] = {
+		[IPA_GROUP_LWA_DL]	= { .min = 0,	.max = 63, },
+		[IPA_GROUP_UL_DL]	= { .min = 0,	.max = 63, },
+		[IPA_MHI_GROUP_DMA]	= { .min = 0,	.max = 255, },
+		[IPA_GROUP_UC_RX_Q]	= { .min = 0,	.max = 255, },
+	},
+	[IPA_RSRC_GRP_TYPE_SRC_ACK_ENTRIES] = {
+		[IPA_GROUP_LWA_DL]	= { .min = 14,	.max =14, },
+		[IPA_GROUP_UL_DL]	= { .min = 20,	.max =20, },
+		[IPA_MHI_GROUP_DMA]	= { .min = 0,	.max = 0, },
+		[IPA_GROUP_UC_RX_Q]	= { .min = 14,	.max =14, },
 	},
 };
 
+/* IPA_HW_v3_5_1 */
 static const struct rsrc_min_max ipa_rsrc_dst_grp_config
-	[][IPA_RSRC_GRP_TYPE_DST_MAX][IPA_DST_GROUP_MAX] = {
-	[IPA_HW_v3_5_1] = {
-		/* LWA_DL UL/DL/DPL unused N/A	 N/A	 N/A */
-		[IPA_RSRC_GRP_TYPE_DST_DATA_SECTORS] = {
-			[IPA_GROUP_LWA_DL]	= { .min = 4,	.max = 4, },
-			[IPA_GROUP_UL_DL]	= { .min = 4,	.max = 4, },
-			[IPA_MHI_GROUP_DMA]	= { .min = 3,	.max = 3, },
-		},
-		[IPA_RSRC_GRP_TYPE_DST_DPS_DMARS] = {
-			[IPA_GROUP_LWA_DL]	= { .min = 2,	.max = 63, },
-			[IPA_GROUP_UL_DL]	= { .min = 1,	.max = 63, },
-			[IPA_MHI_GROUP_DMA]	= { .min = 1,	.max = 2, },
-		},
+	[IPA_RSRC_GRP_TYPE_DST_MAX][IPA_DST_GROUP_MAX] = {
+	/* LWA_DL UL/DL/DPL unused N/A	 N/A	 N/A */
+	[IPA_RSRC_GRP_TYPE_DST_DATA_SECTORS] = {
+		[IPA_GROUP_LWA_DL]	= { .min = 4,	.max = 4, },
+		[IPA_GROUP_UL_DL]	= { .min = 4,	.max = 4, },
+		[IPA_MHI_GROUP_DMA]	= { .min = 3,	.max = 3, },
+	},
+	[IPA_RSRC_GRP_TYPE_DST_DPS_DMARS] = {
+		[IPA_GROUP_LWA_DL]	= { .min = 2,	.max = 63, },
+		[IPA_GROUP_UL_DL]	= { .min = 1,	.max = 63, },
+		[IPA_MHI_GROUP_DMA]	= { .min = 1,	.max = 2, },
 	},
 };
 
@@ -1231,8 +1229,8 @@ static void ipa_write_src_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
 		return;
 	}
 
-	x_limits = &ipa_rsrc_src_grp_config[hw_version][n][group_index];
-	y_limits = &ipa_rsrc_src_grp_config[hw_version][n][group_index + 1];
+	x_limits = &ipa_rsrc_src_grp_config[n][group_index];
+	y_limits = &ipa_rsrc_src_grp_config[n][group_index + 1];
 
 	write_src_rsrc_grp_limits(reg, n, x_limits, y_limits);
 }
@@ -1256,8 +1254,8 @@ static void ipa_write_dst_rsrc_grp_type_reg(enum ipa_hw_version hw_version,
 		return;
 	}
 
-	x_limits = &ipa_rsrc_dst_grp_config[hw_version][n][group_index];
-	y_limits = &ipa_rsrc_dst_grp_config[hw_version][n][group_index + 1];
+	x_limits = &ipa_rsrc_dst_grp_config[n][group_index];
+	y_limits = &ipa_rsrc_dst_grp_config[n][group_index + 1];
 
 	write_src_rsrc_grp_limits(reg, n, x_limits, y_limits);
 }
