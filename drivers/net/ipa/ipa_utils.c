@@ -753,7 +753,7 @@ static u8 ipa_get_qmb_master_sel(enum ipa_client_type client)
 	ep_config = ep_configuration(client);
 	ipa_assert(ep_config->valid);
 
-	return ep_config->qmb_master_sel;
+	return QMB_MASTER_SELECT_DDR;
 }
 
 /** ipa_get_client_mapping() - provide client mapping
