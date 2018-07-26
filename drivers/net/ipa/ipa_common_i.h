@@ -372,12 +372,6 @@ enum hdr_total_len_or_pad_type {
  *			header with the packet length . Assumption is that
  *			header length field size is constant and is 2Bytes
  *			Valid for Output Pipes (IPA Producer)
- * @hdr_a5_mux: Determines whether A5 Mux header should be added to the packet.
- *			This bit is valid only when Hdr_En=01(Header Insertion)
- *			SW should set this bit for IPA-to-A5 pipes.
- *			0: Do not insert A5 Mux Header
- *			1: Insert A5 Mux Header
- *			Valid for Output Pipes (IPA Producer)
  * @hdr_remove_additional:	bool switch, remove more of the header
  *			based on the aggregation configuration (register
  *			HDR_LEN_INC_DEAGG_HDR)
@@ -391,7 +385,6 @@ struct ipa_ep_cfg_hdr {
 	u32  hdr_ofst_metadata;
 	u32  hdr_ofst_pkt_size_valid;
 	u32  hdr_ofst_pkt_size;
-	u32  hdr_a5_mux;
 	u32  hdr_remove_additional;
 	u32  hdr_metadata_reg_valid;
 };
