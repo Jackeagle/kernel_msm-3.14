@@ -1735,19 +1735,15 @@ void gsi_dealloc_channel(unsigned long chan_id)
 
 static u16 __gsi_query_channel_free_re(struct gsi_chan_ctx *chan)
 {
-	u16 start;
-	u16 end;
-	u16 used;
+	struct gsi_ring_ctx *ring = &chan->ring;
+	u64 delta;
 
-	start = ring_rp_local_index(&chan->ring);
-	end = ring_wp_local_index(&chan->ring);
-
-	if (end >= start)
-		used = end - start;
+	if (ring->wp_local < ring->rp_local)
+		delta = ring->rp_local - ring->wp_local;
 	else
-		used = chan->ring.count - (start - end);
+		delta = ring->end - ring->wp_local + ring->rp_local;
 
-	return chan->ring.count - used - 1;
+	return (u16)(delta / GSI_RING_ELEMENT_SIZE - 1);
 }
 
 bool gsi_is_channel_empty(unsigned long chan_id)
