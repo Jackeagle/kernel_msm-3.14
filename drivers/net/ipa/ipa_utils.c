@@ -1272,12 +1272,14 @@ void ipa_set_resource_groups_min_max_limits(void)
 	ipa_debug("Assign source rsrc groups min-max limits\n");
 	for (i = 0; i < src_rsrc_type_max; i++)
 		for (j = 0; j < src_grp_idx_max; j = j + 2)
-			ipa_write_src_rsrc_grp_type_reg(j, i);
+			if (j != IPA_MHI_GROUP_DMA)
+				ipa_write_src_rsrc_grp_type_reg(j, i);
 
 	ipa_debug("Assign destination rsrc groups min-max limits\n");
 	for (i = 0; i < dst_rsrc_type_max; i++)
 		for (j = 0; j < dst_grp_idx_max; j = j + 2)
-			ipa_write_dst_rsrc_grp_type_reg(j, i);
+			if (j != IPA_MHI_GROUP_DMA)
+				ipa_write_dst_rsrc_grp_type_reg(j, i);
 
 	/* Resource group configuration is done by TZ */
 	ipa_err("skip configuring ipa_rx_hps_clients from HLOS\n");
