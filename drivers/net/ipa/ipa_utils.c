@@ -143,363 +143,360 @@ struct ipa_ep_configuration {
 	struct ipa_gsi_ep_config ipa_gsi_ep_info;
 };
 
+/* IPA_HW_v3_5_1 */
 /* clients not included in the list below are considered as invalid */
-static const struct ipa_ep_configuration ipa_ep_configuration
-					[][IPA_CLIENT_MAX] = {
-	/* IPA_HW_v3_5_1 */
-	[IPA_HW_v3_5_1] = {
-		[IPA_CLIENT_WLAN1_PROD] = {
-			.valid		= true,
-			.support_flt	= true,
-			.sequencer_type =
-			   IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 7,
-				.ipa_gsi_chan_num	= 1,
-				.ipa_if_tlv		= 8,
-				.ipa_if_aos		= 16,
-				.ee			= IPA_EE_UC,
-			},
+static const struct ipa_ep_configuration ipa_ep_configuration[] = {
+	[IPA_CLIENT_WLAN1_PROD] = {
+		.valid		= true,
+		.support_flt	= true,
+		.sequencer_type =
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 7,
+			.ipa_gsi_chan_num	= 1,
+			.ipa_if_tlv		= 8,
+			.ipa_if_aos		= 16,
+			.ee			= IPA_EE_UC,
 		},
-		[IPA_CLIENT_USB_PROD] = {
-			.valid		= true,
-			.support_flt	= true,
-			.sequencer_type =
-			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 0,
-				.ipa_gsi_chan_num	= 0,
-				.ipa_if_tlv		= 8,
-				.ipa_if_aos		= 16,
-				.ee			= IPA_EE_AP,
-			},
+	},
+	[IPA_CLIENT_USB_PROD] = {
+		.valid		= true,
+		.support_flt	= true,
+		.sequencer_type =
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 0,
+			.ipa_gsi_chan_num	= 0,
+			.ipa_if_tlv		= 8,
+			.ipa_if_aos		= 16,
+			.ee			= IPA_EE_AP,
 		},
-		[IPA_CLIENT_APPS_LAN_PROD] = {
-			.valid		= true,
-			.support_flt	= false,
-			.sequencer_type =
-				IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 8,
-				.ipa_gsi_chan_num	= 7,
-				.ipa_if_tlv		= 8,
-				.ipa_if_aos		= 16,
-				.ee			= IPA_EE_AP,
-			},
+	},
+	[IPA_CLIENT_APPS_LAN_PROD] = {
+		.valid		= true,
+		.support_flt	= false,
+		.sequencer_type =
+			IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 8,
+			.ipa_gsi_chan_num	= 7,
+			.ipa_if_tlv		= 8,
+			.ipa_if_aos		= 16,
+			.ee			= IPA_EE_AP,
 		},
-		[IPA_CLIENT_APPS_WAN_PROD] = {
-			.valid		= true,
-			.support_flt	= true,
-			.sequencer_type =
-			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 2,
-				.ipa_gsi_chan_num	= 3,
-				.ipa_if_tlv		= 16,
-				.ipa_if_aos		= 32,
-				.ee			= IPA_EE_AP,
-			},
+	},
+	[IPA_CLIENT_APPS_WAN_PROD] = {
+		.valid		= true,
+		.support_flt	= true,
+		.sequencer_type =
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 2,
+			.ipa_gsi_chan_num	= 3,
+			.ipa_if_tlv		= 16,
+			.ipa_if_aos		= 32,
+			.ee			= IPA_EE_AP,
 		},
-		[IPA_CLIENT_APPS_CMD_PROD] = {
-			.valid		= true,
-			.support_flt	= false,
-			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_DMA_ONLY,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 5,
-				.ipa_gsi_chan_num	= 4,
-				.ipa_if_tlv		= 20,
-				.ipa_if_aos		= 23,
-				.ee			= IPA_EE_AP,
-			},
+	},
+	[IPA_CLIENT_APPS_CMD_PROD] = {
+		.valid		= true,
+		.support_flt	= false,
+		.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_DMA_ONLY,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 5,
+			.ipa_gsi_chan_num	= 4,
+			.ipa_if_tlv		= 20,
+			.ipa_if_aos		= 23,
+			.ee			= IPA_EE_AP,
 		},
-		[IPA_CLIENT_Q6_LAN_PROD] = {
-			.valid		= true,
-			.support_flt	= true,
-			.sequencer_type =
-				IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 3,
-				.ipa_gsi_chan_num	= 0,
-				.ipa_if_tlv		= 16,
-				.ipa_if_aos		= 32,
-				.ee			= IPA_EE_Q6,
-			},
+	},
+	[IPA_CLIENT_Q6_LAN_PROD] = {
+		.valid		= true,
+		.support_flt	= true,
+		.sequencer_type =
+			IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 3,
+			.ipa_gsi_chan_num	= 0,
+			.ipa_if_tlv		= 16,
+			.ipa_if_aos		= 32,
+			.ee			= IPA_EE_Q6,
 		},
-		[IPA_CLIENT_Q6_WAN_PROD] = {
-			.valid		= true,
-			.support_flt	= true,
-			.sequencer_type =
-				IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 6,
-				.ipa_gsi_chan_num	= 4,
-				.ipa_if_tlv		= 12,
-				.ipa_if_aos		= 30,
-				.ee			= IPA_EE_Q6,
-			},
+	},
+	[IPA_CLIENT_Q6_WAN_PROD] = {
+		.valid		= true,
+		.support_flt	= true,
+		.sequencer_type =
+			IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 6,
+			.ipa_gsi_chan_num	= 4,
+			.ipa_if_tlv		= 12,
+			.ipa_if_aos		= 30,
+			.ee			= IPA_EE_Q6,
 		},
-		[IPA_CLIENT_Q6_CMD_PROD] = {
-			.valid		= true,
-			.support_flt	= false,
-			.sequencer_type =
-				IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 4,
-				.ipa_gsi_chan_num	= 1,
-				.ipa_if_tlv		= 20,
-				.ipa_if_aos		= 23,
-				.ee			= IPA_EE_Q6,
-			},
+	},
+	[IPA_CLIENT_Q6_CMD_PROD] = {
+		.valid		= true,
+		.support_flt	= false,
+		.sequencer_type =
+			IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 4,
+			.ipa_gsi_chan_num	= 1,
+			.ipa_if_tlv		= 20,
+			.ipa_if_aos		= 23,
+			.ee			= IPA_EE_Q6,
 		},
-		[IPA_CLIENT_TEST_CONS] = {
-			.valid		= true,
-			.support_flt	= true,
-			.sequencer_type =
-			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 14,
-				.ipa_gsi_chan_num	= 5,
-				.ipa_if_tlv		= 8,
-				.ipa_if_aos		= 8,
-				.ee			= IPA_EE_Q6,
-			},
+	},
+	[IPA_CLIENT_TEST_CONS] = {
+		.valid		= true,
+		.support_flt	= true,
+		.sequencer_type =
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 14,
+			.ipa_gsi_chan_num	= 5,
+			.ipa_if_tlv		= 8,
+			.ipa_if_aos		= 8,
+			.ee			= IPA_EE_Q6,
 		},
-		[IPA_CLIENT_TEST1_CONS] = {
-			.valid		= true,
-			.support_flt	= true,
-			.sequencer_type =
-			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 15,
-				.ipa_gsi_chan_num	= 2,
-				.ipa_if_tlv		= 8,
-				.ipa_if_aos		= 8,
-				.ee			= IPA_EE_UC,
-			},
+	},
+	[IPA_CLIENT_TEST1_CONS] = {
+		.valid		= true,
+		.support_flt	= true,
+		.sequencer_type =
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 15,
+			.ipa_gsi_chan_num	= 2,
+			.ipa_if_tlv		= 8,
+			.ipa_if_aos		= 8,
+			.ee			= IPA_EE_UC,
 		},
-		/* Only for testing */
-		[IPA_CLIENT_TEST_PROD] = {
-			.valid		= true,
-			.support_flt	= true,
-			.sequencer_type =
-			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 0,
-				.ipa_gsi_chan_num	= 0,
-				.ipa_if_tlv		= 8,
-				.ipa_if_aos		= 16,
-				.ee			= IPA_EE_AP,
-			},
+	},
+	/* Only for testing */
+	[IPA_CLIENT_TEST_PROD] = {
+		.valid		= true,
+		.support_flt	= true,
+		.sequencer_type =
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 0,
+			.ipa_gsi_chan_num	= 0,
+			.ipa_if_tlv		= 8,
+			.ipa_if_aos		= 16,
+			.ee			= IPA_EE_AP,
 		},
-		[IPA_CLIENT_TEST1_PROD] = {
-			.valid		= true,
-			.support_flt	= true,
-			.sequencer_type =
-			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 0,
-				.ipa_gsi_chan_num	= 0,
-				.ipa_if_tlv		= 8,
-				.ipa_if_aos		= 15,
-				.ee			= IPA_EE_AP,
-			},
+	},
+	[IPA_CLIENT_TEST1_PROD] = {
+		.valid		= true,
+		.support_flt	= true,
+		.sequencer_type =
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 0,
+			.ipa_gsi_chan_num	= 0,
+			.ipa_if_tlv		= 8,
+			.ipa_if_aos		= 15,
+			.ee			= IPA_EE_AP,
 		},
-		[IPA_CLIENT_TEST2_PROD] = {
-			.valid		= true,
-			.support_flt	= true,
-			.sequencer_type =
-			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 2,
-				.ipa_gsi_chan_num	= 3,
-				.ipa_if_tlv		= 16,
-				.ipa_if_aos		= 32,
-				.ee			= IPA_EE_AP,
-			},
+	},
+	[IPA_CLIENT_TEST2_PROD] = {
+		.valid		= true,
+		.support_flt	= true,
+		.sequencer_type =
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 2,
+			.ipa_gsi_chan_num	= 3,
+			.ipa_if_tlv		= 16,
+			.ipa_if_aos		= 32,
+			.ee			= IPA_EE_AP,
 		},
-		[IPA_CLIENT_TEST3_PROD] = {
-			.valid		= true,
-			.support_flt	= true,
-			.sequencer_type =
-			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 4,
-				.ipa_gsi_chan_num	= 1,
-				.ipa_if_tlv		= 20,
-				.ipa_if_aos		= 23,
-				.ee			= IPA_EE_Q6,
-			},
+	},
+	[IPA_CLIENT_TEST3_PROD] = {
+		.valid		= true,
+		.support_flt	= true,
+		.sequencer_type =
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 4,
+			.ipa_gsi_chan_num	= 1,
+			.ipa_if_tlv		= 20,
+			.ipa_if_aos		= 23,
+			.ee			= IPA_EE_Q6,
 		},
-		[IPA_CLIENT_TEST4_PROD] = {
-			.valid		= true,
-			.support_flt	= true,
-			.sequencer_type =
-			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 1,
-				.ipa_gsi_chan_num	= 0,
-				.ipa_if_tlv		= 8,
-				.ipa_if_aos		= 16,
-				.ee			= IPA_EE_UC,
-			},
+	},
+	[IPA_CLIENT_TEST4_PROD] = {
+		.valid		= true,
+		.support_flt	= true,
+		.sequencer_type =
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 1,
+			.ipa_gsi_chan_num	= 0,
+			.ipa_if_tlv		= 8,
+			.ipa_if_aos		= 16,
+			.ee			= IPA_EE_UC,
 		},
-		[IPA_CLIENT_WLAN1_CONS] = {
-			.valid		= true,
-			.support_flt	= false,
-			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 16,
-				.ipa_gsi_chan_num	= 3,
-				.ipa_if_tlv		= 8,
-				.ipa_if_aos		= 8,
-				.ee			= IPA_EE_UC,
-			},
+	},
+	[IPA_CLIENT_WLAN1_CONS] = {
+		.valid		= true,
+		.support_flt	= false,
+		.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 16,
+			.ipa_gsi_chan_num	= 3,
+			.ipa_if_tlv		= 8,
+			.ipa_if_aos		= 8,
+			.ee			= IPA_EE_UC,
 		},
-		[IPA_CLIENT_WLAN2_CONS] = {
-			.valid		= true,
-			.support_flt	= false,
-			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 18,
-				.ipa_gsi_chan_num	= 9,
-				.ipa_if_tlv		= 8,
-				.ipa_if_aos		= 8,
-				.ee			= IPA_EE_AP,
-			},
+	},
+	[IPA_CLIENT_WLAN2_CONS] = {
+		.valid		= true,
+		.support_flt	= false,
+		.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 18,
+			.ipa_gsi_chan_num	= 9,
+			.ipa_if_tlv		= 8,
+			.ipa_if_aos		= 8,
+			.ee			= IPA_EE_AP,
 		},
-		[IPA_CLIENT_WLAN3_CONS] = {
-			.valid		= true,
-			.support_flt	= false,
-			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 19,
-				.ipa_gsi_chan_num	= 10,
-				.ipa_if_tlv		= 8,
-				.ipa_if_aos		= 8,
-				.ee			= IPA_EE_AP,
-			},
+	},
+	[IPA_CLIENT_WLAN3_CONS] = {
+		.valid		= true,
+		.support_flt	= false,
+		.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 19,
+			.ipa_gsi_chan_num	= 10,
+			.ipa_if_tlv		= 8,
+			.ipa_if_aos		= 8,
+			.ee			= IPA_EE_AP,
 		},
-		[IPA_CLIENT_USB_CONS] = {
-			.valid		= true,
-			.support_flt	= false,
-			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 17,
-				.ipa_gsi_chan_num	= 8,
-				.ipa_if_tlv		= 8,
-				.ipa_if_aos		= 8,
-				.ee			= IPA_EE_AP,
-			},
+	},
+	[IPA_CLIENT_USB_CONS] = {
+		.valid		= true,
+		.support_flt	= false,
+		.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 17,
+			.ipa_gsi_chan_num	= 8,
+			.ipa_if_tlv		= 8,
+			.ipa_if_aos		= 8,
+			.ee			= IPA_EE_AP,
 		},
-		[IPA_CLIENT_USB_DPL_CONS] = {
-			.valid		= true,
-			.support_flt	= false,
-			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 11,
-				.ipa_gsi_chan_num	= 2,
-				.ipa_if_tlv		= 4,
-				.ipa_if_aos		= 6,
-				.ee			= IPA_EE_AP,
-			},
+	},
+	[IPA_CLIENT_USB_DPL_CONS] = {
+		.valid		= true,
+		.support_flt	= false,
+		.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 11,
+			.ipa_gsi_chan_num	= 2,
+			.ipa_if_tlv		= 4,
+			.ipa_if_aos		= 6,
+			.ee			= IPA_EE_AP,
 		},
-		[IPA_CLIENT_APPS_LAN_CONS] = {
-			.valid		= true,
-			.support_flt	= false,
-			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 9,
-				.ipa_gsi_chan_num	= 5,
-				.ipa_if_tlv		= 8,
-				.ipa_if_aos		= 12,
-				.ee			= IPA_EE_AP,
-			},
+	},
+	[IPA_CLIENT_APPS_LAN_CONS] = {
+		.valid		= true,
+		.support_flt	= false,
+		.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 9,
+			.ipa_gsi_chan_num	= 5,
+			.ipa_if_tlv		= 8,
+			.ipa_if_aos		= 12,
+			.ee			= IPA_EE_AP,
 		},
-		[IPA_CLIENT_APPS_WAN_CONS] = {
-			.valid		= true,
-			.support_flt	= false,
-			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 10,
-				.ipa_gsi_chan_num	= 6,
-				.ipa_if_tlv		= 8,
-				.ipa_if_aos		= 12,
-				.ee			= IPA_EE_AP,
-			},
+	},
+	[IPA_CLIENT_APPS_WAN_CONS] = {
+		.valid		= true,
+		.support_flt	= false,
+		.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 10,
+			.ipa_gsi_chan_num	= 6,
+			.ipa_if_tlv		= 8,
+			.ipa_if_aos		= 12,
+			.ee			= IPA_EE_AP,
 		},
-		[IPA_CLIENT_Q6_LAN_CONS] = {
-			.valid		= true,
-			.support_flt	= false,
-			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 13,
-				.ipa_gsi_chan_num	= 3,
-				.ipa_if_tlv		= 8,
-				.ipa_if_aos		= 12,
-				.ee			= IPA_EE_Q6,
-			},
+	},
+	[IPA_CLIENT_Q6_LAN_CONS] = {
+		.valid		= true,
+		.support_flt	= false,
+		.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 13,
+			.ipa_gsi_chan_num	= 3,
+			.ipa_if_tlv		= 8,
+			.ipa_if_aos		= 12,
+			.ee			= IPA_EE_Q6,
 		},
-		[IPA_CLIENT_Q6_WAN_CONS] = {
-			.valid		= true,
-			.support_flt	= false,
-			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 12,
-				.ipa_gsi_chan_num	= 2,
-				.ipa_if_tlv		= 8,
-				.ipa_if_aos		= 12,
-				.ee			= IPA_EE_Q6,
-			},
+	},
+	[IPA_CLIENT_Q6_WAN_CONS] = {
+		.valid		= true,
+		.support_flt	= false,
+		.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 12,
+			.ipa_gsi_chan_num	= 2,
+			.ipa_if_tlv		= 8,
+			.ipa_if_aos		= 12,
+			.ee			= IPA_EE_Q6,
 		},
-		/* Only for testing */
-		[IPA_CLIENT_TEST2_CONS] = {
-			.valid		= true,
-			.support_flt	= false,
-			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 18,
-				.ipa_gsi_chan_num	= 9,
-				.ipa_if_tlv		= 8,
-				.ipa_if_aos		= 8,
-				.ee			= IPA_EE_AP,
-			},
+	},
+	/* Only for testing */
+	[IPA_CLIENT_TEST2_CONS] = {
+		.valid		= true,
+		.support_flt	= false,
+		.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 18,
+			.ipa_gsi_chan_num	= 9,
+			.ipa_if_tlv		= 8,
+			.ipa_if_aos		= 8,
+			.ee			= IPA_EE_AP,
 		},
-		[IPA_CLIENT_TEST3_CONS] = {
-			.valid		= true,
-			.support_flt	= false,
-			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 19,
-				.ipa_gsi_chan_num	= 10,
-				.ipa_if_tlv		= 8,
-				.ipa_if_aos		= 8,
-				.ee			= IPA_EE_AP,
-			},
+	},
+	[IPA_CLIENT_TEST3_CONS] = {
+		.valid		= true,
+		.support_flt	= false,
+		.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 19,
+			.ipa_gsi_chan_num	= 10,
+			.ipa_if_tlv		= 8,
+			.ipa_if_aos		= 8,
+			.ee			= IPA_EE_AP,
 		},
-		[IPA_CLIENT_TEST4_CONS] = {
-			.valid		= true,
-			.support_flt	= false,
-			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 11,
-				.ipa_gsi_chan_num	= 2,
-				.ipa_if_tlv		= 4,
-				.ipa_if_aos		= 6,
-				.ee			= IPA_EE_AP,
-			},
+	},
+	[IPA_CLIENT_TEST4_CONS] = {
+		.valid		= true,
+		.support_flt	= false,
+		.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 11,
+			.ipa_gsi_chan_num	= 2,
+			.ipa_if_tlv		= 4,
+			.ipa_if_aos		= 6,
+			.ee			= IPA_EE_AP,
 		},
-	/* Dummy consumer (pipe 31) is used in L2TP rt rule */
-		[IPA_CLIENT_DUMMY_CONS] = {
-			.valid		= true,
-			.support_flt	= false,
-			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.ipa_gsi_ep_info = {
-				.ipa_ep_num		= 31,
-				.ipa_gsi_chan_num	= 31,
-				.ipa_if_tlv		= 8,
-				.ipa_if_aos		= 8,
-				.ee			= IPA_EE_AP,
-			},
+	},
+/* Dummy consumer (pipe 31) is used in L2TP rt rule */
+	[IPA_CLIENT_DUMMY_CONS] = {
+		.valid		= true,
+		.support_flt	= false,
+		.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
+		.ipa_gsi_ep_info = {
+			.ipa_ep_num		= 31,
+			.ipa_gsi_chan_num	= 31,
+			.ipa_if_tlv		= 8,
+			.ipa_if_aos		= 8,
+			.ee			= IPA_EE_AP,
 		},
 	},
 };
@@ -671,7 +668,7 @@ static struct msm_bus_scale_pdata ipa_bus_client_pdata = {
 static const struct ipa_ep_configuration *
 ep_configuration(enum ipa_client_type client)
 {
-	return &ipa_ep_configuration[IPA_HW_v3_5_1][client];
+	return &ipa_ep_configuration[client];
 }
 
 /** ipa_get_gsi_ep_info() - provide gsi ep information
