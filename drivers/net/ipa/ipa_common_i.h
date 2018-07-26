@@ -372,9 +372,6 @@ enum hdr_total_len_or_pad_type {
  *			header with the packet length . Assumption is that
  *			header length field size is constant and is 2Bytes
  *			Valid for Output Pipes (IPA Producer)
- * @hdr_remove_additional:	bool switch, remove more of the header
- *			based on the aggregation configuration (register
- *			HDR_LEN_INC_DEAGG_HDR)
  * @hdr_metadata_reg_valid:	bool switch, metadata from
  *			register INIT_HDR_METADATA_n is valid.
  *			(relevant only for IPA Consumer pipes)
@@ -385,7 +382,6 @@ struct ipa_ep_cfg_hdr {
 	u32  hdr_ofst_metadata;
 	u32  hdr_ofst_pkt_size_valid;
 	u32  hdr_ofst_pkt_size;
-	u32  hdr_remove_additional;
 	u32  hdr_metadata_reg_valid;
 };
 
