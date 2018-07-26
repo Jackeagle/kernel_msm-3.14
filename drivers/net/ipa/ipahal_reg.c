@@ -276,8 +276,7 @@ ipareg_construct_endp_init_hdr_n(enum ipahal_reg reg, const void *fields)
 	const struct ipa_ep_cfg_hdr *ep_hdr = fields;
 	u32 val;
 
-	val = field_gen(ep_hdr->hdr_metadata_reg_valid,
-			HDR_METADATA_REG_VALID_BMSK);
+	val = field_gen(0, HDR_METADATA_REG_VALID_BMSK);
 	val |= field_gen(0, HDR_LEN_INC_DEAGG_HDR_BMSK);
 	val |= field_gen(0, HDR_A5_MUX_BMSK);
 	val |= field_gen(ep_hdr->hdr_ofst_pkt_size, HDR_OFST_PKT_SIZE_BMSK);
