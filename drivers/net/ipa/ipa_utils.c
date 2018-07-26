@@ -982,9 +982,8 @@ static void ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 	/* Override QMB master selection */
 	qmb_master_sel = ipa_get_qmb_master_sel(ipa_ctx->ep[clnt_hdl].client);
 	ipa_ctx->ep[clnt_hdl].cfg.cfg.gen_qmb_master_sel = qmb_master_sel;
-	ipa_debug("pipe=%d, frag_ofld_en=%d cs_ofld_en=%d\n",
-		  clnt_hdl, ipa_ctx->ep[clnt_hdl].cfg.cfg.frag_offload_en,
-		  ipa_ctx->ep[clnt_hdl].cfg.cfg.cs_offload_en);
+	ipa_debug("pipe=%d, frag_ofld_en=0 cs_ofld_en=%d\n",
+		  clnt_hdl, ipa_ctx->ep[clnt_hdl].cfg.cfg.cs_offload_en);
 	ipa_debug("mdata_hdr_ofst=%d gen_qmb_master_sel=%d\n",
 		  ipa_ctx->ep[clnt_hdl].cfg.cfg.cs_metadata_hdr_offset,
 		  ipa_ctx->ep[clnt_hdl].cfg.cfg.gen_qmb_master_sel);

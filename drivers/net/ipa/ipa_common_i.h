@@ -466,13 +466,6 @@ struct ipa_ep_cfg_aggr {
 
 
 /** struct ipa_ep_cfg_cfg - IPA ENDP_INIT Configuration register
- * @frag_offload_en: - 0 - IP packet fragment handling is disabled. IP packet
- *	fragments should be sent to SW. SW is responsible for
- *	configuring filter rules, and IP packet filter exception should be
- *	used to send all fragments to SW. 1 - IP packet fragment
- *	handling is enabled. IPA checks for fragments and uses frag
- *	rules table for processing fragments. Valid only for Input Pipes
- *	(IPA Consumer)
  * @cs_offload_en: Checksum offload enable: 00: Disable checksum offload, 01:
  *	Enable checksum calculation offload (UL) - For output pipe
  *	(IPA producer) specifies that checksum trailer is to be added.
@@ -492,7 +485,6 @@ struct ipa_ep_cfg_aggr {
  *	output pipes (IPA consumer+producer)
  */
 struct ipa_ep_cfg_cfg {
-	bool frag_offload_en;
 	enum ipa_cs_offload cs_offload_en;
 	u8 cs_metadata_hdr_offset;
 	u8 gen_qmb_master_sel;
