@@ -465,14 +465,11 @@ struct ipa_ep_cfg_aggr {
 };
 
 /** struct ipa_ep_cfg_deaggr - deaggregation configuration in IPA end-point
- * @packet_offset_location: Location of packet offset field, which specifies
- *	the offset to the packet from the start of the packet offset field.
  * @max_packet_len: DEAGGR Max Packet Length in Bytes. A Packet with higher
  *	size wil be treated as an error. 0 - Packet Length is not Bound,
  *	IPA should not check for a Max Packet Length.
  */
 struct ipa_ep_cfg_deaggr {
-	u32 packet_offset_location;
 	u32 max_packet_len;
 };
 
