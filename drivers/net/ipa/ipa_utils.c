@@ -741,21 +741,6 @@ struct ipa_ep_context *ipa_get_ep_context(enum ipa_client_type client)
 	return &ipa_ctx->ep[ipa_ep_idx];
 }
 
-/** ipa_get_qmb_master_sel() - provide QMB master selection for the client
- * @client: client type
- *
- * Return value: QMB master index
- */
-static u8 ipa_get_qmb_master_sel(enum ipa_client_type client)
-{
-	const struct ipa_ep_configuration *ep_config;
-
-	ep_config = ep_configuration(client);
-	ipa_assert(ep_config->valid);
-
-	return QMB_MASTER_SELECT_DDR;
-}
-
 /** ipa_get_client_mapping() - provide client mapping
  * @pipe_idx: IPA end-point number
  *
@@ -974,14 +959,12 @@ static void ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
  */
 static void ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 {
-	u8 qmb_master_sel;
-
 	/* copy over EP cfg */
 	ipa_ctx->ep[clnt_hdl].cfg.cfg = *cfg;
 
 	/* Override QMB master selection */
-	qmb_master_sel = ipa_get_qmb_master_sel(ipa_ctx->ep[clnt_hdl].client);
-	ipa_ctx->ep[clnt_hdl].cfg.cfg.gen_qmb_master_sel = qmb_master_sel;
+	ipa_ctx->ep[clnt_hdl].cfg.cfg.gen_qmb_master_sel =
+			QMB_MASTER_SELECT_DDR;
 	ipa_debug("pipe=%d, frag_ofld_en=0 cs_ofld_en=%d\n",
 		  clnt_hdl, ipa_ctx->ep[clnt_hdl].cfg.cfg.cs_offload_en);
 	ipa_debug("mdata_hdr_ofst=%d gen_qmb_master_sel=%d\n",
