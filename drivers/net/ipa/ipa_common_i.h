@@ -479,15 +479,10 @@ struct ipa_ep_cfg_aggr {
  *	checksum meta info header (4 bytes) starts (UL). Values are 0-15, which
  *	mean 0 - 60 byte checksum header offset. Valid for input
  *	pipes only (IPA consumer)
- * @gen_qmb_master_sel: Select bit for ENDP GEN-QMB master. This is used to
- *	separate DDR & PCIe transactions in-order to limit them as
- *	a group (using MAX_WRITES/READS limiation). Valid for input and
- *	output pipes (IPA consumer+producer)
  */
 struct ipa_ep_cfg_cfg {
 	enum ipa_cs_offload cs_offload_en;
 	u8 cs_metadata_hdr_offset;
-	u8 gen_qmb_master_sel;
 };
 
 /** struct ipa_ep_cfg_metadata_mask - Endpoint initialization hdr metadata mask

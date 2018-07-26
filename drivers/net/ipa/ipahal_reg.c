@@ -157,7 +157,7 @@ ipareg_construct_endp_init_cfg_n(enum ipahal_reg reg, const void *fields)
 	val |= field_gen(cfg->cs_offload_en, CS_OFFLOAD_EN_BMSK);
 	val |= field_gen(cfg->cs_metadata_hdr_offset,
 			CS_METADATA_HDR_OFFSET_BMSK);
-	val |= field_gen(cfg->gen_qmb_master_sel, CS_GEN_QMB_MASTER_SEL_BMSK);
+	val |= field_gen(0, CS_GEN_QMB_MASTER_SEL_BMSK);
 
 	return val;
 }
