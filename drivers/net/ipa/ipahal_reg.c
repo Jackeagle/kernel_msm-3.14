@@ -257,8 +257,7 @@ ipareg_construct_endp_init_hdr_ext_n(enum ipahal_reg reg, const void *fields)
 
 	val = field_gen(ep_hdr_ext->hdr_pad_to_alignment,
 			HDR_PAD_TO_ALIGNMENT_BMSK);
-	val |= field_gen(ep_hdr_ext->hdr_total_len_or_pad_offset,
-			HDR_TOTAL_LEN_OR_PAD_OFFSET_BMSK);
+	val |= field_gen(0, HDR_TOTAL_LEN_OR_PAD_OFFSET_BMSK);
 	val |= field_gen(ep_hdr_ext->hdr_payload_len_inc_padding,
 			HDR_PAYLOAD_LEN_INC_PADDING_BMSK);
 	val |= field_gen(ep_hdr_ext->hdr_total_len_or_pad,

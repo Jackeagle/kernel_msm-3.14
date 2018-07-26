@@ -922,8 +922,7 @@ ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
 	ipa_debug("pipe=%d hdr_pad_to_alignment=%d\n", clnt_hdl,
 		  ep_hdr_ext->hdr_pad_to_alignment);
 
-	ipa_debug("hdr_total_len_or_pad_offset=%d\n",
-		  ep_hdr_ext->hdr_total_len_or_pad_offset);
+	ipa_debug("hdr_total_len_or_pad_offset=0\n");
 
 	ipa_debug("hdr_payload_len_inc_padding=%d hdr_total_len_or_pad=%d\n",
 		  ep_hdr_ext->hdr_payload_len_inc_padding,

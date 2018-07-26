@@ -386,8 +386,6 @@ struct ipa_ep_cfg_hdr {
  *	(2^pad to alignment value), i.e. value of 3 means pad to 2^3 = 8 bytes
  *	alignment. Alignment is to 0,2 up to 32 bytes (IPAv2 does not support 64
  *	byte alignment). Valid for Output Pipes only (IPA Producer).
- * @hdr_total_len_or_pad_offset: Offset to length field containing either
- *	total length or pad length, per hdr_total_len_or_pad config
  * @hdr_payload_len_inc_padding: 0-IPA_ENDP_INIT_HDR_n's
  *	HDR_OFST_PKT_SIZE does
  *	not includes padding bytes size, payload_len = packet length,
@@ -401,7 +399,6 @@ struct ipa_ep_cfg_hdr {
  */
 struct ipa_ep_cfg_hdr_ext {
 	u32 hdr_pad_to_alignment;
-	u32 hdr_total_len_or_pad_offset;
 	bool hdr_payload_len_inc_padding;
 	enum hdr_total_len_or_pad_type hdr_total_len_or_pad;
 	bool hdr_total_len_or_pad_valid;
