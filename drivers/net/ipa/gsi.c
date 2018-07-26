@@ -1091,7 +1091,7 @@ static u32 evt_ring_ctx_8_val(u32 int_modt, u32 int_modc)
 }
 
 static void
-gsi_program_evt_ring_ctx(u8 evt_id, struct ipa_mem_buffer *mem, u16 int_modt)
+gsi_program_evt_ring_ctx(u8 evt_id, u32 size, struct ipa_mem_buffer *mem, u16 int_modt)
 {
 	u32 int_modc = 1;	/* moderation always comes from channel*/
 	u32 val;
@@ -1102,7 +1102,7 @@ gsi_program_evt_ring_ctx(u8 evt_id, struct ipa_mem_buffer *mem, u16 int_modt)
 				 GSI_RING_ELEMENT_SIZE);
 	gsi_writel(val, GSI_EE_N_EV_CH_K_CNTXT_0_OFFS(evt_id, IPA_EE_AP));
 
-	val = field_gen(mem->size, EV_R_LENGTH_BMSK);
+	val = field_gen(size, EV_R_LENGTH_BMSK);
 	gsi_writel(val, GSI_EE_N_EV_CH_K_CNTXT_1_OFFS(evt_id, IPA_EE_AP));
 
 	/* The context 2 and 3 registers store the low-order and
@@ -1256,7 +1256,7 @@ long gsi_alloc_evt_ring(u32 ring_count, u16 int_modt)
 		goto err_free_dma;
 	}
 
-	gsi_program_evt_ring_ctx(evt_id, &evtr->mem, int_modt);
+	gsi_program_evt_ring_ctx(evt_id, evtr->mem.size, &evtr->mem, int_modt);
 	gsi_init_ring(&evtr->ring, &evtr->mem);
 
 	atomic_inc(&gsi_ctx->num_evt_ring);
@@ -1342,7 +1342,7 @@ void gsi_reset_evt_ring(unsigned long evt_id)
 
 	ipa_bug_on(evtr->state != GSI_EVT_RING_STATE_ALLOCATED);
 
-	gsi_program_evt_ring_ctx(evt_id, &evtr->mem, evtr->int_modt);
+	gsi_program_evt_ring_ctx(evt_id, evtr->mem.size, &evtr->mem, evtr->int_modt);
 	gsi_init_ring(&evtr->ring, &evtr->mem);
 
 	__gsi_zero_evt_ring_scratch(evt_id);
