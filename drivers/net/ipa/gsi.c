@@ -96,8 +96,7 @@ struct gsi_ring_ctx {
 	u64 rp;
 	u64 wp_local;
 	u64 rp_local;
-	u16 count;			/* number of elements in ring */
-	u64 end;
+	u64 end;			/* physical addr past last element */
 };
 
 struct gsi_chan_ctx {
@@ -1137,7 +1136,6 @@ static void gsi_init_ring(struct gsi_ring_ctx *ring, struct ipa_mem_buffer *mem)
 	ring->rp = mem->phys_base;
 	ring->wp_local = mem->phys_base;
 	ring->rp_local = mem->phys_base;
-	ring->count = mem->size / GSI_RING_ELEMENT_SIZE;
 	ring->end = mem->phys_base + mem->size;
 }
 
