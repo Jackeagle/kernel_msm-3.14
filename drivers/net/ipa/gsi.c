@@ -1147,8 +1147,7 @@ static void gsi_prime_evt_ring(struct gsi_evt_ctx *evtr)
 
 	spin_lock_irqsave(&evtr->ring.slock, flags);
 	memset(evtr->ring.mem.base, 0, evtr->ring.mem.size);
-	evtr->ring.wp_local = evtr->ring.mem.phys_base +
-				(evtr->ring.count - 1) * GSI_RING_ELEMENT_SIZE;
+	evtr->ring.wp_local = evtr->ring.end - GSI_RING_ELEMENT_SIZE;
 	gsi_ring_evt_doorbell(evtr);
 	spin_unlock_irqrestore(&evtr->ring.slock, flags);
 }
