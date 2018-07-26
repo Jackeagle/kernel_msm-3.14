@@ -465,8 +465,6 @@ struct ipa_ep_cfg_aggr {
 };
 
 /** struct ipa_ep_cfg_deaggr - deaggregation configuration in IPA end-point
- * @deaggr_hdr_len: Deaggregation Header length in bytes. Valid only for Input
- *	Pipes, which are configured for 'Generic' deaggregation.
  * @packet_offset_valid: - 0: PACKET_OFFSET is not used, 1: PACKET_OFFSET is
  *	used.
  * @packet_offset_location: Location of packet offset field, which specifies
@@ -476,7 +474,6 @@ struct ipa_ep_cfg_aggr {
  *	IPA should not check for a Max Packet Length.
  */
 struct ipa_ep_cfg_deaggr {
-	u32 deaggr_hdr_len;
 	bool packet_offset_valid;
 	u32 packet_offset_location;
 	u32 max_packet_len;
