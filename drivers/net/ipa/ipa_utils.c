@@ -1054,7 +1054,7 @@ ipa_cfg_ep_deaggr(u32 clnt_hdl, const struct ipa_ep_cfg_deaggr *ep_deaggr)
 
 	ipa_debug("pipe=%d deaggr_hdr_len=0\n", clnt_hdl);
 
-	ipa_debug("packet_offset_valid=%d\n", ep_deaggr->packet_offset_valid);
+	ipa_debug("packet_offset_valid=0\n");
 
 	ipa_debug("packet_offset_location=%d max_packet_len=%d\n",
 		  ep_deaggr->packet_offset_location, ep_deaggr->max_packet_len);

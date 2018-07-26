@@ -424,8 +424,6 @@ static int handle_egress_format(struct net_device *dev,
 		ipa_wan_ep_cfg->ipa_ep_cfg.aggr.aggr_en = IPA_ENABLE_DEAGGR;
 		ipa_wan_ep_cfg->ipa_ep_cfg.aggr.aggr = IPA_QCMAP;
 
-		ipa_wan_ep_cfg->ipa_ep_cfg.deaggr.packet_offset_valid = false;
-
 		ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_ofst_pkt_size = 2;
 
 		ipa_wan_ep_cfg->ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad_valid =

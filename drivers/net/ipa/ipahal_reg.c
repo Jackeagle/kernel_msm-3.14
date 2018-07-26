@@ -169,8 +169,7 @@ ipareg_construct_endp_init_deaggr_n(enum ipahal_reg reg, const void *fields)
 	u32 val;
 
 	val = field_gen(0, DEAGGR_HDR_LEN_BMSK);
-	val |= field_gen(ep_deaggr->packet_offset_valid,
-			PACKET_OFFSET_VALID_BMSK);
+	val |= field_gen(0, PACKET_OFFSET_VALID_BMSK);
 	val |= field_gen(ep_deaggr->packet_offset_location,
 			PACKET_OFFSET_LOCATION_BMSK);
 	val |= field_gen(ep_deaggr->max_packet_len, MAX_PACKET_LEN_BMSK);
