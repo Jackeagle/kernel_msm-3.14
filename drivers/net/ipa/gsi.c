@@ -1091,7 +1091,7 @@ static u32 evt_ring_ctx_8_val(u32 int_modt, u32 int_modc)
 }
 
 static void
-gsi_program_evt_ring_ctx(u8 evt_id, u32 size, struct ipa_mem_buffer *mem, u16 int_modt)
+gsi_program_evt_ring_ctx(u8 evt_id, u32 size, u64 phys_base, u16 int_modt)
 {
 	u32 int_modc = 1;	/* moderation always comes from channel*/
 	u32 val;
@@ -1109,10 +1109,10 @@ gsi_program_evt_ring_ctx(u8 evt_id, u32 size, struct ipa_mem_buffer *mem, u16 in
 	 * high-order 32 bits of the address of the event ring,
 	 * respectively.
 	 */
-	val = mem->phys_base & GENMASK(31, 0);
+	val = phys_base & GENMASK(31, 0);
 	gsi_writel(val, GSI_EE_N_EV_CH_K_CNTXT_2_OFFS(evt_id, IPA_EE_AP));
 
-	val = mem->phys_base >> 32;
+	val = phys_base >> 32;
 	gsi_writel(val, GSI_EE_N_EV_CH_K_CNTXT_3_OFFS(evt_id, IPA_EE_AP));
 
 	val = evt_ring_ctx_8_val(int_modt, int_modc);
@@ -1256,7 +1256,8 @@ long gsi_alloc_evt_ring(u32 ring_count, u16 int_modt)
 		goto err_free_dma;
 	}
 
-	gsi_program_evt_ring_ctx(evt_id, evtr->mem.size, &evtr->mem, int_modt);
+	gsi_program_evt_ring_ctx(evt_id, evtr->mem.size, evtr->mem.phys_base,
+				 evtr->int_modt);
 	gsi_init_ring(&evtr->ring, &evtr->mem);
 
 	atomic_inc(&gsi_ctx->num_evt_ring);
@@ -1342,7 +1343,8 @@ void gsi_reset_evt_ring(unsigned long evt_id)
 
 	ipa_bug_on(evtr->state != GSI_EVT_RING_STATE_ALLOCATED);
 
-	gsi_program_evt_ring_ctx(evt_id, evtr->mem.size, &evtr->mem, evtr->int_modt);
+	gsi_program_evt_ring_ctx(evt_id, evtr->mem.size, evtr->mem.phys_base,
+				 evtr->int_modt);
 	gsi_init_ring(&evtr->ring, &evtr->mem);
 
 	__gsi_zero_evt_ring_scratch(evt_id);
