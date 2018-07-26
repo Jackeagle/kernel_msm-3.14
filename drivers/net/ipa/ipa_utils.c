@@ -140,7 +140,6 @@ struct ipa_ep_configuration {
 	bool valid;
 	bool support_flt;
 	int sequencer_type;
-	u8 qmb_master_sel;
 	struct ipa_gsi_ep_config ipa_gsi_ep_info;
 };
 
@@ -154,7 +153,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.support_flt	= true,
 			.sequencer_type =
 			   IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 7,
 				.ipa_gsi_chan_num	= 1,
@@ -168,7 +166,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.support_flt	= true,
 			.sequencer_type =
 			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 0,
 				.ipa_gsi_chan_num	= 0,
@@ -182,7 +179,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.support_flt	= false,
 			.sequencer_type =
 				IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 8,
 				.ipa_gsi_chan_num	= 7,
@@ -196,7 +192,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.support_flt	= true,
 			.sequencer_type =
 			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 2,
 				.ipa_gsi_chan_num	= 3,
@@ -209,7 +204,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= false,
 			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_DMA_ONLY,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 5,
 				.ipa_gsi_chan_num	= 4,
@@ -223,7 +217,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.support_flt	= true,
 			.sequencer_type =
 				IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 3,
 				.ipa_gsi_chan_num	= 0,
@@ -237,7 +230,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.support_flt	= true,
 			.sequencer_type =
 				IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 6,
 				.ipa_gsi_chan_num	= 4,
@@ -251,7 +243,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.support_flt	= false,
 			.sequencer_type =
 				IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 4,
 				.ipa_gsi_chan_num	= 1,
@@ -265,7 +256,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.support_flt	= true,
 			.sequencer_type =
 			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 14,
 				.ipa_gsi_chan_num	= 5,
@@ -279,7 +269,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.support_flt	= true,
 			.sequencer_type =
 			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 15,
 				.ipa_gsi_chan_num	= 2,
@@ -294,7 +283,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.support_flt	= true,
 			.sequencer_type =
 			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 0,
 				.ipa_gsi_chan_num	= 0,
@@ -308,7 +296,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.support_flt	= true,
 			.sequencer_type =
 			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 0,
 				.ipa_gsi_chan_num	= 0,
@@ -322,7 +309,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.support_flt	= true,
 			.sequencer_type =
 			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 2,
 				.ipa_gsi_chan_num	= 3,
@@ -336,7 +322,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.support_flt	= true,
 			.sequencer_type =
 			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 4,
 				.ipa_gsi_chan_num	= 1,
@@ -350,7 +335,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.support_flt	= true,
 			.sequencer_type =
 			  IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 1,
 				.ipa_gsi_chan_num	= 0,
@@ -363,7 +347,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= false,
 			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 16,
 				.ipa_gsi_chan_num	= 3,
@@ -376,7 +359,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= false,
 			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 18,
 				.ipa_gsi_chan_num	= 9,
@@ -389,7 +371,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= false,
 			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 19,
 				.ipa_gsi_chan_num	= 10,
@@ -402,7 +383,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= false,
 			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 17,
 				.ipa_gsi_chan_num	= 8,
@@ -415,7 +395,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= false,
 			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 11,
 				.ipa_gsi_chan_num	= 2,
@@ -428,7 +407,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= false,
 			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 9,
 				.ipa_gsi_chan_num	= 5,
@@ -441,7 +419,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= false,
 			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 10,
 				.ipa_gsi_chan_num	= 6,
@@ -454,7 +431,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= false,
 			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 13,
 				.ipa_gsi_chan_num	= 3,
@@ -467,7 +443,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= false,
 			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 12,
 				.ipa_gsi_chan_num	= 2,
@@ -481,7 +456,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= false,
 			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 18,
 				.ipa_gsi_chan_num	= 9,
@@ -494,7 +468,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= false,
 			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 19,
 				.ipa_gsi_chan_num	= 10,
@@ -507,7 +480,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= false,
 			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 11,
 				.ipa_gsi_chan_num	= 2,
@@ -521,7 +493,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration
 			.valid		= true,
 			.support_flt	= false,
 			.sequencer_type = IPA_DPS_HPS_SEQ_TYPE_INVALID,
-			.qmb_master_sel = QMB_MASTER_SELECT_DDR,
 			.ipa_gsi_ep_info = {
 				.ipa_ep_num		= 31,
 				.ipa_gsi_chan_num	= 31,
