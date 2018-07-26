@@ -1781,8 +1781,6 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 {
 	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
 	u16 free;
-	struct gsi_tre tre;
-	struct gsi_tre *tre_ptr;
 	u16 idx;
 	u64 wp_rollback;
 	u32 i;
@@ -1808,30 +1806,29 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 
 	wp_rollback = chan->ring.wp_local;
 	for (i = 0; i < num_xfers; i++) {
-		memset(&tre, 0, sizeof(tre));
-		tre.buffer_ptr = xfer[i].addr;
-		tre.buf_len = xfer[i].len;
+		struct gsi_tre *tre_ptr;
+
+		tre_ptr = ipahal_dma_phys_to_virt(&chan->ring.mem,
+						  chan->ring.wp_local);
+
+		tre_ptr->buffer_ptr = xfer[i].addr;
+		tre_ptr->buf_len = xfer[i].len;
 		if (xfer[i].type == GSI_XFER_ELEM_DATA) {
-			tre.re_type = GSI_RE_XFER;
+			tre_ptr->re_type = GSI_RE_XFER;
 		} else if (xfer[i].type == GSI_XFER_ELEM_IMME_CMD) {
-			tre.re_type = GSI_RE_IMMD_CMD;
+			tre_ptr->re_type = GSI_RE_IMMD_CMD;
 		} else if (xfer[i].type == GSI_XFER_ELEM_NOP) {
-			tre.re_type = GSI_RE_NOP;
+			tre_ptr->re_type = GSI_RE_NOP;
 		} else {
 			ipa_err("chan_id %lu bad RE type %u\n", chan_id,
 				xfer[i].type);
 			break;
 		}
-		tre.bei = (xfer[i].flags & GSI_XFER_FLAG_BEI) ? 1 : 0;
-		tre.ieot = (xfer[i].flags & GSI_XFER_FLAG_EOT) ? 1 : 0;
-		tre.ieob = (xfer[i].flags & GSI_XFER_FLAG_EOB) ? 1 : 0;
-		tre.chain = (xfer[i].flags & GSI_XFER_FLAG_CHAIN) ? 1 : 0;
+		tre_ptr->bei = (xfer[i].flags & GSI_XFER_FLAG_BEI) ? 1 : 0;
+		tre_ptr->ieot = (xfer[i].flags & GSI_XFER_FLAG_EOT) ? 1 : 0;
+		tre_ptr->ieob = (xfer[i].flags & GSI_XFER_FLAG_EOB) ? 1 : 0;
+		tre_ptr->chain = (xfer[i].flags & GSI_XFER_FLAG_CHAIN) ? 1 : 0;
 
-		tre_ptr = ipahal_dma_phys_to_virt(&chan->ring.mem,
-						  chan->ring.wp_local);
-
-		/* write the TRE to ring */
-		*tre_ptr = tre;
 		idx = ring_wp_local_index(&chan->ring);
 		chan->user_data[idx] = xfer[i].xfer_user_data;
 		ring_wp_local_inc(&chan->ring);
