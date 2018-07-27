@@ -84,7 +84,7 @@ static bool ipa_is_valid_ep(u32 ep_suspend_data)
 static void ipa_handle_interrupt(int irq_num, bool isr_context)
 {
 	struct ipa_interrupt_info *interrupt_info;
-	u32 suspend_data;
+	u32 endpoints;
 	struct ipa_tx_suspend_irq_data *interrupt_data = NULL;
 
 	interrupt_info = &ipa_interrupt_to_cb[irq_num];
@@ -98,17 +98,17 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 	case IPA_TX_SUSPEND_IRQ:
 		ipa_debug_low("processing TX_SUSPEND interrupt work-around\n");
 		ipa_tx_suspend_interrupt_wa();
-		suspend_data = ipahal_read_reg_n(IPA_IRQ_SUSPEND_INFO_EE_n,
+		endpoints = ipahal_read_reg_n(IPA_IRQ_SUSPEND_INFO_EE_n,
 						 IPA_EE_AP);
-		ipa_debug_low("get interrupt %d\n", suspend_data);
+		ipa_debug_low("get interrupt %u\n", endpoints);
 
 		/* Clear L2 interrupts status.  Note the following
 		 * must not be executed for IPA hardware versions
 		 * prior to 3.1.
 		 */
 		ipahal_write_reg_n(IPA_SUSPEND_IRQ_CLR_EE_n,
-				   IPA_EE_AP, suspend_data);
-		if (!ipa_is_valid_ep(suspend_data))
+				   IPA_EE_AP, endpoints);
+		if (!ipa_is_valid_ep(endpoints))
 			return;
 
 		interrupt_data = kzalloc(sizeof(*interrupt_data), GFP_ATOMIC);
@@ -116,7 +116,7 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 			ipa_err("failed allocating interrupt_data\n");
 			return;
 		}
-		interrupt_data->endpoints = suspend_data;
+		interrupt_data->endpoints = endpoints;
 		break;
 	case IPA_UC_IRQ_0:
 		break;
