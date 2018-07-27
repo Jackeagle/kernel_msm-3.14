@@ -67,31 +67,6 @@ static DECLARE_WORK(ipa_client_remove_work, ipa_client_remove_deferred);
 static struct ipa_context ipa_ctx_struct;
 struct ipa_context *ipa_ctx = &ipa_ctx_struct;
 
-int ipa_active_clients_log_print_table(char *buf, int size)
-{
-	struct ipa_active_clients_log_ctx *log;
-	struct ipa_active_client *entry;
-	unsigned long flags;
-	int cnt;
-
-	log = &ipa_ctx->ipa_active_clients_logging;
-
-	spin_lock_irqsave(&log->lock, flags);
-
-	cnt = scnprintf(buf, size, "\n---- Active Clients Table ----\n");
-	list_for_each_entry(entry, &log->active, links) {
-		cnt += scnprintf(buf + cnt, size - cnt, "%-40s %-3d\n",
-				 entry->id_string, entry->count);
-	}
-	cnt += scnprintf(buf + cnt, size - cnt,
-			"\nTotal active clients count: %d\n",
-			atomic_read(&ipa_ctx->ipa_active_clients.cnt));
-
-	spin_unlock_irqrestore(&log->lock, flags);
-
-	return cnt;
-}
-
 static int ipa_active_clients_log_init(void)
 {
 	struct ipa_active_clients_log_ctx *log;
