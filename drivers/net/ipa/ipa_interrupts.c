@@ -15,7 +15,6 @@
 struct ipa_interrupt_info {
 	ipa_irq_handler_t handler;
 	enum ipa_irq_type interrupt;
-	void *private_data;
 	bool deferred_flag;
 };
 
@@ -146,14 +145,13 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 			  ipa_deferred_interrupt_work);
 		work_data->handler = interrupt_info.handler;
 		work_data->interrupt = interrupt_info.interrupt;
-		work_data->private_data = interrupt_info.private_data;
+		work_data->private_data = NULL;
 		work_data->interrupt_data = interrupt_data;
 		queue_work(ipa_interrupt_wq, &work_data->interrupt_work);
 
 	} else {
 		interrupt_info.handler(interrupt_info.interrupt,
-				       interrupt_info.private_data,
-				       interrupt_data);
+				       NULL, interrupt_data);
 		kfree(interrupt_data);
 	}
 }
@@ -328,7 +326,6 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 	interrupt_info = &ipa_interrupt_to_cb[irq_num];
 	interrupt_info->deferred_flag = deferred_flag;
 	interrupt_info->handler = handler;
-	interrupt_info->private_data = NULL;
 	interrupt_info->interrupt = interrupt;
 
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
@@ -374,7 +371,6 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 	interrupt_info = &ipa_interrupt_to_cb[irq_num];
 	interrupt_info->deferred_flag = false;
 	interrupt_info->handler = NULL;
-	interrupt_info->private_data = NULL;
 	interrupt_info->interrupt = -1;
 
 	/* Unregister SUSPEND_IRQ_EN_EE_N_ADDR for L2 interrupt.
@@ -408,7 +404,6 @@ int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
 	for (idx = 0; idx < IPA_IRQ_NUM_MAX; idx++) {
 		ipa_interrupt_to_cb[idx].deferred_flag = false;
 		ipa_interrupt_to_cb[idx].handler = NULL;
-		ipa_interrupt_to_cb[idx].private_data = NULL;
 		ipa_interrupt_to_cb[idx].interrupt = -1;
 	}
 
@@ -474,7 +469,7 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 			  ipa_deferred_interrupt_work);
 		work_data->handler = interrupt_info.handler;
 		work_data->interrupt = IPA_TX_SUSPEND_IRQ;
-		work_data->private_data = interrupt_info.private_data;
+		work_data->private_data = NULL;
 		work_data->interrupt_data = (void *)suspend_interrupt_data;
 		queue_work(ipa_interrupt_wq, &work_data->interrupt_work);
 		return;
