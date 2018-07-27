@@ -317,21 +317,21 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 			      ipa_irq_handler_t handler, bool deferred_flag,
 			      void *private_data)
 {
-	u32 val;
-	int irq_num;
+	int irq_num = ipa_irq_mapping[interrupt];
+	struct ipa_interrupt_info *interrupt_info;
 	int client_idx;
+	u32 val;
 
-	ipa_debug("%s: interrupt_enum %d\n", __func__, interrupt);
+	ipa_debug("%s: interrupt_enum %d irq_num %d\n", __func__,
+		  interrupt, irq_num);
 
-	irq_num = ipa_irq_mapping[interrupt];
 	ipa_assert(irq_num >= 0);
 
-	ipa_debug("ipa_interrupt_to_cb irq_num(%d)\n", irq_num);
-
-	ipa_interrupt_to_cb[irq_num].deferred_flag = deferred_flag;
-	ipa_interrupt_to_cb[irq_num].handler = handler;
-	ipa_interrupt_to_cb[irq_num].private_data = private_data;
-	ipa_interrupt_to_cb[irq_num].interrupt = interrupt;
+	interrupt_info = &ipa_interrupt_to_cb[irq_num];
+	interrupt_info->deferred_flag = deferred_flag;
+	interrupt_info->handler = handler;
+	interrupt_info->private_data = private_data;
+	interrupt_info->interrupt = interrupt;
 
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
 	ipa_debug("read IPA_IRQ_EN_EE_n register. reg = %d\n", val);
