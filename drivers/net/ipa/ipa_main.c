@@ -813,8 +813,7 @@ static bool ipa_client_add_not_first(void)
  * non-zero.  (This is used to avoid blocking.)  Returns true if the
  * additional reference was added successfully, or false otherwise.
  */
-bool _ipa_client_add_additional(const char *id, bool log_it,
-				const char *file, int line)
+bool _ipa_client_add_additional(const char *id, const char *file, int line)
 {
 	struct ipa_active_client_logging_info log_info;
 	bool ret;
@@ -836,7 +835,7 @@ bool _ipa_client_add_additional(const char *id, bool log_it,
  * ipa_client_add_first() will safely add the first client, enabling
  * clocks and setting up (resuming) pipes before returning.
  */
-void _ipa_client_add(const char *id, bool log_it, const char *file, int line)
+void _ipa_client_add(const char *id, const char *file, int line)
 {
 	struct ipa_active_client_logging_info log_info;
 
@@ -908,7 +907,7 @@ static bool ipa_client_remove_not_final(void)
  * called in workqueue context, dropping the last reference under
  * protection of the mutex.
  */
-void _ipa_client_remove(const char *id, bool log_it, const char *file, int line)
+void _ipa_client_remove(const char *id, const char *file, int line)
 {
 	struct ipa_active_client_logging_info log_info;
 
@@ -929,7 +928,7 @@ void _ipa_client_remove(const char *id, bool log_it, const char *file, int line)
  * upon return for the final reference.
  */
 void
-_ipa_client_remove_wait(const char *id, bool log_it, const char *file, int line)
+_ipa_client_remove_wait(const char *id, const char *file, int line)
 {
 	struct ipa_active_client_logging_info log_info;
 
