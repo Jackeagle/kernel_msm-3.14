@@ -14,7 +14,6 @@
 #include <linux/device.h>
 #include <linux/init.h>
 #include <linux/io.h>
-#include <linux/of.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -22,12 +21,9 @@
 #include <soc/qcom/rpmh.h>
 #include <soc/qcom/tcs.h>
 #include <trace/events/trace_msm_bus.h>
-#include <dt-bindings/msm/msm-bus-ids.h>
 #include "msm_bus_core.h"
 #include "msm_bus_rpmh.h"
 #include "msm_bus_noc.h"
-
-#define MSM_BUS_RSC_COUNT		(MSM_BUS_RSC_LAST-MSM_BUS_RSC_FIRST+1)
 
 #define BCM_TCS_CMD_COMMIT_SHFT		30
 #define BCM_TCS_CMD_COMMIT_MASK		0x40000000
@@ -49,13 +45,6 @@ static int msm_bus_dev_init_qos(struct device *dev, void *data);
 static struct list_head bcm_query_list_inorder[VCD_MAX_CNT];
 static struct msm_bus_node_device_type *cur_rsc;
 static bool init_time = true;
-
-struct msm_bus_rsc_client {
-	uint32_t rsc_id;
-	struct device *dev;
-};
-
-struct msm_bus_rsc_client rsc_clients[MSM_BUS_RSC_COUNT];
 
 struct bcm_db {
 	uint32_t unit_size;
@@ -277,7 +266,7 @@ static int tcs_cmd_gen(struct msm_bus_node_device_type *cur_bcm,
 
 	cmd->addr = cur_bcm->bcmdev->addr;
 	cmd->data = BCM_TCS_CMD(commit, valid, vec_a, vec_b);
-	cmd->wait = commit;
+	cmd->complete = commit;
 
 	return ret;
 }
@@ -316,7 +305,7 @@ static int tcs_cmd_list_gen(int *n_active,
 						&cur_bcm_clist[i])) {
 					cmdlist_active[last_tcs].data |=
 						BCM_TCS_CMD_COMMIT_MASK;
-					cmdlist_active[last_tcs].wait
+					cmdlist_active[last_tcs].complete
 								= true;
 				}
 				continue;
@@ -359,8 +348,8 @@ static int tcs_cmd_list_gen(int *n_active,
 						BCM_TCS_CMD_COMMIT_MASK;
 					cmdlist_sleep[last_tcs].data |=
 						BCM_TCS_CMD_COMMIT_MASK;
-					cmdlist_wake[last_tcs].wait = true;
-					cmdlist_sleep[last_tcs].wait = true;
+					cmdlist_wake[last_tcs].complete = true;
+					cmdlist_sleep[last_tcs].complete = true;
 					idx++;
 				}
 				continue;
@@ -712,6 +701,8 @@ static void bcm_commit_single_req(struct msm_bus_node_device_type *cur_bcm,
 	cur_dev = cur_rsc->rscdev->dev;
 
 	tcs_cmd_gen(cur_bcm, cmd_active, vec_a, vec_b, true);
+	rpmh_write_single(cur_mbox, RPMH_ACTIVE_ONLY_STATE,
+					cmd_active->addr, cmd_active->data);
 
 	kfree(cmd_active);
 }
@@ -1067,17 +1058,17 @@ static int msm_bus_bcm_init(struct device *dev,
 	node_dev->bcmdev = bcmdev;
 	bcmdev->name = pdata->bcmdev->name;
 
-	if (!cmd_db_read_aux_data_len(bcmdev->name)) {
+	if (!cmd_db_get_aux_data_len(bcmdev->name)) {
 		MSM_BUS_ERR("%s: Error getting bcm info, bcm:%s",
 			__func__, bcmdev->name);
 		ret = -ENXIO;
 		goto exit_bcm_init;
 	}
 
-	cmd_db_read_aux_data(bcmdev->name, (u8 *)&aux_data,
+	cmd_db_get_aux_data(bcmdev->name, (u8 *)&aux_data,
 						sizeof(struct bcm_db));
 
-	bcmdev->addr = cmd_db_read_addr(bcmdev->name);
+	bcmdev->addr = cmd_db_get_addr(bcmdev->name);
 	bcmdev->width = (uint32_t)aux_data.width;
 	bcmdev->clk_domain = aux_data.clk_domain;
 	bcmdev->unit_size = aux_data.unit_size;
@@ -1116,19 +1107,12 @@ static int msm_bus_rsc_init(struct platform_device *pdev,
 
 	node_dev->rscdev = rscdev;
 	rscdev->req_state = pdata->rscdev->req_state;
+	rscdev->mbox = rpmh_get_byname(pdev, node_dev->node_info->name);
 
-	for (i = 0; i < MSM_BUS_RSC_COUNT; i++) {
-		if (rsc_clients[i].rsc_id == node_dev->node_info->id) {
-			rscdev->dev = rsc_clients[i].dev;
-
-			if (IS_ERR_OR_NULL(rscdev->dev)) {
-				MSM_BUS_ERR("%s: Failed to get mbox:%s",
-					__func__, node_dev->node_info->name);
-			}
-			break;
-		}
+	if (IS_ERR_OR_NULL(rscdev->mbox)) {
+		MSM_BUS_ERR("%s: Failed to get mbox:%s", __func__,
+						node_dev->node_info->name);
 	}
-
 
 	// Add way to count # of VCDs, initialize LL
 	for (i = 0; i < VCD_MAX_CNT; i++)
@@ -1830,38 +1814,6 @@ int msm_bus_device_rules_remove(struct platform_device *pdev)
 	return 0;
 }
 
-static int msm_bus_rsc_probe(struct platform_device *pdev)
-{
-	int i = 0;
-	int ret = 0;
-	uint32_t rsc_id = 0;
-
-	ret = of_property_read_u32(pdev->dev.of_node, "qcom,msm-bus-id",
-								&rsc_id);
-	if (ret) {
-		MSM_BUS_ERR("unable to find msm bus id\n");
-		return ret;
-	}
-
-	for (i = 0; i < MSM_BUS_RSC_COUNT - 1; i++) {
-		if (!rsc_clients[i].rsc_id) {
-			rsc_clients[i].rsc_id = rsc_id;
-			rsc_clients[i].dev = &pdev->dev;
-		}
-	}
-	return 0;
-}
-
-int msm_bus_rsc_remove(struct platform_device *pdev)
-{
-	int i;
-
-	for (i = 0; i < MSM_BUS_RSC_COUNT - 1; i++) {
-		rsc_clients[i].rsc_id = 0;
-	}
-	return 0;
-}
-
 static const struct of_device_id rules_match[] = {
 	{.compatible = "qcom,msm-bus-static-bw-rules"},
 	{}
@@ -1892,33 +1844,6 @@ static struct platform_driver msm_bus_device_driver = {
 	},
 };
 
-static const struct of_device_id rsc_match[] = {
-	{.compatible = "qcom,msm-bus-rsc"},
-	{}
-};
-
-static struct platform_driver msm_bus_rsc_driver = {
-	.probe = msm_bus_rsc_probe,
-	.remove = msm_bus_rsc_remove,
-	.driver = {
-		.name = "msm_bus_rsc",
-		.owner = THIS_MODULE,
-		.of_match_table = rsc_match,
-	},
-};
-
-int __init msm_bus_rsc_init_driver(void)
-{
-	int rc;
-
-	rc =  platform_driver_register(&msm_bus_rsc_driver);
-	if (rc)
-		MSM_BUS_ERR("Failed to register msm bus rsc device driver");
-
-	return rc;
-}
-
-
 int __init msm_bus_device_init_driver(void)
 {
 	int rc;
@@ -1940,5 +1865,4 @@ int __init msm_bus_device_late_init(void)
 	init_time = false;
 	return commit_late_init_data(false);
 }
-core_initcall(msm_bus_rsc_init_driver);
 subsys_initcall(msm_bus_device_init_driver);
