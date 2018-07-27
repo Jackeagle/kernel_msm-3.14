@@ -1068,13 +1068,13 @@ void gsi_firmware_enable(void)
 
 /* Compute the value to write to the event ring context 0 register */
 static u32
-evt_ring_ctx_0_val(enum gsi_evt_chtype chtype, bool intr_irq, u32 re_size)
+evt_ring_ctx_0_val(void)
 {
 	u32 val;
 
-	val = field_gen((u32)chtype, EV_CHTYPE_BMSK);
-	val |= field_gen(intr_irq ? 1 : 0, EV_INTYPE_BMSK);
-	val |= field_gen(re_size, EV_ELEMENT_SIZE_BMSK);
+	val = field_gen(GSI_EVT_CHTYPE_GPI_EV, EV_CHTYPE_BMSK);
+	val |= field_gen(1, EV_INTYPE_BMSK);
+	val |= field_gen(GSI_RING_ELEMENT_SIZE, EV_ELEMENT_SIZE_BMSK);
 
 	return val;
 }
@@ -1098,8 +1098,7 @@ gsi_program_evt_ring_ctx(u8 evt_id, u32 size, u64 phys_base, u16 int_modt)
 
 	ipa_debug("intf GPI intr IRQ RE size %u\n", GSI_RING_ELEMENT_SIZE);
 
-	val = evt_ring_ctx_0_val(GSI_EVT_CHTYPE_GPI_EV, true,
-				 GSI_RING_ELEMENT_SIZE);
+	val = evt_ring_ctx_0_val();
 	gsi_writel(val, GSI_EE_N_EV_CH_K_CNTXT_0_OFFS(evt_id, IPA_EE_AP));
 
 	val = field_gen(size, EV_R_LENGTH_BMSK);
