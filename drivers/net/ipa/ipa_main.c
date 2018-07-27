@@ -742,8 +742,7 @@ static struct ipa_active_client *active_client_get(const char *id_string)
  * A circular history buffer records reference count updates.
  */
 static void
-ipa_active_clients_log_mod(struct ipa_active_client_logging_info *id,
-			   bool log_it, bool inc)
+ipa_active_clients_log_mod(struct ipa_active_client_logging_info *id, bool inc)
 {
 	struct ipa_active_clients_log_ctx *log;
 	struct ipa_active_client *entry;
@@ -827,7 +826,7 @@ bool _ipa_client_add_additional(const char *id, bool log_it,
 	log_info.id_string = id;
 	log_info.file = file;
 	log_info.line = line;
-	ipa_active_clients_log_mod(&log_info, log_it, true);
+	ipa_active_clients_log_mod(&log_info, true);
 
 	return true;
 }
@@ -844,7 +843,7 @@ void _ipa_client_add(const char *id, bool log_it, const char *file, int line)
 	log_info.id_string = id;
 	log_info.file = file;
 	log_info.line = line;
-	ipa_active_clients_log_mod(&log_info, log_it, true);
+	ipa_active_clients_log_mod(&log_info, true);
 
 	/* There's nothing more to do if this isn't the first reference */
 	if (!ipa_client_add_not_first())
@@ -916,7 +915,7 @@ void _ipa_client_remove(const char *id, bool log_it, const char *file, int line)
 	log_info.id_string = id;
 	log_info.file = file;
 	log_info.line = line;
-	ipa_active_clients_log_mod(&log_info, log_it, false);
+	ipa_active_clients_log_mod(&log_info, false);
 
 	if (!ipa_client_remove_not_final())
 		queue_work(ipa_ctx->power_mgmt_wq, &ipa_client_remove_work);
@@ -937,7 +936,7 @@ _ipa_client_remove_wait(const char *id, bool log_it, const char *file, int line)
 	log_info.id_string = id;
 	log_info.file = file;
 	log_info.line = line;
-	ipa_active_clients_log_mod(&log_info, log_it, false);
+	ipa_active_clients_log_mod(&log_info, false);
 
 	if (!ipa_client_remove_not_final())
 		ipa_client_remove_final();
@@ -1592,7 +1591,7 @@ static int ipa_pre_init(void)
 	log_info.file = __FILE__;
 	log_info.line = __LINE__;
 	log_info.id_string = "PROXY_CLK_VOTE";
-	ipa_active_clients_log_mod(&log_info, true, true);
+	ipa_active_clients_log_mod(&log_info, true);
 	atomic_set(&ipa_ctx->ipa_active_clients.cnt, 1);
 
 	/* Create workqueues for power management */
