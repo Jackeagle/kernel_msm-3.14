@@ -8,7 +8,6 @@
 #include <linux/interrupt.h>
 #include "ipa_i.h"
 
-#define INTERRUPT_WORKQUEUE_NAME "ipa_interrupt_wq"
 #define DIS_SUSPEND_INTERRUPT_TIMEOUT 5		/* msec */
 #define IPA_IRQ_NUM_MAX 32
 
@@ -404,8 +403,7 @@ int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
 		ipa_interrupt_to_cb[idx].interrupt = -1;
 	}
 
-	ipa_interrupt_wq = create_singlethread_workqueue(
-			INTERRUPT_WORKQUEUE_NAME);
+	ipa_interrupt_wq = create_singlethread_workqueue("ipa_interrupt_wq");
 	if (!ipa_interrupt_wq) {
 		ipa_err("workqueue creation failed\n");
 		return -ENOMEM;
