@@ -67,37 +67,6 @@ static DECLARE_WORK(ipa_client_remove_work, ipa_client_remove_deferred);
 static struct ipa_context ipa_ctx_struct;
 struct ipa_context *ipa_ctx = &ipa_ctx_struct;
 
-static int ipa_active_clients_log_init(void)
-{
-	struct ipa_active_clients_log_ctx *log;
-	size_t count = ARRAY_SIZE(log->log_buffer);
-	size_t size = IPA_ACTIVE_CLIENTS_LOG_LINE_LEN;
-	char *bufp;
-
-	log = &ipa_ctx->ipa_active_clients_logging;
-
-	bufp = kcalloc(count, size, GFP_KERNEL);
-	if (!bufp)
-		return -ENOMEM;
-
-	spin_lock_init(&log->lock);
-	log->log_head = 0;
-	log->log_tail = count - 1;
-	INIT_LIST_HEAD(&log->active);
-
-	return 0;
-}
-
-static void ipa_active_clients_log_destroy(void)
-{
-	struct ipa_active_clients_log_ctx *log;
-
-	log = &ipa_ctx->ipa_active_clients_logging;
-
-	kfree(log->log_buffer[0]);
-	memset(log, 0, sizeof(*log));
-}
-
 static int hdr_init_local_cmd(u32 offset, u32 size)
 {
 	struct ipa_mem_buffer mem;
@@ -1705,12 +1674,6 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_clear_bus_scale_tbl;
 	}
 
-	/* init active_clients_log */
-	if (ipa_active_clients_log_init()) {
-		result = -ENOMEM;
-		goto err_unregister_bus_handle;
-	}
-
 	ipa_ctx->gsi_ctx = gsi_init(pdev_p);
 	if (IS_ERR(ipa_ctx->gsi_ctx)) {
 		ipa_err("ipa: error initializing gsi driver.\n");
@@ -1738,8 +1701,6 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 	ipa_ctx->dev = NULL;
 err_clear_gsi_ctx:
 	ipa_ctx->gsi_ctx = NULL;
-	ipa_active_clients_log_destroy();
-err_unregister_bus_handle:
 	msm_bus_scale_unregister_client(ipa_ctx->ipa_bus_hdl);
 	ipa_ctx->ipa_bus_hdl = 0;
 err_clear_bus_scale_tbl:

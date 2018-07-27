@@ -226,14 +226,6 @@ struct ipa_active_client {
 	const char *id_string;
 };
 
-struct ipa_active_clients_log_ctx {
-	spinlock_t lock;	/* protects active list */
-	char *log_buffer[IPA_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES];
-	int log_head;
-	int log_tail;
-	struct list_head active;
-};
-
 struct ipa_status_stats {
 	struct ipahal_pkt_status status[IPA_MAX_STATUS_STAT_NUM];
 	unsigned int curr;
@@ -684,7 +676,6 @@ struct ipa_context {
 	u16 smem_sz;
 	u16 smem_restricted_bytes;
 	struct ipa_active_clients ipa_active_clients;
-	struct ipa_active_clients_log_ctx ipa_active_clients_logging;
 	struct workqueue_struct *power_mgmt_wq;
 	struct ipa_transport_pm transport_pm;
 	u32 clnt_hdl_cmd;
