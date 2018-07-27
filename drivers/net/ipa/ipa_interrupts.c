@@ -370,12 +370,14 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 {
 	int irq_num = ipa_irq_mapping[interrupt];
+	struct ipa_interrupt_info *interrupt_info;
 	u32 val;
 
-	ipa_interrupt_to_cb[irq_num].deferred_flag = false;
-	ipa_interrupt_to_cb[irq_num].handler = NULL;
-	ipa_interrupt_to_cb[irq_num].private_data = NULL;
-	ipa_interrupt_to_cb[irq_num].interrupt = -1;
+	interrupt_info = &ipa_interrupt_to_cb[irq_num];
+	interrupt_info->deferred_flag = false;
+	interrupt_info->handler = NULL;
+	interrupt_info->private_data = NULL;
+	interrupt_info->interrupt = -1;
 
 	/* Unregister SUSPEND_IRQ_EN_EE_N_ADDR for L2 interrupt.
 	 * Note the following must not be executed for IPA hardware
