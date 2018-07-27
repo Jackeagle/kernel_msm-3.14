@@ -36,6 +36,7 @@ static DECLARE_DELAYED_WORK(dwork_en_suspend_int, ipa_enable_tx_suspend_wa);
 static spinlock_t suspend_wa_lock;
 static void ipa_process_interrupts(bool isr_context);
 
+/* Unsupported interrupt types have value -1 in this table */
 static const int ipa_irq_mapping[IPA_IRQ_MAX] = {
 	[IPA_UC_TX_CMD_Q_NOT_FULL_IRQ]		= -1,
 	[IPA_UC_TO_PROC_ACK_Q_NOT_FULL_IRQ]	= -1,
@@ -368,15 +369,8 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
  */
 int ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 {
+	int irq_num = ipa_irq_mapping[interrupt];
 	u32 val;
-	int irq_num;
-
-	irq_num = ipa_irq_mapping[interrupt];
-	if (irq_num < 0 || irq_num >= IPA_IRQ_NUM_MAX) {
-		ipa_err("interrupt %d not supported\n", interrupt);
-		WARN_ON(1);
-		return -EFAULT;
-	}
 
 	kfree(ipa_interrupt_to_cb[irq_num].private_data);
 	ipa_interrupt_to_cb[irq_num].deferred_flag = false;
