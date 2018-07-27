@@ -20,6 +20,7 @@ struct ipa_interrupt_info {
 };
 
 static struct ipa_interrupt_info ipa_interrupt_to_cb[IPA_IRQ_NUM_MAX];
+
 static struct workqueue_struct *ipa_interrupt_wq;
 
 static void ipa_tx_suspend_interrupt_wa(void);
@@ -92,8 +93,7 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 		return;
 	}
 
-	switch (interrupt_info->interrupt) {
-	case IPA_TX_SUSPEND_IRQ:
+	if (interrupt_info->interrupt == IPA_TX_SUSPEND_IRQ) {
 		ipa_debug_low("processing TX_SUSPEND interrupt work-around\n");
 		ipa_tx_suspend_interrupt_wa();
 		endpoints = ipahal_read_reg_n(IPA_IRQ_SUSPEND_INFO_EE_n,
@@ -108,11 +108,6 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 				   IPA_EE_AP, endpoints);
 		if (!ipa_is_valid_ep(endpoints))
 			return;
-		break;
-	case IPA_UC_IRQ_0:
-		break;
-	default:
-		break;
 	}
 
 	/* Force defer processing if in ISR context. */
