@@ -768,8 +768,6 @@ static int ipa_wwan_probe(struct platform_device *pdev)
 	struct net_device *dev;
 	struct ipa_wwan_private *wwan_ptr;
 
-	ipa_info("rmnet_ipa started initialization\n");
-
 	mutex_init(&rmnet_ipa_ctx->pipe_handle_guard);
 	mutex_init(&rmnet_ipa_ctx->add_mux_channel_lock);
 	rmnet_ipa_ctx->ipa_to_apps_hdl = -1;
@@ -819,7 +817,6 @@ static int ipa_wwan_probe(struct platform_device *pdev)
 	ipa_client_add(__func__, false);
 
 	initialized = true;
-	ipa_err("rmnet_ipa completed initialization\n");
 
 	return 0;
 
