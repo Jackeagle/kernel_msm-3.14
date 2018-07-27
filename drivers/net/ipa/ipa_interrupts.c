@@ -120,29 +120,23 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 	}
 }
 
+/* Enable the IPA SUSPEND interrupt (workaround) */
 static void ipa_enable_tx_suspend_wa(struct work_struct *work)
 {
 	u32 val;
-	u32 suspend_bmask;
-	int irq_num;
+	int irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
 
-	ipa_debug_low("Enter\n");
-
-	irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
 	ipa_assert(irq_num != -1);
 
-	/* make sure ipa hw is clocked on*/
 	ipa_client_add(__func__, false);
 
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
-	suspend_bmask = BIT(irq_num);
-	/*enable  TX_SUSPEND_IRQ*/
-	val |= suspend_bmask;
-	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, en);
-	ipa_process_interrupts(false);
-	ipa_client_remove(__func__, false);
+	val |= BIT(irq_num);
+	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
 
-	ipa_debug_low("Exit\n");
+	ipa_process_interrupts(false);
+
+	ipa_client_remove(__func__, false);
 }
 
 static void ipa_tx_suspend_interrupt_wa(void)
