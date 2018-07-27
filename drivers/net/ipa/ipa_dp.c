@@ -331,10 +331,8 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	struct device *dev = ipa_ctx->dev;
 	struct ipa_ep_context *ep = sys->ep;
 	struct ipa_tx_pkt_wrapper *tx_pkt, *tx_pkt_first;
-	struct ipahal_imm_cmd_pyld *tag_pyld_ret = NULL;
-	struct ipa_tx_pkt_wrapper *next_pkt;
-	struct gsi_xfer_elem *xfer_elem = NULL;
-	int i = 0;
+	struct gsi_xfer_elem *xfer_elem;
+	int i;
 	int j;
 	int result;
 
@@ -433,9 +431,10 @@ failure_dma_map:
 	kmem_cache_free(ipa_ctx->tx_pkt_wrapper_cache, tx_pkt);
 
 failure:
-	ipahal_destroy_imm_cmd(tag_pyld_ret);
 	tx_pkt = tx_pkt_first;
 	for (j = 0; j < i; j++) {
+		struct ipa_tx_pkt_wrapper *next_pkt;
+
 		next_pkt = list_next_entry(tx_pkt, link);
 		list_del(&tx_pkt->link);
 
