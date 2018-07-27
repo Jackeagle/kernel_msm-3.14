@@ -1093,7 +1093,7 @@ static int ipa_init_interrupts(void)
 
 	/*add handler for suspend interrupt*/
 	ipa_add_interrupt_handler(IPA_TX_SUSPEND_IRQ, ipa_suspend_handler,
-				  false, NULL);
+				  false);
 	return 0;
 }
 

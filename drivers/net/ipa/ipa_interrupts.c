@@ -308,14 +308,12 @@ static irqreturn_t ipa_isr(int irq, void *ctxt)
  * @handler:		The handler to be added
  * @deferred_flag:	whether the handler processing should be deferred in
  *			a workqueue
- * @private_data:	the client's private data
  *
  * Adds handler to an interrupt type and enable the specific bit
  * in IRQ_EN register, associated interrupt in IRQ_STTS register will be enabled
  */
 void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
-			      ipa_irq_handler_t handler, bool deferred_flag,
-			      void *private_data)
+			      ipa_irq_handler_t handler, bool deferred_flag)
 {
 	int irq_num = ipa_irq_mapping[interrupt];
 	struct ipa_interrupt_info *interrupt_info;
@@ -330,7 +328,7 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 	interrupt_info = &ipa_interrupt_to_cb[irq_num];
 	interrupt_info->deferred_flag = deferred_flag;
 	interrupt_info->handler = handler;
-	interrupt_info->private_data = private_data;
+	interrupt_info->private_data = NULL;
 	interrupt_info->interrupt = interrupt;
 
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
