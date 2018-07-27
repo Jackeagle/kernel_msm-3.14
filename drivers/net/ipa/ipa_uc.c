@@ -308,9 +308,9 @@ int ipa_uc_interface_init(void)
 	}
 
 	ipa_add_interrupt_handler(IPA_UC_IRQ_0, ipa_uc_event_handler, true,
-				  ipa_ctx);
+				  NULL);
 	ipa_add_interrupt_handler(IPA_UC_IRQ_1, ipa_uc_response_hdlr, true,
-				  ipa_ctx);
+				  NULL);
 	ipa_ctx->uc_ctx.uc_sram_mmio = mmio;
 	ipa_ctx->uc_ctx.uc_inited = true;
 
