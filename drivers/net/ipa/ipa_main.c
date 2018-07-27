@@ -1030,11 +1030,9 @@ void ipa_dec_release_wakelock(void)
 /** ipa_suspend_handler() - Handles the suspend interrupt:
  * wakes up the suspended peripheral by requesting its consumer
  * @interrupt:		Interrupt type
- * @private_data:	The client's private data
  * @interrupt_data:	Interrupt specific information data
  */
-void ipa_suspend_handler(enum ipa_irq_type interrupt, void *private_data,
-			 void *interrupt_data)
+void ipa_suspend_handler(enum ipa_irq_type interrupt, void *interrupt_data)
 {
 	struct ipa_tx_suspend_irq_data *suspend_data = interrupt_data;
 	u32 endpoint_mask = suspend_data->endpoints;

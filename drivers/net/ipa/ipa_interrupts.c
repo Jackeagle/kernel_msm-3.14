@@ -66,8 +66,7 @@ static void ipa_deferred_interrupt_work(struct work_struct *work)
 			container_of(work, struct ipa_interrupt_work_wrap,
 				     interrupt_work);
 	ipa_debug("call handler from workq...\n");
-	work_data->handler(work_data->interrupt, NULL,
-			   work_data->interrupt_data);
+	work_data->handler(work_data->interrupt, work_data->interrupt_data);
 	kfree(work_data->interrupt_data);
 	kfree(work_data);
 }
@@ -149,7 +148,7 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 
 	} else {
 		interrupt_info.handler(interrupt_info.interrupt,
-				       NULL, interrupt_data);
+				       interrupt_data);
 		kfree(interrupt_data);
 	}
 }

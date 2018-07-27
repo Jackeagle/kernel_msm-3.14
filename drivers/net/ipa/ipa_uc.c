@@ -171,7 +171,6 @@ int ipa_uc_loaded_check(void)
 EXPORT_SYMBOL(ipa_uc_loaded_check);
 
 static void ipa_uc_event_handler(enum ipa_irq_type interrupt,
-				 void *private_data,
 				 void *interrupt_data)
 {
 	struct ipa_hw_shared_mem_common_mapping *mmio;
@@ -209,8 +208,8 @@ static void ipa_uc_event_handler(enum ipa_irq_type interrupt,
 	ipa_client_remove(__func__, false);
 }
 
-static void ipa_uc_response_hdlr(enum ipa_irq_type interrupt,
-				 void *private_data, void *interrupt_data)
+static void
+ipa_uc_response_hdlr(enum ipa_irq_type interrupt, void *interrupt_data)
 {
 	union ipa_hw_cpu_cmd_completed_response_data uc_rsp;
 	struct ipa_hw_shared_mem_common_mapping *mmio;

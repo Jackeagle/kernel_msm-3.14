@@ -185,7 +185,6 @@ typedef void (*ipa_notify_cb)(void *priv, enum ipa_dp_evt_type evt,
 
 /** typedef ipa_irq_handler_t - irq handler/callback type
  * @param ipa_irq_type - [in] interrupt type
- * @param private_data - [in, out] the client private data
  * @param interrupt_data - [out] interrupt information data
  *
  * callback registered by ipa_add_interrupt_handler function to
@@ -194,7 +193,6 @@ typedef void (*ipa_notify_cb)(void *priv, enum ipa_dp_evt_type evt,
  * No return value
  */
 typedef void (*ipa_irq_handler_t)(enum ipa_irq_type interrupt,
-				void *private_data,
 				void *interrupt_data);
 
 /** struct ipa_sys_connect_params - information needed to setup an IPA end-point
@@ -793,8 +791,7 @@ int ipa_active_clients_log_print_table(char *buf, int size);
 int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev);
 
 void ipa_suspend_active_aggr_wa(u32 clnt_hdl);
-void ipa_suspend_handler(enum ipa_irq_type interrupt, void *private_data,
-			 void *interrupt_data);
+void ipa_suspend_handler(enum ipa_irq_type interrupt, void *interrupt_data);
 void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data);
 
 void ipa_sram_settings_read(void);
