@@ -63,7 +63,6 @@ static void ipa_deferred_interrupt_work(struct work_struct *work)
 	interrupt_info = container_of(work, struct ipa_interrupt_info, work);
 	interrupt_info->handler(interrupt_info->interrupt,
 				interrupt_info->interrupt_data);
-	kfree(interrupt_info->interrupt_data);
 	interrupt_info->interrupt_data = NULL;
 }
 
@@ -84,8 +83,7 @@ static bool ipa_is_valid_ep(u32 ep_suspend_data)
 static void ipa_handle_interrupt(int irq_num, bool isr_context)
 {
 	struct ipa_interrupt_info *interrupt_info;
-	u32 endpoints;
-	struct ipa_tx_suspend_irq_data *interrupt_data = NULL;
+	u32 endpoints = 0;
 
 	interrupt_info = &ipa_interrupt_to_cb[irq_num];
 	if (!interrupt_info->handler) {
@@ -110,13 +108,6 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 				   IPA_EE_AP, endpoints);
 		if (!ipa_is_valid_ep(endpoints))
 			return;
-
-		interrupt_data = kzalloc(sizeof(*interrupt_data), GFP_ATOMIC);
-		if (!interrupt_data) {
-			ipa_err("failed allocating interrupt_data\n");
-			return;
-		}
-		interrupt_data->endpoints = endpoints;
 		break;
 	case IPA_UC_IRQ_0:
 		break;
@@ -126,13 +117,12 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 
 	/* Force defer processing if in ISR context. */
 	if (interrupt_info->deferred_flag || isr_context) {
-		interrupt_info->interrupt_data = interrupt_data;
+		interrupt_info->interrupt_data = (void *)(u64)endpoints;
 		INIT_WORK(&interrupt_info->work, ipa_deferred_interrupt_work);
 		queue_work(ipa_interrupt_wq, &interrupt_info->work);
 	} else {
 		interrupt_info->handler(interrupt_info->interrupt,
-				        interrupt_data);
-		kfree(interrupt_data);
+				        (void *)(u64)endpoints);
 	}
 }
 
@@ -419,7 +409,7 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 {
 	int aggr_active_bitmap = ipahal_read_reg(IPA_STATE_AGGR_ACTIVE);
 	struct ipa_interrupt_info *interrupt_info;
-	struct ipa_tx_suspend_irq_data *interrupt_data;
+	u32 endpoints;
 	int irq_num;
 
 	if (!(aggr_active_bitmap & BIT(clnt_hdl)))
@@ -435,14 +425,9 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 		ipa_err("no CB function for IPA_TX_SUSPEND_IRQ!\n");
 		return;
 	}
-	interrupt_data = kzalloc(sizeof(*interrupt_data), GFP_ATOMIC);
-	if (!interrupt_data) {
-		ipa_err("failed allocating interrupt_data\n");
-		return;
-	}
-	interrupt_data->endpoints = BIT(clnt_hdl);
+	endpoints = BIT(clnt_hdl);
 
-	interrupt_info->interrupt_data = interrupt_data;
+	interrupt_info->interrupt_data = (void *)(u64)endpoints;
 	INIT_WORK(&interrupt_info->work, ipa_deferred_interrupt_work);
 	queue_work(ipa_interrupt_wq, &interrupt_info->work);
 }

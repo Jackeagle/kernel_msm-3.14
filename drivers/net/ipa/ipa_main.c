@@ -1034,8 +1034,7 @@ void ipa_dec_release_wakelock(void)
  */
 void ipa_suspend_handler(enum ipa_irq_type interrupt, void *interrupt_data)
 {
-	struct ipa_tx_suspend_irq_data *suspend_data = interrupt_data;
-	u32 endpoint_mask = suspend_data->endpoints;
+	u32 endpoint_mask = (u32)(u64)interrupt_data;
 
 	ipa_debug("interrupt=%d, endpoint_mask=0x%08x\n",
 		  interrupt, endpoint_mask);
