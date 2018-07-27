@@ -94,22 +94,6 @@ int ipa_active_clients_log_print_table(char *buf, int size)
 	return cnt;
 }
 
-static int ipa_active_clients_panic_notifier(struct notifier_block *this,
-					     unsigned long event, void *ptr)
-{
-	mutex_lock(&ipa_ctx->ipa_active_clients.mutex);
-	ipa_active_clients_log_print_table(ipa_ctx->active_clients_table_buf,
-					   IPA_ACTIVE_CLIENTS_TABLE_BUF_SIZE);
-	ipa_err("%s", ipa_ctx->active_clients_table_buf);
-	mutex_unlock(&ipa_ctx->ipa_active_clients.mutex);
-
-	return NOTIFY_DONE;
-}
-
-static struct notifier_block ipa_active_clients_panic_blk = {
-	.notifier_call	= ipa_active_clients_panic_notifier,
-};
-
 static int ipa_active_clients_log_init(void)
 {
 	struct ipa_active_clients_log_ctx *log;
@@ -138,9 +122,6 @@ static int ipa_active_clients_log_init(void)
 	log->log_head = 0;
 	log->log_tail = count - 1;
 	INIT_LIST_HEAD(&log->active);
-
-	atomic_notifier_chain_register(&panic_notifier_list,
-				       &ipa_active_clients_panic_blk);
 
 	return 0;
 }
