@@ -226,11 +226,11 @@ static void ipa_process_interrupts(bool isr_context)
 
 static void ipa_interrupt_defer(struct work_struct *work)
 {
-	ipa_debug("processing interrupts in wq\n");
 	ipa_client_add(__func__, false);
+
 	ipa_process_interrupts(false);
+
 	ipa_client_remove(__func__, false);
-	ipa_debug("Done\n");
 }
 
 static irqreturn_t ipa_isr(int irq, void *ctxt)
