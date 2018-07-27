@@ -1066,17 +1066,6 @@ void gsi_firmware_enable(void)
 	/* ------- */
 }
 
-/* Compute the value to write to the event ring context 8 register */
-static u32 evt_ring_ctx_8_val(u32 int_modt, u32 int_modc)
-{
-	u32 val;
-
-	val = field_gen(int_modt, MODT_BMSK);
-	val |= field_gen(int_modc, MODC_BMSK);
-
-	return val;
-}
-
 static void
 gsi_program_evt_ring_ctx(u8 evt_id, u32 size, u64 phys_base, u16 int_modt)
 {
@@ -1103,7 +1092,8 @@ gsi_program_evt_ring_ctx(u8 evt_id, u32 size, u64 phys_base, u16 int_modt)
 	val = phys_base >> 32;
 	gsi_writel(val, GSI_EE_N_EV_CH_K_CNTXT_3_OFFS(evt_id, IPA_EE_AP));
 
-	val = evt_ring_ctx_8_val(int_modt, int_modc);
+	val = field_gen(int_modt, MODT_BMSK);
+	val |= field_gen(int_modc, MODC_BMSK);
 	gsi_writel(val, GSI_EE_N_EV_CH_K_CNTXT_8_OFFS(evt_id, IPA_EE_AP));
 
 	/* No MSI write data, and MSI address high and low address is 0 */
