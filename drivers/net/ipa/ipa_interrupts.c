@@ -417,33 +417,32 @@ int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
  */
 void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 {
+	int aggr_active_bitmap = ipahal_read_reg(IPA_STATE_AGGR_ACTIVE);
 	struct ipa_interrupt_info *interrupt_info;
 	struct ipa_tx_suspend_irq_data *interrupt_data;
 	int irq_num;
-	int aggr_active_bitmap = ipahal_read_reg(IPA_STATE_AGGR_ACTIVE);
 
-	if (aggr_active_bitmap & BIT(clnt_hdl)) {
-		/* force close aggregation */
-		ipahal_write_reg(IPA_AGGR_FORCE_CLOSE, BIT(clnt_hdl));
+	if (!(aggr_active_bitmap & BIT(clnt_hdl)))
+		return;
 
-		/* simulate suspend IRQ */
-		irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
-		interrupt_info = &ipa_interrupt_to_cb[irq_num];
-		if (!interrupt_info->handler) {
-			ipa_err("no CB function for IPA_TX_SUSPEND_IRQ!\n");
-			return;
-		}
-		interrupt_data = kzalloc(sizeof(*interrupt_data), GFP_ATOMIC);
-		if (!interrupt_data) {
-			ipa_err("failed allocating interrupt_data\n");
-			return;
-		}
-		interrupt_data->endpoints = BIT(clnt_hdl);
+	/* force close aggregation */
+	ipahal_write_reg(IPA_AGGR_FORCE_CLOSE, BIT(clnt_hdl));
 
-		interrupt_info->interrupt_data = interrupt_data;
-		INIT_WORK(&interrupt_info->work, ipa_deferred_interrupt_work);
-		queue_work(ipa_interrupt_wq, &interrupt_info->work);
-
+	/* simulate suspend IRQ */
+	irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
+	interrupt_info = &ipa_interrupt_to_cb[irq_num];
+	if (!interrupt_info->handler) {
+		ipa_err("no CB function for IPA_TX_SUSPEND_IRQ!\n");
 		return;
 	}
+	interrupt_data = kzalloc(sizeof(*interrupt_data), GFP_ATOMIC);
+	if (!interrupt_data) {
+		ipa_err("failed allocating interrupt_data\n");
+		return;
+	}
+	interrupt_data->endpoints = BIT(clnt_hdl);
+
+	interrupt_info->interrupt_data = interrupt_data;
+	INIT_WORK(&interrupt_info->work, ipa_deferred_interrupt_work);
+	queue_work(ipa_interrupt_wq, &interrupt_info->work);
 }
