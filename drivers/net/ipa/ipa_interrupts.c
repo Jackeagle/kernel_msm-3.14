@@ -123,8 +123,8 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 /* Enable the IPA SUSPEND interrupt (workaround) */
 static void ipa_enable_tx_suspend_wa(struct work_struct *work)
 {
-	u32 val;
 	int irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
+	u32 val;
 
 	ipa_assert(irq_num != -1);
 
@@ -139,28 +139,20 @@ static void ipa_enable_tx_suspend_wa(struct work_struct *work)
 	ipa_client_remove(__func__, false);
 }
 
+/* Disable the IPA SUSPEND interrupt (workaround) */
 static void ipa_tx_suspend_interrupt_wa(void)
 {
+	int irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
 	u32 val;
-	u32 suspend_bmask;
-	int irq_num;
 
-	ipa_debug_low("Enter\n");
-	irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
 	ipa_assert(irq_num != -1);
 
-	/*disable TX_SUSPEND_IRQ*/
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
-	suspend_bmask = BIT(irq_num);
-	val &= ~suspend_bmask;
-	ipa_debug("Disable TX_SUSPEND_IRQ write %u to IPA_IRQ_EN_EE\n", val);
+	val &= ~BIT(irq_num);
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
 
-	ipa_debug_low("processing suspend interrupt WA delayed work\n");
 	queue_delayed_work(ipa_interrupt_wq, &dwork_en_suspend_int,
 			   msecs_to_jiffies(DIS_SUSPEND_INTERRUPT_TIMEOUT));
-
-	ipa_debug_low("Exit\n");
 }
 
 static inline bool is_uc_irq(int irq_num)
