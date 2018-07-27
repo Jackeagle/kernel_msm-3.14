@@ -367,7 +367,7 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
  *
  * Removes the handler and disable the specific bit in IRQ_EN register
  */
-int ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
+void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 {
 	int irq_num = ipa_irq_mapping[interrupt];
 	u32 val;
@@ -390,8 +390,6 @@ int ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
 	val &= ~BIT(irq_num);
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
-
-	return 0;
 }
 
 /** ipa_interrupts_init() - Initialize the IPA interrupts framework

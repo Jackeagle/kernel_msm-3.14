@@ -748,7 +748,7 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 			      ipa_irq_handler_t handler, bool deferred_flag,
 			      void *private_data);
 
-int ipa_remove_interrupt_handler(enum ipa_irq_type interrupt);
+void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt);
 
 /* Miscellaneous */
 void ipa_proxy_clk_vote(void);
