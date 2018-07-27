@@ -13,6 +13,7 @@
 
 struct ipa_interrupt_info {
 	ipa_irq_handler_t handler;
+	void *interrupt_data;		/* For deferred */
 	enum ipa_irq_type interrupt;
 	bool deferred_flag;
 };
@@ -67,6 +68,7 @@ static void ipa_deferred_interrupt_work(struct work_struct *work)
 	work_data->interrupt_info->handler(work_data->interrupt_info->interrupt,
 					   work_data->interrupt_data);
 	kfree(work_data->interrupt_data);
+	work_data->interrupt_data = NULL;
 	kfree(work_data);
 }
 
@@ -316,9 +318,10 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 	ipa_assert(irq_num >= 0);
 
 	interrupt_info = &ipa_interrupt_to_cb[irq_num];
-	interrupt_info->deferred_flag = deferred_flag;
 	interrupt_info->handler = handler;
+	interrupt_info->interrupt_data = NULL;
 	interrupt_info->interrupt = interrupt;
+	interrupt_info->deferred_flag = deferred_flag;
 
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
 	ipa_debug("read IPA_IRQ_EN_EE_n register. reg = %d\n", val);
@@ -361,9 +364,10 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 	u32 val;
 
 	interrupt_info = &ipa_interrupt_to_cb[irq_num];
-	interrupt_info->deferred_flag = false;
 	interrupt_info->handler = NULL;
+	interrupt_info->interrupt_data = NULL;
 	interrupt_info->interrupt = -1;
+	interrupt_info->deferred_flag = false;
 
 	/* Unregister SUSPEND_IRQ_EN_EE_N_ADDR for L2 interrupt.
 	 * Note the following must not be executed for IPA hardware
@@ -394,9 +398,10 @@ int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
 	int res = 0;
 
 	for (idx = 0; idx < IPA_IRQ_NUM_MAX; idx++) {
-		ipa_interrupt_to_cb[idx].deferred_flag = false;
 		ipa_interrupt_to_cb[idx].handler = NULL;
+		ipa_interrupt_to_cb[idx].interrupt_data = NULL;
 		ipa_interrupt_to_cb[idx].interrupt = -1;
+		ipa_interrupt_to_cb[idx].deferred_flag = false;
 	}
 
 	ipa_interrupt_wq = create_singlethread_workqueue("ipa_interrupt_wq");
