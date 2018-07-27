@@ -19,7 +19,6 @@
 #include <linux/module.h>
 #include <linux/of.h>
 #include <linux/platform_device.h>
-#include <asm/unaligned.h>
 #include "ipa_i.h"
 #include "ipahal.h"
 #include "ipahal_fltrt.h"
@@ -1450,15 +1449,6 @@ void ipa_enable_dcd(void)
 	idle_indication_cfg.enter_idle_debounce_thresh = 256;
 
 	ipahal_write_reg_fields(IPA_IDLE_INDICATION_CFG, &idle_indication_cfg);
-}
-
-/** ipa_write_64() - convert 64 bit value to byte array
- * @w: 64 bit integer
- * @dest: byte array
- */
-void ipa_write_64(u64 w, u8 *dest)
-{
-	put_unaligned(w, dest);
 }
 
 /** ipa_set_flt_tuple_mask() - Sets the flt tuple masking for the given pipe

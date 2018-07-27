@@ -574,6 +574,4 @@ struct ipa_ep_cfg_ctrl {
 
 #endif	/* !CONFIG_IPA_ASSERT */
 
-void ipa_write_64(u64 w, u8 *dest);
-
 #endif /* _IPA_COMMON_I_H_ */

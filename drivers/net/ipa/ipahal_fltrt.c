@@ -6,6 +6,7 @@
 #define pr_fmt(fmt)	"ipahal %s:%d " fmt, __func__, __LINE__
 
 #include <linux/debugfs.h>
+#include <asm/unaligned.h>
 #include "ipahal.h"
 #include "ipahal_fltrt.h"
 #include "ipahal_fltrt_i.h"
@@ -136,7 +137,7 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
 
 	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys_base;
 	while (i < tbls_num)
-		ipa_write_64(addr, mem->base + i++ * width);
+		put_unaligned(addr, mem->base + i++ * width);
 
 	return 0;
 }
@@ -170,13 +171,13 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
 		u64 flt_bitmap = ipa_fltrt_create_flt_bitmap(ep_bitmap);
 
 		ipa_debug("flt bitmap 0x%llx\n", flt_bitmap);
-		ipa_write_64(flt_bitmap, mem->base);
+		put_unaligned(flt_bitmap, mem->base);
 		i++;
 	}
 
 	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys_base;
 	while (i < tbls_num)
-		ipa_write_64(addr, mem->base + i++ * width);
+		put_unaligned(addr, mem->base + i++ * width);
 
 	return 0;
 }
