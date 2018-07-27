@@ -814,7 +814,7 @@ static int ipa_wwan_probe(struct platform_device *pdev)
 	ipa_proxy_clk_unvote();
 
 	/* Till the system is suspended, we keep the clock open */
-	ipa_client_add(__func__);
+	ipa_client_add();
 
 	initialized = true;
 
@@ -910,7 +910,7 @@ static int rmnet_ipa_ap_suspend(struct device *dev)
 	netif_stop_queue(netdev);
 
 	ret = 0;
-	ipa_client_remove(__func__);
+	ipa_client_remove();
 	ipa_debug("IPA clocks disabled\n");
 
 unlock_and_bail:
@@ -934,7 +934,7 @@ static int rmnet_ipa_ap_resume(struct device *dev)
 {
 	struct net_device *netdev = rmnet_ipa_ctx->dev;
 
-	ipa_client_add(__func__);
+	ipa_client_add();
 	ipa_debug("IPA clocks enabled\n");
 	if (netdev)
 		netif_wake_queue(netdev);

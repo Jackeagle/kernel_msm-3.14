@@ -212,7 +212,7 @@ int ipa_rx_poll(u32 clnt_hdl, int weight)
 		ipa_rx_switch_to_intr_mode(ep->sys);
 
 		/* Matching enable is in ipa_gsi_irq_rx_notify_cb() */
-		ipa_client_remove("NAPI");
+		ipa_client_remove();
 	}
 
 	return cnt;
@@ -520,7 +520,7 @@ int ipa_send_cmd(u16 num_desc, struct ipa_desc *descr)
 	for (i = 0; i < num_desc; i++)
 		ipa_debug("sending imm cmd %d\n", descr[i].opcode);
 
-	ipa_client_add(__func__);
+	ipa_client_add();
 
 	last_desc = &descr[num_desc - 1];
 	init_completion(&last_desc->xfer_done);
@@ -540,7 +540,7 @@ int ipa_send_cmd(u16 num_desc, struct ipa_desc *descr)
 		wait_for_completion(&last_desc->xfer_done);
 	}
 
-	ipa_client_remove(__func__);
+	ipa_client_remove();
 
 	return result;
 }
@@ -578,7 +578,7 @@ int ipa_send_cmd_timeout(u16 num_desc, struct ipa_desc *descr, u32 timeout)
 	/* completion needs to be released from both here and in ack callback */
 	atomic_set(&comp->cnt, 2);
 
-	ipa_client_add(__func__);
+	ipa_client_add();
 
 	last_desc = &descr[num_desc - 1];
 	init_completion(&last_desc->xfer_done);
@@ -607,7 +607,7 @@ int ipa_send_cmd_timeout(u16 num_desc, struct ipa_desc *descr, u32 timeout)
 	if (!atomic_dec_return(&comp->cnt))
 		kfree(comp);
 
-	ipa_client_remove(__func__);
+	ipa_client_remove();
 
 	return result;
 }
@@ -677,7 +677,7 @@ static void ipa_handle_rx(struct ipa_sys_context *sys)
 	int inactive_cycles = 0;
 	int cnt;
 
-	ipa_client_add(__func__);
+	ipa_client_add();
 	do {
 		cnt = ipa_handle_rx_core(sys);
 		if (cnt == 0)
@@ -697,7 +697,7 @@ static void ipa_handle_rx(struct ipa_sys_context *sys)
 	} while (inactive_cycles <= POLLING_INACTIVITY_RX);
 
 	ipa_rx_switch_to_intr_mode(sys);
-	ipa_client_remove(__func__);
+	ipa_client_remove();
 }
 
 static void ipa_switch_to_intr_rx_work_func(struct work_struct *work)
@@ -739,7 +739,7 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 		goto fail_gen;
 	}
 
-	ipa_client_add(ipa_client_string(sys_in->client));
+	ipa_client_add();
 	memset(ep, 0, offsetof(struct ipa_ep_context, sys));
 
 	if (!ep->sys) {
@@ -840,7 +840,7 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 			ipa_debug("modem cfg emb pipe flt\n");
 	}
 
-	ipa_client_remove(ipa_client_string(sys_in->client));
+	ipa_client_remove();
 
 	ipa_debug("client %d (ep: %u) connected sys=%p\n", sys_in->client,
 		  ipa_ep_idx, ep->sys);
@@ -855,7 +855,7 @@ fail_wq:
 	kfree(ep->sys);
 	memset(&ipa_ctx->ep[ipa_ep_idx], 0, sizeof(struct ipa_ep_context));
 fail_and_disable_clocks:
-	ipa_client_remove(ipa_client_string(sys_in->client));
+	ipa_client_remove();
 fail_gen:
 	return result;
 }
@@ -880,7 +880,7 @@ int ipa_teardown_sys_pipe(u32 clnt_hdl)
 
 	ep = &ipa_ctx->ep[clnt_hdl];
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)));
+	ipa_client_add();
 
 	if (ep->napi_enabled) {
 		do {
@@ -927,7 +927,7 @@ int ipa_teardown_sys_pipe(u32 clnt_hdl)
 	}
 
 	ep->valid = 0;
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)));
+	ipa_client_remove();
 
 	ipa_debug("client (ep: %d) disconnected\n", clnt_hdl);
 
@@ -1049,7 +1049,7 @@ static void ipa_wq_handle_rx(struct work_struct *work)
 	sys = container_of(work, struct ipa_sys_context, work);
 
 	if (sys->ep->napi_enabled) {
-		ipa_client_add("NAPI");
+		ipa_client_add();
 		sys->ep->client_notify(sys->ep->priv, IPA_CLIENT_START_POLL, 0);
 	} else {
 		ipa_handle_rx(sys);
@@ -1351,9 +1351,9 @@ static void ipa_replenish_rx_work_func(struct work_struct *work)
 	struct ipa_sys_context *sys;
 
 	sys = container_of(dwork, struct ipa_sys_context, replenish_rx_work);
-	ipa_client_add(__func__);
+	ipa_client_add();
 	sys->repl_hdlr(sys);
-	ipa_client_remove(__func__);
+	ipa_client_remove();
 }
 
 /** ipa_cleanup_rx() - release RX queue resources */

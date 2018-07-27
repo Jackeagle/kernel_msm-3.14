@@ -209,7 +209,7 @@ void ipa_reset_gsi_channel(u32 clnt_hdl)
 	ep = &ipa_ctx->ep[clnt_hdl];
 	ipa_bug_on(!ep->valid);
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)));
+	ipa_client_add();
 
 	/* Check for open aggregation frame on Consumer EP -
 	 * reset with open aggregation frame WA
@@ -227,7 +227,7 @@ void ipa_reset_gsi_channel(u32 clnt_hdl)
 		ipa_bug_on(gsi_reset_channel(ep->gsi_chan_hdl));
 	}
 
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)));
+	ipa_client_remove();
 
 	ipa_debug("exit\n");
 }

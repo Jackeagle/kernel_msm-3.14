@@ -144,7 +144,7 @@ int ipa_init_q6_smem(void)
 	int rc;
 	char *what;
 
-	ipa_client_add(__func__);
+	ipa_client_add();
 
 	rc = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_OFST, IPA_MEM_MODEM_SIZE);
 	if (rc) {
@@ -164,7 +164,7 @@ int ipa_init_q6_smem(void)
 	if (rc)
 		what = "Modem proc ctx RAM";
 out_client_remove:
-	ipa_client_remove(__func__);
+	ipa_client_remove();
 	if (rc)
 		ipa_err("failed to initialize modem %s memory\n", what);
 
@@ -649,7 +649,7 @@ static bool ipa_client_add_not_first(void)
  * non-zero.  (This is used to avoid blocking.)  Returns true if the
  * additional reference was added successfully, or false otherwise.
  */
-bool ipa_client_add_additional(const char *id)
+bool ipa_client_add_additional(void)
 {
 	return ipa_client_add_not_first();
 }
@@ -659,7 +659,7 @@ bool ipa_client_add_additional(const char *id)
  * ipa_client_add_first() will safely add the first client, enabling
  * clocks and setting up (resuming) pipes before returning.
  */
-void ipa_client_add(const char *id)
+void ipa_client_add(void)
 {
 	/* There's nothing more to do if this isn't the first reference */
 	if (!ipa_client_add_not_first())
@@ -724,7 +724,7 @@ static bool ipa_client_remove_not_final(void)
  * called in workqueue context, dropping the last reference under
  * protection of the mutex.
  */
-void ipa_client_remove(const char *id)
+void ipa_client_remove(void)
 {
 	if (!ipa_client_remove_not_final())
 		queue_work(ipa_ctx->power_mgmt_wq, &ipa_client_remove_work);
@@ -737,8 +737,7 @@ void ipa_client_remove(const char *id)
  * count will be 0 (and pipes will be suspended and clocks stopped)
  * upon return for the final reference.
  */
-void
-ipa_client_remove_wait(const char *id)
+void ipa_client_remove_wait(void)
 {
 	if (!ipa_client_remove_not_final())
 		ipa_client_remove_final();
@@ -810,9 +809,7 @@ static void ipa_suspend_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 		/* pipe will be unsuspended as part of enabling IPA clocks */
 		mutex_lock(&ipa_ctx->transport_pm.transport_pm_mutex);
 		if (!atomic_read(&ipa_ctx->transport_pm.dec_clients)) {
-			const char *id = ipa_client_string(client);
-
-			ipa_client_add(id);
+			ipa_client_add();
 
 			ipa_debug_low("Pipes un-suspended.\n");
 			ipa_debug_low("Enter poll mode.\n");
@@ -866,8 +863,7 @@ static void ipa_freeze_clock_vote_and_notify_modem(void)
 		return;
 	}
 
-	ipa_ctx->smp2p_info.ipa_clk_on =
-			ipa_client_add_additional("FREEZE_VOTE");
+	ipa_ctx->smp2p_info.ipa_clk_on = ipa_client_add_additional();
 
 	/* Signal whether the clock is enabled */
 	mask = BIT(ipa_ctx->smp2p_info.enabled_bit);
@@ -894,7 +890,7 @@ void ipa_reset_freeze_vote(void)
 		return;
 
 	if (ipa_ctx->smp2p_info.ipa_clk_on)
-		ipa_client_remove("FREEZE_VOTE");
+		ipa_client_remove();
 
 	/* Reset the clock enabled valid flag */
 	mask = BIT(ipa_ctx->smp2p_info.valid_bit);
@@ -1137,13 +1133,13 @@ static ssize_t ipa_write(struct file *file, const char __user *buf,
 	if (!count)
 		return 0;
 
-	ipa_client_add(__func__);
+	ipa_client_add();
 
 	result = ipa_firmware_load();
 	if (!result)
 		gsi_firmware_enable();
 
-	ipa_client_remove(__func__);
+	ipa_client_remove();
 
 	if (result) {
 		ipa_err("IPA FW loading process has failed\n");

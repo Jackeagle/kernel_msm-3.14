@@ -1112,7 +1112,7 @@ void ipa_skb_recycle(struct sk_buff *skb)
 void ipa_proxy_clk_unvote(void)
 {
 	if (ipa_ctx->q6_proxy_clk_vote_valid) {
-		ipa_client_remove("PROXY_CLK_VOTE");
+		ipa_client_remove();
 		ipa_ctx->q6_proxy_clk_vote_valid = false;
 	}
 }
@@ -1124,7 +1124,7 @@ void ipa_proxy_clk_unvote(void)
 void ipa_proxy_clk_vote(void)
 {
 	if (!ipa_ctx->q6_proxy_clk_vote_valid) {
-		ipa_client_add("PROXY_CLK_VOTE");
+		ipa_client_add();
 		ipa_ctx->q6_proxy_clk_vote_valid = true;
 	}
 }
@@ -1316,11 +1316,11 @@ void ipa_cfg_default_route(enum ipa_client_type client)
 	route.route_frag_def_pipe = ipa_ep_idx;
 	route.route_def_retain_hdr = 1;
 
-	ipa_client_add(__func__);
+	ipa_client_add();
 
 	ipahal_write_reg_fields(IPA_ROUTE, &route);
 
-	ipa_client_remove(__func__);
+	ipa_client_remove();
 }
 
 /* In certain cases we need to issue a command to reliably clear the
@@ -1395,7 +1395,7 @@ int ipa_stop_gsi_channel(u32 clnt_hdl)
 
 	ep = &ipa_ctx->ep[clnt_hdl];
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)));
+	ipa_client_add();
 
 	if (ipa_producer(ep->client)) {
 		ipa_debug("Calling gsi_stop_channel ch:%lu\n",
@@ -1431,7 +1431,7 @@ int ipa_stop_gsi_channel(u32 clnt_hdl)
 	ipa_err("Failed	 to stop GSI channel with retries\n");
 	res = -EFAULT;
 end_sequence:
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)));
+	ipa_client_remove();
 
 	return res;
 }

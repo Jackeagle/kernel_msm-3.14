@@ -757,10 +757,10 @@ struct msm_bus_scale_pdata *ipa_bus_scale_table_init(void);
 int ipa_send_cmd_timeout(u16 num_desc, struct ipa_desc *descr, u32 timeout);
 int ipa_send_cmd(u16 num_desc, struct ipa_desc *descr);
 
-void ipa_client_add(const char *id);
-bool ipa_client_add_additional(const char *id);
-void ipa_client_remove(const char *id);
-void ipa_client_remove_wait(const char *id);
+void ipa_client_add(void);
+bool ipa_client_add_additional(void);
+void ipa_client_remove(void);
+void ipa_client_remove_wait(void);
 
 void ipa_cfg_default_route(enum ipa_client_type client);
 
