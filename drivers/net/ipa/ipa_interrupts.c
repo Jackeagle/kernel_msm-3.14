@@ -62,7 +62,7 @@ static void ipa_deferred_interrupt_work(struct work_struct *work)
 
 	interrupt_info = container_of(work, struct ipa_interrupt_info, work);
 	interrupt_info->handler(interrupt_info->interrupt,
-				(void)(u64)interrupt_info->interrupt_data);
+				interrupt_info->interrupt_data);
 	interrupt_info->interrupt_data = 0;
 }
 
@@ -121,8 +121,7 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 		INIT_WORK(&interrupt_info->work, ipa_deferred_interrupt_work);
 		queue_work(ipa_interrupt_wq, &interrupt_info->work);
 	} else {
-		interrupt_info->handler(interrupt_info->interrupt,
-				        (void *)(u64)endpoints);
+		interrupt_info->handler(interrupt_info->interrupt, endpoints);
 	}
 }
 
@@ -409,7 +408,6 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 {
 	int aggr_active_bitmap = ipahal_read_reg(IPA_STATE_AGGR_ACTIVE);
 	struct ipa_interrupt_info *interrupt_info;
-	u32 endpoints;
 	int irq_num;
 
 	if (!(aggr_active_bitmap & BIT(clnt_hdl)))
@@ -425,9 +423,8 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 		ipa_err("no CB function for IPA_TX_SUSPEND_IRQ!\n");
 		return;
 	}
-	endpoints = BIT(clnt_hdl);
 
-	interrupt_info->interrupt_data = (void *)(u64)endpoints;
+	interrupt_info->interrupt_data = BIT(clnt_hdl);
 	INIT_WORK(&interrupt_info->work, ipa_deferred_interrupt_work);
 	queue_work(ipa_interrupt_wq, &interrupt_info->work);
 }

@@ -1029,20 +1029,19 @@ void ipa_dec_release_wakelock(void)
 
 /** ipa_suspend_handler() - Handles the suspend interrupt:
  * wakes up the suspended peripheral by requesting its consumer
- * @interrupt:		Interrupt type
- * @interrupt_data:	Interrupt specific information data
+ * @interrupt:	Interrupt type
+ * @endpoints:	Interrupt specific information data
  */
-void ipa_suspend_handler(enum ipa_irq_type interrupt, void *interrupt_data)
+void ipa_suspend_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 {
-	u32 endpoint_mask = (u32)(u64)interrupt_data;
+	u32 endpoints = interrupt_data;
 
-	ipa_debug("interrupt=%d, endpoint_mask=0x%08x\n",
-		  interrupt, endpoint_mask);
+	ipa_debug("interrupt=%d, endpoints=0x%08x\n", interrupt, endpoints);
 
-	while (endpoint_mask) {
-		u32 i = __ffs(endpoint_mask);
+	while (endpoints) {
+		u32 i = __ffs(endpoints);
 
-		endpoint_mask ^= BIT(i);
+		endpoints ^= BIT(i);
 
 		if (!ipa_ctx->ep[i].valid)
 			continue;
