@@ -185,7 +185,7 @@ ipa_uc_event_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 	if (EXTRACT_UC_FEATURE(event_op) >= IPA_HW_FEATURE_MAX) {
 		ipa_err("Invalid feature %u for event %u\n",
 			EXTRACT_UC_FEATURE(event_op), event_op);
-		ipa_client_remove(__func__, false);
+		ipa_client_remove(__func__);
 		return;
 	}
 
@@ -205,7 +205,7 @@ ipa_uc_event_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 	} else {
 		ipa_debug("unsupported uC evt opcode=%u\n", event_op);
 	}
-	ipa_client_remove(__func__, false);
+	ipa_client_remove(__func__);
 }
 
 static void
@@ -223,7 +223,7 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 	if (EXTRACT_UC_FEATURE(response_op) >= IPA_HW_FEATURE_MAX) {
 		ipa_err("Invalid feature %hhu for event %u\n",
 			EXTRACT_UC_FEATURE(response_op), mmio->event_op);
-		ipa_client_remove(__func__, false);
+		ipa_client_remove(__func__);
 		return;
 	}
 
@@ -261,7 +261,7 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 	} else {
 		ipa_err("Unsupported uC rsp opcode = %u\n", response_op);
 	}
-	ipa_client_remove(__func__, false);
+	ipa_client_remove(__func__);
 }
 
 /* Send a command to the microcontroller */
@@ -332,7 +332,7 @@ int ipa_uc_panic_notifier(struct notifier_block *this,
 	/* give uc enough time to save state */
 	udelay(IPA_PKT_FLUSH_TO_US);
 
-	ipa_client_remove(__func__, false);
+	ipa_client_remove(__func__);
 	ipa_debug("err_fatal issued\n");
 fail:
 	return NOTIFY_DONE;

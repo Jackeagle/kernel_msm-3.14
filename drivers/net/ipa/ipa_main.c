@@ -253,7 +253,7 @@ int ipa_init_q6_smem(void)
 	if (rc)
 		what = "Modem proc ctx RAM";
 out_client_remove:
-	ipa_client_remove(__func__, false);
+	ipa_client_remove(__func__);
 	if (rc)
 		ipa_err("failed to initialize modem %s memory\n", what);
 
@@ -1091,7 +1091,7 @@ void ipa_reset_freeze_vote(void)
 		return;
 
 	if (ipa_ctx->smp2p_info.ipa_clk_on)
-		ipa_client_remove("FREEZE_VOTE", true);
+		ipa_client_remove("FREEZE_VOTE");
 
 	/* Reset the clock enabled valid flag */
 	mask = BIT(ipa_ctx->smp2p_info.valid_bit);
@@ -1340,7 +1340,7 @@ static ssize_t ipa_write(struct file *file, const char __user *buf,
 	if (!result)
 		gsi_firmware_enable();
 
-	ipa_client_remove(__func__, false);
+	ipa_client_remove(__func__);
 
 	if (result) {
 		ipa_err("IPA FW loading process has failed\n");

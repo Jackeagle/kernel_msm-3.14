@@ -138,7 +138,7 @@ static void ipa_enable_tx_suspend_wa(struct work_struct *work)
 
 	ipa_process_interrupts(false);
 
-	ipa_client_remove(__func__, false);
+	ipa_client_remove(__func__);
 }
 
 /* Disable the IPA SUSPEND interrupt (workaround) */
@@ -230,7 +230,7 @@ static void ipa_interrupt_defer(struct work_struct *work)
 
 	ipa_process_interrupts(false);
 
-	ipa_client_remove(__func__, false);
+	ipa_client_remove(__func__);
 }
 
 static irqreturn_t ipa_isr(int irq, void *ctxt)
@@ -246,7 +246,7 @@ static irqreturn_t ipa_isr(int irq, void *ctxt)
 	ipa_process_interrupts(true);
 	ipa_debug_low("Exit\n");
 
-	ipa_client_remove(__func__, false);
+	ipa_client_remove(__func__);
 
 	return IRQ_HANDLED;
 }

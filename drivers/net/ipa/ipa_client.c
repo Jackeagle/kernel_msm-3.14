@@ -227,8 +227,7 @@ void ipa_reset_gsi_channel(u32 clnt_hdl)
 		ipa_bug_on(gsi_reset_channel(ep->gsi_chan_hdl));
 	}
 
-	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-			  true);
+	ipa_client_remove(ipa_client_string(ipa_get_client_mapping(clnt_hdl)));
 
 	ipa_debug("exit\n");
 }

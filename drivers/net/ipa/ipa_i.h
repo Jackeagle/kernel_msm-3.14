@@ -771,9 +771,9 @@ int ipa_send_cmd(u16 num_desc, struct ipa_desc *descr);
 	_ipa_client_add((id), __FILE__, __LINE__)
 #define ipa_client_add_additional(id) \
 	_ipa_client_add_additional((id), __FILE__, __LINE__)
-#define ipa_client_remove(id, log_it) \
+#define ipa_client_remove(id) \
 	_ipa_client_remove((id), __FILE__, __LINE__)
-#define ipa_client_remove_wait(id, log_it) \
+#define ipa_client_remove_wait(id) \
 	_ipa_client_remove_wait((id), __FILE__, __LINE__)
 
 void _ipa_client_add(const char *id, const char *file, int line);

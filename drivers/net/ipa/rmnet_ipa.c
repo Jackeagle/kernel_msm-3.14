@@ -910,7 +910,7 @@ static int rmnet_ipa_ap_suspend(struct device *dev)
 	netif_stop_queue(netdev);
 
 	ret = 0;
-	ipa_client_remove(__func__, false);
+	ipa_client_remove(__func__);
 	ipa_debug("IPA clocks disabled\n");
 
 unlock_and_bail:
