@@ -389,13 +389,14 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 {
 	int aggr_active_bitmap = ipahal_read_reg(IPA_STATE_AGGR_ACTIVE);
 	struct ipa_interrupt_info *interrupt_info;
+	u32 clnt_mask = BIT(clnt_hdl);
 	int irq_num;
 
-	if (!(aggr_active_bitmap & BIT(clnt_hdl)))
+	if (!(aggr_active_bitmap & clnt_mask))
 		return;
 
 	/* force close aggregation */
-	ipahal_write_reg(IPA_AGGR_FORCE_CLOSE, BIT(clnt_hdl));
+	ipahal_write_reg(IPA_AGGR_FORCE_CLOSE, clnt_mask);
 
 	/* simulate suspend IRQ */
 	irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
@@ -405,7 +406,8 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 		return;
 	}
 
-	interrupt_info->interrupt_data = BIT(clnt_hdl);
+	interrupt_info->interrupt_data = clnt_mask;
+
 	INIT_WORK(&interrupt_info->work, ipa_deferred_interrupt_work);
 	queue_work(ipa_interrupt_wq, &interrupt_info->work);
 }
