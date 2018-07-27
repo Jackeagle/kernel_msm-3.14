@@ -685,7 +685,6 @@ struct ipa_context {
 	u16 smem_restricted_bytes;
 	struct ipa_active_clients ipa_active_clients;
 	struct ipa_active_clients_log_ctx ipa_active_clients_logging;
-	char *active_clients_table_buf;
 	struct workqueue_struct *power_mgmt_wq;
 	struct ipa_transport_pm transport_pm;
 	u32 clnt_hdl_cmd;

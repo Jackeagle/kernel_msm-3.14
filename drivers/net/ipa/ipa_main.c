@@ -42,8 +42,6 @@
 #define IPA_GPIO_OUT_CLK_RSP_CMPLT_IDX 0
 #define IPA_GPIO_OUT_CLK_VOTE_IDX 1
 
-#define IPA_ACTIVE_CLIENTS_TABLE_BUF_SIZE 2048
-
 #define IPA_APPS_CMD_PROD_RING_COUNT	128
 #define IPA_APPS_LAN_CONS_RING_COUNT	128
 
@@ -100,23 +98,12 @@ static int ipa_active_clients_log_init(void)
 	size_t count = ARRAY_SIZE(log->log_buffer);
 	size_t size = IPA_ACTIVE_CLIENTS_LOG_LINE_LEN;
 	char *bufp;
-	int i;
 
 	log = &ipa_ctx->ipa_active_clients_logging;
 
 	bufp = kcalloc(count, size, GFP_KERNEL);
 	if (!bufp)
 		return -ENOMEM;
-
-	/* OK to fail allocating the active clients table buffer */
-	ipa_ctx->active_clients_table_buf =
-			kzalloc(IPA_ACTIVE_CLIENTS_TABLE_BUF_SIZE, GFP_KERNEL);
-
-	/* Freeing the first log buffer frees them all */
-	for (i = 0; i < count; i++) {
-		log->log_buffer[i] = bufp;
-		bufp += size;
-	}
 
 	spin_lock_init(&log->lock);
 	log->log_head = 0;
@@ -132,7 +119,6 @@ static void ipa_active_clients_log_destroy(void)
 
 	log = &ipa_ctx->ipa_active_clients_logging;
 
-	kfree(ipa_ctx->active_clients_table_buf);
 	kfree(log->log_buffer[0]);
 	memset(log, 0, sizeof(*log));
 }
