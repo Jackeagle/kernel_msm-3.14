@@ -122,7 +122,7 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 
 static void ipa_enable_tx_suspend_wa(struct work_struct *work)
 {
-	u32 en;
+	u32 val;
 	u32 suspend_bmask;
 	int irq_num;
 
@@ -134,12 +134,10 @@ static void ipa_enable_tx_suspend_wa(struct work_struct *work)
 	/* make sure ipa hw is clocked on*/
 	ipa_client_add(__func__, false);
 
-	en = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
+	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
 	suspend_bmask = BIT(irq_num);
 	/*enable  TX_SUSPEND_IRQ*/
-	en |= suspend_bmask;
-	ipa_debug("enable TX_SUSPEND_IRQ, IPA_IRQ_EN_EE reg, write val = %u\n"
-		, en);
+	val |= suspend_bmask;
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, en);
 	ipa_process_interrupts(false);
 	ipa_client_remove(__func__, false);
