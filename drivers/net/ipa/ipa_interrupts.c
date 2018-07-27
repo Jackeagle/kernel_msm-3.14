@@ -12,15 +12,11 @@
 #define IPA_IRQ_NUM_MAX 32
 
 struct ipa_interrupt_info {
+	struct work_struct work;
 	ipa_irq_handler_t handler;
 	void *interrupt_data;		/* For deferred */
 	enum ipa_irq_type interrupt;
 	bool deferred_flag;
-};
-
-struct ipa_interrupt_work_wrap {
-	struct ipa_interrupt_info *interrupt_info;
-	struct work_struct interrupt_work;
 };
 
 static struct ipa_interrupt_info ipa_interrupt_to_cb[IPA_IRQ_NUM_MAX];
@@ -60,15 +56,15 @@ static DECLARE_WORK(ipa_interrupt_defer_work, ipa_interrupt_defer);
 
 static void ipa_deferred_interrupt_work(struct work_struct *work)
 {
-	struct ipa_interrupt_work_wrap *work_data =
-			container_of(work, struct ipa_interrupt_work_wrap,
-				     interrupt_work);
+	struct ipa_interrupt_info *interrupt_info;
+
 	ipa_debug("call handler from workq...\n");
-	work_data->interrupt_info->handler(work_data->interrupt_info->interrupt,
-					   work_data->interrupt_info->interrupt_data);
-	kfree(work_data->interrupt_info->interrupt_data);
-	work_data->interrupt_info->interrupt_data = NULL;
-	kfree(work_data);
+
+	interrupt_info = container_of(work, struct ipa_interrupt_info, work);
+	interrupt_info->handler(interrupt_info->interrupt,
+				interrupt_info->interrupt_data);
+	kfree(interrupt_info->interrupt_data);
+	interrupt_info->interrupt_data = NULL;
 }
 
 static bool ipa_is_valid_ep(u32 ep_suspend_data)
@@ -88,7 +84,6 @@ static bool ipa_is_valid_ep(u32 ep_suspend_data)
 static void ipa_handle_interrupt(int irq_num, bool isr_context)
 {
 	struct ipa_interrupt_info *interrupt_info;
-	struct ipa_interrupt_work_wrap *work_data;
 	u32 suspend_data;
 	struct ipa_tx_suspend_irq_data *interrupt_data = NULL;
 
@@ -131,17 +126,9 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 
 	/* Force defer processing if in ISR context. */
 	if (interrupt_info->deferred_flag || isr_context) {
-		work_data = kzalloc(sizeof(*work_data), GFP_ATOMIC);
-		if (!work_data) {
-			kfree(interrupt_data);
-			return;
-		}
 		interrupt_info->interrupt_data = interrupt_data;
-		INIT_WORK(&work_data->interrupt_work,
-			  ipa_deferred_interrupt_work);
-		work_data->interrupt_info = interrupt_info;
-		queue_work(ipa_interrupt_wq, &work_data->interrupt_work);
-
+		INIT_WORK(&interrupt_info->work, ipa_deferred_interrupt_work);
+		queue_work(ipa_interrupt_wq, &interrupt_info->work);
 	} else {
 		interrupt_info->handler(interrupt_info->interrupt,
 				        interrupt_data);
@@ -431,7 +418,6 @@ int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
 void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 {
 	struct ipa_interrupt_info *interrupt_info;
-	struct ipa_interrupt_work_wrap *work_data;
 	struct ipa_tx_suspend_irq_data *interrupt_data;
 	int irq_num;
 	int aggr_active_bitmap = ipahal_read_reg(IPA_STATE_AGGR_ACTIVE);
@@ -454,17 +440,10 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 		}
 		interrupt_data->endpoints = BIT(clnt_hdl);
 
-		work_data = kzalloc(sizeof(*work_data), GFP_ATOMIC);
-		if (!work_data)
-			goto fail_alloc_work;
-
 		interrupt_info->interrupt_data = interrupt_data;
-		INIT_WORK(&work_data->interrupt_work,
-			  ipa_deferred_interrupt_work);
-		work_data->interrupt_info = interrupt_info;
-		queue_work(ipa_interrupt_wq, &work_data->interrupt_work);
+		INIT_WORK(&interrupt_info->work, ipa_deferred_interrupt_work);
+		queue_work(ipa_interrupt_wq, &interrupt_info->work);
+
 		return;
-fail_alloc_work:
-		kfree(interrupt_data);
 	}
 }
