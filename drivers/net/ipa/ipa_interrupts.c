@@ -87,20 +87,20 @@ static bool ipa_is_valid_ep(u32 ep_suspend_data)
 
 static void ipa_handle_interrupt(int irq_num, bool isr_context)
 {
-	struct ipa_interrupt_info interrupt_info;
+	struct ipa_interrupt_info *interrupt_info;
 	struct ipa_interrupt_work_wrap *work_data;
 	u32 suspend_data;
 	void *interrupt_data = NULL;
 	struct ipa_tx_suspend_irq_data *suspend_interrupt_data = NULL;
 
-	interrupt_info = ipa_interrupt_to_cb[irq_num];
-	if (!interrupt_info.handler) {
+	interrupt_info = &ipa_interrupt_to_cb[irq_num];
+	if (!interrupt_info->handler) {
 		ipa_err("A callback function wasn't set for interrupt num %d\n",
 			irq_num);
 		return;
 	}
 
-	switch (interrupt_info.interrupt) {
+	switch (interrupt_info->interrupt) {
 	case IPA_TX_SUSPEND_IRQ:
 		ipa_debug_low("processing TX_SUSPEND interrupt work-around\n");
 		ipa_tx_suspend_interrupt_wa();
@@ -133,7 +133,7 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 	}
 
 	/* Force defer processing if in ISR context. */
-	if (interrupt_info.deferred_flag || isr_context) {
+	if (interrupt_info->deferred_flag || isr_context) {
 		work_data = kzalloc(sizeof(*work_data), GFP_ATOMIC);
 		if (!work_data) {
 			kfree(interrupt_data);
@@ -141,14 +141,14 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 		}
 		INIT_WORK(&work_data->interrupt_work,
 			  ipa_deferred_interrupt_work);
-		work_data->handler = interrupt_info.handler;
-		work_data->interrupt = interrupt_info.interrupt;
+		work_data->handler = interrupt_info->handler;
+		work_data->interrupt = interrupt_info->interrupt;
 		work_data->interrupt_data = interrupt_data;
 		queue_work(ipa_interrupt_wq, &work_data->interrupt_work);
 
 	} else {
-		interrupt_info.handler(interrupt_info.interrupt,
-				       interrupt_data);
+		interrupt_info->handler(interrupt_info->interrupt,
+				        interrupt_data);
 		kfree(interrupt_data);
 	}
 }
