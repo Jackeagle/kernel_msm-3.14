@@ -36,7 +36,7 @@ static DECLARE_DELAYED_WORK(dwork_en_suspend_int, ipa_enable_tx_suspend_wa);
 static spinlock_t suspend_wa_lock;
 static void ipa_process_interrupts(bool isr_context);
 
-static int ipa_irq_mapping[IPA_IRQ_MAX] = {
+static const int ipa_irq_mapping[IPA_IRQ_MAX] = {
 	[IPA_UC_TX_CMD_Q_NOT_FULL_IRQ]		= -1,
 	[IPA_UC_TO_PROC_ACK_Q_NOT_FULL_IRQ]	= -1,
 	[IPA_BAD_SNOC_ACCESS_IRQ]		= 0,
