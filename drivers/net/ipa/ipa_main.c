@@ -1032,7 +1032,7 @@ void ipa_dec_release_wakelock(void)
  * @interrupt:	Interrupt type
  * @endpoints:	Interrupt specific information data
  */
-void ipa_suspend_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
+static void ipa_suspend_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 {
 	u32 endpoints = interrupt_data;
 
