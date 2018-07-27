@@ -89,8 +89,7 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 	struct ipa_interrupt_info *interrupt_info;
 	struct ipa_interrupt_work_wrap *work_data;
 	u32 suspend_data;
-	void *interrupt_data = NULL;
-	struct ipa_tx_suspend_irq_data *suspend_interrupt_data = NULL;
+	struct ipa_tx_suspend_irq_data *interrupt_data = NULL;
 
 	interrupt_info = &ipa_interrupt_to_cb[irq_num];
 	if (!interrupt_info->handler) {
@@ -116,14 +115,12 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 		if (!ipa_is_valid_ep(suspend_data))
 			return;
 
-		suspend_interrupt_data =
-			kzalloc(sizeof(*suspend_interrupt_data), GFP_ATOMIC);
-		if (!suspend_interrupt_data) {
-			ipa_err("failed allocating suspend_interrupt_data\n");
+		interrupt_data = kzalloc(sizeof(*interrupt_data), GFP_ATOMIC);
+		if (!interrupt_data) {
+			ipa_err("failed allocating interrupt_data\n");
 			return;
 		}
-		suspend_interrupt_data->endpoints = suspend_data;
-		interrupt_data = suspend_interrupt_data;
+		interrupt_data->endpoints = suspend_data;
 		break;
 	case IPA_UC_IRQ_0:
 		break;
