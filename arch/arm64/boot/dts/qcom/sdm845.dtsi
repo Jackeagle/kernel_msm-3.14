@@ -2222,11 +2222,6 @@
 				compatible = "qcom,sdm845-rpmh-clk";
 				#clock-cells = <1>;
 			};
-
-			msm_bus_apps_rsc {
-				compatible = "qcom,msm-bus-rsc";
-				qcom,msm-bus-id = <MSM_BUS_RSC_APPS>;
-			};
 		};
 
 		intc: interrupt-controller@17a00000 {
