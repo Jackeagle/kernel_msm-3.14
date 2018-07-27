@@ -649,7 +649,7 @@ static bool ipa_client_add_not_first(void)
  * non-zero.  (This is used to avoid blocking.)  Returns true if the
  * additional reference was added successfully, or false otherwise.
  */
-bool _ipa_client_add_additional(const char *id, const char *file, int line)
+bool _ipa_client_add_additional(const char *id)
 {
 	return ipa_client_add_not_first();
 }
@@ -659,7 +659,7 @@ bool _ipa_client_add_additional(const char *id, const char *file, int line)
  * ipa_client_add_first() will safely add the first client, enabling
  * clocks and setting up (resuming) pipes before returning.
  */
-void _ipa_client_add(const char *id, const char *file, int line)
+void _ipa_client_add(const char *id)
 {
 	/* There's nothing more to do if this isn't the first reference */
 	if (!ipa_client_add_not_first())
@@ -724,7 +724,7 @@ static bool ipa_client_remove_not_final(void)
  * called in workqueue context, dropping the last reference under
  * protection of the mutex.
  */
-void _ipa_client_remove(const char *id, const char *file, int line)
+void _ipa_client_remove(const char *id)
 {
 	if (!ipa_client_remove_not_final())
 		queue_work(ipa_ctx->power_mgmt_wq, &ipa_client_remove_work);
@@ -738,7 +738,7 @@ void _ipa_client_remove(const char *id, const char *file, int line)
  * upon return for the final reference.
  */
 void
-_ipa_client_remove_wait(const char *id, const char *file, int line)
+_ipa_client_remove_wait(const char *id)
 {
 	if (!ipa_client_remove_not_final())
 		ipa_client_remove_final();
