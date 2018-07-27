@@ -21,7 +21,6 @@ struct ipa_interrupt_info {
 struct ipa_interrupt_work_wrap {
 	struct ipa_interrupt_info *interrupt_info;
 	struct work_struct interrupt_work;
-	void *interrupt_data;
 };
 
 static struct ipa_interrupt_info ipa_interrupt_to_cb[IPA_IRQ_NUM_MAX];
@@ -66,9 +65,9 @@ static void ipa_deferred_interrupt_work(struct work_struct *work)
 				     interrupt_work);
 	ipa_debug("call handler from workq...\n");
 	work_data->interrupt_info->handler(work_data->interrupt_info->interrupt,
-					   work_data->interrupt_data);
-	kfree(work_data->interrupt_data);
-	work_data->interrupt_data = NULL;
+					   work_data->interrupt_info->interrupt_data);
+	kfree(work_data->interrupt_info->interrupt_data);
+	work_data->interrupt_info->interrupt_data = NULL;
 	kfree(work_data);
 }
 
@@ -137,10 +136,10 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 			kfree(interrupt_data);
 			return;
 		}
+		interrupt_info->interrupt_data = interrupt_data;
 		INIT_WORK(&work_data->interrupt_work,
 			  ipa_deferred_interrupt_work);
 		work_data->interrupt_info = interrupt_info;
-		work_data->interrupt_data = interrupt_data;
 		queue_work(ipa_interrupt_wq, &work_data->interrupt_work);
 
 	} else {
@@ -459,10 +458,10 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 		if (!work_data)
 			goto fail_alloc_work;
 
+		interrupt_info->interrupt_data = interrupt_data;
 		INIT_WORK(&work_data->interrupt_work,
 			  ipa_deferred_interrupt_work);
 		work_data->interrupt_info = interrupt_info;
-		work_data->interrupt_data = interrupt_data;
 		queue_work(ipa_interrupt_wq, &work_data->interrupt_work);
 		return;
 fail_alloc_work:
