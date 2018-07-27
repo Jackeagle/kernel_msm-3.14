@@ -22,7 +22,6 @@ struct ipa_interrupt_work_wrap {
 	struct work_struct interrupt_work;
 	ipa_irq_handler_t handler;
 	enum ipa_irq_type interrupt;
-	void *private_data;
 	void *interrupt_data;
 };
 
@@ -67,7 +66,7 @@ static void ipa_deferred_interrupt_work(struct work_struct *work)
 			container_of(work, struct ipa_interrupt_work_wrap,
 				     interrupt_work);
 	ipa_debug("call handler from workq...\n");
-	work_data->handler(work_data->interrupt, work_data->private_data,
+	work_data->handler(work_data->interrupt, NULL,
 			   work_data->interrupt_data);
 	kfree(work_data->interrupt_data);
 	kfree(work_data);
@@ -145,7 +144,6 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 			  ipa_deferred_interrupt_work);
 		work_data->handler = interrupt_info.handler;
 		work_data->interrupt = interrupt_info.interrupt;
-		work_data->private_data = NULL;
 		work_data->interrupt_data = interrupt_data;
 		queue_work(ipa_interrupt_wq, &work_data->interrupt_work);
 
@@ -469,7 +467,6 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 			  ipa_deferred_interrupt_work);
 		work_data->handler = interrupt_info.handler;
 		work_data->interrupt = IPA_TX_SUSPEND_IRQ;
-		work_data->private_data = NULL;
 		work_data->interrupt_data = (void *)suspend_interrupt_data;
 		queue_work(ipa_interrupt_wq, &work_data->interrupt_work);
 		return;
