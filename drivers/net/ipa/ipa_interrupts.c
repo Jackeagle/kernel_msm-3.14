@@ -8,8 +8,10 @@
 #include <linux/interrupt.h>
 #include "ipa_i.h"
 
-#define DIS_SUSPEND_INTERRUPT_TIMEOUT 5		/* msec */
 #define IPA_IRQ_NUM_MAX 32
+
+/* Workaround disables SUSPEND interrupt for this long */
+#define DIS_SUSPEND_INTR_DELAY	msecs_to_jiffies(5)
 
 struct ipa_interrupt_info {
 	struct work_struct work;
@@ -152,7 +154,7 @@ static void ipa_tx_suspend_interrupt_wa(void)
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
 
 	queue_delayed_work(ipa_interrupt_wq, &dwork_en_suspend_int,
-			   msecs_to_jiffies(DIS_SUSPEND_INTERRUPT_TIMEOUT));
+			   DIS_SUSPEND_INTR_DELAY);
 }
 
 static inline bool is_uc_irq(int irq_num)
