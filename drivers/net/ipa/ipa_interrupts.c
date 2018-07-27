@@ -432,7 +432,7 @@ int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
  */
 void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 {
-	struct ipa_interrupt_info interrupt_info;
+	struct ipa_interrupt_info *interrupt_info;
 	struct ipa_interrupt_work_wrap *work_data;
 	struct ipa_tx_suspend_irq_data *suspend_interrupt_data;
 	int irq_num;
@@ -444,8 +444,8 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 
 		/* simulate suspend IRQ */
 		irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
-		interrupt_info = ipa_interrupt_to_cb[irq_num];
-		if (!interrupt_info.handler) {
+		interrupt_info = &ipa_interrupt_to_cb[irq_num];
+		if (!interrupt_info->handler) {
 			ipa_err("no CB function for IPA_TX_SUSPEND_IRQ!\n");
 			return;
 		}
@@ -464,7 +464,7 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 
 		INIT_WORK(&work_data->interrupt_work,
 			  ipa_deferred_interrupt_work);
-		work_data->handler = interrupt_info.handler;
+		work_data->handler = interrupt_info->handler;
 		work_data->interrupt = IPA_TX_SUSPEND_IRQ;
 		work_data->interrupt_data = (void *)suspend_interrupt_data;
 		queue_work(ipa_interrupt_wq, &work_data->interrupt_work);
