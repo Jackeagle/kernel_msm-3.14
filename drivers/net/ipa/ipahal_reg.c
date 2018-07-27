@@ -223,7 +223,7 @@ ipareg_parse_endp_init_aggr_n(enum ipahal_reg reg, void *fields, u32 val)
 	ep_aggr->aggr_byte_limit = field_val(val, AGGR_BYTE_LIMIT_BMSK);
 	ep_aggr->aggr_time_limit = field_val(val, AGGR_TIME_LIMIT_BMSK);
 	ep_aggr->aggr_pkt_limit = field_val(val, AGGR_PKT_LIMIT_BMSK);
-	ep_aggr->aggr_sw_eof_active = field_val(val, AGGR_SW_EOF_ACTIVE_BMSK);
+	ep_aggr->aggr_sw_eof_active = !!field_val(val, AGGR_SW_EOF_ACTIVE_BMSK);
 	ep_aggr->aggr_hard_byte_limit_en
 			= field_val(val, AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK);
 }
@@ -239,7 +239,8 @@ ipareg_construct_endp_init_aggr_n(enum ipahal_reg reg, const void *fields)
 	val |= field_gen(ep_aggr->aggr_byte_limit, AGGR_BYTE_LIMIT_BMSK);
 	val |= field_gen(ep_aggr->aggr_time_limit, AGGR_TIME_LIMIT_BMSK);
 	val |= field_gen(ep_aggr->aggr_pkt_limit, AGGR_PKT_LIMIT_BMSK);
-	val |= field_gen(ep_aggr->aggr_sw_eof_active, AGGR_SW_EOF_ACTIVE_BMSK);
+	val |= field_gen(ep_aggr->aggr_sw_eof_active ? 1 : 0,
+			 AGGR_SW_EOF_ACTIVE_BMSK);
 	val |= field_gen(ep_aggr->aggr_hard_byte_limit_en,
 			AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK);
 
@@ -261,11 +262,11 @@ ipareg_construct_endp_init_hdr_ext_n(enum ipahal_reg reg, const void *fields)
 	val = field_gen(ep_hdr_ext->hdr_pad_to_alignment,
 			HDR_PAD_TO_ALIGNMENT_BMSK);
 	val |= field_gen(0, HDR_TOTAL_LEN_OR_PAD_OFFSET_BMSK);
-	val |= field_gen(ep_hdr_ext->hdr_payload_len_inc_padding,
+	val |= field_gen(ep_hdr_ext->hdr_payload_len_inc_padding ? 1 : 0,
 			HDR_PAYLOAD_LEN_INC_PADDING_BMSK);
 	val |= field_gen(ep_hdr_ext->hdr_total_len_or_pad,
 			HDR_TOTAL_LEN_OR_PAD_BMSK);
-	val |= field_gen(ep_hdr_ext->hdr_total_len_or_pad_valid,
+	val |= field_gen(ep_hdr_ext->hdr_total_len_or_pad_valid ? 1 : 0,
 			HDR_TOTAL_LEN_OR_PAD_VALID_BMSK);
 	val |= field_gen(IPA_HDR_BIG_ENDIAN, HDR_ENDIANNESS_BMSK);
 

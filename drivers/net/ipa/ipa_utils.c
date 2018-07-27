@@ -875,12 +875,12 @@ ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
 
 	ipa_debug("hdr_total_len_or_pad_offset=0\n");
 
-	ipa_debug("hdr_payload_len_inc_padding=%d hdr_total_len_or_pad=%d\n",
-		  ep_hdr_ext->hdr_payload_len_inc_padding,
+	ipa_debug("hdr_payload_len_inc_padding=%s hdr_total_len_or_pad=%d\n",
+		  ep_hdr_ext->hdr_payload_len_inc_padding ? "true" : "false",
 		  ep_hdr_ext->hdr_total_len_or_pad);
 
-	ipa_debug("hdr_total_len_or_pad_valid=%d hdr_little_endian=0\n",
-		  ep_hdr_ext->hdr_total_len_or_pad_valid);
+	ipa_debug("hdr_total_len_or_pad_valid=%s hdr_little_endian=0\n",
+		  ep_hdr_ext->hdr_total_len_or_pad_valid ? "true" : "false");
 
 	ep = &ipa_ctx->ep[clnt_hdl];
 
@@ -907,9 +907,9 @@ static void ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 		  ep_aggr->aggr, ipa_get_aggr_type_str(ep_aggr->aggr));
 	ipa_debug("byte_limit=%d, time_limit=%d\n", ep_aggr->aggr_byte_limit,
 		  ep_aggr->aggr_time_limit);
-	ipa_debug("hard_byte_limit_en=%d aggr_sw_eof_active=%d\n",
+	ipa_debug("hard_byte_limit_en=%d aggr_sw_eof_active=%s\n",
 		  ep_aggr->aggr_hard_byte_limit_en,
-		  ep_aggr->aggr_sw_eof_active);
+		  ep_aggr->aggr_sw_eof_active ? "true" : "false");
 
 	/* copy over EP cfg */
 	ipa_ctx->ep[clnt_hdl].cfg.aggr = *ep_aggr;
