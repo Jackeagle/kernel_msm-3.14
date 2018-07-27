@@ -1461,42 +1461,6 @@ void ipa_write_64(u64 w, u8 *dest)
 	put_unaligned(w, dest);
 }
 
-#define prod_index(client)	IPA_CLIENT_ ## client ## _PROD
-#define prod_string(client) \
-		[prod_index(client)] = #client "_PROD"
-#define cons_index(client)	IPA_CLIENT_ ## client ## _CONS
-#define cons_string(client) \
-		[cons_index(client)] = #client "_CONS"
-#define both_strings(client) \
-		prod_string(client), cons_string(client)
-static const char *ipa_clients_strings[IPA_CLIENT_MAX] = {
-	both_strings(A2_EMBEDDED),
-	both_strings(APPS_LAN),
-	both_strings(APPS_WAN),
-	prod_string(APPS_CMD),
-	cons_string(A5_LAN_WAN),
-	both_strings(Q6_LAN),
-	both_strings(Q6_WAN),
-	prod_string(Q6_CMD),
-	cons_string(Q6_DUN),
-	both_strings(MEMCPY_DMA_SYNC),
-	both_strings(MEMCPY_DMA_ASYNC),
-	both_strings(Q6_DECOMP),
-	both_strings(Q6_DECOMP2),
-	cons_string(Q6_LTE_WIFI_AGGR),
-};
-
-#undef both_strings
-#undef cons_string
-#undef cons_index
-#undef prod_string
-#undef prod_index
-
-const char *ipa_client_string(enum ipa_client_type client)
-{
-	return ipa_clients_strings[client];
-}
-
 /** ipa_set_flt_tuple_mask() - Sets the flt tuple masking for the given pipe
  *  Pipe must be for AP EP (not modem) and support filtering
  *  updates the the filtering masking values without changing the rt ones.
