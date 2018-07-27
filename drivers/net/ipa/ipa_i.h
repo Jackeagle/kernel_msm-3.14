@@ -231,7 +231,6 @@ struct ipa_active_clients_log_ctx {
 	char *log_buffer[IPA_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES];
 	int log_head;
 	int log_tail;
-	bool log_rdy;
 	struct list_head active;
 };
 

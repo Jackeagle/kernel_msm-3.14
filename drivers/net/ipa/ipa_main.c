@@ -110,46 +110,6 @@ static struct notifier_block ipa_active_clients_panic_blk = {
 	.notifier_call	= ipa_active_clients_panic_notifier,
 };
 
-static int
-ipa_active_clients_log_insert(struct ipa_active_client_logging_info *id,
-			      bool inc)
-{
-	struct ipa_active_clients_log_ctx *log;
-	size_t count = ARRAY_SIZE(log->log_buffer);
-	unsigned long long t;
-	unsigned long nsec;
-	const char *basename;
-	int head;
-
-	log = &ipa_ctx->ipa_active_clients_logging;
-
-	if (!log->log_rdy)
-		return -EPERM;
-
-	head = log->log_head;
-
-	t = local_clock();	/* for seconds */
-	nsec = t % 1000000000;	/* nanoseconds */
-
-	basename = strrchr(id->file, '/');
-	if (basename)
-		basename++;
-	else
-		basename = id->file;
-
-	(void)snprintf(log->log_buffer[head], IPA_ACTIVE_CLIENTS_LOG_LINE_LEN,
-		       "[%5llu.%06lu] %c %s, %s: %d",
-		       t / 1000000000, nsec / 1000, inc ? '^' : 'v',
-		       id->id_string, basename, id->line);
-
-	/* Consume this entry.  If hit the end, drop the oldest */
-	log->log_head = (head + 1) % count;
-	if (log->log_head == log->log_tail)
-		log->log_tail = (log->log_tail + 1) % count;
-
-	return 0;
-}
-
 static int ipa_active_clients_log_init(void)
 {
 	struct ipa_active_clients_log_ctx *log;
@@ -181,8 +141,6 @@ static int ipa_active_clients_log_init(void)
 
 	atomic_notifier_chain_register(&panic_notifier_list,
 				       &ipa_active_clients_panic_blk);
-
-	log->log_rdy = 1;
 
 	return 0;
 }
@@ -806,9 +764,6 @@ ipa_active_clients_log_mod(struct ipa_active_client_logging_info *id,
 	} else if (entry->count < 0) {
 		ipa_err("negative count for %s\n", id->id_string);
 	}
-
-	if (log_it)
-		ipa_active_clients_log_insert(id, inc);
 out_unlock:
 	spin_unlock_irqrestore(&log->lock, flags);
 }
