@@ -14,7 +14,7 @@
 struct ipa_interrupt_info {
 	struct work_struct work;
 	ipa_irq_handler_t handler;
-	void *interrupt_data;		/* For deferred */
+	u32 interrupt_data;
 	enum ipa_irq_type interrupt;
 	bool deferred_flag;
 };
@@ -62,8 +62,8 @@ static void ipa_deferred_interrupt_work(struct work_struct *work)
 
 	interrupt_info = container_of(work, struct ipa_interrupt_info, work);
 	interrupt_info->handler(interrupt_info->interrupt,
-				interrupt_info->interrupt_data);
-	interrupt_info->interrupt_data = NULL;
+				(void)(u64)interrupt_info->interrupt_data);
+	interrupt_info->interrupt_data = 0;
 }
 
 static bool ipa_is_valid_ep(u32 ep_suspend_data)
@@ -117,7 +117,7 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 
 	/* Force defer processing if in ISR context. */
 	if (interrupt_info->deferred_flag || isr_context) {
-		interrupt_info->interrupt_data = (void *)(u64)endpoints;
+		interrupt_info->interrupt_data = endpoints;
 		INIT_WORK(&interrupt_info->work, ipa_deferred_interrupt_work);
 		queue_work(ipa_interrupt_wq, &interrupt_info->work);
 	} else {
@@ -295,7 +295,7 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 
 	interrupt_info = &ipa_interrupt_to_cb[irq_num];
 	interrupt_info->handler = handler;
-	interrupt_info->interrupt_data = NULL;
+	interrupt_info->interrupt_data = 0;
 	interrupt_info->interrupt = interrupt;
 	interrupt_info->deferred_flag = deferred_flag;
 
@@ -341,7 +341,7 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 
 	interrupt_info = &ipa_interrupt_to_cb[irq_num];
 	interrupt_info->handler = NULL;
-	interrupt_info->interrupt_data = NULL;
+	interrupt_info->interrupt_data = 0;
 	interrupt_info->interrupt = -1;
 	interrupt_info->deferred_flag = false;
 
@@ -375,7 +375,7 @@ int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
 
 	for (idx = 0; idx < IPA_IRQ_NUM_MAX; idx++) {
 		ipa_interrupt_to_cb[idx].handler = NULL;
-		ipa_interrupt_to_cb[idx].interrupt_data = NULL;
+		ipa_interrupt_to_cb[idx].interrupt_data = 0;
 		ipa_interrupt_to_cb[idx].interrupt = -1;
 		ipa_interrupt_to_cb[idx].deferred_flag = false;
 	}
