@@ -1124,7 +1124,7 @@ void ipa_proxy_clk_unvote(void)
 void ipa_proxy_clk_vote(void)
 {
 	if (!ipa_ctx->q6_proxy_clk_vote_valid) {
-		ipa_client_add("PROXY_CLK_VOTE", true);
+		ipa_client_add("PROXY_CLK_VOTE");
 		ipa_ctx->q6_proxy_clk_vote_valid = true;
 	}
 }
@@ -1316,7 +1316,7 @@ void ipa_cfg_default_route(enum ipa_client_type client)
 	route.route_frag_def_pipe = ipa_ep_idx;
 	route.route_def_retain_hdr = 1;
 
-	ipa_client_add(__func__, false);
+	ipa_client_add(__func__);
 
 	ipahal_write_reg_fields(IPA_ROUTE, &route);
 
@@ -1395,8 +1395,7 @@ int ipa_stop_gsi_channel(u32 clnt_hdl)
 
 	ep = &ipa_ctx->ep[clnt_hdl];
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-		       true);
+	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)));
 
 	if (ipa_producer(ep->client)) {
 		ipa_debug("Calling gsi_stop_channel ch:%lu\n",

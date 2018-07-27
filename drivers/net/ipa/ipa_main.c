@@ -233,7 +233,7 @@ int ipa_init_q6_smem(void)
 	int rc;
 	char *what;
 
-	ipa_client_add(__func__, false);
+	ipa_client_add(__func__);
 
 	rc = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_OFST, IPA_MEM_MODEM_SIZE);
 	if (rc) {
@@ -992,21 +992,25 @@ static void ipa_suspend_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 	ipa_debug("interrupt=%d, endpoints=0x%08x\n", interrupt, endpoints);
 
 	while (endpoints) {
+		enum ipa_client_type client;
 		u32 i = __ffs(endpoints);
 
 		endpoints ^= BIT(i);
 
 		if (!ipa_ctx->ep[i].valid)
 			continue;
-		if (!ipa_ap_consumer(ipa_ctx->ep[i].client))
+
+		client = ipa_ctx->ep[i].client;
+		if (!ipa_ap_consumer(client))
 			continue;
-		/* pipe will be unsuspended as part of
-		 * enabling IPA clocks
-		 */
+
+		/* pipe will be unsuspended as part of enabling IPA clocks */
 		mutex_lock(&ipa_ctx->transport_pm.transport_pm_mutex);
 		if (!atomic_read(&ipa_ctx->transport_pm.dec_clients)) {
-			ipa_client_add(ipa_client_string(ipa_ctx->ep[i].client),
-				       true);
+			const char *id = ipa_client_string(client);
+
+			ipa_client_add(id);
+
 			ipa_debug_low("Pipes un-suspended.\n");
 			ipa_debug_low("Enter poll mode.\n");
 			atomic_set(&ipa_ctx->transport_pm.dec_clients, 1);
@@ -1060,7 +1064,7 @@ static void ipa_freeze_clock_vote_and_notify_modem(void)
 	}
 
 	ipa_ctx->smp2p_info.ipa_clk_on =
-			ipa_client_add_additional("FREEZE_VOTE", true);
+			ipa_client_add_additional("FREEZE_VOTE");
 
 	/* Signal whether the clock is enabled */
 	mask = BIT(ipa_ctx->smp2p_info.enabled_bit);
@@ -1330,7 +1334,7 @@ static ssize_t ipa_write(struct file *file, const char __user *buf,
 	if (!count)
 		return 0;
 
-	ipa_client_add(__func__, false);
+	ipa_client_add(__func__);
 
 	result = ipa_firmware_load();
 	if (!result)

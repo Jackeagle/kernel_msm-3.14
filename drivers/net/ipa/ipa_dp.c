@@ -520,7 +520,7 @@ int ipa_send_cmd(u16 num_desc, struct ipa_desc *descr)
 	for (i = 0; i < num_desc; i++)
 		ipa_debug("sending imm cmd %d\n", descr[i].opcode);
 
-	ipa_client_add(__func__, false);
+	ipa_client_add(__func__);
 
 	last_desc = &descr[num_desc - 1];
 	init_completion(&last_desc->xfer_done);
@@ -578,7 +578,7 @@ int ipa_send_cmd_timeout(u16 num_desc, struct ipa_desc *descr, u32 timeout)
 	/* completion needs to be released from both here and in ack callback */
 	atomic_set(&comp->cnt, 2);
 
-	ipa_client_add(__func__, false);
+	ipa_client_add(__func__);
 
 	last_desc = &descr[num_desc - 1];
 	init_completion(&last_desc->xfer_done);
@@ -677,7 +677,7 @@ static void ipa_handle_rx(struct ipa_sys_context *sys)
 	int inactive_cycles = 0;
 	int cnt;
 
-	ipa_client_add(__func__, false);
+	ipa_client_add(__func__);
 	do {
 		cnt = ipa_handle_rx_core(sys);
 		if (cnt == 0)
@@ -739,7 +739,7 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 		goto fail_gen;
 	}
 
-	ipa_client_add(ipa_client_string(sys_in->client), true);
+	ipa_client_add(ipa_client_string(sys_in->client));
 	memset(ep, 0, offsetof(struct ipa_ep_context, sys));
 
 	if (!ep->sys) {
@@ -880,8 +880,7 @@ int ipa_teardown_sys_pipe(u32 clnt_hdl)
 
 	ep = &ipa_ctx->ep[clnt_hdl];
 
-	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)),
-		       true);
+	ipa_client_add(ipa_client_string(ipa_get_client_mapping(clnt_hdl)));
 
 	if (ep->napi_enabled) {
 		do {
@@ -1051,7 +1050,7 @@ static void ipa_wq_handle_rx(struct work_struct *work)
 	sys = container_of(work, struct ipa_sys_context, work);
 
 	if (sys->ep->napi_enabled) {
-		ipa_client_add("NAPI", true);
+		ipa_client_add("NAPI");
 		sys->ep->client_notify(sys->ep->priv, IPA_CLIENT_START_POLL, 0);
 	} else {
 		ipa_handle_rx(sys);
@@ -1353,7 +1352,7 @@ static void ipa_replenish_rx_work_func(struct work_struct *work)
 	struct ipa_sys_context *sys;
 
 	sys = container_of(dwork, struct ipa_sys_context, replenish_rx_work);
-	ipa_client_add(__func__, false);
+	ipa_client_add(__func__);
 	sys->repl_hdlr(sys);
 	ipa_client_remove(__func__, false);
 }

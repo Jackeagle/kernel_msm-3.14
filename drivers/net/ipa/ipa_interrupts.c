@@ -130,7 +130,7 @@ static void ipa_enable_tx_suspend_wa(struct work_struct *work)
 
 	ipa_assert(irq_num != -1);
 
-	ipa_client_add(__func__, false);
+	ipa_client_add(__func__);
 
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
 	val |= BIT(irq_num);
@@ -226,7 +226,7 @@ static void ipa_process_interrupts(bool isr_context)
 
 static void ipa_interrupt_defer(struct work_struct *work)
 {
-	ipa_client_add(__func__, false);
+	ipa_client_add(__func__);
 
 	ipa_process_interrupts(false);
 
@@ -237,7 +237,7 @@ static irqreturn_t ipa_isr(int irq, void *ctxt)
 {
 	ipa_debug_low("Enter\n");
 	/* defer interrupt handling in case IPA is not clocked on */
-	if (!ipa_client_add_additional(__func__, false)) {
+	if (!ipa_client_add_additional(__func__)) {
 		ipa_debug("defer interrupt processing\n");
 		queue_work(ipa_ctx->power_mgmt_wq, &ipa_interrupt_defer_work);
 		return IRQ_HANDLED;

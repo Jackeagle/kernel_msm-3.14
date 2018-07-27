@@ -177,7 +177,7 @@ ipa_uc_event_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 	union ipa_hw_error_event_data evt;
 	u8 event_op;
 
-	ipa_client_add(__func__, false);
+	ipa_client_add(__func__);
 	mmio = ipa_ctx->uc_ctx.uc_sram_mmio;
 	event_op = mmio->event_op;
 	ipa_debug("uC evt opcode=%u\n", event_op);
@@ -215,7 +215,7 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 	struct ipa_hw_shared_mem_common_mapping *mmio;
 	u8 response_op;
 
-	ipa_client_add(__func__, false);
+	ipa_client_add(__func__);
 	mmio = ipa_ctx->uc_ctx.uc_sram_mmio;
 	response_op = mmio->response_op;
 	ipa_debug("uC rsp opcode=%hhu\n", response_op);
@@ -324,7 +324,7 @@ int ipa_uc_panic_notifier(struct notifier_block *this,
 	if (ipa_uc_state_check())
 		goto fail;
 
-	if (!ipa_client_add_additional(__func__, false))
+	if (!ipa_client_add_additional(__func__))
 		goto fail;
 
 	send_uc_command_nowait(&ipa_ctx->uc_ctx, 0, IPA_CPU_2_HW_CMD_ERR_FATAL);

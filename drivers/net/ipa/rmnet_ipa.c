@@ -814,7 +814,7 @@ static int ipa_wwan_probe(struct platform_device *pdev)
 	ipa_proxy_clk_unvote();
 
 	/* Till the system is suspended, we keep the clock open */
-	ipa_client_add(__func__, false);
+	ipa_client_add(__func__);
 
 	initialized = true;
 
@@ -934,7 +934,7 @@ static int rmnet_ipa_ap_resume(struct device *dev)
 {
 	struct net_device *netdev = rmnet_ipa_ctx->dev;
 
-	ipa_client_add(__func__, false);
+	ipa_client_add(__func__);
 	ipa_debug("IPA clocks enabled\n");
 	if (netdev)
 		netif_wake_queue(netdev);
