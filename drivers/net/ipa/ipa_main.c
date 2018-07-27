@@ -659,81 +659,6 @@ static void ipa_disable_clks(void)
 	WARN_ON(msm_bus_scale_client_update_request(ipa_ctx->ipa_bus_hdl, 0));
 }
 
-/* log->lock is assumed held by the caller */
-static struct ipa_active_client *active_client_find(const char *id)
-{
-	struct ipa_active_clients_log_ctx *log;
-	struct ipa_active_client *entry;
-
-	log = &ipa_ctx->ipa_active_clients_logging;
-
-	list_for_each_entry(entry, &log->active, links)
-		if (!strcmp(entry->id_string, id))
-			return entry;
-
-	return NULL;
-}
-
-/* XXX Used GFP_ATOMIC for now; can probably be changed to use GFP_KERNEL */
-/* log->lock is assumed held by the caller */
-static struct ipa_active_client *active_client_get(const char *id_string)
-{
-	struct ipa_active_clients_log_ctx *log;
-	struct ipa_active_client *entry;
-
-	log = &ipa_ctx->ipa_active_clients_logging;
-
-	entry = active_client_find(id_string);
-	if (entry)
-		return entry;
-
-	entry = kzalloc(sizeof(*entry), GFP_ATOMIC);
-	if (!entry)
-		return NULL;
-
-	entry->id_string = id_string;
-	entry->count = 0;
-	list_add_tail(&entry->links, &log->active);
-
-	return entry;
-}
-
-/* ipa_active_clients_log_mod() - Log a modification to active clients
- *
- * If an existing entry represents the activity being logged, its
- * reference count is updated (incremented or decremented) according
- * to the "inc" argument.  Otherwise a new entry in the active list
- * is created.  When an entry's reference count reaches 0 it is
- * released from the list.
- *
- * A circular history buffer records reference count updates.
- */
-static void
-ipa_active_clients_log_mod(struct ipa_active_client_logging_info *id, bool inc)
-{
-	struct ipa_active_clients_log_ctx *log;
-	struct ipa_active_client *entry;
-	unsigned long flags;
-
-	log = &ipa_ctx->ipa_active_clients_logging;
-
-	spin_lock_irqsave(&log->lock, flags);
-
-	entry = active_client_get(id->id_string);
-	if (!entry)
-		goto out_unlock;
-
-	entry->count += inc ? 1 : -1;
-	if (!entry->count) {
-		list_del(&entry->links);
-		kfree(entry);
-	} else if (entry->count < 0) {
-		ipa_err("negative count for %s\n", id->id_string);
-	}
-out_unlock:
-	spin_unlock_irqrestore(&log->lock, flags);
-}
-
 /* Add an IPA client under protection of the mutex.  This is called
  * for the first client, but a race could mean another caller gets
  * the first reference.  When the first reference is taken, IPA
@@ -782,19 +707,7 @@ static bool ipa_client_add_not_first(void)
  */
 bool _ipa_client_add_additional(const char *id, const char *file, int line)
 {
-	struct ipa_active_client_logging_info log_info;
-	bool ret;
-
-	ret = ipa_client_add_not_first();
-	if (!ret)
-		return false;
-
-	log_info.id_string = id;
-	log_info.file = file;
-	log_info.line = line;
-	ipa_active_clients_log_mod(&log_info, true);
-
-	return true;
+	return ipa_client_add_not_first();
 }
 
 /* Add an IPA client.  If this is not the first client, the
@@ -804,13 +717,6 @@ bool _ipa_client_add_additional(const char *id, const char *file, int line)
  */
 void _ipa_client_add(const char *id, const char *file, int line)
 {
-	struct ipa_active_client_logging_info log_info;
-
-	log_info.id_string = id;
-	log_info.file = file;
-	log_info.line = line;
-	ipa_active_clients_log_mod(&log_info, true);
-
 	/* There's nothing more to do if this isn't the first reference */
 	if (!ipa_client_add_not_first())
 		ipa_client_add_first();
@@ -876,13 +782,6 @@ static bool ipa_client_remove_not_final(void)
  */
 void _ipa_client_remove(const char *id, const char *file, int line)
 {
-	struct ipa_active_client_logging_info log_info;
-
-	log_info.id_string = id;
-	log_info.file = file;
-	log_info.line = line;
-	ipa_active_clients_log_mod(&log_info, false);
-
 	if (!ipa_client_remove_not_final())
 		queue_work(ipa_ctx->power_mgmt_wq, &ipa_client_remove_work);
 }
@@ -897,13 +796,6 @@ void _ipa_client_remove(const char *id, const char *file, int line)
 void
 _ipa_client_remove_wait(const char *id, const char *file, int line)
 {
-	struct ipa_active_client_logging_info log_info;
-
-	log_info.id_string = id;
-	log_info.file = file;
-	log_info.line = line;
-	ipa_active_clients_log_mod(&log_info, false);
-
 	if (!ipa_client_remove_not_final())
 		ipa_client_remove_final();
 }
@@ -1522,7 +1414,6 @@ static bool config_valid(void)
 static int ipa_pre_init(void)
 {
 	int result = 0;
-	struct ipa_active_client_logging_info log_info;
 
 	ipa_debug("IPA Driver initialization started\n");
 
@@ -1558,10 +1449,6 @@ static int ipa_pre_init(void)
 	}
 
 	mutex_init(&ipa_ctx->ipa_active_clients.mutex);
-	log_info.file = __FILE__;
-	log_info.line = __LINE__;
-	log_info.id_string = "PROXY_CLK_VOTE";
-	ipa_active_clients_log_mod(&log_info, true);
 	atomic_set(&ipa_ctx->ipa_active_clients.cnt, 1);
 
 	/* Create workqueues for power management */
