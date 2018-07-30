@@ -1326,12 +1326,8 @@ void gsi_dealloc_evt_ring(unsigned long evt_id)
 
 void gsi_reset_evt_ring(unsigned long evt_id)
 {
-	struct gsi_evt_ctx *evtr;
+	struct gsi_evt_ctx *evtr = &gsi_ctx->evtr[evt_id];
 	u32 completed;
-
-	ipa_bug_on(evt_id >= gsi_ctx->max_ev);
-
-	evtr = &gsi_ctx->evtr[evt_id];
 
 	ipa_bug_on(evtr->state != GSI_EVT_RING_STATE_ALLOCATED);
 
