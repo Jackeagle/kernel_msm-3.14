@@ -36,6 +36,9 @@
 
 #define IPA_MAX_STATUS_STAT_NUM 30
 
+/* An explicitly bad client handle value */
+#define IPA_CLNT_HDL_BAD	(~(u32)0)
+
 #define IPA_MEM_CANARY_VAL 0xdeadbeef
 
 #define IPA_GSI_CHANNEL_STOP_MAX_RETRY 10
