@@ -681,9 +681,6 @@ struct ipa_context {
 	u32 clnt_hdl_cmd;
 	u32 clnt_hdl_data_in;
 	u32 clnt_hdl_data_out;
-	/* featurize if memory footprint becomes a concern */
-	void *logbuf;
-	void *logbuf_low;
 	u32 ipa_bus_hdl;
 	struct msm_bus_scale_pdata *bus_scale_tbl;
 	bool q6_proxy_clk_vote_valid;
