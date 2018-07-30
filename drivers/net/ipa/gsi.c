@@ -796,6 +796,44 @@ static u32 gsi_get_max_event_rings(void)
 	return field_val(val, GSI_NUM_EV_PER_EE_BMSK);
 }
 
+/*
+ * Zero bits in the event bitmap represent event numbers available
+ * for allocation.  Initialize the map so all events supported by
+ * the hardware are available; then preclude any reserved events
+ * from allocation.
+ */
+static void gsi_evt_bmap_init(void)
+{
+	gsi_ctx->evt_bmap = GENMASK(BITS_PER_LONG - 1, gsi_ctx->max_ev);
+	gsi_ctx->evt_bmap |= GENMASK(GSI_MHI_ER_END, GSI_MHI_ER_START);
+}
+
+static void gsi_evt_bmap_exit(void)
+{
+	gsi_ctx->evt_bmap = 0;
+}
+
+/* gsi_ctx->mlock is assumed held by caller */
+static unsigned long gsi_evt_bmap_alloc(void)
+{
+	unsigned long evt_id;
+
+	ipa_assert(gsi_ctx->evt_bmap != ~0UL);
+
+	evt_id = ffz(gsi_ctx->evt_bmap);
+	gsi_ctx->evt_bmap |= BIT(evt_id);
+
+	return evt_id;
+}
+
+/* gsi_ctx->mlock is assumed held by caller */
+static void gsi_evt_bmap_free(unsigned long evt_id)
+{
+	ipa_assert(gsi_ctx->evt_bmap & BIT(evt_id));
+
+	gsi_ctx->evt_bmap &= ~BIT(evt_id);
+}
+
 int gsi_register_device(void)
 {
 	struct platform_device *ipa_pdev = to_platform_device(gsi_ctx->dev);
@@ -851,16 +889,7 @@ int gsi_register_device(void)
 		return -EIO;
 	ipa_debug("max event rings %d\n", gsi_ctx->max_ev);
 
-	/* bitmap is max events excludes reserved events */
-
-	/*
-	 * Zero bits in the event bitmap represent event numbers available
-	 * for allocation.  Initialize the map so all events supported by
-	 * the hardware are available; then preclude any reserved events
-	 * from allocation.
-	 */
-	gsi_ctx->evt_bmap = GENMASK(BITS_PER_LONG - 1, gsi_ctx->max_ev);
-	gsi_ctx->evt_bmap |= GENMASK(GSI_MHI_ER_END, GSI_MHI_ER_START);
+	gsi_evt_bmap_init();
 
 	gsi_irq_enable_all();
 
@@ -892,7 +921,7 @@ int gsi_deregister_device(void)
 	gsi_irq_disable_all();
 
 	/* Clean up everything else set up by gsi_register_device() */
-	gsi_ctx->evt_bmap = 0;
+	gsi_evt_bmap_exit();
 	gsi_ctx->max_ev = 0;
 	gsi_ctx->max_ch = 0;
 	gsi_ctx->per_registered = false;
@@ -1189,24 +1218,14 @@ long gsi_alloc_evt_ring(u32 ring_count, u16 int_modt)
 	mutex_lock(&gsi_ctx->mlock);
 
 	/* Start by allocating the event id to use */
-	if (gsi_ctx->evt_bmap == ~0UL) {
-		ipa_err("all event ids in use\n");
-		ret = -ENOMEM;
-		goto err_unlock;
-	}
-
-	evt_id = ffz(gsi_ctx->evt_bmap);
-	gsi_ctx->evt_bmap |= BIT(evt_id);
-
-	ipa_debug("Using %lu as virt evt id\n", evt_id);
-
+	evt_id = gsi_evt_bmap_alloc();
 	evtr = &gsi_ctx->evtr[evt_id];
-	evtr->id = evt_id;
+	ipa_debug("Using %lu as virt evt id\n", evt_id);
 
 	if (ipahal_dma_alloc(&evtr->mem, size, GFP_KERNEL)) {
 		ipa_err("fail to dma alloc %u bytes\n", size);
 		ret = -ENOMEM;
-		goto err_clear_bit;
+		goto err_free_bmap;
 	}
 
 	/* Verify the result meets our alignment requirements */
@@ -1217,6 +1236,7 @@ long gsi_alloc_evt_ring(u32 ring_count, u16 int_modt)
 		goto err_free_dma;
 	}
 
+	evtr->id = evt_id;
 	evtr->int_modt = int_modt;
 	init_completion(&evtr->compl);
 	atomic_set(&evtr->chan_ref_cnt, 0);
@@ -1233,32 +1253,34 @@ long gsi_alloc_evt_ring(u32 ring_count, u16 int_modt)
 		ret = -ENOMEM;
 		goto err_free_dma;
 	}
+	atomic_inc(&gsi_ctx->num_evt_ring);
 
 	gsi_program_evt_ring_ctx(evt_id, evtr->mem.size, evtr->mem.phys_base,
 				 evtr->int_modt);
 	gsi_init_ring(&evtr->ring, &evtr->mem);
 
-	atomic_inc(&gsi_ctx->num_evt_ring);
 	gsi_prime_evt_ring(evtr);
+
 	mutex_unlock(&gsi_ctx->mlock);
 
 	spin_lock_irqsave(&gsi_ctx->slock, flags);
+
+	/* Enable the event interrupt (clear it first in case pending) */
 	val = BIT(evt_id);
 	gsi_writel(val, GSI_EE_N_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(IPA_EE_AP));
+	gsi_irq_enable_event(evt_id);
 
-	/* enable ieob interrupts */
-	gsi_irq_enable_event(evtr->id);
 	spin_unlock_irqrestore(&gsi_ctx->slock, flags);
 
 	return evt_id;
 
 err_free_dma:
 	ipahal_dma_free(&evtr->mem);
-err_clear_bit:
 	memset(evtr, 0, sizeof(*evtr));
-	gsi_ctx->evt_bmap &= ~BIT(evt_id);
-err_unlock:
-	mutex_unlock(&gsi_ctx->mlock);	/* acquired again below */
+err_free_bmap:
+	gsi_evt_bmap_free(evt_id);
+
+	mutex_unlock(&gsi_ctx->mlock);
 
 	return ret;
 }
@@ -1291,7 +1313,7 @@ void gsi_dealloc_evt_ring(unsigned long evt_id)
 
 	ipa_bug_on(evtr->state != GSI_EVT_RING_STATE_NOT_ALLOCATED);
 
-	gsi_ctx->evt_bmap &= ~BIT(evtr->id);
+	gsi_evt_bmap_free(evtr->id);
 
 	mutex_unlock(&gsi_ctx->mlock);
 
