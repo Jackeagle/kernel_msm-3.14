@@ -316,16 +316,13 @@ int ipa_uc_interface_init(void)
 	return 0;
 }
 
-int ipa_uc_panic_notifier(struct notifier_block *this,
-			  unsigned long event, void *ptr)
+void ipa_uc_panic_notifier(void)
 {
-	ipa_debug("this=%p evt=%lu ptr=%p\n", this, event, ptr);
-
 	if (ipa_uc_state_check())
-		goto fail;
+		return;
 
 	if (!ipa_client_add_additional())
-		goto fail;
+		return;
 
 	send_uc_command_nowait(&ipa_ctx->uc_ctx, 0, IPA_CPU_2_HW_CMD_ERR_FATAL);
 
@@ -333,7 +330,4 @@ int ipa_uc_panic_notifier(struct notifier_block *this,
 	udelay(IPA_PKT_FLUSH_TO_US);
 
 	ipa_client_remove();
-	ipa_debug("err_fatal issued\n");
-fail:
-	return NOTIFY_DONE;
 }

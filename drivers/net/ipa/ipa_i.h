@@ -786,8 +786,7 @@ int ipa_ap_suspend(struct device *dev);
 int ipa_ap_resume(struct device *dev);
 void ipa_set_resource_groups_min_max_limits(void);
 void ipa_suspend_apps_pipes(bool suspend);
-int ipa_uc_panic_notifier(struct notifier_block *this, unsigned long event,
-			  void *ptr);
+void ipa_uc_panic_notifier(void);
 void ipa_inc_acquire_wakelock(void);
 void ipa_dec_release_wakelock(void);
 const char *ipa_hw_error_str(enum ipa_hw_errors err_type);

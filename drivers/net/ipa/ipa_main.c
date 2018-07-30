@@ -907,14 +907,8 @@ void ipa_reset_freeze_vote(void)
 static int
 ipa_panic_notifier(struct notifier_block *this, unsigned long event, void *ptr)
 {
-	int res;
-
 	ipa_freeze_clock_vote_and_notify_modem();
-
-	ipa_debug("Calling uC panic handler\n");
-	res = ipa_uc_panic_notifier(this, event, ptr);
-	if (res)
-		ipa_err("uC panic handler failed %d\n", res);
+	ipa_uc_panic_notifier();
 
 	return NOTIFY_DONE;
 }
