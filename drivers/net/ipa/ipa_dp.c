@@ -921,6 +921,8 @@ int ipa_teardown_sys_pipe(u32 clnt_hdl)
 		ipa_bug_on(result != -EAGAIN && result != -ETIMEDOUT);
 	}
 
+	ipa_bug_on(clnt_hdl >= ipa_ctx->ipa_num_pipes);
+
 	ipa_reset_gsi_channel(clnt_hdl);
 	gsi_dealloc_channel(ep->gsi_chan_hdl);
 	gsi_reset_evt_ring(ep->gsi_evt_ring_hdl);

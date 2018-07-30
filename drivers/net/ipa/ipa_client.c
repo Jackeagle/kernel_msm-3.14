@@ -199,14 +199,9 @@ restore_props_fail:
 
 void ipa_reset_gsi_channel(u32 clnt_hdl)
 {
-	struct ipa_ep_context *ep;
+	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
 	u32 aggr_active_bitmap;
 
-	ipa_debug("entry\n");
-
-	ipa_bug_on(clnt_hdl >= ipa_ctx->ipa_num_pipes);
-
-	ep = &ipa_ctx->ep[clnt_hdl];
 	ipa_bug_on(!ep->valid);
 
 	ipa_client_add();
@@ -228,6 +223,4 @@ void ipa_reset_gsi_channel(u32 clnt_hdl)
 	}
 
 	ipa_client_remove();
-
-	ipa_debug("exit\n");
 }
