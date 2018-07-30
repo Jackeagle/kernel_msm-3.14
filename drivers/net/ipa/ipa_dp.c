@@ -754,7 +754,6 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 	struct ipa_ep_context *ep;
 	u32 ipa_ep_idx;
 	int result = -EINVAL;
-	char buff[IPA_RESOURCE_NAME_MAX];
 
 	ipa_ep_idx = ipa_get_ep_mapping(sys_in->client);
 
@@ -768,8 +767,6 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 	memset(ep, 0, offsetof(struct ipa_ep_context, sys));
 
 	if (!ep->sys) {
-		unsigned int wq_flags;
-
 		ep->sys = kzalloc(sizeof(*ep->sys), GFP_KERNEL);
 		if (!ep->sys) {
 			result = -ENOMEM;
@@ -784,12 +781,9 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 			goto fail_wq;
 		}
 
-		snprintf(buff, IPA_RESOURCE_NAME_MAX, "iparepwq%d",
-			 sys_in->client);
-		ep->sys->repl_wq = alloc_workqueue(buff, wq_flags, 1);
+		ep->sys->repl_wq = ipa_alloc_workqueue("iparepwq",
+						       sys_in->client);
 		if (!ep->sys->repl_wq) {
-			ipa_err("failed to create rep wq for client %d\n",
-				sys_in->client);
 			result = -EFAULT;
 			goto fail_wq2;
 		}
