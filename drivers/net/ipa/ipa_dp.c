@@ -218,6 +218,24 @@ int ipa_rx_poll(u32 clnt_hdl, int weight)
 	return cnt;
 }
 
+static struct workqueue_struct *
+ipa_alloc_workqueue(const char *name, enum ipa_client_type client)
+{
+	char namebuf[IPA_RESOURCE_NAME_MAX];
+	unsigned int wq_flags = WQ_MEM_RECLAIM | WQ_UNBOUND | WQ_SYSFS;
+	struct workqueue_struct *wq;
+	int ret;
+
+	ret = snprintf(namebuf, sizeof(namebuf), "%s%u", name, (u32)client);
+	ipa_assert(ret < sizeof(namebuf));
+
+	wq = alloc_workqueue(namebuf, wq_flags, 1);
+	if (!wq)
+		ipa_err("error creating wq %s for client %d\n", name, client);
+
+	return wq;
+}
+
 /* Send an interrupting no-op request to a producer pipe.  Normally
  * an interrupt is generated upon completion of every transfer
  * performed by a pipe, but a producer pipe can be configured to
@@ -759,14 +777,9 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 		}
 
 		ep->sys->ep = ep;
-		snprintf(buff, IPA_RESOURCE_NAME_MAX, "ipawq%d",
-			 sys_in->client);
-		wq_flags = WQ_MEM_RECLAIM | WQ_UNBOUND | WQ_SYSFS;
-		ep->sys->wq = alloc_workqueue(buff, wq_flags, 1);
 
+		ep->sys->wq = ipa_alloc_workqueue("ipawq", sys_in->client);
 		if (!ep->sys->wq) {
-			ipa_err("failed to create wq for client %d\n",
-				sys_in->client);
 			result = -EFAULT;
 			goto fail_wq;
 		}
