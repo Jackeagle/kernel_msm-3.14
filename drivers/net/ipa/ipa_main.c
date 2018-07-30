@@ -517,16 +517,15 @@ static int setup_apps_lan_cons_pipe(void)
 	return ipa_setup_sys_pipe(&sys_in);
 }
 
-static long ipa_setup_apps_pipes(void)
+static int ipa_setup_apps_pipes(void)
 {
-	long result;
+	int result;
 
 	/* CMD OUT (AP->IPA) */
-	ipa_ctx->clnt_hdl_cmd = setup_apps_cmd_prod_pipe();
-	if (ipa_ctx->clnt_hdl_cmd < 0) {
-		result = -EPERM;
-		goto fail_ch20_wa;
-	}
+	result = setup_apps_cmd_prod_pipe();
+	if (result < 0)
+		return result;
+	ipa_ctx->clnt_hdl_cmd = (u32)result;
 	ipa_debug("Apps to IPA cmd pipe is connected\n");
 
 	ipa_init_sram();
@@ -563,11 +562,10 @@ static long ipa_setup_apps_pipes(void)
 	 * of exceptions (unroutable packets, but other events as well)
 	 * through this pipe.
 	 */
-	ipa_ctx->clnt_hdl_data_in = setup_apps_lan_cons_pipe();
-	if (ipa_ctx->clnt_hdl_data_in < 0) {
-		result = -EPERM;
+	result = setup_apps_lan_cons_pipe();
+	if (result < 0)
 		goto fail_flt_hash_tuple;
-	}
+	ipa_ctx->clnt_hdl_data_in = (u32)result;
 
 	ipa_cfg_default_route(IPA_CLIENT_APPS_LAN_CONS);
 
@@ -575,7 +573,7 @@ static long ipa_setup_apps_pipes(void)
 
 fail_flt_hash_tuple:
 	ipa_teardown_sys_pipe(ipa_ctx->clnt_hdl_cmd);
-fail_ch20_wa:
+
 	return result;
 }
 
