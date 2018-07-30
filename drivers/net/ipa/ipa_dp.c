@@ -310,6 +310,17 @@ static void ipa_nop_timer_init(struct ipa_sys_context *sys)
 	sys->nop_timer.function = ipa_nop_timer_expiry;
 }
 
+/* For some producer pipes we don't interrupt on completions.
+ * Instead we schedule an interrupting NOP command to be issued on
+ * the pipe after a short delay (if one is not already scheduled).
+ * When the NOP completes it signals all preceding transfers have
+ * completed also.
+ */
+static void ipa_no_intr_init(struct ipa_sys_context *sys)
+{
+	sys->no_intr = true;
+}
+
 /** ipa_send() - Send multiple descriptors in one HW transaction
  * @sys: system pipe context
  * @num_desc: number of packets
@@ -2000,11 +2011,8 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 		sys->ep->status.status_ep =
 			ipa_get_ep_mapping(IPA_CLIENT_Q6_WAN_CONS);
 
-		/* For the WAN producer, use a deferred interrupting
-		 * no-op to handle completions rather than having
-		 * every transfer interrupt when complete.
-		 */
-		sys->no_intr = true;
+		/* For the WAN producer, use a deferred interrupting no-op */
+		ipa_no_intr_init(sys);
 
 		return 0;
 	}
