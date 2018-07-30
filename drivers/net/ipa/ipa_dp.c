@@ -108,9 +108,8 @@ ipa_wq_write_done_common(struct ipa_sys_context *sys,
 						 tx_pkt->mem.size,
 						 DMA_TO_DEVICE);
 			} else {
-				dma_unmap_page(dev, next_pkt->mem.phys_base,
-					       next_pkt->mem.size,
-					       DMA_TO_DEVICE);
+				dma_unmap_page(dev, tx_pkt->mem.phys_base,
+					       tx_pkt->mem.size, DMA_TO_DEVICE);
 			}
 		}
 
