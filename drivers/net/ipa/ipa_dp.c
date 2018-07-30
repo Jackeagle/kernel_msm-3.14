@@ -302,14 +302,6 @@ static void ipa_nop_timer_schedule(struct ipa_sys_context *sys)
 	hrtimer_start(&sys->nop_timer, time, HRTIMER_MODE_REL);
 }
 
-static void ipa_nop_timer_init(struct ipa_sys_context *sys)
-{
-	INIT_WORK(&sys->nop_work, ipa_send_nop_work);
-	atomic_set(&sys->nop_pending, 0);
-	hrtimer_init(&sys->nop_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
-	sys->nop_timer.function = ipa_nop_timer_expiry;
-}
-
 /* For some producer pipes we don't interrupt on completions.
  * Instead we schedule an interrupting NOP command to be issued on
  * the pipe after a short delay (if one is not already scheduled).
@@ -318,7 +310,10 @@ static void ipa_nop_timer_init(struct ipa_sys_context *sys)
  */
 static void ipa_no_intr_init(struct ipa_sys_context *sys)
 {
-	ipa_nop_timer_init(sys);
+	INIT_WORK(&sys->nop_work, ipa_send_nop_work);
+	atomic_set(&sys->nop_pending, 0);
+	hrtimer_init(&sys->nop_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+	sys->nop_timer.function = ipa_nop_timer_expiry;
 	sys->no_intr = true;
 }
 
