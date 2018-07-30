@@ -687,7 +687,7 @@ void ipa_rx_switch_to_poll_mode(struct ipa_sys_context *sys)
 		return;
 	gsi_channel_intr_disable(sys->ep->gsi_chan_hdl);
 	ipa_inc_acquire_wakelock();
-	queue_work(sys->wq, &sys->work);
+	queue_work(sys->wq, &sys->rx_work);
 }
 
 /** ipa_handle_rx() - handle packet reception. This function is executed in the
@@ -1057,7 +1057,7 @@ static void ipa_wq_handle_rx(struct work_struct *work)
 {
 	struct ipa_sys_context *sys;
 
-	sys = container_of(work, struct ipa_sys_context, work);
+	sys = container_of(work, struct ipa_sys_context, rx_work);
 
 	if (sys->ep->napi_enabled) {
 		ipa_client_add();
@@ -2020,7 +2020,7 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 	/* Client is a consumer (APPS_LAN_CONS or APPS_WAN_CONS) */
 	sys->ep->status.status_en = true;
 
-	INIT_WORK(&sys->work, ipa_wq_handle_rx);
+	INIT_WORK(&sys->rx_work, ipa_wq_handle_rx);
 	INIT_DELAYED_WORK(&sys->switch_to_intr_work,
 			  ipa_switch_to_intr_rx_work_func);
 	INIT_DELAYED_WORK(&sys->replenish_rx_work,

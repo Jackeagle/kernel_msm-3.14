@@ -370,7 +370,7 @@ struct ipa_sys_context {
 	struct hrtimer nop_timer;	/* For no-intr PROD pipes only */
 	struct work_struct nop_work;
 
-	struct work_struct work;
+	struct work_struct rx_work;
 	struct delayed_work replenish_rx_work;
 	struct work_struct repl_work;
 	void (*repl_hdlr)(struct ipa_sys_context *sys);
