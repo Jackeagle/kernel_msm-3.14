@@ -269,7 +269,7 @@ static void ipa_send_nop_work(struct work_struct *work)
 {
 	struct ipa_sys_context *sys;
 
-	sys = container_of(work, struct ipa_sys_context, work);
+	sys = container_of(work, struct ipa_sys_context, nop_work);
 
 	/* If sending a no-op request fails, schedule another try */
 	if (!ipa_send_nop(sys))
@@ -286,7 +286,7 @@ static enum hrtimer_restart ipa_nop_timer_expiry(struct hrtimer *timer)
 
 	sys = container_of(timer, struct ipa_sys_context, nop_timer);
 	atomic_set(&sys->nop_pending, 0);
-	queue_work(sys->wq, &sys->work);
+	queue_work(sys->wq, &sys->nop_work);
 
 	return HRTIMER_NORESTART;
 }
@@ -304,7 +304,7 @@ static void ipa_nop_timer_schedule(struct ipa_sys_context *sys)
 
 static void ipa_nop_timer_init(struct ipa_sys_context *sys)
 {
-	INIT_WORK(&sys->work, ipa_send_nop_work);
+	INIT_WORK(&sys->nop_work, ipa_send_nop_work);
 	atomic_set(&sys->nop_pending, 0);
 	hrtimer_init(&sys->nop_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
 	sys->nop_timer.function = ipa_nop_timer_expiry;

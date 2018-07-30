@@ -368,8 +368,9 @@ struct ipa_sys_context {
 	bool no_intr;			/* Transmit requests won't interrupt */
 	atomic_t nop_pending;		/* Should a nop be scheduled? */
 	struct hrtimer nop_timer;	/* For no-intr PROD pipes only */
-	struct work_struct work;
+	struct work_struct nop_work;
 
+	struct work_struct work;
 	struct delayed_work replenish_rx_work;
 	struct work_struct repl_work;
 	void (*repl_hdlr)(struct ipa_sys_context *sys);
