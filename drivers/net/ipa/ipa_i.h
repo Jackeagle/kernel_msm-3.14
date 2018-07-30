@@ -681,7 +681,6 @@ struct ipa_context {
 	struct ipa_transport_pm transport_pm;
 	u32 clnt_hdl_cmd;
 	u32 clnt_hdl_data_in;
-	u32 clnt_hdl_data_out;
 	u32 ipa_bus_hdl;
 	struct msm_bus_scale_pdata *bus_scale_tbl;
 	bool q6_proxy_clk_vote_valid;
