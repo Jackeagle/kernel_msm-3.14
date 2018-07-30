@@ -265,15 +265,15 @@ static bool ipa_send_nop(struct ipa_sys_context *sys)
 }
 
 /* Try to send the no-op request.  If it fails, arrange to try again. */
-static void ipa_send_nop_work(struct work_struct *work)
+static void ipa_send_nop_work(struct work_struct *nop_work)
 {
 	struct ipa_sys_context *sys;
 
-	sys = container_of(work, struct ipa_sys_context, nop_work);
+	sys = container_of(nop_work, struct ipa_sys_context, nop_work);
 
 	/* If sending a no-op request fails, schedule another try */
 	if (!ipa_send_nop(sys))
-		queue_work(sys->wq, work);
+		queue_work(sys->wq, nop_work);
 }
 
 /* The delay before sending the no-op request is implemented by a
