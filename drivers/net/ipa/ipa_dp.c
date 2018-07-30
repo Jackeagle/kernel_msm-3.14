@@ -318,6 +318,7 @@ static void ipa_nop_timer_init(struct ipa_sys_context *sys)
  */
 static void ipa_no_intr_init(struct ipa_sys_context *sys)
 {
+	ipa_nop_timer_init(sys);
 	sys->no_intr = true;
 }
 
@@ -797,9 +798,6 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 		result = -ENOMEM;
 		goto fail_gen2;
 	}
-
-	if (ep->sys->no_intr)
-		ipa_nop_timer_init(ep->sys);
 
 	ep->valid = 1;
 	ep->client = sys_in->client;
