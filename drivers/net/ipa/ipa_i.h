@@ -416,7 +416,7 @@ enum ipa_desc_type {
 struct ipa_tx_pkt_wrapper {
 	enum ipa_desc_type type;
 	struct ipa_mem_buffer mem;
-	struct work_struct work;
+	struct work_struct done_work;
 	struct list_head link;
 	void (*callback)(void *user1, int user2);
 	void *user1;

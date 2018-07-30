@@ -144,7 +144,7 @@ ipa_wq_write_done_status(int src_pipe, struct ipa_tx_pkt_wrapper *tx_pkt)
 
 /** ipa_write_done() - this function will be (eventually) called when a Tx
  * operation is complete
- * * @work:	work_struct used by the work queue
+ * * @done_work:	work_struct used by the work queue
  *
  * Will be called in deferred context.
  * - invoke the callback supplied by the client who sent this command
@@ -153,13 +153,13 @@ ipa_wq_write_done_status(int src_pipe, struct ipa_tx_pkt_wrapper *tx_pkt)
  * - delete all the tx packet descriptors from the system
  *   pipe context (not needed anymore)
  */
-static void ipa_wq_write_done(struct work_struct *work)
+static void ipa_wq_write_done(struct work_struct *done_work)
 {
 	struct ipa_tx_pkt_wrapper *tx_pkt;
 	struct ipa_sys_context *sys;
 	struct ipa_tx_pkt_wrapper *this_pkt;
 
-	tx_pkt = container_of(work, struct ipa_tx_pkt_wrapper, work);
+	tx_pkt = container_of(done_work, struct ipa_tx_pkt_wrapper, done_work);
 	sys = tx_pkt->sys;
 	spin_lock_bh(&sys->spinlock);
 	this_pkt = list_first_entry(&sys->head_desc_list,
@@ -258,7 +258,7 @@ static bool ipa_send_nop(struct ipa_sys_context *sys)
 
 	nop_pkt->type = IPA_DATA_DESC;
 	/* No-op packet uses no memory for data */
-	INIT_WORK(&nop_pkt->work, ipa_wq_write_done);
+	INIT_WORK(&nop_pkt->done_work, ipa_wq_write_done);
 	nop_pkt->sys = sys;
 	nop_pkt->cnt = 1;
 
@@ -382,7 +382,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 		if (i == 0) {
 			tx_pkt_first = tx_pkt;
 			tx_pkt->cnt = num_desc;
-			INIT_WORK(&tx_pkt->work, ipa_wq_write_done);
+			INIT_WORK(&tx_pkt->done_work, ipa_wq_write_done);
 		}
 
 		tx_pkt->type = desc[i].type;
@@ -2090,7 +2090,7 @@ void ipa_gsi_irq_tx_notify_cb(void *xfer_data)
 
 	ipa_debug_low("event EOT notified\n");
 
-	queue_work(tx_pkt->sys->wq, &tx_pkt->work);
+	queue_work(tx_pkt->sys->wq, &tx_pkt->done_work);
 }
 
 void ipa_gsi_irq_rx_notify_cb(void *chan_data, u16 count)
