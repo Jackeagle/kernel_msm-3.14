@@ -1387,12 +1387,6 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 	}
 
 	phys_base = props->mem.phys_base;
-	if (phys_base % roundup_pow_of_two(props->mem.size)) {
-		ipa_err("bad params ring base not aligned 0x%llx align 0x%lx\n",
-			phys_base, roundup_pow_of_two(props->mem.size));
-		return -EINVAL;
-	}
-
 	last = phys_base + props->mem.size - GSI_RING_ELEMENT_SIZE;
 
 	/* MSB should stay same within the ring */
@@ -1432,6 +1426,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 		ipa_err("fail to dma alloc %u bytes\n", size);
 		return -ENOMEM;
 	}
+	ipa_assert(!(props->mem.phys_base % roundup_pow_of_two(size)));
 
 	if (gsi_validate_channel_props(props)) {
 		ipa_err("bad params\n");
