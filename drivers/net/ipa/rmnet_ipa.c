@@ -768,10 +768,13 @@ static int ipa_wwan_probe(struct platform_device *pdev)
 	struct net_device *dev;
 	struct ipa_wwan_private *wwan_ptr;
 
+
 	mutex_init(&rmnet_ipa_ctx->pipe_handle_guard);
 	mutex_init(&rmnet_ipa_ctx->add_mux_channel_lock);
-	rmnet_ipa_ctx->ipa_to_apps_hdl = -1;
-	rmnet_ipa_ctx->apps_to_ipa_hdl = -1;
+
+	/* Mark client handles bad until we initialize them */
+	rmnet_ipa_ctx->apps_to_ipa_hdl = IPA_CLNT_HDL_BAD;
+	rmnet_ipa_ctx->ipa_to_apps_hdl = IPA_CLNT_HDL_BAD;
 
 	ret = ipa_init_q6_smem();
 	if (ret) {
@@ -840,12 +843,12 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 	if (ret < 0)
 		ipa_err("Failed to teardown IPA->APPS pipe\n");
 	else
-		rmnet_ipa_ctx->ipa_to_apps_hdl = -1;
+		rmnet_ipa_ctx->ipa_to_apps_hdl = IPA_CLNT_HDL_BAD;
 	ret = ipa_teardown_sys_pipe(rmnet_ipa_ctx->apps_to_ipa_hdl);
 	if (ret < 0)
 		ipa_err("Failed to teardown APPS->IPA pipe\n");
 	else
-		rmnet_ipa_ctx->apps_to_ipa_hdl = -1;
+		rmnet_ipa_ctx->apps_to_ipa_hdl = IPA_CLNT_HDL_BAD;
 	netif_napi_del(&wwan_ptr->napi);
 	mutex_unlock(&rmnet_ipa_ctx->pipe_handle_guard);
 	unregister_netdev(rmnet_ipa_ctx->dev);

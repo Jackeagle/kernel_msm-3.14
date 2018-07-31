@@ -573,6 +573,7 @@ static int ipa_setup_apps_pipes(void)
 
 fail_flt_hash_tuple:
 	ipa_teardown_sys_pipe(ipa_ctx->clnt_hdl_cmd);
+	ipa_ctx->clnt_hdl_cmd = IPA_CLNT_HDL_BAD;
 
 	return result;
 }
@@ -1613,6 +1614,10 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 	ipa_debug(": ipa-base = 0x%x, size = 0x%x\n",
 		  ipa_ctx->ipa_wrapper_base, ipa_ctx->ipa_wrapper_size);
 
+	/* Mark client handles bad until we initialize them */
+	ipa_ctx->clnt_hdl_cmd = IPA_CLNT_HDL_BAD;
+	ipa_ctx->clnt_hdl_data_in = IPA_CLNT_HDL_BAD;
+
 	/* setup IPA register access */
 	phys_addr = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
 	ipa_debug("Mapping 0x%lx\n", phys_addr);
@@ -1690,6 +1695,8 @@ err_hal_destroy:
 	iounmap(ipa_ctx->mmio);
 	ipa_ctx->mmio = NULL;
 err_clear_wrapper:
+	ipa_ctx->clnt_hdl_data_in = 0;
+	ipa_ctx->clnt_hdl_cmd = 0;
 	ipa_ctx->ipa_wrapper_size = 0;
 	ipa_ctx->ipa_wrapper_base = 0;
 err_clear_pdev:
