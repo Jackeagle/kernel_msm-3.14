@@ -683,7 +683,7 @@ struct ipa_context {
 	struct workqueue_struct *power_mgmt_wq;
 	struct ipa_transport_pm transport_pm;
 	u32 clnt_hdl_cmd;
-	u32 clnt_hdl_data_in;
+	u32 clnt_hdl_lan_cons;
 	u32 ipa_bus_hdl;
 	struct msm_bus_scale_pdata *bus_scale_tbl;
 	bool q6_proxy_clk_vote_valid;

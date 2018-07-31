@@ -565,7 +565,7 @@ static int ipa_setup_apps_pipes(void)
 	result = setup_apps_lan_cons_pipe();
 	if (result < 0)
 		goto fail_flt_hash_tuple;
-	ipa_ctx->clnt_hdl_data_in = (u32)result;
+	ipa_ctx->clnt_hdl_lan_cons = (u32)result;
 
 	ipa_cfg_default_route(IPA_CLIENT_APPS_LAN_CONS);
 
@@ -1616,7 +1616,7 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 
 	/* Mark client handles bad until we initialize them */
 	ipa_ctx->clnt_hdl_cmd = IPA_CLNT_HDL_BAD;
-	ipa_ctx->clnt_hdl_data_in = IPA_CLNT_HDL_BAD;
+	ipa_ctx->clnt_hdl_lan_cons = IPA_CLNT_HDL_BAD;
 
 	/* setup IPA register access */
 	phys_addr = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
@@ -1695,7 +1695,7 @@ err_hal_destroy:
 	iounmap(ipa_ctx->mmio);
 	ipa_ctx->mmio = NULL;
 err_clear_wrapper:
-	ipa_ctx->clnt_hdl_data_in = 0;
+	ipa_ctx->clnt_hdl_lan_cons = 0;
 	ipa_ctx->clnt_hdl_cmd = 0;
 	ipa_ctx->ipa_wrapper_size = 0;
 	ipa_ctx->ipa_wrapper_base = 0;
