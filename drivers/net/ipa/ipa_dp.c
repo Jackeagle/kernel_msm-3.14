@@ -877,15 +877,10 @@ fail_gen:
  */
 int ipa_teardown_sys_pipe(u32 clnt_hdl)
 {
-	struct ipa_ep_context *ep;
+	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
 	int empty;
 	int result;
 	int i;
-
-	if (clnt_hdl >= ipa_ctx->ipa_num_pipes || !ipa_ctx->ep[clnt_hdl].valid)
-		return -EINVAL;
-
-	ep = &ipa_ctx->ep[clnt_hdl];
 
 	ipa_client_add();
 
