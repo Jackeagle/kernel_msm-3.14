@@ -1375,11 +1375,6 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, u8 evt_id)
 	gsi_writel(val, offset);
 }
 
-static int gsi_validate_channel_props(struct gsi_chan_props *props)
-{
-	return 0;
-}
-
 long gsi_alloc_channel(struct gsi_chan_props *props)
 {
 	u32 size = props->ring_count * GSI_RING_ELEMENT_SIZE;
@@ -1397,12 +1392,6 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	}
 	ipa_assert(!(props->mem.size % roundup_pow_of_two(size)));
 	ipa_assert(!(props->mem.phys_base % roundup_pow_of_two(size)));
-
-	if (gsi_validate_channel_props(props)) {
-		ipa_err("bad params\n");
-		ipahal_dma_free(&props->mem);
-		return -EINVAL;
-	}
 
 	evt_id = props->evt_ring_hdl;
 	evtr = &gsi_ctx->evtr[evt_id];
@@ -1900,11 +1889,6 @@ int gsi_get_channel_cfg(unsigned long chan_id, struct gsi_chan_props *props)
 int gsi_set_channel_cfg(unsigned long chan_id, struct gsi_chan_props *props)
 {
 	struct gsi_chan_ctx *chan;
-
-	if (gsi_validate_channel_props(props)) {
-		ipa_err("bad params props %p\n", props);
-		return -EINVAL;
-	}
 
 	chan = &gsi_ctx->chan[chan_id];
 	if (chan->state != GSI_CHAN_STATE_ALLOCATED) {
