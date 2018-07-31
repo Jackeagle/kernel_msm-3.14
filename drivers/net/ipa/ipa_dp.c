@@ -875,7 +875,7 @@ fail_gen:
  *
  * Returns:	0 on success, negative on failure
  */
-int ipa_teardown_sys_pipe(u32 clnt_hdl)
+void ipa_teardown_sys_pipe(u32 clnt_hdl)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
 	int empty;
@@ -932,8 +932,6 @@ int ipa_teardown_sys_pipe(u32 clnt_hdl)
 	ipa_client_remove();
 
 	ipa_debug("client (ep: %d) disconnected\n", clnt_hdl);
-
-	return 0;
 }
 
 /** ipa_tx_comp_usr_notify_release() - Callback function which will call the

@@ -835,24 +835,17 @@ err_clear_ctx:
 static int ipa_wwan_remove(struct platform_device *pdev)
 {
 	struct ipa_wwan_private *wwan_ptr = netdev_priv(rmnet_ipa_ctx->dev);
-	int ret;
 
 	ipa_info("rmnet_ipa started deinitialization\n");
 	mutex_lock(&rmnet_ipa_ctx->pipe_handle_guard);
 	if (rmnet_ipa_ctx->ipa_to_apps_hdl != IPA_CLNT_HDL_BAD) {
-		ret = ipa_teardown_sys_pipe(rmnet_ipa_ctx->ipa_to_apps_hdl);
-		if (ret < 0)
-			ipa_err("Failed to teardown IPA->APPS pipe\n");
-		else
-			rmnet_ipa_ctx->ipa_to_apps_hdl = IPA_CLNT_HDL_BAD;
+		ipa_teardown_sys_pipe(rmnet_ipa_ctx->ipa_to_apps_hdl);
+		rmnet_ipa_ctx->ipa_to_apps_hdl = IPA_CLNT_HDL_BAD;
 	}
 
 	if (rmnet_ipa_ctx->apps_to_ipa_hdl != IPA_CLNT_HDL_BAD) {
-		ret = ipa_teardown_sys_pipe(rmnet_ipa_ctx->apps_to_ipa_hdl);
-		if (ret < 0)
-			ipa_err("Failed to teardown APPS->IPA pipe\n");
-		else
-			rmnet_ipa_ctx->apps_to_ipa_hdl = IPA_CLNT_HDL_BAD;
+		ipa_teardown_sys_pipe(rmnet_ipa_ctx->apps_to_ipa_hdl);
+		rmnet_ipa_ctx->apps_to_ipa_hdl = IPA_CLNT_HDL_BAD;
 	}
 
 	netif_napi_del(&wwan_ptr->napi);
