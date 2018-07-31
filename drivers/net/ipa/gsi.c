@@ -1380,12 +1380,6 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 	dma_addr_t phys_base;
 	dma_addr_t last;
 
-	if (props->mem.size % 16) {
-		ipa_err("bad params mem.size %u not a multiple of re size %u\n",
-			props->mem.size, GSI_RING_ELEMENT_SIZE);
-		return -EINVAL;
-	}
-
 	phys_base = props->mem.phys_base;
 	last = phys_base + props->mem.size - GSI_RING_ELEMENT_SIZE;
 
