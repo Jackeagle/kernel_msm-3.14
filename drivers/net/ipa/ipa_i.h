@@ -250,7 +250,7 @@ struct ipa_status_stats {
  * @napi_enabled: when true, IPA call client callback to start polling
  */
 struct ipa_ep_context {
-	int valid;
+	bool valid;
 	enum ipa_client_type client;
 	unsigned long gsi_chan_hdl;
 	unsigned long gsi_evt_ring_hdl;

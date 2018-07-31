@@ -757,7 +757,7 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 	ipa_ep_idx = ipa_get_ep_mapping(sys_in->client);
 
 	ep = &ipa_ctx->ep[ipa_ep_idx];
-	if (ep->valid == 1) {
+	if (ep->valid) {
 		ipa_err("EP %u already allocated.\n", ipa_ep_idx);
 		goto fail_gen;
 	}
@@ -800,7 +800,7 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 		goto fail_gen2;
 	}
 
-	ep->valid = 1;
+	ep->valid = true;
 	ep->client = sys_in->client;
 	ep->client_notify = sys_in->notify;
 	ep->napi_enabled = sys_in->napi_enabled;
@@ -882,11 +882,8 @@ int ipa_teardown_sys_pipe(u32 clnt_hdl)
 	int result;
 	int i;
 
-	if (clnt_hdl >= ipa_ctx->ipa_num_pipes ||
-	    ipa_ctx->ep[clnt_hdl].valid == 0) {
-		ipa_err("bad parm.\n");
+	if (clnt_hdl >= ipa_ctx->ipa_num_pipes || !ipa_ctx->ep[clnt_hdl].valid)
 		return -EINVAL;
-	}
 
 	ep = &ipa_ctx->ep[clnt_hdl];
 
@@ -936,7 +933,7 @@ int ipa_teardown_sys_pipe(u32 clnt_hdl)
 			ipa_debug("modem cfg emb pipe flt\n");
 	}
 
-	ep->valid = 0;
+	ep->valid = false;
 	ipa_client_remove();
 
 	ipa_debug("client (ep: %d) disconnected\n", clnt_hdl);
@@ -1923,8 +1920,9 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 	ep = &ipa_ctx->ep[src_pipe];
 	if (src_pipe >= ipa_ctx->ipa_num_pipes || !ep->valid ||
 	    !ep->client_notify) {
-		ipa_err("drop pipe=%d ep_valid=%d client_notify=%p\n",
-			src_pipe, ep->valid, ep->client_notify);
+		ipa_err("drop pipe=%d ep_valid=%s client_notify=%p\n",
+			src_pipe, ep->valid ? "true" : "false",
+			ep->client_notify);
 		dev_kfree_skb_any(rx_skb);
 		return;
 	}
