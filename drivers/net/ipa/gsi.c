@@ -1377,19 +1377,6 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, u8 evt_id)
 
 static int gsi_validate_channel_props(struct gsi_chan_props *props)
 {
-	dma_addr_t phys_base;
-	dma_addr_t last;
-
-	phys_base = props->mem.phys_base;
-	last = phys_base + props->mem.size - GSI_RING_ELEMENT_SIZE;
-
-	/* MSB should stay same within the ring */
-	if ((phys_base & GENMASK_ULL(63, 32)) != (last & GENMASK_ULL(63, 32))) {
-		ipa_err("MSB is not fixed on ring base 0x%llx size 0x%x\n",
-			phys_base, props->mem.size);
-		return -EINVAL;
-	}
-
 	return 0;
 }
 
@@ -1408,6 +1395,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 		ipa_err("fail to dma alloc %u bytes\n", size);
 		return -ENOMEM;
 	}
+	ipa_assert(!(props->mem.size % roundup_pow_of_two(size)));
 	ipa_assert(!(props->mem.phys_base % roundup_pow_of_two(size)));
 
 	if (gsi_validate_channel_props(props)) {
