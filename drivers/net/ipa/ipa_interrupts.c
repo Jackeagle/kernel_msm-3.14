@@ -351,31 +351,30 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
  */
 int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
 {
-	int idx;
-	int res = 0;
-
-	for (idx = 0; idx < IPA_IRQ_NUM_MAX; idx++) {
-		ipa_interrupt_to_cb[idx].handler = NULL;
-		ipa_interrupt_to_cb[idx].interrupt_data = 0;
-		ipa_interrupt_to_cb[idx].interrupt = -1;
-		ipa_interrupt_to_cb[idx].deferred_flag = false;
-	}
+	int ret;
+	int i;
 
 	ipa_interrupt_wq = create_singlethread_workqueue("ipa_interrupt_wq");
-	if (!ipa_interrupt_wq) {
-		ipa_err("workqueue creation failed\n");
+	if (!ipa_interrupt_wq)
 		return -ENOMEM;
-	}
 
-	res = request_irq(ipa_irq, ipa_isr, IRQF_TRIGGER_RISING, "ipa",
+	ret = request_irq(ipa_irq, ipa_isr, IRQF_TRIGGER_RISING, "ipa",
 			  ipa_dev);
-	if (res) {
-		ipa_err("fail to register IPA IRQ handler irq=%d\n", ipa_irq);
-		return -ENODEV;
+	if (ret) {
+		destroy_workqueue(ipa_interrupt_wq);
+		ipa_interrupt_wq = NULL;
+		return ret;
 	}
-	ipa_debug("IPA IRQ handler irq=%d registered\n", ipa_irq);
 
 	spin_lock_init(&suspend_wa_lock);
+
+	for (i = 0; i < IPA_IRQ_NUM_MAX; i++) {
+		ipa_interrupt_to_cb[i].handler = NULL;
+		ipa_interrupt_to_cb[i].interrupt_data = 0;
+		ipa_interrupt_to_cb[i].interrupt = -1;
+		ipa_interrupt_to_cb[i].deferred_flag = false;
+	}
+
 	return 0;
 }
 
