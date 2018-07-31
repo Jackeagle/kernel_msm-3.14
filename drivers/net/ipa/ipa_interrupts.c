@@ -69,6 +69,7 @@ static void ipa_deferred_interrupt_work(struct work_struct *work)
 	interrupt_info->interrupt_data = 0;
 }
 
+/* Returns true if *any* bit in the suspend mask represents a valid endpoint */
 static bool ipa_is_valid_ep(u32 ep_suspend_data)
 {
 	while (ep_suspend_data) {
