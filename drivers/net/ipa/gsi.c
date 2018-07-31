@@ -1378,12 +1378,12 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, u8 evt_id)
 long gsi_alloc_channel(struct gsi_chan_props *props)
 {
 	u32 size = props->ring_count * GSI_RING_ELEMENT_SIZE;
-	struct gsi_chan_ctx *chan;
-	struct gsi_evt_ctx *evtr;
+	u8 evt_id = (u8)props->evt_ring_hdl;
+	struct gsi_evt_ctx *evtr = &gsi_ctx->evtr[evt_id];
+	long chan_id = (long)props->ch_id;
+	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
 	size_t count;
-	u8 evt_id;
 	void **user_data;
-	long chan_id;
 	u32 completed;
 
 	if (ipahal_dma_alloc(&props->mem, size, GFP_KERNEL)) {
@@ -1393,16 +1393,12 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	ipa_assert(!(props->mem.size % roundup_pow_of_two(size)));
 	ipa_assert(!(props->mem.phys_base % roundup_pow_of_two(size)));
 
-	evt_id = props->evt_ring_hdl;
-	evtr = &gsi_ctx->evtr[evt_id];
 	if (atomic_read(&evtr->chan_ref_cnt)) {
 		ipa_err("evt ring %hhu in use\n", evt_id);
 		ipahal_dma_free(&props->mem);
 		return -ENOTSUPP;
 	}
 
-	chan_id = (long)props->ch_id;
-	chan = &gsi_ctx->chan[chan_id];
 	if (chan->allocated) {
 		ipa_err("chan %ld already allocated\n", chan_id);
 		ipahal_dma_free(&props->mem);
