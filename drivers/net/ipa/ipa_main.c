@@ -817,34 +817,23 @@ static void ipa_suspend_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 	}
 }
 
-/** ipa_init_interrupts() - Register to IPA IRQs
- *
- * Return codes: 0 in success, negative in failure
- *
- */
+/** ipa_init_interrupts() - Register to IPA IRQs */
 static int ipa_init_interrupts(void)
 {
-	int result;
 	int ipa_irq;
+	int ret;
 
-	/* Get IPA IRQ number */
 	ipa_irq = platform_get_irq_byname(ipa_ctx->ipa_pdev, "ipa-irq");
-	if (ipa_irq < 0) {
-		ipa_err(":failed to get ipa-irq!\n");
-		return -ENODEV;
-	}
-	ipa_debug(":ipa-irq = %d\n", ipa_irq);
+	if (ipa_irq < 0)
+		return ipa_irq;
 
-	/*register IPA IRQ handler*/
-	result = ipa_interrupts_init(ipa_irq, &ipa_ctx->ipa_pdev->dev);
-	if (result) {
-		ipa_err("ipa interrupts initialization failed\n");
-		return -ENODEV;
-	}
+	ret = ipa_interrupts_init(ipa_irq, &ipa_ctx->ipa_pdev->dev);
+	if (ret)
+		return ret;
 
-	/*add handler for suspend interrupt*/
 	ipa_add_interrupt_handler(IPA_TX_SUSPEND_IRQ, ipa_suspend_handler,
 				  false);
+
 	return 0;
 }
 
