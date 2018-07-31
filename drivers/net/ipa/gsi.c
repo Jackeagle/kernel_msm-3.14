@@ -1390,11 +1390,6 @@ static int gsi_validate_channel_props(struct gsi_chan_props *props)
 		return -EINVAL;
 	}
 
-	if (!props->mem.base) {
-		ipa_err("GPI protocol requires ring base VA\n");
-		return -EINVAL;
-	}
-
 	if (props->low_weight > GSI_MAX_CH_LOW_WEIGHT) {
 		ipa_err("invalid channel low weight %u\n", props->low_weight);
 		return -EINVAL;
