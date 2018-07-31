@@ -1231,14 +1231,7 @@ long gsi_alloc_evt_ring(u32 ring_count, u16 int_modt)
 		ret = -ENOMEM;
 		goto err_free_bmap;
 	}
-
-	/* Verify the result meets our alignment requirements */
-	if (evtr->mem.phys_base % roundup_pow_of_two(size)) {
-		ipa_err("ring base %pad not aligned to 0x%lx\n",
-			&evtr->mem.phys_base, roundup_pow_of_two(size));
-		ret = -EINVAL;
-		goto err_free_dma;
-	}
+	ipa_assert(!(evtr->mem.phys_base % roundup_pow_of_two(size)));
 
 	evtr->id = evt_id;
 	evtr->int_modt = int_modt;
