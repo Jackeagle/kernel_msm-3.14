@@ -1420,8 +1420,6 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	long chan_id;
 	u32 completed;
 
-	ipa_bug_on(props->ch_id >= gsi_ctx->max_ch);
-
 	if (ipahal_dma_alloc(&props->mem, size, GFP_KERNEL)) {
 		ipa_err("fail to dma alloc %u bytes\n", size);
 		return -ENOMEM;
