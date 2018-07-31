@@ -1177,6 +1177,8 @@ static u32 evt_ring_command(unsigned long evt_id, enum gsi_evt_ch_cmd_opcode op)
 	struct completion *compl = &gsi_ctx->evtr[evt_id].compl;
 	u32 val;
 
+	reinit_completion(compl);
+
 	val = field_gen((u32)evt_id, EV_CHID_BMSK);
 	val |= field_gen((u32)op, EV_OPCODE_BMSK);
 
@@ -1304,7 +1306,6 @@ void gsi_dealloc_evt_ring(unsigned long evt_id)
 	ipa_bug_on(evtr->state != GSI_EVT_RING_STATE_ALLOCATED);
 
 	mutex_lock(&gsi_ctx->mlock);
-	reinit_completion(&evtr->compl);
 
 	completed = evt_ring_command(evt_id, GSI_EVT_DE_ALLOC);
 	ipa_bug_on(!completed);
@@ -1330,7 +1331,6 @@ void gsi_reset_evt_ring(unsigned long evt_id)
 	ipa_bug_on(evtr->state != GSI_EVT_RING_STATE_ALLOCATED);
 
 	mutex_lock(&gsi_ctx->mlock);
-	reinit_completion(&evtr->compl);
 
 	completed = evt_ring_command(evt_id, GSI_EVT_RESET);
 	ipa_bug_on(!completed);
