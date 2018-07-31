@@ -839,16 +839,22 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 
 	ipa_info("rmnet_ipa started deinitialization\n");
 	mutex_lock(&rmnet_ipa_ctx->pipe_handle_guard);
-	ret = ipa_teardown_sys_pipe(rmnet_ipa_ctx->ipa_to_apps_hdl);
-	if (ret < 0)
-		ipa_err("Failed to teardown IPA->APPS pipe\n");
-	else
-		rmnet_ipa_ctx->ipa_to_apps_hdl = IPA_CLNT_HDL_BAD;
-	ret = ipa_teardown_sys_pipe(rmnet_ipa_ctx->apps_to_ipa_hdl);
-	if (ret < 0)
-		ipa_err("Failed to teardown APPS->IPA pipe\n");
-	else
-		rmnet_ipa_ctx->apps_to_ipa_hdl = IPA_CLNT_HDL_BAD;
+	if (rmnet_ipa_ctx->ipa_to_apps_hdl != IPA_CLNT_HDL_BAD) {
+		ret = ipa_teardown_sys_pipe(rmnet_ipa_ctx->ipa_to_apps_hdl);
+		if (ret < 0)
+			ipa_err("Failed to teardown IPA->APPS pipe\n");
+		else
+			rmnet_ipa_ctx->ipa_to_apps_hdl = IPA_CLNT_HDL_BAD;
+	}
+
+	if (rmnet_ipa_ctx->apps_to_ipa_hdl != IPA_CLNT_HDL_BAD) {
+		ret = ipa_teardown_sys_pipe(rmnet_ipa_ctx->apps_to_ipa_hdl);
+		if (ret < 0)
+			ipa_err("Failed to teardown APPS->IPA pipe\n");
+		else
+			rmnet_ipa_ctx->apps_to_ipa_hdl = IPA_CLNT_HDL_BAD;
+	}
+
 	netif_napi_del(&wwan_ptr->napi);
 	mutex_unlock(&rmnet_ipa_ctx->pipe_handle_guard);
 	unregister_netdev(rmnet_ipa_ctx->dev);
