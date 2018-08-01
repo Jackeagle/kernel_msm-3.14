@@ -15,7 +15,6 @@
 
 struct ipa_interrupt_info {
 	ipa_irq_handler_t handler;
-	u32 interrupt_data;
 	enum ipa_irq_type interrupt;
 };
 
@@ -224,7 +223,6 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 
 	interrupt_info = &ipa_interrupt_to_cb[irq_num];
 	interrupt_info->handler = handler;
-	interrupt_info->interrupt_data = 0;
 	interrupt_info->interrupt = interrupt;
 
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
@@ -269,7 +267,6 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 
 	interrupt_info = &ipa_interrupt_to_cb[irq_num];
 	interrupt_info->handler = NULL;
-	interrupt_info->interrupt_data = 0;
 	interrupt_info->interrupt = -1;
 
 	/* Unregister SUSPEND_IRQ_EN_EE_N_ADDR for L2 interrupt.
@@ -316,7 +313,6 @@ int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
 
 	for (i = 0; i < IPA_IRQ_NUM_MAX; i++) {
 		ipa_interrupt_to_cb[i].handler = NULL;
-		ipa_interrupt_to_cb[i].interrupt_data = 0;
 		ipa_interrupt_to_cb[i].interrupt = -1;
 	}
 
