@@ -16,10 +16,7 @@
 
 struct device;
 
-extern struct platform_driver qcom_video_firmware_driver;
-
-int venus_boot(struct venus_core *core);
-int venus_shutdown(struct venus_core *core);
-int venus_set_hw_state(struct venus_core *core, bool suspend);
+int venus_boot(struct device *dev, const char *fwname);
+int venus_shutdown(struct device *dev);
 
 #endif

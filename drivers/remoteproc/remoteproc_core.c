@@ -1083,9 +1083,6 @@ static void rproc_coredump(struct rproc *rproc)
 	if (list_empty(&rproc->dump_segments))
 		return;
 
-	if (rproc_prepare_coredump(rproc))
-		return;
-
 	data_size = sizeof(*ehdr);
 	list_for_each_entry(segment, &rproc->dump_segments, node) {
 		data_size += sizeof(*phdr) + segment->size;
@@ -1142,8 +1139,6 @@ static void rproc_coredump(struct rproc *rproc)
 	}
 
 	dev_coredumpv(&rproc->dev, data, data_size, GFP_KERNEL);
-
-	rproc_unprepare_coredump(rproc);
 }
 
 /**

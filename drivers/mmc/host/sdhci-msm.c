@@ -43,9 +43,7 @@
 #define CORE_PWRCTL_IO_LOW	BIT(2)
 #define CORE_PWRCTL_IO_HIGH	BIT(3)
 #define CORE_PWRCTL_BUS_SUCCESS BIT(0)
-#define CORE_PWRCTL_BUS_FAIL    BIT(1)
 #define CORE_PWRCTL_IO_SUCCESS	BIT(2)
-#define CORE_PWRCTL_IO_FAIL     BIT(3)
 #define REQ_BUS_OFF		BIT(0)
 #define REQ_BUS_ON		BIT(1)
 #define REQ_IO_LOW		BIT(2)
@@ -260,7 +258,6 @@ struct sdhci_msm_host {
 	bool mci_removed;
 	const struct sdhci_msm_variant_ops *var_ops;
 	const struct sdhci_msm_offset *offset;
-	bool pltfm_init_done;
 };
 
 static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
@@ -1317,9 +1314,8 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
 {
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-	struct mmc_host *mmc = host->mmc;
 	u32 irq_status, irq_ack = 0;
-	int retry = 10, ret = 0;
+	int retry = 10;
 	u32 pwr_state = 0, io_level = 0;
 	u32 config;
 	const struct sdhci_msm_offset *msm_offset = msm_host->offset;
@@ -1355,59 +1351,14 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
 
 	/* Handle BUS ON/OFF*/
 	if (irq_status & CORE_PWRCTL_BUS_ON) {
-		if (mmc->supply.vmmc) {
-			ret = regulator_set_load(mmc->supply.vmmc, 800000);
-			ret |= mmc_regulator_set_ocr(mmc, mmc->supply.vmmc,
-					mmc->ios.vdd);
-			if (ret)
-				pr_err("%s: vmmc enable failed: %d\n",
-						mmc_hostname(mmc), ret);
-		}
-		if (mmc->supply.vqmmc && !ret) {
-			ret = regulator_set_load(mmc->supply.vqmmc, 22000);
-			ret |= mmc_regulator_set_ocr(mmc, mmc->supply.vqmmc,
-					mmc->ios.vdd);
-			if (!ret)
-				ret = regulator_enable(mmc->supply.vqmmc);
-			if (ret)
-				pr_err("%s: vqmmc enable failed: %d\n",
-						mmc_hostname(mmc), ret);
-		}
-		if (!ret) {
-			pwr_state = REQ_BUS_ON;
-			io_level = REQ_IO_HIGH;
-			irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
-		} else {
-			pr_err("%s: BUS_ON req failed(%d). irq_status: 0x%08x\n",
-					mmc_hostname(mmc), ret, irq_status);
-			irq_ack |= CORE_PWRCTL_BUS_FAIL;
-		}
+		pwr_state = REQ_BUS_ON;
+		io_level = REQ_IO_HIGH;
+		irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
 	}
 	if (irq_status & CORE_PWRCTL_BUS_OFF) {
-		if (mmc->supply.vmmc && msm_host->pltfm_init_done) {
-			ret = regulator_set_load(mmc->supply.vmmc, 0);
-			ret |= mmc_regulator_set_ocr(mmc, mmc->supply.vmmc,
-					mmc->ios.vdd);
-			if (ret)
-				pr_err("%s: vqmmc disabling failed: %d\n",
-						mmc_hostname(mmc), ret);
-		}
-		if (mmc->supply.vqmmc && msm_host->pltfm_init_done && !ret) {
-			ret = regulator_set_load(mmc->supply.vqmmc, 0);
-			ret |= regulator_disable(mmc->supply.vqmmc);
-			if (ret)
-				pr_err("%s: vqmmc disabling failed: %d\n",
-						mmc_hostname(mmc), ret);
-		}
-		if (!ret) {
-			pwr_state = REQ_BUS_OFF;
-			io_level = REQ_IO_LOW;
-			irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
-		} else {
-			pr_err("%s: BUS_ON req failed(%d). irq_status: 0x%08x\n",
-					mmc_hostname(mmc), ret, irq_status);
-			irq_ack |= CORE_PWRCTL_BUS_FAIL;
-		}
+		pwr_state = REQ_BUS_OFF;
+		io_level = REQ_IO_LOW;
+		irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
 	}
 	/* Handle IO LOW/HIGH */
 	if (irq_status & CORE_PWRCTL_IO_LOW) {
@@ -1417,15 +1368,6 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
 	if (irq_status & CORE_PWRCTL_IO_HIGH) {
 		io_level = REQ_IO_HIGH;
 		irq_ack |= CORE_PWRCTL_IO_SUCCESS;
-	}
-
-	if (io_level && mmc->supply.vqmmc && !pwr_state) {
-		ret = mmc_regulator_set_vqmmc(mmc, &mmc->ios);
-		if (ret)
-			pr_err("%s: IO_level setting failed(%d). signal_voltage: %d, vdd: %d irq_status: 0x%08x\n",
-					mmc_hostname(mmc), ret,
-					mmc->ios.signal_voltage, mmc->ios.vdd,
-					irq_status);
 	}
 
 	/*
@@ -1473,9 +1415,10 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
 		msm_host->curr_pwr_state = pwr_state;
 	if (io_level)
 		msm_host->curr_io_level = io_level;
+
 	pr_debug("%s: %s: Handled IRQ(%d), irq_status=0x%x, ack=0x%x\n",
-			mmc_hostname(msm_host->mmc), __func__,
-			irq, irq_status, irq_ack);
+		mmc_hostname(msm_host->mmc), __func__, irq, irq_status,
+		irq_ack);
 }
 
 static irqreturn_t sdhci_msm_pwr_irq(int irq, void *data)
@@ -1662,19 +1605,6 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
 	pr_debug("%s: supported caps: 0x%08x\n", mmc_hostname(mmc), caps);
 }
 
-static int sdhci_msm_register_vreg(struct sdhci_msm_host *msm_host)
-{
-	int ret = 0;
-
-	ret = mmc_regulator_get_supply(msm_host->mmc);
-	if (ret)
-		return ret;
-	sdhci_msm_set_regulator_caps(msm_host);
-
-	return 0;
-
-}
-
 static const struct sdhci_msm_variant_ops mci_var_ops = {
 	.msm_readl_relaxed = sdhci_msm_mci_variant_readl_relaxed,
 	.msm_writel_relaxed = sdhci_msm_mci_variant_writel_relaxed,
@@ -1720,8 +1650,7 @@ static const struct sdhci_pltfm_data sdhci_msm_pdata = {
 	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
 		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
 		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-		   SDHCI_QUIRK2_INTERNAL_PWR_CTL,
+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
 	.ops = &sdhci_msm_ops,
 };
 
@@ -1890,10 +1819,6 @@ static int sdhci_msm_probe(struct platform_device *pdev)
 				msm_offset->core_vendor_spec_capabilities0);
 	}
 
-	ret = sdhci_msm_register_vreg(msm_host);
-	if (ret == -EPROBE_DEFER)
-		goto clk_disable;
-
 	/*
 	 * Power on reset state may trigger power irq if previous status of
 	 * PWRCTL was either BUS_ON or IO_HIGH_V. So before enabling pwr irq
@@ -1942,7 +1867,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
 	ret = sdhci_add_host(host);
 	if (ret)
 		goto pm_runtime_disable;
-	msm_host->pltfm_init_done = true;
+	sdhci_msm_set_regulator_caps(msm_host);
 
 	pm_runtime_mark_last_busy(&pdev->dev);
 	pm_runtime_put_autosuspend(&pdev->dev);

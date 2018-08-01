@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012-2016, The Linux Foundation. All rights reserved.
- * Copyright (C) 2017-2018, Linaro Ltd.
+ * Copyright (C) 2017 Linaro Ltd.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -24,7 +24,7 @@
 #include "hfi_cmds.h"
 #include "hfi_venus.h"
 
-#define TIMEOUT		msecs_to_jiffies(10000)
+#define TIMEOUT		msecs_to_jiffies(1000)
 
 static u32 to_codec_type(u32 pixfmt)
 {
@@ -49,8 +49,6 @@ static u32 to_codec_type(u32 pixfmt)
 		return HFI_VIDEO_CODEC_VP9;
 	case V4L2_PIX_FMT_XVID:
 		return HFI_VIDEO_CODEC_DIVX;
-	case V4L2_PIX_FMT_HEVC:
-		return HFI_VIDEO_CODEC_HEVC;
 	default:
 		return 0;
 	}
@@ -205,15 +203,13 @@ int hfi_session_init(struct venus_inst *inst, u32 pixfmt)
 {
 	struct venus_core *core = inst->core;
 	const struct hfi_ops *ops = core->ops;
+	u32 codec;
 	int ret;
 
-	if (inst->state >= INST_INIT && inst->state < INST_STOP)
-		return 0;
-
-	inst->hfi_codec = to_codec_type(pixfmt);
+	codec = to_codec_type(pixfmt);
 	reinit_completion(&inst->done);
 
-	ret = ops->session_init(inst, inst->session_type, inst->hfi_codec);
+	ret = ops->session_init(inst, inst->session_type, codec);
 	if (ret)
 		return ret;
 
@@ -316,7 +312,7 @@ int hfi_session_continue(struct venus_inst *inst)
 {
 	struct venus_core *core = inst->core;
 
-	if (core->res->hfi_version == HFI_VERSION_1XX)
+	if (core->res->hfi_version != HFI_VERSION_3XX)
 		return 0;
 
 	return core->ops->session_continue(inst);
@@ -387,14 +383,14 @@ int hfi_session_unload_res(struct venus_inst *inst)
 	return 0;
 }
 
-int hfi_session_flush(struct venus_inst *inst, u32 mode)
+int hfi_session_flush(struct venus_inst *inst)
 {
 	const struct hfi_ops *ops = inst->core->ops;
 	int ret;
 
 	reinit_completion(&inst->done);
 
-	ret = ops->session_flush(inst, mode);
+	ret = ops->session_flush(inst, HFI_FLUSH_ALL);
 	if (ret)
 		return ret;
 
@@ -477,8 +473,7 @@ int hfi_session_process_buf(struct venus_inst *inst, struct hfi_frame_data *fd)
 
 	if (fd->buffer_type == HFI_BUFFER_INPUT)
 		return ops->session_etb(inst, fd);
-	else if (fd->buffer_type == HFI_BUFFER_OUTPUT ||
-		 fd->buffer_type == HFI_BUFFER_OUTPUT2)
+	else if (fd->buffer_type == HFI_BUFFER_OUTPUT)
 		return ops->session_ftb(inst, fd);
 
 	return -EINVAL;
