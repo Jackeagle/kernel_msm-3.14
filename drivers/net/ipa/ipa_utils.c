@@ -1070,20 +1070,25 @@ void ipa_cfg_ep_status(u32 clnt_hdl,
 	ipahal_write_reg_n_fields(IPA_ENDP_STATUS_n, clnt_hdl, ep_status);
 }
 
-/* Suspend a consumer endpoint */
-static void ipa_cfg_ep_ctrl(u32 ipa_ep_idx, bool suspend)
+static void suspend_consumer_endpoint(u32 ipa_ep_idx)
 {
-	struct ipa_ep_cfg_ctrl cfg = { };
-
-	ipa_debug("pipe=%u ep_suspend=%d, ep_delay=0\n", ipa_ep_idx,
-		  suspend ? 1 : 0);
-
-	cfg.ipa_ep_suspend = suspend;
+	struct ipa_ep_cfg_ctrl cfg = { .ipa_ep_suspend = true };
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n, ipa_ep_idx, &cfg);
 
-	if (suspend)
-		ipa_suspend_active_aggr_wa(ipa_ep_idx);
+	/* Due to a hardware bug, a client suspended with an open
+	 * aggregation frame will not generate a SUSPEND IPA interrupt.
+	 * We work around this by force-closing the aggregation frame,
+	 * then simulating the arrival of such an interrupt.
+	 */
+	ipa_suspend_active_aggr_wa(ipa_ep_idx);
+}
+
+static void resume_consumer_endpoint(u32 ipa_ep_idx)
+{
+	struct ipa_ep_cfg_ctrl cfg = { .ipa_ep_suspend = false };
+
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n, ipa_ep_idx, &cfg);
 }
 
 struct msm_bus_scale_pdata *ipa_bus_scale_table_init(void)
@@ -1281,7 +1286,7 @@ static void suspend_consumer_pipe(enum ipa_client_type client)
 
 	ipa_debug("pipe %u\n", ipa_ep_idx);
 
-	ipa_cfg_ep_ctrl(ipa_ep_idx, true);
+	suspend_consumer_endpoint(ipa_ep_idx);
 	ipa_gsi_poll_after_suspend(ep);
 }
 
@@ -1299,7 +1304,7 @@ static void resume_consumer_pipe(enum ipa_client_type client)
 
 	ipa_debug("pipe %u\n", ipa_ep_idx);
 
-	ipa_cfg_ep_ctrl(ipa_ep_idx, false);
+	resume_consumer_endpoint(ipa_ep_idx);
 	if (!atomic_read(&ep->sys->curr_polling_state))
 		gsi_channel_intr_enable(ep->gsi_chan_hdl);
 }
