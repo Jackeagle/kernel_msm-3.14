@@ -57,7 +57,7 @@ static const int ipa_irq_mapping[IPA_IRQ_MAX] = {
 static void ipa_interrupt_work_func(struct work_struct *work);
 static DECLARE_WORK(ipa_interrupt_work, ipa_interrupt_work_func);
 
-static void ipa_deferred_interrupt_work(struct work_struct *work)
+static void simulated_suspend_work_func(struct work_struct *work)
 {
 	struct ipa_interrupt_info *interrupt_info;
 
@@ -386,6 +386,6 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 
 	interrupt_info->interrupt_data = clnt_mask;
 
-	INIT_WORK(&interrupt_info->work, ipa_deferred_interrupt_work);
+	INIT_WORK(&interrupt_info->work, simulated_suspend_work_func);
 	queue_work(ipa_interrupt_wq, &interrupt_info->work);
 }
