@@ -28,7 +28,7 @@ static void ipa_tx_suspend_interrupt_wa(void);
 static void ipa_enable_tx_suspend_wa(struct work_struct *work);
 static DECLARE_DELAYED_WORK(dwork_en_suspend_int, ipa_enable_tx_suspend_wa);
 static spinlock_t suspend_wa_lock;
-static void ipa_process_interrupts(bool isr_context);
+static void ipa_process_interrupts(void);
 
 /* Unsupported interrupt types have value -1 in this table */
 static const int ipa_irq_mapping[IPA_IRQ_MAX] = {
@@ -136,7 +136,7 @@ static void ipa_enable_tx_suspend_wa(struct work_struct *work)
 	val |= BIT(irq_num);
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
 
-	ipa_process_interrupts(false);
+	ipa_process_interrupts();
 
 	ipa_client_remove();
 }
@@ -163,7 +163,7 @@ static inline bool is_uc_irq(int irq_num)
 		ipa_interrupt_to_cb[irq_num].interrupt <= IPA_UC_IRQ_3;
 }
 
-static void ipa_process_interrupts(bool isr_context)
+static void ipa_process_interrupts(void)
 {
 	unsigned long flags;
 
@@ -207,7 +207,7 @@ static void ipa_process_interrupts(bool isr_context)
 			 */
 			spin_unlock_irqrestore(&suspend_wa_lock, flags);
 
-			ipa_handle_interrupt(i, isr_context);
+			ipa_handle_interrupt(i, false);
 
 			spin_lock_irqsave(&suspend_wa_lock, flags);
 
@@ -228,7 +228,7 @@ static void ipa_interrupt_defer(struct work_struct *work)
 {
 	ipa_client_add();
 
-	ipa_process_interrupts(false);
+	ipa_process_interrupts();
 
 	ipa_client_remove();
 }
