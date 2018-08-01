@@ -23,7 +23,6 @@ static struct workqueue_struct *ipa_interrupt_wq;
 
 static void enable_tx_suspend_work_func(struct work_struct *work);
 static DECLARE_DELAYED_WORK(tx_suspend_work, enable_tx_suspend_work_func);
-static spinlock_t suspend_wa_lock;
 
 static const int ipa_irq_mapping[] = {
 	[IPA_INVALID_IRQ]			= -1,
@@ -86,11 +85,7 @@ static inline bool is_uc_irq(int irq_num)
 
 static void ipa_process_interrupts(void)
 {
-	unsigned long flags;
-
 	ipa_debug_low("Enter\n");
-
-	spin_lock_irqsave(&suspend_wa_lock, flags);
 
 	while (true) {
 		u32 ipa_intr_mask;
@@ -121,16 +116,7 @@ static void ipa_process_interrupts(void)
 				ipahal_write_reg_n(IPA_IRQ_CLR_EE_n, IPA_EE_AP,
 						   imask);
 
-			/* Handle the interrupt with spin_lock unlocked to
-			 * avoid calling client in atomic context.  Mutual
-			 * exclusion still preserved as the read/clr is done
-			 * with spin_lock locked.
-			 */
-			spin_unlock_irqrestore(&suspend_wa_lock, flags);
-
 			ipa_handle_interrupt(i);
-
-			spin_lock_irqsave(&suspend_wa_lock, flags);
 
 			/* Clear non uC interrupt after processing
 			 * to avoid clearing interrupt data
@@ -141,7 +127,6 @@ static void ipa_process_interrupts(void)
 		} while ((ipa_intr_mask ^= imask));
 	}
 
-	spin_unlock_irqrestore(&suspend_wa_lock, flags);
 	ipa_debug_low("Exit\n");
 }
 
@@ -284,8 +269,6 @@ int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
 		ipa_interrupt_wq = NULL;
 		return ret;
 	}
-
-	spin_lock_init(&suspend_wa_lock);
 
 	return 0;
 }
