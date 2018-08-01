@@ -273,7 +273,7 @@ int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
 {
 	int ret;
 
-	ipa_interrupt_wq = create_singlethread_workqueue("ipa_interrupt_wq");
+	ipa_interrupt_wq = alloc_ordered_workqueue("ipa_interrupt_wq", 0);
 	if (!ipa_interrupt_wq)
 		return -ENOMEM;
 
