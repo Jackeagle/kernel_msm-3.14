@@ -58,14 +58,14 @@ static DECLARE_WORK(ipa_interrupt_work, ipa_interrupt_work_func);
 
 static void ipa_handle_interrupt(int irq_num)
 {
-	struct ipa_interrupt_info *interrupt_info;
+	struct ipa_interrupt_info *intr_info;
 	u32 endpoints = 0;	/* Only TX_SUSPEND uses its interrupt_data */
 
-	interrupt_info = &ipa_interrupt_to_cb[irq_num];
-	if (!interrupt_info->handler)
+	intr_info = &ipa_interrupt_to_cb[irq_num];
+	if (!intr_info->handler)
 		return;
 
-	if (interrupt_info->interrupt == IPA_TX_SUSPEND_IRQ) {
+	if (intr_info->interrupt == IPA_TX_SUSPEND_IRQ) {
 		/* Implement a workaround for a hardware problem */
 		ipa_tx_suspend_interrupt_wa();
 
@@ -76,7 +76,7 @@ static void ipa_handle_interrupt(int irq_num)
 				   endpoints);
 	}
 
-	interrupt_info->handler(interrupt_info->interrupt, endpoints);
+	intr_info->handler(intr_info->interrupt, endpoints);
 }
 
 /* Re-enable the IPA TX_SUSPEND interrupt after having been disabled
@@ -239,7 +239,7 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 			       ipa_irq_handler_t handler)
 {
 	int irq_num = ipa_irq_mapping[interrupt];
-	struct ipa_interrupt_info *interrupt_info;
+	struct ipa_interrupt_info *intr_info;
 	u32 val;
 
 	ipa_debug("%s: interrupt_enum %d irq_num %d\n", __func__,
@@ -247,9 +247,9 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 
 	ipa_assert(irq_num >= 0);
 
-	interrupt_info = &ipa_interrupt_to_cb[irq_num];
-	interrupt_info->handler = handler;
-	interrupt_info->interrupt = interrupt;
+	intr_info = &ipa_interrupt_to_cb[irq_num];
+	intr_info->handler = handler;
+	intr_info->interrupt = interrupt;
 
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
 	ipa_debug("read IPA_IRQ_EN_EE_n register. reg = %d\n", val);
@@ -269,12 +269,12 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 {
 	int irq_num = ipa_irq_mapping[interrupt];
-	struct ipa_interrupt_info *interrupt_info;
+	struct ipa_interrupt_info *intr_info;
 	u32 val;
 
-	interrupt_info = &ipa_interrupt_to_cb[irq_num];
-	interrupt_info->handler = NULL;
-	interrupt_info->interrupt = IPA_INVALID_IRQ;
+	intr_info = &ipa_interrupt_to_cb[irq_num];
+	intr_info->handler = NULL;
+	intr_info->interrupt = IPA_INVALID_IRQ;
 
 	if (interrupt == IPA_TX_SUSPEND_IRQ)
 		tx_suspend_disable();
@@ -323,7 +323,7 @@ int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
  */
 void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 {
-	struct ipa_interrupt_info *interrupt_info;
+	struct ipa_interrupt_info *intr_info;
 	u32 clnt_mask = BIT(clnt_hdl);
 	int irq_num;
 
@@ -337,7 +337,7 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 	/* Simulate suspend IRQ */
 	ipa_assert(!in_interrupt());
 	irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
-	interrupt_info = &ipa_interrupt_to_cb[irq_num];
-	if (interrupt_info->handler)
-		interrupt_info->handler(interrupt_info->interrupt, clnt_mask);
+	intr_info = &ipa_interrupt_to_cb[irq_num];
+	if (intr_info->handler)
+		intr_info->handler(intr_info->interrupt, clnt_mask);
 }
