@@ -10,8 +10,8 @@
 
 #define IPA_IRQ_NUM_MAX 32
 
-/* Workaround disables SUSPEND interrupt for this long */
-#define DIS_SUSPEND_INTR_DELAY	msecs_to_jiffies(5)
+/* Workaround disables TX_SUSPEND interrupt for this long */
+#define DIS_TX_SUSPEND_INTR_DELAY	msecs_to_jiffies(5)
 
 struct ipa_interrupt_info {
 	struct work_struct work;
@@ -25,8 +25,8 @@ static struct ipa_interrupt_info ipa_interrupt_to_cb[IPA_IRQ_NUM_MAX];
 static struct workqueue_struct *ipa_interrupt_wq;
 
 static void ipa_tx_suspend_interrupt_wa(void);
-static void ipa_enable_tx_suspend_wa(struct work_struct *work);
-static DECLARE_DELAYED_WORK(dwork_en_suspend_int, ipa_enable_tx_suspend_wa);
+static void enable_tx_suspend_work_func(struct work_struct *work);
+static DECLARE_DELAYED_WORK(tx_suspend_work, enable_tx_suspend_work_func);
 static spinlock_t suspend_wa_lock;
 static void ipa_process_interrupts(void);
 
@@ -116,8 +116,12 @@ static void ipa_handle_interrupt(int irq_num)
 	interrupt_info->handler(interrupt_info->interrupt, endpoints);
 }
 
-/* Enable the IPA SUSPEND interrupt (workaround) */
-static void ipa_enable_tx_suspend_wa(struct work_struct *work)
+/* Re-enable the IPA TX_SUSPEND interrupt after having been disabled
+ * for a moment by ipa_tx_suspend_interrupt_wa().  This ex
+ *
+ * This is part of a hardware bug workaround.
+ */
+static void enable_tx_suspend_work_func(struct work_struct *work)
 {
 	int irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
 	u32 val;
@@ -135,7 +139,11 @@ static void ipa_enable_tx_suspend_wa(struct work_struct *work)
 	ipa_client_remove();
 }
 
-/* Disable the IPA SUSPEND interrupt (workaround) */
+/* Disable the IPA TX_SUSPEND interrupt, and arrange for it to be
+ * re-enabled again in 5 milliseconds.
+ *
+ * This is part of a hardware bug workaround.
+ */
 static void ipa_tx_suspend_interrupt_wa(void)
 {
 	int irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
@@ -147,8 +155,8 @@ static void ipa_tx_suspend_interrupt_wa(void)
 	val &= ~BIT(irq_num);
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
 
-	queue_delayed_work(ipa_interrupt_wq, &dwork_en_suspend_int,
-			   DIS_SUSPEND_INTR_DELAY);
+	queue_delayed_work(ipa_interrupt_wq, &tx_suspend_work,
+			   DIS_TX_SUSPEND_INTR_DELAY);
 }
 
 static inline bool is_uc_irq(int irq_num)
