@@ -29,7 +29,8 @@ static spinlock_t suspend_wa_lock;
 static void ipa_process_interrupts(void);
 
 /* Unsupported interrupt types have value -1 in this table */
-static const int ipa_irq_mapping[IPA_IRQ_MAX] = {
+static const int ipa_irq_mapping[] = {
+	[IPA_INVALID_IRQ]			= -1,
 	[IPA_UC_TX_CMD_Q_NOT_FULL_IRQ]		= -1,
 	[IPA_UC_TO_PROC_ACK_Q_NOT_FULL_IRQ]	= -1,
 	[IPA_BAD_SNOC_ACCESS_IRQ]		= 0,
@@ -273,7 +274,7 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 
 	interrupt_info = &ipa_interrupt_to_cb[irq_num];
 	interrupt_info->handler = NULL;
-	interrupt_info->interrupt = -1;
+	interrupt_info->interrupt = IPA_INVALID_IRQ;
 
 	if (interrupt == IPA_TX_SUSPEND_IRQ)
 		tx_suspend_disable();
@@ -313,7 +314,7 @@ int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
 
 	for (i = 0; i < IPA_IRQ_NUM_MAX; i++) {
 		ipa_interrupt_to_cb[i].handler = NULL;
-		ipa_interrupt_to_cb[i].interrupt = -1;
+		ipa_interrupt_to_cb[i].interrupt = IPA_INVALID_IRQ;
 	}
 
 	return 0;

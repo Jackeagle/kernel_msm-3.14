@@ -71,6 +71,7 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
  * Below enum is a logical mapping and not the actual interrupt bit in HW
  */
 enum ipa_irq_type {
+	IPA_INVALID_IRQ = 0,
 	IPA_BAD_SNOC_ACCESS_IRQ,
 	IPA_EOT_COAL_IRQ,
 	IPA_UC_IRQ_0,
