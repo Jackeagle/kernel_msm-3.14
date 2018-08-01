@@ -235,18 +235,8 @@ static void ipa_interrupt_defer(struct work_struct *work)
 
 static irqreturn_t ipa_isr(int irq, void *ctxt)
 {
-	ipa_debug_low("Enter\n");
-	/* defer interrupt handling in case IPA is not clocked on */
-	if (!ipa_client_add_additional()) {
-		ipa_debug("defer interrupt processing\n");
-		queue_work(ipa_ctx->power_mgmt_wq, &ipa_interrupt_defer_work);
-		return IRQ_HANDLED;
-	}
-
-	ipa_process_interrupts(true);
-	ipa_debug_low("Exit\n");
-
-	ipa_client_remove();
+	/* Schedule handling (if not already scheduled) */
+	queue_work(ipa_ctx->power_mgmt_wq, &ipa_interrupt_defer_work);
 
 	return IRQ_HANDLED;
 }
