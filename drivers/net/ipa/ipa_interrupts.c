@@ -253,13 +253,13 @@ int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
 
 	ret = request_irq(ipa_irq, ipa_isr, IRQF_TRIGGER_RISING, "ipa",
 			  ipa_dev);
-	if (ret) {
-		destroy_workqueue(ipa_interrupt_wq);
-		ipa_interrupt_wq = NULL;
-		return ret;
-	}
+	if (!ret)
+		return 0;
 
-	return 0;
+	destroy_workqueue(ipa_interrupt_wq);
+	ipa_interrupt_wq = NULL;
+
+	return ret;
 }
 
 /** ipa_suspend_active_aggr_wa() - Emulate suspend IRQ
