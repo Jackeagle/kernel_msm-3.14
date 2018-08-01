@@ -27,28 +27,11 @@ static DECLARE_DELAYED_WORK(tx_suspend_work, enable_tx_suspend_work_func);
 static spinlock_t suspend_wa_lock;
 static void ipa_process_interrupts(void);
 
-/* Unsupported interrupt types have value -1 in this table */
 static const int ipa_irq_mapping[] = {
 	[IPA_INVALID_IRQ]			= -1,
-	[IPA_UC_TX_CMD_Q_NOT_FULL_IRQ]		= -1,
-	[IPA_UC_TO_PROC_ACK_Q_NOT_FULL_IRQ]	= -1,
-	[IPA_BAD_SNOC_ACCESS_IRQ]		= 0,
-	[IPA_EOT_COAL_IRQ]			= -1,
 	[IPA_UC_IRQ_0]				= 2,
 	[IPA_UC_IRQ_1]				= 3,
-	[IPA_UC_IRQ_2]				= 4,
-	[IPA_UC_IRQ_3]				= 5,
-	[IPA_UC_IN_Q_NOT_EMPTY_IRQ]		= 6,
-	[IPA_UC_RX_CMD_Q_NOT_FULL_IRQ]		= 7,
-	[IPA_PROC_TO_UC_ACK_Q_NOT_EMPTY_IRQ]	= 8,
-	[IPA_RX_ERR_IRQ]			= 9,
-	[IPA_DEAGGR_ERR_IRQ]			= 10,
-	[IPA_TX_ERR_IRQ]			= 11,
-	[IPA_STEP_MODE_IRQ]			= 12,
-	[IPA_PROC_ERR_IRQ]			= 13,
 	[IPA_TX_SUSPEND_IRQ]			= 14,
-	[IPA_TX_HOLB_DROP_IRQ]			= 15,
-	[IPA_GSI_IDLE_IRQ]			= 16,
 };
 
 /* IPA interrupt handlers are called in contexts that can block */
@@ -118,8 +101,9 @@ static void ipa_tx_suspend_interrupt_wa(void)
 
 static inline bool is_uc_irq(int irq_num)
 {
-	return ipa_interrupt_info[irq_num].interrupt >= IPA_UC_IRQ_0 &&
-		ipa_interrupt_info[irq_num].interrupt <= IPA_UC_IRQ_3;
+	enum ipa_irq_type interrupt = ipa_interrupt_info[irq_num].interrupt;
+
+	return interrupt != IPA_UC_IRQ_0 && interrupt != IPA_UC_IRQ_1;
 }
 
 static void ipa_process_interrupts(void)
