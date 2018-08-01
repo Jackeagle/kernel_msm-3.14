@@ -8,9 +8,6 @@
 #include <linux/interrupt.h>
 #include "ipa_i.h"
 
-/* Workaround disables TX_SUSPEND interrupt for this long */
-#define DIS_TX_SUSPEND_INTR_DELAY	msecs_to_jiffies(5)
-
 struct ipa_interrupt_info {
 	ipa_irq_handler_t handler;
 	enum ipa_irq_type interrupt;
@@ -35,6 +32,9 @@ static const int ipa_irq_mapping[] = {
 static void ipa_interrupt_work_func(struct work_struct *work);
 static DECLARE_WORK(ipa_interrupt_work, ipa_interrupt_work_func);
 
+/* Workaround disables TX_SUSPEND interrupt for this long */
+#define DIS_TX_SUSPEND_INTR_DELAY	msecs_to_jiffies(5)
+
 /* Disable the IPA TX_SUSPEND interrupt, and arrange for it to be
  * re-enabled again in 5 milliseconds.
  *
@@ -43,8 +43,6 @@ static DECLARE_WORK(ipa_interrupt_work, ipa_interrupt_work_func);
 static void ipa_tx_suspend_interrupt_wa(void)
 {
 	u32 val;
-
-	ipa_debug_low("briefly disabling TX_SUSPEND interrupt\n");
 
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
 	val &= ~BIT(ipa_irq_mapping[IPA_TX_SUSPEND_IRQ]);
@@ -85,8 +83,6 @@ static inline bool is_uc_irq(int irq_num)
 
 static void ipa_process_interrupts(void)
 {
-	ipa_debug_low("Enter\n");
-
 	while (true) {
 		u32 ipa_intr_mask;
 		u32 imask;	/* one set bit */
@@ -126,8 +122,6 @@ static void ipa_process_interrupts(void)
 						   imask);
 		} while ((ipa_intr_mask ^= imask));
 	}
-
-	ipa_debug_low("Exit\n");
 }
 
 static void ipa_interrupt_work_func(struct work_struct *work)
@@ -207,17 +201,12 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 	struct ipa_interrupt_info *intr_info = &ipa_interrupt_info[irq_num];
 	u32 val;
 
-	ipa_debug("%s: interrupt_enum %d irq_num %d\n", __func__,
-		  interrupt, irq_num);
-
 	intr_info->handler = handler;
 	intr_info->interrupt = interrupt;
 
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
-	ipa_debug("read IPA_IRQ_EN_EE_n register. reg = %d\n", val);
 	val |= BIT(irq_num);
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
-	ipa_debug("wrote IPA_IRQ_EN_EE_n register. reg = %d\n", val);
 
 	if (interrupt == IPA_TX_SUSPEND_IRQ)
 		tx_suspend_enable();
