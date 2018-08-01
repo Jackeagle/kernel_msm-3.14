@@ -99,13 +99,12 @@ static void ipa_handle_interrupt(int irq_num)
  */
 static void enable_tx_suspend_work_func(struct work_struct *work)
 {
-	int irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
 	u32 val;
 
 	ipa_client_add();
 
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
-	val |= BIT(irq_num);
+	val |= BIT(ipa_irq_mapping[IPA_TX_SUSPEND_IRQ]);
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
 
 	ipa_process_interrupts();
@@ -120,13 +119,12 @@ static void enable_tx_suspend_work_func(struct work_struct *work)
  */
 static void ipa_tx_suspend_interrupt_wa(void)
 {
-	int irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
 	u32 val;
 
 	ipa_debug_low("briefly disabling TX_SUSPEND interrupt\n");
 
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
-	val &= ~BIT(irq_num);
+	val &= ~BIT(ipa_irq_mapping[IPA_TX_SUSPEND_IRQ]);
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
 
 	queue_delayed_work(ipa_interrupt_wq, &tx_suspend_work,
