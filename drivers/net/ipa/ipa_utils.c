@@ -1274,30 +1274,40 @@ static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
 }
 
 /* Suspend a consumer pipe */
-static void suspend_pipe(enum ipa_client_type client, bool suspend)
+static void suspend_consumer_pipe(enum ipa_client_type client)
 {
 	u32 ipa_ep_idx = ipa_get_ep_mapping(client);
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 
-	ipa_debug("%ssuspend pipe %u\n", suspend ? "" : "un", ipa_ep_idx);
+	ipa_debug("pipe %u\n", ipa_ep_idx);
 
-	ipa_cfg_ep_ctrl(ipa_ep_idx, suspend);
-	if (suspend)
-		ipa_gsi_poll_after_suspend(ep);
-	else if (!atomic_read(&ep->sys->curr_polling_state))
-		gsi_channel_intr_enable(ep->gsi_chan_hdl);
+	ipa_cfg_ep_ctrl(ipa_ep_idx, true);
+	ipa_gsi_poll_after_suspend(ep);
 }
 
 void ipa_suspend_apps_pipes(void)
 {
-	suspend_pipe(IPA_CLIENT_APPS_WAN_CONS, true);
-	suspend_pipe(IPA_CLIENT_APPS_LAN_CONS, true);
+	suspend_consumer_pipe(IPA_CLIENT_APPS_WAN_CONS);
+	suspend_consumer_pipe(IPA_CLIENT_APPS_LAN_CONS);
+}
+
+/* Resume a suspended consumer pipe */
+static void resume_consumer_pipe(enum ipa_client_type client)
+{
+	u32 ipa_ep_idx = ipa_get_ep_mapping(client);
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+
+	ipa_debug("pipe %u\n", ipa_ep_idx);
+
+	ipa_cfg_ep_ctrl(ipa_ep_idx, false);
+	if (!atomic_read(&ep->sys->curr_polling_state))
+		gsi_channel_intr_enable(ep->gsi_chan_hdl);
 }
 
 void ipa_resume_apps_pipes(void)
 {
-	suspend_pipe(IPA_CLIENT_APPS_LAN_CONS, false);
-	suspend_pipe(IPA_CLIENT_APPS_WAN_CONS, false);
+	resume_consumer_pipe(IPA_CLIENT_APPS_LAN_CONS);
+	resume_consumer_pipe(IPA_CLIENT_APPS_WAN_CONS);
 }
 
 /** ipa_cfg_route() - configure IPA route
