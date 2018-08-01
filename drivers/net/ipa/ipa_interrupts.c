@@ -114,7 +114,7 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 	}
 
 	/* Force defer processing if in ISR context. */
-	if (interrupt_info->deferred_flag || isr_context) {
+	if (isr_context) {
 		interrupt_info->interrupt_data = endpoints;
 		INIT_WORK(&interrupt_info->work, ipa_deferred_interrupt_work);
 		queue_work(ipa_interrupt_wq, &interrupt_info->work);
