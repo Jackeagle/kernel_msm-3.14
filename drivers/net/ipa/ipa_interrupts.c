@@ -69,21 +69,6 @@ static void simulated_suspend_work_func(struct work_struct *work)
 	interrupt_info->interrupt_data = 0;
 }
 
-/* Returns true if *any* bit in the suspend mask represents a valid endpoint */
-static bool ipa_is_valid_ep(u32 ep_suspend_data)
-{
-	while (ep_suspend_data) {
-		int i = __ffs(ep_suspend_data);
-
-		if (ipa_ctx->ep[i].valid)
-			return true;
-
-		ep_suspend_data ^= BIT(i);
-	}
-
-	return false;
-}
-
 static void ipa_handle_interrupt(int irq_num)
 {
 	struct ipa_interrupt_info *interrupt_info;
@@ -109,8 +94,6 @@ static void ipa_handle_interrupt(int irq_num)
 		 */
 		ipahal_write_reg_n(IPA_SUSPEND_IRQ_CLR_EE_n,
 				   IPA_EE_AP, endpoints);
-		if (!ipa_is_valid_ep(endpoints))
-			return;
 	}
 
 	interrupt_info->handler(interrupt_info->interrupt, endpoints);
