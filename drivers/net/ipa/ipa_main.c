@@ -832,8 +832,7 @@ static int ipa_init_interrupts(void)
 	if (ret)
 		return ret;
 
-	ipa_add_interrupt_handler(IPA_TX_SUSPEND_IRQ, ipa_suspend_handler,
-				  false);
+	ipa_add_interrupt_handler(IPA_TX_SUSPEND_IRQ, ipa_suspend_handler);
 
 	return 0;
 }

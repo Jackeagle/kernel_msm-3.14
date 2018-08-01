@@ -732,7 +732,7 @@ void ipa_rx_switch_to_poll_mode(struct ipa_sys_context *sys);
 
 /* interrupts */
 void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
-			      ipa_irq_handler_t handler, bool deferred_flag);
+			       ipa_irq_handler_t handler);
 
 void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt);
 

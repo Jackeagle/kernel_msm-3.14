@@ -254,14 +254,12 @@ static irqreturn_t ipa_isr(int irq, void *ctxt)
 /** ipa_add_interrupt_handler() - Adds handler to an interrupt type
  * @interrupt:		Interrupt type
  * @handler:		The handler to be added
- * @deferred_flag:	whether the handler processing should be deferred in
- *			a workqueue
  *
- * Adds handler to an interrupt type and enable the specific bit
- * in IRQ_EN register, associated interrupt in IRQ_STTS register will be enabled
+ * Adds handler to an IPA interrupt type and enable it.  IPA interrupt
+ * handlers are always run in workqueue context.
  */
 void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
-			      ipa_irq_handler_t handler, bool deferred_flag)
+			       ipa_irq_handler_t handler)
 {
 	int irq_num = ipa_irq_mapping[interrupt];
 	struct ipa_interrupt_info *interrupt_info;
