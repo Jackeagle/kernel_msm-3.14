@@ -14,7 +14,6 @@
 #define DIS_TX_SUSPEND_INTR_DELAY	msecs_to_jiffies(5)
 
 struct ipa_interrupt_info {
-	struct work_struct work;
 	ipa_irq_handler_t handler;
 	u32 interrupt_data;
 	enum ipa_irq_type interrupt;
