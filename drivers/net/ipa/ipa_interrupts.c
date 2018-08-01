@@ -8,8 +8,6 @@
 #include <linux/interrupt.h>
 #include "ipa_i.h"
 
-#define IPA_IRQ_NUM_MAX 32
-
 /* Workaround disables TX_SUSPEND interrupt for this long */
 #define DIS_TX_SUSPEND_INTR_DELAY	msecs_to_jiffies(5)
 
@@ -18,7 +16,8 @@ struct ipa_interrupt_info {
 	enum ipa_irq_type interrupt;
 };
 
-static struct ipa_interrupt_info ipa_interrupt_to_cb[IPA_IRQ_NUM_MAX];
+#define IPA_IRQ_NUM_MAX 32	/* Number of IRQ bits in IPA interrupt mask */
+static struct ipa_interrupt_info ipa_interrupt_info[IPA_IRQ_NUM_MAX];
 
 static struct workqueue_struct *ipa_interrupt_wq;
 
@@ -61,7 +60,7 @@ static void ipa_handle_interrupt(int irq_num)
 	struct ipa_interrupt_info *intr_info;
 	u32 endpoints = 0;	/* Only TX_SUSPEND uses its interrupt_data */
 
-	intr_info = &ipa_interrupt_to_cb[irq_num];
+	intr_info = &ipa_interrupt_info[irq_num];
 	if (!intr_info->handler)
 		return;
 
@@ -120,8 +119,8 @@ static void ipa_tx_suspend_interrupt_wa(void)
 
 static inline bool is_uc_irq(int irq_num)
 {
-	return ipa_interrupt_to_cb[irq_num].interrupt >= IPA_UC_IRQ_0 &&
-		ipa_interrupt_to_cb[irq_num].interrupt <= IPA_UC_IRQ_3;
+	return ipa_interrupt_info[irq_num].interrupt >= IPA_UC_IRQ_0 &&
+		ipa_interrupt_info[irq_num].interrupt <= IPA_UC_IRQ_3;
 }
 
 static void ipa_process_interrupts(void)
@@ -247,7 +246,7 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 
 	ipa_assert(irq_num >= 0);
 
-	intr_info = &ipa_interrupt_to_cb[irq_num];
+	intr_info = &ipa_interrupt_info[irq_num];
 	intr_info->handler = handler;
 	intr_info->interrupt = interrupt;
 
@@ -272,7 +271,7 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 	struct ipa_interrupt_info *intr_info;
 	u32 val;
 
-	intr_info = &ipa_interrupt_to_cb[irq_num];
+	intr_info = &ipa_interrupt_info[irq_num];
 	intr_info->handler = NULL;
 	intr_info->interrupt = IPA_INVALID_IRQ;
 
@@ -288,7 +287,7 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
  * @ipa_irq:	The interrupt number to allocate
  * @ipa_dev:	The basic device structure representing the IPA driver
  *
- * - Initialize the ipa_interrupt_to_cb array
+ * - Initialize the ipa_interrupt_info array
  * - Clear interrupts status
  * - Register the ipa interrupt handler - ipa_isr
  * - Enable apps processor wakeup by IPA interrupts
@@ -337,7 +336,7 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 	/* Simulate suspend IRQ */
 	ipa_assert(!in_interrupt());
 	irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
-	intr_info = &ipa_interrupt_to_cb[irq_num];
+	intr_info = &ipa_interrupt_info[irq_num];
 	if (intr_info->handler)
 		intr_info->handler(intr_info->interrupt, clnt_mask);
 }
