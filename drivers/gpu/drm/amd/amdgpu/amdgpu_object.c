@@ -37,6 +37,18 @@
 #include "amdgpu.h"
 #include "amdgpu_trace.h"
 
+static bool amdgpu_need_backup(struct amdgpu_device *adev)
+{
+	if (adev->flags & AMD_IS_APU)
+		return false;
+
+	if (amdgpu_gpu_recovery == 0 ||
+	    (amdgpu_gpu_recovery == -1  && !amdgpu_sriov_vf(adev)))
+		return false;
+
+	return true;
+}
+
 static void amdgpu_ttm_bo_destroy(struct ttm_buffer_object *tbo)
 {
 	struct amdgpu_device *adev = amdgpu_ttm_adev(tbo->bdev);
@@ -316,8 +328,8 @@ static bool amdgpu_bo_validate_size(struct amdgpu_device *adev,
 	return true;
 
 fail:
-	DRM_ERROR("BO size %lu > total memory in domain: %llu\n", size,
-					      man->size << PAGE_SHIFT);
+	DRM_DEBUG("BO size %lu > total memory in domain: %llu\n", size,
+		  man->size << PAGE_SHIFT);
 	return false;
 }
 
@@ -329,10 +341,15 @@ static int amdgpu_bo_do_create(struct amdgpu_device *adev,
 			       uint64_t init_value,
 			       struct amdgpu_bo **bo_ptr)
 {
+	struct ttm_operation_ctx ctx = {
+		.interruptible = !kernel,
+		.no_wait_gpu = false,
+		.allow_reserved_eviction = true,
+		.resv = resv
+	};
 	struct amdgpu_bo *bo;
 	enum ttm_bo_type type;
 	unsigned long page_align;
-	u64 initial_bytes_moved, bytes_moved;
 	size_t acc_size;
 	int r;
 
@@ -407,22 +424,19 @@ static int amdgpu_bo_do_create(struct amdgpu_device *adev,
 	bo->tbo.bdev = &adev->mman.bdev;
 	amdgpu_ttm_placement_from_domain(bo, domain);
 
-	initial_bytes_moved = atomic64_read(&adev->num_bytes_moved);
-	/* Kernel allocation are uninterruptible */
 	r = ttm_bo_init_reserved(&adev->mman.bdev, &bo->tbo, size, type,
-				 &bo->placement, page_align, !kernel, NULL,
+				 &bo->placement, page_align, &ctx, NULL,
 				 acc_size, sg, resv, &amdgpu_ttm_bo_destroy);
 	if (unlikely(r != 0))
 		return r;
 
-	bytes_moved = atomic64_read(&adev->num_bytes_moved) -
-		      initial_bytes_moved;
 	if (adev->mc.visible_vram_size < adev->mc.real_vram_size &&
 	    bo->tbo.mem.mem_type == TTM_PL_VRAM &&
 	    bo->tbo.mem.start < adev->mc.visible_vram_size >> PAGE_SHIFT)
-		amdgpu_cs_report_moved_bytes(adev, bytes_moved, bytes_moved);
+		amdgpu_cs_report_moved_bytes(adev, ctx.bytes_moved,
+					     ctx.bytes_moved);
 	else
-		amdgpu_cs_report_moved_bytes(adev, bytes_moved, 0);
+		amdgpu_cs_report_moved_bytes(adev, ctx.bytes_moved, 0);
 
 	if (kernel)
 		bo->tbo.priority = 1;
@@ -554,6 +568,7 @@ err:
 
 int amdgpu_bo_validate(struct amdgpu_bo *bo)
 {
+	struct ttm_operation_ctx ctx = { false, false };
 	uint32_t domain;
 	int r;
 
@@ -564,7 +579,7 @@ int amdgpu_bo_validate(struct amdgpu_bo *bo)
 
 retry:
 	amdgpu_ttm_placement_from_domain(bo, domain);
-	r = ttm_bo_validate(&bo->tbo, &bo->placement, false, false);
+	r = ttm_bo_validate(&bo->tbo, &bo->placement, &ctx);
 	if (unlikely(r == -ENOMEM) && domain != bo->allowed_domains) {
 		domain = bo->allowed_domains;
 		goto retry;
@@ -675,6 +690,7 @@ int amdgpu_bo_pin_restricted(struct amdgpu_bo *bo, u32 domain,
 			     u64 *gpu_addr)
 {
 	struct amdgpu_device *adev = amdgpu_ttm_adev(bo->tbo.bdev);
+	struct ttm_operation_ctx ctx = { false, false };
 	int r, i;
 
 	if (amdgpu_ttm_tt_get_usermm(bo->tbo.ttm))
@@ -734,7 +750,7 @@ int amdgpu_bo_pin_restricted(struct amdgpu_bo *bo, u32 domain,
 		bo->placements[i].flags |= TTM_PL_FLAG_NO_EVICT;
 	}
 
-	r = ttm_bo_validate(&bo->tbo, &bo->placement, false, false);
+	r = ttm_bo_validate(&bo->tbo, &bo->placement, &ctx);
 	if (unlikely(r)) {
 		dev_err(adev->dev, "%p pin failed\n", bo);
 		goto error;
@@ -770,6 +786,7 @@ int amdgpu_bo_pin(struct amdgpu_bo *bo, u32 domain, u64 *gpu_addr)
 int amdgpu_bo_unpin(struct amdgpu_bo *bo)
 {
 	struct amdgpu_device *adev = amdgpu_ttm_adev(bo->tbo.bdev);
+	struct ttm_operation_ctx ctx = { false, false };
 	int r, i;
 
 	if (!bo->pin_count) {
@@ -783,7 +800,7 @@ int amdgpu_bo_unpin(struct amdgpu_bo *bo)
 		bo->placements[i].lpfn = 0;
 		bo->placements[i].flags &= ~TTM_PL_FLAG_NO_EVICT;
 	}
-	r = ttm_bo_validate(&bo->tbo, &bo->placement, false, false);
+	r = ttm_bo_validate(&bo->tbo, &bo->placement, &ctx);
 	if (unlikely(r)) {
 		dev_err(adev->dev, "%p validate failed for unpin\n", bo);
 		goto error;
@@ -954,6 +971,7 @@ void amdgpu_bo_move_notify(struct ttm_buffer_object *bo,
 int amdgpu_bo_fault_reserve_notify(struct ttm_buffer_object *bo)
 {
 	struct amdgpu_device *adev = amdgpu_ttm_adev(bo->bdev);
+	struct ttm_operation_ctx ctx = { false, false };
 	struct amdgpu_bo *abo;
 	unsigned long offset, size;
 	int r;
@@ -987,7 +1005,7 @@ int amdgpu_bo_fault_reserve_notify(struct ttm_buffer_object *bo)
 	abo->placement.num_busy_placement = 1;
 	abo->placement.busy_placement = &abo->placements[1];
 
-	r = ttm_bo_validate(bo, &abo->placement, false, false);
+	r = ttm_bo_validate(bo, &abo->placement, &ctx);
 	if (unlikely(r != 0))
 		return r;
 

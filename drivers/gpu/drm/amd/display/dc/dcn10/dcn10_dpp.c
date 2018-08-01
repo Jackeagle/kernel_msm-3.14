@@ -385,10 +385,9 @@ void dpp1_cnv_setup (
 
 void dpp1_set_cursor_attributes(
 		struct dpp *dpp_base,
-		const struct dc_cursor_attributes *attr)
+		enum dc_cursor_color_format color_format)
 {
 	struct dcn10_dpp *dpp = TO_DCN10_DPP(dpp_base);
-	enum dc_cursor_color_format color_format = attr->color_format;
 
 	REG_UPDATE_2(CURSOR0_CONTROL,
 			CUR0_MODE, color_format,
@@ -401,13 +400,6 @@ void dpp1_set_cursor_attributes(
 		REG_UPDATE(CURSOR0_COLOR1,
 				CUR0_COLOR1, 0xFFFFFFFF);
 	}
-
-	/* TODO: Fixed vs float */
-
-	REG_UPDATE_3(FORMAT_CONTROL,
-				CNVC_BYPASS, 0,
-				FORMAT_CONTROL__ALPHA_EN, 1,
-				FORMAT_EXPANSION_MODE, 0);
 }
 
 

@@ -86,11 +86,15 @@ struct dc_stream_state {
 	struct dc_stream_status status;
 
 	struct dc_cursor_attributes cursor_attributes;
+	struct dc_cursor_position cursor_position;
 
 	/* from stream struct */
 	struct kref refcount;
 
 	struct crtc_trigger_info triggered_crtc_reset;
+
+	/* Computed state bits */
+	bool mode_changed : 1;
 
 };
 
@@ -233,6 +237,8 @@ enum surface_update_type dc_check_update_surfaces_for_stream(
  */
 struct dc_stream_state *dc_create_stream_for_sink(struct dc_sink *dc_sink);
 
+void update_stream_signal(struct dc_stream_state *stream);
+
 void dc_stream_retain(struct dc_stream_state *dc_stream);
 void dc_stream_release(struct dc_stream_state *dc_stream);
 
@@ -262,6 +268,17 @@ bool dc_stream_get_crtc_position(struct dc *dc,
 				 int num_streams,
 				 unsigned int *v_pos,
 				 unsigned int *nom_v_pos);
+
+bool dc_stream_configure_crc(struct dc *dc,
+			     struct dc_stream_state *stream,
+			     bool enable,
+			     bool continuous);
+
+bool dc_stream_get_crc(struct dc *dc,
+		       struct dc_stream_state *stream,
+		       uint32_t *r_cr,
+		       uint32_t *g_y,
+		       uint32_t *b_cb);
 
 void dc_stream_set_static_screen_events(struct dc *dc,
 					struct dc_stream_state **stream,

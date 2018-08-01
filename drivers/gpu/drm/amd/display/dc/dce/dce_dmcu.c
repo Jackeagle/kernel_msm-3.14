@@ -53,7 +53,6 @@
 #define MCP_INIT_IRAM 0x89
 #define MCP_DMCU_VERSION 0x90
 #define MASTER_COMM_CNTL_REG__MASTER_COMM_INTERRUPT_MASK   0x00000001L
-unsigned int cached_wait_loop_number = 0;
 
 static bool dce_dmcu_init(struct dmcu *dmcu)
 {
@@ -264,13 +263,33 @@ static void dce_dmcu_setup_psr(struct dmcu *dmcu,
 	REG_UPDATE(MASTER_COMM_CNTL_REG, MASTER_COMM_INTERRUPT, 1);
 }
 
+static bool dce_is_dmcu_initialized(struct dmcu *dmcu)
+{
+	struct dce_dmcu *dmcu_dce = TO_DCE_DMCU(dmcu);
+	unsigned int dmcu_uc_reset;
+
+	/* microcontroller is not running */
+	REG_GET(DMCU_STATUS, UC_IN_RESET, &dmcu_uc_reset);
+
+	/* DMCU is not running */
+	if (dmcu_uc_reset)
+		return false;
+
+	return true;
+}
+
 static void dce_psr_wait_loop(
 	struct dmcu *dmcu,
 	unsigned int wait_loop_number)
 {
 	struct dce_dmcu *dmcu_dce = TO_DCE_DMCU(dmcu);
 	union dce_dmcu_psr_config_data_wait_loop_reg1 masterCmdData1;
-	if (cached_wait_loop_number == wait_loop_number)
+
+	if (dmcu->cached_wait_loop_number == wait_loop_number)
+		return;
+
+	/* DMCU is not running */
+	if (!dce_is_dmcu_initialized(dmcu))
 		return;
 
 	/* waitDMCUReadyForCmd */
@@ -278,7 +297,7 @@ static void dce_psr_wait_loop(
 
 	masterCmdData1.u32 = 0;
 	masterCmdData1.bits.wait_loop = wait_loop_number;
-	cached_wait_loop_number = wait_loop_number;
+	dmcu->cached_wait_loop_number = wait_loop_number;
 	dm_write_reg(dmcu->ctx, REG(MASTER_COMM_DATA_REG1), masterCmdData1.u32);
 
 	/* setDMCUParam_Cmd */
@@ -288,9 +307,10 @@ static void dce_psr_wait_loop(
 	REG_UPDATE(MASTER_COMM_CNTL_REG, MASTER_COMM_INTERRUPT, 1);
 }
 
-static void dce_get_psr_wait_loop(unsigned int *psr_wait_loop_number)
+static void dce_get_psr_wait_loop(
+		struct dmcu *dmcu, unsigned int *psr_wait_loop_number)
 {
-	*psr_wait_loop_number = cached_wait_loop_number;
+	*psr_wait_loop_number = dmcu->cached_wait_loop_number;
 	return;
 }
 
@@ -673,7 +693,7 @@ static void dcn10_psr_wait_loop(
 
 	masterCmdData1.u32 = 0;
 	masterCmdData1.bits.wait_loop = wait_loop_number;
-	cached_wait_loop_number = wait_loop_number;
+	dmcu->cached_wait_loop_number = wait_loop_number;
 	dm_write_reg(dmcu->ctx, REG(MASTER_COMM_DATA_REG1), masterCmdData1.u32);
 
 	/* setDMCUParam_Cmd */
@@ -684,10 +704,19 @@ static void dcn10_psr_wait_loop(
 	}
 }
 
-static void dcn10_get_psr_wait_loop(unsigned int *psr_wait_loop_number)
+static void dcn10_get_psr_wait_loop(
+		struct dmcu *dmcu, unsigned int *psr_wait_loop_number)
 {
-	*psr_wait_loop_number = cached_wait_loop_number;
+	*psr_wait_loop_number = dmcu->cached_wait_loop_number;
 	return;
+}
+
+static bool dcn10_is_dmcu_initialized(struct dmcu *dmcu)
+{
+	/* microcontroller is not running */
+	if (dmcu->dmcu_state != DMCU_RUNNING)
+		return false;
+	return true;
 }
 
 #endif
@@ -699,7 +728,8 @@ static const struct dmcu_funcs dce_funcs = {
 	.setup_psr = dce_dmcu_setup_psr,
 	.get_psr_state = dce_get_dmcu_psr_state,
 	.set_psr_wait_loop = dce_psr_wait_loop,
-	.get_psr_wait_loop = dce_get_psr_wait_loop
+	.get_psr_wait_loop = dce_get_psr_wait_loop,
+	.is_dmcu_initialized = dce_is_dmcu_initialized
 };
 
 #if defined(CONFIG_DRM_AMD_DC_DCN1_0)
@@ -710,7 +740,8 @@ static const struct dmcu_funcs dcn10_funcs = {
 	.setup_psr = dcn10_dmcu_setup_psr,
 	.get_psr_state = dcn10_get_dmcu_psr_state,
 	.set_psr_wait_loop = dcn10_psr_wait_loop,
-	.get_psr_wait_loop = dcn10_get_psr_wait_loop
+	.get_psr_wait_loop = dcn10_get_psr_wait_loop,
+	.is_dmcu_initialized = dcn10_is_dmcu_initialized
 };
 #endif
 
@@ -725,6 +756,7 @@ static void dce_dmcu_construct(
 
 	base->ctx = ctx;
 	base->funcs = &dce_funcs;
+	base->cached_wait_loop_number = 0;
 
 	dmcu_dce->regs = regs;
 	dmcu_dce->dmcu_shift = dmcu_shift;

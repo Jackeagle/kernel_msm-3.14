@@ -38,7 +38,7 @@
 #include "inc/compressor.h"
 #include "dml/display_mode_lib.h"
 
-#define DC_VER "3.1.16"
+#define DC_VER "3.1.27"
 
 #define MAX_SURFACES 3
 #define MAX_STREAMS 6
@@ -62,6 +62,9 @@ struct dc_caps {
 	bool dcc_const_color;
 	bool dynamic_audio;
 	bool is_apu;
+	bool dual_link_dvi;
+	bool post_blend_color_processing;
+	bool force_dp_tps4_for_cp2520;
 };
 
 struct dc_dcc_surface_param {
@@ -146,25 +149,6 @@ struct dc_cap_funcs {
 
 struct link_training_settings;
 
-struct dc_link_funcs {
-	void (*set_drive_settings)(struct dc *dc,
-			struct link_training_settings *lt_settings,
-			const struct dc_link *link);
-	void (*perform_link_training)(struct dc *dc,
-			struct dc_link_settings *link_setting,
-			bool skip_video_pattern);
-	void (*set_preferred_link_settings)(struct dc *dc,
-			struct dc_link_settings *link_setting,
-			struct dc_link *link);
-	void (*enable_hpd)(const struct dc_link *link);
-	void (*disable_hpd)(const struct dc_link *link);
-	void (*set_test_pattern)(
-			struct dc_link *link,
-			enum dp_test_pattern test_pattern,
-			const struct link_training_settings *p_link_settings,
-			const unsigned char *p_custom_pattern,
-			unsigned int cust_pattern_size);
-};
 
 /* Structure to hold configuration flags set by dm at dc creation. */
 struct dc_config {
@@ -237,7 +221,6 @@ struct dce_hwseq;
 struct dc {
 	struct dc_caps caps;
 	struct dc_cap_funcs cap_funcs;
-	struct dc_link_funcs link_funcs;
 	struct dc_config config;
 	struct dc_debug debug;
 
@@ -269,6 +252,8 @@ struct dc {
 	 * to compare to see if display config changed
 	 */
 	struct dm_pp_display_configuration prev_display_config;
+
+	bool optimized_required;
 
 	/* FBC compressor */
 #if defined(CONFIG_DRM_AMD_DC_FBC)
@@ -360,7 +345,7 @@ struct dc_hdr_static_metadata {
 enum dc_transfer_func_type {
 	TF_TYPE_PREDEFINED,
 	TF_TYPE_DISTRIBUTED_POINTS,
-	TF_TYPE_BYPASS
+	TF_TYPE_BYPASS,
 };
 
 struct dc_transfer_func_distributed_points {
@@ -379,6 +364,7 @@ enum dc_transfer_func_predefined {
 	TRANSFER_FUNCTION_BT709,
 	TRANSFER_FUNCTION_PQ,
 	TRANSFER_FUNCTION_LINEAR,
+	TRANSFER_FUNCTION_UNITY,
 };
 
 struct dc_transfer_func {
@@ -405,6 +391,7 @@ union surface_update_flags {
 
 	struct {
 		/* Medium updates */
+		uint32_t dcc_change:1;
 		uint32_t color_space_change:1;
 		uint32_t input_tf_change:1;
 		uint32_t horizontal_mirror_change:1;
@@ -413,12 +400,13 @@ union surface_update_flags {
 		uint32_t swizzle_change:1;
 		uint32_t scaling_change:1;
 		uint32_t position_change:1;
-		uint32_t in_transfer_func:1;
+		uint32_t in_transfer_func_change:1;
 		uint32_t input_csc_change:1;
 
 		/* Full updates */
 		uint32_t new_plane:1;
 		uint32_t bpp_change:1;
+		uint32_t gamma_change:1;
 		uint32_t bandwidth_change:1;
 		uint32_t clock_change:1;
 		uint32_t stereo_format_change:1;
@@ -456,6 +444,7 @@ struct dc_plane_state {
 	enum dc_rotation_angle rotation;
 	enum plane_stereo_format stereo_format;
 
+	bool is_tiling_rotated;
 	bool per_pixel_alpha;
 	bool visible;
 	bool flip_immediate;
@@ -687,7 +676,7 @@ enum dc_irq_source dc_interrupt_to_irq_source(
 		struct dc *dc,
 		uint32_t src_id,
 		uint32_t ext_id);
-void dc_interrupt_set(struct dc *dc, enum dc_irq_source src, bool enable);
+bool dc_interrupt_set(struct dc *dc, enum dc_irq_source src, bool enable);
 void dc_interrupt_ack(struct dc *dc, enum dc_irq_source src);
 enum dc_irq_source dc_get_hpd_irq_source_at_index(
 		struct dc *dc, uint32_t link_index);

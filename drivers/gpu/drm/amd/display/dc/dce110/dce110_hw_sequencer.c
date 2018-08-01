@@ -275,7 +275,7 @@ dce110_set_input_transfer_func(struct pipe_ctx *pipe_ctx,
 	build_prescale_params(&prescale_params, plane_state);
 	ipp->funcs->ipp_program_prescale(ipp, &prescale_params);
 
-	if (plane_state->gamma_correction && dce_use_lut(plane_state))
+	if (plane_state->gamma_correction && dce_use_lut(plane_state->format))
 		ipp->funcs->ipp_program_input_lut(ipp, plane_state->gamma_correction);
 
 	if (tf == NULL) {
@@ -354,8 +354,8 @@ static bool convert_to_custom_float(struct pwl_result_data *rgb_resulted,
 		return false;
 	}
 
-	if (!convert_to_custom_float_format(arr_points[2].slope, &fmt,
-					    &arr_points[2].custom_float_slope)) {
+	if (!convert_to_custom_float_format(arr_points[1].slope, &fmt,
+					    &arr_points[1].custom_float_slope)) {
 		BREAK_TO_DEBUGGER();
 		return false;
 	}
@@ -688,15 +688,22 @@ void dce110_enable_stream(struct pipe_ctx *pipe_ctx)
 	struct dc_crtc_timing *timing = &pipe_ctx->stream->timing;
 	struct dc_link *link = pipe_ctx->stream->sink->link;
 
-	/* 1. update AVI info frame (HDMI, DP)
-	 * we always need to update info frame
-	*/
+
 	uint32_t active_total_with_borders;
 	uint32_t early_control = 0;
 	struct timing_generator *tg = pipe_ctx->stream_res.tg;
 
-	/* TODOFPGA may change to hwss.update_info_frame */
+	/* For MST, there are multiply stream go to only one link.
+	 * connect DIG back_end to front_end while enable_stream and
+	 * disconnect them during disable_stream
+	 * BY this, it is logic clean to separate stream and link */
+	link->link_enc->funcs->connect_dig_be_to_fe(link->link_enc,
+						    pipe_ctx->stream_res.stream_enc->id, true);
+
+	/* update AVI info frame (HDMI, DP)*/
+	/* TODO: FPGA may change to hwss.update_info_frame */
 	dce110_update_info_frame(pipe_ctx);
+
 	/* enable early control to avoid corruption on DP monitor*/
 	active_total_with_borders =
 			timing->h_addressable
@@ -717,12 +724,8 @@ void dce110_enable_stream(struct pipe_ctx *pipe_ctx)
 			pipe_ctx->stream_res.stream_enc->funcs->dp_audio_enable(pipe_ctx->stream_res.stream_enc);
 	}
 
-	/* For MST, there are multiply stream go to only one link.
-	 * connect DIG back_end to front_end while enable_stream and
-	 * disconnect them during disable_stream
-	 * BY this, it is logic clean to separate stream and link */
-	link->link_enc->funcs->connect_dig_be_to_fe(link->link_enc,
-						    pipe_ctx->stream_res.stream_enc->id, true);
+
+
 
 }
 
@@ -870,8 +873,6 @@ void hwss_edp_power_control(
 				"%s: Skipping Panel Power action: %s\n",
 				__func__, (power_up ? "On":"Off"));
 	}
-
-	hwss_edp_wait_for_hpd_ready(link, true);
 }
 
 /*todo: cloned in stream enc, fix*/
@@ -972,11 +973,9 @@ void dce110_disable_stream(struct pipe_ctx *pipe_ctx, int option)
 	}
 
 	/* blank at encoder level */
-	if (dc_is_dp_signal(pipe_ctx->stream->signal)) {
-		if (pipe_ctx->stream->sink->link->connector_signal == SIGNAL_TYPE_EDP)
-			hwss_edp_backlight_control(link, false);
+	if (dc_is_dp_signal(pipe_ctx->stream->signal))
 		pipe_ctx->stream_res.stream_enc->funcs->dp_blank(pipe_ctx->stream_res.stream_enc);
-	}
+
 	link->link_enc->funcs->connect_dig_be_to_fe(
 			link->link_enc,
 			pipe_ctx->stream_res.stream_enc->id,
@@ -988,15 +987,12 @@ void dce110_unblank_stream(struct pipe_ctx *pipe_ctx,
 		struct dc_link_settings *link_settings)
 {
 	struct encoder_unblank_param params = { { 0 } };
-	struct dc_link *link = pipe_ctx->stream->sink->link;
 
 	/* only 3 items below are used by unblank */
 	params.pixel_clk_khz =
 		pipe_ctx->stream->timing.pix_clk_khz;
 	params.link_settings.link_rate = link_settings->link_rate;
 	pipe_ctx->stream_res.stream_enc->funcs->dp_unblank(pipe_ctx->stream_res.stream_enc, &params);
-	if (link->connector_signal == SIGNAL_TYPE_EDP)
-		hwss_edp_backlight_control(link, true);
 }
 
 
@@ -1342,10 +1338,8 @@ static void power_down_encoders(struct dc *dc)
 
 			if (!dc->links[i]->wa_flags.dp_keep_receiver_powered)
 				dp_receiver_power_ctrl(dc->links[i], false);
-			if (connector_id == CONNECTOR_ID_EDP) {
+			if (connector_id == CONNECTOR_ID_EDP)
 				signal = SIGNAL_TYPE_EDP;
-				hwss_edp_backlight_control(dc->links[i], false);
-			}
 		}
 
 		dc->links[i]->link_enc->funcs->disable_output(
@@ -2034,8 +2028,7 @@ enum dc_status dce110_apply_ctx_to_hw(
 		if (pipe_ctx->stream == pipe_ctx_old->stream)
 			continue;
 
-		if (pipe_ctx->stream && pipe_ctx_old->stream
-				&& !pipe_need_reprogram(pipe_ctx_old, pipe_ctx))
+		if (pipe_ctx_old->stream && !pipe_need_reprogram(pipe_ctx_old, pipe_ctx))
 			continue;
 
 		if (pipe_ctx->top_pipe)
@@ -2071,9 +2064,6 @@ enum dc_status dce110_apply_ctx_to_hw(
 				context,
 				dc);
 
-		if (dc->hwss.enable_plane)
-			dc->hwss.enable_plane(dc, pipe_ctx, context);
-
 		if (DC_OK != status)
 			return status;
 	}
@@ -2103,16 +2093,8 @@ static void set_default_colors(struct pipe_ctx *pipe_ctx)
 	struct default_adjustment default_adjust = { 0 };
 
 	default_adjust.force_hw_default = false;
-	if (pipe_ctx->plane_state == NULL)
-		default_adjust.in_color_space = COLOR_SPACE_SRGB;
-	else
-		default_adjust.in_color_space =
-				pipe_ctx->plane_state->color_space;
-	if (pipe_ctx->stream == NULL)
-		default_adjust.out_color_space = COLOR_SPACE_SRGB;
-	else
-		default_adjust.out_color_space =
-				pipe_ctx->stream->output_color_space;
+	default_adjust.in_color_space = pipe_ctx->plane_state->color_space;
+	default_adjust.out_color_space = pipe_ctx->stream->output_color_space;
 	default_adjust.csc_adjust_type = GRAPHICS_CSC_ADJUST_TYPE_SW;
 	default_adjust.surface_pixel_format = pipe_ctx->plane_res.scl_data.format;
 
@@ -2716,7 +2698,6 @@ static void dce110_program_front_end_for_pipe(
 	struct dc_plane_state *plane_state = pipe_ctx->plane_state;
 	struct xfm_grph_csc_adjustment adjust;
 	struct out_csc_color_matrix tbl_entry;
-	struct pipe_ctx *cur_pipe_ctx = &dc->current_state->res_ctx.pipe_ctx[pipe_ctx->pipe_idx];
 	unsigned int i;
 #if defined(CONFIG_DRM_AMD_DC_FBC)
        unsigned int underlay_idx = dc->res_pool->underlay_pipe_index;
@@ -2812,10 +2793,13 @@ static void dce110_program_front_end_for_pipe(
 				plane_state->rotation);
 
 	/* Moved programming gamma from dc to hwss */
-	if (cur_pipe_ctx->plane_state != pipe_ctx->plane_state) {
+	if (pipe_ctx->plane_state->update_flags.bits.full_update ||
+			pipe_ctx->plane_state->update_flags.bits.in_transfer_func_change ||
+			pipe_ctx->plane_state->update_flags.bits.gamma_change)
 		dc->hwss.set_input_transfer_func(pipe_ctx, pipe_ctx->plane_state);
+
+	if (pipe_ctx->plane_state->update_flags.bits.full_update)
 		dc->hwss.set_output_transfer_func(pipe_ctx, pipe_ctx->stream);
-	}
 
 	dm_logger_write(dc->ctx->logger, LOG_SURFACE,
 			"Pipe:%d 0x%x: addr hi:0x%x, "
@@ -2884,15 +2868,17 @@ static void dce110_apply_ctx_for_surface(
 			continue;
 
 		/* Need to allocate mem before program front end for Fiji */
-		if (pipe_ctx->plane_res.mi != NULL)
-			pipe_ctx->plane_res.mi->funcs->allocate_mem_input(
-					pipe_ctx->plane_res.mi,
-					pipe_ctx->stream->timing.h_total,
-					pipe_ctx->stream->timing.v_total,
-					pipe_ctx->stream->timing.pix_clk_khz,
-					context->stream_count);
+		pipe_ctx->plane_res.mi->funcs->allocate_mem_input(
+				pipe_ctx->plane_res.mi,
+				pipe_ctx->stream->timing.h_total,
+				pipe_ctx->stream->timing.v_total,
+				pipe_ctx->stream->timing.pix_clk_khz,
+				context->stream_count);
 
 		dce110_program_front_end_for_pipe(dc, pipe_ctx);
+
+		dc->hwss.update_plane_addr(dc, pipe_ctx);
+
 		program_surface_visibility(dc, pipe_ctx);
 
 	}
@@ -2953,6 +2939,49 @@ static void program_csc_matrix(struct pipe_ctx *pipe_ctx,
 	}
 }
 
+void dce110_set_cursor_position(struct pipe_ctx *pipe_ctx)
+{
+	struct dc_cursor_position pos_cpy = pipe_ctx->stream->cursor_position;
+	struct input_pixel_processor *ipp = pipe_ctx->plane_res.ipp;
+	struct mem_input *mi = pipe_ctx->plane_res.mi;
+	struct dc_cursor_mi_param param = {
+		.pixel_clk_khz = pipe_ctx->stream->timing.pix_clk_khz,
+		.ref_clk_khz = pipe_ctx->stream->ctx->dc->res_pool->ref_clock_inKhz,
+		.viewport_x_start = pipe_ctx->plane_res.scl_data.viewport.x,
+		.viewport_width = pipe_ctx->plane_res.scl_data.viewport.width,
+		.h_scale_ratio = pipe_ctx->plane_res.scl_data.ratios.horz
+	};
+
+	if (pipe_ctx->plane_state->address.type
+			== PLN_ADDR_TYPE_VIDEO_PROGRESSIVE)
+		pos_cpy.enable = false;
+
+	if (pipe_ctx->top_pipe && pipe_ctx->plane_state != pipe_ctx->top_pipe->plane_state)
+		pos_cpy.enable = false;
+
+	if (ipp->funcs->ipp_cursor_set_position)
+		ipp->funcs->ipp_cursor_set_position(ipp, &pos_cpy, &param);
+	if (mi->funcs->set_cursor_position)
+		mi->funcs->set_cursor_position(mi, &pos_cpy, &param);
+}
+
+void dce110_set_cursor_attribute(struct pipe_ctx *pipe_ctx)
+{
+	struct dc_cursor_attributes *attributes = &pipe_ctx->stream->cursor_attributes;
+
+	if (pipe_ctx->plane_res.ipp->funcs->ipp_cursor_set_attributes)
+		pipe_ctx->plane_res.ipp->funcs->ipp_cursor_set_attributes(
+				pipe_ctx->plane_res.ipp, attributes);
+
+	if (pipe_ctx->plane_res.mi->funcs->set_cursor_attributes)
+		pipe_ctx->plane_res.mi->funcs->set_cursor_attributes(
+				pipe_ctx->plane_res.mi, attributes);
+
+	if (pipe_ctx->plane_res.xfm->funcs->set_cursor_attributes)
+		pipe_ctx->plane_res.xfm->funcs->set_cursor_attributes(
+				pipe_ctx->plane_res.xfm, attributes);
+}
+
 static void ready_shared_resources(struct dc *dc, struct dc_state *context) {}
 
 static void optimize_shared_resources(struct dc *dc) {}
@@ -2994,6 +3023,9 @@ static const struct hw_sequencer_funcs dce110_funcs = {
 	.pplib_apply_display_requirements = pplib_apply_display_requirements,
 	.edp_backlight_control = hwss_edp_backlight_control,
 	.edp_power_control = hwss_edp_power_control,
+	.edp_wait_for_hpd_ready = hwss_edp_wait_for_hpd_ready,
+	.set_cursor_position = dce110_set_cursor_position,
+	.set_cursor_attribute = dce110_set_cursor_attribute
 };
 
 void dce110_hw_sequencer_construct(struct dc *dc)

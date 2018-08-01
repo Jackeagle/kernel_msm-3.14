@@ -29,6 +29,7 @@
 #include "core_status.h"
 #include "core_types.h"
 #include "hw_sequencer.h"
+#include "dce/dce_hwseq.h"
 
 #include "resource.h"
 
@@ -214,6 +215,91 @@ bool dc_stream_get_crtc_position(struct dc *dc,
 	return ret;
 }
 
+/**
+ * dc_stream_configure_crc: Configure CRC capture for the given stream.
+ * @dc: DC Object
+ * @stream: The stream to configure CRC on.
+ * @enable: Enable CRC if true, disable otherwise.
+ * @continuous: Capture CRC on every frame if true. Otherwise, only capture
+ *              once.
+ *
+ * By default, only CRC0 is configured, and the entire frame is used to
+ * calculate the crc.
+ */
+bool dc_stream_configure_crc(struct dc *dc, struct dc_stream_state *stream,
+			     bool enable, bool continuous)
+{
+	int i;
+	struct pipe_ctx *pipe;
+	struct crc_params param;
+	struct timing_generator *tg;
+
+	for (i = 0; i < MAX_PIPES; i++) {
+		pipe = &dc->current_state->res_ctx.pipe_ctx[i];
+		if (pipe->stream == stream)
+			break;
+	}
+	/* Stream not found */
+	if (i == MAX_PIPES)
+		return false;
+
+	/* Always capture the full frame */
+	param.windowa_x_start = 0;
+	param.windowa_y_start = 0;
+	param.windowa_x_end = pipe->stream->timing.h_addressable;
+	param.windowa_y_end = pipe->stream->timing.v_addressable;
+	param.windowb_x_start = 0;
+	param.windowb_y_start = 0;
+	param.windowb_x_end = pipe->stream->timing.h_addressable;
+	param.windowb_y_end = pipe->stream->timing.v_addressable;
+
+	/* Default to the union of both windows */
+	param.selection = UNION_WINDOW_A_B;
+	param.continuous_mode = continuous;
+	param.enable = enable;
+
+	tg = pipe->stream_res.tg;
+
+	/* Only call if supported */
+	if (tg->funcs->configure_crc)
+		return tg->funcs->configure_crc(tg, &param);
+	dm_logger_write(dc->ctx->logger, LOG_WARNING, "CRC capture not supported.");
+	return false;
+}
+
+/**
+ * dc_stream_get_crc: Get CRC values for the given stream.
+ * @dc: DC object
+ * @stream: The DC stream state of the stream to get CRCs from.
+ * @r_cr, g_y, b_cb: CRC values for the three channels are stored here.
+ *
+ * dc_stream_configure_crc needs to be called beforehand to enable CRCs.
+ * Return false if stream is not found, or if CRCs are not enabled.
+ */
+bool dc_stream_get_crc(struct dc *dc, struct dc_stream_state *stream,
+		       uint32_t *r_cr, uint32_t *g_y, uint32_t *b_cb)
+{
+	int i;
+	struct pipe_ctx *pipe;
+	struct timing_generator *tg;
+
+	for (i = 0; i < MAX_PIPES; i++) {
+		pipe = &dc->current_state->res_ctx.pipe_ctx[i];
+		if (pipe->stream == stream)
+			break;
+	}
+	/* Stream not found */
+	if (i == MAX_PIPES)
+		return false;
+
+	tg = pipe->stream_res.tg;
+
+	if (tg->funcs->get_crc)
+		return tg->funcs->get_crc(tg, r_cr, g_y, b_cb);
+	dm_logger_write(dc->ctx->logger, LOG_WARNING, "CRC capture not supported.");
+	return false;
+}
+
 void dc_stream_set_static_screen_events(struct dc *dc,
 		struct dc_stream_state **streams,
 		int num_streams,
@@ -239,9 +325,9 @@ void dc_stream_set_static_screen_events(struct dc *dc,
 	dc->hwss.set_static_screen_control(pipes_affected, num_pipes_affected, events);
 }
 
-static void set_drive_settings(struct dc *dc,
-		struct link_training_settings *lt_settings,
-		const struct dc_link *link)
+void dc_link_set_drive_settings(struct dc *dc,
+				struct link_training_settings *lt_settings,
+				const struct dc_link *link)
 {
 
 	int i;
@@ -257,9 +343,9 @@ static void set_drive_settings(struct dc *dc,
 	dc_link_dp_set_drive_settings(dc->links[i], lt_settings);
 }
 
-static void perform_link_training(struct dc *dc,
-		struct dc_link_settings *link_setting,
-		bool skip_video_pattern)
+void dc_link_perform_link_training(struct dc *dc,
+				   struct dc_link_settings *link_setting,
+				   bool skip_video_pattern)
 {
 	int i;
 
@@ -270,31 +356,30 @@ static void perform_link_training(struct dc *dc,
 			skip_video_pattern);
 }
 
-static void set_preferred_link_settings(struct dc *dc,
-		struct dc_link_settings *link_setting,
-		struct dc_link *link)
+void dc_link_set_preferred_link_settings(struct dc *dc,
+					 struct dc_link_settings *link_setting,
+					 struct dc_link *link)
 {
 	link->preferred_link_setting = *link_setting;
 	dp_retrain_link_dp_test(link, link_setting, false);
 }
 
-static void enable_hpd(const struct dc_link *link)
+void dc_link_enable_hpd(const struct dc_link *link)
 {
 	dc_link_dp_enable_hpd(link);
 }
 
-static void disable_hpd(const struct dc_link *link)
+void dc_link_disable_hpd(const struct dc_link *link)
 {
 	dc_link_dp_disable_hpd(link);
 }
 
 
-static void set_test_pattern(
-		struct dc_link *link,
-		enum dp_test_pattern test_pattern,
-		const struct link_training_settings *p_link_settings,
-		const unsigned char *p_custom_pattern,
-		unsigned int cust_pattern_size)
+void dc_link_set_test_pattern(struct dc_link *link,
+			      enum dp_test_pattern test_pattern,
+			      const struct link_training_settings *p_link_settings,
+			      const unsigned char *p_custom_pattern,
+			      unsigned int cust_pattern_size)
 {
 	if (link != NULL)
 		dc_link_dp_set_test_pattern(
@@ -303,27 +388,6 @@ static void set_test_pattern(
 			p_link_settings,
 			p_custom_pattern,
 			cust_pattern_size);
-}
-
-static void allocate_dc_stream_funcs(struct dc  *dc)
-{
-	dc->link_funcs.set_drive_settings =
-			set_drive_settings;
-
-	dc->link_funcs.perform_link_training =
-			perform_link_training;
-
-	dc->link_funcs.set_preferred_link_settings =
-			set_preferred_link_settings;
-
-	dc->link_funcs.enable_hpd =
-			enable_hpd;
-
-	dc->link_funcs.disable_hpd =
-			disable_hpd;
-
-	dc->link_funcs.set_test_pattern =
-			set_test_pattern;
 }
 
 static void destruct(struct dc *dc)
@@ -370,19 +434,17 @@ static bool construct(struct dc *dc,
 		const struct dc_init_data *init_params)
 {
 	struct dal_logger *logger;
-	struct dc_context *dc_ctx = kzalloc(sizeof(*dc_ctx), GFP_KERNEL);
-	struct bw_calcs_dceip *dc_dceip = kzalloc(sizeof(*dc_dceip),
-						  GFP_KERNEL);
-	struct bw_calcs_vbios *dc_vbios = kzalloc(sizeof(*dc_vbios),
-						  GFP_KERNEL);
+	struct dc_context *dc_ctx;
+	struct bw_calcs_dceip *dc_dceip;
+	struct bw_calcs_vbios *dc_vbios;
 #ifdef CONFIG_DRM_AMD_DC_DCN1_0
-	struct dcn_soc_bounding_box *dcn_soc = kzalloc(sizeof(*dcn_soc),
-						       GFP_KERNEL);
-	struct dcn_ip_params *dcn_ip = kzalloc(sizeof(*dcn_ip), GFP_KERNEL);
+	struct dcn_soc_bounding_box *dcn_soc;
+	struct dcn_ip_params *dcn_ip;
 #endif
 
 	enum dce_version dc_version = DCE_VERSION_UNKNOWN;
 
+	dc_dceip = kzalloc(sizeof(*dc_dceip), GFP_KERNEL);
 	if (!dc_dceip) {
 		dm_error("%s: failed to create dceip\n", __func__);
 		goto fail;
@@ -390,6 +452,7 @@ static bool construct(struct dc *dc,
 
 	dc->bw_dceip = dc_dceip;
 
+	dc_vbios = kzalloc(sizeof(*dc_vbios), GFP_KERNEL);
 	if (!dc_vbios) {
 		dm_error("%s: failed to create vbios\n", __func__);
 		goto fail;
@@ -397,6 +460,7 @@ static bool construct(struct dc *dc,
 
 	dc->bw_vbios = dc_vbios;
 #ifdef CONFIG_DRM_AMD_DC_DCN1_0
+	dcn_soc = kzalloc(sizeof(*dcn_soc), GFP_KERNEL);
 	if (!dcn_soc) {
 		dm_error("%s: failed to create dcn_soc\n", __func__);
 		goto fail;
@@ -404,6 +468,7 @@ static bool construct(struct dc *dc,
 
 	dc->dcn_soc = dcn_soc;
 
+	dcn_ip = kzalloc(sizeof(*dcn_ip), GFP_KERNEL);
 	if (!dcn_ip) {
 		dm_error("%s: failed to create dcn_ip\n", __func__);
 		goto fail;
@@ -412,15 +477,9 @@ static bool construct(struct dc *dc,
 	dc->dcn_ip = dcn_ip;
 #endif
 
+	dc_ctx = kzalloc(sizeof(*dc_ctx), GFP_KERNEL);
 	if (!dc_ctx) {
 		dm_error("%s: failed to create ctx\n", __func__);
-		goto fail;
-	}
-
-	dc->current_state = dc_create_state();
-
-	if (!dc->current_state) {
-		dm_error("%s: failed to create validate ctx\n", __func__);
 		goto fail;
 	}
 
@@ -428,6 +487,14 @@ static bool construct(struct dc *dc,
 	dc_ctx->driver_context = init_params->driver;
 	dc_ctx->dc = dc;
 	dc_ctx->asic_id = init_params->asic_id;
+	dc->ctx = dc_ctx;
+
+	dc->current_state = dc_create_state();
+
+	if (!dc->current_state) {
+		dm_error("%s: failed to create validate ctx\n", __func__);
+		goto fail;
+	}
 
 	/* Create logger */
 	logger = dal_logger_create(dc_ctx, init_params->log_mask);
@@ -438,11 +505,10 @@ static bool construct(struct dc *dc,
 		goto fail;
 	}
 	dc_ctx->logger = logger;
-	dc->ctx = dc_ctx;
-	dc->ctx->dce_environment = init_params->dce_environment;
+	dc_ctx->dce_environment = init_params->dce_environment;
 
 	dc_version = resource_parse_asic_id(init_params->asic_id);
-	dc->ctx->dce_version = dc_version;
+	dc_ctx->dce_version = dc_version;
 
 #if defined(CONFIG_DRM_AMD_DC_FBC)
 	dc->ctx->fbc_gpu_addr = init_params->fbc_gpu_addr;
@@ -501,8 +567,6 @@ static bool construct(struct dc *dc,
 
 	if (!create_links(dc, init_params->num_virtual_links))
 		goto fail;
-
-	allocate_dc_stream_funcs(dc);
 
 	return true;
 
@@ -667,7 +731,7 @@ static void program_timing_sync(
 		for (j = 0; j < group_size; j++) {
 			struct pipe_ctx *temp;
 
-			if (!pipe_set[j]->stream_res.tg->funcs->is_blanked(pipe_set[j]->stream_res.tg)) {
+			if (pipe_set[j]->stream_res.tg->funcs->is_blanked && !pipe_set[j]->stream_res.tg->funcs->is_blanked(pipe_set[j]->stream_res.tg)) {
 				if (j == 0)
 					break;
 
@@ -680,7 +744,7 @@ static void program_timing_sync(
 
 		/* remove any other unblanked pipes as they have already been synced */
 		for (j = j + 1; j < group_size; j++) {
-			if (!pipe_set[j]->stream_res.tg->funcs->is_blanked(pipe_set[j]->stream_res.tg)) {
+			if (pipe_set[j]->stream_res.tg->funcs->is_blanked && !pipe_set[j]->stream_res.tg->funcs->is_blanked(pipe_set[j]->stream_res.tg)) {
 				group_size--;
 				pipe_set[j] = pipe_set[group_size];
 				j--;
@@ -761,10 +825,13 @@ static enum dc_status dc_commit_state_no_check(struct dc *dc, struct dc_state *c
 	/* re-program planes for existing stream, in case we need to
 	 * free up plane resource for later use
 	 */
-	for (i = 0; i < dc->current_state->stream_count; i++) {
+	for (i = 0; i < context->stream_count; i++) {
+		if (context->streams[i]->mode_changed)
+			continue;
+
 		dc->hwss.apply_ctx_for_surface(
-			dc, dc->current_state->streams[i],
-			dc->current_state->stream_status[i].plane_count,
+			dc, context->streams[i],
+			context->stream_status[i].plane_count,
 			context); /* use new pipe config in new context */
 	}
 
@@ -789,6 +856,9 @@ static enum dc_status dc_commit_state_no_check(struct dc *dc, struct dc_state *c
 	/* Program all planes within new context*/
 	for (i = 0; i < context->stream_count; i++) {
 		const struct dc_sink *sink = context->streams[i]->sink;
+
+		if (!context->streams[i]->mode_changed)
+			continue;
 
 		dc->hwss.apply_ctx_for_surface(
 				dc, context->streams[i],
@@ -868,6 +938,8 @@ bool dc_post_update_surfaces_to_stream(struct dc *dc)
 			context->res_ctx.pipe_ctx[i].pipe_idx = i;
 			dc->hwss.disable_plane(dc, &context->res_ctx.pipe_ctx[i]);
 		}
+
+	dc->optimized_required = false;
 
 	/* 3rd param should be true, temp w/a for RV*/
 #if defined(CONFIG_DRM_AMD_DC_DCN1_0)
@@ -1064,12 +1136,20 @@ static enum surface_update_type get_plane_info_update_type(const struct dc_surfa
 	if (u->plane_info->per_pixel_alpha != u->surface->per_pixel_alpha)
 		update_flags->bits.per_pixel_alpha_change = 1;
 
+	if (u->plane_info->dcc.enable != u->surface->dcc.enable
+			|| u->plane_info->dcc.grph.independent_64b_blks != u->surface->dcc.grph.independent_64b_blks
+			|| u->plane_info->dcc.grph.meta_pitch != u->surface->dcc.grph.meta_pitch)
+		update_flags->bits.dcc_change = 1;
+
 	if (pixel_format_to_bpp(u->plane_info->format) !=
 			pixel_format_to_bpp(u->surface->format))
 		/* different bytes per element will require full bandwidth
 		 * and DML calculation
 		 */
 		update_flags->bits.bpp_change = 1;
+
+	if (u->gamma && dce_use_lut(u->plane_info->format))
+		update_flags->bits.gamma_change = 1;
 
 	if (memcmp(&u->plane_info->tiling_info, &u->surface->tiling_info,
 			sizeof(union dc_tiling_info)) != 0) {
@@ -1086,6 +1166,7 @@ static enum surface_update_type get_plane_info_update_type(const struct dc_surfa
 
 	if (update_flags->bits.rotation_change
 			|| update_flags->bits.stereo_format_change
+			|| update_flags->bits.gamma_change
 			|| update_flags->bits.bpp_change
 			|| update_flags->bits.bandwidth_change)
 		return UPDATE_TYPE_FULL;
@@ -1166,12 +1247,12 @@ static enum surface_update_type det_surface_update(const struct dc *dc,
 	elevate_update_type(&overall_type, type);
 
 	if (u->in_transfer_func)
-		update_flags->bits.in_transfer_func = 1;
+		update_flags->bits.in_transfer_func_change = 1;
 
 	if (u->input_csc_color_matrix)
 		update_flags->bits.input_csc_change = 1;
 
-	if (update_flags->bits.in_transfer_func
+	if (update_flags->bits.in_transfer_func_change
 			|| update_flags->bits.input_csc_change) {
 		type = UPDATE_TYPE_MED;
 		elevate_update_type(&overall_type, type);
@@ -1263,14 +1344,6 @@ static void commit_planes_for_stream(struct dc *dc,
 		context_clock_trace(dc, context);
 	}
 
-	if (update_type > UPDATE_TYPE_FAST) {
-		for (j = 0; j < dc->res_pool->pipe_count; j++) {
-			struct pipe_ctx *pipe_ctx = &context->res_ctx.pipe_ctx[j];
-
-			dc->hwss.wait_for_mpcc_disconnect(dc, dc->res_pool, pipe_ctx);
-		}
-	}
-
 	if (surface_count == 0) {
 		/*
 		 * In case of turning off screen, no need to program front end a second time.
@@ -1298,7 +1371,7 @@ static void commit_planes_for_stream(struct dc *dc,
 		}
 	}
 
-	if (update_type > UPDATE_TYPE_FAST)
+	if (update_type == UPDATE_TYPE_FULL)
 		context_timing_trace(dc, &context->res_ctx);
 
 	/* Perform requested Updates */
@@ -1314,8 +1387,8 @@ static void commit_planes_for_stream(struct dc *dc,
 			if (pipe_ctx->plane_state != plane_state)
 				continue;
 
-			if (srf_updates[i].flip_addr)
-				dc->hwss.update_plane_addr(dc, pipe_ctx);
+			if (update_type == UPDATE_TYPE_FAST && srf_updates[i].flip_addr)
+					dc->hwss.update_plane_addr(dc, pipe_ctx);
 		}
 	}
 
@@ -1440,13 +1513,13 @@ enum dc_irq_source dc_interrupt_to_irq_source(
 	return dal_irq_service_to_irq_source(dc->res_pool->irqs, src_id, ext_id);
 }
 
-void dc_interrupt_set(struct dc *dc, enum dc_irq_source src, bool enable)
+bool dc_interrupt_set(struct dc *dc, enum dc_irq_source src, bool enable)
 {
 
 	if (dc == NULL)
-		return;
+		return false;
 
-	dal_irq_service_set(dc->res_pool->irqs, src, enable);
+	return dal_irq_service_set(dc->res_pool->irqs, src, enable);
 }
 
 void dc_interrupt_ack(struct dc *dc, enum dc_irq_source src)

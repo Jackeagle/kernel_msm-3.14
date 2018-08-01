@@ -352,6 +352,7 @@ struct amdgpu_mode_info {
 	u16 firmware_flags;
 	/* pointer to backlight encoder */
 	struct amdgpu_encoder *bl_encoder;
+	u8 bl_level; /* saved backlight level */
 	struct amdgpu_audio	audio; /* audio stuff */
 	int			num_crtc; /* number of crtcs */
 	int			num_hpd; /* number of hpd pins */
@@ -658,10 +659,6 @@ void amdgpu_fbdev_fini(struct amdgpu_device *adev);
 void amdgpu_fbdev_set_suspend(struct amdgpu_device *adev, int state);
 int amdgpu_fbdev_total_size(struct amdgpu_device *adev);
 bool amdgpu_fbdev_robj_is_fb(struct amdgpu_device *adev, struct amdgpu_bo *robj);
-void amdgpu_fbdev_restore_mode(struct amdgpu_device *adev);
-
-void amdgpu_fb_output_poll_changed(struct amdgpu_device *adev);
-
 
 int amdgpu_align_pitch(struct amdgpu_device *adev, int width, int bpp, bool tiled);
 

@@ -25,10 +25,8 @@
 #include "amdgpu_ih.h"
 #include "soc15.h"
 
-
-#include "vega10/soc15ip.h"
-#include "vega10/OSSSYS/osssys_4_0_offset.h"
-#include "vega10/OSSSYS/osssys_4_0_sh_mask.h"
+#include "oss/osssys_4_0_offset.h"
+#include "oss/osssys_4_0_sh_mask.h"
 
 #include "soc15_common.h"
 #include "vega10_ih.h"
@@ -97,10 +95,7 @@ static int vega10_ih_irq_init(struct amdgpu_device *adev)
 	/* disable irqs */
 	vega10_ih_disable_interrupts(adev);
 
-	if (adev->flags & AMD_IS_APU)
-		nbio_v7_0_ih_control(adev);
-	else
-		nbio_v6_1_ih_control(adev);
+	adev->nbio_funcs->ih_control(adev);
 
 	ih_rb_cntl = RREG32_SOC15(OSSSYS, 0, mmIH_RB_CNTL);
 	/* Ring Buffer base. [39:8] of 40-bit address of the beginning of the ring buffer*/
@@ -151,10 +146,8 @@ static int vega10_ih_irq_init(struct amdgpu_device *adev)
 						 ENABLE, 0);
 	}
 	WREG32_SOC15(OSSSYS, 0, mmIH_DOORBELL_RPTR, ih_doorbell_rtpr);
-	if (adev->flags & AMD_IS_APU)
-		nbio_v7_0_ih_doorbell_range(adev, adev->irq.ih.use_doorbell, adev->irq.ih.doorbell_index);
-	else
-		nbio_v6_1_ih_doorbell_range(adev, adev->irq.ih.use_doorbell, adev->irq.ih.doorbell_index);
+	adev->nbio_funcs->ih_doorbell_range(adev, adev->irq.ih.use_doorbell,
+					    adev->irq.ih.doorbell_index);
 
 	tmp = RREG32_SOC15(OSSSYS, 0, mmIH_STORM_CLIENT_LIST_CNTL);
 	tmp = REG_SET_FIELD(tmp, IH_STORM_CLIENT_LIST_CNTL,
@@ -285,9 +278,9 @@ static bool vega10_ih_prescreen_iv(struct amdgpu_device *adev)
 	/* Track retry faults in per-VM fault FIFO. */
 	spin_lock(&adev->vm_manager.pasid_lock);
 	vm = idr_find(&adev->vm_manager.pasid_idr, pasid);
-	spin_unlock(&adev->vm_manager.pasid_lock);
-	if (WARN_ON_ONCE(!vm)) {
+	if (!vm) {
 		/* VM not found, process it normally */
+		spin_unlock(&adev->vm_manager.pasid_lock);
 		amdgpu_ih_clear_fault(adev, key);
 		return true;
 	}
@@ -295,9 +288,11 @@ static bool vega10_ih_prescreen_iv(struct amdgpu_device *adev)
 	r = kfifo_put(&vm->faults, key);
 	if (!r) {
 		/* FIFO is full. Ignore it until there is space */
+		spin_unlock(&adev->vm_manager.pasid_lock);
 		amdgpu_ih_clear_fault(adev, key);
 		goto ignore_iv;
 	}
+	spin_unlock(&adev->vm_manager.pasid_lock);
 
 	/* It's the first fault for this address, process it normally */
 	return true;
@@ -334,8 +329,8 @@ static void vega10_ih_decode_iv(struct amdgpu_device *adev,
 	entry->client_id = dw[0] & 0xff;
 	entry->src_id = (dw[0] >> 8) & 0xff;
 	entry->ring_id = (dw[0] >> 16) & 0xff;
-	entry->vm_id = (dw[0] >> 24) & 0xf;
-	entry->vm_id_src = (dw[0] >> 31);
+	entry->vmid = (dw[0] >> 24) & 0xf;
+	entry->vmid_src = (dw[0] >> 31);
 	entry->timestamp = dw[1] | ((u64)(dw[2] & 0xffff) << 32);
 	entry->timestamp_src = dw[2] >> 31;
 	entry->pas_id = dw[3] & 0xffff;

@@ -154,28 +154,28 @@ static void dce_v11_0_init_golden_registers(struct amdgpu_device *adev)
 {
 	switch (adev->asic_type) {
 	case CHIP_CARRIZO:
-		amdgpu_program_register_sequence(adev,
-						 cz_mgcg_cgcg_init,
-						 ARRAY_SIZE(cz_mgcg_cgcg_init));
-		amdgpu_program_register_sequence(adev,
-						 cz_golden_settings_a11,
-						 ARRAY_SIZE(cz_golden_settings_a11));
+		amdgpu_device_program_register_sequence(adev,
+							cz_mgcg_cgcg_init,
+							ARRAY_SIZE(cz_mgcg_cgcg_init));
+		amdgpu_device_program_register_sequence(adev,
+							cz_golden_settings_a11,
+							ARRAY_SIZE(cz_golden_settings_a11));
 		break;
 	case CHIP_STONEY:
-		amdgpu_program_register_sequence(adev,
-						 stoney_golden_settings_a11,
-						 ARRAY_SIZE(stoney_golden_settings_a11));
+		amdgpu_device_program_register_sequence(adev,
+							stoney_golden_settings_a11,
+							ARRAY_SIZE(stoney_golden_settings_a11));
 		break;
 	case CHIP_POLARIS11:
 	case CHIP_POLARIS12:
-		amdgpu_program_register_sequence(adev,
-						 polaris11_golden_settings_a11,
-						 ARRAY_SIZE(polaris11_golden_settings_a11));
+		amdgpu_device_program_register_sequence(adev,
+							polaris11_golden_settings_a11,
+							ARRAY_SIZE(polaris11_golden_settings_a11));
 		break;
 	case CHIP_POLARIS10:
-		amdgpu_program_register_sequence(adev,
-						 polaris10_golden_settings_a11,
-						 ARRAY_SIZE(polaris10_golden_settings_a11));
+		amdgpu_device_program_register_sequence(adev,
+							polaris10_golden_settings_a11,
+							ARRAY_SIZE(polaris10_golden_settings_a11));
 		break;
 	default:
 		break;
@@ -3047,6 +3047,11 @@ static int dce_v11_0_hw_fini(void *handle)
 
 static int dce_v11_0_suspend(void *handle)
 {
+	struct amdgpu_device *adev = (struct amdgpu_device *)handle;
+
+	adev->mode_info.bl_level =
+		amdgpu_atombios_encoder_get_backlight_level_from_reg(adev);
+
 	return dce_v11_0_hw_fini(handle);
 }
 
@@ -3054,6 +3059,9 @@ static int dce_v11_0_resume(void *handle)
 {
 	struct amdgpu_device *adev = (struct amdgpu_device *)handle;
 	int ret;
+
+	amdgpu_atombios_encoder_set_backlight_level_to_reg(adev,
+							   adev->mode_info.bl_level);
 
 	ret = dce_v11_0_hw_init(handle);
 
