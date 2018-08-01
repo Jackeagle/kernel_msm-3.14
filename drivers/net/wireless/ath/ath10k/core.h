@@ -180,6 +180,11 @@ struct ath10k_wmi {
 	const struct wmi_ops *ops;
 	const struct wmi_peer_flags_map *peer_flags;
 
+	u32 mgmt_max_num_pending_tx;
+
+	/* Protected by data_lock */
+	struct idr mgmt_pending_tx;
+
 	u32 num_mem_chunks;
 	u32 rx_decap_mode;
 	struct ath10k_mem_chunk mem_chunks[WMI_MAX_MEM_REQS];
@@ -835,6 +840,8 @@ struct ath10k {
 		u32 subsystem_device;
 
 		bool bmi_ids_valid;
+		bool qmi_ids_valid;
+		u32 qmi_board_id;
 		u8 bmi_board_id;
 		u8 bmi_chip_id;
 
@@ -1051,5 +1058,7 @@ int ath10k_wait_for_suspend(struct ath10k *ar, u32 suspend_opt);
 void ath10k_core_stop(struct ath10k *ar);
 int ath10k_core_register(struct ath10k *ar, u32 chip_id);
 void ath10k_core_unregister(struct ath10k *ar);
+int ath10k_core_fetch_board_file(struct ath10k *ar);
+void ath10k_core_free_board_files(struct ath10k *ar);
 
 #endif /* _CORE_H_ */

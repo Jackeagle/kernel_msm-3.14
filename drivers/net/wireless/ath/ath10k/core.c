@@ -81,6 +81,7 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.hw_ops = &qca988x_ops,
 		.decap_align_bytes = 4,
 		.spectral_bin_discard = 0,
+		.spectral_bin_offset = 0,
 		.vht160_mcs_rx_highest = 0,
 		.vht160_mcs_tx_highest = 0,
 		.n_cipher_suites = 8,
@@ -89,6 +90,9 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.num_wds_entries = 0x20,
 		.target_64bit = false,
 		.rx_ring_fill_level = HTT_RX_RING_FILL_LEVEL,
+		.shadow_reg_support = false,
+		.rri_on_ddr = false,
+		.hw_filter_reset_required = true,
 	},
 	{
 		.id = QCA988X_HW_2_0_VERSION,
@@ -110,6 +114,7 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.hw_ops = &qca988x_ops,
 		.decap_align_bytes = 4,
 		.spectral_bin_discard = 0,
+		.spectral_bin_offset = 0,
 		.vht160_mcs_rx_highest = 0,
 		.vht160_mcs_tx_highest = 0,
 		.n_cipher_suites = 8,
@@ -119,6 +124,9 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.target_64bit = false,
 		.rx_ring_fill_level = HTT_RX_RING_FILL_LEVEL,
 		.per_ce_irq = false,
+		.shadow_reg_support = false,
+		.rri_on_ddr = false,
+		.hw_filter_reset_required = true,
 	},
 	{
 		.id = QCA9887_HW_1_0_VERSION,
@@ -140,6 +148,7 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.hw_ops = &qca988x_ops,
 		.decap_align_bytes = 4,
 		.spectral_bin_discard = 0,
+		.spectral_bin_offset = 0,
 		.vht160_mcs_rx_highest = 0,
 		.vht160_mcs_tx_highest = 0,
 		.n_cipher_suites = 8,
@@ -149,6 +158,9 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.target_64bit = false,
 		.rx_ring_fill_level = HTT_RX_RING_FILL_LEVEL,
 		.per_ce_irq = false,
+		.shadow_reg_support = false,
+		.rri_on_ddr = false,
+		.hw_filter_reset_required = true,
 	},
 	{
 		.id = QCA6174_HW_2_1_VERSION,
@@ -169,6 +181,7 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.hw_ops = &qca988x_ops,
 		.decap_align_bytes = 4,
 		.spectral_bin_discard = 0,
+		.spectral_bin_offset = 0,
 		.vht160_mcs_rx_highest = 0,
 		.vht160_mcs_tx_highest = 0,
 		.n_cipher_suites = 8,
@@ -178,6 +191,9 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.target_64bit = false,
 		.rx_ring_fill_level = HTT_RX_RING_FILL_LEVEL,
 		.per_ce_irq = false,
+		.shadow_reg_support = false,
+		.rri_on_ddr = false,
+		.hw_filter_reset_required = true,
 	},
 	{
 		.id = QCA6174_HW_2_1_VERSION,
@@ -198,6 +214,7 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.hw_ops = &qca988x_ops,
 		.decap_align_bytes = 4,
 		.spectral_bin_discard = 0,
+		.spectral_bin_offset = 0,
 		.vht160_mcs_rx_highest = 0,
 		.vht160_mcs_tx_highest = 0,
 		.n_cipher_suites = 8,
@@ -207,6 +224,9 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.target_64bit = false,
 		.rx_ring_fill_level = HTT_RX_RING_FILL_LEVEL,
 		.per_ce_irq = false,
+		.shadow_reg_support = false,
+		.rri_on_ddr = false,
+		.hw_filter_reset_required = true,
 	},
 	{
 		.id = QCA6174_HW_3_0_VERSION,
@@ -227,6 +247,7 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.hw_ops = &qca988x_ops,
 		.decap_align_bytes = 4,
 		.spectral_bin_discard = 0,
+		.spectral_bin_offset = 0,
 		.vht160_mcs_rx_highest = 0,
 		.vht160_mcs_tx_highest = 0,
 		.n_cipher_suites = 8,
@@ -236,6 +257,9 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.target_64bit = false,
 		.rx_ring_fill_level = HTT_RX_RING_FILL_LEVEL,
 		.per_ce_irq = false,
+		.shadow_reg_support = false,
+		.rri_on_ddr = false,
+		.hw_filter_reset_required = true,
 	},
 	{
 		.id = QCA6174_HW_3_2_VERSION,
@@ -259,6 +283,7 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.target_cpu_freq = 176000000,
 		.decap_align_bytes = 4,
 		.spectral_bin_discard = 0,
+		.spectral_bin_offset = 0,
 		.vht160_mcs_rx_highest = 0,
 		.vht160_mcs_tx_highest = 0,
 		.n_cipher_suites = 8,
@@ -268,6 +293,9 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.target_64bit = false,
 		.rx_ring_fill_level = HTT_RX_RING_FILL_LEVEL,
 		.per_ce_irq = false,
+		.shadow_reg_support = false,
+		.rri_on_ddr = false,
+		.hw_filter_reset_required = true,
 	},
 	{
 		.id = QCA99X0_HW_2_0_DEV_VERSION,
@@ -294,6 +322,7 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.hw_ops = &qca99x0_ops,
 		.decap_align_bytes = 1,
 		.spectral_bin_discard = 4,
+		.spectral_bin_offset = 0,
 		.vht160_mcs_rx_highest = 0,
 		.vht160_mcs_tx_highest = 0,
 		.n_cipher_suites = 11,
@@ -303,6 +332,9 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.target_64bit = false,
 		.rx_ring_fill_level = HTT_RX_RING_FILL_LEVEL,
 		.per_ce_irq = false,
+		.shadow_reg_support = false,
+		.rri_on_ddr = false,
+		.hw_filter_reset_required = true,
 	},
 	{
 		.id = QCA9984_HW_1_0_DEV_VERSION,
@@ -330,6 +362,7 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.hw_ops = &qca99x0_ops,
 		.decap_align_bytes = 1,
 		.spectral_bin_discard = 12,
+		.spectral_bin_offset = 8,
 
 		/* Can do only 2x2 VHT160 or 80+80. 1560Mbps is 4x4 80Mhz
 		 * or 2x2 160Mhz, long-guard-interval.
@@ -343,6 +376,9 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.target_64bit = false,
 		.rx_ring_fill_level = HTT_RX_RING_FILL_LEVEL,
 		.per_ce_irq = false,
+		.shadow_reg_support = false,
+		.rri_on_ddr = false,
+		.hw_filter_reset_required = true,
 	},
 	{
 		.id = QCA9888_HW_2_0_DEV_VERSION,
@@ -369,6 +405,7 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.hw_ops = &qca99x0_ops,
 		.decap_align_bytes = 1,
 		.spectral_bin_discard = 12,
+		.spectral_bin_offset = 8,
 
 		/* Can do only 1x1 VHT160 or 80+80. 780Mbps is 2x2 80Mhz or
 		 * 1x1 160Mhz, long-guard-interval.
@@ -382,6 +419,9 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.target_64bit = false,
 		.rx_ring_fill_level = HTT_RX_RING_FILL_LEVEL,
 		.per_ce_irq = false,
+		.shadow_reg_support = false,
+		.rri_on_ddr = false,
+		.hw_filter_reset_required = true,
 	},
 	{
 		.id = QCA9377_HW_1_0_DEV_VERSION,
@@ -402,6 +442,7 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.hw_ops = &qca988x_ops,
 		.decap_align_bytes = 4,
 		.spectral_bin_discard = 0,
+		.spectral_bin_offset = 0,
 		.vht160_mcs_rx_highest = 0,
 		.vht160_mcs_tx_highest = 0,
 		.n_cipher_suites = 8,
@@ -411,6 +452,9 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.target_64bit = false,
 		.rx_ring_fill_level = HTT_RX_RING_FILL_LEVEL,
 		.per_ce_irq = false,
+		.shadow_reg_support = false,
+		.rri_on_ddr = false,
+		.hw_filter_reset_required = true,
 	},
 	{
 		.id = QCA9377_HW_1_1_DEV_VERSION,
@@ -433,6 +477,7 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.target_cpu_freq = 176000000,
 		.decap_align_bytes = 4,
 		.spectral_bin_discard = 0,
+		.spectral_bin_offset = 0,
 		.vht160_mcs_rx_highest = 0,
 		.vht160_mcs_tx_highest = 0,
 		.n_cipher_suites = 8,
@@ -442,6 +487,9 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.target_64bit = false,
 		.rx_ring_fill_level = HTT_RX_RING_FILL_LEVEL,
 		.per_ce_irq = false,
+		.shadow_reg_support = false,
+		.rri_on_ddr = false,
+		.hw_filter_reset_required = true,
 	},
 	{
 		.id = QCA4019_HW_1_0_DEV_VERSION,
@@ -469,6 +517,7 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.hw_ops = &qca99x0_ops,
 		.decap_align_bytes = 1,
 		.spectral_bin_discard = 4,
+		.spectral_bin_offset = 0,
 		.vht160_mcs_rx_highest = 0,
 		.vht160_mcs_tx_highest = 0,
 		.n_cipher_suites = 11,
@@ -478,6 +527,9 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.target_64bit = false,
 		.rx_ring_fill_level = HTT_RX_RING_FILL_LEVEL,
 		.per_ce_irq = false,
+		.shadow_reg_support = false,
+		.rri_on_ddr = false,
+		.hw_filter_reset_required = true,
 	},
 	{
 		.id = WCN3990_HW_1_0_DEV_VERSION,
@@ -499,6 +551,9 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
 		.target_64bit = true,
 		.rx_ring_fill_level = HTT_RX_RING_FILL_LEVEL_DUAL_MAC,
 		.per_ce_irq = true,
+		.shadow_reg_support = true,
+		.rri_on_ddr = true,
+		.hw_filter_reset_required = false,
 	},
 };
 
@@ -1105,7 +1160,7 @@ static int ath10k_download_fw(struct ath10k *ar)
 	return ret;
 }
 
-static void ath10k_core_free_board_files(struct ath10k *ar)
+void ath10k_core_free_board_files(struct ath10k *ar)
 {
 	if (!IS_ERR(ar->normal_mode_fw.board))
 		release_firmware(ar->normal_mode_fw.board);
@@ -1114,6 +1169,7 @@ static void ath10k_core_free_board_files(struct ath10k *ar)
 	ar->normal_mode_fw.board_data = NULL;
 	ar->normal_mode_fw.board_len = 0;
 }
+EXPORT_SYMBOL(ath10k_core_free_board_files);
 
 static void ath10k_core_free_firmware_files(struct ath10k *ar)
 {
@@ -1399,6 +1455,14 @@ static int ath10k_core_create_board_name(struct ath10k *ar, char *name,
 		goto out;
 	}
 
+	if (ar->id.qmi_ids_valid) {
+		scnprintf(name, name_len,
+			  "bus=%s,qmi-board-id=%x",
+			  ath10k_bus_str(ar->hif.bus),
+			  ar->id.qmi_board_id);
+		goto out;
+	}
+
 	scnprintf(name, name_len,
 		  "bus=%s,vendor=%04x,device=%04x,subsystem-vendor=%04x,subsystem-device=%04x%s",
 		  ath10k_bus_str(ar->hif.bus),
@@ -1410,7 +1474,7 @@ out:
 	return 0;
 }
 
-static int ath10k_core_fetch_board_file(struct ath10k *ar)
+int ath10k_core_fetch_board_file(struct ath10k *ar)
 {
 	char boardname[100];
 	int ret;
@@ -1439,6 +1503,7 @@ success:
 	ath10k_dbg(ar, ATH10K_DBG_BOOT, "using board api %d\n", ar->bd_api);
 	return 0;
 }
+EXPORT_SYMBOL(ath10k_core_fetch_board_file);
 
 int ath10k_core_fetch_firmware_api_n(struct ath10k *ar, const char *name,
 				     struct ath10k_fw_file *fw_file)
@@ -2045,6 +2110,7 @@ static int ath10k_core_init_firmware_features(struct ath10k *ar)
 		ar->fw_stats_req_mask = WMI_STAT_PDEV | WMI_STAT_VDEV |
 			WMI_STAT_PEER;
 		ar->max_spatial_stream = WMI_MAX_SPATIAL_STREAM;
+		ar->wmi.mgmt_max_num_pending_tx = TARGET_TLV_MGMT_NUM_MSDU_DESC;
 		break;
 	case ATH10K_FW_WMI_OP_VERSION_10_4:
 		ar->max_num_peers = TARGET_10_4_NUM_PEERS;
@@ -2350,7 +2416,8 @@ int ath10k_core_start(struct ath10k *ar, enum ath10k_firmware_mode mode,
 	 * possible to implicitly make it correct by creating a dummy vdev and
 	 * then deleting it.
 	 */
-	if (mode == ATH10K_FIRMWARE_MODE_NORMAL) {
+	if (ar->hw_params.hw_filter_reset_required &&
+	    mode == ATH10K_FIRMWARE_MODE_NORMAL) {
 		status = ath10k_core_reset_rx_filter(ar);
 		if (status) {
 			ath10k_err(ar,
