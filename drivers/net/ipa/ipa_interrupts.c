@@ -57,10 +57,9 @@ static DECLARE_WORK(ipa_interrupt_work, ipa_interrupt_work_func);
 
 static void ipa_handle_interrupt(int irq_num)
 {
-	struct ipa_interrupt_info *intr_info;
+	struct ipa_interrupt_info *intr_info = &ipa_interrupt_info[irq_num];
 	u32 endpoints = 0;	/* Only TX_SUSPEND uses its interrupt_data */
 
-	intr_info = &ipa_interrupt_info[irq_num];
 	if (!intr_info->handler)
 		return;
 
@@ -238,15 +237,12 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 			       ipa_irq_handler_t handler)
 {
 	int irq_num = ipa_irq_mapping[interrupt];
-	struct ipa_interrupt_info *intr_info;
+	struct ipa_interrupt_info *intr_info = &ipa_interrupt_info[irq_num];
 	u32 val;
 
 	ipa_debug("%s: interrupt_enum %d irq_num %d\n", __func__,
 		  interrupt, irq_num);
 
-	ipa_assert(irq_num >= 0);
-
-	intr_info = &ipa_interrupt_info[irq_num];
 	intr_info->handler = handler;
 	intr_info->interrupt = interrupt;
 
@@ -268,10 +264,9 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 {
 	int irq_num = ipa_irq_mapping[interrupt];
-	struct ipa_interrupt_info *intr_info;
+	struct ipa_interrupt_info *intr_info = &ipa_interrupt_info[irq_num];
 	u32 val;
 
-	intr_info = &ipa_interrupt_info[irq_num];
 	intr_info->handler = NULL;
 	intr_info->interrupt = IPA_INVALID_IRQ;
 
@@ -322,9 +317,9 @@ int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
  */
 void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 {
-	struct ipa_interrupt_info *intr_info;
+	int irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
+	struct ipa_interrupt_info *intr_info = &ipa_interrupt_info[irq_num];
 	u32 clnt_mask = BIT(clnt_hdl);
-	int irq_num;
 
 	/* Nothing to do if the endpoint doesn't have aggregation open */
 	if (!(ipahal_read_reg(IPA_STATE_AGGR_ACTIVE) & clnt_mask))
@@ -335,8 +330,6 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 
 	/* Simulate suspend IRQ */
 	ipa_assert(!in_interrupt());
-	irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
-	intr_info = &ipa_interrupt_info[irq_num];
 	if (intr_info->handler)
 		intr_info->handler(intr_info->interrupt, clnt_mask);
 }
