@@ -764,7 +764,7 @@ void ipa_client_remove_wait(void);
 
 void ipa_cfg_default_route(enum ipa_client_type client);
 
-int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev);
+int ipa_interrupts_init(u32 ipa_irq, struct platform_device *ipa_device);
 
 void ipa_suspend_active_aggr_wa(u32 clnt_hdl);
 void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data);

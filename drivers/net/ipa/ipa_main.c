@@ -828,7 +828,7 @@ static int ipa_init_interrupts(void)
 	if (ipa_irq < 0)
 		return ipa_irq;
 
-	ret = ipa_interrupts_init(ipa_irq, &ipa_ctx->ipa_pdev->dev);
+	ret = ipa_interrupts_init(ipa_irq, ipa_ctx->ipa_pdev);
 	if (ret)
 		return ret;
 

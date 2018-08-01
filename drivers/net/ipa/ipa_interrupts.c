@@ -236,19 +236,14 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 
 /** ipa_interrupts_init() - Initialize the IPA interrupts framework
  * @ipa_irq:	The interrupt number to allocate
- * @ipa_dev:	The basic device structure representing the IPA driver
- *
- * - Initialize the ipa_interrupt_info array
- * - Clear interrupts status
- * - Register the ipa interrupt handler - ipa_isr
- * - Enable apps processor wakeup by IPA interrupts
+ * @ipa_device:	The IPA platform device structure
  */
-int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
+int ipa_interrupts_init(u32 ipa_irq, struct platform_device *ipa_device)
 {
+	struct device *dev = &ipa_device->dev;
 	int ret;
 
-	ret = request_irq(ipa_irq, ipa_isr, IRQF_TRIGGER_RISING, "ipa",
-			  ipa_dev);
+	ret = request_irq(ipa_irq, ipa_isr, IRQF_TRIGGER_RISING, "ipa", dev);
 	if (ret)
 		return ret;
 
@@ -256,11 +251,9 @@ int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
 	if (ipa_interrupt_wq)
 		return 0;
 
-	ret = -ENOMEM;
-err_free_irq:
-	free_irq(ipa_irq, ipa_dev);
+	free_irq(ipa_irq, dev);
 
-	return ret;
+	return -ENOMEM;
 }
 
 /** ipa_suspend_active_aggr_wa() - Emulate suspend IRQ
