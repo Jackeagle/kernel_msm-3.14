@@ -247,17 +247,18 @@ int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
 {
 	int ret;
 
-	ipa_interrupt_wq = alloc_ordered_workqueue("ipa_interrupt_wq", 0);
-	if (!ipa_interrupt_wq)
-		return -ENOMEM;
-
 	ret = request_irq(ipa_irq, ipa_isr, IRQF_TRIGGER_RISING, "ipa",
 			  ipa_dev);
-	if (!ret)
+	if (ret)
+		return ret;
+
+	ipa_interrupt_wq = alloc_ordered_workqueue("ipa_interrupt_wq", 0);
+	if (ipa_interrupt_wq)
 		return 0;
 
-	destroy_workqueue(ipa_interrupt_wq);
-	ipa_interrupt_wq = NULL;
+	ret = -ENOMEM;
+err_free_irq:
+	free_irq(ipa_irq, ipa_dev);
 
 	return ret;
 }
