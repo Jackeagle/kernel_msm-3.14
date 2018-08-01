@@ -53,21 +53,9 @@ static const int ipa_irq_mapping[IPA_IRQ_MAX] = {
 	[IPA_GSI_IDLE_IRQ]			= 16,
 };
 
-/* All IPA interrupts are handled in workqueue context */
+/* IPA interrupt handlers are called in contexts that can block */
 static void ipa_interrupt_work_func(struct work_struct *work);
 static DECLARE_WORK(ipa_interrupt_work, ipa_interrupt_work_func);
-
-static void simulated_suspend_work_func(struct work_struct *work)
-{
-	struct ipa_interrupt_info *interrupt_info;
-
-	ipa_debug("call handler from workq...\n");
-
-	interrupt_info = container_of(work, struct ipa_interrupt_info, work);
-	interrupt_info->handler(interrupt_info->interrupt,
-				interrupt_info->interrupt_data);
-	interrupt_info->interrupt_data = 0;
-}
 
 static void ipa_handle_interrupt(int irq_num)
 {
@@ -220,7 +208,7 @@ static irqreturn_t ipa_isr(int irq, void *ctxt)
  * @handler:		The handler to be added
  *
  * Adds handler to an IPA interrupt type and enable it.  IPA interrupt
- * handlers are always run in workqueue context.
+ * handlers are allowed to block (they aren't run in interrupt context).
  */
 void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 			       ipa_irq_handler_t handler)
@@ -353,19 +341,13 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 	if (!(ipahal_read_reg(IPA_STATE_AGGR_ACTIVE) & clnt_mask))
 		return;
 
-	/* force close aggregation */
+	/* Force close aggregation */
 	ipahal_write_reg(IPA_AGGR_FORCE_CLOSE, clnt_mask);
 
-	/* simulate suspend IRQ */
+	/* Simulate suspend IRQ */
+	ipa_assert(!in_interrupt());
 	irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
 	interrupt_info = &ipa_interrupt_to_cb[irq_num];
-	if (!interrupt_info->handler) {
-		ipa_err("no CB function for IPA_TX_SUSPEND_IRQ!\n");
-		return;
-	}
-
-	interrupt_info->interrupt_data = clnt_mask;
-
-	INIT_WORK(&interrupt_info->work, simulated_suspend_work_func);
-	queue_work(ipa_interrupt_wq, &interrupt_info->work);
+	if (interrupt_info->handler)
+		interrupt_info->handler(interrupt_info->interrupt, clnt_mask);
 }
