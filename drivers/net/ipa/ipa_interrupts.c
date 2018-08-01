@@ -296,7 +296,6 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
 {
 	int ret;
-	int i;
 
 	ipa_interrupt_wq = create_singlethread_workqueue("ipa_interrupt_wq");
 	if (!ipa_interrupt_wq)
@@ -311,11 +310,6 @@ int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
 	}
 
 	spin_lock_init(&suspend_wa_lock);
-
-	for (i = 0; i < IPA_IRQ_NUM_MAX; i++) {
-		ipa_interrupt_to_cb[i].handler = NULL;
-		ipa_interrupt_to_cb[i].interrupt = IPA_INVALID_IRQ;
-	}
 
 	return 0;
 }
