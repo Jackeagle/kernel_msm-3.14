@@ -617,7 +617,7 @@ static void ipa_client_add_first(void)
 	/* A reference might have been added while awaiting the mutex. */
 	if (!atomic_inc_not_zero(&ipa_ctx->ipa_active_clients.cnt)) {
 		ipa_enable_clks();
-		ipa_suspend_apps_pipes(false);
+		ipa_resume_apps_pipes();
 		atomic_inc(&ipa_ctx->ipa_active_clients.cnt);
 	} else {
 		ipa_assert(atomic_read(&ipa_ctx->ipa_active_clients.cnt) > 1);
@@ -680,7 +680,7 @@ static void ipa_client_remove_final(void)
 	/* A reference might have been removed while awaiting the mutex. */
 	ret = atomic_dec_return(&ipa_ctx->ipa_active_clients.cnt);
 	if (!ret) {
-		ipa_suspend_apps_pipes(true);
+		ipa_suspend_apps_pipes();
 		ipa_disable_clks();
 	} else {
 		ipa_assert(ret > 0);

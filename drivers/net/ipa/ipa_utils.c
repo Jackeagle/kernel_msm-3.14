@@ -1288,10 +1288,16 @@ static void suspend_pipe(enum ipa_client_type client, bool suspend)
 		gsi_channel_intr_enable(ep->gsi_chan_hdl);
 }
 
-void ipa_suspend_apps_pipes(bool suspend)
+void ipa_suspend_apps_pipes(void)
 {
-	suspend_pipe(IPA_CLIENT_APPS_LAN_CONS, suspend);
-	suspend_pipe(IPA_CLIENT_APPS_WAN_CONS, suspend);
+	suspend_pipe(IPA_CLIENT_APPS_WAN_CONS, true);
+	suspend_pipe(IPA_CLIENT_APPS_LAN_CONS, true);
+}
+
+void ipa_resume_apps_pipes(void)
+{
+	suspend_pipe(IPA_CLIENT_APPS_LAN_CONS, false);
+	suspend_pipe(IPA_CLIENT_APPS_WAN_CONS, false);
 }
 
 /** ipa_cfg_route() - configure IPA route
