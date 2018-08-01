@@ -53,8 +53,9 @@ static const int ipa_irq_mapping[IPA_IRQ_MAX] = {
 	[IPA_GSI_IDLE_IRQ]			= 16,
 };
 
-static void ipa_interrupt_defer(struct work_struct *work);
-static DECLARE_WORK(ipa_interrupt_defer_work, ipa_interrupt_defer);
+/* All IPA interrupts are handled in workqueue context */
+static void ipa_interrupt_work_func(struct work_struct *work);
+static DECLARE_WORK(ipa_interrupt_work, ipa_interrupt_work_func);
 
 static void ipa_deferred_interrupt_work(struct work_struct *work)
 {
@@ -217,7 +218,7 @@ static void ipa_process_interrupts(void)
 	ipa_debug_low("Exit\n");
 }
 
-static void ipa_interrupt_defer(struct work_struct *work)
+static void ipa_interrupt_work_func(struct work_struct *work)
 {
 	ipa_client_add();
 
@@ -229,7 +230,7 @@ static void ipa_interrupt_defer(struct work_struct *work)
 static irqreturn_t ipa_isr(int irq, void *ctxt)
 {
 	/* Schedule handling (if not already scheduled) */
-	queue_work(ipa_interrupt_wq, &ipa_interrupt_defer_work);
+	queue_work(ipa_interrupt_wq, &ipa_interrupt_work);
 
 	return IRQ_HANDLED;
 }
