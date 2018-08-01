@@ -102,8 +102,6 @@ static void enable_tx_suspend_work_func(struct work_struct *work)
 	int irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
 	u32 val;
 
-	ipa_assert(irq_num != -1);
-
 	ipa_client_add();
 
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
@@ -126,8 +124,6 @@ static void ipa_tx_suspend_interrupt_wa(void)
 	u32 val;
 
 	ipa_debug_low("briefly disabling TX_SUSPEND interrupt\n");
-
-	ipa_assert(irq_num != -1);
 
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
 	val &= ~BIT(irq_num);
