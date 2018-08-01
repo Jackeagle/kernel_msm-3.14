@@ -365,12 +365,12 @@ int ipa_interrupts_init(u32 ipa_irq, struct device *ipa_dev)
  */
 void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 {
-	int aggr_active_bitmap = ipahal_read_reg(IPA_STATE_AGGR_ACTIVE);
 	struct ipa_interrupt_info *interrupt_info;
 	u32 clnt_mask = BIT(clnt_hdl);
 	int irq_num;
 
-	if (!(aggr_active_bitmap & clnt_mask))
+	/* Nothing to do if the endpoint doesn't have aggregation open */
+	if (!(ipahal_read_reg(IPA_STATE_AGGR_ACTIVE) & clnt_mask))
 		return;
 
 	/* force close aggregation */
