@@ -24,7 +24,6 @@ static struct workqueue_struct *ipa_interrupt_wq;
 static void enable_tx_suspend_work_func(struct work_struct *work);
 static DECLARE_DELAYED_WORK(tx_suspend_work, enable_tx_suspend_work_func);
 static spinlock_t suspend_wa_lock;
-static void ipa_process_interrupts(void);
 
 static const int ipa_irq_mapping[] = {
 	[IPA_INVALID_IRQ]			= -1,
@@ -76,26 +75,6 @@ static void ipa_handle_interrupt(int irq_num)
 	}
 
 	intr_info->handler(intr_info->interrupt, endpoints);
-}
-
-/* Re-enable the IPA TX_SUSPEND interrupt after having been disabled
- * for a moment by ipa_tx_suspend_interrupt_wa().  This ex
- *
- * This is part of a hardware bug workaround.
- */
-static void enable_tx_suspend_work_func(struct work_struct *work)
-{
-	u32 val;
-
-	ipa_client_add();
-
-	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
-	val |= BIT(ipa_irq_mapping[IPA_TX_SUSPEND_IRQ]);
-	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
-
-	ipa_process_interrupts();
-
-	ipa_client_remove();
 }
 
 static inline bool is_uc_irq(int irq_num)
@@ -181,6 +160,26 @@ static irqreturn_t ipa_isr(int irq, void *ctxt)
 	queue_work(ipa_interrupt_wq, &ipa_interrupt_work);
 
 	return IRQ_HANDLED;
+}
+
+/* Re-enable the IPA TX_SUSPEND interrupt after having been disabled
+ * for a moment by ipa_tx_suspend_interrupt_wa().  This ex
+ *
+ * This is part of a hardware bug workaround.
+ */
+static void enable_tx_suspend_work_func(struct work_struct *work)
+{
+	u32 val;
+
+	ipa_client_add();
+
+	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
+	val |= BIT(ipa_irq_mapping[IPA_TX_SUSPEND_IRQ]);
+	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
+
+	ipa_process_interrupts();
+
+	ipa_client_remove();
 }
 
 /* Register SUSPEND_IRQ_EN_EE_N_ADDR for L2 interrupt.
