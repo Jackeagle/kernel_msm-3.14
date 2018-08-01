@@ -72,28 +72,21 @@ static void simulated_suspend_work_func(struct work_struct *work)
 static void ipa_handle_interrupt(int irq_num)
 {
 	struct ipa_interrupt_info *interrupt_info;
-	u32 endpoints = 0;
+	u32 endpoints = 0;	/* Only TX_SUSPEND uses its interrupt_data */
 
 	interrupt_info = &ipa_interrupt_to_cb[irq_num];
-	if (!interrupt_info->handler) {
-		ipa_err("A callback function wasn't set for interrupt num %d\n",
-			irq_num);
+	if (!interrupt_info->handler)
 		return;
-	}
 
 	if (interrupt_info->interrupt == IPA_TX_SUSPEND_IRQ) {
-		ipa_debug_low("processing TX_SUSPEND interrupt work-around\n");
+		/* Implement a workaround for a hardware problem */
 		ipa_tx_suspend_interrupt_wa();
-		endpoints = ipahal_read_reg_n(IPA_IRQ_SUSPEND_INFO_EE_n,
-						 IPA_EE_AP);
-		ipa_debug_low("get interrupt %u\n", endpoints);
 
-		/* Clear L2 interrupts status.  Note the following
-		 * must not be executed for IPA hardware versions
-		 * prior to 3.1.
-		 */
-		ipahal_write_reg_n(IPA_SUSPEND_IRQ_CLR_EE_n,
-				   IPA_EE_AP, endpoints);
+		/* Get and clear mask of endpoints signaling TX_SUSPEND */
+		endpoints = ipahal_read_reg_n(IPA_IRQ_SUSPEND_INFO_EE_n,
+					      IPA_EE_AP);
+		ipahal_write_reg_n(IPA_SUSPEND_IRQ_CLR_EE_n, IPA_EE_AP,
+				   endpoints);
 	}
 
 	interrupt_info->handler(interrupt_info->interrupt, endpoints);
@@ -131,6 +124,8 @@ static void ipa_tx_suspend_interrupt_wa(void)
 {
 	int irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
 	u32 val;
+
+	ipa_debug_low("briefly disabling TX_SUSPEND interrupt\n");
 
 	ipa_assert(irq_num != -1);
 
