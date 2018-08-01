@@ -5,6 +5,15 @@
  */
 #define pr_fmt(fmt)    "ipa %s:%d " fmt, __func__, __LINE__
 
+/*
+ * The IPA supports generating an interrupt on a number of events
+ * using a single IRQ.  When the IPA IRQ fires, an IPA interrupt
+ * status register indicates which IPA interrupt events are being
+ * signaled.  Each IPA interrupt is acknowledged by writing its bit
+ * to an interrupt clear register.  Finally, another register is
+ * used to mask (or rather, enable) particular IPA interrupts.
+ */
+
 #include <linux/interrupt.h>
 #include "ipa_i.h"
 
@@ -33,7 +42,7 @@ static void ipa_interrupt_work_func(struct work_struct *work);
 static DECLARE_WORK(ipa_interrupt_work, ipa_interrupt_work_func);
 
 /* Workaround disables TX_SUSPEND interrupt for this long */
-#define DIS_TX_SUSPEND_INTR_DELAY	msecs_to_jiffies(5)
+#define DISABLE_TX_SUSPEND_INTR_DELAY	msecs_to_jiffies(5)
 
 /* Disable the IPA TX_SUSPEND interrupt, and arrange for it to be
  * re-enabled again in 5 milliseconds.
@@ -49,7 +58,7 @@ static void ipa_tx_suspend_interrupt_wa(void)
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
 
 	queue_delayed_work(ipa_interrupt_wq, &tx_suspend_work,
-			   DIS_TX_SUSPEND_INTR_DELAY);
+			   DISABLE_TX_SUSPEND_INTR_DELAY);
 }
 
 static void ipa_handle_interrupt(int irq_num)
@@ -61,7 +70,7 @@ static void ipa_handle_interrupt(int irq_num)
 		return;
 
 	if (intr_info->interrupt == IPA_TX_SUSPEND_IRQ) {
-		/* Implement a workaround for a hardware problem */
+		/* Disable the suspend interrupt temporarily */
 		ipa_tx_suspend_interrupt_wa();
 
 		/* Get and clear mask of endpoints signaling TX_SUSPEND */
@@ -114,9 +123,9 @@ static void ipa_process_interrupts(void)
 
 			ipa_handle_interrupt(i);
 
-			/* Clear non uC interrupt after processing
+			/* Clear non-uC interrupt after processing
 			 * to avoid clearing interrupt data
-			 * */
+			 */
 			if (!uc_irq)
 				ipahal_write_reg_n(IPA_IRQ_CLR_EE_n, IPA_EE_AP,
 						   imask);
@@ -142,9 +151,8 @@ static irqreturn_t ipa_isr(int irq, void *ctxt)
 }
 
 /* Re-enable the IPA TX_SUSPEND interrupt after having been disabled
- * for a moment by ipa_tx_suspend_interrupt_wa().  This ex
- *
- * This is part of a hardware bug workaround.
+ * for a moment by ipa_tx_suspend_interrupt_wa().  This is part of a
+ * workaround for a hardware bug.
  */
 static void enable_tx_suspend_work_func(struct work_struct *work)
 {
@@ -161,10 +169,7 @@ static void enable_tx_suspend_work_func(struct work_struct *work)
 	ipa_client_remove();
 }
 
-/* Register SUSPEND_IRQ_EN_EE_N_ADDR for L2 interrupt.
- * Note the following must not be executed for IPA hardware
- * versions prior to 3.1.
- */
+/* Register SUSPEND_IRQ_EN_EE_N_ADDR for L2 interrupt. */
 static void tx_suspend_enable(void)
 {
 	enum ipa_client_type client;
@@ -178,18 +183,15 @@ static void tx_suspend_enable(void)
 	ipahal_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_n, IPA_EE_AP, val);
 }
 
-/* Unregister SUSPEND_IRQ_EN_EE_N_ADDR for L2 interrupt.
- * Note the following must not be executed for IPA hardware
- * versions prior to 3.1.
- */
+/* Unregister SUSPEND_IRQ_EN_EE_N_ADDR for L2 interrupt. */
 static void tx_suspend_disable(void)
 {
 	ipahal_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_n, IPA_EE_AP, 0);
 }
 
-/** ipa_add_interrupt_handler() - Adds handler to an interrupt type
- * @interrupt:		Interrupt type
- * @handler:		The handler to be added
+/** ipa_add_interrupt_handler() - Adds handler for an IPA interrupt
+ * @interrupt:		IPA interrupt type
+ * @handler:		The handler for that interrupt
  *
  * Adds handler to an IPA interrupt type and enable it.  IPA interrupt
  * handlers are allowed to block (they aren't run in interrupt context).
@@ -204,6 +206,7 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 	intr_info->handler = handler;
 	intr_info->interrupt = interrupt;
 
+	/* Enable the IPA interrupt */
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
 	val |= BIT(irq_num);
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
@@ -212,10 +215,10 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 		tx_suspend_enable();
 }
 
-/** ipa_remove_interrupt_handler() - Removes handler to an interrupt type
- * @interrupt:		Interrupt type
+/** ipa_remove_interrupt_handler() - Removes handler for an IPA interrupt type
+ * @interrupt:		IPA interrupt type
  *
- * Removes the handler and disable the specific bit in IRQ_EN register
+ * Remove an IPA interrupt handler and disable it.
  */
 void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 {
@@ -229,6 +232,7 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 	if (interrupt == IPA_TX_SUSPEND_IRQ)
 		tx_suspend_disable();
 
+	/* Disable the interrupt */
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
 	val &= ~BIT(irq_num);
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
