@@ -821,14 +821,9 @@ static void ipa_suspend_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 /** ipa_init_interrupts() - Register to IPA IRQs */
 static int ipa_init_interrupts(void)
 {
-	int ipa_irq;
 	int ret;
 
-	ipa_irq = platform_get_irq_byname(ipa_ctx->ipa_pdev, "ipa-irq");
-	if (ipa_irq < 0)
-		return ipa_irq;
-
-	ret = ipa_interrupts_init(ipa_irq, ipa_ctx->ipa_pdev);
+	ret = ipa_interrupts_init(ipa_ctx->ipa_pdev);
 	if (ret)
 		return ret;
 

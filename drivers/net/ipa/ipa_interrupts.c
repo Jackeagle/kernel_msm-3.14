@@ -235,13 +235,18 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 }
 
 /** ipa_interrupts_init() - Initialize the IPA interrupts framework
- * @ipa_irq:	The interrupt number to allocate
  * @ipa_device:	The IPA platform device structure
  */
-int ipa_interrupts_init(u32 ipa_irq, struct platform_device *ipa_device)
+int ipa_interrupts_init(struct platform_device *ipa_device)
 {
 	struct device *dev = &ipa_device->dev;
+	unsigned int ipa_irq;
 	int ret;
+
+	ret = platform_get_irq_byname(ipa_device, "ipa-irq");
+	if (ret < 0)
+		return ret;
+	ipa_irq = ret;
 
 	ret = request_irq(ipa_irq, ipa_isr, IRQF_TRIGGER_RISING, "ipa", dev);
 	if (ret)
