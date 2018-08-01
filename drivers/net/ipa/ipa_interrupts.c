@@ -201,6 +201,32 @@ static irqreturn_t ipa_isr(int irq, void *ctxt)
 	return IRQ_HANDLED;
 }
 
+/* Register SUSPEND_IRQ_EN_EE_N_ADDR for L2 interrupt.
+ * Note the following must not be executed for IPA hardware
+ * versions prior to 3.1.
+ */
+static void tx_suspend_enable(void)
+{
+	enum ipa_client_type client;
+	u32 val = ~0;
+
+	/* Compute the mask to use (bits set for all non-modem endpoints) */
+	for (client = 0; client < IPA_CLIENT_MAX; client++)
+		if (ipa_modem_consumer(client) || ipa_modem_producer(client))
+			val &= ~BIT(ipa_get_ep_mapping(client));
+
+	ipahal_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_n, IPA_EE_AP, val);
+}
+
+/* Unregister SUSPEND_IRQ_EN_EE_N_ADDR for L2 interrupt.
+ * Note the following must not be executed for IPA hardware
+ * versions prior to 3.1.
+ */
+static void tx_suspend_disable(void)
+{
+	ipahal_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_n, IPA_EE_AP, 0);
+}
+
 /** ipa_add_interrupt_handler() - Adds handler to an interrupt type
  * @interrupt:		Interrupt type
  * @handler:		The handler to be added
@@ -213,7 +239,6 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 {
 	int irq_num = ipa_irq_mapping[interrupt];
 	struct ipa_interrupt_info *interrupt_info;
-	int client_idx;
 	u32 val;
 
 	ipa_debug("%s: interrupt_enum %d irq_num %d\n", __func__,
@@ -231,27 +256,8 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
 	ipa_debug("wrote IPA_IRQ_EN_EE_n register. reg = %d\n", val);
 
-	if (interrupt != IPA_TX_SUSPEND_IRQ)
-		return;
-
-	/* Register SUSPEND_IRQ_EN_EE_N_ADDR for L2 interrupt.
-	 * Note the following must not be executed for IPA hardware
-	 * versions prior to 3.1.
-	 */
-	val = ~0;
-	for (client_idx = 0; client_idx < IPA_CLIENT_MAX; client_idx++)
-		if (ipa_modem_consumer(client_idx) ||
-				ipa_modem_producer(client_idx)) {
-			u32 ep_idx = ipa_get_ep_mapping(client_idx);
-
-			ipa_debug("modem ep_idx(%u) client_idx = %d\n",
-					ep_idx, client_idx);
-
-			val &= ~BIT(ep_idx);
-		}
-
-	ipahal_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_n, IPA_EE_AP, val);
-	ipa_debug("wrote IPA_SUSPEND_IRQ_EN_EE_n reg = %d\n", val);
+	if (interrupt == IPA_TX_SUSPEND_IRQ)
+		tx_suspend_enable();
 }
 
 /** ipa_remove_interrupt_handler() - Removes handler to an interrupt type
@@ -269,14 +275,8 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 	interrupt_info->handler = NULL;
 	interrupt_info->interrupt = -1;
 
-	/* Unregister SUSPEND_IRQ_EN_EE_N_ADDR for L2 interrupt.
-	 * Note the following must not be executed for IPA hardware
-	 * versions prior to 3.1.
-	 */
-	if (interrupt == IPA_TX_SUSPEND_IRQ) {
-		ipahal_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_n, IPA_EE_AP, 0);
-		ipa_debug("wrote IPA_SUSPEND_IRQ_EN_EE_n reg = %d\n", 0);
-	}
+	if (interrupt == IPA_TX_SUSPEND_IRQ)
+		tx_suspend_disable();
 
 	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
 	val &= ~BIT(irq_num);
