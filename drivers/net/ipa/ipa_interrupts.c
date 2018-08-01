@@ -83,7 +83,7 @@ static bool ipa_is_valid_ep(u32 ep_suspend_data)
 	return false;
 }
 
-static void ipa_handle_interrupt(int irq_num, bool isr_context)
+static void ipa_handle_interrupt(int irq_num)
 {
 	struct ipa_interrupt_info *interrupt_info;
 	u32 endpoints = 0;
@@ -112,14 +112,7 @@ static void ipa_handle_interrupt(int irq_num, bool isr_context)
 			return;
 	}
 
-	/* Force defer processing if in ISR context. */
-	if (isr_context) {
-		interrupt_info->interrupt_data = endpoints;
-		INIT_WORK(&interrupt_info->work, ipa_deferred_interrupt_work);
-		queue_work(ipa_interrupt_wq, &interrupt_info->work);
-	} else {
-		interrupt_info->handler(interrupt_info->interrupt, endpoints);
-	}
+	interrupt_info->handler(interrupt_info->interrupt, endpoints);
 }
 
 /* Enable the IPA SUSPEND interrupt (workaround) */
@@ -207,7 +200,7 @@ static void ipa_process_interrupts(void)
 			 */
 			spin_unlock_irqrestore(&suspend_wa_lock, flags);
 
-			ipa_handle_interrupt(i, false);
+			ipa_handle_interrupt(i);
 
 			spin_lock_irqsave(&suspend_wa_lock, flags);
 
