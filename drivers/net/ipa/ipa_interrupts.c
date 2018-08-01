@@ -229,7 +229,7 @@ static void ipa_interrupt_defer(struct work_struct *work)
 static irqreturn_t ipa_isr(int irq, void *ctxt)
 {
 	/* Schedule handling (if not already scheduled) */
-	queue_work(ipa_ctx->power_mgmt_wq, &ipa_interrupt_defer_work);
+	queue_work(ipa_interrupt_wq, &ipa_interrupt_defer_work);
 
 	return IRQ_HANDLED;
 }
