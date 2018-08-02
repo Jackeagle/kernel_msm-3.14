@@ -48,20 +48,21 @@ struct ipa_sys_context {
 			unsigned int len_pad;		/* APPS_LAN only */
 			unsigned int len_partial;	/* APPS_LAN only */
 			bool drop_packet;		/* APPS_LAN only */
+
+			struct work_struct work;
+			struct delayed_work replenish_work;
+			struct work_struct repl_work;
+			void (*repl_hdlr)(struct ipa_sys_context *);
+			struct ipa_repl_ctx repl;
 		} rx;
 		struct {	/* Producer pipes only */
+			/* no_intr/nop is APPS_WAN_PROD only */
 			bool no_intr;
 			atomic_t nop_pending;
 			struct hrtimer nop_timer;
 			struct work_struct nop_work;
 		} tx;
 	};
-
-	struct work_struct rx_work;
-	struct delayed_work replenish_rx_work;
-	struct work_struct repl_work;
-	void (*repl_hdlr)(struct ipa_sys_context *sys);
-	struct ipa_repl_ctx repl;
 
 	/* ordering is important - mutable fields go above */
 	struct ipa_ep_context *ep;
@@ -746,7 +747,7 @@ void ipa_rx_switch_to_poll_mode(struct ipa_sys_context *sys)
 		return;
 	gsi_channel_intr_disable(sys->ep->gsi_chan_hdl);
 	ipa_inc_acquire_wakelock();
-	queue_work(sys->wq, &sys->rx_work);
+	queue_work(sys->wq, &sys->rx.work);
 }
 
 /** ipa_handle_rx() - handle packet reception. This function is executed in the
@@ -889,17 +890,18 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 		goto fail_gen2;
 	}
 
-	if (ep->sys->repl_hdlr == ipa_fast_replenish_rx_cache) {
-		ep->sys->repl.capacity = ep->sys->rx.pool_sz + 1;
-		ep->sys->repl.cache = kcalloc(ep->sys->repl.capacity,
+	if (ipa_consumer(sys_in->client) &&
+	    ep->sys->rx.repl_hdlr == ipa_fast_replenish_rx_cache) {
+		ep->sys->rx.repl.capacity = ep->sys->rx.pool_sz + 1;
+		ep->sys->rx.repl.cache = kcalloc(ep->sys->rx.repl.capacity,
 					      sizeof(void *), GFP_KERNEL);
-		if (!ep->sys->repl.cache) {
-			ep->sys->repl_hdlr = ipa_replenish_rx_cache;
-			ep->sys->repl.capacity = 0;
+		if (!ep->sys->rx.repl.cache) {
+			ep->sys->rx.repl_hdlr = ipa_replenish_rx_cache;
+			ep->sys->rx.repl.capacity = 0;
 		} else {
-			atomic_set(&ep->sys->repl.head_idx, 0);
-			atomic_set(&ep->sys->repl.tail_idx, 0);
-			ipa_wq_repl_rx(&ep->sys->repl_work);
+			atomic_set(&ep->sys->rx.repl.head_idx, 0);
+			atomic_set(&ep->sys->rx.repl.tail_idx, 0);
+			ipa_wq_repl_rx(&ep->sys->rx.repl_work);
 		}
 	}
 
@@ -964,7 +966,7 @@ void ipa_teardown_sys_pipe(u32 clnt_hdl)
 	}
 
 	if (ipa_consumer(ep->client))
-		cancel_delayed_work_sync(&ep->sys->replenish_rx_work);
+		cancel_delayed_work_sync(&ep->sys->rx.replenish_work);
 	flush_workqueue(ep->sys->wq);
 	/* channel stop might fail on timeout if IPA is busy */
 	for (i = 0; i < IPA_GSI_CHANNEL_STOP_MAX_RETRY; i++) {
@@ -1107,7 +1109,7 @@ static void ipa_wq_handle_rx(struct work_struct *work)
 {
 	struct ipa_sys_context *sys;
 
-	sys = container_of(work, struct ipa_sys_context, rx_work);
+	sys = container_of(work, struct ipa_sys_context, rx.work);
 
 	if (sys->ep->napi_enabled) {
 		ipa_client_add();
@@ -1127,13 +1129,13 @@ static void ipa_wq_repl_rx(struct work_struct *work)
 	u32 next;
 	u32 curr;
 
-	sys = container_of(work, struct ipa_sys_context, repl_work);
-	curr = atomic_read(&sys->repl.tail_idx);
+	sys = container_of(work, struct ipa_sys_context, rx.repl_work);
+	curr = atomic_read(&sys->rx.repl.tail_idx);
 
 begin:
 	while (1) {
-		next = (curr + 1) % sys->repl.capacity;
-		if (next == atomic_read(&sys->repl.head_idx))
+		next = (curr + 1) % sys->rx.repl.capacity;
+		if (next == atomic_read(&sys->rx.repl.head_idx))
 			goto fail_kmem_cache_alloc;
 
 		rx_pkt = kmem_cache_zalloc(ipa_ctx->rx_pkt_wrapper_cache, flag);
@@ -1161,11 +1163,11 @@ begin:
 			goto fail_dma_mapping;
 		}
 
-		sys->repl.cache[curr] = rx_pkt;
+		sys->rx.repl.cache[curr] = rx_pkt;
 		curr = next;
 		/* ensure write is done before setting tail index */
 		mb();
-		atomic_set(&sys->repl.tail_idx, next);
+		atomic_set(&sys->rx.repl.tail_idx, next);
 	}
 
 	return;
@@ -1175,8 +1177,8 @@ fail_dma_mapping:
 fail_skb_alloc:
 	kmem_cache_free(ipa_ctx->rx_pkt_wrapper_cache, rx_pkt);
 fail_kmem_cache_alloc:
-	if (atomic_read(&sys->repl.tail_idx) ==
-			atomic_read(&sys->repl.head_idx)) {
+	if (atomic_read(&sys->rx.repl.tail_idx) ==
+			atomic_read(&sys->rx.repl.head_idx)) {
 		pr_err_ratelimited("%s sys=%p repl ring empty\n", __func__,
 				   sys);
 		goto begin;
@@ -1279,7 +1281,7 @@ fail_skb_alloc:
 	kmem_cache_free(ipa_ctx->rx_pkt_wrapper_cache, rx_pkt);
 fail_kmem_cache_alloc:
 	if (rx_len_cached - sys->rx.len_pending_xfer == 0)
-		queue_delayed_work(sys->wq, &sys->replenish_rx_work,
+		queue_delayed_work(sys->wq, &sys->rx.replenish_work,
 				   msecs_to_jiffies(1));
 }
 
@@ -1363,7 +1365,7 @@ fail_dma_mapping:
 	spin_unlock_bh(&sys->spinlock);
 fail_kmem_cache_alloc:
 	if (rx_len_cached - sys->rx.len_pending_xfer == 0)
-		queue_delayed_work(sys->wq, &sys->replenish_rx_work,
+		queue_delayed_work(sys->wq, &sys->rx.replenish_work,
 				   msecs_to_jiffies(1));
 }
 
@@ -1377,13 +1379,13 @@ static void ipa_fast_replenish_rx_cache(struct ipa_sys_context *sys)
 	spin_lock_bh(&sys->spinlock);
 
 	rx_len_cached = sys->len;
-	curr = atomic_read(&sys->repl.head_idx);
+	curr = atomic_read(&sys->rx.repl.head_idx);
 
 	while (rx_len_cached < sys->rx.pool_sz) {
-		if (curr == atomic_read(&sys->repl.tail_idx))
+		if (curr == atomic_read(&sys->rx.repl.tail_idx))
 			break;
 
-		rx_pkt = sys->repl.cache[curr];
+		rx_pkt = sys->rx.repl.cache[curr];
 		list_add_tail(&rx_pkt->link, &sys->head_desc_list);
 
 		ret = queue_rx_cache(sys, rx_pkt);
@@ -1391,18 +1393,18 @@ static void ipa_fast_replenish_rx_cache(struct ipa_sys_context *sys)
 			break;
 
 		rx_len_cached = ++sys->len;
-		curr = (curr + 1) % sys->repl.capacity;
+		curr = (curr + 1) % sys->rx.repl.capacity;
 		/* ensure write is done before setting head index */
 		mb();
-		atomic_set(&sys->repl.head_idx, curr);
+		atomic_set(&sys->rx.repl.head_idx, curr);
 	}
 	spin_unlock_bh(&sys->spinlock);
 
-	queue_work(sys->repl_wq, &sys->repl_work);
+	queue_work(sys->repl_wq, &sys->rx.repl_work);
 
 	if (rx_len_cached - sys->rx.len_pending_xfer
 		<= IPA_DEFAULT_SYS_YELLOW_WM) {
-		queue_delayed_work(sys->wq, &sys->replenish_rx_work,
+		queue_delayed_work(sys->wq, &sys->rx.replenish_work,
 				   msecs_to_jiffies(1));
 	}
 }
@@ -1412,9 +1414,9 @@ static void ipa_replenish_rx_work_func(struct work_struct *work)
 	struct delayed_work *dwork = to_delayed_work(work);
 	struct ipa_sys_context *sys;
 
-	sys = container_of(dwork, struct ipa_sys_context, replenish_rx_work);
+	sys = container_of(dwork, struct ipa_sys_context, rx.replenish_work);
 	ipa_client_add();
-	sys->repl_hdlr(sys);
+	sys->rx.repl_hdlr(sys);
 	ipa_client_remove();
 }
 
@@ -1443,19 +1445,19 @@ static void ipa_cleanup_rx(struct ipa_sys_context *sys)
 		kmem_cache_free(ipa_ctx->rx_pkt_wrapper_cache, rx_pkt);
 	}
 
-	if (sys->repl.cache) {
-		head = atomic_read(&sys->repl.head_idx);
-		tail = atomic_read(&sys->repl.tail_idx);
+	if (sys->rx.repl.cache) {
+		head = atomic_read(&sys->rx.repl.head_idx);
+		tail = atomic_read(&sys->rx.repl.tail_idx);
 		while (head != tail) {
-			rx_pkt = sys->repl.cache[head];
+			rx_pkt = sys->rx.repl.cache[head];
 				dma_unmap_single(dev, rx_pkt->data.dma_addr,
 						 sys->rx.buff_sz,
 						 DMA_FROM_DEVICE);
 			sys->rx.free_skb(rx_pkt->data.skb);
 			kmem_cache_free(ipa_ctx->rx_pkt_wrapper_cache, rx_pkt);
-			head = (head + 1) % sys->repl.capacity;
+			head = (head + 1) % sys->rx.repl.capacity;
 		}
-		kfree(sys->repl.cache);
+		kfree(sys->rx.repl.cache);
 	}
 }
 
@@ -1820,7 +1822,7 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 	}
 
 	/* Recycle should be enabled only with GRO aggr. (???) */
-	ipa_assert(sys->repl_hdlr != ipa_replenish_rx_cache_recycle);
+	ipa_assert(sys->rx.repl_hdlr != ipa_replenish_rx_cache_recycle);
 
 	/* payload splits across 2 buff or more,
 	 * take the start of the payload from rx.prev_skb
@@ -2039,7 +2041,7 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u16 size)
 	rx_skb->truesize = rx_pkt_expected->len + sizeof(struct sk_buff);
 	sys->rx.pyld_hdlr(rx_skb, sys);
 	sys->rx.free_wrapper(rx_pkt_expected);
-	sys->repl_hdlr(sys);
+	sys->rx.repl_hdlr(sys);
 }
 
 static void ipa_free_rx_wrapper(struct ipa_rx_pkt_wrapper *rk_pkt)
@@ -2072,12 +2074,12 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 	/* Client is a consumer (APPS_LAN_CONS or APPS_WAN_CONS) */
 	sys->ep->status.status_en = true;
 
-	INIT_WORK(&sys->rx_work, ipa_wq_handle_rx);
+	INIT_WORK(&sys->rx.work, ipa_wq_handle_rx);
 	INIT_DELAYED_WORK(&sys->rx.switch_to_intr_work,
 			  ipa_switch_to_intr_rx_work_func);
-	INIT_DELAYED_WORK(&sys->replenish_rx_work,
+	INIT_DELAYED_WORK(&sys->rx.replenish_work,
 			  ipa_replenish_rx_work_func);
-	INIT_WORK(&sys->repl_work, ipa_wq_repl_rx);
+	INIT_WORK(&sys->rx.repl_work, ipa_wq_repl_rx);
 
 	atomic_set(&sys->rx.curr_polling_state, 0);
 	sys->rx.buff_sz = IPA_GENERIC_RX_BUFF_SZ(IPA_GENERIC_RX_BUFF_BASE_SZ);
@@ -2091,7 +2093,7 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 	ep_cfg_aggr->aggr_time_limit = IPA_GENERIC_AGGR_TIME_LIMIT;
 	if (in->client == IPA_CLIENT_APPS_LAN_CONS) {
 		sys->rx.pyld_hdlr = ipa_lan_rx_pyld_hdlr;
-		sys->repl_hdlr = ipa_replenish_rx_cache_recycle;
+		sys->rx.repl_hdlr = ipa_replenish_rx_cache_recycle;
 		sys->rx.free_wrapper = ipa_recycle_rx_wrapper;
 		ep_cfg_aggr->aggr_byte_limit = IPA_GENERIC_AGGR_BYTE_LIMIT;
 		ep_cfg_aggr->aggr_pkt_limit = IPA_GENERIC_AGGR_PKT_LIMIT;
@@ -2103,9 +2105,9 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 	sys->rx.pyld_hdlr = ipa_wan_rx_pyld_hdlr;
 	sys->rx.free_wrapper = ipa_free_rx_wrapper;
 	if (nr_cpu_ids > 1)
-		sys->repl_hdlr = ipa_fast_replenish_rx_cache;
+		sys->rx.repl_hdlr = ipa_fast_replenish_rx_cache;
 	else
-		sys->repl_hdlr = ipa_replenish_rx_cache;
+		sys->rx.repl_hdlr = ipa_replenish_rx_cache;
 
 	ep_cfg_aggr->aggr_sw_eof_active = true;
 	if (ipa_ctx->ipa_client_apps_wan_cons_agg_gro) {
