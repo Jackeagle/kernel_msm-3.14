@@ -344,33 +344,6 @@ enum ipa_desc_type {
 	IPA_IMM_CMD_DESC,
 };
 
-/** struct ipa_tx_pkt_wrapper - IPA Tx packet wrapper
- * @type: specify if this packet is for the skb or immediate command
- * @mem: memory buffer used by this Tx packet
- * @work: work struct for current Tx packet
- * @link: linked to the wrappers on that pipe
- * @callback: IPA client provided callback
- * @user1: cookie1 for above callback
- * @user2: cookie2 for above callback
- * @sys: corresponding IPA sys context
- * @cnt: 1 for single transfers,
- * >1 and <0xFFFF for first of a "multiple" transfer,
- * 0xFFFF for last desc, 0 for rest of "multiple' transfer
- *
- * This struct can wrap both data packet and immediate command packet.
- */
-struct ipa_tx_pkt_wrapper {
-	enum ipa_desc_type type;
-	struct ipa_mem_buffer mem;
-	struct work_struct done_work;
-	struct list_head link;
-	void (*callback)(void *user1, int user2);
-	void *user1;
-	int user2;
-	struct ipa_sys_context *sys;
-	u32 cnt;
-};
-
 /** struct ipa_desc - IPA descriptor
  * @type: skb or immediate command or plain old data
  * @pyld: points to skb
@@ -413,28 +386,6 @@ ipa_desc_fill_imm_cmd(struct ipa_desc *desc, struct ipahal_imm_cmd_pyld *pyld)
 	desc->len = pyld->len;
 	desc->opcode = pyld->opcode;
 }
-
-/** struct  ipa_rx_data - information needed
- * to send to wlan driver on receiving data from ipa hw
- * @skb: skb
- * @dma_addr: DMA address of this Rx packet
- */
-struct ipa_rx_data {
-	struct sk_buff *skb;
-	dma_addr_t dma_addr;
-};
-
-/** struct ipa_rx_pkt_wrapper - IPA Rx packet wrapper
- * @link: linked to the Rx packets on that pipe
- * @data: skb and DMA address of the received packet
- * @len: how many bytes are copied into skb's flat buffer
- */
-struct ipa_rx_pkt_wrapper {
-	struct list_head link;
-	struct ipa_rx_data data;
-	u32 len;
-	struct ipa_sys_context *sys;
-};
 
 struct ipa_active_clients {
 	struct mutex mutex;	/* protects when cnt changes from/to 0 */
