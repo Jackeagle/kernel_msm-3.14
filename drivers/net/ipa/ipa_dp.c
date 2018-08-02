@@ -35,11 +35,11 @@ struct ipa_sys_context {
 		struct {	/* Consumer pipes only */
 			u32 len_pending_xfer;
 			atomic_t curr_polling_state;
+			struct delayed_work switch_to_intr_work;
 		} rx;
 		struct {	/* Producer pipes only */
 		} tx;
 	};
-	struct delayed_work switch_to_intr_work;
 	int (*pyld_hdlr)(struct sk_buff *skb, struct ipa_sys_context *sys);
 	struct sk_buff * (*get_skb)(unsigned int len, gfp_t flags);
 	void (*free_skb)(struct sk_buff *skb);
@@ -732,7 +732,7 @@ static void ipa_rx_switch_to_intr_mode(struct ipa_sys_context *sys)
 {
 	if (!atomic_xchg(&sys->rx.curr_polling_state, 0)) {
 		ipa_err("already in intr mode\n");
-		queue_delayed_work(sys->wq, &sys->switch_to_intr_work,
+		queue_delayed_work(sys->wq, &sys->rx.switch_to_intr_work,
 				   msecs_to_jiffies(1));
 		return;
 	}
@@ -789,7 +789,8 @@ static void ipa_switch_to_intr_rx_work_func(struct work_struct *work)
 	struct delayed_work *dwork = to_delayed_work(work);
 	struct ipa_sys_context *sys;
 
-	sys = container_of(dwork, struct ipa_sys_context, switch_to_intr_work);
+	sys = container_of(dwork, struct ipa_sys_context,
+			   rx.switch_to_intr_work);
 
 	/* For NAPI, interrupt mode is done in ipa_rx_poll context */
 	ipa_assert(!sys->ep->napi_enabled);
@@ -2071,7 +2072,7 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 	sys->ep->status.status_en = true;
 
 	INIT_WORK(&sys->rx_work, ipa_wq_handle_rx);
-	INIT_DELAYED_WORK(&sys->switch_to_intr_work,
+	INIT_DELAYED_WORK(&sys->rx.switch_to_intr_work,
 			  ipa_switch_to_intr_rx_work_func);
 	INIT_DELAYED_WORK(&sys->replenish_rx_work,
 			  ipa_replenish_rx_work_func);
