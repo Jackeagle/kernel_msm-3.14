@@ -635,7 +635,7 @@ struct ipa_ep_context *ipa_get_ep_context(enum ipa_client_type client);
 void ipa_init_hw(void);
 
 struct msm_bus_scale_pdata *ipa_bus_scale_table_init(void);
-int ipa_send_cmd_timeout(struct ipa_desc *descr, u32 timeout);
+int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout);
 int ipa_send_cmd(u16 num_desc, struct ipa_desc *descr);
 
 void ipa_client_add(void);

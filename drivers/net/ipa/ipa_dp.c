@@ -694,7 +694,7 @@ int ipa_send_cmd(u16 num_desc, struct ipa_desc *descr)
 
 /** ipa_send_cmd_timeout - send one immediate command with limited time
  *	waiting for ACK from IPA HW
- * @descr:	descriptor structure
+ * @desc:	descriptor structure
  * @timeout:	millisecond to wait till get ACK from IPA HW
  *
  * Function will block till command gets ACK from IPA HW or timeout.
@@ -702,16 +702,14 @@ int ipa_send_cmd(u16 num_desc, struct ipa_desc *descr)
  * The callback in ipa_desc should not be set by the caller
  * for this function.
  */
-int ipa_send_cmd_timeout(struct ipa_desc *descr, u32 timeout)
+int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 {
 	int result = 0;
 	struct ipa_ep_context *ep;
 	struct ipa_tag_completion *comp;
 
-	if (!descr || !timeout)
+	if (!desc || !timeout)
 		return -EFAULT;
-
-	ipa_debug("sending imm cmd %d\n", descr[0].opcode);
 
 	comp = kzalloc(sizeof(*comp), GFP_KERNEL);
 	if (!comp)
@@ -725,15 +723,13 @@ int ipa_send_cmd_timeout(struct ipa_desc *descr, u32 timeout)
 	ipa_client_add();
 
 	/* Fill in the callback info (the sole descriptor is the last) */
-	WARN(descr->callback || descr->user1, "callback=%p, user1=%p\n",
-	     descr->callback, descr->user1);
-	descr->callback = ipa_transport_irq_cmd_ack_free;
-	descr->user1 = comp;
+	desc->callback = ipa_transport_irq_cmd_ack_free;
+	desc->user1 = comp;
 
-	init_completion(&descr->xfer_done);
+	init_completion(&desc->xfer_done);
 
 	ep = ipa_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
-	if (ipa_send(ep->sys, 1, descr)) {
+	if (ipa_send(ep->sys, 1, desc)) {
 		/* Callback won't run; drop reference on its behalf */
 		atomic_dec(&comp->cnt);
 		ipa_err("fail to send 1 immediate commands\n");
