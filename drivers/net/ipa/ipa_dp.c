@@ -813,6 +813,7 @@ static void ipa_switch_to_intr_rx_work_func(struct work_struct *work)
 int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 {
 	struct ipa_ep_context *ep;
+	struct ipa_sys_context *sys;
 	u32 ipa_ep_idx;
 	int result = -EINVAL;
 
@@ -825,7 +826,11 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 	}
 
 	ipa_client_add();
-	memset(ep, 0, offsetof(struct ipa_ep_context, sys));
+
+	/* Save the sys pointer; it may have already been initialized */
+	sys = ep->sys;
+	memset(ep, 0, sizeof(*ep));
+	ep->sys = sys;
 
 	if (!ep->sys) {
 		ep->sys = kzalloc(sizeof(*ep->sys), GFP_KERNEL);

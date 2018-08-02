@@ -273,8 +273,6 @@ struct ipa_ep_context {
 	u32 qmi_request_sent;
 	bool napi_enabled;
 	u32 eot_in_poll_err;
-
-	/* sys MUST be the last element of this struct */
 	struct ipa_sys_context *sys;
 };
 
