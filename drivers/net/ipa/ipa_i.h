@@ -223,12 +223,6 @@ struct ipa_sys_connect_params {
 	bool napi_enabled;
 };
 
-struct ipa_active_client {
-	struct list_head links;
-	int count;
-	const char *id_string;
-};
-
 /** struct ipa_ep_context - IPA end point context
  * @valid: flag indicating id EP context is valid
  * @client: EP client type
@@ -395,11 +389,6 @@ struct ipa_active_clients {
 struct ipa_wakelock_ref_cnt {
 	spinlock_t spinlock;	/* protects updates to cnt */
 	int cnt;
-};
-
-struct ipa_tag_completion {
-	struct completion comp;
-	atomic_t cnt;
 };
 
 /** union ipa_hw_error_event_data - HW->CPU Common Events

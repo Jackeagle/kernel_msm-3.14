@@ -132,6 +132,11 @@ struct ipa_dp {
 	struct kmem_cache *rx_pkt_wrapper_cache;
 };
 
+struct ipa_tag_completion {
+	struct completion comp;
+	atomic_t cnt;
+};
+
 #define IPA_QMAP_HEADER_LENGTH 4
 
 #define IPA_WAN_AGGR_PKT_CNT 5
