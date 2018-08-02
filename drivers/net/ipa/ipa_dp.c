@@ -659,8 +659,6 @@ int ipa_send_cmd(struct ipa_desc *desc)
 	struct ipa_ep_context *ep;
 	int ret;
 
-	ipa_client_add();
-
 	init_completion(&desc->xfer_done);
 
 	/* Fill in the callback info (the sole descriptor is the last) */
@@ -669,6 +667,8 @@ int ipa_send_cmd(struct ipa_desc *desc)
 
 	/* Send the commands, and wait for completion if successful */
 	ep = ipa_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
+
+	ipa_client_add();
 
 	ret = ipa_send(ep->sys, 1, desc);
 	if (ret)
@@ -703,11 +703,9 @@ int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 	if (!comp)
 		return -ENOMEM;
 
-	init_completion(&comp->comp);
 	/* completion needs to be released from both here and in ack callback */
 	atomic_set(&comp->cnt, 2);
-
-	ipa_client_add();
+	init_completion(&comp->comp);
 
 	/* Fill in the callback info (the sole descriptor is the last) */
 	desc->callback = ipa_transport_irq_cmd_ack_free;
@@ -716,6 +714,9 @@ int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 	init_completion(&desc->xfer_done);
 
 	ep = ipa_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
+
+	ipa_client_add();
+
 	ret = ipa_send(ep->sys, 1, desc);
 	if (ret) {
 		/* Callback won't run; drop reference on its behalf */
