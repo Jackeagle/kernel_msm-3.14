@@ -271,14 +271,7 @@ struct ipa_ep_context {
 	struct ipa_sys_context *sys;
 };
 
-/** struct ipa_dp - IPA data path information
- * @tx_pkt_wrapper_cache: Tx packets cache
- * @rx_pkt_wrapper_cache: Rx packets cache
- */
-struct ipa_dp {
-	struct kmem_cache *tx_pkt_wrapper_cache;
-	struct kmem_cache *rx_pkt_wrapper_cache;
-};
+struct ipa_dp;	/* Data path information */
 
 #define IPA_HW_NUM_FEATURES 0x8
 #define FEATURE_ENUM_VAL(feature, opcode) ((feature << 5) | opcode)

@@ -74,6 +74,15 @@ struct ipa_sys_context {
 	/* ordering is important - other immutable fields go below */
 };
 
+/** struct ipa_dp - IPA data path information
+ * @tx_pkt_wrapper_cache: Tx packets cache
+ * @rx_pkt_wrapper_cache: Rx packets cache
+ */
+struct ipa_dp {
+	struct kmem_cache *tx_pkt_wrapper_cache;
+	struct kmem_cache *rx_pkt_wrapper_cache;
+};
+
 #define IPA_QMAP_HEADER_LENGTH 4
 
 #define IPA_WAN_AGGR_PKT_CNT 5
