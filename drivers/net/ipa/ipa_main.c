@@ -1358,13 +1358,16 @@ static int ipa_pre_init(void)
 
 	/* init the lookaside cache */
 
+	if (!ipa_dp_init())
+		goto err_destroy_pm_wq;
+
 	ipa_ctx->dp.tx_pkt_wrapper_cache =
 	   kmem_cache_create("IPA_TX_PKT_WRAPPER",
 			     sizeof(struct ipa_tx_pkt_wrapper), 0, 0, NULL);
 	if (!ipa_ctx->dp.tx_pkt_wrapper_cache) {
 		ipa_err(":ipa tx pkt wrapper cache create failed\n");
 		result = -ENOMEM;
-		goto err_destroy_pm_wq;
+		goto err_dp_exit;
 	}
 	ipa_ctx->dp.rx_pkt_wrapper_cache =
 	   kmem_cache_create("IPA_RX_PKT_WRAPPER",
@@ -1436,6 +1439,8 @@ err_unregister_chrdev_region:
 	unregister_chrdev_region(ipa_ctx->dev_num, 1);
 err_gsi_dma_task_free:
 	ipa_gsi_dma_task_free();
+err_dp_exit:
+	ipa_dp_exit();
 err_destroy_rx_cache:
 	kmem_cache_destroy(ipa_ctx->dp.rx_pkt_wrapper_cache);
 err_destroy_tx_cache:

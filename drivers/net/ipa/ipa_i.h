@@ -760,4 +760,7 @@ void ipa_gsi_irq_tx_notify_cb(void *xfer_data);
 
 bool ipa_ep_polling(struct ipa_ep_context *ep);
 
+bool ipa_dp_init(void);
+void ipa_dp_exit(void);
+
 #endif /* _IPA_I_H_ */

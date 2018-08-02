@@ -2269,3 +2269,12 @@ bool ipa_ep_polling(struct ipa_ep_context *ep)
 
 	return !!atomic_read(&ep->sys->rx.curr_polling_state);
 }
+
+bool ipa_dp_init(void)
+{
+	return true;
+}
+
+void ipa_dp_exit(void)
+{
+}
