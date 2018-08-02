@@ -1390,7 +1390,7 @@ int ipa_gsi_dma_task_inject(void)
 	ipa_desc_fill_imm_cmd(&desc, ipa_ctx->dma_task_info.cmd_pyld);
 
 	ipa_debug("sending 1B packet to IPA\n");
-	if (ipa_send_cmd_timeout(1, &desc, IPA_GSI_DMA_TASK_TIMEOUT)) {
+	if (ipa_send_cmd_timeout(&desc, IPA_GSI_DMA_TASK_TIMEOUT)) {
 		ipa_err("ipa_send_cmd failed\n");
 
 		return -EFAULT;

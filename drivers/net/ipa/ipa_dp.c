@@ -692,9 +692,8 @@ int ipa_send_cmd(u16 num_desc, struct ipa_desc *descr)
 	return result;
 }
 
-/** ipa_send_cmd_timeout - send immediate commands with limited time
+/** ipa_send_cmd_timeout - send one immediate command with limited time
  *	waiting for ACK from IPA HW
- * @num_desc:	number of descriptors within the desc struct
  * @descr:	descriptor structure
  * @timeout:	millisecond to wait till get ACK from IPA HW
  *
@@ -703,18 +702,17 @@ int ipa_send_cmd(u16 num_desc, struct ipa_desc *descr)
  * The callback in ipa_desc should not be set by the caller
  * for this function.
  */
-int ipa_send_cmd_timeout(u16 num_desc, struct ipa_desc *descr, u32 timeout)
+int ipa_send_cmd_timeout(struct ipa_desc *descr, u32 timeout)
 {
 	struct ipa_desc *last_desc;
-	int i, result = 0;
+	int result = 0;
 	struct ipa_ep_context *ep;
 	struct ipa_tag_completion *comp;
 
-	if (!num_desc || !descr || !timeout)
+	if (!descr || !timeout)
 		return -EFAULT;
 
-	for (i = 0; i < num_desc; i++)
-		ipa_debug("sending imm cmd %d\n", descr[i].opcode);
+	ipa_debug("sending imm cmd %d\n", descr[0].opcode);
 
 	comp = kzalloc(sizeof(*comp), GFP_KERNEL);
 	if (!comp)
@@ -727,20 +725,19 @@ int ipa_send_cmd_timeout(u16 num_desc, struct ipa_desc *descr, u32 timeout)
 
 	ipa_client_add();
 
-	last_desc = &descr[num_desc - 1];
+	last_desc = &descr[0];
 	init_completion(&last_desc->xfer_done);
 	WARN(last_desc->callback || last_desc->user1,
-	     "num_desc=%hu, callback=%p, user1=%p\n",
-	     num_desc, last_desc->callback, last_desc->user1);
+	     "num_desc=1, callback=%p, user1=%p\n",
+	     last_desc->callback, last_desc->user1);
 	last_desc->callback = ipa_transport_irq_cmd_ack_free;
 	last_desc->user1 = comp;
 
 	ep = ipa_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
-	if (ipa_send(ep->sys, num_desc, descr)) {
+	if (ipa_send(ep->sys, 1, descr)) {
 		/* Callback won't run; drop reference on its behalf */
 		atomic_dec(&comp->cnt);
-		ipa_err("fail to send %hu immediate command%s\n",
-			num_desc, num_desc == 1 ? "" : "s");
+		ipa_err("fail to send 1 immediate commands\n");
 		result = -EFAULT;
 	} else {
 		unsigned long jiffs = msecs_to_jiffies(timeout);
