@@ -67,11 +67,11 @@ struct ipa_sys_context {
 	/* ordering is important - mutable fields go above */
 	struct ipa_ep_context *ep;
 	struct list_head head_desc_list; /* contains len entries */
-	struct list_head rcycl_list;
+	struct list_head rcycl_list;		/* RX only */
 	spinlock_t spinlock;		/* protects head_desc and rcycl lists */
 	struct workqueue_struct *wq;
-	struct workqueue_struct *repl_wq;
-	struct ipa_status_stats *status_stat;
+	struct workqueue_struct *repl_wq;	/* RX only */
+	struct ipa_status_stats *status_stat;	/* RX only */
 	/* ordering is important - other immutable fields go below */
 };
 
