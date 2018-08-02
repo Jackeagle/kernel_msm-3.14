@@ -659,9 +659,6 @@ int ipa_send_cmd(struct ipa_desc *desc)
 	struct ipa_ep_context *ep;
 	int result = 0;
 
-	if (!desc)
-		return -EFAULT;
-
 	ipa_client_add();
 
 	init_completion(&desc->xfer_done);
