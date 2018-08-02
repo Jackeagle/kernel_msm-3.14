@@ -708,8 +708,7 @@ int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 	struct ipa_ep_context *ep;
 	struct ipa_tag_completion *comp;
 
-	if (!desc || !timeout)
-		return -EFAULT;
+	ipa_assert(timeout);
 
 	comp = kzalloc(sizeof(*comp), GFP_KERNEL);
 	if (!comp)
