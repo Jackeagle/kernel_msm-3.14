@@ -657,7 +657,6 @@ static void ipa_transport_irq_cmd_ack_free(void *tag_comp, int ignored)
 int ipa_send_cmd(struct ipa_desc *descr)
 {
 	struct ipa_ep_context *ep;
-	struct ipa_desc *last_desc;
 	int result = 0;
 
 	if (!descr)
@@ -667,13 +666,12 @@ int ipa_send_cmd(struct ipa_desc *descr)
 
 	ipa_client_add();
 
-	last_desc = &descr[0];
-	init_completion(&last_desc->xfer_done);
-	WARN(last_desc->callback || last_desc->user1,
+	init_completion(&descr->xfer_done);
+	WARN(descr->callback || descr->user1,
 	     "callback=%p, user1=%p\n",
-	     last_desc->callback, last_desc->user1);
-	last_desc->callback = ipa_transport_irq_cmd_ack;
-	last_desc->user1 = last_desc;
+	     descr->callback, descr->user1);
+	descr->callback = ipa_transport_irq_cmd_ack;
+	descr->user1 = descr;
 
 	/* Send the commands, and wait for completion if successful */
 	ep = ipa_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
@@ -681,7 +679,7 @@ int ipa_send_cmd(struct ipa_desc *descr)
 		ipa_err("fail to send immediate command\n");
 		result = -EFAULT;
 	} else {
-		wait_for_completion(&last_desc->xfer_done);
+		wait_for_completion(&descr->xfer_done);
 	}
 
 	ipa_client_remove();

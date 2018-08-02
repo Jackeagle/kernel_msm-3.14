@@ -87,7 +87,7 @@ static int hdr_init_local_cmd(u32 offset, u32 size)
 	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
-	ret = ipa_send_cmd(1, &desc);
+	ret = ipa_send_cmd(&desc);
 	if (ret)
 		ipa_err("error sending command\n");
 
@@ -120,7 +120,7 @@ static int dma_shared_mem_zero_cmd(u32 offset, u32 size)
 	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
-	ret = ipa_send_cmd(1, &desc);
+	ret = ipa_send_cmd(&desc);
 	if (ret)
 		ipa_err("error sending command\n");
 
@@ -317,7 +317,7 @@ static int ipa_init_rt4(void)
 	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
-	if (ipa_send_cmd(1, &desc)) {
+	if (ipa_send_cmd(&desc)) {
 		ipa_err("fail to send immediate command\n");
 		rc = -EFAULT;
 	}
@@ -361,7 +361,7 @@ static int ipa_init_rt6(void)
 	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
-	if (ipa_send_cmd(1, &desc)) {
+	if (ipa_send_cmd(&desc)) {
 		ipa_err("fail to send immediate command\n");
 		rc = -EFAULT;
 	}
@@ -406,7 +406,7 @@ static int ipa_init_flt4(void)
 	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
-	if (ipa_send_cmd(1, &desc)) {
+	if (ipa_send_cmd(&desc)) {
 		ipa_err("fail to send immediate command\n");
 		rc = -EFAULT;
 	}
@@ -451,7 +451,7 @@ static int ipa_init_flt6(void)
 	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
-	if (ipa_send_cmd(1, &desc)) {
+	if (ipa_send_cmd(&desc)) {
 		ipa_err("fail to send immediate command\n");
 		rc = -EFAULT;
 	}
