@@ -624,9 +624,6 @@ static void ipa_client_add_first(void)
 	}
 
 	mutex_unlock(&ipa_ctx->ipa_active_clients.mutex);
-
-	ipa_debug_low("active clients = %d\n",
-		      atomic_read(&ipa_ctx->ipa_active_clients.cnt));
 }
 
 /* Attempt to add an IPA client reference, but only if this does not
@@ -635,13 +632,7 @@ static void ipa_client_add_first(void)
  */
 static bool ipa_client_add_not_first(void)
 {
-	if (!atomic_inc_not_zero(&ipa_ctx->ipa_active_clients.cnt))
-		return false;
-
-	ipa_debug_low("active clients = %d\n",
-		      atomic_read(&ipa_ctx->ipa_active_clients.cnt));
-
-	return true;
+	return !!atomic_inc_not_zero(&ipa_ctx->ipa_active_clients.cnt);
 }
 
 /* Add an IPA client, but only if the reference count is already
@@ -673,22 +664,15 @@ void ipa_client_add(void)
  */
 static void ipa_client_remove_final(void)
 {
-	int ret;
-
 	mutex_lock(&ipa_ctx->ipa_active_clients.mutex);
 
 	/* A reference might have been removed while awaiting the mutex. */
-	ret = atomic_dec_return(&ipa_ctx->ipa_active_clients.cnt);
-	if (!ret) {
+	if (!atomic_dec_return(&ipa_ctx->ipa_active_clients.cnt)) {
 		ipa_suspend_apps_pipes();
 		ipa_disable_clks();
-	} else {
-		ipa_assert(ret > 0);
 	}
 
 	mutex_unlock(&ipa_ctx->ipa_active_clients.mutex);
-
-	ipa_debug_low("active clients = %d\n", ret);
 }
 
 /* Decrement the active clients reference count, and if the result
@@ -709,13 +693,7 @@ static void ipa_client_remove_deferred(struct work_struct *work)
  */
 static bool ipa_client_remove_not_final(void)
 {
-	if (!atomic_add_unless(&ipa_ctx->ipa_active_clients.cnt, -1, 1))
-		return false;
-
-	ipa_debug_low("active clients = %d\n",
-		      atomic_read(&ipa_ctx->ipa_active_clients.cnt));
-
-	return true;
+	return !!atomic_add_unless(&ipa_ctx->ipa_active_clients.cnt, -1, 1);
 }
 
 /* Attempt to remove an IPA client reference.  If this represents
