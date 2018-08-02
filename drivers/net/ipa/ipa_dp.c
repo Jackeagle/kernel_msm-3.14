@@ -221,7 +221,7 @@ static struct workqueue_struct *
 ipa_alloc_workqueue(const char *name, enum ipa_client_type client)
 {
 	char namebuf[IPA_RESOURCE_NAME_MAX];
-	unsigned int wq_flags = WQ_MEM_RECLAIM | WQ_UNBOUND | WQ_SYSFS;
+	unsigned int wq_flags = WQ_MEM_RECLAIM | WQ_UNBOUND;
 	struct workqueue_struct *wq;
 	int ret;
 
