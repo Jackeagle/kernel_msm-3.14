@@ -31,7 +31,13 @@ struct ipa_repl_ctx {
  */
 struct ipa_sys_context {
 	u32 len;
-	u32 len_pending_xfer;
+	union {
+		struct {	/* Consumer pipes only */
+			u32 len_pending_xfer;
+		} rx;
+		struct {	/* Producer pipes only */
+		} tx;
+	};
 	atomic_t curr_polling_state;
 	struct delayed_work switch_to_intr_work;
 	int (*pyld_hdlr)(struct sk_buff *skb, struct ipa_sys_context *sys);
@@ -769,7 +775,7 @@ static void ipa_handle_rx(struct ipa_sys_context *sys)
 		 * completed descs; release the worker so delayed work can
 		 * run in a timely manner
 		 */
-		if (sys->len - sys->len_pending_xfer == 0)
+		if (sys->len - sys->rx.len_pending_xfer == 0)
 			break;
 
 	} while (inactive_cycles <= POLLING_INACTIVITY_RX);
@@ -1197,8 +1203,8 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
 	/* As doorbell is a costly operation, notify to GSI
 	 * of new buffers if threshold is exceeded
 	 */
-	if (++sys->len_pending_xfer >= IPA_REPL_XFER_THRESH) {
-		sys->len_pending_xfer = 0;
+	if (++sys->rx.len_pending_xfer >= IPA_REPL_XFER_THRESH) {
+		sys->rx.len_pending_xfer = 0;
 		gsi_start_xfer(sys->ep->gsi_chan_hdl);
 	}
 
@@ -1271,7 +1277,7 @@ fail_dma_mapping:
 fail_skb_alloc:
 	kmem_cache_free(ipa_ctx->rx_pkt_wrapper_cache, rx_pkt);
 fail_kmem_cache_alloc:
-	if (rx_len_cached - sys->len_pending_xfer == 0)
+	if (rx_len_cached - sys->rx.len_pending_xfer == 0)
 		queue_delayed_work(sys->wq, &sys->replenish_rx_work,
 				   msecs_to_jiffies(1));
 }
@@ -1354,7 +1360,7 @@ fail_dma_mapping:
 	INIT_LIST_HEAD(&rx_pkt->link);
 	spin_unlock_bh(&sys->spinlock);
 fail_kmem_cache_alloc:
-	if (rx_len_cached - sys->len_pending_xfer == 0)
+	if (rx_len_cached - sys->rx.len_pending_xfer == 0)
 		queue_delayed_work(sys->wq, &sys->replenish_rx_work,
 				   msecs_to_jiffies(1));
 }
@@ -1392,7 +1398,7 @@ static void ipa_fast_replenish_rx_cache(struct ipa_sys_context *sys)
 
 	queue_work(sys->repl_wq, &sys->repl_work);
 
-	if (rx_len_cached - sys->len_pending_xfer
+	if (rx_len_cached - sys->rx.len_pending_xfer
 		<= IPA_DEFAULT_SYS_YELLOW_WM) {
 		queue_delayed_work(sys->wq, &sys->replenish_rx_work,
 				   msecs_to_jiffies(1));
