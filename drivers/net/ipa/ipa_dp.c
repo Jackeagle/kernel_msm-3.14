@@ -799,6 +799,40 @@ static void ipa_switch_to_intr_rx_work_func(struct work_struct *work)
 	ipa_handle_rx(sys);
 }
 
+static struct ipa_sys_context *ipa_ep_sys_create(enum ipa_client_type client)
+{
+	struct ipa_sys_context *sys;
+
+	/* Caller will zero all "mutable" fields; we fill in the rest */
+	sys = kmalloc(sizeof(*sys), GFP_KERNEL);
+	if (!sys)
+		return NULL;
+
+	/* Caller assigns sys->ep = ep */
+	INIT_LIST_HEAD(&sys->head_desc_list);
+	INIT_LIST_HEAD(&sys->rcycl_list);
+	spin_lock_init(&sys->spinlock);
+
+	sys->wq = ipa_alloc_workqueue("ipawq", client);
+	if (!sys->wq)
+		goto err_free_sys;
+
+	sys->repl_wq = ipa_alloc_workqueue("iparepwq", client);
+	if (!sys->repl_wq)
+		goto err_destroy_wq;
+
+	sys->status_stat = NULL;
+
+	return sys;
+
+err_destroy_wq:
+	destroy_workqueue(sys->wq);
+err_free_sys:
+	kfree(sys);
+
+	return NULL;
+}
+
 /** ipa_setup_sys_pipe() - Setup an IPA GPI pipe and perform
  * IPA EP configuration
  * @sys_in:	[in] input needed to setup the pipe and configure EP
@@ -827,44 +861,25 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 
 	ipa_client_add();
 
-	/* Save the sys pointer; it may have already been initialized */
+	/* Reuse the endpoint's sys pointer if it is initialized */
 	sys = ep->sys;
+	if (!sys) {
+		sys = ipa_ep_sys_create(sys_in->client);
+		if (!sys)
+			goto fail_and_disable_clocks;
+		sys->ep = ep;
+	}
+	/* Zero the "mutable" part of the system context */
+	memset(sys, 0, offsetof(struct ipa_sys_context, ep));
+
+	/* Zero the endpoint structure and record its sys pointer */
 	memset(ep, 0, sizeof(*ep));
 	ep->sys = sys;
-
-	if (!ep->sys) {
-		ep->sys = kzalloc(sizeof(*ep->sys), GFP_KERNEL);
-		if (!ep->sys) {
-			result = -ENOMEM;
-			goto fail_and_disable_clocks;
-		}
-
-		ep->sys->ep = ep;
-
-		ep->sys->wq = ipa_alloc_workqueue("ipawq", sys_in->client);
-		if (!ep->sys->wq) {
-			result = -EFAULT;
-			goto fail_wq;
-		}
-
-		ep->sys->repl_wq = ipa_alloc_workqueue("iparepwq",
-						       sys_in->client);
-		if (!ep->sys->repl_wq) {
-			result = -EFAULT;
-			goto fail_wq2;
-		}
-
-		INIT_LIST_HEAD(&ep->sys->head_desc_list);
-		INIT_LIST_HEAD(&ep->sys->rcycl_list);
-		spin_lock_init(&ep->sys->spinlock);
-	} else {
-		memset(ep->sys, 0, offsetof(struct ipa_sys_context, ep));
-	}
 
 	if (ipa_assign_policy(sys_in, ep->sys)) {
 		ipa_err("failed to sys ctx for client %d\n", sys_in->client);
 		result = -ENOMEM;
-		goto fail_gen2;
+		goto fail_and_disable_clocks;
 	}
 
 	ep->valid = true;
@@ -879,7 +894,7 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 			kzalloc(sizeof(struct ipa_status_stats), GFP_KERNEL);
 		if (!ep->sys->status_stat) {
 			ipa_err("no memory\n");
-			goto fail_gen2;
+			goto fail_and_disable_clocks;
 		}
 	}
 
@@ -892,7 +907,7 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 	result = ipa_gsi_setup_channel(sys_in, ep);
 	if (result) {
 		ipa_err("Failed to setup GSI channel\n");
-		goto fail_gen2;
+		goto fail_and_disable_clocks;
 	}
 
 	if (ipa_consumer(sys_in->client) &&
@@ -925,13 +940,6 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 
 	return ipa_ep_idx;
 
-fail_gen2:
-	destroy_workqueue(ep->sys->repl_wq);
-fail_wq2:
-	destroy_workqueue(ep->sys->wq);
-fail_wq:
-	kfree(ep->sys);
-	memset(&ipa_ctx->ep[ipa_ep_idx], 0, sizeof(struct ipa_ep_context));
 fail_and_disable_clocks:
 	ipa_client_remove();
 fail_gen:
