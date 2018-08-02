@@ -34,11 +34,11 @@ struct ipa_sys_context {
 	union {
 		struct {	/* Consumer pipes only */
 			u32 len_pending_xfer;
+			atomic_t curr_polling_state;
 		} rx;
 		struct {	/* Producer pipes only */
 		} tx;
 	};
-	atomic_t curr_polling_state;
 	struct delayed_work switch_to_intr_work;
 	int (*pyld_hdlr)(struct sk_buff *skb, struct ipa_sys_context *sys);
 	struct sk_buff * (*get_skb)(unsigned int len, gfp_t flags);
@@ -730,7 +730,7 @@ static int ipa_handle_rx_core(struct ipa_sys_context *sys)
 /** ipa_rx_switch_to_intr_mode() - Operate the Rx data path in interrupt mode */
 static void ipa_rx_switch_to_intr_mode(struct ipa_sys_context *sys)
 {
-	if (!atomic_xchg(&sys->curr_polling_state, 0)) {
+	if (!atomic_xchg(&sys->rx.curr_polling_state, 0)) {
 		ipa_err("already in intr mode\n");
 		queue_delayed_work(sys->wq, &sys->switch_to_intr_work,
 				   msecs_to_jiffies(1));
@@ -742,7 +742,7 @@ static void ipa_rx_switch_to_intr_mode(struct ipa_sys_context *sys)
 
 void ipa_rx_switch_to_poll_mode(struct ipa_sys_context *sys)
 {
-	if (atomic_xchg(&sys->curr_polling_state, 1))
+	if (atomic_xchg(&sys->rx.curr_polling_state, 1))
 		return;
 	gsi_channel_intr_disable(sys->ep->gsi_chan_hdl);
 	ipa_inc_acquire_wakelock();
@@ -2077,7 +2077,7 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 			  ipa_replenish_rx_work_func);
 	INIT_WORK(&sys->repl_work, ipa_wq_repl_rx);
 
-	atomic_set(&sys->curr_polling_state, 0);
+	atomic_set(&sys->rx.curr_polling_state, 0);
 	sys->rx_buff_sz = IPA_GENERIC_RX_BUFF_SZ(IPA_GENERIC_RX_BUFF_BASE_SZ);
 	sys->rx_pool_sz = IPA_GENERIC_RX_POOL_SZ;
 	sys->get_skb = ipa_get_skb_ipa_rx;
@@ -2280,5 +2280,7 @@ static u32 ipa_adjust_ra_buff_base_sz(u32 aggr_byte_limit)
 
 bool ipa_ep_polling(struct ipa_ep_context *ep)
 {
-	return !!atomic_read(&ep->sys->curr_polling_state);
+	ipa_assert(ipa_consumer(ep->client));
+
+	return !!atomic_read(&ep->sys->rx.curr_polling_state);
 }
