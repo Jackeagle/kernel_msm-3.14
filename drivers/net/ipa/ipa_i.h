@@ -271,6 +271,15 @@ struct ipa_ep_context {
 	struct ipa_sys_context *sys;
 };
 
+/** struct ipa_dp - IPA data path information
+ * @tx_pkt_wrapper_cache: Tx packets cache
+ * @rx_pkt_wrapper_cache: Rx packets cache
+ */
+struct ipa_dp {
+	struct kmem_cache *tx_pkt_wrapper_cache;
+	struct kmem_cache *rx_pkt_wrapper_cache;
+};
+
 #define IPA_HW_NUM_FEATURES 0x8
 #define FEATURE_ENUM_VAL(feature, opcode) ((feature << 5) | opcode)
 
@@ -569,8 +578,7 @@ struct ipa_dma_task_info {
  * @ipa_wrapper_base: IPA wrapper base address
  * @rt_tbl_set: list of routing tables each of which is a list of rules
  * @reap_rt_tbl_set: list of sys mem routing tables waiting to be reaped
- * @tx_pkt_wrapper_cache: Tx packets cache
- * @rx_pkt_wrapper_cache: Rx packets cache
+ * @dp: data path information
  * @lock: this does NOT protect the linked lists within ipa_sys_context
  * @smem_sz: shared memory size available for SW use starting
  *  from non-restricted bytes
@@ -616,8 +624,7 @@ struct ipa_context {
 	void __iomem *mmio;
 	u32 ipa_wrapper_base;
 	u32 ipa_wrapper_size;
-	struct kmem_cache *tx_pkt_wrapper_cache;
-	struct kmem_cache *rx_pkt_wrapper_cache;
+	struct ipa_dp dp;
 	u16 smem_sz;
 	u16 smem_restricted_bytes;
 	struct ipa_active_clients ipa_active_clients;
