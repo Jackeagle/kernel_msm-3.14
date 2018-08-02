@@ -711,8 +711,6 @@ int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 	desc->callback = ipa_transport_irq_cmd_ack_free;
 	desc->user1 = comp;
 
-	init_completion(&desc->xfer_done);
-
 	ep = ipa_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
 
 	ipa_client_add();
