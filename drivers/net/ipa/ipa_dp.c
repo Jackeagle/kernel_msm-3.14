@@ -71,7 +71,6 @@ struct ipa_sys_context {
 	spinlock_t spinlock;		/* protects head_desc and rcycl lists */
 	struct workqueue_struct *wq;
 	struct workqueue_struct *repl_wq;	/* RX only */
-	struct ipa_status_stats *status_stat;	/* RX only */
 	/* ordering is important - other immutable fields go below */
 };
 
@@ -821,8 +820,6 @@ static struct ipa_sys_context *ipa_ep_sys_create(enum ipa_client_type client)
 	if (!sys->repl_wq)
 		goto err_destroy_wq;
 
-	sys->status_stat = NULL;
-
 	return sys;
 
 err_destroy_wq:
@@ -883,16 +880,6 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 	ep->client_notify = sys_in->notify;
 	ep->napi_enabled = sys_in->napi_enabled;
 	ep->priv = sys_in->priv;
-
-	if (ep->status.status_en && ipa_consumer(ep->client) &&
-	    !ep->sys->status_stat) {
-		ep->sys->status_stat =
-			kzalloc(sizeof(struct ipa_status_stats), GFP_KERNEL);
-		if (!ep->sys->status_stat) {
-			ipa_err("no memory\n");
-			goto err_client_remove;
-		}
-	}
 
 	ipa_cfg_ep(ipa_ep_idx, &sys_in->ipa_ep_cfg);
 
@@ -1588,13 +1575,6 @@ begin:
 		ipa_debug_low("STATUS opcode=%d src=%d dst=%d len=%d\n",
 			      status.status_opcode, status.endp_src_idx,
 			      status.endp_dest_idx, status.pkt_len);
-		if (sys->status_stat) {
-			sys->status_stat->status[sys->status_stat->curr] =
-				status;
-			sys->status_stat->curr++;
-			if (sys->status_stat->curr == IPA_MAX_STATUS_STAT_NUM)
-				sys->status_stat->curr = 0;
-		}
 
 		if (status.status_opcode !=
 			IPAHAL_PKT_STATUS_OPCODE_DROPPED_PACKET &&
@@ -1854,14 +1834,6 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 		ipa_debug_low("STATUS opcode=%d src=%d dst=%d len=%d\n",
 			      status.status_opcode, status.endp_src_idx,
 			      status.endp_dest_idx, status.pkt_len);
-
-		if (sys->status_stat) {
-			sys->status_stat->status[sys->status_stat->curr] =
-				status;
-			sys->status_stat->curr++;
-			if (sys->status_stat->curr == IPA_MAX_STATUS_STAT_NUM)
-				sys->status_stat->curr = 0;
-		}
 
 		if (status.status_opcode !=
 			IPAHAL_PKT_STATUS_OPCODE_DROPPED_PACKET &&

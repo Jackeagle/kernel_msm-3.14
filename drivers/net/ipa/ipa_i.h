@@ -229,11 +229,6 @@ struct ipa_active_client {
 	const char *id_string;
 };
 
-struct ipa_status_stats {
-	struct ipahal_pkt_status status[IPA_MAX_STATUS_STAT_NUM];
-	unsigned int curr;
-};
-
 /** struct ipa_ep_context - IPA end point context
  * @valid: flag indicating id EP context is valid
  * @client: EP client type
