@@ -647,7 +647,6 @@ static void ipa_transport_irq_cmd_ack_free(void *tag_comp, int ignored)
 }
 
 /** ipa_send_cmd - send immediate commands
- * @num_desc:	number of descriptors within the desc struct
  * @descr:	descriptor structure
  *
  * Function will block till command gets ACK from IPA HW, caller needs
@@ -655,33 +654,31 @@ static void ipa_transport_irq_cmd_ack_free(void *tag_comp, int ignored)
  * The callback in ipa_desc should not be set by the caller
  * for this function.
  */
-int ipa_send_cmd(u16 num_desc, struct ipa_desc *descr)
+int ipa_send_cmd(struct ipa_desc *descr)
 {
 	struct ipa_ep_context *ep;
 	struct ipa_desc *last_desc;
-	int i, result = 0;
+	int result = 0;
 
-	if (!num_desc || !descr)
+	if (!descr)
 		return -EFAULT;
 
-	for (i = 0; i < num_desc; i++)
-		ipa_debug("sending imm cmd %d\n", descr[i].opcode);
+	ipa_debug("sending imm cmd %d\n", descr[0].opcode);
 
 	ipa_client_add();
 
-	last_desc = &descr[num_desc - 1];
+	last_desc = &descr[0];
 	init_completion(&last_desc->xfer_done);
 	WARN(last_desc->callback || last_desc->user1,
-	     "num_desc=%hu, callback=%p, user1=%p\n",
-	     num_desc, last_desc->callback, last_desc->user1);
+	     "callback=%p, user1=%p\n",
+	     last_desc->callback, last_desc->user1);
 	last_desc->callback = ipa_transport_irq_cmd_ack;
 	last_desc->user1 = last_desc;
 
 	/* Send the commands, and wait for completion if successful */
 	ep = ipa_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
-	if (ipa_send(ep->sys, num_desc, descr)) {
-		ipa_err("fail to send %hu immediate command%s\n",
-			num_desc, num_desc == 1 ? "" : "s");
+	if (ipa_send(ep->sys, 1, descr)) {
+		ipa_err("fail to send immediate command\n");
 		result = -EFAULT;
 	} else {
 		wait_for_completion(&last_desc->xfer_done);
