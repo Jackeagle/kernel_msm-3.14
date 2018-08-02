@@ -846,27 +846,23 @@ err_free_sys:
  */
 int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 {
-	struct ipa_ep_context *ep;
+	u32 ipa_ep_idx = ipa_get_ep_mapping(sys_in->client);
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 	struct ipa_sys_context *sys;
-	u32 ipa_ep_idx;
-	int result = -EINVAL;
+	int ret;
 
-	ipa_ep_idx = ipa_get_ep_mapping(sys_in->client);
-
-	ep = &ipa_ctx->ep[ipa_ep_idx];
-	if (ep->valid) {
-		ipa_err("EP %u already allocated.\n", ipa_ep_idx);
-		goto fail_gen;
-	}
+	if (ep->valid)
+		return -EINVAL;
 
 	ipa_client_add();
 
 	/* Reuse the endpoint's sys pointer if it is initialized */
 	sys = ep->sys;
 	if (!sys) {
+		ret = -ENOMEM;
 		sys = ipa_ep_sys_create(sys_in->client);
 		if (!sys)
-			goto fail_and_disable_clocks;
+			goto err_client_remove;
 		sys->ep = ep;
 	}
 	/* Zero the "mutable" part of the system context */
@@ -878,8 +874,8 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 
 	if (ipa_assign_policy(sys_in, ep->sys)) {
 		ipa_err("failed to sys ctx for client %d\n", sys_in->client);
-		result = -ENOMEM;
-		goto fail_and_disable_clocks;
+		ret = -ENOMEM;
+		goto err_client_remove;
 	}
 
 	ep->valid = true;
@@ -894,7 +890,7 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 			kzalloc(sizeof(struct ipa_status_stats), GFP_KERNEL);
 		if (!ep->sys->status_stat) {
 			ipa_err("no memory\n");
-			goto fail_and_disable_clocks;
+			goto err_client_remove;
 		}
 	}
 
@@ -904,10 +900,10 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 
 	ipa_debug("ep %u configuration successful\n", ipa_ep_idx);
 
-	result = ipa_gsi_setup_channel(sys_in, ep);
-	if (result) {
+	ret = ipa_gsi_setup_channel(sys_in, ep);
+	if (ret) {
 		ipa_err("Failed to setup GSI channel\n");
-		goto fail_and_disable_clocks;
+		goto err_client_remove;
 	}
 
 	if (ipa_consumer(sys_in->client) &&
@@ -940,10 +936,10 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 
 	return ipa_ep_idx;
 
-fail_and_disable_clocks:
+err_client_remove:
 	ipa_client_remove();
-fail_gen:
-	return result;
+
+	return ret;
 }
 
 /** ipa_teardown_sys_pipe() - Teardown the GPI pipe and cleanup IPA EP
