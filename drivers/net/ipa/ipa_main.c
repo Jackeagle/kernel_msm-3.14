@@ -1358,7 +1358,8 @@ static int ipa_pre_init(void)
 
 	/* init the lookaside cache */
 
-	if (!ipa_dp_init())
+	ipa_ctx->dp = ipa_dp_init();
+	if (!ipa_ctx->dp)
 		goto err_destroy_pm_wq;
 
 	/* allocate memory for DMA_TASK workaround */
@@ -1423,7 +1424,8 @@ err_unregister_chrdev_region:
 err_gsi_dma_task_free:
 	ipa_gsi_dma_task_free();
 err_dp_exit:
-	ipa_dp_exit();
+	ipa_dp_exit(ipa_ctx->dp);
+	ipa_ctx->dp = NULL;
 err_destroy_pm_wq:
 	destroy_workqueue(ipa_ctx->power_mgmt_wq);
 err_disable_clks:

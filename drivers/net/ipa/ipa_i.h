@@ -624,7 +624,7 @@ struct ipa_context {
 	void __iomem *mmio;
 	u32 ipa_wrapper_base;
 	u32 ipa_wrapper_size;
-	struct ipa_dp dp;
+	struct ipa_dp *dp;
 	u16 smem_sz;
 	u16 smem_restricted_bytes;
 	struct ipa_active_clients ipa_active_clients;
@@ -760,7 +760,7 @@ void ipa_gsi_irq_tx_notify_cb(void *xfer_data);
 
 bool ipa_ep_polling(struct ipa_ep_context *ep);
 
-bool ipa_dp_init(void);
-void ipa_dp_exit(void);
+struct ipa_dp *ipa_dp_init(void);
+void ipa_dp_exit(struct ipa_dp *dp);
 
 #endif /* _IPA_I_H_ */
