@@ -35,7 +35,7 @@ struct ipa_sys_context {
 		struct {	/* Consumer pipes only */
 			u32 len_pending_xfer;
 			atomic_t curr_polling_state;
-			struct delayed_work switch_to_intr_work;
+			struct delayed_work switch_to_intr_work; /* sys->wq */
 			int (*pyld_hdlr)(struct sk_buff *,
 					 struct ipa_sys_context *);
 			struct sk_buff *(*get_skb)(unsigned int, gfp_t);
@@ -49,18 +49,18 @@ struct ipa_sys_context {
 			unsigned int len_partial;	/* APPS_LAN only */
 			bool drop_packet;		/* APPS_LAN only */
 
-			struct work_struct work;
-			struct delayed_work replenish_work;
+			struct work_struct work; /* sys->wq */
+			struct delayed_work replenish_work; /* sys->wq */
 			struct work_struct repl_work;
 			void (*repl_hdlr)(struct ipa_sys_context *);
-			struct ipa_repl_ctx repl;
+			struct ipa_repl_ctx repl; /* sys->repl_wq */
 		} rx;
 		struct {	/* Producer pipes only */
 			/* no_intr/nop is APPS_WAN_PROD only */
 			bool no_intr;
 			atomic_t nop_pending;
 			struct hrtimer nop_timer;
-			struct work_struct nop_work;
+			struct work_struct nop_work; /* sys->wq */
 		} tx;
 	};
 
