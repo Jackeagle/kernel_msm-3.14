@@ -657,7 +657,7 @@ static void ipa_transport_irq_cmd_ack_free(void *tag_comp, int ignored)
 int ipa_send_cmd(struct ipa_desc *desc)
 {
 	struct ipa_ep_context *ep;
-	int result = 0;
+	int ret;
 
 	ipa_client_add();
 
@@ -669,16 +669,16 @@ int ipa_send_cmd(struct ipa_desc *desc)
 
 	/* Send the commands, and wait for completion if successful */
 	ep = ipa_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
-	if (ipa_send(ep->sys, 1, desc)) {
+
+	ret = ipa_send(ep->sys, 1, desc);
+	if (ret)
 		ipa_err("fail to send immediate command\n");
-		result = -EFAULT;
-	} else {
+	else
 		wait_for_completion(&desc->xfer_done);
-	}
 
 	ipa_client_remove();
 
-	return result;
+	return ret;
 }
 
 /** ipa_send_cmd_timeout - send one immediate command with limited time
@@ -693,9 +693,9 @@ int ipa_send_cmd(struct ipa_desc *desc)
  */
 int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 {
-	int result = 0;
 	struct ipa_ep_context *ep;
 	struct ipa_tag_completion *comp;
+	int ret;
 
 	ipa_assert(timeout);
 
@@ -716,11 +716,11 @@ int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 	init_completion(&desc->xfer_done);
 
 	ep = ipa_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
-	if (ipa_send(ep->sys, 1, desc)) {
+	ret = ipa_send(ep->sys, 1, desc);
+	if (ret) {
 		/* Callback won't run; drop reference on its behalf */
 		atomic_dec(&comp->cnt);
 		ipa_err("fail to send 1 immediate commands\n");
-		result = -EFAULT;
 	} else {
 		unsigned long jiffs = msecs_to_jiffies(timeout);
 		long completed;
@@ -735,7 +735,7 @@ int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 
 	ipa_client_remove();
 
-	return result;
+	return ret;
 }
 
 /** ipa_handle_rx_core() - The core functionality of packet reception. This
