@@ -704,7 +704,6 @@ int ipa_send_cmd(u16 num_desc, struct ipa_desc *descr)
  */
 int ipa_send_cmd_timeout(struct ipa_desc *descr, u32 timeout)
 {
-	struct ipa_desc *last_desc;
 	int result = 0;
 	struct ipa_ep_context *ep;
 	struct ipa_tag_completion *comp;
@@ -725,13 +724,13 @@ int ipa_send_cmd_timeout(struct ipa_desc *descr, u32 timeout)
 
 	ipa_client_add();
 
-	last_desc = &descr[0];
-	init_completion(&last_desc->xfer_done);
-	WARN(last_desc->callback || last_desc->user1,
-	     "num_desc=1, callback=%p, user1=%p\n",
-	     last_desc->callback, last_desc->user1);
-	last_desc->callback = ipa_transport_irq_cmd_ack_free;
-	last_desc->user1 = comp;
+	/* Fill in the callback info (the sole descriptor is the last) */
+	WARN(descr->callback || descr->user1, "callback=%p, user1=%p\n",
+	     descr->callback, descr->user1);
+	descr->callback = ipa_transport_irq_cmd_ack_free;
+	descr->user1 = comp;
+
+	init_completion(&descr->xfer_done);
 
 	ep = ipa_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
 	if (ipa_send(ep->sys, 1, descr)) {
