@@ -187,7 +187,7 @@ int ipa_rx_poll(u32 clnt_hdl, int weight)
 	int cnt = 0;
 	static int total_cnt;
 
-	while (cnt < weight && atomic_read(&ep->sys->curr_polling_state)) {
+	while (cnt < weight && ipa_ep_polling(ep)) {
 		int ret;
 
 		ret = ipa_poll_gsi_pkt(ep->sys);
@@ -655,7 +655,7 @@ static int ipa_handle_rx_core(struct ipa_sys_context *sys)
 	int cnt = 0;
 
 	/* Stop if the leave polling state */
-	while (atomic_read(&sys->curr_polling_state)) {
+	while (ipa_ep_polling(sys->ep)) {
 		ret = ipa_poll_gsi_pkt(sys);
 		if (ret < 0)
 			break;
@@ -887,7 +887,7 @@ void ipa_teardown_sys_pipe(u32 clnt_hdl)
 	if (ep->napi_enabled) {
 		do {
 			usleep_range(95, 105);
-		} while (atomic_read(&ep->sys->curr_polling_state));
+		} while (ipa_ep_polling(ep));
 	}
 
 	if (ipa_producer(ep->client)) {
@@ -2180,8 +2180,7 @@ fail_alloc_channel:
 	return result;
 }
 
-static int
-ipa_poll_gsi_pkt(struct ipa_sys_context *sys)
+static int ipa_poll_gsi_pkt(struct ipa_sys_context *sys)
 {
 	if (sys->ep->bytes_xfered_valid) {
 		sys->ep->bytes_xfered_valid = false;
@@ -2217,4 +2216,9 @@ static u32 ipa_adjust_ra_buff_base_sz(u32 aggr_byte_limit)
 	 */
 
 	return 1 << __fls(aggr_byte_limit - 1);
+}
+
+bool ipa_ep_polling(struct ipa_ep_context *ep)
+{
+	return !!atomic_read(&ep->sys->curr_polling_state);
 }

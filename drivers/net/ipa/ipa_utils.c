@@ -1305,7 +1305,7 @@ static void resume_consumer_pipe(enum ipa_client_type client)
 	ipa_debug("pipe %u\n", ipa_ep_idx);
 
 	resume_consumer_endpoint(ipa_ep_idx);
-	if (!atomic_read(&ep->sys->curr_polling_state))
+	if (!ipa_ep_polling(ep))
 		gsi_channel_intr_enable(ep->gsi_chan_hdl);
 }
 

@@ -1695,8 +1695,7 @@ int ipa_ap_suspend(struct device *dev)
 
 	/* In case there is a tx/rx handler in polling mode fail to suspend */
 	for (i = 0; i < ipa_ctx->ipa_num_pipes; i++) {
-		if (ipa_ctx->ep[i].sys &&
-		    atomic_read(&ipa_ctx->ep[i].sys->curr_polling_state)) {
+		if (ipa_ctx->ep[i].sys && ipa_ep_polling(&ipa_ctx->ep[i])) {
 			ipa_err("EP %d is in polling state, do not suspend\n",
 				i);
 			return -EAGAIN;
