@@ -1361,28 +1361,11 @@ static int ipa_pre_init(void)
 	if (!ipa_dp_init())
 		goto err_destroy_pm_wq;
 
-	ipa_ctx->dp.tx_pkt_wrapper_cache =
-	   kmem_cache_create("IPA_TX_PKT_WRAPPER",
-			     sizeof(struct ipa_tx_pkt_wrapper), 0, 0, NULL);
-	if (!ipa_ctx->dp.tx_pkt_wrapper_cache) {
-		ipa_err(":ipa tx pkt wrapper cache create failed\n");
-		result = -ENOMEM;
-		goto err_dp_exit;
-	}
-	ipa_ctx->dp.rx_pkt_wrapper_cache =
-	   kmem_cache_create("IPA_RX_PKT_WRAPPER",
-			     sizeof(struct ipa_rx_pkt_wrapper), 0, 0, NULL);
-	if (!ipa_ctx->dp.rx_pkt_wrapper_cache) {
-		ipa_err(":ipa rx pkt wrapper cache create failed\n");
-		result = -ENOMEM;
-		goto err_destroy_tx_cache;
-	}
-
 	/* allocate memory for DMA_TASK workaround */
 	result = ipa_gsi_dma_task_alloc();
 	if (result) {
 		ipa_err("failed to allocate dma task\n");
-		goto err_destroy_rx_cache;
+		goto err_dp_exit;
 	}
 
 	ipa_ctx->class = class_create(THIS_MODULE, DRV_NAME);
@@ -1441,10 +1424,6 @@ err_gsi_dma_task_free:
 	ipa_gsi_dma_task_free();
 err_dp_exit:
 	ipa_dp_exit();
-err_destroy_rx_cache:
-	kmem_cache_destroy(ipa_ctx->dp.rx_pkt_wrapper_cache);
-err_destroy_tx_cache:
-	kmem_cache_destroy(ipa_ctx->dp.tx_pkt_wrapper_cache);
 err_destroy_pm_wq:
 	destroy_workqueue(ipa_ctx->power_mgmt_wq);
 err_disable_clks:

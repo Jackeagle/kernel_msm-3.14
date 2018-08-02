@@ -2272,9 +2272,34 @@ bool ipa_ep_polling(struct ipa_ep_context *ep)
 
 bool ipa_dp_init(void)
 {
+	struct ipa_dp *dp = &ipa_ctx->dp;
+	struct kmem_cache *cache;
+
+	cache = kmem_cache_create("IPA_TX_PKT_WRAPPER",
+				  sizeof(struct ipa_tx_pkt_wrapper),
+				  0, 0, NULL);
+	if (!cache)
+		return false;
+	dp->tx_pkt_wrapper_cache = cache;
+
+	cache = kmem_cache_create("IPA_RX_PKT_WRAPPER",
+				  sizeof(struct ipa_rx_pkt_wrapper),
+				  0, 0, NULL);
+	if (!cache) {
+		kmem_cache_destroy(dp->tx_pkt_wrapper_cache);
+		dp->tx_pkt_wrapper_cache = NULL;
+		return false;
+	}
+	dp->rx_pkt_wrapper_cache = cache;
+
 	return true;
 }
 
 void ipa_dp_exit(void)
 {
+	kmem_cache_destroy(ipa_ctx->dp.rx_pkt_wrapper_cache);
+	ipa_ctx->dp.rx_pkt_wrapper_cache = NULL;
+
+	kmem_cache_destroy(ipa_ctx->dp.tx_pkt_wrapper_cache);
+	ipa_ctx->dp.tx_pkt_wrapper_cache = NULL;
 }
