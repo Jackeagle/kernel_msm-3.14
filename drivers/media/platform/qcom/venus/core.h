@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012-2016, The Linux Foundation. All rights reserved.
- * Copyright (C) 2017 Linaro Ltd.
+ * Copyright (C) 2017-2018, Linaro Ltd.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -81,6 +81,10 @@ struct venus_caps {
 	bool valid;	/* used only for Venus v1xx */
 };
 
+struct video_firmware {
+	struct device *dev;
+	struct iommu_domain *iommu_domain;
+};
 /**
  * struct venus_core - holds core parameters valid for all instances
  *
@@ -129,6 +133,8 @@ struct venus_core {
 	struct device *dev;
 	struct device *dev_dec;
 	struct device *dev_enc;
+	struct video_firmware fw;
+	bool no_tz;
 	struct mutex lock;
 	struct list_head instances;
 	atomic_t insts_count;
@@ -303,6 +309,7 @@ struct venus_inst {
 	u32 opb_buftype;
 	u32 opb_fmt;
 	bool reconfig;
+	bool eos_sent;
 	u32 reconfig_width;
 	u32 reconfig_height;
 	u32 hfi_codec;

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012-2016, The Linux Foundation. All rights reserved.
- * Copyright (C) 2017 Linaro Ltd.
+ * Copyright (C) 2017-2018, Linaro Ltd.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -26,6 +26,9 @@
 #include "helpers.h"
 #include "hfi_helper.h"
 #include "hfi_venus_io.h"
+
+#define MAX_WIDTH 4096
+#define MAX_HEIGHT 2160
 
 struct intbuf {
 	struct list_head list;
@@ -93,6 +96,9 @@ static int venus_helper_queue_dpb_bufs(struct venus_inst *inst)
 	struct intbuf *buf;
 	int ret = 0;
 
+	if (list_empty(&inst->dpbbufs))
+		return 0;
+
 	list_for_each_entry(buf, &inst->dpbbufs, list) {
 		struct hfi_frame_data fdata;
 
@@ -114,6 +120,9 @@ int venus_helper_free_dpb_bufs(struct venus_inst *inst)
 {
 	struct intbuf *buf, *n;
 
+	if (list_empty(&inst->dpbbufs))
+		return 0;
+
 	list_for_each_entry_safe(buf, n, &inst->dpbbufs, list) {
 		list_del_init(&buf->list);
 		dma_free_attrs(inst->core->dev, buf->size, buf->va, buf->da,
@@ -131,7 +140,7 @@ int venus_helper_alloc_dpb_bufs(struct venus_inst *inst)
 {
 	struct venus_core *core = inst->core;
 	struct device *dev = core->dev;
-	enum hfi_version ver = core->res->hfi_version;
+	//enum hfi_version ver = core->res->hfi_version;
 	struct hfi_buffer_requirements bufreq;
 	u32 buftype = inst->dpb_buftype;
 	unsigned int dpb_size = 0;
@@ -140,9 +149,11 @@ int venus_helper_alloc_dpb_bufs(struct venus_inst *inst)
 	u32 count;
 	int ret;
 
+#if 0
 	/* no need to allocate dpb buffers */
 	if (!inst->dpb_fmt)
 		return 0;
+#endif
 
 	if (inst->dpb_buftype == HFI_BUFFER_OUTPUT)
 		dpb_size = inst->output_buf_size;
@@ -156,7 +167,7 @@ int venus_helper_alloc_dpb_bufs(struct venus_inst *inst)
 	if (ret)
 		return ret;
 
-	count = HFI_BUFREQ_COUNT_MIN(&bufreq, ver);
+	count = inst->num_output_bufs;
 
 	for (i = 0; i < count; i++) {
 		buf = kzalloc(sizeof(*buf), GFP_KERNEL);
@@ -179,6 +190,8 @@ int venus_helper_alloc_dpb_bufs(struct venus_inst *inst)
 
 		list_add_tail(&buf->list, &inst->dpbbufs);
 	}
+
+	venus_helper_queue_dpb_bufs(inst);
 
 	return 0;
 
@@ -289,20 +302,19 @@ static const unsigned int intbuf_types_4xx[] = {
 
 static int intbufs_alloc(struct venus_inst *inst)
 {
-	const unsigned int *intbuf;
-	size_t arr_sz, i;
+	size_t arr_sz;
+	size_t i;
 	int ret;
 
-	if (IS_V4(inst->core)) {
+	if (IS_V4(inst->core))
 		arr_sz = ARRAY_SIZE(intbuf_types_4xx);
-		intbuf = intbuf_types_4xx;
-	} else {
+	else
 		arr_sz = ARRAY_SIZE(intbuf_types_1xx);
-		intbuf = intbuf_types_1xx;
-	}
 
 	for (i = 0; i < arr_sz; i++) {
-		ret = intbufs_set_buffer(inst, intbuf[i]);
+		ret = intbufs_set_buffer(inst,
+			    IS_V4(inst->core) ? intbuf_types_4xx[i] :
+						intbuf_types_1xx[i]);
 		if (ret)
 			goto error;
 	}
@@ -975,8 +987,15 @@ void venus_helper_vb2_buf_queue(struct vb2_buffer *vb)
 
 	v4l2_m2m_buf_queue(m2m_ctx, vbuf);
 
-	if (!(inst->streamon_out & inst->streamon_cap))
+	if (!((inst->streamon_out &&
+			vb->type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) ||
+			(inst->streamon_cap &&
+			vb->type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE))) {
+//		pr_log("%s Exit %s - Yet to start_stream the Q",
+//			__func__, vb->type ==
+//			V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE ? "FTB":"ETB");
 		goto unlock;
+	}
 
 	ret = is_buf_refed(inst, vbuf);
 	if (ret)
@@ -992,14 +1011,19 @@ unlock:
 EXPORT_SYMBOL_GPL(venus_helper_vb2_buf_queue);
 
 void venus_helper_buffers_done(struct venus_inst *inst,
-			       enum vb2_buffer_state state)
+			       int type, enum vb2_buffer_state state)
 {
 	struct vb2_v4l2_buffer *buf;
 
-	while ((buf = v4l2_m2m_src_buf_remove(inst->m2m_ctx)))
-		v4l2_m2m_buf_done(buf, state);
-	while ((buf = v4l2_m2m_dst_buf_remove(inst->m2m_ctx)))
-		v4l2_m2m_buf_done(buf, state);
+	if (type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) {
+		while ((buf = v4l2_m2m_src_buf_remove(inst->m2m_ctx)))
+			v4l2_m2m_buf_done(buf, state);
+	}
+
+	if (type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE) {
+		while ((buf = v4l2_m2m_dst_buf_remove(inst->m2m_ctx)))
+			v4l2_m2m_buf_done(buf, state);
+	}
 }
 EXPORT_SYMBOL_GPL(venus_helper_buffers_done);
 
@@ -1011,9 +1035,19 @@ void venus_helper_vb2_stop_streaming(struct vb2_queue *q)
 
 	mutex_lock(&inst->lock);
 
-	if (inst->streamon_out & inst->streamon_cap) {
+	if (!inst->streamon_cap && !inst->streamon_out)
+		goto unlock;
+
+	if (inst->streamon_cap &&
+		(q->type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE)) {
 		ret = hfi_session_stop(inst);
-		ret |= hfi_session_unload_res(inst);
+		inst->streamon_cap = 0;
+	}
+
+	if (inst->streamon_out && !inst->streamon_cap) {
+		inst->streamon_out = 0;
+		hfi_session_stop(inst);
+		ret = hfi_session_unload_res(inst);
 		ret |= session_unregister_bufs(inst);
 		ret |= intbufs_free(inst);
 		ret |= hfi_session_deinit(inst);
@@ -1021,35 +1055,121 @@ void venus_helper_vb2_stop_streaming(struct vb2_queue *q)
 		if (inst->session_error || core->sys_error)
 			ret = -EIO;
 
+#if 0
 		if (ret)
 			hfi_session_abort(inst);
-
+#endif
 		venus_helper_free_dpb_bufs(inst);
-
+		inst->width = 96;
+		inst->height = 96;
 		load_scale_clocks(core);
 		INIT_LIST_HEAD(&inst->registeredbufs);
 	}
+unlock:
 
-	venus_helper_buffers_done(inst, VB2_BUF_STATE_ERROR);
-
-	if (q->type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE)
-		inst->streamon_out = 0;
-	else
-		inst->streamon_cap = 0;
-
+	venus_helper_buffers_done(inst, q->type, VB2_BUF_STATE_ERROR);
 	mutex_unlock(&inst->lock);
 }
 EXPORT_SYMBOL_GPL(venus_helper_vb2_stop_streaming);
+
+int venus_helper_alloc_intbufs(struct venus_inst *inst)
+{
+	int ret = 0;
+	int realloc_needed = false;
+	u32 ptype = HFI_PROPERTY_CONFIG_BUFFER_REQUIREMENTS;
+	union hfi_get_property hprop;
+	unsigned int j;
+	struct intbuf *buf, *n;
+	struct hfi_buffer_desc bd;
+
+	pr_err("%d %s reallocating buffers ", __LINE__, __func__);
+
+	ret = hfi_session_get_property(inst, ptype, &hprop);
+	if (ret)
+		return ret;
+
+	// srinu TBD : we need to loop with standrad array order
+	list_for_each_entry_safe(buf, n, &inst->internalbufs, list) {
+		realloc_needed = false;
+		for (j = 0; j < HFI_BUFFER_TYPE_MAX; j++) {
+			if (hprop.bufreq[j].type != buf->type)
+				continue;
+
+			if (buf->size < hprop.bufreq[j].size) {
+				realloc_needed = true;
+				break;
+			}
+
+			pr_err("%d %s 0x%x enough ",
+				__LINE__, __func__, hprop.bufreq[j].type);
+		}
+	}
+
+	if (realloc_needed) {
+		pr_err("%d %s reallocating buffers ", __LINE__, __func__);
+		ret |= intbufs_free(inst);
+		ret |= intbufs_alloc(inst);
+	} else {
+		list_for_each_entry_safe(buf, n, &inst->internalbufs, list) {
+			memset(&bd, 0, sizeof(bd));
+			bd.buffer_size = buf->size;
+			bd.buffer_type = buf->type;
+			bd.num_buffers = 1;
+			bd.device_addr = buf->da;
+
+			ret = hfi_session_set_buffers(inst, &bd);
+			if (ret)
+				pr_err("set session buffers failed\n");
+		}
+	}
+
+	return ret;
+
+}
+EXPORT_SYMBOL_GPL(venus_helper_alloc_intbufs);
+
+int venus_helper_queue_initial_bufs(struct venus_inst *inst, unsigned int type)
+{
+	struct v4l2_m2m_ctx *m2m_ctx = inst->m2m_ctx;
+	struct v4l2_m2m_buffer *buf, *n;
+	int ret;
+	int count = 0;
+
+	if (type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE)	{
+		v4l2_m2m_for_each_dst_buf_safe(m2m_ctx, buf, n)	{
+			ret = session_process_buf(inst, &buf->vb);
+			count++;
+			if (ret)
+				return_buf_error(inst, &buf->vb);
+		}
+		pr_err("%d %s count %d", __LINE__, __func__, count);
+	}
+	if (type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) {
+		v4l2_m2m_for_each_src_buf_safe(m2m_ctx, buf, n) {
+			ret = session_process_buf(inst, &buf->vb);
+			count++;
+			if (ret)
+				return_buf_error(inst, &buf->vb);
+			}
+		pr_err("%d %s count %d", __LINE__, __func__, count);
+	}
+	return 0;
+}
+EXPORT_SYMBOL(venus_helper_queue_initial_bufs);
 
 int venus_helper_vb2_start_streaming(struct venus_inst *inst)
 {
 	struct venus_core *core = inst->core;
 	int ret;
 
+	/* set max width and height to avoid reallocation of internal buffers */
+	venus_helper_set_input_resolution(inst, MAX_WIDTH, MAX_HEIGHT);
+
 	ret = intbufs_alloc(inst);
 	if (ret)
 		return ret;
 
+	venus_helper_set_input_resolution(inst, inst->width, inst->height);
 	ret = session_register_bufs(inst);
 	if (ret)
 		goto err_bufs_free;
@@ -1064,14 +1184,8 @@ int venus_helper_vb2_start_streaming(struct venus_inst *inst)
 	if (ret)
 		goto err_unload_res;
 
-	ret = venus_helper_queue_dpb_bufs(inst);
-	if (ret)
-		goto err_session_stop;
-
 	return 0;
 
-err_session_stop:
-	hfi_session_stop(inst);
 err_unload_res:
 	hfi_session_unload_res(inst);
 err_unreg_bufs:
@@ -1084,6 +1198,7 @@ EXPORT_SYMBOL_GPL(venus_helper_vb2_start_streaming);
 
 void venus_helper_m2m_device_run(void *priv)
 {
+#if 0
 	struct venus_inst *inst = priv;
 	struct v4l2_m2m_ctx *m2m_ctx = inst->m2m_ctx;
 	struct v4l2_m2m_buffer *buf, *n;
@@ -1104,6 +1219,8 @@ void venus_helper_m2m_device_run(void *priv)
 	}
 
 	mutex_unlock(&inst->lock);
+#endif
+	return;
 }
 EXPORT_SYMBOL_GPL(venus_helper_m2m_device_run);
 
@@ -1194,7 +1311,7 @@ int venus_helper_power_enable(struct venus_core *core, u32 session_type,
 	int ret;
 
 	if (!IS_V3(core) && !IS_V4(core))
-		return 0;
+		return -EINVAL;
 
 	if (IS_V3(core)) {
 		if (session_type == VIDC_SESSION_TYPE_DEC)
