@@ -14,6 +14,60 @@
 #include "ipahal.h"
 #include "ipahal_fltrt.h"
 
+struct ipa_repl_ctx {
+	struct ipa_rx_pkt_wrapper **cache;
+	atomic_t head_idx;
+	atomic_t tail_idx;
+	u32 capacity;
+};
+
+/** struct ipa_sys_context - IPA GPI pipes context
+ * @head_desc_list: header descriptors list
+ * @len: the size of the above list
+ * @spinlock: protects the list and its size
+ * @ep: IPA EP context
+ *
+ * IPA context specific to the GPI pipes a.k.a LAN IN/OUT and WAN
+ */
+struct ipa_sys_context {
+	u32 len;
+	u32 len_pending_xfer;
+	atomic_t curr_polling_state;
+	struct delayed_work switch_to_intr_work;
+	int (*pyld_hdlr)(struct sk_buff *skb, struct ipa_sys_context *sys);
+	struct sk_buff * (*get_skb)(unsigned int len, gfp_t flags);
+	void (*free_skb)(struct sk_buff *skb);
+	void (*free_rx_wrapper)(struct ipa_rx_pkt_wrapper *rk_pkt);
+	u32 rx_buff_sz;
+	u32 rx_pool_sz;
+	struct sk_buff *prev_skb;
+	unsigned int len_rem;
+	unsigned int len_pad;
+	unsigned int len_partial;
+	bool drop_packet;
+
+	bool no_intr;			/* Transmit requests won't interrupt */
+	atomic_t nop_pending;		/* Should a nop be scheduled? */
+	struct hrtimer nop_timer;	/* For no-intr PROD pipes only */
+	struct work_struct nop_work;
+
+	struct work_struct rx_work;
+	struct delayed_work replenish_rx_work;
+	struct work_struct repl_work;
+	void (*repl_hdlr)(struct ipa_sys_context *sys);
+	struct ipa_repl_ctx repl;
+
+	/* ordering is important - mutable fields go above */
+	struct ipa_ep_context *ep;
+	struct list_head head_desc_list; /* contains len entries */
+	struct list_head rcycl_list;
+	spinlock_t spinlock;		/* protects head_desc and rcycl lists */
+	struct workqueue_struct *wq;
+	struct workqueue_struct *repl_wq;
+	struct ipa_status_stats *status_stat;
+	/* ordering is important - other immutable fields go below */
+};
+
 #define IPA_QMAP_HEADER_LENGTH 4
 
 #define IPA_WAN_AGGR_PKT_CNT 5
