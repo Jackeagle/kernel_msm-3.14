@@ -36,14 +36,15 @@ struct ipa_sys_context {
 			u32 len_pending_xfer;
 			atomic_t curr_polling_state;
 			struct delayed_work switch_to_intr_work;
+			int (*pyld_hdlr)(struct sk_buff *,
+					 struct ipa_sys_context *);
+			struct sk_buff *(*get_skb)(unsigned int, gfp_t);
+			void (*free_skb)(struct sk_buff *);
+			void (*free_wrapper)(struct ipa_rx_pkt_wrapper *);
 		} rx;
 		struct {	/* Producer pipes only */
 		} tx;
 	};
-	int (*pyld_hdlr)(struct sk_buff *skb, struct ipa_sys_context *sys);
-	struct sk_buff * (*get_skb)(unsigned int len, gfp_t flags);
-	void (*free_skb)(struct sk_buff *skb);
-	void (*free_rx_wrapper)(struct ipa_rx_pkt_wrapper *rk_pkt);
 	u32 rx_buff_sz;
 	u32 rx_pool_sz;
 	struct sk_buff *prev_skb;
@@ -1143,7 +1144,7 @@ begin:
 		INIT_LIST_HEAD(&rx_pkt->link);
 		rx_pkt->sys = sys;
 
-		rx_pkt->data.skb = sys->get_skb(sys->rx_buff_sz, flag);
+		rx_pkt->data.skb = sys->rx.get_skb(sys->rx_buff_sz, flag);
 		if (!rx_pkt->data.skb) {
 			pr_err_ratelimited("%s fail alloc skb sys=%p\n",
 					   __func__, sys);
@@ -1171,7 +1172,7 @@ begin:
 	return;
 
 fail_dma_mapping:
-	sys->free_skb(rx_pkt->data.skb);
+	sys->rx.free_skb(rx_pkt->data.skb);
 fail_skb_alloc:
 	kmem_cache_free(ipa_ctx->rx_pkt_wrapper_cache, rx_pkt);
 fail_kmem_cache_alloc:
@@ -1243,7 +1244,7 @@ static void ipa_replenish_rx_cache(struct ipa_sys_context *sys)
 		INIT_LIST_HEAD(&rx_pkt->link);
 		rx_pkt->sys = sys;
 
-		rx_pkt->data.skb = sys->get_skb(sys->rx_buff_sz, flag);
+		rx_pkt->data.skb = sys->rx.get_skb(sys->rx_buff_sz, flag);
 		if (!rx_pkt->data.skb) {
 			ipa_err("failed to alloc skb\n");
 			goto fail_skb_alloc;
@@ -1274,7 +1275,7 @@ fail_provide_rx_buffer:
 	dma_unmap_single(dev, rx_pkt->data.dma_addr, sys->rx_buff_sz,
 			 DMA_FROM_DEVICE);
 fail_dma_mapping:
-	sys->free_skb(rx_pkt->data.skb);
+	sys->rx.free_skb(rx_pkt->data.skb);
 fail_skb_alloc:
 	kmem_cache_free(ipa_ctx->rx_pkt_wrapper_cache, rx_pkt);
 fail_kmem_cache_alloc:
@@ -1304,7 +1305,8 @@ static void ipa_replenish_rx_cache_recycle(struct ipa_sys_context *sys)
 			INIT_LIST_HEAD(&rx_pkt->link);
 			rx_pkt->sys = sys;
 
-			rx_pkt->data.skb = sys->get_skb(sys->rx_buff_sz, flag);
+			rx_pkt->data.skb = sys->rx.get_skb(sys->rx_buff_sz,
+							   flag);
 			if (!rx_pkt->data.skb) {
 				ipa_err("failed to alloc skb\n");
 				kmem_cache_free(ipa_ctx->rx_pkt_wrapper_cache,
@@ -1430,7 +1432,7 @@ static void ipa_cleanup_rx(struct ipa_sys_context *sys)
 		list_del(&rx_pkt->link);
 		dma_unmap_single(dev, rx_pkt->data.dma_addr, sys->rx_buff_sz,
 				 DMA_FROM_DEVICE);
-		sys->free_skb(rx_pkt->data.skb);
+		sys->rx.free_skb(rx_pkt->data.skb);
 		kmem_cache_free(ipa_ctx->rx_pkt_wrapper_cache, rx_pkt);
 	}
 
@@ -1438,7 +1440,7 @@ static void ipa_cleanup_rx(struct ipa_sys_context *sys)
 		list_del(&rx_pkt->link);
 		dma_unmap_single(dev, rx_pkt->data.dma_addr, sys->rx_buff_sz,
 				 DMA_FROM_DEVICE);
-		sys->free_skb(rx_pkt->data.skb);
+		sys->rx.free_skb(rx_pkt->data.skb);
 		kmem_cache_free(ipa_ctx->rx_pkt_wrapper_cache, rx_pkt);
 	}
 
@@ -1450,7 +1452,7 @@ static void ipa_cleanup_rx(struct ipa_sys_context *sys)
 				dma_unmap_single(dev, rx_pkt->data.dma_addr,
 						 sys->rx_buff_sz,
 						 DMA_FROM_DEVICE);
-			sys->free_skb(rx_pkt->data.skb);
+			sys->rx.free_skb(rx_pkt->data.skb);
 			kmem_cache_free(ipa_ctx->rx_pkt_wrapper_cache, rx_pkt);
 			head = (head + 1) % sys->repl.capacity;
 		}
@@ -1501,7 +1503,7 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 		buf = skb_push(skb, sys->len_partial);
 		memcpy(buf, sys->prev_skb->data, sys->len_partial);
 		sys->len_partial = 0;
-		sys->free_skb(sys->prev_skb);
+		sys->rx.free_skb(sys->prev_skb);
 		sys->prev_skb = NULL;
 		goto begin;
 	}
@@ -1946,7 +1948,7 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 		}
 	};
 bail:
-	sys->free_skb(skb);
+	sys->rx.free_skb(skb);
 	return rc;
 }
 
@@ -2036,8 +2038,8 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u16 size)
 	rx_skb->len = rx_pkt_expected->len;
 	*(unsigned int *)rx_skb->cb = rx_skb->len;
 	rx_skb->truesize = rx_pkt_expected->len + sizeof(struct sk_buff);
-	sys->pyld_hdlr(rx_skb, sys);
-	sys->free_rx_wrapper(rx_pkt_expected);
+	sys->rx.pyld_hdlr(rx_skb, sys);
+	sys->rx.free_wrapper(rx_pkt_expected);
 	sys->repl_hdlr(sys);
 }
 
@@ -2081,17 +2083,17 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 	atomic_set(&sys->rx.curr_polling_state, 0);
 	sys->rx_buff_sz = IPA_GENERIC_RX_BUFF_SZ(IPA_GENERIC_RX_BUFF_BASE_SZ);
 	sys->rx_pool_sz = IPA_GENERIC_RX_POOL_SZ;
-	sys->get_skb = ipa_get_skb_ipa_rx;
-	sys->free_skb = ipa_free_skb_rx;
+	sys->rx.get_skb = ipa_get_skb_ipa_rx;
+	sys->rx.free_skb = ipa_free_skb_rx;
 
 	ep_cfg_aggr = &in->ipa_ep_cfg.aggr;
 	ep_cfg_aggr->aggr_en = IPA_ENABLE_AGGR;
 	ep_cfg_aggr->aggr = IPA_GENERIC;
 	ep_cfg_aggr->aggr_time_limit = IPA_GENERIC_AGGR_TIME_LIMIT;
 	if (in->client == IPA_CLIENT_APPS_LAN_CONS) {
-		sys->pyld_hdlr = ipa_lan_rx_pyld_hdlr;
+		sys->rx.pyld_hdlr = ipa_lan_rx_pyld_hdlr;
 		sys->repl_hdlr = ipa_replenish_rx_cache_recycle;
-		sys->free_rx_wrapper = ipa_recycle_rx_wrapper;
+		sys->rx.free_wrapper = ipa_recycle_rx_wrapper;
 		ep_cfg_aggr->aggr_byte_limit = IPA_GENERIC_AGGR_BYTE_LIMIT;
 		ep_cfg_aggr->aggr_pkt_limit = IPA_GENERIC_AGGR_PKT_LIMIT;
 
@@ -2099,8 +2101,8 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 	}
 
 	/* in->client == IPA_CLIENT_APPS_WAN_CONS */
-	sys->pyld_hdlr = ipa_wan_rx_pyld_hdlr;
-	sys->free_rx_wrapper = ipa_free_rx_wrapper;
+	sys->rx.pyld_hdlr = ipa_wan_rx_pyld_hdlr;
+	sys->rx.free_wrapper = ipa_free_rx_wrapper;
 	if (nr_cpu_ids > 1)
 		sys->repl_hdlr = ipa_fast_replenish_rx_cache;
 	else
