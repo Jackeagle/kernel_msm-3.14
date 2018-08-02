@@ -50,13 +50,12 @@ struct ipa_sys_context {
 			bool drop_packet;		/* APPS_LAN only */
 		} rx;
 		struct {	/* Producer pipes only */
+			bool no_intr;
+			atomic_t nop_pending;
+			struct hrtimer nop_timer;
+			struct work_struct nop_work;
 		} tx;
 	};
-
-	bool no_intr;			/* Transmit requests won't interrupt */
-	atomic_t nop_pending;		/* Should a nop be scheduled? */
-	struct hrtimer nop_timer;	/* For no-intr PROD pipes only */
-	struct work_struct nop_work;
 
 	struct work_struct rx_work;
 	struct delayed_work replenish_rx_work;
@@ -347,7 +346,7 @@ static void ipa_send_nop_work(struct work_struct *nop_work)
 {
 	struct ipa_sys_context *sys;
 
-	sys = container_of(nop_work, struct ipa_sys_context, nop_work);
+	sys = container_of(nop_work, struct ipa_sys_context, tx.nop_work);
 
 	/* If sending a no-op request fails, schedule another try */
 	if (!ipa_send_nop(sys))
@@ -362,9 +361,9 @@ static enum hrtimer_restart ipa_nop_timer_expiry(struct hrtimer *timer)
 {
 	struct ipa_sys_context *sys;
 
-	sys = container_of(timer, struct ipa_sys_context, nop_timer);
-	atomic_set(&sys->nop_pending, 0);
-	queue_work(sys->wq, &sys->nop_work);
+	sys = container_of(timer, struct ipa_sys_context, tx.nop_timer);
+	atomic_set(&sys->tx.nop_pending, 0);
+	queue_work(sys->wq, &sys->tx.nop_work);
 
 	return HRTIMER_NORESTART;
 }
@@ -373,11 +372,11 @@ static void ipa_nop_timer_schedule(struct ipa_sys_context *sys)
 {
 	ktime_t time;
 
-	if (atomic_xchg(&sys->nop_pending, 1))
+	if (atomic_xchg(&sys->tx.nop_pending, 1))
 		return;
 
 	time = ktime_set(0, IPA_TX_NOP_DELAY_NS);
-	hrtimer_start(&sys->nop_timer, time, HRTIMER_MODE_REL);
+	hrtimer_start(&sys->tx.nop_timer, time, HRTIMER_MODE_REL);
 }
 
 /* For some producer pipes we don't interrupt on completions.
@@ -388,11 +387,11 @@ static void ipa_nop_timer_schedule(struct ipa_sys_context *sys)
  */
 static void ipa_no_intr_init(struct ipa_sys_context *sys)
 {
-	INIT_WORK(&sys->nop_work, ipa_send_nop_work);
-	atomic_set(&sys->nop_pending, 0);
-	hrtimer_init(&sys->nop_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
-	sys->nop_timer.function = ipa_nop_timer_expiry;
-	sys->no_intr = true;
+	INIT_WORK(&sys->tx.nop_work, ipa_send_nop_work);
+	atomic_set(&sys->tx.nop_pending, 0);
+	hrtimer_init(&sys->tx.nop_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+	sys->tx.nop_timer.function = ipa_nop_timer_expiry;
+	sys->tx.no_intr = true;
 }
 
 /** ipa_send() - Send multiple descriptors in one HW transaction
@@ -488,7 +487,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 		}
 
 		if (i == (num_desc - 1)) {
-			if (!sys->no_intr) {
+			if (!sys->tx.no_intr) {
 				xfer_elem[i].flags |= GSI_XFER_FLAG_EOT;
 				xfer_elem[i].flags |= GSI_XFER_FLAG_BEI;
 			}
@@ -507,7 +506,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 
 	spin_unlock_bh(&sys->spinlock);
 
-	if (sys->no_intr)
+	if (sys->tx.no_intr)
 		ipa_nop_timer_schedule(sys);
 
 	return 0;
@@ -1498,35 +1497,35 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 		return rc;
 	}
 
-	if (sys->len_partial) {
-		ipa_debug_low("len_partial %d\n", sys->len_partial);
-		buf = skb_push(skb, sys->len_partial);
-		memcpy(buf, sys->prev_skb->data, sys->len_partial);
-		sys->len_partial = 0;
-		sys->rx.free_skb(sys->prev_skb);
-		sys->prev_skb = NULL;
+	if (sys->rx.len_partial) {
+		ipa_debug_low("len_partial %d\n", sys->rx.len_partial);
+		buf = skb_push(skb, sys->rx.len_partial);
+		memcpy(buf, sys->rx.prev_skb->data, sys->rx.len_partial);
+		sys->rx.len_partial = 0;
+		sys->rx.free_skb(sys->rx.prev_skb);
+		sys->rx.prev_skb = NULL;
 		goto begin;
 	}
 
 	/* this pipe has TX comp (status only) + mux-ed LAN RX data
 	 * (status+data)
 	 */
-	if (sys->len_rem) {
-		ipa_debug_low("rem %d skb %d pad %d\n", sys->len_rem, skb->len,
-			      sys->len_pad);
-		if (sys->len_rem <= skb->len) {
-			if (sys->prev_skb) {
-				skb2 = skb_copy_expand(sys->prev_skb, 0,
-						       sys->len_rem,
+	if (sys->rx.len_rem) {
+		ipa_debug_low("rem %d skb %d pad %d\n", sys->rx.len_rem, skb->len,
+			      sys->rx.len_pad);
+		if (sys->rx.len_rem <= skb->len) {
+			if (sys->rx.prev_skb) {
+				skb2 = skb_copy_expand(sys->rx.prev_skb, 0,
+						       sys->rx.len_rem,
 						       GFP_KERNEL);
 				if (likely(skb2)) {
-					memcpy(skb_put(skb2, sys->len_rem),
-					       skb->data, sys->len_rem);
+					memcpy(skb_put(skb2, sys->rx.len_rem),
+					       skb->data, sys->rx.len_rem);
 					skb_trim(skb2,
-						 skb2->len - sys->len_pad);
+						 skb2->len - sys->rx.len_pad);
 					skb2->truesize = skb2->len +
 						sizeof(struct sk_buff);
-					if (sys->drop_packet)
+					if (sys->rx.drop_packet)
 						dev_kfree_skb_any(skb2);
 					else
 						sys->ep->client_notify(
@@ -1536,15 +1535,15 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 				} else {
 					ipa_err("copy expand failed\n");
 				}
-				dev_kfree_skb_any(sys->prev_skb);
+				dev_kfree_skb_any(sys->rx.prev_skb);
 			}
-			skb_pull(skb, sys->len_rem);
-			sys->prev_skb = NULL;
-			sys->len_rem = 0;
-			sys->len_pad = 0;
+			skb_pull(skb, sys->rx.len_rem);
+			sys->rx.prev_skb = NULL;
+			sys->rx.len_rem = 0;
+			sys->rx.len_pad = 0;
 		} else {
-			if (sys->prev_skb) {
-				skb2 = skb_copy_expand(sys->prev_skb, 0,
+			if (sys->rx.prev_skb) {
+				skb2 = skb_copy_expand(sys->rx.prev_skb, 0,
 						       skb->len, GFP_KERNEL);
 				if (likely(skb2)) {
 					memcpy(skb_put(skb2, skb->len),
@@ -1552,10 +1551,10 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 				} else {
 					ipa_err("copy expand failed\n");
 				}
-				dev_kfree_skb_any(sys->prev_skb);
-				sys->prev_skb = skb2;
+				dev_kfree_skb_any(sys->rx.prev_skb);
+				sys->rx.prev_skb = skb2;
 			}
-			sys->len_rem -= skb->len;
+			sys->rx.len_rem -= skb->len;
 			return rc;
 		}
 	}
@@ -1563,14 +1562,14 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 begin:
 	pkt_status_sz = ipahal_pkt_status_get_size();
 	while (skb->len) {
-		sys->drop_packet = false;
+		sys->rx.drop_packet = false;
 		ipa_debug_low("LEN_REM %d\n", skb->len);
 
 		if (skb->len < pkt_status_sz) {
-			WARN_ON(sys->prev_skb);
+			WARN_ON(sys->rx.prev_skb);
 			ipa_debug_low("status straddles buffer\n");
-			sys->prev_skb = skb_copy(skb, GFP_KERNEL);
-			sys->len_partial = skb->len;
+			sys->rx.prev_skb = skb_copy(skb, GFP_KERNEL);
+			sys->rx.len_partial = skb->len;
 			return rc;
 		}
 
@@ -1645,14 +1644,14 @@ begin:
 			if (status.exception ==
 				IPAHAL_PKT_STATUS_EXCEPTION_NONE &&
 				ipahal_is_rule_miss_id(status.rt_rule_id))
-				sys->drop_packet = true;
+				sys->rx.drop_packet = true;
 			if (skb->len == pkt_status_sz &&
 			    status.exception ==
 					IPAHAL_PKT_STATUS_EXCEPTION_NONE) {
-				WARN_ON(sys->prev_skb);
+				WARN_ON(sys->rx.prev_skb);
 				ipa_debug_low("Ins header in next buffer\n");
-				sys->prev_skb = skb_copy(skb, GFP_KERNEL);
-				sys->len_partial = skb->len;
+				sys->rx.prev_skb = skb_copy(skb, GFP_KERNEL);
+				sys->rx.len_partial = skb->len;
 				return rc;
 			}
 
@@ -1668,7 +1667,7 @@ begin:
 					IPAHAL_PKT_STATUS_EXCEPTION_DEAGGR) {
 				ipa_debug_low(
 					"Dropping packet on DeAggr Exception\n");
-				sys->drop_packet = true;
+				sys->rx.drop_packet = true;
 			}
 
 			len2 = min(status.pkt_len + pkt_status_sz, skb->len);
@@ -1677,17 +1676,17 @@ begin:
 				if (skb->len < len + pkt_status_sz) {
 					ipa_debug_low("SPL skb len %d len %d\n",
 						      skb->len, len);
-					sys->prev_skb = skb2;
-					sys->len_rem = len - skb->len +
+					sys->rx.prev_skb = skb2;
+					sys->rx.len_rem = len - skb->len +
 						pkt_status_sz;
-					sys->len_pad = pad_len_byte;
+					sys->rx.len_pad = pad_len_byte;
 					skb_pull(skb, skb->len);
 				} else {
 					skb_trim(skb2, status.pkt_len +
 							pkt_status_sz);
 					ipa_debug_low("rx avail for %d\n",
 						      status.endp_dest_idx);
-					if (sys->drop_packet) {
+					if (sys->rx.drop_packet) {
 						dev_kfree_skb_any(skb2);
 					} else if (status.pkt_len >
 						   IPA_GENERIC_AGGR_BYTE_LIMIT *
@@ -1717,10 +1716,10 @@ begin:
 			} else {
 				ipa_err("fail to alloc skb\n");
 				if (skb->len < len) {
-					sys->prev_skb = NULL;
-					sys->len_rem = len - skb->len +
+					sys->rx.prev_skb = NULL;
+					sys->rx.len_rem = len - skb->len +
 						pkt_status_sz;
-					sys->len_pad = pad_len_byte;
+					sys->rx.len_pad = pad_len_byte;
 					skb_pull(skb, skb->len);
 				} else {
 					skb_pull(skb, len + pkt_status_sz);
@@ -1763,11 +1762,11 @@ ipa_wan_rx_handle_splt_pyld(struct sk_buff *skb, struct ipa_sys_context *sys)
 {
 	struct sk_buff *skb2;
 
-	ipa_debug_low("rem %d skb %d\n", sys->len_rem, skb->len);
-	if (sys->len_rem <= skb->len) {
-		if (sys->prev_skb) {
-			skb2 = ipa_join_prev_skb(sys->prev_skb, skb,
-						 sys->len_rem);
+	ipa_debug_low("rem %d skb %d\n", sys->rx.len_rem, skb->len);
+	if (sys->rx.len_rem <= skb->len) {
+		if (sys->rx.prev_skb) {
+			skb2 = ipa_join_prev_skb(sys->rx.prev_skb, skb,
+						 sys->rx.len_rem);
 			if (likely(skb2)) {
 				ipa_debug_low(
 					"removing Status element from skb and sending to WAN client");
@@ -1779,15 +1778,15 @@ ipa_wan_rx_handle_splt_pyld(struct sk_buff *skb, struct ipa_sys_context *sys)
 						       (unsigned long)skb2);
 			}
 		}
-		skb_pull(skb, sys->len_rem);
-		sys->prev_skb = NULL;
-		sys->len_rem = 0;
+		skb_pull(skb, sys->rx.len_rem);
+		sys->rx.prev_skb = NULL;
+		sys->rx.len_rem = 0;
 	} else {
-		if (sys->prev_skb) {
-			skb2 = ipa_join_prev_skb(sys->prev_skb, skb, skb->len);
-			sys->prev_skb = skb2;
+		if (sys->rx.prev_skb) {
+			skb2 = ipa_join_prev_skb(sys->rx.prev_skb, skb, skb->len);
+			sys->rx.prev_skb = skb2;
 		}
-		sys->len_rem -= skb->len;
+		sys->rx.len_rem -= skb->len;
 		skb_pull(skb, skb->len);
 	}
 }
@@ -1824,9 +1823,9 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 	ipa_assert(sys->repl_hdlr != ipa_replenish_rx_cache_recycle);
 
 	/* payload splits across 2 buff or more,
-	 * take the start of the payload from prev_skb
+	 * take the start of the payload from rx.prev_skb
 	 */
-	if (sys->len_rem)
+	if (sys->rx.len_rem)
 		ipa_wan_rx_handle_splt_pyld(skb, sys);
 
 	pkt_status_sz = ipahal_pkt_status_get_size();
@@ -1917,8 +1916,8 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 			if (skb->len < frame_len) {
 				ipa_debug_low("SPL skb len %d len %d\n",
 					      skb->len, frame_len);
-				sys->prev_skb = skb2;
-				sys->len_rem = frame_len - skb->len;
+				sys->rx.prev_skb = skb2;
+				sys->rx.len_rem = frame_len - skb->len;
 				skb_pull(skb, skb->len);
 			} else {
 				skb_trim(skb2, frame_len);
@@ -1939,8 +1938,8 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 		} else {
 			ipa_err("fail to clone\n");
 			if (skb->len < frame_len) {
-				sys->prev_skb = NULL;
-				sys->len_rem = frame_len - skb->len;
+				sys->rx.prev_skb = NULL;
+				sys->rx.len_rem = frame_len - skb->len;
 				skb_pull(skb, skb->len);
 			} else {
 				skb_pull(skb, frame_len);
@@ -2182,7 +2181,7 @@ ipa_gsi_ring_count(enum ipa_client_type client, u32 fifo_count)
 static long evt_ring_hdl_get(struct ipa_ep_context *ep, u32 fifo_count)
 {
 	u32 ring_count;
-	u16 modt = ep->sys->no_intr ? 0 : IPA_GSI_EVT_RING_INT_MODT;
+	u16 modt = ep->sys->tx.no_intr ? 0 : IPA_GSI_EVT_RING_INT_MODT;
 
 	ipa_debug("client=%d moderation threshold cycles=%u cnt=1\n",
 		  ep->client, modt);
