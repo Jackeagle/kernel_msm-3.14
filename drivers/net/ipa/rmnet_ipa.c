@@ -177,7 +177,6 @@ static int ipa_wwan_stop(struct net_device *dev)
 static int ipa_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 {
 	struct ipa_wwan_private *wwan_ptr = netdev_priv(dev);
-	bool data_packet;
 	int outstanding;
 	int ret;
 
@@ -187,10 +186,11 @@ static int ipa_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 		return NETDEV_TX_OK;
 	}
 
-	/* Let control packets through even if queue is stopped */
-	data_packet = !RMNET_MAP_GET_CD_BIT(skb);
+	/* Control packets are sent even if queue is stopped.  We
+	 * always honor the data and control high-water marks.
+	 */
 	outstanding = atomic_read(&wwan_ptr->outstanding_pkts);
-	if (data_packet) {
+	if (!RMNET_MAP_GET_CD_BIT(skb)) {	/* Data packet? */
 		if (netif_queue_stopped(dev))
 			return NETDEV_TX_BUSY;
 		if (outstanding >= wwan_ptr->outstanding_high)
