@@ -177,7 +177,7 @@ static int ipa_wwan_stop(struct net_device *dev)
 static int ipa_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 {
 	int ret = 0;
-	bool qmap_check;
+	bool data_packet;
 	struct ipa_wwan_private *wwan_ptr = netdev_priv(dev);
 
 	if (skb->protocol != htons(ETH_P_MAP)) {
@@ -188,9 +188,10 @@ static int ipa_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 		return NETDEV_TX_OK;
 	}
 
-	qmap_check = RMNET_MAP_GET_CD_BIT(skb);
+	/* Let control packets through even if queue is stopped */
+	data_packet = !RMNET_MAP_GET_CD_BIT(skb);
 	if (netif_queue_stopped(dev)) {
-		if (!qmap_check) {
+		if (data_packet) {
 			ipa_err("%s: fatal: %s stopped\n", __func__, dev->name);
 			return NETDEV_TX_BUSY;
 		}
@@ -207,12 +208,11 @@ static int ipa_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 	/* checking High WM hit */
 	if (atomic_read(&wwan_ptr->outstanding_pkts) >=
 					wwan_ptr->outstanding_high) {
-		if (!qmap_check) {
+		if (data_packet) {
 			ipa_debug_low("pending(%d)/(%d)- stop(%d)\n",
 				      atomic_read(&wwan_ptr->outstanding_pkts),
 				      wwan_ptr->outstanding_high,
 				      netif_queue_stopped(dev));
-			ipa_debug_low("qmap_chk(%d)\n", qmap_check);
 			netif_stop_queue(dev);
 			return NETDEV_TX_BUSY;
 		}
