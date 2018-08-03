@@ -1715,7 +1715,6 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
 	u16 free;
 	u16 idx;
-	u64 wp_rollback;
 	u32 i;
 	unsigned long flags;
 	int ret;
@@ -1731,7 +1730,6 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 		goto out_unlock;
 	}
 
-	wp_rollback = chan->ring.wp_local;
 	for (i = 0; i < num_xfers; i++) {
 		struct gsi_tre *tre_ptr;
 
@@ -1747,9 +1745,7 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 		} else if (xfer[i].type == GSI_XFER_ELEM_NOP) {
 			tre_ptr->re_type = GSI_RE_NOP;
 		} else {
-			ipa_err("chan_id %lu bad RE type %u\n", chan_id,
-				xfer[i].type);
-			break;
+			ipa_bug_on("invalid xfer type");
 		}
 		tre_ptr->bei = (xfer[i].flags & GSI_XFER_FLAG_BEI) ? 1 : 0;
 		tre_ptr->ieot = (xfer[i].flags & GSI_XFER_FLAG_EOT) ? 1 : 0;
@@ -1759,13 +1755,6 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 		idx = ring_wp_local_index(&chan->ring);
 		chan->user_data[idx] = xfer[i].xfer_user_data;
 		ring_wp_local_inc(&chan->ring);
-	}
-
-	if (i != num_xfers) {
-		/* reject all the xfers */
-		chan->ring.wp_local = wp_rollback;
-		ret = -EINVAL;
-		goto out_unlock;
 	}
 
 	/* ensure TRE is set before ringing doorbell */
