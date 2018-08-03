@@ -232,11 +232,6 @@ send:
 	return NETDEV_TX_OK;
 }
 
-static void ipa_wwan_tx_timeout(struct net_device *dev)
-{
-	ipa_err("%s: %s stall in UL\n", __func__, dev->name);
-}
-
 /** apps_ipa_tx_complete_notify() - Rx notify
  *
  * @priv: driver context
@@ -702,7 +697,6 @@ static const struct net_device_ops ipa_wwan_ops_ip = {
 	.ndo_open	= ipa_wwan_open,
 	.ndo_stop	= ipa_wwan_stop,
 	.ndo_start_xmit	= ipa_wwan_xmit,
-	.ndo_tx_timeout	= ipa_wwan_tx_timeout,
 	.ndo_do_ioctl	= ipa_wwan_ioctl,
 };
 
