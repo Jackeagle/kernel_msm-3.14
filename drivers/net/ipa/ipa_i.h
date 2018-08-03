@@ -365,7 +365,6 @@ struct ipa_desc {
 	void (*callback)(void *user1, int user2);
 	void *user1;
 	int user2;
-	struct completion xfer_done;
 };
 
 /* Helper function to fill in some IPA descriptor fields for an
