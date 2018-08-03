@@ -190,20 +190,15 @@ static int ipa_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 	/* Let control packets through even if queue is stopped */
 	data_packet = !RMNET_MAP_GET_CD_BIT(skb);
 	outstanding = atomic_read(&wwan_ptr->outstanding_pkts);
-	if (netif_queue_stopped(dev)) {
-		if (data_packet)
+	if (data_packet) {
+		if (netif_queue_stopped(dev))
 			return NETDEV_TX_BUSY;
-		if (outstanding >= wwan_ptr->outstanding_high_ctl)
+		if (outstanding >= wwan_ptr->outstanding_high)
 			return NETDEV_TX_BUSY;
-		goto send;
-	}
-
-	/* checking High WM hit */
-	if (data_packet && outstanding >= wwan_ptr->outstanding_high) {
-		netif_stop_queue(dev);
+	} else if (outstanding >= wwan_ptr->outstanding_high_ctl) {
 		return NETDEV_TX_BUSY;
 	}
-send:
+
 	/* both data packets and commands will be routed to
 	 * IPA_CLIENT_Q6_WAN_CONS based on status configuration.
 	 */
