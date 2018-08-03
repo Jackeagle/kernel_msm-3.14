@@ -1713,7 +1713,6 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 		   struct gsi_xfer_elem *xfer, bool ring_db)
 {
 	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
-	u16 free;
 	u16 idx;
 	u32 i;
 	unsigned long flags;
@@ -1721,11 +1720,7 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 
 	spin_lock_irqsave(&chan->evtr->ring.slock, flags);
 
-	free = __gsi_query_channel_free_re(chan);
-
-	if (num_xfers > free) {
-		ipa_err("chan_id %lu num_xfers %u free %u\n", chan_id,
-			num_xfers, free);
+	if (num_xfers > __gsi_query_channel_free_re(chan)) {
 		ret = -ENOSPC;
 		goto out_unlock;
 	}
@@ -1738,19 +1733,19 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 
 		tre_ptr->buffer_ptr = xfer[i].addr;
 		tre_ptr->buf_len = xfer[i].len;
-		if (xfer[i].type == GSI_XFER_ELEM_DATA) {
+		tre_ptr->bei = xfer[i].flags & GSI_XFER_FLAG_BEI ? 1 : 0;
+		tre_ptr->ieot = xfer[i].flags & GSI_XFER_FLAG_EOT ? 1 : 0;
+		tre_ptr->ieob = xfer[i].flags & GSI_XFER_FLAG_EOB ? 1 : 0;
+		tre_ptr->chain = xfer[i].flags & GSI_XFER_FLAG_CHAIN ? 1 : 0;
+
+		if (xfer[i].type == GSI_XFER_ELEM_DATA)
 			tre_ptr->re_type = GSI_RE_XFER;
-		} else if (xfer[i].type == GSI_XFER_ELEM_IMME_CMD) {
+		else if (xfer[i].type == GSI_XFER_ELEM_IMME_CMD)
 			tre_ptr->re_type = GSI_RE_IMMD_CMD;
-		} else if (xfer[i].type == GSI_XFER_ELEM_NOP) {
+		else if (xfer[i].type == GSI_XFER_ELEM_NOP)
 			tre_ptr->re_type = GSI_RE_NOP;
-		} else {
+		else
 			ipa_bug_on("invalid xfer type");
-		}
-		tre_ptr->bei = (xfer[i].flags & GSI_XFER_FLAG_BEI) ? 1 : 0;
-		tre_ptr->ieot = (xfer[i].flags & GSI_XFER_FLAG_EOT) ? 1 : 0;
-		tre_ptr->ieob = (xfer[i].flags & GSI_XFER_FLAG_EOB) ? 1 : 0;
-		tre_ptr->chain = (xfer[i].flags & GSI_XFER_FLAG_CHAIN) ? 1 : 0;
 
 		idx = ring_wp_local_index(&chan->ring);
 		chan->user_data[idx] = xfer[i].xfer_user_data;
