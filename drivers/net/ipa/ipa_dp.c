@@ -602,16 +602,13 @@ failure:
 	return result;
 }
 
-/** ipa_transport_irq_cmd_ack_free - callback function which will be
+/** ipa_send_cmd_timeout_complete - callback function which will be
  * called by the transport driver after an immediate command is complete.
  * This function will also free the completion object once it is done.
  * @tag_comp: pointer to the completion object
  * @ignored: parameter not used
- *
- * Complete the immediate commands completion object, this will release the
- * thread which waits on this completion object (ipa_send_cmd())
  */
-static void ipa_transport_irq_cmd_ack_free(void *tag_comp, int ignored)
+static void ipa_send_cmd_timeout_complete(void *tag_comp, int ignored)
 {
 	struct ipa_tag_completion *comp = tag_comp;
 
@@ -647,7 +644,7 @@ int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 	init_completion(&comp->comp);
 
 	/* Fill in the callback info (the sole descriptor is the last) */
-	desc->callback = ipa_transport_irq_cmd_ack_free;
+	desc->callback = ipa_send_cmd_timeout_complete;
 	desc->user1 = comp;
 
 	ep = ipa_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
