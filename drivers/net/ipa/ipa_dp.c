@@ -977,7 +977,7 @@ void ipa_teardown_sys_pipe(u32 clnt_hdl)
 	ipa_debug("client (ep: %d) disconnected\n", clnt_hdl);
 }
 
-/** ipa_tx_comp_usr_notify_release() - Callback function which will call the
+/** ipa_tx_dp_complete() - Callback function which will call the
  * user supplied callback function to release the skb, or release it on
  * its own if no callback function was supplied.
  * @user1
@@ -985,7 +985,7 @@ void ipa_teardown_sys_pipe(u32 clnt_hdl)
  *
  * This notified callback is for the destination client.
  */
-static void ipa_tx_comp_usr_notify_release(void *user1, int user2)
+static void ipa_tx_dp_complete(void *user1, int user2)
 {
 	struct sk_buff *skb = (struct sk_buff *)user1;
 	int ep_idx = user2;
@@ -1065,7 +1065,7 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	}
 
 	/* Have the skb be freed after the last descriptor completes. */
-	desc[data_idx].callback = ipa_tx_comp_usr_notify_release;
+	desc[data_idx].callback = ipa_tx_dp_complete;
 	desc[data_idx].user1 = skb;
 	desc[data_idx].user2 = src_ep_idx;
 
