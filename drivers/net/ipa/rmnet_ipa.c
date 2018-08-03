@@ -163,18 +163,6 @@ static int ipa_wwan_stop(struct net_device *dev)
 	return 0;
 }
 
-static int ipa_wwan_change_mtu(struct net_device *dev, int new_mtu)
-{
-	if (new_mtu > WWAN_DATA_LEN)
-		return -EINVAL;
-
-	ipa_debug("[%s] MTU change: old=%d new=%d\n", dev->name, dev->mtu,
-		  new_mtu);
-	dev->mtu = new_mtu;
-
-	return 0;
-}
-
 /** ipa_wwan_xmit() - Transmits an skb.
  *
  * @skb: skb to be transmitted
@@ -716,7 +704,6 @@ static const struct net_device_ops ipa_wwan_ops_ip = {
 	.ndo_start_xmit	= ipa_wwan_xmit,
 	.ndo_tx_timeout	= ipa_wwan_tx_timeout,
 	.ndo_do_ioctl	= ipa_wwan_ioctl,
-	.ndo_change_mtu	= ipa_wwan_change_mtu,
 };
 
 /** wwan_setup() - Setups the wwan network driver.
@@ -733,7 +720,8 @@ static void ipa_wwan_setup(struct net_device *dev)
 	dev->header_ops = NULL;	 /* No header (override ether_setup() value) */
 	dev->type = ARPHRD_RAWIP;
 	dev->hard_header_len = 0;
-	dev->mtu = WWAN_DATA_LEN;
+	dev->max_mtu = WWAN_DATA_LEN;
+	dev->mtu = dev->max_mtu;
 	dev->addr_len = 0;
 	dev->flags &= ~(IFF_BROADCAST | IFF_MULTICAST);
 	dev->needed_headroom = HEADROOM_FOR_QMAP;
