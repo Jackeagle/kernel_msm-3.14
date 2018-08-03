@@ -693,8 +693,9 @@ int ipa_send_cmd(struct ipa_desc *desc)
  */
 int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 {
-	struct ipa_ep_context *ep;
+	unsigned long timeout_jiffies = msecs_to_jiffies(timeout);
 	struct ipa_tag_completion *comp;
+	struct ipa_ep_context *ep;
 	int ret;
 
 	ipa_assert(timeout);
@@ -703,7 +704,9 @@ int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 	if (!comp)
 		return -ENOMEM;
 
-	/* completion needs to be released from both here and in ack callback */
+	/* The reference count is decremented both here and in ack
+	 * callback.  Whichever reaches 0 frees the structure.
+	 */
 	atomic_set(&comp->cnt, 2);
 	init_completion(&comp->comp);
 
@@ -719,16 +722,12 @@ int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 	if (ret) {
 		/* Callback won't run; drop reference on its behalf */
 		atomic_dec(&comp->cnt);
-		ipa_err("fail to send 1 immediate commands\n");
-	} else {
-		unsigned long jiffs = msecs_to_jiffies(timeout);
-		long completed;
-
-		completed = wait_for_completion_timeout(&comp->comp, jiffs);
-		if (!completed)
-			ipa_debug("timeout waiting for imm-cmd ACK\n");
+		goto out;
 	}
 
+	if (!wait_for_completion_timeout(&comp->comp, timeout_jiffies))
+		ret = -ETIMEDOUT;
+out:
 	if (!atomic_dec_return(&comp->cnt))
 		kfree(comp);
 
