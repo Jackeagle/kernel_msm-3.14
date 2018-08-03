@@ -615,13 +615,8 @@ static void ipa_transport_irq_cmd_ack_free(void *tag_comp, int ignored)
 {
 	struct ipa_tag_completion *comp = tag_comp;
 
-	if (!comp) {
-		ipa_err("comp is NULL\n");
-		return;
-	}
-
 	complete(&comp->comp);
-	if (atomic_dec_return(&comp->cnt) == 0)
+	if (!atomic_dec_return(&comp->cnt))
 		kfree(comp);
 }
 
