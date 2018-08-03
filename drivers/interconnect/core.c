@@ -255,14 +255,15 @@ static int aggregate_requests(struct icc_node *node)
 
 static void aggregate_provider(struct icc_provider *p)
 {
-	struct icc_node *n;
+	 //HACK: QUP vote failure issue
+	/*struct icc_node *n;
 
 	p->avg_bw = 0;
 	p->peak_bw = 0;
 
 	list_for_each_entry(n, &p->nodes, node_list)
 		p->aggregate(n, n->avg_bw, n->peak_bw,
-			     &p->avg_bw, &p->peak_bw);
+			     &p->avg_bw, &p->peak_bw);*/
 }
 
 static int apply_constraints(struct icc_path *path)
