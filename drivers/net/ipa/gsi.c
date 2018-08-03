@@ -1713,20 +1713,22 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 		   struct gsi_xfer_elem *xfer, bool ring_db)
 {
 	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
-	u16 idx;
-	u32 i;
 	unsigned long flags;
-	int ret;
+	u32 i;
 
 	spin_lock_irqsave(&chan->evtr->ring.slock, flags);
 
 	if (num_xfers > __gsi_query_channel_free_re(chan)) {
-		ret = -ENOSPC;
-		goto out_unlock;
+		spin_unlock_irqrestore(&chan->evtr->ring.slock, flags);
+
+		return -ENOSPC;
 	}
 
 	for (i = 0; i < num_xfers; i++) {
 		struct gsi_tre *tre_ptr;
+		u16 idx = ring_wp_local_index(&chan->ring);
+
+		chan->user_data[idx] = xfer[i].xfer_user_data;
 
 		tre_ptr = ipahal_dma_phys_to_virt(&chan->ring.mem,
 						  chan->ring.wp_local);
@@ -1747,22 +1749,17 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 		else
 			ipa_bug_on("invalid xfer type");
 
-		idx = ring_wp_local_index(&chan->ring);
-		chan->user_data[idx] = xfer[i].xfer_user_data;
 		ring_wp_local_inc(&chan->ring);
 	}
 
-	/* ensure TRE is set before ringing doorbell */
-	wmb();
+	wmb();	/* Ensure TRE is set before ringing doorbell */
 
 	if (ring_db)
 		gsi_ring_chan_doorbell(chan);
 
-	ret = 0;
-out_unlock:
 	spin_unlock_irqrestore(&chan->evtr->ring.slock, flags);
 
-	return ret;
+	return 0;
 }
 
 int gsi_start_xfer(unsigned long chan_id)
