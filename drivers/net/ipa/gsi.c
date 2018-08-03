@@ -1720,12 +1720,6 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 	unsigned long flags;
 	int ret;
 
-	if (!num_xfers || !xfer) {
-		ipa_err("bad params chan_id %lu num_xfers %u xfer %p\n",
-			chan_id, num_xfers, xfer);
-		return -EINVAL;
-	}
-
 	spin_lock_irqsave(&chan->evtr->ring.slock, flags);
 
 	free = __gsi_query_channel_free_re(chan);
