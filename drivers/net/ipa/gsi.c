@@ -1663,9 +1663,8 @@ void gsi_dealloc_channel(unsigned long chan_id)
 	atomic_dec(&gsi_ctx->num_chan);
 }
 
-static u16 __gsi_query_channel_free_re(struct gsi_chan_ctx *chan)
+static u16 __gsi_query_ring_free_re(struct gsi_ring_ctx *ring)
 {
-	struct gsi_ring_ctx *ring = &chan->ring;
 	u64 delta;
 
 	if (ring->wp_local < ring->rp_local)
@@ -1718,7 +1717,7 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 
 	spin_lock_irqsave(&chan->evtr->ring.slock, flags);
 
-	if (num_xfers > __gsi_query_channel_free_re(chan)) {
+	if (num_xfers > __gsi_query_ring_free_re(&chan->ring)) {
 		spin_unlock_irqrestore(&chan->evtr->ring.slock, flags);
 
 		return -ENOSPC;
