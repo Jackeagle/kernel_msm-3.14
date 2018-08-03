@@ -193,18 +193,15 @@ static int ipa_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 	if (netif_queue_stopped(dev)) {
 		if (data_packet)
 			return NETDEV_TX_BUSY;
-		if (outstanding < wwan_ptr->outstanding_high_ctl) {
-			goto send;
-		else
+		if (outstanding >= wwan_ptr->outstanding_high_ctl)
 			return NETDEV_TX_BUSY;
+		goto send;
 	}
 
 	/* checking High WM hit */
-	if (outstanding >= wwan_ptr->outstanding_high) {
-		if (data_packet) {
-			netif_stop_queue(dev);
-			return NETDEV_TX_BUSY;
-		}
+	if (data_packet && outstanding >= wwan_ptr->outstanding_high) {
+		netif_stop_queue(dev);
+		return NETDEV_TX_BUSY;
 	}
 send:
 	/* both data packets and commands will be routed to
