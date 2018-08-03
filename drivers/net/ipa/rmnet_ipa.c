@@ -177,8 +177,8 @@ static int ipa_wwan_stop(struct net_device *dev)
 static int ipa_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 {
 	struct ipa_wwan_private *wwan_ptr = netdev_priv(dev);
+	unsigned int skb_len;
 	int outstanding;
-	int ret;
 
 	if (skb->protocol != htons(ETH_P_MAP)) {
 		dev_kfree_skb_any(skb);
@@ -202,13 +202,13 @@ static int ipa_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 	/* both data packets and commands will be routed to
 	 * IPA_CLIENT_Q6_WAN_CONS based on status configuration.
 	 */
-	ret = ipa_tx_dp(IPA_CLIENT_APPS_WAN_PROD, skb);
-	if (ret)
+	skb_len = skb->len;
+	if (ipa_tx_dp(IPA_CLIENT_APPS_WAN_PROD, skb))
 		return NETDEV_TX_BUSY;
 
 	atomic_inc(&wwan_ptr->outstanding_pkts);
 	dev->stats.tx_packets++;
-	dev->stats.tx_bytes += skb->len;
+	dev->stats.tx_bytes += skb_len;
 
 	return NETDEV_TX_OK;
 }
