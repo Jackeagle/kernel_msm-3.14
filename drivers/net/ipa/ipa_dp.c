@@ -681,15 +681,14 @@ int ipa_send_cmd(struct ipa_desc *desc)
 	return ret;
 }
 
-/** ipa_send_cmd_timeout - send one immediate command with limited time
- *	waiting for ACK from IPA HW
+/** ipa_send_cmd_timeout - send one immediate command with timeout
  * @desc:	descriptor structure
- * @timeout:	millisecond to wait till get ACK from IPA HW
+ * @timeout:	milliseconds to wait (or 0 to wait indefinitely)
  *
- * Function will block till command gets ACK from IPA HW or timeout.
- * Caller needs to free any resources it allocated after function returns
- * The callback in ipa_desc should not be set by the caller
- * for this function.
+ * Send an immediate command, and wait for it to complete.  If
+ * timeout is non-zero it indicates the number of milliseconds to
+ * wait to receive the acknowledgement from the hardware before
+ * timing out.  If 0 is supplied, wait will not time out.
  */
 int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 {
@@ -697,8 +696,6 @@ int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 	struct ipa_tag_completion *comp;
 	struct ipa_ep_context *ep;
 	int ret;
-
-	ipa_assert(timeout);
 
 	comp = kzalloc(sizeof(*comp), GFP_KERNEL);
 	if (!comp)
@@ -725,7 +722,9 @@ int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 		goto out;
 	}
 
-	if (!wait_for_completion_timeout(&comp->comp, timeout_jiffies))
+	if (!timeout_jiffies)
+		wait_for_completion(&comp->comp);
+	else if (!wait_for_completion_timeout(&comp->comp, timeout_jiffies))
 		ret = -ETIMEDOUT;
 out:
 	if (!atomic_dec_return(&comp->cnt))
