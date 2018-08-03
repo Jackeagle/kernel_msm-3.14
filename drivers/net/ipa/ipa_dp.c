@@ -716,7 +716,7 @@ int ipa_send_cmd_timeout(u16 num_desc, struct ipa_desc *descr, u32 timeout)
 	for (i = 0; i < num_desc; i++)
 		ipa_debug("sending imm cmd %d\n", descr[i].opcode);
 
-	comp = kzalloc(sizeof(*comp), GFP_ATOMIC);
+	comp = kzalloc(sizeof(*comp), GFP_KERNEL);
 	if (!comp)
 		return -ENOMEM;
 
