@@ -602,27 +602,6 @@ failure:
 	return result;
 }
 
-/** ipa_transport_irq_cmd_ack - callback function which will be called by
- * the transport driver after an immediate command is complete.
- * @user1:	pointer to the descriptor of the transfer
- * @user2:
- *
- * Complete the immediate commands completion object, this will release the
- * thread which waits on this completion object (ipa_send_cmd())
- */
-static void ipa_transport_irq_cmd_ack(void *user1, int user2)
-{
-	struct ipa_desc *desc = (struct ipa_desc *)user1;
-
-	if (!desc) {
-		ipa_err("desc is NULL\n");
-		WARN_ON(1);
-		return;
-	}
-	ipa_debug_low("got ack for cmd=%d\n", desc->opcode);
-	complete(&desc->xfer_done);
-}
-
 /** ipa_transport_irq_cmd_ack_free - callback function which will be
  * called by the transport driver after an immediate command is complete.
  * This function will also free the completion object once it is done.
@@ -644,41 +623,6 @@ static void ipa_transport_irq_cmd_ack_free(void *tag_comp, int ignored)
 	complete(&comp->comp);
 	if (atomic_dec_return(&comp->cnt) == 0)
 		kfree(comp);
-}
-
-/** ipa_send_cmd - send immediate commands
- * @desc:	descriptor structure
- *
- * Function will block till command gets ACK from IPA HW, caller needs
- * to free any resources it allocated after function returns
- * The callback in ipa_desc should not be set by the caller
- * for this function.
- */
-int ipa_send_cmd(struct ipa_desc *desc)
-{
-	struct ipa_ep_context *ep;
-	int ret;
-
-	init_completion(&desc->xfer_done);
-
-	/* Fill in the callback info (the sole descriptor is the last) */
-	desc->callback = ipa_transport_irq_cmd_ack;
-	desc->user1 = desc;
-
-	/* Send the commands, and wait for completion if successful */
-	ep = ipa_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
-
-	ipa_client_add();
-
-	ret = ipa_send(ep->sys, 1, desc);
-	if (ret)
-		ipa_err("fail to send immediate command\n");
-	else
-		wait_for_completion(&desc->xfer_done);
-
-	ipa_client_remove();
-
-	return ret;
 }
 
 /** ipa_send_cmd_timeout - send one immediate command with timeout
