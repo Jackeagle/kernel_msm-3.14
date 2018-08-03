@@ -182,8 +182,6 @@ static int ipa_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 	int ret;
 
 	if (skb->protocol != htons(ETH_P_MAP)) {
-		ipa_debug_low("dropping %u bytes from %s (bad proto %hu)\n",
-			      skb->len, current->comm, skb->protocol);
 		dev_kfree_skb_any(skb);
 		dev->stats.tx_dropped++;
 		return NETDEV_TX_OK;
@@ -193,26 +191,17 @@ static int ipa_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 	data_packet = !RMNET_MAP_GET_CD_BIT(skb);
 	outstanding = atomic_read(&wwan_ptr->outstanding_pkts);
 	if (netif_queue_stopped(dev)) {
-		if (data_packet) {
-			ipa_err("%s: fatal: %s stopped\n", __func__, dev->name);
+		if (data_packet)
 			return NETDEV_TX_BUSY;
-		}
 		if (outstanding < wwan_ptr->outstanding_high_ctl) {
-			ipa_err("[%s]Queue stop, send ctrl pkts\n", dev->name);
 			goto send;
-		} else {
-			ipa_err("%s: fatal: %s stopped\n", __func__, dev->name);
+		else
 			return NETDEV_TX_BUSY;
-		}
 	}
 
 	/* checking High WM hit */
 	if (outstanding >= wwan_ptr->outstanding_high) {
 		if (data_packet) {
-			ipa_debug_low("pending(%d)/(%d)- stop(%d)\n",
-				      atomic_read(&wwan_ptr->outstanding_pkts),
-				      wwan_ptr->outstanding_high,
-				      netif_queue_stopped(dev));
 			netif_stop_queue(dev);
 			return NETDEV_TX_BUSY;
 		}
