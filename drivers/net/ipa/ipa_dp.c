@@ -649,8 +649,6 @@ int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 
 	ep = ipa_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
 
-	ipa_client_add();
-
 	ret = ipa_send(ep->sys, 1, desc);
 	if (ret) {
 		/* Callback won't run; drop reference on its behalf */
@@ -665,6 +663,17 @@ int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 out:
 	if (!atomic_dec_return(&comp->cnt))
 		kfree(comp);
+
+	return ret;
+}
+
+int ipa_send_cmd(struct ipa_desc *desc)
+{
+	int ret;
+
+	ipa_client_add();
+
+	ret = ipa_send_cmd_timeout(desc, 0);
 
 	ipa_client_remove();
 

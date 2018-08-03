@@ -636,10 +636,7 @@ void ipa_init_hw(void);
 struct msm_bus_scale_pdata *ipa_bus_scale_table_init(void);
 
 int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout);
-static inline int ipa_send_cmd(struct ipa_desc *desc)
-{
-	return ipa_send_cmd_timeout(desc, 0);
-}
+int ipa_send_cmd(struct ipa_desc *desc);
 
 void ipa_client_add(void);
 bool ipa_client_add_additional(void);
