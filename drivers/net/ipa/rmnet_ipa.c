@@ -798,6 +798,7 @@ static int ipa_wwan_probe(struct platform_device *pdev)
 	rmnet_ipa_ctx->dev = dev;
 	wwan_ptr = netdev_priv(dev);
 	ipa_debug("wwan_ptr (private) = %p", wwan_ptr);
+	wwan_ptr->outstanding_high_ctl = DEFAULT_OUTSTANDING_HIGH_CTL;
 	wwan_ptr->outstanding_high = DEFAULT_OUTSTANDING_HIGH;
 	wwan_ptr->outstanding_low = DEFAULT_OUTSTANDING_LOW;
 	atomic_set(&wwan_ptr->outstanding_pkts, 0);
