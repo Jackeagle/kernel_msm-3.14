@@ -210,6 +210,9 @@ static int ipa_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 				wwan_ptr->outstanding_high_ctl) {
 			ipa_err("[%s]Queue stop, send ctrl pkts\n", dev->name);
 			goto send;
+		} else {
+			ipa_err("%s: fatal: %s stopped\n", __func__, dev->name);
+			return NETDEV_TX_BUSY;
 		}
 	}
 
