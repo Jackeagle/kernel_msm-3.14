@@ -356,12 +356,12 @@ enum ipa_desc_type {
  */
 struct ipa_desc {
 	enum ipa_desc_type type;
+	u16 len;
+	u16 opcode;
 	union {
 		void *pyld;
 		skb_frag_t *frag;
 	};
-	u16 len;
-	u16 opcode;
 	void (*callback)(void *user1, int user2);
 	void *user1;
 	int user2;
@@ -375,9 +375,9 @@ static inline void
 ipa_desc_fill_imm_cmd(struct ipa_desc *desc, struct ipahal_imm_cmd_pyld *pyld)
 {
 	desc->type = IPA_IMM_CMD_DESC;
-	desc->pyld = ipahal_imm_cmd_pyld_data(pyld);
 	desc->len = pyld->len;
 	desc->opcode = pyld->opcode;
+	desc->pyld = ipahal_imm_cmd_pyld_data(pyld);
 }
 
 struct ipa_active_clients {
