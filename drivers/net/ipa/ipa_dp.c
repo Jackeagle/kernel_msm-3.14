@@ -1019,10 +1019,8 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	u32 f;
 	int ret;
 
-	if (!skb->len) {
-		ipa_err("packet size is 0\n");
+	if (!skb->len)
 		return -EINVAL;
-	}
 
 	src_ep_idx = ipa_get_ep_mapping(client);
 	gsi_ep = ipa_get_gsi_ep_info(ipa_ctx->ep[src_ep_idx].client);
@@ -1033,12 +1031,8 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	 */
 	nr_frags = skb_shinfo(skb)->nr_frags;
 	if (1 + nr_frags > gsi_ep->ipa_if_tlv) {
-		if (skb_linearize(skb)) {
-			ipa_err("too many fragments (%u > %u)\n",
-				1 + nr_frags, gsi_ep->ipa_if_tlv);
-
+		if (skb_linearize(skb))
 			return -ENOMEM;
-		}
 		nr_frags = 0;
 	}
 	if (nr_frags) {
@@ -1067,8 +1061,6 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	desc[data_idx].user2 = src_ep_idx;
 
 	ret = ipa_send(ipa_ctx->ep[src_ep_idx].sys, data_idx + 1, desc);
-	if (ret)
-		ipa_err("failed to send skb %p nr_frags %u\n", skb, nr_frags);
 
 	if (nr_frags)
 		kfree(desc);
