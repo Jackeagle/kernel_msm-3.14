@@ -140,13 +140,9 @@ struct ipa_tag_completion {
 #define IPA_QMAP_HEADER_LENGTH 4
 
 #define IPA_WAN_AGGR_PKT_CNT 5
-#define IPA_LAST_DESC_CNT 0xFFFF
 #define POLLING_INACTIVITY_RX 40
 #define POLLING_MIN_SLEEP_RX 1010	/* microseconds */
 #define POLLING_MAX_SLEEP_RX 1050	/* microseconds */
-#define POLLING_INACTIVITY_TX 40
-#define POLLING_MIN_SLEEP_TX 400
-#define POLLING_MAX_SLEEP_TX 500
 /* 8K less 1 nominal MTU (1500 bytes) rounded to units of KB */
 #define IPA_MTU 1500
 #define IPA_GENERIC_AGGR_BYTE_LIMIT 6
@@ -173,10 +169,6 @@ struct ipa_tag_completion {
 
 #define IPA_GSI_MAX_CH_LOW_WEIGHT 15
 #define IPA_GSI_EVT_RING_INT_MODT (32 * 1) /* 1ms under 32KHz clock */
-
-#define IPA_GSI_CH_20_WA_NUM_CH_TO_ALLOC 10
-/* The below virtual channel cannot be used by any entity */
-#define IPA_GSI_CH_20_WA_VIRT_CHAN 29
 
 #define IPA_DEFAULT_SYS_YELLOW_WM 32
 #define IPA_REPL_XFER_THRESH 10
