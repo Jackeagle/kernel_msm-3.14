@@ -895,11 +895,6 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 	if (ipa_consumer(sys_in->client))
 		ipa_replenish_rx_cache(ep->sys);
 
-	if (ipa_producer(sys_in->client)) {
-		if (sys_in->client == IPA_CLIENT_APPS_WAN_PROD)
-			ipa_debug("modem cfg emb pipe flt\n");
-	}
-
 	ipa_client_remove();
 
 	ipa_debug("client %d (ep: %u) connected sys=%p\n", sys_in->client,
@@ -965,11 +960,6 @@ void ipa_teardown_sys_pipe(u32 clnt_hdl)
 		flush_workqueue(ep->sys->repl_wq);
 	if (ipa_consumer(ep->client))
 		ipa_cleanup_rx(ep->sys);
-
-	if (ipa_producer(ep->client)) {
-		if (ep->client == IPA_CLIENT_APPS_WAN_PROD)
-			ipa_debug("modem cfg emb pipe flt\n");
-	}
 
 	ep->valid = false;
 	ipa_client_remove();
