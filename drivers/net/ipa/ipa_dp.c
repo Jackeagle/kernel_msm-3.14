@@ -143,8 +143,7 @@ struct ipa_tag_completion {
 #define POLLING_INACTIVITY_RX 40
 #define POLLING_MIN_SLEEP_RX 1010	/* microseconds */
 #define POLLING_MAX_SLEEP_RX 1050	/* microseconds */
-/* 8K less 1 nominal MTU (1500 bytes) rounded to units of KB */
-#define IPA_MTU 1500
+
 #define IPA_GENERIC_AGGR_BYTE_LIMIT 6
 #define IPA_GENERIC_AGGR_TIME_LIMIT 1
 #define IPA_GENERIC_AGGR_PKT_LIMIT 0
@@ -161,6 +160,7 @@ struct ipa_tag_completion {
 		IPA_GENERIC_RX_BUFF_BASE_SZ)
 
 /* less 1 nominal MTU (1500 bytes) rounded to units of KB */
+#define IPA_MTU 1500
 #define IPA_ADJUST_AGGR_BYTE_LIMIT(X) (((X) - IPA_MTU) / 1000)
 
 #define IPA_RX_BUFF_CLIENT_HEADROOM 256
