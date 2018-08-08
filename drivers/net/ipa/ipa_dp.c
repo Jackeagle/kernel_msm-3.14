@@ -1932,8 +1932,8 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u16 size)
 	sys->len--;
 	spin_unlock_bh(&sys->spinlock);
 
-	if (size)
-		rx_pkt_expected->len = (u32)size;
+	rx_pkt_expected->len = (u32)size;
+
 	rx_skb = rx_pkt_expected->data.skb;
 	dma_unmap_single(dev, rx_pkt_expected->data.dma_addr,
 			 sys->rx.buff_sz, DMA_FROM_DEVICE);
