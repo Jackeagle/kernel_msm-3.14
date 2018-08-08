@@ -1154,7 +1154,6 @@ static void ipa_replenish_rx_cache_recycle(struct ipa_sys_context *sys)
 			if (!rx_pkt)
 				goto fail_kmem_cache_alloc;
 
-			INIT_LIST_HEAD(&rx_pkt->link);
 			rx_pkt->sys = sys;
 
 			rx_pkt->skb = sys->rx.get_skb(sys->rx.buff_sz, flag);
@@ -1171,8 +1170,8 @@ static void ipa_replenish_rx_cache_recycle(struct ipa_sys_context *sys)
 						  link);
 			list_del(&rx_pkt->link);
 			spin_unlock_bh(&sys->spinlock);
-			INIT_LIST_HEAD(&rx_pkt->link);
 		}
+		INIT_LIST_HEAD(&rx_pkt->link);
 		ptr = skb_put(rx_pkt->skb, sys->rx.buff_sz);
 		rx_pkt->dma_addr = dma_map_single(dev, ptr, sys->rx.buff_sz,
 						  DMA_FROM_DEVICE);
