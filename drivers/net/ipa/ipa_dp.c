@@ -171,7 +171,6 @@ static void ipa_rx_switch_to_intr_mode(struct ipa_sys_context *sys);
 static struct sk_buff *ipa_get_skb_ipa_rx(unsigned int len, gfp_t flags);
 static void ipa_replenish_rx_cache(struct ipa_sys_context *sys);
 static void ipa_replenish_rx_work_func(struct work_struct *work);
-static void ipa_fast_replenish_rx_cache(struct ipa_sys_context *sys);
 static void ipa_wq_handle_rx(struct work_struct *work);
 static void ipa_rx_common(struct ipa_sys_context *sys, u32 size);
 static int ipa_assign_policy(struct ipa_sys_connect_params *in,
@@ -859,21 +858,6 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 		goto err_client_remove;
 	}
 
-	if (ipa_consumer(sys_in->client) &&
-	    ep->sys->rx.repl_hdlr == ipa_fast_replenish_rx_cache) {
-		ep->sys->rx.repl.capacity = ep->sys->rx.pool_sz + 1;
-		ep->sys->rx.repl.cache = kcalloc(ep->sys->rx.repl.capacity,
-					      sizeof(void *), GFP_KERNEL);
-		if (!ep->sys->rx.repl.cache) {
-			ep->sys->rx.repl_hdlr = ipa_replenish_rx_cache;
-			ep->sys->rx.repl.capacity = 0;
-		} else {
-			atomic_set(&ep->sys->rx.repl.head_idx, 0);
-			atomic_set(&ep->sys->rx.repl.tail_idx, 0);
-			ipa_wq_repl_rx(&ep->sys->rx.repl_work);
-		}
-	}
-
 	if (ipa_consumer(sys_in->client))
 		ipa_replenish_rx_cache(ep->sys);
 
@@ -1306,46 +1290,6 @@ fail_kmem_cache_alloc:
 	if (rx_len_cached - sys->rx.len_pending_xfer == 0)
 		queue_delayed_work(sys->wq, &sys->rx.replenish_work,
 				   msecs_to_jiffies(1));
-}
-
-static void ipa_fast_replenish_rx_cache(struct ipa_sys_context *sys)
-{
-	struct ipa_rx_pkt_wrapper *rx_pkt;
-	int ret;
-	int rx_len_cached = 0;
-	u32 curr;
-
-	spin_lock_bh(&sys->spinlock);
-
-	rx_len_cached = sys->len;
-	curr = atomic_read(&sys->rx.repl.head_idx);
-
-	while (rx_len_cached < sys->rx.pool_sz) {
-		if (curr == atomic_read(&sys->rx.repl.tail_idx))
-			break;
-
-		rx_pkt = sys->rx.repl.cache[curr];
-		list_add_tail(&rx_pkt->link, &sys->head_desc_list);
-
-		ret = queue_rx_cache(sys, rx_pkt);
-		if (ret)
-			break;
-
-		rx_len_cached = ++sys->len;
-		curr = (curr + 1) % sys->rx.repl.capacity;
-		/* ensure write is done before setting head index */
-		mb();
-		atomic_set(&sys->rx.repl.head_idx, curr);
-	}
-	spin_unlock_bh(&sys->spinlock);
-
-	queue_work(sys->repl_wq, &sys->rx.repl_work);
-
-	if (rx_len_cached - sys->rx.len_pending_xfer
-		<= IPA_DEFAULT_SYS_YELLOW_WM) {
-		queue_delayed_work(sys->wq, &sys->rx.replenish_work,
-				   msecs_to_jiffies(1));
-	}
 }
 
 static void ipa_replenish_rx_work_func(struct work_struct *work)
