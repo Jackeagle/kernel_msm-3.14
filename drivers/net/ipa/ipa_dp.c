@@ -169,8 +169,6 @@ static struct ipa_tx_pkt_wrapper *tag_to_pointer_wa(u64 tag);
 
 static u32 ipa_adjust_ra_buff_base_sz(u32 aggr_byte_limit);
 
-static void ipa_free_skb_rx(struct sk_buff *skb);
-
 static void
 ipa_wq_write_done_common(struct ipa_sys_context *sys,
 			 struct ipa_tx_pkt_wrapper *tx_pkt)
@@ -1112,7 +1110,7 @@ fail_provide_rx_buffer:
 	dma_unmap_single(dev, rx_pkt->dma_addr, sys->rx.buff_sz,
 			 DMA_FROM_DEVICE);
 fail_dma_mapping:
-	ipa_free_skb_rx(rx_pkt->skb);
+	dev_kfree_skb_any(rx_pkt->skb);
 fail_skb_alloc:
 	kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rx_pkt);
 fail_kmem_cache_alloc:
@@ -1143,7 +1141,7 @@ static void ipa_cleanup_rx(struct ipa_sys_context *sys)
 		list_del(&rx_pkt->link);
 		dma_unmap_single(dev, rx_pkt->dma_addr, sys->rx.buff_sz,
 				 DMA_FROM_DEVICE);
-		ipa_free_skb_rx(rx_pkt->skb);
+		dev_kfree_skb_any(rx_pkt->skb);
 		kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rx_pkt);
 	}
 }
@@ -1198,7 +1196,7 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 		buf = skb_push(skb, sys->rx.len_partial);
 		memcpy(buf, sys->rx.prev_skb->data, sys->rx.len_partial);
 		sys->rx.len_partial = 0;
-		ipa_free_skb_rx(sys->rx.prev_skb);
+		dev_kfree_skb_any(sys->rx.prev_skb);
 		sys->rx.prev_skb = NULL;
 		goto begin;
 	}
@@ -1581,18 +1579,14 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 		}
 	};
 bail:
-	ipa_free_skb_rx(skb);
+	dev_kfree_skb_any(skb);
+
 	return rc;
 }
 
 static struct sk_buff *ipa_get_skb_ipa_rx(unsigned int len, gfp_t flags)
 {
 	return __dev_alloc_skb(len, flags);
-}
-
-static void ipa_free_skb_rx(struct sk_buff *skb)
-{
-	dev_kfree_skb_any(skb);
 }
 
 void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
