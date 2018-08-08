@@ -177,14 +177,14 @@ ipa_wq_write_done_common(struct ipa_sys_context *sys,
 	cnt = tx_pkt->cnt;
 	ipa_debug_low("cnt: %d\n", cnt);
 	for (i = 0; i < cnt; i++) {
+		ipa_assert(!list_empty(&sys->head_desc_list));
+
 		spin_lock_bh(&sys->spinlock);
-		if (unlikely(list_empty(&sys->head_desc_list))) {
-			spin_unlock_bh(&sys->spinlock);
-			return;
-		}
+
 		next_pkt = list_next_entry(tx_pkt, link);
 		list_del(&tx_pkt->link);
 		sys->len--;
+
 		spin_unlock_bh(&sys->spinlock);
 
 		/* If DMA memory was mapped, unmap it */
