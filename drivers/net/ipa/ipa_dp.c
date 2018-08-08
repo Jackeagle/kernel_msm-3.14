@@ -41,16 +41,6 @@ struct ipa_tx_pkt_wrapper {
 	u32 cnt;
 };
 
-/** struct  ipa_rx_data - information needed
- * to send to wlan driver on receiving data from ipa hw
- * @skb: skb
- * @dma_addr: DMA address of this Rx packet
- */
-struct ipa_rx_data {
-	struct sk_buff *skb;
-	dma_addr_t dma_addr;
-};
-
 /** struct ipa_rx_pkt_wrapper - IPA Rx packet wrapper
  * @link: linked to the Rx packets on that pipe
  * @data: skb and DMA address of the received packet
@@ -58,7 +48,8 @@ struct ipa_rx_data {
  */
 struct ipa_rx_pkt_wrapper {
 	struct list_head link;
-	struct ipa_rx_data data;
+	struct sk_buff *skb;
+	dma_addr_t dma_addr;
 	struct ipa_sys_context *sys;
 };
 
@@ -1098,21 +1089,19 @@ begin:
 		INIT_LIST_HEAD(&rx_pkt->link);
 		rx_pkt->sys = sys;
 
-		rx_pkt->data.skb = sys->rx.get_skb(sys->rx.buff_sz, flag);
-		if (!rx_pkt->data.skb) {
+		rx_pkt->skb = sys->rx.get_skb(sys->rx.buff_sz, flag);
+		if (!rx_pkt->skb) {
 			pr_err_ratelimited("%s fail alloc skb sys=%p\n",
 					   __func__, sys);
 			goto fail_skb_alloc;
 		}
-		ptr = skb_put(rx_pkt->data.skb, sys->rx.buff_sz);
-		rx_pkt->data.dma_addr = dma_map_single(dev, ptr,
-						       sys->rx.buff_sz,
-						       DMA_FROM_DEVICE);
-		if (dma_mapping_error(dev, rx_pkt->data.dma_addr)) {
+		ptr = skb_put(rx_pkt->skb, sys->rx.buff_sz);
+		rx_pkt->dma_addr = dma_map_single(dev, ptr, sys->rx.buff_sz,
+						  DMA_FROM_DEVICE);
+		if (dma_mapping_error(dev, rx_pkt->dma_addr)) {
 			pr_err_ratelimited("%s dma map fail %p for %p sys=%p\n",
-					   __func__,
-					   (void *)rx_pkt->data.dma_addr,
-			       ptr, sys);
+					   __func__, (void *)rx_pkt->dma_addr,
+					   ptr, sys);
 			goto fail_dma_mapping;
 		}
 
@@ -1126,7 +1115,7 @@ begin:
 	return;
 
 fail_dma_mapping:
-	sys->rx.free_skb(rx_pkt->data.skb);
+	sys->rx.free_skb(rx_pkt->skb);
 fail_skb_alloc:
 	kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rx_pkt);
 fail_kmem_cache_alloc:
@@ -1145,7 +1134,7 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
 	int ret;
 
 	/* Don't bother zeroing this; we fill all fields */
-	gsi_xfer_elem.addr = rx_pkt->data.dma_addr;
+	gsi_xfer_elem.addr = rx_pkt->dma_addr;
 	gsi_xfer_elem.len = sys->rx.buff_sz;
 	gsi_xfer_elem.flags = GSI_XFER_FLAG_EOT;
 	gsi_xfer_elem.flags |= GSI_XFER_FLAG_EOB;
@@ -1198,18 +1187,17 @@ static void ipa_replenish_rx_cache(struct ipa_sys_context *sys)
 		INIT_LIST_HEAD(&rx_pkt->link);
 		rx_pkt->sys = sys;
 
-		rx_pkt->data.skb = sys->rx.get_skb(sys->rx.buff_sz, flag);
-		if (!rx_pkt->data.skb) {
+		rx_pkt->skb = sys->rx.get_skb(sys->rx.buff_sz, flag);
+		if (!rx_pkt->skb) {
 			ipa_err("failed to alloc skb\n");
 			goto fail_skb_alloc;
 		}
-		ptr = skb_put(rx_pkt->data.skb, sys->rx.buff_sz);
-		rx_pkt->data.dma_addr = dma_map_single(dev, ptr,
-						       sys->rx.buff_sz,
-						       DMA_FROM_DEVICE);
-		if (dma_mapping_error(dev, rx_pkt->data.dma_addr)) {
+		ptr = skb_put(rx_pkt->skb, sys->rx.buff_sz);
+		rx_pkt->dma_addr = dma_map_single(dev, ptr, sys->rx.buff_sz,
+						  DMA_FROM_DEVICE);
+		if (dma_mapping_error(dev, rx_pkt->dma_addr)) {
 			ipa_err("dma_map_single failure %p for %p\n",
-				(void *)rx_pkt->data.dma_addr, ptr);
+				(void *)rx_pkt->dma_addr, ptr);
 			goto fail_dma_mapping;
 		}
 
@@ -1226,10 +1214,10 @@ static void ipa_replenish_rx_cache(struct ipa_sys_context *sys)
 fail_provide_rx_buffer:
 	list_del(&rx_pkt->link);
 	rx_len_cached = --sys->len;
-	dma_unmap_single(dev, rx_pkt->data.dma_addr, sys->rx.buff_sz,
+	dma_unmap_single(dev, rx_pkt->dma_addr, sys->rx.buff_sz,
 			 DMA_FROM_DEVICE);
 fail_dma_mapping:
-	sys->rx.free_skb(rx_pkt->data.skb);
+	sys->rx.free_skb(rx_pkt->skb);
 fail_skb_alloc:
 	kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rx_pkt);
 fail_kmem_cache_alloc:
@@ -1259,21 +1247,20 @@ static void ipa_replenish_rx_cache_recycle(struct ipa_sys_context *sys)
 			INIT_LIST_HEAD(&rx_pkt->link);
 			rx_pkt->sys = sys;
 
-			rx_pkt->data.skb = sys->rx.get_skb(sys->rx.buff_sz,
-							   flag);
-			if (!rx_pkt->data.skb) {
+			rx_pkt->skb = sys->rx.get_skb(sys->rx.buff_sz, flag);
+			if (!rx_pkt->skb) {
 				ipa_err("failed to alloc skb\n");
 				kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache,
 						rx_pkt);
 				goto fail_kmem_cache_alloc;
 			}
-			ptr = skb_put(rx_pkt->data.skb, sys->rx.buff_sz);
-			rx_pkt->data.dma_addr = dma_map_single(dev, ptr,
-							       sys->rx.buff_sz,
-							       DMA_FROM_DEVICE);
-			if (dma_mapping_error(dev, rx_pkt->data.dma_addr)) {
+			ptr = skb_put(rx_pkt->skb, sys->rx.buff_sz);
+			rx_pkt->dma_addr = dma_map_single(dev, ptr,
+							  sys->rx.buff_sz,
+							  DMA_FROM_DEVICE);
+			if (dma_mapping_error(dev, rx_pkt->dma_addr)) {
 				ipa_err("dma_map_single failure %p for %p\n",
-					(void *)rx_pkt->data.dma_addr, ptr);
+					(void *)rx_pkt->dma_addr, ptr);
 				goto fail_dma_mapping;
 			}
 		} else {
@@ -1284,14 +1271,13 @@ static void ipa_replenish_rx_cache_recycle(struct ipa_sys_context *sys)
 			list_del(&rx_pkt->link);
 			spin_unlock_bh(&sys->spinlock);
 			INIT_LIST_HEAD(&rx_pkt->link);
-			ptr = skb_put(rx_pkt->data.skb, sys->rx.buff_sz);
-			rx_pkt->data.dma_addr = dma_map_single(dev,
-							       ptr,
-							       sys->rx.buff_sz,
-							       DMA_FROM_DEVICE);
-			if (dma_mapping_error(dev, rx_pkt->data.dma_addr)) {
+			ptr = skb_put(rx_pkt->skb, sys->rx.buff_sz);
+			rx_pkt->dma_addr = dma_map_single(dev, ptr,
+							  sys->rx.buff_sz,
+							  DMA_FROM_DEVICE);
+			if (dma_mapping_error(dev, rx_pkt->dma_addr)) {
 				ipa_err("dma_map_single failure %p for %p\n",
-					(void *)rx_pkt->data.dma_addr, ptr);
+					(void *)rx_pkt->dma_addr, ptr);
 				goto fail_dma_mapping;
 			}
 		}
@@ -1309,7 +1295,7 @@ fail_provide_rx_buffer:
 	rx_len_cached = --sys->len;
 	list_del(&rx_pkt->link);
 	INIT_LIST_HEAD(&rx_pkt->link);
-	dma_unmap_single(dev, rx_pkt->data.dma_addr, sys->rx.buff_sz,
+	dma_unmap_single(dev, rx_pkt->dma_addr, sys->rx.buff_sz,
 			 DMA_FROM_DEVICE);
 fail_dma_mapping:
 	spin_lock_bh(&sys->spinlock);
@@ -1384,17 +1370,17 @@ static void ipa_cleanup_rx(struct ipa_sys_context *sys)
 
 	list_for_each_entry_safe(rx_pkt, r, &sys->head_desc_list, link) {
 		list_del(&rx_pkt->link);
-		dma_unmap_single(dev, rx_pkt->data.dma_addr, sys->rx.buff_sz,
+		dma_unmap_single(dev, rx_pkt->dma_addr, sys->rx.buff_sz,
 				 DMA_FROM_DEVICE);
-		sys->rx.free_skb(rx_pkt->data.skb);
+		sys->rx.free_skb(rx_pkt->skb);
 		kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rx_pkt);
 	}
 
 	list_for_each_entry_safe(rx_pkt, r, &sys->rcycl_list, link) {
 		list_del(&rx_pkt->link);
-		dma_unmap_single(dev, rx_pkt->data.dma_addr, sys->rx.buff_sz,
+		dma_unmap_single(dev, rx_pkt->dma_addr, sys->rx.buff_sz,
 				 DMA_FROM_DEVICE);
-		sys->rx.free_skb(rx_pkt->data.skb);
+		sys->rx.free_skb(rx_pkt->skb);
 		kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rx_pkt);
 	}
 
@@ -1403,10 +1389,10 @@ static void ipa_cleanup_rx(struct ipa_sys_context *sys)
 		tail = atomic_read(&sys->rx.repl.tail_idx);
 		while (head != tail) {
 			rx_pkt = sys->rx.repl.cache[head];
-				dma_unmap_single(dev, rx_pkt->data.dma_addr,
+				dma_unmap_single(dev, rx_pkt->dma_addr,
 						 sys->rx.buff_sz,
 						 DMA_FROM_DEVICE);
-			sys->rx.free_skb(rx_pkt->data.skb);
+			sys->rx.free_skb(rx_pkt->skb);
 			kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rx_pkt);
 			head = (head + 1) % sys->rx.repl.capacity;
 		}
@@ -1905,8 +1891,8 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 
 static void ipa_recycle_rx_wrapper(struct ipa_rx_pkt_wrapper *rx_pkt)
 {
-	rx_pkt->data.dma_addr = 0;
-	ipa_skb_recycle(rx_pkt->data.skb);
+	rx_pkt->dma_addr = 0;
+	ipa_skb_recycle(rx_pkt->skb);
 	INIT_LIST_HEAD(&rx_pkt->link);
 	spin_lock_bh(&rx_pkt->sys->spinlock);
 	list_add_tail(&rx_pkt->link, &rx_pkt->sys->rcycl_list);
@@ -1929,8 +1915,8 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u32 size)
 
 	spin_unlock_bh(&sys->spinlock);
 
-	rx_skb = rx_pkt->data.skb;
-	dma_unmap_single(ipa_ctx->dev, rx_pkt->data.dma_addr, sys->rx.buff_sz,
+	rx_skb = rx_pkt->skb;
+	dma_unmap_single(ipa_ctx->dev, rx_pkt->dma_addr, sys->rx.buff_sz,
 			 DMA_FROM_DEVICE);
 
 	skb_trim(rx_skb, size);
