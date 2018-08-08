@@ -553,14 +553,9 @@ failure:
 		next_pkt = list_next_entry(tx_pkt, link);
 		list_del(&tx_pkt->link);
 
-		if (desc[j].type != IPA_DATA_DESC_SKB_PAGED) {
-			dma_unmap_single(dev, tx_pkt->mem.phys_base,
-					 tx_pkt->mem.size, DMA_TO_DEVICE);
-		} else {
-			dma_unmap_page(dev, tx_pkt->mem.phys_base,
-				       tx_pkt->mem.size, DMA_TO_DEVICE);
-		}
-		kmem_cache_free(ipa_ctx->dp->tx_pkt_wrapper_cache, tx_pkt);
+		tx_pkt->callback = NULL; /* Avoid doing the callback */
+		ipa_tx_complete(tx_pkt);
+
 		tx_pkt = next_pkt;
 	}
 
