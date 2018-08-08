@@ -1633,11 +1633,6 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 	ep->client_notify(ep->priv, IPA_RECEIVE, (unsigned long)(rx_skb));
 }
 
-static void ipa_free_rx_wrapper(struct ipa_rx_pkt_wrapper *rk_pkt)
-{
-	kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rk_pkt);
-}
-
 static void ipa_rx_common(struct ipa_sys_context *sys, u32 size)
 {
 	struct ipa_rx_pkt_wrapper *rx_pkt;
@@ -1664,7 +1659,7 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u32 size)
 	rx_skb->truesize = size + sizeof(struct sk_buff);
 
 	sys->rx.pyld_hdlr(rx_skb, sys);
-	ipa_free_rx_wrapper(rx_pkt);
+	kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rk_pkt);
 	ipa_replenish_rx_cache(sys);
 }
 
