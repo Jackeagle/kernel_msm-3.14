@@ -90,7 +90,6 @@ struct ipa_sys_context {
 
 			struct work_struct work; /* sys->wq */
 			struct delayed_work replenish_work; /* sys->wq */
-			struct work_struct repl_work;
 			void (*repl_hdlr)(struct ipa_sys_context *);
 			struct ipa_repl_ctx repl; /* sys->repl_wq */
 		} rx;
@@ -176,7 +175,6 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u32 size);
 static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 			     struct ipa_sys_context *sys);
 static void ipa_cleanup_rx(struct ipa_sys_context *sys);
-static void ipa_wq_repl_rx(struct work_struct *work);
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 				 struct ipa_ep_context *ep);
 static int ipa_poll_gsi_pkt(struct ipa_sys_context *sys);
@@ -1047,70 +1045,6 @@ static void ipa_wq_handle_rx(struct work_struct *work)
 	}
 }
 
-static void ipa_wq_repl_rx(struct work_struct *work)
-{
-	struct device *dev = ipa_ctx->dev;
-	struct ipa_sys_context *sys;
-	void *ptr;
-	struct ipa_rx_pkt_wrapper *rx_pkt;
-	u32 next;
-	u32 curr;
-
-	sys = container_of(work, struct ipa_sys_context, rx.repl_work);
-	curr = atomic_read(&sys->rx.repl.tail_idx);
-
-begin:
-	while (1) {
-		next = (curr + 1) % sys->rx.repl.capacity;
-		if (next == atomic_read(&sys->rx.repl.head_idx))
-			goto fail_kmem_cache_alloc;
-
-		rx_pkt = kmem_cache_zalloc(ipa_ctx->dp->rx_pkt_wrapper_cache,
-					   GFP_KERNEL);
-		if (!rx_pkt)
-			goto fail_kmem_cache_alloc;
-
-		INIT_LIST_HEAD(&rx_pkt->link);
-		rx_pkt->sys = sys;
-
-		rx_pkt->skb = sys->rx.get_skb(sys->rx.buff_sz, GFP_KERNEL);
-		if (!rx_pkt->skb) {
-			pr_err_ratelimited("%s fail alloc skb sys=%p\n",
-					   __func__, sys);
-			goto fail_skb_alloc;
-		}
-		ptr = skb_put(rx_pkt->skb, sys->rx.buff_sz);
-		rx_pkt->dma_addr = dma_map_single(dev, ptr, sys->rx.buff_sz,
-						  DMA_FROM_DEVICE);
-		if (dma_mapping_error(dev, rx_pkt->dma_addr)) {
-			pr_err_ratelimited("%s dma map fail %p for %p sys=%p\n",
-					   __func__, (void *)rx_pkt->dma_addr,
-					   ptr, sys);
-			goto fail_dma_mapping;
-		}
-
-		sys->rx.repl.cache[curr] = rx_pkt;
-		curr = next;
-		/* ensure write is done before setting tail index */
-		mb();
-		atomic_set(&sys->rx.repl.tail_idx, next);
-	}
-
-	return;
-
-fail_dma_mapping:
-	sys->rx.free_skb(rx_pkt->skb);
-fail_skb_alloc:
-	kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rx_pkt);
-fail_kmem_cache_alloc:
-	if (atomic_read(&sys->rx.repl.tail_idx) ==
-			atomic_read(&sys->rx.repl.head_idx)) {
-		pr_err_ratelimited("%s sys=%p repl ring empty\n", __func__,
-				   sys);
-		goto begin;
-	}
-}
-
 static int
 queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
 {
@@ -1891,7 +1825,6 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 			  ipa_switch_to_intr_rx_work_func);
 	INIT_DELAYED_WORK(&sys->rx.replenish_work,
 			  ipa_replenish_rx_work_func);
-	INIT_WORK(&sys->rx.repl_work, ipa_wq_repl_rx);
 
 	atomic_set(&sys->rx.curr_polling_state, 0);
 	sys->rx.buff_sz = IPA_GENERIC_RX_BUFF_SZ(IPA_GENERIC_RX_BUFF_BASE_SZ);
