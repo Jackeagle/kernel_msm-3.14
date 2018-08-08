@@ -50,7 +50,6 @@ struct ipa_rx_pkt_wrapper {
 	struct list_head link;
 	struct sk_buff *skb;
 	dma_addr_t dma_addr;
-	struct ipa_sys_context *sys;
 };
 
 /** struct ipa_sys_context - IPA GPI pipes context
@@ -1071,7 +1070,6 @@ static void ipa_replenish_rx_cache(struct ipa_sys_context *sys)
 			goto fail_kmem_cache_alloc;
 
 		INIT_LIST_HEAD(&rx_pkt->link);
-		rx_pkt->sys = sys;
 
 		rx_pkt->skb = __dev_alloc_skb(sys->rx.buff_sz, flag);
 		if (!rx_pkt->skb) {
