@@ -71,7 +71,6 @@ struct ipa_sys_context {
 			int (*pyld_hdlr)(struct sk_buff *,
 					 struct ipa_sys_context *);
 			struct sk_buff *(*get_skb)(unsigned int, gfp_t);
-			void (*free_skb)(struct sk_buff *);
 			u32 buff_sz;
 			u32 pool_sz;
 			struct sk_buff *prev_skb;
@@ -169,6 +168,8 @@ static int ipa_poll_gsi_pkt(struct ipa_sys_context *sys);
 static struct ipa_tx_pkt_wrapper *tag_to_pointer_wa(u64 tag);
 
 static u32 ipa_adjust_ra_buff_base_sz(u32 aggr_byte_limit);
+
+static void ipa_free_skb_rx(struct sk_buff *skb);
 
 static void
 ipa_wq_write_done_common(struct ipa_sys_context *sys,
@@ -1111,7 +1112,7 @@ fail_provide_rx_buffer:
 	dma_unmap_single(dev, rx_pkt->dma_addr, sys->rx.buff_sz,
 			 DMA_FROM_DEVICE);
 fail_dma_mapping:
-	sys->rx.free_skb(rx_pkt->skb);
+	ipa_free_skb_rx(rx_pkt->skb);
 fail_skb_alloc:
 	kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rx_pkt);
 fail_kmem_cache_alloc:
@@ -1142,7 +1143,7 @@ static void ipa_cleanup_rx(struct ipa_sys_context *sys)
 		list_del(&rx_pkt->link);
 		dma_unmap_single(dev, rx_pkt->dma_addr, sys->rx.buff_sz,
 				 DMA_FROM_DEVICE);
-		sys->rx.free_skb(rx_pkt->skb);
+		ipa_free_skb_rx(rx_pkt->skb);
 		kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rx_pkt);
 	}
 }
@@ -1197,7 +1198,7 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 		buf = skb_push(skb, sys->rx.len_partial);
 		memcpy(buf, sys->rx.prev_skb->data, sys->rx.len_partial);
 		sys->rx.len_partial = 0;
-		sys->rx.free_skb(sys->rx.prev_skb);
+		ipa_free_skb_rx(sys->rx.prev_skb);
 		sys->rx.prev_skb = NULL;
 		goto begin;
 	}
@@ -1580,7 +1581,7 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 		}
 	};
 bail:
-	sys->rx.free_skb(skb);
+	ipa_free_skb_rx(skb);
 	return rc;
 }
 
@@ -1698,7 +1699,6 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 	sys->rx.buff_sz = IPA_GENERIC_RX_BUFF_SZ(IPA_GENERIC_RX_BUFF_BASE_SZ);
 	sys->rx.pool_sz = IPA_GENERIC_RX_POOL_SZ;
 	sys->rx.get_skb = ipa_get_skb_ipa_rx;
-	sys->rx.free_skb = ipa_free_skb_rx;
 
 	ep_cfg_aggr = &in->ipa_ep_cfg.aggr;
 	ep_cfg_aggr->aggr_en = IPA_ENABLE_AGGR;
