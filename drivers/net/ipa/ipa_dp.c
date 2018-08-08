@@ -929,11 +929,6 @@ static void ipa_tx_dp_complete(void *user1, int user2)
 	}
 }
 
-void ipa_tx_cmd_comp(void *user1, int user2)
-{
-	ipahal_destroy_imm_cmd(user1);
-}
-
 /** ipa_tx_dp() - Data-path tx handler for APPS_WAN_PROD client
  *
  * @client:	[in] which IPA client is sending packets (WAN producer)
