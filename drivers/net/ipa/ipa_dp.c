@@ -1309,8 +1309,6 @@ static void ipa_cleanup_rx(struct ipa_sys_context *sys)
 	struct device *dev = ipa_ctx->dev;
 	struct ipa_rx_pkt_wrapper *rx_pkt;
 	struct ipa_rx_pkt_wrapper *r;
-	u32 head;
-	u32 tail;
 
 	list_for_each_entry_safe(rx_pkt, r, &sys->head_desc_list, link) {
 		list_del(&rx_pkt->link);
@@ -1326,21 +1324,6 @@ static void ipa_cleanup_rx(struct ipa_sys_context *sys)
 				 DMA_FROM_DEVICE);
 		sys->rx.free_skb(rx_pkt->skb);
 		kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rx_pkt);
-	}
-
-	if (sys->rx.repl.cache) {
-		head = atomic_read(&sys->rx.repl.head_idx);
-		tail = atomic_read(&sys->rx.repl.tail_idx);
-		while (head != tail) {
-			rx_pkt = sys->rx.repl.cache[head];
-				dma_unmap_single(dev, rx_pkt->dma_addr,
-						 sys->rx.buff_sz,
-						 DMA_FROM_DEVICE);
-			sys->rx.free_skb(rx_pkt->skb);
-			kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rx_pkt);
-			head = (head + 1) % sys->rx.repl.capacity;
-		}
-		kfree(sys->rx.repl.cache);
 	}
 }
 
