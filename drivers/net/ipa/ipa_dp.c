@@ -1069,7 +1069,6 @@ static void ipa_wq_repl_rx(struct work_struct *work)
 	struct ipa_sys_context *sys;
 	void *ptr;
 	struct ipa_rx_pkt_wrapper *rx_pkt;
-	gfp_t flag = GFP_KERNEL;
 	u32 next;
 	u32 curr;
 
@@ -1082,14 +1081,15 @@ begin:
 		if (next == atomic_read(&sys->rx.repl.head_idx))
 			goto fail_kmem_cache_alloc;
 
-		rx_pkt = kmem_cache_zalloc(ipa_ctx->dp->rx_pkt_wrapper_cache, flag);
+		rx_pkt = kmem_cache_zalloc(ipa_ctx->dp->rx_pkt_wrapper_cache,
+					   GFP_KERNEL);
 		if (!rx_pkt)
 			goto fail_kmem_cache_alloc;
 
 		INIT_LIST_HEAD(&rx_pkt->link);
 		rx_pkt->sys = sys;
 
-		rx_pkt->skb = sys->rx.get_skb(sys->rx.buff_sz, flag);
+		rx_pkt->skb = sys->rx.get_skb(sys->rx.buff_sz, GFP_KERNEL);
 		if (!rx_pkt->skb) {
 			pr_err_ratelimited("%s fail alloc skb sys=%p\n",
 					   __func__, sys);
