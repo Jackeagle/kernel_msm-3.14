@@ -97,8 +97,7 @@ struct ipa_sys_context {
 	/* ordering is important - mutable fields go above */
 	struct ipa_ep_context *ep;
 	struct list_head head_desc_list; /* contains len entries */
-	struct list_head rcycl_list;		/* RX only */
-	spinlock_t spinlock;		/* protects head_desc and rcycl lists */
+	spinlock_t spinlock;		/* protects head_desc list */
 	struct workqueue_struct *wq;
 	struct workqueue_struct *repl_wq;	/* RX only */
 	/* ordering is important - other immutable fields go below */
@@ -764,7 +763,6 @@ static struct ipa_sys_context *ipa_ep_sys_create(enum ipa_client_type client)
 
 	/* Caller assigns sys->ep = ep */
 	INIT_LIST_HEAD(&sys->head_desc_list);
-	INIT_LIST_HEAD(&sys->rcycl_list);
 	spin_lock_init(&sys->spinlock);
 
 	sys->wq = ipa_alloc_workqueue("ipawq", client);
@@ -1155,14 +1153,6 @@ static void ipa_cleanup_rx(struct ipa_sys_context *sys)
 	struct ipa_rx_pkt_wrapper *r;
 
 	list_for_each_entry_safe(rx_pkt, r, &sys->head_desc_list, link) {
-		list_del(&rx_pkt->link);
-		dma_unmap_single(dev, rx_pkt->dma_addr, sys->rx.buff_sz,
-				 DMA_FROM_DEVICE);
-		sys->rx.free_skb(rx_pkt->skb);
-		kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rx_pkt);
-	}
-
-	list_for_each_entry_safe(rx_pkt, r, &sys->rcycl_list, link) {
 		list_del(&rx_pkt->link);
 		dma_unmap_single(dev, rx_pkt->dma_addr, sys->rx.buff_sz,
 				 DMA_FROM_DEVICE);
