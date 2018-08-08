@@ -1885,11 +1885,11 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 		dev_kfree_skb_any(rx_skb);
 		return;
 	}
+
+	/* Consume the status packet, and if no exception, the header */
+	skb_pull(rx_skb, ipahal_pkt_status_get_size());
 	if (status.exception == IPAHAL_PKT_STATUS_EXCEPTION_NONE)
-		skb_pull(rx_skb, ipahal_pkt_status_get_size() +
-				IPA_LAN_RX_HEADER_LENGTH);
-	else
-		skb_pull(rx_skb, ipahal_pkt_status_get_size());
+		skb_pull(rx_skb, IPA_LAN_RX_HEADER_LENGTH);
 
 	/* Metadata Info
 	 *  ------------------------------------------
