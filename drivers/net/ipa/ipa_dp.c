@@ -99,7 +99,6 @@ struct ipa_sys_context {
 	struct list_head head_desc_list; /* contains len entries */
 	spinlock_t spinlock;		/* protects head_desc list */
 	struct workqueue_struct *wq;
-	struct workqueue_struct *repl_wq;	/* RX only */
 	/* ordering is important - other immutable fields go below */
 };
 
@@ -766,21 +765,12 @@ static struct ipa_sys_context *ipa_ep_sys_create(enum ipa_client_type client)
 	spin_lock_init(&sys->spinlock);
 
 	sys->wq = ipa_alloc_workqueue("ipawq", client);
-	if (!sys->wq)
-		goto err_free_sys;
-
-	sys->repl_wq = ipa_alloc_workqueue("iparepwq", client);
-	if (!sys->repl_wq)
-		goto err_destroy_wq;
+	if (!sys->wq) {
+		kfree(sys);
+		return NULL;
+	}
 
 	return sys;
-
-err_destroy_wq:
-	destroy_workqueue(sys->wq);
-err_free_sys:
-	kfree(sys);
-
-	return NULL;
 }
 
 /** ipa_setup_sys_pipe() - Setup an IPA GPI pipe and perform
@@ -910,8 +900,6 @@ void ipa_teardown_sys_pipe(u32 clnt_hdl)
 	gsi_reset_evt_ring(ep->gsi_evt_ring_hdl);
 	gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl);
 
-	if (ep->sys->repl_wq)
-		flush_workqueue(ep->sys->repl_wq);
 	if (ipa_consumer(ep->client))
 		ipa_cleanup_rx(ep->sys);
 
