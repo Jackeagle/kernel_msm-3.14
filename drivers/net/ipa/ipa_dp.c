@@ -70,7 +70,6 @@ struct ipa_sys_context {
 			struct delayed_work switch_to_intr_work; /* sys->wq */
 			int (*pyld_hdlr)(struct sk_buff *,
 					 struct ipa_sys_context *);
-			struct sk_buff *(*get_skb)(unsigned int, gfp_t);
 			u32 buff_sz;
 			u32 pool_sz;
 			struct sk_buff *prev_skb;
@@ -1080,7 +1079,7 @@ static void ipa_replenish_rx_cache(struct ipa_sys_context *sys)
 		INIT_LIST_HEAD(&rx_pkt->link);
 		rx_pkt->sys = sys;
 
-		rx_pkt->skb = sys->rx.get_skb(sys->rx.buff_sz, flag);
+		rx_pkt->skb = ipa_get_skb_ipa_rx(sys->rx.buff_sz, flag);
 		if (!rx_pkt->skb) {
 			ipa_err("failed to alloc skb\n");
 			goto fail_skb_alloc;
@@ -1692,7 +1691,6 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 	atomic_set(&sys->rx.curr_polling_state, 0);
 	sys->rx.buff_sz = IPA_GENERIC_RX_BUFF_SZ(IPA_GENERIC_RX_BUFF_BASE_SZ);
 	sys->rx.pool_sz = IPA_GENERIC_RX_POOL_SZ;
-	sys->rx.get_skb = ipa_get_skb_ipa_rx;
 
 	ep_cfg_aggr = &in->ipa_ep_cfg.aggr;
 	ep_cfg_aggr->aggr_en = IPA_ENABLE_AGGR;
