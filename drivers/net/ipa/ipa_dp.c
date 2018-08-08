@@ -1136,77 +1136,6 @@ fail_kmem_cache_alloc:
 				   msecs_to_jiffies(1));
 }
 
-static void ipa_replenish_rx_cache_recycle(struct ipa_sys_context *sys)
-{
-	struct device *dev = ipa_ctx->dev;
-	void *ptr;
-	struct ipa_rx_pkt_wrapper *rx_pkt;
-	int ret;
-	int rx_len_cached = 0;
-	gfp_t flag = GFP_NOWAIT | __GFP_NOWARN;
-
-	rx_len_cached = sys->len;
-
-	while (rx_len_cached < sys->rx.pool_sz) {
-		if (list_empty(&sys->rcycl_list)) {
-			rx_pkt = kmem_cache_zalloc(
-				ipa_ctx->dp->rx_pkt_wrapper_cache, flag);
-			if (!rx_pkt)
-				goto fail_kmem_cache_alloc;
-
-			rx_pkt->sys = sys;
-
-			rx_pkt->skb = sys->rx.get_skb(sys->rx.buff_sz, flag);
-			if (!rx_pkt->skb) {
-				ipa_err("failed to alloc skb\n");
-				kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache,
-						rx_pkt);
-				goto fail_kmem_cache_alloc;
-			}
-		} else {
-			spin_lock_bh(&sys->spinlock);
-			rx_pkt = list_first_entry(&sys->rcycl_list,
-						  struct ipa_rx_pkt_wrapper,
-						  link);
-			list_del(&rx_pkt->link);
-			spin_unlock_bh(&sys->spinlock);
-		}
-		INIT_LIST_HEAD(&rx_pkt->link);
-		ptr = skb_put(rx_pkt->skb, sys->rx.buff_sz);
-		rx_pkt->dma_addr = dma_map_single(dev, ptr, sys->rx.buff_sz,
-						  DMA_FROM_DEVICE);
-		if (dma_mapping_error(dev, rx_pkt->dma_addr)) {
-			ipa_err("dma_map_single failure %p for %p\n",
-				(void *)rx_pkt->dma_addr, ptr);
-			goto fail_dma_mapping;
-		}
-
-		list_add_tail(&rx_pkt->link, &sys->head_desc_list);
-		rx_len_cached = ++sys->len;
-
-		ret = queue_rx_cache(sys, rx_pkt);
-		if (ret)
-			goto fail_provide_rx_buffer;
-	}
-
-	return;
-fail_provide_rx_buffer:
-	rx_len_cached = --sys->len;
-	list_del(&rx_pkt->link);
-	INIT_LIST_HEAD(&rx_pkt->link);
-	dma_unmap_single(dev, rx_pkt->dma_addr, sys->rx.buff_sz,
-			 DMA_FROM_DEVICE);
-fail_dma_mapping:
-	spin_lock_bh(&sys->spinlock);
-	list_add_tail(&rx_pkt->link, &sys->rcycl_list);
-	INIT_LIST_HEAD(&rx_pkt->link);
-	spin_unlock_bh(&sys->spinlock);
-fail_kmem_cache_alloc:
-	if (rx_len_cached - sys->rx.len_pending_xfer == 0)
-		queue_delayed_work(sys->wq, &sys->rx.replenish_work,
-				   msecs_to_jiffies(1));
-}
-
 static void ipa_replenish_rx_work_func(struct work_struct *work)
 {
 	struct delayed_work *dwork = to_delayed_work(work);
@@ -1574,9 +1503,6 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 				       (unsigned long)(skb));
 		return rc;
 	}
-
-	/* Recycle should be enabled only with GRO aggr. (???) */
-	ipa_assert(sys->rx.repl_hdlr != ipa_replenish_rx_cache_recycle);
 
 	/* payload splits across 2 buff or more,
 	 * take the start of the payload from rx.prev_skb
