@@ -1462,7 +1462,6 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 	}
 
 	if (sys->rx.len_partial) {
-		ipa_debug_low("len_partial %d\n", sys->rx.len_partial);
 		buf = skb_push(skb, sys->rx.len_partial);
 		memcpy(buf, sys->rx.prev_skb->data, sys->rx.len_partial);
 		sys->rx.len_partial = 0;
@@ -1475,8 +1474,6 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 	 * (status+data)
 	 */
 	if (sys->rx.len_rem) {
-		ipa_debug_low("rem %d skb %d pad %d\n", sys->rx.len_rem, skb->len,
-			      sys->rx.len_pad);
 		if (sys->rx.len_rem <= skb->len) {
 			if (sys->rx.prev_skb) {
 				skb2 = skb_copy_expand(sys->rx.prev_skb, 0,
@@ -1527,20 +1524,15 @@ begin:
 	pkt_status_sz = ipahal_pkt_status_get_size();
 	while (skb->len) {
 		sys->rx.drop_packet = false;
-		ipa_debug_low("LEN_REM %d\n", skb->len);
 
 		if (skb->len < pkt_status_sz) {
 			WARN_ON(sys->rx.prev_skb);
-			ipa_debug_low("status straddles buffer\n");
 			sys->rx.prev_skb = skb_copy(skb, GFP_KERNEL);
 			sys->rx.len_partial = skb->len;
 			return rc;
 		}
 
 		ipahal_pkt_status_parse(skb->data, &status);
-		ipa_debug_low("STATUS opcode=%d src=%d dst=%d len=%d\n",
-			      status.status_opcode, status.endp_src_idx,
-			      status.endp_dest_idx, status.pkt_len);
 
 		if (!ipa_status_opcode_supported(status.status_opcode)) {
 			ipa_err("unsupported opcode(%d)\n",
@@ -1560,7 +1552,6 @@ begin:
 		if (status.status_mask & IPAHAL_PKT_STATUS_MASK_TAG_VALID) {
 			struct ipa_tag_completion *comp;
 
-			ipa_debug_low("TAG packet arrived\n");
 			if (status.tag_info == IPA_COOKIE) {
 				skb_pull(skb, pkt_status_sz);
 				if (skb->len < sizeof(comp)) {
@@ -1576,11 +1567,9 @@ begin:
 				continue;
 			} else {
 				tx_pkt = tag_to_pointer_wa(status.tag_info);
-				ipa_debug_low("tx_pkt recv = %p\n", tx_pkt);
 			}
 		}
 		if (status.pkt_len == 0) {
-			ipa_debug_low("Skip aggr close status\n");
 			skb_pull(skb, pkt_status_sz);
 			continue;
 		}
@@ -1601,7 +1590,6 @@ begin:
 			    status.exception ==
 					IPAHAL_PKT_STATUS_EXCEPTION_NONE) {
 				WARN_ON(sys->rx.prev_skb);
-				ipa_debug_low("Ins header in next buffer\n");
 				sys->rx.prev_skb = skb_copy(skb, GFP_KERNEL);
 				sys->rx.len_partial = skb->len;
 				return rc;
@@ -1612,13 +1600,9 @@ begin:
 
 			len = status.pkt_len + pad_len_byte +
 				IPA_SIZE_DL_CSUM_META_TRAILER;
-			ipa_debug_low("pad %d pkt_len %d len %d\n",
-				      pad_len_byte, status.pkt_len, len);
 
 			if (status.exception ==
 					IPAHAL_PKT_STATUS_EXCEPTION_DEAGGR) {
-				ipa_debug_low(
-					"Dropping packet on DeAggr Exception\n");
 				sys->rx.drop_packet = true;
 			}
 
@@ -1626,8 +1610,6 @@ begin:
 			skb2 = ipa_skb_copy_for_client(skb, len2);
 			if (likely(skb2)) {
 				if (skb->len < len + pkt_status_sz) {
-					ipa_debug_low("SPL skb len %d len %d\n",
-						      skb->len, len);
 					sys->rx.prev_skb = skb2;
 					sys->rx.len_rem = len - skb->len +
 						pkt_status_sz;
@@ -1636,8 +1618,6 @@ begin:
 				} else {
 					skb_trim(skb2, status.pkt_len +
 							pkt_status_sz);
-					ipa_debug_low("rx avail for %d\n",
-						      status.endp_dest_idx);
 					if (sys->rx.drop_packet) {
 						dev_kfree_skb_any(skb2);
 					} else if (status.pkt_len >
@@ -1679,12 +1659,9 @@ begin:
 			}
 			/* TX comp */
 			ipa_wq_write_done_status(src_pipe, tx_pkt);
-			ipa_debug_low("tx comp imp for %d\n", src_pipe);
 		} else {
 			/* TX comp */
 			ipa_wq_write_done_status(status.endp_src_idx, tx_pkt);
-			ipa_debug_low("tx comp exp for %d\n",
-				      status.endp_src_idx);
 			skb_pull(skb, pkt_status_sz);
 		}
 	};
@@ -1784,7 +1761,6 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 	while (skb->len) {
 		u32 status_mask;
 
-		ipa_debug_low("LEN_REM %d\n", skb->len);
 		if (skb->len < pkt_status_sz) {
 			ipa_err("status straddles buffer\n");
 			WARN_ON(1);
@@ -1792,9 +1768,6 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 		}
 		ipahal_pkt_status_parse(skb->data, &status);
 		skb_data = skb->data;
-		ipa_debug_low("STATUS opcode=%d src=%d dst=%d len=%d\n",
-			      status.status_opcode, status.endp_src_idx,
-			      status.endp_dest_idx, status.pkt_len);
 
 		if (!ipa_status_opcode_supported(status.status_opcode) ||
 			status.status_opcode ==
@@ -1813,7 +1786,6 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 			goto bail;
 		}
 		if (status.pkt_len == 0) {
-			ipa_debug_low("Skip aggr close status\n");
 			skb_pull(skb, pkt_status_sz);
 			continue;
 		}
@@ -1837,17 +1809,14 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 		 */
 		/*QMAP is BE: convert the pkt_len field from BE to LE*/
 		pkt_len_with_pad = ntohs((qmap_hdr >> 16) & 0xffff);
-		ipa_debug_low("pkt_len with pad %d\n", pkt_len_with_pad);
 		/*get the CHECKSUM_PROCESS bit*/
 		status_mask = status.status_mask;
 		checksum = status_mask & IPAHAL_PKT_STATUS_MASK_CKSUM_PROCESS;
-		ipa_debug_low("checksum_trailer_exists %d\n", !!checksum);
 
 		frame_len = pkt_status_sz + IPA_QMAP_HEADER_LENGTH +
 			    pkt_len_with_pad;
 		if (checksum)
 			frame_len += IPA_DL_CHECKSUM_LENGTH;
-		ipa_debug_low("frame_len %d\n", frame_len);
 
 		skb2 = skb_clone(skb, GFP_ATOMIC);
 		if (likely(skb2)) {
@@ -1855,17 +1824,11 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 			 * payload split across 2 buff
 			 */
 			if (skb->len < frame_len) {
-				ipa_debug_low("SPL skb len %d len %d\n",
-					      skb->len, frame_len);
 				sys->rx.prev_skb = skb2;
 				sys->rx.len_rem = frame_len - skb->len;
 				skb_pull(skb, skb->len);
 			} else {
 				skb_trim(skb2, frame_len);
-				ipa_debug_low("rx avail for %d\n",
-					      status.endp_dest_idx);
-				ipa_debug_low(
-					"removing Status element from skb and sending to WAN client");
 				skb_pull(skb2, pkt_status_sz);
 				skb2->truesize = skb2->len +
 					sizeof(struct sk_buff) +
