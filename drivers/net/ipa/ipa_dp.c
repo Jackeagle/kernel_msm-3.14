@@ -1397,12 +1397,10 @@ static struct sk_buff *ipa_join_prev_skb(struct sk_buff *prev_skb,
 	struct sk_buff *skb2;
 
 	skb2 = skb_copy_expand(prev_skb, 0, len, GFP_KERNEL);
-	if (likely(skb2)) {
+	if (likely(skb2))
 		memcpy(skb_put(skb2, len), skb->data, len);
-	} else {
+	else
 		ipa_err("copy expand failed\n");
-		skb2 = NULL;
-	}
 	dev_kfree_skb_any(prev_skb);
 
 	return skb2;
