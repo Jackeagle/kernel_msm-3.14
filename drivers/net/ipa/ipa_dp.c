@@ -53,13 +53,6 @@ struct ipa_rx_pkt_wrapper {
 	struct ipa_sys_context *sys;
 };
 
-struct ipa_repl_ctx {
-	struct ipa_rx_pkt_wrapper **cache;
-	atomic_t head_idx;
-	atomic_t tail_idx;
-	u32 capacity;
-};
-
 /** struct ipa_sys_context - IPA GPI pipes context
  * @head_desc_list: header descriptors list
  * @len: the size of the above list
@@ -91,7 +84,6 @@ struct ipa_sys_context {
 			struct work_struct work; /* sys->wq */
 			struct delayed_work replenish_work; /* sys->wq */
 			void (*repl_hdlr)(struct ipa_sys_context *);
-			struct ipa_repl_ctx repl; /* sys->repl_wq */
 		} rx;
 		struct {	/* Producer pipes only */
 			/* no_intr/nop is APPS_WAN_PROD only */
