@@ -1164,15 +1164,6 @@ static void ipa_replenish_rx_cache_recycle(struct ipa_sys_context *sys)
 						rx_pkt);
 				goto fail_kmem_cache_alloc;
 			}
-			ptr = skb_put(rx_pkt->skb, sys->rx.buff_sz);
-			rx_pkt->dma_addr = dma_map_single(dev, ptr,
-							  sys->rx.buff_sz,
-							  DMA_FROM_DEVICE);
-			if (dma_mapping_error(dev, rx_pkt->dma_addr)) {
-				ipa_err("dma_map_single failure %p for %p\n",
-					(void *)rx_pkt->dma_addr, ptr);
-				goto fail_dma_mapping;
-			}
 		} else {
 			spin_lock_bh(&sys->spinlock);
 			rx_pkt = list_first_entry(&sys->rcycl_list,
@@ -1181,15 +1172,14 @@ static void ipa_replenish_rx_cache_recycle(struct ipa_sys_context *sys)
 			list_del(&rx_pkt->link);
 			spin_unlock_bh(&sys->spinlock);
 			INIT_LIST_HEAD(&rx_pkt->link);
-			ptr = skb_put(rx_pkt->skb, sys->rx.buff_sz);
-			rx_pkt->dma_addr = dma_map_single(dev, ptr,
-							  sys->rx.buff_sz,
-							  DMA_FROM_DEVICE);
-			if (dma_mapping_error(dev, rx_pkt->dma_addr)) {
-				ipa_err("dma_map_single failure %p for %p\n",
-					(void *)rx_pkt->dma_addr, ptr);
-				goto fail_dma_mapping;
-			}
+		}
+		ptr = skb_put(rx_pkt->skb, sys->rx.buff_sz);
+		rx_pkt->dma_addr = dma_map_single(dev, ptr, sys->rx.buff_sz,
+						  DMA_FROM_DEVICE);
+		if (dma_mapping_error(dev, rx_pkt->dma_addr)) {
+			ipa_err("dma_map_single failure %p for %p\n",
+				(void *)rx_pkt->dma_addr, ptr);
+			goto fail_dma_mapping;
 		}
 
 		list_add_tail(&rx_pkt->link, &sys->head_desc_list);
