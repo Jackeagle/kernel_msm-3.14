@@ -1919,10 +1919,7 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u16 size)
 	struct ipa_rx_pkt_wrapper *rx_pkt_expected;
 	struct sk_buff *rx_skb;
 
-	if (unlikely(list_empty(&sys->head_desc_list))) {
-		WARN_ON(1);
-		return;
-	}
+	ipa_assert(!list_empty(&sys->head_desc_list));
 
 	spin_lock_bh(&sys->spinlock);
 	rx_pkt_expected = list_first_entry(&sys->head_desc_list,
