@@ -182,7 +182,7 @@ static void ipa_replenish_rx_cache(struct ipa_sys_context *sys);
 static void ipa_replenish_rx_work_func(struct work_struct *work);
 static void ipa_fast_replenish_rx_cache(struct ipa_sys_context *sys);
 static void ipa_wq_handle_rx(struct work_struct *work);
-static void ipa_rx_common(struct ipa_sys_context *sys, u16 size);
+static void ipa_rx_common(struct ipa_sys_context *sys, u32 size);
 static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 			     struct ipa_sys_context *sys);
 static void ipa_cleanup_rx(struct ipa_sys_context *sys);
@@ -308,7 +308,7 @@ int ipa_rx_poll(u32 clnt_hdl, int weight)
 		if (ret < 0)
 			break;
 
-		ipa_rx_common(ep->sys, (u16)ret);
+		ipa_rx_common(ep->sys, (u32)ret);
 		cnt += IPA_WAN_AGGR_PKT_CNT;
 		total_cnt++;
 
@@ -695,7 +695,7 @@ static int ipa_handle_rx_core(struct ipa_sys_context *sys)
 		if (ret < 0)
 			break;
 
-		ipa_rx_common(sys, (u16)ret);
+		ipa_rx_common(sys, (u32)ret);
 
 		++cnt;
 	}
@@ -1913,7 +1913,7 @@ static void ipa_recycle_rx_wrapper(struct ipa_rx_pkt_wrapper *rx_pkt)
 	spin_unlock_bh(&rx_pkt->sys->spinlock);
 }
 
-static void ipa_rx_common(struct ipa_sys_context *sys, u16 size)
+static void ipa_rx_common(struct ipa_sys_context *sys, u32 size)
 {
 	struct ipa_rx_pkt_wrapper *rx_pkt;
 	struct sk_buff *rx_skb;
@@ -1933,7 +1933,7 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u16 size)
 	dma_unmap_single(ipa_ctx->dev, rx_pkt->data.dma_addr, sys->rx.buff_sz,
 			 DMA_FROM_DEVICE);
 
-	skb_trim(rx_skb, (unsigned int)size);
+	skb_trim(rx_skb, size);
 
 	*(unsigned int *)rx_skb->cb = rx_skb->len;
 	rx_skb->truesize = size + sizeof(struct sk_buff);
