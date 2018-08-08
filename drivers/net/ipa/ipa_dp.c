@@ -1731,16 +1731,6 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 	ep->client_notify(ep->priv, IPA_RECEIVE, (unsigned long)(rx_skb));
 }
 
-static void ipa_recycle_rx_wrapper(struct ipa_rx_pkt_wrapper *rx_pkt)
-{
-	rx_pkt->dma_addr = 0;
-	ipa_skb_recycle(rx_pkt->skb);
-	INIT_LIST_HEAD(&rx_pkt->link);
-	spin_lock_bh(&rx_pkt->sys->spinlock);
-	list_add_tail(&rx_pkt->link, &rx_pkt->sys->rcycl_list);
-	spin_unlock_bh(&rx_pkt->sys->spinlock);
-}
-
 static void ipa_rx_common(struct ipa_sys_context *sys, u32 size)
 {
 	struct ipa_rx_pkt_wrapper *rx_pkt;
@@ -1817,10 +1807,11 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 	ep_cfg_aggr->aggr_en = IPA_ENABLE_AGGR;
 	ep_cfg_aggr->aggr = IPA_GENERIC;
 	ep_cfg_aggr->aggr_time_limit = IPA_GENERIC_AGGR_TIME_LIMIT;
+	sys->rx.repl_hdlr = ipa_replenish_rx_cache;
+	sys->rx.free_wrapper = ipa_free_rx_wrapper;
+
 	if (in->client == IPA_CLIENT_APPS_LAN_CONS) {
 		sys->rx.pyld_hdlr = ipa_lan_rx_pyld_hdlr;
-		sys->rx.repl_hdlr = ipa_replenish_rx_cache_recycle;
-		sys->rx.free_wrapper = ipa_recycle_rx_wrapper;
 		ep_cfg_aggr->aggr_byte_limit = IPA_GENERIC_AGGR_BYTE_LIMIT;
 		ep_cfg_aggr->aggr_pkt_limit = IPA_GENERIC_AGGR_PKT_LIMIT;
 
@@ -1829,8 +1820,6 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 
 	/* in->client == IPA_CLIENT_APPS_WAN_CONS */
 	sys->rx.pyld_hdlr = ipa_wan_rx_pyld_hdlr;
-	sys->rx.free_wrapper = ipa_free_rx_wrapper;
-	sys->rx.repl_hdlr = ipa_replenish_rx_cache;
 
 	ep_cfg_aggr->aggr_sw_eof_active = true;
 	if (ipa_ctx->ipa_client_apps_wan_cons_agg_gro) {
