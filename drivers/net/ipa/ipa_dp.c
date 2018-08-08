@@ -1989,10 +1989,7 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 	/* in->client == IPA_CLIENT_APPS_WAN_CONS */
 	sys->rx.pyld_hdlr = ipa_wan_rx_pyld_hdlr;
 	sys->rx.free_wrapper = ipa_free_rx_wrapper;
-	if (nr_cpu_ids > 1)
-		sys->rx.repl_hdlr = ipa_fast_replenish_rx_cache;
-	else
-		sys->rx.repl_hdlr = ipa_replenish_rx_cache;
+	sys->rx.repl_hdlr = ipa_replenish_rx_cache;
 
 	ep_cfg_aggr->aggr_sw_eof_active = true;
 	if (ipa_ctx->ipa_client_apps_wan_cons_agg_gro) {
