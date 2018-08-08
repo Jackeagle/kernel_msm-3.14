@@ -1431,6 +1431,14 @@ static struct sk_buff *ipa_skb_copy_for_client(struct sk_buff *skb, int len)
 	return skb2;
 }
 
+static bool ipa_status_opcode_supported(enum ipahal_pkt_status_opcode opcode)
+{
+	return opcode == IPAHAL_PKT_STATUS_OPCODE_PACKET ||
+		opcode == IPAHAL_PKT_STATUS_OPCODE_DROPPED_PACKET ||
+		opcode == IPAHAL_PKT_STATUS_OPCODE_SUSPENDED_PACKET ||
+		opcode == IPAHAL_PKT_STATUS_OPCODE_PACKET_2ND_PASS;
+}
+
 static int
 ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 {
@@ -1534,18 +1542,13 @@ begin:
 			      status.status_opcode, status.endp_src_idx,
 			      status.endp_dest_idx, status.pkt_len);
 
-		if (status.status_opcode !=
-			IPAHAL_PKT_STATUS_OPCODE_DROPPED_PACKET &&
-		    status.status_opcode != IPAHAL_PKT_STATUS_OPCODE_PACKET &&
-		    status.status_opcode !=
-			IPAHAL_PKT_STATUS_OPCODE_SUSPENDED_PACKET &&
-		    status.status_opcode !=
-			IPAHAL_PKT_STATUS_OPCODE_PACKET_2ND_PASS) {
+		if (!ipa_status_opcode_supported(status.status_opcode)) {
 			ipa_err("unsupported opcode(%d)\n",
 				status.status_opcode);
 			skb_pull(skb, pkt_status_sz);
 			continue;
 		}
+
 		if (status.endp_dest_idx >= ipa_ctx->ipa_num_pipes ||
 		    status.endp_src_idx >= ipa_ctx->ipa_num_pipes) {
 			ipa_err("status fields invalid\n");
@@ -1793,12 +1796,9 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 			      status.status_opcode, status.endp_src_idx,
 			      status.endp_dest_idx, status.pkt_len);
 
-		if (status.status_opcode !=
-			IPAHAL_PKT_STATUS_OPCODE_DROPPED_PACKET &&
-		    status.status_opcode !=
-			IPAHAL_PKT_STATUS_OPCODE_PACKET &&
-		    status.status_opcode !=
-			IPAHAL_PKT_STATUS_OPCODE_PACKET_2ND_PASS) {
+		if (!ipa_status_opcode_supported(status.status_opcode) ||
+			status.status_opcode ==
+				IPAHAL_PKT_STATUS_OPCODE_SUSPENDED_PACKET) {
 			ipa_err("unsupported opcode(%d)\n",
 				status.status_opcode);
 			skb_pull(skb, pkt_status_sz);
