@@ -72,7 +72,6 @@ struct ipa_sys_context {
 					 struct ipa_sys_context *);
 			struct sk_buff *(*get_skb)(unsigned int, gfp_t);
 			void (*free_skb)(struct sk_buff *);
-			void (*free_wrapper)(struct ipa_rx_pkt_wrapper *);
 			u32 buff_sz;
 			u32 pool_sz;
 			struct sk_buff *prev_skb;
@@ -1634,6 +1633,11 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 	ep->client_notify(ep->priv, IPA_RECEIVE, (unsigned long)(rx_skb));
 }
 
+static void ipa_free_rx_wrapper(struct ipa_rx_pkt_wrapper *rk_pkt)
+{
+	kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rk_pkt);
+}
+
 static void ipa_rx_common(struct ipa_sys_context *sys, u32 size)
 {
 	struct ipa_rx_pkt_wrapper *rx_pkt;
@@ -1660,13 +1664,8 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u32 size)
 	rx_skb->truesize = size + sizeof(struct sk_buff);
 
 	sys->rx.pyld_hdlr(rx_skb, sys);
-	sys->rx.free_wrapper(rx_pkt);
+	ipa_free_rx_wrapper(rx_pkt);
 	ipa_replenish_rx_cache(sys);
-}
-
-static void ipa_free_rx_wrapper(struct ipa_rx_pkt_wrapper *rk_pkt)
-{
-	kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rk_pkt);
 }
 
 static int ipa_assign_policy(struct ipa_sys_connect_params *in,
@@ -1710,7 +1709,6 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 	ep_cfg_aggr->aggr_en = IPA_ENABLE_AGGR;
 	ep_cfg_aggr->aggr = IPA_GENERIC;
 	ep_cfg_aggr->aggr_time_limit = IPA_GENERIC_AGGR_TIME_LIMIT;
-	sys->rx.free_wrapper = ipa_free_rx_wrapper;
 
 	if (in->client == IPA_CLIENT_APPS_LAN_CONS) {
 		sys->rx.pyld_hdlr = ipa_lan_rx_pyld_hdlr;
