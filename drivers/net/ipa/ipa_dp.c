@@ -1241,14 +1241,8 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 			sys->rx.len_pad = 0;
 		} else {
 			if (sys->rx.prev_skb) {
-				skb2 = skb_copy_expand(sys->rx.prev_skb, 0,
-						       skb->len, GFP_KERNEL);
-				if (likely(skb2)) {
-					memcpy(skb_put(skb2, skb->len),
-					       skb->data, skb->len);
-				} else {
-					ipa_err("copy expand failed\n");
-				}
+				skb2 = ipa_join_prev_skb(sys->rx.prev_skb, skb,
+							 skb->len);
 				dev_kfree_skb_any(sys->rx.prev_skb);
 				sys->rx.prev_skb = skb2;
 			}
