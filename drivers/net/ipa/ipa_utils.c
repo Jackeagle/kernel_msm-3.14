@@ -1096,19 +1096,6 @@ struct msm_bus_scale_pdata *ipa_bus_scale_table_init(void)
 	return &ipa_bus_client_pdata;
 }
 
-void ipa_skb_recycle(struct sk_buff *skb)
-{
-	struct skb_shared_info *shinfo;
-
-	shinfo = skb_shinfo(skb);
-	memset(shinfo, 0, offsetof(struct skb_shared_info, dataref));
-	atomic_set(&shinfo->dataref, 1);
-
-	memset(skb, 0, offsetof(struct sk_buff, tail));
-	skb->data = skb->head + NET_SKB_PAD;
-	skb_reset_tail_pointer(skb);
-}
-
 /** ipa_proxy_clk_unvote() - called to remove IPA clock proxy vote
  *
  * Return value: none

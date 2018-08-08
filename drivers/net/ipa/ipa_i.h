@@ -652,8 +652,6 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data);
 
 void ipa_sram_settings_read(void);
 
-void ipa_skb_recycle(struct sk_buff *skb);
-
 void ipa_cfg_ep_status(u32 clnt_hdl,
 		      const struct ipahal_reg_ep_cfg_status *ipa_ep_cfg);
 
