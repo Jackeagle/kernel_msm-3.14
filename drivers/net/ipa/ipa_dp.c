@@ -1915,22 +1915,23 @@ static void ipa_recycle_rx_wrapper(struct ipa_rx_pkt_wrapper *rx_pkt)
 
 static void ipa_rx_common(struct ipa_sys_context *sys, u16 size)
 {
-	struct device *dev = ipa_ctx->dev;
-	struct ipa_rx_pkt_wrapper *rx_pkt_expected;
+	struct ipa_rx_pkt_wrapper *rx_pkt;
 	struct sk_buff *rx_skb;
 
 	ipa_assert(!list_empty(&sys->head_desc_list));
 
 	spin_lock_bh(&sys->spinlock);
-	rx_pkt_expected = list_first_entry(&sys->head_desc_list,
-					   struct ipa_rx_pkt_wrapper, link);
-	list_del(&rx_pkt_expected->link);
+
+	rx_pkt = list_first_entry(&sys->head_desc_list,
+				  struct ipa_rx_pkt_wrapper, link);
+	list_del(&rx_pkt->link);
 	sys->len--;
+
 	spin_unlock_bh(&sys->spinlock);
 
-	rx_skb = rx_pkt_expected->data.skb;
-	dma_unmap_single(dev, rx_pkt_expected->data.dma_addr,
-			 sys->rx.buff_sz, DMA_FROM_DEVICE);
+	rx_skb = rx_pkt->data.skb;
+	dma_unmap_single(ipa_ctx->dev, rx_pkt->data.dma_addr, sys->rx.buff_sz,
+			 DMA_FROM_DEVICE);
 
 	skb_trim(rx_skb, (unsigned int)size);
 
@@ -1938,7 +1939,7 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u16 size)
 	rx_skb->truesize = size + sizeof(struct sk_buff);
 
 	sys->rx.pyld_hdlr(rx_skb, sys);
-	sys->rx.free_wrapper(rx_pkt_expected);
+	sys->rx.free_wrapper(rx_pkt);
 	sys->rx.repl_hdlr(sys);
 }
 
