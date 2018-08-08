@@ -83,7 +83,6 @@ struct ipa_sys_context {
 
 			struct work_struct work; /* sys->wq */
 			struct delayed_work replenish_work; /* sys->wq */
-			void (*repl_hdlr)(struct ipa_sys_context *);
 		} rx;
 		struct {	/* Producer pipes only */
 			/* no_intr/nop is APPS_WAN_PROD only */
@@ -1129,7 +1128,7 @@ static void ipa_replenish_rx_work_func(struct work_struct *work)
 
 	sys = container_of(dwork, struct ipa_sys_context, rx.replenish_work);
 	ipa_client_add();
-	sys->rx.repl_hdlr(sys);
+	ipa_replenish_rx_cache(sys);
 	ipa_client_remove();
 }
 
@@ -1662,7 +1661,7 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u32 size)
 
 	sys->rx.pyld_hdlr(rx_skb, sys);
 	sys->rx.free_wrapper(rx_pkt);
-	sys->rx.repl_hdlr(sys);
+	ipa_replenish_rx_cache(sys);
 }
 
 static void ipa_free_rx_wrapper(struct ipa_rx_pkt_wrapper *rk_pkt)
@@ -1711,7 +1710,6 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 	ep_cfg_aggr->aggr_en = IPA_ENABLE_AGGR;
 	ep_cfg_aggr->aggr = IPA_GENERIC;
 	ep_cfg_aggr->aggr_time_limit = IPA_GENERIC_AGGR_TIME_LIMIT;
-	sys->rx.repl_hdlr = ipa_replenish_rx_cache;
 	sys->rx.free_wrapper = ipa_free_rx_wrapper;
 
 	if (in->client == IPA_CLIENT_APPS_LAN_CONS) {
