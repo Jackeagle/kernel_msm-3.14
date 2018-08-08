@@ -1937,10 +1937,10 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u16 size)
 	rx_skb = rx_pkt_expected->data.skb;
 	dma_unmap_single(dev, rx_pkt_expected->data.dma_addr,
 			 sys->rx.buff_sz, DMA_FROM_DEVICE);
-	skb_set_tail_pointer(rx_skb, rx_pkt_expected->len);
-	rx_skb->len = rx_pkt_expected->len;
+	skb_set_tail_pointer(rx_skb, (int)size);
+	rx_skb->len = (unsigned int)size;
 	*(unsigned int *)rx_skb->cb = rx_skb->len;
-	rx_skb->truesize = rx_pkt_expected->len + sizeof(struct sk_buff);
+	rx_skb->truesize = size + sizeof(struct sk_buff);
 	sys->rx.pyld_hdlr(rx_skb, sys);
 	sys->rx.free_wrapper(rx_pkt_expected);
 	sys->rx.repl_hdlr(sys);
