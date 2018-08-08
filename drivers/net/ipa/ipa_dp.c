@@ -59,7 +59,6 @@ struct ipa_rx_data {
 struct ipa_rx_pkt_wrapper {
 	struct list_head link;
 	struct ipa_rx_data data;
-	u32 len;
 	struct ipa_sys_context *sys;
 };
 
@@ -1931,8 +1930,6 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u16 size)
 	list_del(&rx_pkt_expected->link);
 	sys->len--;
 	spin_unlock_bh(&sys->spinlock);
-
-	rx_pkt_expected->len = (u32)size;
 
 	rx_skb = rx_pkt_expected->data.skb;
 	dma_unmap_single(dev, rx_pkt_expected->data.dma_addr,
