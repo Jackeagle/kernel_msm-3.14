@@ -153,7 +153,6 @@ struct ipa_tag_completion {
 
 static void ipa_rx_switch_to_intr_mode(struct ipa_sys_context *sys);
 
-static struct sk_buff *ipa_get_skb_ipa_rx(unsigned int len, gfp_t flags);
 static void ipa_replenish_rx_cache(struct ipa_sys_context *sys);
 static void ipa_replenish_rx_work_func(struct work_struct *work);
 static void ipa_wq_handle_rx(struct work_struct *work);
@@ -1079,7 +1078,7 @@ static void ipa_replenish_rx_cache(struct ipa_sys_context *sys)
 		INIT_LIST_HEAD(&rx_pkt->link);
 		rx_pkt->sys = sys;
 
-		rx_pkt->skb = ipa_get_skb_ipa_rx(sys->rx.buff_sz, flag);
+		rx_pkt->skb = __dev_alloc_skb(sys->rx.buff_sz, flag);
 		if (!rx_pkt->skb) {
 			ipa_err("failed to alloc skb\n");
 			goto fail_skb_alloc;
@@ -1583,11 +1582,6 @@ bail:
 	return rc;
 }
 
-static struct sk_buff *ipa_get_skb_ipa_rx(unsigned int len, gfp_t flags)
-{
-	return __dev_alloc_skb(len, flags);
-}
-
 void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 {
 	struct sk_buff *rx_skb = (struct sk_buff *)data;
@@ -1653,7 +1647,7 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u32 size)
 	rx_skb->truesize = size + sizeof(struct sk_buff);
 
 	sys->rx.pyld_hdlr(rx_skb, sys);
-	kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rk_pkt);
+	kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rx_pkt);
 	ipa_replenish_rx_cache(sys);
 }
 
