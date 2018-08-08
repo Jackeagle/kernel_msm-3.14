@@ -1153,6 +1153,21 @@ static struct sk_buff *ipa_skb_copy_for_client(struct sk_buff *skb, int len)
 	return skb2;
 }
 
+static struct sk_buff *ipa_join_prev_skb(struct sk_buff *prev_skb,
+					 struct sk_buff *skb, unsigned int len)
+{
+	struct sk_buff *skb2;
+
+	skb2 = skb_copy_expand(prev_skb, 0, len, GFP_KERNEL);
+	if (likely(skb2))
+		memcpy(skb_put(skb2, len), skb->data, len);
+	else
+		ipa_err("copy expand failed\n");
+	dev_kfree_skb_any(prev_skb);
+
+	return skb2;
+}
+
 static bool ipa_status_opcode_supported(enum ipahal_pkt_status_opcode opcode)
 {
 	return opcode == IPAHAL_PKT_STATUS_OPCODE_PACKET ||
@@ -1389,21 +1404,6 @@ begin:
 	};
 
 	return rc;
-}
-
-static struct sk_buff *ipa_join_prev_skb(struct sk_buff *prev_skb,
-					 struct sk_buff *skb, unsigned int len)
-{
-	struct sk_buff *skb2;
-
-	skb2 = skb_copy_expand(prev_skb, 0, len, GFP_KERNEL);
-	if (likely(skb2))
-		memcpy(skb_put(skb2, len), skb->data, len);
-	else
-		ipa_err("copy expand failed\n");
-	dev_kfree_skb_any(prev_skb);
-
-	return skb2;
 }
 
 static void
