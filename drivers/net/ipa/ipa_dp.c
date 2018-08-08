@@ -166,11 +166,30 @@ static struct ipa_tx_pkt_wrapper *tag_to_pointer_wa(u64 tag);
 
 static u32 ipa_adjust_ra_buff_base_sz(u32 aggr_byte_limit);
 
+static void ipa_tx_complete(struct ipa_tx_pkt_wrapper *tx_pkt)
+{
+	struct device *dev = ipa_ctx->dev;
+
+	/* If DMA memory was mapped, unmap it */
+	if (tx_pkt->mem.base) {
+		if (tx_pkt->type != IPA_DATA_DESC_SKB_PAGED)
+			dma_unmap_single(dev, tx_pkt->mem.phys_base,
+					 tx_pkt->mem.size, DMA_TO_DEVICE);
+		else
+			dma_unmap_page(dev, tx_pkt->mem.phys_base,
+				       tx_pkt->mem.size, DMA_TO_DEVICE);
+	}
+
+	if (tx_pkt->callback)
+		tx_pkt->callback(tx_pkt->user1, tx_pkt->user2);
+
+	kmem_cache_free(ipa_ctx->dp->tx_pkt_wrapper_cache, tx_pkt);
+}
+
 static void
 ipa_wq_write_done_common(struct ipa_sys_context *sys,
 			 struct ipa_tx_pkt_wrapper *tx_pkt)
 {
-	struct device *dev = ipa_ctx->dev;
 	struct ipa_tx_pkt_wrapper *next_pkt;
 	int i, cnt;
 
@@ -187,22 +206,8 @@ ipa_wq_write_done_common(struct ipa_sys_context *sys,
 
 		spin_unlock_bh(&sys->spinlock);
 
-		/* If DMA memory was mapped, unmap it */
-		if (tx_pkt->mem.base) {
-			if (tx_pkt->type != IPA_DATA_DESC_SKB_PAGED) {
-				dma_unmap_single(dev, tx_pkt->mem.phys_base,
-						 tx_pkt->mem.size,
-						 DMA_TO_DEVICE);
-			} else {
-				dma_unmap_page(dev, tx_pkt->mem.phys_base,
-					       tx_pkt->mem.size, DMA_TO_DEVICE);
-			}
-		}
+		ipa_tx_complete(tx_pkt);
 
-		if (tx_pkt->callback)
-			tx_pkt->callback(tx_pkt->user1, tx_pkt->user2);
-
-		kmem_cache_free(ipa_ctx->dp->tx_pkt_wrapper_cache, tx_pkt);
 		tx_pkt = next_pkt;
 	}
 }
