@@ -1396,7 +1396,6 @@ ipa_wan_rx_handle_splt_pyld(struct sk_buff *skb, struct ipa_sys_context *sys)
 static int
 ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 {
-	int rc = 0;
 	struct ipahal_pkt_status status;
 	unsigned char *skb_data;
 	u32 pkt_status_sz;
@@ -1418,7 +1417,7 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 	if (ipa_ctx->ipa_client_apps_wan_cons_agg_gro) {
 		sys->ep->client_notify(sys->ep->priv, IPA_RECEIVE,
 				       (unsigned long)(skb));
-		return rc;
+		return 0;
 	}
 
 	/* payload splits across 2 buff or more,
@@ -1523,7 +1522,7 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 bail:
 	dev_kfree_skb_any(skb);
 
-	return rc;
+	return 0;
 }
 
 void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
