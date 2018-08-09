@@ -1178,7 +1178,6 @@ static bool ipa_status_opcode_supported(enum ipahal_pkt_status_opcode opcode)
 static int
 ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 {
-	int rc = 0;
 	struct ipahal_pkt_status status;
 	u32 pkt_status_sz;
 	struct sk_buff *skb2;
@@ -1194,7 +1193,7 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 
 	if (skb->len == 0) {
 		ipa_err("ZLT\n");
-		return rc;
+		return 0;
 	}
 
 	if (sys->rx.len_partial) {
@@ -1246,7 +1245,7 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 				sys->rx.prev_skb = skb2;
 			}
 			sys->rx.len_rem -= skb->len;
-			return rc;
+			return 0;
 		}
 	}
 
@@ -1259,7 +1258,7 @@ begin:
 			WARN_ON(sys->rx.prev_skb);
 			sys->rx.prev_skb = skb_copy(skb, GFP_KERNEL);
 			sys->rx.len_partial = skb->len;
-			return rc;
+			return 0;
 		}
 
 		ipahal_pkt_status_parse(skb->data, &status);
@@ -1294,7 +1293,7 @@ begin:
 				WARN_ON(sys->rx.prev_skb);
 				sys->rx.prev_skb = skb_copy(skb, GFP_KERNEL);
 				sys->rx.len_partial = skb->len;
-				return rc;
+				return 0;
 			}
 
 			pad_len_byte = ((status.pkt_len + 3) & ~3) -
@@ -1357,7 +1356,7 @@ begin:
 		}
 	};
 
-	return rc;
+	return 0;
 }
 
 static void
