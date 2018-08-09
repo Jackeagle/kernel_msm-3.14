@@ -162,7 +162,6 @@ static void ipa_cleanup_rx(struct ipa_sys_context *sys);
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 				 struct ipa_ep_context *ep);
 static int ipa_poll_gsi_pkt(struct ipa_sys_context *sys);
-static struct ipa_tx_pkt_wrapper *tag_to_pointer_wa(u64 tag);
 
 static u32 ipa_adjust_ra_buff_base_sz(u32 aggr_byte_limit);
 
@@ -1280,26 +1279,6 @@ begin:
 				status.endp_dest_idx, status.pkt_len);
 			ipa_bug();
 		}
-		if (status.status_mask & IPAHAL_PKT_STATUS_MASK_TAG_VALID) {
-			struct ipa_tag_completion *comp;
-
-			if (status.tag_info == IPA_COOKIE) {
-				skb_pull(skb, pkt_status_sz);
-				if (skb->len < sizeof(comp)) {
-					ipa_err("TAG arrived without packet\n");
-					return rc;
-				}
-				memcpy(&comp, skb->data, sizeof(comp));
-				skb_pull(skb, sizeof(comp) +
-						IPA_SIZE_DL_CSUM_META_TRAILER);
-				complete(&comp->comp);
-				if (atomic_dec_return(&comp->cnt) == 0)
-					kfree(comp);
-				continue;
-			} else {
-				tx_pkt = tag_to_pointer_wa(status.tag_info);
-			}
-		}
 		if (status.pkt_len == 0) {
 			skb_pull(skb, pkt_status_sz);
 			continue;
@@ -1831,13 +1810,6 @@ static int ipa_poll_gsi_pkt(struct ipa_sys_context *sys)
 	}
 
 	return gsi_poll_channel(sys->ep->gsi_chan_hdl);
-}
-
-static struct ipa_tx_pkt_wrapper *tag_to_pointer_wa(u64 tag)
-{
-	u64 addr = GENMASK(63, 48) | tag;
-
-	return (struct ipa_tx_pkt_wrapper *)addr;
 }
 
 /** ipa_adjust_ra_buff_base_sz()
