@@ -27,7 +27,7 @@
 
 #define VERSION "0.1"
 
-int qca_patch_ver_req(struct hci_dev *hdev, u32 *rome_version)
+static int rome_patch_ver_req(struct hci_dev *hdev, u32 *rome_version)
 {
 	struct sk_buff *skb;
 	struct edl_event_hdr *edl;
@@ -35,14 +35,15 @@ int qca_patch_ver_req(struct hci_dev *hdev, u32 *rome_version)
 	char cmd;
 	int err = 0;
 
-	bt_dev_dbg(hdev, "QCA BTSoC Patch Version Request");
+	BT_DBG("%s: ROME Patch Version Request", hdev->name);
 
 	cmd = EDL_PATCH_VER_REQ_CMD;
 	skb = __hci_cmd_sync_ev(hdev, EDL_PATCH_CMD_OPCODE, EDL_PATCH_CMD_LEN,
 				&cmd, HCI_VENDOR_PKT, HCI_INIT_TIMEOUT);
 	if (IS_ERR(skb)) {
 		err = PTR_ERR(skb);
-		bt_dev_err(hdev, "Failed to read version of BTSoC (%d)", err);
+		BT_ERR("%s: Failed to read version of ROME (%d)", hdev->name,
+		       err);
 		return err;
 	}
 
@@ -87,14 +88,13 @@ out:
 
 	return err;
 }
-EXPORT_SYMBOL_GPL(qca_patch_ver_req);
 
 static int rome_reset(struct hci_dev *hdev)
 {
 	struct sk_buff *skb;
 	int err;
 
-	bt_dev_dbg(hdev, "QCA BTSoC HCI_RESET");
+	BT_DBG("%s: ROME HCI_RESET", hdev->name);
 
 	skb = __hci_cmd_sync(hdev, HCI_OP_RESET, 0, NULL, HCI_INIT_TIMEOUT);
 	if (IS_ERR(skb)) {
@@ -267,7 +267,7 @@ static int rome_download_firmware(struct hci_dev *hdev,
 	const u8 *segment;
 	int ret, remain, i = 0;
 
-	bt_dev_info(hdev, "QCA BTSoC Downloading %s", config->fwname);
+	bt_dev_info(hdev, "ROME Downloading %s", config->fwname);
 
 	ret = request_firmware(&fw, config->fwname, &hdev->dev);
 	if (ret) {
@@ -339,7 +339,7 @@ int qca_uart_setup_rome(struct hci_dev *hdev, uint8_t baudrate)
 	config.user_baud_rate = baudrate;
 
 	/* Get ROME version information */
-	err = qca_patch_ver_req(hdev, &rome_ver);
+	err = rome_patch_ver_req(hdev, &rome_ver);
 	if (err < 0 || rome_ver == 0) {
 		BT_ERR("%s: Failed to get version 0x%x", hdev->name, err);
 		return err;
@@ -379,51 +379,6 @@ int qca_uart_setup_rome(struct hci_dev *hdev, uint8_t baudrate)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(qca_uart_setup_rome);
-
-int qca_uart_setup_cherokee(struct hci_dev *hdev, uint8_t baudrate,
-			    u32 *soc_ver)
-{
-	struct rome_config config;
-	int err;
-	u8 rom_ver;
-
-	/* Which firmware files to download are based on ROM version.
-	 * ROM version is derived from last two bytes of soc_ver.
-	 */
-	rom_ver = ((*soc_ver & 0x00000f00) >> 0x04) | (*soc_ver & 0x0000000f);
-	config.user_baud_rate = baudrate;
-	/* Download rampatch file */
-	config.type = TLV_TYPE_PATCH;
-	snprintf(config.fwname, sizeof(config.fwname), "qca/crbtfw%02x.tlv",
-		 rom_ver);
-	err = rome_download_firmware(hdev, &config);
-	if (err < 0) {
-		BT_ERR("%s: Failed to download patch (%d)", hdev->name, err);
-		return err;
-	}
-
-	/* Download NVM configuration */
-	config.type = TLV_TYPE_NVM;
-	snprintf(config.fwname, sizeof(config.fwname), "qca/crnv%02x.bin",
-		 rom_ver);
-	err = rome_download_firmware(hdev, &config);
-	if (err < 0) {
-		BT_ERR("%s: Failed to download NVM (%d)", hdev->name, err);
-		return err;
-	}
-
-	/* Perform HCI reset */
-	err = rome_reset(hdev);
-	if (err < 0) {
-		BT_ERR("%s: Failed to run HCI_RESET (%d)", hdev->name, err);
-		return err;
-	}
-
-	bt_dev_info(hdev, "wcn3990 setup on UART is completed");
-
-	return 0;
-}
-EXPORT_SYMBOL_GPL(qca_uart_setup_cherokee);
 
 MODULE_AUTHOR("Ben Young Tae Kim <ytkim@qca.qualcomm.com>");
 MODULE_DESCRIPTION("Bluetooth support for Qualcomm Atheros family ver " VERSION);

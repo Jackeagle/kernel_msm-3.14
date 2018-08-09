@@ -35,7 +35,6 @@ static const struct adreno_info gpulist[] = {
 			[ADRENO_FW_PFP] = "a300_pfp.fw",
 		},
 		.gmem  = SZ_256K,
-		.inactive_period = DRM_MSM_INACTIVE_PERIOD,
 		.init  = a3xx_gpu_init,
 	}, {
 		.rev   = ADRENO_REV(3, 0, 6, 0),
@@ -46,7 +45,6 @@ static const struct adreno_info gpulist[] = {
 			[ADRENO_FW_PFP] = "a300_pfp.fw",
 		},
 		.gmem  = SZ_128K,
-		.inactive_period = DRM_MSM_INACTIVE_PERIOD,
 		.init  = a3xx_gpu_init,
 	}, {
 		.rev   = ADRENO_REV(3, 2, ANY_ID, ANY_ID),
@@ -57,7 +55,6 @@ static const struct adreno_info gpulist[] = {
 			[ADRENO_FW_PFP] = "a300_pfp.fw",
 		},
 		.gmem  = SZ_512K,
-		.inactive_period = DRM_MSM_INACTIVE_PERIOD,
 		.init  = a3xx_gpu_init,
 	}, {
 		.rev   = ADRENO_REV(3, 3, 0, ANY_ID),
@@ -68,7 +65,6 @@ static const struct adreno_info gpulist[] = {
 			[ADRENO_FW_PFP] = "a330_pfp.fw",
 		},
 		.gmem  = SZ_1M,
-		.inactive_period = DRM_MSM_INACTIVE_PERIOD,
 		.init  = a3xx_gpu_init,
 	}, {
 		.rev   = ADRENO_REV(4, 2, 0, ANY_ID),
@@ -79,7 +75,6 @@ static const struct adreno_info gpulist[] = {
 			[ADRENO_FW_PFP] = "a420_pfp.fw",
 		},
 		.gmem  = (SZ_1M + SZ_512K),
-		.inactive_period = DRM_MSM_INACTIVE_PERIOD,
 		.init  = a4xx_gpu_init,
 	}, {
 		.rev   = ADRENO_REV(4, 3, 0, ANY_ID),
@@ -90,7 +85,6 @@ static const struct adreno_info gpulist[] = {
 			[ADRENO_FW_PFP] = "a420_pfp.fw",
 		},
 		.gmem  = (SZ_1M + SZ_512K),
-		.inactive_period = DRM_MSM_INACTIVE_PERIOD,
 		.init  = a4xx_gpu_init,
 	}, {
 		.rev = ADRENO_REV(5, 3, 0, 2),
@@ -102,25 +96,10 @@ static const struct adreno_info gpulist[] = {
 			[ADRENO_FW_GPMU] = "a530v3_gpmu.fw2",
 		},
 		.gmem = SZ_1M,
-		/*
-		 * Increase inactive period to 250 to avoid bouncing
-		 * the GDSC which appears to make it grumpy
-		 */
-		.inactive_period = 250,
 		.quirks = ADRENO_QUIRK_TWO_PASS_USE_WFI |
 			ADRENO_QUIRK_FAULT_DETECT_MASK,
 		.init = a5xx_gpu_init,
 		.zapfw = "a530_zap.mdt",
-	}, {
-		.rev = ADRENO_REV(6, 3, 0, ANY_ID),
-		.revn = 630,
-		.name = "A630",
-		.fw = {
-			[ADRENO_FW_SQE] = "a630_sqe.fw",
-			[ADRENO_FW_GMU] = "a630_gmu.bin",
-		},
-		.gmem = SZ_1M,
-		.init = a6xx_gpu_init,
 	},
 };
 
@@ -137,8 +116,6 @@ MODULE_FIRMWARE("qcom/a530_zap.mdt");
 MODULE_FIRMWARE("qcom/a530_zap.b00");
 MODULE_FIRMWARE("qcom/a530_zap.b01");
 MODULE_FIRMWARE("qcom/a530_zap.b02");
-MODULE_FIRMWARE("qcom/a630_sqe.fw");
-MODULE_FIRMWARE("qcom/a630_gmu.bin");
 
 static inline bool _rev_match(uint8_t entry, uint8_t id)
 {
@@ -181,7 +158,7 @@ struct msm_gpu *adreno_load_gpu(struct drm_device *dev)
 	mutex_lock(&dev->struct_mutex);
 	ret = msm_gpu_hw_init(gpu);
 	mutex_unlock(&dev->struct_mutex);
-	pm_runtime_put_autosuspend(&pdev->dev);
+	pm_runtime_put_sync(&pdev->dev);
 	if (ret) {
 		dev_err(dev->dev, "gpu hw init failed: %d\n", ret);
 		return NULL;
@@ -340,7 +317,6 @@ static int adreno_suspend(struct device *dev)
 #endif
 
 static const struct dev_pm_ops adreno_pm_ops = {
-	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_resume)
 	SET_RUNTIME_PM_OPS(adreno_suspend, adreno_resume, NULL)
 };
 

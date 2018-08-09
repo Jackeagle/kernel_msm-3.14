@@ -96,22 +96,6 @@ static inline int rproc_parse_fw(struct rproc *rproc, const struct firmware *fw)
 	return 0;
 }
 
-static inline int rproc_prepare_coredump(struct rproc *rproc)
-{
-	if (rproc->ops->prepare_coredump)
-		return rproc->ops->prepare_coredump(rproc);
-
-	return 0;
-}
-
-static inline int rproc_unprepare_coredump(struct rproc *rproc)
-{
-	if (rproc->ops->unprepare_coredump)
-		return rproc->ops->unprepare_coredump(rproc);
-
-	return 0;
-}
-
 static inline
 struct resource_table *rproc_find_loaded_rsc_table(struct rproc *rproc,
 						   const struct firmware *fw)

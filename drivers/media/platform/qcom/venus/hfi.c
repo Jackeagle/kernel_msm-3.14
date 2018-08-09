@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012-2016, The Linux Foundation. All rights reserved.
- * Copyright (C) 2017-2018, Linaro Ltd.
+ * Copyright (C) 2017 Linaro Ltd.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -24,7 +24,7 @@
 #include "hfi_cmds.h"
 #include "hfi_venus.h"
 
-#define TIMEOUT		msecs_to_jiffies(10000)
+#define TIMEOUT		msecs_to_jiffies(1000)
 
 static u32 to_codec_type(u32 pixfmt)
 {
@@ -207,9 +207,6 @@ int hfi_session_init(struct venus_inst *inst, u32 pixfmt)
 	const struct hfi_ops *ops = core->ops;
 	int ret;
 
-	if (inst->state >= INST_INIT && inst->state < INST_STOP)
-		return 0;
-
 	inst->hfi_codec = to_codec_type(pixfmt);
 	reinit_completion(&inst->done);
 
@@ -387,14 +384,14 @@ int hfi_session_unload_res(struct venus_inst *inst)
 	return 0;
 }
 
-int hfi_session_flush(struct venus_inst *inst, u32 mode)
+int hfi_session_flush(struct venus_inst *inst)
 {
 	const struct hfi_ops *ops = inst->core->ops;
 	int ret;
 
 	reinit_completion(&inst->done);
 
-	ret = ops->session_flush(inst, mode);
+	ret = ops->session_flush(inst, HFI_FLUSH_ALL);
 	if (ret)
 		return ret;
 

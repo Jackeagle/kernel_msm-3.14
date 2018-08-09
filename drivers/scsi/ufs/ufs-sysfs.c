@@ -227,9 +227,8 @@ static ssize_t ufs_sysfs_read_desc_param(struct ufs_hba *hba,
 	if (param_size > 8)
 		return -EINVAL;
 
-	ret = ufshcd_rw_desc_param(hba, UPIU_QUERY_OPCODE_READ_DESC,
-				   desc_id, desc_index,
-				   param_offset, desc_buf, param_size);
+	ret = ufshcd_read_desc_param(hba, desc_id, desc_index,
+				param_offset, desc_buf, param_size);
 	if (ret)
 		return -EINVAL;
 	switch (param_size) {
