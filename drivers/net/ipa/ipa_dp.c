@@ -1179,7 +1179,7 @@ static void
 ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 {
 	struct ipahal_pkt_status status;
-	u32 pkt_status_sz;
+	u32 pkt_status_sz = ipahal_pkt_status_get_size();
 	struct sk_buff *skb2;
 	int pad_len_byte;
 	int len;
@@ -1191,10 +1191,7 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 	unsigned long unused = IPA_GENERIC_RX_BUFF_BASE_SZ - used;
 	struct ipa_tx_pkt_wrapper *tx_pkt = NULL;
 
-	if (!skb->len) {
-		ipa_err("ZLT\n");
-		return;
-	}
+	ipa_assert(skb->len);
 
 	if (sys->rx.len_partial) {
 		buf = skb_push(skb, sys->rx.len_partial);
@@ -1250,7 +1247,6 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 	}
 
 begin:
-	pkt_status_sz = ipahal_pkt_status_get_size();
 	while (skb->len) {
 		sys->rx.drop_packet = false;
 
@@ -1407,10 +1403,7 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 	unsigned int used_align = ALIGN(used, 32);
 	unsigned long unused = IPA_GENERIC_RX_BUFF_BASE_SZ - used;
 
-	if (!skb->len) {
-		ipa_err("ZLT\n");
-		goto bail;
-	}
+	ipa_assert(skb->len);
 
 	if (ipa_ctx->ipa_client_apps_wan_cons_agg_gro) {
 		sys->ep->client_notify(sys->ep->priv, IPA_RECEIVE,
@@ -1527,7 +1520,10 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 	struct ipahal_pkt_status status;
 	struct ipa_ep_context *ep;
 	unsigned int src_pipe;
+	u32 pkt_status_size = ipahal_pkt_status_get_size();
 	u32 metadata;
+
+	ipa_assert(rx_skb->len >= pkt_status_size);
 
 	ipahal_pkt_status_parse(rx_skb->data, &status);
 	src_pipe = status.endp_src_idx;
@@ -1543,7 +1539,7 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 	}
 
 	/* Consume the status packet, and if no exception, the header */
-	skb_pull(rx_skb, ipahal_pkt_status_get_size());
+	skb_pull(rx_skb, pkt_status_size);
 	if (status.exception == IPAHAL_PKT_STATUS_EXCEPTION_NONE)
 		skb_pull(rx_skb, IPA_LAN_RX_HEADER_LENGTH);
 
@@ -1557,7 +1553,7 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 	ipa_debug_low("meta_data: 0x%x cb: 0x%x\n", metadata,
 		      *(u32 *)rx_skb->cb);
 
-	ep->client_notify(ep->priv, IPA_RECEIVE, (unsigned long)(rx_skb));
+	ep->client_notify(ep->priv, IPA_RECEIVE, (unsigned long)rx_skb);
 }
 
 static void ipa_rx_common(struct ipa_sys_context *sys, u32 size)
