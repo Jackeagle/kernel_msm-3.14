@@ -67,7 +67,7 @@ struct ipa_sys_context {
 			u32 len_pending_xfer;
 			atomic_t curr_polling_state;
 			struct delayed_work switch_to_intr_work; /* sys->wq */
-			int (*pyld_hdlr)(struct sk_buff *,
+			void (*pyld_hdlr)(struct sk_buff *,
 					 struct ipa_sys_context *);
 			u32 buff_sz;
 			u32 pool_sz;
@@ -1175,7 +1175,7 @@ static bool ipa_status_opcode_supported(enum ipahal_pkt_status_opcode opcode)
 		opcode == IPAHAL_PKT_STATUS_OPCODE_PACKET_2ND_PASS;
 }
 
-static int
+static void
 ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 {
 	struct ipahal_pkt_status status;
@@ -1191,9 +1191,9 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 	unsigned long unused = IPA_GENERIC_RX_BUFF_BASE_SZ - used;
 	struct ipa_tx_pkt_wrapper *tx_pkt = NULL;
 
-	if (skb->len == 0) {
+	if (!skb->len) {
 		ipa_err("ZLT\n");
-		return 0;
+		return;
 	}
 
 	if (sys->rx.len_partial) {
@@ -1245,7 +1245,7 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 				sys->rx.prev_skb = skb2;
 			}
 			sys->rx.len_rem -= skb->len;
-			return 0;
+			return;
 		}
 	}
 
@@ -1258,7 +1258,7 @@ begin:
 			WARN_ON(sys->rx.prev_skb);
 			sys->rx.prev_skb = skb_copy(skb, GFP_KERNEL);
 			sys->rx.len_partial = skb->len;
-			return 0;
+			return;
 		}
 
 		ipahal_pkt_status_parse(skb->data, &status);
@@ -1293,7 +1293,7 @@ begin:
 				WARN_ON(sys->rx.prev_skb);
 				sys->rx.prev_skb = skb_copy(skb, GFP_KERNEL);
 				sys->rx.len_partial = skb->len;
-				return 0;
+				return;
 			}
 
 			pad_len_byte = ((status.pkt_len + 3) & ~3) -
@@ -1354,9 +1354,7 @@ begin:
 			ipa_wq_write_done_status(status.endp_src_idx, tx_pkt);
 			skb_pull(skb, pkt_status_sz);
 		}
-	};
-
-	return 0;
+	}
 }
 
 static void
@@ -1393,7 +1391,7 @@ ipa_wan_rx_handle_splt_pyld(struct sk_buff *skb, struct ipa_sys_context *sys)
 	}
 }
 
-static int
+static void
 ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 {
 	struct ipahal_pkt_status status;
@@ -1409,7 +1407,7 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 	unsigned int used_align = ALIGN(used, 32);
 	unsigned long unused = IPA_GENERIC_RX_BUFF_BASE_SZ - used;
 
-	if (skb->len == 0) {
+	if (!skb->len) {
 		ipa_err("ZLT\n");
 		goto bail;
 	}
@@ -1417,7 +1415,7 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 	if (ipa_ctx->ipa_client_apps_wan_cons_agg_gro) {
 		sys->ep->client_notify(sys->ep->priv, IPA_RECEIVE,
 				       (unsigned long)(skb));
-		return 0;
+		return;
 	}
 
 	/* payload splits across 2 buff or more,
@@ -1521,8 +1519,6 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 	};
 bail:
 	dev_kfree_skb_any(skb);
-
-	return 0;
 }
 
 void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
