@@ -33,18 +33,20 @@
 /* In IPAv3 only endpoints 0-3 can be configured to deaggregation */
 #define IPA_EP_SUPPORTS_DEAGGR(idx) ((idx) <= 3)
 
-/* HPS, DPS sequencers Types*/
-#define IPA_DPS_HPS_SEQ_TYPE_DMA_ONLY  0x00000000
-/* DMA + DECIPHER/CIPHER */
-#define IPA_DPS_HPS_SEQ_TYPE_DMA_DEC 0x00000011
-/* Packet Processing + no decipher + uCP (for Ethernet Bridging) */
-#define IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP 0x00000002
-/* 2 Packet Processing pass + no decipher + uCP */
-#define IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP 0x00000004
-/* COMP/DECOMP */
-#define IPA_DPS_HPS_SEQ_TYPE_DMA_COMP_DECOMP 0x00000020
-/* Invalid sequencer type */
-#define IPA_DPS_HPS_SEQ_TYPE_INVALID 0xFFFFFFFF
+/* HPS, DPS sequencers Types (numeric values are hardware values) */
+enum ipa_hps_dps_sequencer_type {
+	IPA_DPS_HPS_SEQ_TYPE_DMA_ONLY				= 0x00000000,
+	/* Packet Processing + no decipher + uCP (for Ethernet Bridging) */
+	IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP		= 0x00000002,
+	/* 2 Packet Processing pass + no decipher + uCP */
+	IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP	= 0x00000004,
+	/* DMA + DECIPHER/CIPHER */
+	IPA_DPS_HPS_SEQ_TYPE_DMA_DEC				= 0x00000011,
+	/* COMP/DECOMP */
+	IPA_DPS_HPS_SEQ_TYPE_DMA_COMP_DECOMP			= 0x00000020,
+	/* Invalid sequencer type */
+	IPA_DPS_HPS_SEQ_TYPE_INVALID				= 0xffffffff,
+};
 
 #define QMB_MASTER_SELECT_DDR		0
 
@@ -136,7 +138,7 @@ static const struct rsrc_min_max ipa_rsrc_dst_grp_config
 struct ipa_ep_configuration {
 	bool valid;
 	bool support_flt;
-	int sequencer_type;
+	enum ipa_hps_dps_sequencer_type sequencer_type;
 	struct ipa_gsi_ep_config ipa_gsi_ep_info;
 };
 
