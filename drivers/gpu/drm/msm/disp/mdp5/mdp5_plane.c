@@ -46,7 +46,7 @@ static void mdp5_plane_destroy(struct drm_plane *plane)
 {
 	struct mdp5_plane *mdp5_plane = to_mdp5_plane(plane);
 
-	drm_plane_helper_disable(plane);
+	drm_plane_helper_disable(plane, NULL);
 	drm_plane_cleanup(plane);
 
 	kfree(mdp5_plane);
@@ -531,7 +531,7 @@ static void mdp5_plane_atomic_async_update(struct drm_plane *plane,
 
 		ctl = mdp5_crtc_get_ctl(new_state->crtc);
 
-		mdp5_ctl_commit(ctl, pipeline, mdp5_plane_get_flush(plane));
+		mdp5_ctl_commit(ctl, pipeline, mdp5_plane_get_flush(plane), true);
 	}
 
 	*to_mdp5_plane_state(plane->state) =

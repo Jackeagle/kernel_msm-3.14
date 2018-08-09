@@ -833,6 +833,6 @@ struct da7219_priv {
 	unsigned int *reg_state;
 };
 
-int da7219_set_pll(struct snd_soc_codec *codec, int source, unsigned int fout);
+int da7219_set_pll(struct snd_soc_component *component, int source, unsigned int fout);
 
 #endif /* __DA7219_H */

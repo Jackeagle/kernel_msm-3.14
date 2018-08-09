@@ -33,6 +33,8 @@ EXPORT_SYMBOL(cpu_khz);
 unsigned int __read_mostly tsc_khz;
 EXPORT_SYMBOL(tsc_khz);
 
+#define KHZ	1000
+
 /*
  * TSC can be unstable due to cpufreq or due to unsynced TSCs
  */
@@ -665,29 +667,16 @@ static unsigned long cpu_khz_from_cpuid(void)
 	return eax_base_mhz * 1000;
 }
 
-/**
- * native_calibrate_cpu - calibrate the cpu on boot
+/*
+ * calibrate cpu using pit, hpet, and ptimer methods. They are available
+ * later in boot after acpi is initialized.
  */
-unsigned long native_calibrate_cpu(void)
+static unsigned long pit_hpet_ptimer_calibrate_cpu(void)
 {
 	u64 tsc1, tsc2, delta, ref1, ref2;
 	unsigned long tsc_pit_min = ULONG_MAX, tsc_ref_min = ULONG_MAX;
-	unsigned long flags, latch, ms, fast_calibrate;
+	unsigned long flags, latch, ms;
 	int hpet = is_hpet_enabled(), i, loopmin;
-
-	fast_calibrate = cpu_khz_from_cpuid();
-	if (fast_calibrate)
-		return fast_calibrate;
-
-	fast_calibrate = cpu_khz_from_msr();
-	if (fast_calibrate)
-		return fast_calibrate;
-
-	local_irq_save(flags);
-	fast_calibrate = quick_pit_calibrate();
-	local_irq_restore(flags);
-	if (fast_calibrate)
-		return fast_calibrate;
 
 	/*
 	 * Run 5 calibration loops to get the lowest frequency value
@@ -829,6 +818,37 @@ unsigned long native_calibrate_cpu(void)
 		hpet ? "HPET" : "PMTIMER", tsc_pit_min, tsc_ref_min);
 	pr_info("Using PIT calibration value\n");
 	return tsc_pit_min;
+}
+
+/**
+ * native_calibrate_cpu_early - can calibrate the cpu early in boot
+ */
+unsigned long native_calibrate_cpu_early(void)
+{
+	unsigned long flags, fast_calibrate = cpu_khz_from_cpuid();
+
+	if (!fast_calibrate)
+		fast_calibrate = cpu_khz_from_msr();
+	if (!fast_calibrate) {
+		local_irq_save(flags);
+		fast_calibrate = quick_pit_calibrate();
+		local_irq_restore(flags);
+	}
+	return fast_calibrate;
+}
+
+
+/**
+ * native_calibrate_cpu - calibrate the cpu
+ */
+static unsigned long native_calibrate_cpu(void)
+{
+	unsigned long tsc_freq = native_calibrate_cpu_early();
+
+	if (!tsc_freq)
+		tsc_freq = pit_hpet_ptimer_calibrate_cpu();
+
+	return tsc_freq;
 }
 
 int recalibrate_cpu_khz(void)
@@ -1282,40 +1302,19 @@ static int __init init_tsc_clocksource(void)
  */
 device_initcall(init_tsc_clocksource);
 
-void __init tsc_early_delay_calibrate(void)
+static bool __init determine_cpu_tsc_frequencies(bool early)
 {
-	unsigned long lpj;
+	/* Make sure that cpu and tsc are not already calibrated */
+	WARN_ON(cpu_khz || tsc_khz);
 
-	if (!boot_cpu_has(X86_FEATURE_TSC))
-		return;
-
-	cpu_khz = x86_platform.calibrate_cpu();
-	tsc_khz = x86_platform.calibrate_tsc();
-
-	tsc_khz = tsc_khz ? : cpu_khz;
-	if (!tsc_khz)
-		return;
-
-	lpj = tsc_khz * 1000;
-	do_div(lpj, HZ);
-	loops_per_jiffy = lpj;
-}
-
-void __init tsc_init(void)
-{
-	u64 lpj, cyc;
-	int cpu;
-	u64 initial_tsc;
-
-	if (!boot_cpu_has(X86_FEATURE_TSC)) {
-		setup_clear_cpu_cap(X86_FEATURE_TSC_DEADLINE_TIMER);
-		return;
+	if (early) {
+		cpu_khz = x86_platform.calibrate_cpu();
+		tsc_khz = x86_platform.calibrate_tsc();
+	} else {
+		/* We should not be here with non-native cpu calibration */
+		WARN_ON(x86_platform.calibrate_cpu != native_calibrate_cpu);
+		cpu_khz = pit_hpet_ptimer_calibrate_cpu();
 	}
-
-	rdtscll(initial_tsc);
-
-	cpu_khz = x86_platform.calibrate_cpu();
-	tsc_khz = x86_platform.calibrate_tsc();
 
 	/*
 	 * Trust non-zero tsc_khz as authorative,
@@ -1327,19 +1326,63 @@ void __init tsc_init(void)
 	else if (abs(cpu_khz - tsc_khz) * 10 > tsc_khz)
 		cpu_khz = tsc_khz;
 
-	if (!tsc_khz) {
-		mark_tsc_unstable("could not calculate TSC khz");
+	if (tsc_khz == 0)
+		return false;
+
+	pr_info("Detected %lu.%03lu MHz processor\n",
+		(unsigned long)cpu_khz / KHZ,
+		(unsigned long)cpu_khz % KHZ);
+
+	if (cpu_khz != tsc_khz) {
+		pr_info("Detected %lu.%03lu MHz TSC",
+			(unsigned long)tsc_khz / KHZ,
+			(unsigned long)tsc_khz % KHZ);
+	}
+	return true;
+}
+
+static unsigned long __init get_loops_per_jiffy(void)
+{
+	unsigned long lpj = tsc_khz * KHZ;
+
+	do_div(lpj, HZ);
+	return lpj;
+}
+
+void __init tsc_early_init(void)
+{
+	if (!boot_cpu_has(X86_FEATURE_TSC))
+		return;
+	if (!determine_cpu_tsc_frequencies(true))
+		return;
+	loops_per_jiffy = get_loops_per_jiffy();
+}
+
+void __init tsc_init(void)
+{
+	u64 cyc;
+	int cpu;
+
+	/*
+	 * native_calibrate_cpu_early can only calibrate using methods that are
+	 * available early in boot.
+	 */
+	if (x86_platform.calibrate_cpu == native_calibrate_cpu_early)
+		x86_platform.calibrate_cpu = native_calibrate_cpu;
+
+	if (!boot_cpu_has(X86_FEATURE_TSC)) {
 		setup_clear_cpu_cap(X86_FEATURE_TSC_DEADLINE_TIMER);
 		return;
 	}
 
-	do_div(initial_tsc, cpu_khz / 1000);
-	pr_info("Initial usec timer %llu\n",
-		(unsigned long long)initial_tsc);
-
-	pr_info("Detected %lu.%03lu MHz processor\n",
-		(unsigned long)cpu_khz / 1000,
-		(unsigned long)cpu_khz % 1000);
+	if (!tsc_khz) {
+		/* We failed to determine frequencies earlier, try again */
+		if (!determine_cpu_tsc_frequencies(false)) {
+			mark_tsc_unstable("could not calculate TSC khz");
+			setup_clear_cpu_cap(X86_FEATURE_TSC_DEADLINE_TIMER);
+			return;
+		}
+	}
 
 	/* Sanitize TSC ADJUST before cyc2ns gets initialized */
 	tsc_store_and_check_tsc_adjust(true);
@@ -1367,10 +1410,7 @@ void __init tsc_init(void)
 	if (!no_sched_irq_time)
 		enable_sched_clock_irqtime();
 
-	lpj = ((u64)tsc_khz * 1000);
-	do_div(lpj, HZ);
-	lpj_fine = lpj;
-
+	lpj_fine = get_loops_per_jiffy();
 	use_tsc_delay();
 
 	check_system_tsc_reliable();
