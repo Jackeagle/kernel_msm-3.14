@@ -243,5 +243,34 @@ void qcom_remove_ssr_subdev(struct rproc *rproc, struct qcom_rproc_ssr *ssr)
 }
 EXPORT_SYMBOL_GPL(qcom_remove_ssr_subdev);
 
+void qcom_add_ipa_ssr_subdev(struct rproc *rproc,
+			     struct qcom_rproc_ipa_ssr *ipa_ssr)
+{
+	extern int ipa_ssr_prepare(struct rproc_subdev *);
+	extern int ipa_ssr_start(struct rproc_subdev *);
+	extern void ipa_ssr_stop(struct rproc_subdev *, bool);
+	extern void ipa_ssr_unprepare(struct rproc_subdev *);
+
+	ipa_ssr->subdev.prepare = ipa_ssr_prepare;
+	ipa_ssr->subdev.unprepare = ipa_ssr_unprepare;
+	ipa_ssr->subdev.start = ipa_ssr_start;
+	ipa_ssr->subdev.stop = ipa_ssr_stop;
+
+	rproc_add_subdev(rproc, &ipa_ssr->subdev);
+}
+EXPORT_SYMBOL_GPL(qcom_add_ipa_ssr_subdev);
+
+/**
+ * qcom_remove_ipa_ssr_subdev() - remove the ipa_ssr subdevice from rproc
+ * @rproc:	rproc handle
+ * @ipa_ssr:	the IPA SSR subdevice to remove
+ */
+void qcom_remove_ipa_ssr_subdev(struct rproc *rproc,
+				struct qcom_rproc_ipa_ssr *ipa_ssr)
+{
+	rproc_remove_subdev(rproc, &ipa_ssr->subdev);
+}
+EXPORT_SYMBOL_GPL(qcom_remove_ipa_ssr_subdev);
+
 MODULE_DESCRIPTION("Qualcomm Remoteproc helper driver");
 MODULE_LICENSE("GPL v2");

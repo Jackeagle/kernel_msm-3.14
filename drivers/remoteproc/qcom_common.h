@@ -30,6 +30,10 @@ struct qcom_rproc_ssr {
 	const char *name;
 };
 
+struct qcom_rproc_ipa_ssr {
+	struct rproc_subdev subdev;
+};
+
 void qcom_add_glink_subdev(struct rproc *rproc, struct qcom_rproc_glink *glink);
 void qcom_remove_glink_subdev(struct rproc *rproc, struct qcom_rproc_glink *glink);
 
@@ -41,6 +45,11 @@ void qcom_remove_smd_subdev(struct rproc *rproc, struct qcom_rproc_subdev *smd);
 void qcom_add_ssr_subdev(struct rproc *rproc, struct qcom_rproc_ssr *ssr,
 			 const char *ssr_name);
 void qcom_remove_ssr_subdev(struct rproc *rproc, struct qcom_rproc_ssr *ssr);
+
+void qcom_add_ipa_ssr_subdev(struct rproc *rproc,
+			     struct qcom_rproc_ipa_ssr *ipa_ssr);
+void qcom_remove_ipa_ssr_subdev(struct rproc *rproc,
+				struct qcom_rproc_ipa_ssr *ipa_ssr);
 
 #if IS_ENABLED(CONFIG_QCOM_SYSMON)
 struct qcom_sysmon *qcom_add_sysmon_subdev(struct rproc *rproc,
