@@ -1271,14 +1271,6 @@ begin:
 			continue;
 		}
 
-		if (status.endp_dest_idx >= ipa_ctx->ipa_num_pipes ||
-		    status.endp_src_idx >= ipa_ctx->ipa_num_pipes) {
-			ipa_err("status fields invalid\n");
-			ipa_err("STATUS opcode=%d src=%d dst=%d len=%d\n",
-				status.status_opcode, status.endp_src_idx,
-				status.endp_dest_idx, status.pkt_len);
-			ipa_bug();
-		}
 		if (status.pkt_len == 0) {
 			skb_pull(skb, pkt_status_sz);
 			continue;
@@ -1330,17 +1322,6 @@ begin:
 							pkt_status_sz);
 					if (sys->rx.drop_packet) {
 						dev_kfree_skb_any(skb2);
-					} else if (status.pkt_len >
-						   IPA_GENERIC_AGGR_BYTE_LIMIT *
-						   1024) {
-						ipa_err("packet size invalid\n");
-						ipa_err("STATUS opcode=%d\n",
-							status.status_opcode);
-						ipa_err("src=%d dst=%d len=%d\n",
-							status.endp_src_idx,
-							status.endp_dest_idx,
-							status.pkt_len);
-						ipa_bug();
 					} else {
 						skb2->truesize =
 							skb2->len +
