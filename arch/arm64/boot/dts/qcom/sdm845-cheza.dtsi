@@ -764,9 +764,6 @@ ap_ts_i2c: &i2c14 {
 	pinctrl-1 = <&qup_uart6_sleep>;
 
 	bluetooth: wcn3990-bt {
-		// HACK: Disable until b/112418541 is fixed.
-		status = "disabled";
-
 		compatible = "qcom,wcn3990-bt";
 		vddio-supply = <&src_pp1800_s4a>;
 		vddxo-supply = <&pp1800_l7a_wcn3990>;
