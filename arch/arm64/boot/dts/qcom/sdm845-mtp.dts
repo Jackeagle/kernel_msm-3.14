@@ -15,6 +15,7 @@
 	compatible = "qcom,sdm845-mtp";
 
 	aliases {
+		hsuart0 = &uart6;
 		serial0 = &uart9;
 	};
 
@@ -465,6 +466,16 @@
 			regulator-max-microvolt = <600000>;
 		};
 	};
+
+	pinctrl@3400000 {
+		qup-i2c10-default {
+			pinconf {
+				pins = "gpio55", "gpio56";
+				drive-strength = <2>;
+				bias-disable;
+			};
+		};
+	};
 };
 
 &dsi0 {
@@ -578,8 +589,29 @@
 	status = "okay";
 };
 
+&qupv3_id_0 {
+	status = "okay";
+};
+
 &qupv3_id_1 {
 	status = "okay";
+};
+
+&uart6 {
+	status = "okay";
+
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&qup_uart6_default>;
+	pinctrl-1 = <&qup_uart6_sleep>;
+
+	bluetooth: bt_wcn3990 {
+		compatible = "qcom,wcn3990-bt";
+		vddio-supply = <&vreg_s4a_1p8>;
+		vddxo-supply = <&vreg_l7a_1p8>;
+		vddrf-supply = <&vreg_l17a_1p3>;
+		vddch0-supply = <&vreg_l25a_3p3>;
+		max-speed = <3200000>;
+	};
 };
 
 &uart9 {
@@ -693,6 +725,21 @@
 	};
 };
 
+&qup_uart6_default {
+	pinmux {
+		pins = "gpio45", "gpio46",
+		       "gpio47", "gpio48";
+	};
+
+	pinconf {
+		pins = "gpio45", "gpio46",
+		       "gpio47", "gpio48";
+		drive-strength = <2>;
+		// TODO: does nothing?
+		// bias-no-pull;
+	};
+};
+
 &qup_uart9_default {
 	pinconf-tx {
 		pins = "gpio4";
@@ -710,6 +757,21 @@
 /* PINCTRL - board-specific pinctrl */
 
 &tlmm {
+	qup_uart6_sleep: qup-uart6-sleep {
+		pinmux {
+		        function = "gpio";
+		        pins = "gpio45", "gpio46",
+			       "gpio47", "gpio48";
+		};
+
+		pinconf {
+			pins = "gpio45", "gpio46",
+			       "gpio47", "gpio48";
+			// TODO: does nothing?
+			// bias-no-pull;
+		};
+	};
+
 	sdc2_clk_default: sdc2-clk-default {
 		pinconf {
 			pins = "sdc2_clk";
