@@ -1281,7 +1281,11 @@ static int dpu_kms_hw_init(struct msm_kms *kms)
 			DPU_POWER_EVENT_POST_ENABLE,
 			dpu_kms_handle_power_event, dpu_kms, "kms");
 
-	pm_runtime_put_sync(&dpu_kms->pdev->dev);
+	/*
+	 * HACK: To enable display with new interconnect
+	 * bus framework changes
+	 */
+	//pm_runtime_put_sync(&dpu_kms->pdev->dev);
 
 	return 0;
 

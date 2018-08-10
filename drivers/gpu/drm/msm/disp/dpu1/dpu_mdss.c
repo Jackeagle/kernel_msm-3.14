@@ -228,7 +228,12 @@ int dpu_mdss_init(struct drm_device *dev)
 
 	pm_runtime_get_sync(dev->dev);
 	dpu_mdss->hwversion = readl_relaxed(dpu_mdss->mmio);
-	pm_runtime_put_sync(dev->dev);
+
+	/*
+	 * HACK: To enable display with new interconnect
+	 * bus framework changes
+	 */
+	//pm_runtime_put_sync(dev->dev);
 
 	priv->mdss = &dpu_mdss->base;
 
