@@ -25,6 +25,7 @@
 #include <linux/uaccess.h>
 #include <linux/interrupt.h>
 #include <linux/interconnect.h>
+#include <linux/remoteproc.h>
 #include <linux/netdevice.h>
 #include <linux/delay.h>
 #include <linux/time.h>
@@ -851,6 +852,33 @@ static void ipa_register_panic_hdlr(void)
 {
 	atomic_notifier_chain_register(&panic_notifier_list, &ipa_panic_blk);
 }
+
+/* Remoteproc callbacks for SSR events: prepare, start, stop, unprepare */
+int ipa_ssr_prepare(struct rproc_subdev *subdev)
+{
+	printk("======== SSR prepare received ========\n");
+	return 0;
+}
+EXPORT_SYMBOL_GPL(ipa_ssr_prepare);
+
+int ipa_ssr_start(struct rproc_subdev *subdev)
+{
+	printk("======== SSR start received ========\n");
+	return 0;
+}
+EXPORT_SYMBOL_GPL(ipa_ssr_start);
+
+void ipa_ssr_stop(struct rproc_subdev *subdev, bool crashed)
+{
+	printk("======== SSR stop received ========\n");
+}
+EXPORT_SYMBOL_GPL(ipa_ssr_stop);
+
+void ipa_ssr_unprepare(struct rproc_subdev *subdev)
+{
+	printk("======== SSR unprepare received ========\n");
+}
+EXPORT_SYMBOL_GPL(ipa_ssr_unprepare);
 
 /** ipa_post_init() - Initialize the IPA Driver (Part II).
  * This part contains all initialization which requires interaction with
