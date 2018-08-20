@@ -27,32 +27,22 @@
 #define field_width(field_mask)	       hweight32(field_mask)
 #define field_shift(field_mask)	       __ffs(field_mask)
 
-#define field_gen(val, field_mask)					\
-	({								\
-		BUILD_BUG_ON(!__builtin_constant_p(field_mask));	\
-		BUILD_BUG_ON(!field_mask);				\
-		__field_gen(val, field_mask);				\
-	})
-
-#define field_val(val, field_mask)					\
-	({								\
-		BUILD_BUG_ON(!__builtin_constant_p(field_mask));	\
-		BUILD_BUG_ON(!field_mask);				\
-		__field_val(val, field_mask);				\
-	})
-
-
 /* Generate a field value--the given value shifted into the field's position */
-static __always_inline u32 __field_gen(u32 val, u32 field_mask)
+static __always_inline u32 field_gen(u32 val, u32 field_mask)
 {
+	BUILD_BUG_ON(!__builtin_constant_p(field_mask));
+	BUILD_BUG_ON(!field_mask);
 	WARN_ON(val > field_mask >> field_shift(field_mask));
 
 	return val << field_shift(field_mask) & field_mask;
 }
 
 /* Extract the value of a field from the given register */
-static __always_inline u32 __field_val(u32 reg, u32 field_mask)
+static __always_inline u32 field_val(u32 reg, u32 field_mask)
 {
+	BUILD_BUG_ON(!__builtin_constant_p(field_mask));
+	BUILD_BUG_ON(!field_mask);
+
 	return (reg & field_mask) >> field_shift(field_mask);
 }
 
