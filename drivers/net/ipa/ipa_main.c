@@ -53,14 +53,6 @@
 /* Item number in shared memory of the IPA filter table */
 #define SMEM_IPA_FILTER_TABLE	497
 
-/* The relative location in /lib/firmware where firmware will reside */
-#define IPA_FWS_PATH		"ipa_fws.elf"
-
-/* IPA Data Processing Star firmware image memory size in IPA SRAM */
-#define IPA_DPS_IMG_MEM_SIZE	128	/* bytes */
-/* IPA Header Processing Star firmware image memory size in IPA SRAM */
-#define IPA_HPS_IMG_MEM_SIZE	320	/* bytes */
-
 static void ipa_post_init(struct work_struct *unused);
 static DECLARE_WORK(ipa_post_init_work, ipa_post_init);
 
@@ -960,115 +952,6 @@ static const struct file_operations ipa_drv_fops = {
 	.open = ipa_open
 };
 
-/* Determine whether the given DPS firmware address range is acceptable. */
-static bool ipa_dps_firmware_size_ok(u32 base, u32 size)
-{
-	u32 load_address;
-
-	load_address = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
-	load_address += ipahal_reg_offset(IPA_DPS_SEQUENCER_FIRST);
-
-	return base == load_address && size <= IPA_DPS_IMG_MEM_SIZE;
-}
-
-/* Determine whether the given HPS firmware address range is acceptable. */
-static bool ipa_hps_firmware_size_ok(u32 base, u32 size)
-{
-	u32 load_address;
-
-	load_address = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
-	load_address += ipahal_reg_offset(IPA_HPS_SEQUENCER_FIRST);
-
-	return base == load_address && size <= IPA_HPS_IMG_MEM_SIZE;
-}
-
-/* Load a single blob of firmware based on its description in the
- * given ELF program header.
- */
-static int ipa_firmware_load_one(const struct firmware *firmware,
-				 const struct elf32_phdr *phdr)
-{
-	void __iomem *dest;
-	const void *src;
-	u32 size;
-	u32 excess;
-
-	/* First do some simple sanity checks on the program header */
-	if (phdr->p_memsz % sizeof(u32))
-		return -EINVAL;
-	if (phdr->p_offset + phdr->p_filesz > firmware->size)
-		return -EINVAL;
-	if (phdr->p_filesz > phdr->p_memsz)
-		return -EINVAL;
-
-	dest = ioremap(phdr->p_vaddr, phdr->p_memsz);
-	if (!dest)
-		return -ENOMEM;
-
-	src = firmware->data + phdr->p_offset;
-	size = phdr->p_filesz;
-	excess = phdr->p_memsz - size;
-
-	/* Copy the firmware, and zero any excess */
-	memcpy_toio(dest, src, size);
-	if (excess)
-		memset_io(dest + size, 0, excess);
-
-	iounmap(dest);
-
-	return 0;
-}
-
-static int ipa_firmware_load(void)
-{
-	const struct elf32_phdr *phdr;
-	const struct elf32_hdr *ehdr;
-	const struct firmware *fw;
-	int ret;
-
-	ret = request_firmware(&fw, IPA_FWS_PATH, ipa_ctx->dev);
-	if (ret)
-		return ret;
-
-	/* Make sure we have at least a header, and that it
-	 * indicates we have three segments (GSI, DPS, HPS).
-	 * Segment sizes will be checked when loaded.
-	 */
-	ret = -EINVAL;
-	if (fw->size < sizeof(*ehdr) + 3 * sizeof(*phdr))
-		goto out;
-	ehdr = (const struct elf32_hdr *)fw->data;
-	if (ehdr->e_phnum != 3)
-		goto out;
-
-	/* Now load each segment after verifying it size is OK */
-	phdr = (const struct elf32_phdr *)(fw->data + ehdr->e_phoff);
-	if (gsi_firmware_size_ok(phdr->p_vaddr, phdr->p_memsz))
-		ret = ipa_firmware_load_one(fw, phdr);
-	else
-		ret = -EINVAL;
-	if (ret)
-		goto out;
-
-	phdr++;
-	if (ipa_dps_firmware_size_ok(phdr->p_vaddr, phdr->p_memsz))
-		ret = ipa_firmware_load_one(fw, phdr);
-	else
-		ret = -EINVAL;
-	if (ret)
-		goto out;
-
-	phdr++;
-	if (ipa_hps_firmware_size_ok(phdr->p_vaddr, phdr->p_memsz))
-		ret = ipa_firmware_load_one(fw, phdr);
-	else
-		ret = -EINVAL;
-out:
-	release_firmware(fw);
-
-	return ret;
-}
-
 static int ipa_open(struct inode *inode, struct file *filp)
 {
 	struct ipa_context *ctx = NULL;
@@ -1423,7 +1306,6 @@ static irqreturn_t ipa_smp2p_modem_clk_query_isr(int irq, void *ctxt)
 
 static irqreturn_t ipa_smp2p_modem_post_init_isr(int irq, void *ctxt)
 {
-	(void)ipa_firmware_load;
 	queue_work(ipa_ctx->power_mgmt_wq, &ipa_post_init_work);
 
 	return IRQ_HANDLED;

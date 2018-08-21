@@ -931,32 +931,6 @@ int gsi_deregister_device(void)
 	return 0;
 }
 
-/* Determine whether the given GSI firmware address range is acceptable. */
-bool gsi_firmware_size_ok(u32 base, u32 size)
-{
-	u32 load_address;
-
-	/* The base has to match the first instruction address.  And
-	 * the size can't exceed the number of 4-byte instructions
-	 * we have room for.
-	 */
-	load_address = gsi_ctx->phys_base + GSI_INST_RAM_N_OFFS(0);
-
-	return base == load_address && size <= 4 * (GSI_INST_RAM_N_MAX_N + 1);
-}
-
-void gsi_firmware_enable(void)
-{
-	u32 val;
-
-	val = field_gen(1, MCS_CFG_ENABLE_BMSK);
-	gsi_writel(val, GSI_MCS_CFG_OFFS);
-
-	val = field_gen(1, GSI_ENABLE_BMSK);
-	val |= field_gen(1, DOUBLE_MCS_CLK_FREQ_BMSK);
-	gsi_writel(val, GSI_CFG_OFFS);
-}
-
 static void
 gsi_program_evt_ring_ctx(u8 evt_id, u32 size, u64 phys_base, u16 int_modt)
 {
