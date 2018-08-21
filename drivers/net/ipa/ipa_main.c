@@ -903,7 +903,7 @@ static void ipa_register_panic_hdlr(void)
  * - Trigger IPA ready callbacks (to all subscribers)
  * - Trigger IPA completion object (to all who wait on it)
  */
-static int ipa_post_init(void)
+static void ipa_post_init(void)
 {
 	int result;
 
@@ -913,13 +913,13 @@ static int ipa_post_init(void)
 	result = ipa_init_interrupts();
 	if (result) {
 		ipa_err("ipa initialization of interrupts failed\n");
-		return -ENODEV;
+		return ;
 	}
 
 	result = gsi_register_device();
 	if (result) {
 		ipa_err(":gsi register error - %d\n", result);
-		return -ENODEV;
+		return ;
 	}
 	ipa_debug("IPA gsi is registered\n");
 
@@ -927,7 +927,7 @@ static int ipa_post_init(void)
 	if (ipa_setup_apps_pipes()) {
 		ipa_err(":failed to setup IPA-Apps pipes\n");
 		gsi_deregister_device();
-		return -ENODEV;
+		return;
 	}
 	ipa_debug("IPA GPI pipes were connected\n");
 
@@ -945,8 +945,6 @@ static int ipa_post_init(void)
 		ipa_err("WWAN init failed (ignoring)\n");
 
 	ipa_info("IPA driver initialization was successful.\n");
-
-	return 0;
 }
 
 static ssize_t ipa_write(struct file *file, const char __user *buf,
