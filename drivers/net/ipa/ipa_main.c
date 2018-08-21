@@ -61,6 +61,9 @@
 /* IPA Header Processing Star firmware image memory size in IPA SRAM */
 #define IPA_HPS_IMG_MEM_SIZE	320	/* bytes */
 
+static void ipa_post_init(struct work_struct *unused);
+static DECLARE_WORK(ipa_post_init_work, ipa_post_init);
+
 static void ipa_client_remove_deferred(struct work_struct *work);
 static DECLARE_WORK(ipa_client_remove_work, ipa_client_remove_deferred);
 
@@ -1080,27 +1083,6 @@ static int ipa_open(struct inode *inode, struct file *filp)
 static ssize_t ipa_write(struct file *file, const char __user *buf,
 			 size_t count, loff_t *ppos)
 {
-	int result;
-
-	if (!count)
-		return 0;
-
-	ipa_client_add();
-
-	result = ipa_firmware_load();
-	if (!result)
-		gsi_firmware_enable();
-
-	ipa_client_remove();
-
-	if (result) {
-		ipa_err("IPA FW loading process has failed\n");
-		return result;
-	}
-	ipa_info("IPA FW loaded successfully\n");
-
-	ipa_post_init(NULL);
-
 	return count;
 }
 
@@ -1439,6 +1421,14 @@ static irqreturn_t ipa_smp2p_modem_clk_query_isr(int irq, void *ctxt)
 	return IRQ_HANDLED;
 }
 
+static irqreturn_t ipa_smp2p_modem_post_init_isr(int irq, void *ctxt)
+{
+	(void)ipa_firmware_load;
+	queue_work(ipa_ctx->power_mgmt_wq, &ipa_post_init_work);
+
+	return IRQ_HANDLED;
+}
+
 static int ipa_smp2p_init(struct device *dev)
 {
 	struct device_node *node = dev->of_node;
@@ -1480,7 +1470,22 @@ static int ipa_smp2p_init(struct device *dev)
 					ipa_smp2p_modem_clk_query_isr, 0,
 					"ipa_smp2p_clk_vote", dev);
 	if (res) {
-		ipa_err("error %d requesting threaded irq\n", res);
+		ipa_err("error %d requesting clk-query threaded irq\n", res);
+		return -ENODEV;
+	}
+
+	res = of_irq_get_byname(node, "ipa-post-init");
+	if (res < 0) {
+		ipa_err("error %d getting post-init irq\n", res);
+		return res;
+	}
+	irq = res;
+
+	res = devm_request_threaded_irq(dev, irq, NULL,
+					ipa_smp2p_modem_post_init_isr, 0,
+					"ipa_smp2p_post_init", dev);
+	if (res) {
+		ipa_err("error %d requesting post-init threaded irq\n", res);
 		return -ENODEV;
 	}
 
