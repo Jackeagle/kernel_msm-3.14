@@ -903,7 +903,7 @@ static void ipa_register_panic_hdlr(void)
  * - Trigger IPA ready callbacks (to all subscribers)
  * - Trigger IPA completion object (to all who wait on it)
  */
-static void ipa_post_init(void)
+static void ipa_post_init(struct work_struct *unused)
 {
 	int result;
 
@@ -1099,7 +1099,7 @@ static ssize_t ipa_write(struct file *file, const char __user *buf,
 	}
 	ipa_info("IPA FW loaded successfully\n");
 
-	ipa_post_init();
+	ipa_post_init(NULL);
 
 	return count;
 }
