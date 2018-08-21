@@ -11,7 +11,6 @@
 #include <linux/compat.h>
 #include <linux/device.h>
 #include <linux/dmapool.h>
-#include <linux/fs.h>
 #include <linux/genalloc.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
@@ -942,33 +941,6 @@ static void ipa_post_init(struct work_struct *unused)
 	ipa_info("IPA driver initialization was successful.\n");
 }
 
-static ssize_t ipa_write(struct file *file, const char __user *buf,
-			 size_t count, loff_t *ppos);
-
-static int ipa_open(struct inode *inode, struct file *filp);
-
-static const struct file_operations ipa_drv_fops = {
-	.write = ipa_write,
-	.open = ipa_open
-};
-
-static int ipa_open(struct inode *inode, struct file *filp)
-{
-	struct ipa_context *ctx = NULL;
-
-	ipa_debug_low("ENTER\n");
-
-	ctx = container_of(inode->i_cdev, struct ipa_context, cdev);
-	filp->private_data = ctx;
-	return 0;
-}
-
-static ssize_t ipa_write(struct file *file, const char __user *buf,
-			 size_t count, loff_t *ppos)
-{
-	return count;
-}
-
 static int ipa_alloc_pkt_init(void)
 {
 	struct ipa_mem_buffer *mem = &ipa_ctx->pkt_init_mem;
@@ -1018,12 +990,6 @@ err_dma_free:
 	ipahal_dma_free(mem);
 
 	return -ENOMEM;
-}
-
-static void ipa_free_pkt_init(void)
-{
-	memset(&ipa_ctx->pkt_init_imm, 0, sizeof(ipa_ctx->pkt_init_imm));
-	ipahal_dma_free(&ipa_ctx->pkt_init_mem);
 }
 
 static bool config_valid(void)
@@ -1232,23 +1198,6 @@ static int ipa_pre_init(void)
 		goto err_dp_exit;
 	}
 
-	ipa_ctx->class = class_create(THIS_MODULE, DRV_NAME);
-
-	result = alloc_chrdev_region(&ipa_ctx->dev_num, 0, 1, DRV_NAME);
-	if (result) {
-		ipa_err("alloc_chrdev_region err.\n");
-		result = -ENODEV;
-		goto err_gsi_dma_task_free;
-	}
-
-	ipa_ctx->chrdev = device_create(ipa_ctx->class, NULL, ipa_ctx->dev_num,
-					ipa_ctx, DRV_NAME);
-	if (IS_ERR(ipa_ctx->chrdev)) {
-		ipa_err(":device_create err.\n");
-		result = -ENODEV;
-		goto err_unregister_chrdev_region;
-	}
-
 	/* Create a wakeup source. */
 	wakeup_source_init(&ipa_ctx->w_lock, "IPA_WS");
 	spin_lock_init(&ipa_ctx->wakelock_ref_cnt.spinlock);
@@ -1257,7 +1206,7 @@ static int ipa_pre_init(void)
 	if (result) {
 		ipa_err("Failed to alloc pkt_init payload\n");
 		result = -ENODEV;
-		goto err_device_destroy;
+		goto err_gsi_dma_task_free;
 	}
 
 	/* Note enabling dynamic clock division must not be
@@ -1265,25 +1214,8 @@ static int ipa_pre_init(void)
 	 */
 	ipa_enable_dcd();
 
-	cdev_init(&ipa_ctx->cdev, &ipa_drv_fops);
-	ipa_ctx->cdev.owner = THIS_MODULE;
-	result = cdev_add(&ipa_ctx->cdev, ipa_ctx->dev_num, 1);
-	if (result) {
-		ipa_err(":cdev_add err=%d\n", -result);
-		result = -ENODEV;
-		goto err_free_pkt_init;
-	}
-	ipa_debug("ipa cdev added successful. major:%d minor:%d\n",
-		  MAJOR(ipa_ctx->dev_num), MINOR(ipa_ctx->dev_num));
-
 	return 0;
 
-err_free_pkt_init:
-	ipa_free_pkt_init();
-err_device_destroy:
-	device_destroy(ipa_ctx->class, ipa_ctx->dev_num);
-err_unregister_chrdev_region:
-	unregister_chrdev_region(ipa_ctx->dev_num, 1);
 err_gsi_dma_task_free:
 	ipa_gsi_dma_task_free();
 err_dp_exit:

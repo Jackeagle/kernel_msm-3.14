@@ -545,11 +545,6 @@ struct ipa_context {
 
 	struct device *dev;
 
-	struct class *class;
-	dev_t dev_num;
-	struct device *chrdev;
-	struct cdev cdev;
-
 	struct ipa_ep_context ep[IPA_MAX_NUM_PIPES];
 	u32 ep_flt_bitmap;
 	u32 ep_flt_num;
