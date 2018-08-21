@@ -1479,8 +1479,7 @@ static int ipa_smp2p_init(struct device *dev)
 	irq = res;
 
 	res = devm_request_threaded_irq(dev, irq, NULL,
-					ipa_smp2p_modem_clk_query_isr,
-					IRQF_TRIGGER_RISING,
+					ipa_smp2p_modem_clk_query_isr, 0,
 					"ipa_smp2p_clk_vote", dev);
 	if (res) {
 		ipa_err("error %d requesting threaded irq\n", res);
