@@ -995,9 +995,10 @@
 			reg-names = "ipa-base",
 				    "gsi-base";
 
-			interrupts-extended = <&intc 0 311 0>,
-					      <&intc 0 432 0>,
-					      <&ipa_smp2p_in 0 0>;
+			interrupts-extended =
+					<&intc 0 311 0>,
+					<&intc 0 432 0>,
+					<&ipa_smp2p_in 0 IRQ_TYPE_EDGE_RISING>;
 			interrupt-names = "ipa-irq",
 					  "gsi-irq",
 					  "ipa-clock-query";
