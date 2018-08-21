@@ -998,10 +998,12 @@
 			interrupts-extended =
 					<&intc 0 311 0>,
 					<&intc 0 432 0>,
-					<&ipa_smp2p_in 0 IRQ_TYPE_EDGE_RISING>;
+					<&ipa_smp2p_in 0 IRQ_TYPE_EDGE_RISING>,
+					<&ipa_smp2p_in 1 IRQ_TYPE_EDGE_RISING>;
 			interrupt-names = "ipa-irq",
 					  "gsi-irq",
-					  "ipa-clock-query";
+					  "ipa-clock-query",
+					  "ipa-post-init";
 
 			qcom,smem-states = <&ipa_smp2p_out 0>,
 					   <&ipa_smp2p_out 1>;
