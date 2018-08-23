@@ -584,7 +584,7 @@ static void gsi_ring_evt_doorbell(struct gsi_ctx *gsi, struct gsi_evt_ctx *evtr)
 	 * respectively.  LSB (doorbell 0) must be written last.
 	 */
 	val = evtr->ring.wp_local >> 32;
-	gsi_writel(gtsi, val,
+	gsi_writel(gsi, val,
 		   GSI_EE_N_EV_CH_K_DOORBELL_1_OFFS(evtr->id, IPA_EE_AP));
 
 	val = evtr->ring.wp_local & GENMASK(31, 0);
@@ -592,7 +592,8 @@ static void gsi_ring_evt_doorbell(struct gsi_ctx *gsi, struct gsi_evt_ctx *evtr)
 		   GSI_EE_N_EV_CH_K_DOORBELL_0_OFFS(evtr->id, IPA_EE_AP));
 }
 
-static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *chan)
+static void
+gsi_ring_chan_doorbell(struct gsi_ctx *gsi, struct gsi_chan_ctx *chan)
 {
 	u32 val;
 	u8 ch_id = chan->props.ch_id;
@@ -603,7 +604,7 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *chan)
 	 * interrupt handling.
 	 */
 	if (chan->props.from_gsi)
-		gsi_ring_evt_doorbell(gsi_ctx, chan->evtr);
+		gsi_ring_evt_doorbell(gsi, chan->evtr);
 	chan->ring.wp = chan->ring.wp_local;
 
 	/* The doorbell 0 and 1 registers store the low-order and
@@ -611,10 +612,10 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *chan)
 	 * respectively.  LSB (doorbell 0) must be written last.
 	 */
 	val = chan->ring.wp_local >> 32;
-	gsi_writel(gsi_ctx, val,
+	gsi_writel(gsi, val,
 		   GSI_EE_N_GSI_CH_K_DOORBELL_1_OFFS(ch_id, IPA_EE_AP));
 	val = chan->ring.wp_local & GENMASK(31, 0);
-	gsi_writel(gsi_ctx, val,
+	gsi_writel(gsi, val,
 		   GSI_EE_N_GSI_CH_K_DOORBELL_0_OFFS(ch_id, IPA_EE_AP));
 }
 
@@ -1585,7 +1586,7 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 	wmb();	/* Ensure TRE is set before ringing doorbell */
 
 	if (ring_db)
-		gsi_ring_chan_doorbell(chan);
+		gsi_ring_chan_doorbell(gsi_ctx, chan);
 
 	spin_unlock_irqrestore(&chan->evtr->ring.slock, flags);
 
@@ -1604,7 +1605,7 @@ int gsi_start_xfer(unsigned long chan_id)
 	if (chan->ring.wp == chan->ring.wp_local)
 		return 0;
 
-	gsi_ring_chan_doorbell(chan);
+	gsi_ring_chan_doorbell(gsi_ctx, chan);
 
 	return 0;
 }
