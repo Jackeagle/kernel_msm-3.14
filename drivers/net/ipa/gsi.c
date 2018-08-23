@@ -1734,11 +1734,16 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev)
 		return ERR_PTR(-EINVAL);
 	}
 
+	size = resource_size(res);
+	if (res->start > U32_MAX || size > U32_MAX) {
+		ipa_err("\"gsi-base\" values out of range\n");
+		return ERR_PTR(-EINVAL);
+	}
+
 	gsi_ctx = kzalloc(sizeof(*gsi_ctx), GFP_KERNEL);
 	if (!gsi_ctx)
 		return ERR_PTR(-ENOMEM);
 
-	size = resource_size(res);
 	gsi_ctx->base = devm_ioremap_nocache(dev, res->start, size);
 	if (!gsi_ctx->base) {
 		ipa_err("failed to remap GSI memory\n");
@@ -1747,7 +1752,6 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev)
 	}
 
 	gsi_ctx->dev = dev;
-	ipa_assert(res->start <= (resource_size_t)U32_MAX);
 	gsi_ctx->phys_base = (u32)res->start;
 
 	return gsi_ctx;
