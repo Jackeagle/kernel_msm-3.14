@@ -1167,7 +1167,9 @@ void gsi_reset_evt_ring(struct gsi_ctx *gsi, unsigned long evt_id)
 	mutex_unlock(&gsi->mlock);
 }
 
-static void gsi_program_chan_ctx(struct gsi_chan_props *props, u8 evt_id)
+static void
+gsi_program_chan_ctx(struct gsi_ctx *gsi, struct gsi_chan_props *props,
+		u8 evt_id)
 {
 	u32 offset;
 	u32 val;
@@ -1177,11 +1179,11 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, u8 evt_id)
 	val |= field_gen(props->from_gsi ? 0 : 1, CHTYPE_DIR_BMSK);
 	val |= field_gen(evt_id, ERINDEX_BMSK);
 	val |= field_gen(GSI_RING_ELEMENT_SIZE, ELEMENT_SIZE_BMSK);
-	gsi_writel(gsi_ctx, val, offset);
+	gsi_writel(gsi, val, offset);
 
 	offset = GSI_EE_N_GSI_CH_K_CNTXT_1_OFFS(props->ch_id, IPA_EE_AP);
 	val = field_gen(props->mem.size, R_LENGTH_BMSK);
-	gsi_writel(gsi_ctx, val, offset);
+	gsi_writel(gsi, val, offset);
 
 	/* The context 2 and 3 registers store the low-order and
 	 * high-order 32 bits of the address of the channel ring,
@@ -1189,17 +1191,17 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, u8 evt_id)
 	 */
 	offset = GSI_EE_N_GSI_CH_K_CNTXT_2_OFFS(props->ch_id, IPA_EE_AP);
 	val = props->mem.phys_base & GENMASK(31, 0);
-	gsi_writel(gsi_ctx, val, offset);
+	gsi_writel(gsi, val, offset);
 
 	offset = GSI_EE_N_GSI_CH_K_CNTXT_3_OFFS(props->ch_id, IPA_EE_AP);
 	val = props->mem.phys_base >> 32;
-	gsi_writel(gsi_ctx, val, offset);
+	gsi_writel(gsi, val, offset);
 
 	offset = GSI_EE_N_GSI_CH_K_QOS_OFFS(props->ch_id, IPA_EE_AP);
 	val = field_gen(props->low_weight, WRR_WEIGHT_BMSK);
 	val |= field_gen(GSI_MAX_PREFETCH, MAX_PREFETCH_BMSK);
 	val |= field_gen(props->use_db_engine ? 1 : 0, USE_DB_ENG_BMSK);
-	gsi_writel(gsi_ctx, val, offset);
+	gsi_writel(gsi, val, offset);
 }
 
 long gsi_alloc_channel(struct gsi_ctx *gsi, struct gsi_chan_props *props)
@@ -1266,7 +1268,7 @@ long gsi_alloc_channel(struct gsi_ctx *gsi, struct gsi_chan_props *props)
 	atomic_inc(&evtr->chan_ref_cnt);
 	evtr->chan = chan;
 
-	gsi_program_chan_ctx(props, evt_id);
+	gsi_program_chan_ctx(gsi, props, evt_id);
 	gsi_init_ring(&chan->ring, &props->mem);
 
 	chan->user_data = user_data;
@@ -1461,7 +1463,7 @@ reset:
 		goto reset;
 	}
 
-	gsi_program_chan_ctx(&chan->props, chan->evtr->id);
+	gsi_program_chan_ctx(gsi, &chan->props, chan->evtr->id);
 	gsi_init_ring(&chan->ring, &chan->props.mem);
 
 	/* restore scratch */
@@ -1710,7 +1712,7 @@ int gsi_set_channel_cfg(struct gsi_ctx *gsi, unsigned long chan_id,
 	mutex_lock(&chan->mlock);
 	chan->props = *props;
 
-	gsi_program_chan_ctx(&chan->props, chan->evtr->id);
+	gsi_program_chan_ctx(gsi, &chan->props, chan->evtr->id);
 	gsi_init_ring(&chan->ring, &chan->props.mem);
 
 	/* restore scratch */
