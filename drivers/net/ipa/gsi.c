@@ -857,8 +857,7 @@ int gsi_register_device(struct gsi_ctx *gsi)
 	if (WARN_ON(max_ev > GSI_EVT_RING_MAX))
 		return -EIO;
 
-	ret = devm_request_irq(gsi->dev, gsi->irq, gsi_isr,
-			       IRQF_TRIGGER_HIGH, "gsi", gsi);
+	ret = request_irq(gsi->irq, gsi_isr, IRQF_TRIGGER_HIGH, "gsi", gsi);
 	if (ret) {
 		ipa_err("failed to register isr for %u\n", gsi->irq);
 		return -EIO;
@@ -905,6 +904,9 @@ void gsi_deregister_device(void)
 		(void)disable_irq_wake(gsi_ctx->irq);
 		gsi_ctx->irq_wake_enabled = false;
 	}
+	free_irq(gsi_ctx->irq, gsi_ctx);
+	gsi_ctx->irq = 0;
+
 	gsi_ctx->per_registered = false;
 }
 
