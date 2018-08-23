@@ -138,6 +138,7 @@ struct gsi_ctx {
 	struct device *dev;
 	u32 phys_base;
 	unsigned int irq;
+	bool irq_wake_enabled;
 	spinlock_t slock;	/* protects global register updates */
 	struct mutex mlock;	/* protects 1-at-a-time commands, evt_bmap */
 	atomic_t num_chan;
@@ -857,13 +858,12 @@ int gsi_register_device(struct gsi_ctx *gsi)
 		return -EIO;
 	}
 
+	gsi->per_registered = true;
+
 	ret = enable_irq_wake(gsi->irq);
 	if (ret)
-		ipa_err("failed to enable wake irq %u\n", gsi->irq);
-	else
-		ipa_err("GSI irq is wake enabled %u\n", gsi->irq);
-
-	gsi->per_registered = true;
+		ipa_err("error %d enabling gsi wake irq\n", ret);
+	gsi->irq_wake_enabled = !ret;
 
 	gsi->max_ch = gsi_get_max_channels();
 	if (WARN_ON(gsi->max_ch > GSI_CHAN_MAX))
@@ -910,9 +910,11 @@ int gsi_deregister_device(void)
 	gsi_evt_bmap_exit();
 	gsi_ctx->max_ev = 0;
 	gsi_ctx->max_ch = 0;
+	if (gsi_ctx->irq_wake_enabled) {
+		(void)disable_irq_wake(gsi_ctx->irq);
+		gsi_ctx->irq_wake_enabled = false;
+	}
 	gsi_ctx->per_registered = false;
-	/* XXX We don't know whether enabling this succeeded */
-	/* (void)disable_irq_wake(gsi_ctx->irq); */
 
 	return 0;
 }
