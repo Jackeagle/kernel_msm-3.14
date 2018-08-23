@@ -887,7 +887,7 @@ int gsi_register_device(struct gsi_ctx *gsi)
 	return 0;
 }
 
-int gsi_deregister_device(void)
+void gsi_deregister_device(void)
 {
 	ipa_assert(!atomic_read(&gsi_ctx->num_chan));
 	ipa_assert(!atomic_read(&gsi_ctx->num_evt_ring));
@@ -906,8 +906,6 @@ int gsi_deregister_device(void)
 		gsi_ctx->irq_wake_enabled = false;
 	}
 	gsi_ctx->per_registered = false;
-
-	return 0;
 }
 
 static void

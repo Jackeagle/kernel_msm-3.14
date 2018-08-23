@@ -173,10 +173,8 @@ int gsi_register_device(struct gsi_ctx *gsi);
 
 /** gsi_deregister_device - Peripheral should call this function to
  * de-register itself with GSI
- *
- * @Return 0, or a negative errno
  */
-int gsi_deregister_device(void);
+void gsi_deregister_device(void);
 
 /** gsi_alloc_evt_ring - Peripheral should call this function to
  * allocate an event ring once gsi_register_device() has been called
