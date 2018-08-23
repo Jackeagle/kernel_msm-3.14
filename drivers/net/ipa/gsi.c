@@ -1725,7 +1725,6 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev)
 	struct device *dev = &pdev->dev;
 	struct resource *res;
 	resource_size_t size;
-	int ret;
 
 	/* Get GSI memory range and map it */
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "gsi-base");
@@ -1746,20 +1745,13 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev)
 
 	gsi_ctx->base = devm_ioremap_nocache(dev, res->start, size);
 	if (!gsi_ctx->base) {
-		ipa_err("failed to remap GSI memory\n");
-		ret = -ENOMEM;
-		goto err_free_gsi;
-	}
+		kfree(gsi_ctx);
+		gsi_ctx = NULL;
 
+		return ERR_PTR(-ENOMEM);
+	}
 	gsi_ctx->dev = dev;
 	gsi_ctx->phys_base = (u32)res->start;
 
 	return gsi_ctx;
-
-err_free_gsi:
-	kfree(gsi_ctx);
-	gsi_ctx = NULL;
-
-	return ERR_PTR(ret);
-
 }
