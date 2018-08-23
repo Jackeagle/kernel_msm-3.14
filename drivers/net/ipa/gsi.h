@@ -320,11 +320,10 @@ int gsi_poll_channel(struct gsi_ctx *gsi, unsigned long chan_id);
 
 /** gsi_channel_intr_enable/disable - control channel interrupts
  *
- * @chan_hdl:  Client handle previously obtained from
- *	       gsi_alloc_channel
+ * @chan_id:  Client handle previously obtained from gsi_alloc_channel()
  */
-void gsi_channel_intr_enable(unsigned long chan_hdl);
-void gsi_channel_intr_disable(unsigned long chan_hdl);
+void gsi_channel_intr_enable(struct gsi_ctx *gsi, unsigned long chan_id);
+void gsi_channel_intr_disable(struct gsi_ctx *gsi, unsigned long chan_id);
 
 /** gsi_queue_xfer - Peripheral should call this function
  * to queue transfers on the given channel

@@ -1647,28 +1647,29 @@ int gsi_poll_channel(struct gsi_ctx *gsi, unsigned long chan_id)
 	return size;
 }
 
-static void gsi_config_channel_mode(unsigned long chan_id, bool polling)
+static void gsi_config_channel_mode(struct gsi_ctx *gsi, unsigned long chan_id,
+		bool polling)
 {
-	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	unsigned long flags;
 
-	spin_lock_irqsave(&gsi_ctx->slock, flags);
+	spin_lock_irqsave(&gsi->slock, flags);
 	if (polling)
 		gsi_irq_disable_event(chan->evtr->id);
 	else
 		gsi_irq_enable_event(chan->evtr->id);
 	atomic_set(&chan->poll_mode, polling ? 1 : 0);
-	spin_unlock_irqrestore(&gsi_ctx->slock, flags);
+	spin_unlock_irqrestore(&gsi->slock, flags);
 }
 
-void gsi_channel_intr_enable(unsigned long chan_id)
+void gsi_channel_intr_enable(struct gsi_ctx *gsi, unsigned long chan_id)
 {
-	gsi_config_channel_mode(chan_id, false);
+	gsi_config_channel_mode(gsi, chan_id, false);
 }
 
-void gsi_channel_intr_disable(unsigned long chan_id)
+void gsi_channel_intr_disable(struct gsi_ctx *gsi, unsigned long chan_id)
 {
-	gsi_config_channel_mode(chan_id, true);
+	gsi_config_channel_mode(gsi, chan_id, true);
 }
 
 int gsi_get_channel_cfg(struct gsi_ctx *gsi, unsigned long chan_id,

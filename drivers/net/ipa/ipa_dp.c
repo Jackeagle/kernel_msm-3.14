@@ -683,14 +683,14 @@ static void ipa_rx_switch_to_intr_mode(struct ipa_sys_context *sys)
 		return;
 	}
 	ipa_dec_release_wakelock();
-	gsi_channel_intr_enable(sys->ep->gsi_chan_hdl);
+	gsi_channel_intr_enable(ipa_ctx->gsi_ctx, sys->ep->gsi_chan_hdl);
 }
 
 void ipa_rx_switch_to_poll_mode(struct ipa_sys_context *sys)
 {
 	if (atomic_xchg(&sys->rx.curr_polling_state, 1))
 		return;
-	gsi_channel_intr_disable(sys->ep->gsi_chan_hdl);
+	gsi_channel_intr_disable(ipa_ctx->gsi_ctx, sys->ep->gsi_chan_hdl);
 	ipa_inc_acquire_wakelock();
 	queue_work(sys->wq, &sys->rx.work);
 }

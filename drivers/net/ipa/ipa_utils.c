@@ -1281,7 +1281,7 @@ static void resume_consumer_pipe(enum ipa_client_type client)
 
 	resume_consumer_endpoint(ipa_ep_idx);
 	if (!ipa_ep_polling(ep))
-		gsi_channel_intr_enable(ep->gsi_chan_hdl);
+		gsi_channel_intr_enable(ipa_ctx->gsi_ctx, ep->gsi_chan_hdl);
 }
 
 void ipa_resume_apps_pipes(void)
