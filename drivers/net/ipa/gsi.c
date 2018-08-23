@@ -1725,8 +1725,9 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev)
 	struct device *dev = &pdev->dev;
 	struct resource *res;
 	resource_size_t size;
+	int ret;
 
-	gsi_ctx = devm_kzalloc(dev, sizeof(*gsi_ctx), GFP_KERNEL);
+	gsi_ctx = kzalloc(sizeof(*gsi_ctx), GFP_KERNEL);
 	if (!gsi_ctx)
 		return ERR_PTR(-ENOMEM);
 
@@ -1734,14 +1735,16 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev)
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "gsi-base");
 	if (!res) {
 		ipa_err("missing \"gsi-base\" property in DTB\n");
-		return ERR_PTR(-EINVAL);
+		ret = -EINVAL;
+		goto err_free_gsi;
 	}
 
 	size = resource_size(res);
 	gsi_ctx->base = devm_ioremap_nocache(dev, res->start, size);
 	if (!gsi_ctx->base) {
 		ipa_err("failed to remap GSI memory\n");
-		return ERR_PTR(-ENOMEM);
+		ret = -ENOMEM;
+		goto err_free_gsi;
 	}
 
 	gsi_ctx->dev = dev;
@@ -1749,4 +1752,11 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev)
 	gsi_ctx->phys_base = (u32)res->start;
 
 	return gsi_ctx;
+
+err_free_gsi:
+	kfree(gsi_ctx);
+	gsi_ctx = NULL;
+
+	return ERR_PTR(ret);
+
 }
