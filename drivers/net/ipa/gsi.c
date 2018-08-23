@@ -1727,17 +1727,16 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev)
 	resource_size_t size;
 	int ret;
 
-	gsi_ctx = kzalloc(sizeof(*gsi_ctx), GFP_KERNEL);
-	if (!gsi_ctx)
-		return ERR_PTR(-ENOMEM);
-
 	/* Get GSI memory range and map it */
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "gsi-base");
 	if (!res) {
 		ipa_err("missing \"gsi-base\" property in DTB\n");
-		ret = -EINVAL;
-		goto err_free_gsi;
+		return ERR_PTR(-EINVAL);
 	}
+
+	gsi_ctx = kzalloc(sizeof(*gsi_ctx), GFP_KERNEL);
+	if (!gsi_ctx)
+		return ERR_PTR(-ENOMEM);
 
 	size = resource_size(res);
 	gsi_ctx->base = devm_ioremap_nocache(dev, res->start, size);
