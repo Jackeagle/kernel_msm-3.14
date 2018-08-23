@@ -967,14 +967,14 @@ static void gsi_init_ring(struct gsi_ring_ctx *ring, struct ipa_mem_buffer *mem)
 	ring->end = mem->phys_base + mem->size;
 }
 
-static void gsi_prime_evt_ring(struct gsi_evt_ctx *evtr)
+static void gsi_prime_evt_ring(struct gsi_ctx *gsi, struct gsi_evt_ctx *evtr)
 {
 	unsigned long flags;
 
 	spin_lock_irqsave(&evtr->ring.slock, flags);
 	memset(evtr->ring.mem.base, 0, evtr->ring.mem.size);
 	evtr->ring.wp_local = evtr->ring.end - GSI_RING_ELEMENT_SIZE;
-	gsi_ring_evt_doorbell(gsi_ctx, evtr);
+	gsi_ring_evt_doorbell(gsi, evtr);
 	spin_unlock_irqrestore(&evtr->ring.slock, flags);
 }
 
@@ -1080,7 +1080,7 @@ long gsi_alloc_evt_ring(u32 ring_count, u16 int_modt)
 				 evtr->mem.phys_base, evtr->int_modt);
 	gsi_init_ring(&evtr->ring, &evtr->mem);
 
-	gsi_prime_evt_ring(evtr);
+	gsi_prime_evt_ring(gsi_ctx, evtr);
 
 	mutex_unlock(&gsi_ctx->mlock);
 
@@ -1163,7 +1163,7 @@ void gsi_reset_evt_ring(unsigned long evt_id)
 
 	__gsi_zero_evt_ring_scratch(evt_id);
 
-	gsi_prime_evt_ring(evtr);
+	gsi_prime_evt_ring(gsi_ctx, evtr);
 	mutex_unlock(&gsi_ctx->mlock);
 }
 
