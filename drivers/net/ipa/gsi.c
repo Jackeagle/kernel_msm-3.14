@@ -351,28 +351,27 @@ static void gsi_handle_chan_ctrl(struct gsi_ctx *gsi)
 	}
 }
 
-static void gsi_handle_evt_ctrl(void)
+static void gsi_handle_evt_ctrl(struct gsi_ctx *gsi)
 {
-	u32 valid_mask = GENMASK(gsi_ctx->max_ev - 1, 0);
+	u32 valid_mask = GENMASK(gsi->max_ev - 1, 0);
 	u32 evt_mask;
 
-	evt_mask = gsi_readl(gsi_ctx,
-			     GSI_EE_N_CNTXT_SRC_EV_CH_IRQ_OFFS(IPA_EE_AP));
-	gsi_writel(gsi_ctx, evt_mask,
+	evt_mask = gsi_readl(gsi, GSI_EE_N_CNTXT_SRC_EV_CH_IRQ_OFFS(IPA_EE_AP));
+	gsi_writel(gsi, evt_mask,
 		   GSI_EE_N_CNTXT_SRC_EV_CH_IRQ_CLR_OFFS(IPA_EE_AP));
 
 	ipa_debug("evt_mask %x\n", evt_mask);
 	if (evt_mask & ~valid_mask) {
-		ipa_err("invalid events (> %u)\n", gsi_ctx->max_ev);
+		ipa_err("invalid events (> %u)\n", gsi->max_ev);
 		evt_mask &= valid_mask;
 	}
 
 	while (evt_mask) {
 		int i = __ffs(evt_mask);
-		struct gsi_evt_ctx *evtr = &gsi_ctx->evtr[i];
+		struct gsi_evt_ctx *evtr = &gsi->evtr[i];
 		u32 val;
 
-		val = gsi_readl(gsi_ctx,
+		val = gsi_readl(gsi,
 				GSI_EE_N_EV_CH_K_CNTXT_0_OFFS(i, IPA_EE_AP));
 		evtr->state = field_val(val, EV_CHSTATE_BMSK);
 		ipa_debug("evt %d state updated to %u\n", i, evtr->state);
@@ -772,7 +771,7 @@ static irqreturn_t gsi_isr(int irq, void *dev_id)
 				gsi_handle_chan_ctrl(gsi);
 				break;
 			case EV_CTRL_BMSK:
-				gsi_handle_evt_ctrl();
+				gsi_handle_evt_ctrl(gsi);
 				break;
 			case GLOB_EE_BMSK:
 				gsi_handle_glob_ee();
