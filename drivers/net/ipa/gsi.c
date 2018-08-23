@@ -133,7 +133,7 @@ struct ch_debug_stats {
 	unsigned long cmd_completed;
 };
 
-struct gsi_ctx {
+struct gsi {
 	void __iomem *base;
 	struct device *dev;
 	u32 phys_base;
@@ -256,7 +256,7 @@ union gsi_channel_scratch {
 /* Read a value from the given offset into the I/O space defined in
  * the GSI context.
  */
-static u32 gsi_readl(struct gsi_ctx *gsi, u32 offset)
+static u32 gsi_readl(struct gsi *gsi, u32 offset)
 {
 	return readl(gsi->base + offset);
 }
@@ -264,12 +264,12 @@ static u32 gsi_readl(struct gsi_ctx *gsi, u32 offset)
 /* Write the provided value to the given offset into the I/O space
  * defined in the GSI context.
  */
-static void gsi_writel(struct gsi_ctx *gsi, u32 v, u32 offset)
+static void gsi_writel(struct gsi *gsi, u32 v, u32 offset)
 {
 	writel(v, gsi->base + offset);
 }
 
-static void _gsi_irq_control_event(struct gsi_ctx *gsi, u8 evt_id, bool enable)
+static void _gsi_irq_control_event(struct gsi *gsi, u8 evt_id, bool enable)
 {
 	u32 offset = GSI_EE_N_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(IPA_EE_AP);
 	u32 mask = BIT(evt_id);
@@ -283,17 +283,17 @@ static void _gsi_irq_control_event(struct gsi_ctx *gsi, u8 evt_id, bool enable)
 	gsi_writel(gsi, val, offset);
 }
 
-static void gsi_irq_disable_event(struct gsi_ctx *gsi, u8 evt_id)
+static void gsi_irq_disable_event(struct gsi *gsi, u8 evt_id)
 {
 	_gsi_irq_control_event(gsi, evt_id, false);
 }
 
-static void gsi_irq_enable_event(struct gsi_ctx *gsi, u8 evt_id)
+static void gsi_irq_enable_event(struct gsi *gsi, u8 evt_id)
 {
 	_gsi_irq_control_event(gsi, evt_id, true);
 }
 
-static void _gsi_irq_control_all(struct gsi_ctx *gsi, bool enable)
+static void _gsi_irq_control_all(struct gsi *gsi, bool enable)
 {
 	u32 val = enable ? ~0 : 0;
 
@@ -308,17 +308,17 @@ static void _gsi_irq_control_all(struct gsi_ctx *gsi, bool enable)
 	gsi_writel(gsi, val, GSI_EE_N_CNTXT_GSI_IRQ_EN_OFFS(IPA_EE_AP));
 }
 
-static void gsi_irq_disable_all(struct gsi_ctx *gsi)
+static void gsi_irq_disable_all(struct gsi *gsi)
 {
 	_gsi_irq_control_all(gsi, false);
 }
 
-static void gsi_irq_enable_all(struct gsi_ctx *gsi)
+static void gsi_irq_enable_all(struct gsi *gsi)
 {
 	_gsi_irq_control_all(gsi, true);
 }
 
-static void gsi_handle_chan_ctrl(struct gsi_ctx *gsi)
+static void gsi_handle_chan_ctrl(struct gsi *gsi)
 {
 	u32 valid_mask = GENMASK(gsi->max_ch - 1, 0);
 	u32 ch_mask;
@@ -349,7 +349,7 @@ static void gsi_handle_chan_ctrl(struct gsi_ctx *gsi)
 	}
 }
 
-static void gsi_handle_evt_ctrl(struct gsi_ctx *gsi)
+static void gsi_handle_evt_ctrl(struct gsi *gsi)
 {
 	u32 valid_mask = GENMASK(gsi->max_ev - 1, 0);
 	u32 evt_mask;
@@ -381,7 +381,7 @@ static void gsi_handle_evt_ctrl(struct gsi_ctx *gsi)
 }
 
 static void
-handle_glob_chan_err(struct gsi_ctx *gsi, u32 err_ee, u32 chan_id, u32 code)
+handle_glob_chan_err(struct gsi *gsi, u32 err_ee, u32 chan_id, u32 code)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	u32 offset;
@@ -429,7 +429,7 @@ handle_glob_chan_err(struct gsi_ctx *gsi, u32 err_ee, u32 chan_id, u32 code)
 }
 
 static void
-handle_glob_evt_err(struct gsi_ctx *gsi, u32 err_ee, u32 evt_id, u32 code)
+handle_glob_evt_err(struct gsi *gsi, u32 err_ee, u32 evt_id, u32 code)
 {
 	struct gsi_evt_ctx *evtr = &gsi->evtr[evt_id];
 
@@ -461,7 +461,7 @@ handle_glob_evt_err(struct gsi_ctx *gsi, u32 err_ee, u32 evt_id, u32 code)
 	}
 }
 
-static void gsi_handle_glob_err(struct gsi_ctx *gsi, u32 err)
+static void gsi_handle_glob_err(struct gsi *gsi, u32 err)
 {
 	struct gsi_log_err *log = (struct gsi_log_err *)&err;
 
@@ -484,7 +484,7 @@ static void gsi_handle_glob_err(struct gsi_ctx *gsi, u32 err)
 	}
 }
 
-static void gsi_handle_glob_ee(struct gsi_ctx *gsi)
+static void gsi_handle_glob_ee(struct gsi *gsi)
 {
 	u32 val;
 
@@ -546,7 +546,7 @@ static void chan_xfer_cb(struct gsi_chan_ctx *chan, u16 count)
 	}
 }
 
-static u16 gsi_process_chan(struct gsi_ctx *gsi, struct gsi_xfer_compl_evt *evt,
+static u16 gsi_process_chan(struct gsi *gsi, struct gsi_xfer_compl_evt *evt,
 		bool callback)
 {
 	struct gsi_chan_ctx *chan;
@@ -574,7 +574,7 @@ static u16 gsi_process_chan(struct gsi_ctx *gsi, struct gsi_xfer_compl_evt *evt,
 	return evt->len;
 }
 
-static void gsi_ring_evt_doorbell(struct gsi_ctx *gsi, struct gsi_evt_ctx *evtr)
+static void gsi_ring_evt_doorbell(struct gsi *gsi, struct gsi_evt_ctx *evtr)
 {
 	u32 val;
 
@@ -592,7 +592,7 @@ static void gsi_ring_evt_doorbell(struct gsi_ctx *gsi, struct gsi_evt_ctx *evtr)
 }
 
 static void
-gsi_ring_chan_doorbell(struct gsi_ctx *gsi, struct gsi_chan_ctx *chan)
+gsi_ring_chan_doorbell(struct gsi *gsi, struct gsi_chan_ctx *chan)
 {
 	u32 val;
 	u8 ch_id = chan->props.ch_id;
@@ -618,7 +618,7 @@ gsi_ring_chan_doorbell(struct gsi_ctx *gsi, struct gsi_chan_ctx *chan)
 		   GSI_EE_N_GSI_CH_K_DOORBELL_0_OFFS(ch_id, IPA_EE_AP));
 }
 
-static void handle_event(struct gsi_ctx *gsi, int evt_id)
+static void handle_event(struct gsi *gsi, int evt_id)
 {
 	struct gsi_evt_ctx *evtr = &gsi->evtr[evt_id];
 	u32 offset = GSI_EE_N_EV_CH_K_CNTXT_4_OFFS(evt_id, IPA_EE_AP);
@@ -656,7 +656,7 @@ static void handle_event(struct gsi_ctx *gsi, int evt_id)
 	spin_unlock_irqrestore(&evtr->ring.slock, flags);
 }
 
-static void gsi_handle_ieob(struct gsi_ctx *gsi)
+static void gsi_handle_ieob(struct gsi *gsi)
 {
 	u32 valid_mask = GENMASK(gsi->max_ev - 1, 0);
 	u32 evt_mask;
@@ -681,7 +681,7 @@ static void gsi_handle_ieob(struct gsi_ctx *gsi)
 	}
 }
 
-static void gsi_handle_inter_ee_chan_ctrl(struct gsi_ctx *gsi)
+static void gsi_handle_inter_ee_chan_ctrl(struct gsi *gsi)
 {
 	u32 valid_mask = GENMASK(gsi->max_ch - 1, 0);
 	u32 ch_mask;
@@ -704,7 +704,7 @@ static void gsi_handle_inter_ee_chan_ctrl(struct gsi_ctx *gsi)
 	}
 }
 
-static void gsi_handle_inter_ee_evt_ctrl(struct gsi_ctx *gsi)
+static void gsi_handle_inter_ee_evt_ctrl(struct gsi *gsi)
 {
 	u32 valid_mask = GENMASK(gsi->max_ev - 1, 0);
 	u32 evt_mask;
@@ -727,7 +727,7 @@ static void gsi_handle_inter_ee_evt_ctrl(struct gsi_ctx *gsi)
 	}
 }
 
-static void gsi_handle_general(struct gsi_ctx *gsi)
+static void gsi_handle_general(struct gsi *gsi)
 {
 	u32 val;
 
@@ -746,14 +746,14 @@ static void gsi_handle_general(struct gsi_ctx *gsi)
 #define GSI_ISR_MAX_ITER 50
 
 /* Returns a bitmask of pending GSI interrupts */
-static u32 gsi_interrupt_type(struct gsi_ctx *gsi)
+static u32 gsi_interrupt_type(struct gsi *gsi)
 {
 	return gsi_readl(gsi, GSI_EE_N_CNTXT_TYPE_IRQ_OFFS(IPA_EE_AP));
 }
 
 static irqreturn_t gsi_isr(int irq, void *dev_id)
 {
-	struct gsi_ctx *gsi = dev_id;
+	struct gsi *gsi = dev_id;
 	u32 cnt = 0;
 	u32 type;
 
@@ -797,14 +797,14 @@ static irqreturn_t gsi_isr(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-static u32 gsi_get_max_channels(struct gsi_ctx *gsi)
+static u32 gsi_get_max_channels(struct gsi *gsi)
 {
 	u32 val = gsi_readl(gsi, GSI_EE_N_GSI_HW_PARAM_2_OFFS(IPA_EE_AP));
 
 	return field_val(val, GSI_NUM_CH_PER_EE_BMSK);
 }
 
-static u32 gsi_get_max_event_rings(struct gsi_ctx *gsi)
+static u32 gsi_get_max_event_rings(struct gsi *gsi)
 {
 	u32 val = gsi_readl(gsi, GSI_EE_N_GSI_HW_PARAM_2_OFFS(IPA_EE_AP));
 
@@ -825,7 +825,7 @@ static u32 gsi_evt_bmap(u32 max_ev)
 }
 
 /* gsi->mlock is assumed held by caller */
-static unsigned long gsi_evt_bmap_alloc(struct gsi_ctx *gsi)
+static unsigned long gsi_evt_bmap_alloc(struct gsi *gsi)
 {
 	unsigned long evt_id;
 
@@ -838,14 +838,14 @@ static unsigned long gsi_evt_bmap_alloc(struct gsi_ctx *gsi)
 }
 
 /* gsi->mlock is assumed held by caller */
-static void gsi_evt_bmap_free(struct gsi_ctx *gsi, unsigned long evt_id)
+static void gsi_evt_bmap_free(struct gsi *gsi, unsigned long evt_id)
 {
 	ipa_assert(gsi->evt_bmap & BIT(evt_id));
 
 	gsi->evt_bmap &= ~BIT(evt_id);
 }
 
-int gsi_register_device(struct gsi_ctx *gsi)
+int gsi_register_device(struct gsi *gsi)
 {
 	u32 val;
 	u32 max_ch;
@@ -893,7 +893,7 @@ int gsi_register_device(struct gsi_ctx *gsi)
 	return 0;
 }
 
-void gsi_deregister_device(struct gsi_ctx *gsi)
+void gsi_deregister_device(struct gsi *gsi)
 {
 	ipa_assert(!atomic_read(&gsi->num_chan));
 	ipa_assert(!atomic_read(&gsi->num_evt_ring));
@@ -915,7 +915,7 @@ void gsi_deregister_device(struct gsi_ctx *gsi)
 	gsi->irq = 0;
 }
 
-static void gsi_program_evt_ring_ctx(struct gsi_ctx *gsi, u8 evt_id,
+static void gsi_program_evt_ring_ctx(struct gsi *gsi, u8 evt_id,
 		u32 size, u64 phys_base, u16 int_modt)
 {
 	u32 int_modc = 1;	/* moderation always comes from channel*/
@@ -966,7 +966,7 @@ static void gsi_init_ring(struct gsi_ring_ctx *ring, struct ipa_mem_buffer *mem)
 	ring->end = mem->phys_base + mem->size;
 }
 
-static void gsi_prime_evt_ring(struct gsi_ctx *gsi, struct gsi_evt_ctx *evtr)
+static void gsi_prime_evt_ring(struct gsi *gsi, struct gsi_evt_ctx *evtr)
 {
 	unsigned long flags;
 
@@ -983,7 +983,7 @@ static void gsi_prime_evt_ring(struct gsi_ctx *gsi, struct gsi_evt_ctx *evtr)
  * is first, value to write is second (reverse of writel() order).
  */
 static u32
-command(struct gsi_ctx *gsi, u32 reg, u32 val, struct completion *compl)
+command(struct gsi *gsi, u32 reg, u32 val, struct completion *compl)
 {
 	// BUILD_BUG_ON(GSI_CMD_TIMEOUT > (unsigned long)U32_MAX);
 
@@ -993,7 +993,7 @@ command(struct gsi_ctx *gsi, u32 reg, u32 val, struct completion *compl)
 }
 
 /* Issue an event ring command and wait for it to complete */
-static u32 evt_ring_command(struct gsi_ctx *gsi, unsigned long evt_id,
+static u32 evt_ring_command(struct gsi *gsi, unsigned long evt_id,
 		enum gsi_evt_ch_cmd_opcode op)
 {
 	struct completion *compl = &gsi->evtr[evt_id].compl;
@@ -1012,7 +1012,7 @@ static u32 evt_ring_command(struct gsi_ctx *gsi, unsigned long evt_id,
 }
 
 /* Issue a channel command and wait for it to complete */
-static u32 channel_command(struct gsi_ctx *gsi, unsigned long chan_id,
+static u32 channel_command(struct gsi *gsi, unsigned long chan_id,
 		enum gsi_ch_cmd_opcode op)
 {
 	struct completion *compl = &gsi->chan[chan_id].compl;
@@ -1031,7 +1031,7 @@ static u32 channel_command(struct gsi_ctx *gsi, unsigned long chan_id,
 }
 
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
-long gsi_alloc_evt_ring(struct gsi_ctx *gsi, u32 ring_count, u16 int_modt)
+long gsi_alloc_evt_ring(struct gsi *gsi, u32 ring_count, u16 int_modt)
 {
 	u32 size = ring_count * GSI_RING_ELEMENT_SIZE;
 	unsigned long evt_id;
@@ -1107,13 +1107,13 @@ err_free_bmap:
 }
 
 static void
-__gsi_zero_evt_ring_scratch(struct gsi_ctx *gsi, unsigned long evt_id)
+__gsi_zero_evt_ring_scratch(struct gsi *gsi, unsigned long evt_id)
 {
 	gsi_writel(gsi, 0, GSI_EE_N_EV_CH_K_SCRATCH_0_OFFS(evt_id, IPA_EE_AP));
 	gsi_writel(gsi, 0, GSI_EE_N_EV_CH_K_SCRATCH_1_OFFS(evt_id, IPA_EE_AP));
 }
 
-void gsi_dealloc_evt_ring(struct gsi_ctx *gsi, unsigned long evt_id)
+void gsi_dealloc_evt_ring(struct gsi *gsi, unsigned long evt_id)
 {
 	struct gsi_evt_ctx *evtr = &gsi->evtr[evt_id];
 	u32 completed;
@@ -1141,7 +1141,7 @@ void gsi_dealloc_evt_ring(struct gsi_ctx *gsi, unsigned long evt_id)
 	atomic_dec(&gsi->num_evt_ring);
 }
 
-void gsi_reset_evt_ring(struct gsi_ctx *gsi, unsigned long evt_id)
+void gsi_reset_evt_ring(struct gsi *gsi, unsigned long evt_id)
 {
 	struct gsi_evt_ctx *evtr = &gsi->evtr[evt_id];
 	u32 completed;
@@ -1166,7 +1166,7 @@ void gsi_reset_evt_ring(struct gsi_ctx *gsi, unsigned long evt_id)
 }
 
 static void
-gsi_program_chan_ctx(struct gsi_ctx *gsi, struct gsi_chan_props *props,
+gsi_program_chan_ctx(struct gsi *gsi, struct gsi_chan_props *props,
 		u8 evt_id)
 {
 	u32 offset;
@@ -1202,7 +1202,7 @@ gsi_program_chan_ctx(struct gsi_ctx *gsi, struct gsi_chan_props *props,
 	gsi_writel(gsi, val, offset);
 }
 
-long gsi_alloc_channel(struct gsi_ctx *gsi, struct gsi_chan_props *props)
+long gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
 {
 	u32 size = props->ring_count * GSI_RING_ELEMENT_SIZE;
 	u8 evt_id = (u8)props->evt_ring_hdl;
@@ -1284,7 +1284,7 @@ err_mutex_unlock:
 }
 
 static void
-__gsi_write_channel_scratch(struct gsi_ctx *gsi, unsigned long chan_id)
+__gsi_write_channel_scratch(struct gsi *gsi, unsigned long chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	union gsi_channel_scratch scr = { };
@@ -1318,7 +1318,7 @@ __gsi_write_channel_scratch(struct gsi_ctx *gsi, unsigned long chan_id)
 		   GSI_EE_N_GSI_CH_K_SCRATCH_3_OFFS(chan_id, IPA_EE_AP));
 }
 
-int gsi_write_channel_scratch(struct gsi_ctx *gsi, unsigned long chan_id,
+int gsi_write_channel_scratch(struct gsi *gsi, unsigned long chan_id,
 		u32 tlv_size)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
@@ -1334,7 +1334,7 @@ int gsi_write_channel_scratch(struct gsi_ctx *gsi, unsigned long chan_id,
 	return 0;
 }
 
-int gsi_start_channel(struct gsi_ctx *gsi, unsigned long chan_id)
+int gsi_start_channel(struct gsi *gsi, unsigned long chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	u32 completed;
@@ -1365,7 +1365,7 @@ int gsi_start_channel(struct gsi_ctx *gsi, unsigned long chan_id)
 	return 0;
 }
 
-int gsi_stop_channel(struct gsi_ctx *gsi, unsigned long chan_id)
+int gsi_stop_channel(struct gsi *gsi, unsigned long chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	u32 offset = GSI_EE_N_GSI_CH_K_CNTXT_0_OFFS(chan_id, IPA_EE_AP);
@@ -1425,7 +1425,7 @@ free_lock:
 	return ret;
 }
 
-int gsi_reset_channel(struct gsi_ctx *gsi, unsigned long chan_id)
+int gsi_reset_channel(struct gsi *gsi, unsigned long chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	bool reset_done = false;
@@ -1472,7 +1472,7 @@ reset:
 	return 0;
 }
 
-void gsi_dealloc_channel(struct gsi_ctx *gsi, unsigned long chan_id)
+void gsi_dealloc_channel(struct gsi *gsi, unsigned long chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	u32 completed;
@@ -1509,7 +1509,7 @@ static u16 __gsi_query_ring_free_re(struct gsi_ring_ctx *ring)
 	return (u16)(delta / GSI_RING_ELEMENT_SIZE - 1);
 }
 
-bool gsi_is_channel_empty(struct gsi_ctx *gsi, unsigned long chan_id)
+bool gsi_is_channel_empty(struct gsi *gsi, unsigned long chan_id)
 {
 	struct gsi_chan_ctx *chan;
 	unsigned long flags;
@@ -1542,7 +1542,7 @@ bool gsi_is_channel_empty(struct gsi_ctx *gsi, unsigned long chan_id)
 	return empty;
 }
 
-int gsi_queue_xfer(struct gsi_ctx *gsi, unsigned long chan_id, u16 num_xfers,
+int gsi_queue_xfer(struct gsi *gsi, unsigned long chan_id, u16 num_xfers,
 		   struct gsi_xfer_elem *xfer, bool ring_db)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
@@ -1595,7 +1595,7 @@ int gsi_queue_xfer(struct gsi_ctx *gsi, unsigned long chan_id, u16 num_xfers,
 	return 0;
 }
 
-int gsi_start_xfer(struct gsi_ctx *gsi, unsigned long chan_id)
+int gsi_start_xfer(struct gsi *gsi, unsigned long chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 
@@ -1612,7 +1612,7 @@ int gsi_start_xfer(struct gsi_ctx *gsi, unsigned long chan_id)
 	return 0;
 }
 
-int gsi_poll_channel(struct gsi_ctx *gsi, unsigned long chan_id)
+int gsi_poll_channel(struct gsi *gsi, unsigned long chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	struct gsi_evt_ctx *evtr = chan->evtr;
@@ -1648,7 +1648,7 @@ int gsi_poll_channel(struct gsi_ctx *gsi, unsigned long chan_id)
 	return size;
 }
 
-static void gsi_config_channel_mode(struct gsi_ctx *gsi, unsigned long chan_id,
+static void gsi_config_channel_mode(struct gsi *gsi, unsigned long chan_id,
 		bool polling)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
@@ -1663,17 +1663,17 @@ static void gsi_config_channel_mode(struct gsi_ctx *gsi, unsigned long chan_id,
 	spin_unlock_irqrestore(&gsi->slock, flags);
 }
 
-void gsi_channel_intr_enable(struct gsi_ctx *gsi, unsigned long chan_id)
+void gsi_channel_intr_enable(struct gsi *gsi, unsigned long chan_id)
 {
 	gsi_config_channel_mode(gsi, chan_id, false);
 }
 
-void gsi_channel_intr_disable(struct gsi_ctx *gsi, unsigned long chan_id)
+void gsi_channel_intr_disable(struct gsi *gsi, unsigned long chan_id)
 {
 	gsi_config_channel_mode(gsi, chan_id, true);
 }
 
-int gsi_get_channel_cfg(struct gsi_ctx *gsi, unsigned long chan_id,
+int gsi_get_channel_cfg(struct gsi *gsi, unsigned long chan_id,
 		struct gsi_chan_props *props)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
@@ -1690,7 +1690,7 @@ int gsi_get_channel_cfg(struct gsi_ctx *gsi, unsigned long chan_id,
 	return 0;
 }
 
-int gsi_set_channel_cfg(struct gsi_ctx *gsi, unsigned long chan_id,
+int gsi_set_channel_cfg(struct gsi *gsi, unsigned long chan_id,
 		struct gsi_chan_props *props)
 {
 	struct gsi_chan_ctx *chan;
@@ -1721,12 +1721,12 @@ int gsi_set_channel_cfg(struct gsi_ctx *gsi, unsigned long chan_id,
 }
 
 /* Initialize GSI driver */
-struct gsi_ctx *gsi_init(struct platform_device *pdev)
+struct gsi *gsi_init(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	struct resource *res;
 	resource_size_t size;
-	struct gsi_ctx *gsi;
+	struct gsi *gsi;
 	int irq;
 
 	/* Get GSI memory range and map it */
