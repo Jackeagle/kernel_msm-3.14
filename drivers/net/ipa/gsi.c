@@ -271,28 +271,28 @@ static void gsi_writel(struct gsi_ctx *gsi, u32 v, u32 offset)
 	writel(v, gsi->base + offset);
 }
 
-static void _gsi_irq_control_event(u8 evt_id, bool enable)
+static void _gsi_irq_control_event(struct gsi_ctx *gsi, u8 evt_id, bool enable)
 {
 	u32 offset = GSI_EE_N_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(IPA_EE_AP);
 	u32 mask = BIT(evt_id);
 	u32 val;
 
-	val = gsi_readl(gsi_ctx, offset);
+	val = gsi_readl(gsi, offset);
 	if (enable)
 		val |= mask;
 	else
 		val &= ~mask;
-	gsi_writel(gsi_ctx, val, offset);
+	gsi_writel(gsi, val, offset);
 }
 
-static void gsi_irq_disable_event(u8 evt_id)
+static void gsi_irq_disable_event(struct gsi_ctx *gsi, u8 evt_id)
 {
-	_gsi_irq_control_event(evt_id, false);
+	_gsi_irq_control_event(gsi, evt_id, false);
 }
 
-static void gsi_irq_enable_event(u8 evt_id)
+static void gsi_irq_enable_event(struct gsi_ctx *gsi, u8 evt_id)
 {
-	_gsi_irq_control_event(evt_id, true);
+	_gsi_irq_control_event(gsi, evt_id, true);
 }
 
 static void _gsi_irq_control_all(struct gsi_ctx *gsi, bool enable)
@@ -1090,7 +1090,7 @@ long gsi_alloc_evt_ring(struct gsi_ctx *gsi, u32 ring_count, u16 int_modt)
 	val = BIT(evt_id);
 	gsi_writel(gsi, val,
 		   GSI_EE_N_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(IPA_EE_AP));
-	gsi_irq_enable_event(evt_id);
+	gsi_irq_enable_event(gsi, evt_id);
 
 	spin_unlock_irqrestore(&gsi->slock, flags);
 
@@ -1655,9 +1655,9 @@ static void gsi_config_channel_mode(struct gsi_ctx *gsi, unsigned long chan_id,
 
 	spin_lock_irqsave(&gsi->slock, flags);
 	if (polling)
-		gsi_irq_disable_event(chan->evtr->id);
+		gsi_irq_disable_event(gsi, chan->evtr->id);
 	else
-		gsi_irq_enable_event(chan->evtr->id);
+		gsi_irq_enable_event(gsi, chan->evtr->id);
 	atomic_set(&chan->poll_mode, polling ? 1 : 0);
 	spin_unlock_irqrestore(&gsi->slock, flags);
 }
