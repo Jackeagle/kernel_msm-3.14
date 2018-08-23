@@ -463,7 +463,7 @@ handle_glob_evt_err(struct gsi_ctx *gsi, u32 err_ee, u32 evt_id, u32 code)
 	}
 }
 
-static void gsi_handle_glob_err(u32 err)
+static void gsi_handle_glob_err(struct gsi_ctx *gsi, u32 err)
 {
 	struct gsi_log_err *log = (struct gsi_log_err *)&err;
 
@@ -476,10 +476,10 @@ static void gsi_handle_glob_err(u32 err)
 
 	switch (log->err_type) {
 	case GSI_ERR_TYPE_CHAN:
-		handle_glob_chan_err(gsi_ctx, log->ee, log->virt_idx, log->code);
+		handle_glob_chan_err(gsi, log->ee, log->virt_idx, log->code);
 		break;
 	case GSI_ERR_TYPE_EVT:
-		handle_glob_evt_err(gsi_ctx, log->ee, log->virt_idx, log->code);
+		handle_glob_evt_err(gsi, log->ee, log->virt_idx, log->code);
 		break;
 	default:
 		WARN_ON(1);
@@ -499,7 +499,7 @@ static void gsi_handle_glob_ee(void)
 		gsi_writel(gsi_ctx, 0, GSI_EE_N_ERROR_LOG_OFFS(IPA_EE_AP));
 		gsi_writel(gsi_ctx, ~0, GSI_EE_N_ERROR_LOG_CLR_OFFS(IPA_EE_AP));
 
-		gsi_handle_glob_err(err);
+		gsi_handle_glob_err(gsi_ctx, err);
 	}
 
 	if (val & EN_GP_INT1_BMSK)
