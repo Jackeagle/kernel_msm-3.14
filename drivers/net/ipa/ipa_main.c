@@ -910,7 +910,7 @@ static void ipa_post_init(struct work_struct *unused)
 		return ;
 	}
 
-	result = gsi_register_device(ipa_ctx->gsi_ctx);
+	result = gsi_register_device(ipa_ctx->gsi);
 	if (result) {
 		ipa_err(":gsi register error - %d\n", result);
 		return ;
@@ -920,7 +920,7 @@ static void ipa_post_init(struct work_struct *unused)
 	/* setup the AP-IPA pipes */
 	if (ipa_setup_apps_pipes()) {
 		ipa_err(":failed to setup IPA-Apps pipes\n");
-		gsi_deregister_device(ipa_ctx->gsi_ctx);
+		gsi_deregister_device(ipa_ctx->gsi);
 
 		return;
 	}
@@ -1431,21 +1431,21 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_clear_bus_scale_tbl;
 	}
 
-	ipa_ctx->gsi_ctx = gsi_init(pdev_p);
-	if (IS_ERR(ipa_ctx->gsi_ctx)) {
+	ipa_ctx->gsi = gsi_init(pdev_p);
+	if (IS_ERR(ipa_ctx->gsi)) {
 		ipa_err("ipa: error initializing gsi driver.\n");
-		result = PTR_ERR(ipa_ctx->gsi_ctx);
-		goto err_clear_gsi_ctx;
+		result = PTR_ERR(ipa_ctx->gsi);
+		goto err_clear_gsi;
 	}
 
 	result = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
 	if (result)
-		goto err_clear_gsi_ctx;
+		goto err_clear_gsi;
 
 	if (ipahal_dev_init(dev)) {
 		ipa_err("failed to assign IPA HAL dev pointer\n");
 		result = -EFAULT;
-		goto err_clear_gsi_ctx;
+		goto err_clear_gsi;
 	}
 	ipa_ctx->dev = dev;
 
@@ -1456,8 +1456,8 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 
 	ipahal_dev_destroy();
 	ipa_ctx->dev = NULL;
-err_clear_gsi_ctx:
-	ipa_ctx->gsi_ctx = NULL;
+err_clear_gsi:
+	ipa_ctx->gsi = NULL;
 	msm_bus_scale_unregister_client(ipa_ctx->ipa_bus_hdl);
 	ipa_ctx->ipa_bus_hdl = 0;
 err_clear_bus_scale_tbl:

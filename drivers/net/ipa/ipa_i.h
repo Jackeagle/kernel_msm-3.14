@@ -541,7 +541,7 @@ struct ipa_dma_task_info {
  */
 struct ipa_context {
 	struct platform_device *ipa_pdev;
-	struct gsi_ctx *gsi_ctx;
+	struct gsi_ctx *gsi;
 
 	struct device *dev;
 

@@ -359,7 +359,7 @@ static bool ipa_send_nop(struct ipa_sys_context *sys)
 	list_add_tail(&nop_pkt->link, &sys->head_desc_list);
 	spin_unlock_bh(&sys->spinlock);
 
-	if (!gsi_queue_xfer(ipa_ctx->gsi_ctx, chan_id, 1, &nop_xfer, true))
+	if (!gsi_queue_xfer(ipa_ctx->gsi, chan_id, 1, &nop_xfer, true))
 		return true;	/* Success */
 
 	spin_lock_bh(&sys->spinlock);
@@ -528,7 +528,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	}
 
 	ipa_debug_low("ch:%lu queue xfer\n", ep->gsi_chan_hdl);
-	result = gsi_queue_xfer(ipa_ctx->gsi_ctx, ep->gsi_chan_hdl,
+	result = gsi_queue_xfer(ipa_ctx->gsi, ep->gsi_chan_hdl,
 				num_desc, xfer_elem, true);
 	if (result)
 		goto failure;
@@ -683,14 +683,14 @@ static void ipa_rx_switch_to_intr_mode(struct ipa_sys_context *sys)
 		return;
 	}
 	ipa_dec_release_wakelock();
-	gsi_channel_intr_enable(ipa_ctx->gsi_ctx, sys->ep->gsi_chan_hdl);
+	gsi_channel_intr_enable(ipa_ctx->gsi, sys->ep->gsi_chan_hdl);
 }
 
 void ipa_rx_switch_to_poll_mode(struct ipa_sys_context *sys)
 {
 	if (atomic_xchg(&sys->rx.curr_polling_state, 1))
 		return;
-	gsi_channel_intr_disable(ipa_ctx->gsi_ctx, sys->ep->gsi_chan_hdl);
+	gsi_channel_intr_disable(ipa_ctx->gsi, sys->ep->gsi_chan_hdl);
 	ipa_inc_acquire_wakelock();
 	queue_work(sys->wq, &sys->rx.work);
 }
@@ -889,9 +889,9 @@ void ipa_teardown_sys_pipe(u32 clnt_hdl)
 	}
 
 	ipa_reset_gsi_channel(clnt_hdl);
-	gsi_dealloc_channel(ipa_ctx->gsi_ctx, ep->gsi_chan_hdl);
-	gsi_reset_evt_ring(ipa_ctx->gsi_ctx, ep->gsi_evt_ring_hdl);
-	gsi_dealloc_evt_ring(ipa_ctx->gsi_ctx, ep->gsi_evt_ring_hdl);
+	gsi_dealloc_channel(ipa_ctx->gsi, ep->gsi_chan_hdl);
+	gsi_reset_evt_ring(ipa_ctx->gsi, ep->gsi_evt_ring_hdl);
+	gsi_dealloc_evt_ring(ipa_ctx->gsi, ep->gsi_evt_ring_hdl);
 
 	if (ipa_consumer(ep->client))
 		ipa_cleanup_rx(ep->sys);
@@ -1025,7 +1025,7 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
 	gsi_xfer_elem.type = GSI_XFER_ELEM_DATA;
 	gsi_xfer_elem.xfer_user_data = rx_pkt;
 
-	ret = gsi_queue_xfer(ipa_ctx->gsi_ctx, sys->ep->gsi_chan_hdl,
+	ret = gsi_queue_xfer(ipa_ctx->gsi, sys->ep->gsi_chan_hdl,
 			     1, &gsi_xfer_elem, false);
 	if (ret)
 		return ret;
@@ -1035,7 +1035,7 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
 	 */
 	if (++sys->rx.len_pending_xfer >= IPA_REPL_XFER_THRESH) {
 		sys->rx.len_pending_xfer = 0;
-		gsi_start_xfer(ipa_ctx->gsi_ctx, sys->ep->gsi_chan_hdl);
+		gsi_start_xfer(ipa_ctx->gsi, sys->ep->gsi_chan_hdl);
 	}
 
 	return 0;
@@ -1719,7 +1719,7 @@ static long evt_ring_hdl_get(struct ipa_ep_context *ep, u32 fifo_count)
 
 	ring_count = ipa_gsi_ring_count(ep->client, fifo_count);
 
-	return gsi_alloc_evt_ring(ipa_ctx->gsi_ctx, ring_count, modt);
+	return gsi_alloc_evt_ring(ipa_ctx->gsi, ring_count, modt);
 }
 
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
@@ -1749,24 +1749,24 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	gsi_channel_props.ring_count = ipa_gsi_ring_count(ep->client,
 							    in->fifo_count);
 
-	result = gsi_alloc_channel(ipa_ctx->gsi_ctx, &gsi_channel_props);
+	result = gsi_alloc_channel(ipa_ctx->gsi, &gsi_channel_props);
 	if (result < 0)
 		goto fail_alloc_channel;
 	ep->gsi_chan_hdl = result;
 
-	result = gsi_write_channel_scratch(ipa_ctx->gsi_ctx, ep->gsi_chan_hdl,
+	result = gsi_write_channel_scratch(ipa_ctx->gsi, ep->gsi_chan_hdl,
 					   gsi_ep_info->ipa_if_tlv);
 	if (result) {
 		ipa_err("failed to write scratch %d\n", result);
 		goto fail_write_channel_scratch;
 	}
 
-	result = gsi_start_channel(ipa_ctx->gsi_ctx, ep->gsi_chan_hdl);
+	result = gsi_start_channel(ipa_ctx->gsi, ep->gsi_chan_hdl);
 	if (!result)
 		return 0;	/* Success */
 
 fail_write_channel_scratch:
-	gsi_dealloc_channel(ipa_ctx->gsi_ctx, ep->gsi_chan_hdl);
+	gsi_dealloc_channel(ipa_ctx->gsi, ep->gsi_chan_hdl);
 fail_alloc_channel:
 	ipa_err("Return with err: %d\n", result);
 
@@ -1781,7 +1781,7 @@ static int ipa_poll_gsi_pkt(struct ipa_sys_context *sys)
 		return (int)sys->ep->bytes_xfered;
 	}
 
-	return gsi_poll_channel(ipa_ctx->gsi_ctx, sys->ep->gsi_chan_hdl);
+	return gsi_poll_channel(ipa_ctx->gsi, sys->ep->gsi_chan_hdl);
 }
 
 /** ipa_adjust_ra_buff_base_sz()
