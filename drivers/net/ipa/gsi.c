@@ -727,12 +727,11 @@ static void gsi_handle_inter_ee_evt_ctrl(struct gsi_ctx *gsi)
 	}
 }
 
-static void gsi_handle_general(void)
+static void gsi_handle_general(struct gsi_ctx *gsi)
 {
 	u32 val;
 
-	val = gsi_readl(gsi_ctx,
-			GSI_EE_N_CNTXT_GSI_IRQ_STTS_OFFS(IPA_EE_AP));
+	val = gsi_readl(gsi, GSI_EE_N_CNTXT_GSI_IRQ_STTS_OFFS(IPA_EE_AP));
 
 	ipa_bug_on(val & CLR_GSI_MCS_STACK_OVRFLOW_BMSK);
 	ipa_bug_on(val & CLR_GSI_CMD_FIFO_OVRFLOW_BMSK);
@@ -741,7 +740,7 @@ static void gsi_handle_general(void)
 	if (val & CLR_GSI_BREAK_POINT_BMSK)
 		ipa_err("got breakpoint\n");
 
-	gsi_writel(gsi_ctx, val, GSI_EE_N_CNTXT_GSI_IRQ_CLR_OFFS(IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_EE_N_CNTXT_GSI_IRQ_CLR_OFFS(IPA_EE_AP));
 }
 
 #define GSI_ISR_MAX_ITER 50
@@ -782,7 +781,7 @@ static irqreturn_t gsi_isr(int irq, void *dev_id)
 				gsi_handle_inter_ee_evt_ctrl(gsi);
 				break;
 			case GENERAL_BMSK:
-				gsi_handle_general();
+				gsi_handle_general(gsi);
 				break;
 			default:
 				WARN(true, "%s: unrecognized type 0x%08x\n",
