@@ -992,11 +992,12 @@ static void gsi_prime_evt_ring(struct gsi_evt_ctx *evtr)
  * non-zero (positive) othwerwise.  Note that the register offset
  * is first, value to write is second (reverse of writel() order).
  */
-static u32 command(u32 reg, u32 val, struct completion *compl)
+static u32
+command(struct gsi_ctx *gsi, u32 reg, u32 val, struct completion *compl)
 {
 	// BUILD_BUG_ON(GSI_CMD_TIMEOUT > (unsigned long)U32_MAX);
 
-	gsi_writel(gsi_ctx, val, reg);
+	gsi_writel(gsi, val, reg);
 
 	return (u32)wait_for_completion_timeout(compl, GSI_CMD_TIMEOUT);
 }
@@ -1012,7 +1013,7 @@ static u32 evt_ring_command(unsigned long evt_id, enum gsi_evt_ch_cmd_opcode op)
 	val = field_gen((u32)evt_id, EV_CHID_BMSK);
 	val |= field_gen((u32)op, EV_OPCODE_BMSK);
 
-	val = command(GSI_EE_N_EV_CH_CMD_OFFS(IPA_EE_AP), val, compl);
+	val = command(gsi_ctx, GSI_EE_N_EV_CH_CMD_OFFS(IPA_EE_AP), val, compl);
 	if (!val)
 		ipa_err("evt_id %lu timed out\n", evt_id);
 
@@ -1030,7 +1031,7 @@ static u32 channel_command(unsigned long chan_id, enum gsi_ch_cmd_opcode op)
 	val = field_gen((u32)chan_id, CH_CHID_BMSK);
 	val |= field_gen((u32)op, CH_OPCODE_BMSK);
 
-	val = command(GSI_EE_N_GSI_CH_CMD_OFFS(IPA_EE_AP), val, compl);
+	val = command(gsi_ctx, GSI_EE_N_GSI_CH_CMD_OFFS(IPA_EE_AP), val, compl);
 	if (!val)
 		ipa_err("chan_id %lu timed out\n", chan_id);
 
