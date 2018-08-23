@@ -752,14 +752,13 @@ static void gsi_handle_general(void)
 
 #define GSI_ISR_MAX_ITER 50
 
-static irqreturn_t gsi_isr(int irq, void *ctxt)
+static irqreturn_t gsi_isr(int irq, void *dev_id)
 {
+	struct gsi_ctx *gsi = dev_id;
 	u32 cnt = 0;
 	u32 type;
 
-	ipa_assert(ctxt == gsi_ctx);
-
-	while ((type = gsi_readl(gsi_ctx,
+	while ((type = gsi_readl(gsi,
 				 GSI_EE_N_CNTXT_TYPE_IRQ_OFFS(IPA_EE_AP)))) {
 		ipa_debug_low("type %x\n", type);
 
