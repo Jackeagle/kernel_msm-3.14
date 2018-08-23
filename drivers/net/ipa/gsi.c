@@ -1022,9 +1022,10 @@ static u32 evt_ring_command(struct gsi_ctx *gsi, unsigned long evt_id,
 }
 
 /* Issue a channel command and wait for it to complete */
-static u32 channel_command(unsigned long chan_id, enum gsi_ch_cmd_opcode op)
+static u32 channel_command(struct gsi_ctx *gsi, unsigned long chan_id,
+		enum gsi_ch_cmd_opcode op)
 {
-	struct completion *compl = &gsi_ctx->chan[chan_id].compl;
+	struct completion *compl = &gsi->chan[chan_id].compl;
 	u32 val;
 
 	reinit_completion(compl);
@@ -1032,7 +1033,7 @@ static u32 channel_command(unsigned long chan_id, enum gsi_ch_cmd_opcode op)
 	val = field_gen((u32)chan_id, CH_CHID_BMSK);
 	val |= field_gen((u32)op, CH_OPCODE_BMSK);
 
-	val = command(gsi_ctx, GSI_EE_N_GSI_CH_CMD_OFFS(IPA_EE_AP), val, compl);
+	val = command(gsi, GSI_EE_N_GSI_CH_CMD_OFFS(IPA_EE_AP), val, compl);
 	if (!val)
 		ipa_err("chan_id %lu timed out\n", chan_id);
 
@@ -1254,7 +1255,7 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 
 	mutex_lock(&gsi_ctx->mlock);
 
-	completed = channel_command(chan_id, GSI_CH_ALLOCATE);
+	completed = channel_command(gsi_ctx, chan_id, GSI_CH_ALLOCATE);
 	if (!completed) {
 		chan_id = -ETIMEDOUT;
 		goto err_mutex_unlock;
@@ -1356,7 +1357,7 @@ int gsi_start_channel(unsigned long chan_id)
 
 	gsi_ctx->ch_dbg[chan_id].ch_start++;
 
-	completed = channel_command(chan_id, GSI_CH_START);
+	completed = channel_command(gsi_ctx, chan_id, GSI_CH_START);
 	if (!completed) {
 		mutex_unlock(&gsi_ctx->mlock);
 		return -ETIMEDOUT;
@@ -1395,7 +1396,7 @@ int gsi_stop_channel(unsigned long chan_id)
 
 	gsi_ctx->ch_dbg[chan_id].ch_stop++;
 
-	completed = channel_command(chan_id, GSI_CH_STOP);
+	completed = channel_command(gsi_ctx, chan_id, GSI_CH_STOP);
 	if (!completed) {
 		/* check channel state here in case the channel is stopped but
 		 * the interrupt was not handled yet.
@@ -1447,7 +1448,7 @@ reset:
 
 	gsi_ctx->ch_dbg[chan_id].ch_reset++;
 
-	completed = channel_command(chan_id, GSI_CH_RESET);
+	completed = channel_command(gsi_ctx, chan_id, GSI_CH_RESET);
 	if (!completed) {
 		ipa_err("chan_id %lu timed out\n", chan_id);
 		mutex_unlock(&gsi_ctx->mlock);
@@ -1489,7 +1490,7 @@ void gsi_dealloc_channel(unsigned long chan_id)
 
 	gsi_ctx->ch_dbg[chan_id].ch_de_alloc++;
 
-	completed = channel_command(chan_id, GSI_CH_DE_ALLOC);
+	completed = channel_command(gsi_ctx, chan_id, GSI_CH_DE_ALLOC);
 	ipa_bug_on(!completed);
 
 	ipa_bug_on(chan->state != GSI_CHAN_STATE_NOT_ALLOCATED);
