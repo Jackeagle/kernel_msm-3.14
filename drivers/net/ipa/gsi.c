@@ -1671,9 +1671,10 @@ void gsi_channel_intr_disable(unsigned long chan_id)
 	gsi_config_channel_mode(chan_id, true);
 }
 
-int gsi_get_channel_cfg(unsigned long chan_id, struct gsi_chan_props *props)
+int gsi_get_channel_cfg(struct gsi_ctx *gsi, unsigned long chan_id,
+		struct gsi_chan_props *props)
 {
-	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 
 	if (chan->state == GSI_CHAN_STATE_NOT_ALLOCATED) {
 		ipa_err("bad state %d\n", chan->state);
@@ -1687,11 +1688,12 @@ int gsi_get_channel_cfg(unsigned long chan_id, struct gsi_chan_props *props)
 	return 0;
 }
 
-int gsi_set_channel_cfg(unsigned long chan_id, struct gsi_chan_props *props)
+int gsi_set_channel_cfg(struct gsi_ctx *gsi, unsigned long chan_id,
+		struct gsi_chan_props *props)
 {
 	struct gsi_chan_ctx *chan;
 
-	chan = &gsi_ctx->chan[chan_id];
+	chan = &gsi->chan[chan_id];
 	if (chan->state != GSI_CHAN_STATE_ALLOCATED) {
 		ipa_err("bad state %d\n", chan->state);
 		return -ENOTSUPP;
