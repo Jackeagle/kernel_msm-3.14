@@ -486,20 +486,19 @@ static void gsi_handle_glob_err(struct gsi_ctx *gsi, u32 err)
 	}
 }
 
-static void gsi_handle_glob_ee(void)
+static void gsi_handle_glob_ee(struct gsi_ctx *gsi)
 {
 	u32 val;
 
-	val = gsi_readl(gsi_ctx, GSI_EE_N_CNTXT_GLOB_IRQ_STTS_OFFS(IPA_EE_AP));
+	val = gsi_readl(gsi, GSI_EE_N_CNTXT_GLOB_IRQ_STTS_OFFS(IPA_EE_AP));
 
 	if (val & ERROR_INT_BMSK) {
-		u32 err = gsi_readl(gsi_ctx,
-				    GSI_EE_N_ERROR_LOG_OFFS(IPA_EE_AP));
+		u32 err = gsi_readl(gsi, GSI_EE_N_ERROR_LOG_OFFS(IPA_EE_AP));
 
-		gsi_writel(gsi_ctx, 0, GSI_EE_N_ERROR_LOG_OFFS(IPA_EE_AP));
-		gsi_writel(gsi_ctx, ~0, GSI_EE_N_ERROR_LOG_CLR_OFFS(IPA_EE_AP));
+		gsi_writel(gsi, 0, GSI_EE_N_ERROR_LOG_OFFS(IPA_EE_AP));
+		gsi_writel(gsi, ~0, GSI_EE_N_ERROR_LOG_CLR_OFFS(IPA_EE_AP));
 
-		gsi_handle_glob_err(gsi_ctx, err);
+		gsi_handle_glob_err(gsi, err);
 	}
 
 	if (val & EN_GP_INT1_BMSK)
@@ -508,7 +507,7 @@ static void gsi_handle_glob_ee(void)
 	ipa_bug_on(val & EN_GP_INT2_BMSK);
 	ipa_bug_on(val & EN_GP_INT3_BMSK);
 
-	gsi_writel(gsi_ctx, val, GSI_EE_N_CNTXT_GLOB_IRQ_CLR_OFFS(IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_EE_N_CNTXT_GLOB_IRQ_CLR_OFFS(IPA_EE_AP));
 }
 
 static void ring_wp_local_inc(struct gsi_ring_ctx *ring)
@@ -774,7 +773,7 @@ static irqreturn_t gsi_isr(int irq, void *dev_id)
 				gsi_handle_evt_ctrl(gsi);
 				break;
 			case GLOB_EE_BMSK:
-				gsi_handle_glob_ee();
+				gsi_handle_glob_ee(gsi);
 				break;
 			case IEOB_BMSK:
 				gsi_handle_ieob();
