@@ -802,16 +802,16 @@ static irqreturn_t gsi_isr(int irq, void *ctxt)
 	return IRQ_HANDLED;
 }
 
-static u32 gsi_get_max_channels(void)
+static u32 gsi_get_max_channels(struct gsi_ctx *gsi)
 {
-	u32 val = gsi_readl(gsi_ctx, GSI_EE_N_GSI_HW_PARAM_2_OFFS(IPA_EE_AP));
+	u32 val = gsi_readl(gsi, GSI_EE_N_GSI_HW_PARAM_2_OFFS(IPA_EE_AP));
 
 	return field_val(val, GSI_NUM_CH_PER_EE_BMSK);
 }
 
-static u32 gsi_get_max_event_rings(void)
+static u32 gsi_get_max_event_rings(struct gsi_ctx *gsi)
 {
-	u32 val = gsi_readl(gsi_ctx, GSI_EE_N_GSI_HW_PARAM_2_OFFS(IPA_EE_AP));
+	u32 val = gsi_readl(gsi, GSI_EE_N_GSI_HW_PARAM_2_OFFS(IPA_EE_AP));
 
 	return field_val(val, GSI_NUM_EV_PER_EE_BMSK);
 }
@@ -863,11 +863,11 @@ int gsi_register_device(struct gsi_ctx *gsi)
 		return -EIO;
 	}
 
-	max_ch = gsi_get_max_channels();
+	max_ch = gsi_get_max_channels(gsi);
 	if (WARN_ON(max_ch > GSI_CHAN_MAX))
 		return -EIO;
 
-	max_ev = gsi_get_max_event_rings();
+	max_ev = gsi_get_max_event_rings(gsi);
 	if (WARN_ON(max_ev > GSI_EVT_RING_MAX))
 		return -EIO;
 
