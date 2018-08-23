@@ -836,7 +836,6 @@ static void gsi_evt_bmap_free(unsigned long evt_id)
 
 int gsi_register_device(struct gsi_ctx *gsi)
 {
-	struct platform_device *ipa_pdev = to_platform_device(gsi->dev);
 	u32 val;
 	int ret;
 
@@ -844,15 +843,6 @@ int gsi_register_device(struct gsi_ctx *gsi)
 		ipa_err("per already registered\n");
 		return -ENOTSUPP;
 	}
-
-	/* Get IPA GSI IRQ number */
-	ret = platform_get_irq_byname(ipa_pdev, "gsi-irq");
-	if (ret < 0) {
-		ipa_err("failed to get gsi-irq!\n");
-		return -ENODEV;
-	}
-	gsi->irq = ret;
-	ipa_debug("GSI irq %u\n", gsi->irq);
 
 	spin_lock_init(&gsi->slock);
 	ret = devm_request_irq(gsi->dev, gsi->irq, gsi_isr,
@@ -1725,6 +1715,7 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev)
 	struct device *dev = &pdev->dev;
 	struct resource *res;
 	resource_size_t size;
+	int irq;
 
 	/* Get GSI memory range and map it */
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "gsi-base");
@@ -1739,6 +1730,14 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev)
 		return ERR_PTR(-EINVAL);
 	}
 
+	/* Get IPA GSI IRQ number */
+	irq = platform_get_irq_byname(pdev, "gsi-irq");
+	if (irq < 0) {
+		ipa_err("failed to get gsi-irq!\n");
+		return ERR_PTR(irq);
+	}
+	ipa_debug("GSI irq %u\n", irq);
+
 	gsi_ctx = kzalloc(sizeof(*gsi_ctx), GFP_KERNEL);
 	if (!gsi_ctx)
 		return ERR_PTR(-ENOMEM);
@@ -1752,6 +1751,7 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev)
 	}
 	gsi_ctx->dev = dev;
 	gsi_ctx->phys_base = (u32)res->start;
+	gsi_ctx->irq = irq;
 
 	return gsi_ctx;
 }
