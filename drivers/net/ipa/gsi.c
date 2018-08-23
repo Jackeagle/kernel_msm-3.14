@@ -143,7 +143,6 @@ struct gsi_ctx {
 	struct mutex mlock;	/* protects 1-at-a-time commands, evt_bmap */
 	atomic_t num_chan;
 	atomic_t num_evt_ring;
-	bool per_registered;
 	struct gsi_chan_ctx chan[GSI_CHAN_MAX];
 	struct ch_debug_stats ch_dbg[GSI_CHAN_MAX];
 	struct gsi_evt_ctx evtr[GSI_EVT_RING_MAX];
@@ -838,11 +837,6 @@ int gsi_register_device(struct gsi_ctx *gsi)
 	u32 max_ev;
 	int ret;
 
-	if (gsi->per_registered) {
-		ipa_err("per already registered\n");
-		return -ENOTSUPP;
-	}
-
 	val = gsi_readl(GSI_EE_N_GSI_STATUS_OFFS(IPA_EE_AP));
 	if (!(val & ENABLED_BMSK)) {
 		ipa_err("manager EE has not enabled GSI, GSI un-usable\n");
@@ -862,8 +856,6 @@ int gsi_register_device(struct gsi_ctx *gsi)
 		ipa_err("failed to register isr for %u\n", gsi->irq);
 		return -EIO;
 	}
-
-	gsi->per_registered = true;
 
 	ret = enable_irq_wake(gsi->irq);
 	if (ret)
@@ -906,8 +898,6 @@ void gsi_deregister_device(void)
 	}
 	free_irq(gsi_ctx->irq, gsi_ctx);
 	gsi_ctx->irq = 0;
-
-	gsi_ctx->per_registered = false;
 }
 
 static void
