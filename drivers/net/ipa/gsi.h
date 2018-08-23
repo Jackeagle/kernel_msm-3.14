@@ -213,7 +213,7 @@ void gsi_reset_evt_ring(struct gsi_ctx *gsi, unsigned long evt_id);
  *
  * @Return Channel handle populated by GSI, opaque to client, or negative errno
  */
-long gsi_alloc_channel(struct gsi_chan_props *props);
+long gsi_alloc_channel(struct gsi_ctx *gsi, struct gsi_chan_props *props);
 
 /** gsi_write_channel_scratch - Peripheral should call this function to
  * write to the scratch area of the channel context
@@ -265,12 +265,11 @@ int gsi_reset_channel(unsigned long chan_hdl);
 /** gsi_dealloc_channel - Peripheral should call this function to
  * de-allocate a channel
  *
- * @chan_hdl:  Client handle previously obtained from
- *	       gsi_alloc_channel
+ * @chan_id:  Client handle previously obtained from gsi_alloc_channel()
  *
  * This function can sleep
  */
-void gsi_dealloc_channel(unsigned long chan_hdl);
+void gsi_dealloc_channel(struct gsi_ctx *gsi, unsigned long chan_id);
 
 /** gsi_is_channel_empty - Peripheral can call this function to query if
  * the channel is empty. This is only applicable to GPI. "Empty" means

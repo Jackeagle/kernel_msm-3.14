@@ -1202,13 +1202,13 @@ static void gsi_program_chan_ctx(struct gsi_chan_props *props, u8 evt_id)
 	gsi_writel(gsi_ctx, val, offset);
 }
 
-long gsi_alloc_channel(struct gsi_chan_props *props)
+long gsi_alloc_channel(struct gsi_ctx *gsi, struct gsi_chan_props *props)
 {
 	u32 size = props->ring_count * GSI_RING_ELEMENT_SIZE;
 	u8 evt_id = (u8)props->evt_ring_hdl;
-	struct gsi_evt_ctx *evtr = &gsi_ctx->evtr[evt_id];
+	struct gsi_evt_ctx *evtr = &gsi->evtr[evt_id];
 	long chan_id = (long)props->ch_id;
-	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	void **user_data;
 	u32 completed;
 
@@ -1244,9 +1244,9 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 	atomic_set(&chan->poll_mode, 0);	/* Initially in callback mode */
 	chan->props = *props;
 
-	mutex_lock(&gsi_ctx->mlock);
+	mutex_lock(&gsi->mlock);
 
-	completed = channel_command(gsi_ctx, chan_id, GSI_CH_ALLOCATE);
+	completed = channel_command(gsi, chan_id, GSI_CH_ALLOCATE);
 	if (!completed) {
 		chan_id = -ETIMEDOUT;
 		goto err_mutex_unlock;
@@ -1258,9 +1258,9 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 		goto err_mutex_unlock;
 	}
 
-	gsi_ctx->ch_dbg[chan_id].ch_allocate++;
+	gsi->ch_dbg[chan_id].ch_allocate++;
 
-	mutex_unlock(&gsi_ctx->mlock);
+	mutex_unlock(&gsi->mlock);
 
 	chan->evtr = evtr;
 	atomic_inc(&evtr->chan_ref_cnt);
@@ -1271,12 +1271,12 @@ long gsi_alloc_channel(struct gsi_chan_props *props)
 
 	chan->user_data = user_data;
 	chan->allocated = true;
-	atomic_inc(&gsi_ctx->num_chan);
+	atomic_inc(&gsi->num_chan);
 
 	return chan_id;
 
 err_mutex_unlock:
-	mutex_unlock(&gsi_ctx->mlock);
+	mutex_unlock(&gsi->mlock);
 	kfree(user_data);
 	ipahal_dma_free(&chan->props.mem);
 
@@ -1470,29 +1470,29 @@ reset:
 	return 0;
 }
 
-void gsi_dealloc_channel(unsigned long chan_id)
+void gsi_dealloc_channel(struct gsi_ctx *gsi, unsigned long chan_id)
 {
-	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	u32 completed;
 
 	ipa_bug_on(chan->state != GSI_CHAN_STATE_ALLOCATED);
 
-	mutex_lock(&gsi_ctx->mlock);
+	mutex_lock(&gsi->mlock);
 
-	gsi_ctx->ch_dbg[chan_id].ch_de_alloc++;
+	gsi->ch_dbg[chan_id].ch_de_alloc++;
 
-	completed = channel_command(gsi_ctx, chan_id, GSI_CH_DE_ALLOC);
+	completed = channel_command(gsi, chan_id, GSI_CH_DE_ALLOC);
 	ipa_bug_on(!completed);
 
 	ipa_bug_on(chan->state != GSI_CHAN_STATE_NOT_ALLOCATED);
 
-	mutex_unlock(&gsi_ctx->mlock);
+	mutex_unlock(&gsi->mlock);
 
 	kfree(chan->user_data);
 	ipahal_dma_free(&chan->props.mem);
 	chan->allocated = false;
 	atomic_dec(&chan->evtr->chan_ref_cnt);
-	atomic_dec(&gsi_ctx->num_chan);
+	atomic_dec(&gsi->num_chan);
 }
 
 static u16 __gsi_query_ring_free_re(struct gsi_ring_ctx *ring)
