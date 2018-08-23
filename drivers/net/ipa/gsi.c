@@ -866,21 +866,22 @@ int gsi_register_device(struct gsi_ctx *gsi)
 	max_ch = gsi_get_max_channels();
 	if (WARN_ON(max_ch > GSI_CHAN_MAX))
 		return -EIO;
-	gsi->max_ch = max_ch;
-	ipa_debug("max channels %d\n", gsi->max_ch);
 
 	max_ev = gsi_get_max_event_rings();
 	if (WARN_ON(max_ev > GSI_EVT_RING_MAX))
 		return -EIO;
+
+	gsi->max_ch = max_ch;
 	gsi->max_ev = max_ev;
 	gsi->evt_bmap = gsi_evt_bmap(max_ev);
-	ipa_debug("max event rings %d\n", gsi->max_ev);
 
+	/* Enable all IPA interrupts */
 	gsi_irq_enable_all();
 
 	/* Writing 1 indicates IRQ interrupts; 0 would be MSI */
 	gsi_writel(1, GSI_EE_N_CNTXT_INTSET_OFFS(IPA_EE_AP));
 
+	/* Initialize the error log */
 	gsi_writel(0, GSI_EE_N_ERROR_LOG_OFFS(IPA_EE_AP));
 
 	return 0;
