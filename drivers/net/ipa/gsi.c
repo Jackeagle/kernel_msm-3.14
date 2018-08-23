@@ -310,14 +310,14 @@ static void _gsi_irq_control_all(struct gsi_ctx *gsi, bool enable)
 	gsi_writel(gsi, val, GSI_EE_N_CNTXT_GSI_IRQ_EN_OFFS(IPA_EE_AP));
 }
 
-static void gsi_irq_disable_all(void)
+static void gsi_irq_disable_all(struct gsi_ctx *gsi)
 {
-	_gsi_irq_control_all(gsi_ctx, false);
+	_gsi_irq_control_all(gsi, false);
 }
 
-static void gsi_irq_enable_all(void)
+static void gsi_irq_enable_all(struct gsi_ctx *gsi)
 {
-	_gsi_irq_control_all(gsi_ctx, true);
+	_gsi_irq_control_all(gsi, true);
 }
 
 static void gsi_handle_chan_ctrl(void)
@@ -887,7 +887,7 @@ int gsi_register_device(struct gsi_ctx *gsi)
 	gsi->evt_bmap = gsi_evt_bmap(max_ev);
 
 	/* Enable all IPA interrupts */
-	gsi_irq_enable_all();
+	gsi_irq_enable_all(gsi);
 
 	/* Writing 1 indicates IRQ interrupts; 0 would be MSI */
 	gsi_writel(gsi, 1, GSI_EE_N_CNTXT_INTSET_OFFS(IPA_EE_AP));
@@ -906,7 +906,7 @@ void gsi_deregister_device(struct gsi_ctx *gsi)
 	/* Don't bother clearing the error log again (ERROR_LOG) or
 	 * setting the interrupt type again (INTSET).
 	 */
-	gsi_irq_disable_all();
+	gsi_irq_disable_all(gsi);
 
 	/* Clean up everything else set up by gsi_register_device() */
 	gsi->evt_bmap = 0;
