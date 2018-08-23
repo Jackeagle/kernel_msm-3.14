@@ -1284,9 +1284,10 @@ err_mutex_unlock:
 	return chan_id;
 }
 
-static void __gsi_write_channel_scratch(unsigned long chan_id)
+static void
+__gsi_write_channel_scratch(struct gsi_ctx *gsi, unsigned long chan_id)
 {
-	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	union gsi_channel_scratch scr = { };
 	struct gsi_gpi_channel_scratch *gpi = &scr.gpi;
 	u32 val;
@@ -1296,25 +1297,25 @@ static void __gsi_write_channel_scratch(unsigned long chan_id)
 	gpi->outstanding_threshold = 2 * GSI_RING_ELEMENT_SIZE;
 
 	val = scr.data.word1;
-	gsi_writel(gsi_ctx, val,
+	gsi_writel(gsi, val,
 		   GSI_EE_N_GSI_CH_K_SCRATCH_0_OFFS(chan_id, IPA_EE_AP));
 
 	val = scr.data.word2;
-	gsi_writel(gsi_ctx, val,
+	gsi_writel(gsi, val,
 		   GSI_EE_N_GSI_CH_K_SCRATCH_1_OFFS(chan_id, IPA_EE_AP));
 
 	val = scr.data.word3;
-	gsi_writel(gsi_ctx, val,
+	gsi_writel(gsi, val,
 		   GSI_EE_N_GSI_CH_K_SCRATCH_2_OFFS(chan_id, IPA_EE_AP));
 
 	/* We must preserve the upper 16 bits of the last scratch
 	 * register.  The next sequence assumes those bits remain
 	 * unchanged between the read and the write.
 	 */
-	val = gsi_readl(gsi_ctx,
+	val = gsi_readl(gsi,
 			GSI_EE_N_GSI_CH_K_SCRATCH_3_OFFS(chan_id, IPA_EE_AP));
 	val = (scr.data.word4 & GENMASK(31, 16)) | (val & GENMASK(15, 0));
-	gsi_writel(gsi_ctx, val,
+	gsi_writel(gsi, val,
 		   GSI_EE_N_GSI_CH_K_SCRATCH_3_OFFS(chan_id, IPA_EE_AP));
 }
 
@@ -1327,7 +1328,7 @@ int gsi_write_channel_scratch(struct gsi_ctx *gsi, unsigned long chan_id,
 
 	mutex_lock(&chan->mlock);
 
-	__gsi_write_channel_scratch(chan_id);
+	__gsi_write_channel_scratch(gsi, chan_id);
 
 	mutex_unlock(&chan->mlock);
 
@@ -1465,7 +1466,7 @@ reset:
 	gsi_init_ring(&chan->ring, &chan->props.mem);
 
 	/* restore scratch */
-	__gsi_write_channel_scratch(chan_id);
+	__gsi_write_channel_scratch(gsi, chan_id);
 
 	mutex_unlock(&gsi->mlock);
 
@@ -1714,7 +1715,7 @@ int gsi_set_channel_cfg(struct gsi_ctx *gsi, unsigned long chan_id,
 	gsi_init_ring(&chan->ring, &chan->props.mem);
 
 	/* restore scratch */
-	__gsi_write_channel_scratch(chan_id);
+	__gsi_write_channel_scratch(gsi, chan_id);
 	mutex_unlock(&chan->mlock);
 
 	return 0;
