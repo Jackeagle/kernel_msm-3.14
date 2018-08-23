@@ -1611,9 +1611,9 @@ int gsi_start_xfer(unsigned long chan_id)
 	return 0;
 }
 
-int gsi_poll_channel(unsigned long chan_id)
+int gsi_poll_channel(struct gsi_ctx *gsi, unsigned long chan_id)
 {
-	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	struct gsi_evt_ctx *evtr = chan->evtr;
 	u32 offset = GSI_EE_N_EV_CH_K_CNTXT_4_OFFS(evtr->id, IPA_EE_AP);
 	unsigned long flags;
@@ -1625,7 +1625,7 @@ int gsi_poll_channel(unsigned long chan_id)
 	if (evtr->ring.rp == evtr->ring.rp_local) {
 		u32 val;
 
-		val = gsi_readl(gsi_ctx, offset);
+		val = gsi_readl(gsi, offset);
 		evtr->ring.rp = (chan->ring.rp & GENMASK_ULL(63, 32)) | val;
 	}
 

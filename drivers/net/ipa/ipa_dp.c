@@ -1780,7 +1780,7 @@ static int ipa_poll_gsi_pkt(struct ipa_sys_context *sys)
 		return (int)sys->ep->bytes_xfered;
 	}
 
-	return gsi_poll_channel(sys->ep->gsi_chan_hdl);
+	return gsi_poll_channel(ipa_ctx->gsi_ctx, sys->ep->gsi_chan_hdl);
 }
 
 /** ipa_adjust_ra_buff_base_sz()

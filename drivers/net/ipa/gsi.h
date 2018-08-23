@@ -312,12 +312,11 @@ int gsi_set_channel_cfg(struct gsi_ctx *gsi, unsigned long chan_id,
 /** gsi_poll_channel - Peripheral should call this function to query for
  * completed transfer descriptors.
  *
- * @chan_hdl:  Client handle previously obtained from
- *	       gsi_alloc_channel
+ * @chan_id:  Client handle previously obtained from gsi_alloc_channel()
  *
  * @Return number of bytes transferred, or a negative error code
  */
-int gsi_poll_channel(unsigned long chan_hdl);
+int gsi_poll_channel(struct gsi_ctx *gsi, unsigned long chan_id);
 
 /** gsi_channel_intr_enable/disable - control channel interrupts
  *
