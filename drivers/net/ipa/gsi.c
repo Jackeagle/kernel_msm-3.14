@@ -295,32 +295,29 @@ static void gsi_irq_enable_event(u8 evt_id)
 	_gsi_irq_control_event(evt_id, true);
 }
 
-static void _gsi_irq_control_all(bool enable)
+static void _gsi_irq_control_all(struct gsi_ctx *gsi, bool enable)
 {
 	u32 val = enable ? ~0 : 0;
 
 	/* Inter EE commands / interrupt are no supported. */
-	gsi_writel(gsi_ctx, val, GSI_EE_N_CNTXT_TYPE_IRQ_MSK_OFFS(IPA_EE_AP));
-	gsi_writel(gsi_ctx, val,
-		   GSI_EE_N_CNTXT_SRC_GSI_CH_IRQ_MSK_OFFS(IPA_EE_AP));
-	gsi_writel(gsi_ctx, val,
-		   GSI_EE_N_CNTXT_SRC_EV_CH_IRQ_MSK_OFFS(IPA_EE_AP));
-	gsi_writel(gsi_ctx, val,
-		   GSI_EE_N_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(IPA_EE_AP));
-	gsi_writel(gsi_ctx, val, GSI_EE_N_CNTXT_GLOB_IRQ_EN_OFFS(IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_EE_N_CNTXT_TYPE_IRQ_MSK_OFFS(IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_EE_N_CNTXT_SRC_GSI_CH_IRQ_MSK_OFFS(IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_EE_N_CNTXT_SRC_EV_CH_IRQ_MSK_OFFS(IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_EE_N_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_EE_N_CNTXT_GLOB_IRQ_EN_OFFS(IPA_EE_AP));
 	/* Never enable GSI_BREAK_POINT */
 	val &= ~field_gen(1, EN_GSI_BREAK_POINT_BMSK);
-	gsi_writel(gsi_ctx, val, GSI_EE_N_CNTXT_GSI_IRQ_EN_OFFS(IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_EE_N_CNTXT_GSI_IRQ_EN_OFFS(IPA_EE_AP));
 }
 
 static void gsi_irq_disable_all(void)
 {
-	_gsi_irq_control_all(false);
+	_gsi_irq_control_all(gsi_ctx, false);
 }
 
 static void gsi_irq_enable_all(void)
 {
-	_gsi_irq_control_all(true);
+	_gsi_irq_control_all(gsi_ctx, true);
 }
 
 static void gsi_handle_chan_ctrl(void)
