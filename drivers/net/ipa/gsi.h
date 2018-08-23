@@ -169,7 +169,7 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev);
  *
  * @Return 0 if successful or a negative error code otherwise.
  */
-int gsi_register_device(void);
+int gsi_register_device(struct gsi_ctx *gsi);
 
 /** gsi_deregister_device - Peripheral should call this function to
  * de-register itself with GSI

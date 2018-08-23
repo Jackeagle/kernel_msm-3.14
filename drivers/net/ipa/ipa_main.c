@@ -910,7 +910,7 @@ static void ipa_post_init(struct work_struct *unused)
 		return ;
 	}
 
-	result = gsi_register_device();
+	result = gsi_register_device(ipa_ctx->gsi_ctx);
 	if (result) {
 		ipa_err(":gsi register error - %d\n", result);
 		return ;

@@ -834,13 +834,13 @@ static void gsi_evt_bmap_free(unsigned long evt_id)
 	gsi_ctx->evt_bmap &= ~BIT(evt_id);
 }
 
-int gsi_register_device(void)
+int gsi_register_device(struct gsi_ctx *gsi)
 {
-	struct platform_device *ipa_pdev = to_platform_device(gsi_ctx->dev);
+	struct platform_device *ipa_pdev = to_platform_device(gsi->dev);
 	u32 val;
 	int ret;
 
-	if (gsi_ctx->per_registered) {
+	if (gsi->per_registered) {
 		ipa_err("per already registered\n");
 		return -ENOTSUPP;
 	}
@@ -851,22 +851,22 @@ int gsi_register_device(void)
 		ipa_err("failed to get gsi-irq!\n");
 		return -ENODEV;
 	}
-	gsi_ctx->irq = ret;
-	ipa_debug("GSI irq %u\n", gsi_ctx->irq);
+	gsi->irq = ret;
+	ipa_debug("GSI irq %u\n", gsi->irq);
 
-	spin_lock_init(&gsi_ctx->slock);
-	ret = devm_request_irq(gsi_ctx->dev, gsi_ctx->irq, gsi_isr,
-			       IRQF_TRIGGER_HIGH, "gsi", gsi_ctx);
+	spin_lock_init(&gsi->slock);
+	ret = devm_request_irq(gsi->dev, gsi->irq, gsi_isr,
+			       IRQF_TRIGGER_HIGH, "gsi", gsi);
 	if (ret) {
-		ipa_err("failed to register isr for %u\n", gsi_ctx->irq);
+		ipa_err("failed to register isr for %u\n", gsi->irq);
 		return -EIO;
 	}
 
-	ret = enable_irq_wake(gsi_ctx->irq);
+	ret = enable_irq_wake(gsi->irq);
 	if (ret)
-		ipa_err("failed to enable wake irq %u\n", gsi_ctx->irq);
+		ipa_err("failed to enable wake irq %u\n", gsi->irq);
 	else
-		ipa_err("GSI irq is wake enabled %u\n", gsi_ctx->irq);
+		ipa_err("GSI irq is wake enabled %u\n", gsi->irq);
 
 	val = gsi_readl(GSI_EE_N_GSI_STATUS_OFFS(IPA_EE_AP));
 	if (!(val & ENABLED_BMSK)) {
@@ -874,20 +874,20 @@ int gsi_register_device(void)
 		return -EIO;
 	}
 
-	gsi_ctx->per_registered = true;
-	mutex_init(&gsi_ctx->mlock);
-	atomic_set(&gsi_ctx->num_chan, 0);
-	atomic_set(&gsi_ctx->num_evt_ring, 0);
+	gsi->per_registered = true;
+	mutex_init(&gsi->mlock);
+	atomic_set(&gsi->num_chan, 0);
+	atomic_set(&gsi->num_evt_ring, 0);
 
-	gsi_ctx->max_ch = gsi_get_max_channels();
-	if (WARN_ON(gsi_ctx->max_ch > GSI_CHAN_MAX))
+	gsi->max_ch = gsi_get_max_channels();
+	if (WARN_ON(gsi->max_ch > GSI_CHAN_MAX))
 		return -EIO;
-	ipa_debug("max channels %d\n", gsi_ctx->max_ch);
+	ipa_debug("max channels %d\n", gsi->max_ch);
 
-	gsi_ctx->max_ev = gsi_get_max_event_rings();
-	if (WARN_ON(gsi_ctx->max_ev > GSI_EVT_RING_MAX))
+	gsi->max_ev = gsi_get_max_event_rings();
+	if (WARN_ON(gsi->max_ev > GSI_EVT_RING_MAX))
 		return -EIO;
-	ipa_debug("max event rings %d\n", gsi_ctx->max_ev);
+	ipa_debug("max event rings %d\n", gsi->max_ev);
 
 	gsi_evt_bmap_init();
 
