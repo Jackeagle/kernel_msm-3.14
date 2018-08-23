@@ -359,7 +359,7 @@ static bool ipa_send_nop(struct ipa_sys_context *sys)
 	list_add_tail(&nop_pkt->link, &sys->head_desc_list);
 	spin_unlock_bh(&sys->spinlock);
 
-	if (!gsi_queue_xfer(chan_id, 1, &nop_xfer, true))
+	if (!gsi_queue_xfer(ipa_ctx->gsi_ctx, chan_id, 1, &nop_xfer, true))
 		return true;	/* Success */
 
 	spin_lock_bh(&sys->spinlock);
@@ -528,8 +528,8 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	}
 
 	ipa_debug_low("ch:%lu queue xfer\n", ep->gsi_chan_hdl);
-	result = gsi_queue_xfer(ep->gsi_chan_hdl, num_desc, xfer_elem,
-				true);
+	result = gsi_queue_xfer(ipa_ctx->gsi_ctx, ep->gsi_chan_hdl,
+				num_desc, xfer_elem, true);
 	if (result)
 		goto failure;
 	kfree(xfer_elem);
@@ -1025,7 +1025,8 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
 	gsi_xfer_elem.type = GSI_XFER_ELEM_DATA;
 	gsi_xfer_elem.xfer_user_data = rx_pkt;
 
-	ret = gsi_queue_xfer(sys->ep->gsi_chan_hdl, 1, &gsi_xfer_elem, false);
+	ret = gsi_queue_xfer(ipa_ctx->gsi_ctx, sys->ep->gsi_chan_hdl,
+			     1, &gsi_xfer_elem, false);
 	if (ret)
 		return ret;
 
@@ -1034,7 +1035,7 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
 	 */
 	if (++sys->rx.len_pending_xfer >= IPA_REPL_XFER_THRESH) {
 		sys->rx.len_pending_xfer = 0;
-		gsi_start_xfer(sys->ep->gsi_chan_hdl);
+		gsi_start_xfer(ipa_ctx->gsi_ctx, sys->ep->gsi_chan_hdl);
 	}
 
 	return 0;

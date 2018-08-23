@@ -124,7 +124,8 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	xfer_elem.flags = GSI_XFER_FLAG_EOT;
 	xfer_elem.type = GSI_XFER_ELEM_DATA;
 
-	gsi_res = gsi_queue_xfer(ep->gsi_chan_hdl, 1, &xfer_elem, true);
+	gsi_res = gsi_queue_xfer(ipa_ctx->gsi_ctx, ep->gsi_chan_hdl,
+				 1, &xfer_elem, true);
 	if (gsi_res) {
 		result = -EFAULT;
 		goto queue_xfer_fail;

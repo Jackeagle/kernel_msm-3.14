@@ -328,8 +328,7 @@ void gsi_channel_intr_disable(struct gsi_ctx *gsi, unsigned long chan_id);
 /** gsi_queue_xfer - Peripheral should call this function
  * to queue transfers on the given channel
  *
- * @chan_hdl:  Client handle previously obtained from
- *	       gsi_alloc_channel
+ * @chan_id:  Client handle previously obtained from gsi_alloc_channel()
  * @num_xfers: Number of transfer in the array @ xfer
  * @xfer:      Array of num_xfers transfer descriptors
  * @ring_db:   If true, tell HW about these queued xfers
@@ -337,17 +336,16 @@ void gsi_channel_intr_disable(struct gsi_ctx *gsi, unsigned long chan_id);
  *
  * @Return gsi_status
  */
-int gsi_queue_xfer(unsigned long chan_hdl, u16 num_xfers,
+int gsi_queue_xfer(struct gsi_ctx *gsi, unsigned long chan_id, u16 num_xfers,
 		   struct gsi_xfer_elem *xfer, bool ring_db);
 
 /** gsi_start_xfer - Peripheral should call this function to
  * inform HW about queued xfers
  *
- * @chan_hdl:  Client handle previously obtained from
- *	       gsi_alloc_channel
+ * @chan_id:  Client handle previously obtained from gsi_alloc_channel()
  *
  * @Return gsi_status
  */
-int gsi_start_xfer(unsigned long chan_hdl);
+int gsi_start_xfer(struct gsi_ctx *gsi, unsigned long chan_id);
 
 #endif /* _GSI_H_ */

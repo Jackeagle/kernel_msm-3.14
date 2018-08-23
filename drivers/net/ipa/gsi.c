@@ -1541,10 +1541,10 @@ bool gsi_is_channel_empty(struct gsi_ctx *gsi, unsigned long chan_id)
 	return empty;
 }
 
-int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
+int gsi_queue_xfer(struct gsi_ctx *gsi, unsigned long chan_id, u16 num_xfers,
 		   struct gsi_xfer_elem *xfer, bool ring_db)
 {
-	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	unsigned long flags;
 	u32 i;
 
@@ -1587,16 +1587,16 @@ int gsi_queue_xfer(unsigned long chan_id, u16 num_xfers,
 	wmb();	/* Ensure TRE is set before ringing doorbell */
 
 	if (ring_db)
-		gsi_ring_chan_doorbell(gsi_ctx, chan);
+		gsi_ring_chan_doorbell(gsi, chan);
 
 	spin_unlock_irqrestore(&chan->evtr->ring.slock, flags);
 
 	return 0;
 }
 
-int gsi_start_xfer(unsigned long chan_id)
+int gsi_start_xfer(struct gsi_ctx *gsi, unsigned long chan_id)
 {
-	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 
 	if (chan->state != GSI_CHAN_STATE_STARTED) {
 		ipa_err("bad state %d\n", chan->state);
@@ -1606,7 +1606,7 @@ int gsi_start_xfer(unsigned long chan_id)
 	if (chan->ring.wp == chan->ring.wp_local)
 		return 0;
 
-	gsi_ring_chan_doorbell(gsi_ctx, chan);
+	gsi_ring_chan_doorbell(gsi, chan);
 
 	return 0;
 }
