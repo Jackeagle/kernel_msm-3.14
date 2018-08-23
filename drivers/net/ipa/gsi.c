@@ -838,6 +838,8 @@ static void gsi_evt_bmap_free(unsigned long evt_id)
 int gsi_register_device(struct gsi_ctx *gsi)
 {
 	u32 val;
+	u32 max_ch;
+	u32 max_ev;
 	int ret;
 
 	if (gsi->per_registered) {
@@ -865,14 +867,16 @@ int gsi_register_device(struct gsi_ctx *gsi)
 		ipa_err("error %d enabling gsi wake irq\n", ret);
 	gsi->irq_wake_enabled = !ret;
 
-	gsi->max_ch = gsi_get_max_channels();
-	if (WARN_ON(gsi->max_ch > GSI_CHAN_MAX))
+	max_ch = gsi_get_max_channels();
+	if (WARN_ON(max_ch > GSI_CHAN_MAX))
 		return -EIO;
+	gsi->max_ch = max_ch;
 	ipa_debug("max channels %d\n", gsi->max_ch);
 
-	gsi->max_ev = gsi_get_max_event_rings();
-	if (WARN_ON(gsi->max_ev > GSI_EVT_RING_MAX))
+	max_ev = gsi_get_max_event_rings();
+	if (WARN_ON(max_ev > GSI_EVT_RING_MAX))
 		return -EIO;
+	gsi->max_ev = max_ev;
 	ipa_debug("max event rings %d\n", gsi->max_ev);
 
 	gsi_evt_bmap_init();
