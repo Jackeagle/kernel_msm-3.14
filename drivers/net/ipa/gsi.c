@@ -844,6 +844,12 @@ int gsi_register_device(struct gsi_ctx *gsi)
 		return -ENOTSUPP;
 	}
 
+	val = gsi_readl(GSI_EE_N_GSI_STATUS_OFFS(IPA_EE_AP));
+	if (!(val & ENABLED_BMSK)) {
+		ipa_err("manager EE has not enabled GSI, GSI un-usable\n");
+		return -EIO;
+	}
+
 	ret = devm_request_irq(gsi->dev, gsi->irq, gsi_isr,
 			       IRQF_TRIGGER_HIGH, "gsi", gsi);
 	if (ret) {
@@ -856,12 +862,6 @@ int gsi_register_device(struct gsi_ctx *gsi)
 		ipa_err("failed to enable wake irq %u\n", gsi->irq);
 	else
 		ipa_err("GSI irq is wake enabled %u\n", gsi->irq);
-
-	val = gsi_readl(GSI_EE_N_GSI_STATUS_OFFS(IPA_EE_AP));
-	if (!(val & ENABLED_BMSK)) {
-		ipa_err("manager EE has not enabled GSI, GSI un-usable\n");
-		return -EIO;
-	}
 
 	gsi->per_registered = true;
 	mutex_init(&gsi->mlock);
