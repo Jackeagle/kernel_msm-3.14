@@ -656,27 +656,26 @@ static void handle_event(struct gsi_ctx *gsi, int evt_id)
 	spin_unlock_irqrestore(&evtr->ring.slock, flags);
 }
 
-static void gsi_handle_ieob(void)
+static void gsi_handle_ieob(struct gsi_ctx *gsi)
 {
-	u32 valid_mask = GENMASK(gsi_ctx->max_ev - 1, 0);
+	u32 valid_mask = GENMASK(gsi->max_ev - 1, 0);
 	u32 evt_mask;
 
-	evt_mask = gsi_readl(gsi_ctx,
-			     GSI_EE_N_CNTXT_SRC_IEOB_IRQ_OFFS(IPA_EE_AP));
-	evt_mask &= gsi_readl(gsi_ctx,
+	evt_mask = gsi_readl(gsi, GSI_EE_N_CNTXT_SRC_IEOB_IRQ_OFFS(IPA_EE_AP));
+	evt_mask &= gsi_readl(gsi,
 			      GSI_EE_N_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(IPA_EE_AP));
-	gsi_writel(gsi_ctx, evt_mask,
+	gsi_writel(gsi, evt_mask,
 		   GSI_EE_N_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(IPA_EE_AP));
 
 	if (evt_mask & ~valid_mask) {
-		ipa_err("invalid events (> %u)\n", gsi_ctx->max_ev);
+		ipa_err("invalid events (> %u)\n", gsi->max_ev);
 		evt_mask &= valid_mask;
 	}
 
 	while (evt_mask) {
 		int i = __ffs(evt_mask);
 
-		handle_event(gsi_ctx, i);
+		handle_event(gsi, i);
 
 		evt_mask ^= BIT(i);
 	}
@@ -776,7 +775,7 @@ static irqreturn_t gsi_isr(int irq, void *dev_id)
 				gsi_handle_glob_ee(gsi);
 				break;
 			case IEOB_BMSK:
-				gsi_handle_ieob();
+				gsi_handle_ieob(gsi);
 				break;
 			case INTER_EE_CH_CTRL_BMSK:
 				gsi_handle_inter_ee_chan_ctrl();
