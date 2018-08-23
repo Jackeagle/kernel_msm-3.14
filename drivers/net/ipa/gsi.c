@@ -320,28 +320,27 @@ static void gsi_irq_enable_all(struct gsi_ctx *gsi)
 	_gsi_irq_control_all(gsi, true);
 }
 
-static void gsi_handle_chan_ctrl(void)
+static void gsi_handle_chan_ctrl(struct gsi_ctx *gsi)
 {
-	u32 valid_mask = GENMASK(gsi_ctx->max_ch - 1, 0);
+	u32 valid_mask = GENMASK(gsi->max_ch - 1, 0);
 	u32 ch_mask;
 
-	ch_mask = gsi_readl(gsi_ctx,
-			    GSI_EE_N_CNTXT_SRC_GSI_CH_IRQ_OFFS(IPA_EE_AP));
-	gsi_writel(gsi_ctx, ch_mask,
+	ch_mask = gsi_readl(gsi, GSI_EE_N_CNTXT_SRC_GSI_CH_IRQ_OFFS(IPA_EE_AP));
+	gsi_writel(gsi, ch_mask,
 		   GSI_EE_N_CNTXT_SRC_GSI_CH_IRQ_CLR_OFFS(IPA_EE_AP));
 
 	ipa_debug("ch_mask %x\n", ch_mask);
 	if (ch_mask & ~valid_mask) {
-		ipa_err("invalid channels (> %u)\n", gsi_ctx->max_ch);
+		ipa_err("invalid channels (> %u)\n", gsi->max_ch);
 		ch_mask &= valid_mask;
 	}
 
 	while (ch_mask) {
 		int i = __ffs(ch_mask);
-		struct gsi_chan_ctx *chan = &gsi_ctx->chan[i];
+		struct gsi_chan_ctx *chan = &gsi->chan[i];
 		u32 val;
 
-		val = gsi_readl(gsi_ctx,
+		val = gsi_readl(gsi,
 				GSI_EE_N_GSI_CH_K_CNTXT_0_OFFS(i, IPA_EE_AP));
 		chan->state = field_val(val, CHSTATE_BMSK);
 		ipa_debug("ch %d state updated to %u\n", i, chan->state);
@@ -770,7 +769,7 @@ static irqreturn_t gsi_isr(int irq, void *dev_id)
 
 			switch (single) {
 			case CH_CTRL_BMSK:
-				gsi_handle_chan_ctrl();
+				gsi_handle_chan_ctrl(gsi);
 				break;
 			case EV_CTRL_BMSK:
 				gsi_handle_evt_ctrl();
