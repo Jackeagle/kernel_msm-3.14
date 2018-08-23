@@ -218,12 +218,13 @@ long gsi_alloc_channel(struct gsi_ctx *gsi, struct gsi_chan_props *props);
 /** gsi_write_channel_scratch - Peripheral should call this function to
  * write to the scratch area of the channel context
  *
- * @chan_hdl:  Client handle previously obtained from gsi_alloc_channel
+ * @chan_id:  Client handle previously obtained from gsi_alloc_channel
  * @tlv_size:  Number of elements in channel TLV queue
  *
  * @Return gsi_status
  */
-int gsi_write_channel_scratch(unsigned long chan_hdl, u32 tlv_size);
+int gsi_write_channel_scratch(struct gsi_ctx *gsi, unsigned long chan_id,
+		u32 tlv_size);
 
 /** gsi_start_channel - Peripheral should call this function to
  * start a channel i.e put into running state

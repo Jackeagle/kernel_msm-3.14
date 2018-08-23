@@ -1753,7 +1753,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		goto fail_alloc_channel;
 	ep->gsi_chan_hdl = result;
 
-	result = gsi_write_channel_scratch(ep->gsi_chan_hdl,
+	result = gsi_write_channel_scratch(ipa_ctx->gsi_ctx, ep->gsi_chan_hdl,
 					   gsi_ep_info->ipa_if_tlv);
 	if (result) {
 		ipa_err("failed to write scratch %d\n", result);

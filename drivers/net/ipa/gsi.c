@@ -1317,9 +1317,10 @@ static void __gsi_write_channel_scratch(unsigned long chan_id)
 		   GSI_EE_N_GSI_CH_K_SCRATCH_3_OFFS(chan_id, IPA_EE_AP));
 }
 
-int gsi_write_channel_scratch(unsigned long chan_id, u32 tlv_size)
+int gsi_write_channel_scratch(struct gsi_ctx *gsi, unsigned long chan_id,
+		u32 tlv_size)
 {
-	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 
 	chan->tlv_size = tlv_size;
 
