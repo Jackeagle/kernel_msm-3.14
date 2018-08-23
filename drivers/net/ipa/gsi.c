@@ -1003,9 +1003,10 @@ command(struct gsi_ctx *gsi, u32 reg, u32 val, struct completion *compl)
 }
 
 /* Issue an event ring command and wait for it to complete */
-static u32 evt_ring_command(unsigned long evt_id, enum gsi_evt_ch_cmd_opcode op)
+static u32 evt_ring_command(struct gsi_ctx *gsi, unsigned long evt_id,
+		enum gsi_evt_ch_cmd_opcode op)
 {
-	struct completion *compl = &gsi_ctx->evtr[evt_id].compl;
+	struct completion *compl = &gsi->evtr[evt_id].compl;
 	u32 val;
 
 	reinit_completion(compl);
@@ -1013,7 +1014,7 @@ static u32 evt_ring_command(unsigned long evt_id, enum gsi_evt_ch_cmd_opcode op)
 	val = field_gen((u32)evt_id, EV_CHID_BMSK);
 	val |= field_gen((u32)op, EV_OPCODE_BMSK);
 
-	val = command(gsi_ctx, GSI_EE_N_EV_CH_CMD_OFFS(IPA_EE_AP), val, compl);
+	val = command(gsi, GSI_EE_N_EV_CH_CMD_OFFS(IPA_EE_AP), val, compl);
 	if (!val)
 		ipa_err("evt_id %lu timed out\n", evt_id);
 
@@ -1069,7 +1070,7 @@ long gsi_alloc_evt_ring(u32 ring_count, u16 int_modt)
 	init_completion(&evtr->compl);
 	atomic_set(&evtr->chan_ref_cnt, 0);
 
-	completed = evt_ring_command(evt_id, GSI_EVT_ALLOCATE);
+	completed = evt_ring_command(gsi_ctx, evt_id, GSI_EVT_ALLOCATE);
 	if (!completed) {
 		ret = -ETIMEDOUT;
 		goto err_free_dma;
@@ -1134,7 +1135,7 @@ void gsi_dealloc_evt_ring(unsigned long evt_id)
 
 	mutex_lock(&gsi_ctx->mlock);
 
-	completed = evt_ring_command(evt_id, GSI_EVT_DE_ALLOC);
+	completed = evt_ring_command(gsi_ctx, evt_id, GSI_EVT_DE_ALLOC);
 	ipa_bug_on(!completed);
 
 	ipa_bug_on(evtr->state != GSI_EVT_RING_STATE_NOT_ALLOCATED);
@@ -1159,7 +1160,7 @@ void gsi_reset_evt_ring(unsigned long evt_id)
 
 	mutex_lock(&gsi_ctx->mlock);
 
-	completed = evt_ring_command(evt_id, GSI_EVT_RESET);
+	completed = evt_ring_command(gsi_ctx, evt_id, GSI_EVT_RESET);
 	ipa_bug_on(!completed);
 
 	ipa_bug_on(evtr->state != GSI_EVT_RING_STATE_ALLOCATED);
