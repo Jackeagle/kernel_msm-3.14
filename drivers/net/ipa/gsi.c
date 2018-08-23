@@ -1143,28 +1143,28 @@ void gsi_dealloc_evt_ring(struct gsi_ctx *gsi, unsigned long evt_id)
 	atomic_dec(&gsi->num_evt_ring);
 }
 
-void gsi_reset_evt_ring(unsigned long evt_id)
+void gsi_reset_evt_ring(struct gsi_ctx *gsi, unsigned long evt_id)
 {
-	struct gsi_evt_ctx *evtr = &gsi_ctx->evtr[evt_id];
+	struct gsi_evt_ctx *evtr = &gsi->evtr[evt_id];
 	u32 completed;
 
 	ipa_bug_on(evtr->state != GSI_EVT_RING_STATE_ALLOCATED);
 
-	mutex_lock(&gsi_ctx->mlock);
+	mutex_lock(&gsi->mlock);
 
-	completed = evt_ring_command(gsi_ctx, evt_id, GSI_EVT_RESET);
+	completed = evt_ring_command(gsi, evt_id, GSI_EVT_RESET);
 	ipa_bug_on(!completed);
 
 	ipa_bug_on(evtr->state != GSI_EVT_RING_STATE_ALLOCATED);
 
-	gsi_program_evt_ring_ctx(gsi_ctx, evt_id, evtr->mem.size,
+	gsi_program_evt_ring_ctx(gsi, evt_id, evtr->mem.size,
 				 evtr->mem.phys_base, evtr->int_modt);
 	gsi_init_ring(&evtr->ring, &evtr->mem);
 
 	__gsi_zero_evt_ring_scratch(evt_id);
 
-	gsi_prime_evt_ring(gsi_ctx, evtr);
-	mutex_unlock(&gsi_ctx->mlock);
+	gsi_prime_evt_ring(gsi, evtr);
+	mutex_unlock(&gsi->mlock);
 }
 
 static void gsi_program_chan_ctx(struct gsi_chan_props *props, u8 evt_id)

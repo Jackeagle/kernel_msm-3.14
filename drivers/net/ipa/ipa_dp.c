@@ -890,7 +890,7 @@ void ipa_teardown_sys_pipe(u32 clnt_hdl)
 
 	ipa_reset_gsi_channel(clnt_hdl);
 	gsi_dealloc_channel(ep->gsi_chan_hdl);
-	gsi_reset_evt_ring(ep->gsi_evt_ring_hdl);
+	gsi_reset_evt_ring(ipa_ctx->gsi_ctx, ep->gsi_evt_ring_hdl);
 	gsi_dealloc_evt_ring(ipa_ctx->gsi_ctx, ep->gsi_evt_ring_hdl);
 
 	if (ipa_consumer(ep->client))

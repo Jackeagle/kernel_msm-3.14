@@ -198,12 +198,11 @@ void gsi_dealloc_evt_ring(struct gsi_ctx *gsi, unsigned long evt_id);
 /** gsi_reset_evt_ring - Peripheral should call this function to
  * reset an event ring to recover from error state
  *
- * @evt_ring_hdl:  Client handle previously obtained from
- *	       gsi_alloc_evt_ring
+ * @evt_id:  Client handle previously obtained from gsi_alloc_evt_ring()
  *
  * This function can sleep
  */
-void gsi_reset_evt_ring(unsigned long evt_ring_hdl);
+void gsi_reset_evt_ring(struct gsi_ctx *gsi, unsigned long evt_id);
 
 /** gsi_alloc_channel - Peripheral should call this function to
  * allocate a channel once gsi_register_device() has been called
