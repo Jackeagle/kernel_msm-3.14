@@ -575,7 +575,7 @@ static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt, bool callback)
 	return evt->len;
 }
 
-static void gsi_ring_evt_doorbell(struct gsi_evt_ctx *evtr)
+static void gsi_ring_evt_doorbell(struct gsi_ctx *gsi, struct gsi_evt_ctx *evtr)
 {
 	u32 val;
 
@@ -584,11 +584,11 @@ static void gsi_ring_evt_doorbell(struct gsi_evt_ctx *evtr)
 	 * respectively.  LSB (doorbell 0) must be written last.
 	 */
 	val = evtr->ring.wp_local >> 32;
-	gsi_writel(gsi_ctx, val,
+	gsi_writel(gtsi, val,
 		   GSI_EE_N_EV_CH_K_DOORBELL_1_OFFS(evtr->id, IPA_EE_AP));
 
 	val = evtr->ring.wp_local & GENMASK(31, 0);
-	gsi_writel(gsi_ctx, val,
+	gsi_writel(gsi, val,
 		   GSI_EE_N_EV_CH_K_DOORBELL_0_OFFS(evtr->id, IPA_EE_AP));
 }
 
@@ -603,7 +603,7 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *chan)
 	 * interrupt handling.
 	 */
 	if (chan->props.from_gsi)
-		gsi_ring_evt_doorbell(chan->evtr);
+		gsi_ring_evt_doorbell(gsi_ctx, chan->evtr);
 	chan->ring.wp = chan->ring.wp_local;
 
 	/* The doorbell 0 and 1 registers store the low-order and
@@ -650,7 +650,7 @@ static void handle_event(struct gsi_ctx *gsi, int evt_id)
 			ring_wp_local_inc(&evtr->ring); /* recycle element */
 		}
 
-		gsi_ring_evt_doorbell(evtr);
+		gsi_ring_evt_doorbell(gsi, evtr);
 	} while (check_again);
 
 	spin_unlock_irqrestore(&evtr->ring.slock, flags);
@@ -973,7 +973,7 @@ static void gsi_prime_evt_ring(struct gsi_evt_ctx *evtr)
 	spin_lock_irqsave(&evtr->ring.slock, flags);
 	memset(evtr->ring.mem.base, 0, evtr->ring.mem.size);
 	evtr->ring.wp_local = evtr->ring.end - GSI_RING_ELEMENT_SIZE;
-	gsi_ring_evt_doorbell(evtr);
+	gsi_ring_evt_doorbell(gsi_ctx, evtr);
 	spin_unlock_irqrestore(&evtr->ring.slock, flags);
 }
 
