@@ -798,20 +798,16 @@ static u32 gsi_get_max_event_rings(void)
 }
 
 /*
- * Zero bits in the event bitmap represent event numbers available
+ * Zero bits in an event bitmap represent event numbers available
  * for allocation.  Initialize the map so all events supported by
  * the hardware are available; then preclude any reserved events
  * from allocation.
  */
-static void gsi_evt_bmap_init(void)
+static u32 gsi_evt_bmap(u32 max_ev)
 {
-	gsi_ctx->evt_bmap = GENMASK(BITS_PER_LONG - 1, gsi_ctx->max_ev);
-	gsi_ctx->evt_bmap |= GENMASK(GSI_MHI_ER_END, GSI_MHI_ER_START);
-}
+	u32 evt_bmap = GENMASK(BITS_PER_LONG - 1, max_ev);
 
-static void gsi_evt_bmap_exit(void)
-{
-	gsi_ctx->evt_bmap = 0;
+	return evt_bmap | GENMASK(GSI_MHI_ER_END, GSI_MHI_ER_START);
 }
 
 /* gsi_ctx->mlock is assumed held by caller */
@@ -877,9 +873,8 @@ int gsi_register_device(struct gsi_ctx *gsi)
 	if (WARN_ON(max_ev > GSI_EVT_RING_MAX))
 		return -EIO;
 	gsi->max_ev = max_ev;
+	gsi->evt_bmap = gsi_evt_bmap(max_ev);
 	ipa_debug("max event rings %d\n", gsi->max_ev);
-
-	gsi_evt_bmap_init();
 
 	gsi_irq_enable_all();
 
@@ -902,7 +897,7 @@ void gsi_deregister_device(void)
 	gsi_irq_disable_all();
 
 	/* Clean up everything else set up by gsi_register_device() */
-	gsi_evt_bmap_exit();
+	gsi_ctx->evt_bmap = 0;
 	gsi_ctx->max_ev = 0;
 	gsi_ctx->max_ch = 0;
 	if (gsi_ctx->irq_wake_enabled) {
