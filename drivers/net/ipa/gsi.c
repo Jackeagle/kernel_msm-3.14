@@ -618,9 +618,9 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *chan)
 		   GSI_EE_N_GSI_CH_K_DOORBELL_0_OFFS(ch_id, IPA_EE_AP));
 }
 
-static void handle_event(int evt_id)
+static void handle_event(struct gsi_ctx *gsi, int evt_id)
 {
-	struct gsi_evt_ctx *evtr = &gsi_ctx->evtr[evt_id];
+	struct gsi_evt_ctx *evtr = &gsi->evtr[evt_id];
 	u32 offset = GSI_EE_N_EV_CH_K_CNTXT_4_OFFS(evt_id, IPA_EE_AP);
 	unsigned long flags;
 	bool check_again;
@@ -628,7 +628,7 @@ static void handle_event(int evt_id)
 	spin_lock_irqsave(&evtr->ring.slock, flags);
 
 	do {
-		u32 val = gsi_readl(gsi_ctx, offset);
+		u32 val = gsi_readl(gsi, offset);
 
 		evtr->ring.rp = (evtr->ring.rp & GENMASK_ULL(63, 32)) | val;
 
@@ -676,7 +676,7 @@ static void gsi_handle_ieob(void)
 	while (evt_mask) {
 		int i = __ffs(evt_mask);
 
-		handle_event(i);
+		handle_event(gsi_ctx, i);
 
 		evt_mask ^= BIT(i);
 	}
