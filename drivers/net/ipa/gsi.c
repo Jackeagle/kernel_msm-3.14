@@ -318,6 +318,14 @@ static void gsi_irq_enable_all(struct gsi *gsi)
 	_gsi_irq_control_all(gsi, true);
 }
 
+static enum gsi_chan_state gsi_chan_state(struct gsi *gsi, u32 chan_id)
+{
+	u32 offset = GSI_EE_N_GSI_CH_K_CNTXT_0_OFFS(chan_id, IPA_EE_AP);
+	u32 val = gsi_readl(gsi, offset);
+
+	return (enum gsi_chan_state)field_val(val, CHSTATE_BMSK);
+}
+
 static void gsi_handle_chan_ctrl(struct gsi *gsi)
 {
 	u32 valid_mask = GENMASK(gsi->max_ch - 1, 0);
@@ -336,12 +344,8 @@ static void gsi_handle_chan_ctrl(struct gsi *gsi)
 	while (ch_mask) {
 		int i = __ffs(ch_mask);
 		struct gsi_chan_ctx *chan = &gsi->chan[i];
-		u32 val;
 
-		val = gsi_readl(gsi,
-				GSI_EE_N_GSI_CH_K_CNTXT_0_OFFS(i, IPA_EE_AP));
-		chan->state = field_val(val, CHSTATE_BMSK);
-		ipa_debug("ch %d state updated to %u\n", i, chan->state);
+		chan->state = gsi_chan_state(gsi, i);
 
 		complete(&chan->compl);
 
@@ -384,8 +388,6 @@ static void
 handle_glob_chan_err(struct gsi *gsi, u32 err_ee, u32 chan_id, u32 code)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
-	u32 offset;
-	u32 val;
 
 	if (err_ee != IPA_EE_AP)
 		ipa_bug_on(code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
@@ -398,11 +400,7 @@ handle_glob_chan_err(struct gsi *gsi, u32 err_ee, u32 chan_id, u32 code)
 	switch (code) {
 	case GSI_INVALID_TRE_ERR:
 		ipa_err("got INVALID_TRE_ERR\n");
-		offset = GSI_EE_N_GSI_CH_K_CNTXT_0_OFFS(chan_id, IPA_EE_AP);
-		val = gsi_readl(gsi, offset);
-		chan->state = field_val(val, CHSTATE_BMSK);
-		ipa_debug("chan_id %u state updated to %u\n", chan_id,
-			  chan->state);
+		chan->state = gsi_chan_state(gsi, chan_id);
 		ipa_bug_on(chan->state != GSI_CHAN_STATE_ERROR);
 		break;
 	case GSI_OUT_OF_BUFFERS_ERR:
@@ -1368,9 +1366,7 @@ int gsi_start_channel(struct gsi *gsi, unsigned long chan_id)
 int gsi_stop_channel(struct gsi *gsi, unsigned long chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
-	u32 offset = GSI_EE_N_GSI_CH_K_CNTXT_0_OFFS(chan_id, IPA_EE_AP);
 	u32 completed;
-	u32 val;
 	int ret;
 
 	if (chan->state == GSI_CHAN_STATE_STOPPED) {
@@ -1394,8 +1390,7 @@ int gsi_stop_channel(struct gsi *gsi, unsigned long chan_id)
 		/* check channel state here in case the channel is stopped but
 		 * the interrupt was not handled yet.
 		 */
-		val = gsi_readl(gsi, offset);
-		chan->state = field_val(val, CHSTATE_BMSK);
+		chan->state = gsi_chan_state(gsi, chan_id);
 		if (chan->state == GSI_CHAN_STATE_STOPPED) {
 			ret = 0;
 			goto free_lock;
