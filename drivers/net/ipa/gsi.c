@@ -1032,7 +1032,7 @@ static u32 channel_command(struct gsi_ctx *gsi, unsigned long chan_id,
 }
 
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
-long gsi_alloc_evt_ring(u32 ring_count, u16 int_modt)
+long gsi_alloc_evt_ring(struct gsi_ctx *gsi, u32 ring_count, u16 int_modt)
 {
 	u32 size = ring_count * GSI_RING_ELEMENT_SIZE;
 	unsigned long evt_id;
@@ -1043,11 +1043,11 @@ long gsi_alloc_evt_ring(u32 ring_count, u16 int_modt)
 	int ret;
 
 	/* Get the mutex to allocate from the bitmap and issue a command */
-	mutex_lock(&gsi_ctx->mlock);
+	mutex_lock(&gsi->mlock);
 
 	/* Start by allocating the event id to use */
-	evt_id = gsi_evt_bmap_alloc(gsi_ctx);
-	evtr = &gsi_ctx->evtr[evt_id];
+	evt_id = gsi_evt_bmap_alloc(gsi);
+	evtr = &gsi->evtr[evt_id];
 	ipa_debug("Using %lu as virt evt id\n", evt_id);
 
 	if (ipahal_dma_alloc(&evtr->mem, size, GFP_KERNEL)) {
@@ -1062,7 +1062,7 @@ long gsi_alloc_evt_ring(u32 ring_count, u16 int_modt)
 	init_completion(&evtr->compl);
 	atomic_set(&evtr->chan_ref_cnt, 0);
 
-	completed = evt_ring_command(gsi_ctx, evt_id, GSI_EVT_ALLOCATE);
+	completed = evt_ring_command(gsi, evt_id, GSI_EVT_ALLOCATE);
 	if (!completed) {
 		ret = -ETIMEDOUT;
 		goto err_free_dma;
@@ -1074,25 +1074,25 @@ long gsi_alloc_evt_ring(u32 ring_count, u16 int_modt)
 		ret = -ENOMEM;
 		goto err_free_dma;
 	}
-	atomic_inc(&gsi_ctx->num_evt_ring);
+	atomic_inc(&gsi->num_evt_ring);
 
-	gsi_program_evt_ring_ctx(gsi_ctx, evt_id, evtr->mem.size,
+	gsi_program_evt_ring_ctx(gsi, evt_id, evtr->mem.size,
 				 evtr->mem.phys_base, evtr->int_modt);
 	gsi_init_ring(&evtr->ring, &evtr->mem);
 
-	gsi_prime_evt_ring(gsi_ctx, evtr);
+	gsi_prime_evt_ring(gsi, evtr);
 
-	mutex_unlock(&gsi_ctx->mlock);
+	mutex_unlock(&gsi->mlock);
 
-	spin_lock_irqsave(&gsi_ctx->slock, flags);
+	spin_lock_irqsave(&gsi->slock, flags);
 
 	/* Enable the event interrupt (clear it first in case pending) */
 	val = BIT(evt_id);
-	gsi_writel(gsi_ctx, val,
+	gsi_writel(gsi, val,
 		   GSI_EE_N_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(IPA_EE_AP));
 	gsi_irq_enable_event(evt_id);
 
-	spin_unlock_irqrestore(&gsi_ctx->slock, flags);
+	spin_unlock_irqrestore(&gsi->slock, flags);
 
 	return evt_id;
 
@@ -1100,9 +1100,9 @@ err_free_dma:
 	ipahal_dma_free(&evtr->mem);
 	memset(evtr, 0, sizeof(*evtr));
 err_free_bmap:
-	gsi_evt_bmap_free(gsi_ctx, evt_id);
+	gsi_evt_bmap_free(gsi, evt_id);
 
-	mutex_unlock(&gsi_ctx->mlock);
+	mutex_unlock(&gsi->mlock);
 
 	return ret;
 }
@@ -1115,9 +1115,9 @@ static void __gsi_zero_evt_ring_scratch(unsigned long evt_id)
 		   GSI_EE_N_EV_CH_K_SCRATCH_1_OFFS(evt_id, IPA_EE_AP));
 }
 
-void gsi_dealloc_evt_ring(unsigned long evt_id)
+void gsi_dealloc_evt_ring(struct gsi_ctx *gsi, unsigned long evt_id)
 {
-	struct gsi_evt_ctx *evtr = &gsi_ctx->evtr[evt_id];
+	struct gsi_evt_ctx *evtr = &gsi->evtr[evt_id];
 	u32 completed;
 
 	ipa_bug_on(atomic_read(&evtr->chan_ref_cnt));
@@ -1125,22 +1125,22 @@ void gsi_dealloc_evt_ring(unsigned long evt_id)
 	/* TODO: add check for ERROR state */
 	ipa_bug_on(evtr->state != GSI_EVT_RING_STATE_ALLOCATED);
 
-	mutex_lock(&gsi_ctx->mlock);
+	mutex_lock(&gsi->mlock);
 
-	completed = evt_ring_command(gsi_ctx, evt_id, GSI_EVT_DE_ALLOC);
+	completed = evt_ring_command(gsi, evt_id, GSI_EVT_DE_ALLOC);
 	ipa_bug_on(!completed);
 
 	ipa_bug_on(evtr->state != GSI_EVT_RING_STATE_NOT_ALLOCATED);
 
-	gsi_evt_bmap_free(gsi_ctx, evtr->id);
+	gsi_evt_bmap_free(gsi, evtr->id);
 
-	mutex_unlock(&gsi_ctx->mlock);
+	mutex_unlock(&gsi->mlock);
 
 	evtr->int_modt = 0;
 	ipahal_dma_free(&evtr->mem);
 	memset(evtr, 0, sizeof(*evtr));
 
-	atomic_dec(&gsi_ctx->num_evt_ring);
+	atomic_dec(&gsi->num_evt_ring);
 }
 
 void gsi_reset_evt_ring(unsigned long evt_id)

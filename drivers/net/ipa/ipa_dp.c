@@ -891,7 +891,7 @@ void ipa_teardown_sys_pipe(u32 clnt_hdl)
 	ipa_reset_gsi_channel(clnt_hdl);
 	gsi_dealloc_channel(ep->gsi_chan_hdl);
 	gsi_reset_evt_ring(ep->gsi_evt_ring_hdl);
-	gsi_dealloc_evt_ring(ep->gsi_evt_ring_hdl);
+	gsi_dealloc_evt_ring(ipa_ctx->gsi_ctx, ep->gsi_evt_ring_hdl);
 
 	if (ipa_consumer(ep->client))
 		ipa_cleanup_rx(ep->sys);
@@ -1718,7 +1718,7 @@ static long evt_ring_hdl_get(struct ipa_ep_context *ep, u32 fifo_count)
 
 	ring_count = ipa_gsi_ring_count(ep->client, fifo_count);
 
-	return gsi_alloc_evt_ring(ring_count, modt);
+	return gsi_alloc_evt_ring(ipa_ctx->gsi_ctx, ring_count, modt);
 }
 
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
