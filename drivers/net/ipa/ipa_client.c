@@ -109,7 +109,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	}
 
 	/* Start channel and put 1 Byte descriptor on it */
-	gsi_res = gsi_start_channel(ep->gsi_chan_hdl);
+	gsi_res = gsi_start_channel(ipa_ctx->gsi_ctx, ep->gsi_chan_hdl);
 	if (gsi_res) {
 		ipa_err("Error starting channel: %d\n", gsi_res);
 		result = -EFAULT;

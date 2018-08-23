@@ -1395,7 +1395,7 @@ int ipa_stop_gsi_channel(u32 clnt_hdl)
 	if (ipa_producer(ep->client)) {
 		ipa_debug("Calling gsi_stop_channel ch:%lu\n",
 			  ep->gsi_chan_hdl);
-		res = gsi_stop_channel(ep->gsi_chan_hdl);
+		res = gsi_stop_channel(ipa_ctx->gsi_ctx, ep->gsi_chan_hdl);
 		ipa_debug("gsi_stop_channel ch: %lu returned %d\n",
 			  ep->gsi_chan_hdl, res);
 		goto end_sequence;
@@ -1404,7 +1404,7 @@ int ipa_stop_gsi_channel(u32 clnt_hdl)
 	for (i = 0; i < IPA_GSI_CHANNEL_STOP_MAX_RETRY; i++) {
 		ipa_debug("Calling gsi_stop_channel ch:%lu\n",
 			  ep->gsi_chan_hdl);
-		res = gsi_stop_channel(ep->gsi_chan_hdl);
+		res = gsi_stop_channel(ipa_ctx->gsi_ctx, ep->gsi_chan_hdl);
 		ipa_debug("gsi_stop_channel ch: %lu returned %d\n",
 			  ep->gsi_chan_hdl, res);
 		if (res != -EAGAIN && res != -ETIMEDOUT)

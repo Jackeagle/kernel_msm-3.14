@@ -1760,7 +1760,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 		goto fail_write_channel_scratch;
 	}
 
-	result = gsi_start_channel(ep->gsi_chan_hdl);
+	result = gsi_start_channel(ipa_ctx->gsi_ctx, ep->gsi_chan_hdl);
 	if (!result)
 		return 0;	/* Success */
 

@@ -229,19 +229,19 @@ int gsi_write_channel_scratch(struct gsi_ctx *gsi, unsigned long chan_id,
 /** gsi_start_channel - Peripheral should call this function to
  * start a channel i.e put into running state
  *
- * @chan_hdl:  Client handle previously obtained from
+ * @chan_id:  Client handle previously obtained from
  *	       gsi_alloc_channel
  *
  * This function can sleep
  *
  * @Return gsi_status
  */
-int gsi_start_channel(unsigned long chan_hdl);
+int gsi_start_channel(struct gsi_ctx *gsi, unsigned long chan_id);
 
 /** gsi_stop_channel - Peripheral should call this function to
  * stop a channel. Stop will happen on a packet boundary
  *
- * @chan_hdl:  Client handle previously obtained from
+ * @chan_id:  Client handle previously obtained from
  *	       gsi_alloc_channel
  *
  * This function can sleep
@@ -249,7 +249,7 @@ int gsi_start_channel(unsigned long chan_hdl);
  * @Return -GSI_STATUS_AGAIN if client should call stop/stop_db again
  *	   other error codes for failure
  */
-int gsi_stop_channel(unsigned long chan_hdl);
+int gsi_stop_channel(struct gsi_ctx *gsi, unsigned long chan_id);
 
 /** gsi_reset_channel - Peripheral should call this function to
  * reset a channel to recover from error state

@@ -1333,9 +1333,9 @@ int gsi_write_channel_scratch(struct gsi_ctx *gsi, unsigned long chan_id,
 	return 0;
 }
 
-int gsi_start_channel(unsigned long chan_id)
+int gsi_start_channel(struct gsi_ctx *gsi, unsigned long chan_id)
 {
-	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	u32 completed;
 
 	if (chan->state != GSI_CHAN_STATE_ALLOCATED &&
@@ -1345,13 +1345,13 @@ int gsi_start_channel(unsigned long chan_id)
 		return -ENOTSUPP;
 	}
 
-	mutex_lock(&gsi_ctx->mlock);
+	mutex_lock(&gsi->mlock);
 
-	gsi_ctx->ch_dbg[chan_id].ch_start++;
+	gsi->ch_dbg[chan_id].ch_start++;
 
-	completed = channel_command(gsi_ctx, chan_id, GSI_CH_START);
+	completed = channel_command(gsi, chan_id, GSI_CH_START);
 	if (!completed) {
-		mutex_unlock(&gsi_ctx->mlock);
+		mutex_unlock(&gsi->mlock);
 		return -ETIMEDOUT;
 	}
 	if (chan->state != GSI_CHAN_STATE_STARTED) {
@@ -1359,14 +1359,14 @@ int gsi_start_channel(unsigned long chan_id)
 		ipa_bug();
 	}
 
-	mutex_unlock(&gsi_ctx->mlock);
+	mutex_unlock(&gsi->mlock);
 
 	return 0;
 }
 
-int gsi_stop_channel(unsigned long chan_id)
+int gsi_stop_channel(struct gsi_ctx *gsi, unsigned long chan_id)
 {
-	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	u32 offset = GSI_EE_N_GSI_CH_K_CNTXT_0_OFFS(chan_id, IPA_EE_AP);
 	u32 completed;
 	u32 val;
@@ -1384,16 +1384,16 @@ int gsi_stop_channel(unsigned long chan_id)
 		return -ENOTSUPP;
 	}
 
-	mutex_lock(&gsi_ctx->mlock);
+	mutex_lock(&gsi->mlock);
 
-	gsi_ctx->ch_dbg[chan_id].ch_stop++;
+	gsi->ch_dbg[chan_id].ch_stop++;
 
-	completed = channel_command(gsi_ctx, chan_id, GSI_CH_STOP);
+	completed = channel_command(gsi, chan_id, GSI_CH_STOP);
 	if (!completed) {
 		/* check channel state here in case the channel is stopped but
 		 * the interrupt was not handled yet.
 		 */
-		val = gsi_readl(gsi_ctx, offset);
+		val = gsi_readl(gsi, offset);
 		chan->state = field_val(val, CHSTATE_BMSK);
 		if (chan->state == GSI_CHAN_STATE_STOPPED) {
 			ret = 0;
@@ -1419,7 +1419,7 @@ int gsi_stop_channel(unsigned long chan_id)
 	ret = 0;
 
 free_lock:
-	mutex_unlock(&gsi_ctx->mlock);
+	mutex_unlock(&gsi->mlock);
 
 	return ret;
 }
