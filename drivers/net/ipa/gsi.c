@@ -752,16 +752,19 @@ static void gsi_handle_general(void)
 
 #define GSI_ISR_MAX_ITER 50
 
+/* Returns a bitmask of pending GSI interrupts */
+static u32 gsi_interrupt_type(struct gsi_ctx *gsi)
+{
+	return gsi_readl(gsi, GSI_EE_N_CNTXT_TYPE_IRQ_OFFS(IPA_EE_AP));
+}
+
 static irqreturn_t gsi_isr(int irq, void *dev_id)
 {
 	struct gsi_ctx *gsi = dev_id;
 	u32 cnt = 0;
 	u32 type;
 
-	while ((type = gsi_readl(gsi,
-				 GSI_EE_N_CNTXT_TYPE_IRQ_OFFS(IPA_EE_AP)))) {
-		ipa_debug_low("type %x\n", type);
-
+	while ((type = gsi_interrupt_type(gsi))) {
 		do {
 			u32 single = BIT(__ffs(type));
 
