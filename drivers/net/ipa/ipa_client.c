@@ -82,7 +82,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	ipahal_write_reg(IPA_AGGR_FORCE_CLOSE, BIT(clnt_hdl));
 
 	/* Reset channel */
-	gsi_res = gsi_reset_channel(ep->gsi_chan_hdl);
+	gsi_res = gsi_reset_channel(ipa_ctx->gsi_ctx, ep->gsi_chan_hdl);
 	if (gsi_res) {
 		ipa_err("Error resetting channel: %d\n", gsi_res);
 		return -EFAULT;
@@ -152,7 +152,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	}
 
 	/* Reset channel */
-	gsi_res = gsi_reset_channel(ep->gsi_chan_hdl);
+	gsi_res = gsi_reset_channel(ipa_ctx->gsi_ctx, ep->gsi_chan_hdl);
 	if (gsi_res) {
 		ipa_err("Error resetting channel: %d\n", gsi_res);
 		result = -EFAULT;
@@ -217,7 +217,8 @@ void ipa_reset_gsi_channel(u32 clnt_hdl)
 	} else {
 		/* If the reset called after stop, need to wait 1ms */
 		msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
-		ipa_bug_on(gsi_reset_channel(ep->gsi_chan_hdl));
+		ipa_bug_on(gsi_reset_channel(ipa_ctx->gsi_ctx,
+					     ep->gsi_chan_hdl));
 	}
 
 	ipa_client_remove();

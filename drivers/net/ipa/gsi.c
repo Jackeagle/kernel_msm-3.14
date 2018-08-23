@@ -1424,9 +1424,9 @@ free_lock:
 	return ret;
 }
 
-int gsi_reset_channel(unsigned long chan_id)
+int gsi_reset_channel(struct gsi_ctx *gsi, unsigned long chan_id)
 {
-	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	bool reset_done = false;
 	u32 completed;
 
@@ -1435,15 +1435,15 @@ int gsi_reset_channel(unsigned long chan_id)
 		return -ENOTSUPP;
 	}
 
-	mutex_lock(&gsi_ctx->mlock);
+	mutex_lock(&gsi->mlock);
 reset:
 
-	gsi_ctx->ch_dbg[chan_id].ch_reset++;
+	gsi->ch_dbg[chan_id].ch_reset++;
 
-	completed = channel_command(gsi_ctx, chan_id, GSI_CH_RESET);
+	completed = channel_command(gsi, chan_id, GSI_CH_RESET);
 	if (!completed) {
 		ipa_err("chan_id %lu timed out\n", chan_id);
-		mutex_unlock(&gsi_ctx->mlock);
+		mutex_unlock(&gsi->mlock);
 		return -ETIMEDOUT;
 	}
 
@@ -1466,7 +1466,7 @@ reset:
 	/* restore scratch */
 	__gsi_write_channel_scratch(chan_id);
 
-	mutex_unlock(&gsi_ctx->mlock);
+	mutex_unlock(&gsi->mlock);
 
 	return 0;
 }
@@ -1508,7 +1508,7 @@ static u16 __gsi_query_ring_free_re(struct gsi_ring_ctx *ring)
 	return (u16)(delta / GSI_RING_ELEMENT_SIZE - 1);
 }
 
-bool gsi_is_channel_empty(unsigned long chan_id)
+bool gsi_is_channel_empty(struct gsi_ctx *gsi, unsigned long chan_id)
 {
 	struct gsi_chan_ctx *chan;
 	unsigned long flags;
@@ -1516,16 +1516,16 @@ bool gsi_is_channel_empty(unsigned long chan_id)
 	u32 offset;
 	u32 val;
 
-	chan = &gsi_ctx->chan[chan_id];
+	chan = &gsi->chan[chan_id];
 
 	spin_lock_irqsave(&chan->evtr->ring.slock, flags);
 
 	offset = GSI_EE_N_GSI_CH_K_CNTXT_4_OFFS(chan->props.ch_id, IPA_EE_AP);
-	val = gsi_readl(gsi_ctx, offset);
+	val = gsi_readl(gsi, offset);
 	chan->ring.rp = (chan->ring.rp & GENMASK_ULL(63, 32)) | val;
 
 	offset = GSI_EE_N_GSI_CH_K_CNTXT_6_OFFS(chan->props.ch_id, IPA_EE_AP);
-	val = gsi_readl(gsi_ctx, offset);
+	val = gsi_readl(gsi, offset);
 	chan->ring.wp = (chan->ring.wp & GENMASK_ULL(63, 32)) | val;
 
 	if (chan->props.from_gsi)

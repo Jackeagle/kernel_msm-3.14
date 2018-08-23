@@ -254,14 +254,14 @@ int gsi_stop_channel(struct gsi_ctx *gsi, unsigned long chan_id);
 /** gsi_reset_channel - Peripheral should call this function to
  * reset a channel to recover from error state
  *
- * @chan_hdl:  Client handle previously obtained from
+ * @chan_id:  Client handle previously obtained from
  *	       gsi_alloc_channel
  *
  * This function can sleep
  *
  * @Return gsi_status
  */
-int gsi_reset_channel(unsigned long chan_hdl);
+int gsi_reset_channel(struct gsi_ctx *gsi, unsigned long chan_id);
 
 /** gsi_dealloc_channel - Peripheral should call this function to
  * de-allocate a channel
@@ -277,11 +277,11 @@ void gsi_dealloc_channel(struct gsi_ctx *gsi, unsigned long chan_id);
  * GSI has consumed all descriptors for a TO_GSI channel and SW has
  * processed all completed descriptors for a FROM_GSI channel.
  *
- * @chan_hdl:  Client handle previously obtained from gsi_alloc_channel
+ * @chan_id:  Client handle previously obtained from gsi_alloc_channel
  *
  * @Return true if channel is empty, false otherwise
  */
-bool gsi_is_channel_empty(unsigned long chan_hdl);
+bool gsi_is_channel_empty(struct gsi_ctx *gsi, unsigned long chan_id);
 
 /** gsi_get_channel_cfg - This function returns the current config
  * of the specified channel
