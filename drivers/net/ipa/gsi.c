@@ -844,7 +844,6 @@ int gsi_register_device(struct gsi_ctx *gsi)
 		return -ENOTSUPP;
 	}
 
-	spin_lock_init(&gsi->slock);
 	ret = devm_request_irq(gsi->dev, gsi->irq, gsi_isr,
 			       IRQF_TRIGGER_HIGH, "gsi", gsi);
 	if (ret) {
@@ -1752,6 +1751,7 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev)
 	gsi_ctx->dev = dev;
 	gsi_ctx->phys_base = (u32)res->start;
 	gsi_ctx->irq = irq;
+	spin_lock_init(&gsi_ctx->slock);
 
 	return gsi_ctx;
 }
