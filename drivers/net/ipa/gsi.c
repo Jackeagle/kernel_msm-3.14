@@ -1108,12 +1108,11 @@ err_free_bmap:
 	return ret;
 }
 
-static void __gsi_zero_evt_ring_scratch(unsigned long evt_id)
+static void
+__gsi_zero_evt_ring_scratch(struct gsi_ctx *gsi, unsigned long evt_id)
 {
-	gsi_writel(gsi_ctx, 0,
-		   GSI_EE_N_EV_CH_K_SCRATCH_0_OFFS(evt_id, IPA_EE_AP));
-	gsi_writel(gsi_ctx, 0,
-		   GSI_EE_N_EV_CH_K_SCRATCH_1_OFFS(evt_id, IPA_EE_AP));
+	gsi_writel(gsi, 0, GSI_EE_N_EV_CH_K_SCRATCH_0_OFFS(evt_id, IPA_EE_AP));
+	gsi_writel(gsi, 0, GSI_EE_N_EV_CH_K_SCRATCH_1_OFFS(evt_id, IPA_EE_AP));
 }
 
 void gsi_dealloc_evt_ring(struct gsi_ctx *gsi, unsigned long evt_id)
@@ -1162,7 +1161,7 @@ void gsi_reset_evt_ring(struct gsi_ctx *gsi, unsigned long evt_id)
 				 evtr->mem.phys_base, evtr->int_modt);
 	gsi_init_ring(&evtr->ring, &evtr->mem);
 
-	__gsi_zero_evt_ring_scratch(evt_id);
+	__gsi_zero_evt_ring_scratch(gsi, evt_id);
 
 	gsi_prime_evt_ring(gsi, evtr);
 	mutex_unlock(&gsi->mlock);
