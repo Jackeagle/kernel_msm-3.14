@@ -151,8 +151,6 @@ struct gsi_ctx {
 	u32 max_ev;
 };
 
-static struct gsi_ctx *gsi_ctx;
-
 /* Hardware values representing a transfer element type */
 enum gsi_re_type {
 	GSI_RE_XFER				= 0x2,
@@ -1728,6 +1726,7 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev)
 	struct device *dev = &pdev->dev;
 	struct resource *res;
 	resource_size_t size;
+	struct gsi_ctx *gsi;
 	int irq;
 
 	/* Get GSI memory range and map it */
@@ -1751,24 +1750,23 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev)
 	}
 	ipa_debug("GSI irq %u\n", irq);
 
-	gsi_ctx = kzalloc(sizeof(*gsi_ctx), GFP_KERNEL);
-	if (!gsi_ctx)
+	gsi = kzalloc(sizeof(*gsi), GFP_KERNEL);
+	if (!gsi)
 		return ERR_PTR(-ENOMEM);
 
-	gsi_ctx->base = devm_ioremap_nocache(dev, res->start, size);
-	if (!gsi_ctx->base) {
-		kfree(gsi_ctx);
-		gsi_ctx = NULL;
+	gsi->base = devm_ioremap_nocache(dev, res->start, size);
+	if (!gsi->base) {
+		kfree(gsi);
 
 		return ERR_PTR(-ENOMEM);
 	}
-	gsi_ctx->dev = dev;
-	gsi_ctx->phys_base = (u32)res->start;
-	gsi_ctx->irq = irq;
-	spin_lock_init(&gsi_ctx->slock);
-	mutex_init(&gsi_ctx->mlock);
-	atomic_set(&gsi_ctx->num_chan, 0);
-	atomic_set(&gsi_ctx->num_evt_ring, 0);
+	gsi->dev = dev;
+	gsi->phys_base = (u32)res->start;
+	gsi->irq = irq;
+	spin_lock_init(&gsi->slock);
+	mutex_init(&gsi->mlock);
+	atomic_set(&gsi->num_chan, 0);
+	atomic_set(&gsi->num_evt_ring, 0);
 
-	return gsi_ctx;
+	return gsi;
 }
