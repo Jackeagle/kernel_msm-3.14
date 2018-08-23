@@ -548,15 +548,16 @@ static void chan_xfer_cb(struct gsi_chan_ctx *chan, u16 count)
 	}
 }
 
-static u16 gsi_process_chan(struct gsi_xfer_compl_evt *evt, bool callback)
+static u16 gsi_process_chan(struct gsi_ctx *gsi, struct gsi_xfer_compl_evt *evt,
+		bool callback)
 {
 	struct gsi_chan_ctx *chan;
 	u32 chan_id = evt->chid;
 
-	ipa_assert(chan_id < gsi_ctx->max_ch);
+	ipa_assert(chan_id < gsi->max_ch);
 
 	/* Event tells us the last completed channel ring element */
-	chan = &gsi_ctx->chan[chan_id];
+	chan = &gsi->chan[chan_id];
 	chan->ring.rp_local = evt->xfer_ptr;
 
 	if (callback) {
@@ -645,7 +646,7 @@ static void handle_event(struct gsi_ctx *gsi, int evt_id)
 
 			evt = ipahal_dma_phys_to_virt(&evtr->ring.mem,
 						      evtr->ring.rp_local);
-			(void)gsi_process_chan(evt, true);
+			(void)gsi_process_chan(gsi, evt, true);
 
 			ring_rp_local_inc(&evtr->ring);
 			ring_wp_local_inc(&evtr->ring); /* recycle element */
@@ -1634,7 +1635,7 @@ int gsi_poll_channel(struct gsi_ctx *gsi, unsigned long chan_id)
 
 		evt = ipahal_dma_phys_to_virt(&evtr->ring.mem,
 					      evtr->ring.rp_local);
-		size = gsi_process_chan(evt, false);
+		size = gsi_process_chan(gsi, evt, false);
 
 		ring_rp_local_inc(&evtr->ring);
 		ring_wp_local_inc(&evtr->ring); /* recycle element */
