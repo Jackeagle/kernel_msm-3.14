@@ -174,7 +174,7 @@ int gsi_register_device(struct gsi_ctx *gsi);
 /** gsi_deregister_device - Peripheral should call this function to
  * de-register itself with GSI
  */
-void gsi_deregister_device(void);
+void gsi_deregister_device(struct gsi_ctx *gsi);
 
 /** gsi_alloc_evt_ring - Peripheral should call this function to
  * allocate an event ring once gsi_register_device() has been called

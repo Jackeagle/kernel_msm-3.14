@@ -878,10 +878,10 @@ int gsi_register_device(struct gsi_ctx *gsi)
 	return 0;
 }
 
-void gsi_deregister_device(void)
+void gsi_deregister_device(struct gsi_ctx *gsi)
 {
-	ipa_assert(!atomic_read(&gsi_ctx->num_chan));
-	ipa_assert(!atomic_read(&gsi_ctx->num_evt_ring));
+	ipa_assert(!atomic_read(&gsi->num_chan));
+	ipa_assert(!atomic_read(&gsi->num_evt_ring));
 
 	/* Don't bother clearing the error log again (ERROR_LOG) or
 	 * setting the interrupt type again (INTSET).
@@ -889,15 +889,15 @@ void gsi_deregister_device(void)
 	gsi_irq_disable_all();
 
 	/* Clean up everything else set up by gsi_register_device() */
-	gsi_ctx->evt_bmap = 0;
-	gsi_ctx->max_ev = 0;
-	gsi_ctx->max_ch = 0;
-	if (gsi_ctx->irq_wake_enabled) {
-		(void)disable_irq_wake(gsi_ctx->irq);
-		gsi_ctx->irq_wake_enabled = false;
+	gsi->evt_bmap = 0;
+	gsi->max_ev = 0;
+	gsi->max_ch = 0;
+	if (gsi->irq_wake_enabled) {
+		(void)disable_irq_wake(gsi->irq);
+		gsi->irq_wake_enabled = false;
 	}
-	free_irq(gsi_ctx->irq, gsi_ctx);
-	gsi_ctx->irq = 0;
+	free_irq(gsi->irq, gsi);
+	gsi->irq = 0;
 }
 
 static void

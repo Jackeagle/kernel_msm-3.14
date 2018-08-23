@@ -920,7 +920,8 @@ static void ipa_post_init(struct work_struct *unused)
 	/* setup the AP-IPA pipes */
 	if (ipa_setup_apps_pipes()) {
 		ipa_err(":failed to setup IPA-Apps pipes\n");
-		gsi_deregister_device();
+		gsi_deregister_device(ipa_ctx->gsi_ctx);
+
 		return;
 	}
 	ipa_debug("IPA GPI pipes were connected\n");
