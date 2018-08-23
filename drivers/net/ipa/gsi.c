@@ -383,16 +383,16 @@ static void gsi_handle_evt_ctrl(struct gsi_ctx *gsi)
 }
 
 static void
-handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 code)
+handle_glob_chan_err(struct gsi_ctx *gsi, u32 err_ee, u32 chan_id, u32 code)
 {
-	struct gsi_chan_ctx *chan = &gsi_ctx->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	u32 offset;
 	u32 val;
 
 	if (err_ee != IPA_EE_AP)
 		ipa_bug_on(code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
 
-	if (WARN_ON(chan_id >= gsi_ctx->max_ch)) {
+	if (WARN_ON(chan_id >= gsi->max_ch)) {
 		ipa_err("unexpected chan_id %u\n", chan_id);
 		return;
 	}
@@ -401,7 +401,7 @@ handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 code)
 	case GSI_INVALID_TRE_ERR:
 		ipa_err("got INVALID_TRE_ERR\n");
 		offset = GSI_EE_N_GSI_CH_K_CNTXT_0_OFFS(chan_id, IPA_EE_AP);
-		val = gsi_readl(gsi_ctx, offset);
+		val = gsi_readl(gsi, offset);
 		chan->state = field_val(val, CHSTATE_BMSK);
 		ipa_debug("chan_id %u state updated to %u\n", chan_id,
 			  chan->state);
@@ -431,14 +431,14 @@ handle_glob_chan_err(u32 err_ee, u32 chan_id, u32 code)
 }
 
 static void
-handle_glob_evt_err(u32 err_ee, u32 evt_id, u32 code)
+handle_glob_evt_err(struct gsi_ctx *gsi, u32 err_ee, u32 evt_id, u32 code)
 {
-	struct gsi_evt_ctx *evtr = &gsi_ctx->evtr[evt_id];
+	struct gsi_evt_ctx *evtr = &gsi->evtr[evt_id];
 
 	if (err_ee != IPA_EE_AP)
 		ipa_bug_on(code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
 
-	if (WARN_ON(evt_id >= gsi_ctx->max_ev)) {
+	if (WARN_ON(evt_id >= gsi->max_ev)) {
 		ipa_err("unexpected evt_id %u\n", evt_id);
 		return;
 	}
@@ -476,10 +476,10 @@ static void gsi_handle_glob_err(u32 err)
 
 	switch (log->err_type) {
 	case GSI_ERR_TYPE_CHAN:
-		handle_glob_chan_err(log->ee, log->virt_idx, log->code);
+		handle_glob_chan_err(gsi_ctx, log->ee, log->virt_idx, log->code);
 		break;
 	case GSI_ERR_TYPE_EVT:
-		handle_glob_evt_err(log->ee, log->virt_idx, log->code);
+		handle_glob_evt_err(gsi_ctx, log->ee, log->virt_idx, log->code);
 		break;
 	default:
 		WARN_ON(1);
