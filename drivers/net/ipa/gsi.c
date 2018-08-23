@@ -889,17 +889,8 @@ int gsi_register_device(struct gsi_ctx *gsi)
 
 int gsi_deregister_device(void)
 {
-	if (atomic_read(&gsi_ctx->num_chan)) {
-		ipa_err("%u channels are allocated\n",
-			atomic_read(&gsi_ctx->num_chan));
-		return -ENOTSUPP;
-	}
-
-	if (atomic_read(&gsi_ctx->num_evt_ring)) {
-		ipa_err("%u evt rings are allocated\n",
-			atomic_read(&gsi_ctx->num_evt_ring));
-		return -ENOTSUPP;
-	}
+	ipa_assert(!atomic_read(&gsi_ctx->num_chan));
+	ipa_assert(!atomic_read(&gsi_ctx->num_evt_ring));
 
 	/* Don't bother clearing the error log again (ERROR_LOG) or
 	 * setting the interrupt type again (INTSET).
