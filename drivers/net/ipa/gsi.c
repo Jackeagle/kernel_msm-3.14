@@ -326,6 +326,14 @@ static enum gsi_chan_state gsi_chan_state(struct gsi *gsi, u32 chan_id)
 	return (enum gsi_chan_state)field_val(val, CHSTATE_BMSK);
 }
 
+static enum gsi_evt_ring_state gsi_evtr_state(struct gsi *gsi, u32 evt_id)
+{
+	u32 offset = GSI_EE_N_EV_CH_K_CNTXT_0_OFFS(evt_id, IPA_EE_AP);
+	u32 val = gsi_readl(gsi, offset);
+
+	return (enum gsi_evt_ring_state)field_val(val, EV_CHSTATE_BMSK);
+}
+
 static void gsi_handle_chan_ctrl(struct gsi *gsi)
 {
 	u32 valid_mask = GENMASK(gsi->max_ch - 1, 0);
@@ -371,12 +379,8 @@ static void gsi_handle_evt_ctrl(struct gsi *gsi)
 	while (evt_mask) {
 		int i = __ffs(evt_mask);
 		struct gsi_evt_ctx *evtr = &gsi->evtr[i];
-		u32 val;
 
-		val = gsi_readl(gsi,
-				GSI_EE_N_EV_CH_K_CNTXT_0_OFFS(i, IPA_EE_AP));
-		evtr->state = field_val(val, EV_CHSTATE_BMSK);
-		ipa_debug("evt %d state updated to %u\n", i, evtr->state);
+		evtr->state = gsi_evtr_state(gsi, i);
 
 		complete(&evtr->compl);
 
