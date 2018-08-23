@@ -138,15 +138,15 @@ struct gsi_ctx {
 	struct device *dev;
 	u32 phys_base;
 	unsigned int irq;
+	spinlock_t slock;	/* protects global register updates */
+	struct mutex mlock;	/* protects 1-at-a-time commands, evt_bmap */
+	atomic_t num_chan;
+	atomic_t num_evt_ring;
 	bool per_registered;
 	struct gsi_chan_ctx chan[GSI_CHAN_MAX];
 	struct ch_debug_stats ch_dbg[GSI_CHAN_MAX];
 	struct gsi_evt_ctx evtr[GSI_EVT_RING_MAX];
-	struct mutex mlock;	/* protects 1-at-a-time commands, evt_bmap */
-	spinlock_t slock;	/* protects global register updates */
 	unsigned long evt_bmap;
-	atomic_t num_chan;
-	atomic_t num_evt_ring;
 	u32 max_ch;
 	u32 max_ev;
 };
@@ -864,9 +864,6 @@ int gsi_register_device(struct gsi_ctx *gsi)
 		ipa_err("GSI irq is wake enabled %u\n", gsi->irq);
 
 	gsi->per_registered = true;
-	mutex_init(&gsi->mlock);
-	atomic_set(&gsi->num_chan, 0);
-	atomic_set(&gsi->num_evt_ring, 0);
 
 	gsi->max_ch = gsi_get_max_channels();
 	if (WARN_ON(gsi->max_ch > GSI_CHAN_MAX))
@@ -1752,6 +1749,9 @@ struct gsi_ctx *gsi_init(struct platform_device *pdev)
 	gsi_ctx->phys_base = (u32)res->start;
 	gsi_ctx->irq = irq;
 	spin_lock_init(&gsi_ctx->slock);
+	mutex_init(&gsi_ctx->mlock);
+	atomic_set(&gsi_ctx->num_chan, 0);
+	atomic_set(&gsi_ctx->num_evt_ring, 0);
 
 	return gsi_ctx;
 }
