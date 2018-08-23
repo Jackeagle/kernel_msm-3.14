@@ -915,8 +915,8 @@ void gsi_deregister_device(struct gsi_ctx *gsi)
 	gsi->irq = 0;
 }
 
-static void
-gsi_program_evt_ring_ctx(u8 evt_id, u32 size, u64 phys_base, u16 int_modt)
+static void gsi_program_evt_ring_ctx(struct gsi_ctx *gsi, u8 evt_id,
+		u32 size, u64 phys_base, u16 int_modt)
 {
 	u32 int_modc = 1;	/* moderation always comes from channel*/
 	u32 val;
@@ -926,43 +926,33 @@ gsi_program_evt_ring_ctx(u8 evt_id, u32 size, u64 phys_base, u16 int_modt)
 	val = field_gen(GSI_EVT_CHTYPE_GPI_EV, EV_CHTYPE_BMSK);
 	val |= field_gen(1, EV_INTYPE_BMSK);
 	val |= field_gen(GSI_RING_ELEMENT_SIZE, EV_ELEMENT_SIZE_BMSK);
-	gsi_writel(gsi_ctx, val,
-		   GSI_EE_N_EV_CH_K_CNTXT_0_OFFS(evt_id, IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_EE_N_EV_CH_K_CNTXT_0_OFFS(evt_id, IPA_EE_AP));
 
 	val = field_gen(size, EV_R_LENGTH_BMSK);
-	gsi_writel(gsi_ctx, val,
-		   GSI_EE_N_EV_CH_K_CNTXT_1_OFFS(evt_id, IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_EE_N_EV_CH_K_CNTXT_1_OFFS(evt_id, IPA_EE_AP));
 
 	/* The context 2 and 3 registers store the low-order and
 	 * high-order 32 bits of the address of the event ring,
 	 * respectively.
 	 */
 	val = phys_base & GENMASK(31, 0);
-	gsi_writel(gsi_ctx, val,
-		   GSI_EE_N_EV_CH_K_CNTXT_2_OFFS(evt_id, IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_EE_N_EV_CH_K_CNTXT_2_OFFS(evt_id, IPA_EE_AP));
 
 	val = phys_base >> 32;
-	gsi_writel(gsi_ctx, val,
-		   GSI_EE_N_EV_CH_K_CNTXT_3_OFFS(evt_id, IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_EE_N_EV_CH_K_CNTXT_3_OFFS(evt_id, IPA_EE_AP));
 
 	val = field_gen(int_modt, MODT_BMSK);
 	val |= field_gen(int_modc, MODC_BMSK);
-	gsi_writel(gsi_ctx, val,
-		   GSI_EE_N_EV_CH_K_CNTXT_8_OFFS(evt_id, IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_EE_N_EV_CH_K_CNTXT_8_OFFS(evt_id, IPA_EE_AP));
 
 	/* No MSI write data, and MSI address high and low address is 0 */
-	gsi_writel(gsi_ctx, 0,
-		   GSI_EE_N_EV_CH_K_CNTXT_9_OFFS(evt_id, IPA_EE_AP));
-	gsi_writel(gsi_ctx, 0,
-		   GSI_EE_N_EV_CH_K_CNTXT_10_OFFS(evt_id, IPA_EE_AP));
-	gsi_writel(gsi_ctx, 0,
-		   GSI_EE_N_EV_CH_K_CNTXT_11_OFFS(evt_id, IPA_EE_AP));
+	gsi_writel(gsi, 0, GSI_EE_N_EV_CH_K_CNTXT_9_OFFS(evt_id, IPA_EE_AP));
+	gsi_writel(gsi, 0, GSI_EE_N_EV_CH_K_CNTXT_10_OFFS(evt_id, IPA_EE_AP));
+	gsi_writel(gsi, 0, GSI_EE_N_EV_CH_K_CNTXT_11_OFFS(evt_id, IPA_EE_AP));
 
 	/* We don't need to get event read pointer updates */
-	gsi_writel(gsi_ctx, 0,
-		   GSI_EE_N_EV_CH_K_CNTXT_12_OFFS(evt_id, IPA_EE_AP));
-	gsi_writel(gsi_ctx, 0,
-		   GSI_EE_N_EV_CH_K_CNTXT_13_OFFS(evt_id, IPA_EE_AP));
+	gsi_writel(gsi, 0, GSI_EE_N_EV_CH_K_CNTXT_12_OFFS(evt_id, IPA_EE_AP));
+	gsi_writel(gsi, 0, GSI_EE_N_EV_CH_K_CNTXT_13_OFFS(evt_id, IPA_EE_AP));
 }
 
 static void gsi_init_ring(struct gsi_ring_ctx *ring, struct ipa_mem_buffer *mem)
@@ -1085,8 +1075,8 @@ long gsi_alloc_evt_ring(u32 ring_count, u16 int_modt)
 	}
 	atomic_inc(&gsi_ctx->num_evt_ring);
 
-	gsi_program_evt_ring_ctx(evt_id, evtr->mem.size, evtr->mem.phys_base,
-				 evtr->int_modt);
+	gsi_program_evt_ring_ctx(gsi_ctx, evt_id, evtr->mem.size,
+				 evtr->mem.phys_base, evtr->int_modt);
 	gsi_init_ring(&evtr->ring, &evtr->mem);
 
 	gsi_prime_evt_ring(evtr);
@@ -1166,8 +1156,8 @@ void gsi_reset_evt_ring(unsigned long evt_id)
 
 	ipa_bug_on(evtr->state != GSI_EVT_RING_STATE_ALLOCATED);
 
-	gsi_program_evt_ring_ctx(evt_id, evtr->mem.size, evtr->mem.phys_base,
-				 evtr->int_modt);
+	gsi_program_evt_ring_ctx(gsi_ctx, evt_id, evtr->mem.size,
+				 evtr->mem.phys_base, evtr->int_modt);
 	gsi_init_ring(&evtr->ring, &evtr->mem);
 
 	__gsi_zero_evt_ring_scratch(evt_id);
