@@ -304,7 +304,7 @@ static void _gsi_irq_control_all(struct gsi *gsi, bool enable)
 	gsi_writel(gsi, val, GSI_EE_N_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(IPA_EE_AP));
 	gsi_writel(gsi, val, GSI_EE_N_CNTXT_GLOB_IRQ_EN_OFFS(IPA_EE_AP));
 	/* Never enable GSI_BREAK_POINT */
-	val &= ~field_gen(1, EN_GSI_BREAK_POINT_BMSK);
+	val &= ~field_gen(1, EN_BREAK_POINT_BMSK);
 	gsi_writel(gsi, val, GSI_EE_N_CNTXT_GSI_IRQ_EN_OFFS(IPA_EE_AP));
 }
 
@@ -735,11 +735,11 @@ static void gsi_handle_general(struct gsi *gsi)
 
 	val = gsi_readl(gsi, GSI_EE_N_CNTXT_GSI_IRQ_STTS_OFFS(IPA_EE_AP));
 
-	ipa_bug_on(val & CLR_GSI_MCS_STACK_OVRFLOW_BMSK);
-	ipa_bug_on(val & CLR_GSI_CMD_FIFO_OVRFLOW_BMSK);
-	ipa_bug_on(val & CLR_GSI_BUS_ERROR_BMSK);
+	ipa_bug_on(val & CLR_MCS_STACK_OVRFLOW_BMSK);
+	ipa_bug_on(val & CLR_CMD_FIFO_OVRFLOW_BMSK);
+	ipa_bug_on(val & CLR_BUS_ERROR_BMSK);
 
-	if (val & CLR_GSI_BREAK_POINT_BMSK)
+	if (val & CLR_BREAK_POINT_BMSK)
 		ipa_err("got breakpoint\n");
 
 	gsi_writel(gsi, val, GSI_EE_N_CNTXT_GSI_IRQ_CLR_OFFS(IPA_EE_AP));
@@ -803,14 +803,14 @@ static u32 gsi_get_max_channels(struct gsi *gsi)
 {
 	u32 val = gsi_readl(gsi, GSI_EE_N_GSI_HW_PARAM_2_OFFS(IPA_EE_AP));
 
-	return field_val(val, GSI_NUM_CH_PER_EE_BMSK);
+	return field_val(val, NUM_CH_PER_EE_BMSK);
 }
 
 static u32 gsi_get_max_event_rings(struct gsi *gsi)
 {
 	u32 val = gsi_readl(gsi, GSI_EE_N_GSI_HW_PARAM_2_OFFS(IPA_EE_AP));
 
-	return field_val(val, GSI_NUM_EV_PER_EE_BMSK);
+	return field_val(val, NUM_EV_PER_EE_BMSK);
 }
 
 /*
