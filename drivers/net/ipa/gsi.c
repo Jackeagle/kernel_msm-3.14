@@ -271,16 +271,15 @@ static void gsi_writel(struct gsi *gsi, u32 v, u32 offset)
 
 static void _gsi_irq_control_event(struct gsi *gsi, u8 evt_id, bool enable)
 {
-	u32 offset = GSI_EE_N_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(IPA_EE_AP);
 	u32 mask = BIT(evt_id);
 	u32 val;
 
-	val = gsi_readl(gsi, offset);
+	val = gsi_readl(gsi, GSI_CNTXT_SRC_IEOB_IRQ_MSK_OFFS);
 	if (enable)
 		val |= mask;
 	else
 		val &= ~mask;
-	gsi_writel(gsi, val, offset);
+	gsi_writel(gsi, val, GSI_CNTXT_SRC_IEOB_IRQ_MSK_OFFS);
 }
 
 static void gsi_irq_disable_event(struct gsi *gsi, u8 evt_id)
@@ -298,14 +297,14 @@ static void _gsi_irq_control_all(struct gsi *gsi, bool enable)
 	u32 val = enable ? ~0 : 0;
 
 	/* Inter EE commands / interrupt are no supported. */
-	gsi_writel(gsi, val, GSI_EE_N_CNTXT_TYPE_IRQ_MSK_OFFS(IPA_EE_AP));
-	gsi_writel(gsi, val, GSI_EE_N_CNTXT_SRC_CH_IRQ_MSK_OFFS(IPA_EE_AP));
-	gsi_writel(gsi, val, GSI_EE_N_CNTXT_SRC_EV_CH_IRQ_MSK_OFFS(IPA_EE_AP));
-	gsi_writel(gsi, val, GSI_EE_N_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(IPA_EE_AP));
-	gsi_writel(gsi, val, GSI_EE_N_CNTXT_GLOB_IRQ_EN_OFFS(IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_CNTXT_TYPE_IRQ_MSK_OFFS);
+	gsi_writel(gsi, val, GSI_CNTXT_SRC_CH_IRQ_MSK_OFFS);
+	gsi_writel(gsi, val, GSI_CNTXT_SRC_EV_CH_IRQ_MSK_OFFS);
+	gsi_writel(gsi, val, GSI_CNTXT_SRC_IEOB_IRQ_MSK_OFFS);
+	gsi_writel(gsi, val, GSI_CNTXT_GLOB_IRQ_EN_OFFS);
 	/* Never enable GSI_BREAK_POINT */
 	val &= ~field_gen(1, EN_BREAK_POINT_BMSK);
-	gsi_writel(gsi, val, GSI_EE_N_CNTXT_GSI_IRQ_EN_OFFS(IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_CNTXT_GSI_IRQ_EN_OFFS);
 }
 
 static void gsi_irq_disable_all(struct gsi *gsi)
@@ -320,16 +319,14 @@ static void gsi_irq_enable_all(struct gsi *gsi)
 
 static enum gsi_chan_state gsi_chan_state(struct gsi *gsi, u32 chan_id)
 {
-	u32 offset = GSI_EE_N_CH_K_CNTXT_0_OFFS(chan_id, IPA_EE_AP);
-	u32 val = gsi_readl(gsi, offset);
+	u32 val = gsi_readl(gsi, GSI_CH_K_CNTXT_0_OFFS(chan_id));
 
 	return (enum gsi_chan_state)field_val(val, CHSTATE_BMSK);
 }
 
 static enum gsi_evt_ring_state gsi_evtr_state(struct gsi *gsi, u32 evt_id)
 {
-	u32 offset = GSI_EE_N_EV_CH_K_CNTXT_0_OFFS(evt_id, IPA_EE_AP);
-	u32 val = gsi_readl(gsi, offset);
+	u32 val = gsi_readl(gsi, GSI_EV_CH_K_CNTXT_0_OFFS(evt_id));
 
 	return (enum gsi_evt_ring_state)field_val(val, EV_CHSTATE_BMSK);
 }
@@ -339,8 +336,8 @@ static void gsi_handle_chan_ctrl(struct gsi *gsi)
 	u32 valid_mask = GENMASK(gsi->max_ch - 1, 0);
 	u32 ch_mask;
 
-	ch_mask = gsi_readl(gsi, GSI_EE_N_CNTXT_SRC_CH_IRQ_OFFS(IPA_EE_AP));
-	gsi_writel(gsi, ch_mask, GSI_EE_N_CNTXT_SRC_CH_IRQ_CLR_OFFS(IPA_EE_AP));
+	ch_mask = gsi_readl(gsi, GSI_CNTXT_SRC_CH_IRQ_OFFS);
+	gsi_writel(gsi, ch_mask, GSI_CNTXT_SRC_CH_IRQ_CLR_OFFS);
 
 	ipa_debug("ch_mask %x\n", ch_mask);
 	if (ch_mask & ~valid_mask) {
@@ -365,9 +362,8 @@ static void gsi_handle_evt_ctrl(struct gsi *gsi)
 	u32 valid_mask = GENMASK(gsi->max_ev - 1, 0);
 	u32 evt_mask;
 
-	evt_mask = gsi_readl(gsi, GSI_EE_N_CNTXT_SRC_EV_CH_IRQ_OFFS(IPA_EE_AP));
-	gsi_writel(gsi, evt_mask,
-		   GSI_EE_N_CNTXT_SRC_EV_CH_IRQ_CLR_OFFS(IPA_EE_AP));
+	evt_mask = gsi_readl(gsi, GSI_CNTXT_SRC_EV_CH_IRQ_OFFS);
+	gsi_writel(gsi, evt_mask, GSI_CNTXT_SRC_EV_CH_IRQ_CLR_OFFS);
 
 	ipa_debug("evt_mask %x\n", evt_mask);
 	if (evt_mask & ~valid_mask) {
@@ -489,13 +485,13 @@ static void gsi_handle_glob_ee(struct gsi *gsi)
 {
 	u32 val;
 
-	val = gsi_readl(gsi, GSI_EE_N_CNTXT_GLOB_IRQ_STTS_OFFS(IPA_EE_AP));
+	val = gsi_readl(gsi, GSI_CNTXT_GLOB_IRQ_STTS_OFFS);
 
 	if (val & ERROR_INT_BMSK) {
-		u32 err = gsi_readl(gsi, GSI_EE_N_ERROR_LOG_OFFS(IPA_EE_AP));
+		u32 err = gsi_readl(gsi, GSI_ERROR_LOG_OFFS);
 
-		gsi_writel(gsi, 0, GSI_EE_N_ERROR_LOG_OFFS(IPA_EE_AP));
-		gsi_writel(gsi, ~0, GSI_EE_N_ERROR_LOG_CLR_OFFS(IPA_EE_AP));
+		gsi_writel(gsi, 0, GSI_ERROR_LOG_OFFS);
+		gsi_writel(gsi, ~0, GSI_ERROR_LOG_CLR_OFFS);
 
 		gsi_handle_glob_err(gsi, err);
 	}
@@ -506,7 +502,7 @@ static void gsi_handle_glob_ee(struct gsi *gsi)
 	ipa_bug_on(val & EN_GP_INT2_BMSK);
 	ipa_bug_on(val & EN_GP_INT3_BMSK);
 
-	gsi_writel(gsi, val, GSI_EE_N_CNTXT_GLOB_IRQ_CLR_OFFS(IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_CNTXT_GLOB_IRQ_CLR_OFFS);
 }
 
 static void ring_wp_local_inc(struct gsi_ring_ctx *ring)
@@ -584,12 +580,10 @@ static void gsi_ring_evt_doorbell(struct gsi *gsi, struct gsi_evt_ctx *evtr)
 	 * respectively.  LSB (doorbell 0) must be written last.
 	 */
 	val = evtr->ring.wp_local >> 32;
-	gsi_writel(gsi, val,
-		   GSI_EE_N_EV_CH_K_DOORBELL_1_OFFS(evtr->id, IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_EV_CH_K_DOORBELL_1_OFFS(evtr->id));
 
 	val = evtr->ring.wp_local & GENMASK(31, 0);
-	gsi_writel(gsi, val,
-		   GSI_EE_N_EV_CH_K_DOORBELL_0_OFFS(evtr->id, IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_EV_CH_K_DOORBELL_0_OFFS(evtr->id));
 }
 
 static void
@@ -612,22 +606,21 @@ gsi_ring_chan_doorbell(struct gsi *gsi, struct gsi_chan_ctx *chan)
 	 * respectively.  LSB (doorbell 0) must be written last.
 	 */
 	val = chan->ring.wp_local >> 32;
-	gsi_writel(gsi, val, GSI_EE_N_CH_K_DOORBELL_1_OFFS(ch_id, IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_CH_K_DOORBELL_1_OFFS(ch_id));
 	val = chan->ring.wp_local & GENMASK(31, 0);
-	gsi_writel(gsi, val, GSI_EE_N_CH_K_DOORBELL_0_OFFS(ch_id, IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_CH_K_DOORBELL_0_OFFS(ch_id));
 }
 
 static void handle_event(struct gsi *gsi, int evt_id)
 {
 	struct gsi_evt_ctx *evtr = &gsi->evtr[evt_id];
-	u32 offset = GSI_EE_N_EV_CH_K_CNTXT_4_OFFS(evt_id, IPA_EE_AP);
 	unsigned long flags;
 	bool check_again;
 
 	spin_lock_irqsave(&evtr->ring.slock, flags);
 
 	do {
-		u32 val = gsi_readl(gsi, offset);
+		u32 val = gsi_readl(gsi, GSI_EV_CH_K_CNTXT_4_OFFS(evt_id));
 
 		evtr->ring.rp = (evtr->ring.rp & GENMASK_ULL(63, 32)) | val;
 
@@ -660,11 +653,9 @@ static void gsi_handle_ieob(struct gsi *gsi)
 	u32 valid_mask = GENMASK(gsi->max_ev - 1, 0);
 	u32 evt_mask;
 
-	evt_mask = gsi_readl(gsi, GSI_EE_N_CNTXT_SRC_IEOB_IRQ_OFFS(IPA_EE_AP));
-	evt_mask &= gsi_readl(gsi,
-			      GSI_EE_N_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(IPA_EE_AP));
-	gsi_writel(gsi, evt_mask,
-		   GSI_EE_N_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(IPA_EE_AP));
+	evt_mask = gsi_readl(gsi, GSI_CNTXT_SRC_IEOB_IRQ_OFFS);
+	evt_mask &= gsi_readl(gsi, GSI_CNTXT_SRC_IEOB_IRQ_MSK_OFFS);
+	gsi_writel(gsi, evt_mask, GSI_CNTXT_SRC_IEOB_IRQ_CLR_OFFS);
 
 	if (evt_mask & ~valid_mask) {
 		ipa_err("invalid events (> %u)\n", gsi->max_ev);
@@ -685,9 +676,8 @@ static void gsi_handle_inter_ee_chan_ctrl(struct gsi *gsi)
 	u32 valid_mask = GENMASK(gsi->max_ch - 1, 0);
 	u32 ch_mask;
 
-	ch_mask = gsi_readl(gsi, GSI_INTER_EE_N_SRC_CH_IRQ_OFFS(IPA_EE_AP));
-	gsi_writel(gsi, ch_mask,
-		   GSI_INTER_EE_N_SRC_CH_IRQ_CLR_OFFS(IPA_EE_AP));
+	ch_mask = gsi_readl(gsi, GSI_INTER_EE_SRC_CH_IRQ_OFFS);
+	gsi_writel(gsi, ch_mask, GSI_INTER_EE_SRC_CH_IRQ_CLR_OFFS);
 
 	if (ch_mask & ~valid_mask) {
 		ipa_err("invalid channels (> %u)\n", gsi->max_ch);
@@ -708,9 +698,8 @@ static void gsi_handle_inter_ee_evt_ctrl(struct gsi *gsi)
 	u32 valid_mask = GENMASK(gsi->max_ev - 1, 0);
 	u32 evt_mask;
 
-	evt_mask = gsi_readl(gsi, GSI_INTER_EE_N_SRC_EV_CH_IRQ_OFFS(IPA_EE_AP));
-	gsi_writel(gsi, evt_mask,
-		   GSI_INTER_EE_N_SRC_EV_CH_IRQ_CLR_OFFS(IPA_EE_AP));
+	evt_mask = gsi_readl(gsi, GSI_INTER_EE_SRC_EV_CH_IRQ_OFFS);
+	gsi_writel(gsi, evt_mask, GSI_INTER_EE_SRC_EV_CH_IRQ_CLR_OFFS);
 
 	if (evt_mask & ~valid_mask) {
 		ipa_err("invalid events (> %u)\n", gsi->max_ev);
@@ -730,7 +719,7 @@ static void gsi_handle_general(struct gsi *gsi)
 {
 	u32 val;
 
-	val = gsi_readl(gsi, GSI_EE_N_CNTXT_GSI_IRQ_STTS_OFFS(IPA_EE_AP));
+	val = gsi_readl(gsi, GSI_CNTXT_GSI_IRQ_STTS_OFFS);
 
 	ipa_bug_on(val & CLR_MCS_STACK_OVRFLOW_BMSK);
 	ipa_bug_on(val & CLR_CMD_FIFO_OVRFLOW_BMSK);
@@ -739,7 +728,7 @@ static void gsi_handle_general(struct gsi *gsi)
 	if (val & CLR_BREAK_POINT_BMSK)
 		ipa_err("got breakpoint\n");
 
-	gsi_writel(gsi, val, GSI_EE_N_CNTXT_GSI_IRQ_CLR_OFFS(IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_CNTXT_GSI_IRQ_CLR_OFFS);
 }
 
 #define GSI_ISR_MAX_ITER 50
@@ -747,7 +736,7 @@ static void gsi_handle_general(struct gsi *gsi)
 /* Returns a bitmask of pending GSI interrupts */
 static u32 gsi_interrupt_type(struct gsi *gsi)
 {
-	return gsi_readl(gsi, GSI_EE_N_CNTXT_TYPE_IRQ_OFFS(IPA_EE_AP));
+	return gsi_readl(gsi, GSI_CNTXT_TYPE_IRQ_OFFS);
 }
 
 static irqreturn_t gsi_isr(int irq, void *dev_id)
@@ -798,14 +787,14 @@ static irqreturn_t gsi_isr(int irq, void *dev_id)
 
 static u32 gsi_get_max_channels(struct gsi *gsi)
 {
-	u32 val = gsi_readl(gsi, GSI_EE_N_GSI_HW_PARAM_2_OFFS(IPA_EE_AP));
+	u32 val = gsi_readl(gsi, GSI_GSI_HW_PARAM_2_OFFS);
 
 	return field_val(val, NUM_CH_PER_EE_BMSK);
 }
 
 static u32 gsi_get_max_event_rings(struct gsi *gsi)
 {
-	u32 val = gsi_readl(gsi, GSI_EE_N_GSI_HW_PARAM_2_OFFS(IPA_EE_AP));
+	u32 val = gsi_readl(gsi, GSI_GSI_HW_PARAM_2_OFFS);
 
 	return field_val(val, NUM_EV_PER_EE_BMSK);
 }
@@ -851,7 +840,7 @@ int gsi_register_device(struct gsi *gsi)
 	u32 max_ev;
 	int ret;
 
-	val = gsi_readl(gsi, GSI_EE_N_GSI_STATUS_OFFS(IPA_EE_AP));
+	val = gsi_readl(gsi, GSI_GSI_STATUS_OFFS);
 	if (!(val & ENABLED_BMSK)) {
 		ipa_err("manager EE has not enabled GSI, GSI un-usable\n");
 		return -EIO;
@@ -884,10 +873,10 @@ int gsi_register_device(struct gsi *gsi)
 	gsi_irq_enable_all(gsi);
 
 	/* Writing 1 indicates IRQ interrupts; 0 would be MSI */
-	gsi_writel(gsi, 1, GSI_EE_N_CNTXT_INTSET_OFFS(IPA_EE_AP));
+	gsi_writel(gsi, 1, GSI_CNTXT_INTSET_OFFS);
 
 	/* Initialize the error log */
-	gsi_writel(gsi, 0, GSI_EE_N_ERROR_LOG_OFFS(IPA_EE_AP));
+	gsi_writel(gsi, 0, GSI_ERROR_LOG_OFFS);
 
 	return 0;
 }
@@ -925,33 +914,33 @@ static void gsi_program_evt_ring_ctx(struct gsi *gsi, u8 evt_id,
 	val = field_gen(GSI_EVT_CHTYPE_GPI_EV, EV_CHTYPE_BMSK);
 	val |= field_gen(1, EV_INTYPE_BMSK);
 	val |= field_gen(GSI_RING_ELEMENT_SIZE, EV_ELEMENT_SIZE_BMSK);
-	gsi_writel(gsi, val, GSI_EE_N_EV_CH_K_CNTXT_0_OFFS(evt_id, IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_EV_CH_K_CNTXT_0_OFFS(evt_id));
 
 	val = field_gen(size, EV_R_LENGTH_BMSK);
-	gsi_writel(gsi, val, GSI_EE_N_EV_CH_K_CNTXT_1_OFFS(evt_id, IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_EV_CH_K_CNTXT_1_OFFS(evt_id));
 
 	/* The context 2 and 3 registers store the low-order and
 	 * high-order 32 bits of the address of the event ring,
 	 * respectively.
 	 */
 	val = phys_base & GENMASK(31, 0);
-	gsi_writel(gsi, val, GSI_EE_N_EV_CH_K_CNTXT_2_OFFS(evt_id, IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_EV_CH_K_CNTXT_2_OFFS(evt_id));
 
 	val = phys_base >> 32;
-	gsi_writel(gsi, val, GSI_EE_N_EV_CH_K_CNTXT_3_OFFS(evt_id, IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_EV_CH_K_CNTXT_3_OFFS(evt_id));
 
 	val = field_gen(int_modt, MODT_BMSK);
 	val |= field_gen(int_modc, MODC_BMSK);
-	gsi_writel(gsi, val, GSI_EE_N_EV_CH_K_CNTXT_8_OFFS(evt_id, IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_EV_CH_K_CNTXT_8_OFFS(evt_id));
 
 	/* No MSI write data, and MSI address high and low address is 0 */
-	gsi_writel(gsi, 0, GSI_EE_N_EV_CH_K_CNTXT_9_OFFS(evt_id, IPA_EE_AP));
-	gsi_writel(gsi, 0, GSI_EE_N_EV_CH_K_CNTXT_10_OFFS(evt_id, IPA_EE_AP));
-	gsi_writel(gsi, 0, GSI_EE_N_EV_CH_K_CNTXT_11_OFFS(evt_id, IPA_EE_AP));
+	gsi_writel(gsi, 0, GSI_EV_CH_K_CNTXT_9_OFFS(evt_id));
+	gsi_writel(gsi, 0, GSI_EV_CH_K_CNTXT_10_OFFS(evt_id));
+	gsi_writel(gsi, 0, GSI_EV_CH_K_CNTXT_11_OFFS(evt_id));
 
 	/* We don't need to get event read pointer updates */
-	gsi_writel(gsi, 0, GSI_EE_N_EV_CH_K_CNTXT_12_OFFS(evt_id, IPA_EE_AP));
-	gsi_writel(gsi, 0, GSI_EE_N_EV_CH_K_CNTXT_13_OFFS(evt_id, IPA_EE_AP));
+	gsi_writel(gsi, 0, GSI_EV_CH_K_CNTXT_12_OFFS(evt_id));
+	gsi_writel(gsi, 0, GSI_EV_CH_K_CNTXT_13_OFFS(evt_id));
 }
 
 static void gsi_init_ring(struct gsi_ring_ctx *ring, struct ipa_mem_buffer *mem)
@@ -1003,7 +992,7 @@ static u32 evt_ring_command(struct gsi *gsi, unsigned long evt_id,
 	val = field_gen((u32)evt_id, EV_CHID_BMSK);
 	val |= field_gen((u32)op, EV_OPCODE_BMSK);
 
-	val = command(gsi, GSI_EE_N_EV_CH_CMD_OFFS(IPA_EE_AP), val, compl);
+	val = command(gsi, GSI_EV_CH_CMD_OFFS, val, compl);
 	if (!val)
 		ipa_err("evt_id %lu timed out\n", evt_id);
 
@@ -1022,7 +1011,7 @@ static u32 channel_command(struct gsi *gsi, unsigned long chan_id,
 	val = field_gen((u32)chan_id, CH_CHID_BMSK);
 	val |= field_gen((u32)op, CH_OPCODE_BMSK);
 
-	val = command(gsi, GSI_EE_N_CH_CMD_OFFS(IPA_EE_AP), val, compl);
+	val = command(gsi, GSI_CH_CMD_OFFS, val, compl);
 	if (!val)
 		ipa_err("chan_id %lu timed out\n", chan_id);
 
@@ -1086,8 +1075,7 @@ long gsi_alloc_evt_ring(struct gsi *gsi, u32 ring_count, u16 int_modt)
 
 	/* Enable the event interrupt (clear it first in case pending) */
 	val = BIT(evt_id);
-	gsi_writel(gsi, val,
-		   GSI_EE_N_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_CNTXT_SRC_IEOB_IRQ_CLR_OFFS);
 	gsi_irq_enable_event(gsi, evt_id);
 
 	spin_unlock_irqrestore(&gsi->slock, flags);
@@ -1108,8 +1096,8 @@ err_free_bmap:
 static void
 __gsi_zero_evt_ring_scratch(struct gsi *gsi, unsigned long evt_id)
 {
-	gsi_writel(gsi, 0, GSI_EE_N_EV_CH_K_SCRATCH_0_OFFS(evt_id, IPA_EE_AP));
-	gsi_writel(gsi, 0, GSI_EE_N_EV_CH_K_SCRATCH_1_OFFS(evt_id, IPA_EE_AP));
+	gsi_writel(gsi, 0, GSI_EV_CH_K_SCRATCH_0_OFFS(evt_id));
+	gsi_writel(gsi, 0, GSI_EV_CH_K_SCRATCH_1_OFFS(evt_id));
 }
 
 void gsi_dealloc_evt_ring(struct gsi *gsi, unsigned long evt_id)
@@ -1168,37 +1156,31 @@ static void
 gsi_program_chan_ctx(struct gsi *gsi, struct gsi_chan_props *props,
 		u8 evt_id)
 {
-	u32 offset;
 	u32 val;
 
-	offset = GSI_EE_N_CH_K_CNTXT_0_OFFS(props->ch_id, IPA_EE_AP);
 	val = field_gen(GSI_CHAN_PROT_GPI, CHTYPE_PROTOCOL_BMSK);
 	val |= field_gen(props->from_gsi ? 0 : 1, CHTYPE_DIR_BMSK);
 	val |= field_gen(evt_id, ERINDEX_BMSK);
 	val |= field_gen(GSI_RING_ELEMENT_SIZE, ELEMENT_SIZE_BMSK);
-	gsi_writel(gsi, val, offset);
+	gsi_writel(gsi, val, GSI_CH_K_CNTXT_0_OFFS(props->ch_id));
 
-	offset = GSI_EE_N_CH_K_CNTXT_1_OFFS(props->ch_id, IPA_EE_AP);
 	val = field_gen(props->mem.size, R_LENGTH_BMSK);
-	gsi_writel(gsi, val, offset);
+	gsi_writel(gsi, val, GSI_CH_K_CNTXT_1_OFFS(props->ch_id));
 
 	/* The context 2 and 3 registers store the low-order and
 	 * high-order 32 bits of the address of the channel ring,
 	 * respectively.
 	 */
-	offset = GSI_EE_N_CH_K_CNTXT_2_OFFS(props->ch_id, IPA_EE_AP);
 	val = props->mem.phys_base & GENMASK(31, 0);
-	gsi_writel(gsi, val, offset);
+	gsi_writel(gsi, val, GSI_CH_K_CNTXT_2_OFFS(props->ch_id));
 
-	offset = GSI_EE_N_CH_K_CNTXT_3_OFFS(props->ch_id, IPA_EE_AP);
 	val = props->mem.phys_base >> 32;
-	gsi_writel(gsi, val, offset);
+	gsi_writel(gsi, val, GSI_CH_K_CNTXT_3_OFFS(props->ch_id));
 
-	offset = GSI_EE_N_CH_K_QOS_OFFS(props->ch_id, IPA_EE_AP);
 	val = field_gen(props->low_weight, WRR_WEIGHT_BMSK);
 	val |= field_gen(GSI_MAX_PREFETCH, MAX_PREFETCH_BMSK);
 	val |= field_gen(props->use_db_engine ? 1 : 0, USE_DB_ENG_BMSK);
-	gsi_writel(gsi, val, offset);
+	gsi_writel(gsi, val, GSI_CH_K_QOS_OFFS(props->ch_id));
 }
 
 long gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
@@ -1295,26 +1277,21 @@ __gsi_write_channel_scratch(struct gsi *gsi, unsigned long chan_id)
 	gpi->outstanding_threshold = 2 * GSI_RING_ELEMENT_SIZE;
 
 	val = scr.data.word1;
-	gsi_writel(gsi, val,
-		   GSI_EE_N_CH_K_SCRATCH_0_OFFS(chan_id, IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_CH_K_SCRATCH_0_OFFS(chan_id));
 
 	val = scr.data.word2;
-	gsi_writel(gsi, val,
-		   GSI_EE_N_CH_K_SCRATCH_1_OFFS(chan_id, IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_CH_K_SCRATCH_1_OFFS(chan_id));
 
 	val = scr.data.word3;
-	gsi_writel(gsi, val,
-		   GSI_EE_N_CH_K_SCRATCH_2_OFFS(chan_id, IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_CH_K_SCRATCH_2_OFFS(chan_id));
 
 	/* We must preserve the upper 16 bits of the last scratch
 	 * register.  The next sequence assumes those bits remain
 	 * unchanged between the read and the write.
 	 */
-	val = gsi_readl(gsi,
-			GSI_EE_N_CH_K_SCRATCH_3_OFFS(chan_id, IPA_EE_AP));
+	val = gsi_readl(gsi, GSI_CH_K_SCRATCH_3_OFFS(chan_id));
 	val = (scr.data.word4 & GENMASK(31, 16)) | (val & GENMASK(15, 0));
-	gsi_writel(gsi, val,
-		   GSI_EE_N_CH_K_SCRATCH_3_OFFS(chan_id, IPA_EE_AP));
+	gsi_writel(gsi, val, GSI_CH_K_SCRATCH_3_OFFS(chan_id));
 }
 
 int gsi_write_channel_scratch(struct gsi *gsi, unsigned long chan_id,
@@ -1510,19 +1487,16 @@ bool gsi_is_channel_empty(struct gsi *gsi, unsigned long chan_id)
 	struct gsi_chan_ctx *chan;
 	unsigned long flags;
 	bool empty;
-	u32 offset;
 	u32 val;
 
 	chan = &gsi->chan[chan_id];
 
 	spin_lock_irqsave(&chan->evtr->ring.slock, flags);
 
-	offset = GSI_EE_N_CH_K_CNTXT_4_OFFS(chan->props.ch_id, IPA_EE_AP);
-	val = gsi_readl(gsi, offset);
+	val = gsi_readl(gsi, GSI_CH_K_CNTXT_4_OFFS(chan->props.ch_id));
 	chan->ring.rp = (chan->ring.rp & GENMASK_ULL(63, 32)) | val;
 
-	offset = GSI_EE_N_CH_K_CNTXT_6_OFFS(chan->props.ch_id, IPA_EE_AP);
-	val = gsi_readl(gsi, offset);
+	val = gsi_readl(gsi, GSI_CH_K_CNTXT_6_OFFS(chan->props.ch_id));
 	chan->ring.wp = (chan->ring.wp & GENMASK_ULL(63, 32)) | val;
 
 	if (chan->props.from_gsi)
@@ -1612,7 +1586,6 @@ int gsi_poll_channel(struct gsi *gsi, unsigned long chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	struct gsi_evt_ctx *evtr = chan->evtr;
-	u32 offset = GSI_EE_N_EV_CH_K_CNTXT_4_OFFS(evtr->id, IPA_EE_AP);
 	unsigned long flags;
 	int size;
 
@@ -1622,7 +1595,7 @@ int gsi_poll_channel(struct gsi *gsi, unsigned long chan_id)
 	if (evtr->ring.rp == evtr->ring.rp_local) {
 		u32 val;
 
-		val = gsi_readl(gsi, offset);
+		val = gsi_readl(gsi, GSI_EV_CH_K_CNTXT_4_OFFS(evtr->id));
 		evtr->ring.rp = (chan->ring.rp & GENMASK_ULL(63, 32)) | val;
 	}
 
