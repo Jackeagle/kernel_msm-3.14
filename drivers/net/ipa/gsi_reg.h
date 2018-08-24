@@ -219,8 +219,8 @@
 #define GSI_IRAM_PTR_INT_MOD_STOPPED_OFFS	0x0000044c
 #define STOP_IRAM_PTR_BMSK			0x00000fff
 
-/* Max value of N for the GSI_INST_RAM_N_OFFS() is 4095 */
-#define GSI_INST_RAM_N_OFFS(n)			(0x00004000 + 0x0004 * (n))
+/* Max value of I for the GSI_INST_RAM_N_OFFS() is 4095 */
+#define GSI_INST_RAM_I_OFFS(i)			(0x00004000 + 0x0004 * (i))
 #define INST_BYTE_3_BMSK			0xff000000
 #define INST_BYTE_2_BMSK			0x00ff0000
 #define INST_BYTE_1_BMSK			0x0000ff00
