@@ -6,6 +6,13 @@
 #ifndef __GSI_REG_H__
 #define __GSI_REG_H__
 
+/* With the exception of GSI_INST_RAM_N_OFFS(), the maximum allowed value
+ * of "n" for any N-parameterized macro below is 3.
+ *
+ * For any K-parameterized macros, the "k" value will represent either an
+ * event channel id or a (data) channel id.  15 is the maximum value of
+ * "k" for event channels; otherwise the maximum is 30.
+ */
 #define GSI_CFG_OFFS				0x00000000
 #define BP_MTRIX_DISABLE_BMSK			0x00000020
 #define PWR_CLPS_BMSK				0x00000010
@@ -212,8 +219,8 @@
 #define GSI_IRAM_PTR_INT_MOD_STOPPED_OFFS	0x0000044c
 #define STOP_IRAM_PTR_BMSK			0x00000fff
 
+/* Max value of N for the GSI_INST_RAM_N_OFFS() is 4095 */
 #define GSI_INST_RAM_N_OFFS(n)			(0x00004000 + 0x0004 * (n))
-#define GSI_INST_RAM_N_MAX_N			4095
 #define INST_BYTE_3_BMSK			0xff000000
 #define INST_BYTE_2_BMSK			0x00ff0000
 #define INST_BYTE_1_BMSK			0x0000ff00
@@ -221,8 +228,6 @@
 
 #define GSI_EE_N_CH_K_CNTXT_0_OFFS(k, n) \
 					(0x0001c000 + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_CH_K_CNTXT_0_MAX_K		30
-#define GSI_EE_N_CH_K_CNTXT_0_MAX_N		3
 #define ELEMENT_SIZE_BMSK			0xff000000
 #define CHSTATE_BMSK				0x00f00000
 #define ERINDEX_BMSK				0x0007c000
@@ -233,62 +238,40 @@
 
 #define GSI_EE_N_CH_K_CNTXT_1_OFFS(k, n) \
 					(0x0001c004 + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_CH_K_CNTXT_1_MAX_K		30
-#define GSI_EE_N_CH_K_CNTXT_1_MAX_N		3
 #define R_LENGTH_BMSK				0x0000ffff
 
 #define GSI_EE_N_CH_K_CNTXT_2_OFFS(k, n) \
 					(0x0001c008 + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_CH_K_CNTXT_2_MAX_K		30
-#define GSI_EE_N_CH_K_CNTXT_2_MAX_N		3
 
 #define GSI_EE_N_CH_K_CNTXT_3_OFFS(k, n) \
 					(0x0001c00c + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_CH_K_CNTXT_3_MAX_K		30
-#define GSI_EE_N_CH_K_CNTXT_3_MAX_N		3
 
 #define GSI_EE_N_CH_K_CNTXT_4_OFFS(k, n) \
 					(0x0001c010 + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_CH_K_CNTXT_4_MAX_K		30
-#define GSI_EE_N_CH_K_CNTXT_4_MAX_N		3
 
 #define GSI_EE_N_CH_K_CNTXT_6_OFFS(k, n) \
 					(0x0001c018 + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_CH_K_CNTXT_6_MAX_K		30
-#define GSI_EE_N_CH_K_CNTXT_6_MAX_N		3
 
 #define GSI_EE_N_CH_K_QOS_OFFS(k, n) \
 					(0x0001c05c + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_CH_K_QOS_MAX_K			30
-#define GSI_EE_N_CH_K_QOS_MAX_N			3
 #define USE_DB_ENG_BMSK				0x00000200
 #define MAX_PREFETCH_BMSK			0x00000100
 #define WRR_WEIGHT_BMSK				0x0000000f
 
 #define GSI_EE_N_CH_K_SCRATCH_0_OFFS(k, n) \
 					(0x0001c060 + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_CH_K_SCRATCH_0_MAX_K		30
-#define GSI_EE_N_CH_K_SCRATCH_0_MAX_N		3
 
 #define GSI_EE_N_CH_K_SCRATCH_1_OFFS(k, n) \
 					(0x0001c064 + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_CH_K_SCRATCH_1_MAX_K		30
-#define GSI_EE_N_CH_K_SCRATCH_1_MAX_N		3
 
 #define GSI_EE_N_CH_K_SCRATCH_2_OFFS(k, n) \
 					(0x0001c068 + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_CH_K_SCRATCH_2_MAX_K		30
-#define GSI_EE_N_CH_K_SCRATCH_2_MAX_N		3
 
 #define GSI_EE_N_CH_K_SCRATCH_3_OFFS(k, n) \
 					(0x0001c06c + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_CH_K_SCRATCH_3_MAX_K		30
-#define GSI_EE_N_CH_K_SCRATCH_3_MAX_N		3
 
 #define GSI_EE_N_EV_CH_K_CNTXT_0_OFFS(k, n) \
 					(0x0001d000 + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_EV_CH_K_CNTXT_0_MAX_K		15
-#define GSI_EE_N_EV_CH_K_CNTXT_0_MAX_N		3
 #define EV_ELEMENT_SIZE_BMSK			0xff000000
 #define EV_CHSTATE_BMSK				0x00f00000
 #define EV_INTYPE_BMSK				0x00010000
@@ -298,104 +281,68 @@
 
 #define GSI_EE_N_EV_CH_K_CNTXT_1_OFFS(k, n) \
 					(0x0001d004 + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_EV_CH_K_CNTXT_1_MAX_K		15
-#define GSI_EE_N_EV_CH_K_CNTXT_1_MAX_N		3
 #define EV_R_LENGTH_BMSK			0x0000ffff
 
 #define GSI_EE_N_EV_CH_K_CNTXT_2_OFFS(k, n) \
 					(0x0001d008 + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_EV_CH_K_CNTXT_2_MAX_K		15
-#define GSI_EE_N_EV_CH_K_CNTXT_2_MAX_N		3
 
 #define GSI_EE_N_EV_CH_K_CNTXT_3_OFFS(k, n) \
 					(0x0001d00c + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_EV_CH_K_CNTXT_3_MAX_K		15
-#define GSI_EE_N_EV_CH_K_CNTXT_3_MAX_N		3
 
 #define GSI_EE_N_EV_CH_K_CNTXT_4_OFFS(k, n) \
 					(0x0001d010 + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_EV_CH_K_CNTXT_4_MAX_K		15
-#define GSI_EE_N_EV_CH_K_CNTXT_4_MAX_N		3
 
 #define GSI_EE_N_EV_CH_K_CNTXT_8_OFFS(k, n) \
 					(0x0001d020 + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_EV_CH_K_CNTXT_8_MAX_K		15
-#define GSI_EE_N_EV_CH_K_CNTXT_8_MAX_N		3
 #define MOD_CNT_BMSK				0xff000000
 #define MODC_BMSK				0x00ff0000
 #define MODT_BMSK				0x0000ffff
 
 #define GSI_EE_N_EV_CH_K_CNTXT_9_OFFS(k, n) \
 					(0x0001d024 + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_EV_CH_K_CNTXT_9_MAX_K		15
-#define GSI_EE_N_EV_CH_K_CNTXT_9_MAX_N		3
 
 #define GSI_EE_N_EV_CH_K_CNTXT_10_OFFS(k, n) \
 					(0x0001d028 + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_EV_CH_K_CNTXT_10_MAX_K		15
-#define GSI_EE_N_EV_CH_K_CNTXT_10_MAX_N		3
 
 #define GSI_EE_N_EV_CH_K_CNTXT_11_OFFS(k, n) \
 					(0x0001d02c + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_EV_CH_K_CNTXT_11_MAX_K		15
-#define GSI_EE_N_EV_CH_K_CNTXT_11_MAX_N		3
 
 #define GSI_EE_N_EV_CH_K_CNTXT_12_OFFS(k, n) \
 					(0x0001d030 + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_EV_CH_K_CNTXT_12_MAX_K		15
-#define GSI_EE_N_EV_CH_K_CNTXT_12_MAX_N		3
 
 #define GSI_EE_N_EV_CH_K_CNTXT_13_OFFS(k, n) \
 					(0x0001d034 + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_EV_CH_K_CNTXT_13_MAX_K		15
-#define GSI_EE_N_EV_CH_K_CNTXT_13_MAX_N		3
 
 #define GSI_EE_N_EV_CH_K_SCRATCH_0_OFFS(k, n) \
 					(0x0001d048 + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_EV_CH_K_SCRATCH_0_MAX_K	15
-#define GSI_EE_N_EV_CH_K_SCRATCH_0_MAX_N	3
 
 #define GSI_EE_N_EV_CH_K_SCRATCH_1_OFFS(k, n) \
 					(0x0001d04c + 0x4000 * (n) + 0x80 * (k))
-#define GSI_EE_N_EV_CH_K_SCRATCH_1_MAX_K	15
-#define GSI_EE_N_EV_CH_K_SCRATCH_1_MAX_N	3
 
 #define GSI_EE_N_CH_K_DOORBELL_0_OFFS(k, n) \
 					(0x0001e000 + 0x4000 * (n) + 0x08 * (k))
-#define GSI_EE_N_CH_K_DOORBELL_0_MAX_K		30
-#define GSI_EE_N_CH_K_DOORBELL_0_MAX_N		3
 
 #define GSI_EE_N_CH_K_DOORBELL_1_OFFS(k, n) \
 					(0x0001e004 + 0x4000 * (n) + 0x08 * (k))
-#define GSI_EE_N_CH_K_DOORBELL_1_MAX_K		30
-#define GSI_EE_N_CH_K_DOORBELL_1_MAX_N		3
 
 #define GSI_EE_N_EV_CH_K_DOORBELL_0_OFFS(k, n) \
 					(0x0001e100 + 0x4000 * (n) + 0x08 * (k))
-#define GSI_EE_N_EV_CH_K_DOORBELL_0_MAX_K	15
-#define GSI_EE_N_EV_CH_K_DOORBELL_0_MAX_N	3
 
 #define GSI_EE_N_EV_CH_K_DOORBELL_1_OFFS(k, n) \
 					(0x0001e104 + 0x4000 * (n) + 0x08 * (k))
-#define GSI_EE_N_EV_CH_K_DOORBELL_1_MAX_K	15
-#define GSI_EE_N_EV_CH_K_DOORBELL_1_MAX_N	3
 
 #define GSI_EE_N_GSI_STATUS_OFFS(n)		(0x0001f000 + 0x4000 * (n))
-#define GSI_EE_N_GSI_STATUS_MAX_N		3
 #define ENABLED_BMSK				0x00000001
 
 #define GSI_EE_N_CH_CMD_OFFS(n)			(0x0001f008 + 0x4000 * (n))
-#define GSI_EE_N_CH_CMD_MAX_N			3
 #define CH_OPCODE_BMSK				0xff000000
 #define CH_CHID_BMSK				0x000000ff
 
 #define GSI_EE_N_EV_CH_CMD_OFFS(n)		(0x0001f010 + 0x4000 * (n))
-#define GSI_EE_N_EV_CH_CMD_MAX_N		3
 #define EV_OPCODE_BMSK				0xff000000
 #define EV_CHID_BMSK				0x000000ff
 
 #define GSI_EE_N_GSI_HW_PARAM_2_OFFS(n)		(0x0001f040 + 0x4000 * (n))
-#define GSI_EE_N_GSI_HW_PARAM_2_MAX_N		2
 #define GSI_CH_FULL_LOGIC_BMSK			0x00004000
 #define GSI_CH_PEND_TRANSLATE_BMSK		0x00002000
 #define NUM_EV_PER_EE_BMSK			0x00001f00
@@ -405,16 +352,13 @@
 #define IRAM_SIZE_TWO_KB_FVAL			1
 
 #define GSI_EE_N_GSI_SW_VERSION_OFFS(n)		(0x0001f044 + 0x4000 * (n))
-#define GSI_EE_N_GSI_SW_VERSION_MAX_N		3
 #define MAJOR_BMSK				0xf0000000
 #define MINOR_BMSK				0x0fff0000
 #define STEP_BMSK				0x0000ffff
 
 #define GSI_EE_N_GSI_MCS_CODE_VER_OFFS(n)	(0x0001f048 + 0x4000 * (n))
-#define GSI_EE_N_GSI_MCS_CODE_VER_MAX_N		3
 
 #define GSI_EE_N_CNTXT_TYPE_IRQ_OFFS(n)		(0x0001f080 + 0x4000 * (n))
-#define GSI_EE_N_CNTXT_TYPE_IRQ_MAX_N		3
 #define GENERAL_BMSK				0x00000040
 #define INTER_EE_EV_CTRL_BMSK			0x00000020
 #define INTER_EE_CH_CTRL_BMSK			0x00000010
@@ -424,7 +368,6 @@
 #define CH_CTRL_BMSK				0x00000001
 
 #define GSI_EE_N_CNTXT_TYPE_IRQ_MSK_OFFS(n)	(0x0001f088 + 0x4000 * (n))
-#define GSI_EE_N_CNTXT_TYPE_IRQ_MSK_MAX_N	3
 #define MSK_GENERAL_BMSK			0x00000040
 #define MSK_INTER_EE_EV_CTRL_BMSK		0x00000020
 #define MSK_INTER_EE_CH_CTRL_BMSK		0x00000010
@@ -434,94 +377,72 @@
 #define MSK_CH_CTRL_BMSK			0x00000001
 
 #define GSI_EE_N_CNTXT_SRC_CH_IRQ_OFFS(n)	(0x0001f090 + 0x4000 * (n))
-#define GSI_EE_N_CNTXT_SRC_CH_IRQ_MAX_N		3
 
 #define GSI_EE_N_CNTXT_SRC_EV_CH_IRQ_OFFS(n)	(0x0001f094 + 0x4000 * (n))
-#define GSI_EE_N_CNTXT_SRC_EV_CH_IRQ_MAX_N	3
 
 #define GSI_EE_N_CNTXT_SRC_CH_IRQ_MSK_OFFS(n)	(0x0001f098 + 0x4000 * (n))
-#define GSI_EE_N_CNTXT_SRC_CH_IRQ_MSK_MAX_N	3
 
 #define GSI_EE_N_CNTXT_SRC_EV_CH_IRQ_MSK_OFFS(n) (0x0001f09c + 0x4000 * (n))
-#define GSI_EE_N_CNTXT_SRC_EV_CH_IRQ_MSK_MAX_N	3
 
 #define GSI_EE_N_CNTXT_SRC_CH_IRQ_CLR_OFFS(n)	(0x0001f0a0 + 0x4000 * (n))
-#define GSI_EE_N_CNTXT_SRC_CH_IRQ_CLR_MAX_N	3
 
 #define GSI_EE_N_CNTXT_SRC_EV_CH_IRQ_CLR_OFFS(n) (0x0001f0a4 + 0x4000 * (n))
-#define GSI_EE_N_CNTXT_SRC_EV_CH_IRQ_CLR_MAX_N	3
 
 #define GSI_EE_N_CNTXT_SRC_IEOB_IRQ_OFFS(n)	(0x0001f0b0 + 0x4000 * (n))
-#define GSI_EE_N_CNTXT_SRC_IEOB_IRQ_MAX_N	3
 
 #define GSI_EE_N_CNTXT_SRC_IEOB_IRQ_MSK_OFFS(n)	(0x0001f0b8 + 0x4000 * (n))
-#define GSI_EE_N_CNTXT_SRC_IEOB_IRQ_MSK_MAX_N	3
 
 #define GSI_EE_N_CNTXT_SRC_IEOB_IRQ_CLR_OFFS(n)	(0x0001f0c0 + 0x4000 * (n))
-#define GSI_EE_N_CNTXT_SRC_IEOB_IRQ_CLR_MAX_N	3
 
 #define GSI_EE_N_CNTXT_GLOB_IRQ_STTS_OFFS(n)	(0x0001f100 + 0x4000 * (n))
-#define GSI_EE_N_CNTXT_GLOB_IRQ_STTS_MAX_N	3
 #define GP_INT3_BMSK				0x00000008
 #define GP_INT2_BMSK				0x00000004
 #define GP_INT1_BMSK				0x00000002
 #define ERROR_INT_BMSK				0x00000001
 
 #define GSI_EE_N_CNTXT_GLOB_IRQ_EN_OFFS(n)	(0x0001f108 + 0x4000 * (n))
-#define GSI_EE_N_CNTXT_GLOB_IRQ_EN_MAX_N	3
 #define EN_GP_INT3_BMSK				0x00000008
 #define EN_GP_INT2_BMSK				0x00000004
 #define EN_GP_INT1_BMSK				0x00000002
 #define EN_ERROR_INT_BMSK			0x00000001
 
 #define GSI_EE_N_CNTXT_GLOB_IRQ_CLR_OFFS(n)	(0x0001f110 + 0x4000 * (n))
-#define GSI_EE_N_CNTXT_GLOB_IRQ_CLR_MAX_N	3
 #define CLR_GP_INT3_BMSK			0x00000008
 #define CLR_GP_INT2_BMSK			0x00000004
 #define CLR_GP_INT1_BMSK			0x00000002
 #define CLR_ERROR_INT_BMSK			0x00000001
 
 #define GSI_EE_N_CNTXT_GSI_IRQ_STTS_OFFS(n)	(0x0001f118 + 0x4000 * (n))
-#define GSI_EE_N_CNTXT_GSI_IRQ_STTS_MAX_N	3
 #define MCS_STACK_OVRFLOW_BMSK			0x00000008
 #define CMD_FIFO_OVRFLOW_BMSK			0x00000004
 #define BUS_ERROR_BMSK				0x00000002
 #define BREAK_POINT_BMSK			0x00000001
 
 #define GSI_EE_N_CNTXT_GSI_IRQ_EN_OFFS(n)	(0x0001f120 + 0x4000 * (n))
-#define GSI_EE_N_CNTXT_GSI_IRQ_EN_MAX_N		3
 #define EN_MCS_STACK_OVRFLOW_BMSK		0x00000008
 #define EN_CMD_FIFO_OVRFLOW_BMSK		0x00000004
 #define EN_BUS_ERROR_BMSK			0x00000002
 #define EN_BREAK_POINT_BMSK			0x00000001
 
 #define GSI_EE_N_CNTXT_GSI_IRQ_CLR_OFFS(n)	(0x0001f128 + 0x4000 * (n))
-#define GSI_EE_N_CNTXT_GSI_IRQ_CLR_MAX_N	3
 #define CLR_MCS_STACK_OVRFLOW_BMSK		0x00000008
 #define CLR_CMD_FIFO_OVRFLOW_BMSK		0x00000004
 #define CLR_BUS_ERROR_BMSK			0x00000002
 #define CLR_BREAK_POINT_BMSK			0x00000001
 
 #define GSI_EE_N_CNTXT_INTSET_OFFS(n)		(0x0001f180 + 0x4000 * (n))
-#define GSI_EE_N_CNTXT_INTSET_MAX_N		3
 #define INTYPE_BMSK				0x00000001
 
 #define GSI_EE_N_ERROR_LOG_OFFS(n)		(0x0001f200 + 0x4000 * (n))
-#define GSI_EE_N_ERROR_LOG_MAX_N		3
 
 #define GSI_EE_N_ERROR_LOG_CLR_OFFS(n)		(0x0001f210 + 0x4000 * (n))
-#define GSI_EE_N_ERROR_LOG_CLR_MAX_N		3
 
 #define GSI_INTER_EE_N_SRC_CH_IRQ_OFFS(n)	(0x0000c018 + 0x1000 * (n))
-#define GSI_INTER_EE_N_SRC_CH_IRQ_MAX_N		3
 
 #define GSI_INTER_EE_N_SRC_EV_CH_IRQ_OFFS(n)	(0x0000c01c + 0x1000 * (n))
-#define GSI_INTER_EE_N_SRC_EV_CH_IRQ_MAX_N	3
 
 #define GSI_INTER_EE_N_SRC_CH_IRQ_CLR_OFFS(n)	(0x0000c028 + 0x1000 * (n))
-#define GSI_INTER_EE_N_SRC_CH_IRQ_CLR_MAX_N	3
 
 #define GSI_INTER_EE_N_SRC_EV_CH_IRQ_CLR_OFFS(n) (0x0000c02c + 0x1000 * (n))
-#define GSI_INTER_EE_N_SRC_EV_CH_IRQ_CLR_MAX_N	3
 
 #endif	/* _GSI_REG_H__ */
