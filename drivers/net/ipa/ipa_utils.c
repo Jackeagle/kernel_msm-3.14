@@ -9,8 +9,12 @@
 #include <linux/genalloc.h>	/* gen_pool_alloc() */
 #include <linux/io.h>
 #include <linux/ratelimit.h>
+#ifdef CONFIG_INTERCONNECT_QCOM_SDM845
+#include <linux/interconnect.h>
+#else /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
 #include <linux/msm-bus.h>
 #include <linux/msm-bus-board.h>
+#endif /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
 #include <linux/elf.h>
 #include <linux/device.h>
 #include <linux/init.h>
@@ -486,6 +490,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 	},
 };
 
+#ifndef CONFIG_INTERCONNECT_QCOM_SDM845
 static struct msm_bus_vectors ipa_min_perf_vectors[] = {
 	{
 		.src = MSM_BUS_MASTER_IPA,
@@ -649,6 +654,7 @@ static struct msm_bus_scale_pdata ipa_bus_client_pdata = {
 	.num_usecases	= ARRAY_SIZE(ipa_usecases),
 	.name		= "ipa",
 };
+#endif /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
 
 static const struct ipa_ep_configuration *
 ep_configuration(enum ipa_client_type client)
@@ -1079,10 +1085,116 @@ static void resume_consumer_endpoint(u32 ipa_ep_idx)
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n, ipa_ep_idx, &cfg);
 }
 
+#ifdef CONFIG_INTERCONNECT_QCOM_SDM845
+
+/* Interconnect path bandwidths (each times 1000 bytes per second) */
+#define IPA_MEMORY_AVG	80000
+#define IPA_MEMORY_PEAK	600000
+
+#define IPA_IMEM_AVG	80000
+#define IPA_IMEM_PEAK	350000
+
+#define IPA_CONFIG_AVG	40000
+#define IPA_CONFIG_PEAK	40000
+
+int ipa_interconnect_init(struct device *dev)
+{
+	struct icc_path *path;
+
+	path = of_icc_get(dev, "memory");
+	if (IS_ERR(path))
+		goto err_return;
+	ipa_ctx->memory_path = path;
+
+	path = of_icc_get(dev, "imem");
+	if (IS_ERR(path))
+		goto err_memory_path_put;
+	ipa_ctx->imem_path = path;
+
+	path = of_icc_get(dev, "config");
+	if (IS_ERR(path))
+		goto err_imem_path_put;
+	ipa_ctx->config_path = path;
+
+	return 0;
+
+err_imem_path_put:
+	icc_put(ipa_ctx->imem_path);
+	ipa_ctx->imem_path = NULL;
+err_memory_path_put:
+	icc_put(ipa_ctx->memory_path);
+	ipa_ctx->memory_path = NULL;
+err_return:
+
+	return PTR_ERR(path);
+}
+
+void ipa_interconnect_exit(void)
+{
+	icc_put(ipa_ctx->config_path);
+	ipa_ctx->config_path = NULL;
+
+	icc_put(ipa_ctx->imem_path);
+	ipa_ctx->imem_path = NULL;
+
+	icc_put(ipa_ctx->memory_path);
+	ipa_ctx->memory_path = NULL;
+}
+
+/* Currently we only use bandwidth level, so just "enable" interconnects */
+int ipa_interconnect_enable(void)
+{
+	int ret;
+
+	ret = icc_set(ipa_ctx->memory_path, IPA_MEMORY_AVG, IPA_MEMORY_PEAK);
+	if (ret)
+		return ret;
+
+	ret = icc_set(ipa_ctx->imem_path, IPA_IMEM_AVG, IPA_IMEM_PEAK);
+	if (ret)
+		goto err_disable_memory_path;
+
+	ret = icc_set(ipa_ctx->config_path, IPA_CONFIG_AVG, IPA_CONFIG_PEAK);
+	if (!ret)
+		return 0;	/* Success */
+
+	(void)icc_set(ipa_ctx->imem_path, 0, 0);
+err_disable_memory_path:
+	(void)icc_set(ipa_ctx->memory_path, 0, 0);
+
+	return ret;
+}
+
+/* To disable an interconnect, we just its bandwidth to 0 */
+int ipa_interconnect_disable(void)
+{
+	int ret;
+
+	ret = icc_set(ipa_ctx->memory_path, 0, 0);
+	if (ret)
+		return ret;
+
+	ret = icc_set(ipa_ctx->imem_path, 0, 0);
+	if (ret)
+		goto err_reenable_memory_path;
+
+	ret = icc_set(ipa_ctx->config_path, 0, 0);
+	if (!ret)
+		return 0;	/* Success */
+
+	/* Re-enable things in the event of an error */
+	(void)icc_set(ipa_ctx->imem_path, IPA_IMEM_AVG, IPA_IMEM_PEAK);
+err_reenable_memory_path:
+	(void)icc_set(ipa_ctx->memory_path, IPA_MEMORY_AVG, IPA_MEMORY_PEAK);
+
+	return ret;
+}
+#else /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
 struct msm_bus_scale_pdata *ipa_bus_scale_table_init(void)
 {
 	return &ipa_bus_client_pdata;
 }
+#endif /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
 
 /** ipa_proxy_clk_unvote() - called to remove IPA clock proxy vote
  *

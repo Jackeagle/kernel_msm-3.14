@@ -559,8 +559,14 @@ struct ipa_context {
 	struct ipa_transport_pm transport_pm;
 	u32 clnt_hdl_cmd;
 	u32 clnt_hdl_lan_cons;
+#ifdef CONFIG_INTERCONNECT_QCOM_SDM845
+	struct icc_path *memory_path;
+	struct icc_path *imem_path;
+	struct icc_path *config_path;
+#else /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
 	u32 ipa_bus_hdl;
 	struct msm_bus_scale_pdata *bus_scale_tbl;
+#endif /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
 	bool q6_proxy_clk_vote_valid;
 	u32 ipa_num_pipes;
 	dma_addr_t pkt_init_imm[IPA_MAX_NUM_PIPES];
@@ -628,7 +634,15 @@ struct ipa_ep_context *ipa_get_ep_context(enum ipa_client_type client);
 
 void ipa_init_hw(void);
 
+#ifdef CONFIG_INTERCONNECT_QCOM_SDM845
+int ipa_interconnect_init(struct device *dev);
+void ipa_interconnect_exit(void);
+
+int ipa_interconnect_enable(void);
+int ipa_interconnect_disable(void);
+#else /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
 struct msm_bus_scale_pdata *ipa_bus_scale_table_init(void);
+#endif /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
 
 int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout);
 int ipa_send_cmd(struct ipa_desc *desc);
