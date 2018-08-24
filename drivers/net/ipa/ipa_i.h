@@ -302,7 +302,7 @@ enum ipa_hw_2_cpu_events {
  * @IPA_HW_FATAL_SYSTEM_ERROR : HW has crashed and requires reset.
  * @IPA_HW_INVALID_OPCODE : Invalid opcode sent
  * @IPA_HW_INVALID_PARAMS : Invalid params for the requested command
- * @IPA_HW_GSI_CH_NOT_EMPTY_FAILURE : GSI channel emptiness validation failed
+ * @IPA_HW_CH_NOT_EMPTY_FAILURE : GSI channel emptiness validation failed
  */
 enum ipa_hw_errors {
 	IPA_HW_ERROR_NONE	       =
@@ -321,7 +321,7 @@ enum ipa_hw_errors {
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 6),
 	IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 7),
-	IPA_HW_GSI_CH_NOT_EMPTY_FAILURE =
+	IPA_HW_CH_NOT_EMPTY_FAILURE =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 8)
 };
 

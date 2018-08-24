@@ -20,12 +20,12 @@
  *				handling.
  * IPA_CPU_2_HW_CMD_CLK_GATE : CPU instructs HW to goto Clock Gated state.
  * IPA_CPU_2_HW_CMD_CLK_UNGATE : CPU instructs HW to goto Clock Ungated state.
- * IPA_CPU_2_HW_CMD_GSI_CH_EMPTY : Command to check for GSI channel emptiness.
+ * IPA_CPU_2_HW_CMD_CH_EMPTY : Command to check for GSI channel emptiness.
  */
 enum ipa_cpu_2_hw_commands {
 	IPA_CPU_2_HW_CMD_ERR_FATAL		   =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 4),
-	IPA_CPU_2_HW_CMD_GSI_CH_EMPTY		   =
+	IPA_CPU_2_HW_CMD_CH_EMPTY		   =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 10),
 };
 
@@ -60,7 +60,7 @@ union ipa_hw_cpu_cmd_completed_response_data {
 } __packed;
 
 /** union ipa_hw_chk_ch_empty_cmd_data -  Structure holding the parameters for
- *  IPA_CPU_2_HW_CMD_GSI_CH_EMPTY command. Parameters are sent as 32b
+ *  IPA_CPU_2_HW_CMD_CH_EMPTY command. Parameters are sent as 32b
  *  immediate parameters.
  * @ee_n : EE owner of the channel
  * @vir_ch_id : GSI virtual channel ID of the channel to checked of emptiness
@@ -104,8 +104,8 @@ const char *ipa_hw_error_str(enum ipa_hw_errors err_type)
 	case IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE:
 		str = "IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE";
 		break;
-	case IPA_HW_GSI_CH_NOT_EMPTY_FAILURE:
-		str = "IPA_HW_GSI_CH_NOT_EMPTY_FAILURE";
+	case IPA_HW_CH_NOT_EMPTY_FAILURE:
+		str = "IPA_HW_CH_NOT_EMPTY_FAILURE";
 		break;
 	default:
 		str = "INVALID ipa_hw_errors type";
