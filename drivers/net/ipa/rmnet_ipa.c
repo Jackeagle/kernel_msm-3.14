@@ -471,10 +471,12 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	switch (cmd) {
 	/* These features are implied; alternatives are not supported */
 	case RMNET_IOCTL_SET_LLP_IP:		/* RAW IP protocol */
+	case RMNET_IOCTL_SET_QOS_DISABLE:	/* QoS header disabled */
 		return 0;
 
 	/* These features are not supported; alternatives are implied */
 	case RMNET_IOCTL_SET_LLP_ETHERNET:	/* Ethernet protocol */
+	case RMNET_IOCTL_SET_QOS_ENABLE:	/* QoS header enabled */
 		return -ENOTSUPP;
 
 	case RMNET_IOCTL_GET_LLP:		/* Get link protocol */
@@ -483,18 +485,12 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			return -EFAULT;
 		return 0;
 
-	/*  Set QoS header enabled  */
-	case RMNET_IOCTL_SET_QOS_ENABLE:
-		return -EINVAL;
-	/*  Set QoS header disabled  */
-	case RMNET_IOCTL_SET_QOS_DISABLE:
-		break;
-	/*  Get QoS header state  */
-	case RMNET_IOCTL_GET_QOS:
+	case RMNET_IOCTL_GET_QOS:		/* Get QoS header state */
 		ioctl_data.u.operation_mode = RMNET_MODE_NONE;
 		if (copy_to_user(user_data, &ioctl_data, size))
-			rc = -EFAULT;
-		break;
+			return -EFAULT;
+		return 0;
+
 	/*  Get operation mode */
 	case RMNET_IOCTL_GET_OPMODE:
 		ioctl_data.u.operation_mode = RMNET_MODE_LLP_IP;
