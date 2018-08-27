@@ -477,12 +477,12 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	case RMNET_IOCTL_SET_LLP_ETHERNET:	/* Ethernet protocol */
 		return -ENOTSUPP;
 
-	/*  Get link protocol  */
-	case RMNET_IOCTL_GET_LLP:
+	case RMNET_IOCTL_GET_LLP:		/* Get link protocol */
 		ioctl_data.u.operation_mode = RMNET_MODE_LLP_IP;
 		if (copy_to_user(user_data, &ioctl_data, size))
-			rc = -EFAULT;
-		break;
+			return -EFAULT;
+		return 0;
+
 	/*  Set QoS header enabled  */
 	case RMNET_IOCTL_SET_QOS_ENABLE:
 		return -EINVAL;
