@@ -458,11 +458,11 @@ static int handle_egress_format(struct net_device *dev,
  */
 static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 {
+	struct rmnet_ioctl_data_s ioctl_data = { };
+	struct rmnet_ioctl_extended_s edata = { };
 	int rc = 0;
 	int mru = 1000, epid = 1, mux_index;
 	void __user *user_data;
-	struct rmnet_ioctl_extended_s edata;
-	struct rmnet_ioctl_data_s ioctl_data;
 	struct ipa_rmnet_mux_val *mux_channel;
 	int rmnet_index;
 	size_t size = sizeof(ioctl_data);
