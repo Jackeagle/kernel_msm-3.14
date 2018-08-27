@@ -492,12 +492,10 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			return -EFAULT;
 		return 0;
 
-	/*  Open transport port	 */
-	case RMNET_IOCTL_OPEN:
-		break;
-	/*  Close transport port  */
-	case RMNET_IOCTL_CLOSE:
-		break;
+	case RMNET_IOCTL_OPEN:			/* Open transport port */
+	case RMNET_IOCTL_CLOSE:			/* Close transport port */
+		return 0;
+
 	/*  Flow enable	 */
 	case RMNET_IOCTL_FLOW_ENABLE:
 		ipa_err("RMNET_IOCTL_FLOW_ENABLE not supported\n");
