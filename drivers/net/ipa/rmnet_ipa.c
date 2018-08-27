@@ -469,13 +469,14 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 
 	ipa_debug("rmnet_ipa got ioctl number 0x%08x", cmd);
 	switch (cmd) {
+	/* These features are implied; alternatives are not supported */
+	case RMNET_IOCTL_SET_LLP_IP:		/* RAW IP protocol */
+		return 0;
+
 	/* These features are not supported; alternatives are implied */
 	case RMNET_IOCTL_SET_LLP_ETHERNET:	/* Ethernet protocol */
 		return -ENOTSUPP;
 
-	/*  Set RAWIP protocol	*/
-	case RMNET_IOCTL_SET_LLP_IP:
-		break;
 	/*  Get link protocol  */
 	case RMNET_IOCTL_GET_LLP:
 		ioctl_data.u.operation_mode = RMNET_MODE_LLP_IP;
