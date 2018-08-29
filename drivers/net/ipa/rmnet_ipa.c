@@ -442,6 +442,159 @@ static int handle_egress_format(struct net_device *dev,
 	return 0;
 }
 
+static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
+{
+	struct rmnet_ioctl_extended_s edata = { };
+	size_t size = sizeof(edata);
+	int mru = 1000, epid = 1, mux_index;
+	struct ipa_rmnet_mux_val *mux_channel;
+	int rmnet_index;
+	int rc = 0;
+
+	ipa_debug("get ioctl: RMNET_IOCTL_EXTENDED\n");
+	if (copy_from_user(&edata, data, size)) {
+		ipa_err("failed to copy extended ioctl data\n");
+		return -EFAULT;
+	}
+
+	switch (edata.extended_ioctl) {
+	/*  Get features  */
+	case RMNET_IOCTL_GET_SUPPORTED_FEATURES:
+		ipa_debug("get RMNET_IOCTL_GET_SUPPORTED_FEATURES\n");
+		edata.u.data =
+			(RMNET_IOCTL_FEAT_NOTIFY_MUX_CHANNEL |
+			RMNET_IOCTL_FEAT_SET_EGRESS_DATA_FORMAT |
+			RMNET_IOCTL_FEAT_SET_INGRESS_DATA_FORMAT);
+		if (copy_to_user(data, &edata, size))
+			rc = -EFAULT;
+		break;
+	/*  Set MRU  */
+	case RMNET_IOCTL_SET_MRU:
+		mru = edata.u.data;
+		ipa_debug("get MRU size %d\n",
+				edata.u.data);
+		break;
+	/*  Get MRU  */
+	case RMNET_IOCTL_GET_MRU:
+		edata.u.data = mru;
+		if (copy_to_user(data, &edata, size))
+			rc = -EFAULT;
+		break;
+	/* GET SG support */
+	case RMNET_IOCTL_GET_SG_SUPPORT:
+		/* We always advertise scatter/gather support */
+		edata.u.data = 1;
+		if (copy_to_user(data, &edata, size))
+			rc = -EFAULT;
+		break;
+	/*  Get endpoint ID  */
+	case RMNET_IOCTL_GET_EPID:
+		ipa_debug("get ioctl: RMNET_IOCTL_GET_EPID\n");
+		edata.u.data = epid;
+		if (copy_to_user(data, &edata, size))
+			rc = -EFAULT;
+		ipa_debug("RMNET_IOCTL_GET_EPID return %d\n",
+				edata.u.data);
+		break;
+	/*  Endpoint pair  */
+	case RMNET_IOCTL_GET_EP_PAIR:
+		ipa_debug("get ioctl: RMNET_IOCTL_GET_EP_PAIR\n");
+		edata.u.ipa_ep_pair.consumer_pipe_num =
+		ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_PROD);
+		edata.u.ipa_ep_pair.producer_pipe_num =
+		ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
+		if (copy_to_user(data, &edata, size))
+			rc = -EFAULT;
+		ipa_debug("RMNET_IOCTL_GET_EP_PAIR c: %d p: %d\n",
+				edata.u.ipa_ep_pair.consumer_pipe_num,
+				edata.u.ipa_ep_pair.producer_pipe_num);
+		break;
+	/*  Get driver name  */
+	case RMNET_IOCTL_GET_DRIVER_NAME:
+		memcpy(&edata.u.if_name, rmnet_ipa_ctx->dev->name, IFNAMSIZ);
+		if (copy_to_user(data, &edata, size))
+			rc = -EFAULT;
+		break;
+	/*  Add MUX ID	*/
+	case RMNET_IOCTL_ADD_MUX_CHANNEL:
+		mux_index = ipa_find_mux_channel_index(
+				edata.u.rmnet_mux_val.mux_id);
+		if (mux_index < MAX_NUM_OF_MUX_CHANNEL) {
+			ipa_debug("already setup mux(%d)\n",
+					edata.u.rmnet_mux_val.mux_id);
+			return rc;
+		}
+		mutex_lock(&rmnet_ipa_ctx->add_mux_channel_lock);
+		if (rmnet_ipa_ctx->rmnet_index >=
+				MAX_NUM_OF_MUX_CHANNEL) {
+			ipa_err("Exceed mux_channel limit(%d)\n",
+				rmnet_ipa_ctx->rmnet_index);
+			mutex_unlock(
+				&rmnet_ipa_ctx->add_mux_channel_lock);
+			return -EFAULT;
+		}
+		ipa_debug("ADD_MUX_CHANNEL(%d, name: %s)\n",
+				edata.u.rmnet_mux_val.mux_id,
+				edata.u.rmnet_mux_val.vchannel_name);
+		/* cache the mux name and id */
+		mux_channel = rmnet_ipa_ctx->mux_channel;
+		rmnet_index = rmnet_ipa_ctx->rmnet_index;
+
+		mux_channel[rmnet_index].mux_id =
+			edata.u.rmnet_mux_val.mux_id;
+		memcpy(mux_channel[rmnet_index].vchannel_name,
+			edata.u.rmnet_mux_val.vchannel_name,
+			sizeof(mux_channel[rmnet_index].vchannel_name));
+		mux_channel[rmnet_index].vchannel_name[
+			IFNAMSIZ - 1] = '\0';
+
+		ipa_debug("cashe device[%s:%d] in IPA_wan[%d]\n",
+				mux_channel[rmnet_index].vchannel_name,
+				mux_channel[rmnet_index].mux_id, rmnet_index);
+		rmnet_ipa_ctx->rmnet_index++;
+		mutex_unlock(&rmnet_ipa_ctx->add_mux_channel_lock);
+		break;
+	case RMNET_IOCTL_SET_EGRESS_DATA_FORMAT:
+		if (handle_egress_format(dev, &edata))
+			rc = -EFAULT;
+		break;
+	case RMNET_IOCTL_SET_INGRESS_DATA_FORMAT:/*  Set IDF  */
+		if (handle_ingress_format(dev, &edata))
+			rc = -EFAULT;
+		break;
+	/*  Get agg count  */
+	case RMNET_IOCTL_GET_AGGREGATION_COUNT:
+		break;
+	/*  Set agg count  */
+	case RMNET_IOCTL_SET_AGGREGATION_COUNT:
+		break;
+	/*  Get agg size  */
+	case RMNET_IOCTL_GET_AGGREGATION_SIZE:
+		break;
+	/*  Set agg size  */
+	case RMNET_IOCTL_SET_AGGREGATION_SIZE:
+		break;
+	/*  Do flow control  */
+	case RMNET_IOCTL_FLOW_CONTROL:
+		break;
+	/*  For legacy use  */
+	case RMNET_IOCTL_GET_DFLT_CONTROL_CHANNEL:
+		break;
+	/*  Get HW/SW map  */
+	case RMNET_IOCTL_GET_HWSW_MAP:
+		break;
+	/*  Set RX Headroom  */
+	case RMNET_IOCTL_SET_RX_HEADROOM:
+		break;
+	default:
+		ipa_err("[%s] unsupported extended cmd[%d]",
+			dev->name, edata.extended_ioctl);
+		rc = -EINVAL;
+	}
+
+	return rc;
+}
+
 /** ipa_wwan_ioctl() - I/O control for wwan network driver.
  *
  * @dev: network device
@@ -459,12 +612,8 @@ static int handle_egress_format(struct net_device *dev,
 static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 {
 	struct rmnet_ioctl_data_s ioctl_data = { };
-	struct rmnet_ioctl_extended_s edata = { };
 	int rc = 0;
-	int mru = 1000, epid = 1, mux_index;
 	void __user *data = ifr->ifr_ifru.ifru_data;
-	struct ipa_rmnet_mux_val *mux_channel;
-	int rmnet_index;
 	size_t size = sizeof(ioctl_data);
 
 	ipa_debug("rmnet_ipa got ioctl number 0x%08x", cmd);
@@ -497,152 +646,9 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	case RMNET_IOCTL_CLOSE:			/* Close transport port */
 		return 0;
 
-	/*  Extended IOCTLs  */
-	case RMNET_IOCTL_EXTENDED:
-		size = sizeof(edata);
+	case RMNET_IOCTL_EXTENDED:		/* Extended IOCTLs */
+		return ipa_wwan_ioctl_extended(dev, data);
 
-		ipa_debug("get ioctl: RMNET_IOCTL_EXTENDED\n");
-		if (copy_from_user(&edata, data, size)) {
-			ipa_err("failed to copy extended ioctl data\n");
-			rc = -EFAULT;
-			break;
-		}
-		switch (edata.extended_ioctl) {
-		/*  Get features  */
-		case RMNET_IOCTL_GET_SUPPORTED_FEATURES:
-			ipa_debug("get RMNET_IOCTL_GET_SUPPORTED_FEATURES\n");
-			edata.u.data =
-				(RMNET_IOCTL_FEAT_NOTIFY_MUX_CHANNEL |
-				RMNET_IOCTL_FEAT_SET_EGRESS_DATA_FORMAT |
-				RMNET_IOCTL_FEAT_SET_INGRESS_DATA_FORMAT);
-			if (copy_to_user(data, &edata, size))
-				rc = -EFAULT;
-			break;
-		/*  Set MRU  */
-		case RMNET_IOCTL_SET_MRU:
-			mru = edata.u.data;
-			ipa_debug("get MRU size %d\n",
-				  edata.u.data);
-			break;
-		/*  Get MRU  */
-		case RMNET_IOCTL_GET_MRU:
-			edata.u.data = mru;
-			if (copy_to_user(data, &edata, size))
-				rc = -EFAULT;
-			break;
-		/* GET SG support */
-		case RMNET_IOCTL_GET_SG_SUPPORT:
-			/* We always advertise scatter/gather support */
-			edata.u.data = 1;
-			if (copy_to_user(data, &edata, size))
-				rc = -EFAULT;
-			break;
-		/*  Get endpoint ID  */
-		case RMNET_IOCTL_GET_EPID:
-			ipa_debug("get ioctl: RMNET_IOCTL_GET_EPID\n");
-			edata.u.data = epid;
-			if (copy_to_user(data, &edata, size))
-				rc = -EFAULT;
-			ipa_debug("RMNET_IOCTL_GET_EPID return %d\n",
-				  edata.u.data);
-			break;
-		/*  Endpoint pair  */
-		case RMNET_IOCTL_GET_EP_PAIR:
-			ipa_debug("get ioctl: RMNET_IOCTL_GET_EP_PAIR\n");
-			edata.u.ipa_ep_pair.consumer_pipe_num =
-			ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_PROD);
-			edata.u.ipa_ep_pair.producer_pipe_num =
-			ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
-			if (copy_to_user(data, &edata, size))
-				rc = -EFAULT;
-			ipa_debug("RMNET_IOCTL_GET_EP_PAIR c: %d p: %d\n",
-				  edata.u.ipa_ep_pair.consumer_pipe_num,
-				  edata.u.ipa_ep_pair.producer_pipe_num);
-			break;
-		/*  Get driver name  */
-		case RMNET_IOCTL_GET_DRIVER_NAME:
-			memcpy(&edata.u.if_name, rmnet_ipa_ctx->dev->name,
-			       IFNAMSIZ);
-			if (copy_to_user(data, &edata, size))
-				rc = -EFAULT;
-			break;
-		/*  Add MUX ID	*/
-		case RMNET_IOCTL_ADD_MUX_CHANNEL:
-			mux_index = ipa_find_mux_channel_index(
-					edata.u.rmnet_mux_val.mux_id);
-			if (mux_index < MAX_NUM_OF_MUX_CHANNEL) {
-				ipa_debug("already setup mux(%d)\n",
-					  edata.u.rmnet_mux_val.mux_id);
-				return rc;
-			}
-			mutex_lock(&rmnet_ipa_ctx->add_mux_channel_lock);
-			if (rmnet_ipa_ctx->rmnet_index >=
-					MAX_NUM_OF_MUX_CHANNEL) {
-				ipa_err("Exceed mux_channel limit(%d)\n",
-					rmnet_ipa_ctx->rmnet_index);
-				mutex_unlock(
-					&rmnet_ipa_ctx->add_mux_channel_lock);
-				return -EFAULT;
-			}
-			ipa_debug("ADD_MUX_CHANNEL(%d, name: %s)\n",
-				  edata.u.rmnet_mux_val.mux_id,
-				  edata.u.rmnet_mux_val.vchannel_name);
-			/* cache the mux name and id */
-			mux_channel = rmnet_ipa_ctx->mux_channel;
-			rmnet_index = rmnet_ipa_ctx->rmnet_index;
-
-			mux_channel[rmnet_index].mux_id =
-				edata.u.rmnet_mux_val.mux_id;
-			memcpy(mux_channel[rmnet_index].vchannel_name,
-			       edata.u.rmnet_mux_val.vchannel_name,
-			       sizeof(mux_channel[rmnet_index].vchannel_name));
-			mux_channel[rmnet_index].vchannel_name[
-				IFNAMSIZ - 1] = '\0';
-
-			ipa_debug("cashe device[%s:%d] in IPA_wan[%d]\n",
-				  mux_channel[rmnet_index].vchannel_name,
-				  mux_channel[rmnet_index].mux_id, rmnet_index);
-			rmnet_ipa_ctx->rmnet_index++;
-			mutex_unlock(&rmnet_ipa_ctx->add_mux_channel_lock);
-			break;
-		case RMNET_IOCTL_SET_EGRESS_DATA_FORMAT:
-			if (handle_egress_format(dev, &edata))
-				rc = -EFAULT;
-			break;
-		case RMNET_IOCTL_SET_INGRESS_DATA_FORMAT:/*  Set IDF  */
-			if (handle_ingress_format(dev, &edata))
-				rc = -EFAULT;
-			break;
-		/*  Get agg count  */
-		case RMNET_IOCTL_GET_AGGREGATION_COUNT:
-			break;
-		/*  Set agg count  */
-		case RMNET_IOCTL_SET_AGGREGATION_COUNT:
-			break;
-		/*  Get agg size  */
-		case RMNET_IOCTL_GET_AGGREGATION_SIZE:
-			break;
-		/*  Set agg size  */
-		case RMNET_IOCTL_SET_AGGREGATION_SIZE:
-			break;
-		/*  Do flow control  */
-		case RMNET_IOCTL_FLOW_CONTROL:
-			break;
-		/*  For legacy use  */
-		case RMNET_IOCTL_GET_DFLT_CONTROL_CHANNEL:
-			break;
-		/*  Get HW/SW map  */
-		case RMNET_IOCTL_GET_HWSW_MAP:
-			break;
-		/*  Set RX Headroom  */
-		case RMNET_IOCTL_SET_RX_HEADROOM:
-			break;
-		default:
-			ipa_err("[%s] unsupported extended cmd[%d]",
-				dev->name, edata.extended_ioctl);
-			rc = -EINVAL;
-		}
-		break;
 	default:
 		ipa_err("[%s] unsupported cmd[%d]", dev->name, cmd);
 
