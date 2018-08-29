@@ -462,7 +462,7 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	struct rmnet_ioctl_extended_s edata = { };
 	int rc = 0;
 	int mru = 1000, epid = 1, mux_index;
-	void __user *user_data;
+	void __user *user_data = ifr->ifr_ifru.ifru_data;
 	struct ipa_rmnet_mux_val *mux_channel;
 	int rmnet_index;
 	size_t size = sizeof(ioctl_data);
@@ -522,7 +522,6 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	/*  Extended IOCTLs  */
 	case RMNET_IOCTL_EXTENDED:
 		size = sizeof(edata);
-		user_data = ifr->ifr_ifru.ifru_data;
 
 		ipa_debug("get ioctl: RMNET_IOCTL_EXTENDED\n");
 		if (copy_from_user(&edata, user_data, size)) {
