@@ -426,26 +426,21 @@ static int ipa_wwan_add_mux_channel(struct rmnet_ioctl_extended_s *edata)
 {
 	u32 mux_id = edata->u.rmnet_mux_val.mux_id;
 	int mux_index;
-	int rmnet_index;
-	int ret = 0;
+	int ret = -EFAULT;
 
 	mutex_lock(&rmnet_ipa_ctx->add_mux_channel_lock);
 
-	if (rmnet_ipa_ctx->rmnet_count >= MAX_NUM_OF_MUX_CHANNEL) {
-		ret = -EFAULT;
+	if (rmnet_ipa_ctx->rmnet_count >= MAX_NUM_OF_MUX_CHANNEL)
 		goto out;
-	}
 
+	ret = 0;
 	for (mux_index = 0; mux_index < rmnet_ipa_ctx->rmnet_count; mux_index++)
 		if (mux_id == rmnet_ipa_ctx->mux_id[mux_index])
 			break;
 
-	if (mux_index < rmnet_ipa_ctx->rmnet_count)
-		goto out;	/* Already set up */
-
-	rmnet_index = rmnet_ipa_ctx->rmnet_count++;
-	/* cache the mux id */
-	rmnet_ipa_ctx->mux_id[rmnet_index] = mux_id;
+	/* Record the mux_id if it hasn't already been seen */
+	if (mux_index == rmnet_ipa_ctx->rmnet_count)
+		rmnet_ipa_ctx->mux_id[rmnet_ipa_ctx->rmnet_count++] = mux_id;
 out:
 	mutex_unlock(&rmnet_ipa_ctx->add_mux_channel_lock);
 
