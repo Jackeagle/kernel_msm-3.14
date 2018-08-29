@@ -103,17 +103,6 @@ static bool initialized;	/* Avoid duplicate initialization */
 static struct rmnet_ipa_context rmnet_ipa_ctx_struct;
 static struct rmnet_ipa_context *rmnet_ipa_ctx = &rmnet_ipa_ctx_struct;
 
-static int ipa_find_mux_channel_index(u32 mux_id)
-{
-	int i;
-
-	for (i = 0; i < MAX_NUM_OF_MUX_CHANNEL; i++)
-		if (mux_id == rmnet_ipa_ctx->mux_id[i])
-			return i;
-
-	return MAX_NUM_OF_MUX_CHANNEL;
-}
-
 /** wwan_open() - Opens the wwan network interface. Opens logical
  * channel on A2 MUX driver and starts the network stack queue
  *
@@ -439,9 +428,9 @@ static int ipa_wwan_add_mux_channel(struct rmnet_ioctl_extended_s *edata)
 	int mux_index;
 	int rmnet_index;
 
-	mux_index = ipa_find_mux_channel_index(mux_id);
-	if (mux_index < MAX_NUM_OF_MUX_CHANNEL)
-		return 0;
+	for (mux_index = 0; mux_index < MAX_NUM_OF_MUX_CHANNEL; mux_index++)
+		if (mux_id == rmnet_ipa_ctx->mux_id[mux_index])
+			return 0;	/* Already set up */
 
 	mutex_lock(&rmnet_ipa_ctx->add_mux_channel_lock);
 
