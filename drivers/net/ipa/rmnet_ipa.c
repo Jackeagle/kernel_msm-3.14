@@ -430,7 +430,10 @@ static int ipa_wwan_add_mux_channel(struct rmnet_ioctl_extended_s *edata)
 
 	for (mux_index = 0; mux_index < MAX_NUM_OF_MUX_CHANNEL; mux_index++)
 		if (mux_id == rmnet_ipa_ctx->mux_id[mux_index])
-			return 0;	/* Already set up */
+			break;
+
+	if (mux_index < MAX_NUM_OF_MUX_CHANNEL)
+		return 0;	/* Already set up */
 
 	mutex_lock(&rmnet_ipa_ctx->add_mux_channel_lock);
 
