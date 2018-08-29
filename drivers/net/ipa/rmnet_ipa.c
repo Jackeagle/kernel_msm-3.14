@@ -583,8 +583,8 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			break;
 		/*  Get driver name  */
 		case RMNET_IOCTL_GET_DRIVER_NAME:
-			memcpy(&edata.u.if_name,
-			       rmnet_ipa_ctx->dev->name, sizeof(IFNAMSIZ));
+			memcpy(&edata.u.if_name, rmnet_ipa_ctx->dev->name,
+			       IFNAMSIZ);
 			if (copy_to_user(user_data, &edata, size))
 				rc = -EFAULT;
 			break;
