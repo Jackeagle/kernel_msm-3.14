@@ -436,11 +436,11 @@ static int ipa_wwan_add_mux_channel(struct rmnet_ioctl_extended_s *edata)
 		goto out;
 	}
 
-	for (mux_index = 0; mux_index < MAX_NUM_OF_MUX_CHANNEL; mux_index++)
+	for (mux_index = 0; mux_index < rmnet_ipa_ctx->rmnet_count; mux_index++)
 		if (mux_id == rmnet_ipa_ctx->mux_id[mux_index])
 			break;
 
-	if (mux_index < MAX_NUM_OF_MUX_CHANNEL)
+	if (mux_index < rmnet_ipa_ctx->rmnet_count)
 		goto out;	/* Already set up */
 
 	rmnet_index = rmnet_ipa_ctx->rmnet_count++;
