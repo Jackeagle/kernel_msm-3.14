@@ -84,10 +84,6 @@ struct ipa_wwan_private {
 
 struct ipa_rmnet_mux_val {
 	u32  mux_id;
-	bool mux_channel_set;
-	bool ul_flt_reg;
-	bool mux_hdr_set;
-	u32  hdr_hdl;
 };
 
 struct rmnet_ipa_context {
