@@ -499,6 +499,7 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 	case RMNET_IOCTL_SET_INGRESS_DATA_FORMAT:	/* Ingress format */
 		return handle_ingress_format(dev, &edata) ? -EFAULT : 0;
 
+	/* Unsupported requests */
 	case RMNET_IOCTL_GET_AGGREGATION_COUNT:		/* Get agg count */
 	case RMNET_IOCTL_SET_AGGREGATION_COUNT:		/* Set agg count */
 	case RMNET_IOCTL_GET_AGGREGATION_SIZE:		/* Get agg size */
@@ -507,10 +508,10 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 	case RMNET_IOCTL_GET_DFLT_CONTROL_CHANNEL:	/* For legacy use */
 	case RMNET_IOCTL_GET_HWSW_MAP:			/* Get HW/SW map */
 	case RMNET_IOCTL_SET_RX_HEADROOM:		/* Set RX Headroom */
-		return 0;
+		return -ENOTSUPP;
 
 	default:
-		ipa_err("[%s] unsupported extended cmd[%d]",
+		ipa_err("[%s] unrecognized extended cmd[%d]",
 			dev->name, edata.extended_ioctl);
 		return -EINVAL;
 	}
