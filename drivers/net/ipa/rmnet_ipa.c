@@ -462,39 +462,33 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 		edata.u.data = RMNET_IOCTL_FEAT_NOTIFY_MUX_CHANNEL;
 		edata.u.data |= RMNET_IOCTL_FEAT_SET_EGRESS_DATA_FORMAT;
 		edata.u.data |= RMNET_IOCTL_FEAT_SET_INGRESS_DATA_FORMAT;
-
-		return copy_to_user(data, &edata, size) ? -EFAULT : 0;
+		goto copy_out;
 
 	case RMNET_IOCTL_SET_MRU:			/* Set MRU */
 		return 0;
 
 	case RMNET_IOCTL_GET_MRU:			/* Get MRU */
 		edata.u.data = 1000;
-
-		return copy_to_user(data, &edata, size) ? -EFAULT : 0;
+		goto copy_out;
 
 	case RMNET_IOCTL_GET_SG_SUPPORT:		/* Get SG support */
 		edata.u.data = 1;	/* Scatter/gather is always supported */
-
-		return copy_to_user(data, &edata, size) ? -EFAULT : 0;
+		goto copy_out;
 
 	case RMNET_IOCTL_GET_EPID:			/* Get endpoint ID */
 		edata.u.data = 1;
-
-		return copy_to_user(data, &edata, size) ? -EFAULT : 0;
+		goto copy_out;
 
 	case RMNET_IOCTL_GET_EP_PAIR:			/* Get endpoint pair */
 		edata.u.ipa_ep_pair.consumer_pipe_num =
 				ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_PROD);
 		edata.u.ipa_ep_pair.producer_pipe_num =
 				ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
-
-		return copy_to_user(data, &edata, size) ? -EFAULT : 0;
+		goto copy_out;
 
 	case RMNET_IOCTL_GET_DRIVER_NAME:		/* Get driver name */
 		memcpy(&edata.u.if_name, rmnet_ipa_ctx->dev->name, IFNAMSIZ);
-
-		return copy_to_user(data, &edata, size) ? -EFAULT : 0;
+		goto copy_out;
 
 	case RMNET_IOCTL_ADD_MUX_CHANNEL:		/* Add MUX ID */
 		return ipa_wwan_add_mux_channel(&edata);
@@ -520,6 +514,9 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 			dev->name, edata.extended_ioctl);
 		return -EINVAL;
 	}
+
+copy_out:
+	return copy_to_user(data, &edata, size) ? -EFAULT : 0;
 }
 
 /** ipa_wwan_ioctl() - I/O control for wwan network driver.
