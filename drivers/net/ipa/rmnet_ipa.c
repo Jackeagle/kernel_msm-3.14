@@ -427,8 +427,14 @@ static int ipa_wwan_add_mux_channel(struct rmnet_ioctl_extended_s *edata)
 	u32 mux_id = edata->u.rmnet_mux_val.mux_id;
 	int mux_index;
 	int rmnet_index;
+	int ret = 0;
 
 	mutex_lock(&rmnet_ipa_ctx->add_mux_channel_lock);
+
+	if (rmnet_ipa_ctx->rmnet_count >= MAX_NUM_OF_MUX_CHANNEL) {
+		ret = -EFAULT;
+		goto out;
+	}
 
 	for (mux_index = 0; mux_index < MAX_NUM_OF_MUX_CHANNEL; mux_index++)
 		if (mux_id == rmnet_ipa_ctx->mux_id[mux_index])
@@ -437,19 +443,13 @@ static int ipa_wwan_add_mux_channel(struct rmnet_ioctl_extended_s *edata)
 	if (mux_index < MAX_NUM_OF_MUX_CHANNEL)
 		goto out;	/* Already set up */
 
-	if (rmnet_ipa_ctx->rmnet_count >= MAX_NUM_OF_MUX_CHANNEL) {
-		ipa_err("Exceed mux_channel limit(%d)\n", rmnet_index);
-		mutex_unlock(&rmnet_ipa_ctx->add_mux_channel_lock);
-		return -EFAULT;
-	}
 	rmnet_index = rmnet_ipa_ctx->rmnet_count++;
-
-	/* cache the mux name and id */
+	/* cache the mux id */
 	rmnet_ipa_ctx->mux_id[rmnet_index] = mux_id;
 out:
 	mutex_unlock(&rmnet_ipa_ctx->add_mux_channel_lock);
 
-	return 0;
+	return ret;
 }
 
 static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
