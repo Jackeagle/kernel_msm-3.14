@@ -442,13 +442,42 @@ static int handle_egress_format(struct net_device *dev,
 	return 0;
 }
 
+static int ipa_wwan_add_mux_channel(struct rmnet_ioctl_extended_s *edata)
+{
+	struct ipa_rmnet_mux_val *mux_channel;
+	u32 mux_id = edata->u.rmnet_mux_val.mux_id;
+	char *vchannel_name = edata->u.rmnet_mux_val.vchannel_name;
+	int mux_index;
+	int rmnet_index;
+
+	mux_index = ipa_find_mux_channel_index(mux_id);
+	if (mux_index < MAX_NUM_OF_MUX_CHANNEL)
+		return 0;
+
+	mutex_lock(&rmnet_ipa_ctx->add_mux_channel_lock);
+
+	if (rmnet_ipa_ctx->rmnet_index >= MAX_NUM_OF_MUX_CHANNEL) {
+		ipa_err("Exceed mux_channel limit(%d)\n", rmnet_index);
+		mutex_unlock(&rmnet_ipa_ctx->add_mux_channel_lock);
+		return -EFAULT;
+	}
+	rmnet_index = rmnet_ipa_ctx->rmnet_index++;
+
+	/* cache the mux name and id */
+	mux_channel = rmnet_ipa_ctx->mux_channel;
+	mux_channel[rmnet_index].mux_id = mux_id;
+	memcpy(mux_channel[rmnet_index].vchannel_name, vchannel_name, IFNAMSIZ);
+	mux_channel[rmnet_index].vchannel_name[IFNAMSIZ - 1] = '\0';
+
+	mutex_unlock(&rmnet_ipa_ctx->add_mux_channel_lock);
+
+	return 0;
+}
+
 static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 {
 	struct rmnet_ioctl_extended_s edata = { };
 	size_t size = sizeof(edata);
-	int mux_index;
-	struct ipa_rmnet_mux_val *mux_channel;
-	int rmnet_index;
 
 	if (copy_from_user(&edata, data, size))
 		return -EFAULT;
@@ -495,31 +524,7 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 		return copy_to_user(data, &edata, size) ? -EFAULT : 0;
 
 	case RMNET_IOCTL_ADD_MUX_CHANNEL:		/* Add MUX ID */
-		mux_index = ipa_find_mux_channel_index(
-				edata.u.rmnet_mux_val.mux_id);
-		if (mux_index < MAX_NUM_OF_MUX_CHANNEL)
-			return 0;
-
-		mutex_lock(&rmnet_ipa_ctx->add_mux_channel_lock);
-		if (rmnet_ipa_ctx->rmnet_index >= MAX_NUM_OF_MUX_CHANNEL) {
-			ipa_err("Exceed mux_channel limit(%d)\n",
-				rmnet_ipa_ctx->rmnet_index);
-			mutex_unlock(&rmnet_ipa_ctx->add_mux_channel_lock);
-			return -EFAULT;
-		}
-		/* cache the mux name and id */
-		mux_channel = rmnet_ipa_ctx->mux_channel;
-		rmnet_index = rmnet_ipa_ctx->rmnet_index;
-
-		mux_channel[rmnet_index].mux_id = edata.u.rmnet_mux_val.mux_id;
-		memcpy(mux_channel[rmnet_index].vchannel_name,
-			edata.u.rmnet_mux_val.vchannel_name, IFNAMSIZ);
-		mux_channel[rmnet_index].vchannel_name[IFNAMSIZ - 1] = '\0';
-
-		rmnet_ipa_ctx->rmnet_index++;
-		mutex_unlock(&rmnet_ipa_ctx->add_mux_channel_lock);
-
-		return 0;
+		return ipa_wwan_add_mux_channel(&edata);
 
 	case RMNET_IOCTL_SET_EGRESS_DATA_FORMAT:	/* Egress data format */
 		return handle_egress_format(dev, &edata) ? -EFAULT : 0;
