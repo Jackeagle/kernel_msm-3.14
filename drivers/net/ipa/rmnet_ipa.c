@@ -428,14 +428,14 @@ static int ipa_wwan_add_mux_channel(struct rmnet_ioctl_extended_s *edata)
 	int mux_index;
 	int rmnet_index;
 
+	mutex_lock(&rmnet_ipa_ctx->add_mux_channel_lock);
+
 	for (mux_index = 0; mux_index < MAX_NUM_OF_MUX_CHANNEL; mux_index++)
 		if (mux_id == rmnet_ipa_ctx->mux_id[mux_index])
 			break;
 
 	if (mux_index < MAX_NUM_OF_MUX_CHANNEL)
-		return 0;	/* Already set up */
-
-	mutex_lock(&rmnet_ipa_ctx->add_mux_channel_lock);
+		goto out;	/* Already set up */
 
 	if (rmnet_ipa_ctx->rmnet_count >= MAX_NUM_OF_MUX_CHANNEL) {
 		ipa_err("Exceed mux_channel limit(%d)\n", rmnet_index);
@@ -446,7 +446,7 @@ static int ipa_wwan_add_mux_channel(struct rmnet_ioctl_extended_s *edata)
 
 	/* cache the mux name and id */
 	rmnet_ipa_ctx->mux_id[rmnet_index] = mux_id;
-
+out:
 	mutex_unlock(&rmnet_ipa_ctx->add_mux_channel_lock);
 
 	return 0;
