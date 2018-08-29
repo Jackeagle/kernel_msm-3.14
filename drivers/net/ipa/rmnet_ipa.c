@@ -478,6 +478,9 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	case RMNET_IOCTL_SET_LLP_ETHERNET:	/* Ethernet protocol */
 	case RMNET_IOCTL_SET_QOS_ENABLE:	/* QoS header enabled */
 	case RMNET_IOCTL_GET_OPMODE:		/* Get operation mode */
+	case RMNET_IOCTL_FLOW_ENABLE:		/* Flow enable */
+	case RMNET_IOCTL_FLOW_DISABLE:		/* Flow disable */
+	case RMNET_IOCTL_FLOW_SET_HNDL:		/* Set flow handle */
 		return -ENOTSUPP;
 
 	case RMNET_IOCTL_GET_LLP:		/* Get link protocol */
@@ -495,20 +498,6 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	case RMNET_IOCTL_OPEN:			/* Open transport port */
 	case RMNET_IOCTL_CLOSE:			/* Close transport port */
 		return 0;
-
-	/*  Flow enable	 */
-	case RMNET_IOCTL_FLOW_ENABLE:
-		ipa_err("RMNET_IOCTL_FLOW_ENABLE not supported\n");
-		rc = -EFAULT;
-		break;
-	/*  Flow disable  */
-	case RMNET_IOCTL_FLOW_DISABLE:
-		ipa_err("RMNET_IOCTL_FLOW_DISABLE not supported\n");
-		rc = -EFAULT;
-		break;
-	/*  Set flow handle  */
-	case RMNET_IOCTL_FLOW_SET_HNDL:
-		break;
 
 	/*  Extended IOCTLs  */
 	case RMNET_IOCTL_EXTENDED:
