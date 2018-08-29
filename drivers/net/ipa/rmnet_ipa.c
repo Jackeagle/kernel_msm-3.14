@@ -449,12 +449,9 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 	int mux_index;
 	struct ipa_rmnet_mux_val *mux_channel;
 	int rmnet_index;
-	int rc = 0;
 
-	if (copy_from_user(&edata, data, size)) {
-		ipa_err("failed to copy extended ioctl data\n");
+	if (copy_from_user(&edata, data, size))
 		return -EFAULT;
-	}
 
 	ipa_debug("RMNET_IOCTL_EXTENDED 0x%08x\n", edata.extended_ioctl);
 
@@ -467,7 +464,8 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 		return copy_to_user(data, &edata, size) ? -EFAULT : 0;
 
 	case RMNET_IOCTL_SET_MRU:			/* Set MRU */
-		break;
+		return 0;
+
 	case RMNET_IOCTL_GET_MRU:			/* Get MRU */
 		edata.u.data = 1000;
 
@@ -500,7 +498,8 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 		mux_index = ipa_find_mux_channel_index(
 				edata.u.rmnet_mux_val.mux_id);
 		if (mux_index < MAX_NUM_OF_MUX_CHANNEL)
-			return rc;
+			return 0;
+
 		mutex_lock(&rmnet_ipa_ctx->add_mux_channel_lock);
 		if (rmnet_ipa_ctx->rmnet_index >= MAX_NUM_OF_MUX_CHANNEL) {
 			ipa_err("Exceed mux_channel limit(%d)\n",
@@ -519,7 +518,9 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 
 		rmnet_ipa_ctx->rmnet_index++;
 		mutex_unlock(&rmnet_ipa_ctx->add_mux_channel_lock);
-		break;
+
+		return 0;
+
 	case RMNET_IOCTL_SET_EGRESS_DATA_FORMAT:	/* Egress data format */
 		return handle_egress_format(dev, &edata) ? -EFAULT : 0;
 
@@ -527,28 +528,20 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 		return handle_ingress_format(dev, &edata) ? -EFAULT : 0;
 
 	case RMNET_IOCTL_GET_AGGREGATION_COUNT:		/* Get agg count */
-		break;
 	case RMNET_IOCTL_SET_AGGREGATION_COUNT:		/* Set agg count */
-		break;
 	case RMNET_IOCTL_GET_AGGREGATION_SIZE:		/* Get agg size */
-		break;
 	case RMNET_IOCTL_SET_AGGREGATION_SIZE:		/* Set agg size */
-		break;
 	case RMNET_IOCTL_FLOW_CONTROL:			/* Do flow control */
-		break;
 	case RMNET_IOCTL_GET_DFLT_CONTROL_CHANNEL:	/* For legacy use */
-		break;
 	case RMNET_IOCTL_GET_HWSW_MAP:			/* Get HW/SW map */
-		break;
 	case RMNET_IOCTL_SET_RX_HEADROOM:		/* Set RX Headroom */
-		break;
+		return 0;
+
 	default:
 		ipa_err("[%s] unsupported extended cmd[%d]",
 			dev->name, edata.extended_ioctl);
-		rc = -EINVAL;
+		return -EINVAL;
 	}
-
-	return rc;
 }
 
 /** ipa_wwan_ioctl() - I/O control for wwan network driver.
