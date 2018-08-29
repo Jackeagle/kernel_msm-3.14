@@ -89,7 +89,7 @@ struct rmnet_ipa_context {
 	u32 mux_id[MAX_NUM_OF_MUX_CHANNEL];
 	int num_q6_rules;
 	int old_num_q6_rules;
-	int rmnet_index;	/* updates protected by add_mux_channel_lock */
+	int rmnet_count;	/* updates protected by add_mux_channel_lock */
 	bool egress_set;
 	bool a7_ul_flt_set;
 	u32 apps_to_ipa_hdl;
@@ -434,12 +434,12 @@ static int ipa_wwan_add_mux_channel(struct rmnet_ioctl_extended_s *edata)
 
 	mutex_lock(&rmnet_ipa_ctx->add_mux_channel_lock);
 
-	if (rmnet_ipa_ctx->rmnet_index >= MAX_NUM_OF_MUX_CHANNEL) {
+	if (rmnet_ipa_ctx->rmnet_count >= MAX_NUM_OF_MUX_CHANNEL) {
 		ipa_err("Exceed mux_channel limit(%d)\n", rmnet_index);
 		mutex_unlock(&rmnet_ipa_ctx->add_mux_channel_lock);
 		return -EFAULT;
 	}
-	rmnet_index = rmnet_ipa_ctx->rmnet_index++;
+	rmnet_index = rmnet_ipa_ctx->rmnet_count++;
 
 	/* cache the mux name and id */
 	rmnet_ipa_ctx->mux_id[rmnet_index] = mux_id;
