@@ -82,15 +82,11 @@ struct ipa_wwan_private {
 	struct napi_struct napi;
 };
 
-struct ipa_rmnet_mux_val {
-	u32  mux_id;
-};
-
 struct rmnet_ipa_context {
 	struct net_device *dev;
 	struct ipa_sys_connect_params apps_to_ipa_ep_cfg;
 	struct ipa_sys_connect_params ipa_to_apps_ep_cfg;
-	struct ipa_rmnet_mux_val mux_channel[MAX_NUM_OF_MUX_CHANNEL];
+	u32 mux_id[MAX_NUM_OF_MUX_CHANNEL];
 	int num_q6_rules;
 	int old_num_q6_rules;
 	int rmnet_index;	/* updates protected by add_mux_channel_lock */
@@ -99,7 +95,7 @@ struct rmnet_ipa_context {
 	u32 apps_to_ipa_hdl;
 	u32 ipa_to_apps_hdl;
 	struct mutex pipe_handle_guard;		/* pipe setup/teardown */
-	struct mutex add_mux_channel_lock;	/* updates to mux_channel[] */
+	struct mutex add_mux_channel_lock;	/* updates to mux_id[] */
 };
 
 static bool initialized;	/* Avoid duplicate initialization */
@@ -111,10 +107,10 @@ static int ipa_find_mux_channel_index(u32 mux_id)
 {
 	int i;
 
-	for (i = 0; i < MAX_NUM_OF_MUX_CHANNEL; i++) {
-		if (mux_id == rmnet_ipa_ctx->mux_channel[i].mux_id)
+	for (i = 0; i < MAX_NUM_OF_MUX_CHANNEL; i++)
+		if (mux_id == rmnet_ipa_ctx->mux_id[i])
 			return i;
-	}
+
 	return MAX_NUM_OF_MUX_CHANNEL;
 }
 
@@ -439,7 +435,6 @@ static int handle_egress_format(struct net_device *dev,
 
 static int ipa_wwan_add_mux_channel(struct rmnet_ioctl_extended_s *edata)
 {
-	struct ipa_rmnet_mux_val *mux_channel;
 	u32 mux_id = edata->u.rmnet_mux_val.mux_id;
 	int mux_index;
 	int rmnet_index;
@@ -458,8 +453,7 @@ static int ipa_wwan_add_mux_channel(struct rmnet_ioctl_extended_s *edata)
 	rmnet_index = rmnet_ipa_ctx->rmnet_index++;
 
 	/* cache the mux name and id */
-	mux_channel = rmnet_ipa_ctx->mux_channel;
-	mux_channel[rmnet_index].mux_id = mux_id;
+	rmnet_ipa_ctx->mux_id[rmnet_index] = mux_id;
 
 	mutex_unlock(&rmnet_ipa_ctx->add_mux_channel_lock);
 
