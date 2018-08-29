@@ -84,7 +84,6 @@ struct ipa_wwan_private {
 
 struct ipa_rmnet_mux_val {
 	u32  mux_id;
-	char	  vchannel_name[IFNAMSIZ];
 	bool mux_channel_set;
 	bool ul_flt_reg;
 	bool mux_hdr_set;
@@ -446,7 +445,6 @@ static int ipa_wwan_add_mux_channel(struct rmnet_ioctl_extended_s *edata)
 {
 	struct ipa_rmnet_mux_val *mux_channel;
 	u32 mux_id = edata->u.rmnet_mux_val.mux_id;
-	char *vchannel_name = edata->u.rmnet_mux_val.vchannel_name;
 	int mux_index;
 	int rmnet_index;
 
@@ -466,8 +464,6 @@ static int ipa_wwan_add_mux_channel(struct rmnet_ioctl_extended_s *edata)
 	/* cache the mux name and id */
 	mux_channel = rmnet_ipa_ctx->mux_channel;
 	mux_channel[rmnet_index].mux_id = mux_id;
-	memcpy(mux_channel[rmnet_index].vchannel_name, vchannel_name, IFNAMSIZ);
-	mux_channel[rmnet_index].vchannel_name[IFNAMSIZ - 1] = '\0';
 
 	mutex_unlock(&rmnet_ipa_ctx->add_mux_channel_lock);
 
