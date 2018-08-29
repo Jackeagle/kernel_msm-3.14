@@ -557,13 +557,11 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 
 	case RMNET_IOCTL_GET_LLP:		/* Get link protocol */
 		ioctl_data.u.operation_mode = RMNET_MODE_LLP_IP;
-
-		return copy_to_user(data, &ioctl_data, size) ? -EFAULT : 0;
+		goto copy_out;
 
 	case RMNET_IOCTL_GET_QOS:		/* Get QoS header state */
 		ioctl_data.u.operation_mode = RMNET_MODE_NONE;
-
-		return copy_to_user(data, &ioctl_data, size) ? -EFAULT : 0;
+		goto copy_out;
 
 	case RMNET_IOCTL_OPEN:			/* Open transport port */
 	case RMNET_IOCTL_CLOSE:			/* Close transport port */
@@ -577,6 +575,9 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 
 		return -EINVAL;
 	}
+
+copy_out:
+	return copy_to_user(data, &ioctl_data, size) ? -EFAULT : 0;
 }
 
 static const struct net_device_ops ipa_wwan_ops_ip = {
