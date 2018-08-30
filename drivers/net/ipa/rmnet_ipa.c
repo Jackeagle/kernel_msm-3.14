@@ -395,9 +395,8 @@ static int handle_egress_format(struct net_device *dev,
 }
 
 /** ipa_wwan_add_mux_channel() - add a mux_id */
-static int ipa_wwan_add_mux_channel(struct rmnet_ioctl_extended_s *edata)
+static int ipa_wwan_add_mux_channel(u32 mux_id)
 {
-	u32 mux_id = edata->u.rmnet_mux_val.mux_id;
 	int mux_index;
 	int ret = -EFAULT;
 
@@ -465,7 +464,7 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 		goto copy_out;
 
 	case RMNET_IOCTL_ADD_MUX_CHANNEL:		/* Add MUX ID */
-		return ipa_wwan_add_mux_channel(&edata);
+		return ipa_wwan_add_mux_channel(edata.u.rmnet_mux_val.mux_id);
 
 	case RMNET_IOCTL_SET_EGRESS_DATA_FORMAT:	/* Egress data format */
 		return handle_egress_format(dev, &edata) ? -EFAULT : 0;
