@@ -88,7 +88,6 @@ struct rmnet_ipa_context {
 	u32 mux_id_count;
 	u32 mux_id[MAX_NUM_OF_MUX_CHANNEL];
 	int num_q6_rules;
-	int old_num_q6_rules;
 	bool egress_set;
 	bool a7_ul_flt_set;
 	u32 apps_to_ipa_hdl;
