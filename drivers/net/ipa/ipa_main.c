@@ -1337,7 +1337,7 @@ static enum ipa_hw_version ipa_version_get(struct platform_device *pdev)
 }
 
 static const struct of_device_id ipa_plat_drv_match[] = {
-	{ .compatible = "qcom,ipa", },
+	{ .compatible = "qcom,ipa-sdm845", },
 	{}
 };
 
