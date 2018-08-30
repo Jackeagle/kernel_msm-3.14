@@ -15,7 +15,6 @@
 #include <dt-bindings/phy/phy-qcom-qusb2.h>
 #include <dt-bindings/reset/qcom,sdm845-aoss.h>
 #include <dt-bindings/soc/qcom,rpmh-rsc.h>
-#include <dt-bindings/soc/qcom,ipa.h>
 
 / {
 	interrupt-parent = <&intc>;
@@ -984,10 +983,8 @@
 			};
 		};
 
-		ipa_hw: ipa@1e00000 {
-			compatible = "qcom,ipa";
-
-			qcom,ipa-hw-ver = <QCOM_IPA_HW_VER_v3_5_1>;
+		ipa: ipa@1e00000 {
+			compatible = "qcom,ipa-sdm845";
 
 			reg = <0x1e00000 0x34000>,
 			      <0x1e04000 0x2c000>;
