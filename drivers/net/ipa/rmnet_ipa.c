@@ -31,13 +31,13 @@
 #define DRIVER_NAME		"wwan_ioctl"
 #define IPA_WWAN_DEV_NAME	"rmnet_ipa%d"
 
-#define MUX_CHANNEL_MAX		10 /* max mux channels */
+#define MUX_CHANNEL_MAX		10	/* max mux channels */
 
 #define NAPI_WEIGHT		60
 
 #define WWAN_DATA_LEN		2000
-#define HEADROOM_FOR_QMAP	8 /* for mux header */
-#define TAILROOM		0 /* for padding by mux layer */
+#define HEADROOM_FOR_QMAP	8	/* for mux header */
+#define TAILROOM		0	/* for padding by mux layer */
 
 #define DEFAULT_OUTSTANDING_HIGH	128
 #define DEFAULT_OUTSTANDING_HIGH_CTL	(DEFAULT_OUTSTANDING_HIGH + 32)
@@ -51,11 +51,8 @@ static int ipa_rmnet_poll(struct napi_struct *napi, int budget);
 /** struct ipa_wwan_private - WWAN private data
  * @net: network interface struct implemented by this driver
  * @stats: iface statistics
- * @outstanding_pkts: number of packets sent to IPA without TX complete ACKed
  * @outstanding_high: number of outstanding packets allowed
  * @outstanding_low: number of outstanding packets which shall cause
- * @ch_id: channel id
- * @lock: spinlock for mutual exclusion
  *
  * WWAN private - holds all relevant info about WWAN driver
  */
@@ -85,14 +82,7 @@ static bool initialized;	/* Avoid duplicate initialization */
 static struct rmnet_ipa_context rmnet_ipa_ctx_struct;
 static struct rmnet_ipa_context *rmnet_ipa_ctx = &rmnet_ipa_ctx_struct;
 
-/** wwan_open() - Opens the wwan network interface. Opens logical
- * channel on A2 MUX driver and starts the network stack queue
- *
- * @dev: network device
- *
- * Return codes:
- * 0: success
- */
+/** wwan_open() - Opens the wwan network interface */
 static int ipa_wwan_open(struct net_device *dev)
 {
 	struct ipa_wwan_private *wwan_ptr = netdev_priv(dev);
@@ -103,15 +93,7 @@ static int ipa_wwan_open(struct net_device *dev)
 	return 0;
 }
 
-/** ipa_wwan_stop() - Stops the wwan network interface. Closes
- * logical channel on A2 MUX driver and stops the network stack
- * queue
- *
- * @dev: network device
- *
- * Return codes:
- * 0: success
- */
+/** ipa_wwan_stop() - Stops the wwan network interface. */
 static int ipa_wwan_stop(struct net_device *dev)
 {
 	netif_stop_queue(dev);
@@ -125,10 +107,8 @@ static int ipa_wwan_stop(struct net_device *dev)
  * @dev: network device
  *
  * Return codes:
- * 0: success
- * NETDEV_TX_BUSY: Error while transmitting the skb. Try again
- * later
- * -EFAULT: Error while transmitting the skb
+ * NETDEV_TX_OK: Success
+ * NETDEV_TX_BUSY: Error while transmitting the skb. Try again later
  */
 static int ipa_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 {
@@ -537,18 +517,7 @@ static void ipa_wwan_setup(struct net_device *dev)
 	dev->watchdog_timeo = msecs_to_jiffies(10 * MSEC_PER_SEC);
 }
 
-/** ipa_wwan_probe() - Initialized the module and registers as a
- * network interface to the network stack
- *
- * Note: In case IPA driver hasn't initialized already, the probe function
- * will return immediately after registering a callback to be invoked when
- * IPA driver initialization is complete.
- *
- * Return codes:
- * 0: success
- * -ENOMEM: No memory available
- * -EFAULT: Internal error
- */
+/** ipa_wwan_probe() - Network probe function */
 static int ipa_wwan_probe(struct platform_device *pdev)
 {
 	int ret;
