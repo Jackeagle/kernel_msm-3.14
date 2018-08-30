@@ -68,7 +68,6 @@ static DECLARE_WORK(ipa_tx_wakequeue_work, ipa_wake_tx_queue);
  * @outstanding_low: number of outstanding packets which shall cause
  * @ch_id: channel id
  * @lock: spinlock for mutual exclusion
- * @device_active: true if device is active
  *
  * WWAN private - holds all relevant info about WWAN driver
  */
@@ -78,7 +77,6 @@ struct ipa_wwan_private {
 	int outstanding_high_ctl;
 	int outstanding_high;
 	int outstanding_low;
-	bool device_active;
 	struct napi_struct napi;
 };
 
@@ -111,8 +109,6 @@ static int ipa_wwan_open(struct net_device *dev)
 {
 	struct ipa_wwan_private *wwan_ptr = netdev_priv(dev);
 
-	ipa_debug("[%s] wwan_open()\n", dev->name);
-	wwan_ptr->device_active = true;
 	napi_enable(&wwan_ptr->napi);
 	netif_start_queue(dev);
 
@@ -130,10 +126,6 @@ static int ipa_wwan_open(struct net_device *dev)
  */
 static int ipa_wwan_stop(struct net_device *dev)
 {
-	struct ipa_wwan_private *wwan_ptr = netdev_priv(dev);
-
-	ipa_debug("%s: stop %s\n", __func__, dev->name);
-	wwan_ptr->device_active = false;
 	netif_stop_queue(dev);
 
 	return 0;
