@@ -281,12 +281,14 @@ static int handle_ingress_format(struct net_device *dev,
 				  struct rmnet_ioctl_extended_s *in)
 {
 	struct ipa_sys_connect_params *wan_cfg;
+	struct ipa_ep_cfg *ep_cfg;
 	int ret;
 
 	wan_cfg = &rmnet_ipa_ctx->ipa_to_apps_ep_cfg;
+	ep_cfg = &wan_cfg->ipa_ep_cfg;
 
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_CHECKSUM)
-		wan_cfg->ipa_ep_cfg.cfg.cs_offload_en = IPA_CS_OFFLOAD_DL;
+		ep_cfg->cfg.cs_offload_en = IPA_CS_OFFLOAD_DL;
 
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA) {
 		u32 agg_size = in->u.ingress_format.agg_size;
@@ -296,20 +298,20 @@ static int handle_ingress_format(struct net_device *dev,
 		if (ret)
 			return ret;
 
-		wan_cfg->ipa_ep_cfg.aggr.aggr_byte_limit = agg_size;
-		wan_cfg->ipa_ep_cfg.aggr.aggr_pkt_limit = agg_count;
+		ep_cfg->aggr.aggr_byte_limit = agg_size;
+		ep_cfg->aggr.aggr_pkt_limit = agg_count;
 	}
 
-	wan_cfg->ipa_ep_cfg.hdr.hdr_len = sizeof(struct rmnet_map_header_s);
-	wan_cfg->ipa_ep_cfg.hdr.hdr_ofst_metadata_valid = 1;
-	wan_cfg->ipa_ep_cfg.hdr.hdr_ofst_metadata = 1;
-	wan_cfg->ipa_ep_cfg.hdr.hdr_ofst_pkt_size_valid = 1;
-	wan_cfg->ipa_ep_cfg.hdr.hdr_ofst_pkt_size = 2;
+	ep_cfg->hdr.hdr_len = sizeof(struct rmnet_map_header_s);
+	ep_cfg->hdr.hdr_ofst_metadata_valid = 1;
+	ep_cfg->hdr.hdr_ofst_metadata = 1;
+	ep_cfg->hdr.hdr_ofst_pkt_size_valid = 1;
+	ep_cfg->hdr.hdr_ofst_pkt_size = 2;
 
-	wan_cfg->ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad_valid = true;
-	wan_cfg->ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad = IPA_HDR_PAD;
-	wan_cfg->ipa_ep_cfg.hdr_ext.hdr_payload_len_inc_padding = true;
-	wan_cfg->ipa_ep_cfg.metadata_mask.metadata_mask = 0xFF000000;
+	ep_cfg->hdr_ext.hdr_total_len_or_pad_valid = true;
+	ep_cfg->hdr_ext.hdr_total_len_or_pad = IPA_HDR_PAD;
+	ep_cfg->hdr_ext.hdr_payload_len_inc_padding = true;
+	ep_cfg->metadata_mask.metadata_mask = 0xFF000000;
 
 	wan_cfg->client = IPA_CLIENT_APPS_WAN_CONS;
 	wan_cfg->notify = apps_ipa_packet_receive_notify;
@@ -338,36 +340,38 @@ static int handle_egress_format(struct net_device *dev,
 				 struct rmnet_ioctl_extended_s *e)
 {
 	struct ipa_sys_connect_params *wan_cfg;
+	struct ipa_ep_cfg *ep_cfg;
 	int ret;
 
 	wan_cfg = &rmnet_ipa_ctx->apps_to_ipa_ep_cfg;
+	ep_cfg = &wan_cfg->ipa_ep_cfg;
 
-	wan_cfg->ipa_ep_cfg.hdr.hdr_len = sizeof(struct rmnet_map_header_s);
+	ep_cfg->hdr.hdr_len = sizeof(struct rmnet_map_header_s);
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_CHECKSUM) {
-		wan_cfg->ipa_ep_cfg.hdr.hdr_len += sizeof(u32);
-		wan_cfg->ipa_ep_cfg.cfg.cs_offload_en = IPA_CS_OFFLOAD_UL;
-		wan_cfg->ipa_ep_cfg.cfg.cs_metadata_hdr_offset = 1;
+		ep_cfg->hdr.hdr_len += sizeof(u32);
+		ep_cfg->cfg.cs_offload_en = IPA_CS_OFFLOAD_UL;
+		ep_cfg->cfg.cs_metadata_hdr_offset = 1;
 	}
 
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_AGGREGATION) {
-		wan_cfg->ipa_ep_cfg.aggr.aggr_en = IPA_ENABLE_DEAGGR;
-		wan_cfg->ipa_ep_cfg.aggr.aggr = IPA_QCMAP;
+		ep_cfg->aggr.aggr_en = IPA_ENABLE_DEAGGR;
+		ep_cfg->aggr.aggr = IPA_QCMAP;
 
-		wan_cfg->ipa_ep_cfg.hdr.hdr_ofst_pkt_size = 2;
+		ep_cfg->hdr.hdr_ofst_pkt_size = 2;
 
-		wan_cfg->ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad_valid = true;
-		wan_cfg->ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad = IPA_HDR_PAD;
-		wan_cfg->ipa_ep_cfg.hdr_ext.hdr_pad_to_alignment = 2;
-		wan_cfg->ipa_ep_cfg.hdr_ext.hdr_payload_len_inc_padding = true;
+		ep_cfg->hdr_ext.hdr_total_len_or_pad_valid = true;
+		ep_cfg->hdr_ext.hdr_total_len_or_pad = IPA_HDR_PAD;
+		ep_cfg->hdr_ext.hdr_pad_to_alignment = 2;
+		ep_cfg->hdr_ext.hdr_payload_len_inc_padding = true;
 	} else {
-		wan_cfg->ipa_ep_cfg.aggr.aggr_en = IPA_BYPASS_AGGR;
+		ep_cfg->aggr.aggr_en = IPA_BYPASS_AGGR;
 	}
 
-	wan_cfg->ipa_ep_cfg.hdr.hdr_ofst_metadata_valid = 1;
-	wan_cfg->ipa_ep_cfg.hdr.hdr_ofst_metadata = 0;	/* Want offset at 0! */
+	ep_cfg->hdr.hdr_ofst_metadata_valid = 1;
+	ep_cfg->hdr.hdr_ofst_metadata = 0;	/* Want offset at 0! */
 
-	wan_cfg->ipa_ep_cfg.mode.dst = IPA_CLIENT_APPS_WAN_PROD;
-	wan_cfg->ipa_ep_cfg.mode.mode = IPA_BASIC;
+	ep_cfg->mode.dst = IPA_CLIENT_APPS_WAN_PROD;
+	ep_cfg->mode.mode = IPA_BASIC;
 
 	wan_cfg->client = IPA_CLIENT_APPS_WAN_PROD;
 	wan_cfg->notify = apps_ipa_tx_complete_notify;
