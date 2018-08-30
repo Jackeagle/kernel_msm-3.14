@@ -48,9 +48,6 @@
 
 static int ipa_rmnet_poll(struct napi_struct *napi, int budget);
 
-static void ipa_wake_tx_queue(struct work_struct *work);
-static DECLARE_WORK(ipa_tx_wakequeue_work, ipa_wake_tx_queue);
-
 /** struct ipa_wwan_private - WWAN private data
  * @net: network interface struct implemented by this driver
  * @stats: iface statistics
@@ -540,18 +537,6 @@ static void ipa_wwan_setup(struct net_device *dev)
 	dev->watchdog_timeo = msecs_to_jiffies(10 * MSEC_PER_SEC);
 }
 
-static void ipa_wake_tx_queue(struct work_struct *work)
-{
-	if (rmnet_ipa_ctx->dev) {
-		struct netdev_queue *queue;
-
-		queue = netdev_get_tx_queue(rmnet_ipa_ctx->dev, 0);
-		__netif_tx_lock_bh(queue);
-		netif_wake_queue(rmnet_ipa_ctx->dev);
-		__netif_tx_unlock_bh(queue);
-	}
-}
-
 /** ipa_wwan_probe() - Initialized the module and registers as a
  * network interface to the network stack
  *
@@ -654,7 +639,6 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 	mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
 	unregister_netdev(rmnet_ipa_ctx->dev);
 
-	cancel_work_sync(&ipa_tx_wakequeue_work);
 	if (rmnet_ipa_ctx->dev)
 		free_netdev(rmnet_ipa_ctx->dev);
 	rmnet_ipa_ctx->dev = NULL;
