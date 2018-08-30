@@ -276,6 +276,7 @@ static void apps_ipa_packet_receive_notify(void *priv, enum ipa_dp_evt_type evt,
 	}
 }
 
+/** handle_egress_format() - Ingress data format configuration */
 static int handle_ingress_format(struct net_device *dev,
 				  struct rmnet_ioctl_extended_s *in)
 {
@@ -332,14 +333,7 @@ static int handle_ingress_format(struct net_device *dev,
 	return 0;
 }
 
-/** handle_egress_format() - Egress data format configuration
- *
- * Setup IPA egress system pipe and Configure:
- *	header handling, checksum, de-aggregation and fifo size
- *
- * @dev: network device
- * @e: egress configuration
- */
+/** handle_egress_format() - Egress data format configuration */
 static int handle_egress_format(struct net_device *dev,
 				 struct rmnet_ioctl_extended_s *e)
 {
@@ -400,6 +394,7 @@ static int handle_egress_format(struct net_device *dev,
 	return 0;
 }
 
+/** ipa_wwan_add_mux_channel() - add a mux_id */
 static int ipa_wwan_add_mux_channel(struct rmnet_ioctl_extended_s *edata)
 {
 	u32 mux_id = edata->u.rmnet_mux_val.mux_id;
@@ -425,6 +420,7 @@ out:
 	return ret;
 }
 
+/** ipa_wwan_ioctl_extended() - rmnet extended I/O control */
 static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 {
 	struct rmnet_ioctl_extended_s edata = { };
@@ -496,20 +492,7 @@ copy_out:
 	return copy_to_user(data, &edata, size) ? -EFAULT : 0;
 }
 
-/** ipa_wwan_ioctl() - I/O control for wwan network driver.
- *
- * @dev: network device
- * @ifr: ignored
- * @cmd: cmd to be excecuded. can be one of the following:
- * IPA_WWAN_IOCTL_OPEN - Open the network interface
- * IPA_WWAN_IOCTL_CLOSE - Close the network interface
- *
- * Return codes:
- * 0: success
- * NETDEV_TX_BUSY: Error while transmitting the skb. Try again
- * later
- * -EFAULT: Error while transmitting the skb
- */
+/** ipa_wwan_ioctl() - I/O control for wwan network driver */
 static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 {
 	struct rmnet_ioctl_data_s ioctl_data = { };
@@ -563,13 +546,7 @@ static const struct net_device_ops ipa_wwan_ops_ip = {
 	.ndo_do_ioctl	= ipa_wwan_ioctl,
 };
 
-/** wwan_setup() - Setups the wwan network driver.
- *
- * @dev: network device
- *
- * Return codes:
- * None
- */
+/** wwan_setup() - Setup the wwan network driver */
 static void ipa_wwan_setup(struct net_device *dev)
 {
 	dev->netdev_ops = &ipa_wwan_ops_ip;
