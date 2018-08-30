@@ -87,11 +87,11 @@ struct rmnet_ipa_context {
 	struct mutex mux_id_mutex;		/* protects mux_id[] */
 	u32 mux_id_count;
 	u32 mux_id[MAX_NUM_OF_MUX_CHANNEL];
-	u32 apps_to_ipa_hdl;
-	u32 ipa_to_apps_hdl;
+	u32 wan_prod_hdl;
+	u32 wan_cons_hdl;
 	struct mutex pipe_setup_mutex;		/* pipe setup/teardown */
-	struct ipa_sys_connect_params apps_to_ipa_ep_cfg;
-	struct ipa_sys_connect_params ipa_to_apps_ep_cfg;
+	struct ipa_sys_connect_params wan_prod_cfg;
+	struct ipa_sys_connect_params wan_cons_cfg;
 };
 
 static bool initialized;	/* Avoid duplicate initialization */
@@ -280,7 +280,7 @@ static int handle_ingress_format(struct net_device *dev,
 	struct ipa_ep_cfg *ep_cfg;
 	int ret;
 
-	wan_cfg = &rmnet_ipa_ctx->ipa_to_apps_ep_cfg;
+	wan_cfg = &rmnet_ipa_ctx->wan_cons_cfg;
 	ep_cfg = &wan_cfg->ipa_ep_cfg;
 
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_CHECKSUM)
@@ -324,7 +324,7 @@ static int handle_ingress_format(struct net_device *dev,
 
 		return ret;
 	}
-	rmnet_ipa_ctx->ipa_to_apps_hdl = ret;
+	rmnet_ipa_ctx->wan_cons_hdl = ret;
 
 	mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
@@ -339,7 +339,7 @@ static int handle_egress_format(struct net_device *dev,
 	struct ipa_ep_cfg *ep_cfg;
 	int ret;
 
-	wan_cfg = &rmnet_ipa_ctx->apps_to_ipa_ep_cfg;
+	wan_cfg = &rmnet_ipa_ctx->wan_prod_cfg;
 	ep_cfg = &wan_cfg->ipa_ep_cfg;
 
 	ep_cfg->hdr.hdr_len = sizeof(struct rmnet_map_header_s);
@@ -382,7 +382,7 @@ static int handle_egress_format(struct net_device *dev,
 
 		return ret;
 	}
-	rmnet_ipa_ctx->apps_to_ipa_hdl = ret;
+	rmnet_ipa_ctx->wan_prod_hdl = ret;
 
 	mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
@@ -591,8 +591,8 @@ static int ipa_wwan_probe(struct platform_device *pdev)
 	mutex_init(&rmnet_ipa_ctx->mux_id_mutex);
 
 	/* Mark client handles bad until we initialize them */
-	rmnet_ipa_ctx->apps_to_ipa_hdl = IPA_CLNT_HDL_BAD;
-	rmnet_ipa_ctx->ipa_to_apps_hdl = IPA_CLNT_HDL_BAD;
+	rmnet_ipa_ctx->wan_prod_hdl = IPA_CLNT_HDL_BAD;
+	rmnet_ipa_ctx->wan_cons_hdl = IPA_CLNT_HDL_BAD;
 
 	ret = ipa_init_q6_smem();
 	if (ret) {
@@ -657,14 +657,14 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 
 	ipa_info("rmnet_ipa started deinitialization\n");
 	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
-	if (rmnet_ipa_ctx->ipa_to_apps_hdl != IPA_CLNT_HDL_BAD) {
-		ipa_teardown_sys_pipe(rmnet_ipa_ctx->ipa_to_apps_hdl);
-		rmnet_ipa_ctx->ipa_to_apps_hdl = IPA_CLNT_HDL_BAD;
+	if (rmnet_ipa_ctx->wan_cons_hdl != IPA_CLNT_HDL_BAD) {
+		ipa_teardown_sys_pipe(rmnet_ipa_ctx->wan_cons_hdl);
+		rmnet_ipa_ctx->wan_cons_hdl = IPA_CLNT_HDL_BAD;
 	}
 
-	if (rmnet_ipa_ctx->apps_to_ipa_hdl != IPA_CLNT_HDL_BAD) {
-		ipa_teardown_sys_pipe(rmnet_ipa_ctx->apps_to_ipa_hdl);
-		rmnet_ipa_ctx->apps_to_ipa_hdl = IPA_CLNT_HDL_BAD;
+	if (rmnet_ipa_ctx->wan_prod_hdl != IPA_CLNT_HDL_BAD) {
+		ipa_teardown_sys_pipe(rmnet_ipa_ctx->wan_prod_hdl);
+		rmnet_ipa_ctx->wan_prod_hdl = IPA_CLNT_HDL_BAD;
 	}
 
 	netif_napi_del(&wwan_ptr->napi);
@@ -826,7 +826,7 @@ static int ipa_rmnet_poll(struct napi_struct *napi, int budget)
 {
 	int rcvd_pkts;
 
-	rcvd_pkts = ipa_rx_poll(rmnet_ipa_ctx->ipa_to_apps_hdl, budget);
+	rcvd_pkts = ipa_rx_poll(rmnet_ipa_ctx->wan_cons_hdl, budget);
 	ipa_debug_low("rcvd packets: %d\n", rcvd_pkts);
 
 	return rcvd_pkts;
