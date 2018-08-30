@@ -279,19 +279,17 @@ static void apps_ipa_packet_receive_notify(void *priv, enum ipa_dp_evt_type evt,
 static int handle_ingress_format(struct net_device *dev,
 				  struct rmnet_ioctl_extended_s *in)
 {
-	int ret;
 	struct ipa_sys_connect_params *wan_cfg;
+	int ret;
 
-	ipa_debug("Get RMNET_IOCTL_SET_INGRESS_DATA_FORMAT\n");
 	wan_cfg = &rmnet_ipa_ctx->ipa_to_apps_ep_cfg;
+
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_CHECKSUM)
 		wan_cfg->ipa_ep_cfg.cfg.cs_offload_en = IPA_CS_OFFLOAD_DL;
 
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA) {
 		u32 agg_size = in->u.ingress_format.agg_size;
 		u32 agg_count = in->u.ingress_format.agg_count;
-
-		ipa_debug("get AGG size %d count %d\n", agg_size, agg_count);
 
 		ret = ipa_disable_apps_wan_cons_deaggr(agg_size, agg_count);
 		if (ret)
@@ -323,7 +321,6 @@ static int handle_ingress_format(struct net_device *dev,
 
 	ret = ipa_setup_sys_pipe(wan_cfg);
 	if (ret < 0) {
-		ipa_err("failed to configure ingress\n");
 		mutex_unlock(&rmnet_ipa_ctx->pipe_handle_guard);
 
 		return ret;
@@ -346,11 +343,11 @@ static int handle_ingress_format(struct net_device *dev,
 static int handle_egress_format(struct net_device *dev,
 				 struct rmnet_ioctl_extended_s *e)
 {
-	int rc;
 	struct ipa_sys_connect_params *wan_cfg;
+	int ret;
 
-	ipa_debug("get RMNET_IOCTL_SET_EGRESS_DATA_FORMAT\n");
 	wan_cfg = &rmnet_ipa_ctx->apps_to_ipa_ep_cfg;
+
 	wan_cfg->ipa_ep_cfg.hdr.hdr_len = sizeof(struct rmnet_map_header_s);
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_CHECKSUM) {
 		wan_cfg->ipa_ep_cfg.hdr.hdr_len += sizeof(u32);
@@ -359,8 +356,6 @@ static int handle_egress_format(struct net_device *dev,
 	}
 
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_AGGREGATION) {
-		ipa_err("WAN UL Aggregation enabled\n");
-
 		wan_cfg->ipa_ep_cfg.aggr.aggr_en = IPA_ENABLE_DEAGGR;
 		wan_cfg->ipa_ep_cfg.aggr.aggr = IPA_QCMAP;
 
@@ -371,13 +366,11 @@ static int handle_egress_format(struct net_device *dev,
 		wan_cfg->ipa_ep_cfg.hdr_ext.hdr_pad_to_alignment = 2;
 		wan_cfg->ipa_ep_cfg.hdr_ext.hdr_payload_len_inc_padding = true;
 	} else {
-		ipa_debug("WAN UL Aggregation disabled\n");
 		wan_cfg->ipa_ep_cfg.aggr.aggr_en = IPA_BYPASS_AGGR;
 	}
 
 	wan_cfg->ipa_ep_cfg.hdr.hdr_ofst_metadata_valid = 1;
-	/* modem want offset at 0! */
-	wan_cfg->ipa_ep_cfg.hdr.hdr_ofst_metadata = 0;
+	wan_cfg->ipa_ep_cfg.hdr.hdr_ofst_metadata = 0;	/* Want offset at 0! */
 
 	wan_cfg->ipa_ep_cfg.mode.dst = IPA_CLIENT_APPS_WAN_PROD;
 	wan_cfg->ipa_ep_cfg.mode.mode = IPA_BASIC;
@@ -389,23 +382,19 @@ static int handle_egress_format(struct net_device *dev,
 
 	mutex_lock(&rmnet_ipa_ctx->pipe_handle_guard);
 
-	rc = ipa_setup_sys_pipe(wan_cfg);
-	if (rc < 0) {
-		ipa_err("failed to config egress endpoint\n");
+	ret = ipa_setup_sys_pipe(wan_cfg);
+	if (ret < 0) {
 		mutex_unlock(&rmnet_ipa_ctx->pipe_handle_guard);
 
-		return rc;
+		return ret;
 	}
-	rmnet_ipa_ctx->apps_to_ipa_hdl = rc;
+	rmnet_ipa_ctx->apps_to_ipa_hdl = ret;
 
 	mutex_unlock(&rmnet_ipa_ctx->pipe_handle_guard);
 
-	if (rmnet_ipa_ctx->num_q6_rules != 0) {
+	if (rmnet_ipa_ctx->num_q6_rules)
 		rmnet_ipa_ctx->a7_ul_flt_set = true;
-	} else {
-		/* wait Q6 UL filter rules*/
-		ipa_debug("no UL-rules\n");
-	}
+
 	rmnet_ipa_ctx->egress_set = true;
 
 	return 0;
@@ -444,7 +433,7 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 	if (copy_from_user(&edata, data, size))
 		return -EFAULT;
 
-	ipa_debug("RMNET_IOCTL_EXTENDED 0x%08x\n", edata.extended_ioctl);
+	ipa_debug("extended cmd 0x%08x\n", edata.extended_ioctl);
 
 	switch (edata.extended_ioctl) {
 	case RMNET_IOCTL_GET_SUPPORTED_FEATURES:	/* Get features */
@@ -500,8 +489,6 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 		return -ENOTSUPP;
 
 	default:
-		ipa_err("[%s] unrecognized extended cmd[%d]",
-			dev->name, edata.extended_ioctl);
 		return -EINVAL;
 	}
 
@@ -529,7 +516,8 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	void __user *data = ifr->ifr_ifru.ifru_data;
 	size_t size = sizeof(ioctl_data);
 
-	ipa_debug("rmnet_ipa got ioctl number 0x%08x", cmd);
+	ipa_debug("cmd 0x%08x", cmd);
+
 	switch (cmd) {
 	/* These features are implied; alternatives are not supported */
 	case RMNET_IOCTL_SET_LLP_IP:		/* RAW IP protocol */
@@ -561,8 +549,6 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 		return ipa_wwan_ioctl_extended(dev, data);
 
 	default:
-		ipa_err("[%s] unsupported cmd[%d]", dev->name, cmd);
-
 		return -EINVAL;
 	}
 
