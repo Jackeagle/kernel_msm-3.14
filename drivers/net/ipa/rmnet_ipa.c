@@ -93,7 +93,7 @@ struct rmnet_ipa_context {
 	bool a7_ul_flt_set;
 	u32 apps_to_ipa_hdl;
 	u32 ipa_to_apps_hdl;
-	struct mutex pipe_handle_guard;		/* pipe setup/teardown */
+	struct mutex pipe_setup_mutex;		/* pipe setup/teardown */
 	struct ipa_sys_connect_params apps_to_ipa_ep_cfg;
 	struct ipa_sys_connect_params ipa_to_apps_ep_cfg;
 };
@@ -320,17 +320,17 @@ static int handle_ingress_format(struct net_device *dev,
 	wan_cfg->napi_enabled = true;
 	wan_cfg->fifo_count = IPA_APPS_WWAN_CONS_RING_COUNT;
 
-	mutex_lock(&rmnet_ipa_ctx->pipe_handle_guard);
+	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
 	ret = ipa_setup_sys_pipe(wan_cfg);
 	if (ret < 0) {
-		mutex_unlock(&rmnet_ipa_ctx->pipe_handle_guard);
+		mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
 		return ret;
 	}
 	rmnet_ipa_ctx->ipa_to_apps_hdl = ret;
 
-	mutex_unlock(&rmnet_ipa_ctx->pipe_handle_guard);
+	mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
 	return 0;
 }
@@ -378,17 +378,17 @@ static int handle_egress_format(struct net_device *dev,
 	wan_cfg->fifo_count = IPA_APPS_WWAN_PROD_RING_COUNT;
 	wan_cfg->priv = dev;
 
-	mutex_lock(&rmnet_ipa_ctx->pipe_handle_guard);
+	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
 	ret = ipa_setup_sys_pipe(wan_cfg);
 	if (ret < 0) {
-		mutex_unlock(&rmnet_ipa_ctx->pipe_handle_guard);
+		mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
 		return ret;
 	}
 	rmnet_ipa_ctx->apps_to_ipa_hdl = ret;
 
-	mutex_unlock(&rmnet_ipa_ctx->pipe_handle_guard);
+	mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
 	if (rmnet_ipa_ctx->num_q6_rules)
 		rmnet_ipa_ctx->a7_ul_flt_set = true;
@@ -596,8 +596,7 @@ static int ipa_wwan_probe(struct platform_device *pdev)
 	struct net_device *dev;
 	struct ipa_wwan_private *wwan_ptr;
 
-
-	mutex_init(&rmnet_ipa_ctx->pipe_handle_guard);
+	mutex_init(&rmnet_ipa_ctx->pipe_setup_mutex);
 	mutex_init(&rmnet_ipa_ctx->mux_id_mutex);
 
 	/* Mark client handles bad until we initialize them */
@@ -666,7 +665,7 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 	struct ipa_wwan_private *wwan_ptr = netdev_priv(rmnet_ipa_ctx->dev);
 
 	ipa_info("rmnet_ipa started deinitialization\n");
-	mutex_lock(&rmnet_ipa_ctx->pipe_handle_guard);
+	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
 	if (rmnet_ipa_ctx->ipa_to_apps_hdl != IPA_CLNT_HDL_BAD) {
 		ipa_teardown_sys_pipe(rmnet_ipa_ctx->ipa_to_apps_hdl);
 		rmnet_ipa_ctx->ipa_to_apps_hdl = IPA_CLNT_HDL_BAD;
@@ -678,7 +677,7 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 	}
 
 	netif_napi_del(&wwan_ptr->napi);
-	mutex_unlock(&rmnet_ipa_ctx->pipe_handle_guard);
+	mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
 	unregister_netdev(rmnet_ipa_ctx->dev);
 
 	cancel_work_sync(&ipa_tx_wakequeue_work);
@@ -687,7 +686,7 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 	rmnet_ipa_ctx->dev = NULL;
 
 	mutex_destroy(&rmnet_ipa_ctx->mux_id_mutex);
-	mutex_destroy(&rmnet_ipa_ctx->pipe_handle_guard);
+	mutex_destroy(&rmnet_ipa_ctx->pipe_setup_mutex);
 
 	initialized = false;
 	ipa_info("rmnet_ipa completed deinitialization\n");
