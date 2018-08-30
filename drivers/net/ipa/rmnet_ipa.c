@@ -84,18 +84,18 @@ struct ipa_wwan_private {
 
 struct rmnet_ipa_context {
 	struct net_device *dev;
-	struct ipa_sys_connect_params apps_to_ipa_ep_cfg;
-	struct ipa_sys_connect_params ipa_to_apps_ep_cfg;
+	struct mutex mux_id_mutex;		/* protects mux_id[] */
+	u32 mux_id_count;
 	u32 mux_id[MAX_NUM_OF_MUX_CHANNEL];
 	int num_q6_rules;
 	int old_num_q6_rules;
-	int rmnet_count;	/* updates protected by add_mux_channel_lock */
 	bool egress_set;
 	bool a7_ul_flt_set;
 	u32 apps_to_ipa_hdl;
 	u32 ipa_to_apps_hdl;
 	struct mutex pipe_handle_guard;		/* pipe setup/teardown */
-	struct mutex add_mux_channel_lock;	/* updates to mux_id[] */
+	struct ipa_sys_connect_params apps_to_ipa_ep_cfg;
+	struct ipa_sys_connect_params ipa_to_apps_ep_cfg;
 };
 
 static bool initialized;	/* Avoid duplicate initialization */
@@ -401,24 +401,24 @@ static int handle_egress_format(struct net_device *dev,
 /** ipa_wwan_add_mux_channel() - add a mux_id */
 static int ipa_wwan_add_mux_channel(u32 mux_id)
 {
-	int mux_index;
+	u32 i;
 	int ret = -EFAULT;
 
-	mutex_lock(&rmnet_ipa_ctx->add_mux_channel_lock);
+	mutex_lock(&rmnet_ipa_ctx->mux_id_mutex);
 
-	if (rmnet_ipa_ctx->rmnet_count >= MAX_NUM_OF_MUX_CHANNEL)
+	if (rmnet_ipa_ctx->mux_id_count >= MAX_NUM_OF_MUX_CHANNEL)
 		goto out;
 
 	ret = 0;
-	for (mux_index = 0; mux_index < rmnet_ipa_ctx->rmnet_count; mux_index++)
-		if (mux_id == rmnet_ipa_ctx->mux_id[mux_index])
+	for (i = 0; i < rmnet_ipa_ctx->mux_id_count; i++)
+		if (mux_id == rmnet_ipa_ctx->mux_id[i])
 			break;
 
 	/* Record the mux_id if it hasn't already been seen */
-	if (mux_index == rmnet_ipa_ctx->rmnet_count)
-		rmnet_ipa_ctx->mux_id[rmnet_ipa_ctx->rmnet_count++] = mux_id;
+	if (i == rmnet_ipa_ctx->mux_id_count)
+		rmnet_ipa_ctx->mux_id[rmnet_ipa_ctx->mux_id_count++] = mux_id;
 out:
-	mutex_unlock(&rmnet_ipa_ctx->add_mux_channel_lock);
+	mutex_unlock(&rmnet_ipa_ctx->mux_id_mutex);
 
 	return ret;
 }
@@ -598,7 +598,7 @@ static int ipa_wwan_probe(struct platform_device *pdev)
 
 
 	mutex_init(&rmnet_ipa_ctx->pipe_handle_guard);
-	mutex_init(&rmnet_ipa_ctx->add_mux_channel_lock);
+	mutex_init(&rmnet_ipa_ctx->mux_id_mutex);
 
 	/* Mark client handles bad until we initialize them */
 	rmnet_ipa_ctx->apps_to_ipa_hdl = IPA_CLNT_HDL_BAD;
@@ -686,7 +686,7 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 		free_netdev(rmnet_ipa_ctx->dev);
 	rmnet_ipa_ctx->dev = NULL;
 
-	mutex_destroy(&rmnet_ipa_ctx->add_mux_channel_lock);
+	mutex_destroy(&rmnet_ipa_ctx->mux_id_mutex);
 	mutex_destroy(&rmnet_ipa_ctx->pipe_handle_guard);
 
 	initialized = false;
