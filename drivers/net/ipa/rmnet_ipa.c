@@ -28,17 +28,17 @@
 #include "ipa_qmi.h"
 #include "ipa_i.h"
 
-#define WWAN_METADATA_SHFT 24
-#define WWAN_METADATA_MASK 0xFF000000
-#define WWAN_DATA_LEN 2000
-#define IPA_RM_INACTIVITY_TIMER 100 /* IPA_RM */
-#define HEADROOM_FOR_QMAP   8 /* for mux header */
-#define TAILROOM	    0 /* for padding by mux layer */
-#define MAX_NUM_OF_MUX_CHANNEL	10 /* max mux channels */
+#define WWAN_METADATA_SHFT	24
+#define WWAN_METADATA_MASK	0xff000000
+#define WWAN_DATA_LEN		2000
+#define IPA_RM_INACTIVITY_TIMER	100 /* IPA_RM */
+#define HEADROOM_FOR_QMAP	8 /* for mux header */
+#define TAILROOM		0 /* for padding by mux layer */
+#define MUX_CHANNEL_MAX		10 /* max mux channels */
 #define UL_FILTER_RULE_HANDLE_START 69
-#define DEFAULT_OUTSTANDING_HIGH 128
-#define DEFAULT_OUTSTANDING_HIGH_CTL (DEFAULT_OUTSTANDING_HIGH + 32)
-#define DEFAULT_OUTSTANDING_LOW 64
+#define DEFAULT_OUTSTANDING_HIGH	128
+#define DEFAULT_OUTSTANDING_HIGH_CTL	(DEFAULT_OUTSTANDING_HIGH + 32)
+#define DEFAULT_OUTSTANDING_LOW		64
 
 #define IPA_WWAN_DEV_NAME "rmnet_ipa%d"
 #define IPA_UPSTEAM_WLAN_IFACE_NAME "wlan0"
@@ -84,7 +84,7 @@ struct rmnet_ipa_context {
 	struct net_device *dev;
 	struct mutex mux_id_mutex;		/* protects mux_id[] */
 	u32 mux_id_count;
-	u32 mux_id[MAX_NUM_OF_MUX_CHANNEL];
+	u32 mux_id[MUX_CHANNEL_MAX];
 	u32 wan_prod_hdl;
 	u32 wan_cons_hdl;
 	struct mutex pipe_setup_mutex;		/* pipe setup/teardown */
@@ -389,7 +389,7 @@ static int ipa_wwan_add_mux_channel(u32 mux_id)
 
 	mutex_lock(&rmnet_ipa_ctx->mux_id_mutex);
 
-	if (rmnet_ipa_ctx->mux_id_count >= MAX_NUM_OF_MUX_CHANNEL)
+	if (rmnet_ipa_ctx->mux_id_count >= MUX_CHANNEL_MAX)
 		goto out;
 
 	ret = 0;
