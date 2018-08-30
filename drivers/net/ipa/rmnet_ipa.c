@@ -87,9 +87,7 @@ struct rmnet_ipa_context {
 	struct mutex mux_id_mutex;		/* protects mux_id[] */
 	u32 mux_id_count;
 	u32 mux_id[MAX_NUM_OF_MUX_CHANNEL];
-	int num_q6_rules;
 	bool egress_set;
-	bool a7_ul_flt_set;
 	u32 apps_to_ipa_hdl;
 	u32 ipa_to_apps_hdl;
 	struct mutex pipe_setup_mutex;		/* pipe setup/teardown */
@@ -388,9 +386,6 @@ static int handle_egress_format(struct net_device *dev,
 	rmnet_ipa_ctx->apps_to_ipa_hdl = ret;
 
 	mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
-
-	if (rmnet_ipa_ctx->num_q6_rules)
-		rmnet_ipa_ctx->a7_ul_flt_set = true;
 
 	rmnet_ipa_ctx->egress_set = true;
 
