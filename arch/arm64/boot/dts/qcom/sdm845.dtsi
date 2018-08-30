@@ -988,7 +988,6 @@
 			compatible = "qcom,ipa";
 
 			qcom,ipa-hw-ver = <QCOM_IPA_HW_VER_v3_5_1>;
-			qcom,ee = <0>;
 
 			reg = <0x1e00000 0x34000>,
 			      <0x1e04000 0x2c000>;
