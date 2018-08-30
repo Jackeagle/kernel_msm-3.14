@@ -136,9 +136,9 @@ ipareg_construct_endp_init_hdr_metadata_mask_n(enum ipahal_reg reg,
 static bool cs_offload_en_valid(u8 cs_offload_en, enum ipahal_reg reg)
 {
 	switch (cs_offload_en) {
-	case IPA_DISABLE_CS_OFFLOAD:
-	case IPA_ENABLE_CS_OFFLOAD_UL:
-	case IPA_ENABLE_CS_OFFLOAD_DL:
+	case IPA_CS_OFFLOAD_NONE:
+	case IPA_CS_OFFLOAD_UL:
+	case IPA_CS_OFFLOAD_DL:
 		return true;
 	default:
 		return false;

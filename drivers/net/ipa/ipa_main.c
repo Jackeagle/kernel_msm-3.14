@@ -505,7 +505,7 @@ static int setup_apps_lan_cons_pipe(void)
 	sys_in.ipa_ep_cfg.hdr_ext.hdr_payload_len_inc_padding = false;
 	sys_in.ipa_ep_cfg.hdr_ext.hdr_pad_to_alignment = 2;
 
-	sys_in.ipa_ep_cfg.cfg.cs_offload_en = IPA_ENABLE_CS_OFFLOAD_DL;
+	sys_in.ipa_ep_cfg.cfg.cs_offload_en = IPA_CS_OFFLOAD_DL;
 
 	return ipa_setup_sys_pipe(&sys_in);
 }

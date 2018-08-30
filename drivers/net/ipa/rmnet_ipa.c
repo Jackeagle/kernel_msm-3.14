@@ -285,8 +285,7 @@ static int handle_ingress_format(struct net_device *dev,
 	ipa_debug("Get RMNET_IOCTL_SET_INGRESS_DATA_FORMAT\n");
 	wan_cfg = &rmnet_ipa_ctx->ipa_to_apps_ep_cfg;
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_CHECKSUM)
-		wan_cfg->ipa_ep_cfg.cfg.cs_offload_en =
-		   IPA_ENABLE_CS_OFFLOAD_DL;
+		wan_cfg->ipa_ep_cfg.cfg.cs_offload_en = IPA_CS_OFFLOAD_DL;
 
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA) {
 		u32 agg_size = in->u.ingress_format.agg_size;
@@ -355,8 +354,7 @@ static int handle_egress_format(struct net_device *dev,
 	wan_cfg->ipa_ep_cfg.hdr.hdr_len = sizeof(struct rmnet_map_header_s);
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_CHECKSUM) {
 		wan_cfg->ipa_ep_cfg.hdr.hdr_len += sizeof(u32);
-		wan_cfg->ipa_ep_cfg.cfg.cs_offload_en =
-			IPA_ENABLE_CS_OFFLOAD_UL;
+		wan_cfg->ipa_ep_cfg.cfg.cs_offload_en = IPA_CS_OFFLOAD_UL;
 		wan_cfg->ipa_ep_cfg.cfg.cs_metadata_hdr_offset = 1;
 	}
 
