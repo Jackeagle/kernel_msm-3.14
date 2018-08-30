@@ -224,7 +224,7 @@ long gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props);
  * @Return gsi_status
  */
 int gsi_write_channel_scratch(struct gsi *gsi, unsigned long chan_id,
-		u32 tlv_size);
+			      u32 tlv_size);
 
 /** gsi_start_channel - Peripheral should call this function to
  * start a channel i.e put into running state
@@ -293,7 +293,7 @@ bool gsi_is_channel_empty(struct gsi *gsi, unsigned long chan_id);
  * @Return gsi_status
  */
 int gsi_get_channel_cfg(struct gsi *gsi, unsigned long chan_id,
-		struct gsi_chan_props *props);
+			struct gsi_chan_props *props);
 
 /** gsi_set_channel_cfg - This function applies the supplied config
  * to the specified channel
@@ -307,7 +307,7 @@ int gsi_get_channel_cfg(struct gsi *gsi, unsigned long chan_id,
  * @Return gsi_status
  */
 int gsi_set_channel_cfg(struct gsi *gsi, unsigned long chan_id,
-		struct gsi_chan_props *props);
+			struct gsi_chan_props *props);
 
 /** gsi_poll_channel - Peripheral should call this function to query for
  * completed transfer descriptors.

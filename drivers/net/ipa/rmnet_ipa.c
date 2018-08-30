@@ -234,7 +234,7 @@ static void apps_ipa_packet_receive_notify(void *priv, enum ipa_dp_evt_type evt,
 
 /** handle_egress_format() - Ingress data format configuration */
 static int handle_ingress_format(struct net_device *dev,
-				  struct rmnet_ioctl_extended_s *in)
+				 struct rmnet_ioctl_extended_s *in)
 {
 	struct ipa_sys_connect_params *wan_cfg;
 	struct ipa_ep_cfg *ep_cfg;
@@ -293,7 +293,7 @@ static int handle_ingress_format(struct net_device *dev,
 
 /** handle_egress_format() - Egress data format configuration */
 static int handle_egress_format(struct net_device *dev,
-				 struct rmnet_ioctl_extended_s *e)
+				struct rmnet_ioctl_extended_s *e)
 {
 	struct ipa_sys_connect_params *wan_cfg;
 	struct ipa_ep_cfg *ep_cfg;

@@ -17,7 +17,7 @@
 #include "gsi.h"
 #include "gsi_reg.h"
 
-#define GSI_CHAN_MAX	  	31
+#define GSI_CHAN_MAX		31
 #define GSI_EVT_RING_MAX	23
 
 #define GSI_CMD_TIMEOUT		msecs_to_jiffies(5 * MSEC_PER_SEC)
@@ -544,7 +544,7 @@ static void chan_xfer_cb(struct gsi_chan_ctx *chan, u16 count)
 }
 
 static u16 gsi_process_chan(struct gsi *gsi, struct gsi_xfer_compl_evt *evt,
-		bool callback)
+			    bool callback)
 {
 	struct gsi_chan_ctx *chan;
 	u32 chan_id = evt->chid;
@@ -799,8 +799,7 @@ static u32 gsi_get_max_event_rings(struct gsi *gsi)
 	return field_val(val, NUM_EV_PER_EE_BMSK);
 }
 
-/*
- * Zero bits in an event bitmap represent event numbers available
+/* Zero bits in an event bitmap represent event numbers available
  * for allocation.  Initialize the map so all events supported by
  * the hardware are available; then preclude any reserved events
  * from allocation.
@@ -903,8 +902,8 @@ void gsi_deregister_device(struct gsi *gsi)
 	gsi->irq = 0;
 }
 
-static void gsi_program_evt_ring_ctx(struct gsi *gsi, u8 evt_id,
-		u32 size, u64 phys_base, u16 int_modt)
+static void gsi_program_evt_ring_ctx(struct gsi *gsi, u8 evt_id, u32 size,
+				     u64 phys_base, u16 int_modt)
 {
 	u32 int_modc = 1;	/* moderation always comes from channel*/
 	u32 val;
@@ -982,7 +981,7 @@ command(struct gsi *gsi, u32 reg, u32 val, struct completion *compl)
 
 /* Issue an event ring command and wait for it to complete */
 static u32 evt_ring_command(struct gsi *gsi, unsigned long evt_id,
-		enum gsi_evt_ch_cmd_opcode op)
+			    enum gsi_evt_ch_cmd_opcode op)
 {
 	struct completion *compl = &gsi->evtr[evt_id].compl;
 	u32 val;
@@ -1001,7 +1000,7 @@ static u32 evt_ring_command(struct gsi *gsi, unsigned long evt_id,
 
 /* Issue a channel command and wait for it to complete */
 static u32 channel_command(struct gsi *gsi, unsigned long chan_id,
-		enum gsi_ch_cmd_opcode op)
+			   enum gsi_ch_cmd_opcode op)
 {
 	struct completion *compl = &gsi->chan[chan_id].compl;
 	u32 val;
@@ -1153,8 +1152,7 @@ void gsi_reset_evt_ring(struct gsi *gsi, unsigned long evt_id)
 }
 
 static void
-gsi_program_chan_ctx(struct gsi *gsi, struct gsi_chan_props *props,
-		u8 evt_id)
+gsi_program_chan_ctx(struct gsi *gsi, struct gsi_chan_props *props, u8 evt_id)
 {
 	u32 val;
 
@@ -1215,7 +1213,6 @@ long gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
 
 	user_data = kcalloc(props->ring_count, sizeof(void *), GFP_KERNEL);
 	if (!user_data) {
-		ipa_err("error allocating user pointer array\n");
 		ipahal_dma_free(&props->mem);
 		return -ENOMEM;
 	}
@@ -1294,8 +1291,8 @@ __gsi_write_channel_scratch(struct gsi *gsi, unsigned long chan_id)
 	gsi_writel(gsi, val, GSI_CH_K_SCRATCH_3_OFFS(chan_id));
 }
 
-int gsi_write_channel_scratch(struct gsi *gsi, unsigned long chan_id,
-		u32 tlv_size)
+int
+gsi_write_channel_scratch(struct gsi *gsi, unsigned long chan_id, u32 tlv_size)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 
@@ -1617,8 +1614,8 @@ int gsi_poll_channel(struct gsi *gsi, unsigned long chan_id)
 	return size;
 }
 
-static void gsi_config_channel_mode(struct gsi *gsi, unsigned long chan_id,
-		bool polling)
+static void
+gsi_config_channel_mode(struct gsi *gsi, unsigned long chan_id, bool polling)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	unsigned long flags;
@@ -1643,7 +1640,7 @@ void gsi_channel_intr_disable(struct gsi *gsi, unsigned long chan_id)
 }
 
 int gsi_get_channel_cfg(struct gsi *gsi, unsigned long chan_id,
-		struct gsi_chan_props *props)
+			struct gsi_chan_props *props)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 
@@ -1660,7 +1657,7 @@ int gsi_get_channel_cfg(struct gsi *gsi, unsigned long chan_id,
 }
 
 int gsi_set_channel_cfg(struct gsi *gsi, unsigned long chan_id,
-		struct gsi_chan_props *props)
+			struct gsi_chan_props *props)
 {
 	struct gsi_chan_ctx *chan;
 

@@ -177,7 +177,7 @@ static int setup_apps_cmd_prod_pipe(void)
 }
 
 /* Only used for IPA_MEM_UC_EVENT_RING_OFST, which must be 1KB aligned */
-static void __always_inline sram_set_canary(u32 *sram_mmio, u32 offset)
+static __always_inline void sram_set_canary(u32 *sram_mmio, u32 offset)
 {
 	BUILD_BUG_ON(offset < sizeof(*sram_mmio));
 	BUILD_BUG_ON(offset % 1024);
@@ -186,7 +186,7 @@ static void __always_inline sram_set_canary(u32 *sram_mmio, u32 offset)
 	*--sram_mmio = IPA_MEM_CANARY_VAL;
 }
 
-static void __always_inline sram_set_canaries(u32 *sram_mmio, u32 offset)
+static __always_inline void sram_set_canaries(u32 *sram_mmio, u32 offset)
 {
 	BUILD_BUG_ON(offset < 2 * sizeof(*sram_mmio));
 	BUILD_BUG_ON(offset % 8);
@@ -906,13 +906,13 @@ static void ipa_post_init(struct work_struct *unused)
 	result = ipa_init_interrupts();
 	if (result) {
 		ipa_err("ipa initialization of interrupts failed\n");
-		return ;
+		return;
 	}
 
 	result = gsi_register_device(ipa_ctx->gsi);
 	if (result) {
 		ipa_err(":gsi register error - %d\n", result);
-		return ;
+		return;
 	}
 	ipa_debug("IPA gsi is registered\n");
 
@@ -1003,14 +1003,14 @@ static bool config_valid(void)
 	BUILD_BUG_ON(!IPA_MEM_V4_RT_NUM_INDEX);
 	required_size = IPA_MEM_V4_RT_NUM_INDEX * width;
 	BUILD_BUG_ON(!IPA_MEM_V4_RT_HASH_SIZE);
-	if (IPA_MEM_V4_RT_HASH_SIZE < required_size) {
+	if (required_size > IPA_MEM_V4_RT_HASH_SIZE) {
 		ipa_err("V4_RT_HASH_SIZE too small (%u < %u * %u)\n",
 			IPA_MEM_V4_RT_HASH_SIZE, IPA_MEM_V4_RT_NUM_INDEX,
 			width);
 		return false;
 	}
 	BUILD_BUG_ON(!IPA_MEM_V4_RT_NHASH_SIZE);
-	if (IPA_MEM_V4_RT_NHASH_SIZE < required_size) {
+	if (required_size > IPA_MEM_V4_RT_NHASH_SIZE) {
 		ipa_err("V4_RT_NHASH_SIZE too small (%u < %u * %u)\n",
 			IPA_MEM_V4_RT_NHASH_SIZE, IPA_MEM_V4_RT_NUM_INDEX,
 			width);
@@ -1020,14 +1020,14 @@ static bool config_valid(void)
 	BUILD_BUG_ON(!IPA_MEM_V6_RT_NUM_INDEX);
 	required_size = IPA_MEM_V6_RT_NUM_INDEX * width;
 	BUILD_BUG_ON(!IPA_MEM_V6_RT_HASH_SIZE);
-	if (IPA_MEM_V6_RT_HASH_SIZE < required_size) {
+	if (required_size > IPA_MEM_V6_RT_HASH_SIZE) {
 		ipa_err("V6_RT_HASH_SIZE too small (%u < %u * %u)\n",
 			IPA_MEM_V6_RT_HASH_SIZE, IPA_MEM_V6_RT_NUM_INDEX,
 			width);
 		return false;
 	}
 	BUILD_BUG_ON(!IPA_MEM_V6_RT_NHASH_SIZE);
-	if (IPA_MEM_V6_RT_NHASH_SIZE < required_size) {
+	if (required_size > IPA_MEM_V6_RT_NHASH_SIZE) {
 		ipa_err("V6_RT_NHASH_SIZE too small (%u < %u * %u)\n",
 			IPA_MEM_V6_RT_NHASH_SIZE, IPA_MEM_V6_RT_NUM_INDEX,
 			width);
@@ -1040,12 +1040,12 @@ static bool config_valid(void)
 	lo_index = IPA_MEM_V4_MODEM_RT_INDEX_LO;
 	table_count = hi_index - lo_index + 1;
 	required_size = table_count * width;
-	if (IPA_MEM_V4_RT_HASH_SIZE < required_size) {
+	if (required_size > IPA_MEM_V4_RT_HASH_SIZE) {
 		ipa_err("V4_RT_HASH_SIZE too small for modem (%u < %u * %u)\n",
 			IPA_MEM_V4_RT_HASH_SIZE, table_count, width);
 		return false;
 	}
-	if (IPA_MEM_V4_RT_NHASH_SIZE < required_size) {
+	if (required_size > IPA_MEM_V4_RT_NHASH_SIZE) {
 		ipa_err("V4_RT_NHASH_SIZE too small for modem (%u < %u * %u)\n",
 			IPA_MEM_V4_RT_NHASH_SIZE, table_count,
 			width);
@@ -1058,12 +1058,12 @@ static bool config_valid(void)
 	lo_index = IPA_MEM_V6_MODEM_RT_INDEX_LO;
 	table_count = hi_index - lo_index + 1;
 	required_size = table_count * width;
-	if (IPA_MEM_V6_RT_HASH_SIZE < required_size) {
+	if (required_size > IPA_MEM_V6_RT_HASH_SIZE) {
 		ipa_err("V6_RT_HASH_SIZE too small for modem (%u < %u * %u)\n",
 			IPA_MEM_V6_RT_HASH_SIZE, table_count, width);
 		return false;
 	}
-	if (IPA_MEM_V6_RT_NHASH_SIZE < required_size) {
+	if (required_size > IPA_MEM_V6_RT_NHASH_SIZE) {
 		ipa_err("V6_RT_NHASH_SIZE too small for modem (%u < %u * %u)\n",
 			IPA_MEM_V6_RT_NHASH_SIZE, table_count,
 			width);
@@ -1074,13 +1074,13 @@ static bool config_valid(void)
 	table_count = ipa_ctx->ep_flt_num + 1;
 	required_size = table_count * width;
 	BUILD_BUG_ON(!IPA_MEM_V4_FLT_HASH_SIZE);
-	if (IPA_MEM_V4_FLT_HASH_SIZE < required_size) {
+	if (required_size > IPA_MEM_V4_FLT_HASH_SIZE) {
 		ipa_err("V4_FLT_HASH_SIZE too small  (%u < %u * %u)\n",
 			IPA_MEM_V4_FLT_HASH_SIZE, table_count, width);
 		return false;
 	}
 	BUILD_BUG_ON(!IPA_MEM_V4_FLT_NHASH_SIZE);
-	if (IPA_MEM_V4_FLT_NHASH_SIZE < required_size) {
+	if (required_size > IPA_MEM_V4_FLT_NHASH_SIZE) {
 		ipa_err("V4_FLT_NHASH_SIZE too small (%u < %u * %u)\n",
 			IPA_MEM_V4_FLT_NHASH_SIZE, table_count,
 			width);
@@ -1088,14 +1088,14 @@ static bool config_valid(void)
 	}
 
 	BUILD_BUG_ON(!IPA_MEM_V6_FLT_HASH_SIZE);
-	if (IPA_MEM_V6_FLT_HASH_SIZE < required_size) {
+	if (required_size > IPA_MEM_V6_FLT_HASH_SIZE) {
 		ipa_err("V6_FLT_HASH_SIZE too small  (%u < %u * %u)\n",
 			IPA_MEM_V6_FLT_HASH_SIZE, table_count,
 			width);
 		return false;
 	}
 	BUILD_BUG_ON(!IPA_MEM_V6_FLT_NHASH_SIZE);
-	if (IPA_MEM_V6_FLT_NHASH_SIZE < required_size) {
+	if (required_size > IPA_MEM_V6_FLT_NHASH_SIZE) {
 		ipa_err("V6_FLT_NHASH_SIZE too small (%u < %u * %u)\n",
 			IPA_MEM_V6_FLT_NHASH_SIZE, table_count, width);
 		return false;

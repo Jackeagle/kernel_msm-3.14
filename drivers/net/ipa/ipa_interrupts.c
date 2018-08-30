@@ -5,8 +5,7 @@
  */
 #define pr_fmt(fmt)    "ipa %s:%d " fmt, __func__, __LINE__
 
-/*
- * The IPA supports generating an interrupt on a number of events
+/* The IPA supports generating an interrupt on a number of events
  * using a single IRQ.  When the IPA IRQ fires, an IPA interrupt
  * status register indicates which IPA interrupt events are being
  * signaled.  Each IPA interrupt is acknowledged by writing its bit
@@ -96,8 +95,7 @@ static void ipa_process_interrupts(void)
 		u32 ipa_intr_mask;
 		u32 imask;	/* one set bit */
 
-		/*
-		 * Determine which interrupts have fired, then examine only
+		/* Determine which interrupts have fired, then examine only
 		 * those that are enabled.  Note that a suspend interrupt
 		 * bug forces us to re-read the enabled mask every time to
 		 * avoid an endless loop.

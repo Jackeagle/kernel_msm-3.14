@@ -93,14 +93,14 @@ static const struct rsrc_min_max ipa_rsrc_src_grp_config
 		[IPA_GROUP_UC_RX_Q]	= { .min = 1,	.max = 63, },
 	},
 	[IPA_RSRC_GRP_TYPE_SRS_DESCRIPTOR_LISTS] = {
-		[IPA_GROUP_LWA_DL]	= { .min = 10,	.max =10, },
-		[IPA_GROUP_UL_DL]	= { .min = 10,	.max =10, },
+		[IPA_GROUP_LWA_DL]	= { .min = 10,	.max = 10, },
+		[IPA_GROUP_UL_DL]	= { .min = 10,	.max = 10, },
 		[IPA_MHI_GROUP_DMA]	= { .min = 0,	.max = 0, },
 		[IPA_GROUP_UC_RX_Q]	= { .min = 8,	.max = 8, },
 	},
 	[IPA_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF] = {
-		[IPA_GROUP_LWA_DL]	= { .min = 12,	.max =12, },
-		[IPA_GROUP_UL_DL]	= { .min = 14,	.max =14, },
+		[IPA_GROUP_LWA_DL]	= { .min = 12,	.max = 12, },
+		[IPA_GROUP_UL_DL]	= { .min = 14,	.max = 14, },
 		[IPA_MHI_GROUP_DMA]	= { .min = 0,	.max = 0, },
 		[IPA_GROUP_UC_RX_Q]	= { .min = 8,	.max = 8, },
 	},
@@ -111,10 +111,10 @@ static const struct rsrc_min_max ipa_rsrc_src_grp_config
 		[IPA_GROUP_UC_RX_Q]	= { .min = 0,	.max = 255, },
 	},
 	[IPA_RSRC_GRP_TYPE_SRC_ACK_ENTRIES] = {
-		[IPA_GROUP_LWA_DL]	= { .min = 14,	.max =14, },
-		[IPA_GROUP_UL_DL]	= { .min = 20,	.max =20, },
+		[IPA_GROUP_LWA_DL]	= { .min = 14,	.max = 14, },
+		[IPA_GROUP_UL_DL]	= { .min = 20,	.max = 20, },
 		[IPA_MHI_GROUP_DMA]	= { .min = 0,	.max = 0, },
-		[IPA_GROUP_UC_RX_Q]	= { .min = 14,	.max =14, },
+		[IPA_GROUP_UC_RX_Q]	= { .min = 14,	.max = 14, },
 	},
 };
 
@@ -803,8 +803,7 @@ static void ipa_cfg_ep_seq(u32 clnt_hdl)
 	enum ipa_client_type client = ipa_ctx->ep[clnt_hdl].client;
 	int type = ep_configuration(client)->sequencer_type;
 
-	ipa_debug("set sequencers to sequence 0x%x, ep = %d\n", type,
-			clnt_hdl);
+	ipa_debug("set sequencers to sequence 0x%x, ep = %d\n", type, clnt_hdl);
 	ipahal_write_reg_n(IPA_ENDP_INIT_SEQ_n, clnt_hdl, type);
 }
 
@@ -828,9 +827,9 @@ static void ipa_cfg_ep_deaggr(u32 clnt_hdl)
  *
  * Note:	Should not be called from atomic context
  */
-static void ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
-				    const struct ipa_ep_cfg_metadata_mask
-				    *metadata_mask)
+static void
+ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
+			 const struct ipa_ep_cfg_metadata_mask *metadata_mask)
 {
 	ipa_debug("pipe=%d, metadata_mask=0x%x\n", clnt_hdl,
 		  metadata_mask->metadata_mask);
@@ -881,7 +880,7 @@ void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
  * Note:	Should not be called from atomic context
  */
 void ipa_cfg_ep_status(u32 clnt_hdl,
-		      const struct ipahal_reg_ep_cfg_status *ep_status)
+		       const struct ipahal_reg_ep_cfg_status *ep_status)
 {
 	ipa_debug("pipe=%d, status_en=%d status_ep=%d status_location=%d\n",
 		  clnt_hdl, ep_status->status_en, ep_status->status_ep,

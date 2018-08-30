@@ -211,8 +211,7 @@ static inline bool ipa_consumer(enum ipa_client_type client)
 	return !ipa_producer(client);
 }
 
-/*
- * Note a client must have a valid entry in the ipa_ep_configuration[]
+/* Note a client must have a valid entry in the ipa_ep_configuration[]
  * array to be are considered a modem consumer or producer client.
  */
 static inline bool ipa_modem_consumer(enum ipa_client_type client)
@@ -447,7 +446,6 @@ struct ipa_ep_cfg_aggr {
 	u32 aggr_hard_byte_limit_en;
 	bool aggr_sw_eof_active;
 };
-
 
 /** struct ipa_ep_cfg_cfg - IPA ENDP_INIT Configuration register
  * @cs_offload_en: Checksum offload enable: 00: Disable checksum offload, 01:

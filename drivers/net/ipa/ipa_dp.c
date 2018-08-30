@@ -68,7 +68,7 @@ struct ipa_sys_context {
 			atomic_t curr_polling_state;
 			struct delayed_work switch_to_intr_work; /* sys->wq */
 			void (*pyld_hdlr)(struct sk_buff *,
-					 struct ipa_sys_context *);
+					  struct ipa_sys_context *);
 			u32 buff_sz;
 			u32 pool_sz;
 			struct sk_buff *prev_skb;
@@ -341,7 +341,8 @@ static bool ipa_send_nop(struct ipa_sys_context *sys)
 	struct ipa_tx_pkt_wrapper *nop_pkt;
 	struct gsi_xfer_elem nop_xfer = { };
 
-	nop_pkt = kmem_cache_zalloc(ipa_ctx->dp->tx_pkt_wrapper_cache, GFP_KERNEL);
+	nop_pkt = kmem_cache_zalloc(ipa_ctx->dp->tx_pkt_wrapper_cache,
+				    GFP_KERNEL);
 	if (!nop_pkt)
 		return false;
 
@@ -585,7 +586,7 @@ static void ipa_send_cmd_timeout_complete(void *tag_comp, int ignored)
  *
  * Send an immediate command, and wait for it to complete.  If
  * timeout is non-zero it indicates the number of milliseconds to
- * wait to receive the acknowledgement from the hardware before
+ * wait to receive the acknowledgment from the hardware before
  * timing out.  If 0 is supplied, wait will not time out.
  */
 int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
@@ -1065,7 +1066,8 @@ static void ipa_replenish_rx_cache(struct ipa_sys_context *sys)
 	rx_len_cached = sys->len;
 
 	while (rx_len_cached < sys->rx.pool_sz) {
-		rx_pkt = kmem_cache_zalloc(ipa_ctx->dp->rx_pkt_wrapper_cache, flag);
+		rx_pkt = kmem_cache_zalloc(ipa_ctx->dp->rx_pkt_wrapper_cache,
+					   flag);
 		if (!rx_pkt)
 			goto fail_kmem_cache_alloc;
 
@@ -1380,7 +1382,8 @@ ipa_wan_rx_handle_splt_pyld(struct sk_buff *skb, struct ipa_sys_context *sys)
 		sys->rx.len_rem = 0;
 	} else {
 		if (sys->rx.prev_skb) {
-			skb2 = ipa_join_prev_skb(sys->rx.prev_skb, skb, skb->len);
+			skb2 = ipa_join_prev_skb(sys->rx.prev_skb, skb,
+						 skb->len);
 			sys->rx.prev_skb = skb2;
 		}
 		sys->rx.len_rem -= skb->len;
@@ -1431,7 +1434,7 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 		skb_data = skb->data;
 
 		if (!ipa_status_opcode_supported(status.status_opcode) ||
-			status.status_opcode ==
+		    status.status_opcode ==
 				IPAHAL_PKT_STATUS_OPCODE_SUSPENDED_PACKET) {
 			ipa_err("unsupported opcode(%d)\n",
 				status.status_opcode);
@@ -1747,7 +1750,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	gsi_channel_props.chan_user_data = ep->sys;
 
 	gsi_channel_props.ring_count = ipa_gsi_ring_count(ep->client,
-							    in->fifo_count);
+							  in->fifo_count);
 
 	result = gsi_alloc_channel(ipa_ctx->gsi, &gsi_channel_props);
 	if (result < 0)
