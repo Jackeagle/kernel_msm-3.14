@@ -24,12 +24,7 @@
 #include <linux/of_irq.h>
 #include <linux/uaccess.h>
 #include <linux/interrupt.h>
-#ifdef CONFIG_INTERCONNECT_QCOM_SDM845
 #include <linux/interconnect.h>
-#else /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
-#include <linux/msm-bus.h>
-#include <linux/msm-bus-board.h>
-#endif /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
 #include <linux/netdevice.h>
 #include <linux/delay.h>
 #include <linux/time.h>
@@ -585,11 +580,7 @@ static void ipa_enable_clks(void)
 {
 	ipa_debug("enabling IPA clocks and bus voting\n");
 
-#ifdef CONFIG_INTERCONNECT_QCOM_SDM845
 	WARN_ON(ipa_interconnect_enable());
-#else /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
-	WARN_ON(msm_bus_scale_client_update_request(ipa_ctx->ipa_bus_hdl, 1));
-#endif /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
 }
 
 /** ipa_disable_clks() - Turn off IPA clocks
@@ -601,11 +592,7 @@ static void ipa_disable_clks(void)
 {
 	ipa_debug("disabling IPA clocks and bus voting\n");
 
-#ifdef CONFIG_INTERCONNECT_QCOM_SDM845
 	WARN_ON(ipa_interconnect_disable());
-#else /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
-	WARN_ON(msm_bus_scale_client_update_request(ipa_ctx->ipa_bus_hdl, 0));
-#endif /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
 }
 
 /* Add an IPA client under protection of the mutex.  This is called
@@ -1379,7 +1366,6 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 		return result;
 	}
 
-#ifdef CONFIG_INTERCONNECT_QCOM_SDM845
 	/* Initialize the interconnect driver early too.  It might
 	 * also return -EPROBE_DEFER.
 	 */
@@ -1388,7 +1374,6 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 		ipa_err("error %d initializing interconnect\n", result);
 		goto out_smp2p_exit;
 	}
-#endif /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
 
 	ipa_ctx->ipa_pdev = pdev_p;
 
@@ -1444,18 +1429,6 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_clear_flt;
 	}
 
-#ifndef CONFIG_INTERCONNECT_QCOM_SDM845
-	/* get BUS handle */
-	ipa_ctx->bus_scale_tbl = ipa_bus_scale_table_init();
-	ipa_ctx->ipa_bus_hdl =
-			msm_bus_scale_register_client(ipa_ctx->bus_scale_tbl);
-	if (!ipa_ctx->ipa_bus_hdl) {
-		ipa_err("fail to register with bus mgr!\n");
-		result = -ENODEV;
-		goto err_clear_bus_scale_tbl;
-	}
-#endif /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
-
 	ipa_ctx->gsi = gsi_init(pdev_p);
 	if (IS_ERR(ipa_ctx->gsi)) {
 		ipa_err("ipa: error initializing gsi driver.\n");
@@ -1483,12 +1456,6 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 	ipa_ctx->dev = NULL;
 err_clear_gsi:
 	ipa_ctx->gsi = NULL;
-#ifndef CONFIG_INTERCONNECT_QCOM_SDM845
-	msm_bus_scale_unregister_client(ipa_ctx->ipa_bus_hdl);
-	ipa_ctx->ipa_bus_hdl = 0;
-err_clear_bus_scale_tbl:
-	ipa_ctx->bus_scale_tbl = NULL;
-#endif /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
 err_clear_flt:
 	ipa_ctx->ep_flt_num = 0;
 	ipa_ctx->ep_flt_bitmap = 0;
@@ -1503,10 +1470,8 @@ err_clear_wrapper:
 	ipa_ctx->ipa_wrapper_base = 0;
 err_clear_pdev:
 	ipa_ctx->ipa_pdev = NULL;
-#ifdef CONFIG_INTERCONNECT_QCOM_SDM845
 	ipa_interconnect_exit();
 out_smp2p_exit:
-#endif /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
 	ipa_smp2p_exit();
 
 	return result;

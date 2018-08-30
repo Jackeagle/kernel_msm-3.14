@@ -9,12 +9,7 @@
 #include <linux/genalloc.h>	/* gen_pool_alloc() */
 #include <linux/io.h>
 #include <linux/ratelimit.h>
-#ifdef CONFIG_INTERCONNECT_QCOM_SDM845
 #include <linux/interconnect.h>
-#else /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
-#include <linux/msm-bus.h>
-#include <linux/msm-bus-board.h>
-#endif /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
 #include <linux/elf.h>
 #include <linux/device.h>
 #include <linux/init.h>
@@ -490,172 +485,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 	},
 };
 
-#ifndef CONFIG_INTERCONNECT_QCOM_SDM845
-static struct msm_bus_vectors ipa_min_perf_vectors[] = {
-	{
-		.src = MSM_BUS_MASTER_IPA,
-		.dst = MSM_BUS_SLAVE_EBI_CH0,
-		.ab = 0 * 1000ULL,
-		.ib = 0 * 1000ULL,
-	},
-	{
-		.src = MSM_BUS_MASTER_IPA,
-		.dst = MSM_BUS_SLAVE_OCIMEM,
-		.ab = 0 * 1000ULL,
-		.ib = 0 * 1000ULL,
-	},
-	{
-		.src = MSM_BUS_MASTER_AMPSS_M0,
-		.dst = MSM_BUS_SLAVE_IPA_CFG,
-		.ab = 0 * 1000ULL,
-		.ib = 0 * 1000ULL,
-	},
-	{
-		.src = MSM_BUS_MASTER_IPA_CORE,
-		.dst = MSM_BUS_SLAVE_IPA_CORE,
-		.ab = 0 * 1000ULL,
-		.ib = 0 * 1000ULL,
-	},
-};
-
-static struct msm_bus_vectors ipa_svs2_perf_vectors[] = {
-	{
-		.src = MSM_BUS_MASTER_IPA,
-		.dst = MSM_BUS_SLAVE_EBI_CH0,
-		.ab = 80000 * 1000ULL,
-		.ib = 600000 * 1000ULL,
-	},
-	{
-		.src = MSM_BUS_MASTER_IPA,
-		.dst = MSM_BUS_SLAVE_OCIMEM,
-		.ab = 80000 * 1000ULL,
-		.ib = 350000 * 1000ULL,
-	},
-	{	/*gcc_config_noc_clk_src */
-		.src = MSM_BUS_MASTER_AMPSS_M0,
-		.dst = MSM_BUS_SLAVE_IPA_CFG,
-		.ab = 40000 * 1000ULL,
-		.ib = 40000 * 1000ULL,
-	},
-	{
-		.src = MSM_BUS_MASTER_IPA_CORE,
-		.dst = MSM_BUS_SLAVE_IPA_CORE,
-		.ab = 0 * 1000ULL,
-		.ib = 75 * 1000ULL, /* IB defined for IPA2X_clk in MHz*/
-	},
-};
-
-static struct msm_bus_vectors ipa_svs_perf_vectors[] = {
-	{
-		.src = MSM_BUS_MASTER_IPA,
-		.dst = MSM_BUS_SLAVE_EBI_CH0,
-		.ab = 80000 * 1000ULL,
-		.ib = 640000 * 1000ULL,
-	},
-	{
-		.src = MSM_BUS_MASTER_IPA,
-		.dst = MSM_BUS_SLAVE_OCIMEM,
-		.ab = 80000 * 1000ULL,
-		.ib = 640000 * 1000ULL,
-	},
-	{
-		.src = MSM_BUS_MASTER_AMPSS_M0,
-		.dst = MSM_BUS_SLAVE_IPA_CFG,
-		.ab = 80000 * 1000ULL,
-		.ib = 80000 * 1000ULL,
-	},
-	{
-		.src = MSM_BUS_MASTER_IPA_CORE,
-		.dst = MSM_BUS_SLAVE_IPA_CORE,
-		.ab = 0 * 1000ULL,
-		.ib = 150 * 1000ULL, /* IB defined for IPA2X_clk in MHz*/
-	},
-};
-
-static struct msm_bus_vectors ipa_nominal_perf_vectors[] = {
-	{
-		.src = MSM_BUS_MASTER_IPA,
-		.dst = MSM_BUS_SLAVE_EBI_CH0,
-		.ab = 206000 * 1000ULL,
-		.ib = 960000 * 1000ULL,
-	},
-	{
-		.src = MSM_BUS_MASTER_IPA,
-		.dst = MSM_BUS_SLAVE_OCIMEM,
-		.ab = 206000 * 1000ULL,
-		.ib = 960000 * 1000ULL,
-	},
-	{
-		.src = MSM_BUS_MASTER_AMPSS_M0,
-		.dst = MSM_BUS_SLAVE_IPA_CFG,
-		.ab = 206000 * 1000ULL,
-		.ib = 160000 * 1000ULL,
-	},
-	{
-		.src = MSM_BUS_MASTER_IPA_CORE,
-		.dst = MSM_BUS_SLAVE_IPA_CORE,
-		.ab = 0 * 1000ULL,
-		.ib = 300 * 1000ULL, /* IB defined for IPA2X_clk in MHz*/
-	},
-};
-
-static struct msm_bus_vectors ipa_turbo_perf_vectors[] = {
-	{
-		.src = MSM_BUS_MASTER_IPA,
-		.dst = MSM_BUS_SLAVE_EBI_CH0,
-		.ab = 206000 * 1000ULL,
-		.ib = 3600000 * 1000ULL,
-	},
-	{
-		.src = MSM_BUS_MASTER_IPA,
-		.dst = MSM_BUS_SLAVE_OCIMEM,
-		.ab = 206000 * 1000ULL,
-		.ib = 3600000 * 1000ULL,
-	},
-	{
-		.src = MSM_BUS_MASTER_AMPSS_M0,
-		.dst = MSM_BUS_SLAVE_IPA_CFG,
-		.ab = 206000 * 1000ULL,
-		.ib = 300000 * 1000ULL,
-	},
-	{
-		.src = MSM_BUS_MASTER_IPA_CORE,
-		.dst = MSM_BUS_SLAVE_IPA_CORE,
-		.ab = 0 * 1000ULL,
-		.ib = 355 * 1000ULL, /* IB defined for IPA clk in MHz*/
-	},
-};
-
-static struct msm_bus_paths ipa_usecases[]	 = {
-	{
-		.num_paths = ARRAY_SIZE(ipa_min_perf_vectors),
-		.vectors = ipa_min_perf_vectors,
-	},
-	{
-		.num_paths = ARRAY_SIZE(ipa_svs2_perf_vectors),
-		.vectors = ipa_svs2_perf_vectors,
-	},
-	{
-		.num_paths = ARRAY_SIZE(ipa_svs_perf_vectors),
-		.vectors = ipa_svs_perf_vectors,
-	},
-	{
-		.num_paths = ARRAY_SIZE(ipa_nominal_perf_vectors),
-		.vectors = ipa_nominal_perf_vectors,
-	},
-	{
-		.num_paths = ARRAY_SIZE(ipa_turbo_perf_vectors),
-		.vectors = ipa_turbo_perf_vectors,
-	},
-};
-
-static struct msm_bus_scale_pdata ipa_bus_client_pdata = {
-	.usecase	= ipa_usecases,
-	.num_usecases	= ARRAY_SIZE(ipa_usecases),
-	.name		= "ipa",
-};
-#endif /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
-
 static const struct ipa_ep_configuration *
 ep_configuration(enum ipa_client_type client)
 {
@@ -1085,8 +914,6 @@ static void resume_consumer_endpoint(u32 ipa_ep_idx)
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n, ipa_ep_idx, &cfg);
 }
 
-#ifdef CONFIG_INTERCONNECT_QCOM_SDM845
-
 /* Interconnect path bandwidths (each times 1000 bytes per second) */
 #define IPA_MEMORY_AVG	80000
 #define IPA_MEMORY_PEAK	600000
@@ -1189,12 +1016,6 @@ err_reenable_memory_path:
 
 	return ret;
 }
-#else /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
-struct msm_bus_scale_pdata *ipa_bus_scale_table_init(void)
-{
-	return &ipa_bus_client_pdata;
-}
-#endif /* !CONFIG_INTERCONNECT_QCOM_SDM845 */
 
 /** ipa_proxy_clk_unvote() - called to remove IPA clock proxy vote
  *
