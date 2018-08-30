@@ -722,28 +722,6 @@ static struct platform_driver rmnet_ipa_driver = {
 	.remove = ipa_wwan_remove,
 };
 
-/** ipa_q6_handshake_complete() - Perform operations once Q6 is up
- * @ssr_bootup - Indicates whether this is a cold boot-up or post-SSR.
- *
- * This function is invoked once the handshake between the IPA AP driver
- * and IPA Q6 driver is complete. At this point, it is possible to perform
- * operations which can't be performed until IPA Q6 driver is up.
- *
- */
-void ipa_q6_handshake_complete(bool ssr_bootup)
-{
-	/* It is required to recover the network stats after SSR recovery */
-	if (ssr_bootup) {
-		/* In case the uC is required to be loaded by the Modem,
-		 * the proxy vote will be removed only when uC loading is
-		 * complete and indication is received by the AP. After SSR,
-		 * uC is already loaded. Therefore, proxy vote can be removed
-		 * once Modem init is complete.
-		 */
-		ipa_proxy_clk_unvote();
-	}
-}
-
 int ipa_wwan_init(void)
 {
 	if (initialized)
