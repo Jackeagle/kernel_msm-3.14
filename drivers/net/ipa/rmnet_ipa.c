@@ -289,20 +289,17 @@ static int handle_ingress_format(struct net_device *dev,
 		   IPA_ENABLE_CS_OFFLOAD_DL;
 
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA) {
-		ipa_debug("get AGG size %d count %d\n",
-			  in->u.ingress_format.agg_size,
-			  in->u.ingress_format.agg_count);
+		u32 agg_size = in->u.ingress_format.agg_size;
+		u32 agg_count = in->u.ingress_format.agg_count;
 
-		ret = ipa_disable_apps_wan_cons_deaggr(
-			  in->u.ingress_format.agg_size,
-			  in->u.ingress_format.agg_count);
+		ipa_debug("get AGG size %d count %d\n", agg_size, agg_count);
+
+		ret = ipa_disable_apps_wan_cons_deaggr(agg_size, agg_count);
 		if (ret)
 			return ret;
 
-		wan_cfg->ipa_ep_cfg.aggr.aggr_byte_limit =
-			in->u.ingress_format.agg_size;
-		wan_cfg->ipa_ep_cfg.aggr.aggr_pkt_limit =
-			in->u.ingress_format.agg_count;
+		wan_cfg->ipa_ep_cfg.aggr.aggr_byte_limit = agg_size;
+		wan_cfg->ipa_ep_cfg.aggr.aggr_pkt_limit = agg_count;
 	}
 
 	wan_cfg->ipa_ep_cfg.hdr.hdr_len = sizeof(struct rmnet_map_header_s);
