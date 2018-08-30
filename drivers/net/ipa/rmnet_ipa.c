@@ -28,29 +28,20 @@
 #include "ipa_qmi.h"
 #include "ipa_i.h"
 
-#define WWAN_METADATA_SHFT	24
-#define WWAN_METADATA_MASK	0xff000000
+#define DRIVER_NAME		"wwan_ioctl"
+#define IPA_WWAN_DEV_NAME	"rmnet_ipa%d"
+
+#define MUX_CHANNEL_MAX		10 /* max mux channels */
+
+#define NAPI_WEIGHT		60
+
 #define WWAN_DATA_LEN		2000
-#define IPA_RM_INACTIVITY_TIMER	100 /* IPA_RM */
 #define HEADROOM_FOR_QMAP	8 /* for mux header */
 #define TAILROOM		0 /* for padding by mux layer */
-#define MUX_CHANNEL_MAX		10 /* max mux channels */
-#define UL_FILTER_RULE_HANDLE_START 69
+
 #define DEFAULT_OUTSTANDING_HIGH	128
 #define DEFAULT_OUTSTANDING_HIGH_CTL	(DEFAULT_OUTSTANDING_HIGH + 32)
 #define DEFAULT_OUTSTANDING_LOW		64
-
-#define IPA_WWAN_DEV_NAME "rmnet_ipa%d"
-#define IPA_UPSTEAM_WLAN_IFACE_NAME "wlan0"
-
-#define IPA_WWAN_RX_SOFTIRQ_THRESH 16
-
-#define INVALID_MUX_ID 0xFF
-#define IPA_QUOTA_REACH_ALERT_MAX_SIZE 64
-#define IPA_QUOTA_REACH_IF_NAME_MAX_SIZE 64
-#define IPA_UEVENT_NUM_EVNP 4 /* number of event pointers */
-#define NAPI_WEIGHT 60
-#define DRIVER_NAME "wwan_ioctl"
 
 #define IPA_APPS_WWAN_CONS_RING_COUNT	128
 #define IPA_APPS_WWAN_PROD_RING_COUNT	256
