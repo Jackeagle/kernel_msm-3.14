@@ -280,12 +280,12 @@ static int handle_ingress_format(struct net_device *dev,
 				  struct rmnet_ioctl_extended_s *in)
 {
 	int ret;
-	struct ipa_sys_connect_params *ipa_wan_ep_cfg;
+	struct ipa_sys_connect_params *wan_cfg;
 
 	ipa_debug("Get RMNET_IOCTL_SET_INGRESS_DATA_FORMAT\n");
-	ipa_wan_ep_cfg = &rmnet_ipa_ctx->ipa_to_apps_ep_cfg;
+	wan_cfg = &rmnet_ipa_ctx->ipa_to_apps_ep_cfg;
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_CHECKSUM)
-		ipa_wan_ep_cfg->ipa_ep_cfg.cfg.cs_offload_en =
+		wan_cfg->ipa_ep_cfg.cfg.cs_offload_en =
 		   IPA_ENABLE_CS_OFFLOAD_DL;
 
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA) {
@@ -299,34 +299,33 @@ static int handle_ingress_format(struct net_device *dev,
 		if (ret)
 			return ret;
 
-		ipa_wan_ep_cfg->ipa_ep_cfg.aggr.aggr_byte_limit =
+		wan_cfg->ipa_ep_cfg.aggr.aggr_byte_limit =
 			in->u.ingress_format.agg_size;
-		ipa_wan_ep_cfg->ipa_ep_cfg.aggr.aggr_pkt_limit =
+		wan_cfg->ipa_ep_cfg.aggr.aggr_pkt_limit =
 			in->u.ingress_format.agg_count;
 	}
 
-	ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_len =
-					sizeof(struct rmnet_map_header_s);
-	ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_ofst_metadata_valid = 1;
-	ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_ofst_metadata = 1;
-	ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_ofst_pkt_size_valid = 1;
-	ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_ofst_pkt_size = 2;
+	wan_cfg->ipa_ep_cfg.hdr.hdr_len = sizeof(struct rmnet_map_header_s);
+	wan_cfg->ipa_ep_cfg.hdr.hdr_ofst_metadata_valid = 1;
+	wan_cfg->ipa_ep_cfg.hdr.hdr_ofst_metadata = 1;
+	wan_cfg->ipa_ep_cfg.hdr.hdr_ofst_pkt_size_valid = 1;
+	wan_cfg->ipa_ep_cfg.hdr.hdr_ofst_pkt_size = 2;
 
-	ipa_wan_ep_cfg->ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad_valid = true;
-	ipa_wan_ep_cfg->ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad = IPA_HDR_PAD;
-	ipa_wan_ep_cfg->ipa_ep_cfg.hdr_ext.hdr_payload_len_inc_padding = true;
-	ipa_wan_ep_cfg->ipa_ep_cfg.metadata_mask.metadata_mask = 0xFF000000;
+	wan_cfg->ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad_valid = true;
+	wan_cfg->ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad = IPA_HDR_PAD;
+	wan_cfg->ipa_ep_cfg.hdr_ext.hdr_payload_len_inc_padding = true;
+	wan_cfg->ipa_ep_cfg.metadata_mask.metadata_mask = 0xFF000000;
 
-	ipa_wan_ep_cfg->client = IPA_CLIENT_APPS_WAN_CONS;
-	ipa_wan_ep_cfg->notify = apps_ipa_packet_receive_notify;
-	ipa_wan_ep_cfg->priv = dev;
+	wan_cfg->client = IPA_CLIENT_APPS_WAN_CONS;
+	wan_cfg->notify = apps_ipa_packet_receive_notify;
+	wan_cfg->priv = dev;
 
-	ipa_wan_ep_cfg->napi_enabled = true;
-	ipa_wan_ep_cfg->fifo_count = IPA_APPS_WWAN_CONS_RING_COUNT;
+	wan_cfg->napi_enabled = true;
+	wan_cfg->fifo_count = IPA_APPS_WWAN_CONS_RING_COUNT;
 
 	mutex_lock(&rmnet_ipa_ctx->pipe_handle_guard);
 
-	ret = ipa_setup_sys_pipe(ipa_wan_ep_cfg);
+	ret = ipa_setup_sys_pipe(wan_cfg);
 	if (ret < 0) {
 		ipa_err("failed to configure ingress\n");
 		mutex_unlock(&rmnet_ipa_ctx->pipe_handle_guard);
@@ -352,55 +351,50 @@ static int handle_egress_format(struct net_device *dev,
 				 struct rmnet_ioctl_extended_s *e)
 {
 	int rc;
-	struct ipa_sys_connect_params *ipa_wan_ep_cfg;
+	struct ipa_sys_connect_params *wan_cfg;
 
 	ipa_debug("get RMNET_IOCTL_SET_EGRESS_DATA_FORMAT\n");
-	ipa_wan_ep_cfg = &rmnet_ipa_ctx->apps_to_ipa_ep_cfg;
-	ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_len =
-					sizeof(struct rmnet_map_header_s);
+	wan_cfg = &rmnet_ipa_ctx->apps_to_ipa_ep_cfg;
+	wan_cfg->ipa_ep_cfg.hdr.hdr_len = sizeof(struct rmnet_map_header_s);
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_CHECKSUM) {
-		ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_len += sizeof(u32);
-		ipa_wan_ep_cfg->ipa_ep_cfg.cfg.cs_offload_en =
+		wan_cfg->ipa_ep_cfg.hdr.hdr_len += sizeof(u32);
+		wan_cfg->ipa_ep_cfg.cfg.cs_offload_en =
 			IPA_ENABLE_CS_OFFLOAD_UL;
-		ipa_wan_ep_cfg->ipa_ep_cfg.cfg.cs_metadata_hdr_offset = 1;
+		wan_cfg->ipa_ep_cfg.cfg.cs_metadata_hdr_offset = 1;
 	}
 
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_AGGREGATION) {
 		ipa_err("WAN UL Aggregation enabled\n");
 
-		ipa_wan_ep_cfg->ipa_ep_cfg.aggr.aggr_en = IPA_ENABLE_DEAGGR;
-		ipa_wan_ep_cfg->ipa_ep_cfg.aggr.aggr = IPA_QCMAP;
+		wan_cfg->ipa_ep_cfg.aggr.aggr_en = IPA_ENABLE_DEAGGR;
+		wan_cfg->ipa_ep_cfg.aggr.aggr = IPA_QCMAP;
 
-		ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_ofst_pkt_size = 2;
+		wan_cfg->ipa_ep_cfg.hdr.hdr_ofst_pkt_size = 2;
 
-		ipa_wan_ep_cfg->ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad_valid =
-			true;
-		ipa_wan_ep_cfg->ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad =
-			IPA_HDR_PAD;
-		ipa_wan_ep_cfg->ipa_ep_cfg.hdr_ext.hdr_pad_to_alignment =
-			2;
-		ipa_wan_ep_cfg->ipa_ep_cfg.hdr_ext.hdr_payload_len_inc_padding =
-			true;
+		wan_cfg->ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad_valid = true;
+		wan_cfg->ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad = IPA_HDR_PAD;
+		wan_cfg->ipa_ep_cfg.hdr_ext.hdr_pad_to_alignment = 2;
+		wan_cfg->ipa_ep_cfg.hdr_ext.hdr_payload_len_inc_padding = true;
 	} else {
 		ipa_debug("WAN UL Aggregation disabled\n");
-		ipa_wan_ep_cfg->ipa_ep_cfg.aggr.aggr_en = IPA_BYPASS_AGGR;
+		wan_cfg->ipa_ep_cfg.aggr.aggr_en = IPA_BYPASS_AGGR;
 	}
 
-	ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_ofst_metadata_valid = 1;
+	wan_cfg->ipa_ep_cfg.hdr.hdr_ofst_metadata_valid = 1;
 	/* modem want offset at 0! */
-	ipa_wan_ep_cfg->ipa_ep_cfg.hdr.hdr_ofst_metadata = 0;
+	wan_cfg->ipa_ep_cfg.hdr.hdr_ofst_metadata = 0;
 
-	ipa_wan_ep_cfg->ipa_ep_cfg.mode.dst = IPA_CLIENT_APPS_WAN_PROD;
-	ipa_wan_ep_cfg->ipa_ep_cfg.mode.mode = IPA_BASIC;
+	wan_cfg->ipa_ep_cfg.mode.dst = IPA_CLIENT_APPS_WAN_PROD;
+	wan_cfg->ipa_ep_cfg.mode.mode = IPA_BASIC;
 
-	ipa_wan_ep_cfg->client = IPA_CLIENT_APPS_WAN_PROD;
-	ipa_wan_ep_cfg->notify = apps_ipa_tx_complete_notify;
-	ipa_wan_ep_cfg->fifo_count = IPA_APPS_WWAN_PROD_RING_COUNT;
-	ipa_wan_ep_cfg->priv = dev;
+	wan_cfg->client = IPA_CLIENT_APPS_WAN_PROD;
+	wan_cfg->notify = apps_ipa_tx_complete_notify;
+	wan_cfg->fifo_count = IPA_APPS_WWAN_PROD_RING_COUNT;
+	wan_cfg->priv = dev;
 
 	mutex_lock(&rmnet_ipa_ctx->pipe_handle_guard);
 
-	rc = ipa_setup_sys_pipe(ipa_wan_ep_cfg);
+	rc = ipa_setup_sys_pipe(wan_cfg);
 	if (rc < 0) {
 		ipa_err("failed to config egress endpoint\n");
 		mutex_unlock(&rmnet_ipa_ctx->pipe_handle_guard);
