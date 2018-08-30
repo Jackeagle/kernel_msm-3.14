@@ -8,8 +8,6 @@
 
 #include <linux/slab.h>
 
-#include <dt-bindings/soc/qcom,ipa.h>
-
 /* A field_mask is a bitmask that defines both the width and
  * position of a field within in a 32-bit register.  Set bits in a
  * field_mask define which bits are considered part of a field.  At
@@ -268,21 +266,6 @@ enum ipa_dp_evt_type {
 	IPA_WRITE_DONE,
 	IPA_CLIENT_START_POLL,
 	IPA_CLIENT_COMP_NAPI,
-};
-
-/** enum ipa_hw_version - IPA hardware version
- * @IPA_HW_v3_5_1: IPA hardware version 3.5.1
- * @IPA_HW_None: IPA hardware version not defined
- *
- * Device Tree uses symbols like QCOM_IPA_HW_VER_v3_5_1 to represent
- * the IPA hardware version.  We use the values below internally,
- * with ipa_version_get() translating between the two.  Note that
- * order is significant for ipa_hw_type values--higher numeric
- * values imply newer hardware versions.
- */
-enum ipa_hw_version {
-	IPA_HW_v3_5_1	= 0,
-	IPA_HW_NONE	= 0xffffffff,
 };
 
 /** enum ipa_mode_type - mode setting type in IPA end-point

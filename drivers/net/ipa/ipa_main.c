@@ -1318,24 +1318,6 @@ static void ipa_smp2p_exit(void)
 	/* IRQ will be released when device goes away */
 }
 
-/* Return the IPA hardware version, or IPA_HW_NONE for any error */
-static enum ipa_hw_version ipa_version_get(struct platform_device *pdev)
-{
-	struct device_node *node = pdev->dev.of_node;
-	u32 ipa_version = 0;
-
-	if (of_property_read_u32(node, "qcom,ipa-hw-ver", &ipa_version))
-		return IPA_HW_NONE;
-
-	/* Translate the DTB value to the value we use internally */
-	if (ipa_version == QCOM_IPA_HW_VER_v3_5_1)
-		return IPA_HW_v3_5_1;
-
-	ipa_err("unsupported IPA hardware version %u\n", ipa_version);
-
-	return IPA_HW_NONE;
-}
-
 static const struct of_device_id ipa_plat_drv_match[] = {
 	{ .compatible = "qcom,ipa-sdm845", },
 	{}
@@ -1345,7 +1327,6 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 {
 	struct device *dev = &pdev_p->dev;
 	struct device_node *node = dev->of_node;
-	enum ipa_hw_version hw_version;
 	unsigned long phys_addr;
 	struct resource *res;
 	int result;
@@ -1376,14 +1357,6 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 	}
 
 	ipa_ctx->ipa_pdev = pdev_p;
-
-	/* Find out whether we're working with supported hardware */
-	hw_version = ipa_version_get(pdev_p);
-	if (hw_version == IPA_HW_NONE) {
-		result = -ENODEV;
-		goto err_clear_pdev;
-	}
-	ipa_debug(": ipa_version = %d", hw_version);
 
 	/* Get IPA wrapper address */
 	res = platform_get_resource_byname(pdev_p, IORESOURCE_MEM, "ipa-base");
