@@ -43,9 +43,8 @@ static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap)
  * example, to delete a route table safely.  If successful, record
  * the table and also the dev pointer in the IPA HAL context.
  */
-int ipahal_empty_fltrt_init(void)
+int ipahal_empty_fltrt_init(struct ipa_mem_buffer *mem)
 {
-	struct ipa_mem_buffer *mem = &ipahal_ctx->empty_fltrt_tbl;
 	u32 size = IPA_HW_TBL_WIDTH;
 
 	if (ipahal_dma_alloc(mem, size, GFP_KERNEL)) {
@@ -66,9 +65,9 @@ int ipahal_empty_fltrt_init(void)
 	return 0;
 }
 
-void ipahal_empty_fltrt_destroy(void)
+void ipahal_empty_fltrt_destroy(struct ipa_mem_buffer *mem)
 {
-	ipahal_dma_free(&ipahal_ctx->empty_fltrt_tbl);
+	ipahal_dma_free(mem);
 }
 
 /* Get the H/W table (flt/rt) header width */

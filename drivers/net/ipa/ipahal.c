@@ -500,7 +500,7 @@ int ipahal_dev_init(struct device *dev)
 	ipa_debug("IPA HAL ipa_pdev=%p\n", dev);
 
 	ipahal_ctx->ipa_pdev = dev;
-	ret = ipahal_empty_fltrt_init();
+	ret = ipahal_empty_fltrt_init(&ipahal_ctx->empty_fltrt_tbl);
 	if (ret)
 		ipahal_ctx->ipa_pdev = NULL;
 
@@ -509,7 +509,7 @@ int ipahal_dev_init(struct device *dev)
 
 void ipahal_dev_destroy(void)
 {
-	ipahal_empty_fltrt_destroy();
+	ipahal_empty_fltrt_destroy(&ipahal_ctx->empty_fltrt_tbl);
 	ipahal_ctx->ipa_pdev = NULL;
 }
 

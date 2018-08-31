@@ -6,7 +6,7 @@
 #ifndef _IPAHAL_FLTRT_I_H_
 #define _IPAHAL_FLTRT_I_H_
 
-int ipahal_empty_fltrt_init(void);
-void ipahal_empty_fltrt_destroy(void);
+int ipahal_empty_fltrt_init(struct ipa_mem_buffer *mem);
+void ipahal_empty_fltrt_destroy(struct ipa_mem_buffer *mem);
 
 #endif /* _IPAHAL_FLTRT_I_H_ */
