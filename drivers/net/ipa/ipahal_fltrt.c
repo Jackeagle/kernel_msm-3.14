@@ -26,14 +26,11 @@
 
 /* RULE ID, bit length (e.g. 10 bits).  */
 #define IPA_RULE_ID_BIT_LEN		10
-#define IPA_LOW_RULE_ID			1
 
 /* struct ipahal_fltrt_obj - Flt/Rt H/W information for specific IPA version
- * @low_rule_id: Low value of Rule ID that can be used
  * @rule_id_bit_len: Rule is high (MSB) bit len
  */
 struct ipahal_fltrt_obj {
-	u32 low_rule_id;
 	u32 rule_id_bit_len;
 };
 
@@ -52,7 +49,6 @@ struct ipahal_fltrt_obj {
  */
 /* IPAv3.5.1 */
 static const struct ipahal_fltrt_obj ipahal_fltrt = {
-	.low_rule_id		= IPA_LOW_RULE_ID,
 	.rule_id_bit_len	= IPA_RULE_ID_BIT_LEN,
 };
 
