@@ -18,6 +18,7 @@
  * Constraints:
  * - IPA_HW_TBL_WIDTH must be non-zero
  * - IPA_HW_TBL_SYSADDR_ALIGN must be a (non-zero) power of 2
+ * - IPA_HW_TBL_HDR_WIDTH must be non-zero
  */
 #define IPA_HW_TBL_WIDTH		8
 #define IPA_HW_TBL_SYSADDR_ALIGN	128
@@ -28,12 +29,10 @@
 #define IPA_LOW_RULE_ID			1
 
 /* struct ipahal_fltrt_obj - Flt/Rt H/W information for specific IPA version
- * @tbl_hdr_width: Width of the header structure in bytes
  * @low_rule_id: Low value of Rule ID that can be used
  * @rule_id_bit_len: Rule is high (MSB) bit len
  */
 struct ipahal_fltrt_obj {
-	u32 tbl_hdr_width;
 	u32 low_rule_id;
 	u32 rule_id_bit_len;
 };
@@ -49,12 +48,10 @@ struct ipahal_fltrt_obj {
  * The entries in this table have the following constraints.  Much
  * of this will be dictated by the hardware; the following statements
  * document assumptions of the code:
- * - tbl_hdr_width is non-zero
  * - rule_id_bit_len is 2 or more
  */
 /* IPAv3.5.1 */
 static const struct ipahal_fltrt_obj ipahal_fltrt = {
-	.tbl_hdr_width		= IPA_HW_TBL_HDR_WIDTH,
 	.low_rule_id		= IPA_LOW_RULE_ID,
 	.rule_id_bit_len	= IPA_RULE_ID_BIT_LEN,
 };
@@ -100,7 +97,7 @@ void ipahal_empty_fltrt_destroy(void)
 /* Get the H/W table (flt/rt) header width */
 u32 ipahal_get_hw_tbl_hdr_width(void)
 {
-	return ipahal_fltrt.tbl_hdr_width;
+	return IPA_HW_TBL_HDR_WIDTH;
 }
 
 /* Does the given ID represents rule miss?
@@ -121,7 +118,7 @@ bool ipahal_is_rule_miss_id(u32 id)
 int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
 				 gfp_t gfp)
 {
-	u32 width = ipahal_fltrt.tbl_hdr_width;
+	u32 width = IPA_HW_TBL_HDR_WIDTH;
 	int i = 0;
 	u64 addr;
 
@@ -150,7 +147,7 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
 int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
 				  struct ipa_mem_buffer *mem, gfp_t gfp)
 {
-	u32 width = ipahal_fltrt.tbl_hdr_width;
+	u32 width = IPA_HW_TBL_HDR_WIDTH;
 	int i = 0;
 	u64 addr;
 
