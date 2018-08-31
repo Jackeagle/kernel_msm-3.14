@@ -291,8 +291,7 @@ static int ipa_init_rt4(void)
 	u32 nhash_offset;
 	int rc;
 
-	rc = ipahal_rt_generate_empty_img(IPA_MEM_V4_RT_NUM_INDEX,
-					  &mem, GFP_KERNEL);
+	rc = ipahal_rt_generate_empty_img(IPA_MEM_V4_RT_NUM_INDEX, &mem);
 	if (rc) {
 		ipa_err("fail generate empty v4 rt img\n");
 		return rc;
@@ -335,8 +334,7 @@ static int ipa_init_rt6(void)
 	u32 nhash_offset;
 	int rc;
 
-	rc = ipahal_rt_generate_empty_img(IPA_MEM_V6_RT_NUM_INDEX,
-					  &mem, GFP_KERNEL);
+	rc = ipahal_rt_generate_empty_img(IPA_MEM_V6_RT_NUM_INDEX, &mem);
 	if (rc) {
 		ipa_err("fail generate empty v6 rt img\n");
 		return rc;
@@ -380,8 +378,7 @@ static int ipa_init_flt4(void)
 	int rc;
 
 	rc = ipahal_flt_generate_empty_img(ipa_ctx->ep_flt_num,
-					   ipa_ctx->ep_flt_bitmap, &mem,
-					   GFP_KERNEL);
+					   ipa_ctx->ep_flt_bitmap, &mem);
 	if (rc) {
 		ipa_err("fail generate empty v4 flt img\n");
 		return rc;
@@ -425,8 +422,7 @@ static int ipa_init_flt6(void)
 	int rc;
 
 	rc = ipahal_flt_generate_empty_img(ipa_ctx->ep_flt_num,
-					   ipa_ctx->ep_flt_bitmap, &mem,
-					   GFP_KERNEL);
+					   ipa_ctx->ep_flt_bitmap, &mem);
 	if (rc) {
 		ipa_err("fail generate empty v6 flt img\n");
 		return rc;

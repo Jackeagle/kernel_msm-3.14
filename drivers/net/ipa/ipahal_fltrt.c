@@ -90,10 +90,8 @@ bool ipahal_is_rule_miss_id(u32 id)
  *  For each table, make it point to the empty table on DDR.
  * @tbls_num: Number of tables. For each will have an entry in the header
  * @mem: mem object that points to DMA mem representing the hdr structure
- * @gfp: GFP flag to supply with DMA allocation request
  */
-int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
-				 gfp_t gfp)
+int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem)
 {
 	u32 width = IPA_HW_TBL_HDR_WIDTH;
 	int i = 0;
@@ -101,7 +99,7 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
 
 	ipa_debug("Entry\n");
 
-	if (ipahal_dma_alloc(mem, tbls_num * width, gfp))
+	if (ipahal_dma_alloc(mem, tbls_num * width, GFP_KERNEL))
 		return -ENOMEM;
 
 	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys_base;
@@ -119,10 +117,9 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem,
  *  should be: bit0->EP0, bit1->EP1
  *  If bitmap is zero -> create tbl without bitmap entry
  * @mem: mem object that points to DMA mem representing the hdr structure
- * @gfp: GFP flag to supply with DMA allocation request
  */
 int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
-				  struct ipa_mem_buffer *mem, gfp_t gfp)
+				  struct ipa_mem_buffer *mem)
 {
 	u32 width = IPA_HW_TBL_HDR_WIDTH;
 	int i = 0;
@@ -133,7 +130,7 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
 	if (ep_bitmap)
 		tbls_num++;
 
-	if (ipahal_dma_alloc(mem, tbls_num * width, gfp))
+	if (ipahal_dma_alloc(mem, tbls_num * width, GFP_KERNEL))
 		return -ENOMEM;
 
 	if (ep_bitmap) {
