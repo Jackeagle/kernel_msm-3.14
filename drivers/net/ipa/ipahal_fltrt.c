@@ -6,7 +6,6 @@
 #define pr_fmt(fmt)	"ipahal %s:%d " fmt, __func__, __LINE__
 
 #include <linux/debugfs.h>
-#include <asm/unaligned.h>
 #include "ipahal.h"
 #include "ipahal_fltrt.h"
 #include "ipahal_fltrt_i.h"
@@ -66,70 +65,4 @@ void ipahal_empty_fltrt_destroy(struct ipa_mem_buffer *mem)
 u32 ipahal_get_hw_tbl_hdr_width(void)
 {
 	return IPA_HW_TBL_HDR_WIDTH;
-}
-
-/* ipahal_rt_generate_empty_img() - Generate empty route image
- *  Creates routing header buffer for the given tables number.
- *  For each table, make it point to the empty table on DDR.
- * @tbls_num: Number of tables. For each will have an entry in the header
- * @mem: mem object that points to DMA mem representing the hdr structure
- */
-int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem)
-{
-	u32 width = ipahal_get_hw_tbl_hdr_width();
-	int i = 0;
-	u64 addr;
-
-	ipa_debug("Entry\n");
-
-	if (ipahal_dma_alloc(mem, tbls_num * width, GFP_KERNEL))
-		return -ENOMEM;
-
-	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys_base;
-	while (i < tbls_num)
-		put_unaligned(addr, mem->base + i++ * width);
-
-	return 0;
-}
-
-/* ipahal_flt_generate_empty_img() - Generate empty filter image
- *  Creates filter header buffer for the given tables number.
- *  For each table, make it point to the empty table on DDR.
- * @tbls_num: Number of tables. For each will have an entry in the header
- * @ep_bitmap: Bitmap representing the EP that has flt tables. The format
- *  should be: bit0->EP0, bit1->EP1
- *  If bitmap is zero -> create tbl without bitmap entry
- * @mem: mem object that points to DMA mem representing the hdr structure
- */
-int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
-				  struct ipa_mem_buffer *mem)
-{
-	u32 width = ipahal_get_hw_tbl_hdr_width();
-	int i = 0;
-	u64 addr;
-
-	ipa_debug("Entry - ep_bitmap 0x%llx\n", ep_bitmap);
-
-	if (ep_bitmap)
-		tbls_num++;
-
-	if (ipahal_dma_alloc(mem, tbls_num * width, GFP_KERNEL))
-		return -ENOMEM;
-
-	if (ep_bitmap) {
-		/* At IPA3, global configuration is possible but not used */
-		put_unaligned(ep_bitmap << 1, mem->base);
-		i++;
-	}
-
-	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys_base;
-	while (i < tbls_num)
-		put_unaligned(addr, mem->base + i++ * width);
-
-	return 0;
-}
-
-void ipahal_free_empty_img(struct ipa_mem_buffer *mem)
-{
-	ipahal_dma_free(mem);
 }
