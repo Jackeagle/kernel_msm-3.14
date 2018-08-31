@@ -25,7 +25,7 @@
  */
 static __always_inline u32 __field_mask_check(u32 field_mask)
 {
-	BUILD_BUG_ON(!__builtin_constant_p(field_mask));
+	/* BUILD_BUG_ON(!__builtin_constant_p(field_mask)); */
 	BUILD_BUG_ON(!field_mask);
 	if (field_mask == ~0)
 		return ~0;	/* Valid, but won't pass next test */

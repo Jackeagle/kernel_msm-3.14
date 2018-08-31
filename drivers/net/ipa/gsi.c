@@ -972,8 +972,6 @@ static void gsi_prime_evt_ring(struct gsi *gsi, struct gsi_evt_ctx *evtr)
 static u32
 command(struct gsi *gsi, u32 reg, u32 val, struct completion *compl)
 {
-	// BUILD_BUG_ON(GSI_CMD_TIMEOUT > (unsigned long)U32_MAX);
-
 	gsi_writel(gsi, val, reg);
 
 	return (u32)wait_for_completion_timeout(compl, GSI_CMD_TIMEOUT);
