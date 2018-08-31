@@ -12,45 +12,26 @@
 #include "ipahal_fltrt_i.h"
 #include "ipahal_i.h"
 
-/* Width and alignment values for H/W structures.  Values could
- * differ for different versions of IPA hardware.
- *
- * Constraints:
- * - IPA_HW_TBL_WIDTH must be non-zero
- * - IPA_HW_TBL_SYSADDR_ALIGN must be a (non-zero) power of 2
- * - IPA_HW_TBL_HDR_WIDTH must be non-zero
- */
-#define IPA_HW_TBL_WIDTH		8
-#define IPA_HW_TBL_SYSADDR_ALIGN	128
-#define IPA_HW_TBL_HDR_WIDTH		8
-
-/* RULE ID, bit length (e.g. 10 bits).  */
-#define IPA_RULE_ID_BIT_LEN		10
-
-/* struct ipahal_fltrt_obj - Flt/Rt H/W information for specific IPA version
- * @rule_id_bit_len: Rule is high (MSB) bit len
- */
-struct ipahal_fltrt_obj {
-	u32 rule_id_bit_len;
-};
-
 /* The IPA implements offloaded packet filtering and routing
  * capabilities.  This is managed by programming IPA-resident
  * tables of rules that define the processing that should be
  * performed by the IPA and the conditions under which they
  * should be applied.  Aspects of these rules are constrained
- * by things like table entry sizes and alignment requirements,
- * and these constraints are defined here.
+ * by things like table entry sizes and alignment requirements;
+ * all but one of these are in units of bytes.  These definitions
+ * are subject to some constraints:
+ * - IPA_HW_TBL_WIDTH must be non-zero
+ * - IPA_HW_TBL_SYSADDR_ALIGN must be a non-zero power of 2
+ * - IPA_HW_TBL_HDR_WIDTH must be non-zero
+ * - IPA_RULE_ID_BIT_LEN must be 2 or more
  *
- * The entries in this table have the following constraints.  Much
- * of this will be dictated by the hardware; the following statements
- * document assumptions of the code:
- * - rule_id_bit_len is 2 or more
+ * Values could differ for different versions of IPA hardware.
+ * These values are for v3.5.1, found in the SDM845.
  */
-/* IPAv3.5.1 */
-static const struct ipahal_fltrt_obj ipahal_fltrt = {
-	.rule_id_bit_len	= IPA_RULE_ID_BIT_LEN,
-};
+#define IPA_HW_TBL_WIDTH		8
+#define IPA_HW_TBL_SYSADDR_ALIGN	128
+#define IPA_HW_TBL_HDR_WIDTH		8
+#define IPA_RULE_ID_BIT_LEN		10	/* number of bits */
 
 static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap)
 {
@@ -101,7 +82,7 @@ u32 ipahal_get_hw_tbl_hdr_width(void)
  */
 bool ipahal_is_rule_miss_id(u32 id)
 {
-	return id == ((1U << ipahal_fltrt.rule_id_bit_len) - 1);
+	return id == (1U << IPA_RULE_ID_BIT_LEN) - 1;
 }
 
 /* ipahal_rt_generate_empty_img() - Generate empty route image
