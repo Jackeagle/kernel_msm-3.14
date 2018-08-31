@@ -517,3 +517,18 @@ void ipahal_destroy(void)
 {
 	ipa_debug("Entry\n");
 }
+
+/*
+ * Width (in bits) of a filter rule ID found in an IPA status packet.
+ * A rule miss is indicated as an all-1's value this width.  Note
+ * that IPA_RULE_ID_BIT_LEN must be 2 or more.
+ */
+#define IPA_RULE_ID_BIT_LEN	10
+
+/* Does the given ID represents rule miss?
+ * Rule miss ID, is always the max ID possible in the bit-pattern
+ */
+bool ipahal_is_rule_miss_id(u32 id)
+{
+	return id == (1U << IPA_RULE_ID_BIT_LEN) - 1;
+}

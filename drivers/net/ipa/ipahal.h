@@ -327,4 +327,7 @@ int ipahal_dev_init(struct device *ipa_pdev);
 void ipahal_dev_destroy(void);
 void ipahal_destroy(void);
 
+/* Does the given ID represents rule miss? */
+bool ipahal_is_rule_miss_id(u32 id);
+
 #endif /* _IPAHAL_H_ */

@@ -11,9 +11,6 @@
 /* Get the H/W table (flt/rt) header width */
 u32 ipahal_get_hw_tbl_hdr_width(void);
 
-/* Does the given ID represents rule miss? */
-bool ipahal_is_rule_miss_id(u32 id);
-
 /* ipahal_rt_generate_empty_img() - Generate empty route image
  *  Creates routing header buffer for the given tables number.
  * For each table, make it point to the empty table on DDR.

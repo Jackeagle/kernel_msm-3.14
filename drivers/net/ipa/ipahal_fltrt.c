@@ -18,12 +18,11 @@
  * performed by the IPA and the conditions under which they
  * should be applied.  Aspects of these rules are constrained
  * by things like table entry sizes and alignment requirements;
- * all but one of these are in units of bytes.  These definitions
- * are subject to some constraints:
+ * all of these are in units of bytes.  These definitions are
+ * subject to some constraints:
  * - IPA_HW_TBL_WIDTH must be non-zero
  * - IPA_HW_TBL_SYSADDR_ALIGN must be a non-zero power of 2
  * - IPA_HW_TBL_HDR_WIDTH must be non-zero
- * - IPA_RULE_ID_BIT_LEN must be 2 or more
  *
  * Values could differ for different versions of IPA hardware.
  * These values are for v3.5.1, found in the SDM845.
@@ -31,7 +30,6 @@
 #define IPA_HW_TBL_WIDTH		8
 #define IPA_HW_TBL_SYSADDR_ALIGN	128
 #define IPA_HW_TBL_HDR_WIDTH		8
-#define IPA_RULE_ID_BIT_LEN		10	/* number of bits */
 
 static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap)
 {
@@ -74,14 +72,6 @@ void ipahal_empty_fltrt_destroy(struct ipa_mem_buffer *mem)
 u32 ipahal_get_hw_tbl_hdr_width(void)
 {
 	return IPA_HW_TBL_HDR_WIDTH;
-}
-
-/* Does the given ID represents rule miss?
- * Rule miss ID, is always the max ID possible in the bit-pattern
- */
-bool ipahal_is_rule_miss_id(u32 id)
-{
-	return id == (1U << IPA_RULE_ID_BIT_LEN) - 1;
 }
 
 /* ipahal_rt_generate_empty_img() - Generate empty route image
