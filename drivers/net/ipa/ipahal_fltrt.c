@@ -14,6 +14,9 @@
 
 /* Width and alignment values for H/W structures.  Values could
  * differ for different versions of IPA hardware.
+ *
+ * Constraints:
+ * - IPA_HW_TBL_WIDTH must be non-zero
  */
 #define IPA_HW_TBL_WIDTH		8
 #define IPA_HW_TBL_SYSADDR_ALIGN	128
@@ -24,14 +27,12 @@
 #define IPA_LOW_RULE_ID			1
 
 /* struct ipahal_fltrt_obj - Flt/Rt H/W information for specific IPA version
- * @tbl_width: Width of table in bytes
  * @sysaddr_align: System table address alignment
  * @tbl_hdr_width: Width of the header structure in bytes
  * @low_rule_id: Low value of Rule ID that can be used
  * @rule_id_bit_len: Rule is high (MSB) bit len
  */
 struct ipahal_fltrt_obj {
-	u32 tbl_width;
 	u32 sysaddr_align;
 	u32 tbl_hdr_width;
 	u32 low_rule_id;
@@ -49,15 +50,12 @@ struct ipahal_fltrt_obj {
  * The entries in this table have the following constraints.  Much
  * of this will be dictated by the hardware; the following statements
  * document assumptions of the code:
- * - 0 is not a valid table width; a 0 tbl_width value in an
- *   entry indicates the entry contains no definitions
  * - sysaddr_align is non-zero, and is a power of 2
  * - tbl_hdr_width is non-zero
  * - rule_id_bit_len is 2 or more
  */
 /* IPAv3.5.1 */
 static const struct ipahal_fltrt_obj ipahal_fltrt = {
-	.tbl_width		= IPA_HW_TBL_WIDTH,
 	.sysaddr_align		= IPA_HW_TBL_SYSADDR_ALIGN,
 	.tbl_hdr_width		= IPA_HW_TBL_HDR_WIDTH,
 	.low_rule_id		= IPA_LOW_RULE_ID,
@@ -77,7 +75,7 @@ static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap)
 int ipahal_empty_fltrt_init(void)
 {
 	struct ipa_mem_buffer *mem = &ipahal_ctx->empty_fltrt_tbl;
-	u32 size = ipahal_fltrt.tbl_width;
+	u32 size = IPA_HW_TBL_WIDTH;
 
 	if (ipahal_dma_alloc(mem, size, GFP_KERNEL)) {
 		ipa_err("DMA buff alloc fail %u bytes for empty tbl\n", size);
