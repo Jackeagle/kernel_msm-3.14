@@ -322,6 +322,9 @@ void ipahal_dma_free(struct ipa_mem_buffer *mem);
  */
 void *ipahal_dma_phys_to_virt(struct ipa_mem_buffer *mem, dma_addr_t phys);
 
+/* Get the H/W table (flt/rt) header width */
+u32 ipahal_get_hw_tbl_hdr_width(void);
+
 void ipahal_init(void __iomem *base);
 int ipahal_dev_init(struct device *ipa_pdev);
 void ipahal_dev_destroy(void);
