@@ -1034,8 +1034,14 @@ static bool config_valid(void)
 	BUILD_BUG_ON(IPA_MEM_V6_RT_NUM_INDEX * IPA_HW_TBL_HDR_WIDTH
 		     > IPA_MEM_V6_RT_NHASH_SIZE);
 
+	/* The lower bound for the modem route table must not exceed
+	 * upper bound, for both IPv4 and IPv6.
+	 */
 	BUILD_BUG_ON(IPA_MEM_V4_MODEM_RT_INDEX_LO >
 		     IPA_MEM_V4_MODEM_RT_INDEX_HI);
+	BUILD_BUG_ON(IPA_MEM_V6_MODEM_RT_INDEX_LO >
+		     IPA_MEM_V6_MODEM_RT_INDEX_HI);
+
 	hi_index = IPA_MEM_V4_MODEM_RT_INDEX_HI;
 	lo_index = IPA_MEM_V4_MODEM_RT_INDEX_LO;
 	table_count = hi_index - lo_index + 1;
@@ -1052,8 +1058,6 @@ static bool config_valid(void)
 		return false;
 	}
 
-	BUILD_BUG_ON(IPA_MEM_V6_MODEM_RT_INDEX_LO >
-		     IPA_MEM_V6_MODEM_RT_INDEX_HI);
 	hi_index = IPA_MEM_V6_MODEM_RT_INDEX_HI;
 	lo_index = IPA_MEM_V6_MODEM_RT_INDEX_LO;
 	table_count = hi_index - lo_index + 1;
