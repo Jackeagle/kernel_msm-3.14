@@ -1000,22 +1000,6 @@ static bool config_valid(void)
 	BUILD_BUG_ON(!IPA_MEM_V4_RT_NUM_INDEX);
 	BUILD_BUG_ON(!IPA_MEM_V6_RT_NUM_INDEX);
 
-	/* The size set aside for AP route tables be non-zero, for
-	 * IPv4 and IPv6, and for both hashed and non-hashed tables.
-	 */
-	BUILD_BUG_ON(!IPA_MEM_V4_RT_HASH_SIZE);
-	BUILD_BUG_ON(!IPA_MEM_V4_RT_NHASH_SIZE);
-	BUILD_BUG_ON(!IPA_MEM_V6_RT_HASH_SIZE);
-	BUILD_BUG_ON(!IPA_MEM_V6_RT_NHASH_SIZE);
-
-	/* The size set aside for filter tables be non-zero, for
-	 * IPv4 and IPv6, and for both hashed and non-hashed tables.
-	 */
-	BUILD_BUG_ON(!IPA_MEM_V4_FLT_HASH_SIZE);
-	BUILD_BUG_ON(!IPA_MEM_V4_FLT_NHASH_SIZE);
-	BUILD_BUG_ON(!IPA_MEM_V6_FLT_HASH_SIZE);
-	BUILD_BUG_ON(!IPA_MEM_V6_FLT_NHASH_SIZE);
-
 	/* The size set aside for the AP route tables for IPv4 and
 	 * IPv6, both hashed and un-hashed, must be big enough to
 	 * hold all of the entries (the number of entries times the
