@@ -1012,6 +1012,14 @@ static bool config_valid(void)
 	BUILD_BUG_ON(!IPA_MEM_V6_RT_HASH_SIZE);
 	BUILD_BUG_ON(!IPA_MEM_V6_RT_NHASH_SIZE);
 
+	/* The size set aside for filter tables be non-zero, for
+	 * IPv4 and IPv6, and for both hashed and non-hashed tables.
+	 */
+	BUILD_BUG_ON(!IPA_MEM_V4_FLT_HASH_SIZE);
+	BUILD_BUG_ON(!IPA_MEM_V4_FLT_NHASH_SIZE);
+	BUILD_BUG_ON(!IPA_MEM_V6_FLT_HASH_SIZE);
+	BUILD_BUG_ON(!IPA_MEM_V6_FLT_NHASH_SIZE);
+
 	required_size = IPA_MEM_V4_RT_NUM_INDEX * IPA_HW_TBL_HDR_WIDTH;
 	if (required_size > IPA_MEM_V4_RT_HASH_SIZE) {
 		ipa_err("V4_RT_HASH_SIZE too small (%u < %u * %u)\n",
@@ -1079,13 +1087,11 @@ static bool config_valid(void)
 	/* Filter tables need an extra slot to hold an endpoint bitmap */
 	table_count = ipa_ctx->ep_flt_num + 1;
 	required_size = table_count * IPA_HW_TBL_HDR_WIDTH;
-	BUILD_BUG_ON(!IPA_MEM_V4_FLT_HASH_SIZE);
 	if (required_size > IPA_MEM_V4_FLT_HASH_SIZE) {
 		ipa_err("V4_FLT_HASH_SIZE too small  (%u < %u * %u)\n",
 			IPA_MEM_V4_FLT_HASH_SIZE, table_count, width);
 		return false;
 	}
-	BUILD_BUG_ON(!IPA_MEM_V4_FLT_NHASH_SIZE);
 	if (required_size > IPA_MEM_V4_FLT_NHASH_SIZE) {
 		ipa_err("V4_FLT_NHASH_SIZE too small (%u < %u * %u)\n",
 			IPA_MEM_V4_FLT_NHASH_SIZE, table_count,
@@ -1093,14 +1099,12 @@ static bool config_valid(void)
 		return false;
 	}
 
-	BUILD_BUG_ON(!IPA_MEM_V6_FLT_HASH_SIZE);
 	if (required_size > IPA_MEM_V6_FLT_HASH_SIZE) {
 		ipa_err("V6_FLT_HASH_SIZE too small  (%u < %u * %u)\n",
 			IPA_MEM_V6_FLT_HASH_SIZE, table_count,
 			width);
 		return false;
 	}
-	BUILD_BUG_ON(!IPA_MEM_V6_FLT_NHASH_SIZE);
 	if (required_size > IPA_MEM_V6_FLT_NHASH_SIZE) {
 		ipa_err("V6_FLT_NHASH_SIZE too small (%u < %u * %u)\n",
 			IPA_MEM_V6_FLT_NHASH_SIZE, table_count, width);
