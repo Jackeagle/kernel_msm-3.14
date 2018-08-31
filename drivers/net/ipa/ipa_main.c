@@ -1020,33 +1020,19 @@ static bool config_valid(void)
 	BUILD_BUG_ON(!IPA_MEM_V6_FLT_HASH_SIZE);
 	BUILD_BUG_ON(!IPA_MEM_V6_FLT_NHASH_SIZE);
 
-	required_size = IPA_MEM_V4_RT_NUM_INDEX * IPA_HW_TBL_HDR_WIDTH;
-	if (required_size > IPA_MEM_V4_RT_HASH_SIZE) {
-		ipa_err("V4_RT_HASH_SIZE too small (%u < %u * %u)\n",
-			IPA_MEM_V4_RT_HASH_SIZE, IPA_MEM_V4_RT_NUM_INDEX,
-			width);
-		return false;
-	}
-	if (required_size > IPA_MEM_V4_RT_NHASH_SIZE) {
-		ipa_err("V4_RT_NHASH_SIZE too small (%u < %u * %u)\n",
-			IPA_MEM_V4_RT_NHASH_SIZE, IPA_MEM_V4_RT_NUM_INDEX,
-			width);
-		return false;
-	}
-
-	required_size = IPA_MEM_V6_RT_NUM_INDEX * IPA_HW_TBL_HDR_WIDTH;
-	if (required_size > IPA_MEM_V6_RT_HASH_SIZE) {
-		ipa_err("V6_RT_HASH_SIZE too small (%u < %u * %u)\n",
-			IPA_MEM_V6_RT_HASH_SIZE, IPA_MEM_V6_RT_NUM_INDEX,
-			width);
-		return false;
-	}
-	if (required_size > IPA_MEM_V6_RT_NHASH_SIZE) {
-		ipa_err("V6_RT_NHASH_SIZE too small (%u < %u * %u)\n",
-			IPA_MEM_V6_RT_NHASH_SIZE, IPA_MEM_V6_RT_NUM_INDEX,
-			width);
-		return false;
-	}
+	/* The size set aside for the AP route tables for IPv4 and
+	 * IPv6, both hashed and un-hashed, must be big enough to
+	 * hold all of the entries (the number of entries times the
+	 * size of each entry).
+	 */
+	BUILD_BUG_ON(IPA_MEM_V4_RT_NUM_INDEX * IPA_HW_TBL_HDR_WIDTH
+		     > IPA_MEM_V4_RT_HASH_SIZE);
+	BUILD_BUG_ON(IPA_MEM_V4_RT_NUM_INDEX * IPA_HW_TBL_HDR_WIDTH
+		     > IPA_MEM_V4_RT_NHASH_SIZE);
+	BUILD_BUG_ON(IPA_MEM_V6_RT_NUM_INDEX * IPA_HW_TBL_HDR_WIDTH
+		     > IPA_MEM_V6_RT_HASH_SIZE);
+	BUILD_BUG_ON(IPA_MEM_V6_RT_NUM_INDEX * IPA_HW_TBL_HDR_WIDTH
+		     > IPA_MEM_V6_RT_NHASH_SIZE);
 
 	BUILD_BUG_ON(IPA_MEM_V4_MODEM_RT_INDEX_LO >
 		     IPA_MEM_V4_MODEM_RT_INDEX_HI);
