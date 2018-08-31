@@ -1042,37 +1042,19 @@ static bool config_valid(void)
 	BUILD_BUG_ON(IPA_MEM_V6_MODEM_RT_INDEX_LO >
 		     IPA_MEM_V6_MODEM_RT_INDEX_HI);
 
-	hi_index = IPA_MEM_V4_MODEM_RT_INDEX_HI;
-	lo_index = IPA_MEM_V4_MODEM_RT_INDEX_LO;
-	table_count = hi_index - lo_index + 1;
-	required_size = table_count * IPA_HW_TBL_HDR_WIDTH;
-	if (required_size > IPA_MEM_V4_RT_HASH_SIZE) {
-		ipa_err("V4_RT_HASH_SIZE too small for modem (%u < %u * %u)\n",
-			IPA_MEM_V4_RT_HASH_SIZE, table_count, width);
-		return false;
-	}
-	if (required_size > IPA_MEM_V4_RT_NHASH_SIZE) {
-		ipa_err("V4_RT_NHASH_SIZE too small for modem (%u < %u * %u)\n",
-			IPA_MEM_V4_RT_NHASH_SIZE, table_count,
-			width);
-		return false;
-	}
-
-	hi_index = IPA_MEM_V6_MODEM_RT_INDEX_HI;
-	lo_index = IPA_MEM_V6_MODEM_RT_INDEX_LO;
-	table_count = hi_index - lo_index + 1;
-	required_size = table_count * IPA_HW_TBL_HDR_WIDTH;
-	if (required_size > IPA_MEM_V6_RT_HASH_SIZE) {
-		ipa_err("V6_RT_HASH_SIZE too small for modem (%u < %u * %u)\n",
-			IPA_MEM_V6_RT_HASH_SIZE, table_count, width);
-		return false;
-	}
-	if (required_size > IPA_MEM_V6_RT_NHASH_SIZE) {
-		ipa_err("V6_RT_NHASH_SIZE too small for modem (%u < %u * %u)\n",
-			IPA_MEM_V6_RT_NHASH_SIZE, table_count,
-			width);
-		return false;
-	}
+	/* The size set aside for the modem route tables for IPv4
+	 * and IPv6, both hashed and un-hashed, must be big enough
+	 * to hold all of the entries (the number of entries times
+	 * the size of each entry).
+	 */
+#define NENTS (IPA_MEM_V4_MODEM_RT_INDEX_HI - IPA_MEM_V4_MODEM_RT_INDEX_LO + 1)
+	BUILD_BUG_ON(NENTS * IPA_HW_TBL_HDR_WIDTH > IPA_MEM_V4_RT_HASH_SIZE);
+	BUILD_BUG_ON(NENTS * IPA_HW_TBL_HDR_WIDTH > IPA_MEM_V4_RT_NHASH_SIZE);
+#undef NENTS
+#define NENTS (IPA_MEM_V6_MODEM_RT_INDEX_HI - IPA_MEM_V6_MODEM_RT_INDEX_LO + 1)
+	BUILD_BUG_ON(NENTS * IPA_HW_TBL_HDR_WIDTH > IPA_MEM_V6_RT_HASH_SIZE);
+	BUILD_BUG_ON(NENTS * IPA_HW_TBL_HDR_WIDTH > IPA_MEM_V6_RT_NHASH_SIZE);
+#undef NENTS
 
 	/* Filter tables need an extra slot to hold an endpoint bitmap */
 	table_count = ipa_ctx->ep_flt_num + 1;
