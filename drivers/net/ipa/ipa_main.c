@@ -995,6 +995,9 @@ static bool config_valid(void)
 	u32 lo_index;
 	u32 table_count;
 
+	/* The size of a filter or route table entry must be non-zero */
+	BUILD_BUG_ON(!IPA_HW_TBL_HDR_WIDTH);
+
 	BUILD_BUG_ON(!IPA_MEM_V4_RT_NUM_INDEX);
 	required_size = IPA_MEM_V4_RT_NUM_INDEX * IPA_HW_TBL_HDR_WIDTH;
 	BUILD_BUG_ON(!IPA_MEM_V4_RT_HASH_SIZE);
