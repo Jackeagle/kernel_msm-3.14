@@ -989,11 +989,7 @@ err_dma_free:
 
 static bool config_valid(void)
 {
-	u32 width = IPA_HW_TBL_HDR_WIDTH;
 	u32 required_size;
-	u32 hi_index;
-	u32 lo_index;
-	u32 table_count;
 
 	/* The size of a filter or route table entry must be non-zero */
 	BUILD_BUG_ON(!IPA_HW_TBL_HDR_WIDTH);
@@ -1056,32 +1052,24 @@ static bool config_valid(void)
 	BUILD_BUG_ON(NENTS * IPA_HW_TBL_HDR_WIDTH > IPA_MEM_V6_RT_NHASH_SIZE);
 #undef NENTS
 
-	/* Filter tables need an extra slot to hold an endpoint bitmap */
-	table_count = ipa_ctx->ep_flt_num + 1;
-	required_size = table_count * IPA_HW_TBL_HDR_WIDTH;
-	if (required_size > IPA_MEM_V4_FLT_HASH_SIZE) {
-		ipa_err("V4_FLT_HASH_SIZE too small  (%u < %u * %u)\n",
-			IPA_MEM_V4_FLT_HASH_SIZE, table_count, width);
+	/* The number of endpoints that support filtering is determined
+	 * at runtime, so we can't use BUILD_BUG_ON().
+	 *
+	 * The size set aside for the filter tables for IPv4 and IPv6,
+	 * both hashed and un-hashed, must be big enough to hold all
+	 * of the entries (the number of entries times the size of each
+	 * entry).  Note that filter tables need an extra entry to hold
+	 * an endpoint bitmap.
+	 */
+	required_size = (ipa_ctx->ep_flt_num + 1) * IPA_HW_TBL_HDR_WIDTH;
+	if (required_size > IPA_MEM_V4_FLT_HASH_SIZE)
 		return false;
-	}
-	if (required_size > IPA_MEM_V4_FLT_NHASH_SIZE) {
-		ipa_err("V4_FLT_NHASH_SIZE too small (%u < %u * %u)\n",
-			IPA_MEM_V4_FLT_NHASH_SIZE, table_count,
-			width);
+	if (required_size > IPA_MEM_V4_FLT_NHASH_SIZE)
 		return false;
-	}
-
-	if (required_size > IPA_MEM_V6_FLT_HASH_SIZE) {
-		ipa_err("V6_FLT_HASH_SIZE too small  (%u < %u * %u)\n",
-			IPA_MEM_V6_FLT_HASH_SIZE, table_count,
-			width);
+	if (required_size > IPA_MEM_V6_FLT_HASH_SIZE)
 		return false;
-	}
-	if (required_size > IPA_MEM_V6_FLT_NHASH_SIZE) {
-		ipa_err("V6_FLT_NHASH_SIZE too small (%u < %u * %u)\n",
-			IPA_MEM_V6_FLT_NHASH_SIZE, table_count, width);
+	if (required_size > IPA_MEM_V6_FLT_NHASH_SIZE)
 		return false;
-	}
 
 	return true;
 }
