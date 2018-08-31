@@ -31,12 +31,6 @@
 #define IPA_HW_TBL_SYSADDR_ALIGN	128
 #define IPA_HW_TBL_HDR_WIDTH		8
 
-static u64 ipa_fltrt_create_flt_bitmap(u64 ep_bitmap)
-{
-	/* At IPA3, global configuration is possible but not used */
-	return ep_bitmap << 1;
-}
-
 /* Set up an empty table in system memory.  This will be used, for
  * example, to delete a route table safely.  If successful, record
  * the table and also the dev pointer in the IPA HAL context.
@@ -123,10 +117,8 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
 		return -ENOMEM;
 
 	if (ep_bitmap) {
-		u64 flt_bitmap = ipa_fltrt_create_flt_bitmap(ep_bitmap);
-
-		ipa_debug("flt bitmap 0x%llx\n", flt_bitmap);
-		put_unaligned(flt_bitmap, mem->base);
+		/* At IPA3, global configuration is possible but not used */
+		put_unaligned(ep_bitmap << 1, mem->base);
 		i++;
 	}
 
