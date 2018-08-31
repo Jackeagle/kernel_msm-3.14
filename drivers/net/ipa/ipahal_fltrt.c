@@ -82,7 +82,7 @@ u32 ipahal_get_hw_tbl_hdr_width(void)
  */
 int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem)
 {
-	u32 width = IPA_HW_TBL_HDR_WIDTH;
+	u32 width = ipahal_get_hw_tbl_hdr_width();
 	int i = 0;
 	u64 addr;
 
@@ -110,7 +110,7 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem)
 int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
 				  struct ipa_mem_buffer *mem)
 {
-	u32 width = IPA_HW_TBL_HDR_WIDTH;
+	u32 width = ipahal_get_hw_tbl_hdr_width();
 	int i = 0;
 	u64 addr;
 
