@@ -17,6 +17,7 @@
  *
  * Constraints:
  * - IPA_HW_TBL_WIDTH must be non-zero
+ * - IPA_HW_TBL_SYSADDR_ALIGN must be a (non-zero) power of 2
  */
 #define IPA_HW_TBL_WIDTH		8
 #define IPA_HW_TBL_SYSADDR_ALIGN	128
@@ -27,13 +28,11 @@
 #define IPA_LOW_RULE_ID			1
 
 /* struct ipahal_fltrt_obj - Flt/Rt H/W information for specific IPA version
- * @sysaddr_align: System table address alignment
  * @tbl_hdr_width: Width of the header structure in bytes
  * @low_rule_id: Low value of Rule ID that can be used
  * @rule_id_bit_len: Rule is high (MSB) bit len
  */
 struct ipahal_fltrt_obj {
-	u32 sysaddr_align;
 	u32 tbl_hdr_width;
 	u32 low_rule_id;
 	u32 rule_id_bit_len;
@@ -50,13 +49,11 @@ struct ipahal_fltrt_obj {
  * The entries in this table have the following constraints.  Much
  * of this will be dictated by the hardware; the following statements
  * document assumptions of the code:
- * - sysaddr_align is non-zero, and is a power of 2
  * - tbl_hdr_width is non-zero
  * - rule_id_bit_len is 2 or more
  */
 /* IPAv3.5.1 */
 static const struct ipahal_fltrt_obj ipahal_fltrt = {
-	.sysaddr_align		= IPA_HW_TBL_SYSADDR_ALIGN,
 	.tbl_hdr_width		= IPA_HW_TBL_HDR_WIDTH,
 	.low_rule_id		= IPA_LOW_RULE_ID,
 	.rule_id_bit_len	= IPA_RULE_ID_BIT_LEN,
@@ -82,7 +79,7 @@ int ipahal_empty_fltrt_init(void)
 		return -ENOMEM;
 	}
 
-	if (mem->phys_base % ipahal_fltrt.sysaddr_align) {
+	if (mem->phys_base % IPA_HW_TBL_SYSADDR_ALIGN) {
 		ipa_err("Empty table buf is not address aligned 0x%pad\n",
 			&mem->phys_base);
 		ipahal_dma_free(mem);
