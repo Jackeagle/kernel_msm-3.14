@@ -34,7 +34,6 @@
 
 #include "ipa_i.h"
 #include "ipahal.h"
-#include "ipahal_fltrt.h"
 
 #define IPA_GPIO_IN_QUERY_CLK_IDX 0
 #define IPA_GPIO_OUT_CLK_RSP_CMPLT_IDX 0

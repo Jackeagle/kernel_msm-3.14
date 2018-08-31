@@ -12,7 +12,6 @@
 #include <linux/netdevice.h>
 #include "ipa_i.h"
 #include "ipahal.h"
-#include "ipahal_fltrt.h"
 
 /** struct ipa_tx_pkt_wrapper - IPA Tx packet wrapper
  * @type: specify if this packet is for the skb or immediate command

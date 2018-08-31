@@ -20,7 +20,6 @@
 #include <linux/platform_device.h>
 #include "ipa_i.h"
 #include "ipahal.h"
-#include "ipahal_fltrt.h"
 
 #define IPA_BCR_REG_VAL			0x0000003B
 

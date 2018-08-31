@@ -10,7 +10,6 @@
 #include "ipahal.h"
 #include "ipahal_i.h"
 #include "ipahal_reg_i.h"
-#include "ipahal_fltrt.h"
 
 /* Produce a contiguous bitmask with a positive number of low-order bits set. */
 #define MASK(bits)	GENMASK((bits) - 1, 0)
