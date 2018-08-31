@@ -989,7 +989,7 @@ err_dma_free:
 
 static bool config_valid(void)
 {
-	u32 width = ipahal_get_hw_tbl_hdr_width();
+	u32 width = IPA_HW_TBL_HDR_WIDTH;
 	u32 required_size;
 	u32 hi_index;
 	u32 lo_index;

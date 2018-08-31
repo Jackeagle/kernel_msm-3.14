@@ -8,6 +8,9 @@
 #include <linux/if_ether.h>
 #include "ipa_common_i.h"
 
+/* The width (bytes) of an IPA filter or route table (IPA v3.5.1) */
+#define IPA_HW_TBL_HDR_WIDTH		8	/* Must be non-zero */
+
 /* Immediate commands abstracted structures */
 
 /* struct ipahal_imm_cmd_pyld - Immediate cmd payload information
@@ -320,9 +323,6 @@ void ipahal_dma_free(struct ipa_mem_buffer *mem);
 /* ipahal_dma_phys_to_virt() - convert a DMA address to its virtual equivalent
  */
 void *ipahal_dma_phys_to_virt(struct ipa_mem_buffer *mem, dma_addr_t phys);
-
-/* Get the H/W table (flt/rt) header width */
-u32 ipahal_get_hw_tbl_hdr_width(void);
 
 void ipahal_init(void __iomem *base);
 int ipahal_dev_init(struct device *ipa_pdev);

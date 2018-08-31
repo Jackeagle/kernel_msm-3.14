@@ -24,14 +24,13 @@
  * subject to some constraints:
  * - IPA_HW_TBL_WIDTH must be non-zero
  * - IPA_HW_TBL_SYSADDR_ALIGN must be a non-zero power of 2
- * - IPA_HW_TBL_HDR_WIDTH must be non-zero
+ * - IPA_HW_TBL_HDR_WIDTH must be non-zero (defined in "ipahal.h")
  *
  * Values could differ for different versions of IPA hardware.
  * These values are for v3.5.1, found in the SDM845.
  */
 #define IPA_HW_TBL_WIDTH		8
 #define IPA_HW_TBL_SYSADDR_ALIGN	128
-#define IPA_HW_TBL_HDR_WIDTH		8
 
 static struct ipahal_context ipahal_ctx_struct;
 struct ipahal_context *ipahal_ctx = &ipahal_ctx_struct;
@@ -533,12 +532,6 @@ static void ipahal_empty_fltrt_destroy(struct ipa_mem_buffer *mem)
 	ipahal_dma_free(mem);
 }
 
-/* Get the H/W table (flt/rt) header width */
-u32 ipahal_get_hw_tbl_hdr_width(void)
-{
-	return IPA_HW_TBL_HDR_WIDTH;
-}
-
 void ipahal_init(void __iomem *base)
 {
 	ipa_debug("Entry - base=%p\n", base);
@@ -598,7 +591,7 @@ bool ipahal_is_rule_miss_id(u32 id)
  */
 int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem)
 {
-	u32 width = ipahal_get_hw_tbl_hdr_width();
+	u32 width = IPA_HW_TBL_HDR_WIDTH;
 	int i = 0;
 	u64 addr;
 
@@ -626,7 +619,7 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem)
 int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
 				  struct ipa_mem_buffer *mem)
 {
-	u32 width = ipahal_get_hw_tbl_hdr_width();
+	u32 width = IPA_HW_TBL_HDR_WIDTH;
 	int i = 0;
 	u64 addr;
 
