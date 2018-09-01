@@ -312,18 +312,6 @@ u32 ipahal_pkt_status_get_size(void);
 void ipahal_pkt_status_parse(const void *unparsed_status,
 			     struct ipahal_pkt_status *status);
 
-/* ipahal_dma_alloc() - allocate a DMA buffer, describe it in mem struct
- */
-int ipahal_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp);
-
-/* ipahal_dma_free() - free a previously-allocated DMA buffer described by mem
- */
-void ipahal_dma_free(struct ipa_mem_buffer *mem);
-
-/* ipahal_dma_phys_to_virt() - convert a DMA address to its virtual equivalent
- */
-void *ipahal_dma_phys_to_virt(struct ipa_mem_buffer *mem, dma_addr_t phys);
-
 int ipahal_init(struct device *dev, void __iomem *base);
 void ipahal_destroy(void);
 

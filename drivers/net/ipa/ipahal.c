@@ -7,6 +7,7 @@
 
 #include <linux/debugfs.h>
 #include <asm/unaligned.h>
+#include "ipa_i.h"
 #include "ipahal.h"
 #include "ipahal_i.h"
 #include "ipahal_reg_i.h"
@@ -471,36 +472,6 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 	status->status_mask = hw_status->status_mask;
 }
 
-int ipahal_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp)
-{
-	dma_addr_t phys;
-	void *cpu_addr;
-
-	cpu_addr = dma_zalloc_coherent(ipahal_ctx->ipa_pdev, size, &phys, gfp);
-	if (!cpu_addr) {
-		ipa_err("failed to alloc DMA buff of size %u\n", size);
-		return -ENOMEM;
-	}
-
-	mem->base = cpu_addr;
-	mem->phys_base = phys;
-	mem->size = size;
-
-	return 0;
-}
-
-void ipahal_dma_free(struct ipa_mem_buffer *mem)
-{
-	dma_free_coherent(ipahal_ctx->ipa_pdev, mem->size, mem->base,
-			  mem->phys_base);
-	memset(mem, 0, sizeof(*mem));
-}
-
-void *ipahal_dma_phys_to_virt(struct ipa_mem_buffer *mem, dma_addr_t phys)
-{
-	return mem->base + (phys - mem->phys_base);
-}
-
 int ipahal_init(struct device *dev, void __iomem *base)
 {
 	struct ipa_mem_buffer *mem = &ipahal_ctx->empty_fltrt_tbl;
@@ -515,7 +486,7 @@ int ipahal_init(struct device *dev, void __iomem *base)
 	 * memory.  This will be used, for example, to delete a
 	 * route safely.
 	 */
-	if (ipahal_dma_alloc(mem, IPA_HW_TBL_WIDTH, GFP_KERNEL)) {
+	if (ipa_dma_alloc(mem, IPA_HW_TBL_WIDTH, GFP_KERNEL)) {
 		ipa_err("error allocating empty filter/route table\n");
 		ipahal_ctx->ipa_pdev = NULL;
 		return -ENOMEM;
@@ -527,7 +498,7 @@ int ipahal_init(struct device *dev, void __iomem *base)
 
 void ipahal_destroy(void)
 {
-	ipahal_dma_free(&ipahal_ctx->empty_fltrt_tbl);
+	ipa_dma_free(&ipahal_ctx->empty_fltrt_tbl);
 	ipahal_ctx->base = NULL;
 	ipahal_ctx->ipa_pdev = NULL;
 }
@@ -561,7 +532,7 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem)
 
 	ipa_debug("Entry\n");
 
-	if (ipahal_dma_alloc(mem, tbls_num * width, GFP_KERNEL))
+	if (ipa_dma_alloc(mem, tbls_num * width, GFP_KERNEL))
 		return -ENOMEM;
 
 	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys_base;
@@ -592,7 +563,7 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
 	if (ep_bitmap)
 		tbls_num++;
 
-	if (ipahal_dma_alloc(mem, tbls_num * width, GFP_KERNEL))
+	if (ipa_dma_alloc(mem, tbls_num * width, GFP_KERNEL))
 		return -ENOMEM;
 
 	if (ep_bitmap) {
@@ -610,5 +581,5 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
 
 void ipahal_free_empty_img(struct ipa_mem_buffer *mem)
 {
-	ipahal_dma_free(mem);
+	ipa_dma_free(mem);
 }

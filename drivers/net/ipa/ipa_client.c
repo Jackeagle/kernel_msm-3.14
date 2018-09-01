@@ -28,7 +28,7 @@ ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep,
 	struct gsi_chan_props props = { };
 
 	/* Allocate the DMA space first; it can fail */
-	if (ipahal_dma_alloc(chan_dma, 2 * GSI_RING_ELEMENT_SIZE, GFP_KERNEL))
+	if (ipa_dma_alloc(chan_dma, 2 * GSI_RING_ELEMENT_SIZE, GFP_KERNEL))
 		return -ENOMEM;
 
 	/* Set up channel properties */
@@ -42,7 +42,7 @@ ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep,
 
 	if (gsi_set_channel_cfg(ipa_ctx->gsi, ep->gsi_chan_hdl, &props)) {
 		ipa_err("Error setting channel properties\n");
-		ipahal_dma_free(chan_dma);
+		ipa_dma_free(chan_dma);
 		return -EFAULT;
 	}
 
@@ -113,7 +113,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 		goto start_chan_fail;
 	}
 
-	if (ipahal_dma_alloc(&dma_byte, 1, GFP_KERNEL)) {
+	if (ipa_dma_alloc(&dma_byte, 1, GFP_KERNEL)) {
 		ipa_err("Error allocating DMA\n");
 		result = -ENOMEM;
 		goto dma_alloc_fail;
@@ -141,7 +141,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 
 	ipa_bug_on(aggr_active_bitmap & BIT(clnt_hdl));
 
-	ipahal_dma_free(&dma_byte);
+	ipa_dma_free(&dma_byte);
 
 	result = ipa_stop_gsi_channel(clnt_hdl);
 	if (result) {
@@ -173,12 +173,12 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	result = ipa_restore_channel_properties(ep, &orig_props);
 	if (result)
 		goto restore_props_fail;
-	ipahal_dma_free(&chan_dma);
+	ipa_dma_free(&chan_dma);
 
 	return 0;
 
 queue_xfer_fail:
-	ipahal_dma_free(&dma_byte);
+	ipa_dma_free(&dma_byte);
 dma_alloc_fail:
 	ipa_stop_gsi_channel(clnt_hdl);
 start_chan_fail:
@@ -190,7 +190,7 @@ start_chan_fail:
 	}
 	ipa_restore_channel_properties(ep, &orig_props);
 restore_props_fail:
-	ipahal_dma_free(&chan_dma);
+	ipa_dma_free(&chan_dma);
 
 	return result;
 }

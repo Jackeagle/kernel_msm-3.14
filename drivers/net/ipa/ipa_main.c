@@ -59,6 +59,35 @@ static DECLARE_WORK(ipa_client_remove_work, ipa_client_remove_deferred);
 static struct ipa_context ipa_ctx_struct;
 struct ipa_context *ipa_ctx = &ipa_ctx_struct;
 
+int ipa_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp)
+{
+	dma_addr_t phys;
+	void *cpu_addr;
+
+	cpu_addr = dma_zalloc_coherent(ipa_ctx->dev, size, &phys, gfp);
+	if (!cpu_addr) {
+		ipa_err("failed to alloc DMA buff of size %u\n", size);
+		return -ENOMEM;
+	}
+
+	mem->base = cpu_addr;
+	mem->phys_base = phys;
+	mem->size = size;
+
+	return 0;
+}
+
+void ipa_dma_free(struct ipa_mem_buffer *mem)
+{
+	dma_free_coherent(ipa_ctx->dev, mem->size, mem->base, mem->phys_base);
+	memset(mem, 0, sizeof(*mem));
+}
+
+void *ipa_dma_phys_to_virt(struct ipa_mem_buffer *mem, dma_addr_t phys)
+{
+	return mem->base + (phys - mem->phys_base);
+}
+
 static int hdr_init_local_cmd(u32 offset, u32 size)
 {
 	struct ipa_mem_buffer mem;
@@ -66,7 +95,7 @@ static int hdr_init_local_cmd(u32 offset, u32 size)
 	struct ipa_desc desc = { };
 	int ret;
 
-	if (ipahal_dma_alloc(&mem, size, GFP_KERNEL))
+	if (ipa_dma_alloc(&mem, size, GFP_KERNEL))
 		return -ENOMEM;
 
 	offset += ipa_ctx->smem_restricted_bytes;
@@ -85,7 +114,7 @@ static int hdr_init_local_cmd(u32 offset, u32 size)
 
 	ipahal_destroy_imm_cmd(cmd_pyld);
 err_dma_free:
-	ipahal_dma_free(&mem);
+	ipa_dma_free(&mem);
 
 	return ret;
 }
@@ -99,7 +128,7 @@ static int dma_shared_mem_zero_cmd(u32 offset, u32 size)
 
 	ipa_assert(size > 0);
 
-	if (ipahal_dma_alloc(&mem, size, GFP_KERNEL))
+	if (ipa_dma_alloc(&mem, size, GFP_KERNEL))
 		return -ENOMEM;
 
 	offset += ipa_ctx->smem_restricted_bytes;
@@ -118,7 +147,7 @@ static int dma_shared_mem_zero_cmd(u32 offset, u32 size)
 
 	ipahal_destroy_imm_cmd(cmd_pyld);
 err_dma_free:
-	ipahal_dma_free(&mem);
+	ipa_dma_free(&mem);
 
 	return ret;
 }
@@ -955,7 +984,7 @@ static int ipa_alloc_pkt_init(void)
 	ipahal_destroy_imm_cmd(cmd_pyld);
 
 	/* Allocate enough DMA memory to hold a payload for each pipe */
-	if (ipahal_dma_alloc(mem, size * ipa_ctx->ipa_num_pipes, GFP_KERNEL)) {
+	if (ipa_dma_alloc(mem, size * ipa_ctx->ipa_num_pipes, GFP_KERNEL)) {
 		ipa_err("failed to alloc DMA buff of size %d\n", mem->size);
 		return -ENOMEM;
 	}
@@ -982,7 +1011,7 @@ static int ipa_alloc_pkt_init(void)
 	return 0;
 err_dma_free:
 	memset(&ipa_ctx->pkt_init_imm[0], 0, i * sizeof(dma_addr_t));
-	ipahal_dma_free(mem);
+	ipa_dma_free(mem);
 
 	return -ENOMEM;
 }

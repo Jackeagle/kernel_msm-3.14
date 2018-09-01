@@ -634,7 +634,7 @@ static void handle_event(struct gsi *gsi, int evt_id)
 			}
 			check_again = true;
 
-			evt = ipahal_dma_phys_to_virt(&evtr->ring.mem,
+			evt = ipa_dma_phys_to_virt(&evtr->ring.mem,
 						      evtr->ring.rp_local);
 			(void)gsi_process_chan(gsi, evt, true);
 
@@ -1034,7 +1034,7 @@ long gsi_alloc_evt_ring(struct gsi *gsi, u32 ring_count, u16 int_modt)
 	evtr = &gsi->evtr[evt_id];
 	ipa_debug("Using %lu as virt evt id\n", evt_id);
 
-	if (ipahal_dma_alloc(&evtr->mem, size, GFP_KERNEL)) {
+	if (ipa_dma_alloc(&evtr->mem, size, GFP_KERNEL)) {
 		ipa_err("fail to dma alloc %u bytes\n", size);
 		ret = -ENOMEM;
 		goto err_free_bmap;
@@ -1080,7 +1080,7 @@ long gsi_alloc_evt_ring(struct gsi *gsi, u32 ring_count, u16 int_modt)
 	return evt_id;
 
 err_free_dma:
-	ipahal_dma_free(&evtr->mem);
+	ipa_dma_free(&evtr->mem);
 	memset(evtr, 0, sizeof(*evtr));
 err_free_bmap:
 	gsi_evt_bmap_free(gsi, evt_id);
@@ -1119,7 +1119,7 @@ void gsi_dealloc_evt_ring(struct gsi *gsi, unsigned long evt_id)
 	mutex_unlock(&gsi->mlock);
 
 	evtr->int_modt = 0;
-	ipahal_dma_free(&evtr->mem);
+	ipa_dma_free(&evtr->mem);
 	memset(evtr, 0, sizeof(*evtr));
 
 	atomic_dec(&gsi->num_evt_ring);
@@ -1189,7 +1189,7 @@ long gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
 	void **user_data;
 	u32 completed;
 
-	if (ipahal_dma_alloc(&props->mem, size, GFP_KERNEL)) {
+	if (ipa_dma_alloc(&props->mem, size, GFP_KERNEL)) {
 		ipa_err("fail to dma alloc %u bytes\n", size);
 		return -ENOMEM;
 	}
@@ -1198,20 +1198,20 @@ long gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
 
 	if (atomic_read(&evtr->chan_ref_cnt)) {
 		ipa_err("evt ring %hhu in use\n", evt_id);
-		ipahal_dma_free(&props->mem);
+		ipa_dma_free(&props->mem);
 		return -ENOTSUPP;
 	}
 
 	if (chan->allocated) {
 		ipa_err("chan %ld already allocated\n", chan_id);
-		ipahal_dma_free(&props->mem);
+		ipa_dma_free(&props->mem);
 		return -ENODEV;
 	}
 	memset(chan, 0, sizeof(*chan));
 
 	user_data = kcalloc(props->ring_count, sizeof(void *), GFP_KERNEL);
 	if (!user_data) {
-		ipahal_dma_free(&props->mem);
+		ipa_dma_free(&props->mem);
 		return -ENOMEM;
 	}
 
@@ -1254,7 +1254,7 @@ long gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
 err_mutex_unlock:
 	mutex_unlock(&gsi->mlock);
 	kfree(user_data);
-	ipahal_dma_free(&chan->props.mem);
+	ipa_dma_free(&chan->props.mem);
 
 	return chan_id;
 }
@@ -1459,7 +1459,7 @@ void gsi_dealloc_channel(struct gsi *gsi, unsigned long chan_id)
 	mutex_unlock(&gsi->mlock);
 
 	kfree(chan->user_data);
-	ipahal_dma_free(&chan->props.mem);
+	ipa_dma_free(&chan->props.mem);
 	chan->allocated = false;
 	atomic_dec(&chan->evtr->chan_ref_cnt);
 	atomic_dec(&gsi->num_chan);
@@ -1528,7 +1528,7 @@ int gsi_queue_xfer(struct gsi *gsi, unsigned long chan_id, u16 num_xfers,
 
 		chan->user_data[idx] = xfer[i].xfer_user_data;
 
-		tre_ptr = ipahal_dma_phys_to_virt(&chan->ring.mem,
+		tre_ptr = ipa_dma_phys_to_virt(&chan->ring.mem,
 						  chan->ring.wp_local);
 
 		tre_ptr->buffer_ptr = xfer[i].addr;
@@ -1597,7 +1597,7 @@ int gsi_poll_channel(struct gsi *gsi, unsigned long chan_id)
 	if (evtr->ring.rp != evtr->ring.rp_local) {
 		struct gsi_xfer_compl_evt *evt;
 
-		evt = ipahal_dma_phys_to_virt(&evtr->ring.mem,
+		evt = ipa_dma_phys_to_virt(&evtr->ring.mem,
 					      evtr->ring.rp_local);
 		size = gsi_process_chan(gsi, evt, false);
 

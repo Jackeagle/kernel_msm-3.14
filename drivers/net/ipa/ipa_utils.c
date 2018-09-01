@@ -1261,13 +1261,13 @@ int ipa_gsi_dma_task_alloc(void)
 {
 	struct ipa_mem_buffer *mem = &ipa_ctx->dma_task_info.mem;
 
-	if (ipahal_dma_alloc(mem, IPA_GSI_CHANNEL_STOP_PKT_SIZE, GFP_KERNEL))
+	if (ipa_dma_alloc(mem, IPA_GSI_CHANNEL_STOP_PKT_SIZE, GFP_KERNEL))
 		return -ENOMEM;
 
 	ipa_ctx->dma_task_info.cmd_pyld = ipahal_dma_task_32b_addr_pyld(mem);
 	if (!ipa_ctx->dma_task_info.cmd_pyld) {
 		ipa_err("failed to construct dma_task_32b_addr cmd\n");
-		ipahal_dma_free(mem);
+		ipa_dma_free(mem);
 
 		return -ENOMEM;
 	}
@@ -1281,7 +1281,7 @@ void ipa_gsi_dma_task_free(void)
 
 	ipahal_destroy_imm_cmd(ipa_ctx->dma_task_info.cmd_pyld);
 	ipa_ctx->dma_task_info.cmd_pyld = NULL;
-	ipahal_dma_free(mem);
+	ipa_dma_free(mem);
 }
 
 /** ipa_gsi_dma_task_inject()- Send DMA_TASK to IPA for GSI stop channel
