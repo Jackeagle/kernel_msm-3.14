@@ -324,8 +324,8 @@ void ipahal_dma_free(struct ipa_mem_buffer *mem);
  */
 void *ipahal_dma_phys_to_virt(struct ipa_mem_buffer *mem, dma_addr_t phys);
 
-void ipahal_init(void __iomem *base);
-int ipahal_dev_init(struct device *ipa_pdev);
+void ipahal_init(struct device *dev, void __iomem *base);
+int ipahal_dev_init(void);
 void ipahal_dev_destroy(void);
 void ipahal_destroy(void);
 
