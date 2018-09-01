@@ -59,6 +59,19 @@ static DECLARE_WORK(ipa_client_remove_work, ipa_client_remove_deferred);
 static struct ipa_context ipa_ctx_struct;
 struct ipa_context *ipa_ctx = &ipa_ctx_struct;
 
+static bool ipa_dma_init(struct device *dev, u32 align)
+{
+	/* Ensure DMA addresses will have the alignment we require */
+	if (dma_get_cache_alignment() % align)
+		return -ENOTSUPP;
+
+	return dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
+}
+
+static void ipa_dma_exit(void)
+{
+}
+
 int ipa_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp)
 {
 	dma_addr_t phys;
@@ -1381,14 +1394,14 @@ int ipa_plat_drv_probe(struct platform_device *platform_device)
 		goto err_clear_gsi;
 	}
 
-	result = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
+	result = ipa_dma_init(dev, IPA_HW_TBL_SYSADDR_ALIGN);
 	if (result)
 		goto err_clear_gsi;
 
 	if (ipahal_init(ipa_ctx->mmio)) {
 		ipa_err("failed to initialize IPA HAL pointer\n");
 		result = -EFAULT;
-		goto err_clear_gsi;
+		goto err_dma_exit;
 	}
 	ipa_ctx->dev = dev;
 	ipa_ctx->clnt_hdl_cmd = IPA_CLNT_HDL_BAD;
@@ -1401,6 +1414,8 @@ int ipa_plat_drv_probe(struct platform_device *platform_device)
 
 	ipa_ctx->dev = NULL;
 	ipahal_destroy();
+err_dma_exit:
+	ipa_dma_exit();
 err_clear_gsi:
 	ipa_ctx->gsi = NULL;
 	iounmap(ipa_ctx->mmio);

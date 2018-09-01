@@ -458,10 +458,6 @@ int ipahal_init(void __iomem *base)
 {
 	struct ipa_mem_buffer *mem = &ipahal_ctx->empty_fltrt_tbl;
 
-	/* Ensure DMA addresses will have the alignment we require */
-	if (dma_get_cache_alignment() % IPA_HW_TBL_SYSADDR_ALIGN)
-		return -EFAULT;
-
 	/* Set up an empty filter/route table entry in system
 	 * memory.  This will be used, for example, to delete a
 	 * route safely.
