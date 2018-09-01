@@ -1017,8 +1017,9 @@ err_dma_free:
 	return -ENOMEM;
 }
 
-static bool config_valid(u32 filter_count)
+static bool config_valid(u32 filter_bitmap)
 {
+	u32 filter_count;
 	u32 required_size;
 
 	/* The size of a filter or route table entry must be non-zero */
@@ -1066,8 +1067,8 @@ static bool config_valid(u32 filter_count)
 	BUILD_BUG_ON(NENTS * IPA_HW_TBL_HDR_WIDTH > IPA_MEM_V6_RT_NHASH_SIZE);
 #undef NENTS
 
-	/* The number of endpoints that support filtering is determined
-	 * at runtime, so we can't use BUILD_BUG_ON().
+	/* The endpoints that support filtering is determined at
+	 * runtime, so we can't use BUILD_BUG_ON().
 	 *
 	 * The size set aside for the filter tables for IPv4 and IPv6,
 	 * both hashed and un-hashed, must be big enough to hold all
@@ -1075,6 +1076,7 @@ static bool config_valid(u32 filter_count)
 	 * entry).  Note that filter tables need an extra entry to hold
 	 * an endpoint bitmap.
 	 */
+	filter_count = hweight32(ipa_ctx->filter_bitmap);
 	required_size = (filter_count + 1) * IPA_HW_TBL_HDR_WIDTH;
 	if (required_size > IPA_MEM_V4_FLT_HASH_SIZE)
 		return false;
@@ -1378,7 +1380,7 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 	ipa_debug("EP with flt support bitmap 0x%x\n", ipa_ctx->filter_bitmap);
 
 	/* Make sure we have a valid configuration before proceeding */
-	if (!config_valid(hweight32(ipa_ctx->filter_bitmap))) {
+	if (!config_valid(ipa_ctx->filter_bitmap)) {
 		ipa_err("invalid configuration\n");
 		result = -EFAULT;
 		goto err_clear_flt;
