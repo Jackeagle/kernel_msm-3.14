@@ -819,16 +819,9 @@ static int ipa_init_interrupts(void)
 {
 	int ret;
 
-	ret = platform_get_irq_byname(ipa_ctx->ipa_pdev, "ipa-irq");
-	if (ret < 0)
-		return ret;
-	ipa_ctx->ipa_irq = ret;
-
 	ret = ipa_interrupts_init();
-	if (ret) {
-		ipa_ctx->ipa_irq = 0;
+	if (!ret)
 		return ret;
-	}
 
 	ipa_add_interrupt_handler(IPA_TX_SUSPEND_IRQ, ipa_suspend_handler);
 
@@ -1353,13 +1346,17 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 	}
 
 	ipa_ctx->ipa_pdev = pdev_p;
+	result = platform_get_irq_byname(ipa_ctx->ipa_pdev, "ipa-irq");
+	if (result < 0)
+		goto err_clear_pdev;
+	ipa_ctx->ipa_irq = result;
 
 	/* Get IPA wrapper address */
 	res = platform_get_resource_byname(pdev_p, IORESOURCE_MEM, "ipa-base");
 	if (!res) {
 		ipa_err(":get resource failed for ipa-base!\n");
 		result = -ENODEV;
-		goto err_clear_pdev;
+		goto err_clear_ipa_irq;
 	}
 	ipa_ctx->ipa_wrapper_base = res->start;
 	ipa_ctx->ipa_wrapper_size = resource_size(res);
@@ -1426,6 +1423,8 @@ err_clear_wrapper:
 	ipa_ctx->clnt_hdl_cmd = 0;
 	ipa_ctx->ipa_wrapper_size = 0;
 	ipa_ctx->ipa_wrapper_base = 0;
+err_clear_ipa_irq:
+	ipa_ctx->ipa_irq = 0;
 err_clear_pdev:
 	ipa_ctx->ipa_pdev = NULL;
 	ipa_interconnect_exit();
