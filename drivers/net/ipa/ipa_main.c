@@ -1016,7 +1016,7 @@ err_dma_free:
 	return -ENOMEM;
 }
 
-static bool config_valid(void)
+static bool config_valid(u32 filter_count)
 {
 	u32 required_size;
 
@@ -1074,7 +1074,7 @@ static bool config_valid(void)
 	 * entry).  Note that filter tables need an extra entry to hold
 	 * an endpoint bitmap.
 	 */
-	required_size = (ipa_ctx->filter_count + 1) * IPA_HW_TBL_HDR_WIDTH;
+	required_size = (filter_count + 1) * IPA_HW_TBL_HDR_WIDTH;
 	if (required_size > IPA_MEM_V4_FLT_HASH_SIZE)
 		return false;
 	if (required_size > IPA_MEM_V4_FLT_NHASH_SIZE)
@@ -1379,7 +1379,7 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 		  ipa_ctx->filter_bitmap, ipa_ctx->filter_count);
 
 	/* Make sure we have a valid configuration before proceeding */
-	if (!config_valid()) {
+	if (!config_valid(ipa_ctx->filter_count)) {
 		ipa_err("invalid configuration\n");
 		result = -EFAULT;
 		goto err_clear_flt;
