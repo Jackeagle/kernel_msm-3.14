@@ -401,11 +401,12 @@ static int ipa_init_flt4(void)
 	struct ipa_desc desc = { };
 	struct ipa_mem_buffer mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
+	u32 filter_count = hweight32(ipa_ctx->filter_bitmap);
 	u32 hash_offset;
 	u32 nhash_offset;
 	int rc;
 
-	rc = ipahal_flt_generate_empty_img(ipa_ctx->filter_count,
+	rc = ipahal_flt_generate_empty_img(filter_count,
 					   ipa_ctx->filter_bitmap, &mem);
 	if (rc) {
 		ipa_err("fail generate empty v4 flt img\n");
@@ -445,11 +446,12 @@ static int ipa_init_flt6(void)
 	struct ipa_desc desc = { };
 	struct ipa_mem_buffer mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
+	u32 filter_count = hweight32(ipa_ctx->filter_bitmap);
 	u32 hash_offset;
 	u32 nhash_offset;
 	int rc;
 
-	rc = ipahal_flt_generate_empty_img(ipa_ctx->filter_count,
+	rc = ipahal_flt_generate_empty_img(filter_count,
 					   ipa_ctx->filter_bitmap, &mem);
 	if (rc) {
 		ipa_err("fail generate empty v6 flt img\n");
@@ -1312,6 +1314,7 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 	struct device_node *node = dev->of_node;
 	unsigned long phys_addr;
 	struct resource *res;
+	u32 filter_count;
 	int result;
 
 	/* We assume we're working on 64-bit hardware */
@@ -1374,12 +1377,12 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 		result = -ENODEV;
 		goto err_clear_mmio;
 	}
-	ipa_ctx->filter_count = hweight32(ipa_ctx->filter_bitmap);
+	filter_count = hweight32(ipa_ctx->filter_bitmap);
 	ipa_debug("EP with flt support bitmap 0x%x (%u pipes)\n",
-		  ipa_ctx->filter_bitmap, ipa_ctx->filter_count);
+		  ipa_ctx->filter_bitmap, filter_count);
 
 	/* Make sure we have a valid configuration before proceeding */
-	if (!config_valid(ipa_ctx->filter_count)) {
+	if (!config_valid(filter_count)) {
 		ipa_err("invalid configuration\n");
 		result = -EFAULT;
 		goto err_clear_flt;
@@ -1413,7 +1416,6 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 err_clear_gsi:
 	ipa_ctx->gsi = NULL;
 err_clear_flt:
-	ipa_ctx->filter_count = 0;
 	ipa_ctx->filter_bitmap = 0;
 err_clear_mmio:
 	iounmap(ipa_ctx->mmio);

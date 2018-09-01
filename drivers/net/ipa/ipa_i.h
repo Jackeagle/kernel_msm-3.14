@@ -503,7 +503,6 @@ struct ipa_dma_task_info {
  * @cdev: cdev of the device
  * @ep: list of all end points
  * @filter_bitmap: End-points supporting filtering bitmap
- * @filter_count: End-points supporting filtering number
  * @flt_tbl: list of all IPA filter tables
  * @mode: IPA operating mode
  * @mmio: iomem
@@ -547,7 +546,6 @@ struct ipa_context {
 
 	struct ipa_ep_context ep[IPA_MAX_NUM_PIPES];
 	u32 filter_bitmap;
-	u32 filter_count;
 	void __iomem *mmio;
 	u32 ipa_wrapper_base;
 	u32 ipa_wrapper_size;
