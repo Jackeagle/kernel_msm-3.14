@@ -1318,6 +1318,7 @@ int ipa_plat_drv_probe(struct platform_device *platform_device)
 	struct device_node *node = dev->of_node;
 	unsigned long phys_addr;
 	struct resource *res;
+	size_t wrapper_size;
 	int result;
 
 	/* We assume we're working on 64-bit hardware */
@@ -1359,9 +1360,9 @@ int ipa_plat_drv_probe(struct platform_device *platform_device)
 		goto err_clear_ipa_irq;
 	}
 	ipa_ctx->ipa_wrapper_base = res->start;
-	ipa_ctx->ipa_wrapper_size = resource_size(res);
-	ipa_debug(": ipa-base = 0x%x, size = 0x%x\n",
-		  ipa_ctx->ipa_wrapper_base, ipa_ctx->ipa_wrapper_size);
+	wrapper_size = (size_t)resource_size(res);
+	ipa_debug(": ipa-base = 0x%x, size = 0x%08zx\n",
+		  ipa_ctx->ipa_wrapper_base, wrapper_size);
 
 	/* Mark client handles bad until we initialize them */
 	ipa_ctx->clnt_hdl_cmd = IPA_CLNT_HDL_BAD;
@@ -1370,7 +1371,7 @@ int ipa_plat_drv_probe(struct platform_device *platform_device)
 	/* setup IPA register access */
 	phys_addr = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
 	ipa_debug("Mapping 0x%lx\n", phys_addr);
-	ipa_ctx->mmio = ioremap(phys_addr, ipa_ctx->ipa_wrapper_size);
+	ipa_ctx->mmio = ioremap(phys_addr, wrapper_size);
 	if (!ipa_ctx->mmio) {
 		ipa_err(":ipa-base ioremap err.\n");
 		result = -EFAULT;
@@ -1421,7 +1422,6 @@ err_clear_mmio:
 err_clear_wrapper:
 	ipa_ctx->clnt_hdl_lan_cons = 0;
 	ipa_ctx->clnt_hdl_cmd = 0;
-	ipa_ctx->ipa_wrapper_size = 0;
 	ipa_ctx->ipa_wrapper_base = 0;
 err_clear_ipa_irq:
 	ipa_ctx->ipa_irq = 0;
