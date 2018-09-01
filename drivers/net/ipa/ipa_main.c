@@ -1068,7 +1068,8 @@ static bool config_valid(u32 filter_bitmap)
 #undef NENTS
 
 	/* The endpoints that support filtering is determined at
-	 * runtime, so we can't use BUILD_BUG_ON().
+	 * runtime, so we can't use BUILD_BUG_ON().  We require at
+	 * least one pipe that supports filtering.
 	 *
 	 * The size set aside for the filter tables for IPv4 and IPv6,
 	 * both hashed and un-hashed, must be big enough to hold all
@@ -1076,6 +1077,8 @@ static bool config_valid(u32 filter_bitmap)
 	 * entry).  Note that filter tables need an extra entry to hold
 	 * an endpoint bitmap.
 	 */
+	if (!ipa_ctx->filter_bitmap)
+		return false;
 	filter_count = hweight32(ipa_ctx->filter_bitmap);
 	required_size = (filter_count + 1) * IPA_HW_TBL_HDR_WIDTH;
 	if (required_size > IPA_MEM_V4_FLT_HASH_SIZE)
@@ -1372,18 +1375,12 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 
 	/* Compute a bitmask representing which endpoints support filtering */
 	ipa_ctx->filter_bitmap = ipa_filter_bitmap_init();
-	if (!ipa_ctx->filter_bitmap) {
-		ipa_err("no endpoints support filtering\n");
-		result = -ENODEV;
-		goto err_clear_mmio;
-	}
-	ipa_debug("EP with flt support bitmap 0x%x\n", ipa_ctx->filter_bitmap);
 
-	/* Make sure we have a valid configuration before proceeding */
+	/* Now make sure we have a valid configuration before proceeding */
 	if (!config_valid(ipa_ctx->filter_bitmap)) {
 		ipa_err("invalid configuration\n");
 		result = -EFAULT;
-		goto err_clear_flt;
+		goto err_clear_mmio;
 	}
 
 	ipa_ctx->gsi = gsi_init(pdev_p);
@@ -1413,7 +1410,6 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 	ipahal_destroy();
 err_clear_gsi:
 	ipa_ctx->gsi = NULL;
-err_clear_flt:
 	ipa_ctx->filter_bitmap = 0;
 err_clear_mmio:
 	iounmap(ipa_ctx->mmio);
