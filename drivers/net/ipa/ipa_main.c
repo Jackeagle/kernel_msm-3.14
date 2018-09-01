@@ -1338,13 +1338,11 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_clear_wrapper;
 	}
 
-	ipahal_init(ipa_ctx->mmio);
-
 	ipa_init_ep_flt_bitmap();
 	if (!ipa_ctx->ep_flt_num) {
 		ipa_err("no endpoints support filtering\n");
 		result = -ENODEV;
-		goto err_hal_destroy;
+		goto err_clear_mmio;
 	}
 	ipa_debug("EP with flt support bitmap 0x%x (%u pipes)\n",
 		  ipa_ctx->ep_flt_bitmap, ipa_ctx->ep_flt_num);
@@ -1367,6 +1365,7 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 	if (result)
 		goto err_clear_gsi;
 
+	ipahal_init(ipa_ctx->mmio);
 	if (ipahal_dev_init(dev)) {
 		ipa_err("failed to assign IPA HAL dev pointer\n");
 		result = -EFAULT;
@@ -1379,15 +1378,15 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 	if (!result)
 		return 0;	/* Success */
 
-	ipahal_dev_destroy();
 	ipa_ctx->dev = NULL;
+	ipahal_dev_destroy();
+	ipahal_destroy();
 err_clear_gsi:
 	ipa_ctx->gsi = NULL;
 err_clear_flt:
 	ipa_ctx->ep_flt_num = 0;
 	ipa_ctx->ep_flt_bitmap = 0;
-err_hal_destroy:
-	ipahal_destroy();
+err_clear_mmio:
 	iounmap(ipa_ctx->mmio);
 	ipa_ctx->mmio = NULL;
 err_clear_wrapper:
