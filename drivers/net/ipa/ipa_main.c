@@ -405,8 +405,8 @@ static int ipa_init_flt4(void)
 	u32 nhash_offset;
 	int rc;
 
-	rc = ipahal_flt_generate_empty_img(ipa_ctx->ep_flt_num,
-					   ipa_ctx->ep_flt_bitmap, &mem);
+	rc = ipahal_flt_generate_empty_img(ipa_ctx->filter_count,
+					   ipa_ctx->filter_bitmap, &mem);
 	if (rc) {
 		ipa_err("fail generate empty v4 flt img\n");
 		return rc;
@@ -449,8 +449,8 @@ static int ipa_init_flt6(void)
 	u32 nhash_offset;
 	int rc;
 
-	rc = ipahal_flt_generate_empty_img(ipa_ctx->ep_flt_num,
-					   ipa_ctx->ep_flt_bitmap, &mem);
+	rc = ipahal_flt_generate_empty_img(ipa_ctx->filter_count,
+					   ipa_ctx->filter_bitmap, &mem);
 	if (rc) {
 		ipa_err("fail generate empty v6 flt img\n");
 		return rc;
@@ -488,7 +488,7 @@ static void ipa_setup_flt_hash_tuple(void)
 	for (pipe_idx = 0; pipe_idx < ipa_ctx->ipa_num_pipes ; pipe_idx++) {
 		if (ipa_is_modem_pipe(pipe_idx))
 			continue;
-		if (ipa_ctx->ep_flt_bitmap & BIT(pipe_idx))
+		if (ipa_ctx->filter_bitmap & BIT(pipe_idx))
 			ipa_set_flt_tuple_mask(pipe_idx, &tuple);
 	}
 }
@@ -1074,7 +1074,7 @@ static bool config_valid(void)
 	 * entry).  Note that filter tables need an extra entry to hold
 	 * an endpoint bitmap.
 	 */
-	required_size = (ipa_ctx->ep_flt_num + 1) * IPA_HW_TBL_HDR_WIDTH;
+	required_size = (ipa_ctx->filter_count + 1) * IPA_HW_TBL_HDR_WIDTH;
 	if (required_size > IPA_MEM_V4_FLT_HASH_SIZE)
 		return false;
 	if (required_size > IPA_MEM_V4_FLT_NHASH_SIZE)
@@ -1367,15 +1367,16 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_clear_wrapper;
 	}
 
-	ipa_ctx->ep_flt_bitmap = ipa_init_ep_flt_bitmap();
-	ipa_ctx->ep_flt_num = hweight32(ipa_ctx->ep_flt_bitmap);
-	if (!ipa_ctx->ep_flt_num) {
+	/* Compute a bitmask representing which endpoints support filtering */
+	ipa_ctx->filter_bitmap = ipa_filter_bitmap_init();
+	if (!ipa_ctx->filter_bitmap) {
 		ipa_err("no endpoints support filtering\n");
 		result = -ENODEV;
 		goto err_clear_mmio;
 	}
+	ipa_ctx->filter_count = hweight32(ipa_ctx->filter_bitmap);
 	ipa_debug("EP with flt support bitmap 0x%x (%u pipes)\n",
-		  ipa_ctx->ep_flt_bitmap, ipa_ctx->ep_flt_num);
+		  ipa_ctx->filter_bitmap, ipa_ctx->filter_count);
 
 	/* Make sure we have a valid configuration before proceeding */
 	if (!config_valid()) {
@@ -1412,8 +1413,8 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 err_clear_gsi:
 	ipa_ctx->gsi = NULL;
 err_clear_flt:
-	ipa_ctx->ep_flt_num = 0;
-	ipa_ctx->ep_flt_bitmap = 0;
+	ipa_ctx->filter_count = 0;
+	ipa_ctx->filter_bitmap = 0;
 err_clear_mmio:
 	iounmap(ipa_ctx->mmio);
 	ipa_ctx->mmio = NULL;

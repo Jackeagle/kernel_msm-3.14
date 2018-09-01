@@ -502,8 +502,8 @@ struct ipa_dma_task_info {
  * @dev: the dev_t of the device
  * @cdev: cdev of the device
  * @ep: list of all end points
- * @ep_flt_bitmap: End-points supporting filtering bitmap
- * @ep_flt_num: End-points supporting filtering number
+ * @filter_bitmap: End-points supporting filtering bitmap
+ * @filter_count: End-points supporting filtering number
  * @flt_tbl: list of all IPA filter tables
  * @mode: IPA operating mode
  * @mmio: iomem
@@ -546,8 +546,8 @@ struct ipa_context {
 	struct device *dev;
 
 	struct ipa_ep_context ep[IPA_MAX_NUM_PIPES];
-	u32 ep_flt_bitmap;
-	u32 ep_flt_num;
+	u32 filter_bitmap;
+	u32 filter_count;
 	void __iomem *mmio;
 	u32 ipa_wrapper_base;
 	u32 ipa_wrapper_size;
@@ -627,7 +627,7 @@ void ipa_proxy_clk_unvote(void);
 
 enum ipa_client_type ipa_get_client_mapping(u32 pipe_idx);
 
-u32 ipa_init_ep_flt_bitmap(void);
+u32 ipa_filter_bitmap_init(void);
 
 /* internal functions */
 
