@@ -15,24 +15,6 @@
 /* Produce a contiguous bitmask with a positive number of low-order bits set. */
 #define MASK(bits)	GENMASK((bits) - 1, 0)
 
-/* The IPA implements offloaded packet filtering and routing
- * capabilities.  This is managed by programming IPA-resident
- * tables of rules that define the processing that should be
- * performed by the IPA and the conditions under which they
- * should be applied.  Aspects of these rules are constrained
- * by things like table entry sizes and alignment requirements;
- * all of these are in units of bytes.  These definitions are
- * subject to some constraints:
- * - IPA_HW_TBL_WIDTH must be non-zero
- * - IPA_HW_TBL_SYSADDR_ALIGN must be a non-zero power of 2
- * - IPA_HW_TBL_HDR_WIDTH must be non-zero (defined in "ipahal.h")
- *
- * Values could differ for different versions of IPA hardware.
- * These values are for v3.5.1, found in the SDM845.
- */
-#define IPA_HW_TBL_WIDTH		8
-#define IPA_HW_TBL_SYSADDR_ALIGN	128
-
 static struct ipahal_context ipahal_ctx_struct;
 struct ipahal_context *ipahal_ctx = &ipahal_ctx_struct;
 
