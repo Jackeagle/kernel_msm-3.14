@@ -584,20 +584,21 @@ void ipa_init_hw(void)
 /** ipa_init_ep_flt_bitmap() - Initialize the bitmap
  * that represents the End-points that supports filtering
  */
-void ipa_init_ep_flt_bitmap(void)
+u32 ipa_init_ep_flt_bitmap(void)
 {
 	enum ipa_client_type cl;
+	u32 ep_flt_bitmap = 0;
 
 	for (cl = 0; cl < IPA_CLIENT_MAX ; cl++) {
 		const struct ipa_ep_configuration *ep_config;
 
 		ep_config = ep_configuration(cl);
-		if (ep_config->support_flt) {
-			u32 pipe_num = ep_config->ipa_gsi_ep_info.ipa_ep_num;
-
-			ipa_ctx->ep_flt_bitmap |= BIT(pipe_num);
-		}
+		if (!ep_config->support_flt)
+			continue;
+		ep_flt_bitmap |= BIT(ep_config->ipa_gsi_ep_info.ipa_ep_num);
 	}
+
+	return ep_flt_bitmap;
 }
 
 static const char *ipa_get_mode_type_str(enum ipa_mode_type mode)
