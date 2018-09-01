@@ -501,18 +501,7 @@ void *ipahal_dma_phys_to_virt(struct ipa_mem_buffer *mem, dma_addr_t phys)
 	return mem->base + (phys - mem->phys_base);
 }
 
-void ipahal_init(struct device *dev, void __iomem *base)
-{
-	ipa_debug("Entry - base=%p\n", base);
-
-	ipahal_ctx->ipa_pdev = dev;
-	ipahal_ctx->base = base;
-}
-
-/* Assign the IPA HAL's device pointer.  Once it's assigned we can
- * initialize the empty table entry.
- */
-int ipahal_dev_init(void)
+int ipahal_init(struct device *dev, void __iomem *base)
 {
 	struct ipa_mem_buffer *mem = &ipahal_ctx->empty_fltrt_tbl;
 
@@ -520,25 +509,25 @@ int ipahal_dev_init(void)
 	if (dma_get_cache_alignment() % IPA_HW_TBL_SYSADDR_ALIGN)
 		return -EFAULT;
 
+	ipahal_ctx->ipa_pdev = dev;
+
 	/* Set up an empty filter/route table entry in system
 	 * memory.  This will be used, for example, to delete a
 	 * route safely.
 	 */
 	if (ipahal_dma_alloc(mem, IPA_HW_TBL_WIDTH, GFP_KERNEL)) {
 		ipa_err("error allocating empty filter/route table\n");
+		ipahal_ctx->ipa_pdev = NULL;
 		return -ENOMEM;
 	}
+	ipahal_ctx->base = base;
 
 	return 0;
 }
 
-void ipahal_dev_destroy(void)
-{
-	ipahal_dma_free(&ipahal_ctx->empty_fltrt_tbl);
-}
-
 void ipahal_destroy(void)
 {
+	ipahal_dma_free(&ipahal_ctx->empty_fltrt_tbl);
 	ipahal_ctx->base = NULL;
 	ipahal_ctx->ipa_pdev = NULL;
 }

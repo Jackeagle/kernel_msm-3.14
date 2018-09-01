@@ -1365,9 +1365,8 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 	if (result)
 		goto err_clear_gsi;
 
-	ipahal_init(dev, ipa_ctx->mmio);
-	if (ipahal_dev_init()) {
-		ipa_err("failed to assign IPA HAL dev pointer\n");
+	if (ipahal_init(dev, ipa_ctx->mmio)) {
+		ipa_err("failed to initialize IPA HAL pointer\n");
 		result = -EFAULT;
 		goto err_clear_gsi;
 	}
@@ -1379,7 +1378,6 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 		return 0;	/* Success */
 
 	ipa_ctx->dev = NULL;
-	ipahal_dev_destroy();
 	ipahal_destroy();
 err_clear_gsi:
 	ipa_ctx->gsi = NULL;
