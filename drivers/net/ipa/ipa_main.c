@@ -1315,7 +1315,6 @@ static const struct of_device_id ipa_plat_drv_match[] = {
 int ipa_plat_drv_probe(struct platform_device *platform_device)
 {
 	struct device *dev = &platform_device->dev;
-	struct device_node *node = dev->of_node;
 	unsigned long phys_addr;
 	struct resource *res;
 	size_t wrapper_size;
@@ -1324,8 +1323,7 @@ int ipa_plat_drv_probe(struct platform_device *platform_device)
 	/* We assume we're working on 64-bit hardware */
 	BUILD_BUG_ON(!IS_ENABLED(CONFIG_64BIT));
 
-	ipa_debug("IPA driver probing started\n");
-	ipa_debug("dev->of_node->name = %s\n", node->name);
+	ipa_debug("IPA driver: probing\n");
 
 	/* Initialize the smp2p driver first.  It might not be ready
 	 * when we're probed, so it might return -EPROBE_DEFER (meaning
@@ -1346,9 +1344,19 @@ int ipa_plat_drv_probe(struct platform_device *platform_device)
 		goto out_smp2p_exit;
 	}
 
+	/* Compute a bitmask representing which endpoints support filtering */
+	ipa_ctx->filter_bitmap = ipa_filter_bitmap_init();
+
+	/* Now make sure we have a valid configuration before proceeding */
+	if (!config_valid(ipa_ctx->filter_bitmap)) {
+		ipa_err("invalid configuration\n");
+		result = -EFAULT;
+		goto err_clear_filter_bitmap;
+	}
+
 	result = platform_get_irq_byname(platform_device, "ipa-irq");
 	if (result < 0)
-		goto err_interconnect_exit;
+		goto err_clear_filter_bitmap;
 	ipa_ctx->ipa_irq = result;
 
 	/* Get IPA wrapper address */
@@ -1378,16 +1386,6 @@ int ipa_plat_drv_probe(struct platform_device *platform_device)
 		goto err_clear_wrapper;
 	}
 
-	/* Compute a bitmask representing which endpoints support filtering */
-	ipa_ctx->filter_bitmap = ipa_filter_bitmap_init();
-
-	/* Now make sure we have a valid configuration before proceeding */
-	if (!config_valid(ipa_ctx->filter_bitmap)) {
-		ipa_err("invalid configuration\n");
-		result = -EFAULT;
-		goto err_clear_mmio;
-	}
-
 	ipa_ctx->gsi = gsi_init(platform_device);
 	if (IS_ERR(ipa_ctx->gsi)) {
 		ipa_err("ipa: error initializing gsi driver.\n");
@@ -1415,8 +1413,6 @@ int ipa_plat_drv_probe(struct platform_device *platform_device)
 	ipahal_destroy();
 err_clear_gsi:
 	ipa_ctx->gsi = NULL;
-	ipa_ctx->filter_bitmap = 0;
-err_clear_mmio:
 	iounmap(ipa_ctx->mmio);
 	ipa_ctx->mmio = NULL;
 err_clear_wrapper:
@@ -1425,7 +1421,8 @@ err_clear_wrapper:
 	ipa_ctx->ipa_wrapper_base = 0;
 err_clear_ipa_irq:
 	ipa_ctx->ipa_irq = 0;
-err_interconnect_exit:
+err_clear_filter_bitmap:
+	ipa_ctx->filter_bitmap = 0;
 	ipa_interconnect_exit();
 out_smp2p_exit:
 	ipa_smp2p_exit();

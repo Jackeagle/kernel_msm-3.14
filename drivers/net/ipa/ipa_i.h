@@ -539,11 +539,10 @@ struct ipa_dma_task_info {
  * IPA context - holds all relevant info about IPA driver and its state
  */
 struct ipa_context {
+	u32 filter_bitmap;
 	u32 ipa_irq;
 	u32 ipa_wrapper_base;
-	u32 filter_bitmap;
 	void __iomem *mmio;
-
 	struct gsi *gsi;
 	struct device *dev;
 
