@@ -501,26 +501,6 @@ void *ipahal_dma_phys_to_virt(struct ipa_mem_buffer *mem, dma_addr_t phys)
 	return mem->base + (phys - mem->phys_base);
 }
 
-/* Set up an empty table in system memory.  This will be used, for
- * example, to delete a route table safely.  If successful, record
- * the table and also the dev pointer in the IPA HAL context.
- */
-static int ipahal_empty_fltrt_init(struct ipa_mem_buffer *mem)
-{
-	if (mem->phys_base % IPA_HW_TBL_SYSADDR_ALIGN) {
-		ipa_err("Empty table buf is not address aligned 0x%pad\n",
-			&mem->phys_base);
-
-		return -EFAULT;
-	}
-
-	return 0;
-}
-
-static void ipahal_empty_fltrt_destroy(struct ipa_mem_buffer *mem)
-{
-}
-
 void ipahal_init(void __iomem *base)
 {
 	ipa_debug("Entry - base=%p\n", base);
@@ -540,15 +520,23 @@ int ipahal_dev_init(struct device *dev)
 	ipa_debug("IPA HAL ipa_pdev=%p\n", dev);
 
 	ipahal_ctx->ipa_pdev = dev;
+
+	/* Set up an empty filter/route table entry in system
+	 * memory.  This will be used, for example, to delete a
+	 * route safely.  Fail if it doesn't satisfy our alignment
+	 * requirement.
+	 */
 	if (ipahal_dma_alloc(mem, IPA_HW_TBL_WIDTH, GFP_KERNEL)) {
 		ipa_err("error allocating empty filter/route table\n");
 		ipahal_ctx->ipa_pdev = NULL;
 		return -ENOMEM;
 	}
 
-	ret = ipahal_empty_fltrt_init(mem);
-	if (ret)
+	if (mem->phys_base % IPA_HW_TBL_SYSADDR_ALIGN) {
+		ipa_err("allocated empty filter/route table is not aligned\n");
+		ret = -EFAULT;
 		goto err_free_dma;
+	}
 
 	return 0;
 
@@ -561,7 +549,6 @@ err_free_dma:
 
 void ipahal_dev_destroy(void)
 {
-	ipahal_empty_fltrt_destroy(&ipahal_ctx->empty_fltrt_tbl);
 	ipahal_dma_free(&ipahal_ctx->empty_fltrt_tbl);
 	ipahal_ctx->ipa_pdev = NULL;
 }
