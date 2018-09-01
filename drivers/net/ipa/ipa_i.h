@@ -549,6 +549,7 @@ struct ipa_context {
 	void __iomem *mmio;
 	u32 ipa_wrapper_base;
 	u32 ipa_wrapper_size;
+	u32 ipa_irq;
 	struct ipa_dp *dp;
 	u16 smem_sz;
 	u16 smem_restricted_bytes;

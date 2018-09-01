@@ -242,15 +242,10 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 int ipa_interrupts_init(struct platform_device *ipa_device)
 {
 	struct device *dev = &ipa_device->dev;
-	unsigned int ipa_irq;
 	int ret;
 
-	ret = platform_get_irq_byname(ipa_device, "ipa-irq");
-	if (ret < 0)
-		return ret;
-	ipa_irq = ret;
-
-	ret = request_irq(ipa_irq, ipa_isr, IRQF_TRIGGER_RISING, "ipa", dev);
+	ret = request_irq(ipa_ctx->ipa_irq, ipa_isr, IRQF_TRIGGER_RISING,
+			  "ipa", dev);
 	if (ret)
 		return ret;
 
@@ -258,7 +253,7 @@ int ipa_interrupts_init(struct platform_device *ipa_device)
 	if (ipa_interrupt_wq)
 		return 0;
 
-	free_irq(ipa_irq, dev);
+	free_irq(ipa_ctx->ipa_irq, dev);
 
 	return -ENOMEM;
 }

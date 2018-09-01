@@ -819,9 +819,16 @@ static int ipa_init_interrupts(void)
 {
 	int ret;
 
-	ret = ipa_interrupts_init(ipa_ctx->ipa_pdev);
-	if (ret)
+	ret = platform_get_irq_byname(ipa_ctx->ipa_pdev, "ipa-irq");
+	if (ret < 0)
 		return ret;
+	ipa_ctx->ipa_irq = ret;
+
+	ret = ipa_interrupts_init(ipa_ctx->ipa_pdev);
+	if (ret) {
+		ipa_ctx->ipa_irq = 0;
+		return ret;
+	}
 
 	ipa_add_interrupt_handler(IPA_TX_SUSPEND_IRQ, ipa_suspend_handler);
 
