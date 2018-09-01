@@ -1372,10 +1372,6 @@ int ipa_plat_drv_probe(struct platform_device *platform_device)
 	ipa_debug(": ipa-base = 0x%x, size = 0x%08zx\n",
 		  ipa_ctx->ipa_wrapper_base, wrapper_size);
 
-	/* Mark client handles bad until we initialize them */
-	ipa_ctx->clnt_hdl_cmd = IPA_CLNT_HDL_BAD;
-	ipa_ctx->clnt_hdl_lan_cons = IPA_CLNT_HDL_BAD;
-
 	/* setup IPA register access */
 	phys_addr = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
 	ipa_debug("Mapping 0x%lx\n", phys_addr);
@@ -1403,6 +1399,8 @@ int ipa_plat_drv_probe(struct platform_device *platform_device)
 		goto err_clear_gsi;
 	}
 	ipa_ctx->dev = dev;
+	ipa_ctx->clnt_hdl_cmd = IPA_CLNT_HDL_BAD;
+	ipa_ctx->clnt_hdl_lan_cons = IPA_CLNT_HDL_BAD;
 
 	/* Proceed to real initialization */
 	result = ipa_pre_init();
