@@ -312,7 +312,7 @@ u32 ipahal_pkt_status_get_size(void);
 void ipahal_pkt_status_parse(const void *unparsed_status,
 			     struct ipahal_pkt_status *status);
 
-int ipahal_init(struct device *dev, void __iomem *base);
+int ipahal_init(void __iomem *base);
 void ipahal_destroy(void);
 
 /* Does the given ID represents rule miss? */

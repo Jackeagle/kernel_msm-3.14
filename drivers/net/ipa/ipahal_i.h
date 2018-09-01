@@ -13,12 +13,10 @@
  * @base: Base address to be used for accessing IPA memory. This is
  *  I/O memory mapped address.
  *  Controlled by debugfs. default is off
- * @ipa_pdev: IPA Platform Device. Will be used for DMA memory
  * @empty_fltrt_tbl: Empty table to be used at tables init.
  */
 struct ipahal_context {
 	void __iomem *base;
-	struct device *ipa_pdev;
 	struct ipa_mem_buffer empty_fltrt_tbl;
 };
 

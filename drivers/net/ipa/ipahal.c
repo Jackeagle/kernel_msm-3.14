@@ -472,7 +472,7 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 	status->status_mask = hw_status->status_mask;
 }
 
-int ipahal_init(struct device *dev, void __iomem *base)
+int ipahal_init(void __iomem *base)
 {
 	struct ipa_mem_buffer *mem = &ipahal_ctx->empty_fltrt_tbl;
 
@@ -480,15 +480,12 @@ int ipahal_init(struct device *dev, void __iomem *base)
 	if (dma_get_cache_alignment() % IPA_HW_TBL_SYSADDR_ALIGN)
 		return -EFAULT;
 
-	ipahal_ctx->ipa_pdev = dev;
-
 	/* Set up an empty filter/route table entry in system
 	 * memory.  This will be used, for example, to delete a
 	 * route safely.
 	 */
 	if (ipa_dma_alloc(mem, IPA_HW_TBL_WIDTH, GFP_KERNEL)) {
 		ipa_err("error allocating empty filter/route table\n");
-		ipahal_ctx->ipa_pdev = NULL;
 		return -ENOMEM;
 	}
 	ipahal_ctx->base = base;
@@ -500,7 +497,6 @@ void ipahal_destroy(void)
 {
 	ipa_dma_free(&ipahal_ctx->empty_fltrt_tbl);
 	ipahal_ctx->base = NULL;
-	ipahal_ctx->ipa_pdev = NULL;
 }
 
 /*
