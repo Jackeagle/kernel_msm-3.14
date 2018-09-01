@@ -1313,7 +1313,6 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 	struct device_node *node = dev->of_node;
 	unsigned long phys_addr;
 	struct resource *res;
-	u32 filter_count;
 	int result;
 
 	/* We assume we're working on 64-bit hardware */
@@ -1376,12 +1375,10 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 		result = -ENODEV;
 		goto err_clear_mmio;
 	}
-	filter_count = hweight32(ipa_ctx->filter_bitmap);
-	ipa_debug("EP with flt support bitmap 0x%x (%u pipes)\n",
-		  ipa_ctx->filter_bitmap, filter_count);
+	ipa_debug("EP with flt support bitmap 0x%x\n", ipa_ctx->filter_bitmap);
 
 	/* Make sure we have a valid configuration before proceeding */
-	if (!config_valid(filter_count)) {
+	if (!config_valid(hweight32(ipa_ctx->filter_bitmap))) {
 		ipa_err("invalid configuration\n");
 		result = -EFAULT;
 		goto err_clear_flt;
