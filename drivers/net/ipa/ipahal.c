@@ -507,29 +507,18 @@ void *ipahal_dma_phys_to_virt(struct ipa_mem_buffer *mem, dma_addr_t phys)
  */
 static int ipahal_empty_fltrt_init(struct ipa_mem_buffer *mem)
 {
-	u32 size = IPA_HW_TBL_WIDTH;
-
-	if (ipahal_dma_alloc(mem, size, GFP_KERNEL)) {
-		ipa_err("DMA buff alloc fail %u bytes for empty tbl\n", size);
-		return -ENOMEM;
-	}
-
 	if (mem->phys_base % IPA_HW_TBL_SYSADDR_ALIGN) {
 		ipa_err("Empty table buf is not address aligned 0x%pad\n",
 			&mem->phys_base);
-		ipahal_dma_free(mem);
 
 		return -EFAULT;
 	}
-
-	ipa_debug("empty table allocated in system memory");
 
 	return 0;
 }
 
 static void ipahal_empty_fltrt_destroy(struct ipa_mem_buffer *mem)
 {
-	ipahal_dma_free(mem);
 }
 
 void ipahal_init(void __iomem *base)
@@ -545,14 +534,27 @@ void ipahal_init(void __iomem *base)
  */
 int ipahal_dev_init(struct device *dev)
 {
+	struct ipa_mem_buffer *mem = &ipahal_ctx->empty_fltrt_tbl;
 	int ret;
 
 	ipa_debug("IPA HAL ipa_pdev=%p\n", dev);
 
 	ipahal_ctx->ipa_pdev = dev;
-	ret = ipahal_empty_fltrt_init(&ipahal_ctx->empty_fltrt_tbl);
-	if (ret)
+	if (ipahal_dma_alloc(mem, IPA_HW_TBL_WIDTH, GFP_KERNEL)) {
+		ipa_err("error allocating empty filter/route table\n");
 		ipahal_ctx->ipa_pdev = NULL;
+		return -ENOMEM;
+	}
+
+	ret = ipahal_empty_fltrt_init(mem);
+	if (ret)
+		goto err_free_dma;
+
+	return 0;
+
+err_free_dma:
+	ipahal_dma_free(mem);
+	ipahal_ctx->ipa_pdev = NULL;
 
 	return ret;
 }
@@ -560,6 +562,7 @@ int ipahal_dev_init(struct device *dev)
 void ipahal_dev_destroy(void)
 {
 	ipahal_empty_fltrt_destroy(&ipahal_ctx->empty_fltrt_tbl);
+	ipahal_dma_free(&ipahal_ctx->empty_fltrt_tbl);
 	ipahal_ctx->ipa_pdev = NULL;
 }
 
