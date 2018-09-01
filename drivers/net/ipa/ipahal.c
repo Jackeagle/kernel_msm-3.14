@@ -515,36 +515,25 @@ void ipahal_init(void __iomem *base)
 int ipahal_dev_init(struct device *dev)
 {
 	struct ipa_mem_buffer *mem = &ipahal_ctx->empty_fltrt_tbl;
-	int ret;
 
 	ipa_debug("IPA HAL ipa_pdev=%p\n", dev);
 
-	ipahal_ctx->ipa_pdev = dev;
+	/* Ensure DMA addresses will have the alignment we require */
+	if (dma_get_cache_alignment() % IPA_HW_TBL_SYSADDR_ALIGN)
+		return -EFAULT;
 
 	/* Set up an empty filter/route table entry in system
 	 * memory.  This will be used, for example, to delete a
-	 * route safely.  Fail if it doesn't satisfy our alignment
-	 * requirement.
+	 * route safely.
 	 */
+	ipahal_ctx->ipa_pdev = dev;
 	if (ipahal_dma_alloc(mem, IPA_HW_TBL_WIDTH, GFP_KERNEL)) {
 		ipa_err("error allocating empty filter/route table\n");
 		ipahal_ctx->ipa_pdev = NULL;
 		return -ENOMEM;
 	}
 
-	if (mem->phys_base % IPA_HW_TBL_SYSADDR_ALIGN) {
-		ipa_err("allocated empty filter/route table is not aligned\n");
-		ret = -EFAULT;
-		goto err_free_dma;
-	}
-
 	return 0;
-
-err_free_dma:
-	ipahal_dma_free(mem);
-	ipahal_ctx->ipa_pdev = NULL;
-
-	return ret;
 }
 
 void ipahal_dev_destroy(void)
