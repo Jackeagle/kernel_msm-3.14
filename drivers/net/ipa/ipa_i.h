@@ -539,9 +539,7 @@ struct ipa_dma_task_info {
  * IPA context - holds all relevant info about IPA driver and its state
  */
 struct ipa_context {
-	struct platform_device *ipa_pdev;
 	struct gsi *gsi;
-
 	struct device *dev;
 
 	struct ipa_ep_context ep[IPA_MAX_NUM_PIPES];
@@ -689,7 +687,7 @@ void ipa_gsi_dma_task_free(void);
 int ipa_gsi_dma_task_inject(void);
 
 int ipa_disable_apps_wan_cons_deaggr(u32 agg_size, u32 agg_count);
-int ipa_plat_drv_probe(struct platform_device *pdev_p);
+int ipa_plat_drv_probe(struct platform_device *platform_device);
 
 void ipa_set_flt_tuple_mask(u32 pipe_idx, struct ipahal_reg_hash_tuple *tuple);
 void ipa_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple);

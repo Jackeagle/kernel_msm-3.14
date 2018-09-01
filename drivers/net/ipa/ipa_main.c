@@ -1312,9 +1312,9 @@ static const struct of_device_id ipa_plat_drv_match[] = {
 	{}
 };
 
-int ipa_plat_drv_probe(struct platform_device *pdev_p)
+int ipa_plat_drv_probe(struct platform_device *platform_device)
 {
-	struct device *dev = &pdev_p->dev;
+	struct device *dev = &platform_device->dev;
 	struct device_node *node = dev->of_node;
 	unsigned long phys_addr;
 	struct resource *res;
@@ -1345,14 +1345,14 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 		goto out_smp2p_exit;
 	}
 
-	ipa_ctx->ipa_pdev = pdev_p;
-	result = platform_get_irq_byname(ipa_ctx->ipa_pdev, "ipa-irq");
+	result = platform_get_irq_byname(platform_device, "ipa-irq");
 	if (result < 0)
-		goto err_clear_pdev;
+		goto err_interconnect_exit;
 	ipa_ctx->ipa_irq = result;
 
 	/* Get IPA wrapper address */
-	res = platform_get_resource_byname(pdev_p, IORESOURCE_MEM, "ipa-base");
+	res = platform_get_resource_byname(platform_device, IORESOURCE_MEM,
+					   "ipa-base");
 	if (!res) {
 		ipa_err(":get resource failed for ipa-base!\n");
 		result = -ENODEV;
@@ -1387,7 +1387,7 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 		goto err_clear_mmio;
 	}
 
-	ipa_ctx->gsi = gsi_init(pdev_p);
+	ipa_ctx->gsi = gsi_init(platform_device);
 	if (IS_ERR(ipa_ctx->gsi)) {
 		ipa_err("ipa: error initializing gsi driver.\n");
 		result = PTR_ERR(ipa_ctx->gsi);
@@ -1425,8 +1425,7 @@ err_clear_wrapper:
 	ipa_ctx->ipa_wrapper_base = 0;
 err_clear_ipa_irq:
 	ipa_ctx->ipa_irq = 0;
-err_clear_pdev:
-	ipa_ctx->ipa_pdev = NULL;
+err_interconnect_exit:
 	ipa_interconnect_exit();
 out_smp2p_exit:
 	ipa_smp2p_exit();
