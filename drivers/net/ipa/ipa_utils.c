@@ -598,7 +598,6 @@ void ipa_init_ep_flt_bitmap(void)
 			ipa_ctx->ep_flt_bitmap |= BIT(pipe_num);
 		}
 	}
-	ipa_ctx->ep_flt_num = hweight32(ipa_ctx->ep_flt_bitmap);
 }
 
 static const char *ipa_get_mode_type_str(enum ipa_mode_type mode)

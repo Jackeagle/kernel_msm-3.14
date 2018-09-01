@@ -1368,6 +1368,7 @@ int ipa_plat_drv_probe(struct platform_device *pdev_p)
 	}
 
 	ipa_init_ep_flt_bitmap();
+	ipa_ctx->ep_flt_num = hweight32(ipa_ctx->ep_flt_bitmap);
 	if (!ipa_ctx->ep_flt_num) {
 		ipa_err("no endpoints support filtering\n");
 		result = -ENODEV;
