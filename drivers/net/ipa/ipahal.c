@@ -496,25 +496,29 @@ bool ipahal_is_rule_miss_id(u32 id)
 	return id == (1U << IPA_RULE_ID_BIT_LEN) - 1;
 }
 
-/* ipahal_rt_generate_empty_img() - Generate empty route image
- *  Creates routing header buffer for the given tables number.
- *  For each table, make it point to the empty table on DDR.
- * @tbls_num: Number of tables. For each will have an entry in the header
- * @mem: mem object that points to DMA mem representing the hdr structure
+/* ipahal_rt_generate_empty_img() - Generate empty route table header
+ *
+ * @route_count: number of table entries
+ * @mem: mem object representing the header structure
+ *
+ * Allocates and fills an "empty" route table header having the given
+ * number of entries.  Each entry in the table contains the DMA address
+ * of a routing entry.
+ *
+ * This function initializes all entries to point at the preallocated
+ * empty routing entry in system RAM.
  */
-int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem)
+int ipahal_rt_generate_empty_img(u32 route_count, struct ipa_mem_buffer *mem)
 {
-	int i = 0;
 	u64 addr;
+	int i;
 
-	ipa_debug("Entry\n");
-
-	if (ipa_dma_alloc(mem, tbls_num * IPA_HW_TBL_HDR_WIDTH, GFP_KERNEL))
+	if (ipa_dma_alloc(mem, route_count * IPA_HW_TBL_HDR_WIDTH, GFP_KERNEL))
 		return -ENOMEM;
 
 	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys_base;
-	while (i < tbls_num)
-		put_unaligned(addr, mem->base + i++ * IPA_HW_TBL_HDR_WIDTH);
+	for (i = 0; i < route_count; i++)
+		put_unaligned(addr, mem->base + i * IPA_HW_TBL_HDR_WIDTH);
 
 	return 0;
 }
