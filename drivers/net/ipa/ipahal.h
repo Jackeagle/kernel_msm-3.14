@@ -329,7 +329,7 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 			     struct ipahal_pkt_status *status);
 
 int ipahal_init(void __iomem *base);
-void ipahal_destroy(void);
+void ipahal_exit(void);
 
 /* Does the given ID represents rule miss? */
 bool ipahal_is_rule_miss_id(u32 id);

@@ -473,7 +473,7 @@ int ipahal_init(void __iomem *base)
 	return 0;
 }
 
-void ipahal_destroy(void)
+void ipahal_exit(void)
 {
 	ipa_dma_free(&ipahal_ctx->empty_fltrt_tbl);
 	ipahal_ctx->base = NULL;

@@ -1372,7 +1372,7 @@ int ipa_plat_drv_probe(struct platform_device *platform_device)
 		return 0;	/* Success */
 
 	ipa_ctx->dev = NULL;
-	ipahal_destroy();
+	ipahal_exit();
 err_dma_exit:
 	ipa_dma_exit();
 err_clear_gsi:
