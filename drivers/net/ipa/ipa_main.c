@@ -950,13 +950,13 @@ static int ipa_alloc_pkt_init(void)
 
 	/* Allocate enough DMA memory to hold a payload for each pipe */
 	if (ipa_dma_alloc(mem, size * ipa_ctx->ipa_num_pipes, GFP_KERNEL)) {
-		ipa_err("failed to alloc DMA buff of size %d\n", mem->size);
+		ipa_err("failed to alloc DMA buff of size %zu\n", mem->size);
 		return -ENOMEM;
 	}
 
 	/* Fill in an IP packet init payload for each pipe */
-	pyld_phys = mem->phys_base;
-	pyld_virt = mem->base;
+	pyld_phys = mem->phys;
+	pyld_virt = mem->virt;
 	for (i = 0; i < ipa_ctx->ipa_num_pipes; i++) {
 		cmd_pyld = ipahal_ip_packet_init_pyld(i);
 		if (!cmd_pyld) {

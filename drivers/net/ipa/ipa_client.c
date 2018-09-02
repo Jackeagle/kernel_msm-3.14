@@ -121,7 +121,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 		goto dma_alloc_fail;
 	}
 
-	xfer_elem.addr = dma_byte.phys_base;
+	xfer_elem.addr = dma_byte.phys;
 	xfer_elem.len = 1;	/* = dma_byte.size; */
 	xfer_elem.flags = GSI_XFER_FLAG_EOT;
 	xfer_elem.type = GSI_XFER_ELEM_DATA;

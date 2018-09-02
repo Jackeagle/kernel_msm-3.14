@@ -169,12 +169,12 @@ static void ipa_tx_complete(struct ipa_tx_pkt_wrapper *tx_pkt)
 	struct device *dev = ipa_ctx->dev;
 
 	/* If DMA memory was mapped, unmap it */
-	if (tx_pkt->mem.base) {
+	if (tx_pkt->mem.virt) {
 		if (tx_pkt->type != IPA_DATA_DESC_SKB_PAGED)
-			dma_unmap_single(dev, tx_pkt->mem.phys_base,
+			dma_unmap_single(dev, tx_pkt->mem.phys,
 					 tx_pkt->mem.size, DMA_TO_DEVICE);
 		else
-			dma_unmap_page(dev, tx_pkt->mem.phys_base,
+			dma_unmap_page(dev, tx_pkt->mem.phys,
 				       tx_pkt->mem.size, DMA_TO_DEVICE);
 	}
 
@@ -477,21 +477,20 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 		tx_pkt->type = desc[i].type;
 
 		if (desc[i].type != IPA_DATA_DESC_SKB_PAGED) {
-			tx_pkt->mem.base = desc[i].pyld;
+			tx_pkt->mem.virt = desc[i].pyld;
 			tx_pkt->mem.size = desc[i].len;
-			tx_pkt->mem.phys_base =
-					dma_map_single(dev, tx_pkt->mem.base,
-						       tx_pkt->mem.size,
-						       DMA_TO_DEVICE);
+			tx_pkt->mem.phys = dma_map_single(dev, tx_pkt->mem.virt,
+							  tx_pkt->mem.size,
+						          DMA_TO_DEVICE);
 		} else {
-			tx_pkt->mem.base = desc[i].frag;
+			tx_pkt->mem.virt = desc[i].frag;
 			tx_pkt->mem.size = desc[i].len;
-			tx_pkt->mem.phys_base =
-					skb_frag_dma_map(dev, desc[i].frag, 0,
-							 tx_pkt->mem.size,
-							 DMA_TO_DEVICE);
+			tx_pkt->mem.phys = skb_frag_dma_map(dev, desc[i].frag,
+							    0,
+							    tx_pkt->mem.size,
+							    DMA_TO_DEVICE);
 		}
-		if (dma_mapping_error(dev, tx_pkt->mem.phys_base)) {
+		if (dma_mapping_error(dev, tx_pkt->mem.phys)) {
 			ipa_err("failed to do dma map.\n");
 			goto failure_dma_map;
 		}
@@ -503,7 +502,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 
 		list_add_tail(&tx_pkt->link, &sys->head_desc_list);
 
-		xfer_elem[i].addr = tx_pkt->mem.phys_base;
+		xfer_elem[i].addr = tx_pkt->mem.phys;
 
 		/* Special treatment for immediate commands, where
 		 * the structure of the descriptor is different

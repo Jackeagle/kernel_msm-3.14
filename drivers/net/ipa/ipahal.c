@@ -131,7 +131,7 @@ ipahal_dma_shared_mem_write_pyld(struct ipa_dma_mem *mem, u32 offset)
 	data->direction = 0;	/* 0 = write to IPA; 1 = read from IPA */
 	data->skip_pipeline_clear = 0;
 	data->pipeline_clear_options = IPAHAL_HPS_CLEAR;
-	data->system_addr = mem->phys_base;
+	data->system_addr = mem->phys;
 
 	return pyld;
 }
@@ -180,7 +180,7 @@ ipahal_hdr_init_local_pyld(struct ipa_dma_mem *mem, u32 offset)
 		return NULL;
 	data = ipahal_imm_cmd_pyld_data(pyld);
 
-	data->hdr_table_addr = mem->phys_base;
+	data->hdr_table_addr = mem->phys;
 	data->size_hdr_table = mem->size;
 	data->hdr_addr = offset;
 
@@ -231,10 +231,10 @@ fltrt_init_common(u16 opcode, struct ipa_dma_mem *mem, u32 hash_offset,
 	ipa_debug("putting hashable rules to phys 0x%x\n", hash_offset);
 	ipa_debug("putting non-hashable rules to phys 0x%x\n", nhash_offset);
 
-	data->hash_rules_addr = (u64)mem->phys_base;
+	data->hash_rules_addr = (u64)mem->phys;
 	data->hash_rules_size = (u32)mem->size;
 	data->hash_local_addr = hash_offset;
-	data->nhash_rules_addr = (u64)mem->phys_base;
+	data->nhash_rules_addr = (u64)mem->phys;
 	data->nhash_rules_size = (u32)mem->size;
 	data->nhash_local_addr = nhash_offset;
 
@@ -328,7 +328,7 @@ ipahal_dma_task_32b_addr_pyld(struct ipa_dma_mem *mem)
 	data->lock = 0;
 	data->unlock = 0;
 	data->size1 = mem->size;
-	data->addr1 = mem->phys_base;
+	data->addr1 = mem->phys;
 	data->packet_size = mem->size;
 
 	return pyld;
@@ -514,9 +514,9 @@ int ipahal_rt_generate_empty_img(u32 route_count, struct ipa_dma_mem *mem)
 	if (ipa_dma_alloc(mem, route_count * IPA_HW_TBL_HDR_WIDTH, GFP_KERNEL))
 		return -ENOMEM;
 
-	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys_base;
+	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys;
 	for (i = 0; i < route_count; i++)
-		put_unaligned(addr, mem->base + i * IPA_HW_TBL_HDR_WIDTH);
+		put_unaligned(addr, mem->virt + i * IPA_HW_TBL_HDR_WIDTH);
 
 	return 0;
 }
@@ -558,12 +558,12 @@ int ipahal_flt_generate_empty_img(u64 filter_bitmap, struct ipa_dma_mem *mem)
 	 * XXX Does bit position 0 represent global?  At IPA3, global
 	 * XXX configuration is possible but not used.
 	 */
-	put_unaligned(filter_bitmap << 1, mem->base);
+	put_unaligned(filter_bitmap << 1, mem->virt);
 
 	/* Point every entry in the table at the empty filter */
-	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys_base;
+	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys;
 	for (i = 1; i < filter_count; i++)
-		put_unaligned(addr, mem->base + i * IPA_HW_TBL_HDR_WIDTH);
+		put_unaligned(addr, mem->virt + i * IPA_HW_TBL_HDR_WIDTH);
 
 	return 0;
 }

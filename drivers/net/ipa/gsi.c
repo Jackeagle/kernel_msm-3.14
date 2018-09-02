@@ -137,7 +137,7 @@ struct ch_debug_stats {
 struct gsi {
 	void __iomem *base;
 	struct device *dev;
-	u32 phys_base;
+	u32 phys;
 	unsigned int irq;
 	bool irq_wake_enabled;
 	spinlock_t slock;	/* protects global register updates */
@@ -510,26 +510,24 @@ static void ring_wp_local_inc(struct gsi_ring_ctx *ring)
 {
 	ring->wp_local += GSI_RING_ELEMENT_SIZE;
 	if (ring->wp_local == ring->end)
-		ring->wp_local = ring->mem.phys_base;
+		ring->wp_local = ring->mem.phys;
 }
 
 static void ring_rp_local_inc(struct gsi_ring_ctx *ring)
 {
 	ring->rp_local += GSI_RING_ELEMENT_SIZE;
 	if (ring->rp_local == ring->end)
-		ring->rp_local = ring->mem.phys_base;
+		ring->rp_local = ring->mem.phys;
 }
 
 static u16 ring_rp_local_index(struct gsi_ring_ctx *ring)
 {
-	return (u16)(ring->rp_local - ring->mem.phys_base) /
-			GSI_RING_ELEMENT_SIZE;
+	return (u16)(ring->rp_local - ring->mem.phys) / GSI_RING_ELEMENT_SIZE;
 }
 
 static u16 ring_wp_local_index(struct gsi_ring_ctx *ring)
 {
-	return (u16)(ring->wp_local - ring->mem.phys_base) /
-			GSI_RING_ELEMENT_SIZE;
+	return (u16)(ring->wp_local - ring->mem.phys) / GSI_RING_ELEMENT_SIZE;
 }
 
 static void chan_xfer_cb(struct gsi_chan_ctx *chan, u16 count)
@@ -904,7 +902,7 @@ void gsi_deregister_device(struct gsi *gsi)
 }
 
 static void gsi_program_evt_ring_ctx(struct gsi *gsi, u8 evt_id, u32 size,
-				     u64 phys_base, u16 int_modt)
+				     u64 phys, u16 int_modt)
 {
 	u32 int_modc = 1;	/* moderation always comes from channel*/
 	u32 val;
@@ -923,10 +921,10 @@ static void gsi_program_evt_ring_ctx(struct gsi *gsi, u8 evt_id, u32 size,
 	 * high-order 32 bits of the address of the event ring,
 	 * respectively.
 	 */
-	val = phys_base & GENMASK(31, 0);
+	val = phys & GENMASK(31, 0);
 	gsi_writel(gsi, val, GSI_EV_CH_K_CNTXT_2_OFFS(evt_id));
 
-	val = phys_base >> 32;
+	val = phys >> 32;
 	gsi_writel(gsi, val, GSI_EV_CH_K_CNTXT_3_OFFS(evt_id));
 
 	val = field_gen(int_modt, MODT_BMSK);
@@ -947,11 +945,11 @@ static void gsi_init_ring(struct gsi_ring_ctx *ring, struct ipa_dma_mem *mem)
 {
 	spin_lock_init(&ring->slock);
 	ring->mem = *mem;
-	ring->wp = mem->phys_base;
-	ring->rp = mem->phys_base;
-	ring->wp_local = mem->phys_base;
-	ring->rp_local = mem->phys_base;
-	ring->end = mem->phys_base + mem->size;
+	ring->wp = mem->phys;
+	ring->rp = mem->phys;
+	ring->wp_local = mem->phys;
+	ring->rp_local = mem->phys;
+	ring->end = mem->phys + mem->size;
 }
 
 static void gsi_prime_evt_ring(struct gsi *gsi, struct gsi_evt_ctx *evtr)
@@ -959,7 +957,7 @@ static void gsi_prime_evt_ring(struct gsi *gsi, struct gsi_evt_ctx *evtr)
 	unsigned long flags;
 
 	spin_lock_irqsave(&evtr->ring.slock, flags);
-	memset(evtr->ring.mem.base, 0, evtr->ring.mem.size);
+	memset(evtr->ring.mem.virt, 0, evtr->ring.mem.size);
 	evtr->ring.wp_local = evtr->ring.end - GSI_RING_ELEMENT_SIZE;
 	gsi_ring_evt_doorbell(gsi, evtr);
 	spin_unlock_irqrestore(&evtr->ring.slock, flags);
@@ -1040,7 +1038,7 @@ long gsi_alloc_evt_ring(struct gsi *gsi, u32 ring_count, u16 int_modt)
 		ret = -ENOMEM;
 		goto err_free_bmap;
 	}
-	ipa_assert(!(evtr->mem.phys_base % roundup_pow_of_two(size)));
+	ipa_assert(!(evtr->mem.phys % roundup_pow_of_two(size)));
 
 	evtr->id = evt_id;
 	evtr->int_modt = int_modt;
@@ -1062,7 +1060,7 @@ long gsi_alloc_evt_ring(struct gsi *gsi, u32 ring_count, u16 int_modt)
 	atomic_inc(&gsi->num_evt_ring);
 
 	gsi_program_evt_ring_ctx(gsi, evt_id, evtr->mem.size,
-				 evtr->mem.phys_base, evtr->int_modt);
+				 evtr->mem.phys, evtr->int_modt);
 	gsi_init_ring(&evtr->ring, &evtr->mem);
 
 	gsi_prime_evt_ring(gsi, evtr);
@@ -1141,7 +1139,7 @@ void gsi_reset_evt_ring(struct gsi *gsi, unsigned long evt_id)
 	ipa_bug_on(evtr->state != GSI_EVT_RING_STATE_ALLOCATED);
 
 	gsi_program_evt_ring_ctx(gsi, evt_id, evtr->mem.size,
-				 evtr->mem.phys_base, evtr->int_modt);
+				 evtr->mem.phys, evtr->int_modt);
 	gsi_init_ring(&evtr->ring, &evtr->mem);
 
 	__gsi_zero_evt_ring_scratch(gsi, evt_id);
@@ -1168,10 +1166,10 @@ gsi_program_chan_ctx(struct gsi *gsi, struct gsi_chan_props *props, u8 evt_id)
 	 * high-order 32 bits of the address of the channel ring,
 	 * respectively.
 	 */
-	val = props->mem.phys_base & GENMASK(31, 0);
+	val = props->mem.phys & GENMASK(31, 0);
 	gsi_writel(gsi, val, GSI_CH_K_CNTXT_2_OFFS(props->ch_id));
 
-	val = props->mem.phys_base >> 32;
+	val = props->mem.phys >> 32;
 	gsi_writel(gsi, val, GSI_CH_K_CNTXT_3_OFFS(props->ch_id));
 
 	val = field_gen(props->low_weight, WRR_WEIGHT_BMSK);
@@ -1195,7 +1193,7 @@ long gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
 		return -ENOMEM;
 	}
 	ipa_assert(!(props->mem.size % roundup_pow_of_two(size)));
-	ipa_assert(!(props->mem.phys_base % roundup_pow_of_two(size)));
+	ipa_assert(!(props->mem.phys % roundup_pow_of_two(size)));
 
 	if (atomic_read(&evtr->chan_ref_cnt)) {
 		ipa_err("evt ring %hhu in use\n", evt_id);
@@ -1726,7 +1724,7 @@ struct gsi *gsi_init(struct platform_device *pdev)
 		return ERR_PTR(-ENOMEM);
 	}
 	gsi->dev = dev;
-	gsi->phys_base = (u32)res->start;
+	gsi->phys = (u32)res->start;
 	gsi->irq = irq;
 	spin_lock_init(&gsi->slock);
 	mutex_init(&gsi->mlock);
