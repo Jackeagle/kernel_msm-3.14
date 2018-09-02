@@ -61,6 +61,12 @@ static __always_inline u32 field_val(u32 reg, u32 field_mask)
 	return (reg & field_mask) >> field_shift(field_mask);
 }
 
+/* Return the maximum representable value for a field with the given mask */
+static __always_inline u32 field_max(u32 field_mask)
+{
+	return field_mask >> field_shift(field_mask);
+}
+
 #define EXTRACT_UC_FEATURE(value) (value >> 5)
 
 /** enum ipa_irq_type - IPA Interrupt Type
