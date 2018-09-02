@@ -9,12 +9,13 @@
 #include <linux/types.h>
 #include <linux/device.h>
 
-/** struct ipa_mem_buffer - IPA memory buffer
- * @base: base
- * @phys_base: physical base address
- * @size: size of memory buffer
+/** struct ipa_dma_mem - IPA allocated DMA memory descriptor
+ *
+ * @base: host virtual base address of DMA memory
+ * @phys_base: physical base address of DMA memory
+ * @size: size (bytes) of DMA memory
  */
-struct ipa_mem_buffer {
+struct ipa_dma_mem {
 	void *base;
 	dma_addr_t phys_base;
 	u32 size;
@@ -27,12 +28,12 @@ bool ipa_dma_init(struct device *dev, u32 align);
 void ipa_dma_exit(void);
 
 /* ipa_dma_alloc() - allocate a DMA buffer, describe it in mem struct */
-int ipa_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp);
+int ipa_dma_alloc(struct ipa_dma_mem *mem, u32 size, gfp_t gfp);
 
 /* ipa_dma_free() - free a previously-allocated DMA buffer */
-void ipa_dma_free(struct ipa_mem_buffer *mem);
+void ipa_dma_free(struct ipa_dma_mem *mem);
 
 /* ipa_dma_phys_to_virt() - return the virtual equivalent of a DMA address */
-void *ipa_dma_phys_to_virt(struct ipa_mem_buffer *mem, dma_addr_t phys);
+void *ipa_dma_phys_to_virt(struct ipa_dma_mem *mem, dma_addr_t phys);
 
 #endif /* !_IPA_DMA_H_ */

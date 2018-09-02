@@ -87,7 +87,7 @@ struct ipa_gsi_ep_config {
  * All the callbacks are in interrupt context
  */
 struct gsi_chan_props {
-	struct ipa_mem_buffer mem;
+	struct ipa_dma_mem mem;
 	u32 ring_count;
 	bool from_gsi;
 	bool use_db_engine;

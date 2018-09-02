@@ -30,7 +30,7 @@
  */
 struct ipa_tx_pkt_wrapper {
 	enum ipa_desc_type type;
-	struct ipa_mem_buffer mem;
+	struct ipa_dma_mem mem;
 	struct work_struct done_work;
 	struct list_head link;
 	void (*callback)(void *user1, int user2);

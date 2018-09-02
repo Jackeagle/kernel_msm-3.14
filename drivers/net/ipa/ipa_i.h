@@ -493,7 +493,7 @@ struct ipa_smp2p_info {
 };
 
 struct ipa_dma_task_info {
-	struct ipa_mem_buffer mem;
+	struct ipa_dma_mem mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 };
 
@@ -562,7 +562,7 @@ struct ipa_context {
 	bool q6_proxy_clk_vote_valid;
 	u32 ipa_num_pipes;
 	dma_addr_t pkt_init_imm[IPA_MAX_NUM_PIPES];
-	struct ipa_mem_buffer pkt_init_mem;
+	struct ipa_dma_mem pkt_init_mem;
 
 	struct ipa_uc_ctx uc_ctx;
 

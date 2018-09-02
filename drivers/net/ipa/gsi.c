@@ -92,7 +92,7 @@ enum gsi_chan_state {
 
 struct gsi_ring_ctx {
 	spinlock_t slock;		/* protects wp, rp updates */
-	struct ipa_mem_buffer mem;
+	struct ipa_dma_mem mem;
 	u64 wp;
 	u64 rp;
 	u64 wp_local;
@@ -114,7 +114,7 @@ struct gsi_chan_ctx {
 };
 
 struct gsi_evt_ctx {
-	struct ipa_mem_buffer mem;
+	struct ipa_dma_mem mem;
 	u16 int_modt;
 	enum gsi_evt_ring_state state;
 	u8 id;
@@ -943,7 +943,7 @@ static void gsi_program_evt_ring_ctx(struct gsi *gsi, u8 evt_id, u32 size,
 	gsi_writel(gsi, 0, GSI_EV_CH_K_CNTXT_13_OFFS(evt_id));
 }
 
-static void gsi_init_ring(struct gsi_ring_ctx *ring, struct ipa_mem_buffer *mem)
+static void gsi_init_ring(struct gsi_ring_ctx *ring, struct ipa_dma_mem *mem)
 {
 	spin_lock_init(&ring->slock);
 	ring->mem = *mem;

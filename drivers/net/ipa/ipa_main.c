@@ -62,7 +62,7 @@ struct ipa_context *ipa_ctx = &ipa_ctx_struct;
 
 static int hdr_init_local_cmd(u32 offset, u32 size)
 {
-	struct ipa_mem_buffer mem;
+	struct ipa_dma_mem mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	struct ipa_desc desc = { };
 	int ret;
@@ -93,7 +93,7 @@ err_dma_free:
 
 static int dma_shared_mem_zero_cmd(u32 offset, u32 size)
 {
-	struct ipa_mem_buffer mem;
+	struct ipa_dma_mem mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	struct ipa_desc desc = { };
 	int ret;
@@ -285,7 +285,7 @@ static int ipa_init_hdr(void)
 static int ipa_init_rt4(void)
 {
 	struct ipa_desc desc = { };
-	struct ipa_mem_buffer mem;
+	struct ipa_dma_mem mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	u32 hash_offset;
 	u32 nhash_offset;
@@ -327,7 +327,7 @@ free_mem:
 static int ipa_init_rt6(void)
 {
 	struct ipa_desc desc = { };
-	struct ipa_mem_buffer mem;
+	struct ipa_dma_mem mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	u32 hash_offset;
 	u32 nhash_offset;
@@ -369,7 +369,7 @@ free_mem:
 static int ipa_init_flt4(void)
 {
 	struct ipa_desc desc = { };
-	struct ipa_mem_buffer mem;
+	struct ipa_dma_mem mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	u32 hash_offset;
 	u32 nhash_offset;
@@ -411,7 +411,7 @@ free_mem:
 static int ipa_init_flt6(void)
 {
 	struct ipa_desc desc = { };
-	struct ipa_mem_buffer mem;
+	struct ipa_dma_mem mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	u32 hash_offset;
 	u32 nhash_offset;
@@ -932,7 +932,7 @@ static void ipa_post_init(struct work_struct *unused)
 
 static int ipa_alloc_pkt_init(void)
 {
-	struct ipa_mem_buffer *mem = &ipa_ctx->pkt_init_mem;
+	struct ipa_dma_mem *mem = &ipa_ctx->pkt_init_mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	dma_addr_t pyld_phys;
 	void *pyld_virt;

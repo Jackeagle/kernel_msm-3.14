@@ -30,7 +30,7 @@ void ipa_dma_exit(void)
 	ipa_dma_dev = NULL;
 }
 
-int ipa_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp)
+int ipa_dma_alloc(struct ipa_dma_mem *mem, u32 size, gfp_t gfp)
 {
 	dma_addr_t phys;
 	void *cpu_addr;
@@ -46,13 +46,13 @@ int ipa_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp)
 	return 0;
 }
 
-void ipa_dma_free(struct ipa_mem_buffer *mem)
+void ipa_dma_free(struct ipa_dma_mem *mem)
 {
 	dma_free_coherent(ipa_dma_dev, mem->size, mem->base, mem->phys_base);
 	memset(mem, 0, sizeof(*mem));
 }
 
-void *ipa_dma_phys_to_virt(struct ipa_mem_buffer *mem, dma_addr_t phys)
+void *ipa_dma_phys_to_virt(struct ipa_dma_mem *mem, dma_addr_t phys)
 {
 	return mem->base + (phys - mem->phys_base);
 }

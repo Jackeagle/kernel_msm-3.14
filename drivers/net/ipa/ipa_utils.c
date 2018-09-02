@@ -1252,7 +1252,7 @@ void ipa_cfg_default_route(enum ipa_client_type client)
  */
 int ipa_gsi_dma_task_alloc(void)
 {
-	struct ipa_mem_buffer *mem = &ipa_ctx->dma_task_info.mem;
+	struct ipa_dma_mem *mem = &ipa_ctx->dma_task_info.mem;
 
 	if (ipa_dma_alloc(mem, IPA_GSI_CHANNEL_STOP_PKT_SIZE, GFP_KERNEL))
 		return -ENOMEM;
@@ -1270,7 +1270,7 @@ int ipa_gsi_dma_task_alloc(void)
 
 void ipa_gsi_dma_task_free(void)
 {
-	struct ipa_mem_buffer *mem = &ipa_ctx->dma_task_info.mem;
+	struct ipa_dma_mem *mem = &ipa_ctx->dma_task_info.mem;
 
 	ipahal_destroy_imm_cmd(ipa_ctx->dma_task_info.cmd_pyld);
 	ipa_ctx->dma_task_info.cmd_pyld = NULL;

@@ -25,7 +25,7 @@
 static int
 ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep,
 			       struct gsi_chan_props *orig_props,
-			       struct ipa_mem_buffer *chan_dma)
+			       struct ipa_dma_mem *chan_dma)
 {
 	struct gsi_chan_props props = { };
 
@@ -69,8 +69,8 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	int result;
 	int gsi_res;
 	struct gsi_chan_props orig_props = { };
-	struct ipa_mem_buffer chan_dma;
-	struct ipa_mem_buffer dma_byte;
+	struct ipa_dma_mem chan_dma;
+	struct ipa_dma_mem dma_byte;
 	struct gsi_xfer_elem xfer_elem = { };
 	int i;
 	int aggr_active_bitmap = 0;

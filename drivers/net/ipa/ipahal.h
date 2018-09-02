@@ -59,7 +59,7 @@ static inline void *ipahal_imm_cmd_pyld_data(struct ipahal_imm_cmd_pyld *pyld)
  * offset	is where to write in IPA local memory
  */
 struct ipahal_imm_cmd_pyld *ipahal_dma_shared_mem_write_pyld(
-				struct ipa_mem_buffer *mem, u32 offset);
+				struct ipa_dma_mem *mem, u32 offset);
 
 /* Return a pointer to the payload for a DMA register write immediate
  * command, or null if one can't be allocated.  Caller must ensure result
@@ -82,7 +82,7 @@ struct ipahal_imm_cmd_pyld *ipahal_register_write_pyld(u32 offset, u32 value,
  * offset	is the location IPA local memory to write
  */
 struct ipahal_imm_cmd_pyld *ipahal_hdr_init_local_pyld(
-				struct ipa_mem_buffer *mem, u32 offset);
+				struct ipa_dma_mem *mem, u32 offset);
 
 /* Return a pointer to the payload for an IP packet init immediate
  * command, or null if one can't be allocated.  Caller must ensure result
@@ -101,7 +101,7 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_packet_init_pyld(u32 dest_pipe_idx);
  * nhash_offset	is the locatin in IPA memory for non-hashed routing table
  */
 struct ipahal_imm_cmd_pyld *ipahal_ip_v4_routing_init_pyld(
-				struct ipa_mem_buffer *mem,
+				struct ipa_dma_mem *mem,
 				u32 hash_offset, u32 nhash_offset);
 
 /* Return a pointer to the payload for an IPv6 routing init immediate
@@ -113,7 +113,7 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_v4_routing_init_pyld(
  * nhash_offset	is the locatin in IPA memory for non-hashed routing table
  */
 struct ipahal_imm_cmd_pyld *ipahal_ip_v6_routing_init_pyld(
-				struct ipa_mem_buffer *mem,
+				struct ipa_dma_mem *mem,
 				u32 hash_offset, u32 nhash_offset);
 
 /* Return a pointer to the payload for an IPv4 filter init immediate
@@ -125,7 +125,7 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_v6_routing_init_pyld(
  * nhash_offset	is the locatin in IPA memory for non-hashed routing table
  */
 struct ipahal_imm_cmd_pyld *ipahal_ip_v4_filter_init_pyld(
-				struct ipa_mem_buffer *mem,
+				struct ipa_dma_mem *mem,
 				u32 hash_offset, u32 nhash_offset);
 
 /* Return a pointer to the payload for an IPv6 filter init immediate
@@ -137,7 +137,7 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_v4_filter_init_pyld(
  * nhash_offset	is the locatin in IPA memory for non-hashed routing table
  */
 struct ipahal_imm_cmd_pyld *ipahal_ip_v6_filter_init_pyld(
-				struct ipa_mem_buffer *mem,
+				struct ipa_dma_mem *mem,
 				u32 hash_offset, u32 nhash_offset);
 
 /* Return a pointer to the payload for an IP packet tag status immediate
@@ -155,7 +155,7 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_packet_tag_status_pyld(u64 tag);
  * mem is the dat to transfer (it will be discarded)
  */
 struct ipahal_imm_cmd_pyld *ipahal_dma_task_32b_addr_pyld(
-				struct ipa_mem_buffer *mem);
+				struct ipa_dma_mem *mem);
 
 /* ipahal_destroy_imm_cmd() - Destroy/Release bulk that was built
  *  by the construction functions
@@ -334,11 +334,11 @@ void ipahal_destroy(void);
 /* Does the given ID represents rule miss? */
 bool ipahal_is_rule_miss_id(u32 id);
 
-int ipahal_rt_generate_empty_img(u32 route_count, struct ipa_mem_buffer *mem);
-int ipahal_flt_generate_empty_img(u64 ep_bitmap, struct ipa_mem_buffer *mem);
+int ipahal_rt_generate_empty_img(u32 route_count, struct ipa_dma_mem *mem);
+int ipahal_flt_generate_empty_img(u64 ep_bitmap, struct ipa_dma_mem *mem);
 
 /* ipahal_free_empty_img() - free empty filter or route image
  */
-void ipahal_free_empty_img(struct ipa_mem_buffer *mem);
+void ipahal_free_empty_img(struct ipa_dma_mem *mem);
 
 #endif /* _IPAHAL_H_ */

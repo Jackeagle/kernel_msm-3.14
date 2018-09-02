@@ -18,7 +18,7 @@
  */
 struct ipahal_context {
 	void __iomem *base;
-	struct ipa_mem_buffer empty_fltrt_tbl;
+	struct ipa_dma_mem empty_fltrt_tbl;
 };
 
 extern struct ipahal_context *ipahal_ctx;

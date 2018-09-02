@@ -109,7 +109,7 @@ static bool check_too_big(char *name, u64 value, u8 bits)
 }
 
 struct ipahal_imm_cmd_pyld *
-ipahal_dma_shared_mem_write_pyld(struct ipa_mem_buffer *mem, u32 offset)
+ipahal_dma_shared_mem_write_pyld(struct ipa_dma_mem *mem, u32 offset)
 {
 	struct ipa_imm_cmd_hw_dma_shared_mem *data;
 	struct ipahal_imm_cmd_pyld *pyld;
@@ -163,7 +163,7 @@ ipahal_register_write_pyld(u32 offset, u32 value, u32 mask, bool clear)
 }
 
 struct ipahal_imm_cmd_pyld *
-ipahal_hdr_init_local_pyld(struct ipa_mem_buffer *mem, u32 offset)
+ipahal_hdr_init_local_pyld(struct ipa_dma_mem *mem, u32 offset)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_hdr_init_local *data;
@@ -208,7 +208,7 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_packet_init_pyld(u32 dest_pipe_idx)
 }
 
 static struct ipahal_imm_cmd_pyld *
-fltrt_init_common(u16 opcode, struct ipa_mem_buffer *mem, u32 hash_offset,
+fltrt_init_common(u16 opcode, struct ipa_dma_mem *mem, u32 hash_offset,
 		  u32 nhash_offset)
 {
 	struct ipa_imm_cmd_hw_ip_fltrt_init *data;
@@ -242,7 +242,7 @@ fltrt_init_common(u16 opcode, struct ipa_mem_buffer *mem, u32 hash_offset,
 }
 
 struct ipahal_imm_cmd_pyld *
-ipahal_ip_v4_routing_init_pyld(struct ipa_mem_buffer *mem, u32 hash_offset,
+ipahal_ip_v4_routing_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
 			       u32 nhash_offset)
 {
 	u16 opcode = IPA_IMM_CMD_IP_V4_ROUTING_INIT;
@@ -253,7 +253,7 @@ ipahal_ip_v4_routing_init_pyld(struct ipa_mem_buffer *mem, u32 hash_offset,
 }
 
 struct ipahal_imm_cmd_pyld *
-ipahal_ip_v6_routing_init_pyld(struct ipa_mem_buffer *mem, u32 hash_offset,
+ipahal_ip_v6_routing_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
 			       u32 nhash_offset)
 {
 	u16 opcode = IPA_IMM_CMD_IP_V6_ROUTING_INIT;
@@ -264,7 +264,7 @@ ipahal_ip_v6_routing_init_pyld(struct ipa_mem_buffer *mem, u32 hash_offset,
 }
 
 struct ipahal_imm_cmd_pyld *
-ipahal_ip_v4_filter_init_pyld(struct ipa_mem_buffer *mem, u32 hash_offset,
+ipahal_ip_v4_filter_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
 			      u32 nhash_offset)
 {
 	u16 opcode = IPA_IMM_CMD_IP_V4_FILTER_INIT;
@@ -275,7 +275,7 @@ ipahal_ip_v4_filter_init_pyld(struct ipa_mem_buffer *mem, u32 hash_offset,
 }
 
 struct ipahal_imm_cmd_pyld *
-ipahal_ip_v6_filter_init_pyld(struct ipa_mem_buffer *mem, u32 hash_offset,
+ipahal_ip_v6_filter_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
 			      u32 nhash_offset)
 {
 	u16 opcode = IPA_IMM_CMD_IP_V6_FILTER_INIT;
@@ -306,7 +306,7 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_packet_tag_status_pyld(u64 tag)
 }
 
 struct ipahal_imm_cmd_pyld *
-ipahal_dma_task_32b_addr_pyld(struct ipa_mem_buffer *mem)
+ipahal_dma_task_32b_addr_pyld(struct ipa_dma_mem *mem)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_dma_task_32b_addr *data;
@@ -458,7 +458,7 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 
 int ipahal_init(void __iomem *base)
 {
-	struct ipa_mem_buffer *mem = &ipahal_ctx->empty_fltrt_tbl;
+	struct ipa_dma_mem *mem = &ipahal_ctx->empty_fltrt_tbl;
 
 	/* Set up an empty filter/route table entry in system
 	 * memory.  This will be used, for example, to delete a
@@ -506,7 +506,7 @@ bool ipahal_is_rule_miss_id(u32 id)
  * This function initializes all entries to point at the preallocated
  * empty routing entry in system RAM.
  */
-int ipahal_rt_generate_empty_img(u32 route_count, struct ipa_mem_buffer *mem)
+int ipahal_rt_generate_empty_img(u32 route_count, struct ipa_dma_mem *mem)
 {
 	u64 addr;
 	int i;
@@ -541,7 +541,7 @@ int ipahal_rt_generate_empty_img(u32 route_count, struct ipa_mem_buffer *mem)
  * endpoint 0, bit 1 for endpoint 1, and so on.  This is different
  * from the hardware (which uses bit 1 to represent filter 0, etc.).
  */
-int ipahal_flt_generate_empty_img(u64 filter_bitmap, struct ipa_mem_buffer *mem)
+int ipahal_flt_generate_empty_img(u64 filter_bitmap, struct ipa_dma_mem *mem)
 {
 	u32 filter_count = hweight32(filter_bitmap) + 1;
 	u64 addr;
@@ -568,7 +568,7 @@ int ipahal_flt_generate_empty_img(u64 filter_bitmap, struct ipa_mem_buffer *mem)
 	return 0;
 }
 
-void ipahal_free_empty_img(struct ipa_mem_buffer *mem)
+void ipahal_free_empty_img(struct ipa_dma_mem *mem)
 {
 	ipa_dma_free(mem);
 }
