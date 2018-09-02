@@ -536,18 +536,22 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
 
 	ipa_debug("Entry - ep_bitmap 0x%llx\n", ep_bitmap);
 
-	if (ep_bitmap)
-		tbls_num++;
+	ipa_assert(ep_bitmap);
+
+	tbls_num++;	/* First slot in a filter table holds endpoint bitmap */
 
 	if (ipa_dma_alloc(mem, tbls_num * IPA_HW_TBL_HDR_WIDTH, GFP_KERNEL))
 		return -ENOMEM;
 
-	if (ep_bitmap) {
-		/* At IPA3, global configuration is possible but not used */
-		put_unaligned(ep_bitmap << 1, mem->base);
-		i++;
-	}
+	/* Save the endpoint bitmap in the first slot of the table.
+	 * Endpoint 0 is represented by bitmap position 1 in the
+	 * table.  (Bit position 1 might represent global?  At IPA3,
+	 * global configuration is possible but not used.)
+	 */
+	put_unaligned(ep_bitmap << 1, mem->base);
+	i++;
 
+	/* Copy the empty entry into every entry in the table */
 	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys_base;
 	while (i < tbls_num)
 		put_unaligned(addr, mem->base + i++ * IPA_HW_TBL_HDR_WIDTH);
