@@ -679,7 +679,7 @@ static void ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 	/* copy over EP cfg */
 	ep->cfg.hdr = *ep_hdr;
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_n, clnt_hdl, &ep->cfg.hdr);
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_N, clnt_hdl, &ep->cfg.hdr);
 }
 
 /** ipa_cfg_ep_hdr_ext() -  IPA end-point extended header configuration
@@ -710,7 +710,7 @@ ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
 	/* copy over EP cfg */
 	ep->cfg.hdr_ext = *ep_hdr_ext;
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_n, clnt_hdl,
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_N, clnt_hdl,
 				  &ep->cfg.hdr_ext);
 }
 
@@ -737,7 +737,7 @@ static void ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 	/* copy over EP cfg */
 	ipa_ctx->ep[clnt_hdl].cfg.aggr = *ep_aggr;
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_AGGR_n, clnt_hdl, ep_aggr);
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_AGGR_N, clnt_hdl, ep_aggr);
 }
 
 /** ipa_cfg_ep_cfg() - IPA end-point cfg configuration
@@ -757,7 +757,7 @@ static void ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 	ipa_debug("mdata_hdr_ofst=%d gen_qmb_master_sel=0\n",
 		  ipa_ctx->ep[clnt_hdl].cfg.cfg.cs_metadata_hdr_offset);
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CFG_n, clnt_hdl,
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CFG_N, clnt_hdl,
 				  &ipa_ctx->ep[clnt_hdl].cfg.cfg);
 }
 
@@ -791,7 +791,7 @@ static void ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 
 	init_mode.dst_pipe_number = ipa_ctx->ep[clnt_hdl].dst_pipe_index;
 	init_mode.ep_mode = *ep_mode;
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_MODE_n, clnt_hdl, &init_mode);
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_MODE_N, clnt_hdl, &init_mode);
 }
 
 /** ipa_cfg_ep_seq() - IPA end-point HPS/DPS sequencer type configuration
@@ -805,7 +805,7 @@ static void ipa_cfg_ep_seq(u32 clnt_hdl)
 	int type = ep_configuration(client)->sequencer_type;
 
 	ipa_debug("set sequencers to sequence 0x%x, ep = %d\n", type, clnt_hdl);
-	ipahal_write_reg_n(IPA_ENDP_INIT_SEQ_n, clnt_hdl, type);
+	ipahal_write_reg_n(IPA_ENDP_INIT_SEQ_N, clnt_hdl, type);
 }
 
 /** ipa_cfg_ep_deaggr() -  IPA end-point deaggregation configuration
@@ -819,7 +819,7 @@ static void ipa_cfg_ep_deaggr(u32 clnt_hdl)
 
 	/* All fields are 0 for all pipes */
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_n, clnt_hdl, NULL);
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_N, clnt_hdl, NULL);
 }
 
 /** ipa_cfg_ep_metadata_mask() - IPA end-point meta-data mask configuration
@@ -838,7 +838,7 @@ ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
 	/* copy over EP cfg */
 	ipa_ctx->ep[clnt_hdl].cfg.metadata_mask = *metadata_mask;
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_n,
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_N,
 				  clnt_hdl, metadata_mask);
 }
 
@@ -890,14 +890,14 @@ void ipa_cfg_ep_status(u32 clnt_hdl,
 	/* copy over EP cfg */
 	ipa_ctx->ep[clnt_hdl].status = *ep_status;
 
-	ipahal_write_reg_n_fields(IPA_ENDP_STATUS_n, clnt_hdl, ep_status);
+	ipahal_write_reg_n_fields(IPA_ENDP_STATUS_N, clnt_hdl, ep_status);
 }
 
 static void suspend_consumer_endpoint(u32 ipa_ep_idx)
 {
 	struct ipa_ep_cfg_ctrl cfg = { .ipa_ep_suspend = true };
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n, ipa_ep_idx, &cfg);
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_idx, &cfg);
 
 	/* Due to a hardware bug, a client suspended with an open
 	 * aggregation frame will not generate a SUSPEND IPA interrupt.
@@ -911,7 +911,7 @@ static void resume_consumer_endpoint(u32 ipa_ep_idx)
 {
 	struct ipa_ep_cfg_ctrl cfg = { .ipa_ep_suspend = false };
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n, ipa_ep_idx, &cfg);
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_idx, &cfg);
 }
 
 /* Interconnect path bandwidths (each times 1000 bytes per second) */
@@ -1118,11 +1118,11 @@ static void ipa_write_src_rsrc_grp_type_reg(int group_index,
 	enum ipahal_reg reg;
 
 	if (group_index == IPA_GROUP_UC_RX_Q) {
-		reg = IPA_SRC_RSRC_GRP_23_RSRC_TYPE_n;
+		reg = IPA_SRC_RSRC_GRP_23_RSRC_TYPE_N;
 	} else {
 		ipa_assert(group_index == IPA_GROUP_LWA_DL ||
 			   group_index == IPA_GROUP_UL_DL);
-		reg = IPA_SRC_RSRC_GRP_01_RSRC_TYPE_n;
+		reg = IPA_SRC_RSRC_GRP_01_RSRC_TYPE_N;
 	}
 
 	x_limits = &ipa_rsrc_src_grp_config[n][group_index];
@@ -1134,7 +1134,7 @@ static void ipa_write_src_rsrc_grp_type_reg(int group_index,
 static void ipa_write_dst_rsrc_grp_type_reg(int group_index,
 					    enum ipa_rsrc_grp_type_src n)
 {
-	enum ipahal_reg reg = IPA_DST_RSRC_GRP_01_RSRC_TYPE_n;
+	enum ipahal_reg reg = IPA_DST_RSRC_GRP_01_RSRC_TYPE_N;
 	const struct rsrc_min_max *x_limits;
 	const struct rsrc_min_max *y_limits;
 
@@ -1384,10 +1384,10 @@ void ipa_set_flt_tuple_mask(u32 pipe_idx, struct ipahal_reg_hash_tuple *tuple)
 {
 	struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
 
-	ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n, pipe_idx,
+	ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, pipe_idx,
 				 &fltrt_tuple);
 	fltrt_tuple.flt = *tuple;
-	ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n, pipe_idx,
+	ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, pipe_idx,
 				  &fltrt_tuple);
 }
 
@@ -1404,10 +1404,10 @@ void ipa_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple)
 {
 	struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
 
-	ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n, tbl_idx,
+	ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, tbl_idx,
 				 &fltrt_tuple);
 	fltrt_tuple.rt = *tuple;
-	ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_n, tbl_idx,
+	ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, tbl_idx,
 				  &fltrt_tuple);
 }
 

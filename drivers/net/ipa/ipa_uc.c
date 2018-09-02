@@ -281,7 +281,7 @@ send_uc_command_nowait(struct ipa_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
 
 	wmb();	/* ensure write to shared memory is done before triggering uc */
 
-	ipahal_write_reg_n(IPA_IRQ_EE_UC_n, 0, 0x1);
+	ipahal_write_reg_n(IPA_IRQ_EE_UC_N, 0, 0x1);
 }
 
 /** ipa_uc_interface_init() - Initialize the interface with the uC
@@ -299,7 +299,7 @@ int ipa_uc_interface_init(void)
 	}
 
 	phys_addr = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
-	phys_addr += ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_n, 0);
+	phys_addr += ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_N, 0);
 	mmio = ioremap(phys_addr, IPA_RAM_UC_SMEM_SIZE);
 	if (!mmio) {
 		ipa_err("Fail to ioremap IPA uC SRAM\n");

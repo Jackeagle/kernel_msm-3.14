@@ -347,10 +347,10 @@ struct ipa_ep_cfg_hdr {
  *	(2^pad to alignment value), i.e. value of 3 means pad to 2^3 = 8 bytes
  *	alignment. Alignment is to 0,2 up to 32 bytes (IPAv2 does not support 64
  *	byte alignment). Valid for Output Pipes only (IPA Producer).
- * @hdr_payload_len_inc_padding: 0-IPA_ENDP_INIT_HDR_n's
+ * @hdr_payload_len_inc_padding: 0-IPA_ENDP_INIT_HDR_N's
  *	HDR_OFST_PKT_SIZE does
  *	not includes padding bytes size, payload_len = packet length,
- *	1-IPA_ENDP_INIT_HDR_n's HDR_OFST_PKT_SIZE includes
+ *	1-IPA_ENDP_INIT_HDR_N's HDR_OFST_PKT_SIZE includes
  *	padding bytes size, payload_len = packet length + padding
  * @hdr_total_len_or_pad: field is used as PAD length ot as Total length
  *	(header + packet + padding)
@@ -447,7 +447,7 @@ struct ipa_ep_cfg_cfg {
 
 /** struct ipa_ep_cfg_metadata_mask - Endpoint initialization hdr metadata mask
  * @metadata_mask: Mask specifying which metadata bits to write to
- *	IPA_ENDP_INIT_HDR_n.s HDR_OFST_METADATA. Only
+ *	IPA_ENDP_INIT_HDR_N.s HDR_OFST_METADATA. Only
  *	masked metadata bits (set to 1) will be written. Valid for Output
  *	Pipes only (IPA Producer)
  */

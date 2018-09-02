@@ -52,9 +52,9 @@ static void ipa_tx_suspend_interrupt_wa(void)
 {
 	u32 val;
 
-	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
+	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP);
 	val &= ~BIT(ipa_irq_mapping[IPA_TX_SUSPEND_IRQ]);
-	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
+	ipahal_write_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP, val);
 
 	queue_delayed_work(ipa_interrupt_wq, &tx_suspend_work,
 			   DISABLE_TX_SUSPEND_INTR_DELAY);
@@ -73,9 +73,9 @@ static void ipa_handle_interrupt(int irq_num)
 		ipa_tx_suspend_interrupt_wa();
 
 		/* Get and clear mask of endpoints signaling TX_SUSPEND */
-		endpoints = ipahal_read_reg_n(IPA_IRQ_SUSPEND_INFO_EE_n,
+		endpoints = ipahal_read_reg_n(IPA_IRQ_SUSPEND_INFO_EE_N,
 					      IPA_EE_AP);
-		ipahal_write_reg_n(IPA_SUSPEND_IRQ_CLR_EE_n, IPA_EE_AP,
+		ipahal_write_reg_n(IPA_SUSPEND_IRQ_CLR_EE_N, IPA_EE_AP,
 				   endpoints);
 	}
 
@@ -100,8 +100,8 @@ static void ipa_process_interrupts(void)
 		 * bug forces us to re-read the enabled mask every time to
 		 * avoid an endless loop.
 		 */
-		ipa_intr_mask = ipahal_read_reg_n(IPA_IRQ_STTS_EE_n, IPA_EE_AP);
-		ipa_intr_mask &= ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
+		ipa_intr_mask = ipahal_read_reg_n(IPA_IRQ_STTS_EE_N, IPA_EE_AP);
+		ipa_intr_mask &= ipahal_read_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP);
 
 		if (!ipa_intr_mask)
 			break;
@@ -116,7 +116,7 @@ static void ipa_process_interrupts(void)
 			 * clearing unhandled interrupts
 			 */
 			if (uc_irq)
-				ipahal_write_reg_n(IPA_IRQ_CLR_EE_n, IPA_EE_AP,
+				ipahal_write_reg_n(IPA_IRQ_CLR_EE_N, IPA_EE_AP,
 						   imask);
 
 			ipa_handle_interrupt(i);
@@ -125,7 +125,7 @@ static void ipa_process_interrupts(void)
 			 * to avoid clearing interrupt data
 			 */
 			if (!uc_irq)
-				ipahal_write_reg_n(IPA_IRQ_CLR_EE_n, IPA_EE_AP,
+				ipahal_write_reg_n(IPA_IRQ_CLR_EE_N, IPA_EE_AP,
 						   imask);
 		} while ((ipa_intr_mask ^= imask));
 	}
@@ -158,9 +158,9 @@ static void enable_tx_suspend_work_func(struct work_struct *work)
 
 	ipa_client_add();
 
-	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
+	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP);
 	val |= BIT(ipa_irq_mapping[IPA_TX_SUSPEND_IRQ]);
-	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
+	ipahal_write_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP, val);
 
 	ipa_process_interrupts();
 
@@ -178,13 +178,13 @@ static void tx_suspend_enable(void)
 		if (ipa_modem_consumer(client) || ipa_modem_producer(client))
 			val &= ~BIT(ipa_get_ep_mapping(client));
 
-	ipahal_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_n, IPA_EE_AP, val);
+	ipahal_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_N, IPA_EE_AP, val);
 }
 
 /* Unregister SUSPEND_IRQ_EN_EE_N_ADDR for L2 interrupt. */
 static void tx_suspend_disable(void)
 {
-	ipahal_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_n, IPA_EE_AP, 0);
+	ipahal_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_N, IPA_EE_AP, 0);
 }
 
 /** ipa_add_interrupt_handler() - Adds handler for an IPA interrupt
@@ -205,9 +205,9 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 	intr_info->interrupt = interrupt;
 
 	/* Enable the IPA interrupt */
-	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
+	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP);
 	val |= BIT(irq_num);
-	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
+	ipahal_write_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP, val);
 
 	if (interrupt == IPA_TX_SUSPEND_IRQ)
 		tx_suspend_enable();
@@ -231,9 +231,9 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 		tx_suspend_disable();
 
 	/* Disable the interrupt */
-	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP);
+	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP);
 	val &= ~BIT(irq_num);
-	ipahal_write_reg_n(IPA_IRQ_EN_EE_n, IPA_EE_AP, val);
+	ipahal_write_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP, val);
 }
 
 /** ipa_interrupts_init() - Initialize the IPA interrupts framework */

@@ -98,12 +98,12 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	if (result)
 		return -EFAULT;
 
-	ipahal_read_reg_n_fields(IPA_ENDP_INIT_CTRL_n, clnt_hdl, &ctrl);
+	ipahal_read_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl, &ctrl);
 	if (ctrl.ipa_ep_suspend) {
 		ipa_debug("pipe is suspended, remove suspend\n");
 		pipe_suspended = true;
 		ctrl.ipa_ep_suspend = false;
-		ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n, clnt_hdl,
+		ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl,
 					  &ctrl);
 	}
 
@@ -167,7 +167,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	if (pipe_suspended) {
 		ipa_debug("suspend the pipe again\n");
 		ctrl.ipa_ep_suspend = true;
-		ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n, clnt_hdl,
+		ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl,
 					  &ctrl);
 	}
 
@@ -187,7 +187,7 @@ start_chan_fail:
 	if (pipe_suspended) {
 		ipa_debug("suspend the pipe again\n");
 		ctrl.ipa_ep_suspend = true;
-		ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_n, clnt_hdl,
+		ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl,
 					  &ctrl);
 	}
 	ipa_restore_channel_properties(ep, &orig_props);
