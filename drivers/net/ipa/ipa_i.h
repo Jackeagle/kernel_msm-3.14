@@ -607,8 +607,6 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in);
 
 void ipa_teardown_sys_pipe(u32 clnt_hdl);
 
-u16 ipa_get_smem_restr_bytes(void);
-
 void ipa_rx_switch_to_poll_mode(struct ipa_sys_context *sys);
 
 /* interrupts */

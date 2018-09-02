@@ -1039,15 +1039,6 @@ void ipa_proxy_clk_vote(void)
 	}
 }
 
-/** ipa_get_smem_restr_bytes()- Return IPA smem restricted bytes
- *
- * Return value: u16 - number of IPA smem restricted bytes
- */
-u16 ipa_get_smem_restr_bytes(void)
-{
-	return ipa_ctx->smem_restricted_bytes;
-}
-
 u32 ipa_get_num_pipes(void)
 {
 	return ipahal_read_reg(IPA_ENABLED_PIPES);
