@@ -4,20 +4,30 @@
  * Copyright (C) 2018 Linaro Ltd.
  */
 
-#include "ipa_i.h"
+#include <linux/dma-mapping.h>
+
 #include "ipa_dma.h"
+
+static struct device *ipa_dma_dev;
 
 bool ipa_dma_init(struct device *dev, u32 align)
 {
+	int ret;
+
 	/* Ensure DMA addresses will have the alignment we require */
 	if (dma_get_cache_alignment() % align)
 		return -ENOTSUPP;
 
-	return dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
+	ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
+	if (!ret)
+		ipa_dma_dev = dev;
+
+	return ret;
 }
 
 void ipa_dma_exit(void)
 {
+	ipa_dma_dev = NULL;
 }
 
 int ipa_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp)
@@ -25,7 +35,7 @@ int ipa_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp)
 	dma_addr_t phys;
 	void *cpu_addr;
 
-	cpu_addr = dma_zalloc_coherent(ipa_ctx->dev, size, &phys, gfp);
+	cpu_addr = dma_zalloc_coherent(ipa_dma_dev, size, &phys, gfp);
 	if (!cpu_addr)
 		return -ENOMEM;
 
@@ -38,7 +48,7 @@ int ipa_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp)
 
 void ipa_dma_free(struct ipa_mem_buffer *mem)
 {
-	dma_free_coherent(ipa_ctx->dev, mem->size, mem->base, mem->phys_base);
+	dma_free_coherent(ipa_dma_dev, mem->size, mem->base, mem->phys_base);
 	memset(mem, 0, sizeof(*mem));
 }
 
