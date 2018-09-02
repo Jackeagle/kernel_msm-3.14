@@ -39,13 +39,13 @@ extern struct ipahal_context *ipahal_ctx;
  * @nhash_rules_addr: Addr in sys mem where non-hashable flt/rt tbl starts
  */
 struct ipa_imm_cmd_hw_ip_fltrt_init {
-	u64 hash_rules_addr:64;
-	u64 hash_rules_size:12;
-	u64 hash_local_addr:16;
-	u64 nhash_rules_size:12;
-	u64 nhash_local_addr:16;
-	u64 rsvd:8;
-	u64 nhash_rules_addr:64;
+	u64 hash_rules_addr;
+	u64 hash_rules_size	: 12,
+	    hash_local_addr	: 16,
+	    nhash_rules_size	: 12,
+	    nhash_local_addr	: 16,
+	    rsvd		: 8;
+	u64 nhash_rules_addr;
 };
 
 /* struct ipa_imm_cmd_hw_hdr_init_local - HDR_INIT_LOCAL command payload
@@ -57,10 +57,10 @@ struct ipa_imm_cmd_hw_ip_fltrt_init {
  * @rsvd: reserved
  */
 struct ipa_imm_cmd_hw_hdr_init_local {
-	u64 hdr_table_addr:64;
-	u64 size_hdr_table:12;
-	u64 hdr_addr:16;
-	u64 rsvd:4;
+	u64 hdr_table_addr;
+	u64 size_hdr_table	: 12,
+	    hdr_addr		: 16,
+	    rsvd		: 4;
 };
 
 /* struct ipa_imm_cmd_hw_ip_packet_init - IP_PACKET_INIT command payload
@@ -72,8 +72,8 @@ struct ipa_imm_cmd_hw_hdr_init_local {
  * @rsvd: reserved
  */
 struct ipa_imm_cmd_hw_ip_packet_init {
-	u64 destination_pipe_index:5;
-	u64 rsv1:59;
+	u64 destination_pipe_index	: 5,
+	    rsv1			: 59;
 };
 
 /* struct ipa_imm_cmd_hw_register_write - REGISTER_WRITE command payload
@@ -93,13 +93,13 @@ struct ipa_imm_cmd_hw_ip_packet_init {
  * @rsvd: reserved - should be set to zero
  */
 struct ipa_imm_cmd_hw_register_write {
-	u64 sw_rsvd:15;
-	u64 skip_pipeline_clear:1;
-	u64 offset:16;
-	u64 value:32;
-	u64 value_mask:32;
-	u64 pipeline_clear_options:2;
-	u64 rsvd:30;
+	u64 sw_rsvd			: 15,
+	    skip_pipeline_clear		: 1,
+	    offset			: 16,
+	    value			: 32;
+	u64 value_mask			: 32,
+	    pipeline_clear_options	: 2,
+	    rsvd			: 30;
 };
 
 /* struct ipa_imm_cmd_hw_dma_shared_mem - DMA_SHARED_MEM command payload
@@ -121,14 +121,14 @@ struct ipa_imm_cmd_hw_register_write {
  * @system_addr: Address in system memory
  */
 struct ipa_imm_cmd_hw_dma_shared_mem {
-	u64 sw_rsvd:16;
-	u64 size:16;
-	u64 local_addr:16;
-	u64 direction:1;
-	u64 skip_pipeline_clear:1;
-	u64 pipeline_clear_options:2;
-	u64 rsvd:12;
-	u64 system_addr:64;
+	u64 sw_rsvd			: 16,
+	    size			: 16,
+	    local_addr			: 16,
+	    direction			: 1,
+	    skip_pipeline_clear		: 1,
+	    pipeline_clear_options	: 2,
+	    rsvd			: 12;
+	u64 system_addr;
 };
 
 /* struct ipa_imm_cmd_hw_ip_packet_tag_status -
@@ -142,8 +142,8 @@ struct ipa_imm_cmd_hw_dma_shared_mem {
  * @tag: Tag that is provided back to SW
  */
 struct ipa_imm_cmd_hw_ip_packet_tag_status {
-	u64 sw_rsvd:16;
-	u64 tag:48;
+	u64 sw_rsvd	: 16,
+	    tag		: 48;
 };
 
 /* struct ipa_imm_cmd_hw_dma_task_32b_addr -
@@ -170,15 +170,15 @@ struct ipa_imm_cmd_hw_ip_packet_tag_status {
  *  must contain this field (2 or more buffers) or EOT.
  */
 struct ipa_imm_cmd_hw_dma_task_32b_addr {
-	u64 sw_rsvd:11;
-	u64 cmplt:1;
-	u64 eof:1;
-	u64 flsh:1;
-	u64 lock:1;
-	u64 unlock:1;
-	u64 size1:16;
-	u64 addr1:32;
-	u64 packet_size:16;
+	u64 sw_rsvd	: 11,
+	    cmplt	: 1,
+	    eof		: 1,
+	    flsh	: 1,
+	    lock	: 1,
+	    unlock	: 1,
+	    size1	: 16,
+	    addr1	: 32;
+	u64 packet_size	: 16;
 };
 
 /* IPA Status packet H/W structures and info */
@@ -236,36 +236,36 @@ struct ipa_imm_cmd_hw_dma_task_32b_addr {
  * @hw_specific: H/W specific reserved value
  */
 struct ipa_pkt_status_hw {
-	u64 status_opcode:8;
-	u64 exception:8;
-	u64 status_mask:16;
-	u64 pkt_len:16;
-	u64 endp_src_idx:5;
-	u64 rsvd1:3;
-	u64 endp_dest_idx:5;
-	u64 rsvd2:3;
-	u64 metadata:32;
-	u64 flt_local:1;
-	u64 flt_hash:1;
-	u64 flt_global:1;
-	u64 flt_ret_hdr:1;
-	u64 flt_rule_id:10;
-	u64 rt_local:1;
-	u64 rt_hash:1;
-	u64 ucp:1;
-	u64 rt_tbl_idx:5;
-	u64 rt_rule_id:10;
-	u64 nat_hit:1;
-	u64 nat_entry_idx:13;
-	u64 nat_type:2;
-	u64 tag_info:48;
-	u64 seq_num:8;
-	u64 time_of_day_ctr:24;
-	u64 hdr_local:1;
-	u64 hdr_offset:10;
-	u64 frag_hit:1;
-	u64 frag_rule:4;
-	u64 hw_specific:16;
+	u64 status_opcode	: 8,
+	    exception		: 8,
+	    status_mask		: 16,
+	    pkt_len		: 16,
+	    endp_src_idx	: 5,
+	    rsvd1		: 3,
+	    endp_dest_idx	: 5,
+	    rsvd2		: 3;
+	u64 metadata		: 32,
+	    flt_local		: 1,
+	    flt_hash		: 1,
+	    flt_global		: 1,
+	    flt_ret_hdr		: 1,
+	    flt_rule_id		: 10,
+	    rt_local		: 1,
+	    rt_hash		: 1,
+	    ucp			: 1,
+	    rt_tbl_idx		: 5,
+	    rt_rule_id		: 10;
+	u64 nat_hit		: 1,
+	    nat_entry_idx	: 13,
+	    nat_type		: 2,
+	    tag_info		: 48;
+	u64 seq_num		: 8,
+	    time_of_day_ctr	: 24,
+	    hdr_local		: 1,
+	    hdr_offset		: 10,
+	    frag_hit		: 1,
+	    frag_rule		: 4,
+	    hw_specific		: 16;
 };
 
 #endif /* _IPAHAL_I_H_ */

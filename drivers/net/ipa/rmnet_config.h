@@ -15,13 +15,13 @@ struct rmnet_phys_ep_conf_s {
 
 struct rmnet_map_header_s {
 #ifndef RMNET_USE_BIG_ENDIAN_STRUCTS
-	u8	pad_len:6;
-	u8	reserved_bit:1;
-	u8	cd_bit:1;
+	u8	pad_len		: 6,
+		reserved_bit	: 1,
+		cd_bit		: 1;
 #else
-	u8	cd_bit:1;
-	u8	reserved_bit:1;
-	u8	pad_len:6;
+	u8	cd_bit		: 1,
+		reserved_bit	: 1,
+		pad_len		: 6;
 #endif /* RMNET_USE_BIG_ENDIAN_STRUCTS */
 	u8	mux_id;
 	u16	pkt_len;

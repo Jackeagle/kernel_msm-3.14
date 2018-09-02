@@ -52,9 +52,9 @@ enum ipa_hw_2_cpu_responses {
  */
 union ipa_hw_cpu_cmd_completed_response_data {
 	struct ipa_hw_cpu_cmd_completed_response_params {
-		u32 original_cmd_op:8;
-		u32 status:8;
-		u32 reserved:16;
+		u32 original_cmd_op	: 8,
+		    status		: 8,
+		    reserved		: 16;
 	} __packed params;
 	u32 raw32b;
 } __packed;
