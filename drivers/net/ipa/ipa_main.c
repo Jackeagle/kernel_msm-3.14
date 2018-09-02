@@ -394,7 +394,7 @@ free_mem:
  *
  * Return codes: 0 for success, negative value for failure
  */
-static int ipa_init_flt4(u32 filter_count)
+static int ipa_init_flt4(void)
 {
 	struct ipa_desc desc = { };
 	struct ipa_mem_buffer mem;
@@ -436,7 +436,7 @@ free_mem:
  *
  * Return codes: 0 for success, negative value for failure
  */
-static int ipa_init_flt6(u32 filter_count)
+static int ipa_init_flt6(void)
 {
 	struct ipa_desc desc = { };
 	struct ipa_mem_buffer mem;
@@ -529,7 +529,6 @@ static int setup_apps_lan_cons_pipe(void)
 
 static int ipa_setup_apps_pipes(void)
 {
-	u32 filter_count = hweight32(ipa_ctx->filter_bitmap);
 	int result;
 
 	/* CMD OUT (AP->IPA) */
@@ -551,10 +550,10 @@ static int ipa_setup_apps_pipes(void)
 	ipa_init_rt6();
 	ipa_debug("V6 RT initialized\n");
 
-	ipa_init_flt4(filter_count);
+	ipa_init_flt4();
 	ipa_debug("V4 FLT initialized\n");
 
-	ipa_init_flt6(filter_count);
+	ipa_init_flt6();
 	ipa_debug("V6 FLT initialized\n");
 
 	ipa_setup_flt_hash_tuple();
