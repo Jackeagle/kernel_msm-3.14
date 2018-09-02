@@ -7,6 +7,8 @@
 
 #include <linux/debugfs.h>
 #include <asm/unaligned.h>
+
+#include "ipa_dma.h"
 #include "ipa_i.h"
 #include "ipahal.h"
 #include "ipahal_i.h"

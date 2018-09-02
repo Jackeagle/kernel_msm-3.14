@@ -8,6 +8,8 @@
 #include <asm/barrier.h>
 #include <linux/delay.h>
 #include <linux/device.h>
+
+#include "ipa_dma.h"
 #include "ipa_i.h"
 
 /* These values were determined empirically and shows good E2E bi-

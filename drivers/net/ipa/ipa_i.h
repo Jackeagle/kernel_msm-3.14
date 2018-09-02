@@ -18,6 +18,7 @@
 #include <linux/platform_device.h>
 #include <linux/firmware.h>
 
+#include "ipa_dma.h"
 #include "ipa_common_i.h"
 #include "ipahal_reg.h"
 #include "ipahal.h"

@@ -32,6 +32,7 @@
 #include <linux/soc/qcom/smem_state.h>
 #include <asm/cacheflush.h>
 
+#include "ipa_dma.h"
 #include "ipa_i.h"
 #include "ipahal.h"
 

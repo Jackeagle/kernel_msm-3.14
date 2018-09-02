@@ -7,7 +7,6 @@
 #define _IPA_COMMON_I_H_
 
 #include <linux/slab.h>
-#include "ipa_dma.h"
 
 /* A field_mask is a bitmask that defines both the width and
  * position of a field within in a 32-bit register.  Set bits in a

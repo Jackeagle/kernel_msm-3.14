@@ -18,6 +18,8 @@
 #include <linux/module.h>
 #include <linux/of.h>
 #include <linux/platform_device.h>
+
+#include "ipa_dma.h"
 #include "ipa_i.h"
 #include "ipahal.h"
 

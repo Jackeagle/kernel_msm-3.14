@@ -6,6 +6,7 @@
 #ifndef _IPAHAL_I_H_
 #define _IPAHAL_I_H_
 
+#include "ipa_dma.h"
 #include "ipa_common_i.h"
 
 /* struct ipahal_context - HAL global context data
