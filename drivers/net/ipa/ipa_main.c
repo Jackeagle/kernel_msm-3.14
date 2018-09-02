@@ -59,48 +59,6 @@ static DECLARE_WORK(ipa_client_remove_work, ipa_client_remove_deferred);
 static struct ipa_context ipa_ctx_struct;
 struct ipa_context *ipa_ctx = &ipa_ctx_struct;
 
-static bool ipa_dma_init(struct device *dev, u32 align)
-{
-	/* Ensure DMA addresses will have the alignment we require */
-	if (dma_get_cache_alignment() % align)
-		return -ENOTSUPP;
-
-	return dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
-}
-
-static void ipa_dma_exit(void)
-{
-}
-
-int ipa_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp)
-{
-	dma_addr_t phys;
-	void *cpu_addr;
-
-	cpu_addr = dma_zalloc_coherent(ipa_ctx->dev, size, &phys, gfp);
-	if (!cpu_addr) {
-		ipa_err("failed to alloc DMA buff of size %u\n", size);
-		return -ENOMEM;
-	}
-
-	mem->base = cpu_addr;
-	mem->phys_base = phys;
-	mem->size = size;
-
-	return 0;
-}
-
-void ipa_dma_free(struct ipa_mem_buffer *mem)
-{
-	dma_free_coherent(ipa_ctx->dev, mem->size, mem->base, mem->phys_base);
-	memset(mem, 0, sizeof(*mem));
-}
-
-void *ipa_dma_phys_to_virt(struct ipa_mem_buffer *mem, dma_addr_t phys)
-{
-	return mem->base + (phys - mem->phys_base);
-}
-
 static int hdr_init_local_cmd(u32 offset, u32 size)
 {
 	struct ipa_mem_buffer mem;

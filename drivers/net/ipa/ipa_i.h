@@ -578,15 +578,6 @@ extern struct ipa_context *ipa_ctx;
 
 /* public APIs */
 
-/* ipa_dma_alloc() - allocate a DMA buffer, describe it in mem struct */
-int ipa_dma_alloc(struct ipa_mem_buffer *mem, u32 size, gfp_t gfp);
-
-/* ipa_dma_free() - free a previously-allocated DMA buffer */
-void ipa_dma_free(struct ipa_mem_buffer *mem);
-
-/* ipa_dma_phys_to_virt() - return the virtual equivalent of a DMA address */
-void *ipa_dma_phys_to_virt(struct ipa_mem_buffer *mem, dma_addr_t phys);
-
 int ipa_wwan_init(void);
 void ipa_wwan_cleanup(void);
 

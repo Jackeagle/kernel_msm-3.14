@@ -7,6 +7,7 @@
 #define _IPA_COMMON_I_H_
 
 #include <linux/slab.h>
+#include "ipa_dma.h"
 
 /* A field_mask is a bitmask that defines both the width and
  * position of a field within in a 32-bit register.  Set bits in a
@@ -241,17 +242,6 @@ struct ipa_active_client_logging_info {
 	const char *id_string;
 	const char *file;
 	int line;
-};
-
-/** struct ipa_mem_buffer - IPA memory buffer
- * @base: base
- * @phys_base: physical base address
- * @size: size of memory buffer
- */
-struct ipa_mem_buffer {
-	void *base;
-	dma_addr_t phys_base;
-	u32 size;
 };
 
 /** enum ipa_cs_offload - checksum offload setting */
