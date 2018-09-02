@@ -244,7 +244,7 @@ static const struct ipa_init_modem_driver_req *init_modem_driver_req(void)
 		return &req;
 
 	/* All offsets are relative to the start of IPA shared memory */
-	base = (u32)ipa_ctx->smem_restricted_bytes;
+	base = (u32)ipa_ctx->smem_offset;
 
 	req.platform_type_valid = true;
 	req.platform_type = IPA_QMI_PLATFORM_TYPE_MSM_ANDROID;

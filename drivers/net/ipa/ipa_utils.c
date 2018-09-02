@@ -549,7 +549,7 @@ void ipa_sram_settings_read(void)
 	ipahal_read_reg_fields(IPA_SHARED_MEM_SIZE, &smem_sz);
 
 	/* reg fields are in 8B units */
-	ipa_ctx->smem_restricted_bytes = smem_sz.shared_mem_baddr * 8;
+	ipa_ctx->smem_offset = smem_sz.shared_mem_baddr * 8;
 	ipa_ctx->smem_size = smem_sz.shared_mem_sz * 8;
 }
 

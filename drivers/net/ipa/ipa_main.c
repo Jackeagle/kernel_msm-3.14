@@ -98,7 +98,7 @@ static int hdr_init_local_cmd(u32 offset, u32 size)
 	if (ipa_dma_alloc(&mem, size, GFP_KERNEL))
 		return -ENOMEM;
 
-	offset += ipa_ctx->smem_restricted_bytes;
+	offset += ipa_ctx->smem_offset;
 
 	cmd_pyld = ipahal_hdr_init_local_pyld(&mem, offset);
 	if (!cmd_pyld) {
@@ -131,7 +131,7 @@ static int dma_shared_mem_zero_cmd(u32 offset, u32 size)
 	if (ipa_dma_alloc(&mem, size, GFP_KERNEL))
 		return -ENOMEM;
 
-	offset += ipa_ctx->smem_restricted_bytes;
+	offset += ipa_ctx->smem_offset;
 
 	cmd_pyld = ipahal_dma_shared_mem_write_pyld(&mem, offset);
 	if (!cmd_pyld) {
@@ -235,7 +235,7 @@ static int ipa_init_sram(void)
 
 	phys_addr = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
 	phys_addr += ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_n, 0);
-	phys_addr += ipa_ctx->smem_restricted_bytes;
+	phys_addr += ipa_ctx->smem_offset;
 
 	ipa_sram_mmio = ioremap(phys_addr, ipa_ctx->smem_size);
 	if (!ipa_sram_mmio) {
@@ -325,9 +325,8 @@ static int ipa_init_rt4(void)
 		return rc;
 	}
 
-	hash_offset = ipa_ctx->smem_restricted_bytes + IPA_MEM_V4_RT_HASH_OFST;
-	nhash_offset = ipa_ctx->smem_restricted_bytes +
-				IPA_MEM_V4_RT_NHASH_OFST;
+	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_RT_HASH_OFST;
+	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_RT_NHASH_OFST;
 	cmd_pyld =
 		ipahal_ip_v4_routing_init_pyld(&mem, hash_offset, nhash_offset);
 	if (!cmd_pyld) {
@@ -368,9 +367,8 @@ static int ipa_init_rt6(void)
 		return rc;
 	}
 
-	hash_offset = ipa_ctx->smem_restricted_bytes + IPA_MEM_V6_RT_HASH_OFST;
-	nhash_offset = ipa_ctx->smem_restricted_bytes +
-				IPA_MEM_V6_RT_NHASH_OFST;
+	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_RT_HASH_OFST;
+	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_RT_NHASH_OFST;
 	cmd_pyld =
 		ipahal_ip_v6_routing_init_pyld(&mem, hash_offset, nhash_offset);
 	if (!cmd_pyld) {
@@ -412,9 +410,8 @@ static int ipa_init_flt4(u32 filter_count)
 		return rc;
 	}
 
-	hash_offset = ipa_ctx->smem_restricted_bytes + IPA_MEM_V4_FLT_HASH_OFST;
-	nhash_offset = ipa_ctx->smem_restricted_bytes +
-					IPA_MEM_V4_FLT_NHASH_OFST;
+	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_FLT_HASH_OFST;
+	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_FLT_NHASH_OFST;
 	cmd_pyld = ipahal_ip_v4_filter_init_pyld(&mem, hash_offset,
 						 nhash_offset);
 	if (!cmd_pyld) {
@@ -456,9 +453,8 @@ static int ipa_init_flt6(u32 filter_count)
 		return rc;
 	}
 
-	hash_offset = ipa_ctx->smem_restricted_bytes + IPA_MEM_V6_FLT_HASH_OFST;
-	nhash_offset = ipa_ctx->smem_restricted_bytes +
-					IPA_MEM_V6_FLT_NHASH_OFST;
+	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_FLT_HASH_OFST;
+	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_FLT_NHASH_OFST;
 	cmd_pyld = ipahal_ip_v6_filter_init_pyld(&mem, hash_offset,
 						 nhash_offset);
 	if (!cmd_pyld) {
@@ -1145,7 +1141,7 @@ static int ipa_pre_init(void)
 
 	ipa_sram_settings_read();
 	ipa_debug("SRAM, size: 0x%x, restricted bytes: 0x%x\n",
-		  ipa_ctx->smem_size, ipa_ctx->smem_restricted_bytes);
+		  ipa_ctx->smem_size, ipa_ctx->smem_offset);
 
 	ipa_debug("hdr_lcl=0 ip4_rt_hash=0 ip4_rt_nonhash=0\n");
 	ipa_debug("ip6_rt_hash=0 ip6_rt_nonhash=0\n");

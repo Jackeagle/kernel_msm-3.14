@@ -512,8 +512,8 @@ struct ipa_dma_task_info {
  * @dp: data path information
  * @lock: this does NOT protect the linked lists within ipa_sys_context
  * @smem_size: shared memory size available for SW use starting
- *  from non-restricted bytes
- * @smem_restricted_bytes: the bytes that SW should not use in the shared mem
+ *  from non-restricted bytes (i.e. starting at smem_offset)
+ * @smem_offset: the offset of the usable area in shared memory
  * @nat_mem: NAT memory
  * @hdr_mem: header memory
  * @hdr_proc_ctx_mem: processing context memory
@@ -549,7 +549,7 @@ struct ipa_context {
 	struct ipa_ep_context ep[IPA_MAX_NUM_PIPES];
 	struct ipa_dp *dp;
 	u32 smem_size;
-	u16 smem_restricted_bytes;
+	u16 smem_offset;
 	struct ipa_active_clients ipa_active_clients;
 	struct workqueue_struct *power_mgmt_wq;
 	struct ipa_transport_pm transport_pm;
