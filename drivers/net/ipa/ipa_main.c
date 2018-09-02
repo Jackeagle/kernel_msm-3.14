@@ -485,7 +485,7 @@ static void ipa_setup_flt_hash_tuple(void)
 	struct ipahal_reg_hash_tuple tuple = { };
 	u32 pipe_idx;
 
-	for (pipe_idx = 0; pipe_idx < ipa_ctx->ipa_num_pipes ; pipe_idx++) {
+	for (pipe_idx = 0; pipe_idx < ipa_ctx->ipa_num_pipes; pipe_idx++) {
 		if (ipa_is_modem_pipe(pipe_idx))
 			continue;
 		if (ipa_ctx->filter_bitmap & BIT(pipe_idx))
@@ -497,10 +497,9 @@ static void ipa_setup_rt_hash_tuple(void)
 {
 	struct ipahal_reg_hash_tuple tuple = { };
 	int tbl_idx;
+	int limit = max(IPA_MEM_V6_RT_NUM_INDEX, IPA_MEM_V4_RT_NUM_INDEX);
 
-	for (tbl_idx = 0;
-	     tbl_idx < max(IPA_MEM_V6_RT_NUM_INDEX, IPA_MEM_V4_RT_NUM_INDEX);
-	     tbl_idx++) {
+	for (tbl_idx = 0; tbl_idx < limit; tbl_idx++) {
 		if (tbl_idx >= IPA_MEM_V4_MODEM_RT_INDEX_LO &&
 		    tbl_idx <= IPA_MEM_V4_MODEM_RT_INDEX_HI)
 			continue;
