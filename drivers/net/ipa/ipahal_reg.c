@@ -461,12 +461,7 @@ static const struct ipahal_reg_obj ipahal_regs[] = {
 /* Get the offset of an "n parameterized" register */
 u32 ipahal_reg_n_offset(enum ipahal_reg reg, u32 n)
 {
-	u32 offset;
-
-	offset = ipahal_regs[reg].offset;
-	offset += ipahal_regs[reg].n_ofst * n;
-
-	return offset;
+	return ipahal_regs[reg].offset + n * ipahal_regs[reg].n_ofst;
 }
 
 /* ipahal_read_reg_n() - Get an "n parameterized" register's value */
