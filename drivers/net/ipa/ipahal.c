@@ -519,42 +519,49 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, struct ipa_mem_buffer *mem)
 	return 0;
 }
 
-/* ipahal_flt_generate_empty_img() - Generate empty filter image
- *  Creates filter header buffer for the given tables number.
- *  For each table, make it point to the empty table on DDR.
- * @tbls_num: Number of tables. For each will have an entry in the header
- * @ep_bitmap: Bitmap representing the EP that has flt tables. The format
- *  should be: bit0->EP0, bit1->EP1
- *  If bitmap is zero -> create tbl without bitmap entry
- * @mem: mem object that points to DMA mem representing the hdr structure
+/* ipahal_flt_generate_empty_img() - Generate empty filter table header
+ *
+ * @filter_bitmap: bitmap representing which endpoints support filtering
+ * @mem: mem object representing the header structure
+ *
+ * Allocates and fills an "empty" filter table header based on the
+ * given filter bitmap.
+ *
+ * The first slot in a filter table header is a 64-bit bitmap whose
+ * set bits define which endpoints support filtering.  Following
+ * this, each set bit in the mask has the DMA address of the filter
+ * used for the corresponding endpoint.
+ *
+ * This function initializes all endpoints that support filtering to
+ * point at the preallocated empty filter in system RAM.
+ *
+ * Note:  the (software) bitmap here uses bit 0 to represent
+ * endpoint 0, bit 1 for endpoint 1, and so on.  This is different
+ * from the hardware (which uses bit 1 to represent filter 0, etc.).
  */
-int ipahal_flt_generate_empty_img(u32 tbls_num, u64 ep_bitmap,
-				  struct ipa_mem_buffer *mem)
+int ipahal_flt_generate_empty_img(u64 filter_bitmap, struct ipa_mem_buffer *mem)
 {
-	int i = 0;
+	u32 filter_count = hweight32(filter_bitmap) + 1;
 	u64 addr;
+	int i;
 
-	ipa_debug("Entry - ep_bitmap 0x%llx\n", ep_bitmap);
+	ipa_assert(filter_bitmap);
 
-	ipa_assert(ep_bitmap);
-
-	tbls_num++;	/* First slot in a filter table holds endpoint bitmap */
-
-	if (ipa_dma_alloc(mem, tbls_num * IPA_HW_TBL_HDR_WIDTH, GFP_KERNEL))
+	if (ipa_dma_alloc(mem, filter_count * IPA_HW_TBL_HDR_WIDTH, GFP_KERNEL))
 		return -ENOMEM;
 
 	/* Save the endpoint bitmap in the first slot of the table.
-	 * Endpoint 0 is represented by bitmap position 1 in the
-	 * table.  (Bit position 1 might represent global?  At IPA3,
-	 * global configuration is possible but not used.)
+	 * Convert it from software to hardware representation by
+	 * shifting it left one position.
+	 * XXX Does bit position 0 represent global?  At IPA3, global
+	 * XXX configuration is possible but not used.
 	 */
-	put_unaligned(ep_bitmap << 1, mem->base);
-	i++;
+	put_unaligned(filter_bitmap << 1, mem->base);
 
-	/* Copy the empty entry into every entry in the table */
+	/* Point every entry in the table at the empty filter */
 	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys_base;
-	while (i < tbls_num)
-		put_unaligned(addr, mem->base + i++ * IPA_HW_TBL_HDR_WIDTH);
+	for (i = 1; i < filter_count; i++)
+		put_unaligned(addr, mem->base + i * IPA_HW_TBL_HDR_WIDTH);
 
 	return 0;
 }

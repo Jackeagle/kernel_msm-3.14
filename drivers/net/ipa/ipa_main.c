@@ -403,8 +403,7 @@ static int ipa_init_flt4(u32 filter_count)
 	u32 nhash_offset;
 	int rc;
 
-	rc = ipahal_flt_generate_empty_img(filter_count,
-					   ipa_ctx->filter_bitmap, &mem);
+	rc = ipahal_flt_generate_empty_img(ipa_ctx->filter_bitmap, &mem);
 	if (rc) {
 		ipa_err("fail generate empty v4 flt img\n");
 		return rc;
@@ -446,8 +445,7 @@ static int ipa_init_flt6(u32 filter_count)
 	u32 nhash_offset;
 	int rc;
 
-	rc = ipahal_flt_generate_empty_img(filter_count,
-					   ipa_ctx->filter_bitmap, &mem);
+	rc = ipahal_flt_generate_empty_img(ipa_ctx->filter_bitmap, &mem);
 	if (rc) {
 		ipa_err("fail generate empty v6 flt img\n");
 		return rc;
