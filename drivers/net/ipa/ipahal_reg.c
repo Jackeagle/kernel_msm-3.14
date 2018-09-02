@@ -504,12 +504,14 @@ void ipahal_write_reg_n_fields(enum ipahal_reg reg, u32 n, const void *fields)
 	ipahal_write_reg_n(reg, n, val);
 }
 
+/* Maximum representable aggregation byte limit value */
 u32 ipahal_aggr_get_max_byte_limit(void)
 {
-	return field_val(0xffffffff, AGGR_BYTE_LIMIT_BMSK);
+	return field_max(AGGR_BYTE_LIMIT_BMSK);
 }
 
+/* Maximum representable aggregation packet limit value */
 u32 ipahal_aggr_get_max_pkt_limit(void)
 {
-	return field_val(0xffffffff, AGGR_PKT_LIMIT_BMSK);
+	return field_max(AGGR_PKT_LIMIT_BMSK);
 }
