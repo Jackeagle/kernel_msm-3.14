@@ -237,7 +237,7 @@ static int ipa_init_sram(void)
 	phys_addr += ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_n,
 					 ipa_ctx->smem_restricted_bytes / 4);
 
-	ipa_sram_mmio = ioremap(phys_addr, ipa_ctx->smem_sz);
+	ipa_sram_mmio = ioremap(phys_addr, ipa_ctx->smem_size);
 	if (!ipa_sram_mmio) {
 		ipa_err("fail to ioremap IPA SRAM\n");
 		return -ENOMEM;
@@ -1145,16 +1145,16 @@ static int ipa_pre_init(void)
 
 	ipa_sram_settings_read();
 	ipa_debug("SRAM, size: 0x%x, restricted bytes: 0x%x\n",
-		  ipa_ctx->smem_sz, ipa_ctx->smem_restricted_bytes);
+		  ipa_ctx->smem_size, ipa_ctx->smem_restricted_bytes);
 
 	ipa_debug("hdr_lcl=0 ip4_rt_hash=0 ip4_rt_nonhash=0\n");
 	ipa_debug("ip6_rt_hash=0 ip6_rt_nonhash=0\n");
 	ipa_debug("ip4_flt_hash=0 ip4_flt_nonhash=0\n");
 	ipa_debug("ip6_flt_hash=0 ip6_flt_nonhash=0\n");
 
-	if (ipa_ctx->smem_sz < IPA_MEM_END_OFST) {
+	if (ipa_ctx->smem_size < IPA_MEM_END_OFST) {
 		ipa_err("insufficient memory: %hu bytes available, need %u\n",
-			ipa_ctx->smem_sz, IPA_MEM_END_OFST);
+			ipa_ctx->smem_size, IPA_MEM_END_OFST);
 		result = -ENOMEM;
 		goto err_disable_clks;
 	}

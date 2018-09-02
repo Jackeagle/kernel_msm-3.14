@@ -511,7 +511,7 @@ struct ipa_dma_task_info {
  * @reap_rt_tbl_set: list of sys mem routing tables waiting to be reaped
  * @dp: data path information
  * @lock: this does NOT protect the linked lists within ipa_sys_context
- * @smem_sz: shared memory size available for SW use starting
+ * @smem_size: shared memory size available for SW use starting
  *  from non-restricted bytes
  * @smem_restricted_bytes: the bytes that SW should not use in the shared mem
  * @nat_mem: NAT memory
@@ -548,7 +548,7 @@ struct ipa_context {
 
 	struct ipa_ep_context ep[IPA_MAX_NUM_PIPES];
 	struct ipa_dp *dp;
-	u16 smem_sz;
+	u32 smem_size;
 	u16 smem_restricted_bytes;
 	struct ipa_active_clients ipa_active_clients;
 	struct workqueue_struct *power_mgmt_wq;
