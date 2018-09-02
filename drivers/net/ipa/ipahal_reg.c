@@ -481,8 +481,6 @@ void ipahal_read_reg_n_fields(enum ipahal_reg reg, u32 n, void *fields)
 {
 	u32 val = ipahal_read_reg_n(reg, n);
 
-	ipa_assert(ipahal_regs[reg].parse);
-
 	ipahal_regs[reg].parse(reg, fields, val);
 }
 
@@ -491,11 +489,8 @@ void ipahal_read_reg_n_fields(enum ipahal_reg reg, u32 n, void *fields)
  */
 void ipahal_write_reg_n_fields(enum ipahal_reg reg, u32 n, const void *fields)
 {
-	u32 val;
+	u32 val = ipahal_regs[reg].construct(reg, fields);
 
-	ipa_assert(ipahal_regs[reg].construct);
-
-	val = ipahal_regs[reg].construct(reg, fields);
 	ipahal_write_reg_n(reg, n, val);
 }
 
