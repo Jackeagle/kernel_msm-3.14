@@ -234,8 +234,8 @@ static int ipa_init_sram(void)
 	u32 *ipa_sram_mmio;
 
 	phys_addr = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
-	phys_addr += ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_n,
-					 ipa_ctx->smem_restricted_bytes / 4);
+	phys_addr += ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_n, 0);
+	phys_addr += ipa_ctx->smem_restricted_bytes;
 
 	ipa_sram_mmio = ioremap(phys_addr, ipa_ctx->smem_size);
 	if (!ipa_sram_mmio) {
