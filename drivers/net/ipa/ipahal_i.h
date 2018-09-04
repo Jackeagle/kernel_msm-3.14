@@ -10,14 +10,10 @@
 #include "ipa_common_i.h"
 
 /* struct ipahal_context - HAL global context data
- * @hw_type: IPA H/W type/version.
- * @base: Base address to be used for accessing IPA memory. This is
- *  I/O memory mapped address.
- *  Controlled by debugfs. default is off
+ *
  * @empty_fltrt_tbl: Empty table to be used at tables init.
  */
 struct ipahal_context {
-	void __iomem *base;
 	struct ipa_dma_mem empty_fltrt_tbl;
 };
 

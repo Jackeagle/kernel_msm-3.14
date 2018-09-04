@@ -20,6 +20,9 @@
 #include "ipahal_reg.h"
 #include "ipahal_reg_i.h"
 
+/* I/O remapped base address of IPA register space */
+static void __iomem *ipa_reg_virt;
+
 /* struct ipahal_reg_obj - Register H/W information for specific IPA version
  * @construct - CB to construct register value from abstracted structure
  * @parse - CB to parse register value to abstracted structure
@@ -459,12 +462,12 @@ static const struct ipahal_reg_obj ipahal_regs[] = {
 
 void ipa_reg_init(void __iomem *base)
 {
-	ipahal_ctx->base = base;
+	ipa_reg_virt = base;
 }
 
 void ipa_reg_exit(void)
 {
-	ipahal_ctx->base = NULL;
+	ipa_reg_virt = NULL;
 }
 
 /* Get the offset of an "n parameterized" register */
@@ -476,13 +479,13 @@ u32 ipahal_reg_n_offset(enum ipahal_reg reg, u32 n)
 /* ipahal_read_reg_n() - Get an "n parameterized" register's value */
 u32 ipahal_read_reg_n(enum ipahal_reg reg, u32 n)
 {
-	return ioread32(ipahal_ctx->base + ipahal_reg_n_offset(reg, n));
+	return ioread32(ipa_reg_virt + ipahal_reg_n_offset(reg, n));
 }
 
 /* ipahal_write_reg_n() - Write a raw value to an "n parameterized" register */
 void ipahal_write_reg_n(enum ipahal_reg reg, u32 n, u32 val)
 {
-	iowrite32(val, ipahal_ctx->base + ipahal_reg_n_offset(reg, n));
+	iowrite32(val, ipa_reg_virt + ipahal_reg_n_offset(reg, n));
 }
 
 /* ipahal_read_reg_n_fields() - Parse value of an "n parameterized" register */
