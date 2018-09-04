@@ -512,8 +512,10 @@ void ipa_cfg_ep_status(u32 clnt_hdl,
 
 int ipa_init_q6_smem(void);
 
+/* Defined in "ipa_uc.c" */
 struct ipa_uc_ctx *ipa_uc_init(phys_addr_t phys_addr);
 bool ipa_uc_loaded(void);
+void ipa_uc_panic_notifier(void);
 
 const struct ipa_gsi_ep_config *ipa_get_gsi_ep_info
 	(enum ipa_client_type client);
@@ -524,7 +526,6 @@ int ipa_ap_resume(struct device *dev);
 void ipa_set_resource_groups_min_max_limits(void);
 void ipa_suspend_apps_pipes(void);
 void ipa_resume_apps_pipes(void);
-void ipa_uc_panic_notifier(void);
 void ipa_inc_acquire_wakelock(void);
 void ipa_dec_release_wakelock(void);
 int ipa_rx_poll(u32 clnt_hdl, int budget);

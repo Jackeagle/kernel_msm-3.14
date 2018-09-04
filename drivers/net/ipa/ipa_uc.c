@@ -10,10 +10,10 @@
 
 /* Supports hardware interface version 0x2000 */
 
-#define IPA_RAM_UC_SMEM_SIZE 128
-#define IPA_PKT_FLUSH_TO_US 100
-#define IPA_UC_POLL_SLEEP_USEC 100
-#define IPA_UC_POLL_MAX_RETRY 10000
+#define IPA_RAM_UC_SMEM_SIZE	128	/* Size of shared memory area */
+
+/* Delay to allow a the microcontroller to save state when crashing */
+#define IPA_SEND_DELAY		100	/* microseconds */
 
 /*
  * The IPA has an embedded microcontroller that is capable of doing
@@ -280,22 +280,6 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 	ipa_client_remove();
 }
 
-/* Send a command to the microcontroller */
-static void send_uc_command(u32 command, u32 command_param)
-{
-	struct ipa_uc_shared_area *shared = ipa_uc_ctx.shared;
-
-	shared->command = command;
-	shared->command_param = command_param;
-	shared->command_param_hi = 0;
-	shared->response = 0;
-	shared->response_param = 0;
-
-	wmb();	/* ensure write to shared memory is done before triggering uc */
-
-	ipahal_write_reg_n(IPA_IRQ_EE_UC_N, IPA_EE_AP, 0x1);
-}
-
 /** ipa_uc_init() - Initialize the microcontroller
  *
  * Returns pointer to microcontroller context on success, NULL otherwise
@@ -314,6 +298,22 @@ struct ipa_uc_ctx *ipa_uc_init(phys_addr_t phys_addr)
 	return &ipa_uc_ctx;
 }
 
+/* Send a command to the microcontroller */
+static void send_uc_command(u32 command, u32 command_param)
+{
+	struct ipa_uc_shared_area *shared = ipa_uc_ctx.shared;
+
+	shared->command = command;
+	shared->command_param = command_param;
+	shared->command_param_hi = 0;
+	shared->response = 0;
+	shared->response_param = 0;
+
+	wmb();	/* ensure write to shared memory is done before triggering uc */
+
+	ipahal_write_reg_n(IPA_IRQ_EE_UC_N, IPA_EE_AP, 0x1);
+}
+
 void ipa_uc_panic_notifier(void)
 {
 	if (!ipa_uc_ctx.uc_loaded)
@@ -325,7 +325,7 @@ void ipa_uc_panic_notifier(void)
 	send_uc_command(IPA_UC_COMMAND_ERR_FATAL, 0);
 
 	/* give uc enough time to save state */
-	udelay(IPA_PKT_FLUSH_TO_US);
+	udelay(IPA_SEND_DELAY);
 
 	ipa_client_remove();
 }
