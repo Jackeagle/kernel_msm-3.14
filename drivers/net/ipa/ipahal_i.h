@@ -170,14 +170,14 @@ struct ipa_imm_cmd_hw_ip_packet_tag_status {
  *  must contain this field (2 or more buffers) or EOT.
  */
 struct ipa_imm_cmd_hw_dma_task_32b_addr {
-	u64 sw_rsvd	: 11,
+	u16 sw_rsvd	: 11,
 	    cmplt	: 1,
 	    eof		: 1,
 	    flsh	: 1,
 	    lock	: 1,
-	    unlock	: 1,
-	    size1	: 16,
-	    addr1	: 32;
+	    unlock	: 1;
+	u16 size1	: 16;
+	u32 addr1	: 32;
 	u64 packet_size	: 16;
 };
 
