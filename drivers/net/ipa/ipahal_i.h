@@ -121,10 +121,10 @@ struct ipa_imm_cmd_hw_register_write {
  * @system_addr: Address in system memory
  */
 struct ipa_imm_cmd_hw_dma_shared_mem {
-	u64 sw_rsvd			: 16,
-	    size			: 16,
-	    local_addr			: 16,
-	    direction			: 1,
+	u16 sw_rsvd;
+	u16 size;
+	u16 local_addr;
+	u16 direction			: 1,
 	    skip_pipeline_clear		: 1,
 	    pipeline_clear_options	: 2,
 	    rsvd			: 12;
