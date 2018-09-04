@@ -176,9 +176,11 @@ struct ipa_imm_cmd_hw_dma_task_32b_addr {
 	    flsh	: 1,
 	    lock	: 1,
 	    unlock	: 1;
-	u16 size1	: 16;
-	u32 addr1	: 32;
-	u64 packet_size	: 16;
+	u16 size1;
+	u32 addr1;
+	u16 packet_size;
+	u16 rsvd1;
+	u32 rsvd2;
 };
 
 /* IPA Status packet H/W structures and info */
