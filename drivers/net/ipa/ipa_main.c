@@ -887,6 +887,7 @@ static void ipa_register_panic_hdlr(void)
  */
 static void ipa_post_init(struct work_struct *unused)
 {
+	phys_addr_t phys_addr;
 	int result;
 
 	/* Assign resource limitation to each group */
@@ -914,7 +915,8 @@ static void ipa_post_init(struct work_struct *unused)
 	}
 	ipa_debug("IPA GPI pipes were connected\n");
 
-	ipa_ctx->uc_ctx = ipa_uc_init();
+	phys_addr = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
+	ipa_ctx->uc_ctx = ipa_uc_init(phys_addr);
 	if (!ipa_ctx->uc_ctx)
 		ipa_err("microcontroller init failed\n");
 

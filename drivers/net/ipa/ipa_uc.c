@@ -158,11 +158,9 @@ static void send_uc_command(struct ipa_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
  *
  * Returns pointer to microcontroller context on success, NULL otherwise
  */
-struct ipa_uc_ctx *ipa_uc_init(void)
+struct ipa_uc_ctx *ipa_uc_init(phys_addr_t phys_addr)
 {
-	unsigned long phys_addr;
 
-	phys_addr = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
 	phys_addr += ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_N, 0);
 	ipa_uc_ctx.uc_sram_mmio = ioremap(phys_addr, IPA_RAM_UC_SMEM_SIZE);
 	if (!ipa_uc_ctx.uc_sram_mmio)

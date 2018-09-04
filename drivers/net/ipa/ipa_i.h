@@ -632,7 +632,7 @@ void ipa_cfg_ep_status(u32 clnt_hdl,
 
 int ipa_init_q6_smem(void);
 
-struct ipa_uc_ctx *ipa_uc_init(void);
+struct ipa_uc_ctx *ipa_uc_init(phys_addr_t phys_addr);
 bool ipa_uc_loaded(void);
 
 const struct ipa_gsi_ep_config *ipa_get_gsi_ep_info
