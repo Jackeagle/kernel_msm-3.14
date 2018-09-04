@@ -101,21 +101,6 @@ struct ipa_imm_cmd_hw_dma_shared_mem {
 	u64 system_addr;
 };
 
-/* struct ipa_imm_cmd_hw_ip_packet_tag_status -
- *  IP_PACKET_TAG_STATUS command payload in H/W format.
- * This cmd is used for to allow SW to track HW processing by setting a TAG
- *  value that is passed back to SW inside Packet Status information.
- *  TAG info will be provided as part of Packet Status info generated for
- *  the next pkt transferred over the pipe.
- *  This immediate command must be followed by a packet in the same transfer.
- * @sw_rsvd: Ignored by H/W. My be used by S/W
- * @tag: Tag that is provided back to SW
- */
-struct ipa_imm_cmd_hw_ip_packet_tag_status {
-	u64 sw_rsvd	: 16,
-	    tag		: 48;
-};
-
 /* struct ipa_imm_cmd_hw_dma_task_32b_addr -
  *	IPA_DMA_TASK_32B_ADDR command payload in H/W format.
  * Used by clients using 32bit addresses. Used to perform DMA operation on
