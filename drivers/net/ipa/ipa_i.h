@@ -464,8 +464,6 @@ struct ipa_uc_ctx {
 	bool uc_inited;
 	bool uc_loaded;
 	struct ipa_hw_shared_mem_common_mapping *uc_sram_mmio;
-	u32 pending_cmd;
-	u32 uc_status;
 };
 
 /** struct ipa_transport_pm - transport power management related members

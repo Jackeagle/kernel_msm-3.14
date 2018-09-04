@@ -154,23 +154,9 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 		 */
 		ipa_proxy_clk_unvote();
 	} else if (response_op == IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED) {
-		struct ipa_hw_cpu_cmd_completed_response_params *params;
-
-		/* Grab the response data so we can extract its parameters */
 		uc_rsp.raw32b = mmio->response_params;
-		params = &uc_rsp.params;
-
-		ipa_debug("uC cmd response opcode=%u status=%u\n",
-			  params->original_cmd_op, params->status);
-
-		/* Make sure we were expecting the command that completed */
-		if (params->original_cmd_op == ipa_ctx->uc_ctx.pending_cmd) {
-			ipa_ctx->uc_ctx.uc_status = params->status;
-		} else {
-			ipa_err("Expected cmd=%u rcvd cmd=%u\n",
-				ipa_ctx->uc_ctx.pending_cmd,
-				params->original_cmd_op);
-		}
+		ipa_err("uC cmd response opcode=%u status=%u\n",
+			  uc_rsp.params.original_cmd_op, uc_rsp.params.status);
 	} else {
 		ipa_err("Unsupported uC rsp opcode = %u\n", response_op);
 	}
@@ -182,9 +168,6 @@ static void
 send_uc_command_nowait(struct ipa_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
 {
 	struct ipa_hw_shared_mem_common_mapping *mmio = uc_ctx->uc_sram_mmio;
-
-	uc_ctx->pending_cmd = opcode;
-	uc_ctx->uc_status = 0;
 
 	mmio->cmd_op = opcode;
 	mmio->cmd_params = cmd;
