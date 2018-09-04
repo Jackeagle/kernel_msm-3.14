@@ -238,36 +238,36 @@ struct ipa_imm_cmd_hw_dma_task_32b_addr {
  * @hw_specific: H/W specific reserved value
  */
 struct ipa_pkt_status_hw {
-	u64 status_opcode	: 8,
-	    exception		: 8,
-	    status_mask		: 16,
-	    pkt_len		: 16,
-	    endp_src_idx	: 5,
-	    rsvd1		: 3,
-	    endp_dest_idx	: 5,
+	u8  status_opcode;
+	u8  exception;
+	u16 status_mask;
+	u16 pkt_len;
+	u8  endp_src_idx	: 5,
+	    rsvd1		: 3;
+	u8  endp_dest_idx	: 5,
 	    rsvd2		: 3;
-	u64 metadata		: 32,
-	    flt_local		: 1,
+	u32 metadata;
+	u16 flt_local		: 1,
 	    flt_hash		: 1,
 	    flt_global		: 1,
 	    flt_ret_hdr		: 1,
 	    flt_rule_id		: 10,
 	    rt_local		: 1,
-	    rt_hash		: 1,
-	    ucp			: 1,
+	    rt_hash		: 1;
+	u16 ucp			: 1,
 	    rt_tbl_idx		: 5,
 	    rt_rule_id		: 10;
 	u64 nat_hit		: 1,
 	    nat_entry_idx	: 13,
 	    nat_type		: 2,
 	    tag_info		: 48;
-	u64 seq_num		: 8,
-	    time_of_day_ctr	: 24,
-	    hdr_local		: 1,
+	u32 seq_num		: 8,
+	    time_of_day_ctr	: 24;
+	u16 hdr_local		: 1,
 	    hdr_offset		: 10,
 	    frag_hit		: 1,
-	    frag_rule		: 4,
-	    hw_specific		: 16;
+	    frag_rule		: 4;
+	u16 hw_specific;
 };
 
 #endif /* _IPAHAL_I_H_ */
