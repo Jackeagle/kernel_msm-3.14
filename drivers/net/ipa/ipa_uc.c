@@ -116,26 +116,28 @@ enum ipa_uc_event {
 	IPA_UC_EVENT_LOG_INFO  = 2,
 };
 
-/** enum ipa_hw_errors - common error types (microcontroller->AP)
+/** enum ipa_uc_error - common error types (microcontroller->AP)
  *
- * @IPA_HW_ERROR_NONE: no error
- * @IPA_HW_INVALID_DOORBELL_ERROR: invalid data read from doorbell
- * @IPA_HW_DMA_ERROR: unexpected DMA error
- * @IPA_HW_FATAL_SYSTEM_ERROR: microcontroller has crashed and requires reset
- * @IPA_HW_INVALID_OPCODE: invalid opcode sent
- * @IPA_HW_INVALID_PARAMS: invalid params for the requested command
- * @IPA_HW_CH_NOT_EMPTY_FAILURE: micrcontroller GSI channel is not empty
+ * @IPA_UC_ERROR_NONE: no error
+ * @IPA_UC_ERROR_INVALID_DOORBELL: invalid data read from doorbell
+ * @IPA_UC_ERROR_DMA: unexpected DMA error
+ * @IPA_UC_ERROR_FATAL_SYSTEM: microcontroller has crashed and requires reset
+ * @IPA_UC_ERROR_INVALID_OPCODE: invalid opcode sent
+ * @IPA_UC_ERROR_INVALID_PARAMS: invalid params for the requested command
+ * @IPA_UC_ERROR_CONS_DISABLE_CMD_GSI_STOP: consumer pipe stop failure
+ * @IPA_UC_ERROR_PROD_DISABLE_CMD_GSI_STOP: producer pipe stop failure
+ * @IPA_UC_ERROR_CH_NOT_EMPTY: micrcontroller GSI channel is not empty
  */
-enum ipa_hw_errors {
-	IPA_HW_ERROR_NONE				= 0,
-	IPA_HW_INVALID_DOORBELL_ERROR			= 1,
-	IPA_HW_DMA_ERROR				= 2,
-	IPA_HW_FATAL_SYSTEM_ERROR			= 3,
-	IPA_HW_INVALID_OPCODE				= 4,
-	IPA_HW_INVALID_PARAMS				= 5,
-	IPA_HW_CONS_DISABLE_CMD_GSI_STOP_FAILURE	= 6,
-	IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE	= 7,
-	IPA_HW_CH_NOT_EMPTY_FAILURE			= 8,
+enum ipa_uc_error {
+	IPA_UC_ERROR_NONE			= 0,
+	IPA_UC_ERROR_INVALID_DOORBELL		= 1,
+	IPA_UC_ERROR_DMA			= 2,
+	IPA_UC_ERROR_FATAL_SYSTEM		= 3,
+	IPA_UC_ERROR_INVALID_OPCODE		= 4,
+	IPA_UC_ERROR_INVALID_PARAMS		= 5,
+	IPA_UC_ERROR_CONS_DISABLE_CMD_GSI_STOP	= 6,
+	IPA_UC_ERROR_PROD_DISABLE_CMD_GSI_STOP	= 7,
+	IPA_UC_ERROR_CH_NOT_EMPTY		= 8,
 };
 
 /** enum ipa_cpu_2_hw_command - commands from the AP to the microcontroller
@@ -158,7 +160,7 @@ enum ipa_hw_2_cpu_responses {
 
 /** union ipa_hw_error_event_data - microcontroller->AP event data
  *
- * @error_type: ipa_hw_errors error type value
+ * @error_type: ipa_hw_error error type value
  * @raw32b: 32-bit register value (used when reading)
  */
 union ipa_hw_error_event_data {
