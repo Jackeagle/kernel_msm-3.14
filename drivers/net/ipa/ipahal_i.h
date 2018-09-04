@@ -58,7 +58,7 @@ struct ipa_imm_cmd_hw_ip_fltrt_init {
  */
 struct ipa_imm_cmd_hw_hdr_init_local {
 	u64 hdr_table_addr;
-	u64 size_hdr_table	: 12,
+	u32 size_hdr_table	: 12,
 	    hdr_addr		: 16,
 	    rsvd		: 4;
 };
