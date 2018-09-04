@@ -93,7 +93,6 @@ struct ipa_uc_ctx {
 	struct ipa_uc_shared_area *shared;
 } ipa_uc_ctx;
 
-#define IPA_HW_NUM_FEATURES 0x8
 #define FEATURE_ENUM_VAL(feature, opcode) ((feature << 5) | opcode)
 
 /** enum ipa_hw_features - Values that represent the features supported
@@ -103,7 +102,6 @@ struct ipa_uc_ctx {
  */
 enum ipa_hw_features {
 	IPA_HW_FEATURE_COMMON		=	0x0,
-	IPA_HW_FEATURE_MAX		=	IPA_HW_NUM_FEATURES
 };
 
 /** enum ipa_hw_2_cpu_events - Values that represent HW event to be sent to CPU.
