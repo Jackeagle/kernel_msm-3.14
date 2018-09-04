@@ -53,14 +53,14 @@
 
 /** struct ipa_uc_shared_area - AP/microcontroller shared memory area
  *
- * @command: ipa_uc_command code (AP->microcontroller)
+ * @command: command code (AP->microcontroller)
  * @command_param: low 32 bits of command parameter (AP->microcontroller)
  * @command_param_hi: high 32 bits of command parameter (AP->microcontroller)
  *
- * @response: ipa_uc_response response code (microcontroller->AP)
+ * @response: response code (microcontroller->AP)
  * @response_param: response parameter (microcontroller->AP)
  *
- * @event: ipa_uc_event code (microcontroller->AP)
+ * @event: event code (microcontroller->AP)
  * @event_param: event parameter (microcontroller->AP)
  *
  * @first_error_address: address of first error-source on SNOC
@@ -69,18 +69,25 @@
  * @interface_version: hardware-reported interface version
  */
 struct ipa_uc_shared_area {
-	u32 command		: 8;	/* followed by 3 reserved bytes */
+	u32 command		: 8;	/* enum ipa_uc_command */
+	/* 3 reserved bytes */
 	u32 command_param;
 	u32 command_param_hi;
-	u32 response		: 8;	/* followed by 3 reserved bytes */
+
+	u32 response		: 8; 	/* enum ipa_uc_response */
+	/* 3 reserved bytes */
 	u32 response_param;
-	u32 event		: 8;	/* followed by 3 reserved bytes */
+
+	u32 event		: 8;	/* enum ipa_uc_event */
+	/* 3 reserved bytes */
 	u32 event_param;
+
 	u32 first_error_address;
 	u32 hw_state		: 8,
 	    warning_counter	: 8,
 	    reserved		: 16;
-	u32 interface_version	: 16;	/* followed by 2 reserved bytes */
+	u32 interface_version	: 16;
+	/* 2 reserved bytes */
 };
 
 /** struct ipa_uc_ctx - IPA microcontroller context
