@@ -93,62 +93,57 @@ struct ipa_uc_ctx {
 	struct ipa_uc_shared_area *shared;
 } ipa_uc_ctx;
 
-#define FEATURE_ENUM_VAL(feature, opcode) ((feature << 5) | opcode)
+/*
+ * Microcontroller event codes, error codes, commands, and responses
+ * to commands all encode both a "code" and a "feature" in their
+ * 8-bit numeric value.  The top 3 bits represent the feature, and
+ * the bottom 5 bits represent the code.  A "common" feature uses
+ * feature code 0, and at this time we only deal with common
+ * features.  Because of this we can just ignore the feature bits
+ * and define the values of symbols in  the following enumerated
+ * types by just their code values.
+ */
 
-#define IPA_HW_FEATURE_COMMON	0	/* Common IPA hardware features */
-
-/** enum ipa_hw_2_cpu_events - Values that represent HW event to be sent to CPU.
- * @IPA_HW_2_CPU_EVENT_NO_OP : No event present
- * @IPA_HW_2_CPU_EVENT_ERROR : Event specify a system error is detected by the
- *  device
- * @IPA_HW_2_CPU_EVENT_LOG_INFO : Event providing logging specific information
+/** enum ipa_hw_2_cpu_events - common cpu events (microcontroller->AP)
+ *
+ * @IPA_HW_2_CPU_EVENT_NO_OP: no event present
+ * @IPA_HW_2_CPU_EVENT_ERROR: system error has been detected
+ * @IPA_HW_2_CPU_EVENT_LOG_INFO: logging information available
  */
 enum ipa_hw_2_cpu_events {
-	IPA_HW_2_CPU_EVENT_NO_OP     =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 0),
-	IPA_HW_2_CPU_EVENT_ERROR     =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 1),
-	IPA_HW_2_CPU_EVENT_LOG_INFO  =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 2),
+	IPA_HW_2_CPU_EVENT_NO_OP     = 0,
+	IPA_HW_2_CPU_EVENT_ERROR     = 1,
+	IPA_HW_2_CPU_EVENT_LOG_INFO  = 2,
 };
 
-/** enum ipa_hw_errors - Common error types.
- * @IPA_HW_ERROR_NONE : No error persists
- * @IPA_HW_INVALID_DOORBELL_ERROR : Invalid data read from doorbell
- * @IPA_HW_DMA_ERROR : Unexpected DMA error
- * @IPA_HW_FATAL_SYSTEM_ERROR : HW has crashed and requires reset.
- * @IPA_HW_INVALID_OPCODE : Invalid opcode sent
- * @IPA_HW_INVALID_PARAMS : Invalid params for the requested command
- * @IPA_HW_CH_NOT_EMPTY_FAILURE : GSI channel emptiness validation failed
+/** enum ipa_hw_errors - common error types (microcontroller->AP)
+ *
+ * @IPA_HW_ERROR_NONE: no error
+ * @IPA_HW_INVALID_DOORBELL_ERROR: invalid data read from doorbell
+ * @IPA_HW_DMA_ERROR: unexpected DMA error
+ * @IPA_HW_FATAL_SYSTEM_ERROR: microcontroller has crashed and requires reset
+ * @IPA_HW_INVALID_OPCODE: invalid opcode sent
+ * @IPA_HW_INVALID_PARAMS: invalid params for the requested command
+ * @IPA_HW_CH_NOT_EMPTY_FAILURE: micrcontroller GSI channel is not empty
  */
 enum ipa_hw_errors {
-	IPA_HW_ERROR_NONE	       =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 0),
-	IPA_HW_INVALID_DOORBELL_ERROR  =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 1),
-	IPA_HW_DMA_ERROR	       =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 2),
-	IPA_HW_FATAL_SYSTEM_ERROR      =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 3),
-	IPA_HW_INVALID_OPCODE	       =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 4),
-	IPA_HW_INVALID_PARAMS	     =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 5),
-	IPA_HW_CONS_DISABLE_CMD_GSI_STOP_FAILURE =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 6),
-	IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 7),
-	IPA_HW_CH_NOT_EMPTY_FAILURE =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 8)
+	IPA_HW_ERROR_NONE				= 0,
+	IPA_HW_INVALID_DOORBELL_ERROR			= 1,
+	IPA_HW_DMA_ERROR				= 2,
+	IPA_HW_FATAL_SYSTEM_ERROR			= 3,
+	IPA_HW_INVALID_OPCODE				= 4,
+	IPA_HW_INVALID_PARAMS				= 5,
+	IPA_HW_CONS_DISABLE_CMD_GSI_STOP_FAILURE	= 6,
+	IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE	= 7,
+	IPA_HW_CH_NOT_EMPTY_FAILURE			= 8,
 };
 
 /** enum ipa_cpu_2_hw_command - commands from the AP to the microcontroller
  *
- * @IPA_CPU_2_HW_CMD_ERR_FATAL: notify of AP system crash
+ * @IPA_CPU_2_HW_CMD_ERR_FATAL: AP system crash notification
  */
 enum ipa_cpu_2_hw_command {
-	IPA_CPU_2_HW_CMD_ERR_FATAL		   =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 4),
+	IPA_CPU_2_HW_CMD_ERR_FATAL	= 4,
 };
 
 /** enum ipa_hw_2_cpu_response - common hardware response codes
@@ -157,10 +152,8 @@ enum ipa_cpu_2_hw_command {
  * @IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED: AP issued command has completed
  */
 enum ipa_hw_2_cpu_responses {
-	IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 1),
-	IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED  =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 2),
+	IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED	= 1,
+	IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED	= 2,
 };
 
 /** union ipa_hw_error_event_data - microcontroller->AP event data
