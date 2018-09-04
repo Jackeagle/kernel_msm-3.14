@@ -185,6 +185,12 @@ struct ipa_imm_cmd_hw_dma_task_32b_addr {
 
 /* IPA Status packet H/W structures and info */
 
+/* Width (in bits) of a filter rule ID found in an IPA status packet.
+ * A rule miss is indicated as an all-1's value this width.  Note
+ * that IPA_RULE_ID_BIT_LEN must be 2 or more.
+ */
+#define IPA_RULE_ID_BIT_LEN	10
+
 /* struct ipa_status_pkt_hw - IPA status packet payload in H/W format.
  *  This structure describes the status packet H/W structure for the
  *   following statuses: IPA_STATUS_PACKET, IPA_STATUS_DROPPED_PACKET,
