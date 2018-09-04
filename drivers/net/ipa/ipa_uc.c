@@ -60,7 +60,7 @@
  * @response_op: ipa_hw_2_cpu_response response opcode (microcontroller->AP)
  * @response_params: response parameter (microcontroller->AP)
  *
- * @event_op: ipa_hw_2_cpu_events event opcode (microcontroller->AP)
+ * @event: ipa_uc_event code (microcontroller->AP)
  * @event_params: event parameter (microcontroller->AP)
  *
  * @first_error_address: address of first error-source on SNOC
@@ -74,7 +74,7 @@ struct ipa_uc_shared_area {
 	u32 cmd_params_hi;
 	u32 response_op		: 8;	/* followed by 3 reserved bytes */
 	u32 response_params;
-	u32 event_op		: 8;	/* followed by 3 reserved bytes */
+	u32 event		: 8;	/* followed by 3 reserved bytes */
 	u32 event_params;
 	u32 first_error_address;
 	u32 hw_state		: 8,
@@ -104,16 +104,16 @@ struct ipa_uc_ctx {
  * types by just their code values.
  */
 
-/** enum ipa_hw_2_cpu_events - common cpu events (microcontroller->AP)
+/** enum ipa_uc_event - common cpu events (microcontroller->AP)
  *
- * @IPA_HW_2_CPU_EVENT_NO_OP: no event present
- * @IPA_HW_2_CPU_EVENT_ERROR: system error has been detected
- * @IPA_HW_2_CPU_EVENT_LOG_INFO: logging information available
+ * @IPA_UC_EVENT_NO_OP: no event present
+ * @IPA_UC_EVENT_ERROR: system error has been detected
+ * @IPA_UC_EVENT_LOG_INFO: logging information available
  */
-enum ipa_hw_2_cpu_events {
-	IPA_HW_2_CPU_EVENT_NO_OP     = 0,
-	IPA_HW_2_CPU_EVENT_ERROR     = 1,
-	IPA_HW_2_CPU_EVENT_LOG_INFO  = 2,
+enum ipa_uc_event {
+	IPA_UC_EVENT_NO_OP     = 0,
+	IPA_UC_EVENT_ERROR     = 1,
+	IPA_UC_EVENT_LOG_INFO  = 2,
 };
 
 /** enum ipa_hw_errors - common error types (microcontroller->AP)
@@ -194,20 +194,20 @@ ipa_uc_event_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 {
 	struct ipa_uc_shared_area *shared = ipa_uc_ctx.shared;
 	union ipa_hw_error_event_data evt;
-	u8 event_op;
+	u8 event;
 
 	ipa_client_add();
 
-	event_op = shared->event_op;
+	event = shared->event;
 	evt.raw32b = shared->event_params;
 
 	/* General handling */
-	if (event_op == IPA_HW_2_CPU_EVENT_ERROR) {
+	if (event == IPA_UC_EVENT_ERROR) {
 		ipa_err("uC error type 0x%02x timestamp 0x%08x\n",
 			evt.error_type, ipahal_read_reg(IPA_TAG_TIMER));
 		ipa_bug();
 	} else {
-		ipa_debug("unsupported uC evt opcode=%u\n", event_op);
+		ipa_debug("unsupported uC evt opcode=%u\n", event);
 	}
 
 	ipa_client_remove();
