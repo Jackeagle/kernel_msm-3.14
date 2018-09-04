@@ -53,9 +53,9 @@
 
 /** struct ipa_uc_shared_area - AP/microcontroller shared memory area
  *
- * @cmd_op: ipa_cpu_2_hw_command opcode (AP->microcontroller)
- * @cmd_params: low 32 bits of command parameter (AP->microcontroller)
- * @cmd_params_hi: high 32 bits of command parameter (AP->microcontroller)
+ * @command: ipa_uc_command code (AP->microcontroller)
+ * @command_param: low 32 bits of command parameter (AP->microcontroller)
+ * @command_param_hi: high 32 bits of command parameter (AP->microcontroller)
  *
  * @response_op: ipa_hw_2_cpu_response response opcode (microcontroller->AP)
  * @response_params: response parameter (microcontroller->AP)
@@ -69,9 +69,9 @@
  * @interface_version: hardware-reported interface version
  */
 struct ipa_uc_shared_area {
-	u32 cmd_op		: 8;	/* followed by 3 reserved bytes */
-	u32 cmd_params;
-	u32 cmd_params_hi;
+	u32 command		: 8;	/* followed by 3 reserved bytes */
+	u32 command_param;
+	u32 command_param_hi;
 	u32 response_op		: 8;	/* followed by 3 reserved bytes */
 	u32 response_params;
 	u32 event		: 8;	/* followed by 3 reserved bytes */
@@ -140,12 +140,32 @@ enum ipa_uc_error {
 	IPA_UC_ERROR_CH_NOT_EMPTY		= 8,
 };
 
-/** enum ipa_cpu_2_hw_command - commands from the AP to the microcontroller
+/** enum ipa_uc_command - commands from the AP to the microcontroller
  *
- * @IPA_CPU_2_HW_CMD_ERR_FATAL: AP system crash notification
+ * @IPA_UC_COMMAND_NO_OP: no operation
+ * @IPA_UC_COMMAND_UPDATE_FLAGS: request to re-read configuration flags
+ * @IPA_UC_COMMAND_DEBUG_RUN_TEST: request to run hardware test
+ * @IPA_UC_COMMAND_DEBUG_GET_INFO: request to read internal debug information
+ * @IPA_UC_COMMAND_ERR_FATAL: AP system crash notification
+ * @IPA_UC_COMMAND_CLK_GATE: request hardware to enter clock gated state
+ * @IPA_UC_COMMAND_CLK_UNGATE: request hardware to enter clock ungated state
+ * @IPA_UC_COMMAND_MEMCPY: request hardware to perform memcpy
+ * @IPA_UC_COMMAND_RESET_PIPE: request pipe reset
+ * @IPA_UC_COMMAND_REG_WRITE: request a register be written
+ * @IPA_UC_COMMAND_GSI_CH_EMPTY: request to determine whether channel is empty
  */
-enum ipa_cpu_2_hw_command {
-	IPA_CPU_2_HW_CMD_ERR_FATAL	= 4,
+enum ipa_uc_command {
+	IPA_UC_COMMAND_NO_OP		= 0,
+	IPA_UC_COMMAND_UPDATE_FLAGS	= 1,
+	IPA_UC_COMMAND_DEBUG_RUN_TEST	= 2,
+	IPA_UC_COMMAND_DEBUG_GET_INFO	= 3,
+	IPA_UC_COMMAND_ERR_FATAL	= 4,
+	IPA_UC_COMMAND_CLK_GATE		= 5,
+	IPA_UC_COMMAND_CLK_UNGATE	= 6,
+	IPA_UC_COMMAND_MEMCPY		= 7,
+	IPA_UC_COMMAND_RESET_PIPE	= 8,
+	IPA_UC_COMMAND_REG_WRITE	= 9,
+	IPA_UC_COMMAND_GSI_CH_EMPTY	= 10,
 };
 
 /** enum ipa_hw_2_cpu_response - common hardware response codes
@@ -170,13 +190,13 @@ union ipa_hw_error_event_data {
 
 /** union ipa_hw_cpu_cmd_completed_response_data - response to AP command
  *
- * @original_cmd_op: the AP issued command this is responding to
+ * @command: the AP issued command this is responding to
  * @status: 0 for success indication, otherwise failure
  * @raw32b: 32-bit register value (used when reading)
  */
 union ipa_hw_cpu_cmd_completed_response_data {
 	struct ipa_hw_cpu_cmd_completed_response_params {
-		u8 original_cmd_op;
+		u8 command;
 		u8 status;
 	} params;
 	u32 raw32b;
@@ -240,8 +260,8 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 		ipa_uc_ctx.uc_loaded = true;
 	} else if (response_op == IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED) {
 		uc_rsp.raw32b = shared->response_params;
-		ipa_err("uC cmd response opcode=%u status=%u\n",
-			  uc_rsp.params.original_cmd_op, uc_rsp.params.status);
+		ipa_err("uC command response code %u status %u\n",
+			  uc_rsp.params.command, uc_rsp.params.status);
 	} else {
 		ipa_err("Unsupported uC rsp opcode = %u\n", response_op);
 	}
@@ -250,13 +270,13 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 }
 
 /* Send a command to the microcontroller */
-static void send_uc_command(u32 cmd, u32 opcode)
+static void send_uc_command(u32 command, u32 command_param)
 {
 	struct ipa_uc_shared_area *shared = ipa_uc_ctx.shared;
 
-	shared->cmd_op = opcode;
-	shared->cmd_params = cmd;
-	shared->cmd_params_hi = 0;
+	shared->command = command;
+	shared->command_param = command_param;
+	shared->command_param_hi = 0;
 	shared->response_op = 0;
 	shared->response_params = 0;
 
@@ -291,7 +311,7 @@ void ipa_uc_panic_notifier(void)
 	if (!ipa_client_add_additional())
 		return;
 
-	send_uc_command(0, IPA_CPU_2_HW_CMD_ERR_FATAL);
+	send_uc_command(0, IPA_UC_COMMAND_ERR_FATAL);
 
 	/* give uc enough time to save state */
 	udelay(IPA_PKT_FLUSH_TO_US);
