@@ -72,45 +72,6 @@ union ipa_hw_chk_ch_empty_cmd_data {
 	u32 raw32b;
 } __packed;
 
-const char *ipa_hw_error_str(enum ipa_hw_errors err_type)
-{
-	const char *str;
-
-	switch (err_type) {
-	case IPA_HW_ERROR_NONE:
-		str = "IPA_HW_ERROR_NONE";
-		break;
-	case IPA_HW_INVALID_DOORBELL_ERROR:
-		str = "IPA_HW_INVALID_DOORBELL_ERROR";
-		break;
-	case IPA_HW_DMA_ERROR:
-		str = "IPA_HW_DMA_ERROR";
-		break;
-	case IPA_HW_FATAL_SYSTEM_ERROR:
-		str = "IPA_HW_FATAL_SYSTEM_ERROR";
-		break;
-	case IPA_HW_INVALID_OPCODE:
-		str = "IPA_HW_INVALID_OPCODE";
-		break;
-	case IPA_HW_INVALID_PARAMS:
-		str = "IPA_HW_INVALID_PARAMS";
-		break;
-	case IPA_HW_CONS_DISABLE_CMD_GSI_STOP_FAILURE:
-		str = "IPA_HW_CONS_DISABLE_CMD_GSI_STOP_FAILURE";
-		break;
-	case IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE:
-		str = "IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE";
-		break;
-	case IPA_HW_CH_NOT_EMPTY_FAILURE:
-		str = "IPA_HW_CH_NOT_EMPTY_FAILURE";
-		break;
-	default:
-		str = "INVALID ipa_hw_errors type";
-	}
-
-	return str;
-}
-
 /** ipa_uc_state_check() - Check the status of the uC interface
  *
  * Return value: 0 if the uC is loaded, interface is initialized
@@ -150,22 +111,20 @@ ipa_uc_event_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 	u8 event_op;
 
 	ipa_client_add();
+
 	mmio = ipa_ctx->uc_ctx.uc_sram_mmio;
 	event_op = mmio->event_op;
-	ipa_debug("uC evt opcode=%u\n", event_op);
+	evt.raw32b = mmio->event_params;
 
 	/* General handling */
 	if (event_op == IPA_HW_2_CPU_EVENT_ERROR) {
-		evt.raw32b = mmio->event_params;
-		ipa_err("uC Error, evt error_type = %s\n",
-			ipa_hw_error_str(evt.error_type));
-		ipa_ctx->uc_ctx.uc_error_type = evt.error_type;
-		ipa_ctx->uc_ctx.uc_error_timestamp =
-			ipahal_read_reg(IPA_TAG_TIMER);
+		ipa_err("uC error type 0x%02x timestamp 0x%08x\n",
+			evt.error_type, ipahal_read_reg(IPA_TAG_TIMER));
 		ipa_bug();
 	} else {
 		ipa_debug("unsupported uC evt opcode=%u\n", event_op);
 	}
+
 	ipa_client_remove();
 }
 

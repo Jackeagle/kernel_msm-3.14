@@ -466,8 +466,6 @@ struct ipa_uc_ctx {
 	struct ipa_hw_shared_mem_common_mapping *uc_sram_mmio;
 	u32 pending_cmd;
 	u32 uc_status;
-	u32 uc_error_type;
-	u32 uc_error_timestamp;
 };
 
 /** struct ipa_transport_pm - transport power management related members
@@ -661,7 +659,6 @@ void ipa_resume_apps_pipes(void);
 void ipa_uc_panic_notifier(void);
 void ipa_inc_acquire_wakelock(void);
 void ipa_dec_release_wakelock(void);
-const char *ipa_hw_error_str(enum ipa_hw_errors err_type);
 int ipa_rx_poll(u32 clnt_hdl, int budget);
 void ipa_reset_freeze_vote(void);
 void ipa_enable_dcd(void);
