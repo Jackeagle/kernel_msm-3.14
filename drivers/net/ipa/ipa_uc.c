@@ -315,7 +315,7 @@ void ipa_uc_panic_notifier(void)
 	if (!ipa_client_add_additional())
 		return;
 
-	send_uc_command(0, IPA_UC_COMMAND_ERR_FATAL);
+	send_uc_command(IPA_UC_COMMAND_ERR_FATAL, 0);
 
 	/* give uc enough time to save state */
 	udelay(IPA_PKT_FLUSH_TO_US);
