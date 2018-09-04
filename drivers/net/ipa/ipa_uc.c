@@ -139,8 +139,7 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 }
 
 /* Send a command to the microcontroller */
-static void
-send_uc_command_nowait(struct ipa_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
+static void send_uc_command(struct ipa_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
 {
 	struct ipa_hw_shared_mem_common_mapping *mmio = uc_ctx->uc_sram_mmio;
 
@@ -183,7 +182,7 @@ void ipa_uc_panic_notifier(void)
 	if (!ipa_client_add_additional())
 		return;
 
-	send_uc_command_nowait(&ipa_uc_ctx, 0, IPA_CPU_2_HW_CMD_ERR_FATAL);
+	send_uc_command(&ipa_uc_ctx, 0, IPA_CPU_2_HW_CMD_ERR_FATAL);
 
 	/* give uc enough time to save state */
 	udelay(IPA_PKT_FLUSH_TO_US);
