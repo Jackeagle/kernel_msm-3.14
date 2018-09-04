@@ -44,25 +44,20 @@
 
 /** struct ipa_uc_shared_area - AP/microcontroller shared memory area
  *
- * @cmd_op : CPU->HW command opcode. See IPA_CPU_2_HW_COMMANDS
- * @cmd_params : CPU->HW command parameter lower 32bit.
- * @cmd_params_hi : CPU->HW command parameter higher 32bit.
- * of parameters (immediate parameters) and point on structure in system memory
- * (in such case the address must be accessible for HW)
- * @response_op : HW->CPU response opcode. See IPA_HW_2_CPU_RESPONSES
- * @response_params : HW->CPU response parameter. The parameter filed can hold
- * 32 bits of parameters (immediate parameters) and point on structure in system
- * memory
- * @event_op : HW->CPU event opcode. See IPA_HW_2_CPU_EVENTS
- * @event_params : HW->CPU event parameter. The parameter filed can hold 32
- *		bits of parameters (immediate parameters) and point on
- *		structure in system memory
- * @first_error_address : Contains the address of first error-source on SNOC
- * @hw_state : State of HW. The state carries information regarding the
- *				error type.
- * @warning_counter : The warnings counter. The counter carries information
- *						regarding non fatal errors in HW
- * @interface_version_common : The Common interface version as reported by HW
+ * @cmd_op: ipa_cpu_2_hw_commands opcode (AP->microcontroller)
+ * @cmd_params: low 32 bits of command parameter (AP->microcontroller)
+ * @cmd_params_hi: high 32 bits of command parameter (AP->microcontroller)
+ *
+ * @response_op: ipa_hw_2_cpu_responses response opcode (microcontroller->AP)
+ * @response_params: response parameter (microcontroller->AP)
+ *
+ * @event_op: ipa_hw_2_cpu_events event opcode (microcontroller->AP)
+ * @event_params: event parameter (microcontroller->AP)
+ *
+ * @first_error_address: address of first error-source on SNOC
+ * @hw_state: state of hardware (including error type information)
+ * @warning_counter: counter of non-fatal hardware errors
+ * @interface_version: hardware-reported interface version
  */
 struct ipa_uc_shared_area {
 	u8  cmd_op;
@@ -82,21 +77,13 @@ struct ipa_uc_shared_area {
 	u8  hw_state;
 	u8  warning_counter;
 	u16 reserved_23_22;
-	u16 interface_version_common;
+	u16 interface_version;
 	u16 reserved_27_26;
 } __packed;
 
 /** struct ipa_uc_ctx - IPA uC context
- * @uc_inited: Indicates if uC interface has been initialized
- * @uc_loaded: Indicates if uC has loaded
- * @uc_failed: Indicates if uC has failed / returned an error
- * @uc_lock: uC interface lock to allow only one uC interaction at a time
- * @uc_completation: Completion mechanism to wait for uC commands
- * @shared: Pointer to uC mapped memory
- * @pending_cmd: The last command sent waiting to be ACKed
- * @uc_status: The last status provided by the uC
- * @uc_error_type: error type from uC error event
- * @uc_error_timestamp: tag timer sampled after uC crashed
+ * @uc_loaded: whether microcontroller has been loaded
+ * @shared: pointer to AP/microcontroller shared memory area
  */
 struct ipa_uc_ctx {
 	bool uc_loaded;
