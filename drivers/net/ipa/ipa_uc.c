@@ -68,13 +68,15 @@ union ipa_hw_cpu_cmd_completed_response_data {
 	u32 raw32b;
 } __packed;
 
+struct ipa_uc_ctx ipa_uc_ctx;
+
 /** ipa_uc_loaded_check() - Check the uC has been loaded
  *
  * Return value: 1 if the uC is loaded, 0 otherwise
  */
 int ipa_uc_loaded_check(void)
 {
-	return ipa_ctx->uc_ctx.uc_loaded;
+	return ipa_uc_ctx.uc_loaded;
 }
 EXPORT_SYMBOL(ipa_uc_loaded_check);
 
@@ -87,7 +89,7 @@ ipa_uc_event_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 
 	ipa_client_add();
 
-	mmio = ipa_ctx->uc_ctx.uc_sram_mmio;
+	mmio = ipa_uc_ctx.uc_sram_mmio;
 	event_op = mmio->event_op;
 	evt.raw32b = mmio->event_params;
 
@@ -112,7 +114,7 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 
 	ipa_client_add();
 
-	mmio = ipa_ctx->uc_ctx.uc_sram_mmio;
+	mmio = ipa_uc_ctx.uc_sram_mmio;
 	response_op = mmio->response_op;
 
 	/* An INIT_COMPLETED response message is sent to the AP by
@@ -125,7 +127,7 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 		 * IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED is received.
 		 */
 		ipa_proxy_clk_unvote();
-		ipa_ctx->uc_ctx.uc_loaded = true;
+		ipa_uc_ctx.uc_loaded = true;
 	} else if (response_op == IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED) {
 		uc_rsp.raw32b = mmio->response_params;
 		ipa_err("uC cmd response opcode=%u status=%u\n",
@@ -154,39 +156,35 @@ send_uc_command_nowait(struct ipa_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
 	ipahal_write_reg_n(IPA_IRQ_EE_UC_N, IPA_EE_AP, 0x1);
 }
 
-/** ipa_uc_interface_init() - Initialize the interface with the uC
+/** ipa_uc_init() - Initialize the microcontroller
  *
- * Return value: 0 on success, negative value otherwise
+ * Returns pointer to microcontroller context on success, NULL otherwise
  */
-int ipa_uc_interface_init(void)
+struct ipa_uc_ctx *ipa_uc_init(void)
 {
 	unsigned long phys_addr;
-	void *mmio;
 
 	phys_addr = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
 	phys_addr += ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_N, 0);
-	mmio = ioremap(phys_addr, IPA_RAM_UC_SMEM_SIZE);
-	if (!mmio) {
-		ipa_err("Fail to ioremap IPA uC SRAM\n");
-		return -ENOMEM;
-	}
+	ipa_uc_ctx.uc_sram_mmio = ioremap(phys_addr, IPA_RAM_UC_SMEM_SIZE);
+	if (!ipa_uc_ctx.uc_sram_mmio)
+		return NULL;
 
 	ipa_add_interrupt_handler(IPA_UC_IRQ_0, ipa_uc_event_handler);
 	ipa_add_interrupt_handler(IPA_UC_IRQ_1, ipa_uc_response_hdlr);
-	ipa_ctx->uc_ctx.uc_sram_mmio = mmio;
 
-	return 0;
+	return &ipa_uc_ctx;
 }
 
 void ipa_uc_panic_notifier(void)
 {
-	if (!ipa_ctx->uc_ctx.uc_loaded)
+	if (!ipa_uc_ctx.uc_loaded)
 		return;
 
 	if (!ipa_client_add_additional())
 		return;
 
-	send_uc_command_nowait(&ipa_ctx->uc_ctx, 0, IPA_CPU_2_HW_CMD_ERR_FATAL);
+	send_uc_command_nowait(&ipa_uc_ctx, 0, IPA_CPU_2_HW_CMD_ERR_FATAL);
 
 	/* give uc enough time to save state */
 	udelay(IPA_PKT_FLUSH_TO_US);

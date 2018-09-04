@@ -544,7 +544,7 @@ struct ipa_context {
 	dma_addr_t pkt_init_imm[IPA_MAX_NUM_PIPES];
 	struct ipa_dma_mem pkt_init_mem;
 
-	struct ipa_uc_ctx uc_ctx;
+	struct ipa_uc_ctx *uc_ctx;
 
 	struct wakeup_source w_lock;
 	struct ipa_wakelock_ref_cnt wakelock_ref_cnt;
@@ -632,7 +632,8 @@ void ipa_cfg_ep_status(u32 clnt_hdl,
 
 int ipa_init_q6_smem(void);
 
-int ipa_uc_interface_init(void);
+struct ipa_uc_ctx *ipa_uc_init(void);
+
 int ipa_uc_loaded_check(void);
 const struct ipa_gsi_ep_config *ipa_get_gsi_ep_info
 	(enum ipa_client_type client);

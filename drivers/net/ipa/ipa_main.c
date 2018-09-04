@@ -914,11 +914,9 @@ static void ipa_post_init(struct work_struct *unused)
 	}
 	ipa_debug("IPA GPI pipes were connected\n");
 
-	result = ipa_uc_interface_init();
-	if (result)
-		ipa_err(":ipa Uc interface init failed (%d)\n", -result);
-	else
-		ipa_debug(":ipa Uc interface init ok\n");
+	ipa_ctx->uc_ctx = ipa_uc_init();
+	if (!ipa_ctx->uc_ctx)
+		ipa_err("microcontroller init failed\n");
 
 	ipa_register_panic_hdlr();
 
