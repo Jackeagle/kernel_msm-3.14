@@ -72,27 +72,6 @@ union ipa_hw_chk_ch_empty_cmd_data {
 	u32 raw32b;
 } __packed;
 
-/** ipa_uc_state_check() - Check the status of the uC interface
- *
- * Return value: 0 if the uC is loaded, interface is initialized
- *		 and there was no recent failure in one of the commands.
- *		 A negative value is returned otherwise.
- */
-static int ipa_uc_state_check(void)
-{
-	if (!ipa_ctx->uc_ctx.uc_inited) {
-		ipa_err("uC interface not initialized\n");
-		return -EFAULT;
-	}
-
-	if (!ipa_ctx->uc_ctx.uc_loaded) {
-		ipa_err("uC is not loaded\n");
-		return -EFAULT;
-	}
-
-	return 0;
-}
-
 /** ipa_uc_loaded_check() - Check the uC has been loaded
  *
  * Return value: 1 if the uC is loaded, 0 otherwise
@@ -199,14 +178,13 @@ int ipa_uc_interface_init(void)
 	ipa_add_interrupt_handler(IPA_UC_IRQ_0, ipa_uc_event_handler);
 	ipa_add_interrupt_handler(IPA_UC_IRQ_1, ipa_uc_response_hdlr);
 	ipa_ctx->uc_ctx.uc_sram_mmio = mmio;
-	ipa_ctx->uc_ctx.uc_inited = true;
 
 	return 0;
 }
 
 void ipa_uc_panic_notifier(void)
 {
-	if (ipa_uc_state_check())
+	if (!ipa_ctx->uc_ctx.uc_loaded)
 		return;
 
 	if (!ipa_client_add_additional())

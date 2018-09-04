@@ -461,7 +461,6 @@ struct ipa_hw_shared_mem_common_mapping {
  * @uc_error_timestamp: tag timer sampled after uC crashed
  */
 struct ipa_uc_ctx {
-	bool uc_inited;
 	bool uc_loaded;
 	struct ipa_hw_shared_mem_common_mapping *uc_sram_mmio;
 };
