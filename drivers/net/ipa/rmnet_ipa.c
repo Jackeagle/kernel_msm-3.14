@@ -392,19 +392,8 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 		edata.u.data |= RMNET_IOCTL_FEAT_SET_INGRESS_DATA_FORMAT;
 		goto copy_out;
 
-	case RMNET_IOCTL_GET_SG_SUPPORT:		/* Get SG support */
-		edata.u.data = 1;	/* Scatter/gather is always supported */
-		goto copy_out;
-
 	case RMNET_IOCTL_GET_EPID:			/* Get endpoint ID */
 		edata.u.data = 1;
-		goto copy_out;
-
-	case RMNET_IOCTL_GET_EP_PAIR:			/* Get endpoint pair */
-		edata.u.ipa_ep_pair.consumer_pipe_num =
-				ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_PROD);
-		edata.u.ipa_ep_pair.producer_pipe_num =
-				ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
 		goto copy_out;
 
 	case RMNET_IOCTL_GET_DRIVER_NAME:		/* Get driver name */
@@ -420,6 +409,17 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 	case RMNET_IOCTL_SET_INGRESS_DATA_FORMAT:	/* Ingress format */
 		return handle_ingress_format(dev, &edata) ? -EFAULT : 0;
 
+	case RMNET_IOCTL_GET_EP_PAIR:			/* Get endpoint pair */
+		edata.u.ipa_ep_pair.consumer_pipe_num =
+				ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_PROD);
+		edata.u.ipa_ep_pair.producer_pipe_num =
+				ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
+		goto copy_out;
+
+	case RMNET_IOCTL_GET_SG_SUPPORT:		/* Get SG support */
+		edata.u.data = 1;	/* Scatter/gather is always supported */
+		goto copy_out;
+
 	/* Unsupported requests */
 	case RMNET_IOCTL_SET_MRU:			/* Set MRU */
 	case RMNET_IOCTL_GET_MRU:			/* Get MRU */
@@ -431,10 +431,16 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 	case RMNET_IOCTL_GET_DFLT_CONTROL_CHANNEL:	/* For legacy use */
 	case RMNET_IOCTL_GET_HWSW_MAP:			/* Get HW/SW map */
 	case RMNET_IOCTL_SET_RX_HEADROOM:		/* Set RX Headroom */
-		return -ENOTSUPP;
+	case RMNET_IOCTL_SET_QOS_VERSION:		/* Set 8/6 byte QoS */
+	case RMNET_IOCTL_GET_QOS_VERSION:		/* Get 8/6 byte QoS */
+	case RMNET_IOCTL_GET_SUPPORTED_QOS_MODES:	/* Get QoS modes */
+	case RMNET_IOCTL_SET_SLEEP_STATE:		/* Set sleep state */
+	case RMNET_IOCTL_SET_XLAT_DEV_INFO:		/* xlat dev name */
+	case RMNET_IOCTL_DEREGISTER_DEV:		/* Deregister netdev */
+		return -ENOTSUPP;	/* Defined, but unsupported command */
 
 	default:
-		return -EINVAL;
+		return -EINVAL;		/* Invalid (unrecognized) command */
 	}
 
 copy_out:
