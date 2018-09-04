@@ -465,7 +465,6 @@ struct ipa_uc_ctx {
 	bool uc_loaded;
 	bool uc_failed;
 	struct ipa_hw_shared_mem_common_mapping *uc_sram_mmio;
-	u32 uc_event_top_ofst;
 	u32 pending_cmd;
 	u32 uc_status;
 	u32 uc_error_type;

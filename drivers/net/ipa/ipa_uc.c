@@ -111,26 +111,6 @@ const char *ipa_hw_error_str(enum ipa_hw_errors err_type)
 	return str;
 }
 
-static void ipa_log_evt_hdlr(void)
-{
-	struct ipa_uc_ctx *uc_ctx = &ipa_ctx->uc_ctx;
-	u32 offset = uc_ctx->uc_sram_mmio->event_params;
-
-	/* If the the event top offset is what we set it to, we're done */
-	if (offset == uc_ctx->uc_event_top_ofst)
-		return;
-
-	/* They differ.  If we set it before, reort that it changed. */
-	if (uc_ctx->uc_event_top_ofst) {
-		ipa_err("uc top ofst changed new=%u cur=%u\n",
-			offset, uc_ctx->uc_event_top_ofst);
-		return;
-	}
-
-	/* First time.  Record the event_params offset and map it. */
-	uc_ctx->uc_event_top_ofst = offset;
-}
-
 /** ipa_uc_state_check() - Check the status of the uC interface
  *
  * Return value: 0 if the uC is loaded, interface is initialized
@@ -189,9 +169,6 @@ ipa_uc_event_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 		ipa_ctx->uc_ctx.uc_error_timestamp =
 			ipahal_read_reg(IPA_TAG_TIMER);
 		ipa_bug();
-	} else if (event_op == IPA_HW_2_CPU_EVENT_LOG_INFO) {
-		ipa_debug("uC evt log info ofst=0x%x\n", mmio->event_params);
-		ipa_log_evt_hdlr();
 	} else {
 		ipa_debug("unsupported uC evt opcode=%u\n", event_op);
 	}
