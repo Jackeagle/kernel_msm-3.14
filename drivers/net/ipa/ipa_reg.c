@@ -17,7 +17,7 @@
 
 #include "field_mask.h"
 #include "ipahal_i.h"
-#include "ipahal_reg.h"
+#include "ipa_reg.h"
 
 /* I/O remapped base address of IPA register space */
 static void __iomem *ipa_reg_virt;

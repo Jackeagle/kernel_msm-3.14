@@ -20,7 +20,7 @@
 
 #include "ipa_dma.h"
 #include "ipa_common_i.h"
-#include "ipahal_reg.h"
+#include "ipa_reg.h"
 #include "ipahal.h"
 #include "gsi.h"
 
