@@ -391,16 +391,6 @@ struct ipa_wakelock_ref_cnt {
 	int cnt;
 };
 
-/** union ipa_hw_error_event_data - HW->CPU Common Events
- * @error_type : Entered when a system error is detected by the HW. Type of
- * error is specified by IPA_HW_ERRORS
- * @reserved : Reserved
- */
-union ipa_hw_error_event_data {
-	u8 error_type;
-	u32 raw32b;
-} __packed;
-
 /** struct ipa_hw_shared_mem_common_mapping - Structure referring to the common
  * section in 128B shared memory located in offset zero of SW Partition in IPA
  * SRAM.

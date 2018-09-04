@@ -42,6 +42,16 @@ enum ipa_hw_2_cpu_responses {
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 2),
 };
 
+/** union ipa_hw_error_event_data - HW->CPU Common Events
+ * @error_type : Entered when a system error is detected by the HW. Type of
+ * error is specified by IPA_HW_ERRORS
+ * @reserved : Reserved
+ */
+union ipa_hw_error_event_data {
+	u8 error_type;
+	u32 raw32b;
+} __packed;
+
 /** union ipa_hw_cpu_cmd_completed_response_data - Structure holding the
  * parameters for IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED response.
  * @original_cmd_op : The original command opcode
