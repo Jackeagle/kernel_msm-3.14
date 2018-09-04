@@ -15,9 +15,35 @@
 #define IPA_UC_POLL_SLEEP_USEC 100
 #define IPA_UC_POLL_MAX_RETRY 10000
 
-/** struct ipa_hw_shared_mem_common_mapping - Structure referring to the common
- * section in 128B shared memory located in offset zero of SW Partition in IPA
- * SRAM.
+/*
+ * A 128 byte block of structured memory within the IPA SRAM is used
+ * to communicate between the AP and the microcontroller embedded in
+ * the IPA.
+ *
+ * To send a command to the microcontroller, the AP fills in the
+ * command opcode and command parameter fields in this area, then
+ * writes a register to signal to the microcontroller the command is
+ * available.  When the microcontroller has executed the command, it
+ * writes response data to this shared area, then issues a response
+ * interrupt (micrcontroller IRQ 1) to the AP.  The response
+ * includes a "response operation" that indicates the completion,
+ * along with a "response parameter" which encodes the original
+ * command and the command's status (result).
+ *
+ * The shared area is also used to communicate events asynchronously
+ * from the microcontroller to the AP.  Events are signaled using
+ * the event interrupt (micrcontroller IRQ 0).  The microcontroller
+ * fills in an "event operation" and "event parameter" before
+ * triggering the interrupt.
+ *
+ * Some additional information is also found in this shared area,
+ * but is currently unused by the IPA driver.
+ *
+ * Much of the space is reserved and must be ignored.
+ */
+
+/** struct ipa_uc_shared_area - AP/microcontroller shared memory area
+ *
  * @cmd_op : CPU->HW command opcode. See IPA_CPU_2_HW_COMMANDS
  * @cmd_params : CPU->HW command parameter lower 32bit.
  * @cmd_params_hi : CPU->HW command parameter higher 32bit.
@@ -37,8 +63,6 @@
  * @warning_counter : The warnings counter. The counter carries information
  *						regarding non fatal errors in HW
  * @interface_version_common : The Common interface version as reported by HW
- *
- * The shared memory is used for communication between IPA HW and CPU.
  */
 struct ipa_hw_shared_mem_common_mapping {
 	u8  cmd_op;
