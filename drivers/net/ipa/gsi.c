@@ -237,10 +237,10 @@ enum gsi_evt_ch_cmd_opcode {
  */
 struct gsi_gpi_channel_scratch {
 	u64 rsvd1;
-	u32 rsvd2			: 16,
-	    max_outstanding_tre		: 16;
-	u32 rsvd3			: 16,
-	    outstanding_threshold	: 16;
+	u16 rsvd2;
+	u16 max_outstanding_tre;
+	u16 rsvd3;
+	u16 outstanding_threshold;
 } __packed;
 
 /** gsi_channel_scratch - channel scratch SW config area */
