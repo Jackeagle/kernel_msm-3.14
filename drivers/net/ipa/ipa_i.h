@@ -463,7 +463,6 @@ struct ipa_hw_shared_mem_common_mapping {
 struct ipa_uc_ctx {
 	bool uc_inited;
 	bool uc_loaded;
-	bool uc_failed;
 	struct ipa_hw_shared_mem_common_mapping *uc_sram_mmio;
 	u32 pending_cmd;
 	u32 uc_status;

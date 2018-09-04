@@ -129,11 +129,6 @@ static int ipa_uc_state_check(void)
 		return -EFAULT;
 	}
 
-	if (ipa_ctx->uc_ctx.uc_failed) {
-		ipa_err("uC has failed its last command\n");
-		return -EFAULT;
-	}
-
 	return 0;
 }
 
@@ -164,7 +159,6 @@ ipa_uc_event_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 		evt.raw32b = mmio->event_params;
 		ipa_err("uC Error, evt error_type = %s\n",
 			ipa_hw_error_str(evt.error_type));
-		ipa_ctx->uc_ctx.uc_failed = true;
 		ipa_ctx->uc_ctx.uc_error_type = evt.error_type;
 		ipa_ctx->uc_ctx.uc_error_timestamp =
 			ipahal_read_reg(IPA_TAG_TIMER);
