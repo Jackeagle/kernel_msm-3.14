@@ -58,20 +58,6 @@ union ipa_hw_cpu_cmd_completed_response_data {
 	u32 raw32b;
 } __packed;
 
-/** union ipa_hw_chk_ch_empty_cmd_data -  Structure holding the parameters for
- *  IPA_CPU_2_HW_CMD_CH_EMPTY command. Parameters are sent as 32b
- *  immediate parameters.
- * @ee_n : EE owner of the channel
- * @vir_ch_id : GSI virtual channel ID of the channel to checked of emptiness
- */
-union ipa_hw_chk_ch_empty_cmd_data {
-	struct ipa_hw_chk_ch_empty_cmd_params {
-		u8 ee_n;
-		u8 vir_ch_id;
-	} params;
-	u32 raw32b;
-} __packed;
-
 /** ipa_uc_loaded_check() - Check the uC has been loaded
  *
  * Return value: 1 if the uC is loaded, 0 otherwise
