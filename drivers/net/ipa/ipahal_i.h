@@ -93,12 +93,12 @@ struct ipa_imm_cmd_hw_ip_packet_init {
  * @rsvd: reserved - should be set to zero
  */
 struct ipa_imm_cmd_hw_register_write {
-	u64 sw_rsvd			: 15,
-	    skip_pipeline_clear		: 1,
-	    offset			: 16,
-	    value			: 32;
-	u64 value_mask			: 32,
-	    pipeline_clear_options	: 2,
+	u16 sw_rsvd			: 15,
+	    skip_pipeline_clear		: 1;
+	u16 offset;
+	u32 value;
+	u32 value_mask;
+	u32 pipeline_clear_options	: 2,
 	    rsvd			: 30;
 };
 
