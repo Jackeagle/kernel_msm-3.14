@@ -60,26 +60,19 @@
  * @interface_version: hardware-reported interface version
  */
 struct ipa_uc_shared_area {
-	u8  cmd_op;
-	u8  reserved_01;
-	u16 reserved_03_02;
+	u32 cmd_op		: 8;	/* followed by 3 reserved bytes */
 	u32 cmd_params;
 	u32 cmd_params_hi;
-	u8  response_op;
-	u8  reserved_0D;
-	u16 reserved_0F_0E;
+	u32 response_op		: 8;	/* followed by 3 reserved bytes */
 	u32 response_params;
-	u8  event_op;
-	u8  reserved_15;
-	u16 reserved_17_16;
+	u32 event_op		: 8;	/* followed by 3 reserved bytes */
 	u32 event_params;
 	u32 first_error_address;
-	u8  hw_state;
-	u8  warning_counter;
-	u16 reserved_23_22;
-	u16 interface_version;
-	u16 reserved_27_26;
-} __packed;
+	u32 hw_state		: 8,
+	    warning_counter	: 8,
+	    reserved		: 16;
+	u32 interface_version	: 16;	/* followed by 2 reserved bytes */
+};
 
 /** struct ipa_uc_ctx - IPA uC context
  * @uc_loaded: whether microcontroller has been loaded
