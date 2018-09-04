@@ -250,7 +250,7 @@ struct ipa_ep_context {
 	bool bytes_xfered_valid;
 	u16 bytes_xfered;
 	struct ipa_ep_cfg cfg;
-	struct ipahal_reg_ep_cfg_status status;
+	struct ipa_reg_ep_cfg_status status;
 	u32 dst_pipe_index;
 	u32 rt_tbl_idx;
 	void *priv;
@@ -508,7 +508,7 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data);
 void ipa_sram_settings_read(void);
 
 void ipa_cfg_ep_status(u32 clnt_hdl,
-		       const struct ipahal_reg_ep_cfg_status *ipa_ep_cfg);
+		       const struct ipa_reg_ep_cfg_status *ipa_ep_cfg);
 
 int ipa_init_q6_smem(void);
 
@@ -539,8 +539,8 @@ int ipa_gsi_dma_task_inject(void);
 int ipa_disable_apps_wan_cons_deaggr(u32 agg_size, u32 agg_count);
 int ipa_plat_drv_probe(struct platform_device *platform_device);
 
-void ipa_set_flt_tuple_mask(u32 pipe_idx, struct ipahal_reg_hash_tuple *tuple);
-void ipa_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple);
+void ipa_set_flt_tuple_mask(u32 pipe_idx, struct ipa_reg_hash_tuple *tuple);
+void ipa_set_rt_tuple_mask(int tbl_idx, struct ipa_reg_hash_tuple *tuple);
 
 void ipa_gsi_irq_rx_notify_cb(void *chan_data, u16 count);
 void ipa_gsi_irq_tx_notify_cb(void *xfer_data);

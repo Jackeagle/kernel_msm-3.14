@@ -206,7 +206,7 @@ static int ipa_init_sram(void)
 	u32 *ipa_sram_mmio;
 
 	phys_addr = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
-	phys_addr += ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_N, 0);
+	phys_addr += ipa_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_N, 0);
 	phys_addr += ipa_ctx->smem_offset;
 
 	ipa_sram_mmio = ioremap(phys_addr, ipa_ctx->smem_size);
@@ -448,7 +448,7 @@ free_mem:
 
 static void ipa_setup_flt_hash_tuple(void)
 {
-	struct ipahal_reg_hash_tuple tuple = { };
+	struct ipa_reg_hash_tuple tuple = { };
 	u32 pipe_idx;
 
 	for (pipe_idx = 0; pipe_idx < ipa_ctx->ipa_num_pipes; pipe_idx++) {
@@ -461,7 +461,7 @@ static void ipa_setup_flt_hash_tuple(void)
 
 static void ipa_setup_rt_hash_tuple(void)
 {
-	struct ipahal_reg_hash_tuple tuple = { };
+	struct ipa_reg_hash_tuple tuple = { };
 	int tbl_idx;
 	int limit = max(IPA_MEM_V6_RT_NUM_INDEX, IPA_MEM_V4_RT_NUM_INDEX);
 

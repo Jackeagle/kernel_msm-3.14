@@ -22,15 +22,15 @@
 /* I/O remapped base address of IPA register space */
 static void __iomem *ipa_reg_virt;
 
-/* struct ipahal_reg_obj - Register H/W information for specific IPA version
+/* struct ipa_reg_obj - Register H/W information for specific IPA version
  * @construct - CB to construct register value from abstracted structure
  * @parse - CB to parse register value to abstracted structure
  * @offset - register offset relative to base address
  * @n_ofst - N parameterized register sub-offset
  */
-struct ipahal_reg_obj {
-	u32 (*construct)(enum ipahal_reg reg, const void *fields);
-	void (*parse)(enum ipahal_reg reg, void *fields, u32 val);
+struct ipa_reg_obj {
+	u32 (*construct)(enum ipa_reg reg, const void *fields);
+	void (*parse)(enum ipa_reg reg, void *fields, u32 val);
 	u32 offset;
 	u16 n_ofst;
 };
@@ -156,9 +156,9 @@ struct ipahal_reg_obj {
 #define ENTER_IDLE_DEBOUNCE_THRESH_BMSK		0x0000ffff
 #define CONST_NON_IDLE_ENABLE_BMSK		0x00010000
 
-static u32 ipareg_construct_rsrg_grp_xy(enum ipahal_reg reg, const void *fields)
+static u32 ipareg_construct_rsrg_grp_xy(enum ipa_reg reg, const void *fields)
 {
-	const struct ipahal_reg_rsrc_grp_cfg *grp = fields;
+	const struct ipa_reg_rsrc_grp_cfg *grp = fields;
 	u32 val;
 
 	val = field_gen(grp->x_min, X_MIN_LIM_BMSK);
@@ -174,9 +174,9 @@ static u32 ipareg_construct_rsrg_grp_xy(enum ipahal_reg reg, const void *fields)
 	return val;
 }
 
-static u32 ipareg_construct_hash_cfg_n(enum ipahal_reg reg, const void *fields)
+static u32 ipareg_construct_hash_cfg_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipahal_reg_fltrt_hash_tuple *tuple = fields;
+	const struct ipa_reg_fltrt_hash_tuple *tuple = fields;
 	u32 val;
 
 	val = field_gen(tuple->flt.src_id, FILTER_HASH_MSK_SRC_ID_BMSK);
@@ -200,9 +200,9 @@ static u32 ipareg_construct_hash_cfg_n(enum ipahal_reg reg, const void *fields)
 	return val;
 }
 
-static void ipareg_parse_hash_cfg_n(enum ipahal_reg reg, void *fields, u32 val)
+static void ipareg_parse_hash_cfg_n(enum ipa_reg reg, void *fields, u32 val)
 {
-	struct ipahal_reg_fltrt_hash_tuple *tuple = fields;
+	struct ipa_reg_fltrt_hash_tuple *tuple = fields;
 
 	memset(tuple, 0, sizeof(*tuple));
 
@@ -226,9 +226,9 @@ static void ipareg_parse_hash_cfg_n(enum ipahal_reg reg, void *fields, u32 val)
 }
 
 static u32
-ipareg_construct_endp_status_n(enum ipahal_reg reg, const void *fields)
+ipareg_construct_endp_status_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipahal_reg_ep_cfg_status *ep_status = fields;
+	const struct ipa_reg_ep_cfg_status *ep_status = fields;
 	u32 val;
 
 	val = field_gen(ep_status->status_en, STATUS_EN_BMSK);
@@ -239,9 +239,9 @@ ipareg_construct_endp_status_n(enum ipahal_reg reg, const void *fields)
 }
 
 static void
-ipareg_parse_shared_mem_size(enum ipahal_reg reg, void *fields, u32 val)
+ipareg_parse_shared_mem_size(enum ipa_reg reg, void *fields, u32 val)
 {
-	struct ipahal_reg_shared_mem_size *smem_sz = fields;
+	struct ipa_reg_shared_mem_size *smem_sz = fields;
 
 	memset(smem_sz, 0, sizeof(*smem_sz));
 
@@ -250,7 +250,7 @@ ipareg_parse_shared_mem_size(enum ipahal_reg reg, void *fields, u32 val)
 }
 
 static u32
-ipareg_construct_endp_init_hdr_metadata_mask_n(enum ipahal_reg reg,
+ipareg_construct_endp_init_hdr_metadata_mask_n(enum ipa_reg reg,
 					       const void *fields)
 {
 	const struct ipa_ep_cfg_metadata_mask *metadata_mask = fields;
@@ -258,7 +258,7 @@ ipareg_construct_endp_init_hdr_metadata_mask_n(enum ipahal_reg reg,
 	return field_gen(metadata_mask->metadata_mask, METADATA_MASK_BMSK);
 }
 
-static bool cs_offload_en_valid(u8 cs_offload_en, enum ipahal_reg reg)
+static bool cs_offload_en_valid(u8 cs_offload_en, enum ipa_reg reg)
 {
 	switch (cs_offload_en) {
 	case IPA_CS_OFFLOAD_NONE:
@@ -271,7 +271,7 @@ static bool cs_offload_en_valid(u8 cs_offload_en, enum ipahal_reg reg)
 }
 
 static u32
-ipareg_construct_endp_init_cfg_n(enum ipahal_reg reg, const void *fields)
+ipareg_construct_endp_init_cfg_n(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_ep_cfg_cfg *cfg = fields;
 	u32 val;
@@ -288,7 +288,7 @@ ipareg_construct_endp_init_cfg_n(enum ipahal_reg reg, const void *fields)
 }
 
 static u32
-ipareg_construct_endp_init_deaggr_n(enum ipahal_reg reg, const void *fields)
+ipareg_construct_endp_init_deaggr_n(enum ipa_reg reg, const void *fields)
 {
 	u32 val;
 
@@ -302,7 +302,7 @@ ipareg_construct_endp_init_deaggr_n(enum ipahal_reg reg, const void *fields)
 }
 
 static u32
-ipareg_construct_endp_init_ctrl_n(enum ipahal_reg reg, const void *fields)
+ipareg_construct_endp_init_ctrl_n(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_ep_cfg_ctrl *ep_ctrl = fields;
 	u32 val;
@@ -314,7 +314,7 @@ ipareg_construct_endp_init_ctrl_n(enum ipahal_reg reg, const void *fields)
 }
 
 static void
-ipareg_parse_endp_init_ctrl_n(enum ipahal_reg reg, void *fields, u32 val)
+ipareg_parse_endp_init_ctrl_n(enum ipa_reg reg, void *fields, u32 val)
 {
 	struct ipa_ep_cfg_ctrl *ep_ctrl = fields;
 
@@ -325,9 +325,9 @@ ipareg_parse_endp_init_ctrl_n(enum ipahal_reg reg, void *fields, u32 val)
 }
 
 static u32
-ipareg_construct_endp_init_mode_n(enum ipahal_reg reg, const void *fields)
+ipareg_construct_endp_init_mode_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipahal_reg_endp_init_mode *init_mode = fields;
+	const struct ipa_reg_endp_init_mode *init_mode = fields;
 	u32 val;
 
 	val = field_gen(init_mode->ep_mode.mode, MODE_BMSK);
@@ -337,7 +337,7 @@ ipareg_construct_endp_init_mode_n(enum ipahal_reg reg, const void *fields)
 }
 
 static void
-ipareg_parse_endp_init_aggr_n(enum ipahal_reg reg, void *fields, u32 val)
+ipareg_parse_endp_init_aggr_n(enum ipa_reg reg, void *fields, u32 val)
 {
 	struct ipa_ep_cfg_aggr *ep_aggr = fields;
 
@@ -354,7 +354,7 @@ ipareg_parse_endp_init_aggr_n(enum ipahal_reg reg, void *fields, u32 val)
 }
 
 static u32
-ipareg_construct_endp_init_aggr_n(enum ipahal_reg reg, const void *fields)
+ipareg_construct_endp_init_aggr_n(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_ep_cfg_aggr *ep_aggr = fields;
 	u32 val;
@@ -379,7 +379,7 @@ enum hdr_endianness {
 };
 
 static u32
-ipareg_construct_endp_init_hdr_ext_n(enum ipahal_reg reg, const void *fields)
+ipareg_construct_endp_init_hdr_ext_n(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext = fields;
 	u32 val;
@@ -399,7 +399,7 @@ ipareg_construct_endp_init_hdr_ext_n(enum ipahal_reg reg, const void *fields)
 }
 
 static u32
-ipareg_construct_endp_init_hdr_n(enum ipahal_reg reg, const void *fields)
+ipareg_construct_endp_init_hdr_n(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_ep_cfg_hdr *ep_hdr = fields;
 	u32 val;
@@ -420,9 +420,9 @@ ipareg_construct_endp_init_hdr_n(enum ipahal_reg reg, const void *fields)
 }
 
 static u32
-ipareg_construct_route(enum ipahal_reg reg, const void *fields)
+ipareg_construct_route(enum ipa_reg reg, const void *fields)
 {
-	const struct ipahal_reg_route *route = fields;
+	const struct ipa_reg_route *route = fields;
 	u32 val;
 
 	val = field_gen(route->route_dis, ROUTE_DIS_BMSK);
@@ -437,9 +437,9 @@ ipareg_construct_route(enum ipahal_reg reg, const void *fields)
 }
 
 static u32
-ipareg_construct_qsb_max_writes(enum ipahal_reg reg, const void *fields)
+ipareg_construct_qsb_max_writes(enum ipa_reg reg, const void *fields)
 {
-	const struct ipahal_reg_qsb_max_writes *max_writes = fields;
+	const struct ipa_reg_qsb_max_writes *max_writes = fields;
 	u32 val;
 
 	val = field_gen(max_writes->qmb_0_max_writes,
@@ -451,9 +451,9 @@ ipareg_construct_qsb_max_writes(enum ipahal_reg reg, const void *fields)
 }
 
 static u32
-ipareg_construct_qsb_max_reads(enum ipahal_reg reg, const void *fields)
+ipareg_construct_qsb_max_reads(enum ipa_reg reg, const void *fields)
 {
-	const struct ipahal_reg_qsb_max_reads *max_reads = fields;
+	const struct ipa_reg_qsb_max_reads *max_reads = fields;
 	u32 val;
 
 	val = field_gen(max_reads->qmb_0_max_reads, GEN_QMB_0_MAX_READS_BMSK);
@@ -463,9 +463,9 @@ ipareg_construct_qsb_max_reads(enum ipahal_reg reg, const void *fields)
 }
 
 static u32
-ipareg_construct_idle_indication_cfg(enum ipahal_reg reg, const void *fields)
+ipareg_construct_idle_indication_cfg(enum ipa_reg reg, const void *fields)
 {
-	const struct ipahal_reg_idle_indication_cfg *idle_indication_cfg;
+	const struct ipa_reg_idle_indication_cfg *idle_indication_cfg;
 	u32 val;
 
 	idle_indication_cfg = fields;
@@ -509,7 +509,7 @@ ipareg_construct_idle_indication_cfg(enum ipahal_reg reg, const void *fields)
 	reg_obj_common(id, NULL, NULL, o, n)
 
 /* IPAv3.5.1 */
-static const struct ipahal_reg_obj ipahal_regs[] = {
+static const struct ipa_reg_obj ipa_regs[] = {
 	reg_obj_cfunc(IPA_ROUTE, route,			0x00000048,	0x0000),
 	reg_obj_nofunc(IPA_IRQ_STTS_EE_N,		0x00003008,	0x1000),
 	reg_obj_nofunc(IPA_IRQ_EN_EE_N,			0x0000300c,	0x1000),
@@ -591,37 +591,37 @@ void ipa_reg_exit(void)
 }
 
 /* Get the offset of an "n parameterized" register */
-u32 ipahal_reg_n_offset(enum ipahal_reg reg, u32 n)
+u32 ipa_reg_n_offset(enum ipa_reg reg, u32 n)
 {
-	return ipahal_regs[reg].offset + n * ipahal_regs[reg].n_ofst;
+	return ipa_regs[reg].offset + n * ipa_regs[reg].n_ofst;
 }
 
 /* ipahal_read_reg_n() - Get an "n parameterized" register's value */
-u32 ipahal_read_reg_n(enum ipahal_reg reg, u32 n)
+u32 ipahal_read_reg_n(enum ipa_reg reg, u32 n)
 {
-	return ioread32(ipa_reg_virt + ipahal_reg_n_offset(reg, n));
+	return ioread32(ipa_reg_virt + ipa_reg_n_offset(reg, n));
 }
 
 /* ipahal_write_reg_n() - Write a raw value to an "n parameterized" register */
-void ipahal_write_reg_n(enum ipahal_reg reg, u32 n, u32 val)
+void ipahal_write_reg_n(enum ipa_reg reg, u32 n, u32 val)
 {
-	iowrite32(val, ipa_reg_virt + ipahal_reg_n_offset(reg, n));
+	iowrite32(val, ipa_reg_virt + ipa_reg_n_offset(reg, n));
 }
 
 /* ipahal_read_reg_n_fields() - Parse value of an "n parameterized" register */
-void ipahal_read_reg_n_fields(enum ipahal_reg reg, u32 n, void *fields)
+void ipahal_read_reg_n_fields(enum ipa_reg reg, u32 n, void *fields)
 {
 	u32 val = ipahal_read_reg_n(reg, n);
 
-	ipahal_regs[reg].parse(reg, fields, val);
+	ipa_regs[reg].parse(reg, fields, val);
 }
 
 /* ipahal_write_reg_n_fields() - Construct a vlaue to write to an "n
  * parameterized" register
  */
-void ipahal_write_reg_n_fields(enum ipahal_reg reg, u32 n, const void *fields)
+void ipahal_write_reg_n_fields(enum ipa_reg reg, u32 n, const void *fields)
 {
-	u32 val = ipahal_regs[reg].construct(reg, fields);
+	u32 val = ipa_regs[reg].construct(reg, fields);
 
 	ipahal_write_reg_n(reg, n, val);
 }

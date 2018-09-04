@@ -546,7 +546,7 @@ enum ipa_client_type ipa_get_client_mapping(u32 pipe_idx)
  */
 void ipa_sram_settings_read(void)
 {
-	struct ipahal_reg_shared_mem_size smem_sz;
+	struct ipa_reg_shared_mem_size smem_sz;
 
 	ipahal_read_reg_fields(IPA_SHARED_MEM_SIZE, &smem_sz);
 
@@ -561,8 +561,8 @@ void ipa_sram_settings_read(void)
  */
 void ipa_cfg_qsb(void)
 {
-	struct ipahal_reg_qsb_max_reads max_reads = { };
-	struct ipahal_reg_qsb_max_writes max_writes = { };
+	struct ipa_reg_qsb_max_reads max_reads = { };
+	struct ipa_reg_qsb_max_writes max_writes = { };
 
 	max_reads.qmb_0_max_reads = 8,
 	max_reads.qmb_1_max_reads = 12;
@@ -769,7 +769,7 @@ static void ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
  */
 static void ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 {
-	struct ipahal_reg_endp_init_mode init_mode;
+	struct ipa_reg_endp_init_mode init_mode;
 	u32 ipa_ep_idx;
 
 	ipa_assert(ipa_producer(ipa_ctx->ep[clnt_hdl].client));
@@ -880,8 +880,8 @@ void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
  *
  * Note:	Should not be called from atomic context
  */
-void ipa_cfg_ep_status(u32 clnt_hdl,
-		       const struct ipahal_reg_ep_cfg_status *ep_status)
+void
+ipa_cfg_ep_status(u32 clnt_hdl, const struct ipa_reg_ep_cfg_status *ep_status)
 {
 	ipa_debug("pipe=%d, status_en=%d status_ep=%d status_location=%d\n",
 		  clnt_hdl, ep_status->status_en, ep_status->status_ep,
@@ -1095,12 +1095,12 @@ bool ipa_is_modem_pipe(u32 pipe_idx)
 	return false;
 }
 
-static void write_src_rsrc_grp_limits(enum ipahal_reg reg,
+static void write_src_rsrc_grp_limits(enum ipa_reg reg,
 				      enum ipa_rsrc_grp_type_src n,
 				      const struct rsrc_min_max *x_limits,
 				      const struct rsrc_min_max *y_limits)
 {
-	struct ipahal_reg_rsrc_grp_cfg val;
+	struct ipa_reg_rsrc_grp_cfg val;
 
 	val.x_min = x_limits->min;
 	val.x_max = x_limits->max;
@@ -1115,7 +1115,7 @@ static void ipa_write_src_rsrc_grp_type_reg(int group_index,
 {
 	const struct rsrc_min_max *x_limits;
 	const struct rsrc_min_max *y_limits;
-	enum ipahal_reg reg;
+	enum ipa_reg reg;
 
 	if (group_index == IPA_GROUP_UC_RX_Q) {
 		reg = IPA_SRC_RSRC_GRP_23_RSRC_TYPE_N;
@@ -1134,7 +1134,7 @@ static void ipa_write_src_rsrc_grp_type_reg(int group_index,
 static void ipa_write_dst_rsrc_grp_type_reg(int group_index,
 					    enum ipa_rsrc_grp_type_src n)
 {
-	enum ipahal_reg reg = IPA_DST_RSRC_GRP_01_RSRC_TYPE_N;
+	enum ipa_reg reg = IPA_DST_RSRC_GRP_01_RSRC_TYPE_N;
 	const struct rsrc_min_max *x_limits;
 	const struct rsrc_min_max *y_limits;
 
@@ -1222,7 +1222,7 @@ void ipa_resume_apps_pipes(void)
  */
 void ipa_cfg_default_route(enum ipa_client_type client)
 {
-	struct ipahal_reg_route route = { };
+	struct ipa_reg_route route = { };
 	u32 ipa_ep_idx;
 
 	ipa_ep_idx = ipa_get_ep_mapping(client);
@@ -1362,7 +1362,7 @@ end_sequence:
  */
 void ipa_enable_dcd(void)
 {
-	struct ipahal_reg_idle_indication_cfg idle_indication_cfg;
+	struct ipa_reg_idle_indication_cfg idle_indication_cfg;
 
 	/* recommended values for IPA 3.5 according to IPA HPG */
 	idle_indication_cfg.const_non_idle_enable = 0;
@@ -1380,9 +1380,9 @@ void ipa_enable_dcd(void)
  * Returns:	0 on success, negative on failure
  *
  */
-void ipa_set_flt_tuple_mask(u32 pipe_idx, struct ipahal_reg_hash_tuple *tuple)
+void ipa_set_flt_tuple_mask(u32 pipe_idx, struct ipa_reg_hash_tuple *tuple)
 {
-	struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
+	struct ipa_reg_fltrt_hash_tuple fltrt_tuple;
 
 	ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, pipe_idx,
 				 &fltrt_tuple);
@@ -1400,9 +1400,9 @@ void ipa_set_flt_tuple_mask(u32 pipe_idx, struct ipahal_reg_hash_tuple *tuple)
  * Returns:	 0 on success, negative on failure
  *
  */
-void ipa_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple)
+void ipa_set_rt_tuple_mask(int tbl_idx, struct ipa_reg_hash_tuple *tuple)
 {
-	struct ipahal_reg_fltrt_hash_tuple fltrt_tuple;
+	struct ipa_reg_fltrt_hash_tuple fltrt_tuple;
 
 	ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, tbl_idx,
 				 &fltrt_tuple);

@@ -287,7 +287,7 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 struct ipa_uc_ctx *ipa_uc_init(phys_addr_t phys_addr)
 {
 
-	phys_addr += ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_N, 0);
+	phys_addr += ipa_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_N, 0);
 	ipa_uc_ctx.shared = ioremap(phys_addr, IPA_RAM_UC_SMEM_SIZE);
 	if (!ipa_uc_ctx.shared)
 		return NULL;
