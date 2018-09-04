@@ -70,15 +70,14 @@ union ipa_hw_cpu_cmd_completed_response_data {
 
 struct ipa_uc_ctx ipa_uc_ctx;
 
-/** ipa_uc_loaded_check() - Check the uC has been loaded
+/** ipa_uc_loaded() - tell whether the microcontroller has been loaded
  *
- * Return value: 1 if the uC is loaded, 0 otherwise
+ * Returns true if the microcontroller is loaded, false otherwise
  */
-int ipa_uc_loaded_check(void)
+bool ipa_uc_loaded(void)
 {
 	return ipa_uc_ctx.uc_loaded;
 }
-EXPORT_SYMBOL(ipa_uc_loaded_check);
 
 static void
 ipa_uc_event_handler(enum ipa_irq_type interrupt, u32 interrupt_data)

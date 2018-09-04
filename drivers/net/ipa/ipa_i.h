@@ -633,8 +633,8 @@ void ipa_cfg_ep_status(u32 clnt_hdl,
 int ipa_init_q6_smem(void);
 
 struct ipa_uc_ctx *ipa_uc_init(void);
+bool ipa_uc_loaded(void);
 
-int ipa_uc_loaded_check(void);
 const struct ipa_gsi_ep_config *ipa_get_gsi_ep_info
 	(enum ipa_client_type client);
 
