@@ -14,9 +14,6 @@
 #include "ipahal_i.h"
 #include "ipahal_reg_i.h"
 
-/* Produce a contiguous bitmask with a positive number of low-order bits set. */
-#define MASK(bits)	GENMASK((bits) - 1, 0)
-
 static struct ipahal_context ipahal_ctx_struct;
 struct ipahal_context *ipahal_ctx = &ipahal_ctx_struct;
 
@@ -100,7 +97,7 @@ ipahal_imm_cmd_pyld_alloc_atomic(u16 opcode, size_t pyld_size)
  */
 static bool check_too_big(char *name, u64 value, u8 bits)
 {
-	if (!WARN_ON(value & ~MASK(bits)))
+	if (!WARN_ON(value & ~GENMASK((bits) - 1, 0)))
 		return false;
 
 	ipa_err("%s is bigger than %hhubit width 0x%llx\n", name, bits, value);
