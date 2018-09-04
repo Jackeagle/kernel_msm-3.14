@@ -268,64 +268,6 @@ struct ipa_ep_context {
 
 struct ipa_dp;	/* Data path information */
 
-#define IPA_HW_NUM_FEATURES 0x8
-#define FEATURE_ENUM_VAL(feature, opcode) ((feature << 5) | opcode)
-
-/** enum ipa_hw_features - Values that represent the features supported
- * in IPA HW
- * @IPA_HW_FEATURE_COMMON : Feature related to common operation of IPA HW
- *
- */
-enum ipa_hw_features {
-	IPA_HW_FEATURE_COMMON		=	0x0,
-	IPA_HW_FEATURE_MAX		=	IPA_HW_NUM_FEATURES
-};
-
-/** enum ipa_hw_2_cpu_events - Values that represent HW event to be sent to CPU.
- * @IPA_HW_2_CPU_EVENT_NO_OP : No event present
- * @IPA_HW_2_CPU_EVENT_ERROR : Event specify a system error is detected by the
- *  device
- * @IPA_HW_2_CPU_EVENT_LOG_INFO : Event providing logging specific information
- */
-enum ipa_hw_2_cpu_events {
-	IPA_HW_2_CPU_EVENT_NO_OP     =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 0),
-	IPA_HW_2_CPU_EVENT_ERROR     =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 1),
-	IPA_HW_2_CPU_EVENT_LOG_INFO  =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 2),
-};
-
-/** enum ipa_hw_errors - Common error types.
- * @IPA_HW_ERROR_NONE : No error persists
- * @IPA_HW_INVALID_DOORBELL_ERROR : Invalid data read from doorbell
- * @IPA_HW_DMA_ERROR : Unexpected DMA error
- * @IPA_HW_FATAL_SYSTEM_ERROR : HW has crashed and requires reset.
- * @IPA_HW_INVALID_OPCODE : Invalid opcode sent
- * @IPA_HW_INVALID_PARAMS : Invalid params for the requested command
- * @IPA_HW_CH_NOT_EMPTY_FAILURE : GSI channel emptiness validation failed
- */
-enum ipa_hw_errors {
-	IPA_HW_ERROR_NONE	       =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 0),
-	IPA_HW_INVALID_DOORBELL_ERROR  =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 1),
-	IPA_HW_DMA_ERROR	       =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 2),
-	IPA_HW_FATAL_SYSTEM_ERROR      =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 3),
-	IPA_HW_INVALID_OPCODE	       =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 4),
-	IPA_HW_INVALID_PARAMS	     =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 5),
-	IPA_HW_CONS_DISABLE_CMD_GSI_STOP_FAILURE =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 6),
-	IPA_HW_PROD_DISABLE_CMD_GSI_STOP_FAILURE =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 7),
-	IPA_HW_CH_NOT_EMPTY_FAILURE =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 8)
-};
-
 struct ipa_sys_context;
 
 /** enum ipa_desc_type - IPA decriptors type
