@@ -191,13 +191,13 @@ enum gsi_err_type {
 };
 
 struct gsi_log_err {
-	u32 arg3	: 4,
-	    arg2	: 4,
-	    arg1	: 4,
-	    code	: 4,
-	    rsvd	: 3,
-	    virt_idx	: 5,
-	    err_type	: 4,
+	u8  arg3	: 4,
+	    arg2	: 4;
+	u8  arg1	: 4,
+	    code	: 4;
+	u8  rsvd	: 3,
+	    virt_idx	: 5;
+	u8  err_type	: 4,
 	    ee		: 4;
 } __packed;
 
