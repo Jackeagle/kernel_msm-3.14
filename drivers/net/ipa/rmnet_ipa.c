@@ -392,13 +392,6 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 		edata.u.data |= RMNET_IOCTL_FEAT_SET_INGRESS_DATA_FORMAT;
 		goto copy_out;
 
-	case RMNET_IOCTL_SET_MRU:			/* Set MRU */
-		return 0;
-
-	case RMNET_IOCTL_GET_MRU:			/* Get MRU */
-		edata.u.data = 1000;
-		goto copy_out;
-
 	case RMNET_IOCTL_GET_SG_SUPPORT:		/* Get SG support */
 		edata.u.data = 1;	/* Scatter/gather is always supported */
 		goto copy_out;
@@ -428,6 +421,8 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 		return handle_ingress_format(dev, &edata) ? -EFAULT : 0;
 
 	/* Unsupported requests */
+	case RMNET_IOCTL_SET_MRU:			/* Set MRU */
+	case RMNET_IOCTL_GET_MRU:			/* Get MRU */
 	case RMNET_IOCTL_GET_AGGREGATION_COUNT:		/* Get agg count */
 	case RMNET_IOCTL_SET_AGGREGATION_COUNT:		/* Set agg count */
 	case RMNET_IOCTL_GET_AGGREGATION_SIZE:		/* Get agg size */
