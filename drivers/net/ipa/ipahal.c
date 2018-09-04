@@ -12,7 +12,6 @@
 #include "ipa_i.h"
 #include "ipahal.h"
 #include "ipahal_i.h"
-#include "ipahal_reg_i.h"
 
 static struct ipahal_context ipahal_ctx_struct;
 struct ipahal_context *ipahal_ctx = &ipahal_ctx_struct;
