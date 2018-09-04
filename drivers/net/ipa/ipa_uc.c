@@ -54,7 +54,7 @@ union ipa_hw_cpu_cmd_completed_response_data {
 	struct ipa_hw_cpu_cmd_completed_response_params {
 		u8 original_cmd_op;
 		u8 status;
-	} __packed params;
+	} params;
 	u32 raw32b;
 } __packed;
 
@@ -68,7 +68,7 @@ union ipa_hw_chk_ch_empty_cmd_data {
 	struct ipa_hw_chk_ch_empty_cmd_params {
 		u8 ee_n;
 		u8 vir_ch_id;
-	} __packed params;
+	} params;
 	u32 raw32b;
 } __packed;
 

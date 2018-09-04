@@ -251,7 +251,7 @@ union gsi_channel_scratch {
 		u32 word2;
 		u32 word3;
 		u32 word4;
-	} data __packed;
+	} data;
 } __packed;
 
 /* Read a value from the given offset into the I/O space defined in
