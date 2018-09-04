@@ -185,12 +185,6 @@ struct ipa_imm_cmd_hw_dma_task_32b_addr {
 
 /* IPA Status packet H/W structures and info */
 
-/* Width (in bits) of a filter rule ID found in an IPA status packet.
- * A rule miss is indicated as an all-1's value this width.  Note
- * that IPA_RULE_ID_BIT_LEN must be 2 or more.
- */
-#define IPA_RULE_ID_BIT_LEN	10
-
 /* struct ipa_status_pkt_hw - IPA status packet payload in H/W format.
  *  This structure describes the status packet H/W structure for the
  *   following statuses: IPA_STATUS_PACKET, IPA_STATUS_DROPPED_PACKET,
@@ -243,6 +237,7 @@ struct ipa_imm_cmd_hw_dma_task_32b_addr {
  * @frag_rule: Frag rule index in H/W frag table in case of frag hit
  * @hw_specific: H/W specific reserved value
  */
+#define IPA_RULE_ID_BITS	10	/* See ipahal_is_rule_miss_id() */
 struct ipa_pkt_status_hw {
 	u8  status_opcode;
 	u8  exception;
@@ -257,12 +252,12 @@ struct ipa_pkt_status_hw {
 	    flt_hash		: 1,
 	    flt_global		: 1,
 	    flt_ret_hdr		: 1,
-	    flt_rule_id		: 10,
+	    flt_rule_id		: IPA_RULE_ID_BITS,
 	    rt_local		: 1,
 	    rt_hash		: 1;
 	u16 ucp			: 1,
 	    rt_tbl_idx		: 5,
-	    rt_rule_id		: 10;
+	    rt_rule_id		: IPA_RULE_ID_BITS;
 	u64 nat_hit		: 1,
 	    nat_entry_idx	: 13,
 	    nat_type		: 2,

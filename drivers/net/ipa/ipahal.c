@@ -414,13 +414,13 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 	status->flt_hash = hw_status->flt_hash;
 	status->flt_global = hw_status->flt_hash;
 	status->flt_ret_hdr = hw_status->flt_ret_hdr;
-	status->flt_miss = ~(hw_status->flt_rule_id) ? false : true;
+	status->flt_miss = ipahal_is_rule_miss_id(hw_status->flt_rule_id);
 	status->flt_rule_id = hw_status->flt_rule_id;
 	status->rt_local = hw_status->rt_local;
 	status->rt_hash = hw_status->rt_hash;
 	status->ucp = hw_status->ucp;
 	status->rt_tbl_idx = hw_status->rt_tbl_idx;
-	status->rt_miss = ~(hw_status->rt_rule_id) ? false : true;
+	status->rt_miss = ipahal_is_rule_miss_id(hw_status->rt_rule_id);
 	status->rt_rule_id = hw_status->rt_rule_id;
 	status->nat_hit = hw_status->nat_hit;
 	status->nat_entry_idx = hw_status->nat_entry_idx;
@@ -476,12 +476,16 @@ void ipahal_exit(void)
 	ipahal_ctx->base = NULL;
 }
 
-/* Does the given ID represents rule miss?
- * Rule miss ID, is always the max ID possible in the bit-pattern
+/* Does the given rule ID represent a routing or filter rule miss?
+ *
+ * A rule miss is indicated as an all-1's value in the rt_rule_id
+ * or flt_rule_id field of the ipahal_pkt_status structure.
  */
 bool ipahal_is_rule_miss_id(u32 id)
 {
-	return id == (1U << IPA_RULE_ID_BIT_LEN) - 1;
+	BUILD_BUG_ON(IPA_RULE_ID_BITS < 2);
+
+	return id == (1U << IPA_RULE_ID_BITS) - 1;
 }
 
 /* ipahal_rt_generate_empty_img() - Generate empty route table header
