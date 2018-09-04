@@ -163,9 +163,9 @@ struct gsi_tre {
 	u64 buffer_ptr;
 	u16 buf_len;
 	u16 rsvd1;
-	u16 chain	: 1,
-	    rsvd4	: 7,
-	    ieob	: 1,
+	u8  chain	: 1,
+	    rsvd4	: 7;
+	u8  ieob	: 1,
 	    ieot	: 1,
 	    bei		: 1,
 	    rsvd3	: 5;
