@@ -162,23 +162,23 @@ enum gsi_re_type {
 struct gsi_tre {
 	u64 buffer_ptr;
 	u16 buf_len;
-	u16 resvd1;
+	u16 rsvd1;
 	u16 chain	: 1,
-	    resvd4	: 7,
+	    rsvd4	: 7,
 	    ieob	: 1,
 	    ieot	: 1,
 	    bei		: 1,
-	    resvd3	: 5;
+	    rsvd3	: 5;
 	u8 re_type;
-	u8 resvd2;
+	u8 rsvd2;
 } __packed;
 
 struct gsi_xfer_compl_evt {
 	u64 xfer_ptr;
 	u16 len;
-	u8 resvd1;
+	u8 rsvd1;
 	u8 code;  /* see gsi_chan_evt */
-	u16 resvd;
+	u16 rsvd;
 	u8 type;
 	u8 chid;
 } __packed;
@@ -195,7 +195,7 @@ struct gsi_log_err {
 	    arg2	: 4,
 	    arg1	: 4,
 	    code	: 4,
-	    resvd	: 3,
+	    rsvd	: 3,
 	    virt_idx	: 5,
 	    err_type	: 4,
 	    ee		: 4;
@@ -236,10 +236,10 @@ enum gsi_evt_ch_cmd_opcode {
  *			 configure this value to 2 * element size.
  */
 struct gsi_gpi_channel_scratch {
-	u64 resvd1;
-	u32 resvd2			: 16,
+	u64 rsvd1;
+	u32 rsvd2			: 16,
 	    max_outstanding_tre		: 16;
-	u32 resvd3			: 16,
+	u32 rsvd3			: 16,
 	    outstanding_threshold	: 16;
 } __packed;
 
