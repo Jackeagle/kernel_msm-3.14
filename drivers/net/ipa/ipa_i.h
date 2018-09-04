@@ -391,69 +391,7 @@ struct ipa_wakelock_ref_cnt {
 	int cnt;
 };
 
-/** struct ipa_hw_shared_mem_common_mapping - Structure referring to the common
- * section in 128B shared memory located in offset zero of SW Partition in IPA
- * SRAM.
- * @cmd_op : CPU->HW command opcode. See IPA_CPU_2_HW_COMMANDS
- * @cmd_params : CPU->HW command parameter lower 32bit.
- * @cmd_params_hi : CPU->HW command parameter higher 32bit.
- * of parameters (immediate parameters) and point on structure in system memory
- * (in such case the address must be accessible for HW)
- * @response_op : HW->CPU response opcode. See IPA_HW_2_CPU_RESPONSES
- * @response_params : HW->CPU response parameter. The parameter filed can hold
- * 32 bits of parameters (immediate parameters) and point on structure in system
- * memory
- * @event_op : HW->CPU event opcode. See IPA_HW_2_CPU_EVENTS
- * @event_params : HW->CPU event parameter. The parameter filed can hold 32
- *		bits of parameters (immediate parameters) and point on
- *		structure in system memory
- * @first_error_address : Contains the address of first error-source on SNOC
- * @hw_state : State of HW. The state carries information regarding the
- *				error type.
- * @warning_counter : The warnings counter. The counter carries information
- *						regarding non fatal errors in HW
- * @interface_version_common : The Common interface version as reported by HW
- *
- * The shared memory is used for communication between IPA HW and CPU.
- */
-struct ipa_hw_shared_mem_common_mapping {
-	u8  cmd_op;
-	u8  reserved_01;
-	u16 reserved_03_02;
-	u32 cmd_params;
-	u32 cmd_params_hi;
-	u8  response_op;
-	u8  reserved_0D;
-	u16 reserved_0F_0E;
-	u32 response_params;
-	u8  event_op;
-	u8  reserved_15;
-	u16 reserved_17_16;
-	u32 event_params;
-	u32 first_error_address;
-	u8  hw_state;
-	u8  warning_counter;
-	u16 reserved_23_22;
-	u16 interface_version_common;
-	u16 reserved_27_26;
-} __packed;
-
-/** struct ipa_uc_ctx - IPA uC context
- * @uc_inited: Indicates if uC interface has been initialized
- * @uc_loaded: Indicates if uC has loaded
- * @uc_failed: Indicates if uC has failed / returned an error
- * @uc_lock: uC interface lock to allow only one uC interaction at a time
- * @uc_completation: Completion mechanism to wait for uC commands
- * @uc_sram_mmio: Pointer to uC mapped memory
- * @pending_cmd: The last command sent waiting to be ACKed
- * @uc_status: The last status provided by the uC
- * @uc_error_type: error type from uC error event
- * @uc_error_timestamp: tag timer sampled after uC crashed
- */
-struct ipa_uc_ctx {
-	bool uc_loaded;
-	struct ipa_hw_shared_mem_common_mapping *uc_sram_mmio;
-};
+struct ipa_uc_ctx;
 
 /** struct ipa_transport_pm - transport power management related members
  * @transport_pm_mutex: Mutex to protect the transport_pm functionality.
