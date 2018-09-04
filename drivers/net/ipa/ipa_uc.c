@@ -226,9 +226,9 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 }
 
 /* Send a command to the microcontroller */
-static void send_uc_command(struct ipa_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
+static void send_uc_command(u32 cmd, u32 opcode)
 {
-	struct ipa_uc_shared_area *shared = uc_ctx->shared;
+	struct ipa_uc_shared_area *shared = ipa_uc_ctx.shared;
 
 	shared->cmd_op = opcode;
 	shared->cmd_params = cmd;
@@ -267,7 +267,7 @@ void ipa_uc_panic_notifier(void)
 	if (!ipa_client_add_additional())
 		return;
 
-	send_uc_command(&ipa_uc_ctx, 0, IPA_CPU_2_HW_CMD_ERR_FATAL);
+	send_uc_command(0, IPA_CPU_2_HW_CMD_ERR_FATAL);
 
 	/* give uc enough time to save state */
 	udelay(IPA_PKT_FLUSH_TO_US);
