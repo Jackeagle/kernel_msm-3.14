@@ -453,7 +453,7 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 	status->status_mask = hw_status->status_mask;
 }
 
-int ipahal_init(void __iomem *base)
+int ipahal_init(void)
 {
 	struct ipa_dma_mem *mem = &ipahal_ctx->empty_fltrt_tbl;
 
@@ -465,7 +465,6 @@ int ipahal_init(void __iomem *base)
 		ipa_err("error allocating empty filter/route table\n");
 		return -ENOMEM;
 	}
-	ipahal_ctx->base = base;
 
 	return 0;
 }
@@ -473,7 +472,6 @@ int ipahal_init(void __iomem *base)
 void ipahal_exit(void)
 {
 	ipa_dma_free(&ipahal_ctx->empty_fltrt_tbl);
-	ipahal_ctx->base = NULL;
 }
 
 /* Does the given rule ID represent a routing or filter rule miss?

@@ -457,6 +457,16 @@ static const struct ipahal_reg_obj ipahal_regs[] = {
 #undef pfunc
 #undef cfunc
 
+void ipa_reg_init(void __iomem *base)
+{
+	ipahal_ctx->base = base;
+}
+
+void ipa_reg_exit(void)
+{
+	ipahal_ctx->base = NULL;
+}
+
 /* Get the offset of an "n parameterized" register */
 u32 ipahal_reg_n_offset(enum ipahal_reg reg, u32 n)
 {

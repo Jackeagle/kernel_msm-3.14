@@ -1346,6 +1346,8 @@ int ipa_plat_drv_probe(struct platform_device *platform_device)
 		goto err_clear_wrapper;
 	}
 
+	ipa_reg_init(ipa_ctx->mmio);
+
 	ipa_ctx->gsi = gsi_init(platform_device);
 	if (IS_ERR(ipa_ctx->gsi)) {
 		ipa_err("ipa: error initializing gsi driver.\n");
@@ -1357,7 +1359,7 @@ int ipa_plat_drv_probe(struct platform_device *platform_device)
 	if (result)
 		goto err_clear_gsi;
 
-	if (ipahal_init(ipa_ctx->mmio)) {
+	if (ipahal_init()) {
 		ipa_err("failed to initialize IPA HAL pointer\n");
 		result = -EFAULT;
 		goto err_dma_exit;
@@ -1377,6 +1379,7 @@ err_dma_exit:
 	ipa_dma_exit();
 err_clear_gsi:
 	ipa_ctx->gsi = NULL;
+	ipa_reg_exit();
 	iounmap(ipa_ctx->mmio);
 	ipa_ctx->mmio = NULL;
 err_clear_wrapper:

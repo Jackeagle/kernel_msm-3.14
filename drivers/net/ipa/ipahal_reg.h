@@ -196,6 +196,10 @@ struct ipahal_reg_idle_indication_cfg {
 	bool const_non_idle_enable;
 };
 
+/* Initialize the IPA register subsystem */
+void ipa_reg_init(void __iomem *base);
+void ipa_reg_exit(void);
+
 /* Get the offset of an n-parameterized register */
 u32 ipahal_reg_n_offset(enum ipahal_reg reg, u32 n);
 
