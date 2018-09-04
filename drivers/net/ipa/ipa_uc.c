@@ -16,6 +16,14 @@
 #define IPA_UC_POLL_MAX_RETRY 10000
 
 /*
+ * The IPA has an embedded microcontroller that is capable of doing
+ * more general-purpose processing, for example for handling certain
+ * exceptional conditions.  When it has completed its boot sequence
+ * it signals the AP with an interrupt.  At this time we don't use
+ * any of the microcontroller capabilities, but we do handle the
+ * "ready" interrupt.  We also notify it (by sending it a special
+ * command) in the event of a crash.
+ *
  * A 128 byte block of structured memory within the IPA SRAM is used
  * to communicate between the AP and the microcontroller embedded in
  * the IPA.
@@ -39,16 +47,17 @@
  * Some additional information is also found in this shared area,
  * but is currently unused by the IPA driver.
  *
- * Much of the space is reserved and must be ignored.
+ * All other space in the shared area is reserved, and must not be
+ * read or written by the AP.
  */
 
 /** struct ipa_uc_shared_area - AP/microcontroller shared memory area
  *
- * @cmd_op: ipa_cpu_2_hw_commands opcode (AP->microcontroller)
+ * @cmd_op: ipa_cpu_2_hw_command opcode (AP->microcontroller)
  * @cmd_params: low 32 bits of command parameter (AP->microcontroller)
  * @cmd_params_hi: high 32 bits of command parameter (AP->microcontroller)
  *
- * @response_op: ipa_hw_2_cpu_responses response opcode (microcontroller->AP)
+ * @response_op: ipa_hw_2_cpu_response response opcode (microcontroller->AP)
  * @response_params: response parameter (microcontroller->AP)
  *
  * @event_op: ipa_hw_2_cpu_events event opcode (microcontroller->AP)
@@ -74,34 +83,29 @@ struct ipa_uc_shared_area {
 	u32 interface_version	: 16;	/* followed by 2 reserved bytes */
 };
 
-/** struct ipa_uc_ctx - IPA uC context
+/** struct ipa_uc_ctx - IPA microcontroller context
+ *
  * @uc_loaded: whether microcontroller has been loaded
  * @shared: pointer to AP/microcontroller shared memory area
  */
 struct ipa_uc_ctx {
 	bool uc_loaded;
 	struct ipa_uc_shared_area *shared;
-};
+} ipa_uc_ctx;
 
-/** enum ipa_cpu_2_hw_commands - Values that represent the commands from the CPU
- * IPA_CPU_2_HW_CMD_ERR_FATAL : CPU instructs HW to perform error fatal
- *				handling.
- * IPA_CPU_2_HW_CMD_CLK_GATE : CPU instructs HW to goto Clock Gated state.
- * IPA_CPU_2_HW_CMD_CLK_UNGATE : CPU instructs HW to goto Clock Ungated state.
- * IPA_CPU_2_HW_CMD_CH_EMPTY : Command to check for GSI channel emptiness.
+/** enum ipa_cpu_2_hw_command - commands from the AP to the microcontroller
+ *
+ * @IPA_CPU_2_HW_CMD_ERR_FATAL: notify of AP system crash
  */
-enum ipa_cpu_2_hw_commands {
+enum ipa_cpu_2_hw_command {
 	IPA_CPU_2_HW_CMD_ERR_FATAL		   =
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 4),
-	IPA_CPU_2_HW_CMD_CH_EMPTY		   =
-		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 10),
 };
 
-/** enum ipa_hw_2_cpu_responses -  Values that represent common HW responses
- *  to CPU commands.
- * @IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED : HW shall send this command once
- *  boot sequence is completed and HW is ready to serve commands from CPU
- * @IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED: Response to CPU commands
+/** enum ipa_hw_2_cpu_response - common hardware response codes
+ *
+ * @IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED: microcontroller ready
+ * @IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED: AP issued command has completed
  */
 enum ipa_hw_2_cpu_responses {
 	IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED =
@@ -110,23 +114,21 @@ enum ipa_hw_2_cpu_responses {
 		FEATURE_ENUM_VAL(IPA_HW_FEATURE_COMMON, 2),
 };
 
-/** union ipa_hw_error_event_data - HW->CPU Common Events
- * @error_type : Entered when a system error is detected by the HW. Type of
- * error is specified by IPA_HW_ERRORS
- * @reserved : Reserved
+/** union ipa_hw_error_event_data - microcontroller->AP event data
+ *
+ * @error_type: ipa_hw_errors error type value
+ * @raw32b: 32-bit register value (used when reading)
  */
 union ipa_hw_error_event_data {
 	u8 error_type;
 	u32 raw32b;
 } __packed;
 
-/** union ipa_hw_cpu_cmd_completed_response_data - Structure holding the
- * parameters for IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED response.
- * @original_cmd_op : The original command opcode
- * @status : 0 for success indication, otherwise failure
- * @reserved : Reserved
+/** union ipa_hw_cpu_cmd_completed_response_data - response to AP command
  *
- * Parameters are sent as 32b immediate parameters.
+ * @original_cmd_op: the AP issued command this is responding to
+ * @status: 0 for success indication, otherwise failure
+ * @raw32b: 32-bit register value (used when reading)
  */
 union ipa_hw_cpu_cmd_completed_response_data {
 	struct ipa_hw_cpu_cmd_completed_response_params {
@@ -135,8 +137,6 @@ union ipa_hw_cpu_cmd_completed_response_data {
 	} params;
 	u32 raw32b;
 } __packed;
-
-struct ipa_uc_ctx ipa_uc_ctx;
 
 /** ipa_uc_loaded() - tell whether the microcontroller has been loaded
  *
