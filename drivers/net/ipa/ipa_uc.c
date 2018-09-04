@@ -179,13 +179,6 @@ ipa_uc_event_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 	event_op = mmio->event_op;
 	ipa_debug("uC evt opcode=%u\n", event_op);
 
-	if (EXTRACT_UC_FEATURE(event_op) >= IPA_HW_FEATURE_MAX) {
-		ipa_err("Invalid feature %u for event %u\n",
-			EXTRACT_UC_FEATURE(event_op), event_op);
-		ipa_client_remove();
-		return;
-	}
-
 	/* General handling */
 	if (event_op == IPA_HW_2_CPU_EVENT_ERROR) {
 		evt.raw32b = mmio->event_params;
@@ -216,13 +209,6 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 	mmio = ipa_ctx->uc_ctx.uc_sram_mmio;
 	response_op = mmio->response_op;
 	ipa_debug("uC rsp opcode=%hhu\n", response_op);
-
-	if (EXTRACT_UC_FEATURE(response_op) >= IPA_HW_FEATURE_MAX) {
-		ipa_err("Invalid feature %hhu for event %u\n",
-			EXTRACT_UC_FEATURE(response_op), mmio->event_op);
-		ipa_client_remove();
-		return;
-	}
 
 	/* An INIT_COMPLETED response message is sent to the AP by
 	 * the microcontroller when it is operational.  Other than
