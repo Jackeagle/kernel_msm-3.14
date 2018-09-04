@@ -236,8 +236,8 @@ static const struct ipa_init_modem_driver_req *init_modem_driver_req(void)
 	u32 base;
 
 	/* This is not the first boot if the microcontroller is loaded */
-	req.skip_uc_load_valid = ipa_ctx->uc_ctx.uc_loaded ? 1 : 0;
-	req.skip_uc_load = req.skip_uc_load_valid;
+	req.skip_uc_load = ipa_uc_loaded_check() ? 1 : 0;
+	req.skip_uc_load_valid = true;
 
 	/* We only have to initialize most of it once */
 	if (req.platform_type_valid)
