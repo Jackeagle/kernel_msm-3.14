@@ -397,10 +397,7 @@ struct ipa_wakelock_ref_cnt {
  * @reserved : Reserved
  */
 union ipa_hw_error_event_data {
-	struct ipa_hw_error_event_params {
-		u32 error_type	: 8,
-		    reserved	: 24;
-	} __packed params;
+	u8 error_type;
 	u32 raw32b;
 } __packed;
 

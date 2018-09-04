@@ -193,9 +193,9 @@ ipa_uc_event_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 	if (event_op == IPA_HW_2_CPU_EVENT_ERROR) {
 		evt.raw32b = mmio->event_params;
 		ipa_err("uC Error, evt error_type = %s\n",
-			ipa_hw_error_str(evt.params.error_type));
+			ipa_hw_error_str(evt.error_type));
 		ipa_ctx->uc_ctx.uc_failed = true;
-		ipa_ctx->uc_ctx.uc_error_type = evt.params.error_type;
+		ipa_ctx->uc_ctx.uc_error_type = evt.error_type;
 		ipa_ctx->uc_ctx.uc_error_timestamp =
 			ipahal_read_reg(IPA_TAG_TIMER);
 		ipa_bug();
