@@ -57,8 +57,8 @@
  * @command_param: low 32 bits of command parameter (AP->microcontroller)
  * @command_param_hi: high 32 bits of command parameter (AP->microcontroller)
  *
- * @response_op: ipa_hw_2_cpu_response response opcode (microcontroller->AP)
- * @response_params: response parameter (microcontroller->AP)
+ * @response: ipa_uc_response response code (microcontroller->AP)
+ * @response_param: response parameter (microcontroller->AP)
  *
  * @event: ipa_uc_event code (microcontroller->AP)
  * @event_params: event parameter (microcontroller->AP)
@@ -72,8 +72,8 @@ struct ipa_uc_shared_area {
 	u32 command		: 8;	/* followed by 3 reserved bytes */
 	u32 command_param;
 	u32 command_param_hi;
-	u32 response_op		: 8;	/* followed by 3 reserved bytes */
-	u32 response_params;
+	u32 response		: 8;	/* followed by 3 reserved bytes */
+	u32 response_param;
 	u32 event		: 8;	/* followed by 3 reserved bytes */
 	u32 event_params;
 	u32 first_error_address;
@@ -168,14 +168,18 @@ enum ipa_uc_command {
 	IPA_UC_COMMAND_GSI_CH_EMPTY	= 10,
 };
 
-/** enum ipa_hw_2_cpu_response - common hardware response codes
+/** enum ipa_uc_response - common hardware response codes
  *
- * @IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED: microcontroller ready
- * @IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED: AP issued command has completed
+ * @IPA_UC_RESPONSE_NO_OP: no operation
+ * @IPA_UC_RESPONSE_INIT_COMPLETED: microcontroller ready
+ * @IPA_UC_RESPONSE_CMD_COMPLETED: AP-issued command has completed
+ * @IPA_UC_RESPONSE_DEBUG_GET_INFO: get debug info
  */
-enum ipa_hw_2_cpu_responses {
-	IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED	= 1,
-	IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED	= 2,
+enum ipa_uc_response {
+	IPA_UC_RESPONSE_NO_OP		= 0,
+	IPA_UC_RESPONSE_INIT_COMPLETED	= 1,
+	IPA_UC_RESPONSE_CMD_COMPLETED	= 2,
+	IPA_UC_RESPONSE_DEBUG_GET_INFO	= 3,
 };
 
 /** union ipa_hw_error_event_data - microcontroller->AP event data
@@ -188,16 +192,16 @@ union ipa_hw_error_event_data {
 	u32 raw32b;
 } __packed;
 
-/** union ipa_hw_cpu_cmd_completed_response_data - response to AP command
+/** union ipa_uc_response_data - response to AP command
  *
  * @command: the AP issued command this is responding to
  * @status: 0 for success indication, otherwise failure
  * @raw32b: 32-bit register value (used when reading)
  */
-union ipa_hw_cpu_cmd_completed_response_data {
-	struct ipa_hw_cpu_cmd_completed_response_params {
-		u8 command;
-		u8 status;
+union ipa_uc_response_data {
+	struct ipa_uc_response_param {
+		u8 command;	/* enum ipa_uc_command */
+		u8 status;	/* enum ipa_uc_error */
 	} params;
 	u32 raw32b;
 } __packed;
@@ -238,32 +242,32 @@ ipa_uc_event_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 static void
 ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 {
-	union ipa_hw_cpu_cmd_completed_response_data uc_rsp;
 	struct ipa_uc_shared_area *shared = ipa_uc_ctx.shared;
-	u8 response_op;
+	union ipa_uc_response_data response_data;
+	u8 response;
 
 	ipa_client_add();
 
-	shared = ipa_uc_ctx.shared;
-	response_op = shared->response_op;
+	response = shared->response;
 
 	/* An INIT_COMPLETED response message is sent to the AP by
 	 * the microcontroller when it is operational.  Other than
 	 * this, the AP should only receive responses from the
 	 * microntroller when it has sent it a request message.
 	 */
-	if (response_op == IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED) {
+	if (response == IPA_UC_RESPONSE_INIT_COMPLETED) {
 		/* The proxy vote is held until uC is loaded to ensure that
 		 * IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED is received.
 		 */
 		ipa_proxy_clk_unvote();
 		ipa_uc_ctx.uc_loaded = true;
-	} else if (response_op == IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED) {
-		uc_rsp.raw32b = shared->response_params;
+	} else if (response == IPA_UC_RESPONSE_CMD_COMPLETED) {
+		response_data.raw32b = shared->response_param;
 		ipa_err("uC command response code %u status %u\n",
-			  uc_rsp.params.command, uc_rsp.params.status);
+			response_data.params.command,
+			response_data.params.status);
 	} else {
-		ipa_err("Unsupported uC rsp opcode = %u\n", response_op);
+		ipa_err("Unsupported uC rsp opcode = %u\n", response);
 	}
 
 	ipa_client_remove();
@@ -277,8 +281,8 @@ static void send_uc_command(u32 command, u32 command_param)
 	shared->command = command;
 	shared->command_param = command_param;
 	shared->command_param_hi = 0;
-	shared->response_op = 0;
-	shared->response_params = 0;
+	shared->response = 0;
+	shared->response_param = 0;
 
 	wmb();	/* ensure write to shared memory is done before triggering uc */
 
