@@ -63,13 +63,11 @@ union ipa_hw_cpu_cmd_completed_response_data {
  *  immediate parameters.
  * @ee_n : EE owner of the channel
  * @vir_ch_id : GSI virtual channel ID of the channel to checked of emptiness
- * @reserved_02_04 : Reserved
  */
 union ipa_hw_chk_ch_empty_cmd_data {
 	struct ipa_hw_chk_ch_empty_cmd_params {
 		u8 ee_n;
 		u8 vir_ch_id;
-		u16 reserved_02_04;
 	} __packed params;
 	u32 raw32b;
 } __packed;
