@@ -1282,7 +1282,7 @@ begin:
 
 			if (status.exception ==
 				IPAHAL_PKT_STATUS_EXCEPTION_NONE &&
-				ipahal_is_rule_miss_id(status.rt_rule_id))
+			    status.rt_miss)
 				sys->rx.drop_packet = true;
 			if (skb->len == pkt_status_sz &&
 			    status.exception ==
