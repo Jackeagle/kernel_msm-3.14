@@ -61,7 +61,7 @@
  * @response_param: response parameter (microcontroller->AP)
  *
  * @event: ipa_uc_event code (microcontroller->AP)
- * @event_params: event parameter (microcontroller->AP)
+ * @event_param: event parameter (microcontroller->AP)
  *
  * @first_error_address: address of first error-source on SNOC
  * @hw_state: state of hardware (including error type information)
@@ -75,7 +75,7 @@ struct ipa_uc_shared_area {
 	u32 response		: 8;	/* followed by 3 reserved bytes */
 	u32 response_param;
 	u32 event		: 8;	/* followed by 3 reserved bytes */
-	u32 event_params;
+	u32 event_param;
 	u32 first_error_address;
 	u32 hw_state		: 8,
 	    warning_counter	: 8,
@@ -182,13 +182,13 @@ enum ipa_uc_response {
 	IPA_UC_RESPONSE_DEBUG_GET_INFO	= 3,
 };
 
-/** union ipa_hw_error_event_data - microcontroller->AP event data
+/** union ipa_uc_event_data - microcontroller->AP event data
  *
- * @error_type: ipa_hw_error error type value
+ * @error_type: ipa_uc_error error type value
  * @raw32b: 32-bit register value (used when reading)
  */
-union ipa_hw_error_event_data {
-	u8 error_type;
+union ipa_uc_event_data {
+	u8 error_type;	/* enum ipa_uc_error */
 	u32 raw32b;
 } __packed;
 
@@ -219,21 +219,21 @@ static void
 ipa_uc_event_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 {
 	struct ipa_uc_shared_area *shared = ipa_uc_ctx.shared;
-	union ipa_hw_error_event_data evt;
+	union ipa_uc_event_data event_param;
 	u8 event;
 
 	ipa_client_add();
 
 	event = shared->event;
-	evt.raw32b = shared->event_params;
+	event_param.raw32b = shared->event_param;
 
 	/* General handling */
 	if (event == IPA_UC_EVENT_ERROR) {
 		ipa_err("uC error type 0x%02x timestamp 0x%08x\n",
-			evt.error_type, ipahal_read_reg(IPA_TAG_TIMER));
+			event_param.error_type, ipahal_read_reg(IPA_TAG_TIMER));
 		ipa_bug();
 	} else {
-		ipa_debug("unsupported uC evt opcode=%u\n", event);
+		ipa_debug("unsupported uC event opcode=%u\n", event);
 	}
 
 	ipa_client_remove();
