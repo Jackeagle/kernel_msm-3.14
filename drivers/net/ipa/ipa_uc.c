@@ -64,7 +64,7 @@
  *						regarding non fatal errors in HW
  * @interface_version_common : The Common interface version as reported by HW
  */
-struct ipa_hw_shared_mem_common_mapping {
+struct ipa_uc_shared_area {
 	u8  cmd_op;
 	u8  reserved_01;
 	u16 reserved_03_02;
@@ -92,7 +92,7 @@ struct ipa_hw_shared_mem_common_mapping {
  * @uc_failed: Indicates if uC has failed / returned an error
  * @uc_lock: uC interface lock to allow only one uC interaction at a time
  * @uc_completation: Completion mechanism to wait for uC commands
- * @uc_sram_mmio: Pointer to uC mapped memory
+ * @shared: Pointer to uC mapped memory
  * @pending_cmd: The last command sent waiting to be ACKed
  * @uc_status: The last status provided by the uC
  * @uc_error_type: error type from uC error event
@@ -100,7 +100,7 @@ struct ipa_hw_shared_mem_common_mapping {
  */
 struct ipa_uc_ctx {
 	bool uc_loaded;
-	struct ipa_hw_shared_mem_common_mapping *uc_sram_mmio;
+	struct ipa_uc_shared_area *shared;
 };
 
 /** enum ipa_cpu_2_hw_commands - Values that represent the commands from the CPU
@@ -170,15 +170,14 @@ bool ipa_uc_loaded(void)
 static void
 ipa_uc_event_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 {
-	struct ipa_hw_shared_mem_common_mapping *mmio;
+	struct ipa_uc_shared_area *shared = ipa_uc_ctx.shared;
 	union ipa_hw_error_event_data evt;
 	u8 event_op;
 
 	ipa_client_add();
 
-	mmio = ipa_uc_ctx.uc_sram_mmio;
-	event_op = mmio->event_op;
-	evt.raw32b = mmio->event_params;
+	event_op = shared->event_op;
+	evt.raw32b = shared->event_params;
 
 	/* General handling */
 	if (event_op == IPA_HW_2_CPU_EVENT_ERROR) {
@@ -196,13 +195,13 @@ static void
 ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 {
 	union ipa_hw_cpu_cmd_completed_response_data uc_rsp;
-	struct ipa_hw_shared_mem_common_mapping *mmio;
+	struct ipa_uc_shared_area *shared = ipa_uc_ctx.shared;
 	u8 response_op;
 
 	ipa_client_add();
 
-	mmio = ipa_uc_ctx.uc_sram_mmio;
-	response_op = mmio->response_op;
+	shared = ipa_uc_ctx.shared;
+	response_op = shared->response_op;
 
 	/* An INIT_COMPLETED response message is sent to the AP by
 	 * the microcontroller when it is operational.  Other than
@@ -216,7 +215,7 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 		ipa_proxy_clk_unvote();
 		ipa_uc_ctx.uc_loaded = true;
 	} else if (response_op == IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED) {
-		uc_rsp.raw32b = mmio->response_params;
+		uc_rsp.raw32b = shared->response_params;
 		ipa_err("uC cmd response opcode=%u status=%u\n",
 			  uc_rsp.params.original_cmd_op, uc_rsp.params.status);
 	} else {
@@ -229,13 +228,13 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 /* Send a command to the microcontroller */
 static void send_uc_command(struct ipa_uc_ctx *uc_ctx, u32 cmd, u32 opcode)
 {
-	struct ipa_hw_shared_mem_common_mapping *mmio = uc_ctx->uc_sram_mmio;
+	struct ipa_uc_shared_area *shared = uc_ctx->shared;
 
-	mmio->cmd_op = opcode;
-	mmio->cmd_params = cmd;
-	mmio->cmd_params_hi = 0;
-	mmio->response_op = 0;
-	mmio->response_params = 0;
+	shared->cmd_op = opcode;
+	shared->cmd_params = cmd;
+	shared->cmd_params_hi = 0;
+	shared->response_op = 0;
+	shared->response_params = 0;
 
 	wmb();	/* ensure write to shared memory is done before triggering uc */
 
@@ -250,8 +249,8 @@ struct ipa_uc_ctx *ipa_uc_init(phys_addr_t phys_addr)
 {
 
 	phys_addr += ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_N, 0);
-	ipa_uc_ctx.uc_sram_mmio = ioremap(phys_addr, IPA_RAM_UC_SMEM_SIZE);
-	if (!ipa_uc_ctx.uc_sram_mmio)
+	ipa_uc_ctx.shared = ioremap(phys_addr, IPA_RAM_UC_SMEM_SIZE);
+	if (!ipa_uc_ctx.shared)
 		return NULL;
 
 	ipa_add_interrupt_handler(IPA_UC_IRQ_0, ipa_uc_event_handler);
