@@ -72,32 +72,6 @@ struct ipa_imm_cmd_hw_ip_packet_init {
 	    rsv1			: 59;
 };
 
-/* struct ipa_imm_cmd_hw_register_write - REGISTER_WRITE command payload
- *  in H/W format.
- * Write value to register. Allows reg changes to be synced with data packet
- *  and other immediate command. Can be used to access the sram
- * @sw_rsvd: Ignored by H/W. May be used by S/W
- * @skip_pipeline_clear: 0 to wait until IPA pipeline is clear. 1 don't wait
- * @offset: offset from IPA base address - Lower 16bit of the IPA reg addr
- * @value: value to write to register
- * @value_mask: mask specifying which value bits to write to the register
- * @pipeline_clear_options: options for pipeline to clear
- *	0: HPS - no pkt inside HPS (not grp specific)
- *	1: source group - The immediate cmd src grp does not use any pkt ctxs
- *	2: Wait until no pkt reside inside IPA pipeline
- *	3: reserved
- * @rsvd: reserved - should be set to zero
- */
-struct ipa_imm_cmd_hw_register_write {
-	u16 sw_rsvd			: 15,
-	    skip_pipeline_clear		: 1;
-	u16 offset;
-	u32 value;
-	u32 value_mask;
-	u32 pipeline_clear_options	: 2,
-	    rsvd			: 30;
-};
-
 /* struct ipa_imm_cmd_hw_dma_shared_mem - DMA_SHARED_MEM command payload
  *  in H/W format.
  * Perform mem copy into or out of the SW area of IPA local mem

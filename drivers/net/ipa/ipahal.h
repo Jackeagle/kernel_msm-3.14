@@ -61,19 +61,6 @@ static inline void *ipahal_imm_cmd_pyld_data(struct ipahal_imm_cmd_pyld *pyld)
 struct ipahal_imm_cmd_pyld *ipahal_dma_shared_mem_write_pyld(
 				struct ipa_dma_mem *mem, u32 offset);
 
-/* Return a pointer to the payload for a DMA register write immediate
- * command, or null if one can't be allocated.  Caller must ensure result
- * gets released by providing it to ipahal_destroy_imm_cmd() when it is no
- * longer needed.
- *
- * offset	is the location of the register in IPA local memory
- * value	is the value to write
- * mask		indicates which bits in register should be updated
- * clear	if true means wait for full pipeline clear (HPS otherwise)
- */
-struct ipahal_imm_cmd_pyld *ipahal_register_write_pyld(u32 offset, u32 value,
-						       u32 mask, bool clear);
-
 /* Return a pointer to the payload for a header init local immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().

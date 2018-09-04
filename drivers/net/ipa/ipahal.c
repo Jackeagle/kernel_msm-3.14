@@ -133,32 +133,6 @@ ipahal_dma_shared_mem_write_pyld(struct ipa_dma_mem *mem, u32 offset)
 }
 
 struct ipahal_imm_cmd_pyld *
-ipahal_register_write_pyld(u32 offset, u32 value, u32 mask, bool clear)
-{
-	struct ipahal_imm_cmd_pyld *pyld;
-	struct ipa_imm_cmd_hw_register_write *data;
-	u16 opcode;
-
-	if (check_too_big("offset", offset, 16))
-		return NULL;
-
-	opcode = IPA_IMM_CMD_REGISTER_WRITE;
-	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
-	if (!pyld)
-		return NULL;
-	data = ipahal_imm_cmd_pyld_data(pyld);
-
-	data->skip_pipeline_clear = 0;
-	data->offset = offset;
-	data->value = value;
-	data->value_mask = mask;
-	data->pipeline_clear_options = clear ? IPAHAL_FULL_PIPELINE_CLEAR
-					     : IPAHAL_HPS_CLEAR;
-
-	return pyld;
-}
-
-struct ipahal_imm_cmd_pyld *
 ipahal_hdr_init_local_pyld(struct ipa_dma_mem *mem, u32 offset)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
