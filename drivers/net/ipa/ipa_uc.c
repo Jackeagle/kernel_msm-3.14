@@ -95,14 +95,7 @@ struct ipa_uc_ctx {
 
 #define FEATURE_ENUM_VAL(feature, opcode) ((feature << 5) | opcode)
 
-/** enum ipa_hw_features - Values that represent the features supported
- * in IPA HW
- * @IPA_HW_FEATURE_COMMON : Feature related to common operation of IPA HW
- *
- */
-enum ipa_hw_features {
-	IPA_HW_FEATURE_COMMON		=	0x0,
-};
+#define IPA_HW_FEATURE_COMMON	0	/* Common IPA hardware features */
 
 /** enum ipa_hw_2_cpu_events - Values that represent HW event to be sent to CPU.
  * @IPA_HW_2_CPU_EVENT_NO_OP : No event present
