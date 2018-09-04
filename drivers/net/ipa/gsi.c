@@ -13,6 +13,7 @@
 #include <linux/platform_device.h>
 #include <linux/delay.h>
 
+#include "field_mask.h"
 #include "ipa_dma.h"
 #include "ipa_i.h"
 #include "gsi.h"
