@@ -136,9 +136,9 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 	u8 response_op;
 
 	ipa_client_add();
+
 	mmio = ipa_ctx->uc_ctx.uc_sram_mmio;
 	response_op = mmio->response_op;
-	ipa_debug("uC rsp opcode=%hhu\n", response_op);
 
 	/* An INIT_COMPLETED response message is sent to the AP by
 	 * the microcontroller when it is operational.  Other than
@@ -146,13 +146,11 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 	 * microntroller when it has sent it a request message.
 	 */
 	if (response_op == IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED) {
-		ipa_ctx->uc_ctx.uc_loaded = true;
-
-		ipa_debug("IPA uC loaded\n");
 		/* The proxy vote is held until uC is loaded to ensure that
 		 * IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED is received.
 		 */
 		ipa_proxy_clk_unvote();
+		ipa_ctx->uc_ctx.uc_loaded = true;
 	} else if (response_op == IPA_HW_2_CPU_RESPONSE_CMD_COMPLETED) {
 		uc_rsp.raw32b = mmio->response_params;
 		ipa_err("uC cmd response opcode=%u status=%u\n",
@@ -160,6 +158,7 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 	} else {
 		ipa_err("Unsupported uC rsp opcode = %u\n", response_op);
 	}
+
 	ipa_client_remove();
 }
 
@@ -189,11 +188,6 @@ int ipa_uc_interface_init(void)
 	unsigned long phys_addr;
 	void *mmio;
 
-	if (ipa_ctx->uc_ctx.uc_inited) {
-		ipa_debug("uC interface already initialized\n");
-		return 0;
-	}
-
 	phys_addr = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
 	phys_addr += ipahal_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_N, 0);
 	mmio = ioremap(phys_addr, IPA_RAM_UC_SMEM_SIZE);
@@ -206,8 +200,6 @@ int ipa_uc_interface_init(void)
 	ipa_add_interrupt_handler(IPA_UC_IRQ_1, ipa_uc_response_hdlr);
 	ipa_ctx->uc_ctx.uc_sram_mmio = mmio;
 	ipa_ctx->uc_ctx.uc_inited = true;
-
-	ipa_debug("IPA uC interface is initialized\n");
 
 	return 0;
 }
