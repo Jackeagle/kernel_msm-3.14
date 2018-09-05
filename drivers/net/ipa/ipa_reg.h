@@ -42,7 +42,6 @@ enum ipa_reg {
 	IPA_QSB_MAX_WRITES,
 	IPA_QSB_MAX_READS,
 	IPA_IDLE_INDICATION_CFG,
-	IPA_REG_MAX,
 };
 
 /* struct ipa_reg_route - IPA route register
