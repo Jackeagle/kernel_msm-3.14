@@ -563,7 +563,6 @@ static const struct ipa_reg_obj ipa_regs[] = {
 		      qsb_max_reads,			0x00000078,	0x0000),
 	reg_obj_cfunc(IPA_IDLE_INDICATION_CFG,
 		      idle_indication_cfg,		0x00000220,	0x0000),
-	reg_obj_nofunc(IPA_ENDP_GSI_CFG_TLV_N,		0x00002924,	0x0004),
 	reg_obj_nofunc(IPA_ENDP_GSI_CFG_AOS_N,		0x000029a8,	0x0004),
 	reg_obj_nofunc(IPA_ENDP_GSI_CFG1_N,		0x00002794,	0x0004),
 	reg_obj_nofunc(IPA_ENDP_GSI_CFG2_N,		0x00002a2c,	0x0004),
