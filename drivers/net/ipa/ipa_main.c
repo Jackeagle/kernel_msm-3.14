@@ -965,7 +965,6 @@ static int ipa_alloc_pkt_init(void)
 		}
 
 		memcpy(pyld_virt, ipahal_imm_cmd_pyld_data(cmd_pyld), size);
-		ipa_ctx->pkt_init_imm[i] = pyld_phys;
 
 		ipahal_destroy_imm_cmd(cmd_pyld);
 
@@ -975,7 +974,6 @@ static int ipa_alloc_pkt_init(void)
 
 	return 0;
 err_dma_free:
-	memset(&ipa_ctx->pkt_init_imm[0], 0, i * sizeof(dma_addr_t));
 	ipa_dma_free(mem);
 
 	return -ENOMEM;

@@ -388,7 +388,6 @@ struct ipa_dma_task_info {
  * @ipa_bus_hdl: msm driver handle for the data path bus
  * @ctrl: holds the core specific operations based on
  *  core version (vtable like)
- * @pkt_init_imm_opcode: opcode for IP_PACKET_INIT imm cmd
  * @wcstats: wlan common buffer stats
  * @uc_ctx: uC interface context
  * @uc_wdi_ctx: WDI specific fields for uC interface
@@ -421,7 +420,6 @@ struct ipa_context {
 	struct icc_path *config_path;
 	bool q6_proxy_clk_vote_valid;
 	u32 ipa_num_pipes;
-	dma_addr_t pkt_init_imm[IPA_MAX_NUM_PIPES];
 	struct ipa_dma_mem pkt_init_mem;
 
 	struct ipa_uc_ctx *uc_ctx;
