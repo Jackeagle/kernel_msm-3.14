@@ -1294,19 +1294,15 @@ int ipa_plat_drv_probe(struct platform_device *platform_device)
 	 * we'll get probed again).
 	 */
 	result = ipa_smp2p_init(dev);
-	if (result) {
-		ipa_err("error %d initializing smp2p\n", result);
+	if (result)
 		return result;
-	}
 
 	/* Initialize the interconnect driver early too.  It might
 	 * also return -EPROBE_DEFER.
 	 */
 	result = ipa_interconnect_init(dev);
-	if (result) {
-		ipa_err("error %d initializing interconnect\n", result);
+	if (result)
 		goto out_smp2p_exit;
-	}
 
 	/* Compute a bitmask representing which endpoints support filtering */
 	ipa_ctx->filter_bitmap = ipa_filter_bitmap_init();
