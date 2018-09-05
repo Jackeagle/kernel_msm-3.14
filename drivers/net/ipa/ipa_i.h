@@ -420,7 +420,6 @@ struct ipa_context {
 	struct icc_path *config_path;
 	bool q6_proxy_clk_vote_valid;
 	u32 ipa_num_pipes;
-	struct ipa_dma_mem pkt_init_mem;
 
 	struct ipa_uc_ctx *uc_ctx;
 

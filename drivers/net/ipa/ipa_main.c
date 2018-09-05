@@ -930,55 +930,6 @@ static void ipa_post_init(struct work_struct *unused)
 	ipa_info("IPA driver initialization was successful.\n");
 }
 
-static int ipa_alloc_pkt_init(void)
-{
-	struct ipa_dma_mem *mem = &ipa_ctx->pkt_init_mem;
-	struct ipahal_imm_cmd_pyld *cmd_pyld;
-	dma_addr_t pyld_phys;
-	void *pyld_virt;
-	u32 size;
-	int i;
-
-	/* First create a payload just to get its size */
-	cmd_pyld = ipahal_ip_packet_init_pyld(0);
-	if (!cmd_pyld) {
-		ipa_err("failed to construct IMM cmd\n");
-		return -ENOMEM;
-	}
-	size = cmd_pyld->len;
-	ipahal_destroy_imm_cmd(cmd_pyld);
-
-	/* Allocate enough DMA memory to hold a payload for each pipe */
-	if (ipa_dma_alloc(mem, size * ipa_ctx->ipa_num_pipes, GFP_KERNEL)) {
-		ipa_err("failed to alloc DMA buff of size %zu\n", mem->size);
-		return -ENOMEM;
-	}
-
-	/* Fill in an IP packet init payload for each pipe */
-	pyld_phys = mem->phys;
-	pyld_virt = mem->virt;
-	for (i = 0; i < ipa_ctx->ipa_num_pipes; i++) {
-		cmd_pyld = ipahal_ip_packet_init_pyld(i);
-		if (!cmd_pyld) {
-			ipa_err("failed to construct IMM cmd\n");
-			goto err_dma_free;
-		}
-
-		memcpy(pyld_virt, ipahal_imm_cmd_pyld_data(cmd_pyld), size);
-
-		ipahal_destroy_imm_cmd(cmd_pyld);
-
-		pyld_virt += size;
-		pyld_phys += size;
-	}
-
-	return 0;
-err_dma_free:
-	ipa_dma_free(mem);
-
-	return -ENOMEM;
-}
-
 static bool config_valid(u32 filter_bitmap)
 {
 	u32 filter_count;
@@ -1153,13 +1104,6 @@ static int ipa_pre_init(void)
 	wakeup_source_init(&ipa_ctx->w_lock, "IPA_WS");
 	spin_lock_init(&ipa_ctx->wakelock_ref_cnt.spinlock);
 
-	result = ipa_alloc_pkt_init();
-	if (result) {
-		ipa_err("Failed to alloc pkt_init payload\n");
-		result = -ENODEV;
-		goto err_gsi_dma_task_free;
-	}
-
 	/* Note enabling dynamic clock division must not be
 	 * attempted for IPA hardware versions prior to 3.5.
 	 */
@@ -1167,8 +1111,6 @@ static int ipa_pre_init(void)
 
 	return 0;
 
-err_gsi_dma_task_free:
-	ipa_gsi_dma_task_free();
 err_dp_exit:
 	ipa_dp_exit(ipa_ctx->dp);
 	ipa_ctx->dp = NULL;
