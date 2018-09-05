@@ -521,7 +521,6 @@ static const struct ipa_reg_obj ipa_regs[] = {
 	reg_obj_nofunc(IPA_BCR,				0x000001d0,	0x0000),
 	reg_obj_nofunc(IPA_ENABLED_PIPES,		0x00000038,	0x0000),
 	reg_obj_nofunc(IPA_TAG_TIMER,			0x00000060,	0x0000),
-	reg_obj_nofunc(IPA_SPARE_REG_1,			0x00002780,	0x0000),
 	reg_obj_nofunc(IPA_STATE_AGGR_ACTIVE,		0x0000010c,	0x0000),
 	reg_obj_cfunc(IPA_ENDP_INIT_HDR_N,
 		      endp_init_hdr_n,			0x00000810,	0x0070),
