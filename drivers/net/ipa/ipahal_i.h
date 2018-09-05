@@ -9,16 +9,6 @@
 #include "ipa_dma.h"
 #include "ipa_common_i.h"
 
-/* struct ipahal_context - HAL global context data
- *
- * @empty_fltrt_tbl: Empty table to be used at tables init.
- */
-struct ipahal_context {
-	struct ipa_dma_mem empty_fltrt_tbl;
-};
-
-extern struct ipahal_context *ipahal_ctx;
-
 /* Immediate commands H/W structures */
 
 /* struct ipa_imm_cmd_hw_ip_fltrt_init - IP_V*_FILTER_INIT/IP_V*_ROUTING_INIT

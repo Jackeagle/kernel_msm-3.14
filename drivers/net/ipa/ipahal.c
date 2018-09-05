@@ -13,8 +13,14 @@
 #include "ipahal.h"
 #include "ipahal_i.h"
 
-static struct ipahal_context ipahal_ctx_struct;
-struct ipahal_context *ipahal_ctx = &ipahal_ctx_struct;
+/* struct ipahal_context - HAL global context data
+ *
+ * @empty_fltrt_tbl: Empty table to be used at tables init.
+ */
+static struct ipahal_context {
+	struct ipa_dma_mem empty_fltrt_tbl;
+} ipahal_ctx_struct;
+static struct ipahal_context *ipahal_ctx = &ipahal_ctx_struct;
 
 /* Immediate commands; value is the opcode for IPA v3.5.1 hardware */
 enum ipahal_imm_cmd {
