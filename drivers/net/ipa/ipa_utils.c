@@ -881,7 +881,7 @@ void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
  * Note:	Should not be called from atomic context
  */
 void
-ipa_cfg_ep_status(u32 clnt_hdl, const struct ipa_reg_ep_cfg_status *ep_status)
+ipa_cfg_ep_status(u32 clnt_hdl, const struct ipa_reg_ep_status *ep_status)
 {
 	ipa_debug("pipe=%d, status_en=%d status_ep=%d status_location=%d\n",
 		  clnt_hdl, ep_status->status_en, ep_status->status_ep,

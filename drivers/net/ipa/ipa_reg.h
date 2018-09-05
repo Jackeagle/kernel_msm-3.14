@@ -86,7 +86,7 @@ struct ipa_reg_shared_mem_size {
 	u32 shared_mem_baddr;
 };
 
-/* struct ipa_reg_ep_cfg_status - status configuration in IPA end-point
+/* struct ipa_reg_ep_status - status configuration in IPA end-point
  * @status_en: Determines if end point supports Status Indications. SW should
  *	set this bit in order to enable Statuses. Output Pipe - send
  *	Status indications only if bit is set. Input Pipe - forward Status
@@ -102,7 +102,7 @@ struct ipa_reg_shared_mem_size {
  *	packet for this endpoint. Valid only for Output Pipes (IPA Producer)
  * @status_pkt_suppress:
  */
-struct ipa_reg_ep_cfg_status {
+struct ipa_reg_ep_status {
 	bool status_en;
 	u8 status_ep;
 	bool status_location;

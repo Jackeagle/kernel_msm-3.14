@@ -149,7 +149,7 @@ static void ipareg_parse_hash_cfg_n(enum ipa_reg reg, void *fields, u32 val)
 static u32
 ipareg_construct_endp_status_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_reg_ep_cfg_status *ep_status = fields;
+	const struct ipa_reg_ep_status *ep_status = fields;
 	u32 val;
 
 	val = field_gen(ep_status->status_en, STATUS_EN_BMSK);
