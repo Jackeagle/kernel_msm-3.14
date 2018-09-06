@@ -186,18 +186,6 @@ ipareg_construct_endp_init_hdr_metadata_mask_n(enum ipa_reg reg,
 	return field_gen(metadata_mask->metadata_mask, METADATA_MASK_BMSK);
 }
 
-static bool cs_offload_en_valid(u8 cs_offload_en, enum ipa_reg reg)
-{
-	switch (cs_offload_en) {
-	case IPA_CS_OFFLOAD_NONE:
-	case IPA_CS_OFFLOAD_UL:
-	case IPA_CS_OFFLOAD_DL:
-		return true;
-	default:
-		return false;
-	}
-}
-
 /* IPA_ENDP_INIT_CFG_N register */
 #define CS_GEN_QMB_MASTER_SEL_BMSK		0x00000100
 #define CS_METADATA_HDR_OFFSET_BMSK		0x00000078
@@ -209,8 +197,6 @@ ipareg_construct_endp_init_cfg_n(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_ep_cfg_cfg *cfg = fields;
 	u32 val;
-
-	ipa_assert(cs_offload_en_valid(cfg->cs_offload_en, reg));
 
 	val = field_gen(0, FRAG_OFFLOAD_EN_BMSK);
 	val |= field_gen(cfg->cs_offload_en, CS_OFFLOAD_EN_BMSK);
