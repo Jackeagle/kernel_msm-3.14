@@ -399,7 +399,7 @@ struct ipa_context {
 	u32 filter_bitmap;
 	u32 ipa_irq;
 	phys_addr_t ipa_phys;
-	void __iomem *mmio;
+	void __iomem *ipa_mmio;
 	struct gsi *gsi;
 	struct device *dev;
 

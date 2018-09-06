@@ -1269,14 +1269,14 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 
 	/* setup IPA register access */
 	ipa_debug("Mapping %pap\n", &ipa_ctx->ipa_phys);
-	ipa_ctx->mmio = ioremap(ipa_ctx->ipa_phys, size);
-	if (!ipa_ctx->mmio) {
+	ipa_ctx->ipa_mmio = ioremap(ipa_ctx->ipa_phys, size);
+	if (!ipa_ctx->ipa_mmio) {
 		ipa_err(":ipa-base ioremap err.\n");
 		result = -EFAULT;
 		goto err_clear_addr;
 	}
 
-	ipa_reg_init(ipa_ctx->mmio);
+	ipa_reg_init(ipa_ctx->ipa_mmio);
 
 	ipa_ctx->gsi = gsi_init(pdev);
 	if (IS_ERR(ipa_ctx->gsi)) {
@@ -1310,8 +1310,8 @@ err_dma_exit:
 err_clear_gsi:
 	ipa_ctx->gsi = NULL;
 	ipa_reg_exit();
-	iounmap(ipa_ctx->mmio);
-	ipa_ctx->mmio = NULL;
+	iounmap(ipa_ctx->ipa_mmio);
+	ipa_ctx->ipa_mmio = NULL;
 err_clear_addr:
 	ipa_ctx->clnt_hdl_lan_cons = 0;
 	ipa_ctx->clnt_hdl_cmd = 0;
