@@ -75,7 +75,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	int i;
 	int aggr_active_bitmap = 0;
 	bool pipe_suspended = false;
-	struct ipa_ep_cfg_ctrl ctrl;
+	struct ipa_reg_ep_init_ctrl ctrl;
 
 	ipa_debug("Applying reset channel with open aggregation frame WA\n");
 	ipahal_write_reg(IPA_AGGR_FORCE_CLOSE, BIT(clnt_hdl));

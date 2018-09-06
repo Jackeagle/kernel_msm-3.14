@@ -248,7 +248,7 @@ ipareg_construct_endp_init_deaggr_n(enum ipa_reg reg, const void *fields)
 static u32
 ipareg_construct_endp_init_ctrl_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_ep_cfg_ctrl *ep_ctrl = fields;
+	const struct ipa_reg_ep_init_ctrl *ep_ctrl = fields;
 	u32 val;
 
 	val = field_gen(ep_ctrl->ipa_ep_suspend, ENDP_SUSPEND_BMSK);
@@ -260,7 +260,7 @@ ipareg_construct_endp_init_ctrl_n(enum ipa_reg reg, const void *fields)
 static void
 ipareg_parse_endp_init_ctrl_n(enum ipa_reg reg, void *fields, u32 val)
 {
-	struct ipa_ep_cfg_ctrl *ep_ctrl = fields;
+	struct ipa_reg_ep_init_ctrl *ep_ctrl = fields;
 
 	memset(ep_ctrl, 0, sizeof(*ep_ctrl));
 
