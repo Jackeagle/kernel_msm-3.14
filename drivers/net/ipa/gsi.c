@@ -1694,15 +1694,15 @@ struct gsi *gsi_init(struct platform_device *pdev)
 	int irq;
 
 	/* Get GSI memory range and map it */
-	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "gsi-base");
+	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "gsi");
 	if (!res) {
-		ipa_err("missing \"gsi-base\" property in DTB\n");
+		ipa_err("missing \"gsi\" property in DTB\n");
 		return ERR_PTR(-EINVAL);
 	}
 
 	size = resource_size(res);
 	if (res->start > U32_MAX || size > U32_MAX) {
-		ipa_err("\"gsi-base\" values out of range\n");
+		ipa_err("\"gsi\" values out of range\n");
 		return ERR_PTR(-EINVAL);
 	}
 
