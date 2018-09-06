@@ -36,12 +36,12 @@ struct ipa_reg_obj {
 };
 
 /* IPA_ROUTE register */
-#define ROUTE_DIS_BMSK				0x00000001
-#define ROUTE_DEF_PIPE_BMSK			0x0000003e
-#define ROUTE_DEF_HDR_TABLE_BMSK		0x00000040
-#define ROUTE_DEF_HDR_OFST_BMSK			0x0001ff80
-#define ROUTE_FRAG_DEF_PIPE_BMSK		0x003e0000
-#define ROUTE_DEF_RETAIN_HDR_BMSK		0x01000000
+#define ROUTE_DIS_BMSK			0x00000001
+#define ROUTE_DEF_PIPE_BMSK		0x0000003e
+#define ROUTE_DEF_HDR_TABLE_BMSK	0x00000040
+#define ROUTE_DEF_HDR_OFST_BMSK		0x0001ff80
+#define ROUTE_FRAG_DEF_PIPE_BMSK	0x003e0000
+#define ROUTE_DEF_RETAIN_HDR_BMSK	0x01000000
 
 static u32
 ipareg_construct_route(enum ipa_reg reg, const void *fields)
@@ -55,21 +55,21 @@ ipareg_construct_route(enum ipa_reg reg, const void *fields)
 	val |= field_gen(route->route_def_hdr_ofst, ROUTE_DEF_HDR_OFST_BMSK);
 	val |= field_gen(route->route_frag_def_pipe, ROUTE_FRAG_DEF_PIPE_BMSK);
 	val |= field_gen(route->route_def_retain_hdr,
-			ROUTE_DEF_RETAIN_HDR_BMSK);
+			 ROUTE_DEF_RETAIN_HDR_BMSK);
 
 	return val;
 }
 
 /* IPA_ENDP_INIT_HDR_N register */
-#define HDR_LEN_BMSK				0x0000003f
-#define HDR_OFST_METADATA_VALID_BMSK		0x00000040
-#define HDR_OFST_METADATA_BMSK			0x00001f80
-#define HDR_ADDITIONAL_CONST_LEN_BMSK		0x0007e000
-#define HDR_OFST_PKT_SIZE_VALID_BMSK		0x00080000
-#define HDR_OFST_PKT_SIZE_BMSK			0x03f00000
-#define HDR_A5_MUX_BMSK				0x04000000
-#define HDR_LEN_INC_DEAGG_HDR_BMSK		0x08000000
-#define HDR_METADATA_REG_VALID_BMSK		0x10000000
+#define HDR_LEN_BMSK			0x0000003f
+#define HDR_OFST_METADATA_VALID_BMSK	0x00000040
+#define HDR_OFST_METADATA_BMSK		0x00001f80
+#define HDR_ADDITIONAL_CONST_LEN_BMSK	0x0007e000
+#define HDR_OFST_PKT_SIZE_VALID_BMSK	0x00080000
+#define HDR_OFST_PKT_SIZE_BMSK		0x03f00000
+#define HDR_A5_MUX_BMSK			0x04000000
+#define HDR_LEN_INC_DEAGG_HDR_BMSK	0x08000000
+#define HDR_METADATA_REG_VALID_BMSK	0x10000000
 
 static u32
 ipareg_construct_endp_init_hdr_n(enum ipa_reg reg, const void *fields)
@@ -77,17 +77,17 @@ ipareg_construct_endp_init_hdr_n(enum ipa_reg reg, const void *fields)
 	const struct ipa_ep_cfg_hdr *ep_hdr = fields;
 	u32 val;
 
-	val = field_gen(0, HDR_METADATA_REG_VALID_BMSK);
-	val |= field_gen(0, HDR_LEN_INC_DEAGG_HDR_BMSK);
-	val |= field_gen(0, HDR_A5_MUX_BMSK);
-	val |= field_gen(ep_hdr->hdr_ofst_pkt_size, HDR_OFST_PKT_SIZE_BMSK);
-	val |= field_gen(ep_hdr->hdr_ofst_pkt_size_valid,
-			HDR_OFST_PKT_SIZE_VALID_BMSK);
-	val |= field_gen(0, HDR_ADDITIONAL_CONST_LEN_BMSK);
-	val |= field_gen(ep_hdr->hdr_ofst_metadata, HDR_OFST_METADATA_BMSK);
+	val = field_gen(ep_hdr->hdr_len, HDR_LEN_BMSK);
 	val |= field_gen(ep_hdr->hdr_ofst_metadata_valid,
-			HDR_OFST_METADATA_VALID_BMSK);
-	val |= field_gen(ep_hdr->hdr_len, HDR_LEN_BMSK);
+			 HDR_OFST_METADATA_VALID_BMSK);
+	val |= field_gen(ep_hdr->hdr_ofst_metadata, HDR_OFST_METADATA_BMSK);
+	val |= field_gen(0, HDR_ADDITIONAL_CONST_LEN_BMSK);
+	val |= field_gen(ep_hdr->hdr_ofst_pkt_size_valid,
+			 HDR_OFST_PKT_SIZE_VALID_BMSK);
+	val |= field_gen(ep_hdr->hdr_ofst_pkt_size, HDR_OFST_PKT_SIZE_BMSK);
+	val |= field_gen(0, HDR_A5_MUX_BMSK);
+	val |= field_gen(0, HDR_LEN_INC_DEAGG_HDR_BMSK);
+	val |= field_gen(0, HDR_METADATA_REG_VALID_BMSK);
 
 	return val;
 }
@@ -106,17 +106,17 @@ ipareg_construct_endp_init_hdr_ext_n(enum ipa_reg reg, const void *fields)
 	const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext = fields;
 	u32 val;
 
-	val = field_gen(ep_hdr_ext->hdr_pad_to_alignment,
-			HDR_PAD_TO_ALIGNMENT_BMSK);
-	val |= field_gen(0, HDR_TOTAL_LEN_OR_PAD_OFFSET_BMSK);
-	val |= field_gen(ep_hdr_ext->hdr_payload_len_inc_padding ? 1 : 0,
-			HDR_PAYLOAD_LEN_INC_PADDING_BMSK);
-	val |= field_gen(ep_hdr_ext->hdr_total_len_or_pad,
-			HDR_TOTAL_LEN_OR_PAD_BMSK);
-	val |= field_gen(ep_hdr_ext->hdr_total_len_or_pad_valid ? 1 : 0,
-			HDR_TOTAL_LEN_OR_PAD_VALID_BMSK);
 	/* 0 = little endian; 1 = big endian */
-	val |= field_gen(1, HDR_ENDIANNESS_BMSK);
+	val = field_gen(1, HDR_ENDIANNESS_BMSK);
+	val |= field_gen(ep_hdr_ext->hdr_total_len_or_pad_valid ? 1 : 0,
+			 HDR_TOTAL_LEN_OR_PAD_VALID_BMSK);
+	val |= field_gen(ep_hdr_ext->hdr_total_len_or_pad,
+			 HDR_TOTAL_LEN_OR_PAD_BMSK);
+	val |= field_gen(ep_hdr_ext->hdr_payload_len_inc_padding ? 1 : 0,
+			 HDR_PAYLOAD_LEN_INC_PADDING_BMSK);
+	val |= field_gen(0, HDR_TOTAL_LEN_OR_PAD_OFFSET_BMSK);
+	val |= field_gen(ep_hdr_ext->hdr_pad_to_alignment,
+			 HDR_PAD_TO_ALIGNMENT_BMSK);
 
 	return val;
 }
@@ -145,7 +145,7 @@ ipareg_construct_endp_init_aggr_n(enum ipa_reg reg, const void *fields)
 	val |= field_gen(ep_aggr->aggr_sw_eof_active ? 1 : 0,
 			 AGGR_SW_EOF_ACTIVE_BMSK);
 	val |= field_gen(ep_aggr->aggr_hard_byte_limit_en,
-			AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK);
+			 AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK);
 
 	return val;
 }
@@ -163,20 +163,20 @@ ipareg_parse_endp_init_aggr_n(enum ipa_reg reg, void *fields, u32 val)
 	ep_aggr->aggr_time_limit = field_val(val, AGGR_TIME_LIMIT_BMSK);
 	ep_aggr->aggr_pkt_limit = field_val(val, AGGR_PKT_LIMIT_BMSK);
 	ep_aggr->aggr_sw_eof_active = !!field_val(val, AGGR_SW_EOF_ACTIVE_BMSK);
-	ep_aggr->aggr_hard_byte_limit_en
-			= field_val(val, AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK);
+	ep_aggr->aggr_hard_byte_limit_en =
+			field_val(val, AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK);
 }
 
 /* IPA_AGGR_FORCE_CLOSE register XXX */
-#define PIPE_BITMAP_BMSK			0x000fffff
+#define PIPE_BITMAP_BMSK	0x000fffff
 
 /* IPA_ENDP_INIT_MODE_N register */
-#define MODE_BMSK				0x00000007
-#define DEST_PIPE_INDEX_BMSK			0x000001f0
-#define BYTE_THRESHOLD_BMSK			0x0ffff000
-#define PIPE_REPLICATION_EN_BMSK		0x10000000
-#define PAD_EN_BMSK				0x20000000
-#define HDR_FTCH_DISABLE_BMSK			0x40000000
+#define MODE_BMSK			0x00000007
+#define DEST_PIPE_INDEX_BMSK		0x000001f0
+#define BYTE_THRESHOLD_BMSK		0x0ffff000
+#define PIPE_REPLICATION_EN_BMSK	0x10000000
+#define PAD_EN_BMSK			0x20000000
+#define HDR_FTCH_DISABLE_BMSK		0x40000000
 
 static u32
 ipareg_construct_endp_init_mode_n(enum ipa_reg reg, const void *fields)
@@ -186,13 +186,17 @@ ipareg_construct_endp_init_mode_n(enum ipa_reg reg, const void *fields)
 
 	val = field_gen(init_mode->ep_mode.mode, MODE_BMSK);
 	val |= field_gen(init_mode->dst_pipe_number, DEST_PIPE_INDEX_BMSK);
+	val |= field_gen(0, BYTE_THRESHOLD_BMSK);
+	val |= field_gen(0, PIPE_REPLICATION_EN_BMSK);
+	val |= field_gen(0, PAD_EN_BMSK);
+	val |= field_gen(0, HDR_FTCH_DISABLE_BMSK);
 
 	return val;
 }
 
 /* IPA_ENDP_INIT_CTRL_N register */
-#define ENDP_SUSPEND_BMSK			0x00000001
-#define ENDP_DELAY_BMSK				0x00000002
+#define ENDP_SUSPEND_BMSK	0x00000001
+#define ENDP_DELAY_BMSK		0x00000002
 
 static u32
 ipareg_construct_endp_init_ctrl_n(enum ipa_reg reg, const void *fields)
@@ -218,10 +222,10 @@ ipareg_parse_endp_init_ctrl_n(enum ipa_reg reg, void *fields, u32 val)
 }
 
 /* IPA_ENDP_INIT_DEAGGR_N register */
-#define DEAGGR_HDR_LEN_BMSK			0x0000003f
-#define PACKET_OFFSET_VALID_BMSK		0x00000080
-#define PACKET_OFFSET_LOCATION_BMSK		0x00003f00
-#define MAX_PACKET_LEN_BMSK			0xffff0000
+#define DEAGGR_HDR_LEN_BMSK		0x0000003f
+#define PACKET_OFFSET_VALID_BMSK	0x00000080
+#define PACKET_OFFSET_LOCATION_BMSK	0x00003f00
+#define MAX_PACKET_LEN_BMSK		0xffff0000
 
 static u32
 ipareg_construct_endp_init_deaggr_n(enum ipa_reg reg, const void *fields)
@@ -238,16 +242,16 @@ ipareg_construct_endp_init_deaggr_n(enum ipa_reg reg, const void *fields)
 }
 
 /* IPA_ENDP_INIT_SEQ_N register XXX */
-#define HPS_SEQ_TYPE_BMSK			0x0000000f
-#define DPS_SEQ_TYPE_BMSK			0x000000f0
-#define HPS_REP_SEQ_TYPE_BMSK			0x00000f00
-#define DPS_REP_SEQ_TYPE_BMSK			0x0000f000
+#define HPS_SEQ_TYPE_BMSK	0x0000000f
+#define DPS_SEQ_TYPE_BMSK	0x000000f0
+#define HPS_REP_SEQ_TYPE_BMSK	0x00000f00
+#define DPS_REP_SEQ_TYPE_BMSK	0x0000f000
 
 /* IPA_ENDP_INIT_CFG_N register */
-#define FRAG_OFFLOAD_EN_BMSK			0x00000001
-#define CS_OFFLOAD_EN_BMSK			0x00000006
-#define CS_METADATA_HDR_OFFSET_BMSK		0x00000078
-#define CS_GEN_QMB_MASTER_SEL_BMSK		0x00000100
+#define FRAG_OFFLOAD_EN_BMSK		0x00000001
+#define CS_OFFLOAD_EN_BMSK		0x00000006
+#define CS_METADATA_HDR_OFFSET_BMSK	0x00000078
+#define CS_GEN_QMB_MASTER_SEL_BMSK	0x00000100
 
 static u32
 ipareg_construct_endp_init_cfg_n(enum ipa_reg reg, const void *fields)
@@ -258,14 +262,14 @@ ipareg_construct_endp_init_cfg_n(enum ipa_reg reg, const void *fields)
 	val = field_gen(0, FRAG_OFFLOAD_EN_BMSK);
 	val |= field_gen(cfg->cs_offload_en, CS_OFFLOAD_EN_BMSK);
 	val |= field_gen(cfg->cs_metadata_hdr_offset,
-			CS_METADATA_HDR_OFFSET_BMSK);
+			 CS_METADATA_HDR_OFFSET_BMSK);
 	val |= field_gen(0, CS_GEN_QMB_MASTER_SEL_BMSK);
 
 	return val;
 }
 
 /* IPA_ENDP_INIT_HDR_METADATA_MASK_N register */
-#define METADATA_MASK_BMSK			0xffffffff
+#define METADATA_MASK_BMSK	0xffffffff
 
 static u32
 ipareg_construct_endp_init_hdr_metadata_mask_n(enum ipa_reg reg,
@@ -277,8 +281,8 @@ ipareg_construct_endp_init_hdr_metadata_mask_n(enum ipa_reg reg,
 }
 
 /* IPA_SHARED_MEM_SIZE register */
-#define SHARED_MEM_SIZE_BMSK			0x0000ffff
-#define SHARED_MEM_BADDR_BMSK			0xffff0000
+#define SHARED_MEM_SIZE_BMSK	0x0000ffff
+#define SHARED_MEM_BADDR_BMSK	0xffff0000
 
 static void
 ipareg_parse_shared_mem_size(enum ipa_reg reg, void *fields, u32 val)
@@ -292,10 +296,10 @@ ipareg_parse_shared_mem_size(enum ipa_reg reg, void *fields, u32 val)
 }
 
 /* IPA_ENDP_STATUS_N register */
-#define STATUS_EN_BMSK				0x00000001
-#define STATUS_ENDP_BMSK			0x0000003e
-#define STATUS_LOCATION_BMSK			0x00000100
-#define STATUS_PKT_SUPPRESS_BMSK		0x00000200
+#define STATUS_EN_BMSK			0x00000001
+#define STATUS_ENDP_BMSK		0x0000003e
+#define STATUS_LOCATION_BMSK		0x00000100
+#define STATUS_PKT_SUPPRESS_BMSK	0x00000200
 
 static u32
 ipareg_construct_endp_status_n(enum ipa_reg reg, const void *fields)
@@ -306,27 +310,29 @@ ipareg_construct_endp_status_n(enum ipa_reg reg, const void *fields)
 	val = field_gen(ep_status->status_en, STATUS_EN_BMSK);
 	val |= field_gen(ep_status->status_ep, STATUS_ENDP_BMSK);
 	val |= field_gen(ep_status->status_location, STATUS_LOCATION_BMSK);
+	val |= field_gen(0, STATUS_PKT_SUPPRESS_BMSK);
 
 	return val;
 }
 
 /* IPA_ENDP_FILTER_ROUTER_HSH_CFG_N register */
-#define FILTER_HASH_MSK_SRC_ID_BMSK		0x00000001
-#define FILTER_HASH_MSK_SRC_IP_BMSK		0x00000002
-#define FILTER_HASH_MSK_DST_IP_BMSK		0x00000004
-#define FILTER_HASH_MSK_SRC_PORT_BMSK		0x00000008
-#define FILTER_HASH_MSK_DST_PORT_BMSK		0x00000010
-#define FILTER_HASH_MSK_PROTOCOL_BMSK		0x00000020
-#define FILTER_HASH_MSK_METADATA_BMSK		0x00000040
-#define FILTER_HASH_UNDEFINED1_BMSK		0x0000ff80
-#define ROUTER_HASH_MSK_SRC_ID_BMSK		0x00010000
-#define ROUTER_HASH_MSK_SRC_IP_BMSK		0x00020000
-#define ROUTER_HASH_MSK_DST_IP_BMSK		0x00040000
-#define ROUTER_HASH_MSK_SRC_PORT_BMSK		0x00080000
-#define ROUTER_HASH_MSK_DST_PORT_BMSK		0x00100000
-#define ROUTER_HASH_MSK_PROTOCOL_BMSK		0x00200000
-#define ROUTER_HASH_MSK_METADATA_BMSK		0x00400000
-#define ROUTER_HASH_UNDEFINED2_BMSK		0xff800000
+#define FILTER_HASH_MSK_SRC_ID_BMSK	0x00000001
+#define FILTER_HASH_MSK_SRC_IP_BMSK	0x00000002
+#define FILTER_HASH_MSK_DST_IP_BMSK	0x00000004
+#define FILTER_HASH_MSK_SRC_PORT_BMSK	0x00000008
+#define FILTER_HASH_MSK_DST_PORT_BMSK	0x00000010
+#define FILTER_HASH_MSK_PROTOCOL_BMSK	0x00000020
+#define FILTER_HASH_MSK_METADATA_BMSK	0x00000040
+#define FILTER_HASH_UNDEFINED1_BMSK	0x0000ff80
+
+#define ROUTER_HASH_MSK_SRC_ID_BMSK	0x00010000
+#define ROUTER_HASH_MSK_SRC_IP_BMSK	0x00020000
+#define ROUTER_HASH_MSK_DST_IP_BMSK	0x00040000
+#define ROUTER_HASH_MSK_SRC_PORT_BMSK	0x00080000
+#define ROUTER_HASH_MSK_DST_PORT_BMSK	0x00100000
+#define ROUTER_HASH_MSK_PROTOCOL_BMSK	0x00200000
+#define ROUTER_HASH_MSK_METADATA_BMSK	0x00400000
+#define ROUTER_HASH_UNDEFINED2_BMSK	0xff800000
 
 static u32 ipareg_construct_hash_cfg_n(enum ipa_reg reg, const void *fields)
 {
@@ -380,10 +386,10 @@ static void ipareg_parse_hash_cfg_n(enum ipa_reg reg, void *fields, u32 val)
 }
 
 /* IPA_RSRC_GRP_XY_RSRC_TYPE_n register */
-#define X_MIN_LIM_BMSK				0x0000003f
-#define X_MAX_LIM_BMSK				0x00003f00
-#define Y_MIN_LIM_BMSK				0x003f0000
-#define Y_MAX_LIM_BMSK				0x3f000000
+#define X_MIN_LIM_BMSK	0x0000003f
+#define X_MAX_LIM_BMSK	0x00003f00
+#define Y_MIN_LIM_BMSK	0x003f0000
+#define Y_MAX_LIM_BMSK	0x3f000000
 
 static u32 ipareg_construct_rsrg_grp_xy(enum ipa_reg reg, const void *fields)
 {
@@ -404,8 +410,8 @@ static u32 ipareg_construct_rsrg_grp_xy(enum ipa_reg reg, const void *fields)
 }
 
 /* IPA_QSB_MAX_WRITES register */
-#define GEN_QMB_0_MAX_WRITES_BMSK		0x0000000f
-#define GEN_QMB_1_MAX_WRITES_BMSK		0x000000f0
+#define GEN_QMB_0_MAX_WRITES_BMSK	0x0000000f
+#define GEN_QMB_1_MAX_WRITES_BMSK	0x000000f0
 
 static u32
 ipareg_construct_qsb_max_writes(enum ipa_reg reg, const void *fields)
@@ -422,8 +428,8 @@ ipareg_construct_qsb_max_writes(enum ipa_reg reg, const void *fields)
 }
 
 /* IPA_QSB_MAX_READS register */
-#define GEN_QMB_0_MAX_READS_BMSK		0x0000000f
-#define GEN_QMB_1_MAX_READS_BMSK		0x000000f0
+#define GEN_QMB_0_MAX_READS_BMSK	0x0000000f
+#define GEN_QMB_1_MAX_READS_BMSK	0x000000f0
 
 static u32
 ipareg_construct_qsb_max_reads(enum ipa_reg reg, const void *fields)
@@ -438,8 +444,8 @@ ipareg_construct_qsb_max_reads(enum ipa_reg reg, const void *fields)
 }
 
 /* IPA_IDLE_INDICATION_CFG regiser */
-#define ENTER_IDLE_DEBOUNCE_THRESH_BMSK		0x0000ffff
-#define CONST_NON_IDLE_ENABLE_BMSK		0x00010000
+#define ENTER_IDLE_DEBOUNCE_THRESH_BMSK	0x0000ffff
+#define CONST_NON_IDLE_ENABLE_BMSK	0x00010000
 
 static u32
 ipareg_construct_idle_indication_cfg(enum ipa_reg reg, const void *fields)
@@ -452,7 +458,7 @@ ipareg_construct_idle_indication_cfg(enum ipa_reg reg, const void *fields)
 	val = field_gen(idle_indication_cfg->enter_idle_debounce_thresh,
 			ENTER_IDLE_DEBOUNCE_THRESH_BMSK);
 	val |= field_gen(idle_indication_cfg->const_non_idle_enable,
-			CONST_NON_IDLE_ENABLE_BMSK);
+			 CONST_NON_IDLE_ENABLE_BMSK);
 
 	return val;
 }
