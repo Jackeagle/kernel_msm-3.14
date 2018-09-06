@@ -205,7 +205,7 @@ static int ipa_init_sram(void)
 	phys_addr_t phys_addr;
 	u32 *ipa_sram_mmio;
 
-	phys_addr = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
+	phys_addr = ipa_ctx->ipa_phys;
 	phys_addr += ipa_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_N, 0);
 	phys_addr += ipa_ctx->smem_offset;
 
@@ -915,7 +915,7 @@ static void ipa_post_init(struct work_struct *unused)
 	}
 	ipa_debug("IPA GPI pipes were connected\n");
 
-	phys_addr = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
+	phys_addr = ipa_ctx->ipa_phys;
 	ipa_ctx->uc_ctx = ipa_uc_init(phys_addr);
 	if (!ipa_ctx->uc_ctx)
 		ipa_err("microcontroller init failed\n");
@@ -1260,19 +1260,19 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	ipa_ctx->ipa_irq = result;
 
 	/* Get IPA wrapper address */
-	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "ipa-base");
+	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "ipa");
 	if (!res) {
 		ipa_err(":get resource failed for ipa-base!\n");
 		result = -ENODEV;
 		goto err_clear_ipa_irq;
 	}
-	ipa_ctx->ipa_wrapper_base = res->start;
+	ipa_ctx->ipa_phys = res->start;
 	wrapper_size = (size_t)resource_size(res);
-	ipa_debug("ipa-base %pap size 0x%08zx\n",
-		  &ipa_ctx->ipa_wrapper_base, wrapper_size);
+	ipa_debug("ipa phys %pap size 0x%08zx\n",
+		  &ipa_ctx->ipa_phys, wrapper_size);
 
 	/* setup IPA register access */
-	phys_addr = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
+	phys_addr = ipa_ctx->ipa_phys;
 	ipa_debug("Mapping 0x%lx\n", phys_addr);
 	ipa_ctx->mmio = ioremap(phys_addr, wrapper_size);
 	if (!ipa_ctx->mmio) {
@@ -1320,7 +1320,7 @@ err_clear_gsi:
 err_clear_wrapper:
 	ipa_ctx->clnt_hdl_lan_cons = 0;
 	ipa_ctx->clnt_hdl_cmd = 0;
-	ipa_ctx->ipa_wrapper_base = 0;
+	ipa_ctx->ipa_phys = 0;
 err_clear_ipa_irq:
 	ipa_ctx->ipa_irq = 0;
 err_clear_filter_bitmap:

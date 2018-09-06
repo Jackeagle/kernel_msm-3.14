@@ -27,9 +27,6 @@
 #define DRV_NAME "ipa"
 #define IPA_COOKIE 0x57831603
 
-/* Offset past base of IPA "wrapper" space for register access */
-#define IPA_REG_BASE_OFFSET	0x00040000
-
 #define IPA_MAX_NUM_PIPES 31
 #define IPA_LAN_RX_HEADER_LENGTH 2
 #define IPA_DL_CHECKSUM_LENGTH 8
@@ -367,7 +364,7 @@ struct ipa_dma_task_info {
  * @flt_tbl: list of all IPA filter tables
  * @mode: IPA operating mode
  * @mmio: iomem
- * @ipa_wrapper_base: IPA wrapper base address
+ * @ipa_phys: physical address of IPA register memory
  * @rt_tbl_set: list of routing tables each of which is a list of rules
  * @reap_rt_tbl_set: list of sys mem routing tables waiting to be reaped
  * @dp: data path information
@@ -401,7 +398,7 @@ struct ipa_dma_task_info {
 struct ipa_context {
 	u32 filter_bitmap;
 	u32 ipa_irq;
-	phys_addr_t ipa_wrapper_base;
+	phys_addr_t ipa_phys;
 	void __iomem *mmio;
 	struct gsi *gsi;
 	struct device *dev;
