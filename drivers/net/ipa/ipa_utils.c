@@ -35,17 +35,17 @@
 
 /* HPS, DPS sequencers Types (numeric values are hardware values) */
 enum ipa_hps_dps_sequencer_type {
-	IPA_SEQ_DMA_ONLY			= 0x00000000,
+	IPA_SEQ_DMA_ONLY			= 0x00,
 	/* Packet Processing + no decipher + uCP (for Ethernet Bridging) */
-	IPA_SEQ_PKT_PROCESS_NO_DEC_UCP		= 0x00000002,
+	IPA_SEQ_PKT_PROCESS_NO_DEC_UCP		= 0x02,
 	/* 2 Packet Processing pass + no decipher + uCP */
-	IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP	= 0x00000004,
+	IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP	= 0x04,
 	/* DMA + DECIPHER/CIPHER */
-	IPA_SEQ_DMA_DEC				= 0x00000011,
+	IPA_SEQ_DMA_DEC				= 0x11,
 	/* COMP/DECOMP */
-	IPA_SEQ_DMA_COMP_DECOMP			= 0x00000020,
+	IPA_SEQ_DMA_COMP_DECOMP			= 0x20,
 	/* Invalid sequencer type */
-	IPA_SEQ_INVALID				= 0xffffffff,
+	IPA_SEQ_INVALID				= 0xff,
 };
 
 #define QMB_MASTER_SELECT_DDR		0
