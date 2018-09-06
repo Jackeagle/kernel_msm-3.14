@@ -74,6 +74,18 @@ struct ipa_reg_endp_init_mode {
 	struct ipa_ep_cfg_mode ep_mode;
 };
 
+/** struct ipa_ep_cfg_ctrl - Control configuration in IPA end-point
+ * @ipa_ep_suspend: 0 - ENDP is enabled, 1 - ENDP is suspended (disabled).
+ *			Valid for PROD Endpoints
+ * @ipa_ep_delay:   0 - ENDP is free-running, 1 - ENDP is delayed.
+ *			SW controls the data flow of an endpoint usind this bit.
+ *			Valid for CONS Endpoints
+ */
+struct ipa_ep_cfg_ctrl {
+	bool ipa_ep_suspend;
+	bool ipa_ep_delay;
+};
+
 /* struct ipa_reg_shared_mem_size - IPA SHARED_MEM_SIZE register
  * @shared_mem_sz: Available size [in 8Bytes] of SW partition within
  *	IPA shared memory.
