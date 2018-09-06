@@ -47,31 +47,31 @@ enum gsi_err_code {
 
 /* Hardware values used when programming an event ring context */
 enum gsi_evt_chtype {
-	GSI_EVT_CHTYPE_MHI_EV			= 0x0,
-	GSI_EVT_CHTYPE_XHCI_EV			= 0x1,
-	GSI_EVT_CHTYPE_GPI_EV			= 0x2,
-	GSI_EVT_CHTYPE_XDCI_EV			= 0x3,
+	GSI_EVT_CHTYPE_MHI_EV	= 0x0,
+	GSI_EVT_CHTYPE_XHCI_EV	= 0x1,
+	GSI_EVT_CHTYPE_GPI_EV	= 0x2,
+	GSI_EVT_CHTYPE_XDCI_EV	= 0x3,
 };
 
 /* Hardware values used when programming a channel context */
 enum gsi_chan_prot {
-	GSI_CHAN_PROT_MHI			= 0x0,
-	GSI_CHAN_PROT_XHCI			= 0x1,
-	GSI_CHAN_PROT_GPI			= 0x2,
-	GSI_CHAN_PROT_XDCI			= 0x3,
+	GSI_CHAN_PROT_MHI	= 0x0,
+	GSI_CHAN_PROT_XHCI	= 0x1,
+	GSI_CHAN_PROT_GPI	= 0x2,
+	GSI_CHAN_PROT_XDCI	= 0x3,
 };
 
 /* Hardware values returned in a transfer completion event structure */
 enum gsi_chan_evt {
-	GSI_CHAN_EVT_INVALID			= 0x0,
-	GSI_CHAN_EVT_SUCCESS			= 0x1,
-	GSI_CHAN_EVT_EOT			= 0x2,
-	GSI_CHAN_EVT_OVERFLOW			= 0x3,
-	GSI_CHAN_EVT_EOB			= 0x4,
-	GSI_CHAN_EVT_OOB			= 0x5,
-	GSI_CHAN_EVT_DB_MODE			= 0x6,
-	GSI_CHAN_EVT_UNDEFINED			= 0x10,
-	GSI_CHAN_EVT_RE_ERROR			= 0x11,
+	GSI_CHAN_EVT_INVALID	= 0x0,
+	GSI_CHAN_EVT_SUCCESS	= 0x1,
+	GSI_CHAN_EVT_EOT	= 0x2,
+	GSI_CHAN_EVT_OVERFLOW	= 0x3,
+	GSI_CHAN_EVT_EOB	= 0x4,
+	GSI_CHAN_EVT_OOB	= 0x5,
+	GSI_CHAN_EVT_DB_MODE	= 0x6,
+	GSI_CHAN_EVT_UNDEFINED	= 0x10,
+	GSI_CHAN_EVT_RE_ERROR	= 0x11,
 };
 
 /* Hardware values signifying the state of an event ring */
@@ -83,12 +83,12 @@ enum gsi_evt_ring_state {
 
 /* Hardware values signifying the state of a channel */
 enum gsi_chan_state {
-	GSI_CHAN_STATE_NOT_ALLOCATED		= 0x0,
-	GSI_CHAN_STATE_ALLOCATED		= 0x1,
-	GSI_CHAN_STATE_STARTED			= 0x2,
-	GSI_CHAN_STATE_STOPPED			= 0x3,
-	GSI_CHAN_STATE_STOP_IN_PROC		= 0x4,
-	GSI_CHAN_STATE_ERROR			= 0xf,
+	GSI_CHAN_STATE_NOT_ALLOCATED	= 0x0,
+	GSI_CHAN_STATE_ALLOCATED	= 0x1,
+	GSI_CHAN_STATE_STARTED		= 0x2,
+	GSI_CHAN_STATE_STOPPED		= 0x3,
+	GSI_CHAN_STATE_STOP_IN_PROC	= 0x4,
+	GSI_CHAN_STATE_ERROR		= 0xf,
 };
 
 struct gsi_ring_ctx {
@@ -155,9 +155,9 @@ struct gsi {
 
 /* Hardware values representing a transfer element type */
 enum gsi_re_type {
-	GSI_RE_XFER				= 0x2,
-	GSI_RE_IMMD_CMD				= 0x3,
-	GSI_RE_NOP				= 0x4,
+	GSI_RE_XFER	= 0x2,
+	GSI_RE_IMMD_CMD	= 0x3,
+	GSI_RE_NOP	= 0x4,
 };
 
 struct gsi_tre {
@@ -186,9 +186,9 @@ struct gsi_xfer_compl_evt {
 
 /* Hardware values from the error log register error type field */
 enum gsi_err_type {
-	GSI_ERR_TYPE_GLOB			= 0x1,
-	GSI_ERR_TYPE_CHAN			= 0x2,
-	GSI_ERR_TYPE_EVT			= 0x3,
+	GSI_ERR_TYPE_GLOB	= 0x1,
+	GSI_ERR_TYPE_CHAN	= 0x2,
+	GSI_ERR_TYPE_EVT	= 0x3,
 };
 
 struct gsi_log_err {
@@ -204,19 +204,19 @@ struct gsi_log_err {
 
 /* Hardware values repreasenting a channel immediate command opcode */
 enum gsi_ch_cmd_opcode {
-	GSI_CH_ALLOCATE				= 0x0,
-	GSI_CH_START				= 0x1,
-	GSI_CH_STOP				= 0x2,
-	GSI_CH_RESET				= 0x9,
-	GSI_CH_DE_ALLOC				= 0xa,
-	GSI_CH_DB_STOP				= 0xb,
+	GSI_CH_ALLOCATE	= 0x0,
+	GSI_CH_START	= 0x1,
+	GSI_CH_STOP	= 0x2,
+	GSI_CH_RESET	= 0x9,
+	GSI_CH_DE_ALLOC	= 0xa,
+	GSI_CH_DB_STOP	= 0xb,
 };
 
 /* Hardware values repreasenting an event ring immediate command opcode */
 enum gsi_evt_ch_cmd_opcode {
-	GSI_EVT_ALLOCATE			= 0x0,
-	GSI_EVT_RESET				= 0x9,
-	GSI_EVT_DE_ALLOC			= 0xa,
+	GSI_EVT_ALLOCATE	= 0x0,
+	GSI_EVT_RESET		= 0x9,
+	GSI_EVT_DE_ALLOC	= 0xa,
 };
 
 /** gsi_gpi_channel_scratch - GPI protocol SW config area of channel scratch

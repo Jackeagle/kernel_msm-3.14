@@ -30,10 +30,10 @@ static void enable_tx_suspend_work_func(struct work_struct *work);
 static DECLARE_DELAYED_WORK(tx_suspend_work, enable_tx_suspend_work_func);
 
 static const int ipa_irq_mapping[] = {
-	[IPA_INVALID_IRQ]			= -1,
-	[IPA_UC_IRQ_0]				= 2,
-	[IPA_UC_IRQ_1]				= 3,
-	[IPA_TX_SUSPEND_IRQ]			= 14,
+	[IPA_INVALID_IRQ]		= -1,
+	[IPA_UC_IRQ_0]			= 2,
+	[IPA_UC_IRQ_1]			= 3,
+	[IPA_TX_SUSPEND_IRQ]		= 14,
 };
 
 /* IPA interrupt handlers are called in contexts that can block */

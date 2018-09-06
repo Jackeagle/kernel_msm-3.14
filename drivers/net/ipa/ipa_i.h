@@ -163,9 +163,9 @@
 #define IPA_MEM_UC_EVENT_RING_OFST		0x1c00
 
 enum ipa_ees {
-	IPA_EE_AP = 0,
-	IPA_EE_Q6 = 1,
-	IPA_EE_UC = 2,
+	IPA_EE_AP	= 0,
+	IPA_EE_Q6	= 1,
+	IPA_EE_UC	= 2,
 };
 
 /** struct ipa_tx_suspend_irq_data - interrupt data for IPA_TX_SUSPEND_IRQ

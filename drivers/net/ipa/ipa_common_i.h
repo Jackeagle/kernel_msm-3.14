@@ -239,8 +239,8 @@ enum ipa_aggr_type {
  * @IPA_HDR_TOTAL_LEN: field is used as total length
  */
 enum hdr_total_len_or_pad_type {
-	IPA_HDR_PAD = 0,
-	IPA_HDR_TOTAL_LEN = 1,
+	IPA_HDR_PAD		= 0,
+	IPA_HDR_TOTAL_LEN	= 1,
 };
 
 /** max size of the name of the resource (routing table, header) */
