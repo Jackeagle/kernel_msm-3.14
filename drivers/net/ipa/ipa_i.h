@@ -534,7 +534,7 @@ void ipa_gsi_dma_task_free(void);
 int ipa_gsi_dma_task_inject(void);
 
 int ipa_disable_apps_wan_cons_deaggr(u32 agg_size, u32 agg_count);
-int ipa_plat_drv_probe(struct platform_device *platform_device);
+int ipa_plat_drv_probe(struct platform_device *pdev);
 
 void ipa_set_flt_tuple_mask(u32 pipe_idx, struct ipa_reg_hash_tuple *tuple);
 void ipa_set_rt_tuple_mask(int tbl_idx, struct ipa_reg_hash_tuple *tuple);

@@ -1216,9 +1216,9 @@ static const struct of_device_id ipa_plat_drv_match[] = {
 	{}
 };
 
-int ipa_plat_drv_probe(struct platform_device *platform_device)
+int ipa_plat_drv_probe(struct platform_device *pdev)
 {
-	struct device *dev = &platform_device->dev;
+	struct device *dev = &pdev->dev;
 	unsigned long phys_addr;
 	struct resource *res;
 	size_t wrapper_size;
@@ -1254,14 +1254,13 @@ int ipa_plat_drv_probe(struct platform_device *platform_device)
 		goto err_clear_filter_bitmap;
 	}
 
-	result = platform_get_irq_byname(platform_device, "ipa-irq");
+	result = platform_get_irq_byname(pdev, "ipa-irq");
 	if (result < 0)
 		goto err_clear_filter_bitmap;
 	ipa_ctx->ipa_irq = result;
 
 	/* Get IPA wrapper address */
-	res = platform_get_resource_byname(platform_device, IORESOURCE_MEM,
-					   "ipa-base");
+	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "ipa-base");
 	if (!res) {
 		ipa_err(":get resource failed for ipa-base!\n");
 		result = -ENODEV;
@@ -1284,7 +1283,7 @@ int ipa_plat_drv_probe(struct platform_device *platform_device)
 
 	ipa_reg_init(ipa_ctx->mmio);
 
-	ipa_ctx->gsi = gsi_init(platform_device);
+	ipa_ctx->gsi = gsi_init(pdev);
 	if (IS_ERR(ipa_ctx->gsi)) {
 		ipa_err("ipa: error initializing gsi driver.\n");
 		result = PTR_ERR(ipa_ctx->gsi);
