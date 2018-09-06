@@ -64,6 +64,14 @@ struct ipa_reg_route {
 	u32 route_def_retain_hdr;
 };
 
+/* struct ipa_aggr_force_close - IPA force close aggregation register
+ *
+ * @pipe_bitmap: bitmap of pipes on which aggregation should be closed
+ */
+struct ipa_reg_aggr_force_close {
+	u32 pipe_bitmap;
+};
+
 /* struct ipa_reg_endp_init_mode - IPA ENDP_INIT_MODE_n register
  * @dst_pipe_number: This parameter specifies destination output-pipe-packets
  *	will be routed to. Valid for DMA mode only and for Input

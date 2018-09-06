@@ -167,8 +167,16 @@ ipareg_parse_endp_init_aggr_n(enum ipa_reg reg, void *fields, u32 val)
 			field_val(val, AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK);
 }
 
-/* IPA_AGGR_FORCE_CLOSE register XXX */
+/* IPA_AGGR_FORCE_CLOSE register */
 #define PIPE_BITMAP_BMSK	0x000fffff
+
+static u32
+ipareg_construct_aggr_force_close(enum ipa_reg reg, const void *fields)
+{
+	const struct ipa_reg_aggr_force_close *force_close = fields;
+
+	return field_gen(force_close->pipe_bitmap, PIPE_BITMAP_BMSK);
+}
 
 /* IPA_ENDP_INIT_MODE_N register */
 #define MODE_BMSK			0x00000007
@@ -512,7 +520,8 @@ static const struct ipa_reg_obj ipa_regs[] = {
 		      endp_init_hdr_ext_n,		0x00000814,	0x0070),
 	reg_obj_both(IPA_ENDP_INIT_AGGR_N,
 		     endp_init_aggr_n,			0x00000824,	0x0070),
-	reg_obj_nofunc(IPA_AGGR_FORCE_CLOSE,		0x000001ec,	0x0000),
+	reg_obj_cfunc(IPA_AGGR_FORCE_CLOSE,
+		     aggr_force_close,			0x000001ec,	0x0000),
 	reg_obj_cfunc(IPA_ENDP_INIT_MODE_N,
 		      endp_init_mode_n,			0x00000820,	0x0070),
 	reg_obj_both(IPA_ENDP_INIT_CTRL_N,

@@ -66,6 +66,7 @@ ipa_restore_channel_properties(struct ipa_ep_context *ep,
 static int
 ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 {
+	struct ipa_reg_aggr_force_close force_close;
 	int result;
 	int gsi_res;
 	struct gsi_chan_props orig_props = { };
@@ -78,7 +79,9 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	struct ipa_reg_ep_init_ctrl ctrl;
 
 	ipa_debug("Applying reset channel with open aggregation frame WA\n");
-	ipahal_write_reg(IPA_AGGR_FORCE_CLOSE, BIT(clnt_hdl));
+
+	force_close.pipe_bitmap = BIT(clnt_hdl);
+	ipahal_write_reg_fields(IPA_AGGR_FORCE_CLOSE, &force_close);
 
 	/* Reset channel */
 	gsi_res = gsi_reset_channel(ipa_ctx->gsi, ep->gsi_chan_hdl);
