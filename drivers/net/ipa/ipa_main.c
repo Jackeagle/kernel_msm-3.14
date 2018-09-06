@@ -1216,7 +1216,7 @@ static const struct of_device_id ipa_plat_drv_match[] = {
 	{}
 };
 
-int ipa_plat_drv_probe(struct platform_device *pdev)
+static int ipa_plat_drv_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	unsigned long phys_addr;
