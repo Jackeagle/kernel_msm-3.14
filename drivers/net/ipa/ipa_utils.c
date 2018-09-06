@@ -23,15 +23,15 @@
 #include "ipa_i.h"
 #include "ipahal.h"
 
-#define IPA_BCR_REG_VAL			0x0000003B
+#define IPA_BCR_REG_VAL			0x0000003b
 
 #define IPA_GSI_DMA_TASK_TIMEOUT	15	/* milliseconds */
 
-#define IPA_GSI_CHANNEL_STOP_SLEEP_MIN 1000	/* microseconds */
-#define IPA_GSI_CHANNEL_STOP_SLEEP_MAX 2000	/* microseconds */
+#define IPA_GSI_CHANNEL_STOP_SLEEP_MIN	1000	/* microseconds */
+#define IPA_GSI_CHANNEL_STOP_SLEEP_MAX	2000	/* microseconds */
 
 /* In IPAv3 only endpoints 0-3 can be configured to deaggregation */
-#define IPA_EP_SUPPORTS_DEAGGR(idx) ((idx) <= 3)
+#define IPA_EP_SUPPORTS_DEAGGR(idx)	((idx) <= 3)
 
 /* HPS, DPS sequencers Types (numeric values are hardware values) */
 enum ipa_hps_dps_sequencer_type {

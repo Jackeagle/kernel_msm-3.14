@@ -36,20 +36,8 @@
 #include "ipa_i.h"
 #include "ipahal.h"
 
-#define IPA_GPIO_IN_QUERY_CLK_IDX 0
-#define IPA_GPIO_OUT_CLK_RSP_CMPLT_IDX 0
-#define IPA_GPIO_OUT_CLK_VOTE_IDX 1
-
 #define IPA_APPS_CMD_PROD_RING_COUNT	128
 #define IPA_APPS_LAN_CONS_RING_COUNT	128
-
-/* Shared memory */
-
-#define IPA_SMEM_SIZE (8 * 1024)
-/* The host we're sharing memory with (could be "qcom,remote-pid") */
-#define SMEM_MODEM		1
-/* Item number in shared memory of the IPA filter table */
-#define SMEM_IPA_FILTER_TABLE	497
 
 static void ipa_post_init(struct work_struct *unused);
 static DECLARE_WORK(ipa_post_init_work, ipa_post_init);

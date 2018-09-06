@@ -24,28 +24,23 @@
 #include "ipahal.h"
 #include "gsi.h"
 
-#define DRV_NAME "ipa"
-#define IPA_COOKIE 0x57831603
+#define DRV_NAME		"ipa"
+#define IPA_COOKIE		0x57831603
 
-#define IPA_MAX_NUM_PIPES 31
-#define IPA_LAN_RX_HEADER_LENGTH 2
-#define IPA_DL_CHECKSUM_LENGTH 8
-#define IPA_GENERIC_RX_POOL_SZ 192
+#define IPA_MAX_NUM_PIPES		31
+#define IPA_LAN_RX_HEADER_LENGTH	2
+#define IPA_DL_CHECKSUM_LENGTH		8
+#define IPA_GENERIC_RX_POOL_SZ		192
 
-#define IPA_MAX_STATUS_STAT_NUM 30
+#define IPA_MAX_STATUS_STAT_NUM		30
 
 /* An explicitly bad client handle value */
-#define IPA_CLNT_HDL_BAD	(~(u32)0)
+#define IPA_CLNT_HDL_BAD		(~(u32)0)
 
-#define IPA_MEM_CANARY_VAL 0xdeadbeef
+#define IPA_MEM_CANARY_VAL		0xdeadbeef
 
-#define IPA_GSI_CHANNEL_STOP_MAX_RETRY 10
-#define IPA_GSI_CHANNEL_STOP_PKT_SIZE 1
-
-#define IPA_ACTIVE_CLIENTS_LOG_BUFFER_SIZE_LINES 120
-#define IPA_ACTIVE_CLIENTS_LOG_LINE_LEN 96
-#define FEATURE_ENUM_VAL(feature, opcode) ((feature << 5) | opcode)
-#define IPA_HW_NUM_FEATURES 0x8
+#define IPA_GSI_CHANNEL_STOP_MAX_RETRY	10
+#define IPA_GSI_CHANNEL_STOP_PKT_SIZE	1
 
 /** The IPA has a block of shared memory, divided into regions used for
  * specific purposes.  The following values define this layout (i.e.,

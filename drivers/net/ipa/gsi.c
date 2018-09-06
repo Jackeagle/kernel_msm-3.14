@@ -23,9 +23,7 @@
 #define GSI_EVT_RING_MAX	23
 
 #define GSI_CMD_TIMEOUT		msecs_to_jiffies(5 * MSEC_PER_SEC)
-#define GSI_STOP_CMD_TIMEOUT	msecs_to_jiffies(20)
 
-#define GSI_MAX_CH_LOW_WEIGHT	15
 #define GSI_MHI_ER_START	10	/* First reserved event number */
 #define GSI_MHI_ER_END		16	/* Last reserved event number */
 
@@ -33,6 +31,8 @@
 #define GSI_RESET_WA_MAX_SLEEP	2000	/* microseconds */
 
 #define GSI_MAX_PREFETCH	0	/* 0 means 1 segment; 1 means 2 */
+
+#define GSI_ISR_MAX_ITER	50
 
 /* Hardware values from the error log register code field */
 enum gsi_err_code {
@@ -730,8 +730,6 @@ static void gsi_handle_general(struct gsi *gsi)
 
 	gsi_writel(gsi, val, GSI_CNTXT_GSI_IRQ_CLR_OFFS);
 }
-
-#define GSI_ISR_MAX_ITER 50
 
 /* Returns a bitmask of pending GSI interrupts */
 static u32 gsi_interrupt_type(struct gsi *gsi)

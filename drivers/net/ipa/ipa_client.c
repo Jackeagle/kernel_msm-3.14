@@ -15,12 +15,12 @@
 /* These values were determined empirically and shows good E2E bi-
  * directional throughputs
  */
-#define IPA_HOLB_TMR_EN 0x1
-#define IPA_HOLB_TMR_DIS 0x0
-#define IPA_POLL_AGGR_STATE_RETRIES_NUM 3
-#define IPA_POLL_AGGR_STATE_SLEEP_MSEC 1
+#define IPA_HOLB_TMR_EN			0x1
+#define IPA_HOLB_TMR_DIS		0x0
+#define IPA_POLL_AGGR_STATE_RETRIES_NUM	3
+#define IPA_POLL_AGGR_STATE_SLEEP_MSEC	1
 
-#define IPA_PKT_FLUSH_TO_US 100
+#define IPA_PKT_FLUSH_TO_US		100
 
 static int
 ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep,

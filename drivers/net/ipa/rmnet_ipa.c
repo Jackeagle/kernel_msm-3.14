@@ -267,7 +267,7 @@ static int handle_ingress_format(struct net_device *dev,
 	ep_cfg->hdr_ext.hdr_total_len_or_pad_valid = true;
 	ep_cfg->hdr_ext.hdr_total_len_or_pad = IPA_HDR_PAD;
 	ep_cfg->hdr_ext.hdr_payload_len_inc_padding = true;
-	ep_cfg->metadata_mask.metadata_mask = 0xFF000000;
+	ep_cfg->metadata_mask.metadata_mask = 0xff000000;
 
 	wan_cfg->client = IPA_CLIENT_APPS_WAN_CONS;
 	wan_cfg->notify = apps_ipa_packet_receive_notify;

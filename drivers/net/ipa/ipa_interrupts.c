@@ -21,7 +21,7 @@ struct ipa_interrupt_info {
 	enum ipa_irq_type interrupt;
 };
 
-#define IPA_IRQ_NUM_MAX 32	/* Number of IRQ bits in IPA interrupt mask */
+#define IPA_IRQ_NUM_MAX	32	/* Number of IRQ bits in IPA interrupt mask */
 static struct ipa_interrupt_info ipa_interrupt_info[IPA_IRQ_NUM_MAX];
 
 static struct workqueue_struct *ipa_interrupt_wq;

@@ -23,8 +23,8 @@
  * @user2: cookie2 for above callback
  * @sys: corresponding IPA sys context
  * @cnt: 1 for single transfers,
- * >1 and <0xFFFF for first of a "multiple" transfer,
- * 0xFFFF for last desc, 0 for rest of "multiple' transfer
+ * >1 and <0xffff for first of a "multiple" transfer,
+ * 0xffff for last desc, 0 for rest of "multiple' transfer
  *
  * This struct can wrap both data packet and immediate command packet.
  */
@@ -110,44 +110,42 @@ struct ipa_tag_completion {
 	atomic_t cnt;
 };
 
-#define IPA_QMAP_HEADER_LENGTH 4
+#define IPA_QMAP_HEADER_LENGTH		4
 
-#define IPA_WAN_AGGR_PKT_CNT 5
-#define POLLING_INACTIVITY_RX 40
-#define POLLING_MIN_SLEEP_RX 1010	/* microseconds */
-#define POLLING_MAX_SLEEP_RX 1050	/* microseconds */
+#define IPA_WAN_AGGR_PKT_CNT		5
+#define POLLING_INACTIVITY_RX		40
+#define POLLING_MIN_SLEEP_RX		1010	/* microseconds */
+#define POLLING_MAX_SLEEP_RX		1050	/* microseconds */
 
-#define IPA_GENERIC_AGGR_BYTE_LIMIT 6
-#define IPA_GENERIC_AGGR_TIME_LIMIT 1
-#define IPA_GENERIC_AGGR_PKT_LIMIT 0
+#define IPA_GENERIC_AGGR_BYTE_LIMIT	6
+#define IPA_GENERIC_AGGR_TIME_LIMIT	1
+#define IPA_GENERIC_AGGR_PKT_LIMIT	0
 
-#define IPA_GENERIC_RX_BUFF_BASE_SZ 8192
-#define IPA_REAL_GENERIC_RX_BUFF_SZ(X) (SKB_DATA_ALIGN(\
-		(X) + NET_SKB_PAD) +\
-		SKB_DATA_ALIGN(sizeof(struct skb_shared_info)))
+#define IPA_GENERIC_RX_BUFF_BASE_SZ	8192
+#define IPA_REAL_GENERIC_RX_BUFF_SZ(X) \
+		(SKB_DATA_ALIGN((X) + NET_SKB_PAD) + \
+		 SKB_DATA_ALIGN(sizeof(struct skb_shared_info)))
 #define IPA_GENERIC_RX_BUFF_SZ(X) \
 	({ typeof(X) _x = (X); (_x - (IPA_REAL_GENERIC_RX_BUFF_SZ(_x) - _x)); })
-#define IPA_GENERIC_RX_BUFF_LIMIT (\
-		IPA_REAL_GENERIC_RX_BUFF_SZ(\
-		IPA_GENERIC_RX_BUFF_BASE_SZ) -\
-		IPA_GENERIC_RX_BUFF_BASE_SZ)
+#define IPA_GENERIC_RX_BUFF_LIMIT \
+		(IPA_REAL_GENERIC_RX_BUFF_SZ(IPA_GENERIC_RX_BUFF_BASE_SZ) - \
+					     IPA_GENERIC_RX_BUFF_BASE_SZ)
 
 /* less 1 nominal MTU (1500 bytes) rounded to units of KB */
-#define IPA_MTU 1500
-#define IPA_ADJUST_AGGR_BYTE_LIMIT(X) (((X) - IPA_MTU) / 1000)
+#define IPA_MTU				1500
+#define IPA_ADJUST_AGGR_BYTE_LIMIT(X)	(((X) - IPA_MTU) / 1000)
 
-#define IPA_RX_BUFF_CLIENT_HEADROOM 256
+#define IPA_RX_BUFF_CLIENT_HEADROOM	256
 
-#define IPA_SIZE_DL_CSUM_META_TRAILER 8
+#define IPA_SIZE_DL_CSUM_META_TRAILER	8
 
-#define IPA_GSI_MAX_CH_LOW_WEIGHT 15
-#define IPA_GSI_EVT_RING_INT_MODT (32 * 1) /* 1ms under 32KHz clock */
+#define IPA_GSI_MAX_CH_LOW_WEIGHT	15
+#define IPA_GSI_EVT_RING_INT_MODT	(32 * 1) /* 1ms under 32KHz clock */
 
-#define IPA_DEFAULT_SYS_YELLOW_WM 32
-#define IPA_REPL_XFER_THRESH 10
+#define IPA_REPL_XFER_THRESH	10
 
 /* How long before sending an interrupting no-op to handle TX completions */
-#define IPA_TX_NOP_DELAY_NS (2 * 1000 * 1000)	/* 2 msec */
+#define IPA_TX_NOP_DELAY_NS		(2 * 1000 * 1000)	/* 2 msec */
 
 static void ipa_rx_switch_to_intr_mode(struct ipa_sys_context *sys);
 
@@ -1551,7 +1549,7 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 	 *  | fw_desc | vdev_id | qmap mux id | Resv |
 	 *  ------------------------------------------
 	 */
-	*(u16 *)rx_skb->cb = ((metadata >> 16) & 0xFFFF);
+	*(u16 *)rx_skb->cb = ((metadata >> 16) & 0xffff);
 	ipa_debug_low("meta_data: 0x%x cb: 0x%x\n", metadata,
 		      *(u32 *)rx_skb->cb);
 

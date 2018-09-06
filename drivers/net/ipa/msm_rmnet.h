@@ -24,19 +24,19 @@
  * Values chosen to not conflict with other drivers in the ecosystem
  */
 
-#define RMNET_IOCTL_SET_LLP_ETHERNET 0x000089F1 /* Set Ethernet protocol  */
-#define RMNET_IOCTL_SET_LLP_IP	     0x000089F2 /* Set RAWIP protocol	  */
-#define RMNET_IOCTL_GET_LLP	     0x000089F3 /* Get link protocol	  */
-#define RMNET_IOCTL_SET_QOS_ENABLE   0x000089F4 /* Set QoS header enabled */
-#define RMNET_IOCTL_SET_QOS_DISABLE  0x000089F5 /* Set QoS header disabled*/
-#define RMNET_IOCTL_GET_QOS	     0x000089F6 /* Get QoS header state	  */
-#define RMNET_IOCTL_GET_OPMODE	     0x000089F7 /* Get operation mode	  */
-#define RMNET_IOCTL_OPEN	     0x000089F8 /* Open transport port	  */
-#define RMNET_IOCTL_CLOSE	     0x000089F9 /* Close transport port	  */
-#define RMNET_IOCTL_FLOW_ENABLE	     0x000089FA /* Flow enable		  */
-#define RMNET_IOCTL_FLOW_DISABLE     0x000089FB /* Flow disable		  */
-#define RMNET_IOCTL_FLOW_SET_HNDL    0x000089FC /* Set flow handle	  */
-#define RMNET_IOCTL_EXTENDED	     0x000089FD /* Extended IOCTLs	  */
+#define RMNET_IOCTL_SET_LLP_ETHERNET 0x000089f1 /* Set Ethernet protocol  */
+#define RMNET_IOCTL_SET_LLP_IP	     0x000089f2 /* Set RAWIP protocol	  */
+#define RMNET_IOCTL_GET_LLP	     0x000089f3 /* Get link protocol	  */
+#define RMNET_IOCTL_SET_QOS_ENABLE   0x000089f4 /* Set QoS header enabled */
+#define RMNET_IOCTL_SET_QOS_DISABLE  0x000089f5 /* Set QoS header disabled*/
+#define RMNET_IOCTL_GET_QOS	     0x000089f6 /* Get QoS header state	  */
+#define RMNET_IOCTL_GET_OPMODE	     0x000089f7 /* Get operation mode	  */
+#define RMNET_IOCTL_OPEN	     0x000089f8 /* Open transport port	  */
+#define RMNET_IOCTL_CLOSE	     0x000089f9 /* Close transport port	  */
+#define RMNET_IOCTL_FLOW_ENABLE	     0x000089fa /* Flow enable		  */
+#define RMNET_IOCTL_FLOW_DISABLE     0x000089fb /* Flow disable		  */
+#define RMNET_IOCTL_FLOW_SET_HNDL    0x000089fc /* Set flow handle	  */
+#define RMNET_IOCTL_EXTENDED	     0x000089fd /* Extended IOCTLs	  */
 
 /* RmNet Data Required IOCTLs */
 #define RMNET_IOCTL_GET_SUPPORTED_FEATURES     0x0000	/* Get features	   */
@@ -49,12 +49,12 @@
 #define RMNET_IOCTL_SET_INGRESS_DATA_FORMAT    0x0007	/* Set IDF	   */
 #define RMNET_IOCTL_SET_AGGREGATION_COUNT      0x0008	/* Set agg count   */
 #define RMNET_IOCTL_GET_AGGREGATION_COUNT      0x0009	/* Get agg count   */
-#define RMNET_IOCTL_SET_AGGREGATION_SIZE       0x000A	/* Set agg size	   */
-#define RMNET_IOCTL_GET_AGGREGATION_SIZE       0x000B	/* Get agg size	   */
-#define RMNET_IOCTL_FLOW_CONTROL	       0x000C	/* Do flow control */
-#define RMNET_IOCTL_GET_DFLT_CONTROL_CHANNEL   0x000D	/* For legacy use  */
-#define RMNET_IOCTL_GET_HWSW_MAP	       0x000E	/* Get HW/SW map   */
-#define RMNET_IOCTL_SET_RX_HEADROOM	       0x000F	/* RX Headroom	   */
+#define RMNET_IOCTL_SET_AGGREGATION_SIZE       0x000a	/* Set agg size	   */
+#define RMNET_IOCTL_GET_AGGREGATION_SIZE       0x000b	/* Get agg size	   */
+#define RMNET_IOCTL_FLOW_CONTROL	       0x000c	/* Do flow control */
+#define RMNET_IOCTL_GET_DFLT_CONTROL_CHANNEL   0x000d	/* For legacy use  */
+#define RMNET_IOCTL_GET_HWSW_MAP	       0x000e	/* Get HW/SW map   */
+#define RMNET_IOCTL_SET_RX_HEADROOM	       0x000f	/* RX Headroom	   */
 #define RMNET_IOCTL_GET_EP_PAIR		       0x0010	/* Endpoint pair   */
 #define RMNET_IOCTL_SET_QOS_VERSION	       0x0011	/* 8/6 byte QoS hdr*/
 #define RMNET_IOCTL_GET_QOS_VERSION	       0x0012	/* 8/6 byte QoS hdr*/

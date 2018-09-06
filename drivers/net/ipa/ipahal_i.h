@@ -155,7 +155,7 @@ struct ipa_imm_cmd_hw_dma_task_32b_addr {
  * @flt_ret_hdr: Retain header in filter rule flag: Does matching flt rule
  *  specifies to retain header?
  * @flt_rule_id: The ID of the matching filter rule. This info can be combined
- *  with endp_src_idx to locate the exact rule. ID=0x3FF reserved to specify
+ *  with endp_src_idx to locate the exact rule. ID=0x3ff reserved to specify
  *  flt miss. In case of miss, all flt info to be ignored
  * @rt_local: Route table location flag: Does matching rt rule belongs to
  *  rt tbl that resides in lcl memory? (if not, then system mem)
@@ -163,7 +163,7 @@ struct ipa_imm_cmd_hw_dma_task_32b_addr {
  * @ucp: UC Processing flag.
  * @rt_tbl_idx: Index of rt tbl that contains the rule on which was a match
  * @rt_rule_id: The ID of the matching rt rule. This info can be combined
- *  with rt_tbl_idx to locate the exact rule. ID=0x3FF reserved to specify
+ *  with rt_tbl_idx to locate the exact rule. ID=0x3ff reserved to specify
  *  rt miss. In case of miss, all rt info to be ignored
  * @nat_hit: NAT hit flag: Was their NAT hit?
  * @nat_entry_idx: Index of the NAT entry used of NAT processing
