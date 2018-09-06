@@ -887,7 +887,6 @@ static void ipa_register_panic_hdlr(void)
  */
 static void ipa_post_init(struct work_struct *unused)
 {
-	phys_addr_t phys_addr;
 	int result;
 
 	/* Assign resource limitation to each group */
@@ -915,8 +914,7 @@ static void ipa_post_init(struct work_struct *unused)
 	}
 	ipa_debug("IPA GPI pipes were connected\n");
 
-	phys_addr = ipa_ctx->ipa_phys;
-	ipa_ctx->uc_ctx = ipa_uc_init(phys_addr);
+	ipa_ctx->uc_ctx = ipa_uc_init(ipa_ctx->ipa_phys);
 	if (!ipa_ctx->uc_ctx)
 		ipa_err("microcontroller init failed\n");
 
@@ -1219,9 +1217,8 @@ static const struct of_device_id ipa_plat_drv_match[] = {
 static int ipa_plat_drv_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
-	unsigned long phys_addr;
 	struct resource *res;
-	size_t wrapper_size;
+	size_t size;
 	int result;
 
 	/* We assume we're working on 64-bit hardware */
@@ -1259,7 +1256,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 		goto err_clear_filter_bitmap;
 	ipa_ctx->ipa_irq = result;
 
-	/* Get IPA wrapper address */
+	/* Get IPA memory range */
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "ipa");
 	if (!res) {
 		ipa_err(":get resource failed for ipa-base!\n");
@@ -1267,18 +1264,16 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 		goto err_clear_ipa_irq;
 	}
 	ipa_ctx->ipa_phys = res->start;
-	wrapper_size = (size_t)resource_size(res);
-	ipa_debug("ipa phys %pap size 0x%08zx\n",
-		  &ipa_ctx->ipa_phys, wrapper_size);
+	size = (size_t)resource_size(res);
+	ipa_debug("ipa phys %pap size 0x%08zx\n", &ipa_ctx->ipa_phys, size);
 
 	/* setup IPA register access */
-	phys_addr = ipa_ctx->ipa_phys;
-	ipa_debug("Mapping 0x%lx\n", phys_addr);
-	ipa_ctx->mmio = ioremap(phys_addr, wrapper_size);
+	ipa_debug("Mapping %pap\n", &ipa_ctx->ipa_phys);
+	ipa_ctx->mmio = ioremap(ipa_ctx->ipa_phys, size);
 	if (!ipa_ctx->mmio) {
 		ipa_err(":ipa-base ioremap err.\n");
 		result = -EFAULT;
-		goto err_clear_wrapper;
+		goto err_clear_addr;
 	}
 
 	ipa_reg_init(ipa_ctx->mmio);
@@ -1317,7 +1312,7 @@ err_clear_gsi:
 	ipa_reg_exit();
 	iounmap(ipa_ctx->mmio);
 	ipa_ctx->mmio = NULL;
-err_clear_wrapper:
+err_clear_addr:
 	ipa_ctx->clnt_hdl_lan_cons = 0;
 	ipa_ctx->clnt_hdl_cmd = 0;
 	ipa_ctx->ipa_phys = 0;
