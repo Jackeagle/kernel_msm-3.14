@@ -1259,7 +1259,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	/* Get IPA memory range */
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "ipa");
 	if (!res) {
-		ipa_err(":get resource failed for ipa-base!\n");
 		result = -ENODEV;
 		goto err_clear_ipa_irq;
 	}
@@ -1267,11 +1266,9 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	size = (size_t)resource_size(res);
 	ipa_debug("ipa phys %pap size 0x%08zx\n", &ipa_ctx->ipa_phys, size);
 
-	/* setup IPA register access */
-	ipa_debug("Mapping %pap\n", &ipa_ctx->ipa_phys);
+	/* Setup IPA register access */
 	ipa_ctx->ipa_mmio = ioremap(ipa_ctx->ipa_phys, size);
 	if (!ipa_ctx->ipa_mmio) {
-		ipa_err(":ipa-base ioremap err.\n");
 		result = -EFAULT;
 		goto err_clear_addr;
 	}
@@ -1280,7 +1277,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 
 	ipa_ctx->gsi = gsi_init(pdev);
 	if (IS_ERR(ipa_ctx->gsi)) {
-		ipa_err("ipa: error initializing gsi driver.\n");
 		result = PTR_ERR(ipa_ctx->gsi);
 		goto err_clear_gsi;
 	}
@@ -1290,7 +1286,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 		goto err_clear_gsi;
 
 	if (ipahal_init()) {
-		ipa_err("failed to initialize IPA HAL pointer\n");
 		result = -EFAULT;
 		goto err_dma_exit;
 	}
