@@ -153,7 +153,8 @@ static void ipa_replenish_rx_cache(struct ipa_sys_context *sys);
 static void ipa_replenish_rx_work_func(struct work_struct *work);
 static void ipa_wq_handle_rx(struct work_struct *work);
 static void ipa_rx_common(struct ipa_sys_context *sys, u32 size);
-static int ipa_assign_policy(struct ipa_sys_connect_params *in,
+static int ipa_assign_policy(enum ipa_client_type client,
+			     struct ipa_sys_connect_params *in,
 			     struct ipa_sys_context *sys);
 static void ipa_cleanup_rx(struct ipa_sys_context *sys);
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
@@ -802,7 +803,7 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 	memset(ep, 0, sizeof(*ep));
 	ep->sys = sys;
 
-	if (ipa_assign_policy(sys_in, ep->sys)) {
+	if (ipa_assign_policy(sys_in->client, sys_in, ep->sys)) {
 		ipa_err("failed to sys ctx for client %d\n", sys_in->client);
 		ret = -ENOMEM;
 		goto err_client_remove;
@@ -1586,15 +1587,16 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u32 size)
 	ipa_replenish_rx_cache(sys);
 }
 
-static int ipa_assign_policy(struct ipa_sys_connect_params *in,
+static int ipa_assign_policy(enum ipa_client_type client,
+			     struct ipa_sys_connect_params *in,
 			     struct ipa_sys_context *sys)
 {
 	struct ipa_ep_cfg_aggr *ep_cfg_aggr;
 
-	if (in->client == IPA_CLIENT_APPS_CMD_PROD)
+	if (client == IPA_CLIENT_APPS_CMD_PROD)
 		return 0;
 
-	if (in->client == IPA_CLIENT_APPS_WAN_PROD) {
+	if (client == IPA_CLIENT_APPS_WAN_PROD) {
 		/* enable source notification status for exception packets
 		 * (i.e. QMAP commands) to be routed to modem.
 		 */
@@ -1626,7 +1628,7 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 	ep_cfg_aggr->aggr = IPA_GENERIC;
 	ep_cfg_aggr->aggr_time_limit = IPA_GENERIC_AGGR_TIME_LIMIT;
 
-	if (in->client == IPA_CLIENT_APPS_LAN_CONS) {
+	if (client == IPA_CLIENT_APPS_LAN_CONS) {
 		sys->rx.pyld_hdlr = ipa_lan_rx_pyld_hdlr;
 		ep_cfg_aggr->aggr_byte_limit = IPA_GENERIC_AGGR_BYTE_LIMIT;
 		ep_cfg_aggr->aggr_pkt_limit = IPA_GENERIC_AGGR_PKT_LIMIT;
@@ -1634,7 +1636,7 @@ static int ipa_assign_policy(struct ipa_sys_connect_params *in,
 		return 0;
 	}
 
-	/* in->client == IPA_CLIENT_APPS_WAN_CONS */
+	/* client == IPA_CLIENT_APPS_WAN_CONS */
 	sys->rx.pyld_hdlr = ipa_wan_rx_pyld_hdlr;
 
 	ep_cfg_aggr->aggr_sw_eof_active = true;
