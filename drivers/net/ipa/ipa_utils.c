@@ -603,22 +603,6 @@ u32 ipa_filter_bitmap_init(void)
 	return filter_bitmap;
 }
 
-static const char *ipa_get_mode_type_str(enum ipa_mode_type mode)
-{
-	switch (mode) {
-	case IPA_BASIC:
-		return "Basic";
-	case IPA_ENABLE_FRAMING_HDLC:
-		return "HDLC framing";
-	case IPA_ENABLE_DEFRAMING_HDLC:
-		return "HDLC de-framing";
-	case IPA_DMA:
-		return "DMA";
-	}
-
-	return "undefined";
-}
-
 static const char *ipa_get_aggr_enable_str(enum ipa_aggr_en_type aggr_en)
 {
 	switch (aggr_en) {
@@ -780,10 +764,6 @@ static void ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 		ipa_ep_idx = ipa_get_ep_mapping(ep_mode->dst);
 	else
 		ipa_ep_idx = ipa_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
-
-	ipa_debug("pipe=%d mode=%d(%s), dst_client_number=%d", clnt_hdl,
-		  ep_mode->mode, ipa_get_mode_type_str(ep_mode->mode),
-		  ep_mode->dst);
 
 	/* copy over EP cfg */
 	ipa_ctx->ep[clnt_hdl].cfg.mode = *ep_mode;
