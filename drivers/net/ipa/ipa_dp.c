@@ -1597,9 +1597,10 @@ static int ipa_assign_policy(enum ipa_client_type client,
  *
  * Returns:	client handle on success, negative on failure
  */
-int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
+int ipa_setup_sys_pipe(enum ipa_client_type client,
+		       struct ipa_sys_connect_params *sys_in)
 {
-	u32 ipa_ep_idx = ipa_get_ep_mapping(sys_in->client);
+	u32 ipa_ep_idx = ipa_get_ep_mapping(client);
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 	struct ipa_sys_context *sys;
 	int ret;
@@ -1613,7 +1614,7 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 	sys = ep->sys;
 	if (!sys) {
 		ret = -ENOMEM;
-		sys = ipa_ep_sys_create(sys_in->client);
+		sys = ipa_ep_sys_create(client);
 		if (!sys)
 			goto err_client_remove;
 		sys->ep = ep;
@@ -1625,14 +1626,14 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 	memset(ep, 0, sizeof(*ep));
 	ep->sys = sys;
 
-	if (ipa_assign_policy(sys_in->client, sys_in, ep->sys)) {
-		ipa_err("failed to sys ctx for client %d\n", sys_in->client);
+	if (ipa_assign_policy(client, sys_in, ep->sys)) {
+		ipa_err("failed to sys ctx for client %d\n", client);
 		ret = -ENOMEM;
 		goto err_client_remove;
 	}
 
 	ep->valid = true;
-	ep->client = sys_in->client;
+	ep->client = client;
 	ep->client_notify = sys_in->notify;
 	ep->napi_enabled = sys_in->napi_enabled;
 	ep->priv = sys_in->priv;
@@ -1649,13 +1650,13 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
 		goto err_client_remove;
 	}
 
-	if (ipa_consumer(sys_in->client))
+	if (ipa_consumer(client))
 		ipa_replenish_rx_cache(ep->sys);
 
 	ipa_client_remove();
 
-	ipa_debug("client %d (ep: %u) connected sys=%p\n", sys_in->client,
-		  ipa_ep_idx, ep->sys);
+	ipa_debug("client %d (ep: %u) connected sys=%p\n", client, ipa_ep_idx,
+		  ep->sys);
 
 	return ipa_ep_idx;
 
