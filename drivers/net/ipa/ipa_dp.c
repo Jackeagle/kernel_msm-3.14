@@ -153,9 +153,6 @@ static void ipa_replenish_rx_cache(struct ipa_sys_context *sys);
 static void ipa_replenish_rx_work_func(struct work_struct *work);
 static void ipa_wq_handle_rx(struct work_struct *work);
 static void ipa_rx_common(struct ipa_sys_context *sys, u32 size);
-static int ipa_assign_policy(enum ipa_client_type client,
-			     struct ipa_sys_connect_params *in,
-			     struct ipa_sys_context *sys);
 static void ipa_cleanup_rx(struct ipa_sys_context *sys);
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 				 struct ipa_ep_context *ep);
@@ -762,85 +759,6 @@ static struct ipa_sys_context *ipa_ep_sys_create(enum ipa_client_type client)
 	}
 
 	return sys;
-}
-
-/** ipa_setup_sys_pipe() - Setup an IPA GPI pipe and perform
- * IPA EP configuration
- * @sys_in:	[in] input needed to setup the pipe and configure EP
- *
- *  - configure the end-point registers with the supplied
- *    parameters from the user.
- *  - Creates a GPI connection with IPA.
- *  - allocate descriptor FIFO
- *
- * Returns:	client handle on success, negative on failure
- */
-int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
-{
-	u32 ipa_ep_idx = ipa_get_ep_mapping(sys_in->client);
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
-	struct ipa_sys_context *sys;
-	int ret;
-
-	if (ep->valid)
-		return -EINVAL;
-
-	ipa_client_add();
-
-	/* Reuse the endpoint's sys pointer if it is initialized */
-	sys = ep->sys;
-	if (!sys) {
-		ret = -ENOMEM;
-		sys = ipa_ep_sys_create(sys_in->client);
-		if (!sys)
-			goto err_client_remove;
-		sys->ep = ep;
-	}
-	/* Zero the "mutable" part of the system context */
-	memset(sys, 0, offsetof(struct ipa_sys_context, ep));
-
-	/* Zero the endpoint structure and record its sys pointer */
-	memset(ep, 0, sizeof(*ep));
-	ep->sys = sys;
-
-	if (ipa_assign_policy(sys_in->client, sys_in, ep->sys)) {
-		ipa_err("failed to sys ctx for client %d\n", sys_in->client);
-		ret = -ENOMEM;
-		goto err_client_remove;
-	}
-
-	ep->valid = true;
-	ep->client = sys_in->client;
-	ep->client_notify = sys_in->notify;
-	ep->napi_enabled = sys_in->napi_enabled;
-	ep->priv = sys_in->priv;
-
-	ipa_cfg_ep(ipa_ep_idx, &sys_in->ipa_ep_cfg);
-
-	ipa_cfg_ep_status(ipa_ep_idx, &ep->status);
-
-	ipa_debug("ep %u configuration successful\n", ipa_ep_idx);
-
-	ret = ipa_gsi_setup_channel(sys_in, ep);
-	if (ret) {
-		ipa_err("Failed to setup GSI channel\n");
-		goto err_client_remove;
-	}
-
-	if (ipa_consumer(sys_in->client))
-		ipa_replenish_rx_cache(ep->sys);
-
-	ipa_client_remove();
-
-	ipa_debug("client %d (ep: %u) connected sys=%p\n", sys_in->client,
-		  ipa_ep_idx, ep->sys);
-
-	return ipa_ep_idx;
-
-err_client_remove:
-	ipa_client_remove();
-
-	return ret;
 }
 
 /** ipa_teardown_sys_pipe() - Teardown the GPI pipe and cleanup IPA EP
@@ -1666,6 +1584,85 @@ static int ipa_assign_policy(enum ipa_client_type client,
 	}
 
 	return 0;
+}
+
+/** ipa_setup_sys_pipe() - Setup an IPA GPI pipe and perform
+ * IPA EP configuration
+ * @sys_in:	[in] input needed to setup the pipe and configure EP
+ *
+ *  - configure the end-point registers with the supplied
+ *    parameters from the user.
+ *  - Creates a GPI connection with IPA.
+ *  - allocate descriptor FIFO
+ *
+ * Returns:	client handle on success, negative on failure
+ */
+int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in)
+{
+	u32 ipa_ep_idx = ipa_get_ep_mapping(sys_in->client);
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+	struct ipa_sys_context *sys;
+	int ret;
+
+	if (ep->valid)
+		return -EINVAL;
+
+	ipa_client_add();
+
+	/* Reuse the endpoint's sys pointer if it is initialized */
+	sys = ep->sys;
+	if (!sys) {
+		ret = -ENOMEM;
+		sys = ipa_ep_sys_create(sys_in->client);
+		if (!sys)
+			goto err_client_remove;
+		sys->ep = ep;
+	}
+	/* Zero the "mutable" part of the system context */
+	memset(sys, 0, offsetof(struct ipa_sys_context, ep));
+
+	/* Zero the endpoint structure and record its sys pointer */
+	memset(ep, 0, sizeof(*ep));
+	ep->sys = sys;
+
+	if (ipa_assign_policy(sys_in->client, sys_in, ep->sys)) {
+		ipa_err("failed to sys ctx for client %d\n", sys_in->client);
+		ret = -ENOMEM;
+		goto err_client_remove;
+	}
+
+	ep->valid = true;
+	ep->client = sys_in->client;
+	ep->client_notify = sys_in->notify;
+	ep->napi_enabled = sys_in->napi_enabled;
+	ep->priv = sys_in->priv;
+
+	ipa_cfg_ep(ipa_ep_idx, &sys_in->ipa_ep_cfg);
+
+	ipa_cfg_ep_status(ipa_ep_idx, &ep->status);
+
+	ipa_debug("ep %u configuration successful\n", ipa_ep_idx);
+
+	ret = ipa_gsi_setup_channel(sys_in, ep);
+	if (ret) {
+		ipa_err("Failed to setup GSI channel\n");
+		goto err_client_remove;
+	}
+
+	if (ipa_consumer(sys_in->client))
+		ipa_replenish_rx_cache(ep->sys);
+
+	ipa_client_remove();
+
+	ipa_debug("client %d (ep: %u) connected sys=%p\n", sys_in->client,
+		  ipa_ep_idx, ep->sys);
+
+	return ipa_ep_idx;
+
+err_client_remove:
+	ipa_client_remove();
+
+	return ret;
 }
 
 void ipa_gsi_irq_tx_notify_cb(void *xfer_data)
