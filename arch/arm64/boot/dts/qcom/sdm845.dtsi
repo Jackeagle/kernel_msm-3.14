@@ -986,10 +986,10 @@
 		ipa: ipa@1e00000 {
 			compatible = "qcom,ipa-sdm845";
 
-			reg = <0x1e00000 0x34000>,
+			reg = <0x1e40000 0x34000>,
 			      <0x1e04000 0x2c000>;
-			reg-names = "ipa-base",
-				    "gsi-base";
+			reg-names = "ipa",
+				    "gsi";
 
 			interrupts-extended =
 					<&intc 0 311 0>,
