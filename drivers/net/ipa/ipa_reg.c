@@ -122,14 +122,14 @@ ipareg_construct_endp_init_hdr_ext_n(enum ipa_reg reg, const void *fields)
 }
 
 /* IPA_ENDP_INIT_AGGR_N register */
-#define AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK	0x01000000
-#define AGGR_FORCE_CLOSE_BMSK			0x00400000
-#define AGGR_SW_EOF_ACTIVE_BMSK			0x00200000
-#define AGGR_PKT_LIMIT_BMSK			0x001f8000
-#define AGGR_TIME_LIMIT_BMSK			0x00007c00
-#define AGGR_BYTE_LIMIT_BMSK			0x000003e0
-#define AGGR_TYPE_BMSK				0x0000001c
 #define AGGR_EN_BMSK				0x00000003
+#define AGGR_TYPE_BMSK				0x0000001c
+#define AGGR_BYTE_LIMIT_BMSK			0x000003e0
+#define AGGR_TIME_LIMIT_BMSK			0x00007c00
+#define AGGR_PKT_LIMIT_BMSK			0x001f8000
+#define AGGR_SW_EOF_ACTIVE_BMSK			0x00200000
+#define AGGR_FORCE_CLOSE_BMSK			0x00400000
+#define AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK	0x01000000
 
 static u32
 ipareg_construct_endp_init_aggr_n(enum ipa_reg reg, const void *fields)
@@ -171,12 +171,12 @@ ipareg_parse_endp_init_aggr_n(enum ipa_reg reg, void *fields, u32 val)
 #define PIPE_BITMAP_BMSK			0x000fffff
 
 /* IPA_ENDP_INIT_MODE_N register */
-#define HDR_FTCH_DISABLE_BMSK			0x40000000
-#define PAD_EN_BMSK				0x20000000
-#define PIPE_REPLICATION_EN_BMSK		0x10000000
-#define BYTE_THRESHOLD_BMSK			0x0ffff000
-#define DEST_PIPE_INDEX_BMSK			0x000001f0
 #define MODE_BMSK				0x00000007
+#define DEST_PIPE_INDEX_BMSK			0x000001f0
+#define BYTE_THRESHOLD_BMSK			0x0ffff000
+#define PIPE_REPLICATION_EN_BMSK		0x10000000
+#define PAD_EN_BMSK				0x20000000
+#define HDR_FTCH_DISABLE_BMSK			0x40000000
 
 static u32
 ipareg_construct_endp_init_mode_n(enum ipa_reg reg, const void *fields)
@@ -218,10 +218,10 @@ ipareg_parse_endp_init_ctrl_n(enum ipa_reg reg, void *fields, u32 val)
 }
 
 /* IPA_ENDP_INIT_DEAGGR_N register */
-#define MAX_PACKET_LEN_BMSK			0xffff0000
-#define PACKET_OFFSET_LOCATION_BMSK		0x00003f00
-#define PACKET_OFFSET_VALID_BMSK		0x00000080
 #define DEAGGR_HDR_LEN_BMSK			0x0000003f
+#define PACKET_OFFSET_VALID_BMSK		0x00000080
+#define PACKET_OFFSET_LOCATION_BMSK		0x00003f00
+#define MAX_PACKET_LEN_BMSK			0xffff0000
 
 static u32
 ipareg_construct_endp_init_deaggr_n(enum ipa_reg reg, const void *fields)
@@ -238,16 +238,16 @@ ipareg_construct_endp_init_deaggr_n(enum ipa_reg reg, const void *fields)
 }
 
 /* IPA_ENDP_INIT_SEQ_N register XXX */
-#define DPS_REP_SEQ_TYPE_BMSK			0x0000f000
-#define HPS_REP_SEQ_TYPE_BMSK			0x00000f00
-#define DPS_SEQ_TYPE_BMSK			0x000000f0
 #define HPS_SEQ_TYPE_BMSK			0x0000000f
+#define DPS_SEQ_TYPE_BMSK			0x000000f0
+#define HPS_REP_SEQ_TYPE_BMSK			0x00000f00
+#define DPS_REP_SEQ_TYPE_BMSK			0x0000f000
 
 /* IPA_ENDP_INIT_CFG_N register */
-#define CS_GEN_QMB_MASTER_SEL_BMSK		0x00000100
-#define CS_METADATA_HDR_OFFSET_BMSK		0x00000078
-#define CS_OFFLOAD_EN_BMSK			0x00000006
 #define FRAG_OFFLOAD_EN_BMSK			0x00000001
+#define CS_OFFLOAD_EN_BMSK			0x00000006
+#define CS_METADATA_HDR_OFFSET_BMSK		0x00000078
+#define CS_GEN_QMB_MASTER_SEL_BMSK		0x00000100
 
 static u32
 ipareg_construct_endp_init_cfg_n(enum ipa_reg reg, const void *fields)
@@ -277,8 +277,8 @@ ipareg_construct_endp_init_hdr_metadata_mask_n(enum ipa_reg reg,
 }
 
 /* IPA_SHARED_MEM_SIZE register */
-#define SHARED_MEM_BADDR_BMSK			0xffff0000
 #define SHARED_MEM_SIZE_BMSK			0x0000ffff
+#define SHARED_MEM_BADDR_BMSK			0xffff0000
 
 static void
 ipareg_parse_shared_mem_size(enum ipa_reg reg, void *fields, u32 val)
@@ -292,10 +292,10 @@ ipareg_parse_shared_mem_size(enum ipa_reg reg, void *fields, u32 val)
 }
 
 /* IPA_ENDP_STATUS_N register */
-#define STATUS_PKT_SUPPRESS_BMSK		0x00000200
-#define STATUS_LOCATION_BMSK			0x00000100
-#define STATUS_ENDP_BMSK			0x0000003e
 #define STATUS_EN_BMSK				0x00000001
+#define STATUS_ENDP_BMSK			0x0000003e
+#define STATUS_LOCATION_BMSK			0x00000100
+#define STATUS_PKT_SUPPRESS_BMSK		0x00000200
 
 static u32
 ipareg_construct_endp_status_n(enum ipa_reg reg, const void *fields)
@@ -380,10 +380,10 @@ static void ipareg_parse_hash_cfg_n(enum ipa_reg reg, void *fields, u32 val)
 }
 
 /* IPA_RSRC_GRP_XY_RSRC_TYPE_n register */
-#define Y_MAX_LIM_BMSK				0x3f000000
-#define Y_MIN_LIM_BMSK				0x003f0000
-#define X_MAX_LIM_BMSK				0x00003f00
 #define X_MIN_LIM_BMSK				0x0000003f
+#define X_MAX_LIM_BMSK				0x00003f00
+#define Y_MIN_LIM_BMSK				0x003f0000
+#define Y_MAX_LIM_BMSK				0x3f000000
 
 static u32 ipareg_construct_rsrg_grp_xy(enum ipa_reg reg, const void *fields)
 {
