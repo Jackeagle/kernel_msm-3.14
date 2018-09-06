@@ -401,7 +401,7 @@ struct ipa_dma_task_info {
 struct ipa_context {
 	u32 filter_bitmap;
 	u32 ipa_irq;
-	u32 ipa_wrapper_base;
+	phys_addr_t ipa_wrapper_base;
 	void __iomem *mmio;
 	struct gsi *gsi;
 	struct device *dev;

@@ -1268,8 +1268,8 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	}
 	ipa_ctx->ipa_wrapper_base = res->start;
 	wrapper_size = (size_t)resource_size(res);
-	ipa_debug(": ipa-base = 0x%x, size = 0x%08zx\n",
-		  ipa_ctx->ipa_wrapper_base, wrapper_size);
+	ipa_debug("ipa-base %pap size 0x%08zx\n",
+		  &ipa_ctx->ipa_wrapper_base, wrapper_size);
 
 	/* setup IPA register access */
 	phys_addr = ipa_ctx->ipa_wrapper_base + IPA_REG_BASE_OFFSET;
