@@ -320,12 +320,6 @@ ipareg_construct_endp_init_aggr_n(enum ipa_reg reg, const void *fields)
 	return val;
 }
 
-/* Values for the HDR_ENDIANNESS field, below */
-enum hdr_endianness {
-	IPA_HDR_LITTLE_ENDIAN = 0,
-	IPA_HDR_BIG_ENDIAN = 1,
-};
-
 /* IPA_ENDP_INIT_HDR_EXT_N register */
 #define HDR_ENDIANNESS_BMSK			0x00000001
 #define HDR_TOTAL_LEN_OR_PAD_VALID_BMSK		0x00000002
@@ -349,7 +343,8 @@ ipareg_construct_endp_init_hdr_ext_n(enum ipa_reg reg, const void *fields)
 			HDR_TOTAL_LEN_OR_PAD_BMSK);
 	val |= field_gen(ep_hdr_ext->hdr_total_len_or_pad_valid ? 1 : 0,
 			HDR_TOTAL_LEN_OR_PAD_VALID_BMSK);
-	val |= field_gen(IPA_HDR_BIG_ENDIAN, HDR_ENDIANNESS_BMSK);
+	/* 0 = little endian; 1 = big endian */
+	val |= field_gen(1, HDR_ENDIANNESS_BMSK);
 
 	return val;
 }
