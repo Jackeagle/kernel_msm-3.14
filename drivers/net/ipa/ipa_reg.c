@@ -249,11 +249,25 @@ ipareg_construct_endp_init_deaggr_n(enum ipa_reg reg, const void *fields)
 	return val;
 }
 
-/* IPA_ENDP_INIT_SEQ_N register XXX */
+/* IPA_ENDP_INIT_SEQ_N register */
 #define HPS_SEQ_TYPE_BMSK	0x0000000f
 #define DPS_SEQ_TYPE_BMSK	0x000000f0
 #define HPS_REP_SEQ_TYPE_BMSK	0x00000f00
 #define DPS_REP_SEQ_TYPE_BMSK	0x0000f000
+
+static u32
+ipareg_construct_endp_init_seq_n(enum ipa_reg reg, const void *fields)
+{
+	const struct ipa_reg_ep_init_seq *ep_seq = fields;
+	u32 val;
+
+	val = field_gen(0, DPS_REP_SEQ_TYPE_BMSK);
+	val |= field_gen(0, HPS_REP_SEQ_TYPE_BMSK);
+	val |= field_gen(0, DPS_SEQ_TYPE_BMSK);
+	val |= field_gen(ep_seq->hps_seq_type, HPS_SEQ_TYPE_BMSK);
+
+	return val;
+}
 
 /* IPA_ENDP_INIT_CFG_N register */
 #define FRAG_OFFLOAD_EN_BMSK		0x00000001
@@ -528,7 +542,8 @@ static const struct ipa_reg_obj ipa_regs[] = {
 		     endp_init_ctrl_n,			0x00000800,	0x0070),
 	reg_obj_cfunc(IPA_ENDP_INIT_DEAGGR_N,
 		      endp_init_deaggr_n,		0x00000834,	0x0070),
-	reg_obj_nofunc(IPA_ENDP_INIT_SEQ_N,		0x0000083c,	0x0070),
+	reg_obj_cfunc(IPA_ENDP_INIT_SEQ_N,
+		      endp_init_seq_n,			0x0000083c,	0x0070),
 	reg_obj_cfunc(IPA_ENDP_INIT_CFG_N,
 		      endp_init_cfg_n,			0x00000808,	0x0070),
 	reg_obj_nofunc(IPA_IRQ_EE_UC_N,			0x0000301c,	0x1000),

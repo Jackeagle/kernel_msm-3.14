@@ -94,6 +94,14 @@ struct ipa_reg_ep_init_ctrl {
 	bool ipa_ep_delay;
 };
 
+/** struct ipa_ep_init_seq - Sequencer configuration in IPA end-point
+ *
+ * @hps_seq_type: type of HPS sequencer (enum ipa_hps_dps_sequencer_type)
+ */
+struct ipa_reg_ep_init_seq {
+	u32 hps_seq_type;
+};
+
 /* struct ipa_reg_shared_mem_size - IPA SHARED_MEM_SIZE register
  * @shared_mem_sz: Available size [in 8Bytes] of SW partition within
  *	IPA shared memory.

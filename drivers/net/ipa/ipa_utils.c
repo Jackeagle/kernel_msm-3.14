@@ -782,10 +782,10 @@ static void ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 static void ipa_cfg_ep_seq(u32 clnt_hdl)
 {
 	enum ipa_client_type client = ipa_ctx->ep[clnt_hdl].client;
-	int type = ep_configuration(client)->sequencer_type;
+	struct ipa_reg_ep_init_seq ep_seq = { };
 
-	ipa_debug("set sequencers to sequence 0x%x, ep = %d\n", type, clnt_hdl);
-	ipahal_write_reg_n(IPA_ENDP_INIT_SEQ_N, clnt_hdl, type);
+	ep_seq.hps_seq_type = (u32)ep_configuration(client)->sequencer_type;
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_SEQ_N, clnt_hdl, &ep_seq);
 }
 
 /** ipa_cfg_ep_deaggr() -  IPA end-point deaggregation configuration
