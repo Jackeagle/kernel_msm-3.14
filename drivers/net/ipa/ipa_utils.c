@@ -733,7 +733,9 @@ static void ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 static void ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 {
 	/* copy over EP cfg */
-	ipa_ctx->ep[clnt_hdl].cfg.cfg = *cfg;
+	ipa_ctx->ep[clnt_hdl].cfg.cfg.cs_offload_en = cfg->cs_offload_en;
+	ipa_ctx->ep[clnt_hdl].cfg.cfg.cs_metadata_hdr_offset =
+			cfg->cs_metadata_hdr_offset;
 
 	/* Override QMB master selection */
 	ipa_debug("pipe=%d, frag_ofld_en=0 cs_ofld_en=%d\n",
