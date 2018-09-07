@@ -76,11 +76,11 @@ struct ipa_reg_aggr_force_close {
  * @dst_pipe_number: This parameter specifies destination output-pipe-packets
  *	will be routed to. Valid for DMA mode only and for Input
  *	Pipes only (IPA Consumer)
- * @mode: endpoint mode setting (DMA, BASIC, FRAMING_HDLC, DEFRAMING_HDLC)
+ * @mode: endpoint mode setting (enum ipa_mode_type)
  */
 struct ipa_reg_endp_init_mode {
 	u32 dst_pipe_number;
-	enum ipa_mode_type mode;
+	u32 mode;
 };
 
 /** struct ipa_ep_init_ctrl - Control configuration in IPA end-point
