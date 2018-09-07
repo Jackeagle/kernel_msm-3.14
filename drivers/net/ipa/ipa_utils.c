@@ -692,7 +692,12 @@ ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
 	ep = &ipa_ctx->ep[clnt_hdl];
 
 	/* copy over EP cfg */
-	ep->cfg.hdr_ext = *ep_hdr_ext;
+	ep->cfg.hdr_ext.hdr_pad_to_alignment = ep_hdr_ext->hdr_pad_to_alignment;
+	ep->cfg.hdr_ext.hdr_payload_len_inc_padding =
+			ep_hdr_ext->hdr_payload_len_inc_padding;
+	ep->cfg.hdr_ext.hdr_total_len_or_pad = ep_hdr_ext->hdr_total_len_or_pad;
+	ep->cfg.hdr_ext.hdr_total_len_or_pad_valid =
+			ep_hdr_ext->hdr_total_len_or_pad_valid;
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_N, clnt_hdl,
 				  &ep->cfg.hdr_ext);
