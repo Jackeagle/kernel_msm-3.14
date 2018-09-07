@@ -371,21 +371,21 @@ static u32 ipareg_construct_hash_cfg_n(enum ipa_reg reg, const void *fields)
 	u32 val;
 
 	val = field_gen(tuple->flt.src_id, FILTER_HASH_MSK_SRC_ID_BMSK);
-	val |= field_gen(tuple->flt.src_ip_addr, FILTER_HASH_MSK_SRC_IP_BMSK);
-	val |= field_gen(tuple->flt.dst_ip_addr, FILTER_HASH_MSK_DST_IP_BMSK);
+	val |= field_gen(tuple->flt.src_ip, FILTER_HASH_MSK_SRC_IP_BMSK);
+	val |= field_gen(tuple->flt.dst_ip, FILTER_HASH_MSK_DST_IP_BMSK);
 	val |= field_gen(tuple->flt.src_port, FILTER_HASH_MSK_SRC_PORT_BMSK);
 	val |= field_gen(tuple->flt.dst_port, FILTER_HASH_MSK_DST_PORT_BMSK);
 	val |= field_gen(tuple->flt.protocol, FILTER_HASH_MSK_PROTOCOL_BMSK);
-	val |= field_gen(tuple->flt.meta_data, FILTER_HASH_MSK_METADATA_BMSK);
+	val |= field_gen(tuple->flt.metadata, FILTER_HASH_MSK_METADATA_BMSK);
 	val |= field_gen(tuple->undefined1, FILTER_HASH_UNDEFINED1_BMSK);
 
 	val |= field_gen(tuple->rt.src_id, ROUTER_HASH_MSK_SRC_ID_BMSK);
-	val |= field_gen(tuple->rt.src_ip_addr, ROUTER_HASH_MSK_SRC_IP_BMSK);
-	val |= field_gen(tuple->rt.dst_ip_addr, ROUTER_HASH_MSK_DST_IP_BMSK);
+	val |= field_gen(tuple->rt.src_ip, ROUTER_HASH_MSK_SRC_IP_BMSK);
+	val |= field_gen(tuple->rt.dst_ip, ROUTER_HASH_MSK_DST_IP_BMSK);
 	val |= field_gen(tuple->rt.src_port, ROUTER_HASH_MSK_SRC_PORT_BMSK);
 	val |= field_gen(tuple->rt.dst_port, ROUTER_HASH_MSK_DST_PORT_BMSK);
 	val |= field_gen(tuple->rt.protocol, ROUTER_HASH_MSK_PROTOCOL_BMSK);
-	val |= field_gen(tuple->rt.meta_data, ROUTER_HASH_MSK_METADATA_BMSK);
+	val |= field_gen(tuple->rt.metadata, ROUTER_HASH_MSK_METADATA_BMSK);
 	val |= field_gen(tuple->undefined2, ROUTER_HASH_UNDEFINED2_BMSK);
 
 	return val;
@@ -398,21 +398,21 @@ static void ipareg_parse_hash_cfg_n(enum ipa_reg reg, void *fields, u32 val)
 	memset(tuple, 0, sizeof(*tuple));
 
 	tuple->flt.src_id = field_val(val, FILTER_HASH_MSK_SRC_ID_BMSK);
-	tuple->flt.src_ip_addr = field_val(val, FILTER_HASH_MSK_SRC_IP_BMSK);
-	tuple->flt.dst_ip_addr = field_val(val, FILTER_HASH_MSK_DST_IP_BMSK);
+	tuple->flt.src_ip = field_val(val, FILTER_HASH_MSK_SRC_IP_BMSK);
+	tuple->flt.dst_ip = field_val(val, FILTER_HASH_MSK_DST_IP_BMSK);
 	tuple->flt.src_port = field_val(val, FILTER_HASH_MSK_SRC_PORT_BMSK);
 	tuple->flt.dst_port = field_val(val, FILTER_HASH_MSK_DST_PORT_BMSK);
 	tuple->flt.protocol = field_val(val, FILTER_HASH_MSK_PROTOCOL_BMSK);
-	tuple->flt.meta_data = field_val(val, FILTER_HASH_MSK_METADATA_BMSK);
+	tuple->flt.metadata = field_val(val, FILTER_HASH_MSK_METADATA_BMSK);
 	tuple->undefined1 = field_val(val, FILTER_HASH_UNDEFINED1_BMSK);
 
 	tuple->rt.src_id = field_val(val, ROUTER_HASH_MSK_SRC_ID_BMSK);
-	tuple->rt.src_ip_addr = field_val(val, ROUTER_HASH_MSK_SRC_IP_BMSK);
-	tuple->rt.dst_ip_addr = field_val(val, ROUTER_HASH_MSK_DST_IP_BMSK);
+	tuple->rt.src_ip = field_val(val, ROUTER_HASH_MSK_SRC_IP_BMSK);
+	tuple->rt.dst_ip = field_val(val, ROUTER_HASH_MSK_DST_IP_BMSK);
 	tuple->rt.src_port = field_val(val, ROUTER_HASH_MSK_SRC_PORT_BMSK);
 	tuple->rt.dst_port = field_val(val, ROUTER_HASH_MSK_DST_PORT_BMSK);
 	tuple->rt.protocol = field_val(val, ROUTER_HASH_MSK_PROTOCOL_BMSK);
-	tuple->rt.meta_data = field_val(val, ROUTER_HASH_MSK_METADATA_BMSK);
+	tuple->rt.metadata = field_val(val, ROUTER_HASH_MSK_METADATA_BMSK);
 	tuple->undefined2 = field_val(val, ROUTER_HASH_UNDEFINED2_BMSK);
 }
 

@@ -275,12 +275,12 @@ struct ipa_reg_ep_status {
 struct ipa_reg_hash_tuple {
 	/* src_id: pipe in flt, tbl index in rt */
 	bool src_id;
-	bool src_ip_addr;
-	bool dst_ip_addr;
+	bool src_ip;
+	bool dst_ip;
 	bool src_port;
 	bool dst_port;
 	bool protocol;
-	bool meta_data;
+	bool metadata;
 };
 
 /* struct ipa_reg_fltrt_hash_tuple - IPA hash tuple register
