@@ -719,7 +719,16 @@ static void ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 		  ep_aggr->aggr_sw_eof_active ? "true" : "false");
 
 	/* copy over EP cfg */
-	ipa_ctx->ep[clnt_hdl].cfg.aggr = *ep_aggr;
+	ipa_ctx->ep[clnt_hdl].cfg.aggr.aggr_en = ep_aggr->aggr_en;
+	ipa_ctx->ep[clnt_hdl].cfg.aggr.aggr = ep_aggr->aggr;
+	ipa_ctx->ep[clnt_hdl].cfg.aggr.aggr_byte_limit =
+			ep_aggr->aggr_byte_limit;
+	ipa_ctx->ep[clnt_hdl].cfg.aggr.aggr_time_limit =
+			ep_aggr->aggr_time_limit;
+	ipa_ctx->ep[clnt_hdl].cfg.aggr.aggr_pkt_limit =
+			ep_aggr->aggr_pkt_limit;
+	ipa_ctx->ep[clnt_hdl].cfg.aggr.aggr_hard_byte_limit_en =
+			ep_aggr->aggr_hard_byte_limit_en;
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_AGGR_N, clnt_hdl, ep_aggr);
 }
