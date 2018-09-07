@@ -848,13 +848,18 @@ static void ipa_cfg_ep_seq(u32 clnt_hdl)
  */
 static void ipa_cfg_ep_deaggr(u32 clnt_hdl)
 {
+	struct ipa_reg_ep_init_deaggr deaggr;
+
 	ipa_debug("pipe=%d deaggr_hdr_len=0\n", clnt_hdl);
 	ipa_debug("packet_offset_valid=0\n");
 	ipa_debug("packet_offset_location=0 max_packet_len=0\n");
 
-	/* All fields are 0 for all pipes */
+	deaggr.deaggr_hdr_len = 0;
+	deaggr.packet_offset_valid = false;
+	deaggr.packet_offset_location = 0;
+	deaggr.max_packet_len = 0;
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_N, clnt_hdl, NULL);
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_N, clnt_hdl, &deaggr);
 }
 
 /** ipa_cfg_ep_metadata_mask() - IPA end-point meta-data mask configuration

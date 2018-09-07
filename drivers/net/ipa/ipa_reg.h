@@ -167,6 +167,20 @@ struct ipa_reg_ep_init_ctrl {
 	bool ipa_ep_delay;
 };
 
+/** struct ipa_reg_ep_init_deaggr - endpoint deaggregation register
+ *
+ * @deaggr_hdr_len:
+ * @packet_offset_valid:
+ * @packet_offset_location:
+ * @max_packet_len:
+ */
+struct ipa_reg_ep_init_deaggr {
+	u32 deaggr_hdr_len;
+	bool packet_offset_valid;
+	u32 packet_offset_location;
+	u32 max_packet_len;
+};
+
 /** struct ipa_ep_init_seq - Sequencer configuration in IPA end-point
  *
  * @hps_seq_type: type of HPS sequencer (enum ipa_hps_dps_sequencer_type)

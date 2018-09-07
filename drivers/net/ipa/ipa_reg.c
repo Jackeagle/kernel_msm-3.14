@@ -243,13 +243,15 @@ ipareg_parse_endp_init_ctrl_n(enum ipa_reg reg, void *fields, u32 val)
 static u32
 ipareg_construct_endp_init_deaggr_n(enum ipa_reg reg, const void *fields)
 {
+	const struct ipa_reg_ep_init_deaggr *deaggr = fields;
 	u32 val;
 
 	/* fields value is completely ignored (can be NULL) */
-	val = field_gen(0, DEAGGR_HDR_LEN_BMSK);
-	val |= field_gen(0, PACKET_OFFSET_VALID_BMSK);
-	val |= field_gen(0, PACKET_OFFSET_LOCATION_BMSK);
-	val |= field_gen(0, MAX_PACKET_LEN_BMSK);
+	val = field_gen(deaggr->deaggr_hdr_len, DEAGGR_HDR_LEN_BMSK);
+	val |= field_gen(deaggr->packet_offset_valid, PACKET_OFFSET_VALID_BMSK);
+	val |= field_gen(deaggr->packet_offset_location,
+			PACKET_OFFSET_LOCATION_BMSK);
+	val |= field_gen(deaggr->max_packet_len, MAX_PACKET_LEN_BMSK);
 
 	return val;
 }
