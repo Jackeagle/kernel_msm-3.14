@@ -244,7 +244,7 @@ struct ipa_reg_shared_mem_size {
  *	Status indications only if bit is set. Input Pipe - forward Status
  *	indication to STATUS_ENDP only if bit is set. Valid for Input
  *	and Output Pipes (IPA Consumer and Producer)
- * @status_ep: Statuses generated for this endpoint will be forwarded to the
+ * @status_endp: Statuses generated for this endpoint will be forwarded to the
  *	specified Status End Point. Status endpoint needs to be
  *	configured with STATUS_EN=1 Valid only for Input Pipes (IPA
  *	Consumer)
@@ -256,7 +256,7 @@ struct ipa_reg_shared_mem_size {
  */
 struct ipa_reg_ep_status {
 	bool status_en;
-	u32 status_ep;
+	u32 status_endp;
 	bool status_location;
 	u32 status_pkt_suppress;
 };

@@ -339,7 +339,7 @@ ipareg_construct_endp_status_n(enum ipa_reg reg, const void *fields)
 	u32 val;
 
 	val = field_gen(ep_status->status_en, STATUS_EN_BMSK);
-	val |= field_gen(ep_status->status_ep, STATUS_ENDP_BMSK);
+	val |= field_gen(ep_status->status_endp, STATUS_ENDP_BMSK);
 	val |= field_gen(ep_status->status_location, STATUS_LOCATION_BMSK);
 	val |= field_gen(0, STATUS_PKT_SUPPRESS_BMSK);
 

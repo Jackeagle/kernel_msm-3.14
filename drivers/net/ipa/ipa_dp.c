@@ -1460,7 +1460,7 @@ static int ipa_assign_policy(enum ipa_client_type client,
 		 * (i.e. QMAP commands) to be routed to modem.
 		 */
 		sys->ep->status.status_en = true;
-		sys->ep->status.status_ep =
+		sys->ep->status.status_endp =
 			ipa_get_ep_mapping(IPA_CLIENT_Q6_WAN_CONS);
 
 		/* For the WAN producer, use a deferred interrupting no-op */
