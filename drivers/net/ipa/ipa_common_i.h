@@ -313,7 +313,6 @@ struct ipa_ep_cfg_hdr_ext {
  */
 struct ipa_ep_cfg_mode {
 	enum ipa_mode_type mode;
-	enum ipa_client_type dst;
 };
 
 /** struct ipa_ep_cfg_aggr - aggregation configuration in IPA end-point
