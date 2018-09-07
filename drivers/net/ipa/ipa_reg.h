@@ -60,7 +60,7 @@ struct ipa_reg_route {
 	u32 route_def_pipe;
 	u32 route_def_hdr_table;
 	u32 route_def_hdr_ofst;
-	u8  route_frag_def_pipe;
+	u32 route_frag_def_pipe;
 	u32 route_def_retain_hdr;
 };
 
@@ -241,9 +241,9 @@ struct ipa_reg_ep_init_hdr_metadata_mask {
  */
 struct ipa_reg_ep_status {
 	bool status_en;
-	u8 status_ep;
+	u32 status_ep;
 	bool status_location;
-	u8 status_pkt_suppress;
+	u32 status_pkt_suppress;
 };
 
 /* struct ipa_hash_tuple - Hash tuple members for flt and rt
@@ -320,7 +320,7 @@ struct ipa_reg_qsb_max_reads {
  * @enter_idle_debounce_thresh:	 configure the debounce threshold
  */
 struct ipa_reg_idle_indication_cfg {
-	u16 enter_idle_debounce_thresh;
+	u32 enter_idle_debounce_thresh;
 	bool const_non_idle_enable;
 };
 
