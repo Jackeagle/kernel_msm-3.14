@@ -297,7 +297,7 @@ static u32
 ipareg_construct_endp_init_hdr_metadata_mask_n(enum ipa_reg reg,
 					       const void *fields)
 {
-	const struct ipa_ep_cfg_metadata_mask *metadata_mask = fields;
+	const struct ipa_reg_ep_init_hdr_metadata_mask *metadata_mask = fields;
 
 	return field_gen(metadata_mask->metadata_mask, METADATA_MASK_BMSK);
 }

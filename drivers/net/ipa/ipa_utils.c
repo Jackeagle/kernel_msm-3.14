@@ -833,15 +833,18 @@ static void
 ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
 			 const struct ipa_ep_cfg_metadata_mask *metadata_mask)
 {
+	struct ipa_reg_ep_init_hdr_metadata_mask mask;
+
 	ipa_debug("pipe=%d, metadata_mask=0x%x\n", clnt_hdl,
 		  metadata_mask->metadata_mask);
 
 	/* copy over EP cfg */
 	ipa_ctx->ep[clnt_hdl].cfg.metadata_mask.metadata_mask =
 			metadata_mask->metadata_mask;
+	mask.metadata_mask = metadata_mask->metadata_mask;
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_N,
-				  clnt_hdl, metadata_mask);
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_N, clnt_hdl,
+				  &mask);
 }
 
 /** ipa_cfg_ep - IPA end-point configuration

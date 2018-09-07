@@ -115,6 +115,16 @@ struct ipa_reg_shared_mem_size {
 	u32 shared_mem_baddr;
 };
 
+/** struct ipa_reg_ep_init_hdr_metadata_mask - Endpoint hdr metadata mask
+ *
+ * @metadata_mask: mask specifying metadata bits to write
+ *
+ *  Valid for producer pipes only.
+ */
+struct ipa_reg_ep_init_hdr_metadata_mask {
+	u32 metadata_mask;
+};
+
 /* struct ipa_reg_ep_status - status configuration in IPA end-point
  * @status_en: Determines if end point supports Status Indications. SW should
  *	set this bit in order to enable Statuses. Output Pipe - send
