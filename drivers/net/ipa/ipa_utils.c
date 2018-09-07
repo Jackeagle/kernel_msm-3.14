@@ -826,6 +826,7 @@ ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
 
 /** ipa_cfg_ep - IPA end-point configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
+ * @dst:	[in] destination client handle (ignored for consumer clients)
  * @ipa_ep_cfg: [in] IPA end-point configuration params
  *
  * This includes nat, IPv6CT, header, mode, aggregation and route settings and
@@ -835,7 +836,8 @@ ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
  *
  * Note:	Should not be called from atomic context
  */
-void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
+void ipa_cfg_ep(u32 clnt_hdl, enum ipa_client_type dst,
+		const struct ipa_ep_cfg *ipa_ep_cfg)
 {
 	ipa_cfg_ep_hdr(clnt_hdl, &ipa_ep_cfg->hdr);
 	ipa_cfg_ep_hdr_ext(clnt_hdl, &ipa_ep_cfg->hdr_ext);
@@ -845,8 +847,7 @@ void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 	ipa_cfg_ep_cfg(clnt_hdl, &ipa_ep_cfg->cfg);
 
 	if (ipa_producer(ipa_ctx->ep[clnt_hdl].client)) {
-		ipa_cfg_ep_mode(clnt_hdl, ipa_ep_cfg->mode.dst,
-				&ipa_ep_cfg->mode);
+		ipa_cfg_ep_mode(clnt_hdl, dst, &ipa_ep_cfg->mode);
 		ipa_cfg_ep_seq(clnt_hdl);
 
 		ipa_cfg_ep_deaggr(clnt_hdl);

@@ -1685,7 +1685,8 @@ int ipa_setup_sys_pipe(enum ipa_client_type client, u32 chan_count,
 	ep->napi_enabled = sys_in->napi_enabled;
 	ep->priv = sys_in->priv;
 
-	ipa_cfg_ep(ipa_ep_idx, &sys_in->ipa_ep_cfg);
+	ipa_cfg_ep(ipa_ep_idx, sys_in->ipa_ep_cfg.mode.dst,
+		   &sys_in->ipa_ep_cfg);
 
 	ipa_cfg_ep_status(ipa_ep_idx, &ep->status);
 

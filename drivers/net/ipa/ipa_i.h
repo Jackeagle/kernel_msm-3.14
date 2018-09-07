@@ -436,7 +436,8 @@ int ipa_stop_gsi_channel(u32 clnt_hdl);
 void ipa_reset_gsi_channel(u32 clnt_hdl);
 
 /* Configuration */
-void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg);
+void ipa_cfg_ep(u32 clnt_hdl, enum ipa_client_type dst,
+		const struct ipa_ep_cfg *ipa_ep_cfg);
 
 /* Data path */
 int ipa_tx_dp(enum ipa_client_type dst, struct sk_buff *skb);
