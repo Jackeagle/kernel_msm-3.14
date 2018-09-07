@@ -322,7 +322,7 @@ ipareg_parse_shared_mem_size(enum ipa_reg reg, void *fields, u32 val)
 
 	memset(smem_sz, 0, sizeof(*smem_sz));
 
-	smem_sz->shared_mem_sz = field_val(val, SHARED_MEM_SIZE_BMSK);
+	smem_sz->shared_mem_size = field_val(val, SHARED_MEM_SIZE_BMSK);
 	smem_sz->shared_mem_baddr = field_val(val, SHARED_MEM_BADDR_BMSK);
 }
 

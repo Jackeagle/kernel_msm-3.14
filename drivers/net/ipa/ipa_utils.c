@@ -552,7 +552,7 @@ void ipa_sram_settings_read(void)
 
 	/* reg fields are in 8B units */
 	ipa_ctx->smem_offset = smem_sz.shared_mem_baddr * 8;
-	ipa_ctx->smem_size = smem_sz.shared_mem_sz * 8;
+	ipa_ctx->smem_size = smem_sz.shared_mem_size * 8;
 }
 
 /** ipa_cfg_qsb() - Configure IPA QSB maximal reads and writes

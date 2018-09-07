@@ -227,14 +227,14 @@ struct ipa_reg_ep_init_hdr_metadata_mask {
 };
 
 /* struct ipa_reg_shared_mem_size - IPA SHARED_MEM_SIZE register
- * @shared_mem_sz: Available size [in 8Bytes] of SW partition within
+ * @shared_mem_size: Available size [in 8Bytes] of SW partition within
  *	IPA shared memory.
  * @shared_mem_baddr: Offset of SW partition within IPA
  *	shared memory[in 8Bytes]. To get absolute address of SW partition,
  *	add this offset to IPA_SRAM_DIRECT_ACCESS_N baddr.
  */
 struct ipa_reg_shared_mem_size {
-	u32 shared_mem_sz;
+	u32 shared_mem_size;
 	u32 shared_mem_baddr;
 };
 
