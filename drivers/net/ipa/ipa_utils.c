@@ -787,8 +787,10 @@ static void ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 	ipa_ctx->ep[clnt_hdl].cfg.cfg.cs_metadata_hdr_offset =
 			cfg->cs_metadata_hdr_offset;
 
+	init_cfg.frag_offload_en = 0;
 	init_cfg.cs_offload_en = cfg->cs_offload_en;
 	init_cfg.cs_metadata_hdr_offset = cfg->cs_metadata_hdr_offset;
+	init_cfg.cs_gen_qmb_master_sel = 0;
 
 	/* Override QMB master selection */
 	ipa_debug("pipe=%d, frag_ofld_en=0 cs_ofld_en=%d\n",
