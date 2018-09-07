@@ -155,7 +155,7 @@ static void ipa_wq_handle_rx(struct work_struct *work);
 static void ipa_rx_common(struct ipa_sys_context *sys, u32 size);
 static void ipa_cleanup_rx(struct ipa_sys_context *sys);
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
-				 struct ipa_ep_context *ep);
+				 struct ipa_ep_context *ep, u32 chan_count);
 static int ipa_poll_gsi_pkt(struct ipa_sys_context *sys);
 
 static u32 ipa_adjust_ra_buff_base_sz(u32 aggr_byte_limit);
@@ -1644,7 +1644,7 @@ int ipa_setup_sys_pipe(enum ipa_client_type client,
 
 	ipa_debug("ep %u configuration successful\n", ipa_ep_idx);
 
-	ret = ipa_gsi_setup_channel(sys_in, ep);
+	ret = ipa_gsi_setup_channel(sys_in, ep, sys_in->fifo_count);
 	if (ret) {
 		ipa_err("Failed to setup GSI channel\n");
 		goto err_client_remove;
@@ -1722,13 +1722,13 @@ static long evt_ring_hdl_get(struct ipa_ep_context *ep, u32 fifo_count)
 }
 
 static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
-				 struct ipa_ep_context *ep)
+				 struct ipa_ep_context *ep, u32 chan_count)
 {
 	struct gsi_chan_props gsi_channel_props = { };
 	const struct ipa_gsi_ep_config *gsi_ep_info;
 	int result;
 
-	result = evt_ring_hdl_get(ep, in->fifo_count);
+	result = evt_ring_hdl_get(ep, chan_count);
 	if (result < 0)
 		return result;
 	ep->gsi_evt_ring_hdl = result;
@@ -1746,7 +1746,7 @@ static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
 	gsi_channel_props.chan_user_data = ep->sys;
 
 	gsi_channel_props.ring_count = ipa_gsi_ring_count(ep->client,
-							  in->fifo_count);
+							  chan_count);
 
 	result = gsi_alloc_channel(ipa_ctx->gsi, &gsi_channel_props);
 	if (result < 0)
