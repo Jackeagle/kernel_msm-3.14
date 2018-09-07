@@ -192,7 +192,7 @@ ipareg_construct_endp_init_mode_n(enum ipa_reg reg, const void *fields)
 	const struct ipa_reg_endp_init_mode *init_mode = fields;
 	u32 val;
 
-	val = field_gen(init_mode->ep_mode.mode, MODE_BMSK);
+	val = field_gen(init_mode->mode, MODE_BMSK);
 	val |= field_gen(init_mode->dst_pipe_number, DEST_PIPE_INDEX_BMSK);
 	val |= field_gen(0, BYTE_THRESHOLD_BMSK);
 	val |= field_gen(0, PIPE_REPLICATION_EN_BMSK);
