@@ -115,6 +115,18 @@ struct ipa_reg_shared_mem_size {
 	u32 shared_mem_baddr;
 };
 
+/** struct ipa_reg_ep_init_cfg - endpoint initial configuration
+ *
+ * @cs_offload_en: type of offloading (enum ipa_cs_offload)
+ * @cs_metadata_hdr_offset: offload (in 4-byte words) within header
+ * where 4-byte checksum metadata begins.  Valid only for consumer
+ * pipes.
+ */
+struct ipa_reg_ep_init_cfg {
+	u32 cs_offload_en;
+	u32 cs_metadata_hdr_offset;
+};
+
 /** struct ipa_reg_ep_init_hdr_metadata_mask - Endpoint hdr metadata mask
  *
  * @metadata_mask: mask specifying metadata bits to write

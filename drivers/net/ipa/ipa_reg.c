@@ -278,7 +278,7 @@ ipareg_construct_endp_init_seq_n(enum ipa_reg reg, const void *fields)
 static u32
 ipareg_construct_endp_init_cfg_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_ep_cfg_cfg *cfg = fields;
+	const struct ipa_reg_ep_init_cfg *cfg = fields;
 	u32 val;
 
 	val = field_gen(0, FRAG_OFFLOAD_EN_BMSK);
