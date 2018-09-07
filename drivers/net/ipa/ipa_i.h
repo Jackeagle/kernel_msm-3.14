@@ -209,7 +209,6 @@ typedef void (*ipa_irq_handler_t)(enum ipa_irq_type interrupt,
  */
 struct ipa_sys_connect_params {
 	struct ipa_ep_cfg ipa_ep_cfg;
-	u32 fifo_count;
 	void *priv;
 	ipa_notify_cb notify;
 	bool napi_enabled;
@@ -443,7 +442,7 @@ void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg);
 int ipa_tx_dp(enum ipa_client_type dst, struct sk_buff *skb);
 
 /* System pipes */
-int ipa_setup_sys_pipe(enum ipa_client_type client,
+int ipa_setup_sys_pipe(enum ipa_client_type client, u32 chan_count,
 		       struct ipa_sys_connect_params *sys_in);
 
 void ipa_teardown_sys_pipe(u32 clnt_hdl);

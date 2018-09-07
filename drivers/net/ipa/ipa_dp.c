@@ -1644,7 +1644,7 @@ fail_alloc_channel:
  *
  * Returns:	client handle on success, negative on failure
  */
-int ipa_setup_sys_pipe(enum ipa_client_type client,
+int ipa_setup_sys_pipe(enum ipa_client_type client, u32 chan_count,
 		       struct ipa_sys_connect_params *sys_in)
 {
 	u32 ipa_ep_idx = ipa_get_ep_mapping(client);
@@ -1691,7 +1691,7 @@ int ipa_setup_sys_pipe(enum ipa_client_type client,
 
 	ipa_debug("ep %u configuration successful\n", ipa_ep_idx);
 
-	ret = ipa_gsi_setup_channel(sys_in, ep, sys_in->fifo_count);
+	ret = ipa_gsi_setup_channel(sys_in, ep, chan_count);
 	if (ret) {
 		ipa_err("Failed to setup GSI channel\n");
 		goto err_client_remove;

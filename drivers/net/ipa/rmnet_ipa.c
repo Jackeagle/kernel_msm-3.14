@@ -238,6 +238,7 @@ static int handle_ingress_format(struct net_device *dev,
 {
 	struct ipa_sys_connect_params *wan_cfg;
 	enum ipa_client_type client = IPA_CLIENT_APPS_WAN_CONS;
+	u32 chan_count = IPA_APPS_WWAN_CONS_RING_COUNT;
 	struct ipa_ep_cfg *ep_cfg;
 	int ret;
 
@@ -274,11 +275,10 @@ static int handle_ingress_format(struct net_device *dev,
 	wan_cfg->priv = dev;
 
 	wan_cfg->napi_enabled = true;
-	wan_cfg->fifo_count = IPA_APPS_WWAN_CONS_RING_COUNT;
 
 	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
-	ret = ipa_setup_sys_pipe(client, wan_cfg);
+	ret = ipa_setup_sys_pipe(client, chan_count, wan_cfg);
 	if (ret < 0) {
 		mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
@@ -297,6 +297,7 @@ static int handle_egress_format(struct net_device *dev,
 {
 	struct ipa_sys_connect_params *wan_cfg;
 	enum ipa_client_type client = IPA_CLIENT_APPS_WAN_PROD;
+	u32 chan_count = IPA_APPS_WWAN_PROD_RING_COUNT;
 	struct ipa_ep_cfg *ep_cfg;
 	int ret;
 
@@ -331,12 +332,11 @@ static int handle_egress_format(struct net_device *dev,
 	ep_cfg->mode.mode = IPA_BASIC;
 
 	wan_cfg->notify = apps_ipa_tx_complete_notify;
-	wan_cfg->fifo_count = IPA_APPS_WWAN_PROD_RING_COUNT;
 	wan_cfg->priv = dev;
 
 	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
-	ret = ipa_setup_sys_pipe(client, wan_cfg);
+	ret = ipa_setup_sys_pipe(client, chan_count, wan_cfg);
 	if (ret < 0) {
 		mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
