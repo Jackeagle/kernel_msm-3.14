@@ -195,6 +195,9 @@ struct ipa_reg_ep_init_deaggr {
  */
 struct ipa_reg_ep_init_seq {
 	u32 hps_seq_type;
+	u32 dps_seq_type;
+	u32 hps_rep_seq_type;
+	u32 dps_rep_seq_type;
 };
 
 /* struct ipa_reg_shared_mem_size - IPA SHARED_MEM_SIZE register

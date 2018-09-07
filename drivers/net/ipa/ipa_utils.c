@@ -845,6 +845,10 @@ static void ipa_cfg_ep_seq(u32 clnt_hdl)
 	struct ipa_reg_ep_init_seq ep_seq = { };
 
 	ep_seq.hps_seq_type = (u32)ep_configuration(client)->sequencer_type;
+	ep_seq.dps_seq_type = 0;
+	ep_seq.hps_rep_seq_type = 0;
+	ep_seq.dps_rep_seq_type = 0;
+
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_SEQ_N, clnt_hdl, &ep_seq);
 }
 

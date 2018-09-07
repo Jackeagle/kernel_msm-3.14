@@ -269,10 +269,10 @@ ipareg_construct_endp_init_seq_n(enum ipa_reg reg, const void *fields)
 	const struct ipa_reg_ep_init_seq *ep_seq = fields;
 	u32 val;
 
-	val = field_gen(0, DPS_REP_SEQ_TYPE_BMSK);
-	val |= field_gen(0, HPS_REP_SEQ_TYPE_BMSK);
-	val |= field_gen(0, DPS_SEQ_TYPE_BMSK);
-	val |= field_gen(ep_seq->hps_seq_type, HPS_SEQ_TYPE_BMSK);
+	val = field_gen(ep_seq->hps_seq_type, HPS_SEQ_TYPE_BMSK);
+	val |= field_gen(ep_seq->dps_seq_type, DPS_SEQ_TYPE_BMSK);
+	val |= field_gen(ep_seq->hps_rep_seq_type, HPS_REP_SEQ_TYPE_BMSK);
+	val |= field_gen(ep_seq->dps_rep_seq_type, DPS_REP_SEQ_TYPE_BMSK);
 
 	return val;
 }
