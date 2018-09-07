@@ -145,14 +145,22 @@ struct ipa_reg_aggr_force_close {
 };
 
 /* struct ipa_reg_endp_init_mode - IPA ENDP_INIT_MODE_n register
- * @dst_pipe_number: This parameter specifies destination output-pipe-packets
+ * @mode: endpoint mode setting (enum ipa_mode_type)
+ * @dst_pipe_index: This parameter specifies destination output-pipe-packets
  *	will be routed to. Valid for DMA mode only and for Input
  *	Pipes only (IPA Consumer)
- * @mode: endpoint mode setting (enum ipa_mode_type)
+ * @byte_threshold:
+ * @pipe_replication_en:
+ * @pad_en:
+ * @hdr_ftch_disable:
  */
 struct ipa_reg_endp_init_mode {
-	u32 dst_pipe_number;
 	u32 mode;
+	u32 dest_pipe_index;
+	u32 byte_threshold;
+	u32 pipe_replication_en;
+	u32 pad_en;
+	u32 hdr_ftch_disable;
 };
 
 /** struct ipa_ep_init_ctrl - Control configuration in IPA end-point

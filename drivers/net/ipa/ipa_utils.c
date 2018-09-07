@@ -824,8 +824,13 @@ static void ipa_cfg_ep_mode(u32 clnt_hdl, enum ipa_client_type dst,
 	ipa_ctx->ep[clnt_hdl].cfg.mode = *ep_mode;
 	ipa_ctx->ep[clnt_hdl].dst_pipe_index = ipa_ep_idx;
 
-	init_mode.dst_pipe_number = ipa_ctx->ep[clnt_hdl].dst_pipe_index;
 	init_mode.mode = ep_mode->mode;
+	init_mode.dest_pipe_index = ipa_ep_idx;
+	init_mode.byte_threshold = 0;
+	init_mode.pipe_replication_en = 0;
+	init_mode.pad_en = 0;
+	init_mode.hdr_ftch_disable = 0;
+
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_MODE_N, clnt_hdl, &init_mode);
 }
 

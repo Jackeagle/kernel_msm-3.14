@@ -198,11 +198,12 @@ ipareg_construct_endp_init_mode_n(enum ipa_reg reg, const void *fields)
 	u32 val;
 
 	val = field_gen(init_mode->mode, MODE_BMSK);
-	val |= field_gen(init_mode->dst_pipe_number, DEST_PIPE_INDEX_BMSK);
-	val |= field_gen(0, BYTE_THRESHOLD_BMSK);
-	val |= field_gen(0, PIPE_REPLICATION_EN_BMSK);
-	val |= field_gen(0, PAD_EN_BMSK);
-	val |= field_gen(0, HDR_FTCH_DISABLE_BMSK);
+	val |= field_gen(init_mode->dest_pipe_index, DEST_PIPE_INDEX_BMSK);
+	val |= field_gen(init_mode->byte_threshold, BYTE_THRESHOLD_BMSK);
+	val |= field_gen(init_mode->pipe_replication_en,
+			PIPE_REPLICATION_EN_BMSK);
+	val |= field_gen(init_mode->pad_en, PAD_EN_BMSK);
+	val |= field_gen(init_mode->hdr_ftch_disable, HDR_FTCH_DISABLE_BMSK);
 
 	return val;
 }
