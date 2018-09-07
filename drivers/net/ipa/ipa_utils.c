@@ -751,17 +751,18 @@ static void ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
  *
  * Note:	Should not be called from atomic context
  */
-static void ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
+static void ipa_cfg_ep_mode(u32 clnt_hdl, enum ipa_client_type dst,
+			    const struct ipa_ep_cfg_mode *ep_mode)
 {
 	struct ipa_reg_endp_init_mode init_mode;
 	u32 ipa_ep_idx;
 
 	ipa_assert(ipa_producer(ipa_ctx->ep[clnt_hdl].client));
 	if (ep_mode->mode == IPA_DMA)
-		ipa_assert(ipa_consumer(ep_mode->dst));
+		ipa_assert(ipa_consumer(dst));
 
-	if (ipa_consumer(ep_mode->dst))
-		ipa_ep_idx = ipa_get_ep_mapping(ep_mode->dst);
+	if (ipa_consumer(dst))
+		ipa_ep_idx = ipa_get_ep_mapping(dst);
 	else
 		ipa_ep_idx = ipa_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
 
@@ -771,7 +772,7 @@ static void ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 
 	init_mode.dst_pipe_number = ipa_ctx->ep[clnt_hdl].dst_pipe_index;
 	init_mode.ep_mode.mode = ep_mode->mode;
-	init_mode.ep_mode.dst = ep_mode->dst;
+	init_mode.ep_mode.dst = dst;
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_MODE_N, clnt_hdl, &init_mode);
 }
 
@@ -844,7 +845,8 @@ void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 	ipa_cfg_ep_cfg(clnt_hdl, &ipa_ep_cfg->cfg);
 
 	if (ipa_producer(ipa_ctx->ep[clnt_hdl].client)) {
-		ipa_cfg_ep_mode(clnt_hdl, &ipa_ep_cfg->mode);
+		ipa_cfg_ep_mode(clnt_hdl, ipa_ep_cfg->mode.dst,
+				&ipa_ep_cfg->mode);
 		ipa_cfg_ep_seq(clnt_hdl);
 
 		ipa_cfg_ep_deaggr(clnt_hdl);
