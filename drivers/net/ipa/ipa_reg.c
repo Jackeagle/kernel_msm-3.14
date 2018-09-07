@@ -218,8 +218,8 @@ ipareg_construct_endp_init_ctrl_n(enum ipa_reg reg, const void *fields)
 	const struct ipa_reg_ep_init_ctrl *ep_ctrl = fields;
 	u32 val;
 
-	val = field_gen(ep_ctrl->ipa_ep_suspend, ENDP_SUSPEND_BMSK);
-	val |= field_gen(ep_ctrl->ipa_ep_delay, ENDP_DELAY_BMSK);
+	val = field_gen(ep_ctrl->endp_suspend, ENDP_SUSPEND_BMSK);
+	val |= field_gen(ep_ctrl->endp_delay, ENDP_DELAY_BMSK);
 
 	return val;
 }
@@ -231,8 +231,8 @@ ipareg_parse_endp_init_ctrl_n(enum ipa_reg reg, void *fields, u32 val)
 
 	memset(ep_ctrl, 0, sizeof(*ep_ctrl));
 
-	ep_ctrl->ipa_ep_suspend = field_val(val, ENDP_SUSPEND_BMSK);
-	ep_ctrl->ipa_ep_delay = field_val(val, ENDP_DELAY_BMSK);
+	ep_ctrl->endp_suspend = field_val(val, ENDP_SUSPEND_BMSK);
+	ep_ctrl->endp_delay = field_val(val, ENDP_DELAY_BMSK);
 }
 
 /* IPA_ENDP_INIT_DEAGGR_N register */

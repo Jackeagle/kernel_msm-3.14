@@ -946,7 +946,7 @@ ipa_cfg_ep_status(u32 clnt_hdl, const struct ipa_reg_ep_status *ep_status)
 
 static void suspend_consumer_endpoint(u32 ipa_ep_idx)
 {
-	struct ipa_reg_ep_init_ctrl cfg = { .ipa_ep_suspend = true };
+	struct ipa_reg_ep_init_ctrl cfg = { .endp_suspend = true };
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_idx, &cfg);
 
@@ -960,7 +960,7 @@ static void suspend_consumer_endpoint(u32 ipa_ep_idx)
 
 static void resume_consumer_endpoint(u32 ipa_ep_idx)
 {
-	struct ipa_reg_ep_init_ctrl cfg = { .ipa_ep_suspend = false };
+	struct ipa_reg_ep_init_ctrl cfg = { .endp_suspend = false };
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_idx, &cfg);
 }
