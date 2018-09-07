@@ -134,17 +134,18 @@ ipareg_construct_endp_init_hdr_ext_n(enum ipa_reg reg, const void *fields)
 static u32
 ipareg_construct_endp_init_aggr_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_ep_cfg_aggr *ep_aggr = fields;
+	const struct ipa_reg_ep_init_aggr *init_aggr = fields;
 	u32 val;
 
-	val = field_gen(ep_aggr->aggr_en, AGGR_EN_BMSK);
-	val |= field_gen(ep_aggr->aggr, AGGR_TYPE_BMSK);
-	val |= field_gen(ep_aggr->aggr_byte_limit, AGGR_BYTE_LIMIT_BMSK);
-	val |= field_gen(ep_aggr->aggr_time_limit, AGGR_TIME_LIMIT_BMSK);
-	val |= field_gen(ep_aggr->aggr_pkt_limit, AGGR_PKT_LIMIT_BMSK);
-	val |= field_gen(ep_aggr->aggr_sw_eof_active ? 1 : 0,
+	val = field_gen(init_aggr->aggr_en, AGGR_EN_BMSK);
+	val |= field_gen(init_aggr->aggr_type, AGGR_TYPE_BMSK);
+	val |= field_gen(init_aggr->aggr_byte_limit, AGGR_BYTE_LIMIT_BMSK);
+	val |= field_gen(init_aggr->aggr_time_limit, AGGR_TIME_LIMIT_BMSK);
+	val |= field_gen(init_aggr->aggr_pkt_limit, AGGR_PKT_LIMIT_BMSK);
+	val |= field_gen(init_aggr->aggr_sw_eof_active ? 1 : 0,
 			 AGGR_SW_EOF_ACTIVE_BMSK);
-	val |= field_gen(ep_aggr->aggr_hard_byte_limit_en,
+	val |= field_gen(init_aggr->aggr_force_close, AGGR_FORCE_CLOSE_BMSK);
+	val |= field_gen(init_aggr->aggr_hard_byte_limit_en,
 			 AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK);
 
 	return val;
@@ -153,16 +154,17 @@ ipareg_construct_endp_init_aggr_n(enum ipa_reg reg, const void *fields)
 static void
 ipareg_parse_endp_init_aggr_n(enum ipa_reg reg, void *fields, u32 val)
 {
-	struct ipa_ep_cfg_aggr *ep_aggr = fields;
+	struct ipa_reg_ep_init_aggr *ep_aggr = fields;
 
 	memset(ep_aggr, 0, sizeof(*ep_aggr));
 
 	ep_aggr->aggr_en = field_val(val, AGGR_EN_BMSK) == IPA_ENABLE_AGGR;
-	ep_aggr->aggr = field_val(val, AGGR_TYPE_BMSK);
+	ep_aggr->aggr_type = field_val(val, AGGR_TYPE_BMSK);
 	ep_aggr->aggr_byte_limit = field_val(val, AGGR_BYTE_LIMIT_BMSK);
 	ep_aggr->aggr_time_limit = field_val(val, AGGR_TIME_LIMIT_BMSK);
 	ep_aggr->aggr_pkt_limit = field_val(val, AGGR_PKT_LIMIT_BMSK);
 	ep_aggr->aggr_sw_eof_active = !!field_val(val, AGGR_SW_EOF_ACTIVE_BMSK);
+	ep_aggr->aggr_force_close = field_val(val, AGGR_SW_EOF_ACTIVE_BMSK);
 	ep_aggr->aggr_hard_byte_limit_en =
 			field_val(val, AGGR_HARD_BYTE_LIMIT_ENABLE_BMSK);
 }

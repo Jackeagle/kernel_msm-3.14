@@ -64,6 +64,36 @@ struct ipa_reg_route {
 	u32 route_def_retain_hdr;
 };
 
+/** struct ipa_reg_ep_init_aggr - IPA endpoint init aggregation register
+ *
+ * @aggr_en: bypass aggregation, enable aggregation, or deaggregation
+ *	     (enum ipa_aggr_en_type)
+ * @aggr_type: type of aggregation (enum ipa_aggr_type aggr)
+ * @aggr_byte_limit: aggregated byte limit in KB, or no limit if 0
+ *		     (producer pipes only)
+ * @aggr_time_limit: time limit before close of aggregation, or
+ *		     aggregation disabled if 0 (producer pipes only)
+ * @aggr_pkt_limit: packet limit before closing aggregation, or no
+ *		    limit if 0 (producer pipes only) XXX units
+ * @aggr_sw_eof_active: whether EOF closes aggregation--in addition to
+ *			hardware aggregation configuration (producer
+ *			pipes configured for generic aggregation only)
+ * @aggr_force_close: whether to force a close XXX verify/when
+ * @aggr_hard_byte_limit_en: whether aggregation frames close *before*
+ * 			     byte count has crossed limit, rather than
+ * 			     after XXX producer only?
+ */
+struct ipa_reg_ep_init_aggr {
+	u32 aggr_en;
+	u32 aggr_type;
+	u32 aggr_byte_limit;
+	u32 aggr_time_limit;
+	u32 aggr_pkt_limit;
+	bool aggr_sw_eof_active;
+	bool aggr_force_close;
+	bool aggr_hard_byte_limit_en;
+};
+
 /* struct ipa_aggr_force_close - IPA force close aggregation register
  *
  * @pipe_bitmap: bitmap of pipes on which aggregation should be closed
