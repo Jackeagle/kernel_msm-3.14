@@ -1635,6 +1635,8 @@ fail_alloc_channel:
 
 /** ipa_setup_sys_pipe() - Setup an IPA GPI pipe and perform
  * IPA EP configuration
+ * @client:	[in] handle assigned by IPA to client
+ * @dst:	[in] destination client handle (ignored for consumer clients)
  * @sys_in:	[in] input needed to setup the pipe and configure EP
  *
  *  - configure the end-point registers with the supplied
@@ -1644,8 +1646,8 @@ fail_alloc_channel:
  *
  * Returns:	client handle on success, negative on failure
  */
-int ipa_setup_sys_pipe(enum ipa_client_type client, u32 chan_count,
-		       struct ipa_sys_connect_params *sys_in)
+int ipa_setup_sys_pipe(enum ipa_client_type client, enum ipa_client_type dst,
+		       u32 chan_count, struct ipa_sys_connect_params *sys_in)
 {
 	u32 ipa_ep_idx = ipa_get_ep_mapping(client);
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
@@ -1685,8 +1687,7 @@ int ipa_setup_sys_pipe(enum ipa_client_type client, u32 chan_count,
 	ep->napi_enabled = sys_in->napi_enabled;
 	ep->priv = sys_in->priv;
 
-	ipa_cfg_ep(ipa_ep_idx, sys_in->ipa_ep_cfg.mode.dst,
-		   &sys_in->ipa_ep_cfg);
+	ipa_cfg_ep(ipa_ep_idx, dst, &sys_in->ipa_ep_cfg);
 
 	ipa_cfg_ep_status(ipa_ep_idx, &ep->status);
 

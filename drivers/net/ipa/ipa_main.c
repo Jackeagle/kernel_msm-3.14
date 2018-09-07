@@ -156,12 +156,12 @@ static int setup_apps_cmd_prod_pipe(void)
 {
 	struct ipa_sys_connect_params sys_in = { };
 	enum ipa_client_type client = IPA_CLIENT_APPS_CMD_PROD;
+	enum ipa_client_type dst = IPA_CLIENT_APPS_LAN_CONS;
 	u32 chan_count = IPA_APPS_CMD_PROD_RING_COUNT;
 
 	sys_in.ipa_ep_cfg.mode.mode = IPA_DMA;
-	sys_in.ipa_ep_cfg.mode.dst = IPA_CLIENT_APPS_LAN_CONS;
 
-	return ipa_setup_sys_pipe(client, chan_count, &sys_in);
+	return ipa_setup_sys_pipe(client, dst, chan_count, &sys_in);
 }
 
 /* Only used for IPA_MEM_UC_EVENT_RING_OFST, which must be 1KB aligned */
@@ -484,7 +484,7 @@ static int setup_apps_lan_cons_pipe(void)
 
 	sys_in.ipa_ep_cfg.cfg.cs_offload_en = IPA_CS_OFFLOAD_DL;
 
-	return ipa_setup_sys_pipe(client, chan_count, &sys_in);
+	return ipa_setup_sys_pipe(client, client, chan_count, &sys_in);
 }
 
 static int ipa_setup_apps_pipes(void)

@@ -443,8 +443,8 @@ void ipa_cfg_ep(u32 clnt_hdl, enum ipa_client_type dst,
 int ipa_tx_dp(enum ipa_client_type dst, struct sk_buff *skb);
 
 /* System pipes */
-int ipa_setup_sys_pipe(enum ipa_client_type client, u32 chan_count,
-		       struct ipa_sys_connect_params *sys_in);
+int ipa_setup_sys_pipe(enum ipa_client_type client, enum ipa_client_type dst,
+		       u32 chan_count, struct ipa_sys_connect_params *sys_in);
 
 void ipa_teardown_sys_pipe(u32 clnt_hdl);
 

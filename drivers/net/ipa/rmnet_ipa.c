@@ -278,7 +278,7 @@ static int handle_ingress_format(struct net_device *dev,
 
 	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
-	ret = ipa_setup_sys_pipe(client, chan_count, wan_cfg);
+	ret = ipa_setup_sys_pipe(client, client, chan_count, wan_cfg);
 	if (ret < 0) {
 		mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
@@ -297,6 +297,7 @@ static int handle_egress_format(struct net_device *dev,
 {
 	struct ipa_sys_connect_params *wan_cfg;
 	enum ipa_client_type client = IPA_CLIENT_APPS_WAN_PROD;
+	enum ipa_client_type dst = IPA_CLIENT_APPS_WAN_PROD;
 	u32 chan_count = IPA_APPS_WWAN_PROD_RING_COUNT;
 	struct ipa_ep_cfg *ep_cfg;
 	int ret;
@@ -328,7 +329,6 @@ static int handle_egress_format(struct net_device *dev,
 	ep_cfg->hdr.hdr_ofst_metadata_valid = 1;
 	ep_cfg->hdr.hdr_ofst_metadata = 0;	/* Want offset at 0! */
 
-	ep_cfg->mode.dst = IPA_CLIENT_APPS_WAN_PROD;
 	ep_cfg->mode.mode = IPA_BASIC;
 
 	wan_cfg->notify = apps_ipa_tx_complete_notify;
@@ -336,7 +336,7 @@ static int handle_egress_format(struct net_device *dev,
 
 	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
-	ret = ipa_setup_sys_pipe(client, chan_count, wan_cfg);
+	ret = ipa_setup_sys_pipe(client, dst, chan_count, wan_cfg);
 	if (ret < 0) {
 		mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
