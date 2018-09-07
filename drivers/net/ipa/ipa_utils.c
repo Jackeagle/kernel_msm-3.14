@@ -770,7 +770,8 @@ static void ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 	ipa_ctx->ep[clnt_hdl].dst_pipe_index = ipa_ep_idx;
 
 	init_mode.dst_pipe_number = ipa_ctx->ep[clnt_hdl].dst_pipe_index;
-	init_mode.ep_mode = *ep_mode;
+	init_mode.ep_mode.mode = ep_mode->mode;
+	init_mode.ep_mode.dst = ep_mode->dst;
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_MODE_N, clnt_hdl, &init_mode);
 }
 
