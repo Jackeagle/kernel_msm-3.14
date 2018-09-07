@@ -817,7 +817,8 @@ ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
 		  metadata_mask->metadata_mask);
 
 	/* copy over EP cfg */
-	ipa_ctx->ep[clnt_hdl].cfg.metadata_mask = *metadata_mask;
+	ipa_ctx->ep[clnt_hdl].cfg.metadata_mask.metadata_mask =
+			metadata_mask->metadata_mask;
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_N,
 				  clnt_hdl, metadata_mask);
