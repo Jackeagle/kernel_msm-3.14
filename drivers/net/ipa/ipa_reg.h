@@ -64,6 +64,30 @@ struct ipa_reg_route {
 	u32 route_def_retain_hdr;
 };
 
+/* ipa_reg_ep_init_hdr - endpoint header initialization
+ *
+ * @hdr_len:
+ * @hdr_ofst_metadata_valid:
+ * @hdr_ofst_metadata:
+ * @hdr_additional_const_len:
+ * @hdr_ofst_pkt_size_valid:
+ * @hdr_ofst_pkt_size:
+ * @hdr_a5_mux:
+ * @hdr_len_inc_deagg_hdr:
+ * @hdr_metadata_reg_valid:
+*/
+struct ipa_reg_ep_init_hdr {
+	u32 hdr_len;
+	u32 hdr_ofst_metadata_valid;
+	u32 hdr_ofst_metadata;
+	u32 hdr_additional_const_len;
+	bool hdr_ofst_pkt_size_valid;
+	u32 hdr_ofst_pkt_size;
+	bool hdr_a5_mux;
+	bool hdr_len_inc_deagg_hdr;
+	bool hdr_metadata_reg_valid;
+};
+
 /* ipa_reg_ep_init_hdr_ext - extended endpoint header initialization
  *
  * @hdr_endianness:

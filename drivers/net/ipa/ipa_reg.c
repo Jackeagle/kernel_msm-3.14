@@ -74,20 +74,23 @@ ipareg_construct_route(enum ipa_reg reg, const void *fields)
 static u32
 ipareg_construct_endp_init_hdr_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_ep_cfg_hdr *ep_hdr = fields;
+	const struct ipa_reg_ep_init_hdr *ep_hdr = fields;
 	u32 val;
 
 	val = field_gen(ep_hdr->hdr_len, HDR_LEN_BMSK);
 	val |= field_gen(ep_hdr->hdr_ofst_metadata_valid,
 			 HDR_OFST_METADATA_VALID_BMSK);
 	val |= field_gen(ep_hdr->hdr_ofst_metadata, HDR_OFST_METADATA_BMSK);
-	val |= field_gen(0, HDR_ADDITIONAL_CONST_LEN_BMSK);
+	val |= field_gen(ep_hdr->hdr_additional_const_len,
+			HDR_ADDITIONAL_CONST_LEN_BMSK);
 	val |= field_gen(ep_hdr->hdr_ofst_pkt_size_valid,
 			 HDR_OFST_PKT_SIZE_VALID_BMSK);
 	val |= field_gen(ep_hdr->hdr_ofst_pkt_size, HDR_OFST_PKT_SIZE_BMSK);
-	val |= field_gen(0, HDR_A5_MUX_BMSK);
-	val |= field_gen(0, HDR_LEN_INC_DEAGG_HDR_BMSK);
-	val |= field_gen(0, HDR_METADATA_REG_VALID_BMSK);
+	val |= field_gen(ep_hdr->hdr_a5_mux, HDR_A5_MUX_BMSK);
+	val |= field_gen(ep_hdr->hdr_len_inc_deagg_hdr,
+			HDR_LEN_INC_DEAGG_HDR_BMSK);
+	val |= field_gen(ep_hdr->hdr_metadata_reg_valid,
+			HDR_METADATA_REG_VALID_BMSK);
 
 	return val;
 }

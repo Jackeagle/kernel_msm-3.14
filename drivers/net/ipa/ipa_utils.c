@@ -644,6 +644,7 @@ static const char *ipa_get_aggr_type_str(enum ipa_aggr_type aggr_type)
  */
 static void ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 {
+	struct ipa_reg_ep_init_hdr cfg_hdr = { };
 	struct ipa_ep_context *ep;
 
 	ipa_debug("pipe=%d metadata_reg_valid=0\n", clnt_hdl);
@@ -667,7 +668,17 @@ static void ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 	ep->cfg.hdr.hdr_ofst_pkt_size_valid = ep_hdr->hdr_ofst_pkt_size_valid;
 	ep->cfg.hdr.hdr_ofst_pkt_size = ep_hdr->hdr_ofst_pkt_size;
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_N, clnt_hdl, &ep->cfg.hdr);
+	cfg_hdr.hdr_len = ep_hdr->hdr_len;
+	cfg_hdr.hdr_ofst_metadata_valid = ep_hdr->hdr_ofst_metadata_valid;
+	cfg_hdr.hdr_ofst_metadata = ep_hdr->hdr_ofst_metadata;
+	cfg_hdr.hdr_additional_const_len = 0;
+	cfg_hdr.hdr_ofst_pkt_size_valid = ep_hdr->hdr_ofst_pkt_size_valid;
+	cfg_hdr.hdr_ofst_pkt_size = ep_hdr->hdr_ofst_pkt_size;
+	cfg_hdr.hdr_a5_mux = false;
+	cfg_hdr.hdr_len_inc_deagg_hdr = false;
+	cfg_hdr.hdr_metadata_reg_valid = false;
+
+	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_N, clnt_hdl, &cfg_hdr);
 }
 
 /** ipa_cfg_ep_hdr_ext() -  IPA end-point extended header configuration
