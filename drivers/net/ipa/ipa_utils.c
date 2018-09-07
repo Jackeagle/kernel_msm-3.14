@@ -661,7 +661,11 @@ static void ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 	ep = &ipa_ctx->ep[clnt_hdl];
 
 	/* copy over EP cfg */
-	ep->cfg.hdr = *ep_hdr;
+	ep->cfg.hdr.hdr_len = ep_hdr->hdr_len;
+	ep->cfg.hdr.hdr_ofst_metadata_valid = ep_hdr->hdr_ofst_metadata_valid;
+	ep->cfg.hdr.hdr_ofst_metadata = ep_hdr->hdr_ofst_metadata;
+	ep->cfg.hdr.hdr_ofst_pkt_size_valid = ep_hdr->hdr_ofst_pkt_size_valid;
+	ep->cfg.hdr.hdr_ofst_pkt_size = ep_hdr->hdr_ofst_pkt_size;
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_N, clnt_hdl, &ep->cfg.hdr);
 }
