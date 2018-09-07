@@ -64,6 +64,24 @@ struct ipa_reg_route {
 	u32 route_def_retain_hdr;
 };
 
+/* ipa_reg_ep_init_hdr_ext - extended endpoint header initialization
+ *
+ * @hdr_endianness:
+ * @hdr_total_len_or_pad_valid;
+ * @hdr_total_len_or_pad
+ * @hdr_payload_len_inc_padding
+ * @hdr_total_len_or_pad_offset
+ * @hdr_pad_to_alignment
+ */
+struct ipa_reg_ep_init_hdr_ext {
+	u32 hdr_endianness;		/* 0 = little endian; 1 = big endian */
+	bool hdr_total_len_or_pad_valid;
+	u32 hdr_total_len_or_pad;	/* 0 = pad; 1 = total_len */
+	bool hdr_payload_len_inc_padding;
+	u32 hdr_total_len_or_pad_offset;
+	u32 hdr_pad_to_alignment;
+};
+
 /** struct ipa_reg_ep_init_aggr - IPA endpoint init aggregation register
  *
  * @aggr_en: bypass aggregation, enable aggregation, or deaggregation

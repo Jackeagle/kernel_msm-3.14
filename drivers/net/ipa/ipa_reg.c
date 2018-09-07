@@ -103,7 +103,7 @@ ipareg_construct_endp_init_hdr_n(enum ipa_reg reg, const void *fields)
 static u32
 ipareg_construct_endp_init_hdr_ext_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext = fields;
+	const struct ipa_reg_ep_init_hdr_ext *ep_hdr_ext = fields;
 	u32 val;
 
 	/* 0 = little endian; 1 = big endian */
