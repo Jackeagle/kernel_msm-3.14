@@ -1300,7 +1300,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 		goto err_clear_filter_bitmap;
 	}
 
-	result = platform_get_irq_byname(pdev, "ipa-irq");
+	result = platform_get_irq_byname(pdev, "ipa");
 	if (result < 0)
 		goto err_clear_filter_bitmap;
 	ipa_ctx->ipa_irq = result;

@@ -1705,9 +1705,9 @@ struct gsi *gsi_init(struct platform_device *pdev)
 	}
 
 	/* Get IPA GSI IRQ number */
-	irq = platform_get_irq_byname(pdev, "gsi-irq");
+	irq = platform_get_irq_byname(pdev, "gsi");
 	if (irq < 0) {
-		ipa_err("failed to get gsi-irq!\n");
+		ipa_err("failed to get gsi IRQ!\n");
 		return ERR_PTR(irq);
 	}
 	ipa_debug("GSI irq %u\n", irq);
