@@ -992,8 +992,8 @@
 				    "gsi";
 
 			interrupts-extended =
-					<&intc 0 311 0>,
-					<&intc 0 432 0>,
+					<&intc 0 311 IRQ_TYPE_LEVEL_HIGH>,
+					<&intc 0 432 IRQ_TYPE_LEVEL_HIGH>,
 					<&ipa_smp2p_in 0 IRQ_TYPE_EDGE_RISING>,
 					<&ipa_smp2p_in 1 IRQ_TYPE_EDGE_RISING>;
 			interrupt-names = "ipa",
