@@ -240,7 +240,7 @@ struct ipa_ep_context {
 	bool bytes_xfered_valid;
 	u16 bytes_xfered;
 	struct ipa_ep_cfg cfg;
-	struct ipa_reg_ep_status status;
+	struct ipa_reg_endp_status status;
 	u32 dst_pipe_index;
 	u32 rt_tbl_idx;
 	void *priv;
@@ -497,7 +497,7 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data);
 void ipa_sram_settings_read(void);
 
 void ipa_cfg_ep_status(u32 clnt_hdl,
-		       const struct ipa_reg_ep_status *ipa_ep_cfg);
+		       const struct ipa_reg_endp_status *ipa_ep_cfg);
 
 int ipa_init_q6_smem(void);
 

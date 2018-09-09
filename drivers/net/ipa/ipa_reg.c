@@ -65,7 +65,7 @@ static u32 ipareg_construct_route(enum ipa_reg reg, const void *fields)
 static u32
 ipareg_construct_endp_init_hdr_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_reg_ep_init_hdr *ep_hdr = fields;
+	const struct ipa_reg_endp_init_hdr *ep_hdr = fields;
 	u32 val;
 
 	val = field_gen(ep_hdr->hdr_len, HDR_LEN_FMASK);
@@ -97,7 +97,7 @@ ipareg_construct_endp_init_hdr_n(enum ipa_reg reg, const void *fields)
 static u32
 ipareg_construct_endp_init_hdr_ext_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_reg_ep_init_hdr_ext *ep_hdr_ext = fields;
+	const struct ipa_reg_endp_init_hdr_ext *ep_hdr_ext = fields;
 	u32 val;
 
 	/* 0 = little endian; 1 = big endian */
@@ -128,7 +128,7 @@ ipareg_construct_endp_init_hdr_ext_n(enum ipa_reg reg, const void *fields)
 static u32
 ipareg_construct_endp_init_aggr_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_reg_ep_init_aggr *init_aggr = fields;
+	const struct ipa_reg_endp_init_aggr *init_aggr = fields;
 	u32 val;
 
 	val = field_gen(init_aggr->aggr_en, AGGR_EN_FMASK);
@@ -148,7 +148,7 @@ ipareg_construct_endp_init_aggr_n(enum ipa_reg reg, const void *fields)
 static void
 ipareg_parse_endp_init_aggr_n(enum ipa_reg reg, void *fields, u32 val)
 {
-	struct ipa_reg_ep_init_aggr *ep_aggr = fields;
+	struct ipa_reg_endp_init_aggr *ep_aggr = fields;
 
 	memset(ep_aggr, 0, sizeof(*ep_aggr));
 
@@ -206,7 +206,7 @@ ipareg_construct_endp_init_mode_n(enum ipa_reg reg, const void *fields)
 static u32
 ipareg_construct_endp_init_ctrl_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_reg_ep_init_ctrl *ep_ctrl = fields;
+	const struct ipa_reg_endp_init_ctrl *ep_ctrl = fields;
 	u32 val;
 
 	val = field_gen(ep_ctrl->endp_suspend, ENDP_SUSPEND_FMASK);
@@ -218,7 +218,7 @@ ipareg_construct_endp_init_ctrl_n(enum ipa_reg reg, const void *fields)
 static void
 ipareg_parse_endp_init_ctrl_n(enum ipa_reg reg, void *fields, u32 val)
 {
-	struct ipa_reg_ep_init_ctrl *ep_ctrl = fields;
+	struct ipa_reg_endp_init_ctrl *ep_ctrl = fields;
 
 	memset(ep_ctrl, 0, sizeof(*ep_ctrl));
 
@@ -235,7 +235,7 @@ ipareg_parse_endp_init_ctrl_n(enum ipa_reg reg, void *fields, u32 val)
 static u32
 ipareg_construct_endp_init_deaggr_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_reg_ep_init_deaggr *deaggr = fields;
+	const struct ipa_reg_endp_init_deaggr *deaggr = fields;
 	u32 val;
 
 	/* fields value is completely ignored (can be NULL) */
@@ -257,7 +257,7 @@ ipareg_construct_endp_init_deaggr_n(enum ipa_reg reg, const void *fields)
 static u32
 ipareg_construct_endp_init_seq_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_reg_ep_init_seq *ep_seq = fields;
+	const struct ipa_reg_endp_init_seq *ep_seq = fields;
 	u32 val;
 
 	val = field_gen(ep_seq->hps_seq_type, HPS_SEQ_TYPE_FMASK);
@@ -277,7 +277,7 @@ ipareg_construct_endp_init_seq_n(enum ipa_reg reg, const void *fields)
 static u32
 ipareg_construct_endp_init_cfg_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_reg_ep_init_cfg *cfg = fields;
+	const struct ipa_reg_endp_init_cfg *cfg = fields;
 	u32 val;
 
 	val = field_gen(cfg->frag_offload_en, FRAG_OFFLOAD_EN_FMASK);
@@ -296,7 +296,9 @@ ipareg_construct_endp_init_cfg_n(enum ipa_reg reg, const void *fields)
 static u32 ipareg_construct_endp_init_hdr_metadata_mask_n(enum ipa_reg reg,
 							  const void *fields)
 {
-	const struct ipa_reg_ep_init_hdr_metadata_mask *metadata_mask = fields;
+	const struct ipa_reg_endp_init_hdr_metadata_mask *metadata_mask;
+
+	metadata_mask = fields;
 
 	return field_gen(metadata_mask->metadata_mask, METADATA_MASK_FMASK);
 }
@@ -324,7 +326,7 @@ ipareg_parse_shared_mem_size(enum ipa_reg reg, void *fields, u32 val)
 
 static u32 ipareg_construct_endp_status_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_reg_ep_status *ep_status = fields;
+	const struct ipa_reg_endp_status *ep_status = fields;
 	u32 val;
 
 	val = field_gen(ep_status->status_en, STATUS_EN_FMASK);

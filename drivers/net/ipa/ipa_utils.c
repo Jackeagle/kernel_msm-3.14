@@ -644,7 +644,7 @@ static const char *ipa_get_aggr_type_str(enum ipa_aggr_type aggr_type)
  */
 static void ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 {
-	struct ipa_reg_ep_init_hdr cfg_hdr = { };
+	struct ipa_reg_endp_init_hdr cfg_hdr = { };
 	struct ipa_ep_context *ep;
 
 	ipa_debug("pipe=%d metadata_reg_valid=0\n", clnt_hdl);
@@ -690,7 +690,7 @@ static void ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 static void
 ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
 {
-	struct ipa_reg_ep_init_hdr_ext hdr_ext = { };
+	struct ipa_reg_endp_init_hdr_ext hdr_ext = { };
 	struct ipa_ep_context *ep;
 
 	ipa_debug("pipe=%d hdr_pad_to_alignment=%d\n", clnt_hdl,
@@ -736,7 +736,7 @@ ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
  */
 static void ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 {
-	struct ipa_reg_ep_init_aggr init_aggr = { };
+	struct ipa_reg_endp_init_aggr init_aggr = { };
 
 	if (ep_aggr->aggr_en == IPA_ENABLE_DEAGGR)
 		ipa_assert(IPA_EP_SUPPORTS_DEAGGR(clnt_hdl));
@@ -783,7 +783,7 @@ static void ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
  */
 static void ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 {
-	struct ipa_reg_ep_init_cfg init_cfg;
+	struct ipa_reg_endp_init_cfg init_cfg;
 
 	/* copy over EP cfg */
 	ipa_ctx->ep[clnt_hdl].cfg.cfg.cs_offload_en = cfg->cs_offload_en;
@@ -847,7 +847,7 @@ static void ipa_cfg_ep_mode(u32 clnt_hdl, enum ipa_client_type dst,
 static void ipa_cfg_ep_seq(u32 clnt_hdl)
 {
 	enum ipa_client_type client = ipa_ctx->ep[clnt_hdl].client;
-	struct ipa_reg_ep_init_seq ep_seq = { };
+	struct ipa_reg_endp_init_seq ep_seq = { };
 
 	ep_seq.hps_seq_type = (u32)ep_configuration(client)->sequencer_type;
 	ep_seq.dps_seq_type = 0;
@@ -862,7 +862,7 @@ static void ipa_cfg_ep_seq(u32 clnt_hdl)
  */
 static void ipa_cfg_ep_deaggr(u32 clnt_hdl)
 {
-	struct ipa_reg_ep_init_deaggr deaggr;
+	struct ipa_reg_endp_init_deaggr deaggr;
 
 	ipa_debug("pipe=%d deaggr_hdr_len=0\n", clnt_hdl);
 	ipa_debug("packet_offset_valid=0\n");
@@ -886,7 +886,7 @@ static void
 ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
 			 const struct ipa_ep_cfg_metadata_mask *metadata_mask)
 {
-	struct ipa_reg_ep_init_hdr_metadata_mask mask;
+	struct ipa_reg_endp_init_hdr_metadata_mask mask;
 
 	ipa_debug("pipe=%d, metadata_mask=0x%x\n", clnt_hdl,
 		  metadata_mask->metadata_mask);
@@ -941,7 +941,7 @@ void ipa_cfg_ep(u32 clnt_hdl, enum ipa_client_type dst,
  * Note:	Should not be called from atomic context
  */
 void
-ipa_cfg_ep_status(u32 clnt_hdl, const struct ipa_reg_ep_status *ep_status)
+ipa_cfg_ep_status(u32 clnt_hdl, const struct ipa_reg_endp_status *ep_status)
 {
 	ipa_debug("pipe=%d, status_en=%d status_ep=%d status_location=%d\n",
 		  clnt_hdl, ep_status->status_en, ep_status->status_endp,
@@ -960,7 +960,7 @@ ipa_cfg_ep_status(u32 clnt_hdl, const struct ipa_reg_ep_status *ep_status)
 
 static void suspend_consumer_endpoint(u32 ipa_ep_idx)
 {
-	struct ipa_reg_ep_init_ctrl cfg = { .endp_suspend = 1 };
+	struct ipa_reg_endp_init_ctrl cfg = { .endp_suspend = 1 };
 
 	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_idx, &cfg);
 
@@ -974,7 +974,7 @@ static void suspend_consumer_endpoint(u32 ipa_ep_idx)
 
 static void resume_consumer_endpoint(u32 ipa_ep_idx)
 {
-	struct ipa_reg_ep_init_ctrl cfg = { .endp_suspend = 0 };
+	struct ipa_reg_endp_init_ctrl cfg = { .endp_suspend = 0 };
 
 	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_idx, &cfg);
 }

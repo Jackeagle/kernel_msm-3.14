@@ -124,7 +124,7 @@ struct ipa_reg_route {
 	u32 route_def_retain_hdr;
 };
 
-/* ipa_reg_ep_init_hdr - ENDP_INIT_HDR_N field structure
+/* ipa_reg_endp_init_hdr - ENDP_INIT_HDR_N field structure
  *
  * @hdr_len:
  * @hdr_ofst_metadata_valid:
@@ -136,7 +136,7 @@ struct ipa_reg_route {
  * @hdr_len_inc_deagg_hdr:
  * @hdr_metadata_reg_valid:
 */
-struct ipa_reg_ep_init_hdr {
+struct ipa_reg_endp_init_hdr {
 	u32 hdr_len;
 	u32 hdr_ofst_metadata_valid;
 	u32 hdr_ofst_metadata;
@@ -148,7 +148,7 @@ struct ipa_reg_ep_init_hdr {
 	u32 hdr_metadata_reg_valid;
 };
 
-/* ipa_reg_ep_init_hdr_ext - IPA_ENDP_INIT_HDR_EXT_N field structure
+/* ipa_reg_endp_init_hdr_ext - IPA_ENDP_INIT_HDR_EXT_N field structure
  *
  * @hdr_endianness:
  * @hdr_total_len_or_pad_valid:
@@ -157,7 +157,7 @@ struct ipa_reg_ep_init_hdr {
  * @hdr_total_len_or_pad_offset:
  * @hdr_pad_to_alignment:
  */
-struct ipa_reg_ep_init_hdr_ext {
+struct ipa_reg_endp_init_hdr_ext {
 	u32 hdr_endianness;		/* 0 = little endian; 1 = big endian */
 	u32 hdr_total_len_or_pad_valid;
 	u32 hdr_total_len_or_pad;	/* 0 = pad; 1 = total_len */
@@ -166,7 +166,7 @@ struct ipa_reg_ep_init_hdr_ext {
 	u32 hdr_pad_to_alignment;
 };
 
-/** struct ipa_reg_ep_init_aggr - IPA_ENDP_INIT_AGGR_N field structure
+/** struct ipa_reg_endp_init_aggr - IPA_ENDP_INIT_AGGR_N field structure
  *
  * @aggr_en: bypass aggregation, enable aggregation, or deaggregation
  *	     (enum ipa_aggr_en_type)
@@ -185,7 +185,7 @@ struct ipa_reg_ep_init_hdr_ext {
  * 			     byte count has crossed limit, rather than
  * 			     after XXX producer only?
  */
-struct ipa_reg_ep_init_aggr {
+struct ipa_reg_endp_init_aggr {
 	u32 aggr_en;		/* enum ipa_aggr_en_type */
 	u32 aggr_type;		/* enum ipa_aggr_type */
 	u32 aggr_byte_limit;
@@ -232,19 +232,19 @@ struct ipa_reg_endp_init_mode {
  *			SW controls the data flow of an endpoint usind this bit.
  *			Valid for CONS Endpoints
  */
-struct ipa_reg_ep_init_ctrl {
+struct ipa_reg_endp_init_ctrl {
 	u32 endp_suspend;
 	u32 endp_delay;
 };
 
-/** struct ipa_reg_ep_init_deaggr - IPA_ENDP_INIT_DEAGGR_N field structure
+/** struct ipa_reg_endp_init_deaggr - IPA_ENDP_INIT_DEAGGR_N field structure
  *
  * @deaggr_hdr_len:
  * @packet_offset_valid:
  * @packet_offset_location:
  * @max_packet_len:
  */
-struct ipa_reg_ep_init_deaggr {
+struct ipa_reg_endp_init_deaggr {
 	u32 deaggr_hdr_len;
 	u32 packet_offset_valid;
 	u32 packet_offset_location;
@@ -255,14 +255,14 @@ struct ipa_reg_ep_init_deaggr {
  *
  * @hps_seq_type: type of HPS sequencer (enum ipa_hps_dps_sequencer_type)
  */
-struct ipa_reg_ep_init_seq {
+struct ipa_reg_endp_init_seq {
 	u32 hps_seq_type;
 	u32 dps_seq_type;
 	u32 hps_rep_seq_type;
 	u32 dps_rep_seq_type;
 };
 
-/** struct ipa_reg_ep_init_cfg - IPA_ENDP_INIT_CFG_N field structure
+/** struct ipa_reg_endp_init_cfg - IPA_ENDP_INIT_CFG_N field structure
  *
  * @frag_offload_en:
  * @cs_offload_en: type of offloading (enum ipa_cs_offload)
@@ -271,21 +271,21 @@ struct ipa_reg_ep_init_seq {
  * pipes.
  * @cs_gen_qmb_master_sel:
  */
-struct ipa_reg_ep_init_cfg {
+struct ipa_reg_endp_init_cfg {
 	u32 frag_offload_en;
 	u32 cs_offload_en;
 	u32 cs_metadata_hdr_offset;
 	u32 cs_gen_qmb_master_sel;
 };
 
-/** struct ipa_reg_ep_init_hdr_metadata_mask - IPA_ENDP_INIT_HDR_METADATA_MASK_N
- * 					       field structure
+/** struct ipa_reg_endp_init_hdr_metadata_mask -
+ *	IPA_ENDP_INIT_HDR_METADATA_MASK_N field structure
  *
  * @metadata_mask: mask specifying metadata bits to write
  *
  *  Valid for producer pipes only.
  */
-struct ipa_reg_ep_init_hdr_metadata_mask {
+struct ipa_reg_endp_init_hdr_metadata_mask {
 	u32 metadata_mask;
 };
 
@@ -302,7 +302,7 @@ struct ipa_reg_shared_mem_size {
 	u32 shared_mem_baddr;
 };
 
-/* struct ipa_reg_ep_status - IPA_ENDP_STATUS_N field structure
+/* struct ipa_reg_endp_status - IPA_ENDP_STATUS_N field structure
  *
  * @status_en: Determines if end point supports Status Indications. SW should
  *	set this bit in order to enable Statuses. Output Pipe - send
@@ -319,7 +319,7 @@ struct ipa_reg_shared_mem_size {
  *	packet for this endpoint. Valid only for Output Pipes (IPA Producer)
  * @status_pkt_suppress:
  */
-struct ipa_reg_ep_status {
+struct ipa_reg_endp_status {
 	u32 status_en;
 	u32 status_endp;
 	u32 status_location;
