@@ -5,14 +5,6 @@
  */
 #define pr_fmt(fmt)	"ipahal %s:%d " fmt, __func__, __LINE__
 
-#ifndef __KERNEL__
-#include <stdint.h>
-#include <stddef.h>
-#include <sys/stat.h>
-#endif
-#include <linux/types.h>
-#include <linux/init.h>
-#include <linux/kernel.h>
 #include <linux/io.h>
 
 #include "field_mask.h"
