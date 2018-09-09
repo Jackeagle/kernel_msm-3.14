@@ -74,9 +74,8 @@ static void ipa_handle_interrupt(int irq_num)
 
 		/* Get and clear mask of endpoints signaling TX_SUSPEND */
 		endpoints = ipa_read_reg_n(IPA_IRQ_SUSPEND_INFO_EE_N,
-					      IPA_EE_AP);
-		ipa_write_reg_n(IPA_SUSPEND_IRQ_CLR_EE_N, IPA_EE_AP,
-				   endpoints);
+					   IPA_EE_AP);
+		ipa_write_reg_n(IPA_SUSPEND_IRQ_CLR_EE_N, IPA_EE_AP, endpoints);
 	}
 
 	intr_info->handler(intr_info->interrupt, endpoints);
@@ -117,7 +116,7 @@ static void ipa_process_interrupts(void)
 			 */
 			if (uc_irq)
 				ipa_write_reg_n(IPA_IRQ_CLR_EE_N, IPA_EE_AP,
-						   imask);
+						imask);
 
 			ipa_handle_interrupt(i);
 
@@ -126,7 +125,7 @@ static void ipa_process_interrupts(void)
 			 */
 			if (!uc_irq)
 				ipa_write_reg_n(IPA_IRQ_CLR_EE_N, IPA_EE_AP,
-						   imask);
+						imask);
 		} while ((ipa_intr_mask ^= imask));
 	}
 }

@@ -62,7 +62,7 @@
  * accessed using these functions:
  *	void ipa_read_reg_n_fields(enum ipa_reg reg, u32 n, void *fields);
  *	void ipa_write_reg_n_fields(enum ipa_reg reg, u32 n,
- *				       const void *fields);
+ *				    const void *fields);
  */
 
 /* Register names */

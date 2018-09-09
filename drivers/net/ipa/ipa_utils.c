@@ -897,7 +897,7 @@ ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
 	mask.metadata_mask = metadata_mask->metadata_mask;
 
 	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_N, clnt_hdl,
-				  &mask);
+			       &mask);
 }
 
 /** ipa_cfg_ep - IPA end-point configuration
@@ -1175,8 +1175,8 @@ static void write_src_rsrc_grp_limits(enum ipa_reg reg,
 	ipa_write_reg_n_fields(reg, n, &val);
 }
 
-static void ipa_write_src_rsrc_grp_type_reg(int group_index,
-					    enum ipa_rsrc_grp_type_src n)
+static void
+ipa_write_src_rsrc_grp_type_reg(int group_index, enum ipa_rsrc_grp_type_src n)
 {
 	const struct rsrc_min_max *x_limits;
 	const struct rsrc_min_max *y_limits;
@@ -1196,8 +1196,8 @@ static void ipa_write_src_rsrc_grp_type_reg(int group_index,
 	write_src_rsrc_grp_limits(reg, n, x_limits, y_limits);
 }
 
-static void ipa_write_dst_rsrc_grp_type_reg(int group_index,
-					    enum ipa_rsrc_grp_type_src n)
+static void
+ipa_write_dst_rsrc_grp_type_reg(int group_index, enum ipa_rsrc_grp_type_src n)
 {
 	enum ipa_reg reg = IPA_DST_RSRC_GRP_01_RSRC_TYPE_N;
 	const struct rsrc_min_max *x_limits;
@@ -1450,7 +1450,7 @@ void ipa_set_flt_tuple_mask(u32 pipe_idx, struct ipa_reg_hash_tuple *tuple)
 	struct ipa_ep_filter_router_hsh_cfg hsh_cfg;
 
 	ipa_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, pipe_idx,
-				 &hsh_cfg);
+			      &hsh_cfg);
 
 	hsh_cfg.flt.src_id = tuple->src_id;
 	hsh_cfg.flt.src_ip = tuple->src_ip;
@@ -1461,7 +1461,7 @@ void ipa_set_flt_tuple_mask(u32 pipe_idx, struct ipa_reg_hash_tuple *tuple)
 	hsh_cfg.flt.metadata = tuple->metadata;
 
 	ipa_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, pipe_idx,
-				  &hsh_cfg);
+			       &hsh_cfg);
 }
 
 /** ipa_set_rt_tuple_mask() - Sets the rt tuple masking for the given tbl
@@ -1478,7 +1478,7 @@ void ipa_set_rt_tuple_mask(int tbl_idx, struct ipa_reg_hash_tuple *tuple)
 	struct ipa_ep_filter_router_hsh_cfg hsh_cfg;
 
 	ipa_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, tbl_idx,
-				 &hsh_cfg);
+			      &hsh_cfg);
 
 	hsh_cfg.rt.src_id = tuple->src_id;
 	hsh_cfg.rt.src_ip = tuple->src_ip;
@@ -1489,7 +1489,7 @@ void ipa_set_rt_tuple_mask(int tbl_idx, struct ipa_reg_hash_tuple *tuple)
 	hsh_cfg.rt.metadata = tuple->metadata;
 
 	ipa_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, tbl_idx,
-				  &hsh_cfg);
+			       &hsh_cfg);
 }
 
 MODULE_LICENSE("GPL v2");
