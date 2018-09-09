@@ -273,13 +273,13 @@ struct ipa_reg_ep_status {
  *
  */
 struct ipa_reg_hash_tuple {
-	bool src_id;	/* pipe number in flt, table index in rt */
-	bool src_ip;
-	bool dst_ip;
-	bool src_port;
-	bool dst_port;
-	bool protocol;
-	bool metadata;
+	u32 src_id;	/* pipe number in flt, table index in rt */
+	u32 src_ip;
+	u32 dst_ip;
+	u32 src_port;
+	u32 dst_port;
+	u32 protocol;
+	u32 metadata;
 };
 
 /* struct ipa_ep_filter_router_hsh_cfg - IPA hash tuple register
