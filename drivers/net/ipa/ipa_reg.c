@@ -111,11 +111,11 @@ ipareg_construct_endp_init_hdr_ext_n(enum ipa_reg reg, const void *fields)
 
 	/* 0 = little endian; 1 = big endian */
 	val = field_gen(1, HDR_ENDIANNESS_BMSK);
-	val |= field_gen(ep_hdr_ext->hdr_total_len_or_pad_valid ? 1 : 0,
+	val |= field_gen(ep_hdr_ext->hdr_total_len_or_pad_valid,
 			 HDR_TOTAL_LEN_OR_PAD_VALID_BMSK);
 	val |= field_gen(ep_hdr_ext->hdr_total_len_or_pad,
 			 HDR_TOTAL_LEN_OR_PAD_BMSK);
-	val |= field_gen(ep_hdr_ext->hdr_payload_len_inc_padding ? 1 : 0,
+	val |= field_gen(ep_hdr_ext->hdr_payload_len_inc_padding,
 			 HDR_PAYLOAD_LEN_INC_PADDING_BMSK);
 	val |= field_gen(0, HDR_TOTAL_LEN_OR_PAD_OFFSET_BMSK);
 	val |= field_gen(ep_hdr_ext->hdr_pad_to_alignment,

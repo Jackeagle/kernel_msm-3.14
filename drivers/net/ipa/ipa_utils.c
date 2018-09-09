@@ -710,12 +710,13 @@ ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
 	/* copy over EP cfg */
 	ep->cfg.hdr_ext.hdr_pad_to_alignment = ep_hdr_ext->hdr_pad_to_alignment;
 	ep->cfg.hdr_ext.hdr_payload_len_inc_padding =
-			ep_hdr_ext->hdr_payload_len_inc_padding;
-	ep->cfg.hdr_ext.hdr_total_len_or_pad = ep_hdr_ext->hdr_total_len_or_pad;
+			ep_hdr_ext->hdr_payload_len_inc_padding ? 1 : 0;
+	ep->cfg.hdr_ext.hdr_total_len_or_pad =
+			ep_hdr_ext->hdr_total_len_or_pad == IPA_HDR_PAD ? 0 : 1;
 	ep->cfg.hdr_ext.hdr_total_len_or_pad_valid =
-			ep_hdr_ext->hdr_total_len_or_pad_valid;
+			ep_hdr_ext->hdr_total_len_or_pad_valid ? 1 : 0;
 
-	hdr_ext.hdr_endianness = 1;
+	hdr_ext.hdr_endianness = 1;	/* big endian */
 	hdr_ext.hdr_total_len_or_pad_valid =
 			ep_hdr_ext->hdr_total_len_or_pad_valid;
 	hdr_ext.hdr_total_len_or_pad = ep_hdr_ext->hdr_total_len_or_pad;
