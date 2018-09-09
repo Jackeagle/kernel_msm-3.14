@@ -6,6 +6,65 @@
 #ifndef _IPA_REG_H_
 #define _IPA_REG_H_
 
+/* The IPA code abstracts the details of its 32-bit registers, allowing access
+ * to them to be done generically.  The original motivation for this was that
+ * the field width and/or position for values stored in some registers differed
+ * for different versions of IPA hardware.  Abstracting access this way allows
+ * code that uses such registers to be simpler, describing how register fields
+ * are used without proliferating special-case code that is dependent on
+ * hardware version.
+ *
+ * Each IPA register has a name, which is one of the values in the "ipa_reg"
+ * enumerated type (e.g., IPA_ENABLED_PIPES).  The offset (memory address) of
+ * the register having a given name is maintained internal to the "ipa_reg"
+ * module.
+ *
+ * For simple registers that hold a single 32-bit value, two functions provide
+ * access to the register:
+ *	u32 ipahal_read_reg(enum ipa_reg reg);
+ *	void ipahal_write_reg(enum ipa_reg reg, u32 val);
+ *
+ * Some registers are "N-parameterized."  This means there is a set of
+ * registers having identical format, and each is accessed by supplying
+ * the "N" value to select which register is intended.  The names for
+ * N-parameterized registers have an "_N" suffix (e.g. IPA_IRQ_STTS_EE_N).
+ * Details of computing the offset for such registers are maintained internal
+ * to the "ipa_reg" module.  For simple registers holding a single 32-bit
+ * value, these functions provide access to N-parameterized registers:
+ *	u32 ipahal_read_reg_n(enum ipa_reg reg, u32 n);
+ *	void ipahal_write_reg_n(enum ipa_reg reg, u32 n, u32 val);
+ *
+ * Some registers contain fields less than 32 bits wide (call these "field
+ * registers").  For each such register a "field structure" is defined to
+ * represent the values of the individual fields within the register.  The
+ * name of the structure matches the name of the register (in lower case).
+ * For example, the individual fields in the IPA_ROUTE register are represented
+ * by the field structure named ipa_reg_route.
+ *
+ * The position and width of fields within a register are defined (in
+ * "ipa_reg.c") using field masks, and the names of the members in the field
+ * structure associated with such registers match the names of the bit masks
+ * that define the fields.  (E.g., ipa_reg_route->route_dis is used to
+ * represent the field defined by the ROUTE_DIS field mask.)
+ *
+ * "Field registers" are accessed using these functions:
+ *	void ipahal_read_reg_fields(enum ipa_reg reg, void *fields);
+ *	void ipahal_write_reg_fields(enum ipa_reg reg, const void *fields);
+ * The "fields" parameter in both cases is the address of the "field structure"
+ * associated with the register being accessed.  When reading, the structure is
+ * filled by ipahal_read_reg_fields() with values found in the register's
+ * fields.  (All fields will be filled; there is no need for the caller to
+ * initialize the passed-in structure before the call.)  When writing, the
+ * caller initializes the structure with all values that should be written to
+ * the fields in the register.
+ *
+ * "Field registers" can also be N-parameterized, in which case they are
+ * accessed using these functions:
+ *	void ipahal_read_reg_n_fields(enum ipa_reg reg, u32 n, void *fields);
+ *	void ipahal_write_reg_n_fields(enum ipa_reg reg, u32 n,
+ *				       const void *fields);
+ */
+
 /* Register names */
 enum ipa_reg {
 	IPA_ROUTE,
@@ -44,7 +103,8 @@ enum ipa_reg {
 	IPA_IDLE_INDICATION_CFG,
 };
 
-/* struct ipa_reg_route - IPA route register
+/* struct ipa_reg_route - IPA_ROUTE field structure
+ *
  * @route_dis: route disable
  * @route_def_pipe: route default pipe
  * @route_def_hdr_table: route default header table
@@ -64,7 +124,7 @@ struct ipa_reg_route {
 	u32 route_def_retain_hdr;
 };
 
-/* ipa_reg_ep_init_hdr - endpoint header initialization
+/* ipa_reg_ep_init_hdr - ENDP_INIT_HDR_N field structure
  *
  * @hdr_len:
  * @hdr_ofst_metadata_valid:
@@ -88,7 +148,7 @@ struct ipa_reg_ep_init_hdr {
 	u32 hdr_metadata_reg_valid;
 };
 
-/* ipa_reg_ep_init_hdr_ext - extended endpoint header initialization
+/* ipa_reg_ep_init_hdr_ext - IPA_ENDP_INIT_HDR_EXT_N field structure
  *
  * @hdr_endianness:
  * @hdr_total_len_or_pad_valid:
@@ -106,7 +166,7 @@ struct ipa_reg_ep_init_hdr_ext {
 	u32 hdr_pad_to_alignment;
 };
 
-/** struct ipa_reg_ep_init_aggr - IPA endpoint init aggregation register
+/** struct ipa_reg_ep_init_aggr - IPA_ENDP_INIT_AGGR_N field structure
  *
  * @aggr_en: bypass aggregation, enable aggregation, or deaggregation
  *	     (enum ipa_aggr_en_type)
@@ -136,7 +196,7 @@ struct ipa_reg_ep_init_aggr {
 	u32 aggr_hard_byte_limit_en;
 };
 
-/* struct ipa_aggr_force_close - IPA force close aggregation register
+/* struct ipa_aggr_force_close - IPA_AGGR_FORCE_CLOSE field structure
  *
  * @pipe_bitmap: bitmap of pipes on which aggregation should be closed
  */
@@ -144,7 +204,8 @@ struct ipa_reg_aggr_force_close {
 	u32 pipe_bitmap;
 };
 
-/* struct ipa_reg_endp_init_mode - IPA ENDP_INIT_MODE_n register
+/* struct ipa_reg_endp_init_mode - IPA_ENDP_INIT_MODE_N field structure
+ *
  * @mode: endpoint mode setting (enum ipa_mode_type)
  * @dst_pipe_index: This parameter specifies destination output-pipe-packets
  *	will be routed to. Valid for DMA mode only and for Input
@@ -163,7 +224,8 @@ struct ipa_reg_endp_init_mode {
 	u32 hdr_ftch_disable;
 };
 
-/** struct ipa_ep_init_ctrl - Control configuration in IPA end-point
+/* struct ipa_ep_init_ctrl - IPA_ENDP_INIT_CTRL_N field structure
+ *
  * @ipa_ep_suspend: 0 - ENDP is enabled, 1 - ENDP is suspended (disabled).
  *			Valid for PROD Endpoints
  * @ipa_ep_delay:   0 - ENDP is free-running, 1 - ENDP is delayed.
@@ -175,7 +237,7 @@ struct ipa_reg_ep_init_ctrl {
 	u32 endp_delay;
 };
 
-/** struct ipa_reg_ep_init_deaggr - endpoint deaggregation register
+/** struct ipa_reg_ep_init_deaggr - IPA_ENDP_INIT_DEAGGR_N field structure
  *
  * @deaggr_hdr_len:
  * @packet_offset_valid:
@@ -189,7 +251,7 @@ struct ipa_reg_ep_init_deaggr {
 	u32 max_packet_len;
 };
 
-/** struct ipa_ep_init_seq - Sequencer configuration in IPA end-point
+/** struct ipa_ep_init_seq - IPA_ENDP_INIT_SEQ_N field structure
  *
  * @hps_seq_type: type of HPS sequencer (enum ipa_hps_dps_sequencer_type)
  */
@@ -200,7 +262,7 @@ struct ipa_reg_ep_init_seq {
 	u32 dps_rep_seq_type;
 };
 
-/** struct ipa_reg_ep_init_cfg - endpoint initial configuration
+/** struct ipa_reg_ep_init_cfg - IPA_ENDP_INIT_CFG_N field structure
  *
  * @frag_offload_en:
  * @cs_offload_en: type of offloading (enum ipa_cs_offload)
@@ -216,7 +278,8 @@ struct ipa_reg_ep_init_cfg {
 	u32 cs_gen_qmb_master_sel;
 };
 
-/** struct ipa_reg_ep_init_hdr_metadata_mask - Endpoint hdr metadata mask
+/** struct ipa_reg_ep_init_hdr_metadata_mask - IPA_ENDP_INIT_HDR_METADATA_MASK_N
+ * 					       field structure
  *
  * @metadata_mask: mask specifying metadata bits to write
  *
@@ -226,7 +289,8 @@ struct ipa_reg_ep_init_hdr_metadata_mask {
 	u32 metadata_mask;
 };
 
-/* struct ipa_reg_shared_mem_size - IPA SHARED_MEM_SIZE register
+/* struct ipa_reg_shared_mem_size - SHARED_MEM_SIZE field structure
+ *
  * @shared_mem_size: Available size [in 8Bytes] of SW partition within
  *	IPA shared memory.
  * @shared_mem_baddr: Offset of SW partition within IPA
@@ -238,7 +302,8 @@ struct ipa_reg_shared_mem_size {
 	u32 shared_mem_baddr;
 };
 
-/* struct ipa_reg_ep_status - status configuration in IPA end-point
+/* struct ipa_reg_ep_status - IPA_ENDP_STATUS_N field structure
+ *
  * @status_en: Determines if end point supports Status Indications. SW should
  *	set this bit in order to enable Statuses. Output Pipe - send
  *	Status indications only if bit is set. Input Pipe - forward Status
@@ -261,8 +326,12 @@ struct ipa_reg_ep_status {
 	u32 status_pkt_suppress;
 };
 
-/* struct ipa_hash_tuple - Hash tuple members for flt and rt
- *  the fields tells if to be masked or not
+/* struct ipa_hash_tuple - structure used to group filter and route fields in
+ *			   struct ipa_ep_filter_router_hsh_cfg
+ *
+ * Each field is a Boolean value, indicating whether that particular value
+ * should be used for filtering or routing.
+ *
  * @src_id: pipe number for flt, table index for rt
  * @src_ip_addr: IP source address
  * @dst_ip_addr: IP destination address
@@ -270,7 +339,6 @@ struct ipa_reg_ep_status {
  * @dst_port: L4 destination port
  * @protocol: IP protocol field
  * @meta_data: packet meta-data
- *
  */
 struct ipa_reg_hash_tuple {
 	u32 src_id;	/* pipe number in flt, table index in rt */
@@ -282,7 +350,9 @@ struct ipa_reg_hash_tuple {
 	u32 metadata;
 };
 
-/* struct ipa_ep_filter_router_hsh_cfg - IPA hash tuple register
+/* struct ipa_ep_filter_router_hsh_cfg - IPA_ENDP_FILTER_ROUTER_HSH_CFG_N
+ * 					 field structure
+ *
  * @flt: Hash tuple info for filtering
  * @undefined1:
  * @rt: Hash tuple info for routing
@@ -296,7 +366,13 @@ struct ipa_ep_filter_router_hsh_cfg {
 	u32 undefined2;
 };
 
-/* struct ipa_reg_rsrc_grp_cfg - Mix/Max values for two rsrc groups
+/* struct ipa_reg_rsrc_grp_cfg - IPA_{SRC,DST}_RSRC_GRP_{02}{13}Y_RSRC_TYPE_N
+ * 				 field structure
+ *
+ * This field structure is used for accessing the following registers:
+ *	IPA_SRC_RSRC_GRP_01_RSRC_TYPE_N IPA_SRC_RSRC_GRP_23_RSRC_TYPE_N
+ *	IPA_DST_RSRC_GRP_01_RSRC_TYPE_N IPA_DST_RSRC_GRP_23_RSRC_TYPE_N
+ *
  * @x_min - first group min value
  * @x_max - first group max value
  * @y_min - second group min value
@@ -309,7 +385,8 @@ struct ipa_reg_rsrc_grp_cfg {
 	u32 y_max;
 };
 
-/* struct ipa_reg_qsb_max_writes - IPA QSB Max Writes register
+/* struct ipa_reg_qsb_max_writes - IPA_QSB_MAX_WRITES field register
+ *
  * @qmb_0_max_writes: Max number of outstanding writes for GEN_QMB_0
  * @qmb_1_max_writes: Max number of outstanding writes for GEN_QMB_1
  */
@@ -318,7 +395,8 @@ struct ipa_reg_qsb_max_writes {
 	u32 qmb_1_max_writes;
 };
 
-/* struct ipa_reg_qsb_max_reads - IPA QSB Max Reads register
+/* struct ipa_reg_qsb_max_reads - IPA_QSB_MAX_READS field register
+ *
  * @qmb_0_max_reads: Max number of outstanding reads for GEN_QMB_0
  * @qmb_1_max_reads: Max number of outstanding reads for GEN_QMB_1
  * @qmb_0_max_read_beats: Max number of outstanding read beats for GEN_QMB_0
@@ -331,7 +409,8 @@ struct ipa_reg_qsb_max_reads {
 	u32 qmb_1_max_read_beats;
 };
 
-/* struct ipa_reg_idle_indication_cfg - IPA IDLE_INDICATION_CFG register
+/* struct ipa_reg_idle_indication_cfg - IPA_IDLE_INDICATION_CFG field register
+ *
  * @const_non_idle_enable: enable the asserting of the IDLE value and DCD
  * @enter_idle_debounce_thresh:	 configure the debounce threshold
  */
@@ -384,8 +463,7 @@ static inline void ipahal_read_reg_fields(enum ipa_reg reg, void *fields)
 }
 
 /* ipahal_write_reg_fields() - Write a parsed value to a register */
-static inline void ipahal_write_reg_fields(enum ipa_reg reg,
-					   const void *fields)
+static inline void ipahal_write_reg_fields(enum ipa_reg reg, const void *fields)
 {
 	ipahal_write_reg_n_fields(reg, 0, fields);
 }

@@ -13,11 +13,12 @@
 /* I/O remapped base address of IPA register space */
 static void __iomem *ipa_reg_virt;
 
-/* struct ipa_reg_obj - Register H/W information for specific IPA version
- * @construct - CB to construct register value from abstracted structure
- * @parse - CB to parse register value to abstracted structure
+/* struct ipa_reg_obj - access information for an abstracted hardware register
+ *
+ * @construct - fn to construct the register value from its field structure
+ * @parse - function to parse register field values into its field structure
  * @offset - register offset relative to base address
- * @n_ofst - N parameterized register sub-offset
+ * @n_ofst - size multiplier for "N-parameterized" registers
  */
 struct ipa_reg_obj {
 	u32 (*construct)(enum ipa_reg reg, const void *fields);
@@ -34,8 +35,7 @@ struct ipa_reg_obj {
 #define ROUTE_FRAG_DEF_PIPE_BMSK	0x003e0000
 #define ROUTE_DEF_RETAIN_HDR_BMSK	0x01000000
 
-static u32
-ipareg_construct_route(enum ipa_reg reg, const void *fields)
+static u32 ipareg_construct_route(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_reg_route *route = fields;
 	u32 val;
@@ -293,9 +293,8 @@ ipareg_construct_endp_init_cfg_n(enum ipa_reg reg, const void *fields)
 /* IPA_ENDP_INIT_HDR_METADATA_MASK_N register */
 #define METADATA_MASK_BMSK	0xffffffff
 
-static u32
-ipareg_construct_endp_init_hdr_metadata_mask_n(enum ipa_reg reg,
-					       const void *fields)
+static u32 ipareg_construct_endp_init_hdr_metadata_mask_n(enum ipa_reg reg,
+							  const void *fields)
 {
 	const struct ipa_reg_ep_init_hdr_metadata_mask *metadata_mask = fields;
 
@@ -323,8 +322,7 @@ ipareg_parse_shared_mem_size(enum ipa_reg reg, void *fields, u32 val)
 #define STATUS_LOCATION_BMSK		0x00000100
 #define STATUS_PKT_SUPPRESS_BMSK	0x00000200
 
-static u32
-ipareg_construct_endp_status_n(enum ipa_reg reg, const void *fields)
+static u32 ipareg_construct_endp_status_n(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_reg_ep_status *ep_status = fields;
 	u32 val;
@@ -435,8 +433,7 @@ static u32 ipareg_construct_rsrg_grp_xy(enum ipa_reg reg, const void *fields)
 #define GEN_QMB_0_MAX_WRITES_BMSK	0x0000000f
 #define GEN_QMB_1_MAX_WRITES_BMSK	0x000000f0
 
-static u32
-ipareg_construct_qsb_max_writes(enum ipa_reg reg, const void *fields)
+static u32 ipareg_construct_qsb_max_writes(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_reg_qsb_max_writes *max_writes = fields;
 	u32 val;
@@ -453,8 +450,7 @@ ipareg_construct_qsb_max_writes(enum ipa_reg reg, const void *fields)
 #define GEN_QMB_0_MAX_READS_BMSK	0x0000000f
 #define GEN_QMB_1_MAX_READS_BMSK	0x000000f0
 
-static u32
-ipareg_construct_qsb_max_reads(enum ipa_reg reg, const void *fields)
+static u32 ipareg_construct_qsb_max_reads(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_reg_qsb_max_reads *max_reads = fields;
 	u32 val;
