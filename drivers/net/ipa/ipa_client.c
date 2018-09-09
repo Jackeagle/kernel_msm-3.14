@@ -101,7 +101,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	if (result)
 		return -EFAULT;
 
-	ipahal_read_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl, &ctrl);
+	ipa_read_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl, &ctrl);
 	if (ctrl.endp_suspend) {
 		ipa_debug("pipe is suspended, remove suspend\n");
 		pipe_suspended = true;
@@ -138,7 +138,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 
 	/* Wait for aggregation frame to be closed and stop channel*/
 	for (i = 0; i < IPA_POLL_AGGR_STATE_RETRIES_NUM; i++) {
-		aggr_active_bitmap = ipahal_read_reg(IPA_STATE_AGGR_ACTIVE);
+		aggr_active_bitmap = ipa_read_reg(IPA_STATE_AGGR_ACTIVE);
 		if (!(aggr_active_bitmap & BIT(clnt_hdl)))
 			break;
 		msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
@@ -211,7 +211,7 @@ void ipa_reset_gsi_channel(u32 clnt_hdl)
 	 * reset with open aggregation frame WA
 	 */
 	if (ipa_consumer(ep->client))
-		aggr_active_bitmap = ipahal_read_reg(IPA_STATE_AGGR_ACTIVE);
+		aggr_active_bitmap = ipa_read_reg(IPA_STATE_AGGR_ACTIVE);
 	else
 		aggr_active_bitmap = 0;
 

@@ -52,7 +52,7 @@ static void ipa_tx_suspend_interrupt_wa(void)
 {
 	u32 val;
 
-	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP);
+	val = ipa_read_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP);
 	val &= ~BIT(ipa_irq_mapping[IPA_TX_SUSPEND_IRQ]);
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP, val);
 
@@ -73,7 +73,7 @@ static void ipa_handle_interrupt(int irq_num)
 		ipa_tx_suspend_interrupt_wa();
 
 		/* Get and clear mask of endpoints signaling TX_SUSPEND */
-		endpoints = ipahal_read_reg_n(IPA_IRQ_SUSPEND_INFO_EE_N,
+		endpoints = ipa_read_reg_n(IPA_IRQ_SUSPEND_INFO_EE_N,
 					      IPA_EE_AP);
 		ipahal_write_reg_n(IPA_SUSPEND_IRQ_CLR_EE_N, IPA_EE_AP,
 				   endpoints);
@@ -100,8 +100,8 @@ static void ipa_process_interrupts(void)
 		 * bug forces us to re-read the enabled mask every time to
 		 * avoid an endless loop.
 		 */
-		ipa_intr_mask = ipahal_read_reg_n(IPA_IRQ_STTS_EE_N, IPA_EE_AP);
-		ipa_intr_mask &= ipahal_read_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP);
+		ipa_intr_mask = ipa_read_reg_n(IPA_IRQ_STTS_EE_N, IPA_EE_AP);
+		ipa_intr_mask &= ipa_read_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP);
 
 		if (!ipa_intr_mask)
 			break;
@@ -158,7 +158,7 @@ static void enable_tx_suspend_work_func(struct work_struct *work)
 
 	ipa_client_add();
 
-	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP);
+	val = ipa_read_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP);
 	val |= BIT(ipa_irq_mapping[IPA_TX_SUSPEND_IRQ]);
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP, val);
 
@@ -205,7 +205,7 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 	intr_info->interrupt = interrupt;
 
 	/* Enable the IPA interrupt */
-	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP);
+	val = ipa_read_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP);
 	val |= BIT(irq_num);
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP, val);
 
@@ -231,7 +231,7 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 		tx_suspend_disable();
 
 	/* Disable the interrupt */
-	val = ipahal_read_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP);
+	val = ipa_read_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP);
 	val &= ~BIT(irq_num);
 	ipahal_write_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP, val);
 }
@@ -270,7 +270,7 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 	u32 clnt_mask = BIT(clnt_hdl);
 
 	/* Nothing to do if the endpoint doesn't have aggregation open */
-	if (!(ipahal_read_reg(IPA_STATE_AGGR_ACTIVE) & clnt_mask))
+	if (!(ipa_read_reg(IPA_STATE_AGGR_ACTIVE) & clnt_mask))
 		return;
 
 	/* Force close aggregation */

@@ -548,7 +548,7 @@ void ipa_sram_settings_read(void)
 {
 	struct ipa_reg_shared_mem_size smem_sz;
 
-	ipahal_read_reg_fields(IPA_SHARED_MEM_SIZE, &smem_sz);
+	ipa_read_reg_fields(IPA_SHARED_MEM_SIZE, &smem_sz);
 
 	/* reg fields are in 8B units */
 	ipa_ctx->smem_offset = smem_sz.shared_mem_baddr * 8;
@@ -1108,7 +1108,7 @@ void ipa_proxy_clk_vote(void)
 
 u32 ipa_get_num_pipes(void)
 {
-	return ipahal_read_reg(IPA_ENABLED_PIPES);
+	return ipa_read_reg(IPA_ENABLED_PIPES);
 }
 
 /** ipa_disable_apps_wan_cons_deaggr()-
@@ -1449,7 +1449,7 @@ void ipa_set_flt_tuple_mask(u32 pipe_idx, struct ipa_reg_hash_tuple *tuple)
 {
 	struct ipa_ep_filter_router_hsh_cfg hsh_cfg;
 
-	ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, pipe_idx,
+	ipa_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, pipe_idx,
 				 &hsh_cfg);
 
 	hsh_cfg.flt.src_id = tuple->src_id;
@@ -1477,7 +1477,7 @@ void ipa_set_rt_tuple_mask(int tbl_idx, struct ipa_reg_hash_tuple *tuple)
 {
 	struct ipa_ep_filter_router_hsh_cfg hsh_cfg;
 
-	ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, tbl_idx,
+	ipa_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, tbl_idx,
 				 &hsh_cfg);
 
 	hsh_cfg.rt.src_id = tuple->src_id;

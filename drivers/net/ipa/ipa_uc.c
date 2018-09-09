@@ -237,7 +237,7 @@ ipa_uc_event_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 	/* General handling */
 	if (event == IPA_UC_EVENT_ERROR) {
 		ipa_err("uC error type 0x%02x timestamp 0x%08x\n",
-			event_param.error_type, ipahal_read_reg(IPA_TAG_TIMER));
+			event_param.error_type, ipa_read_reg(IPA_TAG_TIMER));
 		ipa_bug();
 	} else {
 		ipa_debug("unsupported uC event opcode=%u\n", event);

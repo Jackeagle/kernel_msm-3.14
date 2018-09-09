@@ -489,7 +489,7 @@ ipareg_construct_idle_indication_cfg(enum ipa_reg reg, const void *fields)
  *   written using ipahal_write_reg_n_fields() (or its wrapper
  *   function ipahal_write_reg_fields()).
  * - Generally, if a parse function is supplied, the register should
- *   read using ipahal_read_reg_n_fields() (or ipahal_read_reg_fields()).
+ *   read using ipa_read_reg_n_fields() (or ipa_read_reg_fields()).
  *   (Currently some debug code reads some registers directly, without
  *   parsing.)
  */
@@ -593,8 +593,8 @@ u32 ipa_reg_n_offset(enum ipa_reg reg, u32 n)
 	return ipa_regs[reg].offset + n * ipa_regs[reg].n_ofst;
 }
 
-/* ipahal_read_reg_n() - Get an "n parameterized" register's value */
-u32 ipahal_read_reg_n(enum ipa_reg reg, u32 n)
+/* ipa_read_reg_n() - Get an "n parameterized" register's value */
+u32 ipa_read_reg_n(enum ipa_reg reg, u32 n)
 {
 	return ioread32(ipa_reg_virt + ipa_reg_n_offset(reg, n));
 }
@@ -605,10 +605,10 @@ void ipahal_write_reg_n(enum ipa_reg reg, u32 n, u32 val)
 	iowrite32(val, ipa_reg_virt + ipa_reg_n_offset(reg, n));
 }
 
-/* ipahal_read_reg_n_fields() - Parse value of an "n parameterized" register */
-void ipahal_read_reg_n_fields(enum ipa_reg reg, u32 n, void *fields)
+/* ipa_read_reg_n_fields() - Parse value of an "n parameterized" register */
+void ipa_read_reg_n_fields(enum ipa_reg reg, u32 n, void *fields)
 {
-	u32 val = ipahal_read_reg_n(reg, n);
+	u32 val = ipa_read_reg_n(reg, n);
 
 	ipa_regs[reg].parse(reg, fields, val);
 }
