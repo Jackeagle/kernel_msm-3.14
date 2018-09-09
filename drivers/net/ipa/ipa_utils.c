@@ -570,15 +570,15 @@ void ipa_cfg_qsb(void)
 	max_writes.qmb_0_max_writes = 8;
 	max_writes.qmb_1_max_writes = 4;
 
-	ipahal_write_reg_fields(IPA_QSB_MAX_WRITES, &max_writes);
-	ipahal_write_reg_fields(IPA_QSB_MAX_READS, &max_reads);
+	ipa_write_reg_fields(IPA_QSB_MAX_WRITES, &max_writes);
+	ipa_write_reg_fields(IPA_QSB_MAX_READS, &max_reads);
 }
 
 /** ipa_init_hw() - initialize HW */
 void ipa_init_hw(void)
 {
 	/* SDM845 has IPA version 3.5.1 */
-	ipahal_write_reg(IPA_BCR, IPA_BCR_REG_VAL);
+	ipa_write_reg(IPA_BCR, IPA_BCR_REG_VAL);
 
 	ipa_cfg_qsb();
 }
@@ -678,7 +678,7 @@ static void ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 	cfg_hdr.hdr_len_inc_deagg_hdr = 0;
 	cfg_hdr.hdr_metadata_reg_valid = 0;
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_N, clnt_hdl, &cfg_hdr);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_N, clnt_hdl, &cfg_hdr);
 }
 
 /** ipa_cfg_ep_hdr_ext() -  IPA end-point extended header configuration
@@ -725,7 +725,7 @@ ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
 	hdr_ext.hdr_total_len_or_pad_offset = 0;
 	hdr_ext.hdr_pad_to_alignment = ep_hdr_ext->hdr_pad_to_alignment;
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_N, clnt_hdl, &hdr_ext);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_N, clnt_hdl, &hdr_ext);
 }
 
 /** ipa_cfg_ep_aggr() - IPA end-point aggregation configuration
@@ -772,7 +772,7 @@ static void ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 	init_aggr.aggr_hard_byte_limit_en =
 			ep_aggr->aggr_hard_byte_limit_en ? 1 : 0;
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_AGGR_N, clnt_hdl, &init_aggr);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_AGGR_N, clnt_hdl, &init_aggr);
 }
 
 /** ipa_cfg_ep_cfg() - IPA end-point cfg configuration
@@ -801,7 +801,7 @@ static void ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 	ipa_debug("mdata_hdr_ofst=%d gen_qmb_master_sel=0\n",
 		  ipa_ctx->ep[clnt_hdl].cfg.cfg.cs_metadata_hdr_offset);
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CFG_N, clnt_hdl, &init_cfg);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_CFG_N, clnt_hdl, &init_cfg);
 }
 
 /** ipa_cfg_ep_mode() - IPA end-point mode configuration
@@ -836,7 +836,7 @@ static void ipa_cfg_ep_mode(u32 clnt_hdl, enum ipa_client_type dst,
 	init_mode.pad_en = 0;
 	init_mode.hdr_ftch_disable = 0;
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_MODE_N, clnt_hdl, &init_mode);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_MODE_N, clnt_hdl, &init_mode);
 }
 
 /** ipa_cfg_ep_seq() - IPA end-point HPS/DPS sequencer type configuration
@@ -854,7 +854,7 @@ static void ipa_cfg_ep_seq(u32 clnt_hdl)
 	ep_seq.hps_rep_seq_type = 0;
 	ep_seq.dps_rep_seq_type = 0;
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_SEQ_N, clnt_hdl, &ep_seq);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_SEQ_N, clnt_hdl, &ep_seq);
 }
 
 /** ipa_cfg_ep_deaggr() -  IPA end-point deaggregation configuration
@@ -873,7 +873,7 @@ static void ipa_cfg_ep_deaggr(u32 clnt_hdl)
 	deaggr.packet_offset_location = 0;
 	deaggr.max_packet_len = 0;
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_N, clnt_hdl, &deaggr);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_N, clnt_hdl, &deaggr);
 }
 
 /** ipa_cfg_ep_metadata_mask() - IPA end-point meta-data mask configuration
@@ -896,7 +896,7 @@ ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
 			metadata_mask->metadata_mask;
 	mask.metadata_mask = metadata_mask->metadata_mask;
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_N, clnt_hdl,
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_N, clnt_hdl,
 				  &mask);
 }
 
@@ -955,14 +955,14 @@ ipa_cfg_ep_status(u32 clnt_hdl, const struct ipa_reg_ep_status *ep_status)
 	ipa_ctx->ep[clnt_hdl].status.status_pkt_suppress =
 			ep_status->status_pkt_suppress;
 
-	ipahal_write_reg_n_fields(IPA_ENDP_STATUS_N, clnt_hdl, ep_status);
+	ipa_write_reg_n_fields(IPA_ENDP_STATUS_N, clnt_hdl, ep_status);
 }
 
 static void suspend_consumer_endpoint(u32 ipa_ep_idx)
 {
 	struct ipa_reg_ep_init_ctrl cfg = { .endp_suspend = 1 };
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_idx, &cfg);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_idx, &cfg);
 
 	/* Due to a hardware bug, a client suspended with an open
 	 * aggregation frame will not generate a SUSPEND IPA interrupt.
@@ -976,7 +976,7 @@ static void resume_consumer_endpoint(u32 ipa_ep_idx)
 {
 	struct ipa_reg_ep_init_ctrl cfg = { .endp_suspend = 0 };
 
-	ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_idx, &cfg);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_idx, &cfg);
 }
 
 /* Interconnect path bandwidths (each times 1000 bytes per second) */
@@ -1172,7 +1172,7 @@ static void write_src_rsrc_grp_limits(enum ipa_reg reg,
 	val.y_min = y_limits->min;
 	val.y_max = y_limits->max;
 
-	ipahal_write_reg_n_fields(reg, n, &val);
+	ipa_write_reg_n_fields(reg, n, &val);
 }
 
 static void ipa_write_src_rsrc_grp_type_reg(int group_index,
@@ -1302,7 +1302,7 @@ void ipa_cfg_default_route(enum ipa_client_type client)
 
 	ipa_client_add();
 
-	ipahal_write_reg_fields(IPA_ROUTE, &route);
+	ipa_write_reg_fields(IPA_ROUTE, &route);
 
 	ipa_client_remove();
 }
@@ -1433,7 +1433,7 @@ void ipa_enable_dcd(void)
 	idle_indication_cfg.const_non_idle_enable = 0;
 	idle_indication_cfg.enter_idle_debounce_thresh = 256;
 
-	ipahal_write_reg_fields(IPA_IDLE_INDICATION_CFG, &idle_indication_cfg);
+	ipa_write_reg_fields(IPA_IDLE_INDICATION_CFG, &idle_indication_cfg);
 }
 
 /** ipa_set_flt_tuple_mask() - Sets the flt tuple masking for the given pipe
@@ -1460,7 +1460,7 @@ void ipa_set_flt_tuple_mask(u32 pipe_idx, struct ipa_reg_hash_tuple *tuple)
 	hsh_cfg.flt.protocol = tuple->protocol;
 	hsh_cfg.flt.metadata = tuple->metadata;
 
-	ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, pipe_idx,
+	ipa_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, pipe_idx,
 				  &hsh_cfg);
 }
 
@@ -1488,7 +1488,7 @@ void ipa_set_rt_tuple_mask(int tbl_idx, struct ipa_reg_hash_tuple *tuple)
 	hsh_cfg.rt.protocol = tuple->protocol;
 	hsh_cfg.rt.metadata = tuple->metadata;
 
-	ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, tbl_idx,
+	ipa_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, tbl_idx,
 				  &hsh_cfg);
 }
 

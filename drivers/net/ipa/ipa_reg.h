@@ -22,7 +22,7 @@
  * For simple registers that hold a single 32-bit value, two functions provide
  * access to the register:
  *	u32 ipa_read_reg(enum ipa_reg reg);
- *	void ipahal_write_reg(enum ipa_reg reg, u32 val);
+ *	void ipa_write_reg(enum ipa_reg reg, u32 val);
  *
  * Some registers are "N-parameterized."  This means there is a set of
  * registers having identical format, and each is accessed by supplying
@@ -32,7 +32,7 @@
  * to the "ipa_reg" module.  For simple registers holding a single 32-bit
  * value, these functions provide access to N-parameterized registers:
  *	u32 ipa_read_reg_n(enum ipa_reg reg, u32 n);
- *	void ipahal_write_reg_n(enum ipa_reg reg, u32 n, u32 val);
+ *	void ipa_write_reg_n(enum ipa_reg reg, u32 n, u32 val);
  *
  * Some registers contain fields less than 32 bits wide (call these "field
  * registers").  For each such register a "field structure" is defined to
@@ -49,7 +49,7 @@
  *
  * "Field registers" are accessed using these functions:
  *	void ipa_read_reg_fields(enum ipa_reg reg, void *fields);
- *	void ipahal_write_reg_fields(enum ipa_reg reg, const void *fields);
+ *	void ipa_write_reg_fields(enum ipa_reg reg, const void *fields);
  * The "fields" parameter in both cases is the address of the "field structure"
  * associated with the register being accessed.  When reading, the structure is
  * filled by ipa_read_reg_fields() with values found in the register's
@@ -61,7 +61,7 @@
  * "Field registers" can also be N-parameterized, in which case they are
  * accessed using these functions:
  *	void ipa_read_reg_n_fields(enum ipa_reg reg, u32 n, void *fields);
- *	void ipahal_write_reg_n_fields(enum ipa_reg reg, u32 n,
+ *	void ipa_write_reg_n_fields(enum ipa_reg reg, u32 n,
  *				       const void *fields);
  */
 
@@ -435,14 +435,14 @@ static inline u32 ipa_reg_offset(enum ipa_reg reg)
 /* ipa_read_reg_n() - Get the raw value of n-parameterized register */
 u32 ipa_read_reg_n(enum ipa_reg reg, u32 n);
 
-/* ipahal_write_reg_n() - Write a raw value to an n-param register */
-void ipahal_write_reg_n(enum ipa_reg reg, u32 n, u32 val);
+/* ipa_write_reg_n() - Write a raw value to an n-param register */
+void ipa_write_reg_n(enum ipa_reg reg, u32 n, u32 val);
 
 /* ipa_read_reg_n_fields() - Get the parsed value of an n-param register */
 void ipa_read_reg_n_fields(enum ipa_reg reg, u32 n, void *fields);
 
-/* ipahal_write_reg_n_fields() - Write a parsed value to an n-param register */
-void ipahal_write_reg_n_fields(enum ipa_reg reg, u32 n, const void *fields);
+/* ipa_write_reg_n_fields() - Write a parsed value to an n-param register */
+void ipa_write_reg_n_fields(enum ipa_reg reg, u32 n, const void *fields);
 
 /* ipa_read_reg() - Get the raw value from a register */
 static inline u32 ipa_read_reg(enum ipa_reg reg)
@@ -450,10 +450,10 @@ static inline u32 ipa_read_reg(enum ipa_reg reg)
 	return ipa_read_reg_n(reg, 0);
 }
 
-/* ipahal_write_reg() - Write a raw value to a register*/
-static inline void ipahal_write_reg(enum ipa_reg reg, u32 val)
+/* ipa_write_reg() - Write a raw value to a register*/
+static inline void ipa_write_reg(enum ipa_reg reg, u32 val)
 {
-	ipahal_write_reg_n(reg, 0, val);
+	ipa_write_reg_n(reg, 0, val);
 }
 
 /* ipa_read_reg_fields() - Get the parsed value of a register */
@@ -462,10 +462,10 @@ static inline void ipa_read_reg_fields(enum ipa_reg reg, void *fields)
 	ipa_read_reg_n_fields(reg, 0, fields);
 }
 
-/* ipahal_write_reg_fields() - Write a parsed value to a register */
-static inline void ipahal_write_reg_fields(enum ipa_reg reg, const void *fields)
+/* ipa_write_reg_fields() - Write a parsed value to a register */
+static inline void ipa_write_reg_fields(enum ipa_reg reg, const void *fields)
 {
-	ipahal_write_reg_n_fields(reg, 0, fields);
+	ipa_write_reg_n_fields(reg, 0, fields);
 }
 
 u32 ipahal_aggr_get_max_byte_limit(void);

@@ -81,7 +81,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	ipa_debug("Applying reset channel with open aggregation frame WA\n");
 
 	force_close.pipe_bitmap = BIT(clnt_hdl);
-	ipahal_write_reg_fields(IPA_AGGR_FORCE_CLOSE, &force_close);
+	ipa_write_reg_fields(IPA_AGGR_FORCE_CLOSE, &force_close);
 
 	/* Reset channel */
 	gsi_res = gsi_reset_channel(ipa_ctx->gsi, ep->gsi_chan_hdl);
@@ -106,7 +106,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 		ipa_debug("pipe is suspended, remove suspend\n");
 		pipe_suspended = true;
 		ctrl.endp_suspend = 0;
-		ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl,
+		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl,
 					  &ctrl);
 	}
 
@@ -170,7 +170,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	if (pipe_suspended) {
 		ipa_debug("suspend the pipe again\n");
 		ctrl.endp_suspend = 1;
-		ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl,
+		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl,
 					  &ctrl);
 	}
 
@@ -190,7 +190,7 @@ start_chan_fail:
 	if (pipe_suspended) {
 		ipa_debug("suspend the pipe again\n");
 		ctrl.endp_suspend = 1;
-		ipahal_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl,
+		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl,
 					  &ctrl);
 	}
 	ipa_restore_channel_properties(ep, &orig_props);

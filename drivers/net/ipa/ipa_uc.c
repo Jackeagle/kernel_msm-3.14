@@ -311,7 +311,7 @@ static void send_uc_command(u32 command, u32 command_param)
 
 	wmb();	/* ensure write to shared memory is done before triggering uc */
 
-	ipahal_write_reg_n(IPA_IRQ_EE_UC_N, IPA_EE_AP, 0x1);
+	ipa_write_reg_n(IPA_IRQ_EE_UC_N, IPA_EE_AP, 0x1);
 }
 
 void ipa_uc_panic_notifier(void)

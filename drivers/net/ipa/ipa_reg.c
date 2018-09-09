@@ -486,8 +486,8 @@ ipareg_construct_idle_indication_cfg(enum ipa_reg reg, const void *fields)
  *   a bug for code to attempt to access a register which has an
  *   undefined (zero) offset value.
  * - If a construct function is supplied, the register must be
- *   written using ipahal_write_reg_n_fields() (or its wrapper
- *   function ipahal_write_reg_fields()).
+ *   written using ipa_write_reg_n_fields() (or its wrapper
+ *   function ipa_write_reg_fields()).
  * - Generally, if a parse function is supplied, the register should
  *   read using ipa_read_reg_n_fields() (or ipa_read_reg_fields()).
  *   (Currently some debug code reads some registers directly, without
@@ -599,8 +599,8 @@ u32 ipa_read_reg_n(enum ipa_reg reg, u32 n)
 	return ioread32(ipa_reg_virt + ipa_reg_n_offset(reg, n));
 }
 
-/* ipahal_write_reg_n() - Write a raw value to an "n parameterized" register */
-void ipahal_write_reg_n(enum ipa_reg reg, u32 n, u32 val)
+/* ipa_write_reg_n() - Write a raw value to an "n parameterized" register */
+void ipa_write_reg_n(enum ipa_reg reg, u32 n, u32 val)
 {
 	iowrite32(val, ipa_reg_virt + ipa_reg_n_offset(reg, n));
 }
@@ -613,14 +613,14 @@ void ipa_read_reg_n_fields(enum ipa_reg reg, u32 n, void *fields)
 	ipa_regs[reg].parse(reg, fields, val);
 }
 
-/* ipahal_write_reg_n_fields() - Construct a vlaue to write to an "n
+/* ipa_write_reg_n_fields() - Construct a vlaue to write to an "n
  * parameterized" register
  */
-void ipahal_write_reg_n_fields(enum ipa_reg reg, u32 n, const void *fields)
+void ipa_write_reg_n_fields(enum ipa_reg reg, u32 n, const void *fields)
 {
 	u32 val = ipa_regs[reg].construct(reg, fields);
 
-	ipahal_write_reg_n(reg, n, val);
+	ipa_write_reg_n(reg, n, val);
 }
 
 /* Maximum representable aggregation byte limit value */

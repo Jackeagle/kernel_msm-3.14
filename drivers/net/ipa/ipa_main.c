@@ -261,7 +261,7 @@ static int ipa_init_hdr(void)
 			return ret;
 	}
 
-	ipahal_write_reg(IPA_LOCAL_PKT_PROC_CNTXT_BASE, 0);
+	ipa_write_reg(IPA_LOCAL_PKT_PROC_CNTXT_BASE, 0);
 
 	return 0;
 }
