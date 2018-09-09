@@ -305,7 +305,7 @@ static void _gsi_irq_control_all(struct gsi *gsi, bool enable)
 	gsi_writel(gsi, val, GSI_CNTXT_SRC_IEOB_IRQ_MSK_OFFS);
 	gsi_writel(gsi, val, GSI_CNTXT_GLOB_IRQ_EN_OFFS);
 	/* Never enable GSI_BREAK_POINT */
-	val &= ~field_gen(1, EN_BREAK_POINT_BMSK);
+	val &= ~field_gen(1, EN_BREAK_POINT_FMASK);
 	gsi_writel(gsi, val, GSI_CNTXT_GSI_IRQ_EN_OFFS);
 }
 
@@ -323,14 +323,14 @@ static enum gsi_chan_state gsi_chan_state(struct gsi *gsi, u32 chan_id)
 {
 	u32 val = gsi_readl(gsi, GSI_CH_K_CNTXT_0_OFFS(chan_id));
 
-	return (enum gsi_chan_state)field_val(val, CHSTATE_BMSK);
+	return (enum gsi_chan_state)field_val(val, CHSTATE_FMASK);
 }
 
 static enum gsi_evt_ring_state gsi_evtr_state(struct gsi *gsi, u32 evt_id)
 {
 	u32 val = gsi_readl(gsi, GSI_EV_CH_K_CNTXT_0_OFFS(evt_id));
 
-	return (enum gsi_evt_ring_state)field_val(val, EV_CHSTATE_BMSK);
+	return (enum gsi_evt_ring_state)field_val(val, EV_CHSTATE_FMASK);
 }
 
 static void gsi_handle_chan_ctrl(struct gsi *gsi)
@@ -489,7 +489,7 @@ static void gsi_handle_glob_ee(struct gsi *gsi)
 
 	val = gsi_readl(gsi, GSI_CNTXT_GLOB_IRQ_STTS_OFFS);
 
-	if (val & ERROR_INT_BMSK) {
+	if (val & ERROR_INT_FMASK) {
 		u32 err = gsi_readl(gsi, GSI_ERROR_LOG_OFFS);
 
 		gsi_writel(gsi, 0, GSI_ERROR_LOG_OFFS);
@@ -498,11 +498,11 @@ static void gsi_handle_glob_ee(struct gsi *gsi)
 		gsi_handle_glob_err(gsi, err);
 	}
 
-	if (val & EN_GP_INT1_BMSK)
+	if (val & EN_GP_INT1_FMASK)
 		ipa_err("unexpected GP INT1 received\n");
 
-	ipa_bug_on(val & EN_GP_INT2_BMSK);
-	ipa_bug_on(val & EN_GP_INT3_BMSK);
+	ipa_bug_on(val & EN_GP_INT2_FMASK);
+	ipa_bug_on(val & EN_GP_INT3_FMASK);
 
 	gsi_writel(gsi, val, GSI_CNTXT_GLOB_IRQ_CLR_OFFS);
 }
@@ -721,11 +721,11 @@ static void gsi_handle_general(struct gsi *gsi)
 
 	val = gsi_readl(gsi, GSI_CNTXT_GSI_IRQ_STTS_OFFS);
 
-	ipa_bug_on(val & CLR_MCS_STACK_OVRFLOW_BMSK);
-	ipa_bug_on(val & CLR_CMD_FIFO_OVRFLOW_BMSK);
-	ipa_bug_on(val & CLR_BUS_ERROR_BMSK);
+	ipa_bug_on(val & CLR_MCS_STACK_OVRFLOW_FMASK);
+	ipa_bug_on(val & CLR_CMD_FIFO_OVRFLOW_FMASK);
+	ipa_bug_on(val & CLR_BUS_ERROR_FMASK);
 
-	if (val & CLR_BREAK_POINT_BMSK)
+	if (val & CLR_BREAK_POINT_FMASK)
 		ipa_err("got breakpoint\n");
 
 	gsi_writel(gsi, val, GSI_CNTXT_GSI_IRQ_CLR_OFFS);
@@ -748,25 +748,25 @@ static irqreturn_t gsi_isr(int irq, void *dev_id)
 			u32 single = BIT(__ffs(type));
 
 			switch (single) {
-			case CH_CTRL_BMSK:
+			case CH_CTRL_FMASK:
 				gsi_handle_chan_ctrl(gsi);
 				break;
-			case EV_CTRL_BMSK:
+			case EV_CTRL_FMASK:
 				gsi_handle_evt_ctrl(gsi);
 				break;
-			case GLOB_EE_BMSK:
+			case GLOB_EE_FMASK:
 				gsi_handle_glob_ee(gsi);
 				break;
-			case IEOB_BMSK:
+			case IEOB_FMASK:
 				gsi_handle_ieob(gsi);
 				break;
-			case INTER_EE_CH_CTRL_BMSK:
+			case INTER_EE_CH_CTRL_FMASK:
 				gsi_handle_inter_ee_chan_ctrl(gsi);
 				break;
-			case INTER_EE_EV_CTRL_BMSK:
+			case INTER_EE_EV_CTRL_FMASK:
 				gsi_handle_inter_ee_evt_ctrl(gsi);
 				break;
-			case GENERAL_BMSK:
+			case GENERAL_FMASK:
 				gsi_handle_general(gsi);
 				break;
 			default:
@@ -787,14 +787,14 @@ static u32 gsi_get_max_channels(struct gsi *gsi)
 {
 	u32 val = gsi_readl(gsi, GSI_GSI_HW_PARAM_2_OFFS);
 
-	return field_val(val, NUM_CH_PER_EE_BMSK);
+	return field_val(val, NUM_CH_PER_EE_FMASK);
 }
 
 static u32 gsi_get_max_event_rings(struct gsi *gsi)
 {
 	u32 val = gsi_readl(gsi, GSI_GSI_HW_PARAM_2_OFFS);
 
-	return field_val(val, NUM_EV_PER_EE_BMSK);
+	return field_val(val, NUM_EV_PER_EE_FMASK);
 }
 
 /* Zero bits in an event bitmap represent event numbers available
@@ -838,7 +838,7 @@ int gsi_register_device(struct gsi *gsi)
 	int ret;
 
 	val = gsi_readl(gsi, GSI_GSI_STATUS_OFFS);
-	if (!(val & ENABLED_BMSK)) {
+	if (!(val & ENABLED_FMASK)) {
 		ipa_err("manager EE has not enabled GSI, GSI un-usable\n");
 		return -EIO;
 	}
@@ -908,12 +908,12 @@ static void gsi_program_evt_ring_ctx(struct gsi *gsi, u8 evt_id, u32 size,
 
 	ipa_debug("intf GPI intr IRQ RE size %u\n", GSI_RING_ELEMENT_SIZE);
 
-	val = field_gen(GSI_EVT_CHTYPE_GPI_EV, EV_CHTYPE_BMSK);
-	val |= field_gen(1, EV_INTYPE_BMSK);
-	val |= field_gen(GSI_RING_ELEMENT_SIZE, EV_ELEMENT_SIZE_BMSK);
+	val = field_gen(GSI_EVT_CHTYPE_GPI_EV, EV_CHTYPE_FMASK);
+	val |= field_gen(1, EV_INTYPE_FMASK);
+	val |= field_gen(GSI_RING_ELEMENT_SIZE, EV_ELEMENT_SIZE_FMASK);
 	gsi_writel(gsi, val, GSI_EV_CH_K_CNTXT_0_OFFS(evt_id));
 
-	val = field_gen(size, EV_R_LENGTH_BMSK);
+	val = field_gen(size, EV_R_LENGTH_FMASK);
 	gsi_writel(gsi, val, GSI_EV_CH_K_CNTXT_1_OFFS(evt_id));
 
 	/* The context 2 and 3 registers store the low-order and
@@ -926,8 +926,8 @@ static void gsi_program_evt_ring_ctx(struct gsi *gsi, u8 evt_id, u32 size,
 	val = phys >> 32;
 	gsi_writel(gsi, val, GSI_EV_CH_K_CNTXT_3_OFFS(evt_id));
 
-	val = field_gen(int_modt, MODT_BMSK);
-	val |= field_gen(int_modc, MODC_BMSK);
+	val = field_gen(int_modt, MODT_FMASK);
+	val |= field_gen(int_modc, MODC_FMASK);
 	gsi_writel(gsi, val, GSI_EV_CH_K_CNTXT_8_OFFS(evt_id));
 
 	/* No MSI write data, and MSI address high and low address is 0 */
@@ -984,8 +984,8 @@ static u32 evt_ring_command(struct gsi *gsi, unsigned long evt_id,
 
 	reinit_completion(compl);
 
-	val = field_gen((u32)evt_id, EV_CHID_BMSK);
-	val |= field_gen((u32)op, EV_OPCODE_BMSK);
+	val = field_gen((u32)evt_id, EV_CHID_FMASK);
+	val |= field_gen((u32)op, EV_OPCODE_FMASK);
 
 	val = command(gsi, GSI_EV_CH_CMD_OFFS, val, compl);
 	if (!val)
@@ -1003,8 +1003,8 @@ static u32 channel_command(struct gsi *gsi, unsigned long chan_id,
 
 	reinit_completion(compl);
 
-	val = field_gen((u32)chan_id, CH_CHID_BMSK);
-	val |= field_gen((u32)op, CH_OPCODE_BMSK);
+	val = field_gen((u32)chan_id, CH_CHID_FMASK);
+	val |= field_gen((u32)op, CH_OPCODE_FMASK);
 
 	val = command(gsi, GSI_CH_CMD_OFFS, val, compl);
 	if (!val)
@@ -1152,13 +1152,13 @@ gsi_program_chan_ctx(struct gsi *gsi, struct gsi_chan_props *props, u8 evt_id)
 {
 	u32 val;
 
-	val = field_gen(GSI_CHAN_PROT_GPI, CHTYPE_PROTOCOL_BMSK);
-	val |= field_gen(props->from_gsi ? 0 : 1, CHTYPE_DIR_BMSK);
-	val |= field_gen(evt_id, ERINDEX_BMSK);
-	val |= field_gen(GSI_RING_ELEMENT_SIZE, ELEMENT_SIZE_BMSK);
+	val = field_gen(GSI_CHAN_PROT_GPI, CHTYPE_PROTOCOL_FMASK);
+	val |= field_gen(props->from_gsi ? 0 : 1, CHTYPE_DIR_FMASK);
+	val |= field_gen(evt_id, ERINDEX_FMASK);
+	val |= field_gen(GSI_RING_ELEMENT_SIZE, ELEMENT_SIZE_FMASK);
 	gsi_writel(gsi, val, GSI_CH_K_CNTXT_0_OFFS(props->ch_id));
 
-	val = field_gen(props->mem.size, R_LENGTH_BMSK);
+	val = field_gen(props->mem.size, R_LENGTH_FMASK);
 	gsi_writel(gsi, val, GSI_CH_K_CNTXT_1_OFFS(props->ch_id));
 
 	/* The context 2 and 3 registers store the low-order and
@@ -1171,9 +1171,9 @@ gsi_program_chan_ctx(struct gsi *gsi, struct gsi_chan_props *props, u8 evt_id)
 	val = props->mem.phys >> 32;
 	gsi_writel(gsi, val, GSI_CH_K_CNTXT_3_OFFS(props->ch_id));
 
-	val = field_gen(props->low_weight, WRR_WEIGHT_BMSK);
-	val |= field_gen(GSI_MAX_PREFETCH, MAX_PREFETCH_BMSK);
-	val |= field_gen(props->use_db_engine ? 1 : 0, USE_DB_ENG_BMSK);
+	val = field_gen(props->low_weight, WRR_WEIGHT_FMASK);
+	val |= field_gen(GSI_MAX_PREFETCH, MAX_PREFETCH_FMASK);
+	val |= field_gen(props->use_db_engine ? 1 : 0, USE_DB_ENG_FMASK);
 	gsi_writel(gsi, val, GSI_CH_K_QOS_OFFS(props->ch_id));
 }
 
