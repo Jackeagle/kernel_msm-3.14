@@ -823,7 +823,7 @@ static void ipa_cfg_ep_mode(u32 clnt_hdl, enum ipa_client_type dst,
 		ipa_ep_idx = ipa_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
 
 	/* copy over EP cfg */
-	ipa_ctx->ep[clnt_hdl].cfg.mode = *ep_mode;
+	ipa_ctx->ep[clnt_hdl].cfg.mode.mode = ep_mode->mode;
 	ipa_ctx->ep[clnt_hdl].dst_pipe_index = ipa_ep_idx;
 
 	init_mode.mode = ep_mode->mode;
