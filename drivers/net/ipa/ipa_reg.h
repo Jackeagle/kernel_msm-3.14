@@ -126,14 +126,14 @@ struct ipa_reg_ep_init_hdr_ext {
  * 			     after XXX producer only?
  */
 struct ipa_reg_ep_init_aggr {
-	u32 aggr_en;
-	u32 aggr_type;
+	u32 aggr_en;		/* enum ipa_aggr_en_type */
+	u32 aggr_type;		/* enum ipa_aggr_type */
 	u32 aggr_byte_limit;
 	u32 aggr_time_limit;
 	u32 aggr_pkt_limit;
-	bool aggr_sw_eof_active;
-	bool aggr_force_close;
-	bool aggr_hard_byte_limit_en;
+	u32 aggr_sw_eof_active;
+	u32 aggr_force_close;
+	u32 aggr_hard_byte_limit_en;
 };
 
 /* struct ipa_aggr_force_close - IPA force close aggregation register

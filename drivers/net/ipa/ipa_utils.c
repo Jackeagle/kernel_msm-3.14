@@ -762,13 +762,15 @@ static void ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 	ipa_ctx->ep[clnt_hdl].cfg.aggr.aggr_hard_byte_limit_en =
 			ep_aggr->aggr_hard_byte_limit_en;
 
-	init_aggr.aggr_en = ep_aggr->aggr_en;
-	init_aggr.aggr_type = ep_aggr->aggr;
+	init_aggr.aggr_en = (u32)ep_aggr->aggr_en;
+	init_aggr.aggr_type = (u32)ep_aggr->aggr;
 	init_aggr.aggr_byte_limit = ep_aggr->aggr_byte_limit;
 	init_aggr.aggr_time_limit = ep_aggr->aggr_time_limit;
 	init_aggr.aggr_pkt_limit = ep_aggr->aggr_pkt_limit;
-	init_aggr.aggr_sw_eof_active = false;
-	init_aggr.aggr_hard_byte_limit_en = ep_aggr->aggr_hard_byte_limit_en;
+	init_aggr.aggr_sw_eof_active = 0;
+	init_aggr.aggr_force_close = 0;
+	init_aggr.aggr_hard_byte_limit_en =
+			ep_aggr->aggr_hard_byte_limit_en ? 1 : 0;
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_AGGR_N, clnt_hdl, &init_aggr);
 }

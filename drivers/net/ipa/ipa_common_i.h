@@ -359,7 +359,7 @@ struct ipa_ep_cfg_aggr {
 	u32 aggr_byte_limit;
 	u32 aggr_time_limit;
 	u32 aggr_pkt_limit;
-	u32 aggr_hard_byte_limit_en;
+	bool aggr_hard_byte_limit_en;
 	bool aggr_sw_eof_active;
 };
 
