@@ -399,14 +399,10 @@ struct ipa_reg_qsb_max_writes {
  *
  * @qmb_0_max_reads: Max number of outstanding reads for GEN_QMB_0
  * @qmb_1_max_reads: Max number of outstanding reads for GEN_QMB_1
- * @qmb_0_max_read_beats: Max number of outstanding read beats for GEN_QMB_0
- * @qmb_1_max_read_beats: Max number of outstanding read beats for GEN_QMB_1
  */
 struct ipa_reg_qsb_max_reads {
 	u32 qmb_0_max_reads;
 	u32 qmb_1_max_reads;
-	u32 qmb_0_max_read_beats;
-	u32 qmb_1_max_read_beats;
 };
 
 /* struct ipa_reg_idle_indication_cfg - IPA_IDLE_INDICATION_CFG field register
