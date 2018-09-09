@@ -171,8 +171,8 @@ struct ipa_reg_endp_init_mode {
  *			Valid for CONS Endpoints
  */
 struct ipa_reg_ep_init_ctrl {
-	bool endp_suspend;
-	bool endp_delay;
+	u32 endp_suspend;
+	u32 endp_delay;
 };
 
 /** struct ipa_reg_ep_init_deaggr - endpoint deaggregation register
