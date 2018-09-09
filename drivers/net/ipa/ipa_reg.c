@@ -161,7 +161,7 @@ ipareg_parse_endp_init_aggr_n(enum ipa_reg reg, void *fields, u32 val)
 
 	memset(ep_aggr, 0, sizeof(*ep_aggr));
 
-	ep_aggr->aggr_en = field_val(val, AGGR_EN_BMSK) == IPA_ENABLE_AGGR;
+	ep_aggr->aggr_en = field_val(val, AGGR_EN_BMSK);
 	ep_aggr->aggr_type = field_val(val, AGGR_TYPE_BMSK);
 	ep_aggr->aggr_byte_limit = field_val(val, AGGR_BYTE_LIMIT_BMSK);
 	ep_aggr->aggr_time_limit = field_val(val, AGGR_TIME_LIMIT_BMSK);
