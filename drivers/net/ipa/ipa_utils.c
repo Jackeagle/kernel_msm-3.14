@@ -1443,7 +1443,15 @@ void ipa_set_flt_tuple_mask(u32 pipe_idx, struct ipa_reg_hash_tuple *tuple)
 
 	ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, pipe_idx,
 				 &hsh_cfg);
-	hsh_cfg.flt = *tuple;
+
+	hsh_cfg.flt.src_id = tuple->src_id;
+	hsh_cfg.flt.src_ip = tuple->src_ip;
+	hsh_cfg.flt.dst_ip = tuple->dst_ip;
+	hsh_cfg.flt.src_port = tuple->src_port;
+	hsh_cfg.flt.dst_port = tuple->dst_port;
+	hsh_cfg.flt.protocol = tuple->protocol;
+	hsh_cfg.flt.metadata = tuple->metadata;
+
 	ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, pipe_idx,
 				  &hsh_cfg);
 }
