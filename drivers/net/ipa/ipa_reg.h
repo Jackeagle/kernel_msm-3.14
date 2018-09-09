@@ -273,8 +273,7 @@ struct ipa_reg_ep_status {
  *
  */
 struct ipa_reg_hash_tuple {
-	/* src_id: pipe in flt, tbl index in rt */
-	bool src_id;
+	bool src_id;	/* pipe number in flt, table index in rt */
 	bool src_ip;
 	bool dst_ip;
 	bool src_port;
@@ -283,15 +282,17 @@ struct ipa_reg_hash_tuple {
 	bool metadata;
 };
 
-/* struct ipa_reg_fltrt_hash_tuple - IPA hash tuple register
+/* struct ipa_ep_filter_router_hsh_cfg - IPA hash tuple register
  * @flt: Hash tuple info for filtering
+ * @undefined1:
  * @rt: Hash tuple info for routing
+ * @undefined2:
  * @undefinedX: Undefined/Unused bit fields set of the register
  */
-struct ipa_reg_fltrt_hash_tuple {
+struct ipa_ep_filter_router_hsh_cfg {
 	struct ipa_reg_hash_tuple flt;
-	struct ipa_reg_hash_tuple rt;
 	u32 undefined1;
+	struct ipa_reg_hash_tuple rt;
 	u32 undefined2;
 };
 

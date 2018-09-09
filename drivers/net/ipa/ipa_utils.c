@@ -1439,13 +1439,13 @@ void ipa_enable_dcd(void)
  */
 void ipa_set_flt_tuple_mask(u32 pipe_idx, struct ipa_reg_hash_tuple *tuple)
 {
-	struct ipa_reg_fltrt_hash_tuple fltrt_tuple;
+	struct ipa_ep_filter_router_hsh_cfg hsh_cfg;
 
 	ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, pipe_idx,
-				 &fltrt_tuple);
-	fltrt_tuple.flt = *tuple;
+				 &hsh_cfg);
+	hsh_cfg.flt = *tuple;
 	ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, pipe_idx,
-				  &fltrt_tuple);
+				  &hsh_cfg);
 }
 
 /** ipa_set_rt_tuple_mask() - Sets the rt tuple masking for the given tbl
@@ -1459,13 +1459,13 @@ void ipa_set_flt_tuple_mask(u32 pipe_idx, struct ipa_reg_hash_tuple *tuple)
  */
 void ipa_set_rt_tuple_mask(int tbl_idx, struct ipa_reg_hash_tuple *tuple)
 {
-	struct ipa_reg_fltrt_hash_tuple fltrt_tuple;
+	struct ipa_ep_filter_router_hsh_cfg hsh_cfg;
 
 	ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, tbl_idx,
-				 &fltrt_tuple);
-	fltrt_tuple.rt = *tuple;
+				 &hsh_cfg);
+	hsh_cfg.rt = *tuple;
 	ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, tbl_idx,
-				  &fltrt_tuple);
+				  &hsh_cfg);
 }
 
 MODULE_LICENSE("GPL v2");
