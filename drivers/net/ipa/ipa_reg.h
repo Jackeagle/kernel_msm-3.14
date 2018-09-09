@@ -184,7 +184,7 @@ struct ipa_reg_ep_init_ctrl {
  */
 struct ipa_reg_ep_init_deaggr {
 	u32 deaggr_hdr_len;
-	bool packet_offset_valid;
+	u32 packet_offset_valid;
 	u32 packet_offset_location;
 	u32 max_packet_len;
 };

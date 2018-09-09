@@ -869,7 +869,7 @@ static void ipa_cfg_ep_deaggr(u32 clnt_hdl)
 	ipa_debug("packet_offset_location=0 max_packet_len=0\n");
 
 	deaggr.deaggr_hdr_len = 0;
-	deaggr.packet_offset_valid = false;
+	deaggr.packet_offset_valid = 0;
 	deaggr.packet_offset_location = 0;
 	deaggr.max_packet_len = 0;
 
