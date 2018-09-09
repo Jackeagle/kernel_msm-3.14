@@ -674,9 +674,9 @@ static void ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 	cfg_hdr.hdr_additional_const_len = 0;
 	cfg_hdr.hdr_ofst_pkt_size_valid = ep_hdr->hdr_ofst_pkt_size_valid;
 	cfg_hdr.hdr_ofst_pkt_size = ep_hdr->hdr_ofst_pkt_size;
-	cfg_hdr.hdr_a5_mux = false;
-	cfg_hdr.hdr_len_inc_deagg_hdr = false;
-	cfg_hdr.hdr_metadata_reg_valid = false;
+	cfg_hdr.hdr_a5_mux = 0;
+	cfg_hdr.hdr_len_inc_deagg_hdr = 0;
+	cfg_hdr.hdr_metadata_reg_valid = 0;
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_N, clnt_hdl, &cfg_hdr);
 }

@@ -82,15 +82,15 @@ ipareg_construct_endp_init_hdr_n(enum ipa_reg reg, const void *fields)
 			 HDR_OFST_METADATA_VALID_BMSK);
 	val |= field_gen(ep_hdr->hdr_ofst_metadata, HDR_OFST_METADATA_BMSK);
 	val |= field_gen(ep_hdr->hdr_additional_const_len,
-			HDR_ADDITIONAL_CONST_LEN_BMSK);
+			 HDR_ADDITIONAL_CONST_LEN_BMSK);
 	val |= field_gen(ep_hdr->hdr_ofst_pkt_size_valid,
 			 HDR_OFST_PKT_SIZE_VALID_BMSK);
 	val |= field_gen(ep_hdr->hdr_ofst_pkt_size, HDR_OFST_PKT_SIZE_BMSK);
 	val |= field_gen(ep_hdr->hdr_a5_mux, HDR_A5_MUX_BMSK);
 	val |= field_gen(ep_hdr->hdr_len_inc_deagg_hdr,
-			HDR_LEN_INC_DEAGG_HDR_BMSK);
+			 HDR_LEN_INC_DEAGG_HDR_BMSK);
 	val |= field_gen(ep_hdr->hdr_metadata_reg_valid,
-			HDR_METADATA_REG_VALID_BMSK);
+			 HDR_METADATA_REG_VALID_BMSK);
 
 	return val;
 }
@@ -145,7 +145,7 @@ ipareg_construct_endp_init_aggr_n(enum ipa_reg reg, const void *fields)
 	val |= field_gen(init_aggr->aggr_byte_limit, AGGR_BYTE_LIMIT_BMSK);
 	val |= field_gen(init_aggr->aggr_time_limit, AGGR_TIME_LIMIT_BMSK);
 	val |= field_gen(init_aggr->aggr_pkt_limit, AGGR_PKT_LIMIT_BMSK);
-	val |= field_gen(init_aggr->aggr_sw_eof_active ? 1 : 0,
+	val |= field_gen(init_aggr->aggr_sw_eof_active,
 			 AGGR_SW_EOF_ACTIVE_BMSK);
 	val |= field_gen(init_aggr->aggr_force_close, AGGR_FORCE_CLOSE_BMSK);
 	val |= field_gen(init_aggr->aggr_hard_byte_limit_en,

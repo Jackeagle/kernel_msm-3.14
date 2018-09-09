@@ -81,11 +81,11 @@ struct ipa_reg_ep_init_hdr {
 	u32 hdr_ofst_metadata_valid;
 	u32 hdr_ofst_metadata;
 	u32 hdr_additional_const_len;
-	bool hdr_ofst_pkt_size_valid;
+	u32 hdr_ofst_pkt_size_valid;
 	u32 hdr_ofst_pkt_size;
-	bool hdr_a5_mux;
-	bool hdr_len_inc_deagg_hdr;
-	bool hdr_metadata_reg_valid;
+	u32 hdr_a5_mux;
+	u32 hdr_len_inc_deagg_hdr;
+	u32 hdr_metadata_reg_valid;
 };
 
 /* ipa_reg_ep_init_hdr_ext - extended endpoint header initialization
