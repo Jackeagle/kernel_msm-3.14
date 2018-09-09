@@ -1459,7 +1459,7 @@ static int ipa_assign_policy(enum ipa_client_type client,
 		/* enable source notification status for exception packets
 		 * (i.e. QMAP commands) to be routed to modem.
 		 */
-		sys->ep->status.status_en = true;
+		sys->ep->status.status_en = 1;
 		sys->ep->status.status_endp =
 			ipa_get_ep_mapping(IPA_CLIENT_Q6_WAN_CONS);
 
@@ -1470,7 +1470,7 @@ static int ipa_assign_policy(enum ipa_client_type client,
 	}
 
 	/* Client is a consumer (APPS_LAN_CONS or APPS_WAN_CONS) */
-	sys->ep->status.status_en = true;
+	sys->ep->status.status_en = 1;
 
 	INIT_WORK(&sys->rx.work, ipa_wq_handle_rx);
 	INIT_DELAYED_WORK(&sys->rx.switch_to_intr_work,
@@ -1507,7 +1507,7 @@ static int ipa_assign_policy(enum ipa_client_type client,
 		adjusted = ipa_adjust_ra_buff_base_sz(limit);
 
 		/* disable ipa_status */
-		sys->ep->status.status_en = false;
+		sys->ep->status.status_en = 0;
 
 		ipa_err("get close-by %u\n", adjusted);
 		adjusted = IPA_GENERIC_RX_BUFF_SZ(adjusted);

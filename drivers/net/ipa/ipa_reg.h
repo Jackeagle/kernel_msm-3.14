@@ -255,9 +255,9 @@ struct ipa_reg_shared_mem_size {
  * @status_pkt_suppress:
  */
 struct ipa_reg_ep_status {
-	bool status_en;
+	u32 status_en;
 	u32 status_endp;
-	bool status_location;
+	u32 status_location;
 	u32 status_pkt_suppress;
 };
 
