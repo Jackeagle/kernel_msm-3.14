@@ -1471,7 +1471,15 @@ void ipa_set_rt_tuple_mask(int tbl_idx, struct ipa_reg_hash_tuple *tuple)
 
 	ipahal_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, tbl_idx,
 				 &hsh_cfg);
-	hsh_cfg.rt = *tuple;
+
+	hsh_cfg.rt.src_id = tuple->src_id;
+	hsh_cfg.rt.src_ip = tuple->src_ip;
+	hsh_cfg.rt.dst_ip = tuple->dst_ip;
+	hsh_cfg.rt.src_port = tuple->src_port;
+	hsh_cfg.rt.dst_port = tuple->dst_port;
+	hsh_cfg.rt.protocol = tuple->protocol;
+	hsh_cfg.rt.metadata = tuple->metadata;
+
 	ipahal_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, tbl_idx,
 				  &hsh_cfg);
 }
