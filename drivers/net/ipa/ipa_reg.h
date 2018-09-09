@@ -337,7 +337,7 @@ struct ipa_reg_qsb_max_reads {
  */
 struct ipa_reg_idle_indication_cfg {
 	u32 enter_idle_debounce_thresh;
-	bool const_non_idle_enable;
+	u32 const_non_idle_enable;
 };
 
 /* Initialize the IPA register subsystem */
