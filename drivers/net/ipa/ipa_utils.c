@@ -613,18 +613,6 @@ static void ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
 
-	ipa_debug("pipe=%d metadata_reg_valid=0\n", clnt_hdl);
-
-	ipa_debug("remove_additional=0, a5_mux=0, ofst_pkt_size=0x%x\n",
-		  ep_hdr->hdr_ofst_pkt_size);
-
-	ipa_debug("ofst_pkt_size_valid=%d, additional_const_len=0x0\n",
-		  ep_hdr->hdr_ofst_pkt_size_valid);
-
-	ipa_debug("ofst_metadata=0x%x, ofst_metadata_valid=%d, len=0x%x",
-		  ep_hdr->hdr_ofst_metadata, ep_hdr->hdr_ofst_metadata_valid,
-		  ep_hdr->hdr_len);
-
 	ep->init_hdr.hdr_len = ep_hdr->hdr_len;
 	ep->init_hdr.hdr_ofst_metadata_valid = ep_hdr->hdr_ofst_metadata_valid;
 	ep->init_hdr.hdr_ofst_metadata = ep_hdr->hdr_ofst_metadata;
@@ -648,18 +636,6 @@ static void
 ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
-
-	ipa_debug("pipe=%d hdr_pad_to_alignment=%d\n", clnt_hdl,
-		  ep_hdr_ext->hdr_pad_to_alignment);
-
-	ipa_debug("hdr_total_len_or_pad_offset=0\n");
-
-	ipa_debug("hdr_payload_len_inc_padding=%s hdr_total_len_or_pad=%d\n",
-		  ep_hdr_ext->hdr_payload_len_inc_padding ? "true" : "false",
-		  ep_hdr_ext->hdr_total_len_or_pad);
-
-	ipa_debug("hdr_total_len_or_pad_valid=%s hdr_little_endian=0\n",
-		  ep_hdr_ext->hdr_total_len_or_pad_valid ? "true" : "false");
 
 	ep->hdr_ext.hdr_endianness = 1;	/* big endian */
 	ep->hdr_ext.hdr_total_len_or_pad_valid =
@@ -715,12 +691,6 @@ static void ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 	ep->init_cfg.cs_offload_en = cfg->cs_offload_en;
 	ep->init_cfg.cs_metadata_hdr_offset = cfg->cs_metadata_hdr_offset;
 	ep->init_cfg.cs_gen_qmb_master_sel = 0;
-
-	/* Override QMB master selection */
-	ipa_debug("pipe=%d, frag_ofld_en=0 cs_ofld_en=%d\n",
-		  clnt_hdl, ep->init_cfg.cs_offload_en);
-	ipa_debug("mdata_hdr_ofst=%d gen_qmb_master_sel=0\n",
-		  ep->init_cfg.cs_metadata_hdr_offset);
 
 	ipa_write_reg_n_fields(IPA_ENDP_INIT_CFG_N, clnt_hdl,
 			       &ep->init_cfg);
@@ -783,10 +753,6 @@ static void ipa_cfg_ep_deaggr(u32 clnt_hdl)
 {
 	struct ipa_reg_endp_init_deaggr deaggr;
 
-	ipa_debug("pipe=%d deaggr_hdr_len=0\n", clnt_hdl);
-	ipa_debug("packet_offset_valid=0\n");
-	ipa_debug("packet_offset_location=0 max_packet_len=0\n");
-
 	deaggr.deaggr_hdr_len = 0;
 	deaggr.packet_offset_valid = 0;
 	deaggr.packet_offset_location = 0;
@@ -806,9 +772,6 @@ ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
 			 const struct ipa_ep_cfg_metadata_mask *metadata_mask)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
-
-	ipa_debug("pipe=%d, metadata_mask=0x%x\n", clnt_hdl,
-		  metadata_mask->metadata_mask);
 
 	ep->init_hdr_metadata_mask.metadata_mask = metadata_mask->metadata_mask;
 
