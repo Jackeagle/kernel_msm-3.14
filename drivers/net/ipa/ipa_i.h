@@ -215,7 +215,7 @@ struct ipa_sys_connect_params {
 };
 
 /** struct ipa_ep_context - IPA end point context
- * @valid: flag indicating id EP context is valid
+ * @allocated: flag indicating endpoint has been allocated
  * @client: EP client type
  * @gsi_chan_hdl: EP's GSI channel handle
  * @gsi_evt_ring_hdl: EP's GSI channel event ring handle
@@ -233,7 +233,7 @@ struct ipa_sys_connect_params {
  * @napi_enabled: when true, IPA call client callback to start polling
  */
 struct ipa_ep_context {
-	bool valid;
+	bool allocated;
 	enum ipa_client_type client;
 	unsigned long gsi_chan_hdl;
 	unsigned long gsi_evt_ring_hdl;

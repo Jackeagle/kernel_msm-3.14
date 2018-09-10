@@ -744,7 +744,7 @@ static void ipa_suspend_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 
 		endpoints ^= BIT(i);
 
-		if (!ipa_ctx->ep[i].valid)
+		if (!ipa_ctx->ep[i].allocated)
 			continue;
 
 		client = ipa_ctx->ep[i].client;

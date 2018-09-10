@@ -1389,10 +1389,10 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 	src_pipe = status.endp_src_idx;
 	metadata = status.metadata;
 	ep = &ipa_ctx->ep[src_pipe];
-	if (src_pipe >= ipa_ctx->ipa_num_pipes || !ep->valid ||
+	if (src_pipe >= ipa_ctx->ipa_num_pipes || !ep->allocated ||
 	    !ep->client_notify) {
-		ipa_err("drop pipe=%d ep_valid=%s client_notify=%p\n",
-			src_pipe, ep->valid ? "true" : "false",
+		ipa_err("drop pipe=%d allocated=%s client_notify=%p\n",
+			src_pipe, ep->allocated ? "true" : "false",
 			ep->client_notify);
 		dev_kfree_skb_any(rx_skb);
 		return;
@@ -1714,6 +1714,44 @@ ipa_ep_prod_cs_offload_enable(struct ipa_ep_cfg_cfg *cfg, u32 metadata_offset)
 	cfg->cs_metadata_hdr_offset = metadata_offset;
 }
 
+static int ipa_ep_alloc(enum ipa_client_type client)
+{
+	u32 ipa_ep_idx = ipa_get_ep_mapping(client);
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+	struct ipa_sys_context *sys;
+
+	ipa_assert(!ep->allocated);
+
+	/* Reuse the endpoint's sys pointer if it is initialized */
+	sys = ep->sys;
+	if (!sys) {
+		sys = ipa_ep_sys_create(client);
+		if (!sys)
+			return -ENOMEM;
+		sys->ep = ep;
+	}
+
+	/* Zero the "mutable" part of the system context */
+	memset(sys, 0, offsetof(struct ipa_sys_context, ep));
+
+	/* Initialize the endpoint context */
+	memset(ep, 0, sizeof(*ep));
+	ep->sys = sys;
+	ep->client = client;
+	ep->allocated = true;
+
+	return ipa_ep_idx;
+}
+
+static void ipa_ep_free(u32 ipa_ep_idx)
+{
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+
+	ipa_assert(ep->allocated);
+
+	ep->allocated = false;
+}
+
 /** ipa_setup_sys_pipe() - Setup an IPA GPI pipe and perform
  * IPA EP configuration
  * @client:	[in] handle assigned by IPA to client
@@ -1732,29 +1770,14 @@ int ipa_setup_sys_pipe(enum ipa_client_type client, enum ipa_client_type dst,
 {
 	u32 ipa_ep_idx = ipa_get_ep_mapping(client);
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
-	struct ipa_sys_context *sys;
 	int ret;
 
-	if (ep->valid)
-		return -EINVAL;
+	ret = ipa_ep_alloc(client);
+	if (ret < 0)
+		return ret;
+	ipa_ep_idx = ret;
 
 	ipa_client_add();
-
-	/* Reuse the endpoint's sys pointer if it is initialized */
-	sys = ep->sys;
-	if (!sys) {
-		ret = -ENOMEM;
-		sys = ipa_ep_sys_create(client);
-		if (!sys)
-			goto err_client_remove;
-		sys->ep = ep;
-	}
-	/* Zero the "mutable" part of the system context */
-	memset(sys, 0, offsetof(struct ipa_sys_context, ep));
-
-	/* Zero the endpoint structure and record its sys pointer */
-	memset(ep, 0, sizeof(*ep));
-	ep->sys = sys;
 
 	if (ipa_assign_policy(client, sys_in, ep->sys)) {
 		ipa_err("failed to sys ctx for client %d\n", client);
@@ -1762,8 +1785,6 @@ int ipa_setup_sys_pipe(enum ipa_client_type client, enum ipa_client_type dst,
 		goto err_client_remove;
 	}
 
-	ep->valid = true;
-	ep->client = client;
 	ep->client_notify = sys_in->notify;
 	ep->napi_enabled = sys_in->napi_enabled;
 	ep->priv = sys_in->priv;
@@ -1847,7 +1868,8 @@ void ipa_teardown_sys_pipe(u32 clnt_hdl)
 	if (ipa_consumer(ep->client))
 		ipa_cleanup_rx(ep->sys);
 
-	ep->valid = false;
+	ipa_ep_free(clnt_hdl);
+
 	ipa_client_remove();
 
 	ipa_debug("client (ep: %d) disconnected\n", clnt_hdl);
