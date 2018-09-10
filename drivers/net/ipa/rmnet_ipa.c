@@ -258,6 +258,11 @@ ipa_ep_cons_aggregation(struct ipa_ep_cfg_aggr *aggr, u32 size, u32 count)
 	aggr->aggr_pkt_limit = count;
 }
 
+static void ipa_ep_cons_cs_offload_enable(struct ipa_ep_cfg_cfg *cfg)
+{
+	cfg->cs_offload_en = IPA_CS_OFFLOAD_DL;
+}
+
 /** handle_egress_format() - Ingress data format configuration */
 static int handle_ingress_format(struct net_device *dev,
 				 struct rmnet_ioctl_extended_s *in)
@@ -272,7 +277,7 @@ static int handle_ingress_format(struct net_device *dev,
 	int ret;
 
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_CHECKSUM)
-		ep_cfg->cfg.cs_offload_en = IPA_CS_OFFLOAD_DL;
+		ipa_ep_cons_cs_offload_enable(&ep_cfg->cfg);
 
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA) {
 		u32 agg_size = in->u.ingress_format.agg_size;
