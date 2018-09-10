@@ -240,7 +240,8 @@ struct ipa_ep_context {
 	bool bytes_xfered_valid;
 	u16 bytes_xfered;
 
-	struct ipa_ep_cfg_hdr cfg_hdr;
+	struct ipa_reg_endp_init_hdr init_hdr;
+
 	struct ipa_ep_cfg_hdr_ext cfg_hdr_ext;
 	struct ipa_ep_cfg_mode cfg_mode;
 	struct ipa_ep_cfg_aggr cfg_aggr;

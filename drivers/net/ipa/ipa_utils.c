@@ -644,8 +644,7 @@ static const char *ipa_get_aggr_type_str(enum ipa_aggr_type aggr_type)
  */
 static void ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 {
-	struct ipa_reg_endp_init_hdr cfg_hdr = { };
-	struct ipa_ep_context *ep;
+	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
 
 	ipa_debug("pipe=%d metadata_reg_valid=0\n", clnt_hdl);
 
@@ -659,26 +658,17 @@ static void ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 		  ep_hdr->hdr_ofst_metadata, ep_hdr->hdr_ofst_metadata_valid,
 		  ep_hdr->hdr_len);
 
-	ep = &ipa_ctx->ep[clnt_hdl];
+	ep->init_hdr.hdr_len = ep_hdr->hdr_len;
+	ep->init_hdr.hdr_ofst_metadata_valid = ep_hdr->hdr_ofst_metadata_valid;
+	ep->init_hdr.hdr_ofst_metadata = ep_hdr->hdr_ofst_metadata;
+	ep->init_hdr.hdr_additional_const_len = 0;
+	ep->init_hdr.hdr_ofst_pkt_size_valid = ep_hdr->hdr_ofst_pkt_size_valid;
+	ep->init_hdr.hdr_ofst_pkt_size = ep_hdr->hdr_ofst_pkt_size;
+	ep->init_hdr.hdr_a5_mux = 0;
+	ep->init_hdr.hdr_len_inc_deagg_hdr = 0;
+	ep->init_hdr.hdr_metadata_reg_valid = 0;
 
-	/* copy over EP cfg */
-	ep->cfg_hdr.hdr_len = ep_hdr->hdr_len;
-	ep->cfg_hdr.hdr_ofst_metadata_valid = ep_hdr->hdr_ofst_metadata_valid;
-	ep->cfg_hdr.hdr_ofst_metadata = ep_hdr->hdr_ofst_metadata;
-	ep->cfg_hdr.hdr_ofst_pkt_size_valid = ep_hdr->hdr_ofst_pkt_size_valid;
-	ep->cfg_hdr.hdr_ofst_pkt_size = ep_hdr->hdr_ofst_pkt_size;
-
-	cfg_hdr.hdr_len = ep_hdr->hdr_len;
-	cfg_hdr.hdr_ofst_metadata_valid = ep_hdr->hdr_ofst_metadata_valid;
-	cfg_hdr.hdr_ofst_metadata = ep_hdr->hdr_ofst_metadata;
-	cfg_hdr.hdr_additional_const_len = 0;
-	cfg_hdr.hdr_ofst_pkt_size_valid = ep_hdr->hdr_ofst_pkt_size_valid;
-	cfg_hdr.hdr_ofst_pkt_size = ep_hdr->hdr_ofst_pkt_size;
-	cfg_hdr.hdr_a5_mux = 0;
-	cfg_hdr.hdr_len_inc_deagg_hdr = 0;
-	cfg_hdr.hdr_metadata_reg_valid = 0;
-
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_N, clnt_hdl, &cfg_hdr);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_N, clnt_hdl, &ep->init_hdr);
 }
 
 /** ipa_cfg_ep_hdr_ext() -  IPA end-point extended header configuration
