@@ -751,25 +751,21 @@ static void ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
  */
 static void ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 {
-	struct ipa_reg_endp_init_cfg init_cfg;
+	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
 
-	/* copy over EP cfg */
-	ipa_ctx->ep[clnt_hdl].cfg_cfg.cs_offload_en = cfg->cs_offload_en;
-	ipa_ctx->ep[clnt_hdl].cfg_cfg.cs_metadata_hdr_offset =
-			cfg->cs_metadata_hdr_offset;
-
-	init_cfg.frag_offload_en = 0;
-	init_cfg.cs_offload_en = cfg->cs_offload_en;
-	init_cfg.cs_metadata_hdr_offset = cfg->cs_metadata_hdr_offset;
-	init_cfg.cs_gen_qmb_master_sel = 0;
+	ep->init_cfg.frag_offload_en = 0;
+	ep->init_cfg.cs_offload_en = cfg->cs_offload_en;
+	ep->init_cfg.cs_metadata_hdr_offset = cfg->cs_metadata_hdr_offset;
+	ep->init_cfg.cs_gen_qmb_master_sel = 0;
 
 	/* Override QMB master selection */
 	ipa_debug("pipe=%d, frag_ofld_en=0 cs_ofld_en=%d\n",
-		  clnt_hdl, ipa_ctx->ep[clnt_hdl].cfg_cfg.cs_offload_en);
+		  clnt_hdl, ep->init_cfg.cs_offload_en);
 	ipa_debug("mdata_hdr_ofst=%d gen_qmb_master_sel=0\n",
-		  ipa_ctx->ep[clnt_hdl].cfg_cfg.cs_metadata_hdr_offset);
+		  ep->init_cfg.cs_metadata_hdr_offset);
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_CFG_N, clnt_hdl, &init_cfg);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_CFG_N, clnt_hdl,
+			       &ep->init_cfg);
 }
 
 /** ipa_cfg_ep_mode() - IPA end-point mode configuration
