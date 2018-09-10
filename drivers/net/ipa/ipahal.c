@@ -147,26 +147,6 @@ ipahal_hdr_init_local_pyld(struct ipa_dma_mem *mem, u32 offset)
 	return pyld;
 }
 
-struct ipahal_imm_cmd_pyld *ipahal_ip_packet_init_pyld(u32 dest_pipe_idx)
-{
-	struct ipahal_imm_cmd_pyld *pyld;
-	struct ipa_imm_cmd_hw_ip_packet_init *data;
-	u16 opcode;
-
-	/* destination_pipe_index is 5 bits wide */
-	ipa_assert(dest_pipe_idx < 1 << 5);
-
-	opcode = IPA_IMM_CMD_IP_PACKET_INIT;
-	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
-	if (!pyld)
-		return NULL;
-	data = ipahal_imm_cmd_pyld_data(pyld);
-
-	data->destination_pipe_index = dest_pipe_idx;
-
-	return pyld;
-}
-
 static struct ipahal_imm_cmd_pyld *
 fltrt_init_common(u16 opcode, struct ipa_dma_mem *mem, u32 hash_offset,
 		  u32 nhash_offset)

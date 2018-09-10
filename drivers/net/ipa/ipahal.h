@@ -71,14 +71,6 @@ struct ipahal_imm_cmd_pyld *ipahal_dma_shared_mem_write_pyld(
 struct ipahal_imm_cmd_pyld *ipahal_hdr_init_local_pyld(
 				struct ipa_dma_mem *mem, u32 offset);
 
-/* Return a pointer to the payload for an IP packet init immediate
- * command, or null if one can't be allocated.  Caller must ensure result
- * gets released by providing it to ipahal_destroy_imm_cmd().
- *
- * dest_pipe_idx is the destination pipe
- */
-struct ipahal_imm_cmd_pyld *ipahal_ip_packet_init_pyld(u32 dest_pipe_idx);
-
 /* Return a pointer to the payload for an IPv4 routing init immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
