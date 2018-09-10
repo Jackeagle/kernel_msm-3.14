@@ -105,10 +105,8 @@ ipahal_dma_shared_mem_write_pyld(struct ipa_dma_mem *mem, u32 offset)
 	struct ipahal_imm_cmd_pyld *pyld;
 	u16 opcode;
 
-	if (check_too_big("size", mem->size, 16))
-		return NULL;
-	if (check_too_big("offset", offset, 16))
-		return NULL;
+	ipa_assert(mem->size < 1 << 16);	/* size is 16 bits wide */
+	ipa_assert(offset < 1 << 16);		/* local_addr is 16 bits wide */
 
 	opcode = IPA_IMM_CMD_DMA_SHARED_MEM;
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
