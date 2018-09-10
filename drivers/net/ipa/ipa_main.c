@@ -159,7 +159,7 @@ static int setup_apps_cmd_prod_pipe(void)
 	enum ipa_client_type dst = IPA_CLIENT_APPS_LAN_CONS;
 	u32 chan_count = IPA_APPS_CMD_PROD_RING_COUNT;
 
-	sys_in.ipa_ep_cfg.mode.mode = IPA_DMA;
+	ipa_ep_prod_header_mode(&sys_in.ipa_ep_cfg.mode, IPA_DMA);
 
 	return ipa_setup_sys_pipe(client, dst, chan_count, &sys_in);
 }
