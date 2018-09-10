@@ -288,6 +288,12 @@ ipa_ep_prod_header_pad(struct ipa_ep_cfg_hdr_ext *hdr_ext, u32 pad_align)
 	hdr_ext->hdr_total_len_or_pad_valid = true;
 }
 
+static void
+ipa_ep_prod_header_mode(struct ipa_ep_cfg_mode *mode, enum ipa_mode_type type)
+{
+	mode->mode = type;
+}
+
 /** handle_egress_format() - Ingress data format configuration */
 static int handle_ingress_format(struct net_device *dev,
 				 struct rmnet_ioctl_extended_s *in)
@@ -382,7 +388,7 @@ static int handle_egress_format(struct net_device *dev,
 
 	ipa_ep_prod_header(&ep_cfg->hdr, header_size, 0, length_offset);
 
-	ep_cfg->mode.mode = IPA_BASIC;
+	ipa_ep_prod_header_mode(&ep_cfg->mode, IPA_BASIC);
 
 	wan_cfg->notify = apps_ipa_tx_complete_notify;
 	wan_cfg->priv = dev;
