@@ -279,6 +279,15 @@ static void ipa_ep_prod_header(struct ipa_ep_cfg_hdr *hdr, u32 header_size,
 	hdr->hdr_ofst_pkt_size = length_offset;
 }
 
+static void
+ipa_ep_prod_header_pad(struct ipa_ep_cfg_hdr_ext *hdr_ext, u32 pad_align)
+{
+	hdr_ext->hdr_pad_to_alignment = pad_align;
+	hdr_ext->hdr_payload_len_inc_padding = true;
+	hdr_ext->hdr_total_len_or_pad = IPA_HDR_PAD;
+	hdr_ext->hdr_total_len_or_pad_valid = true;
+}
+
 /** handle_egress_format() - Ingress data format configuration */
 static int handle_ingress_format(struct net_device *dev,
 				 struct rmnet_ioctl_extended_s *in)
@@ -365,10 +374,7 @@ static int handle_egress_format(struct net_device *dev,
 
 		length_offset = offsetof(struct rmnet_map_header_s, pkt_len);
 
-		ep_cfg->hdr_ext.hdr_total_len_or_pad_valid = true;
-		ep_cfg->hdr_ext.hdr_total_len_or_pad = IPA_HDR_PAD;
-		ep_cfg->hdr_ext.hdr_pad_to_alignment = ilog2(sizeof(u32));
-		ep_cfg->hdr_ext.hdr_payload_len_inc_padding = true;
+		ipa_ep_prod_header_pad(&ep_cfg->hdr_ext, ilog2(sizeof(u32)));
 	} else {
 		ep_cfg->aggr.aggr_en = IPA_BYPASS_AGGR;
 		length_offset = 0;
