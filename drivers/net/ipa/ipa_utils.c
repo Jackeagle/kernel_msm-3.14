@@ -603,39 +603,6 @@ u32 ipa_filter_bitmap_init(void)
 	return filter_bitmap;
 }
 
-static const char *ipa_get_aggr_enable_str(enum ipa_aggr_en_type aggr_en)
-{
-	switch (aggr_en) {
-	case IPA_BYPASS_AGGR:
-		return "no aggregation";
-	case IPA_ENABLE_AGGR:
-		return "aggregation enabled";
-	case IPA_ENABLE_DEAGGR:
-		return "de-aggregation enabled";
-	}
-
-	return "undefined";
-}
-
-static const char *ipa_get_aggr_type_str(enum ipa_aggr_type aggr_type)
-{
-	switch (aggr_type) {
-	case IPA_MBIM_16:
-		return "MBIM_16";
-	case IPA_HDLC:
-		return "HDLC";
-	case IPA_TLP:
-		return "TLP";
-	case IPA_RNDIS:
-		return "RNDIS";
-	case IPA_GENERIC:
-		return "GENERIC";
-	case IPA_QCMAP:
-		return "QCMAP";
-	}
-	return "undefined";
-}
-
 /** ipa_cfg_ep_hdr() -	IPA end-point header configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @ipa_ep_cfg: [in] IPA end-point configuration params
@@ -719,15 +686,6 @@ static void ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 
 	if (ep_aggr->aggr_en == IPA_ENABLE_DEAGGR)
 		ipa_assert(IPA_EP_SUPPORTS_DEAGGR(clnt_hdl));
-
-	ipa_debug("pipe=%d en=%d(%s), type=%d(%s)\n", clnt_hdl,
-		  ep_aggr->aggr_en, ipa_get_aggr_enable_str(ep_aggr->aggr_en),
-		  ep_aggr->aggr, ipa_get_aggr_type_str(ep_aggr->aggr));
-	ipa_debug("byte_limit=%d, time_limit=%d\n", ep_aggr->aggr_byte_limit,
-		  ep_aggr->aggr_time_limit);
-	ipa_debug("hard_byte_limit_en=%d aggr_sw_eof_active=%s\n",
-		  ep_aggr->aggr_hard_byte_limit_en,
-		  ep_aggr->aggr_sw_eof_active ? "true" : "false");
 
 	ep->init_aggr.aggr_en = (u32)ep_aggr->aggr_en;
 	ep->init_aggr.aggr_type = (u32)ep_aggr->aggr;
