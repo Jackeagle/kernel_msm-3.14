@@ -239,7 +239,14 @@ struct ipa_ep_context {
 	unsigned long gsi_evt_ring_hdl;
 	bool bytes_xfered_valid;
 	u16 bytes_xfered;
-	struct ipa_ep_cfg cfg;
+
+	struct ipa_ep_cfg_hdr cfg_hdr;
+	struct ipa_ep_cfg_hdr_ext cfg_hdr_ext;
+	struct ipa_ep_cfg_mode cfg_mode;
+	struct ipa_ep_cfg_aggr cfg_aggr;
+	struct ipa_ep_cfg_cfg cfg_cfg;
+	struct ipa_ep_cfg_metadata_mask cfg_metadata_mask;
+
 	struct ipa_reg_endp_status status;
 	u32 dst_pipe_index;
 	u32 rt_tbl_idx;

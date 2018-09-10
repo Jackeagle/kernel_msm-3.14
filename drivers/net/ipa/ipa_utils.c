@@ -662,11 +662,11 @@ static void ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 	ep = &ipa_ctx->ep[clnt_hdl];
 
 	/* copy over EP cfg */
-	ep->cfg.hdr.hdr_len = ep_hdr->hdr_len;
-	ep->cfg.hdr.hdr_ofst_metadata_valid = ep_hdr->hdr_ofst_metadata_valid;
-	ep->cfg.hdr.hdr_ofst_metadata = ep_hdr->hdr_ofst_metadata;
-	ep->cfg.hdr.hdr_ofst_pkt_size_valid = ep_hdr->hdr_ofst_pkt_size_valid;
-	ep->cfg.hdr.hdr_ofst_pkt_size = ep_hdr->hdr_ofst_pkt_size;
+	ep->cfg_hdr.hdr_len = ep_hdr->hdr_len;
+	ep->cfg_hdr.hdr_ofst_metadata_valid = ep_hdr->hdr_ofst_metadata_valid;
+	ep->cfg_hdr.hdr_ofst_metadata = ep_hdr->hdr_ofst_metadata;
+	ep->cfg_hdr.hdr_ofst_pkt_size_valid = ep_hdr->hdr_ofst_pkt_size_valid;
+	ep->cfg_hdr.hdr_ofst_pkt_size = ep_hdr->hdr_ofst_pkt_size;
 
 	cfg_hdr.hdr_len = ep_hdr->hdr_len;
 	cfg_hdr.hdr_ofst_metadata_valid = ep_hdr->hdr_ofst_metadata_valid;
@@ -708,12 +708,12 @@ ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
 	ep = &ipa_ctx->ep[clnt_hdl];
 
 	/* copy over EP cfg */
-	ep->cfg.hdr_ext.hdr_pad_to_alignment = ep_hdr_ext->hdr_pad_to_alignment;
-	ep->cfg.hdr_ext.hdr_payload_len_inc_padding =
+	ep->cfg_hdr_ext.hdr_pad_to_alignment = ep_hdr_ext->hdr_pad_to_alignment;
+	ep->cfg_hdr_ext.hdr_payload_len_inc_padding =
 			ep_hdr_ext->hdr_payload_len_inc_padding ? 1 : 0;
-	ep->cfg.hdr_ext.hdr_total_len_or_pad =
+	ep->cfg_hdr_ext.hdr_total_len_or_pad =
 			ep_hdr_ext->hdr_total_len_or_pad == IPA_HDR_PAD ? 0 : 1;
-	ep->cfg.hdr_ext.hdr_total_len_or_pad_valid =
+	ep->cfg_hdr_ext.hdr_total_len_or_pad_valid =
 			ep_hdr_ext->hdr_total_len_or_pad_valid ? 1 : 0;
 
 	hdr_ext.hdr_endianness = 1;	/* big endian */
@@ -751,15 +751,15 @@ static void ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 		  ep_aggr->aggr_sw_eof_active ? "true" : "false");
 
 	/* copy over EP cfg */
-	ipa_ctx->ep[clnt_hdl].cfg.aggr.aggr_en = ep_aggr->aggr_en;
-	ipa_ctx->ep[clnt_hdl].cfg.aggr.aggr = ep_aggr->aggr;
-	ipa_ctx->ep[clnt_hdl].cfg.aggr.aggr_byte_limit =
+	ipa_ctx->ep[clnt_hdl].cfg_aggr.aggr_en = ep_aggr->aggr_en;
+	ipa_ctx->ep[clnt_hdl].cfg_aggr.aggr = ep_aggr->aggr;
+	ipa_ctx->ep[clnt_hdl].cfg_aggr.aggr_byte_limit =
 			ep_aggr->aggr_byte_limit;
-	ipa_ctx->ep[clnt_hdl].cfg.aggr.aggr_time_limit =
+	ipa_ctx->ep[clnt_hdl].cfg_aggr.aggr_time_limit =
 			ep_aggr->aggr_time_limit;
-	ipa_ctx->ep[clnt_hdl].cfg.aggr.aggr_pkt_limit =
+	ipa_ctx->ep[clnt_hdl].cfg_aggr.aggr_pkt_limit =
 			ep_aggr->aggr_pkt_limit;
-	ipa_ctx->ep[clnt_hdl].cfg.aggr.aggr_hard_byte_limit_en =
+	ipa_ctx->ep[clnt_hdl].cfg_aggr.aggr_hard_byte_limit_en =
 			ep_aggr->aggr_hard_byte_limit_en;
 
 	init_aggr.aggr_en = (u32)ep_aggr->aggr_en;
@@ -786,8 +786,8 @@ static void ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 	struct ipa_reg_endp_init_cfg init_cfg;
 
 	/* copy over EP cfg */
-	ipa_ctx->ep[clnt_hdl].cfg.cfg.cs_offload_en = cfg->cs_offload_en;
-	ipa_ctx->ep[clnt_hdl].cfg.cfg.cs_metadata_hdr_offset =
+	ipa_ctx->ep[clnt_hdl].cfg_cfg.cs_offload_en = cfg->cs_offload_en;
+	ipa_ctx->ep[clnt_hdl].cfg_cfg.cs_metadata_hdr_offset =
 			cfg->cs_metadata_hdr_offset;
 
 	init_cfg.frag_offload_en = 0;
@@ -797,9 +797,9 @@ static void ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 
 	/* Override QMB master selection */
 	ipa_debug("pipe=%d, frag_ofld_en=0 cs_ofld_en=%d\n",
-		  clnt_hdl, ipa_ctx->ep[clnt_hdl].cfg.cfg.cs_offload_en);
+		  clnt_hdl, ipa_ctx->ep[clnt_hdl].cfg_cfg.cs_offload_en);
 	ipa_debug("mdata_hdr_ofst=%d gen_qmb_master_sel=0\n",
-		  ipa_ctx->ep[clnt_hdl].cfg.cfg.cs_metadata_hdr_offset);
+		  ipa_ctx->ep[clnt_hdl].cfg_cfg.cs_metadata_hdr_offset);
 
 	ipa_write_reg_n_fields(IPA_ENDP_INIT_CFG_N, clnt_hdl, &init_cfg);
 }
@@ -826,7 +826,7 @@ static void ipa_cfg_ep_mode(u32 clnt_hdl, enum ipa_client_type dst,
 		ipa_ep_idx = ipa_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
 
 	/* copy over EP cfg */
-	ipa_ctx->ep[clnt_hdl].cfg.mode.mode = ep_mode->mode;
+	ipa_ctx->ep[clnt_hdl].cfg_mode.mode = ep_mode->mode;
 	ipa_ctx->ep[clnt_hdl].dst_pipe_index = ipa_ep_idx;
 
 	init_mode.mode = ep_mode->mode;
@@ -892,7 +892,7 @@ ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
 		  metadata_mask->metadata_mask);
 
 	/* copy over EP cfg */
-	ipa_ctx->ep[clnt_hdl].cfg.metadata_mask.metadata_mask =
+	ipa_ctx->ep[clnt_hdl].cfg_metadata_mask.metadata_mask =
 			metadata_mask->metadata_mask;
 	mask.metadata_mask = metadata_mask->metadata_mask;
 
