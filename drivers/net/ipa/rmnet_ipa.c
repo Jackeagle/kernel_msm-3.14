@@ -251,6 +251,13 @@ static void ipa_ep_cons_header_ext(struct ipa_ep_cfg_hdr_ext *hdr_ext,
 	hdr_ext->hdr_total_len_or_pad_valid = true;
 }
 
+static void
+ipa_ep_cons_aggregation(struct ipa_ep_cfg_aggr *aggr, u32 size, u32 count)
+{
+	aggr->aggr_byte_limit = size;
+	aggr->aggr_pkt_limit = count;
+}
+
 /** handle_egress_format() - Ingress data format configuration */
 static int handle_ingress_format(struct net_device *dev,
 				 struct rmnet_ioctl_extended_s *in)
@@ -276,8 +283,7 @@ static int handle_ingress_format(struct net_device *dev,
 		if (agg_count > ipa_reg_aggr_max_packet_limit())
 			return -EINVAL;
 
-		ep_cfg->aggr.aggr_byte_limit = agg_size;
-		ep_cfg->aggr.aggr_pkt_limit = agg_count;
+		ipa_ep_cons_aggregation(&ep_cfg->aggr, agg_size, agg_count);
 
 		ipa_ctx->ipa_client_apps_wan_cons_agg_gro = true;
 	}
