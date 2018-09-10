@@ -242,6 +242,15 @@ static void ipa_ep_cons_header(struct ipa_ep_cfg_hdr *hdr, u32 header_size,
 	hdr->hdr_ofst_pkt_size = length_offset;
 }
 
+static void ipa_ep_cons_header_ext(struct ipa_ep_cfg_hdr_ext *hdr_ext,
+				   u32 pad_align, bool pad_included)
+{
+	hdr_ext->hdr_pad_to_alignment = pad_align;
+	hdr_ext->hdr_payload_len_inc_padding = pad_included;
+	hdr_ext->hdr_total_len_or_pad = IPA_HDR_PAD;
+	hdr_ext->hdr_total_len_or_pad_valid = true;
+}
+
 /** handle_egress_format() - Ingress data format configuration */
 static int handle_ingress_format(struct net_device *dev,
 				 struct rmnet_ioctl_extended_s *in)
@@ -276,9 +285,8 @@ static int handle_ingress_format(struct net_device *dev,
 	ipa_ep_cons_header(&ep_cfg->hdr, header_size, metadata_offset,
 			   length_offset);
 
-	ep_cfg->hdr_ext.hdr_total_len_or_pad_valid = true;
-	ep_cfg->hdr_ext.hdr_total_len_or_pad = IPA_HDR_PAD;
-	ep_cfg->hdr_ext.hdr_payload_len_inc_padding = true;
+	ipa_ep_cons_header_ext(&ep_cfg->hdr_ext, 0, true);
+
 	ep_cfg->metadata_mask.metadata_mask = 0xff000000;
 
 	wan_cfg->notify = apps_ipa_packet_receive_notify;
