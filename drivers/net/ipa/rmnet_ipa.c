@@ -269,6 +269,16 @@ static void ipa_ep_cons_metadata_mask(struct ipa_ep_cfg_metadata_mask *mask,
 	mask->metadata_mask = metadata_mask;
 }
 
+static void ipa_ep_prod_header(struct ipa_ep_cfg_hdr *hdr, u32 header_size,
+			       u32 metadata_offset, u32 length_offset)
+{
+	hdr->hdr_len = header_size;
+	hdr->hdr_ofst_metadata_valid = 1;
+	hdr->hdr_ofst_metadata = 0;		/* Want offset at 0! */
+	hdr->hdr_ofst_pkt_size_valid = 0;	/* XXX */
+	hdr->hdr_ofst_pkt_size = length_offset;
+}
+
 /** handle_egress_format() - Ingress data format configuration */
 static int handle_ingress_format(struct net_device *dev,
 				 struct rmnet_ioctl_extended_s *in)
@@ -364,10 +374,7 @@ static int handle_egress_format(struct net_device *dev,
 		length_offset = 0;
 	}
 
-	ep_cfg->hdr.hdr_len = header_size;
-	ep_cfg->hdr.hdr_ofst_metadata_valid = 1;
-	ep_cfg->hdr.hdr_ofst_metadata = 0;	/* Want offset at 0! */
-	ep_cfg->hdr.hdr_ofst_pkt_size = length_offset;
+	ipa_ep_prod_header(&ep_cfg->hdr, header_size, 0, length_offset);
 
 	ep_cfg->mode.mode = IPA_BASIC;
 
