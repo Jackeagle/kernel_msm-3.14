@@ -335,14 +335,15 @@ static int handle_egress_format(struct net_device *dev,
 	enum ipa_client_type dst = IPA_CLIENT_APPS_WAN_PROD;
 	u32 chan_count = IPA_APPS_WWAN_PROD_RING_COUNT;
 	struct ipa_ep_cfg *ep_cfg;
+	u32 header_size = sizeof(struct rmnet_map_header_s);
+	u32 length_offset;
 	int ret;
 
 	wan_cfg = &rmnet_ipa_ctx->wan_prod_cfg;
 	ep_cfg = &wan_cfg->ipa_ep_cfg;
 
-	ep_cfg->hdr.hdr_len = sizeof(struct rmnet_map_header_s);
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_CHECKSUM) {
-		ep_cfg->hdr.hdr_len += sizeof(u32);
+		header_size += sizeof(u32);
 		ep_cfg->cfg.cs_offload_en = IPA_CS_OFFLOAD_UL;
 		ep_cfg->cfg.cs_metadata_hdr_offset =
 				sizeof(struct rmnet_map_header_s) / 4;
@@ -352,8 +353,7 @@ static int handle_egress_format(struct net_device *dev,
 		ep_cfg->aggr.aggr_en = IPA_ENABLE_DEAGGR;
 		ep_cfg->aggr.aggr = IPA_QCMAP;
 
-		ep_cfg->hdr.hdr_ofst_pkt_size =
-				offsetof(struct rmnet_map_header_s, pkt_len);
+		length_offset = offsetof(struct rmnet_map_header_s, pkt_len);
 
 		ep_cfg->hdr_ext.hdr_total_len_or_pad_valid = true;
 		ep_cfg->hdr_ext.hdr_total_len_or_pad = IPA_HDR_PAD;
@@ -361,10 +361,13 @@ static int handle_egress_format(struct net_device *dev,
 		ep_cfg->hdr_ext.hdr_payload_len_inc_padding = true;
 	} else {
 		ep_cfg->aggr.aggr_en = IPA_BYPASS_AGGR;
+		length_offset = 0;
 	}
 
+	ep_cfg->hdr.hdr_len = header_size;
 	ep_cfg->hdr.hdr_ofst_metadata_valid = 1;
 	ep_cfg->hdr.hdr_ofst_metadata = 0;	/* Want offset at 0! */
+	ep_cfg->hdr.hdr_ofst_pkt_size = length_offset;
 
 	ep_cfg->mode.mode = IPA_BASIC;
 
