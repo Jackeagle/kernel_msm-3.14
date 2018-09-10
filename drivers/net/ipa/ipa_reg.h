@@ -464,7 +464,7 @@ static inline void ipa_write_reg_fields(enum ipa_reg reg, const void *fields)
 	ipa_write_reg_n_fields(reg, 0, fields);
 }
 
-u32 ipahal_aggr_get_max_byte_limit(void);
-u32 ipahal_aggr_get_max_pkt_limit(void);
+u32 ipa_reg_aggr_max_byte_limit(void);
+u32 ipa_reg_aggr_max_packet_limit(void);
 
 #endif /* _IPA_REG_H_ */

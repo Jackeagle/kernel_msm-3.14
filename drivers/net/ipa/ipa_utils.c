@@ -990,14 +990,14 @@ int ipa_disable_apps_wan_cons_deaggr(u32 agg_size, u32 agg_count)
 	u32 limit;
 
 	/* checking if IPA-HW can support */
-	limit = ipahal_aggr_get_max_byte_limit();
+	limit = ipa_reg_aggr_max_byte_limit();
 	if (agg_size > limit * SZ_1K) {
 		ipa_err("IPA-AGG byte limit %d\n", limit);
 		ipa_err("exceed aggr_byte_limit\n");
 		return -EINVAL;
 	}
 
-	limit = ipahal_aggr_get_max_pkt_limit();
+	limit = ipa_reg_aggr_max_packet_limit();
 	if (agg_count > limit) {
 		ipa_err("IPA-AGG pkt limit %d\n", limit);
 		ipa_err("exceed aggr_pkt_limit\n");

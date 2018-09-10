@@ -514,7 +514,6 @@ void ipa_uc_panic_notifier(void);
 
 const struct ipa_gsi_ep_config *ipa_get_gsi_ep_info
 	(enum ipa_client_type client);
-
 u32 ipa_get_num_pipes(void);
 int ipa_ap_suspend(struct device *dev);
 int ipa_ap_resume(struct device *dev);

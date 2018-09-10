@@ -626,13 +626,13 @@ void ipa_write_reg_n_fields(enum ipa_reg reg, u32 n, const void *fields)
 }
 
 /* Maximum representable aggregation byte limit value */
-u32 ipahal_aggr_get_max_byte_limit(void)
+u32 ipa_reg_aggr_max_byte_limit(void)
 {
 	return field_max(AGGR_BYTE_LIMIT_FMASK);
 }
 
 /* Maximum representable aggregation packet limit value */
-u32 ipahal_aggr_get_max_pkt_limit(void)
+u32 ipa_reg_aggr_max_packet_limit(void)
 {
 	return field_max(AGGR_PKT_LIMIT_FMASK);
 }
