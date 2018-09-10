@@ -1714,7 +1714,7 @@ ipa_ep_prod_cs_offload_enable(struct ipa_ep_cfg_cfg *cfg, u32 metadata_offset)
 	cfg->cs_metadata_hdr_offset = metadata_offset;
 }
 
-static int ipa_ep_alloc(enum ipa_client_type client)
+int ipa_ep_alloc(enum ipa_client_type client)
 {
 	u32 ipa_ep_idx = ipa_get_ep_mapping(client);
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
@@ -1743,7 +1743,7 @@ static int ipa_ep_alloc(enum ipa_client_type client)
 	return ipa_ep_idx;
 }
 
-static void ipa_ep_free(u32 ipa_ep_idx)
+void ipa_ep_free(u32 ipa_ep_idx)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 
@@ -1765,22 +1765,16 @@ static void ipa_ep_free(u32 ipa_ep_idx)
  *
  * Returns:	client handle on success, negative on failure
  */
-int ipa_setup_sys_pipe(enum ipa_client_type client, enum ipa_client_type dst,
+int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 		       u32 chan_count, struct ipa_sys_connect_params *sys_in)
 {
-	u32 ipa_ep_idx = ipa_get_ep_mapping(client);
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 	int ret;
 
-	ret = ipa_ep_alloc(client);
-	if (ret < 0)
-		return ret;
-	ipa_ep_idx = ret;
-
 	ipa_client_add();
 
-	if (ipa_assign_policy(client, sys_in, ep->sys)) {
-		ipa_err("failed to sys ctx for client %d\n", client);
+	if (ipa_assign_policy(ep->client, sys_in, ep->sys)) {
+		ipa_err("failed to sys ctx for client %d\n", ep->client);
 		ret = -ENOMEM;
 		goto err_client_remove;
 	}
@@ -1801,13 +1795,13 @@ int ipa_setup_sys_pipe(enum ipa_client_type client, enum ipa_client_type dst,
 		goto err_client_remove;
 	}
 
-	if (ipa_consumer(client))
+	if (ipa_consumer(ep->client))
 		ipa_replenish_rx_cache(ep->sys);
 
 	ipa_client_remove();
 
-	ipa_debug("client %d (ep: %u) connected sys=%p\n", client, ipa_ep_idx,
-		  ep->sys);
+	ipa_debug("client %d (ep: %u) connected sys=%p\n", ep->client,
+		  ipa_ep_idx, ep->sys);
 
 	return ipa_ep_idx;
 

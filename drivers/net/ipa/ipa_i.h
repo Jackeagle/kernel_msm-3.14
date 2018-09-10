@@ -470,7 +470,10 @@ void ipa_ep_prod_aggregation(struct ipa_ep_cfg_aggr *aggr,
 void ipa_ep_prod_cs_offload_enable(struct ipa_ep_cfg_cfg *cfg,
 				   u32 metadata_offset);
 
-int ipa_setup_sys_pipe(enum ipa_client_type client, enum ipa_client_type dst,
+int ipa_ep_alloc(enum ipa_client_type client);
+void ipa_ep_free(u32 ipa_ep_idx);
+
+int ipa_setup_sys_pipe(u32 client_hdl, enum ipa_client_type dst,
 		       u32 chan_count, struct ipa_sys_connect_params *sys_in);
 
 void ipa_teardown_sys_pipe(u32 clnt_hdl);

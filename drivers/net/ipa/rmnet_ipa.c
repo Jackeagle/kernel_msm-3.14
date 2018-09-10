@@ -243,6 +243,7 @@ static int handle_ingress_format(struct net_device *dev,
 	u32 header_size = sizeof(struct rmnet_map_header_s);
 	u32 metadata_offset = offsetof(struct rmnet_map_header_s, mux_id);
 	u32 length_offset = offsetof(struct rmnet_map_header_s, pkt_len);
+	u32 cons_hdl;
 	int ret;
 
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_CHECKSUM)
@@ -276,13 +277,22 @@ static int handle_ingress_format(struct net_device *dev,
 
 	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
-	ret = ipa_setup_sys_pipe(client, client, chan_count, wan_cfg);
+	ret = ipa_ep_alloc(client);
 	if (ret < 0) {
 		mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
 		return ret;
 	}
-	rmnet_ipa_ctx->wan_cons_hdl = ret;
+	cons_hdl = ret;
+
+	ret = ipa_setup_sys_pipe(cons_hdl, client, chan_count, wan_cfg);
+	if (ret < 0) {
+		ipa_ep_free(cons_hdl);
+		mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
+
+		return ret;
+	}
+	rmnet_ipa_ctx->wan_cons_hdl = cons_hdl;
 
 	mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
@@ -300,6 +310,7 @@ static int handle_egress_format(struct net_device *dev,
 	struct ipa_ep_cfg *ep_cfg;
 	u32 header_size = sizeof(struct rmnet_map_header_s);
 	u32 length_offset;
+	u32 prod_hdl;
 	int ret;
 
 	wan_cfg = &rmnet_ipa_ctx->wan_prod_cfg;
@@ -333,13 +344,22 @@ static int handle_egress_format(struct net_device *dev,
 
 	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
-	ret = ipa_setup_sys_pipe(client, dst, chan_count, wan_cfg);
+	ret = ipa_ep_alloc(client);
 	if (ret < 0) {
 		mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
 		return ret;
 	}
-	rmnet_ipa_ctx->wan_prod_hdl = ret;
+	prod_hdl = ret;
+
+	ret = ipa_setup_sys_pipe(prod_hdl, dst, chan_count, wan_cfg);
+	if (ret < 0) {
+		ipa_ep_free(prod_hdl);
+		mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
+
+		return ret;
+	}
+	rmnet_ipa_ctx->wan_prod_hdl = prod_hdl;
 
 	mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
 

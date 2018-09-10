@@ -158,10 +158,24 @@ static int setup_apps_cmd_prod_pipe(void)
 	enum ipa_client_type client = IPA_CLIENT_APPS_CMD_PROD;
 	enum ipa_client_type dst = IPA_CLIENT_APPS_LAN_CONS;
 	u32 chan_count = IPA_APPS_CMD_PROD_RING_COUNT;
+	u32 prod_hdl;
+	int ret;
 
 	ipa_ep_prod_header_mode(&sys_in.ipa_ep_cfg.mode, IPA_DMA);
 
-	return ipa_setup_sys_pipe(client, dst, chan_count, &sys_in);
+	ret = ipa_ep_alloc(client);
+	if (ret < 0)
+		return ret;
+	prod_hdl = ret;
+
+	ret = ipa_setup_sys_pipe(prod_hdl, dst, chan_count, &sys_in);
+	if (ret < 0) {
+		ipa_ep_free(prod_hdl);
+
+		return ret;
+	}
+
+	return prod_hdl;
 }
 
 /* Only used for IPA_MEM_UC_EVENT_RING_OFST, which must be 1KB aligned */
@@ -472,6 +486,8 @@ static int setup_apps_lan_cons_pipe(void)
 	enum ipa_client_type client = IPA_CLIENT_APPS_LAN_CONS;
 	u32 chan_count = IPA_APPS_LAN_CONS_RING_COUNT;
 	struct ipa_ep_cfg *ep_cfg = &sys_in.ipa_ep_cfg;
+	u32 cons_hdl;
+	int ret;
 
 	sys_in.notify = ipa_lan_rx_cb;
 	sys_in.priv = NULL;
@@ -482,7 +498,19 @@ static int setup_apps_lan_cons_pipe(void)
 
 	ipa_ep_cons_cs_offload_enable(&ep_cfg->cfg);
 
-	return ipa_setup_sys_pipe(client, client, chan_count, &sys_in);
+	ret = ipa_ep_alloc(client);
+	if (ret < 0)
+		return ret;
+	cons_hdl = ret;
+
+	ret = ipa_setup_sys_pipe(cons_hdl, client, chan_count, &sys_in);
+	if (ret < 0) {
+		ipa_ep_free(cons_hdl);
+
+		return ret;
+	}
+
+	return cons_hdl;
 }
 
 static int ipa_setup_apps_pipes(void)
