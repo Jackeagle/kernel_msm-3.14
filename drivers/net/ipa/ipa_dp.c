@@ -1689,7 +1689,7 @@ int ipa_setup_sys_pipe(enum ipa_client_type client, enum ipa_client_type dst,
 
 	ipa_cfg_ep(ipa_ep_idx, dst, &sys_in->ipa_ep_cfg);
 
-	ipa_cfg_ep_status(ipa_ep_idx, &ep->status);
+	ipa_cfg_ep_status(ipa_ep_idx);
 
 	ipa_debug("ep %u configuration successful\n", ipa_ep_idx);
 
