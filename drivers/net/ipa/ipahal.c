@@ -131,10 +131,8 @@ ipahal_hdr_init_local_pyld(struct ipa_dma_mem *mem, u32 offset)
 	struct ipa_imm_cmd_hw_hdr_init_local *data;
 	u16 opcode;
 
-	if (check_too_big("size", mem->size, 12))
-		return NULL;
-	if (check_too_big("offset", offset, 16))
-		return NULL;
+	ipa_assert(mem->size < 1 << 12);  /* size_hdr_table is 12 bits wide */
+	ipa_assert(offset < 1 << 16);		/* hdr_addr is 16 bits wide */
 
 	opcode = IPA_IMM_CMD_HDR_INIT_LOCAL;
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
