@@ -903,10 +903,6 @@ ipa_cfg_ep_status(u32 clnt_hdl)
 {
 	const struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
 
-	ipa_debug("pipe=%d, status_en=%d status_ep=%d status_location=%d\n",
-		  clnt_hdl, ep->status.status_en, ep->status.status_endp,
-		  ep->status.status_location);
-
 	ipa_write_reg_n_fields(IPA_ENDP_STATUS_N, clnt_hdl, &ep->status);
 }
 
