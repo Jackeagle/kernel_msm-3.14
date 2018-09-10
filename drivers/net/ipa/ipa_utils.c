@@ -680,8 +680,7 @@ static void ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 static void
 ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
 {
-	struct ipa_reg_endp_init_hdr_ext hdr_ext = { };
-	struct ipa_ep_context *ep;
+	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
 
 	ipa_debug("pipe=%d hdr_pad_to_alignment=%d\n", clnt_hdl,
 		  ep_hdr_ext->hdr_pad_to_alignment);
@@ -695,27 +694,17 @@ ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
 	ipa_debug("hdr_total_len_or_pad_valid=%s hdr_little_endian=0\n",
 		  ep_hdr_ext->hdr_total_len_or_pad_valid ? "true" : "false");
 
-	ep = &ipa_ctx->ep[clnt_hdl];
-
-	/* copy over EP cfg */
-	ep->cfg_hdr_ext.hdr_pad_to_alignment = ep_hdr_ext->hdr_pad_to_alignment;
-	ep->cfg_hdr_ext.hdr_payload_len_inc_padding =
-			ep_hdr_ext->hdr_payload_len_inc_padding ? 1 : 0;
-	ep->cfg_hdr_ext.hdr_total_len_or_pad =
-			ep_hdr_ext->hdr_total_len_or_pad == IPA_HDR_PAD ? 0 : 1;
-	ep->cfg_hdr_ext.hdr_total_len_or_pad_valid =
-			ep_hdr_ext->hdr_total_len_or_pad_valid ? 1 : 0;
-
-	hdr_ext.hdr_endianness = 1;	/* big endian */
-	hdr_ext.hdr_total_len_or_pad_valid =
+	ep->hdr_ext.hdr_endianness = 1;	/* big endian */
+	ep->hdr_ext.hdr_total_len_or_pad_valid =
 			ep_hdr_ext->hdr_total_len_or_pad_valid;
-	hdr_ext.hdr_total_len_or_pad = ep_hdr_ext->hdr_total_len_or_pad;
-	hdr_ext.hdr_payload_len_inc_padding =
+	ep->hdr_ext.hdr_total_len_or_pad = ep_hdr_ext->hdr_total_len_or_pad;
+	ep->hdr_ext.hdr_payload_len_inc_padding =
 			ep_hdr_ext->hdr_payload_len_inc_padding;
-	hdr_ext.hdr_total_len_or_pad_offset = 0;
-	hdr_ext.hdr_pad_to_alignment = ep_hdr_ext->hdr_pad_to_alignment;
+	ep->hdr_ext.hdr_total_len_or_pad_offset = 0;
+	ep->hdr_ext.hdr_pad_to_alignment = ep_hdr_ext->hdr_pad_to_alignment;
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_N, clnt_hdl, &hdr_ext);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_N, clnt_hdl,
+			       &ep->hdr_ext);
 }
 
 /** ipa_cfg_ep_aggr() - IPA end-point aggregation configuration

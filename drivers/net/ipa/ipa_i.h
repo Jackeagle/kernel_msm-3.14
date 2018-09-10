@@ -241,8 +241,8 @@ struct ipa_ep_context {
 	u16 bytes_xfered;
 
 	struct ipa_reg_endp_init_hdr init_hdr;
+	struct ipa_reg_endp_init_hdr_ext hdr_ext;
 
-	struct ipa_ep_cfg_hdr_ext cfg_hdr_ext;
 	struct ipa_ep_cfg_mode cfg_mode;
 	struct ipa_ep_cfg_aggr cfg_aggr;
 	struct ipa_ep_cfg_cfg cfg_cfg;
