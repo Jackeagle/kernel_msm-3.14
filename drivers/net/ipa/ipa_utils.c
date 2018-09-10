@@ -792,7 +792,7 @@ static void ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 static void ipa_cfg_ep_mode(u32 clnt_hdl, enum ipa_client_type dst,
 			    const struct ipa_ep_cfg_mode *ep_mode)
 {
-	struct ipa_reg_endp_init_mode init_mode;
+	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
 	u32 ipa_ep_idx;
 
 	ipa_assert(ipa_producer(ipa_ctx->ep[clnt_hdl].client));
@@ -804,18 +804,15 @@ static void ipa_cfg_ep_mode(u32 clnt_hdl, enum ipa_client_type dst,
 	else
 		ipa_ep_idx = ipa_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
 
-	/* copy over EP cfg */
-	ipa_ctx->ep[clnt_hdl].cfg_mode.mode = ep_mode->mode;
-	ipa_ctx->ep[clnt_hdl].dst_pipe_index = ipa_ep_idx;
+	ep->init_mode.mode = ep_mode->mode;
+	ep->init_mode.dest_pipe_index = ipa_ep_idx;
+	ep->init_mode.byte_threshold = 0;
+	ep->init_mode.pipe_replication_en = 0;
+	ep->init_mode.pad_en = 0;
+	ep->init_mode.hdr_ftch_disable = 0;
 
-	init_mode.mode = ep_mode->mode;
-	init_mode.dest_pipe_index = ipa_ep_idx;
-	init_mode.byte_threshold = 0;
-	init_mode.pipe_replication_en = 0;
-	init_mode.pad_en = 0;
-	init_mode.hdr_ftch_disable = 0;
-
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_MODE_N, clnt_hdl, &init_mode);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_MODE_N, clnt_hdl,
+			       &ep->init_mode);
 }
 
 /** ipa_cfg_ep_seq() - IPA end-point HPS/DPS sequencer type configuration

@@ -242,8 +242,8 @@ struct ipa_ep_context {
 
 	struct ipa_reg_endp_init_hdr init_hdr;
 	struct ipa_reg_endp_init_hdr_ext hdr_ext;
+	struct ipa_reg_endp_init_mode init_mode;
 
-	struct ipa_ep_cfg_mode cfg_mode;
 	struct ipa_ep_cfg_aggr cfg_aggr;
 	struct ipa_ep_cfg_cfg cfg_cfg;
 	struct ipa_ep_cfg_metadata_mask cfg_metadata_mask;
