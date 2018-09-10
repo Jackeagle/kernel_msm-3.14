@@ -232,10 +232,8 @@ ipahal_dma_task_32b_addr_pyld(struct ipa_dma_mem *mem)
 	struct ipa_imm_cmd_hw_dma_task_32b_addr *data;
 	u16 opcode = IPA_IMM_CMD_DMA_TASK_32B_ADDR;
 
-	if (check_too_big("size", mem->size, 16))
-		return NULL;
-	if (check_too_big("packet_size", mem->size, 16))
-		return NULL;
+	/* size1 and packet_size are both 16 bits wide */
+	ipa_assert(mem->size < 1 << 16);
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
