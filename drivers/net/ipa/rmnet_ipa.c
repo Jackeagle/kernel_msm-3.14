@@ -294,6 +294,20 @@ ipa_ep_prod_header_mode(struct ipa_ep_cfg_mode *mode, enum ipa_mode_type type)
 	mode->mode = type;
 }
 
+static void ipa_ep_prod_aggregation(struct ipa_ep_cfg_aggr *aggr,
+				    enum ipa_aggr_en_type aggr_en,
+				    enum ipa_aggr_type aggr_type)
+{
+	aggr->aggr_en = aggr_en;
+	aggr->aggr = aggr_type;  /* Ignored if aggr_en == IPA_BYPASS_AGGR */
+	/* The rest are set later */
+	aggr->aggr_byte_limit = 0;
+	aggr->aggr_time_limit = 0;
+	aggr->aggr_pkt_limit = 0;
+	aggr->aggr_hard_byte_limit_en = false;
+	aggr->aggr_sw_eof_active = false;
+}
+
 /** handle_egress_format() - Ingress data format configuration */
 static int handle_ingress_format(struct net_device *dev,
 				 struct rmnet_ioctl_extended_s *in)
@@ -375,14 +389,14 @@ static int handle_egress_format(struct net_device *dev,
 	}
 
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_AGGREGATION) {
-		ep_cfg->aggr.aggr_en = IPA_ENABLE_DEAGGR;
-		ep_cfg->aggr.aggr = IPA_QCMAP;
+		ipa_ep_prod_aggregation(&ep_cfg->aggr, IPA_ENABLE_DEAGGR,
+				        IPA_QCMAP);
 
 		length_offset = offsetof(struct rmnet_map_header_s, pkt_len);
 
 		ipa_ep_prod_header_pad(&ep_cfg->hdr_ext, ilog2(sizeof(u32)));
 	} else {
-		ep_cfg->aggr.aggr_en = IPA_BYPASS_AGGR;
+		ipa_ep_prod_aggregation(&ep_cfg->aggr, IPA_BYPASS_AGGR, 0);
 		length_offset = 0;
 	}
 
