@@ -263,6 +263,12 @@ static void ipa_ep_cons_cs_offload_enable(struct ipa_ep_cfg_cfg *cfg)
 	cfg->cs_offload_en = IPA_CS_OFFLOAD_DL;
 }
 
+static void ipa_ep_cons_metadata_mask(struct ipa_ep_cfg_metadata_mask *mask,
+				       u32 metadata_mask)
+{
+	mask->metadata_mask = metadata_mask;
+}
+
 /** handle_egress_format() - Ingress data format configuration */
 static int handle_ingress_format(struct net_device *dev,
 				 struct rmnet_ioctl_extended_s *in)
@@ -298,7 +304,7 @@ static int handle_ingress_format(struct net_device *dev,
 
 	ipa_ep_cons_header_ext(&ep_cfg->hdr_ext, 0, true);
 
-	ep_cfg->metadata_mask.metadata_mask = 0xff000000;
+	ipa_ep_cons_metadata_mask(&ep_cfg->metadata_mask, 0xff000000);
 
 	wan_cfg->notify = apps_ipa_packet_receive_notify;
 	wan_cfg->priv = dev;
