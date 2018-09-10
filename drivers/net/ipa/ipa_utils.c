@@ -905,14 +905,6 @@ ipa_cfg_ep_status(u32 clnt_hdl, const struct ipa_reg_endp_status *ep_status)
 		  clnt_hdl, ep_status->status_en, ep_status->status_endp,
 		  ep_status->status_location);
 
-	/* copy over EP cfg */
-	ipa_ctx->ep[clnt_hdl].status.status_en = ep_status->status_en;
-	ipa_ctx->ep[clnt_hdl].status.status_endp = ep_status->status_endp;
-	ipa_ctx->ep[clnt_hdl].status.status_location =
-			ep_status->status_location;
-	ipa_ctx->ep[clnt_hdl].status.status_pkt_suppress =
-			ep_status->status_pkt_suppress;
-
 	ipa_write_reg_n_fields(IPA_ENDP_STATUS_N, clnt_hdl, ep_status);
 }
 
