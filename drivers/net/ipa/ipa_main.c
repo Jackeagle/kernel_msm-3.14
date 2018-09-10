@@ -471,18 +471,16 @@ static int setup_apps_lan_cons_pipe(void)
 	struct ipa_sys_connect_params sys_in = { };
 	enum ipa_client_type client = IPA_CLIENT_APPS_LAN_CONS;
 	u32 chan_count = IPA_APPS_LAN_CONS_RING_COUNT;
+	struct ipa_ep_cfg *ep_cfg = &sys_in.ipa_ep_cfg;
 
 	sys_in.notify = ipa_lan_rx_cb;
 	sys_in.priv = NULL;
 
-	sys_in.ipa_ep_cfg.hdr.hdr_len = IPA_LAN_RX_HEADER_LENGTH;
+	ipa_ep_cons_header(&ep_cfg->hdr, IPA_LAN_RX_HEADER_LENGTH, 0, 0);
 
-	sys_in.ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad_valid = true;
-	sys_in.ipa_ep_cfg.hdr_ext.hdr_total_len_or_pad = IPA_HDR_PAD;
-	sys_in.ipa_ep_cfg.hdr_ext.hdr_payload_len_inc_padding = false;
-	sys_in.ipa_ep_cfg.hdr_ext.hdr_pad_to_alignment = ilog2(sizeof(u32));
+	ipa_ep_cons_header_ext(&ep_cfg->hdr_ext, ilog2(sizeof(u32)), false);
 
-	sys_in.ipa_ep_cfg.cfg.cs_offload_en = IPA_CS_OFFLOAD_DL;
+	ipa_ep_cons_cs_offload_enable(&ep_cfg->cfg);
 
 	return ipa_setup_sys_pipe(client, client, chan_count, &sys_in);
 }
