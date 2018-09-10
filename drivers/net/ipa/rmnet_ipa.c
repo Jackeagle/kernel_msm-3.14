@@ -262,9 +262,11 @@ static int handle_ingress_format(struct net_device *dev,
 
 	ep_cfg->hdr.hdr_len = sizeof(struct rmnet_map_header_s);
 	ep_cfg->hdr.hdr_ofst_metadata_valid = 1;
-	ep_cfg->hdr.hdr_ofst_metadata = 1;
+	ep_cfg->hdr.hdr_ofst_metadata =
+			offsetof(struct rmnet_map_header_s, mux_id);
 	ep_cfg->hdr.hdr_ofst_pkt_size_valid = 1;
-	ep_cfg->hdr.hdr_ofst_pkt_size = 2;
+	ep_cfg->hdr.hdr_ofst_pkt_size =
+			offsetof(struct rmnet_map_header_s, pkt_len);
 
 	ep_cfg->hdr_ext.hdr_total_len_or_pad_valid = true;
 	ep_cfg->hdr_ext.hdr_total_len_or_pad = IPA_HDR_PAD;
@@ -309,18 +311,20 @@ static int handle_egress_format(struct net_device *dev,
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_CHECKSUM) {
 		ep_cfg->hdr.hdr_len += sizeof(u32);
 		ep_cfg->cfg.cs_offload_en = IPA_CS_OFFLOAD_UL;
-		ep_cfg->cfg.cs_metadata_hdr_offset = 1;
+		ep_cfg->cfg.cs_metadata_hdr_offset =
+				sizeof(struct rmnet_map_header_s) / 4;
 	}
 
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_AGGREGATION) {
 		ep_cfg->aggr.aggr_en = IPA_ENABLE_DEAGGR;
 		ep_cfg->aggr.aggr = IPA_QCMAP;
 
-		ep_cfg->hdr.hdr_ofst_pkt_size = 2;
+		ep_cfg->hdr.hdr_ofst_pkt_size =
+				offsetof(struct rmnet_map_header_s, pkt_len);
 
 		ep_cfg->hdr_ext.hdr_total_len_or_pad_valid = true;
 		ep_cfg->hdr_ext.hdr_total_len_or_pad = IPA_HDR_PAD;
-		ep_cfg->hdr_ext.hdr_pad_to_alignment = 2;
+		ep_cfg->hdr_ext.hdr_pad_to_alignment = ilog2(sizeof(u32));
 		ep_cfg->hdr_ext.hdr_payload_len_inc_padding = true;
 	} else {
 		ep_cfg->aggr.aggr_en = IPA_BYPASS_AGGR;
