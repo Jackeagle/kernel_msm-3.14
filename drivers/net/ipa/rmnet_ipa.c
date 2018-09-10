@@ -308,7 +308,14 @@ static void ipa_ep_prod_aggregation(struct ipa_ep_cfg_aggr *aggr,
 	aggr->aggr_sw_eof_active = false;
 }
 
-/** handle_egress_format() - Ingress data format configuration */
+static void
+ipa_ep_prod_cs_offload_enable(struct ipa_ep_cfg_cfg *cfg, u32 metadata_offset)
+{
+	cfg->cs_offload_en = IPA_CS_OFFLOAD_UL;
+	cfg->cs_metadata_hdr_offset = metadata_offset;
+}
+
+/** handle_ingress_format() - Ingress data format configuration */
 static int handle_ingress_format(struct net_device *dev,
 				 struct rmnet_ioctl_extended_s *in)
 {
@@ -382,10 +389,10 @@ static int handle_egress_format(struct net_device *dev,
 	ep_cfg = &wan_cfg->ipa_ep_cfg;
 
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_CHECKSUM) {
+		u32 hdr_offset = sizeof(struct rmnet_map_header_s) / 4;
+
 		header_size += sizeof(u32);
-		ep_cfg->cfg.cs_offload_en = IPA_CS_OFFLOAD_UL;
-		ep_cfg->cfg.cs_metadata_hdr_offset =
-				sizeof(struct rmnet_map_header_s) / 4;
+		ipa_ep_prod_cs_offload_enable(&ep_cfg->cfg, hdr_offset);
 	}
 
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_AGGREGATION) {
