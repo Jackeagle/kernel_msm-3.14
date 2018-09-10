@@ -715,7 +715,7 @@ ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
  */
 static void ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 {
-	struct ipa_reg_endp_init_aggr init_aggr = { };
+	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
 
 	if (ep_aggr->aggr_en == IPA_ENABLE_DEAGGR)
 		ipa_assert(IPA_EP_SUPPORTS_DEAGGR(clnt_hdl));
@@ -729,29 +729,18 @@ static void ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 		  ep_aggr->aggr_hard_byte_limit_en,
 		  ep_aggr->aggr_sw_eof_active ? "true" : "false");
 
-	/* copy over EP cfg */
-	ipa_ctx->ep[clnt_hdl].cfg_aggr.aggr_en = ep_aggr->aggr_en;
-	ipa_ctx->ep[clnt_hdl].cfg_aggr.aggr = ep_aggr->aggr;
-	ipa_ctx->ep[clnt_hdl].cfg_aggr.aggr_byte_limit =
-			ep_aggr->aggr_byte_limit;
-	ipa_ctx->ep[clnt_hdl].cfg_aggr.aggr_time_limit =
-			ep_aggr->aggr_time_limit;
-	ipa_ctx->ep[clnt_hdl].cfg_aggr.aggr_pkt_limit =
-			ep_aggr->aggr_pkt_limit;
-	ipa_ctx->ep[clnt_hdl].cfg_aggr.aggr_hard_byte_limit_en =
-			ep_aggr->aggr_hard_byte_limit_en;
-
-	init_aggr.aggr_en = (u32)ep_aggr->aggr_en;
-	init_aggr.aggr_type = (u32)ep_aggr->aggr;
-	init_aggr.aggr_byte_limit = ep_aggr->aggr_byte_limit;
-	init_aggr.aggr_time_limit = ep_aggr->aggr_time_limit;
-	init_aggr.aggr_pkt_limit = ep_aggr->aggr_pkt_limit;
-	init_aggr.aggr_sw_eof_active = 0;
-	init_aggr.aggr_force_close = 0;
-	init_aggr.aggr_hard_byte_limit_en =
+	ep->init_aggr.aggr_en = (u32)ep_aggr->aggr_en;
+	ep->init_aggr.aggr_type = (u32)ep_aggr->aggr;
+	ep->init_aggr.aggr_byte_limit = ep_aggr->aggr_byte_limit;
+	ep->init_aggr.aggr_time_limit = ep_aggr->aggr_time_limit;
+	ep->init_aggr.aggr_pkt_limit = ep_aggr->aggr_pkt_limit;
+	ep->init_aggr.aggr_sw_eof_active = 0;
+	ep->init_aggr.aggr_force_close = 0;
+	ep->init_aggr.aggr_hard_byte_limit_en =
 			ep_aggr->aggr_hard_byte_limit_en ? 1 : 0;
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_AGGR_N, clnt_hdl, &init_aggr);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_AGGR_N, clnt_hdl,
+			       &ep->init_aggr);
 }
 
 /** ipa_cfg_ep_cfg() - IPA end-point cfg configuration
