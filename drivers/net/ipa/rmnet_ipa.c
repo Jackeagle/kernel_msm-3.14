@@ -252,12 +252,15 @@ static int handle_ingress_format(struct net_device *dev,
 		u32 agg_size = in->u.ingress_format.agg_size;
 		u32 agg_count = in->u.ingress_format.agg_count;
 
-		ret = ipa_disable_apps_wan_cons_deaggr(agg_size, agg_count);
-		if (ret)
-			return ret;
+		if (agg_size > ipa_reg_aggr_max_byte_limit())
+			return -EINVAL;
+		if (agg_count > ipa_reg_aggr_max_packet_limit())
+			return -EINVAL;
 
 		ep_cfg->aggr.aggr_byte_limit = agg_size;
 		ep_cfg->aggr.aggr_pkt_limit = agg_count;
+
+		ipa_ctx->ipa_client_apps_wan_cons_agg_gro = true;
 	}
 
 	ep_cfg->hdr.hdr_len = sizeof(struct rmnet_map_header_s);

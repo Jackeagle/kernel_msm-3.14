@@ -980,35 +980,6 @@ u32 ipa_get_num_pipes(void)
 	return ipa_read_reg(IPA_ENABLED_PIPES);
 }
 
-/** ipa_disable_apps_wan_cons_deaggr()-
- * set ipa_ctx->ipa_client_apps_wan_cons_agg_gro
- *
- * Return value: 0 or negative in case of failure
- */
-int ipa_disable_apps_wan_cons_deaggr(u32 agg_size, u32 agg_count)
-{
-	u32 limit;
-
-	/* checking if IPA-HW can support */
-	limit = ipa_reg_aggr_max_byte_limit();
-	if (agg_size > limit * SZ_1K) {
-		ipa_err("IPA-AGG byte limit %d\n", limit);
-		ipa_err("exceed aggr_byte_limit\n");
-		return -EINVAL;
-	}
-
-	limit = ipa_reg_aggr_max_packet_limit();
-	if (agg_count > limit) {
-		ipa_err("IPA-AGG pkt limit %d\n", limit);
-		ipa_err("exceed aggr_pkt_limit\n");
-		return -EINVAL;
-	}
-
-	ipa_ctx->ipa_client_apps_wan_cons_agg_gro = true;
-
-	return 0;
-}
-
 /** ipa_is_modem_pipe()- Checks if pipe is owned by the modem
  *
  * @pipe_idx: pipe number
