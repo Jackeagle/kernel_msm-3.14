@@ -1476,12 +1476,9 @@ static int ipa_assign_policy(enum ipa_client_type client,
 
 		return 0;
 	}
-
-
 	/* client == IPA_CLIENT_APPS_WAN_CONS */
 	sys->rx.pyld_hdlr = ipa_wan_rx_pyld_hdlr;
 
-	ep_cfg_aggr->aggr_sw_eof_active = true;
 	if (ipa_ctx->ipa_client_apps_wan_cons_agg_gro) {
 		u32 limit;
 		u32 adjusted;
@@ -1791,6 +1788,9 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 					IPA_GENERIC_AGGR_BYTE_LIMIT;
 			ep_cfg_aggr->aggr_pkt_limit =
 					IPA_GENERIC_AGGR_PKT_LIMIT;
+			ep_cfg_aggr->aggr_sw_eof_active = false;
+		} else {
+			ep_cfg_aggr->aggr_sw_eof_active = true;
 		}
 	}
 
