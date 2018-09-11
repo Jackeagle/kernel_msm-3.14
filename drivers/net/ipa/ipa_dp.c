@@ -121,15 +121,16 @@ struct ipa_tag_completion {
 #define IPA_GENERIC_AGGR_TIME_LIMIT	1
 #define IPA_GENERIC_AGGR_PKT_LIMIT	0
 
-#define IPA_GENERIC_RX_BUFF_BASE_SZ	8192
+#define IPA_RX_BUFFER_ORDER	1	/* Default RX buffer is 2^1 pages */
+#define IPA_RX_BUFFER_SIZE	(1 << (IPA_RX_BUFFER_ORDER + PAGE_SHIFT))
 #define IPA_REAL_GENERIC_RX_BUFF_SZ(X) \
 		(SKB_DATA_ALIGN((X) + NET_SKB_PAD) + \
 		 SKB_DATA_ALIGN(sizeof(struct skb_shared_info)))
 #define IPA_GENERIC_RX_BUFF_SZ(X) \
 	({ typeof(X) _x = (X); (_x - (IPA_REAL_GENERIC_RX_BUFF_SZ(_x) - _x)); })
 #define IPA_GENERIC_RX_BUFF_LIMIT \
-		(IPA_REAL_GENERIC_RX_BUFF_SZ(IPA_GENERIC_RX_BUFF_BASE_SZ) - \
-					     IPA_GENERIC_RX_BUFF_BASE_SZ)
+		(IPA_REAL_GENERIC_RX_BUFF_SZ(IPA_RX_BUFFER_SIZE) - \
+					     IPA_RX_BUFFER_SIZE)
 
 /* less 1 nominal MTU (1500 bytes) rounded to units of KB */
 #define IPA_MTU				1500
@@ -1050,7 +1051,7 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 	int src_pipe;
 	unsigned int used = *(unsigned int *)skb->cb;
 	unsigned int used_align = ALIGN(used, 32);
-	unsigned long unused = IPA_GENERIC_RX_BUFF_BASE_SZ - used;
+	unsigned long unused = IPA_RX_BUFFER_SIZE - used;
 	struct ipa_tx_pkt_wrapper *tx_pkt = NULL;
 
 	ipa_assert(skb->len);
@@ -1264,7 +1265,7 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 	int ep_idx;
 	unsigned int used = *(unsigned int *)skb->cb;
 	unsigned int used_align = ALIGN(used, 32);
-	unsigned long unused = IPA_GENERIC_RX_BUFF_BASE_SZ - used;
+	unsigned long unused = IPA_RX_BUFFER_SIZE - used;
 
 	ipa_assert(skb->len);
 
@@ -1483,7 +1484,7 @@ static int ipa_assign_policy(enum ipa_client_type client,
 			  ipa_replenish_rx_work_func);
 
 	atomic_set(&sys->rx.curr_polling_state, 0);
-	sys->rx.buff_sz = IPA_GENERIC_RX_BUFF_SZ(IPA_GENERIC_RX_BUFF_BASE_SZ);
+	sys->rx.buff_sz = IPA_GENERIC_RX_BUFF_SZ(IPA_RX_BUFFER_SIZE);
 	sys->rx.pool_sz = IPA_GENERIC_RX_POOL_SZ;
 
 	if (client == IPA_CLIENT_APPS_LAN_CONS) {
