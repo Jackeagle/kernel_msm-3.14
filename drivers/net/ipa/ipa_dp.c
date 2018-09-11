@@ -1472,9 +1472,6 @@ static int ipa_assign_policy(enum ipa_client_type client,
 	sys->rx.pool_sz = IPA_GENERIC_RX_POOL_SZ;
 
 	ep_cfg_aggr = &in->ipa_ep_cfg.aggr;
-	ep_cfg_aggr->aggr_en = IPA_ENABLE_AGGR;
-	ep_cfg_aggr->aggr = IPA_GENERIC;
-	ep_cfg_aggr->aggr_time_limit = IPA_GENERIC_AGGR_TIME_LIMIT;
 
 	if (client == IPA_CLIENT_APPS_LAN_CONS) {
 		sys->rx.pyld_hdlr = ipa_lan_rx_pyld_hdlr;
@@ -1785,6 +1782,14 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 		ipa_ep_prod_status(&ep->status, true, IPA_CLIENT_Q6_WAN_CONS);
 
 	ipa_client_add();
+
+	if (ipa_consumer(ep->client)) {
+		struct ipa_ep_cfg_aggr *ep_cfg_aggr = &sys_in->ipa_ep_cfg.aggr;
+
+		ep_cfg_aggr->aggr_en = IPA_ENABLE_AGGR;
+		ep_cfg_aggr->aggr = IPA_GENERIC;
+		ep_cfg_aggr->aggr_time_limit = IPA_GENERIC_AGGR_TIME_LIMIT;
+	}
 
 	if (ipa_assign_policy(ep->client, sys_in, ep->sys)) {
 		ipa_err("failed to sys ctx for client %d\n", ep->client);
