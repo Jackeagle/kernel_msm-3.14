@@ -1453,7 +1453,7 @@ static int ipa_assign_policy(enum ipa_client_type client,
 			     struct ipa_sys_connect_params *in,
 			     struct ipa_sys_context *sys)
 {
-	struct ipa_ep_cfg_aggr *ep_cfg_aggr;
+	struct ipa_ep_cfg_aggr *ep_cfg_aggr = &in->ipa_ep_cfg.aggr;
 
 	if (ipa_producer(client))
 		return 0;
@@ -1471,15 +1471,12 @@ static int ipa_assign_policy(enum ipa_client_type client,
 	sys->rx.buff_sz = IPA_GENERIC_RX_BUFF_SZ(IPA_GENERIC_RX_BUFF_BASE_SZ);
 	sys->rx.pool_sz = IPA_GENERIC_RX_POOL_SZ;
 
-	ep_cfg_aggr = &in->ipa_ep_cfg.aggr;
-
 	if (client == IPA_CLIENT_APPS_LAN_CONS) {
 		sys->rx.pyld_hdlr = ipa_lan_rx_pyld_hdlr;
-		ep_cfg_aggr->aggr_byte_limit = IPA_GENERIC_AGGR_BYTE_LIMIT;
-		ep_cfg_aggr->aggr_pkt_limit = IPA_GENERIC_AGGR_PKT_LIMIT;
 
 		return 0;
 	}
+
 
 	/* client == IPA_CLIENT_APPS_WAN_CONS */
 	sys->rx.pyld_hdlr = ipa_wan_rx_pyld_hdlr;
@@ -1789,6 +1786,12 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 		ep_cfg_aggr->aggr_en = IPA_ENABLE_AGGR;
 		ep_cfg_aggr->aggr = IPA_GENERIC;
 		ep_cfg_aggr->aggr_time_limit = IPA_GENERIC_AGGR_TIME_LIMIT;
+		if (ep->client == IPA_CLIENT_APPS_LAN_CONS) {
+			ep_cfg_aggr->aggr_byte_limit =
+					IPA_GENERIC_AGGR_BYTE_LIMIT;
+			ep_cfg_aggr->aggr_pkt_limit =
+					IPA_GENERIC_AGGR_PKT_LIMIT;
+		}
 	}
 
 	if (ipa_assign_policy(ep->client, sys_in, ep->sys)) {
