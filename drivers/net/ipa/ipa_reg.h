@@ -425,6 +425,10 @@ void ipa_reg_endp_init_hdr_cons(struct ipa_reg_endp_init_hdr *init_hdr,
 void ipa_reg_endp_init_hdr_prod(struct ipa_reg_endp_init_hdr *init_hdr,
 				u32 header_size, u32 metadata_offset,
 				u32 length_offset);
+void ipa_reg_endp_init_hdr_ext_cons(struct ipa_reg_endp_init_hdr_ext *hdr_ext,
+				    u32 pad_align, bool pad_included);
+void ipa_reg_endp_init_hdr_ext_prod(struct ipa_reg_endp_init_hdr_ext *hdr_ext,
+				    u32 pad_align);
 
 /* Get the offset of an n-parameterized register */
 u32 ipa_reg_n_offset(enum ipa_reg reg, u32 n);

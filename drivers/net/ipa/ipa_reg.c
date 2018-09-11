@@ -123,6 +123,33 @@ ipa_reg_construct_endp_init_hdr_n(enum ipa_reg reg, const void *fields)
 }
 
 /* IPA_ENDP_INIT_HDR_EXT_N register */
+
+void ipa_reg_endp_init_hdr_ext_common(struct ipa_reg_endp_init_hdr_ext *hdr_ext)
+{
+	hdr_ext->hdr_endianness = 1;			/* big endian */
+	hdr_ext->hdr_total_len_or_pad_valid = 1;
+	hdr_ext->hdr_total_len_or_pad = 0;		/* pad */
+	hdr_ext->hdr_total_len_or_pad_offset = 0;	/* XXX description? */
+}
+
+void ipa_reg_endp_init_hdr_ext_cons(struct ipa_reg_endp_init_hdr_ext *hdr_ext,
+				    u32 pad_align, bool pad_included)
+{
+	hdr_ext->hdr_payload_len_inc_padding = pad_included ? 1 : 0;
+	hdr_ext->hdr_pad_to_alignment = pad_align;
+
+	ipa_reg_endp_init_hdr_ext_common(hdr_ext);
+}
+
+void ipa_reg_endp_init_hdr_ext_prod(struct ipa_reg_endp_init_hdr_ext *hdr_ext,
+				    u32 pad_align)
+{
+	hdr_ext->hdr_payload_len_inc_padding = 0;
+	hdr_ext->hdr_pad_to_alignment = pad_align;	/* XXX ignored */
+
+	ipa_reg_endp_init_hdr_ext_common(hdr_ext);
+}
+
 #define HDR_ENDIANNESS_FMASK			0x00000001
 #define HDR_TOTAL_LEN_OR_PAD_VALID_FMASK	0x00000002
 #define HDR_TOTAL_LEN_OR_PAD_FMASK		0x00000004
