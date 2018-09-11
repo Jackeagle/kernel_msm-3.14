@@ -35,7 +35,7 @@ struct ipa_reg_obj {
 #define ROUTE_FRAG_DEF_PIPE_FMASK	0x003e0000
 #define ROUTE_DEF_RETAIN_HDR_FMASK	0x01000000
 
-static u32 ipareg_construct_route(enum ipa_reg reg, const void *fields)
+static u32 ipa_reg_construct_route(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_reg_route *route = fields;
 	u32 val;
@@ -63,7 +63,7 @@ static u32 ipareg_construct_route(enum ipa_reg reg, const void *fields)
 #define HDR_METADATA_REG_VALID_FMASK	0x10000000
 
 static u32
-ipareg_construct_endp_init_hdr_n(enum ipa_reg reg, const void *fields)
+ipa_reg_construct_endp_init_hdr_n(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_reg_endp_init_hdr *ep_hdr = fields;
 	u32 val;
@@ -95,7 +95,7 @@ ipareg_construct_endp_init_hdr_n(enum ipa_reg reg, const void *fields)
 #define HDR_PAD_TO_ALIGNMENT_FMASK		0x00003c00
 
 static u32
-ipareg_construct_endp_init_hdr_ext_n(enum ipa_reg reg, const void *fields)
+ipa_reg_construct_endp_init_hdr_ext_n(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_reg_endp_init_hdr_ext *ep_hdr_ext = fields;
 	u32 val;
@@ -126,7 +126,7 @@ ipareg_construct_endp_init_hdr_ext_n(enum ipa_reg reg, const void *fields)
 #define AGGR_HARD_BYTE_LIMIT_ENABLE_FMASK	0x01000000
 
 static u32
-ipareg_construct_endp_init_aggr_n(enum ipa_reg reg, const void *fields)
+ipa_reg_construct_endp_init_aggr_n(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_reg_endp_init_aggr *init_aggr = fields;
 	u32 val;
@@ -146,7 +146,7 @@ ipareg_construct_endp_init_aggr_n(enum ipa_reg reg, const void *fields)
 }
 
 static void
-ipareg_parse_endp_init_aggr_n(enum ipa_reg reg, void *fields, u32 val)
+ipa_reg_parse_endp_init_aggr_n(enum ipa_reg reg, void *fields, u32 val)
 {
 	struct ipa_reg_endp_init_aggr *ep_aggr = fields;
 
@@ -167,7 +167,7 @@ ipareg_parse_endp_init_aggr_n(enum ipa_reg reg, void *fields, u32 val)
 #define PIPE_BITMAP_FMASK	0x000fffff
 
 static u32
-ipareg_construct_aggr_force_close(enum ipa_reg reg, const void *fields)
+ipa_reg_construct_aggr_force_close(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_reg_aggr_force_close *force_close = fields;
 
@@ -183,7 +183,7 @@ ipareg_construct_aggr_force_close(enum ipa_reg reg, const void *fields)
 #define HDR_FTCH_DISABLE_FMASK		0x40000000
 
 static u32
-ipareg_construct_endp_init_mode_n(enum ipa_reg reg, const void *fields)
+ipa_reg_construct_endp_init_mode_n(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_reg_endp_init_mode *init_mode = fields;
 	u32 val;
@@ -204,7 +204,7 @@ ipareg_construct_endp_init_mode_n(enum ipa_reg reg, const void *fields)
 #define ENDP_DELAY_FMASK	0x00000002
 
 static u32
-ipareg_construct_endp_init_ctrl_n(enum ipa_reg reg, const void *fields)
+ipa_reg_construct_endp_init_ctrl_n(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_reg_endp_init_ctrl *ep_ctrl = fields;
 	u32 val;
@@ -216,7 +216,7 @@ ipareg_construct_endp_init_ctrl_n(enum ipa_reg reg, const void *fields)
 }
 
 static void
-ipareg_parse_endp_init_ctrl_n(enum ipa_reg reg, void *fields, u32 val)
+ipa_reg_parse_endp_init_ctrl_n(enum ipa_reg reg, void *fields, u32 val)
 {
 	struct ipa_reg_endp_init_ctrl *ep_ctrl = fields;
 
@@ -233,7 +233,7 @@ ipareg_parse_endp_init_ctrl_n(enum ipa_reg reg, void *fields, u32 val)
 #define MAX_PACKET_LEN_FMASK		0xffff0000
 
 static u32
-ipareg_construct_endp_init_deaggr_n(enum ipa_reg reg, const void *fields)
+ipa_reg_construct_endp_init_deaggr_n(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_reg_endp_init_deaggr *deaggr = fields;
 	u32 val;
@@ -255,7 +255,7 @@ ipareg_construct_endp_init_deaggr_n(enum ipa_reg reg, const void *fields)
 #define DPS_REP_SEQ_TYPE_FMASK	0x0000f000
 
 static u32
-ipareg_construct_endp_init_seq_n(enum ipa_reg reg, const void *fields)
+ipa_reg_construct_endp_init_seq_n(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_reg_endp_init_seq *ep_seq = fields;
 	u32 val;
@@ -275,7 +275,7 @@ ipareg_construct_endp_init_seq_n(enum ipa_reg reg, const void *fields)
 #define CS_GEN_QMB_MASTER_SEL_FMASK	0x00000100
 
 static u32
-ipareg_construct_endp_init_cfg_n(enum ipa_reg reg, const void *fields)
+ipa_reg_construct_endp_init_cfg_n(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_reg_endp_init_cfg *cfg = fields;
 	u32 val;
@@ -293,7 +293,7 @@ ipareg_construct_endp_init_cfg_n(enum ipa_reg reg, const void *fields)
 /* IPA_ENDP_INIT_HDR_METADATA_MASK_N register */
 #define METADATA_MASK_FMASK	0xffffffff
 
-static u32 ipareg_construct_endp_init_hdr_metadata_mask_n(enum ipa_reg reg,
+static u32 ipa_reg_construct_endp_init_hdr_metadata_mask_n(enum ipa_reg reg,
 							  const void *fields)
 {
 	const struct ipa_reg_endp_init_hdr_metadata_mask *metadata_mask;
@@ -308,7 +308,7 @@ static u32 ipareg_construct_endp_init_hdr_metadata_mask_n(enum ipa_reg reg,
 #define SHARED_MEM_BADDR_FMASK	0xffff0000
 
 static void
-ipareg_parse_shared_mem_size(enum ipa_reg reg, void *fields, u32 val)
+ipa_reg_parse_shared_mem_size(enum ipa_reg reg, void *fields, u32 val)
 {
 	struct ipa_reg_shared_mem_size *smem_sz = fields;
 
@@ -324,7 +324,7 @@ ipareg_parse_shared_mem_size(enum ipa_reg reg, void *fields, u32 val)
 #define STATUS_LOCATION_FMASK		0x00000100
 #define STATUS_PKT_SUPPRESS_FMASK	0x00000200
 
-static u32 ipareg_construct_endp_status_n(enum ipa_reg reg, const void *fields)
+static u32 ipa_reg_construct_endp_status_n(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_reg_endp_status *ep_status = fields;
 	u32 val;
@@ -356,7 +356,7 @@ static u32 ipareg_construct_endp_status_n(enum ipa_reg reg, const void *fields)
 #define ROUTER_HASH_MSK_METADATA_FMASK	0x00400000
 #define ROUTER_HASH_UNDEFINED2_FMASK	0xff800000
 
-static u32 ipareg_construct_hash_cfg_n(enum ipa_reg reg, const void *fields)
+static u32 ipa_reg_construct_hash_cfg_n(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_ep_filter_router_hsh_cfg *hsh_cfg = fields;
 	u32 val;
@@ -382,7 +382,7 @@ static u32 ipareg_construct_hash_cfg_n(enum ipa_reg reg, const void *fields)
 	return val;
 }
 
-static void ipareg_parse_hash_cfg_n(enum ipa_reg reg, void *fields, u32 val)
+static void ipa_reg_parse_hash_cfg_n(enum ipa_reg reg, void *fields, u32 val)
 {
 	struct ipa_ep_filter_router_hsh_cfg *hsh_cfg = fields;
 
@@ -413,7 +413,7 @@ static void ipareg_parse_hash_cfg_n(enum ipa_reg reg, void *fields, u32 val)
 #define Y_MIN_LIM_FMASK	0x003f0000
 #define Y_MAX_LIM_FMASK	0x3f000000
 
-static u32 ipareg_construct_rsrg_grp_xy(enum ipa_reg reg, const void *fields)
+static u32 ipa_reg_construct_rsrg_grp_xy(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_reg_rsrc_grp_cfg *grp = fields;
 	u32 val;
@@ -435,7 +435,8 @@ static u32 ipareg_construct_rsrg_grp_xy(enum ipa_reg reg, const void *fields)
 #define GEN_QMB_0_MAX_WRITES_FMASK	0x0000000f
 #define GEN_QMB_1_MAX_WRITES_FMASK	0x000000f0
 
-static u32 ipareg_construct_qsb_max_writes(enum ipa_reg reg, const void *fields)
+static u32
+ipa_reg_construct_qsb_max_writes(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_reg_qsb_max_writes *max_writes = fields;
 	u32 val;
@@ -452,7 +453,7 @@ static u32 ipareg_construct_qsb_max_writes(enum ipa_reg reg, const void *fields)
 #define GEN_QMB_0_MAX_READS_FMASK	0x0000000f
 #define GEN_QMB_1_MAX_READS_FMASK	0x000000f0
 
-static u32 ipareg_construct_qsb_max_reads(enum ipa_reg reg, const void *fields)
+static u32 ipa_reg_construct_qsb_max_reads(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_reg_qsb_max_reads *max_reads = fields;
 	u32 val;
@@ -468,7 +469,7 @@ static u32 ipareg_construct_qsb_max_reads(enum ipa_reg reg, const void *fields)
 #define CONST_NON_IDLE_ENABLE_FMASK		0x00010000
 
 static u32
-ipareg_construct_idle_indication_cfg(enum ipa_reg reg, const void *fields)
+ipa_reg_construct_idle_indication_cfg(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_reg_idle_indication_cfg *idle_indication_cfg;
 	u32 val;
@@ -495,8 +496,8 @@ ipareg_construct_idle_indication_cfg(enum ipa_reg reg, const void *fields)
  *   (Currently some debug code reads some registers directly, without
  *   parsing.)
  */
-#define cfunc(f)	ipareg_construct_ ## f
-#define pfunc(f)	ipareg_parse_ ## f
+#define cfunc(f)	ipa_reg_construct_ ## f
+#define pfunc(f)	ipa_reg_parse_ ## f
 #define reg_obj_common(id, cf, pf, o, n)	\
 	[id] = {				\
 		.construct = cf,		\
