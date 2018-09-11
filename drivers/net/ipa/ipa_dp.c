@@ -1658,6 +1658,15 @@ void ipa_ep_cons_metadata_mask(struct ipa_ep_cfg_metadata_mask *mask,
 	mask->metadata_mask = metadata_mask;
 }
 
+void ipa_ep_cons_status(struct ipa_reg_endp_status *status, bool enable)
+{
+	status->status_en = enable ? 1 : 0;
+
+	status->status_endp = 0;	/* ignored */
+	status->status_location = 0;	/* ignored */
+	status->status_pkt_suppress = 0;	/* XXX ignored/unused? */
+}
+
 void ipa_ep_prod_header(struct ipa_ep_cfg_hdr *hdr, u32 header_size,
 			u32 metadata_offset, u32 length_offset)
 {
