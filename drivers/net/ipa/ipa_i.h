@@ -450,6 +450,26 @@ void ipa_cfg_ep(u32 clnt_hdl, enum ipa_client_type dst,
 int ipa_tx_dp(enum ipa_client_type dst, struct sk_buff *skb);
 
 /* System pipes */
+void ipa_ep_cons_header(struct ipa_ep_cfg_hdr *hdr, u32 header_size,
+			u32 metadata_offset, u32 length_offset);
+void ipa_ep_cons_header_ext(struct ipa_ep_cfg_hdr_ext *hdr_ext, u32
+			    pad_align, bool pad_included);
+void ipa_ep_cons_aggregation(struct ipa_ep_cfg_aggr *aggr, u32 size,
+			     u32 count);
+void ipa_ep_cons_cs_offload_enable(struct ipa_ep_cfg_cfg *cfg);
+void ipa_ep_cons_metadata_mask(struct ipa_ep_cfg_metadata_mask *mask,
+			       u32 metadata_mask);
+void ipa_ep_prod_header(struct ipa_ep_cfg_hdr *hdr, u32 header_size,
+			u32 metadata_offset, u32 length_offset);
+void ipa_ep_prod_header_pad(struct ipa_ep_cfg_hdr_ext *hdr_ext, u32 pad_align);
+void ipa_ep_prod_header_mode(struct ipa_ep_cfg_mode *mode,
+			     enum ipa_mode_type type);
+void ipa_ep_prod_aggregation(struct ipa_ep_cfg_aggr *aggr,
+			     enum ipa_aggr_en_type aggr_en,
+			     enum ipa_aggr_type aggr_type);
+void ipa_ep_prod_cs_offload_enable(struct ipa_ep_cfg_cfg *cfg,
+				   u32 metadata_offset);
+
 int ipa_setup_sys_pipe(enum ipa_client_type client, enum ipa_client_type dst,
 		       u32 chan_count, struct ipa_sys_connect_params *sys_in);
 
