@@ -476,6 +476,8 @@ void ipa_ep_prod_status(struct ipa_reg_endp_status *status, bool enable,
 int ipa_ep_alloc(enum ipa_client_type client);
 void ipa_ep_free(u32 ipa_ep_idx);
 
+void ipa_no_intr_init(u32 prod_ep_idx);
+
 int ipa_setup_sys_pipe(u32 client_hdl, enum ipa_client_type dst,
 		       u32 chan_count, struct ipa_sys_connect_params *sys_in);
 

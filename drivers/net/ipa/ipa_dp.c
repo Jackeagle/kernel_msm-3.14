@@ -409,8 +409,11 @@ static void ipa_nop_timer_schedule(struct ipa_sys_context *sys)
  * When the NOP completes it signals all preceding transfers have
  * completed also.
  */
-static void ipa_no_intr_init(struct ipa_sys_context *sys)
+void ipa_no_intr_init(u32 prod_ep_idx)
 {
+	struct ipa_ep_context *ep = &ipa_ctx->ep[prod_ep_idx];
+	struct ipa_sys_context *sys = ep->sys;
+
 	INIT_WORK(&sys->tx.nop_work, ipa_send_nop_work);
 	atomic_set(&sys->tx.nop_pending, 0);
 	hrtimer_init(&sys->tx.nop_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
@@ -1776,7 +1779,7 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 		ipa_ep_prod_status(&ep->status, true, IPA_CLIENT_Q6_WAN_CONS);
 
 		/* For the WAN producer, use a deferred interrupting no-op */
-		ipa_no_intr_init(ep->sys);
+		ipa_no_intr_init(ipa_ep_idx);
 	}
 
 	ipa_client_add();
