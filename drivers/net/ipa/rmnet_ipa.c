@@ -352,6 +352,9 @@ static int handle_egress_format(struct net_device *dev,
 	wan_cfg->notify = apps_ipa_tx_complete_notify;
 	wan_cfg->priv = dev;
 
+	/* Use a deferred interrupting no-op to reduce completion interrupts */
+	ipa_no_intr_init(prod_hdl);
+
 	ret = ipa_setup_sys_pipe(prod_hdl, dst, chan_count, wan_cfg);
 	if (ret < 0) {
 		ipa_ep_free(prod_hdl);

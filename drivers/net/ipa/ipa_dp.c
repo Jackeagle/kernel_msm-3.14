@@ -1772,15 +1772,11 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 	int ret;
 
-	if (ep->client == IPA_CLIENT_APPS_WAN_PROD) {
-		/* enable source notification status for exception packets
-		 * (i.e. QMAP commands) to be routed to modem.
-		 */
+	/* Enable source notification status for exception packets
+	 * (i.e. QMAP commands) to be routed to modem.
+	 */
+	if (ep->client == IPA_CLIENT_APPS_WAN_PROD)
 		ipa_ep_prod_status(&ep->status, true, IPA_CLIENT_Q6_WAN_CONS);
-
-		/* For the WAN producer, use a deferred interrupting no-op */
-		ipa_no_intr_init(ipa_ep_idx);
-	}
 
 	ipa_client_add();
 
