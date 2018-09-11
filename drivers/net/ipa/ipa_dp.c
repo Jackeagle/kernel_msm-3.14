@@ -1455,13 +1455,10 @@ static int ipa_assign_policy(enum ipa_client_type client,
 {
 	struct ipa_ep_cfg_aggr *ep_cfg_aggr;
 
-	if (client == IPA_CLIENT_APPS_CMD_PROD)
+	if (ipa_producer(client))
 		return 0;
 
-	if (client == IPA_CLIENT_APPS_WAN_PROD)
-		return 0;
-
-	/* Client is a consumer (APPS_LAN_CONS or APPS_WAN_CONS) */
+	/* Client APPS_LAN_CONS or APPS_WAN_CONS */
 	sys->ep->status.status_en = 1;
 
 	INIT_WORK(&sys->rx.work, ipa_wq_handle_rx);
