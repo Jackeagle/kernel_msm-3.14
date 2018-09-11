@@ -13,14 +13,14 @@
 /* I/O remapped base address of IPA register space */
 static void __iomem *ipa_reg_virt;
 
-/* struct ipa_reg_obj - access information for an abstracted hardware register
+/* struct ipa_reg_desc - descriptor for an abstracted hardware register
  *
  * @construct - fn to construct the register value from its field structure
  * @parse - function to parse register field values into its field structure
  * @offset - register offset relative to base address
  * @n_ofst - size multiplier for "N-parameterized" registers
  */
-struct ipa_reg_obj {
+struct ipa_reg_desc {
 	u32 (*construct)(enum ipa_reg reg, const void *fields);
 	void (*parse)(enum ipa_reg reg, void *fields, u32 val);
 	u32 offset;
@@ -515,7 +515,7 @@ ipa_reg_construct_idle_indication_cfg(enum ipa_reg reg, const void *fields)
 	reg_obj_common(id, NULL, NULL, o, n)
 
 /* IPAv3.5.1 */
-static const struct ipa_reg_obj ipa_regs[] = {
+static const struct ipa_reg_desc ipa_reg[] = {
 	reg_obj_cfunc(IPA_ROUTE, route,			0x00000048,	0x0000),
 	reg_obj_nofunc(IPA_IRQ_STTS_EE_N,		0x00003008,	0x1000),
 	reg_obj_nofunc(IPA_IRQ_EN_EE_N,			0x0000300c,	0x1000),
@@ -593,7 +593,7 @@ void ipa_reg_exit(void)
 /* Get the offset of an "n parameterized" register */
 u32 ipa_reg_n_offset(enum ipa_reg reg, u32 n)
 {
-	return ipa_regs[reg].offset + n * ipa_regs[reg].n_ofst;
+	return ipa_reg[reg].offset + n * ipa_reg[reg].n_ofst;
 }
 
 /* ipa_read_reg_n() - Get an "n parameterized" register's value */
@@ -613,7 +613,7 @@ void ipa_read_reg_n_fields(enum ipa_reg reg, u32 n, void *fields)
 {
 	u32 val = ipa_read_reg_n(reg, n);
 
-	ipa_regs[reg].parse(reg, fields, val);
+	ipa_reg[reg].parse(reg, fields, val);
 }
 
 /* ipa_write_reg_n_fields() - Construct a vlaue to write to an "n
@@ -621,7 +621,7 @@ void ipa_read_reg_n_fields(enum ipa_reg reg, u32 n, void *fields)
  */
 void ipa_write_reg_n_fields(enum ipa_reg reg, u32 n, const void *fields)
 {
-	u32 val = ipa_regs[reg].construct(reg, fields);
+	u32 val = ipa_reg[reg].construct(reg, fields);
 
 	ipa_write_reg_n(reg, n, val);
 }
