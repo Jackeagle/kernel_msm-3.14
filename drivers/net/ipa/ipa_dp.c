@@ -1459,7 +1459,7 @@ static int ipa_assign_policy(enum ipa_client_type client,
 		return 0;
 
 	/* Client APPS_LAN_CONS or APPS_WAN_CONS */
-	sys->ep->status.status_en = 1;
+	ipa_ep_cons_status(&sys->ep->status, true);
 
 	INIT_WORK(&sys->rx.work, ipa_wq_handle_rx);
 	INIT_DELAYED_WORK(&sys->rx.switch_to_intr_work,
@@ -1496,7 +1496,7 @@ static int ipa_assign_policy(enum ipa_client_type client,
 		adjusted = ipa_adjust_ra_buff_base_sz(limit);
 
 		/* disable ipa_status */
-		sys->ep->status.status_en = 0;
+		ipa_ep_cons_status(&sys->ep->status, false);
 
 		ipa_err("get close-by %u\n", adjusted);
 		adjusted = IPA_GENERIC_RX_BUFF_SZ(adjusted);
