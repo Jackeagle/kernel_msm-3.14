@@ -1454,6 +1454,8 @@ static int ipa_assign_policy(enum ipa_client_type client,
 			     struct ipa_sys_context *sys)
 {
 	struct ipa_ep_cfg_aggr *ep_cfg_aggr = &in->ipa_ep_cfg.aggr;
+	u32 limit;
+	u32 adjusted;
 
 	if (ipa_producer(client))
 		return 0;
@@ -1479,27 +1481,25 @@ static int ipa_assign_policy(enum ipa_client_type client,
 	/* client == IPA_CLIENT_APPS_WAN_CONS */
 	sys->rx.pyld_hdlr = ipa_wan_rx_pyld_hdlr;
 
-	if (ipa_ctx->ipa_client_apps_wan_cons_agg_gro) {
-		u32 limit;
-		u32 adjusted;
+	if (!ipa_ctx->ipa_client_apps_wan_cons_agg_gro)
+		return 0;
 
-		limit = ep_cfg_aggr->aggr_byte_limit;
-		adjusted = ipa_adjust_ra_buff_base_sz(limit);
+	limit = ep_cfg_aggr->aggr_byte_limit;
+	adjusted = ipa_adjust_ra_buff_base_sz(limit);
 
-		/* disable ipa_status */
-		ipa_ep_cons_status(&sys->ep->status, false);
+	/* disable ipa_status */
+	ipa_ep_cons_status(&sys->ep->status, false);
 
-		ipa_err("get close-by %u\n", adjusted);
-		adjusted = IPA_GENERIC_RX_BUFF_SZ(adjusted);
-		ipa_err("set rx.buff_sz %u\n", adjusted);
-		sys->rx.buff_sz = adjusted;
+	ipa_err("get close-by %u\n", adjusted);
+	adjusted = IPA_GENERIC_RX_BUFF_SZ(adjusted);
+	ipa_err("set rx.buff_sz %u\n", adjusted);
+	sys->rx.buff_sz = adjusted;
 
-		if (sys->rx.buff_sz < limit)
-			limit = sys->rx.buff_sz;
-		limit = IPA_ADJUST_AGGR_BYTE_LIMIT(limit);
-		ipa_err("set aggr_limit %u\n", limit);
-		ep_cfg_aggr->aggr_byte_limit = limit;
-	}
+	if (sys->rx.buff_sz < limit)
+		limit = sys->rx.buff_sz;
+	limit = IPA_ADJUST_AGGR_BYTE_LIMIT(limit);
+	ipa_err("set aggr_limit %u\n", limit);
+	ep_cfg_aggr->aggr_byte_limit = limit;
 
 	return 0;
 }
