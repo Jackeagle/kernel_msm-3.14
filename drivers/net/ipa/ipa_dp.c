@@ -1460,9 +1460,6 @@ static int ipa_assign_policy(enum ipa_client_type client,
 	if (ipa_producer(client))
 		return 0;
 
-	/* Client APPS_LAN_CONS or APPS_WAN_CONS */
-	ipa_ep_cons_status(&sys->ep->status, true);
-
 	INIT_WORK(&sys->rx.work, ipa_wq_handle_rx);
 	INIT_DELAYED_WORK(&sys->rx.switch_to_intr_work,
 			  ipa_switch_to_intr_rx_work_func);
@@ -1486,9 +1483,6 @@ static int ipa_assign_policy(enum ipa_client_type client,
 
 	limit = ep_cfg_aggr->aggr_byte_limit;
 	adjusted = ipa_adjust_ra_buff_base_sz(limit);
-
-	/* disable ipa_status */
-	ipa_ep_cons_status(&sys->ep->status, false);
 
 	ipa_err("get close-by %u\n", adjusted);
 	adjusted = IPA_GENERIC_RX_BUFF_SZ(adjusted);
@@ -1777,6 +1771,8 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 	if (ipa_consumer(ep->client)) {
 		struct ipa_ep_cfg_aggr *ep_cfg_aggr = &sys_in->ipa_ep_cfg.aggr;
 
+		ipa_ep_cons_status(&ep->status, true);
+
 		ep_cfg_aggr->aggr_en = IPA_ENABLE_AGGR;
 		ep_cfg_aggr->aggr = IPA_GENERIC;
 		ep_cfg_aggr->aggr_time_limit = IPA_GENERIC_AGGR_TIME_LIMIT;
@@ -1788,7 +1784,10 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 			ep_cfg_aggr->aggr_sw_eof_active = false;
 		} else {
 			ep_cfg_aggr->aggr_sw_eof_active = true;
-			if (!ipa_ctx->ipa_client_apps_wan_cons_agg_gro) {
+
+			if (ipa_ctx->ipa_client_apps_wan_cons_agg_gro) {
+				ipa_ep_cons_status(&ep->status, false);
+			} else {
 				ep_cfg_aggr->aggr_byte_limit =
 						IPA_GENERIC_AGGR_BYTE_LIMIT;
 				ep_cfg_aggr->aggr_pkt_limit =
