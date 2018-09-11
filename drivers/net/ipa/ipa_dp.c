@@ -1449,13 +1449,29 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u32 size)
 	ipa_replenish_rx_cache(sys);
 }
 
+static u32 ipa_aggr_byte_limit_adjust(struct ipa_sys_context *sys, u32 limit)
+{
+	u32 adjusted;
+
+	adjusted = ipa_adjust_ra_buff_base_sz(limit);
+	adjusted = IPA_GENERIC_RX_BUFF_SZ(adjusted);
+	sys->rx.buff_sz = adjusted;
+	ipa_err("set rx.buff_sz %u\n", adjusted);
+
+	if (sys->rx.buff_sz < limit)
+		limit = sys->rx.buff_sz;
+	limit = IPA_ADJUST_AGGR_BYTE_LIMIT(limit);
+	ipa_err("set aggr_limit %u\n", limit);
+
+	return limit;
+}
+
 static int ipa_assign_policy(enum ipa_client_type client,
 			     struct ipa_sys_connect_params *in,
 			     struct ipa_sys_context *sys)
 {
 	struct ipa_ep_cfg_aggr *ep_cfg_aggr = &in->ipa_ep_cfg.aggr;
 	u32 limit;
-	u32 adjusted;
 
 	if (ipa_producer(client))
 		return 0;
@@ -1482,18 +1498,7 @@ static int ipa_assign_policy(enum ipa_client_type client,
 		return 0;
 
 	limit = ep_cfg_aggr->aggr_byte_limit;
-	adjusted = ipa_adjust_ra_buff_base_sz(limit);
-
-	ipa_err("get close-by %u\n", adjusted);
-	adjusted = IPA_GENERIC_RX_BUFF_SZ(adjusted);
-	ipa_err("set rx.buff_sz %u\n", adjusted);
-	sys->rx.buff_sz = adjusted;
-
-	if (sys->rx.buff_sz < limit)
-		limit = sys->rx.buff_sz;
-	limit = IPA_ADJUST_AGGR_BYTE_LIMIT(limit);
-	ipa_err("set aggr_limit %u\n", limit);
-	ep_cfg_aggr->aggr_byte_limit = limit;
+	ep_cfg_aggr->aggr_byte_limit = ipa_aggr_byte_limit_adjust(sys, limit);
 
 	return 0;
 }
