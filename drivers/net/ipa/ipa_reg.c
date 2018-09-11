@@ -52,6 +52,42 @@ static u32 ipa_reg_construct_route(enum ipa_reg reg, const void *fields)
 }
 
 /* IPA_ENDP_INIT_HDR_N register */
+
+static void
+ipa_reg_endp_init_hdr_common(struct ipa_reg_endp_init_hdr *init_hdr)
+{
+	init_hdr->hdr_additional_const_len = 0;	/* XXX description? */
+	init_hdr->hdr_a5_mux = 0;		/* XXX description? */
+	init_hdr->hdr_len_inc_deagg_hdr = 0;	/* XXX description? */
+	init_hdr->hdr_metadata_reg_valid = 0;	/* XXX description? */
+}
+
+void ipa_reg_endp_init_hdr_cons(struct ipa_reg_endp_init_hdr *init_hdr,
+				u32 header_size, u32 metadata_offset,
+				u32 length_offset)
+{
+	init_hdr->hdr_len = header_size;
+	init_hdr->hdr_ofst_metadata_valid = 1;
+	init_hdr->hdr_ofst_metadata = metadata_offset;	/* XXX ignored */
+	init_hdr->hdr_ofst_pkt_size_valid = 1;
+	init_hdr->hdr_ofst_pkt_size = length_offset;
+
+	ipa_reg_endp_init_hdr_common(init_hdr);
+}
+
+void ipa_reg_endp_init_hdr_prod(struct ipa_reg_endp_init_hdr *init_hdr,
+				u32 header_size, u32 metadata_offset,
+				u32 length_offset)
+{
+	init_hdr->hdr_len = header_size;
+	init_hdr->hdr_ofst_metadata_valid = 1;
+	init_hdr->hdr_ofst_metadata = metadata_offset;
+	init_hdr->hdr_ofst_pkt_size_valid = 1;
+	init_hdr->hdr_ofst_pkt_size = length_offset;	/* XXX ignored */
+
+	ipa_reg_endp_init_hdr_common(init_hdr);
+}
+
 #define HDR_LEN_FMASK			0x0000003f
 #define HDR_OFST_METADATA_VALID_FMASK	0x00000040
 #define HDR_OFST_METADATA_FMASK		0x00001f80

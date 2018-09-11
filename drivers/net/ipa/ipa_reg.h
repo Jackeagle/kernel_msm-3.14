@@ -419,6 +419,13 @@ struct ipa_reg_idle_indication_cfg {
 void ipa_reg_init(void __iomem *base);
 void ipa_reg_exit(void);
 
+void ipa_reg_endp_init_hdr_cons(struct ipa_reg_endp_init_hdr *init_hdr,
+				u32 header_size, u32 metadata_offset,
+				u32 length_offset);
+void ipa_reg_endp_init_hdr_prod(struct ipa_reg_endp_init_hdr *init_hdr,
+				u32 header_size, u32 metadata_offset,
+				u32 length_offset);
+
 /* Get the offset of an n-parameterized register */
 u32 ipa_reg_n_offset(enum ipa_reg reg, u32 n);
 
