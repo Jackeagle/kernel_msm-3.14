@@ -1769,8 +1769,6 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 	int ret;
 
-	ipa_client_add();
-
 	if (ep->client == IPA_CLIENT_APPS_WAN_PROD) {
 		/* enable source notification status for exception packets
 		 * (i.e. QMAP commands) to be routed to modem.
@@ -1780,6 +1778,8 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 		/* For the WAN producer, use a deferred interrupting no-op */
 		ipa_no_intr_init(ep->sys);
 	}
+
+	ipa_client_add();
 
 	if (ipa_assign_policy(ep->client, sys_in, ep->sys)) {
 		ipa_err("failed to sys ctx for client %d\n", ep->client);
