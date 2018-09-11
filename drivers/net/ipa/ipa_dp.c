@@ -1455,18 +1455,8 @@ static int ipa_assign_policy(enum ipa_client_type client,
 	if (client == IPA_CLIENT_APPS_CMD_PROD)
 		return 0;
 
-	if (client == IPA_CLIENT_APPS_WAN_PROD) {
-		/* enable source notification status for exception packets
-		 * (i.e. QMAP commands) to be routed to modem.
-		 */
-		ipa_ep_prod_status(&sys->ep->status, true,
-				   IPA_CLIENT_Q6_WAN_CONS);
-
-		/* For the WAN producer, use a deferred interrupting no-op */
-		ipa_no_intr_init(sys);
-
+	if (client == IPA_CLIENT_APPS_WAN_PROD)
 		return 0;
-	}
 
 	/* Client is a consumer (APPS_LAN_CONS or APPS_WAN_CONS) */
 	sys->ep->status.status_en = 1;
@@ -1780,6 +1770,16 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 	int ret;
 
 	ipa_client_add();
+
+	if (ep->client == IPA_CLIENT_APPS_WAN_PROD) {
+		/* enable source notification status for exception packets
+		 * (i.e. QMAP commands) to be routed to modem.
+		 */
+		ipa_ep_prod_status(&ep->status, true, IPA_CLIENT_Q6_WAN_CONS);
+
+		/* For the WAN producer, use a deferred interrupting no-op */
+		ipa_no_intr_init(ep->sys);
+	}
 
 	if (ipa_assign_policy(ep->client, sys_in, ep->sys)) {
 		ipa_err("failed to sys ctx for client %d\n", ep->client);
