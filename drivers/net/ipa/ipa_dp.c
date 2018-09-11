@@ -1459,9 +1459,8 @@ static int ipa_assign_policy(enum ipa_client_type client,
 		/* enable source notification status for exception packets
 		 * (i.e. QMAP commands) to be routed to modem.
 		 */
-		sys->ep->status.status_en = 1;
-		sys->ep->status.status_endp =
-			ipa_get_ep_mapping(IPA_CLIENT_Q6_WAN_CONS);
+		ipa_ep_prod_status(&sys->ep->status, true,
+				   IPA_CLIENT_Q6_WAN_CONS);
 
 		/* For the WAN producer, use a deferred interrupting no-op */
 		ipa_no_intr_init(sys);
@@ -1712,6 +1711,15 @@ ipa_ep_prod_cs_offload_enable(struct ipa_ep_cfg_cfg *cfg, u32 metadata_offset)
 {
 	cfg->cs_offload_en = IPA_CS_OFFLOAD_UL;
 	cfg->cs_metadata_hdr_offset = metadata_offset;
+}
+
+void ipa_ep_prod_status(struct ipa_reg_endp_status *status, bool enable,
+			enum ipa_client_type client)
+{
+	status->status_en = enable ? 1 : 0;
+	status->status_endp = ipa_get_ep_mapping(client);
+	status->status_location = 0;
+	status->status_pkt_suppress = 0;
 }
 
 int ipa_ep_alloc(enum ipa_client_type client)
