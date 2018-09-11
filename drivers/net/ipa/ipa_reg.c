@@ -65,22 +65,22 @@ static u32 ipa_reg_construct_route(enum ipa_reg reg, const void *fields)
 static u32
 ipa_reg_construct_endp_init_hdr_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_reg_endp_init_hdr *ep_hdr = fields;
+	const struct ipa_reg_endp_init_hdr *init_hdr = fields;
 	u32 val;
 
-	val = field_gen(ep_hdr->hdr_len, HDR_LEN_FMASK);
-	val |= field_gen(ep_hdr->hdr_ofst_metadata_valid,
+	val = field_gen(init_hdr->hdr_len, HDR_LEN_FMASK);
+	val |= field_gen(init_hdr->hdr_ofst_metadata_valid,
 			 HDR_OFST_METADATA_VALID_FMASK);
-	val |= field_gen(ep_hdr->hdr_ofst_metadata, HDR_OFST_METADATA_FMASK);
-	val |= field_gen(ep_hdr->hdr_additional_const_len,
+	val |= field_gen(init_hdr->hdr_ofst_metadata, HDR_OFST_METADATA_FMASK);
+	val |= field_gen(init_hdr->hdr_additional_const_len,
 			 HDR_ADDITIONAL_CONST_LEN_FMASK);
-	val |= field_gen(ep_hdr->hdr_ofst_pkt_size_valid,
+	val |= field_gen(init_hdr->hdr_ofst_pkt_size_valid,
 			 HDR_OFST_PKT_SIZE_VALID_FMASK);
-	val |= field_gen(ep_hdr->hdr_ofst_pkt_size, HDR_OFST_PKT_SIZE_FMASK);
-	val |= field_gen(ep_hdr->hdr_a5_mux, HDR_A5_MUX_FMASK);
-	val |= field_gen(ep_hdr->hdr_len_inc_deagg_hdr,
+	val |= field_gen(init_hdr->hdr_ofst_pkt_size, HDR_OFST_PKT_SIZE_FMASK);
+	val |= field_gen(init_hdr->hdr_a5_mux, HDR_A5_MUX_FMASK);
+	val |= field_gen(init_hdr->hdr_len_inc_deagg_hdr,
 			 HDR_LEN_INC_DEAGG_HDR_FMASK);
-	val |= field_gen(ep_hdr->hdr_metadata_reg_valid,
+	val |= field_gen(init_hdr->hdr_metadata_reg_valid,
 			 HDR_METADATA_REG_VALID_FMASK);
 
 	return val;
@@ -97,19 +97,19 @@ ipa_reg_construct_endp_init_hdr_n(enum ipa_reg reg, const void *fields)
 static u32
 ipa_reg_construct_endp_init_hdr_ext_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_reg_endp_init_hdr_ext *ep_hdr_ext = fields;
+	const struct ipa_reg_endp_init_hdr_ext *init_hdr_ext = fields;
 	u32 val;
 
 	/* 0 = little endian; 1 = big endian */
 	val = field_gen(1, HDR_ENDIANNESS_FMASK);
-	val |= field_gen(ep_hdr_ext->hdr_total_len_or_pad_valid,
+	val |= field_gen(init_hdr_ext->hdr_total_len_or_pad_valid,
 			 HDR_TOTAL_LEN_OR_PAD_VALID_FMASK);
-	val |= field_gen(ep_hdr_ext->hdr_total_len_or_pad,
+	val |= field_gen(init_hdr_ext->hdr_total_len_or_pad,
 			 HDR_TOTAL_LEN_OR_PAD_FMASK);
-	val |= field_gen(ep_hdr_ext->hdr_payload_len_inc_padding,
+	val |= field_gen(init_hdr_ext->hdr_payload_len_inc_padding,
 			 HDR_PAYLOAD_LEN_INC_PADDING_FMASK);
 	val |= field_gen(0, HDR_TOTAL_LEN_OR_PAD_OFFSET_FMASK);
-	val |= field_gen(ep_hdr_ext->hdr_pad_to_alignment,
+	val |= field_gen(init_hdr_ext->hdr_pad_to_alignment,
 			 HDR_PAD_TO_ALIGNMENT_FMASK);
 
 	return val;
@@ -148,18 +148,19 @@ ipa_reg_construct_endp_init_aggr_n(enum ipa_reg reg, const void *fields)
 static void
 ipa_reg_parse_endp_init_aggr_n(enum ipa_reg reg, void *fields, u32 val)
 {
-	struct ipa_reg_endp_init_aggr *ep_aggr = fields;
+	struct ipa_reg_endp_init_aggr *init_aggr = fields;
 
-	memset(ep_aggr, 0, sizeof(*ep_aggr));
+	memset(init_aggr, 0, sizeof(*init_aggr));
 
-	ep_aggr->aggr_en = field_val(val, AGGR_EN_FMASK);
-	ep_aggr->aggr_type = field_val(val, AGGR_TYPE_FMASK);
-	ep_aggr->aggr_byte_limit = field_val(val, AGGR_BYTE_LIMIT_FMASK);
-	ep_aggr->aggr_time_limit = field_val(val, AGGR_TIME_LIMIT_FMASK);
-	ep_aggr->aggr_pkt_limit = field_val(val, AGGR_PKT_LIMIT_FMASK);
-	ep_aggr->aggr_sw_eof_active = !!field_val(val, AGGR_SW_EOF_ACTIVE_FMASK);
-	ep_aggr->aggr_force_close = field_val(val, AGGR_SW_EOF_ACTIVE_FMASK);
-	ep_aggr->aggr_hard_byte_limit_en =
+	init_aggr->aggr_en = field_val(val, AGGR_EN_FMASK);
+	init_aggr->aggr_type = field_val(val, AGGR_TYPE_FMASK);
+	init_aggr->aggr_byte_limit = field_val(val, AGGR_BYTE_LIMIT_FMASK);
+	init_aggr->aggr_time_limit = field_val(val, AGGR_TIME_LIMIT_FMASK);
+	init_aggr->aggr_pkt_limit = field_val(val, AGGR_PKT_LIMIT_FMASK);
+	init_aggr->aggr_sw_eof_active =
+			field_val(val, AGGR_SW_EOF_ACTIVE_FMASK);
+	init_aggr->aggr_force_close = field_val(val, AGGR_SW_EOF_ACTIVE_FMASK);
+	init_aggr->aggr_hard_byte_limit_en =
 			field_val(val, AGGR_HARD_BYTE_LIMIT_ENABLE_FMASK);
 }
 
@@ -206,11 +207,11 @@ ipa_reg_construct_endp_init_mode_n(enum ipa_reg reg, const void *fields)
 static u32
 ipa_reg_construct_endp_init_ctrl_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_reg_endp_init_ctrl *ep_ctrl = fields;
+	const struct ipa_reg_endp_init_ctrl *init_ctrl = fields;
 	u32 val;
 
-	val = field_gen(ep_ctrl->endp_suspend, ENDP_SUSPEND_FMASK);
-	val |= field_gen(ep_ctrl->endp_delay, ENDP_DELAY_FMASK);
+	val = field_gen(init_ctrl->endp_suspend, ENDP_SUSPEND_FMASK);
+	val |= field_gen(init_ctrl->endp_delay, ENDP_DELAY_FMASK);
 
 	return val;
 }
@@ -218,12 +219,12 @@ ipa_reg_construct_endp_init_ctrl_n(enum ipa_reg reg, const void *fields)
 static void
 ipa_reg_parse_endp_init_ctrl_n(enum ipa_reg reg, void *fields, u32 val)
 {
-	struct ipa_reg_endp_init_ctrl *ep_ctrl = fields;
+	struct ipa_reg_endp_init_ctrl *init_ctrl = fields;
 
-	memset(ep_ctrl, 0, sizeof(*ep_ctrl));
+	memset(init_ctrl, 0, sizeof(*init_ctrl));
 
-	ep_ctrl->endp_suspend = field_val(val, ENDP_SUSPEND_FMASK);
-	ep_ctrl->endp_delay = field_val(val, ENDP_DELAY_FMASK);
+	init_ctrl->endp_suspend = field_val(val, ENDP_SUSPEND_FMASK);
+	init_ctrl->endp_delay = field_val(val, ENDP_DELAY_FMASK);
 }
 
 /* IPA_ENDP_INIT_DEAGGR_N register */
@@ -235,15 +236,16 @@ ipa_reg_parse_endp_init_ctrl_n(enum ipa_reg reg, void *fields, u32 val)
 static u32
 ipa_reg_construct_endp_init_deaggr_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_reg_endp_init_deaggr *deaggr = fields;
+	const struct ipa_reg_endp_init_deaggr *init_deaggr = fields;
 	u32 val;
 
 	/* fields value is completely ignored (can be NULL) */
-	val = field_gen(deaggr->deaggr_hdr_len, DEAGGR_HDR_LEN_FMASK);
-	val |= field_gen(deaggr->packet_offset_valid, PACKET_OFFSET_VALID_FMASK);
-	val |= field_gen(deaggr->packet_offset_location,
-			PACKET_OFFSET_LOCATION_FMASK);
-	val |= field_gen(deaggr->max_packet_len, MAX_PACKET_LEN_FMASK);
+	val = field_gen(init_deaggr->deaggr_hdr_len, DEAGGR_HDR_LEN_FMASK);
+	val |= field_gen(init_deaggr->packet_offset_valid,
+			 PACKET_OFFSET_VALID_FMASK);
+	val |= field_gen(init_deaggr->packet_offset_location,
+			 PACKET_OFFSET_LOCATION_FMASK);
+	val |= field_gen(init_deaggr->max_packet_len, MAX_PACKET_LEN_FMASK);
 
 	return val;
 }
@@ -257,13 +259,13 @@ ipa_reg_construct_endp_init_deaggr_n(enum ipa_reg reg, const void *fields)
 static u32
 ipa_reg_construct_endp_init_seq_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_reg_endp_init_seq *ep_seq = fields;
+	const struct ipa_reg_endp_init_seq *init_seq = fields;
 	u32 val;
 
-	val = field_gen(ep_seq->hps_seq_type, HPS_SEQ_TYPE_FMASK);
-	val |= field_gen(ep_seq->dps_seq_type, DPS_SEQ_TYPE_FMASK);
-	val |= field_gen(ep_seq->hps_rep_seq_type, HPS_REP_SEQ_TYPE_FMASK);
-	val |= field_gen(ep_seq->dps_rep_seq_type, DPS_REP_SEQ_TYPE_FMASK);
+	val = field_gen(init_seq->hps_seq_type, HPS_SEQ_TYPE_FMASK);
+	val |= field_gen(init_seq->dps_seq_type, DPS_SEQ_TYPE_FMASK);
+	val |= field_gen(init_seq->hps_rep_seq_type, HPS_REP_SEQ_TYPE_FMASK);
+	val |= field_gen(init_seq->dps_rep_seq_type, DPS_REP_SEQ_TYPE_FMASK);
 
 	return val;
 }
@@ -277,14 +279,14 @@ ipa_reg_construct_endp_init_seq_n(enum ipa_reg reg, const void *fields)
 static u32
 ipa_reg_construct_endp_init_cfg_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_reg_endp_init_cfg *cfg = fields;
+	const struct ipa_reg_endp_init_cfg *init_cfg = fields;
 	u32 val;
 
-	val = field_gen(cfg->frag_offload_en, FRAG_OFFLOAD_EN_FMASK);
-	val |= field_gen(cfg->cs_offload_en, CS_OFFLOAD_EN_FMASK);
-	val |= field_gen(cfg->cs_metadata_hdr_offset,
+	val = field_gen(init_cfg->frag_offload_en, FRAG_OFFLOAD_EN_FMASK);
+	val |= field_gen(init_cfg->cs_offload_en, CS_OFFLOAD_EN_FMASK);
+	val |= field_gen(init_cfg->cs_metadata_hdr_offset,
 			 CS_METADATA_HDR_OFFSET_FMASK);
-	val |= field_gen(cfg->cs_gen_qmb_master_sel,
+	val |= field_gen(init_cfg->cs_gen_qmb_master_sel,
 			 CS_GEN_QMB_MASTER_SEL_FMASK);
 
 	return val;
@@ -310,12 +312,12 @@ static u32 ipa_reg_construct_endp_init_hdr_metadata_mask_n(enum ipa_reg reg,
 static void
 ipa_reg_parse_shared_mem_size(enum ipa_reg reg, void *fields, u32 val)
 {
-	struct ipa_reg_shared_mem_size *smem_sz = fields;
+	struct ipa_reg_shared_mem_size *mem_size = fields;
 
-	memset(smem_sz, 0, sizeof(*smem_sz));
+	memset(mem_size, 0, sizeof(*mem_size));
 
-	smem_sz->shared_mem_size = field_val(val, SHARED_MEM_SIZE_FMASK);
-	smem_sz->shared_mem_baddr = field_val(val, SHARED_MEM_BADDR_FMASK);
+	mem_size->shared_mem_size = field_val(val, SHARED_MEM_SIZE_FMASK);
+	mem_size->shared_mem_baddr = field_val(val, SHARED_MEM_BADDR_FMASK);
 }
 
 /* IPA_ENDP_STATUS_N register */
@@ -326,12 +328,12 @@ ipa_reg_parse_shared_mem_size(enum ipa_reg reg, void *fields, u32 val)
 
 static u32 ipa_reg_construct_endp_status_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_reg_endp_status *ep_status = fields;
+	const struct ipa_reg_endp_status *endp_status = fields;
 	u32 val;
 
-	val = field_gen(ep_status->status_en, STATUS_EN_FMASK);
-	val |= field_gen(ep_status->status_endp, STATUS_ENDP_FMASK);
-	val |= field_gen(ep_status->status_location, STATUS_LOCATION_FMASK);
+	val = field_gen(endp_status->status_en, STATUS_EN_FMASK);
+	val |= field_gen(endp_status->status_endp, STATUS_ENDP_FMASK);
+	val |= field_gen(endp_status->status_location, STATUS_LOCATION_FMASK);
 	val |= field_gen(0, STATUS_PKT_SUPPRESS_FMASK);
 
 	return val;
@@ -415,18 +417,18 @@ static void ipa_reg_parse_hash_cfg_n(enum ipa_reg reg, void *fields, u32 val)
 
 static u32 ipa_reg_construct_rsrg_grp_xy(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_reg_rsrc_grp_cfg *grp = fields;
+	const struct ipa_reg_rsrc_grp_cfg *grp_cfg = fields;
 	u32 val;
 
-	val = field_gen(grp->x_min, X_MIN_LIM_FMASK);
-	val |= field_gen(grp->x_max, X_MAX_LIM_FMASK);
+	val = field_gen(grp_cfg->x_min, X_MIN_LIM_FMASK);
+	val |= field_gen(grp_cfg->x_max, X_MAX_LIM_FMASK);
 
 	/* DST_23 register has only X fields at ipa V3_5 */
 	if (reg == IPA_DST_RSRC_GRP_23_RSRC_TYPE_N)
 		return val;
 
-	val |= field_gen(grp->y_min, Y_MIN_LIM_FMASK);
-	val |= field_gen(grp->y_max, Y_MAX_LIM_FMASK);
+	val |= field_gen(grp_cfg->y_min, Y_MIN_LIM_FMASK);
+	val |= field_gen(grp_cfg->y_max, Y_MAX_LIM_FMASK);
 
 	return val;
 }
@@ -471,14 +473,14 @@ static u32 ipa_reg_construct_qsb_max_reads(enum ipa_reg reg, const void *fields)
 static u32
 ipa_reg_construct_idle_indication_cfg(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_reg_idle_indication_cfg *idle_indication_cfg;
+	const struct ipa_reg_idle_indication_cfg *indication_cfg;
 	u32 val;
 
-	idle_indication_cfg = fields;
+	indication_cfg = fields;
 
-	val = field_gen(idle_indication_cfg->enter_idle_debounce_thresh,
+	val = field_gen(indication_cfg->enter_idle_debounce_thresh,
 			ENTER_IDLE_DEBOUNCE_THRESH_FMASK);
-	val |= field_gen(idle_indication_cfg->const_non_idle_enable,
+	val |= field_gen(indication_cfg->const_non_idle_enable,
 			 CONST_NON_IDLE_ENABLE_FMASK);
 
 	return val;
