@@ -546,13 +546,13 @@ enum ipa_client_type ipa_get_client_mapping(u32 pipe_idx)
  */
 void ipa_sram_settings_read(void)
 {
-	struct ipa_reg_shared_mem_size smem_sz;
+	struct ipa_reg_shared_mem_size mem_size;
 
-	ipa_read_reg_fields(IPA_SHARED_MEM_SIZE, &smem_sz);
+	ipa_read_reg_fields(IPA_SHARED_MEM_SIZE, &mem_size);
 
 	/* reg fields are in 8B units */
-	ipa_ctx->smem_offset = smem_sz.shared_mem_baddr * 8;
-	ipa_ctx->smem_size = smem_sz.shared_mem_size * 8;
+	ipa_ctx->smem_offset = mem_size.shared_mem_baddr * 8;
+	ipa_ctx->smem_size = mem_size.shared_mem_size * 8;
 }
 
 /** ipa_cfg_qsb() - Configure IPA QSB maximal reads and writes
@@ -736,14 +736,14 @@ static void ipa_cfg_ep_mode(u32 clnt_hdl, enum ipa_client_type dst,
 static void ipa_cfg_ep_seq(u32 clnt_hdl)
 {
 	enum ipa_client_type client = ipa_ctx->ep[clnt_hdl].client;
-	struct ipa_reg_endp_init_seq ep_seq = { };
+	struct ipa_reg_endp_init_seq init_seq = { };
 
-	ep_seq.hps_seq_type = (u32)ep_configuration(client)->sequencer_type;
-	ep_seq.dps_seq_type = 0;
-	ep_seq.hps_rep_seq_type = 0;
-	ep_seq.dps_rep_seq_type = 0;
+	init_seq.hps_seq_type = (u32)ep_configuration(client)->sequencer_type;
+	init_seq.dps_seq_type = 0;
+	init_seq.hps_rep_seq_type = 0;
+	init_seq.dps_rep_seq_type = 0;
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_SEQ_N, clnt_hdl, &ep_seq);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_SEQ_N, clnt_hdl, &init_seq);
 }
 
 /** ipa_cfg_ep_deaggr() -  IPA end-point deaggregation configuration
@@ -751,14 +751,14 @@ static void ipa_cfg_ep_seq(u32 clnt_hdl)
  */
 static void ipa_cfg_ep_deaggr(u32 clnt_hdl)
 {
-	struct ipa_reg_endp_init_deaggr deaggr;
+	struct ipa_reg_endp_init_deaggr init_deaggr;
 
-	deaggr.deaggr_hdr_len = 0;
-	deaggr.packet_offset_valid = 0;
-	deaggr.packet_offset_location = 0;
-	deaggr.max_packet_len = 0;
+	init_deaggr.deaggr_hdr_len = 0;
+	init_deaggr.packet_offset_valid = 0;
+	init_deaggr.packet_offset_location = 0;
+	init_deaggr.max_packet_len = 0;
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_N, clnt_hdl, &deaggr);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_N, clnt_hdl, &init_deaggr);
 }
 
 /** ipa_cfg_ep_metadata_mask() - IPA end-point meta-data mask configuration
@@ -829,9 +829,9 @@ ipa_cfg_ep_status(u32 clnt_hdl)
 
 static void suspend_consumer_endpoint(u32 ipa_ep_idx)
 {
-	struct ipa_reg_endp_init_ctrl cfg = { .endp_suspend = 1 };
+	struct ipa_reg_endp_init_ctrl init_ctrl = { .endp_suspend = 1 };
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_idx, &cfg);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_idx, &init_ctrl);
 
 	/* Due to a hardware bug, a client suspended with an open
 	 * aggregation frame will not generate a SUSPEND IPA interrupt.
@@ -843,9 +843,9 @@ static void suspend_consumer_endpoint(u32 ipa_ep_idx)
 
 static void resume_consumer_endpoint(u32 ipa_ep_idx)
 {
-	struct ipa_reg_endp_init_ctrl cfg = { .endp_suspend = 0 };
+	struct ipa_reg_endp_init_ctrl init_ctrl = { .endp_suspend = 0 };
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_idx, &cfg);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_idx, &init_ctrl);
 }
 
 /* Interconnect path bandwidths (each times 1000 bytes per second) */

@@ -76,7 +76,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	int i;
 	int aggr_active_bitmap = 0;
 	bool pipe_suspended = false;
-	struct ipa_reg_endp_init_ctrl ctrl;
+	struct ipa_reg_endp_init_ctrl init_ctrl;
 
 	ipa_debug("Applying reset channel with open aggregation frame WA\n");
 
@@ -101,12 +101,13 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	if (result)
 		return -EFAULT;
 
-	ipa_read_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl, &ctrl);
-	if (ctrl.endp_suspend) {
+	ipa_read_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl, &init_ctrl);
+	if (init_ctrl.endp_suspend) {
 		ipa_debug("pipe is suspended, remove suspend\n");
 		pipe_suspended = true;
-		ctrl.endp_suspend = 0;
-		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl, &ctrl);
+		init_ctrl.endp_suspend = 0;
+		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl,
+				       &init_ctrl);
 	}
 
 	/* Start channel and put 1 Byte descriptor on it */
@@ -168,8 +169,9 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 
 	if (pipe_suspended) {
 		ipa_debug("suspend the pipe again\n");
-		ctrl.endp_suspend = 1;
-		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl, &ctrl);
+		init_ctrl.endp_suspend = 1;
+		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl,
+				       &init_ctrl);
 	}
 
 	/* Restore channels properties */
@@ -187,8 +189,9 @@ dma_alloc_fail:
 start_chan_fail:
 	if (pipe_suspended) {
 		ipa_debug("suspend the pipe again\n");
-		ctrl.endp_suspend = 1;
-		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl, &ctrl);
+		init_ctrl.endp_suspend = 1;
+		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl,
+				       &init_ctrl);
 	}
 	ipa_restore_channel_properties(ep, &orig_props);
 restore_props_fail:
