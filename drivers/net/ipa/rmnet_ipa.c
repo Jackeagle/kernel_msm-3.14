@@ -232,18 +232,28 @@ static void apps_ipa_packet_receive_notify(void *priv, enum ipa_dp_evt_type evt,
 	}
 }
 
+static void ipa_ep_cons_header(struct ipa_ep_cfg_hdr *hdr, u32 header_size,
+			       u32 metadata_offset, u32 length_offset)
+{
+	hdr->hdr_len = header_size;
+	hdr->hdr_ofst_metadata_valid = 1;
+	hdr->hdr_ofst_metadata = metadata_offset;
+	hdr->hdr_ofst_pkt_size_valid = 1;
+	hdr->hdr_ofst_pkt_size = length_offset;
+}
+
 /** handle_egress_format() - Ingress data format configuration */
 static int handle_ingress_format(struct net_device *dev,
 				 struct rmnet_ioctl_extended_s *in)
 {
-	struct ipa_sys_connect_params *wan_cfg;
 	enum ipa_client_type client = IPA_CLIENT_APPS_WAN_CONS;
 	u32 chan_count = IPA_APPS_WWAN_CONS_RING_COUNT;
-	struct ipa_ep_cfg *ep_cfg;
+	struct ipa_sys_connect_params *wan_cfg = &rmnet_ipa_ctx->wan_cons_cfg;
+	struct ipa_ep_cfg *ep_cfg = &wan_cfg->ipa_ep_cfg;
+	u32 header_size = sizeof(struct rmnet_map_header_s);
+	u32 metadata_offset = offsetof(struct rmnet_map_header_s, mux_id);
+	u32 length_offset = offsetof(struct rmnet_map_header_s, pkt_len);
 	int ret;
-
-	wan_cfg = &rmnet_ipa_ctx->wan_cons_cfg;
-	ep_cfg = &wan_cfg->ipa_ep_cfg;
 
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_CHECKSUM)
 		ep_cfg->cfg.cs_offload_en = IPA_CS_OFFLOAD_DL;
@@ -263,13 +273,8 @@ static int handle_ingress_format(struct net_device *dev,
 		ipa_ctx->ipa_client_apps_wan_cons_agg_gro = true;
 	}
 
-	ep_cfg->hdr.hdr_len = sizeof(struct rmnet_map_header_s);
-	ep_cfg->hdr.hdr_ofst_metadata_valid = 1;
-	ep_cfg->hdr.hdr_ofst_metadata =
-			offsetof(struct rmnet_map_header_s, mux_id);
-	ep_cfg->hdr.hdr_ofst_pkt_size_valid = 1;
-	ep_cfg->hdr.hdr_ofst_pkt_size =
-			offsetof(struct rmnet_map_header_s, pkt_len);
+	ipa_ep_cons_header(&ep_cfg->hdr, header_size, metadata_offset,
+			   length_offset);
 
 	ep_cfg->hdr_ext.hdr_total_len_or_pad_valid = true;
 	ep_cfg->hdr_ext.hdr_total_len_or_pad = IPA_HDR_PAD;
