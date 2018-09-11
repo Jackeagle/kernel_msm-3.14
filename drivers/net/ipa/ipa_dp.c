@@ -128,9 +128,10 @@ struct ipa_tag_completion {
 		 SKB_DATA_ALIGN(sizeof(struct skb_shared_info)))
 #define IPA_GENERIC_RX_BUFF_SZ(X) \
 	({ typeof(X) _x = (X); (_x - (IPA_REAL_GENERIC_RX_BUFF_SZ(_x) - _x)); })
-#define IPA_GENERIC_RX_BUFF_LIMIT \
-		(IPA_REAL_GENERIC_RX_BUFF_SZ(IPA_RX_BUFFER_SIZE) - \
-					     IPA_RX_BUFFER_SIZE)
+
+/* The amount of RX buffer space consumed by standard skb overhead */
+#define IPA_RX_BUFFER_RESERVED \
+	(IPA_RX_BUFFER_SIZE - SKB_MAX_ORDER(NET_SKB_PAD, IPA_RX_BUFFER_ORDER))
 
 /* less 1 nominal MTU (1500 bytes) rounded to units of KB */
 #define IPA_MTU				1500
@@ -1917,9 +1918,9 @@ static int ipa_poll_gsi_pkt(struct ipa_sys_context *sys)
 static u32 ipa_adjust_ra_buff_base_sz(u32 aggr_byte_limit)
 {
 	aggr_byte_limit += IPA_MTU;
-	aggr_byte_limit += IPA_GENERIC_RX_BUFF_LIMIT;
+	aggr_byte_limit += IPA_RX_BUFFER_RESERVED;
 
-	BUILD_BUG_ON(IPA_MTU + IPA_GENERIC_RX_BUFF_LIMIT == 0);
+	BUILD_BUG_ON(IPA_MTU + IPA_RX_BUFFER_RESERVED == 0);
 
 	/* We want a power-of-2 that's *less than* the value, so we
 	 * start by subracting 1.  We find the highest set bit in
