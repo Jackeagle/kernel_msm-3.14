@@ -161,12 +161,12 @@ static int setup_apps_cmd_prod_pipe(void)
 	u32 prod_hdl;
 	int ret;
 
-	ipa_ep_prod_header_mode(&sys_in.ipa_ep_cfg.mode, IPA_DMA);
-
 	ret = ipa_ep_alloc(client);
 	if (ret < 0)
 		return ret;
 	prod_hdl = ret;
+
+	ipa_ep_prod_header_mode(&sys_in.ipa_ep_cfg.mode, IPA_DMA);
 
 	ret = ipa_setup_sys_pipe(prod_hdl, dst, chan_count, &sys_in);
 	if (ret < 0) {
@@ -489,6 +489,11 @@ static int setup_apps_lan_cons_pipe(void)
 	u32 cons_hdl;
 	int ret;
 
+	ret = ipa_ep_alloc(client);
+	if (ret < 0)
+		return ret;
+	cons_hdl = ret;
+
 	sys_in.notify = ipa_lan_rx_cb;
 	sys_in.priv = NULL;
 
@@ -497,11 +502,6 @@ static int setup_apps_lan_cons_pipe(void)
 	ipa_ep_cons_header_ext(&ep_cfg->hdr_ext, ilog2(sizeof(u32)), false);
 
 	ipa_ep_cons_cs_offload_enable(&ep_cfg->cfg);
-
-	ret = ipa_ep_alloc(client);
-	if (ret < 0)
-		return ret;
-	cons_hdl = ret;
 
 	ret = ipa_setup_sys_pipe(cons_hdl, client, chan_count, &sys_in);
 	if (ret < 0) {

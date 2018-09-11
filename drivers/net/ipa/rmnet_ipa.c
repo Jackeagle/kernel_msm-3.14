@@ -246,6 +246,16 @@ static int handle_ingress_format(struct net_device *dev,
 	u32 cons_hdl;
 	int ret;
 
+	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
+
+	ret = ipa_ep_alloc(client);
+	if (ret < 0) {
+		mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
+
+		return ret;
+	}
+	cons_hdl = ret;
+
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_CHECKSUM)
 		ipa_ep_cons_cs_offload_enable(&ep_cfg->cfg);
 
@@ -274,16 +284,6 @@ static int handle_ingress_format(struct net_device *dev,
 	wan_cfg->priv = dev;
 
 	wan_cfg->napi_enabled = true;
-
-	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
-
-	ret = ipa_ep_alloc(client);
-	if (ret < 0) {
-		mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
-
-		return ret;
-	}
-	cons_hdl = ret;
 
 	ret = ipa_setup_sys_pipe(cons_hdl, client, chan_count, wan_cfg);
 	if (ret < 0) {
@@ -316,6 +316,16 @@ static int handle_egress_format(struct net_device *dev,
 	wan_cfg = &rmnet_ipa_ctx->wan_prod_cfg;
 	ep_cfg = &wan_cfg->ipa_ep_cfg;
 
+	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
+
+	ret = ipa_ep_alloc(client);
+	if (ret < 0) {
+		mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
+
+		return ret;
+	}
+	prod_hdl = ret;
+
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_CHECKSUM) {
 		u32 hdr_offset = sizeof(struct rmnet_map_header_s) / 4;
 
@@ -341,16 +351,6 @@ static int handle_egress_format(struct net_device *dev,
 
 	wan_cfg->notify = apps_ipa_tx_complete_notify;
 	wan_cfg->priv = dev;
-
-	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
-
-	ret = ipa_ep_alloc(client);
-	if (ret < 0) {
-		mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
-
-		return ret;
-	}
-	prod_hdl = ret;
 
 	ret = ipa_setup_sys_pipe(prod_hdl, dst, chan_count, wan_cfg);
 	if (ret < 0) {
