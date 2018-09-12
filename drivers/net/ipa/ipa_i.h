@@ -533,8 +533,6 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data);
 
 void ipa_sram_settings_read(void);
 
-void ipa_cfg_ep_status(u32 clnt_hdl);
-
 int ipa_init_q6_smem(void);
 
 /* Defined in "ipa_uc.c" */
