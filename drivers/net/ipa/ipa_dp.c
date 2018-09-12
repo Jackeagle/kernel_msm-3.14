@@ -1780,8 +1780,6 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 	if (ep->client == IPA_CLIENT_APPS_WAN_PROD)
 		ipa_ep_prod_status(&ep->status, true, IPA_CLIENT_Q6_WAN_CONS);
 
-	ipa_client_add();
-
 	if (ipa_consumer(ep->client)) {
 		ipa_ep_cons_status(&ep->status, true);
 
@@ -1838,6 +1836,8 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 	ep->client_notify = sys_in->notify;
 	ep->napi_enabled = sys_in->napi_enabled;
 	ep->priv = sys_in->priv;
+
+	ipa_client_add();
 
 	ipa_cfg_ep(ipa_ep_idx, dst, &sys_in->ipa_ep_cfg);
 
