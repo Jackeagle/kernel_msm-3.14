@@ -280,7 +280,6 @@ static int handle_ingress_format(struct net_device *dev,
 		agg_size = IPA_GENERIC_AGGR_BYTE_LIMIT;
 		agg_count = IPA_GENERIC_AGGR_PKT_LIMIT;
 	}
-	ipa_ep_cons_aggregation(&ep_cfg->aggr, agg_size, agg_count);
 
 	/* Compute the buffer size required to handle the requested
 	 * aggregation byte limit.  The aggr_byte_limit value is
@@ -299,7 +298,9 @@ static int handle_ingress_format(struct net_device *dev,
 	 * buffer, and convert the result to the KB units the
 	 * aggr_byte_limit uses.
 	 */
-	ep_cfg->aggr.aggr_byte_limit = (rx_buffer_size - IPA_MTU) / SZ_1K;
+	agg_size = (rx_buffer_size - IPA_MTU) / SZ_1K;
+
+	ipa_ep_cons_aggregation(&ep_cfg->aggr, agg_size, agg_count);
 
 	ipa_ep_cons_header(&ep_cfg->hdr, header_size, metadata_offset,
 			   length_offset);
