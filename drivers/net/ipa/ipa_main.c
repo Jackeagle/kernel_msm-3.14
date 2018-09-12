@@ -505,6 +505,10 @@ static int setup_apps_lan_cons_pipe(void)
 
 	ipa_ep_cons_status(&ep_cfg->status, true);
 
+	ep_cfg->aggr.aggr_byte_limit = IPA_GENERIC_AGGR_BYTE_LIMIT;
+	ep_cfg->aggr.aggr_pkt_limit = IPA_GENERIC_AGGR_PKT_LIMIT;
+	ep_cfg->aggr.aggr_sw_eof_active = false;
+
 	ret = ipa_setup_sys_pipe(cons_hdl, client, chan_count, &sys_in);
 	if (ret < 0) {
 		ipa_ep_free(cons_hdl);

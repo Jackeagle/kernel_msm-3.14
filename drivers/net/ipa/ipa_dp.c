@@ -117,10 +117,6 @@ struct ipa_tag_completion {
 #define POLLING_MIN_SLEEP_RX		1010	/* microseconds */
 #define POLLING_MAX_SLEEP_RX		1050	/* microseconds */
 
-#define IPA_GENERIC_AGGR_BYTE_LIMIT	6
-#define IPA_GENERIC_AGGR_TIME_LIMIT	1
-#define IPA_GENERIC_AGGR_PKT_LIMIT	0
-
 #define IPA_RX_BUFFER_ORDER	1	/* Default RX buffer is 2^1 pages */
 #define IPA_RX_BUFFER_SIZE	(1 << (IPA_RX_BUFFER_ORDER + PAGE_SHIFT))
 
@@ -1778,13 +1774,7 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 	int ret;
 
 	if (ipa_consumer(ep->client)) {
-		if (ep->client == IPA_CLIENT_APPS_LAN_CONS) {
-			ep_cfg_aggr->aggr_byte_limit =
-					IPA_GENERIC_AGGR_BYTE_LIMIT;
-			ep_cfg_aggr->aggr_pkt_limit =
-					IPA_GENERIC_AGGR_PKT_LIMIT;
-			ep_cfg_aggr->aggr_sw_eof_active = false;
-		} else {
+		if (ep->client != IPA_CLIENT_APPS_LAN_CONS) {
 			ep_cfg_aggr->aggr_sw_eof_active = true;
 
 			if (!ipa_ctx->ipa_client_apps_wan_cons_agg_gro) {
