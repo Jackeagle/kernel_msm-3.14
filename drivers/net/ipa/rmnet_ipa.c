@@ -248,19 +248,8 @@ static int handle_ingress_format(struct net_device *dev,
 	u32 aggr_count = IPA_GENERIC_AGGR_PKT_LIMIT;
 	bool aggr_active = false;
 	u32 rx_buffer_size;
-	u32 byte_limit;
 	u32 cons_hdl;
 	int ret;
-
-	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
-
-	ret = ipa_ep_alloc(client);
-	if (ret < 0) {
-		mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
-
-		return ret;
-	}
-	cons_hdl = ret;
 
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_CHECKSUM)
 		offload_type = IPA_CS_OFFLOAD_DL;
@@ -287,8 +276,7 @@ static int handle_ingress_format(struct net_device *dev,
 	 * the computed maximum number of data bytes that can be
 	 * held in the buffer--no metadata/headers.)
 	 */
-	byte_limit = aggr_size * SZ_1K;
-	rx_buffer_size = ipa_aggr_byte_limit_buf_size(byte_limit);
+	rx_buffer_size = ipa_aggr_byte_limit_buf_size(aggr_size * SZ_1K);
 
 	/* Account for the extra IPA_MTU past the limit in the
 	 * buffer, and convert the result to the KB units the
@@ -296,6 +284,19 @@ static int handle_ingress_format(struct net_device *dev,
 	 */
 	aggr_size = (rx_buffer_size - IPA_MTU) / SZ_1K;
 
+	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
+
+	if (rmnet_ipa_ctx->wan_cons_hdl != IPA_CLNT_HDL_BAD) {
+		ret = -EBUSY;
+		goto out_unlock;
+	}
+
+	ret = ipa_ep_alloc(client);
+	if (ret < 0)
+		goto out_unlock;
+	cons_hdl = ret;
+
+	/* Record our endpoint configuration parameters */
 	ipa_ep_cons_header(&ep_cfg->hdr, header_size, metadata_offset,
 			   length_offset);
 	ipa_ep_cons_header_ext(&ep_cfg->hdr_ext, 0, true);
@@ -312,17 +313,14 @@ static int handle_ingress_format(struct net_device *dev,
 
 	ret = ipa_setup_sys_pipe(cons_hdl, client, chan_count, rx_buffer_size,
 				 wan_cfg);
-	if (ret < 0) {
+	if (ret)
 		ipa_ep_free(cons_hdl);
-		mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
-
-		return ret;
-	}
-	rmnet_ipa_ctx->wan_cons_hdl = cons_hdl;
-
+	else
+		rmnet_ipa_ctx->wan_cons_hdl = cons_hdl;
+out_unlock:
 	mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
-	return 0;
+	return ret;
 }
 
 /** handle_egress_format() - Egress data format configuration */
@@ -387,17 +385,14 @@ static int handle_egress_format(struct net_device *dev,
 	ipa_ep_prod_status(&ep_cfg->status, true, IPA_CLIENT_Q6_WAN_CONS);
 
 	ret = ipa_setup_sys_pipe(prod_hdl, dst, chan_count, 0, wan_cfg);
-	if (ret < 0) {
+	if (ret)
 		ipa_ep_free(prod_hdl);
-		mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
-
-		return ret;
-	}
-	rmnet_ipa_ctx->wan_prod_hdl = prod_hdl;
+	else
+		rmnet_ipa_ctx->wan_prod_hdl = prod_hdl;
 
 	mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
-	return 0;
+	return ret;
 }
 
 /** ipa_wwan_add_mux_channel() - add a mux_id */

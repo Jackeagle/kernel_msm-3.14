@@ -161,6 +161,9 @@ static int setup_apps_cmd_prod_pipe(void)
 	u32 prod_hdl;
 	int ret;
 
+	if (ipa_ctx->clnt_hdl_cmd != IPA_CLNT_HDL_BAD)
+		ret = -EBUSY;
+
 	ret = ipa_ep_alloc(client);
 	if (ret < 0)
 		return ret;
@@ -169,13 +172,12 @@ static int setup_apps_cmd_prod_pipe(void)
 	ipa_ep_prod_header_mode(&sys_in.ipa_ep_cfg.mode, IPA_DMA);
 
 	ret = ipa_setup_sys_pipe(prod_hdl, dst, chan_count, 0, &sys_in);
-	if (ret < 0) {
+	if (ret)
 		ipa_ep_free(prod_hdl);
+	else
+		ipa_ctx->clnt_hdl_cmd = prod_hdl;
 
-		return ret;
-	}
-
-	return prod_hdl;
+	return ret;
 }
 
 /* Only used for IPA_MEM_UC_EVENT_RING_OFST, which must be 1KB aligned */
@@ -532,13 +534,12 @@ static int setup_apps_lan_cons_pipe(void)
 
 	ret = ipa_setup_sys_pipe(cons_hdl, client, chan_count, rx_buffer_size,
 				 &sys_in);
-	if (ret < 0) {
+	if (ret)
 		ipa_ep_free(cons_hdl);
+	else
+		ipa_ctx->clnt_hdl_lan_cons = cons_hdl;
 
-		return ret;
-	}
-
-	return cons_hdl;
+	return ret;
 }
 
 static int ipa_setup_apps_pipes(void)
@@ -549,7 +550,7 @@ static int ipa_setup_apps_pipes(void)
 	result = setup_apps_cmd_prod_pipe();
 	if (result < 0)
 		return result;
-	ipa_ctx->clnt_hdl_cmd = (u32)result;
+
 	ipa_debug("Apps to IPA cmd pipe is connected\n");
 
 	ipa_init_sram();
@@ -589,7 +590,6 @@ static int ipa_setup_apps_pipes(void)
 	result = setup_apps_lan_cons_pipe();
 	if (result < 0)
 		goto fail_flt_hash_tuple;
-	ipa_ctx->clnt_hdl_lan_cons = (u32)result;
 
 	ipa_cfg_default_route(IPA_CLIENT_APPS_LAN_CONS);
 
