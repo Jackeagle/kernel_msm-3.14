@@ -779,6 +779,22 @@ ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
 			       &ep->init_hdr_metadata_mask);
 }
 
+/** ipa_cfg_ep_status() - IPA end-point status configuration
+ * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
+ * @ipa_ep_cfg: [in] IPA end-point configuration params
+ *
+ * Returns:	0 on success, negative on failure
+ *
+ * Note:	Should not be called from atomic context
+ */
+void
+ipa_cfg_ep_status(u32 clnt_hdl)
+{
+	const struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
+
+	ipa_write_reg_n_fields(IPA_ENDP_STATUS_N, clnt_hdl, &ep->status);
+}
+
 /** ipa_cfg_ep - IPA end-point configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @dst:	[in] destination client handle (ignored for consumer clients)
@@ -809,22 +825,6 @@ void ipa_cfg_ep(u32 clnt_hdl, enum ipa_client_type dst,
 	} else {
 		ipa_cfg_ep_metadata_mask(clnt_hdl, &ipa_ep_cfg->metadata_mask);
 	}
-}
-
-/** ipa_cfg_ep_status() - IPA end-point status configuration
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg: [in] IPA end-point configuration params
- *
- * Returns:	0 on success, negative on failure
- *
- * Note:	Should not be called from atomic context
- */
-void
-ipa_cfg_ep_status(u32 clnt_hdl)
-{
-	const struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
-
-	ipa_write_reg_n_fields(IPA_ENDP_STATUS_N, clnt_hdl, &ep->status);
 }
 
 static void suspend_consumer_endpoint(u32 ipa_ep_idx)
