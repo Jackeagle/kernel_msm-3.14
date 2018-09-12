@@ -507,8 +507,8 @@ static int setup_apps_lan_cons_pipe(void)
 
 	ipa_ep_cons_status(&ep_cfg->status, true);
 
-	ep_cfg->aggr.aggr_byte_limit = IPA_GENERIC_AGGR_BYTE_LIMIT;
-	ep_cfg->aggr.aggr_pkt_limit = IPA_GENERIC_AGGR_PKT_LIMIT;
+	ipa_ep_cons_aggregation(&ep_cfg->aggr, IPA_GENERIC_AGGR_BYTE_LIMIT,
+				IPA_GENERIC_AGGR_PKT_LIMIT);
 	ep_cfg->aggr.aggr_sw_eof_active = false;
 
 	/* Compute the buffer size required to handle the requested
