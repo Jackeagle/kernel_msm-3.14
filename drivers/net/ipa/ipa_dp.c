@@ -1519,22 +1519,16 @@ static int ipa_assign_policy(enum ipa_client_type client,
 	sys->rx.buff_sz = ipa_aggr_byte_limit_buf_size(byte_limit);
 	sys->rx.pool_sz = IPA_GENERIC_RX_POOL_SZ;
 
-	if (client == IPA_CLIENT_APPS_LAN_CONS) {
-		sys->rx.pyld_hdlr = ipa_lan_rx_pyld_hdlr;
-
-		return 0;
-	}
-	/* client == IPA_CLIENT_APPS_WAN_CONS */
-	sys->rx.pyld_hdlr = ipa_wan_rx_pyld_hdlr;
-
-	if (!ipa_ctx->ipa_client_apps_wan_cons_agg_gro)
-		return 0;
-
 	/* Account for the extra IPA_MTU past the limit in the
 	 * buffer, and convert the result to the KB units the
 	 * aggr_byte_limit uses.
 	 */
 	ep_cfg_aggr->aggr_byte_limit = (sys->rx.buff_sz - IPA_MTU) / SZ_1K;
+
+	if (client == IPA_CLIENT_APPS_LAN_CONS)
+		sys->rx.pyld_hdlr = ipa_lan_rx_pyld_hdlr;
+	else
+		sys->rx.pyld_hdlr = ipa_wan_rx_pyld_hdlr;
 
 	return 0;
 }
