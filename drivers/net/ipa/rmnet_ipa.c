@@ -269,12 +269,13 @@ static int handle_ingress_format(struct net_device *dev,
 		aggr_size = in->u.ingress_format.agg_size;
 		aggr_count = in->u.ingress_format.agg_count;
 		aggr_active = true;
-
-		if (aggr_size > ipa_reg_aggr_max_byte_limit())
-			return -EINVAL;
-		if (aggr_count > ipa_reg_aggr_max_packet_limit())
-			return -EINVAL;
 	}
+
+	if (aggr_size > ipa_reg_aggr_max_byte_limit())
+		return -EINVAL;
+
+	if (aggr_count > ipa_reg_aggr_max_packet_limit())
+		return -EINVAL;
 
 	/* Compute the buffer size required to handle the requested
 	 * aggregation byte limit.  The aggr_byte_limit value is
