@@ -1774,7 +1774,6 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 	struct ipa_ep_cfg_aggr *ep_cfg_aggr = &sys_in->ipa_ep_cfg.aggr;
-	struct ipa_reg_endp_status *ep_cfg_status = &sys_in->ipa_ep_cfg.status;
 	u32 byte_limit;
 	int ret;
 
@@ -1788,9 +1787,7 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 		} else {
 			ep_cfg_aggr->aggr_sw_eof_active = true;
 
-			if (ipa_ctx->ipa_client_apps_wan_cons_agg_gro) {
-				ipa_ep_cons_status(ep_cfg_status, false);
-			} else {
+			if (!ipa_ctx->ipa_client_apps_wan_cons_agg_gro) {
 				ep_cfg_aggr->aggr_byte_limit =
 						IPA_GENERIC_AGGR_BYTE_LIMIT;
 				ep_cfg_aggr->aggr_pkt_limit =
