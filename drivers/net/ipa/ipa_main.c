@@ -503,7 +503,7 @@ static int setup_apps_lan_cons_pipe(void)
 
 	ipa_ep_cons_header_ext(&ep_cfg->hdr_ext, ilog2(sizeof(u32)), false);
 
-	ipa_ep_cons_cs_offload_enable(&ep_cfg->cfg);
+	ipa_ep_cons_cs_offload(&ep_cfg->cfg, IPA_CS_OFFLOAD_DL);
 
 	ipa_ep_cons_status(&ep_cfg->status, true);
 

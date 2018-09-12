@@ -261,7 +261,9 @@ static int handle_ingress_format(struct net_device *dev,
 	cons_hdl = ret;
 
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_CHECKSUM)
-		ipa_ep_cons_cs_offload_enable(&ep_cfg->cfg);
+		ipa_ep_cons_cs_offload(&ep_cfg->cfg, IPA_CS_OFFLOAD_DL);
+	else
+		ipa_ep_cons_cs_offload(&ep_cfg->cfg, IPA_CS_OFFLOAD_NONE);
 
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA) {
 		agg_size = in->u.ingress_format.agg_size;

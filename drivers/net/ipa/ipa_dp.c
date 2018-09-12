@@ -1639,9 +1639,11 @@ void ipa_ep_cons_aggregation(struct ipa_ep_cfg_aggr *aggr, u32 size, u32 count,
 	aggr->aggr_sw_eof_active = close_on_eof;
 }
 
-void ipa_ep_cons_cs_offload_enable(struct ipa_ep_cfg_cfg *cfg)
+void ipa_ep_cons_cs_offload(struct ipa_ep_cfg_cfg *cfg,
+			    enum ipa_cs_offload offload_type)
 {
-	cfg->cs_offload_en = IPA_CS_OFFLOAD_DL;
+	cfg->cs_offload_en = offload_type;
+	cfg->cs_metadata_hdr_offset = 0;	/* ignored */
 }
 
 void ipa_ep_cons_metadata_mask(struct ipa_ep_cfg_metadata_mask *mask,
