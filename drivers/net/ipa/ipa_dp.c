@@ -127,9 +127,6 @@ struct ipa_tag_completion {
 /* RX buffer space remaining after standard overhead is consumed */
 #define IPA_RX_BUFFER_AVAILABLE(X)	((X) - IPA_RX_BUFFER_RESERVED)
 
-/* less 1 nominal MTU (1500 bytes) rounded to units of KB */
-#define IPA_MTU				1500
-
 #define IPA_RX_BUFF_CLIENT_HEADROOM	256
 
 #define IPA_SIZE_DL_CSUM_META_TRAILER	8
@@ -1463,7 +1460,7 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u32 size)
  * of buffer space the IPA hardware will know is available to hold
  * received data (without any overhead).
  */
-static u32 ipa_aggr_byte_limit_buf_size(u32 byte_limit)
+u32 ipa_aggr_byte_limit_buf_size(u32 byte_limit)
 {
 	/* Account for one additional packet, including overhead */
 	byte_limit += IPA_RX_BUFFER_RESERVED;
@@ -1765,35 +1762,16 @@ void ipa_ep_free(u32 ipa_ep_idx)
  *
  * Returns:	client handle on success, negative on failure
  */
-int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
-		       u32 chan_count, struct ipa_sys_connect_params *sys_in)
+int
+ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst, u32 chan_count,
+		   u32 rx_buffer_size, struct ipa_sys_connect_params *sys_in)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
-	struct ipa_ep_cfg_aggr *ep_cfg_aggr = &sys_in->ipa_ep_cfg.aggr;
-	u32 byte_limit;
 	int ret;
 
 	if (ipa_consumer(ep->client)) {
-		/* Compute the buffer size required to handle the requested
-		 * aggregation byte limit.  The aggr_byte_limit value is
-		 * expressed as a number of KB, so we need to convert it to
-		 * bytes to determine the buffer size.
-		 *
-		 * The buffer will be sufficient to hold one IPA_MTU-sized
-		 * packet after the limit is reached.  (The size returned is
-		 * the computed maximum number of data bytes that can be
-		 * held in the buffer--no metadata/headers.)
-		 */
-		byte_limit = ep_cfg_aggr->aggr_byte_limit * SZ_1K;
-		ep->sys->rx.buff_sz = ipa_aggr_byte_limit_buf_size(byte_limit);
+		ep->sys->rx.buff_sz = rx_buffer_size;
 		ep->sys->rx.pool_sz = IPA_GENERIC_RX_POOL_SZ;
-
-		/* Account for the extra IPA_MTU past the limit in the
-		 * buffer, and convert the result to the KB units the
-		 * aggr_byte_limit uses.
-		 */
-		ep_cfg_aggr->aggr_byte_limit =
-				(ep->sys->rx.buff_sz - IPA_MTU) / SZ_1K;
 	}
 
 	if (ipa_assign_policy(ep->client, ep->sys)) {

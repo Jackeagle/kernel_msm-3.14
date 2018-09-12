@@ -243,6 +243,8 @@ static int handle_ingress_format(struct net_device *dev,
 	u32 header_size = sizeof(struct rmnet_map_header_s);
 	u32 metadata_offset = offsetof(struct rmnet_map_header_s, mux_id);
 	u32 length_offset = offsetof(struct rmnet_map_header_s, pkt_len);
+	u32 rx_buffer_size;
+	u32 byte_limit;
 	u32 cons_hdl;
 	int ret;
 
@@ -290,12 +292,32 @@ static int handle_ingress_format(struct net_device *dev,
 		ep_cfg->aggr.aggr_pkt_limit = IPA_GENERIC_AGGR_PKT_LIMIT;
 	}
 
+	/* Compute the buffer size required to handle the requested
+	 * aggregation byte limit.  The aggr_byte_limit value is
+	 * expressed as a number of KB, so we need to convert it to
+	 * bytes to determine the buffer size.
+	 *
+	 * The buffer will be sufficient to hold one IPA_MTU-sized
+	 * packet after the limit is reached.  (The size returned is
+	 * the computed maximum number of data bytes that can be
+	 * held in the buffer--no metadata/headers.)
+	 */
+	byte_limit = ep_cfg->aggr.aggr_byte_limit * SZ_1K;
+	rx_buffer_size = ipa_aggr_byte_limit_buf_size(byte_limit);
+
+	/* Account for the extra IPA_MTU past the limit in the
+	 * buffer, and convert the result to the KB units the
+	 * aggr_byte_limit uses.
+	 */
+	ep_cfg->aggr.aggr_byte_limit = (rx_buffer_size - IPA_MTU) / SZ_1K;
+
 	wan_cfg->notify = apps_ipa_packet_receive_notify;
 	wan_cfg->priv = dev;
 
 	wan_cfg->napi_enabled = true;
 
-	ret = ipa_setup_sys_pipe(cons_hdl, client, chan_count, wan_cfg);
+	ret = ipa_setup_sys_pipe(cons_hdl, client, chan_count, rx_buffer_size,
+				 wan_cfg);
 	if (ret < 0) {
 		ipa_ep_free(cons_hdl);
 		mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
@@ -370,7 +392,7 @@ static int handle_egress_format(struct net_device *dev,
 	 */
 	ipa_ep_prod_status(&ep_cfg->status, true, IPA_CLIENT_Q6_WAN_CONS);
 
-	ret = ipa_setup_sys_pipe(prod_hdl, dst, chan_count, wan_cfg);
+	ret = ipa_setup_sys_pipe(prod_hdl, dst, chan_count, 0, wan_cfg);
 	if (ret < 0) {
 		ipa_ep_free(prod_hdl);
 		mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);

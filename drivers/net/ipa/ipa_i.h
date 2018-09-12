@@ -27,6 +27,8 @@
 #define DRV_NAME		"ipa"
 #define IPA_COOKIE		0x57831603
 
+#define IPA_MTU			1500
+
 #define IPA_MAX_NUM_PIPES		31
 #define IPA_LAN_RX_HEADER_LENGTH	2
 #define IPA_DL_CHECKSUM_LENGTH		8
@@ -481,7 +483,8 @@ void ipa_ep_free(u32 ipa_ep_idx);
 void ipa_no_intr_init(u32 prod_ep_idx);
 
 int ipa_setup_sys_pipe(u32 client_hdl, enum ipa_client_type dst,
-		       u32 chan_count, struct ipa_sys_connect_params *sys_in);
+		       u32 chan_count, u32 rx_buffer_size,
+		       struct ipa_sys_connect_params *sys_in);
 
 void ipa_teardown_sys_pipe(u32 clnt_hdl);
 
@@ -523,6 +526,8 @@ void ipa_client_add(void);
 bool ipa_client_add_additional(void);
 void ipa_client_remove(void);
 void ipa_client_remove_wait(void);
+
+u32 ipa_aggr_byte_limit_buf_size(u32 byte_limit);
 
 void ipa_cfg_default_route(enum ipa_client_type client);
 
