@@ -1627,13 +1627,16 @@ void ipa_ep_cons_header_ext(struct ipa_ep_cfg_hdr_ext *hdr_ext,
 	hdr_ext->hdr_total_len_or_pad_valid = true;
 }
 
-void ipa_ep_cons_aggregation(struct ipa_ep_cfg_aggr *aggr, u32 size, u32 count)
+void ipa_ep_cons_aggregation(struct ipa_ep_cfg_aggr *aggr, u32 size, u32 count,
+			     bool close_on_eof)
 {
 	aggr->aggr_en = IPA_ENABLE_AGGR;
 	aggr->aggr = IPA_GENERIC;
 	aggr->aggr_byte_limit = size;
 	aggr->aggr_time_limit = IPA_GENERIC_AGGR_TIME_LIMIT;
 	aggr->aggr_pkt_limit = count;
+	aggr->aggr_hard_byte_limit_en = false;
+	aggr->aggr_sw_eof_active = close_on_eof;
 }
 
 void ipa_ep_cons_cs_offload_enable(struct ipa_ep_cfg_cfg *cfg)

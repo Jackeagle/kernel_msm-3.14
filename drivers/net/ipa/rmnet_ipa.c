@@ -263,7 +263,6 @@ static int handle_ingress_format(struct net_device *dev,
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_CHECKSUM)
 		ipa_ep_cons_cs_offload_enable(&ep_cfg->cfg);
 
-	ep_cfg->aggr.aggr_sw_eof_active = true;
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA) {
 		agg_size = in->u.ingress_format.agg_size;
 		agg_count = in->u.ingress_format.agg_count;
@@ -300,7 +299,7 @@ static int handle_ingress_format(struct net_device *dev,
 	 */
 	agg_size = (rx_buffer_size - IPA_MTU) / SZ_1K;
 
-	ipa_ep_cons_aggregation(&ep_cfg->aggr, agg_size, agg_count);
+	ipa_ep_cons_aggregation(&ep_cfg->aggr, agg_size, agg_count, true);
 
 	ipa_ep_cons_header(&ep_cfg->hdr, header_size, metadata_offset,
 			   length_offset);

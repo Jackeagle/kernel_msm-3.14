@@ -457,7 +457,7 @@ void ipa_ep_cons_header(struct ipa_ep_cfg_hdr *hdr, u32 header_size,
 void ipa_ep_cons_header_ext(struct ipa_ep_cfg_hdr_ext *hdr_ext, u32
 			    pad_align, bool pad_included);
 void ipa_ep_cons_aggregation(struct ipa_ep_cfg_aggr *aggr, u32 size,
-			     u32 count);
+			     u32 count, bool close_on_eof);
 void ipa_ep_cons_cs_offload_enable(struct ipa_ep_cfg_cfg *cfg);
 void ipa_ep_cons_metadata_mask(struct ipa_ep_cfg_metadata_mask *mask,
 			       u32 metadata_mask);
