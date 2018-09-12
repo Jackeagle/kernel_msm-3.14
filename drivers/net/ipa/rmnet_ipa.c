@@ -281,13 +281,6 @@ static int handle_ingress_format(struct net_device *dev,
 		ep_cfg->aggr.aggr_pkt_limit = IPA_GENERIC_AGGR_PKT_LIMIT;
 	}
 
-	ipa_ep_cons_header(&ep_cfg->hdr, header_size, metadata_offset,
-			   length_offset);
-
-	ipa_ep_cons_header_ext(&ep_cfg->hdr_ext, 0, true);
-
-	ipa_ep_cons_metadata_mask(&ep_cfg->metadata_mask, 0xff000000);
-
 	/* Compute the buffer size required to handle the requested
 	 * aggregation byte limit.  The aggr_byte_limit value is
 	 * expressed as a number of KB, so we need to convert it to
@@ -306,6 +299,13 @@ static int handle_ingress_format(struct net_device *dev,
 	 * aggr_byte_limit uses.
 	 */
 	ep_cfg->aggr.aggr_byte_limit = (rx_buffer_size - IPA_MTU) / SZ_1K;
+
+	ipa_ep_cons_header(&ep_cfg->hdr, header_size, metadata_offset,
+			   length_offset);
+
+	ipa_ep_cons_header_ext(&ep_cfg->hdr_ext, 0, true);
+
+	ipa_ep_cons_metadata_mask(&ep_cfg->metadata_mask, 0xff000000);
 
 	wan_cfg->notify = apps_ipa_packet_receive_notify;
 	wan_cfg->priv = dev;
