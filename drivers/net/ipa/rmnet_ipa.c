@@ -334,8 +334,11 @@ static int handle_egress_format(struct net_device *dev,
 	u32 chan_count = IPA_APPS_WWAN_PROD_RING_COUNT;
 	u32 header_size = sizeof(struct rmnet_map_header_s);
 	enum ipa_cs_offload offload_type = IPA_CS_OFFLOAD_NONE;
+	enum ipa_aggr_en_type aggr_en = IPA_BYPASS_AGGR;
+	enum ipa_aggr_type aggr_type = 0;	/* ignored if BYPASS */
 	u32 header_offset = 0;
-	u32 length_offset;
+	u32 length_offset = 0;
+	u32 header_pad = 0;
 	u32 prod_hdl;
 	int ret;
 
@@ -356,16 +359,13 @@ static int handle_egress_format(struct net_device *dev,
 	ipa_ep_prod_cs_offload(&ep_cfg->cfg, offload_type, header_offset);
 
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_AGGREGATION) {
-		ipa_ep_prod_aggregation(&ep_cfg->aggr, IPA_ENABLE_DEAGGR,
-				        IPA_QCMAP);
-
+		aggr_en = IPA_ENABLE_DEAGGR;
+		aggr_type = IPA_QCMAP;
 		length_offset = offsetof(struct rmnet_map_header_s, pkt_len);
-
-		ipa_ep_prod_header_pad(&ep_cfg->hdr_ext, ilog2(sizeof(u32)));
-	} else {
-		ipa_ep_prod_aggregation(&ep_cfg->aggr, IPA_BYPASS_AGGR, 0);
-		length_offset = 0;
+		header_pad = ilog2(sizeof(u32));
 	}
+	ipa_ep_prod_header_pad(&ep_cfg->hdr_ext, header_pad);
+	ipa_ep_prod_aggregation(&ep_cfg->aggr, aggr_en, aggr_type);
 
 	ipa_ep_prod_header(&ep_cfg->hdr, header_size, 0, length_offset);
 
