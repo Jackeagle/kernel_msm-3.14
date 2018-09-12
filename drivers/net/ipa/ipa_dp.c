@@ -1505,7 +1505,7 @@ static int ipa_assign_policy(enum ipa_client_type client,
 			  ipa_replenish_rx_work_func);
 
 	atomic_set(&sys->rx.curr_polling_state, 0);
-	sys->rx.buff_sz = IPA_RX_BUFFER_AVAILABLE(IPA_RX_BUFFER_SIZE);
+	sys->rx.buff_sz = ipa_aggr_byte_limit_buf_size(IPA_RX_BUFFER_SIZE);
 	sys->rx.pool_sz = IPA_GENERIC_RX_POOL_SZ;
 
 	if (client == IPA_CLIENT_APPS_LAN_CONS) {
