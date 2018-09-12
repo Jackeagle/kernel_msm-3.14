@@ -156,8 +156,6 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u32 size);
 static void ipa_cleanup_rx(struct ipa_sys_context *sys);
 static int ipa_poll_gsi_pkt(struct ipa_sys_context *sys);
 
-static u32 ipa_adjust_ra_buff_base_sz(u32 aggr_byte_limit);
-
 static void ipa_tx_complete(struct ipa_tx_pkt_wrapper *tx_pkt)
 {
 	struct device *dev = ipa_ctx->dev;
@@ -1453,13 +1451,38 @@ static u32 ipa_aggr_byte_limit_adjust(struct ipa_sys_context *sys, u32 limit)
 {
 	u32 adjusted;
 
-	adjusted = ipa_adjust_ra_buff_base_sz(limit);
-	adjusted = IPA_RX_BUFFER_AVAILABLE(adjusted);
-	sys->rx.buff_sz = adjusted;
+	/* We want to compute the aggregation byte limit to configure
+	 * to allow the requested number of bytes to be available
+	 * received data.  The limit supplied does not include
+	 * standard skb overhead, so start by adding that.
+	 */
+	limit += IPA_RX_BUFFER_RESERVED;
+
+	/* Aggregation will close when *more* than the configured
+	 * number of bytes have been added to the aggregation frame.
+	 * That means our buffer needs to be able to hold at least
+	 * one full MTU beyond the configured byte limit.  Add that
+	 * to ensure the buffer is big enough.
+	 */
+	limit += IPA_MTU;
+
+	/* Finally, we choose power-of-2 buffer sizes to alleviate
+	 * fragmentation.  Find a power-of-2 that's *less than* the
+	 * limit we need--so we start by subracting 1.  The highest
+	 * set bit in that is used to compute the power of 2.
+	 * XXX Why is this *less than* and not possibly equal?
+	 */
+	limit 1 << __fls(limit - 1);
+
+	/* Given that size, figure out how much buffer space that
+	 * leaves us for received data.
+	 */
+	sys->rx.buff_sz = IPA_RX_BUFFER_AVAILABLE(limit);
 	ipa_err("set rx.buff_sz %u\n", adjusted);
 
 	if (sys->rx.buff_sz < limit)
 		limit = sys->rx.buff_sz;
+
 	limit = IPA_ADJUST_AGGR_BYTE_LIMIT(limit);
 	ipa_err("set aggr_limit %u\n", limit);
 
@@ -1906,26 +1929,6 @@ static int ipa_poll_gsi_pkt(struct ipa_sys_context *sys)
 	}
 
 	return gsi_poll_channel(ipa_ctx->gsi, sys->ep->gsi_chan_hdl);
-}
-
-/** ipa_adjust_ra_buff_base_sz()
- *
- * Return value: the largest power of two which is smaller
- * than the input value
- */
-static u32 ipa_adjust_ra_buff_base_sz(u32 aggr_byte_limit)
-{
-	aggr_byte_limit += IPA_MTU;
-	aggr_byte_limit += IPA_RX_BUFFER_RESERVED;
-
-	BUILD_BUG_ON(IPA_MTU + IPA_RX_BUFFER_RESERVED == 0);
-
-	/* We want a power-of-2 that's *less than* the value, so we
-	 * start by subracting 1.  We find the highest set bit in
-	 * that, and use that to compute a power of 2.
-	 */
-
-	return 1 << __fls(aggr_byte_limit - 1);
 }
 
 bool ipa_ep_polling(struct ipa_ep_context *ep)
