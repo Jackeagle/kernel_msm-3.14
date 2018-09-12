@@ -327,18 +327,17 @@ out_unlock:
 static int handle_egress_format(struct net_device *dev,
 				struct rmnet_ioctl_extended_s *e)
 {
-	struct ipa_sys_connect_params *wan_cfg;
+	struct ipa_sys_connect_params *wan_cfg = &rmnet_ipa_ctx->wan_prod_cfg;
+	struct ipa_ep_cfg *ep_cfg = &wan_cfg->ipa_ep_cfg;
 	enum ipa_client_type client = IPA_CLIENT_APPS_WAN_PROD;
 	enum ipa_client_type dst = IPA_CLIENT_APPS_WAN_PROD;
 	u32 chan_count = IPA_APPS_WWAN_PROD_RING_COUNT;
-	struct ipa_ep_cfg *ep_cfg;
 	u32 header_size = sizeof(struct rmnet_map_header_s);
+	enum ipa_cs_offload offload_type = IPA_CS_OFFLOAD_NONE;
+	u32 header_offset = 0;
 	u32 length_offset;
 	u32 prod_hdl;
 	int ret;
-
-	wan_cfg = &rmnet_ipa_ctx->wan_prod_cfg;
-	ep_cfg = &wan_cfg->ipa_ep_cfg;
 
 	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
@@ -351,14 +350,10 @@ static int handle_egress_format(struct net_device *dev,
 	prod_hdl = ret;
 
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_CHECKSUM) {
-		u32 hdr_offset = sizeof(struct rmnet_map_header_s) / 4;
-
+		header_offset = sizeof(struct rmnet_map_header_s) / 4;
 		header_size += sizeof(u32);
-		ipa_ep_prod_cs_offload(&ep_cfg->cfg, IPA_CS_OFFLOAD_UL,
-				       hdr_offset);
-	} else {
-		ipa_ep_prod_cs_offload(&ep_cfg->cfg, IPA_CS_OFFLOAD_NONE, 0);
 	}
+	ipa_ep_prod_cs_offload(&ep_cfg->cfg, offload_type, header_offset);
 
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_AGGREGATION) {
 		ipa_ep_prod_aggregation(&ep_cfg->aggr, IPA_ENABLE_DEAGGR,
