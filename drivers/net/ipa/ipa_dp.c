@@ -1492,9 +1492,6 @@ static int ipa_assign_policy(enum ipa_client_type client,
 			     struct ipa_sys_connect_params *in,
 			     struct ipa_sys_context *sys)
 {
-	struct ipa_ep_cfg_aggr *ep_cfg_aggr = &in->ipa_ep_cfg.aggr;
-	u32 byte_limit = ep_cfg_aggr->aggr_byte_limit * SZ_1K;
-
 	if (ipa_producer(client))
 		return 0;
 
@@ -1505,25 +1502,6 @@ static int ipa_assign_policy(enum ipa_client_type client,
 			  ipa_replenish_rx_work_func);
 
 	atomic_set(&sys->rx.curr_polling_state, 0);
-
-	/* Compute the buffer size required to handle the requested
-	 * aggregation byte limit.  The aggr_byte_limit value is
-	 * expressed as a number of KB, so we need to convert it to
-	 * bytes to determine the buffer size.
-	 *
-	 * The buffer will be sufficient to hold one IPA_MTU-sized
-	 * packet after the limit is reached.  (The size returned is
-	 * the computed maximum number of data bytes that can be
-	 * held in the buffer--no metadata/headers.)
-	 */
-	sys->rx.buff_sz = ipa_aggr_byte_limit_buf_size(byte_limit);
-	sys->rx.pool_sz = IPA_GENERIC_RX_POOL_SZ;
-
-	/* Account for the extra IPA_MTU past the limit in the
-	 * buffer, and convert the result to the KB units the
-	 * aggr_byte_limit uses.
-	 */
-	ep_cfg_aggr->aggr_byte_limit = (sys->rx.buff_sz - IPA_MTU) / SZ_1K;
 
 	if (client == IPA_CLIENT_APPS_LAN_CONS)
 		sys->rx.pyld_hdlr = ipa_lan_rx_pyld_hdlr;
@@ -1793,6 +1771,8 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 		       u32 chan_count, struct ipa_sys_connect_params *sys_in)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+	struct ipa_ep_cfg_aggr *ep_cfg_aggr = &sys_in->ipa_ep_cfg.aggr;
+	u32 byte_limit;
 	int ret;
 
 	/* Enable source notification status for exception packets
@@ -1804,8 +1784,6 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 	ipa_client_add();
 
 	if (ipa_consumer(ep->client)) {
-		struct ipa_ep_cfg_aggr *ep_cfg_aggr = &sys_in->ipa_ep_cfg.aggr;
-
 		ipa_ep_cons_status(&ep->status, true);
 
 		ep_cfg_aggr->aggr_en = IPA_ENABLE_AGGR;
@@ -1829,6 +1807,27 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 						IPA_GENERIC_AGGR_PKT_LIMIT;
 			}
 		}
+
+		/* Compute the buffer size required to handle the requested
+		 * aggregation byte limit.  The aggr_byte_limit value is
+		 * expressed as a number of KB, so we need to convert it to
+		 * bytes to determine the buffer size.
+		 *
+		 * The buffer will be sufficient to hold one IPA_MTU-sized
+		 * packet after the limit is reached.  (The size returned is
+		 * the computed maximum number of data bytes that can be
+		 * held in the buffer--no metadata/headers.)
+		 */
+		byte_limit = ep_cfg_aggr->aggr_byte_limit * SZ_1K;
+		ep->sys->rx.buff_sz = ipa_aggr_byte_limit_buf_size(byte_limit);
+		ep->sys->rx.pool_sz = IPA_GENERIC_RX_POOL_SZ;
+
+		/* Account for the extra IPA_MTU past the limit in the
+		 * buffer, and convert the result to the KB units the
+		 * aggr_byte_limit uses.
+		 */
+		ep_cfg_aggr->aggr_byte_limit =
+				(ep->sys->rx.buff_sz - IPA_MTU) / SZ_1K;
 	}
 
 	if (ipa_assign_policy(ep->client, sys_in, ep->sys)) {
