@@ -1493,7 +1493,7 @@ static int ipa_assign_policy(enum ipa_client_type client,
 			     struct ipa_sys_context *sys)
 {
 	struct ipa_ep_cfg_aggr *ep_cfg_aggr = &in->ipa_ep_cfg.aggr;
-	u32 byte_limit;
+	u32 byte_limit = ep_cfg_aggr->aggr_byte_limit * SZ_1K;
 
 	if (ipa_producer(client))
 		return 0;
@@ -1505,7 +1505,7 @@ static int ipa_assign_policy(enum ipa_client_type client,
 			  ipa_replenish_rx_work_func);
 
 	atomic_set(&sys->rx.curr_polling_state, 0);
-	sys->rx.buff_sz = ipa_aggr_byte_limit_buf_size(IPA_RX_BUFFER_SIZE);
+	sys->rx.buff_sz = ipa_aggr_byte_limit_buf_size(byte_limit);
 	sys->rx.pool_sz = IPA_GENERIC_RX_POOL_SZ;
 
 	if (client == IPA_CLIENT_APPS_LAN_CONS) {
@@ -1529,7 +1529,6 @@ static int ipa_assign_policy(enum ipa_client_type client,
 	 * the computed maximum number of data bytes that can be
 	 * held in the buffer--no metadata/headers.)
 	 */
-	byte_limit = ep_cfg_aggr->aggr_byte_limit * SZ_1K;
 	sys->rx.buff_sz = ipa_aggr_byte_limit_buf_size(byte_limit);
 
 	/* If the buffer size was reduced below the limit, adjust */
