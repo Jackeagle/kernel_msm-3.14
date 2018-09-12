@@ -356,7 +356,6 @@ static int handle_egress_format(struct net_device *dev,
 		header_offset = sizeof(struct rmnet_map_header_s) / 4;
 		header_size += sizeof(u32);
 	}
-	ipa_ep_prod_cs_offload(&ep_cfg->cfg, offload_type, header_offset);
 
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_AGGREGATION) {
 		aggr_en = IPA_ENABLE_DEAGGR;
@@ -364,23 +363,23 @@ static int handle_egress_format(struct net_device *dev,
 		length_offset = offsetof(struct rmnet_map_header_s, pkt_len);
 		header_pad = ilog2(sizeof(u32));
 	}
-	ipa_ep_prod_header_pad(&ep_cfg->hdr_ext, header_pad);
-	ipa_ep_prod_aggregation(&ep_cfg->aggr, aggr_en, aggr_type);
 
 	ipa_ep_prod_header(&ep_cfg->hdr, header_size, 0, length_offset);
-
+	ipa_ep_prod_header_pad(&ep_cfg->hdr_ext, header_pad);
+	ipa_ep_prod_cs_offload(&ep_cfg->cfg, offload_type, header_offset);
 	ipa_ep_prod_header_mode(&ep_cfg->mode, IPA_BASIC);
-
-	wan_cfg->notify = apps_ipa_tx_complete_notify;
-	wan_cfg->priv = dev;
-
-	/* Use a deferred interrupting no-op to reduce completion interrupts */
-	ipa_no_intr_init(prod_hdl);
-
+	ipa_ep_prod_aggregation(&ep_cfg->aggr, aggr_en, aggr_type);
 	/* Enable source notification status for exception packets
 	 * (i.e. QMAP commands) to be routed to modem.
 	 */
 	ipa_ep_prod_status(&ep_cfg->status, true, IPA_CLIENT_Q6_WAN_CONS);
+
+	wan_cfg->notify = apps_ipa_tx_complete_notify;
+	wan_cfg->priv = dev;
+	wan_cfg->napi_enabled = false;
+
+	/* Use a deferred interrupting no-op to reduce completion interrupts */
+	ipa_no_intr_init(prod_hdl);
 
 	ret = ipa_setup_sys_pipe(prod_hdl, dst, chan_count, 0, wan_cfg);
 	if (ret)
