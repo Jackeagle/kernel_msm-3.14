@@ -133,7 +133,6 @@ struct ipa_tag_completion {
 
 /* less 1 nominal MTU (1500 bytes) rounded to units of KB */
 #define IPA_MTU				1500
-#define IPA_ADJUST_AGGR_BYTE_LIMIT(X)	(((X) - IPA_MTU) / 1000)
 
 #define IPA_RX_BUFF_CLIENT_HEADROOM	256
 
@@ -1447,46 +1446,46 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u32 size)
 	ipa_replenish_rx_cache(sys);
 }
 
-static u32 ipa_aggr_byte_limit_adjust(struct ipa_sys_context *sys, u32 limit)
+/*
+ * Compute the buffer size required to support a requested aggregation
+ * byte limit.  Aggregration will close when *more* than the configured
+ * number of bytes have been added to an aggregation frame.  Our
+ * buffers therefore need to to be big enough to receive one complete
+ * packet once the configured byte limit has been consumed.
+ *
+ * An incoming packet can have as much as IPA_MTU of data in it, but
+ * the buffer also needs to be large enough to accomodate the standard
+ * socket buffer overhead (NET_SKB_PAD of headroom, plus an implied
+ * skb_shared_info structure at the end).
+ *
+ * So we compute the required buffer size by adding the standard
+ * socket buffer overhead and MTU to the requested size.  We round
+ * that down to a power of 2 in an effort to avoid fragmentation due
+ * to unaligned buffer sizes.
+ *
+ * After accounting for all of this, we return the number of bytes
+ * of buffer space the IPA hardware will know is available to hold
+ * received data (without any overhead).
+ */
+static u32 ipa_aggr_byte_limit_buf_size(u32 byte_limit)
 {
-	u32 adjusted;
+	/* Account for one additional packet, including overhead */
+	byte_limit += IPA_RX_BUFFER_RESERVED;
+	byte_limit += IPA_MTU;
 
-	/* We want to compute the aggregation byte limit to configure
-	 * to allow the requested number of bytes to be available
-	 * received data.  The limit supplied does not include
-	 * standard skb overhead, so start by adding that.
-	 */
-	limit += IPA_RX_BUFFER_RESERVED;
-
-	/* Aggregation will close when *more* than the configured
-	 * number of bytes have been added to the aggregation frame.
-	 * That means our buffer needs to be able to hold at least
-	 * one full MTU beyond the configured byte limit.  Add that
-	 * to ensure the buffer is big enough.
-	 */
-	limit += IPA_MTU;
-
-	/* Finally, we choose power-of-2 buffer sizes to alleviate
-	 * fragmentation.  Find a power-of-2 that's *less than* the
-	 * limit we need--so we start by subracting 1.  The highest
-	 * set bit in that is used to compute the power of 2.
+	/* Convert this size to a nearby power-of-2.  We choose one
+	 * that's *less than* the limit we seek--so we start by
+	 * subracting 1.  The highest set bit in that is used to
+	 * compute the power of 2.
+	 *
 	 * XXX Why is this *less than* and not possibly equal?
 	 */
-	limit 1 << __fls(limit - 1);
+	byte_limit = 1 << __fls(byte_limit - 1);
 
 	/* Given that size, figure out how much buffer space that
 	 * leaves us for received data.
 	 */
-	sys->rx.buff_sz = IPA_RX_BUFFER_AVAILABLE(limit);
-	ipa_err("set rx.buff_sz %u\n", adjusted);
-
-	if (sys->rx.buff_sz < limit)
-		limit = sys->rx.buff_sz;
-
-	limit = IPA_ADJUST_AGGR_BYTE_LIMIT(limit);
-	ipa_err("set aggr_limit %u\n", limit);
-
-	return limit;
+	return IPA_RX_BUFFER_AVAILABLE(byte_limit);
 }
 
 static int ipa_assign_policy(enum ipa_client_type client,
@@ -1520,8 +1519,24 @@ static int ipa_assign_policy(enum ipa_client_type client,
 	if (!ipa_ctx->ipa_client_apps_wan_cons_agg_gro)
 		return 0;
 
+	/* Compute the buffer size required to handle the requested
+	 * aggregation byte limit.  The buffer will be sufficient to
+	 * hold one IPA_MTU-sized packet after the limit is reached.
+	 * (The size returned is the computed maximum number of data
+	 * bytes that can be held in the buffer--no metadata/headers.)
+	 */
 	limit = ep_cfg_aggr->aggr_byte_limit;
-	ep_cfg_aggr->aggr_byte_limit = ipa_aggr_byte_limit_adjust(sys, limit);
+	sys->rx.buff_sz = ipa_aggr_byte_limit_buf_size(limit);
+
+	/* If the buffer size was reduced below the limit, adjust */
+	if (sys->rx.buff_sz < limit)
+		limit = sys->rx.buff_sz;
+
+	/* The limit is an IPA_MTU less than the buffer size. */
+	limit -= IPA_MTU;
+
+	/* Finally, the register value is expressed in KB */
+	ep_cfg_aggr->aggr_byte_limit = limit / SZ_1K;
 
 	return 0;
 }
