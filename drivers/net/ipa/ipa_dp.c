@@ -1531,15 +1531,11 @@ static int ipa_assign_policy(enum ipa_client_type client,
 	 */
 	sys->rx.buff_sz = ipa_aggr_byte_limit_buf_size(byte_limit);
 
-	/* If the buffer size was reduced below the limit, adjust */
-	if (sys->rx.buff_sz < byte_limit)
-		byte_limit = sys->rx.buff_sz;
-
-	/* The limit is an IPA_MTU less than the buffer size. */
-	byte_limit -= IPA_MTU;
-
-	/* Finally, convert the result back to KB */
-	ep_cfg_aggr->aggr_byte_limit = byte_limit / SZ_1K;
+	/* Account for the extra IPA_MTU past the limit in the
+	 * buffer, and convert the result to the KB units the
+	 * aggr_byte_limit uses.
+	 */
+	ep_cfg_aggr->aggr_byte_limit = (sys->rx.buff_sz - IPA_MTU) / SZ_1K;
 
 	return 0;
 }
