@@ -1558,8 +1558,7 @@ static long evt_ring_hdl_get(struct ipa_ep_context *ep, u32 fifo_count)
 	return gsi_alloc_evt_ring(ipa_ctx->gsi, ring_count, modt);
 }
 
-static int ipa_gsi_setup_channel(struct ipa_sys_connect_params *in,
-				 struct ipa_ep_context *ep, u32 chan_count)
+static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 chan_count)
 {
 	struct gsi_chan_props gsi_channel_props = { };
 	const struct ipa_gsi_ep_config *gsi_ep_info;
@@ -1790,7 +1789,7 @@ ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst, u32 chan_count,
 
 	ipa_debug("ep %u configuration successful\n", ipa_ep_idx);
 
-	ret = ipa_gsi_setup_channel(sys_in, ep, chan_count);
+	ret = ipa_gsi_setup_channel(ep, chan_count);
 	if (ret) {
 		ipa_err("Failed to setup GSI channel\n");
 		goto err_client_remove;
