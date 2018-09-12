@@ -123,15 +123,13 @@ struct ipa_tag_completion {
 
 #define IPA_RX_BUFFER_ORDER	1	/* Default RX buffer is 2^1 pages */
 #define IPA_RX_BUFFER_SIZE	(1 << (IPA_RX_BUFFER_ORDER + PAGE_SHIFT))
-#define IPA_REAL_GENERIC_RX_BUFF_SZ(X) \
-		(SKB_DATA_ALIGN((X) + NET_SKB_PAD) + \
-		 SKB_DATA_ALIGN(sizeof(struct skb_shared_info)))
-#define IPA_GENERIC_RX_BUFF_SZ(X) \
-	({ typeof(X) _x = (X); (_x - (IPA_REAL_GENERIC_RX_BUFF_SZ(_x) - _x)); })
 
 /* The amount of RX buffer space consumed by standard skb overhead */
 #define IPA_RX_BUFFER_RESERVED \
 	(IPA_RX_BUFFER_SIZE - SKB_MAX_ORDER(NET_SKB_PAD, IPA_RX_BUFFER_ORDER))
+
+/* RX buffer space remaining after standard overhead is consumed */
+#define IPA_RX_BUFFER_AVAILABLE(X)	((X) - IPA_RX_BUFFER_RESERVED)
 
 /* less 1 nominal MTU (1500 bytes) rounded to units of KB */
 #define IPA_MTU				1500
@@ -1456,7 +1454,7 @@ static u32 ipa_aggr_byte_limit_adjust(struct ipa_sys_context *sys, u32 limit)
 	u32 adjusted;
 
 	adjusted = ipa_adjust_ra_buff_base_sz(limit);
-	adjusted = IPA_GENERIC_RX_BUFF_SZ(adjusted);
+	adjusted = IPA_RX_BUFFER_AVAILABLE(adjusted);
 	sys->rx.buff_sz = adjusted;
 	ipa_err("set rx.buff_sz %u\n", adjusted);
 
@@ -1485,7 +1483,7 @@ static int ipa_assign_policy(enum ipa_client_type client,
 			  ipa_replenish_rx_work_func);
 
 	atomic_set(&sys->rx.curr_polling_state, 0);
-	sys->rx.buff_sz = IPA_GENERIC_RX_BUFF_SZ(IPA_RX_BUFFER_SIZE);
+	sys->rx.buff_sz = IPA_RX_BUFFER_AVAILABLE(IPA_RX_BUFFER_SIZE);
 	sys->rx.pool_sz = IPA_GENERIC_RX_POOL_SZ;
 
 	if (client == IPA_CLIENT_APPS_LAN_CONS) {
