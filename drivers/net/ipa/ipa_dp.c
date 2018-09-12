@@ -1493,7 +1493,7 @@ static int ipa_assign_policy(enum ipa_client_type client,
 			     struct ipa_sys_context *sys)
 {
 	struct ipa_ep_cfg_aggr *ep_cfg_aggr = &in->ipa_ep_cfg.aggr;
-	u32 limit;
+	u32 byte_limit;
 
 	if (ipa_producer(client))
 		return 0;
@@ -1520,23 +1520,27 @@ static int ipa_assign_policy(enum ipa_client_type client,
 		return 0;
 
 	/* Compute the buffer size required to handle the requested
-	 * aggregation byte limit.  The buffer will be sufficient to
-	 * hold one IPA_MTU-sized packet after the limit is reached.
-	 * (The size returned is the computed maximum number of data
-	 * bytes that can be held in the buffer--no metadata/headers.)
+	 * aggregation byte limit.  The aggr_byte_limit value is
+	 * expressed as a number of KB, so we need to convert it to
+	 * bytes to determine the buffer size.
+	 *
+	 * The buffer will be sufficient to hold one IPA_MTU-sized
+	 * packet after the limit is reached.  (The size returned is
+	 * the computed maximum number of data bytes that can be
+	 * held in the buffer--no metadata/headers.)
 	 */
-	limit = ep_cfg_aggr->aggr_byte_limit;
-	sys->rx.buff_sz = ipa_aggr_byte_limit_buf_size(limit);
+	byte_limit = ep_cfg_aggr->aggr_byte_limit * SZ_1K;
+	sys->rx.buff_sz = ipa_aggr_byte_limit_buf_size(byte_limit);
 
 	/* If the buffer size was reduced below the limit, adjust */
-	if (sys->rx.buff_sz < limit)
-		limit = sys->rx.buff_sz;
+	if (sys->rx.buff_sz < byte_limit)
+		byte_limit = sys->rx.buff_sz;
 
 	/* The limit is an IPA_MTU less than the buffer size. */
-	limit -= IPA_MTU;
+	byte_limit -= IPA_MTU;
 
-	/* Finally, the register value is expressed in KB */
-	ep_cfg_aggr->aggr_byte_limit = limit / SZ_1K;
+	/* Finally, convert the result back to KB */
+	ep_cfg_aggr->aggr_byte_limit = byte_limit / SZ_1K;
 
 	return 0;
 }
