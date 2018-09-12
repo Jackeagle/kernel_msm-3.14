@@ -243,10 +243,12 @@ static int handle_ingress_format(struct net_device *dev,
 	u32 header_size = sizeof(struct rmnet_map_header_s);
 	u32 metadata_offset = offsetof(struct rmnet_map_header_s, mux_id);
 	u32 length_offset = offsetof(struct rmnet_map_header_s, pkt_len);
+	enum ipa_cs_offload offload_type = IPA_CS_OFFLOAD_NONE;
+	u32 aggr_size = IPA_GENERIC_AGGR_BYTE_LIMIT;
+	u32 aggr_count = IPA_GENERIC_AGGR_PKT_LIMIT;
+	bool aggr_active = false;
 	u32 rx_buffer_size;
 	u32 byte_limit;
-	u32 agg_size;
-	u32 agg_count;
 	u32 cons_hdl;
 	int ret;
 
@@ -261,25 +263,17 @@ static int handle_ingress_format(struct net_device *dev,
 	cons_hdl = ret;
 
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_CHECKSUM)
-		ipa_ep_cons_cs_offload(&ep_cfg->cfg, IPA_CS_OFFLOAD_DL);
-	else
-		ipa_ep_cons_cs_offload(&ep_cfg->cfg, IPA_CS_OFFLOAD_NONE);
+		offload_type = IPA_CS_OFFLOAD_DL;
 
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA) {
-		agg_size = in->u.ingress_format.agg_size;
-		agg_count = in->u.ingress_format.agg_count;
+		aggr_size = in->u.ingress_format.agg_size;
+		aggr_count = in->u.ingress_format.agg_count;
+		aggr_active = true;
 
-		if (agg_size > ipa_reg_aggr_max_byte_limit())
+		if (aggr_size > ipa_reg_aggr_max_byte_limit())
 			return -EINVAL;
-		if (agg_count > ipa_reg_aggr_max_packet_limit())
+		if (aggr_count > ipa_reg_aggr_max_packet_limit())
 			return -EINVAL;
-
-		ipa_ctx->ipa_client_apps_wan_cons_agg_gro = true;
-		ipa_ep_cons_status(&ep_cfg->status, false);
-	} else  {
-		ipa_ep_cons_status(&ep_cfg->status, true);
-		agg_size = IPA_GENERIC_AGGR_BYTE_LIMIT;
-		agg_count = IPA_GENERIC_AGGR_PKT_LIMIT;
 	}
 
 	/* Compute the buffer size required to handle the requested
@@ -292,28 +286,28 @@ static int handle_ingress_format(struct net_device *dev,
 	 * the computed maximum number of data bytes that can be
 	 * held in the buffer--no metadata/headers.)
 	 */
-	byte_limit = agg_size * SZ_1K;
+	byte_limit = aggr_size * SZ_1K;
 	rx_buffer_size = ipa_aggr_byte_limit_buf_size(byte_limit);
 
 	/* Account for the extra IPA_MTU past the limit in the
 	 * buffer, and convert the result to the KB units the
 	 * aggr_byte_limit uses.
 	 */
-	agg_size = (rx_buffer_size - IPA_MTU) / SZ_1K;
-
-	ipa_ep_cons_aggregation(&ep_cfg->aggr, agg_size, agg_count, true);
+	aggr_size = (rx_buffer_size - IPA_MTU) / SZ_1K;
 
 	ipa_ep_cons_header(&ep_cfg->hdr, header_size, metadata_offset,
 			   length_offset);
-
 	ipa_ep_cons_header_ext(&ep_cfg->hdr_ext, 0, true);
-
+	ipa_ep_cons_aggregation(&ep_cfg->aggr, aggr_size, aggr_count, true);
+	ipa_ep_cons_cs_offload(&ep_cfg->cfg, offload_type);
 	ipa_ep_cons_metadata_mask(&ep_cfg->metadata_mask, 0xff000000);
+	ipa_ep_cons_status(&ep_cfg->status, !aggr_active);
 
 	wan_cfg->notify = apps_ipa_packet_receive_notify;
 	wan_cfg->priv = dev;
-
 	wan_cfg->napi_enabled = true;
+
+	ipa_ctx->ipa_client_apps_wan_cons_agg_gro = aggr_active;
 
 	ret = ipa_setup_sys_pipe(cons_hdl, client, chan_count, rx_buffer_size,
 				 wan_cfg);
