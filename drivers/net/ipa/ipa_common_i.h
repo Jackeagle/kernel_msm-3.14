@@ -8,6 +8,8 @@
 
 #include <linux/slab.h>
 
+#include "ipa_reg.h"
+
 /** enum ipa_irq_type - IPA Interrupt Type
  * Used to register handlers for IPA interrupts
  *
@@ -409,6 +411,8 @@ struct ipa_ep_cfg {
 	struct ipa_ep_cfg_aggr aggr;
 	struct ipa_ep_cfg_cfg cfg;
 	struct ipa_ep_cfg_metadata_mask metadata_mask;
+
+	struct ipa_reg_endp_status status;
 };
 
 #define ipa_debug(fmt, args...) \

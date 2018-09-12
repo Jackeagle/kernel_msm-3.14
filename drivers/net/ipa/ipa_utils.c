@@ -792,6 +792,11 @@ ipa_cfg_ep_status(u32 clnt_hdl, const struct ipa_reg_endp_status *status)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
 
+	ep->status.status_en = status->status_en;
+	ep->status.status_endp = status->status_endp;
+	ep->status.status_location = status->status_location;
+	ep->status.status_pkt_suppress = status->status_pkt_suppress;
+
 	ipa_write_reg_n_fields(IPA_ENDP_STATUS_N, clnt_hdl, &ep->status);
 }
 
@@ -810,8 +815,6 @@ ipa_cfg_ep_status(u32 clnt_hdl, const struct ipa_reg_endp_status *status)
 void ipa_cfg_ep(u32 clnt_hdl, enum ipa_client_type dst,
 		const struct ipa_ep_cfg *ipa_ep_cfg)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
-
 	ipa_cfg_ep_hdr(clnt_hdl, &ipa_ep_cfg->hdr);
 	ipa_cfg_ep_hdr_ext(clnt_hdl, &ipa_ep_cfg->hdr_ext);
 
@@ -828,7 +831,7 @@ void ipa_cfg_ep(u32 clnt_hdl, enum ipa_client_type dst,
 		ipa_cfg_ep_metadata_mask(clnt_hdl, &ipa_ep_cfg->metadata_mask);
 	}
 
-	ipa_cfg_ep_status(clnt_hdl, &ep->status);
+	ipa_cfg_ep_status(clnt_hdl, &ipa_ep_cfg->status);
 }
 
 static void suspend_consumer_endpoint(u32 ipa_ep_idx)

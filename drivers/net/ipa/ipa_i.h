@@ -246,8 +246,8 @@ struct ipa_ep_context {
 	struct ipa_reg_endp_init_aggr init_aggr;
 	struct ipa_reg_endp_init_cfg init_cfg;
 	struct ipa_reg_endp_init_hdr_metadata_mask init_hdr_metadata_mask;
-
 	struct ipa_reg_endp_status status;
+
 	u32 dst_pipe_index;
 	u32 rt_tbl_idx;
 	void *priv;
