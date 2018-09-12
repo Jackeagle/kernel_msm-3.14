@@ -342,16 +342,6 @@ static int handle_egress_format(struct net_device *dev,
 	u32 prod_hdl;
 	int ret;
 
-	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
-
-	ret = ipa_ep_alloc(client);
-	if (ret < 0) {
-		mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
-
-		return ret;
-	}
-	prod_hdl = ret;
-
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_CHECKSUM) {
 		header_offset = sizeof(struct rmnet_map_header_s) / 4;
 		header_size += sizeof(u32);
@@ -363,6 +353,18 @@ static int handle_egress_format(struct net_device *dev,
 		length_offset = offsetof(struct rmnet_map_header_s, pkt_len);
 		header_pad = ilog2(sizeof(u32));
 	}
+
+	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
+
+	if (rmnet_ipa_ctx->wan_prod_hdl != IPA_CLNT_HDL_BAD) {
+		ret = -EBUSY;
+		goto out_unlock;
+	}
+
+	ret = ipa_ep_alloc(client);
+	if (ret < 0)
+		goto out_unlock;
+	prod_hdl = ret;
 
 	ipa_ep_prod_header(&ep_cfg->hdr, header_size, 0, length_offset);
 	ipa_ep_prod_header_pad(&ep_cfg->hdr_ext, header_pad);
@@ -387,6 +389,7 @@ static int handle_egress_format(struct net_device *dev,
 	else
 		rmnet_ipa_ctx->wan_prod_hdl = prod_hdl;
 
+out_unlock:
 	mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
 	return ret;
