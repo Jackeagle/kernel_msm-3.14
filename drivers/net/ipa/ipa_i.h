@@ -472,8 +472,9 @@ void ipa_ep_prod_header_mode(struct ipa_ep_cfg_mode *mode,
 void ipa_ep_prod_aggregation(struct ipa_ep_cfg_aggr *aggr,
 			     enum ipa_aggr_en_type aggr_en,
 			     enum ipa_aggr_type aggr_type);
-void ipa_ep_prod_cs_offload_enable(struct ipa_ep_cfg_cfg *cfg,
-				   u32 metadata_offset);
+void ipa_ep_prod_cs_offload(struct ipa_ep_cfg_cfg *cfg,
+		            enum ipa_cs_offload offload_type,
+			    u32 metadata_offset);
 
 void ipa_ep_prod_status(struct ipa_reg_endp_status *status, bool enable,
 			enum ipa_client_type client);

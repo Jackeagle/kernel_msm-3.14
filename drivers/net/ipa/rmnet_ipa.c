@@ -354,7 +354,10 @@ static int handle_egress_format(struct net_device *dev,
 		u32 hdr_offset = sizeof(struct rmnet_map_header_s) / 4;
 
 		header_size += sizeof(u32);
-		ipa_ep_prod_cs_offload_enable(&ep_cfg->cfg, hdr_offset);
+		ipa_ep_prod_cs_offload(&ep_cfg->cfg, IPA_CS_OFFLOAD_UL,
+				       hdr_offset);
+	} else {
+		ipa_ep_prod_cs_offload(&ep_cfg->cfg, IPA_CS_OFFLOAD_NONE, 0);
 	}
 
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_AGGREGATION) {

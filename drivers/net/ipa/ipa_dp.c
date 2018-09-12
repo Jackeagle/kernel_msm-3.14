@@ -1699,10 +1699,11 @@ void ipa_ep_prod_aggregation(struct ipa_ep_cfg_aggr *aggr,
 	aggr->aggr_sw_eof_active = false;
 }
 
-void
-ipa_ep_prod_cs_offload_enable(struct ipa_ep_cfg_cfg *cfg, u32 metadata_offset)
+void ipa_ep_prod_cs_offload(struct ipa_ep_cfg_cfg *cfg,
+		           enum ipa_cs_offload offload_type,
+			   u32 metadata_offset)
 {
-	cfg->cs_offload_en = IPA_CS_OFFLOAD_UL;
+	cfg->cs_offload_en = offload_type;
 	cfg->cs_metadata_hdr_offset = metadata_offset;
 }
 
