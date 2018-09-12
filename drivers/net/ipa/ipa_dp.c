@@ -1637,7 +1637,10 @@ void ipa_ep_cons_header_ext(struct ipa_ep_cfg_hdr_ext *hdr_ext,
 
 void ipa_ep_cons_aggregation(struct ipa_ep_cfg_aggr *aggr, u32 size, u32 count)
 {
+	aggr->aggr_en = IPA_ENABLE_AGGR;
+	aggr->aggr = IPA_GENERIC;
 	aggr->aggr_byte_limit = size;
+	aggr->aggr_time_limit = IPA_GENERIC_AGGR_TIME_LIMIT;
 	aggr->aggr_pkt_limit = count;
 }
 
@@ -1783,9 +1786,6 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 	if (ipa_consumer(ep->client)) {
 		ipa_ep_cons_status(&ep->status, true);
 
-		ep_cfg_aggr->aggr_en = IPA_ENABLE_AGGR;
-		ep_cfg_aggr->aggr = IPA_GENERIC;
-		ep_cfg_aggr->aggr_time_limit = IPA_GENERIC_AGGR_TIME_LIMIT;
 		if (ep->client == IPA_CLIENT_APPS_LAN_CONS) {
 			ep_cfg_aggr->aggr_byte_limit =
 					IPA_GENERIC_AGGR_BYTE_LIMIT;
