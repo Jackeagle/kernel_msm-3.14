@@ -503,6 +503,8 @@ static int setup_apps_lan_cons_pipe(void)
 
 	ipa_ep_cons_cs_offload_enable(&ep_cfg->cfg);
 
+	ipa_ep_cons_status(&ep_cfg->status, true);
+
 	ret = ipa_setup_sys_pipe(cons_hdl, client, chan_count, &sys_in);
 	if (ret < 0) {
 		ipa_ep_free(cons_hdl);

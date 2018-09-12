@@ -1779,8 +1779,6 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 	int ret;
 
 	if (ipa_consumer(ep->client)) {
-		ipa_ep_cons_status(ep_cfg_status, true);
-
 		if (ep->client == IPA_CLIENT_APPS_LAN_CONS) {
 			ep_cfg_aggr->aggr_byte_limit =
 					IPA_GENERIC_AGGR_BYTE_LIMIT;

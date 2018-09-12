@@ -280,6 +280,8 @@ static int handle_ingress_format(struct net_device *dev,
 
 	ipa_ep_cons_metadata_mask(&ep_cfg->metadata_mask, 0xff000000);
 
+	ipa_ep_cons_status(&ep_cfg->status, true);
+
 	wan_cfg->notify = apps_ipa_packet_receive_notify;
 	wan_cfg->priv = dev;
 
