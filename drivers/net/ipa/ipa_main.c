@@ -495,21 +495,14 @@ static int setup_apps_lan_cons_pipe(void)
 	u32 cons_hdl;
 	int ret;
 
-	ret = ipa_ep_alloc(client);
-	if (ret < 0)
-		return ret;
-	cons_hdl = ret;
+	if (aggr_size > ipa_reg_aggr_max_byte_limit())
+		return -EINVAL;
 
-	sys_in.notify = ipa_lan_rx_cb;
-	sys_in.priv = NULL;
+	if (aggr_count > ipa_reg_aggr_max_packet_limit())
+		return -EINVAL;
 
-	ipa_ep_cons_header(&ep_cfg->hdr, IPA_LAN_RX_HEADER_LENGTH, 0, 0);
-
-	ipa_ep_cons_header_ext(&ep_cfg->hdr_ext, ilog2(sizeof(u32)), false);
-
-	ipa_ep_cons_cs_offload(&ep_cfg->cfg, IPA_CS_OFFLOAD_DL);
-
-	ipa_ep_cons_status(&ep_cfg->status, true);
+	if (ipa_ctx->clnt_hdl_lan_cons != IPA_CLNT_HDL_BAD)
+		return -EBUSY;
 
 	/* Compute the buffer size required to handle the requested
 	 * aggregation byte limit.  The aggr_byte_limit value is
@@ -530,7 +523,21 @@ static int setup_apps_lan_cons_pipe(void)
 	 */
 	aggr_size = (rx_buffer_size - IPA_MTU) / SZ_1K;
 
+	ret = ipa_ep_alloc(client);
+	if (ret < 0)
+		return ret;
+	cons_hdl = ret;
+
+	ipa_ep_cons_header(&ep_cfg->hdr, IPA_LAN_RX_HEADER_LENGTH, 0, 0);
+	ipa_ep_cons_header_ext(&ep_cfg->hdr_ext, ilog2(sizeof(u32)), false);
 	ipa_ep_cons_aggregation(&ep_cfg->aggr, aggr_size, aggr_count, false);
+	ipa_ep_cons_cs_offload(&ep_cfg->cfg, IPA_CS_OFFLOAD_DL);
+	ipa_ep_cons_metadata_mask(&ep_cfg->metadata_mask, 0x0);
+	ipa_ep_cons_status(&ep_cfg->status, true);
+
+	sys_in.notify = ipa_lan_rx_cb;
+	sys_in.priv = NULL;
+	sys_in.napi_enabled = false;
 
 	ret = ipa_setup_sys_pipe(cons_hdl, client, chan_count, rx_buffer_size,
 				 &sys_in);
