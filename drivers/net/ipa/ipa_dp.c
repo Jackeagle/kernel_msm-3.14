@@ -1481,28 +1481,6 @@ u32 ipa_aggr_byte_limit_buf_size(u32 byte_limit)
 	return IPA_RX_BUFFER_AVAILABLE(byte_limit);
 }
 
-static int ipa_assign_policy(enum ipa_client_type client,
-			     struct ipa_sys_context *sys)
-{
-	if (ipa_producer(client))
-		return 0;
-
-	INIT_WORK(&sys->rx.work, ipa_wq_handle_rx);
-	INIT_DELAYED_WORK(&sys->rx.switch_to_intr_work,
-			  ipa_switch_to_intr_rx_work_func);
-	INIT_DELAYED_WORK(&sys->rx.replenish_work,
-			  ipa_replenish_rx_work_func);
-
-	atomic_set(&sys->rx.curr_polling_state, 0);
-
-	if (client == IPA_CLIENT_APPS_LAN_CONS)
-		sys->rx.pyld_hdlr = ipa_lan_rx_pyld_hdlr;
-	else
-		sys->rx.pyld_hdlr = ipa_wan_rx_pyld_hdlr;
-
-	return 0;
-}
-
 void ipa_gsi_irq_tx_notify_cb(void *xfer_data)
 {
 	struct ipa_tx_pkt_wrapper *tx_pkt = xfer_data;
@@ -1775,14 +1753,18 @@ ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst, u32 chan_count,
 	int ret;
 
 	if (ipa_consumer(ep->client)) {
+		atomic_set(&ep->sys->rx.curr_polling_state, 0);
+		INIT_DELAYED_WORK(&ep->sys->rx.switch_to_intr_work,
+				  ipa_switch_to_intr_rx_work_func);
+		if (ep->client == IPA_CLIENT_APPS_LAN_CONS)
+			ep->sys->rx.pyld_hdlr = ipa_lan_rx_pyld_hdlr;
+		else
+			ep->sys->rx.pyld_hdlr = ipa_wan_rx_pyld_hdlr;
 		ep->sys->rx.buff_sz = rx_buffer_size;
 		ep->sys->rx.pool_sz = IPA_GENERIC_RX_POOL_SZ;
-	}
-
-	if (ipa_assign_policy(ep->client, ep->sys)) {
-		ipa_err("failed to sys ctx for client %d\n", ep->client);
-		ret = -ENOMEM;
-		goto err_client_remove;
+		INIT_WORK(&ep->sys->rx.work, ipa_wq_handle_rx);
+		INIT_DELAYED_WORK(&ep->sys->rx.replenish_work,
+				  ipa_replenish_rx_work_func);
 	}
 
 	ep->client_notify = sys_in->notify;
