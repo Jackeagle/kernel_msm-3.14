@@ -1505,6 +1505,17 @@ static int ipa_assign_policy(enum ipa_client_type client,
 			  ipa_replenish_rx_work_func);
 
 	atomic_set(&sys->rx.curr_polling_state, 0);
+
+	/* Compute the buffer size required to handle the requested
+	 * aggregation byte limit.  The aggr_byte_limit value is
+	 * expressed as a number of KB, so we need to convert it to
+	 * bytes to determine the buffer size.
+	 *
+	 * The buffer will be sufficient to hold one IPA_MTU-sized
+	 * packet after the limit is reached.  (The size returned is
+	 * the computed maximum number of data bytes that can be
+	 * held in the buffer--no metadata/headers.)
+	 */
 	sys->rx.buff_sz = ipa_aggr_byte_limit_buf_size(byte_limit);
 	sys->rx.pool_sz = IPA_GENERIC_RX_POOL_SZ;
 
@@ -1518,18 +1529,6 @@ static int ipa_assign_policy(enum ipa_client_type client,
 
 	if (!ipa_ctx->ipa_client_apps_wan_cons_agg_gro)
 		return 0;
-
-	/* Compute the buffer size required to handle the requested
-	 * aggregation byte limit.  The aggr_byte_limit value is
-	 * expressed as a number of KB, so we need to convert it to
-	 * bytes to determine the buffer size.
-	 *
-	 * The buffer will be sufficient to hold one IPA_MTU-sized
-	 * packet after the limit is reached.  (The size returned is
-	 * the computed maximum number of data bytes that can be
-	 * held in the buffer--no metadata/headers.)
-	 */
-	sys->rx.buff_sz = ipa_aggr_byte_limit_buf_size(byte_limit);
 
 	/* Account for the extra IPA_MTU past the limit in the
 	 * buffer, and convert the result to the KB units the
