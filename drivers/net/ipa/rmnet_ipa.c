@@ -245,6 +245,8 @@ static int handle_ingress_format(struct net_device *dev,
 	u32 length_offset = offsetof(struct rmnet_map_header_s, pkt_len);
 	u32 rx_buffer_size;
 	u32 byte_limit;
+	u32 agg_size;
+	u32 agg_count;
 	u32 cons_hdl;
 	int ret;
 
@@ -263,23 +265,22 @@ static int handle_ingress_format(struct net_device *dev,
 
 	ep_cfg->aggr.aggr_sw_eof_active = true;
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA) {
-		u32 agg_size = in->u.ingress_format.agg_size;
-		u32 agg_count = in->u.ingress_format.agg_count;
+		agg_size = in->u.ingress_format.agg_size;
+		agg_count = in->u.ingress_format.agg_count;
 
 		if (agg_size > ipa_reg_aggr_max_byte_limit())
 			return -EINVAL;
 		if (agg_count > ipa_reg_aggr_max_packet_limit())
 			return -EINVAL;
 
-		ipa_ep_cons_aggregation(&ep_cfg->aggr, agg_size, agg_count);
-
 		ipa_ctx->ipa_client_apps_wan_cons_agg_gro = true;
 		ipa_ep_cons_status(&ep_cfg->status, false);
 	} else  {
 		ipa_ep_cons_status(&ep_cfg->status, true);
-		ep_cfg->aggr.aggr_byte_limit = IPA_GENERIC_AGGR_BYTE_LIMIT;
-		ep_cfg->aggr.aggr_pkt_limit = IPA_GENERIC_AGGR_PKT_LIMIT;
+		agg_size = IPA_GENERIC_AGGR_BYTE_LIMIT;
+		agg_count = IPA_GENERIC_AGGR_PKT_LIMIT;
 	}
+	ipa_ep_cons_aggregation(&ep_cfg->aggr, agg_size, agg_count);
 
 	/* Compute the buffer size required to handle the requested
 	 * aggregation byte limit.  The aggr_byte_limit value is
@@ -291,7 +292,7 @@ static int handle_ingress_format(struct net_device *dev,
 	 * the computed maximum number of data bytes that can be
 	 * held in the buffer--no metadata/headers.)
 	 */
-	byte_limit = ep_cfg->aggr.aggr_byte_limit * SZ_1K;
+	byte_limit = agg_size * SZ_1K;
 	rx_buffer_size = ipa_aggr_byte_limit_buf_size(byte_limit);
 
 	/* Account for the extra IPA_MTU past the limit in the
