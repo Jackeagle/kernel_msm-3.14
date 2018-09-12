@@ -1489,7 +1489,6 @@ static u32 ipa_aggr_byte_limit_buf_size(u32 byte_limit)
 }
 
 static int ipa_assign_policy(enum ipa_client_type client,
-			     struct ipa_sys_connect_params *in,
 			     struct ipa_sys_context *sys)
 {
 	if (ipa_producer(client))
@@ -1830,7 +1829,7 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 				(ep->sys->rx.buff_sz - IPA_MTU) / SZ_1K;
 	}
 
-	if (ipa_assign_policy(ep->client, sys_in, ep->sys)) {
+	if (ipa_assign_policy(ep->client, ep->sys)) {
 		ipa_err("failed to sys ctx for client %d\n", ep->client);
 		ret = -ENOMEM;
 		goto err_client_remove;
