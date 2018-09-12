@@ -355,6 +355,11 @@ static int handle_egress_format(struct net_device *dev,
 	/* Use a deferred interrupting no-op to reduce completion interrupts */
 	ipa_no_intr_init(prod_hdl);
 
+	/* Enable source notification status for exception packets
+	 * (i.e. QMAP commands) to be routed to modem.
+	 */
+	ipa_ep_prod_status(&ep_cfg->status, true, IPA_CLIENT_Q6_WAN_CONS);
+
 	ret = ipa_setup_sys_pipe(prod_hdl, dst, chan_count, wan_cfg);
 	if (ret < 0) {
 		ipa_ep_free(prod_hdl);

@@ -1778,12 +1778,6 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 	u32 byte_limit;
 	int ret;
 
-	/* Enable source notification status for exception packets
-	 * (i.e. QMAP commands) to be routed to modem.
-	 */
-	if (ep->client == IPA_CLIENT_APPS_WAN_PROD)
-		ipa_ep_prod_status(ep_cfg_status, true, IPA_CLIENT_Q6_WAN_CONS);
-
 	if (ipa_consumer(ep->client)) {
 		ipa_ep_cons_status(ep_cfg_status, true);
 
