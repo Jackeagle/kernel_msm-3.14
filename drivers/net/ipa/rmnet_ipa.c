@@ -283,6 +283,12 @@ static int handle_ingress_format(struct net_device *dev,
 
 	ipa_ep_cons_metadata_mask(&ep_cfg->metadata_mask, 0xff000000);
 
+	ep_cfg->aggr.aggr_sw_eof_active = true;
+
+	if (!ipa_ctx->ipa_client_apps_wan_cons_agg_gro) {
+		ep_cfg->aggr.aggr_byte_limit = IPA_GENERIC_AGGR_BYTE_LIMIT;
+		ep_cfg->aggr.aggr_pkt_limit = IPA_GENERIC_AGGR_PKT_LIMIT;
+	}
 
 	wan_cfg->notify = apps_ipa_packet_receive_notify;
 	wan_cfg->priv = dev;

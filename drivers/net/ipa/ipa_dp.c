@@ -1774,17 +1774,6 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst,
 	int ret;
 
 	if (ipa_consumer(ep->client)) {
-		if (ep->client != IPA_CLIENT_APPS_LAN_CONS) {
-			ep_cfg_aggr->aggr_sw_eof_active = true;
-
-			if (!ipa_ctx->ipa_client_apps_wan_cons_agg_gro) {
-				ep_cfg_aggr->aggr_byte_limit =
-						IPA_GENERIC_AGGR_BYTE_LIMIT;
-				ep_cfg_aggr->aggr_pkt_limit =
-						IPA_GENERIC_AGGR_PKT_LIMIT;
-			}
-		}
-
 		/* Compute the buffer size required to handle the requested
 		 * aggregation byte limit.  The aggr_byte_limit value is
 		 * expressed as a number of KB, so we need to convert it to
