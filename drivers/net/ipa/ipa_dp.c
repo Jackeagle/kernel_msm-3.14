@@ -1764,7 +1764,7 @@ void ipa_ep_free(u32 ipa_ep_idx)
  *  - Creates a GPI connection with IPA.
  *  - allocate descriptor FIFO
  *
- * Returns:	client handle on success, negative on failure
+ * Returns:	0 on success, negative on failure
  */
 int
 ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst, u32 chan_count,
@@ -1803,13 +1803,8 @@ ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst, u32 chan_count,
 	if (ipa_consumer(ep->client))
 		ipa_replenish_rx_cache(ep->sys);
 
-	ipa_client_remove();
-
 	ipa_debug("client %d (ep: %u) connected sys=%p\n", ep->client,
 		  ipa_ep_idx, ep->sys);
-
-	return ipa_ep_idx;
-
 err_client_remove:
 	ipa_client_remove();
 
