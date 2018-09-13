@@ -627,23 +627,15 @@ static void ipa_endp_init_aggr_write(u32 clnt_hdl)
 			       &ep->init_aggr);
 }
 
-/** ipa_cfg_ep_cfg() - IPA end-point cfg configuration
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg: [in] IPA end-point configuration params
+/** ipa_endp_init_cfg_write() - write endpoint configuration register
  *
- * Note:	Should not be called from atomic context
+ * @ipa_ep_idx:	endpoint whose configuration register should be written
  */
-static void ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
+static void ipa_endp_init_cfg_write(u32 ipa_ep_idx)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 
-	ep->init_cfg.frag_offload_en = 0;
-	ep->init_cfg.cs_offload_en = cfg->cs_offload_en;
-	ep->init_cfg.cs_metadata_hdr_offset = cfg->cs_metadata_hdr_offset;
-	ep->init_cfg.cs_gen_qmb_master_sel = 0;
-
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_CFG_N, clnt_hdl,
-			       &ep->init_cfg);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_CFG_N, ipa_ep_idx, &ep->init_cfg);
 }
 
 /** ipa_endp_init_mode_write() - write endpoint mode register
@@ -748,8 +740,7 @@ void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 	ipa_endp_init_hdr_ext_write(clnt_hdl);
 
 	ipa_endp_init_aggr_write(clnt_hdl);
-
-	ipa_cfg_ep_cfg(clnt_hdl, &ipa_ep_cfg->cfg);
+	ipa_endp_init_cfg_write(clnt_hdl);
 
 	if (ipa_producer(ipa_ctx->ep[clnt_hdl].client)) {
 		ipa_endp_init_mode_write(clnt_hdl);

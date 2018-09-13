@@ -1635,11 +1635,20 @@ void ipa_endp_init_aggr_prod(u32 ipa_ep_idx, enum ipa_aggr_en aggr_en,
 	ipa_reg_endp_init_aggr_prod(&ep->init_aggr, aggr_en, aggr_type);
 }
 
-void ipa_ep_cons_cs_offload(struct ipa_ep_cfg_cfg *cfg,
-			    enum ipa_cs_offload_en offload_type)
+void ipa_endp_init_cfg_cons(u32 ipa_ep_idx, enum ipa_cs_offload_en offload_type)
 {
-	cfg->cs_offload_en = offload_type;
-	cfg->cs_metadata_hdr_offset = 0;	/* ignored */
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+
+	ipa_reg_endp_init_cfg_cons(&ep->init_cfg, offload_type);
+}
+
+void ipa_endp_init_cfg_prod(u32 ipa_ep_idx, enum ipa_cs_offload_en offload_type,
+			    u32 metadata_offset)
+{
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+
+	ipa_reg_endp_init_cfg_prod(&ep->init_cfg, offload_type,
+				   metadata_offset);
 }
 
 void ipa_ep_cons_metadata_mask(struct ipa_ep_cfg_metadata_mask *mask,
@@ -1672,14 +1681,6 @@ void ipa_endp_init_mode_prod(u32 ipa_ep_idx, enum ipa_mode mode,
 	u32 dst_ep_idx = ipa_get_ep_mapping(dst_client);
 
 	ipa_reg_endp_init_mode_prod(&ep->init_mode, mode, dst_ep_idx);
-}
-
-void ipa_ep_prod_cs_offload(struct ipa_ep_cfg_cfg *cfg,
-		           enum ipa_cs_offload_en offload_type,
-			   u32 metadata_offset)
-{
-	cfg->cs_offload_en = offload_type;
-	cfg->cs_metadata_hdr_offset = metadata_offset;
 }
 
 void ipa_ep_prod_status(struct ipa_reg_endp_status *status, bool enable,
