@@ -243,7 +243,7 @@ static int handle_ingress_format(struct net_device *dev,
 	u32 header_size = sizeof(struct rmnet_map_header_s);
 	u32 metadata_offset = offsetof(struct rmnet_map_header_s, mux_id);
 	u32 length_offset = offsetof(struct rmnet_map_header_s, pkt_len);
-	enum ipa_cs_offload offload_type = IPA_CS_OFFLOAD_NONE;
+	enum ipa_cs_offload_en offload_type = IPA_CS_OFFLOAD_NONE;
 	u32 aggr_size = IPA_GENERIC_AGGR_BYTE_LIMIT;
 	u32 aggr_count = IPA_GENERIC_AGGR_PKT_LIMIT;
 	bool aggr_active = false;
@@ -333,7 +333,7 @@ static int handle_egress_format(struct net_device *dev,
 	enum ipa_client_type dst = IPA_CLIENT_APPS_WAN_PROD;
 	u32 chan_count = IPA_APPS_WWAN_PROD_RING_COUNT;
 	u32 header_size = sizeof(struct rmnet_map_header_s);
-	enum ipa_cs_offload offload_type = IPA_CS_OFFLOAD_NONE;
+	enum ipa_cs_offload_en offload_type = IPA_CS_OFFLOAD_NONE;
 	enum ipa_aggr_en aggr_en = IPA_BYPASS_AGGR;
 	enum ipa_aggr_type aggr_type = 0;	/* ignored if BYPASS */
 	u32 header_offset = 0;

@@ -295,6 +295,14 @@ struct ipa_reg_endp_init_seq {
 	u32 dps_rep_seq_type;
 };
 
+/** enum ipa_cs_offload_en - checksum offload setting */
+enum ipa_cs_offload_en {
+	IPA_CS_OFFLOAD_NONE	= 0,
+	IPA_CS_OFFLOAD_UL	= 1,
+	IPA_CS_OFFLOAD_DL	= 2,
+	IPA_CS_RSVD
+};
+
 /** struct ipa_reg_endp_init_cfg - IPA_ENDP_INIT_CFG_N field structure
  *
  * @frag_offload_en:

@@ -1618,7 +1618,7 @@ void ipa_ep_cons_aggregation(struct ipa_ep_cfg_aggr *aggr, u32 size, u32 count,
 }
 
 void ipa_ep_cons_cs_offload(struct ipa_ep_cfg_cfg *cfg,
-			    enum ipa_cs_offload offload_type)
+			    enum ipa_cs_offload_en offload_type)
 {
 	cfg->cs_offload_en = offload_type;
 	cfg->cs_metadata_hdr_offset = 0;	/* ignored */
@@ -1678,7 +1678,7 @@ void ipa_ep_prod_aggregation(struct ipa_ep_cfg_aggr *aggr,
 }
 
 void ipa_ep_prod_cs_offload(struct ipa_ep_cfg_cfg *cfg,
-		           enum ipa_cs_offload offload_type,
+		           enum ipa_cs_offload_en offload_type,
 			   u32 metadata_offset)
 {
 	cfg->cs_offload_en = offload_type;

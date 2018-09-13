@@ -184,14 +184,6 @@ struct ipa_active_client_logging_info {
 	int line;
 };
 
-/** enum ipa_cs_offload - checksum offload setting */
-enum ipa_cs_offload {
-	IPA_CS_OFFLOAD_NONE	= 0,
-	IPA_CS_OFFLOAD_UL	= 1,
-	IPA_CS_OFFLOAD_DL	= 2,
-	IPA_CS_RSVD
-};
-
 /** enum ipa_dp_evt_type - type of event client callback is
  * invoked for on data path
  * @IPA_RECEIVE: data is struct sk_buff
@@ -354,7 +346,7 @@ struct ipa_ep_cfg_aggr {
  *	pipes only (IPA consumer)
  */
 struct ipa_ep_cfg_cfg {
-	enum ipa_cs_offload cs_offload_en;
+	enum ipa_cs_offload_en cs_offload_en;
 	u8 cs_metadata_hdr_offset;
 };
 
