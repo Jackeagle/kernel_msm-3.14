@@ -522,6 +522,13 @@ enum ipa_client_type ipa_get_client_mapping(u32 pipe_idx)
 	return ipa_ctx->ep[pipe_idx].client;
 }
 
+enum ipa_seq_type ipa_endp_seq_type(u32 ipa_ep_idx)
+{
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+
+	return ep_configuration(ep->client)->seq_type;
+}
+
 /** ipa_sram_settings_read() - Read SRAM settings from HW
  *
  * Returns:	None

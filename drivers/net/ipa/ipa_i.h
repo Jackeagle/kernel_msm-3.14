@@ -452,6 +452,7 @@ int ipa_tx_dp(enum ipa_client_type dst, struct sk_buff *skb);
 
 /* System pipes */
 bool ipa_endp_aggr_support(u32 ipa_ep_idx);
+enum ipa_seq_type ipa_endp_seq_type(u32 ipa_ep_idx);
 
 void ipa_endp_init_hdr_cons(u32 ipa_ep_idx, u32 header_size,
 			    u32 metadata_offset, u32 length_offset);
