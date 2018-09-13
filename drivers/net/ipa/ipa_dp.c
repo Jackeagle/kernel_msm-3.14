@@ -1807,7 +1807,7 @@ int ipa_setup_sys_pipe(u32 ipa_ep_idx, u32 chan_count, u32 rx_buffer_size,
 
 	ipa_client_add();
 
-	ipa_cfg_ep(ipa_ep_idx, &sys_in->ipa_ep_cfg);
+	ipa_cfg_ep(ipa_ep_idx);
 
 	ipa_debug("ep %u configuration successful\n", ipa_ep_idx);
 

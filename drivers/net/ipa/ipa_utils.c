@@ -706,7 +706,6 @@ static void ipa_endp_status_write(u32 ipa_ep_idx)
 /** ipa_cfg_ep - IPA end-point configuration
  * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
  * @dst:	[in] destination client handle (ignored for consumer clients)
- * @ipa_ep_cfg: [in] IPA end-point configuration params
  *
  * This includes nat, IPv6CT, header, mode, aggregation and route settings and
  * is a one shot API to configure the IPA end-point fully
@@ -715,7 +714,7 @@ static void ipa_endp_status_write(u32 ipa_ep_idx)
  *
  * Note:	Should not be called from atomic context
  */
-void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
+void ipa_cfg_ep(u32 clnt_hdl)
 {
 	ipa_endp_init_hdr_write(clnt_hdl);
 	ipa_endp_init_hdr_ext_write(clnt_hdl);
