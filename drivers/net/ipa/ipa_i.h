@@ -452,8 +452,11 @@ void ipa_cfg_ep(u32 clnt_hdl, enum ipa_client_type dst,
 int ipa_tx_dp(enum ipa_client_type dst, struct sk_buff *skb);
 
 /* System pipes */
-void ipa_ep_cons_header(struct ipa_ep_cfg_hdr *hdr, u32 header_size,
-			u32 metadata_offset, u32 length_offset);
+void ipa_endp_init_hdr_cons(u32 ipa_ep_idx, u32 header_size,
+			    u32 metadata_offset, u32 length_offset);
+void ipa_endp_init_hdr_prod(u32 ipa_ep_idx, u32 header_size,
+			    u32 metadata_offset, u32 length_offset);
+
 void ipa_ep_cons_header_ext(struct ipa_ep_cfg_hdr_ext *hdr_ext, u32
 			    pad_align, bool pad_included);
 void ipa_ep_cons_aggregation(struct ipa_ep_cfg_aggr *aggr, u32 size,
@@ -464,8 +467,6 @@ void ipa_ep_cons_metadata_mask(struct ipa_ep_cfg_metadata_mask *mask,
 			       u32 metadata_mask);
 void ipa_ep_cons_status(struct ipa_reg_endp_status *status, bool enable);
 
-void ipa_ep_prod_header(struct ipa_ep_cfg_hdr *hdr, u32 header_size,
-			u32 metadata_offset, u32 length_offset);
 void ipa_ep_prod_header_pad(struct ipa_ep_cfg_hdr_ext *hdr_ext, u32 pad_align);
 void ipa_ep_prod_header_mode(struct ipa_ep_cfg_mode *mode,
 			     enum ipa_mode type);

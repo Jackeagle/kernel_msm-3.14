@@ -587,27 +587,15 @@ u32 ipa_filter_bitmap_init(void)
 	return filter_bitmap;
 }
 
-/** ipa_cfg_ep_hdr() -	IPA end-point header configuration
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg: [in] IPA end-point configuration params
+/** ipa_endp_init_hdr_write()
  *
- * Note:	Should not be called from atomic context
+ * @ipa_ep_idx:	endpoint whose header config register should be written
  */
-static void ipa_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
+static void ipa_endp_init_hdr_write(u32 ipa_ep_idx)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 
-	ep->init_hdr.hdr_len = ep_hdr->hdr_len;
-	ep->init_hdr.hdr_ofst_metadata_valid = ep_hdr->hdr_ofst_metadata_valid;
-	ep->init_hdr.hdr_ofst_metadata = ep_hdr->hdr_ofst_metadata;
-	ep->init_hdr.hdr_additional_const_len = 0;
-	ep->init_hdr.hdr_ofst_pkt_size_valid = ep_hdr->hdr_ofst_pkt_size_valid;
-	ep->init_hdr.hdr_ofst_pkt_size = ep_hdr->hdr_ofst_pkt_size;
-	ep->init_hdr.hdr_a5_mux = 0;
-	ep->init_hdr.hdr_len_inc_deagg_hdr = 0;
-	ep->init_hdr.hdr_metadata_reg_valid = 0;
-
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_N, clnt_hdl, &ep->init_hdr);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_N, ipa_ep_idx, &ep->init_hdr);
 }
 
 /** ipa_cfg_ep_hdr_ext() -  IPA end-point extended header configuration
@@ -799,7 +787,8 @@ ipa_cfg_ep_status(u32 clnt_hdl, const struct ipa_reg_endp_status *status)
 void ipa_cfg_ep(u32 clnt_hdl, enum ipa_client_type dst,
 		const struct ipa_ep_cfg *ipa_ep_cfg)
 {
-	ipa_cfg_ep_hdr(clnt_hdl, &ipa_ep_cfg->hdr);
+	ipa_endp_init_hdr_write(clnt_hdl);
+
 	ipa_cfg_ep_hdr_ext(clnt_hdl, &ipa_ep_cfg->hdr_ext);
 
 	ipa_cfg_ep_aggr(clnt_hdl, &ipa_ep_cfg->aggr);

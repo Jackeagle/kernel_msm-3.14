@@ -1586,14 +1586,22 @@ fail_alloc_channel:
 	return result;
 }
 
-void ipa_ep_cons_header(struct ipa_ep_cfg_hdr *hdr, u32 header_size,
-			u32 metadata_offset, u32 length_offset)
+void ipa_endp_init_hdr_cons(u32 ipa_ep_idx, u32 header_size,
+			    u32 metadata_offset, u32 length_offset)
 {
-	hdr->hdr_len = header_size;
-	hdr->hdr_ofst_metadata_valid = 1;
-	hdr->hdr_ofst_metadata = metadata_offset;
-	hdr->hdr_ofst_pkt_size_valid = 1;
-	hdr->hdr_ofst_pkt_size = length_offset;
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+
+	ipa_reg_endp_init_hdr_cons(&ep->init_hdr, header_size, metadata_offset,
+				   length_offset);
+}
+
+void ipa_endp_init_hdr_prod(u32 ipa_ep_idx, u32 header_size,
+			    u32 metadata_offset, u32 length_offset)
+{
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+
+	ipa_reg_endp_init_hdr_prod(&ep->init_hdr, header_size, metadata_offset,
+				   length_offset);
 }
 
 void ipa_ep_cons_header_ext(struct ipa_ep_cfg_hdr_ext *hdr_ext,
@@ -1637,16 +1645,6 @@ void ipa_ep_cons_status(struct ipa_reg_endp_status *status, bool enable)
 	status->status_endp = 0;	/* ignored */
 	status->status_location = 0;	/* ignored */
 	status->status_pkt_suppress = 0;	/* XXX ignored/unused? */
-}
-
-void ipa_ep_prod_header(struct ipa_ep_cfg_hdr *hdr, u32 header_size,
-			u32 metadata_offset, u32 length_offset)
-{
-	hdr->hdr_len = header_size;
-	hdr->hdr_ofst_metadata_valid = 1;
-	hdr->hdr_ofst_metadata = 0;		/* Want offset at 0! */
-	hdr->hdr_ofst_pkt_size_valid = 0;	/* XXX */
-	hdr->hdr_ofst_pkt_size = length_offset;
 }
 
 void ipa_ep_prod_header_pad(struct ipa_ep_cfg_hdr_ext *hdr_ext, u32 pad_align)

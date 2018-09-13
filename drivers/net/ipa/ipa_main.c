@@ -528,7 +528,8 @@ static int setup_apps_lan_cons_pipe(void)
 		return ret;
 	cons_hdl = ret;
 
-	ipa_ep_cons_header(&ep_cfg->hdr, IPA_LAN_RX_HEADER_LENGTH, 0, 0);
+	ipa_endp_init_hdr_cons(cons_hdl, IPA_LAN_RX_HEADER_LENGTH, 0, 0);
+
 	ipa_ep_cons_header_ext(&ep_cfg->hdr_ext, ilog2(sizeof(u32)), false);
 	ipa_ep_cons_aggregation(&ep_cfg->aggr, aggr_size, aggr_count, false);
 	ipa_ep_cons_cs_offload(&ep_cfg->cfg, IPA_CS_OFFLOAD_DL);

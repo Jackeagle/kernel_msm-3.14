@@ -297,8 +297,9 @@ static int handle_ingress_format(struct net_device *dev,
 	cons_hdl = ret;
 
 	/* Record our endpoint configuration parameters */
-	ipa_ep_cons_header(&ep_cfg->hdr, header_size, metadata_offset,
-			   length_offset);
+	ipa_endp_init_hdr_cons(cons_hdl, header_size, metadata_offset,
+			       length_offset);
+
 	ipa_ep_cons_header_ext(&ep_cfg->hdr_ext, 0, true);
 	ipa_ep_cons_aggregation(&ep_cfg->aggr, aggr_size, aggr_count, true);
 	ipa_ep_cons_cs_offload(&ep_cfg->cfg, offload_type);
@@ -366,7 +367,9 @@ static int handle_egress_format(struct net_device *dev,
 		goto out_unlock;
 	prod_hdl = ret;
 
-	ipa_ep_prod_header(&ep_cfg->hdr, header_size, 0, length_offset);
+	/* We really do want 0 metadata offset */
+	ipa_endp_init_hdr_prod(prod_hdl, header_size, 0, length_offset);
+
 	ipa_ep_prod_header_pad(&ep_cfg->hdr_ext, header_pad);
 	ipa_ep_prod_cs_offload(&ep_cfg->cfg, offload_type, header_offset);
 	ipa_ep_prod_header_mode(&ep_cfg->mode, IPA_BASIC);
