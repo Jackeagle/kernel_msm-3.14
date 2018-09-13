@@ -300,8 +300,8 @@ static int handle_ingress_format(struct net_device *dev,
 	ipa_endp_init_hdr_cons(cons_hdl, header_size, metadata_offset,
 			       length_offset);
 	ipa_endp_init_hdr_ext_cons(cons_hdl, 0, true);
+	ipa_endp_init_aggr_cons(cons_hdl, aggr_size, aggr_count, true);
 
-	ipa_ep_cons_aggregation(&ep_cfg->aggr, aggr_size, aggr_count, true);
 	ipa_ep_cons_cs_offload(&ep_cfg->cfg, offload_type);
 	ipa_ep_cons_metadata_mask(&ep_cfg->metadata_mask, 0xff000000);
 	ipa_ep_cons_status(&ep_cfg->status, !aggr_active);
@@ -375,9 +375,9 @@ static int handle_egress_format(struct net_device *dev,
 	ipa_endp_init_hdr_prod(prod_hdl, header_size, 0, length_offset);
 	ipa_endp_init_hdr_ext_prod(prod_hdl, header_align);
 	ipa_endp_init_mode_prod(prod_hdl, IPA_BASIC, dst_client);
+	ipa_endp_init_aggr_prod(prod_hdl, aggr_en, aggr_type);
 
 	ipa_ep_prod_cs_offload(&ep_cfg->cfg, offload_type, header_offset);
-	ipa_ep_prod_aggregation(&ep_cfg->aggr, aggr_en, aggr_type);
 	/* Enable source notification status for exception packets
 	 * (i.e. QMAP commands) to be routed to modem.
 	 */

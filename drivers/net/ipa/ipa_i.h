@@ -463,18 +463,17 @@ void ipa_endp_init_hdr_ext_prod(u32 ipa_ep_idx, u32 pad_align);
 void ipa_endp_init_mode_cons(u32 ipa_ep_idx);
 void ipa_endp_init_mode_prod(u32 ipa_ep_idx, enum ipa_mode mode,
 			     enum ipa_client_type dst_client);
+void ipa_endp_init_aggr_cons(u32 ipa_ep_idx, u32 size, u32 count,
+			     bool close_on_eof);
+void ipa_endp_init_aggr_prod(u32 ipa_ep_idx, enum ipa_aggr_en aggr_en,
+			     enum ipa_aggr_type aggr_type);
 
-void ipa_ep_cons_aggregation(struct ipa_ep_cfg_aggr *aggr, u32 size,
-			     u32 count, bool close_on_eof);
 void ipa_ep_cons_cs_offload(struct ipa_ep_cfg_cfg *cfg,
 			   enum ipa_cs_offload_en offload_type);
 void ipa_ep_cons_metadata_mask(struct ipa_ep_cfg_metadata_mask *mask,
 			       u32 metadata_mask);
 void ipa_ep_cons_status(struct ipa_reg_endp_status *status, bool enable);
 
-void ipa_ep_prod_aggregation(struct ipa_ep_cfg_aggr *aggr,
-			     enum ipa_aggr_en aggr_en,
-			     enum ipa_aggr_type aggr_type);
 void ipa_ep_prod_cs_offload(struct ipa_ep_cfg_cfg *cfg,
 		            enum ipa_cs_offload_en offload_type,
 			    u32 metadata_offset);

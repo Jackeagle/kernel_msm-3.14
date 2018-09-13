@@ -1619,16 +1619,20 @@ void ipa_endp_init_hdr_ext_prod(u32 ipa_ep_idx, u32 pad_align)
 	ipa_reg_endp_init_hdr_ext_prod(&ep->hdr_ext, pad_align);
 }
 
-void ipa_ep_cons_aggregation(struct ipa_ep_cfg_aggr *aggr, u32 size, u32 count,
-			     bool close_on_eof)
+void
+ipa_endp_init_aggr_cons(u32 ipa_ep_idx, u32 size, u32 count, bool close_on_eof)
 {
-	aggr->aggr_en = IPA_ENABLE_AGGR;
-	aggr->aggr = IPA_GENERIC;
-	aggr->aggr_byte_limit = size;
-	aggr->aggr_time_limit = IPA_GENERIC_AGGR_TIME_LIMIT;
-	aggr->aggr_pkt_limit = count;
-	aggr->aggr_hard_byte_limit_en = false;
-	aggr->aggr_sw_eof_active = close_on_eof;
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+
+	ipa_reg_endp_init_aggr_cons(&ep->init_aggr, size, count, close_on_eof);
+}
+
+void ipa_endp_init_aggr_prod(u32 ipa_ep_idx, enum ipa_aggr_en aggr_en,
+			     enum ipa_aggr_type aggr_type)
+{
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+
+	ipa_reg_endp_init_aggr_prod(&ep->init_aggr, aggr_en, aggr_type);
 }
 
 void ipa_ep_cons_cs_offload(struct ipa_ep_cfg_cfg *cfg,
@@ -1668,20 +1672,6 @@ void ipa_endp_init_mode_prod(u32 ipa_ep_idx, enum ipa_mode mode,
 	u32 dst_ep_idx = ipa_get_ep_mapping(dst_client);
 
 	ipa_reg_endp_init_mode_prod(&ep->init_mode, mode, dst_ep_idx);
-}
-
-void ipa_ep_prod_aggregation(struct ipa_ep_cfg_aggr *aggr,
-			     enum ipa_aggr_en aggr_en,
-			     enum ipa_aggr_type aggr_type)
-{
-	aggr->aggr_en = aggr_en;
-	aggr->aggr = aggr_type;  /* Ignored if aggr_en == IPA_BYPASS_AGGR */
-	/* The rest are set later */
-	aggr->aggr_byte_limit = 0;
-	aggr->aggr_time_limit = 0;
-	aggr->aggr_pkt_limit = 0;
-	aggr->aggr_hard_byte_limit_en = false;
-	aggr->aggr_sw_eof_active = false;
 }
 
 void ipa_ep_prod_cs_offload(struct ipa_ep_cfg_cfg *cfg,

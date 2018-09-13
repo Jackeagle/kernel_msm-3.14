@@ -615,25 +615,13 @@ ipa_endp_init_hdr_ext_write(u32 ipa_ep_idx)
 			       &ep->hdr_ext);
 }
 
-/** ipa_cfg_ep_aggr() - IPA end-point aggregation configuration
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg: [in] IPA end-point configuration params
+/** ipa_endp_init_aggr_write() write endpoint aggregation register
  *
- * Note:	Should not be called from atomic context
+ * @ipa_ep_idx:	endpoint whose aggregation config register should be written
  */
-static void ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
+static void ipa_endp_init_aggr_write(u32 clnt_hdl)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
-
-	ep->init_aggr.aggr_en = (u32)ep_aggr->aggr_en;
-	ep->init_aggr.aggr_type = (u32)ep_aggr->aggr;
-	ep->init_aggr.aggr_byte_limit = ep_aggr->aggr_byte_limit;
-	ep->init_aggr.aggr_time_limit = ep_aggr->aggr_time_limit;
-	ep->init_aggr.aggr_pkt_limit = ep_aggr->aggr_pkt_limit;
-	ep->init_aggr.aggr_sw_eof_active = 0;
-	ep->init_aggr.aggr_force_close = 0;
-	ep->init_aggr.aggr_hard_byte_limit_en =
-			ep_aggr->aggr_hard_byte_limit_en ? 1 : 0;
 
 	ipa_write_reg_n_fields(IPA_ENDP_INIT_AGGR_N, clnt_hdl,
 			       &ep->init_aggr);
@@ -759,7 +747,7 @@ void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 	ipa_endp_init_hdr_write(clnt_hdl);
 	ipa_endp_init_hdr_ext_write(clnt_hdl);
 
-	ipa_cfg_ep_aggr(clnt_hdl, &ipa_ep_cfg->aggr);
+	ipa_endp_init_aggr_write(clnt_hdl);
 
 	ipa_cfg_ep_cfg(clnt_hdl, &ipa_ep_cfg->cfg);
 
