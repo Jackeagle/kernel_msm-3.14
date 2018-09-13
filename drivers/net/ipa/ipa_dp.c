@@ -1656,9 +1656,6 @@ void ipa_ep_cons_status(struct ipa_reg_endp_status *status, bool enable)
 void ipa_ep_prod_header_mode(struct ipa_ep_cfg_mode *mode, enum ipa_mode type,
 			     enum ipa_client_type dst_client)
 {
-	if (ipa_producer(dst_client))
-		dst_client = IPA_CLIENT_APPS_LAN_CONS;
-
 	mode->mode = type;
 	mode->dest_pipe_index = ipa_get_ep_mapping(dst_client);
 }

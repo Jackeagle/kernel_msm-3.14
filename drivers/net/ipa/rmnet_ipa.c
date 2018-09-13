@@ -330,7 +330,7 @@ static int handle_egress_format(struct net_device *dev,
 	struct ipa_sys_connect_params *wan_cfg = &rmnet_ipa_ctx->wan_prod_cfg;
 	struct ipa_ep_cfg *ep_cfg = &wan_cfg->ipa_ep_cfg;
 	enum ipa_client_type client = IPA_CLIENT_APPS_WAN_PROD;
-	enum ipa_client_type dst_client = IPA_CLIENT_APPS_WAN_PROD;
+	enum ipa_client_type dst_client = IPA_CLIENT_APPS_LAN_CONS;
 	u32 chan_count = IPA_APPS_WWAN_PROD_RING_COUNT;
 	u32 header_size = sizeof(struct rmnet_map_header_s);
 	enum ipa_cs_offload_en offload_type = IPA_CS_OFFLOAD_NONE;
