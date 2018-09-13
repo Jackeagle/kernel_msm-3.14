@@ -30,8 +30,6 @@
 #define IPA_GSI_CHANNEL_STOP_SLEEP_MIN	1000	/* microseconds */
 #define IPA_GSI_CHANNEL_STOP_SLEEP_MAX	2000	/* microseconds */
 
-/* In IPAv3 only endpoints 0-3 can be configured to deaggregation */
-#define IPA_EP_SUPPORTS_DEAGGR(idx)	((idx) <= 3)
 #define QMB_MASTER_SELECT_DDR		0
 
 /* Resource Group index*/
@@ -587,6 +585,12 @@ u32 ipa_filter_bitmap_init(void)
 	return filter_bitmap;
 }
 
+/* In IPAv3 only endpoints 0-3 can be configured to deaggregation */
+bool ipa_endp_aggr_support(u32 ipa_ep_idx)
+{
+	return ipa_ep_idx < 4;
+}
+
 /** ipa_endp_init_hdr_write()
  *
  * @ipa_ep_idx:	endpoint whose header config register should be written
@@ -622,7 +626,7 @@ static void ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
 
 	if (ep_aggr->aggr_en == IPA_ENABLE_DEAGGR)
-		ipa_assert(IPA_EP_SUPPORTS_DEAGGR(clnt_hdl));
+		ipa_assert(ipa_endp_aggr_support(clnt_hdl));
 
 	ep->init_aggr.aggr_en = (u32)ep_aggr->aggr_en;
 	ep->init_aggr.aggr_type = (u32)ep_aggr->aggr;

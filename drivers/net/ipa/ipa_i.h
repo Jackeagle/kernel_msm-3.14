@@ -451,6 +451,8 @@ void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg);
 int ipa_tx_dp(enum ipa_client_type dst, struct sk_buff *skb);
 
 /* System pipes */
+bool ipa_endp_aggr_support(u32 ipa_ep_idx);
+
 void ipa_endp_init_hdr_cons(u32 ipa_ep_idx, u32 header_size,
 			    u32 metadata_offset, u32 length_offset);
 void ipa_endp_init_hdr_prod(u32 ipa_ep_idx, u32 header_size,
