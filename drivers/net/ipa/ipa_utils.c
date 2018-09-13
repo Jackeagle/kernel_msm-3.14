@@ -667,7 +667,6 @@ static void ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
 
-	ipa_assert(ipa_producer(ipa_ctx->ep[clnt_hdl].client));
 
 	ep->init_mode.mode = ep_mode->mode;
 	ep->init_mode.dest_pipe_index = ep_mode->dest_pipe_index;
