@@ -668,19 +668,16 @@ static void ipa_endp_init_seq_write(u32 ipa_ep_idx)
 	ipa_write_reg_n_fields(IPA_ENDP_INIT_SEQ_N, ipa_ep_idx, &ep->init_seq);
 }
 
-/** ipa_cfg_ep_deaggr() -  IPA end-point deaggregation configuration
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
+/** ipa_endp_init_deaggr_write() - write endpoint deaggregation register
+ *
+ * @ipa_ep_idx:	endpoint whose register should be written
  */
-static void ipa_cfg_ep_deaggr(u32 clnt_hdl)
+void ipa_endp_init_deaggr_write(u32 ipa_ep_idx)
 {
-	struct ipa_reg_endp_init_deaggr init_deaggr;
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 
-	init_deaggr.deaggr_hdr_len = 0;
-	init_deaggr.packet_offset_valid = 0;
-	init_deaggr.packet_offset_location = 0;
-	init_deaggr.max_packet_len = 0;
-
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_N, clnt_hdl, &init_deaggr);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_N, ipa_ep_idx,
+			       &ep->init_deaggr);
 }
 
 /** ipa_cfg_ep_metadata_mask() - IPA end-point meta-data mask configuration
@@ -745,8 +742,7 @@ void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 	if (ipa_producer(ipa_ctx->ep[clnt_hdl].client)) {
 		ipa_endp_init_mode_write(clnt_hdl);
 		ipa_endp_init_seq_write(clnt_hdl);
-
-		ipa_cfg_ep_deaggr(clnt_hdl);
+		ipa_endp_init_deaggr_write(clnt_hdl);
 	} else {
 		ipa_cfg_ep_metadata_mask(clnt_hdl, &ipa_ep_cfg->metadata_mask);
 	}

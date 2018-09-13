@@ -378,6 +378,7 @@ static int handle_egress_format(struct net_device *dev,
 	ipa_endp_init_aggr_prod(prod_hdl, aggr_en, aggr_type);
 	ipa_endp_init_cfg_prod(prod_hdl, offload_type, header_offset);
 	ipa_endp_init_seq_prod(prod_hdl);
+	ipa_endp_init_deaggr_prod(prod_hdl);
 
 	/* Enable source notification status for exception packets
 	 * (i.e. QMAP commands) to be routed to modem.
