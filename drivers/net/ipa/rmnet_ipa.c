@@ -239,7 +239,6 @@ static int handle_ingress_format(struct net_device *dev,
 	enum ipa_client_type client = IPA_CLIENT_APPS_WAN_CONS;
 	u32 chan_count = IPA_APPS_WWAN_CONS_RING_COUNT;
 	struct ipa_sys_connect_params *wan_cfg = &rmnet_ipa_ctx->wan_cons_cfg;
-	struct ipa_ep_cfg *ep_cfg = &wan_cfg->ipa_ep_cfg;
 	u32 header_size = sizeof(struct rmnet_map_header_s);
 	u32 metadata_offset = offsetof(struct rmnet_map_header_s, mux_id);
 	u32 length_offset = offsetof(struct rmnet_map_header_s, pkt_len);
@@ -303,8 +302,7 @@ static int handle_ingress_format(struct net_device *dev,
 	ipa_endp_init_aggr_cons(cons_hdl, aggr_size, aggr_count, true);
 	ipa_endp_init_cfg_cons(cons_hdl, offload_type);
 	ipa_endp_init_hdr_metadata_mask_cons(cons_hdl, 0xff000000);
-
-	ipa_ep_cons_status(&ep_cfg->status, !aggr_active);
+	ipa_endp_status_cons(cons_hdl, !aggr_active);
 
 	wan_cfg->notify = apps_ipa_packet_receive_notify;
 	wan_cfg->priv = dev;
@@ -328,7 +326,6 @@ static int handle_egress_format(struct net_device *dev,
 				struct rmnet_ioctl_extended_s *e)
 {
 	struct ipa_sys_connect_params *wan_cfg = &rmnet_ipa_ctx->wan_prod_cfg;
-	struct ipa_ep_cfg *ep_cfg = &wan_cfg->ipa_ep_cfg;
 	enum ipa_client_type client = IPA_CLIENT_APPS_WAN_PROD;
 	enum ipa_client_type dst_client = IPA_CLIENT_APPS_LAN_CONS;
 	u32 chan_count = IPA_APPS_WWAN_PROD_RING_COUNT;
@@ -379,11 +376,10 @@ static int handle_egress_format(struct net_device *dev,
 	ipa_endp_init_cfg_prod(prod_hdl, offload_type, header_offset);
 	ipa_endp_init_seq_prod(prod_hdl);
 	ipa_endp_init_deaggr_prod(prod_hdl);
-
 	/* Enable source notification status for exception packets
 	 * (i.e. QMAP commands) to be routed to modem.
 	 */
-	ipa_ep_prod_status(&ep_cfg->status, true, IPA_CLIENT_Q6_WAN_CONS);
+	ipa_endp_status_prod(prod_hdl, true, IPA_CLIENT_Q6_WAN_CONS);
 
 	wan_cfg->notify = apps_ipa_tx_complete_notify;
 	wan_cfg->priv = dev;

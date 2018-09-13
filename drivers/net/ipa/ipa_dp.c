@@ -1665,14 +1665,22 @@ void ipa_endp_init_hdr_metadata_mask_prod(u32 ipa_ep_idx)
 	ipa_reg_endp_init_hdr_metadata_mask_prod(&ep->metadata_mask);
 }
 
-void ipa_ep_cons_status(struct ipa_reg_endp_status *status, bool enable)
+void ipa_endp_status_cons(u32 ipa_ep_idx, bool enable)
 {
-	status->status_en = enable ? 1 : 0;
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 
-	status->status_endp = 0;	/* ignored */
-	status->status_location = 0;	/* ignored */
-	status->status_pkt_suppress = 0;	/* XXX ignored/unused? */
+	ipa_reg_endp_status_cons(&ep->status, enable);
 }
+
+void ipa_endp_status_prod(u32 ipa_ep_idx, bool enable,
+			  enum ipa_client_type status_client)
+{
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+	u32 status_ep_idx = ipa_get_ep_mapping(status_client);
+
+	ipa_reg_endp_status_prod(&ep->status, enable, status_ep_idx);
+}
+
 
 /* Note that the mode setting is not valid for consumer endpoints */
 void ipa_endp_init_mode_cons(u32 ipa_ep_idx)
@@ -1720,15 +1728,6 @@ void ipa_endp_init_deaggr_prod(u32 ipa_ep_idx)
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 
 	ipa_reg_endp_init_deaggr_prod(&ep->init_deaggr);
-}
-
-void ipa_ep_prod_status(struct ipa_reg_endp_status *status, bool enable,
-			enum ipa_client_type client)
-{
-	status->status_en = enable ? 1 : 0;
-	status->status_endp = ipa_get_ep_mapping(client);
-	status->status_location = 0;
-	status->status_pkt_suppress = 0;
 }
 
 int ipa_ep_alloc(enum ipa_client_type client)

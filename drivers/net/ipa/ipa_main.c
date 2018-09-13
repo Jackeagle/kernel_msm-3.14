@@ -489,7 +489,6 @@ static int setup_apps_lan_cons_pipe(void)
 	struct ipa_sys_connect_params sys_in = { };
 	enum ipa_client_type client = IPA_CLIENT_APPS_LAN_CONS;
 	u32 chan_count = IPA_APPS_LAN_CONS_RING_COUNT;
-	struct ipa_ep_cfg *ep_cfg = &sys_in.ipa_ep_cfg;
 	u32 aggr_size = IPA_GENERIC_AGGR_BYTE_LIMIT;
 	u32 aggr_count = IPA_GENERIC_AGGR_PKT_LIMIT;
 	u32 rx_buffer_size;
@@ -535,8 +534,7 @@ static int setup_apps_lan_cons_pipe(void)
 	ipa_endp_init_aggr_cons(cons_hdl, aggr_size, aggr_count, false);
 	ipa_endp_init_cfg_cons(cons_hdl, IPA_CS_OFFLOAD_DL);
 	ipa_endp_init_hdr_metadata_mask_cons(cons_hdl, 0x0);
-
-	ipa_ep_cons_status(&ep_cfg->status, true);
+	ipa_endp_status_cons(cons_hdl, true);
 
 	sys_in.notify = ipa_lan_rx_cb;
 	sys_in.priv = NULL;

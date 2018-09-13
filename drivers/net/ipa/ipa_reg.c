@@ -548,7 +548,7 @@ void ipa_reg_endp_status_cons(struct ipa_reg_endp_status *endp_status,
 			      bool enable)
 {
 	endp_status->status_en = enable ? 1 : 0;
-	endp_status->status_endp = 0;	/* ignored */
+	endp_status->status_endp = 0;		/* ignored */
 	endp_status->status_location = 0;	/* before packet data */
 
 	ipa_reg_endp_status_common(endp_status);

@@ -480,11 +480,9 @@ void ipa_endp_init_deaggr_cons(u32 ipa_ep_idx);
 void ipa_endp_init_deaggr_prod(u32 ipa_ep_idx);
 void ipa_endp_init_hdr_metadata_mask_cons(u32 ipa_ep_idx, u32 mask);
 void ipa_endp_init_hdr_metadata_mask_prod(u32 ipa_ep_idx);
-
-void ipa_ep_cons_status(struct ipa_reg_endp_status *status, bool enable);
-void ipa_ep_prod_status(struct ipa_reg_endp_status *status, bool enable,
-			enum ipa_client_type client);
-
+void ipa_endp_status_cons(u32 ipa_ep_idx, bool enable);
+void ipa_endp_status_prod(u32 ipa_ep_idx, bool enable,
+			  enum ipa_client_type client);
 int ipa_ep_alloc(enum ipa_client_type client);
 void ipa_ep_free(u32 ipa_ep_idx);
 
