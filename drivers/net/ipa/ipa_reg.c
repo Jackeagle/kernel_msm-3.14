@@ -275,6 +275,34 @@ ipa_reg_construct_aggr_force_close(enum ipa_reg reg, const void *fields)
 }
 
 /* IPA_ENDP_INIT_MODE_N register */
+
+static void
+ipa_reg_endp_init_mode_common(struct ipa_reg_endp_init_mode *init_mode)
+{
+	init_mode->byte_threshold = 0;		/* XXX description? */
+	init_mode->pipe_replication_en = 0;	/* XXX description? */
+	init_mode->pad_en = 0;			/* XXX description? */
+	init_mode->hdr_ftch_disable = 0;	/* XXX description? */
+}
+
+/* IPA_ENDP_INIT_MODE is not valid for consumer pipes */
+void ipa_reg_endp_init_mode_cons(struct ipa_reg_endp_init_mode *init_mode)
+{
+	init_mode->mode = 0;            /* ignored */
+	init_mode->dest_pipe_index = 0; /* ignored */
+
+	ipa_reg_endp_init_mode_common(init_mode);
+}
+
+void ipa_reg_endp_init_mode_prod(struct ipa_reg_endp_init_mode *init_mode,
+				 enum ipa_mode mode, u32 dest_endp)
+{
+	init_mode->mode = mode;
+	init_mode->dest_pipe_index = mode == IPA_DMA ? dest_endp : 0;
+
+	ipa_reg_endp_init_mode_common(init_mode);
+}
+
 #define MODE_FMASK			0x00000007
 #define DEST_PIPE_INDEX_FMASK		0x000001f0
 #define BYTE_THRESHOLD_FMASK		0x0ffff000
