@@ -284,6 +284,21 @@ struct ipa_reg_endp_init_deaggr {
 	u32 max_packet_len;
 };
 
+/* HPS, DPS sequencers types */
+enum ipa_seq_type {
+	IPA_SEQ_DMA_ONLY			= 0x00,
+	/* Packet Processing + no decipher + uCP (for Ethernet Bridging) */
+	IPA_SEQ_PKT_PROCESS_NO_DEC_UCP		= 0x02,
+	/* 2 Packet Processing pass + no decipher + uCP */
+	IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP	= 0x04,
+	/* DMA + DECIPHER/CIPHER */
+	IPA_SEQ_DMA_DEC				= 0x11,
+	/* COMP/DECOMP */
+	IPA_SEQ_DMA_COMP_DECOMP			= 0x20,
+	/* Invalid sequencer type */
+	IPA_SEQ_INVALID				= 0xff,
+};
+
 /** struct ipa_ep_init_seq - IPA_ENDP_INIT_SEQ_N field structure
  *
  * @hps_seq_type: type of HPS sequencer (enum ipa_hps_dps_sequencer_type)
