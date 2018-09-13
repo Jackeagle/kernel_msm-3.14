@@ -506,6 +506,11 @@ void ipa_reg_endp_init_deaggr_prod(
 void ipa_reg_endp_init_seq_cons(struct ipa_reg_endp_init_seq *init_seq);
 void ipa_reg_endp_init_seq_prod(struct ipa_reg_endp_init_seq *init_seq,
 				enum ipa_seq_type seq_type);
+void ipa_reg_endp_init_hdr_metadata_mask_cons(
+		struct ipa_reg_endp_init_hdr_metadata_mask *metadata_mask,
+		u32 mask);
+void ipa_reg_endp_init_hdr_metadata_mask_prod(
+		struct ipa_reg_endp_init_hdr_metadata_mask *metadata_mask);
 
 /* Get the offset of an n-parameterized register */
 u32 ipa_reg_n_offset(enum ipa_reg reg, u32 n);

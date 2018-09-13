@@ -494,6 +494,22 @@ ipa_reg_construct_endp_init_cfg_n(enum ipa_reg reg, const void *fields)
 }
 
 /* IPA_ENDP_INIT_HDR_METADATA_MASK_N register */
+
+void ipa_reg_endp_init_hdr_metadata_mask_cons(
+		struct ipa_reg_endp_init_hdr_metadata_mask *metadata_mask,
+		u32 mask)
+{
+	metadata_mask->metadata_mask = mask;
+}
+
+/* IPA_ENDP_INIT_HDR_METADATA_MASK_N is not valid for producer pipes */
+void ipa_reg_endp_init_hdr_metadata_mask_prod(
+		struct ipa_reg_endp_init_hdr_metadata_mask *metadata_mask)
+{
+	metadata_mask->metadata_mask = 0;	/* ignored */
+}
+
+
 #define METADATA_MASK_FMASK	0xffffffff
 
 static u32 ipa_reg_construct_endp_init_hdr_metadata_mask_n(enum ipa_reg reg,
