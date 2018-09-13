@@ -218,23 +218,6 @@ enum ipa_mode_type {
 	IPA_DMA,
 };
 
-/** enum ipa_aggr_en_type - aggregation setting type in IPA end-point */
-enum ipa_aggr_en_type {
-	IPA_BYPASS_AGGR,
-	IPA_ENABLE_AGGR,
-	IPA_ENABLE_DEAGGR,
-};
-
-/** enum ipa_aggr_type - type of aggregation in IPA end-point */
-enum ipa_aggr_type {
-	IPA_MBIM_16 = 0,
-	IPA_HDLC    = 1,
-	IPA_TLP	    = 2,
-	IPA_RNDIS   = 3,
-	IPA_GENERIC = 4,
-	IPA_QCMAP   = 6,
-};
-
 #define IPA_GENERIC_AGGR_BYTE_LIMIT	6
 #define IPA_GENERIC_AGGR_TIME_LIMIT	1
 #define IPA_GENERIC_AGGR_PKT_LIMIT	0
@@ -360,7 +343,7 @@ struct ipa_ep_cfg_mode {
  *			aggregation.
  */
 struct ipa_ep_cfg_aggr {
-	enum ipa_aggr_en_type aggr_en;
+	enum ipa_aggr_en aggr_en;
 	enum ipa_aggr_type aggr;
 	u32 aggr_byte_limit;
 	u32 aggr_time_limit;

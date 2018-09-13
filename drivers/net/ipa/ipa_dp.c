@@ -1664,7 +1664,7 @@ ipa_ep_prod_header_mode(struct ipa_ep_cfg_mode *mode, enum ipa_mode_type type)
 }
 
 void ipa_ep_prod_aggregation(struct ipa_ep_cfg_aggr *aggr,
-			     enum ipa_aggr_en_type aggr_en,
+			     enum ipa_aggr_en aggr_en,
 			     enum ipa_aggr_type aggr_type)
 {
 	aggr->aggr_en = aggr_en;

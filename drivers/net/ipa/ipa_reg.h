@@ -166,10 +166,29 @@ struct ipa_reg_endp_init_hdr_ext {
 	u32 hdr_pad_to_alignment;
 };
 
+/** enum ipa_aggr_en - aggregation setting type in IPA end-point */
+enum ipa_aggr_en {
+	IPA_BYPASS_AGGR		= 0,
+	IPA_ENABLE_AGGR		= 1,
+	IPA_ENABLE_DEAGGR	= 2,
+};
+
+/** enum ipa_aggr_type - type of aggregation in IPA end-point */
+enum ipa_aggr_type {
+	IPA_MBIM_16 = 0,
+	IPA_HDLC    = 1,
+	IPA_TLP	    = 2,
+	IPA_RNDIS   = 3,
+	IPA_GENERIC = 4,
+	IPA_QCMAP   = 6,
+};
+
+#define IPA_AGGR_TIME_LIMIT_DEFAULT	1	/* XXX units? */
+
 /** struct ipa_reg_endp_init_aggr - IPA_ENDP_INIT_AGGR_N field structure
  *
  * @aggr_en: bypass aggregation, enable aggregation, or deaggregation
- *	     (enum ipa_aggr_en_type)
+ *	     (enum ipa_aggr_en)
  * @aggr_type: type of aggregation (enum ipa_aggr_type aggr)
  * @aggr_byte_limit: aggregated byte limit in KB, or no limit if 0
  *		     (producer pipes only)
@@ -186,7 +205,7 @@ struct ipa_reg_endp_init_hdr_ext {
  * 			     after XXX producer only?
  */
 struct ipa_reg_endp_init_aggr {
-	u32 aggr_en;		/* enum ipa_aggr_en_type */
+	u32 aggr_en;		/* enum ipa_aggr_en */
 	u32 aggr_type;		/* enum ipa_aggr_type */
 	u32 aggr_byte_limit;
 	u32 aggr_time_limit;
