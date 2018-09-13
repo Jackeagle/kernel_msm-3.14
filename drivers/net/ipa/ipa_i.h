@@ -468,8 +468,8 @@ void ipa_ep_cons_metadata_mask(struct ipa_ep_cfg_metadata_mask *mask,
 			       u32 metadata_mask);
 void ipa_ep_cons_status(struct ipa_reg_endp_status *status, bool enable);
 
-void ipa_ep_prod_header_mode(struct ipa_ep_cfg_mode *mode,
-			     enum ipa_mode type);
+void ipa_ep_prod_header_mode(struct ipa_ep_cfg_mode *mode, enum ipa_mode type,
+			     enum ipa_client_type dst_client);
 void ipa_ep_prod_aggregation(struct ipa_ep_cfg_aggr *aggr,
 			     enum ipa_aggr_en aggr_en,
 			     enum ipa_aggr_type aggr_type);

@@ -156,7 +156,7 @@ static int setup_apps_cmd_prod_pipe(void)
 {
 	struct ipa_sys_connect_params sys_in = { };
 	enum ipa_client_type client = IPA_CLIENT_APPS_CMD_PROD;
-	enum ipa_client_type dst = IPA_CLIENT_APPS_LAN_CONS;
+	enum ipa_client_type dst_client = IPA_CLIENT_APPS_LAN_CONS;
 	u32 chan_count = IPA_APPS_CMD_PROD_RING_COUNT;
 	u32 prod_hdl;
 	int ret;
@@ -169,9 +169,9 @@ static int setup_apps_cmd_prod_pipe(void)
 		return ret;
 	prod_hdl = ret;
 
-	ipa_ep_prod_header_mode(&sys_in.ipa_ep_cfg.mode, IPA_DMA);
+	ipa_ep_prod_header_mode(&sys_in.ipa_ep_cfg.mode, IPA_DMA, dst_client);
 
-	ret = ipa_setup_sys_pipe(prod_hdl, dst, chan_count, 0, &sys_in);
+	ret = ipa_setup_sys_pipe(prod_hdl, dst_client, chan_count, 0, &sys_in);
 	if (ret)
 		ipa_ep_free(prod_hdl);
 	else

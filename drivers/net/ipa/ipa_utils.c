@@ -667,19 +667,11 @@ static void ipa_cfg_ep_mode(u32 clnt_hdl, enum ipa_client_type dst,
 			    const struct ipa_ep_cfg_mode *ep_mode)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
-	u32 ipa_ep_idx;
 
 	ipa_assert(ipa_producer(ipa_ctx->ep[clnt_hdl].client));
-	if (ep_mode->mode == IPA_DMA)
-		ipa_assert(ipa_consumer(dst));
-
-	if (ipa_consumer(dst))
-		ipa_ep_idx = ipa_get_ep_mapping(dst);
-	else
-		ipa_ep_idx = ipa_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
 
 	ep->init_mode.mode = ep_mode->mode;
-	ep->init_mode.dest_pipe_index = ipa_ep_idx;
+	ep->init_mode.dest_pipe_index = ep_mode->dest_pipe_index;
 	ep->init_mode.byte_threshold = 0;
 	ep->init_mode.pipe_replication_en = 0;
 	ep->init_mode.pad_en = 0;

@@ -331,7 +331,7 @@ static int handle_egress_format(struct net_device *dev,
 	struct ipa_sys_connect_params *wan_cfg = &rmnet_ipa_ctx->wan_prod_cfg;
 	struct ipa_ep_cfg *ep_cfg = &wan_cfg->ipa_ep_cfg;
 	enum ipa_client_type client = IPA_CLIENT_APPS_WAN_PROD;
-	enum ipa_client_type dst = IPA_CLIENT_APPS_WAN_PROD;
+	enum ipa_client_type dst_client = IPA_CLIENT_APPS_WAN_PROD;
 	u32 chan_count = IPA_APPS_WWAN_PROD_RING_COUNT;
 	u32 header_size = sizeof(struct rmnet_map_header_s);
 	enum ipa_cs_offload_en offload_type = IPA_CS_OFFLOAD_NONE;
@@ -372,7 +372,7 @@ static int handle_egress_format(struct net_device *dev,
 	ipa_endp_init_hdr_ext_prod(prod_hdl, header_align);
 
 	ipa_ep_prod_cs_offload(&ep_cfg->cfg, offload_type, header_offset);
-	ipa_ep_prod_header_mode(&ep_cfg->mode, IPA_BASIC);
+	ipa_ep_prod_header_mode(&ep_cfg->mode, IPA_BASIC, dst_client);
 	ipa_ep_prod_aggregation(&ep_cfg->aggr, aggr_en, aggr_type);
 	/* Enable source notification status for exception packets
 	 * (i.e. QMAP commands) to be routed to modem.
@@ -386,7 +386,7 @@ static int handle_egress_format(struct net_device *dev,
 	/* Use a deferred interrupting no-op to reduce completion interrupts */
 	ipa_no_intr_init(prod_hdl);
 
-	ret = ipa_setup_sys_pipe(prod_hdl, dst, chan_count, 0, wan_cfg);
+	ret = ipa_setup_sys_pipe(prod_hdl, dst_client, chan_count, 0, wan_cfg);
 	if (ret)
 		ipa_ep_free(prod_hdl);
 	else

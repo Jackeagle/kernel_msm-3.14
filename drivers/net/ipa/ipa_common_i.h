@@ -280,6 +280,7 @@ struct ipa_ep_cfg_hdr_ext {
  */
 struct ipa_ep_cfg_mode {
 	enum ipa_mode mode;
+	u32 dest_pipe_index;
 };
 
 /** struct ipa_ep_cfg_aggr - aggregation configuration in IPA end-point
