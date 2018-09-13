@@ -314,7 +314,7 @@ enum ipa_cs_offload_en {
  */
 struct ipa_reg_endp_init_cfg {
 	u32 frag_offload_en;
-	u32 cs_offload_en;
+	u32 cs_offload_en;		/* enum ipa_cs_offload_en */
 	u32 cs_metadata_hdr_offset;
 	u32 cs_gen_qmb_master_sel;
 };
@@ -479,6 +479,11 @@ void ipa_reg_endp_init_aggr_prod(struct ipa_reg_endp_init_aggr *init_aggr,
 void ipa_reg_endp_init_mode_cons(struct ipa_reg_endp_init_mode *init_mode);
 void ipa_reg_endp_init_mode_prod(struct ipa_reg_endp_init_mode *init_mode,
 				 enum ipa_mode mode, u32 dest_endp);
+void ipa_reg_endp_init_cfg_cons(struct ipa_reg_endp_init_cfg *init_cfg,
+				enum ipa_cs_offload_en offload_type);
+void ipa_reg_endp_init_cfg_prod(struct ipa_reg_endp_init_cfg *init_cfg,
+				enum ipa_cs_offload_en offload_type,
+				u32 metadata_offset);
 
 /* Get the offset of an n-parameterized register */
 u32 ipa_reg_n_offset(enum ipa_reg reg, u32 n);

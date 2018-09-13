@@ -398,6 +398,33 @@ ipa_reg_construct_endp_init_seq_n(enum ipa_reg reg, const void *fields)
 }
 
 /* IPA_ENDP_INIT_CFG_N register */
+
+static void
+ipa_reg_endp_init_cfg_common(struct ipa_reg_endp_init_cfg *init_cfg)
+{
+	init_cfg->frag_offload_en = 0;		/* XXX description?  */
+	init_cfg->cs_gen_qmb_master_sel = 0;	/* XXX description?  */
+}
+
+void ipa_reg_endp_init_cfg_cons(struct ipa_reg_endp_init_cfg *init_cfg,
+				enum ipa_cs_offload_en offload_type)
+{
+	init_cfg->cs_offload_en = offload_type;
+	init_cfg->cs_metadata_hdr_offset = 0;	/* ignored */
+
+	ipa_reg_endp_init_cfg_common(init_cfg);
+}
+
+void ipa_reg_endp_init_cfg_prod(struct ipa_reg_endp_init_cfg *init_cfg,
+				enum ipa_cs_offload_en offload_type,
+				u32 metadata_offset)
+{
+	init_cfg->cs_offload_en = offload_type;
+	init_cfg->cs_metadata_hdr_offset = metadata_offset;
+
+	ipa_reg_endp_init_cfg_common(init_cfg);
+}
+
 #define FRAG_OFFLOAD_EN_FMASK		0x00000001
 #define CS_OFFLOAD_EN_FMASK		0x00000006
 #define CS_METADATA_HDR_OFFSET_FMASK	0x00000078
