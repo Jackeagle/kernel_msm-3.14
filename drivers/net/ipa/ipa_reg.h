@@ -448,6 +448,12 @@ void ipa_reg_endp_init_hdr_ext_cons(struct ipa_reg_endp_init_hdr_ext *hdr_ext,
 				    u32 pad_align, bool pad_included);
 void ipa_reg_endp_init_hdr_ext_prod(struct ipa_reg_endp_init_hdr_ext *hdr_ext,
 				    u32 pad_align);
+void ipa_reg_endp_init_aggr_cons(struct ipa_reg_endp_init_aggr *init_aggr,
+				 u32 byte_limit, u32 packet_limit,
+				 bool close_on_eof);
+void ipa_reg_endp_init_aggr_prod(struct ipa_reg_endp_init_aggr *init_aggr,
+				 enum ipa_aggr_en aggr_en,
+				 enum ipa_aggr_type aggr_type);
 
 /* Get the offset of an n-parameterized register */
 u32 ipa_reg_n_offset(enum ipa_reg reg, u32 n);

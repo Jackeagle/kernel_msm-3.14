@@ -179,6 +179,42 @@ ipa_reg_construct_endp_init_hdr_ext_n(enum ipa_reg reg, const void *fields)
 }
 
 /* IPA_ENDP_INIT_AGGR_N register */
+
+static void
+ipa_reg_endp_init_aggr_common(struct ipa_reg_endp_init_aggr *init_aggr)
+{
+	init_aggr->aggr_force_close = 0;	/* XXX description?  */
+	init_aggr->aggr_hard_byte_limit_en = 0;	/* XXX ignored for PROD? */
+}
+
+void ipa_reg_endp_init_aggr_cons(struct ipa_reg_endp_init_aggr *init_aggr,
+				 u32 byte_limit, u32 packet_limit,
+				 bool close_on_eof)
+{
+	init_aggr->aggr_en = IPA_ENABLE_AGGR;
+	init_aggr->aggr_type = IPA_GENERIC;
+	init_aggr->aggr_byte_limit = byte_limit;
+	init_aggr->aggr_time_limit = IPA_AGGR_TIME_LIMIT_DEFAULT;
+	init_aggr->aggr_pkt_limit = packet_limit;
+	init_aggr->aggr_sw_eof_active = close_on_eof ? 1 : 0;
+
+	ipa_reg_endp_init_aggr_common(init_aggr);
+}
+
+void ipa_reg_endp_init_aggr_prod(struct ipa_reg_endp_init_aggr *init_aggr,
+				 enum ipa_aggr_en aggr_en,
+				 enum ipa_aggr_type aggr_type)
+{
+	init_aggr->aggr_en = (u32)aggr_en;
+	init_aggr->aggr_type = aggr_en == IPA_BYPASS_AGGR ? 0 : (u32)aggr_type;
+	init_aggr->aggr_byte_limit = 0;		/* ignored */
+	init_aggr->aggr_time_limit = 0;		/* ignored */
+	init_aggr->aggr_pkt_limit = 0;		/* ignored */
+	init_aggr->aggr_sw_eof_active = 0;	/* ignored */
+
+	ipa_reg_endp_init_aggr_common(init_aggr);
+}
+
 #define AGGR_EN_FMASK				0x00000003
 #define AGGR_TYPE_FMASK				0x0000001c
 #define AGGR_BYTE_LIMIT_FMASK			0x000003e0
