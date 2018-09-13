@@ -366,6 +366,11 @@ static int handle_egress_format(struct net_device *dev,
 		goto out_unlock;
 	prod_hdl = ret;
 
+	if (aggr_en == IPA_ENABLE_DEAGGR && !ipa_endp_aggr_support(prod_hdl)) {
+		ret = -ENOTSUPP;
+		goto out_unlock;
+	}
+
 	/* We really do want 0 metadata offset */
 	ipa_endp_init_hdr_prod(prod_hdl, header_size, 0, length_offset);
 	ipa_endp_init_hdr_ext_prod(prod_hdl, header_align);

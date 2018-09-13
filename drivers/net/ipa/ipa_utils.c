@@ -625,9 +625,6 @@ static void ipa_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
 
-	if (ep_aggr->aggr_en == IPA_ENABLE_DEAGGR)
-		ipa_assert(ipa_endp_aggr_support(clnt_hdl));
-
 	ep->init_aggr.aggr_en = (u32)ep_aggr->aggr_en;
 	ep->init_aggr.aggr_type = (u32)ep_aggr->aggr;
 	ep->init_aggr.aggr_byte_limit = ep_aggr->aggr_byte_limit;
