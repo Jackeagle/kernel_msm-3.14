@@ -249,7 +249,7 @@ struct ipa_ep_context {
 	struct ipa_reg_endp_init_cfg init_cfg;
 	struct ipa_reg_endp_init_seq init_seq;
 	struct ipa_reg_endp_init_deaggr init_deaggr;
-	struct ipa_reg_endp_init_hdr_metadata_mask init_hdr_metadata_mask;
+	struct ipa_reg_endp_init_hdr_metadata_mask metadata_mask;
 	struct ipa_reg_endp_status status;
 
 	u32 dst_pipe_index;
@@ -478,9 +478,9 @@ void ipa_endp_init_seq_cons(u32 ipa_ep_idx);
 void ipa_endp_init_seq_prod(u32 ipa_ep_idx);
 void ipa_endp_init_deaggr_cons(u32 ipa_ep_idx);
 void ipa_endp_init_deaggr_prod(u32 ipa_ep_idx);
+void ipa_endp_init_hdr_metadata_mask_cons(u32 ipa_ep_idx, u32 mask);
+void ipa_endp_init_hdr_metadata_mask_prod(u32 ipa_ep_idx);
 
-void ipa_ep_cons_metadata_mask(struct ipa_ep_cfg_metadata_mask *mask,
-			       u32 metadata_mask);
 void ipa_ep_cons_status(struct ipa_reg_endp_status *status, bool enable);
 void ipa_ep_prod_status(struct ipa_reg_endp_status *status, bool enable,
 			enum ipa_client_type client);

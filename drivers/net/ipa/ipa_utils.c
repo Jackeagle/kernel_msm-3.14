@@ -680,22 +680,16 @@ void ipa_endp_init_deaggr_write(u32 ipa_ep_idx)
 			       &ep->init_deaggr);
 }
 
-/** ipa_cfg_ep_metadata_mask() - IPA end-point meta-data mask configuration
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg: [in] IPA end-point configuration params
+/** ipa_endp_init_hdr_metadata_mask_write() - endpoint metadata mask register
  *
- * Note:	Should not be called from atomic context
+ * @ipa_ep_idx:	endpoint whose register should be written
  */
-static void
-ipa_cfg_ep_metadata_mask(u32 clnt_hdl,
-			 const struct ipa_ep_cfg_metadata_mask *metadata_mask)
+static void ipa_endp_init_hdr_metadata_mask_write(u32 ipa_ep_idx)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 
-	ep->init_hdr_metadata_mask.metadata_mask = metadata_mask->metadata_mask;
-
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_N, clnt_hdl,
-			       &ep->init_hdr_metadata_mask);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_N, ipa_ep_idx,
+			       &ep->metadata_mask);
 }
 
 /** ipa_cfg_ep_status() - IPA end-point status configuration
@@ -744,7 +738,7 @@ void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 		ipa_endp_init_seq_write(clnt_hdl);
 		ipa_endp_init_deaggr_write(clnt_hdl);
 	} else {
-		ipa_cfg_ep_metadata_mask(clnt_hdl, &ipa_ep_cfg->metadata_mask);
+		ipa_endp_init_hdr_metadata_mask_write(clnt_hdl);
 	}
 
 	ipa_cfg_ep_status(clnt_hdl, &ipa_ep_cfg->status);

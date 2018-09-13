@@ -1651,10 +1651,18 @@ void ipa_endp_init_cfg_prod(u32 ipa_ep_idx, enum ipa_cs_offload_en offload_type,
 				   metadata_offset);
 }
 
-void ipa_ep_cons_metadata_mask(struct ipa_ep_cfg_metadata_mask *mask,
-			       u32 metadata_mask)
+void ipa_endp_init_hdr_metadata_mask_cons(u32 ipa_ep_idx, u32 mask)
 {
-	mask->metadata_mask = metadata_mask;
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+
+	ipa_reg_endp_init_hdr_metadata_mask_cons(&ep->metadata_mask, mask);
+}
+
+void ipa_endp_init_hdr_metadata_mask_prod(u32 ipa_ep_idx)
+{
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+
+	ipa_reg_endp_init_hdr_metadata_mask_prod(&ep->metadata_mask);
 }
 
 void ipa_ep_cons_status(struct ipa_reg_endp_status *status, bool enable)

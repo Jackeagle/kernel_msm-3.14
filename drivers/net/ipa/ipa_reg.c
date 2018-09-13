@@ -502,7 +502,7 @@ void ipa_reg_endp_init_hdr_metadata_mask_cons(
 	metadata_mask->metadata_mask = mask;
 }
 
-/* IPA_ENDP_INIT_HDR_METADATA_MASK_N is not valid for producer pipes */
+/* IPA_ENDP_INIT_HDR_METADATA_MASK is not valid for producer pipes */
 void ipa_reg_endp_init_hdr_metadata_mask_prod(
 		struct ipa_reg_endp_init_hdr_metadata_mask *metadata_mask)
 {
