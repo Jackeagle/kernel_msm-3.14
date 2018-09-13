@@ -1604,13 +1604,19 @@ void ipa_endp_init_hdr_prod(u32 ipa_ep_idx, u32 header_size,
 				   length_offset);
 }
 
-void ipa_ep_cons_header_ext(struct ipa_ep_cfg_hdr_ext *hdr_ext,
-			    u32 pad_align, bool pad_included)
+void
+ipa_endp_init_hdr_ext_cons(u32 ipa_ep_idx, u32 pad_align, bool pad_included)
 {
-	hdr_ext->hdr_pad_to_alignment = pad_align;
-	hdr_ext->hdr_payload_len_inc_padding = pad_included;
-	hdr_ext->hdr_total_len_or_pad = IPA_HDR_PAD;
-	hdr_ext->hdr_total_len_or_pad_valid = true;
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+
+	ipa_reg_endp_init_hdr_ext_cons(&ep->hdr_ext, pad_align, pad_included);
+}
+
+void ipa_endp_init_hdr_ext_prod(u32 ipa_ep_idx, u32 pad_align)
+{
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+
+	ipa_reg_endp_init_hdr_ext_prod(&ep->hdr_ext, pad_align);
 }
 
 void ipa_ep_cons_aggregation(struct ipa_ep_cfg_aggr *aggr, u32 size, u32 count,
@@ -1645,14 +1651,6 @@ void ipa_ep_cons_status(struct ipa_reg_endp_status *status, bool enable)
 	status->status_endp = 0;	/* ignored */
 	status->status_location = 0;	/* ignored */
 	status->status_pkt_suppress = 0;	/* XXX ignored/unused? */
-}
-
-void ipa_ep_prod_header_pad(struct ipa_ep_cfg_hdr_ext *hdr_ext, u32 pad_align)
-{
-	hdr_ext->hdr_pad_to_alignment = pad_align;
-	hdr_ext->hdr_payload_len_inc_padding = true;
-	hdr_ext->hdr_total_len_or_pad = IPA_HDR_PAD;
-	hdr_ext->hdr_total_len_or_pad_valid = true;
 }
 
 void

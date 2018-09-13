@@ -598,27 +598,16 @@ static void ipa_endp_init_hdr_write(u32 ipa_ep_idx)
 	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_N, ipa_ep_idx, &ep->init_hdr);
 }
 
-/** ipa_cfg_ep_hdr_ext() -  IPA end-point extended header configuration
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ep_hdr_ext: [in] IPA end-point configuration params
+/** ipa_endp_init_hdr_ext_write() - write endpoint extended header register
  *
- * Note:	Should not be called from atomic context
+ * @ipa_ep_idx:	endpoint whose register should be written
  */
 static void
-ipa_cfg_ep_hdr_ext(u32 clnt_hdl, const struct ipa_ep_cfg_hdr_ext *ep_hdr_ext)
+ipa_endp_init_hdr_ext_write(u32 ipa_ep_idx)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 
-	ep->hdr_ext.hdr_endianness = 1;	/* big endian */
-	ep->hdr_ext.hdr_total_len_or_pad_valid =
-			ep_hdr_ext->hdr_total_len_or_pad_valid;
-	ep->hdr_ext.hdr_total_len_or_pad = ep_hdr_ext->hdr_total_len_or_pad;
-	ep->hdr_ext.hdr_payload_len_inc_padding =
-			ep_hdr_ext->hdr_payload_len_inc_padding;
-	ep->hdr_ext.hdr_total_len_or_pad_offset = 0;
-	ep->hdr_ext.hdr_pad_to_alignment = ep_hdr_ext->hdr_pad_to_alignment;
-
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_N, clnt_hdl,
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_N, ipa_ep_idx,
 			       &ep->hdr_ext);
 }
 
@@ -788,8 +777,7 @@ void ipa_cfg_ep(u32 clnt_hdl, enum ipa_client_type dst,
 		const struct ipa_ep_cfg *ipa_ep_cfg)
 {
 	ipa_endp_init_hdr_write(clnt_hdl);
-
-	ipa_cfg_ep_hdr_ext(clnt_hdl, &ipa_ep_cfg->hdr_ext);
+	ipa_endp_init_hdr_ext_write(clnt_hdl);
 
 	ipa_cfg_ep_aggr(clnt_hdl, &ipa_ep_cfg->aggr);
 

@@ -299,8 +299,8 @@ static int handle_ingress_format(struct net_device *dev,
 	/* Record our endpoint configuration parameters */
 	ipa_endp_init_hdr_cons(cons_hdl, header_size, metadata_offset,
 			       length_offset);
+	ipa_endp_init_hdr_ext_cons(cons_hdl, 0, true);
 
-	ipa_ep_cons_header_ext(&ep_cfg->hdr_ext, 0, true);
 	ipa_ep_cons_aggregation(&ep_cfg->aggr, aggr_size, aggr_count, true);
 	ipa_ep_cons_cs_offload(&ep_cfg->cfg, offload_type);
 	ipa_ep_cons_metadata_mask(&ep_cfg->metadata_mask, 0xff000000);
@@ -339,7 +339,7 @@ static int handle_egress_format(struct net_device *dev,
 	enum ipa_aggr_type aggr_type = 0;	/* ignored if BYPASS */
 	u32 header_offset = 0;
 	u32 length_offset = 0;
-	u32 header_pad = 0;
+	u32 header_align = 0;
 	u32 prod_hdl;
 	int ret;
 
@@ -352,7 +352,7 @@ static int handle_egress_format(struct net_device *dev,
 		aggr_en = IPA_ENABLE_DEAGGR;
 		aggr_type = IPA_QCMAP;
 		length_offset = offsetof(struct rmnet_map_header_s, pkt_len);
-		header_pad = ilog2(sizeof(u32));
+		header_align = ilog2(sizeof(u32));
 	}
 
 	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
@@ -369,8 +369,8 @@ static int handle_egress_format(struct net_device *dev,
 
 	/* We really do want 0 metadata offset */
 	ipa_endp_init_hdr_prod(prod_hdl, header_size, 0, length_offset);
+	ipa_endp_init_hdr_ext_prod(prod_hdl, header_align);
 
-	ipa_ep_prod_header_pad(&ep_cfg->hdr_ext, header_pad);
 	ipa_ep_prod_cs_offload(&ep_cfg->cfg, offload_type, header_offset);
 	ipa_ep_prod_header_mode(&ep_cfg->mode, IPA_BASIC);
 	ipa_ep_prod_aggregation(&ep_cfg->aggr, aggr_en, aggr_type);
