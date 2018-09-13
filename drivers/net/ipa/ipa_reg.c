@@ -355,6 +355,29 @@ ipa_reg_parse_endp_init_ctrl_n(enum ipa_reg reg, void *fields, u32 val)
 }
 
 /* IPA_ENDP_INIT_DEAGGR_N register */
+
+static void
+ipa_reg_endp_init_deaggr_common(struct ipa_reg_endp_init_deaggr *init_deaggr)
+{
+	init_deaggr->deaggr_hdr_len = 0;		/* XXX description? */
+	init_deaggr->packet_offset_valid = 0;		/* XXX description? */
+	init_deaggr->packet_offset_location = 0;	/* XXX description? */
+	init_deaggr->max_packet_len = 0;		/* XXX description? */
+}
+
+/* XXX The deaggr setting seems not to be valid for consumer endpoints */
+void
+ipa_reg_endp_init_deaggr_cons(struct ipa_reg_endp_init_deaggr *init_deaggr)
+{
+	ipa_reg_endp_init_deaggr_common(init_deaggr);
+}
+
+void
+ipa_reg_endp_init_deaggr_prod(struct ipa_reg_endp_init_deaggr *init_deaggr)
+{
+	ipa_reg_endp_init_deaggr_common(init_deaggr);
+}
+
 #define DEAGGR_HDR_LEN_FMASK		0x0000003f
 #define PACKET_OFFSET_VALID_FMASK	0x00000080
 #define PACKET_OFFSET_LOCATION_FMASK	0x00003f00

@@ -499,6 +499,10 @@ void ipa_reg_endp_init_cfg_cons(struct ipa_reg_endp_init_cfg *init_cfg,
 void ipa_reg_endp_init_cfg_prod(struct ipa_reg_endp_init_cfg *init_cfg,
 				enum ipa_cs_offload_en offload_type,
 				u32 metadata_offset);
+void ipa_reg_endp_init_deaggr_cons(
+		struct ipa_reg_endp_init_deaggr *init_deaggr);
+void ipa_reg_endp_init_deaggr_prod(
+		struct ipa_reg_endp_init_deaggr *init_deaggr);
 
 /* Get the offset of an n-parameterized register */
 u32 ipa_reg_n_offset(enum ipa_reg reg, u32 n);
