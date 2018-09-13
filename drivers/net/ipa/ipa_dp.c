@@ -1683,6 +1683,22 @@ void ipa_endp_init_mode_prod(u32 ipa_ep_idx, enum ipa_mode mode,
 	ipa_reg_endp_init_mode_prod(&ep->init_mode, mode, dst_ep_idx);
 }
 
+/* XXX The sequencer setting seems not to be valid for consumer endpoints */
+void ipa_endp_init_seq_cons(u32 ipa_ep_idx)
+{
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+
+	ipa_reg_endp_init_seq_cons(&ep->init_seq);
+}
+
+void ipa_endp_init_seq_prod(u32 ipa_ep_idx)
+{
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+	u32 seq_type = (u32)ipa_endp_seq_type(ipa_ep_idx);
+
+	ipa_reg_endp_init_seq_prod(&ep->init_seq, seq_type);
+}
+
 void ipa_ep_prod_status(struct ipa_reg_endp_status *status, bool enable,
 			enum ipa_client_type client)
 {

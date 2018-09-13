@@ -657,22 +657,15 @@ static void ipa_endp_init_mode_write(u32 ipa_ep_idx)
 			       &ep->init_mode);
 }
 
-/** ipa_cfg_ep_seq() - IPA end-point HPS/DPS sequencer type configuration
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
+/** ipa_endp_init_seq_write() - write endpoint sequencer register
  *
- * Note:	Should not be called from atomic context
+ * @ipa_ep_idx:	endpoint whose register should be written
  */
-static void ipa_cfg_ep_seq(u32 clnt_hdl)
+static void ipa_endp_init_seq_write(u32 ipa_ep_idx)
 {
-	enum ipa_client_type client = ipa_ctx->ep[clnt_hdl].client;
-	struct ipa_reg_endp_init_seq init_seq = { };
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 
-	init_seq.hps_seq_type = (u32)ep_configuration(client)->seq_type;
-	init_seq.dps_seq_type = 0;
-	init_seq.hps_rep_seq_type = 0;
-	init_seq.dps_rep_seq_type = 0;
-
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_SEQ_N, clnt_hdl, &init_seq);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_SEQ_N, ipa_ep_idx, &ep->init_seq);
 }
 
 /** ipa_cfg_ep_deaggr() -  IPA end-point deaggregation configuration
@@ -751,7 +744,7 @@ void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 
 	if (ipa_producer(ipa_ctx->ep[clnt_hdl].client)) {
 		ipa_endp_init_mode_write(clnt_hdl);
-		ipa_cfg_ep_seq(clnt_hdl);
+		ipa_endp_init_seq_write(clnt_hdl);
 
 		ipa_cfg_ep_deaggr(clnt_hdl);
 	} else {

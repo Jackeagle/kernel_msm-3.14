@@ -247,6 +247,7 @@ struct ipa_ep_context {
 	struct ipa_reg_endp_init_mode init_mode;
 	struct ipa_reg_endp_init_aggr init_aggr;
 	struct ipa_reg_endp_init_cfg init_cfg;
+	struct ipa_reg_endp_init_seq init_seq;
 	struct ipa_reg_endp_init_hdr_metadata_mask init_hdr_metadata_mask;
 	struct ipa_reg_endp_status status;
 
@@ -472,6 +473,8 @@ void ipa_endp_init_cfg_cons(u32 ipa_ep_idx,
 			    enum ipa_cs_offload_en offload_type);
 void ipa_endp_init_cfg_prod(u32 ipa_ep_idx, enum ipa_cs_offload_en offload_type,
 			    u32 metadata_offset);
+void ipa_endp_init_seq_cons(u32 ipa_ep_idx);
+void ipa_endp_init_seq_prod(u32 ipa_ep_idx);
 
 void ipa_ep_cons_metadata_mask(struct ipa_ep_cfg_metadata_mask *mask,
 			       u32 metadata_mask);

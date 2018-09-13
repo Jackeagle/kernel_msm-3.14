@@ -170,6 +170,7 @@ static int setup_apps_cmd_prod_pipe(void)
 	prod_hdl = ret;
 
 	ipa_endp_init_mode_prod(prod_hdl, IPA_DMA, dst_client);
+	ipa_endp_init_seq_prod(prod_hdl);
 
 	ret = ipa_setup_sys_pipe(prod_hdl, chan_count, 0, &sys_in);
 	if (ret)
