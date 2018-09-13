@@ -663,8 +663,7 @@ static void ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
  *
  * Note:	Should not be called from atomic context
  */
-static void ipa_cfg_ep_mode(u32 clnt_hdl, enum ipa_client_type dst,
-			    const struct ipa_ep_cfg_mode *ep_mode)
+static void ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
 
@@ -765,8 +764,7 @@ ipa_cfg_ep_status(u32 clnt_hdl, const struct ipa_reg_endp_status *status)
  *
  * Note:	Should not be called from atomic context
  */
-void ipa_cfg_ep(u32 clnt_hdl, enum ipa_client_type dst,
-		const struct ipa_ep_cfg *ipa_ep_cfg)
+void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 {
 	ipa_endp_init_hdr_write(clnt_hdl);
 	ipa_endp_init_hdr_ext_write(clnt_hdl);
@@ -776,7 +774,7 @@ void ipa_cfg_ep(u32 clnt_hdl, enum ipa_client_type dst,
 	ipa_cfg_ep_cfg(clnt_hdl, &ipa_ep_cfg->cfg);
 
 	if (ipa_producer(ipa_ctx->ep[clnt_hdl].client)) {
-		ipa_cfg_ep_mode(clnt_hdl, dst, &ipa_ep_cfg->mode);
+		ipa_cfg_ep_mode(clnt_hdl, &ipa_ep_cfg->mode);
 		ipa_cfg_ep_seq(clnt_hdl);
 
 		ipa_cfg_ep_deaggr(clnt_hdl);

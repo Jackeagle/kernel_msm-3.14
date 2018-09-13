@@ -445,8 +445,7 @@ int ipa_stop_gsi_channel(u32 clnt_hdl);
 void ipa_reset_gsi_channel(u32 clnt_hdl);
 
 /* Configuration */
-void ipa_cfg_ep(u32 clnt_hdl, enum ipa_client_type dst,
-		const struct ipa_ep_cfg *ipa_ep_cfg);
+void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg);
 
 /* Data path */
 int ipa_tx_dp(enum ipa_client_type dst, struct sk_buff *skb);
@@ -485,8 +484,7 @@ void ipa_ep_free(u32 ipa_ep_idx);
 
 void ipa_no_intr_init(u32 prod_ep_idx);
 
-int ipa_setup_sys_pipe(u32 client_hdl, enum ipa_client_type dst,
-		       u32 chan_count, u32 rx_buffer_size,
+int ipa_setup_sys_pipe(u32 client_hdl, u32 chan_count, u32 rx_buffer_size,
 		       struct ipa_sys_connect_params *sys_in);
 
 void ipa_teardown_sys_pipe(u32 clnt_hdl);

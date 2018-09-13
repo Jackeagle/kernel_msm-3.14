@@ -171,7 +171,7 @@ static int setup_apps_cmd_prod_pipe(void)
 
 	ipa_ep_prod_header_mode(&sys_in.ipa_ep_cfg.mode, IPA_DMA, dst_client);
 
-	ret = ipa_setup_sys_pipe(prod_hdl, dst_client, chan_count, 0, &sys_in);
+	ret = ipa_setup_sys_pipe(prod_hdl, chan_count, 0, &sys_in);
 	if (ret)
 		ipa_ep_free(prod_hdl);
 	else
@@ -540,8 +540,7 @@ static int setup_apps_lan_cons_pipe(void)
 	sys_in.priv = NULL;
 	sys_in.napi_enabled = false;
 
-	ret = ipa_setup_sys_pipe(cons_hdl, client, chan_count, rx_buffer_size,
-				 &sys_in);
+	ret = ipa_setup_sys_pipe(cons_hdl, chan_count, rx_buffer_size, &sys_in);
 	if (ret)
 		ipa_ep_free(cons_hdl);
 	else

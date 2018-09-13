@@ -1738,7 +1738,6 @@ void ipa_ep_free(u32 ipa_ep_idx)
 /** ipa_setup_sys_pipe() - Setup an IPA GPI pipe and perform
  * IPA EP configuration
  * @client:	[in] handle assigned by IPA to client
- * @dst:	[in] destination client handle (ignored for consumer clients)
  * @sys_in:	[in] input needed to setup the pipe and configure EP
  *
  *  - configure the end-point registers with the supplied
@@ -1748,9 +1747,8 @@ void ipa_ep_free(u32 ipa_ep_idx)
  *
  * Returns:	0 on success, negative on failure
  */
-int
-ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst, u32 chan_count,
-		   u32 rx_buffer_size, struct ipa_sys_connect_params *sys_in)
+int ipa_setup_sys_pipe(u32 ipa_ep_idx, u32 chan_count, u32 rx_buffer_size,
+		       struct ipa_sys_connect_params *sys_in)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 	int ret;
@@ -1776,7 +1774,7 @@ ipa_setup_sys_pipe(u32 ipa_ep_idx, enum ipa_client_type dst, u32 chan_count,
 
 	ipa_client_add();
 
-	ipa_cfg_ep(ipa_ep_idx, dst, &sys_in->ipa_ep_cfg);
+	ipa_cfg_ep(ipa_ep_idx, &sys_in->ipa_ep_cfg);
 
 	ipa_debug("ep %u configuration successful\n", ipa_ep_idx);
 

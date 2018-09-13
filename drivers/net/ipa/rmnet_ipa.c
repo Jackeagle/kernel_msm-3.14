@@ -312,8 +312,7 @@ static int handle_ingress_format(struct net_device *dev,
 
 	ipa_ctx->ipa_client_apps_wan_cons_agg_gro = aggr_active;
 
-	ret = ipa_setup_sys_pipe(cons_hdl, client, chan_count, rx_buffer_size,
-				 wan_cfg);
+	ret = ipa_setup_sys_pipe(cons_hdl, chan_count, rx_buffer_size, wan_cfg);
 	if (ret)
 		ipa_ep_free(cons_hdl);
 	else
@@ -386,7 +385,7 @@ static int handle_egress_format(struct net_device *dev,
 	/* Use a deferred interrupting no-op to reduce completion interrupts */
 	ipa_no_intr_init(prod_hdl);
 
-	ret = ipa_setup_sys_pipe(prod_hdl, dst_client, chan_count, 0, wan_cfg);
+	ret = ipa_setup_sys_pipe(prod_hdl, chan_count, 0, wan_cfg);
 	if (ret)
 		ipa_ep_free(prod_hdl);
 	else
