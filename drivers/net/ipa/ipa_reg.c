@@ -538,6 +538,32 @@ ipa_reg_parse_shared_mem_size(enum ipa_reg reg, void *fields, u32 val)
 }
 
 /* IPA_ENDP_STATUS_N register */
+
+static void ipa_reg_endp_status_common(struct ipa_reg_endp_status *endp_status)
+{
+	endp_status->status_pkt_suppress = 0;	/* XXX description?  */
+}
+
+void ipa_reg_endp_status_cons(struct ipa_reg_endp_status *endp_status,
+			      bool enable)
+{
+	endp_status->status_en = enable ? 1 : 0;
+	endp_status->status_endp = 0;	/* ignored */
+	endp_status->status_location = 0;	/* before packet data */
+
+	ipa_reg_endp_status_common(endp_status);
+}
+
+void ipa_reg_endp_status_prod(struct ipa_reg_endp_status *endp_status,
+			      bool enable, u32 endp)
+{
+	endp_status->status_en = enable ? 1 : 0;
+	endp_status->status_endp = endp;
+	endp_status->status_location = 0;	/* ignored */
+
+	ipa_reg_endp_status_common(endp_status);
+}
+
 #define STATUS_EN_FMASK			0x00000001
 #define STATUS_ENDP_FMASK		0x0000003e
 #define STATUS_LOCATION_FMASK		0x00000100

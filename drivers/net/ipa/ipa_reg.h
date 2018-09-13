@@ -511,6 +511,10 @@ void ipa_reg_endp_init_hdr_metadata_mask_cons(
 		u32 mask);
 void ipa_reg_endp_init_hdr_metadata_mask_prod(
 		struct ipa_reg_endp_init_hdr_metadata_mask *metadata_mask);
+void ipa_reg_endp_status_cons(struct ipa_reg_endp_status *endp_status,
+			      bool enable);
+void ipa_reg_endp_status_prod(struct ipa_reg_endp_status *endp_status,
+			      bool enable, u32 endp);
 
 /* Get the offset of an n-parameterized register */
 u32 ipa_reg_n_offset(enum ipa_reg reg, u32 n);
