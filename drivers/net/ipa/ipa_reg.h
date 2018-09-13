@@ -223,6 +223,20 @@ struct ipa_reg_aggr_force_close {
 	u32 pipe_bitmap;
 };
 
+/** enum ipa_mode - mode setting type in IPA end-point
+ * @BASIC: basic mode
+ * @ENABLE_FRAMING_HDLC: not currently supported
+ * @ENABLE_DEFRAMING_HDLC: not currently supported
+ * @DMA: all data arriving IPA will not go through IPA logic blocks, this
+ *  allows IPA to work as DMA for specific pipes.
+ */
+enum ipa_mode {
+	IPA_BASIC			= 0,
+	IPA_ENABLE_FRAMING_HDLC		= 1,
+	IPA_ENABLE_DEFRAMING_HDLC	= 2,
+	IPA_DMA				= 3,
+};
+
 /* struct ipa_reg_endp_init_mode - IPA_ENDP_INIT_MODE_N field structure
  *
  * @mode: endpoint mode setting (enum ipa_mode_type)
@@ -235,7 +249,7 @@ struct ipa_reg_aggr_force_close {
  * @hdr_ftch_disable:
  */
 struct ipa_reg_endp_init_mode {
-	u32 mode;
+	u32 mode;		/* enum ipa_mode */
 	u32 dest_pipe_index;
 	u32 byte_threshold;
 	u32 pipe_replication_en;

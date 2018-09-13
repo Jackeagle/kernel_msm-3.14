@@ -1658,7 +1658,7 @@ void ipa_ep_prod_header_pad(struct ipa_ep_cfg_hdr_ext *hdr_ext, u32 pad_align)
 }
 
 void
-ipa_ep_prod_header_mode(struct ipa_ep_cfg_mode *mode, enum ipa_mode_type type)
+ipa_ep_prod_header_mode(struct ipa_ep_cfg_mode *mode, enum ipa_mode type)
 {
 	mode->mode = type;
 }

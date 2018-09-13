@@ -204,20 +204,6 @@ enum ipa_dp_evt_type {
 	IPA_CLIENT_COMP_NAPI,
 };
 
-/** enum ipa_mode_type - mode setting type in IPA end-point
- * @BASIC: basic mode
- * @ENABLE_FRAMING_HDLC: not currently supported
- * @ENABLE_DEFRAMING_HDLC: not currently supported
- * @DMA: all data arriving IPA will not go through IPA logic blocks, this
- *  allows IPA to work as DMA for specific pipes.
- */
-enum ipa_mode_type {
-	IPA_BASIC,
-	IPA_ENABLE_FRAMING_HDLC,
-	IPA_ENABLE_DEFRAMING_HDLC,
-	IPA_DMA,
-};
-
 #define IPA_GENERIC_AGGR_BYTE_LIMIT	6
 #define IPA_GENERIC_AGGR_TIME_LIMIT	1
 #define IPA_GENERIC_AGGR_PKT_LIMIT	0
@@ -301,7 +287,7 @@ struct ipa_ep_cfg_hdr_ext {
  *		Valid for Input Pipes only (IPA Consumer)
  */
 struct ipa_ep_cfg_mode {
-	enum ipa_mode_type mode;
+	enum ipa_mode mode;
 };
 
 /** struct ipa_ep_cfg_aggr - aggregation configuration in IPA end-point

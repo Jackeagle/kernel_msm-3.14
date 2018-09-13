@@ -468,7 +468,7 @@ void ipa_ep_prod_header(struct ipa_ep_cfg_hdr *hdr, u32 header_size,
 			u32 metadata_offset, u32 length_offset);
 void ipa_ep_prod_header_pad(struct ipa_ep_cfg_hdr_ext *hdr_ext, u32 pad_align);
 void ipa_ep_prod_header_mode(struct ipa_ep_cfg_mode *mode,
-			     enum ipa_mode_type type);
+			     enum ipa_mode type);
 void ipa_ep_prod_aggregation(struct ipa_ep_cfg_aggr *aggr,
 			     enum ipa_aggr_en aggr_en,
 			     enum ipa_aggr_type aggr_type);
