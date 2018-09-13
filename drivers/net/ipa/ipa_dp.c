@@ -1653,11 +1653,21 @@ void ipa_ep_cons_status(struct ipa_reg_endp_status *status, bool enable)
 	status->status_pkt_suppress = 0;	/* XXX ignored/unused? */
 }
 
-void ipa_ep_prod_header_mode(struct ipa_ep_cfg_mode *mode, enum ipa_mode type,
+/* Note that the mode setting is not valid for consumer endpoints */
+void ipa_endp_init_mode_cons(u32 ipa_ep_idx)
+{
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+
+	ipa_reg_endp_init_mode_cons(&ep->init_mode);
+}
+
+void ipa_endp_init_mode_prod(u32 ipa_ep_idx, enum ipa_mode mode,
 			     enum ipa_client_type dst_client)
 {
-	mode->mode = type;
-	mode->dest_pipe_index = ipa_get_ep_mapping(dst_client);
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+	u32 dst_ep_idx = ipa_get_ep_mapping(dst_client);
+
+	ipa_reg_endp_init_mode_prod(&ep->init_mode, mode, dst_ep_idx);
 }
 
 void ipa_ep_prod_aggregation(struct ipa_ep_cfg_aggr *aggr,

@@ -657,25 +657,15 @@ static void ipa_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 			       &ep->init_cfg);
 }
 
-/** ipa_cfg_ep_mode() - IPA end-point mode configuration
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
- * @ipa_ep_cfg: [in] IPA end-point configuration params
+/** ipa_endp_init_mode_write() - write endpoint mode register
  *
- * Note:	Should not be called from atomic context
+ * @ipa_ep_idx:	endpoint whose register should be written
  */
-static void ipa_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
+static void ipa_endp_init_mode_write(u32 ipa_ep_idx)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
 
-
-	ep->init_mode.mode = ep_mode->mode;
-	ep->init_mode.dest_pipe_index = ep_mode->dest_pipe_index;
-	ep->init_mode.byte_threshold = 0;
-	ep->init_mode.pipe_replication_en = 0;
-	ep->init_mode.pad_en = 0;
-	ep->init_mode.hdr_ftch_disable = 0;
-
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_MODE_N, clnt_hdl,
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_MODE_N, ipa_ep_idx,
 			       &ep->init_mode);
 }
 
@@ -773,7 +763,7 @@ void ipa_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 	ipa_cfg_ep_cfg(clnt_hdl, &ipa_ep_cfg->cfg);
 
 	if (ipa_producer(ipa_ctx->ep[clnt_hdl].client)) {
-		ipa_cfg_ep_mode(clnt_hdl, &ipa_ep_cfg->mode);
+		ipa_endp_init_mode_write(clnt_hdl);
 		ipa_cfg_ep_seq(clnt_hdl);
 
 		ipa_cfg_ep_deaggr(clnt_hdl);

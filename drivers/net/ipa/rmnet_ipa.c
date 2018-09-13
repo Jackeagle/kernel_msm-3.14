@@ -369,9 +369,9 @@ static int handle_egress_format(struct net_device *dev,
 	/* We really do want 0 metadata offset */
 	ipa_endp_init_hdr_prod(prod_hdl, header_size, 0, length_offset);
 	ipa_endp_init_hdr_ext_prod(prod_hdl, header_align);
+	ipa_endp_init_mode_prod(prod_hdl, IPA_BASIC, dst_client);
 
 	ipa_ep_prod_cs_offload(&ep_cfg->cfg, offload_type, header_offset);
-	ipa_ep_prod_header_mode(&ep_cfg->mode, IPA_BASIC, dst_client);
 	ipa_ep_prod_aggregation(&ep_cfg->aggr, aggr_en, aggr_type);
 	/* Enable source notification status for exception packets
 	 * (i.e. QMAP commands) to be routed to modem.
