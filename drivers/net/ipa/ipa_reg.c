@@ -401,6 +401,30 @@ ipa_reg_construct_endp_init_deaggr_n(enum ipa_reg reg, const void *fields)
 }
 
 /* IPA_ENDP_INIT_SEQ_N register */
+
+static void
+ipa_reg_endp_init_seq_common(struct ipa_reg_endp_init_seq *init_seq)
+{
+	init_seq->dps_seq_type = 0;	/* XXX description? */
+	init_seq->hps_rep_seq_type = 0;	/* XXX description? */
+	init_seq->dps_rep_seq_type = 0;	/* XXX description? */
+}
+
+void ipa_reg_endp_init_seq_cons(struct ipa_reg_endp_init_seq *init_seq)
+{
+	init_seq->hps_seq_type = 0;	/* ignored */
+
+	ipa_reg_endp_init_seq_common(init_seq);
+}
+
+void ipa_reg_endp_init_seq_prod(struct ipa_reg_endp_init_seq *init_seq,
+				enum ipa_seq_type seq_type)
+{
+	init_seq->hps_seq_type = (u32)seq_type;
+
+	ipa_reg_endp_init_seq_common(init_seq);
+}
+
 #define HPS_SEQ_TYPE_FMASK	0x0000000f
 #define DPS_SEQ_TYPE_FMASK	0x000000f0
 #define HPS_REP_SEQ_TYPE_FMASK	0x00000f00

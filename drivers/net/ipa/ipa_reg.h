@@ -503,6 +503,9 @@ void ipa_reg_endp_init_deaggr_cons(
 		struct ipa_reg_endp_init_deaggr *init_deaggr);
 void ipa_reg_endp_init_deaggr_prod(
 		struct ipa_reg_endp_init_deaggr *init_deaggr);
+void ipa_reg_endp_init_seq_cons(struct ipa_reg_endp_init_seq *init_seq);
+void ipa_reg_endp_init_seq_prod(struct ipa_reg_endp_init_seq *init_seq,
+				enum ipa_seq_type seq_type);
 
 /* Get the offset of an n-parameterized register */
 u32 ipa_reg_n_offset(enum ipa_reg reg, u32 n);
