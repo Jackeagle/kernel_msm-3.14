@@ -1183,6 +1183,27 @@ static irqreturn_t ipa_smp2p_modem_post_init_isr(int irq, void *ctxt)
 	return IRQ_HANDLED;
 }
 
+static int
+ipa_smp2p_irq(struct device *dev, const char *name, irq_handler_t handler)
+{
+	struct device_node *node = dev->of_node;
+	unsigned int irq;
+	int ret;
+
+	ret = of_irq_get_byname(node, name);
+	if (ret < 0) {
+		ipa_err("error %d getting %s irq\n", ret, name);
+		return ret;
+	}
+	irq = ret;
+
+	ret = devm_request_threaded_irq(dev, irq, NULL, handler, 0, name, dev);
+	if (ret)
+		ipa_err("error %d requesting %s irq\n", ret, name);
+
+	return ret;
+}
+
 static int ipa_smp2p_init(struct device *dev)
 {
 	struct device_node *node = dev->of_node;
@@ -1190,7 +1211,6 @@ static int ipa_smp2p_init(struct device *dev)
 	struct qcom_smem_state *enabled_state;
 	unsigned int valid_bit;
 	unsigned int enabled_bit;
-	int irq;
 	int res;
 
 	ipa_debug("node->name=%s\n", node->name);
@@ -1213,35 +1233,15 @@ static int ipa_smp2p_init(struct device *dev)
 		return res;
 	}
 
-	res = of_irq_get_byname(node, "ipa-clock-query");
-	if (res < 0) {
-		ipa_err("error %d getting ipa-clock-query irq\n", res);
+	res = ipa_smp2p_irq(dev, "ipa-clock-query",
+			    ipa_smp2p_modem_clk_query_isr);
+	if (res < 0)
 		return res;
-	}
-	irq = res;
 
-	res = devm_request_threaded_irq(dev, irq, NULL,
-					ipa_smp2p_modem_clk_query_isr, 0,
-					"ipa-clock-query", dev);
-	if (res) {
-		ipa_err("error %d requesting clk-query threaded irq\n", res);
-		return -ENODEV;
-	}
-
-	res = of_irq_get_byname(node, "ipa-post-init");
-	if (res < 0) {
-		ipa_err("error %d getting post-init irq\n", res);
+	res = ipa_smp2p_irq(dev, "ipa-post-init",
+			    ipa_smp2p_modem_post_init_isr);
+	if (res < 0)
 		return res;
-	}
-	irq = res;
-
-	res = devm_request_threaded_irq(dev, irq, NULL,
-					ipa_smp2p_modem_post_init_isr, 0,
-					"ipa-post-init", dev);
-	if (res) {
-		ipa_err("error %d requesting post-init threaded irq\n", res);
-		return -ENODEV;
-	}
 
 	/* Success.  Record our smp2p information */
 	ipa_ctx->smp2p_info.valid_state = valid_state;
