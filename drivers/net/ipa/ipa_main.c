@@ -1222,7 +1222,7 @@ static int ipa_smp2p_init(struct device *dev)
 
 	res = devm_request_threaded_irq(dev, irq, NULL,
 					ipa_smp2p_modem_clk_query_isr, 0,
-					"ipa_smp2p_clk_vote", dev);
+					"ipa-clock-query", dev);
 	if (res) {
 		ipa_err("error %d requesting clk-query threaded irq\n", res);
 		return -ENODEV;
@@ -1237,7 +1237,7 @@ static int ipa_smp2p_init(struct device *dev)
 
 	res = devm_request_threaded_irq(dev, irq, NULL,
 					ipa_smp2p_modem_post_init_isr, 0,
-					"ipa_smp2p_post_init", dev);
+					"ipa-post-init", dev);
 	if (res) {
 		ipa_err("error %d requesting post-init threaded irq\n", res);
 		return -ENODEV;
