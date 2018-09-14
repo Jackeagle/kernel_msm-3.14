@@ -213,28 +213,6 @@ enum hdr_total_len_or_pad_type {
 /** max size of the name of the resource (routing table, header) */
 #define IPA_RESOURCE_NAME_MAX	32
 
-/** struct ipa_ep_cfg_hdr_ext - extended header configuration in IPA end-point
- * @hdr_pad_to_alignment: Pad packet to specified alignment
- *	(2^pad to alignment value), i.e. value of 3 means pad to 2^3 = 8 bytes
- *	alignment. Alignment is to 0,2 up to 32 bytes (IPAv2 does not support 64
- *	byte alignment). Valid for Output Pipes only (IPA Producer).
- * @hdr_payload_len_inc_padding: 0-IPA_ENDP_INIT_HDR_N's
- *	HDR_OFST_PKT_SIZE does
- *	not includes padding bytes size, payload_len = packet length,
- *	1-IPA_ENDP_INIT_HDR_N's HDR_OFST_PKT_SIZE includes
- *	padding bytes size, payload_len = packet length + padding
- * @hdr_total_len_or_pad: field is used as PAD length ot as Total length
- *	(header + packet + padding)
- * @hdr_total_len_or_pad_valid: 0-Ignore TOTAL_LEN_OR_PAD field, 1-Process
- *	TOTAL_LEN_OR_PAD field
- */
-struct ipa_ep_cfg_hdr_ext {
-	u32 hdr_pad_to_alignment;
-	bool hdr_payload_len_inc_padding;
-	enum hdr_total_len_or_pad_type hdr_total_len_or_pad;
-	bool hdr_total_len_or_pad_valid;
-};
-
 /** struct ipa_ep_cfg_mode - mode configuration in IPA end-point
  * @mode:	Valid for Input Pipes only (IPA Consumer)
  * @dst:	This parameter specifies the output pipe to which the packets
@@ -327,7 +305,6 @@ struct ipa_ep_cfg_metadata_mask {
 };
 
 /** struct ipa_ep_cfg - configuration of IPA end-point
- * @hdr_ext:		Extended header parameters
  * @mode:		Mode parameters
  * @aggr:		Aggregation parameters
  * @deaggr:		Deaggregation params
@@ -335,7 +312,6 @@ struct ipa_ep_cfg_metadata_mask {
  * @metadata_mask:	Hdr metadata mask
  */
 struct ipa_ep_cfg {
-	struct ipa_ep_cfg_hdr_ext hdr_ext;
 	struct ipa_ep_cfg_mode mode;
 	struct ipa_ep_cfg_aggr aggr;
 	struct ipa_ep_cfg_cfg cfg;
