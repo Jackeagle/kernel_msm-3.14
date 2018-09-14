@@ -1191,17 +1191,17 @@ ipa_smp2p_irq(struct device *dev, const char *name, irq_handler_t handler)
 	int ret;
 
 	ret = of_irq_get_byname(node, name);
-	if (ret < 0) {
-		ipa_err("error %d getting %s irq\n", ret, name);
+	if (ret < 0)
 		return ret;
-	}
+	if (!ret)
+		return -EINVAL;		/* IRQ mapping failure */
 	irq = ret;
 
 	ret = devm_request_threaded_irq(dev, irq, NULL, handler, 0, name, dev);
 	if (ret)
-		ipa_err("error %d requesting %s irq\n", ret, name);
+		return ret;
 
-	return ret;
+	return irq;
 }
 
 static int ipa_smp2p_init(struct device *dev)
