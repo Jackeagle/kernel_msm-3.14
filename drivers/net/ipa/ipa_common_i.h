@@ -213,22 +213,9 @@ enum hdr_total_len_or_pad_type {
 /** max size of the name of the resource (routing table, header) */
 #define IPA_RESOURCE_NAME_MAX	32
 
-/** struct ipa_ep_cfg_metadata_mask - Endpoint initialization hdr metadata mask
- * @metadata_mask: Mask specifying which metadata bits to write to
- *	IPA_ENDP_INIT_HDR_N.s HDR_OFST_METADATA. Only
- *	masked metadata bits (set to 1) will be written. Valid for Output
- *	Pipes only (IPA Producer)
- */
-struct ipa_ep_cfg_metadata_mask {
-	u32 metadata_mask;
-};
-
 /** struct ipa_ep_cfg - configuration of IPA end-point
- * @metadata_mask:	Hdr metadata mask
  */
 struct ipa_ep_cfg {
-	struct ipa_ep_cfg_metadata_mask metadata_mask;
-
 	struct ipa_reg_endp_status status;
 };
 
