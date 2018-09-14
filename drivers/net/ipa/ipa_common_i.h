@@ -213,41 +213,6 @@ enum hdr_total_len_or_pad_type {
 /** max size of the name of the resource (routing table, header) */
 #define IPA_RESOURCE_NAME_MAX	32
 
-/** struct ipa_ep_cfg_hdr - header configuration in IPA end-point
- *
- * @hdr_len:Header length in bytes to be added/removed. Assuming
- *			header len is constant per endpoint. Valid for
- *			both Input and Output Pipes
- * @hdr_ofst_metadata_valid:	0: Metadata_Ofst  value is invalid, i.e., no
- *			metadata within header.
- *			1: Metadata_Ofst  value is valid, i.e., metadata
- *			within header is in offset Metadata_Ofst Valid
- *			for Input Pipes only (IPA Consumer) (for output
- *			pipes, metadata already set within the header)
- * @hdr_ofst_metadata:	Offset within header in which metadata resides
- *			Size of metadata - 4bytes
- *			Example -  Stream ID/SSID/mux ID.
- *			Valid for  Input Pipes only (IPA Consumer) (for output
- *			pipes, metadata already set within the header)
- * @hdr_ofst_pkt_size_valid:	0: Hdr_Ofst_Pkt_Size  value is invalid, i.e., no
- *			length field within the inserted header
- *			1: Hdr_Ofst_Pkt_Size  value is valid, i.e., a
- *			packet length field resides within the header
- *			Valid for Output Pipes (IPA Producer)
- * @hdr_ofst_pkt_size:	Offset within header in which packet size reside. Upon
- *			Header Insertion, IPA will update this field within the
- *			header with the packet length . Assumption is that
- *			header length field size is constant and is 2Bytes
- *			Valid for Output Pipes (IPA Producer)
- */
-struct ipa_ep_cfg_hdr {
-	u32  hdr_len;
-	u32  hdr_ofst_metadata_valid;
-	u32  hdr_ofst_metadata;
-	u32  hdr_ofst_pkt_size_valid;
-	u32  hdr_ofst_pkt_size;
-};
-
 /** struct ipa_ep_cfg_hdr_ext - extended header configuration in IPA end-point
  * @hdr_pad_to_alignment: Pad packet to specified alignment
  *	(2^pad to alignment value), i.e. value of 3 means pad to 2^3 = 8 bytes
@@ -362,7 +327,6 @@ struct ipa_ep_cfg_metadata_mask {
 };
 
 /** struct ipa_ep_cfg - configuration of IPA end-point
- * @hdr:		Header parameters
  * @hdr_ext:		Extended header parameters
  * @mode:		Mode parameters
  * @aggr:		Aggregation parameters
@@ -371,7 +335,6 @@ struct ipa_ep_cfg_metadata_mask {
  * @metadata_mask:	Hdr metadata mask
  */
 struct ipa_ep_cfg {
-	struct ipa_ep_cfg_hdr hdr;
 	struct ipa_ep_cfg_hdr_ext hdr_ext;
 	struct ipa_ep_cfg_mode mode;
 	struct ipa_ep_cfg_aggr aggr;
