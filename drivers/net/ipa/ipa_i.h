@@ -195,12 +195,6 @@ typedef void (*ipa_irq_handler_t)(enum ipa_irq_type interrupt,
 
 /** struct ipa_sys_connect_params - information needed to setup an IPA end-point
  * in system-BAM mode
- * @ipa_ep_cfg: IPA EP configuration
- * @client:	the type of client who "owns" the EP
- * @fifo_count: number of elements in the desc FIFO. This size is used to
- *		calculate the GSI ring size in the following way:
- *		For the APPS_CMD producer pipe, GSI ring is 4 * fifo_count.
-		For all other pipes, GSI ring is 2 * desc_fifo_sz.
  * @priv:	callback cookie
  * @notify:	callback
  *		priv - callback cookie
@@ -210,7 +204,6 @@ typedef void (*ipa_irq_handler_t)(enum ipa_irq_type interrupt,
  * @napi_enabled: when true, IPA call client callback to start polling
  */
 struct ipa_sys_connect_params {
-	struct ipa_ep_cfg ipa_ep_cfg;
 	void *priv;
 	ipa_notify_cb notify;
 	bool napi_enabled;
