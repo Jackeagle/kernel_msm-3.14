@@ -213,54 +213,6 @@ enum hdr_total_len_or_pad_type {
 /** max size of the name of the resource (routing table, header) */
 #define IPA_RESOURCE_NAME_MAX	32
 
-/** struct ipa_ep_cfg_aggr - aggregation configuration in IPA end-point
- *
- * @aggr_en:	Valid for both Input and Output Pipes
- * @aggr:	aggregation type (Valid for both Input and Output Pipes)
- * @aggr_byte_limit:	Limit of aggregated packet size in KB (<=32KB) When set
- *			to 0, there is no size limitation on the aggregation.
- *			When both, Aggr_Byte_Limit and Aggr_Time_Limit are set
- *			to 0, there is no aggregation, every packet is sent
- *			independently according to the aggregation structure
- *			Valid for Output Pipes only (IPA Producer )
- * @aggr_time_limit:	Timer to close aggregated packet (<=32ms) When set to 0,
- *			there is no time limitation on the aggregation.  When
- *			both, Aggr_Byte_Limit and Aggr_Time_Limit are set to 0,
- *			there is no aggregation, every packet is sent
- *			independently according to the aggregation structure
- *			Valid for Output Pipes only (IPA Producer)
- * @aggr_pkt_limit: Defines if EOF close aggregation or not. if set to false
- *			HW closes aggregation (sends EOT) only based on its
- *			aggregation config (byte/time limit, etc). if set to
- *			true EOF closes aggregation in addition to HW based
- *			aggregation closure. Valid for Output Pipes only (IPA
- *			Producer). EOF affects only Pipes configured for
- *			generic aggregation.
- * @aggr_hard_byte_limit_en: If set to 1, byte-limit aggregation for this
- *			pipe will apply a hard-limit behavior which will not
- *			allow frames to be closed with more than byte-limit
- *			bytes. If set to 0, previous byte-limit behavior
- *			will apply - frames close once a packet causes the
- *			accumulated byte-count to cross the byte-limit
- *			threshold (closed frame will contain that packet).
- * @aggr_sw_eof_active: 0: EOF does not close aggregation. HW closes aggregation
- *			(sends EOT) only based on its aggregation config
- *			(byte/time limit, etc).
- *			1: EOF closes aggregation in addition to HW based
- *			aggregation closure. Valid for Output Pipes only (IPA
- *			Producer). EOF affects only Pipes configured for generic
- *			aggregation.
- */
-struct ipa_ep_cfg_aggr {
-	enum ipa_aggr_en aggr_en;
-	enum ipa_aggr_type aggr;
-	u32 aggr_byte_limit;
-	u32 aggr_time_limit;
-	u32 aggr_pkt_limit;
-	bool aggr_hard_byte_limit_en;
-	bool aggr_sw_eof_active;
-};
-
 /** struct ipa_ep_cfg_cfg - IPA ENDP_INIT Configuration register
  * @cs_offload_en: Checksum offload enable: 00: Disable checksum offload, 01:
  *	Enable checksum calculation offload (UL) - For output pipe
@@ -292,13 +244,10 @@ struct ipa_ep_cfg_metadata_mask {
 };
 
 /** struct ipa_ep_cfg - configuration of IPA end-point
- * @aggr:		Aggregation parameters
- * @deaggr:		Deaggregation params
  * @cfg:		Configuration register data
  * @metadata_mask:	Hdr metadata mask
  */
 struct ipa_ep_cfg {
-	struct ipa_ep_cfg_aggr aggr;
 	struct ipa_ep_cfg_cfg cfg;
 	struct ipa_ep_cfg_metadata_mask metadata_mask;
 
