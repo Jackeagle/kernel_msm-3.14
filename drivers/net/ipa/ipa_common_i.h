@@ -213,19 +213,6 @@ enum hdr_total_len_or_pad_type {
 /** max size of the name of the resource (routing table, header) */
 #define IPA_RESOURCE_NAME_MAX	32
 
-/** struct ipa_ep_cfg_mode - mode configuration in IPA end-point
- * @mode:	Valid for Input Pipes only (IPA Consumer)
- * @dst:	This parameter specifies the output pipe to which the packets
- *		will be routed to.
- *		This parameter is valid for Mode=DMA and not valid for
- *		Mode=Basic
- *		Valid for Input Pipes only (IPA Consumer)
- */
-struct ipa_ep_cfg_mode {
-	enum ipa_mode mode;
-	u32 dest_pipe_index;
-};
-
 /** struct ipa_ep_cfg_aggr - aggregation configuration in IPA end-point
  *
  * @aggr_en:	Valid for both Input and Output Pipes
@@ -305,14 +292,12 @@ struct ipa_ep_cfg_metadata_mask {
 };
 
 /** struct ipa_ep_cfg - configuration of IPA end-point
- * @mode:		Mode parameters
  * @aggr:		Aggregation parameters
  * @deaggr:		Deaggregation params
  * @cfg:		Configuration register data
  * @metadata_mask:	Hdr metadata mask
  */
 struct ipa_ep_cfg {
-	struct ipa_ep_cfg_mode mode;
 	struct ipa_ep_cfg_aggr aggr;
 	struct ipa_ep_cfg_cfg cfg;
 	struct ipa_ep_cfg_metadata_mask metadata_mask;
