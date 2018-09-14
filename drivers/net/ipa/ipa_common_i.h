@@ -213,26 +213,6 @@ enum hdr_total_len_or_pad_type {
 /** max size of the name of the resource (routing table, header) */
 #define IPA_RESOURCE_NAME_MAX	32
 
-/** struct ipa_ep_cfg_cfg - IPA ENDP_INIT Configuration register
- * @cs_offload_en: Checksum offload enable: 00: Disable checksum offload, 01:
- *	Enable checksum calculation offload (UL) - For output pipe
- *	(IPA producer) specifies that checksum trailer is to be added.
- *	For input pipe (IPA consumer) specifies presence of checksum
- *	header and IPA checksum calculation accordingly. 10: Enable
- *	checksum calculation offload (DL) - For output pipe (IPA
- *	producer) specifies that checksum trailer is to be added. For
- *	input pipe (IPA consumer) specifies IPA checksum calculation.
- *	11: Reserved
- * @cs_metadata_hdr_offset: Offset in Words (4 bytes) within header in which
- *	checksum meta info header (4 bytes) starts (UL). Values are 0-15, which
- *	mean 0 - 60 byte checksum header offset. Valid for input
- *	pipes only (IPA consumer)
- */
-struct ipa_ep_cfg_cfg {
-	enum ipa_cs_offload_en cs_offload_en;
-	u8 cs_metadata_hdr_offset;
-};
-
 /** struct ipa_ep_cfg_metadata_mask - Endpoint initialization hdr metadata mask
  * @metadata_mask: Mask specifying which metadata bits to write to
  *	IPA_ENDP_INIT_HDR_N.s HDR_OFST_METADATA. Only
@@ -244,11 +224,9 @@ struct ipa_ep_cfg_metadata_mask {
 };
 
 /** struct ipa_ep_cfg - configuration of IPA end-point
- * @cfg:		Configuration register data
  * @metadata_mask:	Hdr metadata mask
  */
 struct ipa_ep_cfg {
-	struct ipa_ep_cfg_cfg cfg;
 	struct ipa_ep_cfg_metadata_mask metadata_mask;
 
 	struct ipa_reg_endp_status status;
