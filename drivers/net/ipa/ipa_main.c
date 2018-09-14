@@ -1210,7 +1210,7 @@ ipa_smp2p_irq_exit(struct device *dev, unsigned int irq)
 	devm_free_irq(dev, irq, dev);
 }
 
-static int ipa_smp2p_init(struct device *dev)
+static int ipa_smp2p_init(struct device *dev, bool modem_init)
 {
 	struct device_node *node = dev->of_node;
 	struct qcom_smem_state *valid_state;
@@ -1246,12 +1246,14 @@ static int ipa_smp2p_init(struct device *dev)
 		return ret;
 	clock_irq = ret;
 
-	ret = ipa_smp2p_irq_init(dev, "ipa-post-init",
-				 ipa_smp2p_modem_post_init_isr);
-	if (ret < 0) {
-		ipa_smp2p_irq_exit(dev, clock_irq);
+	if (modem_init) {
+		ret = ipa_smp2p_irq_init(dev, "ipa-post-init",
+					 ipa_smp2p_modem_post_init_isr);
+		if (ret < 0) {
+			ipa_smp2p_irq_exit(dev, clock_irq);
 
-		return ret;
+			return ret;
+		}
 	}
 
 	/* Success.  Record our smp2p information */
@@ -1260,7 +1262,8 @@ static int ipa_smp2p_init(struct device *dev)
 	ipa_ctx->smp2p_info.enabled_state = enabled_state;
 	ipa_ctx->smp2p_info.enabled_bit = enabled_bit;
 	ipa_ctx->smp2p_info.clock_query_irq = clock_irq;
-	ipa_ctx->smp2p_info.post_init_irq = ret;
+	if (modem_init)
+		ipa_ctx->smp2p_info.post_init_irq = ret;
 
 	return 0;
 }
@@ -1294,7 +1297,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	 * when we're probed, so it might return -EPROBE_DEFER (meaning
 	 * we'll get probed again).
 	 */
-	result = ipa_smp2p_init(dev);
+	result = ipa_smp2p_init(dev, true);
 	if (result)
 		return result;
 
