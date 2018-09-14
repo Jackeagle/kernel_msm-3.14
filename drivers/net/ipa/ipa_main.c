@@ -39,6 +39,20 @@
 #define IPA_APPS_CMD_PROD_RING_COUNT	128
 #define IPA_APPS_LAN_CONS_RING_COUNT	128
 
+/* Details of the initialization sequence are determined by who is
+ * responsible for doing some early IPA hardware initialization.
+ * The Device Tree compatible string defines what to expect.
+ */
+enum ipa_init_type {
+	ipa_undefined_init = 0,
+	ipa_tz_init,
+	ipa_modem_init,
+};
+
+struct ipa_match_data {
+	enum ipa_init_type init_type;
+};
+
 static void ipa_post_init(struct work_struct *unused);
 static DECLARE_WORK(ipa_post_init_work, ipa_post_init);
 
@@ -1276,15 +1290,36 @@ static void ipa_smp2p_exit(struct device *dev)
 	memset(&ipa_ctx->smp2p_info, 0, sizeof(ipa_ctx->smp2p_info));
 }
 
+static const struct ipa_match_data tz_init = {
+	.init_type = ipa_tz_init,
+};
+
+static const struct ipa_match_data modem_init = {
+	.init_type = ipa_modem_init,
+};
+
 static const struct of_device_id ipa_plat_drv_match[] = {
-	{ .compatible = "qcom,ipa-sdm845", },
+	{
+		.compatible = "qcom,ipa-sdm845",
+		.data = NULL,
+	},
+	{
+		.compatible = "qcom,ipa-sdm845-tz_init",
+		.data = &tz_init,
+	},
+	{
+		.compatible = "qcom,ipa-sdm845-modem_init",
+		.data = &modem_init,
+	},
 	{}
 };
 
 static int ipa_plat_drv_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
+	const struct ipa_match_data *match_data;
 	struct resource *res;
+	bool modem_init;
 	size_t size;
 	int result;
 
@@ -1293,11 +1328,16 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 
 	ipa_debug("IPA driver: probing\n");
 
+	match_data = of_device_get_match_data(&pdev->dev);
+	modem_init = !match_data || match_data->init_type == ipa_modem_init;
+	if (!modem_init)
+		return -ENOTSUPP;
+
 	/* Initialize the smp2p driver first.  It might not be ready
 	 * when we're probed, so it might return -EPROBE_DEFER (meaning
 	 * we'll get probed again).
 	 */
-	result = ipa_smp2p_init(dev, true);
+	result = ipa_smp2p_init(dev, modem_init);
 	if (result)
 		return result;
 
