@@ -342,6 +342,8 @@ struct ipa_smp2p_info {
 	struct qcom_smem_state *enabled_state;
 	unsigned int valid_bit;
 	unsigned int enabled_bit;
+	unsigned int clock_query_irq;
+	unsigned int post_init_irq;
 	bool ipa_clk_on;
 	bool res_sent;
 };

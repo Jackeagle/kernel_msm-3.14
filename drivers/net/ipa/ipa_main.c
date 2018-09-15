@@ -1184,7 +1184,7 @@ static irqreturn_t ipa_smp2p_modem_post_init_isr(int irq, void *ctxt)
 }
 
 static int
-ipa_smp2p_irq(struct device *dev, const char *name, irq_handler_t handler)
+ipa_smp2p_irq_init(struct device *dev, const char *name, irq_handler_t handler)
 {
 	struct device_node *node = dev->of_node;
 	unsigned int irq;
@@ -1204,6 +1204,12 @@ ipa_smp2p_irq(struct device *dev, const char *name, irq_handler_t handler)
 	return irq;
 }
 
+static void
+ipa_smp2p_irq_exit(struct device *dev, unsigned int irq)
+{
+	devm_free_irq(dev, irq, dev);
+}
+
 static int ipa_smp2p_init(struct device *dev)
 {
 	struct device_node *node = dev->of_node;
@@ -1211,51 +1217,60 @@ static int ipa_smp2p_init(struct device *dev)
 	struct qcom_smem_state *enabled_state;
 	unsigned int valid_bit;
 	unsigned int enabled_bit;
-	int res;
+	unsigned int clock_irq;
+	int ret;
 
 	ipa_debug("node->name=%s\n", node->name);
 	valid_state = qcom_smem_state_get(dev, "ipa-clock-enabled-valid",
 					  &valid_bit);
 	if (IS_ERR(valid_state)) {
-		res = PTR_ERR(valid_state);
+		ret = PTR_ERR(valid_state);
 		ipa_err("error %d getting ipa-clock-enabled-valid state\n",
-			res);
+			ret);
 
-		return res;
+		return ret;
 	}
 
 	enabled_state = qcom_smem_state_get(dev, "ipa-clock-enabled",
 					    &enabled_bit);
 	if (IS_ERR(enabled_state)) {
-		res = PTR_ERR(enabled_state);
-		ipa_err("error %d getting ipa-clock-enabled state\n", res);
+		ret = PTR_ERR(enabled_state);
+		ipa_err("error %d getting ipa-clock-enabled state\n", ret);
 
-		return res;
+		return ret;
 	}
 
-	res = ipa_smp2p_irq(dev, "ipa-clock-query",
-			    ipa_smp2p_modem_clk_query_isr);
-	if (res < 0)
-		return res;
+	ret = ipa_smp2p_irq_init(dev, "ipa-clock-query",
+				 ipa_smp2p_modem_clk_query_isr);
+	if (ret < 0)
+		return ret;
+	clock_irq = ret;
 
-	res = ipa_smp2p_irq(dev, "ipa-post-init",
-			    ipa_smp2p_modem_post_init_isr);
-	if (res < 0)
-		return res;
+	ret = ipa_smp2p_irq_init(dev, "ipa-post-init",
+				 ipa_smp2p_modem_post_init_isr);
+	if (ret < 0) {
+		ipa_smp2p_irq_exit(dev, clock_irq);
+
+		return ret;
+	}
 
 	/* Success.  Record our smp2p information */
 	ipa_ctx->smp2p_info.valid_state = valid_state;
 	ipa_ctx->smp2p_info.valid_bit = valid_bit;
 	ipa_ctx->smp2p_info.enabled_state = enabled_state;
 	ipa_ctx->smp2p_info.enabled_bit = enabled_bit;
+	ipa_ctx->smp2p_info.clock_query_irq = clock_irq;
+	ipa_ctx->smp2p_info.post_init_irq = ret;
 
 	return 0;
 }
 
-static void ipa_smp2p_exit(void)
+static void ipa_smp2p_exit(struct device *dev)
 {
+	ipa_smp2p_irq_exit(dev, ipa_ctx->smp2p_info.post_init_irq);
+	ipa_smp2p_irq_exit(dev, ipa_ctx->smp2p_info.clock_query_irq);
+
 	memset(&ipa_ctx->smp2p_info, 0, sizeof(ipa_ctx->smp2p_info));
-	/* IRQ will be released when device goes away */
 }
 
 static const struct of_device_id ipa_plat_drv_match[] = {
@@ -1366,7 +1381,7 @@ err_clear_filter_bitmap:
 	ipa_ctx->filter_bitmap = 0;
 	ipa_interconnect_exit();
 out_smp2p_exit:
-	ipa_smp2p_exit();
+	ipa_smp2p_exit(dev);
 
 	return result;
 }
