@@ -1425,6 +1425,36 @@ out_smp2p_exit:
 	return result;
 }
 
+static int ipa_plat_drv_remove(struct platform_device *pdev)
+{
+	struct device *dev = &pdev->dev;
+
+	ipa_ctx->dev = NULL;
+	ipahal_exit();
+	ipa_dma_exit();
+	ipa_ctx->gsi = NULL;	/* XXX ipa_gsi_exit() */
+	ipa_reg_exit();
+
+	iounmap(ipa_ctx->ipa_mmio);
+	ipa_ctx->ipa_mmio = NULL;
+	ipa_ctx->ipa_phys = 0;
+
+	if (ipa_ctx->clnt_hdl_lan_cons != IPA_CLNT_HDL_BAD) {
+		ipa_ep_free(ipa_ctx->clnt_hdl_lan_cons);
+		ipa_ctx->clnt_hdl_lan_cons = IPA_CLNT_HDL_BAD;
+	}
+	if (ipa_ctx->clnt_hdl_cmd != IPA_CLNT_HDL_BAD) {
+		ipa_ep_free(ipa_ctx->clnt_hdl_cmd);
+		ipa_ctx->clnt_hdl_cmd = IPA_CLNT_HDL_BAD;
+	}
+	ipa_ctx->ipa_irq = 0;	/* XXX Need to de-initialize? */
+	ipa_ctx->filter_bitmap = 0;
+	ipa_interconnect_exit();
+	ipa_smp2p_exit(dev);
+
+	return 0;
+}
+
 /** ipa_ap_suspend() - suspend callback for runtime_pm
  * @dev: pointer to device
  *
@@ -1474,6 +1504,7 @@ static const struct dev_pm_ops ipa_pm_ops = {
 
 static struct platform_driver ipa_plat_drv = {
 	.probe = ipa_plat_drv_probe,
+	.remove = ipa_plat_drv_remove,
 	.driver = {
 		.name = DRV_NAME,
 		.owner = THIS_MODULE,
