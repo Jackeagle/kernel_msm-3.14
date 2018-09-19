@@ -1300,10 +1300,6 @@ static const struct ipa_match_data modem_init = {
 
 static const struct of_device_id ipa_plat_drv_match[] = {
 	{
-		.compatible = "qcom,ipa-sdm845",
-		.data = NULL,
-	},
-	{
 		.compatible = "qcom,ipa-sdm845-tz_init",
 		.data = &tz_init,
 	},
@@ -1329,7 +1325,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	ipa_debug("IPA driver: probing\n");
 
 	match_data = of_device_get_match_data(&pdev->dev);
-	modem_init = !match_data || match_data->init_type == ipa_modem_init;
+	modem_init = match_data->init_type == ipa_modem_init;
 	if (!modem_init)
 		return -ENOTSUPP;
 
