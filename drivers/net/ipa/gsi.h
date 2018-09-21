@@ -162,7 +162,10 @@ struct gsi_xfer_elem {
 };
 
 struct gsi;
+
 struct gsi *gsi_init(struct platform_device *pdev);
+
+int gsi_firmware_load(struct gsi *gsi);
 
 /** gsi_register_device - Peripheral should call this function to
  * register itself with GSI before invoking any other APIs

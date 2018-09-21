@@ -12,12 +12,18 @@
 #include <linux/module.h>
 #include <linux/platform_device.h>
 #include <linux/delay.h>
+#include <linux/qcom_scm.h>
+#include <linux/soc/qcom/mdt_loader.h>
 
 #include "field_mask.h"
 #include "ipa_dma.h"
 #include "ipa_i.h"
 #include "gsi.h"
 #include "gsi_reg.h"
+
+/* The name of the main firmware file relative to /lib/firmware */
+#define IPA_FWS_PATH		"ipa_fws.mdt"
+#define IPA_PAS_ID		15
 
 #define GSI_CHAN_MAX		31
 #define GSI_EVT_RING_MAX	23
@@ -1731,4 +1737,43 @@ struct gsi *gsi_init(struct platform_device *pdev)
 	atomic_set(&gsi->num_evt_ring, 0);
 
 	return gsi;
+}
+
+int gsi_firmware_load(struct gsi *gsi)
+{
+	const struct firmware *fw;
+	phys_addr_t phys;
+	void *virt;
+	ssize_t size;
+	int ret;
+
+	ret = request_firmware(&fw, IPA_FWS_PATH, gsi->dev);
+	if (ret)
+		return ret;
+
+	size = qcom_mdt_get_size(fw);
+	if (size < 0) {
+		ret = size;
+		goto out_release_firmware;
+	}
+
+	phys = (phys_addr_t)gsi->phys + GSI_INST_RAM_I_OFFS(0);
+	virt = memremap(phys, size, MEMREMAP_WC);
+	if (!virt) {
+		ret = -ENOMEM;
+		goto out_release_firmware;
+	}
+
+	ret = qcom_mdt_load(gsi->dev, fw, IPA_FWS_PATH, IPA_PAS_ID,
+			    virt, phys, size, NULL);
+	memunmap(virt);
+	if (ret < 0)
+		goto out_release_firmware;
+
+	ret = qcom_scm_pas_auth_and_reset(IPA_PAS_ID);
+
+out_release_firmware:
+	release_firmware(fw);
+
+	return ret;
 }
