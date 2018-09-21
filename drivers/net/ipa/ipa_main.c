@@ -28,6 +28,7 @@
 #include <linux/netdevice.h>
 #include <linux/delay.h>
 #include <linux/time.h>
+#include <linux/qcom_scm.h>
 #include <linux/soc/qcom/smem.h>
 #include <linux/soc/qcom/smem_state.h>
 #include <asm/cacheflush.h>
@@ -1326,12 +1327,17 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 
 	match_data = of_device_get_match_data(&pdev->dev);
 	modem_init = match_data->init_type == ipa_modem_init;
-	if (!modem_init)
-		return -ENOTSUPP;
 
-	/* Initialize the smp2p driver first.  It might not be ready
-	 * when we're probed, so it might return -EPROBE_DEFER (meaning
-	 * we'll get probed again).
+	/* If we need Trust Zone, make sure it's available */
+	if (!modem_init) {
+		if (!IS_ENABLED(CONFIG_QCOM_MDT_LOADER))
+			return -ENOTSUPP;
+		if (!qcom_scm_is_available())
+			return -EPROBE_DEFER;
+	}
+
+	/* Initialize the smp2p driver early.  It might not be ready
+	 * when we're probed, so it might return -EPROBE_DEFER.
 	 */
 	result = ipa_smp2p_init(dev, modem_init);
 	if (result)
@@ -1398,9 +1404,29 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 
 	/* Proceed to real initialization */
 	result = ipa_pre_init();
-	if (!result)
-		return 0;	/* Success */
+	if (result)
+		goto err_clear_dev;
 
+	/* If the modem is not verifying and loading firmware we need to
+	 * get it loaded ourselves.  Only then can we proceed with the
+	 * second stage of IPA initialization.  If the modem is doing it,
+	 * it will send an SMP2P interrupt to signal this has been done,
+	 * and that will trigger the "post init".
+	 */
+	if (!modem_init) {
+		result = gsi_firmware_load(ipa_ctx->gsi);
+		if (result)
+			goto err_clear_dev;
+
+		/* Now we can proceed to stage two initialization */
+		ipa_post_init(NULL);
+	}
+
+	return 0;	/* Success */
+
+err_clear_dev:
+	ipa_ctx->clnt_hdl_lan_cons = 0;
+	ipa_ctx->clnt_hdl_cmd = 0;
 	ipa_ctx->dev = NULL;
 	ipahal_exit();
 err_dma_exit:
