@@ -524,29 +524,20 @@ void ipa_sram_settings_read(void)
 	ipa_ctx->smem_size = mem_size.shared_mem_size * 8;
 }
 
-/** ipa_cfg_qsb() - Configure IPA QSB maximal reads and writes
- *
- * Returns:	None
- */
-void ipa_cfg_qsb(void)
+/** ipa_init_hw() - initialize HW */
+void ipa_init_hw(void)
 {
 	struct ipa_reg_qsb_max_writes max_writes;
 	struct ipa_reg_qsb_max_reads max_reads;
+
+	/* SDM845 has IPA version 3.5.1 */
+	ipa_write_reg(IPA_BCR, IPA_BCR_REG_VAL);
 
 	ipa_reg_qsb_max_writes(&max_writes, 8, 4);
 	ipa_write_reg_fields(IPA_QSB_MAX_WRITES, &max_writes);
 
 	ipa_reg_qsb_max_reads(&max_reads, 8, 12);
 	ipa_write_reg_fields(IPA_QSB_MAX_READS, &max_reads);
-}
-
-/** ipa_init_hw() - initialize HW */
-void ipa_init_hw(void)
-{
-	/* SDM845 has IPA version 3.5.1 */
-	ipa_write_reg(IPA_BCR, IPA_BCR_REG_VAL);
-
-	ipa_cfg_qsb();
 }
 
 /** ipa_filter_bitmap_init() - Initialize the bitmap
