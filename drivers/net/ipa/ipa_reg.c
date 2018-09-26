@@ -652,13 +652,14 @@ static void ipa_reg_parse_hash_cfg_n(enum ipa_reg reg, void *fields, u32 val)
 	hsh_cfg->undefined2 = field_val(val, ROUTER_HASH_UNDEFINED2_FMASK);
 }
 
-/* IPA_RSRC_GRP_XY_RSRC_TYPE_n register */
+/* IPA_RSRC_GRP_XY_RSRC_TYPE_N register(s) */
 #define X_MIN_LIM_FMASK	0x0000003f
 #define X_MAX_LIM_FMASK	0x00003f00
 #define Y_MIN_LIM_FMASK	0x003f0000
 #define Y_MAX_LIM_FMASK	0x3f000000
 
-static u32 ipa_reg_construct_rsrg_grp_xy(enum ipa_reg reg, const void *fields)
+static u32
+ipa_reg_construct_rsrg_grp_xy_rsrc_type_n(enum ipa_reg reg, const void *fields)
 {
 	const struct ipa_reg_rsrc_grp_cfg *grp_cfg = fields;
 	u32 val;
@@ -802,13 +803,13 @@ static const struct ipa_reg_desc ipa_reg[] = {
 	reg_obj_both(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N,
 		     hash_cfg_n,			0x0000085c,	0x0070),
 	reg_obj_cfunc(IPA_SRC_RSRC_GRP_01_RSRC_TYPE_N,
-		      rsrg_grp_xy,			0x00000400,	0x0020),
+		      rsrg_grp_xy_rsrc_type_n,		0x00000400,	0x0020),
 	reg_obj_cfunc(IPA_SRC_RSRC_GRP_23_RSRC_TYPE_N,
-		      rsrg_grp_xy,			0x00000404,	0x0020),
+		      rsrg_grp_xy_rsrc_type_n,		0x00000404,	0x0020),
 	reg_obj_cfunc(IPA_DST_RSRC_GRP_01_RSRC_TYPE_N,
-		      rsrg_grp_xy,			0x00000500,	0x0020),
+		      rsrg_grp_xy_rsrc_type_n,		0x00000500,	0x0020),
 	reg_obj_cfunc(IPA_DST_RSRC_GRP_23_RSRC_TYPE_N,
-		      rsrg_grp_xy,			0x00000504,	0x0020),
+		      rsrg_grp_xy_rsrc_type_n,		0x00000504,	0x0020),
 	reg_obj_cfunc(IPA_QSB_MAX_WRITES,
 		      qsb_max_writes,			0x00000074,	0x0000),
 	reg_obj_cfunc(IPA_QSB_MAX_READS,
