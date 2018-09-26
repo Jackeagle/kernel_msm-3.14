@@ -928,13 +928,14 @@ static void ipa_dst_rsrc_grp_init(enum ipa_rsrc_grp_type_src n)
 
 void ipa_set_resource_groups_min_max_limits(void)
 {
-	int i;
+	ipa_src_rsrc_grp_init(IPA_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS);
+	ipa_src_rsrc_grp_init(IPA_RSRC_GRP_TYPE_SRS_DESCRIPTOR_LISTS);
+	ipa_src_rsrc_grp_init(IPA_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF);
+	ipa_src_rsrc_grp_init(IPA_RSRC_GRP_TYPE_SRC_HPS_DMARS);
+	ipa_src_rsrc_grp_init(IPA_RSRC_GRP_TYPE_SRC_ACK_ENTRIES);
 
-	for (i = 0; i < ARRAY_SIZE(ipa_src_rsrc_grp); i++)
-		ipa_src_rsrc_grp_init(i);
-
-	for (i = 0; i < ARRAY_SIZE(ipa_dst_rsrc_grp); i++)
-		ipa_dst_rsrc_grp_init(i);
+	ipa_dst_rsrc_grp_init(IPA_RSRC_GRP_TYPE_DST_DATA_SECTORS);
+	ipa_dst_rsrc_grp_init(IPA_RSRC_GRP_TYPE_DST_DPS_DMARS);
 }
 
 static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
