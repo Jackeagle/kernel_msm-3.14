@@ -530,16 +530,13 @@ void ipa_sram_settings_read(void)
  */
 void ipa_cfg_qsb(void)
 {
-	struct ipa_reg_qsb_max_reads max_reads = { };
-	struct ipa_reg_qsb_max_writes max_writes = { };
+	struct ipa_reg_qsb_max_writes max_writes;
+	struct ipa_reg_qsb_max_reads max_reads;
 
-	max_reads.qmb_0_max_reads = 8,
-	max_reads.qmb_1_max_reads = 12;
-
-	max_writes.qmb_0_max_writes = 8;
-	max_writes.qmb_1_max_writes = 4;
-
+	ipa_reg_qsb_max_writes(&max_writes, 8, 4);
 	ipa_write_reg_fields(IPA_QSB_MAX_WRITES, &max_writes);
+
+	ipa_reg_qsb_max_reads(&max_reads, 8, 12);
 	ipa_write_reg_fields(IPA_QSB_MAX_READS, &max_reads);
 }
 
