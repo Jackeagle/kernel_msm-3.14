@@ -32,12 +32,11 @@
 
 #define QMB_MASTER_SELECT_DDR		0
 
-/* Resource Group index*/
-#define IPA_RSRC_GROUP_LWA_DL		0 /* currently not used */
-#define IPA_RSRC_GROUP_UL_DL		1
-
-#define IPA_SRC_GROUP_MAX		4
-#define IPA_DST_GROUP_MAX		3
+enum ipa_rsrc_group {
+	IPA_RSRC_GROUP_LWA_DL,	/* currently not used */
+	IPA_RSRC_GROUP_UL_DL,
+	IPA_RSRC_GROUP_MAX,
+};
 
 enum ipa_rsrc_grp_type_src {
 	IPA_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS,
@@ -63,7 +62,7 @@ struct rsrc_min_max {
 };
 
 /* IPA_HW_v3_5_1 */
-static const struct rsrc_min_max ipa_src_rsrc_grp[][IPA_SRC_GROUP_MAX] = {
+static const struct rsrc_min_max ipa_src_rsrc_grp[][IPA_RSRC_GROUP_MAX] = {
 	[IPA_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS] = {
 		[IPA_RSRC_GROUP_LWA_DL]	= { .min = 1,	.max = 63, },
 		[IPA_RSRC_GROUP_UL_DL]	= { .min = 1,	.max = 63, },
@@ -87,7 +86,7 @@ static const struct rsrc_min_max ipa_src_rsrc_grp[][IPA_SRC_GROUP_MAX] = {
 };
 
 /* IPA_HW_v3_5_1 */
-static const struct rsrc_min_max ipa_dst_rsrc_grp[][IPA_DST_GROUP_MAX] = {
+static const struct rsrc_min_max ipa_dst_rsrc_grp[][IPA_RSRC_GROUP_MAX] = {
 	[IPA_RSRC_GRP_TYPE_DST_DATA_SECTORS] = {
 		[IPA_RSRC_GROUP_LWA_DL]	= { .min = 4,	.max = 4, },
 		[IPA_RSRC_GROUP_UL_DL]	= { .min = 4,	.max = 4, },
