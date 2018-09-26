@@ -892,10 +892,10 @@ bool ipa_is_modem_pipe(u32 pipe_idx)
 	return false;
 }
 
-static void write_src_rsrc_grp_limits(enum ipa_reg reg,
-				      enum ipa_rsrc_grp_type_src n,
-				      const struct rsrc_min_max *x_limits,
-				      const struct rsrc_min_max *y_limits)
+static void write_rsrc_grp_limits(enum ipa_reg reg,
+				  enum ipa_rsrc_grp_type_src n,
+				  const struct rsrc_min_max *x_limits,
+				  const struct rsrc_min_max *y_limits)
 {
 	struct ipa_reg_rsrc_grp_cfg val;
 
@@ -917,7 +917,7 @@ ipa_write_src_rsrc_grp_type_reg(enum ipa_rsrc_grp_type_src n)
 	x_limits = &ipa_rsrc_src_grp_config[n][IPA_GROUP_LWA_DL];
 	y_limits = &ipa_rsrc_src_grp_config[n][IPA_GROUP_UL_DL];
 
-	write_src_rsrc_grp_limits(reg, n, x_limits, y_limits);
+	write_rsrc_grp_limits(reg, n, x_limits, y_limits);
 }
 
 static void
@@ -930,7 +930,7 @@ ipa_write_dst_rsrc_grp_type_reg(enum ipa_rsrc_grp_type_src n)
 	x_limits = &ipa_rsrc_dst_grp_config[n][IPA_GROUP_LWA_DL];
 	y_limits = &ipa_rsrc_dst_grp_config[n][IPA_GROUP_UL_DL];
 
-	write_src_rsrc_grp_limits(reg, n, x_limits, y_limits);
+	write_rsrc_grp_limits(reg, n, x_limits, y_limits);
 }
 
 void ipa_set_resource_groups_min_max_limits(void)
