@@ -892,7 +892,7 @@ static void write_rsrc_grp_limits(enum ipa_reg reg,
 				  const struct rsrc_min_max *x_limits,
 				  const struct rsrc_min_max *y_limits)
 {
-	struct ipa_reg_rsrc_grp_cfg val;
+	struct ipa_reg_rsrc_grp_xy_rsrc_type_n val;
 
 	val.x_min = x_limits->min;
 	val.x_max = x_limits->max;

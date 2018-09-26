@@ -422,8 +422,8 @@ struct ipa_ep_filter_router_hsh_cfg {
 	u32 undefined2;
 };
 
-/* struct ipa_reg_rsrc_grp_cfg - IPA_{SRC,DST}_RSRC_GRP_{02}{13}Y_RSRC_TYPE_N
- * 				 field structure
+/* struct ipa_reg_rsrc_grp_xy_rsrc_type_n -
+ *    IPA_{SRC,DST}_RSRC_GRP_{02}{13}Y_RSRC_TYPE_N field structure
  *
  * This field structure is used for accessing the following registers:
  *	IPA_SRC_RSRC_GRP_01_RSRC_TYPE_N IPA_SRC_RSRC_GRP_23_RSRC_TYPE_N
@@ -434,7 +434,7 @@ struct ipa_ep_filter_router_hsh_cfg {
  * @y_min - second group min value
  * @y_max - second group max value
  */
-struct ipa_reg_rsrc_grp_cfg {
+struct ipa_reg_rsrc_grp_xy_rsrc_type_n {
 	u32 x_min;
 	u32 x_max;
 	u32 y_min;

@@ -661,18 +661,18 @@ static void ipa_reg_parse_hash_cfg_n(enum ipa_reg reg, void *fields, u32 val)
 static u32
 ipa_reg_construct_rsrg_grp_xy_rsrc_type_n(enum ipa_reg reg, const void *fields)
 {
-	const struct ipa_reg_rsrc_grp_cfg *grp_cfg = fields;
+	const struct ipa_reg_rsrc_grp_xy_rsrc_type_n *limits = fields;
 	u32 val;
 
-	val = field_gen(grp_cfg->x_min, X_MIN_LIM_FMASK);
-	val |= field_gen(grp_cfg->x_max, X_MAX_LIM_FMASK);
+	val = field_gen(limits->x_min, X_MIN_LIM_FMASK);
+	val |= field_gen(limits->x_max, X_MAX_LIM_FMASK);
 
 	/* DST_23 register has only X fields at ipa V3_5 */
 	if (reg == IPA_DST_RSRC_GRP_23_RSRC_TYPE_N)
 		return val;
 
-	val |= field_gen(grp_cfg->y_min, Y_MIN_LIM_FMASK);
-	val |= field_gen(grp_cfg->y_max, Y_MAX_LIM_FMASK);
+	val |= field_gen(limits->y_min, Y_MIN_LIM_FMASK);
+	val |= field_gen(limits->y_max, Y_MAX_LIM_FMASK);
 
 	return val;
 }
