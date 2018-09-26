@@ -902,8 +902,7 @@ static void write_rsrc_grp_limits(enum ipa_reg reg,
 	ipa_write_reg_n_fields(reg, n, &val);
 }
 
-static void
-ipa_write_src_rsrc_grp_type_reg(enum ipa_rsrc_grp_type_src n)
+static void ipa_src_rsrc_grp_init(enum ipa_rsrc_grp_type_src n)
 {
 	const struct rsrc_min_max *x_limits;
 	const struct rsrc_min_max *y_limits;
@@ -915,8 +914,7 @@ ipa_write_src_rsrc_grp_type_reg(enum ipa_rsrc_grp_type_src n)
 	write_rsrc_grp_limits(reg, n, x_limits, y_limits);
 }
 
-static void
-ipa_write_dst_rsrc_grp_type_reg(enum ipa_rsrc_grp_type_src n)
+static void ipa_dst_rsrc_grp_init(enum ipa_rsrc_grp_type_src n)
 {
 	enum ipa_reg reg = IPA_DST_RSRC_GRP_01_RSRC_TYPE_N;
 	const struct rsrc_min_max *x_limits;
@@ -933,10 +931,10 @@ void ipa_set_resource_groups_min_max_limits(void)
 	int i;
 
 	for (i = 0; i < ARRAY_SIZE(ipa_src_rsrc_grp); i++)
-		ipa_write_src_rsrc_grp_type_reg(i);
+		ipa_src_rsrc_grp_init(i);
 
 	for (i = 0; i < ARRAY_SIZE(ipa_dst_rsrc_grp); i++)
-		ipa_write_dst_rsrc_grp_type_reg(i);
+		ipa_dst_rsrc_grp_init(i);
 }
 
 static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
