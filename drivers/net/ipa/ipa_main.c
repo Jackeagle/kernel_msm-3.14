@@ -1112,12 +1112,7 @@ static int ipa_pre_init(void)
 	ipa_debug("IPA HW initialization sequence completed");
 
 	ipa_ctx->ipa_num_pipes = ipa_get_num_pipes();
-	if (ipa_ctx->ipa_num_pipes > IPA_MAX_NUM_PIPES) {
-		ipa_err("IPA has more pipes then supported! has %d, max %d\n",
-			ipa_ctx->ipa_num_pipes, IPA_MAX_NUM_PIPES);
-		result = -ENODEV;
-		goto err_disable_clks;
-	}
+	ipa_assert(ipa_ctx->ipa_num_pipes <= IPA_MAX_NUM_PIPES);
 
 	ipa_sram_settings_read();
 	ipa_debug("SRAM, size: 0x%x, restricted bytes: 0x%x\n",
