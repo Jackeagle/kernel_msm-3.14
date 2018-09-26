@@ -45,13 +45,11 @@ enum ipa_rsrc_grp_type_src {
 	IPA_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF,
 	IPA_RSRC_GRP_TYPE_SRC_HPS_DMARS,
 	IPA_RSRC_GRP_TYPE_SRC_ACK_ENTRIES,
-	IPA_RSRC_GRP_TYPE_SRC_MAX,
 };
 
 enum ipa_rsrc_grp_type_dst {
 	IPA_RSRC_GRP_TYPE_DST_DATA_SECTORS,
 	IPA_RSRC_GRP_TYPE_DST_DPS_DMARS,
-	IPA_RSRC_GRP_TYPE_DST_MAX,
 };
 
 enum ipa_rsrc_grp_type_rx {
@@ -66,7 +64,7 @@ struct rsrc_min_max {
 
 /* IPA_HW_v3_5_1 */
 static const struct rsrc_min_max ipa_rsrc_src_grp_config
-	[IPA_RSRC_GRP_TYPE_SRC_MAX][IPA_SRC_GROUP_MAX] = {
+	[][IPA_SRC_GROUP_MAX] = {
 	[IPA_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS] = {
 		[IPA_GROUP_LWA_DL]	= { .min = 1,	.max = 63, },
 		[IPA_GROUP_UL_DL]	= { .min = 1,	.max = 63, },
@@ -91,7 +89,7 @@ static const struct rsrc_min_max ipa_rsrc_src_grp_config
 
 /* IPA_HW_v3_5_1 */
 static const struct rsrc_min_max ipa_rsrc_dst_grp_config
-	[IPA_RSRC_GRP_TYPE_DST_MAX][IPA_DST_GROUP_MAX] = {
+	[][IPA_DST_GROUP_MAX] = {
 	/* LWA_DL UL/DL/DPL unused N/A	 N/A	 N/A */
 	[IPA_RSRC_GRP_TYPE_DST_DATA_SECTORS] = {
 		[IPA_GROUP_LWA_DL]	= { .min = 4,	.max = 4, },
