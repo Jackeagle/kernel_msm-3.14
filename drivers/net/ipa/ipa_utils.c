@@ -63,8 +63,7 @@ struct rsrc_min_max {
 };
 
 /* IPA_HW_v3_5_1 */
-static const struct rsrc_min_max ipa_rsrc_src_grp_config
-	[][IPA_SRC_GROUP_MAX] = {
+static const struct rsrc_min_max ipa_src_rsrc_grp[][IPA_SRC_GROUP_MAX] = {
 	[IPA_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS] = {
 		[IPA_GROUP_LWA_DL]	= { .min = 1,	.max = 63, },
 		[IPA_GROUP_UL_DL]	= { .min = 1,	.max = 63, },
@@ -88,9 +87,7 @@ static const struct rsrc_min_max ipa_rsrc_src_grp_config
 };
 
 /* IPA_HW_v3_5_1 */
-static const struct rsrc_min_max ipa_rsrc_dst_grp_config
-	[][IPA_DST_GROUP_MAX] = {
-	/* LWA_DL UL/DL/DPL unused N/A	 N/A	 N/A */
+static const struct rsrc_min_max ipa_dst_rsrc_grp[][IPA_DST_GROUP_MAX] = {
 	[IPA_RSRC_GRP_TYPE_DST_DATA_SECTORS] = {
 		[IPA_GROUP_LWA_DL]	= { .min = 4,	.max = 4, },
 		[IPA_GROUP_UL_DL]	= { .min = 4,	.max = 4, },
@@ -912,8 +909,8 @@ ipa_write_src_rsrc_grp_type_reg(enum ipa_rsrc_grp_type_src n)
 	const struct rsrc_min_max *y_limits;
 	enum ipa_reg reg = IPA_SRC_RSRC_GRP_01_RSRC_TYPE_N;
 
-	x_limits = &ipa_rsrc_src_grp_config[n][IPA_GROUP_LWA_DL];
-	y_limits = &ipa_rsrc_src_grp_config[n][IPA_GROUP_UL_DL];
+	x_limits = &ipa_src_rsrc_grp[n][IPA_GROUP_LWA_DL];
+	y_limits = &ipa_src_rsrc_grp[n][IPA_GROUP_UL_DL];
 
 	write_rsrc_grp_limits(reg, n, x_limits, y_limits);
 }
@@ -925,8 +922,8 @@ ipa_write_dst_rsrc_grp_type_reg(enum ipa_rsrc_grp_type_src n)
 	const struct rsrc_min_max *x_limits;
 	const struct rsrc_min_max *y_limits;
 
-	x_limits = &ipa_rsrc_dst_grp_config[n][IPA_GROUP_LWA_DL];
-	y_limits = &ipa_rsrc_dst_grp_config[n][IPA_GROUP_UL_DL];
+	x_limits = &ipa_dst_rsrc_grp[n][IPA_GROUP_LWA_DL];
+	y_limits = &ipa_dst_rsrc_grp[n][IPA_GROUP_UL_DL];
 
 	write_rsrc_grp_limits(reg, n, x_limits, y_limits);
 }
@@ -935,10 +932,10 @@ void ipa_set_resource_groups_min_max_limits(void)
 {
 	int i;
 
-	for (i = 0; i < ARRAY_SIZE(ipa_rsrc_src_grp_config); i++)
+	for (i = 0; i < ARRAY_SIZE(ipa_src_rsrc_grp); i++)
 		ipa_write_src_rsrc_grp_type_reg(i);
 
-	for (i = 0; i < ARRAY_SIZE(ipa_rsrc_dst_grp_config); i++)
+	for (i = 0; i < ARRAY_SIZE(ipa_dst_rsrc_grp); i++)
 		ipa_write_dst_rsrc_grp_type_reg(i);
 }
 
