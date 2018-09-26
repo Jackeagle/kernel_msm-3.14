@@ -653,6 +653,17 @@ static void ipa_reg_parse_hash_cfg_n(enum ipa_reg reg, void *fields, u32 val)
 }
 
 /* IPA_RSRC_GRP_XY_RSRC_TYPE_N register(s) */
+
+void
+ipa_reg_rsrc_grp_xy_rsrc_type_n(struct ipa_reg_rsrc_grp_xy_rsrc_type_n *limits,
+				 u32 x_min, u32 x_max, u32 y_min, u32 y_max)
+{
+	limits->x_min = x_min;
+	limits->x_max = x_max;
+	limits->y_min = y_min;
+	limits->y_max = y_max;
+}
+
 #define X_MIN_LIM_FMASK	0x0000003f
 #define X_MAX_LIM_FMASK	0x00003f00
 #define Y_MIN_LIM_FMASK	0x003f0000
