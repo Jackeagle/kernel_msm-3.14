@@ -960,24 +960,16 @@ ipa_write_dst_rsrc_grp_type_reg(int group_index, enum ipa_rsrc_grp_type_src n)
 
 void ipa_set_resource_groups_min_max_limits(void)
 {
-	int src_rsrc_type_max = IPA_RSRC_GRP_TYPE_SRC_MAX;
-	int dst_rsrc_type_max = IPA_RSRC_GRP_TYPE_DST_MAX;
-	int src_grp_idx_max = IPA_SRC_GROUP_MAX;
-	int dst_grp_idx_max = IPA_DST_GROUP_MAX;
 	int i;
 	int j;
 
-	ipa_debug("ENTER\n");
-
-	ipa_debug("Assign source rsrc groups min-max limits\n");
-	for (i = 0; i < src_rsrc_type_max; i++)
-		for (j = 0; j < src_grp_idx_max; j = j + 2)
+	for (i = 0; i < IPA_RSRC_GRP_TYPE_SRC_MAX; i++)
+		for (j = 0; j < IPA_SRC_GROUP_MAX; j = j + 2)
 			if (j != IPA_MHI_GROUP_DMA)
 				ipa_write_src_rsrc_grp_type_reg(j, i);
 
-	ipa_debug("Assign destination rsrc groups min-max limits\n");
-	for (i = 0; i < dst_rsrc_type_max; i++)
-		for (j = 0; j < dst_grp_idx_max; j = j + 2)
+	for (i = 0; i < IPA_RSRC_GRP_TYPE_DST_MAX; i++)
+		for (j = 0; j < IPA_DST_GROUP_MAX; j = j + 2)
 			if (j != IPA_MHI_GROUP_DMA)
 				ipa_write_dst_rsrc_grp_type_reg(j, i);
 }
