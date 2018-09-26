@@ -35,8 +35,6 @@
 /* Resource Group index*/
 #define IPA_GROUP_LWA_DL		0 /* currently not used */
 #define IPA_GROUP_UL_DL			1
-#define IPA_MHI_GROUP_DMA		2
-#define IPA_GROUP_UC_RX_Q		3 /* currently not used */
 
 #define IPA_SRC_GROUP_MAX		4
 #define IPA_DST_GROUP_MAX		3
@@ -98,12 +96,10 @@ static const struct rsrc_min_max ipa_rsrc_dst_grp_config
 	[IPA_RSRC_GRP_TYPE_DST_DATA_SECTORS] = {
 		[IPA_GROUP_LWA_DL]	= { .min = 4,	.max = 4, },
 		[IPA_GROUP_UL_DL]	= { .min = 4,	.max = 4, },
-		[IPA_MHI_GROUP_DMA]	= { .min = 3,	.max = 3, },
 	},
 	[IPA_RSRC_GRP_TYPE_DST_DPS_DMARS] = {
 		[IPA_GROUP_LWA_DL]	= { .min = 2,	.max = 63, },
 		[IPA_GROUP_UL_DL]	= { .min = 1,	.max = 63, },
-		[IPA_MHI_GROUP_DMA]	= { .min = 1,	.max = 2, },
 	},
 };
 
