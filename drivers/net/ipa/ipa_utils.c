@@ -33,8 +33,8 @@
 #define QMB_MASTER_SELECT_DDR		0
 
 /* Resource Group index*/
-#define IPA_GROUP_LWA_DL		0 /* currently not used */
-#define IPA_GROUP_UL_DL			1
+#define IPA_RSRC_GROUP_LWA_DL		0 /* currently not used */
+#define IPA_RSRC_GROUP_UL_DL		1
 
 #define IPA_SRC_GROUP_MAX		4
 #define IPA_DST_GROUP_MAX		3
@@ -65,36 +65,36 @@ struct rsrc_min_max {
 /* IPA_HW_v3_5_1 */
 static const struct rsrc_min_max ipa_src_rsrc_grp[][IPA_SRC_GROUP_MAX] = {
 	[IPA_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS] = {
-		[IPA_GROUP_LWA_DL]	= { .min = 1,	.max = 63, },
-		[IPA_GROUP_UL_DL]	= { .min = 1,	.max = 63, },
+		[IPA_RSRC_GROUP_LWA_DL]	= { .min = 1,	.max = 63, },
+		[IPA_RSRC_GROUP_UL_DL]	= { .min = 1,	.max = 63, },
 	},
 	[IPA_RSRC_GRP_TYPE_SRS_DESCRIPTOR_LISTS] = {
-		[IPA_GROUP_LWA_DL]	= { .min = 10,	.max = 10, },
-		[IPA_GROUP_UL_DL]	= { .min = 10,	.max = 10, },
+		[IPA_RSRC_GROUP_LWA_DL]	= { .min = 10,	.max = 10, },
+		[IPA_RSRC_GROUP_UL_DL]	= { .min = 10,	.max = 10, },
 	},
 	[IPA_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF] = {
-		[IPA_GROUP_LWA_DL]	= { .min = 12,	.max = 12, },
-		[IPA_GROUP_UL_DL]	= { .min = 14,	.max = 14, },
+		[IPA_RSRC_GROUP_LWA_DL]	= { .min = 12,	.max = 12, },
+		[IPA_RSRC_GROUP_UL_DL]	= { .min = 14,	.max = 14, },
 	},
 	[IPA_RSRC_GRP_TYPE_SRC_HPS_DMARS] = {
-		[IPA_GROUP_LWA_DL]	= { .min = 0,	.max = 63, },
-		[IPA_GROUP_UL_DL]	= { .min = 0,	.max = 63, },
+		[IPA_RSRC_GROUP_LWA_DL]	= { .min = 0,	.max = 63, },
+		[IPA_RSRC_GROUP_UL_DL]	= { .min = 0,	.max = 63, },
 	},
 	[IPA_RSRC_GRP_TYPE_SRC_ACK_ENTRIES] = {
-		[IPA_GROUP_LWA_DL]	= { .min = 14,	.max = 14, },
-		[IPA_GROUP_UL_DL]	= { .min = 20,	.max = 20, },
+		[IPA_RSRC_GROUP_LWA_DL]	= { .min = 14,	.max = 14, },
+		[IPA_RSRC_GROUP_UL_DL]	= { .min = 20,	.max = 20, },
 	},
 };
 
 /* IPA_HW_v3_5_1 */
 static const struct rsrc_min_max ipa_dst_rsrc_grp[][IPA_DST_GROUP_MAX] = {
 	[IPA_RSRC_GRP_TYPE_DST_DATA_SECTORS] = {
-		[IPA_GROUP_LWA_DL]	= { .min = 4,	.max = 4, },
-		[IPA_GROUP_UL_DL]	= { .min = 4,	.max = 4, },
+		[IPA_RSRC_GROUP_LWA_DL]	= { .min = 4,	.max = 4, },
+		[IPA_RSRC_GROUP_UL_DL]	= { .min = 4,	.max = 4, },
 	},
 	[IPA_RSRC_GRP_TYPE_DST_DPS_DMARS] = {
-		[IPA_GROUP_LWA_DL]	= { .min = 2,	.max = 63, },
-		[IPA_GROUP_UL_DL]	= { .min = 1,	.max = 63, },
+		[IPA_RSRC_GROUP_LWA_DL]	= { .min = 2,	.max = 63, },
+		[IPA_RSRC_GROUP_UL_DL]	= { .min = 1,	.max = 63, },
 	},
 };
 
@@ -893,8 +893,8 @@ static void ipa_src_rsrc_grp_init(enum ipa_rsrc_grp_type_src n)
 	const struct rsrc_min_max *x_limits;
 	const struct rsrc_min_max *y_limits;
 
-	x_limits = &ipa_src_rsrc_grp[n][IPA_GROUP_LWA_DL];
-	y_limits = &ipa_src_rsrc_grp[n][IPA_GROUP_UL_DL];
+	x_limits = &ipa_src_rsrc_grp[n][IPA_RSRC_GROUP_LWA_DL];
+	y_limits = &ipa_src_rsrc_grp[n][IPA_RSRC_GROUP_UL_DL];
 	ipa_reg_rsrc_grp_xy_rsrc_type_n(&limits, x_limits->min, x_limits->max,
 				        y_limits->min, y_limits->max);
 
@@ -907,8 +907,8 @@ static void ipa_dst_rsrc_grp_init(enum ipa_rsrc_grp_type_src n)
 	const struct rsrc_min_max *x_limits;
 	const struct rsrc_min_max *y_limits;
 
-	x_limits = &ipa_dst_rsrc_grp[n][IPA_GROUP_LWA_DL];
-	y_limits = &ipa_dst_rsrc_grp[n][IPA_GROUP_UL_DL];
+	x_limits = &ipa_dst_rsrc_grp[n][IPA_RSRC_GROUP_LWA_DL];
+	y_limits = &ipa_dst_rsrc_grp[n][IPA_RSRC_GROUP_UL_DL];
 	ipa_reg_rsrc_grp_xy_rsrc_type_n(&limits, x_limits->min, x_limits->max,
 				        y_limits->min, y_limits->max);
 
