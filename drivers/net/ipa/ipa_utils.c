@@ -926,15 +926,7 @@ ipa_write_src_rsrc_grp_type_reg(int group_index, enum ipa_rsrc_grp_type_src n)
 {
 	const struct rsrc_min_max *x_limits;
 	const struct rsrc_min_max *y_limits;
-	enum ipa_reg reg;
-
-	if (group_index == IPA_GROUP_UC_RX_Q) {
-		reg = IPA_SRC_RSRC_GRP_23_RSRC_TYPE_N;
-	} else {
-		ipa_assert(group_index == IPA_GROUP_LWA_DL ||
-			   group_index == IPA_GROUP_UL_DL);
-		reg = IPA_SRC_RSRC_GRP_01_RSRC_TYPE_N;
-	}
+	enum ipa_reg reg = IPA_SRC_RSRC_GRP_01_RSRC_TYPE_N;
 
 	x_limits = &ipa_rsrc_src_grp_config[n][group_index];
 	y_limits = &ipa_rsrc_src_grp_config[n][group_index + 1];
@@ -949,9 +941,6 @@ ipa_write_dst_rsrc_grp_type_reg(int group_index, enum ipa_rsrc_grp_type_src n)
 	const struct rsrc_min_max *x_limits;
 	const struct rsrc_min_max *y_limits;
 
-	ipa_assert(group_index == IPA_GROUP_LWA_DL ||
-		   group_index == IPA_GROUP_UL_DL);
-
 	x_limits = &ipa_rsrc_dst_grp_config[n][group_index];
 	y_limits = &ipa_rsrc_dst_grp_config[n][group_index + 1];
 
@@ -961,17 +950,12 @@ ipa_write_dst_rsrc_grp_type_reg(int group_index, enum ipa_rsrc_grp_type_src n)
 void ipa_set_resource_groups_min_max_limits(void)
 {
 	int i;
-	int j;
 
 	for (i = 0; i < IPA_RSRC_GRP_TYPE_SRC_MAX; i++)
-		for (j = 0; j < IPA_SRC_GROUP_MAX; j = j + 2)
-			if (j != IPA_MHI_GROUP_DMA)
-				ipa_write_src_rsrc_grp_type_reg(j, i);
+		ipa_write_src_rsrc_grp_type_reg(IPA_GROUP_LWA_DL, i);
 
 	for (i = 0; i < IPA_RSRC_GRP_TYPE_DST_MAX; i++)
-		for (j = 0; j < IPA_DST_GROUP_MAX; j = j + 2)
-			if (j != IPA_MHI_GROUP_DMA)
-				ipa_write_dst_rsrc_grp_type_reg(j, i);
+		ipa_write_dst_rsrc_grp_type_reg(IPA_GROUP_LWA_DL, i);
 }
 
 static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
