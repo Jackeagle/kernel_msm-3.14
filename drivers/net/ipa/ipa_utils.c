@@ -937,10 +937,10 @@ void ipa_set_resource_groups_min_max_limits(void)
 {
 	int i;
 
-	for (i = 0; i < IPA_RSRC_GRP_TYPE_SRC_MAX; i++)
+	for (i = 0; i < ARRAY_SIZE(ipa_rsrc_src_grp_config); i++)
 		ipa_write_src_rsrc_grp_type_reg(i);
 
-	for (i = 0; i < IPA_RSRC_GRP_TYPE_DST_MAX; i++)
+	for (i = 0; i < ARRAY_SIZE(ipa_rsrc_dst_grp_config); i++)
 		ipa_write_dst_rsrc_grp_type_reg(i);
 }
 
