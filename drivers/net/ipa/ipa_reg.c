@@ -689,6 +689,14 @@ ipa_reg_construct_rsrg_grp_xy_rsrc_type_n(enum ipa_reg reg, const void *fields)
 }
 
 /* IPA_QSB_MAX_WRITES register */
+
+void ipa_reg_qsb_max_writes(struct ipa_reg_qsb_max_writes *max_writes,
+			    u32 qmb_0_max_writes, u32 qmb_1_max_writes)
+{
+	max_writes->qmb_0_max_writes = qmb_0_max_writes;
+	max_writes->qmb_1_max_writes = qmb_1_max_writes;
+}
+
 #define GEN_QMB_0_MAX_WRITES_FMASK	0x0000000f
 #define GEN_QMB_1_MAX_WRITES_FMASK	0x000000f0
 
@@ -707,6 +715,14 @@ ipa_reg_construct_qsb_max_writes(enum ipa_reg reg, const void *fields)
 }
 
 /* IPA_QSB_MAX_READS register */
+
+void ipa_reg_qsb_max_reads(struct ipa_reg_qsb_max_reads *max_reads,
+			   u32 qmb_0_max_reads, u32 qmb_1_max_reads)
+{
+	max_reads->qmb_0_max_reads = qmb_0_max_reads;
+	max_reads->qmb_1_max_reads = qmb_1_max_reads;
+}
+
 #define GEN_QMB_0_MAX_READS_FMASK	0x0000000f
 #define GEN_QMB_1_MAX_READS_FMASK	0x000000f0
 

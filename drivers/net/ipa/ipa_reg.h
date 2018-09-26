@@ -516,6 +516,11 @@ void ipa_reg_endp_status_cons(struct ipa_reg_endp_status *endp_status,
 void ipa_reg_endp_status_prod(struct ipa_reg_endp_status *endp_status,
 			      bool enable, u32 endp);
 
+void ipa_reg_qsb_max_writes(struct ipa_reg_qsb_max_writes *max_writes,
+			    u32 qmb_0_max_writes, u32 qmb_1_max_writes);
+void ipa_reg_qsb_max_reads(struct ipa_reg_qsb_max_reads *max_reads,
+			   u32 qmb_0_max_reads, u32 qmb_1_max_reads);
+
 void ipa_reg_rsrc_grp_xy_rsrc_type_n(
 				struct ipa_reg_rsrc_grp_xy_rsrc_type_n *limits,
 				u32 x_min, u32 x_max, u32 y_min, u32 y_max);
