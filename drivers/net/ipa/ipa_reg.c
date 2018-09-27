@@ -853,13 +853,16 @@ static const struct ipa_reg_desc ipa_reg[] = {
 #undef pfunc
 #undef cfunc
 
-void ipa_reg_init(void __iomem *base)
+int ipa_reg_init(phys_addr_t phys_addr, size_t size)
 {
-	ipa_reg_virt = base;
+	ipa_reg_virt = ioremap(phys_addr, size);
+
+	return ipa_reg_virt ? 0 : -ENOMEM;
 }
 
 void ipa_reg_exit(void)
 {
+	iounmap(ipa_reg_virt);
 	ipa_reg_virt = NULL;
 }
 

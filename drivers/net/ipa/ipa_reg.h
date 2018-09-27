@@ -472,7 +472,7 @@ struct ipa_reg_idle_indication_cfg {
 };
 
 /* Initialize the IPA register subsystem */
-void ipa_reg_init(void __iomem *base);
+int ipa_reg_init(phys_addr_t phys_addr, size_t size);
 void ipa_reg_exit(void);
 
 void ipa_reg_endp_init_hdr_cons(struct ipa_reg_endp_init_hdr *init_hdr,

@@ -1312,7 +1312,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	const struct ipa_match_data *match_data;
 	struct resource *res;
 	bool modem_init;
-	size_t size;
 	int result;
 
 	/* We assume we're working on 64-bit hardware */
@@ -1366,18 +1365,12 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 		result = -ENODEV;
 		goto err_clear_ipa_irq;
 	}
-	ipa_ctx->ipa_phys = res->start;
-	size = (size_t)resource_size(res);
-	ipa_debug("ipa phys %pap size 0x%08zx\n", &ipa_ctx->ipa_phys, size);
 
 	/* Setup IPA register access */
-	ipa_ctx->ipa_mmio = ioremap(ipa_ctx->ipa_phys, size);
-	if (!ipa_ctx->ipa_mmio) {
-		result = -EFAULT;
-		goto err_clear_addr;
-	}
-
-	ipa_reg_init(ipa_ctx->ipa_mmio);
+	result = ipa_reg_init(res->start, (size_t)resource_size(res));
+	if (result)
+		goto err_clear_ipa_irq;
+	ipa_ctx->ipa_phys = res->start;
 
 	ipa_ctx->gsi = gsi_init(pdev);
 	if (IS_ERR(ipa_ctx->gsi)) {
@@ -1389,10 +1382,10 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (result)
 		goto err_clear_gsi;
 
-	if (ipahal_init()) {
-		result = -EFAULT;
+	result = ipahal_init();
+	if (result)
 		goto err_dma_exit;
-	}
+
 	ipa_ctx->dev = dev;
 	ipa_ctx->clnt_hdl_cmd = IPA_CLNT_HDL_BAD;
 	ipa_ctx->clnt_hdl_lan_cons = IPA_CLNT_HDL_BAD;
@@ -1428,13 +1421,8 @@ err_dma_exit:
 	ipa_dma_exit();
 err_clear_gsi:
 	ipa_ctx->gsi = NULL;
-	ipa_reg_exit();
-	iounmap(ipa_ctx->ipa_mmio);
-	ipa_ctx->ipa_mmio = NULL;
-err_clear_addr:
-	ipa_ctx->clnt_hdl_lan_cons = 0;
-	ipa_ctx->clnt_hdl_cmd = 0;
 	ipa_ctx->ipa_phys = 0;
+	ipa_reg_exit();
 err_clear_ipa_irq:
 	ipa_ctx->ipa_irq = 0;
 err_clear_filter_bitmap:
@@ -1456,8 +1444,6 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 	ipa_ctx->gsi = NULL;	/* XXX ipa_gsi_exit() */
 	ipa_reg_exit();
 
-	iounmap(ipa_ctx->ipa_mmio);
-	ipa_ctx->ipa_mmio = NULL;
 	ipa_ctx->ipa_phys = 0;
 
 	if (ipa_ctx->clnt_hdl_lan_cons != IPA_CLNT_HDL_BAD) {
