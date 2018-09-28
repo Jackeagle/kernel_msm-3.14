@@ -15,6 +15,7 @@
 #include <dt-bindings/phy/phy-qcom-qusb2.h>
 #include <dt-bindings/reset/qcom,sdm845-aoss.h>
 #include <dt-bindings/soc/qcom,rpmh-rsc.h>
+#include <dt-bindings/interconnect/qcom.h>
 
 / {
 	interrupt-parent = <&intc>;
@@ -1001,15 +1002,13 @@
 					  "ipa-clock-query",
 					  "ipa-post-init";
 
-			/*
-			 * "master"	= { MASTER_IPA, SLAVE_EBI1 }
-			 * "imem"	= { MASTER_IPA, SLAVE_IMEM }
-			 * "config"	= { MASTER_APPSS_PROC, SLAVE_IPA_CFG }
-			 */
-			interconnects = <&qnoc 37 &qnoc 512>,
-					<&qnoc 37 &qnoc 575>,
-					<&qnoc 0 &qnoc 530>;
-			interconnect-names = "memory", "imem", "config";
+			interconnects =
+				<&qnoc MASTER_IPA &qnoc SLAVE_EBI1>,
+				<&qnoc MASTER_IPA &qnoc SLAVE_IMEM>,
+				<&qnoc MASTER_APPSS_PROC &qnoc SLAVE_IPA_CFG>;
+			interconnect-names = "memory",
+					     "imem",
+					     "config";
 
 			qcom,smem-states = <&ipa_smp2p_out 0>,
 					   <&ipa_smp2p_out 1>;
