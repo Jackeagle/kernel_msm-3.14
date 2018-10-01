@@ -953,12 +953,6 @@ static void ipa_post_init(struct work_struct *unused)
 {
 	int result;
 
-	result = ipa_init_interrupts();
-	if (result) {
-		ipa_err("ipa initialization of interrupts failed\n");
-		return;
-	}
-
 	result = gsi_register_device(ipa_ctx->gsi);
 	if (result) {
 		ipa_err(":gsi register error - %d\n", result);
@@ -1166,8 +1160,11 @@ static int ipa_pre_init(void)
 	/* Assign resource limitation to each group */
 	ipa_set_resource_groups_min_max_limits();
 
-	return 0;
+	result = ipa_init_interrupts();
+	if (!result)
+		return 0;	/* Success! */
 
+	ipa_err("ipa initialization of interrupts failed\n");
 err_dp_exit:
 	ipa_dp_exit(ipa_ctx->dp);
 	ipa_ctx->dp = NULL;
