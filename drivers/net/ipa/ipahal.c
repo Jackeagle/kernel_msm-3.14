@@ -154,11 +154,7 @@ fltrt_init_common(u16 opcode, struct ipa_dma_mem *mem, u32 hash_offset,
 	struct ipa_imm_cmd_hw_ip_fltrt_init *data;
 	struct ipahal_imm_cmd_pyld *pyld;
 
-	if (check_too_big("hash_rules_size", mem->size, 12))
-		return NULL;
 	if (check_too_big("hash_local_addr", hash_offset, 16))
-		return NULL;
-	if (check_too_big("nhash_rules_size", mem->size, 12))
 		return NULL;
 	if (check_too_big("nhash_local_addr", nhash_offset, 16))
 		return NULL;
