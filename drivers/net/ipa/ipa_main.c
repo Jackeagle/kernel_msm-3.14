@@ -953,9 +953,6 @@ static void ipa_post_init(struct work_struct *unused)
 {
 	int result;
 
-	/* Assign resource limitation to each group */
-	ipa_set_resource_groups_min_max_limits();
-
 	result = ipa_init_interrupts();
 	if (result) {
 		ipa_err("ipa initialization of interrupts failed\n");
@@ -1165,6 +1162,9 @@ static int ipa_pre_init(void)
 	 * attempted for IPA hardware versions prior to 3.5.
 	 */
 	ipa_enable_dcd();
+
+	/* Assign resource limitation to each group */
+	ipa_set_resource_groups_min_max_limits();
 
 	return 0;
 
