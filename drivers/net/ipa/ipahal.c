@@ -82,22 +82,6 @@ ipahal_imm_cmd_pyld_alloc(u16 opcode, size_t pyld_size)
 	return pyld;
 }
 
-/* Returns true if the value provided is too big to be represented
- * in the given number of bits.  In this case, WARN_ON() is called,
- * and a message is printed using ipa_err().
- *
- * Returns false if the value is OK (not too big).
- */
-static bool check_too_big(char *name, u64 value, u8 bits)
-{
-	if (!WARN_ON(value & ~GENMASK((bits) - 1, 0)))
-		return false;
-
-	ipa_err("%s is bigger than %hhubit width 0x%llx\n", name, bits, value);
-
-	return true;
-}
-
 struct ipahal_imm_cmd_pyld *
 ipahal_dma_shared_mem_write_pyld(struct ipa_dma_mem *mem, u32 offset)
 {
@@ -153,11 +137,6 @@ fltrt_init_common(u16 opcode, struct ipa_dma_mem *mem, u32 hash_offset,
 {
 	struct ipa_imm_cmd_hw_ip_fltrt_init *data;
 	struct ipahal_imm_cmd_pyld *pyld;
-
-	if (check_too_big("hash_local_addr", hash_offset, 16))
-		return NULL;
-	if (check_too_big("nhash_local_addr", nhash_offset, 16))
-		return NULL;
 
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
