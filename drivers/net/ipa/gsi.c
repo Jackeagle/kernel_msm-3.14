@@ -1742,6 +1742,7 @@ struct gsi *gsi_init(struct platform_device *pdev)
 int gsi_firmware_load(struct gsi *gsi)
 {
 	const struct firmware *fw;
+	unsigned long order;
 	phys_addr_t phys;
 	void *virt;
 	ssize_t size;
@@ -1756,22 +1757,21 @@ int gsi_firmware_load(struct gsi *gsi)
 		ret = size;
 		goto out_release_firmware;
 	}
-
-	phys = (phys_addr_t)gsi->phys + GSI_INST_RAM_I_OFFS(0);
-	virt = memremap(phys, size, MEMREMAP_WC);
+	/* We need to ensure the memory is page-aligned */
+	order = get_order(size);
+	virt = (void *)__get_free_pages(GFP_KERNEL | __GFP_ZERO, order);
 	if (!virt) {
 		ret = -ENOMEM;
 		goto out_release_firmware;
 	}
+	phys = virt_to_phys(virt);
 
 	ret = qcom_mdt_load(gsi->dev, fw, IPA_FWS_PATH, IPA_PAS_ID,
 			    virt, phys, size, NULL);
-	memunmap(virt);
-	if (ret < 0)
-		goto out_release_firmware;
+	if (!ret)
+		ret = qcom_scm_pas_auth_and_reset(IPA_PAS_ID);
 
-	ret = qcom_scm_pas_auth_and_reset(IPA_PAS_ID);
-
+	free_pages((unsigned long)virt, order);
 out_release_firmware:
 	release_firmware(fw);
 
