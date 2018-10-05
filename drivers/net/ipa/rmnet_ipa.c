@@ -340,6 +340,7 @@ static int handle_egress_format(struct net_device *dev,
 	int ret;
 
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_CHECKSUM) {
+		offload_type = IPA_CS_OFFLOAD_UL;
 		header_offset = sizeof(struct rmnet_map_header_s) / 4;
 		header_size += sizeof(u32);
 	}
