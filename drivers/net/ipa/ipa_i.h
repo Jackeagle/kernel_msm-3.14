@@ -562,7 +562,8 @@ int ipa_gsi_dma_task_alloc(void);
 void ipa_gsi_dma_task_free(void);
 int ipa_gsi_dma_task_inject(void);
 
-void ipa_set_flt_tuple_mask(u32 pipe_idx, struct ipa_reg_hash_tuple *tuple);
+void ipa_set_flt_tuple_mask(u32 pipe_idx,
+			    const struct ipa_reg_hash_tuple *tuple);
 void ipa_set_rt_tuple_mask(int tbl_idx, struct ipa_reg_hash_tuple *tuple);
 
 void ipa_gsi_irq_rx_notify_cb(void *chan_data, u16 count);
