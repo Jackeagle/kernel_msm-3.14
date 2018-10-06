@@ -469,7 +469,6 @@ free_mem:
 
 static void ipa_setup_flt_hash_tuple(void)
 {
-	struct ipa_reg_hash_tuple tuple = { };	/* All fields zero */
 	u32 pipe_mask = ipa_ctx->filter_bitmap;
 
 	while (pipe_mask) {
@@ -477,13 +476,12 @@ static void ipa_setup_flt_hash_tuple(void)
 
 		pipe_mask ^= BIT(i);
 		if (!ipa_is_modem_pipe(i))
-			ipa_set_flt_tuple_mask(i, &tuple);
+			ipa_set_flt_tuple_mask(i);
 	}
 }
 
 static void ipa_setup_rt_hash_tuple(void)
 {
-	struct ipa_reg_hash_tuple tuple = { };	/* All fields zero */
 	u32 route_mask;
 	u32 modem_mask;
 	int limit;
@@ -501,7 +499,7 @@ static void ipa_setup_rt_hash_tuple(void)
 		u32 i = __ffs(route_mask);
 
 		route_mask ^= BIT(i);
-		ipa_set_rt_tuple_mask(i, &tuple);
+		ipa_set_rt_tuple_mask(i);
 	}
 }
 

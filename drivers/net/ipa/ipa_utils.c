@@ -1120,17 +1120,14 @@ void ipa_enable_dcd(void)
  * Returns:	0 on success, negative on failure
  *
  */
-void
-ipa_set_flt_tuple_mask(u32 pipe_idx, const struct ipa_reg_hash_tuple *tuple)
+void ipa_set_flt_tuple_mask(u32 pipe_idx)
 {
 	struct ipa_ep_filter_router_hsh_cfg hsh_cfg;
 
 	ipa_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, pipe_idx,
 			      &hsh_cfg);
 
-	ipa_reg_hash_tuple(&hsh_cfg.flt, tuple->src_id, tuple->src_ip,
-			   tuple->dst_ip, tuple->src_port, tuple->dst_port,
-			   tuple->protocol, tuple->metadata);
+	ipa_reg_hash_tuple(&hsh_cfg.flt, 0, 0, 0, 0, 0, 0, 0);
 
 	ipa_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, pipe_idx,
 			       &hsh_cfg);
@@ -1145,16 +1142,14 @@ ipa_set_flt_tuple_mask(u32 pipe_idx, const struct ipa_reg_hash_tuple *tuple)
  * Returns:	 0 on success, negative on failure
  *
  */
-void ipa_set_rt_tuple_mask(int tbl_idx, const struct ipa_reg_hash_tuple *tuple)
+void ipa_set_rt_tuple_mask(int tbl_idx)
 {
 	struct ipa_ep_filter_router_hsh_cfg hsh_cfg;
 
 	ipa_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, tbl_idx,
 			      &hsh_cfg);
 
-	ipa_reg_hash_tuple(&hsh_cfg.rt, tuple->src_id, tuple->src_ip,
-			   tuple->dst_ip, tuple->src_port, tuple->dst_port,
-			   tuple->protocol, tuple->metadata);
+	ipa_reg_hash_tuple(&hsh_cfg.rt, 0, 0, 0, 0, 0, 0, 0);
 
 	ipa_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, tbl_idx,
 			       &hsh_cfg);
