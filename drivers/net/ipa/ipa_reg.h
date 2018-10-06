@@ -41,6 +41,18 @@
  * For example, the individual fields in the IPA_ROUTE register are represented
  * by the field structure named ipa_reg_route.
  *
+ * Each field register has a function used to fill in its corresponding
+ * field structure with particular values.  Parameters to this function
+ * supply values to assign.  In many cases only a few such parameters
+ * are required, because some field values are invariant.  The name of
+ * this sort of function is derived from the structure name, so for example
+ * ipa_reg_route() is used to initialize an ipa_reg_route structure.
+ * Field registers associated with endpoints often use different fields
+ * or different values dependent on whether the endpoint is a producer or
+ * consumer.  In these cases separate functions are used to initialize
+ * the field structure (for example ipa_reg_endp_init_hdr_cons() and
+ * ipa_reg_endp_init_hdr_prod()).
+ *
  * The position and width of fields within a register are defined (in
  * "ipa_reg.c") using field masks, and the names of the members in the field
  * structure associated with such registers match the names of the bit masks
@@ -51,8 +63,8 @@
  *	void ipa_read_reg_fields(enum ipa_reg reg, void *fields);
  *	void ipa_write_reg_fields(enum ipa_reg reg, const void *fields);
  * The "fields" parameter in both cases is the address of the "field structure"
- * associated with the register being accessed.  When reading, the structure is
- * filled by ipa_read_reg_fields() with values found in the register's
+ * associated with the register being accessed.  When reading, the structure
+ * is filled by ipa_read_reg_fields() with values found in the register's
  * fields.  (All fields will be filled; there is no need for the caller to
  * initialize the passed-in structure before the call.)  When writing, the
  * caller initializes the structure with all values that should be written to
