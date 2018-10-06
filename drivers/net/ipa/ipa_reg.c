@@ -346,6 +346,14 @@ ipa_reg_construct_endp_init_mode_n(enum ipa_reg reg, const void *fields)
 }
 
 /* IPA_ENDP_INIT_CTRL_N register */
+
+void
+ipa_reg_endp_init_ctrl(struct ipa_reg_endp_init_ctrl *init_ctrl, bool suspend)
+{
+	init_ctrl->endp_suspend = suspend ? 1 : 0;
+	init_ctrl->endp_delay = 0;
+}
+
 #define ENDP_SUSPEND_FMASK	0x00000001
 #define ENDP_DELAY_FMASK	0x00000002
 
@@ -540,7 +548,8 @@ static u32 ipa_reg_construct_endp_init_hdr_metadata_mask_n(enum ipa_reg reg,
 	return field_gen(metadata_mask->metadata_mask, METADATA_MASK_FMASK);
 }
 
-/* IPA_SHARED_MEM_SIZE register */
+/* IPA_SHARED_MEM_SIZE register (read-only) */
+
 #define SHARED_MEM_SIZE_FMASK	0x0000ffff
 #define SHARED_MEM_BADDR_FMASK	0xffff0000
 

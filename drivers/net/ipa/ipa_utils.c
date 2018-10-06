@@ -703,8 +703,9 @@ void ipa_cfg_ep(u32 clnt_hdl)
 
 static void suspend_consumer_endpoint(u32 ipa_ep_idx)
 {
-	struct ipa_reg_endp_init_ctrl init_ctrl = { .endp_suspend = 1 };
+	struct ipa_reg_endp_init_ctrl init_ctrl;
 
+	ipa_reg_endp_init_ctrl(&init_ctrl, true);
 	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_idx, &init_ctrl);
 
 	/* Due to a hardware bug, a client suspended with an open
@@ -717,8 +718,9 @@ static void suspend_consumer_endpoint(u32 ipa_ep_idx)
 
 static void resume_consumer_endpoint(u32 ipa_ep_idx)
 {
-	struct ipa_reg_endp_init_ctrl init_ctrl = { .endp_suspend = 0 };
+	struct ipa_reg_endp_init_ctrl init_ctrl;
 
+	ipa_reg_endp_init_ctrl(&init_ctrl, false);
 	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_idx, &init_ctrl);
 }
 

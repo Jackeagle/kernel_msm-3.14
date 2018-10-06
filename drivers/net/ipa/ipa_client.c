@@ -105,7 +105,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	if (init_ctrl.endp_suspend) {
 		ipa_debug("pipe is suspended, remove suspend\n");
 		pipe_suspended = true;
-		init_ctrl.endp_suspend = 0;
+		ipa_reg_endp_init_ctrl(&init_ctrl, false);
 		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl,
 				       &init_ctrl);
 	}
@@ -169,7 +169,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 
 	if (pipe_suspended) {
 		ipa_debug("suspend the pipe again\n");
-		init_ctrl.endp_suspend = 1;
+		ipa_reg_endp_init_ctrl(&init_ctrl, true);
 		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl,
 				       &init_ctrl);
 	}
@@ -189,7 +189,7 @@ dma_alloc_fail:
 start_chan_fail:
 	if (pipe_suspended) {
 		ipa_debug("suspend the pipe again\n");
-		init_ctrl.endp_suspend = 1;
+		ipa_reg_endp_init_ctrl(&init_ctrl, true);
 		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl,
 				       &init_ctrl);
 	}
