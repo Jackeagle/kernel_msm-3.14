@@ -520,9 +520,7 @@ void ipa_reg_endp_status_cons(struct ipa_reg_endp_status *endp_status,
 void ipa_reg_endp_status_prod(struct ipa_reg_endp_status *endp_status,
 			      bool enable, u32 endp);
 
-void ipa_reg_hash_tuple(struct ipa_reg_hash_tuple *tuple, u32 src_id,
-			u32 src_ip, u32 dst_ip, u32 src_port, u32 dst_port,
-			u32 protocol, u32 metadata);
+void ipa_reg_hash_tuple(struct ipa_reg_hash_tuple *tuple);
 
 void ipa_reg_rsrc_grp_xy_rsrc_type_n(
 				struct ipa_reg_rsrc_grp_xy_rsrc_type_n *limits,

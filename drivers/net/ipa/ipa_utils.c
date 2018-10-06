@@ -1127,7 +1127,7 @@ void ipa_set_flt_tuple_mask(u32 pipe_idx)
 	ipa_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, pipe_idx,
 			      &hsh_cfg);
 
-	ipa_reg_hash_tuple(&hsh_cfg.flt, 0, 0, 0, 0, 0, 0, 0);
+	ipa_reg_hash_tuple(&hsh_cfg.flt);
 
 	ipa_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, pipe_idx,
 			       &hsh_cfg);
@@ -1149,7 +1149,7 @@ void ipa_set_rt_tuple_mask(int tbl_idx)
 	ipa_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, tbl_idx,
 			      &hsh_cfg);
 
-	ipa_reg_hash_tuple(&hsh_cfg.rt, 0, 0, 0, 0, 0, 0, 0);
+	ipa_reg_hash_tuple(&hsh_cfg.rt);
 
 	ipa_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, tbl_idx,
 			       &hsh_cfg);
