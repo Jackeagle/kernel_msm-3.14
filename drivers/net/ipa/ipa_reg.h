@@ -404,6 +404,7 @@ struct ipa_reg_hash_tuple {
 	u32 dst_port;
 	u32 protocol;
 	u32 metadata;
+	u32 undefined;
 };
 
 /* struct ipa_ep_filter_router_hsh_cfg - IPA_ENDP_FILTER_ROUTER_HSH_CFG_N
@@ -417,9 +418,7 @@ struct ipa_reg_hash_tuple {
  */
 struct ipa_ep_filter_router_hsh_cfg {
 	struct ipa_reg_hash_tuple flt;
-	u32 undefined1;
 	struct ipa_reg_hash_tuple rt;
-	u32 undefined2;
 };
 
 /* struct ipa_reg_rsrc_grp_xy_rsrc_type_n -

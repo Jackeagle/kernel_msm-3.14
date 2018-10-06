@@ -640,7 +640,7 @@ static u32 ipa_reg_construct_hash_cfg_n(enum ipa_reg reg, const void *fields)
 	val |= field_gen(hsh_cfg->flt.dst_port, FILTER_HASH_MSK_DST_PORT_FMASK);
 	val |= field_gen(hsh_cfg->flt.protocol, FILTER_HASH_MSK_PROTOCOL_FMASK);
 	val |= field_gen(hsh_cfg->flt.metadata, FILTER_HASH_MSK_METADATA_FMASK);
-	val |= field_gen(hsh_cfg->undefined1, FILTER_HASH_UNDEFINED1_FMASK);
+	val |= field_gen(hsh_cfg->flt.undefined, FILTER_HASH_UNDEFINED1_FMASK);
 
 	val |= field_gen(hsh_cfg->rt.src_id, ROUTER_HASH_MSK_SRC_ID_FMASK);
 	val |= field_gen(hsh_cfg->rt.src_ip, ROUTER_HASH_MSK_SRC_IP_FMASK);
@@ -649,7 +649,7 @@ static u32 ipa_reg_construct_hash_cfg_n(enum ipa_reg reg, const void *fields)
 	val |= field_gen(hsh_cfg->rt.dst_port, ROUTER_HASH_MSK_DST_PORT_FMASK);
 	val |= field_gen(hsh_cfg->rt.protocol, ROUTER_HASH_MSK_PROTOCOL_FMASK);
 	val |= field_gen(hsh_cfg->rt.metadata, ROUTER_HASH_MSK_METADATA_FMASK);
-	val |= field_gen(hsh_cfg->undefined2, ROUTER_HASH_UNDEFINED2_FMASK);
+	val |= field_gen(hsh_cfg->rt.undefined, FILTER_HASH_UNDEFINED1_FMASK);
 
 	return val;
 }
@@ -667,7 +667,7 @@ static void ipa_reg_parse_hash_cfg_n(enum ipa_reg reg, void *fields, u32 val)
 	hsh_cfg->flt.dst_port = field_val(val, FILTER_HASH_MSK_DST_PORT_FMASK);
 	hsh_cfg->flt.protocol = field_val(val, FILTER_HASH_MSK_PROTOCOL_FMASK);
 	hsh_cfg->flt.metadata = field_val(val, FILTER_HASH_MSK_METADATA_FMASK);
-	hsh_cfg->undefined1 = field_val(val, FILTER_HASH_UNDEFINED1_FMASK);
+	hsh_cfg->flt.undefined = field_val(val, FILTER_HASH_UNDEFINED1_FMASK);
 
 	hsh_cfg->rt.src_id = field_val(val, ROUTER_HASH_MSK_SRC_ID_FMASK);
 	hsh_cfg->rt.src_ip = field_val(val, ROUTER_HASH_MSK_SRC_IP_FMASK);
@@ -676,7 +676,7 @@ static void ipa_reg_parse_hash_cfg_n(enum ipa_reg reg, void *fields, u32 val)
 	hsh_cfg->rt.dst_port = field_val(val, ROUTER_HASH_MSK_DST_PORT_FMASK);
 	hsh_cfg->rt.protocol = field_val(val, ROUTER_HASH_MSK_PROTOCOL_FMASK);
 	hsh_cfg->rt.metadata = field_val(val, ROUTER_HASH_MSK_METADATA_FMASK);
-	hsh_cfg->undefined2 = field_val(val, ROUTER_HASH_UNDEFINED2_FMASK);
+	hsh_cfg->rt.undefined = field_val(val, ROUTER_HASH_UNDEFINED2_FMASK);
 }
 
 /* IPA_RSRC_GRP_XY_RSRC_TYPE_N register(s) */

@@ -1135,6 +1135,7 @@ ipa_set_flt_tuple_mask(u32 pipe_idx, const struct ipa_reg_hash_tuple *tuple)
 	hsh_cfg.flt.dst_port = tuple->dst_port;
 	hsh_cfg.flt.protocol = tuple->protocol;
 	hsh_cfg.flt.metadata = tuple->metadata;
+	hsh_cfg.flt.undefined = tuple->undefined;
 
 	ipa_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, pipe_idx,
 			       &hsh_cfg);
@@ -1163,6 +1164,7 @@ void ipa_set_rt_tuple_mask(int tbl_idx, const struct ipa_reg_hash_tuple *tuple)
 	hsh_cfg.rt.dst_port = tuple->dst_port;
 	hsh_cfg.rt.protocol = tuple->protocol;
 	hsh_cfg.rt.metadata = tuple->metadata;
+	hsh_cfg.rt.undefined = tuple->undefined;
 
 	ipa_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, tbl_idx,
 			       &hsh_cfg);
