@@ -275,6 +275,13 @@ ipa_reg_parse_endp_init_aggr_n(enum ipa_reg reg, void *fields, u32 val)
 }
 
 /* IPA_AGGR_FORCE_CLOSE register */
+
+void ipa_reg_aggr_force_close(struct ipa_reg_aggr_force_close *force_close,
+			      u32 pipe_bitmap)
+{
+	force_close->pipe_bitmap = pipe_bitmap;
+}
+
 #define PIPE_BITMAP_FMASK	0x000fffff
 
 static u32

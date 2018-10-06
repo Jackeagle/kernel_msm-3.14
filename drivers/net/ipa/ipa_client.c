@@ -80,7 +80,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 
 	ipa_debug("Applying reset channel with open aggregation frame WA\n");
 
-	force_close.pipe_bitmap = BIT(clnt_hdl);
+	ipa_reg_aggr_force_close(&force_close, BIT(clnt_hdl));
 	ipa_write_reg_fields(IPA_AGGR_FORCE_CLOSE, &force_close);
 
 	/* Reset channel */

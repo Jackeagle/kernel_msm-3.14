@@ -273,7 +273,7 @@ void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
 		return;
 
 	/* Force close aggregation */
-	force_close.pipe_bitmap = clnt_mask;
+	ipa_reg_aggr_force_close(&force_close, clnt_mask);
 	ipa_write_reg_fields(IPA_AGGR_FORCE_CLOSE, &force_close);
 
 	/* Simulate suspend IRQ */

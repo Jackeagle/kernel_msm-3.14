@@ -492,6 +492,8 @@ void ipa_reg_endp_init_aggr_cons(struct ipa_reg_endp_init_aggr *init_aggr,
 void ipa_reg_endp_init_aggr_prod(struct ipa_reg_endp_init_aggr *init_aggr,
 				 enum ipa_aggr_en aggr_en,
 				 enum ipa_aggr_type aggr_type);
+void ipa_reg_aggr_force_close(struct ipa_reg_aggr_force_close *force_close,
+			      u32 pipe_bitmap);
 void ipa_reg_endp_init_mode_cons(struct ipa_reg_endp_init_mode *init_mode);
 void ipa_reg_endp_init_mode_prod(struct ipa_reg_endp_init_mode *init_mode,
 				 enum ipa_mode mode, u32 dest_endp);
