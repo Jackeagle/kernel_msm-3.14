@@ -462,8 +462,8 @@ struct ipa_reg_qsb_max_reads {
 
 /* struct ipa_reg_idle_indication_cfg - IPA_IDLE_INDICATION_CFG field register
  *
- * @const_non_idle_enable: enable the asserting of the IDLE value and DCD
  * @enter_idle_debounce_thresh:	 configure the debounce threshold
+ * @const_non_idle_enable: enable the asserting of the IDLE value and DCD
  */
 struct ipa_reg_idle_indication_cfg {
 	u32 enter_idle_debounce_thresh;
@@ -530,6 +530,9 @@ void ipa_reg_qsb_max_writes(struct ipa_reg_qsb_max_writes *max_writes,
 			    u32 qmb_0_max_writes, u32 qmb_1_max_writes);
 void ipa_reg_qsb_max_reads(struct ipa_reg_qsb_max_reads *max_reads,
 			   u32 qmb_0_max_reads, u32 qmb_1_max_reads);
+
+void ipa_reg_idle_indication_cfg(struct ipa_reg_idle_indication_cfg *indication,
+			         u32 debounce_thresh, bool non_idle_enable);
 
 /* Get the offset of an n-parameterized register */
 u32 ipa_reg_n_offset(enum ipa_reg reg, u32 n);

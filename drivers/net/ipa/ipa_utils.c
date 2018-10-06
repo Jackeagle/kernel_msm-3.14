@@ -1102,13 +1102,12 @@ end_sequence:
  */
 void ipa_enable_dcd(void)
 {
-	struct ipa_reg_idle_indication_cfg idle_indication_cfg;
+	struct ipa_reg_idle_indication_cfg indication;
 
 	/* recommended values for IPA 3.5 according to IPA HPG */
-	idle_indication_cfg.const_non_idle_enable = 0;
-	idle_indication_cfg.enter_idle_debounce_thresh = 256;
+	ipa_reg_idle_indication_cfg(&indication, 256, 0);
 
-	ipa_write_reg_fields(IPA_IDLE_INDICATION_CFG, &idle_indication_cfg);
+	ipa_write_reg_fields(IPA_IDLE_INDICATION_CFG, &indication);
 }
 
 /** ipa_set_flt_tuple_mask() - Sets the flt tuple masking for the given pipe

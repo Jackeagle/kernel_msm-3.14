@@ -777,7 +777,15 @@ static u32 ipa_reg_construct_qsb_max_reads(enum ipa_reg reg, const void *fields)
 	return val;
 }
 
-/* IPA_IDLE_INDICATION_CFG regiser */
+/* IPA_IDLE_INDICATION_CFG register */
+
+void ipa_reg_idle_indication_cfg(struct ipa_reg_idle_indication_cfg *indication,
+				 u32 debounce_thresh, bool non_idle_enable)
+{
+	indication->enter_idle_debounce_thresh = debounce_thresh;
+	indication->const_non_idle_enable = non_idle_enable;
+}
+
 #define ENTER_IDLE_DEBOUNCE_THRESH_FMASK	0x0000ffff
 #define CONST_NON_IDLE_ENABLE_FMASK		0x00010000
 
