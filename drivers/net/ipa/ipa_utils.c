@@ -1149,7 +1149,7 @@ ipa_set_flt_tuple_mask(u32 pipe_idx, const struct ipa_reg_hash_tuple *tuple)
  * Returns:	 0 on success, negative on failure
  *
  */
-void ipa_set_rt_tuple_mask(int tbl_idx, struct ipa_reg_hash_tuple *tuple)
+void ipa_set_rt_tuple_mask(int tbl_idx, const struct ipa_reg_hash_tuple *tuple)
 {
 	struct ipa_ep_filter_router_hsh_cfg hsh_cfg;
 
