@@ -484,19 +484,24 @@ static void ipa_setup_flt_hash_tuple(void)
 static void ipa_setup_rt_hash_tuple(void)
 {
 	struct ipa_reg_hash_tuple tuple = { };	/* All fields zero */
-	int tbl_idx;
-	int limit = max(IPA_MEM_V6_RT_NUM_INDEX, IPA_MEM_V4_RT_NUM_INDEX);
+	u32 route_mask;
+	u32 modem_mask;
+	int limit;
 
-	for (tbl_idx = 0; tbl_idx < limit; tbl_idx++) {
-		if (tbl_idx >= IPA_MEM_V4_MODEM_RT_INDEX_LO &&
-		    tbl_idx <= IPA_MEM_V4_MODEM_RT_INDEX_HI)
-			continue;
+	/* Compute a mask representing non-modem route table entries */
+	limit = max(IPA_MEM_V6_RT_NUM_INDEX, IPA_MEM_V4_RT_NUM_INDEX);
+	route_mask = GENMASK(limit - 1, 0);
+	modem_mask = GENMASK(IPA_MEM_V4_MODEM_RT_INDEX_HI,
+			     IPA_MEM_V4_MODEM_RT_INDEX_LO);
+	modem_mask |= GENMASK(IPA_MEM_V6_MODEM_RT_INDEX_HI,
+			      IPA_MEM_V6_MODEM_RT_INDEX_LO);
+	route_mask &= ~modem_mask;
 
-		if (tbl_idx >= IPA_MEM_V6_MODEM_RT_INDEX_LO &&
-		    tbl_idx <= IPA_MEM_V6_MODEM_RT_INDEX_HI)
-			continue;
+	while (route_mask) {
+		u32 i = __ffs(route_mask);
 
-		ipa_set_rt_tuple_mask(tbl_idx, &tuple);
+		route_mask ^= BIT(i);
+		ipa_set_rt_tuple_mask(i, &tuple);
 	}
 }
 
