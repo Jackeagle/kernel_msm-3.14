@@ -247,7 +247,7 @@ static int handle_ingress_format(struct net_device *dev,
 	u32 aggr_count = IPA_GENERIC_AGGR_PKT_LIMIT;
 	bool aggr_active = false;
 	u32 rx_buffer_size;
-	u32 cons_hdl;
+	u32 ep_id;
 	int ret;
 
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_CHECKSUM)
@@ -293,16 +293,16 @@ static int handle_ingress_format(struct net_device *dev,
 	ret = ipa_ep_alloc(client);
 	if (ret < 0)
 		goto out_unlock;
-	cons_hdl = ret;
+	ep_id = ret;
 
 	/* Record our endpoint configuration parameters */
-	ipa_endp_init_hdr_cons(cons_hdl, header_size, metadata_offset,
+	ipa_endp_init_hdr_cons(ep_id, header_size, metadata_offset,
 			       length_offset);
-	ipa_endp_init_hdr_ext_cons(cons_hdl, 0, true);
-	ipa_endp_init_aggr_cons(cons_hdl, aggr_size, aggr_count, true);
-	ipa_endp_init_cfg_cons(cons_hdl, offload_type);
-	ipa_endp_init_hdr_metadata_mask_cons(cons_hdl, 0xff000000);
-	ipa_endp_status_cons(cons_hdl, !aggr_active);
+	ipa_endp_init_hdr_ext_cons(ep_id, 0, true);
+	ipa_endp_init_aggr_cons(ep_id, aggr_size, aggr_count, true);
+	ipa_endp_init_cfg_cons(ep_id, offload_type);
+	ipa_endp_init_hdr_metadata_mask_cons(ep_id, 0xff000000);
+	ipa_endp_status_cons(ep_id, !aggr_active);
 
 	wan_cfg->notify = apps_ipa_packet_receive_notify;
 	wan_cfg->priv = dev;
@@ -310,11 +310,11 @@ static int handle_ingress_format(struct net_device *dev,
 
 	ipa_ctx->ipa_client_apps_wan_cons_agg_gro = aggr_active;
 
-	ret = ipa_setup_sys_pipe(cons_hdl, chan_count, rx_buffer_size, wan_cfg);
+	ret = ipa_setup_sys_pipe(ep_id, chan_count, rx_buffer_size, wan_cfg);
 	if (ret)
-		ipa_ep_free(cons_hdl);
+		ipa_ep_free(ep_id);
 	else
-		rmnet_ipa_ctx->wan_cons_hdl = cons_hdl;
+		rmnet_ipa_ctx->wan_cons_hdl = ep_id;
 out_unlock:
 	mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
 
@@ -336,7 +336,7 @@ static int handle_egress_format(struct net_device *dev,
 	u32 header_offset = 0;
 	u32 length_offset = 0;
 	u32 header_align = 0;
-	u32 prod_hdl;
+	u32 ep_id;
 	int ret;
 
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_CHECKSUM) {
@@ -362,38 +362,38 @@ static int handle_egress_format(struct net_device *dev,
 	ret = ipa_ep_alloc(client);
 	if (ret < 0)
 		goto out_unlock;
-	prod_hdl = ret;
+	ep_id = ret;
 
-	if (aggr_en == IPA_ENABLE_DEAGGR && !ipa_endp_aggr_support(prod_hdl)) {
+	if (aggr_en == IPA_ENABLE_DEAGGR && !ipa_endp_aggr_support(ep_id)) {
 		ret = -ENOTSUPP;
 		goto out_unlock;
 	}
 
 	/* We really do want 0 metadata offset */
-	ipa_endp_init_hdr_prod(prod_hdl, header_size, 0, length_offset);
-	ipa_endp_init_hdr_ext_prod(prod_hdl, header_align);
-	ipa_endp_init_mode_prod(prod_hdl, IPA_BASIC, dst_client);
-	ipa_endp_init_aggr_prod(prod_hdl, aggr_en, aggr_type);
-	ipa_endp_init_cfg_prod(prod_hdl, offload_type, header_offset);
-	ipa_endp_init_seq_prod(prod_hdl);
-	ipa_endp_init_deaggr_prod(prod_hdl);
+	ipa_endp_init_hdr_prod(ep_id, header_size, 0, length_offset);
+	ipa_endp_init_hdr_ext_prod(ep_id, header_align);
+	ipa_endp_init_mode_prod(ep_id, IPA_BASIC, dst_client);
+	ipa_endp_init_aggr_prod(ep_id, aggr_en, aggr_type);
+	ipa_endp_init_cfg_prod(ep_id, offload_type, header_offset);
+	ipa_endp_init_seq_prod(ep_id);
+	ipa_endp_init_deaggr_prod(ep_id);
 	/* Enable source notification status for exception packets
 	 * (i.e. QMAP commands) to be routed to modem.
 	 */
-	ipa_endp_status_prod(prod_hdl, true, IPA_CLIENT_Q6_WAN_CONS);
+	ipa_endp_status_prod(ep_id, true, IPA_CLIENT_Q6_WAN_CONS);
 
 	wan_cfg->notify = apps_ipa_tx_complete_notify;
 	wan_cfg->priv = dev;
 	wan_cfg->napi_enabled = false;
 
 	/* Use a deferred interrupting no-op to reduce completion interrupts */
-	ipa_no_intr_init(prod_hdl);
+	ipa_no_intr_init(ep_id);
 
-	ret = ipa_setup_sys_pipe(prod_hdl, chan_count, 0, wan_cfg);
+	ret = ipa_setup_sys_pipe(ep_id, chan_count, 0, wan_cfg);
 	if (ret)
-		ipa_ep_free(prod_hdl);
+		ipa_ep_free(ep_id);
 	else
-		rmnet_ipa_ctx->wan_prod_hdl = prod_hdl;
+		rmnet_ipa_ctx->wan_prod_hdl = ep_id;
 
 out_unlock:
 	mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);

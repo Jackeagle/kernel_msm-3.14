@@ -173,7 +173,7 @@ static int setup_apps_cmd_prod_pipe(void)
 	enum ipa_client_type client = IPA_CLIENT_APPS_CMD_PROD;
 	enum ipa_client_type dst_client = IPA_CLIENT_APPS_LAN_CONS;
 	u32 chan_count = IPA_APPS_CMD_PROD_RING_COUNT;
-	u32 prod_hdl;
+	u32 ep_id;
 	int ret;
 
 	if (ipa_ctx->clnt_hdl_cmd != IPA_CLNT_HDL_BAD)
@@ -182,17 +182,17 @@ static int setup_apps_cmd_prod_pipe(void)
 	ret = ipa_ep_alloc(client);
 	if (ret < 0)
 		return ret;
-	prod_hdl = ret;
+	ep_id = ret;
 
-	ipa_endp_init_mode_prod(prod_hdl, IPA_DMA, dst_client);
-	ipa_endp_init_seq_prod(prod_hdl);
-	ipa_endp_init_deaggr_prod(prod_hdl);
+	ipa_endp_init_mode_prod(ep_id, IPA_DMA, dst_client);
+	ipa_endp_init_seq_prod(ep_id);
+	ipa_endp_init_deaggr_prod(ep_id);
 
-	ret = ipa_setup_sys_pipe(prod_hdl, chan_count, 0, &sys_in);
+	ret = ipa_setup_sys_pipe(ep_id, chan_count, 0, &sys_in);
 	if (ret)
-		ipa_ep_free(prod_hdl);
+		ipa_ep_free(ep_id);
 	else
-		ipa_ctx->clnt_hdl_cmd = prod_hdl;
+		ipa_ctx->clnt_hdl_cmd = ep_id;
 
 	return ret;
 }
@@ -512,7 +512,7 @@ static int setup_apps_lan_cons_pipe(void)
 	u32 aggr_count = IPA_GENERIC_AGGR_PKT_LIMIT;
 	u32 rx_buffer_size;
 	u32 byte_limit;
-	u32 cons_hdl;
+	u32 ep_id;
 	int ret;
 
 	if (aggr_size > ipa_reg_aggr_max_byte_limit())
@@ -546,24 +546,24 @@ static int setup_apps_lan_cons_pipe(void)
 	ret = ipa_ep_alloc(client);
 	if (ret < 0)
 		return ret;
-	cons_hdl = ret;
+	ep_id = ret;
 
-	ipa_endp_init_hdr_cons(cons_hdl, IPA_LAN_RX_HEADER_LENGTH, 0, 0);
-	ipa_endp_init_hdr_ext_cons(cons_hdl, ilog2(sizeof(u32)), false);
-	ipa_endp_init_aggr_cons(cons_hdl, aggr_size, aggr_count, false);
-	ipa_endp_init_cfg_cons(cons_hdl, IPA_CS_OFFLOAD_DL);
-	ipa_endp_init_hdr_metadata_mask_cons(cons_hdl, 0x0);
-	ipa_endp_status_cons(cons_hdl, true);
+	ipa_endp_init_hdr_cons(ep_id, IPA_LAN_RX_HEADER_LENGTH, 0, 0);
+	ipa_endp_init_hdr_ext_cons(ep_id, ilog2(sizeof(u32)), false);
+	ipa_endp_init_aggr_cons(ep_id, aggr_size, aggr_count, false);
+	ipa_endp_init_cfg_cons(ep_id, IPA_CS_OFFLOAD_DL);
+	ipa_endp_init_hdr_metadata_mask_cons(ep_id, 0x0);
+	ipa_endp_status_cons(ep_id, true);
 
 	sys_in.notify = ipa_lan_rx_cb;
 	sys_in.priv = NULL;
 	sys_in.napi_enabled = false;
 
-	ret = ipa_setup_sys_pipe(cons_hdl, chan_count, rx_buffer_size, &sys_in);
+	ret = ipa_setup_sys_pipe(ep_id, chan_count, rx_buffer_size, &sys_in);
 	if (ret)
-		ipa_ep_free(cons_hdl);
+		ipa_ep_free(ep_id);
 	else
-		ipa_ctx->clnt_hdl_lan_cons = cons_hdl;
+		ipa_ctx->clnt_hdl_lan_cons = ep_id;
 
 	return ret;
 }
