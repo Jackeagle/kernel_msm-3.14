@@ -610,6 +610,21 @@ static u32 ipa_reg_construct_endp_status_n(enum ipa_reg reg, const void *fields)
 }
 
 /* IPA_ENDP_FILTER_ROUTER_HSH_CFG_N register */
+
+void ipa_reg_hash_tuple(struct ipa_reg_hash_tuple *tuple, u32 src_id,
+			u32 src_ip, u32 dst_ip, u32 src_port, u32 dst_port,
+			u32 protocol, u32 metadata)
+{
+	tuple->src_id = src_id;	/* pipe number in flt, table index in rt */
+	tuple->src_ip = src_ip;
+	tuple->dst_ip = dst_ip;
+	tuple->src_port = src_port;
+	tuple->dst_port = dst_port;
+	tuple->protocol = protocol;
+	tuple->metadata = metadata;
+	tuple->undefined = 0;
+}
+
 #define FILTER_HASH_MSK_SRC_ID_FMASK	0x00000001
 #define FILTER_HASH_MSK_SRC_IP_FMASK	0x00000002
 #define FILTER_HASH_MSK_DST_IP_FMASK	0x00000004
