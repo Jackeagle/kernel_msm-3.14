@@ -965,18 +965,13 @@ void ipa_resume_apps_pipes(void)
  */
 void ipa_cfg_default_route(enum ipa_client_type client)
 {
-	struct ipa_reg_route route = { };
-	u32 ipa_ep_idx;
-
-	ipa_ep_idx = ipa_get_ep_mapping(client);
+	struct ipa_reg_route route;
+	u32 ipa_ep_idx = ipa_get_ep_mapping(client);
 
 	ipa_debug("dis=0, def_pipe=%u, hdr_tbl=1 hdr_ofst=0\n", ipa_ep_idx);
 	ipa_debug("frag_def_pipe=%u def_retain_hdr=1\n", ipa_ep_idx);
 
-	route.route_def_pipe = ipa_ep_idx;
-	route.route_def_hdr_table = 1;
-	route.route_frag_def_pipe = ipa_ep_idx;
-	route.route_def_retain_hdr = 1;
+	ipa_reg_route(&route, ipa_ep_idx);
 
 	ipa_client_add();
 

@@ -475,6 +475,7 @@ struct ipa_reg_idle_indication_cfg {
 int ipa_reg_init(phys_addr_t phys_addr, size_t size);
 void ipa_reg_exit(void);
 
+void ipa_reg_route(struct ipa_reg_route *route, u32 ipa_ep_idx);
 void ipa_reg_endp_init_hdr_cons(struct ipa_reg_endp_init_hdr *init_hdr,
 				u32 header_size, u32 metadata_offset,
 				u32 length_offset);

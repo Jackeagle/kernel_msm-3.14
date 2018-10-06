@@ -28,6 +28,17 @@ struct ipa_reg_desc {
 };
 
 /* IPA_ROUTE register */
+
+void ipa_reg_route(struct ipa_reg_route *route, u32 ipa_ep_idx)
+{
+	route->route_dis = 0;
+	route->route_def_pipe = ipa_ep_idx;
+	route->route_def_hdr_table = 1;
+	route->route_def_hdr_ofst = 0;
+	route->route_frag_def_pipe = ipa_ep_idx;
+	route->route_def_retain_hdr = 1;
+}
+
 #define ROUTE_DIS_FMASK			0x00000001
 #define ROUTE_DEF_PIPE_FMASK		0x0000003e
 #define ROUTE_DEF_HDR_TABLE_FMASK	0x00000040
