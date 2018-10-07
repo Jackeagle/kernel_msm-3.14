@@ -309,13 +309,7 @@ static int ipa_init_rt4(struct ipa_dma_mem *mem)
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	u32 hash_offset;
 	u32 nhash_offset;
-	int rc;
-
-	rc = ipahal_rt_generate_empty_img(IPA_MEM_RT_COUNT, mem);
-	if (rc) {
-		ipa_err("fail generate empty v4 rt img\n");
-		return rc;
-	}
+	int ret;
 
 	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_RT_HASH_OFST;
 	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_RT_NHASH_OFST;
@@ -323,21 +317,18 @@ static int ipa_init_rt4(struct ipa_dma_mem *mem)
 		ipahal_ip_v4_routing_init_pyld(mem, hash_offset, nhash_offset);
 	if (!cmd_pyld) {
 		ipa_err("fail construct ip_v4_rt_init imm cmd\n");
-		rc = -EPERM;
-		goto free_mem;
+		return -EPERM;
 	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
-	if (ipa_send_cmd(&desc)) {
+	ret = ipa_send_cmd(&desc);
+	if (ret) {
 		ipa_err("fail to send immediate command\n");
-		rc = -EFAULT;
+		ret = -EFAULT;
 	}
-
 	ipahal_destroy_imm_cmd(cmd_pyld);
 
-free_mem:
-	ipahal_free_empty_img(mem);
-	return rc;
+	return ret;
 }
 
 /** ipa_init_rt6() - Initialize IPA routing block for IPv6.
@@ -350,13 +341,7 @@ static int ipa_init_rt6(struct ipa_dma_mem *mem)
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	u32 hash_offset;
 	u32 nhash_offset;
-	int rc;
-
-	rc = ipahal_rt_generate_empty_img(IPA_MEM_RT_COUNT, mem);
-	if (rc) {
-		ipa_err("fail generate empty v6 rt img\n");
-		return rc;
-	}
+	int ret;
 
 	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_RT_HASH_OFST;
 	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_RT_NHASH_OFST;
@@ -364,21 +349,18 @@ static int ipa_init_rt6(struct ipa_dma_mem *mem)
 		ipahal_ip_v6_routing_init_pyld(mem, hash_offset, nhash_offset);
 	if (!cmd_pyld) {
 		ipa_err("fail construct ip_v6_rt_init imm cmd\n");
-		rc = -EPERM;
-		goto free_mem;
+		return -EPERM;
 	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
-	if (ipa_send_cmd(&desc)) {
+	ret = ipa_send_cmd(&desc);
+	if (ret) {
 		ipa_err("fail to send immediate command\n");
-		rc = -EFAULT;
+		ret = -EFAULT;
 	}
-
 	ipahal_destroy_imm_cmd(cmd_pyld);
 
-free_mem:
-	ipahal_free_empty_img(mem);
-	return rc;
+	return ret;
 }
 
 /** ipa_init_flt4() - Initialize IPA filtering block for IPv4.
@@ -564,11 +546,16 @@ static int ipa_ep_apps_setup(void)
 	ipa_init_hdr();
 	ipa_debug("HDR initialized\n");
 
+	result = ipahal_rt_generate_empty_img(IPA_MEM_RT_COUNT, &mem);
+	ipa_assert(!result);
+
 	ipa_init_rt4(&mem);
 	ipa_debug("V4 RT initialized\n");
 
 	ipa_init_rt6(&mem);
 	ipa_debug("V6 RT initialized\n");
+
+	ipahal_free_empty_img(&mem);
 
 	result = ipahal_flt_generate_empty_img(ipa_ctx->filter_bitmap, &mem);
 	ipa_assert(!result);
