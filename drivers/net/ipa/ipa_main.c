@@ -176,7 +176,7 @@ static int setup_apps_cmd_prod_pipe(void)
 	u32 ep_id;
 	int ret;
 
-	if (ipa_ctx->clnt_hdl_cmd != IPA_CLNT_HDL_BAD)
+	if (ipa_ctx->cmd_prod_ep_id != IPA_EP_ID_BAD)
 		ret = -EBUSY;
 
 	ret = ipa_ep_alloc(client);
@@ -192,7 +192,7 @@ static int setup_apps_cmd_prod_pipe(void)
 	if (ret)
 		ipa_ep_free(ep_id);
 	else
-		ipa_ctx->clnt_hdl_cmd = ep_id;
+		ipa_ctx->cmd_prod_ep_id = ep_id;
 
 	return ret;
 }
@@ -521,7 +521,7 @@ static int setup_apps_lan_cons_pipe(void)
 	if (aggr_count > ipa_reg_aggr_max_packet_limit())
 		return -EINVAL;
 
-	if (ipa_ctx->clnt_hdl_lan_cons != IPA_CLNT_HDL_BAD)
+	if (ipa_ctx->lan_cons_ep_id != IPA_EP_ID_BAD)
 		return -EBUSY;
 
 	/* Compute the buffer size required to handle the requested
@@ -563,7 +563,7 @@ static int setup_apps_lan_cons_pipe(void)
 	if (ret)
 		ipa_ep_free(ep_id);
 	else
-		ipa_ctx->clnt_hdl_lan_cons = ep_id;
+		ipa_ctx->lan_cons_ep_id = ep_id;
 
 	return ret;
 }
@@ -622,8 +622,8 @@ static int ipa_setup_apps_pipes(void)
 	return 0;
 
 fail_flt_hash_tuple:
-	ipa_teardown_sys_pipe(ipa_ctx->clnt_hdl_cmd);
-	ipa_ctx->clnt_hdl_cmd = IPA_CLNT_HDL_BAD;
+	ipa_teardown_sys_pipe(ipa_ctx->cmd_prod_ep_id);
+	ipa_ctx->cmd_prod_ep_id = IPA_EP_ID_BAD;
 
 	return result;
 }
@@ -1388,8 +1388,8 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 		goto err_dma_exit;
 
 	ipa_ctx->dev = dev;
-	ipa_ctx->clnt_hdl_cmd = IPA_CLNT_HDL_BAD;
-	ipa_ctx->clnt_hdl_lan_cons = IPA_CLNT_HDL_BAD;
+	ipa_ctx->cmd_prod_ep_id = IPA_EP_ID_BAD;
+	ipa_ctx->lan_cons_ep_id = IPA_EP_ID_BAD;
 
 	/* Proceed to real initialization */
 	result = ipa_pre_init();
@@ -1414,8 +1414,8 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	return 0;	/* Success */
 
 err_clear_dev:
-	ipa_ctx->clnt_hdl_lan_cons = 0;
-	ipa_ctx->clnt_hdl_cmd = 0;
+	ipa_ctx->lan_cons_ep_id = 0;
+	ipa_ctx->cmd_prod_ep_id = 0;
 	ipa_ctx->dev = NULL;
 	ipahal_exit();
 err_dma_exit:
@@ -1447,13 +1447,13 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 
 	ipa_ctx->ipa_phys = 0;
 
-	if (ipa_ctx->clnt_hdl_lan_cons != IPA_CLNT_HDL_BAD) {
-		ipa_ep_free(ipa_ctx->clnt_hdl_lan_cons);
-		ipa_ctx->clnt_hdl_lan_cons = IPA_CLNT_HDL_BAD;
+	if (ipa_ctx->lan_cons_ep_id != IPA_EP_ID_BAD) {
+		ipa_ep_free(ipa_ctx->lan_cons_ep_id);
+		ipa_ctx->lan_cons_ep_id = IPA_EP_ID_BAD;
 	}
-	if (ipa_ctx->clnt_hdl_cmd != IPA_CLNT_HDL_BAD) {
-		ipa_ep_free(ipa_ctx->clnt_hdl_cmd);
-		ipa_ctx->clnt_hdl_cmd = IPA_CLNT_HDL_BAD;
+	if (ipa_ctx->cmd_prod_ep_id != IPA_EP_ID_BAD) {
+		ipa_ep_free(ipa_ctx->cmd_prod_ep_id);
+		ipa_ctx->cmd_prod_ep_id = IPA_EP_ID_BAD;
 	}
 	ipa_ctx->ipa_irq = 0;	/* XXX Need to de-initialize? */
 	ipa_ctx->filter_bitmap = 0;

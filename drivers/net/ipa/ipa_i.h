@@ -36,8 +36,8 @@
 
 #define IPA_MAX_STATUS_STAT_NUM		30
 
-/* An explicitly bad client handle value */
-#define IPA_CLNT_HDL_BAD		(~(u32)0)
+/* An explicitly bad endpoint index value */
+#define IPA_EP_ID_BAD			(~(u32)0)
 
 #define IPA_MEM_CANARY_VAL		0xdeadbeef
 
@@ -408,8 +408,8 @@ struct ipa_context {
 	struct ipa_active_clients ipa_active_clients;
 	struct workqueue_struct *power_mgmt_wq;
 	struct ipa_transport_pm transport_pm;
-	u32 clnt_hdl_cmd;
-	u32 clnt_hdl_lan_cons;
+	u32 cmd_prod_ep_id;
+	u32 lan_cons_ep_id;
 	struct icc_path *memory_path;
 	struct icc_path *imem_path;
 	struct icc_path *config_path;
