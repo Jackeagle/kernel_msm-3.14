@@ -1768,7 +1768,7 @@ void ipa_ep_free(u32 ipa_ep_id)
 	ep->allocated = false;
 }
 
-/** ipa_setup_sys_pipe() - Setup an IPA GPI endpoint and perform
+/** ipa_ep_setup() - Setup an IPA GPI endpoint and perform
  * IPA EP configuration
  * @client:	[in] handle assigned by IPA to client
  * @sys_in:	[in] input needed to setup the endpoint and configure EP
@@ -1780,8 +1780,8 @@ void ipa_ep_free(u32 ipa_ep_id)
  *
  * Returns:	0 on success, negative on failure
  */
-int ipa_setup_sys_pipe(u32 ipa_ep_id, u32 chan_count, u32 rx_buffer_size,
-		       struct ipa_sys_connect_params *sys_in)
+int ipa_ep_setup(u32 ipa_ep_id, u32 chan_count, u32 rx_buffer_size,
+		 struct ipa_sys_connect_params *sys_in)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
 	int ret;
@@ -1828,12 +1828,12 @@ err_client_remove:
 	return ret;
 }
 
-/** ipa_teardown_sys_pipe() - Teardown the GPI pipe and cleanup IPA EP
- * @ep_id:	[in] the endpiont id obtained from ipa_setup_sys_pipe
+/** ipa_ep_teardown() - Teardown the GPI pipe and cleanup IPA EP
+ * @ep_id:	[in] the endpiont id obtained from ipa_ep_setup()
  *
  * Returns:	0 on success, negative on failure
  */
-void ipa_teardown_sys_pipe(u32 ep_id)
+void ipa_ep_teardown(u32 ep_id)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 	int empty;

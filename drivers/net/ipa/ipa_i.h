@@ -482,10 +482,10 @@ void ipa_ep_free(u32 ipa_ep_id);
 
 void ipa_no_intr_init(u32 prod_ep_id);
 
-int ipa_setup_sys_pipe(u32 client_hdl, u32 chan_count, u32 rx_buffer_size,
-		       struct ipa_sys_connect_params *sys_in);
+int ipa_ep_setup(u32 client_hdl, u32 chan_count, u32 rx_buffer_size,
+		 struct ipa_sys_connect_params *sys_in);
 
-void ipa_teardown_sys_pipe(u32 ep_id);
+void ipa_ep_teardown(u32 ep_id);
 
 void ipa_rx_switch_to_poll_mode(struct ipa_sys_context *sys);
 
@@ -550,8 +550,8 @@ u32 ipa_get_ep_count(void);
 int ipa_ap_suspend(struct device *dev);
 int ipa_ap_resume(struct device *dev);
 void ipa_set_resource_groups_min_max_limits(void);
-void ipa_suspend_apps_pipes(void);
-void ipa_resume_apps_pipes(void);
+void ipa_ep_suspend_all(void);
+void ipa_ep_resume_all(void);
 void ipa_inc_acquire_wakelock(void);
 void ipa_dec_release_wakelock(void);
 int ipa_rx_poll(u32 ep_id, int budget);

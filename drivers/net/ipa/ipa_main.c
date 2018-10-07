@@ -188,7 +188,7 @@ static int setup_apps_cmd_prod_pipe(void)
 	ipa_endp_init_seq_prod(ep_id);
 	ipa_endp_init_deaggr_prod(ep_id);
 
-	ret = ipa_setup_sys_pipe(ep_id, chan_count, 0, &sys_in);
+	ret = ipa_ep_setup(ep_id, chan_count, 0, &sys_in);
 	if (ret)
 		ipa_ep_free(ep_id);
 	else
@@ -559,7 +559,7 @@ static int setup_apps_lan_cons_pipe(void)
 	sys_in.priv = NULL;
 	sys_in.napi_enabled = false;
 
-	ret = ipa_setup_sys_pipe(ep_id, chan_count, rx_buffer_size, &sys_in);
+	ret = ipa_ep_setup(ep_id, chan_count, rx_buffer_size, &sys_in);
 	if (ret)
 		ipa_ep_free(ep_id);
 	else
@@ -622,7 +622,7 @@ static int ipa_setup_apps_pipes(void)
 	return 0;
 
 fail_flt_hash_tuple:
-	ipa_teardown_sys_pipe(ipa_ctx->cmd_prod_ep_id);
+	ipa_ep_teardown(ipa_ctx->cmd_prod_ep_id);
 	ipa_ctx->cmd_prod_ep_id = IPA_EP_ID_BAD;
 
 	return result;
@@ -667,7 +667,7 @@ static void ipa_client_add_first(void)
 	/* A reference might have been added while awaiting the mutex. */
 	if (!atomic_inc_not_zero(&ipa_ctx->ipa_active_clients.cnt)) {
 		ipa_enable_clks();
-		ipa_resume_apps_pipes();
+		ipa_ep_resume_all();
 		atomic_inc(&ipa_ctx->ipa_active_clients.cnt);
 	} else {
 		ipa_assert(atomic_read(&ipa_ctx->ipa_active_clients.cnt) > 1);
@@ -718,7 +718,7 @@ static void ipa_client_remove_final(void)
 
 	/* A reference might have been removed while awaiting the mutex. */
 	if (!atomic_dec_return(&ipa_ctx->ipa_active_clients.cnt)) {
-		ipa_suspend_apps_pipes();
+		ipa_ep_suspend_all();
 		ipa_disable_clks();
 	}
 

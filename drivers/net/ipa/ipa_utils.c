@@ -933,7 +933,7 @@ static void suspend_consumer_pipe(enum ipa_client_type client)
 	ipa_gsi_poll_after_suspend(ep);
 }
 
-void ipa_suspend_apps_pipes(void)
+void ipa_ep_suspend_all(void)
 {
 	suspend_consumer_pipe(IPA_CLIENT_APPS_WAN_CONS);
 	suspend_consumer_pipe(IPA_CLIENT_APPS_LAN_CONS);
@@ -952,7 +952,7 @@ static void resume_consumer_pipe(enum ipa_client_type client)
 		gsi_channel_intr_enable(ipa_ctx->gsi, ep->gsi_chan_hdl);
 }
 
-void ipa_resume_apps_pipes(void)
+void ipa_ep_resume_all(void)
 {
 	resume_consumer_pipe(IPA_CLIENT_APPS_LAN_CONS);
 	resume_consumer_pipe(IPA_CLIENT_APPS_WAN_CONS);

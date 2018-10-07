@@ -310,7 +310,7 @@ static int handle_ingress_format(struct net_device *dev,
 
 	ipa_ctx->ipa_client_apps_wan_cons_agg_gro = aggr_active;
 
-	ret = ipa_setup_sys_pipe(ep_id, chan_count, rx_buffer_size, wan_cfg);
+	ret = ipa_ep_setup(ep_id, chan_count, rx_buffer_size, wan_cfg);
 	if (ret)
 		ipa_ep_free(ep_id);
 	else
@@ -389,7 +389,7 @@ static int handle_egress_format(struct net_device *dev,
 	/* Use a deferred interrupting no-op to reduce completion interrupts */
 	ipa_no_intr_init(ep_id);
 
-	ret = ipa_setup_sys_pipe(ep_id, chan_count, 0, wan_cfg);
+	ret = ipa_ep_setup(ep_id, chan_count, 0, wan_cfg);
 	if (ret)
 		ipa_ep_free(ep_id);
 	else
@@ -648,12 +648,12 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 	ipa_info("rmnet_ipa started deinitialization\n");
 	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
 	if (rmnet_ipa_ctx->wan_cons_ep_id != IPA_EP_ID_BAD) {
-		ipa_teardown_sys_pipe(rmnet_ipa_ctx->wan_cons_ep_id);
+		ipa_ep_teardown(rmnet_ipa_ctx->wan_cons_ep_id);
 		rmnet_ipa_ctx->wan_cons_ep_id = IPA_EP_ID_BAD;
 	}
 
 	if (rmnet_ipa_ctx->wan_prod_ep_id != IPA_EP_ID_BAD) {
-		ipa_teardown_sys_pipe(rmnet_ipa_ctx->wan_prod_ep_id);
+		ipa_ep_teardown(rmnet_ipa_ctx->wan_prod_ep_id);
 		rmnet_ipa_ctx->wan_prod_ep_id = IPA_EP_ID_BAD;
 	}
 
