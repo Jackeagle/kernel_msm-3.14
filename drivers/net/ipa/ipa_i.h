@@ -214,17 +214,10 @@ struct ipa_sys_connect_params {
  * @client: EP client type
  * @gsi_chan_hdl: EP's GSI channel handle
  * @gsi_evt_ring_hdl: EP's GSI channel event ring handle
- * @chan_scratch: EP's GSI channel scratch info
- * @cfg: EP cionfiguration
- * @dst_pipe_index: destination pipe index
- * @rt_tbl_idx: routing table index
  * @priv: user provided information which will forwarded once the user is
  *	  notified for new data avail
  * @client_notify: user provided CB for EP events notification, the event is
  *		   data revived.
- * @disconnect_in_progress: Indicates client disconnect in progress.
- * @qmi_request_sent: Indicates whether QMI request to enable clear data path
- *					request is sent or not.
  * @napi_enabled: when true, IPA call client callback to start polling
  */
 struct ipa_ep_context {
@@ -245,18 +238,10 @@ struct ipa_ep_context {
 	struct ipa_reg_endp_init_hdr_metadata_mask metadata_mask;
 	struct ipa_reg_endp_status status;
 
-	u32 dst_pipe_index;
-	u32 rt_tbl_idx;
 	void *priv;
 	void (*client_notify)(void *priv, enum ipa_dp_evt_type evt,
 			      unsigned long data);
-	u32 dflt_flt4_rule_hdl;
-	u32 dflt_flt6_rule_hdl;
-	u32 uc_offload_state;
-	bool disconnect_in_progress;
-	u32 qmi_request_sent;
 	bool napi_enabled;
-	u32 eot_in_poll_err;
 	struct ipa_sys_context *sys;
 };
 
