@@ -140,14 +140,17 @@
 #define IPA_MEM_V6_FLT_HASH_OFST		0x388
 #define IPA_MEM_V6_FLT_NHASH_OFST		0x408
 
-#define IPA_MEM_V4_RT_NUM_INDEX			0xf
+/* The maximum number of routing table entries (IPv4, IPv6; hashed and not) */
+#define IPA_MEM_RT_COUNT			15
+
+#define IPA_MEM_V4_RT_NUM_INDEX			IPA_MEM_RT_COUNT
 #define IPA_MEM_V4_MODEM_RT_INDEX_LO		0x0
 #define IPA_MEM_V4_MODEM_RT_INDEX_HI		0x7
 #define IPA_MEM_V4_RT_HASH_OFST			0x488
 #define IPA_MEM_V4_RT_HASH_SIZE			0x78
 #define IPA_MEM_V4_RT_NHASH_OFST		0x508
 #define IPA_MEM_V4_RT_NHASH_SIZE		0x78
-#define IPA_MEM_V6_RT_NUM_INDEX			0xf
+#define IPA_MEM_V6_RT_NUM_INDEX			IPA_MEM_RT_COUNT
 #define IPA_MEM_V6_MODEM_RT_INDEX_LO		0x0
 #define IPA_MEM_V6_MODEM_RT_INDEX_HI		0x7
 #define IPA_MEM_V6_RT_HASH_OFST			0x588
