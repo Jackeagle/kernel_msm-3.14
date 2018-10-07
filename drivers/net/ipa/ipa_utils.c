@@ -485,16 +485,6 @@ u32 ipa_get_ep_mapping(enum ipa_client_type client)
 	return ep_info->ep_id;
 }
 
-/** ipa_get_client_mapping() - provide client mapping
- * @ep_id: IPA end-point number
- *
- * Return value: client mapping
- */
-enum ipa_client_type ipa_get_client_mapping(u32 ep_id)
-{
-	return ipa_ctx->ep[ep_id].client;
-}
-
 enum ipa_seq_type ipa_endp_seq_type(u32 ep_id)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];

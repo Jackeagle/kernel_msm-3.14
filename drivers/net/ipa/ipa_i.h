@@ -484,8 +484,6 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt);
 void ipa_proxy_clk_vote(void);
 void ipa_proxy_clk_unvote(void);
 
-enum ipa_client_type ipa_get_client_mapping(u32 ep_id);
-
 u32 ipa_filter_bitmap_init(void);
 
 /* internal functions */
