@@ -850,7 +850,7 @@ void ipa_proxy_clk_vote(void)
 	}
 }
 
-u32 ipa_get_num_pipes(void)
+u32 ipa_get_ep_count(void)
 {
 	return ipa_read_reg(IPA_ENABLED_PIPES);
 }

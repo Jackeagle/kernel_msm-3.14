@@ -199,7 +199,7 @@ ipa_wq_write_done_status(u32 src_ep_id, struct ipa_tx_pkt_wrapper *tx_pkt)
 {
 	struct ipa_sys_context *sys;
 
-	WARN_ON(src_ep_id >= ipa_ctx->ipa_num_pipes);
+	WARN_ON(src_ep_id >= ipa_ctx->ep_count);
 
 	if (!ipa_ctx->ep[src_ep_id].status.status_en)
 		return;
@@ -1291,8 +1291,8 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 			continue;
 		}
 
-		if (status.endp_dest_idx >= ipa_ctx->ipa_num_pipes ||
-		    status.endp_src_idx >= ipa_ctx->ipa_num_pipes ||
+		if (status.endp_dest_idx >= ipa_ctx->ep_count ||
+		    status.endp_src_idx >= ipa_ctx->ep_count ||
 		    status.pkt_len > IPA_GENERIC_AGGR_BYTE_LIMIT * 1024) {
 			ipa_err("status fields invalid\n");
 			WARN_ON(1);
@@ -1382,7 +1382,7 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 	src_ep_id = status.endp_src_idx;
 	metadata = status.metadata;
 	ep = &ipa_ctx->ep[src_ep_id];
-	if (src_ep_id >= ipa_ctx->ipa_num_pipes || !ep->allocated ||
+	if (src_ep_id >= ipa_ctx->ep_count || !ep->allocated ||
 	    !ep->client_notify) {
 		ipa_err("drop endpoint=%u allocated=%s client_notify=%p\n",
 			src_ep_id, ep->allocated ? "true" : "false",

@@ -1106,8 +1106,8 @@ static int ipa_pre_init(void)
 
 	ipa_debug("IPA HW initialization sequence completed");
 
-	ipa_ctx->ipa_num_pipes = ipa_get_num_pipes();
-	ipa_assert(ipa_ctx->ipa_num_pipes <= IPA_MAX_NUM_PIPES);
+	ipa_ctx->ep_count = ipa_get_ep_count();
+	ipa_assert(ipa_ctx->ep_count <= IPA_EP_COUNT_MAX);
 
 	ipa_sram_settings_read();
 	ipa_debug("SRAM, size: 0x%x, restricted bytes: 0x%x\n",
@@ -1474,12 +1474,12 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
  */
 int ipa_ap_suspend(struct device *dev)
 {
-	int i;
+	u32 i;
 
 	ipa_debug("Enter...\n");
 
 	/* In case there is a tx/rx handler in polling mode fail to suspend */
-	for (i = 0; i < ipa_ctx->ipa_num_pipes; i++) {
+	for (i = 0; i < ipa_ctx->ep_count; i++) {
 		if (ipa_ctx->ep[i].sys && ipa_ep_polling(&ipa_ctx->ep[i])) {
 			ipa_err("EP %d is in polling state, do not suspend\n",
 				i);

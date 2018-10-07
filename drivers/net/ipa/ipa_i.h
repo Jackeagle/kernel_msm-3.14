@@ -29,8 +29,8 @@
 
 #define IPA_MTU			1500
 
-#define IPA_MAX_NUM_PIPES		31
-#define IPA_LAN_RX_HEADER_LENGTH	2
+#define IPA_EP_COUNT_MAX		31
+#define IPA_LAN_RX_HEADER_LENGTH	0
 #define IPA_DL_CHECKSUM_LENGTH		8
 #define IPA_GENERIC_RX_POOL_SZ		192
 
@@ -387,7 +387,7 @@ struct ipa_dma_task_info {
  * @wcstats: wlan common buffer stats
  * @uc_ctx: uC interface context
  * @uc_wdi_ctx: WDI specific fields for uC interface
- * @ipa_num_pipes: The number of endpoints used by IPA HW
+ * @ep_count: The number of endpoints used by IPA HW
  * @ipa_client_apps_wan_cons_agg_gro: RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA
  * @w_lock: Indicates the wakeup source.
  * @wakelock_ref_cnt: Indicates the number of times wakelock is acquired
@@ -401,7 +401,7 @@ struct ipa_context {
 	struct gsi *gsi;
 	struct device *dev;
 
-	struct ipa_ep_context ep[IPA_MAX_NUM_PIPES];
+	struct ipa_ep_context ep[IPA_EP_COUNT_MAX];
 	struct ipa_dp *dp;
 	u32 smem_size;
 	u16 smem_offset;
@@ -414,7 +414,7 @@ struct ipa_context {
 	struct icc_path *imem_path;
 	struct icc_path *config_path;
 	bool q6_proxy_clk_vote_valid;
-	u32 ipa_num_pipes;
+	u32 ep_count;
 
 	struct ipa_uc_ctx *uc_ctx;
 
@@ -546,7 +546,7 @@ void ipa_uc_panic_notifier(void);
 
 const struct ipa_gsi_ep_config *ipa_get_gsi_ep_info
 	(enum ipa_client_type client);
-u32 ipa_get_num_pipes(void);
+u32 ipa_get_ep_count(void);
 int ipa_ap_suspend(struct device *dev);
 int ipa_ap_resume(struct device *dev);
 void ipa_set_resource_groups_min_max_limits(void);
