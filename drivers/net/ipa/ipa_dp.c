@@ -1828,7 +1828,7 @@ err_client_remove:
 	return ret;
 }
 
-/** ipa_ep_teardown() - Teardown the GPI pipe and cleanup IPA EP
+/** ipa_ep_teardown() - Teardown an endpoint
  * @ep_id:	[in] the endpiont id obtained from ipa_ep_setup()
  *
  * Returns:	0 on success, negative on failure

@@ -899,7 +899,7 @@ static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
 }
 
 /* Suspend a consumer endpoint */
-static void suspend_consumer_pipe(enum ipa_client_type client)
+static void ipa_ep_cons_suspend(enum ipa_client_type client)
 {
 	struct ipa_reg_endp_init_ctrl init_ctrl;
 	u32 ep_id = ipa_get_ep_mapping(client);
@@ -919,12 +919,12 @@ static void suspend_consumer_pipe(enum ipa_client_type client)
 
 void ipa_ep_suspend_all(void)
 {
-	suspend_consumer_pipe(IPA_CLIENT_APPS_WAN_CONS);
-	suspend_consumer_pipe(IPA_CLIENT_APPS_LAN_CONS);
+	ipa_ep_cons_suspend(IPA_CLIENT_APPS_WAN_CONS);
+	ipa_ep_cons_suspend(IPA_CLIENT_APPS_LAN_CONS);
 }
 
 /* Resume a suspended consumer endpoint */
-static void resume_consumer_pipe(enum ipa_client_type client)
+static void ipa_ep_cons_resume(enum ipa_client_type client)
 {
 	struct ipa_reg_endp_init_ctrl init_ctrl;
 	u32 ep_id = ipa_get_ep_mapping(client);
@@ -939,8 +939,8 @@ static void resume_consumer_pipe(enum ipa_client_type client)
 
 void ipa_ep_resume_all(void)
 {
-	resume_consumer_pipe(IPA_CLIENT_APPS_LAN_CONS);
-	resume_consumer_pipe(IPA_CLIENT_APPS_WAN_CONS);
+	ipa_ep_cons_resume(IPA_CLIENT_APPS_LAN_CONS);
+	ipa_ep_cons_resume(IPA_CLIENT_APPS_WAN_CONS);
 }
 
 /** ipa_cfg_route() - configure IPA route

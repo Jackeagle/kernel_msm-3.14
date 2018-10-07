@@ -72,7 +72,7 @@ struct rmnet_ipa_context {
 	u32 mux_id[MUX_CHANNEL_MAX];
 	u32 wan_prod_ep_id;
 	u32 wan_cons_ep_id;
-	struct mutex pipe_setup_mutex;		/* endpoint setup/teardown */
+	struct mutex ep_setup_mutex;		/* endpoint setup/teardown */
 	struct ipa_sys_connect_params wan_prod_cfg;
 	struct ipa_sys_connect_params wan_cons_cfg;
 };
@@ -283,7 +283,7 @@ static int handle_ingress_format(struct net_device *dev,
 	 */
 	aggr_size = (rx_buffer_size - IPA_MTU) / SZ_1K;
 
-	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
+	mutex_lock(&rmnet_ipa_ctx->ep_setup_mutex);
 
 	if (rmnet_ipa_ctx->wan_cons_ep_id != IPA_EP_ID_BAD) {
 		ret = -EBUSY;
@@ -316,7 +316,7 @@ static int handle_ingress_format(struct net_device *dev,
 	else
 		rmnet_ipa_ctx->wan_cons_ep_id = ep_id;
 out_unlock:
-	mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
+	mutex_unlock(&rmnet_ipa_ctx->ep_setup_mutex);
 
 	return ret;
 }
@@ -352,7 +352,7 @@ static int handle_egress_format(struct net_device *dev,
 		header_align = ilog2(sizeof(u32));
 	}
 
-	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
+	mutex_lock(&rmnet_ipa_ctx->ep_setup_mutex);
 
 	if (rmnet_ipa_ctx->wan_prod_ep_id != IPA_EP_ID_BAD) {
 		ret = -EBUSY;
@@ -396,7 +396,7 @@ static int handle_egress_format(struct net_device *dev,
 		rmnet_ipa_ctx->wan_prod_ep_id = ep_id;
 
 out_unlock:
-	mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
+	mutex_unlock(&rmnet_ipa_ctx->ep_setup_mutex);
 
 	return ret;
 }
@@ -577,7 +577,7 @@ static int ipa_wwan_probe(struct platform_device *pdev)
 	struct net_device *dev;
 	struct ipa_wwan_private *wwan_ptr;
 
-	mutex_init(&rmnet_ipa_ctx->pipe_setup_mutex);
+	mutex_init(&rmnet_ipa_ctx->ep_setup_mutex);
 	mutex_init(&rmnet_ipa_ctx->mux_id_mutex);
 
 	/* Mark client handles bad until we initialize them */
@@ -646,7 +646,7 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 	struct ipa_wwan_private *wwan_ptr = netdev_priv(rmnet_ipa_ctx->dev);
 
 	ipa_info("rmnet_ipa started deinitialization\n");
-	mutex_lock(&rmnet_ipa_ctx->pipe_setup_mutex);
+	mutex_lock(&rmnet_ipa_ctx->ep_setup_mutex);
 	if (rmnet_ipa_ctx->wan_cons_ep_id != IPA_EP_ID_BAD) {
 		ipa_ep_teardown(rmnet_ipa_ctx->wan_cons_ep_id);
 		rmnet_ipa_ctx->wan_cons_ep_id = IPA_EP_ID_BAD;
@@ -658,7 +658,7 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 	}
 
 	netif_napi_del(&wwan_ptr->napi);
-	mutex_unlock(&rmnet_ipa_ctx->pipe_setup_mutex);
+	mutex_unlock(&rmnet_ipa_ctx->ep_setup_mutex);
 	unregister_netdev(rmnet_ipa_ctx->dev);
 
 	if (rmnet_ipa_ctx->dev)
@@ -666,7 +666,7 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 	rmnet_ipa_ctx->dev = NULL;
 
 	mutex_destroy(&rmnet_ipa_ctx->mux_id_mutex);
-	mutex_destroy(&rmnet_ipa_ctx->pipe_setup_mutex);
+	mutex_destroy(&rmnet_ipa_ctx->ep_setup_mutex);
 
 	initialized = false;
 	ipa_info("rmnet_ipa completed deinitialization\n");

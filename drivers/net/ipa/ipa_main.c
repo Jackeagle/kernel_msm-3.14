@@ -167,7 +167,7 @@ out_client_remove:
 	return rc;
 }
 
-static int setup_apps_cmd_prod_pipe(void)
+static int ipa_ep_apps_cmd_prod_setup(void)
 {
 	struct ipa_sys_connect_params sys_in = { };
 	enum ipa_client_type client = IPA_CLIENT_APPS_CMD_PROD;
@@ -503,7 +503,7 @@ static void ipa_setup_rt_hash_tuple(void)
 	}
 }
 
-static int setup_apps_lan_cons_pipe(void)
+static int ipa_ep_apps_lan_cons_setup(void)
 {
 	struct ipa_sys_connect_params sys_in = { };
 	enum ipa_client_type client = IPA_CLIENT_APPS_LAN_CONS;
@@ -568,12 +568,12 @@ static int setup_apps_lan_cons_pipe(void)
 	return ret;
 }
 
-static int ipa_setup_apps_pipes(void)
+static int ipa_ep_apps_setup(void)
 {
 	int result;
 
 	/* CMD OUT (AP->IPA) */
-	result = setup_apps_cmd_prod_pipe();
+	result = ipa_ep_apps_cmd_prod_setup();
 	if (result < 0)
 		return result;
 
@@ -613,7 +613,7 @@ static int ipa_setup_apps_pipes(void)
 	 * of exceptions (unroutable packets, but other events as well)
 	 * through this endpoint.
 	 */
-	result = setup_apps_lan_cons_pipe();
+	result = ipa_ep_apps_lan_cons_setup();
 	if (result < 0)
 		goto fail_flt_hash_tuple;
 
@@ -965,7 +965,7 @@ static void ipa_post_init(struct work_struct *unused)
 	ipa_debug("IPA gsi is registered\n");
 
 	/* setup the AP-IPA endpoints */
-	if (ipa_setup_apps_pipes()) {
+	if (ipa_ep_apps_setup()) {
 		ipa_err(":failed to setup IPA-Apps endpoints\n");
 		gsi_deregister_device(ipa_ctx->gsi);
 
