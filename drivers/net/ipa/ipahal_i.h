@@ -49,19 +49,6 @@ struct ipa_imm_cmd_hw_hdr_init_local {
 	    rsvd		: 4;
 };
 
-/* struct ipa_imm_cmd_hw_ip_packet_init - IP_PACKET_INIT command payload
- *  in H/W format.
- * Configuration for specific IP pkt. Shall be called prior to an IP pkt
- *  data. Pkt will not go through IP pkt processing.
- * @destination_pipe_index: Destination pipe index  (in case routing
- *  is enabled, this field will overwrite the rt  rule)
- * @rsvd: reserved
- */
-struct ipa_imm_cmd_hw_ip_packet_init {
-	u64 destination_pipe_index	: 5,
-	    rsv1			: 59;
-};
-
 /* struct ipa_imm_cmd_hw_dma_shared_mem - DMA_SHARED_MEM command payload
  *  in H/W format.
  * Perform mem copy into or out of the SW area of IPA local mem
