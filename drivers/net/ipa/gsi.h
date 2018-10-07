@@ -19,14 +19,14 @@
 
 /** struct ipa_gsi_ep_config - IPA GSI endpoint configurations
  *
- * @ipa_ep_num: IPA EP pipe number
+ * @ep_id: IPA endpoint identifier
  * @ipa_gsi_chan_num: GSI channel number
  * @ipa_if_tlv: number of IPA_IF TLV
  * @ipa_if_aos: number of IPA_IF AOS
  * @ee: Execution environment
  */
 struct ipa_gsi_ep_config {
-	u32 ipa_ep_num;
+	u32 ep_id;
 	u32 ipa_gsi_chan_num;
 	u32 ipa_if_tlv;
 	u32 ipa_if_aos;

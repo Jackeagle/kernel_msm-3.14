@@ -112,7 +112,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 7,
+			.ep_id			= 7,
 			.ipa_gsi_chan_num	= 1,
 			.ipa_if_tlv		= 8,
 			.ipa_if_aos		= 16,
@@ -124,7 +124,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 0,
+			.ep_id			= 0,
 			.ipa_gsi_chan_num	= 0,
 			.ipa_if_tlv		= 8,
 			.ipa_if_aos		= 16,
@@ -136,7 +136,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_PKT_PROCESS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 8,
+			.ep_id			= 8,
 			.ipa_gsi_chan_num	= 7,
 			.ipa_if_tlv		= 8,
 			.ipa_if_aos		= 16,
@@ -148,7 +148,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 2,
+			.ep_id			= 2,
 			.ipa_gsi_chan_num	= 3,
 			.ipa_if_tlv		= 16,
 			.ipa_if_aos		= 32,
@@ -160,7 +160,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_DMA_ONLY,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 5,
+			.ep_id			= 5,
 			.ipa_gsi_chan_num	= 4,
 			.ipa_if_tlv		= 20,
 			.ipa_if_aos		= 23,
@@ -172,7 +172,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_PKT_PROCESS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 3,
+			.ep_id			= 3,
 			.ipa_gsi_chan_num	= 0,
 			.ipa_if_tlv		= 16,
 			.ipa_if_aos		= 32,
@@ -184,7 +184,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_PKT_PROCESS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 6,
+			.ep_id			= 6,
 			.ipa_gsi_chan_num	= 4,
 			.ipa_if_tlv		= 12,
 			.ipa_if_aos		= 30,
@@ -196,7 +196,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_PKT_PROCESS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 4,
+			.ep_id			= 4,
 			.ipa_gsi_chan_num	= 1,
 			.ipa_if_tlv		= 20,
 			.ipa_if_aos		= 23,
@@ -208,7 +208,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 14,
+			.ep_id			= 14,
 			.ipa_gsi_chan_num	= 5,
 			.ipa_if_tlv		= 8,
 			.ipa_if_aos		= 8,
@@ -220,7 +220,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 15,
+			.ep_id			= 15,
 			.ipa_gsi_chan_num	= 2,
 			.ipa_if_tlv		= 8,
 			.ipa_if_aos		= 8,
@@ -233,7 +233,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 0,
+			.ep_id			= 0,
 			.ipa_gsi_chan_num	= 0,
 			.ipa_if_tlv		= 8,
 			.ipa_if_aos		= 16,
@@ -245,7 +245,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 0,
+			.ep_id			= 0,
 			.ipa_gsi_chan_num	= 0,
 			.ipa_if_tlv		= 8,
 			.ipa_if_aos		= 15,
@@ -257,7 +257,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 2,
+			.ep_id			= 2,
 			.ipa_gsi_chan_num	= 3,
 			.ipa_if_tlv		= 16,
 			.ipa_if_aos		= 32,
@@ -269,7 +269,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 4,
+			.ep_id			= 4,
 			.ipa_gsi_chan_num	= 1,
 			.ipa_if_tlv		= 20,
 			.ipa_if_aos		= 23,
@@ -281,7 +281,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 1,
+			.ep_id			= 1,
 			.ipa_gsi_chan_num	= 0,
 			.ipa_if_tlv		= 8,
 			.ipa_if_aos		= 16,
@@ -293,7 +293,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 16,
+			.ep_id			= 16,
 			.ipa_gsi_chan_num	= 3,
 			.ipa_if_tlv		= 8,
 			.ipa_if_aos		= 8,
@@ -305,7 +305,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 18,
+			.ep_id			= 18,
 			.ipa_gsi_chan_num	= 9,
 			.ipa_if_tlv		= 8,
 			.ipa_if_aos		= 8,
@@ -317,7 +317,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 19,
+			.ep_id			= 19,
 			.ipa_gsi_chan_num	= 10,
 			.ipa_if_tlv		= 8,
 			.ipa_if_aos		= 8,
@@ -329,7 +329,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 17,
+			.ep_id			= 17,
 			.ipa_gsi_chan_num	= 8,
 			.ipa_if_tlv		= 8,
 			.ipa_if_aos		= 8,
@@ -341,7 +341,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 11,
+			.ep_id			= 11,
 			.ipa_gsi_chan_num	= 2,
 			.ipa_if_tlv		= 4,
 			.ipa_if_aos		= 6,
@@ -353,7 +353,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 9,
+			.ep_id			= 9,
 			.ipa_gsi_chan_num	= 5,
 			.ipa_if_tlv		= 8,
 			.ipa_if_aos		= 12,
@@ -365,7 +365,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 10,
+			.ep_id			= 10,
 			.ipa_gsi_chan_num	= 6,
 			.ipa_if_tlv		= 8,
 			.ipa_if_aos		= 12,
@@ -377,7 +377,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 13,
+			.ep_id			= 13,
 			.ipa_gsi_chan_num	= 3,
 			.ipa_if_tlv		= 8,
 			.ipa_if_aos		= 12,
@@ -389,7 +389,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 12,
+			.ep_id			= 12,
 			.ipa_gsi_chan_num	= 2,
 			.ipa_if_tlv		= 8,
 			.ipa_if_aos		= 12,
@@ -402,7 +402,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 18,
+			.ep_id			= 18,
 			.ipa_gsi_chan_num	= 9,
 			.ipa_if_tlv		= 8,
 			.ipa_if_aos		= 8,
@@ -414,7 +414,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 19,
+			.ep_id			= 19,
 			.ipa_gsi_chan_num	= 10,
 			.ipa_if_tlv		= 8,
 			.ipa_if_aos		= 8,
@@ -426,7 +426,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 11,
+			.ep_id			= 11,
 			.ipa_gsi_chan_num	= 2,
 			.ipa_if_tlv		= 4,
 			.ipa_if_aos		= 6,
@@ -439,7 +439,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
-			.ipa_ep_num		= 31,
+			.ep_id			= 31,
 			.ipa_gsi_chan_num	= 31,
 			.ipa_if_tlv		= 8,
 			.ipa_if_aos		= 8,
@@ -482,14 +482,14 @@ u32 ipa_get_ep_mapping(enum ipa_client_type client)
 
 	ipa_assert(ep_info);
 
-	return ep_info->ipa_ep_num;
+	return ep_info->ep_id;
 }
 
 struct ipa_ep_context *ipa_get_ep_context(enum ipa_client_type client)
 {
-	u32 ipa_ep_id = ipa_get_ep_mapping(client);
+	u32 ep_id = ipa_get_ep_mapping(client);
 
-	return &ipa_ctx->ep[ipa_ep_id];
+	return &ipa_ctx->ep[ep_id];
 }
 
 /** ipa_get_client_mapping() - provide client mapping
@@ -502,9 +502,9 @@ enum ipa_client_type ipa_get_client_mapping(u32 ep_id)
 	return ipa_ctx->ep[ep_id].client;
 }
 
-enum ipa_seq_type ipa_endp_seq_type(u32 ipa_ep_id)
+enum ipa_seq_type ipa_endp_seq_type(u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
 	return ep_configuration(ep->client)->seq_type;
 }
@@ -554,45 +554,45 @@ u32 ipa_filter_bitmap_init(void)
 		ep_config = ep_configuration(cl);
 		if (!ep_config->support_flt)
 			continue;
-		filter_bitmap |= BIT(ep_config->ipa_gsi_ep_info.ipa_ep_num);
+		filter_bitmap |= BIT(ep_config->ipa_gsi_ep_info.ep_id);
 	}
 
 	return filter_bitmap;
 }
 
 /* In IPAv3 only endpoints 0-3 can be configured to deaggregation */
-bool ipa_endp_aggr_support(u32 ipa_ep_id)
+bool ipa_endp_aggr_support(u32 ep_id)
 {
-	return ipa_ep_id < 4;
+	return ep_id < 4;
 }
 
 /** ipa_endp_init_hdr_write()
  *
- * @ipa_ep_id:	endpoint whose header config register should be written
+ * @ep_id:	endpoint whose header config register should be written
  */
-static void ipa_endp_init_hdr_write(u32 ipa_ep_id)
+static void ipa_endp_init_hdr_write(u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_N, ipa_ep_id, &ep->init_hdr);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_N, ep_id, &ep->init_hdr);
 }
 
 /** ipa_endp_init_hdr_ext_write() - write endpoint extended header register
  *
- * @ipa_ep_id:	endpoint whose register should be written
+ * @ep_id:	endpoint whose register should be written
  */
 static void
-ipa_endp_init_hdr_ext_write(u32 ipa_ep_id)
+ipa_endp_init_hdr_ext_write(u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_N, ipa_ep_id,
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_N, ep_id,
 			       &ep->hdr_ext);
 }
 
 /** ipa_endp_init_aggr_write() write endpoint aggregation register
  *
- * @ipa_ep_id:	endpoint whose aggregation config register should be written
+ * @ep_id:	endpoint whose aggregation config register should be written
  */
 static void ipa_endp_init_aggr_write(u32 ep_id)
 {
@@ -603,71 +603,71 @@ static void ipa_endp_init_aggr_write(u32 ep_id)
 
 /** ipa_endp_init_cfg_write() - write endpoint configuration register
  *
- * @ipa_ep_id:	endpoint whose configuration register should be written
+ * @ep_id:	endpoint whose configuration register should be written
  */
-static void ipa_endp_init_cfg_write(u32 ipa_ep_id)
+static void ipa_endp_init_cfg_write(u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_CFG_N, ipa_ep_id, &ep->init_cfg);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_CFG_N, ep_id, &ep->init_cfg);
 }
 
 /** ipa_endp_init_mode_write() - write endpoint mode register
  *
- * @ipa_ep_id:	endpoint whose register should be written
+ * @ep_id:	endpoint whose register should be written
  */
-static void ipa_endp_init_mode_write(u32 ipa_ep_id)
+static void ipa_endp_init_mode_write(u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_MODE_N, ipa_ep_id,
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_MODE_N, ep_id,
 			       &ep->init_mode);
 }
 
 /** ipa_endp_init_seq_write() - write endpoint sequencer register
  *
- * @ipa_ep_id:	endpoint whose register should be written
+ * @ep_id:	endpoint whose register should be written
  */
-static void ipa_endp_init_seq_write(u32 ipa_ep_id)
+static void ipa_endp_init_seq_write(u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_SEQ_N, ipa_ep_id, &ep->init_seq);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_SEQ_N, ep_id, &ep->init_seq);
 }
 
 /** ipa_endp_init_deaggr_write() - write endpoint deaggregation register
  *
- * @ipa_ep_id:	endpoint whose register should be written
+ * @ep_id:	endpoint whose register should be written
  */
-void ipa_endp_init_deaggr_write(u32 ipa_ep_id)
+void ipa_endp_init_deaggr_write(u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_N, ipa_ep_id,
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_N, ep_id,
 			       &ep->init_deaggr);
 }
 
 /** ipa_endp_init_hdr_metadata_mask_write() - endpoint metadata mask register
  *
- * @ipa_ep_id:	endpoint whose register should be written
+ * @ep_id:	endpoint whose register should be written
  */
-static void ipa_endp_init_hdr_metadata_mask_write(u32 ipa_ep_id)
+static void ipa_endp_init_hdr_metadata_mask_write(u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_N, ipa_ep_id,
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_N, ep_id,
 			       &ep->metadata_mask);
 }
 
 /** ipa_endp_init_hdr_metadata_mask_write() - endpoint metadata mask register
  *
- * @ipa_ep_id:	endpoint whose register should be written
+ * @ep_id:	endpoint whose register should be written
  */
-static void ipa_endp_status_write(u32 ipa_ep_id)
+static void ipa_endp_status_write(u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
-	ipa_write_reg_n_fields(IPA_ENDP_STATUS_N, ipa_ep_id, &ep->status);
+	ipa_write_reg_n_fields(IPA_ENDP_STATUS_N, ep_id, &ep->status);
 }
 
 /** ipa_cfg_ep - IPA end-point configuration
@@ -700,27 +700,27 @@ void ipa_cfg_ep(u32 ep_id)
 	ipa_endp_status_write(ep_id);
 }
 
-static void suspend_consumer_endpoint(u32 ipa_ep_id)
+static void suspend_consumer_endpoint(u32 ep_id)
 {
 	struct ipa_reg_endp_init_ctrl init_ctrl;
 
 	ipa_reg_endp_init_ctrl(&init_ctrl, true);
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_id, &init_ctrl);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 
 	/* Due to a hardware bug, a client suspended with an open
 	 * aggregation frame will not generate a SUSPEND IPA interrupt.
 	 * We work around this by force-closing the aggregation frame,
 	 * then simulating the arrival of such an interrupt.
 	 */
-	ipa_suspend_active_aggr_wa(ipa_ep_id);
+	ipa_suspend_active_aggr_wa(ep_id);
 }
 
-static void resume_consumer_endpoint(u32 ipa_ep_id)
+static void resume_consumer_endpoint(u32 ep_id)
 {
 	struct ipa_reg_endp_init_ctrl init_ctrl;
 
 	ipa_reg_endp_init_ctrl(&init_ctrl, false);
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_id, &init_ctrl);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 }
 
 /* Interconnect path bandwidths (each times 1000 bytes per second) */
@@ -924,12 +924,12 @@ static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
 /* Suspend a consumer pipe */
 static void suspend_consumer_pipe(enum ipa_client_type client)
 {
-	u32 ipa_ep_id = ipa_get_ep_mapping(client);
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	u32 ep_id = ipa_get_ep_mapping(client);
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
-	ipa_debug("pipe %u\n", ipa_ep_id);
+	ipa_debug("pipe %u\n", ep_id);
 
-	suspend_consumer_endpoint(ipa_ep_id);
+	suspend_consumer_endpoint(ep_id);
 	ipa_gsi_poll_after_suspend(ep);
 }
 
@@ -942,12 +942,12 @@ void ipa_suspend_apps_pipes(void)
 /* Resume a suspended consumer pipe */
 static void resume_consumer_pipe(enum ipa_client_type client)
 {
-	u32 ipa_ep_id = ipa_get_ep_mapping(client);
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	u32 ep_id = ipa_get_ep_mapping(client);
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
-	ipa_debug("pipe %u\n", ipa_ep_id);
+	ipa_debug("pipe %u\n", ep_id);
 
-	resume_consumer_endpoint(ipa_ep_id);
+	resume_consumer_endpoint(ep_id);
 	if (!ipa_ep_polling(ep))
 		gsi_channel_intr_enable(ipa_ctx->gsi, ep->gsi_chan_hdl);
 }
@@ -967,12 +967,12 @@ void ipa_resume_apps_pipes(void)
 void ipa_cfg_default_route(enum ipa_client_type client)
 {
 	struct ipa_reg_route route;
-	u32 ipa_ep_id = ipa_get_ep_mapping(client);
+	u32 ep_id = ipa_get_ep_mapping(client);
 
-	ipa_debug("dis=0, def_pipe=%u, hdr_tbl=1 hdr_ofst=0\n", ipa_ep_id);
-	ipa_debug("frag_def_pipe=%u def_retain_hdr=1\n", ipa_ep_id);
+	ipa_debug("dis=0, def_pipe=%u, hdr_tbl=1 hdr_ofst=0\n", ep_id);
+	ipa_debug("frag_def_pipe=%u def_retain_hdr=1\n", ep_id);
 
-	ipa_reg_route(&route, ipa_ep_id);
+	ipa_reg_route(&route, ep_id);
 
 	ipa_client_add();
 
