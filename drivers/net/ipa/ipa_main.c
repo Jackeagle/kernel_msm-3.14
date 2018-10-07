@@ -303,16 +303,15 @@ static int ipa_init_hdr(void)
  *
  * Return codes: 0 for success, negative value for failure
  */
-static int ipa_init_rt4(void)
+static int ipa_init_rt4(struct ipa_dma_mem *mem)
 {
 	struct ipa_desc desc = { };
-	struct ipa_dma_mem mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	u32 hash_offset;
 	u32 nhash_offset;
 	int rc;
 
-	rc = ipahal_rt_generate_empty_img(IPA_MEM_RT_COUNT, &mem);
+	rc = ipahal_rt_generate_empty_img(IPA_MEM_RT_COUNT, mem);
 	if (rc) {
 		ipa_err("fail generate empty v4 rt img\n");
 		return rc;
@@ -321,7 +320,7 @@ static int ipa_init_rt4(void)
 	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_RT_HASH_OFST;
 	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_RT_NHASH_OFST;
 	cmd_pyld =
-		ipahal_ip_v4_routing_init_pyld(&mem, hash_offset, nhash_offset);
+		ipahal_ip_v4_routing_init_pyld(mem, hash_offset, nhash_offset);
 	if (!cmd_pyld) {
 		ipa_err("fail construct ip_v4_rt_init imm cmd\n");
 		rc = -EPERM;
@@ -337,7 +336,7 @@ static int ipa_init_rt4(void)
 	ipahal_destroy_imm_cmd(cmd_pyld);
 
 free_mem:
-	ipahal_free_empty_img(&mem);
+	ipahal_free_empty_img(mem);
 	return rc;
 }
 
@@ -345,16 +344,15 @@ free_mem:
  *
  * Return codes: 0 for success, negative value for failure
  */
-static int ipa_init_rt6(void)
+static int ipa_init_rt6(struct ipa_dma_mem *mem)
 {
 	struct ipa_desc desc = { };
-	struct ipa_dma_mem mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	u32 hash_offset;
 	u32 nhash_offset;
 	int rc;
 
-	rc = ipahal_rt_generate_empty_img(IPA_MEM_RT_COUNT, &mem);
+	rc = ipahal_rt_generate_empty_img(IPA_MEM_RT_COUNT, mem);
 	if (rc) {
 		ipa_err("fail generate empty v6 rt img\n");
 		return rc;
@@ -363,7 +361,7 @@ static int ipa_init_rt6(void)
 	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_RT_HASH_OFST;
 	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_RT_NHASH_OFST;
 	cmd_pyld =
-		ipahal_ip_v6_routing_init_pyld(&mem, hash_offset, nhash_offset);
+		ipahal_ip_v6_routing_init_pyld(mem, hash_offset, nhash_offset);
 	if (!cmd_pyld) {
 		ipa_err("fail construct ip_v6_rt_init imm cmd\n");
 		rc = -EPERM;
@@ -379,7 +377,7 @@ static int ipa_init_rt6(void)
 	ipahal_destroy_imm_cmd(cmd_pyld);
 
 free_mem:
-	ipahal_free_empty_img(&mem);
+	ipahal_free_empty_img(mem);
 	return rc;
 }
 
@@ -566,10 +564,10 @@ static int ipa_ep_apps_setup(void)
 	ipa_init_hdr();
 	ipa_debug("HDR initialized\n");
 
-	ipa_init_rt4();
+	ipa_init_rt4(&mem);
 	ipa_debug("V4 RT initialized\n");
 
-	ipa_init_rt6();
+	ipa_init_rt6(&mem);
 	ipa_debug("V6 RT initialized\n");
 
 	result = ipahal_flt_generate_empty_img(ipa_ctx->filter_bitmap, &mem);
