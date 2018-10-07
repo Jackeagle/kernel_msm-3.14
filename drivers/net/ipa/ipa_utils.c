@@ -700,29 +700,6 @@ void ipa_cfg_ep(u32 ep_id)
 	ipa_endp_status_write(ep_id);
 }
 
-static void suspend_consumer_endpoint(u32 ep_id)
-{
-	struct ipa_reg_endp_init_ctrl init_ctrl;
-
-	ipa_reg_endp_init_ctrl(&init_ctrl, true);
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
-
-	/* Due to a hardware bug, a client suspended with an open
-	 * aggregation frame will not generate a SUSPEND IPA interrupt.
-	 * We work around this by force-closing the aggregation frame,
-	 * then simulating the arrival of such an interrupt.
-	 */
-	ipa_suspend_active_aggr_wa(ep_id);
-}
-
-static void resume_consumer_endpoint(u32 ep_id)
-{
-	struct ipa_reg_endp_init_ctrl init_ctrl;
-
-	ipa_reg_endp_init_ctrl(&init_ctrl, false);
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
-}
-
 /* Interconnect path bandwidths (each times 1000 bytes per second) */
 #define IPA_MEMORY_AVG	80000
 #define IPA_MEMORY_PEAK	600000
@@ -924,13 +901,20 @@ static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
 /* Suspend a consumer endpoint */
 static void suspend_consumer_pipe(enum ipa_client_type client)
 {
+	struct ipa_reg_endp_init_ctrl init_ctrl;
 	u32 ep_id = ipa_get_ep_mapping(client);
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
-	ipa_debug("endpoint %u\n", ep_id);
+	ipa_reg_endp_init_ctrl(&init_ctrl, true);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 
-	suspend_consumer_endpoint(ep_id);
-	ipa_gsi_poll_after_suspend(ep);
+	/* Due to a hardware bug, a client suspended with an open
+	 * aggregation frame will not generate a SUSPEND IPA interrupt.
+	 * We work around this by force-closing the aggregation frame,
+	 * then simulating the arrival of such an interrupt.
+	 */
+	ipa_suspend_active_aggr_wa(ep_id);
+
+	ipa_gsi_poll_after_suspend(&ipa_ctx->ep[ep_id]);
 }
 
 void ipa_ep_suspend_all(void)
@@ -942,12 +926,13 @@ void ipa_ep_suspend_all(void)
 /* Resume a suspended consumer endpoint */
 static void resume_consumer_pipe(enum ipa_client_type client)
 {
+	struct ipa_reg_endp_init_ctrl init_ctrl;
 	u32 ep_id = ipa_get_ep_mapping(client);
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
-	ipa_debug("endpoint %u\n", ep_id);
+	ipa_reg_endp_init_ctrl(&init_ctrl, false);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 
-	resume_consumer_endpoint(ep_id);
 	if (!ipa_ep_polling(ep))
 		gsi_channel_intr_enable(ipa_ctx->gsi, ep->gsi_chan_hdl);
 }
@@ -1049,9 +1034,7 @@ int ipa_stop_gsi_channel(u32 ep_id)
 {
 	int res = 0;
 	int i;
-	struct ipa_ep_context *ep;
-
-	ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
 	ipa_client_add();
 
