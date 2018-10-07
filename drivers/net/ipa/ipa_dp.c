@@ -578,7 +578,8 @@ int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 {
 	unsigned long timeout_jiffies = msecs_to_jiffies(timeout);
 	struct ipa_tag_completion *comp;
-	struct ipa_ep_context *ep;
+	u32 ep_id = ipa_get_ep_mapping(IPA_CLIENT_APPS_CMD_PROD);
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 	int ret;
 
 	comp = kzalloc(sizeof(*comp), GFP_KERNEL);
@@ -594,8 +595,6 @@ int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 	/* Fill in the callback info (the sole descriptor is the last) */
 	desc->callback = ipa_send_cmd_timeout_complete;
 	desc->user1 = comp;
-
-	ep = ipa_get_ep_context(IPA_CLIENT_APPS_CMD_PROD);
 
 	ret = ipa_send(ep->sys, 1, desc);
 	if (ret) {
