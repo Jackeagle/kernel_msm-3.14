@@ -29,13 +29,13 @@ struct ipa_reg_desc {
 
 /* IPA_ROUTE register */
 
-void ipa_reg_route(struct ipa_reg_route *route, u32 ipa_ep_id)
+void ipa_reg_route(struct ipa_reg_route *route, u32 ep_id)
 {
 	route->route_dis = 0;
-	route->route_def_pipe = ipa_ep_id;
+	route->route_def_pipe = ep_id;
 	route->route_def_hdr_table = 1;
 	route->route_def_hdr_ofst = 0;
-	route->route_frag_def_pipe = ipa_ep_id;
+	route->route_frag_def_pipe = ep_id;
 	route->route_def_retain_hdr = 1;
 }
 

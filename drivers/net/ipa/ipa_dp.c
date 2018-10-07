@@ -195,16 +195,16 @@ ipa_wq_write_done_common(struct ipa_sys_context *sys,
 }
 
 static void
-ipa_wq_write_done_status(u32 src_ep_id, struct ipa_tx_pkt_wrapper *tx_pkt)
+ipa_wq_write_done_status(u32 ep_id, struct ipa_tx_pkt_wrapper *tx_pkt)
 {
 	struct ipa_sys_context *sys;
 
-	WARN_ON(src_ep_id >= ipa_ctx->ep_count);
+	WARN_ON(ep_id >= ipa_ctx->ep_count);
 
-	if (!ipa_ctx->ep[src_ep_id].status.status_en)
+	if (!ipa_ctx->ep[ep_id].status.status_en)
 		return;
 
-	sys = ipa_ctx->ep[src_ep_id].sys;
+	sys = ipa_ctx->ep[ep_id].sys;
 	if (!sys)
 		return;
 
@@ -792,7 +792,7 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	struct ipa_desc _desc = { };
 	struct ipa_desc *desc = &_desc;	/* Default, linear case */
 	const struct ipa_gsi_ep_config *gsi_ep;
-	u32 src_ep_id;
+	u32 ep_id;
 	int data_idx;
 	u32 nr_frags;
 	u32 f;
@@ -801,8 +801,8 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	if (!skb->len)
 		return -EINVAL;
 
-	src_ep_id = ipa_get_ep_mapping(client);
-	gsi_ep = ipa_get_gsi_ep_info(ipa_ctx->ep[src_ep_id].client);
+	ep_id = ipa_get_ep_mapping(client);
+	gsi_ep = ipa_get_gsi_ep_info(ipa_ctx->ep[ep_id].client);
 
 	/* Make sure source endpoint's TLV FIFO has enough entries to
 	 * hold the linear portion of the skb and all its frags.
@@ -837,9 +837,9 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	/* Have the skb be freed after the last descriptor completes. */
 	desc[data_idx].callback = ipa_tx_dp_complete;
 	desc[data_idx].user1 = skb;
-	desc[data_idx].user2 = src_ep_id;
+	desc[data_idx].user2 = ep_id;
 
-	ret = ipa_send(ipa_ctx->ep[src_ep_id].sys, data_idx + 1, desc);
+	ret = ipa_send(ipa_ctx->ep[ep_id].sys, data_idx + 1, desc);
 
 	if (nr_frags)
 		kfree(desc);
@@ -1037,7 +1037,7 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 	int len;
 	int len2;
 	unsigned char *buf;
-	u32 src_ep_id;
+	u32 ep_id;
 	unsigned int used = *(unsigned int *)skb->cb;
 	unsigned int used_align = ALIGN(used, 32);
 	unsigned long unused = IPA_RX_BUFFER_SIZE - used;
@@ -1125,7 +1125,7 @@ begin:
 
 		if (status.endp_dest_idx == (sys->ep - ipa_ctx->ep)) {
 			/* RX data */
-			src_ep_id = status.endp_src_idx;
+			ep_id = status.endp_src_idx;
 
 			/* A packet which is received back to the AP after
 			 * there was no route match.
@@ -1196,7 +1196,7 @@ begin:
 				}
 			}
 			/* TX comp */
-			ipa_wq_write_done_status(src_ep_id, tx_pkt);
+			ipa_wq_write_done_status(ep_id, tx_pkt);
 		} else {
 			/* TX comp */
 			ipa_wq_write_done_status(status.endp_src_idx, tx_pkt);
@@ -1372,20 +1372,20 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 	struct sk_buff *rx_skb = (struct sk_buff *)data;
 	struct ipahal_pkt_status status;
 	struct ipa_ep_context *ep;
-	u32 src_ep_id;
+	u32 ep_id;
 	u32 pkt_status_size = ipahal_pkt_status_get_size();
 	u32 metadata;
 
 	ipa_assert(rx_skb->len >= pkt_status_size);
 
 	ipahal_pkt_status_parse(rx_skb->data, &status);
-	src_ep_id = status.endp_src_idx;
+	ep_id = status.endp_src_idx;
 	metadata = status.metadata;
-	ep = &ipa_ctx->ep[src_ep_id];
-	if (src_ep_id >= ipa_ctx->ep_count || !ep->allocated ||
+	ep = &ipa_ctx->ep[ep_id];
+	if (ep_id >= ipa_ctx->ep_count || !ep->allocated ||
 	    !ep->client_notify) {
 		ipa_err("drop endpoint=%u allocated=%s client_notify=%p\n",
-			src_ep_id, ep->allocated ? "true" : "false",
+			ep_id, ep->allocated ? "true" : "false",
 			ep->client_notify);
 		dev_kfree_skb_any(rx_skb);
 		return;
@@ -1586,96 +1586,96 @@ fail_alloc_channel:
 	return result;
 }
 
-void ipa_endp_init_hdr_cons(u32 ipa_ep_id, u32 header_size,
+void ipa_endp_init_hdr_cons(u32 ep_id, u32 header_size,
 			    u32 metadata_offset, u32 length_offset)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
 	ipa_reg_endp_init_hdr_cons(&ep->init_hdr, header_size, metadata_offset,
 				   length_offset);
 }
 
-void ipa_endp_init_hdr_prod(u32 ipa_ep_id, u32 header_size,
+void ipa_endp_init_hdr_prod(u32 ep_id, u32 header_size,
 			    u32 metadata_offset, u32 length_offset)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
 	ipa_reg_endp_init_hdr_prod(&ep->init_hdr, header_size, metadata_offset,
 				   length_offset);
 }
 
 void
-ipa_endp_init_hdr_ext_cons(u32 ipa_ep_id, u32 pad_align, bool pad_included)
+ipa_endp_init_hdr_ext_cons(u32 ep_id, u32 pad_align, bool pad_included)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
 	ipa_reg_endp_init_hdr_ext_cons(&ep->hdr_ext, pad_align, pad_included);
 }
 
-void ipa_endp_init_hdr_ext_prod(u32 ipa_ep_id, u32 pad_align)
+void ipa_endp_init_hdr_ext_prod(u32 ep_id, u32 pad_align)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
 	ipa_reg_endp_init_hdr_ext_prod(&ep->hdr_ext, pad_align);
 }
 
 void
-ipa_endp_init_aggr_cons(u32 ipa_ep_id, u32 size, u32 count, bool close_on_eof)
+ipa_endp_init_aggr_cons(u32 ep_id, u32 size, u32 count, bool close_on_eof)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
 	ipa_reg_endp_init_aggr_cons(&ep->init_aggr, size, count, close_on_eof);
 }
 
-void ipa_endp_init_aggr_prod(u32 ipa_ep_id, enum ipa_aggr_en aggr_en,
+void ipa_endp_init_aggr_prod(u32 ep_id, enum ipa_aggr_en aggr_en,
 			     enum ipa_aggr_type aggr_type)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
 	ipa_reg_endp_init_aggr_prod(&ep->init_aggr, aggr_en, aggr_type);
 }
 
-void ipa_endp_init_cfg_cons(u32 ipa_ep_id, enum ipa_cs_offload_en offload_type)
+void ipa_endp_init_cfg_cons(u32 ep_id, enum ipa_cs_offload_en offload_type)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
 	ipa_reg_endp_init_cfg_cons(&ep->init_cfg, offload_type);
 }
 
-void ipa_endp_init_cfg_prod(u32 ipa_ep_id, enum ipa_cs_offload_en offload_type,
+void ipa_endp_init_cfg_prod(u32 ep_id, enum ipa_cs_offload_en offload_type,
 			    u32 metadata_offset)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
 	ipa_reg_endp_init_cfg_prod(&ep->init_cfg, offload_type,
 				   metadata_offset);
 }
 
-void ipa_endp_init_hdr_metadata_mask_cons(u32 ipa_ep_id, u32 mask)
+void ipa_endp_init_hdr_metadata_mask_cons(u32 ep_id, u32 mask)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
 	ipa_reg_endp_init_hdr_metadata_mask_cons(&ep->metadata_mask, mask);
 }
 
-void ipa_endp_init_hdr_metadata_mask_prod(u32 ipa_ep_id)
+void ipa_endp_init_hdr_metadata_mask_prod(u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
 	ipa_reg_endp_init_hdr_metadata_mask_prod(&ep->metadata_mask);
 }
 
-void ipa_endp_status_cons(u32 ipa_ep_id, bool enable)
+void ipa_endp_status_cons(u32 ep_id, bool enable)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
 	ipa_reg_endp_status_cons(&ep->status, enable);
 }
 
-void ipa_endp_status_prod(u32 ipa_ep_id, bool enable,
+void ipa_endp_status_prod(u32 ep_id, bool enable,
 			  enum ipa_client_type status_client)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 	u32 status_ep_id = ipa_get_ep_mapping(status_client);
 
 	ipa_reg_endp_status_prod(&ep->status, enable, status_ep_id);
@@ -1683,57 +1683,57 @@ void ipa_endp_status_prod(u32 ipa_ep_id, bool enable,
 
 
 /* Note that the mode setting is not valid for consumer endpoints */
-void ipa_endp_init_mode_cons(u32 ipa_ep_id)
+void ipa_endp_init_mode_cons(u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
 	ipa_reg_endp_init_mode_cons(&ep->init_mode);
 }
 
-void ipa_endp_init_mode_prod(u32 ipa_ep_id, enum ipa_mode mode,
+void ipa_endp_init_mode_prod(u32 ep_id, enum ipa_mode mode,
 			     enum ipa_client_type dst_client)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 	u32 dst_ep_id = ipa_get_ep_mapping(dst_client);
 
 	ipa_reg_endp_init_mode_prod(&ep->init_mode, mode, dst_ep_id);
 }
 
 /* XXX The sequencer setting seems not to be valid for consumer endpoints */
-void ipa_endp_init_seq_cons(u32 ipa_ep_id)
+void ipa_endp_init_seq_cons(u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
 	ipa_reg_endp_init_seq_cons(&ep->init_seq);
 }
 
-void ipa_endp_init_seq_prod(u32 ipa_ep_id)
+void ipa_endp_init_seq_prod(u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
-	u32 seq_type = (u32)ipa_endp_seq_type(ipa_ep_id);
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	u32 seq_type = (u32)ipa_endp_seq_type(ep_id);
 
 	ipa_reg_endp_init_seq_prod(&ep->init_seq, seq_type);
 }
 
 /* XXX The deaggr setting seems not to be valid for consumer endpoints */
-void ipa_endp_init_deaggr_cons(u32 ipa_ep_id)
+void ipa_endp_init_deaggr_cons(u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
 	ipa_reg_endp_init_deaggr_cons(&ep->init_deaggr);
 }
 
-void ipa_endp_init_deaggr_prod(u32 ipa_ep_id)
+void ipa_endp_init_deaggr_prod(u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
 	ipa_reg_endp_init_deaggr_prod(&ep->init_deaggr);
 }
 
 int ipa_ep_alloc(enum ipa_client_type client)
 {
-	u32 ipa_ep_id = ipa_get_ep_mapping(client);
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	u32 ep_id = ipa_get_ep_mapping(client);
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 	struct ipa_sys_context *sys;
 
 	ipa_assert(!ep->allocated);
@@ -1756,12 +1756,12 @@ int ipa_ep_alloc(enum ipa_client_type client)
 	ep->client = client;
 	ep->allocated = true;
 
-	return ipa_ep_id;
+	return ep_id;
 }
 
-void ipa_ep_free(u32 ipa_ep_id)
+void ipa_ep_free(u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
 	ipa_assert(ep->allocated);
 
@@ -1780,10 +1780,10 @@ void ipa_ep_free(u32 ipa_ep_id)
  *
  * Returns:	0 on success, negative on failure
  */
-int ipa_ep_setup(u32 ipa_ep_id, u32 chan_count, u32 rx_buffer_size,
+int ipa_ep_setup(u32 ep_id, u32 chan_count, u32 rx_buffer_size,
 		 struct ipa_sys_connect_params *sys_in)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 	int ret;
 
 	if (ipa_consumer(ep->client)) {
@@ -1807,9 +1807,9 @@ int ipa_ep_setup(u32 ipa_ep_id, u32 chan_count, u32 rx_buffer_size,
 
 	ipa_client_add();
 
-	ipa_cfg_ep(ipa_ep_id);
+	ipa_cfg_ep(ep_id);
 
-	ipa_debug("ep %u configuration successful\n", ipa_ep_id);
+	ipa_debug("ep %u configuration successful\n", ep_id);
 
 	ret = ipa_gsi_setup_channel(ep, chan_count);
 	if (ret) {
@@ -1821,7 +1821,7 @@ int ipa_ep_setup(u32 ipa_ep_id, u32 chan_count, u32 rx_buffer_size,
 		ipa_replenish_rx_cache(ep->sys);
 
 	ipa_debug("client %d (ep: %u) connected sys=%p\n", ep->client,
-		  ipa_ep_id, ep->sys);
+		  ep_id, ep->sys);
 err_client_remove:
 	ipa_client_remove();
 
