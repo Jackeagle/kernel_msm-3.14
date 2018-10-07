@@ -312,7 +312,7 @@ static int ipa_init_rt4(void)
 	u32 nhash_offset;
 	int rc;
 
-	rc = ipahal_rt_generate_empty_img(IPA_MEM_V4_RT_NUM_INDEX, &mem);
+	rc = ipahal_rt_generate_empty_img(IPA_MEM_RT_COUNT, &mem);
 	if (rc) {
 		ipa_err("fail generate empty v4 rt img\n");
 		return rc;
@@ -354,7 +354,7 @@ static int ipa_init_rt6(void)
 	u32 nhash_offset;
 	int rc;
 
-	rc = ipahal_rt_generate_empty_img(IPA_MEM_V6_RT_NUM_INDEX, &mem);
+	rc = ipahal_rt_generate_empty_img(IPA_MEM_RT_COUNT, &mem);
 	if (rc) {
 		ipa_err("fail generate empty v6 rt img\n");
 		return rc;
@@ -484,11 +484,9 @@ static void ipa_setup_rt_hash_tuple(void)
 {
 	u32 route_mask;
 	u32 modem_mask;
-	int limit;
 
 	/* Compute a mask representing non-modem route table entries */
-	limit = max(IPA_MEM_V6_RT_NUM_INDEX, IPA_MEM_V4_RT_NUM_INDEX);
-	route_mask = GENMASK(limit - 1, 0);
+	route_mask = GENMASK(IPA_MEM_RT_COUNT - 1, 0);
 	modem_mask = GENMASK(IPA_MEM_V4_MODEM_RT_INDEX_HI,
 			     IPA_MEM_V4_MODEM_RT_INDEX_LO);
 	modem_mask |= GENMASK(IPA_MEM_V6_MODEM_RT_INDEX_HI,
@@ -986,21 +984,20 @@ static void validate_config(void)
 	/* The number of entries in the AP route tables must be non-zero,
 	 * for both IPv4 and IPv6.  (This is not true for filter tables.)
 	 */
-	BUILD_BUG_ON(!IPA_MEM_V4_RT_NUM_INDEX);
-	BUILD_BUG_ON(!IPA_MEM_V6_RT_NUM_INDEX);
+	BUILD_BUG_ON(!IPA_MEM_RT_COUNT);
 
 	/* The size set aside for the AP route tables for IPv4 and
 	 * IPv6, both hashed and un-hashed, must be big enough to
 	 * hold all of the entries (the number of entries times the
 	 * size of each entry).
 	 */
-	BUILD_BUG_ON(IPA_MEM_V4_RT_NUM_INDEX * IPA_HW_TBL_HDR_WIDTH
+	BUILD_BUG_ON(IPA_MEM_RT_COUNT * IPA_HW_TBL_HDR_WIDTH
 		     > IPA_MEM_V4_RT_HASH_SIZE);
-	BUILD_BUG_ON(IPA_MEM_V4_RT_NUM_INDEX * IPA_HW_TBL_HDR_WIDTH
+	BUILD_BUG_ON(IPA_MEM_RT_COUNT * IPA_HW_TBL_HDR_WIDTH
 		     > IPA_MEM_V4_RT_NHASH_SIZE);
-	BUILD_BUG_ON(IPA_MEM_V6_RT_NUM_INDEX * IPA_HW_TBL_HDR_WIDTH
+	BUILD_BUG_ON(IPA_MEM_RT_COUNT * IPA_HW_TBL_HDR_WIDTH
 		     > IPA_MEM_V6_RT_HASH_SIZE);
-	BUILD_BUG_ON(IPA_MEM_V6_RT_NUM_INDEX * IPA_HW_TBL_HDR_WIDTH
+	BUILD_BUG_ON(IPA_MEM_RT_COUNT * IPA_HW_TBL_HDR_WIDTH
 		     > IPA_MEM_V6_RT_NHASH_SIZE);
 
 	/* The lower bound for the modem route table must not exceed
