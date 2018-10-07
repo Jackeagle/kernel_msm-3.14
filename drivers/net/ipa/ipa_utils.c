@@ -530,6 +530,7 @@ u32 ipa_filter_bitmap_init(void)
 {
 	enum ipa_client_type cl;
 	u32 filter_bitmap = 0;
+	u32 count = 0;
 
 	for (cl = 0; cl < IPA_CLIENT_MAX ; cl++) {
 		const struct ipa_ep_configuration *ep_config;
@@ -537,6 +538,9 @@ u32 ipa_filter_bitmap_init(void)
 		ep_config = ep_configuration(cl);
 		if (!ep_config->support_flt)
 			continue;
+		if (++count > IPA_MEM_FLT_COUNT)
+			return 0;	/* Too many filtering endpoints */
+
 		filter_bitmap |= BIT(ep_config->ipa_gsi_ep_info.ep_id);
 	}
 

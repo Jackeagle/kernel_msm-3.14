@@ -1034,8 +1034,6 @@ static bool config_valid(u32 filter_bitmap)
 	 * entry).  Note that filter tables need an extra entry to hold
 	 * an endpoint bitmap.
 	 */
-	if (!ipa_ctx->filter_bitmap)
-		return false;
 	filter_count = hweight32(ipa_ctx->filter_bitmap);
 	required_size = (filter_count + 1) * IPA_HW_TBL_HDR_WIDTH;
 	if (required_size > IPA_MEM_V4_FLT_HASH_SIZE)
@@ -1334,6 +1332,8 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 
 	/* Compute a bitmask representing which endpoints support filtering */
 	ipa_ctx->filter_bitmap = ipa_filter_bitmap_init();
+	if (!ipa_ctx->filter_bitmap)
+		goto out_smp2p_exit;
 
 	/* Now make sure we have a valid configuration before proceeding */
 	if (!config_valid(ipa_ctx->filter_bitmap)) {

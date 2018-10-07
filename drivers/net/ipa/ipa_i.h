@@ -129,6 +129,10 @@
  * |  UC EVENT RING	     | From IPA 3.5
  * +-------------------------+
  */
+
+/* The maximum number of filter table entries (IPv4, IPv6; hashed and not) */
+#define IPA_MEM_FLT_COUNT	14
+
 #define IPA_MEM_V4_FLT_HASH_OFST		0x288
 #define IPA_MEM_V4_FLT_HASH_SIZE		0x78
 #define IPA_MEM_V4_FLT_NHASH_OFST		0x308
