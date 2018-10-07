@@ -974,10 +974,11 @@ static void ipa_post_init(struct work_struct *unused)
 	ipa_info("IPA driver initialization was successful.\n");
 }
 
-static bool config_valid(u32 filter_bitmap)
+/* Encapsulate validation that can be done at build time. */
+static void validate_config(void)
 {
-	u32 filter_count;
-	u32 required_size;
+	/* We assume we're working on 64-bit hardware */
+	BUILD_BUG_ON(!IS_ENABLED(CONFIG_64BIT));
 
 	/* The size of a filter or route table entry must be non-zero */
 	BUILD_BUG_ON(!IPA_HW_TBL_HDR_WIDTH);
@@ -1023,29 +1024,6 @@ static bool config_valid(u32 filter_bitmap)
 	BUILD_BUG_ON(NENTS * IPA_HW_TBL_HDR_WIDTH > IPA_MEM_V6_RT_HASH_SIZE);
 	BUILD_BUG_ON(NENTS * IPA_HW_TBL_HDR_WIDTH > IPA_MEM_V6_RT_NHASH_SIZE);
 #undef NENTS
-
-	/* The endpoints that support filtering is determined at
-	 * runtime, so we can't use BUILD_BUG_ON().  We require at
-	 * least one endpoint that supports filtering.
-	 *
-	 * The size set aside for the filter tables for IPv4 and IPv6,
-	 * both hashed and un-hashed, must be big enough to hold all
-	 * of the entries (the number of entries times the size of each
-	 * entry).  Note that filter tables need an extra entry to hold
-	 * an endpoint bitmap.
-	 */
-	filter_count = hweight32(ipa_ctx->filter_bitmap);
-	required_size = (filter_count + 1) * IPA_HW_TBL_HDR_WIDTH;
-	if (required_size > IPA_MEM_V4_FLT_HASH_SIZE)
-		return false;
-	if (required_size > IPA_MEM_V4_FLT_NHASH_SIZE)
-		return false;
-	if (required_size > IPA_MEM_V6_FLT_HASH_SIZE)
-		return false;
-	if (required_size > IPA_MEM_V6_FLT_NHASH_SIZE)
-		return false;
-
-	return true;
 }
 
 /** ipa_pre_init() - Initialize the IPA Driver.
@@ -1300,8 +1278,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	bool modem_init;
 	int result;
 
-	/* We assume we're working on 64-bit hardware */
-	BUILD_BUG_ON(!IS_ENABLED(CONFIG_64BIT));
+	validate_config();
 
 	ipa_debug("IPA driver: probing\n");
 
@@ -1334,13 +1311,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	ipa_ctx->filter_bitmap = ipa_filter_bitmap_init();
 	if (!ipa_ctx->filter_bitmap)
 		goto out_smp2p_exit;
-
-	/* Now make sure we have a valid configuration before proceeding */
-	if (!config_valid(ipa_ctx->filter_bitmap)) {
-		ipa_err("invalid configuration\n");
-		result = -EFAULT;
-		goto err_clear_filter_bitmap;
-	}
 
 	result = platform_get_irq_byname(pdev, "ipa");
 	if (result < 0)
