@@ -487,24 +487,24 @@ u32 ipa_get_ep_mapping(enum ipa_client_type client)
 
 struct ipa_ep_context *ipa_get_ep_context(enum ipa_client_type client)
 {
-	u32 ipa_ep_idx = ipa_get_ep_mapping(client);
+	u32 ipa_ep_id = ipa_get_ep_mapping(client);
 
-	return &ipa_ctx->ep[ipa_ep_idx];
+	return &ipa_ctx->ep[ipa_ep_id];
 }
 
 /** ipa_get_client_mapping() - provide client mapping
- * @pipe_idx: IPA end-point number
+ * @ep_id: IPA end-point number
  *
  * Return value: client mapping
  */
-enum ipa_client_type ipa_get_client_mapping(u32 pipe_idx)
+enum ipa_client_type ipa_get_client_mapping(u32 ep_id)
 {
-	return ipa_ctx->ep[pipe_idx].client;
+	return ipa_ctx->ep[ep_id].client;
 }
 
-enum ipa_seq_type ipa_endp_seq_type(u32 ipa_ep_idx)
+enum ipa_seq_type ipa_endp_seq_type(u32 ipa_ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
 
 	return ep_configuration(ep->client)->seq_type;
 }
@@ -561,38 +561,38 @@ u32 ipa_filter_bitmap_init(void)
 }
 
 /* In IPAv3 only endpoints 0-3 can be configured to deaggregation */
-bool ipa_endp_aggr_support(u32 ipa_ep_idx)
+bool ipa_endp_aggr_support(u32 ipa_ep_id)
 {
-	return ipa_ep_idx < 4;
+	return ipa_ep_id < 4;
 }
 
 /** ipa_endp_init_hdr_write()
  *
- * @ipa_ep_idx:	endpoint whose header config register should be written
+ * @ipa_ep_id:	endpoint whose header config register should be written
  */
-static void ipa_endp_init_hdr_write(u32 ipa_ep_idx)
+static void ipa_endp_init_hdr_write(u32 ipa_ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_N, ipa_ep_idx, &ep->init_hdr);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_N, ipa_ep_id, &ep->init_hdr);
 }
 
 /** ipa_endp_init_hdr_ext_write() - write endpoint extended header register
  *
- * @ipa_ep_idx:	endpoint whose register should be written
+ * @ipa_ep_id:	endpoint whose register should be written
  */
 static void
-ipa_endp_init_hdr_ext_write(u32 ipa_ep_idx)
+ipa_endp_init_hdr_ext_write(u32 ipa_ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_N, ipa_ep_idx,
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_N, ipa_ep_id,
 			       &ep->hdr_ext);
 }
 
 /** ipa_endp_init_aggr_write() write endpoint aggregation register
  *
- * @ipa_ep_idx:	endpoint whose aggregation config register should be written
+ * @ipa_ep_id:	endpoint whose aggregation config register should be written
  */
 static void ipa_endp_init_aggr_write(u32 ep_id)
 {
@@ -603,71 +603,71 @@ static void ipa_endp_init_aggr_write(u32 ep_id)
 
 /** ipa_endp_init_cfg_write() - write endpoint configuration register
  *
- * @ipa_ep_idx:	endpoint whose configuration register should be written
+ * @ipa_ep_id:	endpoint whose configuration register should be written
  */
-static void ipa_endp_init_cfg_write(u32 ipa_ep_idx)
+static void ipa_endp_init_cfg_write(u32 ipa_ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_CFG_N, ipa_ep_idx, &ep->init_cfg);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_CFG_N, ipa_ep_id, &ep->init_cfg);
 }
 
 /** ipa_endp_init_mode_write() - write endpoint mode register
  *
- * @ipa_ep_idx:	endpoint whose register should be written
+ * @ipa_ep_id:	endpoint whose register should be written
  */
-static void ipa_endp_init_mode_write(u32 ipa_ep_idx)
+static void ipa_endp_init_mode_write(u32 ipa_ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_MODE_N, ipa_ep_idx,
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_MODE_N, ipa_ep_id,
 			       &ep->init_mode);
 }
 
 /** ipa_endp_init_seq_write() - write endpoint sequencer register
  *
- * @ipa_ep_idx:	endpoint whose register should be written
+ * @ipa_ep_id:	endpoint whose register should be written
  */
-static void ipa_endp_init_seq_write(u32 ipa_ep_idx)
+static void ipa_endp_init_seq_write(u32 ipa_ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_SEQ_N, ipa_ep_idx, &ep->init_seq);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_SEQ_N, ipa_ep_id, &ep->init_seq);
 }
 
 /** ipa_endp_init_deaggr_write() - write endpoint deaggregation register
  *
- * @ipa_ep_idx:	endpoint whose register should be written
+ * @ipa_ep_id:	endpoint whose register should be written
  */
-void ipa_endp_init_deaggr_write(u32 ipa_ep_idx)
+void ipa_endp_init_deaggr_write(u32 ipa_ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_N, ipa_ep_idx,
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_N, ipa_ep_id,
 			       &ep->init_deaggr);
 }
 
 /** ipa_endp_init_hdr_metadata_mask_write() - endpoint metadata mask register
  *
- * @ipa_ep_idx:	endpoint whose register should be written
+ * @ipa_ep_id:	endpoint whose register should be written
  */
-static void ipa_endp_init_hdr_metadata_mask_write(u32 ipa_ep_idx)
+static void ipa_endp_init_hdr_metadata_mask_write(u32 ipa_ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_N, ipa_ep_idx,
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_HDR_METADATA_MASK_N, ipa_ep_id,
 			       &ep->metadata_mask);
 }
 
 /** ipa_endp_init_hdr_metadata_mask_write() - endpoint metadata mask register
  *
- * @ipa_ep_idx:	endpoint whose register should be written
+ * @ipa_ep_id:	endpoint whose register should be written
  */
-static void ipa_endp_status_write(u32 ipa_ep_idx)
+static void ipa_endp_status_write(u32 ipa_ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
 
-	ipa_write_reg_n_fields(IPA_ENDP_STATUS_N, ipa_ep_idx, &ep->status);
+	ipa_write_reg_n_fields(IPA_ENDP_STATUS_N, ipa_ep_id, &ep->status);
 }
 
 /** ipa_cfg_ep - IPA end-point configuration
@@ -700,27 +700,27 @@ void ipa_cfg_ep(u32 ep_id)
 	ipa_endp_status_write(ep_id);
 }
 
-static void suspend_consumer_endpoint(u32 ipa_ep_idx)
+static void suspend_consumer_endpoint(u32 ipa_ep_id)
 {
 	struct ipa_reg_endp_init_ctrl init_ctrl;
 
 	ipa_reg_endp_init_ctrl(&init_ctrl, true);
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_idx, &init_ctrl);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_id, &init_ctrl);
 
 	/* Due to a hardware bug, a client suspended with an open
 	 * aggregation frame will not generate a SUSPEND IPA interrupt.
 	 * We work around this by force-closing the aggregation frame,
 	 * then simulating the arrival of such an interrupt.
 	 */
-	ipa_suspend_active_aggr_wa(ipa_ep_idx);
+	ipa_suspend_active_aggr_wa(ipa_ep_id);
 }
 
-static void resume_consumer_endpoint(u32 ipa_ep_idx)
+static void resume_consumer_endpoint(u32 ipa_ep_id)
 {
 	struct ipa_reg_endp_init_ctrl init_ctrl;
 
 	ipa_reg_endp_init_ctrl(&init_ctrl, false);
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_idx, &init_ctrl);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ipa_ep_id, &init_ctrl);
 }
 
 /* Interconnect path bandwidths (each times 1000 bytes per second) */
@@ -855,12 +855,12 @@ u32 ipa_get_num_pipes(void)
 	return ipa_read_reg(IPA_ENABLED_PIPES);
 }
 
-/** ipa_is_modem_pipe()- Checks if pipe is owned by the modem
+/** ipa_is_modem_ep()- Checks if endpoint is owned by the modem
  *
- * @pipe_idx: pipe number
+ * @ep_id: endpoint identifier
  * Return value: true if owned by modem, false otherwize
  */
-bool ipa_is_modem_pipe(u32 pipe_idx)
+bool ipa_is_modem_ep(u32 ep_id)
 {
 	int client_idx;
 
@@ -868,7 +868,7 @@ bool ipa_is_modem_pipe(u32 pipe_idx)
 		if (!ipa_modem_consumer(client_idx) &&
 		    !ipa_modem_producer(client_idx))
 			continue;
-		if (ipa_get_ep_mapping(client_idx) == pipe_idx)
+		if (ipa_get_ep_mapping(client_idx) == ep_id)
 			return true;
 	}
 
@@ -924,12 +924,12 @@ static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
 /* Suspend a consumer pipe */
 static void suspend_consumer_pipe(enum ipa_client_type client)
 {
-	u32 ipa_ep_idx = ipa_get_ep_mapping(client);
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+	u32 ipa_ep_id = ipa_get_ep_mapping(client);
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
 
-	ipa_debug("pipe %u\n", ipa_ep_idx);
+	ipa_debug("pipe %u\n", ipa_ep_id);
 
-	suspend_consumer_endpoint(ipa_ep_idx);
+	suspend_consumer_endpoint(ipa_ep_id);
 	ipa_gsi_poll_after_suspend(ep);
 }
 
@@ -942,12 +942,12 @@ void ipa_suspend_apps_pipes(void)
 /* Resume a suspended consumer pipe */
 static void resume_consumer_pipe(enum ipa_client_type client)
 {
-	u32 ipa_ep_idx = ipa_get_ep_mapping(client);
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_idx];
+	u32 ipa_ep_id = ipa_get_ep_mapping(client);
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ipa_ep_id];
 
-	ipa_debug("pipe %u\n", ipa_ep_idx);
+	ipa_debug("pipe %u\n", ipa_ep_id);
 
-	resume_consumer_endpoint(ipa_ep_idx);
+	resume_consumer_endpoint(ipa_ep_id);
 	if (!ipa_ep_polling(ep))
 		gsi_channel_intr_enable(ipa_ctx->gsi, ep->gsi_chan_hdl);
 }
@@ -967,12 +967,12 @@ void ipa_resume_apps_pipes(void)
 void ipa_cfg_default_route(enum ipa_client_type client)
 {
 	struct ipa_reg_route route;
-	u32 ipa_ep_idx = ipa_get_ep_mapping(client);
+	u32 ipa_ep_id = ipa_get_ep_mapping(client);
 
-	ipa_debug("dis=0, def_pipe=%u, hdr_tbl=1 hdr_ofst=0\n", ipa_ep_idx);
-	ipa_debug("frag_def_pipe=%u def_retain_hdr=1\n", ipa_ep_idx);
+	ipa_debug("dis=0, def_pipe=%u, hdr_tbl=1 hdr_ofst=0\n", ipa_ep_id);
+	ipa_debug("frag_def_pipe=%u def_retain_hdr=1\n", ipa_ep_id);
 
-	ipa_reg_route(&route, ipa_ep_idx);
+	ipa_reg_route(&route, ipa_ep_id);
 
 	ipa_client_add();
 
@@ -1109,25 +1109,25 @@ void ipa_enable_dcd(void)
 	ipa_write_reg_fields(IPA_IDLE_INDICATION_CFG, &indication);
 }
 
-/** ipa_set_flt_tuple_mask() - Sets the flt tuple masking for the given pipe
- *  Pipe must be for AP EP (not modem) and support filtering
- *  updates the the filtering masking values without changing the rt ones.
+/** ipa_set_flt_tuple_mask() - Sets the flt tuple masking for the given
+ * endpoint.  Endpoint must be for AP (not modem) and support filtering.
+ * Updates the the filtering masking values without changing the rt ones.
  *
- * @pipe_idx: filter pipe index to configure the tuple masking
+ * @ep_id: filter pipe endpoint to configure the tuple masking
  * @tuple: the tuple members masking
  * Returns:	0 on success, negative on failure
  *
  */
-void ipa_set_flt_tuple_mask(u32 pipe_idx)
+void ipa_set_flt_tuple_mask(u32 ep_id)
 {
 	struct ipa_ep_filter_router_hsh_cfg hsh_cfg;
 
-	ipa_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, pipe_idx,
+	ipa_read_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, ep_id,
 			      &hsh_cfg);
 
 	ipa_reg_hash_tuple(&hsh_cfg.flt);
 
-	ipa_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, pipe_idx,
+	ipa_write_reg_n_fields(IPA_ENDP_FILTER_ROUTER_HSH_CFG_N, ep_id,
 			       &hsh_cfg);
 }
 

@@ -36,7 +36,7 @@
 
 #define IPA_MAX_STATUS_STAT_NUM		30
 
-/* An explicitly bad endpoint index value */
+/* An explicitly bad endpoint identifier value */
 #define IPA_EP_ID_BAD			(~(u32)0)
 
 #define IPA_MEM_CANARY_VAL		0xdeadbeef
@@ -447,40 +447,40 @@ void ipa_cfg_ep(u32 ep_id);
 int ipa_tx_dp(enum ipa_client_type dst, struct sk_buff *skb);
 
 /* System pipes */
-bool ipa_endp_aggr_support(u32 ipa_ep_idx);
-enum ipa_seq_type ipa_endp_seq_type(u32 ipa_ep_idx);
+bool ipa_endp_aggr_support(u32 ipa_ep_id);
+enum ipa_seq_type ipa_endp_seq_type(u32 ipa_ep_id);
 
-void ipa_endp_init_hdr_cons(u32 ipa_ep_idx, u32 header_size,
+void ipa_endp_init_hdr_cons(u32 ipa_ep_id, u32 header_size,
 			    u32 metadata_offset, u32 length_offset);
-void ipa_endp_init_hdr_prod(u32 ipa_ep_idx, u32 header_size,
+void ipa_endp_init_hdr_prod(u32 ipa_ep_id, u32 header_size,
 			    u32 metadata_offset, u32 length_offset);
-void ipa_endp_init_hdr_ext_cons(u32 ipa_ep_idx, u32 pad_align,
+void ipa_endp_init_hdr_ext_cons(u32 ipa_ep_id, u32 pad_align,
 				bool pad_included);
-void ipa_endp_init_hdr_ext_prod(u32 ipa_ep_idx, u32 pad_align);
-void ipa_endp_init_mode_cons(u32 ipa_ep_idx);
-void ipa_endp_init_mode_prod(u32 ipa_ep_idx, enum ipa_mode mode,
+void ipa_endp_init_hdr_ext_prod(u32 ipa_ep_id, u32 pad_align);
+void ipa_endp_init_mode_cons(u32 ipa_ep_id);
+void ipa_endp_init_mode_prod(u32 ipa_ep_id, enum ipa_mode mode,
 			     enum ipa_client_type dst_client);
-void ipa_endp_init_aggr_cons(u32 ipa_ep_idx, u32 size, u32 count,
+void ipa_endp_init_aggr_cons(u32 ipa_ep_id, u32 size, u32 count,
 			     bool close_on_eof);
-void ipa_endp_init_aggr_prod(u32 ipa_ep_idx, enum ipa_aggr_en aggr_en,
+void ipa_endp_init_aggr_prod(u32 ipa_ep_id, enum ipa_aggr_en aggr_en,
 			     enum ipa_aggr_type aggr_type);
-void ipa_endp_init_cfg_cons(u32 ipa_ep_idx,
+void ipa_endp_init_cfg_cons(u32 ipa_ep_id,
 			    enum ipa_cs_offload_en offload_type);
-void ipa_endp_init_cfg_prod(u32 ipa_ep_idx, enum ipa_cs_offload_en offload_type,
+void ipa_endp_init_cfg_prod(u32 ipa_ep_id, enum ipa_cs_offload_en offload_type,
 			    u32 metadata_offset);
-void ipa_endp_init_seq_cons(u32 ipa_ep_idx);
-void ipa_endp_init_seq_prod(u32 ipa_ep_idx);
-void ipa_endp_init_deaggr_cons(u32 ipa_ep_idx);
-void ipa_endp_init_deaggr_prod(u32 ipa_ep_idx);
-void ipa_endp_init_hdr_metadata_mask_cons(u32 ipa_ep_idx, u32 mask);
-void ipa_endp_init_hdr_metadata_mask_prod(u32 ipa_ep_idx);
-void ipa_endp_status_cons(u32 ipa_ep_idx, bool enable);
-void ipa_endp_status_prod(u32 ipa_ep_idx, bool enable,
+void ipa_endp_init_seq_cons(u32 ipa_ep_id);
+void ipa_endp_init_seq_prod(u32 ipa_ep_id);
+void ipa_endp_init_deaggr_cons(u32 ipa_ep_id);
+void ipa_endp_init_deaggr_prod(u32 ipa_ep_id);
+void ipa_endp_init_hdr_metadata_mask_cons(u32 ipa_ep_id, u32 mask);
+void ipa_endp_init_hdr_metadata_mask_prod(u32 ipa_ep_id);
+void ipa_endp_status_cons(u32 ipa_ep_id, bool enable);
+void ipa_endp_status_prod(u32 ipa_ep_id, bool enable,
 			  enum ipa_client_type client);
 int ipa_ep_alloc(enum ipa_client_type client);
-void ipa_ep_free(u32 ipa_ep_idx);
+void ipa_ep_free(u32 ipa_ep_id);
 
-void ipa_no_intr_init(u32 prod_ep_idx);
+void ipa_no_intr_init(u32 prod_ep_id);
 
 int ipa_setup_sys_pipe(u32 client_hdl, u32 chan_count, u32 rx_buffer_size,
 		       struct ipa_sys_connect_params *sys_in);
@@ -499,13 +499,13 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt);
 void ipa_proxy_clk_vote(void);
 void ipa_proxy_clk_unvote(void);
 
-enum ipa_client_type ipa_get_client_mapping(u32 pipe_idx);
+enum ipa_client_type ipa_get_client_mapping(u32 ep_id);
 
 u32 ipa_filter_bitmap_init(void);
 
 /* internal functions */
 
-bool ipa_is_modem_pipe(u32 pipe_idx);
+bool ipa_is_modem_ep(u32 ep_id);
 
 u32 ipa_get_ep_mapping(enum ipa_client_type client);
 struct ipa_ep_context *ipa_get_ep_context(enum ipa_client_type client);
@@ -562,7 +562,7 @@ int ipa_gsi_dma_task_alloc(void);
 void ipa_gsi_dma_task_free(void);
 int ipa_gsi_dma_task_inject(void);
 
-void ipa_set_flt_tuple_mask(u32 pipe_idx);
+void ipa_set_flt_tuple_mask(u32 ep_id);
 void ipa_set_rt_tuple_mask(int tbl_idx);
 
 void ipa_gsi_irq_rx_notify_cb(void *chan_data, u16 count);

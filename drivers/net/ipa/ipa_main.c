@@ -469,13 +469,13 @@ free_mem:
 
 static void ipa_setup_flt_hash_tuple(void)
 {
-	u32 pipe_mask = ipa_ctx->filter_bitmap;
+	u32 ep_mask = ipa_ctx->filter_bitmap;
 
-	while (pipe_mask) {
-		u32 i = __ffs(pipe_mask);
+	while (ep_mask) {
+		u32 i = __ffs(ep_mask);
 
-		pipe_mask ^= BIT(i);
-		if (!ipa_is_modem_pipe(i))
+		ep_mask ^= BIT(i);
+		if (!ipa_is_modem_ep(i))
 			ipa_set_flt_tuple_mask(i);
 	}
 }
