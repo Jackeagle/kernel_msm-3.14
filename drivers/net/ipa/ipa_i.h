@@ -436,12 +436,12 @@ void ipa_wwan_cleanup(void);
 
 /* Generic GSI channels functions */
 
-int ipa_stop_gsi_channel(u32 clnt_hdl);
+int ipa_stop_gsi_channel(u32 ep_id);
 
-void ipa_reset_gsi_channel(u32 clnt_hdl);
+void ipa_reset_gsi_channel(u32 ep_id);
 
 /* Configuration */
-void ipa_cfg_ep(u32 clnt_hdl);
+void ipa_cfg_ep(u32 ep_id);
 
 /* Data path */
 int ipa_tx_dp(enum ipa_client_type dst, struct sk_buff *skb);
@@ -485,7 +485,7 @@ void ipa_no_intr_init(u32 prod_ep_idx);
 int ipa_setup_sys_pipe(u32 client_hdl, u32 chan_count, u32 rx_buffer_size,
 		       struct ipa_sys_connect_params *sys_in);
 
-void ipa_teardown_sys_pipe(u32 clnt_hdl);
+void ipa_teardown_sys_pipe(u32 ep_id);
 
 void ipa_rx_switch_to_poll_mode(struct ipa_sys_context *sys);
 
@@ -532,7 +532,7 @@ void ipa_cfg_default_route(enum ipa_client_type client);
 
 int ipa_interrupts_init(void);
 
-void ipa_suspend_active_aggr_wa(u32 clnt_hdl);
+void ipa_suspend_active_aggr_wa(u32 ep_id);
 void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data);
 
 void ipa_sram_settings_read(void);
@@ -554,7 +554,7 @@ void ipa_suspend_apps_pipes(void);
 void ipa_resume_apps_pipes(void);
 void ipa_inc_acquire_wakelock(void);
 void ipa_dec_release_wakelock(void);
-int ipa_rx_poll(u32 clnt_hdl, int budget);
+int ipa_rx_poll(u32 ep_id, int budget);
 void ipa_reset_freeze_vote(void);
 void ipa_enable_dcd(void);
 

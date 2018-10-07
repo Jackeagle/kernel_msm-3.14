@@ -64,7 +64,7 @@ ipa_restore_channel_properties(struct ipa_ep_context *ep,
 }
 
 static int
-ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
+ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 {
 	struct ipa_reg_aggr_force_close force_close;
 	int result;
@@ -80,7 +80,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 
 	ipa_debug("Applying reset channel with open aggregation frame WA\n");
 
-	ipa_reg_aggr_force_close(&force_close, BIT(clnt_hdl));
+	ipa_reg_aggr_force_close(&force_close, BIT(ep_id));
 	ipa_write_reg_fields(IPA_AGGR_FORCE_CLOSE, &force_close);
 
 	/* Reset channel */
@@ -101,13 +101,12 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	if (result)
 		return -EFAULT;
 
-	ipa_read_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl, &init_ctrl);
+	ipa_read_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 	if (init_ctrl.endp_suspend) {
 		ipa_debug("pipe is suspended, remove suspend\n");
 		pipe_suspended = true;
 		ipa_reg_endp_init_ctrl(&init_ctrl, false);
-		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl,
-				       &init_ctrl);
+		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 	}
 
 	/* Start channel and put 1 Byte descriptor on it */
@@ -139,16 +138,16 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	/* Wait for aggregation frame to be closed and stop channel*/
 	for (i = 0; i < IPA_POLL_AGGR_STATE_RETRIES_NUM; i++) {
 		aggr_active_bitmap = ipa_read_reg(IPA_STATE_AGGR_ACTIVE);
-		if (!(aggr_active_bitmap & BIT(clnt_hdl)))
+		if (!(aggr_active_bitmap & BIT(ep_id)))
 			break;
 		msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
 	}
 
-	ipa_bug_on(aggr_active_bitmap & BIT(clnt_hdl));
+	ipa_bug_on(aggr_active_bitmap & BIT(ep_id));
 
 	ipa_dma_free(&dma_byte);
 
-	result = ipa_stop_gsi_channel(clnt_hdl);
+	result = ipa_stop_gsi_channel(ep_id);
 	if (result) {
 		ipa_err("Error stopping channel: %d\n", result);
 		goto start_chan_fail;
@@ -170,8 +169,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 	if (pipe_suspended) {
 		ipa_debug("suspend the pipe again\n");
 		ipa_reg_endp_init_ctrl(&init_ctrl, true);
-		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl,
-				       &init_ctrl);
+		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 	}
 
 	/* Restore channels properties */
@@ -185,13 +183,12 @@ ipa_reset_with_open_aggr_frame_wa(u32 clnt_hdl, struct ipa_ep_context *ep)
 queue_xfer_fail:
 	ipa_dma_free(&dma_byte);
 dma_alloc_fail:
-	ipa_stop_gsi_channel(clnt_hdl);
+	ipa_stop_gsi_channel(ep_id);
 start_chan_fail:
 	if (pipe_suspended) {
 		ipa_debug("suspend the pipe again\n");
 		ipa_reg_endp_init_ctrl(&init_ctrl, true);
-		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, clnt_hdl,
-				       &init_ctrl);
+		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 	}
 	ipa_restore_channel_properties(ep, &orig_props);
 restore_props_fail:
@@ -200,9 +197,9 @@ restore_props_fail:
 	return result;
 }
 
-void ipa_reset_gsi_channel(u32 clnt_hdl)
+void ipa_reset_gsi_channel(u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 	u32 aggr_active_bitmap;
 
 	ipa_client_add();
@@ -215,8 +212,8 @@ void ipa_reset_gsi_channel(u32 clnt_hdl)
 	else
 		aggr_active_bitmap = 0;
 
-	if (aggr_active_bitmap & BIT(clnt_hdl)) {
-		ipa_bug_on(ipa_reset_with_open_aggr_frame_wa(clnt_hdl, ep));
+	if (aggr_active_bitmap & BIT(ep_id)) {
+		ipa_bug_on(ipa_reset_with_open_aggr_frame_wa(ep_id, ep));
 	} else {
 		/* If the reset called after stop, need to wait 1ms */
 		msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);

@@ -254,9 +254,9 @@ static void ipa_wq_write_done(struct work_struct *done_work)
  * Returns the number of received packets, and switches to interrupt
  * mode if that's less than weight.
  */
-int ipa_rx_poll(u32 clnt_hdl, int weight)
+int ipa_rx_poll(u32 ep_id, int weight)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 	int cnt = 0;
 	static int total_cnt;
 
@@ -1829,13 +1829,13 @@ err_client_remove:
 }
 
 /** ipa_teardown_sys_pipe() - Teardown the GPI pipe and cleanup IPA EP
- * @clnt_hdl:	[in] the handle obtained from ipa_setup_sys_pipe
+ * @ep_id:	[in] the endpiont id obtained from ipa_setup_sys_pipe
  *
  * Returns:	0 on success, negative on failure
  */
-void ipa_teardown_sys_pipe(u32 clnt_hdl)
+void ipa_teardown_sys_pipe(u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 	int empty;
 	int result;
 	int i;
@@ -1865,13 +1865,13 @@ void ipa_teardown_sys_pipe(u32 clnt_hdl)
 	flush_workqueue(ep->sys->wq);
 	/* channel stop might fail on timeout if IPA is busy */
 	for (i = 0; i < IPA_GSI_CHANNEL_STOP_MAX_RETRY; i++) {
-		result = ipa_stop_gsi_channel(clnt_hdl);
+		result = ipa_stop_gsi_channel(ep_id);
 		if (!result)
 			break;
 		ipa_bug_on(result != -EAGAIN && result != -ETIMEDOUT);
 	}
 
-	ipa_reset_gsi_channel(clnt_hdl);
+	ipa_reset_gsi_channel(ep_id);
 	gsi_dealloc_channel(ipa_ctx->gsi, ep->gsi_chan_hdl);
 	gsi_reset_evt_ring(ipa_ctx->gsi, ep->gsi_evt_ring_hdl);
 	gsi_dealloc_evt_ring(ipa_ctx->gsi, ep->gsi_evt_ring_hdl);
@@ -1879,11 +1879,11 @@ void ipa_teardown_sys_pipe(u32 clnt_hdl)
 	if (ipa_consumer(ep->client))
 		ipa_cleanup_rx(ep->sys);
 
-	ipa_ep_free(clnt_hdl);
+	ipa_ep_free(ep_id);
 
 	ipa_client_remove();
 
-	ipa_debug("client (ep: %d) disconnected\n", clnt_hdl);
+	ipa_debug("client (ep: %u) disconnected\n", ep_id);
 }
 
 static int ipa_poll_gsi_pkt(struct ipa_sys_context *sys)

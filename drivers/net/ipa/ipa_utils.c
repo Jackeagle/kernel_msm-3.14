@@ -594,12 +594,11 @@ ipa_endp_init_hdr_ext_write(u32 ipa_ep_idx)
  *
  * @ipa_ep_idx:	endpoint whose aggregation config register should be written
  */
-static void ipa_endp_init_aggr_write(u32 clnt_hdl)
+static void ipa_endp_init_aggr_write(u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[clnt_hdl];
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
-	ipa_write_reg_n_fields(IPA_ENDP_INIT_AGGR_N, clnt_hdl,
-			       &ep->init_aggr);
+	ipa_write_reg_n_fields(IPA_ENDP_INIT_AGGR_N, ep_id, &ep->init_aggr);
 }
 
 /** ipa_endp_init_cfg_write() - write endpoint configuration register
@@ -672,7 +671,7 @@ static void ipa_endp_status_write(u32 ipa_ep_idx)
 }
 
 /** ipa_cfg_ep - IPA end-point configuration
- * @clnt_hdl:	[in] opaque client handle assigned by IPA to client
+ * @ep_id:	[in] endpoint id assigned by IPA to client
  * @dst:	[in] destination client handle (ignored for consumer clients)
  *
  * This includes nat, IPv6CT, header, mode, aggregation and route settings and
@@ -682,23 +681,23 @@ static void ipa_endp_status_write(u32 ipa_ep_idx)
  *
  * Note:	Should not be called from atomic context
  */
-void ipa_cfg_ep(u32 clnt_hdl)
+void ipa_cfg_ep(u32 ep_id)
 {
-	ipa_endp_init_hdr_write(clnt_hdl);
-	ipa_endp_init_hdr_ext_write(clnt_hdl);
+	ipa_endp_init_hdr_write(ep_id);
+	ipa_endp_init_hdr_ext_write(ep_id);
 
-	ipa_endp_init_aggr_write(clnt_hdl);
-	ipa_endp_init_cfg_write(clnt_hdl);
+	ipa_endp_init_aggr_write(ep_id);
+	ipa_endp_init_cfg_write(ep_id);
 
-	if (ipa_producer(ipa_ctx->ep[clnt_hdl].client)) {
-		ipa_endp_init_mode_write(clnt_hdl);
-		ipa_endp_init_seq_write(clnt_hdl);
-		ipa_endp_init_deaggr_write(clnt_hdl);
+	if (ipa_producer(ipa_ctx->ep[ep_id].client)) {
+		ipa_endp_init_mode_write(ep_id);
+		ipa_endp_init_seq_write(ep_id);
+		ipa_endp_init_deaggr_write(ep_id);
 	} else {
-		ipa_endp_init_hdr_metadata_mask_write(clnt_hdl);
+		ipa_endp_init_hdr_metadata_mask_write(ep_id);
 	}
 
-	ipa_endp_status_write(clnt_hdl);
+	ipa_endp_status_write(ep_id);
 }
 
 static void suspend_consumer_endpoint(u32 ipa_ep_idx)
@@ -1046,13 +1045,13 @@ int ipa_gsi_dma_task_inject(void)
  *
  * Return value: 0 on success, negative otherwise
  */
-int ipa_stop_gsi_channel(u32 clnt_hdl)
+int ipa_stop_gsi_channel(u32 ep_id)
 {
 	int res = 0;
 	int i;
 	struct ipa_ep_context *ep;
 
-	ep = &ipa_ctx->ep[clnt_hdl];
+	ep = &ipa_ctx->ep[ep_id];
 
 	ipa_client_add();
 

@@ -261,12 +261,12 @@ int ipa_interrupts_init(void)
  *  aggregation frame in order to bypass HW bug of IRQ not generated when
  *  endpoint is suspended during an open aggregation.
  */
-void ipa_suspend_active_aggr_wa(u32 clnt_hdl)
+void ipa_suspend_active_aggr_wa(u32 ep_id)
 {
 	struct ipa_reg_aggr_force_close force_close;
 	int irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
 	struct ipa_interrupt_info *intr_info = &ipa_interrupt_info[irq_num];
-	u32 clnt_mask = BIT(clnt_hdl);
+	u32 clnt_mask = BIT(ep_id);
 
 	/* Nothing to do if the endpoint doesn't have aggregation open */
 	if (!(ipa_read_reg(IPA_STATE_AGGR_ACTIVE) & clnt_mask))
