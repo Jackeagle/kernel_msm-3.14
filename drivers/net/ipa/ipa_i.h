@@ -506,7 +506,6 @@ int ipa_send_cmd(struct ipa_desc *desc);
 void ipa_client_add(void);
 bool ipa_client_add_additional(void);
 void ipa_client_remove(void);
-void ipa_client_remove_wait(void);
 
 u32 ipa_aggr_byte_limit_buf_size(u32 byte_limit);
 

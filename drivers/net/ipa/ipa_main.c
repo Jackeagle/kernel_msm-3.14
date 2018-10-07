@@ -757,19 +757,6 @@ void ipa_client_remove(void)
 		queue_work(ipa_ctx->power_mgmt_wq, &ipa_client_remove_work);
 }
 
-/* Remove an IPA client reference.  If other references remain
- * return is immediate.  For the last reference, this function
- * blocks until it can be safely removed under mutex protection.
- * Unless another client can be added concurrently, the reference
- * count will be 0 (and endpoints will be suspended and clocks stopped)
- * upon return for the final reference.
- */
-void ipa_client_remove_wait(void)
-{
-	if (!ipa_client_remove_not_final())
-		ipa_client_remove_final();
-}
-
 /** ipa_inc_acquire_wakelock() - Increase active clients counter, and
  * acquire wakelock if necessary
  *
