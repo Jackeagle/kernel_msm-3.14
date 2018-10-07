@@ -393,13 +393,7 @@ static int ipa_init_flt4(struct ipa_dma_mem *mem)
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	u32 hash_offset;
 	u32 nhash_offset;
-	int rc;
-
-	rc = ipahal_flt_generate_empty_img(ipa_ctx->filter_bitmap, mem);
-	if (rc) {
-		ipa_err("fail generate empty v4 flt img\n");
-		return rc;
-	}
+	int ret;
 
 	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_FLT_HASH_OFST;
 	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_FLT_NHASH_OFST;
@@ -407,21 +401,19 @@ static int ipa_init_flt4(struct ipa_dma_mem *mem)
 						 nhash_offset);
 	if (!cmd_pyld) {
 		ipa_err("fail construct ip_v4_flt_init imm cmd\n");
-		rc = -EPERM;
-		goto free_mem;
+		return -EPERM;
 	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
-	if (ipa_send_cmd(&desc)) {
+	ret = ipa_send_cmd(&desc);
+	if (ret) {
 		ipa_err("fail to send immediate command\n");
-		rc = -EFAULT;
+		ret = -EFAULT;
 	}
 
 	ipahal_destroy_imm_cmd(cmd_pyld);
 
-free_mem:
-	ipahal_free_empty_img(mem);
-	return rc;
+	return ret;
 }
 
 /** ipa_init_flt6() - Initialize IPA filtering block for IPv6.
@@ -434,13 +426,7 @@ static int ipa_init_flt6(struct ipa_dma_mem *mem)
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	u32 hash_offset;
 	u32 nhash_offset;
-	int rc;
-
-	rc = ipahal_flt_generate_empty_img(ipa_ctx->filter_bitmap, mem);
-	if (rc) {
-		ipa_err("fail generate empty v6 flt img\n");
-		return rc;
-	}
+	int ret;
 
 	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_FLT_HASH_OFST;
 	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_FLT_NHASH_OFST;
@@ -448,21 +434,18 @@ static int ipa_init_flt6(struct ipa_dma_mem *mem)
 						 nhash_offset);
 	if (!cmd_pyld) {
 		ipa_err("fail construct ip_v6_flt_init imm cmd\n");
-		rc = -EPERM;
-		goto free_mem;
+		return -EPERM;
 	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
-	if (ipa_send_cmd(&desc)) {
+	ret = ipa_send_cmd(&desc);
+	if (ret) {
 		ipa_err("fail to send immediate command\n");
-		rc = -EFAULT;
+		ret = -EFAULT;
 	}
-
 	ipahal_destroy_imm_cmd(cmd_pyld);
 
-free_mem:
-	ipahal_free_empty_img(mem);
-	return rc;
+	return ret;
 }
 
 static void ipa_setup_flt_hash_tuple(void)
@@ -589,11 +572,16 @@ static int ipa_ep_apps_setup(void)
 	ipa_init_rt6();
 	ipa_debug("V6 RT initialized\n");
 
+	result = ipahal_flt_generate_empty_img(ipa_ctx->filter_bitmap, &mem);
+	ipa_assert(!result);
+
 	ipa_init_flt4(&mem);
 	ipa_debug("V4 FLT initialized\n");
 
 	ipa_init_flt6(&mem);
 	ipa_debug("V6 FLT initialized\n");
+
+	ipahal_free_empty_img(&mem);
 
 	ipa_setup_flt_hash_tuple();
 	ipa_debug("flt hash tuple is configured\n");
