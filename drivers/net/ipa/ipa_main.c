@@ -577,7 +577,7 @@ static int ipa_setup_apps_pipes(void)
 	if (result < 0)
 		return result;
 
-	ipa_debug("Apps to IPA cmd pipe is connected\n");
+	ipa_debug("Apps to IPA cmd endpoint is connected\n");
 
 	ipa_init_sram();
 	ipa_debug("SRAM initialized\n");
@@ -606,12 +606,12 @@ static int ipa_setup_apps_pipes(void)
 	/* LAN IN (IPA->AP)
 	 *
 	 * Even without supporting LAN traffic, we use the LAN consumer
-	 * pipe for receiving some information from the IPA.  If we issue
+	 * endpoint for receiving some information from the IPA.  If we issue
 	 * a tagged command, we arrange to be notified of its completion
-	 * through this pipe.  In addition, we arrange for this pipe to
-	 * be used as the IPA's default route; the IPA will notify the AP
+	 * through this endpoint.  In addition, we arrange for this endpoint
+	 * to be used as the IPA's default route; the IPA will notify the AP
 	 * of exceptions (unroutable packets, but other events as well)
-	 * through this pipe.
+	 * through this endpoint.
 	 */
 	result = setup_apps_lan_cons_pipe();
 	if (result < 0)
@@ -655,8 +655,8 @@ static void ipa_disable_clks(void)
 /* Add an IPA client under protection of the mutex.  This is called
  * for the first client, but a race could mean another caller gets
  * the first reference.  When the first reference is taken, IPA
- * clocks are enabled pipes are resumed.  A positive reference count
- * means the pipes are active; this doesn't set the first reference
+ * clocks are enabled endpoints are resumed.  A positive reference count
+ * means the endpoints are active; this doesn't set the first reference
  * until after this is complete (and the mutex, not the atomic
  * count, is what protects this).
  */
@@ -697,7 +697,7 @@ bool ipa_client_add_additional(void)
 /* Add an IPA client.  If this is not the first client, the
  * reference count is updated and return is immediate.  Otherwise
  * ipa_client_add_first() will safely add the first client, enabling
- * clocks and setting up (resuming) pipes before returning.
+ * clocks and setting up (resuming) endpoints before returning.
  */
 void ipa_client_add(void)
 {
@@ -709,7 +709,7 @@ void ipa_client_add(void)
 /* Remove an IPA client under protection of the mutex.  This is
  * called for the last remaining client, but a race could mean
  * another caller gets an additional reference before the mutex
- * is acquired.  When the final reference is dropped, pipes are
+ * is acquired.  When the final reference is dropped, endpoints are
  * suspended and IPA clocks disabled.
  */
 static void ipa_client_remove_final(void)
@@ -726,7 +726,7 @@ static void ipa_client_remove_final(void)
 }
 
 /* Decrement the active clients reference count, and if the result
- * is 0, suspend the pipes and disable clocks.
+ * is 0, suspend the endpoints and disable clocks.
  *
  * This function runs in work queue context, scheduled to run whenever
  * the last reference would be dropped in ipa_client_remove().
@@ -761,7 +761,7 @@ void ipa_client_remove(void)
  * return is immediate.  For the last reference, this function
  * blocks until it can be safely removed under mutex protection.
  * Unless another client can be added concurrently, the reference
- * count will be 0 (and pipes will be suspended and clocks stopped)
+ * count will be 0 (and endpoints will be suspended and clocks stopped)
  * upon return for the final reference.
  */
 void ipa_client_remove_wait(void)
@@ -833,12 +833,12 @@ static void ipa_suspend_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 		if (!ipa_ap_consumer(client))
 			continue;
 
-		/* pipe will be unsuspended as part of enabling IPA clocks */
+		/* endpoint will be unsuspended by enabling IPA clocks */
 		mutex_lock(&ipa_ctx->transport_pm.transport_pm_mutex);
 		if (!atomic_read(&ipa_ctx->transport_pm.dec_clients)) {
 			ipa_client_add();
 
-			ipa_debug_low("Pipes un-suspended.\n");
+			ipa_debug_low("Endpoints un-suspended.\n");
 			ipa_debug_low("Enter poll mode.\n");
 			atomic_set(&ipa_ctx->transport_pm.dec_clients, 1);
 		}
@@ -944,7 +944,7 @@ static void ipa_register_panic_hdlr(void)
  * - Initialize filtering lists heads and idr
  * - Initialize interrupts
  * - Register GSI
- * - Setup APPS pipes
+ * - Setup APPS endpoints
  * - Initialize IPA debugfs
  * - Initialize IPA uC interface
  * - Initialize WDI interface
@@ -964,14 +964,14 @@ static void ipa_post_init(struct work_struct *unused)
 	}
 	ipa_debug("IPA gsi is registered\n");
 
-	/* setup the AP-IPA pipes */
+	/* setup the AP-IPA endpoints */
 	if (ipa_setup_apps_pipes()) {
-		ipa_err(":failed to setup IPA-Apps pipes\n");
+		ipa_err(":failed to setup IPA-Apps endpoints\n");
 		gsi_deregister_device(ipa_ctx->gsi);
 
 		return;
 	}
-	ipa_debug("IPA GPI pipes were connected\n");
+	ipa_debug("IPA GPI endpoints were connected\n");
 
 	ipa_ctx->uc_ctx = ipa_uc_init(ipa_ctx->ipa_phys);
 	if (!ipa_ctx->uc_ctx)
@@ -1039,7 +1039,7 @@ static bool config_valid(u32 filter_bitmap)
 
 	/* The endpoints that support filtering is determined at
 	 * runtime, so we can't use BUILD_BUG_ON().  We require at
-	 * least one pipe that supports filtering.
+	 * least one endpoint that supports filtering.
 	 *
 	 * The size set aside for the filter tables for IPv4 and IPv6,
 	 * both hashed and un-hashed, must be big enough to hold all
@@ -1081,9 +1081,9 @@ static bool config_valid(u32 filter_bitmap)
  *   routing and IPA-tree
  * Create memory pool with 4 objects for DMA operations(each object
  *   is 512Bytes long), this object will be use for tx(A5->IPA)
- * Initialize lists head(routing, hdr, system pipes)
+ * Initialize lists head(routing, hdr, system endpoints)
  * Initialize mutexes (for ipa_ctx and NAT memory mutexes)
- * Initialize spinlocks (for list related to A5<->IPA pipes)
+ * Initialize spinlocks (for list related to A5<->IPA endpoints)
  * Initialize 2 single-threaded work-queue named "ipa rx wq" and "ipa tx wq"
  * Initialize Red-Black-Tree(s) for handles of header,routing rule,
  *  routing table ,filtering rule

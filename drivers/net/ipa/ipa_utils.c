@@ -433,7 +433,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 			.ee			= IPA_EE_AP,
 		},
 	},
-/* Dummy consumer (pipe 31) is used in L2TP rt rule */
+/* Dummy consumer (endpoint 31) is used in L2TP rt rule */
 	[IPA_CLIENT_DUMMY_CONS] = {
 		.valid		= true,
 		.support_flt	= false,
@@ -921,13 +921,13 @@ static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
 	ipa_rx_switch_to_poll_mode(ep->sys);
 }
 
-/* Suspend a consumer pipe */
+/* Suspend a consumer endpoint */
 static void suspend_consumer_pipe(enum ipa_client_type client)
 {
 	u32 ep_id = ipa_get_ep_mapping(client);
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
-	ipa_debug("pipe %u\n", ep_id);
+	ipa_debug("endpoint %u\n", ep_id);
 
 	suspend_consumer_endpoint(ep_id);
 	ipa_gsi_poll_after_suspend(ep);
@@ -939,13 +939,13 @@ void ipa_suspend_apps_pipes(void)
 	suspend_consumer_pipe(IPA_CLIENT_APPS_LAN_CONS);
 }
 
-/* Resume a suspended consumer pipe */
+/* Resume a suspended consumer endpoint */
 static void resume_consumer_pipe(enum ipa_client_type client)
 {
 	u32 ep_id = ipa_get_ep_mapping(client);
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
-	ipa_debug("pipe %u\n", ep_id);
+	ipa_debug("endpoint %u\n", ep_id);
 
 	resume_consumer_endpoint(ep_id);
 	if (!ipa_ep_polling(ep))
@@ -969,8 +969,8 @@ void ipa_cfg_default_route(enum ipa_client_type client)
 	struct ipa_reg_route route;
 	u32 ep_id = ipa_get_ep_mapping(client);
 
-	ipa_debug("dis=0, def_pipe=%u, hdr_tbl=1 hdr_ofst=0\n", ep_id);
-	ipa_debug("frag_def_pipe=%u def_retain_hdr=1\n", ep_id);
+	ipa_debug("dis=0, def_endpoint=%u, hdr_tbl=1 hdr_ofst=0\n", ep_id);
+	ipa_debug("frag_def_endpoint=%u def_retain_hdr=1\n", ep_id);
 
 	ipa_reg_route(&route, ep_id);
 
@@ -1113,7 +1113,7 @@ void ipa_enable_dcd(void)
  * endpoint.  Endpoint must be for AP (not modem) and support filtering.
  * Updates the the filtering masking values without changing the rt ones.
  *
- * @ep_id: filter pipe endpoint to configure the tuple masking
+ * @ep_id: filter endpoint to configure the tuple masking
  * @tuple: the tuple members masking
  * Returns:	0 on success, negative on failure
  *

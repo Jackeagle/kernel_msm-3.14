@@ -72,7 +72,7 @@ struct rmnet_ipa_context {
 	u32 mux_id[MUX_CHANNEL_MAX];
 	u32 wan_prod_ep_id;
 	u32 wan_cons_ep_id;
-	struct mutex pipe_setup_mutex;		/* pipe setup/teardown */
+	struct mutex pipe_setup_mutex;		/* endpoint setup/teardown */
 	struct ipa_sys_connect_params wan_prod_cfg;
 	struct ipa_sys_connect_params wan_cons_cfg;
 };

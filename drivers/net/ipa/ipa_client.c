@@ -75,7 +75,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 	struct gsi_xfer_elem xfer_elem = { };
 	int i;
 	int aggr_active_bitmap = 0;
-	bool pipe_suspended = false;
+	bool ep_suspended = false;
 	struct ipa_reg_endp_init_ctrl init_ctrl;
 
 	ipa_debug("Applying reset channel with open aggregation frame WA\n");
@@ -103,8 +103,8 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 
 	ipa_read_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 	if (init_ctrl.endp_suspend) {
-		ipa_debug("pipe is suspended, remove suspend\n");
-		pipe_suspended = true;
+		ipa_debug("endpoint is suspended, remove suspend\n");
+		ep_suspended = true;
 		ipa_reg_endp_init_ctrl(&init_ctrl, false);
 		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 	}
@@ -166,8 +166,8 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 	 */
 	msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
 
-	if (pipe_suspended) {
-		ipa_debug("suspend the pipe again\n");
+	if (ep_suspended) {
+		ipa_debug("suspend the endpoint again\n");
 		ipa_reg_endp_init_ctrl(&init_ctrl, true);
 		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 	}
@@ -185,8 +185,8 @@ queue_xfer_fail:
 dma_alloc_fail:
 	ipa_stop_gsi_channel(ep_id);
 start_chan_fail:
-	if (pipe_suspended) {
-		ipa_debug("suspend the pipe again\n");
+	if (ep_suspended) {
+		ipa_debug("suspend the endpoint again\n");
 		ipa_reg_endp_init_ctrl(&init_ctrl, true);
 		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 	}

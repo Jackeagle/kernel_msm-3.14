@@ -387,7 +387,7 @@ struct ipa_dma_task_info {
  * @wcstats: wlan common buffer stats
  * @uc_ctx: uC interface context
  * @uc_wdi_ctx: WDI specific fields for uC interface
- * @ipa_num_pipes: The number of pipes used by IPA HW
+ * @ipa_num_pipes: The number of endpoints used by IPA HW
  * @ipa_client_apps_wan_cons_agg_gro: RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA
  * @w_lock: Indicates the wakeup source.
  * @wakelock_ref_cnt: Indicates the number of times wakelock is acquired
@@ -422,7 +422,7 @@ struct ipa_context {
 	struct ipa_wakelock_ref_cnt wakelock_ref_cnt;
 	/* RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA */
 	bool ipa_client_apps_wan_cons_agg_gro;
-	/* M-release support to know client pipes */
+	/* M-release support to know client endpoint */
 	struct ipa_smp2p_info smp2p_info;
 	struct ipa_dma_task_info dma_task_info;
 };
@@ -446,7 +446,7 @@ void ipa_cfg_ep(u32 ep_id);
 /* Data path */
 int ipa_tx_dp(enum ipa_client_type dst, struct sk_buff *skb);
 
-/* System pipes */
+/* System endpoints */
 bool ipa_endp_aggr_support(u32 ipa_ep_id);
 enum ipa_seq_type ipa_endp_seq_type(u32 ipa_ep_id);
 

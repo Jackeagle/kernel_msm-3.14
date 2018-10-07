@@ -255,7 +255,7 @@ int ipa_interrupts_init(void)
 }
 
 /** ipa_suspend_active_aggr_wa() - Emulate suspend IRQ
- * @clnt_hndl:		suspended client handle, IRQ is emulated for this pipe
+ * @ep_id: suspended client handle, IRQ is emulated for this * endpoint
  *
  *  Emulate suspend IRQ to unsuspend client which was suspended with an open
  *  aggregation frame in order to bypass HW bug of IRQ not generated when

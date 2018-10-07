@@ -131,8 +131,8 @@ enum ipa_uc_event {
  * @IPA_UC_ERROR_FATAL_SYSTEM: microcontroller has crashed and requires reset
  * @IPA_UC_ERROR_INVALID_OPCODE: invalid opcode sent
  * @IPA_UC_ERROR_INVALID_PARAMS: invalid params for the requested command
- * @IPA_UC_ERROR_CONS_DISABLE_CMD_GSI_STOP: consumer pipe stop failure
- * @IPA_UC_ERROR_PROD_DISABLE_CMD_GSI_STOP: producer pipe stop failure
+ * @IPA_UC_ERROR_CONS_DISABLE_CMD_GSI_STOP: consumer endpoint stop failure
+ * @IPA_UC_ERROR_PROD_DISABLE_CMD_GSI_STOP: producer endpoint stop failure
  * @IPA_UC_ERROR_CH_NOT_EMPTY: micrcontroller GSI channel is not empty
  */
 enum ipa_uc_error {
@@ -157,7 +157,7 @@ enum ipa_uc_error {
  * @IPA_UC_COMMAND_CLK_GATE: request hardware to enter clock gated state
  * @IPA_UC_COMMAND_CLK_UNGATE: request hardware to enter clock ungated state
  * @IPA_UC_COMMAND_MEMCPY: request hardware to perform memcpy
- * @IPA_UC_COMMAND_RESET_PIPE: request pipe reset
+ * @IPA_UC_COMMAND_RESET_PIPE: request endpoint reset
  * @IPA_UC_COMMAND_REG_WRITE: request a register be written
  * @IPA_UC_COMMAND_GSI_CH_EMPTY: request to determine whether channel is empty
  */

@@ -103,9 +103,9 @@ struct ipa_imm_cmd_hw_dma_shared_mem {
  *  dest client. This is used used for aggr sequence
  * @flsh: Flush flag: When asserted, pkt will go through the IPA blocks but
  *  will not be xfered to dest client but rather will be discarded
- * @lock: Lock pipe flag: When asserted, IPA will stop processing descriptors
- *  from other EPs in the same src grp (RX queue)
- * @unlock: Unlock pipe flag: When asserted, IPA will stop exclusively
+ * @lock: Lock endpoint flag: When asserted, IPA will stop processing
+ *  descriptors from other EPs in the same src grp (RX queue)
+ * @unlock: Unlock endpoint flag: When asserted, IPA will stop exclusively
  *  servicing current EP out of the src EPs of the grp (RX queue)
  * @size1: Size of buffer1 data
  * @addr1: Pointer to buffer1 data

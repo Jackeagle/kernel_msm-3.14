@@ -17,7 +17,7 @@
  * @type: specify if this packet is for the skb or immediate command
  * @mem: memory buffer used by this Tx packet
  * @work: work struct for current Tx packet
- * @link: linked to the wrappers on that pipe
+ * @link: linked to the wrappers on that endpoint
  * @callback: IPA client provided callback
  * @user1: cookie1 for above callback
  * @user2: cookie2 for above callback
@@ -41,7 +41,7 @@ struct ipa_tx_pkt_wrapper {
 };
 
 /** struct ipa_rx_pkt_wrapper - IPA Rx packet wrapper
- * @link: linked to the Rx packets on that pipe
+ * @link: linked to the Rx packets on that endpoint
  * @data: skb and DMA address of the received packet
  * @len: how many bytes are copied into skb's flat buffer
  */
@@ -51,18 +51,18 @@ struct ipa_rx_pkt_wrapper {
 	dma_addr_t dma_addr;
 };
 
-/** struct ipa_sys_context - IPA GPI pipes context
+/** struct ipa_sys_context - IPA GPI endpoint context
  * @head_desc_list: header descriptors list
  * @len: the size of the above list
  * @spinlock: protects the list and its size
  * @ep: IPA EP context
  *
- * IPA context specific to the GPI pipes a.k.a LAN IN/OUT and WAN
+ * IPA context specific to the GPI endpoints a.k.a LAN IN/OUT and WAN
  */
 struct ipa_sys_context {
 	u32 len;
 	union {
-		struct {	/* Consumer pipes only */
+		struct {	/* Consumer endpoints only */
 			u32 len_pending_xfer;
 			atomic_t curr_polling_state;
 			struct delayed_work switch_to_intr_work; /* sys->wq */
@@ -79,7 +79,7 @@ struct ipa_sys_context {
 			struct work_struct work; /* sys->wq */
 			struct delayed_work replenish_work; /* sys->wq */
 		} rx;
-		struct {	/* Producer pipes only */
+		struct {	/* Producer endpoints only */
 			/* no_intr/nop is APPS_WAN_PROD only */
 			bool no_intr;
 			atomic_t nop_pending;
@@ -195,16 +195,16 @@ ipa_wq_write_done_common(struct ipa_sys_context *sys,
 }
 
 static void
-ipa_wq_write_done_status(int src_pipe, struct ipa_tx_pkt_wrapper *tx_pkt)
+ipa_wq_write_done_status(u32 src_ep_id, struct ipa_tx_pkt_wrapper *tx_pkt)
 {
 	struct ipa_sys_context *sys;
 
-	WARN_ON(src_pipe >= ipa_ctx->ipa_num_pipes);
+	WARN_ON(src_ep_id >= ipa_ctx->ipa_num_pipes);
 
-	if (!ipa_ctx->ep[src_pipe].status.status_en)
+	if (!ipa_ctx->ep[src_ep_id].status.status_en)
 		return;
 
-	sys = ipa_ctx->ep[src_pipe].sys;
+	sys = ipa_ctx->ep[src_ep_id].sys;
 	if (!sys)
 		return;
 
@@ -223,7 +223,7 @@ ipa_wq_write_done_status(int src_pipe, struct ipa_tx_pkt_wrapper *tx_pkt)
  * - iterate over all packets and validate that
  *   the order for sent packet is the same as expected
  * - delete all the tx packet descriptors from the system
- *   pipe context (not needed anymore)
+ *   context (not needed anymore)
  */
 static void ipa_wq_write_done(struct work_struct *done_work)
 {
@@ -308,15 +308,15 @@ ipa_alloc_workqueue(const char *name, enum ipa_client_type client)
 	return wq;
 }
 
-/* Send an interrupting no-op request to a producer pipe.  Normally
- * an interrupt is generated upon completion of every transfer
- * performed by a pipe, but a producer pipe can be configured to
- * avoid getting these interrupts.  Instead, once a transfer has
- * been initiated, a no-op is scheduled to be sent after a short
- * delay.  This no-op request will interrupt when it is complete,
- * and in handling that interrupt, previously-completed transfers
- * will be handled as well.  If a no-op is already scheduled,
- * another is not initiated (there's only one pending at a time).
+/* Send an interrupting no-op request to a producer endpoint.  Normally
+ * an interrupt is generated upon completion of every transfer performed
+ * by an endpoint, but a producer endpoint can be configured to avoid
+ * getting these interrupts.  Instead, once a transfer has been initiated,
+ * a no-op is scheduled to be sent after a short delay.  This no-op
+ * request will interrupt when it is complete, and in handling that
+ * interrupt, previously-completed transfers will be handled as well.
+ * If a no-op is already scheduled, another is not initiated (there's
+ * only one pending at a time).
  */
 static bool ipa_send_nop(struct ipa_sys_context *sys)
 {
@@ -393,9 +393,9 @@ static void ipa_nop_timer_schedule(struct ipa_sys_context *sys)
 	hrtimer_start(&sys->tx.nop_timer, time, HRTIMER_MODE_REL);
 }
 
-/* For some producer pipes we don't interrupt on completions.
+/* For some producer endpoints we don't interrupt on completions.
  * Instead we schedule an interrupting NOP command to be issued on
- * the pipe after a short delay (if one is not already scheduled).
+ * the endpoint after a short delay (if one is not already scheduled).
  * When the NOP completes it signals all preceding transfers have
  * completed also.
  */
@@ -412,7 +412,7 @@ void ipa_no_intr_init(u32 prod_ep_id)
 }
 
 /** ipa_send() - Send multiple descriptors in one HW transaction
- * @sys: system pipe context
+ * @sys: system context
  * @num_desc: number of packets
  * @desc: packets to send (may be immediate command or data)
  *
@@ -632,9 +632,9 @@ int ipa_send_cmd(struct ipa_desc *desc)
  * function is read from multiple code paths.
  *
  * All the packets on the Rx data path are received on the IPA_A5_LAN_WAN_IN
- * endpoint. The function runs as long as there are packets in the pipe.
+ * endpoint. The function runs as long as there are packets at the endpoint.
  * For each packet:
- *  - Disconnect the packet from the system pipe linked list
+ *  - Disconnect the packet from the system enpoint linked list
  *  - Unmap the packets skb, make it non DMAable
  *  - Free the packet from the cache
  *  - Prepare a proper skb
@@ -703,7 +703,7 @@ static void ipa_handle_rx(struct ipa_sys_context *sys)
 
 		usleep_range(POLLING_MIN_SLEEP_RX, POLLING_MAX_SLEEP_RX);
 
-		/* if pipe is out of buffers there is no point polling for
+		/* if endpoint is out of buffers there is no point polling for
 		 * completed descs; release the worker so delayed work can
 		 * run in a timely manner
 		 */
@@ -804,7 +804,7 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	src_ep_id = ipa_get_ep_mapping(client);
 	gsi_ep = ipa_get_gsi_ep_info(ipa_ctx->ep[src_ep_id].client);
 
-	/* Make sure source pipe's TLV FIFO has enough entries to
+	/* Make sure source endpoint's TLV FIFO has enough entries to
 	 * hold the linear portion of the skb and all its frags.
 	 * If not, see if we can linearize it before giving up.
 	 */
@@ -901,7 +901,7 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
  *   - Allocate the packets socket buffer (skb)
  *   - Fill the packets skb with data
  *   - Make the packet DMAable
- *   - Add the packet to the system pipe linked list
+ *   - Add the packet to the system context linked list
  */
 static void ipa_replenish_rx_cache(struct ipa_sys_context *sys)
 {
@@ -1037,7 +1037,7 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 	int len;
 	int len2;
 	unsigned char *buf;
-	int src_pipe;
+	u32 src_ep_id;
 	unsigned int used = *(unsigned int *)skb->cb;
 	unsigned int used_align = ALIGN(used, 32);
 	unsigned long unused = IPA_RX_BUFFER_SIZE - used;
@@ -1054,7 +1054,7 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 		goto begin;
 	}
 
-	/* this pipe has TX comp (status only) + mux-ed LAN RX data
+	/* this endpoint has TX comp (status only) + mux-ed LAN RX data
 	 * (status+data)
 	 */
 	if (sys->rx.len_rem) {
@@ -1125,7 +1125,7 @@ begin:
 
 		if (status.endp_dest_idx == (sys->ep - ipa_ctx->ep)) {
 			/* RX data */
-			src_pipe = status.endp_src_idx;
+			src_ep_id = status.endp_src_idx;
 
 			/* A packet which is received back to the AP after
 			 * there was no route match.
@@ -1196,7 +1196,7 @@ begin:
 				}
 			}
 			/* TX comp */
-			ipa_wq_write_done_status(src_pipe, tx_pkt);
+			ipa_wq_write_done_status(src_ep_id, tx_pkt);
 		} else {
 			/* TX comp */
 			ipa_wq_write_done_status(status.endp_src_idx, tx_pkt);
@@ -1372,20 +1372,20 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 	struct sk_buff *rx_skb = (struct sk_buff *)data;
 	struct ipahal_pkt_status status;
 	struct ipa_ep_context *ep;
-	unsigned int src_pipe;
+	u32 src_ep_id;
 	u32 pkt_status_size = ipahal_pkt_status_get_size();
 	u32 metadata;
 
 	ipa_assert(rx_skb->len >= pkt_status_size);
 
 	ipahal_pkt_status_parse(rx_skb->data, &status);
-	src_pipe = status.endp_src_idx;
+	src_ep_id = status.endp_src_idx;
 	metadata = status.metadata;
-	ep = &ipa_ctx->ep[src_pipe];
-	if (src_pipe >= ipa_ctx->ipa_num_pipes || !ep->allocated ||
+	ep = &ipa_ctx->ep[src_ep_id];
+	if (src_ep_id >= ipa_ctx->ipa_num_pipes || !ep->allocated ||
 	    !ep->client_notify) {
-		ipa_err("drop pipe=%d allocated=%s client_notify=%p\n",
-			src_pipe, ep->allocated ? "true" : "false",
+		ipa_err("drop endpoint=%u allocated=%s client_notify=%p\n",
+			src_ep_id, ep->allocated ? "true" : "false",
 			ep->client_notify);
 		dev_kfree_skb_any(rx_skb);
 		return;
@@ -1502,9 +1502,9 @@ void ipa_gsi_irq_rx_notify_cb(void *chan_data, u16 count)
 
 /* GSI ring length is calculated based on the fifo_count which
  * defines the descriptor FIFO.
- * For producer pipes there is also an additional descriptor
+ * For producer endpoints there is also an additional descriptor
  * for TAG STATUS immediate command.  An exception to this is the
- * APPS_WAN_PROD pipe, which uses event ring rather than TAG STATUS
+ * APPS_WAN_PROD endpoint, which uses event ring rather than TAG STATUS
  * based completions.
  */
 static u32
@@ -1768,10 +1768,10 @@ void ipa_ep_free(u32 ipa_ep_id)
 	ep->allocated = false;
 }
 
-/** ipa_setup_sys_pipe() - Setup an IPA GPI pipe and perform
+/** ipa_setup_sys_pipe() - Setup an IPA GPI endpoint and perform
  * IPA EP configuration
  * @client:	[in] handle assigned by IPA to client
- * @sys_in:	[in] input needed to setup the pipe and configure EP
+ * @sys_in:	[in] input needed to setup the endpoint and configure EP
  *
  *  - configure the end-point registers with the supplied
  *    parameters from the user.
