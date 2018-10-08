@@ -315,8 +315,7 @@ static int ipa_init_rt4(struct ipa_dma_mem *mem)
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
 	ret = ipa_send_cmd(&desc);
-	if (ret)
-		ret = -EFAULT;
+
 	ipahal_destroy_imm_cmd(cmd_pyld);
 
 	return ret;
@@ -345,8 +344,7 @@ static int ipa_init_rt6(struct ipa_dma_mem *mem)
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
 	ret = ipa_send_cmd(&desc);
-	if (ret)
-		ret = -EFAULT;
+
 	ipahal_destroy_imm_cmd(cmd_pyld);
 
 	return ret;
@@ -375,8 +373,6 @@ static int ipa_init_flt4(struct ipa_dma_mem *mem)
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
 	ret = ipa_send_cmd(&desc);
-	if (ret)
-		ret = -EFAULT;
 
 	ipahal_destroy_imm_cmd(cmd_pyld);
 
@@ -406,8 +402,6 @@ static int ipa_init_flt6(struct ipa_dma_mem *mem)
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
 	ret = ipa_send_cmd(&desc);
-	if (ret)
-		ret = -EFAULT;
 
 	ipahal_destroy_imm_cmd(cmd_pyld);
 
