@@ -261,16 +261,11 @@ ipahal_imm_cmd_pyld_alloc(u16 opcode, size_t pyld_size)
 {
 	struct ipahal_imm_cmd_pyld *pyld;
 
-	ipa_debug_low("immediate command: %u\n", opcode);
-
 	pyld = kzalloc(sizeof(*pyld) + pyld_size, GFP_KERNEL);
-	if (unlikely(!pyld)) {
-		ipa_err("kzalloc err (opcode %hu pyld_size %zu)\n", opcode,
-			pyld_size);
-		return NULL;
+	if (pyld) {
+		pyld->opcode = opcode;
+		pyld->len = pyld_size;
 	}
-	pyld->opcode = opcode;
-	pyld->len = pyld_size;
 
 	return pyld;
 }
