@@ -256,13 +256,13 @@ static const struct ipa_init_modem_driver_req *init_modem_driver_req(void)
 
 	req.v4_route_tbl_info_valid = true;
 	req.v4_route_tbl_info.start = base + IPA_MEM_V4_RT_NHASH_OFST;
-	req.v4_route_tbl_info.count = IPA_MEM_V4_MODEM_RT_INDEX_HI -
-					IPA_MEM_V4_MODEM_RT_INDEX_LO + 1;
+	req.v4_route_tbl_info.count = IPA_MEM_MODEM_RT_INDEX_HI -
+					IPA_MEM_MODEM_RT_INDEX_LO + 1;
 
 	req.v6_route_tbl_info_valid = true;
 	req.v6_route_tbl_info.start = base + IPA_MEM_V6_RT_NHASH_OFST;
-	req.v6_route_tbl_info.count = IPA_MEM_V6_MODEM_RT_INDEX_HI -
-					IPA_MEM_V6_MODEM_RT_INDEX_LO + 1;
+	req.v6_route_tbl_info.count = IPA_MEM_MODEM_RT_INDEX_HI -
+					IPA_MEM_MODEM_RT_INDEX_LO + 1;
 
 	req.v4_filter_tbl_start_valid = true;
 	req.v4_filter_tbl_start = base + IPA_MEM_V4_FLT_NHASH_OFST;
@@ -287,13 +287,13 @@ static const struct ipa_init_modem_driver_req *init_modem_driver_req(void)
 
 	req.v4_hash_route_tbl_info_valid = true;
 	req.v4_hash_route_tbl_info.start = base + IPA_MEM_V4_RT_HASH_OFST;
-	req.v4_hash_route_tbl_info.count = IPA_MEM_V4_MODEM_RT_INDEX_HI -
-					    IPA_MEM_V4_MODEM_RT_INDEX_LO + 1;
+	req.v4_hash_route_tbl_info.count = IPA_MEM_MODEM_RT_INDEX_HI -
+					    IPA_MEM_MODEM_RT_INDEX_LO + 1;
 
 	req.v6_hash_route_tbl_info_valid = true;
 	req.v6_hash_route_tbl_info.start = base + IPA_MEM_V6_RT_HASH_OFST;
-	req.v6_hash_route_tbl_info.count = IPA_MEM_V6_MODEM_RT_INDEX_HI -
-					    IPA_MEM_V6_MODEM_RT_INDEX_LO + 1;
+	req.v6_hash_route_tbl_info.count = IPA_MEM_MODEM_RT_INDEX_HI -
+					    IPA_MEM_MODEM_RT_INDEX_LO + 1;
 
 	req.v4_hash_filter_tbl_start_valid = true;
 	req.v4_hash_filter_tbl_start = base + IPA_MEM_V4_FLT_HASH_OFST;
