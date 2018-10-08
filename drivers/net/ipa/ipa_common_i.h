@@ -219,9 +219,6 @@ enum hdr_total_len_or_pad_type {
 #define ipa_err(fmt, args...) \
 		pr_err(fmt, ## args)
 
-#define ipa_info(fmt, args...) \
-		pr_info(fmt, ## args)
-
 #define ipa_bug() \
 	do {								\
 		ipa_err("an unrecoverable error has occurred\n");	\

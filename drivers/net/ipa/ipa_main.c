@@ -897,7 +897,7 @@ static void ipa_post_init(void)
 	if (ipa_wwan_init())
 		ipa_err("WWAN init failed (ignoring)\n");
 
-	ipa_info("IPA driver initialization was successful.\n");
+	dev_info(ipa_ctx->dev, "IPA driver initialization was successful.\n");
 }
 
 /** ipa_pre_init() - Initialize the IPA Driver.

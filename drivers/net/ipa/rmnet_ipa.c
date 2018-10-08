@@ -641,7 +641,8 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 {
 	struct ipa_wwan_private *wwan_ptr = netdev_priv(rmnet_ipa_ctx->dev);
 
-	ipa_info("rmnet_ipa started deinitialization\n");
+	dev_info(&pdev->dev, "rmnet_ipa started deinitialization\n");
+
 	mutex_lock(&rmnet_ipa_ctx->ep_setup_mutex);
 	if (rmnet_ipa_ctx->wan_cons_ep_id != IPA_EP_ID_BAD) {
 		ipa_ep_teardown(rmnet_ipa_ctx->wan_cons_ep_id);
@@ -665,7 +666,8 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 	mutex_destroy(&rmnet_ipa_ctx->ep_setup_mutex);
 
 	initialized = false;
-	ipa_info("rmnet_ipa completed deinitialization\n");
+
+	dev_info(&pdev->dev, "rmnet_ipa completed deinitialization\n");
 
 	return 0;
 }
