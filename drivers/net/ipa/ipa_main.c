@@ -105,7 +105,6 @@ static int dma_shared_mem_zero_cmd(u32 offset, u32 size)
 
 	cmd_pyld = ipahal_dma_shared_mem_write_pyld(&mem, offset);
 	if (!cmd_pyld) {
-		ipa_err("error allocating command payload\n");
 		ret = -ENOMEM;
 		goto err_dma_free;
 	}
@@ -131,31 +130,22 @@ err_dma_free:
 int ipa_init_q6_smem(void)
 {
 	int rc;
-	char *what;
 
 	ipa_client_add();
 
 	rc = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_OFST, IPA_MEM_MODEM_SIZE);
-	if (rc) {
-		what = "Modem RAM";
+	if (rc)
 		goto out_client_remove;
-	}
 
 	rc = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_HDR_OFST,
 				     IPA_MEM_MODEM_HDR_SIZE);
-	if (rc) {
-		what = "Modem HDRs RAM";
+	if (rc)
 		goto out_client_remove;
-	}
 
 	rc = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_HDR_PROC_CTX_OFST,
 				     IPA_MEM_MODEM_HDR_PROC_CTX_SIZE);
-	if (rc)
-		what = "Modem proc ctx RAM";
 out_client_remove:
 	ipa_client_remove();
-	if (rc)
-		ipa_err("failed to initialize modem %s memory\n", what);
 
 	return rc;
 }
