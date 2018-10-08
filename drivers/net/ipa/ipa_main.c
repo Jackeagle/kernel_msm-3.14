@@ -118,35 +118,29 @@ err_dma_free:
 	return ret;
 }
 
-/** ipa_init_q6_smem() - Initialize Q6 general memory and
- *		       header memory regions in IPA.
- *
- * Return codes:
- * 0: success
- * -ENOMEM: failed to allocate dma memory
- * -EFAULT: failed to send IPA command to initialize the memory
+/** ipa_modem_smem_init() - Initialize modem general memory and header memory
  */
-int ipa_init_q6_smem(void)
+int ipa_modem_smem_init(void)
 {
-	int rc;
+	int ret;
 
 	ipa_client_add();
 
-	rc = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_OFST, IPA_MEM_MODEM_SIZE);
-	if (rc)
+	ret = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_OFST, IPA_MEM_MODEM_SIZE);
+	if (ret)
 		goto out_client_remove;
 
-	rc = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_HDR_OFST,
+	ret = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_HDR_OFST,
 				     IPA_MEM_MODEM_HDR_SIZE);
-	if (rc)
+	if (ret)
 		goto out_client_remove;
 
-	rc = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_HDR_PROC_CTX_OFST,
+	ret = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_HDR_PROC_CTX_OFST,
 				     IPA_MEM_MODEM_HDR_PROC_CTX_SIZE);
 out_client_remove:
 	ipa_client_remove();
 
-	return rc;
+	return ret;
 }
 
 static int ipa_ep_apps_cmd_prod_setup(void)

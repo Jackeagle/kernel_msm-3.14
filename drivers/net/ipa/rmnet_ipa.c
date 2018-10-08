@@ -584,11 +584,9 @@ static int ipa_wwan_probe(struct platform_device *pdev)
 	rmnet_ipa_ctx->wan_prod_ep_id = IPA_EP_ID_BAD;
 	rmnet_ipa_ctx->wan_cons_ep_id = IPA_EP_ID_BAD;
 
-	ret = ipa_init_q6_smem();
-	if (ret) {
-		ipa_err("ipa_init_q6_smem failed!\n");
+	ret = ipa_modem_smem_init();
+	if (ret)
 		goto err_clear_ctx;
-	}
 
 	/* start A7 QMI service/client */
 	ipa_qmi_init();

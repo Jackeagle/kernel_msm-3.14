@@ -446,7 +446,7 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data);
 
 void ipa_sram_settings_read(void);
 
-int ipa_init_q6_smem(void);
+int ipa_modem_smem_init(void);
 
 /* Defined in "ipa_uc.c" */
 struct ipa_uc_ctx *ipa_uc_init(phys_addr_t phys_addr);
