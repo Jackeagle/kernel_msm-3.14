@@ -992,10 +992,8 @@ static int ipa_pre_init(void)
 
 	/* allocate memory for DMA_TASK workaround */
 	result = ipa_gsi_dma_task_alloc();
-	if (result) {
-		ipa_err("failed to allocate dma task\n");
+	if (result)
 		goto err_dp_exit;
-	}
 
 	/* Create a wakeup source. */
 	wakeup_source_init(&ipa_ctx->w_lock, "IPA_WS");

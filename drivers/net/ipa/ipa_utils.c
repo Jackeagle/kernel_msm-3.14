@@ -970,7 +970,6 @@ int ipa_gsi_dma_task_alloc(void)
 
 	ipa_ctx->dma_task_info.cmd_pyld = ipahal_dma_task_32b_addr_pyld(mem);
 	if (!ipa_ctx->dma_task_info.cmd_pyld) {
-		ipa_err("failed to construct dma_task_32b_addr cmd\n");
 		ipa_dma_free(mem);
 
 		return -ENOMEM;
