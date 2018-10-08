@@ -696,11 +696,11 @@ void ipa_inc_acquire_wakelock(void)
 	unsigned long flags;
 
 	spin_lock_irqsave(&ipa_ctx->wakelock_ref_cnt.spinlock, flags);
+
 	ipa_ctx->wakelock_ref_cnt.cnt++;
 	if (ipa_ctx->wakelock_ref_cnt.cnt == 1)
 		__pm_stay_awake(&ipa_ctx->w_lock);
-	ipa_debug_low("active wakelock ref cnt = %d\n",
-		      ipa_ctx->wakelock_ref_cnt.cnt);
+
 	spin_unlock_irqrestore(&ipa_ctx->wakelock_ref_cnt.spinlock, flags);
 }
 
@@ -716,11 +716,11 @@ void ipa_dec_release_wakelock(void)
 	unsigned long flags;
 
 	spin_lock_irqsave(&ipa_ctx->wakelock_ref_cnt.spinlock, flags);
+
 	ipa_ctx->wakelock_ref_cnt.cnt--;
-	ipa_debug_low("active wakelock ref cnt = %d\n",
-		      ipa_ctx->wakelock_ref_cnt.cnt);
 	if (ipa_ctx->wakelock_ref_cnt.cnt == 0)
 		__pm_relax(&ipa_ctx->w_lock);
+
 	spin_unlock_irqrestore(&ipa_ctx->wakelock_ref_cnt.spinlock, flags);
 }
 
@@ -753,8 +753,6 @@ static void ipa_suspend_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 		if (!atomic_read(&ipa_ctx->transport_pm.dec_clients)) {
 			ipa_client_add();
 
-			ipa_debug_low("Endpoints un-suspended.\n");
-			ipa_debug_low("Enter poll mode.\n");
 			atomic_set(&ipa_ctx->transport_pm.dec_clients, 1);
 		}
 		mutex_unlock(&ipa_ctx->transport_pm.transport_pm_mutex);

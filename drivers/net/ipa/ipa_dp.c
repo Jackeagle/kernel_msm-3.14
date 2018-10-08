@@ -176,7 +176,6 @@ ipa_wq_write_done_common(struct ipa_sys_context *sys,
 	int i, cnt;
 
 	cnt = tx_pkt->cnt;
-	ipa_debug_low("cnt: %d\n", cnt);
 	for (i = 0; i < cnt; i++) {
 		ipa_assert(!list_empty(&sys->head_desc_list));
 
@@ -513,7 +512,6 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 		}
 	}
 
-	ipa_debug_low("ch:%lu queue xfer\n", ep->gsi_chan_hdl);
 	result = gsi_queue_xfer(ipa_ctx->gsi, ep->gsi_chan_hdl,
 				num_desc, xfer_elem, true);
 	if (result)
@@ -765,8 +763,6 @@ static void ipa_tx_dp_complete(void *user1, int user2)
 {
 	struct sk_buff *skb = (struct sk_buff *)user1;
 	int ep_id = user2;
-
-	ipa_debug_low("skb=%p ep=%d\n", skb, ep_id);
 
 	if (ipa_ctx->ep[ep_id].client_notify) {
 		void *priv = ipa_ctx->ep[ep_id].priv;
@@ -1211,14 +1207,11 @@ ipa_wan_rx_handle_splt_pyld(struct sk_buff *skb, struct ipa_sys_context *sys)
 {
 	struct sk_buff *skb2;
 
-	ipa_debug_low("rem %d skb %d\n", sys->rx.len_rem, skb->len);
 	if (sys->rx.len_rem <= skb->len) {
 		if (sys->rx.prev_skb) {
 			skb2 = ipa_join_prev_skb(sys->rx.prev_skb, skb,
 						 sys->rx.len_rem);
 			if (likely(skb2)) {
-				ipa_debug_low(
-					"removing Status element from skb and sending to WAN client");
 				skb_pull(skb2, ipahal_pkt_status_get_size());
 				skb2->truesize = skb2->len +
 					sizeof(struct sk_buff);
@@ -1404,8 +1397,6 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 	 *  ------------------------------------------
 	 */
 	*(u16 *)rx_skb->cb = ((metadata >> 16) & 0xffff);
-	ipa_debug_low("meta_data: 0x%x cb: 0x%x\n", metadata,
-		      *(u32 *)rx_skb->cb);
 
 	ep->client_notify(ep->priv, IPA_RECEIVE, (unsigned long)rx_skb);
 }
@@ -1485,8 +1476,6 @@ u32 ipa_aggr_byte_limit_buf_size(u32 byte_limit)
 void ipa_gsi_irq_tx_notify_cb(void *xfer_data)
 {
 	struct ipa_tx_pkt_wrapper *tx_pkt = xfer_data;
-
-	ipa_debug_low("event EOT notified\n");
 
 	queue_work(tx_pkt->sys->wq, &tx_pkt->done_work);
 }

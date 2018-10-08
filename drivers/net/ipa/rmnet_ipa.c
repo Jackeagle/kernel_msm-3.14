@@ -184,8 +184,6 @@ static void apps_ipa_tx_complete_notify(void *priv, enum ipa_dp_evt_type evt,
 	if (netif_queue_stopped(dev) &&
 	    atomic_read(&wwan_ptr->outstanding_pkts) <
 				wwan_ptr->outstanding_low) {
-		ipa_debug_low("Outstanding low (%d) - waking up queue\n",
-			      wwan_ptr->outstanding_low);
 		netif_wake_queue(dev);
 	}
 
@@ -792,7 +790,6 @@ static int ipa_rmnet_poll(struct napi_struct *napi, int budget)
 	int rcvd_pkts;
 
 	rcvd_pkts = ipa_rx_poll(rmnet_ipa_ctx->wan_cons_ep_id, budget);
-	ipa_debug_low("rcvd packets: %d\n", rcvd_pkts);
 
 	return rcvd_pkts;
 }

@@ -485,7 +485,6 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 	enum ipahal_pkt_status_exception exception;
 	bool is_ipv6;
 
-	ipa_debug_low("Parse Status Packet\n");
 	memset(status, 0, sizeof(*status));
 
 	is_ipv6 = (hw_status->status_mask & 0x80) ? false : true;
