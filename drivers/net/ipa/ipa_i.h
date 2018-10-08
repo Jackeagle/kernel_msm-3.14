@@ -24,9 +24,6 @@
 #include "ipahal.h"
 #include "gsi.h"
 
-#define DRV_NAME		"ipa"
-#define IPA_COOKIE		0x57831603
-
 #define IPA_MTU			1500
 
 #define IPA_EP_COUNT_MAX		31
