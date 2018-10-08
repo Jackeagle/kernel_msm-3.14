@@ -289,19 +289,6 @@ int ipa_rx_poll(u32 ep_id, int weight)
 	return cnt;
 }
 
-static struct workqueue_struct *
-ipa_alloc_workqueue(const char *name, enum ipa_client_type client)
-{
-	unsigned int wq_flags = WQ_MEM_RECLAIM | WQ_UNBOUND;
-	struct workqueue_struct *wq;
-
-	wq = alloc_workqueue("%s%u", wq_flags, 1, name, (u32)client);
-	if (!wq)
-		ipa_err("error creating wq %s for client %d\n", name, client);
-
-	return wq;
-}
-
 /* Send an interrupting no-op request to a producer endpoint.  Normally
  * an interrupt is generated upon completion of every transfer performed
  * by an endpoint, but a producer endpoint can be configured to avoid
@@ -726,6 +713,7 @@ static void ipa_switch_to_intr_rx_work_func(struct work_struct *work)
 
 static struct ipa_sys_context *ipa_ep_sys_create(enum ipa_client_type client)
 {
+	unsigned int wq_flags = WQ_MEM_RECLAIM | WQ_UNBOUND;
 	struct ipa_sys_context *sys;
 
 	/* Caller will zero all "mutable" fields; we fill in the rest */
@@ -733,15 +721,15 @@ static struct ipa_sys_context *ipa_ep_sys_create(enum ipa_client_type client)
 	if (!sys)
 		return NULL;
 
-	/* Caller assigns sys->ep = ep */
-	INIT_LIST_HEAD(&sys->head_desc_list);
-	spin_lock_init(&sys->spinlock);
-
-	sys->wq = ipa_alloc_workqueue("ipawq", client);
+	sys->wq = alloc_workqueue("ipawq%u", wq_flags, 1, (u32)client);
 	if (!sys->wq) {
 		kfree(sys);
 		return NULL;
 	}
+
+	/* Caller assigns sys->ep = ep */
+	INIT_LIST_HEAD(&sys->head_desc_list);
+	spin_lock_init(&sys->spinlock);
 
 	return sys;
 }
