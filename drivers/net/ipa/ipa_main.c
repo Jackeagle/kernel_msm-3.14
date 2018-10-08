@@ -487,8 +487,8 @@ static void ipa_setup_rt_hash_tuple(void)
 
 	/* Compute a mask representing non-modem route table entries */
 	route_mask = GENMASK(IPA_MEM_RT_COUNT - 1, 0);
-	modem_mask = GENMASK(IPA_MEM_MODEM_RT_INDEX_HI,
-			     IPA_MEM_MODEM_RT_INDEX_LO);
+	modem_mask = GENMASK(IPA_MEM_MODEM_RT_INDEX_MAX,
+			     IPA_MEM_MODEM_RT_INDEX_MIN);
 	route_mask &= ~modem_mask;
 
 	while (route_mask) {
@@ -979,24 +979,11 @@ static void validate_config(void)
 	/* The size of a filter or route table entry must be non-zero */
 	BUILD_BUG_ON(!IPA_HW_TBL_HDR_WIDTH);
 
-	/* The number of entries in the AP route tables must be non-zero,
-	 * for both IPv4 and IPv6.  (This is not true for filter tables.)
+	/* The number of modem entries in the route tables must be non-zero,
+	 * and must not exceed the total number of entries.
 	 */
-	BUILD_BUG_ON(!IPA_MEM_RT_COUNT);
-
-	/* The lower bound for the modem route table must not exceed
-	 * upper bound, for both IPv4 and IPv6.
-	 */
-	BUILD_BUG_ON(IPA_MEM_MODEM_RT_INDEX_LO > IPA_MEM_MODEM_RT_INDEX_HI);
-
-	/* The size set aside for the modem route tables for IPv4
-	 * and IPv6, both hashed and un-hashed, must be big enough
-	 * to hold all of the entries (the number of entries times
-	 * the size of each entry).
-	 */
-#define NENTS (IPA_MEM_MODEM_RT_INDEX_HI - IPA_MEM_MODEM_RT_INDEX_LO + 1)
-	BUILD_BUG_ON(NENTS * IPA_HW_TBL_HDR_WIDTH > IPA_MEM_RT_SIZE);
-#undef NENTS
+	BUILD_BUG_ON(!IPA_MEM_MODEM_RT_COUNT);
+	BUILD_BUG_ON(IPA_MEM_RT_COUNT < IPA_MEM_MODEM_RT_COUNT);
 }
 
 /** ipa_pre_init() - Initialize the IPA Driver.
