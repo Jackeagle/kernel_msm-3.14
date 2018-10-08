@@ -74,7 +74,6 @@ static int hdr_init_local_cmd(u32 offset, u32 size)
 
 	cmd_pyld = ipahal_hdr_init_local_pyld(&mem, offset);
 	if (!cmd_pyld) {
-		ipa_err("error allocating command payload\n");
 		ret = -ENOMEM;
 		goto err_dma_free;
 	}
