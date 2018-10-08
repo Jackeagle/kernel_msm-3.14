@@ -210,9 +210,6 @@ enum hdr_total_len_or_pad_type {
 	IPA_HDR_TOTAL_LEN	= 1,
 };
 
-/** max size of the name of the resource (routing table, header) */
-#define IPA_RESOURCE_NAME_MAX	32
-
 #define ipa_debug(fmt, args...) \
 		pr_debug(fmt, ## args)
 

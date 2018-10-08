@@ -292,15 +292,10 @@ int ipa_rx_poll(u32 ep_id, int weight)
 static struct workqueue_struct *
 ipa_alloc_workqueue(const char *name, enum ipa_client_type client)
 {
-	char namebuf[IPA_RESOURCE_NAME_MAX];
 	unsigned int wq_flags = WQ_MEM_RECLAIM | WQ_UNBOUND;
 	struct workqueue_struct *wq;
-	int ret;
 
-	ret = snprintf(namebuf, sizeof(namebuf), "%s%u", name, (u32)client);
-	ipa_assert(ret < sizeof(namebuf));
-
-	wq = alloc_workqueue(namebuf, wq_flags, 1);
+	wq = alloc_workqueue("%s%u", wq_flags, 1, name, (u32)client);
 	if (!wq)
 		ipa_err("error creating wq %s for client %d\n", name, client);
 
