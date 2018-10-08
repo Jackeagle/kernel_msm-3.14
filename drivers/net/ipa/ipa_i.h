@@ -469,7 +469,6 @@ void ipa_enable_dcd(void);
 
 int ipa_gsi_dma_task_alloc(void);
 void ipa_gsi_dma_task_free(void);
-int ipa_gsi_dma_task_inject(void);
 
 void ipa_set_flt_tuple_mask(u32 ep_id);
 void ipa_set_rt_tuple_mask(int tbl_idx);

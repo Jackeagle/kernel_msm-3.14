@@ -993,18 +993,15 @@ void ipa_gsi_dma_task_free(void)
  * Send a DMA_TASK of 1B to IPA to unblock GSI channel in STOP_IN_PROG.
  * Return value: 0 on success, negative otherwise
  */
-int ipa_gsi_dma_task_inject(void)
+static int ipa_gsi_dma_task_inject(void)
 {
 	struct ipa_desc desc = { };
 
 	ipa_desc_fill_imm_cmd(&desc, ipa_ctx->dma_task_info.cmd_pyld);
 
 	ipa_debug("sending 1B packet to IPA\n");
-	if (ipa_send_cmd_timeout(&desc, IPA_GSI_DMA_TASK_TIMEOUT)) {
-		ipa_err("ipa_send_cmd failed\n");
-
+	if (ipa_send_cmd_timeout(&desc, IPA_GSI_DMA_TASK_TIMEOUT))
 		return -EFAULT;
-	}
 
 	return 0;
 }
@@ -1046,10 +1043,8 @@ int ipa_stop_gsi_channel(u32 ep_id)
 		ipa_debug("Inject a DMA_TASK with 1B packet to IPA\n");
 		/* Send a 1B packet DMA_TASK to IPA and try again */
 		res = ipa_gsi_dma_task_inject();
-		if (res) {
-			ipa_err("Failed to inject DMA TASk for GSI\n");
+		if (res)
 			goto end_sequence;
-		}
 
 		/* sleep for short period to flush IPA */
 		usleep_range(IPA_GSI_CHANNEL_STOP_SLEEP_MIN,
