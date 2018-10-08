@@ -1182,7 +1182,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	/* Compute a bitmask representing which endpoints support filtering */
 	ipa_ctx->filter_bitmap = ipa_filter_bitmap_init();
 	if (!ipa_ctx->filter_bitmap)
-		goto out_smp2p_exit;
+		goto err_interconnect_exit;
 
 	result = platform_get_irq_byname(pdev, "ipa");
 	if (result < 0)
@@ -1257,6 +1257,7 @@ err_clear_ipa_irq:
 	ipa_ctx->ipa_irq = 0;
 err_clear_filter_bitmap:
 	ipa_ctx->filter_bitmap = 0;
+err_interconnect_exit:
 	ipa_interconnect_exit();
 out_smp2p_exit:
 	ipa_smp2p_exit(dev);
