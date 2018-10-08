@@ -592,6 +592,8 @@ int ipahal_rt_generate_empty_img(u32 route_count, struct ipa_dma_mem *mem)
 	u64 addr;
 	int i;
 
+	BUILD_BUG_ON(!IPA_HW_TBL_HDR_WIDTH);
+
 	if (ipa_dma_alloc(mem, route_count * IPA_HW_TBL_HDR_WIDTH, GFP_KERNEL))
 		return -ENOMEM;
 

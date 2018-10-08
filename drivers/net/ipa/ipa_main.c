@@ -485,6 +485,9 @@ static void ipa_setup_rt_hash_tuple(void)
 	u32 route_mask;
 	u32 modem_mask;
 
+	BUILD_BUG_ON(!IPA_MEM_MODEM_RT_COUNT);
+	BUILD_BUG_ON(IPA_MEM_RT_COUNT < IPA_MEM_MODEM_RT_COUNT);
+
 	/* Compute a mask representing non-modem route table entries */
 	route_mask = GENMASK(IPA_MEM_RT_COUNT - 1, 0);
 	modem_mask = GENMASK(IPA_MEM_MODEM_RT_INDEX_MAX,
@@ -970,22 +973,6 @@ static void ipa_post_init(struct work_struct *unused)
 	ipa_info("IPA driver initialization was successful.\n");
 }
 
-/* Encapsulate validation that can be done at build time. */
-static void validate_config(void)
-{
-	/* We assume we're working on 64-bit hardware */
-	BUILD_BUG_ON(!IS_ENABLED(CONFIG_64BIT));
-
-	/* The size of a filter or route table entry must be non-zero */
-	BUILD_BUG_ON(!IPA_HW_TBL_HDR_WIDTH);
-
-	/* The number of modem entries in the route tables must be non-zero,
-	 * and must not exceed the total number of entries.
-	 */
-	BUILD_BUG_ON(!IPA_MEM_MODEM_RT_COUNT);
-	BUILD_BUG_ON(IPA_MEM_RT_COUNT < IPA_MEM_MODEM_RT_COUNT);
-}
-
 /** ipa_pre_init() - Initialize the IPA Driver.
  * This part contains all initialization which doesn't require IPA HW, such
  * as structure allocations and initializations, register writes, etc.
@@ -1238,7 +1225,8 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	bool modem_init;
 	int result;
 
-	validate_config();
+	/* We assume we're working on 64-bit hardware */
+	BUILD_BUG_ON(!IS_ENABLED(CONFIG_64BIT));
 
 	ipa_debug("IPA driver: probing\n");
 
