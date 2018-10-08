@@ -54,9 +54,6 @@ struct ipa_match_data {
 	enum ipa_init_type init_type;
 };
 
-static void ipa_post_init(struct work_struct *unused);
-static DECLARE_WORK(ipa_post_init_work, ipa_post_init);
-
 static void ipa_client_remove_deferred(struct work_struct *work);
 static DECLARE_WORK(ipa_client_remove_work, ipa_client_remove_deferred);
 
@@ -1071,7 +1068,7 @@ static irqreturn_t ipa_smp2p_modem_clk_query_isr(int irq, void *ctxt)
 
 static irqreturn_t ipa_smp2p_modem_post_init_isr(int irq, void *ctxt)
 {
-	queue_work(ipa_ctx->power_mgmt_wq, &ipa_post_init_work);
+	ipa_post_init(NULL);
 
 	return IRQ_HANDLED;
 }
