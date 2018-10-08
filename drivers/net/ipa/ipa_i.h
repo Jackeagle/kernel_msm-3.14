@@ -45,100 +45,19 @@
 #define IPA_GSI_CHANNEL_STOP_PKT_SIZE	1
 
 /** The IPA has a block of shared memory, divided into regions used for
- * specific purposes.  The following values define this layout (i.e.,
- * the sizes and locations of all these regions).  One or two "canary"
+ * specific purposes.  Values below define this layout (i.e., the
+ * sizes and locations of all these regions).  One or two "canary"
  * values sit between some regions, as a check for erroneous writes
- * outside a region.
- *
- * IPA SRAM memory layout:
- * +-------------------------+
- * |	UC MEM		     |
- * +-------------------------+
- * |	UC INFO		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | V4 FLT HDR HASHABLE     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | V4 FLT HDR NON-HASHABLE |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | V6 FLT HDR HASHABLE     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | V6 FLT HDR NON-HASHABLE |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | V4 RT HDR HASHABLE	     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | V4 RT HDR NON-HASHABLE  |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | V6 RT HDR HASHABLE	     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | V6 RT HDR NON-HASHABLE  |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |  MODEM HDR		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * | MODEM PROC CTX	     |
- * +-------------------------+
- * | APPS PROC CTX	     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |  MODEM MEM		     |
- * +-------------------------+
- * |	CANARY		     |
- * +-------------------------+
- * |  UC EVENT RING	     | From IPA 3.5
- * +-------------------------+
+ * outside a region.  There are combinations of and routing tables,
+ * covering IPv4 and IPv6, and for each of those, hashed and
+ * non-hashed variants.  About half of routing table entries are
+ * reserved for modem use.
  */
 
 /* The maximum number of filter table entries (IPv4, IPv6; hashed and not) */
 #define IPA_MEM_FLT_COUNT	14
  /* The size of a filter table (first slot contains an endpoint bitmap) */
 #define IPA_MEM_FLT_SIZE	((IPA_MEM_FLT_COUNT + 1) * IPA_HW_TBL_HDR_WIDTH)
-
-#define IPA_MEM_V4_FLT_HASH_OFST		0x288
-#define IPA_MEM_V4_FLT_NHASH_OFST		0x308
-#define IPA_MEM_V6_FLT_HASH_OFST		0x388
-#define IPA_MEM_V6_FLT_NHASH_OFST		0x408
 
 /* The number of routing table entries (IPv4, IPv6; hashed and not) */
 #define IPA_MEM_RT_COUNT			15
@@ -152,6 +71,10 @@
  /* The size of a routing table */
 #define IPA_MEM_RT_SIZE		(IPA_MEM_RT_COUNT * IPA_HW_TBL_HDR_WIDTH)
 
+#define IPA_MEM_V4_FLT_HASH_OFST		0x288
+#define IPA_MEM_V4_FLT_NHASH_OFST		0x308
+#define IPA_MEM_V6_FLT_HASH_OFST		0x388
+#define IPA_MEM_V6_FLT_NHASH_OFST		0x408
 #define IPA_MEM_V4_RT_HASH_OFST			0x488
 #define IPA_MEM_V4_RT_NHASH_OFST		0x508
 #define IPA_MEM_V6_RT_HASH_OFST			0x588
@@ -167,7 +90,7 @@
 #define IPA_MEM_MODEM_OFST			0xbd8
 #define IPA_MEM_MODEM_SIZE			0x1024
 #define IPA_MEM_END_OFST			0x2000
-#define IPA_MEM_UC_EVENT_RING_OFST		0x1c00
+#define IPA_MEM_UC_EVENT_RING_OFST		0x1c00	/* v3.5 and later */
 
 enum ipa_ees {
 	IPA_EE_AP	= 0,
@@ -184,7 +107,7 @@ struct ipa_tx_suspend_irq_data {
 };
 
 typedef void (*ipa_notify_cb)(void *priv, enum ipa_dp_evt_type evt,
-		       unsigned long data);
+			      unsigned long data);
 
 /** typedef ipa_irq_handler_t - irq handler/callback type
  * @param ipa_irq_type - [in] interrupt type
