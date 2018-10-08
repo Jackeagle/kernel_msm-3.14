@@ -1522,6 +1522,8 @@ int gsi_queue_xfer(struct gsi *gsi, unsigned long chan_id, u16 num_xfers,
 
 	if (num_xfers > __gsi_query_ring_free_re(&chan->ring)) {
 		spin_unlock_irqrestore(&chan->evtr->ring.slock, flags);
+		ipa_err("no space for %u-element transfer on ch %lu\n",
+			num_xfers, chan_id);
 
 		return -ENOSPC;
 	}

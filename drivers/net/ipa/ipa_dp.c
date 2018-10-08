@@ -478,7 +478,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 							    DMA_TO_DEVICE);
 		}
 		if (dma_mapping_error(dev, tx_pkt->mem.phys)) {
-			ipa_err("failed to do dma map.\n");
+			ipa_err("dma mapping error on descriptor\n");
 			goto failure_dma_map;
 		}
 
@@ -603,10 +603,12 @@ int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 		goto out;
 	}
 
-	if (!timeout_jiffies)
+	if (!timeout_jiffies) {
 		wait_for_completion(&comp->comp);
-	else if (!wait_for_completion_timeout(&comp->comp, timeout_jiffies))
+	} else if (!wait_for_completion_timeout(&comp->comp, timeout_jiffies)) {
 		ret = -ETIMEDOUT;
+		ipa_err("command timed out\n");
+	}
 out:
 	if (!atomic_dec_return(&comp->cnt))
 		kfree(comp);
