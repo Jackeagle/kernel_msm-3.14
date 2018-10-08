@@ -297,10 +297,8 @@ static int ipa_init_rt4(struct ipa_dma_mem *mem)
 	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_RT_NHASH_OFST;
 	cmd_pyld =
 		ipahal_ip_v4_routing_init_pyld(mem, hash_offset, nhash_offset);
-	if (!cmd_pyld) {
-		ipa_err("fail construct ip_v4_rt_init imm cmd\n");
+	if (!cmd_pyld)
 		return -EPERM;
-	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
 	ret = ipa_send_cmd(&desc);
@@ -326,10 +324,8 @@ static int ipa_init_rt6(struct ipa_dma_mem *mem)
 	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_RT_NHASH_OFST;
 	cmd_pyld =
 		ipahal_ip_v6_routing_init_pyld(mem, hash_offset, nhash_offset);
-	if (!cmd_pyld) {
-		ipa_err("fail construct ip_v6_rt_init imm cmd\n");
+	if (!cmd_pyld)
 		return -EPERM;
-	}
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
 	ret = ipa_send_cmd(&desc);
@@ -355,10 +351,9 @@ static int ipa_init_flt4(struct ipa_dma_mem *mem)
 	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_FLT_NHASH_OFST;
 	cmd_pyld = ipahal_ip_v4_filter_init_pyld(mem, hash_offset,
 						 nhash_offset);
-	if (!cmd_pyld) {
-		ipa_err("fail construct ip_v4_flt_init imm cmd\n");
+	if (!cmd_pyld)
 		return -EPERM;
-	}
+
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
 	ret = ipa_send_cmd(&desc);
@@ -384,10 +379,9 @@ static int ipa_init_flt6(struct ipa_dma_mem *mem)
 	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_FLT_NHASH_OFST;
 	cmd_pyld = ipahal_ip_v6_filter_init_pyld(mem, hash_offset,
 						 nhash_offset);
-	if (!cmd_pyld) {
-		ipa_err("fail construct ip_v6_flt_init imm cmd\n");
+	if (!cmd_pyld)
 		return -EPERM;
-	}
+
 	ipa_desc_fill_imm_cmd(&desc, cmd_pyld);
 
 	ret = ipa_send_cmd(&desc);
