@@ -1017,6 +1017,7 @@ err_disable_clks:
 	return result;
 }
 
+/* Threaded IRQ handler for modem "ipa-clock-query" SMP2P interrupt */
 static irqreturn_t ipa_smp2p_modem_clk_query_isr(int irq, void *ctxt)
 {
 	ipa_freeze_clock_vote_and_notify_modem();
@@ -1024,6 +1025,7 @@ static irqreturn_t ipa_smp2p_modem_clk_query_isr(int irq, void *ctxt)
 	return IRQ_HANDLED;
 }
 
+/* Threaded IRQ handler for modem "ipa-post-init" SMP2P interrupt */
 static irqreturn_t ipa_smp2p_modem_post_init_isr(int irq, void *ctxt)
 {
 	ipa_post_init();
@@ -1095,6 +1097,7 @@ static int ipa_smp2p_init(struct device *dev, bool modem_init)
 	clock_irq = ret;
 
 	if (modem_init) {
+		/* Result will be non-zero (negative for error) */
 		ret = ipa_smp2p_irq_init(dev, "ipa-post-init",
 					 ipa_smp2p_modem_post_init_isr);
 		if (ret < 0) {
@@ -1110,15 +1113,15 @@ static int ipa_smp2p_init(struct device *dev, bool modem_init)
 	ipa_ctx->smp2p_info.enabled_state = enabled_state;
 	ipa_ctx->smp2p_info.enabled_bit = enabled_bit;
 	ipa_ctx->smp2p_info.clock_query_irq = clock_irq;
-	if (modem_init)
-		ipa_ctx->smp2p_info.post_init_irq = ret;
+	ipa_ctx->smp2p_info.post_init_irq = modem_init ? ret : 0;
 
 	return 0;
 }
 
 static void ipa_smp2p_exit(struct device *dev)
 {
-	ipa_smp2p_irq_exit(dev, ipa_ctx->smp2p_info.post_init_irq);
+	if (ipa_ctx->smp2p_info.post_init_irq)
+		ipa_smp2p_irq_exit(dev, ipa_ctx->smp2p_info.post_init_irq);
 	ipa_smp2p_irq_exit(dev, ipa_ctx->smp2p_info.clock_query_irq);
 
 	memset(&ipa_ctx->smp2p_info, 0, sizeof(ipa_ctx->smp2p_info));
