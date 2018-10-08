@@ -1160,13 +1160,10 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	match_data = of_device_get_match_data(&pdev->dev);
 	modem_init = match_data->init_type == ipa_modem_init;
 
-	/* If we need Trust Zone, make sure it's available */
-	if (!modem_init) {
-		if (!IS_ENABLED(CONFIG_QCOM_MDT_LOADER))
-			return -ENOTSUPP;
+	/* If we need Trust Zone, make sure it's ready */
+	if (!modem_init)
 		if (!qcom_scm_is_available())
 			return -EPROBE_DEFER;
-	}
 
 	/* Initialize the smp2p driver early.  It might not be ready
 	 * when we're probed, so it might return -EPROBE_DEFER.
