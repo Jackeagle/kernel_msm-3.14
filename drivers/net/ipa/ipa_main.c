@@ -908,7 +908,7 @@ static void ipa_register_panic_hdlr(void)
  * - Trigger IPA ready callbacks (to all subscribers)
  * - Trigger IPA completion object (to all who wait on it)
  */
-static void ipa_post_init(struct work_struct *unused)
+static void ipa_post_init(void)
 {
 	int result;
 
@@ -1068,7 +1068,7 @@ static irqreturn_t ipa_smp2p_modem_clk_query_isr(int irq, void *ctxt)
 
 static irqreturn_t ipa_smp2p_modem_post_init_isr(int irq, void *ctxt)
 {
-	ipa_post_init(NULL);
+	ipa_post_init();
 
 	return IRQ_HANDLED;
 }
@@ -1282,7 +1282,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 			goto err_clear_dev;
 
 		/* Now we can proceed to stage two initialization */
-		ipa_post_init(NULL);
+		ipa_post_init();
 	}
 
 	return 0;	/* Success */
