@@ -1540,18 +1540,13 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 chan_count)
 		goto fail_alloc_channel;
 	ep->gsi_chan_hdl = (u32)result;
 
-	result = gsi_write_channel_scratch(ipa_ctx->gsi, ep->gsi_chan_hdl,
-					   gsi_ep_info->ipa_if_tlv);
-	if (result) {
-		ipa_err("failed to write scratch %d\n", result);
-		goto fail_write_channel_scratch;
-	}
+	gsi_write_channel_scratch(ipa_ctx->gsi, ep->gsi_chan_hdl,
+				  gsi_ep_info->ipa_if_tlv);
 
 	result = gsi_start_channel(ipa_ctx->gsi, ep->gsi_chan_hdl);
 	if (!result)
 		return 0;	/* Success */
 
-fail_write_channel_scratch:
 	gsi_dealloc_channel(ipa_ctx->gsi, ep->gsi_chan_hdl);
 fail_alloc_channel:
 	ipa_err("Return with err: %d\n", result);

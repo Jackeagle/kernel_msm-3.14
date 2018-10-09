@@ -1286,7 +1286,7 @@ static void __gsi_write_channel_scratch(struct gsi *gsi, u32 chan_id)
 	gsi_writel(gsi, val, GSI_CH_K_SCRATCH_3_OFFS(chan_id));
 }
 
-int gsi_write_channel_scratch(struct gsi *gsi, u32 chan_id, u32 tlv_size)
+void gsi_write_channel_scratch(struct gsi *gsi, u32 chan_id, u32 tlv_size)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 
@@ -1297,8 +1297,6 @@ int gsi_write_channel_scratch(struct gsi *gsi, u32 chan_id, u32 tlv_size)
 	__gsi_write_channel_scratch(gsi, chan_id);
 
 	mutex_unlock(&chan->mlock);
-
-	return 0;
 }
 
 int gsi_start_channel(struct gsi *gsi, u32 chan_id)

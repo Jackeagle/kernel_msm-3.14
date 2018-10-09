@@ -226,7 +226,7 @@ int gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props);
  *
  * @Return gsi_status
  */
-int gsi_write_channel_scratch(struct gsi *gsi, u32 chan_id, u32 tlv_size);
+void gsi_write_channel_scratch(struct gsi *gsi, u32 chan_id, u32 tlv_size);
 
 /** gsi_start_channel - Peripheral should call this function to
  * start a channel i.e put into running state
