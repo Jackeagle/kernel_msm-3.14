@@ -1173,8 +1173,8 @@ gsi_program_chan_ctx(struct gsi *gsi, struct gsi_chan_props *props, u32 evt_id)
 int gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
 {
 	u32 size = props->ring_count * GSI_RING_ELEMENT_SIZE;
-	u32 evt_id = props->evt_ring_hdl;
-	struct gsi_evt_ctx *evtr = &gsi->evtr[evt_id];
+	u32 evt_ring_id = props->evt_ring_id;
+	struct gsi_evt_ctx *evtr = &gsi->evtr[evt_ring_id];
 	int channel_id = (int)props->channel_id;
 	struct gsi_chan_ctx *chan = &gsi->chan[channel_id];
 	void **user_data;
@@ -1187,7 +1187,7 @@ int gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
 	ipa_assert(!(props->mem.phys % roundup_pow_of_two(size)));
 
 	if (atomic_read(&evtr->chan_ref_cnt)) {
-		ipa_err("evt ring %u in use\n", evt_id);
+		ipa_err("evt ring %u in use\n", evt_ring_id);
 		ipa_dma_free(&props->mem);
 		return -ENOTSUPP;
 	}
@@ -1231,7 +1231,7 @@ int gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
 	atomic_inc(&evtr->chan_ref_cnt);
 	evtr->chan = chan;
 
-	gsi_program_chan_ctx(gsi, props, evt_id);
+	gsi_program_chan_ctx(gsi, props, evt_ring_id);
 	gsi_init_ring(&chan->ring, &props->mem);
 
 	chan->user_data = user_data;
@@ -1648,7 +1648,7 @@ int gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id,
 	}
 
 	if (chan->props.channel_id != props->channel_id ||
-	    chan->props.evt_ring_hdl != props->evt_ring_hdl) {
+	    chan->props.evt_ring_id != props->evt_ring_id) {
 		ipa_err("changing immutable fields not supported\n");
 		return -ENOTSUPP;
 	}

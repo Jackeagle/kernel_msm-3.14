@@ -37,7 +37,7 @@ struct ipa_gsi_ep_config {
  *
  * @dir:	     channel direction
  * @channel_id:	     virtual channel ID
- * @evt_ring_hdl:    handle of associated event ring. set to ~0 if no
+ * @evt_ring_id:     id of associated event ring. set to ~0 if no
  *		     event ring associated
  * @re_size:	     size of channel ring element
  * @ring_len:	     length of ring in bytes (must be integral multiple of
@@ -93,7 +93,7 @@ struct gsi_chan_props {
 	bool use_db_engine;
 	u8 low_weight;
 	u32 channel_id;
-	u32 evt_ring_hdl;
+	u32 evt_ring_id;
 	void *chan_user_data;
 };
 
@@ -184,7 +184,7 @@ void gsi_deregister_device(struct gsi *gsi);
  *
  * This function can sleep
  *
- * @Return Client handle populated by GSI, or a negative errno
+ * @Return id for event ring populated by GSI, or a negative errno
  */
 int gsi_alloc_evt_ring(struct gsi *gsi, u32 ring_count, u16 int_modt);
 
@@ -192,7 +192,7 @@ int gsi_alloc_evt_ring(struct gsi *gsi, u32 ring_count, u16 int_modt);
  * de-allocate an event ring. There should not exist any active
  * channels using this event ring
  *
- * @evt_id:  Client handle previously obtained from gsi_alloc_evt_ring
+ * @evt_id:  event ring id previously obtained from gsi_alloc_evt_ring
  *
  * This function can sleep
  */
@@ -201,7 +201,7 @@ void gsi_dealloc_evt_ring(struct gsi *gsi, u32 evt_id);
 /** gsi_reset_evt_ring - Peripheral should call this function to
  * reset an event ring to recover from error state
  *
- * @evt_id:  Client handle previously obtained from gsi_alloc_evt_ring()
+ * @evt_id:  event ring id previously obtained from gsi_alloc_evt_ring()
  *
  * This function can sleep
  */
@@ -300,7 +300,7 @@ int gsi_get_channel_cfg(struct gsi *gsi, u32 channel_id,
 /** gsi_set_channel_cfg - This function applies the supplied config
  * to the specified channel
  *
- * channel_id and evt_ring_hdl of the channel cannot be changed after
+ * channel_id and evt_ring_id of the channel cannot be changed after
  * gsi_alloc_channel
  *
  * @channel_id:  Client handle previously obtained from gsi_alloc_channel

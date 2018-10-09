@@ -1480,8 +1480,7 @@ void ipa_gsi_irq_rx_notify_cb(void *chan_data, u16 count)
  * APPS_WAN_PROD endpoint, which uses event ring rather than TAG STATUS
  * based completions.
  */
-static u32
-ipa_gsi_ring_count(enum ipa_client_type client, u32 fifo_count)
+static u32 ipa_gsi_ring_count(enum ipa_client_type client, u32 fifo_count)
 {
 	if (client == IPA_CLIENT_APPS_CMD_PROD)
 		return 4 * fifo_count;
@@ -1489,14 +1488,14 @@ ipa_gsi_ring_count(enum ipa_client_type client, u32 fifo_count)
 	return 2 * fifo_count;
 }
 
-/* Returns the event ring handle to use for the given endpoint
+/* Returns the event ring id to use for the given endpoint
  * context, or a negative error code if an error occurs.
  *
  * If successful, the returned handle will be either the common
  * event ring handle or a new handle.  Caller is responsible for
  * deallocating the event ring *unless* it is the common one.
  */
-static int evt_ring_hdl_get(struct ipa_ep_context *ep, u32 fifo_count)
+static int evt_ring_get(struct ipa_ep_context *ep, u32 fifo_count)
 {
 	u32 ring_count;
 	u16 modt = ep->sys->tx.no_intr ? 0 : IPA_GSI_EVT_RING_INT_MODT;
@@ -1515,16 +1514,16 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 chan_count)
 	const struct ipa_gsi_ep_config *gsi_ep_info;
 	int result;
 
-	result = evt_ring_hdl_get(ep, chan_count);
+	result = evt_ring_get(ep, chan_count);
 	if (result < 0)
 		return result;
-	ep->gsi_evt_ring_hdl = (u32)result;
+	ep->evt_ring_id = (u32)result;
 
 	gsi_ep_info = ipa_get_gsi_ep_info(ep->client);
 
 	gsi_channel_props.from_gsi = ipa_consumer(ep->client);
 	gsi_channel_props.channel_id = gsi_ep_info->ipa_gsi_chan_num;
-	gsi_channel_props.evt_ring_hdl = ep->gsi_evt_ring_hdl;
+	gsi_channel_props.evt_ring_id = ep->evt_ring_id;
 	gsi_channel_props.use_db_engine = true;
 	if (ep->client == IPA_CLIENT_APPS_CMD_PROD)
 		gsi_channel_props.low_weight = IPA_GSI_MAX_CH_LOW_WEIGHT;
@@ -1841,8 +1840,8 @@ void ipa_ep_teardown(u32 ep_id)
 
 	ipa_reset_gsi_channel(ep_id);
 	gsi_dealloc_channel(ipa_ctx->gsi, ep->channel_id);
-	gsi_reset_evt_ring(ipa_ctx->gsi, ep->gsi_evt_ring_hdl);
-	gsi_dealloc_evt_ring(ipa_ctx->gsi, ep->gsi_evt_ring_hdl);
+	gsi_reset_evt_ring(ipa_ctx->gsi, ep->evt_ring_id);
+	gsi_dealloc_evt_ring(ipa_ctx->gsi, ep->evt_ring_id);
 
 	if (ipa_consumer(ep->client))
 		ipa_cleanup_rx(ep->sys);
