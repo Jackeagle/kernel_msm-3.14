@@ -815,27 +815,6 @@ static u32 gsi_evt_bmap(u32 evt_ring_max)
 	return evt_bmap | GENMASK(GSI_MHI_ER_END, GSI_MHI_ER_START);
 }
 
-/* gsi->mlock is assumed held by caller */
-static u32 gsi_evt_bmap_alloc(struct gsi *gsi)
-{
-	u32 evt_ring_id;
-
-	ipa_assert(gsi->evt_bmap != ~0UL);
-
-	evt_ring_id = (u32)ffz(gsi->evt_bmap);
-	gsi->evt_bmap |= BIT(evt_ring_id);
-
-	return evt_ring_id;
-}
-
-/* gsi->mlock is assumed held by caller */
-static void gsi_evt_bmap_free(struct gsi *gsi, u32 evt_ring_id)
-{
-	ipa_assert(gsi->evt_bmap & BIT(evt_ring_id));
-
-	gsi->evt_bmap &= ~BIT(evt_ring_id);
-}
-
 int gsi_register_device(struct gsi *gsi)
 {
 	u32 val;
@@ -1028,7 +1007,10 @@ int gsi_alloc_evt_ring(struct gsi *gsi, u32 ring_count, u16 int_modt)
 	mutex_lock(&gsi->mlock);
 
 	/* Start by allocating the event id to use */
-	evt_ring_id = gsi_evt_bmap_alloc(gsi);
+	ipa_assert(gsi->evt_bmap != ~0UL);
+	evt_ring_id = (u32)ffz(gsi->evt_bmap);
+	gsi->evt_bmap |= BIT(evt_ring_id);
+
 	evt_ring = &gsi->evt_ring[evt_ring_id];
 	ipa_debug("Using %u as virt evt id\n", evt_ring_id);
 
@@ -1080,7 +1062,8 @@ err_free_dma:
 	ipa_dma_free(&evt_ring->mem);
 	memset(evt_ring, 0, sizeof(*evt_ring));
 err_free_bmap:
-	gsi_evt_bmap_free(gsi, evt_ring_id);
+	ipa_assert(gsi->evt_bmap & BIT(evt_ring_id));
+	gsi->evt_bmap &= ~BIT(evt_ring_id);
 
 	mutex_unlock(&gsi->mlock);
 
@@ -1110,7 +1093,8 @@ void gsi_dealloc_evt_ring(struct gsi *gsi, u32 evt_ring_id)
 
 	ipa_bug_on(evt_ring->state != GSI_EVT_RING_STATE_NOT_ALLOCATED);
 
-	gsi_evt_bmap_free(gsi, evt_ring->id);
+	ipa_assert(gsi->evt_bmap & BIT(evt_ring_id));
+	gsi->evt_bmap &= ~BIT(evt_ring_id);
 
 	mutex_unlock(&gsi->mlock);
 
