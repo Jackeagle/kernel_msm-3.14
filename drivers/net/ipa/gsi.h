@@ -20,20 +20,20 @@
 /** struct ipa_gsi_ep_config - IPA GSI endpoint configurations
  *
  * @ep_id: IPA endpoint identifier
- * @ipa_gsi_chan_num: GSI channel number
+ * @channel_id: GSI channel number
  * @ipa_if_tlv: number of IPA_IF TLV
  * @ipa_if_aos: number of IPA_IF AOS
  * @ee: Execution environment
  */
 struct ipa_gsi_ep_config {
 	u32 ep_id;
-	u32 ipa_gsi_chan_num;
+	u32 channel_id;
 	u32 ipa_if_tlv;
 	u32 ipa_if_aos;
 	u32 ee;
 };
 
-/** gsi_chan_props - Channel related properties
+/** gsi_channel_props - Channel related properties
  *
  * @dir:	     channel direction
  * @channel_id:	     virtual channel ID
@@ -64,7 +64,7 @@ struct ipa_gsi_ep_config {
  *		     RE3: EOT=1, EOB=0, CHAIN=0;
  *
  *		     the callback will be triggered for RE3 using the
- *		     xfer_user_data of that RE
+ *		     user_data of that RE
  *
  *		     e.g. 2
  *
@@ -82,11 +82,11 @@ struct ipa_gsi_ep_config {
  *		     callback for RE2 using GSI_CHAN_EVT_OVERFLOW
  *		     callback for RE3 using GSI_CHAN_EVT_EOT
  *
- * @chan_user_data:  cookie used for notifications
+ * @user_data:  cookie used for notifications
  *
  * All the callbacks are in interrupt context
  */
-struct gsi_chan_props {
+struct gsi_channel_props {
 	struct ipa_dma_mem mem;
 	u32 ring_count;
 	bool from_gsi;
@@ -94,7 +94,7 @@ struct gsi_chan_props {
 	u8 low_weight;
 	u32 channel_id;
 	u32 evt_ring_id;
-	void *chan_user_data;
+	void *user_data;
 };
 
 enum gsi_xfer_flag {
@@ -151,14 +151,14 @@ enum gsi_xfer_elem_type {
  *		    GSI_XFER_ELEM_IMME_CMD: for IPA immediate commands
  *		    GSI_XFER_ELEM_NOP: for event generation only
  *
- * @xfer_user_data: cookie used in xfer_cb
+ * @user_data: cookie used in xfer_cb
  */
 struct gsi_xfer_elem {
 	u64 addr;
 	u16 len;
 	u16 flags;
 	enum gsi_xfer_elem_type type;
-	void *xfer_user_data;
+	void *user_data;
 };
 
 struct gsi;
@@ -216,7 +216,7 @@ void gsi_reset_evt_ring(struct gsi *gsi, u32 evt_id);
  *
  * @Return Channel handle populated by GSI, opaque to client, or negative errno
  */
-int gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props);
+int gsi_alloc_channel(struct gsi *gsi, struct gsi_channel_props *props);
 
 /** gsi_write_channel_scratch - Peripheral should call this function to
  * write to the scratch area of the channel context
@@ -295,7 +295,7 @@ bool gsi_is_channel_empty(struct gsi *gsi, u32 channel_id);
  * @Return gsi_status
  */
 int gsi_get_channel_cfg(struct gsi *gsi, u32 channel_id,
-			struct gsi_chan_props *props);
+			struct gsi_channel_props *props);
 
 /** gsi_set_channel_cfg - This function applies the supplied config
  * to the specified channel
@@ -309,7 +309,7 @@ int gsi_get_channel_cfg(struct gsi *gsi, u32 channel_id,
  * @Return gsi_status
  */
 int gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id,
-			struct gsi_chan_props *props);
+			struct gsi_channel_props *props);
 
 /** gsi_poll_channel - Peripheral should call this function to query for
  * completed transfer descriptors.

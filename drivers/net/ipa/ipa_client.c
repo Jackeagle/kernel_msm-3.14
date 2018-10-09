@@ -24,10 +24,10 @@
 
 static int
 ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep,
-			       struct gsi_chan_props *orig_props,
+			       struct gsi_channel_props *orig_props,
 			       struct ipa_dma_mem *chan_dma)
 {
-	struct gsi_chan_props props = { };
+	struct gsi_channel_props props = { };
 
 	/* Allocate the DMA space first; it can fail */
 	if (ipa_dma_alloc(chan_dma, 2 * GSI_RING_ELEMENT_SIZE, GFP_KERNEL))
@@ -40,7 +40,7 @@ ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep,
 	props.mem = *chan_dma;
 	props.use_db_engine = false;
 	props.low_weight = 1;
-	props.chan_user_data = NULL;
+	props.user_data = NULL;
 
 	if (gsi_set_channel_cfg(ipa_ctx->gsi, ep->channel_id, &props)) {
 		ipa_err("Error setting channel properties\n");
@@ -53,7 +53,7 @@ ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep,
 
 static int
 ipa_restore_channel_properties(struct ipa_ep_context *ep,
-			       struct gsi_chan_props *props)
+			       struct gsi_channel_props *props)
 {
 	if (gsi_set_channel_cfg(ipa_ctx->gsi, ep->channel_id, props)) {
 		ipa_err("Error restoring channel properties\n");
@@ -69,7 +69,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 	struct ipa_reg_aggr_force_close force_close;
 	int result;
 	int gsi_res;
-	struct gsi_chan_props orig_props = { };
+	struct gsi_channel_props orig_props = { };
 	struct ipa_dma_mem chan_dma;
 	struct ipa_dma_mem dma_byte;
 	struct gsi_xfer_elem xfer_elem = { };

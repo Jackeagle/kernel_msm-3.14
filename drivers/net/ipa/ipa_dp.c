@@ -318,7 +318,7 @@ static bool ipa_send_nop(struct ipa_sys_context *sys)
 
 	nop_xfer.type = GSI_XFER_ELEM_NOP;
 	nop_xfer.flags = GSI_XFER_FLAG_EOT;
-	nop_xfer.xfer_user_data = nop_pkt;
+	nop_xfer.user_data = nop_pkt;
 
 	spin_lock_bh(&sys->spinlock);
 	list_add_tail(&nop_pkt->link, &sys->head_desc_list);
@@ -488,7 +488,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 				xfer_elem[i].flags |= GSI_XFER_FLAG_EOT;
 				xfer_elem[i].flags |= GSI_XFER_FLAG_BEI;
 			}
-			xfer_elem[i].xfer_user_data = tx_pkt_first;
+			xfer_elem[i].user_data = tx_pkt_first;
 		} else {
 			xfer_elem[i].flags |= GSI_XFER_FLAG_CHAIN;
 		}
@@ -853,7 +853,7 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
 	gsi_xfer_elem.flags = GSI_XFER_FLAG_EOT;
 	gsi_xfer_elem.flags |= GSI_XFER_FLAG_EOB;
 	gsi_xfer_elem.type = GSI_XFER_ELEM_DATA;
-	gsi_xfer_elem.xfer_user_data = rx_pkt;
+	gsi_xfer_elem.user_data = rx_pkt;
 
 	ret = gsi_queue_xfer(ipa_ctx->gsi, sys->ep->channel_id,
 			     1, &gsi_xfer_elem, false);
@@ -1510,7 +1510,7 @@ static int evt_ring_get(struct ipa_ep_context *ep, u32 fifo_count)
 
 static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 chan_count)
 {
-	struct gsi_chan_props gsi_channel_props = { };
+	struct gsi_channel_props gsi_channel_props = { };
 	const struct ipa_gsi_ep_config *gsi_ep_info;
 	int result;
 
@@ -1522,14 +1522,14 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 chan_count)
 	gsi_ep_info = ipa_get_gsi_ep_info(ep->client);
 
 	gsi_channel_props.from_gsi = ipa_consumer(ep->client);
-	gsi_channel_props.channel_id = gsi_ep_info->ipa_gsi_chan_num;
+	gsi_channel_props.channel_id = gsi_ep_info->channel_id;
 	gsi_channel_props.evt_ring_id = ep->evt_ring_id;
 	gsi_channel_props.use_db_engine = true;
 	if (ep->client == IPA_CLIENT_APPS_CMD_PROD)
 		gsi_channel_props.low_weight = IPA_GSI_MAX_CH_LOW_WEIGHT;
 	else
 		gsi_channel_props.low_weight = 1;
-	gsi_channel_props.chan_user_data = ep->sys;
+	gsi_channel_props.user_data = ep->sys;
 
 	gsi_channel_props.ring_count = ipa_gsi_ring_count(ep->client,
 							  chan_count);
