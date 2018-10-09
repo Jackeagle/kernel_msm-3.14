@@ -1496,7 +1496,7 @@ ipa_gsi_ring_count(enum ipa_client_type client, u32 fifo_count)
  * event ring handle or a new handle.  Caller is responsible for
  * deallocating the event ring *unless* it is the common one.
  */
-static long evt_ring_hdl_get(struct ipa_ep_context *ep, u32 fifo_count)
+static int evt_ring_hdl_get(struct ipa_ep_context *ep, u32 fifo_count)
 {
 	u32 ring_count;
 	u16 modt = ep->sys->tx.no_intr ? 0 : IPA_GSI_EVT_RING_INT_MODT;
@@ -1518,7 +1518,7 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 chan_count)
 	result = evt_ring_hdl_get(ep, chan_count);
 	if (result < 0)
 		return result;
-	ep->gsi_evt_ring_hdl = result;
+	ep->gsi_evt_ring_hdl = (u32)result;
 
 	gsi_ep_info = ipa_get_gsi_ep_info(ep->client);
 

@@ -93,7 +93,7 @@ struct gsi_chan_props {
 	bool use_db_engine;
 	u8 low_weight;
 	u8 ch_id;
-	unsigned long evt_ring_hdl;
+	u32 evt_ring_hdl;
 	void *chan_user_data;
 };
 
@@ -186,7 +186,7 @@ void gsi_deregister_device(struct gsi *gsi);
  *
  * @Return Client handle populated by GSI, or a negative errno
  */
-long gsi_alloc_evt_ring(struct gsi *gsi, u32 ring_count, u16 int_modt);
+int gsi_alloc_evt_ring(struct gsi *gsi, u32 ring_count, u16 int_modt);
 
 /** gsi_dealloc_evt_ring - Peripheral should call this function to
  * de-allocate an event ring. There should not exist any active
@@ -196,7 +196,7 @@ long gsi_alloc_evt_ring(struct gsi *gsi, u32 ring_count, u16 int_modt);
  *
  * This function can sleep
  */
-void gsi_dealloc_evt_ring(struct gsi *gsi, unsigned long evt_id);
+void gsi_dealloc_evt_ring(struct gsi *gsi, u32 evt_id);
 
 /** gsi_reset_evt_ring - Peripheral should call this function to
  * reset an event ring to recover from error state
@@ -205,7 +205,7 @@ void gsi_dealloc_evt_ring(struct gsi *gsi, unsigned long evt_id);
  *
  * This function can sleep
  */
-void gsi_reset_evt_ring(struct gsi *gsi, unsigned long evt_id);
+void gsi_reset_evt_ring(struct gsi *gsi, u32 evt_id);
 
 /** gsi_alloc_channel - Peripheral should call this function to
  * allocate a channel once gsi_register_device() has been called
