@@ -1473,19 +1473,20 @@ void ipa_gsi_irq_rx_notify_cb(void *chan_data, u16 count)
 	ipa_rx_switch_to_poll_mode(sys);
 }
 
-/* GSI ring length is calculated based on the fifo_count which
+/* GSI ring length is calculated based on the channel_count which
  * defines the descriptor FIFO.
  * For producer endpoints there is also an additional descriptor
  * for TAG STATUS immediate command.  An exception to this is the
  * APPS_WAN_PROD endpoint, which uses event ring rather than TAG STATUS
  * based completions.
  */
-static u32 ipa_gsi_ring_count(enum ipa_client_type client, u32 fifo_count)
+static u32
+ipa_gsi_evt_ring_count(enum ipa_client_type client, u32 channel_count)
 {
 	if (client == IPA_CLIENT_APPS_CMD_PROD)
-		return 4 * fifo_count;
+		return 4 * channel_count;
 
-	return 2 * fifo_count;
+	return 2 * channel_count;
 }
 
 /* Returns the event ring id to use for the given endpoint
@@ -1495,26 +1496,26 @@ static u32 ipa_gsi_ring_count(enum ipa_client_type client, u32 fifo_count)
  * event ring handle or a new handle.  Caller is responsible for
  * deallocating the event ring *unless* it is the common one.
  */
-static int evt_ring_get(struct ipa_ep_context *ep, u32 fifo_count)
+static int evt_ring_get(struct ipa_ep_context *ep, u32 channel_count)
 {
-	u32 ring_count;
+	u32 evt_ring_count;
 	u16 modt = ep->sys->tx.no_intr ? 0 : IPA_GSI_EVT_RING_INT_MODT;
 
 	ipa_debug("client=%d moderation threshold cycles=%u cnt=1\n",
 		  ep->client, modt);
 
-	ring_count = ipa_gsi_ring_count(ep->client, fifo_count);
+	evt_ring_count = ipa_gsi_evt_ring_count(ep->client, channel_count);
 
-	return gsi_alloc_evt_ring(ipa_ctx->gsi, ring_count, modt);
+	return gsi_alloc_evt_ring(ipa_ctx->gsi, evt_ring_count, modt);
 }
 
-static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 chan_count)
+static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count)
 {
 	struct gsi_channel_props gsi_channel_props = { };
 	const struct ipa_gsi_ep_config *gsi_ep_info;
 	int result;
 
-	result = evt_ring_get(ep, chan_count);
+	result = evt_ring_get(ep, channel_count);
 	if (result < 0)
 		return result;
 	ep->evt_ring_id = (u32)result;
@@ -1531,8 +1532,8 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 chan_count)
 		gsi_channel_props.low_weight = 1;
 	gsi_channel_props.user_data = ep->sys;
 
-	gsi_channel_props.ring_count = ipa_gsi_ring_count(ep->client,
-							  chan_count);
+	gsi_channel_props.ring_count = ipa_gsi_evt_ring_count(ep->client,
+							      channel_count);
 
 	result = gsi_alloc_channel(ipa_ctx->gsi, &gsi_channel_props);
 	if (result < 0)
@@ -1747,7 +1748,7 @@ void ipa_ep_free(u32 ep_id)
  *
  * Returns:	0 on success, negative on failure
  */
-int ipa_ep_setup(u32 ep_id, u32 chan_count, u32 rx_buffer_size,
+int ipa_ep_setup(u32 ep_id, u32 channel_count, u32 rx_buffer_size,
 		 struct ipa_sys_connect_params *sys_in)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
@@ -1778,7 +1779,7 @@ int ipa_ep_setup(u32 ep_id, u32 chan_count, u32 rx_buffer_size,
 
 	ipa_debug("ep %u configuration successful\n", ep_id);
 
-	ret = ipa_gsi_setup_channel(ep, chan_count);
+	ret = ipa_gsi_setup_channel(ep, channel_count);
 	if (ret) {
 		ipa_err("Failed to setup GSI channel\n");
 		goto err_client_remove;
