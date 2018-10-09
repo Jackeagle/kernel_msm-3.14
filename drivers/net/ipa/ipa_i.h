@@ -137,7 +137,7 @@ struct ipa_sys_connect_params {
 /** struct ipa_ep_context - IPA end point context
  * @allocated: flag indicating endpoint has been allocated
  * @client: EP client type
- * @gsi_chan_hdl: EP's GSI channel handle
+ * @channel_id: EP's GSI channel handle
  * @gsi_evt_ring_hdl: EP's GSI channel event ring handle
  * @priv: user provided information which will forwarded once the user is
  *	  notified for new data avail
@@ -148,7 +148,7 @@ struct ipa_sys_connect_params {
 struct ipa_ep_context {
 	bool allocated;
 	enum ipa_client_type client;
-	u32 gsi_chan_hdl;
+	u32 channel_id;
 	u32 gsi_evt_ring_hdl;
 	bool bytes_xfered_valid;
 	u16 bytes_xfered;

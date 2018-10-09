@@ -150,7 +150,7 @@ struct gsi {
 	struct ch_debug_stats ch_dbg[GSI_CHAN_MAX];
 	struct gsi_evt_ctx evtr[GSI_EVT_RING_MAX];
 	unsigned long evt_bmap;
-	u32 max_ch;
+	u32 channel_max;
 	u32 max_ev;
 };
 
@@ -336,7 +336,7 @@ static enum gsi_evt_ring_state gsi_evtr_state(struct gsi *gsi, u32 evt_id)
 
 static void gsi_handle_chan_ctrl(struct gsi *gsi)
 {
-	u32 valid_mask = GENMASK(gsi->max_ch - 1, 0);
+	u32 valid_mask = GENMASK(gsi->channel_max - 1, 0);
 	u32 ch_mask;
 
 	ch_mask = gsi_readl(gsi, GSI_CNTXT_SRC_CH_IRQ_OFFS);
@@ -344,7 +344,7 @@ static void gsi_handle_chan_ctrl(struct gsi *gsi)
 
 	ipa_debug("ch_mask %x\n", ch_mask);
 	if (ch_mask & ~valid_mask) {
-		ipa_err("invalid channels (> %u)\n", gsi->max_ch);
+		ipa_err("invalid channels (> %u)\n", gsi->channel_max);
 		ch_mask &= valid_mask;
 	}
 
@@ -394,7 +394,7 @@ handle_glob_chan_err(struct gsi *gsi, u32 err_ee, u32 channel_id, u32 code)
 	if (err_ee != IPA_EE_AP)
 		ipa_bug_on(code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
 
-	if (WARN_ON(channel_id >= gsi->max_ch)) {
+	if (WARN_ON(channel_id >= gsi->channel_max)) {
 		ipa_err("unexpected channel_id %u\n", channel_id);
 		return;
 	}
@@ -550,7 +550,7 @@ static u16 gsi_process_chan(struct gsi *gsi, struct gsi_xfer_compl_evt *evt,
 	struct gsi_chan_ctx *chan;
 	u32 channel_id = (u32)evt->chid;
 
-	ipa_assert(channel_id < gsi->max_ch);
+	ipa_assert(channel_id < gsi->channel_max);
 
 	/* Event tells us the last completed channel ring element */
 	chan = &gsi->chan[channel_id];
@@ -674,14 +674,14 @@ static void gsi_handle_ieob(struct gsi *gsi)
 
 static void gsi_handle_inter_ee_chan_ctrl(struct gsi *gsi)
 {
-	u32 valid_mask = GENMASK(gsi->max_ch - 1, 0);
+	u32 valid_mask = GENMASK(gsi->channel_max - 1, 0);
 	u32 ch_mask;
 
 	ch_mask = gsi_readl(gsi, GSI_INTER_EE_SRC_CH_IRQ_OFFS);
 	gsi_writel(gsi, ch_mask, GSI_INTER_EE_SRC_CH_IRQ_CLR_OFFS);
 
 	if (ch_mask & ~valid_mask) {
-		ipa_err("invalid channels (> %u)\n", gsi->max_ch);
+		ipa_err("invalid channels (> %u)\n", gsi->channel_max);
 		ch_mask &= valid_mask;
 	}
 
@@ -784,7 +784,7 @@ static irqreturn_t gsi_isr(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-static u32 gsi_get_max_channels(struct gsi *gsi)
+static u32 gsi_get_channel_max(struct gsi *gsi)
 {
 	u32 val = gsi_readl(gsi, GSI_GSI_HW_PARAM_2_OFFS);
 
@@ -834,7 +834,7 @@ static void gsi_evt_bmap_free(struct gsi *gsi, u32 evt_id)
 int gsi_register_device(struct gsi *gsi)
 {
 	u32 val;
-	u32 max_ch;
+	u32 channel_max;
 	u32 max_ev;
 	int ret;
 
@@ -844,8 +844,8 @@ int gsi_register_device(struct gsi *gsi)
 		return -EIO;
 	}
 
-	max_ch = gsi_get_max_channels(gsi);
-	if (WARN_ON(max_ch > GSI_CHAN_MAX))
+	channel_max = gsi_get_channel_max(gsi);
+	if (WARN_ON(channel_max > GSI_CHAN_MAX))
 		return -EIO;
 
 	max_ev = gsi_get_max_event_rings(gsi);
@@ -862,8 +862,7 @@ int gsi_register_device(struct gsi *gsi)
 	if (ret)
 		ipa_err("error %d enabling gsi wake irq\n", ret);
 	gsi->irq_wake_enabled = !ret;
-
-	gsi->max_ch = max_ch;
+	gsi->channel_max = channel_max;
 	gsi->max_ev = max_ev;
 	gsi->evt_bmap = gsi_evt_bmap(max_ev);
 
@@ -892,7 +891,7 @@ void gsi_deregister_device(struct gsi *gsi)
 	/* Clean up everything else set up by gsi_register_device() */
 	gsi->evt_bmap = 0;
 	gsi->max_ev = 0;
-	gsi->max_ch = 0;
+	gsi->channel_max = 0;
 	if (gsi->irq_wake_enabled) {
 		(void)disable_irq_wake(gsi->irq);
 		gsi->irq_wake_enabled = false;

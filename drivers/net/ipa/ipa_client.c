@@ -42,7 +42,7 @@ ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep,
 	props.low_weight = 1;
 	props.chan_user_data = NULL;
 
-	if (gsi_set_channel_cfg(ipa_ctx->gsi, ep->gsi_chan_hdl, &props)) {
+	if (gsi_set_channel_cfg(ipa_ctx->gsi, ep->channel_id, &props)) {
 		ipa_err("Error setting channel properties\n");
 		ipa_dma_free(chan_dma);
 		return -EFAULT;
@@ -55,7 +55,7 @@ static int
 ipa_restore_channel_properties(struct ipa_ep_context *ep,
 			       struct gsi_chan_props *props)
 {
-	if (gsi_set_channel_cfg(ipa_ctx->gsi, ep->gsi_chan_hdl, props)) {
+	if (gsi_set_channel_cfg(ipa_ctx->gsi, ep->channel_id, props)) {
 		ipa_err("Error restoring channel properties\n");
 		return -EFAULT;
 	}
@@ -84,14 +84,14 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 	ipa_write_reg_fields(IPA_AGGR_FORCE_CLOSE, &force_close);
 
 	/* Reset channel */
-	gsi_res = gsi_reset_channel(ipa_ctx->gsi, ep->gsi_chan_hdl);
+	gsi_res = gsi_reset_channel(ipa_ctx->gsi, ep->channel_id);
 	if (gsi_res) {
 		ipa_err("Error resetting channel: %d\n", gsi_res);
 		return -EFAULT;
 	}
 
 	/* Reconfigure channel to dummy GPI channel */
-	gsi_res = gsi_get_channel_cfg(ipa_ctx->gsi, ep->gsi_chan_hdl,
+	gsi_res = gsi_get_channel_cfg(ipa_ctx->gsi, ep->channel_id,
 				      &orig_props);
 	if (gsi_res) {
 		ipa_err("Error getting channel properties: %d\n", gsi_res);
@@ -110,7 +110,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 	}
 
 	/* Start channel and put 1 Byte descriptor on it */
-	gsi_res = gsi_start_channel(ipa_ctx->gsi, ep->gsi_chan_hdl);
+	gsi_res = gsi_start_channel(ipa_ctx->gsi, ep->channel_id);
 	if (gsi_res) {
 		ipa_err("Error starting channel: %d\n", gsi_res);
 		result = -EFAULT;
@@ -128,7 +128,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 	xfer_elem.flags = GSI_XFER_FLAG_EOT;
 	xfer_elem.type = GSI_XFER_ELEM_DATA;
 
-	gsi_res = gsi_queue_xfer(ipa_ctx->gsi, ep->gsi_chan_hdl, 1, &xfer_elem,
+	gsi_res = gsi_queue_xfer(ipa_ctx->gsi, ep->channel_id, 1, &xfer_elem,
 				 true);
 	if (gsi_res) {
 		result = -EFAULT;
@@ -154,7 +154,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 	}
 
 	/* Reset channel */
-	gsi_res = gsi_reset_channel(ipa_ctx->gsi, ep->gsi_chan_hdl);
+	gsi_res = gsi_reset_channel(ipa_ctx->gsi, ep->channel_id);
 	if (gsi_res) {
 		ipa_err("Error resetting channel: %d\n", gsi_res);
 		result = -EFAULT;
@@ -217,7 +217,7 @@ void ipa_reset_gsi_channel(u32 ep_id)
 	} else {
 		/* If the reset called after stop, need to wait 1ms */
 		msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
-		ipa_bug_on(gsi_reset_channel(ipa_ctx->gsi, ep->gsi_chan_hdl));
+		ipa_bug_on(gsi_reset_channel(ipa_ctx->gsi, ep->channel_id));
 	}
 
 	ipa_client_remove();

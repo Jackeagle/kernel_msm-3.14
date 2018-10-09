@@ -881,7 +881,7 @@ void ipa_set_resource_groups_min_max_limits(void)
 
 static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
 {
-	ipa_debug("switch ch %d to poll\n", ep->gsi_chan_hdl);
+	ipa_debug("switch channel %u to poll\n", ep->channel_id);
 	ipa_rx_switch_to_poll_mode(ep->sys);
 }
 
@@ -921,7 +921,7 @@ static void ipa_ep_cons_resume(enum ipa_client_type client)
 	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 
 	if (!ipa_ep_polling(ep))
-		gsi_channel_intr_enable(ipa_ctx->gsi, ep->gsi_chan_hdl);
+		gsi_channel_intr_enable(ipa_ctx->gsi, ep->channel_id);
 }
 
 void ipa_ep_resume_all(void)
@@ -1022,20 +1022,16 @@ int ipa_stop_gsi_channel(u32 ep_id)
 	ipa_client_add();
 
 	if (ipa_producer(ep->client)) {
-		ipa_debug("Calling gsi_stop_channel ch:%u\n",
-			  ep->gsi_chan_hdl);
-		res = gsi_stop_channel(ipa_ctx->gsi, ep->gsi_chan_hdl);
-		ipa_debug("gsi_stop_channel ch: %u returned %d\n",
-			  ep->gsi_chan_hdl, res);
+		ipa_debug("stopping channel %u\n", ep->channel_id);
+		res = gsi_stop_channel(ipa_ctx->gsi, ep->channel_id);
+		ipa_debug("stop channel result %d\n", res);
 		goto end_sequence;
 	}
 
 	for (i = 0; i < IPA_GSI_CHANNEL_STOP_MAX_RETRY; i++) {
-		ipa_debug("Calling gsi_stop_channel ch:%u\n",
-			  ep->gsi_chan_hdl);
-		res = gsi_stop_channel(ipa_ctx->gsi, ep->gsi_chan_hdl);
-		ipa_debug("gsi_stop_channel ch: %u returned %d\n",
-			  ep->gsi_chan_hdl, res);
+		ipa_debug("stopping channel %u\n", ep->channel_id);
+		res = gsi_stop_channel(ipa_ctx->gsi, ep->channel_id);
+		ipa_debug("stop channel result %d\n", res);
 		if (res != -EAGAIN && res != -ETIMEDOUT)
 			goto end_sequence;
 

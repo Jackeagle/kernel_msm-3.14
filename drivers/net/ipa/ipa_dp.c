@@ -301,7 +301,7 @@ int ipa_rx_poll(u32 ep_id, int weight)
  */
 static bool ipa_send_nop(struct ipa_sys_context *sys)
 {
-	u32 channel_id = sys->ep->gsi_chan_hdl;
+	u32 channel_id = sys->ep->channel_id;
 	struct ipa_tx_pkt_wrapper *nop_pkt;
 	struct gsi_xfer_elem nop_xfer = { };
 
@@ -494,7 +494,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 		}
 	}
 
-	result = gsi_queue_xfer(ipa_ctx->gsi, ep->gsi_chan_hdl,
+	result = gsi_queue_xfer(ipa_ctx->gsi, ep->channel_id,
 				num_desc, xfer_elem, true);
 	if (result)
 		goto failure;
@@ -650,14 +650,14 @@ static void ipa_rx_switch_to_intr_mode(struct ipa_sys_context *sys)
 		return;
 	}
 	ipa_dec_release_wakelock();
-	gsi_channel_intr_enable(ipa_ctx->gsi, sys->ep->gsi_chan_hdl);
+	gsi_channel_intr_enable(ipa_ctx->gsi, sys->ep->channel_id);
 }
 
 void ipa_rx_switch_to_poll_mode(struct ipa_sys_context *sys)
 {
 	if (atomic_xchg(&sys->rx.curr_polling_state, 1))
 		return;
-	gsi_channel_intr_disable(ipa_ctx->gsi, sys->ep->gsi_chan_hdl);
+	gsi_channel_intr_disable(ipa_ctx->gsi, sys->ep->channel_id);
 	ipa_inc_acquire_wakelock();
 	queue_work(sys->wq, &sys->rx.work);
 }
@@ -855,7 +855,7 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
 	gsi_xfer_elem.type = GSI_XFER_ELEM_DATA;
 	gsi_xfer_elem.xfer_user_data = rx_pkt;
 
-	ret = gsi_queue_xfer(ipa_ctx->gsi, sys->ep->gsi_chan_hdl,
+	ret = gsi_queue_xfer(ipa_ctx->gsi, sys->ep->channel_id,
 			     1, &gsi_xfer_elem, false);
 	if (ret)
 		return ret;
@@ -865,7 +865,7 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
 	 */
 	if (++sys->rx.len_pending_xfer >= IPA_REPL_XFER_THRESH) {
 		sys->rx.len_pending_xfer = 0;
-		gsi_start_xfer(ipa_ctx->gsi, sys->ep->gsi_chan_hdl);
+		gsi_start_xfer(ipa_ctx->gsi, sys->ep->channel_id);
 	}
 
 	return 0;
@@ -1538,16 +1538,16 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 chan_count)
 	result = gsi_alloc_channel(ipa_ctx->gsi, &gsi_channel_props);
 	if (result < 0)
 		goto fail_alloc_channel;
-	ep->gsi_chan_hdl = (u32)result;
+	ep->channel_id = (u32)result;
 
-	gsi_write_channel_scratch(ipa_ctx->gsi, ep->gsi_chan_hdl,
+	gsi_write_channel_scratch(ipa_ctx->gsi, ep->channel_id,
 				  gsi_ep_info->ipa_if_tlv);
 
-	result = gsi_start_channel(ipa_ctx->gsi, ep->gsi_chan_hdl);
+	result = gsi_start_channel(ipa_ctx->gsi, ep->channel_id);
 	if (!result)
 		return 0;	/* Success */
 
-	gsi_dealloc_channel(ipa_ctx->gsi, ep->gsi_chan_hdl);
+	gsi_dealloc_channel(ipa_ctx->gsi, ep->channel_id);
 fail_alloc_channel:
 	ipa_err("Return with err: %d\n", result);
 
@@ -1840,7 +1840,7 @@ void ipa_ep_teardown(u32 ep_id)
 	}
 
 	ipa_reset_gsi_channel(ep_id);
-	gsi_dealloc_channel(ipa_ctx->gsi, ep->gsi_chan_hdl);
+	gsi_dealloc_channel(ipa_ctx->gsi, ep->channel_id);
 	gsi_reset_evt_ring(ipa_ctx->gsi, ep->gsi_evt_ring_hdl);
 	gsi_dealloc_evt_ring(ipa_ctx->gsi, ep->gsi_evt_ring_hdl);
 
@@ -1862,7 +1862,7 @@ static int ipa_poll_gsi_pkt(struct ipa_sys_context *sys)
 		return (int)sys->ep->bytes_xfered;
 	}
 
-	return gsi_poll_channel(ipa_ctx->gsi, sys->ep->gsi_chan_hdl);
+	return gsi_poll_channel(ipa_ctx->gsi, sys->ep->channel_id);
 }
 
 bool ipa_ep_polling(struct ipa_ep_context *ep)
