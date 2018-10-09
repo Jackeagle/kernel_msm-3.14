@@ -1489,33 +1489,15 @@ ipa_gsi_evt_ring_count(enum ipa_client_type client, u32 channel_count)
 	return 2 * channel_count;
 }
 
-/* Returns the event ring id to use for the given endpoint
- * context, or a negative error code if an error occurs.
- *
- * If successful, the returned handle will be either the common
- * event ring handle or a new handle.  Caller is responsible for
- * deallocating the event ring *unless* it is the common one.
- */
-static int evt_ring_get(struct ipa_ep_context *ep, u32 channel_count)
-{
-	u32 evt_ring_count;
-	u16 modt = ep->sys->tx.no_intr ? 0 : IPA_GSI_EVT_RING_INT_MODT;
-
-	ipa_debug("client=%d moderation threshold cycles=%u cnt=1\n",
-		  ep->client, modt);
-
-	evt_ring_count = ipa_gsi_evt_ring_count(ep->client, channel_count);
-
-	return gsi_alloc_evt_ring(ipa_ctx->gsi, evt_ring_count, modt);
-}
-
 static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count)
 {
 	struct gsi_channel_props gsi_channel_props = { };
 	const struct ipa_gsi_ep_config *gsi_ep_info;
+	u32 evt_ring_count = ipa_gsi_evt_ring_count(ep->client, channel_count);
+	u16 modt = ep->sys->tx.no_intr ? 0 : IPA_GSI_EVT_RING_INT_MODT;
 	int result;
 
-	result = evt_ring_get(ep, channel_count);
+	result = gsi_alloc_evt_ring(ipa_ctx->gsi, evt_ring_count, modt);
 	if (result < 0)
 		return result;
 	ep->evt_ring_id = (u32)result;
