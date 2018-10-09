@@ -92,7 +92,7 @@ struct gsi_chan_props {
 	bool from_gsi;
 	bool use_db_engine;
 	u8 low_weight;
-	u8 ch_id;
+	u32 ch_id;
 	u32 evt_ring_hdl;
 	void *chan_user_data;
 };
@@ -216,7 +216,7 @@ void gsi_reset_evt_ring(struct gsi *gsi, u32 evt_id);
  *
  * @Return Channel handle populated by GSI, opaque to client, or negative errno
  */
-long gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props);
+int gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props);
 
 /** gsi_write_channel_scratch - Peripheral should call this function to
  * write to the scratch area of the channel context
@@ -226,8 +226,7 @@ long gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props);
  *
  * @Return gsi_status
  */
-int gsi_write_channel_scratch(struct gsi *gsi, unsigned long chan_id,
-			      u32 tlv_size);
+int gsi_write_channel_scratch(struct gsi *gsi, u32 chan_id, u32 tlv_size);
 
 /** gsi_start_channel - Peripheral should call this function to
  * start a channel i.e put into running state
@@ -239,7 +238,7 @@ int gsi_write_channel_scratch(struct gsi *gsi, unsigned long chan_id,
  *
  * @Return gsi_status
  */
-int gsi_start_channel(struct gsi *gsi, unsigned long chan_id);
+int gsi_start_channel(struct gsi *gsi, u32 chan_id);
 
 /** gsi_stop_channel - Peripheral should call this function to
  * stop a channel. Stop will happen on a packet boundary
@@ -252,7 +251,7 @@ int gsi_start_channel(struct gsi *gsi, unsigned long chan_id);
  * @Return -GSI_STATUS_AGAIN if client should call stop/stop_db again
  *	   other error codes for failure
  */
-int gsi_stop_channel(struct gsi *gsi, unsigned long chan_id);
+int gsi_stop_channel(struct gsi *gsi, u32 chan_id);
 
 /** gsi_reset_channel - Peripheral should call this function to
  * reset a channel to recover from error state
@@ -264,7 +263,7 @@ int gsi_stop_channel(struct gsi *gsi, unsigned long chan_id);
  *
  * @Return gsi_status
  */
-int gsi_reset_channel(struct gsi *gsi, unsigned long chan_id);
+int gsi_reset_channel(struct gsi *gsi, u32 chan_id);
 
 /** gsi_dealloc_channel - Peripheral should call this function to
  * de-allocate a channel
@@ -273,7 +272,7 @@ int gsi_reset_channel(struct gsi *gsi, unsigned long chan_id);
  *
  * This function can sleep
  */
-void gsi_dealloc_channel(struct gsi *gsi, unsigned long chan_id);
+void gsi_dealloc_channel(struct gsi *gsi, u32 chan_id);
 
 /** gsi_is_channel_empty - Peripheral can call this function to query if
  * the channel is empty. This is only applicable to GPI. "Empty" means
@@ -284,7 +283,7 @@ void gsi_dealloc_channel(struct gsi *gsi, unsigned long chan_id);
  *
  * @Return true if channel is empty, false otherwise
  */
-bool gsi_is_channel_empty(struct gsi *gsi, unsigned long chan_id);
+bool gsi_is_channel_empty(struct gsi *gsi, u32 chan_id);
 
 /** gsi_get_channel_cfg - This function returns the current config
  * of the specified channel
@@ -295,7 +294,7 @@ bool gsi_is_channel_empty(struct gsi *gsi, unsigned long chan_id);
  *
  * @Return gsi_status
  */
-int gsi_get_channel_cfg(struct gsi *gsi, unsigned long chan_id,
+int gsi_get_channel_cfg(struct gsi *gsi, u32 chan_id,
 			struct gsi_chan_props *props);
 
 /** gsi_set_channel_cfg - This function applies the supplied config
@@ -309,7 +308,7 @@ int gsi_get_channel_cfg(struct gsi *gsi, unsigned long chan_id,
  *
  * @Return gsi_status
  */
-int gsi_set_channel_cfg(struct gsi *gsi, unsigned long chan_id,
+int gsi_set_channel_cfg(struct gsi *gsi, u32 chan_id,
 			struct gsi_chan_props *props);
 
 /** gsi_poll_channel - Peripheral should call this function to query for
@@ -319,14 +318,14 @@ int gsi_set_channel_cfg(struct gsi *gsi, unsigned long chan_id,
  *
  * @Return number of bytes transferred, or a negative error code
  */
-int gsi_poll_channel(struct gsi *gsi, unsigned long chan_id);
+int gsi_poll_channel(struct gsi *gsi, u32 chan_id);
 
 /** gsi_channel_intr_enable/disable - control channel interrupts
  *
  * @chan_id:  Client handle previously obtained from gsi_alloc_channel()
  */
-void gsi_channel_intr_enable(struct gsi *gsi, unsigned long chan_id);
-void gsi_channel_intr_disable(struct gsi *gsi, unsigned long chan_id);
+void gsi_channel_intr_enable(struct gsi *gsi, u32 chan_id);
+void gsi_channel_intr_disable(struct gsi *gsi, u32 chan_id);
 
 /** gsi_queue_xfer - Peripheral should call this function
  * to queue transfers on the given channel
@@ -339,7 +338,7 @@ void gsi_channel_intr_disable(struct gsi *gsi, unsigned long chan_id);
  *
  * @Return gsi_status
  */
-int gsi_queue_xfer(struct gsi *gsi, unsigned long chan_id, u16 num_xfers,
+int gsi_queue_xfer(struct gsi *gsi, u32 chan_id, u16 num_xfers,
 		   struct gsi_xfer_elem *xfer, bool ring_db);
 
 /** gsi_start_xfer - Peripheral should call this function to
@@ -349,6 +348,6 @@ int gsi_queue_xfer(struct gsi *gsi, unsigned long chan_id, u16 num_xfers,
  *
  * @Return gsi_status
  */
-int gsi_start_xfer(struct gsi *gsi, unsigned long chan_id);
+int gsi_start_xfer(struct gsi *gsi, u32 chan_id);
 
 #endif /* _GSI_H_ */

@@ -548,7 +548,7 @@ static u16 gsi_process_chan(struct gsi *gsi, struct gsi_xfer_compl_evt *evt,
 			    bool callback)
 {
 	struct gsi_chan_ctx *chan;
-	u32 chan_id = evt->chid;
+	u32 chan_id = (u32)evt->chid;
 
 	ipa_assert(chan_id < gsi->max_ch);
 
@@ -560,7 +560,7 @@ static u16 gsi_process_chan(struct gsi *gsi, struct gsi_xfer_compl_evt *evt,
 		if (evt->code == GSI_CHAN_EVT_EOT)
 			chan_xfer_cb(chan, evt->len);
 		else
-			ipa_err("ch %hhu unexpected %sX event id %hhu\n",
+			ipa_err("ch %u unexpected %sX event id %hhu\n",
 				chan_id, chan->props.from_gsi ? "R" : "T",
 				evt->code);
 	}
@@ -996,20 +996,20 @@ static u32 evt_ring_command(struct gsi *gsi, u32 evt_id,
 }
 
 /* Issue a channel command and wait for it to complete */
-static u32 channel_command(struct gsi *gsi, unsigned long chan_id,
-			   enum gsi_ch_cmd_opcode op)
+static u32
+channel_command(struct gsi *gsi, u32 chan_id, enum gsi_ch_cmd_opcode op)
 {
 	struct completion *compl = &gsi->chan[chan_id].compl;
 	u32 val;
 
 	reinit_completion(compl);
 
-	val = field_gen((u32)chan_id, CH_CHID_FMASK);
+	val = field_gen(chan_id, CH_CHID_FMASK);
 	val |= field_gen((u32)op, CH_OPCODE_FMASK);
 
 	val = command(gsi, GSI_CH_CMD_OFFS, val, compl);
 	if (!val)
-		ipa_err("chan_id %lu timed out\n", chan_id);
+		ipa_err("chan_id %u timed out\n", chan_id);
 
 	return val;
 }
@@ -1177,12 +1177,12 @@ gsi_program_chan_ctx(struct gsi *gsi, struct gsi_chan_props *props, u32 evt_id)
 	gsi_writel(gsi, val, GSI_CH_K_QOS_OFFS(props->ch_id));
 }
 
-long gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
+int gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
 {
 	u32 size = props->ring_count * GSI_RING_ELEMENT_SIZE;
 	u32 evt_id = props->evt_ring_hdl;
 	struct gsi_evt_ctx *evtr = &gsi->evtr[evt_id];
-	long chan_id = (long)props->ch_id;
+	int chan_id = (int)props->ch_id;
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	void **user_data;
 	u32 completed;
@@ -1201,7 +1201,7 @@ long gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
 	}
 
 	if (chan->allocated) {
-		ipa_err("chan %ld already allocated\n", chan_id);
+		ipa_err("chan %d already allocated\n", chan_id);
 		ipa_dma_free(&props->mem);
 		return -ENODEV;
 	}
@@ -1220,13 +1220,13 @@ long gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
 
 	mutex_lock(&gsi->mlock);
 
-	completed = channel_command(gsi, chan_id, GSI_CH_ALLOCATE);
+	completed = channel_command(gsi, (u32)chan_id, GSI_CH_ALLOCATE);
 	if (!completed) {
 		chan_id = -ETIMEDOUT;
 		goto err_mutex_unlock;
 	}
 	if (chan->state != GSI_CHAN_STATE_ALLOCATED) {
-		ipa_err("chan_id %ld allocation failed state %d\n",
+		ipa_err("chan_id %d allocation failed state %d\n",
 			chan_id, chan->state);
 		chan_id = -ENOMEM;
 		goto err_mutex_unlock;
@@ -1257,8 +1257,7 @@ err_mutex_unlock:
 	return chan_id;
 }
 
-static void
-__gsi_write_channel_scratch(struct gsi *gsi, unsigned long chan_id)
+static void __gsi_write_channel_scratch(struct gsi *gsi, u32 chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	union gsi_channel_scratch scr = { };
@@ -1287,8 +1286,7 @@ __gsi_write_channel_scratch(struct gsi *gsi, unsigned long chan_id)
 	gsi_writel(gsi, val, GSI_CH_K_SCRATCH_3_OFFS(chan_id));
 }
 
-int
-gsi_write_channel_scratch(struct gsi *gsi, unsigned long chan_id, u32 tlv_size)
+int gsi_write_channel_scratch(struct gsi *gsi, u32 chan_id, u32 tlv_size)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 
@@ -1303,7 +1301,7 @@ gsi_write_channel_scratch(struct gsi *gsi, unsigned long chan_id, u32 tlv_size)
 	return 0;
 }
 
-int gsi_start_channel(struct gsi *gsi, unsigned long chan_id)
+int gsi_start_channel(struct gsi *gsi, u32 chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	u32 completed;
@@ -1325,7 +1323,7 @@ int gsi_start_channel(struct gsi *gsi, unsigned long chan_id)
 		return -ETIMEDOUT;
 	}
 	if (chan->state != GSI_CHAN_STATE_STARTED) {
-		ipa_err("chan %lu unexpected state %u\n", chan_id, chan->state);
+		ipa_err("chan %u unexpected state %u\n", chan_id, chan->state);
 		ipa_bug();
 	}
 
@@ -1334,14 +1332,14 @@ int gsi_start_channel(struct gsi *gsi, unsigned long chan_id)
 	return 0;
 }
 
-int gsi_stop_channel(struct gsi *gsi, unsigned long chan_id)
+int gsi_stop_channel(struct gsi *gsi, u32 chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	u32 completed;
 	int ret;
 
 	if (chan->state == GSI_CHAN_STATE_STOPPED) {
-		ipa_debug("chan_id %lu already stopped\n", chan_id);
+		ipa_debug("chan_id %u already stopped\n", chan_id);
 		return 0;
 	}
 
@@ -1372,13 +1370,13 @@ int gsi_stop_channel(struct gsi *gsi, unsigned long chan_id)
 
 	if (chan->state != GSI_CHAN_STATE_STOPPED &&
 	    chan->state != GSI_CHAN_STATE_STOP_IN_PROC) {
-		ipa_err("chan %lu unexpected state %u\n", chan_id, chan->state);
+		ipa_err("chan %u unexpected state %u\n", chan_id, chan->state);
 		ret = -EBUSY;
 		goto free_lock;
 	}
 
 	if (chan->state == GSI_CHAN_STATE_STOP_IN_PROC) {
-		ipa_err("chan %lu busy try again\n", chan_id);
+		ipa_err("chan %u busy try again\n", chan_id);
 		ret = -EAGAIN;
 		goto free_lock;
 	}
@@ -1391,7 +1389,7 @@ free_lock:
 	return ret;
 }
 
-int gsi_reset_channel(struct gsi *gsi, unsigned long chan_id)
+int gsi_reset_channel(struct gsi *gsi, u32 chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	bool reset_done = false;
@@ -1409,13 +1407,13 @@ reset:
 
 	completed = channel_command(gsi, chan_id, GSI_CH_RESET);
 	if (!completed) {
-		ipa_err("chan_id %lu timed out\n", chan_id);
+		ipa_err("chan_id %u timed out\n", chan_id);
 		mutex_unlock(&gsi->mlock);
 		return -ETIMEDOUT;
 	}
 
 	if (chan->state != GSI_CHAN_STATE_ALLOCATED) {
-		ipa_err("chan_id %lu unexpected state %u\n", chan_id,
+		ipa_err("chan_id %u unexpected state %u\n", chan_id,
 			chan->state);
 		ipa_bug();
 	}
@@ -1438,7 +1436,7 @@ reset:
 	return 0;
 }
 
-void gsi_dealloc_channel(struct gsi *gsi, unsigned long chan_id)
+void gsi_dealloc_channel(struct gsi *gsi, u32 chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	u32 completed;
@@ -1475,7 +1473,7 @@ static u16 __gsi_query_ring_free_re(struct gsi_ring_ctx *ring)
 	return (u16)(delta / GSI_RING_ELEMENT_SIZE - 1);
 }
 
-bool gsi_is_channel_empty(struct gsi *gsi, unsigned long chan_id)
+bool gsi_is_channel_empty(struct gsi *gsi, u32 chan_id)
 {
 	struct gsi_chan_ctx *chan;
 	unsigned long flags;
@@ -1499,13 +1497,13 @@ bool gsi_is_channel_empty(struct gsi *gsi, unsigned long chan_id)
 
 	spin_unlock_irqrestore(&chan->evtr->ring.slock, flags);
 
-	ipa_debug("chan_id %lu RP 0x%llx WP 0x%llx RP_LOCAL 0x%llx\n", chan_id,
+	ipa_debug("chan_id %u RP 0x%llx WP 0x%llx RP_LOCAL 0x%llx\n", chan_id,
 		  chan->ring.rp, chan->ring.wp, chan->ring.rp_local);
 
 	return empty;
 }
 
-int gsi_queue_xfer(struct gsi *gsi, unsigned long chan_id, u16 num_xfers,
+int gsi_queue_xfer(struct gsi *gsi, u32 chan_id, u16 num_xfers,
 		   struct gsi_xfer_elem *xfer, bool ring_db)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
@@ -1516,7 +1514,7 @@ int gsi_queue_xfer(struct gsi *gsi, unsigned long chan_id, u16 num_xfers,
 
 	if (num_xfers > __gsi_query_ring_free_re(&chan->ring)) {
 		spin_unlock_irqrestore(&chan->evtr->ring.slock, flags);
-		ipa_err("no space for %u-element transfer on ch %lu\n",
+		ipa_err("no space for %u-element transfer on ch %u\n",
 			num_xfers, chan_id);
 
 		return -ENOSPC;
@@ -1560,7 +1558,7 @@ int gsi_queue_xfer(struct gsi *gsi, unsigned long chan_id, u16 num_xfers,
 	return 0;
 }
 
-int gsi_start_xfer(struct gsi *gsi, unsigned long chan_id)
+int gsi_start_xfer(struct gsi *gsi, u32 chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 
@@ -1577,7 +1575,7 @@ int gsi_start_xfer(struct gsi *gsi, unsigned long chan_id)
 	return 0;
 }
 
-int gsi_poll_channel(struct gsi *gsi, unsigned long chan_id)
+int gsi_poll_channel(struct gsi *gsi, u32 chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	struct gsi_evt_ctx *evtr = chan->evtr;
@@ -1612,8 +1610,7 @@ int gsi_poll_channel(struct gsi *gsi, unsigned long chan_id)
 	return size;
 }
 
-static void
-gsi_config_channel_mode(struct gsi *gsi, unsigned long chan_id, bool polling)
+static void gsi_config_channel_mode(struct gsi *gsi, u32 chan_id, bool polling)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	unsigned long flags;
@@ -1627,18 +1624,18 @@ gsi_config_channel_mode(struct gsi *gsi, unsigned long chan_id, bool polling)
 	spin_unlock_irqrestore(&gsi->slock, flags);
 }
 
-void gsi_channel_intr_enable(struct gsi *gsi, unsigned long chan_id)
+void gsi_channel_intr_enable(struct gsi *gsi, u32 chan_id)
 {
 	gsi_config_channel_mode(gsi, chan_id, false);
 }
 
-void gsi_channel_intr_disable(struct gsi *gsi, unsigned long chan_id)
+void gsi_channel_intr_disable(struct gsi *gsi, u32 chan_id)
 {
 	gsi_config_channel_mode(gsi, chan_id, true);
 }
 
-int gsi_get_channel_cfg(struct gsi *gsi, unsigned long chan_id,
-			struct gsi_chan_props *props)
+int
+gsi_get_channel_cfg(struct gsi *gsi, u32 chan_id, struct gsi_chan_props *props)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 
@@ -1654,12 +1651,11 @@ int gsi_get_channel_cfg(struct gsi *gsi, unsigned long chan_id,
 	return 0;
 }
 
-int gsi_set_channel_cfg(struct gsi *gsi, unsigned long chan_id,
-			struct gsi_chan_props *props)
+int
+gsi_set_channel_cfg(struct gsi *gsi, u32 chan_id, struct gsi_chan_props *props)
 {
-	struct gsi_chan_ctx *chan;
+	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 
-	chan = &gsi->chan[chan_id];
 	if (chan->state != GSI_CHAN_STATE_ALLOCATED) {
 		ipa_err("bad state %d\n", chan->state);
 		return -ENOTSUPP;

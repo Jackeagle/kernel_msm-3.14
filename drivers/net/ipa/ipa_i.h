@@ -148,7 +148,7 @@ struct ipa_sys_connect_params {
 struct ipa_ep_context {
 	bool allocated;
 	enum ipa_client_type client;
-	unsigned long gsi_chan_hdl;
+	u32 gsi_chan_hdl;
 	u32 gsi_evt_ring_hdl;
 	bool bytes_xfered_valid;
 	u16 bytes_xfered;

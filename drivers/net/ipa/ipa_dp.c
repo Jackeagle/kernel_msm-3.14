@@ -301,7 +301,7 @@ int ipa_rx_poll(u32 ep_id, int weight)
  */
 static bool ipa_send_nop(struct ipa_sys_context *sys)
 {
-	unsigned long chan_id = sys->ep->gsi_chan_hdl;
+	u32 chan_id = sys->ep->gsi_chan_hdl;
 	struct ipa_tx_pkt_wrapper *nop_pkt;
 	struct gsi_xfer_elem nop_xfer = { };
 
@@ -1538,7 +1538,7 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 chan_count)
 	result = gsi_alloc_channel(ipa_ctx->gsi, &gsi_channel_props);
 	if (result < 0)
 		goto fail_alloc_channel;
-	ep->gsi_chan_hdl = result;
+	ep->gsi_chan_hdl = (u32)result;
 
 	result = gsi_write_channel_scratch(ipa_ctx->gsi, ep->gsi_chan_hdl,
 					   gsi_ep_info->ipa_if_tlv);
