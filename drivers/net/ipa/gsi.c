@@ -320,9 +320,9 @@ static void gsi_irq_enable_all(struct gsi *gsi)
 	_gsi_irq_control_all(gsi, true);
 }
 
-static enum gsi_chan_state gsi_chan_state(struct gsi *gsi, u32 chan_id)
+static enum gsi_chan_state gsi_chan_state(struct gsi *gsi, u32 channel_id)
 {
-	u32 val = gsi_readl(gsi, GSI_CH_K_CNTXT_0_OFFS(chan_id));
+	u32 val = gsi_readl(gsi, GSI_CH_K_CNTXT_0_OFFS(channel_id));
 
 	return (enum gsi_chan_state)field_val(val, CHSTATE_FMASK);
 }
@@ -387,22 +387,22 @@ static void gsi_handle_evt_ctrl(struct gsi *gsi)
 }
 
 static void
-handle_glob_chan_err(struct gsi *gsi, u32 err_ee, u32 chan_id, u32 code)
+handle_glob_chan_err(struct gsi *gsi, u32 err_ee, u32 channel_id, u32 code)
 {
-	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[channel_id];
 
 	if (err_ee != IPA_EE_AP)
 		ipa_bug_on(code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
 
-	if (WARN_ON(chan_id >= gsi->max_ch)) {
-		ipa_err("unexpected chan_id %u\n", chan_id);
+	if (WARN_ON(channel_id >= gsi->max_ch)) {
+		ipa_err("unexpected channel_id %u\n", channel_id);
 		return;
 	}
 
 	switch (code) {
 	case GSI_INVALID_TRE_ERR:
 		ipa_err("got INVALID_TRE_ERR\n");
-		chan->state = gsi_chan_state(gsi, chan_id);
+		chan->state = gsi_chan_state(gsi, channel_id);
 		ipa_bug_on(chan->state != GSI_CHAN_STATE_ERROR);
 		break;
 	case GSI_OUT_OF_BUFFERS_ERR:
@@ -548,12 +548,12 @@ static u16 gsi_process_chan(struct gsi *gsi, struct gsi_xfer_compl_evt *evt,
 			    bool callback)
 {
 	struct gsi_chan_ctx *chan;
-	u32 chan_id = (u32)evt->chid;
+	u32 channel_id = (u32)evt->chid;
 
-	ipa_assert(chan_id < gsi->max_ch);
+	ipa_assert(channel_id < gsi->max_ch);
 
 	/* Event tells us the last completed channel ring element */
-	chan = &gsi->chan[chan_id];
+	chan = &gsi->chan[channel_id];
 	chan->ring.rp_local = evt->xfer_ptr;
 
 	if (callback) {
@@ -561,7 +561,7 @@ static u16 gsi_process_chan(struct gsi *gsi, struct gsi_xfer_compl_evt *evt,
 			chan_xfer_cb(chan, evt->len);
 		else
 			ipa_err("ch %u unexpected %sX event id %hhu\n",
-				chan_id, chan->props.from_gsi ? "R" : "T",
+				channel_id, chan->props.from_gsi ? "R" : "T",
 				evt->code);
 	}
 
@@ -591,7 +591,7 @@ static void
 gsi_ring_chan_doorbell(struct gsi *gsi, struct gsi_chan_ctx *chan)
 {
 	u32 val;
-	u8 ch_id = chan->props.ch_id;
+	u8 channel_id = chan->props.channel_id;
 
 	/* allocate new events for this channel first
 	 * before submitting the new TREs.
@@ -607,9 +607,9 @@ gsi_ring_chan_doorbell(struct gsi *gsi, struct gsi_chan_ctx *chan)
 	 * respectively.  LSB (doorbell 0) must be written last.
 	 */
 	val = chan->ring.wp_local >> 32;
-	gsi_writel(gsi, val, GSI_CH_K_DOORBELL_1_OFFS(ch_id));
+	gsi_writel(gsi, val, GSI_CH_K_DOORBELL_1_OFFS(channel_id));
 	val = chan->ring.wp_local & GENMASK(31, 0);
-	gsi_writel(gsi, val, GSI_CH_K_DOORBELL_0_OFFS(ch_id));
+	gsi_writel(gsi, val, GSI_CH_K_DOORBELL_0_OFFS(channel_id));
 }
 
 static void handle_event(struct gsi *gsi, u32 evt_id)
@@ -997,14 +997,14 @@ evt_ring_command(struct gsi *gsi, u32 evt_id, enum gsi_evt_ch_cmd_opcode op)
 
 /* Issue a channel command and wait for it to complete */
 static bool
-channel_command(struct gsi *gsi, u32 chan_id, enum gsi_ch_cmd_opcode op)
+channel_command(struct gsi *gsi, u32 channel_id, enum gsi_ch_cmd_opcode op)
 {
-	struct completion *compl = &gsi->chan[chan_id].compl;
+	struct completion *compl = &gsi->chan[channel_id].compl;
 	u32 val;
 
 	reinit_completion(compl);
 
-	val = field_gen(chan_id, CH_CHID_FMASK);
+	val = field_gen(channel_id, CH_CHID_FMASK);
 	val |= field_gen((u32)op, CH_OPCODE_FMASK);
 
 	return command(gsi, GSI_CH_CMD_OFFS, val, compl);
@@ -1150,25 +1150,25 @@ gsi_program_chan_ctx(struct gsi *gsi, struct gsi_chan_props *props, u32 evt_id)
 	val |= field_gen(props->from_gsi ? 0 : 1, CHTYPE_DIR_FMASK);
 	val |= field_gen(evt_id, ERINDEX_FMASK);
 	val |= field_gen(GSI_RING_ELEMENT_SIZE, ELEMENT_SIZE_FMASK);
-	gsi_writel(gsi, val, GSI_CH_K_CNTXT_0_OFFS(props->ch_id));
+	gsi_writel(gsi, val, GSI_CH_K_CNTXT_0_OFFS(props->channel_id));
 
 	val = field_gen(props->mem.size, R_LENGTH_FMASK);
-	gsi_writel(gsi, val, GSI_CH_K_CNTXT_1_OFFS(props->ch_id));
+	gsi_writel(gsi, val, GSI_CH_K_CNTXT_1_OFFS(props->channel_id));
 
 	/* The context 2 and 3 registers store the low-order and
 	 * high-order 32 bits of the address of the channel ring,
 	 * respectively.
 	 */
 	val = props->mem.phys & GENMASK(31, 0);
-	gsi_writel(gsi, val, GSI_CH_K_CNTXT_2_OFFS(props->ch_id));
+	gsi_writel(gsi, val, GSI_CH_K_CNTXT_2_OFFS(props->channel_id));
 
 	val = props->mem.phys >> 32;
-	gsi_writel(gsi, val, GSI_CH_K_CNTXT_3_OFFS(props->ch_id));
+	gsi_writel(gsi, val, GSI_CH_K_CNTXT_3_OFFS(props->channel_id));
 
 	val = field_gen(props->low_weight, WRR_WEIGHT_FMASK);
 	val |= field_gen(GSI_MAX_PREFETCH, MAX_PREFETCH_FMASK);
 	val |= field_gen(props->use_db_engine ? 1 : 0, USE_DB_ENG_FMASK);
-	gsi_writel(gsi, val, GSI_CH_K_QOS_OFFS(props->ch_id));
+	gsi_writel(gsi, val, GSI_CH_K_QOS_OFFS(props->channel_id));
 }
 
 int gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
@@ -1176,8 +1176,8 @@ int gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
 	u32 size = props->ring_count * GSI_RING_ELEMENT_SIZE;
 	u32 evt_id = props->evt_ring_hdl;
 	struct gsi_evt_ctx *evtr = &gsi->evtr[evt_id];
-	int chan_id = (int)props->ch_id;
-	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
+	int channel_id = (int)props->channel_id;
+	struct gsi_chan_ctx *chan = &gsi->chan[channel_id];
 	void **user_data;
 
 	if (ipa_dma_alloc(&props->mem, size, GFP_KERNEL)) {
@@ -1194,7 +1194,7 @@ int gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
 	}
 
 	if (chan->allocated) {
-		ipa_err("chan %d already allocated\n", chan_id);
+		ipa_err("chan %d already allocated\n", channel_id);
 		ipa_dma_free(&props->mem);
 		return -ENODEV;
 	}
@@ -1213,18 +1213,18 @@ int gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
 
 	mutex_lock(&gsi->mlock);
 
-	if (!channel_command(gsi, (u32)chan_id, GSI_CH_ALLOCATE)) {
-		chan_id = -ETIMEDOUT;
+	if (!channel_command(gsi, (u32)channel_id, GSI_CH_ALLOCATE)) {
+		channel_id = -ETIMEDOUT;
 		goto err_mutex_unlock;
 	}
 	if (chan->state != GSI_CHAN_STATE_ALLOCATED) {
-		ipa_err("chan_id %d allocation failed state %d\n",
-			chan_id, chan->state);
-		chan_id = -ENOMEM;
+		ipa_err("channel_id %d allocation failed state %d\n",
+			channel_id, chan->state);
+		channel_id = -ENOMEM;
 		goto err_mutex_unlock;
 	}
 
-	gsi->ch_dbg[chan_id].ch_allocate++;
+	gsi->ch_dbg[channel_id].ch_allocate++;
 
 	mutex_unlock(&gsi->mlock);
 
@@ -1239,19 +1239,19 @@ int gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
 	chan->allocated = true;
 	atomic_inc(&gsi->num_chan);
 
-	return chan_id;
+	return channel_id;
 
 err_mutex_unlock:
 	mutex_unlock(&gsi->mlock);
 	kfree(user_data);
 	ipa_dma_free(&chan->props.mem);
 
-	return chan_id;
+	return channel_id;
 }
 
-static void __gsi_write_channel_scratch(struct gsi *gsi, u32 chan_id)
+static void __gsi_write_channel_scratch(struct gsi *gsi, u32 channel_id)
 {
-	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[channel_id];
 	union gsi_channel_scratch scr = { };
 	struct gsi_gpi_channel_scratch *gpi = &scr.gpi;
 	u32 val;
@@ -1261,39 +1261,39 @@ static void __gsi_write_channel_scratch(struct gsi *gsi, u32 chan_id)
 	gpi->outstanding_threshold = 2 * GSI_RING_ELEMENT_SIZE;
 
 	val = scr.data.word1;
-	gsi_writel(gsi, val, GSI_CH_K_SCRATCH_0_OFFS(chan_id));
+	gsi_writel(gsi, val, GSI_CH_K_SCRATCH_0_OFFS(channel_id));
 
 	val = scr.data.word2;
-	gsi_writel(gsi, val, GSI_CH_K_SCRATCH_1_OFFS(chan_id));
+	gsi_writel(gsi, val, GSI_CH_K_SCRATCH_1_OFFS(channel_id));
 
 	val = scr.data.word3;
-	gsi_writel(gsi, val, GSI_CH_K_SCRATCH_2_OFFS(chan_id));
+	gsi_writel(gsi, val, GSI_CH_K_SCRATCH_2_OFFS(channel_id));
 
 	/* We must preserve the upper 16 bits of the last scratch
 	 * register.  The next sequence assumes those bits remain
 	 * unchanged between the read and the write.
 	 */
-	val = gsi_readl(gsi, GSI_CH_K_SCRATCH_3_OFFS(chan_id));
+	val = gsi_readl(gsi, GSI_CH_K_SCRATCH_3_OFFS(channel_id));
 	val = (scr.data.word4 & GENMASK(31, 16)) | (val & GENMASK(15, 0));
-	gsi_writel(gsi, val, GSI_CH_K_SCRATCH_3_OFFS(chan_id));
+	gsi_writel(gsi, val, GSI_CH_K_SCRATCH_3_OFFS(channel_id));
 }
 
-void gsi_write_channel_scratch(struct gsi *gsi, u32 chan_id, u32 tlv_size)
+void gsi_write_channel_scratch(struct gsi *gsi, u32 channel_id, u32 tlv_size)
 {
-	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[channel_id];
 
 	chan->tlv_size = tlv_size;
 
 	mutex_lock(&chan->mlock);
 
-	__gsi_write_channel_scratch(gsi, chan_id);
+	__gsi_write_channel_scratch(gsi, channel_id);
 
 	mutex_unlock(&chan->mlock);
 }
 
-int gsi_start_channel(struct gsi *gsi, u32 chan_id)
+int gsi_start_channel(struct gsi *gsi, u32 channel_id)
 {
-	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[channel_id];
 
 	if (chan->state != GSI_CHAN_STATE_ALLOCATED &&
 	    chan->state != GSI_CHAN_STATE_STOP_IN_PROC &&
@@ -1304,14 +1304,15 @@ int gsi_start_channel(struct gsi *gsi, u32 chan_id)
 
 	mutex_lock(&gsi->mlock);
 
-	gsi->ch_dbg[chan_id].ch_start++;
+	gsi->ch_dbg[channel_id].ch_start++;
 
-	if (!channel_command(gsi, chan_id, GSI_CH_START)) {
+	if (!channel_command(gsi, channel_id, GSI_CH_START)) {
 		mutex_unlock(&gsi->mlock);
 		return -ETIMEDOUT;
 	}
 	if (chan->state != GSI_CHAN_STATE_STARTED) {
-		ipa_err("chan %u unexpected state %u\n", chan_id, chan->state);
+		ipa_err("chan %u unexpected state %u\n", channel_id,
+			chan->state);
 		ipa_bug();
 	}
 
@@ -1320,13 +1321,13 @@ int gsi_start_channel(struct gsi *gsi, u32 chan_id)
 	return 0;
 }
 
-int gsi_stop_channel(struct gsi *gsi, u32 chan_id)
+int gsi_stop_channel(struct gsi *gsi, u32 channel_id)
 {
-	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[channel_id];
 	int ret;
 
 	if (chan->state == GSI_CHAN_STATE_STOPPED) {
-		ipa_debug("chan_id %u already stopped\n", chan_id);
+		ipa_debug("channel_id %u already stopped\n", channel_id);
 		return 0;
 	}
 
@@ -1339,13 +1340,13 @@ int gsi_stop_channel(struct gsi *gsi, u32 chan_id)
 
 	mutex_lock(&gsi->mlock);
 
-	gsi->ch_dbg[chan_id].ch_stop++;
+	gsi->ch_dbg[channel_id].ch_stop++;
 
-	if (!channel_command(gsi, chan_id, GSI_CH_STOP)) {
+	if (!channel_command(gsi, channel_id, GSI_CH_STOP)) {
 		/* check channel state here in case the channel is stopped but
 		 * the interrupt was not handled yet.
 		 */
-		chan->state = gsi_chan_state(gsi, chan_id);
+		chan->state = gsi_chan_state(gsi, channel_id);
 		if (chan->state == GSI_CHAN_STATE_STOPPED) {
 			ret = 0;
 			goto free_lock;
@@ -1356,13 +1357,14 @@ int gsi_stop_channel(struct gsi *gsi, u32 chan_id)
 
 	if (chan->state != GSI_CHAN_STATE_STOPPED &&
 	    chan->state != GSI_CHAN_STATE_STOP_IN_PROC) {
-		ipa_err("chan %u unexpected state %u\n", chan_id, chan->state);
+		ipa_err("chan %u unexpected state %u\n", channel_id,
+			chan->state);
 		ret = -EBUSY;
 		goto free_lock;
 	}
 
 	if (chan->state == GSI_CHAN_STATE_STOP_IN_PROC) {
-		ipa_err("chan %u busy try again\n", chan_id);
+		ipa_err("chan %u busy try again\n", channel_id);
 		ret = -EAGAIN;
 		goto free_lock;
 	}
@@ -1375,9 +1377,9 @@ free_lock:
 	return ret;
 }
 
-int gsi_reset_channel(struct gsi *gsi, u32 chan_id)
+int gsi_reset_channel(struct gsi *gsi, u32 channel_id)
 {
-	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[channel_id];
 	bool reset_done = false;
 
 	if (chan->state != GSI_CHAN_STATE_STOPPED) {
@@ -1388,15 +1390,15 @@ int gsi_reset_channel(struct gsi *gsi, u32 chan_id)
 	mutex_lock(&gsi->mlock);
 reset:
 
-	gsi->ch_dbg[chan_id].ch_reset++;
+	gsi->ch_dbg[channel_id].ch_reset++;
 
-	if (!channel_command(gsi, chan_id, GSI_CH_RESET)) {
+	if (!channel_command(gsi, channel_id, GSI_CH_RESET)) {
 		mutex_unlock(&gsi->mlock);
 		return -ETIMEDOUT;
 	}
 
 	if (chan->state != GSI_CHAN_STATE_ALLOCATED) {
-		ipa_err("chan_id %u unexpected state %u\n", chan_id,
+		ipa_err("channel_id %u unexpected state %u\n", channel_id,
 			chan->state);
 		ipa_bug();
 	}
@@ -1412,25 +1414,25 @@ reset:
 	gsi_init_ring(&chan->ring, &chan->props.mem);
 
 	/* restore scratch */
-	__gsi_write_channel_scratch(gsi, chan_id);
+	__gsi_write_channel_scratch(gsi, channel_id);
 
 	mutex_unlock(&gsi->mlock);
 
 	return 0;
 }
 
-void gsi_dealloc_channel(struct gsi *gsi, u32 chan_id)
+void gsi_dealloc_channel(struct gsi *gsi, u32 channel_id)
 {
-	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[channel_id];
 	bool completed;
 
 	ipa_bug_on(chan->state != GSI_CHAN_STATE_ALLOCATED);
 
 	mutex_lock(&gsi->mlock);
 
-	gsi->ch_dbg[chan_id].ch_de_alloc++;
+	gsi->ch_dbg[channel_id].ch_de_alloc++;
 
-	completed = channel_command(gsi, chan_id, GSI_CH_DE_ALLOC);
+	completed = channel_command(gsi, channel_id, GSI_CH_DE_ALLOC);
 	ipa_bug_on(!completed);
 
 	ipa_bug_on(chan->state != GSI_CHAN_STATE_NOT_ALLOCATED);
@@ -1456,21 +1458,21 @@ static u16 __gsi_query_ring_free_re(struct gsi_ring_ctx *ring)
 	return (u16)(delta / GSI_RING_ELEMENT_SIZE - 1);
 }
 
-bool gsi_is_channel_empty(struct gsi *gsi, u32 chan_id)
+bool gsi_is_channel_empty(struct gsi *gsi, u32 channel_id)
 {
 	struct gsi_chan_ctx *chan;
 	unsigned long flags;
 	bool empty;
 	u32 val;
 
-	chan = &gsi->chan[chan_id];
+	chan = &gsi->chan[channel_id];
 
 	spin_lock_irqsave(&chan->evtr->ring.slock, flags);
 
-	val = gsi_readl(gsi, GSI_CH_K_CNTXT_4_OFFS(chan->props.ch_id));
+	val = gsi_readl(gsi, GSI_CH_K_CNTXT_4_OFFS(chan->props.channel_id));
 	chan->ring.rp = (chan->ring.rp & GENMASK_ULL(63, 32)) | val;
 
-	val = gsi_readl(gsi, GSI_CH_K_CNTXT_6_OFFS(chan->props.ch_id));
+	val = gsi_readl(gsi, GSI_CH_K_CNTXT_6_OFFS(chan->props.channel_id));
 	chan->ring.wp = (chan->ring.wp & GENMASK_ULL(63, 32)) | val;
 
 	if (chan->props.from_gsi)
@@ -1480,16 +1482,17 @@ bool gsi_is_channel_empty(struct gsi *gsi, u32 chan_id)
 
 	spin_unlock_irqrestore(&chan->evtr->ring.slock, flags);
 
-	ipa_debug("chan_id %u RP 0x%llx WP 0x%llx RP_LOCAL 0x%llx\n", chan_id,
-		  chan->ring.rp, chan->ring.wp, chan->ring.rp_local);
+	ipa_debug("channel_id %u RP 0x%llx WP 0x%llx RP_LOCAL 0x%llx\n",
+		  channel_id, chan->ring.rp, chan->ring.wp,
+		  chan->ring.rp_local);
 
 	return empty;
 }
 
-int gsi_queue_xfer(struct gsi *gsi, u32 chan_id, u16 num_xfers,
+int gsi_queue_xfer(struct gsi *gsi, u32 channel_id, u16 num_xfers,
 		   struct gsi_xfer_elem *xfer, bool ring_db)
 {
-	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[channel_id];
 	unsigned long flags;
 	u32 i;
 
@@ -1498,7 +1501,7 @@ int gsi_queue_xfer(struct gsi *gsi, u32 chan_id, u16 num_xfers,
 	if (num_xfers > __gsi_query_ring_free_re(&chan->ring)) {
 		spin_unlock_irqrestore(&chan->evtr->ring.slock, flags);
 		ipa_err("no space for %u-element transfer on ch %u\n",
-			num_xfers, chan_id);
+			num_xfers, channel_id);
 
 		return -ENOSPC;
 	}
@@ -1541,9 +1544,9 @@ int gsi_queue_xfer(struct gsi *gsi, u32 chan_id, u16 num_xfers,
 	return 0;
 }
 
-int gsi_start_xfer(struct gsi *gsi, u32 chan_id)
+int gsi_start_xfer(struct gsi *gsi, u32 channel_id)
 {
-	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[channel_id];
 
 	if (chan->state != GSI_CHAN_STATE_STARTED) {
 		ipa_err("bad state %d\n", chan->state);
@@ -1558,9 +1561,9 @@ int gsi_start_xfer(struct gsi *gsi, u32 chan_id)
 	return 0;
 }
 
-int gsi_poll_channel(struct gsi *gsi, u32 chan_id)
+int gsi_poll_channel(struct gsi *gsi, u32 channel_id)
 {
-	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[channel_id];
 	struct gsi_evt_ctx *evtr = chan->evtr;
 	unsigned long flags;
 	int size;
@@ -1593,9 +1596,10 @@ int gsi_poll_channel(struct gsi *gsi, u32 chan_id)
 	return size;
 }
 
-static void gsi_config_channel_mode(struct gsi *gsi, u32 chan_id, bool polling)
+static void
+gsi_config_channel_mode(struct gsi *gsi, u32 channel_id, bool polling)
 {
-	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[channel_id];
 	unsigned long flags;
 
 	spin_lock_irqsave(&gsi->slock, flags);
@@ -1607,20 +1611,20 @@ static void gsi_config_channel_mode(struct gsi *gsi, u32 chan_id, bool polling)
 	spin_unlock_irqrestore(&gsi->slock, flags);
 }
 
-void gsi_channel_intr_enable(struct gsi *gsi, u32 chan_id)
+void gsi_channel_intr_enable(struct gsi *gsi, u32 channel_id)
 {
-	gsi_config_channel_mode(gsi, chan_id, false);
+	gsi_config_channel_mode(gsi, channel_id, false);
 }
 
-void gsi_channel_intr_disable(struct gsi *gsi, u32 chan_id)
+void gsi_channel_intr_disable(struct gsi *gsi, u32 channel_id)
 {
-	gsi_config_channel_mode(gsi, chan_id, true);
+	gsi_config_channel_mode(gsi, channel_id, true);
 }
 
-int
-gsi_get_channel_cfg(struct gsi *gsi, u32 chan_id, struct gsi_chan_props *props)
+int gsi_get_channel_cfg(struct gsi *gsi, u32 channel_id,
+			struct gsi_chan_props *props)
 {
-	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[channel_id];
 
 	if (chan->state == GSI_CHAN_STATE_NOT_ALLOCATED) {
 		ipa_err("bad state %d\n", chan->state);
@@ -1634,17 +1638,17 @@ gsi_get_channel_cfg(struct gsi *gsi, u32 chan_id, struct gsi_chan_props *props)
 	return 0;
 }
 
-int
-gsi_set_channel_cfg(struct gsi *gsi, u32 chan_id, struct gsi_chan_props *props)
+int gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id,
+		        struct gsi_chan_props *props)
 {
-	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
+	struct gsi_chan_ctx *chan = &gsi->chan[channel_id];
 
 	if (chan->state != GSI_CHAN_STATE_ALLOCATED) {
 		ipa_err("bad state %d\n", chan->state);
 		return -ENOTSUPP;
 	}
 
-	if (chan->props.ch_id != props->ch_id ||
+	if (chan->props.channel_id != props->channel_id ||
 	    chan->props.evt_ring_hdl != props->evt_ring_hdl) {
 		ipa_err("changing immutable fields not supported\n");
 		return -ENOTSUPP;
@@ -1657,7 +1661,7 @@ gsi_set_channel_cfg(struct gsi *gsi, u32 chan_id, struct gsi_chan_props *props)
 	gsi_init_ring(&chan->ring, &chan->props.mem);
 
 	/* restore scratch */
-	__gsi_write_channel_scratch(gsi, chan_id);
+	__gsi_write_channel_scratch(gsi, channel_id);
 	mutex_unlock(&chan->mlock);
 
 	return 0;

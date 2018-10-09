@@ -301,7 +301,7 @@ int ipa_rx_poll(u32 ep_id, int weight)
  */
 static bool ipa_send_nop(struct ipa_sys_context *sys)
 {
-	u32 chan_id = sys->ep->gsi_chan_hdl;
+	u32 channel_id = sys->ep->gsi_chan_hdl;
 	struct ipa_tx_pkt_wrapper *nop_pkt;
 	struct gsi_xfer_elem nop_xfer = { };
 
@@ -324,7 +324,7 @@ static bool ipa_send_nop(struct ipa_sys_context *sys)
 	list_add_tail(&nop_pkt->link, &sys->head_desc_list);
 	spin_unlock_bh(&sys->spinlock);
 
-	if (!gsi_queue_xfer(ipa_ctx->gsi, chan_id, 1, &nop_xfer, true))
+	if (!gsi_queue_xfer(ipa_ctx->gsi, channel_id, 1, &nop_xfer, true))
 		return true;	/* Success */
 
 	spin_lock_bh(&sys->spinlock);
@@ -1523,7 +1523,7 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 chan_count)
 	gsi_ep_info = ipa_get_gsi_ep_info(ep->client);
 
 	gsi_channel_props.from_gsi = ipa_consumer(ep->client);
-	gsi_channel_props.ch_id = gsi_ep_info->ipa_gsi_chan_num;
+	gsi_channel_props.channel_id = gsi_ep_info->ipa_gsi_chan_num;
 	gsi_channel_props.evt_ring_hdl = ep->gsi_evt_ring_hdl;
 	gsi_channel_props.use_db_engine = true;
 	if (ep->client == IPA_CLIENT_APPS_CMD_PROD)

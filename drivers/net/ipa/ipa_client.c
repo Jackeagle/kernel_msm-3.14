@@ -35,7 +35,7 @@ ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep,
 
 	/* Set up channel properties */
 	props.from_gsi = true;
-	props.ch_id = orig_props->ch_id;
+	props.channel_id = orig_props->channel_id;
 	props.evt_ring_hdl = orig_props->evt_ring_hdl;
 	props.mem = *chan_dma;
 	props.use_db_engine = false;

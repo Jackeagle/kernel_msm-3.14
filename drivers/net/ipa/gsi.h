@@ -36,7 +36,7 @@ struct ipa_gsi_ep_config {
 /** gsi_chan_props - Channel related properties
  *
  * @dir:	     channel direction
- * @ch_id:	     virtual channel ID
+ * @channel_id:	     virtual channel ID
  * @evt_ring_hdl:    handle of associated event ring. set to ~0 if no
  *		     event ring associated
  * @re_size:	     size of channel ring element
@@ -92,7 +92,7 @@ struct gsi_chan_props {
 	bool from_gsi;
 	bool use_db_engine;
 	u8 low_weight;
-	u32 ch_id;
+	u32 channel_id;
 	u32 evt_ring_hdl;
 	void *chan_user_data;
 };
@@ -221,29 +221,29 @@ int gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props);
 /** gsi_write_channel_scratch - Peripheral should call this function to
  * write to the scratch area of the channel context
  *
- * @chan_id:  Client handle previously obtained from gsi_alloc_channel
+ * @channel_id:  Client handle previously obtained from gsi_alloc_channel
  * @tlv_size:  Number of elements in channel TLV queue
  *
  * @Return gsi_status
  */
-void gsi_write_channel_scratch(struct gsi *gsi, u32 chan_id, u32 tlv_size);
+void gsi_write_channel_scratch(struct gsi *gsi, u32 channel_id, u32 tlv_size);
 
 /** gsi_start_channel - Peripheral should call this function to
  * start a channel i.e put into running state
  *
- * @chan_id:  Client handle previously obtained from
+ * @channel_id:  Client handle previously obtained from
  *	       gsi_alloc_channel
  *
  * This function can sleep
  *
  * @Return gsi_status
  */
-int gsi_start_channel(struct gsi *gsi, u32 chan_id);
+int gsi_start_channel(struct gsi *gsi, u32 channel_id);
 
 /** gsi_stop_channel - Peripheral should call this function to
  * stop a channel. Stop will happen on a packet boundary
  *
- * @chan_id:  Client handle previously obtained from
+ * @channel_id:  Client handle previously obtained from
  *	       gsi_alloc_channel
  *
  * This function can sleep
@@ -251,86 +251,86 @@ int gsi_start_channel(struct gsi *gsi, u32 chan_id);
  * @Return -GSI_STATUS_AGAIN if client should call stop/stop_db again
  *	   other error codes for failure
  */
-int gsi_stop_channel(struct gsi *gsi, u32 chan_id);
+int gsi_stop_channel(struct gsi *gsi, u32 channel_id);
 
 /** gsi_reset_channel - Peripheral should call this function to
  * reset a channel to recover from error state
  *
- * @chan_id:  Client handle previously obtained from
+ * @channel_id:  Client handle previously obtained from
  *	       gsi_alloc_channel
  *
  * This function can sleep
  *
  * @Return gsi_status
  */
-int gsi_reset_channel(struct gsi *gsi, u32 chan_id);
+int gsi_reset_channel(struct gsi *gsi, u32 channel_id);
 
 /** gsi_dealloc_channel - Peripheral should call this function to
  * de-allocate a channel
  *
- * @chan_id:  Client handle previously obtained from gsi_alloc_channel()
+ * @channel_id:  Client handle previously obtained from gsi_alloc_channel()
  *
  * This function can sleep
  */
-void gsi_dealloc_channel(struct gsi *gsi, u32 chan_id);
+void gsi_dealloc_channel(struct gsi *gsi, u32 channel_id);
 
 /** gsi_is_channel_empty - Peripheral can call this function to query if
  * the channel is empty. This is only applicable to GPI. "Empty" means
  * GSI has consumed all descriptors for a TO_GSI channel and SW has
  * processed all completed descriptors for a FROM_GSI channel.
  *
- * @chan_id:  Client handle previously obtained from gsi_alloc_channel
+ * @channel_id:  Client handle previously obtained from gsi_alloc_channel
  *
  * @Return true if channel is empty, false otherwise
  */
-bool gsi_is_channel_empty(struct gsi *gsi, u32 chan_id);
+bool gsi_is_channel_empty(struct gsi *gsi, u32 channel_id);
 
 /** gsi_get_channel_cfg - This function returns the current config
  * of the specified channel
  *
- * @chan_id:  Client handle previously obtained from
+ * @channel_id:  Client handle previously obtained from
  *	       gsi_alloc_channel
  * @props:     where to copy properties to
  *
  * @Return gsi_status
  */
-int gsi_get_channel_cfg(struct gsi *gsi, u32 chan_id,
+int gsi_get_channel_cfg(struct gsi *gsi, u32 channel_id,
 			struct gsi_chan_props *props);
 
 /** gsi_set_channel_cfg - This function applies the supplied config
  * to the specified channel
  *
- * ch_id and evt_ring_hdl of the channel cannot be changed after
+ * channel_id and evt_ring_hdl of the channel cannot be changed after
  * gsi_alloc_channel
  *
- * @chan_id:  Client handle previously obtained from gsi_alloc_channel
+ * @channel_id:  Client handle previously obtained from gsi_alloc_channel
  * @props:     the properties to apply
  *
  * @Return gsi_status
  */
-int gsi_set_channel_cfg(struct gsi *gsi, u32 chan_id,
+int gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id,
 			struct gsi_chan_props *props);
 
 /** gsi_poll_channel - Peripheral should call this function to query for
  * completed transfer descriptors.
  *
- * @chan_id:  Client handle previously obtained from gsi_alloc_channel()
+ * @channel_id:  Client handle previously obtained from gsi_alloc_channel()
  *
  * @Return number of bytes transferred, or a negative error code
  */
-int gsi_poll_channel(struct gsi *gsi, u32 chan_id);
+int gsi_poll_channel(struct gsi *gsi, u32 channel_id);
 
 /** gsi_channel_intr_enable/disable - control channel interrupts
  *
- * @chan_id:  Client handle previously obtained from gsi_alloc_channel()
+ * @channel_id:  Client handle previously obtained from gsi_alloc_channel()
  */
-void gsi_channel_intr_enable(struct gsi *gsi, u32 chan_id);
-void gsi_channel_intr_disable(struct gsi *gsi, u32 chan_id);
+void gsi_channel_intr_enable(struct gsi *gsi, u32 channel_id);
+void gsi_channel_intr_disable(struct gsi *gsi, u32 channel_id);
 
 /** gsi_queue_xfer - Peripheral should call this function
  * to queue transfers on the given channel
  *
- * @chan_id:  Client handle previously obtained from gsi_alloc_channel()
+ * @channel_id:  Client handle previously obtained from gsi_alloc_channel()
  * @num_xfers: Number of transfer in the array @ xfer
  * @xfer:      Array of num_xfers transfer descriptors
  * @ring_db:   If true, tell HW about these queued xfers
@@ -338,16 +338,16 @@ void gsi_channel_intr_disable(struct gsi *gsi, u32 chan_id);
  *
  * @Return gsi_status
  */
-int gsi_queue_xfer(struct gsi *gsi, u32 chan_id, u16 num_xfers,
+int gsi_queue_xfer(struct gsi *gsi, u32 channel_id, u16 num_xfers,
 		   struct gsi_xfer_elem *xfer, bool ring_db);
 
 /** gsi_start_xfer - Peripheral should call this function to
  * inform HW about queued xfers
  *
- * @chan_id:  Client handle previously obtained from gsi_alloc_channel()
+ * @channel_id:  Client handle previously obtained from gsi_alloc_channel()
  *
  * @Return gsi_status
  */
-int gsi_start_xfer(struct gsi *gsi, u32 chan_id);
+int gsi_start_xfer(struct gsi *gsi, u32 channel_id);
 
 #endif /* _GSI_H_ */
