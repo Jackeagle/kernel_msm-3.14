@@ -789,7 +789,7 @@ static irqreturn_t gsi_isr(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-static u32 gsi_get_channel_max(struct gsi *gsi)
+static u32 gsi_channel_max(struct gsi *gsi)
 {
 	u32 val = gsi_readl(gsi, GSI_GSI_HW_PARAM_2_OFFS);
 
@@ -808,7 +808,7 @@ static u32 gsi_evt_ring_max(struct gsi *gsi)
  * the hardware are available; then preclude any reserved events
  * from allocation.
  */
-static u32 gsi_evt_bmap(u32 evt_ring_max)
+static u32 gsi_evt_bmap_init(u32 evt_ring_max)
 {
 	u32 evt_bmap = GENMASK(BITS_PER_LONG - 1, evt_ring_max);
 
@@ -828,7 +828,7 @@ int gsi_register_device(struct gsi *gsi)
 		return -EIO;
 	}
 
-	channel_max = gsi_get_channel_max(gsi);
+	channel_max = gsi_channel_max(gsi);
 	if (WARN_ON(channel_max > GSI_CHAN_MAX))
 		return -EIO;
 
@@ -848,7 +848,7 @@ int gsi_register_device(struct gsi *gsi)
 	gsi->irq_wake_enabled = !ret;
 	gsi->channel_max = channel_max;
 	gsi->evt_ring_max = evt_ring_max;
-	gsi->evt_bmap = gsi_evt_bmap(evt_ring_max);
+	gsi->evt_bmap = gsi_evt_bmap_init(evt_ring_max);
 
 	/* Enable all IPA interrupts */
 	gsi_irq_enable_all(gsi);
