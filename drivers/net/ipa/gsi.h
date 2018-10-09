@@ -179,33 +179,33 @@ int gsi_register_device(struct gsi *gsi);
  */
 void gsi_deregister_device(struct gsi *gsi);
 
-/** gsi_alloc_evt_ring - Peripheral should call this function to
+/** gsi_evt_ring_alloc - Peripheral should call this function to
  * allocate an event ring once gsi_register_device() has been called
  *
  * This function can sleep
  *
  * @Return id for event ring populated by GSI, or a negative errno
  */
-int gsi_alloc_evt_ring(struct gsi *gsi, u32 ring_count, u16 int_modt);
+int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, u16 int_modt);
 
-/** gsi_dealloc_evt_ring - Peripheral should call this function to
+/** gsi_evt_ring_dealloc - Peripheral should call this function to
  * de-allocate an event ring. There should not exist any active
  * channels using this event ring
  *
- * @evt_id:  event ring id previously obtained from gsi_alloc_evt_ring
+ * @evt_id:  event ring id previously obtained from gsi_evt_ring_alloc
  *
  * This function can sleep
  */
-void gsi_dealloc_evt_ring(struct gsi *gsi, u32 evt_id);
+void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_id);
 
-/** gsi_reset_evt_ring - Peripheral should call this function to
+/** gsi_evt_ring_reset - Peripheral should call this function to
  * reset an event ring to recover from error state
  *
- * @evt_id:  event ring id previously obtained from gsi_alloc_evt_ring()
+ * @evt_id:  event ring id previously obtained from gsi_evt_ring_alloc()
  *
  * This function can sleep
  */
-void gsi_reset_evt_ring(struct gsi *gsi, u32 evt_id);
+void gsi_evt_ring_reset(struct gsi *gsi, u32 evt_id);
 
 /** gsi_alloc_channel - Peripheral should call this function to
  * allocate a channel once gsi_register_device() has been called

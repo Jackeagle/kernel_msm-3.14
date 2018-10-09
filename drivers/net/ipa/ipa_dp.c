@@ -1497,7 +1497,7 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count)
 	u16 modt = ep->sys->tx.no_intr ? 0 : IPA_GSI_EVT_RING_INT_MODT;
 	int result;
 
-	result = gsi_alloc_evt_ring(ipa_ctx->gsi, evt_ring_count, modt);
+	result = gsi_evt_ring_alloc(ipa_ctx->gsi, evt_ring_count, modt);
 	if (result < 0)
 		return result;
 	ep->evt_ring_id = (u32)result;
@@ -1823,8 +1823,8 @@ void ipa_ep_teardown(u32 ep_id)
 
 	ipa_reset_gsi_channel(ep_id);
 	gsi_dealloc_channel(ipa_ctx->gsi, ep->channel_id);
-	gsi_reset_evt_ring(ipa_ctx->gsi, ep->evt_ring_id);
-	gsi_dealloc_evt_ring(ipa_ctx->gsi, ep->evt_ring_id);
+	gsi_evt_ring_reset(ipa_ctx->gsi, ep->evt_ring_id);
+	gsi_evt_ring_dealloc(ipa_ctx->gsi, ep->evt_ring_id);
 
 	if (ipa_consumer(ep->client))
 		ipa_cleanup_rx(ep->sys);

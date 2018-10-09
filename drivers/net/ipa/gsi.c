@@ -884,8 +884,8 @@ void gsi_deregister_device(struct gsi *gsi)
 	gsi->irq = 0;
 }
 
-static void gsi_program_evt_ring_ctx(struct gsi *gsi, u32 evt_ring_id, u32 size,
-				     u64 phys, u16 int_modt)
+static void gsi_evt_ring_program(struct gsi *gsi, u32 evt_ring_id, u32 size,
+				 u64 phys, u16 int_modt)
 {
 	u32 int_modc = 1;	/* moderation always comes from channel*/
 	u32 val;
@@ -935,7 +935,7 @@ static void gsi_init_ring(struct gsi_ring *ring, struct ipa_dma_mem *mem)
 	ring->end = mem->phys + mem->size;
 }
 
-static void gsi_prime_evt_ring(struct gsi *gsi, struct gsi_evt_ring *evt_ring)
+static void gsi_evt_ring_prime(struct gsi *gsi, struct gsi_evt_ring *evt_ring)
 {
 	unsigned long flags;
 
@@ -994,7 +994,7 @@ channel_command(struct gsi *gsi, u32 channel_id, enum gsi_ch_cmd_opcode op)
 }
 
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
-int gsi_alloc_evt_ring(struct gsi *gsi, u32 ring_count, u16 int_modt)
+int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, u16 int_modt)
 {
 	u32 size = ring_count * GSI_RING_ELEMENT_SIZE;
 	u32 evt_ring_id;
@@ -1039,11 +1039,11 @@ int gsi_alloc_evt_ring(struct gsi *gsi, u32 ring_count, u16 int_modt)
 	}
 	atomic_inc(&gsi->evt_ring_count);
 
-	gsi_program_evt_ring_ctx(gsi, evt_ring_id, evt_ring->mem.size,
-				 evt_ring->mem.phys, evt_ring->int_modt);
+	gsi_evt_ring_program(gsi, evt_ring_id, evt_ring->mem.size,
+			     evt_ring->mem.phys, evt_ring->int_modt);
 	gsi_init_ring(&evt_ring->ring, &evt_ring->mem);
 
-	gsi_prime_evt_ring(gsi, evt_ring);
+	gsi_evt_ring_prime(gsi, evt_ring);
 
 	mutex_unlock(&gsi->mlock);
 
@@ -1070,13 +1070,13 @@ err_free_bmap:
 	return ret;
 }
 
-static void __gsi_zero_evt_ring_scratch(struct gsi *gsi, u32 evt_ring_id)
+static void __gsi_evt_ring_scratch_zero(struct gsi *gsi, u32 evt_ring_id)
 {
 	gsi_writel(gsi, 0, GSI_EV_CH_K_SCRATCH_0_OFFS(evt_ring_id));
 	gsi_writel(gsi, 0, GSI_EV_CH_K_SCRATCH_1_OFFS(evt_ring_id));
 }
 
-void gsi_dealloc_evt_ring(struct gsi *gsi, u32 evt_ring_id)
+void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
 {
 	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
 	bool completed;
@@ -1105,7 +1105,7 @@ void gsi_dealloc_evt_ring(struct gsi *gsi, u32 evt_ring_id)
 	atomic_dec(&gsi->evt_ring_count);
 }
 
-void gsi_reset_evt_ring(struct gsi *gsi, u32 evt_ring_id)
+void gsi_evt_ring_reset(struct gsi *gsi, u32 evt_ring_id)
 {
 	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
 	bool completed;
@@ -1119,13 +1119,13 @@ void gsi_reset_evt_ring(struct gsi *gsi, u32 evt_ring_id)
 
 	ipa_bug_on(evt_ring->state != GSI_EVT_RING_STATE_ALLOCATED);
 
-	gsi_program_evt_ring_ctx(gsi, evt_ring_id, evt_ring->mem.size,
-				 evt_ring->mem.phys, evt_ring->int_modt);
+	gsi_evt_ring_program(gsi, evt_ring_id, evt_ring->mem.size,
+			     evt_ring->mem.phys, evt_ring->int_modt);
 	gsi_init_ring(&evt_ring->ring, &evt_ring->mem);
 
-	__gsi_zero_evt_ring_scratch(gsi, evt_ring_id);
+	__gsi_evt_ring_scratch_zero(gsi, evt_ring_id);
 
-	gsi_prime_evt_ring(gsi, evt_ring);
+	gsi_evt_ring_prime(gsi, evt_ring);
 	mutex_unlock(&gsi->mlock);
 }
 
