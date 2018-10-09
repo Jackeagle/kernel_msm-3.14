@@ -29,6 +29,7 @@
 #include <linux/delay.h>
 #include <linux/time.h>
 #include <linux/qcom_scm.h>
+#include <linux/soc/qcom/mdt_loader.h>
 #include <linux/soc/qcom/smem.h>
 #include <linux/soc/qcom/smem_state.h>
 #include <asm/cacheflush.h>
@@ -36,6 +37,10 @@
 #include "ipa_dma.h"
 #include "ipa_i.h"
 #include "ipahal.h"
+
+/* The name of the main firmware file relative to /lib/firmware */
+#define IPA_FWS_PATH		"ipa_fws.mdt"
+#define IPA_PAS_ID		15
 
 #define IPA_APPS_CMD_PROD_RING_COUNT	128
 #define IPA_APPS_LAN_CONS_RING_COUNT	128
@@ -1015,6 +1020,45 @@ err_disable_clks:
 	return result;
 }
 
+static int ipa_firmware_load(void)
+{
+	const struct firmware *fw;
+	unsigned long order;
+	phys_addr_t phys;
+	void *virt;
+	ssize_t size;
+	int ret;
+
+	ret = request_firmware(&fw, IPA_FWS_PATH, ipa_ctx->dev);
+	if (ret)
+		return ret;
+
+	size = qcom_mdt_get_size(fw);
+	if (size < 0) {
+		ret = size;
+		goto out_release_firmware;
+	}
+	/* We need to ensure the memory is page-aligned */
+	order = get_order(size);
+	virt = (void *)__get_free_pages(GFP_KERNEL | __GFP_ZERO, order);
+	if (!virt) {
+		ret = -ENOMEM;
+		goto out_release_firmware;
+	}
+	phys = virt_to_phys(virt);
+
+	ret = qcom_mdt_load(ipa_ctx->dev, fw, IPA_FWS_PATH, IPA_PAS_ID,
+			    virt, phys, size, NULL);
+	if (!ret)
+		ret = qcom_scm_pas_auth_and_reset(IPA_PAS_ID);
+
+	free_pages((unsigned long)virt, order);
+out_release_firmware:
+	release_firmware(fw);
+
+	return ret;
+}
+
 /* Threaded IRQ handler for modem "ipa-clock-query" SMP2P interrupt */
 static irqreturn_t ipa_smp2p_modem_clk_query_isr(int irq, void *ctxt)
 {
@@ -1233,7 +1277,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	 * and that will trigger the "post init".
 	 */
 	if (!modem_init) {
-		result = gsi_firmware_load(ipa_ctx->gsi);
+		result = ipa_firmware_load();
 		if (result)
 			goto err_clear_dev;
 
