@@ -964,21 +964,25 @@ static void gsi_prime_evt_ring(struct gsi *gsi, struct gsi_evt_ctx *evtr)
 }
 
 /* Issue a GSI command by writing a value to a register, then wait
- * for completion to be signaled.  Returns 0 if a timeout occurred,
- * non-zero (positive) othwerwise.  Note that the register offset
- * is first, value to write is second (reverse of writel() order).
+ * for completion to be signaled.  Returns true if successful or
+ * false if a timeout occurred.  Note that the register offset is
+ * first, value to write is second (reverse of writel() order).
  */
-static u32
-command(struct gsi *gsi, u32 reg, u32 val, struct completion *compl)
+static bool command(struct gsi *gsi, u32 reg, u32 val, struct completion *compl)
 {
-	gsi_writel(gsi, val, reg);
+	bool ret;
 
-	return (u32)wait_for_completion_timeout(compl, GSI_CMD_TIMEOUT);
+	gsi_writel(gsi, val, reg);
+	ret = !!wait_for_completion_timeout(compl, GSI_CMD_TIMEOUT);
+	if (!ret)
+		ipa_err("command timeout\n");
+
+	return ret;
 }
 
 /* Issue an event ring command and wait for it to complete */
-static u32 evt_ring_command(struct gsi *gsi, u32 evt_id,
-			    enum gsi_evt_ch_cmd_opcode op)
+static bool
+evt_ring_command(struct gsi *gsi, u32 evt_id, enum gsi_evt_ch_cmd_opcode op)
 {
 	struct completion *compl = &gsi->evtr[evt_id].compl;
 	u32 val;
@@ -988,15 +992,11 @@ static u32 evt_ring_command(struct gsi *gsi, u32 evt_id,
 	val = field_gen(evt_id, EV_CHID_FMASK);
 	val |= field_gen((u32)op, EV_OPCODE_FMASK);
 
-	val = command(gsi, GSI_EV_CH_CMD_OFFS, val, compl);
-	if (!val)
-		ipa_err("evt_id %u timed out\n", evt_id);
-
-	return val;
+	return command(gsi, GSI_EV_CH_CMD_OFFS, val, compl);
 }
 
 /* Issue a channel command and wait for it to complete */
-static u32
+static bool
 channel_command(struct gsi *gsi, u32 chan_id, enum gsi_ch_cmd_opcode op)
 {
 	struct completion *compl = &gsi->chan[chan_id].compl;
@@ -1007,11 +1007,7 @@ channel_command(struct gsi *gsi, u32 chan_id, enum gsi_ch_cmd_opcode op)
 	val = field_gen(chan_id, CH_CHID_FMASK);
 	val |= field_gen((u32)op, CH_OPCODE_FMASK);
 
-	val = command(gsi, GSI_CH_CMD_OFFS, val, compl);
-	if (!val)
-		ipa_err("chan_id %u timed out\n", chan_id);
-
-	return val;
+	return command(gsi, GSI_CH_CMD_OFFS, val, compl);
 }
 
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
@@ -1021,7 +1017,6 @@ int gsi_alloc_evt_ring(struct gsi *gsi, u32 ring_count, u16 int_modt)
 	u32 evt_id;
 	struct gsi_evt_ctx *evtr;
 	unsigned long flags;
-	u32 completed;
 	u32 val;
 	int ret;
 
@@ -1045,8 +1040,7 @@ int gsi_alloc_evt_ring(struct gsi *gsi, u32 ring_count, u16 int_modt)
 	init_completion(&evtr->compl);
 	atomic_set(&evtr->chan_ref_cnt, 0);
 
-	completed = evt_ring_command(gsi, evt_id, GSI_EVT_ALLOCATE);
-	if (!completed) {
+	if (!evt_ring_command(gsi, evt_id, GSI_EVT_ALLOCATE)) {
 		ret = -ETIMEDOUT;
 		goto err_free_dma;
 	}
@@ -1098,7 +1092,7 @@ static void __gsi_zero_evt_ring_scratch(struct gsi *gsi, u32 evt_id)
 void gsi_dealloc_evt_ring(struct gsi *gsi, u32 evt_id)
 {
 	struct gsi_evt_ctx *evtr = &gsi->evtr[evt_id];
-	u32 completed;
+	bool completed;
 
 	ipa_bug_on(atomic_read(&evtr->chan_ref_cnt));
 
@@ -1126,7 +1120,7 @@ void gsi_dealloc_evt_ring(struct gsi *gsi, u32 evt_id)
 void gsi_reset_evt_ring(struct gsi *gsi, u32 evt_id)
 {
 	struct gsi_evt_ctx *evtr = &gsi->evtr[evt_id];
-	u32 completed;
+	bool completed;
 
 	ipa_bug_on(evtr->state != GSI_EVT_RING_STATE_ALLOCATED);
 
@@ -1185,7 +1179,6 @@ int gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
 	int chan_id = (int)props->ch_id;
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	void **user_data;
-	u32 completed;
 
 	if (ipa_dma_alloc(&props->mem, size, GFP_KERNEL)) {
 		ipa_err("fail to dma alloc %u bytes\n", size);
@@ -1220,8 +1213,7 @@ int gsi_alloc_channel(struct gsi *gsi, struct gsi_chan_props *props)
 
 	mutex_lock(&gsi->mlock);
 
-	completed = channel_command(gsi, (u32)chan_id, GSI_CH_ALLOCATE);
-	if (!completed) {
+	if (!channel_command(gsi, (u32)chan_id, GSI_CH_ALLOCATE)) {
 		chan_id = -ETIMEDOUT;
 		goto err_mutex_unlock;
 	}
@@ -1302,7 +1294,6 @@ void gsi_write_channel_scratch(struct gsi *gsi, u32 chan_id, u32 tlv_size)
 int gsi_start_channel(struct gsi *gsi, u32 chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
-	u32 completed;
 
 	if (chan->state != GSI_CHAN_STATE_ALLOCATED &&
 	    chan->state != GSI_CHAN_STATE_STOP_IN_PROC &&
@@ -1315,8 +1306,7 @@ int gsi_start_channel(struct gsi *gsi, u32 chan_id)
 
 	gsi->ch_dbg[chan_id].ch_start++;
 
-	completed = channel_command(gsi, chan_id, GSI_CH_START);
-	if (!completed) {
+	if (!channel_command(gsi, chan_id, GSI_CH_START)) {
 		mutex_unlock(&gsi->mlock);
 		return -ETIMEDOUT;
 	}
@@ -1333,7 +1323,6 @@ int gsi_start_channel(struct gsi *gsi, u32 chan_id)
 int gsi_stop_channel(struct gsi *gsi, u32 chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
-	u32 completed;
 	int ret;
 
 	if (chan->state == GSI_CHAN_STATE_STOPPED) {
@@ -1352,8 +1341,7 @@ int gsi_stop_channel(struct gsi *gsi, u32 chan_id)
 
 	gsi->ch_dbg[chan_id].ch_stop++;
 
-	completed = channel_command(gsi, chan_id, GSI_CH_STOP);
-	if (!completed) {
+	if (!channel_command(gsi, chan_id, GSI_CH_STOP)) {
 		/* check channel state here in case the channel is stopped but
 		 * the interrupt was not handled yet.
 		 */
@@ -1391,7 +1379,6 @@ int gsi_reset_channel(struct gsi *gsi, u32 chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
 	bool reset_done = false;
-	u32 completed;
 
 	if (chan->state != GSI_CHAN_STATE_STOPPED) {
 		ipa_err("bad state %d\n", chan->state);
@@ -1403,9 +1390,7 @@ reset:
 
 	gsi->ch_dbg[chan_id].ch_reset++;
 
-	completed = channel_command(gsi, chan_id, GSI_CH_RESET);
-	if (!completed) {
-		ipa_err("chan_id %u timed out\n", chan_id);
+	if (!channel_command(gsi, chan_id, GSI_CH_RESET)) {
 		mutex_unlock(&gsi->mlock);
 		return -ETIMEDOUT;
 	}
@@ -1437,7 +1422,7 @@ reset:
 void gsi_dealloc_channel(struct gsi *gsi, u32 chan_id)
 {
 	struct gsi_chan_ctx *chan = &gsi->chan[chan_id];
-	u32 completed;
+	bool completed;
 
 	ipa_bug_on(chan->state != GSI_CHAN_STATE_ALLOCATED);
 
