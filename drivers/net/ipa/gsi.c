@@ -92,7 +92,7 @@ enum gsi_chan_state {
 	GSI_CHAN_STATE_ERROR		= 0xf,
 };
 
-struct gsi_ring_ctx {
+struct gsi_ring {
 	spinlock_t slock;		/* protects wp, rp updates */
 	struct ipa_dma_mem mem;
 	u64 wp;
@@ -105,7 +105,7 @@ struct gsi_ring_ctx {
 struct gsi_chan_ctx {
 	struct gsi_chan_props props;
 	enum gsi_chan_state state;
-	struct gsi_ring_ctx ring;
+	struct gsi_ring ring;
 	void **user_data;
 	struct gsi_evt_ctx *evtr;
 	struct mutex mlock;		/* protects chan_scratch updates */
@@ -120,7 +120,7 @@ struct gsi_evt_ctx {
 	u16 int_modt;
 	enum gsi_evt_ring_state state;
 	u32 id;
-	struct gsi_ring_ctx ring;
+	struct gsi_ring ring;
 	struct completion compl;
 	struct gsi_chan_ctx *chan;
 	atomic_t chan_ref_cnt;
@@ -509,26 +509,26 @@ static void gsi_handle_glob_ee(struct gsi *gsi)
 	gsi_writel(gsi, val, GSI_CNTXT_GLOB_IRQ_CLR_OFFS);
 }
 
-static void ring_wp_local_inc(struct gsi_ring_ctx *ring)
+static void ring_wp_local_inc(struct gsi_ring *ring)
 {
 	ring->wp_local += GSI_RING_ELEMENT_SIZE;
 	if (ring->wp_local == ring->end)
 		ring->wp_local = ring->mem.phys;
 }
 
-static void ring_rp_local_inc(struct gsi_ring_ctx *ring)
+static void ring_rp_local_inc(struct gsi_ring *ring)
 {
 	ring->rp_local += GSI_RING_ELEMENT_SIZE;
 	if (ring->rp_local == ring->end)
 		ring->rp_local = ring->mem.phys;
 }
 
-static u16 ring_rp_local_index(struct gsi_ring_ctx *ring)
+static u16 ring_rp_local_index(struct gsi_ring *ring)
 {
 	return (u16)(ring->rp_local - ring->mem.phys) / GSI_RING_ELEMENT_SIZE;
 }
 
-static u16 ring_wp_local_index(struct gsi_ring_ctx *ring)
+static u16 ring_wp_local_index(struct gsi_ring *ring)
 {
 	return (u16)(ring->wp_local - ring->mem.phys) / GSI_RING_ELEMENT_SIZE;
 }
@@ -941,7 +941,7 @@ static void gsi_program_evt_ring_ctx(struct gsi *gsi, u32 evt_ring_id, u32 size,
 	gsi_writel(gsi, 0, GSI_EV_CH_K_CNTXT_13_OFFS(evt_ring_id));
 }
 
-static void gsi_init_ring(struct gsi_ring_ctx *ring, struct ipa_dma_mem *mem)
+static void gsi_init_ring(struct gsi_ring *ring, struct ipa_dma_mem *mem)
 {
 	spin_lock_init(&ring->slock);
 	ring->mem = *mem;
@@ -1446,7 +1446,7 @@ void gsi_dealloc_channel(struct gsi *gsi, u32 channel_id)
 	atomic_dec(&gsi->num_chan);
 }
 
-static u16 __gsi_query_ring_free_re(struct gsi_ring_ctx *ring)
+static u16 __gsi_query_ring_free_re(struct gsi_ring *ring)
 {
 	u64 delta;
 
