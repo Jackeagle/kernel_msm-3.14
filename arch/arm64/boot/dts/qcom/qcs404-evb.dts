@@ -191,6 +191,10 @@
 	qcom,vdd-voltage-level = <0 1050000 1050000>;
 };
 
+&usb2 {
+	status = "okay";
+};
+
 &usb2_phy_prim {
 	status = "okay";
 
@@ -209,4 +213,8 @@
 	vdda33-supply = <&vreg_l12_3p3>;
 
 	qcom,vdd-voltage-level = <0 1144000 1200000>;
+};
+
+&usb3 {
+	status = "okay";
 };
