@@ -18,6 +18,31 @@
 #define CLK_RPMH_ARC_EN_OFFSET		0
 #define CLK_RPMH_VRM_EN_OFFSET		4
 
+#define BCM_TCS_CMD_COMMIT_MASK		0x40000000
+#define BCM_TCS_CMD_VALID_SHFT		29
+#define BCM_TCS_CMD_VOTE_MASK		0x3fff
+#define BCM_TCS_CMD_VOTE_SHFT		0
+
+#define BCM_TCS_CMD(valid, vote) \
+	(BCM_TCS_CMD_COMMIT_MASK |\
+	(valid << BCM_TCS_CMD_VALID_SHFT) |\
+	((cpu_to_le32(vote) &\
+	BCM_TCS_CMD_VOTE_MASK) << BCM_TCS_CMD_VOTE_SHFT))
+
+/**
+ * struct bcm_db - Auxiliary data pertaining to each Bus Clock Manager(BCM)
+ * @unit: bcm threshold values are in magnitudes of this
+ * @width: prototype width
+ * @vcd: virtual clock domain that this bcm belongs to
+ */
+
+struct bcm_db {
+    u32 unit;
+    u16 width;
+    u8 vcd;
+    u8 reserved;
+};
+
 /**
  * struct clk_rpmh - individual rpmh clock data structure
  * @hw:			handle between common and hardware-specific interfaces
@@ -42,6 +67,7 @@ struct clk_rpmh {
 	u32 aggr_state;
 	u32 last_sent_aggr_state;
 	u32 valid_state_mask;
+	struct bcm_db aux_data;
 	struct device *dev;
 	struct clk_rpmh *peer;
 };
@@ -97,6 +123,17 @@ static DEFINE_MUTEX(rpmh_clk_lock);
 				_div)					\
 	__DEFINE_CLK_RPMH(_platform, _name, _name_active, _res_name,	\
 			  CLK_RPMH_VRM_EN_OFFSET, 1, _div)
+
+#define DEFINE_CLK_RPMH_BCM(_platform, _name, _res_name)		\
+	static struct clk_rpmh _platform##_##_name = {			\
+		.res_name = _res_name,					\
+		.valid_state_mask = BIT(RPMH_ACTIVE_ONLY_STATE),	\
+		.div = 1,						\
+		.hw.init = &(struct clk_init_data){			\
+			.ops = &clk_rpmh_bcm_ops,			\
+			.name = #_name,					\
+		},							\
+	};								\
 
 static inline struct clk_rpmh *to_clk_rpmh(struct clk_hw *_hw)
 {
@@ -210,6 +247,76 @@ static const struct clk_ops clk_rpmh_ops = {
 	.recalc_rate	= clk_rpmh_recalc_rate,
 };
 
+static int clk_rpmh_bcm_send_cmd(struct clk_rpmh *c, bool enable)
+{
+	struct tcs_cmd cmd = { 0 };
+	u32 cmd_state;
+	int ret;
+
+	cmd_state = enable ? c->aggr_state : 0;
+
+	if (c->last_sent_aggr_state == cmd_state)
+		return 0;
+
+	cmd.addr = c->res_addr;
+	cmd.data = BCM_TCS_CMD(enable, cmd_state);
+
+	ret = rpmh_write_async(c->dev, RPMH_ACTIVE_ONLY_STATE, &cmd, 1);
+	if (ret) {
+		dev_err(c->dev, "set active state of %s failed: (%d)\n",
+			c->res_name, ret);
+		return ret;
+	}
+
+	c->last_sent_aggr_state = cmd_state;
+
+	return 0;
+}
+
+static int clk_rpmh_bcm_prepare(struct clk_hw *hw)
+{
+	struct clk_rpmh *c = to_clk_rpmh(hw);
+	int ret = 0;
+
+	mutex_lock(&rpmh_clk_lock);
+	ret = clk_rpmh_bcm_send_cmd(c, true);
+	mutex_unlock(&rpmh_clk_lock);
+
+	return ret;
+};
+
+static void clk_rpmh_bcm_unprepare(struct clk_hw *hw)
+{
+	struct clk_rpmh *c = to_clk_rpmh(hw);
+
+	mutex_lock(&rpmh_clk_lock);
+	clk_rpmh_bcm_send_cmd(c, false);
+	mutex_unlock(&rpmh_clk_lock);
+};
+
+static int clk_rpmh_bcm_set_rate(struct clk_hw *hw, unsigned long rate,
+				unsigned long parent_rate)
+{
+	struct clk_rpmh *c = to_clk_rpmh(hw);
+
+	c->aggr_state = rate / c->aux_data.unit;
+	return 0;
+};
+
+static long clk_rpmh_round_rate(struct clk_hw *hw, unsigned long rate,
+			       unsigned long *parent_rate)
+{
+	return rate;
+}
+
+static const struct clk_ops clk_rpmh_bcm_ops = {
+	.prepare	= clk_rpmh_bcm_prepare,
+	.unprepare	= clk_rpmh_bcm_unprepare,
+	.set_rate	= clk_rpmh_bcm_set_rate,
+	.round_rate	= clk_rpmh_round_rate,
+	.recalc_rate	= clk_rpmh_recalc_rate,
+};
+
 /* Resource name must match resource id present in cmd-db. */
 DEFINE_CLK_RPMH_ARC(sdm845, bi_tcxo, bi_tcxo_ao, "xo.lvl", 0x3, 2);
 DEFINE_CLK_RPMH_VRM(sdm845, ln_bb_clk2, ln_bb_clk2_ao, "lnbclka2", 2);
@@ -217,6 +324,7 @@ DEFINE_CLK_RPMH_VRM(sdm845, ln_bb_clk3, ln_bb_clk3_ao, "lnbclka3", 2);
 DEFINE_CLK_RPMH_VRM(sdm845, rf_clk1, rf_clk1_ao, "rfclka1", 1);
 DEFINE_CLK_RPMH_VRM(sdm845, rf_clk2, rf_clk2_ao, "rfclka2", 1);
 DEFINE_CLK_RPMH_VRM(sdm845, rf_clk3, rf_clk3_ao, "rfclka3", 1);
+DEFINE_CLK_RPMH_BCM(sdm845, ipa, "IP0");
 
 static struct clk_hw *sdm845_rpmh_clocks[] = {
 	[RPMH_CXO_CLK]		= &sdm845_bi_tcxo.hw,
@@ -231,6 +339,7 @@ static struct clk_hw *sdm845_rpmh_clocks[] = {
 	[RPMH_RF_CLK2_A]	= &sdm845_rf_clk2_ao.hw,
 	[RPMH_RF_CLK3]		= &sdm845_rf_clk3.hw,
 	[RPMH_RF_CLK3_A]	= &sdm845_rf_clk3_ao.hw,
+	[RPMH_IPA_CLK]		= &sdm845_ipa.hw,
 };
 
 static const struct clk_rpmh_desc clk_rpmh_sdm845 = {
@@ -267,6 +376,7 @@ static int clk_rpmh_probe(struct platform_device *pdev)
 
 	for (i = 0; i < desc->num_clks; i++) {
 		u32 res_addr;
+		u32 aux_data_len;
 
 		rpmh_clk = to_clk_rpmh(hw_clks[i]);
 		res_addr = cmd_db_read_addr(rpmh_clk->res_name);
@@ -274,6 +384,20 @@ static int clk_rpmh_probe(struct platform_device *pdev)
 			dev_err(&pdev->dev, "missing RPMh resource address for %s\n",
 				rpmh_clk->res_name);
 			return -ENODEV;
+		}
+		aux_data_len = cmd_db_read_aux_data_len(rpmh_clk->res_name);
+		if (aux_data_len == sizeof(struct bcm_db)) {
+			ret = cmd_db_read_aux_data(rpmh_clk->res_name,
+			(u8 *)&rpmh_clk->aux_data, sizeof(struct bcm_db));
+			if (ret < 0) {
+				dev_err(&pdev->dev, "aux data read failure for %s (%d)\n",
+				rpmh_clk->res_name, ret);
+				return ret;
+			}
+			rpmh_clk->aux_data.unit =
+					le32_to_cpu(rpmh_clk->aux_data.unit);
+			rpmh_clk->aux_data.width =
+					le16_to_cpu(rpmh_clk->aux_data.width);
 		}
 		rpmh_clk->res_addr += res_addr;
 		rpmh_clk->dev = &pdev->dev;
