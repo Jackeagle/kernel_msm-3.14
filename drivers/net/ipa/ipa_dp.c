@@ -1777,8 +1777,6 @@ void ipa_ep_teardown(u32 ep_id)
 	int result;
 	int i;
 
-	ipa_client_add();
-
 	if (ep->napi_enabled) {
 		do {
 			usleep_range(95, 105);
@@ -1817,8 +1815,6 @@ void ipa_ep_teardown(u32 ep_id)
 		ipa_cleanup_rx(ep->sys);
 
 	ipa_ep_free(ep_id);
-
-	ipa_client_remove();
 
 	ipa_debug("client (ep: %u) disconnected\n", ep_id);
 }

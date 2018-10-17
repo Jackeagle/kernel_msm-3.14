@@ -644,6 +644,9 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 	dev_info(&pdev->dev, "rmnet_ipa started deinitialization\n");
 
 	mutex_lock(&rmnet_ipa_ctx->ep_setup_mutex);
+
+	ipa_client_add();
+
 	if (rmnet_ipa_ctx->wan_cons_ep_id != IPA_EP_ID_BAD) {
 		ipa_ep_teardown(rmnet_ipa_ctx->wan_cons_ep_id);
 		rmnet_ipa_ctx->wan_cons_ep_id = IPA_EP_ID_BAD;
@@ -653,6 +656,8 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 		ipa_ep_teardown(rmnet_ipa_ctx->wan_prod_ep_id);
 		rmnet_ipa_ctx->wan_prod_ep_id = IPA_EP_ID_BAD;
 	}
+
+	ipa_client_remove();
 
 	netif_napi_del(&wwan_ptr->napi);
 	mutex_unlock(&rmnet_ipa_ctx->ep_setup_mutex);
