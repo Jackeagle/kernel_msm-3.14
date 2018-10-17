@@ -202,8 +202,6 @@ void ipa_reset_gsi_channel(u32 ep_id)
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 	u32 aggr_active_bitmap;
 
-	ipa_client_add();
-
 	/* Check for open aggregation frame on Consumer EP -
 	 * reset with open aggregation frame WA
 	 */
@@ -219,6 +217,4 @@ void ipa_reset_gsi_channel(u32 ep_id)
 		msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
 		ipa_bug_on(gsi_reset_channel(ipa_ctx->gsi, ep->channel_id));
 	}
-
-	ipa_client_remove();
 }
