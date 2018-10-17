@@ -829,12 +829,10 @@ int gsi_register_device(struct gsi *gsi)
 	}
 
 	channel_max = gsi_channel_max(gsi);
-	if (WARN_ON(channel_max > GSI_CHAN_MAX))
-		return -EIO;
+	ipa_assert(channel_max <= GSI_CHAN_MAX);
 
 	evt_ring_max = gsi_evt_ring_max(gsi);
-	if (WARN_ON(evt_ring_max > GSI_EVT_RING_MAX))
-		return -EIO;
+	ipa_assert(evt_ring_max <= GSI_EVT_RING_MAX);
 
 	ret = request_irq(gsi->irq, gsi_isr, IRQF_TRIGGER_HIGH, "gsi", gsi);
 	if (ret) {
