@@ -229,8 +229,6 @@ ipa_uc_event_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 	union ipa_uc_event_data event_param;
 	u8 event;
 
-	ipa_client_add();
-
 	event = shared->event;
 	event_param.raw32b = shared->event_param;
 
@@ -242,8 +240,6 @@ ipa_uc_event_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 	} else {
 		ipa_debug("unsupported uC event opcode=%u\n", event);
 	}
-
-	ipa_client_remove();
 }
 
 static void
@@ -252,8 +248,6 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 	struct ipa_uc_shared_area *shared = ipa_uc_ctx.shared;
 	union ipa_uc_response_data response_data;
 	u8 response;
-
-	ipa_client_add();
 
 	response = shared->response;
 
@@ -276,8 +270,6 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 	} else {
 		ipa_err("Unsupported uC rsp opcode = %u\n", response);
 	}
-
-	ipa_client_remove();
 }
 
 /** ipa_uc_init() - Initialize the microcontroller
