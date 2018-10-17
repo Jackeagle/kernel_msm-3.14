@@ -596,19 +596,6 @@ out:
 	return ret;
 }
 
-int ipa_send_cmd(struct ipa_desc *desc)
-{
-	int ret;
-
-	ipa_client_add();
-
-	ret = ipa_send_cmd_timeout(desc, 0);
-
-	ipa_client_remove();
-
-	return ret;
-}
-
 /** ipa_handle_rx_core() - The core functionality of packet reception. This
  * function is read from multiple code paths.
  *

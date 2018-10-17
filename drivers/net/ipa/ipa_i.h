@@ -426,7 +426,10 @@ int ipa_interconnect_enable(void);
 int ipa_interconnect_disable(void);
 
 int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout);
-int ipa_send_cmd(struct ipa_desc *desc);
+static inline int ipa_send_cmd(struct ipa_desc *desc)
+{
+	return ipa_send_cmd_timeout(desc, 0);
+}
 
 void ipa_client_add(void);
 bool ipa_client_add_additional(void);
