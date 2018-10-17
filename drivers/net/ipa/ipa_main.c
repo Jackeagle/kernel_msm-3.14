@@ -130,23 +130,17 @@ int ipa_modem_smem_init(void)
 {
 	int ret;
 
-	ipa_client_add();
-
 	ret = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_OFST, IPA_MEM_MODEM_SIZE);
 	if (ret)
-		goto out_client_remove;
+		return ret;
 
 	ret = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_HDR_OFST,
-				     IPA_MEM_MODEM_HDR_SIZE);
+				      IPA_MEM_MODEM_HDR_SIZE);
 	if (ret)
-		goto out_client_remove;
+		return ret;
 
-	ret = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_HDR_PROC_CTX_OFST,
-				     IPA_MEM_MODEM_HDR_PROC_CTX_SIZE);
-out_client_remove:
-	ipa_client_remove();
-
-	return ret;
+	return dma_shared_mem_zero_cmd(IPA_MEM_MODEM_HDR_PROC_CTX_OFST,
+				       IPA_MEM_MODEM_HDR_PROC_CTX_SIZE);
 }
 
 static int ipa_ep_apps_cmd_prod_setup(void)
