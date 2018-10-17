@@ -941,12 +941,7 @@ void ipa_cfg_default_route(enum ipa_client_type client)
 	ipa_debug("frag_def_endpoint=%u def_retain_hdr=1\n", ep_id);
 
 	ipa_reg_route(&route, ep_id);
-
-	ipa_client_add();
-
 	ipa_write_reg_fields(IPA_ROUTE, &route);
-
-	ipa_client_remove();
 }
 
 /* In certain cases we need to issue a command to reliably clear the
@@ -1050,7 +1045,6 @@ void ipa_enable_dcd(void)
 
 	/* recommended values for IPA 3.5 according to IPA HPG */
 	ipa_reg_idle_indication_cfg(&indication, 256, 0);
-
 	ipa_write_reg_fields(IPA_IDLE_INDICATION_CFG, &indication);
 }
 
