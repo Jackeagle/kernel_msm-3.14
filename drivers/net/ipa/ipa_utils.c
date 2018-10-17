@@ -462,13 +462,11 @@ ep_configuration(enum ipa_client_type client)
 const struct ipa_gsi_ep_config *
 ipa_get_gsi_ep_info(enum ipa_client_type client)
 {
-	const struct ipa_ep_configuration *ep_config;
+	const struct ipa_ep_configuration *ep_config = ep_configuration(client);
 
-	ep_config = ep_configuration(client);
-	if (ep_config->valid)
-		return &ep_config->ipa_gsi_ep_info;
+	ipa_assert(ep_config->valid);
 
-	return NULL;
+	return &ep_config->ipa_gsi_ep_info;
 }
 
 /** ipa_get_ep_mapping() - provide endpoint mapping
@@ -479,8 +477,6 @@ ipa_get_gsi_ep_info(enum ipa_client_type client)
 u32 ipa_get_ep_mapping(enum ipa_client_type client)
 {
 	const struct ipa_gsi_ep_config *ep_info = ipa_get_gsi_ep_info(client);
-
-	ipa_assert(ep_info);
 
 	return ep_info->ep_id;
 }
