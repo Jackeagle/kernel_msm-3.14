@@ -323,7 +323,7 @@ static void gsi_irq_enable_all(struct gsi *gsi)
 
 static enum gsi_channel_state gsi_channel_state(struct gsi *gsi, u32 channel_id)
 {
-	u32 val = gsi_readl(gsi, GSI_CH_K_CNTXT_0_OFFS(channel_id));
+	u32 val = gsi_readl(gsi, GSI_CH_C_CNTXT_0_OFFS(channel_id));
 
 	return (enum gsi_channel_state)field_val(val, CHSTATE_FMASK);
 }
@@ -331,7 +331,7 @@ static enum gsi_channel_state gsi_channel_state(struct gsi *gsi, u32 channel_id)
 static enum gsi_evt_ring_state
 gsi_evt_ring_state(struct gsi *gsi, u32 evt_ring_id)
 {
-	u32 val = gsi_readl(gsi, GSI_EV_CH_K_CNTXT_0_OFFS(evt_ring_id));
+	u32 val = gsi_readl(gsi, GSI_EV_CH_E_CNTXT_0_OFFS(evt_ring_id));
 
 	return (enum gsi_evt_ring_state)field_val(val, EV_CHSTATE_FMASK);
 }
@@ -586,10 +586,10 @@ gsi_evt_ring_doorbell(struct gsi *gsi, struct gsi_evt_ring *evt_ring)
 	 * respectively.  LSB (doorbell 0) must be written last.
 	 */
 	val = evt_ring->ring.wp_local >> 32;
-	gsi_writel(gsi, val, GSI_EV_CH_K_DOORBELL_1_OFFS(evt_ring->id));
+	gsi_writel(gsi, val, GSI_EV_CH_E_DOORBELL_1_OFFS(evt_ring->id));
 
 	val = evt_ring->ring.wp_local & GENMASK(31, 0);
-	gsi_writel(gsi, val, GSI_EV_CH_K_DOORBELL_0_OFFS(evt_ring->id));
+	gsi_writel(gsi, val, GSI_EV_CH_E_DOORBELL_0_OFFS(evt_ring->id));
 }
 
 static void gsi_channel_doorbell(struct gsi *gsi, struct gsi_channel *channel)
@@ -611,9 +611,9 @@ static void gsi_channel_doorbell(struct gsi *gsi, struct gsi_channel *channel)
 	 * respectively.  LSB (doorbell 0) must be written last.
 	 */
 	val = channel->ring.wp_local >> 32;
-	gsi_writel(gsi, val, GSI_CH_K_DOORBELL_1_OFFS(channel_id));
+	gsi_writel(gsi, val, GSI_CH_C_DOORBELL_1_OFFS(channel_id));
 	val = channel->ring.wp_local & GENMASK(31, 0);
-	gsi_writel(gsi, val, GSI_CH_K_DOORBELL_0_OFFS(channel_id));
+	gsi_writel(gsi, val, GSI_CH_C_DOORBELL_0_OFFS(channel_id));
 }
 
 static void handle_event(struct gsi *gsi, u32 evt_ring_id)
@@ -625,7 +625,7 @@ static void handle_event(struct gsi *gsi, u32 evt_ring_id)
 	spin_lock_irqsave(&evt_ring->ring.slock, flags);
 
 	do {
-		u32 val = gsi_readl(gsi, GSI_EV_CH_K_CNTXT_4_OFFS(evt_ring_id));
+		u32 val = gsi_readl(gsi, GSI_EV_CH_E_CNTXT_4_OFFS(evt_ring_id));
 
 		evt_ring->ring.rp = evt_ring->ring.rp & GENMASK_ULL(63, 32);
 		evt_ring->ring.rp |= val;
@@ -893,33 +893,33 @@ static void gsi_evt_ring_program(struct gsi *gsi, u32 evt_ring_id, u32 size,
 	val = field_gen(GSI_EVT_CHTYPE_GPI_EV, EV_CHTYPE_FMASK);
 	val |= field_gen(1, EV_INTYPE_FMASK);
 	val |= field_gen(GSI_RING_ELEMENT_SIZE, EV_ELEMENT_SIZE_FMASK);
-	gsi_writel(gsi, val, GSI_EV_CH_K_CNTXT_0_OFFS(evt_ring_id));
+	gsi_writel(gsi, val, GSI_EV_CH_E_CNTXT_0_OFFS(evt_ring_id));
 
 	val = field_gen(size, EV_R_LENGTH_FMASK);
-	gsi_writel(gsi, val, GSI_EV_CH_K_CNTXT_1_OFFS(evt_ring_id));
+	gsi_writel(gsi, val, GSI_EV_CH_E_CNTXT_1_OFFS(evt_ring_id));
 
 	/* The context 2 and 3 registers store the low-order and
 	 * high-order 32 bits of the address of the event ring,
 	 * respectively.
 	 */
 	val = phys & GENMASK(31, 0);
-	gsi_writel(gsi, val, GSI_EV_CH_K_CNTXT_2_OFFS(evt_ring_id));
+	gsi_writel(gsi, val, GSI_EV_CH_E_CNTXT_2_OFFS(evt_ring_id));
 
 	val = phys >> 32;
-	gsi_writel(gsi, val, GSI_EV_CH_K_CNTXT_3_OFFS(evt_ring_id));
+	gsi_writel(gsi, val, GSI_EV_CH_E_CNTXT_3_OFFS(evt_ring_id));
 
 	val = field_gen(int_modt, MODT_FMASK);
 	val |= field_gen(int_modc, MODC_FMASK);
-	gsi_writel(gsi, val, GSI_EV_CH_K_CNTXT_8_OFFS(evt_ring_id));
+	gsi_writel(gsi, val, GSI_EV_CH_E_CNTXT_8_OFFS(evt_ring_id));
 
 	/* No MSI write data, and MSI address high and low address is 0 */
-	gsi_writel(gsi, 0, GSI_EV_CH_K_CNTXT_9_OFFS(evt_ring_id));
-	gsi_writel(gsi, 0, GSI_EV_CH_K_CNTXT_10_OFFS(evt_ring_id));
-	gsi_writel(gsi, 0, GSI_EV_CH_K_CNTXT_11_OFFS(evt_ring_id));
+	gsi_writel(gsi, 0, GSI_EV_CH_E_CNTXT_9_OFFS(evt_ring_id));
+	gsi_writel(gsi, 0, GSI_EV_CH_E_CNTXT_10_OFFS(evt_ring_id));
+	gsi_writel(gsi, 0, GSI_EV_CH_E_CNTXT_11_OFFS(evt_ring_id));
 
 	/* We don't need to get event read pointer updates */
-	gsi_writel(gsi, 0, GSI_EV_CH_K_CNTXT_12_OFFS(evt_ring_id));
-	gsi_writel(gsi, 0, GSI_EV_CH_K_CNTXT_13_OFFS(evt_ring_id));
+	gsi_writel(gsi, 0, GSI_EV_CH_E_CNTXT_12_OFFS(evt_ring_id));
+	gsi_writel(gsi, 0, GSI_EV_CH_E_CNTXT_13_OFFS(evt_ring_id));
 }
 
 static void gsi_init_ring(struct gsi_ring *ring, struct ipa_dma_mem *mem)
@@ -1070,8 +1070,8 @@ err_free_bmap:
 
 static void __gsi_evt_ring_scratch_zero(struct gsi *gsi, u32 evt_ring_id)
 {
-	gsi_writel(gsi, 0, GSI_EV_CH_K_SCRATCH_0_OFFS(evt_ring_id));
-	gsi_writel(gsi, 0, GSI_EV_CH_K_SCRATCH_1_OFFS(evt_ring_id));
+	gsi_writel(gsi, 0, GSI_EV_CH_E_SCRATCH_0_OFFS(evt_ring_id));
+	gsi_writel(gsi, 0, GSI_EV_CH_E_SCRATCH_1_OFFS(evt_ring_id));
 }
 
 void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
@@ -1137,25 +1137,25 @@ static void gsi_program_channel(struct gsi *gsi,
 	val |= field_gen(props->from_gsi ? 0 : 1, CHTYPE_DIR_FMASK);
 	val |= field_gen(evt_ring_id, ERINDEX_FMASK);
 	val |= field_gen(GSI_RING_ELEMENT_SIZE, ELEMENT_SIZE_FMASK);
-	gsi_writel(gsi, val, GSI_CH_K_CNTXT_0_OFFS(props->channel_id));
+	gsi_writel(gsi, val, GSI_CH_C_CNTXT_0_OFFS(props->channel_id));
 
 	val = field_gen(props->mem.size, R_LENGTH_FMASK);
-	gsi_writel(gsi, val, GSI_CH_K_CNTXT_1_OFFS(props->channel_id));
+	gsi_writel(gsi, val, GSI_CH_C_CNTXT_1_OFFS(props->channel_id));
 
 	/* The context 2 and 3 registers store the low-order and
 	 * high-order 32 bits of the address of the channel ring,
 	 * respectively.
 	 */
 	val = props->mem.phys & GENMASK(31, 0);
-	gsi_writel(gsi, val, GSI_CH_K_CNTXT_2_OFFS(props->channel_id));
+	gsi_writel(gsi, val, GSI_CH_C_CNTXT_2_OFFS(props->channel_id));
 
 	val = props->mem.phys >> 32;
-	gsi_writel(gsi, val, GSI_CH_K_CNTXT_3_OFFS(props->channel_id));
+	gsi_writel(gsi, val, GSI_CH_C_CNTXT_3_OFFS(props->channel_id));
 
 	val = field_gen(props->low_weight, WRR_WEIGHT_FMASK);
 	val |= field_gen(GSI_MAX_PREFETCH, MAX_PREFETCH_FMASK);
 	val |= field_gen(props->use_db_engine ? 1 : 0, USE_DB_ENG_FMASK);
-	gsi_writel(gsi, val, GSI_CH_K_QOS_OFFS(props->channel_id));
+	gsi_writel(gsi, val, GSI_CH_C_QOS_OFFS(props->channel_id));
 }
 
 int gsi_alloc_channel(struct gsi *gsi, struct gsi_channel_props *props)
@@ -1248,21 +1248,21 @@ static void __gsi_write_channel_scratch(struct gsi *gsi, u32 channel_id)
 	gpi->outstanding_threshold = 2 * GSI_RING_ELEMENT_SIZE;
 
 	val = scr.data.word1;
-	gsi_writel(gsi, val, GSI_CH_K_SCRATCH_0_OFFS(channel_id));
+	gsi_writel(gsi, val, GSI_CH_C_SCRATCH_0_OFFS(channel_id));
 
 	val = scr.data.word2;
-	gsi_writel(gsi, val, GSI_CH_K_SCRATCH_1_OFFS(channel_id));
+	gsi_writel(gsi, val, GSI_CH_C_SCRATCH_1_OFFS(channel_id));
 
 	val = scr.data.word3;
-	gsi_writel(gsi, val, GSI_CH_K_SCRATCH_2_OFFS(channel_id));
+	gsi_writel(gsi, val, GSI_CH_C_SCRATCH_2_OFFS(channel_id));
 
 	/* We must preserve the upper 16 bits of the last scratch
 	 * register.  The next sequence assumes those bits remain
 	 * unchanged between the read and the write.
 	 */
-	val = gsi_readl(gsi, GSI_CH_K_SCRATCH_3_OFFS(channel_id));
+	val = gsi_readl(gsi, GSI_CH_C_SCRATCH_3_OFFS(channel_id));
 	val = (scr.data.word4 & GENMASK(31, 16)) | (val & GENMASK(15, 0));
-	gsi_writel(gsi, val, GSI_CH_K_SCRATCH_3_OFFS(channel_id));
+	gsi_writel(gsi, val, GSI_CH_C_SCRATCH_3_OFFS(channel_id));
 }
 
 void gsi_write_channel_scratch(struct gsi *gsi, u32 channel_id, u32 tlv_size)
@@ -1454,10 +1454,10 @@ bool gsi_is_channel_empty(struct gsi *gsi, u32 channel_id)
 
 	spin_lock_irqsave(&channel->evt_ring->ring.slock, flags);
 
-	val = gsi_readl(gsi, GSI_CH_K_CNTXT_4_OFFS(channel->props.channel_id));
+	val = gsi_readl(gsi, GSI_CH_C_CNTXT_4_OFFS(channel->props.channel_id));
 	channel->ring.rp = (channel->ring.rp & GENMASK_ULL(63, 32)) | val;
 
-	val = gsi_readl(gsi, GSI_CH_K_CNTXT_6_OFFS(channel->props.channel_id));
+	val = gsi_readl(gsi, GSI_CH_C_CNTXT_6_OFFS(channel->props.channel_id));
 	channel->ring.wp = (channel->ring.wp & GENMASK_ULL(63, 32)) | val;
 
 	if (channel->props.from_gsi)
@@ -1559,7 +1559,7 @@ int gsi_poll_channel(struct gsi *gsi, u32 channel_id)
 	if (evt_ring->ring.rp == evt_ring->ring.rp_local) {
 		u32 val;
 
-		val = gsi_readl(gsi, GSI_EV_CH_K_CNTXT_4_OFFS(evt_ring->id));
+		val = gsi_readl(gsi, GSI_EV_CH_E_CNTXT_4_OFFS(evt_ring->id));
 		evt_ring->ring.rp = channel->ring.rp & GENMASK_ULL(63, 32);
 		evt_ring->ring.rp |= val;
 	}

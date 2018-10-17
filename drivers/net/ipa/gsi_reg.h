@@ -6,8 +6,18 @@
 #ifndef __GSI_REG_H__
 #define __GSI_REG_H__
 
-/* With the exception of GSI_INST_RAM_N_OFFS(), the maximum allowed value
- * of "n" for any N-parameterized macro below is 3.
+/* The maximum allowed value of "n" for any N-parameterized macro below
+ * is 3.  The N value comes from the ipa_ees enumerated type.
+ *
+ * For GSI_INST_RAM_I_OFFS(), the "i" value supplied is an instruction
+ * offset (where each instruction is 32 bits wide).  The maximum offset
+ * value is 4095.
+ *
+ * Macros parameterized by (data) channel number supply a parameter "c".
+ * The maximum value of "c" is 30 (but the limit is hardware-dependent).
+ *
+ * Macros parameterized by event channel number supply a parameter "e".
+ * The maximum value of "e" is 15 (but the limit is hardware-dependent).
  *
  * For any K-parameterized macros, the "k" value will represent either an
  * event channel id or a (data) channel id.  15 is the maximum value of
@@ -219,17 +229,17 @@
 #define GSI_IRAM_PTR_INT_MOD_STOPPED_OFFS	0x0000044c
 #define STOP_IRAM_PTR_FMASK			0x00000fff
 
-/* Max value of I for the GSI_INST_RAM_N_OFFS() is 4095 */
+/* Max value of I for the GSI_INST_RAM_I_OFFS() is 4095 */
 #define GSI_INST_RAM_I_OFFS(i)			(0x00004000 + 0x0004 * (i))
 #define INST_BYTE_0_FMASK			0x000000ff
 #define INST_BYTE_1_FMASK			0x0000ff00
 #define INST_BYTE_2_FMASK			0x00ff0000
 #define INST_BYTE_3_FMASK			0xff000000
 
-#define GSI_CH_K_CNTXT_0_OFFS(k) \
-				GSI_EE_N_CH_K_CNTXT_0_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_CH_K_CNTXT_0_OFFS(k, n) \
-					(0x0001c000 + 0x4000 * (n) + 0x80 * (k))
+#define GSI_CH_C_CNTXT_0_OFFS(c) \
+				GSI_EE_N_CH_C_CNTXT_0_OFFS(c, IPA_EE_AP)
+#define GSI_EE_N_CH_C_CNTXT_0_OFFS(c, n) \
+					(0x0001c000 + 0x4000 * (n) + 0x80 * (c))
 #define CHTYPE_PROTOCOL_FMASK			0x00000007
 #define CHTYPE_DIR_FMASK			0x00000008
 #define EE_FMASK				0x000000f0
@@ -238,62 +248,62 @@
 #define CHSTATE_FMASK				0x00f00000
 #define ELEMENT_SIZE_FMASK			0xff000000
 
-#define GSI_CH_K_CNTXT_1_OFFS(k) \
-				GSI_EE_N_CH_K_CNTXT_1_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_CH_K_CNTXT_1_OFFS(k, n) \
-					(0x0001c004 + 0x4000 * (n) + 0x80 * (k))
+#define GSI_CH_C_CNTXT_1_OFFS(c) \
+				GSI_EE_N_CH_C_CNTXT_1_OFFS(c, IPA_EE_AP)
+#define GSI_EE_N_CH_C_CNTXT_1_OFFS(c, n) \
+					(0x0001c004 + 0x4000 * (n) + 0x80 * (c))
 #define R_LENGTH_FMASK				0x0000ffff
 
-#define GSI_CH_K_CNTXT_2_OFFS(k) \
-				GSI_EE_N_CH_K_CNTXT_2_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_CH_K_CNTXT_2_OFFS(k, n) \
-					(0x0001c008 + 0x4000 * (n) + 0x80 * (k))
+#define GSI_CH_C_CNTXT_2_OFFS(c) \
+				GSI_EE_N_CH_C_CNTXT_2_OFFS(c, IPA_EE_AP)
+#define GSI_EE_N_CH_C_CNTXT_2_OFFS(c, n) \
+					(0x0001c008 + 0x4000 * (n) + 0x80 * (c))
 
-#define GSI_CH_K_CNTXT_3_OFFS(k) \
-				GSI_EE_N_CH_K_CNTXT_3_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_CH_K_CNTXT_3_OFFS(k, n) \
-					(0x0001c00c + 0x4000 * (n) + 0x80 * (k))
+#define GSI_CH_C_CNTXT_3_OFFS(c) \
+				GSI_EE_N_CH_C_CNTXT_3_OFFS(c, IPA_EE_AP)
+#define GSI_EE_N_CH_C_CNTXT_3_OFFS(c, n) \
+					(0x0001c00c + 0x4000 * (n) + 0x80 * (c))
 
-#define GSI_CH_K_CNTXT_4_OFFS(k) \
-				GSI_EE_N_CH_K_CNTXT_4_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_CH_K_CNTXT_4_OFFS(k, n) \
-					(0x0001c010 + 0x4000 * (n) + 0x80 * (k))
+#define GSI_CH_C_CNTXT_4_OFFS(c) \
+				GSI_EE_N_CH_C_CNTXT_4_OFFS(c, IPA_EE_AP)
+#define GSI_EE_N_CH_C_CNTXT_4_OFFS(c, n) \
+					(0x0001c010 + 0x4000 * (n) + 0x80 * (c))
 
-#define GSI_CH_K_CNTXT_6_OFFS(k) \
-				GSI_EE_N_CH_K_CNTXT_6_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_CH_K_CNTXT_6_OFFS(k, n) \
-					(0x0001c018 + 0x4000 * (n) + 0x80 * (k))
+#define GSI_CH_C_CNTXT_6_OFFS(c) \
+				GSI_EE_N_CH_C_CNTXT_6_OFFS(c, IPA_EE_AP)
+#define GSI_EE_N_CH_C_CNTXT_6_OFFS(c, n) \
+					(0x0001c018 + 0x4000 * (n) + 0x80 * (c))
 
-#define GSI_CH_K_QOS_OFFS(k)	GSI_EE_N_CH_K_QOS_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_CH_K_QOS_OFFS(k, n)	(0x0001c05c + 0x4000 * (n) + 0x80 * (k))
+#define GSI_CH_C_QOS_OFFS(c)	GSI_EE_N_CH_C_QOS_OFFS(c, IPA_EE_AP)
+#define GSI_EE_N_CH_C_QOS_OFFS(c, n)	(0x0001c05c + 0x4000 * (n) + 0x80 * (c))
 #define WRR_WEIGHT_FMASK			0x0000000f
 #define MAX_PREFETCH_FMASK			0x00000100
 #define USE_DB_ENG_FMASK			0x00000200
 
-#define GSI_CH_K_SCRATCH_0_OFFS(k) \
-				GSI_EE_N_CH_K_SCRATCH_0_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_CH_K_SCRATCH_0_OFFS(k, n) \
-					(0x0001c060 + 0x4000 * (n) + 0x80 * (k))
+#define GSI_CH_C_SCRATCH_0_OFFS(c) \
+				GSI_EE_N_CH_C_SCRATCH_0_OFFS(c, IPA_EE_AP)
+#define GSI_EE_N_CH_C_SCRATCH_0_OFFS(c, n) \
+					(0x0001c060 + 0x4000 * (n) + 0x80 * (c))
 
-#define GSI_CH_K_SCRATCH_1_OFFS(k) \
-				GSI_EE_N_CH_K_SCRATCH_1_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_CH_K_SCRATCH_1_OFFS(k, n) \
-					(0x0001c064 + 0x4000 * (n) + 0x80 * (k))
+#define GSI_CH_C_SCRATCH_1_OFFS(c) \
+				GSI_EE_N_CH_C_SCRATCH_1_OFFS(c, IPA_EE_AP)
+#define GSI_EE_N_CH_C_SCRATCH_1_OFFS(c, n) \
+					(0x0001c064 + 0x4000 * (n) + 0x80 * (c))
 
-#define GSI_CH_K_SCRATCH_2_OFFS(k) \
-				GSI_EE_N_CH_K_SCRATCH_2_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_CH_K_SCRATCH_2_OFFS(k, n) \
-					(0x0001c068 + 0x4000 * (n) + 0x80 * (k))
+#define GSI_CH_C_SCRATCH_2_OFFS(c) \
+				GSI_EE_N_CH_C_SCRATCH_2_OFFS(c, IPA_EE_AP)
+#define GSI_EE_N_CH_C_SCRATCH_2_OFFS(c, n) \
+					(0x0001c068 + 0x4000 * (n) + 0x80 * (c))
 
-#define GSI_CH_K_SCRATCH_3_OFFS(k) \
-				GSI_EE_N_CH_K_SCRATCH_3_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_CH_K_SCRATCH_3_OFFS(k, n) \
-					(0x0001c06c + 0x4000 * (n) + 0x80 * (k))
+#define GSI_CH_C_SCRATCH_3_OFFS(c) \
+				GSI_EE_N_CH_C_SCRATCH_3_OFFS(c, IPA_EE_AP)
+#define GSI_EE_N_CH_C_SCRATCH_3_OFFS(c, n) \
+					(0x0001c06c + 0x4000 * (n) + 0x80 * (c))
 
-#define GSI_EV_CH_K_CNTXT_0_OFFS(k) \
-				GSI_EE_N_EV_CH_K_CNTXT_0_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_EV_CH_K_CNTXT_0_OFFS(k, n) \
-					(0x0001d000 + 0x4000 * (n) + 0x80 * (k))
+#define GSI_EV_CH_E_CNTXT_0_OFFS(e) \
+				GSI_EE_N_EV_CH_E_CNTXT_0_OFFS(e, IPA_EE_AP)
+#define GSI_EE_N_EV_CH_E_CNTXT_0_OFFS(e, n) \
+					(0x0001d000 + 0x4000 * (n) + 0x80 * (e))
 #define EV_CHTYPE_FMASK				0x0000000f
 #define EV_EE_FMASK				0x000000f0
 #define EV_EVCHID_FMASK				0x0000ff00
@@ -301,89 +311,89 @@
 #define EV_CHSTATE_FMASK			0x00f00000
 #define EV_ELEMENT_SIZE_FMASK			0xff000000
 
-#define GSI_EV_CH_K_CNTXT_1_OFFS(k) \
-				GSI_EE_N_EV_CH_K_CNTXT_1_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_EV_CH_K_CNTXT_1_OFFS(k, n) \
-					(0x0001d004 + 0x4000 * (n) + 0x80 * (k))
+#define GSI_EV_CH_E_CNTXT_1_OFFS(e) \
+				GSI_EE_N_EV_CH_E_CNTXT_1_OFFS(e, IPA_EE_AP)
+#define GSI_EE_N_EV_CH_E_CNTXT_1_OFFS(e, n) \
+					(0x0001d004 + 0x4000 * (n) + 0x80 * (e))
 #define EV_R_LENGTH_FMASK			0x0000ffff
 
-#define GSI_EV_CH_K_CNTXT_2_OFFS(k) \
-				GSI_EE_N_EV_CH_K_CNTXT_2_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_EV_CH_K_CNTXT_2_OFFS(k, n) \
-					(0x0001d008 + 0x4000 * (n) + 0x80 * (k))
+#define GSI_EV_CH_E_CNTXT_2_OFFS(e) \
+				GSI_EE_N_EV_CH_E_CNTXT_2_OFFS(e, IPA_EE_AP)
+#define GSI_EE_N_EV_CH_E_CNTXT_2_OFFS(e, n) \
+					(0x0001d008 + 0x4000 * (n) + 0x80 * (e))
 
-#define GSI_EV_CH_K_CNTXT_3_OFFS(k) \
-				GSI_EE_N_EV_CH_K_CNTXT_3_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_EV_CH_K_CNTXT_3_OFFS(k, n) \
-					(0x0001d00c + 0x4000 * (n) + 0x80 * (k))
+#define GSI_EV_CH_E_CNTXT_3_OFFS(e) \
+				GSI_EE_N_EV_CH_E_CNTXT_3_OFFS(e, IPA_EE_AP)
+#define GSI_EE_N_EV_CH_E_CNTXT_3_OFFS(e, n) \
+					(0x0001d00c + 0x4000 * (n) + 0x80 * (e))
 
-#define GSI_EV_CH_K_CNTXT_4_OFFS(k) \
-				GSI_EE_N_EV_CH_K_CNTXT_4_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_EV_CH_K_CNTXT_4_OFFS(k, n) \
-					(0x0001d010 + 0x4000 * (n) + 0x80 * (k))
+#define GSI_EV_CH_E_CNTXT_4_OFFS(e) \
+				GSI_EE_N_EV_CH_E_CNTXT_4_OFFS(e, IPA_EE_AP)
+#define GSI_EE_N_EV_CH_E_CNTXT_4_OFFS(e, n) \
+					(0x0001d010 + 0x4000 * (n) + 0x80 * (e))
 
-#define GSI_EV_CH_K_CNTXT_8_OFFS(k) \
-				GSI_EE_N_EV_CH_K_CNTXT_8_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_EV_CH_K_CNTXT_8_OFFS(k, n) \
-					(0x0001d020 + 0x4000 * (n) + 0x80 * (k))
+#define GSI_EV_CH_E_CNTXT_8_OFFS(e) \
+				GSI_EE_N_EV_CH_E_CNTXT_8_OFFS(e, IPA_EE_AP)
+#define GSI_EE_N_EV_CH_E_CNTXT_8_OFFS(e, n) \
+					(0x0001d020 + 0x4000 * (n) + 0x80 * (e))
 #define MODT_FMASK				0x0000ffff
 #define MODC_FMASK				0x00ff0000
 #define MOD_CNT_FMASK				0xff000000
 
-#define GSI_EV_CH_K_CNTXT_9_OFFS(k) \
-				GSI_EE_N_EV_CH_K_CNTXT_9_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_EV_CH_K_CNTXT_9_OFFS(k, n) \
-					(0x0001d024 + 0x4000 * (n) + 0x80 * (k))
+#define GSI_EV_CH_E_CNTXT_9_OFFS(e) \
+				GSI_EE_N_EV_CH_E_CNTXT_9_OFFS(e, IPA_EE_AP)
+#define GSI_EE_N_EV_CH_E_CNTXT_9_OFFS(e, n) \
+					(0x0001d024 + 0x4000 * (n) + 0x80 * (e))
 
-#define GSI_EV_CH_K_CNTXT_10_OFFS(k) \
-				GSI_EE_N_EV_CH_K_CNTXT_10_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_EV_CH_K_CNTXT_10_OFFS(k, n) \
-					(0x0001d028 + 0x4000 * (n) + 0x80 * (k))
+#define GSI_EV_CH_E_CNTXT_10_OFFS(e) \
+				GSI_EE_N_EV_CH_E_CNTXT_10_OFFS(e, IPA_EE_AP)
+#define GSI_EE_N_EV_CH_E_CNTXT_10_OFFS(e, n) \
+					(0x0001d028 + 0x4000 * (n) + 0x80 * (e))
 
-#define GSI_EV_CH_K_CNTXT_11_OFFS(k) \
-				GSI_EE_N_EV_CH_K_CNTXT_11_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_EV_CH_K_CNTXT_11_OFFS(k, n) \
-					(0x0001d02c + 0x4000 * (n) + 0x80 * (k))
+#define GSI_EV_CH_E_CNTXT_11_OFFS(e) \
+				GSI_EE_N_EV_CH_E_CNTXT_11_OFFS(e, IPA_EE_AP)
+#define GSI_EE_N_EV_CH_E_CNTXT_11_OFFS(e, n) \
+					(0x0001d02c + 0x4000 * (n) + 0x80 * (e))
 
-#define GSI_EV_CH_K_CNTXT_12_OFFS(k) \
-				GSI_EE_N_EV_CH_K_CNTXT_12_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_EV_CH_K_CNTXT_12_OFFS(k, n) \
-					(0x0001d030 + 0x4000 * (n) + 0x80 * (k))
+#define GSI_EV_CH_E_CNTXT_12_OFFS(e) \
+				GSI_EE_N_EV_CH_E_CNTXT_12_OFFS(e, IPA_EE_AP)
+#define GSI_EE_N_EV_CH_E_CNTXT_12_OFFS(e, n) \
+					(0x0001d030 + 0x4000 * (n) + 0x80 * (e))
 
-#define GSI_EV_CH_K_CNTXT_13_OFFS(k) \
-				GSI_EE_N_EV_CH_K_CNTXT_13_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_EV_CH_K_CNTXT_13_OFFS(k, n) \
-					(0x0001d034 + 0x4000 * (n) + 0x80 * (k))
+#define GSI_EV_CH_E_CNTXT_13_OFFS(e) \
+				GSI_EE_N_EV_CH_E_CNTXT_13_OFFS(e, IPA_EE_AP)
+#define GSI_EE_N_EV_CH_E_CNTXT_13_OFFS(e, n) \
+					(0x0001d034 + 0x4000 * (n) + 0x80 * (e))
 
-#define GSI_EV_CH_K_SCRATCH_0_OFFS(k) \
-				GSI_EE_N_EV_CH_K_SCRATCH_0_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_EV_CH_K_SCRATCH_0_OFFS(k, n) \
-					(0x0001d048 + 0x4000 * (n) + 0x80 * (k))
+#define GSI_EV_CH_E_SCRATCH_0_OFFS(e) \
+				GSI_EE_N_EV_CH_E_SCRATCH_0_OFFS(e, IPA_EE_AP)
+#define GSI_EE_N_EV_CH_E_SCRATCH_0_OFFS(e, n) \
+					(0x0001d048 + 0x4000 * (n) + 0x80 * (e))
 
-#define GSI_EV_CH_K_SCRATCH_1_OFFS(k) \
-				GSI_EE_N_EV_CH_K_SCRATCH_1_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_EV_CH_K_SCRATCH_1_OFFS(k, n) \
-					(0x0001d04c + 0x4000 * (n) + 0x80 * (k))
+#define GSI_EV_CH_E_SCRATCH_1_OFFS(e) \
+				GSI_EE_N_EV_CH_E_SCRATCH_1_OFFS(e, IPA_EE_AP)
+#define GSI_EE_N_EV_CH_E_SCRATCH_1_OFFS(e, n) \
+					(0x0001d04c + 0x4000 * (n) + 0x80 * (e))
 
-#define GSI_CH_K_DOORBELL_0_OFFS(k) \
-				GSI_EE_N_CH_K_DOORBELL_0_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_CH_K_DOORBELL_0_OFFS(k, n) \
-					(0x0001e000 + 0x4000 * (n) + 0x08 * (k))
+#define GSI_CH_C_DOORBELL_0_OFFS(c) \
+				GSI_EE_N_CH_C_DOORBELL_0_OFFS(c, IPA_EE_AP)
+#define GSI_EE_N_CH_C_DOORBELL_0_OFFS(c, n) \
+					(0x0001e000 + 0x4000 * (n) + 0x08 * (c))
 
-#define GSI_CH_K_DOORBELL_1_OFFS(k) \
-				GSI_EE_N_CH_K_DOORBELL_1_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_CH_K_DOORBELL_1_OFFS(k, n) \
-					(0x0001e004 + 0x4000 * (n) + 0x08 * (k))
+#define GSI_CH_C_DOORBELL_1_OFFS(c) \
+				GSI_EE_N_CH_C_DOORBELL_1_OFFS(c, IPA_EE_AP)
+#define GSI_EE_N_CH_C_DOORBELL_1_OFFS(c, n) \
+					(0x0001e004 + 0x4000 * (n) + 0x08 * (c))
 
-#define GSI_EV_CH_K_DOORBELL_0_OFFS(k) \
-				GSI_EE_N_EV_CH_K_DOORBELL_0_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_EV_CH_K_DOORBELL_0_OFFS(k, n) \
-					(0x0001e100 + 0x4000 * (n) + 0x08 * (k))
+#define GSI_EV_CH_E_DOORBELL_0_OFFS(e) \
+				GSI_EE_N_EV_CH_E_DOORBELL_0_OFFS(e, IPA_EE_AP)
+#define GSI_EE_N_EV_CH_E_DOORBELL_0_OFFS(e, n) \
+					(0x0001e100 + 0x4000 * (n) + 0x08 * (e))
 
-#define GSI_EV_CH_K_DOORBELL_1_OFFS(k) \
-				GSI_EE_N_EV_CH_K_DOORBELL_1_OFFS(k, IPA_EE_AP)
-#define GSI_EE_N_EV_CH_K_DOORBELL_1_OFFS(k, n) \
-					(0x0001e104 + 0x4000 * (n) + 0x08 * (k))
+#define GSI_EV_CH_E_DOORBELL_1_OFFS(e) \
+				GSI_EE_N_EV_CH_E_DOORBELL_1_OFFS(e, IPA_EE_AP)
+#define GSI_EE_N_EV_CH_E_DOORBELL_1_OFFS(e, n) \
+					(0x0001e104 + 0x4000 * (n) + 0x08 * (e))
 
 #define GSI_GSI_STATUS_OFFS	GSI_EE_N_GSI_STATUS_OFFS(IPA_EE_AP)
 #define GSI_EE_N_GSI_STATUS_OFFS(n)		(0x0001f000 + 0x4000 * (n))
