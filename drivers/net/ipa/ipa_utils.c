@@ -1011,31 +1011,23 @@ static int ipa_gsi_dma_task_inject(void)
  */
 int ipa_stop_gsi_channel(u32 ep_id)
 {
-	int res = 0;
-	int i;
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	int ret;
+	int i;
 
-	ipa_client_add();
-
-	if (ipa_producer(ep->client)) {
-		ipa_debug("stopping channel %u\n", ep->channel_id);
-		res = gsi_stop_channel(ipa_ctx->gsi, ep->channel_id);
-		ipa_debug("stop channel result %d\n", res);
-		goto end_sequence;
-	}
+	if (ipa_producer(ep->client))
+		return gsi_stop_channel(ipa_ctx->gsi, ep->channel_id);
 
 	for (i = 0; i < IPA_GSI_CHANNEL_STOP_MAX_RETRY; i++) {
-		ipa_debug("stopping channel %u\n", ep->channel_id);
-		res = gsi_stop_channel(ipa_ctx->gsi, ep->channel_id);
-		ipa_debug("stop channel result %d\n", res);
-		if (res != -EAGAIN && res != -ETIMEDOUT)
-			goto end_sequence;
+		ret = gsi_stop_channel(ipa_ctx->gsi, ep->channel_id);
+		if (ret != -EAGAIN && ret != -ETIMEDOUT)
+			return ret;
 
 		ipa_debug("Inject a DMA_TASK with 1B packet to IPA\n");
 		/* Send a 1B packet DMA_TASK to IPA and try again */
-		res = ipa_gsi_dma_task_inject();
-		if (res)
-			goto end_sequence;
+		ret = ipa_gsi_dma_task_inject();
+		if (ret)
+			return ret;
 
 		/* sleep for short period to flush IPA */
 		usleep_range(IPA_GSI_CHANNEL_STOP_SLEEP_MIN,
@@ -1043,11 +1035,8 @@ int ipa_stop_gsi_channel(u32 ep_id)
 	}
 
 	ipa_err("Failed	 to stop GSI channel with retries\n");
-	res = -EFAULT;
-end_sequence:
-	ipa_client_remove();
 
-	return res;
+	return -EFAULT;
 }
 
 /** ipa_enable_dcd() - enable dynamic clock division on IPA
