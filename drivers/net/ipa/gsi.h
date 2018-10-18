@@ -6,14 +6,10 @@
 #ifndef _GSI_H_
 #define _GSI_H_
 
-#include <linux/device.h>
 #include <linux/types.h>
-#include <linux/completion.h>
-#include <linux/mutex.h>
-#include <linux/spinlock.h>
 #include <linux/platform_device.h>
 
-#include "ipahal.h"
+#include "ipa_dma.h"
 
 #define GSI_RING_ELEMENT_SIZE	16	/* bytes (channel or event ring) */
 
@@ -164,8 +160,6 @@ struct gsi_xfer_elem {
 struct gsi;
 
 struct gsi *gsi_init(struct platform_device *pdev);
-
-int gsi_firmware_load(struct gsi *gsi);
 
 /** gsi_register_device - Peripheral should call this function to
  * register itself with GSI before invoking any other APIs
