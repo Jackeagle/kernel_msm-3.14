@@ -71,8 +71,13 @@
 		#size-cells = <2>;
 		ranges;
 
-		memory@85fc0000 {
-			reg = <0 0x85fc0000 0 0x20000>;
+		memory@85700000 {
+			reg = <0 0x85700000 0 0x600000>;
+			no-map;
+		};
+
+		memory@85e00000 {
+			reg = <0 0x85e00000 0 0x120000>;
 			no-map;
 		};
 
@@ -92,32 +97,75 @@
 			no-map;
 		};
 
-		rmtfs@88f00000 {
+		memory@8bf00000 {
+			reg = <0 0x8bf00000 0 0x500000>;
+			no-map;
+		};
+
+		ipa_fw_mem: memory@8c400000 {
+			reg = <0 0x8c400000 0 0x10000>;
+			no-map;
+		};
+
+		ipa_gsi_mem: memory@8c410000 {
+			reg = <0 0x8c410000 0 0x5000>;
+			no-map;
+		};
+
+		memory@8c415000 {
+			reg = <0 0x8c415000 0 0x2000>;
+			no-map;
+		};
+
+		adsp_mem: memory@8c500000 {
+			reg = <0 0x8c500000 0 0x1a00000>;
+			no-map;
+		};
+
+		memory@8df00000 {
+			reg = <0 0x8df00000 0 0x100000>;
+			no-map;
+		};
+
+		mpss_mem: memory@8e000000 {
+			reg = <0 0x8e000000 0 0x7800000>;
+			no-map;
+		};
+
+		venus_mem: memory@95800000 {
+			reg = <0 0x95800000 0 0x500000>;
+			no-map;
+		};
+
+		cdsp_mem: memory@95d00000 {
+			reg = <0 0x95d00000 0 0x800000>;
+			no-map;
+		};
+
+		mba_mem: memory@96500000 {
+			reg = <0 0x96500000 0 0x200000>;
+			no-map;
+		};
+
+		slpi_mem: memory@96700000 {
+			reg = <0 0x96700000 0 0x1400000>;
+			no-map;
+		};
+
+		spss_mem: memory@97b00000 {
+			reg = <0 0x97b00000 0 0x100000>;
+			no-map;
+		};
+
+		rmtfs {
 			compatible = "qcom,rmtfs-mem";
-			reg = <0x0 0x88f00000 0x0 0x200000>;
+
+			size = <0x0 0x200000>;
+			alloc-ranges = <0x0 0xa0000000 0x0 0x2000000>;
 			no-map;
 
 			qcom,client-id = <1>;
-		};
-
-		mpss_mem: reserved-memory@8e000000 {
-			no-map;
-			reg = <0 0x8e000000 0 0x7800000>;
-		};
-
-		venus_region: venus@95800000 {
-			reg = <0x0 0x95800000 0x0 0x500000>;
-			no-map;
-		};
-
-		mba_mem: reserved-memory@96500000 {
-			no-map;
-			reg = <0 0x96500000 0 0x200000>;
-		};
-
-		wlan_msa_mem: reserved-memory@96700000 {
-			no-map;
-			reg = <0 0x96700000 0 0x100000>;
+			qcom,vmid = <15>;
 		};
 	};
 
