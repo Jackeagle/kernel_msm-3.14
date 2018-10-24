@@ -1042,7 +1042,7 @@ err_disable_clks:
 	return result;
 }
 
-static int ipa_firmware_load(void)
+static int ipa_firmware_load(struct device *dev)
 {
 	const struct firmware *fw;
 	unsigned long order;
@@ -1299,7 +1299,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	 * and that will trigger the "post init".
 	 */
 	if (!modem_init) {
-		result = ipa_firmware_load();
+		result = ipa_firmware_load(dev);
 		if (result)
 			goto err_clear_dev;
 
