@@ -18,6 +18,7 @@
 #include <linux/module.h>
 #include <linux/of.h>
 #include <linux/of_platform.h>
+#include <linux/of_address.h>
 #include <linux/platform_device.h>
 #include <linux/rbtree.h>
 #include <linux/of_gpio.h>
@@ -1045,36 +1046,42 @@ err_disable_clks:
 static int ipa_firmware_load(struct device *dev)
 {
 	const struct firmware *fw;
-	unsigned long order;
+	struct device_node *node;
+	struct resource res;
 	phys_addr_t phys;
-	void *virt;
 	ssize_t size;
+	void *virt;
 	int ret;
 
-	ret = request_firmware(&fw, IPA_FWS_PATH, ipa_ctx->dev);
+	ret = request_firmware(&fw, IPA_FWS_PATH, dev);
 	if (ret)
 		return ret;
 
-	size = qcom_mdt_get_size(fw);
-	if (size < 0) {
-		ret = size;
+	node = of_parse_phandle(dev->of_node, "memory-region", 0);
+	if (!node) {
+		dev_err(dev, "memory-region not specified\n");
+		ret = -EINVAL;
 		goto out_release_firmware;
 	}
-	/* We need to ensure the memory is page-aligned */
-	order = get_order(size);
-	virt = (void *)__get_free_pages(GFP_KERNEL | __GFP_ZERO, order);
+
+	ret = of_address_to_resource(node, 0, &res);
+	if (ret)
+		goto out_release_firmware;
+
+	phys = res.start,
+	size = (size_t)resource_size(&res);
+	virt = memremap(phys, size, MEMREMAP_WC);
 	if (!virt) {
 		ret = -ENOMEM;
 		goto out_release_firmware;
 	}
-	phys = virt_to_phys(virt);
 
-	ret = qcom_mdt_load(ipa_ctx->dev, fw, IPA_FWS_PATH, IPA_PAS_ID,
+	ret = qcom_mdt_load(dev, fw, IPA_FWS_PATH, IPA_PAS_ID,
 			    virt, phys, size, NULL);
 	if (!ret)
 		ret = qcom_scm_pas_auth_and_reset(IPA_PAS_ID);
 
-	free_pages((unsigned long)virt, order);
+	memunmap(virt);
 out_release_firmware:
 	release_firmware(fw);
 
