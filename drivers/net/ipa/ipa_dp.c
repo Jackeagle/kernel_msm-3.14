@@ -414,9 +414,10 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	struct ipa_ep_context *ep = sys->ep;
 	struct ipa_tx_pkt_wrapper *tx_pkt;
 	struct ipa_tx_pkt_wrapper *first = NULL;
+	struct ipa_tx_pkt_wrapper *next;
 	struct gsi_xfer_elem *xfer_elem;
+	LIST_HEAD(pkt_list);
 	int i;
-	int j;
 	int result;
 
 	ipa_assert(num_desc);
@@ -462,7 +463,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 		tx_pkt->callback = desc[i].callback;
 		tx_pkt->user1 = desc[i].user1;
 		tx_pkt->user2 = desc[i].user2;
-		list_add_tail(&tx_pkt->link, &sys->head_desc_list);
+		list_add_tail(&tx_pkt->link, &pkt_list);
 
 		xfer_elem[i].addr = tx_pkt->mem.phys;
 
@@ -492,10 +493,14 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	}
 	xfer_elem[num_desc - 1].user_data = first;
 
+	list_splice_tail_init(&pkt_list, &sys->head_desc_list);
+
 	result = gsi_queue_xfer(ipa_ctx->gsi, ep->channel_id,
 				num_desc, xfer_elem, true);
-	if (result)
+	if (result) {
+		list_cut_end(&pkt_list, &sys->head_desc_list, &first->link);
 		goto err_unwind;
+	}
 	kfree(xfer_elem);
 
 	spin_unlock_bh(&sys->spinlock);
@@ -506,17 +511,10 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	return 0;
 
 err_unwind:
-	tx_pkt = first;
-	for (j = 0; j < i; j++) {
-		struct ipa_tx_pkt_wrapper *next_pkt;
-
-		next_pkt = list_next_entry(tx_pkt, link);
+	list_for_each_entry_safe(tx_pkt, next, &pkt_list, link) {
 		list_del(&tx_pkt->link);
-
 		tx_pkt->callback = NULL; /* Avoid doing the callback */
 		ipa_tx_complete(tx_pkt);
-
-		tx_pkt = next_pkt;
 	}
 
 	kfree(xfer_elem);
