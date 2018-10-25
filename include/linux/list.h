@@ -285,6 +285,30 @@ static inline void list_cut_position(struct list_head *list,
 		__list_cut_position(list, head, entry);
 }
 
+/**
+ * list_cut_end() - transfer entries at end of a list to another list
+ * @list: list to receive the removed entries (no need to initialize)
+ * @head: a list with entries to be removed
+ * @entry: an entry within head list (must not be head)
+ *
+ * This helper moves entries at the end of @head, starting at (and
+ * including) @entry, from @head to @list.  It is assumed that
+ * @entry is an element present on @head.
+ */
+static inline void list_cut_end(struct list_head *list,
+		struct list_head *head, struct list_head *entry)
+{
+	if (list_empty(head))
+		return;
+
+	list->prev = head->prev;
+	head->prev->next = list;
+	head->prev = entry->prev;
+	entry->prev->next = head;
+	entry->prev = list;
+	list->next = entry;
+}
+
 static inline void __list_splice(const struct list_head *list,
 				 struct list_head *prev,
 				 struct list_head *next)
