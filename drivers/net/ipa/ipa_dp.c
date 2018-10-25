@@ -434,7 +434,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 		tx_pkt = kmem_cache_zalloc(ipa_ctx->dp->tx_pkt_wrapper_cache,
 					   GFP_ATOMIC);
 		if (!tx_pkt)
-			goto failure;
+			goto err_unwind;
 
 		if (i == 0) {
 			tx_pkt_first = tx_pkt;
@@ -450,7 +450,9 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 					      desc[i].len, DMA_TO_DEVICE);
 		if (dma_mapping_error(dev, phys)) {
 			ipa_err("dma mapping error on descriptor\n");
-			goto failure_dma_map;
+			kmem_cache_free(ipa_ctx->dp->tx_pkt_wrapper_cache,
+					tx_pkt);
+			goto err_unwind;
 		}
 
 		tx_pkt->type = desc[i].type;
@@ -490,7 +492,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	result = gsi_queue_xfer(ipa_ctx->gsi, ep->channel_id,
 				num_desc, xfer_elem, true);
 	if (result)
-		goto failure;
+		goto err_unwind;
 	kfree(xfer_elem);
 
 	spin_unlock_bh(&sys->spinlock);
@@ -500,10 +502,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 
 	return 0;
 
-failure_dma_map:
-	kmem_cache_free(ipa_ctx->dp->tx_pkt_wrapper_cache, tx_pkt);
-
-failure:
+err_unwind:
 	tx_pkt = tx_pkt_first;
 	for (j = 0; j < i; j++) {
 		struct ipa_tx_pkt_wrapper *next_pkt;
