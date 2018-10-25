@@ -154,12 +154,12 @@ static void ipa_tx_complete(struct ipa_tx_pkt_wrapper *tx_pkt)
 
 	/* If DMA memory was mapped, unmap it */
 	if (tx_pkt->mem.virt) {
-		if (tx_pkt->type != IPA_DATA_DESC_SKB_PAGED)
-			dma_unmap_single(dev, tx_pkt->mem.phys,
-					 tx_pkt->mem.size, DMA_TO_DEVICE);
-		else
+		if (tx_pkt->type == IPA_DATA_DESC_SKB_PAGED)
 			dma_unmap_page(dev, tx_pkt->mem.phys,
 				       tx_pkt->mem.size, DMA_TO_DEVICE);
+		else
+			dma_unmap_single(dev, tx_pkt->mem.phys,
+					 tx_pkt->mem.size, DMA_TO_DEVICE);
 	}
 
 	if (tx_pkt->callback)
@@ -429,12 +429,12 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	/* Within loop, all errors are allocation or DMA mapping */
 	result = -ENOMEM;
 	for (i = 0; i < num_desc; i++) {
+		dma_addr_t phys;
+
 		tx_pkt = kmem_cache_zalloc(ipa_ctx->dp->tx_pkt_wrapper_cache,
 					   GFP_ATOMIC);
 		if (!tx_pkt)
 			goto failure;
-
-		INIT_LIST_HEAD(&tx_pkt->link);
 
 		if (i == 0) {
 			tx_pkt_first = tx_pkt;
@@ -442,32 +442,25 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 			INIT_WORK(&tx_pkt->done_work, ipa_wq_write_done);
 		}
 
-		tx_pkt->type = desc[i].type;
-
-		if (desc[i].type != IPA_DATA_DESC_SKB_PAGED) {
-			tx_pkt->mem.virt = desc[i].pyld;
-			tx_pkt->mem.size = desc[i].len;
-			tx_pkt->mem.phys = dma_map_single(dev, tx_pkt->mem.virt,
-							  tx_pkt->mem.size,
-						          DMA_TO_DEVICE);
-		} else {
-			tx_pkt->mem.virt = desc[i].frag;
-			tx_pkt->mem.size = desc[i].len;
-			tx_pkt->mem.phys = skb_frag_dma_map(dev, desc[i].frag,
-							    0,
-							    tx_pkt->mem.size,
-							    DMA_TO_DEVICE);
-		}
-		if (dma_mapping_error(dev, tx_pkt->mem.phys)) {
+		if (desc[i].type == IPA_DATA_DESC_SKB_PAGED)
+			phys = skb_frag_dma_map(dev, desc[i].payload, 0,
+						desc[i].len, DMA_TO_DEVICE);
+		else
+			phys = dma_map_single(dev, desc[i].payload,
+					      desc[i].len, DMA_TO_DEVICE);
+		if (dma_mapping_error(dev, phys)) {
 			ipa_err("dma mapping error on descriptor\n");
 			goto failure_dma_map;
 		}
 
-		tx_pkt->sys = sys;
+		tx_pkt->type = desc[i].type;
+		tx_pkt->mem.virt = desc[i].payload;
+		tx_pkt->mem.phys = phys;
+		tx_pkt->mem.size = desc[i].len;
 		tx_pkt->callback = desc[i].callback;
 		tx_pkt->user1 = desc[i].user1;
 		tx_pkt->user2 = desc[i].user2;
-
+		tx_pkt->sys = sys;
 		list_add_tail(&tx_pkt->link, &sys->head_desc_list);
 
 		xfer_elem[i].addr = tx_pkt->mem.phys;
@@ -485,12 +478,12 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 
 		if (i == (num_desc - 1)) {
 			if (!sys->tx.no_intr) {
-				xfer_elem[i].flags |= GSI_XFER_FLAG_EOT;
+				xfer_elem[i].flags = GSI_XFER_FLAG_EOT;
 				xfer_elem[i].flags |= GSI_XFER_FLAG_BEI;
 			}
 			xfer_elem[i].user_data = tx_pkt_first;
 		} else {
-			xfer_elem[i].flags |= GSI_XFER_FLAG_CHAIN;
+			xfer_elem[i].flags = GSI_XFER_FLAG_CHAIN;
 		}
 	}
 
@@ -791,14 +784,14 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	 * data in the skb, one each for each of its fragments.
 	 */
 	data_idx = 0;
-	desc[data_idx].pyld = skb->data;
+	desc[data_idx].payload = skb->data;
 	desc[data_idx].len = skb_headlen(skb);
 	desc[data_idx].type = IPA_DATA_DESC_SKB;
 	for (f = 0; f < nr_frags; f++) {
 		data_idx++;
-		desc[data_idx].frag = &skb_shinfo(skb)->frags[f];
+		desc[data_idx].payload = &skb_shinfo(skb)->frags[f];
 		desc[data_idx].type = IPA_DATA_DESC_SKB_PAGED;
-		desc[data_idx].len = skb_frag_size(desc[data_idx].frag);
+		desc[data_idx].len = skb_frag_size(desc[data_idx].payload);
 	}
 
 	/* Have the skb be freed after the last descriptor completes. */
