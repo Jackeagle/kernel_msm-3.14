@@ -412,12 +412,14 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 {
 	struct device *dev = ipa_ctx->dev;
 	struct ipa_ep_context *ep = sys->ep;
-	struct ipa_tx_pkt_wrapper *tx_pkt, *tx_pkt_first;
+	struct ipa_tx_pkt_wrapper *tx_pkt;
+	struct ipa_tx_pkt_wrapper *first = NULL;
 	struct gsi_xfer_elem *xfer_elem;
 	int i;
 	int j;
 	int result;
 
+	ipa_assert(num_desc);
 	ipa_assert(num_desc <= ipa_get_gsi_ep_info(ep->client)->ipa_if_tlv);
 
 	xfer_elem = kcalloc(num_desc, sizeof(*xfer_elem), GFP_ATOMIC);
@@ -436,11 +438,8 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 		if (!tx_pkt)
 			goto err_unwind;
 
-		if (i == 0) {
-			tx_pkt_first = tx_pkt;
-			tx_pkt->cnt = num_desc;
-			INIT_WORK(&tx_pkt->done_work, ipa_wq_write_done);
-		}
+		if (!first)
+			first = tx_pkt;
 
 		if (desc[i].type == IPA_DATA_DESC_SKB_PAGED)
 			phys = skb_frag_dma_map(dev, desc[i].payload, 0,
@@ -482,12 +481,16 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 			xfer_elem[i].flags = GSI_XFER_FLAG_CHAIN;
 	}
 
+	/* Fill in extra fields in the first TX packet */
+	first->cnt = num_desc;
+	INIT_WORK(&first->done_work, ipa_wq_write_done);
+
 	/* Fill in extra fields in the last transfer element */
 	if (!sys->tx.no_intr) {
 		xfer_elem[num_desc - 1].flags = GSI_XFER_FLAG_EOT;
 		xfer_elem[num_desc - 1].flags |= GSI_XFER_FLAG_BEI;
 	}
-	xfer_elem[num_desc - 1].user_data = tx_pkt_first;
+	xfer_elem[num_desc - 1].user_data = first;
 
 	result = gsi_queue_xfer(ipa_ctx->gsi, ep->channel_id,
 				num_desc, xfer_elem, true);
@@ -503,7 +506,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	return 0;
 
 err_unwind:
-	tx_pkt = tx_pkt_first;
+	tx_pkt = first;
 	for (j = 0; j < i; j++) {
 		struct ipa_tx_pkt_wrapper *next_pkt;
 
