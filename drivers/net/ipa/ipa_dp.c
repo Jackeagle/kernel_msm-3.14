@@ -427,8 +427,6 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	if (!xfer_elem)
 		return -ENOMEM;
 
-	spin_lock_bh(&sys->spinlock);
-
 	/* Within loop, all errors are allocation or DMA mapping */
 	result = -ENOMEM;
 	for (i = 0; i < num_desc; i++) {
@@ -493,32 +491,29 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	}
 	xfer_elem[num_desc - 1].user_data = first;
 
-	list_splice_tail_init(&pkt_list, &sys->head_desc_list);
+	spin_lock_bh(&sys->spinlock);
 
+	list_splice_tail_init(&pkt_list, &sys->head_desc_list);
 	result = gsi_queue_xfer(ipa_ctx->gsi, ep->channel_id,
 				num_desc, xfer_elem, true);
-	if (result) {
+	if (result)
 		list_cut_end(&pkt_list, &sys->head_desc_list, &first->link);
-		goto err_unwind;
-	}
-	kfree(xfer_elem);
 
 	spin_unlock_bh(&sys->spinlock);
 
-	if (sys->tx.no_intr)
-		ipa_nop_timer_schedule(sys);
+	kfree(xfer_elem);
 
-	return 0;
-
+	if (!result) {
+		if (sys->tx.no_intr)
+			ipa_nop_timer_schedule(sys);
+		return 0;
+	}
 err_unwind:
 	list_for_each_entry_safe(tx_pkt, next, &pkt_list, link) {
 		list_del(&tx_pkt->link);
 		tx_pkt->callback = NULL; /* Avoid doing the callback */
 		ipa_tx_complete(tx_pkt);
 	}
-
-	kfree(xfer_elem);
-	spin_unlock_bh(&sys->spinlock);
 
 	return result;
 }
