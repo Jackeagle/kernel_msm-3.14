@@ -30,14 +30,14 @@
  */
 struct ipa_tx_pkt_wrapper {
 	enum ipa_desc_type type;
+	struct ipa_sys_context *sys;
 	struct ipa_dma_mem mem;
-	struct work_struct done_work;
-	struct list_head link;
 	void (*callback)(void *user1, int user2);
 	void *user1;
 	int user2;
-	struct ipa_sys_context *sys;
+	struct list_head link;
 	u32 cnt;
+	struct work_struct done_work;
 };
 
 /** struct ipa_rx_pkt_wrapper - IPA Rx packet wrapper
@@ -455,13 +455,13 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 		}
 
 		tx_pkt->type = desc[i].type;
+		tx_pkt->sys = sys;
 		tx_pkt->mem.virt = desc[i].payload;
 		tx_pkt->mem.phys = phys;
 		tx_pkt->mem.size = desc[i].len;
 		tx_pkt->callback = desc[i].callback;
 		tx_pkt->user1 = desc[i].user1;
 		tx_pkt->user2 = desc[i].user2;
-		tx_pkt->sys = sys;
 		list_add_tail(&tx_pkt->link, &sys->head_desc_list);
 
 		xfer_elem[i].addr = tx_pkt->mem.phys;
