@@ -478,16 +478,16 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 			xfer_elem[i].type = GSI_XFER_ELEM_DATA;
 		}
 
-		if (i == (num_desc - 1)) {
-			if (!sys->tx.no_intr) {
-				xfer_elem[i].flags = GSI_XFER_FLAG_EOT;
-				xfer_elem[i].flags |= GSI_XFER_FLAG_BEI;
-			}
-			xfer_elem[i].user_data = tx_pkt_first;
-		} else {
+		if (i < num_desc - 1)
 			xfer_elem[i].flags = GSI_XFER_FLAG_CHAIN;
-		}
 	}
+
+	/* Fill in extra fields in the last transfer element */
+	if (!sys->tx.no_intr) {
+		xfer_elem[num_desc - 1].flags = GSI_XFER_FLAG_EOT;
+		xfer_elem[num_desc - 1].flags |= GSI_XFER_FLAG_BEI;
+	}
+	xfer_elem[num_desc - 1].user_data = tx_pkt_first;
 
 	result = gsi_queue_xfer(ipa_ctx->gsi, ep->channel_id,
 				num_desc, xfer_elem, true);
