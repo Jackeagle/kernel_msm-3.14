@@ -1163,9 +1163,10 @@ int gsi_alloc_channel(struct gsi *gsi, struct gsi_channel_props *props)
 	u32 size = props->ring_count * GSI_RING_ELEMENT_SIZE;
 	u32 evt_ring_id = props->evt_ring_id;
 	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
-	int channel_id = (int)props->channel_id;
+	u32 channel_id = props->channel_id;
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	void **user_data;
+	int ret;
 
 	if (ipa_dma_alloc(&props->mem, size, GFP_KERNEL)) {
 		ipa_err("fail to dma alloc %u bytes\n", size);
@@ -1200,14 +1201,14 @@ int gsi_alloc_channel(struct gsi *gsi, struct gsi_channel_props *props)
 
 	mutex_lock(&gsi->mlock);
 
-	if (!channel_command(gsi, (u32)channel_id, GSI_CH_ALLOCATE)) {
-		channel_id = -ETIMEDOUT;
+	if (!channel_command(gsi, channel_id, GSI_CH_ALLOCATE)) {
+		ret = -ETIMEDOUT;
 		goto err_mutex_unlock;
 	}
 	if (channel->state != GSI_CHANNEL_STATE_ALLOCATED) {
-		ipa_err("channel_id %d allocation failed state %d\n",
+		ipa_err("channel_id %u allocation failed state %d\n",
 			channel_id, channel->state);
-		channel_id = -ENOMEM;
+		ret = -ENOMEM;
 		goto err_mutex_unlock;
 	}
 
@@ -1226,14 +1227,14 @@ int gsi_alloc_channel(struct gsi *gsi, struct gsi_channel_props *props)
 	channel->allocated = true;
 	atomic_inc(&gsi->channel_count);
 
-	return channel_id;
+	return (int)channel_id;
 
 err_mutex_unlock:
 	mutex_unlock(&gsi->mlock);
 	kfree(user_data);
 	ipa_dma_free(&channel->props.mem);
 
-	return channel_id;
+	return ret;
 }
 
 static void __gsi_write_channel_scratch(struct gsi *gsi, u32 channel_id)
