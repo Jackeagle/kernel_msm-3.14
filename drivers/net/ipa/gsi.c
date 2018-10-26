@@ -319,9 +319,9 @@ static void gsi_irq_enable_all(struct gsi *gsi)
 	_gsi_irq_control_all(gsi, true);
 }
 
-static u32 gsi_channel_id(struct gsi_channel *channel)
+static u32 gsi_channel_id(struct gsi *gsi, struct gsi_channel *channel)
 {
-	return channel->props.channel_id;
+	return (u32)(channel - &gsi->channel[0]);
 }
 
 static enum gsi_channel_state gsi_channel_state(struct gsi *gsi, u32 channel_id)
@@ -597,7 +597,7 @@ gsi_evt_ring_doorbell(struct gsi *gsi, struct gsi_evt_ring *evt_ring)
 
 static void gsi_channel_doorbell(struct gsi *gsi, struct gsi_channel *channel)
 {
-	u32 channel_id = gsi_channel_id(channel);
+	u32 channel_id = gsi_channel_id(gsi, channel);
 	u32 val;
 
 	/* allocate new events for this channel first
@@ -1566,7 +1566,7 @@ int gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id,
 		return -ENOTSUPP;
 	}
 
-	if (gsi_channel_id(channel) != props->channel_id ||
+	if (gsi_channel_id(gsi, channel) != props->channel_id ||
 	    channel->props.evt_ring_id != props->evt_ring_id) {
 		ipa_err("changing immutable fields not supported\n");
 		return -ENOTSUPP;
