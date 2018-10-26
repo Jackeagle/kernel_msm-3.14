@@ -1561,21 +1561,14 @@ void gsi_channel_intr_disable(struct gsi *gsi, u32 channel_id)
 	gsi_config_channel_mode(gsi, channel_id, true);
 }
 
-int gsi_get_channel_cfg(struct gsi *gsi, u32 channel_id,
-			struct gsi_channel_props *props)
+void gsi_get_channel_cfg(struct gsi *gsi, u32 channel_id,
+			 struct gsi_channel_props *props)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
-
-	if (channel->state == GSI_CHANNEL_STATE_NOT_ALLOCATED) {
-		ipa_err("bad state %d\n", channel->state);
-		return -ENOTSUPP;
-	}
 
 	mutex_lock(&channel->mlock);
 	*props = channel->props;
 	mutex_unlock(&channel->mlock);
-
-	return 0;
 }
 
 int gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id,

@@ -90,13 +90,9 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 		return -EFAULT;
 	}
 
-	/* Reconfigure channel to dummy GPI channel */
-	gsi_res = gsi_get_channel_cfg(ipa_ctx->gsi, ep->channel_id,
-				      &orig_props);
-	if (gsi_res) {
-		ipa_err("Error getting channel properties: %d\n", gsi_res);
-		return -EFAULT;
-	}
+	/* Get its current configuration, then reconfigure to dummy GPI */
+	gsi_get_channel_cfg(ipa_ctx->gsi, ep->channel_id, &orig_props);
+
 	result = ipa_reconfigure_channel_to_gpi(ep, &orig_props, &chan_dma);
 	if (result)
 		return -EFAULT;

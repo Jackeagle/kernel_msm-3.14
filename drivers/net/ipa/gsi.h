@@ -220,11 +220,9 @@ void gsi_dealloc_channel(struct gsi *gsi, u32 channel_id);
  * @channel_id:  Client handle previously obtained from
  *	       gsi_alloc_channel
  * @props:     where to copy properties to
- *
- * @Return gsi_status
  */
-int gsi_get_channel_cfg(struct gsi *gsi, u32 channel_id,
-			struct gsi_channel_props *props);
+void gsi_get_channel_cfg(struct gsi *gsi, u32 channel_id,
+			 struct gsi_channel_props *props);
 
 /** gsi_set_channel_cfg - This function applies the supplied config
  * to the specified channel
