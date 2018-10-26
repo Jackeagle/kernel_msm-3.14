@@ -281,13 +281,4 @@ void gsi_channel_intr_disable(struct gsi *gsi, u32 channel_id);
 int gsi_queue_xfer(struct gsi *gsi, u32 channel_id, u16 num_xfers,
 		   struct gsi_xfer_elem *xfer, bool ring_db);
 
-/** gsi_start_xfer - Peripheral should call this function to
- * inform HW about queued xfers
- *
- * @channel_id:  Client handle previously obtained from gsi_alloc_channel()
- *
- * @Return gsi_status
- */
-int gsi_start_xfer(struct gsi *gsi, u32 channel_id);
-
 #endif /* _GSI_H_ */

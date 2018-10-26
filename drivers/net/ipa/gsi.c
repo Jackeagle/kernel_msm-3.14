@@ -1529,15 +1529,6 @@ int gsi_queue_xfer(struct gsi *gsi, u32 channel_id, u16 num_xfers,
 	return 0;
 }
 
-int gsi_start_xfer(struct gsi *gsi, u32 channel_id)
-{
-	struct gsi_channel *channel = &gsi->channel[channel_id];
-
-	gsi_channel_doorbell(gsi, channel);
-
-	return 0;
-}
-
 int gsi_poll_channel(struct gsi *gsi, u32 channel_id)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];

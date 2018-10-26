@@ -835,14 +835,12 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
 	ring_doorbell = sys->rx.len_pending_xfer++ >= IPA_REPL_XFER_THRESH;
 
 	ret = gsi_queue_xfer(ipa_ctx->gsi, sys->ep->channel_id,
-			     1, &gsi_xfer_elem, false);
+			     1, &gsi_xfer_elem, ring_doorbell);
 	if (ret)
 		return ret;
 
-	if (ring_doorbell) {
+	if (ring_doorbell)
 		sys->rx.len_pending_xfer = 0;
-		gsi_start_xfer(ipa_ctx->gsi, sys->ep->channel_id);
-	}
 
 	return 0;
 }
