@@ -1127,10 +1127,10 @@ void gsi_evt_ring_reset(struct gsi *gsi, u32 evt_ring_id)
 	mutex_unlock(&gsi->mlock);
 }
 
-static void gsi_program_channel(struct gsi *gsi,
-				struct gsi_channel_props *props,
-				u32 channel_id, u32 evt_ring_id)
+static void
+gsi_program_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id)
 {
+	struct gsi_channel_props *props = &gsi->channel[channel_id].props;
 	u32 val;
 
 	val = field_gen(GSI_CHANNEL_PROTOCOL_GPI, CHTYPE_PROTOCOL_FMASK);
@@ -1203,7 +1203,7 @@ int gsi_alloc_channel(struct gsi *gsi, u32 channel_id,
 	channel->evt_ring = evt_ring;
 	evt_ring->channel = channel;
 
-	gsi_program_channel(gsi, props, channel_id, evt_ring_id);
+	gsi_program_channel(gsi, channel_id, evt_ring_id);
 	gsi_init_ring(&channel->ring, &props->mem);
 
 	channel->user_data = user_data;
@@ -1381,8 +1381,7 @@ reset:
 		goto reset;
 	}
 
-	gsi_program_channel(gsi, &channel->props, channel_id,
-			    channel->evt_ring->id);
+	gsi_program_channel(gsi, channel_id, channel->evt_ring->id);
 	gsi_init_ring(&channel->ring, &channel->props.mem);
 
 	/* restore scratch */
@@ -1574,8 +1573,7 @@ int gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id,
 	mutex_lock(&channel->mlock);
 	channel->props = *props;
 
-	gsi_program_channel(gsi, &channel->props, channel_id,
-			    channel->evt_ring->id);
+	gsi_program_channel(gsi, channel_id, channel->evt_ring->id);
 	gsi_init_ring(&channel->ring, &channel->props.mem);
 
 	/* restore scratch */
