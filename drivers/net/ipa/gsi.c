@@ -1155,25 +1155,24 @@ static void gsi_program_channel(struct gsi *gsi,
 
 int gsi_alloc_channel(struct gsi *gsi, struct gsi_channel_props *props)
 {
-	u32 size = props->ring_count * GSI_RING_ELEMENT_SIZE;
 	u32 evt_ring_id = props->evt_ring_id;
 	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
 	u32 channel_id = props->channel_id;
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	void **user_data;
+	u32 size;
 	int ret;
 
-	if (ipa_dma_alloc(&props->mem, size, GFP_KERNEL)) {
-		ipa_err("fail to dma alloc %u bytes\n", size);
+	/* Hardware requires a power-of-2 ring size (and alignment) */
+	size = roundup_pow_of_two(props->ring_count * GSI_RING_ELEMENT_SIZE);
+	if (ipa_dma_alloc(&props->mem, size, GFP_KERNEL))
 		return -ENOMEM;
-	}
-	ipa_assert(!(props->mem.size % roundup_pow_of_two(size)));
-	ipa_assert(!(props->mem.phys % roundup_pow_of_two(size)));
+	ipa_assert(!(props->mem.phys % size));
 
 	user_data = kcalloc(props->ring_count, sizeof(void *), GFP_KERNEL);
 	if (!user_data) {
-		ipa_dma_free(&props->mem);
-		return -ENOMEM;
+		ret = -ENOMEM;
+		goto err_dma_free;
 	}
 
 	memset(channel, 0, sizeof(*channel));
@@ -1190,9 +1189,7 @@ int gsi_alloc_channel(struct gsi *gsi, struct gsi_channel_props *props)
 		goto err_mutex_unlock;
 	}
 	if (channel->state != GSI_CHANNEL_STATE_ALLOCATED) {
-		ipa_err("channel_id %u allocation failed state %d\n",
-			channel_id, channel->state);
-		ret = -ENOMEM;
+		ret = -EIO;
 		goto err_mutex_unlock;
 	}
 
@@ -1214,6 +1211,7 @@ int gsi_alloc_channel(struct gsi *gsi, struct gsi_channel_props *props)
 err_mutex_unlock:
 	mutex_unlock(&gsi->mlock);
 	kfree(user_data);
+err_dma_free:
 	ipa_dma_free(&channel->props.mem);
 
 	return ret;
