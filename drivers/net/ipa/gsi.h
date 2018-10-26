@@ -162,43 +162,42 @@ int gsi_reset_channel(struct gsi *gsi, u32 channel_id);
  */
 void gsi_dealloc_channel(struct gsi *gsi, u32 channel_id);
 
-/** gsi_set_channel_cfg - This function applies the supplied config
- * to the specified channel
+/** gsi_set_channel_cfg() - Configure a channel
+ * @gsi:		GSI pointer
+ * @channel_id:		Channel to be configured
+ * @doorbell_enable:	Whether to enable hardware doorbell engine
  *
- * channel_id and evt_ring_id of the channel cannot be changed after
- * gsi_alloc_channel
- *
- * @channel_id:  Client handle previously obtained from gsi_alloc_channel
- * @doorbell_enable: whether to enable the doorbell engine
  */
 void gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id, bool doorbell_enable);
 
-/** gsi_poll_channel - Peripheral should call this function to query for
- * completed transfer descriptors.
+/** gsi_poll_channel() - Poll for a single completion on a channel
+ * @gsi:	GSI pointer
+ * @channel_id:	Channel to be polled
  *
- * @channel_id:  Client handle previously obtained from gsi_alloc_channel()
- *
- * @Return number of bytes transferred, or a negative error code
+ * @Return:	Byte transfer count on success, or a negative error code
  */
 int gsi_poll_channel(struct gsi *gsi, u32 channel_id);
 
-/** gsi_channel_intr_enable/disable - control channel interrupts
- *
- * @channel_id:  Client handle previously obtained from gsi_alloc_channel()
+/** gsi_channel_intr_enable() - Enable interrupts on a channel
+ * @gsi:	GSI pointer
+ * @channel_id:	Channel whose interrupts should be enabled
  */
 void gsi_channel_intr_enable(struct gsi *gsi, u32 channel_id);
+
+/** gsi_channel_intr_disable() - Disable interrupts on a channel
+ * @gsi:	GSI pointer
+ * @channel_id:	Channel whose interrupts should be disabled
+ */
 void gsi_channel_intr_disable(struct gsi *gsi, u32 channel_id);
 
-/** gsi_queue_xfer - Peripheral should call this function
- * to queue transfers on the given channel
+/** gsi_queue_xfer() - Queue transfer requests on a channel
+ * @gsi:	GSI pointer
+ * @channel_id:	Channel on which transfers should be queued
+ * @num_xfers:	Number of transfer in the @xfer array
+ * @xfer:	Array of transfer descriptors
+ * @ring_db:	Whether to tell HW about these queued xfers
  *
- * @channel_id:  Client handle previously obtained from gsi_alloc_channel()
- * @num_xfers: Number of transfer in the array @ xfer
- * @xfer:      Array of num_xfers transfer descriptors
- * @ring_db:   If true, tell HW about these queued xfers
- *	       If false, do not notify HW at this time
- *
- * @Return gsi_status
+ * @Return:	0 on success, or a negative error code
  */
 int gsi_queue_xfer(struct gsi *gsi, u32 channel_id, u16 num_xfers,
 		   struct gsi_xfer_elem *xfer, bool ring_db);
