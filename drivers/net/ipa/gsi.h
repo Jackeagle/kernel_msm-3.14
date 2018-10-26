@@ -155,7 +155,7 @@ void gsi_evt_ring_reset(struct gsi *gsi, u32 evt_id);
  *
  * @Return Channel handle populated by GSI, opaque to client, or negative errno
  */
-int gsi_alloc_channel(struct gsi *gsi, u32 channel_id,
+int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id,
 		      struct gsi_channel_props *props);
 
 /** gsi_write_channel_scratch - Peripheral should call this function to
