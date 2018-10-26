@@ -1564,11 +1564,6 @@ int gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id,
 		return -ENOTSUPP;
 	}
 
-	if (channel->props.evt_ring_id != props->evt_ring_id) {
-		ipa_err("changing immutable fields not supported\n");
-		return -ENOTSUPP;
-	}
-
 	mutex_lock(&channel->mlock);
 	channel->props = *props;
 

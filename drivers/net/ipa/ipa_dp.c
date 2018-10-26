@@ -1479,7 +1479,6 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count)
 	gsi_ep_info = ipa_get_gsi_ep_info(ep->client);
 
 	gsi_channel_props.from_gsi = ipa_consumer(ep->client);
-	gsi_channel_props.evt_ring_id = ep->evt_ring_id;
 	gsi_channel_props.use_db_engine = true;
 	if (ep->client == IPA_CLIENT_APPS_CMD_PROD)
 		gsi_channel_props.low_weight = IPA_GSI_MAX_CH_LOW_WEIGHT;

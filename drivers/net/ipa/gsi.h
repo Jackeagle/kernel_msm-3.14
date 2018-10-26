@@ -53,7 +53,6 @@ struct gsi_channel_props {
 	bool from_gsi;
 	bool use_db_engine;
 	u8 low_weight;
-	u32 evt_ring_id;
 	void *user_data;
 };
 
