@@ -110,7 +110,6 @@ struct gsi_channel {
 	struct gsi_evt_ring *evt_ring;
 	struct mutex mlock;		/* protects channel_scratch updates */
 	struct completion compl;
-	bool allocated;
 	atomic_t poll_mode;
 	u32 tlv_size;			/* # slots in TLV */
 };
@@ -1180,12 +1179,6 @@ int gsi_alloc_channel(struct gsi *gsi, struct gsi_channel_props *props)
 		ipa_dma_free(&props->mem);
 		return -ENOTSUPP;
 	}
-
-	if (channel->allocated) {
-		ipa_err("channel %d already allocated\n", channel_id);
-		ipa_dma_free(&props->mem);
-		return -ENODEV;
-	}
 	memset(channel, 0, sizeof(*channel));
 
 	user_data = kcalloc(props->ring_count, sizeof(void *), GFP_KERNEL);
@@ -1224,7 +1217,6 @@ int gsi_alloc_channel(struct gsi *gsi, struct gsi_channel_props *props)
 	gsi_init_ring(&channel->ring, &props->mem);
 
 	channel->user_data = user_data;
-	channel->allocated = true;
 	atomic_inc(&gsi->channel_count);
 
 	return (int)channel_id;
@@ -1429,7 +1421,6 @@ void gsi_dealloc_channel(struct gsi *gsi, u32 channel_id)
 
 	kfree(channel->user_data);
 	ipa_dma_free(&channel->props.mem);
-	channel->allocated = false;
 	atomic_dec(&channel->evt_ring->channel_ref_cnt);
 	atomic_dec(&gsi->channel_count);
 }
