@@ -1153,11 +1153,11 @@ static void gsi_program_channel(struct gsi *gsi,
 	gsi_writel(gsi, val, GSI_CH_C_QOS_OFFS(props->channel_id));
 }
 
-int gsi_alloc_channel(struct gsi *gsi, struct gsi_channel_props *props)
+int gsi_alloc_channel(struct gsi *gsi, u32 channel_id,
+		      struct gsi_channel_props *props)
 {
 	u32 evt_ring_id = props->evt_ring_id;
 	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
-	u32 channel_id = props->channel_id;
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	void **user_data;
 	u32 size;
