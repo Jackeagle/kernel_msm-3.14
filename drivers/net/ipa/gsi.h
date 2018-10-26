@@ -214,17 +214,6 @@ int gsi_reset_channel(struct gsi *gsi, u32 channel_id);
  */
 void gsi_dealloc_channel(struct gsi *gsi, u32 channel_id);
 
-/** gsi_is_channel_empty - Peripheral can call this function to query if
- * the channel is empty. This is only applicable to GPI. "Empty" means
- * GSI has consumed all descriptors for a TO_GSI channel and SW has
- * processed all completed descriptors for a FROM_GSI channel.
- *
- * @channel_id:  Client handle previously obtained from gsi_alloc_channel
- *
- * @Return true if channel is empty, false otherwise
- */
-bool gsi_is_channel_empty(struct gsi *gsi, u32 channel_id);
-
 /** gsi_get_channel_cfg - This function returns the current config
  * of the specified channel
  *

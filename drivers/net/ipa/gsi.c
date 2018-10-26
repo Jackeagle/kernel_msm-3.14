@@ -1445,35 +1445,6 @@ static u16 __gsi_query_ring_free_re(struct gsi_ring *ring)
 	return (u16)(delta / GSI_RING_ELEMENT_SIZE - 1);
 }
 
-bool gsi_is_channel_empty(struct gsi *gsi, u32 channel_id)
-{
-	struct gsi_channel *channel = &gsi->channel[channel_id];
-	unsigned long flags;
-	bool empty;
-	u32 val;
-
-	spin_lock_irqsave(&channel->evt_ring->ring.slock, flags);
-
-	val = gsi_readl(gsi, GSI_CH_C_CNTXT_4_OFFS(channel->props.channel_id));
-	channel->ring.rp = (channel->ring.rp & GENMASK_ULL(63, 32)) | val;
-
-	val = gsi_readl(gsi, GSI_CH_C_CNTXT_6_OFFS(channel->props.channel_id));
-	channel->ring.wp = (channel->ring.wp & GENMASK_ULL(63, 32)) | val;
-
-	if (channel->props.from_gsi)
-		empty = channel->ring.rp_local == channel->ring.rp;
-	else
-		empty = channel->ring.wp == channel->ring.rp;
-
-	spin_unlock_irqrestore(&channel->evt_ring->ring.slock, flags);
-
-	ipa_debug("channel_id %u RP 0x%llx WP 0x%llx RP_LOCAL 0x%llx\n",
-		  channel_id, channel->ring.rp, channel->ring.wp,
-		  channel->ring.rp_local);
-
-	return empty;
-}
-
 int gsi_queue_xfer(struct gsi *gsi, u32 channel_id, u16 num_xfers,
 		   struct gsi_xfer_elem *xfer, bool ring_db)
 {
