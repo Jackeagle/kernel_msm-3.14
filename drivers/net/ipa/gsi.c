@@ -1566,8 +1566,7 @@ int gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id,
 		return -ENOTSUPP;
 	}
 
-	if (gsi_channel_id(gsi, channel) != props->channel_id ||
-	    channel->props.evt_ring_id != props->evt_ring_id) {
+	if (channel->props.evt_ring_id != props->evt_ring_id) {
 		ipa_err("changing immutable fields not supported\n");
 		return -ENOTSUPP;
 	}
