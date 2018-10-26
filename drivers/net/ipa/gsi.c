@@ -122,7 +122,6 @@ struct gsi_evt_ring {
 	struct gsi_ring ring;
 	struct completion compl;
 	struct gsi_channel *channel;
-	atomic_t channel_ref_cnt;
 };
 
 struct ch_debug_stats {
@@ -1021,7 +1020,6 @@ int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, u16 int_modt)
 	evt_ring->id = evt_ring_id;
 	evt_ring->int_modt = int_modt;
 	init_completion(&evt_ring->compl);
-	atomic_set(&evt_ring->channel_ref_cnt, 0);
 
 	if (!evt_ring_command(gsi, evt_ring_id, GSI_EVT_ALLOCATE)) {
 		ret = -ETIMEDOUT;
@@ -1077,8 +1075,6 @@ void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
 {
 	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
 	bool completed;
-
-	ipa_bug_on(atomic_read(&evt_ring->channel_ref_cnt));
 
 	/* TODO: add check for ERROR state */
 	ipa_bug_on(evt_ring->state != GSI_EVT_RING_STATE_ALLOCATED);
@@ -1174,18 +1170,13 @@ int gsi_alloc_channel(struct gsi *gsi, struct gsi_channel_props *props)
 	ipa_assert(!(props->mem.size % roundup_pow_of_two(size)));
 	ipa_assert(!(props->mem.phys % roundup_pow_of_two(size)));
 
-	if (atomic_read(&evt_ring->channel_ref_cnt)) {
-		ipa_err("evt ring %u in use\n", evt_ring_id);
-		ipa_dma_free(&props->mem);
-		return -ENOTSUPP;
-	}
-	memset(channel, 0, sizeof(*channel));
-
 	user_data = kcalloc(props->ring_count, sizeof(void *), GFP_KERNEL);
 	if (!user_data) {
 		ipa_dma_free(&props->mem);
 		return -ENOMEM;
 	}
+
+	memset(channel, 0, sizeof(*channel));
 
 	mutex_init(&channel->mlock);
 	init_completion(&channel->compl);
@@ -1210,7 +1201,6 @@ int gsi_alloc_channel(struct gsi *gsi, struct gsi_channel_props *props)
 	mutex_unlock(&gsi->mlock);
 
 	channel->evt_ring = evt_ring;
-	atomic_inc(&evt_ring->channel_ref_cnt);
 	evt_ring->channel = channel;
 
 	gsi_program_channel(gsi, props, evt_ring_id);
@@ -1421,7 +1411,6 @@ void gsi_dealloc_channel(struct gsi *gsi, u32 channel_id)
 
 	kfree(channel->user_data);
 	ipa_dma_free(&channel->props.mem);
-	atomic_dec(&channel->evt_ring->channel_ref_cnt);
 	atomic_dec(&gsi->channel_count);
 }
 
