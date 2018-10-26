@@ -1175,8 +1175,6 @@ int gsi_alloc_channel(struct gsi *gsi, struct gsi_channel_props *props)
 		goto err_dma_free;
 	}
 
-	memset(channel, 0, sizeof(*channel));
-
 	mutex_init(&channel->mlock);
 	init_completion(&channel->compl);
 	atomic_set(&channel->poll_mode, 0);	/* Initially in callback mode */
@@ -1409,6 +1407,8 @@ void gsi_dealloc_channel(struct gsi *gsi, u32 channel_id)
 
 	kfree(channel->user_data);
 	ipa_dma_free(&channel->props.mem);
+	memset(channel, 0, sizeof(*channel));
+
 	atomic_dec(&gsi->channel_count);
 }
 
