@@ -1533,11 +1533,6 @@ int gsi_start_xfer(struct gsi *gsi, u32 channel_id)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 
-	if (channel->state != GSI_CHANNEL_STATE_STARTED) {
-		ipa_err("bad state %d\n", channel->state);
-		return -ENOTSUPP;
-	}
-
 	if (channel->ring.wp == channel->ring.wp_local)
 		return 0;
 
