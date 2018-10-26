@@ -820,6 +820,7 @@ static int
 queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
 {
 	struct gsi_xfer_elem gsi_xfer_elem;
+	bool ring_doorbell;
 	int ret;
 
 	/* Don't bother zeroing this; we fill all fields */
@@ -830,15 +831,15 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
 	gsi_xfer_elem.type = GSI_XFER_ELEM_DATA;
 	gsi_xfer_elem.user_data = rx_pkt;
 
+	/* Doorbell is expensive; only ring it when a batch is queued */
+	ring_doorbell = sys->rx.len_pending_xfer++ >= IPA_REPL_XFER_THRESH;
+
 	ret = gsi_queue_xfer(ipa_ctx->gsi, sys->ep->channel_id,
 			     1, &gsi_xfer_elem, false);
 	if (ret)
 		return ret;
 
-	/* As doorbell is a costly operation, notify to GSI
-	 * of new buffers if threshold is exceeded
-	 */
-	if (++sys->rx.len_pending_xfer >= IPA_REPL_XFER_THRESH) {
+	if (ring_doorbell) {
 		sys->rx.len_pending_xfer = 0;
 		gsi_start_xfer(ipa_ctx->gsi, sys->ep->channel_id);
 	}
