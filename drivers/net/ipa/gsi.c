@@ -1533,9 +1533,6 @@ int gsi_start_xfer(struct gsi *gsi, u32 channel_id)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 
-	if (channel->ring.wp == channel->ring.wp_local)
-		return 0;
-
 	gsi_channel_doorbell(gsi, channel);
 
 	return 0;
