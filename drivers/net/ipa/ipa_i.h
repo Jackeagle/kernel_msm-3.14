@@ -118,20 +118,6 @@ typedef void (*ipa_notify_cb)(void *priv, enum ipa_dp_evt_type evt,
 typedef void (*ipa_irq_handler_t)(enum ipa_irq_type interrupt,
 				  u32 interrupt_data);
 
-/** struct ipa_sys_connect_params - information needed to setup an IPA end-point
- * in system-BAM mode
- * @priv:	callback cookie
- * @notify:	callback
- *		priv - callback cookie
- *		evt - type of event
- *		data - data relevant to event.  May not be valid. See event_type
- *		enum for valid cases.
- */
-struct ipa_sys_connect_params {
-	void *priv;
-	ipa_notify_cb notify;
-};
-
 /** struct ipa_ep_context - IPA end point context
  * @allocated: flag indicating endpoint has been allocated
  * @client: EP client type
@@ -161,9 +147,9 @@ struct ipa_ep_context {
 	struct ipa_reg_endp_init_hdr_metadata_mask metadata_mask;
 	struct ipa_reg_endp_status status;
 
-	void *priv;
 	void (*client_notify)(void *priv, enum ipa_dp_evt_type evt,
 			      unsigned long data);
+	void *priv;
 	bool napi_enabled;
 	struct ipa_sys_context *sys;
 };
@@ -387,8 +373,11 @@ void ipa_ep_free(u32 ep_id);
 
 void ipa_no_intr_init(u32 prod_ep_id);
 
-int ipa_ep_setup(u32 client_hdl, u32 channel_count, u32 evt_ring_mult,
-		 u32 rx_buffer_size, struct ipa_sys_connect_params *sys_in);
+int ipa_ep_setup(u32 ep_id, u32 channel_count, u32 evt_ring_mult,
+		 u32 rx_buffer_size,
+		 void (*client_notify)(void *priv, enum ipa_dp_evt_type type,
+				       unsigned long data),
+		 void *priv);
 
 void ipa_ep_teardown(u32 ep_id);
 

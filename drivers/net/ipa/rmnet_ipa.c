@@ -73,8 +73,6 @@ struct rmnet_ipa_context {
 	u32 wan_prod_ep_id;
 	u32 wan_cons_ep_id;
 	struct mutex ep_setup_mutex;		/* endpoint setup/teardown */
-	struct ipa_sys_connect_params wan_prod_cfg;
-	struct ipa_sys_connect_params wan_cons_cfg;
 };
 
 static bool initialized;	/* Avoid duplicate initialization */
@@ -236,7 +234,6 @@ static int handle_ingress_format(struct net_device *dev,
 {
 	enum ipa_client_type client = IPA_CLIENT_APPS_WAN_CONS;
 	u32 channel_count = IPA_APPS_WWAN_CONS_RING_COUNT;
-	struct ipa_sys_connect_params *wan_cfg = &rmnet_ipa_ctx->wan_cons_cfg;
 	u32 header_size = sizeof(struct rmnet_map_header_s);
 	u32 metadata_offset = offsetof(struct rmnet_map_header_s, mux_id);
 	u32 length_offset = offsetof(struct rmnet_map_header_s, pkt_len);
@@ -302,12 +299,10 @@ static int handle_ingress_format(struct net_device *dev,
 	ipa_endp_init_hdr_metadata_mask_cons(ep_id, 0xff000000);
 	ipa_endp_status_cons(ep_id, !aggr_active);
 
-	wan_cfg->notify = apps_ipa_packet_receive_notify;
-	wan_cfg->priv = dev;
-
 	ipa_ctx->ipa_client_apps_wan_cons_agg_gro = aggr_active;
 
-	ret = ipa_ep_setup(ep_id, channel_count, 1, rx_buffer_size, wan_cfg);
+	ret = ipa_ep_setup(ep_id, channel_count, 1, rx_buffer_size,
+			   apps_ipa_packet_receive_notify, dev);
 	if (ret)
 		ipa_ep_free(ep_id);
 	else
@@ -322,7 +317,6 @@ out_unlock:
 static int handle_egress_format(struct net_device *dev,
 				struct rmnet_ioctl_extended_s *e)
 {
-	struct ipa_sys_connect_params *wan_cfg = &rmnet_ipa_ctx->wan_prod_cfg;
 	enum ipa_client_type client = IPA_CLIENT_APPS_WAN_PROD;
 	enum ipa_client_type dst_client = IPA_CLIENT_APPS_LAN_CONS;
 	u32 channel_count = IPA_APPS_WWAN_PROD_RING_COUNT;
@@ -379,13 +373,11 @@ static int handle_egress_format(struct net_device *dev,
 	 */
 	ipa_endp_status_prod(ep_id, true, IPA_CLIENT_Q6_WAN_CONS);
 
-	wan_cfg->notify = apps_ipa_tx_complete_notify;
-	wan_cfg->priv = dev;
-
 	/* Use a deferred interrupting no-op to reduce completion interrupts */
 	ipa_no_intr_init(ep_id);
 
-	ret = ipa_ep_setup(ep_id, channel_count, 1, 0, wan_cfg);
+	ret = ipa_ep_setup(ep_id, channel_count, 1, 0,
+			   apps_ipa_tx_complete_notify, dev);
 	if (ret)
 		ipa_ep_free(ep_id);
 	else

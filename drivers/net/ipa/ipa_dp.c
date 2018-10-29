@@ -1678,7 +1678,6 @@ void ipa_ep_free(u32 ep_id)
 /** ipa_ep_setup() - Setup an IPA GPI endpoint and perform
  * IPA EP configuration
  * @client:	[in] handle assigned by IPA to client
- * @sys_in:	[in] input needed to setup the endpoint and configure EP
  *
  *  - configure the end-point registers with the supplied
  *    parameters from the user.
@@ -1688,7 +1687,10 @@ void ipa_ep_free(u32 ep_id)
  * Returns:	0 on success, negative on failure
  */
 int ipa_ep_setup(u32 ep_id, u32 channel_count, u32 evt_ring_mult,
-		 u32 rx_buffer_size, struct ipa_sys_connect_params *sys_in)
+		 u32 rx_buffer_size,
+		 void (*client_notify)(void *priv, enum ipa_dp_evt_type type,
+				       unsigned long data),
+		 void *priv)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 	int ret;
@@ -1708,8 +1710,8 @@ int ipa_ep_setup(u32 ep_id, u32 channel_count, u32 evt_ring_mult,
 				  ipa_replenish_rx_work_func);
 	}
 
-	ep->client_notify = sys_in->notify;
-	ep->priv = sys_in->priv;
+	ep->client_notify = client_notify;
+	ep->priv = priv;
 	ep->napi_enabled = ep->client == IPA_CLIENT_APPS_WAN_CONS;
 
 	ipa_client_add();

@@ -146,7 +146,6 @@ int ipa_modem_smem_init(void)
 
 static int ipa_ep_apps_cmd_prod_setup(void)
 {
-	struct ipa_sys_connect_params sys_in = { };
 	enum ipa_client_type client = IPA_CLIENT_APPS_CMD_PROD;
 	enum ipa_client_type dst_client = IPA_CLIENT_APPS_LAN_CONS;
 	u32 channel_count = IPA_APPS_CMD_PROD_RING_COUNT;
@@ -165,7 +164,7 @@ static int ipa_ep_apps_cmd_prod_setup(void)
 	ipa_endp_init_seq_prod(ep_id);
 	ipa_endp_init_deaggr_prod(ep_id);
 
-	ret = ipa_ep_setup(ep_id, channel_count, 2, 0, &sys_in);
+	ret = ipa_ep_setup(ep_id, channel_count, 2, 0, NULL, NULL);
 	if (ret)
 		ipa_ep_free(ep_id);
 	else
@@ -423,7 +422,6 @@ static void ipa_setup_rt_hash_tuple(void)
 
 static int ipa_ep_apps_lan_cons_setup(void)
 {
-	struct ipa_sys_connect_params sys_in = { };
 	enum ipa_client_type client = IPA_CLIENT_APPS_LAN_CONS;
 	u32 channel_count = IPA_APPS_LAN_CONS_RING_COUNT;
 	u32 aggr_size = IPA_GENERIC_AGGR_BYTE_LIMIT;
@@ -473,10 +471,8 @@ static int ipa_ep_apps_lan_cons_setup(void)
 	ipa_endp_init_hdr_metadata_mask_cons(ep_id, 0x0);
 	ipa_endp_status_cons(ep_id, true);
 
-	sys_in.notify = ipa_lan_rx_cb;
-	sys_in.priv = NULL;
-
-	ret = ipa_ep_setup(ep_id, channel_count, 1, rx_buffer_size, &sys_in);
+	ret = ipa_ep_setup(ep_id, channel_count, 1, rx_buffer_size,
+			   ipa_lan_rx_cb, NULL);
 	if (ret)
 		ipa_ep_free(ep_id);
 	else
