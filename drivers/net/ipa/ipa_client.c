@@ -22,7 +22,10 @@
 
 #define IPA_PKT_FLUSH_TO_US		100
 
-static int ipa_reset_with_open_aggr_frame_wa(u32 ep_id)
+/* Special reset sequence used on a consumer channel when
+ * aggregation is active.
+ */
+static int ipa_channel_reset_aggr(u32 ep_id)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 	struct ipa_reg_aggr_force_close force_close;
@@ -76,14 +79,13 @@ static int ipa_reset_with_open_aggr_frame_wa(u32 ep_id)
 	if (ret)
 		goto err_dma_free;
 
-	/* Wait for aggregation frame to be closed and stop channel*/
+	/* Wait for aggregation frame to be closed */
 	for (i = 0; i < IPA_POLL_AGGR_STATE_RETRIES_NUM; i++) {
 		aggr_active_bitmap = ipa_read_reg(IPA_STATE_AGGR_ACTIVE);
 		if (!(aggr_active_bitmap & BIT(ep_id)))
 			break;
 		msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
 	}
-
 	ipa_bug_on(aggr_active_bitmap & BIT(ep_id));
 
 	ipa_dma_free(&dma_byte);
@@ -121,20 +123,20 @@ out_suspend_again:
 void ipa_reset_gsi_channel(u32 ep_id)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
-	u32 aggr_active_bitmap;
+	u32 aggr_active_bitmap = 0;
 
-	/* Check for open aggregation frame on Consumer EP -
-	 * reset with open aggregation frame WA
+	/* For consumer endpoints, a hardware limitation prevents us
+	 * from issuing a channel reset if aggregation is active.
+	 * Check for this case, and if detected, perform a special
+	 * reset sequence.  Otherwise just do a "normal" reset.
 	 */
 	if (ipa_consumer(ep->client))
 		aggr_active_bitmap = ipa_read_reg(IPA_STATE_AGGR_ACTIVE);
-	else
-		aggr_active_bitmap = 0;
 
 	if (aggr_active_bitmap & BIT(ep_id)) {
-		ipa_bug_on(ipa_reset_with_open_aggr_frame_wa(ep_id));
+		ipa_bug_on(ipa_channel_reset_aggr(ep_id));
 	} else {
-		/* If the reset called after stop, need to wait 1ms */
+		/* In case the reset follows stop, need to wait 1 msec */
 		msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
 		ipa_bug_on(gsi_reset_channel(ipa_ctx->gsi, ep->channel_id));
 	}
