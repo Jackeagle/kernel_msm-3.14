@@ -48,7 +48,6 @@ struct ipa_gsi_ep_config {
  * @user_data:		Data maintained for (but unused by) the channel.
  */
 struct gsi_channel_props {
-	struct ipa_dma_mem mem;
 	u32 ring_count;
 	bool from_gsi;
 	bool use_db_engine;
