@@ -111,6 +111,7 @@ struct gsi_channel {
 	bool priority;		/* Does hardware give this channel priority? */
 	enum gsi_channel_state state;
 	struct gsi_ring ring;
+	void *notify_data;
 	void **user_data;
 	struct gsi_evt_ring *evt_ring;
 	struct mutex mlock;		/* protects channel_scratch updates */
@@ -434,7 +435,6 @@ handle_glob_chan_err(struct gsi *gsi, u32 err_ee, u32 channel_id, u32 code)
 		ipa_err("unexpected channel error code %u\n", code);
 		ipa_bug();
 	}
-	ipa_assert(channel->props.user_data);
 }
 
 static void
@@ -551,7 +551,7 @@ static void channel_xfer_cb(struct gsi_channel *channel, u16 count)
 		xfer_data = channel->user_data[ring_rp_local];;
 		ipa_gsi_irq_tx_notify_cb(xfer_data);
 	} else {
-		ipa_gsi_irq_rx_notify_cb(channel->props.user_data, count);
+		ipa_gsi_irq_rx_notify_cb(channel->notify_data, count);
 	}
 }
 
@@ -1164,7 +1164,8 @@ gsi_program_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id)
 
 int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 channel_count,
 		      bool from_ipa, bool priority, u32 evt_ring_mult,
-		      bool moderation, struct gsi_channel_props *props)
+		      bool moderation, void *notify_data,
+		      struct gsi_channel_props *props)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	u32 evt_ring_count = channel_count * evt_ring_mult;
@@ -1191,6 +1192,7 @@ int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 channel_count,
 	init_completion(&channel->compl);
 	atomic_set(&channel->poll_mode, 0);	/* Initially in callback mode */
 	channel->from_ipa = from_ipa;
+	channel->notify_data = notify_data;
 	channel->props = *props;
 
 	mutex_lock(&gsi->mlock);

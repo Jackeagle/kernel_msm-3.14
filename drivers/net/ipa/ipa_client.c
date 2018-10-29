@@ -27,9 +27,7 @@ static int ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep,
 {
 	struct gsi_channel_props props = { };
 
-	/* Set up channel properties */
 	props.use_db_engine = false;
-	props.user_data = NULL;
 
 	if (gsi_set_channel_cfg(ipa_ctx->gsi, ep->channel_id, &props)) {
 		ipa_err("Error setting channel properties\n");

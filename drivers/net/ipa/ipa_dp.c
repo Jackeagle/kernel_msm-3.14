@@ -1457,11 +1457,10 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 	gsi_ep_info = ipa_get_gsi_ep_info(ep->client);
 
 	gsi_channel_props.use_db_engine = true;
-	gsi_channel_props.user_data = ep->sys;
 
 	result = gsi_alloc_channel(ipa_ctx->gsi, gsi_ep_info->channel_id,
 				   channel_count, from_ipa, priority,
-				   evt_ring_mult, moderation,
+				   evt_ring_mult, moderation, ep->sys,
 				   &gsi_channel_props);
 	if (result < 0)
 		goto fail_alloc_channel;
