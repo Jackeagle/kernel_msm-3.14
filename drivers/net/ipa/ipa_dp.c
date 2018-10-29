@@ -1686,10 +1686,11 @@ void ipa_ep_free(u32 ep_id)
  *
  * Returns:	0 on success, negative on failure
  */
-int ipa_ep_setup(u32 ep_id, u32 channel_count, u32 evt_ring_count,
+int ipa_ep_setup(u32 ep_id, u32 channel_count, u32 evt_ring_mult,
 		 u32 rx_buffer_size, struct ipa_sys_connect_params *sys_in)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	u32 evt_ring_count = channel_count * evt_ring_mult;
 	int ret;
 
 	if (ipa_consumer(ep->client)) {

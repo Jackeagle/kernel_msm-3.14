@@ -236,7 +236,6 @@ static int handle_ingress_format(struct net_device *dev,
 {
 	enum ipa_client_type client = IPA_CLIENT_APPS_WAN_CONS;
 	u32 channel_count = IPA_APPS_WWAN_CONS_RING_COUNT;
-	u32 evt_ring_count = channel_count;
 	struct ipa_sys_connect_params *wan_cfg = &rmnet_ipa_ctx->wan_cons_cfg;
 	u32 header_size = sizeof(struct rmnet_map_header_s);
 	u32 metadata_offset = offsetof(struct rmnet_map_header_s, mux_id);
@@ -309,8 +308,7 @@ static int handle_ingress_format(struct net_device *dev,
 
 	ipa_ctx->ipa_client_apps_wan_cons_agg_gro = aggr_active;
 
-	ret = ipa_ep_setup(ep_id, channel_count, evt_ring_count,
-			   rx_buffer_size, wan_cfg);
+	ret = ipa_ep_setup(ep_id, channel_count, 1, rx_buffer_size, wan_cfg);
 	if (ret)
 		ipa_ep_free(ep_id);
 	else
@@ -329,7 +327,6 @@ static int handle_egress_format(struct net_device *dev,
 	enum ipa_client_type client = IPA_CLIENT_APPS_WAN_PROD;
 	enum ipa_client_type dst_client = IPA_CLIENT_APPS_LAN_CONS;
 	u32 channel_count = IPA_APPS_WWAN_PROD_RING_COUNT;
-	u32 evt_ring_count = channel_count;
 	u32 header_size = sizeof(struct rmnet_map_header_s);
 	enum ipa_cs_offload_en offload_type = IPA_CS_OFFLOAD_NONE;
 	enum ipa_aggr_en aggr_en = IPA_BYPASS_AGGR;
@@ -390,7 +387,7 @@ static int handle_egress_format(struct net_device *dev,
 	/* Use a deferred interrupting no-op to reduce completion interrupts */
 	ipa_no_intr_init(ep_id);
 
-	ret = ipa_ep_setup(ep_id, channel_count, evt_ring_count, 0, wan_cfg);
+	ret = ipa_ep_setup(ep_id, channel_count, 1, 0, wan_cfg);
 	if (ret)
 		ipa_ep_free(ep_id);
 	else
