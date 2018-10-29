@@ -131,9 +131,7 @@ struct ipa_tag_completion {
 
 #define IPA_SIZE_DL_CSUM_META_TRAILER	8
 
-#define IPA_GSI_MAX_CH_LOW_WEIGHT	15
-
-#define IPA_REPL_XFER_THRESH	10
+#define IPA_REPL_XFER_THRESH		10
 
 /* How long before sending an interrupting no-op to handle TX completions */
 #define IPA_TX_NOP_DELAY_NS		(2 * 1000 * 1000)	/* 2 msec */
@@ -1452,21 +1450,19 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 	struct gsi_channel_props gsi_channel_props = { };
 	const struct ipa_gsi_ep_config *gsi_ep_info;
 	bool from_ipa = ipa_consumer(ep->client);
+	bool priority = ep->client == IPA_CLIENT_APPS_CMD_PROD;
 	bool moderation = !ep->sys->tx.no_intr;
 	int result;
 
 	gsi_ep_info = ipa_get_gsi_ep_info(ep->client);
 
 	gsi_channel_props.use_db_engine = true;
-	if (ep->client == IPA_CLIENT_APPS_CMD_PROD)
-		gsi_channel_props.low_weight = IPA_GSI_MAX_CH_LOW_WEIGHT;
-	else
-		gsi_channel_props.low_weight = 1;
 	gsi_channel_props.user_data = ep->sys;
 
 	result = gsi_alloc_channel(ipa_ctx->gsi, gsi_ep_info->channel_id,
-				   channel_count, from_ipa, evt_ring_mult,
-				   moderation, &gsi_channel_props);
+				   channel_count, from_ipa, priority,
+				   evt_ring_mult, moderation,
+				   &gsi_channel_props);
 	if (result < 0)
 		goto fail_alloc_channel;
 	ep->channel_id = (u32)result;

@@ -108,6 +108,7 @@ struct gsi_ring {
 struct gsi_channel {
 	struct gsi_channel_props props;
 	bool from_ipa;			/* true: IPA->AP; false: AP->IPA */
+	bool priority;		/* Does hardware give this channel priority? */
 	enum gsi_channel_state state;
 	struct gsi_ring ring;
 	void **user_data;
@@ -1133,6 +1134,7 @@ gsi_program_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	struct gsi_channel_props *props = &channel->props;
+	u32 low_weight = channel->priority ? field_max(WRR_WEIGHT_FMASK) : 0;
 	u32 val;
 
 	val = field_gen(GSI_CHANNEL_PROTOCOL_GPI, CHTYPE_PROTOCOL_FMASK);
@@ -1154,15 +1156,15 @@ gsi_program_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id)
 	val = channel->ring.mem.phys >> 32;
 	gsi_writel(gsi, val, GSI_CH_C_CNTXT_3_OFFS(channel_id));
 
-	val = field_gen(props->low_weight, WRR_WEIGHT_FMASK);
+	val = field_gen(low_weight, WRR_WEIGHT_FMASK);
 	val |= field_gen(GSI_MAX_PREFETCH, MAX_PREFETCH_FMASK);
 	val |= field_gen(props->use_db_engine ? 1 : 0, USE_DB_ENG_FMASK);
 	gsi_writel(gsi, val, GSI_CH_C_QOS_OFFS(channel_id));
 }
 
 int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 channel_count,
-		      bool from_ipa, u32 evt_ring_mult, bool moderation,
-		      struct gsi_channel_props *props)
+		      bool from_ipa, bool priority, u32 evt_ring_mult,
+		      bool moderation, struct gsi_channel_props *props)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	u32 evt_ring_count = channel_count * evt_ring_mult;
@@ -1208,6 +1210,7 @@ int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 channel_count,
 
 	channel->evt_ring = evt_ring;
 	evt_ring->channel = channel;
+	channel->priority = priority;
 
 	gsi_program_channel(gsi, channel_id, evt_ring->id);
 

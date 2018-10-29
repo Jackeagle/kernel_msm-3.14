@@ -39,12 +39,10 @@ struct ipa_gsi_ep_config {
 /**
  * gsi_channel_props - Properties of a data channel.
  * @use_db_engine:	XXX Whether to use the doorbell engine.
- * @low_weight:		XXX Relative priority of this channel.
  * @user_data:		Data maintained for (but unused by) the channel.
  */
 struct gsi_channel_props {
 	bool use_db_engine;
-	u8 low_weight;
 	void *user_data;
 };
 
@@ -119,8 +117,8 @@ void gsi_deregister_device(struct gsi *gsi);
  * @Return Channel handle populated by GSI, opaque to client, or negative errno
  */
 int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 channel_count,
-		      bool from_ipa, u32 evt_ring_mult, bool moderation,
-		      struct gsi_channel_props *props);
+		      bool from_ipa, bool priority, u32 evt_ring_mult,
+		      bool moderation, struct gsi_channel_props *props);
 
 /** gsi_write_channel_scratch - Peripheral should call this function to
  * write to the scratch area of the channel context
