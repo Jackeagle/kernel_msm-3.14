@@ -1451,7 +1451,6 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 {
 	struct gsi_channel_props gsi_channel_props = { };
 	const struct ipa_gsi_ep_config *gsi_ep_info;
-	u32 evt_ring_count = channel_count * evt_ring_mult;
 	bool moderation = !ep->sys->tx.no_intr;
 	int result;
 
@@ -1465,13 +1464,8 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 		gsi_channel_props.low_weight = 1;
 	gsi_channel_props.user_data = ep->sys;
 
-	result = gsi_evt_ring_alloc(ipa_ctx->gsi, evt_ring_count, moderation);
-	if (result < 0)
-		return result;
-	ep->evt_ring_id = (u32)result;
-
 	result = gsi_alloc_channel(ipa_ctx->gsi, gsi_ep_info->channel_id,
-				   channel_count, ep->evt_ring_id,
+				   channel_count, evt_ring_mult, moderation,
 				   &gsi_channel_props);
 	if (result < 0)
 		goto fail_alloc_channel;
@@ -1486,7 +1480,6 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 
 	gsi_dealloc_channel(ipa_ctx->gsi, ep->channel_id);
 fail_alloc_channel:
-	gsi_evt_ring_dealloc(ipa_ctx->gsi, ep->evt_ring_id);
 	ipa_err("Return with err: %d\n", result);
 
 	return result;
@@ -1779,7 +1772,6 @@ void ipa_ep_teardown(u32 ep_id)
 
 	ipa_reset_gsi_channel(ep_id);
 	gsi_dealloc_channel(ipa_ctx->gsi, ep->channel_id);
-	gsi_evt_ring_dealloc(ipa_ctx->gsi, ep->evt_ring_id);
 
 	if (ipa_consumer(ep->client))
 		ipa_cleanup_rx(ep->sys);

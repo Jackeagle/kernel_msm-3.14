@@ -118,9 +118,9 @@ struct gsi_channel {
 };
 
 struct gsi_evt_ring {
-	enum gsi_evt_ring_state state;
 	u32 id;
 	bool moderation;
+	enum gsi_evt_ring_state state;
 	struct gsi_ring ring;
 	struct completion compl;
 	struct gsi_channel *channel;
@@ -1016,7 +1016,7 @@ channel_command(struct gsi *gsi, u32 channel_id, enum gsi_ch_cmd_opcode op)
 }
 
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
-int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
+static int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 {
 	u32 evt_ring_id;
 	struct gsi_evt_ring *evt_ring;
@@ -1092,7 +1092,7 @@ static void __gsi_evt_ring_scratch_zero(struct gsi *gsi, u32 evt_ring_id)
 	gsi_writel(gsi, 0, GSI_EV_CH_E_SCRATCH_1_OFFS(evt_ring_id));
 }
 
-void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
+static void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
 {
 	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
 	bool completed;
@@ -1160,16 +1160,23 @@ gsi_program_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id)
 }
 
 int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 channel_count,
-		      u32 evt_ring_id, struct gsi_channel_props *props)
+		      u32 evt_ring_mult, bool moderation,
+		      struct gsi_channel_props *props)
 {
-	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
 	struct gsi_channel *channel = &gsi->channel[channel_id];
+	u32 evt_ring_count = channel_count * evt_ring_mult;
+	struct gsi_evt_ring *evt_ring;
 	void **user_data;
 	int ret;
 
+	ret = gsi_evt_ring_alloc(gsi, evt_ring_count, moderation);
+	if (ret < 0)
+		return ret;
+	evt_ring = &gsi->evt_ring[ret];
+
 	ret = gsi_ring_alloc(&channel->ring, channel_count);
 	if (ret)
-		return ret;
+		goto err_evt_ring_free;
 
 	user_data = kcalloc(channel_count, sizeof(void *), GFP_KERNEL);
 	if (!user_data) {
@@ -1200,7 +1207,7 @@ int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 channel_count,
 	channel->evt_ring = evt_ring;
 	evt_ring->channel = channel;
 
-	gsi_program_channel(gsi, channel_id, evt_ring_id);
+	gsi_program_channel(gsi, channel_id, evt_ring->id);
 
 	channel->user_data = user_data;
 	atomic_inc(&gsi->channel_count);
@@ -1212,6 +1219,8 @@ err_mutex_unlock:
 	kfree(user_data);
 err_ring_free:
 	gsi_ring_free(&channel->ring);
+err_evt_ring_free:
+	gsi_evt_ring_dealloc(gsi, evt_ring->id);
 
 	return ret;
 }
@@ -1408,6 +1417,9 @@ void gsi_dealloc_channel(struct gsi *gsi, u32 channel_id)
 
 	kfree(channel->user_data);
 	gsi_ring_free(&channel->ring);
+
+	gsi_evt_ring_dealloc(gsi, channel->evt_ring->id);
+
 	memset(channel, 0, sizeof(*channel));
 
 	atomic_dec(&gsi->channel_count);
