@@ -124,7 +124,7 @@ void gsi_deregister_device(struct gsi *gsi);
  *
  * @Return id for event ring populated by GSI, or a negative errno
  */
-int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, u16 int_modt);
+int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation);
 
 /** gsi_evt_ring_dealloc - Peripheral should call this function to
  * de-allocate an event ring. There should not exist any active

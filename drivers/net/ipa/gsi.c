@@ -23,6 +23,9 @@
 #define GSI_CHAN_MAX		14
 #define GSI_EVT_RING_MAX	10
 
+/* Delay period if interrupt moderation is in effect */
+#define IPA_GSI_EVT_RING_INT_MODT	(32 * 1) /* 1ms under 32KHz clock */
+
 #define GSI_CMD_TIMEOUT		msecs_to_jiffies(5 * MSEC_PER_SEC)
 
 #define GSI_MHI_ER_START	10	/* First reserved event number */
@@ -116,9 +119,9 @@ struct gsi_channel {
 
 struct gsi_evt_ring {
 	struct ipa_dma_mem mem;
-	u16 int_modt;
 	enum gsi_evt_ring_state state;
 	u32 id;
+	bool moderation;
 	struct gsi_ring ring;
 	struct completion compl;
 	struct gsi_channel *channel;
@@ -885,9 +888,11 @@ void gsi_deregister_device(struct gsi *gsi)
 	gsi->irq = 0;
 }
 
-static void gsi_evt_ring_program(struct gsi *gsi, u32 evt_ring_id, u32 size,
-				 u64 phys, u16 int_modt)
+static void
+gsi_evt_ring_program(struct gsi *gsi, u32 evt_ring_id, u32 size, u64 phys)
 {
+	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
+	u32 int_modt = evt_ring->moderation ? IPA_GSI_EVT_RING_INT_MODT : 0;
 	u32 int_modc = 1;	/* moderation always comes from channel*/
 	u32 val;
 
@@ -995,7 +1000,7 @@ channel_command(struct gsi *gsi, u32 channel_id, enum gsi_ch_cmd_opcode op)
 }
 
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
-int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, u16 int_modt)
+int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 {
 	u32 size = ring_count * GSI_RING_ELEMENT_SIZE;
 	u32 evt_ring_id;
@@ -1022,8 +1027,6 @@ int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, u16 int_modt)
 	}
 	ipa_assert(!(evt_ring->mem.phys % roundup_pow_of_two(size)));
 
-	evt_ring->id = evt_ring_id;
-	evt_ring->int_modt = int_modt;
 	init_completion(&evt_ring->compl);
 
 	if (!evt_ring_command(gsi, evt_ring_id, GSI_EVT_ALLOCATE)) {
@@ -1039,8 +1042,11 @@ int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, u16 int_modt)
 	}
 	atomic_inc(&gsi->evt_ring_count);
 
+	evt_ring->id = evt_ring_id;
+	evt_ring->moderation = moderation;
+
 	gsi_evt_ring_program(gsi, evt_ring_id, evt_ring->mem.size,
-			     evt_ring->mem.phys, evt_ring->int_modt);
+			     evt_ring->mem.phys);
 	gsi_init_ring(&evt_ring->ring, &evt_ring->mem);
 
 	gsi_evt_ring_prime(gsi, evt_ring);
@@ -1096,7 +1102,7 @@ void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
 
 	mutex_unlock(&gsi->mlock);
 
-	evt_ring->int_modt = 0;
+	evt_ring->moderation = false;
 	ipa_dma_free(&evt_ring->mem);
 	memset(evt_ring, 0, sizeof(*evt_ring));
 
@@ -1118,7 +1124,7 @@ void gsi_evt_ring_reset(struct gsi *gsi, u32 evt_ring_id)
 	ipa_bug_on(evt_ring->state != GSI_EVT_RING_STATE_ALLOCATED);
 
 	gsi_evt_ring_program(gsi, evt_ring_id, evt_ring->mem.size,
-			     evt_ring->mem.phys, evt_ring->int_modt);
+			     evt_ring->mem.phys);
 	gsi_init_ring(&evt_ring->ring, &evt_ring->mem);
 
 	__gsi_evt_ring_scratch_zero(gsi, evt_ring_id);

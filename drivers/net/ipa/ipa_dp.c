@@ -132,7 +132,6 @@ struct ipa_tag_completion {
 #define IPA_SIZE_DL_CSUM_META_TRAILER	8
 
 #define IPA_GSI_MAX_CH_LOW_WEIGHT	15
-#define IPA_GSI_EVT_RING_INT_MODT	(32 * 1) /* 1ms under 32KHz clock */
 
 #define IPA_REPL_XFER_THRESH	10
 
@@ -1452,11 +1451,11 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 {
 	struct gsi_channel_props gsi_channel_props = { };
 	const struct ipa_gsi_ep_config *gsi_ep_info;
-	u16 modt = ep->sys->tx.no_intr ? 0 : IPA_GSI_EVT_RING_INT_MODT;
 	u32 evt_ring_count = channel_count * evt_ring_mult;
+	bool moderation = !ep->sys->tx.no_intr;
 	int result;
 
-	result = gsi_evt_ring_alloc(ipa_ctx->gsi, evt_ring_count, modt);
+	result = gsi_evt_ring_alloc(ipa_ctx->gsi, evt_ring_count, moderation);
 	if (result < 0)
 		return result;
 	ep->evt_ring_id = (u32)result;
