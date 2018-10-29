@@ -329,8 +329,6 @@ void ipa_wwan_cleanup(void);
 
 int ipa_stop_gsi_channel(u32 ep_id);
 
-void ipa_reset_gsi_channel(u32 ep_id);
-
 /* Configuration */
 void ipa_cfg_ep(u32 ep_id);
 
