@@ -420,9 +420,7 @@ u32 ipa_client_ep_id(enum ipa_client_type client)
 
 enum ipa_seq_type ipa_endp_seq_type(u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
-
-	return ep_configuration(ep->client)->seq_type;
+	return ipa_ep_configuration[ipa_ctx->ep[ep_id].client].seq_type;
 }
 
 /** ipa_sram_settings_read() - Read SRAM settings from HW
