@@ -930,15 +930,18 @@ static void gsi_evt_ring_program(struct gsi *gsi, u32 evt_ring_id)
 	gsi_writel(gsi, 0, GSI_EV_CH_E_CNTXT_13_OFFS(evt_ring_id));
 }
 
-static void gsi_ring_init(struct gsi_ring *ring, struct ipa_dma_mem *mem)
+static void gsi_ring_init(struct gsi_ring *ring)
+{
+	ring->wp_local = ring->wp = ring->mem.phys;
+	ring->rp_local = ring->rp = ring->mem.phys;
+}
+
+static void gsi_ring_alloc(struct gsi_ring *ring, struct ipa_dma_mem *mem)
 {
 	spin_lock_init(&ring->slock);
 	ring->mem = *mem;
-	ring->wp = mem->phys;
-	ring->rp = mem->phys;
-	ring->wp_local = mem->phys;
-	ring->rp_local = mem->phys;
 	ring->end = mem->phys + mem->size;
+	gsi_ring_init(ring);
 }
 
 static void gsi_evt_ring_prime(struct gsi *gsi, struct gsi_evt_ring *evt_ring)
@@ -1046,7 +1049,7 @@ int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 	evt_ring->moderation = moderation;
 
 	gsi_evt_ring_program(gsi, evt_ring_id);
-	gsi_ring_init(&evt_ring->ring, &evt_ring->mem);
+	gsi_ring_alloc(&evt_ring->ring, &evt_ring->mem);
 
 	gsi_evt_ring_prime(gsi, evt_ring);
 
@@ -1123,7 +1126,7 @@ void gsi_evt_ring_reset(struct gsi *gsi, u32 evt_ring_id)
 	ipa_bug_on(evt_ring->state != GSI_EVT_RING_STATE_ALLOCATED);
 
 	gsi_evt_ring_program(gsi, evt_ring_id);
-	gsi_ring_init(&evt_ring->ring, &evt_ring->mem);
+	gsi_ring_alloc(&evt_ring->ring, &evt_ring->mem);
 
 	__gsi_evt_ring_scratch_zero(gsi, evt_ring_id);
 
@@ -1207,7 +1210,7 @@ int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id,
 	evt_ring->channel = channel;
 
 	gsi_program_channel(gsi, channel_id, evt_ring_id);
-	gsi_ring_init(&channel->ring, &props->mem);
+	gsi_ring_alloc(&channel->ring, &props->mem);
 
 	channel->user_data = user_data;
 	atomic_inc(&gsi->channel_count);
@@ -1385,7 +1388,7 @@ reset:
 	}
 
 	gsi_program_channel(gsi, channel_id, channel->evt_ring->id);
-	gsi_ring_init(&channel->ring, &channel->props.mem);
+	gsi_ring_alloc(&channel->ring, &channel->props.mem);
 
 	/* restore scratch */
 	__gsi_write_channel_scratch(gsi, channel_id);
@@ -1572,7 +1575,7 @@ int gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id,
 	channel->props = *props;
 
 	gsi_program_channel(gsi, channel_id, channel->evt_ring->id);
-	gsi_ring_init(&channel->ring, &channel->props.mem);
+	gsi_ring_alloc(&channel->ring, &channel->props.mem);
 
 	/* restore scratch */
 	__gsi_write_channel_scratch(gsi, channel_id);
