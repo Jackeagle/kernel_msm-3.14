@@ -22,9 +22,9 @@
 
 #define IPA_PKT_FLUSH_TO_US		100
 
-static int
-ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
+static int ipa_reset_with_open_aggr_frame_wa(u32 ep_id)
 {
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 	struct ipa_reg_aggr_force_close force_close;
 	struct ipa_reg_endp_init_ctrl init_ctrl;
 	struct ipa_dma_mem dma_byte;
@@ -132,7 +132,7 @@ void ipa_reset_gsi_channel(u32 ep_id)
 		aggr_active_bitmap = 0;
 
 	if (aggr_active_bitmap & BIT(ep_id)) {
-		ipa_bug_on(ipa_reset_with_open_aggr_frame_wa(ep_id, ep));
+		ipa_bug_on(ipa_reset_with_open_aggr_frame_wa(ep_id));
 	} else {
 		/* If the reset called after stop, need to wait 1ms */
 		msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
