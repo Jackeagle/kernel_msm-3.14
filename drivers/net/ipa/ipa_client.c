@@ -48,7 +48,6 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 	struct ipa_reg_aggr_force_close force_close;
 	int result;
 	int gsi_res;
-	struct gsi_channel_props orig_props = { };
 	struct ipa_dma_mem dma_byte;
 	struct gsi_xfer_elem xfer_elem = { };
 	int i;
@@ -67,9 +66,6 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 		ipa_err("Error resetting channel: %d\n", gsi_res);
 		return -EFAULT;
 	}
-
-	/* Get its current configuration, then reconfigure to dummy GPI */
-	gsi_get_channel_cfg(ipa_ctx->gsi, ep->channel_id, &orig_props);
 
 	result = ipa_reconfigure_channel_to_gpi(ep);
 	if (result)
