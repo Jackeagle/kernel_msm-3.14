@@ -37,14 +37,6 @@ struct ipa_gsi_ep_config {
 };
 
 /**
- * gsi_channel_props - Properties of a data channel.
- * @use_db_engine:	XXX Whether to use the doorbell engine.
- */
-struct gsi_channel_props {
-	bool use_db_engine;
-};
-
-/**
  * enum gsi_xfer_flag - Transfer element flag values.
  * @GSI_XFER_FLAG_CHAIN:	Not the last element in a transaction.
  * @GSI_XFER_FLAG_EOB:		Generate event interrupt when complete.
@@ -108,16 +100,11 @@ void gsi_deregister_device(struct gsi *gsi);
 /** gsi_alloc_channel - Peripheral should call this function to
  * allocate a channel once gsi_register_device() has been called
  *
- * @props:     Channel properties
- *
- * This function can sleep
- *
  * @Return Channel handle populated by GSI, opaque to client, or negative errno
  */
 int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 channel_count,
 		      bool from_ipa, bool priority, u32 evt_ring_mult,
-		      bool moderation, void *notify_data,
-		      struct gsi_channel_props *props);
+		      bool moderation, void *notify_data);
 
 /** gsi_write_channel_scratch - Peripheral should call this function to
  * write to the scratch area of the channel context

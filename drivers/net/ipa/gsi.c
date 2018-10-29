@@ -106,7 +106,6 @@ struct gsi_ring {
 };
 
 struct gsi_channel {
-	struct gsi_channel_props props;
 	bool from_ipa;			/* true: IPA->AP; false: AP->IPA */
 	bool priority;		/* Does hardware give this channel priority? */
 	enum gsi_channel_state state;
@@ -1163,8 +1162,7 @@ static void gsi_program_channel(struct gsi *gsi, u32 channel_id,
 
 int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 channel_count,
 		      bool from_ipa, bool priority, u32 evt_ring_mult,
-		      bool moderation, void *notify_data,
-		      struct gsi_channel_props *props)
+		      bool moderation, void *notify_data)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	u32 evt_ring_count = channel_count * evt_ring_mult;
@@ -1192,7 +1190,6 @@ int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 channel_count,
 	atomic_set(&channel->poll_mode, 0);	/* Initially in callback mode */
 	channel->from_ipa = from_ipa;
 	channel->notify_data = notify_data;
-	channel->props = *props;
 
 	mutex_lock(&gsi->mlock);
 

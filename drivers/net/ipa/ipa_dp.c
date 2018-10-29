@@ -1447,7 +1447,6 @@ void ipa_gsi_irq_rx_notify_cb(void *chan_data, u16 count)
 static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 				 u32 evt_ring_mult)
 {
-	struct gsi_channel_props gsi_channel_props = { };
 	const struct ipa_gsi_ep_config *gsi_ep_info;
 	bool from_ipa = ipa_consumer(ep->client);
 	bool priority = ep->client == IPA_CLIENT_APPS_CMD_PROD;
@@ -1456,12 +1455,9 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 
 	gsi_ep_info = ipa_get_gsi_ep_info(ep->client);
 
-	gsi_channel_props.use_db_engine = true;
-
 	result = gsi_alloc_channel(ipa_ctx->gsi, gsi_ep_info->channel_id,
 				   channel_count, from_ipa, priority,
-				   evt_ring_mult, moderation, ep->sys,
-				   &gsi_channel_props);
+				   evt_ring_mult, moderation, ep->sys);
 	if (result < 0)
 		goto fail_alloc_channel;
 	ep->channel_id = (u32)result;
