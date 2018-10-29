@@ -1455,11 +1455,6 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 	bool moderation = !ep->sys->tx.no_intr;
 	int result;
 
-	result = gsi_evt_ring_alloc(ipa_ctx->gsi, evt_ring_count, moderation);
-	if (result < 0)
-		return result;
-	ep->evt_ring_id = (u32)result;
-
 	gsi_ep_info = ipa_get_gsi_ep_info(ep->client);
 
 	gsi_channel_props.from_gsi = ipa_consumer(ep->client);
@@ -1469,6 +1464,11 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 	else
 		gsi_channel_props.low_weight = 1;
 	gsi_channel_props.user_data = ep->sys;
+
+	result = gsi_evt_ring_alloc(ipa_ctx->gsi, evt_ring_count, moderation);
+	if (result < 0)
+		return result;
+	ep->evt_ring_id = (u32)result;
 
 	result = gsi_alloc_channel(ipa_ctx->gsi, gsi_ep_info->channel_id,
 				   channel_count, ep->evt_ring_id,
