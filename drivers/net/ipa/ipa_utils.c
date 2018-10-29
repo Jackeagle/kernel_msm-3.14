@@ -469,16 +469,14 @@ ipa_get_gsi_ep_info(enum ipa_client_type client)
 	return &ep_config->ipa_gsi_ep_info;
 }
 
-/** ipa_get_ep_mapping() - provide endpoint mapping
+/** ipa_client_ep_id() - provide endpoint mapping
  * @client: client type
  *
  * Return value: endpoint mapping
  */
-u32 ipa_get_ep_mapping(enum ipa_client_type client)
+u32 ipa_client_ep_id(enum ipa_client_type client)
 {
-	const struct ipa_gsi_ep_config *ep_info = ipa_get_gsi_ep_info(client);
-
-	return ep_info->ep_id;
+	return ipa_get_gsi_ep_info(client)->ep_id;
 }
 
 enum ipa_seq_type ipa_endp_seq_type(u32 ep_id)
@@ -828,7 +826,7 @@ bool ipa_is_modem_ep(u32 ep_id)
 		if (!ipa_modem_consumer(client_idx) &&
 		    !ipa_modem_producer(client_idx))
 			continue;
-		if (ipa_get_ep_mapping(client_idx) == ep_id)
+		if (ipa_client_ep_id(client_idx) == ep_id)
 			return true;
 	}
 
@@ -885,7 +883,7 @@ static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
 static void ipa_ep_cons_suspend(enum ipa_client_type client)
 {
 	struct ipa_reg_endp_init_ctrl init_ctrl;
-	u32 ep_id = ipa_get_ep_mapping(client);
+	u32 ep_id = ipa_client_ep_id(client);
 
 	ipa_reg_endp_init_ctrl(&init_ctrl, true);
 	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
@@ -910,7 +908,7 @@ void ipa_ep_suspend_all(void)
 static void ipa_ep_cons_resume(enum ipa_client_type client)
 {
 	struct ipa_reg_endp_init_ctrl init_ctrl;
-	u32 ep_id = ipa_get_ep_mapping(client);
+	u32 ep_id = ipa_client_ep_id(client);
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 
 	ipa_reg_endp_init_ctrl(&init_ctrl, false);
@@ -935,7 +933,7 @@ void ipa_ep_resume_all(void)
 void ipa_cfg_default_route(enum ipa_client_type client)
 {
 	struct ipa_reg_route route;
-	u32 ep_id = ipa_get_ep_mapping(client);
+	u32 ep_id = ipa_client_ep_id(client);
 
 	ipa_debug("dis=0, def_endpoint=%u, hdr_tbl=1 hdr_ofst=0\n", ep_id);
 	ipa_debug("frag_def_endpoint=%u def_retain_hdr=1\n", ep_id);

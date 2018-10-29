@@ -546,7 +546,7 @@ int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 {
 	unsigned long timeout_jiffies = msecs_to_jiffies(timeout);
 	struct ipa_tag_completion *comp;
-	u32 ep_id = ipa_get_ep_mapping(IPA_CLIENT_APPS_CMD_PROD);
+	u32 ep_id = ipa_client_ep_id(IPA_CLIENT_APPS_CMD_PROD);
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 	int ret;
 
@@ -756,7 +756,7 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	if (!skb->len)
 		return -EINVAL;
 
-	ep_id = ipa_get_ep_mapping(client);
+	ep_id = ipa_client_ep_id(client);
 	gsi_ep = ipa_get_gsi_ep_info(ipa_ctx->ep[ep_id].client);
 
 	/* Make sure source endpoint's TLV FIFO has enough entries to
@@ -1253,7 +1253,7 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 			skb_pull(skb, pkt_status_sz);
 			continue;
 		}
-		ep_id = ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
+		ep_id = ipa_client_ep_id(IPA_CLIENT_APPS_WAN_CONS);
 		if (status.endp_dest_idx != ep_id) {
 			ipa_err("expected endp_dest_idx %d received %d\n",
 				ep_id, status.endp_dest_idx);
@@ -1569,7 +1569,7 @@ void ipa_endp_status_prod(u32 ep_id, bool enable,
 			  enum ipa_client_type status_client)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
-	u32 status_ep_id = ipa_get_ep_mapping(status_client);
+	u32 status_ep_id = ipa_client_ep_id(status_client);
 
 	ipa_reg_endp_status_prod(&ep->status, enable, status_ep_id);
 }
@@ -1587,7 +1587,7 @@ void ipa_endp_init_mode_prod(u32 ep_id, enum ipa_mode mode,
 			     enum ipa_client_type dst_client)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
-	u32 dst_ep_id = ipa_get_ep_mapping(dst_client);
+	u32 dst_ep_id = ipa_client_ep_id(dst_client);
 
 	ipa_reg_endp_init_mode_prod(&ep->init_mode, mode, dst_ep_id);
 }
@@ -1625,7 +1625,7 @@ void ipa_endp_init_deaggr_prod(u32 ep_id)
 
 int ipa_ep_alloc(enum ipa_client_type client)
 {
-	u32 ep_id = ipa_get_ep_mapping(client);
+	u32 ep_id = ipa_client_ep_id(client);
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 	struct ipa_sys_context *sys;
 

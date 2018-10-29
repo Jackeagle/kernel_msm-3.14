@@ -397,7 +397,7 @@ u32 ipa_filter_bitmap_init(void);
 
 bool ipa_is_modem_ep(u32 ep_id);
 
-u32 ipa_get_ep_mapping(enum ipa_client_type client);
+u32 ipa_client_ep_id(enum ipa_client_type client);
 
 void ipa_init_hw(void);
 

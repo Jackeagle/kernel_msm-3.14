@@ -273,8 +273,7 @@ static const struct ipa_init_modem_driver_req *init_modem_driver_req(void)
 	req.modem_mem_info.size = IPA_MEM_MODEM_SIZE;
 
 	req.ctrl_comm_dest_end_pt_valid = true;
-	req.ctrl_comm_dest_end_pt =
-			ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
+	req.ctrl_comm_dest_end_pt = ipa_client_ep_id(IPA_CLIENT_APPS_WAN_CONS);
 
 	req.hdr_proc_ctx_tbl_info_valid =
 			IPA_MEM_MODEM_HDR_PROC_CTX_SIZE ? 1 : 0;

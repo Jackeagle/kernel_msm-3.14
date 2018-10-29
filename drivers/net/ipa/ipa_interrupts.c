@@ -175,7 +175,7 @@ static void tx_suspend_enable(void)
 	/* Compute the mask to use (bits set for all non-modem endpoints) */
 	for (client = 0; client < IPA_CLIENT_MAX; client++)
 		if (ipa_modem_consumer(client) || ipa_modem_producer(client))
-			val &= ~BIT(ipa_get_ep_mapping(client));
+			val &= ~BIT(ipa_client_ep_id(client));
 
 	ipa_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_N, IPA_EE_AP, val);
 }

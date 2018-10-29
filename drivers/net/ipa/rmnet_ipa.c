@@ -451,9 +451,9 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 
 	case RMNET_IOCTL_GET_EP_PAIR:			/* Get endpoint pair */
 		edata.u.ipa_ep_pair.consumer_pipe_num =
-				ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_PROD);
+				ipa_client_ep_id(IPA_CLIENT_APPS_WAN_PROD);
 		edata.u.ipa_ep_pair.producer_pipe_num =
-				ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_CONS);
+				ipa_client_ep_id(IPA_CLIENT_APPS_WAN_CONS);
 		goto copy_out;
 
 	case RMNET_IOCTL_GET_SG_SUPPORT:		/* Get SG support */
