@@ -1129,11 +1129,10 @@ static void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
 	atomic_dec(&gsi->evt_ring_count);
 }
 
-static void
-gsi_program_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id)
+static void gsi_program_channel(struct gsi *gsi, u32 channel_id,
+				u32 evt_ring_id, bool doorbell_enable)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
-	struct gsi_channel_props *props = &channel->props;
 	u32 low_weight = channel->priority ? field_max(WRR_WEIGHT_FMASK) : 0;
 	u32 val;
 
@@ -1158,7 +1157,7 @@ gsi_program_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id)
 
 	val = field_gen(low_weight, WRR_WEIGHT_FMASK);
 	val |= field_gen(GSI_MAX_PREFETCH, MAX_PREFETCH_FMASK);
-	val |= field_gen(props->use_db_engine ? 1 : 0, USE_DB_ENG_FMASK);
+	val |= field_gen(doorbell_enable ? 1 : 0, USE_DB_ENG_FMASK);
 	gsi_writel(gsi, val, GSI_CH_C_QOS_OFFS(channel_id));
 }
 
@@ -1214,7 +1213,7 @@ int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 channel_count,
 	evt_ring->channel = channel;
 	channel->priority = priority;
 
-	gsi_program_channel(gsi, channel_id, evt_ring->id);
+	gsi_program_channel(gsi, channel_id, evt_ring->id, true);
 
 	channel->user_data = user_data;
 	atomic_inc(&gsi->channel_count);
@@ -1393,7 +1392,7 @@ reset:
 		goto reset;
 	}
 
-	gsi_program_channel(gsi, channel_id, channel->evt_ring->id);
+	gsi_program_channel(gsi, channel_id, channel->evt_ring->id, true);
 	gsi_ring_init(&channel->ring);
 
 	/* restore scratch */
@@ -1570,10 +1569,10 @@ void gsi_get_channel_cfg(struct gsi *gsi, u32 channel_id,
 	mutex_unlock(&channel->mlock);
 }
 
-int gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id,
-		        struct gsi_channel_props *props)
+int gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id, bool doorbell_enable)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
+	u32 evt_ring_id = channel->evt_ring->id;
 
 	if (channel->state != GSI_CHANNEL_STATE_ALLOCATED) {
 		ipa_err("bad state %d\n", channel->state);
@@ -1581,9 +1580,8 @@ int gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id,
 	}
 
 	mutex_lock(&channel->mlock);
-	channel->props = *props;
 
-	gsi_program_channel(gsi, channel_id, channel->evt_ring->id);
+	gsi_program_channel(gsi, channel_id, evt_ring_id, doorbell_enable);
 	gsi_ring_init(&channel->ring);
 
 	/* restore scratch */

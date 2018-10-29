@@ -192,12 +192,11 @@ void gsi_get_channel_cfg(struct gsi *gsi, u32 channel_id,
  * gsi_alloc_channel
  *
  * @channel_id:  Client handle previously obtained from gsi_alloc_channel
- * @props:     the properties to apply
+ * @doorbell_enable: whether to enable the doorbell engine
  *
  * @Return gsi_status
  */
-int gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id,
-			struct gsi_channel_props *props);
+int gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id, bool doorbell_enable);
 
 /** gsi_poll_channel - Peripheral should call this function to query for
  * completed transfer descriptors.
