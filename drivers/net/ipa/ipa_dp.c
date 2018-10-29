@@ -1486,6 +1486,7 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 
 	gsi_dealloc_channel(ipa_ctx->gsi, ep->channel_id);
 fail_alloc_channel:
+	gsi_evt_ring_dealloc(ipa_ctx->gsi, ep->evt_ring_id);
 	ipa_err("Return with err: %d\n", result);
 
 	return result;
