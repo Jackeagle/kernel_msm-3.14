@@ -26,14 +26,13 @@ static int
 ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 {
 	struct ipa_reg_aggr_force_close force_close;
-	int result;
-	int gsi_res;
+	struct ipa_reg_endp_init_ctrl init_ctrl;
 	struct ipa_dma_mem dma_byte;
 	struct gsi_xfer_elem xfer_elem = { };
-	int i;
 	int aggr_active_bitmap = 0;
 	bool ep_suspended = false;
-	struct ipa_reg_endp_init_ctrl init_ctrl;
+	int ret;
+	int i;
 
 	ipa_debug("Applying reset channel with open aggregation frame WA\n");
 
@@ -41,11 +40,9 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 	ipa_write_reg_fields(IPA_AGGR_FORCE_CLOSE, &force_close);
 
 	/* Reset channel */
-	gsi_res = gsi_reset_channel(ipa_ctx->gsi, ep->channel_id);
-	if (gsi_res) {
-		ipa_err("Error resetting channel: %d\n", gsi_res);
-		return -EFAULT;
-	}
+	ret = gsi_reset_channel(ipa_ctx->gsi, ep->channel_id);
+	if (ret)
+		return ret;
 
 	/* Turn off the doorbell engine.  We're going to poll until
 	 * we know aggregation isn't active.
@@ -61,17 +58,13 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 	}
 
 	/* Start channel and put 1 Byte descriptor on it */
-	gsi_res = gsi_start_channel(ipa_ctx->gsi, ep->channel_id);
-	if (gsi_res) {
-		ipa_err("Error starting channel: %d\n", gsi_res);
-		result = -EFAULT;
-		goto start_chan_fail;
-	}
+	ret = gsi_start_channel(ipa_ctx->gsi, ep->channel_id);
+	if (ret)
+		goto out_suspend_again;
 
 	if (ipa_dma_alloc(&dma_byte, 1, GFP_KERNEL)) {
-		ipa_err("Error allocating DMA\n");
-		result = -ENOMEM;
-		goto dma_alloc_fail;
+		ret = -ENOMEM;
+		goto err_stop_channel;
 	}
 
 	xfer_elem.addr = dma_byte.phys;
@@ -79,12 +72,9 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 	xfer_elem.flags = GSI_XFER_FLAG_EOT;
 	xfer_elem.type = GSI_XFER_ELEM_DATA;
 
-	gsi_res = gsi_queue_xfer(ipa_ctx->gsi, ep->channel_id, 1, &xfer_elem,
-				 true);
-	if (gsi_res) {
-		result = -EFAULT;
-		goto queue_xfer_fail;
-	}
+	ret = gsi_queue_xfer(ipa_ctx->gsi, ep->channel_id, 1, &xfer_elem, true);
+	if (ret)
+		goto err_dma_free;
 
 	/* Wait for aggregation frame to be closed and stop channel*/
 	for (i = 0; i < IPA_POLL_AGGR_STATE_RETRIES_NUM; i++) {
@@ -98,41 +88,25 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 
 	ipa_dma_free(&dma_byte);
 
-	result = ipa_stop_gsi_channel(ep_id);
-	if (result) {
-		ipa_err("Error stopping channel: %d\n", result);
-		goto start_chan_fail;
-	}
+	ret = ipa_stop_gsi_channel(ep_id);
+	if (ret)
+		goto out_suspend_again;
 
-	/* Reset channel */
-	gsi_res = gsi_reset_channel(ipa_ctx->gsi, ep->channel_id);
-	if (gsi_res) {
-		ipa_err("Error resetting channel: %d\n", gsi_res);
-		result = -EFAULT;
-		goto start_chan_fail;
-	}
-
-	/* Need to sleep for 1ms as required by H/W verified
-	 * sequence for resetting GSI channel
+	/* Reset the channel.  If successful we need to sleep for 1
+	 * msec to complete the GSI channel reset sequence.  Either
+	 * way we finish by suspending the channel again (if necessary)
+	 * and re-enabling its doorbell engine.
 	 */
-	msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
+	ret = gsi_reset_channel(ipa_ctx->gsi, ep->channel_id);
+	if (!ret)
+		msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
+	goto out_suspend_again;
 
-	if (ep_suspended) {
-		ipa_debug("suspend the endpoint again\n");
-		ipa_reg_endp_init_ctrl(&init_ctrl, true);
-		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
-	}
-
-	/* Turn on the doorbell engine again */
-	gsi_set_channel_cfg(ipa_ctx->gsi, ep->channel_id, true);
-
-	return 0;
-
-queue_xfer_fail:
+err_dma_free:
 	ipa_dma_free(&dma_byte);
-dma_alloc_fail:
+err_stop_channel:
 	ipa_stop_gsi_channel(ep_id);
-start_chan_fail:
+out_suspend_again:
 	if (ep_suspended) {
 		ipa_debug("suspend the endpoint again\n");
 		ipa_reg_endp_init_ctrl(&init_ctrl, true);
@@ -141,7 +115,7 @@ start_chan_fail:
 	/* Turn on the doorbell engine again */
 	gsi_set_channel_cfg(ipa_ctx->gsi, ep->channel_id, true);
 
-	return result;
+	return ret;
 }
 
 void ipa_reset_gsi_channel(u32 ep_id)
