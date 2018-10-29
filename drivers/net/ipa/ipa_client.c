@@ -12,15 +12,8 @@
 #include "ipa_dma.h"
 #include "ipa_i.h"
 
-/* These values were determined empirically and shows good E2E bi-
- * directional throughputs
- */
-#define IPA_HOLB_TMR_EN			0x1
-#define IPA_HOLB_TMR_DIS		0x0
-#define IPA_POLL_AGGR_STATE_RETRIES_NUM	3
-#define IPA_POLL_AGGR_STATE_SLEEP_MSEC	1
-
-#define IPA_PKT_FLUSH_TO_US		100
+#define CHANNEL_RESET_AGGR_RETRY_COUNT	3
+#define CHANNEL_RESET_DELAY		1	/* milliseconds */
 
 /* Special reset sequence used on a consumer channel when
  * aggregation is active.
@@ -80,11 +73,11 @@ static int ipa_channel_reset_aggr(u32 ep_id)
 		goto err_dma_free;
 
 	/* Wait for aggregation frame to be closed */
-	for (i = 0; i < IPA_POLL_AGGR_STATE_RETRIES_NUM; i++) {
+	for (i = 0; i < CHANNEL_RESET_AGGR_RETRY_COUNT; i++) {
 		aggr_active_bitmap = ipa_read_reg(IPA_STATE_AGGR_ACTIVE);
 		if (!(aggr_active_bitmap & BIT(ep_id)))
 			break;
-		msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
+		msleep(CHANNEL_RESET_DELAY);
 	}
 	ipa_bug_on(aggr_active_bitmap & BIT(ep_id));
 
@@ -101,7 +94,7 @@ static int ipa_channel_reset_aggr(u32 ep_id)
 	 */
 	ret = gsi_reset_channel(ipa_ctx->gsi, ep->channel_id);
 	if (!ret)
-		msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
+		msleep(CHANNEL_RESET_DELAY);
 	goto out_suspend_again;
 
 err_dma_free:
@@ -137,7 +130,7 @@ void ipa_reset_gsi_channel(u32 ep_id)
 		ipa_bug_on(ipa_channel_reset_aggr(ep_id));
 	} else {
 		/* In case the reset follows stop, need to wait 1 msec */
-		msleep(IPA_POLL_AGGR_STATE_SLEEP_MSEC);
+		msleep(CHANNEL_RESET_DELAY);
 		ipa_bug_on(gsi_reset_channel(ipa_ctx->gsi, ep->channel_id));
 	}
 }
