@@ -20,6 +20,8 @@
 #include "gsi.h"
 #include "gsi_reg.h"
 
+#define GSI_RING_ELEMENT_SIZE	16	/* bytes (channel or event ring) */
+
 #define GSI_CHAN_MAX		14
 #define GSI_EVT_RING_MAX	10
 
