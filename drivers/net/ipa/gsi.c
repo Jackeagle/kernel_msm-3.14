@@ -1126,7 +1126,7 @@ void gsi_evt_ring_reset(struct gsi *gsi, u32 evt_ring_id)
 	ipa_bug_on(evt_ring->state != GSI_EVT_RING_STATE_ALLOCATED);
 
 	gsi_evt_ring_program(gsi, evt_ring_id);
-	gsi_ring_alloc(&evt_ring->ring, &evt_ring->mem);
+	gsi_ring_init(&evt_ring->ring);
 
 	__gsi_evt_ring_scratch_zero(gsi, evt_ring_id);
 
@@ -1388,7 +1388,7 @@ reset:
 	}
 
 	gsi_program_channel(gsi, channel_id, channel->evt_ring->id);
-	gsi_ring_alloc(&channel->ring, &channel->props.mem);
+	gsi_ring_init(&channel->ring);
 
 	/* restore scratch */
 	__gsi_write_channel_scratch(gsi, channel_id);
@@ -1575,7 +1575,7 @@ int gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id,
 	channel->props = *props;
 
 	gsi_program_channel(gsi, channel_id, channel->evt_ring->id);
-	gsi_ring_alloc(&channel->ring, &channel->props.mem);
+	gsi_ring_init(&channel->ring);
 
 	/* restore scratch */
 	__gsi_write_channel_scratch(gsi, channel_id);
