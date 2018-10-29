@@ -48,7 +48,6 @@ struct ipa_gsi_ep_config {
  * @user_data:		Data maintained for (but unused by) the channel.
  */
 struct gsi_channel_props {
-	u32 ring_count;
 	bool from_gsi;
 	bool use_db_engine;
 	u8 low_weight;
@@ -144,8 +143,8 @@ void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_id);
  *
  * @Return Channel handle populated by GSI, opaque to client, or negative errno
  */
-int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id,
-		      struct gsi_channel_props *props);
+int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 channel_count,
+		      u32 evt_ring_id, struct gsi_channel_props *props);
 
 /** gsi_write_channel_scratch - Peripheral should call this function to
  * write to the scratch area of the channel context

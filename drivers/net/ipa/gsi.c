@@ -1159,19 +1159,19 @@ gsi_program_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id)
 	gsi_writel(gsi, val, GSI_CH_C_QOS_OFFS(channel_id));
 }
 
-int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id,
-		      struct gsi_channel_props *props)
+int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 channel_count,
+		      u32 evt_ring_id, struct gsi_channel_props *props)
 {
 	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	void **user_data;
 	int ret;
 
-	ret = gsi_ring_alloc(&channel->ring, props->ring_count);
+	ret = gsi_ring_alloc(&channel->ring, channel_count);
 	if (ret)
 		return ret;
 
-	user_data = kcalloc(props->ring_count, sizeof(void *), GFP_KERNEL);
+	user_data = kcalloc(channel_count, sizeof(void *), GFP_KERNEL);
 	if (!user_data) {
 		ret = -ENOMEM;
 		goto err_ring_free;
