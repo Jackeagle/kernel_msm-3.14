@@ -22,20 +22,6 @@
 
 #define IPA_PKT_FLUSH_TO_US		100
 
-static int ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep)
-{
-	gsi_set_channel_cfg(ipa_ctx->gsi, ep->channel_id, false);
-
-	return 0;
-}
-
-static int ipa_restore_channel_properties(struct ipa_ep_context *ep)
-{
-	gsi_set_channel_cfg(ipa_ctx->gsi, ep->channel_id, true);
-
-	return 0;
-}
-
 static int
 ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 {
@@ -61,9 +47,10 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 		return -EFAULT;
 	}
 
-	result = ipa_reconfigure_channel_to_gpi(ep);
-	if (result)
-		return -EFAULT;
+	/* Turn off the doorbell engine.  We're going to poll until
+	 * we know aggregation isn't active.
+	 */
+	gsi_set_channel_cfg(ipa_ctx->gsi, ep->channel_id, false);
 
 	ipa_read_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 	if (init_ctrl.endp_suspend) {
@@ -136,8 +123,10 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 	}
 
-	/* Restore channels properties */
-	return ipa_restore_channel_properties(ep);
+	/* Turn on the doorbell engine again */
+	gsi_set_channel_cfg(ipa_ctx->gsi, ep->channel_id, true);
+
+	return 0;
 
 queue_xfer_fail:
 	ipa_dma_free(&dma_byte);
@@ -149,7 +138,8 @@ start_chan_fail:
 		ipa_reg_endp_init_ctrl(&init_ctrl, true);
 		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 	}
-	ipa_restore_channel_properties(ep);
+	/* Turn on the doorbell engine again */
+	gsi_set_channel_cfg(ipa_ctx->gsi, ep->channel_id, true);
 
 	return result;
 }
