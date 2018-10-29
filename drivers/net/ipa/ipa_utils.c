@@ -462,9 +462,7 @@ ep_configuration(enum ipa_client_type client)
 const struct ipa_gsi_ep_config *
 ipa_get_gsi_ep_info(enum ipa_client_type client)
 {
-	const struct ipa_ep_configuration *ep_config = ep_configuration(client);
-
-	return &ep_config->ipa_gsi_ep_info;
+	return &ipa_ep_configuration[client].ipa_gsi_ep_info;
 }
 
 /** ipa_client_ep_id() - provide endpoint mapping
