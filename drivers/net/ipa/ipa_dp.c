@@ -1448,11 +1448,12 @@ void ipa_gsi_irq_rx_notify_cb(void *chan_data, u16 count)
 }
 
 static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
-				 u32 evt_ring_count)
+				 u32 evt_ring_mult)
 {
 	struct gsi_channel_props gsi_channel_props = { };
 	const struct ipa_gsi_ep_config *gsi_ep_info;
 	u16 modt = ep->sys->tx.no_intr ? 0 : IPA_GSI_EVT_RING_INT_MODT;
+	u32 evt_ring_count = channel_count * evt_ring_mult;
 	int result;
 
 	result = gsi_evt_ring_alloc(ipa_ctx->gsi, evt_ring_count, modt);
@@ -1690,7 +1691,6 @@ int ipa_ep_setup(u32 ep_id, u32 channel_count, u32 evt_ring_mult,
 		 u32 rx_buffer_size, struct ipa_sys_connect_params *sys_in)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
-	u32 evt_ring_count = channel_count * evt_ring_mult;
 	int ret;
 
 	if (ipa_consumer(ep->client)) {
@@ -1718,7 +1718,7 @@ int ipa_ep_setup(u32 ep_id, u32 channel_count, u32 evt_ring_mult,
 
 	ipa_debug("ep %u configuration successful\n", ep_id);
 
-	ret = ipa_gsi_setup_channel(ep, channel_count, evt_ring_count);
+	ret = ipa_gsi_setup_channel(ep, channel_count, evt_ring_mult);
 	if (ret) {
 		ipa_err("Failed to setup GSI channel\n");
 		goto err_client_remove;
