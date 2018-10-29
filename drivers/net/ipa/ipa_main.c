@@ -475,7 +475,6 @@ static int ipa_ep_apps_lan_cons_setup(void)
 
 	sys_in.notify = ipa_lan_rx_cb;
 	sys_in.priv = NULL;
-	sys_in.napi_enabled = false;
 
 	ret = ipa_ep_setup(ep_id, channel_count, 1, rx_buffer_size, &sys_in);
 	if (ret)

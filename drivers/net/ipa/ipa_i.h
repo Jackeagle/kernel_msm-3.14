@@ -126,12 +126,10 @@ typedef void (*ipa_irq_handler_t)(enum ipa_irq_type interrupt,
  *		evt - type of event
  *		data - data relevant to event.  May not be valid. See event_type
  *		enum for valid cases.
- * @napi_enabled: when true, IPA call client callback to start polling
  */
 struct ipa_sys_connect_params {
 	void *priv;
 	ipa_notify_cb notify;
-	bool napi_enabled;
 };
 
 /** struct ipa_ep_context - IPA end point context

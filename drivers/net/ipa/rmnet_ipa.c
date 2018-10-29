@@ -304,7 +304,6 @@ static int handle_ingress_format(struct net_device *dev,
 
 	wan_cfg->notify = apps_ipa_packet_receive_notify;
 	wan_cfg->priv = dev;
-	wan_cfg->napi_enabled = true;
 
 	ipa_ctx->ipa_client_apps_wan_cons_agg_gro = aggr_active;
 
@@ -382,7 +381,6 @@ static int handle_egress_format(struct net_device *dev,
 
 	wan_cfg->notify = apps_ipa_tx_complete_notify;
 	wan_cfg->priv = dev;
-	wan_cfg->napi_enabled = false;
 
 	/* Use a deferred interrupting no-op to reduce completion interrupts */
 	ipa_no_intr_init(ep_id);

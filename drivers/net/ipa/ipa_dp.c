@@ -1709,8 +1709,8 @@ int ipa_ep_setup(u32 ep_id, u32 channel_count, u32 evt_ring_mult,
 	}
 
 	ep->client_notify = sys_in->notify;
-	ep->napi_enabled = sys_in->napi_enabled;
 	ep->priv = sys_in->priv;
+	ep->napi_enabled = ep->client == IPA_CLIENT_APPS_WAN_CONS;
 
 	ipa_client_add();
 
