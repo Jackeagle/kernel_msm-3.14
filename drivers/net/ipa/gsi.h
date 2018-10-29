@@ -38,17 +38,11 @@ struct ipa_gsi_ep_config {
 
 /**
  * gsi_channel_props - Properties of a data channel.
- * @mem:		The DMA memory containing the channel's ring buffer.
- * @ring_count:		The number of entries in the ring buffer.
- * @from_gsi:		The direction of the channel data flow.
  * @use_db_engine:	XXX Whether to use the doorbell engine.
  * @low_weight:		XXX Relative priority of this channel.
- * @channel_id:		Which GSI channel this is.
- * @evt_ring_id:	The event ring associated with this channel.
  * @user_data:		Data maintained for (but unused by) the channel.
  */
 struct gsi_channel_props {
-	bool from_gsi;
 	bool use_db_engine;
 	u8 low_weight;
 	void *user_data;
@@ -125,7 +119,7 @@ void gsi_deregister_device(struct gsi *gsi);
  * @Return Channel handle populated by GSI, opaque to client, or negative errno
  */
 int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 channel_count,
-		      u32 evt_ring_mult, bool moderation,
+		      bool from_ipa, u32 evt_ring_mult, bool moderation,
 		      struct gsi_channel_props *props);
 
 /** gsi_write_channel_scratch - Peripheral should call this function to

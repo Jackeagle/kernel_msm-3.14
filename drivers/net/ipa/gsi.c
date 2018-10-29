@@ -107,6 +107,7 @@ struct gsi_ring {
 
 struct gsi_channel {
 	struct gsi_channel_props props;
+	bool from_ipa;			/* true: IPA->AP; false: AP->IPA */
 	enum gsi_channel_state state;
 	struct gsi_ring ring;
 	void **user_data;
@@ -543,7 +544,7 @@ static void channel_xfer_cb(struct gsi_channel *channel, u16 count)
 {
 	void *xfer_data;
 
-	if (!channel->props.from_gsi) {
+	if (!channel->from_ipa) {
 		u16 ring_rp_local = ring_rp_local_index(&channel->ring);
 
 		xfer_data = channel->user_data[ring_rp_local];;
@@ -570,7 +571,7 @@ static u16 gsi_process_channel(struct gsi *gsi, struct gsi_xfer_compl_evt *evt,
 			channel_xfer_cb(channel, evt->len);
 		else
 			ipa_err("ch %u unexpected %sX event id %hhu\n",
-				channel_id, channel->props.from_gsi ? "R" : "T",
+				channel_id, channel->from_ipa ? "R" : "T",
 				evt->code);
 	}
 
@@ -607,7 +608,7 @@ static void gsi_channel_doorbell(struct gsi *gsi, struct gsi_channel *channel)
 	 * for TO_GSI channels the event ring doorbell is rang as part of
 	 * interrupt handling.
 	 */
-	if (channel->props.from_gsi)
+	if (channel->from_ipa)
 		gsi_evt_ring_doorbell(gsi, channel->evt_ring);
 	channel->ring.wp = channel->ring.wp_local;
 
@@ -1135,7 +1136,7 @@ gsi_program_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id)
 	u32 val;
 
 	val = field_gen(GSI_CHANNEL_PROTOCOL_GPI, CHTYPE_PROTOCOL_FMASK);
-	val |= field_gen(props->from_gsi ? 0 : 1, CHTYPE_DIR_FMASK);
+	val |= field_gen(channel->from_ipa ? 0 : 1, CHTYPE_DIR_FMASK);
 	val |= field_gen(evt_ring_id, ERINDEX_FMASK);
 	val |= field_gen(GSI_RING_ELEMENT_SIZE, ELEMENT_SIZE_FMASK);
 	gsi_writel(gsi, val, GSI_CH_C_CNTXT_0_OFFS(channel_id));
@@ -1160,7 +1161,7 @@ gsi_program_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id)
 }
 
 int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 channel_count,
-		      u32 evt_ring_mult, bool moderation,
+		      bool from_ipa, u32 evt_ring_mult, bool moderation,
 		      struct gsi_channel_props *props)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
@@ -1187,6 +1188,7 @@ int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 channel_count,
 	mutex_init(&channel->mlock);
 	init_completion(&channel->compl);
 	atomic_set(&channel->poll_mode, 0);	/* Initially in callback mode */
+	channel->from_ipa = from_ipa;
 	channel->props = *props;
 
 	mutex_lock(&gsi->mlock);
@@ -1380,7 +1382,7 @@ reset:
 	}
 
 	/* workaround: reset GSI producers again */
-	if (channel->props.from_gsi && !reset_done) {
+	if (channel->from_ipa && !reset_done) {
 		usleep_range(GSI_RESET_WA_MIN_SLEEP, GSI_RESET_WA_MAX_SLEEP);
 		reset_done = true;
 		goto reset;
