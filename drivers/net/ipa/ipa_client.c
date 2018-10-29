@@ -22,8 +22,7 @@
 
 #define IPA_PKT_FLUSH_TO_US		100
 
-static int ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep,
-					  struct gsi_channel_props *orig_props)
+static int ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep)
 {
 	if (gsi_set_channel_cfg(ipa_ctx->gsi, ep->channel_id, false)) {
 		ipa_err("Error setting channel properties\n");
@@ -33,9 +32,7 @@ static int ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep,
 	return 0;
 }
 
-static int
-ipa_restore_channel_properties(struct ipa_ep_context *ep,
-			       struct gsi_channel_props *props)
+static int ipa_restore_channel_properties(struct ipa_ep_context *ep)
 {
 	if (gsi_set_channel_cfg(ipa_ctx->gsi, ep->channel_id, true)) {
 		ipa_err("Error restoring channel properties\n");
@@ -74,7 +71,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 	/* Get its current configuration, then reconfigure to dummy GPI */
 	gsi_get_channel_cfg(ipa_ctx->gsi, ep->channel_id, &orig_props);
 
-	result = ipa_reconfigure_channel_to_gpi(ep, &orig_props);
+	result = ipa_reconfigure_channel_to_gpi(ep);
 	if (result)
 		return -EFAULT;
 
@@ -150,7 +147,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 	}
 
 	/* Restore channels properties */
-	return ipa_restore_channel_properties(ep, &orig_props);
+	return ipa_restore_channel_properties(ep);
 
 queue_xfer_fail:
 	ipa_dma_free(&dma_byte);
@@ -162,7 +159,7 @@ start_chan_fail:
 		ipa_reg_endp_init_ctrl(&init_ctrl, true);
 		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 	}
-	ipa_restore_channel_properties(ep, &orig_props);
+	ipa_restore_channel_properties(ep);
 
 	return result;
 }
