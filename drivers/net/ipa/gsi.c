@@ -888,10 +888,10 @@ void gsi_deregister_device(struct gsi *gsi)
 	gsi->irq = 0;
 }
 
-static void
-gsi_evt_ring_program(struct gsi *gsi, u32 evt_ring_id, u32 size, u64 phys)
+static void gsi_evt_ring_program(struct gsi *gsi, u32 evt_ring_id)
 {
 	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
+	u64 phys = evt_ring->mem.phys;
 	u32 int_modt = evt_ring->moderation ? IPA_GSI_EVT_RING_INT_MODT : 0;
 	u32 int_modc = 1;	/* moderation always comes from channel*/
 	u32 val;
@@ -903,7 +903,7 @@ gsi_evt_ring_program(struct gsi *gsi, u32 evt_ring_id, u32 size, u64 phys)
 	val |= field_gen(GSI_RING_ELEMENT_SIZE, EV_ELEMENT_SIZE_FMASK);
 	gsi_writel(gsi, val, GSI_EV_CH_E_CNTXT_0_OFFS(evt_ring_id));
 
-	val = field_gen(size, EV_R_LENGTH_FMASK);
+	val = field_gen((u32)evt_ring->mem.size, EV_R_LENGTH_FMASK);
 	gsi_writel(gsi, val, GSI_EV_CH_E_CNTXT_1_OFFS(evt_ring_id));
 
 	/* The context 2 and 3 registers store the low-order and
@@ -1045,8 +1045,7 @@ int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 	evt_ring->id = evt_ring_id;
 	evt_ring->moderation = moderation;
 
-	gsi_evt_ring_program(gsi, evt_ring_id, evt_ring->mem.size,
-			     evt_ring->mem.phys);
+	gsi_evt_ring_program(gsi, evt_ring_id);
 	gsi_init_ring(&evt_ring->ring, &evt_ring->mem);
 
 	gsi_evt_ring_prime(gsi, evt_ring);
@@ -1123,8 +1122,7 @@ void gsi_evt_ring_reset(struct gsi *gsi, u32 evt_ring_id)
 
 	ipa_bug_on(evt_ring->state != GSI_EVT_RING_STATE_ALLOCATED);
 
-	gsi_evt_ring_program(gsi, evt_ring_id, evt_ring->mem.size,
-			     evt_ring->mem.phys);
+	gsi_evt_ring_program(gsi, evt_ring_id);
 	gsi_init_ring(&evt_ring->ring, &evt_ring->mem);
 
 	__gsi_evt_ring_scratch_zero(gsi, evt_ring_id);
