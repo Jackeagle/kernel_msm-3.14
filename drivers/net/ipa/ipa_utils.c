@@ -415,7 +415,7 @@ ipa_get_gsi_ep_info(enum ipa_client_type client)
  */
 u32 ipa_client_ep_id(enum ipa_client_type client)
 {
-	return ipa_get_gsi_ep_info(client)->ep_id;
+	return ipa_ep_configuration[client].ipa_gsi_ep_info.ep_id;
 }
 
 enum ipa_seq_type ipa_endp_seq_type(u32 ep_id)
