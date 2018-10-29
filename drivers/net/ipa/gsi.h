@@ -136,15 +136,6 @@ int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation);
  */
 void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_id);
 
-/** gsi_evt_ring_reset - Peripheral should call this function to
- * reset an event ring to recover from error state
- *
- * @evt_id:  event ring id previously obtained from gsi_evt_ring_alloc()
- *
- * This function can sleep
- */
-void gsi_evt_ring_reset(struct gsi *gsi, u32 evt_id);
-
 /** gsi_alloc_channel - Peripheral should call this function to
  * allocate a channel once gsi_register_device() has been called
  *

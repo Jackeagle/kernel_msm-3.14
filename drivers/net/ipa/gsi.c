@@ -1085,7 +1085,7 @@ static void __gsi_evt_ring_scratch_zero(struct gsi *gsi, u32 evt_ring_id)
 	gsi_writel(gsi, 0, GSI_EV_CH_E_SCRATCH_1_OFFS(evt_ring_id));
 }
 
-void gsi_evt_ring_reset(struct gsi *gsi, u32 evt_ring_id)
+static void gsi_evt_ring_reset(struct gsi *gsi, u32 evt_ring_id)
 {
 	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
 	bool completed;
@@ -1112,6 +1112,8 @@ void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
 {
 	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
 	bool completed;
+
+	gsi_evt_ring_reset(gsi, evt_ring_id);
 
 	/* TODO: add check for ERROR state */
 	ipa_bug_on(evt_ring->state != GSI_EVT_RING_STATE_ALLOCATED);

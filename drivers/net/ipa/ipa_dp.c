@@ -1779,7 +1779,6 @@ void ipa_ep_teardown(u32 ep_id)
 
 	ipa_reset_gsi_channel(ep_id);
 	gsi_dealloc_channel(ipa_ctx->gsi, ep->channel_id);
-	gsi_evt_ring_reset(ipa_ctx->gsi, ep->evt_ring_id);
 	gsi_evt_ring_dealloc(ipa_ctx->gsi, ep->evt_ring_id);
 
 	if (ipa_consumer(ep->client))
