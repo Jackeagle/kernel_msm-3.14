@@ -149,7 +149,8 @@ static int ipa_ep_apps_cmd_prod_setup(void)
 	struct ipa_sys_connect_params sys_in = { };
 	enum ipa_client_type client = IPA_CLIENT_APPS_CMD_PROD;
 	enum ipa_client_type dst_client = IPA_CLIENT_APPS_LAN_CONS;
-	u32 chan_count = IPA_APPS_CMD_PROD_RING_COUNT;
+	u32 channel_count = IPA_APPS_CMD_PROD_RING_COUNT;
+	u32 evt_ring_count = 2 * channel_count;
 	u32 ep_id;
 	int ret;
 
@@ -165,7 +166,7 @@ static int ipa_ep_apps_cmd_prod_setup(void)
 	ipa_endp_init_seq_prod(ep_id);
 	ipa_endp_init_deaggr_prod(ep_id);
 
-	ret = ipa_ep_setup(ep_id, chan_count, 0, &sys_in);
+	ret = ipa_ep_setup(ep_id, channel_count, evt_ring_count, 0, &sys_in);
 	if (ret)
 		ipa_ep_free(ep_id);
 	else
@@ -425,7 +426,8 @@ static int ipa_ep_apps_lan_cons_setup(void)
 {
 	struct ipa_sys_connect_params sys_in = { };
 	enum ipa_client_type client = IPA_CLIENT_APPS_LAN_CONS;
-	u32 chan_count = IPA_APPS_LAN_CONS_RING_COUNT;
+	u32 channel_count = IPA_APPS_LAN_CONS_RING_COUNT;
+	u32 evt_ring_count = channel_count;
 	u32 aggr_size = IPA_GENERIC_AGGR_BYTE_LIMIT;
 	u32 aggr_count = IPA_GENERIC_AGGR_PKT_LIMIT;
 	u32 rx_buffer_size;
@@ -477,7 +479,8 @@ static int ipa_ep_apps_lan_cons_setup(void)
 	sys_in.priv = NULL;
 	sys_in.napi_enabled = false;
 
-	ret = ipa_ep_setup(ep_id, chan_count, rx_buffer_size, &sys_in);
+	ret = ipa_ep_setup(ep_id, channel_count, evt_ring_count,
+			   rx_buffer_size, &sys_in);
 	if (ret)
 		ipa_ep_free(ep_id);
 	else

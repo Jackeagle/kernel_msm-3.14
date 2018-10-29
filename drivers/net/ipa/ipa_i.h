@@ -389,8 +389,8 @@ void ipa_ep_free(u32 ep_id);
 
 void ipa_no_intr_init(u32 prod_ep_id);
 
-int ipa_ep_setup(u32 client_hdl, u32 chan_count, u32 rx_buffer_size,
-		 struct ipa_sys_connect_params *sys_in);
+int ipa_ep_setup(u32 client_hdl, u32 channel_count, u32 evt_ring_count,
+		 u32 rx_buffer_size, struct ipa_sys_connect_params *sys_in);
 
 void ipa_ep_teardown(u32 ep_id);
 
