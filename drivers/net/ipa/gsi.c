@@ -937,16 +937,27 @@ static void gsi_ring_init(struct gsi_ring *ring)
 	ring->rp_local = ring->rp = ring->mem.phys;
 }
 
-static void gsi_ring_alloc(struct gsi_ring *ring, struct ipa_dma_mem *mem)
+static int
+gsi_ring_alloc(struct gsi_ring *ring, struct ipa_dma_mem *mem, u32 count)
 {
+	size_t size = roundup_pow_of_two(count * GSI_RING_ELEMENT_SIZE);
+
+	/* Hardware requires a power-of-2 ring size (and alignment) */
+	if (ipa_dma_alloc(mem, size, GFP_KERNEL))
+		return -ENOMEM;
+	ipa_assert(!(mem->phys % size));
+
 	spin_lock_init(&ring->slock);
 	ring->mem = *mem;
 	ring->end = mem->phys + mem->size;
 	gsi_ring_init(ring);
+
+	return 0;
 }
 
 static void gsi_ring_free(struct gsi_ring *ring, struct ipa_dma_mem *mem)
 {
+	ipa_dma_free(mem);
 	memset(ring, 0, sizeof(*ring));
 }
 
@@ -1011,7 +1022,6 @@ channel_command(struct gsi *gsi, u32 channel_id, enum gsi_ch_cmd_opcode op)
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
 int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 {
-	u32 size = ring_count * GSI_RING_ELEMENT_SIZE;
 	u32 evt_ring_id;
 	struct gsi_evt_ring *evt_ring;
 	unsigned long flags;
@@ -1029,14 +1039,9 @@ int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 	evt_ring = &gsi->evt_ring[evt_ring_id];
 	ipa_debug("Using %u as virt evt id\n", evt_ring_id);
 
-	if (ipa_dma_alloc(&evt_ring->mem, size, GFP_KERNEL)) {
-		ipa_err("fail to dma alloc %u bytes\n", size);
-		ret = -ENOMEM;
+	ret = gsi_ring_alloc(&evt_ring->ring, &evt_ring->mem, ring_count);
+	if (ret)
 		goto err_free_bmap;
-	}
-	ipa_assert(!(evt_ring->mem.phys % roundup_pow_of_two(size)));
-
-	gsi_ring_alloc(&evt_ring->ring, &evt_ring->mem);
 
 	init_completion(&evt_ring->compl);
 
@@ -1074,7 +1079,6 @@ int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 	return evt_ring_id;
 
 err_free_ring:
-	ipa_dma_free(&evt_ring->mem);
 	gsi_ring_free(&evt_ring->ring, &evt_ring->mem);
 	memset(evt_ring, 0, sizeof(*evt_ring));
 err_free_bmap:
@@ -1121,7 +1125,7 @@ void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
 	mutex_unlock(&gsi->mlock);
 
 	evt_ring->moderation = false;
-	ipa_dma_free(&evt_ring->mem);
+	gsi_ring_free(&evt_ring->ring, &evt_ring->mem);
 	memset(evt_ring, 0, sizeof(*evt_ring));
 
 	atomic_dec(&gsi->evt_ring_count);
@@ -1165,16 +1169,11 @@ int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id,
 	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	void **user_data;
-	u32 size;
 	int ret;
 
-	/* Hardware requires a power-of-2 ring size (and alignment) */
-	size = roundup_pow_of_two(props->ring_count * GSI_RING_ELEMENT_SIZE);
-	if (ipa_dma_alloc(&channel->mem, size, GFP_KERNEL))
-		return -ENOMEM;
-	ipa_assert(!(channel->mem.phys % size));
-
-	gsi_ring_alloc(&channel->ring, &channel->mem);
+	ret = gsi_ring_alloc(&channel->ring, &channel->mem, props->ring_count);
+	if (ret)
+		return ret;
 
 	user_data = kcalloc(props->ring_count, sizeof(void *), GFP_KERNEL);
 	if (!user_data) {
@@ -1216,7 +1215,6 @@ err_mutex_unlock:
 	mutex_unlock(&gsi->mlock);
 	kfree(user_data);
 err_ring_free:
-	ipa_dma_free(&channel->mem);
 	gsi_ring_free(&channel->ring, &channel->mem);
 
 	return ret;
@@ -1413,7 +1411,7 @@ void gsi_dealloc_channel(struct gsi *gsi, u32 channel_id)
 	mutex_unlock(&gsi->mlock);
 
 	kfree(channel->user_data);
-	ipa_dma_free(&channel->mem);
+	gsi_ring_free(&channel->ring, &channel->mem);
 	memset(channel, 0, sizeof(*channel));
 
 	atomic_dec(&gsi->channel_count);
