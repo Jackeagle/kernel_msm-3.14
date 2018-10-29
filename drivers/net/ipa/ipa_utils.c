@@ -1011,10 +1011,10 @@ int ipa_stop_gsi_channel(u32 ep_id)
 	int i;
 
 	if (ipa_producer(ep->client))
-		return gsi_stop_channel(ipa_ctx->gsi, ep->channel_id);
+		return gsi_channel_stop(ipa_ctx->gsi, ep->channel_id);
 
 	for (i = 0; i < IPA_GSI_CHANNEL_STOP_MAX_RETRY; i++) {
-		ret = gsi_stop_channel(ipa_ctx->gsi, ep->channel_id);
+		ret = gsi_channel_stop(ipa_ctx->gsi, ep->channel_id);
 		if (ret != -EAGAIN && ret != -ETIMEDOUT)
 			return ret;
 

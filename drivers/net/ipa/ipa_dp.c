@@ -324,7 +324,7 @@ static bool ipa_send_nop(struct ipa_sys_context *sys)
 	list_add_tail(&nop_pkt->link, &sys->head_desc_list);
 	spin_unlock_bh(&sys->spinlock);
 
-	if (!gsi_queue_xfer(ipa_ctx->gsi, channel_id, 1, &nop_xfer, true))
+	if (!gsi_channel_queue(ipa_ctx->gsi, channel_id, 1, &nop_xfer, true))
 		return true;	/* Success */
 
 	spin_lock_bh(&sys->spinlock);
@@ -494,8 +494,8 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	spin_lock_bh(&sys->spinlock);
 
 	list_splice_tail_init(&pkt_list, &sys->head_desc_list);
-	result = gsi_queue_xfer(ipa_ctx->gsi, ep->channel_id,
-				num_desc, xfer_elem, true);
+	result = gsi_channel_queue(ipa_ctx->gsi, ep->channel_id,
+				   num_desc, xfer_elem, true);
 	if (result)
 		list_cut_end(&pkt_list, &sys->head_desc_list, &first->link);
 
@@ -834,8 +834,8 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
 	/* Doorbell is expensive; only ring it when a batch is queued */
 	ring_doorbell = sys->rx.len_pending_xfer++ >= IPA_REPL_XFER_THRESH;
 
-	ret = gsi_queue_xfer(ipa_ctx->gsi, sys->ep->channel_id,
-			     1, &gsi_xfer_elem, ring_doorbell);
+	ret = gsi_channel_queue(ipa_ctx->gsi, sys->ep->channel_id,
+				1, &gsi_xfer_elem, ring_doorbell);
 	if (ret)
 		return ret;
 
@@ -1458,21 +1458,21 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 
 	gsi_ep_info = ipa_get_gsi_ep_info(ep->client);
 
-	result = gsi_alloc_channel(ipa_ctx->gsi, gsi_ep_info->channel_id,
+	result = gsi_channel_alloc(ipa_ctx->gsi, gsi_ep_info->channel_id,
 				   channel_count, from_ipa, priority,
 				   evt_ring_mult, moderation, ep->sys);
 	if (result < 0)
 		goto fail_alloc_channel;
 	ep->channel_id = (u32)result;
 
-	gsi_write_channel_scratch(ipa_ctx->gsi, ep->channel_id,
+	gsi_channel_scratch_write(ipa_ctx->gsi, ep->channel_id,
 				  gsi_ep_info->ipa_if_tlv);
 
-	result = gsi_start_channel(ipa_ctx->gsi, ep->channel_id);
+	result = gsi_channel_start(ipa_ctx->gsi, ep->channel_id);
 	if (!result)
 		return 0;	/* Success */
 
-	gsi_dealloc_channel(ipa_ctx->gsi, ep->channel_id);
+	gsi_channel_free(ipa_ctx->gsi, ep->channel_id);
 fail_alloc_channel:
 	ipa_err("Return with err: %d\n", result);
 
@@ -1744,14 +1744,14 @@ static int ipa_channel_reset_aggr(u32 ep_id)
 	ipa_write_reg_fields(IPA_AGGR_FORCE_CLOSE, &force_close);
 
 	/* Reset channel */
-	ret = gsi_reset_channel(ipa_ctx->gsi, ep->channel_id);
+	ret = gsi_channel_reset(ipa_ctx->gsi, ep->channel_id);
 	if (ret)
 		return ret;
 
 	/* Turn off the doorbell engine.  We're going to poll until
 	 * we know aggregation isn't active.
 	 */
-	gsi_set_channel_cfg(ipa_ctx->gsi, ep->channel_id, false);
+	gsi_channel_config(ipa_ctx->gsi, ep->channel_id, false);
 
 	ipa_read_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 	if (init_ctrl.endp_suspend) {
@@ -1762,7 +1762,7 @@ static int ipa_channel_reset_aggr(u32 ep_id)
 	}
 
 	/* Start channel and put 1 Byte descriptor on it */
-	ret = gsi_start_channel(ipa_ctx->gsi, ep->channel_id);
+	ret = gsi_channel_start(ipa_ctx->gsi, ep->channel_id);
 	if (ret)
 		goto out_suspend_again;
 
@@ -1776,7 +1776,8 @@ static int ipa_channel_reset_aggr(u32 ep_id)
 	xfer_elem.flags = GSI_XFER_FLAG_EOT;
 	xfer_elem.type = GSI_XFER_ELEM_DATA;
 
-	ret = gsi_queue_xfer(ipa_ctx->gsi, ep->channel_id, 1, &xfer_elem, true);
+	ret = gsi_channel_queue(ipa_ctx->gsi, ep->channel_id, 1, &xfer_elem,
+				true);
 	if (ret)
 		goto err_dma_free;
 
@@ -1800,7 +1801,7 @@ static int ipa_channel_reset_aggr(u32 ep_id)
 	 * way we finish by suspending the channel again (if necessary)
 	 * and re-enabling its doorbell engine.
 	 */
-	ret = gsi_reset_channel(ipa_ctx->gsi, ep->channel_id);
+	ret = gsi_channel_reset(ipa_ctx->gsi, ep->channel_id);
 	if (!ret)
 		msleep(CHANNEL_RESET_DELAY);
 	goto out_suspend_again;
@@ -1816,7 +1817,7 @@ out_suspend_again:
 		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 	}
 	/* Turn on the doorbell engine again */
-	gsi_set_channel_cfg(ipa_ctx->gsi, ep->channel_id, true);
+	gsi_channel_config(ipa_ctx->gsi, ep->channel_id, true);
 
 	return ret;
 }
@@ -1839,7 +1840,7 @@ static void ipa_reset_gsi_channel(u32 ep_id)
 	} else {
 		/* In case the reset follows stop, need to wait 1 msec */
 		msleep(CHANNEL_RESET_DELAY);
-		ipa_bug_on(gsi_reset_channel(ipa_ctx->gsi, ep->channel_id));
+		ipa_bug_on(gsi_channel_reset(ipa_ctx->gsi, ep->channel_id));
 	}
 }
 
@@ -1885,7 +1886,7 @@ void ipa_ep_teardown(u32 ep_id)
 	}
 
 	ipa_reset_gsi_channel(ep_id);
-	gsi_dealloc_channel(ipa_ctx->gsi, ep->channel_id);
+	gsi_channel_free(ipa_ctx->gsi, ep->channel_id);
 
 	if (ipa_consumer(ep->client))
 		ipa_cleanup_rx(ep->sys);
@@ -1903,7 +1904,7 @@ static int ipa_poll_gsi_pkt(struct ipa_sys_context *sys)
 		return (int)sys->ep->bytes_xfered;
 	}
 
-	return gsi_poll_channel(ipa_ctx->gsi, sys->ep->channel_id);
+	return gsi_channel_poll(ipa_ctx->gsi, sys->ep->channel_id);
 }
 
 bool ipa_ep_polling(struct ipa_ep_context *ep)

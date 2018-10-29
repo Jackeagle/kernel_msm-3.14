@@ -343,7 +343,7 @@ gsi_evt_ring_state(struct gsi *gsi, u32 evt_ring_id)
 	return (enum gsi_evt_ring_state)field_val(val, EV_CHSTATE_FMASK);
 }
 
-static void gsi_handle_chan_ctrl(struct gsi *gsi)
+static void gsi_isr_chan_ctrl(struct gsi *gsi)
 {
 	u32 valid_mask = GENMASK(gsi->channel_max - 1, 0);
 	u32 channel_mask;
@@ -369,7 +369,7 @@ static void gsi_handle_chan_ctrl(struct gsi *gsi)
 	}
 }
 
-static void gsi_handle_evt_ctrl(struct gsi *gsi)
+static void gsi_isr_evt_ctrl(struct gsi *gsi)
 {
 	u32 valid_mask = GENMASK(gsi->evt_ring_max - 1, 0);
 	u32 evt_mask;
@@ -469,7 +469,7 @@ handle_glob_evt_err(struct gsi *gsi, u32 err_ee, u32 evt_ring_id, u32 code)
 	}
 }
 
-static void gsi_handle_glob_err(struct gsi *gsi, u32 err)
+static void gsi_isr_glob_err(struct gsi *gsi, u32 err)
 {
 	struct gsi_log_err *log = (struct gsi_log_err *)&err;
 
@@ -492,7 +492,7 @@ static void gsi_handle_glob_err(struct gsi *gsi, u32 err)
 	}
 }
 
-static void gsi_handle_glob_ee(struct gsi *gsi)
+static void gsi_isr_glob_ee(struct gsi *gsi)
 {
 	u32 val;
 
@@ -504,7 +504,7 @@ static void gsi_handle_glob_ee(struct gsi *gsi)
 		gsi_writel(gsi, 0, GSI_ERROR_LOG_OFFS);
 		gsi_writel(gsi, ~0, GSI_ERROR_LOG_CLR_OFFS);
 
-		gsi_handle_glob_err(gsi, err);
+		gsi_isr_glob_err(gsi, err);
 	}
 
 	if (val & EN_GP_INT1_FMASK)
@@ -554,7 +554,7 @@ static void channel_xfer_cb(struct gsi_channel *channel, u16 count)
 	}
 }
 
-static u16 gsi_process_channel(struct gsi *gsi, struct gsi_xfer_compl_evt *evt,
+static u16 gsi_channel_process(struct gsi *gsi, struct gsi_xfer_compl_evt *evt,
 			       bool callback)
 {
 	struct gsi_channel *channel;
@@ -622,7 +622,7 @@ static void gsi_channel_doorbell(struct gsi *gsi, struct gsi_channel *channel)
 	gsi_writel(gsi, val, GSI_CH_C_DOORBELL_0_OFFS(channel_id));
 }
 
-static void handle_event(struct gsi *gsi, u32 evt_ring_id)
+static void gsi_event_handle(struct gsi *gsi, u32 evt_ring_id)
 {
 	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
 	unsigned long flags;
@@ -648,7 +648,7 @@ static void handle_event(struct gsi *gsi, u32 evt_ring_id)
 
 			evt = ipa_dma_phys_to_virt(&evt_ring->ring.mem,
 						   evt_ring->ring.rp_local);
-			(void)gsi_process_channel(gsi, evt, true);
+			(void)gsi_channel_process(gsi, evt, true);
 
 			ring_rp_local_inc(&evt_ring->ring);
 			ring_wp_local_inc(&evt_ring->ring); /* recycle */
@@ -660,7 +660,7 @@ static void handle_event(struct gsi *gsi, u32 evt_ring_id)
 	spin_unlock_irqrestore(&evt_ring->ring.slock, flags);
 }
 
-static void gsi_handle_ieob(struct gsi *gsi)
+static void gsi_isr_ioeb(struct gsi *gsi)
 {
 	u32 valid_mask = GENMASK(gsi->evt_ring_max - 1, 0);
 	u32 evt_mask;
@@ -677,13 +677,13 @@ static void gsi_handle_ieob(struct gsi *gsi)
 	while (evt_mask) {
 		u32 i = (u32)__ffs(evt_mask);
 
-		handle_event(gsi, i);
+		gsi_event_handle(gsi, i);
 
 		evt_mask ^= BIT(i);
 	}
 }
 
-static void gsi_handle_inter_ee_chan_ctrl(struct gsi *gsi)
+static void gsi_isr_inter_ee_chan_ctrl(struct gsi *gsi)
 {
 	u32 valid_mask = GENMASK(gsi->channel_max - 1, 0);
 	u32 channel_mask;
@@ -705,7 +705,7 @@ static void gsi_handle_inter_ee_chan_ctrl(struct gsi *gsi)
 	}
 }
 
-static void gsi_handle_inter_ee_evt_ctrl(struct gsi *gsi)
+static void gsi_isr_inter_ee_evt_ctrl(struct gsi *gsi)
 {
 	u32 valid_mask = GENMASK(gsi->evt_ring_max - 1, 0);
 	u32 evt_mask;
@@ -727,7 +727,7 @@ static void gsi_handle_inter_ee_evt_ctrl(struct gsi *gsi)
 	}
 }
 
-static void gsi_handle_general(struct gsi *gsi)
+static void gsi_isr_general(struct gsi *gsi)
 {
 	u32 val;
 
@@ -744,7 +744,7 @@ static void gsi_handle_general(struct gsi *gsi)
 }
 
 /* Returns a bitmask of pending GSI interrupts */
-static u32 gsi_interrupt_type(struct gsi *gsi)
+static u32 gsi_isr_type(struct gsi *gsi)
 {
 	return gsi_readl(gsi, GSI_CNTXT_TYPE_IRQ_OFFS);
 }
@@ -755,31 +755,31 @@ static irqreturn_t gsi_isr(int irq, void *dev_id)
 	u32 cnt = 0;
 	u32 type;
 
-	while ((type = gsi_interrupt_type(gsi))) {
+	while ((type = gsi_isr_type(gsi))) {
 		do {
 			u32 single = BIT(__ffs(type));
 
 			switch (single) {
 			case CH_CTRL_FMASK:
-				gsi_handle_chan_ctrl(gsi);
+				gsi_isr_chan_ctrl(gsi);
 				break;
 			case EV_CTRL_FMASK:
-				gsi_handle_evt_ctrl(gsi);
+				gsi_isr_evt_ctrl(gsi);
 				break;
 			case GLOB_EE_FMASK:
-				gsi_handle_glob_ee(gsi);
+				gsi_isr_glob_ee(gsi);
 				break;
 			case IEOB_FMASK:
-				gsi_handle_ieob(gsi);
+				gsi_isr_ioeb(gsi);
 				break;
 			case INTER_EE_CH_CTRL_FMASK:
-				gsi_handle_inter_ee_chan_ctrl(gsi);
+				gsi_isr_inter_ee_chan_ctrl(gsi);
 				break;
 			case INTER_EE_EV_CTRL_FMASK:
-				gsi_handle_inter_ee_evt_ctrl(gsi);
+				gsi_isr_inter_ee_evt_ctrl(gsi);
 				break;
 			case GENERAL_FMASK:
-				gsi_handle_general(gsi);
+				gsi_isr_general(gsi);
 				break;
 			default:
 				WARN(true, "%s: unrecognized type 0x%08x\n",
@@ -1087,7 +1087,7 @@ err_free_bmap:
 	return ret;
 }
 
-static void __gsi_evt_ring_scratch_zero(struct gsi *gsi, u32 evt_ring_id)
+static void gsi_evt_ring_scratch_zero(struct gsi *gsi, u32 evt_ring_id)
 {
 	gsi_writel(gsi, 0, GSI_EV_CH_E_SCRATCH_0_OFFS(evt_ring_id));
 	gsi_writel(gsi, 0, GSI_EV_CH_E_SCRATCH_1_OFFS(evt_ring_id));
@@ -1108,7 +1108,7 @@ static void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
 
 	gsi_evt_ring_program(gsi, evt_ring_id);
 	gsi_ring_init(&evt_ring->ring);
-	__gsi_evt_ring_scratch_zero(gsi, evt_ring_id);
+	gsi_evt_ring_scratch_zero(gsi, evt_ring_id);
 	gsi_evt_ring_prime(gsi, evt_ring);
 
 	completed = evt_ring_command(gsi, evt_ring_id, GSI_EVT_DE_ALLOC);
@@ -1128,7 +1128,7 @@ static void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
 	atomic_dec(&gsi->evt_ring_count);
 }
 
-static void gsi_program_channel(struct gsi *gsi, u32 channel_id,
+static void gsi_channel_program(struct gsi *gsi, u32 channel_id,
 				u32 evt_ring_id, bool doorbell_enable)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
@@ -1160,7 +1160,7 @@ static void gsi_program_channel(struct gsi *gsi, u32 channel_id,
 	gsi_writel(gsi, val, GSI_CH_C_QOS_OFFS(channel_id));
 }
 
-int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 channel_count,
+int gsi_channel_alloc(struct gsi *gsi, u32 channel_id, u32 channel_count,
 		      bool from_ipa, bool priority, u32 evt_ring_mult,
 		      bool moderation, void *notify_data)
 {
@@ -1210,7 +1210,7 @@ int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 channel_count,
 	evt_ring->channel = channel;
 	channel->priority = priority;
 
-	gsi_program_channel(gsi, channel_id, evt_ring->id, true);
+	gsi_channel_program(gsi, channel_id, evt_ring->id, true);
 
 	channel->user_data = user_data;
 	atomic_inc(&gsi->channel_count);
@@ -1228,7 +1228,7 @@ err_evt_ring_free:
 	return ret;
 }
 
-static void __gsi_write_channel_scratch(struct gsi *gsi, u32 channel_id)
+static void __gsi_channel_scratch_write(struct gsi *gsi, u32 channel_id)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	union gsi_channel_scratch scr = { };
@@ -1257,7 +1257,7 @@ static void __gsi_write_channel_scratch(struct gsi *gsi, u32 channel_id)
 	gsi_writel(gsi, val, GSI_CH_C_SCRATCH_3_OFFS(channel_id));
 }
 
-void gsi_write_channel_scratch(struct gsi *gsi, u32 channel_id, u32 tlv_size)
+void gsi_channel_scratch_write(struct gsi *gsi, u32 channel_id, u32 tlv_size)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 
@@ -1265,12 +1265,12 @@ void gsi_write_channel_scratch(struct gsi *gsi, u32 channel_id, u32 tlv_size)
 
 	mutex_lock(&channel->mlock);
 
-	__gsi_write_channel_scratch(gsi, channel_id);
+	__gsi_channel_scratch_write(gsi, channel_id);
 
 	mutex_unlock(&channel->mlock);
 }
 
-int gsi_start_channel(struct gsi *gsi, u32 channel_id)
+int gsi_channel_start(struct gsi *gsi, u32 channel_id)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 
@@ -1300,7 +1300,7 @@ int gsi_start_channel(struct gsi *gsi, u32 channel_id)
 	return 0;
 }
 
-int gsi_stop_channel(struct gsi *gsi, u32 channel_id)
+int gsi_channel_stop(struct gsi *gsi, u32 channel_id)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	int ret;
@@ -1356,7 +1356,7 @@ free_lock:
 	return ret;
 }
 
-int gsi_reset_channel(struct gsi *gsi, u32 channel_id)
+int gsi_channel_reset(struct gsi *gsi, u32 channel_id)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	bool reset_done = false;
@@ -1389,18 +1389,18 @@ reset:
 		goto reset;
 	}
 
-	gsi_program_channel(gsi, channel_id, channel->evt_ring->id, true);
+	gsi_channel_program(gsi, channel_id, channel->evt_ring->id, true);
 	gsi_ring_init(&channel->ring);
 
 	/* restore scratch */
-	__gsi_write_channel_scratch(gsi, channel_id);
+	__gsi_channel_scratch_write(gsi, channel_id);
 
 	mutex_unlock(&gsi->mlock);
 
 	return 0;
 }
 
-void gsi_dealloc_channel(struct gsi *gsi, u32 channel_id)
+void gsi_channel_free(struct gsi *gsi, u32 channel_id)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	bool completed;
@@ -1440,8 +1440,8 @@ static u16 __gsi_query_ring_free_re(struct gsi_ring *ring)
 	return (u16)(delta / GSI_RING_ELEMENT_SIZE - 1);
 }
 
-int gsi_queue_xfer(struct gsi *gsi, u32 channel_id, u16 num_xfers,
-		   struct gsi_xfer_elem *xfer, bool ring_db)
+int gsi_channel_queue(struct gsi *gsi, u32 channel_id, u16 num_xfers,
+		      struct gsi_xfer_elem *xfer, bool ring_db)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	unsigned long flags;
@@ -1495,7 +1495,7 @@ int gsi_queue_xfer(struct gsi *gsi, u32 channel_id, u16 num_xfers,
 	return 0;
 }
 
-int gsi_poll_channel(struct gsi *gsi, u32 channel_id)
+int gsi_channel_poll(struct gsi *gsi, u32 channel_id)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	struct gsi_evt_ring *evt_ring = channel->evt_ring;
@@ -1518,7 +1518,7 @@ int gsi_poll_channel(struct gsi *gsi, u32 channel_id)
 
 		evt = ipa_dma_phys_to_virt(&evt_ring->ring.mem,
 					   evt_ring->ring.rp_local);
-		size = gsi_process_channel(gsi, evt, false);
+		size = gsi_channel_process(gsi, evt, false);
 
 		ring_rp_local_inc(&evt_ring->ring);
 		ring_wp_local_inc(&evt_ring->ring); /* recycle element */
@@ -1531,8 +1531,7 @@ int gsi_poll_channel(struct gsi *gsi, u32 channel_id)
 	return size;
 }
 
-static void
-gsi_config_channel_mode(struct gsi *gsi, u32 channel_id, bool polling)
+static void gsi_channel_mode_set(struct gsi *gsi, u32 channel_id, bool polling)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	unsigned long flags;
@@ -1548,26 +1547,26 @@ gsi_config_channel_mode(struct gsi *gsi, u32 channel_id, bool polling)
 
 void gsi_channel_intr_enable(struct gsi *gsi, u32 channel_id)
 {
-	gsi_config_channel_mode(gsi, channel_id, false);
+	gsi_channel_mode_set(gsi, channel_id, false);
 }
 
 void gsi_channel_intr_disable(struct gsi *gsi, u32 channel_id)
 {
-	gsi_config_channel_mode(gsi, channel_id, true);
+	gsi_channel_mode_set(gsi, channel_id, true);
 }
 
-void gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id, bool doorbell_enable)
+void gsi_channel_config(struct gsi *gsi, u32 channel_id, bool doorbell_enable)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	u32 evt_ring_id = channel->evt_ring->id;
 
 	mutex_lock(&channel->mlock);
 
-	gsi_program_channel(gsi, channel_id, evt_ring_id, doorbell_enable);
+	gsi_channel_program(gsi, channel_id, evt_ring_id, doorbell_enable);
 	gsi_ring_init(&channel->ring);
 
 	/* restore scratch */
-	__gsi_write_channel_scratch(gsi, channel_id);
+	__gsi_channel_scratch_write(gsi, channel_id);
 	mutex_unlock(&channel->mlock);
 }
 

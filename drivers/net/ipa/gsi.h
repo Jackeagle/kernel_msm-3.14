@@ -97,86 +97,87 @@ int gsi_register_device(struct gsi *gsi);
  */
 void gsi_deregister_device(struct gsi *gsi);
 
-/** gsi_alloc_channel - Peripheral should call this function to
+/** gsi_channel_alloc - Peripheral should call this function to
  * allocate a channel once gsi_register_device() has been called
  *
  * @Return Channel handle populated by GSI, opaque to client, or negative errno
  */
-int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 channel_count,
+int gsi_channel_alloc(struct gsi *gsi, u32 channel_id, u32 channel_count,
 		      bool from_ipa, bool priority, u32 evt_ring_mult,
 		      bool moderation, void *notify_data);
 
-/** gsi_write_channel_scratch - Peripheral should call this function to
+/** gsi_channel_scratch_write - Peripheral should call this function to
  * write to the scratch area of the channel context
  *
- * @channel_id:  Client handle previously obtained from gsi_alloc_channel
+ * @channel_id:  Client handle previously obtained from
+ * gsi_channel_alloc
  * @tlv_size:  Number of elements in channel TLV queue
  *
  * @Return gsi_status
  */
-void gsi_write_channel_scratch(struct gsi *gsi, u32 channel_id, u32 tlv_size);
+void gsi_channel_scratch_write(struct gsi *gsi, u32 channel_id, u32 tlv_size);
 
-/** gsi_start_channel - Peripheral should call this function to
+/** gsi_channel_start - Peripheral should call this function to
  * start a channel i.e put into running state
  *
  * @channel_id:  Client handle previously obtained from
- *	       gsi_alloc_channel
+ *	       gsi_channel_alloc
  *
  * This function can sleep
  *
  * @Return gsi_status
  */
-int gsi_start_channel(struct gsi *gsi, u32 channel_id);
+int gsi_channel_start(struct gsi *gsi, u32 channel_id);
 
-/** gsi_stop_channel - Peripheral should call this function to
+/** gsi_channel_stop - Peripheral should call this function to
  * stop a channel. Stop will happen on a packet boundary
  *
  * @channel_id:  Client handle previously obtained from
- *	       gsi_alloc_channel
+ *	       gsi_channel_alloc
  *
  * This function can sleep
  *
  * @Return -GSI_STATUS_AGAIN if client should call stop/stop_db again
  *	   other error codes for failure
  */
-int gsi_stop_channel(struct gsi *gsi, u32 channel_id);
+int gsi_channel_stop(struct gsi *gsi, u32 channel_id);
 
-/** gsi_reset_channel - Peripheral should call this function to
+/** gsi_channel_reset - Peripheral should call this function to
  * reset a channel to recover from error state
  *
  * @channel_id:  Client handle previously obtained from
- *	       gsi_alloc_channel
+ *	       gsi_channel_alloc
  *
  * This function can sleep
  *
  * @Return gsi_status
  */
-int gsi_reset_channel(struct gsi *gsi, u32 channel_id);
+int gsi_channel_reset(struct gsi *gsi, u32 channel_id);
 
 /** gsi_dealloc_channel - Peripheral should call this function to
  * de-allocate a channel
  *
- * @channel_id:  Client handle previously obtained from gsi_alloc_channel()
+ * @channel_id:  Client handle previously obtained from gsi_channel_alloc()
  *
  * This function can sleep
  */
-void gsi_dealloc_channel(struct gsi *gsi, u32 channel_id);
+void gsi_channel_free(struct gsi *gsi, u32 channel_id);
 
-/** gsi_set_channel_cfg() - Configure a channel
+/** gsi_channel_config() - Configure a channel
  * @gsi:		GSI pointer
  * @channel_id:		Channel to be configured
  * @doorbell_enable:	Whether to enable hardware doorbell engine
  *
  */
-void gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id, bool doorbell_enable);
+void gsi_channel_config(struct gsi *gsi, u32 channel_id, bool doorbell_enable);
 
-/** gsi_poll_channel() - Poll for a single completion on a channel
+/** gsi_channel_poll() - Poll for a single completion on a channel
  * @gsi:	GSI pointer
  * @channel_id:	Channel to be polled
  *
  * @Return:	Byte transfer count on success, or a negative error code
  */
-int gsi_poll_channel(struct gsi *gsi, u32 channel_id);
+int gsi_channel_poll(struct gsi *gsi, u32 channel_id);
 
 /** gsi_channel_intr_enable() - Enable interrupts on a channel
  * @gsi:	GSI pointer
@@ -190,7 +191,7 @@ void gsi_channel_intr_enable(struct gsi *gsi, u32 channel_id);
  */
 void gsi_channel_intr_disable(struct gsi *gsi, u32 channel_id);
 
-/** gsi_queue_xfer() - Queue transfer requests on a channel
+/** gsi_channel_queue() - Queue transfer requests on a channel
  * @gsi:	GSI pointer
  * @channel_id:	Channel on which transfers should be queued
  * @num_xfers:	Number of transfer in the @xfer array
@@ -199,7 +200,7 @@ void gsi_channel_intr_disable(struct gsi *gsi, u32 channel_id);
  *
  * @Return:	0 on success, or a negative error code
  */
-int gsi_queue_xfer(struct gsi *gsi, u32 channel_id, u16 num_xfers,
-		   struct gsi_xfer_elem *xfer, bool ring_db);
+int gsi_channel_queue(struct gsi *gsi, u32 channel_id, u16 num_xfers,
+		      struct gsi_xfer_elem *xfer, bool ring_db);
 
 #endif /* _GSI_H_ */
