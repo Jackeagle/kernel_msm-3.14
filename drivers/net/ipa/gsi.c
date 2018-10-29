@@ -945,6 +945,11 @@ static void gsi_ring_alloc(struct gsi_ring *ring, struct ipa_dma_mem *mem)
 	gsi_ring_init(ring);
 }
 
+static void gsi_ring_free(struct gsi_ring *ring, struct ipa_dma_mem *mem)
+{
+	memset(ring, 0, sizeof(*ring));
+}
+
 static void gsi_evt_ring_prime(struct gsi *gsi, struct gsi_evt_ring *evt_ring)
 {
 	unsigned long flags;
@@ -1037,14 +1042,14 @@ int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 
 	if (!evt_ring_command(gsi, evt_ring_id, GSI_EVT_ALLOCATE)) {
 		ret = -ETIMEDOUT;
-		goto err_free_dma;
+		goto err_free_ring;
 	}
 
 	if (evt_ring->state != GSI_EVT_RING_STATE_ALLOCATED) {
 		ipa_err("evt_ring_id %u allocation failed state %u\n",
 			evt_ring_id, evt_ring->state);
 		ret = -ENOMEM;
-		goto err_free_dma;
+		goto err_free_ring;
 	}
 	atomic_inc(&gsi->evt_ring_count);
 
@@ -1068,8 +1073,9 @@ int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 
 	return evt_ring_id;
 
-err_free_dma:
+err_free_ring:
 	ipa_dma_free(&evt_ring->mem);
+	gsi_ring_free(&evt_ring->ring, &evt_ring->mem);
 	memset(evt_ring, 0, sizeof(*evt_ring));
 err_free_bmap:
 	ipa_assert(gsi->evt_bmap & BIT(evt_ring_id));
@@ -1173,7 +1179,7 @@ int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id,
 	user_data = kcalloc(props->ring_count, sizeof(void *), GFP_KERNEL);
 	if (!user_data) {
 		ret = -ENOMEM;
-		goto err_dma_free;
+		goto err_ring_free;
 	}
 
 	mutex_init(&channel->mlock);
@@ -1209,8 +1215,9 @@ int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id,
 err_mutex_unlock:
 	mutex_unlock(&gsi->mlock);
 	kfree(user_data);
-err_dma_free:
+err_ring_free:
 	ipa_dma_free(&channel->mem);
+	gsi_ring_free(&channel->ring, &channel->mem);
 
 	return ret;
 }
