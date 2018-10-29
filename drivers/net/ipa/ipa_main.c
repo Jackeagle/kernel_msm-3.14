@@ -44,8 +44,8 @@
 #define IPA_FWS_PATH		"ipa_fws.mdt"
 #define IPA_PAS_ID		15
 
-#define IPA_APPS_CMD_PROD_RING_COUNT	128
-#define IPA_APPS_LAN_CONS_RING_COUNT	128
+#define IPA_APPS_CMD_PROD_RING_COUNT	256
+#define IPA_APPS_LAN_CONS_RING_COUNT	256
 
 /* Details of the initialization sequence are determined by who is
  * responsible for doing some early IPA hardware initialization.

@@ -1447,22 +1447,6 @@ void ipa_gsi_irq_rx_notify_cb(void *chan_data, u16 count)
 	ipa_rx_switch_to_poll_mode(sys);
 }
 
-/* GSI ring length is calculated based on the channel_count which
- * defines the descriptor FIFO.
- * For producer endpoints there is also an additional descriptor
- * for TAG STATUS immediate command.  An exception to this is the
- * APPS_WAN_PROD endpoint, which uses event ring rather than TAG STATUS
- * based completions.
- */
-static u32
-ipa_gsi_evt_ring_count(enum ipa_client_type client, u32 channel_count)
-{
-	if (client == IPA_CLIENT_APPS_CMD_PROD)
-		return 4 * channel_count;
-
-	return 2 * channel_count;
-}
-
 static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 				 u32 evt_ring_count)
 {
@@ -1486,8 +1470,7 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 		gsi_channel_props.low_weight = 1;
 	gsi_channel_props.user_data = ep->sys;
 
-	gsi_channel_props.ring_count = ipa_gsi_evt_ring_count(ep->client,
-							      channel_count);
+	gsi_channel_props.ring_count = channel_count;
 
 	result = gsi_alloc_channel(ipa_ctx->gsi, gsi_ep_info->channel_id,
 				   ep->evt_ring_id, &gsi_channel_props);
