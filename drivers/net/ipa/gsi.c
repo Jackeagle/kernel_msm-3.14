@@ -1030,6 +1030,8 @@ int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 	}
 	ipa_assert(!(evt_ring->mem.phys % roundup_pow_of_two(size)));
 
+	gsi_ring_alloc(&evt_ring->ring, &evt_ring->mem);
+
 	init_completion(&evt_ring->compl);
 
 	if (!evt_ring_command(gsi, evt_ring_id, GSI_EVT_ALLOCATE)) {
@@ -1049,7 +1051,6 @@ int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 	evt_ring->moderation = moderation;
 
 	gsi_evt_ring_program(gsi, evt_ring_id);
-	gsi_ring_alloc(&evt_ring->ring, &evt_ring->mem);
 
 	gsi_evt_ring_prime(gsi, evt_ring);
 
@@ -1180,6 +1181,8 @@ int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id,
 		return -ENOMEM;
 	ipa_assert(!(props->mem.phys % size));
 
+	gsi_ring_alloc(&channel->ring, &props->mem);
+
 	user_data = kcalloc(props->ring_count, sizeof(void *), GFP_KERNEL);
 	if (!user_data) {
 		ret = -ENOMEM;
@@ -1210,7 +1213,6 @@ int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id,
 	evt_ring->channel = channel;
 
 	gsi_program_channel(gsi, channel_id, evt_ring_id);
-	gsi_ring_alloc(&channel->ring, &props->mem);
 
 	channel->user_data = user_data;
 	atomic_inc(&gsi->channel_count);
