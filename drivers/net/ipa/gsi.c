@@ -1085,7 +1085,7 @@ static void __gsi_evt_ring_scratch_zero(struct gsi *gsi, u32 evt_ring_id)
 	gsi_writel(gsi, 0, GSI_EV_CH_E_SCRATCH_1_OFFS(evt_ring_id));
 }
 
-static void gsi_evt_ring_reset(struct gsi *gsi, u32 evt_ring_id)
+void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
 {
 	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
 	bool completed;
@@ -1096,29 +1096,12 @@ static void gsi_evt_ring_reset(struct gsi *gsi, u32 evt_ring_id)
 
 	completed = evt_ring_command(gsi, evt_ring_id, GSI_EVT_RESET);
 	ipa_bug_on(!completed);
-
 	ipa_bug_on(evt_ring->state != GSI_EVT_RING_STATE_ALLOCATED);
 
 	gsi_evt_ring_program(gsi, evt_ring_id);
 	gsi_ring_init(&evt_ring->ring);
-
 	__gsi_evt_ring_scratch_zero(gsi, evt_ring_id);
-
 	gsi_evt_ring_prime(gsi, evt_ring);
-	mutex_unlock(&gsi->mlock);
-}
-
-void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
-{
-	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
-	bool completed;
-
-	gsi_evt_ring_reset(gsi, evt_ring_id);
-
-	/* TODO: add check for ERROR state */
-	ipa_bug_on(evt_ring->state != GSI_EVT_RING_STATE_ALLOCATED);
-
-	mutex_lock(&gsi->mlock);
 
 	completed = evt_ring_command(gsi, evt_ring_id, GSI_EVT_DE_ALLOC);
 	ipa_bug_on(!completed);
