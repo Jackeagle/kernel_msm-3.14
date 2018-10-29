@@ -1556,15 +1556,10 @@ void gsi_channel_intr_disable(struct gsi *gsi, u32 channel_id)
 	gsi_config_channel_mode(gsi, channel_id, true);
 }
 
-int gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id, bool doorbell_enable)
+void gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id, bool doorbell_enable)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	u32 evt_ring_id = channel->evt_ring->id;
-
-	if (channel->state != GSI_CHANNEL_STATE_ALLOCATED) {
-		ipa_err("bad state %d\n", channel->state);
-		return -ENOTSUPP;
-	}
 
 	mutex_lock(&channel->mlock);
 
@@ -1574,8 +1569,6 @@ int gsi_set_channel_cfg(struct gsi *gsi, u32 channel_id, bool doorbell_enable)
 	/* restore scratch */
 	__gsi_write_channel_scratch(gsi, channel_id);
 	mutex_unlock(&channel->mlock);
-
-	return 0;
 }
 
 /* Initialize GSI driver */
