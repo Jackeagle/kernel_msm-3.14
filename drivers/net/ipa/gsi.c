@@ -107,7 +107,6 @@ struct gsi_ring {
 
 struct gsi_channel {
 	struct gsi_channel_props props;
-	struct ipa_dma_mem mem;
 	enum gsi_channel_state state;
 	struct gsi_ring ring;
 	void **user_data;
@@ -119,7 +118,6 @@ struct gsi_channel {
 };
 
 struct gsi_evt_ring {
-	struct ipa_dma_mem mem;
 	enum gsi_evt_ring_state state;
 	u32 id;
 	bool moderation;
@@ -892,7 +890,7 @@ void gsi_deregister_device(struct gsi *gsi)
 static void gsi_evt_ring_program(struct gsi *gsi, u32 evt_ring_id)
 {
 	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
-	u64 phys = evt_ring->mem.phys;
+	u64 phys = evt_ring->ring.mem.phys;
 	u32 int_modt = evt_ring->moderation ? IPA_GSI_EVT_RING_INT_MODT : 0;
 	u32 int_modc = 1;	/* moderation always comes from channel*/
 	u32 val;
@@ -904,7 +902,7 @@ static void gsi_evt_ring_program(struct gsi *gsi, u32 evt_ring_id)
 	val |= field_gen(GSI_RING_ELEMENT_SIZE, EV_ELEMENT_SIZE_FMASK);
 	gsi_writel(gsi, val, GSI_EV_CH_E_CNTXT_0_OFFS(evt_ring_id));
 
-	val = field_gen((u32)evt_ring->mem.size, EV_R_LENGTH_FMASK);
+	val = field_gen((u32)evt_ring->ring.mem.size, EV_R_LENGTH_FMASK);
 	gsi_writel(gsi, val, GSI_EV_CH_E_CNTXT_1_OFFS(evt_ring_id));
 
 	/* The context 2 and 3 registers store the low-order and
@@ -937,27 +935,25 @@ static void gsi_ring_init(struct gsi_ring *ring)
 	ring->rp_local = ring->rp = ring->mem.phys;
 }
 
-static int
-gsi_ring_alloc(struct gsi_ring *ring, struct ipa_dma_mem *mem, u32 count)
+static int gsi_ring_alloc(struct gsi_ring *ring, u32 count)
 {
 	size_t size = roundup_pow_of_two(count * GSI_RING_ELEMENT_SIZE);
 
 	/* Hardware requires a power-of-2 ring size (and alignment) */
-	if (ipa_dma_alloc(mem, size, GFP_KERNEL))
+	if (ipa_dma_alloc(&ring->mem, size, GFP_KERNEL))
 		return -ENOMEM;
-	ipa_assert(!(mem->phys % size));
+	ipa_assert(!(ring->mem.phys % size));
 
-	spin_lock_init(&ring->slock);
-	ring->mem = *mem;
-	ring->end = mem->phys + mem->size;
+	ring->end = ring->mem.phys + size;
 	gsi_ring_init(ring);
+	spin_lock_init(&ring->slock);
 
 	return 0;
 }
 
-static void gsi_ring_free(struct gsi_ring *ring, struct ipa_dma_mem *mem)
+static void gsi_ring_free(struct gsi_ring *ring)
 {
-	ipa_dma_free(mem);
+	ipa_dma_free(&ring->mem);
 	memset(ring, 0, sizeof(*ring));
 }
 
@@ -1039,7 +1035,7 @@ int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 	evt_ring = &gsi->evt_ring[evt_ring_id];
 	ipa_debug("Using %u as virt evt id\n", evt_ring_id);
 
-	ret = gsi_ring_alloc(&evt_ring->ring, &evt_ring->mem, ring_count);
+	ret = gsi_ring_alloc(&evt_ring->ring, ring_count);
 	if (ret)
 		goto err_free_bmap;
 
@@ -1079,7 +1075,7 @@ int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 	return evt_ring_id;
 
 err_free_ring:
-	gsi_ring_free(&evt_ring->ring, &evt_ring->mem);
+	gsi_ring_free(&evt_ring->ring);
 	memset(evt_ring, 0, sizeof(*evt_ring));
 err_free_bmap:
 	ipa_assert(gsi->evt_bmap & BIT(evt_ring_id));
@@ -1125,7 +1121,7 @@ void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
 	mutex_unlock(&gsi->mlock);
 
 	evt_ring->moderation = false;
-	gsi_ring_free(&evt_ring->ring, &evt_ring->mem);
+	gsi_ring_free(&evt_ring->ring);
 	memset(evt_ring, 0, sizeof(*evt_ring));
 
 	atomic_dec(&gsi->evt_ring_count);
@@ -1144,17 +1140,17 @@ gsi_program_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id)
 	val |= field_gen(GSI_RING_ELEMENT_SIZE, ELEMENT_SIZE_FMASK);
 	gsi_writel(gsi, val, GSI_CH_C_CNTXT_0_OFFS(channel_id));
 
-	val = field_gen(channel->mem.size, R_LENGTH_FMASK);
+	val = field_gen(channel->ring.mem.size, R_LENGTH_FMASK);
 	gsi_writel(gsi, val, GSI_CH_C_CNTXT_1_OFFS(channel_id));
 
 	/* The context 2 and 3 registers store the low-order and
 	 * high-order 32 bits of the address of the channel ring,
 	 * respectively.
 	 */
-	val = channel->mem.phys & GENMASK(31, 0);
+	val = channel->ring.mem.phys & GENMASK(31, 0);
 	gsi_writel(gsi, val, GSI_CH_C_CNTXT_2_OFFS(channel_id));
 
-	val = channel->mem.phys >> 32;
+	val = channel->ring.mem.phys >> 32;
 	gsi_writel(gsi, val, GSI_CH_C_CNTXT_3_OFFS(channel_id));
 
 	val = field_gen(props->low_weight, WRR_WEIGHT_FMASK);
@@ -1171,7 +1167,7 @@ int gsi_alloc_channel(struct gsi *gsi, u32 channel_id, u32 evt_ring_id,
 	void **user_data;
 	int ret;
 
-	ret = gsi_ring_alloc(&channel->ring, &channel->mem, props->ring_count);
+	ret = gsi_ring_alloc(&channel->ring, props->ring_count);
 	if (ret)
 		return ret;
 
@@ -1215,7 +1211,7 @@ err_mutex_unlock:
 	mutex_unlock(&gsi->mlock);
 	kfree(user_data);
 err_ring_free:
-	gsi_ring_free(&channel->ring, &channel->mem);
+	gsi_ring_free(&channel->ring);
 
 	return ret;
 }
@@ -1411,7 +1407,7 @@ void gsi_dealloc_channel(struct gsi *gsi, u32 channel_id)
 	mutex_unlock(&gsi->mlock);
 
 	kfree(channel->user_data);
-	gsi_ring_free(&channel->ring, &channel->mem);
+	gsi_ring_free(&channel->ring);
 	memset(channel, 0, sizeof(*channel));
 
 	atomic_dec(&gsi->channel_count);
