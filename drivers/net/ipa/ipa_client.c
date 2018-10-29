@@ -22,27 +22,20 @@
 
 #define IPA_PKT_FLUSH_TO_US		100
 
-static int
-ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep,
-			       struct gsi_channel_props *orig_props,
-			       struct ipa_dma_mem *chan_dma)
+static int ipa_reconfigure_channel_to_gpi(struct ipa_ep_context *ep,
+					  struct gsi_channel_props *orig_props)
 {
 	struct gsi_channel_props props = { };
 
-	/* Allocate the DMA space first; it can fail */
-	if (ipa_dma_alloc(chan_dma, 2 * GSI_RING_ELEMENT_SIZE, GFP_KERNEL))
-		return -ENOMEM;
-
 	/* Set up channel properties */
 	props.from_gsi = true;
-	props.mem = *chan_dma;
+	props.mem = orig_props->mem;
 	props.use_db_engine = false;
 	props.low_weight = 1;
 	props.user_data = NULL;
 
 	if (gsi_set_channel_cfg(ipa_ctx->gsi, ep->channel_id, &props)) {
 		ipa_err("Error setting channel properties\n");
-		ipa_dma_free(chan_dma);
 		return -EFAULT;
 	}
 
@@ -68,7 +61,6 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 	int result;
 	int gsi_res;
 	struct gsi_channel_props orig_props = { };
-	struct ipa_dma_mem chan_dma;
 	struct ipa_dma_mem dma_byte;
 	struct gsi_xfer_elem xfer_elem = { };
 	int i;
@@ -91,7 +83,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 	/* Get its current configuration, then reconfigure to dummy GPI */
 	gsi_get_channel_cfg(ipa_ctx->gsi, ep->channel_id, &orig_props);
 
-	result = ipa_reconfigure_channel_to_gpi(ep, &orig_props, &chan_dma);
+	result = ipa_reconfigure_channel_to_gpi(ep, &orig_props);
 	if (result)
 		return -EFAULT;
 
@@ -167,12 +159,7 @@ ipa_reset_with_open_aggr_frame_wa(u32 ep_id, struct ipa_ep_context *ep)
 	}
 
 	/* Restore channels properties */
-	result = ipa_restore_channel_properties(ep, &orig_props);
-	if (result)
-		goto restore_props_fail;
-	ipa_dma_free(&chan_dma);
-
-	return 0;
+	return ipa_restore_channel_properties(ep, &orig_props);
 
 queue_xfer_fail:
 	ipa_dma_free(&dma_byte);
@@ -185,8 +172,6 @@ start_chan_fail:
 		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 	}
 	ipa_restore_channel_properties(ep, &orig_props);
-restore_props_fail:
-	ipa_dma_free(&chan_dma);
 
 	return result;
 }
