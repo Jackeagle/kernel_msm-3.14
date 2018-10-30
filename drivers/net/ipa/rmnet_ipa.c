@@ -203,15 +203,15 @@ static void apps_ipa_packet_receive_notify(void *priv, enum ipa_dp_evt_type evt,
 
 	if (evt == IPA_RECEIVE) {
 		struct sk_buff *skb = (struct sk_buff *)data;
-		int result;
+		int ret;
 		unsigned int packet_len = skb->len;
 
 		ipa_debug("Rx packet was received\n");
 		skb->dev = rmnet_ipa_ctx->dev;
 		skb->protocol = htons(ETH_P_MAP);
 
-		result = netif_receive_skb(skb);
-		if (result) {
+		ret = netif_receive_skb(skb);
+		if (ret) {
 			pr_err_ratelimited("fail on netif_receive_skb\n");
 			dev->stats.rx_dropped++;
 		}

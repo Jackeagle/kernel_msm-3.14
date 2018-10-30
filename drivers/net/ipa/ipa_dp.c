@@ -417,7 +417,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	struct gsi_xfer_elem *xfer_elem;
 	LIST_HEAD(pkt_list);
 	int i;
-	int result;
+	int ret;
 
 	ipa_assert(num_desc);
 	ipa_assert(num_desc <= ipa_client_tlv_count(ep->client));
@@ -427,7 +427,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 		return -ENOMEM;
 
 	/* Within loop, all errors are allocation or DMA mapping */
-	result = -ENOMEM;
+	ret = -ENOMEM;
 	for (i = 0; i < num_desc; i++) {
 		dma_addr_t phys;
 
@@ -488,16 +488,16 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	spin_lock_bh(&sys->spinlock);
 
 	list_splice_tail_init(&pkt_list, &sys->head_desc_list);
-	result = gsi_channel_queue(ipa_ctx->gsi, ep->channel_id,
-				   num_desc, xfer_elem, true);
-	if (result)
+	ret = gsi_channel_queue(ipa_ctx->gsi, ep->channel_id, num_desc,
+				xfer_elem, true);
+	if (ret)
 		list_cut_end(&pkt_list, &sys->head_desc_list, &first->link);
 
 	spin_unlock_bh(&sys->spinlock);
 
 	kfree(xfer_elem);
 
-	if (!result) {
+	if (!ret) {
 		if (sys->tx.no_intr)
 			ipa_nop_timer_schedule(sys);
 		return 0;
@@ -509,7 +509,7 @@ err_unwind:
 		ipa_tx_complete(tx_pkt);
 	}
 
-	return result;
+	return ret;
 }
 
 /** ipa_send_cmd_timeout_complete - callback function which will be
@@ -1449,26 +1449,26 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 	bool from_ipa = ipa_consumer(ep->client);
 	bool priority = ep->client == IPA_CLIENT_APPS_CMD_PROD;
 	bool moderation = !ep->sys->tx.no_intr;
-	int result;
+	int ret;
 
-	result = gsi_channel_alloc(ipa_ctx->gsi, channel_id,
-				   channel_count, from_ipa, priority,
-				   evt_ring_mult, moderation, ep->sys);
-	if (result < 0)
+	ret = gsi_channel_alloc(ipa_ctx->gsi, channel_id, channel_count,
+				from_ipa, priority, evt_ring_mult, moderation,
+				ep->sys);
+	if (ret < 0)
 		goto fail_alloc_channel;
 	ep->channel_id = channel_id;
 
 	gsi_channel_scratch_write(ipa_ctx->gsi, ep->channel_id, tlv_count);
 
-	result = gsi_channel_start(ipa_ctx->gsi, ep->channel_id);
-	if (!result)
+	ret = gsi_channel_start(ipa_ctx->gsi, ep->channel_id);
+	if (!ret)
 		return 0;	/* Success */
 
 	gsi_channel_free(ipa_ctx->gsi, ep->channel_id);
 fail_alloc_channel:
-	ipa_err("Return with err: %d\n", result);
+	ipa_err("Return with err: %d\n", ret);
 
-	return result;
+	return ret;
 }
 
 void ipa_endp_init_hdr_cons(u32 ep_id, u32 header_size,
@@ -1845,7 +1845,7 @@ void ipa_ep_teardown(u32 ep_id)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 	int empty;
-	int result;
+	int ret;
 	int i;
 
 	if (ep->napi_enabled) {
@@ -1871,10 +1871,10 @@ void ipa_ep_teardown(u32 ep_id)
 	flush_workqueue(ep->sys->wq);
 	/* channel stop might fail on timeout if IPA is busy */
 	for (i = 0; i < IPA_GSI_CHANNEL_STOP_MAX_RETRY; i++) {
-		result = ipa_stop_gsi_channel(ep_id);
-		if (!result)
+		ret = ipa_stop_gsi_channel(ep_id);
+		if (!ret)
 			break;
-		ipa_bug_on(result != -EAGAIN && result != -ETIMEDOUT);
+		ipa_bug_on(ret != -EAGAIN && ret != -ETIMEDOUT);
 	}
 
 	ipa_reset_gsi_channel(ep_id);

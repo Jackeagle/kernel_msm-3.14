@@ -482,12 +482,12 @@ static int ipa_ep_apps_lan_cons_setup(void)
 static int ipa_ep_apps_setup(void)
 {
 	struct ipa_dma_mem mem;	/* Empty table */
-	int result;
+	int ret;
 
 	/* CMD OUT (AP->IPA) */
-	result = ipa_ep_apps_cmd_prod_setup();
-	if (result < 0)
-		return result;
+	ret = ipa_ep_apps_cmd_prod_setup();
+	if (ret < 0)
+		return ret;
 
 	ipa_debug("Apps to IPA cmd endpoint is connected\n");
 
@@ -497,8 +497,8 @@ static int ipa_ep_apps_setup(void)
 	ipa_init_hdr();
 	ipa_debug("HDR initialized\n");
 
-	result = ipahal_rt_generate_empty_img(IPA_MEM_RT_COUNT, &mem);
-	ipa_assert(!result);
+	ret = ipahal_rt_generate_empty_img(IPA_MEM_RT_COUNT, &mem);
+	ipa_assert(!ret);
 
 	ipa_init_rt4(&mem);
 	ipa_debug("V4 RT initialized\n");
@@ -508,8 +508,8 @@ static int ipa_ep_apps_setup(void)
 
 	ipahal_free_empty_img(&mem);
 
-	result = ipahal_flt_generate_empty_img(ipa_ctx->filter_bitmap, &mem);
-	ipa_assert(!result);
+	ret = ipahal_flt_generate_empty_img(ipa_ctx->filter_bitmap, &mem);
+	ipa_assert(!ret);
 
 	ipa_init_flt4(&mem);
 	ipa_debug("V4 FLT initialized\n");
@@ -535,8 +535,8 @@ static int ipa_ep_apps_setup(void)
 	 * of exceptions (unroutable packets, but other events as well)
 	 * through this endpoint.
 	 */
-	result = ipa_ep_apps_lan_cons_setup();
-	if (result < 0)
+	ret = ipa_ep_apps_lan_cons_setup();
+	if (ret < 0)
 		goto fail_flt_hash_tuple;
 
 	ipa_cfg_default_route(IPA_CLIENT_APPS_LAN_CONS);
@@ -547,7 +547,7 @@ fail_flt_hash_tuple:
 	ipa_ep_teardown(ipa_ctx->cmd_prod_ep_id);
 	ipa_ctx->cmd_prod_ep_id = IPA_EP_ID_BAD;
 
-	return result;
+	return ret;
 }
 
 /** ipa_enable_clks() - Turn on IPA clocks
@@ -889,11 +889,11 @@ EXPORT_SYMBOL_GPL(ipa_ssr_unprepare);
  */
 static void ipa_post_init(void)
 {
-	int result;
+	int ret;
 
-	result = gsi_register_device(ipa_ctx->gsi);
-	if (result) {
-		ipa_err(":gsi register error - %d\n", result);
+	ret = gsi_register_device(ipa_ctx->gsi);
+	if (ret) {
+		ipa_err(":gsi register error - %d\n", ret);
 		return;
 	}
 	ipa_debug("IPA gsi is registered\n");
@@ -953,7 +953,7 @@ static void ipa_post_init(void)
  */
 static int ipa_pre_init(void)
 {
-	int result = 0;
+	int ret = 0;
 
 	ipa_debug("IPA Driver initialization started\n");
 
@@ -979,7 +979,7 @@ static int ipa_pre_init(void)
 	if (ipa_ctx->smem_size < IPA_MEM_END_OFST) {
 		ipa_err("insufficient memory: %hu bytes available, need %u\n",
 			ipa_ctx->smem_size, IPA_MEM_END_OFST);
-		result = -ENOMEM;
+		ret = -ENOMEM;
 		goto err_disable_clks;
 	}
 
@@ -991,7 +991,7 @@ static int ipa_pre_init(void)
 		create_singlethread_workqueue("ipa_power_mgmt");
 	if (!ipa_ctx->power_mgmt_wq) {
 		ipa_err("failed to create power mgmt wq\n");
-		result = -ENOMEM;
+		ret = -ENOMEM;
 		goto err_disable_clks;
 	}
 
@@ -1004,8 +1004,8 @@ static int ipa_pre_init(void)
 		goto err_destroy_pm_wq;
 
 	/* allocate memory for DMA_TASK workaround */
-	result = ipa_gsi_dma_task_alloc();
-	if (result)
+	ret = ipa_gsi_dma_task_alloc();
+	if (ret)
 		goto err_dp_exit;
 
 	/* Create a wakeup source. */
@@ -1020,8 +1020,8 @@ static int ipa_pre_init(void)
 	/* Assign resource limitation to each group */
 	ipa_set_resource_groups_min_max_limits();
 
-	result = ipa_init_interrupts();
-	if (!result)
+	ret = ipa_init_interrupts();
+	if (!ret)
 		return 0;	/* Success! */
 
 	ipa_err("ipa initialization of interrupts failed\n");
@@ -1033,7 +1033,7 @@ err_destroy_pm_wq:
 err_disable_clks:
 	ipa_disable_clks();
 
-	return result;
+	return ret;
 }
 
 static int ipa_firmware_load(struct device *dev)
@@ -1217,7 +1217,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	const struct ipa_match_data *match_data;
 	struct resource *res;
 	bool modem_init;
-	int result;
+	int ret;
 
 	/* We assume we're working on 64-bit hardware */
 	BUILD_BUG_ON(!IS_ENABLED(CONFIG_64BIT));
@@ -1235,15 +1235,15 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	/* Initialize the smp2p driver early.  It might not be ready
 	 * when we're probed, so it might return -EPROBE_DEFER.
 	 */
-	result = ipa_smp2p_init(dev, modem_init);
-	if (result)
-		return result;
+	ret = ipa_smp2p_init(dev, modem_init);
+	if (ret)
+		return ret;
 
 	/* Initialize the interconnect driver early too.  It might
 	 * also return -EPROBE_DEFER.
 	 */
-	result = ipa_interconnect_init(dev);
-	if (result)
+	ret = ipa_interconnect_init(dev);
+	if (ret)
 		goto out_smp2p_exit;
 
 	ipa_ctx->dev = dev;	/* Set early for ipa_err()/ipa_debug() */
@@ -1253,44 +1253,44 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (!ipa_ctx->filter_bitmap)
 		goto err_interconnect_exit;
 
-	result = platform_get_irq_byname(pdev, "ipa");
-	if (result < 0)
+	ret = platform_get_irq_byname(pdev, "ipa");
+	if (ret < 0)
 		goto err_clear_filter_bitmap;
-	ipa_ctx->ipa_irq = result;
+	ipa_ctx->ipa_irq = ret;
 
 	/* Get IPA memory range */
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "ipa");
 	if (!res) {
-		result = -ENODEV;
+		ret = -ENODEV;
 		goto err_clear_ipa_irq;
 	}
 
 	/* Setup IPA register access */
-	result = ipa_reg_init(res->start, (size_t)resource_size(res));
-	if (result)
+	ret = ipa_reg_init(res->start, (size_t)resource_size(res));
+	if (ret)
 		goto err_clear_ipa_irq;
 	ipa_ctx->ipa_phys = res->start;
 
 	ipa_ctx->gsi = gsi_init(pdev);
 	if (IS_ERR(ipa_ctx->gsi)) {
-		result = PTR_ERR(ipa_ctx->gsi);
+		ret = PTR_ERR(ipa_ctx->gsi);
 		goto err_clear_gsi;
 	}
 
-	result = ipa_dma_init(dev, IPA_HW_TBL_SYSADDR_ALIGN);
-	if (result)
+	ret = ipa_dma_init(dev, IPA_HW_TBL_SYSADDR_ALIGN);
+	if (ret)
 		goto err_clear_gsi;
 
-	result = ipahal_init();
-	if (result)
+	ret = ipahal_init();
+	if (ret)
 		goto err_dma_exit;
 
 	ipa_ctx->cmd_prod_ep_id = IPA_EP_ID_BAD;
 	ipa_ctx->lan_cons_ep_id = IPA_EP_ID_BAD;
 
 	/* Proceed to real initialization */
-	result = ipa_pre_init();
-	if (result)
+	ret = ipa_pre_init();
+	if (ret)
 		goto err_clear_dev;
 
 	/* If the modem is not verifying and loading firmware we need to
@@ -1300,8 +1300,8 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	 * and that will trigger the "post init".
 	 */
 	if (!modem_init) {
-		result = ipa_firmware_load(dev);
-		if (result)
+		ret = ipa_firmware_load(dev);
+		if (ret)
 			goto err_clear_dev;
 
 		/* Now we can proceed to stage two initialization */
@@ -1330,7 +1330,7 @@ err_interconnect_exit:
 out_smp2p_exit:
 	ipa_smp2p_exit(dev);
 
-	return result;
+	return ret;
 }
 
 static int ipa_plat_drv_remove(struct platform_device *pdev)
