@@ -953,7 +953,6 @@ static int gsi_ring_alloc(struct gsi_ring *ring, u32 count)
 	ipa_assert(!(ring->mem.phys % size));
 
 	ring->end = ring->mem.phys + size;
-	gsi_ring_init(ring);
 	spin_lock_init(&ring->slock);
 
 	return 0;
@@ -1065,7 +1064,7 @@ static int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 	evt_ring->moderation = moderation;
 
 	gsi_evt_ring_program(gsi, evt_ring_id);
-
+	gsi_ring_init(&evt_ring->ring);
 	gsi_evt_ring_prime(gsi, evt_ring);
 
 	mutex_unlock(&gsi->mlock);
@@ -1217,6 +1216,7 @@ int gsi_channel_alloc(struct gsi *gsi, u32 channel_id, u32 channel_count,
 	channel->priority = priority;
 
 	gsi_channel_program(gsi, channel_id, evt_ring_id, true);
+	gsi_ring_init(&channel->ring);
 
 	channel->user_data = user_data;
 	atomic_inc(&gsi->channel_count);
