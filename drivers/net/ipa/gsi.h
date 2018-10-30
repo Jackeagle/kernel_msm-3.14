@@ -24,10 +24,10 @@
  * the AP to be interrupted; the BEI flag prevents that.
  */
 enum gsi_xfer_flag {
-	GSI_XFER_FLAG_CHAIN	= 0x1,
-	GSI_XFER_FLAG_EOB	= 0x100,
-	GSI_XFER_FLAG_EOT	= 0x200,
-	GSI_XFER_FLAG_BEI	= 0x400
+	GSI_XFER_FLAG_CHAIN	= BIT(1),
+	GSI_XFER_FLAG_EOB	= BIT(2),
+	GSI_XFER_FLAG_EOT	= BIT(3),
+	GSI_XFER_FLAG_BEI	= BIT(4),
 };
 
 /**
@@ -45,15 +45,15 @@ enum gsi_xfer_elem_type {
 /**
  * gsi_xfer_elem - Description of a single transfer element.
  * @addr:	Physical address of a buffer for data or immediate commands.
- * @len_opcode:	Length of the data buffer, or immediate command opcode.
- * @flags:	XXX enum gsi_xfer_flag
- * @type:	XXX enum gsi_xfer_elem_type
+ * @len_opcode:	Length of the data buffer, or enum ipahal_imm_cmd opcode
+ * @flags:	Flags for the transfer
+ * @type:	Command type (immediate command, data transfer NOP)
  * @user_data:	Data maintained for (but unused by) the transfer element.
  */
 struct gsi_xfer_elem {
 	u64 addr;
 	u16 len_opcode;
-	u16 flags;
+	enum gsi_xfer_flag flags;
 	enum gsi_xfer_elem_type type;
 	void *user_data;
 };

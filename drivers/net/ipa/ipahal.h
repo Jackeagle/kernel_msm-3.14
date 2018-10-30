@@ -36,7 +36,7 @@
  * common fields
  */
 struct ipahal_imm_cmd_pyld {
-	u16 opcode;
+	u16 opcode;	/* enum ipahal_imm_cmd opcode */
 };
 
 /* Return the address of type-specific data portion of an immediate
