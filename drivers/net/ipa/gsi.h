@@ -18,21 +18,19 @@
  * @ep_id:	IPA endpoint identifier.
  * @channel_id:	GSI channel number used for this endpoint.
  * @ipa_if_tlv:	The number of TLV (type-length-value) entries for the endpoint.
- * @ipa_if_aos:	The number of AOS (ACK-on-success) entries for the endpoint.
  * @ee:		Execution environment endpoint is associated with.
  *
  * Each GSI endpoint has a set of configuration parameters defined within
  * entries in the ipa_ep_configuration[] array.  Its @ep_id field uniquely
  * defines the endpoint, and @channel_id defines which data channel (ring
  * buffer) is used for the endpoint.
- * XXX TLV and AOS
- * XXX ipa_if_aos and ee are never used in the code
+ * XXX TLV
+ * XXX ee is never used in the code
  */
 struct ipa_gsi_ep_config {
 	u32 ep_id;
 	u32 channel_id;
 	u32 ipa_if_tlv;
-	u32 ipa_if_aos;
 	u32 ee;
 };
 
