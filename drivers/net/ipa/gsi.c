@@ -118,7 +118,7 @@ struct gsi_channel {
 	struct mutex mlock;		/* protects channel_scratch updates */
 	struct completion compl;
 	atomic_t poll_mode;
-	u32 tlv_size;			/* # slots in TLV */
+	u32 tlv_count;			/* # slots in TLV */
 };
 
 struct gsi_evt_ring {
@@ -1238,7 +1238,7 @@ static void __gsi_channel_scratch_write(struct gsi *gsi, u32 channel_id)
 	u32 val;
 
 	/* See comments above definition of gsi_gpi_channel_scratch */
-	gpi->max_outstanding_tre = channel->tlv_size * GSI_RING_ELEMENT_SIZE;
+	gpi->max_outstanding_tre = channel->tlv_count * GSI_RING_ELEMENT_SIZE;
 	gpi->outstanding_threshold = 2 * GSI_RING_ELEMENT_SIZE;
 
 	val = scr.data.word1;
@@ -1259,11 +1259,11 @@ static void __gsi_channel_scratch_write(struct gsi *gsi, u32 channel_id)
 	gsi_writel(gsi, val, GSI_CH_C_SCRATCH_3_OFFS(channel_id));
 }
 
-void gsi_channel_scratch_write(struct gsi *gsi, u32 channel_id, u32 tlv_size)
+void gsi_channel_scratch_write(struct gsi *gsi, u32 channel_id, u32 tlv_count)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 
-	channel->tlv_size = tlv_size;
+	channel->tlv_count = tlv_count;
 
 	mutex_lock(&channel->mlock);
 

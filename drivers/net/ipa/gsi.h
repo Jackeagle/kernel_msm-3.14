@@ -88,11 +88,11 @@ int gsi_channel_alloc(struct gsi *gsi, u32 channel_id, u32 channel_count,
  *
  * @channel_id:  Client handle previously obtained from
  * gsi_channel_alloc
- * @tlv_size:  Number of elements in channel TLV queue
+ * @tlv_count:  Number of elements in channel TLV queue
  *
  * @Return gsi_status
  */
-void gsi_channel_scratch_write(struct gsi *gsi, u32 channel_id, u32 tlv_size);
+void gsi_channel_scratch_write(struct gsi *gsi, u32 channel_id, u32 tlv_count);
 
 /** gsi_channel_start - Peripheral should call this function to
  * start a channel i.e put into running state
