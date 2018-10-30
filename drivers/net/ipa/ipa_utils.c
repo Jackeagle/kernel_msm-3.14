@@ -97,6 +97,27 @@ static const struct rsrc_min_max ipa_dst_rsrc_grp[][IPA_RSRC_GROUP_MAX] = {
 	},
 };
 
+/**
+ * struct ipa_gsi_ep_config - GSI endpoint configuration.
+ * @ep_id:	IPA endpoint identifier.
+ * @channel_id:	GSI channel number used for this endpoint.
+ * @tlv_count:	The number of TLV (type-length-value) entries for the channel.
+ * @ee:		Execution environment endpoint is associated with.
+ *
+ * Each GSI endpoint has a set of configuration parameters defined within
+ * entries in the ipa_ep_configuration[] array.  Its @ep_id field uniquely
+ * defines the endpoint, and @channel_id defines which data channel (ring
+ * buffer) is used for the endpoint.
+ * XXX TLV
+ * XXX ee is never used in the code
+ */
+struct ipa_gsi_ep_config {
+	u32 ep_id;
+	u32 channel_id;
+	u32 tlv_count;
+	u32 ee;
+};
+
 struct ipa_ep_configuration {
 	bool support_flt;
 	enum ipa_seq_type seq_type;
@@ -112,7 +133,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 7,
 			.channel_id	= 1,
-			.ipa_if_tlv	= 8,
+			.tlv_count	= 8,
 			.ee		= IPA_EE_UC,
 		},
 	},
@@ -122,7 +143,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 0,
 			.channel_id	= 0,
-			.ipa_if_tlv	= 8,
+			.tlv_count	= 8,
 			.ee		= IPA_EE_AP,
 		},
 	},
@@ -132,7 +153,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 8,
 			.channel_id	= 7,
-			.ipa_if_tlv	= 8,
+			.tlv_count	= 8,
 			.ee		= IPA_EE_AP,
 		},
 	},
@@ -142,7 +163,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 2,
 			.channel_id	= 3,
-			.ipa_if_tlv	= 16,
+			.tlv_count	= 16,
 			.ee		= IPA_EE_AP,
 		},
 	},
@@ -152,7 +173,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 5,
 			.channel_id	= 4,
-			.ipa_if_tlv	= 20,
+			.tlv_count	= 20,
 			.ee		= IPA_EE_AP,
 		},
 	},
@@ -162,7 +183,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 3,
 			.channel_id	= 0,
-			.ipa_if_tlv	= 16,
+			.tlv_count	= 16,
 			.ee		= IPA_EE_Q6,
 		},
 	},
@@ -172,7 +193,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 6,
 			.channel_id	= 4,
-			.ipa_if_tlv	= 12,
+			.tlv_count	= 12,
 			.ee		= IPA_EE_Q6,
 		},
 	},
@@ -182,7 +203,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 4,
 			.channel_id	= 1,
-			.ipa_if_tlv	= 20,
+			.tlv_count	= 20,
 			.ee		= IPA_EE_Q6,
 		},
 	},
@@ -192,7 +213,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 14,
 			.channel_id	= 5,
-			.ipa_if_tlv	= 8,
+			.tlv_count	= 8,
 			.ee		= IPA_EE_Q6,
 		},
 	},
@@ -202,7 +223,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 15,
 			.channel_id	= 2,
-			.ipa_if_tlv	= 8,
+			.tlv_count	= 8,
 			.ee		= IPA_EE_UC,
 		},
 	},
@@ -213,7 +234,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 0,
 			.channel_id	= 0,
-			.ipa_if_tlv	= 8,
+			.tlv_count	= 8,
 			.ee		= IPA_EE_AP,
 		},
 	},
@@ -223,7 +244,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 0,
 			.channel_id	= 0,
-			.ipa_if_tlv	= 8,
+			.tlv_count	= 8,
 			.ee		= IPA_EE_AP,
 		},
 	},
@@ -233,7 +254,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 2,
 			.channel_id	= 3,
-			.ipa_if_tlv	= 16,
+			.tlv_count	= 16,
 			.ee		= IPA_EE_AP,
 		},
 	},
@@ -243,7 +264,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 4,
 			.channel_id	= 1,
-			.ipa_if_tlv	= 20,
+			.tlv_count	= 20,
 			.ee		= IPA_EE_Q6,
 		},
 	},
@@ -253,7 +274,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 1,
 			.channel_id	= 0,
-			.ipa_if_tlv	= 8,
+			.tlv_count	= 8,
 			.ee		= IPA_EE_UC,
 		},
 	},
@@ -263,7 +284,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 16,
 			.channel_id	= 3,
-			.ipa_if_tlv	= 8,
+			.tlv_count	= 8,
 			.ee		= IPA_EE_UC,
 		},
 	},
@@ -273,7 +294,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 18,
 			.channel_id	= 9,
-			.ipa_if_tlv	= 8,
+			.tlv_count	= 8,
 			.ee		= IPA_EE_AP,
 		},
 	},
@@ -283,7 +304,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 19,
 			.channel_id	= 10,
-			.ipa_if_tlv	= 8,
+			.tlv_count	= 8,
 			.ee		= IPA_EE_AP,
 		},
 	},
@@ -293,7 +314,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 17,
 			.channel_id	= 8,
-			.ipa_if_tlv	= 8,
+			.tlv_count	= 8,
 			.ee		= IPA_EE_AP,
 		},
 	},
@@ -303,7 +324,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 11,
 			.channel_id	= 2,
-			.ipa_if_tlv	= 4,
+			.tlv_count	= 4,
 			.ee		= IPA_EE_AP,
 		},
 	},
@@ -313,7 +334,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 9,
 			.channel_id	= 5,
-			.ipa_if_tlv	= 8,
+			.tlv_count	= 8,
 			.ee		= IPA_EE_AP,
 		},
 	},
@@ -323,7 +344,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 10,
 			.channel_id	= 6,
-			.ipa_if_tlv	= 8,
+			.tlv_count	= 8,
 			.ee		= IPA_EE_AP,
 		},
 	},
@@ -333,7 +354,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 13,
 			.channel_id	= 3,
-			.ipa_if_tlv	= 8,
+			.tlv_count	= 8,
 			.ee		= IPA_EE_Q6,
 		},
 	},
@@ -343,7 +364,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 12,
 			.channel_id	= 2,
-			.ipa_if_tlv	= 8,
+			.tlv_count	= 8,
 			.ee		= IPA_EE_Q6,
 		},
 	},
@@ -354,7 +375,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 18,
 			.channel_id	= 9,
-			.ipa_if_tlv	= 8,
+			.tlv_count	= 8,
 			.ee		= IPA_EE_AP,
 		},
 	},
@@ -364,7 +385,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 19,
 			.channel_id	= 10,
-			.ipa_if_tlv	= 8,
+			.tlv_count	= 8,
 			.ee		= IPA_EE_AP,
 		},
 	},
@@ -374,7 +395,7 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 11,
 			.channel_id	= 2,
-			.ipa_if_tlv	= 4,
+			.tlv_count	= 4,
 			.ee		= IPA_EE_AP,
 		},
 	},
@@ -385,22 +406,11 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		.ipa_gsi_ep_info = {
 			.ep_id		= 31,
 			.channel_id	= 31,
-			.ipa_if_tlv	= 8,
+			.tlv_count	= 8,
 			.ee		= IPA_EE_AP,
 		},
 	},
 };
-
-/** ipa_get_gsi_ep_info() - provide gsi ep information
- * @client: IPA client value
- *
- * Return value: pointer to ipa_gsi_ep_info
- */
-const struct ipa_gsi_ep_config *
-ipa_get_gsi_ep_info(enum ipa_client_type client)
-{
-	return &ipa_ep_configuration[client].ipa_gsi_ep_info;
-}
 
 /** ipa_client_ep_id() - provide endpoint mapping
  * @client: client type
@@ -415,6 +425,11 @@ u32 ipa_client_ep_id(enum ipa_client_type client)
 u32 ipa_client_channel_id(enum ipa_client_type client)
 {
 	return ipa_ep_configuration[client].ipa_gsi_ep_info.channel_id;
+}
+
+u32 ipa_client_tlv_count(enum ipa_client_type client)
+{
+	return ipa_ep_configuration[client].ipa_gsi_ep_info.tlv_count;
 }
 
 enum ipa_seq_type ipa_endp_seq_type(u32 ep_id)

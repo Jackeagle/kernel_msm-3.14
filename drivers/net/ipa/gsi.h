@@ -14,27 +14,6 @@
 #define GSI_RING_ELEMENT_SIZE	16	/* bytes (channel or event ring) */
 
 /**
- * struct ipa_gsi_ep_config - GSI endpoint configuration.
- * @ep_id:	IPA endpoint identifier.
- * @channel_id:	GSI channel number used for this endpoint.
- * @ipa_if_tlv:	The number of TLV (type-length-value) entries for the endpoint.
- * @ee:		Execution environment endpoint is associated with.
- *
- * Each GSI endpoint has a set of configuration parameters defined within
- * entries in the ipa_ep_configuration[] array.  Its @ep_id field uniquely
- * defines the endpoint, and @channel_id defines which data channel (ring
- * buffer) is used for the endpoint.
- * XXX TLV
- * XXX ee is never used in the code
- */
-struct ipa_gsi_ep_config {
-	u32 ep_id;
-	u32 channel_id;
-	u32 ipa_if_tlv;
-	u32 ee;
-};
-
-/**
  * enum gsi_xfer_flag - Transfer element flag values.
  * @GSI_XFER_FLAG_CHAIN:	Not the last element in a transaction.
  * @GSI_XFER_FLAG_EOB:		Generate event interrupt when complete.

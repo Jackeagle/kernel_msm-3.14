@@ -399,6 +399,7 @@ bool ipa_is_modem_ep(u32 ep_id);
 
 u32 ipa_client_ep_id(enum ipa_client_type client);
 u32 ipa_client_channel_id(enum ipa_client_type client);
+u32 ipa_client_tlv_count(enum ipa_client_type client);
 
 void ipa_init_hw(void);
 
@@ -436,8 +437,6 @@ struct ipa_uc_ctx *ipa_uc_init(phys_addr_t phys_addr);
 bool ipa_uc_loaded(void);
 void ipa_uc_panic_notifier(void);
 
-const struct ipa_gsi_ep_config *ipa_get_gsi_ep_info
-	(enum ipa_client_type client);
 u32 ipa_get_ep_count(void);
 int ipa_ap_suspend(struct device *dev);
 int ipa_ap_resume(struct device *dev);

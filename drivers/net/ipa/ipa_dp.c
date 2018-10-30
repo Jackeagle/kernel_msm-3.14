@@ -421,7 +421,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	int result;
 
 	ipa_assert(num_desc);
-	ipa_assert(num_desc <= ipa_get_gsi_ep_info(ep->client)->ipa_if_tlv);
+	ipa_assert(num_desc <= ipa_client_tlv_count(ep->client));
 
 	xfer_elem = kcalloc(num_desc, sizeof(*xfer_elem), GFP_ATOMIC);
 	if (!xfer_elem)
@@ -746,7 +746,7 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 {
 	struct ipa_desc _desc = { };
 	struct ipa_desc *desc = &_desc;	/* Default, linear case */
-	const struct ipa_gsi_ep_config *gsi_ep;
+	u32 tlv_count = ipa_client_tlv_count(client);
 	u32 ep_id;
 	int data_idx;
 	u32 nr_frags;
@@ -757,14 +757,13 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 		return -EINVAL;
 
 	ep_id = ipa_client_ep_id(client);
-	gsi_ep = ipa_get_gsi_ep_info(ipa_ctx->ep[ep_id].client);
 
 	/* Make sure source endpoint's TLV FIFO has enough entries to
 	 * hold the linear portion of the skb and all its frags.
 	 * If not, see if we can linearize it before giving up.
 	 */
 	nr_frags = skb_shinfo(skb)->nr_frags;
-	if (1 + nr_frags > gsi_ep->ipa_if_tlv) {
+	if (1 + nr_frags > tlv_count) {
 		if (skb_linearize(skb))
 			return -ENOMEM;
 		nr_frags = 0;
@@ -1450,14 +1449,12 @@ void ipa_gsi_irq_rx_notify_cb(void *chan_data, u16 count)
 static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 				 u32 evt_ring_mult)
 {
-	const struct ipa_gsi_ep_config *gsi_ep_info;
 	u32 channel_id = ipa_client_channel_id(ep->client);
+	u32 tlv_count = ipa_client_tlv_count(ep->client);
 	bool from_ipa = ipa_consumer(ep->client);
 	bool priority = ep->client == IPA_CLIENT_APPS_CMD_PROD;
 	bool moderation = !ep->sys->tx.no_intr;
 	int result;
-
-	gsi_ep_info = ipa_get_gsi_ep_info(ep->client);
 
 	result = gsi_channel_alloc(ipa_ctx->gsi, channel_id,
 				   channel_count, from_ipa, priority,
@@ -1466,8 +1463,7 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 		goto fail_alloc_channel;
 	ep->channel_id = channel_id;
 
-	gsi_channel_scratch_write(ipa_ctx->gsi, ep->channel_id,
-				  gsi_ep_info->ipa_if_tlv);
+	gsi_channel_scratch_write(ipa_ctx->gsi, ep->channel_id, tlv_count);
 
 	result = gsi_channel_start(ipa_ctx->gsi, ep->channel_id);
 	if (!result)
