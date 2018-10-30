@@ -1451,6 +1451,7 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 				 u32 evt_ring_mult)
 {
 	const struct ipa_gsi_ep_config *gsi_ep_info;
+	u32 channel_id = ipa_client_channel_id(ep->client);
 	bool from_ipa = ipa_consumer(ep->client);
 	bool priority = ep->client == IPA_CLIENT_APPS_CMD_PROD;
 	bool moderation = !ep->sys->tx.no_intr;
@@ -1458,12 +1459,12 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 
 	gsi_ep_info = ipa_get_gsi_ep_info(ep->client);
 
-	result = gsi_channel_alloc(ipa_ctx->gsi, gsi_ep_info->channel_id,
+	result = gsi_channel_alloc(ipa_ctx->gsi, channel_id,
 				   channel_count, from_ipa, priority,
 				   evt_ring_mult, moderation, ep->sys);
 	if (result < 0)
 		goto fail_alloc_channel;
-	ep->channel_id = (u32)result;
+	ep->channel_id = channel_id;
 
 	gsi_channel_scratch_write(ipa_ctx->gsi, ep->channel_id,
 				  gsi_ep_info->ipa_if_tlv);

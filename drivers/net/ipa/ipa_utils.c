@@ -412,6 +412,11 @@ u32 ipa_client_ep_id(enum ipa_client_type client)
 	return ipa_ep_configuration[client].ipa_gsi_ep_info.ep_id;
 }
 
+u32 ipa_client_channel_id(enum ipa_client_type client)
+{
+	return ipa_ep_configuration[client].ipa_gsi_ep_info.channel_id;
+}
+
 enum ipa_seq_type ipa_endp_seq_type(u32 ep_id)
 {
 	return ipa_ep_configuration[ipa_ctx->ep[ep_id].client].seq_type;
