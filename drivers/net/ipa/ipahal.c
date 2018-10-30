@@ -261,10 +261,8 @@ ipahal_imm_cmd_pyld_alloc(u16 opcode, size_t pyld_size)
 	struct ipahal_imm_cmd_pyld *pyld;
 
 	pyld = kzalloc(sizeof(*pyld) + pyld_size, GFP_KERNEL);
-	if (pyld) {
+	if (pyld)
 		pyld->opcode = opcode;
-		pyld->len = pyld_size;
-	}
 
 	return pyld;
 }

@@ -36,7 +36,6 @@
  * common fields
  */
 struct ipahal_imm_cmd_pyld {
-	u16 len;
 	u16 opcode;
 };
 

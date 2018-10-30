@@ -441,10 +441,12 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 
 		if (desc[i].type == IPA_DATA_DESC_SKB_PAGED)
 			phys = skb_frag_dma_map(dev, desc[i].payload, 0,
-						desc[i].len, DMA_TO_DEVICE);
+						desc[i].len_opcode,
+						DMA_TO_DEVICE);
 		else
 			phys = dma_map_single(dev, desc[i].payload,
-					      desc[i].len, DMA_TO_DEVICE);
+					      desc[i].len_opcode,
+					      DMA_TO_DEVICE);
 		if (dma_mapping_error(dev, phys)) {
 			ipa_err("dma mapping error on descriptor\n");
 			kmem_cache_free(ipa_ctx->dp->tx_pkt_wrapper_cache,
@@ -456,25 +458,18 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 		tx_pkt->sys = sys;
 		tx_pkt->mem.virt = desc[i].payload;
 		tx_pkt->mem.phys = phys;
-		tx_pkt->mem.size = desc[i].len;
+		tx_pkt->mem.size = desc[i].len_opcode;
 		tx_pkt->callback = desc[i].callback;
 		tx_pkt->user1 = desc[i].user1;
 		tx_pkt->user2 = desc[i].user2;
 		list_add_tail(&tx_pkt->link, &pkt_list);
 
 		xfer_elem[i].addr = tx_pkt->mem.phys;
-
-		/* Special treatment for immediate commands, where
-		 * the structure of the descriptor is different
-		 */
-		if (desc[i].type == IPA_IMM_CMD_DESC) {
-			xfer_elem[i].len_opcode = desc[i].opcode;
+		if (desc[i].type == IPA_IMM_CMD_DESC)
 			xfer_elem[i].type = GSI_XFER_ELEM_IMME_CMD;
-		} else {
-			xfer_elem[i].len_opcode = desc[i].len;
+		else
 			xfer_elem[i].type = GSI_XFER_ELEM_DATA;
-		}
-
+		xfer_elem[i].len_opcode = desc[i].len_opcode;
 		if (i < num_desc - 1)
 			xfer_elem[i].flags = GSI_XFER_FLAG_CHAIN;
 	}
@@ -778,13 +773,14 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	 */
 	data_idx = 0;
 	desc[data_idx].payload = skb->data;
-	desc[data_idx].len = skb_headlen(skb);
+	desc[data_idx].len_opcode = skb_headlen(skb);
 	desc[data_idx].type = IPA_DATA_DESC_SKB;
 	for (f = 0; f < nr_frags; f++) {
 		data_idx++;
 		desc[data_idx].payload = &skb_shinfo(skb)->frags[f];
 		desc[data_idx].type = IPA_DATA_DESC_SKB_PAGED;
-		desc[data_idx].len = skb_frag_size(desc[data_idx].payload);
+		desc[data_idx].len_opcode =
+				skb_frag_size(desc[data_idx].payload);
 	}
 
 	/* Have the skb be freed after the last descriptor completes. */

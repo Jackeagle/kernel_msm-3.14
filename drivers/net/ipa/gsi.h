@@ -45,7 +45,7 @@ enum gsi_xfer_elem_type {
 /**
  * gsi_xfer_elem - Description of a single transfer element.
  * @addr:	Physical address of a buffer for data or immediate commands.
- * @len:	Length of the data buffer, or immediate command opcode.
+ * @len_opcode:	Length of the data buffer, or immediate command opcode.
  * @flags:	XXX enum gsi_xfer_flag
  * @type:	XXX enum gsi_xfer_elem_type
  * @user_data:	Data maintained for (but unused by) the transfer element.

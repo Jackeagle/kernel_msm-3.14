@@ -333,8 +333,7 @@ enum ipa_desc_type {
  * @dma_address: dma mapped address of pyld
  * @dma_address_valid: valid field for dma_address
  * @is_tag_status: flag for IP_PACKET_TAG_STATUS imd cmd
- * @len: length of the pyld
- * @opcode: for immediate commands
+ * @len_opcode: length of the pyld, or opcode for immediate commands
  * @callback: IPA client provided completion callback
  * @user1: cookie1 for above callback
  * @user2: cookie2 for above callback
@@ -343,8 +342,7 @@ enum ipa_desc_type {
  */
 struct ipa_desc {
 	enum ipa_desc_type type;
-	u16 len;
-	u16 opcode;
+	u16 len_opcode;
 	void *payload;
 	void (*callback)(void *user1, int user2);
 	void *user1;
@@ -359,8 +357,7 @@ static inline void
 ipa_desc_fill_imm_cmd(struct ipa_desc *desc, struct ipahal_imm_cmd_pyld *pyld)
 {
 	desc->type = IPA_IMM_CMD_DESC;
-	desc->len = pyld->len;
-	desc->opcode = pyld->opcode;
+	desc->len_opcode = pyld->opcode;
 	desc->payload = ipahal_imm_cmd_pyld_data(pyld);
 }
 
