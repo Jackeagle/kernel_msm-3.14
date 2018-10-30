@@ -430,7 +430,7 @@ static int ipa_ep_apps_lan_cons_setup(void)
 	u32 ep_id;
 	int ret;
 
-	if (aggr_bytes > ipa_reg_aggr_max_byte_limit() * SZ_1K)
+	if (aggr_bytes > ipa_reg_aggr_max_byte_limit())
 		return -EINVAL;
 
 	if (aggr_count > ipa_reg_aggr_max_packet_limit())

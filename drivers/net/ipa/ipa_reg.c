@@ -949,10 +949,10 @@ void ipa_write_reg_n_fields(enum ipa_reg reg, u32 n, const void *fields)
 	ipa_write_reg_n(reg, n, val);
 }
 
-/* Maximum representable aggregation byte limit value */
+/* Maximum representable aggregation byte limit value (in bytes) */
 u32 ipa_reg_aggr_max_byte_limit(void)
 {
-	return field_max(AGGR_BYTE_LIMIT_FMASK);
+	return field_max(AGGR_BYTE_LIMIT_FMASK) * SZ_1K;
 }
 
 /* Maximum representable aggregation packet limit value */
