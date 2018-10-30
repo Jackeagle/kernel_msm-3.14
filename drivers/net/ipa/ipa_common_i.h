@@ -196,8 +196,8 @@ enum ipa_dp_evt_type {
 	IPA_CLIENT_COMP_NAPI,
 };
 
-#define IPA_GENERIC_AGGR_BYTE_LIMIT	6
-#define IPA_GENERIC_AGGR_TIME_LIMIT	1
+#define IPA_GENERIC_AGGR_BYTE_LIMIT	(6 * SZ_1K)	/* bytes */
+#define IPA_GENERIC_AGGR_TIME_LIMIT	1		/* milliseconds */
 #define IPA_GENERIC_AGGR_PKT_LIMIT	0
 
 /** enum hdr_total_len_or_pad_type - type of value held by TOTAL_LEN_OR_PAD

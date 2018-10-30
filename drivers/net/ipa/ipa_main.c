@@ -423,7 +423,7 @@ static int ipa_ep_apps_lan_cons_setup(void)
 {
 	enum ipa_client_type client = IPA_CLIENT_APPS_LAN_CONS;
 	u32 channel_count = IPA_APPS_LAN_CONS_RING_COUNT;
-	u32 aggr_bytes = IPA_GENERIC_AGGR_BYTE_LIMIT * SZ_1K;
+	u32 aggr_bytes = IPA_GENERIC_AGGR_BYTE_LIMIT;
 	u32 aggr_size;
 	u32 aggr_count = IPA_GENERIC_AGGR_PKT_LIMIT;
 	u32 rx_buffer_size;

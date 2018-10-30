@@ -1242,7 +1242,7 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 
 		if (status.endp_dest_idx >= ipa_ctx->ep_count ||
 		    status.endp_src_idx >= ipa_ctx->ep_count ||
-		    status.pkt_len > IPA_GENERIC_AGGR_BYTE_LIMIT * SZ_1K) {
+		    status.pkt_len > IPA_GENERIC_AGGR_BYTE_LIMIT) {
 			ipa_err("status fields invalid\n");
 			WARN_ON(1);
 			goto bail;
