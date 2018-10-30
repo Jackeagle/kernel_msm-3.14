@@ -468,10 +468,10 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 		 * the structure of the descriptor is different
 		 */
 		if (desc[i].type == IPA_IMM_CMD_DESC) {
-			xfer_elem[i].len = desc[i].opcode;
+			xfer_elem[i].len_opcode = desc[i].opcode;
 			xfer_elem[i].type = GSI_XFER_ELEM_IMME_CMD;
 		} else {
-			xfer_elem[i].len = desc[i].len;
+			xfer_elem[i].len_opcode = desc[i].len;
 			xfer_elem[i].type = GSI_XFER_ELEM_DATA;
 		}
 
@@ -823,7 +823,7 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
 
 	/* Don't bother zeroing this; we fill all fields */
 	gsi_xfer_elem.addr = rx_pkt->dma_addr;
-	gsi_xfer_elem.len = sys->rx.buff_sz;
+	gsi_xfer_elem.len_opcode = sys->rx.buff_sz;
 	gsi_xfer_elem.flags = GSI_XFER_FLAG_EOT;
 	gsi_xfer_elem.flags |= GSI_XFER_FLAG_EOB;
 	gsi_xfer_elem.type = GSI_XFER_ELEM_DATA;
@@ -1768,7 +1768,7 @@ static int ipa_channel_reset_aggr(u32 ep_id)
 	}
 
 	xfer_elem.addr = dma_byte.phys;
-	xfer_elem.len = 1;	/* = dma_byte.size; */
+	xfer_elem.len_opcode = 1;	/* = dma_byte.size; */
 	xfer_elem.flags = GSI_XFER_FLAG_EOT;
 	xfer_elem.type = GSI_XFER_ELEM_DATA;
 

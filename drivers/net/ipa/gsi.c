@@ -1474,7 +1474,7 @@ int gsi_channel_queue(struct gsi *gsi, u32 channel_id, u16 num_xfers,
 						  channel->ring.wp_local);
 
 		tre_ptr->buffer_ptr = xfer[i].addr;
-		tre_ptr->buf_len = xfer[i].len;
+		tre_ptr->buf_len = xfer[i].len_opcode;
 		tre_ptr->bei = xfer[i].flags & GSI_XFER_FLAG_BEI ? 1 : 0;
 		tre_ptr->ieot = xfer[i].flags & GSI_XFER_FLAG_EOT ? 1 : 0;
 		tre_ptr->ieob = xfer[i].flags & GSI_XFER_FLAG_EOB ? 1 : 0;

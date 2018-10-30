@@ -52,7 +52,7 @@ enum gsi_xfer_elem_type {
  */
 struct gsi_xfer_elem {
 	u64 addr;
-	u16 len;
+	u16 len_opcode;
 	u16 flags;
 	enum gsi_xfer_elem_type type;
 	void *user_data;
