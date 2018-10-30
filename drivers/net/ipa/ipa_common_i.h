@@ -210,11 +210,8 @@ enum hdr_total_len_or_pad_type {
 	IPA_HDR_TOTAL_LEN	= 1,
 };
 
-#define ipa_debug(fmt, args...) \
-		pr_debug(fmt, ## args)
-
-#define ipa_err(fmt, args...) \
-		pr_err(fmt, ## args)
+#define ipa_debug(fmt, args...)	dev_dbg(ipa_ctx->dev, fmt, ## args)
+#define ipa_err(fmt, args...)	dev_err(ipa_ctx->dev, fmt, ## args)
 
 #define ipa_bug() \
 	do {								\

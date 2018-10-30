@@ -3,7 +3,6 @@
 /* Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
-#define pr_fmt(fmt)    "ipa %s:%d " fmt, __func__, __LINE__
 
 /* The IPA supports generating an interrupt on a number of events
  * using a single IRQ.  When the IPA IRQ fires, an IPA interrupt

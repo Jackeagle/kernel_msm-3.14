@@ -3,7 +3,6 @@
 /* Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
-#define pr_fmt(fmt)    "ipa %s:%d " fmt, __func__, __LINE__
 
 #include <linux/version.h>
 
@@ -1226,7 +1225,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 
 	ipa_debug("IPA driver: probing\n");
 
-	match_data = of_device_get_match_data(&pdev->dev);
+	match_data = of_device_get_match_data(dev);
 	modem_init = match_data->init_type == ipa_modem_init;
 
 	/* If we need Trust Zone, make sure it's ready */
@@ -1247,6 +1246,8 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	result = ipa_interconnect_init(dev);
 	if (result)
 		goto out_smp2p_exit;
+
+	ipa_ctx->dev = dev;	/* Set early for ipa_err()/ipa_debug() */
 
 	/* Compute a bitmask representing which endpoints support filtering */
 	ipa_ctx->filter_bitmap = ipa_filter_bitmap_init();
@@ -1285,7 +1286,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (result)
 		goto err_dma_exit;
 
-	ipa_ctx->dev = dev;
 	ipa_ctx->cmd_prod_ep_id = IPA_EP_ID_BAD;
 	ipa_ctx->lan_cons_ep_id = IPA_EP_ID_BAD;
 
@@ -1314,7 +1314,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 err_clear_dev:
 	ipa_ctx->lan_cons_ep_id = 0;
 	ipa_ctx->cmd_prod_ep_id = 0;
-	ipa_ctx->dev = NULL;
 	ipahal_exit();
 err_dma_exit:
 	ipa_dma_exit();
@@ -1328,6 +1327,7 @@ err_clear_filter_bitmap:
 	ipa_ctx->filter_bitmap = 0;
 err_interconnect_exit:
 	ipa_interconnect_exit();
+	ipa_ctx->dev = NULL;
 out_smp2p_exit:
 	ipa_smp2p_exit(dev);
 

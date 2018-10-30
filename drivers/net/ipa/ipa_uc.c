@@ -3,7 +3,6 @@
 /* Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 Linaro Ltd.
  */
-#define pr_fmt(fmt)    "ipa %s:%d " fmt, __func__, __LINE__
 
 #include <linux/delay.h>
 #include "ipa_i.h"

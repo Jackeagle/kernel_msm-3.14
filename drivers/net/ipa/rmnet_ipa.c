@@ -6,8 +6,6 @@
 
 /* WWAN Transport Network Driver. */
 
-#define pr_fmt(fmt)    "ipa-wan %s:%d " fmt, __func__, __LINE__
-
 #include <linux/completion.h>
 #include <linux/errno.h>
 #include <linux/if_arp.h>
