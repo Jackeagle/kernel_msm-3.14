@@ -260,8 +260,10 @@ static int handle_ingress_format(struct net_device *dev,
 
 	/* Compute the buffer size required to handle the requested
 	 * aggregation byte limit.  The aggr_byte_limit value is
-	 * expressed as a number of KB, so we need to convert it to
-	 * bytes to determine the buffer size.
+	 * expressed as a number of KB, but we derive that value
+	 * after computing the buffer size to use (in bytes).  The
+	 * buffer must be sufficient to hold one IPA_MTU-sized
+	 * packet *after* the limit is reached.
 	 *
 	 * The buffer will be sufficient to hold one IPA_MTU-sized
 	 * packet after the limit is reached.  (The size returned is

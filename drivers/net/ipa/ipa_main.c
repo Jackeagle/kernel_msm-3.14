@@ -423,14 +423,14 @@ static int ipa_ep_apps_lan_cons_setup(void)
 {
 	enum ipa_client_type client = IPA_CLIENT_APPS_LAN_CONS;
 	u32 channel_count = IPA_APPS_LAN_CONS_RING_COUNT;
-	u32 aggr_size = IPA_GENERIC_AGGR_BYTE_LIMIT;
+	u32 aggr_bytes = IPA_GENERIC_AGGR_BYTE_LIMIT * SZ_1K;
+	u32 aggr_size;
 	u32 aggr_count = IPA_GENERIC_AGGR_PKT_LIMIT;
 	u32 rx_buffer_size;
-	u32 byte_limit;
 	u32 ep_id;
 	int ret;
 
-	if (aggr_size > ipa_reg_aggr_max_byte_limit())
+	if (aggr_bytes > ipa_reg_aggr_max_byte_limit() * SZ_1K)
 		return -EINVAL;
 
 	if (aggr_count > ipa_reg_aggr_max_packet_limit())
@@ -441,16 +441,15 @@ static int ipa_ep_apps_lan_cons_setup(void)
 
 	/* Compute the buffer size required to handle the requested
 	 * aggregation byte limit.  The aggr_byte_limit value is
-	 * expressed as a number of KB, so we need to convert it to
-	 * bytes to determine the buffer size.
+	 * expressed as a number of KB, but we derive that value
+	 * after computing the buffer size to use (in bytes).  The
+	 * buffer must be sufficient to hold one IPA_MTU-sized
+	 * packet *after* the limit is reached.
 	 *
-	 * The buffer will be sufficient to hold one IPA_MTU-sized
-	 * packet after the limit is reached.  (The size returned is
-	 * the computed maximum number of data bytes that can be
-	 * held in the buffer--no metadata/headers.)
+	 * (Note that the rx_buffer_size value reflects only the
+	 * space for data, not any standard metadata or headers.)
 	 */
-	byte_limit = aggr_size * SZ_1K;
-	rx_buffer_size = ipa_aggr_byte_limit_buf_size(byte_limit);
+	rx_buffer_size = ipa_aggr_byte_limit_buf_size(aggr_bytes);
 
 	/* Account for the extra IPA_MTU past the limit in the
 	 * buffer, and convert the result to the KB units the
