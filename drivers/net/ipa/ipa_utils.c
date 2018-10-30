@@ -98,7 +98,6 @@ static const struct rsrc_min_max ipa_dst_rsrc_grp[][IPA_RSRC_GROUP_MAX] = {
 };
 
 struct ipa_ep_configuration {
-	bool valid;
 	bool support_flt;
 	enum ipa_seq_type seq_type;
 	struct ipa_gsi_ep_config ipa_gsi_ep_info;
@@ -108,7 +107,6 @@ struct ipa_ep_configuration {
 /* clients not included in the list below are considered as invalid */
 static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 	[IPA_CLIENT_WLAN1_PROD] = {
-		.valid		= true,
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
@@ -119,7 +117,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_USB_PROD] = {
-		.valid		= true,
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
@@ -130,7 +127,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_APPS_LAN_PROD] = {
-		.valid		= true,
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_PKT_PROCESS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
@@ -141,7 +137,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_APPS_WAN_PROD] = {
-		.valid		= true,
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
@@ -152,7 +147,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_APPS_CMD_PROD] = {
-		.valid		= true,
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_DMA_ONLY,
 		.ipa_gsi_ep_info = {
@@ -163,7 +157,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_Q6_LAN_PROD] = {
-		.valid		= true,
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_PKT_PROCESS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
@@ -174,7 +167,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_Q6_WAN_PROD] = {
-		.valid		= true,
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_PKT_PROCESS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
@@ -185,7 +177,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_Q6_CMD_PROD] = {
-		.valid		= true,
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_PKT_PROCESS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
@@ -196,7 +187,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_TEST_CONS] = {
-		.valid		= true,
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
@@ -207,7 +197,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_TEST1_CONS] = {
-		.valid		= true,
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
@@ -219,7 +208,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 	},
 	/* Only for testing */
 	[IPA_CLIENT_TEST_PROD] = {
-		.valid		= true,
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
@@ -230,7 +218,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_TEST1_PROD] = {
-		.valid		= true,
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
@@ -241,7 +228,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_TEST2_PROD] = {
-		.valid		= true,
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
@@ -252,7 +238,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_TEST3_PROD] = {
-		.valid		= true,
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
@@ -263,7 +248,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_TEST4_PROD] = {
-		.valid		= true,
 		.support_flt	= true,
 		.seq_type	= IPA_SEQ_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 		.ipa_gsi_ep_info = {
@@ -274,7 +258,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_WLAN1_CONS] = {
-		.valid		= true,
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
@@ -285,7 +268,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_WLAN2_CONS] = {
-		.valid		= true,
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
@@ -296,7 +278,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_WLAN3_CONS] = {
-		.valid		= true,
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
@@ -307,7 +288,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_USB_CONS] = {
-		.valid		= true,
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
@@ -318,7 +298,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_USB_DPL_CONS] = {
-		.valid		= true,
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
@@ -329,7 +308,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_APPS_LAN_CONS] = {
-		.valid		= true,
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
@@ -340,7 +318,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_APPS_WAN_CONS] = {
-		.valid		= true,
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
@@ -351,7 +328,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_Q6_LAN_CONS] = {
-		.valid		= true,
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
@@ -362,7 +338,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_Q6_WAN_CONS] = {
-		.valid		= true,
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
@@ -374,7 +349,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 	},
 	/* Only for testing */
 	[IPA_CLIENT_TEST2_CONS] = {
-		.valid		= true,
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
@@ -385,7 +359,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_TEST3_CONS] = {
-		.valid		= true,
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
@@ -396,7 +369,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 		},
 	},
 	[IPA_CLIENT_TEST4_CONS] = {
-		.valid		= true,
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
@@ -408,7 +380,6 @@ static const struct ipa_ep_configuration ipa_ep_configuration[] = {
 	},
 /* Dummy consumer (endpoint 31) is used in L2TP rt rule */
 	[IPA_CLIENT_DUMMY_CONS] = {
-		.valid		= true,
 		.support_flt	= false,
 		.seq_type	= IPA_SEQ_INVALID,
 		.ipa_gsi_ep_info = {
