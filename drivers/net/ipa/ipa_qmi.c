@@ -200,6 +200,9 @@ static void ipa_init_driver_rsp_fn(struct qmi_handle *qmi,
 				   struct qmi_txn *txn,
 				   const void *decoded)
 {
+	txn->result = 0;	/* IPA_QMI_INIT_DRIVER request was successful */
+	complete(&txn->completion);
+
 	ipa_handshake_complete(qmi, sq, true);
 }
 
@@ -319,6 +322,8 @@ ipa_client_new_server(struct qmi_handle *qmi, struct qmi_service *svc)
 	ret = qmi_send_request(qmi, &sq, txn, IPA_QMI_INIT_DRIVER,
 			       IPA_QMI_INIT_DRIVER_REQ_SZ,
 			       ipa_init_modem_driver_req_ei, req);
+	if (!ret)
+		ret = qmi_txn_wait(txn, MAX_SCHEDULE_TIMEOUT);
 	if (ret) {
 		qmi_txn_cancel(txn);
 		kfree(txn);
