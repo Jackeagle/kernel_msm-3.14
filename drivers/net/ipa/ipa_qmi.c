@@ -89,10 +89,11 @@ static int ipa_send_master_driver_init_complete_ind(struct qmi_handle *qmi,
  * should be sent, it calls ipa_send_master_driver_init_complete_ind()
  * to send it.
  */
-static int ipa_handshake_complete(struct qmi_handle *qmi,
+static void ipa_handshake_complete(struct qmi_handle *qmi,
 				  struct sockaddr_qrtr *sq, bool init_driver)
 {
 	bool send_it;
+	int ret;
 
 	if (init_driver) {
 		init_driver_response_received = true;
@@ -102,9 +103,11 @@ static int ipa_handshake_complete(struct qmi_handle *qmi,
 		send_it = init_driver_response_received;
 	}
 	if (!send_it)
-		return 0;
+		return;
 
-	return ipa_send_master_driver_init_complete_ind(qmi, sq);
+	ret = ipa_send_master_driver_init_complete_ind(qmi, sq);
+	if (ret)
+		ipa_err("error %d sending init complete indication\n", ret);
 }
 
 /* Callback function to handle an INDICATION_REGISTER request message
@@ -135,14 +138,10 @@ static void ipa_indication_register_fn(struct qmi_handle *qmi,
 	ret = qmi_send_response(qmi, sq, txn, IPA_QMI_INDICATION_REGISTER,
 				IPA_QMI_INDICATION_REGISTER_RSP_SZ,
 				ipa_indication_register_rsp_ei, &rsp);
-	if (ret) {
-		ipa_err("error %d sending response\n", ret);
-		return;
-	}
-
-	ret = ipa_handshake_complete(qmi, sq, false);
 	if (ret)
-		ipa_err("error %d completing handshake\n", ret);
+		ipa_err("error %d sending response\n", ret);
+	else
+		ipa_handshake_complete(qmi, sq, false);
 }
 
 /* Callback function to handle a DRIVER_INIT_COMPLETE request message
@@ -201,13 +200,7 @@ static void ipa_init_driver_rsp_fn(struct qmi_handle *qmi,
 				   struct qmi_txn *txn,
 				   const void *decoded)
 {
-	int ret;
-
-	kfree(txn);
-
-	ret = ipa_handshake_complete(qmi, sq, true);
-	if (ret)
-		ipa_err("error %d completing handshake\n", ret);
+	ipa_handshake_complete(qmi, sq, true);
 }
 
 /* The client handles one response message type sent by the modem. */
