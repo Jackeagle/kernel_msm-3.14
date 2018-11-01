@@ -403,7 +403,7 @@ static void gsi_isr_evt_ctrl(struct gsi *gsi)
 }
 
 static void
-handle_glob_chan_err(struct gsi *gsi, u32 err_ee, u32 channel_id, u32 code)
+gsi_isr_glob_chan_err(struct gsi *gsi, u32 err_ee, u32 channel_id, u32 code)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 
@@ -444,7 +444,7 @@ handle_glob_chan_err(struct gsi *gsi, u32 err_ee, u32 channel_id, u32 code)
 }
 
 static void
-handle_glob_evt_err(struct gsi *gsi, u32 err_ee, u32 evt_ring_id, u32 code)
+gsi_isr_glob_evt_err(struct gsi *gsi, u32 err_ee, u32 evt_ring_id, u32 code)
 {
 	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
 
@@ -489,10 +489,10 @@ static void gsi_isr_glob_err(struct gsi *gsi, u32 err)
 
 	switch (log->err_type) {
 	case GSI_ERR_TYPE_CHAN:
-		handle_glob_chan_err(gsi, log->ee, log->virt_idx, log->code);
+		gsi_isr_glob_chan_err(gsi, log->ee, log->virt_idx, log->code);
 		break;
 	case GSI_ERR_TYPE_EVT:
-		handle_glob_evt_err(gsi, log->ee, log->virt_idx, log->code);
+		gsi_isr_glob_evt_err(gsi, log->ee, log->virt_idx, log->code);
 		break;
 	default:
 		WARN_ON(1);
