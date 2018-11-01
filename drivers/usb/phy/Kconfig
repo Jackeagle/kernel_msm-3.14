@@ -183,4 +183,14 @@ config USB_ULPI_VIEWPORT
 	  Provides read/write operations to the ULPI phy register set for
 	  controllers with a viewport register (e.g. Chipidea/ARC controllers).
 
+config MSM_SNPS_FEMTO_PHY
+	tristate "MSM SNPS HSUSB PHY Driver"
+	depends on ARCH_QCOM
+	select USB_PHY
+	help
+	  Enable this to support the 28nm HSUSB PHY on MSM chips. This driver
+	  supports the high-speed PHY which is usually paired with either
+	  the ChipIdea or Synopsys DWC3 USB IPs on MSM SOCs. This driver expects
+	  to configure the PHY with a dedicated register I/O memory region.
+
 endmenu

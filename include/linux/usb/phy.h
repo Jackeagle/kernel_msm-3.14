@@ -15,6 +15,9 @@
 #include <linux/usb.h>
 #include <uapi/linux/usb/charger.h>
 
+#define PHY_HSFS_MODE	BIT(8)
+#define PHY_LS_MODE	BIT(9)
+
 enum usb_phy_interface {
 	USBPHY_INTERFACE_MODE_UNKNOWN,
 	USBPHY_INTERFACE_MODE_UTMI,
