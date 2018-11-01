@@ -12,8 +12,8 @@
 #include <linux/platform_device.h>
 #include <linux/delay.h>
 #include <linux/qcom_scm.h>
+#include <linux/bitfield.h>
 
-#include "field_mask.h"
 #include "ipa_dma.h"
 #include "ipa_i.h"
 #include "gsi.h"
@@ -309,7 +309,7 @@ static void _gsi_irq_control_all(struct gsi *gsi, bool enable)
 	gsi_writel(gsi, val, GSI_CNTXT_SRC_IEOB_IRQ_MSK_OFFS);
 	gsi_writel(gsi, val, GSI_CNTXT_GLOB_IRQ_EN_OFFS);
 	/* Never enable GSI_BREAK_POINT */
-	val &= ~field_gen(1, EN_BREAK_POINT_FMASK);
+	val &= ~FIELD_PREP(EN_BREAK_POINT_FMASK, 1);
 	gsi_writel(gsi, val, GSI_CNTXT_GSI_IRQ_EN_OFFS);
 }
 
@@ -337,7 +337,7 @@ static enum gsi_channel_state gsi_channel_state(struct gsi *gsi, u32 channel_id)
 {
 	u32 val = gsi_readl(gsi, GSI_CH_C_CNTXT_0_OFFS(channel_id));
 
-	return (enum gsi_channel_state)field_val(val, CHSTATE_FMASK);
+	return (enum gsi_channel_state)FIELD_GET(CHSTATE_FMASK, val);
 }
 
 static enum gsi_evt_ring_state
@@ -345,7 +345,7 @@ gsi_evt_ring_state(struct gsi *gsi, u32 evt_ring_id)
 {
 	u32 val = gsi_readl(gsi, GSI_EV_CH_E_CNTXT_0_OFFS(evt_ring_id));
 
-	return (enum gsi_evt_ring_state)field_val(val, EV_CHSTATE_FMASK);
+	return (enum gsi_evt_ring_state)FIELD_GET(EV_CHSTATE_FMASK, val);
 }
 
 static void gsi_isr_chan_ctrl(struct gsi *gsi)
@@ -805,14 +805,14 @@ static u32 gsi_channel_max(struct gsi *gsi)
 {
 	u32 val = gsi_readl(gsi, GSI_GSI_HW_PARAM_2_OFFS);
 
-	return field_val(val, NUM_CH_PER_EE_FMASK);
+	return FIELD_GET(NUM_CH_PER_EE_FMASK, val);
 }
 
 static u32 gsi_evt_ring_max(struct gsi *gsi)
 {
 	u32 val = gsi_readl(gsi, GSI_GSI_HW_PARAM_2_OFFS);
 
-	return field_val(val, NUM_EV_PER_EE_FMASK);
+	return FIELD_GET(NUM_EV_PER_EE_FMASK, val);
 }
 
 /* Zero bits in an event bitmap represent event numbers available
@@ -904,12 +904,12 @@ static void gsi_evt_ring_program(struct gsi *gsi, u32 evt_ring_id)
 
 	ipa_debug("intf GPI intr IRQ RE size %u\n", GSI_RING_ELEMENT_SIZE);
 
-	val = field_gen(GSI_EVT_CHTYPE_GPI_EV, EV_CHTYPE_FMASK);
-	val |= field_gen(1, EV_INTYPE_FMASK);
-	val |= field_gen(GSI_RING_ELEMENT_SIZE, EV_ELEMENT_SIZE_FMASK);
+	val = FIELD_PREP(EV_CHTYPE_FMASK, GSI_EVT_CHTYPE_GPI_EV);
+	val |= FIELD_PREP(EV_INTYPE_FMASK, 1);
+	val |= FIELD_PREP(EV_ELEMENT_SIZE_FMASK, GSI_RING_ELEMENT_SIZE);
 	gsi_writel(gsi, val, GSI_EV_CH_E_CNTXT_0_OFFS(evt_ring_id));
 
-	val = field_gen((u32)evt_ring->ring.mem.size, EV_R_LENGTH_FMASK);
+	val = FIELD_PREP(EV_R_LENGTH_FMASK, (u32)evt_ring->ring.mem.size);
 	gsi_writel(gsi, val, GSI_EV_CH_E_CNTXT_1_OFFS(evt_ring_id));
 
 	/* The context 2 and 3 registers store the low-order and
@@ -922,8 +922,8 @@ static void gsi_evt_ring_program(struct gsi *gsi, u32 evt_ring_id)
 	val = phys >> 32;
 	gsi_writel(gsi, val, GSI_EV_CH_E_CNTXT_3_OFFS(evt_ring_id));
 
-	val = field_gen(int_modt, MODT_FMASK);
-	val |= field_gen(int_modc, MODC_FMASK);
+	val = FIELD_PREP(MODT_FMASK, int_modt);
+	val |= FIELD_PREP(MODC_FMASK, int_modc);
 	gsi_writel(gsi, val, GSI_EV_CH_E_CNTXT_8_OFFS(evt_ring_id));
 
 	/* No MSI write data, and MSI address high and low address is 0 */
@@ -1000,8 +1000,8 @@ static bool evt_ring_command(struct gsi *gsi, u32 evt_ring_id,
 
 	reinit_completion(compl);
 
-	val = field_gen(evt_ring_id, EV_CHID_FMASK);
-	val |= field_gen((u32)op, EV_OPCODE_FMASK);
+	val = FIELD_PREP(EV_CHID_FMASK, evt_ring_id);
+	val |= FIELD_PREP(EV_OPCODE_FMASK, (u32)op);
 
 	return command(gsi, GSI_EV_CH_CMD_OFFS, val, compl);
 }
@@ -1015,8 +1015,8 @@ channel_command(struct gsi *gsi, u32 channel_id, enum gsi_ch_cmd_opcode op)
 
 	reinit_completion(compl);
 
-	val = field_gen(channel_id, CH_CHID_FMASK);
-	val |= field_gen((u32)op, CH_OPCODE_FMASK);
+	val = FIELD_PREP(CH_CHID_FMASK, channel_id);
+	val |= FIELD_PREP(CH_OPCODE_FMASK, (u32)op);
 
 	return command(gsi, GSI_CH_CMD_OFFS, val, compl);
 }
@@ -1136,16 +1136,16 @@ static void gsi_channel_program(struct gsi *gsi, u32 channel_id,
 				u32 evt_ring_id, bool doorbell_enable)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
-	u32 low_weight = channel->priority ? field_max(WRR_WEIGHT_FMASK) : 0;
+	u32 low_weight = channel->priority ? FIELD_MAX(WRR_WEIGHT_FMASK) : 0;
 	u32 val;
 
-	val = field_gen(GSI_CHANNEL_PROTOCOL_GPI, CHTYPE_PROTOCOL_FMASK);
-	val |= field_gen(channel->from_ipa ? 0 : 1, CHTYPE_DIR_FMASK);
-	val |= field_gen(evt_ring_id, ERINDEX_FMASK);
-	val |= field_gen(GSI_RING_ELEMENT_SIZE, ELEMENT_SIZE_FMASK);
+	val = FIELD_PREP(CHTYPE_PROTOCOL_FMASK, GSI_CHANNEL_PROTOCOL_GPI);
+	val |= FIELD_PREP(CHTYPE_DIR_FMASK, channel->from_ipa ? 0 : 1);
+	val |= FIELD_PREP(ERINDEX_FMASK, evt_ring_id);
+	val |= FIELD_PREP(ELEMENT_SIZE_FMASK, GSI_RING_ELEMENT_SIZE);
 	gsi_writel(gsi, val, GSI_CH_C_CNTXT_0_OFFS(channel_id));
 
-	val = field_gen(channel->ring.mem.size, R_LENGTH_FMASK);
+	val = FIELD_PREP(R_LENGTH_FMASK, channel->ring.mem.size);
 	gsi_writel(gsi, val, GSI_CH_C_CNTXT_1_OFFS(channel_id));
 
 	/* The context 2 and 3 registers store the low-order and
@@ -1158,9 +1158,9 @@ static void gsi_channel_program(struct gsi *gsi, u32 channel_id,
 	val = channel->ring.mem.phys >> 32;
 	gsi_writel(gsi, val, GSI_CH_C_CNTXT_3_OFFS(channel_id));
 
-	val = field_gen(low_weight, WRR_WEIGHT_FMASK);
-	val |= field_gen(GSI_MAX_PREFETCH, MAX_PREFETCH_FMASK);
-	val |= field_gen(doorbell_enable ? 1 : 0, USE_DB_ENG_FMASK);
+	val = FIELD_PREP(WRR_WEIGHT_FMASK, low_weight);
+	val |= FIELD_PREP(MAX_PREFETCH_FMASK, GSI_MAX_PREFETCH);
+	val |= FIELD_PREP(USE_DB_ENG_FMASK, doorbell_enable ? 1 : 0);
 	gsi_writel(gsi, val, GSI_CH_C_QOS_OFFS(channel_id));
 }
 
