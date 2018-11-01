@@ -350,13 +350,14 @@ gsi_evt_ring_state(struct gsi *gsi, u32 evt_ring_id)
 
 static void gsi_isr_chan_ctrl(struct gsi *gsi)
 {
-	u32 valid_mask = GENMASK(gsi->channel_max - 1, 0);
 	u32 channel_mask;
+	u32 valid_mask;
 
 	channel_mask = gsi_readl(gsi, GSI_CNTXT_SRC_CH_IRQ_OFFS);
 	gsi_writel(gsi, channel_mask, GSI_CNTXT_SRC_CH_IRQ_CLR_OFFS);
 
 	ipa_debug("channel_mask %x\n", channel_mask);
+	valid_mask = GENMASK(gsi->channel_max - 1, 0);
 	if (channel_mask & ~valid_mask) {
 		ipa_err("invalid channels (> %u)\n", gsi->channel_max);
 		channel_mask &= valid_mask;
@@ -376,13 +377,14 @@ static void gsi_isr_chan_ctrl(struct gsi *gsi)
 
 static void gsi_isr_evt_ctrl(struct gsi *gsi)
 {
-	u32 valid_mask = GENMASK(gsi->evt_ring_max - 1, 0);
+	u32 valid_mask;
 	u32 evt_mask;
 
 	evt_mask = gsi_readl(gsi, GSI_CNTXT_SRC_EV_CH_IRQ_OFFS);
 	gsi_writel(gsi, evt_mask, GSI_CNTXT_SRC_EV_CH_IRQ_CLR_OFFS);
 
 	ipa_debug("evt_mask %x\n", evt_mask);
+	valid_mask = GENMASK(gsi->evt_ring_max - 1, 0);
 	if (evt_mask & ~valid_mask) {
 		ipa_err("invalid events (> %u)\n", gsi->evt_ring_max);
 		evt_mask &= valid_mask;
@@ -691,12 +693,13 @@ static void gsi_isr_ioeb(struct gsi *gsi)
 
 static void gsi_isr_inter_ee_chan_ctrl(struct gsi *gsi)
 {
-	u32 valid_mask = GENMASK(gsi->channel_max - 1, 0);
 	u32 channel_mask;
+	u32 valid_mask;
 
 	channel_mask = gsi_readl(gsi, GSI_INTER_EE_SRC_CH_IRQ_OFFS);
 	gsi_writel(gsi, channel_mask, GSI_INTER_EE_SRC_CH_IRQ_CLR_OFFS);
 
+	valid_mask = GENMASK(gsi->channel_max - 1, 0);
 	if (channel_mask & ~valid_mask) {
 		ipa_err("invalid channels (> %u)\n", gsi->channel_max);
 		channel_mask &= valid_mask;
@@ -713,12 +716,13 @@ static void gsi_isr_inter_ee_chan_ctrl(struct gsi *gsi)
 
 static void gsi_isr_inter_ee_evt_ctrl(struct gsi *gsi)
 {
-	u32 valid_mask = GENMASK(gsi->evt_ring_max - 1, 0);
+	u32 valid_mask;
 	u32 evt_mask;
 
 	evt_mask = gsi_readl(gsi, GSI_INTER_EE_SRC_EV_CH_IRQ_OFFS);
 	gsi_writel(gsi, evt_mask, GSI_INTER_EE_SRC_EV_CH_IRQ_CLR_OFFS);
 
+	valid_mask = GENMASK(gsi->evt_ring_max - 1, 0);
 	if (evt_mask & ~valid_mask) {
 		ipa_err("invalid events (> %u)\n", gsi->evt_ring_max);
 		evt_mask &= valid_mask;
@@ -758,9 +762,10 @@ static u32 gsi_isr_type(struct gsi *gsi)
 static irqreturn_t gsi_isr(int irq, void *dev_id)
 {
 	struct gsi *gsi = dev_id;
-	u32 cnt = 0;
 	u32 type;
+	u32 cnt;
 
+	cnt = 0;
 	while ((type = gsi_isr_type(gsi))) {
 		do {
 			u32 single = BIT(__ffs(type));
@@ -829,9 +834,9 @@ static u32 gsi_evt_bmap_init(u32 evt_ring_max)
 
 int gsi_register_device(struct gsi *gsi)
 {
-	u32 val;
-	u32 channel_max;
 	u32 evt_ring_max;
+	u32 channel_max;
+	u32 val;
 	int ret;
 
 	val = gsi_readl(gsi, GSI_GSI_STATUS_OFFS);
@@ -897,10 +902,14 @@ void gsi_deregister_device(struct gsi *gsi)
 static void gsi_evt_ring_program(struct gsi *gsi, u32 evt_ring_id)
 {
 	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
-	u64 phys = evt_ring->ring.mem.phys;
-	u32 int_modt = evt_ring->moderation ? IPA_GSI_EVT_RING_INT_MODT : 0;
-	u32 int_modc = 1;	/* moderation always comes from channel*/
+	u32 int_modt;
+	u32 int_modc;
+	u64 phys;
 	u32 val;
+
+	phys = evt_ring->ring.mem.phys;
+	int_modt = evt_ring->moderation ? IPA_GSI_EVT_RING_INT_MODT : 0;
+	int_modc = 1;	/* moderation always comes from channel*/
 
 	ipa_debug("intf GPI intr IRQ RE size %u\n", GSI_RING_ELEMENT_SIZE);
 
@@ -1024,9 +1033,9 @@ channel_command(struct gsi *gsi, u32 channel_id, enum gsi_ch_cmd_opcode op)
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
 static int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 {
-	u32 evt_ring_id;
 	struct gsi_evt_ring *evt_ring;
 	unsigned long flags;
+	u32 evt_ring_id;
 	u32 val;
 	int ret;
 
@@ -1136,7 +1145,7 @@ static void gsi_channel_program(struct gsi *gsi, u32 channel_id,
 				u32 evt_ring_id, bool doorbell_enable)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
-	u32 low_weight = channel->priority ? FIELD_MAX(WRR_WEIGHT_FMASK) : 0;
+	u32 low_weight;
 	u32 val;
 
 	val = FIELD_PREP(CHTYPE_PROTOCOL_FMASK, GSI_CHANNEL_PROTOCOL_GPI);
@@ -1158,6 +1167,7 @@ static void gsi_channel_program(struct gsi *gsi, u32 channel_id,
 	val = channel->ring.mem.phys >> 32;
 	gsi_writel(gsi, val, GSI_CH_C_CNTXT_3_OFFS(channel_id));
 
+	low_weight = channel->priority ? FIELD_MAX(WRR_WEIGHT_FMASK) : 0;
 	val = FIELD_PREP(WRR_WEIGHT_FMASK, low_weight);
 	val |= FIELD_PREP(MAX_PREFETCH_FMASK, GSI_MAX_PREFETCH);
 	val |= FIELD_PREP(USE_DB_ENG_FMASK, doorbell_enable ? 1 : 0);
@@ -1169,11 +1179,12 @@ int gsi_channel_alloc(struct gsi *gsi, u32 channel_id, u32 channel_count,
 		      bool moderation, void *notify_data)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
-	u32 evt_ring_count = channel_count * evt_ring_mult;
+	u32 evt_ring_count;
 	u32 evt_ring_id;
 	void **user_data;
 	int ret;
 
+	evt_ring_count = channel_count * evt_ring_mult;
 	ret = gsi_evt_ring_alloc(gsi, evt_ring_count, moderation);
 	if (ret < 0)
 		return ret;
@@ -1236,10 +1247,11 @@ err_evt_ring_free:
 static void __gsi_channel_scratch_write(struct gsi *gsi, u32 channel_id)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
+	struct gsi_gpi_channel_scratch *gpi;
 	union gsi_channel_scratch scr = { };
-	struct gsi_gpi_channel_scratch *gpi = &scr.gpi;
 	u32 val;
 
+	gpi = &scr.gpi;
 	/* See comments above definition of gsi_gpi_channel_scratch */
 	gpi->max_outstanding_tre = channel->tlv_count * GSI_RING_ELEMENT_SIZE;
 	gpi->outstanding_threshold = 2 * GSI_RING_ELEMENT_SIZE;
@@ -1364,14 +1376,16 @@ free_lock:
 int gsi_channel_reset(struct gsi *gsi, u32 channel_id)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
-	u32 evt_ring_id = gsi_evt_ring_id(gsi, channel->evt_ring);
-	bool reset_done = false;
+	u32 evt_ring_id;
+	bool reset_done;
 
 	if (channel->state != GSI_CHANNEL_STATE_STOPPED) {
 		ipa_err("bad state %d\n", channel->state);
 		return -ENOTSUPP;
 	}
 
+	evt_ring_id = gsi_evt_ring_id(gsi, channel->evt_ring);
+	reset_done = false;
 	mutex_lock(&gsi->mlock);
 reset:
 
@@ -1409,11 +1423,12 @@ reset:
 void gsi_channel_free(struct gsi *gsi, u32 channel_id)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
-	u32 evt_ring_id = gsi_evt_ring_id(gsi, channel->evt_ring);
+	u32 evt_ring_id;
 	bool completed;
 
 	ipa_bug_on(channel->state != GSI_CHANNEL_STATE_ALLOCATED);
 
+	evt_ring_id = gsi_evt_ring_id(gsi, channel->evt_ring);
 	mutex_lock(&gsi->mlock);
 
 	gsi->ch_dbg[channel_id].ch_de_alloc++;
@@ -1505,10 +1520,13 @@ int gsi_channel_queue(struct gsi *gsi, u32 channel_id, u16 num_xfers,
 int gsi_channel_poll(struct gsi *gsi, u32 channel_id)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
-	struct gsi_evt_ring *evt_ring = channel->evt_ring;
-	u32 evt_ring_id = gsi_evt_ring_id(gsi, evt_ring);
+	struct gsi_evt_ring *evt_ring;
 	unsigned long flags;
+	u32 evt_ring_id;
 	int size;
+
+	evt_ring = channel->evt_ring;
+	evt_ring_id = gsi_evt_ring_id(gsi, evt_ring);
 
 	spin_lock_irqsave(&evt_ring->ring.slock, flags);
 
@@ -1542,15 +1560,19 @@ int gsi_channel_poll(struct gsi *gsi, u32 channel_id)
 static void gsi_channel_mode_set(struct gsi *gsi, u32 channel_id, bool polling)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
-	u32 evt_ring_id = gsi_evt_ring_id(gsi, channel->evt_ring);
 	unsigned long flags;
+	u32 evt_ring_id;
+
+	evt_ring_id = gsi_evt_ring_id(gsi, channel->evt_ring);
 
 	spin_lock_irqsave(&gsi->slock, flags);
+
 	if (polling)
 		gsi_irq_disable_event(gsi, evt_ring_id);
 	else
 		gsi_irq_enable_event(gsi, evt_ring_id);
 	atomic_set(&channel->poll_mode, polling ? 1 : 0);
+
 	spin_unlock_irqrestore(&gsi->slock, flags);
 }
 
@@ -1567,7 +1589,9 @@ void gsi_channel_intr_disable(struct gsi *gsi, u32 channel_id)
 void gsi_channel_config(struct gsi *gsi, u32 channel_id, bool doorbell_enable)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
-	u32 evt_ring_id = gsi_evt_ring_id(gsi, channel->evt_ring);
+	u32 evt_ring_id;
+
+	evt_ring_id = gsi_evt_ring_id(gsi, channel->evt_ring);
 
 	mutex_lock(&channel->mlock);
 

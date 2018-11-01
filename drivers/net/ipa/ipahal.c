@@ -296,8 +296,8 @@ ipahal_dma_shared_mem_write_pyld(struct ipa_dma_mem *mem, u32 offset)
 struct ipahal_imm_cmd_pyld *
 ipahal_hdr_init_local_pyld(struct ipa_dma_mem *mem, u32 offset)
 {
-	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_hdr_init_local *data;
+	struct ipahal_imm_cmd_pyld *pyld;
 	u16 opcode;
 
 	ipa_assert(mem->size < 1 << 12);  /* size_hdr_table is 12 bits wide */
@@ -388,13 +388,14 @@ ipahal_ip_v6_filter_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
 struct ipahal_imm_cmd_pyld *
 ipahal_dma_task_32b_addr_pyld(struct ipa_dma_mem *mem)
 {
-	struct ipahal_imm_cmd_pyld *pyld;
 	struct ipa_imm_cmd_hw_dma_task_32b_addr *data;
-	u16 opcode = IPA_IMM_CMD_DMA_TASK_32B_ADDR;
+	struct ipahal_imm_cmd_pyld *pyld;
+	u16 opcode;
 
 	/* size1 and packet_size are both 16 bits wide */
 	ipa_assert(mem->size < 1 << 16);
 
+	opcode = IPA_IMM_CMD_DMA_TASK_32B_ADDR;
 	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
 	if (!pyld)
 		return NULL;
@@ -477,14 +478,16 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 			     struct ipahal_pkt_status *status)
 {
 	const struct ipa_pkt_status_hw *hw_status = unparsed_status;
-	u8 status_opcode = (u8)hw_status->status_opcode;
-	u8 nat_type = (u8)hw_status->nat_type;
 	enum ipahal_pkt_status_exception exception;
+	u8 status_opcode;
 	bool is_ipv6;
+	u8 nat_type;
 
 	memset(status, 0, sizeof(*status));
 
+	status_opcode = (u8)hw_status->status_opcode;
 	is_ipv6 = (hw_status->status_mask & 0x80) ? false : true;
+	nat_type = (u8)hw_status->nat_type;
 
 	status->pkt_len = hw_status->pkt_len;
 	status->endp_src_idx = hw_status->endp_src_idx;

@@ -22,6 +22,16 @@
 #include "ipa_i.h"
 #include "ipahal.h"
 
+/* Interconnect path bandwidths (each times 1000 bytes per second) */
+#define IPA_MEMORY_AVG			80000
+#define IPA_MEMORY_PEAK			600000
+
+#define IPA_IMEM_AVG			80000
+#define IPA_IMEM_PEAK			350000
+
+#define IPA_CONFIG_AVG			40000
+#define IPA_CONFIG_PEAK			40000
+
 #define IPA_BCR_REG_VAL			0x0000003b
 
 #define IPA_GSI_DMA_TASK_TIMEOUT	15	/* milliseconds */
@@ -631,16 +641,6 @@ void ipa_cfg_ep(u32 ep_id)
 	ipa_endp_status_write(ep_id);
 }
 
-/* Interconnect path bandwidths (each times 1000 bytes per second) */
-#define IPA_MEMORY_AVG	80000
-#define IPA_MEMORY_PEAK	600000
-
-#define IPA_IMEM_AVG	80000
-#define IPA_IMEM_PEAK	350000
-
-#define IPA_CONFIG_AVG	40000
-#define IPA_CONFIG_PEAK	40000
-
 int ipa_interconnect_init(struct device *dev)
 {
 	struct icc_path *path;
@@ -858,8 +858,11 @@ void ipa_ep_suspend_all(void)
 static void ipa_ep_cons_resume(enum ipa_client_type client)
 {
 	struct ipa_reg_endp_init_ctrl init_ctrl;
-	u32 ep_id = ipa_client_ep_id(client);
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep;
+	u32 ep_id;
+
+	ep_id = ipa_client_ep_id(client);
+	ep = &ipa_ctx->ep[ep_id];
 
 	ipa_reg_endp_init_ctrl(&init_ctrl, false);
 	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
@@ -883,12 +886,8 @@ void ipa_ep_resume_all(void)
 void ipa_cfg_default_route(enum ipa_client_type client)
 {
 	struct ipa_reg_route route;
-	u32 ep_id = ipa_client_ep_id(client);
 
-	ipa_debug("dis=0, def_endpoint=%u, hdr_tbl=1 hdr_ofst=0\n", ep_id);
-	ipa_debug("frag_def_endpoint=%u def_retain_hdr=1\n", ep_id);
-
-	ipa_reg_route(&route, ep_id);
+	ipa_reg_route(&route, ipa_client_ep_id(client));
 	ipa_write_reg_fields(IPA_ROUTE, &route);
 }
 

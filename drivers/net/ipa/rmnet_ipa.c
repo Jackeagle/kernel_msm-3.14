@@ -157,9 +157,11 @@ static int ipa_wwan_xmit(struct sk_buff *skb, struct net_device *dev)
 static void apps_ipa_tx_complete_notify(void *priv, enum ipa_dp_evt_type evt,
 					unsigned long data)
 {
-	struct sk_buff *skb = (struct sk_buff *)data;
-	struct net_device *dev = (struct net_device *)priv;
 	struct ipa_wwan_private *wwan_ptr;
+	struct net_device *dev = priv;
+	struct sk_buff *skb;
+
+	skb = (struct sk_buff *)data;
 
 	if (dev != rmnet_ipa_ctx->dev) {
 		ipa_debug("Received pre-SSR packet completion\n");
@@ -198,9 +200,10 @@ static void apps_ipa_tx_complete_notify(void *priv, enum ipa_dp_evt_type evt,
 static void apps_ipa_packet_receive_notify(void *priv, enum ipa_dp_evt_type evt,
 					   unsigned long data)
 {
+	struct ipa_wwan_private *wwan_ptr;
 	struct net_device *dev = priv;
-	struct ipa_wwan_private *wwan_ptr = netdev_priv(dev);
 
+	wwan_ptr = netdev_priv(dev);
 	if (evt == IPA_RECEIVE) {
 		struct sk_buff *skb = (struct sk_buff *)data;
 		int ret;
@@ -230,18 +233,29 @@ static void apps_ipa_packet_receive_notify(void *priv, enum ipa_dp_evt_type evt,
 static int handle_ingress_format(struct net_device *dev,
 				 struct rmnet_ioctl_extended_s *in)
 {
-	enum ipa_client_type client = IPA_CLIENT_APPS_WAN_CONS;
-	u32 channel_count = IPA_APPS_WWAN_CONS_RING_COUNT;
-	u32 header_size = sizeof(struct rmnet_map_header_s);
-	u32 metadata_offset = offsetof(struct rmnet_map_header_s, mux_id);
-	u32 length_offset = offsetof(struct rmnet_map_header_s, pkt_len);
-	enum ipa_cs_offload_en offload_type = IPA_CS_OFFLOAD_NONE;
-	u32 aggr_size = IPA_GENERIC_AGGR_BYTE_LIMIT;
-	u32 aggr_count = IPA_GENERIC_AGGR_PKT_LIMIT;
-	bool aggr_active = false;
+	enum ipa_cs_offload_en offload_type;
+	enum ipa_client_type client;
+	u32 metadata_offset;
 	u32 rx_buffer_size;
+	u32 channel_count;
+	u32 length_offset;
+	u32 header_size;
+	bool aggr_active;
+	u32 aggr_bytes;
+	u32 aggr_count;
+	u32 aggr_size;	/* in KB */
 	u32 ep_id;
 	int ret;
+
+	client = IPA_CLIENT_APPS_WAN_CONS;
+	channel_count = IPA_APPS_WWAN_CONS_RING_COUNT;
+	header_size = sizeof(struct rmnet_map_header_s);
+	metadata_offset = offsetof(struct rmnet_map_header_s, mux_id);
+	length_offset = offsetof(struct rmnet_map_header_s, pkt_len);
+	offload_type = IPA_CS_OFFLOAD_NONE;
+	aggr_bytes = IPA_GENERIC_AGGR_BYTE_LIMIT;
+	aggr_count = IPA_GENERIC_AGGR_PKT_LIMIT;
+	aggr_active = false;
 
 	if (in->u.data & RMNET_IOCTL_INGRESS_FORMAT_CHECKSUM)
 		offload_type = IPA_CS_OFFLOAD_DL;
@@ -317,18 +331,29 @@ out_unlock:
 static int handle_egress_format(struct net_device *dev,
 				struct rmnet_ioctl_extended_s *e)
 {
-	enum ipa_client_type client = IPA_CLIENT_APPS_WAN_PROD;
-	enum ipa_client_type dst_client = IPA_CLIENT_APPS_LAN_CONS;
-	u32 channel_count = IPA_APPS_WWAN_PROD_RING_COUNT;
-	u32 header_size = sizeof(struct rmnet_map_header_s);
-	enum ipa_cs_offload_en offload_type = IPA_CS_OFFLOAD_NONE;
-	enum ipa_aggr_en aggr_en = IPA_BYPASS_AGGR;
-	enum ipa_aggr_type aggr_type = 0;	/* ignored if BYPASS */
-	u32 header_offset = 0;
-	u32 length_offset = 0;
-	u32 header_align = 0;
+	enum ipa_cs_offload_en offload_type;
+	enum ipa_client_type dst_client;
+	enum ipa_client_type client;
+	enum ipa_aggr_type aggr_type;
+	enum ipa_aggr_en aggr_en;
+	u32 channel_count;
+	u32 length_offset;
+	u32 header_align;
+	u32 header_offset;
+	u32 header_size;
 	u32 ep_id;
 	int ret;
+
+	client = IPA_CLIENT_APPS_WAN_PROD;
+	dst_client = IPA_CLIENT_APPS_LAN_CONS;
+	channel_count = IPA_APPS_WWAN_PROD_RING_COUNT;
+	header_size = sizeof(struct rmnet_map_header_s);
+	offload_type = IPA_CS_OFFLOAD_NONE;
+	aggr_en = IPA_BYPASS_AGGR;
+	aggr_type = 0;	/* ignored if BYPASS */
+	header_offset = 0;
+	length_offset = 0;
+	header_align = 0;
 
 	if (e->u.data & RMNET_IOCTL_EGRESS_FORMAT_CHECKSUM) {
 		offload_type = IPA_CS_OFFLOAD_UL;
@@ -392,15 +417,16 @@ out_unlock:
 /** ipa_wwan_add_mux_channel() - add a mux_id */
 static int ipa_wwan_add_mux_channel(u32 mux_id)
 {
+	int ret;
 	u32 i;
-	int ret = -EFAULT;
 
 	mutex_lock(&rmnet_ipa_ctx->mux_id_mutex);
 
-	if (rmnet_ipa_ctx->mux_id_count >= MUX_CHANNEL_MAX)
+	if (rmnet_ipa_ctx->mux_id_count >= MUX_CHANNEL_MAX) {
+		ret = -EFAULT;
 		goto out;
+	}
 
-	ret = 0;
 	for (i = 0; i < rmnet_ipa_ctx->mux_id_count; i++)
 		if (mux_id == rmnet_ipa_ctx->mux_id[i])
 			break;
@@ -408,6 +434,7 @@ static int ipa_wwan_add_mux_channel(u32 mux_id)
 	/* Record the mux_id if it hasn't already been seen */
 	if (i == rmnet_ipa_ctx->mux_id_count)
 		rmnet_ipa_ctx->mux_id[rmnet_ipa_ctx->mux_id_count++] = mux_id;
+	ret = 0;
 out:
 	mutex_unlock(&rmnet_ipa_ctx->mux_id_mutex);
 
@@ -491,10 +518,13 @@ copy_out:
 static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 {
 	struct rmnet_ioctl_data_s ioctl_data = { };
-	void __user *data = ifr->ifr_ifru.ifru_data;
-	size_t size = sizeof(ioctl_data);
+	void __user *data;
+	size_t size;
 
 	ipa_debug("cmd 0x%08x", cmd);
+
+	data = ifr->ifr_ifru.ifru_data;
+	size = sizeof(ioctl_data);
 
 	switch (cmd) {
 	/* These features are implied; alternatives are not supported */
@@ -561,9 +591,9 @@ static void ipa_wwan_setup(struct net_device *dev)
 /** ipa_wwan_probe() - Network probe function */
 static int ipa_wwan_probe(struct platform_device *pdev)
 {
-	int ret;
-	struct net_device *dev;
 	struct ipa_wwan_private *wwan_ptr;
+	struct net_device *dev;
+	int ret;
 
 	mutex_init(&rmnet_ipa_ctx->ep_setup_mutex);
 	mutex_init(&rmnet_ipa_ctx->mux_id_mutex);
@@ -784,11 +814,7 @@ void ipa_wwan_cleanup(void)
 
 static int ipa_rmnet_poll(struct napi_struct *napi, int budget)
 {
-	int rcvd_pkts;
-
-	rcvd_pkts = ipa_rx_poll(rmnet_ipa_ctx->wan_cons_ep_id, budget);
-
-	return rcvd_pkts;
+	return ipa_rx_poll(rmnet_ipa_ctx->wan_cons_ep_id, budget);
 }
 
 MODULE_DESCRIPTION("WWAN Network Interface");

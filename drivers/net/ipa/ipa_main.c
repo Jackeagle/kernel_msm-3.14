@@ -68,9 +68,9 @@ struct ipa_context *ipa_ctx = &ipa_ctx_struct;
 
 static int hdr_init_local_cmd(u32 offset, u32 size)
 {
-	struct ipa_dma_mem mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	struct ipa_desc desc = { };
+	struct ipa_dma_mem mem;
 	int ret;
 
 	if (ipa_dma_alloc(&mem, size, GFP_KERNEL))
@@ -96,9 +96,9 @@ err_dma_free:
 
 static int dma_shared_mem_zero_cmd(u32 offset, u32 size)
 {
-	struct ipa_dma_mem mem;
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 	struct ipa_desc desc = { };
+	struct ipa_dma_mem mem;
 	int ret;
 
 	ipa_assert(size > 0);
@@ -145,19 +145,24 @@ int ipa_modem_smem_init(void)
 
 static int ipa_ep_apps_cmd_prod_setup(void)
 {
-	enum ipa_client_type client = IPA_CLIENT_APPS_CMD_PROD;
-	enum ipa_client_type dst_client = IPA_CLIENT_APPS_LAN_CONS;
-	u32 channel_count = IPA_APPS_CMD_PROD_RING_COUNT;
+	enum ipa_client_type dst_client;
+	enum ipa_client_type client;
+	u32 channel_count;
 	u32 ep_id;
 	int ret;
 
 	if (ipa_ctx->cmd_prod_ep_id != IPA_EP_ID_BAD)
 		ret = -EBUSY;
 
+	client = IPA_CLIENT_APPS_CMD_PROD;
+	dst_client = IPA_CLIENT_APPS_LAN_CONS;
+	channel_count = IPA_APPS_CMD_PROD_RING_COUNT;
+
 	ret = ipa_ep_alloc(client);
 	if (ret < 0)
 		return ret;
 	ep_id = ret;
+
 
 	ipa_endp_init_mode_prod(ep_id, IPA_DMA, dst_client);
 	ipa_endp_init_seq_prod(ep_id);
@@ -307,10 +312,10 @@ static int ipa_init_rt4(struct ipa_dma_mem *mem)
  */
 static int ipa_init_rt6(struct ipa_dma_mem *mem)
 {
-	struct ipa_desc desc = { };
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
-	u32 hash_offset;
+	struct ipa_desc desc = { };
 	u32 nhash_offset;
+	u32 hash_offset;
 	int ret;
 
 	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_RT_HASH_OFST;
@@ -334,10 +339,10 @@ static int ipa_init_rt6(struct ipa_dma_mem *mem)
  */
 static int ipa_init_flt4(struct ipa_dma_mem *mem)
 {
-	struct ipa_desc desc = { };
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
-	u32 hash_offset;
+	struct ipa_desc desc = { };
 	u32 nhash_offset;
+	u32 hash_offset;
 	int ret;
 
 	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_FLT_HASH_OFST;
@@ -362,10 +367,10 @@ static int ipa_init_flt4(struct ipa_dma_mem *mem)
  */
 static int ipa_init_flt6(struct ipa_dma_mem *mem)
 {
-	struct ipa_desc desc = { };
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
-	u32 hash_offset;
+	struct ipa_desc desc = { };
 	u32 nhash_offset;
+	u32 hash_offset;
 	int ret;
 
 	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_FLT_HASH_OFST;
@@ -421,14 +426,19 @@ static void ipa_setup_rt_hash_tuple(void)
 
 static int ipa_ep_apps_lan_cons_setup(void)
 {
-	enum ipa_client_type client = IPA_CLIENT_APPS_LAN_CONS;
-	u32 channel_count = IPA_APPS_LAN_CONS_RING_COUNT;
-	u32 aggr_bytes = IPA_GENERIC_AGGR_BYTE_LIMIT;
-	u32 aggr_size;
-	u32 aggr_count = IPA_GENERIC_AGGR_PKT_LIMIT;
+	enum ipa_client_type client;
 	u32 rx_buffer_size;
+	u32 channel_count;
+	u32 aggr_count;
+	u32 aggr_bytes;
+	u32 aggr_size;
 	u32 ep_id;
 	int ret;
+
+	client = IPA_CLIENT_APPS_LAN_CONS;
+	channel_count = IPA_APPS_LAN_CONS_RING_COUNT;
+	aggr_count = IPA_GENERIC_AGGR_PKT_LIMIT;
+	aggr_bytes = IPA_GENERIC_AGGR_BYTE_LIMIT;
 
 	if (aggr_bytes > ipa_reg_aggr_max_byte_limit())
 		return -EINVAL;
@@ -769,8 +779,8 @@ static int ipa_init_interrupts(void)
 
 static void ipa_freeze_clock_vote_and_notify_modem(void)
 {
-	u32 mask;
 	u32 value;
+	u32 mask;
 
 	if (ipa_ctx->smp2p_info.res_sent)
 		return;
@@ -1126,13 +1136,15 @@ ipa_smp2p_irq_exit(struct device *dev, unsigned int irq)
 
 static int ipa_smp2p_init(struct device *dev, bool modem_init)
 {
-	struct device_node *node = dev->of_node;
-	struct qcom_smem_state *valid_state;
 	struct qcom_smem_state *enabled_state;
-	unsigned int valid_bit;
+	struct qcom_smem_state *valid_state;
+	struct device_node *node;
 	unsigned int enabled_bit;
+	unsigned int valid_bit;
 	unsigned int clock_irq;
 	int ret;
+
+	node = dev->of_node;
 
 	ipa_debug("node->name=%s\n", node->name);
 	valid_state = qcom_smem_state_get(dev, "ipa-clock-enabled-valid",
@@ -1213,14 +1225,16 @@ static const struct of_device_id ipa_plat_drv_match[] = {
 
 static int ipa_plat_drv_probe(struct platform_device *pdev)
 {
-	struct device *dev = &pdev->dev;
 	const struct ipa_match_data *match_data;
 	struct resource *res;
+	struct device *dev;
 	bool modem_init;
 	int ret;
 
 	/* We assume we're working on 64-bit hardware */
 	BUILD_BUG_ON(!IS_ENABLED(CONFIG_64BIT));
+
+	dev = &pdev->dev;
 
 	ipa_debug("IPA driver: probing\n");
 

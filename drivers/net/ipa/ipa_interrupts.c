@@ -196,9 +196,10 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 			       ipa_irq_handler_t handler)
 {
 	int irq_num = ipa_irq_mapping[interrupt];
-	struct ipa_interrupt_info *intr_info = &ipa_interrupt_info[irq_num];
+	struct ipa_interrupt_info *intr_info;
 	u32 val;
 
+	intr_info = &ipa_interrupt_info[irq_num];
 	intr_info->handler = handler;
 	intr_info->interrupt = interrupt;
 
@@ -219,9 +220,10 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 {
 	int irq_num = ipa_irq_mapping[interrupt];
-	struct ipa_interrupt_info *intr_info = &ipa_interrupt_info[irq_num];
+	struct ipa_interrupt_info *intr_info;
 	u32 val;
 
+	intr_info = &ipa_interrupt_info[irq_num];
 	intr_info->handler = NULL;
 	intr_info->interrupt = IPA_INVALID_IRQ;
 
@@ -263,9 +265,13 @@ int ipa_interrupts_init(void)
 void ipa_suspend_active_aggr_wa(u32 ep_id)
 {
 	struct ipa_reg_aggr_force_close force_close;
-	int irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
-	struct ipa_interrupt_info *intr_info = &ipa_interrupt_info[irq_num];
-	u32 clnt_mask = BIT(ep_id);
+	struct ipa_interrupt_info *intr_info;
+	u32 clnt_mask;
+	int irq_num;
+
+	irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
+	intr_info = &ipa_interrupt_info[irq_num];
+	clnt_mask = BIT(ep_id);
 
 	/* Nothing to do if the endpoint doesn't have aggregation open */
 	if (!(ipa_read_reg(IPA_STATE_AGGR_ACTIVE) & clnt_mask))

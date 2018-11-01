@@ -172,7 +172,8 @@ ipa_wq_write_done_common(struct ipa_sys_context *sys,
 			 struct ipa_tx_pkt_wrapper *tx_pkt)
 {
 	struct ipa_tx_pkt_wrapper *next_pkt;
-	int i, cnt;
+	int cnt;
+	int i;
 
 	cnt = tx_pkt->cnt;
 	for (i = 0; i < cnt; i++) {
@@ -225,9 +226,9 @@ ipa_wq_write_done_status(u32 ep_id, struct ipa_tx_pkt_wrapper *tx_pkt)
  */
 static void ipa_wq_write_done(struct work_struct *done_work)
 {
+	struct ipa_tx_pkt_wrapper *this_pkt;
 	struct ipa_tx_pkt_wrapper *tx_pkt;
 	struct ipa_sys_context *sys;
-	struct ipa_tx_pkt_wrapper *this_pkt;
 
 	tx_pkt = container_of(done_work, struct ipa_tx_pkt_wrapper, done_work);
 	sys = tx_pkt->sys;
@@ -255,8 +256,8 @@ static void ipa_wq_write_done(struct work_struct *done_work)
 int ipa_rx_poll(u32 ep_id, int weight)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
-	int cnt = 0;
 	static int total_cnt;
+	int cnt = 0;
 
 	while (cnt < weight && ipa_ep_polling(ep)) {
 		int ret;
@@ -300,9 +301,9 @@ int ipa_rx_poll(u32 ep_id, int weight)
  */
 static bool ipa_send_nop(struct ipa_sys_context *sys)
 {
-	u32 channel_id = sys->ep->channel_id;
-	struct ipa_tx_pkt_wrapper *nop_pkt;
 	struct gsi_xfer_elem nop_xfer = { };
+	struct ipa_tx_pkt_wrapper *nop_pkt;
+	u32 channel_id;
 
 	nop_pkt = kmem_cache_zalloc(ipa_ctx->dp->tx_pkt_wrapper_cache,
 				    GFP_KERNEL);
@@ -323,6 +324,7 @@ static bool ipa_send_nop(struct ipa_sys_context *sys)
 	list_add_tail(&nop_pkt->link, &sys->head_desc_list);
 	spin_unlock_bh(&sys->spinlock);
 
+	channel_id = sys->ep->channel_id;
 	if (!gsi_channel_queue(ipa_ctx->gsi, channel_id, 1, &nop_xfer, true))
 		return true;	/* Success */
 
@@ -382,13 +384,12 @@ static void ipa_nop_timer_schedule(struct ipa_sys_context *sys)
 void ipa_no_intr_init(u32 prod_ep_id)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[prod_ep_id];
-	struct ipa_sys_context *sys = ep->sys;
 
-	INIT_WORK(&sys->tx.nop_work, ipa_send_nop_work);
-	atomic_set(&sys->tx.nop_pending, 0);
-	hrtimer_init(&sys->tx.nop_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
-	sys->tx.nop_timer.function = ipa_nop_timer_expiry;
-	sys->tx.no_intr = true;
+	INIT_WORK(&ep->sys->tx.nop_work, ipa_send_nop_work);
+	atomic_set(&ep->sys->tx.nop_pending, 0);
+	hrtimer_init(&ep->sys->tx.nop_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+	ep->sys->tx.nop_timer.function = ipa_nop_timer_expiry;
+	ep->sys->tx.no_intr = true;
 }
 
 /** ipa_send() - Send multiple descriptors in one HW transaction
@@ -409,18 +410,16 @@ void ipa_no_intr_init(u32 prod_ep_id)
 static int
 ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 {
-	struct device *dev = ipa_ctx->dev;
-	struct ipa_ep_context *ep = sys->ep;
 	struct ipa_tx_pkt_wrapper *tx_pkt;
-	struct ipa_tx_pkt_wrapper *first = NULL;
+	struct ipa_tx_pkt_wrapper *first;
 	struct ipa_tx_pkt_wrapper *next;
 	struct gsi_xfer_elem *xfer_elem;
 	LIST_HEAD(pkt_list);
-	int i;
 	int ret;
+	int i;
 
 	ipa_assert(num_desc);
-	ipa_assert(num_desc <= ipa_client_tlv_count(ep->client));
+	ipa_assert(num_desc <= ipa_client_tlv_count(sys->ep->client));
 
 	xfer_elem = kcalloc(num_desc, sizeof(*xfer_elem), GFP_ATOMIC);
 	if (!xfer_elem)
@@ -428,6 +427,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 
 	/* Within loop, all errors are allocation or DMA mapping */
 	ret = -ENOMEM;
+	first = NULL;
 	for (i = 0; i < num_desc; i++) {
 		dma_addr_t phys;
 
@@ -440,14 +440,14 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 			first = tx_pkt;
 
 		if (desc[i].type == IPA_DATA_DESC_SKB_PAGED)
-			phys = skb_frag_dma_map(dev, desc[i].payload, 0,
-						desc[i].len_opcode,
+			phys = skb_frag_dma_map(ipa_ctx->dev, desc[i].payload,
+						0, desc[i].len_opcode,
 						DMA_TO_DEVICE);
 		else
-			phys = dma_map_single(dev, desc[i].payload,
+			phys = dma_map_single(ipa_ctx->dev, desc[i].payload,
 					      desc[i].len_opcode,
 					      DMA_TO_DEVICE);
-		if (dma_mapping_error(dev, phys)) {
+		if (dma_mapping_error(ipa_ctx->dev, phys)) {
 			ipa_err("dma mapping error on descriptor\n");
 			kmem_cache_free(ipa_ctx->dp->tx_pkt_wrapper_cache,
 					tx_pkt);
@@ -488,7 +488,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	spin_lock_bh(&sys->spinlock);
 
 	list_splice_tail_init(&pkt_list, &sys->head_desc_list);
-	ret = gsi_channel_queue(ipa_ctx->gsi, ep->channel_id, num_desc,
+	ret = gsi_channel_queue(ipa_ctx->gsi, sys->ep->channel_id, num_desc,
 				xfer_elem, true);
 	if (ret)
 		list_cut_end(&pkt_list, &sys->head_desc_list, &first->link);
@@ -515,12 +515,12 @@ err_unwind:
 /** ipa_send_cmd_timeout_complete - callback function which will be
  * called by the transport driver after an immediate command is complete.
  * This function will also free the completion object once it is done.
- * @tag_comp: pointer to the completion object
+ * @user1: pointer to the completion object
  * @ignored: parameter not used
  */
-static void ipa_send_cmd_timeout_complete(void *tag_comp, int ignored)
+static void ipa_send_cmd_timeout_complete(void *user1, int ignored)
 {
-	struct ipa_tag_completion *comp = tag_comp;
+	struct ipa_tag_completion *comp = user1;
 
 	complete(&comp->comp);
 	if (!atomic_dec_return(&comp->cnt))
@@ -538,10 +538,9 @@ static void ipa_send_cmd_timeout_complete(void *tag_comp, int ignored)
  */
 int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 {
-	unsigned long timeout_jiffies = msecs_to_jiffies(timeout);
 	struct ipa_tag_completion *comp;
-	u32 ep_id = ipa_client_ep_id(IPA_CLIENT_APPS_CMD_PROD);
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	unsigned long timeout_jiffies;
+	struct ipa_ep_context *ep;
 	int ret;
 
 	comp = kzalloc(sizeof(*comp), GFP_KERNEL);
@@ -558,6 +557,7 @@ int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 	desc->callback = ipa_send_cmd_timeout_complete;
 	desc->user1 = comp;
 
+	ep = &ipa_ctx->ep[ipa_client_ep_id(IPA_CLIENT_APPS_CMD_PROD)];
 	ret = ipa_send(ep->sys, 1, desc);
 	if (ret) {
 		/* Callback won't run; drop reference on its behalf */
@@ -565,6 +565,7 @@ int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 		goto out;
 	}
 
+	timeout_jiffies = msecs_to_jiffies(timeout);
 	if (!timeout_jiffies) {
 		wait_for_completion(&comp->comp);
 	} else if (!wait_for_completion_timeout(&comp->comp, timeout_jiffies)) {
@@ -593,19 +594,21 @@ out:
  */
 static int ipa_handle_rx_core(struct ipa_sys_context *sys)
 {
-	int ret;
-	int cnt = 0;
+	int cnt;
 
 	/* Stop if the leave polling state */
+	cnt = 0;
 	while (ipa_ep_polling(sys->ep)) {
-		ret = ipa_poll_gsi_pkt(sys);
+		int ret = ipa_poll_gsi_pkt(sys);
+
 		if (ret < 0)
 			break;
 
 		ipa_rx_common(sys, (u32)ret);
 
-		++cnt;
+		cnt++;
 	}
+
 	return cnt;
 }
 
@@ -682,7 +685,7 @@ static void ipa_switch_to_intr_rx_work_func(struct work_struct *work)
 
 static struct ipa_sys_context *ipa_ep_sys_create(enum ipa_client_type client)
 {
-	unsigned int wq_flags = WQ_MEM_RECLAIM | WQ_UNBOUND;
+	const unsigned int wq_flags = WQ_MEM_RECLAIM | WQ_UNBOUND;
 	struct ipa_sys_context *sys;
 
 	/* Caller will zero all "mutable" fields; we fill in the rest */
@@ -713,13 +716,15 @@ static struct ipa_sys_context *ipa_ep_sys_create(enum ipa_client_type client)
  */
 static void ipa_tx_dp_complete(void *user1, int user2)
 {
-	struct sk_buff *skb = (struct sk_buff *)user1;
+	struct sk_buff *skb = user1;
 	int ep_id = user2;
 
 	if (ipa_ctx->ep[ep_id].client_notify) {
-		void *priv = ipa_ctx->ep[ep_id].priv;
-		unsigned long data = (unsigned long)skb;
+		unsigned long data;
+		void *priv;
 
+		priv = ipa_ctx->ep[ep_id].priv;
+		data = (unsigned long)skb;
 		ipa_ctx->ep[ep_id].client_notify(priv, IPA_WRITE_DONE, data);
 	} else {
 		dev_kfree_skb_any(skb);
@@ -738,14 +743,14 @@ static void ipa_tx_dp_complete(void *user1, int user2)
  */
 int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 {
-	struct ipa_desc _desc = { };
-	struct ipa_desc *desc = &_desc;	/* Default, linear case */
-	u32 tlv_count = ipa_client_tlv_count(client);
-	u32 ep_id;
+	struct ipa_desc _desc = { };	/* Used for common case */
+	struct ipa_desc *desc;
+	u32 tlv_count;
 	int data_idx;
 	u32 nr_frags;
-	u32 f;
+	u32 ep_id;
 	int ret;
+	u32 f;
 
 	if (!skb->len)
 		return -EINVAL;
@@ -757,6 +762,7 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 	 * If not, see if we can linearize it before giving up.
 	 */
 	nr_frags = skb_shinfo(skb)->nr_frags;
+	tlv_count = ipa_client_tlv_count(client);
 	if (1 + nr_frags > tlv_count) {
 		if (skb_linearize(skb))
 			return -ENOMEM;
@@ -766,6 +772,8 @@ int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 		desc = kcalloc(1 + nr_frags, sizeof(*desc), GFP_ATOMIC);
 		if (!desc)
 			return -ENOMEM;
+	} else {
+		desc = &_desc;	/* Default, linear case */
 	}
 
 	/* Fill in the IPA request descriptors--one for the linear
@@ -853,16 +861,15 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
  */
 static void ipa_replenish_rx_cache(struct ipa_sys_context *sys)
 {
-	struct device *dev = ipa_ctx->dev;
-	void *ptr;
 	struct ipa_rx_pkt_wrapper *rx_pkt;
-	int ret;
-	int rx_len_cached = 0;
-	gfp_t flag = GFP_NOWAIT | __GFP_NOWARN;
-
-	rx_len_cached = sys->len;
+	struct device *dev = ipa_ctx->dev;
+	u32 rx_len_cached = sys->len;
 
 	while (rx_len_cached < sys->rx.pool_sz) {
+		gfp_t flag = GFP_NOWAIT | __GFP_NOWARN;
+		void *ptr;
+		int ret;
+
 		rx_pkt = kmem_cache_zalloc(ipa_ctx->dp->rx_pkt_wrapper_cache,
 					   flag);
 		if (!rx_pkt)
@@ -923,14 +930,13 @@ static void ipa_replenish_rx_work_func(struct work_struct *work)
 /** ipa_cleanup_rx() - release RX queue resources */
 static void ipa_cleanup_rx(struct ipa_sys_context *sys)
 {
-	struct device *dev = ipa_ctx->dev;
 	struct ipa_rx_pkt_wrapper *rx_pkt;
 	struct ipa_rx_pkt_wrapper *r;
 
 	list_for_each_entry_safe(rx_pkt, r, &sys->head_desc_list, link) {
 		list_del(&rx_pkt->link);
-		dma_unmap_single(dev, rx_pkt->dma_addr, sys->rx.buff_sz,
-				 DMA_FROM_DEVICE);
+		dma_unmap_single(ipa_ctx->dev, rx_pkt->dma_addr,
+				 sys->rx.buff_sz, DMA_FROM_DEVICE);
 		dev_kfree_skb_any(rx_pkt->skb);
 		kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rx_pkt);
 	}
@@ -938,7 +944,7 @@ static void ipa_cleanup_rx(struct ipa_sys_context *sys)
 
 static struct sk_buff *ipa_skb_copy_for_client(struct sk_buff *skb, int len)
 {
-	struct sk_buff *skb2 = NULL;
+	struct sk_buff *skb2;
 
 	skb2 = __dev_alloc_skb(len + IPA_RX_BUFF_CLIENT_HEADROOM, GFP_KERNEL);
 	if (likely(skb2)) {
@@ -979,17 +985,21 @@ static void
 ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 {
 	struct ipahal_pkt_status status;
-	u32 pkt_status_sz = ipahal_pkt_status_get_size();
 	struct sk_buff *skb2;
+	unsigned long unused;
+	unsigned int align;
+	unsigned int used;
+	unsigned char *buf;
+	u32 pkt_status_sz;
 	int pad_len_byte;
+	u32 ep_id;
 	int len;
 	int len2;
-	unsigned char *buf;
-	u32 ep_id;
-	unsigned int used = *(unsigned int *)skb->cb;
-	unsigned int used_align = ALIGN(used, 32);
-	unsigned long unused = IPA_RX_BUFFER_SIZE - used;
-	struct ipa_tx_pkt_wrapper *tx_pkt = NULL;
+
+	pkt_status_sz = ipahal_pkt_status_get_size();
+	used = *(unsigned int *)skb->cb;
+	align = ALIGN(used, 32);
+	unused = IPA_RX_BUFFER_SIZE - used;
 
 	ipa_assert(skb->len);
 
@@ -1123,7 +1133,7 @@ begin:
 							sizeof(struct sk_buff) +
 							(ALIGN(len +
 							pkt_status_sz, 32) *
-							unused / used_align);
+							unused / align);
 						sys->ep->client_notify(
 							sys->ep->priv,
 							IPA_RECEIVE,
@@ -1144,10 +1154,10 @@ begin:
 				}
 			}
 			/* TX comp */
-			ipa_wq_write_done_status(ep_id, tx_pkt);
+			ipa_wq_write_done_status(ep_id, NULL);
 		} else {
 			/* TX comp */
-			ipa_wq_write_done_status(status.endp_src_idx, tx_pkt);
+			ipa_wq_write_done_status(status.endp_src_idx, NULL);
 			skb_pull(skb, pkt_status_sz);
 		}
 	}
@@ -1190,16 +1200,20 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 {
 	struct ipahal_pkt_status status;
 	unsigned char *skb_data;
-	u32 pkt_status_sz;
 	struct sk_buff *skb2;
 	u16 pkt_len_with_pad;
+	unsigned long unused;
+	unsigned int align;
+	unsigned int used;
+	u32 pkt_status_sz;
+	int frame_len;
 	u32 qmap_hdr;
 	int checksum;
-	int frame_len;
 	int ep_id;
-	unsigned int used = *(unsigned int *)skb->cb;
-	unsigned int used_align = ALIGN(used, 32);
-	unsigned long unused = IPA_RX_BUFFER_SIZE - used;
+
+	used = *(unsigned int *)skb->cb;
+	align = ALIGN(used, 32);
+	unused = IPA_RX_BUFFER_SIZE - used;
 
 	ipa_assert(skb->len);
 
@@ -1291,7 +1305,7 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 				skb2->truesize = skb2->len +
 					sizeof(struct sk_buff) +
 					(ALIGN(frame_len, 32) *
-					 unused / used_align);
+					 unused / align);
 				sys->ep->client_notify(sys->ep->priv,
 						       IPA_RECEIVE,
 						       (unsigned long)(skb2));
@@ -1317,9 +1331,11 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 	struct sk_buff *rx_skb = (struct sk_buff *)data;
 	struct ipahal_pkt_status status;
 	struct ipa_ep_context *ep;
-	u32 ep_id;
-	u32 pkt_status_size = ipahal_pkt_status_get_size();
+	u32 pkt_status_size;
 	u32 metadata;
+	u32 ep_id;
+
+	pkt_status_size = ipahal_pkt_status_get_size();
 
 	ipa_assert(rx_skb->len >= pkt_status_size);
 
@@ -1447,9 +1463,12 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 	u32 channel_id = ipa_client_channel_id(ep->client);
 	u32 tlv_count = ipa_client_tlv_count(ep->client);
 	bool from_ipa = ipa_consumer(ep->client);
-	bool priority = ep->client == IPA_CLIENT_APPS_CMD_PROD;
-	bool moderation = !ep->sys->tx.no_intr;
+	bool moderation;
+	bool priority;
 	int ret;
+
+	priority = ep->client == IPA_CLIENT_APPS_CMD_PROD;
+	moderation = !ep->sys->tx.no_intr;
 
 	ret = gsi_channel_alloc(ipa_ctx->gsi, channel_id, channel_count,
 				from_ipa, priority, evt_ring_mult, moderation,
@@ -1561,7 +1580,9 @@ void ipa_endp_status_prod(u32 ep_id, bool enable,
 			  enum ipa_client_type status_client)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
-	u32 status_ep_id = ipa_client_ep_id(status_client);
+	u32 status_ep_id;
+
+	status_ep_id = ipa_client_ep_id(status_client);
 
 	ipa_reg_endp_status_prod(&ep->status, enable, status_ep_id);
 }
@@ -1579,7 +1600,9 @@ void ipa_endp_init_mode_prod(u32 ep_id, enum ipa_mode mode,
 			     enum ipa_client_type dst_client)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
-	u32 dst_ep_id = ipa_client_ep_id(dst_client);
+	u32 dst_ep_id;
+
+	dst_ep_id = ipa_client_ep_id(dst_client);
 
 	ipa_reg_endp_init_mode_prod(&ep->init_mode, mode, dst_ep_id);
 }
@@ -1595,7 +1618,9 @@ void ipa_endp_init_seq_cons(u32 ep_id)
 void ipa_endp_init_seq_prod(u32 ep_id)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
-	u32 seq_type = (u32)ipa_endp_seq_type(ep_id);
+	u32 seq_type;
+
+	seq_type = (u32)ipa_endp_seq_type(ep_id);
 
 	ipa_reg_endp_init_seq_prod(&ep->init_seq, seq_type);
 }
@@ -1618,8 +1643,10 @@ void ipa_endp_init_deaggr_prod(u32 ep_id)
 int ipa_ep_alloc(enum ipa_client_type client)
 {
 	u32 ep_id = ipa_client_ep_id(client);
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 	struct ipa_sys_context *sys;
+	struct ipa_ep_context *ep;
+
+	ep = &ipa_ctx->ep[ep_id];
 
 	ipa_assert(!ep->allocated);
 
@@ -1723,8 +1750,8 @@ static int ipa_channel_reset_aggr(u32 ep_id)
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 	struct ipa_reg_aggr_force_close force_close;
 	struct ipa_reg_endp_init_ctrl init_ctrl;
-	struct ipa_dma_mem dma_byte;
 	struct gsi_xfer_elem xfer_elem = { };
+	struct ipa_dma_mem dma_byte;
 	int aggr_active_bitmap = 0;
 	bool ep_suspended = false;
 	int ret;
@@ -1908,8 +1935,8 @@ bool ipa_ep_polling(struct ipa_ep_context *ep)
 
 struct ipa_dp *ipa_dp_init(void)
 {
-	struct ipa_dp *dp;
 	struct kmem_cache *cache;
+	struct ipa_dp *dp;
 
 	dp = kzalloc(sizeof(*dp), GFP_KERNEL);
 	if (!dp)
