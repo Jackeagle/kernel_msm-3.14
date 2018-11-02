@@ -6,7 +6,9 @@
 #ifndef _IPAHAL_H_
 #define _IPAHAL_H_
 
-#include <linux/if_ether.h>
+#include <linux/types.h>
+
+#include "ipa_dma.h"
 
 /* The IPA implements offloaded packet filtering and routing
  * capabilities.  This is managed by programming IPA-resident

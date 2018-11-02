@@ -4,13 +4,16 @@
  * Copyright (C) 2018 Linaro Ltd.
  */
 
+#include <linux/types.h>
 #include <linux/delay.h>
 #include <linux/device.h>
-#include <linux/dmapool.h>
 #include <linux/list.h>
+#include <linux/slab.h>
 #include <linux/netdevice.h>
-#include "ipa_i.h"
+
+#include "ipa_i.h"	/* ipa_err() */
 #include "ipahal.h"
+#include "ipa_dma.h"
 
 /**
  * struct ipa_tx_pkt_wrapper - IPA transmit packet wrapper

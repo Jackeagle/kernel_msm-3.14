@@ -4,12 +4,13 @@
  * Copyright (C) 2018 Linaro Ltd.
  */
 
-#include <linux/debugfs.h>
+#include <linux/types.h>
+#include <linux/slab.h>
 #include <asm/unaligned.h>
 
-#include "ipa_dma.h"
-#include "ipa_i.h"
 #include "ipahal.h"
+#include "ipa_i.h"	/* ipa_err() */
+#include "ipa_dma.h"
 
 /**
  * struct ipahal_context - HAL global context data

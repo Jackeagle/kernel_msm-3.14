@@ -4,39 +4,32 @@
  * Copyright (C) 2018 Linaro Ltd.
  */
 
-#include <linux/version.h>
-
-#include <linux/clk.h>
-#include <linux/compat.h>
+#include <linux/types.h>
+#include <linux/atomic.h>
+#include <linux/spinlock.h>
+#include <linux/mutex.h>
 #include <linux/device.h>
-#include <linux/dmapool.h>
-#include <linux/genalloc.h>
-#include <linux/init.h>
-#include <linux/kernel.h>
-#include <linux/mm.h>
-#include <linux/module.h>
+#include <linux/firmware.h>
+#include <linux/workqueue.h>
+#include <linux/bug.h>
+#include <linux/io.h>
 #include <linux/of.h>
-#include <linux/of_platform.h>
-#include <linux/of_address.h>
-#include <linux/platform_device.h>
-#include <linux/rbtree.h>
-#include <linux/of_gpio.h>
 #include <linux/of_irq.h>
-#include <linux/uaccess.h>
+#include <linux/of_address.h>
+#include <linux/of_platform.h>
 #include <linux/interrupt.h>
-#include <linux/interconnect.h>
+#include <linux/notifier.h>
 #include <linux/remoteproc.h>
-#include <linux/netdevice.h>
-#include <linux/delay.h>
-#include <linux/time.h>
+#include <linux/pm_wakeup.h>
+#include <linux/kconfig.h>
 #include <linux/qcom_scm.h>
 #include <linux/soc/qcom/mdt_loader.h>
 #include <linux/soc/qcom/smem.h>
 #include <linux/soc/qcom/smem_state.h>
-#include <asm/cacheflush.h>
+#include <linux/module.h>
 
-#include "ipa_dma.h"
 #include "ipa_i.h"
+#include "ipa_dma.h"
 #include "ipahal.h"
 
 /* The name of the main firmware file relative to /lib/firmware */

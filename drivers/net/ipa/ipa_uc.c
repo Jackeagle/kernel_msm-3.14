@@ -4,7 +4,9 @@
  * Copyright (C) 2018 Linaro Ltd.
  */
 
+#include <linux/types.h>
 #include <linux/delay.h>
+
 #include "ipa_i.h"
 
 /* Supports hardware interface version 0x2000 */

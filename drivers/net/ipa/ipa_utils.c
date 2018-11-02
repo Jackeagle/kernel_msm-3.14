@@ -4,19 +4,11 @@
  * Copyright (C) 2018 Linaro Ltd.
  */
 
-#include <net/ip.h>
-#include <linux/genalloc.h>	/* gen_pool_alloc() */
-#include <linux/io.h>
-#include <linux/ratelimit.h>
-#include <linux/interconnect.h>
-#include <linux/elf.h>
+#include <linux/types.h>
 #include <linux/device.h>
-#include <linux/init.h>
-#include <linux/kernel.h>
-#include <linux/mm.h>
+#include <linux/interconnect.h>
 #include <linux/module.h>
-#include <linux/of.h>
-#include <linux/platform_device.h>
+#include <linux/delay.h>
 
 #include "ipa_dma.h"
 #include "ipa_i.h"

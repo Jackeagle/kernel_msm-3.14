@@ -12,8 +12,12 @@
  * used to mask (or rather, enable) particular IPA interrupts.
  */
 
+#include <linux/types.h>
 #include <linux/interrupt.h>
+#include <linux/workqueue.h>
+
 #include "ipa_i.h"
+#include "ipa_reg.h"
 
 struct ipa_interrupt_info {
 	ipa_irq_handler_t handler;

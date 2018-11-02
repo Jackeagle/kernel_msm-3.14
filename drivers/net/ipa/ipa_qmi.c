@@ -4,13 +4,15 @@
  * Copyright (C) 2018 Linaro Ltd.
  */
 
+#include <linux/types.h>
 #include <linux/string.h>
+#include <linux/slab.h>
 #include <linux/qrtr.h>
 #include <linux/soc/qcom/qmi.h>
 
 #include "ipa_qmi_msg.h"
 
-#include "ipa_i.h" /* For ipa_err(), ipa_context, and ipa_mem_partition */
+#include "ipa_i.h"	/* ipa_err() */
 
 #define QMI_INIT_DRIVER_TIMEOUT	60000	/* A minute in milliseconds */
 
@@ -76,8 +78,8 @@ static int ipa_send_master_driver_init_complete_ind(struct qmi_handle *qmi,
 	ind.status.error = QMI_ERR_NONE_V01;
 
 	return qmi_send_indication(qmi, sq, IPA_QMI_INIT_COMPLETE_IND,
-				IPA_QMI_INIT_COMPLETE_IND_SZ,
-				ipa_init_complete_ind_ei, &ind);
+				   IPA_QMI_INIT_COMPLETE_IND_SZ,
+				   ipa_init_complete_ind_ei, &ind);
 }
 
 /* This function is called to determine whether to complete the
@@ -90,7 +92,7 @@ static int ipa_send_master_driver_init_complete_ind(struct qmi_handle *qmi,
  * to send it.
  */
 static void ipa_handshake_complete(struct qmi_handle *qmi,
-				  struct sockaddr_qrtr *sq, bool init_driver)
+				   struct sockaddr_qrtr *sq, bool init_driver)
 {
 	bool send_it;
 	int ret;

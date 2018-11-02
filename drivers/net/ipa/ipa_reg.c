@@ -4,6 +4,7 @@
  * Copyright (C) 2018 Linaro Ltd.
  */
 
+#include <linux/types.h>
 #include <linux/io.h>
 #include <linux/bitfield.h>
 

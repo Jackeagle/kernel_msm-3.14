@@ -6,24 +6,22 @@
 #ifndef _IPA_I_H_
 #define _IPA_I_H_
 
-#include <linux/bitops.h>
-#include <linux/cdev.h>
-#include <linux/export.h>
-#include <linux/idr.h>
-#include <linux/list.h>
+#include <linux/types.h>
+#include <linux/sizes.h>
+#include <linux/bug.h>
+#include <linux/spinlock.h>
 #include <linux/mutex.h>
+#include <linux/device.h>
+#include <linux/workqueue.h>
+#include <linux/interconnect.h>
+#include <linux/pm_wakeup.h>
 #include <linux/skbuff.h>
-#include <linux/slab.h>
-#include <linux/iommu.h>
-#include <linux/platform_device.h>
-#include <linux/firmware.h>
 
 #include "ipa_dma.h"
 #include "ipa_reg.h"
-#include "ipahal.h"
 #include "gsi.h"
 
-#define IPA_MTU			1500
+#define IPA_MTU				1500
 
 #define IPA_EP_COUNT_MAX		31
 #define IPA_LAN_RX_HEADER_LENGTH	0
@@ -100,7 +98,7 @@
 
 #define ipa_bug_on(condition)						\
 	do {								\
-		if (unlikely(condition)) {				\
+		if (condition) {				\
 			ipa_err("ipa_bug_on(%s) failed!\n", #condition); \
 			ipa_bug();					\
 		}							\
@@ -118,7 +116,7 @@
  */
 #define ipa_assert(cond) \
 	do {								\
-		if (unlikely(!(cond))) {				\
+		if (!(cond)) {				\
 			ipa_err("ipa_assert(%s) failed!\n", #cond);	\
 			ipa_bug();					\
 		}							\

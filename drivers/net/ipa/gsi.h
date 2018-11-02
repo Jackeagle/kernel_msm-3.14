@@ -9,8 +9,6 @@
 #include <linux/types.h>
 #include <linux/platform_device.h>
 
-#include "ipa_dma.h"
-
 #define GSI_RING_ELEMENT_SIZE	16	/* bytes (channel or event ring) */
 
 /**

@@ -4,20 +4,28 @@
  * Copyright (C) 2018 Linaro Ltd.
  */
 
-#include <linux/of.h>
-#include <linux/interrupt.h>
-#include <linux/io.h>
+#include <linux/types.h>
+#include <linux/bitops.h>
 #include <linux/log2.h>
-#include <linux/module.h>
-#include <linux/platform_device.h>
-#include <linux/delay.h>
-#include <linux/qcom_scm.h>
 #include <linux/bitfield.h>
+#include <linux/atomic.h>
+#include <linux/spinlock.h>
+#include <linux/mutex.h>
+#include <linux/slab.h>
+#include <linux/completion.h>
+#include <linux/jiffies.h>
+#include <linux/string.h>
+#include <linux/device.h>
+#include <linux/io.h>
+#include <linux/bug.h>
+#include <linux/delay.h>
+#include <linux/interrupt.h>
+#include <linux/platform_device.h>
 
-#include "ipa_dma.h"
-#include "ipa_i.h"
 #include "gsi.h"
 #include "gsi_reg.h"
+#include "ipa_dma.h"
+#include "ipa_i.h"	/* ipa_err() */
 
 #define GSI_RING_ELEMENT_SIZE	16	/* bytes (channel or event ring) */
 
@@ -358,9 +366,10 @@ static void gsi_isr_chan_ctrl(struct gsi *gsi)
 	ipa_assert(!(channel_mask & ~GENMASK(gsi->channel_max - 1, 0)));
 
 	while (channel_mask) {
+		struct gsi_channel *channel;
 		int i = __ffs(channel_mask);
-		struct gsi_channel *channel = &gsi->channel[i];
 
+		channel = &gsi->channel[i];
 		channel->state = gsi_channel_state(gsi, i);
 
 		complete(&channel->compl);
@@ -379,9 +388,10 @@ static void gsi_isr_evt_ctrl(struct gsi *gsi)
 	ipa_assert(!(evt_mask & ~GENMASK(gsi->evt_ring_max - 1, 0)));
 
 	while (evt_mask) {
+		struct gsi_evt_ring *evt_ring;
 		int i = __ffs(evt_mask);
-		struct gsi_evt_ring *evt_ring = &gsi->evt_ring[i];
 
+		evt_ring = &gsi->evt_ring[i];
 		evt_ring->state = gsi_evt_ring_state(gsi, i);
 
 		complete(&evt_ring->compl);
