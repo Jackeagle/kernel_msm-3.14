@@ -197,26 +197,6 @@ ipa_wq_write_done_common(struct ipa_sys_context *sys,
 	}
 }
 
-static void
-ipa_wq_write_done_status(u32 ep_id, struct ipa_tx_pkt_wrapper *tx_pkt)
-{
-	struct ipa_sys_context *sys;
-
-	WARN_ON(ep_id >= ipa_ctx->ep_count);
-
-	if (!ipa_ctx->ep[ep_id].status.status_en)
-		return;
-
-	sys = ipa_ctx->ep[ep_id].sys;
-	if (!sys)
-		return;
-
-	if (likely(tx_pkt))
-		ipa_wq_write_done_common(sys, tx_pkt);
-	else
-		ipa_err("tx_pkt is NULL\n");
-}
-
 /**
  * ipa_wq_write_done() - Work function executed when TX completes
  * * @done_work:	work_struct used by the work queue
@@ -1150,11 +1130,7 @@ begin:
 					skb_pull(skb, len + pkt_status_sz);
 				}
 			}
-			/* TX comp */
-			ipa_wq_write_done_status(ep_id, NULL);
 		} else {
-			/* TX comp */
-			ipa_wq_write_done_status(status.endp_src_idx, NULL);
 			skb_pull(skb, pkt_status_sz);
 		}
 	}
