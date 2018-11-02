@@ -983,7 +983,7 @@
 			};
 		};
 
-		ipa: ipa@1e00000 {
+		ipa@1e00000 {
 			compatible = "qcom,ipa-sdm845-modem_init";
 
 			reg = <0x1e40000 0x34000>,
