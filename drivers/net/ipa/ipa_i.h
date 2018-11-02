@@ -358,15 +358,16 @@ enum ipahal_imm_cmd {
 /**
  * ipa_desc_fill_imm_cmd() - Fill an IPA descriptor for an immediate command
  * @desc:	Descriptor to fill
- * @pyld:	Command payload, returned by ipahal_construct_imm_cmd().
+ * @opcode:	Opcode to use
+ * @payload:	Command payload
  */
-static inline void
-ipa_desc_fill_imm_cmd(struct ipa_desc *desc, enum ipahal_imm_cmd opcode,
-		      struct ipahal_imm_cmd_pyld *pyld)
+static inline void ipa_desc_fill_imm_cmd(struct ipa_desc *desc,
+					 enum ipahal_imm_cmd opcode,
+					 void *payload)
 {
 	desc->type = IPA_IMM_CMD_DESC;
 	desc->len_opcode = (u16)opcode;
-	desc->payload = ipahal_imm_cmd_pyld_data(pyld);
+	desc->payload = payload;
 }
 
 struct ipa_wakelock_ref_cnt {
@@ -399,7 +400,7 @@ struct ipa_smp2p_info {
 
 struct ipa_dma_task_info {
 	struct ipa_dma_mem mem;
-	struct ipahal_imm_cmd_pyld *cmd_pyld;
+	void *payload;
 };
 
 /**

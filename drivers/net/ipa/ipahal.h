@@ -28,14 +28,6 @@
 #define IPA_HW_TBL_HDR_WIDTH		8
 
 /**
- * struct ipahal_imm_cmd_pyld - Immediate cmd payload information
- * @opcode:	Opcode of the immediate command
- */
-struct ipahal_imm_cmd_pyld {
-	u16 opcode;	/* enum ipahal_imm_cmd opcode */
-};
-
-/**
  * ipahal_dma_shared_mem_write_pyld() - Write to shared memory command payload
  * 
  * Return a pointer to the payload for a DMA shared memory write immediate
@@ -131,12 +123,12 @@ void *ipahal_ip_v6_filter_init_pyld(struct ipa_dma_mem *mem,
 void *ipahal_dma_task_32b_addr_pyld(struct ipa_dma_mem *mem);
 
 /**
- * ipahal_destroy_imm_cmd() - Release an allocated immediate command payload
- * @pyld:	Payload to be released
+ * ipahal_payload_free() - Release an allocated immediate command payload
+ * @payload:	Payload to be released
  */
-static inline void ipahal_destroy_imm_cmd(struct ipahal_imm_cmd_pyld *pyld)
+static inline void ipahal_payload_free(void *payload)
 {
-	kfree(pyld);
+	kfree(payload);
 }
 
 /**

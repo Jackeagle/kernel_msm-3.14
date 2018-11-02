@@ -907,8 +907,8 @@ int ipa_gsi_dma_task_alloc(void)
 		return -ENOMEM;
 
 	/* IPA_IMM_CMD_DMA_TASK_32B_ADDR */
-	ipa_ctx->dma_task_info.cmd_pyld = ipahal_dma_task_32b_addr_pyld(mem);
-	if (!ipa_ctx->dma_task_info.cmd_pyld) {
+	ipa_ctx->dma_task_info.payload = ipahal_dma_task_32b_addr_pyld(mem);
+	if (!ipa_ctx->dma_task_info.payload) {
 		ipa_dma_free(mem);
 
 		return -ENOMEM;
@@ -921,8 +921,8 @@ void ipa_gsi_dma_task_free(void)
 {
 	struct ipa_dma_mem *mem = &ipa_ctx->dma_task_info.mem;
 
-	ipahal_destroy_imm_cmd(ipa_ctx->dma_task_info.cmd_pyld);
-	ipa_ctx->dma_task_info.cmd_pyld = NULL;
+	ipahal_payload_free(ipa_ctx->dma_task_info.payload);
+	ipa_ctx->dma_task_info.payload = NULL;
 	ipa_dma_free(mem);
 }
 
@@ -936,7 +936,7 @@ static int ipa_gsi_dma_task_inject(void)
 	struct ipa_desc desc = { };
 
 	ipa_desc_fill_imm_cmd(&desc, IPA_IMM_CMD_DMA_TASK_32B_ADDR,
-			      ipa_ctx->dma_task_info.cmd_pyld);
+			      ipa_ctx->dma_task_info.payload);
 
 	ipa_debug("sending 1B packet to IPA\n");
 	if (ipa_send_cmd_timeout(&desc, IPA_GSI_DMA_TASK_TIMEOUT))
