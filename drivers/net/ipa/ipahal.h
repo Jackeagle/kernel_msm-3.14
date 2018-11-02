@@ -36,18 +36,6 @@ struct ipahal_imm_cmd_pyld {
 };
 
 /**
- * ipahal_imm_cmd_pyld_data(
- * @pyld:	Generic immediate command payload pointer
- *
- * Return:	The address of type-specific data portion of an immediate
- *		command payload (following its opcode).
- */
-static inline void *ipahal_imm_cmd_pyld_data(struct ipahal_imm_cmd_pyld *pyld)
-{
-	return pyld + 1;
-}
-
-/**
  * ipahal_dma_shared_mem_write_pyld() - Write to shared memory command payload
  * 
  * Return a pointer to the payload for a DMA shared memory write immediate
@@ -57,8 +45,7 @@ static inline void *ipahal_imm_cmd_pyld_data(struct ipahal_imm_cmd_pyld *pyld)
  *
  * Return:	 Pointer to the immediate command payload, or NULL
  */
-struct ipahal_imm_cmd_pyld *ipahal_dma_shared_mem_write_pyld(
-				struct ipa_dma_mem *mem, u32 offset);
+void *ipahal_dma_shared_mem_write_pyld(struct ipa_dma_mem *mem, u32 offset);
 
 /**
  * ipahal_hdr_init_local_pyld() - Header initialization command payload
@@ -71,8 +58,7 @@ struct ipahal_imm_cmd_pyld *ipahal_dma_shared_mem_write_pyld(
  *
  * Return:	 Pointer to the immediate command payload, or NULL
  */
-struct ipahal_imm_cmd_pyld *ipahal_hdr_init_local_pyld(
-				struct ipa_dma_mem *mem, u32 offset);
+void *ipahal_hdr_init_local_pyld(struct ipa_dma_mem *mem, u32 offset);
 
 /**
  * ipahal_ip_v4_routing_init_pyld() - IPv4 routing table initialization payload
@@ -86,9 +72,8 @@ struct ipahal_imm_cmd_pyld *ipahal_hdr_init_local_pyld(
  *
  * Return:	 Pointer to the immediate command payload, or NULL
  */
-struct ipahal_imm_cmd_pyld *ipahal_ip_v4_routing_init_pyld(
-				struct ipa_dma_mem *mem,
-				u32 hash_offset, u32 nhash_offset);
+void *ipahal_ip_v4_routing_init_pyld(struct ipa_dma_mem *mem,
+				     u32 hash_offset, u32 nhash_offset);
 
 /**
  * ipahal_ip_v6_routing_init_pyld() - IPv6 routing table initialization payload
@@ -102,12 +87,11 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_v4_routing_init_pyld(
  *
  * Return:	 Pointer to the immediate command payload, or NULL
  */
-struct ipahal_imm_cmd_pyld *ipahal_ip_v6_routing_init_pyld(
-				struct ipa_dma_mem *mem,
-				u32 hash_offset, u32 nhash_offset);
+void *ipahal_ip_v6_routing_init_pyld(struct ipa_dma_mem *mem,
+				     u32 hash_offset, u32 nhash_offset);
 
 /**
- * ipahal_ip_v6_filter_init_pyld() - IPv4 filter table initialization payload
+ * ipahal_ip_v4_filter_init_pyld() - IPv4 filter table initialization payload
  * mem:		The IPv4 filter table data to be written
  * hash_offset:	The location in IPA memory for a hashed filter table
  * nhash_offset: The location in IPA memory for a non-hashed filter table
@@ -118,9 +102,8 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_v6_routing_init_pyld(
  *
  * Return:	 Pointer to the immediate command payload, or NULL
  */
-struct ipahal_imm_cmd_pyld *ipahal_ip_v4_filter_init_pyld(
-				struct ipa_dma_mem *mem,
-				u32 hash_offset, u32 nhash_offset);
+void *ipahal_ip_v4_filter_init_pyld(struct ipa_dma_mem *mem,
+				    u32 hash_offset, u32 nhash_offset);
 
 /**
  * ipahal_ip_v6_filter_init_pyld() - IPv6 filter table initialization payload
@@ -134,9 +117,8 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_v4_filter_init_pyld(
  *
  * Return:	 Pointer to the immediate command payload, or NULL
  */
-struct ipahal_imm_cmd_pyld *ipahal_ip_v6_filter_init_pyld(
-				struct ipa_dma_mem *mem,
-				u32 hash_offset, u32 nhash_offset);
+void *ipahal_ip_v6_filter_init_pyld(struct ipa_dma_mem *mem,
+				    u32 hash_offset, u32 nhash_offset);
 
 /**
  * ipahal_dma_task_32b_addr_pyld() - 32-bit DMA task command payload
@@ -146,8 +128,7 @@ struct ipahal_imm_cmd_pyld *ipahal_ip_v6_filter_init_pyld(
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
  */
-struct ipahal_imm_cmd_pyld *ipahal_dma_task_32b_addr_pyld(
-				struct ipa_dma_mem *mem);
+void *ipahal_dma_task_32b_addr_pyld(struct ipa_dma_mem *mem);
 
 /**
  * ipahal_destroy_imm_cmd() - Release an allocated immediate command payload

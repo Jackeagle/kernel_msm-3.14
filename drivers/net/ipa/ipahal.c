@@ -237,33 +237,16 @@ struct ipa_pkt_status_hw {
 	u16 hw_specific;
 };
 
-static struct ipahal_imm_cmd_pyld *
-ipahal_imm_cmd_pyld_alloc(u16 opcode, size_t pyld_size)
-{
-	struct ipahal_imm_cmd_pyld *pyld;
-
-	pyld = kzalloc(sizeof(*pyld) + pyld_size, GFP_KERNEL);
-	if (pyld)
-		pyld->opcode = opcode;
-
-	return pyld;
-}
-
-struct ipahal_imm_cmd_pyld *
-ipahal_dma_shared_mem_write_pyld(struct ipa_dma_mem *mem, u32 offset)
+void *ipahal_dma_shared_mem_write_pyld(struct ipa_dma_mem *mem, u32 offset)
 {
 	struct ipa_imm_cmd_hw_dma_shared_mem *data;
-	struct ipahal_imm_cmd_pyld *pyld;
-	u16 opcode;
 
 	ipa_assert(mem->size < 1 << 16);	/* size is 16 bits wide */
 	ipa_assert(offset < 1 << 16);		/* local_addr is 16 bits wide */
 
-	opcode = IPA_IMM_CMD_DMA_SHARED_MEM;
-	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
-	if (!pyld)
+	data = kzalloc(sizeof(*data), GFP_KERNEL);
+	if (!data)
 		return NULL;
-	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->size = mem->size;
 	data->local_addr = offset;
@@ -272,46 +255,35 @@ ipahal_dma_shared_mem_write_pyld(struct ipa_dma_mem *mem, u32 offset)
 	data->pipeline_clear_options = IPAHAL_HPS_CLEAR;
 	data->system_addr = mem->phys;
 
-	return pyld;
+	return data;
 }
 
-struct ipahal_imm_cmd_pyld *
-ipahal_hdr_init_local_pyld(struct ipa_dma_mem *mem, u32 offset)
+void *ipahal_hdr_init_local_pyld(struct ipa_dma_mem *mem, u32 offset)
 {
 	struct ipa_imm_cmd_hw_hdr_init_local *data;
-	struct ipahal_imm_cmd_pyld *pyld;
-	u16 opcode;
 
 	ipa_assert(mem->size < 1 << 12);  /* size_hdr_table is 12 bits wide */
 	ipa_assert(offset < 1 << 16);		/* hdr_addr is 16 bits wide */
 
-	opcode = IPA_IMM_CMD_HDR_INIT_LOCAL;
-	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
-	if (!pyld)
+	data = kzalloc(sizeof(*data), GFP_KERNEL);
+	if (!data)
 		return NULL;
-	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->hdr_table_addr = mem->phys;
 	data->size_hdr_table = mem->size;
 	data->hdr_addr = offset;
 
-	return pyld;
+	return data;
 }
 
-static struct ipahal_imm_cmd_pyld *
-fltrt_init_common(u16 opcode, struct ipa_dma_mem *mem, u32 hash_offset,
-		  u32 nhash_offset)
+static void *fltrt_init_common(u16 opcode, struct ipa_dma_mem *mem,
+			       u32 hash_offset, u32 nhash_offset)
 {
 	struct ipa_imm_cmd_hw_ip_fltrt_init *data;
-	struct ipahal_imm_cmd_pyld *pyld;
 
-	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
-	if (!pyld)
+	data = kzalloc(sizeof(*data), GFP_KERNEL);
+	if (!data)
 		return NULL;
-	data = ipahal_imm_cmd_pyld_data(pyld);
-
-	ipa_debug("putting hashable rules to phys 0x%x\n", hash_offset);
-	ipa_debug("putting non-hashable rules to phys 0x%x\n", nhash_offset);
 
 	data->hash_rules_addr = (u64)mem->phys;
 	data->hash_rules_size = (u32)mem->size;
@@ -320,11 +292,10 @@ fltrt_init_common(u16 opcode, struct ipa_dma_mem *mem, u32 hash_offset,
 	data->nhash_rules_size = (u32)mem->size;
 	data->nhash_local_addr = nhash_offset;
 
-	return pyld;
+	return data;
 }
 
-struct ipahal_imm_cmd_pyld *
-ipahal_ip_v4_routing_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
+void *ipahal_ip_v4_routing_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
 			       u32 nhash_offset)
 {
 	u16 opcode = IPA_IMM_CMD_IP_V4_ROUTING_INIT;
@@ -334,9 +305,8 @@ ipahal_ip_v4_routing_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
 	return fltrt_init_common(opcode, mem, hash_offset, nhash_offset);
 }
 
-struct ipahal_imm_cmd_pyld *
-ipahal_ip_v6_routing_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
-			       u32 nhash_offset)
+void *ipahal_ip_v6_routing_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
+				     u32 nhash_offset)
 {
 	u16 opcode = IPA_IMM_CMD_IP_V6_ROUTING_INIT;
 
@@ -345,9 +315,8 @@ ipahal_ip_v6_routing_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
 	return fltrt_init_common(opcode, mem, hash_offset, nhash_offset);
 }
 
-struct ipahal_imm_cmd_pyld *
-ipahal_ip_v4_filter_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
-			      u32 nhash_offset)
+void *ipahal_ip_v4_filter_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
+				    u32 nhash_offset)
 {
 	u16 opcode = IPA_IMM_CMD_IP_V4_FILTER_INIT;
 
@@ -356,9 +325,8 @@ ipahal_ip_v4_filter_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
 	return fltrt_init_common(opcode, mem, hash_offset, nhash_offset);
 }
 
-struct ipahal_imm_cmd_pyld *
-ipahal_ip_v6_filter_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
-			      u32 nhash_offset)
+void *ipahal_ip_v6_filter_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
+				    u32 nhash_offset)
 {
 	u16 opcode = IPA_IMM_CMD_IP_V6_FILTER_INIT;
 
@@ -367,21 +335,16 @@ ipahal_ip_v6_filter_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
 	return fltrt_init_common(opcode, mem, hash_offset, nhash_offset);
 }
 
-struct ipahal_imm_cmd_pyld *
-ipahal_dma_task_32b_addr_pyld(struct ipa_dma_mem *mem)
+void *ipahal_dma_task_32b_addr_pyld(struct ipa_dma_mem *mem)
 {
 	struct ipa_imm_cmd_hw_dma_task_32b_addr *data;
-	struct ipahal_imm_cmd_pyld *pyld;
-	u16 opcode;
 
 	/* size1 and packet_size are both 16 bits wide */
 	ipa_assert(mem->size < 1 << 16);
 
-	opcode = IPA_IMM_CMD_DMA_TASK_32B_ADDR;
-	pyld = ipahal_imm_cmd_pyld_alloc(opcode, sizeof(*data));
-	if (!pyld)
+	data = kzalloc(sizeof(*data), GFP_KERNEL);
+	if (!data)
 		return NULL;
-	data = ipahal_imm_cmd_pyld_data(pyld);
 
 	data->cmplt = 0;
 	data->eof = 0;
@@ -392,7 +355,7 @@ ipahal_dma_task_32b_addr_pyld(struct ipa_dma_mem *mem)
 	data->addr1 = mem->phys;
 	data->packet_size = mem->size;
 
-	return pyld;
+	return data;
 }
 
 /* IPA Packet Status Logic */

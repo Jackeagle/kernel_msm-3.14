@@ -906,6 +906,7 @@ int ipa_gsi_dma_task_alloc(void)
 	if (ipa_dma_alloc(mem, IPA_GSI_CHANNEL_STOP_PKT_SIZE, GFP_KERNEL))
 		return -ENOMEM;
 
+	/* IPA_IMM_CMD_DMA_TASK_32B_ADDR */
 	ipa_ctx->dma_task_info.cmd_pyld = ipahal_dma_task_32b_addr_pyld(mem);
 	if (!ipa_ctx->dma_task_info.cmd_pyld) {
 		ipa_dma_free(mem);
