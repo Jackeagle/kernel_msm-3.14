@@ -221,19 +221,6 @@ enum ipahal_pkt_status_mask {
 };
 
 /**
- * enum ipahal_pkt_status_nat_type - Type of NAT
- *
- *  The values assigned here are assumed by ipa_pkt_status_parse() to
- *  match values returned in the nat_type field of a ipa_pkt_status_hw
- *  structure inserted by the IPA in received buffer.
- */
-enum ipahal_pkt_status_nat_type {
-	IPAHAL_PKT_STATUS_NAT_NONE	= 0,
-	IPAHAL_PKT_STATUS_NAT_SRC	= 1,
-	IPAHAL_PKT_STATUS_NAT_DST	= 2,
-};
-
-/**
  * struct ipahal_pkt_status - IPA status packet abstracted payload.
  *  This structure describes the status packet fields for the
  *   following statuses: IPA_STATUS_PACKET, IPA_STATUS_DROPPED_PACKET,
@@ -303,7 +290,6 @@ struct ipahal_pkt_status {
 	u16 rt_rule_id;
 	bool nat_hit;
 	u16 nat_entry_idx;
-	enum ipahal_pkt_status_nat_type nat_type;
 	u64 tag_info;
 	u8 seq_num;
 	u32 time_of_day_ctr;

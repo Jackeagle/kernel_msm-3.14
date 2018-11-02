@@ -212,11 +212,7 @@ struct ipa_imm_cmd_hw_dma_task_32b_addr {
  *  rt miss. In case of miss, all rt info to be ignored
  * @nat_hit: NAT hit flag: Was their NAT hit?
  * @nat_entry_idx: Index of the NAT entry used of NAT processing
- * @nat_type: Defines the type of the NAT operation:
- *	00: No NAT
- *	01: Source NAT
- *	10: Destination NAT
- *	11: Reserved
+ * @nat_type: Defines the type of the NAT operation (ignored for now)
  * @tag_info: S/W defined value provided via immediate command
  * @seq_num: Per source endp unique packet sequence number
  * @time_of_day_ctr: running counter from IPA clock
@@ -437,18 +433,6 @@ static bool status_opcode_valid(u8 status_opcode)
 	}
 }
 
-static bool nat_type_valid(u8 nat_type)
-{
-	switch (nat_type) {
-	case IPAHAL_PKT_STATUS_NAT_NONE:
-	case IPAHAL_PKT_STATUS_NAT_SRC:
-	case IPAHAL_PKT_STATUS_NAT_DST:
-		return true;
-	default:
-		return false;
-	}
-}
-
 /* Maps an exception type returned in a ipa_pkt_status_hw structure
  * to the ipahal_pkt_status_exception value that represents it in
  * the exception field of a ipahal_pkt_status structure.  Returns
@@ -487,13 +471,11 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 	enum ipahal_pkt_status_exception exception;
 	u8 status_opcode;
 	bool is_ipv6;
-	u8 nat_type;
 
 	memset(status, 0, sizeof(*status));
 
 	status_opcode = (u8)hw_status->status_opcode;
 	is_ipv6 = (hw_status->status_mask & 0x80) ? false : true;
-	nat_type = (u8)hw_status->nat_type;
 
 	status->pkt_len = hw_status->pkt_len;
 	status->endp_src_idx = hw_status->endp_src_idx;
@@ -525,11 +507,6 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 		ipa_err("unsupported Status Opcode 0x%x\n", status_opcode);
 	else
 		status->status_opcode = status_opcode;
-
-	if (WARN_ON(!nat_type_valid((nat_type))))
-		ipa_err("unsupported Status NAT type 0x%x\n", nat_type);
-	else
-		status->nat_type = nat_type;
 
 	exception = exception_map((u8)hw_status->exception, is_ipv6);
 	if (WARN_ON(exception == IPAHAL_PKT_STATUS_EXCEPTION_MAX))
