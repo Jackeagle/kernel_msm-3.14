@@ -114,7 +114,7 @@ struct gsi_channel {
 	void *notify_data;
 	void **user_data;
 	struct gsi_evt_ring *evt_ring;
-	struct mutex mlock;		/* protects channel_scratch updates */
+	struct mutex mutex;		/* protects channel_scratch updates */
 	struct completion compl;
 	atomic_t poll_mode;
 	u32 tlv_count;			/* # slots in TLV */
@@ -145,7 +145,7 @@ struct gsi {
 	unsigned int irq;
 	bool irq_wake_enabled;
 	spinlock_t slock;	/* protects global register updates */
-	struct mutex mlock;	/* protects 1-at-a-time commands, evt_bmap */
+	struct mutex mutex;	/* protects 1-at-a-time commands, evt_bmap */
 	atomic_t channel_count;
 	atomic_t evt_ring_count;
 	struct gsi_channel channel[GSI_CHAN_MAX];
@@ -1040,7 +1040,7 @@ static int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 	int ret;
 
 	/* Get the mutex to allocate from the bitmap and issue a command */
-	mutex_lock(&gsi->mlock);
+	mutex_lock(&gsi->mutex);
 
 	/* Start by allocating the event id to use */
 	ipa_assert(gsi->evt_bmap != ~0UL);
@@ -1075,7 +1075,7 @@ static int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 	gsi_ring_init(&evt_ring->ring);
 	gsi_evt_ring_prime(gsi, evt_ring);
 
-	mutex_unlock(&gsi->mlock);
+	mutex_unlock(&gsi->mutex);
 
 	spin_lock_irqsave(&gsi->slock, flags);
 
@@ -1095,7 +1095,7 @@ err_free_bmap:
 	ipa_assert(gsi->evt_bmap & BIT(evt_ring_id));
 	gsi->evt_bmap &= ~BIT(evt_ring_id);
 
-	mutex_unlock(&gsi->mlock);
+	mutex_unlock(&gsi->mutex);
 
 	return ret;
 }
@@ -1113,7 +1113,7 @@ static void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
 
 	ipa_bug_on(evt_ring->state != GSI_EVT_RING_STATE_ALLOCATED);
 
-	mutex_lock(&gsi->mlock);
+	mutex_lock(&gsi->mutex);
 
 	completed = evt_ring_command(gsi, evt_ring_id, GSI_EVT_RESET);
 	ipa_bug_on(!completed);
@@ -1132,7 +1132,7 @@ static void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
 	ipa_assert(gsi->evt_bmap & BIT(evt_ring_id));
 	gsi->evt_bmap &= ~BIT(evt_ring_id);
 
-	mutex_unlock(&gsi->mlock);
+	mutex_unlock(&gsi->mutex);
 
 	evt_ring->moderation = false;
 	gsi_ring_free(&evt_ring->ring);
@@ -1200,13 +1200,13 @@ int gsi_channel_alloc(struct gsi *gsi, u32 channel_id, u32 channel_count,
 		goto err_ring_free;
 	}
 
-	mutex_init(&channel->mlock);
+	mutex_init(&channel->mutex);
 	init_completion(&channel->compl);
 	atomic_set(&channel->poll_mode, 0);	/* Initially in callback mode */
 	channel->from_ipa = from_ipa;
 	channel->notify_data = notify_data;
 
-	mutex_lock(&gsi->mlock);
+	mutex_lock(&gsi->mutex);
 
 	if (!channel_command(gsi, channel_id, GSI_CH_ALLOCATE)) {
 		ret = -ETIMEDOUT;
@@ -1219,7 +1219,7 @@ int gsi_channel_alloc(struct gsi *gsi, u32 channel_id, u32 channel_count,
 
 	gsi->ch_dbg[channel_id].ch_allocate++;
 
-	mutex_unlock(&gsi->mlock);
+	mutex_unlock(&gsi->mutex);
 
 	channel->evt_ring = &gsi->evt_ring[evt_ring_id];
 	channel->evt_ring->channel = channel;
@@ -1234,7 +1234,7 @@ int gsi_channel_alloc(struct gsi *gsi, u32 channel_id, u32 channel_count,
 	return 0;
 
 err_mutex_unlock:
-	mutex_unlock(&gsi->mlock);
+	mutex_unlock(&gsi->mutex);
 	kfree(user_data);
 err_ring_free:
 	gsi_ring_free(&channel->ring);
@@ -1280,11 +1280,11 @@ void gsi_channel_scratch_write(struct gsi *gsi, u32 channel_id, u32 tlv_count)
 
 	channel->tlv_count = tlv_count;
 
-	mutex_lock(&channel->mlock);
+	mutex_lock(&channel->mutex);
 
 	__gsi_channel_scratch_write(gsi, channel_id);
 
-	mutex_unlock(&channel->mlock);
+	mutex_unlock(&channel->mutex);
 }
 
 int gsi_channel_start(struct gsi *gsi, u32 channel_id)
@@ -1298,12 +1298,12 @@ int gsi_channel_start(struct gsi *gsi, u32 channel_id)
 		return -ENOTSUPP;
 	}
 
-	mutex_lock(&gsi->mlock);
+	mutex_lock(&gsi->mutex);
 
 	gsi->ch_dbg[channel_id].ch_start++;
 
 	if (!channel_command(gsi, channel_id, GSI_CH_START)) {
-		mutex_unlock(&gsi->mlock);
+		mutex_unlock(&gsi->mutex);
 		return -ETIMEDOUT;
 	}
 	if (channel->state != GSI_CHANNEL_STATE_STARTED) {
@@ -1312,7 +1312,7 @@ int gsi_channel_start(struct gsi *gsi, u32 channel_id)
 		ipa_bug();
 	}
 
-	mutex_unlock(&gsi->mlock);
+	mutex_unlock(&gsi->mutex);
 
 	return 0;
 }
@@ -1334,7 +1334,7 @@ int gsi_channel_stop(struct gsi *gsi, u32 channel_id)
 		return -ENOTSUPP;
 	}
 
-	mutex_lock(&gsi->mlock);
+	mutex_lock(&gsi->mutex);
 
 	gsi->ch_dbg[channel_id].ch_stop++;
 
@@ -1368,7 +1368,7 @@ int gsi_channel_stop(struct gsi *gsi, u32 channel_id)
 	ret = 0;
 
 free_lock:
-	mutex_unlock(&gsi->mlock);
+	mutex_unlock(&gsi->mutex);
 
 	return ret;
 }
@@ -1386,13 +1386,13 @@ int gsi_channel_reset(struct gsi *gsi, u32 channel_id)
 
 	evt_ring_id = gsi_evt_ring_id(gsi, channel->evt_ring);
 	reset_done = false;
-	mutex_lock(&gsi->mlock);
+	mutex_lock(&gsi->mutex);
 reset:
 
 	gsi->ch_dbg[channel_id].ch_reset++;
 
 	if (!channel_command(gsi, channel_id, GSI_CH_RESET)) {
-		mutex_unlock(&gsi->mlock);
+		mutex_unlock(&gsi->mutex);
 		return -ETIMEDOUT;
 	}
 
@@ -1415,7 +1415,7 @@ reset:
 	/* restore scratch */
 	__gsi_channel_scratch_write(gsi, channel_id);
 
-	mutex_unlock(&gsi->mlock);
+	mutex_unlock(&gsi->mutex);
 
 	return 0;
 }
@@ -1429,7 +1429,7 @@ void gsi_channel_free(struct gsi *gsi, u32 channel_id)
 	ipa_bug_on(channel->state != GSI_CHANNEL_STATE_ALLOCATED);
 
 	evt_ring_id = gsi_evt_ring_id(gsi, channel->evt_ring);
-	mutex_lock(&gsi->mlock);
+	mutex_lock(&gsi->mutex);
 
 	gsi->ch_dbg[channel_id].ch_de_alloc++;
 
@@ -1438,7 +1438,7 @@ void gsi_channel_free(struct gsi *gsi, u32 channel_id)
 
 	ipa_bug_on(channel->state != GSI_CHANNEL_STATE_NOT_ALLOCATED);
 
-	mutex_unlock(&gsi->mlock);
+	mutex_unlock(&gsi->mutex);
 
 	kfree(channel->user_data);
 	gsi_ring_free(&channel->ring);
@@ -1593,14 +1593,14 @@ void gsi_channel_config(struct gsi *gsi, u32 channel_id, bool doorbell_enable)
 
 	evt_ring_id = gsi_evt_ring_id(gsi, channel->evt_ring);
 
-	mutex_lock(&channel->mlock);
+	mutex_lock(&channel->mutex);
 
 	gsi_channel_program(gsi, channel_id, evt_ring_id, doorbell_enable);
 	gsi_ring_init(&channel->ring);
 
 	/* restore scratch */
 	__gsi_channel_scratch_write(gsi, channel_id);
-	mutex_unlock(&channel->mlock);
+	mutex_unlock(&channel->mutex);
 }
 
 /* Initialize GSI driver */
@@ -1647,7 +1647,7 @@ struct gsi *gsi_init(struct platform_device *pdev)
 	gsi->phys = (u32)res->start;
 	gsi->irq = irq;
 	spin_lock_init(&gsi->slock);
-	mutex_init(&gsi->mlock);
+	mutex_init(&gsi->mutex);
 	atomic_set(&gsi->channel_count, 0);
 	atomic_set(&gsi->evt_ring_count, 0);
 
