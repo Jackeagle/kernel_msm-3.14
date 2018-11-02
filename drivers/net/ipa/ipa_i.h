@@ -58,8 +58,6 @@
 
 /* The maximum number of filter table entries (IPv4, IPv6; hashed and not) */
 #define IPA_MEM_FLT_COUNT	14
- /* The size of a filter table (first slot contains an endpoint bitmap) */
-#define IPA_MEM_FLT_SIZE	((IPA_MEM_FLT_COUNT + 1) * IPA_HW_TBL_HDR_WIDTH)
 
 /* The number of routing table entries (IPv4, IPv6; hashed and not) */
 #define IPA_MEM_RT_COUNT			15
@@ -69,9 +67,6 @@
 #define IPA_MEM_MODEM_RT_INDEX_MIN		0
 #define IPA_MEM_MODEM_RT_INDEX_MAX \
                (IPA_MEM_MODEM_RT_INDEX_MIN + IPA_MEM_MODEM_RT_COUNT - 1)
-
- /* The size of a routing table */
-#define IPA_MEM_RT_SIZE		(IPA_MEM_RT_COUNT * IPA_HW_TBL_HDR_WIDTH)
 
 #define IPA_MEM_V4_FLT_HASH_OFST		0x288
 #define IPA_MEM_V4_FLT_NHASH_OFST		0x308
