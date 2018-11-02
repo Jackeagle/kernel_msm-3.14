@@ -355,21 +355,6 @@ enum ipahal_imm_cmd {
 	IPA_IMM_CMD_DMA_SHARED_MEM		= 19,
 };
 
-/**
- * ipa_desc_fill_imm_cmd() - Fill an IPA descriptor for an immediate command
- * @desc:	Descriptor to fill
- * @opcode:	Opcode to use
- * @payload:	Command payload
- */
-static inline void ipa_desc_fill_imm_cmd(struct ipa_desc *desc,
-					 enum ipahal_imm_cmd opcode,
-					 void *payload)
-{
-	desc->type = IPA_IMM_CMD_DESC;
-	desc->len_opcode = (u16)opcode;
-	desc->payload = payload;
-}
-
 struct ipa_wakelock_ref_cnt {
 	spinlock_t spinlock;	/* protects updates to cnt */
 	int cnt;

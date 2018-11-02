@@ -83,7 +83,10 @@ static int hdr_init_local_cmd(u32 offset, u32 size)
 		ret = -ENOMEM;
 		goto err_dma_free;
 	}
-	ipa_desc_fill_imm_cmd(&desc, IPA_IMM_CMD_HDR_INIT_LOCAL, payload);
+
+	desc.type = IPA_IMM_CMD_DESC;
+	desc.len_opcode = IPA_IMM_CMD_HDR_INIT_LOCAL;
+	desc.payload = payload;
 
 	ret = ipa_send_cmd(&desc);
 
@@ -113,7 +116,10 @@ static int dma_shared_mem_zero_cmd(u32 offset, u32 size)
 		ret = -ENOMEM;
 		goto err_dma_free;
 	}
-	ipa_desc_fill_imm_cmd(&desc, IPA_IMM_CMD_DMA_SHARED_MEM, payload);
+
+	desc.type = IPA_IMM_CMD_DESC;
+	desc.len_opcode = IPA_IMM_CMD_DMA_SHARED_MEM;
+	desc.payload = payload;
 
 	ret = ipa_send_cmd(&desc);
 
@@ -301,7 +307,10 @@ static int ipa_init_rt4(struct ipa_dma_mem *mem)
 						 nhash_offset);
 	if (!payload)
 		return -ENOMEM;
-	ipa_desc_fill_imm_cmd(&desc, IPA_IMM_CMD_IP_V4_ROUTING_INIT, payload);
+
+	desc.type = IPA_IMM_CMD_DESC;
+	desc.len_opcode = IPA_IMM_CMD_IP_V4_ROUTING_INIT;
+	desc.payload = payload;
 
 	ret = ipa_send_cmd(&desc);
 
@@ -329,7 +338,10 @@ static int ipa_init_rt6(struct ipa_dma_mem *mem)
 						 nhash_offset);
 	if (!payload)
 		return -ENOMEM;
-	ipa_desc_fill_imm_cmd(&desc, IPA_IMM_CMD_IP_V6_ROUTING_INIT, payload);
+
+	desc.type = IPA_IMM_CMD_DESC;
+	desc.len_opcode = IPA_IMM_CMD_IP_V6_ROUTING_INIT;
+	desc.payload = payload;
 
 	ret = ipa_send_cmd(&desc);
 
@@ -358,7 +370,9 @@ static int ipa_init_flt4(struct ipa_dma_mem *mem)
 	if (!payload)
 		return -ENOMEM;
 
-	ipa_desc_fill_imm_cmd(&desc, IPA_IMM_CMD_IP_V4_FILTER_INIT, payload);
+	desc.type = IPA_IMM_CMD_DESC;
+	desc.len_opcode = IPA_IMM_CMD_IP_V4_FILTER_INIT;
+	desc.payload = payload;
 
 	ret = ipa_send_cmd(&desc);
 
@@ -387,7 +401,9 @@ static int ipa_init_flt6(struct ipa_dma_mem *mem)
 	if (!payload)
 		return -ENOMEM;
 
-	ipa_desc_fill_imm_cmd(&desc, IPA_IMM_CMD_IP_V6_FILTER_INIT, payload);
+	desc.type = IPA_IMM_CMD_DESC;
+	desc.len_opcode = IPA_IMM_CMD_IP_V6_FILTER_INIT;
+	desc.payload = payload;
 
 	ret = ipa_send_cmd(&desc);
 
