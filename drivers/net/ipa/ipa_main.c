@@ -522,41 +522,23 @@ static int ipa_ep_apps_setup(void)
 	if (ret < 0)
 		return ret;
 
-	ipa_debug("Apps to IPA cmd endpoint is connected\n");
-
 	ipa_init_sram();
-	ipa_debug("SRAM initialized\n");
-
 	ipa_init_hdr();
-	ipa_debug("HDR initialized\n");
 
 	ret = ipahal_rt_generate_empty_img(IPA_MEM_RT_COUNT, &mem);
 	ipa_assert(!ret);
-
 	ipa_init_rt4(&mem);
-	ipa_debug("V4 RT initialized\n");
-
 	ipa_init_rt6(&mem);
-	ipa_debug("V6 RT initialized\n");
-
 	ipahal_free_empty_img(&mem);
 
 	ret = ipahal_flt_generate_empty_img(ipa_ctx->filter_bitmap, &mem);
 	ipa_assert(!ret);
-
 	ipa_init_flt4(&mem);
-	ipa_debug("V4 FLT initialized\n");
-
 	ipa_init_flt6(&mem);
-	ipa_debug("V6 FLT initialized\n");
-
 	ipahal_free_empty_img(&mem);
 
 	ipa_setup_flt_hash_tuple();
-	ipa_debug("flt hash tuple is configured\n");
-
 	ipa_setup_rt_hash_tuple();
-	ipa_debug("rt hash tuple is configured\n");
 
 	/* LAN IN (IPA->AP)
 	 *
@@ -588,8 +570,6 @@ fail_flt_hash_tuple:
  */
 static void ipa_enable_clks(void)
 {
-	ipa_debug("enabling IPA clocks and bus voting\n");
-
 	WARN_ON(ipa_interconnect_enable());
 }
 
@@ -598,8 +578,6 @@ static void ipa_enable_clks(void)
  */
 static void ipa_disable_clks(void)
 {
-	ipa_debug("disabling IPA clocks and bus voting\n");
-
 	WARN_ON(ipa_interconnect_disable());
 }
 
@@ -749,8 +727,6 @@ static void ipa_suspend_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 {
 	u32 endpoints = interrupt_data;
 
-	ipa_debug("interrupt=%d, endpoints=0x%08x\n", interrupt, endpoints);
-
 	while (endpoints) {
 		enum ipa_client_type client;
 		u32 i = __ffs(endpoints);
@@ -819,8 +795,6 @@ static void ipa_freeze_clock_vote_and_notify_modem(void)
 				    value);
 
 	ipa_ctx->smp2p_info.res_sent = true;
-	ipa_debug("IPA clocks are %s\n",
-		  ipa_ctx->smp2p_info.ipa_clk_on ? "ON" : "OFF");
 }
 
 void ipa_reset_freeze_vote(void)
@@ -901,12 +875,13 @@ static void ipa_post_init(void)
 {
 	int ret;
 
+	ipa_debug("ipa_post_init() started\n");
+
 	ret = gsi_device_init(ipa_ctx->gsi);
 	if (ret) {
 		ipa_err(":gsi register error - %d\n", ret);
 		return;
 	}
-	ipa_debug("IPA gsi is registered\n");
 
 	/* setup the AP-IPA endpoints */
 	if (ipa_ep_apps_setup()) {
@@ -915,7 +890,6 @@ static void ipa_post_init(void)
 
 		return;
 	}
-	ipa_debug("IPA GPI endpoints were connected\n");
 
 	ipa_ctx->uc_ctx = ipa_uc_init(ipa_ctx->ipa_phys);
 	if (!ipa_ctx->uc_ctx)
@@ -939,27 +913,16 @@ static int ipa_pre_init(void)
 {
 	int ret = 0;
 
-	ipa_debug("IPA Driver initialization started\n");
-
 	/* enable IPA clocks explicitly to allow the initialization */
 	ipa_enable_clks();
 
 	ipa_init_hw();
 
-	ipa_debug("IPA HW initialization sequence completed");
-
 	ipa_ctx->ep_count = ipa_get_ep_count();
+	ipa_debug("ep_count %u\n", ipa_get_ep_count());
 	ipa_assert(ipa_ctx->ep_count <= IPA_EP_COUNT_MAX);
 
 	ipa_sram_settings_read();
-	ipa_debug("SRAM, size: 0x%x, restricted bytes: 0x%x\n",
-		  ipa_ctx->smem_size, ipa_ctx->smem_offset);
-
-	ipa_debug("hdr_lcl=0 ip4_rt_hash=0 ip4_rt_nonhash=0\n");
-	ipa_debug("ip6_rt_hash=0 ip6_rt_nonhash=0\n");
-	ipa_debug("ip4_flt_hash=0 ip4_flt_nonhash=0\n");
-	ipa_debug("ip6_flt_hash=0 ip6_flt_nonhash=0\n");
-
 	if (ipa_ctx->smem_size < IPA_MEM_END_OFST) {
 		ipa_err("insufficient memory: %hu bytes available, need %u\n",
 			ipa_ctx->smem_size, IPA_MEM_END_OFST);
@@ -1120,16 +1083,10 @@ static int ipa_smp2p_init(struct device *dev, bool modem_init)
 
 	node = dev->of_node;
 
-	ipa_debug("node->name=%s\n", node->name);
 	valid_state = qcom_smem_state_get(dev, "ipa-clock-enabled-valid",
 					  &valid_bit);
-	if (IS_ERR(valid_state)) {
-		ret = PTR_ERR(valid_state);
-		ipa_err("error %d getting ipa-clock-enabled-valid state\n",
-			ret);
-
-		return ret;
-	}
+	if (IS_ERR(valid_state))
+		return PTR_ERR(valid_state);
 
 	enabled_state = qcom_smem_state_get(dev, "ipa-clock-enabled",
 					    &enabled_bit);
@@ -1210,8 +1167,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 
 	dev = &pdev->dev;
 
-	ipa_debug("IPA driver: probing\n");
-
 	match_data = of_device_get_match_data(dev);
 	modem_init = match_data->init_type == ipa_modem_init;
 
@@ -1238,6 +1193,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 
 	/* Compute a bitmask representing which endpoints support filtering */
 	ipa_ctx->filter_bitmap = ipa_filter_bitmap_init();
+	ipa_debug("filter_bitmap 0x%08x\n", ipa_ctx->filter_bitmap);
 	if (!ipa_ctx->filter_bitmap)
 		goto err_interconnect_exit;
 
@@ -1362,8 +1318,6 @@ int ipa_ap_suspend(struct device *dev)
 {
 	u32 i;
 
-	ipa_debug("Enter...\n");
-
 	/* In case there is a tx/rx handler in polling mode fail to suspend */
 	for (i = 0; i < ipa_ctx->ep_count; i++) {
 		if (ipa_ctx->ep[i].sys && ipa_ep_polling(&ipa_ctx->ep[i])) {
@@ -1372,8 +1326,6 @@ int ipa_ap_suspend(struct device *dev)
 			return -EAGAIN;
 		}
 	}
-
-	ipa_debug("Exit\n");
 
 	return 0;
 }

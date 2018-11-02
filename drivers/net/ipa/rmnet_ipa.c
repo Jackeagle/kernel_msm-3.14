@@ -164,7 +164,6 @@ static void apps_ipa_tx_complete_notify(void *priv, enum ipa_dp_evt_type evt,
 	skb = (struct sk_buff *)data;
 
 	if (dev != rmnet_ipa_ctx->dev) {
-		ipa_debug("Received pre-SSR packet completion\n");
 		dev_kfree_skb_any(skb);
 		return;
 	}
@@ -209,7 +208,6 @@ static void apps_ipa_packet_receive_notify(void *priv, enum ipa_dp_evt_type evt,
 		int ret;
 		unsigned int packet_len = skb->len;
 
-		ipa_debug("Rx packet was received\n");
 		skb->dev = rmnet_ipa_ctx->dev;
 		skb->protocol = htons(ETH_P_MAP);
 
@@ -450,8 +448,6 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 	if (copy_from_user(&edata, data, size))
 		return -EFAULT;
 
-	ipa_debug("extended cmd 0x%08x\n", edata.extended_ioctl);
-
 	switch (edata.extended_ioctl) {
 	case RMNET_IOCTL_GET_SUPPORTED_FEATURES:	/* Get features */
 		edata.u.data = RMNET_IOCTL_FEAT_NOTIFY_MUX_CHANNEL;
@@ -520,8 +516,6 @@ static int ipa_wwan_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	struct rmnet_ioctl_data_s ioctl_data = { };
 	void __user *data;
 	size_t size;
-
-	ipa_debug("cmd 0x%08x", cmd);
 
 	data = ifr->ifr_ifru.ifru_data;
 	size = sizeof(ioctl_data);
@@ -621,7 +615,6 @@ static int ipa_wwan_probe(struct platform_device *pdev)
 	}
 	rmnet_ipa_ctx->dev = dev;
 	wwan_ptr = netdev_priv(dev);
-	ipa_debug("wwan_ptr (private) = %p", wwan_ptr);
 	wwan_ptr->outstanding_high_ctl = DEFAULT_OUTSTANDING_HIGH_CTL;
 	wwan_ptr->outstanding_high = DEFAULT_OUTSTANDING_HIGH;
 	wwan_ptr->outstanding_low = DEFAULT_OUTSTANDING_LOW;
@@ -637,7 +630,6 @@ static int ipa_wwan_probe(struct platform_device *pdev)
 		goto err_napi_del;
 	}
 
-	ipa_debug("IPA-WWAN devices (%s) initialization ok :>>>>\n", dev->name);
 	/* offline charging mode */
 	ipa_proxy_clk_unvote();
 
@@ -717,7 +709,6 @@ static int rmnet_ipa_ap_suspend(struct device *dev)
 	struct ipa_wwan_private *wwan_ptr;
 	int ret;
 
-	ipa_debug("Enter...\n");
 	if (!netdev) {
 		ipa_err("netdev is NULL.\n");
 		ret = 0;
@@ -734,7 +725,6 @@ static int rmnet_ipa_ap_suspend(struct device *dev)
 
 	/* Do not allow A7 to suspend in case there are outstanding packets */
 	if (atomic_read(&wwan_ptr->outstanding_pkts) != 0) {
-		ipa_debug("Outstanding packets, postponing AP suspend.\n");
 		ret = -EAGAIN;
 		goto unlock_and_bail;
 	}
@@ -744,12 +734,10 @@ static int rmnet_ipa_ap_suspend(struct device *dev)
 
 	ret = 0;
 	ipa_client_remove();
-	ipa_debug("IPA clocks disabled\n");
 
 unlock_and_bail:
 	netif_tx_unlock_bh(netdev);
 bail:
-	ipa_debug("Exit with %d\n", ret);
 
 	return ret;
 }
@@ -768,10 +756,8 @@ static int rmnet_ipa_ap_resume(struct device *dev)
 	struct net_device *netdev = rmnet_ipa_ctx->dev;
 
 	ipa_client_add();
-	ipa_debug("IPA clocks enabled\n");
 	if (netdev)
 		netif_wake_queue(netdev);
-	ipa_debug("Exit\n");
 
 	return 0;
 }

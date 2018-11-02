@@ -459,6 +459,9 @@ void ipa_sram_settings_read(void)
 	/* reg fields are in 8B units */
 	ipa_ctx->smem_offset = mem_size.shared_mem_baddr * 8;
 	ipa_ctx->smem_size = mem_size.shared_mem_size * 8;
+
+	ipa_debug("sram size 0x%x offset 0x%x\n", ipa_ctx->smem_size,
+		  ipa_ctx->smem_offset);
 }
 
 /** ipa_init_hw() - initialize HW */
@@ -825,7 +828,6 @@ void ipa_set_resource_groups_min_max_limits(void)
 
 static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
 {
-	ipa_debug("switch channel %u to poll\n", ep->channel_id);
 	ipa_rx_switch_to_poll_mode(ep->sys);
 }
 
@@ -964,7 +966,6 @@ int ipa_stop_gsi_channel(u32 ep_id)
 		if (ret != -EAGAIN && ret != -ETIMEDOUT)
 			return ret;
 
-		ipa_debug("Inject a DMA_TASK with 1B packet to IPA\n");
 		/* Send a 1B packet DMA_TASK to IPA and try again */
 		ret = ipa_gsi_dma_task_inject();
 		if (ret)

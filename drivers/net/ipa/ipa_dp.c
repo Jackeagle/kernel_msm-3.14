@@ -1452,18 +1452,14 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 				from_ipa, priority, evt_ring_mult, moderation,
 				ep->sys);
 	if (ret)
-		goto fail_alloc_channel;
+		return ret;
 	ep->channel_id = channel_id;
 
 	gsi_channel_scratch_write(ipa_ctx->gsi, ep->channel_id, tlv_count);
 
 	ret = gsi_channel_start(ipa_ctx->gsi, ep->channel_id);
-	if (!ret)
-		return 0;	/* Success */
-
-	gsi_channel_free(ipa_ctx->gsi, ep->channel_id);
-fail_alloc_channel:
-	ipa_err("Return with err: %d\n", ret);
+	if (ret)
+		gsi_channel_free(ipa_ctx->gsi, ep->channel_id);
 
 	return ret;
 }
@@ -1701,19 +1697,12 @@ int ipa_ep_setup(u32 ep_id, u32 channel_count, u32 evt_ring_mult,
 
 	ipa_cfg_ep(ep_id);
 
-	ipa_debug("ep %u configuration successful\n", ep_id);
-
 	ret = ipa_gsi_setup_channel(ep, channel_count, evt_ring_mult);
-	if (ret) {
-		ipa_err("Failed to setup GSI channel\n");
+	if (ret)
 		goto err_client_remove;
-	}
 
 	if (ipa_consumer(ep->client))
 		ipa_replenish_rx_cache(ep->sys);
-
-	ipa_debug("client %d (ep: %u) connected sys=%p\n", ep->client,
-		  ep_id, ep->sys);
 err_client_remove:
 	ipa_client_remove();
 
@@ -1742,8 +1731,6 @@ static int ipa_channel_reset_aggr(u32 ep_id)
 	int ret;
 	int i;
 
-	ipa_debug("Applying reset channel with open aggregation frame WA\n");
-
 	ipa_reg_aggr_force_close(&force_close, BIT(ep_id));
 	ipa_write_reg_fields(IPA_AGGR_FORCE_CLOSE, &force_close);
 
@@ -1759,7 +1746,6 @@ static int ipa_channel_reset_aggr(u32 ep_id)
 
 	ipa_read_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 	if (init_ctrl.endp_suspend) {
-		ipa_debug("endpoint is suspended, remove suspend\n");
 		ep_suspended = true;
 		ipa_reg_endp_init_ctrl(&init_ctrl, false);
 		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
@@ -1816,7 +1802,6 @@ err_stop_channel:
 	ipa_stop_gsi_channel(ep_id);
 out_suspend_again:
 	if (ep_suspended) {
-		ipa_debug("suspend the endpoint again\n");
 		ipa_reg_endp_init_ctrl(&init_ctrl, true);
 		ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 	}
@@ -1895,8 +1880,6 @@ void ipa_ep_teardown(u32 ep_id)
 		ipa_cleanup_rx(ep->sys);
 
 	ipa_ep_free(ep_id);
-
-	ipa_debug("client (ep: %u) disconnected\n", ep_id);
 }
 
 static int ipa_poll_gsi_pkt(struct ipa_sys_context *sys)

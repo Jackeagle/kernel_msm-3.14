@@ -119,18 +119,8 @@ static void ipa_indication_register_fn(struct qmi_handle *qmi,
 				       struct qmi_txn *txn,
 				       const void *decoded)
 {
-	const struct ipa_indication_register_req *req = decoded;
 	struct ipa_indication_register_rsp rsp = { };
 	int ret;
-
-	/* Both of these should be true (1), but we ignore them.
-	 * Supposedly we're supposed to only send the master
-	 * driver init complete indication if this is true.
-	 */
-	ipa_debug("req->master_driver_init_complete_valid = %hhu\n",
-		  req->master_driver_init_complete_valid);
-	ipa_debug("req->master_driver_init_complete = %hhu\n",
-		  req->master_driver_init_complete);
 
 	rsp.rsp.result = QMI_RESULT_SUCCESS_V01;
 	rsp.rsp.error = QMI_ERR_NONE_V01;
@@ -153,14 +143,8 @@ static void ipa_driver_init_complete_fn(struct qmi_handle *qmi,
 					struct qmi_txn *txn,
 					const void *decoded)
 {
-	const struct ipa_driver_init_complete_req *req = decoded;
 	struct ipa_driver_init_complete_rsp rsp = { };
 	int ret;
-
-	/* I'm not sure what value is provided in the status field
-	 * (presumably it indicates success).  We ignore it though...
-	 */
-	ipa_debug("req->status = %hhu\n", req->status);
 
 	rsp.rsp.result = QMI_RESULT_SUCCESS_V01;
 	rsp.rsp.error = QMI_ERR_NONE_V01;

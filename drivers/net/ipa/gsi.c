@@ -820,9 +820,11 @@ int gsi_device_init(struct gsi *gsi)
 	}
 
 	channel_max = gsi_channel_max(gsi);
+	ipa_debug("channel_max %u\n", channel_max);
 	ipa_assert(channel_max <= GSI_CHAN_MAX);
 
 	evt_ring_max = gsi_evt_ring_max(gsi);
+	ipa_debug("evt_ring_max %u\n", evt_ring_max);
 	ipa_assert(evt_ring_max <= GSI_EVT_RING_MAX);
 
 	ret = request_irq(gsi->irq, gsi_isr, IRQF_TRIGGER_HIGH, "gsi", gsi);
@@ -884,8 +886,6 @@ static void gsi_evt_ring_program(struct gsi *gsi, u32 evt_ring_id)
 	phys = evt_ring->ring.mem.phys;
 	int_modt = evt_ring->moderation ? IPA_GSI_EVT_RING_INT_MODT : 0;
 	int_modc = 1;	/* moderation always comes from channel*/
-
-	ipa_debug("intf GPI intr IRQ RE size %u\n", GSI_RING_ELEMENT_SIZE);
 
 	val = FIELD_PREP(EV_CHTYPE_FMASK, GSI_EVT_CHTYPE_GPI_EV);
 	val |= FIELD_PREP(EV_INTYPE_FMASK, 1);
@@ -1022,7 +1022,6 @@ static int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 	gsi->evt_bmap |= BIT(evt_ring_id);
 
 	evt_ring = &gsi->evt_ring[evt_ring_id];
-	ipa_debug("Using %u as virt evt id\n", evt_ring_id);
 
 	ret = gsi_ring_alloc(&evt_ring->ring, ring_count);
 	if (ret)
@@ -1296,10 +1295,8 @@ int gsi_channel_stop(struct gsi *gsi, u32 channel_id)
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	int ret;
 
-	if (channel->state == GSI_CHANNEL_STATE_STOPPED) {
-		ipa_debug("channel_id %u already stopped\n", channel_id);
+	if (channel->state == GSI_CHANNEL_STATE_STOPPED)
 		return 0;
-	}
 
 	if (channel->state != GSI_CHANNEL_STATE_STARTED &&
 	    channel->state != GSI_CHANNEL_STATE_STOP_IN_PROC &&
@@ -1605,7 +1602,6 @@ struct gsi *gsi_init(struct platform_device *pdev)
 		ipa_err("failed to get gsi IRQ!\n");
 		return ERR_PTR(irq);
 	}
-	ipa_debug("GSI irq %u\n", irq);
 
 	gsi = kzalloc(sizeof(*gsi), GFP_KERNEL);
 	if (!gsi)
