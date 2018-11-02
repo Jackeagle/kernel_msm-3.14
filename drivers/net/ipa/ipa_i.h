@@ -351,11 +351,6 @@ ipa_desc_fill_imm_cmd(struct ipa_desc *desc, struct ipahal_imm_cmd_pyld *pyld)
 	desc->payload = ipahal_imm_cmd_pyld_data(pyld);
 }
 
-struct ipa_active_clients {
-	struct mutex mutex;	/* protects when cnt changes from/to 0 */
-	atomic_t cnt;
-};
-
 struct ipa_wakelock_ref_cnt {
 	spinlock_t spinlock;	/* protects updates to cnt */
 	int cnt;
@@ -400,7 +395,8 @@ struct ipa_dma_task_info {
  * @dp:			Data path information
  * @smem_size:		Size of shared memory
  * @smem_offset:	Offset of the usable area in shared memory
- * @ipa_active_clients:	Active client count
+ * @active_clients_mutex: Used when active clients count changes from/to 0
+ * @active_clients_count: Active client count
  * @power_mgmt_wq:	Workqueue for power management
  * @transport_pm:	Transport power management related information
  * @cmd_prod_ep_id:	Endpoint for APPS_CMD_PROD
@@ -428,7 +424,8 @@ struct ipa_context {
 	struct ipa_dp *dp;
 	u32 smem_size;
 	u16 smem_offset;
-	struct ipa_active_clients ipa_active_clients;
+	struct mutex active_clients_mutex;	/* count changes from/to 0 */
+	atomic_t active_clients_count;
 	struct workqueue_struct *power_mgmt_wq;
 	struct ipa_transport_pm transport_pm;
 	u32 cmd_prod_ep_id;

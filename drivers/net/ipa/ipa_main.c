@@ -597,18 +597,18 @@ static void ipa_disable_clks(void)
  */
 static void ipa_client_add_first(void)
 {
-	mutex_lock(&ipa_ctx->ipa_active_clients.mutex);
+	mutex_lock(&ipa_ctx->active_clients_mutex);
 
 	/* A reference might have been added while awaiting the mutex. */
-	if (!atomic_inc_not_zero(&ipa_ctx->ipa_active_clients.cnt)) {
+	if (!atomic_inc_not_zero(&ipa_ctx->active_clients_count)) {
 		ipa_enable_clks();
 		ipa_ep_resume_all();
-		atomic_inc(&ipa_ctx->ipa_active_clients.cnt);
+		atomic_inc(&ipa_ctx->active_clients_count);
 	} else {
-		ipa_assert(atomic_read(&ipa_ctx->ipa_active_clients.cnt) > 1);
+		ipa_assert(atomic_read(&ipa_ctx->active_clients_count) > 1);
 	}
 
-	mutex_unlock(&ipa_ctx->ipa_active_clients.mutex);
+	mutex_unlock(&ipa_ctx->active_clients_mutex);
 }
 
 /* Attempt to add an IPA client reference, but only if this does not
@@ -617,7 +617,7 @@ static void ipa_client_add_first(void)
  */
 static bool ipa_client_add_not_first(void)
 {
-	return !!atomic_inc_not_zero(&ipa_ctx->ipa_active_clients.cnt);
+	return !!atomic_inc_not_zero(&ipa_ctx->active_clients_count);
 }
 
 /* Add an IPA client, but only if the reference count is already
@@ -649,15 +649,15 @@ void ipa_client_add(void)
  */
 static void ipa_client_remove_final(void)
 {
-	mutex_lock(&ipa_ctx->ipa_active_clients.mutex);
+	mutex_lock(&ipa_ctx->active_clients_mutex);
 
 	/* A reference might have been removed while awaiting the mutex. */
-	if (!atomic_dec_return(&ipa_ctx->ipa_active_clients.cnt)) {
+	if (!atomic_dec_return(&ipa_ctx->active_clients_count)) {
 		ipa_ep_suspend_all();
 		ipa_disable_clks();
 	}
 
-	mutex_unlock(&ipa_ctx->ipa_active_clients.mutex);
+	mutex_unlock(&ipa_ctx->active_clients_mutex);
 }
 
 /* Decrement the active clients reference count, and if the result
@@ -678,7 +678,7 @@ static void ipa_client_remove_deferred(struct work_struct *work)
  */
 static bool ipa_client_remove_not_final(void)
 {
-	return !!atomic_add_unless(&ipa_ctx->ipa_active_clients.cnt, -1, 1);
+	return !!atomic_add_unless(&ipa_ctx->active_clients_count, -1, 1);
 }
 
 /* Attempt to remove an IPA client reference.  If this represents
@@ -951,8 +951,8 @@ static int ipa_pre_init(void)
 		goto err_disable_clks;
 	}
 
-	mutex_init(&ipa_ctx->ipa_active_clients.mutex);
-	atomic_set(&ipa_ctx->ipa_active_clients.cnt, 1);
+	mutex_init(&ipa_ctx->active_clients_mutex);
+	atomic_set(&ipa_ctx->active_clients_count, 1);
 
 	/* Create workqueues for power management */
 	ipa_ctx->power_mgmt_wq =
