@@ -351,17 +351,11 @@ gsi_evt_ring_state(struct gsi *gsi, u32 evt_ring_id)
 static void gsi_isr_chan_ctrl(struct gsi *gsi)
 {
 	u32 channel_mask;
-	u32 valid_mask;
 
 	channel_mask = gsi_readl(gsi, GSI_CNTXT_SRC_CH_IRQ_OFFS);
 	gsi_writel(gsi, channel_mask, GSI_CNTXT_SRC_CH_IRQ_CLR_OFFS);
 
-	ipa_debug("channel_mask %x\n", channel_mask);
-	valid_mask = GENMASK(gsi->channel_max - 1, 0);
-	if (channel_mask & ~valid_mask) {
-		ipa_err("invalid channels (> %u)\n", gsi->channel_max);
-		channel_mask &= valid_mask;
-	}
+	ipa_assert(!(channel_mask & ~GENMASK(gsi->channel_max - 1, 0)));
 
 	while (channel_mask) {
 		int i = __ffs(channel_mask);
@@ -377,18 +371,12 @@ static void gsi_isr_chan_ctrl(struct gsi *gsi)
 
 static void gsi_isr_evt_ctrl(struct gsi *gsi)
 {
-	u32 valid_mask;
 	u32 evt_mask;
 
 	evt_mask = gsi_readl(gsi, GSI_CNTXT_SRC_EV_CH_IRQ_OFFS);
 	gsi_writel(gsi, evt_mask, GSI_CNTXT_SRC_EV_CH_IRQ_CLR_OFFS);
 
-	ipa_debug("evt_mask %x\n", evt_mask);
-	valid_mask = GENMASK(gsi->evt_ring_max - 1, 0);
-	if (evt_mask & ~valid_mask) {
-		ipa_err("invalid events (> %u)\n", gsi->evt_ring_max);
-		evt_mask &= valid_mask;
-	}
+	ipa_assert(!(evt_mask & ~GENMASK(gsi->evt_ring_max - 1, 0)));
 
 	while (evt_mask) {
 		int i = __ffs(evt_mask);
@@ -670,17 +658,13 @@ static void gsi_event_handle(struct gsi *gsi, u32 evt_ring_id)
 
 static void gsi_isr_ioeb(struct gsi *gsi)
 {
-	u32 valid_mask = GENMASK(gsi->evt_ring_max - 1, 0);
 	u32 evt_mask;
 
 	evt_mask = gsi_readl(gsi, GSI_CNTXT_SRC_IEOB_IRQ_OFFS);
 	evt_mask &= gsi_readl(gsi, GSI_CNTXT_SRC_IEOB_IRQ_MSK_OFFS);
 	gsi_writel(gsi, evt_mask, GSI_CNTXT_SRC_IEOB_IRQ_CLR_OFFS);
 
-	if (evt_mask & ~valid_mask) {
-		ipa_err("invalid events (> %u)\n", gsi->evt_ring_max);
-		evt_mask &= valid_mask;
-	}
+	ipa_assert(!(evt_mask & ~GENMASK(gsi->evt_ring_max - 1, 0)));
 
 	while (evt_mask) {
 		u32 i = (u32)__ffs(evt_mask);
@@ -694,16 +678,11 @@ static void gsi_isr_ioeb(struct gsi *gsi)
 static void gsi_isr_inter_ee_chan_ctrl(struct gsi *gsi)
 {
 	u32 channel_mask;
-	u32 valid_mask;
 
 	channel_mask = gsi_readl(gsi, GSI_INTER_EE_SRC_CH_IRQ_OFFS);
 	gsi_writel(gsi, channel_mask, GSI_INTER_EE_SRC_CH_IRQ_CLR_OFFS);
 
-	valid_mask = GENMASK(gsi->channel_max - 1, 0);
-	if (channel_mask & ~valid_mask) {
-		ipa_err("invalid channels (> %u)\n", gsi->channel_max);
-		channel_mask &= valid_mask;
-	}
+	ipa_assert(!(channel_mask & ~GENMASK(gsi->channel_max - 1, 0)));
 
 	while (channel_mask) {
 		int i = __ffs(channel_mask);
@@ -716,17 +695,12 @@ static void gsi_isr_inter_ee_chan_ctrl(struct gsi *gsi)
 
 static void gsi_isr_inter_ee_evt_ctrl(struct gsi *gsi)
 {
-	u32 valid_mask;
 	u32 evt_mask;
 
 	evt_mask = gsi_readl(gsi, GSI_INTER_EE_SRC_EV_CH_IRQ_OFFS);
 	gsi_writel(gsi, evt_mask, GSI_INTER_EE_SRC_EV_CH_IRQ_CLR_OFFS);
 
-	valid_mask = GENMASK(gsi->evt_ring_max - 1, 0);
-	if (evt_mask & ~valid_mask) {
-		ipa_err("invalid events (> %u)\n", gsi->evt_ring_max);
-		evt_mask &= valid_mask;
-	}
+	ipa_assert(!(evt_mask & ~GENMASK(gsi->evt_ring_max - 1, 0)));
 
 	while (evt_mask) {
 		u32 i = (u32)__ffs(evt_mask);
