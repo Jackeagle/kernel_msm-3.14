@@ -20,7 +20,6 @@
 #include <linux/version.h>
 #include <linux/workqueue.h>
 #include <net/pkt_sched.h>
-#include "net_map.h"
 #include "msm_rmnet.h"
 #include "rmnet_config.h"
 #include "ipa_qmi.h"
