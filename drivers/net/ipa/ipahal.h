@@ -221,13 +221,9 @@ enum ipahal_pkt_status_mask {
 
 /**
  * struct ipahal_pkt_status - IPA status packet abstracted payload.
- *  This structure describes the status packet fields for the
- *   following statuses: IPA_STATUS_PACKET, IPA_STATUS_DROPPED_PACKET,
- *   IPA_STATUS_SUSPENDED_PACKET.
- *  Other statuses types has different status packet structure.
- * @status_opcode: The Type of the status (Opcode).
+ * @status_opcode: The type of status (Opcode).
  * @exception: The first exception that took place.
- *  In case of exception, src endp and pkt len are always valid.
+ *  In case of exception, endp_src_idx and pkt_len are always valid.
  * @status_mask: Bit mask for flags on several properties on the packet
  *  and processing it may passed at IPA.
  * @pkt_len: Pkt pyld len including hdr and retained hdr if used. Does
@@ -236,36 +232,13 @@ enum ipahal_pkt_status_mask {
  * @endp_dest_idx: Destination end point index.
  *  Not valid in case of exception
  * @metadata: meta data value used by packet
- * @flt_local: Filter table location flag: Does matching flt rule belongs to
- *  flt tbl that resides in lcl memory? (if not, then system mem)
- * @flt_hash: Filter hash hit flag: Does matching flt rule was in hash tbl?
- * @flt_global: Global filter rule flag: Does matching flt rule belongs to
- *  the global flt tbl? (if not, then the per endp tables)
- * @flt_ret_hdr: Retain header in filter rule flag: Does matching flt rule
- *  specifies to retain header?
- * @flt_miss: Filtering miss flag: Was their a filtering rule miss?
- *   In case of miss, all flt info to be ignored
- * @flt_rule_id: The ID of the matching filter rule (if no miss).
- *  This info can be combined with endp_src_idx to locate the exact rule.
- * @rt_local: Route table location flag: Does matching rt rule belongs to
- *  rt tbl that resides in lcl memory? (if not, then system mem)
- * @rt_hash: Route hash hit flag: Does matching rt rule was in hash tbl?
- * @ucp: UC Processing flag
- * @rt_tbl_idx: Index of rt tbl that contains the rule on which was a match
  * @rt_miss: Routing miss flag: Was their a routing rule miss?
- * @rt_rule_id: The ID of the matching rt rule. (if no miss). This info
- *  can be combined with rt_tbl_idx to locate the exact rule.
- * @nat_hit: NAT hit flag: Was their NAT hit?
- * @nat_entry_idx: Index of the NAT entry used of NAT processing
- * @nat_type: Defines the type of the NAT operation:
- * @tag_info: S/W defined value provided via immediate command
- * @seq_num: Per source endp unique packet sequence number
- * @time_of_day_ctr: running counter from IPA clock
- * @hdr_local: Header table location flag: In header insertion, was the header
- *  taken from the table resides in local memory? (If no, then system mem)
- * @hdr_offset: Offset of used header in the header table
- * @frag_hit: Frag hit flag: Was their frag rule hit in H/W frag table?
- * @frag_rule: Frag rule index in H/W frag table in case of frag hit
+ *
+ * This structure describes the status packet fields for the following
+ * status values: IPA_STATUS_PACKET, IPA_STATUS_DROPPED_PACKET,
+ * IPA_STATUS_SUSPENDED_PACKET.  Other status types have different status
+ * packet structure.  Note that the hardware supplies additional status
+ * information that is currently unused.
  */
 struct ipahal_pkt_status {
 	enum ipahal_pkt_status_opcode status_opcode;
@@ -275,27 +248,7 @@ struct ipahal_pkt_status {
 	u8 endp_src_idx;
 	u8 endp_dest_idx;
 	u32 metadata;
-	bool flt_local;
-	bool flt_hash;
-	bool flt_global;
-	bool flt_ret_hdr;
-	bool flt_miss;
-	u16 flt_rule_id;
-	bool rt_local;
-	bool rt_hash;
-	bool ucp;
-	u8 rt_tbl_idx;
 	bool rt_miss;
-	u16 rt_rule_id;
-	bool nat_hit;
-	u16 nat_entry_idx;
-	u64 tag_info;
-	u8 seq_num;
-	u32 time_of_day_ctr;
-	bool hdr_local;
-	u16 hdr_offset;
-	bool frag_hit;
-	u8 frag_rule;
 };
 
 /**

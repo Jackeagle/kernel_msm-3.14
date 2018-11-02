@@ -454,40 +454,18 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 	const struct ipa_pkt_status_hw *hw_status = unparsed_status;
 	bool is_ipv6;
 
-	memset(status, 0, sizeof(*status));
-
 	status->status_opcode =
 			(enum ipahal_pkt_status_opcode)hw_status->status_opcode;
+	is_ipv6 = hw_status->status_mask & BIT(7) ? false : true;
+	/* If hardware status values change we may have to re-map this */
+	status->status_mask =
+			(enum ipahal_pkt_status_mask)hw_status->status_mask;
+	status->exception = exception_map(hw_status->exception, is_ipv6);
 	status->pkt_len = hw_status->pkt_len;
 	status->endp_src_idx = hw_status->endp_src_idx;
 	status->endp_dest_idx = hw_status->endp_dest_idx;
 	status->metadata = hw_status->metadata;
-	status->flt_local = hw_status->flt_local;
-	status->flt_hash = hw_status->flt_hash;
-	status->flt_global = hw_status->flt_hash;
-	status->flt_ret_hdr = hw_status->flt_ret_hdr;
-	status->flt_miss = ipahal_is_rule_miss_id(hw_status->flt_rule_id);
-	status->flt_rule_id = hw_status->flt_rule_id;
-	status->rt_local = hw_status->rt_local;
-	status->rt_hash = hw_status->rt_hash;
-	status->ucp = hw_status->ucp;
-	status->rt_tbl_idx = hw_status->rt_tbl_idx;
 	status->rt_miss = ipahal_is_rule_miss_id(hw_status->rt_rule_id);
-	status->rt_rule_id = hw_status->rt_rule_id;
-	status->nat_hit = hw_status->nat_hit;
-	status->nat_entry_idx = hw_status->nat_entry_idx;
-	status->tag_info = hw_status->tag_info;
-	status->seq_num = hw_status->seq_num;
-	status->time_of_day_ctr = hw_status->time_of_day_ctr;
-	status->hdr_local = hw_status->hdr_local;
-	status->hdr_offset = hw_status->hdr_offset;
-	status->frag_hit = hw_status->frag_hit;
-	status->frag_rule = hw_status->frag_rule;
-	/* If hardware status values change we may have to re-map this */
-	status->status_mask =
-			(enum ipahal_pkt_status_mask)hw_status->status_mask;
-	is_ipv6 = hw_status->status_mask & BIT(7) ? false : true;
-	status->exception = exception_map(hw_status->exception, is_ipv6);
 }
 
 int ipahal_init(void)
