@@ -126,10 +126,7 @@ void *ipahal_dma_task_32b_addr_pyld(struct ipa_dma_mem *mem);
  * ipahal_payload_free() - Release an allocated immediate command payload
  * @payload:	Payload to be released
  */
-static inline void ipahal_payload_free(void *payload)
-{
-	kfree(payload);
-}
+void ipahal_payload_free(void *payload);
 
 /**
  * enum ipahal_pkt_status_opcode - Packet Status Opcode

@@ -342,6 +342,11 @@ void *ipahal_dma_task_32b_addr_pyld(struct ipa_dma_mem *mem)
 	return data;
 }
 
+void ipahal_payload_free(void *payload)
+{
+	kfree(payload);
+}
+
 /* IPA Packet Status Logic */
 
 /* Maps an exception type returned in a ipa_pkt_status_hw structure
