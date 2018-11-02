@@ -355,11 +355,6 @@ enum ipahal_imm_cmd {
 	IPA_IMM_CMD_DMA_SHARED_MEM		= 19,
 };
 
-struct ipa_wakelock_ref_cnt {
-	spinlock_t spinlock;	/* protects updates to cnt */
-	int cnt;
-};
-
 struct ipa_uc_ctx;
 
 /**
@@ -411,8 +406,9 @@ struct ipa_dma_task_info {
  * @modem_clk_vote_valid: Whether proxy clock vote is held for modem
  * @ep_count:		Number of endpoints available in hardware
  * @uc_ctx:		Microcontroller context
- * @wakeup:		Wakeup source.
- * @wakelock_ref_cnt:	Count of times wakelock is acquired
+ * @wakeup_lock:	Lock protecting updates to wakeup_count
+ * @wakeup_count:	Count of times wakelock is acquired
+ * @wakeup:		Wakeup source
  * @ipa_client_apps_wan_cons_agg_gro: APPS_WAN_CONS generic receive offload
  * @smp2p_info:		Information related to SMP2P
  * @dma_task_info:	Preallocated DMA task
@@ -442,8 +438,10 @@ struct ipa_context {
 
 	struct ipa_uc_ctx *uc_ctx;
 
+	spinlock_t wakeup_lock;		/* protects updates to wakeup_count */
+	u32 wakeup_count;
 	struct wakeup_source wakeup;
-	struct ipa_wakelock_ref_cnt wakelock_ref_cnt;
+
 	/* RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA */
 	bool ipa_client_apps_wan_cons_agg_gro;
 	/* M-release support to know client endpoint */

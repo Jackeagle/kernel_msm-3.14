@@ -693,13 +693,13 @@ void ipa_inc_acquire_wakelock(void)
 {
 	unsigned long flags;
 
-	spin_lock_irqsave(&ipa_ctx->wakelock_ref_cnt.spinlock, flags);
+	spin_lock_irqsave(&ipa_ctx->wakeup_lock, flags);
 
-	ipa_ctx->wakelock_ref_cnt.cnt++;
-	if (ipa_ctx->wakelock_ref_cnt.cnt == 1)
+	ipa_ctx->wakeup_count++;
+	if (ipa_ctx->wakeup_count == 1)
 		__pm_stay_awake(&ipa_ctx->wakeup);
 
-	spin_unlock_irqrestore(&ipa_ctx->wakelock_ref_cnt.spinlock, flags);
+	spin_unlock_irqrestore(&ipa_ctx->wakeup_lock, flags);
 }
 
 /** ipa_dec_release_wakelock() - Decrease active clients counter
@@ -710,13 +710,13 @@ void ipa_dec_release_wakelock(void)
 {
 	unsigned long flags;
 
-	spin_lock_irqsave(&ipa_ctx->wakelock_ref_cnt.spinlock, flags);
+	spin_lock_irqsave(&ipa_ctx->wakeup_lock, flags);
 
-	ipa_ctx->wakelock_ref_cnt.cnt--;
-	if (ipa_ctx->wakelock_ref_cnt.cnt == 0)
+	ipa_ctx->wakeup_count--;
+	if (ipa_ctx->wakeup_count == 0)
 		__pm_relax(&ipa_ctx->wakeup);
 
-	spin_unlock_irqrestore(&ipa_ctx->wakelock_ref_cnt.spinlock, flags);
+	spin_unlock_irqrestore(&ipa_ctx->wakeup_lock, flags);
 }
 
 /** ipa_suspend_handler() - Handle the suspend interrupt
@@ -957,7 +957,7 @@ static int ipa_pre_init(void)
 
 	/* Create a wakeup source. */
 	wakeup_source_init(&ipa_ctx->wakeup, "IPA_WS");
-	spin_lock_init(&ipa_ctx->wakelock_ref_cnt.spinlock);
+	spin_lock_init(&ipa_ctx->wakeup_lock);
 
 	/* Note enabling dynamic clock division must not be
 	 * attempted for IPA hardware versions prior to 3.5.
