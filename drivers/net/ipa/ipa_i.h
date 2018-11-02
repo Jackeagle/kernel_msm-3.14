@@ -306,10 +306,6 @@ struct ipa_ep_context {
 	struct ipa_sys_context *sys;
 };
 
-struct ipa_dp;	/* Data path information */
-
-struct ipa_sys_context;
-
 /**
  * enum ipa_desc_type - IPA decriptor type
  */
@@ -354,8 +350,6 @@ enum ipahal_imm_cmd {
 	IPA_IMM_CMD_DMA_TASK_32B_ADDR		= 17,
 	IPA_IMM_CMD_DMA_SHARED_MEM		= 19,
 };
-
-struct ipa_uc_ctx;
 
 /**
  * struct ipa_transport_pm - Transport power management data
