@@ -339,15 +339,33 @@ struct ipa_desc {
 };
 
 /**
+ * enum ipahal_imm_cmd:	IPA immediate commands
+ *
+ * All immediate commands are issued using the APPS_CMD_PROD
+ * endpoint.  The numeric values here are the opcodes for IPA v3.5.1
+ * hardware
+ */
+enum ipahal_imm_cmd {
+	IPA_IMM_CMD_IP_V4_FILTER_INIT		= 3,
+	IPA_IMM_CMD_IP_V6_FILTER_INIT		= 4,
+	IPA_IMM_CMD_IP_V4_ROUTING_INIT		= 7,
+	IPA_IMM_CMD_IP_V6_ROUTING_INIT		= 8,
+	IPA_IMM_CMD_HDR_INIT_LOCAL		= 9,
+	IPA_IMM_CMD_DMA_TASK_32B_ADDR		= 17,
+	IPA_IMM_CMD_DMA_SHARED_MEM		= 19,
+};
+
+/**
  * ipa_desc_fill_imm_cmd() - Fill an IPA descriptor for an immediate command
  * @desc:	Descriptor to fill
  * @pyld:	Command payload, returned by ipahal_construct_imm_cmd().
  */
 static inline void
-ipa_desc_fill_imm_cmd(struct ipa_desc *desc, struct ipahal_imm_cmd_pyld *pyld)
+ipa_desc_fill_imm_cmd(struct ipa_desc *desc, enum ipahal_imm_cmd opcode,
+		      struct ipahal_imm_cmd_pyld *pyld)
 {
 	desc->type = IPA_IMM_CMD_DESC;
-	desc->len_opcode = pyld->opcode;
+	desc->len_opcode = (u16)opcode;
 	desc->payload = ipahal_imm_cmd_pyld_data(pyld);
 }
 

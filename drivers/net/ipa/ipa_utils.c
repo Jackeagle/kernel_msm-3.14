@@ -934,7 +934,8 @@ static int ipa_gsi_dma_task_inject(void)
 {
 	struct ipa_desc desc = { };
 
-	ipa_desc_fill_imm_cmd(&desc, ipa_ctx->dma_task_info.cmd_pyld);
+	ipa_desc_fill_imm_cmd(&desc, IPA_IMM_CMD_DMA_TASK_32B_ADDR,
+			      ipa_ctx->dma_task_info.cmd_pyld);
 
 	ipa_debug("sending 1B packet to IPA\n");
 	if (ipa_send_cmd_timeout(&desc, IPA_GSI_DMA_TASK_TIMEOUT))

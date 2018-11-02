@@ -20,23 +20,6 @@ static struct ipahal_context {
 } ipahal_ctx_struct;
 static struct ipahal_context *ipahal_ctx = &ipahal_ctx_struct;
 
-/**
- * enum ipahal_imm_cmd:	IPA immediate commands
- *
- * All immediate commands are issued using the APPS_CMD_PROD
- * endpoint.  The numeric values here are the opcodes for IPA v3.5.1
- * hardware
- */
-enum ipahal_imm_cmd {
-	IPA_IMM_CMD_IP_V4_FILTER_INIT		= 3,
-	IPA_IMM_CMD_IP_V6_FILTER_INIT		= 4,
-	IPA_IMM_CMD_IP_V4_ROUTING_INIT		= 7,
-	IPA_IMM_CMD_IP_V6_ROUTING_INIT		= 8,
-	IPA_IMM_CMD_HDR_INIT_LOCAL		= 9,
-	IPA_IMM_CMD_DMA_TASK_32B_ADDR		= 17,
-	IPA_IMM_CMD_DMA_SHARED_MEM		= 19,
-};
-
 /* enum ipa_pipeline_clear_option - Values for pipeline clear waiting options
  * @IPAHAL_HPS_CLEAR: Wait for HPS clear. All queues except high priority queue
  *  shall not be serviced until HPS is clear of packets or immediate commands.
