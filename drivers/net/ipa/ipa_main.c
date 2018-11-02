@@ -885,7 +885,7 @@ static void ipa_post_init(void)
 {
 	int ret;
 
-	ret = gsi_register_device(ipa_ctx->gsi);
+	ret = gsi_device_init(ipa_ctx->gsi);
 	if (ret) {
 		ipa_err(":gsi register error - %d\n", ret);
 		return;
@@ -895,7 +895,7 @@ static void ipa_post_init(void)
 	/* setup the AP-IPA endpoints */
 	if (ipa_ep_apps_setup()) {
 		ipa_err(":failed to setup IPA-Apps endpoints\n");
-		gsi_deregister_device(ipa_ctx->gsi);
+		gsi_device_exit(ipa_ctx->gsi);
 
 		return;
 	}

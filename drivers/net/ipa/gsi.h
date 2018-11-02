@@ -72,22 +72,22 @@ struct gsi;
 struct gsi *gsi_init(struct platform_device *pdev);
 
 /**
- * gsi_register_device() - Initialize a GSI device
+ * gsi_device_init() - Initialize a GSI device
  * @gsi:	GSI pointer returned by gsi_init()
  *
  * Initialize a GSI device.
  *
  * @Return:	0 if successful or a negative error code otherwise.
  */
-int gsi_register_device(struct gsi *gsi);
+int gsi_device_init(struct gsi *gsi);
 
 /**
- * gsi_deregister_device() - De-initialize a GSI device
+ * gsi_device_exit() - De-initialize a GSI device
  * @gsi:	GSI pointer returned by gsi_init()
  *
- * This is the inverse of gsi_register_device()
+ * This is the inverse of gsi_device_init()
  */
-void gsi_deregister_device(struct gsi *gsi);
+void gsi_device_exit(struct gsi *gsi);
 
 /**
  * gsi_channel_alloc() - Allocate a GSI channel

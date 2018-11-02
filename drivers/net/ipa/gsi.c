@@ -832,7 +832,7 @@ static u32 gsi_evt_bmap_init(u32 evt_ring_max)
 	return evt_bmap | GENMASK(GSI_MHI_ER_END, GSI_MHI_ER_START);
 }
 
-int gsi_register_device(struct gsi *gsi)
+int gsi_device_init(struct gsi *gsi)
 {
 	u32 evt_ring_max;
 	u32 channel_max;
@@ -877,7 +877,7 @@ int gsi_register_device(struct gsi *gsi)
 	return 0;
 }
 
-void gsi_deregister_device(struct gsi *gsi)
+void gsi_device_exit(struct gsi *gsi)
 {
 	ipa_assert(!atomic_read(&gsi->channel_count));
 	ipa_assert(!atomic_read(&gsi->evt_ring_count));
@@ -887,7 +887,7 @@ void gsi_deregister_device(struct gsi *gsi)
 	 */
 	gsi_irq_disable_all(gsi);
 
-	/* Clean up everything else set up by gsi_register_device() */
+	/* Clean up everything else set up by gsi_device_init() */
 	gsi->evt_bmap = 0;
 	gsi->evt_ring_max = 0;
 	gsi->channel_max = 0;
