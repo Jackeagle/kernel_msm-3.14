@@ -417,22 +417,6 @@ ipahal_dma_task_32b_addr_pyld(struct ipa_dma_mem *mem)
 
 /* IPA Packet Status Logic */
 
-static bool status_opcode_valid(u8 status_opcode)
-{
-	switch ((enum ipahal_pkt_status_opcode)status_opcode) {
-	case IPAHAL_PKT_STATUS_OPCODE_PACKET:
-	case IPAHAL_PKT_STATUS_OPCODE_NEW_FRAG_RULE:
-	case IPAHAL_PKT_STATUS_OPCODE_DROPPED_PACKET:
-	case IPAHAL_PKT_STATUS_OPCODE_SUSPENDED_PACKET:
-	case IPAHAL_PKT_STATUS_OPCODE_LOG:
-	case IPAHAL_PKT_STATUS_OPCODE_DCMP:
-	case IPAHAL_PKT_STATUS_OPCODE_PACKET_2ND_PASS:
-		return true;
-	default:
-		return false;
-	}
-}
-
 /* Maps an exception type returned in a ipa_pkt_status_hw structure
  * to the ipahal_pkt_status_exception value that represents it in
  * the exception field of a ipahal_pkt_status structure.  Returns
@@ -468,15 +452,11 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 			     struct ipahal_pkt_status *status)
 {
 	const struct ipa_pkt_status_hw *hw_status = unparsed_status;
-	enum ipahal_pkt_status_exception exception;
-	u8 status_opcode;
 	bool is_ipv6;
 
 	memset(status, 0, sizeof(*status));
 
-	status_opcode = (u8)hw_status->status_opcode;
-	is_ipv6 = (hw_status->status_mask & 0x80) ? false : true;
-
+	status->status_opcode = hw_status->status_opcode;
 	status->pkt_len = hw_status->pkt_len;
 	status->endp_src_idx = hw_status->endp_src_idx;
 	status->endp_dest_idx = hw_status->endp_dest_idx;
@@ -502,21 +482,10 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 	status->hdr_offset = hw_status->hdr_offset;
 	status->frag_hit = hw_status->frag_hit;
 	status->frag_rule = hw_status->frag_rule;
-
-	if (WARN_ON(!status_opcode_valid(status_opcode)))
-		ipa_err("unsupported Status Opcode 0x%x\n", status_opcode);
-	else
-		status->status_opcode = status_opcode;
-
-	exception = exception_map((u8)hw_status->exception, is_ipv6);
-	if (WARN_ON(exception == IPAHAL_PKT_STATUS_EXCEPTION_MAX))
-		ipa_err("unsupported Status Exception type 0x%x\n",
-			hw_status->exception);
-	else
-		status->exception = exception;
-
 	/* If hardware status values change we may have to re-map this */
 	status->status_mask = hw_status->status_mask;
+	is_ipv6 = hw_status->status_mask & BIT(7) ? false : true;
+	status->exception = exception_map(hw_status->exception, is_ipv6);
 }
 
 int ipahal_init(void)
