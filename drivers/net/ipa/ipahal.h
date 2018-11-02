@@ -215,8 +215,7 @@ enum ipahal_pkt_status_exception {
  *  If so, csum trailer exists
  */
 enum ipahal_pkt_status_mask {
-	/* Other values are defined but are not specifically handed yet. */
-	IPAHAL_PKT_STATUS_MASK_TAG_VALID	= 0x0010,
+	/* Other values are defined but are not specifically handled yet. */
 	IPAHAL_PKT_STATUS_MASK_CKSUM_PROCESS	= 0x0100,
 };
 
@@ -230,7 +229,7 @@ enum ipahal_pkt_status_mask {
  * @exception: The first exception that took place.
  *  In case of exception, src endp and pkt len are always valid.
  * @status_mask: Bit mask for flags on several properties on the packet
- *  and processing it may passed at IPA. See enum ipahal_pkt_status_mask
+ *  and processing it may passed at IPA.
  * @pkt_len: Pkt pyld len including hdr and retained hdr if used. Does
  *  not include padding or checksum trailer len.
  * @endp_src_idx: Source end point index.
@@ -271,7 +270,7 @@ enum ipahal_pkt_status_mask {
 struct ipahal_pkt_status {
 	enum ipahal_pkt_status_opcode status_opcode;
 	enum ipahal_pkt_status_exception exception;
-	u32 status_mask;
+	enum ipahal_pkt_status_mask status_mask;
 	u32 pkt_len;
 	u8 endp_src_idx;
 	u8 endp_dest_idx;

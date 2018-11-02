@@ -456,7 +456,8 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 
 	memset(status, 0, sizeof(*status));
 
-	status->status_opcode = hw_status->status_opcode;
+	status->status_opcode =
+			(enum ipahal_pkt_status_opcode)hw_status->status_opcode;
 	status->pkt_len = hw_status->pkt_len;
 	status->endp_src_idx = hw_status->endp_src_idx;
 	status->endp_dest_idx = hw_status->endp_dest_idx;
@@ -483,7 +484,8 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 	status->frag_hit = hw_status->frag_hit;
 	status->frag_rule = hw_status->frag_rule;
 	/* If hardware status values change we may have to re-map this */
-	status->status_mask = hw_status->status_mask;
+	status->status_mask =
+			(enum ipahal_pkt_status_mask)hw_status->status_mask;
 	is_ipv6 = hw_status->status_mask & BIT(7) ? false : true;
 	status->exception = exception_map(hw_status->exception, is_ipv6);
 }
