@@ -907,7 +907,7 @@ static void ipa_post_init(void)
 
 	ipa_register_panic_hdlr();
 
-	ipa_ctx->q6_proxy_clk_vote_valid = true;
+	ipa_ctx->modem_clk_vote_valid = true;
 
 	if (ipa_wwan_init())
 		ipa_err("WWAN init failed (ignoring)\n");

@@ -404,7 +404,7 @@ struct ipa_dma_task_info {
  * @memory_path:	Path for memory interconnect
  * @imem_path:		Path for internal memory interconnect
  * @config_path:	Path for configuration interconnect
- * @q6_proxy_clk_vote_valid: Whether proxy clock vote is held for modem
+ * @modem_clk_vote_valid: Whether proxy clock vote is held for modem
  * @ep_count:		Number of endpoints available in hardware
  * @uc_ctx:		Microcontroller context
  * @w_lock:		Wakeup source.
@@ -433,7 +433,7 @@ struct ipa_context {
 	struct icc_path *memory_path;
 	struct icc_path *imem_path;
 	struct icc_path *config_path;
-	bool q6_proxy_clk_vote_valid;
+	bool modem_clk_vote_valid;
 	u32 ep_count;
 
 	struct ipa_uc_ctx *uc_ctx;

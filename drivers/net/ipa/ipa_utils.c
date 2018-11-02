@@ -740,9 +740,9 @@ err_reenable_memory_path:
  */
 void ipa_proxy_clk_unvote(void)
 {
-	if (ipa_ctx->q6_proxy_clk_vote_valid) {
+	if (ipa_ctx->modem_clk_vote_valid) {
 		ipa_client_remove();
-		ipa_ctx->q6_proxy_clk_vote_valid = false;
+		ipa_ctx->modem_clk_vote_valid = false;
 	}
 }
 
@@ -752,9 +752,9 @@ void ipa_proxy_clk_unvote(void)
  */
 void ipa_proxy_clk_vote(void)
 {
-	if (!ipa_ctx->q6_proxy_clk_vote_valid) {
+	if (!ipa_ctx->modem_clk_vote_valid) {
 		ipa_client_add();
-		ipa_ctx->q6_proxy_clk_vote_valid = true;
+		ipa_ctx->modem_clk_vote_valid = true;
 	}
 }
 
