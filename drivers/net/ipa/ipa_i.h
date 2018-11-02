@@ -407,7 +407,7 @@ struct ipa_dma_task_info {
  * @modem_clk_vote_valid: Whether proxy clock vote is held for modem
  * @ep_count:		Number of endpoints available in hardware
  * @uc_ctx:		Microcontroller context
- * @w_lock:		Wakeup source.
+ * @wakeup:		Wakeup source.
  * @wakelock_ref_cnt:	Count of times wakelock is acquired
  * @ipa_client_apps_wan_cons_agg_gro: APPS_WAN_CONS generic receive offload
  * @smp2p_info:		Information related to SMP2P
@@ -438,7 +438,7 @@ struct ipa_context {
 
 	struct ipa_uc_ctx *uc_ctx;
 
-	struct wakeup_source w_lock;
+	struct wakeup_source wakeup;
 	struct ipa_wakelock_ref_cnt wakelock_ref_cnt;
 	/* RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA */
 	bool ipa_client_apps_wan_cons_agg_gro;

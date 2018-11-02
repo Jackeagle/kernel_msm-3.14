@@ -703,7 +703,7 @@ void ipa_inc_acquire_wakelock(void)
 
 	ipa_ctx->wakelock_ref_cnt.cnt++;
 	if (ipa_ctx->wakelock_ref_cnt.cnt == 1)
-		__pm_stay_awake(&ipa_ctx->w_lock);
+		__pm_stay_awake(&ipa_ctx->wakeup);
 
 	spin_unlock_irqrestore(&ipa_ctx->wakelock_ref_cnt.spinlock, flags);
 }
@@ -720,7 +720,7 @@ void ipa_dec_release_wakelock(void)
 
 	ipa_ctx->wakelock_ref_cnt.cnt--;
 	if (ipa_ctx->wakelock_ref_cnt.cnt == 0)
-		__pm_relax(&ipa_ctx->w_lock);
+		__pm_relax(&ipa_ctx->wakeup);
 
 	spin_unlock_irqrestore(&ipa_ctx->wakelock_ref_cnt.spinlock, flags);
 }
@@ -977,7 +977,7 @@ static int ipa_pre_init(void)
 		goto err_dp_exit;
 
 	/* Create a wakeup source. */
-	wakeup_source_init(&ipa_ctx->w_lock, "IPA_WS");
+	wakeup_source_init(&ipa_ctx->wakeup, "IPA_WS");
 	spin_lock_init(&ipa_ctx->wakelock_ref_cnt.spinlock);
 
 	/* Note enabling dynamic clock division must not be
