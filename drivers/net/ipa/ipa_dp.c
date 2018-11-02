@@ -1475,7 +1475,7 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 	ret = gsi_channel_alloc(ipa_ctx->gsi, channel_id, channel_count,
 				from_ipa, priority, evt_ring_mult, moderation,
 				ep->sys);
-	if (ret < 0)
+	if (ret)
 		goto fail_alloc_channel;
 	ep->channel_id = channel_id;
 

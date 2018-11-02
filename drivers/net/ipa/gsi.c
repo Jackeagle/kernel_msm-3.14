@@ -1231,7 +1231,7 @@ int gsi_channel_alloc(struct gsi *gsi, u32 channel_id, u32 channel_count,
 	channel->user_data = user_data;
 	atomic_inc(&gsi->channel_count);
 
-	return (int)channel_id;
+	return 0;
 
 err_mutex_unlock:
 	mutex_unlock(&gsi->mlock);

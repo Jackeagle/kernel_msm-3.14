@@ -102,7 +102,7 @@ void gsi_deregister_device(struct gsi *gsi);
  * @notify_data: Pointer value to supply with notifications that
  * 		occur because of events on this channel
  *
- * @Return:	 Channel id, or a negative error code.
+ * @Return:	 0 if successful, or a negative error code.
  */
 int gsi_channel_alloc(struct gsi *gsi, u32 channel_id, u32 channel_count,
 		      bool from_ipa, bool priority, u32 evt_ring_mult,
