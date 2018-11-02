@@ -11,14 +11,6 @@
 #define RMNET_MODE_LLP_ETH  0x01
 #define RMNET_MODE_LLP_IP   0x02
 #define RMNET_MODE_QOS	    0x04
-#define RMNET_MODE_MASK	    (RMNET_MODE_LLP_ETH | \
-			     RMNET_MODE_LLP_IP	| \
-			     RMNET_MODE_QOS)
-
-#define RMNET_IS_MODE_QOS(mode)	 \
-	((mode & RMNET_MODE_QOS) == RMNET_MODE_QOS)
-#define RMNET_IS_MODE_IP(mode)	 \
-	((mode & RMNET_MODE_LLP_IP) == RMNET_MODE_LLP_IP)
 
 /* IOCTL commands
  * Values chosen to not conflict with other drivers in the ecosystem
@@ -68,24 +60,12 @@
 #define RMNET_IOCTL_FEAT_NOTIFY_MUX_CHANNEL		BIT(0)
 #define RMNET_IOCTL_FEAT_SET_EGRESS_DATA_FORMAT		BIT(1)
 #define RMNET_IOCTL_FEAT_SET_INGRESS_DATA_FORMAT	BIT(2)
-#define RMNET_IOCTL_FEAT_SET_AGGREGATION_COUNT		BIT(3)
-#define RMNET_IOCTL_FEAT_GET_AGGREGATION_COUNT		BIT(4)
-#define RMNET_IOCTL_FEAT_SET_AGGREGATION_SIZE		BIT(5)
-#define RMNET_IOCTL_FEAT_GET_AGGREGATION_SIZE		BIT(6)
-#define RMNET_IOCTL_FEAT_FLOW_CONTROL			BIT(7)
-#define RMNET_IOCTL_FEAT_GET_DFLT_CONTROL_CHANNEL	BIT(8)
-#define RMNET_IOCTL_FEAT_GET_HWSW_MAP			BIT(9)
 
 /* Input values for the RMNET_IOCTL_SET_EGRESS_DATA_FORMAT IOCTL  */
-#define RMNET_IOCTL_EGRESS_FORMAT_MAP			BIT(1)
 #define RMNET_IOCTL_EGRESS_FORMAT_AGGREGATION		BIT(2)
-#define RMNET_IOCTL_EGRESS_FORMAT_MUXING		BIT(3)
 #define RMNET_IOCTL_EGRESS_FORMAT_CHECKSUM		BIT(4)
 
 /* Input values for the RMNET_IOCTL_SET_INGRESS_DATA_FORMAT IOCTL */
-#define RMNET_IOCTL_INGRESS_FORMAT_MAP			BIT(1)
-#define RMNET_IOCTL_INGRESS_FORMAT_DEAGGREGATION	BIT(2)
-#define RMNET_IOCTL_INGRESS_FORMAT_DEMUXING		BIT(3)
 #define RMNET_IOCTL_INGRESS_FORMAT_CHECKSUM		BIT(4)
 #define RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA		BIT(5)
 
@@ -137,21 +117,4 @@ struct rmnet_ioctl_data_s {
 		u32	tcm_handle;
 	} u;
 };
-
-#define RMNET_IOCTL_QOS_MODE_6	BIT(0)
-#define RMNET_IOCTL_QOS_MODE_8	BIT(1)
-
-/* QMI QoS header definition */
-struct QMI_QOS_HDR_S {
-	unsigned char	version;
-	unsigned char	flags;
-	u32		flow_id;
-} __packed;
-
-/* QMI QoS 8-byte header. */
-struct qmi_qos_hdr8_s {
-	struct QMI_QOS_HDR_S	hdr;
-	u8			reserved[2];
-} __packed;
-
 #endif /* _MSM_RMNET_H_ */
