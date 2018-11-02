@@ -124,7 +124,8 @@ err_dma_free:
 	return ret;
 }
 
-/** ipa_modem_smem_init() - Initialize modem general memory and header memory
+/**
+ * ipa_modem_smem_init() - Initialize modem general memory and header memory
  */
 int ipa_modem_smem_init(void)
 {
@@ -197,9 +198,10 @@ static __always_inline void sram_set_canaries(u32 *sram_mmio, u32 offset)
 	*--sram_mmio = IPA_MEM_CANARY_VAL;
 }
 
-/** ipa_init_sram() - Initialize IPA local SRAM.
+/**
+ * ipa_init_sram() - Initialize IPA local SRAM.
  *
- * Return codes: 0 for success, negative value for failure
+ * Return:	0 if successful, or a negative error code
  */
 static int ipa_init_sram(void)
 {
@@ -236,9 +238,10 @@ static int ipa_init_sram(void)
 	return 0;
 }
 
-/** ipa_init_hdr() - Initialize IPA header block.
+/**
+ * ipa_init_hdr() - Initialize IPA header block.
  *
- * Return codes: 0 for success, negative value for failure
+ * Return:	0 if successful, or a negative error code
  */
 static int ipa_init_hdr(void)
 {
@@ -279,9 +282,10 @@ static int ipa_init_hdr(void)
 	return 0;
 }
 
-/** ipa_init_rt4() - Initialize IPA routing block for IPv4.
+/**
+ * ipa_init_rt4() - Initialize IPA routing block for IPv4.
  *
- * Return codes: 0 for success, negative value for failure
+ * Return:	0 if successful, or a negative error code
  */
 static int ipa_init_rt4(struct ipa_dma_mem *mem)
 {
@@ -306,9 +310,10 @@ static int ipa_init_rt4(struct ipa_dma_mem *mem)
 	return ret;
 }
 
-/** ipa_init_rt6() - Initialize IPA routing block for IPv6.
+/**
+ * ipa_init_rt6() - Initialize IPA routing block for IPv6.
  *
- * Return codes: 0 for success, negative value for failure
+ * Return:	0 if successful, or a negative error code
  */
 static int ipa_init_rt6(struct ipa_dma_mem *mem)
 {
@@ -333,9 +338,10 @@ static int ipa_init_rt6(struct ipa_dma_mem *mem)
 	return ret;
 }
 
-/** ipa_init_flt4() - Initialize IPA filtering block for IPv4.
+/**
+ * ipa_init_flt4() - Initialize IPA filtering block for IPv4.
  *
- * Return codes: 0 for success, negative value for failure
+ * Return:	0 if successful, or a negative error code
  */
 static int ipa_init_flt4(struct ipa_dma_mem *mem)
 {
@@ -361,9 +367,10 @@ static int ipa_init_flt4(struct ipa_dma_mem *mem)
 	return ret;
 }
 
-/** ipa_init_flt6() - Initialize IPA filtering block for IPv6.
+/**
+ * ipa_init_flt6() - Initialize IPA filtering block for IPv6.
  *
- * Return codes: 0 for success, negative value for failure
+ * Return:	0 if successful, or a negative error code
  */
 static int ipa_init_flt6(struct ipa_dma_mem *mem)
 {
@@ -560,10 +567,8 @@ fail_flt_hash_tuple:
 	return ret;
 }
 
-/** ipa_enable_clks() - Turn on IPA clocks
- *
- * Return codes:
- * None
+/**
+ * ipa_enable_clks() - Turn on IPA clocks
  */
 static void ipa_enable_clks(void)
 {
@@ -572,10 +577,8 @@ static void ipa_enable_clks(void)
 	WARN_ON(ipa_interconnect_enable());
 }
 
-/** ipa_disable_clks() - Turn off IPA clocks
- *
- * Return codes:
- * None
+/**
+ * ipa_disable_clks() - Turn off IPA clocks
  */
 static void ipa_disable_clks(void)
 {
@@ -691,9 +694,6 @@ void ipa_client_remove(void)
 
 /** ipa_inc_acquire_wakelock() - Increase active clients counter, and
  * acquire wakelock if necessary
- *
- * Return codes:
- * None
  */
 void ipa_inc_acquire_wakelock(void)
 {
@@ -711,9 +711,6 @@ void ipa_inc_acquire_wakelock(void)
 /** ipa_dec_release_wakelock() - Decrease active clients counter
  *
  * In case if the ref count is 0, release the wakelock.
- *
- * Return codes:
- * None
  */
 void ipa_dec_release_wakelock(void)
 {
@@ -728,8 +725,7 @@ void ipa_dec_release_wakelock(void)
 	spin_unlock_irqrestore(&ipa_ctx->wakelock_ref_cnt.spinlock, flags);
 }
 
-/** ipa_suspend_handler() - Handles the suspend interrupt:
- * wakes up the suspended peripheral by requesting its consumer
+/** ipa_suspend_handler() - Handle the suspend interrupt
  * @interrupt:	Interrupt type
  * @endpoints:	Interrupt specific information data
  */
@@ -763,7 +759,9 @@ static void ipa_suspend_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 	}
 }
 
-/** ipa_init_interrupts() - Register to IPA IRQs */
+/**
+ * ipa_init_interrupts() - Initialize IPA interrupts
+ */
 static int ipa_init_interrupts(void)
 {
 	int ret;
@@ -878,24 +876,10 @@ void ipa_ssr_unprepare(struct rproc_subdev *subdev)
 }
 EXPORT_SYMBOL_GPL(ipa_ssr_unprepare);
 
-/** ipa_post_init() - Initialize the IPA Driver (Part II).
- * This part contains all initialization which requires interaction with
- * IPA HW (via GSI).
+/**
+ * ipa_post_init() - Initialize the IPA Driver (Part II).
  *
- * Function initialization process:
- * - Initialize endpoints bitmaps
- * - Initialize resource groups min and max values
- * - Initialize filtering lists heads and idr
- * - Initialize interrupts
- * - Register GSI
- * - Setup APPS endpoints
- * - Initialize IPA debugfs
- * - Initialize IPA uC interface
- * - Initialize WDI interface
- * - Initialize USB interface
- * - Register for panic handler
- * - Trigger IPA ready callbacks (to all subscribers)
- * - Trigger IPA completion object (to all who wait on it)
+ * Perform initialization that requires interaction with IPA hardware.
  */
 static void ipa_post_init(void)
 {
@@ -932,34 +916,8 @@ static void ipa_post_init(void)
 }
 
 /** ipa_pre_init() - Initialize the IPA Driver.
- * This part contains all initialization which doesn't require IPA HW, such
- * as structure allocations and initializations, register writes, etc.
  *
- * @pdev:	The platform device structure representing the IPA driver
- *
- * Function initialization process:
- * Allocate memory for the driver context data struct
- * Initializing the ipa_ctx with :
- *    1)parsed values from the dts file
- *    2)parameters passed to the module initialization
- *    3)read HW values(such as core memory size)
- * Map IPA core registers to CPU memory
- * Restart IPA core(HW reset)
- * Initialize the look-aside caches(kmem_cache/slab) for filter,
- *   routing and IPA-tree
- * Create memory pool with 4 objects for DMA operations(each object
- *   is 512Bytes long), this object will be use for tx(A5->IPA)
- * Initialize lists head(routing, hdr, system endpoints)
- * Initialize mutexes (for ipa_ctx and NAT memory mutexes)
- * Initialize spinlocks (for list related to A5<->IPA endpoints)
- * Initialize 2 single-threaded work-queue named "ipa rx wq" and "ipa tx wq"
- * Initialize Red-Black-Tree(s) for handles of header,routing rule,
- *  routing table ,filtering rule
- * Initialize the filter block by committing IPV4 and IPV6 default rules
- * Create empty routing table in system memory(no committing)
- * Create a char-device for IPA
- * Initialize IPA RM (resource manager)
- * Configure GSI registers (in GSI case)
+ * Perform initialization which doesn't require access to IPA hardware.
  */
 static int ipa_pre_init(void)
 {
@@ -1375,14 +1333,14 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 	return 0;
 }
 
-/** ipa_ap_suspend() - suspend callback for runtime_pm
- * @dev: pointer to device
+/**
+ * ipa_ap_suspend() - suspend callback for runtime_pm
+ * @dev:	IPA device structure
  *
  * This callback will be invoked by the runtime_pm framework when an AP suspend
  * operation is invoked, usually by pressing a suspend button.
  *
- * Returns -EAGAIN to runtime_pm framework in case IPA is in use by AP.
- * This will postpone the suspend operation until IPA is no longer used by AP.
+ * Return: 	0 if successful, -EAGAIN if IPA is in use
  */
 int ipa_ap_suspend(struct device *dev)
 {
@@ -1404,13 +1362,14 @@ int ipa_ap_suspend(struct device *dev)
 	return 0;
 }
 
-/** ipa_ap_resume() - resume callback for runtime_pm
- * @dev: pointer to device
+/**
+ * ipa_ap_resume() - resume callback for runtime_pm
+ * @dev:	IPA device structure
  *
  * This callback will be invoked by the runtime_pm framework when an AP resume
  * operation is invoked.
  *
- * Always returns 0 since resume should always succeed.
+ * Return:	Zero
  */
 int ipa_ap_resume(struct device *dev)
 {

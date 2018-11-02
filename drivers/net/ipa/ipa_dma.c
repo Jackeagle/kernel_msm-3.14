@@ -10,7 +10,7 @@
 
 static struct device *ipa_dma_dev;
 
-bool ipa_dma_init(struct device *dev, u32 align)
+int ipa_dma_init(struct device *dev, u32 align)
 {
 	int ret;
 

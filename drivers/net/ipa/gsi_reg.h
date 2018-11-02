@@ -20,8 +20,8 @@
  * The maximum value of "e" is 15 (but the limit is hardware-dependent).
  *
  * For any K-parameterized macros, the "k" value will represent either an
- * event channel id or a (data) channel id.  15 is the maximum value of
- * "k" for event channels; otherwise the maximum is 30.
+ * event ring id or a (data) channel id.  15 is the maximum value of
+ * "k" for event rings; otherwise the maximum is 30.
  */
 #define GSI_CFG_OFFS				0x00000000
 #define GSI_ENABLE_FMASK			0x00000001

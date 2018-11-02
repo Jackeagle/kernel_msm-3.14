@@ -115,8 +115,8 @@ enum ipa_reg {
 	IPA_IDLE_INDICATION_CFG,
 };
 
-/* struct ipa_reg_route - IPA_ROUTE field structure
- *
+/**
+ * struct ipa_reg_route - IPA_ROUTE field structure
  * @route_dis: route disable
  * @route_def_pipe: route default pipe
  * @route_def_hdr_table: route default header table
@@ -136,7 +136,8 @@ struct ipa_reg_route {
 	u32 route_def_retain_hdr;
 };
 
-/* ipa_reg_endp_init_hdr - ENDP_INIT_HDR_N field structure
+/**
+ * ipa_reg_endp_init_hdr - ENDP_INIT_HDR_N field structure
  *
  * @hdr_len:
  * @hdr_ofst_metadata_valid:
@@ -160,7 +161,8 @@ struct ipa_reg_endp_init_hdr {
 	u32 hdr_metadata_reg_valid;
 };
 
-/* ipa_reg_endp_init_hdr_ext - IPA_ENDP_INIT_HDR_EXT_N field structure
+/**
+ * ipa_reg_endp_init_hdr_ext - IPA_ENDP_INIT_HDR_EXT_N field structure
  *
  * @hdr_endianness:
  * @hdr_total_len_or_pad_valid:
@@ -178,14 +180,18 @@ struct ipa_reg_endp_init_hdr_ext {
 	u32 hdr_pad_to_alignment;
 };
 
-/** enum ipa_aggr_en - aggregation setting type in IPA end-point */
+/**
+ * enum ipa_aggr_en - aggregation setting type in IPA end-point
+ */
 enum ipa_aggr_en {
 	IPA_BYPASS_AGGR		= 0,
 	IPA_ENABLE_AGGR		= 1,
 	IPA_ENABLE_DEAGGR	= 2,
 };
 
-/** enum ipa_aggr_type - type of aggregation in IPA end-point */
+/**
+ * enum ipa_aggr_type - type of aggregation in IPA end-point
+ */
 enum ipa_aggr_type {
 	IPA_MBIM_16 = 0,
 	IPA_HDLC    = 1,
@@ -197,8 +203,8 @@ enum ipa_aggr_type {
 
 #define IPA_AGGR_TIME_LIMIT_DEFAULT	1	/* XXX units? */
 
-/** struct ipa_reg_endp_init_aggr - IPA_ENDP_INIT_AGGR_N field structure
- *
+/**
+ * struct ipa_reg_endp_init_aggr - IPA_ENDP_INIT_AGGR_N field structure
  * @aggr_en: bypass aggregation, enable aggregation, or deaggregation
  *	     (enum ipa_aggr_en)
  * @aggr_type: type of aggregation (enum ipa_aggr_type aggr)
@@ -227,15 +233,16 @@ struct ipa_reg_endp_init_aggr {
 	u32 aggr_hard_byte_limit_en;
 };
 
-/* struct ipa_aggr_force_close - IPA_AGGR_FORCE_CLOSE field structure
- *
+/**
+ * struct ipa_aggr_force_close - IPA_AGGR_FORCE_CLOSE field structure
  * @pipe_bitmap: bitmap of pipes on which aggregation should be closed
  */
 struct ipa_reg_aggr_force_close {
 	u32 pipe_bitmap;
 };
 
-/** enum ipa_mode - mode setting type in IPA end-point
+/**
+ * enum ipa_mode - mode setting type in IPA end-point
  * @BASIC: basic mode
  * @ENABLE_FRAMING_HDLC: not currently supported
  * @ENABLE_DEFRAMING_HDLC: not currently supported
@@ -249,7 +256,8 @@ enum ipa_mode {
 	IPA_DMA				= 3,
 };
 
-/* struct ipa_reg_endp_init_mode - IPA_ENDP_INIT_MODE_N field structure
+/**
+ * struct ipa_reg_endp_init_mode - IPA_ENDP_INIT_MODE_N field structure
  *
  * @mode: endpoint mode setting (enum ipa_mode_type)
  * @dst_pipe_index: This parameter specifies destination output-pipe-packets
@@ -269,7 +277,8 @@ struct ipa_reg_endp_init_mode {
 	u32 hdr_ftch_disable;
 };
 
-/* struct ipa_ep_init_ctrl - IPA_ENDP_INIT_CTRL_N field structure
+/**
+ * struct ipa_ep_init_ctrl - IPA_ENDP_INIT_CTRL_N field structure
  *
  * @ipa_ep_suspend: 0 - ENDP is enabled, 1 - ENDP is suspended (disabled).
  *			Valid for PROD Endpoints
@@ -282,7 +291,8 @@ struct ipa_reg_endp_init_ctrl {
 	u32 endp_delay;
 };
 
-/** struct ipa_reg_endp_init_deaggr - IPA_ENDP_INIT_DEAGGR_N field structure
+/**
+ * struct ipa_reg_endp_init_deaggr - IPA_ENDP_INIT_DEAGGR_N field structure
  *
  * @deaggr_hdr_len:
  * @packet_offset_valid:
@@ -311,9 +321,10 @@ enum ipa_seq_type {
 	IPA_SEQ_INVALID				= 0xff,
 };
 
-/** struct ipa_ep_init_seq - IPA_ENDP_INIT_SEQ_N field structure
- *
+/**
+ * struct ipa_ep_init_seq - IPA_ENDP_INIT_SEQ_N field structure
  * @hps_seq_type: type of HPS sequencer (enum ipa_hps_dps_sequencer_type)
+ * @dps_seq_type: type of DPS sequencer (enum ipa_hps_dps_sequencer_type)
  */
 struct ipa_reg_endp_init_seq {
 	u32 hps_seq_type;
@@ -322,7 +333,9 @@ struct ipa_reg_endp_init_seq {
 	u32 dps_rep_seq_type;
 };
 
-/** enum ipa_cs_offload_en - checksum offload setting */
+/**
+ * enum ipa_cs_offload_en - checksum offload setting
+ */
 enum ipa_cs_offload_en {
 	IPA_CS_OFFLOAD_NONE	= 0,
 	IPA_CS_OFFLOAD_UL	= 1,
@@ -330,8 +343,8 @@ enum ipa_cs_offload_en {
 	IPA_CS_RSVD
 };
 
-/** struct ipa_reg_endp_init_cfg - IPA_ENDP_INIT_CFG_N field structure
- *
+/**
+ * struct ipa_reg_endp_init_cfg - IPA_ENDP_INIT_CFG_N field structure
  * @frag_offload_en:
  * @cs_offload_en: type of offloading (enum ipa_cs_offload)
  * @cs_metadata_hdr_offset: offload (in 4-byte words) within header
@@ -346,19 +359,19 @@ struct ipa_reg_endp_init_cfg {
 	u32 cs_gen_qmb_master_sel;
 };
 
-/** struct ipa_reg_endp_init_hdr_metadata_mask -
+/**
+ * struct ipa_reg_endp_init_hdr_metadata_mask -
  *	IPA_ENDP_INIT_HDR_METADATA_MASK_N field structure
- *
  * @metadata_mask: mask specifying metadata bits to write
  *
- *  Valid for producer pipes only.
+ * Valid for producer pipes only.
  */
 struct ipa_reg_endp_init_hdr_metadata_mask {
 	u32 metadata_mask;
 };
 
-/* struct ipa_reg_shared_mem_size - SHARED_MEM_SIZE field structure
- *
+/**
+ * struct ipa_reg_shared_mem_size - SHARED_MEM_SIZE field structure
  * @shared_mem_size: Available size [in 8Bytes] of SW partition within
  *	IPA shared memory.
  * @shared_mem_baddr: Offset of SW partition within IPA
@@ -370,8 +383,8 @@ struct ipa_reg_shared_mem_size {
 	u32 shared_mem_baddr;
 };
 
-/* struct ipa_reg_endp_status - IPA_ENDP_STATUS_N field structure
- *
+/**
+ * struct ipa_reg_endp_status - IPA_ENDP_STATUS_N field structure
  * @status_en: Determines if end point supports Status Indications. SW should
  *	set this bit in order to enable Statuses. Output Pipe - send
  *	Status indications only if bit is set. Input Pipe - forward Status
@@ -394,12 +407,9 @@ struct ipa_reg_endp_status {
 	u32 status_pkt_suppress;
 };
 
-/* struct ipa_hash_tuple - structure used to group filter and route fields in
+/**
+ * struct ipa_hash_tuple - structure used to group filter and route fields in
  *			   struct ipa_ep_filter_router_hsh_cfg
- *
- * Each field is a Boolean value, indicating whether that particular value
- * should be used for filtering or routing.
- *
  * @src_id: pipe number for flt, table index for rt
  * @src_ip_addr: IP source address
  * @dst_ip_addr: IP destination address
@@ -407,6 +417,10 @@ struct ipa_reg_endp_status {
  * @dst_port: L4 destination port
  * @protocol: IP protocol field
  * @meta_data: packet meta-data
+ *
+ * Each field is a Boolean value, indicating whether that particular value
+ * should be used for filtering or routing.
+ *
  */
 struct ipa_reg_hash_tuple {
 	u32 src_id;	/* pipe number in flt, table index in rt */
@@ -419,9 +433,9 @@ struct ipa_reg_hash_tuple {
 	u32 undefined;
 };
 
-/* struct ipa_ep_filter_router_hsh_cfg - IPA_ENDP_FILTER_ROUTER_HSH_CFG_N
+/**
+ * struct ipa_ep_filter_router_hsh_cfg - IPA_ENDP_FILTER_ROUTER_HSH_CFG_N
  * 					 field structure
- *
  * @flt: Hash tuple info for filtering
  * @undefined1:
  * @rt: Hash tuple info for routing
@@ -433,17 +447,18 @@ struct ipa_ep_filter_router_hsh_cfg {
 	struct ipa_reg_hash_tuple rt;
 };
 
-/* struct ipa_reg_rsrc_grp_xy_rsrc_type_n -
+/**
+ * struct ipa_reg_rsrc_grp_xy_rsrc_type_n -
  *    IPA_{SRC,DST}_RSRC_GRP_{02}{13}Y_RSRC_TYPE_N field structure
+ * @x_min - first group min value
+ * @x_max - first group max value
+ * @y_min - second group min value
+ * @y_max - second group max value
  *
  * This field structure is used for accessing the following registers:
  *	IPA_SRC_RSRC_GRP_01_RSRC_TYPE_N IPA_SRC_RSRC_GRP_23_RSRC_TYPE_N
  *	IPA_DST_RSRC_GRP_01_RSRC_TYPE_N IPA_DST_RSRC_GRP_23_RSRC_TYPE_N
  *
- * @x_min - first group min value
- * @x_max - first group max value
- * @y_min - second group min value
- * @y_max - second group max value
  */
 struct ipa_reg_rsrc_grp_xy_rsrc_type_n {
 	u32 x_min;
@@ -452,8 +467,8 @@ struct ipa_reg_rsrc_grp_xy_rsrc_type_n {
 	u32 y_max;
 };
 
-/* struct ipa_reg_qsb_max_writes - IPA_QSB_MAX_WRITES field register
- *
+/**
+ * struct ipa_reg_qsb_max_writes - IPA_QSB_MAX_WRITES field register
  * @qmb_0_max_writes: Max number of outstanding writes for GEN_QMB_0
  * @qmb_1_max_writes: Max number of outstanding writes for GEN_QMB_1
  */
@@ -462,8 +477,8 @@ struct ipa_reg_qsb_max_writes {
 	u32 qmb_1_max_writes;
 };
 
-/* struct ipa_reg_qsb_max_reads - IPA_QSB_MAX_READS field register
- *
+/**
+ * struct ipa_reg_qsb_max_reads - IPA_QSB_MAX_READS field register
  * @qmb_0_max_reads: Max number of outstanding reads for GEN_QMB_0
  * @qmb_1_max_reads: Max number of outstanding reads for GEN_QMB_1
  */
@@ -472,8 +487,7 @@ struct ipa_reg_qsb_max_reads {
 	u32 qmb_1_max_reads;
 };
 
-/* struct ipa_reg_idle_indication_cfg - IPA_IDLE_INDICATION_CFG field register
- *
+/** struct ipa_reg_idle_indication_cfg - IPA_IDLE_INDICATION_CFG field register
  * @enter_idle_debounce_thresh:	 configure the debounce threshold
  * @const_non_idle_enable: enable the asserting of the IDLE value and DCD
  */

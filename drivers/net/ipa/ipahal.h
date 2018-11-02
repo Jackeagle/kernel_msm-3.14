@@ -27,117 +27,139 @@
 #define IPA_HW_TBL_SYSADDR_ALIGN	128
 #define IPA_HW_TBL_HDR_WIDTH		8
 
-/* Immediate commands abstracted structures */
-
-/* struct ipahal_imm_cmd_pyld - Immediate cmd payload information
- * @len: length of the buffer
- * @opcode: opcode of the immediate command
- * The immediate command type-specific payload implicitly follows these
- * common fields
+/**
+ * struct ipahal_imm_cmd_pyld - Immediate cmd payload information
+ * @opcode:	Opcode of the immediate command
  */
 struct ipahal_imm_cmd_pyld {
 	u16 opcode;	/* enum ipahal_imm_cmd opcode */
 };
 
-/* Return the address of type-specific data portion of an immediate
- * command payload.
+/**
+ * ipahal_imm_cmd_pyld_data(
+ * @pyld:	Generic immediate command payload pointer
+ *
+ * Return:	The address of type-specific data portion of an immediate
+ *		command payload (following its opcode).
  */
 static inline void *ipahal_imm_cmd_pyld_data(struct ipahal_imm_cmd_pyld *pyld)
 {
 	return pyld + 1;
 }
 
-/* Immediate command Function APIs */
-
-/* Return a pointer to the payload for a DMA shared memory write immediate
+/**
+ * ipahal_dma_shared_mem_write_pyld() - Write to shared memory command payload
+ * 
+ * Return a pointer to the payload for a DMA shared memory write immediate
  * command, or null if one can't be allocated.  Result is dynamically
  * allocated, and caller must ensure it gets released by providing it to
  * ipahal_destroy_imm_cmd() when it is no longer needed.
  *
- * mem		a DMA buffer containing data to be written (up to 2KB)
- * offset	is where to write in IPA local memory
+ * Return:	 Pointer to the immediate command payload, or NULL
  */
 struct ipahal_imm_cmd_pyld *ipahal_dma_shared_mem_write_pyld(
 				struct ipa_dma_mem *mem, u32 offset);
 
-/* Return a pointer to the payload for a header init local immediate
+/**
+ * ipahal_hdr_init_local_pyld() - Header initialization command payload
+ * mem:		DMA buffer containing data for initialization
+ * offset:	Where in location IPA local memory to write
+ *
+ * Return a pointer to the payload for a header init local immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
  *
- * mem		a DMA buffer containing data to be written (up to 2KB)
- * offset	is the location IPA local memory to write
+ * Return:	 Pointer to the immediate command payload, or NULL
  */
 struct ipahal_imm_cmd_pyld *ipahal_hdr_init_local_pyld(
 				struct ipa_dma_mem *mem, u32 offset);
 
-/* Return a pointer to the payload for an IPv4 routing init immediate
+/**
+ * ipahal_ip_v4_routing_init_pyld() - IPv4 routing table initialization payload
+ * mem:		The IPv4 routing table data to be written
+ * hash_offset:	The location in IPA memory for a hashed routing table
+ * nhash_offset: The location in IPA memory for a non-hashed routing table
+ *
+ * Return a pointer to the payload for an IPv4 routing init immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
  *
- * mem		contains the IPv4 routing table data to be written
- * hash_offset	is the locatin in IPA memory for hashed routing table
- * nhash_offset	is the locatin in IPA memory for non-hashed routing table
+ * Return:	 Pointer to the immediate command payload, or NULL
  */
 struct ipahal_imm_cmd_pyld *ipahal_ip_v4_routing_init_pyld(
 				struct ipa_dma_mem *mem,
 				u32 hash_offset, u32 nhash_offset);
 
-/* Return a pointer to the payload for an IPv6 routing init immediate
+/**
+ * ipahal_ip_v6_routing_init_pyld() - IPv6 routing table initialization payload
+ * mem:		The IPv6 routing table data to be written
+ * hash_offset:	The location in IPA memory for a hashed routing table
+ * nhash_offset: The location in IPA memory for a non-hashed routing table
+ *
+ * Return a pointer to the payload for an IPv4 routing init immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
  *
- * mem		contains the IPv6 routing table data to be written
- * hash_offset	is the locatin in IPA memory for hashed routing table
- * nhash_offset	is the locatin in IPA memory for non-hashed routing table
+ * Return:	 Pointer to the immediate command payload, or NULL
  */
 struct ipahal_imm_cmd_pyld *ipahal_ip_v6_routing_init_pyld(
 				struct ipa_dma_mem *mem,
 				u32 hash_offset, u32 nhash_offset);
 
-/* Return a pointer to the payload for an IPv4 filter init immediate
+/**
+ * ipahal_ip_v6_filter_init_pyld() - IPv4 filter table initialization payload
+ * mem:		The IPv4 filter table data to be written
+ * hash_offset:	The location in IPA memory for a hashed filter table
+ * nhash_offset: The location in IPA memory for a non-hashed filter table
+ *
+ * Return a pointer to the payload for an IPv4 filter init immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
  *
- * mem		contains the IPv4 filter table data to be written
- * hash_offset	is the locatin in IPA memory for hashed routing table
- * nhash_offset	is the locatin in IPA memory for non-hashed routing table
+ * Return:	 Pointer to the immediate command payload, or NULL
  */
 struct ipahal_imm_cmd_pyld *ipahal_ip_v4_filter_init_pyld(
 				struct ipa_dma_mem *mem,
 				u32 hash_offset, u32 nhash_offset);
 
-/* Return a pointer to the payload for an IPv6 filter init immediate
+/**
+ * ipahal_ip_v6_filter_init_pyld() - IPv6 filter table initialization payload
+ * mem:		The IPv6 filter table data to be written
+ * hash_offset:	The location in IPA memory for a hashed filter table
+ * nhash_offset: The location in IPA memory for a non-hashed filter table
+ *
+ * Return a pointer to the payload for an IPv4 filter init immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
  *
- * mem		contains the IPv6 filter table data to be written
- * hash_offset	is the locatin in IPA memory for hashed routing table
- * nhash_offset	is the locatin in IPA memory for non-hashed routing table
+ * Return:	 Pointer to the immediate command payload, or NULL
  */
 struct ipahal_imm_cmd_pyld *ipahal_ip_v6_filter_init_pyld(
 				struct ipa_dma_mem *mem,
 				u32 hash_offset, u32 nhash_offset);
 
-/* Return a pointer to the payload for DMA task 32-bit address immediate
+/**
+ * ipahal_dma_task_32b_addr_pyld() - 32-bit DMA task command payload
+ * mem:		DMA memory involved in the task
+ *
+ * Return a pointer to the payload for DMA task 32-bit address immediate
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
- *
- * mem is the dat to transfer (it will be discarded)
  */
 struct ipahal_imm_cmd_pyld *ipahal_dma_task_32b_addr_pyld(
 				struct ipa_dma_mem *mem);
 
-/* ipahal_destroy_imm_cmd() - Destroy/Release bulk that was built
- *  by the construction functions
+/**
+ * ipahal_destroy_imm_cmd() - Release an allocated immediate command payload
+ * @pyld:	Payload to be released
  */
 static inline void ipahal_destroy_imm_cmd(struct ipahal_imm_cmd_pyld *pyld)
 {
 	kfree(pyld);
 }
 
-/* IPA Status packet Structures and Function APIs */
-
-/* enum ipahal_pkt_status_opcode - Packet Status Opcode
+/**
+ * enum ipahal_pkt_status_opcode - Packet Status Opcode
  * @IPAHAL_STATUS_OPCODE_PACKET_2ND_PASS: Packet Status generated as part of
  *  IPA second processing pass for a packet (i.e. IPA XLAT processing for
  *  the translated packet).
@@ -157,7 +179,8 @@ enum ipahal_pkt_status_opcode {
 	IPAHAL_PKT_STATUS_OPCODE_PACKET_2ND_PASS	= 0x40,
 };
 
-/* enum ipahal_pkt_status_exception - Packet Status exception type
+/**
+ * enum ipahal_pkt_status_exception - Packet Status exception type
  * @IPAHAL_PKT_STATUS_EXCEPTION_PACKET_LENGTH: formerly IHL exception.
  *
  * Note: IPTYPE, PACKET_LENGTH and PACKET_THRESHOLD exceptions means that
@@ -183,7 +206,8 @@ enum ipahal_pkt_status_exception {
 	IPAHAL_PKT_STATUS_EXCEPTION_MAX,
 };
 
-/* enum ipahal_pkt_status_mask - Packet Status bitmask values of
+/**
+ * enum ipahal_pkt_status_mask - Packet Status bitmask values of
  *  the contained flags. This bitmask indicates flags on the properties of
  *  the packet as well as IPA processing it may had.
  * @TAG_VALID: Flag specifying if TAG and TAG info valid?
@@ -196,7 +220,8 @@ enum ipahal_pkt_status_mask {
 	IPAHAL_PKT_STATUS_MASK_CKSUM_PROCESS	= 0x0100,
 };
 
-/* enum ipahal_pkt_status_nat_type - Type of NAT
+/**
+ * enum ipahal_pkt_status_nat_type - Type of NAT
  *
  *  The values assigned here are assumed by ipa_pkt_status_parse() to
  *  match values returned in the nat_type field of a ipa_pkt_status_hw
@@ -208,7 +233,8 @@ enum ipahal_pkt_status_nat_type {
 	IPAHAL_PKT_STATUS_NAT_DST	= 2,
 };
 
-/* struct ipahal_pkt_status - IPA status packet abstracted payload.
+/**
+ * struct ipahal_pkt_status - IPA status packet abstracted payload.
  *  This structure describes the status packet fields for the
  *   following statuses: IPA_STATUS_PACKET, IPA_STATUS_DROPPED_PACKET,
  *   IPA_STATUS_SUSPENDED_PACKET.
@@ -287,13 +313,14 @@ struct ipahal_pkt_status {
 	u8 frag_rule;
 };
 
-/* ipahal_pkt_status_get_size() - Get H/W size of packet status
+/**
+ * ipahal_pkt_status_get_size() - Get size of a hardware packet status
  */
 u32 ipahal_pkt_status_get_size(void);
 
-/* ipahal_pkt_status_parse() - Parse Packet Status payload to abstracted form
- * @unparsed_status: Pointer to H/W format of the packet status as read from H/W
- * @status: Pointer to pre-allocated buffer where the parsed info will be stored
+/* ipahal_pkt_status_parse() - Parse packet status payload
+ * @unparsed_status:	Packet status read from hardware
+ * @status:		Buffer to hold parsed status information
  */
 void ipahal_pkt_status_parse(const void *unparsed_status,
 			     struct ipahal_pkt_status *status);
@@ -301,13 +328,15 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 int ipahal_init(void);
 void ipahal_exit(void);
 
-/* Does the given ID represents rule miss? */
+/* Does the given ID represent rule miss? */
 bool ipahal_is_rule_miss_id(u32 id);
 
 int ipahal_rt_generate_empty_img(u32 route_count, struct ipa_dma_mem *mem);
 int ipahal_flt_generate_empty_img(u64 ep_bitmap, struct ipa_dma_mem *mem);
 
-/* ipahal_free_empty_img() - free empty filter or route image
+/**
+ * ipahal_free_empty_img() - Free empty filter or route image
+ * @mem:	DMA memory containing filter/route data
  */
 void ipahal_free_empty_img(struct ipa_dma_mem *mem);
 

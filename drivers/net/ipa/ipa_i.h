@@ -44,7 +44,9 @@
 #define IPA_GSI_CHANNEL_STOP_MAX_RETRY	10
 #define IPA_GSI_CHANNEL_STOP_PKT_SIZE	1
 
-/** The IPA has a block of shared memory, divided into regions used for
+/**
+ * DOC:
+ * The IPA has a block of shared memory, divided into regions used for
  * specific purposes.  Values below define this layout (i.e., the
  * sizes and locations of all these regions).  One or two "canary"
  * values sit between some regions, as a check for erroneous writes
@@ -138,12 +140,12 @@ enum ipa_ees {
 	IPA_EE_UC	= 2,
 };
 
-/** enum ipa_client_type - names for the various IPA "clients"
- * these are from the perspective of the clients, for e.g.
- * HSIC1_PROD means HSIC client is the producer and IPA is the
- * consumer.
+/**
+ * enum ipa_client_type - names for the various IPA "clients"
+ *
+ * These are from the perspective of the clients, e.g. HSIC1_PROD
+ * means HSIC client is the producer and IPA is the consumer.
  * PROD clients are always even, and CONS clients are always odd.
- * Add new clients in the end of the list and update IPA_CLIENT_MAX
  */
 enum ipa_client_type {
 	IPA_CLIENT_WLAN1_PROD                   = 10,
@@ -204,9 +206,6 @@ static inline bool ipa_consumer(enum ipa_client_type client)
 	return !ipa_producer(client);
 }
 
-/* Note a client must have a valid entry in the ipa_ep_configuration[]
- * array to be are considered a modem consumer or producer client.
- */
 static inline bool ipa_modem_consumer(enum ipa_client_type client)
 {
 	return client == IPA_CLIENT_Q6_LAN_CONS ||
@@ -226,10 +225,10 @@ static inline bool ipa_ap_consumer(enum ipa_client_type client)
 		client == IPA_CLIENT_APPS_WAN_CONS;
 }
 
-/** enum ipa_irq_type - IPA Interrupt Type
- * Used to register handlers for IPA interrupts
+/**
+ * enum ipa_irq_type - IPA Interrupt Type
  *
- * Below enum is a logical mapping and not the actual interrupt bit in HW
+ * Used to register handlers for IPA interrupts.
  */
 enum ipa_irq_type {
 	IPA_INVALID_IRQ = 0,
@@ -239,30 +238,27 @@ enum ipa_irq_type {
 	IPA_IRQ_MAX
 };
 
-/** typedef ipa_irq_handler_t - irq handler/callback type
- * @param ipa_irq_type - [in] interrupt type
- * @param interrupt_data - [out] interrupt information data
+/**
+ * typedef ipa_irq_handler_t - irq handler/callback type
+ * @param ipa_irq_type		- interrupt type
+ * @param interrupt_data	- interrupt information data
  *
- * callback registered by ipa_add_interrupt_handler function to
+ * Callback function registered by ipa_add_interrupt_handler() to
  * handle a specific interrupt type
- *
- * No return value
  */
 typedef void (*ipa_irq_handler_t)(enum ipa_irq_type interrupt,
 				  u32 interrupt_data);
 
-/** struct ipa_tx_suspend_irq_data - interrupt data for IPA_TX_SUSPEND_IRQ
- * @endpoints: bitmask of endpoints which case IPA_TX_SUSPEND_IRQ interrupt
- * @dma_addr: DMA address of this Rx packet
+/**
+ * struct ipa_tx_suspend_irq_data - Interrupt data for IPA_TX_SUSPEND_IRQ
+ * @endpoints:	Bitmask of endpoints which cause IPA_TX_SUSPEND_IRQ interrupt
  */
 struct ipa_tx_suspend_irq_data {
 	u32 endpoints;
 };
 
-/** enum ipa_dp_evt_type - type of event client callback is
- * invoked for on data path
- * @IPA_RECEIVE: data is struct sk_buff
- * @IPA_WRITE_DONE: data is struct sk_buff
+/**
+ * enum ipa_dp_evt_type - Data path event type
  */
 enum ipa_dp_evt_type {
 	IPA_RECEIVE,
@@ -274,16 +270,16 @@ enum ipa_dp_evt_type {
 typedef void (*ipa_notify_cb)(void *priv, enum ipa_dp_evt_type evt,
 			      unsigned long data);
 
-/** struct ipa_ep_context - IPA end point context
- * @allocated: flag indicating endpoint has been allocated
- * @client: EP client type
- * @channel_id: EP's GSI channel handle
- * @evt_ring_id: EP's GSI channel event ring handle
- * @priv: user provided information which will forwarded once the user is
+/**
+ * struct ipa_ep_context - IPA end point context
+ * @allocated:	True when the endpoint has been allocated
+ * @client:	Client associated with the endpoint
+ * @channel_id:	EP's GSI channel
+ * @evt_ring_id: EP's GSI channel event ring
+ * @priv:	Pointer supplied when client_notify is called
  *	  notified for new data avail
- * @client_notify: user provided CB for EP events notification, the event is
- *		   data revived.
- * @napi_enabled: when true, IPA call client callback to start polling
+ * @client_notify: Function called for event notification
+ * @napi_enabled: Endpoint uses NAPI
  */
 struct ipa_ep_context {
 	bool allocated;
@@ -314,9 +310,8 @@ struct ipa_dp;	/* Data path information */
 
 struct ipa_sys_context;
 
-/** enum ipa_desc_type - IPA decriptors type
- *
- * IPA decriptors type, IPA supports DD and ICD but no CD
+/**
+ * enum ipa_desc_type - IPA decriptor type
  */
 enum ipa_desc_type {
 	IPA_DATA_DESC,
@@ -325,20 +320,14 @@ enum ipa_desc_type {
 	IPA_IMM_CMD_DESC,
 };
 
-/** struct ipa_desc - IPA descriptor
- * @type: skb or immediate command or plain old data
- * @pyld: points to skb
- * @frag: points to paged fragment
- * or kmalloc'ed immediate command parameters/plain old data
- * @dma_address: dma mapped address of pyld
- * @dma_address_valid: valid field for dma_address
- * @is_tag_status: flag for IP_PACKET_TAG_STATUS imd cmd
- * @len_opcode: length of the pyld, or opcode for immediate commands
- * @callback: IPA client provided completion callback
- * @user1: cookie1 for above callback
- * @user2: cookie2 for above callback
- * @xfer_done: completion object for sync completion
- * @skip_db_ring: specifies whether GSI doorbell should not be rang
+/**
+ * struct ipa_desc - IPA descriptor
+ * @type:	Type of data in the descriptor
+ * @len_opcode: Length of the payload, or opcode for immediate commands
+ * @payload:	Points to descriptor payload (e.g., socket buffer)
+ * @callback:	Completion callback
+ * @user1:	Pointer data supplied to callback
+ * @user2:	Integer data supplied with callback
  */
 struct ipa_desc {
 	enum ipa_desc_type type;
@@ -349,9 +338,10 @@ struct ipa_desc {
 	int user2;
 };
 
-/* Helper function to fill in some IPA descriptor fields for an
- * immediate command using an immediate command payload returned by
- * ipahal_construct_imm_cmd().
+/**
+ * ipa_desc_fill_imm_cmd() - Fill an IPA descriptor for an immediate command
+ * @desc:	Descriptor to fill
+ * @pyld:	Command payload, returned by ipahal_construct_imm_cmd().
  */
 static inline void
 ipa_desc_fill_imm_cmd(struct ipa_desc *desc, struct ipahal_imm_cmd_pyld *pyld)
@@ -373,8 +363,10 @@ struct ipa_wakelock_ref_cnt {
 
 struct ipa_uc_ctx;
 
-/** struct ipa_transport_pm - transport power management related members
- * @transport_pm_mutex: Mutex to protect the transport_pm functionality.
+/**
+ * struct ipa_transport_pm - Transport power management data
+ * @dec_clients:	?
+ * @transport_pm_mutex:	Mutex to protect the transport_pm functionality.
  */
 struct ipa_transport_pm {
 	atomic_t dec_clients;
@@ -397,46 +389,33 @@ struct ipa_dma_task_info {
 	struct ipahal_imm_cmd_pyld *cmd_pyld;
 };
 
-/** struct ipa_context - IPA context
- * @class: pointer to the struct class
- * @dev_num: device number
- * @dev: the dev_t of the device
- * @cdev: cdev of the device
- * @ep: list of all end points
- * @filter_bitmap: End-points supporting filtering bitmap
- * @flt_tbl: list of all IPA filter tables
- * @mode: IPA operating mode
- * @mmio: iomem
- * @ipa_phys: physical address of IPA register memory
- * @rt_tbl_set: list of routing tables each of which is a list of rules
- * @reap_rt_tbl_set: list of sys mem routing tables waiting to be reaped
- * @dp: data path information
- * @lock: this does NOT protect the linked lists within ipa_sys_context
- * @smem_size: shared memory size available for SW use starting
- *  from non-restricted bytes (i.e. starting at smem_offset)
- * @smem_offset: the offset of the usable area in shared memory
- * @nat_mem: NAT memory
- * @hdr_mem: header memory
- * @hdr_proc_ctx_mem: processing context memory
- * @power_mgmt_wq: workqueue for power management
- * @tag_process_before_gating: indicates whether to start tag process before
- *  gating IPA clocks
- * @transport_pm: transport power management related information
- * @ipa_active_clients: structure for reference counting connected IPA clients
- * @logbuf: ipc log buffer for high priority messages
- * @logbuf_low: ipc log buffer for low priority messages
- * @ipa_bus_hdl: msm driver handle for the data path bus
- * @ctrl: holds the core specific operations based on
- *  core version (vtable like)
- * @wcstats: wlan common buffer stats
- * @uc_ctx: uC interface context
- * @uc_wdi_ctx: WDI specific fields for uC interface
- * @ep_count: The number of endpoints used by IPA HW
- * @ipa_client_apps_wan_cons_agg_gro: RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA
- * @w_lock: Indicates the wakeup source.
- * @wakelock_ref_cnt: Indicates the number of times wakelock is acquired
- *  finished initializing. Example of use - IOCTLs to /dev/ipa
- * IPA context - holds all relevant info about IPA driver and its state
+/**
+ * struct ipa_context - IPA context
+ * @filter_bitmap:	End-points supporting filtering bitmap
+ * @ipa_irq:		IRQ number used for IPA
+ * @ipa_phys:		Physical address of IPA register memory
+ * @gsi:		Pointer to GSI structure
+ * @dev:		IPA device structure
+ * @ep:			Endpoint array
+ * @dp:			Data path information
+ * @smem_size:		Size of shared memory
+ * @smem_offset:	Offset of the usable area in shared memory
+ * @ipa_active_clients:	Active client count
+ * @power_mgmt_wq:	Workqueue for power management
+ * @transport_pm:	Transport power management related information
+ * @cmd_prod_ep_id:	Endpoint for APPS_CMD_PROD
+ * @lan_cons_ep_id:	Endpoint for APPS_LAN_CONS
+ * @memory_path:	Path for memory interconnect
+ * @imem_path:		Path for internal memory interconnect
+ * @config_path:	Path for configuration interconnect
+ * @q6_proxy_clk_vote_valid: Whether proxy clock vote is held for modem
+ * @ep_count:		Number of endpoints available in hardware
+ * @uc_ctx:		Microcontroller context
+ * @w_lock:		Wakeup source.
+ * @wakelock_ref_cnt:	Count of times wakelock is acquired
+ * @ipa_client_apps_wan_cons_agg_gro: APPS_WAN_CONS generic receive offload
+ * @smp2p_info:		Information related to SMP2P
+ * @dma_task_info:	Preallocated DMA task
  */
 struct ipa_context {
 	u32 filter_bitmap;
@@ -473,22 +452,15 @@ struct ipa_context {
 
 extern struct ipa_context *ipa_ctx;
 
-/* public APIs */
-
 int ipa_wwan_init(void);
 void ipa_wwan_cleanup(void);
 
-/* Generic GSI channels functions */
-
 int ipa_stop_gsi_channel(u32 ep_id);
 
-/* Configuration */
 void ipa_cfg_ep(u32 ep_id);
 
-/* Data path */
 int ipa_tx_dp(enum ipa_client_type dst, struct sk_buff *skb);
 
-/* System endpoints */
 bool ipa_endp_aggr_support(u32 ep_id);
 enum ipa_seq_type ipa_endp_seq_type(u32 ep_id);
 
@@ -534,19 +506,15 @@ void ipa_ep_teardown(u32 ep_id);
 
 void ipa_rx_switch_to_poll_mode(struct ipa_sys_context *sys);
 
-/* interrupts */
 void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 			       ipa_irq_handler_t handler);
 
 void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt);
 
-/* Miscellaneous */
 void ipa_proxy_clk_vote(void);
 void ipa_proxy_clk_unvote(void);
 
 u32 ipa_filter_bitmap_init(void);
-
-/* internal functions */
 
 bool ipa_is_modem_ep(u32 ep_id);
 
@@ -585,7 +553,6 @@ void ipa_sram_settings_read(void);
 
 int ipa_modem_smem_init(void);
 
-/* Defined in "ipa_uc.c" */
 struct ipa_uc_ctx *ipa_uc_init(phys_addr_t phys_addr);
 bool ipa_uc_loaded(void);
 void ipa_uc_panic_notifier(void);

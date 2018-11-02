@@ -11,16 +11,22 @@
 #include "ipa_i.h"
 #include "ipahal.h"
 
-/* struct ipahal_context - HAL global context data
- *
- * @empty_fltrt_tbl: Empty table to be used at tables init.
+/**
+ * struct ipahal_context - HAL global context data
+ * @empty_fltrt_tbl:	Empty table to be used for table initialization
  */
 static struct ipahal_context {
 	struct ipa_dma_mem empty_fltrt_tbl;
 } ipahal_ctx_struct;
 static struct ipahal_context *ipahal_ctx = &ipahal_ctx_struct;
 
-/* Immediate commands; value is the opcode for IPA v3.5.1 hardware */
+/**
+ * enum ipahal_imm_cmd:	IPA immediate commands
+ *
+ * All immediate commands are issued using the APPS_CMD_PROD
+ * endpoint.  The numeric values here are the opcodes for IPA v3.5.1
+ * hardware
+ */
 enum ipahal_imm_cmd {
 	IPA_IMM_CMD_IP_V4_FILTER_INIT		= 3,
 	IPA_IMM_CMD_IP_V6_FILTER_INIT		= 4,
@@ -558,7 +564,6 @@ void ipahal_exit(void)
 }
 
 /* Does the given rule ID represent a routing or filter rule miss?
- *
  * A rule miss is indicated as an all-1's value in the rt_rule_id
  * or flt_rule_id field of the ipahal_pkt_status structure.
  */
@@ -569,10 +574,10 @@ bool ipahal_is_rule_miss_id(u32 id)
 	return id == (1U << IPA_RULE_ID_BITS) - 1;
 }
 
-/* ipahal_rt_generate_empty_img() - Generate empty route table header
- *
- * @route_count: number of table entries
- * @mem: mem object representing the header structure
+/**
+ * ipahal_rt_generate_empty_img() - Generate empty route table header
+ * @route_count:	Number of table entries
+ * @mem:		DMA memory object representing the header structure
  *
  * Allocates and fills an "empty" route table header having the given
  * number of entries.  Each entry in the table contains the DMA address
@@ -580,6 +585,8 @@ bool ipahal_is_rule_miss_id(u32 id)
  *
  * This function initializes all entries to point at the preallocated
  * empty routing entry in system RAM.
+ *
+ * Return:	0 if successful, or a negative error code otherwise
  */
 int ipahal_rt_generate_empty_img(u32 route_count, struct ipa_dma_mem *mem)
 {
@@ -598,10 +605,10 @@ int ipahal_rt_generate_empty_img(u32 route_count, struct ipa_dma_mem *mem)
 	return 0;
 }
 
-/* ipahal_flt_generate_empty_img() - Generate empty filter table header
- *
- * @filter_bitmap: bitmap representing which endpoints support filtering
- * @mem: mem object representing the header structure
+/**
+ * ipahal_flt_generate_empty_img() - Generate empty filter table header
+ * @filter_bitmap:	Bitmap representing which endpoints support filtering
+ * @mem:		DMA memory object representing the header structure
  *
  * Allocates and fills an "empty" filter table header based on the
  * given filter bitmap.
@@ -617,6 +624,8 @@ int ipahal_rt_generate_empty_img(u32 route_count, struct ipa_dma_mem *mem)
  * Note:  the (software) bitmap here uses bit 0 to represent
  * endpoint 0, bit 1 for endpoint 1, and so on.  This is different
  * from the hardware (which uses bit 1 to represent filter 0, etc.).
+ *
+ * Return:	0 if successful, or a negative error code
  */
 int ipahal_flt_generate_empty_img(u64 filter_bitmap, struct ipa_dma_mem *mem)
 {

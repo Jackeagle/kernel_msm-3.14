@@ -185,7 +185,8 @@ static void tx_suspend_disable(void)
 	ipa_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_N, IPA_EE_AP, 0);
 }
 
-/** ipa_add_interrupt_handler() - Adds handler for an IPA interrupt
+/**
+ * ipa_add_interrupt_handler() - Adds handler for an IPA interrupt
  * @interrupt:		IPA interrupt type
  * @handler:		The handler for that interrupt
  *
@@ -212,7 +213,8 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 		tx_suspend_enable();
 }
 
-/** ipa_remove_interrupt_handler() - Removes handler for an IPA interrupt type
+/**
+ * ipa_remove_interrupt_handler() - Removes handler for an IPA interrupt type
  * @interrupt:		IPA interrupt type
  *
  * Remove an IPA interrupt handler and disable it.
@@ -236,7 +238,9 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 	ipa_write_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP, val);
 }
 
-/** ipa_interrupts_init() - Initialize the IPA interrupts framework */
+/**
+ * ipa_interrupts_init() - Initialize the IPA interrupts framework
+ */
 int ipa_interrupts_init(void)
 {
 	int ret;
@@ -255,12 +259,13 @@ int ipa_interrupts_init(void)
 	return -ENOMEM;
 }
 
-/** ipa_suspend_active_aggr_wa() - Emulate suspend IRQ
- * @ep_id: suspended client handle, IRQ is emulated for this * endpoint
+/**
+ * ipa_suspend_active_aggr_wa() - Emulate suspend interrupt
+ * @ep_id:	Endpoint on which to emulate a suspend
  *
- *  Emulate suspend IRQ to unsuspend client which was suspended with an open
- *  aggregation frame in order to bypass HW bug of IRQ not generated when
- *  endpoint is suspended during an open aggregation.
+ *  Emulate suspend IRQ to unsuspend a client suspended with an open
+ *  aggregation frame.  This is to work around a hardware issue
+ *  where an IRQ is not generated as it should be when this occurs.
  */
 void ipa_suspend_active_aggr_wa(u32 ep_id)
 {

@@ -12,20 +12,17 @@
 #include "ipa_i.h"
 #include "ipahal.h"
 
-/** struct ipa_tx_pkt_wrapper - IPA Tx packet wrapper
- * @type: specify if this packet is for the skb or immediate command
- * @mem: memory buffer used by this Tx packet
- * @work: work struct for current Tx packet
- * @link: linked to the wrappers on that endpoint
- * @callback: IPA client provided callback
- * @user1: cookie1 for above callback
- * @user2: cookie2 for above callback
- * @sys: corresponding IPA sys context
- * @cnt: 1 for single transfers,
- * >1 and <0xffff for first of a "multiple" transfer,
- * 0xffff for last desc, 0 for rest of "multiple' transfer
- *
- * This struct can wrap both data packet and immediate command packet.
+/**
+ * struct ipa_tx_pkt_wrapper - IPA transmit packet wrapper
+ * @type:	type of descriptor
+ * @sys:	Corresponding IPA sys context
+ * @mem:	Memory buffer used by this packet
+ * @callback:	IPA client provided callback
+ * @user1:	Cookie1 for above callback
+ * @user2:	Cookie2 for above callback
+ * @link:	Links for the endpoint's sys->head_desc_list
+ * @cnt:	Number of descriptors in request
+ * @done_work:	Work structure used when complete
  */
 struct ipa_tx_pkt_wrapper {
 	enum ipa_desc_type type;
@@ -40,9 +37,9 @@ struct ipa_tx_pkt_wrapper {
 };
 
 /** struct ipa_rx_pkt_wrapper - IPA Rx packet wrapper
- * @link: linked to the Rx packets on that endpoint
- * @data: skb and DMA address of the received packet
- * @len: how many bytes are copied into skb's flat buffer
+ * @link:	Links for the endpoint's sys->head_desc_list
+ * @skb:	Socket buffer containing the received packet
+ * @len:	How many bytes are copied into skb's buffer
  */
 struct ipa_rx_pkt_wrapper {
 	struct list_head link;
@@ -51,12 +48,13 @@ struct ipa_rx_pkt_wrapper {
 };
 
 /** struct ipa_sys_context - IPA GPI endpoint context
- * @head_desc_list: header descriptors list
- * @len: the size of the above list
- * @spinlock: protects the list and its size
- * @ep: IPA EP context
- *
- * IPA context specific to the GPI endpoints a.k.a LAN IN/OUT and WAN
+ * @len:	The number of entries in @head_desc_list
+ * @tx:		Details related to AP->IPA endpoints
+ * @rx:		Details related to IPA->AP endpoints
+ * @ep:		Associated endpoint
+ * @head_desc_list: List of packets
+ * @spinlock:	Lock protecting the descriptor list
+ * @workqueue:	Workqueue used for this endpoint
  */
 struct ipa_sys_context {
 	u32 len;
@@ -95,15 +93,21 @@ struct ipa_sys_context {
 	/* ordering is important - other immutable fields go below */
 };
 
-/** struct ipa_dp - IPA data path information
- * @tx_pkt_wrapper_cache: Tx packets cache
- * @rx_pkt_wrapper_cache: Rx packets cache
+/**
+ * struct ipa_dp - IPA data path information
+ * @tx_pkt_wrapper_cache:	Tx packets cache
+ * @rx_pkt_wrapper_cache:	Rx packets cache
  */
 struct ipa_dp {
 	struct kmem_cache *tx_pkt_wrapper_cache;
 	struct kmem_cache *rx_pkt_wrapper_cache;
 };
 
+/**
+ * struct ipa_tag_completion - Reference counted completion object
+ * @comp:	Completion when last reference is dropped
+ * @cnt:	Reference count
+ */
 struct ipa_tag_completion {
 	struct completion comp;
 	atomic_t cnt;
@@ -213,16 +217,9 @@ ipa_wq_write_done_status(u32 ep_id, struct ipa_tx_pkt_wrapper *tx_pkt)
 		ipa_err("tx_pkt is NULL\n");
 }
 
-/** ipa_write_done() - this function will be (eventually) called when a Tx
- * operation is complete
+/**
+ * ipa_wq_write_done() - Work function executed when TX completes
  * * @done_work:	work_struct used by the work queue
- *
- * Will be called in deferred context.
- * - invoke the callback supplied by the client who sent this command
- * - iterate over all packets and validate that
- *   the order for sent packet is the same as expected
- * - delete all the tx packet descriptors from the system
- *   context (not needed anymore)
  */
 static void ipa_wq_write_done(struct work_struct *done_work)
 {
@@ -246,12 +243,12 @@ static void ipa_wq_write_done(struct work_struct *done_work)
 	ipa_wq_write_done_common(sys, tx_pkt);
 }
 
-/** ipa_rx_poll() - Poll the rx packets from IPA HW.
+/**
+ * ipa_rx_poll() - Poll the rx packets from IPA hardware
+ * @ep_id:	Endpoint to poll
+ * @weight:	NAPI poll weight
  *
- * This function is executed in softirq context.
- *
- * Returns the number of received packets, and switches to interrupt
- * mode if that's less than weight.
+ * Return:	The number of received packets.
  */
 int ipa_rx_poll(u32 ep_id, int weight)
 {
@@ -289,15 +286,18 @@ int ipa_rx_poll(u32 ep_id, int weight)
 	return cnt;
 }
 
-/* Send an interrupting no-op request to a producer endpoint.  Normally
- * an interrupt is generated upon completion of every transfer performed
- * by an endpoint, but a producer endpoint can be configured to avoid
- * getting these interrupts.  Instead, once a transfer has been initiated,
- * a no-op is scheduled to be sent after a short delay.  This no-op
- * request will interrupt when it is complete, and in handling that
- * interrupt, previously-completed transfers will be handled as well.
- * If a no-op is already scheduled, another is not initiated (there's
- * only one pending at a time).
+/**
+ * ipa_send_nop() - Send an interrupting no-op request to a producer endpoint.  
+ * @sys:	System context for the endpoint
+ *
+ * Normally an interrupt is generated upon completion of every transfer
+ * performed by an endpoint, but a producer endpoint can be configured
+ * to avoid getting these interrupts.  Instead, once a transfer has been
+ * initiated, a no-op is scheduled to be sent after a short delay.  This
+ * no-op request will interrupt when it is complete, and in handling that
+ * interrupt, previously-completed transfers will be handled as well.  If
+ * a no-op is already scheduled, another is not initiated (there's only
+ * one pending at a time).
  */
 static bool ipa_send_nop(struct ipa_sys_context *sys)
 {
@@ -337,7 +337,12 @@ static bool ipa_send_nop(struct ipa_sys_context *sys)
 	return false;
 }
 
-/* Try to send the no-op request.  If it fails, arrange to try again. */
+/**
+ * ipa_send_nop_work() - Work function for sending a no-op request
+ * nop_work:	Work structure for the request
+ *
+ * Try to send the no-op request.  If it fails, arrange to try again.
+ */
 static void ipa_send_nop_work(struct work_struct *nop_work)
 {
 	struct ipa_sys_context *sys;
@@ -349,7 +354,11 @@ static void ipa_send_nop_work(struct work_struct *nop_work)
 		queue_work(sys->wq, nop_work);
 }
 
-/* The delay before sending the no-op request is implemented by a
+/**
+ * ipa_nop_timer_expiry() - Timer function to schedule a no-op request
+ * @timer:	High-resolution timer structure
+ *
+ * The delay before sending the no-op request is implemented by a
  * high resolution timer, which will call this in interrupt context.
  * Arrange to send the no-op in workqueue context when it expires.
  */
@@ -375,7 +384,11 @@ static void ipa_nop_timer_schedule(struct ipa_sys_context *sys)
 	hrtimer_start(&sys->tx.nop_timer, time, HRTIMER_MODE_REL);
 }
 
-/* For some producer endpoints we don't interrupt on completions.
+/**
+ * ipa_no_intr_init() - Configure endpoint point for no-op requests
+ * @prod_ep_id:	Endpoint that will use interrupting no-ops
+ *
+ * For some producer endpoints we don't interrupt on completions.
  * Instead we schedule an interrupting NOP command to be issued on
  * the endpoint after a short delay (if one is not already scheduled).
  * When the NOP completes it signals all preceding transfers have
@@ -392,20 +405,13 @@ void ipa_no_intr_init(u32 prod_ep_id)
 	ep->sys->tx.no_intr = true;
 }
 
-/** ipa_send() - Send multiple descriptors in one HW transaction
- * @sys: system context
- * @num_desc: number of packets
- * @desc: packets to send (may be immediate command or data)
+/**
+ * ipa_send() - Send descriptors to hardware as a single transaction
+ * @sys:	System context for endpoint
+ * @num_desc:	Number of descriptors
+ * @desc:	Transfer descriptors to send
  *
- * This function is used for GPI connection.
- * - ipa_tx_pkt_wrapper will be used for each ipa
- *   descriptor (allocated from wrappers cache)
- * - The wrapper struct will be configured for each ipa-desc payload and will
- *   contain information which will be later used by the user callbacks
- * - Each packet (command or data) that will be sent will also be saved in
- *   ipa_sys_context for later check that all data was sent
- *
- * Return codes: 0: success, -EFAULT: failure
+ * Return:	0 iff successful, or a negative error code.
  */
 static int
 ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
@@ -512,11 +518,13 @@ err_unwind:
 	return ret;
 }
 
-/** ipa_send_cmd_timeout_complete - callback function which will be
- * called by the transport driver after an immediate command is complete.
- * This function will also free the completion object once it is done.
- * @user1: pointer to the completion object
- * @ignored: parameter not used
+/**
+ * ipa_send_cmd_timeout_complete() - Command completion callback
+ * @user1:	Opaque value carried by the command
+ * @ignored:	Second opaque value (ignored)
+ *
+ * Schedule a completion to signal that a command is done.  Free the
+ * tag_completion structure if its reference count reaches zero.
  */
 static void ipa_send_cmd_timeout_complete(void *user1, int ignored)
 {
@@ -527,7 +535,8 @@ static void ipa_send_cmd_timeout_complete(void *user1, int ignored)
 		kfree(comp);
 }
 
-/** ipa_send_cmd_timeout - send one immediate command with timeout
+/**
+ * ipa_send_cmd_timeout() - Send an immediate command with timeout
  * @desc:	descriptor structure
  * @timeout:	milliseconds to wait (or 0 to wait indefinitely)
  *
@@ -535,6 +544,8 @@ static void ipa_send_cmd_timeout_complete(void *user1, int ignored)
  * timeout is non-zero it indicates the number of milliseconds to
  * wait to receive the acknowledgment from the hardware before
  * timing out.  If 0 is supplied, wait will not time out.
+ *
+ * Return:	0 if successful, or a negative error code
  */
 int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout)
 {
@@ -579,24 +590,17 @@ out:
 	return ret;
 }
 
-/** ipa_handle_rx_core() - The core functionality of packet reception. This
- * function is read from multiple code paths.
+/**
+ * ipa_handle_rx_core() - Core packet reception handling
+ * @sys:	System context for endpoint receiving packets
  *
- * All the packets on the Rx data path are received on the IPA_A5_LAN_WAN_IN
- * endpoint. The function runs as long as there are packets at the endpoint.
- * For each packet:
- *  - Disconnect the packet from the system enpoint linked list
- *  - Unmap the packets skb, make it non DMAable
- *  - Free the packet from the cache
- *  - Prepare a proper skb
- *  - Call the endpoints notify function, passing the skb in the parameters
- *  - Replenish the rx cache
+ * Return:	The number of packets processed, or a negative error code
  */
 static int ipa_handle_rx_core(struct ipa_sys_context *sys)
 {
 	int cnt;
 
-	/* Stop if the leave polling state */
+	/* Stop if the endpoint leaves polling state */
 	cnt = 0;
 	while (ipa_ep_polling(sys->ep)) {
 		int ret = ipa_poll_gsi_pkt(sys);
@@ -612,7 +616,10 @@ static int ipa_handle_rx_core(struct ipa_sys_context *sys)
 	return cnt;
 }
 
-/** ipa_rx_switch_to_intr_mode() - Operate the Rx data path in interrupt mode */
+/**
+ * ipa_rx_switch_to_intr_mode() - Switch from polling to interrupt mode
+ * @sys:	System context for endpoint switching mode
+ */
 static void ipa_rx_switch_to_intr_mode(struct ipa_sys_context *sys)
 {
 	if (!atomic_xchg(&sys->rx.curr_polling_state, 0)) {
@@ -634,12 +641,9 @@ void ipa_rx_switch_to_poll_mode(struct ipa_sys_context *sys)
 	queue_work(sys->wq, &sys->rx.work);
 }
 
-/** ipa_handle_rx() - handle packet reception. This function is executed in the
- * context of a work queue.
- * @work: work struct needed by the work queue
- *
- * ipa_handle_rx_core() is run in polling mode. After all packets has been
- * received, the driver switches back to interrupt mode.
+/**
+ * ipa_handle_rx() - Handle packet reception.
+ * @sys:	System context for endpoint receiving packets
  */
 static void ipa_handle_rx(struct ipa_sys_context *sys)
 {
@@ -706,13 +710,13 @@ static struct ipa_sys_context *ipa_ep_sys_create(enum ipa_client_type client)
 	return sys;
 }
 
-/** ipa_tx_dp_complete() - Callback function which will call the
- * user supplied callback function to release the skb, or release it on
- * its own if no callback function was supplied.
- * @user1
- * @user2
+/**
+ * ipa_tx_dp_complete() - Transmit complete callback
+ * @user1:	Caller-supplied pointer value
+ * @user2:	Caller-supplied integer value
  *
- * This notified callback is for the destination client.
+ * Calls the endpoint's client_notify function if it exists;
+ * otherwise just frees the socket buffer (supplied in user1).
  */
 static void ipa_tx_dp_complete(void *user1, int user2)
 {
@@ -731,15 +735,12 @@ static void ipa_tx_dp_complete(void *user1, int user2)
 	}
 }
 
-/** ipa_tx_dp() - Data-path tx handler for APPS_WAN_PROD client
+/**
+ * ipa_tx_dp() - Transmit a socket buffer for APPS_WAN_PROD
+ * @client:	IPA client that is sending packets (WAN producer)
+ * @skb:	The socket buffer to send
  *
- * @client:	[in] which IPA client is sending packets (WAN producer)
- * @skb:	[in] the packet to send
- *
- * Data-path transmit handler.  This is currently used only for the
- * for the WLAN hardware data-path.
- *
- * Returns:	0 on success, negative on failure
+ * Returns:	0 if successful, or a negative error code
  */
 int ipa_tx_dp(enum ipa_client_type client, struct sk_buff *skb)
 {
@@ -847,17 +848,13 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
 	return 0;
 }
 
-/** ipa_replenish_rx_cache() - Replenish the Rx packets cache.
+/**
+ * ipa_replenish_rx_cache() - Replenish the Rx packets cache.
+ * @sys:	System context for IPA->AP endpoint 
  *
- * The function allocates buffers in the rx_pkt_wrapper_cache cache until there
- * are IPA_RX_POOL_CEIL buffers in the cache.
- *   - Allocate a buffer in the cache
- *   - Initialized the packets link
- *   - Initialize the packets work struct
- *   - Allocate the packets socket buffer (skb)
- *   - Fill the packets skb with data
- *   - Make the packet DMAable
- *   - Add the packet to the system context linked list
+ * Allocate RX packet wrapper structures with maximal socket buffers
+ * for an endpoint.  These are supplied to the hardware, which fills
+ * them with incoming data.
  */
 static void ipa_replenish_rx_cache(struct ipa_sys_context *sys)
 {
@@ -1398,7 +1395,10 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u32 size)
 	ipa_replenish_rx_cache(sys);
 }
 
-/*
+/**
+ * ipa_aggr_byte_limit_buf_size()
+ * @byte_limit:	Desired limit (in bytes) for aggregation
+ *
  * Compute the buffer size required to support a requested aggregation
  * byte limit.  Aggregration will close when *more* than the configured
  * number of bytes have been added to an aggregation frame.  Our
@@ -1418,6 +1418,8 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u32 size)
  * After accounting for all of this, we return the number of bytes
  * of buffer space the IPA hardware will know is available to hold
  * received data (without any overhead).
+ *
+ * Return:	The computes size of buffer space available
  */
 u32 ipa_aggr_byte_limit_buf_size(u32 byte_limit)
 {
@@ -1680,16 +1682,16 @@ void ipa_ep_free(u32 ep_id)
 	ep->allocated = false;
 }
 
-/** ipa_ep_setup() - Setup an IPA GPI endpoint and perform
- * IPA EP configuration
- * @client:	[in] handle assigned by IPA to client
+/**
+ * ipa_ep_setup() - Set up an IPA endpoint
+ * @ep_id:		Endpoint to set up
+ * @channel_count:	Number of transfer elements in the channel
+ * @evt_ring_mult:	Used to determine number of elements in event ring
+ * @rx_buffer_size:	Receive buffer size to use (or 0 for TX endpoitns)
+ * @client_notify:	Notify function to call on completion
+ * @priv:		Value supplied to the notify function
  *
- *  - configure the end-point registers with the supplied
- *    parameters from the user.
- *  - Creates a GPI connection with IPA.
- *  - allocate descriptor FIFO
- *
- * Returns:	0 on success, negative on failure
+ * Returns:	0 if successful, or a negative error code
  */
 int ipa_ep_setup(u32 ep_id, u32 channel_count, u32 evt_ring_mult,
 		 u32 rx_buffer_size,
@@ -1742,8 +1744,15 @@ err_client_remove:
 	return ret;
 }
 
-/* Special reset sequence used on a consumer channel when
- * aggregation is active.
+/**
+ * ipa_channel_reset_aggr() - Reset with aggregation active
+ * @ep_id:	Endpoint on which reset is performed
+ *
+ * If aggregation is active on a channel when a reset is performed,
+ * a special sequence of actions must be taken.  This is a workaround
+ * for a hardware limitation.
+ *
+ * Return:	0 if successful, or a negative error code.
  */
 static int ipa_channel_reset_aggr(u32 ep_id)
 {
@@ -1863,10 +1872,9 @@ static void ipa_reset_gsi_channel(u32 ep_id)
 	}
 }
 
-/** ipa_ep_teardown() - Teardown an endpoint
- * @ep_id:	[in] the endpiont id obtained from ipa_ep_setup()
- *
- * Returns:	0 on success, negative on failure
+/**
+ * ipa_ep_teardown() - Tear down an endpoint
+ * @ep_id:	The endpoint to tear down
  */
 void ipa_ep_teardown(u32 ep_id)
 {
