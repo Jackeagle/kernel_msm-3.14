@@ -253,7 +253,7 @@ int ipa_rx_poll(u32 ep_id, int weight)
 			cnt--;
 			break;
 		}
-	};
+	}
 
 	if (cnt < weight) {
 		ep->client_notify(ep->priv, IPA_CLIENT_COMP_NAPI, 0);
@@ -1294,7 +1294,7 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 				skb_pull(skb, frame_len);
 			}
 		}
-	};
+	}
 bail:
 	dev_kfree_skb_any(skb);
 }
