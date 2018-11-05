@@ -6,7 +6,10 @@
 #ifndef _IPA_REG_H_
 #define _IPA_REG_H_
 
-/* The IPA code abstracts the details of its 32-bit registers, allowing access
+/**
+ * DOC: The IPA Register Abstraction
+ *
+ * The IPA code abstracts the details of its 32-bit registers, allowing access
  * to them to be done generically.  The original motivation for this was that
  * the field width and/or position for values stored in some registers differed
  * for different versions of IPA hardware.  Abstracting access this way allows
