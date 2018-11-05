@@ -9,6 +9,19 @@
 
 #include "ipa_i.h"
 
+/**
+ * DOC:  The IPA Embedded Microcontroller
+ *
+ * The IPA incorporates an embedded microcontroller that is able to
+ * do some additional handling/offloading of network activity.  The
+ * current code makes essentially no use of the microcontroller.
+ * Despite not being used, the microcontroller still requires some
+ * initialization, and it needs to be notified in the event the AP
+ * crashes.  The IPA embedded microcontroller represents another IPA
+ * execution environment (in addition to the AP subsystem and
+ * modem).
+ */
+
 /* Supports hardware interface version 0x2000 */
 
 #define IPA_RAM_UC_SMEM_SIZE	128	/* Size of shared memory area */
