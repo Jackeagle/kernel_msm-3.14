@@ -4,12 +4,22 @@
  * Copyright (C) 2018 Linaro Ltd.
  */
 
-/* The IPA supports generating an interrupt on a number of events
- * using a single IRQ.  When the IPA IRQ fires, an IPA interrupt
- * status register indicates which IPA interrupt events are being
- * signaled.  Each IPA interrupt is acknowledged by writing its bit
- * to an interrupt clear register.  Finally, another register is
- * used to mask (or rather, enable) particular IPA interrupts.
+/*
+ * DOC: IPA Interrupts
+ *
+ * The IPA has an interrupt line distinct from the interrupt used
+ * by the GSI code.  Whereas GSI interrupts are generally related
+ * to channel events (like transfer completions), IPA interrupts are
+ * related to other events related to the IPA.  Some of the IPA
+ * interrupts come from a microcontroller embedded in the IPA.
+ * Each IPA interrupt type can be both masked and acknowledged
+ * independent of the others,
+ *
+ * So two of the IPA interrupts are initiated by the microcontroller.
+ * A third can be generated to signal the need for a wakeup/resume
+ * when the IPA has been suspended.  The modem can cause this event
+ * to occur (for example, for an incoming call).  There are other IPA
+ * events defined, but at this time only these three are supported.
  */
 
 #include <linux/types.h>
