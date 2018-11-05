@@ -31,7 +31,7 @@
 
 /**
  * ipahal_dma_shared_mem_write_pyld() - Write to shared memory command payload
- * 
+ *
  * Return a pointer to the payload for a DMA shared memory write immediate
  * command, or null if one can't be allocated.  Result is dynamically
  * allocated, and caller must ensure it gets released by providing it to

@@ -13,6 +13,28 @@
 #include "ipa_dma.h"
 
 /**
+ * DOC:  IPA Immediate Commands
+ *
+ * The APPS_CMD_PROD channel is used to issue immediate commands to
+ * the IPA.  An immediate command is generally used to request the
+ * IPA do something other than data transfer.
+ *
+ * An immediate command is represented by a GSI transfer element.
+ * Each immediate command has a well-defined format, with a known
+ * length.  The transfer element's length field can therefore be
+ * used to hold a command's opcode.  The "payload" of an immediate
+ * command contains additional information required for the command.
+ * It resides in DRAM and is referred to using the DMA memory data
+ * pointer (the same one used to refer to the data in a "normal"
+ * transfer).
+ *
+ * Immediate commands are issued to the IPA through the APPS_CMD_PROD
+ * channel using the normal GSI queueing mechanism.  And each command's
+ * completion is handled using the normal GSI transfer completion
+ * mechanisms.
+ */
+
+/**
  * struct ipahal_context - HAL global context data
  * @empty_fltrt_tbl:	Empty table to be used for table initialization
  */
