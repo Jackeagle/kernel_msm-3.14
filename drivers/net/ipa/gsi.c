@@ -27,6 +27,56 @@
 #include "ipa_dma.h"
 #include "ipa_i.h"	/* ipa_err() */
 
+/**
+ * DOC: The Role of GSI in IPA Operation
+ *
+ * The generic software interface (GSI) is an integral component of
+ * the IPA, providing a well-defined layer between the AP subsystem
+ * (or, for that matter, the modem) and the IPA core::
+ *
+ *  ----------   -------------   ---------
+ *  |        |   |G|       |G|   |       |
+ *  |  APSS  |===|S|  IPA  |S|===| Modem |
+ *  |        |   |I|       |I|   |       |
+ *  ----------   -------------   ---------
+ *
+ * In the above diagram, the APSS and Modem represent "execution
+ * environments" (EEs), which are independent operating environments
+ * that use the IPA for data transfer.
+ *
+ * Each EE uses a set of unidirectional GSI "channels," which allow
+ * transfer of data to or from the IPA.  A channel is implemented as a
+ * ring buffer, with a DRAM-resident array of "transfer elements" (TREs)
+ * available to describe transfers to or from other EEs through the IPA.
+ * A transfer element can also contain an immediate command, requesting
+ * the IPA perform actions other than data transfer.
+ *
+ * Each transfer element refers to a block of data--also located DRAM.
+ * After writing one or more TREs to a channel, the writer (either the
+ * IPA or an EE) writes a doorbell register to inform the receiving side
+ * how many elements have been written.  Writing to a doorbell register
+ * triggers an interrupt on the receiver.
+ *
+ * Each channel has a GSI "event ring" associated with it.  An event
+ * ring is implemented very much like a channel ring, but is always
+ * directed from the IPA to an EE.  The IPA notifies an EE (such as
+ * the AP) about channel events by adding an entry to the event ring
+ * associated with the channel; when it writes the event ring's
+ * doorbell register the EE will be interrupted.
+ *
+ * A transfer element has a set of flags.  One flag indicates whether
+ * the completion of the transfer operation generates a channel event.
+ * Another flag allows transfer elements to be chained together,
+ * forming a single logical transaction.  These flags are used to
+ * control whether and when interrupts are generated to signal
+ * completion of a channel transfer.
+ *
+ * Elements in channel and event rings are completed (or consumed)
+ * strictly in order.  Completion of one entry implies the completion
+ * of all preceding entries.  A single completion interrupt can
+ * therefore be used to communicate the completion of many transfers.
+ */
+
 #define GSI_RING_ELEMENT_SIZE	16	/* bytes (channel or event ring) */
 
 #define GSI_CHAN_MAX		14
