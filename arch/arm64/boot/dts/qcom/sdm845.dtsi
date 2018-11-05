@@ -1002,10 +1002,15 @@
 					  "ipa-clock-query",
 					  "ipa-post-init";
 
+			/*
+			 * "master"     = { MASTER_IPA, SLAVE_EBI1 }
+			 * "imem"       = { MASTER_IPA, SLAVE_IMEM }
+			 * "config"     = { MASTER_APPSS_PROC, SLAVE_IPA_CFG }
+			 */
 			interconnects =
-				<&qnoc MASTER_IPA &qnoc SLAVE_EBI1>,
-				<&qnoc MASTER_IPA &qnoc SLAVE_IMEM>,
-				<&qnoc MASTER_APPSS_PROC &qnoc SLAVE_IPA_CFG>;
+				<&qnoc 37 &qnoc 512>,
+				<&qnoc 37 &qnoc 575>,
+				<&qnoc 0 &qnoc 530>;
 			interconnect-names = "memory",
 					     "imem",
 					     "config";
