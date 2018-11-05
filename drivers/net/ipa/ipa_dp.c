@@ -16,6 +16,58 @@
 #include "ipa_dma.h"
 
 /**
+ * DOC:  The IPA Data Path
+ *
+ * The IPA is used to transmit data between execution environments.
+ * The data path code uses functions and structures supplied by the
+ * GSI to interact with the IPA hardware.  A packet to be transmitted
+ * or received is held in a socket buffer.  Each has a "wrapper"
+ * structure associated with it.  A GSI transfer request refers to
+ * the packet wrapper, and when queued to the hardware the packet
+ * wrapper is added to a list of outstanding requests for an endpoint
+ * (maintained in the head_desc_list in the endpoint's system context).
+ * When the GSI transfer completes, a callback function is provided
+ * the packet wrapper pointer, allowing it to be released after the
+ * received socket buffer has been passed up the stack, or a buffer
+ * whose data has been transmitted has been freed.
+ *
+ * Producer (PROD) endpoints are used to send data from the AP toward
+ * the IPA.  The common function for sending data on producer endpoints
+ * is ipa_send().  It takes a system context and an array of IPA
+ * descriptors as arguments.  Each descriptor is given a TX packet
+ * wrapper, and its content is translated into an equivalent GSI
+ * transfer element  structure after its memory address is mapped for
+ * DMA.  The GSI transfer element array is finally passed to the GSI
+ * layer using gsi_channel_queue().
+ *
+ * The code provides a "no_intr" feature, allowing endpoints to have
+ * their transmit completions not produce an interrupt.  (This
+ * behavior is used only for the modem producer.)  In this case, a
+ * no-op request is generated every 200 milliseconds while transmit
+ * requests are outstanding.  The no-op will generate an interrupt
+ * when it's complete, and its completion implies the completion of
+ * all transmit requests issued before it.  The GSI will call
+ * ipa_gsi_irq_tx_notify_cb() in response to interrupts on a producer
+ * endpoint.
+ *
+ * Receive buffers are passed to consumer (CONS) channels to be
+ * available to hold incoming data.  Arriving data is placed
+ * in these buffers, leading to events being generated on the event
+ * ring assciated with a channel.  When an interrupt occurs on a
+ * consumer endpoint, the GSI layer calls ipa_gsi_irq_rx_notify_cb().
+ * This causes the endpoint to switch to polling mode.  The
+ * completion of a receive also leads to ipa_replenish_rx_cache()
+ * being called, to replace the consumed buffer.
+ *
+ * Consumer enpoints optionally use NAPI (only the modem consumer,
+ * WWAN_CONS, does currently).  An atomic variable records whether
+ * the endpoint is in polling mode or not.  This is needed because
+ * switching to polling mode is currently done in a workqueue.  Once
+ * NAPI polling completes, and endpoint switches back to interrupt
+ * mode.
+ */
+
+/**
  * struct ipa_tx_pkt_wrapper - IPA transmit packet wrapper
  * @type:	type of descriptor
  * @sys:	Corresponding IPA sys context
@@ -270,7 +322,7 @@ int ipa_rx_poll(u32 ep_id, int weight)
 }
 
 /**
- * ipa_send_nop() - Send an interrupting no-op request to a producer endpoint.  
+ * ipa_send_nop() - Send an interrupting no-op request to a producer endpoint.
  * @sys:	System context for the endpoint
  *
  * Normally an interrupt is generated upon completion of every transfer
@@ -833,7 +885,7 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
 
 /**
  * ipa_replenish_rx_cache() - Replenish the Rx packets cache.
- * @sys:	System context for IPA->AP endpoint 
+ * @sys:	System context for IPA->AP endpoint
  *
  * Allocate RX packet wrapper structures with maximal socket buffers
  * for an endpoint.  These are supplied to the hardware, which fills
