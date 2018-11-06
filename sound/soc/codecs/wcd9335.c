@@ -1797,7 +1797,6 @@ static int wcd9335_slim_set_hw_params(struct wcd9335_codec *wcd,
 	}
 
 	dai_data->sruntime = slim_stream_allocate(wcd->slim, "WCD9335-SLIM");
-	slim_stream_prepare(dai_data->sruntime, cfg);
 
 	return 0;
 
@@ -1974,17 +1973,36 @@ static int wcd9335_hw_params(struct snd_pcm_substream *substream,
 	return 0;
 }
 
-static int wcd9335_prepare(struct snd_pcm_substream *substream,
-			   struct snd_soc_dai *dai)
+static int wcd9335_trigger(struct snd_pcm_substream *substream, int cmd,
+                                struct snd_soc_dai *dai)
 {
 	struct wcd_slim_codec_dai_data *dai_data;
 	struct wcd9335_codec *wcd;
+	struct slim_stream_config *cfg;
 
 	wcd = snd_soc_component_get_drvdata(dai->component);
-	dai_data = &wcd->dai[dai->id];
-	slim_stream_enable(dai_data->sruntime);
 
-	return 0;
+	dai_data = &wcd->dai[dai->id];
+
+        switch (cmd) {
+        case SNDRV_PCM_TRIGGER_START:
+        case SNDRV_PCM_TRIGGER_RESUME:
+        case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
+		cfg = &dai_data->sconfig;
+		slim_stream_prepare(dai_data->sruntime, cfg);
+		slim_stream_enable(dai_data->sruntime);
+                break;
+        case SNDRV_PCM_TRIGGER_STOP:
+        case SNDRV_PCM_TRIGGER_SUSPEND:
+        case SNDRV_PCM_TRIGGER_PAUSE_PUSH:
+		slim_stream_unprepare(dai_data->sruntime);
+		slim_stream_disable(dai_data->sruntime);
+                break;
+        default:
+                break;
+        }
+
+        return 0;
 }
 
 static int wcd9335_set_channel_map(struct snd_soc_dai *dai,
@@ -2070,7 +2088,7 @@ static int wcd9335_get_channel_map(struct snd_soc_dai *dai,
 
 static struct snd_soc_dai_ops wcd9335_dai_ops = {
 	.hw_params = wcd9335_hw_params,
-	.prepare = wcd9335_prepare,
+        .trigger = wcd9335_trigger,
 	.set_channel_map = wcd9335_set_channel_map,
 	.get_channel_map = wcd9335_get_channel_map,
 };
@@ -3060,8 +3078,6 @@ static int wcd9335_codec_enable_slim(struct snd_soc_dapm_widget *w,
 		wcd9335_codec_enable_int_port(dai, comp);
 		break;
 	case SND_SOC_DAPM_POST_PMD:
-		slim_stream_unprepare(dai->sruntime);
-		slim_stream_disable(dai->sruntime);
 		kfree(dai->sconfig.chs);
 
 		break;
