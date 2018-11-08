@@ -20,7 +20,7 @@ config IPA_ASSERT
 	default y
 	help
 	 Incorporate IPA assertion verification in the build.  This
-	 cause various design assumptions to be checked at runtime,
+	 causes various design assumptions to be checked at runtime,
 	 generating a report (and a crash) if any assumed condition
 	 does not hold.  You may wish to disable this to avoid the
 	 overhead of checking.
