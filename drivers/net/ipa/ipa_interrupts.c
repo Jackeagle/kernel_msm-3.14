@@ -98,7 +98,7 @@ static inline bool is_uc_irq(int irq_num)
 {
 	enum ipa_irq_type interrupt = ipa_interrupt_info[irq_num].interrupt;
 
-	return interrupt != IPA_UC_IRQ_0 && interrupt != IPA_UC_IRQ_1;
+	return interrupt == IPA_UC_IRQ_0 || interrupt == IPA_UC_IRQ_1;
 }
 
 static void ipa_process_interrupts(void)
