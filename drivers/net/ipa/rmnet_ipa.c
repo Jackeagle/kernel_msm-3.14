@@ -92,7 +92,10 @@ static int ipa_wwan_open(struct net_device *dev)
 /** ipa_wwan_stop() - Stops the wwan network interface. */
 static int ipa_wwan_stop(struct net_device *dev)
 {
+	struct ipa_wwan_private *wwan_ptr = netdev_priv(dev);
+
 	netif_stop_queue(dev);
+	napi_disable(&wwan_ptr->napi);
 
 	return 0;
 }
