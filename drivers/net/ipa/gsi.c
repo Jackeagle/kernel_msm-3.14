@@ -79,7 +79,7 @@
 
 #define GSI_RING_ELEMENT_SIZE	16	/* bytes (channel or event ring) */
 
-#define GSI_CHAN_MAX		14
+#define GSI_CHANNEL_MAX		14
 #define GSI_EVT_RING_MAX	10
 
 /* Delay period if interrupt moderation is in effect */
@@ -206,8 +206,8 @@ struct gsi {
 	struct mutex mutex;	/* protects 1-at-a-time commands, evt_bmap */
 	atomic_t channel_count;
 	atomic_t evt_ring_count;
-	struct gsi_channel channel[GSI_CHAN_MAX];
-	struct ch_debug_stats ch_dbg[GSI_CHAN_MAX];
+	struct gsi_channel channel[GSI_CHANNEL_MAX];
+	struct ch_debug_stats ch_dbg[GSI_CHANNEL_MAX];
 	struct gsi_evt_ring evt_ring[GSI_EVT_RING_MAX];
 	unsigned long evt_bmap;
 	u32 channel_max;
@@ -881,7 +881,7 @@ int gsi_device_init(struct gsi *gsi)
 
 	channel_max = gsi_channel_max(gsi);
 	ipa_debug("channel_max %u\n", channel_max);
-	ipa_assert(channel_max <= GSI_CHAN_MAX);
+	ipa_assert(channel_max <= GSI_CHANNEL_MAX);
 
 	evt_ring_max = gsi_evt_ring_max(gsi);
 	ipa_debug("evt_ring_max %u\n", evt_ring_max);
