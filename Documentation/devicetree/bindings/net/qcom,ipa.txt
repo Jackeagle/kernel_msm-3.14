@@ -2,8 +2,7 @@ Qualcomm IPA (IP Accelerator) Driver
 
 This binding describes the Qualcomm IPA.  The IPA is capable of offloading
 certain network processing tasks (e.g. filtering, routing, and NAT) from
-the main processor.  The IPA currently serves only as a network interface,
-providing access to an LTE network available via a modem.
+the main processor.
 
 The IPA sits between multiple independent "execution environments,"
 including the AP subsystem (APSS) and the modem.  The IPA presents
@@ -39,7 +38,7 @@ All properties defined below are required.
 	Must be "ipa" and "gsi".
 
 - interrupts-extended:
-	Specifies the IRQs used by the IPA.  Four cells are required,
+	Specifies the IRQs used by the IPA.  Four interrupts are required,
 	specifying: the IPA IRQ; the GSI IRQ; the clock query interrupt
 	from the modem; and the "ready for stage 2 initialization"
 	interrupt from the modem.  The first two are hardware IRQs; the
@@ -57,17 +56,17 @@ All properties defined below are required.
 	The name used for the IPA core clock.  Must be "core".
 
 - interconnects:
-	Specifies the interconnects used by the IPA.  Three cells are
-	required, specifying:  the path from the IPA to memory; from
-	IPA to internal (SoC resident) memory; and between the AP
-	subsystem and IPA for register access.
+	Specifies the interconnects used by the IPA.  Three interconnects
+	are required, specifying:  the path from the IPA to memory; from
+	IPA to internal (SoC resident) memory; and between the AP subsystem
+	and IPA for register access.
 
 - interconnect-names:
 	The names of the interconnects defined by the "interconnects"
 	property.  Must be "memory", "imem", and "config".
 
 - qcom,smem-states
-	The state bits used for SMP2P output.  Two cells must be specified.
+	The state bits used for SMP2P output.  Two states must be specified.
 	The first indicates whether the value in the second bit is valid
 	(1 means valid).  The second, if valid, defines whether the IPA
 	clock is enabled (1 means enabled).
