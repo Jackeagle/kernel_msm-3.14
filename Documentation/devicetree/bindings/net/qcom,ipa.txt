@@ -1,4 +1,4 @@
-Qualcomm IPA (IP Accelerator) Driver
+Qualcomm IPA (IP Accelerator)
 
 This binding describes the Qualcomm IPA.  The IPA is capable of offloading
 certain network processing tasks (e.g. filtering, routing, and NAT) from
@@ -27,15 +27,17 @@ All properties defined below are required.
 
 - compatible:
 	Must be one of the following compatible strings:
-		"qcom,ipa-sdm845-modem_init"
-		"qcom,ipa-sdm845-tz_init"
+		"qcom,sdm845-ipa-modem_init"
+		"qcom,sdm845-ipa-tz_init"
 
 -reg:
-	Resources specyfing the physical address spaces of the IPA and GSI.
+	Resources specifying the physical address spaces of the IPA and GSI.
 
 -reg-names:
-	The names of the address space ranges defined by the "reg" property.
-	Must be "ipa" and "gsi".
+	The names of the two address space ranges defined by the
+	"reg" property.  Must be:
+		"ipa"
+		"gsi"
 
 - interrupts-extended:
 	Specifies the IRQs used by the IPA.  Four interrupts are required,
@@ -46,8 +48,11 @@ All properties defined below are required.
 
 - interrupt-names:
 	The names of the interrupts defined by the "interrupts-extended"
-	property.  Must be "ipa", "gsi", "ipa-clock-query", and
-	"ipa-post-init".
+	property.  Must be:
+		"ipa"
+		"gsi"
+		"ipa-clock-query"
+		"ipa-post-init"
 
 - clocks:
 	Resource that defines the IPA core clock.
@@ -63,7 +68,10 @@ All properties defined below are required.
 
 - interconnect-names:
 	The names of the interconnects defined by the "interconnects"
-	property.  Must be "memory", "imem", and "config".
+	property.  Must be:
+		"memory"
+		"imem"
+		"config"
 
 - qcom,smem-states
 	The state bits used for SMP2P output.  Two states must be specified.
@@ -72,13 +80,14 @@ All properties defined below are required.
 	clock is enabled (1 means enabled).
 
 - qcom,smem-state-names
-	The names of the state bits used for SMP2P output.  These must be
-	"ipa-clock-enabled-valid" and "ipa-clock-enabled".
+	The names of the state bits used for SMP2P output.  Must be:
+		"ipa-clock-enabled-valid"
+		"ipa-clock-enabled"
 
 - memory-region
 	A phandle for a reserved memory area that holds the firmware passed
 	to Trust Zone for authentication.  (Note, this is required
-	only for "qcom,ipa-sdm845-tz_init".)
+	only for "qcom,sdm845-ipa-tz_init".)
 
 = EXAMPLE
 
@@ -101,8 +110,8 @@ with the interrupts and SMEM states used by the IPA.
 		};
 	};
 
-	ipa@1e00000 {
-		compatible = "qcom,ipa-sdm845-modem_init";
+	ipa@1e40000 {
+		compatible = "qcom,sdm845-ipa-modem_init";
 
 		reg = <0x1e40000 0x34000>,
 		      <0x1e04000 0x2c000>;
