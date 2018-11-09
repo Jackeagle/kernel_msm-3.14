@@ -1137,11 +1137,11 @@ static const struct ipa_match_data modem_init = {
 
 static const struct of_device_id ipa_plat_drv_match[] = {
 	{
-		.compatible = "qcom,ipa-sdm845-tz_init",
+		.compatible = "qcom,sdm845-ipa-tz-init",
 		.data = &tz_init,
 	},
 	{
-		.compatible = "qcom,ipa-sdm845-modem_init",
+		.compatible = "qcom,sdm845-ipa-modem-init",
 		.data = &modem_init,
 	},
 	{}
