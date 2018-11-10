@@ -508,65 +508,121 @@ static int ipa_ep_apps_lan_cons_setup(void)
 
 /**
  * ipa_route_table_init() - Initialize an empty route table
- * @route_count:	Non-zero number of entries in the route table
- * @mem:		DMA memory object representing the route table
  *
- * Fill an "empty" route table having the given number of entries.
- * Each entry in the table contains the DMA address of a routing
- * entry.  This function initializes all entries to point at the
- * preallocated empty routing entry in system RAM.
+ * Each entry in the route table contains the DMA address of a route
+ * descriptor.  This function allocates that zero route, then allocates
+ * the route table and initializes all its entries to point at the zero
+ * route.
+ *
+ * Return:	0 if successful or -ENOMEM.
  */
-static void ipa_route_table_init(u32 route_count, struct ipa_dma_mem *mem)
+static int ipa_route_table_init(void)
 {
+	u32 route_count = IPA_MEM_RT_COUNT;
+	size_t size;
 	u64 addr;
 	u64 *p;
 
-	p = mem->virt;
+	/* Set up the zero route ("no route") in system memory. */
+	if (ipa_dma_alloc(&ipa_ctx->zero_route, IPA_ROUTE_SIZE, GFP_KERNEL))
+		return -ENOMEM;
+
+	/* Allocate the route table, and initialize all entries in
+	 * the table to use the zero route.
+	 */
+	size = (size_t)route_count * IPA_TABLE_ENTRY_SIZE;
+	if (ipa_dma_alloc(&ipa_ctx->route_table, size, GFP_KERNEL))
+		goto err_free_zero_route;
+
+	p = ipa_ctx->route_table.virt;
 	addr = (u64)ipa_ctx->zero_route.phys;
 	do
 		put_unaligned(addr, p++);
 	while (--route_count);
+
+	return 0;
+
+err_free_zero_route:
+	ipa_dma_free(&ipa_ctx->zero_route);
+
+	return -ENOMEM;
 }
 
 /**
- * ipa_filter_table_init() - Generate an empty filter table
- * @filter_bitmap:	Bitmap representing which endpoints support filtering
- * @mem:		DMA memory object representing the filter table
- *
- * Fills an "empty" filter table for the given non-zero filter bitmap.
- *
- * The first slot in a filter table header is a 64-bit bitmap whose
- * set bits define which endpoints support filtering.  Following
- * this, each set bit in the mask has the DMA address of the filter
- * used for the corresponding endpoint.  This function initializes
- * all endpoints that support filtering to point at the preallocated
- * empty filter in system RAM.
- *
- * Note:  filter_count does not include the initial bitmap slot
- * Note:  the (software) bitmap here uses bit 0 to represent
- * endpoint 0, bit 1 for endpoint 1, and so on.  This is different
- * from the hardware (which uses bit 1 to represent filter 0, etc.).
+ * ipa_route_table_exit() - Inverse of ipa_route_table_init().
  */
-static void ipa_filter_table_init(u32 filter_bitmap, struct ipa_dma_mem *mem)
+static void ipa_route_table_exit(void)
 {
-	u32 filter_count = hweight32(filter_bitmap);
+	ipa_dma_free(&ipa_ctx->route_table);
+	ipa_dma_free(&ipa_ctx->zero_route);
+}
+
+/**
+ * ipa_filter_table_init() - Initialize an empty filter table
+ *
+ * Each entry in the filter table contains the DMA address of a filter
+ * descriptor.  This function allocates the zero filter, allocates the
+ * filter table.  It saves a bitmap of endpoints that support filtering
+ * in the first slot, and initializes the remaining entries to point at
+ * the zero filter.
+ *
+ * Return:	0 if successful or a negative error code.
+ */
+static int ipa_filter_table_init(void)
+{
+	u32 filter_count;
+	size_t size;
 	u64 addr;
 	u64 *p;
 
-	p = mem->virt;
+	/* Compute the bitmap of endpoints that support filtering. */
+	ipa_ctx->filter_bitmap = ipa_filter_bitmap_init();
+	ipa_debug("filter_bitmap 0x%08x\n", ipa_ctx->filter_bitmap);
+	if (!ipa_ctx->filter_bitmap)
+		return -EINVAL;
 
-	/* Save the endpoint bitmap in the first slot of the table.
-	 * Convert it from software to hardware representation by
+	/* Set up the zero filter ("no filter") in system memory. */
+	if (ipa_dma_alloc(&ipa_ctx->zero_filter, IPA_FILTER_SIZE, GFP_KERNEL))
+		goto err_clear_filter_bitmap;
+
+	/* Allocate the filter table, with an extra slot for the bitmap. */
+	filter_count = hweight32(ipa_ctx->filter_bitmap);
+	size = (size_t)(filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
+	if (ipa_dma_alloc(&ipa_ctx->filter_table, size, GFP_KERNEL))
+		goto err_free_zero_filter;
+
+	/* Save the filter table bitmap.  The "soft" bitmap value
+	 * must be converted to the hardware representation by
 	 * shifting it left one position.  (Bit 0 represents global
 	 * configuration, which is possible but not used.)
 	 */
-	put_unaligned((u64)filter_bitmap << 1, p++);
+	p = ipa_ctx->filter_table.virt;
+	put_unaligned((u64)ipa_ctx->filter_bitmap << 1, p++);
 
 	/* Now point every entry in the table at the empty filter */
 	addr = (u64)ipa_ctx->zero_filter.phys;
 	do
 		put_unaligned(addr, p++);
 	while (--filter_count);
+
+	return 0;
+
+err_free_zero_filter:
+	ipa_dma_free(&ipa_ctx->zero_filter);
+err_clear_filter_bitmap:
+	ipa_ctx->filter_bitmap = 0;
+
+	return -ENOMEM;
+}
+
+/**
+ * ipa_filter_table_exit() - Inverse of ipa_filter_table_init().
+ */
+static void ipa_filter_table_exit(void)
+{
+	ipa_dma_free(&ipa_ctx->filter_table);
+	ipa_dma_free(&ipa_ctx->zero_filter);
+	ipa_ctx->filter_bitmap = 0;
 }
 
 static int ipa_ep_apps_setup(void)
@@ -1210,7 +1266,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	struct resource *res;
 	struct device *dev;
 	bool modem_init;
-	u32 size;
 	int ret;
 
 	/* We assume we're working on 64-bit hardware */
@@ -1246,38 +1301,17 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_interconnect_exit;
 
-	/* Set up zero route and filter table entries in system memory.
-	 * These represent "no route" or "no filter".
-	 */
-	ret = -ENOMEM;
-	if (ipa_dma_alloc(&ipa_ctx->zero_route, IPA_ROUTE_SIZE, GFP_KERNEL))
+	ret = ipa_route_table_init();
+	if (ret)
 		goto err_dma_exit;
 
-	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
-	if (ipa_dma_alloc(&ipa_ctx->route_table, (size_t)size, GFP_KERNEL))
-		goto err_free_zero_route;
-	ipa_route_table_init(IPA_MEM_RT_COUNT, &ipa_ctx->route_table);
-
-	/* The first slot of a filter table holds a bitmap of endpoints
-	 * that support filtering.  Following that is an entry containing
-	 * the physical address of the filter to use for the endpoint
-	 * corresponding to each set bit in the bitmap.
-	 */
-	ipa_ctx->filter_bitmap = ipa_filter_bitmap_init();
-	ipa_debug("filter_bitmap 0x%08x\n", ipa_ctx->filter_bitmap);
-	if (!ipa_ctx->filter_bitmap)
-		goto err_free_route_table;
-	if (ipa_dma_alloc(&ipa_ctx->zero_filter, IPA_FILTER_SIZE, GFP_KERNEL))
-		goto err_clear_filter_bitmap;
-
-	size = (hweight32(ipa_ctx->filter_bitmap) + 1) * IPA_TABLE_ENTRY_SIZE;
-	if (ipa_dma_alloc(&ipa_ctx->filter_table, size, GFP_KERNEL))
-		goto err_free_zero_filter;
-	ipa_filter_table_init(ipa_ctx->filter_bitmap, &ipa_ctx->filter_table);
+	ret = ipa_filter_table_init();
+	if (ret)
+		goto err_route_table_exit;
 
 	ret = platform_get_irq_byname(pdev, "ipa");
 	if (ret < 0)
-		goto err_free_filter_table;
+		goto err_filter_table_exit;
 	ipa_ctx->ipa_irq = ret;
 
 	/* Get IPA memory range */
@@ -1336,16 +1370,10 @@ err_clear_gsi:
 	ipa_reg_exit();
 err_clear_ipa_irq:
 	ipa_ctx->ipa_irq = 0;
-err_free_filter_table:
-	ipa_dma_free(&ipa_ctx->filter_table);
-err_free_zero_filter:
-	ipa_dma_free(&ipa_ctx->zero_filter);
-err_clear_filter_bitmap:
-	ipa_ctx->filter_bitmap = 0;
-err_free_route_table:
-	ipa_dma_free(&ipa_ctx->route_table);
-err_free_zero_route:
-	ipa_dma_free(&ipa_ctx->zero_route);
+err_filter_table_exit:
+	ipa_filter_table_exit();
+err_route_table_exit:
+	ipa_route_table_exit();
 err_dma_exit:
 	ipa_dma_exit();
 	ipa_ctx->dev = NULL;
