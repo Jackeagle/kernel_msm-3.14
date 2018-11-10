@@ -433,7 +433,7 @@ bool ipahal_is_rule_miss_id(u32 id)
 
 /**
  * ipahal_rt_generate_empty_img() - Generate empty route table header
- * @route_count:	Number of table entries
+ * @route_count:	Non-zero number of table entries
  * @mem:		DMA memory object representing the header structure
  *
  * Allocates and fills an "empty" route table header having the given
@@ -448,35 +448,35 @@ bool ipahal_is_rule_miss_id(u32 id)
 int ipahal_rt_generate_empty_img(u32 route_count, struct ipa_dma_mem *mem)
 {
 	u64 addr;
-	int i;
+	u64 *p;
 
-	BUILD_BUG_ON(!IPA_HW_TBL_HDR_WIDTH);
+	BUILD_BUG_ON(IPA_HW_TBL_HDR_WIDTH != sizeof(*p));
 
 	if (ipa_dma_alloc(mem, route_count * IPA_HW_TBL_HDR_WIDTH, GFP_KERNEL))
 		return -ENOMEM;
 
+	p = mem->virt;
 	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys;
-	for (i = 0; i < route_count; i++)
-		put_unaligned(addr, mem->virt + i * IPA_HW_TBL_HDR_WIDTH);
+	do
+		put_unaligned(addr, p++);
+	while (--route_count);
 
 	return 0;
 }
 
 /**
- * ipahal_flt_generate_empty_img() - Generate empty filter table header
+ * ipahal_flt_generate_empty_img() - Generate an empty filter table
  * @filter_bitmap:	Bitmap representing which endpoints support filtering
- * @mem:		DMA memory object representing the header structure
+ * @mem:		DMA memory object representing the filter table
  *
- * Allocates and fills an "empty" filter table header based on the
- * given filter bitmap.
+ * Fills an "empty" filter table based on the given non-zero filter bitmap.
  *
  * The first slot in a filter table header is a 64-bit bitmap whose
  * set bits define which endpoints support filtering.  Following
  * this, each set bit in the mask has the DMA address of the filter
- * used for the corresponding endpoint.
- *
- * This function initializes all endpoints that support filtering to
- * point at the preallocated empty filter in system RAM.
+ * used for the corresponding endpoint.  This function initializes
+ * all endpoints that support filtering to point at the preallocated
+ * empty filter in system RAM.
  *
  * Note:  the (software) bitmap here uses bit 0 to represent
  * endpoint 0, bit 1 for endpoint 1, and so on.  This is different
@@ -488,25 +488,24 @@ int ipahal_flt_generate_empty_img(u64 filter_bitmap, struct ipa_dma_mem *mem)
 {
 	u32 filter_count = hweight32(filter_bitmap) + 1;
 	u64 addr;
-	int i;
-
-	ipa_assert(filter_bitmap);
+	u64 *p;
 
 	if (ipa_dma_alloc(mem, filter_count * IPA_HW_TBL_HDR_WIDTH, GFP_KERNEL))
 		return -ENOMEM;
+	p = mem->virt;
 
 	/* Save the endpoint bitmap in the first slot of the table.
 	 * Convert it from software to hardware representation by
-	 * shifting it left one position.
-	 * XXX Does bit position 0 represent global?  At IPA3, global
-	 * XXX configuration is possible but not used.
+	 * shifting it left one position.  (Bit 0 represents global
+	 * configuration, which is possible but not used.)
 	 */
-	put_unaligned(filter_bitmap << 1, mem->virt);
+	put_unaligned(filter_bitmap << 1, p++);
 
-	/* Point every entry in the table at the empty filter */
+	/* Now point every entry in the table at the empty filter */
 	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys;
-	for (i = 1; i < filter_count; i++)
-		put_unaligned(addr, mem->virt + i * IPA_HW_TBL_HDR_WIDTH);
+	do
+		put_unaligned(addr, p++);
+	while (--filter_count);
 
 	return 0;
 }
