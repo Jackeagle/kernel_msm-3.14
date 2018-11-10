@@ -34,15 +34,6 @@
  * mechanisms.
  */
 
-/**
- * struct ipahal_context - HAL global context data
- * @empty_fltrt_tbl:	Empty table to be used for table initialization
- */
-static struct ipahal_context {
-	struct ipa_dma_mem empty_fltrt_tbl;
-} ipahal_ctx_struct;
-static struct ipahal_context *ipahal_ctx = &ipahal_ctx_struct;
-
 /* enum ipa_pipeline_clear_option - Values for pipeline clear waiting options
  * @IPAHAL_HPS_CLEAR: Wait for HPS clear. All queues except high priority queue
  *  shall not be serviced until HPS is clear of packets or immediate commands.
@@ -401,7 +392,7 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 
 int ipahal_init(void)
 {
-	struct ipa_dma_mem *mem = &ipahal_ctx->empty_fltrt_tbl;
+	struct ipa_dma_mem *mem = &ipa_ctx->zero_filter_route;
 
 	/* Set up an empty filter/route table entry in system
 	 * memory.  This will be used, for example, to delete a
@@ -417,7 +408,7 @@ int ipahal_init(void)
 
 void ipahal_exit(void)
 {
-	ipa_dma_free(&ipahal_ctx->empty_fltrt_tbl);
+	ipa_dma_free(&ipa_ctx->zero_filter_route);
 }
 
 /* Does the given rule ID represent a routing or filter rule miss?
@@ -447,7 +438,7 @@ void ipa_route_table_init(u32 route_count, struct ipa_dma_mem *mem)
 	u64 *p;
 
 	p = mem->virt;
-	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys;
+	addr = (u64)ipa_ctx->zero_filter_route.phys;
 	do
 		put_unaligned(addr, p++);
 	while (--route_count);
@@ -489,7 +480,7 @@ void ipa_filter_table_init(u32 filter_count, u32 filter_bitmap,
 	put_unaligned((u64)filter_bitmap << 1, p++);
 
 	/* Now point every entry in the table at the empty filter */
-	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys;
+	addr = (u64)ipa_ctx->zero_filter_route.phys;
 	do
 		put_unaligned(addr, p++);
 	while (--filter_count);

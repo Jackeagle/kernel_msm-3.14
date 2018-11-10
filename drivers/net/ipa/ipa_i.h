@@ -407,6 +407,8 @@ struct ipa_context {
 	struct gsi *gsi;
 	struct device *dev;
 
+	struct ipa_dma_mem zero_filter_route;
+
 	struct ipa_ep_context ep[IPA_EP_COUNT_MAX];
 	struct ipa_dp *dp;
 	u32 smem_size;
