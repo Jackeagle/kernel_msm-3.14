@@ -6,7 +6,6 @@
 
 #include <linux/types.h>
 #include <linux/slab.h>
-#include <asm/unaligned.h>
 
 #include "ipahal.h"
 #include "ipa_i.h"	/* ipa_err() */
@@ -399,68 +398,4 @@ bool ipahal_is_rule_miss_id(u32 id)
 	BUILD_BUG_ON(IPA_RULE_ID_BITS < 2);
 
 	return id == (1U << IPA_RULE_ID_BITS) - 1;
-}
-
-/**
- * ipa_route_table_init() - Initialize an empty route table
- * @route_count:	Non-zero number of entries in the route table
- * @mem:		DMA memory object representing the route table
- *
- * Fill an "empty" route table having the given number of entries.
- * Each entry in the table contains the DMA address of a routing
- * entry.  This function initializes all entries to point at the
- * preallocated empty routing entry in system RAM.
- */
-void ipa_route_table_init(u32 route_count, struct ipa_dma_mem *mem)
-{
-	u64 addr;
-	u64 *p;
-
-	p = mem->virt;
-	addr = (u64)ipa_ctx->zero_route.phys;
-	do
-		put_unaligned(addr, p++);
-	while (--route_count);
-}
-
-/**
- * ipa_filter_table_init() - Generate an empty filter table
- * @filter_count:	Number of filter slots in the filter table
- * @filter_bitmap:	Bitmap representing which endpoints support filtering
- * @mem:		DMA memory object representing the filter table
- *
- * Fills an "empty" filter table for the given non-zero filter bitmap.
- *
- * The first slot in a filter table header is a 64-bit bitmap whose
- * set bits define which endpoints support filtering.  Following
- * this, each set bit in the mask has the DMA address of the filter
- * used for the corresponding endpoint.  This function initializes
- * all endpoints that support filtering to point at the preallocated
- * empty filter in system RAM.
- *
- * Note:  filter_count does not include the initial bitmap slot
- * Note:  the (software) bitmap here uses bit 0 to represent
- * endpoint 0, bit 1 for endpoint 1, and so on.  This is different
- * from the hardware (which uses bit 1 to represent filter 0, etc.).
- */
-void ipa_filter_table_init(u32 filter_count, u32 filter_bitmap,
-			   struct ipa_dma_mem *mem)
-{
-	u64 addr;
-	u64 *p;
-
-	p = mem->virt;
-
-	/* Save the endpoint bitmap in the first slot of the table.
-	 * Convert it from software to hardware representation by
-	 * shifting it left one position.  (Bit 0 represents global
-	 * configuration, which is possible but not used.)
-	 */
-	put_unaligned((u64)filter_bitmap << 1, p++);
-
-	/* Now point every entry in the table at the empty filter */
-	addr = (u64)ipa_ctx->zero_filter.phys;
-	do
-		put_unaligned(addr, p++);
-	while (--filter_count);
 }

@@ -189,8 +189,4 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 /* Does the given ID represent rule miss? */
 bool ipahal_is_rule_miss_id(u32 id);
 
-void ipa_route_table_init(u32 route_count, struct ipa_dma_mem *mem);
-void ipa_filter_table_init(u32 filter_count, u32 filter_bitmap,
-			   struct ipa_dma_mem *mem);
-
 #endif /* _IPAHAL_H_ */
