@@ -592,8 +592,6 @@ static int ipa_ep_apps_setup(void)
 	ipa_init_rt4(ipa_ctx->route_table.phys, size);
 	ipa_init_rt6(ipa_ctx->route_table.phys, size);
 
-	ipa_dma_free(&ipa_ctx->route_table);
-
 	/* The first slot of a filter table holds a bitmap of endpoints
 	 * that support filtering.  Following that is an entry containing
 	 * the physical address of the filter to use for the endpoint
@@ -608,8 +606,6 @@ static int ipa_ep_apps_setup(void)
 			      &ipa_ctx->filter_table);
 	ipa_init_flt4(ipa_ctx->filter_table.phys, size);
 	ipa_init_flt6(ipa_ctx->filter_table.phys, size);
-
-	ipa_dma_free(&ipa_ctx->filter_table);
 
 	ipa_setup_flt_hash_tuple();
 	ipa_setup_rt_hash_tuple();
