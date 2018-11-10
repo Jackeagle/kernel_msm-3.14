@@ -286,7 +286,7 @@ static int ipa_init_hdr(void)
  *
  * Return:	0 if successful, or a negative error code
  */
-static int ipa_init_rt4(struct ipa_dma_mem *mem)
+static int ipa_init_rt4(dma_addr_t phys, size_t size)
 {
 	struct ipa_desc desc = { };
 	u32 nhash_offset;
@@ -296,7 +296,7 @@ static int ipa_init_rt4(struct ipa_dma_mem *mem)
 
 	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_RT_HASH_OFST;
 	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_RT_NHASH_OFST;
-	payload = ipa_imm_ip_fltrt_init_pyld(mem->phys, mem->size, hash_offset,
+	payload = ipa_imm_ip_fltrt_init_pyld(phys, size, hash_offset,
 					     nhash_offset);
 	if (!payload)
 		return -ENOMEM;
@@ -317,7 +317,7 @@ static int ipa_init_rt4(struct ipa_dma_mem *mem)
  *
  * Return:	0 if successful, or a negative error code
  */
-static int ipa_init_rt6(struct ipa_dma_mem *mem)
+static int ipa_init_rt6(dma_addr_t phys, size_t size)
 {
 	struct ipa_desc desc = { };
 	u32 nhash_offset;
@@ -327,7 +327,7 @@ static int ipa_init_rt6(struct ipa_dma_mem *mem)
 
 	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_RT_HASH_OFST;
 	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_RT_NHASH_OFST;
-	payload = ipa_imm_ip_fltrt_init_pyld(mem->phys, mem->size, hash_offset,
+	payload = ipa_imm_ip_fltrt_init_pyld(phys, size, hash_offset,
 					     nhash_offset);
 	if (!payload)
 		return -ENOMEM;
@@ -348,7 +348,7 @@ static int ipa_init_rt6(struct ipa_dma_mem *mem)
  *
  * Return:	0 if successful, or a negative error code
  */
-static int ipa_init_flt4(struct ipa_dma_mem *mem)
+static int ipa_init_flt4(dma_addr_t phys, size_t size)
 {
 	struct ipa_desc desc = { };
 	u32 nhash_offset;
@@ -358,7 +358,7 @@ static int ipa_init_flt4(struct ipa_dma_mem *mem)
 
 	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_FLT_HASH_OFST;
 	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_FLT_NHASH_OFST;
-	payload = ipa_imm_ip_fltrt_init_pyld(mem->phys, mem->size, hash_offset,
+	payload = ipa_imm_ip_fltrt_init_pyld(phys, size, hash_offset,
 					     nhash_offset);
 	if (!payload)
 		return -ENOMEM;
@@ -379,7 +379,7 @@ static int ipa_init_flt4(struct ipa_dma_mem *mem)
  *
  * Return:	0 if successful, or a negative error code
  */
-static int ipa_init_flt6(struct ipa_dma_mem *mem)
+static int ipa_init_flt6(dma_addr_t phys, size_t size)
 {
 	struct ipa_desc desc = { };
 	u32 nhash_offset;
@@ -389,7 +389,7 @@ static int ipa_init_flt6(struct ipa_dma_mem *mem)
 
 	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_FLT_HASH_OFST;
 	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_FLT_NHASH_OFST;
-	payload = ipa_imm_ip_fltrt_init_pyld(mem->phys, mem->size, hash_offset,
+	payload = ipa_imm_ip_fltrt_init_pyld(phys, size, hash_offset,
 					     nhash_offset);
 	if (!payload)
 		return -ENOMEM;
@@ -520,14 +520,14 @@ static int ipa_ep_apps_setup(void)
 
 	ret = ipahal_rt_generate_empty_img(IPA_MEM_RT_COUNT, &mem);
 	ipa_assert(!ret);
-	ipa_init_rt4(&mem);
-	ipa_init_rt6(&mem);
+	ipa_init_rt4(mem.phys, mem.size);
+	ipa_init_rt6(mem.phys, mem.size);
 	ipahal_free_empty_img(&mem);
 
 	ret = ipahal_flt_generate_empty_img(ipa_ctx->filter_bitmap, &mem);
 	ipa_assert(!ret);
-	ipa_init_flt4(&mem);
-	ipa_init_flt6(&mem);
+	ipa_init_flt4(mem.phys, mem.size);
+	ipa_init_flt6(mem.phys, mem.size);
 	ipahal_free_empty_img(&mem);
 
 	ipa_setup_flt_hash_tuple();
