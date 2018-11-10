@@ -508,6 +508,7 @@ static int ipa_ep_apps_lan_cons_setup(void)
 static int ipa_ep_apps_setup(void)
 {
 	struct ipa_dma_mem mem;	/* Empty table */
+	u32 size;
 	int ret;
 
 	/* CMD OUT (AP->IPA) */
@@ -518,11 +519,14 @@ static int ipa_ep_apps_setup(void)
 	ipa_init_sram();
 	ipa_init_hdr();
 
-	ret = ipahal_rt_generate_empty_img(IPA_MEM_RT_COUNT, &mem);
-	ipa_assert(!ret);
-	ipa_init_rt4(mem.phys, mem.size);
-	ipa_init_rt6(mem.phys, mem.size);
-	ipahal_free_empty_img(&mem);
+	size = IPA_MEM_RT_COUNT * IPA_HW_TBL_HDR_WIDTH;
+	ipa_bug_on(!ipa_dma_alloc(&mem, (size_t)size, GFP_KERNEL));
+
+	ipa_route_table_init(IPA_MEM_RT_COUNT, &mem);
+	ipa_init_rt4(mem.phys, size);
+	ipa_init_rt6(mem.phys, size);
+
+	ipa_dma_free(&mem);
 
 	ret = ipahal_flt_generate_empty_img(ipa_ctx->filter_bitmap, &mem);
 	ipa_assert(!ret);

@@ -196,7 +196,7 @@ void ipahal_exit(void);
 /* Does the given ID represent rule miss? */
 bool ipahal_is_rule_miss_id(u32 id);
 
-int ipahal_rt_generate_empty_img(u32 route_count, struct ipa_dma_mem *mem);
+void ipa_route_table_init(u32 route_count, struct ipa_dma_mem *mem);
 int ipahal_flt_generate_empty_img(u64 ep_bitmap, struct ipa_dma_mem *mem);
 
 /**

@@ -432,36 +432,27 @@ bool ipahal_is_rule_miss_id(u32 id)
 }
 
 /**
- * ipahal_rt_generate_empty_img() - Generate empty route table header
- * @route_count:	Non-zero number of table entries
- * @mem:		DMA memory object representing the header structure
+ * ipa_route_table_init() - Initialize an empty route table
+ * @route_count:	Non-zero number of entries in the route table
+ * @mem:		DMA memory object representing the route table
  *
- * Allocates and fills an "empty" route table header having the given
- * number of entries.  Each entry in the table contains the DMA address
- * of a routing entry.
- *
- * This function initializes all entries to point at the preallocated
- * empty routing entry in system RAM.
- *
- * Return:	0 if successful, or a negative error code otherwise
+ * Fill an "empty" route table having the given number of entries.
+ * Each entry in the table contains the DMA address of a routing
+ * entry.  This function initializes all entries to point at the
+ * preallocated empty routing entry in system RAM.
  */
-int ipahal_rt_generate_empty_img(u32 route_count, struct ipa_dma_mem *mem)
+void ipa_route_table_init(u32 route_count, struct ipa_dma_mem *mem)
 {
 	u64 addr;
 	u64 *p;
 
 	BUILD_BUG_ON(IPA_HW_TBL_HDR_WIDTH != sizeof(*p));
 
-	if (ipa_dma_alloc(mem, route_count * IPA_HW_TBL_HDR_WIDTH, GFP_KERNEL))
-		return -ENOMEM;
-
 	p = mem->virt;
 	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys;
 	do
 		put_unaligned(addr, p++);
 	while (--route_count);
-
-	return 0;
 }
 
 /**
