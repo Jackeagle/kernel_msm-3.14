@@ -20,9 +20,10 @@
  * Values could differ for different versions of IPA hardware.
  * These values are for v3.5.1, found in the SDM845.
  */
-#define IPA_HW_TBL_WIDTH		8
 #define IPA_HW_TBL_SYSADDR_ALIGN	128
 #define IPA_TABLE_ENTRY_SIZE		sizeof(u64)
+#define IPA_FILTER_SIZE			8
+#define IPA_ROUTE_SIZE			8
 
 /**
  * ipahal_dma_shared_mem_write_pyld() - Write to shared memory command payload

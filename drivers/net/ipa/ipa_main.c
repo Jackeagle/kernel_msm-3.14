@@ -1232,15 +1232,14 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_clear_gsi;
 
-	/* Set up an empty filter/route table entry in system
-	 * memory.  This will be used, for example, to delete a
-	 * route safely.
+	/* Set up zero route and filter table entries in system memory.
+	 * These represent "no route" or "no filter".
 	 */
-	if (ipa_dma_alloc(&ipa_ctx->zero_filter_route, IPA_HW_TBL_WIDTH,
-			  GFP_KERNEL)) {
-		ret = -ENOMEM;
+	ret = -ENOMEM;
+	if (ipa_dma_alloc(&ipa_ctx->zero_route, IPA_ROUTE_SIZE, GFP_KERNEL))
 		goto err_dma_exit;
-	}
+	if (ipa_dma_alloc(&ipa_ctx->zero_filter, IPA_FILTER_SIZE, GFP_KERNEL))
+		goto err_free_zero_route;
 
 	ipa_ctx->cmd_prod_ep_id = IPA_EP_ID_BAD;
 	ipa_ctx->lan_cons_ep_id = IPA_EP_ID_BAD;
@@ -1248,7 +1247,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	/* Proceed to real initialization */
 	ret = ipa_pre_init();
 	if (ret)
-		goto err_clear_dev;
+		goto err_clear_ep_ids;
 
 	/* If the modem is not verifying and loading firmware we need to
 	 * get it loaded ourselves.  Only then can we proceed with the
@@ -1259,7 +1258,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (!modem_init) {
 		ret = ipa_firmware_load(dev);
 		if (ret)
-			goto err_clear_dev;
+			goto err_undo_pre_init;
 
 		/* Now we can proceed to stage two initialization */
 		ipa_post_init();
@@ -1267,10 +1266,14 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 
 	return 0;	/* Success */
 
-err_clear_dev:
+err_undo_pre_init:
+	/* XXX This needs to be implemented */
+err_clear_ep_ids:
 	ipa_ctx->lan_cons_ep_id = 0;
 	ipa_ctx->cmd_prod_ep_id = 0;
-	ipa_dma_free(&ipa_ctx->zero_filter_route);
+	ipa_dma_free(&ipa_ctx->zero_filter);
+err_free_zero_route:
+	ipa_dma_free(&ipa_ctx->zero_route);
 err_dma_exit:
 	ipa_dma_exit();
 err_clear_gsi:
@@ -1295,7 +1298,8 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 	struct device *dev = &pdev->dev;
 
 	ipa_ctx->dev = NULL;
-	ipa_dma_free(&ipa_ctx->zero_filter_route);
+	ipa_dma_free(&ipa_ctx->zero_filter);
+	ipa_dma_free(&ipa_ctx->zero_route);
 	ipa_dma_exit();
 	ipa_ctx->gsi = NULL;	/* XXX ipa_gsi_exit() */
 	ipa_reg_exit();

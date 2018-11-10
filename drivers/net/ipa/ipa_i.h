@@ -407,7 +407,8 @@ struct ipa_context {
 	struct gsi *gsi;
 	struct device *dev;
 
-	struct ipa_dma_mem zero_filter_route;
+	struct ipa_dma_mem zero_route;
+	struct ipa_dma_mem zero_filter;
 
 	struct ipa_ep_context ep[IPA_EP_COUNT_MAX];
 	struct ipa_dp *dp;

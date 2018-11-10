@@ -417,7 +417,7 @@ void ipa_route_table_init(u32 route_count, struct ipa_dma_mem *mem)
 	u64 *p;
 
 	p = mem->virt;
-	addr = (u64)ipa_ctx->zero_filter_route.phys;
+	addr = (u64)ipa_ctx->zero_route.phys;
 	do
 		put_unaligned(addr, p++);
 	while (--route_count);
@@ -459,7 +459,7 @@ void ipa_filter_table_init(u32 filter_count, u32 filter_bitmap,
 	put_unaligned((u64)filter_bitmap << 1, p++);
 
 	/* Now point every entry in the table at the empty filter */
-	addr = (u64)ipa_ctx->zero_filter_route.phys;
+	addr = (u64)ipa_ctx->zero_filter.phys;
 	do
 		put_unaligned(addr, p++);
 	while (--filter_count);
