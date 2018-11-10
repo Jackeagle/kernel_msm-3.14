@@ -55,64 +55,19 @@ void *ipahal_dma_shared_mem_write_pyld(struct ipa_dma_mem *mem, u32 offset);
 void *ipahal_hdr_init_local_pyld(struct ipa_dma_mem *mem, u32 offset);
 
 /**
- * ipahal_ip_v4_routing_init_pyld() - IPv4 routing table initialization payload
- * mem:		The IPv4 routing table data to be written
- * hash_offset:	The location in IPA memory for a hashed routing table
- * nhash_offset: The location in IPA memory for a non-hashed routing table
+ * ipa_ip_fltrt_init_pyld() - IP filter/routing table initialization payload
+ * mem:		The IPv4 or IPv6 routing or filter table data to be written
+ * hash_offset:	The location in IPA memory for a hashed table
+ * nhash_offset: The location in IPA memory for a non-hashed table
  *
- * Return a pointer to the payload for an IPv4 routing init immediate
- * command, or null if one can't be allocated.  Caller must ensure result
- * gets released by providing it to ipahal_destroy_imm_cmd().
- *
- * Return:	 Pointer to the immediate command payload, or NULL
- */
-void *ipahal_ip_v4_routing_init_pyld(dma_addr_t phys, size_t size,
-				     u32 hash_offset, u32 nhash_offset);
-
-/**
- * ipahal_ip_v6_routing_init_pyld() - IPv6 routing table initialization payload
- * mem:		The IPv6 routing table data to be written
- * hash_offset:	The location in IPA memory for a hashed routing table
- * nhash_offset: The location in IPA memory for a non-hashed routing table
- *
- * Return a pointer to the payload for an IPv4 routing init immediate
- * command, or null if one can't be allocated.  Caller must ensure result
- * gets released by providing it to ipahal_destroy_imm_cmd().
+ * Common function used for initializing the payload for an IPv4 or
+ * IPv6 filtering or routing init immediate command.  Caller must
+ * ensure result gets released by providing it to ipahal_destroy_imm_cmd().
  *
  * Return:	 Pointer to the immediate command payload, or NULL
  */
-void *ipahal_ip_v6_routing_init_pyld(dma_addr_t phys, size_t size,
-				     u32 hash_offset, u32 nhash_offset);
-
-/**
- * ipahal_ip_v4_filter_init_pyld() - IPv4 filter table initialization payload
- * mem:		The IPv4 filter table data to be written
- * hash_offset:	The location in IPA memory for a hashed filter table
- * nhash_offset: The location in IPA memory for a non-hashed filter table
- *
- * Return a pointer to the payload for an IPv4 filter init immediate
- * command, or null if one can't be allocated.  Caller must ensure result
- * gets released by providing it to ipahal_destroy_imm_cmd().
- *
- * Return:	 Pointer to the immediate command payload, or NULL
- */
-void *ipahal_ip_v4_filter_init_pyld(dma_addr_t phys, size_t size,
-				    u32 hash_offset, u32 nhash_offset);
-
-/**
- * ipahal_ip_v6_filter_init_pyld() - IPv6 filter table initialization payload
- * mem:		The IPv6 filter table data to be written
- * hash_offset:	The location in IPA memory for a hashed filter table
- * nhash_offset: The location in IPA memory for a non-hashed filter table
- *
- * Return a pointer to the payload for an IPv4 filter init immediate
- * command, or null if one can't be allocated.  Caller must ensure result
- * gets released by providing it to ipahal_destroy_imm_cmd().
- *
- * Return:	 Pointer to the immediate command payload, or NULL
- */
-void *ipahal_ip_v6_filter_init_pyld(dma_addr_t phys, size_t size,
-				    u32 hash_offset, u32 nhash_offset);
+void *ipa_imm_ip_fltrt_init_pyld(dma_addr_t phys, size_t size, u32 hash_offset,
+				 u32 nhash_offset);
 
 /**
  * ipahal_dma_task_32b_addr_pyld() - 32-bit DMA task command payload
