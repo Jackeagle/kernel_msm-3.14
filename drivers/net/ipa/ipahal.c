@@ -456,11 +456,12 @@ void ipa_route_table_init(u32 route_count, struct ipa_dma_mem *mem)
 }
 
 /**
- * ipahal_flt_generate_empty_img() - Generate an empty filter table
+ * ipa_filter_table_init() - Generate an empty filter table
+ * @filter_count:	Number of filter slots in the filter table
  * @filter_bitmap:	Bitmap representing which endpoints support filtering
  * @mem:		DMA memory object representing the filter table
  *
- * Fills an "empty" filter table based on the given non-zero filter bitmap.
+ * Fills an "empty" filter table for the given non-zero filter bitmap.
  *
  * The first slot in a filter table header is a 64-bit bitmap whose
  * set bits define which endpoints support filtering.  Following
@@ -469,20 +470,17 @@ void ipa_route_table_init(u32 route_count, struct ipa_dma_mem *mem)
  * all endpoints that support filtering to point at the preallocated
  * empty filter in system RAM.
  *
+ * Note:  filter_count does not include the initial bitmap slot
  * Note:  the (software) bitmap here uses bit 0 to represent
  * endpoint 0, bit 1 for endpoint 1, and so on.  This is different
  * from the hardware (which uses bit 1 to represent filter 0, etc.).
- *
- * Return:	0 if successful, or a negative error code
  */
-int ipahal_flt_generate_empty_img(u64 filter_bitmap, struct ipa_dma_mem *mem)
+void ipa_filter_table_init(u32 filter_count, u32 filter_bitmap,
+			   struct ipa_dma_mem *mem)
 {
-	u32 filter_count = hweight32(filter_bitmap) + 1;
 	u64 addr;
 	u64 *p;
 
-	if (ipa_dma_alloc(mem, filter_count * IPA_HW_TBL_HDR_WIDTH, GFP_KERNEL))
-		return -ENOMEM;
 	p = mem->virt;
 
 	/* Save the endpoint bitmap in the first slot of the table.
@@ -490,18 +488,11 @@ int ipahal_flt_generate_empty_img(u64 filter_bitmap, struct ipa_dma_mem *mem)
 	 * shifting it left one position.  (Bit 0 represents global
 	 * configuration, which is possible but not used.)
 	 */
-	put_unaligned(filter_bitmap << 1, p++);
+	put_unaligned((u64)filter_bitmap << 1, p++);
 
 	/* Now point every entry in the table at the empty filter */
 	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys;
 	do
 		put_unaligned(addr, p++);
 	while (--filter_count);
-
-	return 0;
-}
-
-void ipahal_free_empty_img(struct ipa_dma_mem *mem)
-{
-	ipa_dma_free(mem);
 }

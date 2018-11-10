@@ -197,12 +197,7 @@ void ipahal_exit(void);
 bool ipahal_is_rule_miss_id(u32 id);
 
 void ipa_route_table_init(u32 route_count, struct ipa_dma_mem *mem);
-int ipahal_flt_generate_empty_img(u64 ep_bitmap, struct ipa_dma_mem *mem);
-
-/**
- * ipahal_free_empty_img() - Free empty filter or route image
- * @mem:	DMA memory containing filter/route data
- */
-void ipahal_free_empty_img(struct ipa_dma_mem *mem);
+void ipa_filter_table_init(u32 filter_count, u32 filter_bitmap,
+			   struct ipa_dma_mem *mem);
 
 #endif /* _IPAHAL_H_ */

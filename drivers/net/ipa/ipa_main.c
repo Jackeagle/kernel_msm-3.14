@@ -508,6 +508,7 @@ static int ipa_ep_apps_lan_cons_setup(void)
 static int ipa_ep_apps_setup(void)
 {
 	struct ipa_dma_mem mem;	/* Empty table */
+	u32 filter_count;
 	u32 size;
 	int ret;
 
@@ -520,7 +521,7 @@ static int ipa_ep_apps_setup(void)
 	ipa_init_hdr();
 
 	size = IPA_MEM_RT_COUNT * IPA_HW_TBL_HDR_WIDTH;
-	ipa_bug_on(!ipa_dma_alloc(&mem, (size_t)size, GFP_KERNEL));
+	ipa_bug_on(ipa_dma_alloc(&mem, (size_t)size, GFP_KERNEL));
 
 	ipa_route_table_init(IPA_MEM_RT_COUNT, &mem);
 	ipa_init_rt4(mem.phys, size);
@@ -528,11 +529,20 @@ static int ipa_ep_apps_setup(void)
 
 	ipa_dma_free(&mem);
 
-	ret = ipahal_flt_generate_empty_img(ipa_ctx->filter_bitmap, &mem);
-	ipa_assert(!ret);
-	ipa_init_flt4(mem.phys, mem.size);
-	ipa_init_flt6(mem.phys, mem.size);
-	ipahal_free_empty_img(&mem);
+	/* The first slot of a filter table holds a bitmap of endpoints
+	 * that support filtering.  Following that is an entry containing
+	 * the physical address of the filter to use for the endpoint
+	 * corresponding to each set bit in the bitmap.
+	 */
+	filter_count = hweight32(ipa_ctx->filter_bitmap);
+	size = (filter_count + 1) * IPA_HW_TBL_HDR_WIDTH;
+	ipa_bug_on(ipa_dma_alloc(&mem, size, GFP_KERNEL));
+
+	ipa_filter_table_init(filter_count, ipa_ctx->filter_bitmap, &mem);
+	ipa_init_flt4(mem.phys, size);
+	ipa_init_flt6(mem.phys, size);
+
+	ipa_dma_free(&mem);
 
 	ipa_setup_flt_hash_tuple();
 	ipa_setup_rt_hash_tuple();
