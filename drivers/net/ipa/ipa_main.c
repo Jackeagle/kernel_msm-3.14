@@ -1282,8 +1282,23 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	ret = -ENOMEM;
 	if (ipa_dma_alloc(&ipa_ctx->zero_route, IPA_ROUTE_SIZE, GFP_KERNEL))
 		goto err_dma_exit;
-	if (ipa_dma_alloc(&ipa_ctx->zero_filter, IPA_FILTER_SIZE, GFP_KERNEL))
+
+	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
+	if (ipa_dma_alloc(&ipa_ctx->route_table, (size_t)size, GFP_KERNEL))
 		goto err_free_zero_route;
+	ipa_route_table_init(IPA_MEM_RT_COUNT, &ipa_ctx->route_table);
+
+	/* The first slot of a filter table holds a bitmap of endpoints
+	 * that support filtering.  Following that is an entry containing
+	 * the physical address of the filter to use for the endpoint
+	 * corresponding to each set bit in the bitmap.
+	 */
+	if (ipa_dma_alloc(&ipa_ctx->zero_filter, IPA_FILTER_SIZE, GFP_KERNEL))
+		goto err_free_route_table;
+	size = (hweight32(ipa_ctx->filter_bitmap) + 1) * IPA_TABLE_ENTRY_SIZE;
+	if (ipa_dma_alloc(&ipa_ctx->filter_table, size, GFP_KERNEL))
+		goto err_free_zero_filter;
+	ipa_filter_table_init(ipa_ctx->filter_bitmap, &ipa_ctx->filter_table);
 
 	ipa_ctx->cmd_prod_ep_id = IPA_EP_ID_BAD;
 	ipa_ctx->lan_cons_ep_id = IPA_EP_ID_BAD;
@@ -1292,20 +1307,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	ret = ipa_pre_init();
 	if (ret)
 		goto err_clear_ep_ids;
-
-	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
-	ipa_bug_on(ipa_dma_alloc(&ipa_ctx->route_table, (size_t)size,
-				  GFP_KERNEL));
-	ipa_route_table_init(IPA_MEM_RT_COUNT, &ipa_ctx->route_table);
-
-	/* The first slot of a filter table holds a bitmap of endpoints
-	 * that support filtering.  Following that is an entry containing
-	 * the physical address of the filter to use for the endpoint
-	 * corresponding to each set bit in the bitmap.
-	 */
-	size = (hweight32(ipa_ctx->filter_bitmap) + 1) * IPA_TABLE_ENTRY_SIZE;
-	ipa_bug_on(ipa_dma_alloc(&ipa_ctx->filter_table, size, GFP_KERNEL));
-	ipa_filter_table_init(ipa_ctx->filter_bitmap, &ipa_ctx->filter_table);
 
 	/* If the modem is not verifying and loading firmware we need to
 	 * get it loaded ourselves.  Only then can we proceed with the
@@ -1329,7 +1330,11 @@ err_undo_pre_init:
 err_clear_ep_ids:
 	ipa_ctx->lan_cons_ep_id = 0;
 	ipa_ctx->cmd_prod_ep_id = 0;
+	ipa_dma_free(&ipa_ctx->filter_table);
+err_free_zero_filter:
 	ipa_dma_free(&ipa_ctx->zero_filter);
+err_free_route_table:
+	ipa_dma_free(&ipa_ctx->route_table);
 err_free_zero_route:
 	ipa_dma_free(&ipa_ctx->zero_route);
 err_dma_exit:
@@ -1356,7 +1361,9 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 	struct device *dev = &pdev->dev;
 
 	ipa_ctx->dev = NULL;
+	ipa_dma_free(&ipa_ctx->filter_table);
 	ipa_dma_free(&ipa_ctx->zero_filter);
+	ipa_dma_free(&ipa_ctx->route_table);
 	ipa_dma_free(&ipa_ctx->zero_route);
 	ipa_dma_exit();
 	ipa_ctx->gsi = NULL;	/* XXX ipa_gsi_exit() */
