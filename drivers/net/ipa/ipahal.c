@@ -390,15 +390,6 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 	status->rt_miss = ipahal_is_rule_miss_id(hw_status->rt_rule_id);
 }
 
-int ipahal_init(void)
-{
-	return 0;
-}
-
-void ipahal_exit(void)
-{
-}
-
 /* Does the given rule ID represent a routing or filter rule miss?
  * A rule miss is indicated as an all-1's value in the rt_rule_id
  * or flt_rule_id field of the ipahal_pkt_status structure.

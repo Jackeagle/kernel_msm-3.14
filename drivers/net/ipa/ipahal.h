@@ -185,9 +185,6 @@ u32 ipahal_pkt_status_get_size(void);
 void ipahal_pkt_status_parse(const void *unparsed_status,
 			     struct ipahal_pkt_status *status);
 
-int ipahal_init(void);
-void ipahal_exit(void);
-
 /* Does the given ID represent rule miss? */
 bool ipahal_is_rule_miss_id(u32 id);
 
