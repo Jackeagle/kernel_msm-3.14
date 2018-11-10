@@ -579,7 +579,9 @@ static void ipa_route_table_exit(void)
  */
 static int ipa_filter_table_init(void)
 {
+	dma_addr_t phys;
 	size_t size;
+	void *virt;
 	u64 *p;
 	u32 i;
 
@@ -590,8 +592,12 @@ static int ipa_filter_table_init(void)
 		return -EINVAL;
 
 	/* Set up the zero filter ("no filter") in system memory. */
-	if (ipa_dma_alloc(&ipa_ctx->zero_filter, IPA_FILTER_SIZE, GFP_KERNEL))
+	size = IPA_FILTER_SIZE;
+	virt = dma_zalloc_coherent(ipa_ctx->dev, size, &phys, GFP_KERNEL);
+	if (!virt)
 		goto err_clear_filter_bitmap;
+	ipa_ctx->zero_filter_virt = virt;
+	ipa_ctx->zero_filter_phys = phys;
 
 	/* Allocate the filter table, with an extra slot for the bitmap. */
 	ipa_ctx->filter_count = hweight32(ipa_ctx->filter_bitmap);
@@ -609,13 +615,16 @@ static int ipa_filter_table_init(void)
 
 	/* Now point every entry in the table at the empty filter */
 	for (i = 0; i < ipa_ctx->filter_count; i++)
-		put_unaligned(ipa_ctx->zero_filter.phys, p++);
+		put_unaligned(ipa_ctx->zero_filter_phys, p++);
 
 	return 0;
 
 err_free_zero_filter:
-	ipa_dma_free(&ipa_ctx->zero_filter);
 	ipa_ctx->filter_count = 0;
+	dma_free_coherent(ipa_ctx->dev, IPA_FILTER_SIZE,
+			  ipa_ctx->zero_filter_virt, ipa_ctx->zero_filter_phys);
+	ipa_ctx->zero_filter_virt = NULL;
+	ipa_ctx->zero_filter_phys = 0;
 err_clear_filter_bitmap:
 	ipa_ctx->filter_bitmap = 0;
 
@@ -628,8 +637,11 @@ err_clear_filter_bitmap:
 static void ipa_filter_table_exit(void)
 {
 	ipa_dma_free(&ipa_ctx->filter_table);
-	ipa_dma_free(&ipa_ctx->zero_filter);
 	ipa_ctx->filter_count = 0;
+	dma_free_coherent(ipa_ctx->dev, IPA_FILTER_SIZE,
+			  ipa_ctx->zero_filter_virt, ipa_ctx->zero_filter_phys);
+	ipa_ctx->zero_filter_virt = NULL;
+	ipa_ctx->zero_filter_phys = 0;
 	ipa_ctx->filter_bitmap = 0;
 }
 
@@ -1399,7 +1411,11 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 
 	ipa_ctx->dev = NULL;
 	ipa_dma_free(&ipa_ctx->filter_table);
-	ipa_dma_free(&ipa_ctx->zero_filter);
+	ipa_ctx->filter_count = 0;
+	dma_free_coherent(ipa_ctx->dev, IPA_FILTER_SIZE,
+			  ipa_ctx->zero_filter_virt, ipa_ctx->zero_filter_phys);
+	ipa_ctx->zero_filter_virt = NULL;
+	ipa_ctx->zero_filter_phys = 0;
 	ipa_dma_free(&ipa_ctx->route_table);
 	dma_free_coherent(ipa_ctx->dev, IPA_ROUTE_SIZE,
 			  ipa_ctx->zero_route_virt, ipa_ctx->zero_route_phys);

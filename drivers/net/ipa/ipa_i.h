@@ -411,7 +411,8 @@ struct ipa_context {
 	void *zero_route_virt;
 	dma_addr_t zero_route_phys;
 	struct ipa_dma_mem route_table;
-	struct ipa_dma_mem zero_filter;
+	void *zero_filter_virt;
+	dma_addr_t zero_filter_phys;
 	struct ipa_dma_mem filter_table;
 
 	struct ipa_ep_context ep[IPA_EP_COUNT_MAX];
