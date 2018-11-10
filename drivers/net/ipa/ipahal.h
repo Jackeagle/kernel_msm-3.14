@@ -20,14 +20,13 @@
  * subject to some constraints:
  * - IPA_HW_TBL_WIDTH must be non-zero
  * - IPA_HW_TBL_SYSADDR_ALIGN must be a non-zero power of 2
- * - IPA_HW_TBL_HDR_WIDTH must be non-zero
  *
  * Values could differ for different versions of IPA hardware.
  * These values are for v3.5.1, found in the SDM845.
  */
 #define IPA_HW_TBL_WIDTH		8
 #define IPA_HW_TBL_SYSADDR_ALIGN	128
-#define IPA_HW_TBL_HDR_WIDTH		8
+#define IPA_HW_TBL_HDR_WIDTH		sizeof(u64)
 
 /**
  * ipahal_dma_shared_mem_write_pyld() - Write to shared memory command payload

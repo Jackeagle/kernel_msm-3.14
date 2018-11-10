@@ -446,8 +446,6 @@ void ipa_route_table_init(u32 route_count, struct ipa_dma_mem *mem)
 	u64 addr;
 	u64 *p;
 
-	BUILD_BUG_ON(IPA_HW_TBL_HDR_WIDTH != sizeof(*p));
-
 	p = mem->virt;
 	addr = (u64)ipahal_ctx->empty_fltrt_tbl.phys;
 	do
