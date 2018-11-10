@@ -1242,15 +1242,42 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 
 	ipa_ctx->dev = dev;	/* Set early for ipa_err()/ipa_debug() */
 
-	/* Compute a bitmask representing which endpoints support filtering */
+	ret = ipa_dma_init(dev, IPA_HW_TBL_SYSADDR_ALIGN);
+	if (ret)
+		goto err_interconnect_exit;
+
+	/* Set up zero route and filter table entries in system memory.
+	 * These represent "no route" or "no filter".
+	 */
+	ret = -ENOMEM;
+	if (ipa_dma_alloc(&ipa_ctx->zero_route, IPA_ROUTE_SIZE, GFP_KERNEL))
+		goto err_dma_exit;
+
+	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
+	if (ipa_dma_alloc(&ipa_ctx->route_table, (size_t)size, GFP_KERNEL))
+		goto err_free_zero_route;
+	ipa_route_table_init(IPA_MEM_RT_COUNT, &ipa_ctx->route_table);
+
+	/* The first slot of a filter table holds a bitmap of endpoints
+	 * that support filtering.  Following that is an entry containing
+	 * the physical address of the filter to use for the endpoint
+	 * corresponding to each set bit in the bitmap.
+	 */
 	ipa_ctx->filter_bitmap = ipa_filter_bitmap_init();
 	ipa_debug("filter_bitmap 0x%08x\n", ipa_ctx->filter_bitmap);
 	if (!ipa_ctx->filter_bitmap)
-		goto err_interconnect_exit;
+		goto err_free_route_table;
+	if (ipa_dma_alloc(&ipa_ctx->zero_filter, IPA_FILTER_SIZE, GFP_KERNEL))
+		goto err_clear_filter_bitmap;
+
+	size = (hweight32(ipa_ctx->filter_bitmap) + 1) * IPA_TABLE_ENTRY_SIZE;
+	if (ipa_dma_alloc(&ipa_ctx->filter_table, size, GFP_KERNEL))
+		goto err_free_zero_filter;
+	ipa_filter_table_init(ipa_ctx->filter_bitmap, &ipa_ctx->filter_table);
 
 	ret = platform_get_irq_byname(pdev, "ipa");
 	if (ret < 0)
-		goto err_clear_filter_bitmap;
+		goto err_free_filter_table;
 	ipa_ctx->ipa_irq = ret;
 
 	/* Get IPA memory range */
@@ -1271,34 +1298,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 		ret = PTR_ERR(ipa_ctx->gsi);
 		goto err_clear_gsi;
 	}
-
-	ret = ipa_dma_init(dev, IPA_HW_TBL_SYSADDR_ALIGN);
-	if (ret)
-		goto err_clear_gsi;
-
-	/* Set up zero route and filter table entries in system memory.
-	 * These represent "no route" or "no filter".
-	 */
-	ret = -ENOMEM;
-	if (ipa_dma_alloc(&ipa_ctx->zero_route, IPA_ROUTE_SIZE, GFP_KERNEL))
-		goto err_dma_exit;
-
-	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
-	if (ipa_dma_alloc(&ipa_ctx->route_table, (size_t)size, GFP_KERNEL))
-		goto err_free_zero_route;
-	ipa_route_table_init(IPA_MEM_RT_COUNT, &ipa_ctx->route_table);
-
-	/* The first slot of a filter table holds a bitmap of endpoints
-	 * that support filtering.  Following that is an entry containing
-	 * the physical address of the filter to use for the endpoint
-	 * corresponding to each set bit in the bitmap.
-	 */
-	if (ipa_dma_alloc(&ipa_ctx->zero_filter, IPA_FILTER_SIZE, GFP_KERNEL))
-		goto err_free_route_table;
-	size = (hweight32(ipa_ctx->filter_bitmap) + 1) * IPA_TABLE_ENTRY_SIZE;
-	if (ipa_dma_alloc(&ipa_ctx->filter_table, size, GFP_KERNEL))
-		goto err_free_zero_filter;
-	ipa_filter_table_init(ipa_ctx->filter_bitmap, &ipa_ctx->filter_table);
 
 	ipa_ctx->cmd_prod_ep_id = IPA_EP_ID_BAD;
 	ipa_ctx->lan_cons_ep_id = IPA_EP_ID_BAD;
@@ -1330,26 +1329,28 @@ err_undo_pre_init:
 err_clear_ep_ids:
 	ipa_ctx->lan_cons_ep_id = 0;
 	ipa_ctx->cmd_prod_ep_id = 0;
-	ipa_dma_free(&ipa_ctx->filter_table);
-err_free_zero_filter:
-	ipa_dma_free(&ipa_ctx->zero_filter);
-err_free_route_table:
-	ipa_dma_free(&ipa_ctx->route_table);
-err_free_zero_route:
-	ipa_dma_free(&ipa_ctx->zero_route);
-err_dma_exit:
-	ipa_dma_exit();
+	/* XXX gsi_exit(pdev); */
 err_clear_gsi:
 	ipa_ctx->gsi = NULL;
 	ipa_ctx->ipa_phys = 0;
 	ipa_reg_exit();
 err_clear_ipa_irq:
 	ipa_ctx->ipa_irq = 0;
+err_free_filter_table:
+	ipa_dma_free(&ipa_ctx->filter_table);
+err_free_zero_filter:
+	ipa_dma_free(&ipa_ctx->zero_filter);
 err_clear_filter_bitmap:
 	ipa_ctx->filter_bitmap = 0;
+err_free_route_table:
+	ipa_dma_free(&ipa_ctx->route_table);
+err_free_zero_route:
+	ipa_dma_free(&ipa_ctx->zero_route);
+err_dma_exit:
+	ipa_dma_exit();
+	ipa_ctx->dev = NULL;
 err_interconnect_exit:
 	ipa_interconnect_exit();
-	ipa_ctx->dev = NULL;
 out_smp2p_exit:
 	ipa_smp2p_exit(dev);
 
