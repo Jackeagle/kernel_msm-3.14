@@ -402,6 +402,7 @@ struct ipa_dma_task_info {
  */
 struct ipa_context {
 	u32 filter_bitmap;
+	u32 filter_count;	/* Number of set bits in filter_bitmap */
 	u32 ipa_irq;
 	phys_addr_t ipa_phys;
 	struct gsi *gsi;

@@ -579,10 +579,9 @@ static void ipa_route_table_exit(void)
  */
 static int ipa_filter_table_init(void)
 {
-	u32 filter_count;
 	size_t size;
-	u64 addr;
 	u64 *p;
+	u32 i;
 
 	/* Compute the bitmap of endpoints that support filtering. */
 	ipa_ctx->filter_bitmap = ipa_filter_bitmap_init();
@@ -595,8 +594,8 @@ static int ipa_filter_table_init(void)
 		goto err_clear_filter_bitmap;
 
 	/* Allocate the filter table, with an extra slot for the bitmap. */
-	filter_count = hweight32(ipa_ctx->filter_bitmap);
-	size = (size_t)(filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
+	ipa_ctx->filter_count = hweight32(ipa_ctx->filter_bitmap);
+	size = (size_t)(ipa_ctx->filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
 	if (ipa_dma_alloc(&ipa_ctx->filter_table, size, GFP_KERNEL))
 		goto err_free_zero_filter;
 
@@ -609,15 +608,14 @@ static int ipa_filter_table_init(void)
 	put_unaligned((u64)ipa_ctx->filter_bitmap << 1, p++);
 
 	/* Now point every entry in the table at the empty filter */
-	addr = (u64)ipa_ctx->zero_filter.phys;
-	do
-		put_unaligned(addr, p++);
-	while (--filter_count);
+	for (i = 0; i < ipa_ctx->filter_count; i++)
+		put_unaligned(ipa_ctx->zero_filter.phys, p++);
 
 	return 0;
 
 err_free_zero_filter:
 	ipa_dma_free(&ipa_ctx->zero_filter);
+	ipa_ctx->filter_count = 0;
 err_clear_filter_bitmap:
 	ipa_ctx->filter_bitmap = 0;
 
@@ -631,6 +629,7 @@ static void ipa_filter_table_exit(void)
 {
 	ipa_dma_free(&ipa_ctx->filter_table);
 	ipa_dma_free(&ipa_ctx->zero_filter);
+	ipa_ctx->filter_count = 0;
 	ipa_ctx->filter_bitmap = 0;
 }
 
