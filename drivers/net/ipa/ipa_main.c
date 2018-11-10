@@ -1410,17 +1410,8 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 	struct device *dev = &pdev->dev;
 
 	ipa_ctx->dev = NULL;
-	ipa_dma_free(&ipa_ctx->filter_table);
-	ipa_ctx->filter_count = 0;
-	dma_free_coherent(ipa_ctx->dev, IPA_FILTER_SIZE,
-			  ipa_ctx->zero_filter_virt, ipa_ctx->zero_filter_phys);
-	ipa_ctx->zero_filter_virt = NULL;
-	ipa_ctx->zero_filter_phys = 0;
-	ipa_dma_free(&ipa_ctx->route_table);
-	dma_free_coherent(ipa_ctx->dev, IPA_ROUTE_SIZE,
-			  ipa_ctx->zero_route_virt, ipa_ctx->zero_route_phys);
-	ipa_ctx->zero_route_virt = NULL;
-	ipa_ctx->zero_route_phys = 0;
+	ipa_filter_table_exit();
+	ipa_route_table_exit();
 	ipa_dma_exit();
 	ipa_ctx->gsi = NULL;	/* XXX ipa_gsi_exit() */
 	ipa_reg_exit();
