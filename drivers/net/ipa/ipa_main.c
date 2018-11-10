@@ -1236,6 +1236,17 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_dma_exit;
 
+
+	/* Set up an empty filter/route table entry in system
+	 * memory.  This will be used, for example, to delete a
+	 * route safely.
+	 */
+	if (ipa_dma_alloc(&ipa_ctx->zero_filter_route, IPA_HW_TBL_WIDTH,
+			  GFP_KERNEL)) {
+		ret = -ENOMEM;
+		goto err_dma_exit;
+	}
+
 	ipa_ctx->cmd_prod_ep_id = IPA_EP_ID_BAD;
 	ipa_ctx->lan_cons_ep_id = IPA_EP_ID_BAD;
 
@@ -1264,6 +1275,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 err_clear_dev:
 	ipa_ctx->lan_cons_ep_id = 0;
 	ipa_ctx->cmd_prod_ep_id = 0;
+	ipa_dma_free(&ipa_ctx->zero_filter_route);
 	ipahal_exit();
 err_dma_exit:
 	ipa_dma_exit();
@@ -1289,6 +1301,7 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 	struct device *dev = &pdev->dev;
 
 	ipa_ctx->dev = NULL;
+	ipa_dma_free(&ipa_ctx->zero_filter_route);
 	ipahal_exit();
 	ipa_dma_exit();
 	ipa_ctx->gsi = NULL;	/* XXX ipa_gsi_exit() */

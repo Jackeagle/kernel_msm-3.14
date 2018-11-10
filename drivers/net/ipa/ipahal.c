@@ -392,23 +392,11 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 
 int ipahal_init(void)
 {
-	struct ipa_dma_mem *mem = &ipa_ctx->zero_filter_route;
-
-	/* Set up an empty filter/route table entry in system
-	 * memory.  This will be used, for example, to delete a
-	 * route safely.
-	 */
-	if (ipa_dma_alloc(mem, IPA_HW_TBL_WIDTH, GFP_KERNEL)) {
-		ipa_err("error allocating empty filter/route table\n");
-		return -ENOMEM;
-	}
-
 	return 0;
 }
 
 void ipahal_exit(void)
 {
-	ipa_dma_free(&ipa_ctx->zero_filter_route);
 }
 
 /* Does the given rule ID represent a routing or filter rule miss?
