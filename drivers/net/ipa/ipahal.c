@@ -318,32 +318,28 @@ static void *fltrt_init_common(dma_addr_t phys, size_t size, u32 hash_offset,
 	return data;
 }
 
-void *ipahal_ip_v4_routing_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
-			       u32 nhash_offset)
+void *ipahal_ip_v4_routing_init_pyld(dma_addr_t phys, size_t size,
+				     u32 hash_offset, u32 nhash_offset)
 {
-	return fltrt_init_common(mem->phys, mem->size, hash_offset,
-				 nhash_offset);
+	return fltrt_init_common(phys, size, hash_offset, nhash_offset);
 }
 
-void *ipahal_ip_v6_routing_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
-				     u32 nhash_offset)
+void *ipahal_ip_v6_routing_init_pyld(dma_addr_t phys, size_t size,
+				     u32 hash_offset, u32 nhash_offset)
 {
-	return fltrt_init_common(mem->phys, mem->size, hash_offset,
-				 nhash_offset);
+	return fltrt_init_common(phys, size, hash_offset, nhash_offset);
 }
 
-void *ipahal_ip_v4_filter_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
-				    u32 nhash_offset)
+void *ipahal_ip_v4_filter_init_pyld(dma_addr_t phys, size_t size,
+				    u32 hash_offset, u32 nhash_offset)
 {
-	return fltrt_init_common(mem->phys, mem->size, hash_offset,
-				 nhash_offset);
+	return fltrt_init_common(phys, size, hash_offset, nhash_offset);
 }
 
-void *ipahal_ip_v6_filter_init_pyld(struct ipa_dma_mem *mem, u32 hash_offset,
-				    u32 nhash_offset)
+void *ipahal_ip_v6_filter_init_pyld(dma_addr_t phys, size_t size,
+				    u32 hash_offset, u32 nhash_offset)
 {
-	return fltrt_init_common(mem->phys, mem->size, hash_offset,
-				 nhash_offset);
+	return fltrt_init_common(phys, size, hash_offset, nhash_offset);
 }
 
 void *ipahal_dma_task_32b_addr_pyld(struct ipa_dma_mem *mem)

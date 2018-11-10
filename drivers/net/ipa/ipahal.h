@@ -66,7 +66,7 @@ void *ipahal_hdr_init_local_pyld(struct ipa_dma_mem *mem, u32 offset);
  *
  * Return:	 Pointer to the immediate command payload, or NULL
  */
-void *ipahal_ip_v4_routing_init_pyld(struct ipa_dma_mem *mem,
+void *ipahal_ip_v4_routing_init_pyld(dma_addr_t phys, size_t size,
 				     u32 hash_offset, u32 nhash_offset);
 
 /**
@@ -81,7 +81,7 @@ void *ipahal_ip_v4_routing_init_pyld(struct ipa_dma_mem *mem,
  *
  * Return:	 Pointer to the immediate command payload, or NULL
  */
-void *ipahal_ip_v6_routing_init_pyld(struct ipa_dma_mem *mem,
+void *ipahal_ip_v6_routing_init_pyld(dma_addr_t phys, size_t size,
 				     u32 hash_offset, u32 nhash_offset);
 
 /**
@@ -96,7 +96,7 @@ void *ipahal_ip_v6_routing_init_pyld(struct ipa_dma_mem *mem,
  *
  * Return:	 Pointer to the immediate command payload, or NULL
  */
-void *ipahal_ip_v4_filter_init_pyld(struct ipa_dma_mem *mem,
+void *ipahal_ip_v4_filter_init_pyld(dma_addr_t phys, size_t size,
 				    u32 hash_offset, u32 nhash_offset);
 
 /**
@@ -111,7 +111,7 @@ void *ipahal_ip_v4_filter_init_pyld(struct ipa_dma_mem *mem,
  *
  * Return:	 Pointer to the immediate command payload, or NULL
  */
-void *ipahal_ip_v6_filter_init_pyld(struct ipa_dma_mem *mem,
+void *ipahal_ip_v6_filter_init_pyld(dma_addr_t phys, size_t size,
 				    u32 hash_offset, u32 nhash_offset);
 
 /**

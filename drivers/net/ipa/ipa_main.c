@@ -296,8 +296,8 @@ static int ipa_init_rt4(struct ipa_dma_mem *mem)
 
 	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_RT_HASH_OFST;
 	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_RT_NHASH_OFST;
-	payload = ipahal_ip_v4_routing_init_pyld(mem, hash_offset,
-						 nhash_offset);
+	payload = ipahal_ip_v4_routing_init_pyld(mem->phys, mem->size,
+						 hash_offset, nhash_offset);
 	if (!payload)
 		return -ENOMEM;
 
@@ -327,8 +327,8 @@ static int ipa_init_rt6(struct ipa_dma_mem *mem)
 
 	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_RT_HASH_OFST;
 	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_RT_NHASH_OFST;
-	payload = ipahal_ip_v6_routing_init_pyld(mem, hash_offset,
-						 nhash_offset);
+	payload = ipahal_ip_v6_routing_init_pyld(mem->phys, mem->size,
+						 hash_offset, nhash_offset);
 	if (!payload)
 		return -ENOMEM;
 
@@ -358,8 +358,8 @@ static int ipa_init_flt4(struct ipa_dma_mem *mem)
 
 	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_FLT_HASH_OFST;
 	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_FLT_NHASH_OFST;
-	payload = ipahal_ip_v4_filter_init_pyld(mem, hash_offset,
-						nhash_offset);
+	payload = ipahal_ip_v4_filter_init_pyld(mem->phys, mem->size,
+						hash_offset, nhash_offset);
 	if (!payload)
 		return -ENOMEM;
 
@@ -389,8 +389,8 @@ static int ipa_init_flt6(struct ipa_dma_mem *mem)
 
 	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_FLT_HASH_OFST;
 	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_FLT_NHASH_OFST;
-	payload = ipahal_ip_v6_filter_init_pyld(mem, hash_offset,
-						nhash_offset);
+	payload = ipahal_ip_v6_filter_init_pyld(mem->phys, mem->size,
+						hash_offset, nhash_offset);
 	if (!payload)
 		return -ENOMEM;
 
