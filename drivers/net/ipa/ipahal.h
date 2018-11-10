@@ -11,22 +11,18 @@
 #include "ipa_dma.h"
 
 /* The IPA implements offloaded packet filtering and routing
- * capabilities.  This is managed by programming IPA-resident
- * tables of rules that define the processing that should be
- * performed by the IPA and the conditions under which they
- * should be applied.  Aspects of these rules are constrained
- * by things like table entry sizes and alignment requirements;
- * all of these are in units of bytes.  These definitions are
- * subject to some constraints:
- * - IPA_HW_TBL_WIDTH must be non-zero
- * - IPA_HW_TBL_SYSADDR_ALIGN must be a non-zero power of 2
+ * capabilities.  This is managed by programming tables of rules
+ * that define the processing that should be performed by the IPA
+ * and the conditions under which they should be applied.  Each
+ * route or filter table entry is a DMA address that refers to the
+ * routing or filtering rule.
  *
  * Values could differ for different versions of IPA hardware.
  * These values are for v3.5.1, found in the SDM845.
  */
 #define IPA_HW_TBL_WIDTH		8
 #define IPA_HW_TBL_SYSADDR_ALIGN	128
-#define IPA_HW_TBL_HDR_WIDTH		sizeof(u64)
+#define IPA_TABLE_ENTRY_SIZE		sizeof(u64)
 
 /**
  * ipahal_dma_shared_mem_write_pyld() - Write to shared memory command payload

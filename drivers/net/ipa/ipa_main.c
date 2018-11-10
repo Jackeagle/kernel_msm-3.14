@@ -520,7 +520,7 @@ static int ipa_ep_apps_setup(void)
 	ipa_init_sram();
 	ipa_init_hdr();
 
-	size = IPA_MEM_RT_COUNT * IPA_HW_TBL_HDR_WIDTH;
+	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
 	ipa_bug_on(ipa_dma_alloc(&mem, (size_t)size, GFP_KERNEL));
 
 	ipa_route_table_init(IPA_MEM_RT_COUNT, &mem);
@@ -535,7 +535,7 @@ static int ipa_ep_apps_setup(void)
 	 * corresponding to each set bit in the bitmap.
 	 */
 	filter_count = hweight32(ipa_ctx->filter_bitmap);
-	size = (filter_count + 1) * IPA_HW_TBL_HDR_WIDTH;
+	size = (filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
 	ipa_bug_on(ipa_dma_alloc(&mem, size, GFP_KERNEL));
 
 	ipa_filter_table_init(filter_count, ipa_ctx->filter_bitmap, &mem);
