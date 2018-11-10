@@ -923,8 +923,6 @@ EXPORT_SYMBOL_GPL(ipa_ssr_unprepare);
  */
 static void ipa_post_init(void)
 {
-	u32 filter_count;
-	u32 size;
 	int ret;
 
 	ipa_debug("ipa_post_init() started\n");
@@ -934,21 +932,6 @@ static void ipa_post_init(void)
 		ipa_err(":gsi register error - %d\n", ret);
 		return;
 	}
-
-	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
-	ipa_bug_on(ipa_dma_alloc(&ipa_ctx->route_table, (size_t)size,
-				  GFP_KERNEL));
-	ipa_route_table_init(IPA_MEM_RT_COUNT, &ipa_ctx->route_table);
-
-	/* The first slot of a filter table holds a bitmap of endpoints
-	 * that support filtering.  Following that is an entry containing
-	 * the physical address of the filter to use for the endpoint
-	 * corresponding to each set bit in the bitmap.
-	 */
-	filter_count = hweight32(ipa_ctx->filter_bitmap);
-	size = (filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
-	ipa_bug_on(ipa_dma_alloc(&ipa_ctx->filter_table, size, GFP_KERNEL));
-	ipa_filter_table_init(ipa_ctx->filter_bitmap, &ipa_ctx->filter_table);
 
 	/* setup the AP-IPA endpoints */
 	if (ipa_ep_apps_setup()) {
@@ -1227,6 +1210,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	struct resource *res;
 	struct device *dev;
 	bool modem_init;
+	u32 size;
 	int ret;
 
 	/* We assume we're working on 64-bit hardware */
@@ -1308,6 +1292,20 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	ret = ipa_pre_init();
 	if (ret)
 		goto err_clear_ep_ids;
+
+	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
+	ipa_bug_on(ipa_dma_alloc(&ipa_ctx->route_table, (size_t)size,
+				  GFP_KERNEL));
+	ipa_route_table_init(IPA_MEM_RT_COUNT, &ipa_ctx->route_table);
+
+	/* The first slot of a filter table holds a bitmap of endpoints
+	 * that support filtering.  Following that is an entry containing
+	 * the physical address of the filter to use for the endpoint
+	 * corresponding to each set bit in the bitmap.
+	 */
+	size = (hweight32(ipa_ctx->filter_bitmap) + 1) * IPA_TABLE_ENTRY_SIZE;
+	ipa_bug_on(ipa_dma_alloc(&ipa_ctx->filter_table, size, GFP_KERNEL));
+	ipa_filter_table_init(ipa_ctx->filter_bitmap, &ipa_ctx->filter_table);
 
 	/* If the modem is not verifying and loading firmware we need to
 	 * get it loaded ourselves.  Only then can we proceed with the
