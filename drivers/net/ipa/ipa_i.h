@@ -407,7 +407,8 @@ struct ipa_context {
 	struct gsi *gsi;
 	struct device *dev;
 
-	struct ipa_dma_mem zero_route;
+	void *zero_route_virt;
+	dma_addr_t zero_route_phys;
 	struct ipa_dma_mem route_table;
 	struct ipa_dma_mem zero_filter;
 	struct ipa_dma_mem filter_table;

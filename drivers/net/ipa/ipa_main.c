@@ -518,32 +518,38 @@ static int ipa_ep_apps_lan_cons_setup(void)
  */
 static int ipa_route_table_init(void)
 {
-	u32 route_count = IPA_MEM_RT_COUNT;
+	dma_addr_t phys;
 	size_t size;
-	u64 addr;
+	void *virt;
 	u64 *p;
+	u32 i;
 
 	/* Set up the zero route ("no route") in system memory. */
-	if (ipa_dma_alloc(&ipa_ctx->zero_route, IPA_ROUTE_SIZE, GFP_KERNEL))
+	size = IPA_ROUTE_SIZE;
+	virt = dma_zalloc_coherent(ipa_ctx->dev, size, &phys, GFP_KERNEL);
+	if (!virt)
 		return -ENOMEM;
+	ipa_ctx->zero_route_virt = virt;
+	ipa_ctx->zero_route_phys = phys;
 
 	/* Allocate the route table, and initialize all entries in
 	 * the table to use the zero route.
 	 */
-	size = (size_t)route_count * IPA_TABLE_ENTRY_SIZE;
+	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
 	if (ipa_dma_alloc(&ipa_ctx->route_table, size, GFP_KERNEL))
 		goto err_free_zero_route;
 
 	p = ipa_ctx->route_table.virt;
-	addr = (u64)ipa_ctx->zero_route.phys;
-	do
-		put_unaligned(addr, p++);
-	while (--route_count);
+	for (i = 0; i < IPA_MEM_RT_COUNT; i++)
+		put_unaligned(ipa_ctx->zero_route_phys, p++);
 
 	return 0;
 
 err_free_zero_route:
-	ipa_dma_free(&ipa_ctx->zero_route);
+	dma_free_coherent(ipa_ctx->dev, IPA_ROUTE_SIZE,
+			  ipa_ctx->zero_route_virt, ipa_ctx->zero_route_phys);
+	ipa_ctx->zero_route_virt = NULL;
+	ipa_ctx->zero_route_phys = 0;
 
 	return -ENOMEM;
 }
@@ -554,7 +560,10 @@ err_free_zero_route:
 static void ipa_route_table_exit(void)
 {
 	ipa_dma_free(&ipa_ctx->route_table);
-	ipa_dma_free(&ipa_ctx->zero_route);
+	dma_free_coherent(ipa_ctx->dev, IPA_ROUTE_SIZE,
+			  ipa_ctx->zero_route_virt, ipa_ctx->zero_route_phys);
+	ipa_ctx->zero_route_virt = NULL;
+	ipa_ctx->zero_route_phys = 0;
 }
 
 /**
@@ -1393,7 +1402,10 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 	ipa_dma_free(&ipa_ctx->filter_table);
 	ipa_dma_free(&ipa_ctx->zero_filter);
 	ipa_dma_free(&ipa_ctx->route_table);
-	ipa_dma_free(&ipa_ctx->zero_route);
+	dma_free_coherent(ipa_ctx->dev, IPA_ROUTE_SIZE,
+			  ipa_ctx->zero_route_virt, ipa_ctx->zero_route_phys);
+	ipa_ctx->zero_route_virt = NULL;
+	ipa_ctx->zero_route_phys = 0;
 	ipa_dma_exit();
 	ipa_ctx->gsi = NULL;	/* XXX ipa_gsi_exit() */
 	ipa_reg_exit();
