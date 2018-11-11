@@ -82,7 +82,9 @@
 struct ipa_tx_pkt_wrapper {
 	enum ipa_desc_type type;
 	struct ipa_sys_context *sys;
-	struct ipa_dma_mem mem;
+	void *virt;
+	dma_addr_t phys;
+	size_t size;
 	void (*callback)(void *user1, int user2);
 	void *user1;
 	int user2;
@@ -211,13 +213,13 @@ static void ipa_tx_complete(struct ipa_tx_pkt_wrapper *tx_pkt)
 	struct device *dev = ipa_ctx->dev;
 
 	/* If DMA memory was mapped, unmap it */
-	if (tx_pkt->mem.virt) {
+	if (tx_pkt->virt) {
 		if (tx_pkt->type == IPA_DATA_DESC_SKB_PAGED)
-			dma_unmap_page(dev, tx_pkt->mem.phys,
-				       tx_pkt->mem.size, DMA_TO_DEVICE);
+			dma_unmap_page(dev, tx_pkt->phys, tx_pkt->size,
+				       DMA_TO_DEVICE);
 		else
-			dma_unmap_single(dev, tx_pkt->mem.phys,
-					 tx_pkt->mem.size, DMA_TO_DEVICE);
+			dma_unmap_single(dev, tx_pkt->phys, tx_pkt->size,
+					 DMA_TO_DEVICE);
 	}
 
 	if (tx_pkt->callback)
@@ -497,15 +499,15 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 
 		tx_pkt->type = desc[i].type;
 		tx_pkt->sys = sys;
-		tx_pkt->mem.virt = desc[i].payload;
-		tx_pkt->mem.phys = phys;
-		tx_pkt->mem.size = desc[i].len_opcode;
+		tx_pkt->virt = desc[i].payload;
+		tx_pkt->phys = phys;
+		tx_pkt->size = desc[i].len_opcode;
 		tx_pkt->callback = desc[i].callback;
 		tx_pkt->user1 = desc[i].user1;
 		tx_pkt->user2 = desc[i].user2;
 		list_add_tail(&tx_pkt->link, &pkt_list);
 
-		xfer_elem[i].addr = tx_pkt->mem.phys;
+		xfer_elem[i].addr = tx_pkt->phys;
 		if (desc[i].type == IPA_IMM_CMD_DESC)
 			xfer_elem[i].type = GSI_XFER_ELEM_IMME_CMD;
 		else
