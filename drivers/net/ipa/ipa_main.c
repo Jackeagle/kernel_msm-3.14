@@ -27,7 +27,6 @@
 #include <linux/soc/qcom/smem.h>
 #include <linux/soc/qcom/smem_state.h>
 #include <linux/module.h>
-#include <asm/unaligned.h>
 
 #include "ipa_i.h"
 #include "ipa_dma.h"
@@ -542,7 +541,7 @@ static int ipa_route_table_init(void)
 	ipa_ctx->route_table_phys = phys;
 
 	for (i = 0; i < IPA_MEM_RT_COUNT; i++)
-		put_unaligned(ipa_ctx->zero_route_phys, virt++);
+		*virt++ = ipa_ctx->zero_route_phys;
 
 	return 0;
 
@@ -617,11 +616,11 @@ static int ipa_filter_table_init(void)
 	 * shifting it left one position.  (Bit 0 represents global
 	 * configuration, which is possible but not used.)
 	 */
-	put_unaligned((u64)ipa_ctx->filter_bitmap << 1, virt++);
+	*virt++ = (u64)ipa_ctx->filter_bitmap << 1;
 
 	/* Now point every entry in the table at the empty filter */
 	for (i = 0; i < ipa_ctx->filter_count; i++)
-		put_unaligned(ipa_ctx->zero_filter_phys, virt++);
+		*virt++ = ipa_ctx->zero_filter_phys;
 
 	return 0;
 
