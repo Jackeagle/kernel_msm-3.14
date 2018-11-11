@@ -408,12 +408,8 @@ struct ipa_context {
 	struct gsi *gsi;
 	struct device *dev;
 
-	void *zero_route_virt;
-	dma_addr_t zero_route_phys;
 	void *route_table_virt;
 	dma_addr_t route_table_phys;
-	void *zero_filter_virt;
-	dma_addr_t zero_filter_phys;
 	void *filter_table_virt;
 	dma_addr_t filter_table_phys;
 

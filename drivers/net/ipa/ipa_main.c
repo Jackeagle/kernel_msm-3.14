@@ -517,41 +517,31 @@ static int ipa_ep_apps_lan_cons_setup(void)
  */
 static int ipa_route_table_init(void)
 {
+	u64 zero_route_phys;
 	dma_addr_t phys;
 	size_t size;
 	u64 *virt;
 	u32 i;
 
-	/* Set up the zero route ("no route") in system memory. */
-	size = IPA_ROUTE_SIZE;
-	virt = dma_zalloc_coherent(ipa_ctx->dev, size, &phys, GFP_KERNEL);
-	if (!virt)
-		return -ENOMEM;
-	ipa_ctx->zero_route_virt = virt;
-	ipa_ctx->zero_route_phys = phys;
-
-	/* Allocate the route table, and initialize all entries in
-	 * the table to use the zero route.
+	/* Allocate the route table, with enough space at the end of
+	 * the table to hold the zero route descriptor.  Initialize
+	 * all filter table entries to point to the zero route.
 	 */
 	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
-	virt = dma_zalloc_coherent(ipa_ctx->dev, size, &phys, GFP_KERNEL);
+	virt = dma_zalloc_coherent(ipa_ctx->dev, size + IPA_ROUTE_SIZE,
+			&phys, GFP_KERNEL);
 	if (!virt)
-		goto err_free_zero_route;
+		return -ENOMEM;
 	ipa_ctx->route_table_virt = virt;
 	ipa_ctx->route_table_phys = phys;
 
+	/* Zero route is immediately after the filter table */
+	zero_route_phys = phys + size;
+
 	for (i = 0; i < IPA_MEM_RT_COUNT; i++)
-		*virt++ = ipa_ctx->zero_route_phys;
+		*virt++ = zero_route_phys;
 
 	return 0;
-
-err_free_zero_route:
-	dma_free_coherent(ipa_ctx->dev, IPA_ROUTE_SIZE,
-			  ipa_ctx->zero_route_virt, ipa_ctx->zero_route_phys);
-	ipa_ctx->zero_route_virt = NULL;
-	ipa_ctx->zero_route_phys = 0;
-
-	return -ENOMEM;
 }
 
 /**
@@ -559,15 +549,15 @@ err_free_zero_route:
  */
 static void ipa_route_table_exit(void)
 {
-	dma_free_coherent(ipa_ctx->dev, IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE,
-			  ipa_ctx->route_table_virt, ipa_ctx->route_table_phys);
+	size_t size;
+
+	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
+	size += IPA_ROUTE_SIZE;
+
+	dma_free_coherent(ipa_ctx->dev, size, ipa_ctx->route_table_virt,
+			  ipa_ctx->route_table_phys);
 	ipa_ctx->route_table_virt = NULL;
 	ipa_ctx->route_table_phys = 0;
-
-	dma_free_coherent(ipa_ctx->dev, IPA_ROUTE_SIZE,
-			  ipa_ctx->zero_route_virt, ipa_ctx->zero_route_phys);
-	ipa_ctx->zero_route_virt = NULL;
-	ipa_ctx->zero_route_phys = 0;
 }
 
 /**
@@ -583,6 +573,7 @@ static void ipa_route_table_exit(void)
  */
 static int ipa_filter_table_init(void)
 {
+	u64 zero_filter_phys;
 	dma_addr_t phys;
 	size_t size;
 	u64 *virt;
@@ -594,43 +585,38 @@ static int ipa_filter_table_init(void)
 	if (!ipa_ctx->filter_bitmap)
 		return -EINVAL;
 
-	/* Set up the zero filter ("no filter") in system memory. */
-	size = IPA_FILTER_SIZE;
-	virt = dma_zalloc_coherent(ipa_ctx->dev, size, &phys, GFP_KERNEL);
-	if (!virt)
-		goto err_clear_filter_bitmap;
-	ipa_ctx->zero_filter_virt = virt;
-	ipa_ctx->zero_filter_phys = phys;
-
-	/* Allocate the filter table, with an extra slot for the bitmap. */
+	/* Allocate the filter table, with an extra slot for the bitmap.
+	 * Also allocate enough space at the end of the table to hold
+	 * the * zero filter descriptor.  Initialize all filter table
+	 * entries point to that.
+	 */
 	ipa_ctx->filter_count = hweight32(ipa_ctx->filter_bitmap);
-	size = (size_t)(ipa_ctx->filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
-	virt = dma_zalloc_coherent(ipa_ctx->dev, size, &phys, GFP_KERNEL);
+	size = (ipa_ctx->filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
+	virt = dma_zalloc_coherent(ipa_ctx->dev, size + IPA_FILTER_SIZE,
+				   &phys, GFP_KERNEL);
 	if (!virt)
-		goto err_free_zero_filter;
+		goto err_clear_filter_count;
 	ipa_ctx->filter_table_virt = virt;
 	ipa_ctx->filter_table_phys = phys;
+
+	/* Zero filter is immediately after the filter table */
+	zero_filter_phys = phys + size;
 
 	/* Save the filter table bitmap.  The "soft" bitmap value
 	 * must be converted to the hardware representation by
 	 * shifting it left one position.  (Bit 0 represents global
-	 * configuration, which is possible but not used.)
+	 * filtering, which is possible but not used.)
 	 */
 	*virt++ = (u64)ipa_ctx->filter_bitmap << 1;
 
 	/* Now point every entry in the table at the empty filter */
 	for (i = 0; i < ipa_ctx->filter_count; i++)
-		*virt++ = ipa_ctx->zero_filter_phys;
+		*virt++ = zero_filter_phys;
 
 	return 0;
 
-err_free_zero_filter:
+err_clear_filter_count:
 	ipa_ctx->filter_count = 0;
-	dma_free_coherent(ipa_ctx->dev, IPA_FILTER_SIZE,
-			  ipa_ctx->zero_filter_virt, ipa_ctx->zero_filter_phys);
-	ipa_ctx->zero_filter_virt = NULL;
-	ipa_ctx->zero_filter_phys = 0;
-err_clear_filter_bitmap:
 	ipa_ctx->filter_bitmap = 0;
 
 	return -ENOMEM;
@@ -643,17 +629,14 @@ static void ipa_filter_table_exit(void)
 {
 	size_t size;
 
-	size = (size_t)(ipa_ctx->filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
+	size = (ipa_ctx->filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
+	size += IPA_FILTER_SIZE;
+
 	dma_free_coherent(ipa_ctx->dev, size, ipa_ctx->filter_table_virt,
 			  ipa_ctx->filter_table_phys);
 	ipa_ctx->filter_table_virt = NULL;
 	ipa_ctx->filter_table_phys = 0;
 	ipa_ctx->filter_count = 0;
-
-	dma_free_coherent(ipa_ctx->dev, IPA_FILTER_SIZE,
-			  ipa_ctx->zero_filter_virt, ipa_ctx->zero_filter_phys);
-	ipa_ctx->zero_filter_virt = NULL;
-	ipa_ctx->zero_filter_phys = 0;
 	ipa_ctx->filter_bitmap = 0;
 }
 
