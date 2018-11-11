@@ -520,8 +520,7 @@ static int ipa_route_table_init(void)
 {
 	dma_addr_t phys;
 	size_t size;
-	void *virt;
-	u64 *p;
+	u64 *virt;
 	u32 i;
 
 	/* Set up the zero route ("no route") in system memory. */
@@ -542,9 +541,8 @@ static int ipa_route_table_init(void)
 	ipa_ctx->route_table_virt = virt;
 	ipa_ctx->route_table_phys = phys;
 
-	p = ipa_ctx->route_table_virt;
 	for (i = 0; i < IPA_MEM_RT_COUNT; i++)
-		put_unaligned(ipa_ctx->zero_route_phys, p++);
+		put_unaligned(ipa_ctx->zero_route_phys, virt++);
 
 	return 0;
 
@@ -588,8 +586,7 @@ static int ipa_filter_table_init(void)
 {
 	dma_addr_t phys;
 	size_t size;
-	void *virt;
-	u64 *p;
+	u64 *virt;
 	u32 i;
 
 	/* Compute the bitmap of endpoints that support filtering. */
@@ -620,12 +617,11 @@ static int ipa_filter_table_init(void)
 	 * shifting it left one position.  (Bit 0 represents global
 	 * configuration, which is possible but not used.)
 	 */
-	p = ipa_ctx->filter_table_virt;
-	put_unaligned((u64)ipa_ctx->filter_bitmap << 1, p++);
+	put_unaligned((u64)ipa_ctx->filter_bitmap << 1, virt++);
 
 	/* Now point every entry in the table at the empty filter */
 	for (i = 0; i < ipa_ctx->filter_count; i++)
-		put_unaligned(ipa_ctx->zero_filter_phys, p++);
+		put_unaligned(ipa_ctx->zero_filter_phys, virt++);
 
 	return 0;
 
