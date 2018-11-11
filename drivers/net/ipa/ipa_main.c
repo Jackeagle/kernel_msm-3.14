@@ -95,18 +95,20 @@ err_dma_free:
 static int dma_shared_mem_zero_cmd(u32 offset, u32 size)
 {
 	struct ipa_desc desc = { };
-	struct ipa_dma_mem mem;
+	dma_addr_t phys;
 	void *payload;
+	void *virt;
 	int ret;
 
 	ipa_assert(size > 0);
 
-	if (ipa_dma_alloc(&mem, size, GFP_KERNEL))
+	virt = dma_zalloc_coherent(ipa_ctx->dev, size, &phys, GFP_KERNEL);
+	if (!virt)
 		return -ENOMEM;
 
 	offset += ipa_ctx->smem_offset;
 
-	payload = ipahal_dma_shared_mem_write_pyld(mem.phys, mem.size, offset);
+	payload = ipahal_dma_shared_mem_write_pyld(phys, size, offset);
 	if (!payload) {
 		ret = -ENOMEM;
 		goto err_dma_free;
@@ -120,7 +122,7 @@ static int dma_shared_mem_zero_cmd(u32 offset, u32 size)
 
 	ipahal_payload_free(payload);
 err_dma_free:
-	ipa_dma_free(&mem);
+	dma_free_coherent(ipa_ctx->dev, size, virt, phys);
 
 	return ret;
 }
