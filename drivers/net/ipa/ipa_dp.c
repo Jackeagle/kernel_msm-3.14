@@ -1780,9 +1780,11 @@ static int ipa_channel_reset_aggr(u32 ep_id)
 	struct ipa_reg_aggr_force_close force_close;
 	struct ipa_reg_endp_init_ctrl init_ctrl;
 	struct gsi_xfer_elem xfer_elem = { };
-	struct ipa_dma_mem dma_byte;
 	int aggr_active_bitmap = 0;
 	bool ep_suspended = false;
+	dma_addr_t phys;
+	size_t size;
+	void *virt;
 	int ret;
 	int i;
 
@@ -1811,13 +1813,15 @@ static int ipa_channel_reset_aggr(u32 ep_id)
 	if (ret)
 		goto out_suspend_again;
 
-	if (ipa_dma_alloc(&dma_byte, 1, GFP_KERNEL)) {
+	size = 1;
+	virt = dma_zalloc_coherent(ipa_ctx->dev, size, &phys, GFP_KERNEL);
+	if (!virt) {
 		ret = -ENOMEM;
 		goto err_stop_channel;
 	}
 
-	xfer_elem.addr = dma_byte.phys;
-	xfer_elem.len_opcode = 1;	/* = dma_byte.size; */
+	xfer_elem.addr = phys;
+	xfer_elem.len_opcode = size;
 	xfer_elem.flags = GSI_XFER_FLAG_EOT;
 	xfer_elem.type = GSI_XFER_ELEM_DATA;
 
@@ -1835,7 +1839,7 @@ static int ipa_channel_reset_aggr(u32 ep_id)
 	}
 	ipa_bug_on(aggr_active_bitmap & BIT(ep_id));
 
-	ipa_dma_free(&dma_byte);
+	dma_free_coherent(ipa_ctx->dev, size, virt, phys);
 
 	ret = ipa_stop_gsi_channel(ep_id);
 	if (ret)
@@ -1852,7 +1856,7 @@ static int ipa_channel_reset_aggr(u32 ep_id)
 	goto out_suspend_again;
 
 err_dma_free:
-	ipa_dma_free(&dma_byte);
+	dma_free_coherent(ipa_ctx->dev, size, virt, phys);
 err_stop_channel:
 	ipa_stop_gsi_channel(ep_id);
 out_suspend_again:
