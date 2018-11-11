@@ -54,8 +54,3 @@ void ipa_dma_free(struct ipa_dma_mem *mem)
 	dma_free_coherent(ipa_dma_dev, mem->size, mem->virt, mem->phys);
 	memset(mem, 0, sizeof(*mem));
 }
-
-void *ipa_dma_phys_to_virt(struct ipa_dma_mem *mem, dma_addr_t phys)
-{
-	return mem->virt + (phys - mem->phys);
-}

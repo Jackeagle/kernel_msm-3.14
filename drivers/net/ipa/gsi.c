@@ -571,6 +571,11 @@ static void gsi_isr_glob_ee(struct gsi *gsi)
 	gsi_writel(gsi, val, GSI_CNTXT_GLOB_IRQ_CLR_OFFS);
 }
 
+static void *gsi_ring_phys_to_virt(struct gsi_ring *ring, u64 phys)
+{
+	return ring->mem.virt + (phys - ring->mem.phys);
+}
+
 static void ring_wp_local_inc(struct gsi_ring *ring)
 {
 	ring->wp_local += GSI_RING_ELEMENT_SIZE;
@@ -702,8 +707,8 @@ static void gsi_event_handle(struct gsi *gsi, u32 evt_ring_id)
 			}
 			check_again = true;
 
-			evt = ipa_dma_phys_to_virt(&evt_ring->ring.mem,
-						   evt_ring->ring.rp_local);
+			evt = gsi_ring_phys_to_virt(&evt_ring->ring,
+						    evt_ring->ring.rp_local);
 			(void)gsi_channel_process(gsi, evt, true);
 
 			ring_rp_local_inc(&evt_ring->ring);
@@ -1516,8 +1521,8 @@ int gsi_channel_queue(struct gsi *gsi, u32 channel_id, u16 num_xfers,
 
 		channel->user_data[idx] = xfer[i].user_data;
 
-		tre_ptr = ipa_dma_phys_to_virt(&channel->ring.mem,
-						  channel->ring.wp_local);
+		tre_ptr = gsi_ring_phys_to_virt(&channel->ring,
+						channel->ring.wp_local);
 
 		tre_ptr->buffer_ptr = xfer[i].addr;
 		tre_ptr->buf_len = xfer[i].len_opcode;
@@ -1573,8 +1578,8 @@ int gsi_channel_poll(struct gsi *gsi, u32 channel_id)
 	if (evt_ring->ring.rp != evt_ring->ring.rp_local) {
 		struct gsi_xfer_compl_evt *evt;
 
-		evt = ipa_dma_phys_to_virt(&evt_ring->ring.mem,
-					   evt_ring->ring.rp_local);
+		evt = gsi_ring_phys_to_virt(&evt_ring->ring,
+					    evt_ring->ring.rp_local);
 		size = gsi_channel_process(gsi, evt, false);
 
 		ring_rp_local_inc(&evt_ring->ring);

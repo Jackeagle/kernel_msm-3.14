@@ -49,13 +49,4 @@ int ipa_dma_alloc(struct ipa_dma_mem *mem, size_t size, gfp_t gfp);
  */
 void ipa_dma_free(struct ipa_dma_mem *mem);
 
-/**
- * ipa_dma_phys_to_virt() - return the virtual equivalent of a DMA address
- * @phys:	DMA allocation information
- * @phys:	Physical address to convert
- *
- * Return:	Virtual address corresponding to the given physical address
- */
-void *ipa_dma_phys_to_virt(struct ipa_dma_mem *mem, dma_addr_t phys);
-
 #endif /* !_IPA_DMA_H_ */
