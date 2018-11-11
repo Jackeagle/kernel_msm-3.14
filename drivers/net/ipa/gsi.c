@@ -156,7 +156,9 @@ enum gsi_channel_state {
 
 struct gsi_ring {
 	spinlock_t slock;		/* protects wp, rp updates */
-	struct ipa_dma_mem mem;
+	void *virt;
+	dma_addr_t phys;
+	size_t size;
 	u64 wp;
 	u64 rp;
 	u64 wp_local;
@@ -573,31 +575,31 @@ static void gsi_isr_glob_ee(struct gsi *gsi)
 
 static void *gsi_ring_phys_to_virt(struct gsi_ring *ring, u64 phys)
 {
-	return ring->mem.virt + (phys - ring->mem.phys);
+	return ring->virt + (phys - ring->phys);
 }
 
 static void ring_wp_local_inc(struct gsi_ring *ring)
 {
 	ring->wp_local += GSI_RING_ELEMENT_SIZE;
 	if (ring->wp_local == ring->end)
-		ring->wp_local = ring->mem.phys;
+		ring->wp_local = ring->phys;
 }
 
 static void ring_rp_local_inc(struct gsi_ring *ring)
 {
 	ring->rp_local += GSI_RING_ELEMENT_SIZE;
 	if (ring->rp_local == ring->end)
-		ring->rp_local = ring->mem.phys;
+		ring->rp_local = ring->phys;
 }
 
 static u16 ring_rp_local_index(struct gsi_ring *ring)
 {
-	return (u16)(ring->rp_local - ring->mem.phys) / GSI_RING_ELEMENT_SIZE;
+	return (u16)(ring->rp_local - ring->phys) / GSI_RING_ELEMENT_SIZE;
 }
 
 static u16 ring_wp_local_index(struct gsi_ring *ring)
 {
-	return (u16)(ring->wp_local - ring->mem.phys) / GSI_RING_ELEMENT_SIZE;
+	return (u16)(ring->wp_local - ring->phys) / GSI_RING_ELEMENT_SIZE;
 }
 
 static void channel_xfer_cb(struct gsi_channel *channel, u16 count)
@@ -948,7 +950,7 @@ static void gsi_evt_ring_program(struct gsi *gsi, u32 evt_ring_id)
 	u64 phys;
 	u32 val;
 
-	phys = evt_ring->ring.mem.phys;
+	phys = evt_ring->ring.phys;
 	int_modt = evt_ring->moderation ? IPA_GSI_EVT_RING_INT_MODT : 0;
 	int_modc = 1;	/* moderation always comes from channel*/
 
@@ -957,7 +959,7 @@ static void gsi_evt_ring_program(struct gsi *gsi, u32 evt_ring_id)
 	val |= FIELD_PREP(EV_ELEMENT_SIZE_FMASK, GSI_RING_ELEMENT_SIZE);
 	gsi_writel(gsi, val, GSI_EV_CH_E_CNTXT_0_OFFS(evt_ring_id));
 
-	val = FIELD_PREP(EV_R_LENGTH_FMASK, (u32)evt_ring->ring.mem.size);
+	val = FIELD_PREP(EV_R_LENGTH_FMASK, (u32)evt_ring->ring.size);
 	gsi_writel(gsi, val, GSI_EV_CH_E_CNTXT_1_OFFS(evt_ring_id));
 
 	/* The context 2 and 3 registers store the low-order and
@@ -986,20 +988,25 @@ static void gsi_evt_ring_program(struct gsi *gsi, u32 evt_ring_id)
 
 static void gsi_ring_init(struct gsi_ring *ring)
 {
-	ring->wp_local = ring->wp = ring->mem.phys;
-	ring->rp_local = ring->rp = ring->mem.phys;
+	ring->wp_local = ring->wp = ring->phys;
+	ring->rp_local = ring->rp = ring->phys;
 }
 
 static int gsi_ring_alloc(struct gsi_ring *ring, u32 count)
 {
 	size_t size = roundup_pow_of_two(count * GSI_RING_ELEMENT_SIZE);
+	phys_addr_t phys;
+	void *virt;
 
 	/* Hardware requires a power-of-2 ring size (and alignment) */
-	if (ipa_dma_alloc(&ring->mem, size, GFP_KERNEL))
+	virt = dma_zalloc_coherent(ipa_ctx->dev, size, &phys, GFP_KERNEL);
+	if (!virt)
 		return -ENOMEM;
-	ipa_assert(!(ring->mem.phys % size));
-
-	ring->end = ring->mem.phys + size;
+	ipa_assert(!(phys % size));
+	ring->virt = virt;
+	ring->phys = phys;
+	ring->size = size;
+	ring->end = phys + size;
 	spin_lock_init(&ring->slock);
 
 	return 0;
@@ -1007,7 +1014,7 @@ static int gsi_ring_alloc(struct gsi_ring *ring, u32 count)
 
 static void gsi_ring_free(struct gsi_ring *ring)
 {
-	ipa_dma_free(&ring->mem);
+	dma_free_coherent(ipa_ctx->dev, ring->size, ring->virt, ring->phys);
 	memset(ring, 0, sizeof(*ring));
 }
 
@@ -1016,7 +1023,7 @@ static void gsi_evt_ring_prime(struct gsi *gsi, struct gsi_evt_ring *evt_ring)
 	unsigned long flags;
 
 	spin_lock_irqsave(&evt_ring->ring.slock, flags);
-	memset(evt_ring->ring.mem.virt, 0, evt_ring->ring.mem.size);
+	memset(evt_ring->ring.virt, 0, evt_ring->ring.size);
 	evt_ring->ring.wp_local = evt_ring->ring.end - GSI_RING_ELEMENT_SIZE;
 	gsi_evt_ring_doorbell(gsi, evt_ring);
 	spin_unlock_irqrestore(&evt_ring->ring.slock, flags);
@@ -1192,17 +1199,17 @@ static void gsi_channel_program(struct gsi *gsi, u32 channel_id,
 	val |= FIELD_PREP(ELEMENT_SIZE_FMASK, GSI_RING_ELEMENT_SIZE);
 	gsi_writel(gsi, val, GSI_CH_C_CNTXT_0_OFFS(channel_id));
 
-	val = FIELD_PREP(R_LENGTH_FMASK, channel->ring.mem.size);
+	val = FIELD_PREP(R_LENGTH_FMASK, channel->ring.size);
 	gsi_writel(gsi, val, GSI_CH_C_CNTXT_1_OFFS(channel_id));
 
 	/* The context 2 and 3 registers store the low-order and
 	 * high-order 32 bits of the address of the channel ring,
 	 * respectively.
 	 */
-	val = channel->ring.mem.phys & GENMASK(31, 0);
+	val = channel->ring.phys & GENMASK(31, 0);
 	gsi_writel(gsi, val, GSI_CH_C_CNTXT_2_OFFS(channel_id));
 
-	val = channel->ring.mem.phys >> 32;
+	val = channel->ring.phys >> 32;
 	gsi_writel(gsi, val, GSI_CH_C_CNTXT_3_OFFS(channel_id));
 
 	low_weight = channel->priority ? FIELD_MAX(WRR_WEIGHT_FMASK) : 0;
