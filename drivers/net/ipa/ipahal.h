@@ -75,7 +75,7 @@ void *ipa_imm_ip_fltrt_init_pyld(dma_addr_t phys, size_t size, u32 hash_offset,
  * command, or null if one can't be allocated.  Caller must ensure result
  * gets released by providing it to ipahal_destroy_imm_cmd().
  */
-void *ipahal_dma_task_32b_addr_pyld(struct ipa_dma_mem *mem);
+void *ipahal_dma_task_32b_addr_pyld(dma_addr_t phys, size_t size);
 
 /**
  * ipahal_payload_free() - Release an allocated immediate command payload

@@ -308,12 +308,12 @@ void *ipa_imm_ip_fltrt_init_pyld(dma_addr_t phys, size_t size, u32 hash_offset,
 	return data;
 }
 
-void *ipahal_dma_task_32b_addr_pyld(struct ipa_dma_mem *mem)
+void *ipahal_dma_task_32b_addr_pyld(dma_addr_t phys, size_t size)
 {
 	struct ipa_imm_cmd_hw_dma_task_32b_addr *data;
 
 	/* size1 and packet_size are both 16 bits wide */
-	ipa_assert(mem->size < 1 << 16);
+	ipa_assert(size < 1 << 16);
 
 	data = kzalloc(sizeof(*data), GFP_KERNEL);
 	if (!data)
@@ -324,9 +324,9 @@ void *ipahal_dma_task_32b_addr_pyld(struct ipa_dma_mem *mem)
 	data->flsh = 1;
 	data->lock = 0;
 	data->unlock = 0;
-	data->size1 = mem->size;
-	data->addr1 = mem->phys;
-	data->packet_size = mem->size;
+	data->size1 = size;
+	data->addr1 = phys;
+	data->packet_size = size;
 
 	return data;
 }

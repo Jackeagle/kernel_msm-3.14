@@ -901,7 +901,8 @@ int ipa_gsi_dma_task_alloc(void)
 		return -ENOMEM;
 
 	/* IPA_IMM_CMD_DMA_TASK_32B_ADDR */
-	ipa_ctx->dma_task_info.payload = ipahal_dma_task_32b_addr_pyld(mem);
+	ipa_ctx->dma_task_info.payload =
+			ipahal_dma_task_32b_addr_pyld(mem->phys, mem->size);
 	if (!ipa_ctx->dma_task_info.payload) {
 		ipa_dma_free(mem);
 
