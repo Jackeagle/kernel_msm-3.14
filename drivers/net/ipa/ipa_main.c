@@ -71,7 +71,7 @@ static int hdr_init_local_cmd(u32 offset, u32 size)
 
 	offset += ipa_ctx->smem_offset;
 
-	payload = ipahal_hdr_init_local_pyld(&mem, offset);
+	payload = ipahal_hdr_init_local_pyld(mem.phys, mem.size, offset);
 	if (!payload) {
 		ret = -ENOMEM;
 		goto err_dma_free;

@@ -271,19 +271,19 @@ void *ipahal_dma_shared_mem_write_pyld(struct ipa_dma_mem *mem, u32 offset)
 	return data;
 }
 
-void *ipahal_hdr_init_local_pyld(struct ipa_dma_mem *mem, u32 offset)
+void *ipahal_hdr_init_local_pyld(dma_addr_t phys, size_t size, u32 offset)
 {
 	struct ipa_imm_cmd_hw_hdr_init_local *data;
 
-	ipa_assert(mem->size < 1 << 12);  /* size_hdr_table is 12 bits wide */
-	ipa_assert(offset < 1 << 16);		/* hdr_addr is 16 bits wide */
+	ipa_assert(size < 1 << 12);	/* size_hdr_table is 12 bits wide */
+	ipa_assert(offset < 1 << 16);	/* hdr_addr is 16 bits wide */
 
 	data = kzalloc(sizeof(*data), GFP_KERNEL);
 	if (!data)
 		return NULL;
 
-	data->hdr_table_addr = mem->phys;
-	data->size_hdr_table = mem->size;
+	data->hdr_table_addr = phys;
+	data->size_hdr_table = size;
 	data->hdr_addr = offset;
 
 	return data;

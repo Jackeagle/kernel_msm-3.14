@@ -39,7 +39,8 @@ void *ipahal_dma_shared_mem_write_pyld(struct ipa_dma_mem *mem, u32 offset);
 
 /**
  * ipahal_hdr_init_local_pyld() - Header initialization command payload
- * mem:		DMA buffer containing data for initialization
+ * phys:	DMA address of data for initialization
+ * size:	Size of DMA area
  * offset:	Where in location IPA local memory to write
  *
  * Return a pointer to the payload for a header init local immediate
@@ -48,7 +49,7 @@ void *ipahal_dma_shared_mem_write_pyld(struct ipa_dma_mem *mem, u32 offset);
  *
  * Return:	 Pointer to the immediate command payload, or NULL
  */
-void *ipahal_hdr_init_local_pyld(struct ipa_dma_mem *mem, u32 offset);
+void *ipahal_hdr_init_local_pyld(dma_addr_t phys, size_t size, u32 offset);
 
 /**
  * ipa_ip_fltrt_init_pyld() - IP filter/routing table initialization payload
