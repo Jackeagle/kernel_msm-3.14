@@ -10,7 +10,6 @@
 #include <linux/module.h>
 #include <linux/delay.h>
 
-#include "ipa_dma.h"
 #include "ipa_i.h"
 #include "ipahal.h"
 

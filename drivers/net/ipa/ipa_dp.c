@@ -13,7 +13,6 @@
 
 #include "ipa_i.h"	/* ipa_err() */
 #include "ipahal.h"
-#include "ipa_dma.h"
 
 /**
  * DOC:  The IPA Data Path

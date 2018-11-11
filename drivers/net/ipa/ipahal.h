@@ -8,8 +8,6 @@
 
 #include <linux/types.h>
 
-#include "ipa_dma.h"
-
 /* The IPA implements offloaded packet filtering and routing
  * capabilities.  This is managed by programming tables of rules
  * that define the processing that should be performed by the IPA

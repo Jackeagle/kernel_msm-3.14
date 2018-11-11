@@ -9,7 +9,6 @@
 
 #include "ipahal.h"
 #include "ipa_i.h"	/* ipa_err() */
-#include "ipa_dma.h"
 
 /**
  * DOC:  IPA Immediate Commands

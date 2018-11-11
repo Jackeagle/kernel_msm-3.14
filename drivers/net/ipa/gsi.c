@@ -24,7 +24,6 @@
 
 #include "gsi.h"
 #include "gsi_reg.h"
-#include "ipa_dma.h"
 #include "ipa_i.h"	/* ipa_err() */
 
 /**

@@ -29,7 +29,6 @@
 #include <linux/module.h>
 
 #include "ipa_i.h"
-#include "ipa_dma.h"
 #include "ipahal.h"
 
 /* The name of the main firmware file relative to /lib/firmware */
@@ -710,7 +709,7 @@ static void ipa_disable_clks(void)
 }
 
 /* No inverse required */
-static int ipa_dma_init_local(void)
+static int ipa_dma_init(void)
 {
 	/* Make sure DMA memory is adequately aligned */
 	if (dma_get_cache_alignment() % IPA_HW_TBL_SYSADDR_ALIGN)
@@ -1329,7 +1328,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 
 	ipa_ctx->dev = dev;	/* Set early for ipa_err()/ipa_debug() */
 
-	ret = ipa_dma_init_local();
+	ret = ipa_dma_init();
 	if (ret)
 		goto err_interconnect_exit;
 

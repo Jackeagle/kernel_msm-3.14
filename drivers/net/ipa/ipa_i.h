@@ -17,7 +17,6 @@
 #include <linux/pm_wakeup.h>
 #include <linux/skbuff.h>
 
-#include "ipa_dma.h"
 #include "ipa_reg.h"
 #include "gsi.h"
 
