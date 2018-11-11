@@ -609,15 +609,18 @@ static int ipa_filter_table_init(void)
 	/* Allocate the filter table, with an extra slot for the bitmap. */
 	ipa_ctx->filter_count = hweight32(ipa_ctx->filter_bitmap);
 	size = (size_t)(ipa_ctx->filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
-	if (ipa_dma_alloc(&ipa_ctx->filter_table, size, GFP_KERNEL))
+	virt = dma_zalloc_coherent(ipa_ctx->dev, size, &phys, GFP_KERNEL);
+	if (!virt)
 		goto err_free_zero_filter;
+	ipa_ctx->filter_table_virt = virt;
+	ipa_ctx->filter_table_phys = phys;
 
 	/* Save the filter table bitmap.  The "soft" bitmap value
 	 * must be converted to the hardware representation by
 	 * shifting it left one position.  (Bit 0 represents global
 	 * configuration, which is possible but not used.)
 	 */
-	p = ipa_ctx->filter_table.virt;
+	p = ipa_ctx->filter_table_virt;
 	put_unaligned((u64)ipa_ctx->filter_bitmap << 1, p++);
 
 	/* Now point every entry in the table at the empty filter */
@@ -643,8 +646,15 @@ err_clear_filter_bitmap:
  */
 static void ipa_filter_table_exit(void)
 {
-	ipa_dma_free(&ipa_ctx->filter_table);
+	size_t size;
+
+	size = (size_t)(ipa_ctx->filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
+	dma_free_coherent(ipa_ctx->dev, size, ipa_ctx->filter_table_virt,
+			  ipa_ctx->filter_table_phys);
+	ipa_ctx->filter_table_virt = NULL;
+	ipa_ctx->filter_table_phys = 0;
 	ipa_ctx->filter_count = 0;
+
 	dma_free_coherent(ipa_ctx->dev, IPA_FILTER_SIZE,
 			  ipa_ctx->zero_filter_virt, ipa_ctx->zero_filter_phys);
 	ipa_ctx->zero_filter_virt = NULL;
@@ -669,8 +679,9 @@ static int ipa_ep_apps_setup(void)
 	ipa_init_rt4(ipa_ctx->route_table_phys, size);
 	ipa_init_rt6(ipa_ctx->route_table_phys, size);
 
-	ipa_init_flt4(ipa_ctx->filter_table.phys, ipa_ctx->filter_table.size);
-	ipa_init_flt6(ipa_ctx->filter_table.phys, ipa_ctx->filter_table.size);
+	size = (ipa_ctx->filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
+	ipa_init_flt4(ipa_ctx->filter_table_phys, size);
+	ipa_init_flt6(ipa_ctx->filter_table_phys, size);
 
 	ipa_setup_flt_hash_tuple();
 	ipa_setup_rt_hash_tuple();
