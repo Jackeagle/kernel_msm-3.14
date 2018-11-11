@@ -895,30 +895,38 @@ void ipa_cfg_default_route(enum ipa_client_type client)
  */
 int ipa_gsi_dma_task_alloc(void)
 {
-	struct ipa_dma_mem *mem = &ipa_ctx->dma_task_info.mem;
+	struct ipa_dma_task_info *info = &ipa_ctx->dma_task_info;
+	size_t size = IPA_GSI_CHANNEL_STOP_PKT_SIZE;
+	dma_addr_t phys;
 
-	if (ipa_dma_alloc(mem, IPA_GSI_CHANNEL_STOP_PKT_SIZE, GFP_KERNEL))
+	info->virt = dma_zalloc_coherent(ipa_ctx->dev, size, &phys, GFP_KERNEL);
+	if (!info->virt)
 		return -ENOMEM;
 
 	/* IPA_IMM_CMD_DMA_TASK_32B_ADDR */
-	ipa_ctx->dma_task_info.payload =
-			ipahal_dma_task_32b_addr_pyld(mem->phys, mem->size);
+	ipa_ctx->dma_task_info.payload = ipahal_dma_task_32b_addr_pyld(phys,
+								       size);
 	if (!ipa_ctx->dma_task_info.payload) {
-		ipa_dma_free(mem);
+		dma_free_coherent(ipa_ctx->dev, size, info->virt, phys);
+		info->virt = NULL;
 
 		return -ENOMEM;
 	}
+	info->phys = phys;
 
 	return 0;
 }
 
 void ipa_gsi_dma_task_free(void)
 {
-	struct ipa_dma_mem *mem = &ipa_ctx->dma_task_info.mem;
+	struct ipa_dma_task_info *info = &ipa_ctx->dma_task_info;
+	size_t size = IPA_GSI_CHANNEL_STOP_PKT_SIZE;
 
 	ipahal_payload_free(ipa_ctx->dma_task_info.payload);
 	ipa_ctx->dma_task_info.payload = NULL;
-	ipa_dma_free(mem);
+	dma_free_coherent(ipa_ctx->dev, size, info->virt, info->phys);
+	info->phys = 0;
+	info->virt = NULL;
 }
 
 /** ipa_gsi_dma_task_inject()- Send DMA_TASK to IPA for GSI stop channel

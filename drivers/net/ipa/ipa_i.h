@@ -366,7 +366,8 @@ struct ipa_smp2p_info {
 };
 
 struct ipa_dma_task_info {
-	struct ipa_dma_mem mem;
+	void *virt;
+	dma_addr_t phys;
 	void *payload;
 };
 
