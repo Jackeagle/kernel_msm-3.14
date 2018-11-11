@@ -35,7 +35,8 @@
  *
  * Return:	 Pointer to the immediate command payload, or NULL
  */
-void *ipahal_dma_shared_mem_write_pyld(struct ipa_dma_mem *mem, u32 offset);
+void *ipahal_dma_shared_mem_write_pyld(dma_addr_t phys, size_t size,
+				       u32 offset);
 
 /**
  * ipahal_hdr_init_local_pyld() - Header initialization command payload

@@ -106,7 +106,7 @@ static int dma_shared_mem_zero_cmd(u32 offset, u32 size)
 
 	offset += ipa_ctx->smem_offset;
 
-	payload = ipahal_dma_shared_mem_write_pyld(&mem, offset);
+	payload = ipahal_dma_shared_mem_write_pyld(mem.phys, mem.size, offset);
 	if (!payload) {
 		ret = -ENOMEM;
 		goto err_dma_free;

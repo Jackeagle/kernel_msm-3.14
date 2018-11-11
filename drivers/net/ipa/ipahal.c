@@ -250,23 +250,23 @@ struct ipa_pkt_status_hw {
 	u16 hw_specific;
 };
 
-void *ipahal_dma_shared_mem_write_pyld(struct ipa_dma_mem *mem, u32 offset)
+void *ipahal_dma_shared_mem_write_pyld(dma_addr_t phys, size_t size, u32 offset)
 {
 	struct ipa_imm_cmd_hw_dma_shared_mem *data;
 
-	ipa_assert(mem->size < 1 << 16);	/* size is 16 bits wide */
-	ipa_assert(offset < 1 << 16);		/* local_addr is 16 bits wide */
+	ipa_assert(size < 1 << 16);	/* size is 16 bits wide */
+	ipa_assert(offset < 1 << 16);	/* local_addr is 16 bits wide */
 
 	data = kzalloc(sizeof(*data), GFP_KERNEL);
 	if (!data)
 		return NULL;
 
-	data->size = mem->size;
+	data->size = size;
 	data->local_addr = offset;
 	data->direction = 0;	/* 0 = write to IPA; 1 = read from IPA */
 	data->skip_pipeline_clear = 0;
 	data->pipeline_clear_options = IPAHAL_HPS_CLEAR;
-	data->system_addr = mem->phys;
+	data->system_addr = phys;
 
 	return data;
 }
