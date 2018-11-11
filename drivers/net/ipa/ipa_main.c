@@ -536,10 +536,13 @@ static int ipa_route_table_init(void)
 	 * the table to use the zero route.
 	 */
 	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
-	if (ipa_dma_alloc(&ipa_ctx->route_table, size, GFP_KERNEL))
+	virt = dma_zalloc_coherent(ipa_ctx->dev, size, &phys, GFP_KERNEL);
+	if (!virt)
 		goto err_free_zero_route;
+	ipa_ctx->route_table_virt = virt;
+	ipa_ctx->route_table_phys = phys;
 
-	p = ipa_ctx->route_table.virt;
+	p = ipa_ctx->route_table_virt;
 	for (i = 0; i < IPA_MEM_RT_COUNT; i++)
 		put_unaligned(ipa_ctx->zero_route_phys, p++);
 
@@ -559,7 +562,11 @@ err_free_zero_route:
  */
 static void ipa_route_table_exit(void)
 {
-	ipa_dma_free(&ipa_ctx->route_table);
+	dma_free_coherent(ipa_ctx->dev, IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE,
+			  ipa_ctx->route_table_virt, ipa_ctx->route_table_phys);
+	ipa_ctx->route_table_virt = NULL;
+	ipa_ctx->route_table_phys = 0;
+
 	dma_free_coherent(ipa_ctx->dev, IPA_ROUTE_SIZE,
 			  ipa_ctx->zero_route_virt, ipa_ctx->zero_route_phys);
 	ipa_ctx->zero_route_virt = NULL;
@@ -647,6 +654,7 @@ static void ipa_filter_table_exit(void)
 
 static int ipa_ep_apps_setup(void)
 {
+	u32 size;
 	int ret;
 
 	/* CMD OUT (AP->IPA) */
@@ -657,8 +665,9 @@ static int ipa_ep_apps_setup(void)
 	ipa_init_sram();
 	ipa_init_hdr();
 
-	ipa_init_rt4(ipa_ctx->route_table.phys, ipa_ctx->route_table.size);
-	ipa_init_rt6(ipa_ctx->route_table.phys, ipa_ctx->route_table.size);
+	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
+	ipa_init_rt4(ipa_ctx->route_table_phys, size);
+	ipa_init_rt6(ipa_ctx->route_table_phys, size);
 
 	ipa_init_flt4(ipa_ctx->filter_table.phys, ipa_ctx->filter_table.size);
 	ipa_init_flt6(ipa_ctx->filter_table.phys, ipa_ctx->filter_table.size);

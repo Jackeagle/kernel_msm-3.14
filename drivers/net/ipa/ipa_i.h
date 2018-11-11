@@ -410,7 +410,8 @@ struct ipa_context {
 
 	void *zero_route_virt;
 	dma_addr_t zero_route_phys;
-	struct ipa_dma_mem route_table;
+	void *route_table_virt;
+	dma_addr_t route_table_phys;
 	void *zero_filter_virt;
 	dma_addr_t zero_filter_phys;
 	struct ipa_dma_mem filter_table;
