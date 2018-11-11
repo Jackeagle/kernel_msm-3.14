@@ -709,6 +709,16 @@ static void ipa_disable_clks(void)
 	WARN_ON(ipa_interconnect_disable());
 }
 
+/* No inverse required */
+static int ipa_dma_init_local(void)
+{
+	/* Make sure DMA memory is adequately aligned */
+	if (dma_get_cache_alignment() % IPA_HW_TBL_SYSADDR_ALIGN)
+		return -ENOTSUPP;
+
+	return dma_set_mask_and_coherent(ipa_ctx->dev, DMA_BIT_MASK(64));
+}
+
 /* Add an IPA client under protection of the mutex.  This is called
  * for the first client, but a race could mean another caller gets
  * the first reference.  When the first reference is taken, IPA
@@ -1319,13 +1329,13 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 
 	ipa_ctx->dev = dev;	/* Set early for ipa_err()/ipa_debug() */
 
-	ret = ipa_dma_init(dev, IPA_HW_TBL_SYSADDR_ALIGN);
+	ret = ipa_dma_init_local();
 	if (ret)
 		goto err_interconnect_exit;
 
 	ret = ipa_route_table_init();
 	if (ret)
-		goto err_dma_exit;
+		goto err_interconnect_exit;
 
 	ret = ipa_filter_table_init();
 	if (ret)
@@ -1396,8 +1406,6 @@ err_filter_table_exit:
 	ipa_filter_table_exit();
 err_route_table_exit:
 	ipa_route_table_exit();
-err_dma_exit:
-	ipa_dma_exit();
 	ipa_ctx->dev = NULL;
 err_interconnect_exit:
 	ipa_interconnect_exit();
@@ -1414,7 +1422,6 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 	ipa_ctx->dev = NULL;
 	ipa_filter_table_exit();
 	ipa_route_table_exit();
-	ipa_dma_exit();
 	ipa_ctx->gsi = NULL;	/* XXX ipa_gsi_exit() */
 	ipa_reg_exit();
 
