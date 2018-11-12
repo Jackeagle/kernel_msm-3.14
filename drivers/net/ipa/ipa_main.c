@@ -727,21 +727,21 @@ static void ipa_clock_exit(struct ipa_context *ipa)
 /**
  * ipa_enable_clks() - Turn on IPA clocks
  */
-static void ipa_enable_clks(void)
+static void ipa_enable_clks(struct ipa_context *ipa)
 {
 	if (WARN_ON(ipa_interconnect_enable()))
 		return;
 
-	if (WARN_ON(clk_prepare_enable(ipa_ctx->core_clock)))
+	if (WARN_ON(clk_prepare_enable(ipa->core_clock)))
 		ipa_interconnect_disable();
 }
 
 /**
  * ipa_disable_clks() - Turn off IPA clocks
  */
-static void ipa_disable_clks(void)
+static void ipa_disable_clks(struct ipa_context *ipa)
 {
-	clk_disable_unprepare(ipa_ctx->core_clock);
+	clk_disable_unprepare(ipa->core_clock);
 	WARN_ON(ipa_interconnect_disable());
 }
 
@@ -769,7 +769,7 @@ static void ipa_client_add_first(void)
 
 	/* A reference might have been added while awaiting the mutex. */
 	if (!atomic_inc_not_zero(&ipa_ctx->active_clients_count)) {
-		ipa_enable_clks();
+		ipa_enable_clks(ipa_ctx);
 		ipa_ep_resume_all();
 		atomic_inc(&ipa_ctx->active_clients_count);
 	} else {
@@ -822,7 +822,7 @@ static void ipa_client_remove_final(void)
 	/* A reference might have been removed while awaiting the mutex. */
 	if (!atomic_dec_return(&ipa_ctx->active_clients_count)) {
 		ipa_ep_suspend_all();
-		ipa_disable_clks();
+		ipa_disable_clks(ipa_ctx);
 	}
 
 	mutex_unlock(&ipa_ctx->active_clients_mutex);
@@ -1088,7 +1088,7 @@ static int ipa_pre_init(struct ipa_context *ipa)
 	int ret = 0;
 
 	/* enable IPA clocks explicitly to allow the initialization */
-	ipa_enable_clks();
+	ipa_enable_clks(ipa);
 
 	ipa_init_hw();
 
@@ -1152,7 +1152,7 @@ err_dp_exit:
 err_destroy_pm_wq:
 	destroy_workqueue(ipa->power_mgmt_wq);
 err_disable_clks:
-	ipa_disable_clks();
+	ipa_disable_clks(ipa);
 
 	return ret;
 }
