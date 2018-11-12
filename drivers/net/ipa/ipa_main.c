@@ -669,6 +669,23 @@ static void ipa_filter_exit(struct ipa_context *ipa)
 	ipa->filter_bitmap = 0;
 }
 
+static int ipa_irq_init(struct ipa_context *ipa)
+{
+	int ret;
+
+	ret = platform_get_irq_byname(ipa->pdev, "ipa");
+	if (ret < 0)
+		return ret;
+	ipa->ipa_irq = ret;
+
+	return 0;
+}
+
+static void ipa_irq_exit(struct ipa_context *ipa)
+{
+	ipa->ipa_irq = 0;
+}
+
 static int ipa_ep_apps_setup(void)
 {
 	u32 size;
@@ -1422,10 +1439,9 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_route_exit;
 
-	ret = platform_get_irq_byname(pdev, "ipa");
-	if (ret < 0)
+	ret = ipa_irq_init(ipa);
+	if (ret)
 		goto err_filter_exit;
-	ipa->ipa_irq = ret;
 
 	ipa->gsi = gsi_init(pdev);
 	if (IS_ERR(ipa->gsi)) {
@@ -1466,7 +1482,7 @@ err_clear_ep_ids:
 	/* XXX gsi_exit(pdev); */
 err_clear_gsi:
 	ipa->gsi = NULL;
-	ipa->ipa_irq = 0;
+	ipa_irq_exit(ipa);
 err_filter_exit:
 	ipa_filter_exit(ipa);
 err_route_exit:
@@ -1502,7 +1518,7 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 	/* XXX ipa_gsi_exit(ipa) */
 	ipa->gsi = NULL;
 	ipa_mem_exit(ipa);
-	ipa->ipa_irq = 0;	/* XXX Need to de-initialize? */
+	ipa_irq_exit(ipa);
 	ipa_filter_exit(ipa);
 	ipa_route_exit(ipa);
 	ipa_clock_exit(ipa);
