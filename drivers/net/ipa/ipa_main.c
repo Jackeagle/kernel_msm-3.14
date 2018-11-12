@@ -1276,30 +1276,30 @@ static irqreturn_t ipa_smp2p_modem_post_init_isr(int irq, void *ctxt)
 	return IRQ_HANDLED;
 }
 
-static int
-ipa_smp2p_irq_init(struct device *dev, const char *name, irq_handler_t handler)
+static int ipa_smp2p_irq_init(struct ipa_context *ipa, const char *name,
+			      irq_handler_t handler)
 {
-	struct device_node *node = dev->of_node;
+	struct device *dev = &ipa->pdev->dev;
 	unsigned int irq;
 	int ret;
 
-	ret = of_irq_get_byname(node, name);
+	ret = of_irq_get_byname(dev->of_node, name);
 	if (ret < 0)
 		return ret;
 	if (!ret)
 		return -EINVAL;		/* IRQ mapping failure */
 	irq = ret;
 
-	ret = devm_request_threaded_irq(dev, irq, NULL, handler, 0, name, dev);
+	ret = devm_request_threaded_irq(dev, irq, NULL, handler, 0, name, ipa);
 	if (ret)
 		return ret;
 
 	return irq;
 }
 
-static void ipa_smp2p_irq_exit(struct device *dev, unsigned int irq)
+static void ipa_smp2p_irq_exit(struct ipa_context *ipa, unsigned int irq)
 {
-	devm_free_irq(dev, irq, dev);
+	devm_free_irq(&ipa->pdev->dev, irq, ipa);
 }
 
 static int ipa_smp2p_init(struct ipa_context *ipa, bool modem_init)
@@ -1326,7 +1326,7 @@ static int ipa_smp2p_init(struct ipa_context *ipa, bool modem_init)
 		return ret;
 	}
 
-	ret = ipa_smp2p_irq_init(dev, "ipa-clock-query",
+	ret = ipa_smp2p_irq_init(ipa, "ipa-clock-query",
 				 ipa_smp2p_modem_clk_query_isr);
 	if (ret < 0)
 		return ret;
@@ -1334,10 +1334,10 @@ static int ipa_smp2p_init(struct ipa_context *ipa, bool modem_init)
 
 	if (modem_init) {
 		/* Result will be non-zero (negative for error) */
-		ret = ipa_smp2p_irq_init(dev, "ipa-post-init",
+		ret = ipa_smp2p_irq_init(ipa, "ipa-post-init",
 					 ipa_smp2p_modem_post_init_isr);
 		if (ret < 0) {
-			ipa_smp2p_irq_exit(dev, clock_irq);
+			ipa_smp2p_irq_exit(ipa, clock_irq);
 
 			return ret;
 		}
@@ -1356,11 +1356,9 @@ static int ipa_smp2p_init(struct ipa_context *ipa, bool modem_init)
 
 static void ipa_smp2p_exit(struct ipa_context *ipa)
 {
-	struct device *dev = &ipa->pdev->dev;
-
 	if (ipa->smp2p_info.post_init_irq)
-		ipa_smp2p_irq_exit(dev, ipa->smp2p_info.post_init_irq);
-	ipa_smp2p_irq_exit(dev, ipa->smp2p_info.clock_query_irq);
+		ipa_smp2p_irq_exit(ipa, ipa->smp2p_info.post_init_irq);
+	ipa_smp2p_irq_exit(ipa, ipa->smp2p_info.clock_query_irq);
 
 	memset(&ipa->smp2p_info, 0, sizeof(ipa->smp2p_info));
 }
