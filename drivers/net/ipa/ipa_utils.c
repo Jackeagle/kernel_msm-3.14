@@ -441,18 +441,18 @@ enum ipa_seq_type ipa_endp_seq_type(u32 ep_id)
  *
  * Returns:	None
  */
-void ipa_sram_settings_read(void)
+void ipa_sram_settings_read(struct ipa_context *ipa)
 {
 	struct ipa_reg_shared_mem_size mem_size;
 
 	ipa_read_reg_fields(IPA_SHARED_MEM_SIZE, &mem_size);
 
 	/* reg fields are in 8B units */
-	ipa_ctx->smem_offset = mem_size.shared_mem_baddr * 8;
-	ipa_ctx->smem_size = mem_size.shared_mem_size * 8;
+	ipa->smem_offset = mem_size.shared_mem_baddr * 8;
+	ipa->smem_size = mem_size.shared_mem_size * 8;
 
-	ipa_debug("sram size 0x%x offset 0x%x\n", ipa_ctx->smem_size,
-		  ipa_ctx->smem_offset);
+	ipa_debug("sram size 0x%x offset 0x%x\n", ipa->smem_size,
+		  ipa->smem_offset);
 }
 
 /** ipa_init_hw() - initialize HW */

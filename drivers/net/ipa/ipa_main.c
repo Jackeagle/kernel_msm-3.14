@@ -1093,12 +1093,12 @@ static int ipa_pre_init(struct ipa_context *ipa)
 	ipa_init_hw();
 
 	ipa->ep_count = ipa_get_ep_count();
-	ipa_debug("ep_count %u\n", ipa_get_ep_count());
+	ipa_debug("ep_count %u\n", ipa->ep_count);
 	ipa_assert(ipa->ep_count <= IPA_EP_COUNT_MAX);
 
-	ipa_sram_settings_read();
+	ipa_sram_settings_read(ipa);
 	if (ipa->smem_size < IPA_MEM_END_OFST) {
-		ipa_err("insufficient memory: %hu bytes available, need %u\n",
+		ipa_err("insufficient memory: %u bytes available, need %u\n",
 			ipa->smem_size, IPA_MEM_END_OFST);
 		ret = -ENOMEM;
 		goto err_disable_clks;
@@ -1108,8 +1108,7 @@ static int ipa_pre_init(struct ipa_context *ipa)
 	atomic_set(&ipa->active_clients_count, 1);
 
 	/* Create workqueues for power management */
-	ipa->power_mgmt_wq =
-		create_singlethread_workqueue("ipa_power_mgmt");
+	ipa->power_mgmt_wq = create_singlethread_workqueue("ipa_power_mgmt");
 	if (!ipa->power_mgmt_wq) {
 		ipa_err("failed to create power mgmt wq\n");
 		ret = -ENOMEM;
