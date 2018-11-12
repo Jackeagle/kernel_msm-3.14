@@ -1329,6 +1329,7 @@ static const struct of_device_id ipa_plat_drv_match[] = {
 static int ipa_plat_drv_probe(struct platform_device *pdev)
 {
 	const struct ipa_match_data *match_data;
+	struct ipa_context *ipa = ipa_ctx;
 	struct resource *res;
 	bool modem_init;
 	int ret;
@@ -1336,9 +1337,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	/* We assume we're working on 64-bit hardware */
 	BUILD_BUG_ON(!IS_ENABLED(CONFIG_64BIT));
 
-	ipa_ctx->dev = &pdev->dev;
-
-	match_data = of_device_get_match_data(ipa_ctx->dev);
+	match_data = of_device_get_match_data(&pdev->dev);
 	modem_init = match_data->init_type == ipa_modem_init;
 
 	/* If we need Trust Zone, make sure it's ready */
@@ -1346,40 +1345,42 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 		if (!qcom_scm_is_available())
 			return -EPROBE_DEFER;
 
+	ipa->dev = &pdev->dev;
+
 	/* Initialize the smp2p driver early.  It might not be ready
 	 * when we're probed, so it might return -EPROBE_DEFER.
 	 */
-	ret = ipa_smp2p_init(ipa_ctx, modem_init);
+	ret = ipa_smp2p_init(ipa, modem_init);
 	if (ret)
 		return ret;
 
 	/* Initialize the interconnect driver early too.  It might
 	 * also return -EPROBE_DEFER.
 	 */
-	ret = ipa_interconnect_init(ipa_ctx);
+	ret = ipa_interconnect_init(ipa);
 	if (ret)
 		goto out_smp2p_exit;
 
-	ret = ipa_clock_init(ipa_ctx);
+	ret = ipa_clock_init(ipa);
 	if (ret)
 		goto err_interconnect_exit;
 
-	ret = ipa_dma_init(ipa_ctx);
+	ret = ipa_dma_init(ipa);
 	if (ret)
 		goto err_clock_exit;
 
-	ret = ipa_route_init(ipa_ctx);
+	ret = ipa_route_init(ipa);
 	if (ret)
 		goto err_clock_exit;
 
-	ret = ipa_filter_init(ipa_ctx);
+	ret = ipa_filter_init(ipa);
 	if (ret)
 		goto err_route_exit;
 
 	ret = platform_get_irq_byname(pdev, "ipa");
 	if (ret < 0)
 		goto err_filter_exit;
-	ipa_ctx->ipa_irq = ret;
+	ipa->ipa_irq = ret;
 
 	/* Get IPA memory range */
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "ipa");
@@ -1392,19 +1393,19 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	ret = ipa_reg_init(res->start, (size_t)resource_size(res));
 	if (ret)
 		goto err_clear_ipa_irq;
-	ipa_ctx->ipa_phys = res->start;
+	ipa->ipa_phys = res->start;
 
-	ipa_ctx->gsi = gsi_init(pdev);
-	if (IS_ERR(ipa_ctx->gsi)) {
-		ret = PTR_ERR(ipa_ctx->gsi);
+	ipa->gsi = gsi_init(pdev);
+	if (IS_ERR(ipa->gsi)) {
+		ret = PTR_ERR(ipa->gsi);
 		goto err_clear_gsi;
 	}
 
-	ipa_ctx->cmd_prod_ep_id = IPA_EP_ID_BAD;
-	ipa_ctx->lan_cons_ep_id = IPA_EP_ID_BAD;
+	ipa->cmd_prod_ep_id = IPA_EP_ID_BAD;
+	ipa->lan_cons_ep_id = IPA_EP_ID_BAD;
 
 	/* Proceed to real initialization */
-	ret = ipa_pre_init(ipa_ctx);
+	ret = ipa_pre_init(ipa);
 	if (ret)
 		goto err_clear_ep_ids;
 
@@ -1415,7 +1416,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	 * and that will trigger the "post init".
 	 */
 	if (!modem_init) {
-		ret = ipa_firmware_load(ipa_ctx->dev);
+		ret = ipa_firmware_load(ipa->dev);
 		if (ret)
 			goto err_undo_pre_init;
 
@@ -1428,26 +1429,26 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 err_undo_pre_init:
 	/* XXX This needs to be implemented */
 err_clear_ep_ids:
-	ipa_ctx->lan_cons_ep_id = 0;
-	ipa_ctx->cmd_prod_ep_id = 0;
+	ipa->lan_cons_ep_id = 0;
+	ipa->cmd_prod_ep_id = 0;
 	/* XXX gsi_exit(pdev); */
 err_clear_gsi:
-	ipa_ctx->gsi = NULL;
-	ipa_ctx->ipa_phys = 0;
+	ipa->gsi = NULL;
+	ipa->ipa_phys = 0;
 	ipa_reg_exit();
 err_clear_ipa_irq:
-	ipa_ctx->ipa_irq = 0;
+	ipa->ipa_irq = 0;
 err_filter_exit:
-	ipa_filter_exit(ipa_ctx);
+	ipa_filter_exit(ipa);
 err_route_exit:
-	ipa_route_exit(ipa_ctx);
+	ipa_route_exit(ipa);
 err_clock_exit:
-	ipa_ctx->dev = NULL;
-	ipa_clock_exit(ipa_ctx);
+	ipa->dev = NULL;
+	ipa_clock_exit(ipa);
 err_interconnect_exit:
-	ipa_interconnect_exit(ipa_ctx);
+	ipa_interconnect_exit(ipa);
 out_smp2p_exit:
-	ipa_smp2p_exit(ipa_ctx);
+	ipa_smp2p_exit(ipa);
 
 	return ret;
 }
