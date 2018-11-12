@@ -745,16 +745,6 @@ static void ipa_disable_clks(struct ipa_context *ipa)
 	WARN_ON(ipa_interconnect_disable());
 }
 
-/* No inverse required */
-static int ipa_dma_init(struct ipa_context *ipa)
-{
-	/* Make sure DMA memory is adequately aligned */
-	if (dma_get_cache_alignment() % IPA_HW_TBL_SYSADDR_ALIGN)
-		return -ENOTSUPP;
-
-	return dma_set_mask_and_coherent(ipa->dev, DMA_BIT_MASK(64));
-}
-
 /* Add an IPA client under protection of the mutex.  This is called
  * for the first client, but a race could mean another caller gets
  * the first reference.  When the first reference is taken, IPA
@@ -1366,7 +1356,12 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_interconnect_exit;
 
-	ret = ipa_dma_init(ipa);
+	/* Make sure DMA memory is adequately aligned */
+	if (dma_get_cache_alignment() % IPA_HW_TBL_SYSADDR_ALIGN) {
+		ret = -ENOTSUPP;
+		goto err_clock_exit;
+	}
+	ret = dma_set_mask_and_coherent(ipa->dev, DMA_BIT_MASK(64));
 	if (ret)
 		goto err_clock_exit;
 
