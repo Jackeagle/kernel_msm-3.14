@@ -1083,7 +1083,7 @@ static void ipa_post_init(void)
  *
  * Perform initialization which doesn't require access to IPA hardware.
  */
-static int ipa_pre_init(void)
+static int ipa_pre_init(struct ipa_context *ipa)
 {
 	int ret = 0;
 
@@ -1092,36 +1092,36 @@ static int ipa_pre_init(void)
 
 	ipa_init_hw();
 
-	ipa_ctx->ep_count = ipa_get_ep_count();
+	ipa->ep_count = ipa_get_ep_count();
 	ipa_debug("ep_count %u\n", ipa_get_ep_count());
-	ipa_assert(ipa_ctx->ep_count <= IPA_EP_COUNT_MAX);
+	ipa_assert(ipa->ep_count <= IPA_EP_COUNT_MAX);
 
 	ipa_sram_settings_read();
-	if (ipa_ctx->smem_size < IPA_MEM_END_OFST) {
+	if (ipa->smem_size < IPA_MEM_END_OFST) {
 		ipa_err("insufficient memory: %hu bytes available, need %u\n",
-			ipa_ctx->smem_size, IPA_MEM_END_OFST);
+			ipa->smem_size, IPA_MEM_END_OFST);
 		ret = -ENOMEM;
 		goto err_disable_clks;
 	}
 
-	mutex_init(&ipa_ctx->active_clients_mutex);
-	atomic_set(&ipa_ctx->active_clients_count, 1);
+	mutex_init(&ipa->active_clients_mutex);
+	atomic_set(&ipa->active_clients_count, 1);
 
 	/* Create workqueues for power management */
-	ipa_ctx->power_mgmt_wq =
+	ipa->power_mgmt_wq =
 		create_singlethread_workqueue("ipa_power_mgmt");
-	if (!ipa_ctx->power_mgmt_wq) {
+	if (!ipa->power_mgmt_wq) {
 		ipa_err("failed to create power mgmt wq\n");
 		ret = -ENOMEM;
 		goto err_disable_clks;
 	}
 
-	mutex_init(&ipa_ctx->transport_pm.transport_pm_mutex);
+	mutex_init(&ipa->transport_pm.transport_pm_mutex);
 
 	/* init the lookaside cache */
 
-	ipa_ctx->dp = ipa_dp_init();
-	if (!ipa_ctx->dp)
+	ipa->dp = ipa_dp_init();
+	if (!ipa->dp)
 		goto err_destroy_pm_wq;
 
 	/* allocate memory for DMA_TASK workaround */
@@ -1130,8 +1130,8 @@ static int ipa_pre_init(void)
 		goto err_dp_exit;
 
 	/* Create a wakeup source. */
-	wakeup_source_init(&ipa_ctx->wakeup, "IPA_WS");
-	spin_lock_init(&ipa_ctx->wakeup_lock);
+	wakeup_source_init(&ipa->wakeup, "IPA_WS");
+	spin_lock_init(&ipa->wakeup_lock);
 
 	/* Note enabling dynamic clock division must not be
 	 * attempted for IPA hardware versions prior to 3.5.
@@ -1147,10 +1147,10 @@ static int ipa_pre_init(void)
 
 	ipa_err("ipa initialization of interrupts failed\n");
 err_dp_exit:
-	ipa_dp_exit(ipa_ctx->dp);
-	ipa_ctx->dp = NULL;
+	ipa_dp_exit(ipa->dp);
+	ipa->dp = NULL;
 err_destroy_pm_wq:
-	destroy_workqueue(ipa_ctx->power_mgmt_wq);
+	destroy_workqueue(ipa->power_mgmt_wq);
 err_disable_clks:
 	ipa_disable_clks();
 
@@ -1405,7 +1405,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	ipa_ctx->lan_cons_ep_id = IPA_EP_ID_BAD;
 
 	/* Proceed to real initialization */
-	ret = ipa_pre_init();
+	ret = ipa_pre_init(ipa_ctx);
 	if (ret)
 		goto err_clear_ep_ids;
 
