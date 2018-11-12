@@ -1326,6 +1326,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 
 	/* We assume we're working on 64-bit hardware */
 	BUILD_BUG_ON(!IS_ENABLED(CONFIG_64BIT));
+	BUILD_BUG_ON(ARCH_DMA_MINALIGN % IPA_HW_TBL_SYSADDR_ALIGN);
 
 	match_data = of_device_get_match_data(&pdev->dev);
 	modem_init = match_data->init_type == ipa_modem_init;
@@ -1356,11 +1357,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_interconnect_exit;
 
-	/* Make sure DMA memory is adequately aligned */
-	if (dma_get_cache_alignment() % IPA_HW_TBL_SYSADDR_ALIGN) {
-		ret = -ENOTSUPP;
-		goto err_clock_exit;
-	}
 	ret = dma_set_mask_and_coherent(ipa->dev, DMA_BIT_MASK(64));
 	if (ret)
 		goto err_clock_exit;
