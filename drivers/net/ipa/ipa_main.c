@@ -1103,14 +1103,14 @@ EXPORT_SYMBOL_GPL(ipa_ssr_unprepare);
  *
  * Perform initialization that requires interaction with IPA hardware.
  */
-static void ipa_post_init(void)
+static void ipa_post_init(struct ipa_context *ipa)
 {
-	struct device *dev = &ipa_ctx->pdev->dev;
+	struct device *dev = &ipa->pdev->dev;
 	int ret;
 
 	ipa_debug("ipa_post_init() started\n");
 
-	ret = gsi_device_init(ipa_ctx->gsi);
+	ret = gsi_device_init(ipa->gsi);
 	if (ret) {
 		ipa_err(":gsi register error - %d\n", ret);
 		return;
@@ -1119,18 +1119,18 @@ static void ipa_post_init(void)
 	/* setup the AP-IPA endpoints */
 	if (ipa_ep_apps_setup()) {
 		ipa_err(":failed to setup IPA-Apps endpoints\n");
-		gsi_device_exit(ipa_ctx->gsi);
+		gsi_device_exit(ipa->gsi);
 
 		return;
 	}
 
-	ipa_ctx->uc_ctx = ipa_uc_init(ipa_ctx->ipa_phys);
-	if (!ipa_ctx->uc_ctx)
+	ipa->uc_ctx = ipa_uc_init(ipa->ipa_phys);
+	if (!ipa->uc_ctx)
 		ipa_err("microcontroller init failed\n");
 
 	ipa_register_panic_hdlr();
 
-	ipa_ctx->modem_clk_vote_valid = true;
+	ipa->modem_clk_vote_valid = true;
 
 	if (ipa_wwan_init())
 		ipa_err("WWAN init failed (ignoring)\n");
@@ -1261,7 +1261,7 @@ out_release_firmware:
 }
 
 /* Threaded IRQ handler for modem "ipa-clock-query" SMP2P interrupt */
-static irqreturn_t ipa_smp2p_modem_clk_query_isr(int irq, void *ctxt)
+static irqreturn_t ipa_smp2p_modem_clk_query_isr(int irq, void *dev_id)
 {
 	ipa_freeze_clock_vote_and_notify_modem();
 
@@ -1269,9 +1269,11 @@ static irqreturn_t ipa_smp2p_modem_clk_query_isr(int irq, void *ctxt)
 }
 
 /* Threaded IRQ handler for modem "ipa-post-init" SMP2P interrupt */
-static irqreturn_t ipa_smp2p_modem_post_init_isr(int irq, void *ctxt)
+static irqreturn_t ipa_smp2p_modem_post_init_isr(int irq, void *dev_id)
 {
-	ipa_post_init();
+	struct ipa_context *ipa = dev_id;
+
+	ipa_post_init(ipa);
 
 	return IRQ_HANDLED;
 }
@@ -1467,7 +1469,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 			goto err_undo_pre_init;
 
 		/* Now we can proceed to stage two initialization */
-		ipa_post_init();
+		ipa_post_init(ipa);
 	}
 
 	return 0;	/* Success */
