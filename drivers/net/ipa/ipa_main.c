@@ -698,12 +698,12 @@ fail_flt_hash_tuple:
 	return ret;
 }
 
-static int ipa_clock_init(struct device *dev)
+static int ipa_clock_init(struct ipa_context *ipa)
 {
 	struct clk *clk;
 	int ret;
 
-	clk = clk_get(dev, "core");
+	clk = clk_get(ipa->dev, "core");
 	if (IS_ERR(clk))
 		return PTR_ERR(clk);
 
@@ -713,15 +713,15 @@ static int ipa_clock_init(struct device *dev)
 		return ret;
 	}
 
-	ipa_ctx->core_clock = clk;
+	ipa->core_clock = clk;
 
 	return 0;
 }
 
-static void ipa_clock_exit(void)
+static void ipa_clock_exit(struct ipa_context *ipa)
 {
-	clk_put(ipa_ctx->core_clock);
-	ipa_ctx->core_clock = NULL;
+	clk_put(ipa->core_clock);
+	ipa->core_clock = NULL;
 }
 
 /**
@@ -1362,7 +1362,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (ret)
 		goto out_smp2p_exit;
 
-	ret = ipa_clock_init(dev);
+	ret = ipa_clock_init(ipa_ctx);
 	if (ret)
 		goto err_interconnect_exit;
 
@@ -1447,7 +1447,7 @@ err_route_table_exit:
 	ipa_route_table_exit();
 err_clock_exit:
 	ipa_ctx->dev = NULL;
-	ipa_clock_exit();
+	ipa_clock_exit(ipa_ctx);
 err_interconnect_exit:
 	ipa_interconnect_exit(ipa_ctx);
 out_smp2p_exit:
