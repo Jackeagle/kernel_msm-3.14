@@ -1410,9 +1410,13 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_clock_exit;
 
-	ret = ipa_route_init(ipa);
+	ret = ipa_mem_init(ipa);
 	if (ret)
 		goto err_clock_exit;
+
+	ret = ipa_route_init(ipa);
+	if (ret)
+		goto err_mem_exit;
 
 	ret = ipa_filter_init(ipa);
 	if (ret)
@@ -1422,10 +1426,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (ret < 0)
 		goto err_filter_exit;
 	ipa->ipa_irq = ret;
-
-	ret = ipa_mem_init(ipa);
-	if (ret)
-		goto err_clear_ipa_irq;
 
 	ipa->gsi = gsi_init(pdev);
 	if (IS_ERR(ipa->gsi)) {
@@ -1466,13 +1466,13 @@ err_clear_ep_ids:
 	/* XXX gsi_exit(pdev); */
 err_clear_gsi:
 	ipa->gsi = NULL;
-	ipa_mem_exit(ipa);
-err_clear_ipa_irq:
 	ipa->ipa_irq = 0;
 err_filter_exit:
 	ipa_filter_exit(ipa);
 err_route_exit:
 	ipa_route_exit(ipa);
+err_mem_exit:
+	ipa_mem_exit(ipa);
 err_clock_exit:
 	ipa_clock_exit(ipa);
 err_interconnect_exit:
