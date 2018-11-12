@@ -515,9 +515,10 @@ static int ipa_ep_apps_lan_cons_setup(void)
  * ipa_route_table_init() - Initialize an empty route table
  *
  * Each entry in the route table contains the DMA address of a route
- * descriptor.  This function allocates that zero route, then allocates
- * the route table and initializes all its entries to point at the zero
- * route.
+ * descriptor.  A special zero descriptor is allocated that represents
+ * "no route" and this function initializes all its entries to point
+ * at that zero route.  The zero route is allocated with the table,
+ * immediately past its end.
  *
  * Return:	0 if successful or -ENOMEM.
  */
@@ -526,7 +527,7 @@ static int ipa_route_table_init(void)
 	u64 zero_route_phys;
 	dma_addr_t phys;
 	size_t size;
-	u64 *virt;
+	u64 *virt;	/* Assumes IPA_TABLE_ENTRY_SIZE is 64 bits */
 	u32 i;
 
 	/* Allocate the route table, with enough space at the end of
@@ -541,7 +542,7 @@ static int ipa_route_table_init(void)
 	ipa_ctx->route_table_virt = virt;
 	ipa_ctx->route_table_phys = phys;
 
-	/* Zero route is immediately after the filter table */
+	/* Zero route is immediately after the route table */
 	zero_route_phys = phys + size;
 
 	for (i = 0; i < IPA_MEM_RT_COUNT; i++)
@@ -569,11 +570,13 @@ static void ipa_route_table_exit(void)
 /**
  * ipa_filter_table_init() - Initialize an empty filter table
  *
- * Each entry in the filter table contains the DMA address of a filter
- * descriptor.  This function allocates the zero filter, allocates the
- * filter table.  It saves a bitmap of endpoints that support filtering
- * in the first slot, and initializes the remaining entries to point at
- * the zero filter.
+ * The filter table consists of a bitmask representing which endpoints
+ * support filtering, followed by one table entry for each set bit
+ * in the mask.  Each entry in the filter table contains the DMA
+ * address of a filter descriptor.  A special zero descriptor is
+ * allocated that represents "no filter" and this function initializes
+ * all its entries to point at that zero filter.  The zero filter is
+ * allocated with the table, immediately past its end.
  *
  * Return:	0 if successful or a negative error code.
  */
@@ -582,7 +585,7 @@ static int ipa_filter_table_init(void)
 	u64 zero_filter_phys;
 	dma_addr_t phys;
 	size_t size;
-	u64 *virt;
+	u64 *virt;	/* Assumes IPA_TABLE_ENTRY_SIZE is 64 bits */
 	u32 i;
 
 	/* Compute the bitmap of endpoints that support filtering. */
@@ -1236,8 +1239,7 @@ ipa_smp2p_irq_init(struct device *dev, const char *name, irq_handler_t handler)
 	return irq;
 }
 
-static void
-ipa_smp2p_irq_exit(struct device *dev, unsigned int irq)
+static void ipa_smp2p_irq_exit(struct device *dev, unsigned int irq)
 {
 	devm_free_irq(dev, irq, dev);
 }
