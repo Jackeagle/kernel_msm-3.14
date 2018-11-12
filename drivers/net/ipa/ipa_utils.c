@@ -892,21 +892,21 @@ void ipa_cfg_default_route(enum ipa_client_type client)
  * hardware in a known state.  By preallocating the command here we
  * guarantee it can't fail for that reason.
  */
-int ipa_gsi_dma_task_alloc(void)
+int ipa_gsi_dma_task_alloc(struct ipa_context *ipa)
 {
-	struct ipa_dma_task_info *info = &ipa_ctx->dma_task_info;
+	struct ipa_dma_task_info *info = &ipa->dma_task_info;
 	size_t size = IPA_GSI_CHANNEL_STOP_PKT_SIZE;
 	dma_addr_t phys;
 
-	info->virt = dma_zalloc_coherent(ipa_ctx->dev, size, &phys, GFP_KERNEL);
+	info->virt = dma_zalloc_coherent(ipa->dev, size, &phys, GFP_KERNEL);
 	if (!info->virt)
 		return -ENOMEM;
 
 	/* IPA_IMM_CMD_DMA_TASK_32B_ADDR */
-	ipa_ctx->dma_task_info.payload = ipahal_dma_task_32b_addr_pyld(phys,
+	ipa->dma_task_info.payload = ipahal_dma_task_32b_addr_pyld(phys,
 								       size);
-	if (!ipa_ctx->dma_task_info.payload) {
-		dma_free_coherent(ipa_ctx->dev, size, info->virt, phys);
+	if (!ipa->dma_task_info.payload) {
+		dma_free_coherent(ipa->dev, size, info->virt, phys);
 		info->virt = NULL;
 
 		return -ENOMEM;
@@ -916,14 +916,14 @@ int ipa_gsi_dma_task_alloc(void)
 	return 0;
 }
 
-void ipa_gsi_dma_task_free(void)
+void ipa_gsi_dma_task_free(struct ipa_context *ipa)
 {
-	struct ipa_dma_task_info *info = &ipa_ctx->dma_task_info;
+	struct ipa_dma_task_info *info = &ipa->dma_task_info;
 	size_t size = IPA_GSI_CHANNEL_STOP_PKT_SIZE;
 
-	ipahal_payload_free(ipa_ctx->dma_task_info.payload);
-	ipa_ctx->dma_task_info.payload = NULL;
-	dma_free_coherent(ipa_ctx->dev, size, info->virt, info->phys);
+	ipahal_payload_free(ipa->dma_task_info.payload);
+	ipa->dma_task_info.payload = NULL;
+	dma_free_coherent(ipa->dev, size, info->virt, info->phys);
 	info->phys = 0;
 	info->virt = NULL;
 }

@@ -562,8 +562,8 @@ int ipa_rx_poll(u32 ep_id, int budget);
 void ipa_reset_freeze_vote(void);
 void ipa_enable_dcd(void);
 
-int ipa_gsi_dma_task_alloc(void);
-void ipa_gsi_dma_task_free(void);
+int ipa_gsi_dma_task_alloc(struct ipa_context *ipa);
+void ipa_gsi_dma_task_free(struct ipa_context *ipa);
 
 void ipa_set_flt_tuple_mask(u32 ep_id);
 void ipa_set_rt_tuple_mask(int tbl_idx);

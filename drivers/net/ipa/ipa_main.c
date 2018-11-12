@@ -1124,7 +1124,7 @@ static int ipa_pre_init(struct ipa_context *ipa)
 		goto err_destroy_pm_wq;
 
 	/* allocate memory for DMA_TASK workaround */
-	ret = ipa_gsi_dma_task_alloc();
+	ret = ipa_gsi_dma_task_alloc(ipa);
 	if (ret)
 		goto err_dp_exit;
 
