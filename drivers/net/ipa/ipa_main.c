@@ -1331,16 +1331,15 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 {
 	const struct ipa_match_data *match_data;
 	struct resource *res;
-	struct device *dev;
 	bool modem_init;
 	int ret;
 
 	/* We assume we're working on 64-bit hardware */
 	BUILD_BUG_ON(!IS_ENABLED(CONFIG_64BIT));
 
-	dev = &pdev->dev;
+	ipa_ctx->dev = &pdev->dev;
 
-	match_data = of_device_get_match_data(dev);
+	match_data = of_device_get_match_data(ipa_ctx->dev);
 	modem_init = match_data->init_type == ipa_modem_init;
 
 	/* If we need Trust Zone, make sure it's ready */
@@ -1365,8 +1364,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	ret = ipa_clock_init(ipa_ctx);
 	if (ret)
 		goto err_interconnect_exit;
-
-	ipa_ctx->dev = dev;	/* Set early for ipa_err()/ipa_debug() */
 
 	ret = ipa_dma_init();
 	if (ret)
@@ -1419,7 +1416,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	 * and that will trigger the "post init".
 	 */
 	if (!modem_init) {
-		ret = ipa_firmware_load(dev);
+		ret = ipa_firmware_load(ipa_ctx->dev);
 		if (ret)
 			goto err_undo_pre_init;
 
