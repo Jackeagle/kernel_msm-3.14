@@ -750,6 +750,10 @@ static int ipa_mem_init(struct ipa_context *ipa)
 	struct resource *res;
 	int ret;
 
+	ret = dma_set_mask_and_coherent(&ipa->pdev->dev, DMA_BIT_MASK(64));
+	if (ret)
+		return ret;
+
 	/* Get IPA memory range */
 	res = platform_get_resource_byname(ipa->pdev, IORESOURCE_MEM, "ipa");
 	if (!res)
@@ -1405,10 +1409,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	ret = ipa_clock_init(ipa);
 	if (ret)
 		goto err_interconnect_exit;
-
-	ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
-	if (ret)
-		goto err_clock_exit;
 
 	ret = ipa_mem_init(ipa);
 	if (ret)
