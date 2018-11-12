@@ -746,13 +746,13 @@ static void ipa_disable_clks(void)
 }
 
 /* No inverse required */
-static int ipa_dma_init(void)
+static int ipa_dma_init(struct ipa_context *ipa)
 {
 	/* Make sure DMA memory is adequately aligned */
 	if (dma_get_cache_alignment() % IPA_HW_TBL_SYSADDR_ALIGN)
 		return -ENOTSUPP;
 
-	return dma_set_mask_and_coherent(ipa_ctx->dev, DMA_BIT_MASK(64));
+	return dma_set_mask_and_coherent(ipa->dev, DMA_BIT_MASK(64));
 }
 
 /* Add an IPA client under protection of the mutex.  This is called
@@ -1365,7 +1365,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_interconnect_exit;
 
-	ret = ipa_dma_init();
+	ret = ipa_dma_init(ipa_ctx);
 	if (ret)
 		goto err_clock_exit;
 
