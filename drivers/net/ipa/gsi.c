@@ -994,11 +994,12 @@ static void gsi_ring_init(struct gsi_ring *ring)
 static int gsi_ring_alloc(struct gsi_ring *ring, u32 count)
 {
 	size_t size = roundup_pow_of_two(count * GSI_RING_ELEMENT_SIZE);
+	struct device *dev = &ipa_ctx->pdev->dev;
 	phys_addr_t phys;
 	void *virt;
 
 	/* Hardware requires a power-of-2 ring size (and alignment) */
-	virt = dma_zalloc_coherent(ipa_ctx->dev, size, &phys, GFP_KERNEL);
+	virt = dma_zalloc_coherent(dev, size, &phys, GFP_KERNEL);
 	if (!virt)
 		return -ENOMEM;
 	ipa_assert(!(phys % size));
@@ -1013,7 +1014,9 @@ static int gsi_ring_alloc(struct gsi_ring *ring, u32 count)
 
 static void gsi_ring_free(struct gsi_ring *ring)
 {
-	dma_free_coherent(ipa_ctx->dev, ring->size, ring->virt, ring->phys);
+	struct device *dev = &ipa_ctx->pdev->dev;
+
+	dma_free_coherent(dev, ring->size, ring->virt, ring->phys);
 	memset(ring, 0, sizeof(*ring));
 }
 

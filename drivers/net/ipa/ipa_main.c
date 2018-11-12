@@ -63,13 +63,14 @@ struct ipa_context *ipa_ctx = &ipa_ctx_struct;
 
 static int hdr_init_local_cmd(u32 offset, u32 size)
 {
+	struct device *dev = &ipa_ctx->pdev->dev;
 	struct ipa_desc desc = { };
 	dma_addr_t phys;
 	void *payload;
 	void *virt;
 	int ret;
 
-	virt = dma_zalloc_coherent(ipa_ctx->dev, size, &phys, GFP_KERNEL);
+	virt = dma_zalloc_coherent(dev, size, &phys, GFP_KERNEL);
 	if (!virt)
 		return -ENOMEM;
 
@@ -89,13 +90,14 @@ static int hdr_init_local_cmd(u32 offset, u32 size)
 
 	ipahal_payload_free(payload);
 err_dma_free:
-	dma_free_coherent(ipa_ctx->dev, size, virt, phys);
+	dma_free_coherent(dev, size, virt, phys);
 
 	return ret;
 }
 
 static int dma_shared_mem_zero_cmd(u32 offset, u32 size)
 {
+	struct device *dev = &ipa_ctx->pdev->dev;
 	struct ipa_desc desc = { };
 	dma_addr_t phys;
 	void *payload;
@@ -104,7 +106,7 @@ static int dma_shared_mem_zero_cmd(u32 offset, u32 size)
 
 	ipa_assert(size > 0);
 
-	virt = dma_zalloc_coherent(ipa_ctx->dev, size, &phys, GFP_KERNEL);
+	virt = dma_zalloc_coherent(dev, size, &phys, GFP_KERNEL);
 	if (!virt)
 		return -ENOMEM;
 
@@ -124,7 +126,7 @@ static int dma_shared_mem_zero_cmd(u32 offset, u32 size)
 
 	ipahal_payload_free(payload);
 err_dma_free:
-	dma_free_coherent(ipa_ctx->dev, size, virt, phys);
+	dma_free_coherent(dev, size, virt, phys);
 
 	return ret;
 }
@@ -524,6 +526,7 @@ static int ipa_ep_apps_lan_cons_setup(void)
  */
 static int ipa_route_init(struct ipa_context *ipa)
 {
+	struct device *dev = &ipa->pdev->dev;
 	u64 zero_route_phys;
 	dma_addr_t phys;
 	size_t size;
@@ -535,8 +538,8 @@ static int ipa_route_init(struct ipa_context *ipa)
 	 * all filter table entries to point to the zero route.
 	 */
 	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
-	virt = dma_zalloc_coherent(ipa->dev, size + IPA_ROUTE_SIZE,
-				   &phys, GFP_KERNEL);
+	virt = dma_zalloc_coherent(dev, size + IPA_ROUTE_SIZE, &phys,
+				   GFP_KERNEL);
 	if (!virt)
 		return -ENOMEM;
 	ipa->route_virt = virt;
@@ -556,13 +559,13 @@ static int ipa_route_init(struct ipa_context *ipa)
  */
 static void ipa_route_exit(struct ipa_context *ipa)
 {
+	struct device *dev = &ipa->pdev->dev;
 	size_t size;
 
 	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
 	size += IPA_ROUTE_SIZE;
 
-	dma_free_coherent(ipa->dev, size, ipa->route_virt,
-			  ipa->route_phys);
+	dma_free_coherent(dev, size, ipa->route_virt, ipa->route_phys);
 	ipa->route_virt = NULL;
 	ipa->route_phys = 0;
 }
@@ -582,6 +585,7 @@ static void ipa_route_exit(struct ipa_context *ipa)
  */
 static int ipa_filter_init(struct ipa_context *ipa)
 {
+	struct device *dev = &ipa->pdev->dev;
 	u64 zero_filter_phys;
 	dma_addr_t phys;
 	size_t size;
@@ -601,8 +605,8 @@ static int ipa_filter_init(struct ipa_context *ipa)
 	 */
 	ipa->filter_count = hweight32(ipa->filter_bitmap);
 	size = (ipa->filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
-	virt = dma_zalloc_coherent(ipa->dev, size + IPA_FILTER_SIZE,
-				   &phys, GFP_KERNEL);
+	virt = dma_zalloc_coherent(dev, size + IPA_FILTER_SIZE, &phys,
+				   GFP_KERNEL);
 	if (!virt)
 		goto err_clear_filter_count;
 	ipa->filter_virt = virt;
@@ -636,13 +640,13 @@ err_clear_filter_count:
  */
 static void ipa_filter_exit(struct ipa_context *ipa)
 {
+	struct device *dev = &ipa->pdev->dev;
 	size_t size;
 
 	size = (ipa->filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
 	size += IPA_FILTER_SIZE;
 
-	dma_free_coherent(ipa->dev, size, ipa->filter_virt,
-			  ipa->filter_phys);
+	dma_free_coherent(dev, size, ipa->filter_virt, ipa->filter_phys);
 	ipa->filter_virt = NULL;
 	ipa->filter_phys = 0;
 	ipa->filter_count = 0;
@@ -700,10 +704,11 @@ fail_flt_hash_tuple:
 
 static int ipa_clock_init(struct ipa_context *ipa)
 {
+	struct device *dev = &ipa->pdev->dev;
 	struct clk *clk;
 	int ret;
 
-	clk = clk_get(ipa->dev, "core");
+	clk = clk_get(dev, "core");
 	if (IS_ERR(clk))
 		return PTR_ERR(clk);
 
@@ -1037,6 +1042,7 @@ EXPORT_SYMBOL_GPL(ipa_ssr_unprepare);
  */
 static void ipa_post_init(void)
 {
+	struct device *dev = &ipa_ctx->pdev->dev;
 	int ret;
 
 	ipa_debug("ipa_post_init() started\n");
@@ -1066,7 +1072,7 @@ static void ipa_post_init(void)
 	if (ipa_wwan_init())
 		ipa_err("WWAN init failed (ignoring)\n");
 
-	dev_info(ipa_ctx->dev, "IPA driver initialization was successful.\n");
+	dev_info(dev, "IPA driver initialization was successful.\n");
 }
 
 /** ipa_pre_init() - Initialize the IPA Driver.
@@ -1236,21 +1242,19 @@ static void ipa_smp2p_irq_exit(struct device *dev, unsigned int irq)
 static int ipa_smp2p_init(struct ipa_context *ipa, bool modem_init)
 {
 	struct qcom_smem_state *enabled_state;
+	struct device *dev = &ipa->pdev->dev;
 	struct qcom_smem_state *valid_state;
-	struct device_node *node;
 	unsigned int enabled_bit;
 	unsigned int valid_bit;
 	unsigned int clock_irq;
 	int ret;
 
-	node = ipa->dev->of_node;
-
-	valid_state = qcom_smem_state_get(ipa->dev, "ipa-clock-enabled-valid",
+	valid_state = qcom_smem_state_get(dev, "ipa-clock-enabled-valid",
 					  &valid_bit);
 	if (IS_ERR(valid_state))
 		return PTR_ERR(valid_state);
 
-	enabled_state = qcom_smem_state_get(ipa->dev, "ipa-clock-enabled",
+	enabled_state = qcom_smem_state_get(dev, "ipa-clock-enabled",
 					    &enabled_bit);
 	if (IS_ERR(enabled_state)) {
 		ret = PTR_ERR(enabled_state);
@@ -1259,7 +1263,7 @@ static int ipa_smp2p_init(struct ipa_context *ipa, bool modem_init)
 		return ret;
 	}
 
-	ret = ipa_smp2p_irq_init(ipa->dev, "ipa-clock-query",
+	ret = ipa_smp2p_irq_init(dev, "ipa-clock-query",
 				 ipa_smp2p_modem_clk_query_isr);
 	if (ret < 0)
 		return ret;
@@ -1267,10 +1271,10 @@ static int ipa_smp2p_init(struct ipa_context *ipa, bool modem_init)
 
 	if (modem_init) {
 		/* Result will be non-zero (negative for error) */
-		ret = ipa_smp2p_irq_init(ipa->dev, "ipa-post-init",
+		ret = ipa_smp2p_irq_init(dev, "ipa-post-init",
 					 ipa_smp2p_modem_post_init_isr);
 		if (ret < 0) {
-			ipa_smp2p_irq_exit(ipa->dev, clock_irq);
+			ipa_smp2p_irq_exit(dev, clock_irq);
 
 			return ret;
 		}
@@ -1289,9 +1293,11 @@ static int ipa_smp2p_init(struct ipa_context *ipa, bool modem_init)
 
 static void ipa_smp2p_exit(struct ipa_context *ipa)
 {
+	struct device *dev = &ipa->pdev->dev;
+
 	if (ipa->smp2p_info.post_init_irq)
-		ipa_smp2p_irq_exit(ipa->dev, ipa->smp2p_info.post_init_irq);
-	ipa_smp2p_irq_exit(ipa->dev, ipa->smp2p_info.clock_query_irq);
+		ipa_smp2p_irq_exit(dev, ipa->smp2p_info.post_init_irq);
+	ipa_smp2p_irq_exit(dev, ipa->smp2p_info.clock_query_irq);
 
 	memset(&ipa->smp2p_info, 0, sizeof(ipa->smp2p_info));
 }
@@ -1320,6 +1326,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 {
 	const struct ipa_match_data *match_data;
 	struct ipa_context *ipa = ipa_ctx;
+	struct device *dev = &pdev->dev;
 	struct resource *res;
 	bool modem_init;
 	int ret;
@@ -1328,7 +1335,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	BUILD_BUG_ON(!IS_ENABLED(CONFIG_64BIT));
 	BUILD_BUG_ON(ARCH_DMA_MINALIGN % IPA_HW_TBL_SYSADDR_ALIGN);
 
-	match_data = of_device_get_match_data(&pdev->dev);
+	match_data = of_device_get_match_data(dev);
 	modem_init = match_data->init_type == ipa_modem_init;
 
 	/* If we need Trust Zone, make sure it's ready */
@@ -1336,8 +1343,8 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 		if (!qcom_scm_is_available())
 			return -EPROBE_DEFER;
 
-	ipa->dev = &pdev->dev;
-	dev_set_drvdata(ipa->dev, ipa);
+	ipa->pdev = pdev;
+	dev_set_drvdata(dev, ipa);
 
 	/* Initialize the smp2p driver early.  It might not be ready
 	 * when we're probed, so it might return -EPROBE_DEFER.
@@ -1357,7 +1364,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_interconnect_exit;
 
-	ret = dma_set_mask_and_coherent(ipa->dev, DMA_BIT_MASK(64));
+	ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
 	if (ret)
 		goto err_clock_exit;
 
@@ -1408,7 +1415,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	 * and that will trigger the "post init".
 	 */
 	if (!modem_init) {
-		ret = ipa_firmware_load(ipa->dev);
+		ret = ipa_firmware_load(dev);
 		if (ret)
 			goto err_undo_pre_init;
 
@@ -1435,7 +1442,7 @@ err_filter_exit:
 err_route_exit:
 	ipa_route_exit(ipa);
 err_clock_exit:
-	ipa->dev = NULL;
+	ipa->pdev = NULL;
 	ipa_clock_exit(ipa);
 err_interconnect_exit:
 	ipa_interconnect_exit(ipa);
@@ -1469,8 +1476,8 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 	ipa_clock_exit(ipa);
 	ipa_interconnect_exit(ipa);
 	ipa_smp2p_exit(ipa);
-	dev_set_drvdata(ipa->dev, NULL);
-	ipa->dev = NULL;
+	dev_set_drvdata(&pdev->dev, NULL);
+	ipa->pdev = NULL;
 
 	return 0;
 }

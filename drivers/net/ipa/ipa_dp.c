@@ -209,7 +209,7 @@ static int ipa_poll_gsi_pkt(struct ipa_sys_context *sys);
 
 static void ipa_tx_complete(struct ipa_tx_pkt_wrapper *tx_pkt)
 {
-	struct device *dev = ipa_ctx->dev;
+	struct device *dev = &ipa_ctx->pdev->dev;
 
 	/* If DMA memory was mapped, unmap it */
 	if (tx_pkt->virt) {
@@ -452,6 +452,7 @@ void ipa_no_intr_init(u32 prod_ep_id)
 static int
 ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 {
+	struct device *dev = &ipa_ctx->pdev->dev;
 	struct ipa_tx_pkt_wrapper *tx_pkt;
 	struct ipa_tx_pkt_wrapper *first;
 	struct ipa_tx_pkt_wrapper *next;
@@ -482,14 +483,14 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 			first = tx_pkt;
 
 		if (desc[i].type == IPA_DATA_DESC_SKB_PAGED)
-			phys = skb_frag_dma_map(ipa_ctx->dev, desc[i].payload,
-						0, desc[i].len_opcode,
+			phys = skb_frag_dma_map(dev, desc[i].payload, 0,
+						desc[i].len_opcode,
 						DMA_TO_DEVICE);
 		else
-			phys = dma_map_single(ipa_ctx->dev, desc[i].payload,
+			phys = dma_map_single(dev, desc[i].payload,
 					      desc[i].len_opcode,
 					      DMA_TO_DEVICE);
-		if (dma_mapping_error(ipa_ctx->dev, phys)) {
+		if (dma_mapping_error(dev, phys)) {
 			ipa_err("dma mapping error on descriptor\n");
 			kmem_cache_free(ipa_ctx->dp->tx_pkt_wrapper_cache,
 					tx_pkt);
@@ -894,8 +895,8 @@ queue_rx_cache(struct ipa_sys_context *sys, struct ipa_rx_pkt_wrapper *rx_pkt)
  */
 static void ipa_replenish_rx_cache(struct ipa_sys_context *sys)
 {
+	struct device *dev = &ipa_ctx->pdev->dev;
 	struct ipa_rx_pkt_wrapper *rx_pkt;
-	struct device *dev = ipa_ctx->dev;
 	u32 rx_len_cached = sys->len;
 
 	while (rx_len_cached < sys->rx.pool_sz) {
@@ -963,13 +964,14 @@ static void ipa_replenish_rx_work_func(struct work_struct *work)
 /** ipa_cleanup_rx() - release RX queue resources */
 static void ipa_cleanup_rx(struct ipa_sys_context *sys)
 {
+	struct device *dev = &ipa_ctx->pdev->dev;
 	struct ipa_rx_pkt_wrapper *rx_pkt;
 	struct ipa_rx_pkt_wrapper *r;
 
 	list_for_each_entry_safe(rx_pkt, r, &sys->head_desc_list, link) {
 		list_del(&rx_pkt->link);
-		dma_unmap_single(ipa_ctx->dev, rx_pkt->dma_addr,
-				 sys->rx.buff_sz, DMA_FROM_DEVICE);
+		dma_unmap_single(dev, rx_pkt->dma_addr, sys->rx.buff_sz,
+				 DMA_FROM_DEVICE);
 		dev_kfree_skb_any(rx_pkt->skb);
 		kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rx_pkt);
 	}
@@ -1399,6 +1401,7 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 
 static void ipa_rx_common(struct ipa_sys_context *sys, u32 size)
 {
+	struct device *dev = &ipa_ctx->pdev->dev;
 	struct ipa_rx_pkt_wrapper *rx_pkt;
 	struct sk_buff *rx_skb;
 
@@ -1414,7 +1417,7 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u32 size)
 	spin_unlock_bh(&sys->spinlock);
 
 	rx_skb = rx_pkt->skb;
-	dma_unmap_single(ipa_ctx->dev, rx_pkt->dma_addr, sys->rx.buff_sz,
+	dma_unmap_single(dev, rx_pkt->dma_addr, sys->rx.buff_sz,
 			 DMA_FROM_DEVICE);
 
 	skb_trim(rx_skb, size);
@@ -1779,6 +1782,7 @@ static int ipa_channel_reset_aggr(u32 ep_id)
 {
 	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
 	struct ipa_reg_aggr_force_close force_close;
+	struct device *dev = &ipa_ctx->pdev->dev;
 	struct ipa_reg_endp_init_ctrl init_ctrl;
 	struct gsi_xfer_elem xfer_elem = { };
 	int aggr_active_bitmap = 0;
@@ -1815,7 +1819,7 @@ static int ipa_channel_reset_aggr(u32 ep_id)
 		goto out_suspend_again;
 
 	size = 1;
-	virt = dma_zalloc_coherent(ipa_ctx->dev, size, &phys, GFP_KERNEL);
+	virt = dma_zalloc_coherent(dev, size, &phys, GFP_KERNEL);
 	if (!virt) {
 		ret = -ENOMEM;
 		goto err_stop_channel;
@@ -1840,7 +1844,7 @@ static int ipa_channel_reset_aggr(u32 ep_id)
 	}
 	ipa_bug_on(aggr_active_bitmap & BIT(ep_id));
 
-	dma_free_coherent(ipa_ctx->dev, size, virt, phys);
+	dma_free_coherent(dev, size, virt, phys);
 
 	ret = ipa_stop_gsi_channel(ep_id);
 	if (ret)
@@ -1857,7 +1861,7 @@ static int ipa_channel_reset_aggr(u32 ep_id)
 	goto out_suspend_again;
 
 err_dma_free:
-	dma_free_coherent(ipa_ctx->dev, size, virt, phys);
+	dma_free_coherent(dev, size, virt, phys);
 err_stop_channel:
 	ipa_stop_gsi_channel(ep_id);
 out_suspend_again:

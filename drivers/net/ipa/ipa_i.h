@@ -86,8 +86,10 @@
 #define IPA_MEM_END_OFST			0x2000
 #define IPA_MEM_UC_EVENT_RING_OFST		0x1c00	/* v3.5 and later */
 
-#define ipa_debug(fmt, args...)	dev_dbg(ipa_ctx->dev, fmt, ## args)
-#define ipa_err(fmt, args...)	dev_err(ipa_ctx->dev, fmt, ## args)
+#define ipa_debug(fmt, args...) \
+		dev_dbg(&ipa_ctx->pdev->dev, fmt, ## args)
+#define ipa_err(fmt, args...) \
+		dev_err(&ipa_ctx->pdev->dev, fmt, ## args)
 
 #define ipa_bug() \
 	do {								\
@@ -376,7 +378,7 @@ struct ipa_dma_task_info {
  * @ipa_irq:		IRQ number used for IPA
  * @ipa_phys:		Physical address of IPA register memory
  * @gsi:		Pointer to GSI structure
- * @dev:		IPA device structure
+ * @pdev:		IPA platform device structure
  * @ep:			Endpoint array
  * @dp:			Data path information
  * @smem_size:		Size of shared memory
@@ -401,12 +403,12 @@ struct ipa_dma_task_info {
  * @dma_task_info:	Preallocated DMA task
  */
 struct ipa_context {
+	struct platform_device *pdev;
 	u32 filter_bitmap;
 	u32 filter_count;	/* Number of set bits in filter_bitmap */
 	u32 ipa_irq;
 	phys_addr_t ipa_phys;
 	struct gsi *gsi;
-	struct device *dev;
 
 	void *route_virt;
 	dma_addr_t route_phys;

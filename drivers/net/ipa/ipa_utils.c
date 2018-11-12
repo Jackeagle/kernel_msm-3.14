@@ -637,19 +637,20 @@ void ipa_cfg_ep(u32 ep_id)
 
 int ipa_interconnect_init(struct ipa_context *ipa)
 {
+	struct device *dev = &ipa->pdev->dev;
 	struct icc_path *path;
 
-	path = of_icc_get(ipa->dev, "memory");
+	path = of_icc_get(dev, "memory");
 	if (IS_ERR(path))
 		goto err_return;
 	ipa->memory_path = path;
 
-	path = of_icc_get(ipa->dev, "imem");
+	path = of_icc_get(dev, "imem");
 	if (IS_ERR(path))
 		goto err_memory_path_put;
 	ipa->imem_path = path;
 
-	path = of_icc_get(ipa->dev, "config");
+	path = of_icc_get(dev, "config");
 	if (IS_ERR(path))
 		goto err_imem_path_put;
 	ipa->config_path = path;
@@ -896,9 +897,10 @@ int ipa_gsi_dma_task_alloc(struct ipa_context *ipa)
 {
 	struct ipa_dma_task_info *info = &ipa->dma_task_info;
 	size_t size = IPA_GSI_CHANNEL_STOP_PKT_SIZE;
+	struct device *dev = &ipa->pdev->dev;
 	dma_addr_t phys;
 
-	info->virt = dma_zalloc_coherent(ipa->dev, size, &phys, GFP_KERNEL);
+	info->virt = dma_zalloc_coherent(dev, size, &phys, GFP_KERNEL);
 	if (!info->virt)
 		return -ENOMEM;
 
@@ -906,7 +908,7 @@ int ipa_gsi_dma_task_alloc(struct ipa_context *ipa)
 	ipa->dma_task_info.payload = ipahal_dma_task_32b_addr_pyld(phys,
 								       size);
 	if (!ipa->dma_task_info.payload) {
-		dma_free_coherent(ipa->dev, size, info->virt, phys);
+		dma_free_coherent(dev, size, info->virt, phys);
 		info->virt = NULL;
 
 		return -ENOMEM;
@@ -920,10 +922,11 @@ void ipa_gsi_dma_task_free(struct ipa_context *ipa)
 {
 	struct ipa_dma_task_info *info = &ipa->dma_task_info;
 	size_t size = IPA_GSI_CHANNEL_STOP_PKT_SIZE;
+	struct device *dev = &ipa->pdev->dev;
 
 	ipahal_payload_free(ipa->dma_task_info.payload);
 	ipa->dma_task_info.payload = NULL;
-	dma_free_coherent(ipa->dev, size, info->virt, info->phys);
+	dma_free_coherent(dev, size, info->virt, info->phys);
 	info->phys = 0;
 	info->virt = NULL;
 }
