@@ -1346,6 +1346,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 			return -EPROBE_DEFER;
 
 	ipa->dev = &pdev->dev;
+	dev_set_drvdata(ipa->dev, ipa);
 
 	/* Initialize the smp2p driver early.  It might not be ready
 	 * when we're probed, so it might return -EPROBE_DEFER.
@@ -1455,26 +1456,29 @@ out_smp2p_exit:
 
 static int ipa_plat_drv_remove(struct platform_device *pdev)
 {
-	ipa_ctx->dev = NULL;
-	ipa_filter_exit(ipa_ctx);
-	ipa_route_exit(ipa_ctx);
-	ipa_ctx->gsi = NULL;	/* XXX ipa_gsi_exit() */
+	struct ipa_context *ipa = dev_get_drvdata(&pdev->dev);
+
+	ipa_filter_exit(ipa);
+	ipa_route_exit(ipa);
+	ipa->gsi = NULL;	/* XXX ipa_gsi_exit() */
 	ipa_reg_exit();
 
-	ipa_ctx->ipa_phys = 0;
+	ipa->ipa_phys = 0;
 
-	if (ipa_ctx->lan_cons_ep_id != IPA_EP_ID_BAD) {
-		ipa_ep_free(ipa_ctx->lan_cons_ep_id);
-		ipa_ctx->lan_cons_ep_id = IPA_EP_ID_BAD;
+	if (ipa->lan_cons_ep_id != IPA_EP_ID_BAD) {
+		ipa_ep_free(ipa->lan_cons_ep_id);
+		ipa->lan_cons_ep_id = IPA_EP_ID_BAD;
 	}
-	if (ipa_ctx->cmd_prod_ep_id != IPA_EP_ID_BAD) {
-		ipa_ep_free(ipa_ctx->cmd_prod_ep_id);
-		ipa_ctx->cmd_prod_ep_id = IPA_EP_ID_BAD;
+	if (ipa->cmd_prod_ep_id != IPA_EP_ID_BAD) {
+		ipa_ep_free(ipa->cmd_prod_ep_id);
+		ipa->cmd_prod_ep_id = IPA_EP_ID_BAD;
 	}
-	ipa_ctx->ipa_irq = 0;	/* XXX Need to de-initialize? */
-	ipa_ctx->filter_bitmap = 0;
-	ipa_interconnect_exit(ipa_ctx);
-	ipa_smp2p_exit(ipa_ctx);
+	ipa->ipa_irq = 0;	/* XXX Need to de-initialize? */
+	ipa->filter_bitmap = 0;
+	ipa_interconnect_exit(ipa);
+	ipa_smp2p_exit(ipa);
+	dev_set_drvdata(ipa->dev, NULL);
+	ipa->dev = NULL;
 
 	return 0;
 }
