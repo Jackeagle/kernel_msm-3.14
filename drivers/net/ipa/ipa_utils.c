@@ -635,48 +635,48 @@ void ipa_cfg_ep(u32 ep_id)
 	ipa_endp_status_write(ep_id);
 }
 
-int ipa_interconnect_init(struct device *dev)
+int ipa_interconnect_init(struct ipa_context *ipa)
 {
 	struct icc_path *path;
 
-	path = of_icc_get(dev, "memory");
+	path = of_icc_get(ipa->dev, "memory");
 	if (IS_ERR(path))
 		goto err_return;
-	ipa_ctx->memory_path = path;
+	ipa->memory_path = path;
 
-	path = of_icc_get(dev, "imem");
+	path = of_icc_get(ipa->dev, "imem");
 	if (IS_ERR(path))
 		goto err_memory_path_put;
-	ipa_ctx->imem_path = path;
+	ipa->imem_path = path;
 
-	path = of_icc_get(dev, "config");
+	path = of_icc_get(ipa->dev, "config");
 	if (IS_ERR(path))
 		goto err_imem_path_put;
-	ipa_ctx->config_path = path;
+	ipa->config_path = path;
 
 	return 0;
 
 err_imem_path_put:
-	icc_put(ipa_ctx->imem_path);
-	ipa_ctx->imem_path = NULL;
+	icc_put(ipa->imem_path);
+	ipa->imem_path = NULL;
 err_memory_path_put:
-	icc_put(ipa_ctx->memory_path);
-	ipa_ctx->memory_path = NULL;
+	icc_put(ipa->memory_path);
+	ipa->memory_path = NULL;
 err_return:
 
 	return PTR_ERR(path);
 }
 
-void ipa_interconnect_exit(void)
+void ipa_interconnect_exit(struct ipa_context *ipa)
 {
-	icc_put(ipa_ctx->config_path);
-	ipa_ctx->config_path = NULL;
+	icc_put(ipa->config_path);
+	ipa->config_path = NULL;
 
-	icc_put(ipa_ctx->imem_path);
-	ipa_ctx->imem_path = NULL;
+	icc_put(ipa->imem_path);
+	ipa->imem_path = NULL;
 
-	icc_put(ipa_ctx->memory_path);
-	ipa_ctx->memory_path = NULL;
+	icc_put(ipa->memory_path);
+	ipa->memory_path = NULL;
 }
 
 /* Currently we only use bandwidth level, so just "enable" interconnects */

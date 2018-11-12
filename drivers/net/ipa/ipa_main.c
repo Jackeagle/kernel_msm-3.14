@@ -1358,7 +1358,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	/* Initialize the interconnect driver early too.  It might
 	 * also return -EPROBE_DEFER.
 	 */
-	ret = ipa_interconnect_init(dev);
+	ret = ipa_interconnect_init(ipa_ctx);
 	if (ret)
 		goto out_smp2p_exit;
 
@@ -1449,7 +1449,7 @@ err_clock_exit:
 	ipa_ctx->dev = NULL;
 	ipa_clock_exit();
 err_interconnect_exit:
-	ipa_interconnect_exit();
+	ipa_interconnect_exit(ipa_ctx);
 out_smp2p_exit:
 	ipa_smp2p_exit(ipa_ctx);
 
@@ -1476,7 +1476,7 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 	}
 	ipa_ctx->ipa_irq = 0;	/* XXX Need to de-initialize? */
 	ipa_ctx->filter_bitmap = 0;
-	ipa_interconnect_exit();
+	ipa_interconnect_exit(ipa_ctx);
 	ipa_smp2p_exit(ipa_ctx);
 
 	return 0;

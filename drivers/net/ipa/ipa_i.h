@@ -517,8 +517,8 @@ u32 ipa_client_tlv_count(enum ipa_client_type client);
 
 void ipa_init_hw(void);
 
-int ipa_interconnect_init(struct device *dev);
-void ipa_interconnect_exit(void);
+int ipa_interconnect_init(struct ipa_context *ipa);
+void ipa_interconnect_exit(struct ipa_context *ipa);
 
 int ipa_interconnect_enable(void);
 int ipa_interconnect_disable(void);
