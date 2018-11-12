@@ -255,12 +255,12 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 /**
  * ipa_interrupts_init() - Initialize the IPA interrupts framework
  */
-int ipa_interrupts_init(void)
+int ipa_interrupts_init(struct ipa_context *ipa)
 {
 	int ret;
 
-	ret = request_irq(ipa_ctx->ipa_irq, ipa_isr, IRQF_TRIGGER_RISING,
-			  "ipa", ipa_ctx->dev);
+	ret = request_irq(ipa->ipa_irq, ipa_isr, IRQF_TRIGGER_RISING,
+			  "ipa", ipa->dev);
 	if (ret)
 		return ret;
 
@@ -268,7 +268,7 @@ int ipa_interrupts_init(void)
 	if (ipa_interrupt_wq)
 		return 0;
 
-	free_irq(ipa_ctx->ipa_irq, ipa_ctx->dev);
+	free_irq(ipa->ipa_irq, ipa->dev);
 
 	return -ENOMEM;
 }

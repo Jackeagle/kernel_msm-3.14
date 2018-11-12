@@ -928,11 +928,11 @@ static void ipa_suspend_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 /**
  * ipa_init_interrupts() - Initialize IPA interrupts
  */
-static int ipa_init_interrupts(void)
+static int ipa_init_interrupts(struct ipa_context *ipa)
 {
 	int ret;
 
-	ret = ipa_interrupts_init();
+	ret = ipa_interrupts_init(ipa);
 	if (!ret)
 		return ret;
 
@@ -1140,7 +1140,7 @@ static int ipa_pre_init(struct ipa_context *ipa)
 	/* Assign resource limitation to each group */
 	ipa_set_resource_groups_min_max_limits();
 
-	ret = ipa_init_interrupts();
+	ret = ipa_init_interrupts(ipa);
 	if (!ret)
 		return 0;	/* Success! */
 
