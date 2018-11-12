@@ -512,7 +512,7 @@ static int ipa_ep_apps_lan_cons_setup(void)
 }
 
 /**
- * ipa_route_table_init() - Initialize an empty route table
+ * ipa_route_init() - Initialize an empty route table
  *
  * Each entry in the route table contains the DMA address of a route
  * descriptor.  A special zero descriptor is allocated that represents
@@ -522,7 +522,7 @@ static int ipa_ep_apps_lan_cons_setup(void)
  *
  * Return:	0 if successful or -ENOMEM.
  */
-static int ipa_route_table_init(struct ipa_context *ipa)
+static int ipa_route_init(struct ipa_context *ipa)
 {
 	u64 zero_route_phys;
 	dma_addr_t phys;
@@ -539,8 +539,8 @@ static int ipa_route_table_init(struct ipa_context *ipa)
 				   &phys, GFP_KERNEL);
 	if (!virt)
 		return -ENOMEM;
-	ipa->route_table_virt = virt;
-	ipa->route_table_phys = phys;
+	ipa->route_virt = virt;
+	ipa->route_phys = phys;
 
 	/* Zero route is immediately after the route table */
 	zero_route_phys = (u64)phys + size;
@@ -552,23 +552,23 @@ static int ipa_route_table_init(struct ipa_context *ipa)
 }
 
 /**
- * ipa_route_table_exit() - Inverse of ipa_route_table_init().
+ * ipa_route_exit() - Inverse of ipa_route_init().
  */
-static void ipa_route_table_exit(struct ipa_context *ipa)
+static void ipa_route_exit(struct ipa_context *ipa)
 {
 	size_t size;
 
 	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
 	size += IPA_ROUTE_SIZE;
 
-	dma_free_coherent(ipa->dev, size, ipa->route_table_virt,
-			  ipa->route_table_phys);
-	ipa->route_table_virt = NULL;
-	ipa->route_table_phys = 0;
+	dma_free_coherent(ipa->dev, size, ipa->route_virt,
+			  ipa->route_phys);
+	ipa->route_virt = NULL;
+	ipa->route_phys = 0;
 }
 
 /**
- * ipa_filter_table_init() - Initialize an empty filter table
+ * ipa_filter_init() - Initialize an empty filter table
  *
  * The filter table consists of a bitmask representing which endpoints
  * support filtering, followed by one table entry for each set bit
@@ -580,7 +580,7 @@ static void ipa_route_table_exit(struct ipa_context *ipa)
  *
  * Return:	0 if successful or a negative error code.
  */
-static int ipa_filter_table_init(struct ipa_context *ipa)
+static int ipa_filter_init(struct ipa_context *ipa)
 {
 	u64 zero_filter_phys;
 	dma_addr_t phys;
@@ -605,8 +605,8 @@ static int ipa_filter_table_init(struct ipa_context *ipa)
 				   &phys, GFP_KERNEL);
 	if (!virt)
 		goto err_clear_filter_count;
-	ipa->filter_table_virt = virt;
-	ipa->filter_table_phys = phys;
+	ipa->filter_virt = virt;
+	ipa->filter_phys = phys;
 
 	/* Zero filter is immediately after the filter table */
 	zero_filter_phys = (u64)phys + size;
@@ -632,19 +632,19 @@ err_clear_filter_count:
 }
 
 /**
- * ipa_filter_table_exit() - Inverse of ipa_filter_table_init().
+ * ipa_filter_exit() - Inverse of ipa_filter_init().
  */
-static void ipa_filter_table_exit(struct ipa_context *ipa)
+static void ipa_filter_exit(struct ipa_context *ipa)
 {
 	size_t size;
 
 	size = (ipa->filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
 	size += IPA_FILTER_SIZE;
 
-	dma_free_coherent(ipa->dev, size, ipa->filter_table_virt,
-			  ipa->filter_table_phys);
-	ipa->filter_table_virt = NULL;
-	ipa->filter_table_phys = 0;
+	dma_free_coherent(ipa->dev, size, ipa->filter_virt,
+			  ipa->filter_phys);
+	ipa->filter_virt = NULL;
+	ipa->filter_phys = 0;
 	ipa->filter_count = 0;
 	ipa->filter_bitmap = 0;
 }
@@ -663,12 +663,12 @@ static int ipa_ep_apps_setup(void)
 	ipa_init_hdr();
 
 	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
-	ipa_init_rt4(ipa_ctx->route_table_phys, size);
-	ipa_init_rt6(ipa_ctx->route_table_phys, size);
+	ipa_init_rt4(ipa_ctx->route_phys, size);
+	ipa_init_rt6(ipa_ctx->route_phys, size);
 
 	size = (ipa_ctx->filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
-	ipa_init_flt4(ipa_ctx->filter_table_phys, size);
-	ipa_init_flt6(ipa_ctx->filter_table_phys, size);
+	ipa_init_flt4(ipa_ctx->filter_phys, size);
+	ipa_init_flt6(ipa_ctx->filter_phys, size);
 
 	ipa_setup_flt_hash_tuple();
 	ipa_setup_rt_hash_tuple();
@@ -1369,17 +1369,17 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_clock_exit;
 
-	ret = ipa_route_table_init(ipa_ctx);
+	ret = ipa_route_init(ipa_ctx);
 	if (ret)
 		goto err_clock_exit;
 
-	ret = ipa_filter_table_init(ipa_ctx);
+	ret = ipa_filter_init(ipa_ctx);
 	if (ret)
-		goto err_route_table_exit;
+		goto err_route_exit;
 
 	ret = platform_get_irq_byname(pdev, "ipa");
 	if (ret < 0)
-		goto err_filter_table_exit;
+		goto err_filter_exit;
 	ipa_ctx->ipa_irq = ret;
 
 	/* Get IPA memory range */
@@ -1438,10 +1438,10 @@ err_clear_gsi:
 	ipa_reg_exit();
 err_clear_ipa_irq:
 	ipa_ctx->ipa_irq = 0;
-err_filter_table_exit:
-	ipa_filter_table_exit(ipa_ctx);
-err_route_table_exit:
-	ipa_route_table_exit(ipa_ctx);
+err_filter_exit:
+	ipa_filter_exit(ipa_ctx);
+err_route_exit:
+	ipa_route_exit(ipa_ctx);
 err_clock_exit:
 	ipa_ctx->dev = NULL;
 	ipa_clock_exit(ipa_ctx);
@@ -1456,8 +1456,8 @@ out_smp2p_exit:
 static int ipa_plat_drv_remove(struct platform_device *pdev)
 {
 	ipa_ctx->dev = NULL;
-	ipa_filter_table_exit(ipa_ctx);
-	ipa_route_table_exit(ipa_ctx);
+	ipa_filter_exit(ipa_ctx);
+	ipa_route_exit(ipa_ctx);
 	ipa_ctx->gsi = NULL;	/* XXX ipa_gsi_exit() */
 	ipa_reg_exit();
 

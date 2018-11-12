@@ -408,10 +408,10 @@ struct ipa_context {
 	struct gsi *gsi;
 	struct device *dev;
 
-	void *route_table_virt;
-	dma_addr_t route_table_phys;
-	void *filter_table_virt;
-	dma_addr_t filter_table_phys;
+	void *route_virt;
+	dma_addr_t route_phys;
+	void *filter_virt;
+	dma_addr_t filter_phys;
 
 	struct ipa_ep_context ep[IPA_EP_COUNT_MAX];
 	struct ipa_dp *dp;
