@@ -61,6 +61,22 @@ static DECLARE_WORK(ipa_client_remove_work, ipa_client_remove_deferred);
 static struct ipa_context ipa_ctx_struct;
 struct ipa_context *ipa_ctx = &ipa_ctx_struct;
 
+static struct ipa_context *ipa_create(struct platform_device *pdev)
+{
+	struct ipa_context *ipa = ipa_ctx;
+
+	ipa->pdev = pdev;
+	dev_set_drvdata(&ipa->pdev->dev, ipa);
+
+	return ipa;
+}
+
+static void ipa_destroy(struct ipa_context *ipa)
+{
+	dev_set_drvdata(&ipa->pdev->dev, NULL);
+	ipa->pdev = NULL;
+}
+
 static int hdr_init_local_cmd(u32 offset, u32 size)
 {
 	struct device *dev = &ipa_ctx->pdev->dev;
@@ -1343,15 +1359,16 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 		if (!qcom_scm_is_available())
 			return -EPROBE_DEFER;
 
-	ipa->pdev = pdev;
-	dev_set_drvdata(dev, ipa);
+	ipa = ipa_create(pdev);
+	if (!ipa)
+		return -ENOMEM;
 
 	/* Initialize the smp2p driver early.  It might not be ready
 	 * when we're probed, so it might return -EPROBE_DEFER.
 	 */
 	ret = ipa_smp2p_init(ipa, modem_init);
 	if (ret)
-		return ret;
+		goto out_ipa_destroy;
 
 	/* Initialize the interconnect driver early too.  It might
 	 * also return -EPROBE_DEFER.
@@ -1442,12 +1459,13 @@ err_filter_exit:
 err_route_exit:
 	ipa_route_exit(ipa);
 err_clock_exit:
-	ipa->pdev = NULL;
 	ipa_clock_exit(ipa);
 err_interconnect_exit:
 	ipa_interconnect_exit(ipa);
 out_smp2p_exit:
 	ipa_smp2p_exit(ipa);
+out_ipa_destroy:
+	ipa_destroy(ipa);
 
 	return ret;
 }
@@ -1476,8 +1494,7 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 	ipa_clock_exit(ipa);
 	ipa_interconnect_exit(ipa);
 	ipa_smp2p_exit(ipa);
-	dev_set_drvdata(&pdev->dev, NULL);
-	ipa->pdev = NULL;
+	ipa_destroy(ipa);
 
 	return 0;
 }
