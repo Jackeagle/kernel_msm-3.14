@@ -745,6 +745,32 @@ static void ipa_clock_exit(struct ipa_context *ipa)
 	ipa->core_clock = NULL;
 }
 
+static int ipa_mem_init(struct ipa_context *ipa)
+{
+	struct resource *res;
+	int ret;
+
+	/* Get IPA memory range */
+	res = platform_get_resource_byname(ipa->pdev, IORESOURCE_MEM, "ipa");
+	if (!res)
+		return -ENODEV;
+
+	/* Setup IPA register access */
+	ret = ipa_reg_init(res->start, (size_t)resource_size(res));
+	if (ret)
+		return ret;
+
+	ipa->ipa_phys = res->start;
+
+	return 0;
+}
+
+static void ipa_mem_exit(struct ipa_context *ipa)
+{
+	ipa->ipa_phys = 0;
+	ipa_reg_exit();
+}
+
 /**
  * ipa_enable_clks() - Turn on IPA clocks
  */
@@ -1343,7 +1369,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	const struct ipa_match_data *match_data;
 	struct ipa_context *ipa = ipa_ctx;
 	struct device *dev = &pdev->dev;
-	struct resource *res;
 	bool modem_init;
 	int ret;
 
@@ -1398,18 +1423,9 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 		goto err_filter_exit;
 	ipa->ipa_irq = ret;
 
-	/* Get IPA memory range */
-	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "ipa");
-	if (!res) {
-		ret = -ENODEV;
-		goto err_clear_ipa_irq;
-	}
-
-	/* Setup IPA register access */
-	ret = ipa_reg_init(res->start, (size_t)resource_size(res));
+	ret = ipa_mem_init(ipa);
 	if (ret)
 		goto err_clear_ipa_irq;
-	ipa->ipa_phys = res->start;
 
 	ipa->gsi = gsi_init(pdev);
 	if (IS_ERR(ipa->gsi)) {
@@ -1450,8 +1466,7 @@ err_clear_ep_ids:
 	/* XXX gsi_exit(pdev); */
 err_clear_gsi:
 	ipa->gsi = NULL;
-	ipa->ipa_phys = 0;
-	ipa_reg_exit();
+	ipa_mem_exit(ipa);
 err_clear_ipa_irq:
 	ipa->ipa_irq = 0;
 err_filter_exit:
@@ -1486,8 +1501,7 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 	}
 	/* XXX ipa_gsi_exit(ipa) */
 	ipa->gsi = NULL;
-	ipa->ipa_phys = 0;
-	ipa_reg_exit();
+	ipa_mem_exit(ipa);
 	ipa->ipa_irq = 0;	/* XXX Need to de-initialize? */
 	ipa_filter_exit(ipa);
 	ipa_route_exit(ipa);
