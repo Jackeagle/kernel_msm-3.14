@@ -1306,9 +1306,6 @@ static int ipa_pre_init(struct ipa_context *ipa)
 	if (ret)
 		goto err_ep_count_clear;
 
-	mutex_init(&ipa->active_clients_mutex);
-	atomic_set(&ipa->active_clients_count, 1);
-
 	/* Create workqueues for power management */
 	ipa->power_mgmt_wq = create_singlethread_workqueue("ipa_power_mgmt");
 	if (!ipa->power_mgmt_wq) {
@@ -1317,15 +1314,15 @@ static int ipa_pre_init(struct ipa_context *ipa)
 		goto err_sram_settings_clear;
 	}
 
-	mutex_init(&ipa->transport_pm.transport_pm_mutex);
-
-	/* init the lookaside cache */
-
 	ipa->dp = ipa_dp_init();
 	if (!ipa->dp)
 		goto err_destroy_pm_wq;
 
 	/* allocate memory for DMA_TASK workaround */
+	mutex_init(&ipa->active_clients_mutex);
+	atomic_set(&ipa->active_clients_count, 1);
+	mutex_init(&ipa->transport_pm.transport_pm_mutex);
+
 	ret = ipa_gsi_dma_task_alloc(ipa);
 	if (ret)
 		goto err_dp_exit;
