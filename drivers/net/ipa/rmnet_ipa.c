@@ -590,59 +590,58 @@ static int ipa_wwan_begin(struct rmnet_ipa_context *wwan)
 	struct net_device *netdev;
 	int ret;
 
-	mutex_init(&wwan->ep_setup_mutex);
-	mutex_init(&wwan->mux_id_mutex);
-
-	/* Mark client handles bad until we initialize them */
-	wwan->wan_prod_ep_id = IPA_EP_ID_BAD;
-	wwan->wan_cons_ep_id = IPA_EP_ID_BAD;
-
+	/* Zero modem shared memory before we begin */
 	ret = ipa_modem_smem_init();
 	if (ret)
-		goto err_clear_ctx;
+		return ret;
 
-	/* start A7 QMI service/client */
-	ipa_qmi_init();
+	/* Start QMI communication with the modem */
+	ret = ipa_qmi_init();
+	if (ret)
+		return ret;
 
-	/* initialize wan-driver netdev */
 	netdev = alloc_netdev(sizeof(struct ipa_wwan_private),
 			      IPA_WWAN_DEV_NAME, NET_NAME_UNKNOWN,
 			      ipa_wwan_setup);
 	if (!netdev) {
-		ipa_err("no memory for netdev\n");
 		ret = -ENOMEM;
-		goto err_clear_ctx;
+		goto err_qmi_exit;
 	}
-	wwan->netdev = netdev;
-	wwan_ptr = netdev_priv(netdev);
-	wwan_ptr->outstanding_high_ctl = DEFAULT_OUTSTANDING_HIGH_CTL;
-	wwan_ptr->outstanding_high = DEFAULT_OUTSTANDING_HIGH;
-	wwan_ptr->outstanding_low = DEFAULT_OUTSTANDING_LOW;
-	atomic_set(&wwan_ptr->outstanding_pkts, 0);
-
 	/* Enable SG support in netdevice. */
 	netdev->hw_features |= NETIF_F_SG;
 
+	wwan->netdev = netdev;
+	mutex_init(&wwan->mux_id_mutex);
+	wwan->wan_prod_ep_id = IPA_EP_ID_BAD;
+	wwan->wan_cons_ep_id = IPA_EP_ID_BAD;
+	mutex_init(&wwan->ep_setup_mutex);
+
+	wwan_ptr = netdev_priv(netdev);
+	atomic_set(&wwan_ptr->outstanding_pkts, 0);
+	wwan_ptr->outstanding_high_ctl = DEFAULT_OUTSTANDING_HIGH_CTL;
+	wwan_ptr->outstanding_high = DEFAULT_OUTSTANDING_HIGH;
+	wwan_ptr->outstanding_low = DEFAULT_OUTSTANDING_LOW;
 	netif_napi_add(netdev, &wwan_ptr->napi, ipa_rmnet_poll, NAPI_WEIGHT);
+
 	ret = register_netdev(netdev);
-	if (ret) {
-		ipa_err("unable to register ipa_netdev %d rc=%d\n", 0, ret);
+	if (ret)
 		goto err_napi_del;
-	}
 
-	/* offline charging mode */
-	ipa_proxy_clk_unvote();
-
-	/* Till the system is suspended, we keep the clock open */
+	/* Take a clock reference; a suspend request will remove this */
 	ipa_client_add();
+	ipa_proxy_clk_unvote();
 
 	return 0;
 
 err_napi_del:
 	netif_napi_del(&wwan_ptr->napi);
+	memset(wwan_ptr, 0, sizeof(*wwan_ptr));
 	free_netdev(netdev);
-err_clear_ctx:
+	mutex_destroy(&wwan->ep_setup_mutex);
+	mutex_destroy(&wwan->mux_id_mutex);
 	memset(wwan, 0, sizeof(*wwan));
+err_qmi_exit:
+	ipa_qmi_exit();
 
 	return ret;
 }
