@@ -445,8 +445,8 @@ void ipa_sram_settings_read(struct ipa_context *ipa)
 		  ipa->smem_offset);
 }
 
-/** ipa_init_hw() - initialize HW */
-void ipa_init_hw(void)
+/** ipa_hardware_init() - Primitive hardware initialization */
+void ipa_hardware_init(struct ipa_context *ipa)
 {
 	struct ipa_reg_qsb_max_writes max_writes;
 	struct ipa_reg_qsb_max_reads max_reads;

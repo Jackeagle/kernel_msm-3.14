@@ -524,7 +524,7 @@ u32 ipa_client_ep_id(enum ipa_client_type client);
 u32 ipa_client_channel_id(enum ipa_client_type client);
 u32 ipa_client_tlv_count(enum ipa_client_type client);
 
-void ipa_init_hw(void);
+void ipa_hardware_init(struct ipa_context *ipa);
 
 int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout);
 static inline int ipa_send_cmd(struct ipa_desc *desc)

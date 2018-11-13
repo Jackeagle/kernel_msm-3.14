@@ -1296,7 +1296,7 @@ static int ipa_pre_init(struct ipa_context *ipa)
 	if (ret)
 		return ret;
 
-	ipa_init_hw();
+	ipa_hardware_init(ipa);
 
 	ipa->ep_count = ipa_get_ep_count();
 	ipa_debug("ep_count %u\n", ipa->ep_count);
