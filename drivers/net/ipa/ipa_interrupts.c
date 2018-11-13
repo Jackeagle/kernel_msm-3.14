@@ -27,6 +27,7 @@
 #include <linux/workqueue.h>
 
 #include "ipa_i.h"
+#include "ipa_clock.h"
 #include "ipa_reg.h"
 
 struct ipa_interrupt_info {

@@ -7,6 +7,7 @@
 #include <linux/types.h>
 #include <linux/delay.h>
 
+#include "ipa_clock.h"
 #include "ipa_i.h"
 
 /**

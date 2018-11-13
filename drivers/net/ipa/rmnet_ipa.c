@@ -23,6 +23,7 @@
 
 #include "msm_rmnet.h"
 #include "rmnet_config.h"
+#include "ipa_clock.h"
 #include "ipa_qmi.h"
 #include "ipa_i.h"
 

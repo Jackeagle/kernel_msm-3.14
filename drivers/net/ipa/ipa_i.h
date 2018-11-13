@@ -510,9 +510,6 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 
 void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt);
 
-void ipa_clock_proxy_get(void);
-void ipa_clock_proxy_put(void);
-
 u32 ipa_filter_bitmap_init(void);
 
 bool ipa_is_modem_ep(u32 ep_id);
@@ -528,10 +525,6 @@ static inline int ipa_send_cmd(struct ipa_desc *desc)
 {
 	return ipa_send_cmd_timeout(desc, 0);
 }
-
-void ipa_clock_get(void);
-bool ipa_clock_get_additional(void);
-void ipa_clock_put(void);
 
 u32 ipa_aggr_byte_limit_buf_size(u32 byte_limit);
 

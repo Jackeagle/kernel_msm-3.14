@@ -12,6 +12,7 @@
 #include <linux/netdevice.h>
 
 #include "ipa_i.h"	/* ipa_err() */
+#include "ipa_clock.h"
 #include "ipahal.h"
 
 /**

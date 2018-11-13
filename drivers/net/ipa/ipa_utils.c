@@ -637,30 +637,6 @@ void ipa_cfg_ep(u32 ep_id)
 	ipa_endp_status_write(ep_id);
 }
 
-/** ipa_clock_proxy_put() - called to remove IPA clock proxy vote
- *
- * Return value: none
- */
-void ipa_clock_proxy_put(void)
-{
-	if (ipa_ctx->proxy_held) {
-		ipa_clock_put();
-		ipa_ctx->proxy_held = false;
-	}
-}
-
-/** ipa_clock_proxy_get() - called to add IPA clock proxy vote
- *
- * Return value: none
- */
-void ipa_clock_proxy_get(void)
-{
-	if (!ipa_ctx->proxy_held) {
-		ipa_clock_get();
-		ipa_ctx->proxy_held = true;
-	}
-}
-
 int ipa_ep_count_get(struct ipa_context *ipa)
 {
 	u32 count = ipa_read_reg(IPA_ENABLED_PIPES);
