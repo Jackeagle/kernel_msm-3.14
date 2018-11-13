@@ -324,7 +324,7 @@ void ipa_uc_panic_notifier(void)
 	if (!ipa_uc_ctx.uc_loaded)
 		return;
 
-	if (!ipa_client_add_additional())
+	if (!ipa_clock_get_additional())
 		return;
 
 	send_uc_command(IPA_UC_COMMAND_ERR_FATAL, 0);
@@ -332,5 +332,5 @@ void ipa_uc_panic_notifier(void)
 	/* give uc enough time to save state */
 	udelay(IPA_SEND_DELAY);
 
-	ipa_client_remove();
+	ipa_clock_put();
 }

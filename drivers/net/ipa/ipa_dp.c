@@ -316,7 +316,7 @@ int ipa_rx_poll(u32 ep_id, int weight)
 		ipa_rx_switch_to_intr_mode(ep->sys);
 
 		/* Matching enable is in ipa_gsi_irq_rx_notify_cb() */
-		ipa_client_remove();
+		ipa_clock_put();
 	}
 
 	return cnt;
@@ -687,7 +687,7 @@ static void ipa_handle_rx(struct ipa_sys_context *sys)
 	int inactive_cycles = 0;
 	int cnt;
 
-	ipa_client_add();
+	ipa_clock_get();
 	do {
 		cnt = ipa_handle_rx_core(sys);
 		if (cnt == 0)
@@ -707,7 +707,7 @@ static void ipa_handle_rx(struct ipa_sys_context *sys)
 	} while (inactive_cycles <= POLLING_INACTIVITY_RX);
 
 	ipa_rx_switch_to_intr_mode(sys);
-	ipa_client_remove();
+	ipa_clock_put();
 }
 
 static void ipa_switch_to_intr_rx_work_func(struct work_struct *work)
@@ -849,7 +849,7 @@ static void ipa_wq_handle_rx(struct work_struct *work)
 	sys = container_of(work, struct ipa_sys_context, rx.work);
 
 	if (sys->ep->napi_enabled) {
-		ipa_client_add();
+		ipa_clock_get();
 		sys->ep->client_notify(sys->ep->priv, IPA_CLIENT_START_POLL, 0);
 	} else {
 		ipa_handle_rx(sys);
@@ -956,9 +956,9 @@ static void ipa_replenish_rx_work_func(struct work_struct *work)
 	struct ipa_sys_context *sys;
 
 	sys = container_of(dwork, struct ipa_sys_context, rx.replenish_work);
-	ipa_client_add();
+	ipa_clock_get();
 	ipa_replenish_rx_cache(sys);
-	ipa_client_remove();
+	ipa_clock_put();
 }
 
 /** ipa_cleanup_rx() - release RX queue resources */
@@ -1752,7 +1752,7 @@ int ipa_ep_setup(u32 ep_id, u32 channel_count, u32 evt_ring_mult,
 	ep->priv = priv;
 	ep->napi_enabled = ep->client == IPA_CLIENT_APPS_WAN_CONS;
 
-	ipa_client_add();
+	ipa_clock_get();
 
 	ipa_cfg_ep(ep_id);
 
@@ -1763,7 +1763,7 @@ int ipa_ep_setup(u32 ep_id, u32 channel_count, u32 evt_ring_mult,
 	if (ipa_consumer(ep->client))
 		ipa_replenish_rx_cache(ep->sys);
 err_client_remove:
-	ipa_client_remove();
+	ipa_clock_put();
 
 	return ret;
 }

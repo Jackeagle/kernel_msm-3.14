@@ -644,7 +644,7 @@ void ipa_cfg_ep(u32 ep_id)
 void ipa_proxy_clk_unvote(void)
 {
 	if (ipa_ctx->modem_clk_vote_valid) {
-		ipa_client_remove();
+		ipa_clock_put();
 		ipa_ctx->modem_clk_vote_valid = false;
 	}
 }
@@ -656,7 +656,7 @@ void ipa_proxy_clk_unvote(void)
 void ipa_proxy_clk_vote(void)
 {
 	if (!ipa_ctx->modem_clk_vote_valid) {
-		ipa_client_add();
+		ipa_clock_get();
 		ipa_ctx->modem_clk_vote_valid = true;
 	}
 }

@@ -529,9 +529,9 @@ static inline int ipa_send_cmd(struct ipa_desc *desc)
 	return ipa_send_cmd_timeout(desc, 0);
 }
 
-void ipa_client_add(void);
-bool ipa_client_add_additional(void);
-void ipa_client_remove(void);
+void ipa_clock_get(void);
+bool ipa_clock_get_additional(void);
+void ipa_clock_put(void);
 
 u32 ipa_aggr_byte_limit_buf_size(u32 byte_limit);
 

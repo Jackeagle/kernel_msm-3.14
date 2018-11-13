@@ -65,8 +65,8 @@ struct ipa_match_data {
 	enum ipa_init_type init_type;
 };
 
-static void ipa_client_remove_deferred(struct work_struct *work);
-static DECLARE_WORK(ipa_client_remove_work, ipa_client_remove_deferred);
+static void ipa_clock_put_deferred(struct work_struct *work);
+static DECLARE_WORK(ipa_clock_put_work, ipa_clock_put_deferred);
 
 static struct ipa_context ipa_ctx_struct;
 struct ipa_context *ipa_ctx = &ipa_ctx_struct;
@@ -949,7 +949,7 @@ static void ipa_mem_exit(struct ipa_context *ipa)
  * until after this is complete (and the mutex, not the atomic
  * count, is what protects this).
  */
-static void ipa_client_add_first(void)
+static void ipa_clock_get_first(void)
 {
 	mutex_lock(&ipa_ctx->clock_mutex);
 
@@ -962,11 +962,11 @@ static void ipa_client_add_first(void)
 	mutex_unlock(&ipa_ctx->clock_mutex);
 }
 
-/* Attempt to add an IPA client reference, but only if this does not
+/* Attempt to add an IPA clock reference, but only if this does not
  * represent the initial reference.  Returns true if the reference
  * was taken, false otherwise.
  */
-static bool ipa_client_add_not_first(void)
+static bool ipa_clock_get_not_first(void)
 {
 	return !!atomic_inc_not_zero(&ipa_ctx->clock_count);
 }
@@ -975,21 +975,21 @@ static bool ipa_client_add_not_first(void)
  * non-zero.  (This is used to avoid blocking.)  Returns true if the
  * additional reference was added successfully, or false otherwise.
  */
-bool ipa_client_add_additional(void)
+bool ipa_clock_get_additional(void)
 {
-	return ipa_client_add_not_first();
+	return ipa_clock_get_not_first();
 }
 
 /* Add an IPA client.  If this is not the first client, the
  * reference count is updated and return is immediate.  Otherwise
- * ipa_client_add_first() will safely add the first client, enabling
+ * ipa_clock_get_first() will safely add the first client, enabling
  * clocks and setting up (resuming) endpoints before returning.
  */
-void ipa_client_add(void)
+void ipa_clock_get(void)
 {
 	/* There's nothing more to do if this isn't the first reference */
-	if (!ipa_client_add_not_first())
-		ipa_client_add_first();
+	if (!ipa_clock_get_not_first())
+		ipa_clock_get_first();
 }
 
 /* Remove an IPA client under protection of the mutex.  This is
@@ -998,7 +998,7 @@ void ipa_client_add(void)
  * is acquired.  When the final reference is dropped, endpoints are
  * suspended and IPA clocks disabled.
  */
-static void ipa_client_remove_final(void)
+static void ipa_clock_put_final(void)
 {
 	mutex_lock(&ipa_ctx->clock_mutex);
 
@@ -1015,32 +1015,32 @@ static void ipa_client_remove_final(void)
  * is 0, suspend the endpoints and disable clocks.
  *
  * This function runs in work queue context, scheduled to run whenever
- * the last reference would be dropped in ipa_client_remove().
+ * the last reference would be dropped in ipa_clock_put_final().
  */
-static void ipa_client_remove_deferred(struct work_struct *work)
+static void ipa_clock_put_deferred(struct work_struct *work)
 {
-	ipa_client_remove_final();
+	ipa_clock_put_final();
 }
 
-/* Attempt to remove a client reference, but only if this is not the
+/* Attempt to remove a clock reference, but only if this is not the
  * only reference remaining.  Returns true if the reference was
  * removed, or false if doing so would produce a zero reference
  * count.
  */
-static bool ipa_client_remove_not_final(void)
+static bool ipa_clock_put_not_final(void)
 {
 	return !!atomic_add_unless(&ipa_ctx->clock_count, -1, 1);
 }
 
-/* Attempt to remove an IPA client reference.  If this represents
- * the last reference arrange for ipa_client_remove_final() to be
+/* Attempt to remove an IPA clock reference.  If this represents
+ * the last reference arrange for ipa_clock_put_final() to be
  * called in workqueue context, dropping the last reference under
  * protection of the mutex.
  */
-void ipa_client_remove(void)
+void ipa_clock_put(void)
 {
-	if (!ipa_client_remove_not_final())
-		queue_work(ipa_ctx->clock_wq, &ipa_client_remove_work);
+	if (!ipa_clock_put_not_final())
+		queue_work(ipa_ctx->clock_wq, &ipa_clock_put_work);
 }
 
 /** ipa_inc_acquire_wakelock() - Increase active clients counter, and
@@ -1100,7 +1100,7 @@ static void ipa_suspend_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 		/* endpoint will be unsuspended by enabling IPA clocks */
 		mutex_lock(&ipa_ctx->transport_pm.transport_pm_mutex);
 		if (!atomic_read(&ipa_ctx->transport_pm.dec_clients)) {
-			ipa_client_add();
+			ipa_clock_get();
 
 			atomic_set(&ipa_ctx->transport_pm.dec_clients, 1);
 		}
@@ -1137,7 +1137,7 @@ static void ipa_freeze_clock_vote_and_notify_modem(struct ipa_context *ipa)
 		return;
 	}
 
-	ipa->smp2p_info.ipa_clk_on = ipa_client_add_additional();
+	ipa->smp2p_info.ipa_clk_on = ipa_clock_get_additional();
 
 	/* Signal whether the clock is enabled */
 	mask = BIT(ipa->smp2p_info.enabled_bit);
@@ -1160,7 +1160,7 @@ void ipa_reset_freeze_vote(struct ipa_context *ipa)
 		return;
 
 	if (ipa->smp2p_info.ipa_clk_on)
-		ipa_client_remove();
+		ipa_clock_put();
 
 	/* Reset the clock enabled valid flag */
 	mask = BIT(ipa->smp2p_info.valid_bit);
