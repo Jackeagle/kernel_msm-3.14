@@ -855,9 +855,15 @@ static int ipa_clock_init(struct ipa_context *ipa)
 		goto err_clk_put;
 
 	ipa->clock_wq = create_singlethread_workqueue("ipa_clock");
-	if (ipa->clock_wq)
-		return 0;	/* Success */
+	if (!ipa->clock_wq)
+		goto err_interconnect_exit;
 
+	mutex_init(&ipa->clock_mutex);
+	atomic_set(&ipa->clock_count, 1);
+
+	return 0;
+
+err_interconnect_exit:
 	ret = -ENOMEM;
 	ipa_interconnect_exit(ipa);
 err_clk_put:
@@ -869,6 +875,8 @@ err_clk_put:
 
 static void ipa_clock_exit(struct ipa_context *ipa)
 {
+	atomic_set(&ipa->clock_count, 0);
+	mutex_destroy(&ipa->clock_mutex);
 	destroy_workqueue(ipa->clock_wq);
 	ipa->clock_wq = NULL;
 	ipa_interconnect_exit(ipa);
@@ -943,15 +951,15 @@ static void ipa_mem_exit(struct ipa_context *ipa)
  */
 static void ipa_client_add_first(void)
 {
-	mutex_lock(&ipa_ctx->active_clients_mutex);
+	mutex_lock(&ipa_ctx->clock_mutex);
 
 	/* A reference might have been added before we got the mutex. */
-	if (atomic_inc_return(&ipa_ctx->active_clients_count) == 1) {
+	if (atomic_inc_return(&ipa_ctx->clock_count) == 1) {
 		(void)ipa_clock_enable(ipa_ctx);
 		ipa_ep_resume_all();
 	}
 
-	mutex_unlock(&ipa_ctx->active_clients_mutex);
+	mutex_unlock(&ipa_ctx->clock_mutex);
 }
 
 /* Attempt to add an IPA client reference, but only if this does not
@@ -960,7 +968,7 @@ static void ipa_client_add_first(void)
  */
 static bool ipa_client_add_not_first(void)
 {
-	return !!atomic_inc_not_zero(&ipa_ctx->active_clients_count);
+	return !!atomic_inc_not_zero(&ipa_ctx->clock_count);
 }
 
 /* Add an IPA client, but only if the reference count is already
@@ -992,15 +1000,15 @@ void ipa_client_add(void)
  */
 static void ipa_client_remove_final(void)
 {
-	mutex_lock(&ipa_ctx->active_clients_mutex);
+	mutex_lock(&ipa_ctx->clock_mutex);
 
 	/* A reference might have been removed before we got the mutex. */
-	if (!atomic_dec_return(&ipa_ctx->active_clients_count)) {
+	if (!atomic_dec_return(&ipa_ctx->clock_count)) {
 		ipa_ep_suspend_all();
 		ipa_clock_disable(ipa_ctx);
 	}
 
-	mutex_unlock(&ipa_ctx->active_clients_mutex);
+	mutex_unlock(&ipa_ctx->clock_mutex);
 }
 
 /* Decrement the active clients reference count, and if the result
@@ -1021,7 +1029,7 @@ static void ipa_client_remove_deferred(struct work_struct *work)
  */
 static bool ipa_client_remove_not_final(void)
 {
-	return !!atomic_add_unless(&ipa_ctx->active_clients_count, -1, 1);
+	return !!atomic_add_unless(&ipa_ctx->clock_count, -1, 1);
 }
 
 /* Attempt to remove an IPA client reference.  If this represents
@@ -1320,8 +1328,6 @@ static int ipa_pre_init(struct ipa_context *ipa)
 		goto err_sram_settings_clear;
 
 	/* allocate memory for DMA_TASK workaround */
-	mutex_init(&ipa->active_clients_mutex);
-	atomic_set(&ipa->active_clients_count, 1);
 	mutex_init(&ipa->transport_pm.transport_pm_mutex);
 
 	ret = ipa_gsi_dma_task_alloc(ipa);
