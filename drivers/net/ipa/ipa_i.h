@@ -416,6 +416,8 @@ struct ipa_context {
 	dma_addr_t filter_phys;
 	bool post_init_complete;
 
+	struct notifier_block panic_notifier;
+
 	struct ipa_ep_context ep[IPA_EP_COUNT_MAX];
 	struct ipa_dp *dp;
 	u32 smem_size;

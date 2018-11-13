@@ -1052,7 +1052,7 @@ void ipa_reset_freeze_vote(void)
 }
 
 static int
-ipa_panic_notifier(struct notifier_block *this, unsigned long event, void *ptr)
+ipa_panic_notifier(struct notifier_block *nb, unsigned long action, void *data)
 {
 	ipa_freeze_clock_vote_and_notify_modem();
 	ipa_uc_panic_notifier();
@@ -1060,15 +1060,21 @@ ipa_panic_notifier(struct notifier_block *this, unsigned long event, void *ptr)
 	return NOTIFY_DONE;
 }
 
-static struct notifier_block ipa_panic_blk = {
-	.notifier_call = ipa_panic_notifier,
-	/* IPA panic handler needs to run before modem shuts down */
-	.priority = INT_MAX,
-};
-
-static void ipa_register_panic_hdlr(void)
+static int ipa_panic_notifier_register(struct ipa_context *ipa)
 {
-	atomic_notifier_chain_register(&panic_notifier_list, &ipa_panic_blk);
+	/* IPA panic handler needs to run before modem shuts down */
+	ipa->panic_notifier.notifier_call = ipa_panic_notifier;
+	ipa->panic_notifier.priority = INT_MAX;	/* Do it early */
+
+	return atomic_notifier_chain_register(&panic_notifier_list,
+					      &ipa->panic_notifier);
+}
+
+static void ipa_panic_notifier_unregister(struct ipa_context *ipa)
+{
+	atomic_notifier_chain_unregister(&panic_notifier_list,
+					 &ipa->panic_notifier);
+	memset(&ipa->panic_notifier, 0, sizeof(ipa->panic_notifier));
 }
 
 /* Remoteproc callbacks for SSR events: prepare, start, stop, unprepare */
@@ -1128,7 +1134,7 @@ static void ipa_post_init(struct ipa_context *ipa)
 	if (!ipa->uc_ctx)
 		ipa_err("microcontroller init failed\n");
 
-	ipa_register_panic_hdlr();
+	(void)ipa_panic_notifier_register(ipa);
 
 	ipa->modem_clk_vote_valid = true;
 
@@ -1144,6 +1150,8 @@ static void ipa_post_init(struct ipa_context *ipa)
 static void ipa_post_exit(struct ipa_context *ipa)
 {
 	ipa->post_init_complete = false;
+
+	ipa_panic_notifier_unregister(ipa);
 }
 
 /** ipa_pre_init() - Initialize the IPA Driver.
