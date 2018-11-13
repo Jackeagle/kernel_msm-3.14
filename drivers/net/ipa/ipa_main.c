@@ -175,9 +175,6 @@ static int ipa_ep_apps_cmd_prod_setup(void)
 	u32 ep_id;
 	int ret;
 
-	if (ipa_ctx->cmd_prod_ep_id != IPA_EP_ID_BAD)
-		ret = -EBUSY;
-
 	client = IPA_CLIENT_APPS_CMD_PROD;
 	dst_client = IPA_CLIENT_APPS_LAN_CONS;
 	channel_count = IPA_APPS_CMD_PROD_RING_COUNT;
@@ -186,7 +183,6 @@ static int ipa_ep_apps_cmd_prod_setup(void)
 	if (ret < 0)
 		return ret;
 	ep_id = ret;
-
 
 	ipa_endp_init_mode_prod(ep_id, IPA_DMA, dst_client);
 	ipa_endp_init_seq_prod(ep_id);
