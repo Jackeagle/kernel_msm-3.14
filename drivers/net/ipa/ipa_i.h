@@ -545,7 +545,8 @@ int ipa_interrupts_init(struct ipa_context *ipa);
 void ipa_suspend_active_aggr_wa(u32 ep_id);
 void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data);
 
-void ipa_sram_settings_read(struct ipa_context *ipa);
+int ipa_sram_settings_get(struct ipa_context *ipa);
+void ipa_sram_settings_clear(struct ipa_context *ipa);
 
 int ipa_modem_smem_init(void);
 

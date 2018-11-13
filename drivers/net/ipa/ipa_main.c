@@ -1302,13 +1302,9 @@ static int ipa_pre_init(struct ipa_context *ipa)
 	if (ret)
 		goto err_clock_disable;
 
-	ipa_sram_settings_read(ipa);
-	if (ipa->smem_size < IPA_MEM_END_OFST) {
-		ipa_err("insufficient memory: %u bytes available, need %u\n",
-			ipa->smem_size, IPA_MEM_END_OFST);
-		ret = -ENOMEM;
+	ret = ipa_sram_settings_get(ipa);
+	if (ret)
 		goto err_ep_count_clear;
-	}
 
 	mutex_init(&ipa->active_clients_mutex);
 	atomic_set(&ipa->active_clients_count, 1);
@@ -1318,7 +1314,7 @@ static int ipa_pre_init(struct ipa_context *ipa)
 	if (!ipa->power_mgmt_wq) {
 		ipa_err("failed to create power mgmt wq\n");
 		ret = -ENOMEM;
-		goto err_clock_disable;
+		goto err_sram_settings_clear;
 	}
 
 	mutex_init(&ipa->transport_pm.transport_pm_mutex);
@@ -1356,6 +1352,8 @@ err_dp_exit:
 	ipa->dp = NULL;
 err_destroy_pm_wq:
 	destroy_workqueue(ipa->power_mgmt_wq);
+err_sram_settings_clear:
+	ipa_sram_settings_clear(ipa);
 err_ep_count_clear:
 	ipa_ep_count_clear(ipa);
 err_clock_disable:
