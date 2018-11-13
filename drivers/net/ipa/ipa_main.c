@@ -1139,18 +1139,26 @@ static void ipa_post_init(struct ipa_context *ipa)
 
 	ipa->modem_clk_vote_valid = true;
 
-	if (ipa_wwan_init())
-		ipa_err("WWAN init failed (ignoring)\n");
+	ipa->wwan = ipa_wwan_init();
+	if (IS_ERR(ipa->wwan)) {
+		ipa_err("WWAN init returned %d (ignoring)\n",
+			PTR_ERR(ipa->wwan));
+		ipa->wwan = NULL;
+	}
 
 	ipa->post_init_complete = true;
 
 	dev_info(dev, "IPA driver initialization was successful.\n");
-
 }
 
 static void ipa_post_exit(struct ipa_context *ipa)
 {
 	ipa->post_init_complete = false;
+
+	if (ipa->wwan) {
+		ipa_wwan_cleanup(ipa->wwan);
+		ipa->wwan = NULL;
+	}
 
 	ipa_panic_notifier_unregister(ipa);
 }

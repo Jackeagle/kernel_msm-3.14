@@ -409,6 +409,7 @@ struct ipa_context {
 	u32 ipa_irq;
 	phys_addr_t ipa_phys;
 	struct gsi *gsi;
+	void *wwan;
 
 	void *route_virt;
 	dma_addr_t route_phys;
@@ -450,8 +451,8 @@ struct ipa_context {
 
 extern struct ipa_context *ipa_ctx;
 
-int ipa_wwan_init(void);
-void ipa_wwan_cleanup(void);
+void *ipa_wwan_init(void);
+void ipa_wwan_cleanup(void *data);
 
 int ipa_stop_gsi_channel(u32 ep_id);
 

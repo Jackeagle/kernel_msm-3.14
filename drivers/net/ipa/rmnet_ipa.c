@@ -780,15 +780,23 @@ static struct platform_driver rmnet_ipa_driver = {
 	.remove = ipa_wwan_remove,
 };
 
-int ipa_wwan_init(void)
+void *ipa_wwan_init(void)
 {
-	return platform_driver_register(&rmnet_ipa_driver);
+	int ret;
+
+	ret = platform_driver_register(&rmnet_ipa_driver);
+	if (ret)
+		return ERR_PTR(ret);
+
+	return rmnet_ipa_ctx;
 }
 
-void ipa_wwan_cleanup(void)
+void ipa_wwan_cleanup(void *data)
 {
+	struct rmnet_ipa_context *wwan = data;
+
 	platform_driver_unregister(&rmnet_ipa_driver);
-	memset(&rmnet_ipa_ctx_struct, 0, sizeof(rmnet_ipa_ctx_struct));
+	memset(wwan, 0, sizeof(*wwan));
 }
 
 static int ipa_rmnet_poll(struct napi_struct *napi, int budget)
