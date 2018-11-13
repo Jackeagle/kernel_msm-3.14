@@ -526,12 +526,6 @@ u32 ipa_client_tlv_count(enum ipa_client_type client);
 
 void ipa_init_hw(void);
 
-int ipa_interconnect_init(struct ipa_context *ipa);
-void ipa_interconnect_exit(struct ipa_context *ipa);
-
-int ipa_interconnect_enable(void);
-int ipa_interconnect_disable(void);
-
 int ipa_send_cmd_timeout(struct ipa_desc *desc, u32 timeout);
 static inline int ipa_send_cmd(struct ipa_desc *desc)
 {

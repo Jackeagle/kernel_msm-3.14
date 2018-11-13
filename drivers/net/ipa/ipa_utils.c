@@ -13,16 +13,6 @@
 #include "ipa_i.h"
 #include "ipahal.h"
 
-/* Interconnect path bandwidths (each times 1000 bytes per second) */
-#define IPA_MEMORY_AVG			80000
-#define IPA_MEMORY_PEAK			600000
-
-#define IPA_IMEM_AVG			80000
-#define IPA_IMEM_PEAK			350000
-
-#define IPA_CONFIG_AVG			40000
-#define IPA_CONFIG_PEAK			40000
-
 #define IPA_BCR_REG_VAL			0x0000003b
 
 #define IPA_GSI_DMA_TASK_TIMEOUT	15	/* milliseconds */
@@ -633,100 +623,6 @@ void ipa_cfg_ep(u32 ep_id)
 	}
 
 	ipa_endp_status_write(ep_id);
-}
-
-int ipa_interconnect_init(struct ipa_context *ipa)
-{
-	struct device *dev = &ipa->pdev->dev;
-	struct icc_path *path;
-
-	path = of_icc_get(dev, "memory");
-	if (IS_ERR(path))
-		goto err_return;
-	ipa->memory_path = path;
-
-	path = of_icc_get(dev, "imem");
-	if (IS_ERR(path))
-		goto err_memory_path_put;
-	ipa->imem_path = path;
-
-	path = of_icc_get(dev, "config");
-	if (IS_ERR(path))
-		goto err_imem_path_put;
-	ipa->config_path = path;
-
-	return 0;
-
-err_imem_path_put:
-	icc_put(ipa->imem_path);
-	ipa->imem_path = NULL;
-err_memory_path_put:
-	icc_put(ipa->memory_path);
-	ipa->memory_path = NULL;
-err_return:
-
-	return PTR_ERR(path);
-}
-
-void ipa_interconnect_exit(struct ipa_context *ipa)
-{
-	icc_put(ipa->config_path);
-	ipa->config_path = NULL;
-
-	icc_put(ipa->imem_path);
-	ipa->imem_path = NULL;
-
-	icc_put(ipa->memory_path);
-	ipa->memory_path = NULL;
-}
-
-/* Currently we only use bandwidth level, so just "enable" interconnects */
-int ipa_interconnect_enable(void)
-{
-	int ret;
-
-	ret = icc_set(ipa_ctx->memory_path, IPA_MEMORY_AVG, IPA_MEMORY_PEAK);
-	if (ret)
-		return ret;
-
-	ret = icc_set(ipa_ctx->imem_path, IPA_IMEM_AVG, IPA_IMEM_PEAK);
-	if (ret)
-		goto err_disable_memory_path;
-
-	ret = icc_set(ipa_ctx->config_path, IPA_CONFIG_AVG, IPA_CONFIG_PEAK);
-	if (!ret)
-		return 0;	/* Success */
-
-	(void)icc_set(ipa_ctx->imem_path, 0, 0);
-err_disable_memory_path:
-	(void)icc_set(ipa_ctx->memory_path, 0, 0);
-
-	return ret;
-}
-
-/* To disable an interconnect, we just its bandwidth to 0 */
-int ipa_interconnect_disable(void)
-{
-	int ret;
-
-	ret = icc_set(ipa_ctx->memory_path, 0, 0);
-	if (ret)
-		return ret;
-
-	ret = icc_set(ipa_ctx->imem_path, 0, 0);
-	if (ret)
-		goto err_reenable_memory_path;
-
-	ret = icc_set(ipa_ctx->config_path, 0, 0);
-	if (!ret)
-		return 0;	/* Success */
-
-	/* Re-enable things in the event of an error */
-	(void)icc_set(ipa_ctx->imem_path, IPA_IMEM_AVG, IPA_IMEM_PEAK);
-err_reenable_memory_path:
-	(void)icc_set(ipa_ctx->memory_path, IPA_MEMORY_AVG, IPA_MEMORY_PEAK);
-
-	return ret;
 }
 
 /** ipa_proxy_clk_unvote() - called to remove IPA clock proxy vote

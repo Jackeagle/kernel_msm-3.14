@@ -34,6 +34,16 @@
 
 #define	IPA_CORE_CLOCK_RATE	(75UL * 1000 * 1000)
 
+/* Interconnect path bandwidths (each times 1000 bytes per second) */
+#define IPA_MEMORY_AVG			80000
+#define IPA_MEMORY_PEAK			600000
+
+#define IPA_IMEM_AVG			80000
+#define IPA_IMEM_PEAK			350000
+
+#define IPA_CONFIG_AVG			40000
+#define IPA_CONFIG_PEAK			40000
+
 /* The name of the main firmware file relative to /lib/firmware */
 #define IPA_FWS_PATH		"ipa_fws.mdt"
 #define IPA_PAS_ID		15
@@ -727,6 +737,100 @@ static int ipa_ep_apps_setup(void)
 fail_flt_hash_tuple:
 	ipa_ep_teardown(ipa_ctx->cmd_prod_ep_id);
 	ipa_ctx->cmd_prod_ep_id = IPA_EP_ID_BAD;
+
+	return ret;
+}
+
+static int ipa_interconnect_init(struct ipa_context *ipa)
+{
+	struct device *dev = &ipa->pdev->dev;
+	struct icc_path *path;
+
+	path = of_icc_get(dev, "memory");
+	if (IS_ERR(path))
+		goto err_return;
+	ipa->memory_path = path;
+
+	path = of_icc_get(dev, "imem");
+	if (IS_ERR(path))
+		goto err_memory_path_put;
+	ipa->imem_path = path;
+
+	path = of_icc_get(dev, "config");
+	if (IS_ERR(path))
+		goto err_imem_path_put;
+	ipa->config_path = path;
+
+	return 0;
+
+err_imem_path_put:
+	icc_put(ipa->imem_path);
+	ipa->imem_path = NULL;
+err_memory_path_put:
+	icc_put(ipa->memory_path);
+	ipa->memory_path = NULL;
+err_return:
+
+	return PTR_ERR(path);
+}
+
+static void ipa_interconnect_exit(struct ipa_context *ipa)
+{
+	icc_put(ipa->config_path);
+	ipa->config_path = NULL;
+
+	icc_put(ipa->imem_path);
+	ipa->imem_path = NULL;
+
+	icc_put(ipa->memory_path);
+	ipa->memory_path = NULL;
+}
+
+/* Currently we only use bandwidth level, so just "enable" interconnects */
+static int ipa_interconnect_enable(void)
+{
+	int ret;
+
+	ret = icc_set(ipa_ctx->memory_path, IPA_MEMORY_AVG, IPA_MEMORY_PEAK);
+	if (ret)
+		return ret;
+
+	ret = icc_set(ipa_ctx->imem_path, IPA_IMEM_AVG, IPA_IMEM_PEAK);
+	if (ret)
+		goto err_disable_memory_path;
+
+	ret = icc_set(ipa_ctx->config_path, IPA_CONFIG_AVG, IPA_CONFIG_PEAK);
+	if (!ret)
+		return 0;	/* Success */
+
+	(void)icc_set(ipa_ctx->imem_path, 0, 0);
+err_disable_memory_path:
+	(void)icc_set(ipa_ctx->memory_path, 0, 0);
+
+	return ret;
+}
+
+/* To disable an interconnect, we just its bandwidth to 0 */
+static int ipa_interconnect_disable(void)
+{
+	int ret;
+
+	ret = icc_set(ipa_ctx->memory_path, 0, 0);
+	if (ret)
+		return ret;
+
+	ret = icc_set(ipa_ctx->imem_path, 0, 0);
+	if (ret)
+		goto err_reenable_memory_path;
+
+	ret = icc_set(ipa_ctx->config_path, 0, 0);
+	if (!ret)
+		return 0;	/* Success */
+
+	/* Re-enable things in the event of an error */
+	(void)icc_set(ipa_ctx->imem_path, IPA_IMEM_AVG, IPA_IMEM_PEAK);
+err_reenable_memory_path:
+	(void)icc_set(ipa_ctx->memory_path, IPA_MEMORY_AVG, IPA_MEMORY_PEAK);
 
 	return ret;
 }
