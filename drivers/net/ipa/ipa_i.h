@@ -553,7 +553,9 @@ struct ipa_uc_ctx *ipa_uc_init(phys_addr_t phys_addr);
 bool ipa_uc_loaded(void);
 void ipa_uc_panic_notifier(void);
 
-u32 ipa_get_ep_count(void);
+int ipa_ep_count_get(struct ipa_context *ipa);
+void ipa_ep_count_clear(struct ipa_context *ipa);
+
 int ipa_ap_suspend(struct device *dev);
 int ipa_ap_resume(struct device *dev);
 void ipa_set_resource_groups_min_max_limits(void);

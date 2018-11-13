@@ -1298,16 +1298,16 @@ static int ipa_pre_init(struct ipa_context *ipa)
 
 	ipa_hardware_init(ipa);
 
-	ipa->ep_count = ipa_get_ep_count();
-	ipa_debug("ep_count %u\n", ipa->ep_count);
-	ipa_assert(ipa->ep_count <= IPA_EP_COUNT_MAX);
+	ret = ipa_ep_count_get(ipa);
+	if (ret)
+		goto err_clock_disable;
 
 	ipa_sram_settings_read(ipa);
 	if (ipa->smem_size < IPA_MEM_END_OFST) {
 		ipa_err("insufficient memory: %u bytes available, need %u\n",
 			ipa->smem_size, IPA_MEM_END_OFST);
 		ret = -ENOMEM;
-		goto err_clock_disable;
+		goto err_ep_count_clear;
 	}
 
 	mutex_init(&ipa->active_clients_mutex);
@@ -1356,6 +1356,8 @@ err_dp_exit:
 	ipa->dp = NULL;
 err_destroy_pm_wq:
 	destroy_workqueue(ipa->power_mgmt_wq);
+err_ep_count_clear:
+	ipa_ep_count_clear(ipa);
 err_clock_disable:
 	ipa_clock_disable(ipa);
 

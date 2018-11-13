@@ -649,9 +649,21 @@ void ipa_proxy_clk_vote(void)
 	}
 }
 
-u32 ipa_get_ep_count(void)
+int ipa_ep_count_get(struct ipa_context *ipa)
 {
-	return ipa_read_reg(IPA_ENABLED_PIPES);
+	u32 count = ipa_read_reg(IPA_ENABLED_PIPES);
+
+	ipa_debug("endpoint count %u\n", count);
+	if (count > IPA_EP_COUNT_MAX)
+		return -EINVAL;
+	ipa->ep_count = count;
+
+	return 0;
+}
+
+void ipa_ep_count_clear(struct ipa_context *ipa)
+{
+	ipa->ep_count = 0;
 }
 
 /** ipa_is_modem_ep()- Checks if endpoint is owned by the modem
