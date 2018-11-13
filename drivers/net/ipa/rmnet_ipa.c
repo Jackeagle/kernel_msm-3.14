@@ -583,69 +583,6 @@ static void ipa_wwan_setup(struct net_device *dev)
 	dev->watchdog_timeo = msecs_to_jiffies(10 * MSEC_PER_SEC);
 }
 
-/** ipa_wwan_begin() - Start things up */
-static int ipa_wwan_begin(struct rmnet_ipa_context *wwan)
-{
-	struct ipa_wwan_private *wwan_ptr;
-	struct net_device *netdev;
-	int ret;
-
-	/* Zero modem shared memory before we begin */
-	ret = ipa_modem_smem_init();
-	if (ret)
-		return ret;
-
-	/* Start QMI communication with the modem */
-	ret = ipa_qmi_init();
-	if (ret)
-		return ret;
-
-	netdev = alloc_netdev(sizeof(struct ipa_wwan_private),
-			      IPA_WWAN_DEV_NAME, NET_NAME_UNKNOWN,
-			      ipa_wwan_setup);
-	if (!netdev) {
-		ret = -ENOMEM;
-		goto err_qmi_exit;
-	}
-	/* Enable SG support in netdevice. */
-	netdev->hw_features |= NETIF_F_SG;
-
-	wwan->netdev = netdev;
-	mutex_init(&wwan->mux_id_mutex);
-	wwan->wan_prod_ep_id = IPA_EP_ID_BAD;
-	wwan->wan_cons_ep_id = IPA_EP_ID_BAD;
-	mutex_init(&wwan->ep_setup_mutex);
-
-	wwan_ptr = netdev_priv(netdev);
-	atomic_set(&wwan_ptr->outstanding_pkts, 0);
-	wwan_ptr->outstanding_high_ctl = DEFAULT_OUTSTANDING_HIGH_CTL;
-	wwan_ptr->outstanding_high = DEFAULT_OUTSTANDING_HIGH;
-	wwan_ptr->outstanding_low = DEFAULT_OUTSTANDING_LOW;
-	netif_napi_add(netdev, &wwan_ptr->napi, ipa_rmnet_poll, NAPI_WEIGHT);
-
-	ret = register_netdev(netdev);
-	if (ret)
-		goto err_napi_del;
-
-	/* Take a clock reference; a suspend request will remove this */
-	ipa_client_add();
-	ipa_proxy_clk_unvote();
-
-	return 0;
-
-err_napi_del:
-	netif_napi_del(&wwan_ptr->napi);
-	memset(wwan_ptr, 0, sizeof(*wwan_ptr));
-	free_netdev(netdev);
-	mutex_destroy(&wwan->ep_setup_mutex);
-	mutex_destroy(&wwan->mux_id_mutex);
-	memset(wwan, 0, sizeof(*wwan));
-err_qmi_exit:
-	ipa_qmi_exit();
-
-	return ret;
-}
-
 /** rmnet_ipa_ap_suspend() - suspend callback for runtime_pm
  * @dev: pointer to device
  *
@@ -711,13 +648,65 @@ void rmnet_ipa_ap_resume(void *data)
 
 void *ipa_wwan_init(void)
 {
+	struct rmnet_ipa_context *wwan = rmnet_ipa_ctx;
+	struct ipa_wwan_private *wwan_ptr;
+	struct net_device *netdev;
 	int ret;
 
-	ret = ipa_wwan_begin(rmnet_ipa_ctx);
+	/* Zero modem shared memory before we begin */
+	ret = ipa_modem_smem_init();
 	if (ret)
 		return ERR_PTR(ret);
 
-	return rmnet_ipa_ctx;
+	/* Start QMI communication with the modem */
+	ret = ipa_qmi_init();
+	if (ret)
+		return ERR_PTR(ret);
+
+	netdev = alloc_netdev(sizeof(struct ipa_wwan_private),
+			      IPA_WWAN_DEV_NAME, NET_NAME_UNKNOWN,
+			      ipa_wwan_setup);
+	if (!netdev) {
+		ret = -ENOMEM;
+		goto err_qmi_exit;
+	}
+	/* Enable SG support in netdevice. */
+	netdev->hw_features |= NETIF_F_SG;
+
+	wwan->netdev = netdev;
+	mutex_init(&wwan->mux_id_mutex);
+	wwan->wan_prod_ep_id = IPA_EP_ID_BAD;
+	wwan->wan_cons_ep_id = IPA_EP_ID_BAD;
+	mutex_init(&wwan->ep_setup_mutex);
+
+	wwan_ptr = netdev_priv(netdev);
+	atomic_set(&wwan_ptr->outstanding_pkts, 0);
+	wwan_ptr->outstanding_high_ctl = DEFAULT_OUTSTANDING_HIGH_CTL;
+	wwan_ptr->outstanding_high = DEFAULT_OUTSTANDING_HIGH;
+	wwan_ptr->outstanding_low = DEFAULT_OUTSTANDING_LOW;
+	netif_napi_add(netdev, &wwan_ptr->napi, ipa_rmnet_poll, NAPI_WEIGHT);
+
+	ret = register_netdev(netdev);
+	if (ret)
+		goto err_napi_del;
+
+	/* Take a clock reference; a suspend request will remove this */
+	ipa_client_add();
+	ipa_proxy_clk_unvote();
+
+	return wwan;
+
+err_napi_del:
+	netif_napi_del(&wwan_ptr->napi);
+	memset(wwan_ptr, 0, sizeof(*wwan_ptr));
+	free_netdev(netdev);
+	mutex_destroy(&wwan->ep_setup_mutex);
+	mutex_destroy(&wwan->mux_id_mutex);
+	memset(wwan, 0, sizeof(*wwan));
+err_qmi_exit:
+	ipa_qmi_exit();
+
+	return ERR_PTR(ret);
 }
 
 void ipa_wwan_cleanup(void *data)
