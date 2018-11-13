@@ -702,39 +702,29 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 int rmnet_ipa_ap_suspend(void *data)
 {
 	struct rmnet_ipa_context *wwan = data;
-	struct net_device *netdev = wwan->netdev;
 	struct ipa_wwan_private *wwan_ptr;
+	struct net_device *netdev;
 	int ret;
 
-	if (!netdev) {
-		ipa_err("netdev is NULL.\n");
-		ret = 0;
-		goto bail;
-	}
-
-	netif_tx_lock_bh(netdev);
-	wwan_ptr = netdev_priv(netdev);
-	if (!wwan_ptr) {
-		ipa_err("wwan_ptr is NULL.\n");
-		ret = 0;
-		goto unlock_and_bail;
-	}
-
-	/* Do not allow A7 to suspend in case there are outstanding packets */
-	if (atomic_read(&wwan_ptr->outstanding_pkts) != 0) {
-		ret = -EAGAIN;
-		goto unlock_and_bail;
-	}
-
-	/* Make sure that there is no Tx operation ongoing */
-	netif_stop_queue(netdev);
+	netdev = wwan->netdev;
+	if (!netdev)
+		return 0;
 
 	ret = 0;
-	ipa_client_remove();
+	netif_tx_lock_bh(netdev);
+	wwan_ptr = netdev_priv(netdev);
+	if (!wwan_ptr)
+		goto out_unlock;
 
-unlock_and_bail:
+	/* Only not allow suspend if there are no outstanding packets */
+	if (!atomic_read(&wwan_ptr->outstanding_pkts)) {
+		netif_stop_queue(netdev);
+		ipa_client_remove();
+	} else {
+		ret = -EAGAIN;
+	}
+out_unlock:
 	netif_tx_unlock_bh(netdev);
-bail:
 
 	return ret;
 }
