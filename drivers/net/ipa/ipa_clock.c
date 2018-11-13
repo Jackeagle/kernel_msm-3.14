@@ -75,50 +75,50 @@ static void ipa_interconnect_exit(struct ipa_context *ipa)
 }
 
 /* Currently we only use bandwidth level, so just "enable" interconnects */
-static int ipa_interconnect_enable(void)
+static int ipa_interconnect_enable(struct ipa_context *ipa)
 {
 	int ret;
 
-	ret = icc_set(ipa_ctx->memory_path, IPA_MEMORY_AVG, IPA_MEMORY_PEAK);
+	ret = icc_set(ipa->memory_path, IPA_MEMORY_AVG, IPA_MEMORY_PEAK);
 	if (ret)
 		return ret;
 
-	ret = icc_set(ipa_ctx->imem_path, IPA_IMEM_AVG, IPA_IMEM_PEAK);
+	ret = icc_set(ipa->imem_path, IPA_IMEM_AVG, IPA_IMEM_PEAK);
 	if (ret)
 		goto err_disable_memory_path;
 
-	ret = icc_set(ipa_ctx->config_path, IPA_CONFIG_AVG, IPA_CONFIG_PEAK);
+	ret = icc_set(ipa->config_path, IPA_CONFIG_AVG, IPA_CONFIG_PEAK);
 	if (!ret)
 		return 0;	/* Success */
 
-	(void)icc_set(ipa_ctx->imem_path, 0, 0);
+	(void)icc_set(ipa->imem_path, 0, 0);
 err_disable_memory_path:
-	(void)icc_set(ipa_ctx->memory_path, 0, 0);
+	(void)icc_set(ipa->memory_path, 0, 0);
 
 	return ret;
 }
 
 /* To disable an interconnect, we just its bandwidth to 0 */
-static int ipa_interconnect_disable(void)
+static int ipa_interconnect_disable(struct ipa_context *ipa)
 {
 	int ret;
 
-	ret = icc_set(ipa_ctx->memory_path, 0, 0);
+	ret = icc_set(ipa->memory_path, 0, 0);
 	if (ret)
 		return ret;
 
-	ret = icc_set(ipa_ctx->imem_path, 0, 0);
+	ret = icc_set(ipa->imem_path, 0, 0);
 	if (ret)
 		goto err_reenable_memory_path;
 
-	ret = icc_set(ipa_ctx->config_path, 0, 0);
+	ret = icc_set(ipa->config_path, 0, 0);
 	if (!ret)
 		return 0;	/* Success */
 
 	/* Re-enable things in the event of an error */
-	(void)icc_set(ipa_ctx->imem_path, IPA_IMEM_AVG, IPA_IMEM_PEAK);
+	(void)icc_set(ipa->imem_path, IPA_IMEM_AVG, IPA_IMEM_PEAK);
 err_reenable_memory_path:
-	(void)icc_set(ipa_ctx->memory_path, IPA_MEMORY_AVG, IPA_MEMORY_PEAK);
+	(void)icc_set(ipa->memory_path, IPA_MEMORY_AVG, IPA_MEMORY_PEAK);
 
 	return ret;
 }
@@ -179,13 +179,13 @@ int ipa_clock_enable(struct ipa_context *ipa)
 {
 	int ret;
 
-	ret = ipa_interconnect_enable();
+	ret = ipa_interconnect_enable(ipa);
 	if (ret)
 		return ret;
 
 	ret = clk_prepare_enable(ipa->core_clock);
 	if (ret)
-		ipa_interconnect_disable();
+		ipa_interconnect_disable(ipa);
 
 	return ret;
 }
@@ -196,7 +196,7 @@ int ipa_clock_enable(struct ipa_context *ipa)
 void ipa_clock_disable(struct ipa_context *ipa)
 {
 	clk_disable_unprepare(ipa->core_clock);
-	(void)ipa_interconnect_disable();
+	(void)ipa_interconnect_disable(ipa);
 }
 
 /* Add an IPA client under protection of the mutex.  This is called
