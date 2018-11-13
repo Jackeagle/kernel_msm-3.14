@@ -758,6 +758,33 @@ static void ipa_clock_exit(struct ipa_context *ipa)
 	ipa->core_clock = NULL;
 }
 
+/**
+ * ipa_clock_enable() - Turn on IPA clocks
+ */
+static int ipa_clock_enable(struct ipa_context *ipa)
+{
+	int ret;
+
+	ret = ipa_interconnect_enable();
+	if (ret)
+		return ret;
+
+	ret = clk_prepare_enable(ipa->core_clock);
+	if (ret)
+		ipa_interconnect_disable();
+
+	return ret;
+}
+
+/**
+ * ipa_clock_disable() - Turn off IPA clocks
+ */
+static void ipa_clock_disable(struct ipa_context *ipa)
+{
+	clk_disable_unprepare(ipa->core_clock);
+	(void)ipa_interconnect_disable();
+}
+
 static int ipa_mem_init(struct ipa_context *ipa)
 {
 	struct resource *res;
@@ -788,27 +815,6 @@ static void ipa_mem_exit(struct ipa_context *ipa)
 	ipa_reg_exit();
 }
 
-/**
- * ipa_enable_clks() - Turn on IPA clocks
- */
-static void ipa_enable_clks(struct ipa_context *ipa)
-{
-	if (WARN_ON(ipa_interconnect_enable()))
-		return;
-
-	if (WARN_ON(clk_prepare_enable(ipa->core_clock)))
-		ipa_interconnect_disable();
-}
-
-/**
- * ipa_disable_clks() - Turn off IPA clocks
- */
-static void ipa_disable_clks(struct ipa_context *ipa)
-{
-	clk_disable_unprepare(ipa->core_clock);
-	WARN_ON(ipa_interconnect_disable());
-}
-
 /* Add an IPA client under protection of the mutex.  This is called
  * for the first client, but a race could mean another caller gets
  * the first reference.  When the first reference is taken, IPA
@@ -821,20 +827,17 @@ static void ipa_client_add_first(void)
 {
 	mutex_lock(&ipa_ctx->active_clients_mutex);
 
-	/* A reference might have been added while awaiting the mutex. */
-	if (!atomic_inc_not_zero(&ipa_ctx->active_clients_count)) {
-		ipa_enable_clks(ipa_ctx);
+	/* A reference might have been added before we got the mutex. */
+	if (atomic_inc_return(&ipa_ctx->active_clients_count) == 1) {
+		(void)ipa_clock_enable(ipa_ctx);
 		ipa_ep_resume_all();
-		atomic_inc(&ipa_ctx->active_clients_count);
-	} else {
-		ipa_assert(atomic_read(&ipa_ctx->active_clients_count) > 1);
 	}
 
 	mutex_unlock(&ipa_ctx->active_clients_mutex);
 }
 
 /* Attempt to add an IPA client reference, but only if this does not
- * represent the initiaal reference.  Returns true if the reference
+ * represent the initial reference.  Returns true if the reference
  * was taken, false otherwise.
  */
 static bool ipa_client_add_not_first(void)
@@ -873,10 +876,10 @@ static void ipa_client_remove_final(void)
 {
 	mutex_lock(&ipa_ctx->active_clients_mutex);
 
-	/* A reference might have been removed while awaiting the mutex. */
+	/* A reference might have been removed before we got the mutex. */
 	if (!atomic_dec_return(&ipa_ctx->active_clients_count)) {
 		ipa_ep_suspend_all();
-		ipa_disable_clks(ipa_ctx);
+		ipa_clock_disable(ipa_ctx);
 	}
 
 	mutex_unlock(&ipa_ctx->active_clients_mutex);
@@ -1177,10 +1180,12 @@ static void ipa_post_exit(struct ipa_context *ipa)
  */
 static int ipa_pre_init(struct ipa_context *ipa)
 {
-	int ret = 0;
+	int ret;
 
 	/* enable IPA clocks explicitly to allow the initialization */
-	ipa_enable_clks(ipa);
+	ret = ipa_clock_enable(ipa);
+	if (ret)
+		return ret;
 
 	ipa_init_hw();
 
@@ -1193,7 +1198,7 @@ static int ipa_pre_init(struct ipa_context *ipa)
 		ipa_err("insufficient memory: %u bytes available, need %u\n",
 			ipa->smem_size, IPA_MEM_END_OFST);
 		ret = -ENOMEM;
-		goto err_disable_clks;
+		goto err_clock_disable;
 	}
 
 	mutex_init(&ipa->active_clients_mutex);
@@ -1204,7 +1209,7 @@ static int ipa_pre_init(struct ipa_context *ipa)
 	if (!ipa->power_mgmt_wq) {
 		ipa_err("failed to create power mgmt wq\n");
 		ret = -ENOMEM;
-		goto err_disable_clks;
+		goto err_clock_disable;
 	}
 
 	mutex_init(&ipa->transport_pm.transport_pm_mutex);
@@ -1242,8 +1247,8 @@ err_dp_exit:
 	ipa->dp = NULL;
 err_destroy_pm_wq:
 	destroy_workqueue(ipa->power_mgmt_wq);
-err_disable_clks:
-	ipa_disable_clks(ipa);
+err_clock_disable:
+	ipa_clock_disable(ipa);
 
 	return ret;
 }
