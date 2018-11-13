@@ -1023,7 +1023,7 @@ static bool ipa_client_remove_not_final(void)
 void ipa_client_remove(void)
 {
 	if (!ipa_client_remove_not_final())
-		queue_work(ipa_ctx->power_mgmt_wq, &ipa_client_remove_work);
+		queue_work(ipa_ctx->clock_wq, &ipa_client_remove_work);
 }
 
 /** ipa_inc_acquire_wakelock() - Increase active clients counter, and
@@ -1307,8 +1307,8 @@ static int ipa_pre_init(struct ipa_context *ipa)
 		goto err_ep_count_clear;
 
 	/* Create workqueues for power management */
-	ipa->power_mgmt_wq = create_singlethread_workqueue("ipa_power_mgmt");
-	if (!ipa->power_mgmt_wq) {
+	ipa->clock_wq = create_singlethread_workqueue("ipa_clock");
+	if (!ipa->clock_wq) {
 		ipa_err("failed to create power mgmt wq\n");
 		ret = -ENOMEM;
 		goto err_sram_settings_clear;
@@ -1348,7 +1348,7 @@ err_dp_exit:
 	ipa_dp_exit(ipa->dp);
 	ipa->dp = NULL;
 err_destroy_pm_wq:
-	destroy_workqueue(ipa->power_mgmt_wq);
+	destroy_workqueue(ipa->clock_wq);
 err_sram_settings_clear:
 	ipa_sram_settings_clear(ipa);
 err_ep_count_clear:

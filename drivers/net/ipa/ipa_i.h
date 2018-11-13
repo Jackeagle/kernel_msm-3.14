@@ -385,7 +385,7 @@ struct ipa_dma_task_info {
  * @smem_offset:	Offset of the usable area in shared memory
  * @active_clients_mutex: Used when active clients count changes from/to 0
  * @active_clients_count: Active client count
- * @power_mgmt_wq:	Workqueue for power management
+ * @clock_wq:		Workqueue for removing last clock reference
  * @transport_pm:	Transport power management related information
  * @cmd_prod_ep_id:	Endpoint for APPS_CMD_PROD
  * @lan_cons_ep_id:	Endpoint for APPS_LAN_CONS
@@ -425,7 +425,7 @@ struct ipa_context {
 	u32 smem_size;
 	u16 smem_offset;
 
-	struct workqueue_struct *power_mgmt_wq;
+	struct workqueue_struct *clock_wq;
 	struct ipa_dp *dp;
 	struct mutex active_clients_mutex;	/* count changes from/to 0 */
 	atomic_t active_clients_count;
