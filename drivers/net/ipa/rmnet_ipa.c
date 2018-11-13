@@ -584,18 +584,18 @@ static void ipa_wwan_setup(struct net_device *dev)
 }
 
 /** ipa_wwan_begin() - Start things up */
-static int ipa_wwan_begin(struct platform_device *pdev)
+static int ipa_wwan_begin(struct rmnet_ipa_context *wwan)
 {
 	struct ipa_wwan_private *wwan_ptr;
 	struct net_device *netdev;
 	int ret;
 
-	mutex_init(&rmnet_ipa_ctx->ep_setup_mutex);
-	mutex_init(&rmnet_ipa_ctx->mux_id_mutex);
+	mutex_init(&wwan->ep_setup_mutex);
+	mutex_init(&wwan->mux_id_mutex);
 
 	/* Mark client handles bad until we initialize them */
-	rmnet_ipa_ctx->wan_prod_ep_id = IPA_EP_ID_BAD;
-	rmnet_ipa_ctx->wan_cons_ep_id = IPA_EP_ID_BAD;
+	wwan->wan_prod_ep_id = IPA_EP_ID_BAD;
+	wwan->wan_cons_ep_id = IPA_EP_ID_BAD;
 
 	ret = ipa_modem_smem_init();
 	if (ret)
@@ -613,7 +613,7 @@ static int ipa_wwan_begin(struct platform_device *pdev)
 		ret = -ENOMEM;
 		goto err_clear_ctx;
 	}
-	rmnet_ipa_ctx->netdev = netdev;
+	wwan->netdev = netdev;
 	wwan_ptr = netdev_priv(netdev);
 	wwan_ptr->outstanding_high_ctl = DEFAULT_OUTSTANDING_HIGH_CTL;
 	wwan_ptr->outstanding_high = DEFAULT_OUTSTANDING_HIGH;
@@ -642,43 +642,42 @@ err_napi_del:
 	netif_napi_del(&wwan_ptr->napi);
 	free_netdev(netdev);
 err_clear_ctx:
-	memset(&rmnet_ipa_ctx_struct, 0, sizeof(rmnet_ipa_ctx_struct));
+	memset(wwan, 0, sizeof(*wwan));
 
 	return ret;
 }
 
-static int ipa_wwan_end(struct platform_device *pdev)
+static void ipa_wwan_end(struct rmnet_ipa_context *wwan)
 {
-	struct ipa_wwan_private *wwan_ptr = netdev_priv(rmnet_ipa_ctx->netdev);
+	struct ipa_wwan_private *wwan_ptr;
 
-	mutex_lock(&rmnet_ipa_ctx->ep_setup_mutex);
+	mutex_lock(&wwan->ep_setup_mutex);
 
 	ipa_client_add();
 
-	if (rmnet_ipa_ctx->wan_cons_ep_id != IPA_EP_ID_BAD) {
-		ipa_ep_teardown(rmnet_ipa_ctx->wan_cons_ep_id);
-		rmnet_ipa_ctx->wan_cons_ep_id = IPA_EP_ID_BAD;
+	if (wwan->wan_cons_ep_id != IPA_EP_ID_BAD) {
+		ipa_ep_teardown(wwan->wan_cons_ep_id);
+		wwan->wan_cons_ep_id = IPA_EP_ID_BAD;
 	}
 
-	if (rmnet_ipa_ctx->wan_prod_ep_id != IPA_EP_ID_BAD) {
-		ipa_ep_teardown(rmnet_ipa_ctx->wan_prod_ep_id);
-		rmnet_ipa_ctx->wan_prod_ep_id = IPA_EP_ID_BAD;
+	if (wwan->wan_prod_ep_id != IPA_EP_ID_BAD) {
+		ipa_ep_teardown(wwan->wan_prod_ep_id);
+		wwan->wan_prod_ep_id = IPA_EP_ID_BAD;
 	}
 
 	ipa_client_remove();
 
+	wwan_ptr = netdev_priv(rmnet_ipa_ctx->netdev);
 	netif_napi_del(&wwan_ptr->napi);
-	mutex_unlock(&rmnet_ipa_ctx->ep_setup_mutex);
-	unregister_netdev(rmnet_ipa_ctx->netdev);
+	mutex_unlock(&wwan->ep_setup_mutex);
+	unregister_netdev(wwan->netdev);
 
-	if (rmnet_ipa_ctx->netdev)
-		free_netdev(rmnet_ipa_ctx->netdev);
-	rmnet_ipa_ctx->netdev = NULL;
+	if (wwan->netdev)
+		free_netdev(wwan->netdev);
+	wwan->netdev = NULL;
 
-	mutex_destroy(&rmnet_ipa_ctx->mux_id_mutex);
-	mutex_destroy(&rmnet_ipa_ctx->ep_setup_mutex);
-
-	return 0;
+	mutex_destroy(&wwan->mux_id_mutex);
+	mutex_destroy(&wwan->ep_setup_mutex);
 }
 
 /** rmnet_ipa_ap_suspend() - suspend callback for runtime_pm
@@ -748,7 +747,7 @@ void *ipa_wwan_init(void)
 {
 	int ret;
 
-	ret = ipa_wwan_begin(NULL);
+	ret = ipa_wwan_begin(rmnet_ipa_ctx);
 	if (ret)
 		return ERR_PTR(ret);
 
@@ -759,7 +758,7 @@ void ipa_wwan_cleanup(void *data)
 {
 	struct rmnet_ipa_context *wwan = data;
 
-	(void)ipa_wwan_end(NULL);
+	ipa_wwan_end(wwan);
 	memset(wwan, 0, sizeof(*wwan));
 }
 
