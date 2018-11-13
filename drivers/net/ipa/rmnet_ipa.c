@@ -73,8 +73,6 @@ struct rmnet_ipa_context {
 	struct mutex ep_setup_mutex;		/* endpoint setup/teardown */
 };
 
-static bool initialized;	/* Avoid duplicate initialization */
-
 static struct rmnet_ipa_context rmnet_ipa_ctx_struct;
 static struct rmnet_ipa_context *rmnet_ipa_ctx = &rmnet_ipa_ctx_struct;
 
@@ -638,8 +636,6 @@ static int ipa_wwan_probe(struct platform_device *pdev)
 	/* Till the system is suspended, we keep the clock open */
 	ipa_client_add();
 
-	initialized = true;
-
 	return 0;
 
 err_napi_del:
@@ -683,8 +679,6 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 
 	mutex_destroy(&rmnet_ipa_ctx->mux_id_mutex);
 	mutex_destroy(&rmnet_ipa_ctx->ep_setup_mutex);
-
-	initialized = false;
 
 	dev_info(&pdev->dev, "rmnet_ipa completed deinitialization\n");
 
@@ -788,9 +782,6 @@ static struct platform_driver rmnet_ipa_driver = {
 
 int ipa_wwan_init(void)
 {
-	if (initialized)
-		return 0;
-
 	return platform_driver_register(&rmnet_ipa_driver);
 }
 
