@@ -1135,7 +1135,15 @@ static void ipa_post_init(struct ipa_context *ipa)
 	if (ipa_wwan_init())
 		ipa_err("WWAN init failed (ignoring)\n");
 
+	ipa->post_init_complete = true;
+
 	dev_info(dev, "IPA driver initialization was successful.\n");
+
+}
+
+static void ipa_post_exit(struct ipa_context *ipa)
+{
+	ipa->post_init_complete = false;
 }
 
 /** ipa_pre_init() - Initialize the IPA Driver.
@@ -1505,7 +1513,9 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 {
 	struct ipa_context *ipa = dev_get_drvdata(&pdev->dev);
 
-	/* XXX if (post_inited) ipa_post_exit(ipa); */
+	if (ipa->post_init_complete)
+		ipa_post_exit(ipa);
+
 	/* XXX ipa_pre_exit(ipa); */
 	if (ipa->lan_cons_ep_id != IPA_EP_ID_BAD) {
 		ipa_ep_free(ipa->lan_cons_ep_id);

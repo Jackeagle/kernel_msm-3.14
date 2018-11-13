@@ -414,6 +414,7 @@ struct ipa_context {
 	dma_addr_t route_phys;
 	void *filter_virt;
 	dma_addr_t filter_phys;
+	bool post_init_complete;
 
 	struct ipa_ep_context ep[IPA_EP_COUNT_MAX];
 	struct ipa_dp *dp;
