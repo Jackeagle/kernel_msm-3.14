@@ -404,49 +404,46 @@ struct ipa_dma_task_info {
  */
 struct ipa_context {
 	struct platform_device *pdev;
-	u32 filter_bitmap;
-	u32 filter_count;	/* Number of set bits in filter_bitmap */
-	u32 ipa_irq;
-	phys_addr_t ipa_phys;
-	struct gsi *gsi;
-	void *wwan;
-
-	void *route_virt;
-	dma_addr_t route_phys;
-	void *filter_virt;
-	dma_addr_t filter_phys;
-	bool post_init_complete;
-
-	struct notifier_block panic_notifier;
-
-	struct ipa_ep_context ep[IPA_EP_COUNT_MAX];
-	struct ipa_dp *dp;
-	u32 smem_size;
-	u16 smem_offset;
-	struct mutex active_clients_mutex;	/* count changes from/to 0 */
-	atomic_t active_clients_count;
-	struct workqueue_struct *power_mgmt_wq;
-	struct ipa_transport_pm transport_pm;
-	u32 cmd_prod_ep_id;
-	u32 lan_cons_ep_id;
+	struct ipa_smp2p_info smp2p_info;
+	struct clk *core_clock;
 	struct icc_path *memory_path;
 	struct icc_path *imem_path;
 	struct icc_path *config_path;
-	struct clk *core_clock;
-	bool modem_clk_vote_valid;
+	phys_addr_t ipa_phys;
+	void *route_virt;
+	dma_addr_t route_phys;
+	u32 filter_bitmap;
+	u32 filter_count;	/* Number of set bits in filter_bitmap */
+	void *filter_virt;
+	dma_addr_t filter_phys;
+	u32 ipa_irq;
+	struct gsi *gsi;
+	u32 cmd_prod_ep_id;
+	u32 lan_cons_ep_id;
+
 	u32 ep_count;
+	u32 smem_size;
+	u16 smem_offset;
 
-	struct ipa_uc_ctx *uc_ctx;
-
-	spinlock_t wakeup_lock;		/* protects updates to wakeup_count */
+	struct workqueue_struct *power_mgmt_wq;
+	struct ipa_dp *dp;
+	struct mutex active_clients_mutex;	/* count changes from/to 0 */
+	atomic_t active_clients_count;
+	struct ipa_transport_pm transport_pm;
+	struct ipa_dma_task_info dma_task_info;
 	u32 wakeup_count;
 	struct wakeup_source wakeup;
+	spinlock_t wakeup_lock;		/* protects updates to wakeup_count */
+
+	struct ipa_ep_context ep[IPA_EP_COUNT_MAX];
+	struct ipa_uc_ctx *uc_ctx;
+	struct notifier_block panic_notifier;
+	bool modem_clk_vote_valid;
+	void *wwan;
+	bool post_init_complete;
 
 	/* RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA */
 	bool ipa_client_apps_wan_cons_agg_gro;
-	/* M-release support to know client endpoint */
-	struct ipa_smp2p_info smp2p_info;
-	struct ipa_dma_task_info dma_task_info;
 };
 
 extern struct ipa_context *ipa_ctx;
