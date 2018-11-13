@@ -999,62 +999,63 @@ static int ipa_init_interrupts(struct ipa_context *ipa)
 	return 0;
 }
 
-static void ipa_freeze_clock_vote_and_notify_modem(void)
+static void ipa_freeze_clock_vote_and_notify_modem(struct ipa_context *ipa)
 {
 	u32 value;
 	u32 mask;
 
-	if (ipa_ctx->smp2p_info.res_sent)
+	if (ipa->smp2p_info.res_sent)
 		return;
 
-	if (!ipa_ctx->smp2p_info.enabled_state) {
+	if (!ipa->smp2p_info.enabled_state) {
 		ipa_err("smp2p out gpio not assigned\n");
 		return;
 	}
 
-	ipa_ctx->smp2p_info.ipa_clk_on = ipa_client_add_additional();
+	ipa->smp2p_info.ipa_clk_on = ipa_client_add_additional();
 
 	/* Signal whether the clock is enabled */
-	mask = BIT(ipa_ctx->smp2p_info.enabled_bit);
-	value = ipa_ctx->smp2p_info.ipa_clk_on ? mask : 0;
-	qcom_smem_state_update_bits(ipa_ctx->smp2p_info.enabled_state, mask,
-				    value);
+	mask = BIT(ipa->smp2p_info.enabled_bit);
+	value = ipa->smp2p_info.ipa_clk_on ? mask : 0;
+	qcom_smem_state_update_bits(ipa->smp2p_info.enabled_state, mask, value);
 
 	/* Now indicate that the enabled flag is valid */
-	mask = BIT(ipa_ctx->smp2p_info.valid_bit);
+	mask = BIT(ipa->smp2p_info.valid_bit);
 	value = mask;
-	qcom_smem_state_update_bits(ipa_ctx->smp2p_info.valid_state, mask,
-				    value);
+	qcom_smem_state_update_bits(ipa->smp2p_info.valid_state, mask, value);
 
-	ipa_ctx->smp2p_info.res_sent = true;
+	ipa->smp2p_info.res_sent = true;
 }
 
-void ipa_reset_freeze_vote(void)
+void ipa_reset_freeze_vote(struct ipa_context *ipa)
 {
 	u32 mask;
 
-	if (!ipa_ctx->smp2p_info.res_sent)
+	if (!ipa->smp2p_info.res_sent)
 		return;
 
-	if (ipa_ctx->smp2p_info.ipa_clk_on)
+	if (ipa->smp2p_info.ipa_clk_on)
 		ipa_client_remove();
 
 	/* Reset the clock enabled valid flag */
-	mask = BIT(ipa_ctx->smp2p_info.valid_bit);
-	qcom_smem_state_update_bits(ipa_ctx->smp2p_info.valid_state, mask, 0);
+	mask = BIT(ipa->smp2p_info.valid_bit);
+	qcom_smem_state_update_bits(ipa->smp2p_info.valid_state, mask, 0);
 
 	/* Mark the clock disabled for good measure... */
-	mask = BIT(ipa_ctx->smp2p_info.enabled_bit);
-	qcom_smem_state_update_bits(ipa_ctx->smp2p_info.enabled_state, mask, 0);
+	mask = BIT(ipa->smp2p_info.enabled_bit);
+	qcom_smem_state_update_bits(ipa->smp2p_info.enabled_state, mask, 0);
 
-	ipa_ctx->smp2p_info.res_sent = false;
-	ipa_ctx->smp2p_info.ipa_clk_on = false;
+	ipa->smp2p_info.res_sent = false;
+	ipa->smp2p_info.ipa_clk_on = false;
 }
 
 static int
 ipa_panic_notifier(struct notifier_block *nb, unsigned long action, void *data)
 {
-	ipa_freeze_clock_vote_and_notify_modem();
+	struct ipa_context *ipa;
+
+	ipa = container_of(nb, struct ipa_context, panic_notifier);
+	ipa_freeze_clock_vote_and_notify_modem(ipa);
 	ipa_uc_panic_notifier();
 
 	return NOTIFY_DONE;
@@ -1279,7 +1280,9 @@ out_release_firmware:
 /* Threaded IRQ handler for modem "ipa-clock-query" SMP2P interrupt */
 static irqreturn_t ipa_smp2p_modem_clk_query_isr(int irq, void *dev_id)
 {
-	ipa_freeze_clock_vote_and_notify_modem();
+	struct ipa_context *ipa = dev_id;
+
+	ipa_freeze_clock_vote_and_notify_modem(ipa);
 
 	return IRQ_HANDLED;
 }

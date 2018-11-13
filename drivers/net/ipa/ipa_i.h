@@ -564,7 +564,7 @@ void ipa_ep_resume_all(void);
 void ipa_inc_acquire_wakelock(void);
 void ipa_dec_release_wakelock(void);
 int ipa_rx_poll(u32 ep_id, int budget);
-void ipa_reset_freeze_vote(void);
+void ipa_reset_freeze_vote(struct ipa_context *ipa);
 void ipa_enable_dcd(void);
 
 int ipa_gsi_dma_task_alloc(struct ipa_context *ipa);
