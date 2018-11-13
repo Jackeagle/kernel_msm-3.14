@@ -851,8 +851,15 @@ static int ipa_clock_init(struct ipa_context *ipa)
 		goto err_clk_put;
 
 	ret = ipa_interconnect_init(ipa);
-	if (!ret)
+	if (ret)
+		goto err_clk_put;
+
+	ipa->clock_wq = create_singlethread_workqueue("ipa_clock");
+	if (ipa->clock_wq)
 		return 0;	/* Success */
+
+	ret = -ENOMEM;
+	ipa_interconnect_exit(ipa);
 err_clk_put:
 	ipa->core_clock = NULL;
 	clk_put(clk);
@@ -862,6 +869,8 @@ err_clk_put:
 
 static void ipa_clock_exit(struct ipa_context *ipa)
 {
+	destroy_workqueue(ipa->clock_wq);
+	ipa->clock_wq = NULL;
 	ipa_interconnect_exit(ipa);
 	clk_put(ipa->core_clock);
 	ipa->core_clock = NULL;
@@ -1306,17 +1315,9 @@ static int ipa_pre_init(struct ipa_context *ipa)
 	if (ret)
 		goto err_ep_count_clear;
 
-	/* Create workqueues for power management */
-	ipa->clock_wq = create_singlethread_workqueue("ipa_clock");
-	if (!ipa->clock_wq) {
-		ipa_err("failed to create power mgmt wq\n");
-		ret = -ENOMEM;
-		goto err_sram_settings_clear;
-	}
-
 	ipa->dp = ipa_dp_init();
 	if (!ipa->dp)
-		goto err_destroy_pm_wq;
+		goto err_sram_settings_clear;
 
 	/* allocate memory for DMA_TASK workaround */
 	mutex_init(&ipa->active_clients_mutex);
@@ -1347,8 +1348,6 @@ static int ipa_pre_init(struct ipa_context *ipa)
 err_dp_exit:
 	ipa_dp_exit(ipa->dp);
 	ipa->dp = NULL;
-err_destroy_pm_wq:
-	destroy_workqueue(ipa->clock_wq);
 err_sram_settings_clear:
 	ipa_sram_settings_clear(ipa);
 err_ep_count_clear:

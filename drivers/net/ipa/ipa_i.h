@@ -409,6 +409,7 @@ struct ipa_context {
 	struct icc_path *memory_path;
 	struct icc_path *imem_path;
 	struct icc_path *config_path;
+	struct workqueue_struct *clock_wq;
 	phys_addr_t ipa_phys;
 	void *route_virt;
 	dma_addr_t route_phys;
@@ -425,7 +426,6 @@ struct ipa_context {
 	u32 smem_size;
 	u16 smem_offset;
 
-	struct workqueue_struct *clock_wq;
 	struct ipa_dp *dp;
 	struct mutex active_clients_mutex;	/* count changes from/to 0 */
 	atomic_t active_clients_count;
