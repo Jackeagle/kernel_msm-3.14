@@ -699,9 +699,10 @@ static int ipa_wwan_remove(struct platform_device *pdev)
  * As an outcome, the number of IPA active clients should be decremented
  * until IPA clocks can be gated.
  */
-int rmnet_ipa_ap_suspend(struct device *dev)
+int rmnet_ipa_ap_suspend(void *data)
 {
-	struct net_device *netdev = rmnet_ipa_ctx->netdev;
+	struct rmnet_ipa_context *wwan = data;
+	struct net_device *netdev = wwan->netdev;
 	struct ipa_wwan_private *wwan_ptr;
 	int ret;
 
@@ -747,15 +748,14 @@ bail:
  * Enables the network interface queue and returns success to the
  * runtime_pm framework.
  */
-int rmnet_ipa_ap_resume(struct device *dev)
+void rmnet_ipa_ap_resume(void *data)
 {
-	struct net_device *netdev = rmnet_ipa_ctx->netdev;
+	struct rmnet_ipa_context *wwan = data;
+	struct net_device *netdev = wwan->netdev;
 
 	ipa_client_add();
 	if (netdev)
 		netif_wake_queue(netdev);
-
-	return 0;
 }
 
 static const struct of_device_id rmnet_ipa_dt_match[] = {

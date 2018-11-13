@@ -1572,7 +1572,7 @@ int ipa_ap_suspend(struct device *dev)
 	int ret;
 	u32 i;
 
-	ret = rmnet_ipa_ap_suspend(NULL);
+	ret = rmnet_ipa_ap_suspend(ipa_ctx->wwan);
 	if (ret)
 		return ret;
 
@@ -1586,7 +1586,7 @@ int ipa_ap_suspend(struct device *dev)
 		}
 	}
 	if (ret)
-		rmnet_ipa_ap_resume(NULL);
+		rmnet_ipa_ap_resume(ipa_ctx->wwan);
 
 	return ret;
 }
@@ -1602,7 +1602,7 @@ int ipa_ap_suspend(struct device *dev)
  */
 int ipa_ap_resume(struct device *dev)
 {
-	rmnet_ipa_ap_resume(NULL);
+	rmnet_ipa_ap_resume(ipa_ctx->wwan);
 
 	return 0;
 }
