@@ -26,8 +26,8 @@
 #define IPA_CONFIG_AVG			(40 * 1000)
 #define IPA_CONFIG_PEAK			(40 * 1000)
 
-static void ipa_clock_put_deferred(struct work_struct *work);
-static DECLARE_WORK(ipa_clock_put_work, ipa_clock_put_deferred);
+static void ipa_clock_put_final(struct work_struct *work);
+static DECLARE_WORK(ipa_clock_put_work, ipa_clock_put_final);
 
 static int ipa_interconnect_init(struct ipa_context *ipa)
 {
@@ -220,11 +220,11 @@ static void ipa_clock_get_first(void)
 	mutex_unlock(&ipa_ctx->clock_mutex);
 }
 
-/* Attempt to add an IPA clock reference, but only if this does not
- * represent the initial reference.  Returns true if the reference
- * was taken, false otherwise.
+/* Add an IPA client, but only if the reference count is already
+ * non-zero.  (This is used to avoid blocking.)  Returns true if the
+ * additional reference was added successfully, or false otherwise.
  */
-static bool ipa_clock_get_not_first(void)
+bool ipa_clock_get_additional(void)
 {
 	return !!atomic_inc_not_zero(&ipa_ctx->clock_count);
 }
@@ -236,27 +236,17 @@ static bool ipa_clock_get_not_first(void)
  */
 void ipa_clock_get(void)
 {
-	/* There's nothing more to do if this isn't the first reference */
-	if (!ipa_clock_get_not_first())
+	if (!ipa_clock_get_additional())
 		ipa_clock_get_first();
 }
 
-/* Add an IPA client, but only if the reference count is already
- * non-zero.  (This is used to avoid blocking.)  Returns true if the
- * additional reference was added successfully, or false otherwise.
+/* Decrement the active clients reference count, and if the result
+ * is 0, suspend the endpoints and disable clocks.
+ *
+ * This function runs in work queue context, scheduled to run whenever
+ * the last reference would be dropped in ipa_clock_put_final().
  */
-bool ipa_clock_get_additional(void)
-{
-	return ipa_clock_get_not_first();
-}
-
-/* Remove an IPA client under protection of the mutex.  This is
- * called for the last remaining client, but a race could mean
- * another caller gets an additional reference before the mutex
- * is acquired.  When the final reference is dropped, endpoints are
- * suspended and IPA clocks disabled.
- */
-static void ipa_clock_put_final(void)
+static void ipa_clock_put_final(struct work_struct *work)
 {
 	mutex_lock(&ipa_ctx->clock_mutex);
 
@@ -269,35 +259,14 @@ static void ipa_clock_put_final(void)
 	mutex_unlock(&ipa_ctx->clock_mutex);
 }
 
-/* Decrement the active clients reference count, and if the result
- * is 0, suspend the endpoints and disable clocks.
- *
- * This function runs in work queue context, scheduled to run whenever
- * the last reference would be dropped in ipa_clock_put_final().
- */
-static void ipa_clock_put_deferred(struct work_struct *work)
-{
-	ipa_clock_put_final();
-}
-
-/* Attempt to remove a clock reference, but only if this is not the
- * only reference remaining.  Returns true if the reference was
- * removed, or false if doing so would produce a zero reference
- * count.
- */
-static bool ipa_clock_put_not_final(void)
-{
-	return !!atomic_add_unless(&ipa_ctx->clock_count, -1, 1);
-}
-
 /* Attempt to remove an IPA clock reference.  If this represents
  * the last reference arrange for ipa_clock_put_final() to be
- * called in workqueue context, dropping the last reference under
+ * called in workqueue context to drop the last reference under
  * protection of the mutex.
  */
 void ipa_clock_put(void)
 {
-	if (!ipa_clock_put_not_final())
+	if (!atomic_add_unless(&ipa_ctx->clock_count, -1, 1))
 		queue_work(ipa_ctx->clock_wq, &ipa_clock_put_work);
 }
 
