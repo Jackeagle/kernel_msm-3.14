@@ -651,8 +651,6 @@ static int ipa_wwan_end(struct platform_device *pdev)
 {
 	struct ipa_wwan_private *wwan_ptr = netdev_priv(rmnet_ipa_ctx->netdev);
 
-	dev_info(&pdev->dev, "rmnet_ipa started deinitialization\n");
-
 	mutex_lock(&rmnet_ipa_ctx->ep_setup_mutex);
 
 	ipa_client_add();
@@ -679,8 +677,6 @@ static int ipa_wwan_end(struct platform_device *pdev)
 
 	mutex_destroy(&rmnet_ipa_ctx->mux_id_mutex);
 	mutex_destroy(&rmnet_ipa_ctx->ep_setup_mutex);
-
-	dev_info(&pdev->dev, "rmnet_ipa completed deinitialization\n");
 
 	return 0;
 }
@@ -748,27 +744,11 @@ void rmnet_ipa_ap_resume(void *data)
 		netif_wake_queue(netdev);
 }
 
-static const struct of_device_id rmnet_ipa_dt_match[] = {
-	{.compatible = "qcom,rmnet-ipa"},
-	{},
-};
-MODULE_DEVICE_TABLE(of, rmnet_ipa_dt_match);
-
-static struct platform_driver rmnet_ipa_driver = {
-	.driver = {
-		.name = "rmnet_ipa",
-		.owner = THIS_MODULE,
-		.of_match_table = rmnet_ipa_dt_match,
-	},
-	.probe = ipa_wwan_begin,
-	.remove = ipa_wwan_end,
-};
-
 void *ipa_wwan_init(void)
 {
 	int ret;
 
-	ret = platform_driver_register(&rmnet_ipa_driver);
+	ret = ipa_wwan_begin(NULL);
 	if (ret)
 		return ERR_PTR(ret);
 
@@ -779,7 +759,7 @@ void ipa_wwan_cleanup(void *data)
 {
 	struct rmnet_ipa_context *wwan = data;
 
-	platform_driver_unregister(&rmnet_ipa_driver);
+	(void)ipa_wwan_end(NULL);
 	memset(wwan, 0, sizeof(*wwan));
 }
 
