@@ -637,27 +637,27 @@ void ipa_cfg_ep(u32 ep_id)
 	ipa_endp_status_write(ep_id);
 }
 
-/** ipa_proxy_clk_unvote() - called to remove IPA clock proxy vote
+/** ipa_clock_proxy_put() - called to remove IPA clock proxy vote
  *
  * Return value: none
  */
-void ipa_proxy_clk_unvote(void)
+void ipa_clock_proxy_put(void)
 {
-	if (ipa_ctx->modem_clk_vote_valid) {
+	if (ipa_ctx->proxy_held) {
 		ipa_clock_put();
-		ipa_ctx->modem_clk_vote_valid = false;
+		ipa_ctx->proxy_held = false;
 	}
 }
 
-/** ipa_proxy_clk_vote() - called to add IPA clock proxy vote
+/** ipa_clock_proxy_get() - called to add IPA clock proxy vote
  *
  * Return value: none
  */
-void ipa_proxy_clk_vote(void)
+void ipa_clock_proxy_get(void)
 {
-	if (!ipa_ctx->modem_clk_vote_valid) {
+	if (!ipa_ctx->proxy_held) {
 		ipa_clock_get();
-		ipa_ctx->modem_clk_vote_valid = true;
+		ipa_ctx->proxy_held = true;
 	}
 }
 

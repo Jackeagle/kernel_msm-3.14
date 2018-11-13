@@ -692,7 +692,7 @@ void *ipa_wwan_init(void)
 
 	/* Take a clock reference; a suspend request will remove this */
 	ipa_clock_get();
-	ipa_proxy_clk_unvote();
+	ipa_clock_proxy_put();
 
 	return wwan;
 

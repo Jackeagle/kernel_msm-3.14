@@ -1260,7 +1260,7 @@ static int ipa_post_init(struct ipa_context *ipa)
 	if (ret)
 		goto err_uc_exit;
 
-	ipa->modem_clk_vote_valid = true;
+	ipa->proxy_held = true;
 
 	ipa->wwan = ipa_wwan_init();
 	if (IS_ERR(ipa->wwan)) {

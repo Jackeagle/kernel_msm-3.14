@@ -274,7 +274,7 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 		/* The proxy vote is held until uC is loaded to ensure that
 		 * IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED is received.
 		 */
-		ipa_proxy_clk_unvote();
+		ipa_clock_proxy_put();
 		ipa_uc_ctx.uc_loaded = true;
 	} else if (response == IPA_UC_RESPONSE_CMD_COMPLETED) {
 		response_data.raw32b = shared->response_param;

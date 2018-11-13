@@ -392,7 +392,7 @@ struct ipa_dma_task_info {
  * @memory_path:	Path for memory interconnect
  * @imem_path:		Path for internal memory interconnect
  * @config_path:	Path for configuration interconnect
- * @modem_clk_vote_valid: Whether proxy clock vote is held for modem
+ * @proxy_held:		Whether proxy clock reference is held for modem
  * @ep_count:		Number of endpoints available in hardware
  * @uc_ctx:		Microcontroller context
  * @wakeup_lock:	Lock protecting updates to wakeup_count
@@ -438,7 +438,7 @@ struct ipa_context {
 	struct ipa_ep_context ep[IPA_EP_COUNT_MAX];
 	struct ipa_uc_ctx *uc_ctx;
 	struct notifier_block panic_notifier;
-	bool modem_clk_vote_valid;
+	bool proxy_held;
 	void *wwan;
 	bool post_init_complete;
 
@@ -510,8 +510,8 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
 
 void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt);
 
-void ipa_proxy_clk_vote(void);
-void ipa_proxy_clk_unvote(void);
+void ipa_clock_proxy_get(void);
+void ipa_clock_proxy_put(void);
 
 u32 ipa_filter_bitmap_init(void);
 
