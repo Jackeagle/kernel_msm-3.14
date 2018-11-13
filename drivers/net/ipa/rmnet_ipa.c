@@ -583,8 +583,8 @@ static void ipa_wwan_setup(struct net_device *dev)
 	dev->watchdog_timeo = msecs_to_jiffies(10 * MSEC_PER_SEC);
 }
 
-/** ipa_wwan_probe() - Network probe function */
-static int ipa_wwan_probe(struct platform_device *pdev)
+/** ipa_wwan_begin() - Start things up */
+static int ipa_wwan_begin(struct platform_device *pdev)
 {
 	struct ipa_wwan_private *wwan_ptr;
 	struct net_device *netdev;
@@ -647,7 +647,7 @@ err_clear_ctx:
 	return ret;
 }
 
-static int ipa_wwan_remove(struct platform_device *pdev)
+static int ipa_wwan_end(struct platform_device *pdev)
 {
 	struct ipa_wwan_private *wwan_ptr = netdev_priv(rmnet_ipa_ctx->netdev);
 
@@ -760,8 +760,8 @@ static struct platform_driver rmnet_ipa_driver = {
 		.owner = THIS_MODULE,
 		.of_match_table = rmnet_ipa_dt_match,
 	},
-	.probe = ipa_wwan_probe,
-	.remove = ipa_wwan_remove,
+	.probe = ipa_wwan_begin,
+	.remove = ipa_wwan_end,
 };
 
 void *ipa_wwan_init(void)
