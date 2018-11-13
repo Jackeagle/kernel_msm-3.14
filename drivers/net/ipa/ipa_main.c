@@ -1110,45 +1110,57 @@ EXPORT_SYMBOL_GPL(ipa_ssr_unprepare);
  *
  * Perform initialization that requires interaction with IPA hardware.
  */
-static void ipa_post_init(struct ipa_context *ipa)
+static int ipa_post_init(struct ipa_context *ipa)
 {
-	struct device *dev = &ipa->pdev->dev;
 	int ret;
 
 	ipa_debug("ipa_post_init() started\n");
 
 	ret = gsi_device_init(ipa->gsi);
-	if (ret) {
-		ipa_err(":gsi register error - %d\n", ret);
-		return;
-	}
+	if (ret)
+		return ret;
 
 	/* setup the AP-IPA endpoints */
-	if (ipa_ep_apps_setup()) {
-		ipa_err(":failed to setup IPA-Apps endpoints\n");
-		gsi_device_exit(ipa->gsi);
-
-		return;
-	}
+	ret = ipa_ep_apps_setup();
+	if (ret)
+		goto err_gsi_exit;
 
 	ipa->uc_ctx = ipa_uc_init(ipa->ipa_phys);
-	if (!ipa->uc_ctx)
-		ipa_err("microcontroller init failed\n");
+	if (!ipa->uc_ctx) {
+		ret = -ENOMEM;
+		goto err_ep_teardown;
+	}
 
-	(void)ipa_panic_notifier_register(ipa);
+	ret = ipa_panic_notifier_register(ipa);
+	if (ret)
+		goto err_uc_exit;
 
 	ipa->modem_clk_vote_valid = true;
 
 	ipa->wwan = ipa_wwan_init();
 	if (IS_ERR(ipa->wwan)) {
-		ipa_err("WWAN init returned %ld (ignoring)\n",
-			PTR_ERR(ipa->wwan));
-		ipa->wwan = NULL;
+		ret = PTR_ERR(ipa->wwan);
+		goto err_clear_wwan;
 	}
 
 	ipa->post_init_complete = true;
 
-	dev_info(dev, "IPA driver initialization was successful.\n");
+	dev_info(&ipa->pdev->dev,
+		 "IPA driver initialization was successful.\n");
+
+	return 0;
+
+err_clear_wwan:
+	ipa->wwan = NULL;
+	ipa_panic_notifier_unregister(ipa);
+err_uc_exit:
+	/* XXX ipa_uc_exit(); */
+err_ep_teardown:
+	/* XXX ipa_ep_apps_teardown(); */
+err_gsi_exit:
+	gsi_device_exit(ipa->gsi);
+
+	return ret;
 }
 
 static void ipa_post_exit(struct ipa_context *ipa)
@@ -1300,7 +1312,7 @@ static irqreturn_t ipa_smp2p_modem_post_init_isr(int irq, void *dev_id)
 {
 	struct ipa_context *ipa = dev_id;
 
-	ipa_post_init(ipa);
+	(void)ipa_post_init(ipa);
 
 	return IRQ_HANDLED;
 }
@@ -1492,17 +1504,14 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	 */
 	if (!modem_init) {
 		ret = ipa_firmware_load(dev);
-		if (ret)
-			goto err_undo_pre_init;
-
-		/* Now we can proceed to stage two initialization */
-		ipa_post_init(ipa);
+		if (!ret)
+			ret = ipa_post_init(ipa);
 	}
 
-	return 0;	/* Success */
+	if (!ret)
+		return 0;	/* Success */
 
-err_undo_pre_init:
-	/* XXX This needs to be implemented */
+	/* XXX Need to undo ipa_pre_init() here */
 err_clear_ep_ids:
 	ipa->lan_cons_ep_id = 0;
 	ipa->cmd_prod_ep_id = 0;
