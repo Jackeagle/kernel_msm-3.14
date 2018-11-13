@@ -699,7 +699,7 @@ static int ipa_wwan_remove(struct platform_device *pdev)
  * As an outcome, the number of IPA active clients should be decremented
  * until IPA clocks can be gated.
  */
-static int rmnet_ipa_ap_suspend(struct device *dev)
+int rmnet_ipa_ap_suspend(struct device *dev)
 {
 	struct net_device *netdev = rmnet_ipa_ctx->netdev;
 	struct ipa_wwan_private *wwan_ptr;
@@ -747,7 +747,7 @@ bail:
  * Enables the network interface queue and returns success to the
  * runtime_pm framework.
  */
-static int rmnet_ipa_ap_resume(struct device *dev)
+int rmnet_ipa_ap_resume(struct device *dev)
 {
 	struct net_device *netdev = rmnet_ipa_ctx->netdev;
 
@@ -764,16 +764,10 @@ static const struct of_device_id rmnet_ipa_dt_match[] = {
 };
 MODULE_DEVICE_TABLE(of, rmnet_ipa_dt_match);
 
-static const struct dev_pm_ops rmnet_ipa_pm_ops = {
-	.suspend_noirq = rmnet_ipa_ap_suspend,
-	.resume_noirq = rmnet_ipa_ap_resume,
-};
-
 static struct platform_driver rmnet_ipa_driver = {
 	.driver = {
 		.name = "rmnet_ipa",
 		.owner = THIS_MODULE,
-		.pm = &rmnet_ipa_pm_ops,
 		.of_match_table = rmnet_ipa_dt_match,
 	},
 	.probe = ipa_wwan_probe,

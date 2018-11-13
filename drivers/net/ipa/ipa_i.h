@@ -454,6 +454,9 @@ extern struct ipa_context *ipa_ctx;
 void *ipa_wwan_init(void);
 void ipa_wwan_cleanup(void *data);
 
+int rmnet_ipa_ap_suspend(struct device *dev);
+int rmnet_ipa_ap_resume(struct device *dev);
+
 int ipa_stop_gsi_channel(u32 ep_id);
 
 void ipa_cfg_ep(u32 ep_id);

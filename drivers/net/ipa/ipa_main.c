@@ -1141,7 +1141,7 @@ static void ipa_post_init(struct ipa_context *ipa)
 
 	ipa->wwan = ipa_wwan_init();
 	if (IS_ERR(ipa->wwan)) {
-		ipa_err("WWAN init returned %d (ignoring)\n",
+		ipa_err("WWAN init returned %ld (ignoring)\n",
 			PTR_ERR(ipa->wwan));
 		ipa->wwan = NULL;
 	}
@@ -1569,21 +1569,26 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
  */
 int ipa_ap_suspend(struct device *dev)
 {
+	int ret;
 	u32 i;
+
+	ret = rmnet_ipa_ap_suspend(NULL);
+	if (ret)
+		return ret;
 
 	/* In case there is a tx/rx handler in polling mode fail to suspend */
 	for (i = 0; i < ipa_ctx->ep_count; i++) {
 		struct ipa_ep_context *ep = &ipa_ctx->ep[i];
 
-		if (ipa_producer(ep->client))
-			continue;
-		if (ep->sys && ipa_ep_polling(ep)) {
-			ipa_err("EP %d is polling, do not suspend\n", i);
-			return -EAGAIN;
+		if (ipa_consumer(ep->client) && ep->sys && ipa_ep_polling(ep)) {
+			ret = -EAGAIN;
+			break;
 		}
 	}
+	if (ret)
+		rmnet_ipa_ap_resume(NULL);
 
-	return 0;
+	return ret;
 }
 
 /**
@@ -1597,6 +1602,8 @@ int ipa_ap_suspend(struct device *dev)
  */
 int ipa_ap_resume(struct device *dev)
 {
+	rmnet_ipa_ap_resume(NULL);
+
 	return 0;
 }
 
