@@ -64,7 +64,7 @@ struct ipa_wwan_private {
 };
 
 struct rmnet_ipa_context {
-	struct net_device *dev;
+	struct net_device *netdev;
 	struct mutex mux_id_mutex;		/* protects mux_id[] */
 	u32 mux_id_count;
 	u32 mux_id[MUX_CHANNEL_MAX];
@@ -166,7 +166,7 @@ static void apps_ipa_tx_complete_notify(void *priv, enum ipa_dp_evt_type evt,
 
 	skb = (struct sk_buff *)data;
 
-	if (dev != rmnet_ipa_ctx->dev) {
+	if (dev != rmnet_ipa_ctx->netdev) {
 		dev_kfree_skb_any(skb);
 		return;
 	}
@@ -211,7 +211,7 @@ static void apps_ipa_packet_receive_notify(void *priv, enum ipa_dp_evt_type evt,
 		int ret;
 		unsigned int packet_len = skb->len;
 
-		skb->dev = rmnet_ipa_ctx->dev;
+		skb->dev = rmnet_ipa_ctx->netdev;
 		skb->protocol = htons(ETH_P_MAP);
 
 		ret = netif_receive_skb(skb);
@@ -463,7 +463,7 @@ static int ipa_wwan_ioctl_extended(struct net_device *dev, void __user *data)
 		goto copy_out;
 
 	case RMNET_IOCTL_GET_DRIVER_NAME:		/* Get driver name */
-		memcpy(&edata.u.if_name, rmnet_ipa_ctx->dev->name, IFNAMSIZ);
+		memcpy(&edata.u.if_name, rmnet_ipa_ctx->netdev->name, IFNAMSIZ);
 		goto copy_out;
 
 	case RMNET_IOCTL_ADD_MUX_CHANNEL:		/* Add MUX ID */
@@ -589,7 +589,7 @@ static void ipa_wwan_setup(struct net_device *dev)
 static int ipa_wwan_probe(struct platform_device *pdev)
 {
 	struct ipa_wwan_private *wwan_ptr;
-	struct net_device *dev;
+	struct net_device *netdev;
 	int ret;
 
 	mutex_init(&rmnet_ipa_ctx->ep_setup_mutex);
@@ -607,27 +607,26 @@ static int ipa_wwan_probe(struct platform_device *pdev)
 	ipa_qmi_init();
 
 	/* initialize wan-driver netdev */
-	dev = alloc_netdev(sizeof(struct ipa_wwan_private),
-			   IPA_WWAN_DEV_NAME,
-			   NET_NAME_UNKNOWN,
-			   ipa_wwan_setup);
-	if (!dev) {
+	netdev = alloc_netdev(sizeof(struct ipa_wwan_private),
+			      IPA_WWAN_DEV_NAME, NET_NAME_UNKNOWN,
+			      ipa_wwan_setup);
+	if (!netdev) {
 		ipa_err("no memory for netdev\n");
 		ret = -ENOMEM;
 		goto err_clear_ctx;
 	}
-	rmnet_ipa_ctx->dev = dev;
-	wwan_ptr = netdev_priv(dev);
+	rmnet_ipa_ctx->netdev = netdev;
+	wwan_ptr = netdev_priv(netdev);
 	wwan_ptr->outstanding_high_ctl = DEFAULT_OUTSTANDING_HIGH_CTL;
 	wwan_ptr->outstanding_high = DEFAULT_OUTSTANDING_HIGH;
 	wwan_ptr->outstanding_low = DEFAULT_OUTSTANDING_LOW;
 	atomic_set(&wwan_ptr->outstanding_pkts, 0);
 
 	/* Enable SG support in netdevice. */
-	dev->hw_features |= NETIF_F_SG;
+	netdev->hw_features |= NETIF_F_SG;
 
-	netif_napi_add(dev, &wwan_ptr->napi, ipa_rmnet_poll, NAPI_WEIGHT);
-	ret = register_netdev(dev);
+	netif_napi_add(netdev, &wwan_ptr->napi, ipa_rmnet_poll, NAPI_WEIGHT);
+	ret = register_netdev(netdev);
 	if (ret) {
 		ipa_err("unable to register ipa_netdev %d rc=%d\n", 0, ret);
 		goto err_napi_del;
@@ -645,7 +644,7 @@ static int ipa_wwan_probe(struct platform_device *pdev)
 
 err_napi_del:
 	netif_napi_del(&wwan_ptr->napi);
-	free_netdev(dev);
+	free_netdev(netdev);
 err_clear_ctx:
 	memset(&rmnet_ipa_ctx_struct, 0, sizeof(rmnet_ipa_ctx_struct));
 
@@ -654,7 +653,7 @@ err_clear_ctx:
 
 static int ipa_wwan_remove(struct platform_device *pdev)
 {
-	struct ipa_wwan_private *wwan_ptr = netdev_priv(rmnet_ipa_ctx->dev);
+	struct ipa_wwan_private *wwan_ptr = netdev_priv(rmnet_ipa_ctx->netdev);
 
 	dev_info(&pdev->dev, "rmnet_ipa started deinitialization\n");
 
@@ -676,11 +675,11 @@ static int ipa_wwan_remove(struct platform_device *pdev)
 
 	netif_napi_del(&wwan_ptr->napi);
 	mutex_unlock(&rmnet_ipa_ctx->ep_setup_mutex);
-	unregister_netdev(rmnet_ipa_ctx->dev);
+	unregister_netdev(rmnet_ipa_ctx->netdev);
 
-	if (rmnet_ipa_ctx->dev)
-		free_netdev(rmnet_ipa_ctx->dev);
-	rmnet_ipa_ctx->dev = NULL;
+	if (rmnet_ipa_ctx->netdev)
+		free_netdev(rmnet_ipa_ctx->netdev);
+	rmnet_ipa_ctx->netdev = NULL;
 
 	mutex_destroy(&rmnet_ipa_ctx->mux_id_mutex);
 	mutex_destroy(&rmnet_ipa_ctx->ep_setup_mutex);
@@ -708,7 +707,7 @@ static int ipa_wwan_remove(struct platform_device *pdev)
  */
 static int rmnet_ipa_ap_suspend(struct device *dev)
 {
-	struct net_device *netdev = rmnet_ipa_ctx->dev;
+	struct net_device *netdev = rmnet_ipa_ctx->netdev;
 	struct ipa_wwan_private *wwan_ptr;
 	int ret;
 
@@ -756,7 +755,7 @@ bail:
  */
 static int rmnet_ipa_ap_resume(struct device *dev)
 {
-	struct net_device *netdev = rmnet_ipa_ctx->dev;
+	struct net_device *netdev = rmnet_ipa_ctx->netdev;
 
 	ipa_client_add();
 	if (netdev)
