@@ -17,9 +17,6 @@
 int ipa_clock_init(struct ipa_context *ipa);
 void ipa_clock_exit(struct ipa_context *ipa);
 
-int ipa_clock_enable(struct ipa_context *ipa);
-void ipa_clock_disable(struct ipa_context *ipa);
-
 void ipa_clock_get(void);
 bool ipa_clock_get_additional(void);
 void ipa_clock_put(void);

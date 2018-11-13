@@ -175,7 +175,7 @@ void ipa_clock_exit(struct ipa_context *ipa)
 /**
  * ipa_clock_enable() - Turn on IPA clocks
  */
-int ipa_clock_enable(struct ipa_context *ipa)
+static int ipa_clock_enable(struct ipa_context *ipa)
 {
 	int ret;
 
@@ -193,7 +193,7 @@ int ipa_clock_enable(struct ipa_context *ipa)
 /**
  * ipa_clock_disable() - Turn off IPA clocks
  */
-void ipa_clock_disable(struct ipa_context *ipa)
+static void ipa_clock_disable(struct ipa_context *ipa)
 {
 	clk_disable_unprepare(ipa->core_clock);
 	(void)ipa_interconnect_disable(ipa);

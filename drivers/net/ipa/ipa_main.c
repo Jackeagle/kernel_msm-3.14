@@ -1022,16 +1022,13 @@ static int ipa_pre_init(struct ipa_context *ipa)
 {
 	int ret;
 
-	/* enable IPA clocks explicitly to allow the initialization */
-	ret = ipa_clock_enable(ipa);
-	if (ret)
-		return ret;
+	ipa_clock_get();
 
 	ipa_hardware_init(ipa);
 
 	ret = ipa_ep_count_get(ipa);
 	if (ret)
-		goto err_clock_disable;
+		goto err_clock_put;
 
 	ret = ipa_sram_settings_get(ipa);
 	if (ret)
@@ -1072,8 +1069,8 @@ err_sram_settings_clear:
 	ipa_sram_settings_clear(ipa);
 err_ep_count_clear:
 	ipa_ep_count_clear(ipa);
-err_clock_disable:
-	ipa_clock_disable(ipa);
+err_clock_put:
+	ipa_clock_put();
 
 	return ret;
 }
