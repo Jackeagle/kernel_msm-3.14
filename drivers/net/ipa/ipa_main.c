@@ -740,20 +740,25 @@ static int ipa_clock_init(struct ipa_context *ipa)
 	clk = clk_get(dev, "core");
 	if (IS_ERR(clk))
 		return PTR_ERR(clk);
-
-	ret = clk_set_rate(clk, IPA_CORE_CLOCK_RATE);
-	if (ret) {
-		clk_put(clk);
-		return ret;
-	}
-
 	ipa->core_clock = clk;
 
-	return 0;
+	ret = clk_set_rate(clk, IPA_CORE_CLOCK_RATE);
+	if (ret)
+		goto err_clk_put;
+
+	ret = ipa_interconnect_init(ipa);
+	if (!ret)
+		return 0;	/* Success */
+err_clk_put:
+	ipa->core_clock = NULL;
+	clk_put(clk);
+
+	return ret;
 }
 
 static void ipa_clock_exit(struct ipa_context *ipa)
 {
+	ipa_interconnect_exit(ipa);
 	clk_put(ipa->core_clock);
 	ipa->core_clock = NULL;
 }
@@ -1456,16 +1461,12 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (ret)
 		goto out_ipa_destroy;
 
-	/* Initialize the interconnect driver early too.  It might
-	 * also return -EPROBE_DEFER.
+	/* Initialize the clock and interconnects early too.  They
+	 * could also return -EPROBE_DEFER.
 	 */
-	ret = ipa_interconnect_init(ipa);
-	if (ret)
-		goto out_smp2p_exit;
-
 	ret = ipa_clock_init(ipa);
 	if (ret)
-		goto err_interconnect_exit;
+		goto out_smp2p_exit;
 
 	ret = ipa_mem_init(ipa);
 	if (ret)
@@ -1528,8 +1529,6 @@ err_mem_exit:
 	ipa_mem_exit(ipa);
 err_clock_exit:
 	ipa_clock_exit(ipa);
-err_interconnect_exit:
-	ipa_interconnect_exit(ipa);
 out_smp2p_exit:
 	ipa_smp2p_exit(ipa);
 out_ipa_destroy:
@@ -1561,7 +1560,6 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 	ipa_filter_exit(ipa);
 	ipa_route_exit(ipa);
 	ipa_clock_exit(ipa);
-	ipa_interconnect_exit(ipa);
 	ipa_smp2p_exit(ipa);
 	ipa_destroy(ipa);
 
