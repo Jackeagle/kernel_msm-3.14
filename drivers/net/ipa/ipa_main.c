@@ -682,7 +682,7 @@ static void ipa_irq_exit(struct ipa_context *ipa)
 	ipa->ipa_irq = 0;
 }
 
-static int ipa_ep_apps_setup(void)
+static int ipa_ep_apps_setup(struct ipa_context *ipa)
 {
 	u32 size;
 	int ret;
@@ -693,15 +693,15 @@ static int ipa_ep_apps_setup(void)
 		return ret;
 
 	ipa_init_sram();
-	ipa_init_hdr(ipa_ctx);
+	ipa_init_hdr(ipa);
 
 	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
-	ipa_init_rt4(ipa_ctx->route_phys, size);
-	ipa_init_rt6(ipa_ctx->route_phys, size);
+	ipa_init_rt4(ipa->route_phys, size);
+	ipa_init_rt6(ipa->route_phys, size);
 
-	size = (ipa_ctx->filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
-	ipa_init_flt4(ipa_ctx->filter_phys, size);
-	ipa_init_flt6(ipa_ctx->filter_phys, size);
+	size = (ipa->filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
+	ipa_init_flt4(ipa->filter_phys, size);
+	ipa_init_flt6(ipa->filter_phys, size);
 
 	ipa_setup_flt_hash_tuple();
 	ipa_setup_rt_hash_tuple();
@@ -725,8 +725,8 @@ static int ipa_ep_apps_setup(void)
 	return 0;
 
 fail_flt_hash_tuple:
-	ipa_ep_teardown(ipa_ctx->cmd_prod_ep_id);
-	ipa_ctx->cmd_prod_ep_id = IPA_EP_ID_BAD;
+	ipa_ep_teardown(ipa->cmd_prod_ep_id);
+	ipa->cmd_prod_ep_id = IPA_EP_ID_BAD;
 
 	return ret;
 }
@@ -951,7 +951,7 @@ static int ipa_post_init(struct ipa_context *ipa)
 	}
 
 	/* setup the AP-IPA endpoints */
-	ret = ipa_ep_apps_setup();
+	ret = ipa_ep_apps_setup(ipa);
 	if (ret)
 		goto err_gsi_exit;
 
