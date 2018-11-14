@@ -666,7 +666,7 @@ static void ipa_rx_switch_to_intr_mode(struct ipa_sys_context *sys)
 				   msecs_to_jiffies(1));
 		return;
 	}
-	ipa_dec_release_wakelock();
+	ipa_dec_release_wakelock(ipa_ctx);
 	gsi_channel_intr_enable(ipa_ctx->gsi, sys->ep->channel_id);
 }
 
@@ -675,7 +675,7 @@ void ipa_rx_switch_to_poll_mode(struct ipa_sys_context *sys)
 	if (atomic_xchg(&sys->rx.curr_polling_state, 1))
 		return;
 	gsi_channel_intr_disable(ipa_ctx->gsi, sys->ep->channel_id);
-	ipa_inc_acquire_wakelock();
+	ipa_inc_acquire_wakelock(ipa_ctx);
 	queue_work(sys->wq, &sys->rx.work);
 }
 

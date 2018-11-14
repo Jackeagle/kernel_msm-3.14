@@ -296,7 +296,8 @@ static int ipa_init_hdr(struct ipa_context *ipa)
 			return ret;
 	}
 
-	ipa_write_reg(IPA_LOCAL_PKT_PROC_CNTXT_BASE, 0);
+	ipa_write_reg(IPA_LOCAL_PKT_PROC_CNTXT_BASE,
+		      ipa->smem_offset + IPA_MEM_MODEM_HDR_PROC_CTX_OFST);
 
 	return 0;
 }
@@ -764,34 +765,34 @@ static void ipa_mem_exit(struct ipa_context *ipa)
 /** ipa_inc_acquire_wakelock() - Increase active clients counter, and
  * acquire wakelock if necessary
  */
-void ipa_inc_acquire_wakelock(void)
+void ipa_inc_acquire_wakelock(struct ipa_context *ipa)
 {
 	unsigned long flags;
 
-	spin_lock_irqsave(&ipa_ctx->wakeup_lock, flags);
+	spin_lock_irqsave(&ipa->wakeup_lock, flags);
 
-	ipa_ctx->wakeup_count++;
-	if (ipa_ctx->wakeup_count == 1)
-		__pm_stay_awake(&ipa_ctx->wakeup);
+	ipa->wakeup_count++;
+	if (ipa->wakeup_count == 1)
+		__pm_stay_awake(&ipa->wakeup);
 
-	spin_unlock_irqrestore(&ipa_ctx->wakeup_lock, flags);
+	spin_unlock_irqrestore(&ipa->wakeup_lock, flags);
 }
 
 /** ipa_dec_release_wakelock() - Decrease active clients counter
  *
  * In case if the ref count is 0, release the wakelock.
  */
-void ipa_dec_release_wakelock(void)
+void ipa_dec_release_wakelock(struct ipa_context *ipa)
 {
 	unsigned long flags;
 
-	spin_lock_irqsave(&ipa_ctx->wakeup_lock, flags);
+	spin_lock_irqsave(&ipa->wakeup_lock, flags);
 
-	ipa_ctx->wakeup_count--;
-	if (ipa_ctx->wakeup_count == 0)
-		__pm_relax(&ipa_ctx->wakeup);
+	ipa->wakeup_count--;
+	if (ipa->wakeup_count == 0)
+		__pm_relax(&ipa->wakeup);
 
-	spin_unlock_irqrestore(&ipa_ctx->wakeup_lock, flags);
+	spin_unlock_irqrestore(&ipa->wakeup_lock, flags);
 }
 
 /** ipa_suspend_handler() - Handle the suspend interrupt
@@ -1266,7 +1267,7 @@ static const struct of_device_id ipa_plat_drv_match[] = {
 static int ipa_plat_drv_probe(struct platform_device *pdev)
 {
 	const struct ipa_match_data *match_data;
-	struct ipa_context *ipa = ipa_ctx;
+	struct ipa_context *ipa;
 	struct device *dev = &pdev->dev;
 	bool modem_init;
 	int ret;
