@@ -452,14 +452,9 @@ gsi_isr_glob_chan_err(struct gsi *gsi, u32 err_ee, u32 channel_id, u32 code)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 
-	if (err_ee != IPA_EE_AP)
-		ipa_bug_on(code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
-
 	switch (code) {
 	case GSI_INVALID_TRE_ERR:
 		dev_err(gsi->dev, "got INVALID_TRE_ERR\n");
-		channel->state = gsi_channel_state(gsi, channel_id);
-		ipa_bug_on(channel->state != GSI_CHANNEL_STATE_ERROR);
 		break;
 	case GSI_OUT_OF_BUFFERS_ERR:
 		dev_err(gsi->dev, "got OUT_OF_BUFFERS_ERR\n");
@@ -478,8 +473,8 @@ gsi_isr_glob_chan_err(struct gsi *gsi, u32 err_ee, u32 channel_id, u32 code)
 		dev_err(gsi->dev, "got HWO_1_ERR\n");
 		break;
 	default:
-		dev_err(gsi->dev, "unexpected channel error code %u\n", code);
-		ipa_bug();
+		WARN(true, "unexpected channel error code %u\n", code);
+		break;
 	}
 }
 
@@ -487,9 +482,6 @@ static void
 gsi_isr_glob_evt_err(struct gsi *gsi, u32 err_ee, u32 evt_ring_id, u32 code)
 {
 	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
-
-	if (err_ee != IPA_EE_AP)
-		ipa_bug_on(code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
 
 	switch (code) {
 	case GSI_OUT_OF_BUFFERS_ERR:
@@ -506,8 +498,8 @@ gsi_isr_glob_evt_err(struct gsi *gsi, u32 err_ee, u32 evt_ring_id, u32 code)
 		dev_err(gsi->dev, "got EVT_RING_EMPTY_ERR\n");
 		break;
 	default:
-		dev_err(gsi->dev, "unexpected event error code %u\n", code);
-		ipa_bug();
+		WARN(true, "unexpected event error code %u\n", code);
+		break;
 	}
 }
 
@@ -522,15 +514,12 @@ static void gsi_isr_glob_err(struct gsi *gsi)
 	gsi_writel(gsi, ~0, GSI_ERROR_LOG_CLR_OFFS);
 
 	log = (struct gsi_log_err *)&val;
-
-	ipa_bug_on(log->err_type == GSI_ERR_TYPE_GLOB);
-
 	if (log->err_type == GSI_ERR_TYPE_CHAN)
 		gsi_isr_glob_chan_err(gsi, log->ee, log->virt_idx, log->code);
 	else if (log->err_type == GSI_ERR_TYPE_EVT)
 		gsi_isr_glob_evt_err(gsi, log->ee, log->virt_idx, log->code);
-	else
-		WARN_ON(1);
+	else	/* GSI_ERR_TYPE_GLOB should be fatal */
+		WARN(true, "unexpected global error 0x%08x\n", log->err_type);
 }
 
 static void gsi_isr_glob_ee(struct gsi *gsi)
@@ -542,13 +531,15 @@ static void gsi_isr_glob_ee(struct gsi *gsi)
 	if (val & ERROR_INT_FMASK)
 		gsi_isr_glob_err(gsi);
 
-	if (val & EN_GP_INT1_FMASK)
-		dev_err(gsi->dev, "unexpected GP INT1 received\n");
-
-	ipa_bug_on(val & EN_GP_INT2_FMASK);
-	ipa_bug_on(val & EN_GP_INT3_FMASK);
-
 	gsi_writel(gsi, val, GSI_CNTXT_GLOB_IRQ_CLR_OFFS);
+
+	val ^= ERROR_INT_FMASK;
+
+	if (val & EN_GP_INT1_FMASK)
+		dev_err(gsi->dev, "unexpected global INT1\n");
+	val ^= EN_GP_INT1_FMASK;
+
+	WARN(val, "unexpected global interrupt 0x%08x\n", val);
 }
 
 static void *gsi_ring_phys_to_virt(struct gsi_ring *ring, u64 phys)
@@ -753,15 +744,13 @@ static void gsi_isr_general(struct gsi *gsi)
 	u32 val;
 
 	val = gsi_readl(gsi, GSI_CNTXT_GSI_IRQ_STTS_OFFS);
-
-	ipa_bug_on(val & CLR_MCS_STACK_OVRFLOW_FMASK);
-	ipa_bug_on(val & CLR_CMD_FIFO_OVRFLOW_FMASK);
-	ipa_bug_on(val & CLR_BUS_ERROR_FMASK);
+	gsi_writel(gsi, val, GSI_CNTXT_GSI_IRQ_CLR_OFFS);
 
 	if (val & CLR_BREAK_POINT_FMASK)
 		dev_err(gsi->dev, "got breakpoint\n");
+	val ^= CLR_BREAK_POINT_FMASK;
 
-	gsi_writel(gsi, val, GSI_CNTXT_GSI_IRQ_CLR_OFFS);
+	WARN(val, "unexpected general interrupt 0x%08x\n", val);
 }
 
 /* Returns a bitmask of pending GSI interrupts */
@@ -811,7 +800,8 @@ static irqreturn_t gsi_isr(int irq, void *dev_id)
 			type ^= single;
 		} while (type);
 
-		ipa_bug_on(++cnt > GSI_ISR_MAX_ITER);
+		if (WARN(++cnt > GSI_ISR_MAX_ITER, "interrupt flood\n"))
+			break;
 	}
 
 	return IRQ_HANDLED;
@@ -1162,13 +1152,10 @@ static void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
 	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
 	bool completed;
 
-	ipa_bug_on(evt_ring->state != GSI_EVT_RING_STATE_ALLOCATED);
-
 	mutex_lock(&gsi->mutex);
 
 	completed = evt_ring_command(gsi, evt_ring_id, GSI_EVT_RESET);
 	ipa_bug_on(!completed);
-	ipa_bug_on(evt_ring->state != GSI_EVT_RING_STATE_ALLOCATED);
 
 	gsi_evt_ring_program(gsi, evt_ring_id);
 	gsi_ring_init(&evt_ring->ring);
@@ -1177,8 +1164,6 @@ static void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
 
 	completed = evt_ring_command(gsi, evt_ring_id, GSI_EVT_DE_ALLOC);
 	ipa_bug_on(!completed);
-
-	ipa_bug_on(evt_ring->state != GSI_EVT_RING_STATE_NOT_ALLOCATED);
 
 	ipa_assert(gsi->evt_bmap & BIT(evt_ring_id));
 	gsi->evt_bmap &= ~BIT(evt_ring_id);
@@ -1357,11 +1342,6 @@ int gsi_channel_start(struct gsi *gsi, u32 channel_id)
 		mutex_unlock(&gsi->mutex);
 		return -ETIMEDOUT;
 	}
-	if (channel->state != GSI_CHANNEL_STATE_STARTED) {
-		dev_err(gsi->dev, "channel %u unexpected state %u\n",
-			channel_id, channel->state);
-		ipa_bug();
-	}
 
 	mutex_unlock(&gsi->mutex);
 
@@ -1443,12 +1423,6 @@ reset:
 	if (!channel_command(gsi, channel_id, GSI_CH_RESET)) {
 		mutex_unlock(&gsi->mutex);
 		return -ETIMEDOUT;
-	}
-
-	if (channel->state != GSI_CHANNEL_STATE_ALLOCATED) {
-		dev_err(gsi->dev, "channel_id %u unexpected state %u\n",
-			channel_id, channel->state);
-		ipa_bug();
 	}
 
 	/* workaround: reset GSI producers again */
