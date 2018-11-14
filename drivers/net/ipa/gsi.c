@@ -450,57 +450,33 @@ static void gsi_isr_evt_ctrl(struct gsi *gsi)
 static void
 gsi_isr_glob_chan_err(struct gsi *gsi, u32 err_ee, u32 channel_id, u32 code)
 {
-	struct gsi_channel *channel = &gsi->channel[channel_id];
-
-	switch (code) {
-	case GSI_INVALID_TRE_ERR:
-		dev_err(gsi->dev, "got INVALID_TRE_ERR\n");
-		break;
-	case GSI_OUT_OF_BUFFERS_ERR:
-		dev_err(gsi->dev, "got OUT_OF_BUFFERS_ERR\n");
-		break;
-	case GSI_OUT_OF_RESOURCES_ERR:
-		dev_err(gsi->dev, "got OUT_OF_RESOURCES_ERR\n");
-		complete(&channel->compl);
-		break;
-	case GSI_UNSUPPORTED_INTER_EE_OP_ERR:
-		dev_err(gsi->dev, "got UNSUPPORTED_INTER_EE_OP_ERR\n");
-		break;
-	case GSI_NON_ALLOCATED_EVT_ACCESS_ERR:
-		dev_err(gsi->dev, "got NON_ALLOCATED_EVT_ACCESS_ERR\n");
-		break;
-	case GSI_HWO_1_ERR:
-		dev_err(gsi->dev, "got HWO_1_ERR\n");
-		break;
-	default:
-		WARN(true, "unexpected channel error code %u\n", code);
-		break;
+	if (code == GSI_OUT_OF_RESOURCES_ERR) {
+		dev_err(gsi->dev, "channel %u out of resources\n", channel_id);
+		complete(&gsi->channel[channel_id].compl);
+		return;
 	}
+
+	/* Report, but otherwise ignore all other error codes */
+	WARN(true, "channel %u global error ee 0x%08x code 0x%08x\n",
+	     channel_id, err_ee, code);
 }
 
 static void
 gsi_isr_glob_evt_err(struct gsi *gsi, u32 err_ee, u32 evt_ring_id, u32 code)
 {
-	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
+	if (code == GSI_OUT_OF_RESOURCES_ERR) {
+		struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
+		u32 channel_id = gsi_channel_id(gsi, evt_ring->channel);
 
-	switch (code) {
-	case GSI_OUT_OF_BUFFERS_ERR:
-		dev_err(gsi->dev, "got OUT_OF_BUFFERS_ERR\n");
-		break;
-	case GSI_OUT_OF_RESOURCES_ERR:
-		dev_err(gsi->dev, "got OUT_OF_RESOURCES_ERR\n");
 		complete(&evt_ring->compl);
-		break;
-	case GSI_UNSUPPORTED_INTER_EE_OP_ERR:
-		dev_err(gsi->dev, "got UNSUPPORTED_INTER_EE_OP_ERR\n");
-		break;
-	case GSI_EVT_RING_EMPTY_ERR:
-		dev_err(gsi->dev, "got EVT_RING_EMPTY_ERR\n");
-		break;
-	default:
-		WARN(true, "unexpected event error code %u\n", code);
-		break;
+		dev_err(gsi->dev, "evt_ring for channel %u out of resources\n",
+			channel_id);
+		return;
 	}
+
+	/* Report, but otherwise ignore all other error codes */
+	WARN(true, "event ring 0x%08x global error ee %u code 0x%08x\n",
+	     evt_ring_id, err_ee, code);
 }
 
 static void gsi_isr_glob_err(struct gsi *gsi)
