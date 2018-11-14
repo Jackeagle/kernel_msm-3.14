@@ -1713,9 +1713,9 @@ int ipa_ep_alloc(struct ipa_context *ipa, enum ipa_client_type client)
 	return ep_id;
 }
 
-void ipa_ep_free(u32 ep_id)
+void ipa_ep_free(struct ipa_context *ipa, u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 
 	ipa_assert(ep->allocated);
 
@@ -1733,13 +1733,13 @@ void ipa_ep_free(u32 ep_id)
  *
  * Returns:	0 if successful, or a negative error code
  */
-int ipa_ep_setup(u32 ep_id, u32 channel_count, u32 evt_ring_mult,
-		 u32 rx_buffer_size,
+int ipa_ep_setup(struct ipa_context *ipa, u32 ep_id, u32 channel_count,
+		 u32 evt_ring_mult, u32 rx_buffer_size,
 		 void (*client_notify)(void *priv, enum ipa_dp_evt_type type,
 				       unsigned long data),
 		 void *priv)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 	int ret;
 
 	if (ipa_consumer(ep->client)) {
@@ -1952,7 +1952,7 @@ void ipa_ep_teardown(struct ipa_context *ipa, u32 ep_id)
 	if (ipa_consumer(ep->client))
 		ipa_cleanup_rx(ep->sys);
 
-	ipa_ep_free(ep_id);
+	ipa_ep_free(ipa, ep_id);
 }
 
 static int ipa_poll_gsi_pkt(struct ipa_sys_context *sys)

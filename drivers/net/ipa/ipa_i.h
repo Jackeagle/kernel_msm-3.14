@@ -498,12 +498,12 @@ void ipa_endp_status_cons(struct ipa_context *ipa, u32 ep_id, bool enable);
 void ipa_endp_status_prod(struct ipa_context *ipa, u32 ep_id, bool enable,
 			  enum ipa_client_type client);
 int ipa_ep_alloc(struct ipa_context *ipa, enum ipa_client_type client);
-void ipa_ep_free(u32 ep_id);
+void ipa_ep_free(struct ipa_context *ipa, u32 ep_id);
 
 void ipa_no_intr_init(u32 prod_ep_id);
 
-int ipa_ep_setup(u32 ep_id, u32 channel_count, u32 evt_ring_mult,
-		 u32 rx_buffer_size,
+int ipa_ep_setup(struct ipa_context *ipa, u32 ep_id, u32 channel_count,
+		 u32 evt_ring_mult, u32 rx_buffer_size,
 		 void (*client_notify)(void *priv, enum ipa_dp_evt_type type,
 				       unsigned long data),
 		 void *priv);

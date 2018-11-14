@@ -315,10 +315,10 @@ static int handle_ingress_format(struct net_device *dev,
 
 	ipa_ctx->ipa_client_apps_wan_cons_agg_gro = aggr_active;
 
-	ret = ipa_ep_setup(ep_id, channel_count, 1, rx_buffer_size,
+	ret = ipa_ep_setup(ipa_ctx, ep_id, channel_count, 1, rx_buffer_size,
 			   apps_ipa_packet_receive_notify, dev);
 	if (ret)
-		ipa_ep_free(ep_id);
+		ipa_ep_free(ipa_ctx, ep_id);
 	else
 		rmnet_ipa_ctx->wan_cons_ep_id = ep_id;
 out_unlock:
@@ -401,10 +401,10 @@ static int handle_egress_format(struct net_device *dev,
 	/* Use a deferred interrupting no-op to reduce completion interrupts */
 	ipa_no_intr_init(ep_id);
 
-	ret = ipa_ep_setup(ep_id, channel_count, 1, 0,
+	ret = ipa_ep_setup(ipa_ctx, ep_id, channel_count, 1, 0,
 			   apps_ipa_tx_complete_notify, dev);
 	if (ret)
-		ipa_ep_free(ep_id);
+		ipa_ep_free(ipa_ctx, ep_id);
 	else
 		rmnet_ipa_ctx->wan_prod_ep_id = ep_id;
 

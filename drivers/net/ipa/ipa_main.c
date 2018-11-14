@@ -186,9 +186,9 @@ static int ipa_ep_apps_cmd_prod_setup(struct ipa_context *ipa)
 	ipa_endp_init_seq_prod(ipa, ep_id);
 	ipa_endp_init_deaggr_prod(ipa, ep_id);
 
-	ret = ipa_ep_setup(ep_id, channel_count, 2, 0, NULL, NULL);
+	ret = ipa_ep_setup(ipa, ep_id, channel_count, 2, 0, NULL, NULL);
 	if (ret)
-		ipa_ep_free(ep_id);
+		ipa_ep_free(ipa, ep_id);
 	else
 		ipa->cmd_prod_ep_id = ep_id;
 
@@ -515,10 +515,10 @@ static int ipa_ep_apps_lan_cons_setup(struct ipa_context *ipa)
 	ipa_endp_init_hdr_metadata_mask_cons(ipa, ep_id, 0x0);
 	ipa_endp_status_cons(ipa, ep_id, true);
 
-	ret = ipa_ep_setup(ep_id, channel_count, 1, rx_buffer_size,
+	ret = ipa_ep_setup(ipa, ep_id, channel_count, 1, rx_buffer_size,
 			   ipa_lan_rx_cb, NULL);
 	if (ret)
-		ipa_ep_free(ep_id);
+		ipa_ep_free(ipa, ep_id);
 	else
 		ipa->lan_cons_ep_id = ep_id;
 
@@ -1382,11 +1382,11 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 
 	ipa_pre_exit(ipa);
 	if (ipa->lan_cons_ep_id != IPA_EP_ID_BAD) {
-		ipa_ep_free(ipa->lan_cons_ep_id);
+		ipa_ep_free(ipa, ipa->lan_cons_ep_id);
 		ipa->lan_cons_ep_id = IPA_EP_ID_BAD;
 	}
 	if (ipa->cmd_prod_ep_id != IPA_EP_ID_BAD) {
-		ipa_ep_free(ipa->cmd_prod_ep_id);
+		ipa_ep_free(ipa, ipa->cmd_prod_ep_id);
 		ipa->cmd_prod_ep_id = IPA_EP_ID_BAD;
 	}
 	/* XXX ipa_gsi_exit(ipa) */
