@@ -955,6 +955,13 @@ static int ipa_post_init(struct ipa_context *ipa)
 
 	ipa_debug("ipa_post_init() started\n");
 
+	ipa->gsi = gsi_init(pdev);
+	if (IS_ERR(ipa->gsi)) {
+		ret = PTR_ERR(ipa->gsi);
+		ipa->gsi = NULL;
+		return ret;
+	}
+
 	ret = gsi_device_init(ipa->gsi);
 	if (ret)
 		return ret;
@@ -1314,12 +1321,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_clear_ep_ids;
 
-	ipa->gsi = gsi_init(pdev);
-	if (IS_ERR(ipa->gsi)) {
-		ret = PTR_ERR(ipa->gsi);
-		goto err_pre_exit;
-	}
-
 	/* If the modem is not verifying and loading firmware we need to
 	 * get it loaded ourselves.  Only then can we proceed with the
 	 * second stage of IPA initialization.  If the modem is doing it,
@@ -1335,9 +1336,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (!ret)
 		return 0;	/* Success */
 
-	/* XXX gsi_exit(pdev); */
-err_pre_exit:
-	ipa->gsi = NULL;
 	/* XXX Need to undo ipa_pre_init() here */
 err_clear_ep_ids:
 	ipa->lan_cons_ep_id = 0;
