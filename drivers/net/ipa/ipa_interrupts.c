@@ -271,8 +271,19 @@ int ipa_interrupts_init(struct ipa_context *ipa)
 		return 0;
 
 	free_irq(ipa->ipa_irq, dev);
+	ipa->ipa_irq = 0;
 
 	return -ENOMEM;
+}
+
+void ipa_interrupts_exit(struct ipa_context *ipa)
+{
+	struct device *dev = &ipa->pdev->dev;
+
+	free_irq(ipa->ipa_irq, dev);
+	ipa->ipa_irq = 0;
+	destroy_workqueue(ipa_interrupt_wq);
+	ipa_interrupt_wq = NULL;
 }
 
 /**
