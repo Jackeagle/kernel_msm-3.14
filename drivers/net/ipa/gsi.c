@@ -165,6 +165,14 @@ struct gsi_ring {
 	u64 end;			/* physical addr past last element */
 };
 
+struct channel_stats {
+	u64 allocate;
+	u64 start;
+	u64 stop;
+	u64 reset;
+	u64 dealloc;
+};
+
 struct gsi_channel {
 	bool from_ipa;			/* true: IPA->AP; false: AP->IPA */
 	bool priority;		/* Does hardware give this channel priority? */
@@ -177,6 +185,7 @@ struct gsi_channel {
 	struct completion compl;
 	atomic_t poll_mode;
 	u32 tlv_count;			/* # slots in TLV */
+	struct channel_stats stats;
 };
 
 struct gsi_evt_ring {
@@ -185,16 +194,6 @@ struct gsi_evt_ring {
 	struct gsi_ring ring;
 	struct completion compl;
 	struct gsi_channel *channel;
-};
-
-struct ch_debug_stats {
-	unsigned long ch_allocate;
-	unsigned long ch_start;
-	unsigned long ch_stop;
-	unsigned long ch_reset;
-	unsigned long ch_de_alloc;
-	unsigned long ch_db_stop;
-	unsigned long cmd_completed;
 };
 
 struct gsi {
@@ -208,7 +207,6 @@ struct gsi {
 	atomic_t channel_count;
 	atomic_t evt_ring_count;
 	struct gsi_channel channel[GSI_CHANNEL_MAX];
-	struct ch_debug_stats ch_dbg[GSI_CHANNEL_MAX];
 	struct gsi_evt_ring evt_ring[GSI_EVT_RING_MAX];
 	unsigned long evt_bmap;
 	u32 channel_max;
@@ -1210,7 +1208,7 @@ int gsi_channel_alloc(struct gsi *gsi, u32 channel_id, u32 channel_count,
 
 	mutex_lock(&gsi->mutex);
 
-	gsi->ch_dbg[channel_id].ch_allocate++;
+	gsi->channel[channel_id].stats.allocate++;
 	channel_command(gsi, channel_id, GSI_CH_ALLOCATE);
 	if (channel->state != GSI_CHANNEL_STATE_ALLOCATED) {
 		ret = -EIO;
@@ -1298,7 +1296,7 @@ int gsi_channel_start(struct gsi *gsi, u32 channel_id)
 
 	mutex_lock(&gsi->mutex);
 
-	gsi->ch_dbg[channel_id].ch_start++;
+	gsi->channel[channel_id].stats.start++;
 	channel_command(gsi, channel_id, GSI_CH_START);
 
 	mutex_unlock(&gsi->mutex);
@@ -1323,7 +1321,7 @@ int gsi_channel_stop(struct gsi *gsi, u32 channel_id)
 
 	mutex_lock(&gsi->mutex);
 
-	gsi->ch_dbg[channel_id].ch_stop++;
+	gsi->channel[channel_id].stats.stop++;
 	channel_command(gsi, channel_id, GSI_CH_STOP);
 
 	if (channel->state != GSI_CHANNEL_STATE_STOPPED &&
@@ -1363,7 +1361,7 @@ int gsi_channel_reset(struct gsi *gsi, u32 channel_id)
 	reset_done = false;
 	mutex_lock(&gsi->mutex);
 reset:
-	gsi->ch_dbg[channel_id].ch_reset++;
+	gsi->channel[channel_id].stats.reset++;
 	channel_command(gsi, channel_id, GSI_CH_RESET);
 
 	/* workaround: reset GSI producers again */
@@ -1392,7 +1390,7 @@ void gsi_channel_free(struct gsi *gsi, u32 channel_id)
 	evt_ring_id = gsi_evt_ring_id(gsi, channel->evt_ring);
 	mutex_lock(&gsi->mutex);
 
-	gsi->ch_dbg[channel_id].ch_de_alloc++;
+	gsi->channel[channel_id].stats.dealloc++;
 	channel_command(gsi, channel_id, GSI_CH_DE_ALLOC);
 
 	mutex_unlock(&gsi->mutex);
