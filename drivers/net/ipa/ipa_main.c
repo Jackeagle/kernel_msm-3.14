@@ -1306,12 +1306,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_filter_exit;
 
-	ipa->gsi = gsi_init(pdev);
-	if (IS_ERR(ipa->gsi)) {
-		ret = PTR_ERR(ipa->gsi);
-		goto err_clear_gsi;
-	}
-
 	ipa->cmd_prod_ep_id = IPA_EP_ID_BAD;
 	ipa->lan_cons_ep_id = IPA_EP_ID_BAD;
 
@@ -1319,6 +1313,12 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	ret = ipa_pre_init(ipa);
 	if (ret)
 		goto err_clear_ep_ids;
+
+	ipa->gsi = gsi_init(pdev);
+	if (IS_ERR(ipa->gsi)) {
+		ret = PTR_ERR(ipa->gsi);
+		goto err_pre_exit;
+	}
 
 	/* If the modem is not verifying and loading firmware we need to
 	 * get it loaded ourselves.  Only then can we proceed with the
@@ -1335,13 +1335,13 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (!ret)
 		return 0;	/* Success */
 
+	/* XXX gsi_exit(pdev); */
+err_pre_exit:
+	ipa->gsi = NULL;
 	/* XXX Need to undo ipa_pre_init() here */
 err_clear_ep_ids:
 	ipa->lan_cons_ep_id = 0;
 	ipa->cmd_prod_ep_id = 0;
-	/* XXX gsi_exit(pdev); */
-err_clear_gsi:
-	ipa->gsi = NULL;
 	ipa_irq_exit(ipa);
 err_filter_exit:
 	ipa_filter_exit(ipa);
