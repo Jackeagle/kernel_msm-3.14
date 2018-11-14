@@ -1029,15 +1029,14 @@ static void gsi_ring_init(struct gsi_ring *ring)
 	ring->rp_local = ring->rp = ring->phys;
 }
 
-static int gsi_ring_alloc(struct gsi_ring *ring, u32 count)
+static int gsi_ring_alloc(struct gsi *gsi, struct gsi_ring *ring, u32 count)
 {
 	size_t size = roundup_pow_of_two(count * GSI_RING_ELEMENT_SIZE);
-	struct device *dev = &ipa_ctx->pdev->dev;
 	phys_addr_t phys;
 	void *virt;
 
 	/* Hardware requires a power-of-2 ring size (and alignment) */
-	virt = dma_zalloc_coherent(dev, size, &phys, GFP_KERNEL);
+	virt = dma_zalloc_coherent(gsi->dev, size, &phys, GFP_KERNEL);
 	if (!virt)
 		return -ENOMEM;
 	ipa_assert(!(phys % size));
@@ -1050,11 +1049,9 @@ static int gsi_ring_alloc(struct gsi_ring *ring, u32 count)
 	return 0;
 }
 
-static void gsi_ring_free(struct gsi_ring *ring)
+static void gsi_ring_free(struct gsi *gsi, struct gsi_ring *ring)
 {
-	struct device *dev = &ipa_ctx->pdev->dev;
-
-	dma_free_coherent(dev, ring->size, ring->virt, ring->phys);
+	dma_free_coherent(gsi->dev, ring->size, ring->virt, ring->phys);
 	memset(ring, 0, sizeof(*ring));
 }
 
@@ -1135,7 +1132,7 @@ static int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 
 	evt_ring = &gsi->evt_ring[evt_ring_id];
 
-	ret = gsi_ring_alloc(&evt_ring->ring, ring_count);
+	ret = gsi_ring_alloc(gsi, &evt_ring->ring, ring_count);
 	if (ret)
 		goto err_free_bmap;
 
@@ -1174,7 +1171,7 @@ static int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 	return evt_ring_id;
 
 err_free_ring:
-	gsi_ring_free(&evt_ring->ring);
+	gsi_ring_free(gsi, &evt_ring->ring);
 	memset(evt_ring, 0, sizeof(*evt_ring));
 err_free_bmap:
 	ipa_assert(gsi->evt_bmap & BIT(evt_ring_id));
@@ -1220,7 +1217,7 @@ static void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
 	mutex_unlock(&gsi->mutex);
 
 	evt_ring->moderation = false;
-	gsi_ring_free(&evt_ring->ring);
+	gsi_ring_free(gsi, &evt_ring->ring);
 	memset(evt_ring, 0, sizeof(*evt_ring));
 
 	atomic_dec(&gsi->evt_ring_count);
@@ -1275,7 +1272,7 @@ int gsi_channel_alloc(struct gsi *gsi, u32 channel_id, u32 channel_count,
 		return ret;
 	evt_ring_id = (u32)ret;
 
-	ret = gsi_ring_alloc(&channel->ring, channel_count);
+	ret = gsi_ring_alloc(gsi, &channel->ring, channel_count);
 	if (ret)
 		goto err_evt_ring_free;
 
@@ -1322,7 +1319,7 @@ err_mutex_unlock:
 	mutex_unlock(&gsi->mutex);
 	kfree(user_data);
 err_ring_free:
-	gsi_ring_free(&channel->ring);
+	gsi_ring_free(gsi, &channel->ring);
 err_evt_ring_free:
 	gsi_evt_ring_dealloc(gsi, evt_ring_id);
 
@@ -1524,7 +1521,7 @@ void gsi_channel_free(struct gsi *gsi, u32 channel_id)
 	mutex_unlock(&gsi->mutex);
 
 	kfree(channel->user_data);
-	gsi_ring_free(&channel->ring);
+	gsi_ring_free(gsi, &channel->ring);
 
 	gsi_evt_ring_dealloc(gsi, evt_ring_id);
 
