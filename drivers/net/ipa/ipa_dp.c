@@ -1674,13 +1674,13 @@ void ipa_endp_init_deaggr_prod(u32 ep_id)
 	ipa_reg_endp_init_deaggr_prod(&ep->init_deaggr);
 }
 
-int ipa_ep_alloc(enum ipa_client_type client)
+int ipa_ep_alloc(struct ipa_context *ipa, enum ipa_client_type client)
 {
 	u32 ep_id = ipa_client_ep_id(client);
 	struct ipa_sys_context *sys;
 	struct ipa_ep_context *ep;
 
-	ep = &ipa_ctx->ep[ep_id];
+	ep = &ipa->ep[ep_id];
 
 	ipa_assert(!ep->allocated);
 

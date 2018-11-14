@@ -177,7 +177,7 @@ static int ipa_ep_apps_cmd_prod_setup(struct ipa_context *ipa)
 	dst_client = IPA_CLIENT_APPS_LAN_CONS;
 	channel_count = IPA_APPS_CMD_PROD_RING_COUNT;
 
-	ret = ipa_ep_alloc(client);
+	ret = ipa_ep_alloc(ipa, client);
 	if (ret < 0)
 		return ret;
 	ep_id = ret;
@@ -503,7 +503,7 @@ static int ipa_ep_apps_lan_cons_setup(struct ipa_context *ipa)
 	 */
 	aggr_size = (rx_buffer_size - IPA_MTU) / SZ_1K;
 
-	ret = ipa_ep_alloc(client);
+	ret = ipa_ep_alloc(ipa, client);
 	if (ret < 0)
 		return ret;
 	ep_id = ret;

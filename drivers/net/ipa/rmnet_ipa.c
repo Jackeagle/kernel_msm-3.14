@@ -299,7 +299,7 @@ static int handle_ingress_format(struct net_device *dev,
 		goto out_unlock;
 	}
 
-	ret = ipa_ep_alloc(client);
+	ret = ipa_ep_alloc(ipa_ctx, client);
 	if (ret < 0)
 		goto out_unlock;
 	ep_id = ret;
@@ -375,7 +375,7 @@ static int handle_egress_format(struct net_device *dev,
 		goto out_unlock;
 	}
 
-	ret = ipa_ep_alloc(client);
+	ret = ipa_ep_alloc(ipa_ctx, client);
 	if (ret < 0)
 		goto out_unlock;
 	ep_id = ret;
