@@ -1902,9 +1902,9 @@ static void ipa_reset_gsi_channel(u32 ep_id)
  * ipa_ep_teardown() - Tear down an endpoint
  * @ep_id:	The endpoint to tear down
  */
-void ipa_ep_teardown(u32 ep_id)
+void ipa_ep_teardown(struct ipa_context *ipa, u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 	int empty;
 	int ret;
 	int i;
@@ -1939,7 +1939,7 @@ void ipa_ep_teardown(u32 ep_id)
 	}
 
 	ipa_reset_gsi_channel(ep_id);
-	gsi_channel_free(ipa_ctx->gsi, ep->channel_id);
+	gsi_channel_free(ipa->gsi, ep->channel_id);
 
 	if (ipa_consumer(ep->client))
 		ipa_cleanup_rx(ep->sys);

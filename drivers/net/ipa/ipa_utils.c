@@ -773,7 +773,7 @@ void ipa_ep_resume_all(void)
  * Return codes:
  * 0: success
  */
-void ipa_cfg_default_route(enum ipa_client_type client)
+void ipa_cfg_default_route(struct ipa_context *ipa, enum ipa_client_type client)
 {
 	struct ipa_reg_route route;
 

@@ -720,12 +720,12 @@ void ipa_wwan_cleanup(void *data)
 	ipa_clock_get();
 
 	if (wwan->wan_cons_ep_id != IPA_EP_ID_BAD) {
-		ipa_ep_teardown(wwan->wan_cons_ep_id);
+		ipa_ep_teardown(ipa_ctx, wwan->wan_cons_ep_id);
 		wwan->wan_cons_ep_id = IPA_EP_ID_BAD;
 	}
 
 	if (wwan->wan_prod_ep_id != IPA_EP_ID_BAD) {
-		ipa_ep_teardown(wwan->wan_prod_ep_id);
+		ipa_ep_teardown(ipa_ctx, wwan->wan_prod_ep_id);
 		wwan->wan_prod_ep_id = IPA_EP_ID_BAD;
 	}
 

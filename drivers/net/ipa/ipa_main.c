@@ -165,7 +165,7 @@ int ipa_modem_smem_init(struct ipa_context *ipa)
 				       IPA_MEM_MODEM_HDR_PROC_CTX_SIZE);
 }
 
-static int ipa_ep_apps_cmd_prod_setup(void)
+static int ipa_ep_apps_cmd_prod_setup(struct ipa_context *ipa)
 {
 	enum ipa_client_type dst_client;
 	enum ipa_client_type client;
@@ -190,7 +190,7 @@ static int ipa_ep_apps_cmd_prod_setup(void)
 	if (ret)
 		ipa_ep_free(ep_id);
 	else
-		ipa_ctx->cmd_prod_ep_id = ep_id;
+		ipa->cmd_prod_ep_id = ep_id;
 
 	return ret;
 }
@@ -220,16 +220,16 @@ static __always_inline void sram_set_canaries(u32 *sram_mmio, u32 offset)
  *
  * Return:	0 if successful, or a negative error code
  */
-static int ipa_init_sram(void)
+static int ipa_init_sram(struct ipa_context *ipa)
 {
 	phys_addr_t phys_addr;
 	u32 *ipa_sram_mmio;
 
-	phys_addr = ipa_ctx->ipa_phys;
+	phys_addr = ipa->ipa_phys;
 	phys_addr += ipa_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_N, 0);
-	phys_addr += ipa_ctx->smem_offset;
+	phys_addr += ipa->smem_offset;
 
-	ipa_sram_mmio = ioremap(phys_addr, ipa_ctx->smem_size);
+	ipa_sram_mmio = ioremap(phys_addr, ipa->smem_size);
 	if (!ipa_sram_mmio) {
 		ipa_err("fail to ioremap IPA SRAM\n");
 		return -ENOMEM;
@@ -306,7 +306,7 @@ static int ipa_init_hdr(struct ipa_context *ipa)
  *
  * Return:	0 if successful, or a negative error code
  */
-static int ipa_init_rt4(dma_addr_t phys, size_t size)
+static int ipa_init_rt4(struct ipa_context *ipa, dma_addr_t phys, size_t size)
 {
 	struct ipa_desc desc = { };
 	u32 nhash_offset;
@@ -314,8 +314,8 @@ static int ipa_init_rt4(dma_addr_t phys, size_t size)
 	void *payload;
 	int ret;
 
-	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_RT_HASH_OFST;
-	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_RT_NHASH_OFST;
+	hash_offset = ipa->smem_offset + IPA_MEM_V4_RT_HASH_OFST;
+	nhash_offset = ipa->smem_offset + IPA_MEM_V4_RT_NHASH_OFST;
 	payload = ipa_imm_ip_fltrt_init_pyld(phys, size, hash_offset,
 					     nhash_offset);
 	if (!payload)
@@ -337,7 +337,7 @@ static int ipa_init_rt4(dma_addr_t phys, size_t size)
  *
  * Return:	0 if successful, or a negative error code
  */
-static int ipa_init_rt6(dma_addr_t phys, size_t size)
+static int ipa_init_rt6(struct ipa_context *ipa, dma_addr_t phys, size_t size)
 {
 	struct ipa_desc desc = { };
 	u32 nhash_offset;
@@ -345,8 +345,8 @@ static int ipa_init_rt6(dma_addr_t phys, size_t size)
 	void *payload;
 	int ret;
 
-	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_RT_HASH_OFST;
-	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_RT_NHASH_OFST;
+	hash_offset = ipa->smem_offset + IPA_MEM_V6_RT_HASH_OFST;
+	nhash_offset = ipa->smem_offset + IPA_MEM_V6_RT_NHASH_OFST;
 	payload = ipa_imm_ip_fltrt_init_pyld(phys, size, hash_offset,
 					     nhash_offset);
 	if (!payload)
@@ -368,7 +368,7 @@ static int ipa_init_rt6(dma_addr_t phys, size_t size)
  *
  * Return:	0 if successful, or a negative error code
  */
-static int ipa_init_flt4(dma_addr_t phys, size_t size)
+static int ipa_init_flt4(struct ipa_context *ipa, dma_addr_t phys, size_t size)
 {
 	struct ipa_desc desc = { };
 	u32 nhash_offset;
@@ -376,8 +376,8 @@ static int ipa_init_flt4(dma_addr_t phys, size_t size)
 	void *payload;
 	int ret;
 
-	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_FLT_HASH_OFST;
-	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V4_FLT_NHASH_OFST;
+	hash_offset = ipa->smem_offset + IPA_MEM_V4_FLT_HASH_OFST;
+	nhash_offset = ipa->smem_offset + IPA_MEM_V4_FLT_NHASH_OFST;
 	payload = ipa_imm_ip_fltrt_init_pyld(phys, size, hash_offset,
 					     nhash_offset);
 	if (!payload)
@@ -399,7 +399,7 @@ static int ipa_init_flt4(dma_addr_t phys, size_t size)
  *
  * Return:	0 if successful, or a negative error code
  */
-static int ipa_init_flt6(dma_addr_t phys, size_t size)
+static int ipa_init_flt6(struct ipa_context *ipa, dma_addr_t phys, size_t size)
 {
 	struct ipa_desc desc = { };
 	u32 nhash_offset;
@@ -407,8 +407,8 @@ static int ipa_init_flt6(dma_addr_t phys, size_t size)
 	void *payload;
 	int ret;
 
-	hash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_FLT_HASH_OFST;
-	nhash_offset = ipa_ctx->smem_offset + IPA_MEM_V6_FLT_NHASH_OFST;
+	hash_offset = ipa->smem_offset + IPA_MEM_V6_FLT_HASH_OFST;
+	nhash_offset = ipa->smem_offset + IPA_MEM_V6_FLT_NHASH_OFST;
 	payload = ipa_imm_ip_fltrt_init_pyld(phys, size, hash_offset,
 					     nhash_offset);
 	if (!payload)
@@ -425,9 +425,9 @@ static int ipa_init_flt6(dma_addr_t phys, size_t size)
 	return ret;
 }
 
-static void ipa_setup_flt_hash_tuple(void)
+static void ipa_setup_flt_hash_tuple(struct ipa_context *ipa)
 {
-	u32 ep_mask = ipa_ctx->filter_bitmap;
+	u32 ep_mask = ipa->filter_bitmap;
 
 	while (ep_mask) {
 		u32 i = __ffs(ep_mask);
@@ -438,7 +438,7 @@ static void ipa_setup_flt_hash_tuple(void)
 	}
 }
 
-static void ipa_setup_rt_hash_tuple(void)
+static void ipa_setup_rt_hash_tuple(struct ipa_context *ipa)
 {
 	u32 route_mask;
 	u32 modem_mask;
@@ -460,7 +460,7 @@ static void ipa_setup_rt_hash_tuple(void)
 	}
 }
 
-static int ipa_ep_apps_lan_cons_setup(void)
+static int ipa_ep_apps_lan_cons_setup(struct ipa_context *ipa)
 {
 	enum ipa_client_type client;
 	u32 rx_buffer_size;
@@ -482,7 +482,7 @@ static int ipa_ep_apps_lan_cons_setup(void)
 	if (aggr_count > ipa_reg_aggr_max_packet_limit())
 		return -EINVAL;
 
-	if (ipa_ctx->lan_cons_ep_id != IPA_EP_ID_BAD)
+	if (ipa->lan_cons_ep_id != IPA_EP_ID_BAD)
 		return -EBUSY;
 
 	/* Compute the buffer size required to handle the requested
@@ -520,7 +520,7 @@ static int ipa_ep_apps_lan_cons_setup(void)
 	if (ret)
 		ipa_ep_free(ep_id);
 	else
-		ipa_ctx->lan_cons_ep_id = ep_id;
+		ipa->lan_cons_ep_id = ep_id;
 
 	return ret;
 }
@@ -688,23 +688,23 @@ static int ipa_ep_apps_setup(struct ipa_context *ipa)
 	int ret;
 
 	/* CMD OUT (AP->IPA) */
-	ret = ipa_ep_apps_cmd_prod_setup();
+	ret = ipa_ep_apps_cmd_prod_setup(ipa);
 	if (ret < 0)
 		return ret;
 
-	ipa_init_sram();
+	ipa_init_sram(ipa);
 	ipa_init_hdr(ipa);
 
 	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
-	ipa_init_rt4(ipa->route_phys, size);
-	ipa_init_rt6(ipa->route_phys, size);
+	ipa_init_rt4(ipa, ipa->route_phys, size);
+	ipa_init_rt6(ipa, ipa->route_phys, size);
 
 	size = (ipa->filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
-	ipa_init_flt4(ipa->filter_phys, size);
-	ipa_init_flt6(ipa->filter_phys, size);
+	ipa_init_flt4(ipa, ipa->filter_phys, size);
+	ipa_init_flt6(ipa, ipa->filter_phys, size);
 
-	ipa_setup_flt_hash_tuple();
-	ipa_setup_rt_hash_tuple();
+	ipa_setup_flt_hash_tuple(ipa);
+	ipa_setup_rt_hash_tuple(ipa);
 
 	/* LAN IN (IPA->AP)
 	 *
@@ -716,16 +716,16 @@ static int ipa_ep_apps_setup(struct ipa_context *ipa)
 	 * of exceptions (unroutable packets, but other events as well)
 	 * through this endpoint.
 	 */
-	ret = ipa_ep_apps_lan_cons_setup();
+	ret = ipa_ep_apps_lan_cons_setup(ipa);
 	if (ret < 0)
 		goto fail_flt_hash_tuple;
 
-	ipa_cfg_default_route(IPA_CLIENT_APPS_LAN_CONS);
+	ipa_cfg_default_route(ipa, IPA_CLIENT_APPS_LAN_CONS);
 
 	return 0;
 
 fail_flt_hash_tuple:
-	ipa_ep_teardown(ipa->cmd_prod_ep_id);
+	ipa_ep_teardown(ipa, ipa->cmd_prod_ep_id);
 	ipa->cmd_prod_ep_id = IPA_EP_ID_BAD;
 
 	return ret;

@@ -503,7 +503,7 @@ int ipa_ep_setup(u32 ep_id, u32 channel_count, u32 evt_ring_mult,
 				       unsigned long data),
 		 void *priv);
 
-void ipa_ep_teardown(u32 ep_id);
+void ipa_ep_teardown(struct ipa_context *ipa, u32 ep_id);
 
 void ipa_rx_switch_to_poll_mode(struct ipa_sys_context *sys);
 
@@ -530,7 +530,8 @@ static inline int ipa_send_cmd(struct ipa_desc *desc)
 
 u32 ipa_aggr_byte_limit_buf_size(u32 byte_limit);
 
-void ipa_cfg_default_route(enum ipa_client_type client);
+void ipa_cfg_default_route(struct ipa_context *ipa,
+			   enum ipa_client_type client);
 
 int ipa_interrupts_init(struct ipa_context *ipa);
 void ipa_interrupts_exit(struct ipa_context *ipa);
