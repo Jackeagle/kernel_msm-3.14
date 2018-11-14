@@ -1039,7 +1039,6 @@ static int gsi_ring_alloc(struct gsi *gsi, struct gsi_ring *ring, u32 count)
 	virt = dma_zalloc_coherent(gsi->dev, size, &phys, GFP_KERNEL);
 	if (!virt)
 		return -ENOMEM;
-	ipa_assert(!(phys % size));
 	ring->virt = virt;
 	ring->phys = phys;
 	ring->size = size;
