@@ -24,7 +24,7 @@
 
 #include "gsi.h"
 #include "gsi_reg.h"
-#include "ipa_i.h"	/* ipa_err() */
+#include "ipa_i.h"
 
 /**
  * DOC: The Role of GSI in IPA Operation
@@ -77,9 +77,6 @@
  */
 
 #define GSI_RING_ELEMENT_SIZE	16	/* bytes (channel or event ring) */
-
-#define GSI_CHANNEL_MAX		14
-#define GSI_EVT_RING_MAX	10
 
 /* Delay period if interrupt moderation is in effect */
 #define IPA_GSI_EVT_RING_INT_MODT	(32 * 1) /* 1ms under 32KHz clock */
@@ -204,10 +201,10 @@ struct gsi {
 	bool irq_wake_enabled;
 	atomic_t channel_count;
 	u32 channel_max;
-	struct gsi_channel channel[GSI_CHANNEL_MAX];
+	struct gsi_channel *channel;
 	atomic_t evt_ring_count;
 	u32 evt_ring_max;
-	struct gsi_evt_ring evt_ring[GSI_EVT_RING_MAX];
+	struct gsi_evt_ring *evt_ring;
 	unsigned long evt_bmap;
 	spinlock_t slock;	/* protects global register updates */
 	struct mutex mutex;	/* protects 1-at-a-time commands, evt_bmap */
@@ -864,12 +861,22 @@ struct gsi *gsi_init(struct platform_device *pdev)
 	atomic_set(&gsi->channel_count, 0);
 	gsi->channel_max = gsi_channel_max(gsi);
 	dev_dbg(gsi->dev, "channel_max %u\n", gsi->channel_max);
-	ipa_assert(gsi->channel_max <= GSI_CHANNEL_MAX);
+	gsi->channel = kcalloc(gsi->channel_max, sizeof(*gsi->channel),
+			       GFP_KERNEL);
+	if (!gsi->channel) {
+		ret = -ENOMEM;
+		goto err_free_irq;
+	}
 
 	atomic_set(&gsi->evt_ring_count, 0);
 	gsi->evt_ring_max = gsi_evt_ring_max(gsi);
 	dev_dbg(gsi->dev, "evt_ring_max %u\n", gsi->evt_ring_max);
-	ipa_assert(gsi->evt_ring_max <= GSI_EVT_RING_MAX);
+	gsi->evt_ring = kcalloc(gsi->evt_ring_max, sizeof(*gsi->evt_ring),
+			        GFP_KERNEL);
+	if (!gsi->evt_ring) {
+		ret = -ENOMEM;
+		goto err_free_channel;
+	}
 
 	gsi->evt_bmap = gsi_evt_bmap_init(gsi->evt_ring_max);
 
@@ -887,6 +894,12 @@ struct gsi *gsi_init(struct platform_device *pdev)
 
 	return gsi;
 
+err_free_channel:
+	kfree(gsi->channel);
+err_free_irq:
+	if (gsi->irq_wake_enabled)
+		(void)disable_irq_wake(gsi->irq);
+	free_irq(gsi->irq, gsi);
 err_unmap_base:
 	iounmap(gsi->base);
 err_free_gsi:
@@ -899,6 +912,8 @@ void gsi_exit(struct gsi *gsi)
 {
 	gsi_irq_disable_all(gsi);
 	mutex_destroy(&gsi->mutex);
+	kfree(gsi->evt_ring);
+	kfree(gsi->channel);
 	if (gsi->irq_wake_enabled)
 		(void)disable_irq_wake(gsi->irq);
 	free_irq(gsi->irq, gsi);
