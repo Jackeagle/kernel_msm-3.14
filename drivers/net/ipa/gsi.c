@@ -1031,20 +1031,17 @@ static void gsi_evt_ring_prime(struct gsi *gsi, struct gsi_evt_ring *evt_ring)
  * false if a timeout occurred.  Note that the register offset is
  * first, value to write is second (reverse of writel() order).
  */
-static bool command(struct gsi *gsi, u32 reg, u32 val, struct completion *compl)
+static void command(struct gsi *gsi, u32 reg, u32 val, struct completion *compl)
 {
-	bool ret;
+	unsigned long ret;
 
 	gsi_writel(gsi, val, reg);
-	ret = !!wait_for_completion_timeout(compl, GSI_CMD_TIMEOUT);
-	if (!ret)
-		dev_err(gsi->dev, "command timeout\n");
-
-	return ret;
+	ret = wait_for_completion_timeout(compl, GSI_CMD_TIMEOUT);
+	WARN(!ret, "command timeout reg 0x%08x val 0x%08x\n", reg, val);
 }
 
 /* Issue an event ring command and wait for it to complete */
-static bool evt_ring_command(struct gsi *gsi, u32 evt_ring_id,
+static void evt_ring_command(struct gsi *gsi, u32 evt_ring_id,
 			     enum gsi_evt_ch_cmd_opcode op)
 {
 	struct completion *compl = &gsi->evt_ring[evt_ring_id].compl;
@@ -1055,11 +1052,11 @@ static bool evt_ring_command(struct gsi *gsi, u32 evt_ring_id,
 	val = FIELD_PREP(EV_CHID_FMASK, evt_ring_id);
 	val |= FIELD_PREP(EV_OPCODE_FMASK, (u32)op);
 
-	return command(gsi, GSI_EV_CH_CMD_OFFS, val, compl);
+	command(gsi, GSI_EV_CH_CMD_OFFS, val, compl);
 }
 
 /* Issue a channel command and wait for it to complete */
-static bool
+static void
 channel_command(struct gsi *gsi, u32 channel_id, enum gsi_ch_cmd_opcode op)
 {
 	struct completion *compl = &gsi->channel[channel_id].compl;
@@ -1070,7 +1067,7 @@ channel_command(struct gsi *gsi, u32 channel_id, enum gsi_ch_cmd_opcode op)
 	val = FIELD_PREP(CH_CHID_FMASK, channel_id);
 	val |= FIELD_PREP(CH_OPCODE_FMASK, (u32)op);
 
-	return command(gsi, GSI_CH_CMD_OFFS, val, compl);
+	command(gsi, GSI_CH_CMD_OFFS, val, compl);
 }
 
 /* Note: only GPI interfaces, IRQ interrupts are currently supported */
@@ -1098,10 +1095,7 @@ static int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 
 	init_completion(&evt_ring->compl);
 
-	if (!evt_ring_command(gsi, evt_ring_id, GSI_EVT_ALLOCATE)) {
-		ret = -ETIMEDOUT;
-		goto err_free_ring;
-	}
+	evt_ring_command(gsi, evt_ring_id, GSI_EVT_ALLOCATE);
 
 	if (evt_ring->state != GSI_EVT_RING_STATE_ALLOCATED) {
 		dev_err(gsi->dev, "evt_ring_id %u allocation failed state %u\n",
@@ -1150,20 +1144,17 @@ static void gsi_evt_ring_scratch_zero(struct gsi *gsi, u32 evt_ring_id)
 static void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
 {
 	struct gsi_evt_ring *evt_ring = &gsi->evt_ring[evt_ring_id];
-	bool completed;
 
 	mutex_lock(&gsi->mutex);
 
-	completed = evt_ring_command(gsi, evt_ring_id, GSI_EVT_RESET);
-	ipa_bug_on(!completed);
+	evt_ring_command(gsi, evt_ring_id, GSI_EVT_RESET);
 
 	gsi_evt_ring_program(gsi, evt_ring_id);
 	gsi_ring_init(&evt_ring->ring);
 	gsi_evt_ring_scratch_zero(gsi, evt_ring_id);
 	gsi_evt_ring_prime(gsi, evt_ring);
 
-	completed = evt_ring_command(gsi, evt_ring_id, GSI_EVT_DE_ALLOC);
-	ipa_bug_on(!completed);
+	evt_ring_command(gsi, evt_ring_id, GSI_EVT_DE_ALLOC);
 
 	ipa_assert(gsi->evt_bmap & BIT(evt_ring_id));
 	gsi->evt_bmap &= ~BIT(evt_ring_id);
@@ -1244,16 +1235,12 @@ int gsi_channel_alloc(struct gsi *gsi, u32 channel_id, u32 channel_count,
 
 	mutex_lock(&gsi->mutex);
 
-	if (!channel_command(gsi, channel_id, GSI_CH_ALLOCATE)) {
-		ret = -ETIMEDOUT;
-		goto err_mutex_unlock;
-	}
+	gsi->ch_dbg[channel_id].ch_allocate++;
+	channel_command(gsi, channel_id, GSI_CH_ALLOCATE);
 	if (channel->state != GSI_CHANNEL_STATE_ALLOCATED) {
 		ret = -EIO;
 		goto err_mutex_unlock;
 	}
-
-	gsi->ch_dbg[channel_id].ch_allocate++;
 
 	mutex_unlock(&gsi->mutex);
 
@@ -1337,11 +1324,7 @@ int gsi_channel_start(struct gsi *gsi, u32 channel_id)
 	mutex_lock(&gsi->mutex);
 
 	gsi->ch_dbg[channel_id].ch_start++;
-
-	if (!channel_command(gsi, channel_id, GSI_CH_START)) {
-		mutex_unlock(&gsi->mutex);
-		return -ETIMEDOUT;
-	}
+	channel_command(gsi, channel_id, GSI_CH_START);
 
 	mutex_unlock(&gsi->mutex);
 
@@ -1366,19 +1349,7 @@ int gsi_channel_stop(struct gsi *gsi, u32 channel_id)
 	mutex_lock(&gsi->mutex);
 
 	gsi->ch_dbg[channel_id].ch_stop++;
-
-	if (!channel_command(gsi, channel_id, GSI_CH_STOP)) {
-		/* check channel state here in case the channel is stopped but
-		 * the interrupt was not handled yet.
-		 */
-		channel->state = gsi_channel_state(gsi, channel_id);
-		if (channel->state == GSI_CHANNEL_STATE_STOPPED) {
-			ret = 0;
-			goto free_lock;
-		}
-		ret = -ETIMEDOUT;
-		goto free_lock;
-	}
+	channel_command(gsi, channel_id, GSI_CH_STOP);
 
 	if (channel->state != GSI_CHANNEL_STATE_STOPPED &&
 	    channel->state != GSI_CHANNEL_STATE_STOP_IN_PROC) {
@@ -1417,13 +1388,8 @@ int gsi_channel_reset(struct gsi *gsi, u32 channel_id)
 	reset_done = false;
 	mutex_lock(&gsi->mutex);
 reset:
-
 	gsi->ch_dbg[channel_id].ch_reset++;
-
-	if (!channel_command(gsi, channel_id, GSI_CH_RESET)) {
-		mutex_unlock(&gsi->mutex);
-		return -ETIMEDOUT;
-	}
+	channel_command(gsi, channel_id, GSI_CH_RESET);
 
 	/* workaround: reset GSI producers again */
 	if (channel->from_ipa && !reset_done) {
@@ -1447,7 +1413,6 @@ void gsi_channel_free(struct gsi *gsi, u32 channel_id)
 {
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	u32 evt_ring_id;
-	bool completed;
 
 	ipa_bug_on(channel->state != GSI_CHANNEL_STATE_ALLOCATED);
 
@@ -1455,9 +1420,7 @@ void gsi_channel_free(struct gsi *gsi, u32 channel_id)
 	mutex_lock(&gsi->mutex);
 
 	gsi->ch_dbg[channel_id].ch_de_alloc++;
-
-	completed = channel_command(gsi, channel_id, GSI_CH_DE_ALLOC);
-	ipa_bug_on(!completed);
+	channel_command(gsi, channel_id, GSI_CH_DE_ALLOC);
 
 	ipa_bug_on(channel->state != GSI_CHANNEL_STATE_NOT_ALLOCATED);
 
