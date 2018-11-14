@@ -1069,6 +1069,21 @@ err_clock_put:
 	return ret;
 }
 
+static void ipa_pre_exit(struct ipa_context *ipa)
+{
+	ipa_remove_interrupt_handler(IPA_TX_SUSPEND_IRQ);
+	ipa_interrupts_exit(ipa);
+	mutex_destroy(&ipa->post_init_mutex);
+	wakeup_source_trash(&ipa->wakeup);
+	ipa_gsi_dma_task_free(ipa);
+	mutex_destroy(&ipa->transport_pm.transport_pm_mutex);
+	ipa_dp_exit(ipa->dp);
+	ipa->dp = NULL;
+	ipa_sram_settings_clear(ipa);
+	ipa_ep_count_clear(ipa);
+	ipa_clock_put();
+}
+
 static int ipa_firmware_load(struct device *dev)
 {
 	const struct firmware *fw;
@@ -1321,7 +1336,7 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (!ret)
 		return 0;	/* Success */
 
-	/* XXX Need to undo ipa_pre_init() here */
+	ipa_pre_exit(ipa);
 err_clear_ep_ids:
 	ipa->lan_cons_ep_id = 0;
 	ipa->cmd_prod_ep_id = 0;
@@ -1361,7 +1376,7 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 	if (ipa_post_init_complete(ipa))
 		ipa_post_exit(ipa);
 
-	/* XXX ipa_pre_exit(ipa); */
+	ipa_pre_exit(ipa);
 	if (ipa->lan_cons_ep_id != IPA_EP_ID_BAD) {
 		ipa_ep_free(ipa->lan_cons_ep_id);
 		ipa->lan_cons_ep_id = IPA_EP_ID_BAD;
