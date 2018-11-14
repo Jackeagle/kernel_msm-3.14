@@ -414,8 +414,6 @@ static void gsi_isr_chan_ctrl(struct gsi *gsi)
 	channel_mask = gsi_readl(gsi, GSI_CNTXT_SRC_CH_IRQ_OFFS);
 	gsi_writel(gsi, channel_mask, GSI_CNTXT_SRC_CH_IRQ_CLR_OFFS);
 
-	ipa_assert(!(channel_mask & ~GENMASK(gsi->channel_max - 1, 0)));
-
 	while (channel_mask) {
 		struct gsi_channel *channel;
 		int i = __ffs(channel_mask);
@@ -435,8 +433,6 @@ static void gsi_isr_evt_ctrl(struct gsi *gsi)
 
 	evt_mask = gsi_readl(gsi, GSI_CNTXT_SRC_EV_CH_IRQ_OFFS);
 	gsi_writel(gsi, evt_mask, GSI_CNTXT_SRC_EV_CH_IRQ_CLR_OFFS);
-
-	ipa_assert(!(evt_mask & ~GENMASK(gsi->evt_ring_max - 1, 0)));
 
 	while (evt_mask) {
 		struct gsi_evt_ring *evt_ring;
@@ -458,11 +454,6 @@ gsi_isr_glob_chan_err(struct gsi *gsi, u32 err_ee, u32 channel_id, u32 code)
 
 	if (err_ee != IPA_EE_AP)
 		ipa_bug_on(code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
-
-	if (WARN_ON(channel_id >= gsi->channel_max)) {
-		dev_err(gsi->dev, "unexpected channel_id %u\n", channel_id);
-		return;
-	}
 
 	switch (code) {
 	case GSI_INVALID_TRE_ERR:
@@ -499,11 +490,6 @@ gsi_isr_glob_evt_err(struct gsi *gsi, u32 err_ee, u32 evt_ring_id, u32 code)
 
 	if (err_ee != IPA_EE_AP)
 		ipa_bug_on(code != GSI_UNSUPPORTED_INTER_EE_OP_ERR);
-
-	if (WARN_ON(evt_ring_id >= gsi->evt_ring_max)) {
-		dev_err(gsi->dev, "unexpected evt_ring_id %u\n", evt_ring_id);
-		return;
-	}
 
 	switch (code) {
 	case GSI_OUT_OF_BUFFERS_ERR:
@@ -621,8 +607,6 @@ static u16 gsi_channel_process(struct gsi *gsi, struct gsi_xfer_compl_evt *evt,
 	struct gsi_channel *channel;
 	u32 channel_id = (u32)evt->chid;
 
-	ipa_assert(channel_id < gsi->channel_max);
-
 	/* Event tells us the last completed channel ring element */
 	channel = &gsi->channel[channel_id];
 	channel->ring.rp_local = evt->xfer_ptr;
@@ -730,8 +714,6 @@ static void gsi_isr_ioeb(struct gsi *gsi)
 	evt_mask &= gsi_readl(gsi, GSI_CNTXT_SRC_IEOB_IRQ_MSK_OFFS);
 	gsi_writel(gsi, evt_mask, GSI_CNTXT_SRC_IEOB_IRQ_CLR_OFFS);
 
-	ipa_assert(!(evt_mask & ~GENMASK(gsi->evt_ring_max - 1, 0)));
-
 	while (evt_mask) {
 		u32 i = (u32)__ffs(evt_mask);
 
@@ -748,8 +730,6 @@ static void gsi_isr_inter_ee_chan_ctrl(struct gsi *gsi)
 	channel_mask = gsi_readl(gsi, GSI_INTER_EE_SRC_CH_IRQ_OFFS);
 	gsi_writel(gsi, channel_mask, GSI_INTER_EE_SRC_CH_IRQ_CLR_OFFS);
 
-	ipa_assert(!(channel_mask & ~GENMASK(gsi->channel_max - 1, 0)));
-
 	while (channel_mask) {
 		u32 i = (u32)__ffs(channel_mask);
 
@@ -765,8 +745,6 @@ static void gsi_isr_inter_ee_evt_ctrl(struct gsi *gsi)
 
 	evt_mask = gsi_readl(gsi, GSI_INTER_EE_SRC_EV_CH_IRQ_OFFS);
 	gsi_writel(gsi, evt_mask, GSI_INTER_EE_SRC_EV_CH_IRQ_CLR_OFFS);
-
-	ipa_assert(!(evt_mask & ~GENMASK(gsi->evt_ring_max - 1, 0)));
 
 	while (evt_mask) {
 		u32 i = (u32)__ffs(evt_mask);
@@ -1173,7 +1151,6 @@ err_free_ring:
 	gsi_ring_free(gsi, &evt_ring->ring);
 	memset(evt_ring, 0, sizeof(*evt_ring));
 err_free_bmap:
-	ipa_assert(gsi->evt_bmap & BIT(evt_ring_id));
 	gsi->evt_bmap &= ~BIT(evt_ring_id);
 
 	mutex_unlock(&gsi->mutex);
