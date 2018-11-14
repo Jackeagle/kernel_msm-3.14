@@ -182,9 +182,9 @@ static int ipa_ep_apps_cmd_prod_setup(struct ipa_context *ipa)
 		return ret;
 	ep_id = ret;
 
-	ipa_endp_init_mode_prod(ep_id, IPA_DMA, dst_client);
-	ipa_endp_init_seq_prod(ep_id);
-	ipa_endp_init_deaggr_prod(ep_id);
+	ipa_endp_init_mode_prod(ipa, ep_id, IPA_DMA, dst_client);
+	ipa_endp_init_seq_prod(ipa, ep_id);
+	ipa_endp_init_deaggr_prod(ipa, ep_id);
 
 	ret = ipa_ep_setup(ep_id, channel_count, 2, 0, NULL, NULL);
 	if (ret)
@@ -508,12 +508,12 @@ static int ipa_ep_apps_lan_cons_setup(struct ipa_context *ipa)
 		return ret;
 	ep_id = ret;
 
-	ipa_endp_init_hdr_cons(ep_id, IPA_LAN_RX_HEADER_LENGTH, 0, 0);
-	ipa_endp_init_hdr_ext_cons(ep_id, ilog2(sizeof(u32)), false);
-	ipa_endp_init_aggr_cons(ep_id, aggr_size, aggr_count, false);
-	ipa_endp_init_cfg_cons(ep_id, IPA_CS_OFFLOAD_DL);
-	ipa_endp_init_hdr_metadata_mask_cons(ep_id, 0x0);
-	ipa_endp_status_cons(ep_id, true);
+	ipa_endp_init_hdr_cons(ipa, ep_id, IPA_LAN_RX_HEADER_LENGTH, 0, 0);
+	ipa_endp_init_hdr_ext_cons(ipa, ep_id, ilog2(sizeof(u32)), false);
+	ipa_endp_init_aggr_cons(ipa, ep_id, aggr_size, aggr_count, false);
+	ipa_endp_init_cfg_cons(ipa, ep_id, IPA_CS_OFFLOAD_DL);
+	ipa_endp_init_hdr_metadata_mask_cons(ipa, ep_id, 0x0);
+	ipa_endp_status_cons(ipa, ep_id, true);
 
 	ret = ipa_ep_setup(ep_id, channel_count, 1, rx_buffer_size,
 			   ipa_lan_rx_cb, NULL);

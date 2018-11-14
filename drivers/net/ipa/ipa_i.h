@@ -465,32 +465,37 @@ int ipa_tx_dp(enum ipa_client_type dst, struct sk_buff *skb);
 bool ipa_endp_aggr_support(u32 ep_id);
 enum ipa_seq_type ipa_endp_seq_type(u32 ep_id);
 
-void ipa_endp_init_hdr_cons(u32 ep_id, u32 header_size,
+void ipa_endp_init_hdr_cons(struct ipa_context *ipa, u32 ep_id, u32 header_size,
 			    u32 metadata_offset, u32 length_offset);
-void ipa_endp_init_hdr_prod(u32 ep_id, u32 header_size,
+void ipa_endp_init_hdr_prod(struct ipa_context *ipa, u32 ep_id, u32 header_size,
 			    u32 metadata_offset, u32 length_offset);
-void ipa_endp_init_hdr_ext_cons(u32 ep_id, u32 pad_align,
-				bool pad_included);
-void ipa_endp_init_hdr_ext_prod(u32 ep_id, u32 pad_align);
-void ipa_endp_init_mode_cons(u32 ep_id);
-void ipa_endp_init_mode_prod(u32 ep_id, enum ipa_mode mode,
+void ipa_endp_init_hdr_ext_cons(struct ipa_context *ipa, u32 ep_id,
+				u32 pad_align, bool pad_included);
+void ipa_endp_init_hdr_ext_prod(struct ipa_context *ipa, u32 ep_id,
+				u32 pad_align);
+void ipa_endp_init_mode_cons(struct ipa_context *ipa, u32 ep_id);
+void ipa_endp_init_mode_prod(struct ipa_context *ipa, u32 ep_id,
+			     enum ipa_mode mode,
 			     enum ipa_client_type dst_client);
-void ipa_endp_init_aggr_cons(u32 ep_id, u32 size, u32 count,
-			     bool close_on_eof);
-void ipa_endp_init_aggr_prod(u32 ep_id, enum ipa_aggr_en aggr_en,
+void ipa_endp_init_aggr_cons(struct ipa_context *ipa, u32 ep_id, u32 size,
+			     u32 count, bool close_on_eof);
+void ipa_endp_init_aggr_prod(struct ipa_context *ipa, u32 ep_id,
+			     enum ipa_aggr_en aggr_en,
 			     enum ipa_aggr_type aggr_type);
-void ipa_endp_init_cfg_cons(u32 ep_id,
+void ipa_endp_init_cfg_cons(struct ipa_context *ipa, u32 ep_id,
 			    enum ipa_cs_offload_en offload_type);
-void ipa_endp_init_cfg_prod(u32 ep_id, enum ipa_cs_offload_en offload_type,
+void ipa_endp_init_cfg_prod(struct ipa_context *ipa, u32 ep_id,
+			    enum ipa_cs_offload_en offload_type,
 			    u32 metadata_offset);
-void ipa_endp_init_seq_cons(u32 ep_id);
-void ipa_endp_init_seq_prod(u32 ep_id);
-void ipa_endp_init_deaggr_cons(u32 ep_id);
-void ipa_endp_init_deaggr_prod(u32 ep_id);
-void ipa_endp_init_hdr_metadata_mask_cons(u32 ep_id, u32 mask);
-void ipa_endp_init_hdr_metadata_mask_prod(u32 ep_id);
-void ipa_endp_status_cons(u32 ep_id, bool enable);
-void ipa_endp_status_prod(u32 ep_id, bool enable,
+void ipa_endp_init_seq_cons(struct ipa_context *ipa, u32 ep_id);
+void ipa_endp_init_seq_prod(struct ipa_context *ipa, u32 ep_id);
+void ipa_endp_init_deaggr_cons(struct ipa_context *ipa, u32 ep_id);
+void ipa_endp_init_deaggr_prod(struct ipa_context *ipa, u32 ep_id);
+void ipa_endp_init_hdr_metadata_mask_cons(struct ipa_context *ipa, u32 ep_id,
+					  u32 mask);
+void ipa_endp_init_hdr_metadata_mask_prod(struct ipa_context *ipa, u32 ep_id);
+void ipa_endp_status_cons(struct ipa_context *ipa, u32 ep_id, bool enable);
+void ipa_endp_status_prod(struct ipa_context *ipa, u32 ep_id, bool enable,
 			  enum ipa_client_type client);
 int ipa_ep_alloc(struct ipa_context *ipa, enum ipa_client_type client);
 void ipa_ep_free(u32 ep_id);

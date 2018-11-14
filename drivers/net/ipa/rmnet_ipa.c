@@ -305,13 +305,13 @@ static int handle_ingress_format(struct net_device *dev,
 	ep_id = ret;
 
 	/* Record our endpoint configuration parameters */
-	ipa_endp_init_hdr_cons(ep_id, header_size, metadata_offset,
+	ipa_endp_init_hdr_cons(ipa_ctx, ep_id, header_size, metadata_offset,
 			       length_offset);
-	ipa_endp_init_hdr_ext_cons(ep_id, 0, true);
-	ipa_endp_init_aggr_cons(ep_id, aggr_size, aggr_count, true);
-	ipa_endp_init_cfg_cons(ep_id, offload_type);
-	ipa_endp_init_hdr_metadata_mask_cons(ep_id, 0xff000000);
-	ipa_endp_status_cons(ep_id, !aggr_active);
+	ipa_endp_init_hdr_ext_cons(ipa_ctx, ep_id, 0, true);
+	ipa_endp_init_aggr_cons(ipa_ctx, ep_id, aggr_size, aggr_count, true);
+	ipa_endp_init_cfg_cons(ipa_ctx, ep_id, offload_type);
+	ipa_endp_init_hdr_metadata_mask_cons(ipa_ctx, ep_id, 0xff000000);
+	ipa_endp_status_cons(ipa_ctx, ep_id, !aggr_active);
 
 	ipa_ctx->ipa_client_apps_wan_cons_agg_gro = aggr_active;
 
@@ -386,17 +386,17 @@ static int handle_egress_format(struct net_device *dev,
 	}
 
 	/* We really do want 0 metadata offset */
-	ipa_endp_init_hdr_prod(ep_id, header_size, 0, length_offset);
-	ipa_endp_init_hdr_ext_prod(ep_id, header_align);
-	ipa_endp_init_mode_prod(ep_id, IPA_BASIC, dst_client);
-	ipa_endp_init_aggr_prod(ep_id, aggr_en, aggr_type);
-	ipa_endp_init_cfg_prod(ep_id, offload_type, header_offset);
-	ipa_endp_init_seq_prod(ep_id);
-	ipa_endp_init_deaggr_prod(ep_id);
+	ipa_endp_init_hdr_prod(ipa_ctx, ep_id, header_size, 0, length_offset);
+	ipa_endp_init_hdr_ext_prod(ipa_ctx, ep_id, header_align);
+	ipa_endp_init_mode_prod(ipa_ctx, ep_id, IPA_BASIC, dst_client);
+	ipa_endp_init_aggr_prod(ipa_ctx, ep_id, aggr_en, aggr_type);
+	ipa_endp_init_cfg_prod(ipa_ctx, ep_id, offload_type, header_offset);
+	ipa_endp_init_seq_prod(ipa_ctx, ep_id);
+	ipa_endp_init_deaggr_prod(ipa_ctx, ep_id);
 	/* Enable source notification status for exception packets
 	 * (i.e. QMAP commands) to be routed to modem.
 	 */
-	ipa_endp_status_prod(ep_id, true, IPA_CLIENT_Q6_WAN_CONS);
+	ipa_endp_status_prod(ipa_ctx, ep_id, true, IPA_CLIENT_Q6_WAN_CONS);
 
 	/* Use a deferred interrupting no-op to reduce completion interrupts */
 	ipa_no_intr_init(ep_id);

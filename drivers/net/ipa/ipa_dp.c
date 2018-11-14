@@ -1524,96 +1524,103 @@ static int ipa_gsi_setup_channel(struct ipa_ep_context *ep, u32 channel_count,
 	return ret;
 }
 
-void ipa_endp_init_hdr_cons(u32 ep_id, u32 header_size,
+void ipa_endp_init_hdr_cons(struct ipa_context *ipa, u32 ep_id, u32 header_size,
 			    u32 metadata_offset, u32 length_offset)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 
 	ipa_reg_endp_init_hdr_cons(&ep->init_hdr, header_size, metadata_offset,
 				   length_offset);
 }
 
-void ipa_endp_init_hdr_prod(u32 ep_id, u32 header_size,
+void ipa_endp_init_hdr_prod(struct ipa_context *ipa, u32 ep_id, u32 header_size,
 			    u32 metadata_offset, u32 length_offset)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 
 	ipa_reg_endp_init_hdr_prod(&ep->init_hdr, header_size, metadata_offset,
 				   length_offset);
 }
 
 void
-ipa_endp_init_hdr_ext_cons(u32 ep_id, u32 pad_align, bool pad_included)
+ipa_endp_init_hdr_ext_cons(struct ipa_context *ipa, u32 ep_id, u32 pad_align,
+			   bool pad_included)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 
 	ipa_reg_endp_init_hdr_ext_cons(&ep->hdr_ext, pad_align, pad_included);
 }
 
-void ipa_endp_init_hdr_ext_prod(u32 ep_id, u32 pad_align)
+void ipa_endp_init_hdr_ext_prod(struct ipa_context *ipa, u32 ep_id,
+				u32 pad_align)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 
 	ipa_reg_endp_init_hdr_ext_prod(&ep->hdr_ext, pad_align);
 }
 
 void
-ipa_endp_init_aggr_cons(u32 ep_id, u32 size, u32 count, bool close_on_eof)
+ipa_endp_init_aggr_cons(struct ipa_context *ipa, u32 ep_id, u32 size, u32 count,
+			bool close_on_eof)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 
 	ipa_reg_endp_init_aggr_cons(&ep->init_aggr, size, count, close_on_eof);
 }
 
-void ipa_endp_init_aggr_prod(u32 ep_id, enum ipa_aggr_en aggr_en,
+void ipa_endp_init_aggr_prod(struct ipa_context *ipa, u32 ep_id,
+			     enum ipa_aggr_en aggr_en,
 			     enum ipa_aggr_type aggr_type)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 
 	ipa_reg_endp_init_aggr_prod(&ep->init_aggr, aggr_en, aggr_type);
 }
 
-void ipa_endp_init_cfg_cons(u32 ep_id, enum ipa_cs_offload_en offload_type)
+void ipa_endp_init_cfg_cons(struct ipa_context *ipa, u32 ep_id,
+			    enum ipa_cs_offload_en offload_type)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 
 	ipa_reg_endp_init_cfg_cons(&ep->init_cfg, offload_type);
 }
 
-void ipa_endp_init_cfg_prod(u32 ep_id, enum ipa_cs_offload_en offload_type,
+void ipa_endp_init_cfg_prod(struct ipa_context *ipa, u32 ep_id,
+			    enum ipa_cs_offload_en offload_type,
 			    u32 metadata_offset)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 
 	ipa_reg_endp_init_cfg_prod(&ep->init_cfg, offload_type,
 				   metadata_offset);
 }
 
-void ipa_endp_init_hdr_metadata_mask_cons(u32 ep_id, u32 mask)
+void ipa_endp_init_hdr_metadata_mask_cons(struct ipa_context *ipa, u32 ep_id,
+					  u32 mask)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 
 	ipa_reg_endp_init_hdr_metadata_mask_cons(&ep->metadata_mask, mask);
 }
 
-void ipa_endp_init_hdr_metadata_mask_prod(u32 ep_id)
+void ipa_endp_init_hdr_metadata_mask_prod(struct ipa_context *ipa, u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 
 	ipa_reg_endp_init_hdr_metadata_mask_prod(&ep->metadata_mask);
 }
 
-void ipa_endp_status_cons(u32 ep_id, bool enable)
+void ipa_endp_status_cons(struct ipa_context *ipa, u32 ep_id, bool enable)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 
 	ipa_reg_endp_status_cons(&ep->status, enable);
 }
 
-void ipa_endp_status_prod(u32 ep_id, bool enable,
+void ipa_endp_status_prod(struct ipa_context *ipa, u32 ep_id, bool enable,
 			  enum ipa_client_type status_client)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 	u32 status_ep_id;
 
 	status_ep_id = ipa_client_ep_id(status_client);
@@ -1623,17 +1630,18 @@ void ipa_endp_status_prod(u32 ep_id, bool enable,
 
 
 /* Note that the mode setting is not valid for consumer endpoints */
-void ipa_endp_init_mode_cons(u32 ep_id)
+void ipa_endp_init_mode_cons(struct ipa_context *ipa, u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 
 	ipa_reg_endp_init_mode_cons(&ep->init_mode);
 }
 
-void ipa_endp_init_mode_prod(u32 ep_id, enum ipa_mode mode,
+void ipa_endp_init_mode_prod(struct ipa_context *ipa, u32 ep_id,
+			     enum ipa_mode mode,
 			     enum ipa_client_type dst_client)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 	u32 dst_ep_id;
 
 	dst_ep_id = ipa_client_ep_id(dst_client);
@@ -1642,16 +1650,16 @@ void ipa_endp_init_mode_prod(u32 ep_id, enum ipa_mode mode,
 }
 
 /* XXX The sequencer setting seems not to be valid for consumer endpoints */
-void ipa_endp_init_seq_cons(u32 ep_id)
+void ipa_endp_init_seq_cons(struct ipa_context *ipa, u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 
 	ipa_reg_endp_init_seq_cons(&ep->init_seq);
 }
 
-void ipa_endp_init_seq_prod(u32 ep_id)
+void ipa_endp_init_seq_prod(struct ipa_context *ipa, u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 	u32 seq_type;
 
 	seq_type = (u32)ipa_endp_seq_type(ep_id);
@@ -1660,16 +1668,16 @@ void ipa_endp_init_seq_prod(u32 ep_id)
 }
 
 /* XXX The deaggr setting seems not to be valid for consumer endpoints */
-void ipa_endp_init_deaggr_cons(u32 ep_id)
+void ipa_endp_init_deaggr_cons(struct ipa_context *ipa, u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 
 	ipa_reg_endp_init_deaggr_cons(&ep->init_deaggr);
 }
 
-void ipa_endp_init_deaggr_prod(u32 ep_id)
+void ipa_endp_init_deaggr_prod(struct ipa_context *ipa, u32 ep_id)
 {
-	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+	struct ipa_ep_context *ep = &ipa->ep[ep_id];
 
 	ipa_reg_endp_init_deaggr_prod(&ep->init_deaggr);
 }
