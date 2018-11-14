@@ -511,14 +511,17 @@ gsi_isr_glob_evt_err(struct gsi *gsi, u32 err_ee, u32 evt_ring_id, u32 code)
 	}
 }
 
-static void gsi_isr_glob_err(struct gsi *gsi, u32 err)
+static void gsi_isr_glob_err(struct gsi *gsi)
 {
-	struct gsi_log_err *log = (struct gsi_log_err *)&err;
+	struct gsi_log_err *log;
+	u32 val;
 
-	dev_err(gsi->dev, "log err_type %u ee %u idx %u\n", log->err_type,
-		log->ee, log->virt_idx);
-	dev_err(gsi->dev, "log code 0x%1x arg1 0x%1x arg2 0x%1x arg3 0x%1x\n",
-		log->code, log->arg1, log->arg2, log->arg3);
+	/* Get the logged error, then reinitialize the log */
+	val = gsi_readl(gsi, GSI_ERROR_LOG_OFFS);
+	gsi_writel(gsi, 0, GSI_ERROR_LOG_OFFS);
+	gsi_writel(gsi, ~0, GSI_ERROR_LOG_CLR_OFFS);
+
+	log = (struct gsi_log_err *)&val;
 
 	ipa_bug_on(log->err_type == GSI_ERR_TYPE_GLOB);
 
@@ -540,14 +543,8 @@ static void gsi_isr_glob_ee(struct gsi *gsi)
 
 	val = gsi_readl(gsi, GSI_CNTXT_GLOB_IRQ_STTS_OFFS);
 
-	if (val & ERROR_INT_FMASK) {
-		u32 err = gsi_readl(gsi, GSI_ERROR_LOG_OFFS);
-
-		gsi_writel(gsi, 0, GSI_ERROR_LOG_OFFS);
-		gsi_writel(gsi, ~0, GSI_ERROR_LOG_CLR_OFFS);
-
-		gsi_isr_glob_err(gsi, err);
-	}
+	if (val & ERROR_INT_FMASK)
+		gsi_isr_glob_err(gsi);
 
 	if (val & EN_GP_INT1_FMASK)
 		dev_err(gsi->dev, "unexpected GP INT1 received\n");
