@@ -822,22 +822,6 @@ static void ipa_suspend_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 	}
 }
 
-/**
- * ipa_init_interrupts() - Initialize IPA interrupts
- */
-static int ipa_init_interrupts(struct ipa_context *ipa)
-{
-	int ret;
-
-	ret = ipa_interrupts_init(ipa);
-	if (!ret)
-		return ret;
-
-	ipa_add_interrupt_handler(IPA_TX_SUSPEND_IRQ, ipa_suspend_handler);
-
-	return 0;
-}
-
 static void ipa_freeze_clock_vote_and_notify_modem(struct ipa_context *ipa)
 {
 	u32 value;
@@ -1064,11 +1048,14 @@ static int ipa_pre_init(struct ipa_context *ipa)
 	/* Assign resource limitation to each group */
 	ipa_set_resource_groups_min_max_limits();
 
-	ret = ipa_init_interrupts(ipa);
-	if (!ret)
-		return 0;	/* Success! */
+	ret = ipa_interrupts_init(ipa);
+	if (ret)
+		goto err_dp_exit;
 
-	ipa_err("ipa initialization of interrupts failed\n");
+	ipa_add_interrupt_handler(IPA_TX_SUSPEND_IRQ, ipa_suspend_handler);
+
+	return 0;
+
 err_dp_exit:
 	ipa_dp_exit(ipa->dp);
 	ipa->dp = NULL;
