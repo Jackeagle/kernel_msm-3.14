@@ -896,9 +896,6 @@ struct gsi *gsi_init(struct platform_device *pdev)
 
 void gsi_exit(struct gsi *gsi)
 {
-	ipa_assert(!atomic_read(&gsi->channel_count));
-	ipa_assert(!atomic_read(&gsi->evt_ring_count));
-
 	/* Don't bother clearing the error log again (ERROR_LOG) or
 	 * setting the interrupt type again (INTSET).
 	 */
@@ -1059,7 +1056,10 @@ static int gsi_evt_ring_alloc(struct gsi *gsi, u32 ring_count, bool moderation)
 	mutex_lock(&gsi->mutex);
 
 	/* Start by allocating the event id to use */
-	ipa_assert(gsi->evt_bmap != ~0UL);
+	if (gsi->evt_bmap == ~0UL) {
+		ret = -ENOSPC;
+		goto err_unlock;
+	}
 	evt_ring_id = (u32)ffz(gsi->evt_bmap);
 	gsi->evt_bmap |= BIT(evt_ring_id);
 
@@ -1105,7 +1105,7 @@ err_free_ring:
 	memset(evt_ring, 0, sizeof(*evt_ring));
 err_free_bmap:
 	gsi->evt_bmap &= ~BIT(evt_ring_id);
-
+err_unlock:
 	mutex_unlock(&gsi->mutex);
 
 	return ret;
@@ -1132,7 +1132,6 @@ static void gsi_evt_ring_dealloc(struct gsi *gsi, u32 evt_ring_id)
 
 	evt_ring_command(gsi, evt_ring_id, GSI_EVT_DE_ALLOC);
 
-	ipa_assert(gsi->evt_bmap & BIT(evt_ring_id));
 	gsi->evt_bmap &= ~BIT(evt_ring_id);
 
 	mutex_unlock(&gsi->mutex);
@@ -1390,15 +1389,11 @@ void gsi_channel_free(struct gsi *gsi, u32 channel_id)
 	struct gsi_channel *channel = &gsi->channel[channel_id];
 	u32 evt_ring_id;
 
-	ipa_bug_on(channel->state != GSI_CHANNEL_STATE_ALLOCATED);
-
 	evt_ring_id = gsi_evt_ring_id(gsi, channel->evt_ring);
 	mutex_lock(&gsi->mutex);
 
 	gsi->ch_dbg[channel_id].ch_de_alloc++;
 	channel_command(gsi, channel_id, GSI_CH_DE_ALLOC);
-
-	ipa_bug_on(channel->state != GSI_CHANNEL_STATE_NOT_ALLOCATED);
 
 	mutex_unlock(&gsi->mutex);
 
@@ -1461,10 +1456,8 @@ int gsi_channel_queue(struct gsi *gsi, u32 channel_id, u16 num_xfers,
 			tre_ptr->re_type = GSI_RE_XFER;
 		else if (xfer[i].type == GSI_XFER_ELEM_IMME_CMD)
 			tre_ptr->re_type = GSI_RE_IMMD_CMD;
-		else if (xfer[i].type == GSI_XFER_ELEM_NOP)
+		else /* xfer[i].type == GSI_XFER_ELEM_NOP */
 			tre_ptr->re_type = GSI_RE_NOP;
-		else
-			ipa_bug_on("invalid xfer type");
 
 		ring_wp_local_inc(&channel->ring);
 	}
