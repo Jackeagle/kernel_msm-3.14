@@ -73,9 +73,9 @@ static void ipa_destroy(struct ipa_context *ipa)
 	ipa->pdev = NULL;
 }
 
-static int hdr_init_local_cmd(u32 offset, u32 size)
+static int hdr_init_local_cmd(struct ipa_context *ipa, u32 offset, u32 size)
 {
-	struct device *dev = &ipa_ctx->pdev->dev;
+	struct device *dev = &ipa->pdev->dev;
 	struct ipa_desc desc = { };
 	dma_addr_t phys;
 	void *payload;
@@ -86,7 +86,7 @@ static int hdr_init_local_cmd(u32 offset, u32 size)
 	if (!virt)
 		return -ENOMEM;
 
-	offset += ipa_ctx->smem_offset;
+	offset += ipa->smem_offset;
 
 	payload = ipahal_hdr_init_local_pyld(phys, size, offset);
 	if (!payload) {
@@ -260,12 +260,12 @@ static int ipa_init_sram(void)
  *
  * Return:	0 if successful, or a negative error code
  */
-static int ipa_init_hdr(void)
+static int ipa_init_hdr(struct ipa_context *ipa)
 {
 	int ret;
 
 	if (IPA_MEM_MODEM_HDR_SIZE) {
-		ret = hdr_init_local_cmd(IPA_MEM_MODEM_HDR_OFST,
+		ret = hdr_init_local_cmd(ipa, IPA_MEM_MODEM_HDR_OFST,
 					 IPA_MEM_MODEM_HDR_SIZE);
 		if (ret)
 			return ret;
@@ -273,14 +273,14 @@ static int ipa_init_hdr(void)
 
 	if (IPA_MEM_APPS_HDR_SIZE) {
 		BUILD_BUG_ON(IPA_MEM_APPS_HDR_OFST % 8);
-		ret = hdr_init_local_cmd(IPA_MEM_APPS_HDR_OFST,
+		ret = hdr_init_local_cmd(ipa, IPA_MEM_APPS_HDR_OFST,
 					 IPA_MEM_APPS_HDR_SIZE);
 		if (ret)
 			return ret;
 	}
 
 	if (IPA_MEM_MODEM_HDR_PROC_CTX_SIZE) {
-		ret = dma_shared_mem_zero_cmd(ipa_ctx,
+		ret = dma_shared_mem_zero_cmd(ipa,
 					      IPA_MEM_MODEM_HDR_PROC_CTX_OFST,
 					      IPA_MEM_MODEM_HDR_PROC_CTX_SIZE);
 		if (ret)
@@ -289,7 +289,7 @@ static int ipa_init_hdr(void)
 
 	if (IPA_MEM_APPS_HDR_PROC_CTX_SIZE) {
 		BUILD_BUG_ON(IPA_MEM_APPS_HDR_PROC_CTX_OFST % 8);
-		ret = dma_shared_mem_zero_cmd(ipa_ctx,
+		ret = dma_shared_mem_zero_cmd(ipa,
 					      IPA_MEM_APPS_HDR_PROC_CTX_OFST,
 					      IPA_MEM_APPS_HDR_PROC_CTX_SIZE);
 		if (ret)
@@ -693,7 +693,7 @@ static int ipa_ep_apps_setup(void)
 		return ret;
 
 	ipa_init_sram();
-	ipa_init_hdr();
+	ipa_init_hdr(ipa_ctx);
 
 	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
 	ipa_init_rt4(ipa_ctx->route_phys, size);
