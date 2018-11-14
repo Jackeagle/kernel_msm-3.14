@@ -202,15 +202,15 @@ struct gsi {
 	u32 phys;
 	unsigned int irq;
 	bool irq_wake_enabled;
-	spinlock_t slock;	/* protects global register updates */
-	struct mutex mutex;	/* protects 1-at-a-time commands, evt_bmap */
 	atomic_t channel_count;
-	atomic_t evt_ring_count;
+	u32 channel_max;
 	struct gsi_channel channel[GSI_CHANNEL_MAX];
+	atomic_t evt_ring_count;
+	u32 evt_ring_max;
 	struct gsi_evt_ring evt_ring[GSI_EVT_RING_MAX];
 	unsigned long evt_bmap;
-	u32 channel_max;
-	u32 evt_ring_max;
+	spinlock_t slock;	/* protects global register updates */
+	struct mutex mutex;	/* protects 1-at-a-time commands, evt_bmap */
 };
 
 /* Hardware values representing a transfer element type */
@@ -812,8 +812,6 @@ struct gsi *gsi_init(struct platform_device *pdev)
 {
 	struct resource *res;
 	resource_size_t size;
-	u32 evt_ring_max;
-	u32 channel_max;
 	struct gsi *gsi;
 	int irq;
 	u32 val;
@@ -822,10 +820,10 @@ struct gsi *gsi_init(struct platform_device *pdev)
 	/* Get GSI memory range and map it */
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "gsi");
 	if (!res)
-		return ERR_PTR(-EINVAL);
+		return ERR_PTR(-ENXIO);
 
 	size = resource_size(res);
-	if (res->start > U32_MAX || size > U32_MAX)
+	if (res->start > U32_MAX || res->start > U32_MAX - size)
 		return ERR_PTR(-EINVAL);
 
 	/* Get IPA GSI IRQ number */
@@ -838,77 +836,74 @@ struct gsi *gsi_init(struct platform_device *pdev)
 		return ERR_PTR(-ENOMEM);
 	gsi->dev = &pdev->dev;
 
-	gsi->base = devm_ioremap_nocache(gsi->dev, res->start, size);
+	gsi->base = ioremap_nocache(res->start, size);
 	if (!gsi->base) {
-		kfree(gsi);
-
-		return ERR_PTR(-ENOMEM);
+		ret = -ENOMEM;
+		goto err_free_gsi;
 	}
 	gsi->phys = (u32)res->start;
-	gsi->irq = irq;
-	spin_lock_init(&gsi->slock);
-	mutex_init(&gsi->mutex);
-	atomic_set(&gsi->channel_count, 0);
-	atomic_set(&gsi->evt_ring_count, 0);
 
 	/* Here is where we first touch the GSI hardware */
 	val = gsi_readl(gsi, GSI_GSI_STATUS_OFFS);
 	if (!(val & ENABLED_FMASK)) {
 		dev_err(gsi->dev, "GSI has not been enabled\n");
-		return ERR_PTR(-EIO);
+		ret = -EIO;
+		goto err_unmap_base;
 	}
 
-	channel_max = gsi_channel_max(gsi);
-	dev_dbg(gsi->dev, "channel_max %u\n", channel_max);
-	ipa_assert(channel_max <= GSI_CHANNEL_MAX);
-
-	evt_ring_max = gsi_evt_ring_max(gsi);
-	dev_dbg(gsi->dev, "evt_ring_max %u\n", evt_ring_max);
-	ipa_assert(evt_ring_max <= GSI_EVT_RING_MAX);
-
-	ret = request_irq(gsi->irq, gsi_isr, IRQF_TRIGGER_HIGH, "gsi", gsi);
-	if (ret) {
-		dev_err(gsi->dev, "failed to register isr for %u\n", gsi->irq);
-		return ERR_PTR(ret);
-	}
+	ret = request_irq(irq, gsi_isr, IRQF_TRIGGER_HIGH, "gsi", gsi);
+	if (ret)
+		goto err_unmap_base;
+	gsi->irq = irq;
 
 	ret = enable_irq_wake(gsi->irq);
 	if (ret)
 		dev_err(gsi->dev, "error %d enabling gsi wake irq\n", ret);
 	gsi->irq_wake_enabled = !ret;
-	gsi->channel_max = channel_max;
-	gsi->evt_ring_max = evt_ring_max;
-	gsi->evt_bmap = gsi_evt_bmap_init(evt_ring_max);
 
-	/* Enable all IPA interrupts */
-	gsi_irq_enable_all(gsi);
+	atomic_set(&gsi->channel_count, 0);
+	gsi->channel_max = gsi_channel_max(gsi);
+	dev_dbg(gsi->dev, "channel_max %u\n", gsi->channel_max);
+	ipa_assert(gsi->channel_max <= GSI_CHANNEL_MAX);
 
-	/* Writing 1 indicates IRQ interrupts; 0 would be MSI */
-	gsi_writel(gsi, 1, GSI_CNTXT_INTSET_OFFS);
+	atomic_set(&gsi->evt_ring_count, 0);
+	gsi->evt_ring_max = gsi_evt_ring_max(gsi);
+	dev_dbg(gsi->dev, "evt_ring_max %u\n", gsi->evt_ring_max);
+	ipa_assert(gsi->evt_ring_max <= GSI_EVT_RING_MAX);
+
+	gsi->evt_bmap = gsi_evt_bmap_init(gsi->evt_ring_max);
+
+	spin_lock_init(&gsi->slock);
+	mutex_init(&gsi->mutex);
 
 	/* Initialize the error log */
 	gsi_writel(gsi, 0, GSI_ERROR_LOG_OFFS);
 
+	/* Writing 1 indicates IRQ interrupts; 0 would be MSI */
+	gsi_writel(gsi, 1, GSI_CNTXT_INTSET_OFFS);
+
+	/* Enable all IPA interrupts */
+	gsi_irq_enable_all(gsi);
+
 	return gsi;
+
+err_unmap_base:
+	iounmap(gsi->base);
+err_free_gsi:
+	kfree(gsi);
+
+	return ERR_PTR(ret);
 }
 
 void gsi_exit(struct gsi *gsi)
 {
-	/* Don't bother clearing the error log again (ERROR_LOG) or
-	 * setting the interrupt type again (INTSET).
-	 */
 	gsi_irq_disable_all(gsi);
-
-	/* Clean up everything else set up by gsi_init() */
-	gsi->evt_bmap = 0;
-	gsi->evt_ring_max = 0;
-	gsi->channel_max = 0;
-	if (gsi->irq_wake_enabled) {
+	mutex_destroy(&gsi->mutex);
+	if (gsi->irq_wake_enabled)
 		(void)disable_irq_wake(gsi->irq);
-		gsi->irq_wake_enabled = false;
-	}
 	free_irq(gsi->irq, gsi);
-	gsi->irq = 0;
+	iounmap(gsi->base);
+	kfree(gsi);
 }
 
 static void gsi_evt_ring_program(struct gsi *gsi, u32 evt_ring_id)
