@@ -655,7 +655,7 @@ void *ipa_wwan_init(void)
 	int ret;
 
 	/* Zero modem shared memory before we begin */
-	ret = ipa_modem_smem_init();
+	ret = ipa_modem_smem_init(ipa_ctx);
 	if (ret)
 		return ERR_PTR(ret);
 

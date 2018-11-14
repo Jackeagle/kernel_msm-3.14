@@ -541,7 +541,7 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data);
 int ipa_sram_settings_get(struct ipa_context *ipa);
 void ipa_sram_settings_clear(struct ipa_context *ipa);
 
-int ipa_modem_smem_init(void);
+int ipa_modem_smem_init(struct ipa_context *ipa);
 
 struct ipa_uc_ctx *ipa_uc_init(phys_addr_t phys_addr);
 bool ipa_uc_loaded(void);

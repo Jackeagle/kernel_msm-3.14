@@ -107,9 +107,10 @@ err_dma_free:
 	return ret;
 }
 
-static int dma_shared_mem_zero_cmd(u32 offset, u32 size)
+static int
+dma_shared_mem_zero_cmd(struct ipa_context *ipa, u32 offset, u32 size)
 {
-	struct device *dev = &ipa_ctx->pdev->dev;
+	struct device *dev = &ipa->pdev->dev;
 	struct ipa_desc desc = { };
 	dma_addr_t phys;
 	void *payload;
@@ -122,7 +123,7 @@ static int dma_shared_mem_zero_cmd(u32 offset, u32 size)
 	if (!virt)
 		return -ENOMEM;
 
-	offset += ipa_ctx->smem_offset;
+	offset += ipa->smem_offset;
 
 	payload = ipahal_dma_shared_mem_write_pyld(phys, size, offset);
 	if (!payload) {
@@ -146,20 +147,21 @@ err_dma_free:
 /**
  * ipa_modem_smem_init() - Initialize modem general memory and header memory
  */
-int ipa_modem_smem_init(void)
+int ipa_modem_smem_init(struct ipa_context *ipa)
 {
 	int ret;
 
-	ret = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_OFST, IPA_MEM_MODEM_SIZE);
+	ret = dma_shared_mem_zero_cmd(ipa, IPA_MEM_MODEM_OFST,
+				      IPA_MEM_MODEM_SIZE);
 	if (ret)
 		return ret;
 
-	ret = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_HDR_OFST,
+	ret = dma_shared_mem_zero_cmd(ipa, IPA_MEM_MODEM_HDR_OFST,
 				      IPA_MEM_MODEM_HDR_SIZE);
 	if (ret)
 		return ret;
 
-	return dma_shared_mem_zero_cmd(IPA_MEM_MODEM_HDR_PROC_CTX_OFST,
+	return dma_shared_mem_zero_cmd(ipa, IPA_MEM_MODEM_HDR_PROC_CTX_OFST,
 				       IPA_MEM_MODEM_HDR_PROC_CTX_SIZE);
 }
 
@@ -278,7 +280,8 @@ static int ipa_init_hdr(void)
 	}
 
 	if (IPA_MEM_MODEM_HDR_PROC_CTX_SIZE) {
-		ret = dma_shared_mem_zero_cmd(IPA_MEM_MODEM_HDR_PROC_CTX_OFST,
+		ret = dma_shared_mem_zero_cmd(ipa_ctx,
+					      IPA_MEM_MODEM_HDR_PROC_CTX_OFST,
 					      IPA_MEM_MODEM_HDR_PROC_CTX_SIZE);
 		if (ret)
 			return ret;
@@ -286,7 +289,8 @@ static int ipa_init_hdr(void)
 
 	if (IPA_MEM_APPS_HDR_PROC_CTX_SIZE) {
 		BUILD_BUG_ON(IPA_MEM_APPS_HDR_PROC_CTX_OFST % 8);
-		ret = dma_shared_mem_zero_cmd(IPA_MEM_APPS_HDR_PROC_CTX_OFST,
+		ret = dma_shared_mem_zero_cmd(ipa_ctx,
+					      IPA_MEM_APPS_HDR_PROC_CTX_OFST,
 					      IPA_MEM_APPS_HDR_PROC_CTX_SIZE);
 		if (ret)
 			return ret;
