@@ -198,8 +198,8 @@ struct ch_debug_stats {
 };
 
 struct gsi {
-	void __iomem *base;
 	struct device *dev;
+	void __iomem *base;
 	u32 phys;
 	unsigned int irq;
 	bool irq_wake_enabled;
@@ -316,8 +316,6 @@ union gsi_channel_scratch {
 		u32 word4;
 	} data;
 } __packed;
-
-static struct gsi *gsi_struct_init(struct platform_device *pdev);
 
 /* Read a value from the given offset into the I/O space defined in
  * the GSI context.
@@ -874,18 +872,51 @@ static u32 gsi_evt_bmap_init(u32 evt_ring_max)
 	return evt_bmap | GENMASK(GSI_MHI_ER_END, GSI_MHI_ER_START);
 }
 
+/* Initialize GSI driver.  GSI firmware must be loaded and initialized */
 struct gsi *gsi_init(struct platform_device *pdev)
 {
+	struct resource *res;
+	resource_size_t size;
 	u32 evt_ring_max;
 	u32 channel_max;
 	struct gsi *gsi;
+	int irq;
 	u32 val;
 	int ret;
 
-	gsi = gsi_struct_init(pdev);
-	if (IS_ERR(gsi))
-		return gsi;
+	/* Get GSI memory range and map it */
+	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "gsi");
+	if (!res)
+		return ERR_PTR(-EINVAL);
 
+	size = resource_size(res);
+	if (res->start > U32_MAX || size > U32_MAX)
+		return ERR_PTR(-EINVAL);
+
+	/* Get IPA GSI IRQ number */
+	irq = platform_get_irq_byname(pdev, "gsi");
+	if (irq < 0)
+		return ERR_PTR(irq);
+
+	gsi = kzalloc(sizeof(*gsi), GFP_KERNEL);
+	if (!gsi)
+		return ERR_PTR(-ENOMEM);
+	gsi->dev = &pdev->dev;
+
+	gsi->base = devm_ioremap_nocache(gsi->dev, res->start, size);
+	if (!gsi->base) {
+		kfree(gsi);
+
+		return ERR_PTR(-ENOMEM);
+	}
+	gsi->phys = (u32)res->start;
+	gsi->irq = irq;
+	spin_lock_init(&gsi->slock);
+	mutex_init(&gsi->mutex);
+	atomic_set(&gsi->channel_count, 0);
+	atomic_set(&gsi->evt_ring_count, 0);
+
+	/* Here is where we first touch the GSI hardware */
 	val = gsi_readl(gsi, GSI_GSI_STATUS_OFFS);
 	if (!(val & ENABLED_FMASK)) {
 		ipa_err("manager EE has not enabled GSI, GSI un-usable\n");
@@ -1653,54 +1684,4 @@ void gsi_channel_config(struct gsi *gsi, u32 channel_id, bool doorbell_enable)
 	/* restore scratch */
 	__gsi_channel_scratch_write(gsi, channel_id);
 	mutex_unlock(&channel->mutex);
-}
-
-/* Initialize GSI driver */
-static struct gsi *gsi_struct_init(struct platform_device *pdev)
-{
-	struct device *dev = &pdev->dev;
-	struct resource *res;
-	resource_size_t size;
-	struct gsi *gsi;
-	int irq;
-
-	/* Get GSI memory range and map it */
-	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "gsi");
-	if (!res) {
-		ipa_err("missing \"gsi\" property in DTB\n");
-		return ERR_PTR(-EINVAL);
-	}
-
-	size = resource_size(res);
-	if (res->start > U32_MAX || size > U32_MAX) {
-		ipa_err("\"gsi\" values out of range\n");
-		return ERR_PTR(-EINVAL);
-	}
-
-	/* Get IPA GSI IRQ number */
-	irq = platform_get_irq_byname(pdev, "gsi");
-	if (irq < 0) {
-		ipa_err("failed to get gsi IRQ!\n");
-		return ERR_PTR(irq);
-	}
-
-	gsi = kzalloc(sizeof(*gsi), GFP_KERNEL);
-	if (!gsi)
-		return ERR_PTR(-ENOMEM);
-
-	gsi->base = devm_ioremap_nocache(dev, res->start, size);
-	if (!gsi->base) {
-		kfree(gsi);
-
-		return ERR_PTR(-ENOMEM);
-	}
-	gsi->dev = dev;
-	gsi->phys = (u32)res->start;
-	gsi->irq = irq;
-	spin_lock_init(&gsi->slock);
-	mutex_init(&gsi->mutex);
-	atomic_set(&gsi->channel_count, 0);
-	atomic_set(&gsi->evt_ring_count, 0);
-
-	return gsi;
 }
