@@ -434,6 +434,7 @@ struct ipa_context {
 	u32 wakeup_count;
 	struct wakeup_source wakeup;
 	spinlock_t wakeup_lock;		/* protects updates to wakeup_count */
+	struct mutex post_init_mutex;
 
 	struct ipa_ep_context ep[IPA_EP_COUNT_MAX];
 	struct ipa_uc_ctx *uc_ctx;
@@ -441,6 +442,7 @@ struct ipa_context {
 	bool proxy_held;
 	void *wwan;
 	bool post_init_complete;
+	bool shutting_down;
 
 	/* RMNET_IOCTL_INGRESS_FORMAT_AGG_DATA */
 	bool ipa_client_apps_wan_cons_agg_gro;

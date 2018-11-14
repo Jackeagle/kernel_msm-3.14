@@ -1049,6 +1049,8 @@ static int ipa_pre_init(struct ipa_context *ipa)
 	wakeup_source_init(&ipa->wakeup, "IPA_WS");
 	spin_lock_init(&ipa->wakeup_lock);
 
+	mutex_init(&ipa->post_init_mutex);
+
 	/* Note enabling dynamic clock division must not be
 	 * attempted for IPA hardware versions prior to 3.5.
 	 */
@@ -1135,7 +1137,10 @@ static irqreturn_t ipa_smp2p_modem_post_init_isr(int irq, void *dev_id)
 {
 	struct ipa_context *ipa = dev_id;
 
-	(void)ipa_post_init(ipa);
+	mutex_lock(&ipa->post_init_mutex);
+	if (!ipa->shutting_down)
+		(void)ipa_post_init(ipa);
+	mutex_lock(&ipa->post_init_mutex);
 
 	return IRQ_HANDLED;
 }
@@ -1354,11 +1359,23 @@ out_ipa_destroy:
 	return ret;
 }
 
+static bool ipa_post_init_complete(struct ipa_context *ipa)
+{
+	if (ipa->smp2p_info.post_init_irq) {
+		disable_irq(ipa->smp2p_info.post_init_irq);
+		mutex_lock(&ipa->post_init_mutex);
+		ipa->shutting_down = true;
+		mutex_unlock(&ipa->post_init_mutex);
+	}
+
+	return ipa->post_init_complete;
+}
+
 static int ipa_plat_drv_remove(struct platform_device *pdev)
 {
 	struct ipa_context *ipa = dev_get_drvdata(&pdev->dev);
 
-	if (ipa->post_init_complete)
+	if (ipa_post_init_complete(ipa))
 		ipa_post_exit(ipa);
 
 	/* XXX ipa_pre_exit(ipa); */
