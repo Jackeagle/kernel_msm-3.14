@@ -62,30 +62,17 @@ struct gsi;
  * gsi_init() - Initialize GSI subsystem
  * @pdev:	IPA platform device, to look up resources
  *
- * This stage of initialization can occur before the GSI firmware
- * has been loaded.
- *
- * Return:	GSI pointer to provide to other GSI functions.
+ * @Return:	A pointer to a GSI structure or a pointer-coded error.
  */
 struct gsi *gsi_init(struct platform_device *pdev);
 
 /**
- * gsi_device_init() - Initialize a GSI device
+ * gsi_exit() - De-initialize GSI subsystem
  * @gsi:	GSI pointer returned by gsi_init()
  *
- * Initialize a GSI device.
- *
- * @Return:	0 if successful or a negative error code otherwise.
+ * This is the inverse of gsi_init()
  */
-int gsi_device_init(struct gsi *gsi);
-
-/**
- * gsi_device_exit() - De-initialize a GSI device
- * @gsi:	GSI pointer returned by gsi_init()
- *
- * This is the inverse of gsi_device_init()
- */
-void gsi_device_exit(struct gsi *gsi);
+void gsi_exit(struct gsi *gsi);
 
 /**
  * gsi_channel_alloc() - Allocate a GSI channel

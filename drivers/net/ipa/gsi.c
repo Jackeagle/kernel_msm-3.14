@@ -317,6 +317,8 @@ union gsi_channel_scratch {
 	} data;
 } __packed;
 
+static struct gsi *gsi_struct_init(struct platform_device *pdev);
+
 /* Read a value from the given offset into the I/O space defined in
  * the GSI context.
  */
@@ -872,17 +874,22 @@ static u32 gsi_evt_bmap_init(u32 evt_ring_max)
 	return evt_bmap | GENMASK(GSI_MHI_ER_END, GSI_MHI_ER_START);
 }
 
-int gsi_device_init(struct gsi *gsi)
+struct gsi *gsi_init(struct platform_device *pdev)
 {
 	u32 evt_ring_max;
 	u32 channel_max;
+	struct gsi *gsi;
 	u32 val;
 	int ret;
+
+	gsi = gsi_struct_init(pdev);
+	if (IS_ERR(gsi))
+		return gsi;
 
 	val = gsi_readl(gsi, GSI_GSI_STATUS_OFFS);
 	if (!(val & ENABLED_FMASK)) {
 		ipa_err("manager EE has not enabled GSI, GSI un-usable\n");
-		return -EIO;
+		return ERR_PTR(-EIO);
 	}
 
 	channel_max = gsi_channel_max(gsi);
@@ -896,7 +903,7 @@ int gsi_device_init(struct gsi *gsi)
 	ret = request_irq(gsi->irq, gsi_isr, IRQF_TRIGGER_HIGH, "gsi", gsi);
 	if (ret) {
 		ipa_err("failed to register isr for %u\n", gsi->irq);
-		return -EIO;
+		return ERR_PTR(ret);
 	}
 
 	ret = enable_irq_wake(gsi->irq);
@@ -916,10 +923,10 @@ int gsi_device_init(struct gsi *gsi)
 	/* Initialize the error log */
 	gsi_writel(gsi, 0, GSI_ERROR_LOG_OFFS);
 
-	return 0;
+	return gsi;
 }
 
-void gsi_device_exit(struct gsi *gsi)
+void gsi_exit(struct gsi *gsi)
 {
 	ipa_assert(!atomic_read(&gsi->channel_count));
 	ipa_assert(!atomic_read(&gsi->evt_ring_count));
@@ -929,7 +936,7 @@ void gsi_device_exit(struct gsi *gsi)
 	 */
 	gsi_irq_disable_all(gsi);
 
-	/* Clean up everything else set up by gsi_device_init() */
+	/* Clean up everything else set up by gsi_init() */
 	gsi->evt_bmap = 0;
 	gsi->evt_ring_max = 0;
 	gsi->channel_max = 0;
@@ -1649,7 +1656,7 @@ void gsi_channel_config(struct gsi *gsi, u32 channel_id, bool doorbell_enable)
 }
 
 /* Initialize GSI driver */
-struct gsi *gsi_init(struct platform_device *pdev)
+static struct gsi *gsi_struct_init(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	struct resource *res;

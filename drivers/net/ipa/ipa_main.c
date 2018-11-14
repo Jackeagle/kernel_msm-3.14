@@ -955,16 +955,12 @@ static int ipa_post_init(struct ipa_context *ipa)
 
 	ipa_debug("ipa_post_init() started\n");
 
-	ipa->gsi = gsi_init(pdev);
+	ipa->gsi = gsi_init(ipa->pdev);
 	if (IS_ERR(ipa->gsi)) {
 		ret = PTR_ERR(ipa->gsi);
 		ipa->gsi = NULL;
 		return ret;
 	}
-
-	ret = gsi_device_init(ipa->gsi);
-	if (ret)
-		return ret;
 
 	/* setup the AP-IPA endpoints */
 	ret = ipa_ep_apps_setup();
@@ -1004,7 +1000,7 @@ err_uc_exit:
 err_ep_teardown:
 	/* XXX ipa_ep_apps_teardown(); */
 err_gsi_exit:
-	gsi_device_exit(ipa->gsi);
+	gsi_exit(ipa->gsi);
 
 	return ret;
 }
@@ -1019,6 +1015,8 @@ static void ipa_post_exit(struct ipa_context *ipa)
 	}
 
 	ipa_panic_notifier_unregister(ipa);
+
+	gsi_exit(ipa->gsi);
 }
 
 /** ipa_pre_init() - Initialize the IPA Driver.
