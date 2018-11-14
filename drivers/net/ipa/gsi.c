@@ -525,16 +525,12 @@ static void gsi_isr_glob_err(struct gsi *gsi)
 
 	ipa_bug_on(log->err_type == GSI_ERR_TYPE_GLOB);
 
-	switch (log->err_type) {
-	case GSI_ERR_TYPE_CHAN:
+	if (log->err_type == GSI_ERR_TYPE_CHAN)
 		gsi_isr_glob_chan_err(gsi, log->ee, log->virt_idx, log->code);
-		break;
-	case GSI_ERR_TYPE_EVT:
+	else if (log->err_type == GSI_ERR_TYPE_EVT)
 		gsi_isr_glob_evt_err(gsi, log->ee, log->virt_idx, log->code);
-		break;
-	default:
+	else
 		WARN_ON(1);
-	}
 }
 
 static void gsi_isr_glob_ee(struct gsi *gsi)
