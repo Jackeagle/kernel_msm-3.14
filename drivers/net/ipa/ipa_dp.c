@@ -1284,13 +1284,6 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 			continue;
 		}
 
-		if (status.endp_dest_idx >= ipa_ctx->ep_count ||
-		    status.endp_src_idx >= ipa_ctx->ep_count ||
-		    status.pkt_len > IPA_GENERIC_AGGR_BYTE_LIMIT) {
-			ipa_err("status fields invalid\n");
-			WARN_ON(1);
-			goto bail;
-		}
 		if (status.pkt_len == 0) {
 			skb_pull(skb, status_size);
 			continue;
@@ -1379,14 +1372,6 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 	ep_id = status.endp_src_idx;
 	metadata = status.metadata;
 	ep = &ipa_ctx->ep[ep_id];
-	if (ep_id >= ipa_ctx->ep_count || !ep->allocated ||
-	    !ep->client_notify) {
-		ipa_err("drop endpoint=%u allocated=%s client_notify=%p\n",
-			ep_id, ep->allocated ? "true" : "false",
-			ep->client_notify);
-		dev_kfree_skb_any(rx_skb);
-		return;
-	}
 
 	/* Consume the status packet, and if no exception, the header */
 	skb_pull(rx_skb, status_size);
