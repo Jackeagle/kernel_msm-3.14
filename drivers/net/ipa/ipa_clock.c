@@ -26,9 +26,6 @@
 #define IPA_CONFIG_AVG			(40 * 1000)
 #define IPA_CONFIG_PEAK			(40 * 1000)
 
-static void ipa_clock_put_final(struct work_struct *work);
-static DECLARE_WORK(ipa_clock_put_work, ipa_clock_put_final);
-
 static int ipa_interconnect_init(struct ipa_context *ipa)
 {
 	struct device *dev = &ipa->pdev->dev;
@@ -199,15 +196,19 @@ void ipa_clock_get(struct ipa_context *ipa)
  */
 static void ipa_clock_put_final(struct work_struct *work)
 {
-	mutex_lock(&ipa_ctx->clock_mutex);
+	struct ipa_context *ipa;
+
+	ipa = container_of(work, struct ipa_context, clock_work);
+
+	mutex_lock(&ipa->clock_mutex);
 
 	/* A reference might have been removed before we got the mutex. */
-	if (!atomic_dec_return(&ipa_ctx->clock_count)) {
+	if (!atomic_dec_return(&ipa->clock_count)) {
 		ipa_ep_suspend_all();
-		ipa_clock_disable(ipa_ctx);
+		ipa_clock_disable(ipa);
 	}
 
-	mutex_unlock(&ipa_ctx->clock_mutex);
+	mutex_unlock(&ipa->clock_mutex);
 }
 
 /* Attempt to remove an IPA clock reference.  If this represents
@@ -218,7 +219,7 @@ static void ipa_clock_put_final(struct work_struct *work)
 void ipa_clock_put(struct ipa_context *ipa)
 {
 	if (!atomic_add_unless(&ipa->clock_count, -1, 1))
-		queue_work(ipa->clock_wq, &ipa_clock_put_work);
+		queue_work(ipa->clock_wq, &ipa->clock_work);
 }
 
 /** ipa_clock_proxy_put() - called to remove IPA clock proxy vote
@@ -268,6 +269,7 @@ int ipa_clock_init(struct ipa_context *ipa)
 	if (!ipa->clock_wq)
 		goto err_interconnect_exit;
 
+	INIT_WORK(&ipa->clock_work, ipa_clock_put_final);
 	mutex_init(&ipa->clock_mutex);
 	atomic_set(&ipa->clock_count, 1);
 
@@ -287,6 +289,8 @@ void ipa_clock_exit(struct ipa_context *ipa)
 {
 	atomic_set(&ipa->clock_count, 0);
 	mutex_destroy(&ipa->clock_mutex);
+	cancel_work_sync(&ipa->clock_work);
+	memset(&ipa->clock_work, 0, sizeof(ipa->clock_work));
 	destroy_workqueue(ipa->clock_wq);
 	ipa->clock_wq = NULL;
 	ipa_interconnect_exit(ipa);

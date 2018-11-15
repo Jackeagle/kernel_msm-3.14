@@ -410,6 +410,7 @@ struct ipa_context {
 	struct icc_path *imem_path;
 	struct icc_path *config_path;
 	struct workqueue_struct *clock_wq;
+	struct work_struct clock_work;
 	struct mutex clock_mutex;
 	atomic_t clock_count;
 	phys_addr_t ipa_phys;
