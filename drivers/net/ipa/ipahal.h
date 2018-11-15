@@ -13,16 +13,16 @@
  * capabilities.  This is managed by programming tables of rules
  * that define the processing that should be performed by the IPA
  * and the conditions under which they should be applied.  Each
- * route or filter table entry is a DMA address that refers to the
- * routing or filtering rule.
+ * route or filter table entry is a physical address that refers
+ * to a routing or filtering rule.
  *
  * Values could differ for different versions of IPA hardware.
  * These values are for v3.5.1, found in the SDM845.
  */
-#define IPA_HW_TBL_SYSADDR_ALIGN	128
-#define IPA_TABLE_ENTRY_SIZE		sizeof(u64)
-#define IPA_FILTER_SIZE			8
-#define IPA_ROUTE_SIZE			8
+#define IPA_TABLE_ALIGN		128		/* Minimum table alignment */
+#define IPA_TABLE_ENTRY_SIZE	sizeof(u64)	/* Holds a physical address */
+#define IPA_FILTER_SIZE		8
+#define IPA_ROUTE_SIZE		8
 
 /**
  * ipahal_dma_shared_mem_write_pyld() - Write to shared memory command payload
