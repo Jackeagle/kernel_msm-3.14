@@ -1023,16 +1023,14 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 	struct ipahal_pkt_status status;
 	struct sk_buff *skb2;
 	unsigned long unused;
+	unsigned char *buf;
 	unsigned int align;
 	unsigned int used;
-	unsigned char *buf;
-	u32 pkt_status_sz;
 	int pad_len_byte;
 	u32 ep_id;
 	int len;
 	int len2;
 
-	pkt_status_sz = ipahal_pkt_status_get_size();
 	used = *(unsigned int *)skb->cb;
 	align = ALIGN(used, 32);
 	unused = IPA_RX_BUFFER_SIZE - used;
@@ -1094,26 +1092,27 @@ ipa_lan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 
 begin:
 	while (skb->len) {
+		size_t status_size;
+
 		sys->rx.drop_packet = false;
 
-		if (skb->len < pkt_status_sz) {
+		status_size = ipahal_pkt_status_parse(skb, &status);
+		if (!status_size) {
 			WARN_ON(sys->rx.prev_skb);
 			sys->rx.prev_skb = skb_copy(skb, GFP_KERNEL);
 			sys->rx.len_partial = skb->len;
 			return;
 		}
 
-		ipahal_pkt_status_parse(skb->data, &status);
-
 		if (!ipa_status_opcode_supported(status.status_opcode)) {
 			ipa_err("unsupported opcode(%d)\n",
 				status.status_opcode);
-			skb_pull(skb, pkt_status_sz);
+			skb_pull(skb, status_size);
 			continue;
 		}
 
 		if (status.pkt_len == 0) {
-			skb_pull(skb, pkt_status_sz);
+			skb_pull(skb, status_size);
 			continue;
 		}
 
@@ -1129,7 +1128,7 @@ begin:
 				IPAHAL_PKT_STATUS_EXCEPTION_NONE &&
 			    status.rt_miss)
 				sys->rx.drop_packet = true;
-			if (skb->len == pkt_status_sz &&
+			if (skb->len == status_size &&
 			    status.exception ==
 					IPAHAL_PKT_STATUS_EXCEPTION_NONE) {
 				WARN_ON(sys->rx.prev_skb);
@@ -1149,18 +1148,19 @@ begin:
 				sys->rx.drop_packet = true;
 			}
 
-			len2 = min(status.pkt_len + pkt_status_sz, skb->len);
+			len2 = min(status.pkt_len + status_size,
+				   (size_t)skb->len);
 			skb2 = ipa_skb_copy_for_client(skb, len2);
 			if (likely(skb2)) {
-				if (skb->len < len + pkt_status_sz) {
+				if (skb->len < len + status_size) {
 					sys->rx.prev_skb = skb2;
 					sys->rx.len_rem = len - skb->len +
-						pkt_status_sz;
+						status_size;
 					sys->rx.len_pad = pad_len_byte;
 					skb_pull(skb, skb->len);
 				} else {
 					skb_trim(skb2, status.pkt_len +
-							pkt_status_sz);
+							status_size);
 					if (sys->rx.drop_packet) {
 						dev_kfree_skb_any(skb2);
 					} else {
@@ -1168,29 +1168,31 @@ begin:
 							skb2->len +
 							sizeof(struct sk_buff) +
 							(ALIGN(len +
-							pkt_status_sz, 32) *
+							status_size, 32) *
 							unused / align);
 						sys->ep->client_notify(
 							sys->ep->priv,
 							IPA_RECEIVE,
 							(unsigned long)(skb2));
 					}
-					skb_pull(skb, len + pkt_status_sz);
+					skb_pull(skb, len +
+							status_size);
 				}
 			} else {
 				ipa_err("fail to alloc skb\n");
 				if (skb->len < len) {
 					sys->rx.prev_skb = NULL;
 					sys->rx.len_rem = len - skb->len +
-						pkt_status_sz;
+						status_size;
 					sys->rx.len_pad = pad_len_byte;
 					skb_pull(skb, skb->len);
 				} else {
-					skb_pull(skb, len + pkt_status_sz);
+					skb_pull(skb, len +
+							status_size);
 				}
 			}
 		} else {
-			skb_pull(skb, pkt_status_sz);
+			skb_pull(skb, status_size);
 		}
 	}
 }
@@ -1234,10 +1236,10 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 	unsigned char *skb_data;
 	struct sk_buff *skb2;
 	u16 pkt_len_with_pad;
+	size_t status_size;
 	unsigned long unused;
 	unsigned int align;
 	unsigned int used;
-	u32 pkt_status_sz;
 	int frame_len;
 	u32 qmap_hdr;
 	int checksum;
@@ -1261,16 +1263,16 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 	if (sys->rx.len_rem)
 		ipa_wan_rx_handle_splt_pyld(skb, sys);
 
-	pkt_status_sz = ipahal_pkt_status_get_size();
+	status_size = ipahal_pkt_status_get_size();
 	while (skb->len) {
 		u32 status_mask;
 
-		if (skb->len < pkt_status_sz) {
-			ipa_err("status straddles buffer\n");
-			WARN_ON(1);
-			goto bail;
+		status_size = ipahal_pkt_status_parse(skb, &status);
+		if (!status_size) {
+			ipa_err("%zu status bytes dropped\n", status_size);
+			dev_kfree_skb_any(skb);
+			return;
 		}
-		ipahal_pkt_status_parse(skb->data, &status);
 		skb_data = skb->data;
 
 		if (!ipa_status_opcode_supported(status.status_opcode) ||
@@ -1278,7 +1280,7 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 				IPAHAL_PKT_STATUS_OPCODE_SUSPENDED_PACKET) {
 			ipa_err("unsupported opcode(%d)\n",
 				status.status_opcode);
-			skb_pull(skb, pkt_status_sz);
+			skb_pull(skb, status_size);
 			continue;
 		}
 
@@ -1290,7 +1292,7 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 			goto bail;
 		}
 		if (status.pkt_len == 0) {
-			skb_pull(skb, pkt_status_sz);
+			skb_pull(skb, status_size);
 			continue;
 		}
 		ep_id = ipa_client_ep_id(IPA_CLIENT_APPS_WAN_CONS);
@@ -1301,12 +1303,12 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 			goto bail;
 		}
 		/* RX data */
-		if (skb->len == pkt_status_sz) {
+		if (skb->len == status_size) {
 			ipa_err("Ins header in next buffer\n");
 			WARN_ON(1);
 			goto bail;
 		}
-		qmap_hdr = *(u32 *)(skb_data + pkt_status_sz);
+		qmap_hdr = *(u32 *)(skb_data + status_size);
 
 		/* Take the pkt_len_with_pad from the last 2 bytes of the QMAP
 		 * header
@@ -1317,7 +1319,7 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 		status_mask = status.status_mask;
 		checksum = status_mask & IPAHAL_PKT_STATUS_MASK_CKSUM_PROCESS;
 
-		frame_len = pkt_status_sz + IPA_QMAP_HEADER_LENGTH +
+		frame_len = status_size + IPA_QMAP_HEADER_LENGTH +
 			    pkt_len_with_pad;
 		if (checksum)
 			frame_len += IPA_DL_CHECKSUM_LENGTH;
@@ -1333,7 +1335,7 @@ ipa_wan_rx_pyld_hdlr(struct sk_buff *skb, struct ipa_sys_context *sys)
 				skb_pull(skb, skb->len);
 			} else {
 				skb_trim(skb2, frame_len);
-				skb_pull(skb2, pkt_status_sz);
+				skb_pull(skb2, status_size);
 				skb2->truesize = skb2->len +
 					sizeof(struct sk_buff) +
 					(ALIGN(frame_len, 32) *
@@ -1363,15 +1365,17 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 	struct sk_buff *rx_skb = (struct sk_buff *)data;
 	struct ipahal_pkt_status status;
 	struct ipa_ep_context *ep;
-	u32 pkt_status_size;
+	size_t status_size;
 	u32 metadata;
 	u32 ep_id;
 
-	pkt_status_size = ipahal_pkt_status_get_size();
+	status_size = ipahal_pkt_status_parse(rx_skb, &status);
+	if (!status_size) {
+		ipa_err("%zu status bytes dropped\n", status_size);
+		dev_kfree_skb_any(rx_skb);
+		return;
+	}
 
-	ipa_assert(rx_skb->len >= pkt_status_size);
-
-	ipahal_pkt_status_parse(rx_skb->data, &status);
 	ep_id = status.endp_src_idx;
 	metadata = status.metadata;
 	ep = &ipa_ctx->ep[ep_id];
@@ -1385,7 +1389,7 @@ void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data)
 	}
 
 	/* Consume the status packet, and if no exception, the header */
-	skb_pull(rx_skb, pkt_status_size);
+	skb_pull(rx_skb, status_size);
 	if (status.exception == IPAHAL_PKT_STATUS_EXCEPTION_NONE)
 		skb_pull(rx_skb, IPA_LAN_RX_HEADER_LENGTH);
 

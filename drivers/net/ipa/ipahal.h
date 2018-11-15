@@ -7,6 +7,7 @@
 #define _IPAHAL_H_
 
 #include <linux/types.h>
+#include <linux/skbuff.h>
 
 /* The IPA implements offloaded packet filtering and routing
  * capabilities.  This is managed by programming tables of rules
@@ -180,11 +181,13 @@ struct ipahal_pkt_status {
 u32 ipahal_pkt_status_get_size(void);
 
 /* ipahal_pkt_status_parse() - Parse packet status payload
- * @unparsed_status:	Packet status read from hardware
- * @status:		Buffer to hold parsed status information
+ * @skb:	Socket buffer containing status
+ * @status:	Address of buffer for parsed status
+ *
+ * Return:	Number of bytes of status in @skb, or 0 for error
  */
-void ipahal_pkt_status_parse(const void *unparsed_status,
-			     struct ipahal_pkt_status *status);
+size_t ipahal_pkt_status_parse(struct sk_buff *skb,
+			       struct ipahal_pkt_status *status);
 
 /* Does the given ID represent rule miss? */
 bool ipahal_is_rule_miss_id(u32 id);

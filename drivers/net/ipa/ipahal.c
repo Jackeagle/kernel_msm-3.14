@@ -364,15 +364,16 @@ u32 ipahal_pkt_status_get_size(void)
 	return sizeof(struct ipa_pkt_status_hw);
 }
 
-/* ipahal_pkt_status_parse() - Parse Packet Status payload to abstracted form
- * @unparsed_status: Pointer to H/W format of the packet status as read from H/W
- * @status: Pointer to pre-allocated buffer where the parsed info will be stored
- */
-void ipahal_pkt_status_parse(const void *unparsed_status,
-			     struct ipahal_pkt_status *status)
+size_t
+ipahal_pkt_status_parse(struct sk_buff *skb, struct ipahal_pkt_status *status)
 {
-	const struct ipa_pkt_status_hw *hw_status = unparsed_status;
+	const struct ipa_pkt_status_hw *hw_status;
 	bool is_ipv6;
+
+	if (skb->len < sizeof(*hw_status))
+		return 0;
+
+	hw_status = (struct ipa_pkt_status_hw *)skb->data;
 
 	status->status_opcode =
 			(enum ipahal_pkt_status_opcode)hw_status->status_opcode;
@@ -386,6 +387,8 @@ void ipahal_pkt_status_parse(const void *unparsed_status,
 	status->endp_dest_idx = hw_status->endp_dest_idx;
 	status->metadata = hw_status->metadata;
 	status->rt_miss = ipahal_is_rule_miss_id(hw_status->rt_rule_id);
+
+	return sizeof(*hw_status);
 }
 
 /* Does the given rule ID represent a routing or filter rule miss?
