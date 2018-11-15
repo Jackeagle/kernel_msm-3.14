@@ -1913,26 +1913,23 @@ static void ipa_reset_gsi_channel(u32 ep_id)
 void ipa_ep_teardown(struct ipa_context *ipa, u32 ep_id)
 {
 	struct ipa_ep_context *ep = &ipa->ep[ep_id];
-	int empty;
 	int ret;
 	int i;
 
-	if (ep->napi_enabled) {
-		do {
+	if (ep->napi_enabled)
+		while (ipa_ep_polling(ep))
 			usleep_range(95, 105);
-		} while (ipa_ep_polling(ep));
-	}
 
 	if (ipa_producer(ep->client)) {
+		bool empty = false;
+
 		do {
 			spin_lock_bh(&ep->sys->spinlock);
 			empty = list_empty(&ep->sys->head_desc_list);
 			spin_unlock_bh(&ep->sys->spinlock);
 			if (!empty)
 				usleep_range(95, 105);
-			else
-				break;
-		} while (1);
+		} while (!empty);
 	}
 
 	if (ipa_consumer(ep->client))
