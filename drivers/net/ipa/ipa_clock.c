@@ -207,26 +207,26 @@ static void ipa_clock_disable(struct ipa_context *ipa)
  * until after this is complete (and the mutex, not the atomic
  * count, is what protects this).
  */
-static void ipa_clock_get_first(void)
+static void ipa_clock_get_first(struct ipa_context *ipa)
 {
-	mutex_lock(&ipa_ctx->clock_mutex);
+	mutex_lock(&ipa->clock_mutex);
 
 	/* A reference might have been added before we got the mutex. */
-	if (atomic_inc_return(&ipa_ctx->clock_count) == 1) {
-		(void)ipa_clock_enable(ipa_ctx);
+	if (atomic_inc_return(&ipa->clock_count) == 1) {
+		(void)ipa_clock_enable(ipa);
 		ipa_ep_resume_all();
 	}
 
-	mutex_unlock(&ipa_ctx->clock_mutex);
+	mutex_unlock(&ipa->clock_mutex);
 }
 
 /* Add an IPA client, but only if the reference count is already
  * non-zero.  (This is used to avoid blocking.)  Returns true if the
  * additional reference was added successfully, or false otherwise.
  */
-bool ipa_clock_get_additional(void)
+bool ipa_clock_get_additional(struct ipa_context *ipa)
 {
-	return !!atomic_inc_not_zero(&ipa_ctx->clock_count);
+	return !!atomic_inc_not_zero(&ipa->clock_count);
 }
 
 /* Add an IPA client.  If this is not the first client, the
@@ -234,10 +234,10 @@ bool ipa_clock_get_additional(void)
  * ipa_clock_get_first() will safely add the first client, enabling
  * clocks and setting up (resuming) endpoints before returning.
  */
-void ipa_clock_get(void)
+void ipa_clock_get(struct ipa_context *ipa)
 {
-	if (!ipa_clock_get_additional())
-		ipa_clock_get_first();
+	if (!ipa_clock_get_additional(ipa))
+		ipa_clock_get_first(ipa);
 }
 
 /* Decrement the active clients reference count, and if the result
@@ -264,21 +264,21 @@ static void ipa_clock_put_final(struct work_struct *work)
  * called in workqueue context to drop the last reference under
  * protection of the mutex.
  */
-void ipa_clock_put(void)
+void ipa_clock_put(struct ipa_context *ipa)
 {
-	if (!atomic_add_unless(&ipa_ctx->clock_count, -1, 1))
-		queue_work(ipa_ctx->clock_wq, &ipa_clock_put_work);
+	if (!atomic_add_unless(&ipa->clock_count, -1, 1))
+		queue_work(ipa->clock_wq, &ipa_clock_put_work);
 }
 
 /** ipa_clock_proxy_put() - called to remove IPA clock proxy vote
  *
  * Return value: none
  */
-void ipa_clock_proxy_put(void)
+void ipa_clock_proxy_put(struct ipa_context *ipa)
 {
-	if (ipa_ctx->proxy_held) {
-		ipa_clock_put();
-		ipa_ctx->proxy_held = false;
+	if (ipa->proxy_held) {
+		ipa_clock_put(ipa);
+		ipa->proxy_held = false;
 	}
 }
 
@@ -286,10 +286,10 @@ void ipa_clock_proxy_put(void)
  *
  * Return value: none
  */
-void ipa_clock_proxy_get(void)
+void ipa_clock_proxy_get(struct ipa_context *ipa)
 {
-	if (!ipa_ctx->proxy_held) {
-		ipa_clock_get();
-		ipa_ctx->proxy_held = true;
+	if (!ipa->proxy_held) {
+		ipa_clock_get(ipa);
+		ipa->proxy_held = true;
 	}
 }

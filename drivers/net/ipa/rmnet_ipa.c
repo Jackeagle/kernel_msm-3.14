@@ -618,7 +618,7 @@ int rmnet_ipa_ap_suspend(void *data)
 	/* Only not allow suspend if there are no outstanding packets */
 	if (!atomic_read(&wwan_ptr->outstanding_pkts)) {
 		netif_stop_queue(netdev);
-		ipa_clock_put();
+		ipa_clock_put(ipa_ctx);
 	} else {
 		ret = -EAGAIN;
 	}
@@ -642,7 +642,7 @@ void rmnet_ipa_ap_resume(void *data)
 	struct rmnet_ipa_context *wwan = data;
 	struct net_device *netdev = wwan->netdev;
 
-	ipa_clock_get();
+	ipa_clock_get(ipa_ctx);
 	if (netdev)
 		netif_wake_queue(netdev);
 }
@@ -692,8 +692,8 @@ void *ipa_wwan_init(void)
 		goto err_napi_del;
 
 	/* Take a clock reference; a suspend request will remove this */
-	ipa_clock_get();
-	ipa_clock_proxy_put();
+	ipa_clock_get(ipa_ctx);
+	ipa_clock_proxy_put(ipa_ctx);
 
 	return wwan;
 
@@ -717,7 +717,7 @@ void ipa_wwan_cleanup(void *data)
 
 	mutex_lock(&wwan->ep_setup_mutex);
 
-	ipa_clock_get();
+	ipa_clock_get(ipa_ctx);
 
 	if (wwan->wan_cons_ep_id != IPA_EP_ID_BAD) {
 		ipa_ep_teardown(ipa_ctx, wwan->wan_cons_ep_id);
@@ -729,7 +729,7 @@ void ipa_wwan_cleanup(void *data)
 		wwan->wan_prod_ep_id = IPA_EP_ID_BAD;
 	}
 
-	ipa_clock_put();
+	ipa_clock_put(ipa_ctx);
 
 	if (wwan->netdev) {
 		wwan_ptr = netdev_priv(wwan->netdev);

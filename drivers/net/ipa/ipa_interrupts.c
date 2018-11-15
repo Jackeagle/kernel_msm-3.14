@@ -146,11 +146,11 @@ static void ipa_process_interrupts(void)
 
 static void ipa_interrupt_work_func(struct work_struct *work)
 {
-	ipa_clock_get();
+	ipa_clock_get(ipa_ctx);
 
 	ipa_process_interrupts();
 
-	ipa_clock_put();
+	ipa_clock_put(ipa_ctx);
 }
 
 static irqreturn_t ipa_isr(int irq, void *ctxt)
@@ -169,7 +169,7 @@ static void enable_tx_suspend_work_func(struct work_struct *work)
 {
 	u32 val;
 
-	ipa_clock_get();
+	ipa_clock_get(ipa_ctx);
 
 	val = ipa_read_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP);
 	val |= BIT(ipa_irq_mapping[IPA_TX_SUSPEND_IRQ]);
@@ -177,7 +177,7 @@ static void enable_tx_suspend_work_func(struct work_struct *work)
 
 	ipa_process_interrupts();
 
-	ipa_clock_put();
+	ipa_clock_put(ipa_ctx);
 }
 
 /* Register SUSPEND_IRQ_EN_EE_N_ADDR for L2 interrupt. */

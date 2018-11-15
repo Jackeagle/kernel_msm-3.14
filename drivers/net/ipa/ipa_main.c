@@ -819,7 +819,7 @@ static void ipa_suspend_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 		/* endpoint will be unsuspended by enabling IPA clocks */
 		mutex_lock(&ipa_ctx->transport_pm.transport_pm_mutex);
 		if (!atomic_read(&ipa_ctx->transport_pm.dec_clients)) {
-			ipa_clock_get();
+			ipa_clock_get(ipa_ctx);
 
 			atomic_set(&ipa_ctx->transport_pm.dec_clients, 1);
 		}
@@ -840,7 +840,7 @@ static void ipa_freeze_clock_vote_and_notify_modem(struct ipa_context *ipa)
 		return;
 	}
 
-	ipa->smp2p_info.ipa_clk_on = ipa_clock_get_additional();
+	ipa->smp2p_info.ipa_clk_on = ipa_clock_get_additional(ipa);
 
 	/* Signal whether the clock is enabled */
 	mask = BIT(ipa->smp2p_info.enabled_bit);
@@ -863,7 +863,7 @@ void ipa_reset_freeze_vote(struct ipa_context *ipa)
 		return;
 
 	if (ipa->smp2p_info.ipa_clk_on)
-		ipa_clock_put();
+		ipa_clock_put(ipa);
 
 	/* Reset the clock enabled valid flag */
 	mask = BIT(ipa->smp2p_info.valid_bit);
@@ -1016,7 +1016,7 @@ static int ipa_pre_init(struct ipa_context *ipa)
 {
 	int ret;
 
-	ipa_clock_get();
+	ipa_clock_get(ipa);
 
 	ipa_hardware_init(ipa);
 
@@ -1069,7 +1069,7 @@ err_sram_settings_clear:
 err_ep_count_clear:
 	ipa_ep_count_clear(ipa);
 err_clock_put:
-	ipa_clock_put();
+	ipa_clock_put(ipa);
 
 	return ret;
 }
@@ -1086,7 +1086,7 @@ static void ipa_pre_exit(struct ipa_context *ipa)
 	ipa->dp = NULL;
 	ipa_sram_settings_clear(ipa);
 	ipa_ep_count_clear(ipa);
-	ipa_clock_put();
+	ipa_clock_put(ipa);
 }
 
 static int ipa_firmware_load(struct device *dev)

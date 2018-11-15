@@ -275,7 +275,7 @@ ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
 		/* The proxy vote is held until uC is loaded to ensure that
 		 * IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED is received.
 		 */
-		ipa_clock_proxy_put();
+		ipa_clock_proxy_put(ipa_ctx);
 		ipa_uc_ctx.uc_loaded = true;
 	} else if (response == IPA_UC_RESPONSE_CMD_COMPLETED) {
 		response_data.raw32b = shared->response_param;
@@ -325,7 +325,7 @@ void ipa_uc_panic_notifier(void)
 	if (!ipa_uc_ctx.uc_loaded)
 		return;
 
-	if (!ipa_clock_get_additional())
+	if (!ipa_clock_get_additional(ipa_ctx))
 		return;
 
 	send_uc_command(IPA_UC_COMMAND_ERR_FATAL, 0);
@@ -333,5 +333,5 @@ void ipa_uc_panic_notifier(void)
 	/* give uc enough time to save state */
 	udelay(IPA_SEND_DELAY);
 
-	ipa_clock_put();
+	ipa_clock_put(ipa_ctx);
 }

@@ -17,11 +17,11 @@
 int ipa_clock_init(struct ipa_context *ipa);
 void ipa_clock_exit(struct ipa_context *ipa);
 
-void ipa_clock_get(void);
-bool ipa_clock_get_additional(void);
-void ipa_clock_put(void);
+void ipa_clock_get(struct ipa_context *ipa);
+bool ipa_clock_get_additional(struct ipa_context *ipa);
+void ipa_clock_put(struct ipa_context *ipa);
 
-void ipa_clock_proxy_put(void);
-void ipa_clock_proxy_get(void);
+void ipa_clock_proxy_put(struct ipa_context *ipa);
+void ipa_clock_proxy_get(struct ipa_context *ipa);
 
 #endif /* _IPA_CLOCK_H_ */
