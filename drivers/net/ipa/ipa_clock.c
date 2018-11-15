@@ -123,55 +123,6 @@ err_reenable_memory_path:
 	return ret;
 }
 
-int ipa_clock_init(struct ipa_context *ipa)
-{
-	struct device *dev = &ipa->pdev->dev;
-	struct clk *clk;
-	int ret;
-
-	clk = clk_get(dev, "core");
-	if (IS_ERR(clk))
-		return PTR_ERR(clk);
-	ipa->core_clock = clk;
-
-	ret = clk_set_rate(clk, IPA_CORE_CLOCK_RATE);
-	if (ret)
-		goto err_clk_put;
-
-	ret = ipa_interconnect_init(ipa);
-	if (ret)
-		goto err_clk_put;
-
-	ipa->clock_wq = create_singlethread_workqueue("ipa_clock");
-	if (!ipa->clock_wq)
-		goto err_interconnect_exit;
-
-	mutex_init(&ipa->clock_mutex);
-	atomic_set(&ipa->clock_count, 1);
-
-	return 0;
-
-err_interconnect_exit:
-	ret = -ENOMEM;
-	ipa_interconnect_exit(ipa);
-err_clk_put:
-	ipa->core_clock = NULL;
-	clk_put(clk);
-
-	return ret;
-}
-
-void ipa_clock_exit(struct ipa_context *ipa)
-{
-	atomic_set(&ipa->clock_count, 0);
-	mutex_destroy(&ipa->clock_mutex);
-	destroy_workqueue(ipa->clock_wq);
-	ipa->clock_wq = NULL;
-	ipa_interconnect_exit(ipa);
-	clk_put(ipa->core_clock);
-	ipa->core_clock = NULL;
-}
-
 /**
  * ipa_clock_enable() - Turn on IPA clocks
  */
@@ -292,4 +243,53 @@ void ipa_clock_proxy_get(struct ipa_context *ipa)
 		ipa_clock_get(ipa);
 		ipa->proxy_held = true;
 	}
+}
+
+int ipa_clock_init(struct ipa_context *ipa)
+{
+	struct device *dev = &ipa->pdev->dev;
+	struct clk *clk;
+	int ret;
+
+	clk = clk_get(dev, "core");
+	if (IS_ERR(clk))
+		return PTR_ERR(clk);
+	ipa->core_clock = clk;
+
+	ret = clk_set_rate(clk, IPA_CORE_CLOCK_RATE);
+	if (ret)
+		goto err_clk_put;
+
+	ret = ipa_interconnect_init(ipa);
+	if (ret)
+		goto err_clk_put;
+
+	ipa->clock_wq = create_singlethread_workqueue("ipa_clock");
+	if (!ipa->clock_wq)
+		goto err_interconnect_exit;
+
+	mutex_init(&ipa->clock_mutex);
+	atomic_set(&ipa->clock_count, 1);
+
+	return 0;
+
+err_interconnect_exit:
+	ret = -ENOMEM;
+	ipa_interconnect_exit(ipa);
+err_clk_put:
+	ipa->core_clock = NULL;
+	clk_put(clk);
+
+	return ret;
+}
+
+void ipa_clock_exit(struct ipa_context *ipa)
+{
+	atomic_set(&ipa->clock_count, 0);
+	mutex_destroy(&ipa->clock_mutex);
+	destroy_workqueue(ipa->clock_wq);
+	ipa->clock_wq = NULL;
+	ipa_interconnect_exit(ipa);
+	clk_put(ipa->core_clock);
+	ipa->core_clock = NULL;
 }
