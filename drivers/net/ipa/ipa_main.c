@@ -215,36 +215,6 @@ static __always_inline void sram_set_canaries(u32 *sram_mmio, u32 offset)
 	*--sram_mmio = IPA_MEM_CANARY_VAL;
 }
 
-/** ipa_sram_settings_get() - Read SRAM settings from HW
- *
- * Returns:	None
- */
-static int ipa_sram_settings_get(struct ipa_context *ipa)
-{
-	struct ipa_reg_shared_mem_size mem_size;
-	u32 size;
-
-	ipa_read_reg_fields(IPA_SHARED_MEM_SIZE, &mem_size);
-
-	/* The fields in the register are in 8 byte units */
-	size = mem_size.shared_mem_size * 8;
-	ipa_debug("sram size 0x%x bytes\n", size);
-	if (size < IPA_MEM_END_OFST)
-		return -ENOMEM;
-	ipa->smem_size = size;
-
-	ipa->smem_offset = mem_size.shared_mem_baddr * 8;
-	ipa_debug("sram offset 0x%x bytes\n", ipa->smem_offset);
-
-	return 0;
-}
-
-static void ipa_sram_settings_clear(struct ipa_context *ipa)
-{
-	ipa->smem_offset = 0;
-	ipa->smem_size = 0;
-}
-
 /**
  * ipa_smem_init() - Initialize IPA shared memory
  *
@@ -252,21 +222,36 @@ static void ipa_sram_settings_clear(struct ipa_context *ipa)
  */
 static int ipa_smem_init(struct ipa_context *ipa)
 {
+	struct ipa_reg_shared_mem_size mem_size;
 	phys_addr_t phys_addr;
 	u32 *ipa_sram_mmio;
-	int ret;
+	u32 size;
 
-	ret = ipa_sram_settings_get(ipa);
-	if (ret)
-		return ret;
+	/* Get the location and size of the shared memory area */
+	ipa_read_reg_fields(IPA_SHARED_MEM_SIZE, &mem_size);
 
+	/* The fields in the register are in 8 byte units */
+	size = mem_size.shared_mem_size * 8;
+	ipa_debug("sram size 0x%x bytes\n", size);
+	if (size < IPA_MEM_END_OFST)
+		return -ENOSPC;
+	ipa->smem_size = size;
+
+	ipa->smem_offset = mem_size.shared_mem_baddr * 8;
+	ipa_debug("sram offset 0x%x bytes\n", ipa->smem_offset);
+
+	/* Now write "canary" values at the end of subsections of
+	 * the shared memory area.  (They're actually written
+	 * *before* section offsets, but the effect is the same.)
+	 */
 	phys_addr = ipa->ipa_phys;
 	phys_addr += ipa_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_N, 0);
 	phys_addr += ipa->smem_offset;
 
 	ipa_sram_mmio = ioremap(phys_addr, ipa->smem_size);
 	if (!ipa_sram_mmio) {
-		ipa_sram_settings_clear(ipa);
+		ipa->smem_offset = 0;
+		ipa->smem_size = 0;
 		return -ENOMEM;
 	}
 
@@ -292,7 +277,8 @@ static int ipa_smem_init(struct ipa_context *ipa)
 
 static void ipa_smem_exit(struct ipa_context *ipa)
 {
-	ipa_sram_settings_clear(ipa);
+	ipa->smem_offset = 0;
+	ipa->smem_size = 0;
 }
 
 /**
