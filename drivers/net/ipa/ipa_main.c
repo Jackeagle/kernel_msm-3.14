@@ -282,11 +282,14 @@ static void ipa_smem_exit(struct ipa_context *ipa)
 }
 
 /**
- * ipa_init_hdr() - Initialize IPA header block.
+ * ipa_header_config() - Configure IPA AP and modem header areas
+ *
+ * Initialize memory areas used for AP and modem header structures.
+ * No inverse is required for this function.
  *
  * Return:	0 if successful, or a negative error code
  */
-static int ipa_init_hdr(struct ipa_context *ipa)
+static int ipa_header_config(struct ipa_context *ipa)
 {
 	int ret;
 
@@ -721,7 +724,9 @@ static int ipa_ep_apps_setup(struct ipa_context *ipa)
 	if (ret < 0)
 		return ret;
 
-	ipa_init_hdr(ipa);
+	ret = ipa_header_config(ipa);
+	if (ret)
+		goto err_cmd_prod_teardown;
 
 	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
 	ipa_init_rt4(ipa, ipa->route_phys, size);
