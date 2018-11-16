@@ -254,14 +254,21 @@ static int ipa_smem_init(struct ipa_context *ipa)
 {
 	phys_addr_t phys_addr;
 	u32 *ipa_sram_mmio;
+	int ret;
+
+	ret = ipa_sram_settings_get(ipa);
+	if (ret)
+		return ret;
 
 	phys_addr = ipa->ipa_phys;
 	phys_addr += ipa_reg_n_offset(IPA_SRAM_DIRECT_ACCESS_N, 0);
 	phys_addr += ipa->smem_offset;
 
 	ipa_sram_mmio = ioremap(phys_addr, ipa->smem_size);
-	if (!ipa_sram_mmio)
+	if (!ipa_sram_mmio) {
+		ipa_sram_settings_clear(ipa);
 		return -ENOMEM;
+	}
 
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V4_FLT_HASH_OFST);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V4_FLT_NHASH_OFST);
@@ -285,7 +292,7 @@ static int ipa_smem_init(struct ipa_context *ipa)
 
 static void ipa_smem_exit(struct ipa_context *ipa)
 {
-	/* Nothing to do yet */
+	ipa_sram_settings_clear(ipa);
 }
 
 /**
@@ -1091,13 +1098,9 @@ static int ipa_pre_init(struct ipa_context *ipa)
 	if (ret)
 		goto err_clock_put;
 
-	ret = ipa_sram_settings_get(ipa);
-	if (ret)
-		goto err_ep_exit;
-
 	ret = ipa_dp_init(ipa);
 	if (ret)
-		goto err_sram_settings_clear;
+		goto err_ep_exit;
 
 	/* allocate memory for DMA_TASK workaround */
 	mutex_init(&ipa->transport_pm.transport_pm_mutex);
@@ -1130,8 +1133,6 @@ static int ipa_pre_init(struct ipa_context *ipa)
 
 err_dp_exit:
 	ipa_dp_exit(ipa);
-err_sram_settings_clear:
-	ipa_sram_settings_clear(ipa);
 err_ep_exit:
 	ipa_ep_exit(ipa);
 err_clock_put:
@@ -1151,7 +1152,6 @@ static void ipa_pre_exit(struct ipa_context *ipa)
 	ipa_gsi_dma_task_free(ipa);
 	mutex_destroy(&ipa->transport_pm.transport_pm_mutex);
 	ipa_dp_exit(ipa);
-	ipa_sram_settings_clear(ipa);
 	ipa_ep_exit(ipa);
 	ipa_clock_put(ipa);
 }
