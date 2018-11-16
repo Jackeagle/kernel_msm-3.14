@@ -467,7 +467,7 @@ ipa_filter_ipv6_config(struct ipa_context *ipa, dma_addr_t phys, size_t size)
 	return ret;
 }
 
-static void ipa_setup_flt_hash_tuple(struct ipa_context *ipa)
+static void ipa_filter_hash_tuple_config(struct ipa_context *ipa)
 {
 	u32 ep_mask = ipa->filter_bitmap;
 
@@ -480,7 +480,7 @@ static void ipa_setup_flt_hash_tuple(struct ipa_context *ipa)
 	}
 }
 
-static void ipa_setup_rt_hash_tuple(struct ipa_context *ipa)
+static void ipa_route_hash_tuple_config(struct ipa_context *ipa)
 {
 	u32 route_mask;
 	u32 modem_mask;
@@ -608,6 +608,8 @@ static int ipa_route_init(struct ipa_context *ipa)
 	ipa_route_ipv4_config(ipa, ipa->route_phys, size);
 	ipa_route_ipv6_config(ipa, ipa->route_phys, size);
 
+	ipa_route_hash_tuple_config(ipa);
+
 	return 0;
 }
 
@@ -686,6 +688,8 @@ static int ipa_filter_init(struct ipa_context *ipa)
 	ipa_filter_ipv4_config(ipa, ipa->filter_phys, size);
 	ipa_filter_ipv6_config(ipa, ipa->filter_phys, size);
 
+	ipa_filter_hash_tuple_config(ipa);
+
 	return 0;
 
 err_clear_filter_count:
@@ -752,9 +756,6 @@ static int ipa_ep_apps_setup(struct ipa_context *ipa)
 	ret = ipa_filter_init(ipa);
 	if (ret)
 		goto err_route_exit;
-
-	ipa_setup_flt_hash_tuple(ipa);
-	ipa_setup_rt_hash_tuple(ipa);
 
 	/* LAN IN (IPA->AP)
 	 *
