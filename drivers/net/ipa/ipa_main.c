@@ -1054,7 +1054,8 @@ err_clear_wwan:
 	ipa->wwan = NULL;
 	ipa_panic_notifier_unregister(ipa);
 err_uc_exit:
-	/* XXX ipa_uc_exit(); */
+	ipa_uc_exit(ipa->uc_ctx);
+	ipa->uc_ctx = NULL;
 err_ep_teardown:
 	ipa_ep_apps_teardown(ipa);
 err_gsi_exit:
@@ -1071,7 +1072,8 @@ static void ipa_post_exit(struct ipa_context *ipa)
 		ipa_wwan_cleanup(ipa->wwan);
 		ipa->wwan = NULL;
 	}
-
+	ipa_uc_exit(ipa->uc_ctx);
+	ipa->uc_ctx = NULL;
 	ipa_panic_notifier_unregister(ipa);
 
 	ipa_ep_apps_teardown(ipa);

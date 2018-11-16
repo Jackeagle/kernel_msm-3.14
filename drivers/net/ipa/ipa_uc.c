@@ -304,6 +304,14 @@ struct ipa_uc_ctx *ipa_uc_init(phys_addr_t phys_addr)
 	return &ipa_uc_ctx;
 }
 
+void ipa_uc_exit(struct ipa_uc_ctx *uc_ctx)
+{
+	ipa_remove_interrupt_handler(IPA_UC_IRQ_1);
+	ipa_remove_interrupt_handler(IPA_UC_IRQ_0);
+	iounmap(ipa_uc_ctx.shared);
+	ipa_uc_ctx.shared = NULL;
+}
+
 /* Send a command to the microcontroller */
 static void send_uc_command(u32 command, u32 command_param)
 {
