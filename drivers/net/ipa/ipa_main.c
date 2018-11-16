@@ -728,9 +728,17 @@ static int ipa_ep_apps_setup(struct ipa_context *ipa)
 	if (ret)
 		goto err_cmd_prod_teardown;
 
+	ret = ipa_route_init(ipa);
+	if (ret)
+		goto err_cmd_prod_teardown;
+
 	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
 	ipa_init_rt4(ipa, ipa->route_phys, size);
 	ipa_init_rt6(ipa, ipa->route_phys, size);
+
+	ret = ipa_filter_init(ipa);
+	if (ret)
+		goto err_route_exit;
 
 	size = (ipa->filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
 	ipa_init_flt4(ipa, ipa->filter_phys, size);
@@ -751,12 +759,16 @@ static int ipa_ep_apps_setup(struct ipa_context *ipa)
 	 */
 	ret = ipa_ep_apps_lan_cons_setup(ipa);
 	if (ret < 0)
-		goto err_cmd_prod_teardown;
+		goto err_filter_exit;
 
 	ipa_cfg_default_route(ipa, IPA_CLIENT_APPS_LAN_CONS);
 
 	return 0;
 
+err_filter_exit:
+	ipa_filter_exit(ipa);
+err_route_exit:
+	ipa_route_exit(ipa);
 err_cmd_prod_teardown:
 	ipa_ep_teardown(ipa, ipa->cmd_prod_ep_id);
 	ipa->cmd_prod_ep_id = IPA_EP_ID_BAD;
@@ -768,6 +780,9 @@ static void ipa_ep_apps_teardown(struct ipa_context *ipa)
 {
 	ipa_ep_teardown(ipa, ipa->lan_cons_ep_id);
 	ipa->lan_cons_ep_id = IPA_EP_ID_BAD;
+
+	ipa_filter_exit(ipa);
+	ipa_route_exit(ipa);
 
 	ipa_ep_teardown(ipa, ipa->cmd_prod_ep_id);
 	ipa->cmd_prod_ep_id = IPA_EP_ID_BAD;
@@ -992,18 +1007,10 @@ static int ipa_post_init(struct ipa_context *ipa)
 		return ret;
 	}
 
-	ret = ipa_route_init(ipa);
-	if (ret)
-		goto err_gsi_exit;
-
-	ret = ipa_filter_init(ipa);
-	if (ret)
-		goto err_route_exit;
-
 	/* setup the AP-IPA endpoints */
 	ret = ipa_ep_apps_setup(ipa);
 	if (ret)
-		goto err_filter_exit;
+		goto err_gsi_exit;
 
 	ipa->uc_ctx = ipa_uc_init(ipa->ipa_phys);
 	if (!ipa->uc_ctx) {
@@ -1037,10 +1044,6 @@ err_uc_exit:
 	/* XXX ipa_uc_exit(); */
 err_ep_teardown:
 	ipa_ep_apps_teardown(ipa);
-err_filter_exit:
-	ipa_filter_exit(ipa);
-err_route_exit:
-	ipa_route_exit(ipa);
 err_gsi_exit:
 	gsi_exit(ipa->gsi);
 
@@ -1059,8 +1062,6 @@ static void ipa_post_exit(struct ipa_context *ipa)
 	ipa_panic_notifier_unregister(ipa);
 
 	ipa_ep_apps_teardown(ipa);
-	ipa_filter_exit(ipa);
-	ipa_route_exit(ipa);
 	gsi_exit(ipa->gsi);
 }
 
