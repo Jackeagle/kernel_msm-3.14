@@ -1045,6 +1045,7 @@ err_ep_teardown:
 	ipa_ep_apps_teardown(ipa);
 err_gsi_exit:
 	gsi_exit(ipa->gsi);
+	ipa->gsi = NULL;
 
 	return ret;
 }
@@ -1063,6 +1064,7 @@ static void ipa_post_exit(struct ipa_context *ipa)
 
 	ipa_ep_apps_teardown(ipa);
 	gsi_exit(ipa->gsi);
+	ipa->gsi = NULL;
 }
 
 /** ipa_pre_init() - Initialize the IPA Driver.
@@ -1427,8 +1429,6 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 		ipa_ep_free(ipa, ipa->cmd_prod_ep_id);
 		ipa->cmd_prod_ep_id = IPA_EP_ID_BAD;
 	}
-	/* XXX ipa_gsi_exit(ipa) */
-	ipa->gsi = NULL;
 	ipa_mem_exit(ipa);
 	ipa_clock_exit(ipa);
 	ipa_smp2p_exit(ipa);
