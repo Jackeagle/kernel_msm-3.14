@@ -421,6 +421,7 @@ struct ipa_context {
 	dma_addr_t filter_phys;
 	u32 irq;
 	struct work_struct interrupt_work;
+	struct delayed_work tx_suspend_work;	/* Hardware bug workaround */
 	struct workqueue_struct *interrupt_wq;
 	struct gsi *gsi;
 	u32 cmd_prod_ep_id;
