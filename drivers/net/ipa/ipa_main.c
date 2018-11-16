@@ -216,11 +216,11 @@ static __always_inline void sram_set_canaries(u32 *sram_mmio, u32 offset)
 }
 
 /**
- * ipa_init_sram() - Initialize IPA local SRAM.
+ * ipa_smem_init() - Initialize IPA shared memory
  *
  * Return:	0 if successful, or a negative error code
  */
-static int ipa_init_sram(struct ipa_context *ipa)
+static int ipa_smem_init(struct ipa_context *ipa)
 {
 	phys_addr_t phys_addr;
 	u32 *ipa_sram_mmio;
@@ -230,10 +230,8 @@ static int ipa_init_sram(struct ipa_context *ipa)
 	phys_addr += ipa->smem_offset;
 
 	ipa_sram_mmio = ioremap(phys_addr, ipa->smem_size);
-	if (!ipa_sram_mmio) {
-		ipa_err("fail to ioremap IPA SRAM\n");
+	if (!ipa_sram_mmio)
 		return -ENOMEM;
-	}
 
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V4_FLT_HASH_OFST);
 	sram_set_canaries(ipa_sram_mmio, IPA_MEM_V4_FLT_NHASH_OFST);
@@ -253,6 +251,11 @@ static int ipa_init_sram(struct ipa_context *ipa)
 	iounmap(ipa_sram_mmio);
 
 	return 0;
+}
+
+static void ipa_smem_exit(struct ipa_context *ipa)
+{
+	/* Nothing to do yet */
 }
 
 /**
@@ -693,7 +696,10 @@ static int ipa_ep_apps_setup(struct ipa_context *ipa)
 	if (ret < 0)
 		return ret;
 
-	ipa_init_sram(ipa);
+	ret = ipa_smem_init(ipa);
+	if (ret)
+		goto err_cmd_prod_teardown;
+
 	ipa_init_hdr(ipa);
 
 	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
@@ -719,13 +725,15 @@ static int ipa_ep_apps_setup(struct ipa_context *ipa)
 	 */
 	ret = ipa_ep_apps_lan_cons_setup(ipa);
 	if (ret < 0)
-		goto fail_flt_hash_tuple;
+		goto err_smem_exit;
 
 	ipa_cfg_default_route(ipa, IPA_CLIENT_APPS_LAN_CONS);
 
 	return 0;
 
-fail_flt_hash_tuple:
+err_smem_exit:
+	ipa_smem_exit(ipa);
+err_cmd_prod_teardown:
 	ipa_ep_teardown(ipa, ipa->cmd_prod_ep_id);
 	ipa->cmd_prod_ep_id = IPA_EP_ID_BAD;
 
@@ -736,6 +744,8 @@ static void ipa_ep_apps_teardown(struct ipa_context *ipa)
 {
 	ipa_ep_teardown(ipa, ipa->lan_cons_ep_id);
 	ipa->lan_cons_ep_id = IPA_EP_ID_BAD;
+
+	ipa_smem_exit(ipa);
 
 	ipa_ep_teardown(ipa, ipa->cmd_prod_ep_id);
 	ipa->cmd_prod_ep_id = IPA_EP_ID_BAD;
