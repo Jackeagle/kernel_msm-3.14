@@ -162,7 +162,7 @@ static void ipa_clock_get_first(struct ipa_context *ipa)
 	/* A reference might have been added before we got the mutex. */
 	if (atomic_inc_return(&ipa->clock_count) == 1) {
 		(void)ipa_clock_enable(ipa);
-		ipa_ep_resume_all();
+		ipa_ep_resume_all(ipa);
 	}
 
 	mutex_unlock(&ipa->clock_mutex);
@@ -204,7 +204,7 @@ static void ipa_clock_put_final(struct work_struct *work)
 
 	/* A reference might have been removed before we got the mutex. */
 	if (!atomic_dec_return(&ipa->clock_count)) {
-		ipa_ep_suspend_all();
+		ipa_ep_suspend_all(ipa);
 		ipa_clock_disable(ipa);
 	}
 

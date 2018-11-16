@@ -693,7 +693,8 @@ static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
 }
 
 /* Suspend a consumer endpoint */
-static void ipa_ep_cons_suspend(enum ipa_client_type client)
+static void
+ipa_ep_cons_suspend(struct ipa_context *ipa, enum ipa_client_type client)
 {
 	struct ipa_reg_endp_init_ctrl init_ctrl;
 	u32 ep_id = ipa_client_ep_id(client);
@@ -708,36 +709,37 @@ static void ipa_ep_cons_suspend(enum ipa_client_type client)
 	 */
 	ipa_suspend_active_aggr_wa(ep_id);
 
-	ipa_gsi_poll_after_suspend(&ipa_ctx->ep[ep_id]);
+	ipa_gsi_poll_after_suspend(&ipa->ep[ep_id]);
 }
 
-void ipa_ep_suspend_all(void)
+void ipa_ep_suspend_all(struct ipa_context *ipa)
 {
-	ipa_ep_cons_suspend(IPA_CLIENT_APPS_WAN_CONS);
-	ipa_ep_cons_suspend(IPA_CLIENT_APPS_LAN_CONS);
+	ipa_ep_cons_suspend(ipa, IPA_CLIENT_APPS_WAN_CONS);
+	ipa_ep_cons_suspend(ipa, IPA_CLIENT_APPS_LAN_CONS);
 }
 
 /* Resume a suspended consumer endpoint */
-static void ipa_ep_cons_resume(enum ipa_client_type client)
+static void
+ipa_ep_cons_resume(struct ipa_context *ipa, enum ipa_client_type client)
 {
 	struct ipa_reg_endp_init_ctrl init_ctrl;
 	struct ipa_ep_context *ep;
 	u32 ep_id;
 
 	ep_id = ipa_client_ep_id(client);
-	ep = &ipa_ctx->ep[ep_id];
+	ep = &ipa->ep[ep_id];
 
 	ipa_reg_endp_init_ctrl(&init_ctrl, false);
 	ipa_write_reg_n_fields(IPA_ENDP_INIT_CTRL_N, ep_id, &init_ctrl);
 
 	if (!ipa_ep_polling(ep))
-		gsi_channel_intr_enable(ipa_ctx->gsi, ep->channel_id);
+		gsi_channel_intr_enable(ipa->gsi, ep->channel_id);
 }
 
-void ipa_ep_resume_all(void)
+void ipa_ep_resume_all(struct ipa_context *ipa)
 {
-	ipa_ep_cons_resume(IPA_CLIENT_APPS_LAN_CONS);
-	ipa_ep_cons_resume(IPA_CLIENT_APPS_WAN_CONS);
+	ipa_ep_cons_resume(ipa, IPA_CLIENT_APPS_LAN_CONS);
+	ipa_ep_cons_resume(ipa, IPA_CLIENT_APPS_WAN_CONS);
 }
 
 /** ipa_cfg_route() - configure IPA route

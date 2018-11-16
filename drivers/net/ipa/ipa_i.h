@@ -571,8 +571,10 @@ void ipa_ep_exit(struct ipa_context *ipa);
 int ipa_ap_suspend(struct device *dev);
 int ipa_ap_resume(struct device *dev);
 void ipa_set_resource_groups_min_max_limits(void);
-void ipa_ep_suspend_all(void);
-void ipa_ep_resume_all(void);
+
+void ipa_ep_suspend_all(struct ipa_context *ipa);
+void ipa_ep_resume_all(struct ipa_context *ipa);
+
 void ipa_inc_acquire_wakelock(struct ipa_context *ipa);
 void ipa_dec_release_wakelock(struct ipa_context *ipa);
 int ipa_rx_poll(u32 ep_id, int budget);
