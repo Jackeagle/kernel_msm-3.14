@@ -91,12 +91,14 @@ struct ipa_imm_cmd_hw_ip_fltrt_init {
  * @size_hdr_table: Size of the above (in bytes)
  * @hdr_addr: header address in IPA sram (used as DST for memory copy)
  * @rsvd: reserved
+ * @pad: explicit pad (present in the structure even if not defined)
  */
 struct ipa_imm_cmd_hw_hdr_init_local {
 	u64 hdr_table_addr;
 	u32 size_hdr_table	: 12,
 	    hdr_addr		: 16,
 	    rsvd		: 4;
+	u32 pad;
 };
 
 /* struct ipa_imm_cmd_hw_dma_shared_mem - DMA_SHARED_MEM command payload
