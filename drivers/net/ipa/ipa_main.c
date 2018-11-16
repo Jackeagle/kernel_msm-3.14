@@ -1027,9 +1027,17 @@ static int ipa_pre_init(struct ipa_context *ipa)
 	if (ret)
 		goto err_clock_put;
 
-	ret = ipa_sram_settings_get(ipa);
+	ret = ipa_route_init(ipa);
 	if (ret)
 		goto err_ep_exit;
+
+	ret = ipa_filter_init(ipa);
+	if (ret)
+		goto err_route_exit;
+
+	ret = ipa_sram_settings_get(ipa);
+	if (ret)
+		goto err_filter_exit;
 
 	ret = ipa_dp_init(ipa);
 	if (ret)
@@ -1068,6 +1076,10 @@ err_dp_exit:
 	ipa_dp_exit(ipa);
 err_sram_settings_clear:
 	ipa_sram_settings_clear(ipa);
+err_filter_exit:
+	ipa_filter_exit(ipa);
+err_route_exit:
+	ipa_route_exit(ipa);
 err_ep_exit:
 	ipa_ep_exit(ipa);
 err_clock_put:
@@ -1088,6 +1100,8 @@ static void ipa_pre_exit(struct ipa_context *ipa)
 	mutex_destroy(&ipa->transport_pm.transport_pm_mutex);
 	ipa_dp_exit(ipa);
 	ipa_sram_settings_clear(ipa);
+	ipa_filter_exit(ipa);
+	ipa_route_exit(ipa);
 	ipa_ep_exit(ipa);
 	ipa_clock_put(ipa);
 }
@@ -1308,17 +1322,9 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_clock_exit;
 
-	ret = ipa_route_init(ipa);
-	if (ret)
-		goto err_mem_exit;
-
-	ret = ipa_filter_init(ipa);
-	if (ret)
-		goto err_route_exit;
-
 	ret = ipa_irq_init(ipa);
 	if (ret)
-		goto err_filter_exit;
+		goto err_mem_exit;
 
 	/* Proceed to real initialization */
 	ret = ipa_pre_init(ipa);
@@ -1343,10 +1349,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	ipa_pre_exit(ipa);
 err_clear_ep_ids:
 	ipa_irq_exit(ipa);
-err_filter_exit:
-	ipa_filter_exit(ipa);
-err_route_exit:
-	ipa_route_exit(ipa);
 err_mem_exit:
 	ipa_mem_exit(ipa);
 err_clock_exit:
@@ -1391,8 +1393,6 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 	ipa->gsi = NULL;
 	ipa_mem_exit(ipa);
 	ipa_irq_exit(ipa);
-	ipa_filter_exit(ipa);
-	ipa_route_exit(ipa);
 	ipa_clock_exit(ipa);
 	ipa_smp2p_exit(ipa);
 	ipa_destroy(ipa);
