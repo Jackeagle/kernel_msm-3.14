@@ -436,6 +436,7 @@ struct ipa_context {
 	struct wakeup_source wakeup;
 	spinlock_t wakeup_lock;		/* protects updates to wakeup_count */
 	struct mutex post_init_mutex;
+	struct workqueue_struct *interrupt_wq;
 
 	struct ipa_ep_context *ep;
 	struct ipa_uc_ctx *uc_ctx;

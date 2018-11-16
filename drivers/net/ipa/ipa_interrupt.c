@@ -38,8 +38,6 @@ struct ipa_interrupt_info {
 #define IPA_IRQ_NUM_MAX	32	/* Number of IRQ bits in IPA interrupt mask */
 static struct ipa_interrupt_info ipa_interrupt_info[IPA_IRQ_NUM_MAX];
 
-static struct workqueue_struct *ipa_interrupt_wq;
-
 static void enable_tx_suspend_work_func(struct work_struct *work);
 static DECLARE_DELAYED_WORK(tx_suspend_work, enable_tx_suspend_work_func);
 
@@ -70,7 +68,7 @@ static void ipa_tx_suspend_interrupt_wa(void)
 	val &= ~BIT(ipa_irq_mapping[IPA_TX_SUSPEND_IRQ]);
 	ipa_write_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP, val);
 
-	queue_delayed_work(ipa_interrupt_wq, &tx_suspend_work,
+	queue_delayed_work(ipa_ctx->interrupt_wq, &tx_suspend_work,
 			   DISABLE_TX_SUSPEND_INTR_DELAY);
 }
 
@@ -153,10 +151,12 @@ static void ipa_interrupt_work_func(struct work_struct *work)
 	ipa_clock_put(ipa_ctx);
 }
 
-static irqreturn_t ipa_isr(int irq, void *ctxt)
+static irqreturn_t ipa_isr(int irq, void *dev_id)
 {
+	struct ipa_context *ipa = dev_id;
+
 	/* Schedule handling (if not already scheduled) */
-	queue_work(ipa_interrupt_wq, &ipa_interrupt_work);
+	queue_work(ipa->interrupt_wq, &ipa_interrupt_work);
 
 	return IRQ_HANDLED;
 }
@@ -265,8 +265,8 @@ int ipa_interrupt_init(struct ipa_context *ipa)
 	if (ret)
 		return ret;
 
-	ipa_interrupt_wq = alloc_ordered_workqueue("ipa_interrupt_wq", 0);
-	if (ipa_interrupt_wq)
+	ipa->interrupt_wq = alloc_ordered_workqueue("ipa_interrupt_wq", 0);
+	if (ipa->interrupt_wq)
 		return 0;	/* Success */
 
 	free_irq(ipa->ipa_irq, ipa);
@@ -279,8 +279,8 @@ void ipa_interrupt_exit(struct ipa_context *ipa)
 {
 	free_irq(ipa->ipa_irq, ipa);
 	ipa->ipa_irq = 0;
-	destroy_workqueue(ipa_interrupt_wq);
-	ipa_interrupt_wq = NULL;
+	destroy_workqueue(ipa->interrupt_wq);
+	ipa->interrupt_wq = NULL;
 }
 
 /**
