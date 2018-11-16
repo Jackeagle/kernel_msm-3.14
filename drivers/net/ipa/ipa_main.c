@@ -732,6 +732,15 @@ fail_flt_hash_tuple:
 	return ret;
 }
 
+static void ipa_ep_apps_teardown(struct ipa_context *ipa)
+{
+	ipa_ep_teardown(ipa, ipa->lan_cons_ep_id);
+	ipa->lan_cons_ep_id = IPA_EP_ID_BAD;
+
+	ipa_ep_teardown(ipa, ipa->cmd_prod_ep_id);
+	ipa->cmd_prod_ep_id = IPA_EP_ID_BAD;
+}
+
 static int ipa_mem_init(struct ipa_context *ipa)
 {
 	struct resource *res;
@@ -995,7 +1004,7 @@ err_clear_wwan:
 err_uc_exit:
 	/* XXX ipa_uc_exit(); */
 err_ep_teardown:
-	/* XXX ipa_ep_apps_teardown(); */
+	ipa_ep_apps_teardown(ipa);
 err_filter_exit:
 	ipa_filter_exit(ipa);
 err_route_exit:
@@ -1017,6 +1026,7 @@ static void ipa_post_exit(struct ipa_context *ipa)
 
 	ipa_panic_notifier_unregister(ipa);
 
+	ipa_ep_apps_teardown(ipa);
 	ipa_filter_exit(ipa);
 	ipa_route_exit(ipa);
 	gsi_exit(ipa->gsi);
