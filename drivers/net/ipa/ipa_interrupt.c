@@ -56,7 +56,7 @@ static const int ipa_irq_mapping[] = {
  *
  * This is part of a hardware bug workaround.
  */
-static void ipa_tx_suspend_interrupt_wa(void)
+static void ipa_tx_suspend_interrupt_wa(struct ipa_context *ipa)
 {
 	u32 val;
 
@@ -64,11 +64,11 @@ static void ipa_tx_suspend_interrupt_wa(void)
 	val &= ~BIT(ipa_irq_mapping[IPA_TX_SUSPEND_IRQ]);
 	ipa_write_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP, val);
 
-	queue_delayed_work(ipa_ctx->interrupt_wq, &tx_suspend_work,
+	queue_delayed_work(ipa->interrupt_wq, &tx_suspend_work,
 			   DISABLE_TX_SUSPEND_INTR_DELAY);
 }
 
-static void ipa_handle_interrupt(int irq_num)
+static void ipa_handle_interrupt(struct ipa_context *ipa, int irq_num)
 {
 	struct ipa_interrupt_info *intr_info = &ipa_interrupt_info[irq_num];
 	u32 endpoints = 0;	/* Only TX_SUSPEND uses its interrupt_data */
@@ -78,7 +78,7 @@ static void ipa_handle_interrupt(int irq_num)
 
 	if (intr_info->interrupt == IPA_TX_SUSPEND_IRQ) {
 		/* Disable the suspend interrupt temporarily */
-		ipa_tx_suspend_interrupt_wa();
+		ipa_tx_suspend_interrupt_wa(ipa);
 
 		/* Get and clear mask of endpoints signaling TX_SUSPEND */
 		endpoints = ipa_read_reg_n(IPA_IRQ_SUSPEND_INFO_EE_N,
@@ -96,7 +96,7 @@ static inline bool is_uc_irq(int irq_num)
 	return interrupt == IPA_UC_IRQ_0 || interrupt == IPA_UC_IRQ_1;
 }
 
-static void ipa_process_interrupts(void)
+static void ipa_process_interrupts(struct ipa_context *ipa)
 {
 	while (true) {
 		u32 ipa_intr_mask;
@@ -126,7 +126,7 @@ static void ipa_process_interrupts(void)
 				ipa_write_reg_n(IPA_IRQ_CLR_EE_N, IPA_EE_AP,
 						imask);
 
-			ipa_handle_interrupt(i);
+			ipa_handle_interrupt(ipa, i);
 
 			/* Clear non-uC interrupt after processing
 			 * to avoid clearing interrupt data
@@ -146,7 +146,7 @@ static void ipa_interrupt_work_func(struct work_struct *work)
 
 	ipa_clock_get(ipa);
 
-	ipa_process_interrupts();
+	ipa_process_interrupts(ipa);
 
 	ipa_clock_put(ipa);
 }
@@ -175,7 +175,7 @@ static void enable_tx_suspend_work_func(struct work_struct *work)
 	val |= BIT(ipa_irq_mapping[IPA_TX_SUSPEND_IRQ]);
 	ipa_write_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP, val);
 
-	ipa_process_interrupts();
+	ipa_process_interrupts(ipa_ctx);
 
 	ipa_clock_put(ipa_ctx);
 }
