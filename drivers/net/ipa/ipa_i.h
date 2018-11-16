@@ -22,7 +22,6 @@
 
 #define IPA_MTU				1500
 
-#define IPA_EP_COUNT_MAX		31
 #define IPA_LAN_RX_HEADER_LENGTH	0
 #define IPA_DL_CHECKSUM_LENGTH		8
 #define IPA_GENERIC_RX_POOL_SZ		192
@@ -437,7 +436,7 @@ struct ipa_context {
 	spinlock_t wakeup_lock;		/* protects updates to wakeup_count */
 	struct mutex post_init_mutex;
 
-	struct ipa_ep_context ep[IPA_EP_COUNT_MAX];
+	struct ipa_ep_context *ep;
 	struct ipa_uc_ctx *uc_ctx;
 	struct notifier_block panic_notifier;
 	bool proxy_held;
@@ -554,8 +553,8 @@ struct ipa_uc_ctx *ipa_uc_init(phys_addr_t phys_addr);
 bool ipa_uc_loaded(void);
 void ipa_uc_panic_notifier(void);
 
-int ipa_ep_count_get(struct ipa_context *ipa);
-void ipa_ep_count_clear(struct ipa_context *ipa);
+int ipa_ep_init(struct ipa_context *ipa);
+void ipa_ep_exit(struct ipa_context *ipa);
 
 int ipa_ap_suspend(struct device *dev);
 int ipa_ap_resume(struct device *dev);

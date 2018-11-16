@@ -637,20 +637,23 @@ void ipa_cfg_ep(u32 ep_id)
 	ipa_endp_status_write(ep_id);
 }
 
-int ipa_ep_count_get(struct ipa_context *ipa)
+int ipa_ep_init(struct ipa_context *ipa)
 {
-	u32 count = ipa_read_reg(IPA_ENABLED_PIPES);
+	ipa->ep_count = ipa_read_reg(IPA_ENABLED_PIPES);
+	ipa_debug("endpoint count %u\n", ipa->ep_count);
+	ipa->ep = kcalloc(ipa->ep_count, sizeof(*ipa->ep), GFP_KERNEL);
+	if (ipa->ep)
+		return 0;	/* Success */
 
-	ipa_debug("endpoint count %u\n", count);
-	if (count > IPA_EP_COUNT_MAX)
-		return -EINVAL;
-	ipa->ep_count = count;
+	ipa->ep_count = 0;
 
-	return 0;
+	return -ENOMEM;
 }
 
-void ipa_ep_count_clear(struct ipa_context *ipa)
+void ipa_ep_exit(struct ipa_context *ipa)
 {
+	kfree(ipa->ep);
+	ipa->ep = NULL;
 	ipa->ep_count = 0;
 }
 

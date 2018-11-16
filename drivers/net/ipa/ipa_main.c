@@ -1020,13 +1020,13 @@ static int ipa_pre_init(struct ipa_context *ipa)
 
 	ipa_hardware_init(ipa);
 
-	ret = ipa_ep_count_get(ipa);
+	ret = ipa_ep_init(ipa);
 	if (ret)
 		goto err_clock_put;
 
 	ret = ipa_sram_settings_get(ipa);
 	if (ret)
-		goto err_ep_count_clear;
+		goto err_ep_exit;
 
 	ipa->dp = ipa_dp_init();
 	if (!ipa->dp)
@@ -1066,8 +1066,8 @@ err_dp_exit:
 	ipa->dp = NULL;
 err_sram_settings_clear:
 	ipa_sram_settings_clear(ipa);
-err_ep_count_clear:
-	ipa_ep_count_clear(ipa);
+err_ep_exit:
+	ipa_ep_exit(ipa);
 err_clock_put:
 	ipa_clock_put(ipa);
 
@@ -1085,7 +1085,7 @@ static void ipa_pre_exit(struct ipa_context *ipa)
 	ipa_dp_exit(ipa->dp);
 	ipa->dp = NULL;
 	ipa_sram_settings_clear(ipa);
-	ipa_ep_count_clear(ipa);
+	ipa_ep_exit(ipa);
 	ipa_clock_put(ipa);
 }
 
