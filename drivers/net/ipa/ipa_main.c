@@ -605,6 +605,9 @@ static int ipa_route_init(struct ipa_context *ipa)
 	for (i = 0; i < IPA_MEM_RT_COUNT; i++)
 		*virt++ = zero_route_phys;
 
+	ipa_route_ipv4_config(ipa, ipa->route_phys, size);
+	ipa_route_ipv6_config(ipa, ipa->route_phys, size);
+
 	return 0;
 }
 
@@ -680,6 +683,9 @@ static int ipa_filter_init(struct ipa_context *ipa)
 	for (i = 0; i < ipa->filter_count; i++)
 		*virt++ = zero_filter_phys;
 
+	ipa_filter_ipv4_config(ipa, ipa->filter_phys, size);
+	ipa_filter_ipv6_config(ipa, ipa->filter_phys, size);
+
 	return 0;
 
 err_clear_filter_count:
@@ -726,7 +732,6 @@ static void ipa_irq_exit(struct ipa_context *ipa)
 
 static int ipa_ep_apps_setup(struct ipa_context *ipa)
 {
-	u32 size;
 	int ret;
 
 	/* We need to use the AP command out endpoint to perform
@@ -744,17 +749,9 @@ static int ipa_ep_apps_setup(struct ipa_context *ipa)
 	if (ret)
 		goto err_cmd_prod_teardown;
 
-	size = IPA_MEM_RT_COUNT * IPA_TABLE_ENTRY_SIZE;
-	ipa_route_ipv4_config(ipa, ipa->route_phys, size);
-	ipa_route_ipv6_config(ipa, ipa->route_phys, size);
-
 	ret = ipa_filter_init(ipa);
 	if (ret)
 		goto err_route_exit;
-
-	size = (ipa->filter_count + 1) * IPA_TABLE_ENTRY_SIZE;
-	ipa_filter_ipv4_config(ipa, ipa->filter_phys, size);
-	ipa_filter_ipv6_config(ipa, ipa->filter_phys, size);
 
 	ipa_setup_flt_hash_tuple(ipa);
 	ipa_setup_rt_hash_tuple(ipa);
