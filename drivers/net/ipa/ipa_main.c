@@ -951,10 +951,18 @@ static int ipa_post_init(struct ipa_context *ipa)
 		return ret;
 	}
 
+	ret = ipa_route_init(ipa);
+	if (ret)
+		goto err_gsi_exit;
+
+	ret = ipa_filter_init(ipa);
+	if (ret)
+		goto err_route_exit;
+
 	/* setup the AP-IPA endpoints */
 	ret = ipa_ep_apps_setup(ipa);
 	if (ret)
-		goto err_gsi_exit;
+		goto err_filter_exit;
 
 	ipa->uc_ctx = ipa_uc_init(ipa->ipa_phys);
 	if (!ipa->uc_ctx) {
@@ -988,6 +996,10 @@ err_uc_exit:
 	/* XXX ipa_uc_exit(); */
 err_ep_teardown:
 	/* XXX ipa_ep_apps_teardown(); */
+err_filter_exit:
+	ipa_filter_exit(ipa);
+err_route_exit:
+	ipa_route_exit(ipa);
 err_gsi_exit:
 	gsi_exit(ipa->gsi);
 
@@ -1005,6 +1017,8 @@ static void ipa_post_exit(struct ipa_context *ipa)
 
 	ipa_panic_notifier_unregister(ipa);
 
+	ipa_filter_exit(ipa);
+	ipa_route_exit(ipa);
 	gsi_exit(ipa->gsi);
 }
 
@@ -1027,17 +1041,9 @@ static int ipa_pre_init(struct ipa_context *ipa)
 	if (ret)
 		goto err_clock_put;
 
-	ret = ipa_route_init(ipa);
-	if (ret)
-		goto err_ep_exit;
-
-	ret = ipa_filter_init(ipa);
-	if (ret)
-		goto err_route_exit;
-
 	ret = ipa_sram_settings_get(ipa);
 	if (ret)
-		goto err_filter_exit;
+		goto err_ep_exit;
 
 	ret = ipa_dp_init(ipa);
 	if (ret)
@@ -1076,10 +1082,6 @@ err_dp_exit:
 	ipa_dp_exit(ipa);
 err_sram_settings_clear:
 	ipa_sram_settings_clear(ipa);
-err_filter_exit:
-	ipa_filter_exit(ipa);
-err_route_exit:
-	ipa_route_exit(ipa);
 err_ep_exit:
 	ipa_ep_exit(ipa);
 err_clock_put:
@@ -1100,8 +1102,6 @@ static void ipa_pre_exit(struct ipa_context *ipa)
 	mutex_destroy(&ipa->transport_pm.transport_pm_mutex);
 	ipa_dp_exit(ipa);
 	ipa_sram_settings_clear(ipa);
-	ipa_filter_exit(ipa);
-	ipa_route_exit(ipa);
 	ipa_ep_exit(ipa);
 	ipa_clock_put(ipa);
 }
