@@ -714,14 +714,12 @@ static int ipa_ep_apps_setup(struct ipa_context *ipa)
 	u32 size;
 	int ret;
 
-	/* CMD OUT (AP->IPA) */
+	/* We need to use the AP command out endpoint to perform
+	 * initialization, so we set that up first.
+	 */
 	ret = ipa_ep_apps_cmd_prod_setup(ipa);
 	if (ret < 0)
 		return ret;
-
-	ret = ipa_smem_init(ipa);
-	if (ret)
-		goto err_cmd_prod_teardown;
 
 	ipa_init_hdr(ipa);
 
@@ -748,14 +746,12 @@ static int ipa_ep_apps_setup(struct ipa_context *ipa)
 	 */
 	ret = ipa_ep_apps_lan_cons_setup(ipa);
 	if (ret < 0)
-		goto err_smem_exit;
+		goto err_cmd_prod_teardown;
 
 	ipa_cfg_default_route(ipa, IPA_CLIENT_APPS_LAN_CONS);
 
 	return 0;
 
-err_smem_exit:
-	ipa_smem_exit(ipa);
 err_cmd_prod_teardown:
 	ipa_ep_teardown(ipa, ipa->cmd_prod_ep_id);
 	ipa->cmd_prod_ep_id = IPA_EP_ID_BAD;
@@ -767,8 +763,6 @@ static void ipa_ep_apps_teardown(struct ipa_context *ipa)
 {
 	ipa_ep_teardown(ipa, ipa->lan_cons_ep_id);
 	ipa->lan_cons_ep_id = IPA_EP_ID_BAD;
-
-	ipa_smem_exit(ipa);
 
 	ipa_ep_teardown(ipa, ipa->cmd_prod_ep_id);
 	ipa->cmd_prod_ep_id = IPA_EP_ID_BAD;
@@ -1001,10 +995,14 @@ static int ipa_post_init(struct ipa_context *ipa)
 	if (ret)
 		goto err_route_exit;
 
+	ret = ipa_smem_init(ipa);
+	if (ret)
+		goto err_filter_exit;
+
 	/* setup the AP-IPA endpoints */
 	ret = ipa_ep_apps_setup(ipa);
 	if (ret)
-		goto err_filter_exit;
+		goto err_smem_exit;
 
 	ipa->uc_ctx = ipa_uc_init(ipa->ipa_phys);
 	if (!ipa->uc_ctx) {
@@ -1038,6 +1036,8 @@ err_uc_exit:
 	/* XXX ipa_uc_exit(); */
 err_ep_teardown:
 	ipa_ep_apps_teardown(ipa);
+err_smem_exit:
+	ipa_smem_exit(ipa);
 err_filter_exit:
 	ipa_filter_exit(ipa);
 err_route_exit:
@@ -1060,6 +1060,7 @@ static void ipa_post_exit(struct ipa_context *ipa)
 	ipa_panic_notifier_unregister(ipa);
 
 	ipa_ep_apps_teardown(ipa);
+	ipa_smem_exit(ipa);
 	ipa_filter_exit(ipa);
 	ipa_route_exit(ipa);
 	gsi_exit(ipa->gsi);
