@@ -224,7 +224,7 @@ static inline bool ipa_ap_consumer(enum ipa_client_type client)
  * Used to register handlers for IPA interrupts.
  */
 enum ipa_irq_type {
-	IPA_INVALID_IRQ = 0,
+	IPA_INVALID_IRQ,
 	IPA_UC_IRQ_0,
 	IPA_UC_IRQ_1,
 	IPA_TX_SUSPEND_IRQ,
