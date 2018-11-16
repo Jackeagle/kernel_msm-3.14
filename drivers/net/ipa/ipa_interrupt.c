@@ -174,7 +174,7 @@ static void enable_tx_suspend_work_func(struct work_struct *work)
 }
 
 /* Register SUSPEND_IRQ_EN_EE_N_ADDR for L2 interrupt. */
-static void tx_suspend_enable(void)
+static void tx_suspend_enable(struct ipa_context *ipa)
 {
 	enum ipa_client_type client;
 	u32 val = ~0;
@@ -188,7 +188,7 @@ static void tx_suspend_enable(void)
 }
 
 /* Unregister SUSPEND_IRQ_EN_EE_N_ADDR for L2 interrupt. */
-static void tx_suspend_disable(void)
+static void tx_suspend_disable(struct ipa_context *ipa)
 {
 	ipa_write_reg_n(IPA_SUSPEND_IRQ_EN_EE_N, IPA_EE_AP, 0);
 }
@@ -219,7 +219,7 @@ void ipa_add_interrupt_handler(struct ipa_context *ipa,
 	ipa_write_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP, val);
 
 	if (interrupt == IPA_TX_SUSPEND_IRQ)
-		tx_suspend_enable();
+		tx_suspend_enable(ipa);
 }
 
 /**
@@ -240,7 +240,7 @@ void ipa_remove_interrupt_handler(struct ipa_context *ipa,
 	intr_info->interrupt = IPA_INVALID_IRQ;
 
 	if (interrupt == IPA_TX_SUSPEND_IRQ)
-		tx_suspend_disable();
+		tx_suspend_disable(ipa);
 
 	/* Disable the interrupt */
 	val = ipa_read_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP);
