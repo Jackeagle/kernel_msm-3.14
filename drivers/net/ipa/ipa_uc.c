@@ -298,16 +298,16 @@ struct ipa_uc_ctx *ipa_uc_init(phys_addr_t phys_addr)
 	if (!ipa_uc_ctx.shared)
 		return NULL;
 
-	ipa_add_interrupt_handler(IPA_UC_IRQ_0, ipa_uc_event_handler);
-	ipa_add_interrupt_handler(IPA_UC_IRQ_1, ipa_uc_response_hdlr);
+	ipa_add_interrupt_handler(ipa_ctx, IPA_UC_IRQ_0, ipa_uc_event_handler);
+	ipa_add_interrupt_handler(ipa_ctx, IPA_UC_IRQ_1, ipa_uc_response_hdlr);
 
 	return &ipa_uc_ctx;
 }
 
 void ipa_uc_exit(struct ipa_uc_ctx *uc_ctx)
 {
-	ipa_remove_interrupt_handler(IPA_UC_IRQ_1);
-	ipa_remove_interrupt_handler(IPA_UC_IRQ_0);
+	ipa_remove_interrupt_handler(ipa_ctx, IPA_UC_IRQ_1);
+	ipa_remove_interrupt_handler(ipa_ctx, IPA_UC_IRQ_0);
 	iounmap(ipa_uc_ctx.shared);
 	ipa_uc_ctx.shared = NULL;
 }

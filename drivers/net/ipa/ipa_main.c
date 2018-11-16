@@ -1115,7 +1115,7 @@ static int ipa_pre_init(struct ipa_context *ipa)
 	if (ret)
 		goto err_dp_exit;
 
-	ipa_add_interrupt_handler(IPA_TX_SUSPEND_IRQ, ipa_suspend_handler);
+	ipa_add_interrupt_handler(ipa, IPA_TX_SUSPEND_IRQ, ipa_suspend_handler);
 
 	return 0;
 
@@ -1135,7 +1135,7 @@ err_clock_put:
 
 static void ipa_pre_exit(struct ipa_context *ipa)
 {
-	ipa_remove_interrupt_handler(IPA_TX_SUSPEND_IRQ);
+	ipa_remove_interrupt_handler(ipa, IPA_TX_SUSPEND_IRQ);
 	ipa_interrupt_exit(ipa);
 	mutex_destroy(&ipa->post_init_mutex);
 	wakeup_source_trash(&ipa->wakeup);

@@ -242,6 +242,13 @@ enum ipa_irq_type {
 typedef void (*ipa_irq_handler_t)(enum ipa_irq_type interrupt,
 				  u32 interrupt_data);
 
+#define IPA_INTERRUPT_MAX	32	/* # bits in IPA interrupt mask */
+
+struct ipa_interrupt_info {
+	ipa_irq_handler_t handler;
+	enum ipa_irq_type interrupt;
+};
+
 /**
  * struct ipa_tx_suspend_irq_data - Interrupt data for IPA_TX_SUSPEND_IRQ
  * @endpoints:	Bitmask of endpoints which cause IPA_TX_SUSPEND_IRQ interrupt
@@ -423,6 +430,7 @@ struct ipa_context {
 	struct work_struct interrupt_work;
 	struct delayed_work tx_suspend_work;	/* Hardware bug workaround */
 	struct workqueue_struct *interrupt_wq;
+	struct ipa_interrupt_info interrupt_info[IPA_INTERRUPT_MAX];
 	struct gsi *gsi;
 	u32 cmd_prod_ep_id;
 	u32 lan_cons_ep_id;
@@ -516,10 +524,12 @@ void ipa_ep_teardown(struct ipa_context *ipa, u32 ep_id);
 
 void ipa_rx_switch_to_poll_mode(struct ipa_sys_context *sys);
 
-void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
+void ipa_add_interrupt_handler(struct ipa_context *ipa,
+			       enum ipa_irq_type interrupt,
 			       ipa_irq_handler_t handler);
 
-void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt);
+void ipa_remove_interrupt_handler(struct ipa_context *ipa,
+				  enum ipa_irq_type interrupt);
 
 u32 ipa_filter_bitmap_init(void);
 

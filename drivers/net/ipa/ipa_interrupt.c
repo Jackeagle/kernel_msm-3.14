@@ -30,14 +30,6 @@
 #include "ipa_clock.h"
 #include "ipa_reg.h"
 
-struct ipa_interrupt_info {
-	ipa_irq_handler_t handler;
-	enum ipa_irq_type interrupt;
-};
-
-#define IPA_IRQ_NUM_MAX	32	/* Number of IRQ bits in IPA interrupt mask */
-static struct ipa_interrupt_info ipa_interrupt_info[IPA_IRQ_NUM_MAX];
-
 static const int ipa_irq_mapping[] = {
 	[IPA_INVALID_IRQ]		= -1,
 	[IPA_UC_IRQ_0]			= 2,
@@ -67,9 +59,10 @@ static void ipa_tx_suspend_interrupt_wa(struct ipa_context *ipa)
 
 static void ipa_handle_interrupt(struct ipa_context *ipa, int irq_num)
 {
-	struct ipa_interrupt_info *intr_info = &ipa_interrupt_info[irq_num];
+	struct ipa_interrupt_info *intr_info;
 	u32 endpoints = 0;	/* Only TX_SUSPEND uses its interrupt_data */
 
+	intr_info = &ipa->interrupt_info[irq_num];
 	if (!intr_info->handler)
 		return;
 
@@ -86,9 +79,9 @@ static void ipa_handle_interrupt(struct ipa_context *ipa, int irq_num)
 	intr_info->handler(intr_info->interrupt, endpoints);
 }
 
-static inline bool is_uc_irq(int irq_num)
+static inline bool is_uc_irq(struct ipa_context *ipa, int irq_num)
 {
-	enum ipa_irq_type interrupt = ipa_interrupt_info[irq_num].interrupt;
+	enum ipa_irq_type interrupt = ipa->interrupt_info[irq_num].interrupt;
 
 	return interrupt == IPA_UC_IRQ_0 || interrupt == IPA_UC_IRQ_1;
 }
@@ -112,7 +105,7 @@ static void ipa_process_interrupts(struct ipa_context *ipa)
 
 		do {
 			int i = __ffs(ipa_intr_mask);
-			bool uc_irq = is_uc_irq(i);
+			bool uc_irq = is_uc_irq(ipa, i);
 
 			imask = BIT(i);
 
@@ -167,7 +160,7 @@ static void enable_tx_suspend_work_func(struct work_struct *work)
 	struct ipa_context *ipa;
 	u32 val;
 
-	ipa = container_of(work, struct ipa_context, tx_suspend_work);
+	ipa = container_of(work, struct ipa_context, tx_suspend_work.work);
 
 	ipa_clock_get(ipa);
 
@@ -208,14 +201,15 @@ static void tx_suspend_disable(void)
  * Adds handler to an IPA interrupt type and enable it.  IPA interrupt
  * handlers are allowed to block (they aren't run in interrupt context).
  */
-void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
+void ipa_add_interrupt_handler(struct ipa_context *ipa,
+			       enum ipa_irq_type interrupt,
 			       ipa_irq_handler_t handler)
 {
 	int irq_num = ipa_irq_mapping[interrupt];
 	struct ipa_interrupt_info *intr_info;
 	u32 val;
 
-	intr_info = &ipa_interrupt_info[irq_num];
+	intr_info = &ipa->interrupt_info[irq_num];
 	intr_info->handler = handler;
 	intr_info->interrupt = interrupt;
 
@@ -234,13 +228,14 @@ void ipa_add_interrupt_handler(enum ipa_irq_type interrupt,
  *
  * Remove an IPA interrupt handler and disable it.
  */
-void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
+void ipa_remove_interrupt_handler(struct ipa_context *ipa,
+				  enum ipa_irq_type interrupt)
 {
 	int irq_num = ipa_irq_mapping[interrupt];
 	struct ipa_interrupt_info *intr_info;
 	u32 val;
 
-	intr_info = &ipa_interrupt_info[irq_num];
+	intr_info = &ipa->interrupt_info[irq_num];
 	intr_info->handler = NULL;
 	intr_info->interrupt = IPA_INVALID_IRQ;
 
@@ -311,7 +306,7 @@ void ipa_suspend_active_aggr_wa(u32 ep_id)
 	int irq_num;
 
 	irq_num = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
-	intr_info = &ipa_interrupt_info[irq_num];
+	intr_info = &ipa_ctx->interrupt_info[irq_num];
 	clnt_mask = BIT(ep_id);
 
 	/* Nothing to do if the endpoint doesn't have aggregation open */
