@@ -428,7 +428,8 @@ struct ipa_context {
 	u32 smem_size;
 	u16 smem_offset;
 
-	struct ipa_dp *dp;
+	struct kmem_cache *tx_pkt_wrapper_cache;
+	struct kmem_cache *rx_pkt_wrapper_cache;
 	struct ipa_transport_pm transport_pm;
 	struct ipa_dma_task_info dma_task_info;
 	u32 wakeup_count;
@@ -578,7 +579,7 @@ void ipa_gsi_irq_tx_notify_cb(void *xfer_data);
 
 bool ipa_ep_polling(struct ipa_ep_context *ep);
 
-struct ipa_dp *ipa_dp_init(void);
-void ipa_dp_exit(struct ipa_dp *dp);
+int ipa_dp_init(struct ipa_context *ipa);
+void ipa_dp_exit(struct ipa_context *ipa);
 
 #endif /* _IPA_I_H_ */

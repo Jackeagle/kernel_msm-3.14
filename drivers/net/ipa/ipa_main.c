@@ -1028,8 +1028,8 @@ static int ipa_pre_init(struct ipa_context *ipa)
 	if (ret)
 		goto err_ep_exit;
 
-	ipa->dp = ipa_dp_init();
-	if (!ipa->dp)
+	ret = ipa_dp_init(ipa);
+	if (ret)
 		goto err_sram_settings_clear;
 
 	/* allocate memory for DMA_TASK workaround */
@@ -1062,8 +1062,7 @@ static int ipa_pre_init(struct ipa_context *ipa)
 	return 0;
 
 err_dp_exit:
-	ipa_dp_exit(ipa->dp);
-	ipa->dp = NULL;
+	ipa_dp_exit(ipa);
 err_sram_settings_clear:
 	ipa_sram_settings_clear(ipa);
 err_ep_exit:
@@ -1082,8 +1081,7 @@ static void ipa_pre_exit(struct ipa_context *ipa)
 	wakeup_source_trash(&ipa->wakeup);
 	ipa_gsi_dma_task_free(ipa);
 	mutex_destroy(&ipa->transport_pm.transport_pm_mutex);
-	ipa_dp_exit(ipa->dp);
-	ipa->dp = NULL;
+	ipa_dp_exit(ipa);
 	ipa_sram_settings_clear(ipa);
 	ipa_ep_exit(ipa);
 	ipa_clock_put(ipa);

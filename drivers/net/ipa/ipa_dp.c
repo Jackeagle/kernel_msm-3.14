@@ -151,16 +151,6 @@ struct ipa_sys_context {
 };
 
 /**
- * struct ipa_dp - IPA data path information
- * @tx_pkt_wrapper_cache:	Tx packets cache
- * @rx_pkt_wrapper_cache:	Rx packets cache
- */
-struct ipa_dp {
-	struct kmem_cache *tx_pkt_wrapper_cache;
-	struct kmem_cache *rx_pkt_wrapper_cache;
-};
-
-/**
  * struct ipa_tag_completion - Reference counted completion object
  * @comp:	Completion when last reference is dropped
  * @cnt:	Reference count
@@ -225,7 +215,7 @@ static void ipa_tx_complete(struct ipa_tx_pkt_wrapper *tx_pkt)
 	if (tx_pkt->callback)
 		tx_pkt->callback(tx_pkt->user1, tx_pkt->user2);
 
-	kmem_cache_free(ipa_ctx->dp->tx_pkt_wrapper_cache, tx_pkt);
+	kmem_cache_free(ipa_ctx->tx_pkt_wrapper_cache, tx_pkt);
 }
 
 static void
@@ -342,7 +332,7 @@ static bool ipa_send_nop(struct ipa_sys_context *sys)
 	struct ipa_tx_pkt_wrapper *nop_pkt;
 	u32 channel_id;
 
-	nop_pkt = kmem_cache_zalloc(ipa_ctx->dp->tx_pkt_wrapper_cache,
+	nop_pkt = kmem_cache_zalloc(ipa_ctx->tx_pkt_wrapper_cache,
 				    GFP_KERNEL);
 	if (!nop_pkt)
 		return false;
@@ -369,7 +359,7 @@ static bool ipa_send_nop(struct ipa_sys_context *sys)
 	list_del(&nop_pkt->link);
 	spin_unlock_bh(&sys->spinlock);
 
-	kmem_cache_free(ipa_ctx->dp->tx_pkt_wrapper_cache, nop_pkt);
+	kmem_cache_free(ipa_ctx->tx_pkt_wrapper_cache, nop_pkt);
 
 	return false;
 }
@@ -475,7 +465,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 	for (i = 0; i < num_desc; i++) {
 		dma_addr_t phys;
 
-		tx_pkt = kmem_cache_zalloc(ipa_ctx->dp->tx_pkt_wrapper_cache,
+		tx_pkt = kmem_cache_zalloc(ipa_ctx->tx_pkt_wrapper_cache,
 					   GFP_ATOMIC);
 		if (!tx_pkt)
 			goto err_unwind;
@@ -493,7 +483,7 @@ ipa_send(struct ipa_sys_context *sys, u32 num_desc, struct ipa_desc *desc)
 					      DMA_TO_DEVICE);
 		if (dma_mapping_error(dev, phys)) {
 			ipa_err("dma mapping error on descriptor\n");
-			kmem_cache_free(ipa_ctx->dp->tx_pkt_wrapper_cache,
+			kmem_cache_free(ipa_ctx->tx_pkt_wrapper_cache,
 					tx_pkt);
 			goto err_unwind;
 		}
@@ -905,7 +895,7 @@ static void ipa_replenish_rx_cache(struct ipa_sys_context *sys)
 		void *ptr;
 		int ret;
 
-		rx_pkt = kmem_cache_zalloc(ipa_ctx->dp->rx_pkt_wrapper_cache,
+		rx_pkt = kmem_cache_zalloc(ipa_ctx->rx_pkt_wrapper_cache,
 					   flag);
 		if (!rx_pkt)
 			goto fail_kmem_cache_alloc;
@@ -944,7 +934,7 @@ fail_provide_rx_buffer:
 fail_dma_mapping:
 	dev_kfree_skb_any(rx_pkt->skb);
 fail_skb_alloc:
-	kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rx_pkt);
+	kmem_cache_free(ipa_ctx->rx_pkt_wrapper_cache, rx_pkt);
 fail_kmem_cache_alloc:
 	if (rx_len_cached - sys->rx.len_pending_xfer == 0)
 		queue_delayed_work(sys->wq, &sys->rx.replenish_work,
@@ -974,7 +964,7 @@ static void ipa_cleanup_rx(struct ipa_sys_context *sys)
 		dma_unmap_single(dev, rx_pkt->dma_addr, sys->rx.buff_sz,
 				 DMA_FROM_DEVICE);
 		dev_kfree_skb_any(rx_pkt->skb);
-		kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rx_pkt);
+		kmem_cache_free(ipa_ctx->rx_pkt_wrapper_cache, rx_pkt);
 	}
 }
 
@@ -1416,7 +1406,7 @@ static void ipa_rx_common(struct ipa_sys_context *sys, u32 size)
 	rx_skb->truesize = size + sizeof(struct sk_buff);
 
 	sys->rx.pyld_hdlr(rx_skb, sys);
-	kmem_cache_free(ipa_ctx->dp->rx_pkt_wrapper_cache, rx_pkt);
+	kmem_cache_free(ipa_ctx->rx_pkt_wrapper_cache, rx_pkt);
 	ipa_replenish_rx_cache(sys);
 }
 
@@ -1959,40 +1949,33 @@ bool ipa_ep_polling(struct ipa_ep_context *ep)
 	return !!atomic_read(&ep->sys->rx.curr_polling_state);
 }
 
-struct ipa_dp *ipa_dp_init(void)
+int ipa_dp_init(struct ipa_context *ipa)
 {
 	struct kmem_cache *cache;
-	struct ipa_dp *dp;
-
-	dp = kzalloc(sizeof(*dp), GFP_KERNEL);
-	if (!dp)
-		return NULL;
 
 	cache = kmem_cache_create("IPA_TX_PKT_WRAPPER",
 				  sizeof(struct ipa_tx_pkt_wrapper),
 				  0, 0, NULL);
-	if (!cache) {
-		kfree(dp);
-		return NULL;
-	}
-	dp->tx_pkt_wrapper_cache = cache;
+	if (!cache)
+		return -ENOMEM;
+	ipa->tx_pkt_wrapper_cache = cache;
 
 	cache = kmem_cache_create("IPA_RX_PKT_WRAPPER",
 				  sizeof(struct ipa_rx_pkt_wrapper),
 				  0, 0, NULL);
 	if (!cache) {
-		kmem_cache_destroy(dp->tx_pkt_wrapper_cache);
-		kfree(dp);
-		return NULL;
+		kmem_cache_destroy(ipa->tx_pkt_wrapper_cache);
+		return -ENOMEM;
 	}
-	dp->rx_pkt_wrapper_cache = cache;
+	ipa->rx_pkt_wrapper_cache = cache;
 
-	return dp;
+	return 0;
 }
 
-void ipa_dp_exit(struct ipa_dp *dp)
+void ipa_dp_exit(struct ipa_context *ipa)
 {
-	kmem_cache_destroy(dp->rx_pkt_wrapper_cache);
-	kmem_cache_destroy(dp->tx_pkt_wrapper_cache);
-	kfree(dp);
+	kmem_cache_destroy(ipa->rx_pkt_wrapper_cache);
+	ipa->rx_pkt_wrapper_cache = NULL;
+	kmem_cache_destroy(ipa->tx_pkt_wrapper_cache);
+	ipa->tx_pkt_wrapper_cache = NULL;
 }
