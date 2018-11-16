@@ -215,6 +215,36 @@ static __always_inline void sram_set_canaries(u32 *sram_mmio, u32 offset)
 	*--sram_mmio = IPA_MEM_CANARY_VAL;
 }
 
+/** ipa_sram_settings_get() - Read SRAM settings from HW
+ *
+ * Returns:	None
+ */
+static int ipa_sram_settings_get(struct ipa_context *ipa)
+{
+	struct ipa_reg_shared_mem_size mem_size;
+	u32 size;
+
+	ipa_read_reg_fields(IPA_SHARED_MEM_SIZE, &mem_size);
+
+	/* The fields in the register are in 8 byte units */
+	size = mem_size.shared_mem_size * 8;
+	ipa_debug("sram size 0x%x bytes\n", size);
+	if (size < IPA_MEM_END_OFST)
+		return -ENOMEM;
+	ipa->smem_size = size;
+
+	ipa->smem_offset = mem_size.shared_mem_baddr * 8;
+	ipa_debug("sram offset 0x%x bytes\n", ipa->smem_offset);
+
+	return 0;
+}
+
+static void ipa_sram_settings_clear(struct ipa_context *ipa)
+{
+	ipa->smem_offset = 0;
+	ipa->smem_size = 0;
+}
+
 /**
  * ipa_smem_init() - Initialize IPA shared memory
  *

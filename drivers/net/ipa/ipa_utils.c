@@ -427,36 +427,6 @@ enum ipa_seq_type ipa_endp_seq_type(u32 ep_id)
 	return ipa_ep_configuration[ipa_ctx->ep[ep_id].client].seq_type;
 }
 
-/** ipa_sram_settings_get() - Read SRAM settings from HW
- *
- * Returns:	None
- */
-int ipa_sram_settings_get(struct ipa_context *ipa)
-{
-	struct ipa_reg_shared_mem_size mem_size;
-	u32 size;
-
-	ipa_read_reg_fields(IPA_SHARED_MEM_SIZE, &mem_size);
-
-	/* The fields in the register are in 8 byte units */
-	size = mem_size.shared_mem_size * 8;
-	ipa_debug("sram size 0x%x bytes\n", size);
-	if (size < IPA_MEM_END_OFST)
-		return -ENOMEM;
-	ipa->smem_size = size;
-
-	ipa->smem_offset = mem_size.shared_mem_baddr * 8;
-	ipa_debug("sram offset 0x%x bytes\n", ipa->smem_offset);
-
-	return 0;
-}
-
-void ipa_sram_settings_clear(struct ipa_context *ipa)
-{
-	ipa->smem_offset = 0;
-	ipa->smem_size = 0;
-}
-
 /** ipa_hardware_init() - Primitive hardware initialization */
 void ipa_hardware_init(struct ipa_context *ipa)
 {
