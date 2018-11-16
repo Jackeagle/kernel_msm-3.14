@@ -1016,6 +1016,9 @@ static int ipa_pre_init(struct ipa_context *ipa)
 {
 	int ret;
 
+	ipa->cmd_prod_ep_id = IPA_EP_ID_BAD;
+	ipa->lan_cons_ep_id = IPA_EP_ID_BAD;
+
 	ipa_clock_get(ipa);
 
 	ipa_hardware_init(ipa);
@@ -1069,6 +1072,8 @@ err_ep_exit:
 	ipa_ep_exit(ipa);
 err_clock_put:
 	ipa_clock_put(ipa);
+	ipa->lan_cons_ep_id = 0;
+	ipa->cmd_prod_ep_id = 0;
 
 	return ret;
 }
@@ -1315,9 +1320,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_filter_exit;
 
-	ipa->cmd_prod_ep_id = IPA_EP_ID_BAD;
-	ipa->lan_cons_ep_id = IPA_EP_ID_BAD;
-
 	/* Proceed to real initialization */
 	ret = ipa_pre_init(ipa);
 	if (ret)
@@ -1340,8 +1342,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 
 	ipa_pre_exit(ipa);
 err_clear_ep_ids:
-	ipa->lan_cons_ep_id = 0;
-	ipa->cmd_prod_ep_id = 0;
 	ipa_irq_exit(ipa);
 err_filter_exit:
 	ipa_filter_exit(ipa);
