@@ -1128,7 +1128,7 @@ static int ipa_pre_init(struct ipa_context *ipa)
 	/* Assign resource limitation to each group */
 	ipa_set_resource_groups_min_max_limits();
 
-	ret = ipa_interrupts_init(ipa);
+	ret = ipa_interrupt_init(ipa);
 	if (ret)
 		goto err_dp_exit;
 
@@ -1153,7 +1153,7 @@ err_clock_put:
 static void ipa_pre_exit(struct ipa_context *ipa)
 {
 	ipa_remove_interrupt_handler(IPA_TX_SUSPEND_IRQ);
-	ipa_interrupts_exit(ipa);
+	ipa_interrupt_exit(ipa);
 	mutex_destroy(&ipa->post_init_mutex);
 	wakeup_source_trash(&ipa->wakeup);
 	ipa_gsi_dma_task_free(ipa);

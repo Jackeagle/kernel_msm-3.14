@@ -539,8 +539,8 @@ u32 ipa_aggr_byte_limit_buf_size(u32 byte_limit);
 void ipa_cfg_default_route(struct ipa_context *ipa,
 			   enum ipa_client_type client);
 
-int ipa_interrupts_init(struct ipa_context *ipa);
-void ipa_interrupts_exit(struct ipa_context *ipa);
+int ipa_interrupt_init(struct ipa_context *ipa);
+void ipa_interrupt_exit(struct ipa_context *ipa);
 
 void ipa_suspend_active_aggr_wa(u32 ep_id);
 void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data);

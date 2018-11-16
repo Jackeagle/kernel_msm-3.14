@@ -256,7 +256,7 @@ void ipa_remove_interrupt_handler(enum ipa_irq_type interrupt)
 /**
  * ipa_interrupts_init() - Initialize the IPA interrupts framework
  */
-int ipa_interrupts_init(struct ipa_context *ipa)
+int ipa_interrupt_init(struct ipa_context *ipa)
 {
 	struct device *dev = &ipa->pdev->dev;
 	int ret;
@@ -276,7 +276,7 @@ int ipa_interrupts_init(struct ipa_context *ipa)
 	return -ENOMEM;
 }
 
-void ipa_interrupts_exit(struct ipa_context *ipa)
+void ipa_interrupt_exit(struct ipa_context *ipa)
 {
 	struct device *dev = &ipa->pdev->dev;
 
