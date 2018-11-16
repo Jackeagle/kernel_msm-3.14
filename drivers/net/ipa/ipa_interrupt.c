@@ -48,10 +48,6 @@ static const int ipa_irq_mapping[] = {
 	[IPA_TX_SUSPEND_IRQ]		= 14,
 };
 
-/* IPA interrupt handlers are called in contexts that can block */
-static void ipa_interrupt_work_func(struct work_struct *work);
-static DECLARE_WORK(ipa_interrupt_work, ipa_interrupt_work_func);
-
 /* Workaround disables TX_SUSPEND interrupt for this long */
 #define DISABLE_TX_SUSPEND_INTR_DELAY	msecs_to_jiffies(5)
 
@@ -144,11 +140,15 @@ static void ipa_process_interrupts(void)
 
 static void ipa_interrupt_work_func(struct work_struct *work)
 {
-	ipa_clock_get(ipa_ctx);
+	struct ipa_context *ipa;
+
+	ipa = container_of(work, struct ipa_context, interrupt_work);
+
+	ipa_clock_get(ipa);
 
 	ipa_process_interrupts();
 
-	ipa_clock_put(ipa_ctx);
+	ipa_clock_put(ipa);
 }
 
 static irqreturn_t ipa_isr(int irq, void *dev_id)
@@ -156,7 +156,7 @@ static irqreturn_t ipa_isr(int irq, void *dev_id)
 	struct ipa_context *ipa = dev_id;
 
 	/* Schedule handling (if not already scheduled) */
-	queue_work(ipa->interrupt_wq, &ipa_interrupt_work);
+	queue_work(ipa->interrupt_wq, &ipa->interrupt_work);
 
 	return IRQ_HANDLED;
 }
@@ -269,6 +269,7 @@ int ipa_interrupt_init(struct ipa_context *ipa)
 	if (ret)
 		goto err_clear_irq;
 
+	INIT_WORK(&ipa->interrupt_work, ipa_interrupt_work_func);
 	ipa->interrupt_wq = alloc_ordered_workqueue("ipa_interrupt_wq", 0);
 	if (ipa->interrupt_wq)
 		return 0;	/* Success */
@@ -285,6 +286,8 @@ void ipa_interrupt_exit(struct ipa_context *ipa)
 {
 	free_irq(ipa->irq, ipa);
 	ipa->irq = 0;
+	cancel_work_sync(&ipa->interrupt_work);
+	memset(&ipa->interrupt_work, 0, sizeof(ipa->interrupt_work));
 	destroy_workqueue(ipa->interrupt_wq);
 	ipa->interrupt_wq = NULL;
 }

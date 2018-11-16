@@ -420,6 +420,8 @@ struct ipa_context {
 	void *filter_virt;
 	dma_addr_t filter_phys;
 	u32 irq;
+	struct work_struct interrupt_work;
+	struct workqueue_struct *interrupt_wq;
 	struct gsi *gsi;
 	u32 cmd_prod_ep_id;
 	u32 lan_cons_ep_id;
@@ -436,7 +438,6 @@ struct ipa_context {
 	struct wakeup_source wakeup;
 	spinlock_t wakeup_lock;		/* protects updates to wakeup_count */
 	struct mutex post_init_mutex;
-	struct workqueue_struct *interrupt_wq;
 
 	struct ipa_ep_context *ep;
 	struct ipa_uc_ctx *uc_ctx;
