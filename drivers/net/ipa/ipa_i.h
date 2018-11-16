@@ -419,7 +419,7 @@ struct ipa_context {
 	u32 filter_count;	/* Number of set bits in filter_bitmap */
 	void *filter_virt;
 	dma_addr_t filter_phys;
-	u32 ipa_irq;
+	u32 irq;
 	struct gsi *gsi;
 	u32 cmd_prod_ep_id;
 	u32 lan_cons_ep_id;

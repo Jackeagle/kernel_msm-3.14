@@ -717,23 +717,6 @@ static void ipa_filter_exit(struct ipa_context *ipa)
 	ipa->filter_bitmap = 0;
 }
 
-static int ipa_irq_init(struct ipa_context *ipa)
-{
-	int ret;
-
-	ret = platform_get_irq_byname(ipa->pdev, "ipa");
-	if (ret < 0)
-		return ret;
-	ipa->ipa_irq = ret;
-
-	return 0;
-}
-
-static void ipa_irq_exit(struct ipa_context *ipa)
-{
-	ipa->ipa_irq = 0;
-}
-
 static int ipa_ep_apps_setup(struct ipa_context *ipa)
 {
 	int ret;
@@ -1380,14 +1363,11 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_clock_exit;
 
-	ret = ipa_irq_init(ipa);
-	if (ret)
-		goto err_mem_exit;
 
 	/* Proceed to real initialization */
 	ret = ipa_pre_init(ipa);
 	if (ret)
-		goto err_clear_ep_ids;
+		goto err_mem_exit;
 
 	/* If the modem is not verifying and loading firmware we need to
 	 * get it loaded ourselves.  Only then can we proceed with the
@@ -1405,8 +1385,6 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 		return 0;	/* Success */
 
 	ipa_pre_exit(ipa);
-err_clear_ep_ids:
-	ipa_irq_exit(ipa);
 err_mem_exit:
 	ipa_mem_exit(ipa);
 err_clock_exit:
@@ -1450,7 +1428,6 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 	/* XXX ipa_gsi_exit(ipa) */
 	ipa->gsi = NULL;
 	ipa_mem_exit(ipa);
-	ipa_irq_exit(ipa);
 	ipa_clock_exit(ipa);
 	ipa_smp2p_exit(ipa);
 	ipa_destroy(ipa);

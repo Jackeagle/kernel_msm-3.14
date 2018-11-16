@@ -260,25 +260,31 @@ int ipa_interrupt_init(struct ipa_context *ipa)
 {
 	int ret;
 
-	ret = request_irq(ipa->ipa_irq, ipa_isr, IRQF_TRIGGER_RISING,
-			  "ipa", ipa);
-	if (ret)
+	ret = platform_get_irq_byname(ipa->pdev, "ipa");
+	if (ret < 0)
 		return ret;
+	ipa->irq = ret;
+
+	ret = request_irq(ipa->irq, ipa_isr, IRQF_TRIGGER_RISING, "ipa", ipa);
+	if (ret)
+		goto err_clear_irq;
 
 	ipa->interrupt_wq = alloc_ordered_workqueue("ipa_interrupt_wq", 0);
 	if (ipa->interrupt_wq)
 		return 0;	/* Success */
+	ret = -ENOMEM;
 
-	free_irq(ipa->ipa_irq, ipa);
-	ipa->ipa_irq = 0;
+	free_irq(ipa->irq, ipa);
+err_clear_irq:
+	ipa->irq = 0;
 
-	return -ENOMEM;
+	return ret;
 }
 
 void ipa_interrupt_exit(struct ipa_context *ipa)
 {
-	free_irq(ipa->ipa_irq, ipa);
-	ipa->ipa_irq = 0;
+	free_irq(ipa->irq, ipa);
+	ipa->irq = 0;
 	destroy_workqueue(ipa->interrupt_wq);
 	ipa->interrupt_wq = NULL;
 }
