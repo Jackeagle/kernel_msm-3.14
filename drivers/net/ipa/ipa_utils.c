@@ -687,8 +687,10 @@ void ipa_set_resource_groups_min_max_limits(void)
 	ipa_dst_rsrc_grp_init(IPA_RSRC_GRP_TYPE_DST_DPS_DMARS);
 }
 
-static void ipa_gsi_poll_after_suspend(struct ipa_ep_context *ep)
+static void ipa_gsi_poll_after_suspend(struct ipa_context *ipa, u32 ep_id)
 {
+	struct ipa_ep_context *ep = &ipa_ctx->ep[ep_id];
+
 	ipa_rx_switch_to_poll_mode(ep->sys);
 }
 
@@ -709,7 +711,7 @@ ipa_ep_cons_suspend(struct ipa_context *ipa, enum ipa_client_type client)
 	 */
 	ipa_suspend_active_aggr_wa(ipa, ep_id);
 
-	ipa_gsi_poll_after_suspend(&ipa->ep[ep_id]);
+	ipa_gsi_poll_after_suspend(ipa, ep_id);
 }
 
 void ipa_ep_suspend_all(struct ipa_context *ipa)
