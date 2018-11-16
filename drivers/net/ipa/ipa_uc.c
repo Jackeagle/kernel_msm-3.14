@@ -238,7 +238,7 @@ bool ipa_uc_loaded(void)
 }
 
 static void
-ipa_uc_event_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
+ipa_uc_event_handler(enum ipa_interrupt interrupt, u32 interrupt_data)
 {
 	struct ipa_uc_shared_area *shared = ipa_uc_ctx.shared;
 	union ipa_uc_event_data event_param;
@@ -258,7 +258,7 @@ ipa_uc_event_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
 }
 
 static void
-ipa_uc_response_hdlr(enum ipa_irq_type interrupt, u32 interrupt_data)
+ipa_uc_response_hdlr(enum ipa_interrupt interrupt, u32 interrupt_data)
 {
 	struct ipa_uc_shared_area *shared = ipa_uc_ctx.shared;
 	union ipa_uc_response_data response_data;
@@ -298,16 +298,16 @@ struct ipa_uc_ctx *ipa_uc_init(phys_addr_t phys_addr)
 	if (!ipa_uc_ctx.shared)
 		return NULL;
 
-	ipa_add_interrupt_handler(ipa_ctx, IPA_UC_IRQ_0, ipa_uc_event_handler);
-	ipa_add_interrupt_handler(ipa_ctx, IPA_UC_IRQ_1, ipa_uc_response_hdlr);
+	ipa_interrupt_add(ipa_ctx, IPA_INTERRUPT_UC_0, ipa_uc_event_handler);
+	ipa_interrupt_add(ipa_ctx, IPA_INTERRUPT_UC_1, ipa_uc_response_hdlr);
 
 	return &ipa_uc_ctx;
 }
 
 void ipa_uc_exit(struct ipa_uc_ctx *uc_ctx)
 {
-	ipa_remove_interrupt_handler(ipa_ctx, IPA_UC_IRQ_1);
-	ipa_remove_interrupt_handler(ipa_ctx, IPA_UC_IRQ_0);
+	ipa_interrupt_remove(ipa_ctx, IPA_INTERRUPT_UC_1);
+	ipa_interrupt_remove(ipa_ctx, IPA_INTERRUPT_UC_0);
 	iounmap(ipa_uc_ctx.shared);
 	ipa_uc_ctx.shared = NULL;
 }

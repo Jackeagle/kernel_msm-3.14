@@ -30,11 +30,12 @@
 #include "ipa_clock.h"
 #include "ipa_reg.h"
 
-static const int ipa_irq_mapping[] = {
-	[IPA_INVALID_IRQ]		= -1,
-	[IPA_UC_IRQ_0]			= 2,
-	[IPA_UC_IRQ_1]			= 3,
-	[IPA_TX_SUSPEND_IRQ]		= 14,
+/* Map a logical interrupt number to a hardware IPA IRQ number */
+static const int ipa_interrupt_mapping[] = {
+	[IPA_INTERRUPT_INVALID]		= -1,
+	[IPA_INTERRUPT_UC_0]		= 2,
+	[IPA_INTERRUPT_UC_1]		= 3,
+	[IPA_INTERRUPT_TX_SUSPEND]	= 14,
 };
 
 /* Workaround disables TX_SUSPEND interrupt for this long */
@@ -50,14 +51,14 @@ static void ipa_tx_suspend_interrupt_wa(struct ipa_context *ipa)
 	u32 val;
 
 	val = ipa_read_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP);
-	val &= ~BIT(ipa_irq_mapping[IPA_TX_SUSPEND_IRQ]);
+	val &= ~BIT(ipa_interrupt_mapping[IPA_INTERRUPT_TX_SUSPEND]);
 	ipa_write_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP, val);
 
 	queue_delayed_work(ipa->interrupt_wq, &ipa->tx_suspend_work,
 			   DISABLE_TX_SUSPEND_INTR_DELAY);
 }
 
-static void ipa_handle_interrupt(struct ipa_context *ipa, u32 ipa_irq)
+static void ipa_interrupt_process(struct ipa_context *ipa, u32 ipa_irq)
 {
 	struct ipa_interrupt_info *intr_info;
 	u32 endpoints = 0;	/* Only TX_SUSPEND uses its interrupt_data */
@@ -66,7 +67,7 @@ static void ipa_handle_interrupt(struct ipa_context *ipa, u32 ipa_irq)
 	if (!intr_info->handler)
 		return;
 
-	if (intr_info->interrupt == IPA_TX_SUSPEND_IRQ) {
+	if (intr_info->interrupt == IPA_INTERRUPT_TX_SUSPEND) {
 		/* Disable the suspend interrupt temporarily */
 		ipa_tx_suspend_interrupt_wa(ipa);
 
@@ -81,12 +82,13 @@ static void ipa_handle_interrupt(struct ipa_context *ipa, u32 ipa_irq)
 
 static inline bool is_uc_irq(struct ipa_context *ipa, u32 ipa_irq)
 {
-	enum ipa_irq_type interrupt = ipa->interrupt_info[ipa_irq].interrupt;
+	enum ipa_interrupt interrupt = ipa->interrupt_info[ipa_irq].interrupt;
 
-	return interrupt == IPA_UC_IRQ_0 || interrupt == IPA_UC_IRQ_1;
+	return interrupt == IPA_INTERRUPT_UC_0 ||
+		interrupt == IPA_INTERRUPT_UC_1;
 }
 
-static void ipa_process_interrupts(struct ipa_context *ipa)
+static void ipa_interrupt_process_all(struct ipa_context *ipa)
 {
 	while (true) {
 		u32 ipa_intr_mask;
@@ -116,7 +118,7 @@ static void ipa_process_interrupts(struct ipa_context *ipa)
 				ipa_write_reg_n(IPA_IRQ_CLR_EE_N, IPA_EE_AP,
 						imask);
 
-			ipa_handle_interrupt(ipa, i);
+			ipa_interrupt_process(ipa, i);
 
 			/* Clear non-uC interrupt after processing
 			 * to avoid clearing interrupt data
@@ -136,7 +138,7 @@ static void ipa_interrupt_work_func(struct work_struct *work)
 
 	ipa_clock_get(ipa);
 
-	ipa_process_interrupts(ipa);
+	ipa_interrupt_process_all(ipa);
 
 	ipa_clock_put(ipa);
 }
@@ -165,10 +167,10 @@ static void enable_tx_suspend_work_func(struct work_struct *work)
 	ipa_clock_get(ipa);
 
 	val = ipa_read_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP);
-	val |= BIT(ipa_irq_mapping[IPA_TX_SUSPEND_IRQ]);
+	val |= BIT(ipa_interrupt_mapping[IPA_INTERRUPT_TX_SUSPEND]);
 	ipa_write_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP, val);
 
-	ipa_process_interrupts(ipa);
+	ipa_interrupt_process_all(ipa);
 
 	ipa_clock_put(ipa);
 }
@@ -194,18 +196,17 @@ static void tx_suspend_disable(struct ipa_context *ipa)
 }
 
 /**
- * ipa_add_interrupt_handler() - Adds handler for an IPA interrupt
+ * ipa_interrupt_add() - Adds handler for an IPA interrupt
  * @interrupt:		IPA interrupt type
  * @handler:		The handler for that interrupt
  *
  * Adds handler to an IPA interrupt type and enable it.  IPA interrupt
  * handlers are allowed to block (they aren't run in interrupt context).
  */
-void ipa_add_interrupt_handler(struct ipa_context *ipa,
-			       enum ipa_irq_type interrupt,
-			       ipa_irq_handler_t handler)
+void ipa_interrupt_add(struct ipa_context *ipa, enum ipa_interrupt interrupt,
+		       ipa_irq_handler_t handler)
 {
-	u32 ipa_irq = ipa_irq_mapping[interrupt];
+	u32 ipa_irq = ipa_interrupt_mapping[interrupt];
 	struct ipa_interrupt_info *intr_info;
 	u32 val;
 
@@ -218,28 +219,27 @@ void ipa_add_interrupt_handler(struct ipa_context *ipa,
 	val |= BIT(ipa_irq);
 	ipa_write_reg_n(IPA_IRQ_EN_EE_N, IPA_EE_AP, val);
 
-	if (interrupt == IPA_TX_SUSPEND_IRQ)
+	if (interrupt == IPA_INTERRUPT_TX_SUSPEND)
 		tx_suspend_enable(ipa);
 }
 
 /**
- * ipa_remove_interrupt_handler() - Removes handler for an IPA interrupt type
+ * ipa_interrupt_remove() - Removes handler for an IPA interrupt type
  * @interrupt:		IPA interrupt type
  *
  * Remove an IPA interrupt handler and disable it.
  */
-void ipa_remove_interrupt_handler(struct ipa_context *ipa,
-				  enum ipa_irq_type interrupt)
+void ipa_interrupt_remove(struct ipa_context *ipa, enum ipa_interrupt interrupt)
 {
-	u32 ipa_irq = ipa_irq_mapping[interrupt];
+	u32 ipa_irq = ipa_interrupt_mapping[interrupt];
 	struct ipa_interrupt_info *intr_info;
 	u32 val;
 
 	intr_info = &ipa->interrupt_info[ipa_irq];
 	intr_info->handler = NULL;
-	intr_info->interrupt = IPA_INVALID_IRQ;
+	intr_info->interrupt = IPA_INTERRUPT_INVALID;
 
-	if (interrupt == IPA_TX_SUSPEND_IRQ)
+	if (interrupt == IPA_INTERRUPT_TX_SUSPEND)
 		tx_suspend_disable(ipa);
 
 	/* Disable the interrupt */
@@ -305,7 +305,7 @@ void ipa_suspend_active_aggr_wa(struct ipa_context *ipa, u32 ep_id)
 	u32 clnt_mask;
 	u32 ipa_irq;
 
-	ipa_irq = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
+	ipa_irq = ipa_interrupt_mapping[IPA_INTERRUPT_TX_SUSPEND];
 	intr_info = &ipa->interrupt_info[ipa_irq];
 	clnt_mask = BIT(ep_id);
 

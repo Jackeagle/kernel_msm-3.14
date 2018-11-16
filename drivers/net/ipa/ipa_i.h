@@ -219,34 +219,33 @@ static inline bool ipa_ap_consumer(enum ipa_client_type client)
 }
 
 /**
- * enum ipa_irq_type - IPA Interrupt Type
+ * enum ipa_interrupt - IPA Interrupt Type
  *
  * Used to register handlers for IPA interrupts.
  */
-enum ipa_irq_type {
-	IPA_INVALID_IRQ,
-	IPA_UC_IRQ_0,
-	IPA_UC_IRQ_1,
-	IPA_TX_SUSPEND_IRQ,
-	IPA_IRQ_MAX
+enum ipa_interrupt {
+	IPA_INTERRUPT_INVALID,
+	IPA_INTERRUPT_UC_0,
+	IPA_INTERRUPT_UC_1,
+	IPA_INTERRUPT_TX_SUSPEND,
 };
 
 /**
  * typedef ipa_irq_handler_t - irq handler/callback type
- * @param ipa_irq_type		- interrupt type
+ * @param interrupt		- interrupt type
  * @param interrupt_data	- interrupt information data
  *
- * Callback function registered by ipa_add_interrupt_handler() to
+ * Callback function registered by ipa_interrupt_add() to
  * handle a specific interrupt type
  */
-typedef void (*ipa_irq_handler_t)(enum ipa_irq_type interrupt,
+typedef void (*ipa_irq_handler_t)(enum ipa_interrupt interrupt,
 				  u32 interrupt_data);
 
 #define IPA_INTERRUPT_MAX	32	/* # bits in IPA interrupt mask */
 
 struct ipa_interrupt_info {
 	ipa_irq_handler_t handler;
-	enum ipa_irq_type interrupt;
+	enum ipa_interrupt interrupt;
 };
 
 /**
@@ -524,12 +523,10 @@ void ipa_ep_teardown(struct ipa_context *ipa, u32 ep_id);
 
 void ipa_rx_switch_to_poll_mode(struct ipa_sys_context *sys);
 
-void ipa_add_interrupt_handler(struct ipa_context *ipa,
-			       enum ipa_irq_type interrupt,
-			       ipa_irq_handler_t handler);
-
-void ipa_remove_interrupt_handler(struct ipa_context *ipa,
-				  enum ipa_irq_type interrupt);
+void ipa_interrupt_add(struct ipa_context *ipa, enum ipa_interrupt interrupt,
+		       ipa_irq_handler_t handler);
+void ipa_interrupt_remove(struct ipa_context *ipa,
+			  enum ipa_interrupt interrupt);
 
 u32 ipa_filter_bitmap_init(void);
 

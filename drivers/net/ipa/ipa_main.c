@@ -848,7 +848,8 @@ void ipa_dec_release_wakelock(struct ipa_context *ipa)
  * @interrupt:	Interrupt type
  * @endpoints:	Interrupt specific information data
  */
-static void ipa_suspend_handler(enum ipa_irq_type interrupt, u32 interrupt_data)
+static void
+ipa_suspend_handler(enum ipa_interrupt interrupt, u32 interrupt_data)
 {
 	u32 endpoints = interrupt_data;
 
@@ -1115,7 +1116,7 @@ static int ipa_pre_init(struct ipa_context *ipa)
 	if (ret)
 		goto err_dp_exit;
 
-	ipa_add_interrupt_handler(ipa, IPA_TX_SUSPEND_IRQ, ipa_suspend_handler);
+	ipa_interrupt_add(ipa, IPA_INTERRUPT_TX_SUSPEND, ipa_suspend_handler);
 
 	return 0;
 
@@ -1135,7 +1136,7 @@ err_clock_put:
 
 static void ipa_pre_exit(struct ipa_context *ipa)
 {
-	ipa_remove_interrupt_handler(ipa, IPA_TX_SUSPEND_IRQ);
+	ipa_interrupt_remove(ipa, IPA_INTERRUPT_TX_SUSPEND);
 	ipa_interrupt_exit(ipa);
 	mutex_destroy(&ipa->post_init_mutex);
 	wakeup_source_trash(&ipa->wakeup);
