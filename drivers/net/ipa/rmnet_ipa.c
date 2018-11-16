@@ -584,7 +584,7 @@ static void ipa_wwan_setup(struct net_device *dev)
 	dev->watchdog_timeo = msecs_to_jiffies(10 * MSEC_PER_SEC);
 }
 
-/** rmnet_ipa_ap_suspend() - suspend callback for runtime_pm
+/** rmnet_ipa_suspend() - suspend callback for runtime_pm
  * @dev: pointer to device
  *
  * This callback will be invoked by the runtime_pm framework when an AP suspend
@@ -598,7 +598,7 @@ static void ipa_wwan_setup(struct net_device *dev)
  * As an outcome, the number of IPA active clients should be decremented
  * until IPA clocks can be gated.
  */
-int rmnet_ipa_ap_suspend(void *data)
+int rmnet_ipa_suspend(void *data)
 {
 	struct rmnet_ipa_context *wwan = data;
 	struct ipa_wwan_private *wwan_ptr;
@@ -628,7 +628,7 @@ out_unlock:
 	return ret;
 }
 
-/** rmnet_ipa_ap_resume() - resume callback for runtime_pm
+/** rmnet_ipa_resume() - resume callback for runtime_pm
  * @dev: pointer to device
  *
  * This callback will be invoked by the runtime_pm framework when an AP resume
@@ -637,7 +637,7 @@ out_unlock:
  * Enables the network interface queue and returns success to the
  * runtime_pm framework.
  */
-void rmnet_ipa_ap_resume(void *data)
+void rmnet_ipa_resume(void *data)
 {
 	struct rmnet_ipa_context *wwan = data;
 	struct net_device *netdev = wwan->netdev;

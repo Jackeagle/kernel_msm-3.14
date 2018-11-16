@@ -1438,7 +1438,7 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
 }
 
 /**
- * ipa_ap_suspend() - suspend callback for runtime_pm
+ * ipa_suspend() - suspend callback for runtime_pm
  * @dev:	IPA device structure
  *
  * This callback will be invoked by the runtime_pm framework when an AP suspend
@@ -1446,18 +1446,19 @@ static int ipa_plat_drv_remove(struct platform_device *pdev)
  *
  * Return: 	0 if successful, -EAGAIN if IPA is in use
  */
-int ipa_ap_suspend(struct device *dev)
+int ipa_suspend(struct device *dev)
 {
+	struct ipa_context *ipa = dev_get_drvdata(dev);
 	int ret;
 	u32 i;
 
-	ret = rmnet_ipa_ap_suspend(ipa_ctx->wwan);
+	ret = rmnet_ipa_suspend(ipa->wwan);
 	if (ret)
 		return ret;
 
 	/* In case there is a tx/rx handler in polling mode fail to suspend */
-	for (i = 0; i < ipa_ctx->ep_count; i++) {
-		struct ipa_ep_context *ep = &ipa_ctx->ep[i];
+	for (i = 0; i < ipa->ep_count; i++) {
+		struct ipa_ep_context *ep = &ipa->ep[i];
 
 		if (ipa_consumer(ep->client) && ep->sys && ipa_ep_polling(ep)) {
 			ret = -EAGAIN;
@@ -1465,13 +1466,13 @@ int ipa_ap_suspend(struct device *dev)
 		}
 	}
 	if (ret)
-		rmnet_ipa_ap_resume(ipa_ctx->wwan);
+		rmnet_ipa_resume(ipa->wwan);
 
 	return ret;
 }
 
 /**
- * ipa_ap_resume() - resume callback for runtime_pm
+ * ipa_resume() - resume callback for runtime_pm
  * @dev:	IPA device structure
  *
  * This callback will be invoked by the runtime_pm framework when an AP resume
@@ -1479,16 +1480,18 @@ int ipa_ap_suspend(struct device *dev)
  *
  * Return:	Zero
  */
-int ipa_ap_resume(struct device *dev)
+int ipa_resume(struct device *dev)
 {
-	rmnet_ipa_ap_resume(ipa_ctx->wwan);
+	struct ipa_context *ipa = dev_get_drvdata(dev);
+
+	rmnet_ipa_resume(ipa->wwan);
 
 	return 0;
 }
 
 static const struct dev_pm_ops ipa_pm_ops = {
-	.suspend_noirq = ipa_ap_suspend,
-	.resume_noirq = ipa_ap_resume,
+	.suspend_noirq = ipa_suspend,
+	.resume_noirq = ipa_resume,
 };
 
 static struct platform_driver ipa_plat_drv = {

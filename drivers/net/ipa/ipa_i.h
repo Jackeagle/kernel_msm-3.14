@@ -466,8 +466,8 @@ extern struct ipa_context *ipa_ctx;
 void *ipa_wwan_init(void);
 void ipa_wwan_cleanup(void *data);
 
-int rmnet_ipa_ap_suspend(void *data);
-void rmnet_ipa_ap_resume(void *data);
+int rmnet_ipa_suspend(void *data);
+void rmnet_ipa_resume(void *data);
 
 int ipa_stop_gsi_channel(u32 ep_id);
 
@@ -567,8 +567,6 @@ void ipa_uc_panic_notifier(void);
 int ipa_ep_init(struct ipa_context *ipa);
 void ipa_ep_exit(struct ipa_context *ipa);
 
-int ipa_ap_suspend(struct device *dev);
-int ipa_ap_resume(struct device *dev);
 void ipa_set_resource_groups_min_max_limits(void);
 
 void ipa_ep_suspend_all(struct ipa_context *ipa);
