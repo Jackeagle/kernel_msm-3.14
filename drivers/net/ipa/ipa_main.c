@@ -1160,18 +1160,17 @@ static irqreturn_t ipa_smp2p_modem_post_init_isr(int irq, void *dev_id)
 static int ipa_smp2p_irq_init(struct ipa_context *ipa, const char *name,
 			      irq_handler_t handler)
 {
-	struct device *dev = &ipa->pdev->dev;
 	unsigned int irq;
 	int ret;
 
-	ret = of_irq_get_byname(dev->of_node, name);
+	ret = platform_get_irq_byname(ipa->pdev, name);
 	if (ret < 0)
 		return ret;
 	if (!ret)
 		return -EINVAL;		/* IRQ mapping failure */
 	irq = ret;
 
-	ret = devm_request_threaded_irq(dev, irq, NULL, handler, 0, name, ipa);
+	ret = request_threaded_irq(irq, NULL, handler, 0, name, ipa);
 	if (ret)
 		return ret;
 
@@ -1180,7 +1179,7 @@ static int ipa_smp2p_irq_init(struct ipa_context *ipa, const char *name,
 
 static void ipa_smp2p_irq_exit(struct ipa_context *ipa, unsigned int irq)
 {
-	devm_free_irq(&ipa->pdev->dev, irq, ipa);
+	free_irq(irq, ipa);
 }
 
 static int ipa_smp2p_init(struct ipa_context *ipa, bool modem_init)
