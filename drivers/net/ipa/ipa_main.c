@@ -950,7 +950,10 @@ ipa_panic_notifier(struct notifier_block *nb, unsigned long action, void *data)
 
 	ipa = container_of(nb, struct ipa_context, panic_notifier);
 	ipa_freeze_clock_vote_and_notify_modem(ipa);
-	ipa_uc_panic_notifier();
+	if (ipa_clock_get_additional(ipa)) {
+		ipa_uc_panic_notifier();
+		ipa_clock_put(ipa_ctx);
+	}
 
 	return NOTIFY_DONE;
 }
