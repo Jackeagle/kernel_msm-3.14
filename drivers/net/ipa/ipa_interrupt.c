@@ -298,7 +298,7 @@ void ipa_interrupt_exit(struct ipa_context *ipa)
  *  aggregation frame.  This is to work around a hardware issue
  *  where an IRQ is not generated as it should be when this occurs.
  */
-void ipa_suspend_active_aggr_wa(u32 ep_id)
+void ipa_suspend_active_aggr_wa(struct ipa_context *ipa, u32 ep_id)
 {
 	struct ipa_reg_aggr_force_close force_close;
 	struct ipa_interrupt_info *intr_info;
@@ -306,7 +306,7 @@ void ipa_suspend_active_aggr_wa(u32 ep_id)
 	u32 ipa_irq;
 
 	ipa_irq = ipa_irq_mapping[IPA_TX_SUSPEND_IRQ];
-	intr_info = &ipa_ctx->interrupt_info[ipa_irq];
+	intr_info = &ipa->interrupt_info[ipa_irq];
 	clnt_mask = BIT(ep_id);
 
 	/* Nothing to do if the endpoint doesn't have aggregation open */

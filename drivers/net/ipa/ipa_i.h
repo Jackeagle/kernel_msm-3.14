@@ -555,7 +555,7 @@ void ipa_cfg_default_route(struct ipa_context *ipa,
 int ipa_interrupt_init(struct ipa_context *ipa);
 void ipa_interrupt_exit(struct ipa_context *ipa);
 
-void ipa_suspend_active_aggr_wa(u32 ep_id);
+void ipa_suspend_active_aggr_wa(struct ipa_context *ipa, u32 ep_id);
 void ipa_lan_rx_cb(void *priv, enum ipa_dp_evt_type evt, unsigned long data);
 
 int ipa_modem_smem_init(struct ipa_context *ipa);

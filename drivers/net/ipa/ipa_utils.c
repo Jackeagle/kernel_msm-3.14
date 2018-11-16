@@ -707,7 +707,7 @@ ipa_ep_cons_suspend(struct ipa_context *ipa, enum ipa_client_type client)
 	 * We work around this by force-closing the aggregation frame,
 	 * then simulating the arrival of such an interrupt.
 	 */
-	ipa_suspend_active_aggr_wa(ep_id);
+	ipa_suspend_active_aggr_wa(ipa, ep_id);
 
 	ipa_gsi_poll_after_suspend(&ipa->ep[ep_id]);
 }
