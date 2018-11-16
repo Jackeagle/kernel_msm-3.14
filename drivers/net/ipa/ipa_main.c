@@ -848,8 +848,9 @@ void ipa_dec_release_wakelock(struct ipa_context *ipa)
  * @interrupt:	Interrupt type
  * @endpoints:	Interrupt specific information data
  */
-static void
-ipa_suspend_handler(enum ipa_interrupt interrupt, u32 interrupt_data)
+static void ipa_suspend_handler(struct ipa_context *ipa,
+				enum ipa_interrupt interrupt,
+				u32 interrupt_data)
 {
 	u32 endpoints = interrupt_data;
 
@@ -859,21 +860,21 @@ ipa_suspend_handler(enum ipa_interrupt interrupt, u32 interrupt_data)
 
 		endpoints ^= BIT(i);
 
-		if (!ipa_ctx->ep[i].allocated)
+		if (!ipa->ep[i].allocated)
 			continue;
 
-		client = ipa_ctx->ep[i].client;
+		client = ipa->ep[i].client;
 		if (!ipa_ap_consumer(client))
 			continue;
 
 		/* endpoint will be unsuspended by enabling IPA clocks */
-		mutex_lock(&ipa_ctx->transport_pm.transport_pm_mutex);
-		if (!atomic_read(&ipa_ctx->transport_pm.dec_clients)) {
-			ipa_clock_get(ipa_ctx);
+		mutex_lock(&ipa->transport_pm.transport_pm_mutex);
+		if (!atomic_read(&ipa->transport_pm.dec_clients)) {
+			ipa_clock_get(ipa);
 
-			atomic_set(&ipa_ctx->transport_pm.dec_clients, 1);
+			atomic_set(&ipa->transport_pm.dec_clients, 1);
 		}
-		mutex_unlock(&ipa_ctx->transport_pm.transport_pm_mutex);
+		mutex_unlock(&ipa->transport_pm.transport_pm_mutex);
 	}
 }
 

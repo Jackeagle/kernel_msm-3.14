@@ -77,7 +77,7 @@ static void ipa_interrupt_process(struct ipa_context *ipa, u32 ipa_irq)
 		ipa_write_reg_n(IPA_SUSPEND_IRQ_CLR_EE_N, IPA_EE_AP, endpoints);
 	}
 
-	intr_info->handler(intr_info->interrupt, endpoints);
+	intr_info->handler(ipa, intr_info->interrupt, endpoints);
 }
 
 static inline bool is_uc_irq(struct ipa_context *ipa, u32 ipa_irq)
@@ -320,5 +320,5 @@ void ipa_suspend_active_aggr_wa(struct ipa_context *ipa, u32 ep_id)
 	/* Simulate suspend IRQ */
 	ipa_assert(!in_interrupt());
 	if (intr_info->handler)
-		intr_info->handler(intr_info->interrupt, clnt_mask);
+		intr_info->handler(ipa, intr_info->interrupt, clnt_mask);
 }

@@ -237,8 +237,9 @@ bool ipa_uc_loaded(void)
 	return ipa_uc_ctx.uc_loaded;
 }
 
-static void
-ipa_uc_event_handler(enum ipa_interrupt interrupt, u32 interrupt_data)
+static void ipa_uc_event_handler(struct ipa_context *ipa,
+				 enum ipa_interrupt interrupt,
+				 u32 interrupt_data)
 {
 	struct ipa_uc_shared_area *shared = ipa_uc_ctx.shared;
 	union ipa_uc_event_data event_param;
@@ -257,8 +258,9 @@ ipa_uc_event_handler(enum ipa_interrupt interrupt, u32 interrupt_data)
 	}
 }
 
-static void
-ipa_uc_response_hdlr(enum ipa_interrupt interrupt, u32 interrupt_data)
+static void ipa_uc_response_hdlr(struct ipa_context *ipa,
+				  enum ipa_interrupt interrupt,
+				  u32 interrupt_data)
 {
 	struct ipa_uc_shared_area *shared = ipa_uc_ctx.shared;
 	union ipa_uc_response_data response_data;
@@ -275,7 +277,7 @@ ipa_uc_response_hdlr(enum ipa_interrupt interrupt, u32 interrupt_data)
 		/* The proxy vote is held until uC is loaded to ensure that
 		 * IPA_HW_2_CPU_RESPONSE_INIT_COMPLETED is received.
 		 */
-		ipa_clock_proxy_put(ipa_ctx);
+		ipa_clock_proxy_put(ipa);
 		ipa_uc_ctx.uc_loaded = true;
 	} else if (response == IPA_UC_RESPONSE_CMD_COMPLETED) {
 		response_data.raw32b = shared->response_param;

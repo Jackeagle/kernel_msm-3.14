@@ -238,7 +238,9 @@ enum ipa_interrupt {
  * Callback function registered by ipa_interrupt_add() to
  * handle a specific interrupt type
  */
-typedef void (*ipa_irq_handler_t)(enum ipa_interrupt interrupt,
+struct ipa_context;
+typedef void (*ipa_irq_handler_t)(struct ipa_context *ipa,
+				  enum ipa_interrupt interrupt,
 				  u32 interrupt_data);
 
 #define IPA_INTERRUPT_MAX	32	/* # bits in IPA interrupt mask */
