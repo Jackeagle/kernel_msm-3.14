@@ -426,6 +426,7 @@ struct ipa_context {
 	struct icc_path *memory_path;
 	struct icc_path *imem_path;
 	struct icc_path *config_path;
+	struct clk *core_clock;
 	bool modem_clk_vote_valid;
 	u32 ep_count;
 

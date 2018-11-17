@@ -13,6 +13,7 @@
 #include <linux/workqueue.h>
 #include <linux/bug.h>
 #include <linux/io.h>
+#include <linux/clk.h>
 #include <linux/of.h>
 #include <linux/of_irq.h>
 #include <linux/of_address.h>
@@ -30,6 +31,8 @@
 
 #include "ipa_i.h"
 #include "ipahal.h"
+
+#define	IPA_CORE_CLOCK_RATE	(75UL * 1000 * 1000)
 
 /* The name of the main firmware file relative to /lib/firmware */
 #define IPA_FWS_PATH		"ipa_fws.mdt"
@@ -692,12 +695,42 @@ fail_flt_hash_tuple:
 	return ret;
 }
 
+static int ipa_clock_init(struct device *dev)
+{
+	struct clk *clk;
+	int ret;
+
+	clk = clk_get(dev, "core");
+	if (IS_ERR(clk))
+		return PTR_ERR(clk);
+
+	ret = clk_set_rate(clk, IPA_CORE_CLOCK_RATE);
+	if (ret) {
+		clk_put(clk);
+		return ret;
+	}
+
+	ipa_ctx->core_clock = clk;
+
+	return 0;
+}
+
+static void ipa_clock_exit(void)
+{
+	clk_put(ipa_ctx->core_clock);
+	ipa_ctx->core_clock = NULL;
+}
+
 /**
  * ipa_enable_clks() - Turn on IPA clocks
  */
 static void ipa_enable_clks(void)
 {
-	WARN_ON(ipa_interconnect_enable());
+	if (WARN_ON(ipa_interconnect_enable()))
+		return;
+
+	if (WARN_ON(clk_prepare_enable(ipa_ctx->core_clock)))
+		ipa_interconnect_disable();
 }
 
 /**
@@ -705,6 +738,7 @@ static void ipa_enable_clks(void)
  */
 static void ipa_disable_clks(void)
 {
+	clk_disable_unprepare(ipa_ctx->core_clock);
 	WARN_ON(ipa_interconnect_disable());
 }
 
@@ -1326,15 +1360,19 @@ static int ipa_plat_drv_probe(struct platform_device *pdev)
 	if (ret)
 		goto out_smp2p_exit;
 
+	ret = ipa_clock_init(dev);
+	if (ret)
+		goto err_interconnect_exit;
+
 	ipa_ctx->dev = dev;	/* Set early for ipa_err()/ipa_debug() */
 
 	ret = ipa_dma_init();
 	if (ret)
-		goto err_interconnect_exit;
+		goto err_clock_exit;
 
 	ret = ipa_route_table_init();
 	if (ret)
-		goto err_interconnect_exit;
+		goto err_clock_exit;
 
 	ret = ipa_filter_table_init();
 	if (ret)
@@ -1405,7 +1443,9 @@ err_filter_table_exit:
 	ipa_filter_table_exit();
 err_route_table_exit:
 	ipa_route_table_exit();
+err_clock_exit:
 	ipa_ctx->dev = NULL;
+	ipa_clock_exit();
 err_interconnect_exit:
 	ipa_interconnect_exit();
 out_smp2p_exit:
