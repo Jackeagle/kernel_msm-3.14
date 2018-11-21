@@ -12,10 +12,13 @@
 #include <linux/delay.h>
 #include <linux/io.h>
 #include <linux/of.h>
+#include <linux/of_graph.h>
 #include <linux/platform_device.h>
 #include <linux/regulator/consumer.h>
 #include <linux/phy/phy.h>
 #include <linux/reset.h>
+#include <linux/extcon.h>
+#include <linux/notifier.h>
 
 /* SSPHY control registers */
 #define SS_PHY_CTRL0			0x6C
@@ -47,6 +50,8 @@ struct ssphy_priv {
 	struct regulator *vdda1p8;
 	unsigned int vdd_levels[LEVEL_NUM];
 	struct regulator *vbus;
+	struct extcon_dev *vbus_edev;
+	struct notifier_block vbus_notify;
 };
 
 static void qcom_ssphy_write(void *base, u32 offset, u32 mask, u32 val)
@@ -102,9 +107,28 @@ put_vdda1p8_lpm:
 	return ret;
 }
 
+static int qcom_ssphy_vbus_notifier(struct notifier_block *nb,
+				    unsigned long event, void *ptr)
+{
+	struct ssphy_priv *priv = container_of(nb, struct ssphy_priv,
+					       vbus_notify);
+
+	if (!!event)
+		/* Indicate power present to SS phy */
+		qcom_ssphy_write(priv->base, SS_PHY_CTRL4,
+				 LANE0_PWR_PRESENT, LANE0_PWR_PRESENT);
+	else
+		/* Clear power indication to SS phy */
+		qcom_ssphy_write(priv->base, SS_PHY_CTRL4,
+				 LANE0_PWR_PRESENT, 0);
+
+	return 0;
+}
+
 static int qcom_ssphy_power_on(struct phy *phy)
 {
 	struct ssphy_priv *priv = phy_get_drvdata(phy);
+	int state;
 	int ret;
 
 	/* Enable VBUS supply */
@@ -150,6 +174,15 @@ static int qcom_ssphy_power_on(struct phy *phy)
 	qcom_ssphy_write(priv->base, SS_PHY_CTRL2, REF_SS_PHY_EN, REF_SS_PHY_EN);
 	qcom_ssphy_write(priv->base, SS_PHY_CTRL4, TEST_POWERDOWN, 0);
 
+	/* Setup initial state */
+	if (priv->vbus_edev) {
+		state = extcon_get_state(priv->vbus_edev, EXTCON_USB);
+		ret = qcom_ssphy_vbus_notifier(&priv->vbus_notify, state,
+						    priv->vbus_edev);
+		if (ret)
+			return ret;
+	}
+
 	return 0;
 }
 
@@ -188,6 +221,7 @@ static const char * const qcom_ssphy_clks[] = {
 static int qcom_ssphy_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
+	struct device_node *extcon_node;
 	struct phy_provider *provider;
 	struct ssphy_priv *priv;
 	struct resource *res;
@@ -246,6 +280,28 @@ static int qcom_ssphy_probe(struct platform_device *pdev)
 		if (PTR_ERR(priv->vbus) == -EPROBE_DEFER)
 			return PTR_ERR(priv->vbus);
 		priv->vbus = NULL;
+	}
+
+	extcon_node = of_graph_get_remote_node(dev->of_node, -1, -1);
+	if (extcon_node) {
+		priv->vbus_edev = extcon_find_edev_by_node(extcon_node);
+		if (IS_ERR(priv->vbus_edev)) {
+			if (PTR_ERR(priv->vbus_edev) != -ENODEV) {
+				of_node_put(extcon_node);
+				return PTR_ERR(priv->vbus_edev);
+			}
+			priv->vbus_edev = NULL;
+		}
+	}
+	of_node_put(extcon_node);
+
+	if (priv->vbus_edev) {
+		priv->vbus_notify.notifier_call = qcom_ssphy_vbus_notifier;
+		ret = devm_extcon_register_notifier(dev, priv->vbus_edev,
+						    EXTCON_USB,
+						    &priv->vbus_notify);
+		if (ret)
+			return ret;
 	}
 
 	phy = devm_phy_create(dev, dev->of_node, &qcom_ssphy_ops);
