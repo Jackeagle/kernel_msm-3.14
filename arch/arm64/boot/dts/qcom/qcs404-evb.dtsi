@@ -39,6 +39,12 @@
 		vbus-gpio = <&pms405_gpios 12 GPIO_ACTIVE_HIGH>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&usb3_id_pin>, <&usb3_vbus_pin>;
+
+		port {
+			ep_usb3_con: endpoint {
+				remote-endpoint = <&ep_usb3_phy>;
+			};
+		};
 	};
 };
 
@@ -278,6 +284,12 @@
 	vbus-supply = <&usb3_vbus_reg>;
 	qcom,vdd-voltage-level = <0 1050000 1050000>;
 	status = "okay";
+
+	port {
+		ep_usb3_phy: endpoint {
+			remote-endpoint = <&ep_usb3_con>;
+		};
+	};
 };
 
 /* PINCTRL - additions to nodes defined in qcs404.dtsi */
