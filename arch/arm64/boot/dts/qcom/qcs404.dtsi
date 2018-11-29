@@ -452,11 +452,6 @@
 				};
 			};
 
-			blsp1_uart3_default: blsp1-uart3-default {
-				pins = "gpio82", "gpio83", "gpio84", "gpio85";
-				function = "blsp_uart3";
-			};
-
 			blsp2_i2c0_default: blsp2-i2c0-default {
 				pins = "gpio28", "gpio29";
 				function = "blsp_i2c5";
@@ -688,8 +683,6 @@
 			clock-names = "core", "iface";
 			dmas = <&blsp1_dma 7>, <&blsp1_dma 6>;
 			dma-names = "rx", "tx";
-			pinctrl-names = "default";
-			pinctrl-0 = <&blsp1_uart3_default>;
 			status = "disabled";
 		};
 
