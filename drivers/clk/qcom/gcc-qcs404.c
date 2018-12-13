@@ -306,10 +306,16 @@ static struct clk_alpha_pll gpll0_out_main = {
 	},
 };
 
+static const struct pll_vco gpll0_ao_out_vco[] = {
+	{ 800000000, 800000000, 0 },
+};
+
 static struct clk_alpha_pll gpll0_ao_out_main = {
 	.offset = 0x21000,
 	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_DEFAULT],
 	.flags = SUPPORTS_FSM_MODE,
+	.vco_table = gpll0_ao_out_vco,
+	.num_vco = ARRAY_SIZE(gpll0_ao_out_vco),
 	.clkr = {
 		.enable_reg = 0x45000,
 		.enable_mask = BIT(0),
