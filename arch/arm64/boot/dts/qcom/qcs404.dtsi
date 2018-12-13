@@ -33,6 +33,8 @@
 			enable-method = "psci";
 			next-level-cache = <&L2_0>;
 			#cooling-cells= <2>;
+			clocks = <&apcs_glb>;
+			operating-points-v2 = <&cpu_opp_table>;
 		};
 
 		CPU1: cpu@101 {
@@ -42,6 +44,8 @@
 			enable-method = "psci";
 			next-level-cache = <&L2_0>;
 			#cooling-cells= <2>;
+			clocks = <&apcs_glb>;
+			operating-points-v2 = <&cpu_opp_table>;
 		};
 
 		CPU2: cpu@102 {
@@ -51,6 +55,8 @@
 			enable-method = "psci";
 			next-level-cache = <&L2_0>;
 			#cooling-cells= <2>;
+			clocks = <&apcs_glb>;
+			operating-points-v2 = <&cpu_opp_table>;
 		};
 
 		CPU3: cpu@103 {
@@ -60,6 +66,8 @@
 			enable-method = "psci";
 			next-level-cache = <&L2_0>;
 			#cooling-cells= <2>;
+			clocks = <&apcs_glb>;
+			operating-points-v2 = <&cpu_opp_table>;
 		};
 
 		L2_0: l2-cache {
