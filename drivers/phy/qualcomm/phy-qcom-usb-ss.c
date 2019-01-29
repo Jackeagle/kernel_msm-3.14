@@ -258,7 +258,7 @@ static int qcom_ssphy_init_reset(struct ssphy_priv *priv)
 	return 0;
 }
 
-static int qcom_ssphy_set_mode(struct phy *phy, enum phy_mode mode, int submode)
+static int qcom_ssphy_set_mode(struct phy *phy, enum phy_mode mode)
 {
 	struct ssphy_priv *priv = phy_get_drvdata(phy);
 
