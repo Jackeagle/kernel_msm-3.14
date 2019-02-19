@@ -91,11 +91,3 @@
 		};
 	};
 };
-
-&blsp1_dma {
-	qcom,controlled-remotely = <1>;
-};
-
-&blsp2_dma {
-	qcom,controlled-remotely = <1>;
-};
