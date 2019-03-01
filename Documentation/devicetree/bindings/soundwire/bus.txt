@@ -1,0 +1,51 @@
+Soundwire bus
+
+SoundWire is a 2-pin multi-drop interface with data and clock line.
+It facilitates development of low cost, efficient, high performance systems.
+
+Required property for Soundwire controller node:
+
+Required properties:
+- #address-cells	- Should be 1
+- #size-cell		- Should be 0 
+Rest of the controller bindings are very much specific to vendor.
+
+Child nodes:
+Every Soundwire controller node can contain zero or more child nodes
+representing slave devices on the bus. Every Soundwire slave device is
+uniquely determined by the enumeration address containing 5 fields:
+Soundwire Version, Instance ID, Manufacturer ID, Part ID and Class ID
+for a device.
+
+Required property for SLIMbus child node if it is present:
+- reg		- Should be ('Instance ID') from Soundwire
+		  Enumeration  Address.
+		  Instance ID Is for the cases where multiple Devices of the
+		  same type or Class are attached to the bus.
+
+- compatible	-"swrVER,MFD,PID,CID". The textual representation of
+		  Soundwire Version, Manufacturer ID, Part ID, shall be
+		  in lower case hexadecimal with leading zeroes suppressed
+		  Version number '0x10' represents SoundWire 1.0
+		  Version number '0x11' represents SoundWire 1.1
+		
+
+Soundwire example for Qualcomm's soundwire controller:
+
+	soundwire@c2d0000 {
+		compatible = "qcom,soundwire-v1.5.0"
+		reg = <0x0c2d0000 0x2000>;
+		...
+		#address-cells = <1>;
+		#size-cell = <0>;
+
+		wsa8810@0{
+			compatible = "swr10,217,211,0";
+			reg = <0>;
+		};
+
+		wsa8810@1{
+			compatible = "swr10,217,211,0";
+			reg = <1>;
+		};
+	};

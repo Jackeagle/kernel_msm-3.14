@@ -2,6 +2,7 @@
 // Copyright(c) 2015-17 Intel Corporation.
 
 #include <linux/acpi.h>
+#include <linux/of.h>
 #include <linux/soundwire/sdw.h>
 #include <linux/soundwire/sdw_type.h>
 #include "bus.h"
@@ -108,6 +109,59 @@ int sdw_acpi_find_slaves(struct sdw_bus *bus)
 		sdw_slave_add(bus, &id, acpi_fwnode_handle(adev));
 	}
 
+	return 0;
+}
+
+#endif
+
+#if IS_ENABLED(CONFIG_OF)
+/*
+ * sdw_of_find_slaves() - Find Slave devices in master device tree node
+ * @bus: SDW bus instance
+ *
+ * Scans Master DT node for SDW child Slave devices and registers it.
+ */
+int sdw_of_find_slaves(struct sdw_bus *bus)
+{
+	struct device *dev = bus->dev;
+	struct device_node *node;
+
+	if (!bus->dev->of_node)
+		return 0;
+
+	for_each_child_of_node(bus->dev->of_node, node) {
+		unsigned long long addr;
+		struct sdw_slave_id id;
+		const char *compat = NULL;
+		int reg, ret;
+		int ver, manf_id, prod_code, class;
+
+		compat = of_get_property(node, "compatible", NULL);
+		if (!compat)
+			continue;
+
+		ret = sscanf(compat, "swr%x,%x,%x,%x", &ver, &manf_id, &prod_code, &class);
+		if (ret != 4) {
+			dev_err(dev, "Manf ID & Product code not found %s\n",
+				compat);
+			continue;
+		}
+
+		ret = of_property_read_u32(node, "reg", &reg);
+		if (ret) {
+			dev_err(dev, "Device and Instance id not found:%d\n",
+				ret);
+			continue;
+		}
+
+		id.sdw_version = ver - 0xF;
+		id.unique_id = reg;
+		id.mfg_id = manf_id;
+		id.part_id = prod_code;
+		id.class_id = class;
+
+		sdw_slave_add(bus, &id, of_fwnode_handle(node));
+	}
 	return 0;
 }
 
