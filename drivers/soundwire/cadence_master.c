@@ -434,7 +434,7 @@ cdns_xfer_msg_defer(struct sdw_bus *bus,
 	int cmd = 0, ret;
 
 	/* for defer only 1 message is supported */
-	if (msg->len > 1)
+	if (defer->length > 1)
 		return -ENOTSUPP;
 
 	ret = cdns_prep_msg(cdns, msg, &cmd);
