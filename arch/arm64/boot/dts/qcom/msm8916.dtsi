@@ -105,6 +105,8 @@
 			cpu-idle-states = <&CPU_SLEEP_0>;
 			clocks = <&apcs>;
 			operating-points-v2 = <&cpu_opp_table>;
+			power-domains = <&cprpd>;
+			power-domain-names = "cpr";
 			#cooling-cells = <2>;
 		};
 
@@ -117,6 +119,8 @@
 			cpu-idle-states = <&CPU_SLEEP_0>;
 			clocks = <&apcs>;
 			operating-points-v2 = <&cpu_opp_table>;
+			power-domains = <&cprpd>;
+			power-domain-names = "cpr";
 			#cooling-cells = <2>;
 		};
 
@@ -129,6 +133,8 @@
 			cpu-idle-states = <&CPU_SLEEP_0>;
 			clocks = <&apcs>;
 			operating-points-v2 = <&cpu_opp_table>;
+			power-domains = <&cprpd>;
+			power-domain-names = "cpr";
 			#cooling-cells = <2>;
 		};
 
@@ -141,6 +147,8 @@
 			cpu-idle-states = <&CPU_SLEEP_0>;
 			clocks = <&apcs>;
 			operating-points-v2 = <&cpu_opp_table>;
+			power-domains = <&cprpd>;
+			power-domain-names = "cpr";
 			#cooling-cells = <2>;
 		};
 
@@ -288,20 +296,45 @@
 	};
 
 	cpu_opp_table: cpu_opp_table {
-		compatible = "operating-points-v2";
+		compatible = "operating-points-v2-qcom-cpu";
+		nvmem-cells = <&speedbin_efuse>;
 		opp-shared;
 
 		opp-200000000 {
 			opp-hz = /bits/ 64 <200000000>;
+			required-opps = <&cpr_opp1>;
 		};
 		opp-400000000 {
 			opp-hz = /bits/ 64 <400000000>;
+			required-opps = <&cpr_opp2>;
+		};
+		opp-533330000 {
+			opp-hz = /bits/ 64 <533330000>;
+			required-opps = <&cpr_opp3>;
 		};
 		opp-800000000 {
 			opp-hz = /bits/ 64 <800000000>;
+			required-opps = <&cpr_opp4>;
 		};
 		opp-998400000 {
 			opp-hz = /bits/ 64 <998400000>;
+			required-opps = <&cpr_opp5>;
+		};
+		opp-1094400000 {
+			opp-hz = /bits/ 64 <1094400000>;
+			required-opps = <&cpr_opp6>;
+		};
+		opp-1152000000 {
+			opp-hz = /bits/ 64 <1152000000>;
+			required-opps = <&cpr_opp7>;
+		};
+		opp-1209600000 {
+			opp-hz = /bits/ 64 <1209600000>;
+			required-opps = <&cpr_opp8>;
+		};
+		opp-1363200000 {
+			opp-hz = /bits/ 64 <1363200000>;
+			required-opps = <&cpr_opp9>;
 		};
 	};
 
@@ -807,6 +840,10 @@
 			};
 			tsens_calsel: calsel@ec {
 				reg = <0xec 0x4>;
+			};
+			speedbin_efuse: speedbin@c {
+				reg = <0xc 0x1>;
+				bits = <2 3>;
 			};
 		};
 
@@ -1529,6 +1566,81 @@
 			ports {
 				#address-cells = <1>;
 				#size-cells = <0>;
+			};
+		};
+
+		cprpd: cpr@b018000 {
+			compatible = "qcom,msm8916-cpr";
+			reg = <0xb018000 0x1000>;
+			interrupts = <0 15 IRQ_TYPE_EDGE_RISING>;
+			vdd-mx-supply = <&pm8916_l3>;
+			vdd-apc-supply = <&pm8916_spmi_s2>;
+			#power-domain-cells = <0>;
+			operating-points-v2 = <&cpr_opp_table>;
+			acc-syscon = <&tcsr>;
+
+			nvmem = <&qfprom>;
+			nvmem-names = "qfprom";
+
+			qcom,cpr-ref-clk = <19200>;
+			qcom,cpr-timer-delay-us = <5000>;
+			qcom,cpr-timer-cons-up = <0>;
+			qcom,cpr-timer-cons-down = <2>;
+			qcom,cpr-up-threshold = <0>;
+			qcom,cpr-down-threshold = <2>;
+			qcom,cpr-idle-clocks = <15>;
+			qcom,cpr-gcnt-us = <1>;
+			qcom,vdd-apc-step-up-limit = <1>;
+			qcom,vdd-apc-step-down-limit = <1>;
+		};
+
+		cpr_opp_table: opp-table {
+			compatible = "operating-points-v2-qcom-level";
+
+			cpr_opp1: opp1 {
+				opp-level = <1>;
+				qcom,opp-fuse-level = <1>;
+				opp-hz = /bits/ 64 <200000000>;
+			};
+			cpr_opp2: opp2 {
+				opp-level = <2>;
+				qcom,opp-fuse-level = <1>;
+				opp-hz = /bits/ 64 <400000000>;
+			};
+			cpr_opp3: opp3 {
+				opp-level = <3>;
+				qcom,opp-fuse-level = <2>;
+				opp-hz = /bits/ 64 <533330000>;
+			};
+			cpr_opp4: opp4 {
+				opp-level = <4>;
+				qcom,opp-fuse-level = <2>;
+				opp-hz = /bits/ 64 <800000000>;
+			};
+			cpr_opp5: opp5 {
+				opp-level = <5>;
+				qcom,opp-fuse-level = <3>;
+				opp-hz = /bits/ 64 <998400000>;
+			};
+			cpr_opp6: opp6 {
+				opp-level = <6>;
+				qcom,opp-fuse-level = <3>;
+				opp-hz = /bits/ 64 <1094400000>;
+			};
+			cpr_opp7: opp7 {
+				opp-level = <7>;
+				qcom,opp-fuse-level = <3>;
+				opp-hz = /bits/ 64 <1152000000>;
+			};
+			cpr_opp8: opp8 {
+				opp-level = <8>;
+				qcom,opp-fuse-level = <3>;
+				opp-hz = /bits/ 64 <1209600000>;
+			};
+			cpr_opp9: opp9 {
+				opp-level = <9>;
+				qcom,opp-fuse-level = <3>;
+				opp-hz = /bits/ 64 <1363200000>;
 			};
 		};
 	};
