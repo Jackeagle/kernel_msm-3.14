@@ -94,6 +94,11 @@
 			no-map;
 		};
 
+		gpu_mem: memory@8c415000 {
+			reg = <0 0x8c415000 0 0x2000>;
+			no-map;
+		};
+
 		wlan_msa_mem: memory@96700000 {
 			reg = <0 0x96700000 0 0x100000>;
 			no-map;
@@ -1512,6 +1517,10 @@
 			operating-points-v2 = <&gpu_opp_table>;
 
 			qcom,gmu = <&gmu>;
+
+			zap-shader {
+				memory-region = <&gpu_mem>;
+			};
 
 			gpu_opp_table: opp-table {
 				compatible = "operating-points-v2";
