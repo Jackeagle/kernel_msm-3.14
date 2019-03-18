@@ -509,10 +509,8 @@ static int cpr_scale(struct cpr_drv *drv, enum voltage_change_dir dir)
 	if (dir != UP && dir != DOWN)
 		return 0;
 
-	step_uV = regulator_get_linear_step(drv->vdd_apc);
-	if (!step_uV)
-		return -EINVAL;
-
+	//step_uV = regulator_get_linear_step(drv->vdd_apc);
+	step_uV = 12500; /*TODO: Get step volt here */
 	corner = drv->corner;
 
 	val = cpr_read(drv, REG_RBCPR_RESULT_0);
@@ -986,9 +984,8 @@ static int cpr_fuse_corner_init(struct cpr_drv *drv)
 
 	accs = acc_desc->settings;
 
-	step_volt = regulator_get_linear_step(drv->vdd_apc);
-	if (!step_volt)
-		return -EINVAL;
+	//step_volt = regulator_get_linear_step(drv->vdd_apc);
+	step_volt = 12500; /* TODO: Replace with ^ when apc_reg ready */
 
 	/* Populate fuse_corner members */
 	fuse = drv->fuse_corners;
@@ -1221,12 +1218,9 @@ static int cpr_corner_init(struct cpr_drv *drv)
 	bool apply_scaling;
 	unsigned long freq_diff, freq_diff_mhz;
 	unsigned long freq;
-	int step_volt = regulator_get_linear_step(drv->vdd_apc);
+	int step_volt = 12500; /* TODO: Get from regulator APIs */
 	struct dev_pm_opp *opp;
 	struct device *pd_dev;
-
-	if (!step_volt)
-		return -EINVAL;
 
 	corner = drv->corners;
 	end = &corner[drv->num_corners - 1];
