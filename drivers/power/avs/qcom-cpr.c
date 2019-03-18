@@ -1529,6 +1529,7 @@ static const struct cpr_desc msm8916_cpr_desc = {
 	.step_quot = (int []){ 26, 26, 26, 26, 26, 26, 26, 26 },
 	.cpr_fuses = {
 		.init_voltage_step = 10000,
+		.init_voltage_width = 6,
 		.fuse_corner_data = (struct fuse_corner_data[]){
 			/* fuse corner 0 */
 			{
@@ -1575,25 +1576,25 @@ static const struct cpr_desc msm8916_cpr_desc = {
 		},
 		.cpr_fuse = (struct cpr_fuse[]){
 			{
-				.ring_osc = { 222, 3, 6},
-				.init_voltage = { 220, 6, 2 },
-				.quotient = { 221, 12, 2 },
+				.ring_osc = "cpr_ring_osc1",
+				.init_voltage = "cpr_init_voltage1",
+				.quotient = "cpr_quotient1",
 			},
 			{
-				.ring_osc = { 222, 3, 6},
-				.init_voltage = { 218, 6, 2 },
-				.quotient = { 219, 12, 0 },
+				.ring_osc = "cpr_ring_osc2",
+				.init_voltage = "cpr_init_voltage2",
+				.quotient = "cpr_quotient2",
 			},
 			{
-				.ring_osc = { 222, 3, 6},
-				.init_voltage = { 216, 6, 0 },
-				.quotient = { 216, 12, 6 },
+				.ring_osc = "cpr_ring_osc3",
+				.init_voltage = "cpr_init_voltage3",
+				.quotient = "cpr_quotient3",
 			},
 		},
-		.disable = &(struct qfprom_offset){ 223, 1, 1 },
 	},
-	.speed_bin = { 12, 3, 2 },
-	.pvs_version = { 6, 2, 7 },
+	.pvs_version = "cpr_pvs_version",
+	.fuse_revision = "cpr_fuse_revision",
+	.speed_bin = "cpr_speed_bin",
 };
 
 static const struct acc_desc msm8916_acc_desc = {
@@ -1608,7 +1609,7 @@ static const struct acc_desc msm8916_acc_desc = {
 		{ 0xf000, 0x100 }
 	},
 	.num_regs_per_fuse = 1,
-	.override = { 6, 1, 4 },
+	.override = "cpr_acc_override",
 	.override_value = 1,
 };
 
