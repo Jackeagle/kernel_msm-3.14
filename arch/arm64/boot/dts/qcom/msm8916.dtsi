@@ -859,7 +859,7 @@
 			};
 			cpr_efuse_init_voltage1: ivoltage1@dc {
 				reg = <0xdc 0x4>;
-				bits = <2 6>;
+				bits = <4 6>;
 			};
 			cpr_efuse_init_voltage2: ivoltage2@da {
 				reg = <0xda 0x4>;
