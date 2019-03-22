@@ -26,6 +26,7 @@
 #include <linux/clk.h>
 #include <linux/nvmem-consumer.h>
 #include <linux/bitops.h>
+#include <linux/regulator/qcom_smd-regulator.h>
 
 /* Register Offsets for RB-CPR and Bit Definitions */
 
@@ -125,6 +126,11 @@
 
 #define FUSE_REVISION_UNKNOWN		(-1)
 
+enum vdd_mx_vmin_method {
+	VDD_MX_VMIN_APC_CORNER_CEILING,
+	VDD_MX_VMIN_FUSE_CORNER_MAP,
+};
+
 enum voltage_change_dir {
 	NO_CHANGE,
 	DOWN,
@@ -151,6 +157,7 @@ struct fuse_corner_data {
 	/* fuse quot_offset */
 	int quot_offset_scale;
 	int quot_offset_adjust;
+	int vdd_mx_req;
 };
 
 struct cpr_fuses {
@@ -175,6 +182,7 @@ struct corner_data {
 
 struct cpr_desc {
 	unsigned int num_fuse_corners;
+	enum vdd_mx_vmin_method	vdd_mx_vmin_method;
 	int min_diff_quot;
 	int *step_quot;
 	struct cpr_fuses cpr_fuses;
@@ -205,6 +213,7 @@ struct fuse_corner {
 	int step_quot;
 	const struct reg_sequence *accs;
 	int num_accs;
+	int vdd_mx_req;
 	unsigned long max_freq;
 	u32 ring_osc_idx;
 };
@@ -243,6 +252,7 @@ struct cpr_drv {
 	void __iomem		*base;
 	struct corner		*corner;
 	struct regulator	*vdd_apc;
+	struct regulator	*vdd_mx;
 	struct clk		*cpu_clk;
 	struct regmap		*tcsr;
 	bool			loop_disabled;
@@ -408,6 +418,20 @@ static void cpr_corner_restore(struct cpr_drv *drv, struct corner *corner)
 		ctl, irq);
 }
 
+static int
+cpr_mx_get(struct cpr_drv *drv, struct fuse_corner *fuse, int apc_volt)
+{
+	switch (drv->desc->vdd_mx_vmin_method) {
+	case VDD_MX_VMIN_APC_CORNER_CEILING:
+		return fuse->max_uV;
+	case VDD_MX_VMIN_FUSE_CORNER_MAP:
+		return fuse->vdd_mx_req;
+	}
+
+	dev_warn(drv->dev, "Failed to get mx\n");
+	return 0;
+}
+
 static void cpr_set_acc(struct regmap *tcsr, struct fuse_corner *f,
 			struct fuse_corner *end)
 {
@@ -422,7 +446,7 @@ static void cpr_set_acc(struct regmap *tcsr, struct fuse_corner *f,
 
 static int cpr_pre_voltage(struct cpr_drv *drv,
 			   struct fuse_corner *fuse_corner,
-			   enum voltage_change_dir dir)
+			   enum voltage_change_dir dir, int vdd_mx_vmin)
 {
 	int ret = 0;
 	struct fuse_corner *prev_fuse_corner = drv->corner->fuse_corner;
@@ -430,18 +454,24 @@ static int cpr_pre_voltage(struct cpr_drv *drv,
 	if (drv->tcsr && dir == DOWN)
 		cpr_set_acc(drv->tcsr, prev_fuse_corner, fuse_corner);
 
+	if (vdd_mx_vmin && dir == UP)
+		ret = qcom_rpm_set_corner(drv->vdd_mx, vdd_mx_vmin);
+
 	return ret;
 }
 
 static int cpr_post_voltage(struct cpr_drv *drv,
 			    struct fuse_corner *fuse_corner,
-			    enum voltage_change_dir dir)
+			    enum voltage_change_dir dir, int vdd_mx_vmin)
 {
 	int ret = 0;
 	struct fuse_corner *prev_fuse_corner = drv->corner->fuse_corner;
 
 	if (drv->tcsr && dir == UP)
 		cpr_set_acc(drv->tcsr, prev_fuse_corner, fuse_corner);
+
+	if (vdd_mx_vmin && dir == DOWN)
+		ret = qcom_rpm_set_corner(drv->vdd_mx, vdd_mx_vmin);
 
 	return ret;
 }
@@ -654,6 +684,13 @@ static int cpr_enable(struct cpr_drv *drv)
 {
 	int ret;
 
+	/* Enable dependency power before vdd_apc */
+	if (drv->vdd_mx) {
+		ret = regulator_enable(drv->vdd_mx);
+		if (ret)
+			return ret;
+	}
+
 	ret = regulator_enable(drv->vdd_apc);
 	if (ret)
 		return ret;
@@ -675,6 +712,11 @@ static int cpr_disable(struct cpr_drv *drv)
 	int ret;
 
 	ret = regulator_disable(drv->vdd_apc);
+	if (ret)
+		return ret;
+
+	if (drv->vdd_mx)
+		ret = regulator_disable(drv->vdd_mx);
 	if (ret)
 		return ret;
 
@@ -789,6 +831,7 @@ static int cpr_set_performance(struct generic_pm_domain *domain,
 	struct corner *corner, *end;
 	enum voltage_change_dir dir;
 	int ret = 0, new_uV;
+	int vdd_mx_vmin = 0;
 
 	mutex_lock(&drv->lock);
 
@@ -817,6 +860,9 @@ static int cpr_set_performance(struct generic_pm_domain *domain,
 		new_uV = corner->last_uV;
 	else
 		new_uV = corner->uV;
+
+	if (dir != NO_CHANGE && drv->vdd_mx)
+		vdd_mx_vmin = cpr_mx_get(drv, fuse_corner, new_uV);
 
 	if (cpr_is_allowed(drv))
 		cpr_ctl_disable(drv);
@@ -991,6 +1037,9 @@ static int cpr_fuse_corner_init(struct cpr_drv *drv)
 		fuse->accs = accs;
 		fuse->num_accs = acc_desc->num_regs_per_fuse;
 		accs += acc_desc->num_regs_per_fuse;
+
+		/* Populate MX request */
+		fuse->vdd_mx_req = fdata->vdd_mx_req;
 	}
 
 	/*
@@ -1493,6 +1542,7 @@ static const struct cpr_desc qcs404_cpr_desc = {
 				.quot_adjust = 0,
 				.quot_offset_scale = 5,
 				.quot_offset_adjust = 0,
+				.vdd_mx_req = 0,
 			},
 			/* fuse corner 1 */
 			{
@@ -1506,6 +1556,7 @@ static const struct cpr_desc qcs404_cpr_desc = {
 				.quot_adjust = -20,
 				.quot_offset_scale = 5,
 				.quot_offset_adjust = 0,
+				.vdd_mx_req = 0,
 			},
 			/* fuse corner 2 */
 			{
@@ -1519,6 +1570,7 @@ static const struct cpr_desc qcs404_cpr_desc = {
 				.quot_adjust = 0,
 				.quot_offset_scale = 5,
 				.quot_offset_adjust = 0,
+				.vdd_mx_req = 0,
 			},
 		},
 	},
@@ -1791,6 +1843,10 @@ static int cpr_probe(struct platform_device *pdev)
 	drv->vdd_apc = devm_regulator_get(dev, "vdd-apc");
 	if (IS_ERR(drv->vdd_apc))
 		return PTR_ERR(drv->vdd_apc);
+
+	drv->vdd_mx = devm_regulator_get(dev, "vdd-mx");
+	if (IS_ERR(drv->vdd_mx))
+		return PTR_ERR(drv->vdd_mx);
 
 	/* Initialize fuse corners, since it simply depends
 	 * on data in efuses.
