@@ -1522,6 +1522,101 @@ static int cpr_find_initial_corner(struct cpr_drv *drv)
 	return 0;
 }
 
+static const struct cpr_desc msm8916_cpr_desc = {
+	.num_fuse_corners = 3,
+	.vdd_mx_vmin_method = VDD_MX_VMIN_FUSE_CORNER_MAP,
+	.min_diff_quot = CPR_FUSE_MIN_QUOT_DIFF,
+	.step_quot = (int []){ 26, 26, 26, 26, 26, 26, 26, 26 },
+	.cpr_fuses = {
+		.init_voltage_step = 10000,
+		.fuse_corner_data = (struct fuse_corner_data[]){
+			/* fuse corner 0 */
+			{
+				.ref_uV = 1050000,
+				.max_uV = 1050000,
+				.min_uV = 1050000,
+				.max_volt_scale = 0,
+				.max_quot_scale = 0,
+				.quot_offset = 0,
+				.quot_scale = 1,
+				.quot_adjust = 0,
+				.quot_offset_scale = 1,
+				.quot_offset_adjust = 0,
+				.vdd_mx_req = 3,
+			},
+			/* fuse corner 1 */
+			{
+				.ref_uV = 1150000,
+				.max_uV = 1150000,
+				.min_uV = 1050000,
+				.max_volt_scale = 0,
+				.max_quot_scale = 0,
+				.quot_offset = 0,
+				.quot_scale = 1,
+				.quot_adjust = 0,
+				.quot_offset_scale = 1,
+				.quot_offset_adjust = 0,
+				.vdd_mx_req = 4,
+			},
+			/* fuse corner 2 */
+			{
+				.ref_uV = 1350000,
+				.max_uV = 1350000,
+				.min_uV = 1162500,
+				.max_volt_scale = 0,
+				.max_quot_scale = 650,
+				.quot_offset = 0,
+				.quot_scale = 1,
+				.quot_adjust = 0,
+				.quot_offset_scale = 1,
+				.quot_offset_adjust = 0,
+				.vdd_mx_req = 6,
+			},
+		},
+		.cpr_fuse = (struct cpr_fuse[]){
+			{
+				.ring_osc = { 222, 3, 6},
+				.init_voltage = { 220, 6, 2 },
+				.quotient = { 221, 12, 2 },
+			},
+			{
+				.ring_osc = { 222, 3, 6},
+				.init_voltage = { 218, 6, 2 },
+				.quotient = { 219, 12, 0 },
+			},
+			{
+				.ring_osc = { 222, 3, 6},
+				.init_voltage = { 216, 6, 0 },
+				.quotient = { 216, 12, 6 },
+			},
+		},
+		.disable = &(struct qfprom_offset){ 223, 1, 1 },
+	},
+	.speed_bin = { 12, 3, 2 },
+	.pvs_version = { 6, 2, 7 },
+};
+
+static const struct acc_desc msm8916_acc_desc = {
+	.settings = (struct reg_sequence[]){
+		{ 0xf000, 0 },
+		{ 0xf000, 0x100 },
+		{ 0xf000, 0x101 }
+	},
+	.override_settings = (struct reg_sequence[]){
+		{ 0xf000, 0 },
+		{ 0xf000, 0x100 },
+		{ 0xf000, 0x100 }
+	},
+	.num_regs_per_fuse = 1,
+	.override = { 6, 1, 4 },
+	.override_value = 1,
+};
+
+static const struct cpr_acc_desc msm8916_cpr_acc_desc = {
+	.cpr_desc = &msm8916_cpr_desc,
+	.acc_desc = &msm8916_acc_desc,
+};
+
 static const struct cpr_desc qcs404_cpr_desc = {
 	.num_fuse_corners = 3,
 	.min_diff_quot = CPR_FUSE_MIN_QUOT_DIFF,
@@ -1920,6 +2015,7 @@ static int cpr_remove(struct platform_device *pdev)
 }
 
 static const struct of_device_id cpr_match_table[] = {
+	{ .compatible = "qcom,msm8916-cpr", .data = &msm8916_cpr_acc_desc },
 	{ .compatible = "qcom,qcs404-cpr", .data = &qcs404_cpr_acc_desc },
 	{ }
 };
