@@ -480,9 +480,14 @@ static int cpr_scale_voltage(struct cpr_drv *drv, struct corner *corner,
 			     int new_uV, enum voltage_change_dir dir)
 {
 	int ret = 0;
+	int vdd_mx_vmin = 0;
 	struct fuse_corner *fuse_corner = corner->fuse_corner;
 
-	ret = cpr_pre_voltage(drv, fuse_corner, dir);
+	/* Determine the vdd_mx voltage */
+	if (dir != NO_CHANGE && drv->vdd_mx)
+		vdd_mx_vmin = cpr_mx_get(drv, corner->fuse_corner, new_uV);
+
+	ret = cpr_pre_voltage(drv, fuse_corner, dir, vdd_mx_vmin);
 	if (ret)
 		return ret;
 
@@ -493,7 +498,7 @@ static int cpr_scale_voltage(struct cpr_drv *drv, struct corner *corner,
 		return ret;
 	}
 
-	ret = cpr_post_voltage(drv, fuse_corner, dir);
+	ret = cpr_post_voltage(drv, fuse_corner, dir, vdd_mx_vmin);
 	if (ret)
 		return ret;
 
@@ -829,7 +834,6 @@ static int cpr_set_performance(struct generic_pm_domain *domain,
 	struct corner *corner, *end;
 	enum voltage_change_dir dir;
 	int ret = 0, new_uV;
-	int vdd_mx_vmin = 0;
 
 	mutex_lock(&drv->lock);
 
@@ -858,9 +862,6 @@ static int cpr_set_performance(struct generic_pm_domain *domain,
 		new_uV = corner->last_uV;
 	else
 		new_uV = corner->uV;
-
-	if (dir != NO_CHANGE && drv->vdd_mx)
-		vdd_mx_vmin = cpr_mx_get(drv, fuse_corner, new_uV);
 
 	if (cpr_is_allowed(drv))
 		cpr_ctl_disable(drv);
