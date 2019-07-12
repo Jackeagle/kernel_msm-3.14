@@ -628,5 +628,5 @@ MODULE_VERSION(PCC_VERSION);
 MODULE_DESCRIPTION("Processor Clocking Control interface driver");
 MODULE_LICENSE("GPL");
 
-late_initcall(pcc_cpufreq_init);
+core_initcall(pcc_cpufreq_init);
 module_exit(pcc_cpufreq_exit);

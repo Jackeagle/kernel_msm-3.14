@@ -125,7 +125,7 @@ static int __init s3c2410_cpufreq_init(void)
 {
 	return subsys_interface_register(&s3c2410_cpufreq_interface);
 }
-arch_initcall(s3c2410_cpufreq_init);
+core_initcall(s3c2410_cpufreq_init);
 
 static int s3c2410a_cpufreq_add(struct device *dev,
 				struct subsys_interface *sif)
@@ -152,4 +152,4 @@ static int __init s3c2410a_cpufreq_init(void)
 {
 	return subsys_interface_register(&s3c2410a_cpufreq_interface);
 }
-arch_initcall(s3c2410a_cpufreq_init);
+core_initcall(s3c2410a_cpufreq_init);

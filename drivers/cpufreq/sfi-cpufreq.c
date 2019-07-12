@@ -112,7 +112,7 @@ err_free_array:
 	kfree(sfi_cpufreq_array);
 	return ret;
 }
-late_initcall(sfi_cpufreq_init);
+core_initcall(sfi_cpufreq_init);
 
 static void __exit sfi_cpufreq_exit(void)
 {

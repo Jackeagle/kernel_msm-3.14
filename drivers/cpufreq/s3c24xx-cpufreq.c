@@ -617,7 +617,7 @@ static int __init s3c_cpufreq_initcall(void)
 	return ret;
 }
 
-late_initcall(s3c_cpufreq_initcall);
+core_initcall(s3c_cpufreq_initcall);
 
 /**
  * s3c_plltab_register - register CPU PLL table.

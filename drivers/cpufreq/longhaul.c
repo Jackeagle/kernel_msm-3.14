@@ -999,5 +999,5 @@ MODULE_AUTHOR("Dave Jones");
 MODULE_DESCRIPTION("Longhaul driver for VIA Cyrix processors.");
 MODULE_LICENSE("GPL");
 
-late_initcall(longhaul_init);
+core_initcall(longhaul_init);
 module_exit(longhaul_exit);

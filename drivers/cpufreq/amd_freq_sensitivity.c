@@ -135,7 +135,7 @@ static int __init amd_freq_sensitivity_init(void)
 			POWERSAVE_BIAS_DEF);
 	return 0;
 }
-late_initcall(amd_freq_sensitivity_init);
+core_initcall(amd_freq_sensitivity_init);
 
 static void __exit amd_freq_sensitivity_exit(void)
 {

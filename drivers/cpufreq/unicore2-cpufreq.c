@@ -73,4 +73,4 @@ static int __init ucv2_cpufreq_init(void)
 	return cpufreq_register_driver(&ucv2_driver);
 }
 
-arch_initcall(ucv2_cpufreq_init);
+core_initcall(ucv2_cpufreq_init);

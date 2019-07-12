@@ -480,8 +480,8 @@ remove_opp:
 
 	return ret;
 }
-/* late_initcall, to guarantee the driver is loaded after A37xx clock driver */
-late_initcall(armada37xx_cpufreq_driver_init);
+/* core_initcall, to guarantee the driver is loaded after A37xx clock driver */
+core_initcall(armada37xx_cpufreq_driver_init);
 
 MODULE_AUTHOR("Gregory CLEMENT <gregory.clement@free-electrons.com>");
 MODULE_DESCRIPTION("Armada 37xx cpufreq driver");

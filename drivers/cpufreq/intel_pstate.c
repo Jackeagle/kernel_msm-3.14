@@ -2698,7 +2698,7 @@ hwp_cpu_matched:
 
 	return 0;
 }
-device_initcall(intel_pstate_init);
+core_initcall(intel_pstate_init);
 
 static int __init intel_pstate_setup(char *str)
 {

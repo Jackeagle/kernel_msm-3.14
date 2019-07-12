@@ -290,8 +290,8 @@ static int s3c2440_cpufreq_init(void)
 	return subsys_interface_register(&s3c2440_cpufreq_interface);
 }
 
-/* arch_initcall adds the clocks we need, so use subsys_initcall. */
-subsys_initcall(s3c2440_cpufreq_init);
+/* core_initcall adds the clocks we need, so use core_initcall. */
+core_initcall(s3c2440_cpufreq_init);
 
 static struct subsys_interface s3c2442_cpufreq_interface = {
 	.name		= "s3c2442_cpufreq",
@@ -303,4 +303,4 @@ static int s3c2442_cpufreq_init(void)
 {
 	return subsys_interface_register(&s3c2442_cpufreq_interface);
 }
-subsys_initcall(s3c2442_cpufreq_init);
+core_initcall(s3c2442_cpufreq_init);

@@ -691,6 +691,6 @@ MODULE_AUTHOR("Dave Jones");
 MODULE_DESCRIPTION("Powernow driver for AMD K7 processors.");
 MODULE_LICENSE("GPL");
 
-late_initcall(powernow_init);
+core_initcall(powernow_init);
 module_exit(powernow_exit);
 

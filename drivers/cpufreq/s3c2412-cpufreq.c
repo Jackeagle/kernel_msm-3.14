@@ -249,4 +249,4 @@ static int s3c2412_cpufreq_init(void)
 {
 	return subsys_interface_register(&s3c2412_cpufreq_interface);
 }
-arch_initcall(s3c2412_cpufreq_init);
+core_initcall(s3c2412_cpufreq_init);

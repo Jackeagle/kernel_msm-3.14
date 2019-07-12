@@ -349,5 +349,5 @@ acpi_cpufreq_exit (void)
 	cpufreq_unregister_driver(&acpi_cpufreq_driver);
 }
 
-late_initcall(acpi_cpufreq_init);
+core_initcall(acpi_cpufreq_init);
 module_exit(acpi_cpufreq_exit);

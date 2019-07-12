@@ -35,4 +35,4 @@ static int __init tango_cpufreq_init(void)
 
 	return PTR_ERR_OR_ZERO(res);
 }
-device_initcall(tango_cpufreq_init);
+core_initcall(tango_cpufreq_init);

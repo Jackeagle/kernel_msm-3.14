@@ -370,4 +370,4 @@ static int __init sa1110_clk_init(void)
 }
 
 module_param_string(sdram, sdram_name, sizeof(sdram_name), 0);
-arch_initcall(sa1110_clk_init);
+core_initcall(sa1110_clk_init);

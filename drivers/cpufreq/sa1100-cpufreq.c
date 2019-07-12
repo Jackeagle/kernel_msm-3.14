@@ -203,4 +203,4 @@ static int __init sa1100_dram_init(void)
 		return -ENODEV;
 }
 
-arch_initcall(sa1100_dram_init);
+core_initcall(sa1100_dram_init);

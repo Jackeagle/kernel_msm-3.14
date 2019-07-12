@@ -125,4 +125,4 @@ static int __init cbe_cpufreq_pmi_init(void)
 
 	return 0;
 }
-device_initcall(cbe_cpufreq_pmi_init);
+core_initcall(cbe_cpufreq_pmi_init);

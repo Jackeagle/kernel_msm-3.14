@@ -101,4 +101,4 @@ static int __init armada_xp_pmsu_cpufreq_init(void)
 	platform_device_register_simple("cpufreq-dt", -1, NULL, 0);
 	return 0;
 }
-device_initcall(armada_xp_pmsu_cpufreq_init);
+core_initcall(armada_xp_pmsu_cpufreq_init);

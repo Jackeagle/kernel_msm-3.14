@@ -1219,5 +1219,5 @@ MODULE_AUTHOR("Mark Langsdorf <mark.langsdorf@amd.com>");
 MODULE_DESCRIPTION("AMD Athlon 64 and Opteron processor frequency driver.");
 MODULE_LICENSE("GPL");
 
-late_initcall(powernowk8_init);
+core_initcall(powernowk8_init);
 module_exit(powernowk8_exit);
