@@ -28,6 +28,10 @@ arm/soc
 		git://git.kernel.org/pub/scm/linux/kernel/git/shawnguo/linux tags/imx-soc-5.3
 	samsung/soc
 		https://git.kernel.org/pub/scm/linux/kernel/git/krzk/linux tags/samsung-soc-5.3
+	riscpc/devel
+		git://git.armlinux.org.uk/~rmk/linux-arm for-arm-soc
+	patch
+		ARM: stm32: use "depends on" instead of "if" after prompt
 
 arm/dt
 	integrator/dts
@@ -129,6 +133,8 @@ arm/dt
 		https://git.kernel.org/pub/scm/linux/kernel/git/sunxi/linux tags/sunxi-dt64-for-5.3-round-2
 	samsung/dt3
 		https://git.kernel.org/pub/scm/linux/kernel/git/krzk/linux tags/samsung-dt-5.3-3
+	patch
+		ARM: dts: gemini: Set DIR-685 SPI CS as active low
 
 arm/drivers
 	fsl/soc
