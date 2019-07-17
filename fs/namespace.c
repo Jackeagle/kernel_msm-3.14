@@ -70,7 +70,7 @@ static struct hlist_head *mountpoint_hashtable __read_mostly;
 static struct kmem_cache *mnt_cache __read_mostly;
 static DECLARE_RWSEM(namespace_sem);
 static HLIST_HEAD(unmounted);	/* protected by namespace_sem */
-static LIST_HEAD(ex_mountpoints);
+static LIST_HEAD(ex_mountpoints); /* protected by namespace_sem */
 
 /* /sys/fs */
 struct kobject *fs_kobj;
@@ -746,7 +746,11 @@ done:
 	return mp;
 }
 
-static void put_mountpoint(struct mountpoint *mp, struct list_head *list)
+/*
+ * vfsmount lock must be held.  Additionally, the caller is responsible
+ * for serializing calls for given disposal list.
+ */
+static void __put_mountpoint(struct mountpoint *mp, struct list_head *list)
 {
 	if (!--mp->m_count) {
 		struct dentry *dentry = mp->m_dentry;
@@ -754,12 +758,16 @@ static void put_mountpoint(struct mountpoint *mp, struct list_head *list)
 		spin_lock(&dentry->d_lock);
 		dentry->d_flags &= ~DCACHE_MOUNTED;
 		spin_unlock(&dentry->d_lock);
-		if (!list)
-			list = &ex_mountpoints;
 		dput_to_list(dentry, list);
 		hlist_del(&mp->m_hash);
 		kfree(mp);
 	}
+}
+
+/* called with namespace_lock and vfsmount lock */
+static void put_mountpoint(struct mountpoint *mp)
+{
+	__put_mountpoint(mp, &ex_mountpoints);
 }
 
 static inline int check_mnt(struct mount *mnt)
@@ -808,9 +816,9 @@ static struct mountpoint *unhash_mnt(struct mount *mnt)
 /*
  * vfsmount lock must be held for write
  */
-static void umount_mnt(struct mount *mnt, struct list_head *list)
+static void umount_mnt(struct mount *mnt)
 {
-	put_mountpoint(unhash_mnt(mnt), list);
+	put_mountpoint(unhash_mnt(mnt));
 }
 
 /*
@@ -857,7 +865,7 @@ void mnt_change_mountpoint(struct mount *parent, struct mountpoint *mp, struct m
 
 	attach_mnt(mnt, parent, mp);
 
-	put_mountpoint(old_mp, NULL);
+	put_mountpoint(old_mp);
 	mnt_add_count(old_parent, -1);
 }
 
@@ -1155,7 +1163,7 @@ static void mntput_no_expire(struct mount *mnt)
 	if (unlikely(!list_empty(&mnt->mnt_mounts))) {
 		struct mount *p, *tmp;
 		list_for_each_entry_safe(p, tmp, &mnt->mnt_mounts,  mnt_child) {
-			umount_mnt(p, &list);
+			__put_mountpoint(unhash_mnt(p), &list);
 			hlist_add_head(&p->mnt_umount, &mnt->mnt_stuck_children);
 		}
 	}
@@ -1461,7 +1469,7 @@ static void umount_tree(struct mount *mnt, enum umount_tree_flags how)
 				/* Don't forget about p */
 				list_add_tail(&p->mnt_child, &p->mnt_parent->mnt_mounts);
 			} else {
-				umount_mnt(p, NULL);
+				umount_mnt(p);
 				hlist_add_head(&p->mnt_umount, &unmounted);
 			}
 		}
@@ -1615,12 +1623,12 @@ void __detach_mounts(struct dentry *dentry)
 	while (!hlist_empty(&mp->m_list)) {
 		mnt = hlist_entry(mp->m_list.first, struct mount, mnt_mp_list);
 		if (mnt->mnt.mnt_flags & MNT_UMOUNT) {
-			umount_mnt(mnt, NULL);
+			umount_mnt(mnt);
 			hlist_add_head(&mnt->mnt_umount, &unmounted);
 		}
 		else umount_tree(mnt, UMOUNT_CONNECTED);
 	}
-	put_mountpoint(mp, NULL);
+	put_mountpoint(mp);
 out_unlock:
 	unlock_mount_hash();
 	namespace_unlock();
@@ -2091,7 +2099,7 @@ static int attach_recursive_mnt(struct mount *source_mnt,
 		child->mnt.mnt_flags &= ~MNT_LOCKED;
 		commit_tree(child);
 	}
-	put_mountpoint(smp, NULL);
+	put_mountpoint(smp);
 	unlock_mount_hash();
 
 	return 0;
@@ -2108,7 +2116,7 @@ static int attach_recursive_mnt(struct mount *source_mnt,
 	ns->pending_mounts = 0;
 
 	read_seqlock_excl(&mount_lock);
-	put_mountpoint(smp, NULL);
+	put_mountpoint(smp);
 	read_sequnlock_excl(&mount_lock);
 
 	return err;
@@ -2148,7 +2156,7 @@ static void unlock_mount(struct mountpoint *where)
 	struct dentry *dentry = where->m_dentry;
 
 	read_seqlock_excl(&mount_lock);
-	put_mountpoint(where, NULL);
+	put_mountpoint(where);
 	read_sequnlock_excl(&mount_lock);
 
 	namespace_unlock();
@@ -2625,7 +2633,7 @@ static int do_move_mount(struct path *old_path, struct path *new_path)
 	 * automatically */
 	list_del_init(&old->mnt_expire);
 	if (attached)
-		put_mountpoint(old_mp, NULL);
+		put_mountpoint(old_mp);
 out:
 	unlock_mount(mp);
 	if (!err) {
@@ -3636,8 +3644,8 @@ SYSCALL_DEFINE2(pivot_root, const char __user *, new_root,
 	if (!is_path_reachable(new_mnt, new.dentry, &root))
 		goto out4;
 	lock_mount_hash();
-	put_mountpoint(unhash_mnt(new_mnt), NULL);
-	root_mp = unhash_mnt(root_mnt);
+	umount_mnt(new_mnt);
+	root_mp = unhash_mnt(root_mnt); /* we'll need its mountpoint */
 	if (root_mnt->mnt.mnt_flags & MNT_LOCKED) {
 		new_mnt->mnt.mnt_flags |= MNT_LOCKED;
 		root_mnt->mnt.mnt_flags &= ~MNT_LOCKED;
@@ -3650,7 +3658,7 @@ SYSCALL_DEFINE2(pivot_root, const char __user *, new_root,
 	touch_mnt_namespace(current->nsproxy->mnt_ns);
 	/* A moved mount should not expire automatically */
 	list_del_init(&new_mnt->mnt_expire);
-	put_mountpoint(root_mp, NULL);
+	put_mountpoint(root_mp);
 	unlock_mount_hash();
 	chroot_fs_refs(&root, &new);
 	error = 0;
