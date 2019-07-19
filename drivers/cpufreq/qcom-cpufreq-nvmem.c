@@ -227,7 +227,8 @@ static int qcom_cpufreq_probe(struct platform_device *pdev)
 		if (drv->data->genpd_names) {
 			drv->genpd_opp_tables[cpu] =
 				dev_pm_opp_attach_genpd(cpu_dev,
-							drv->data->genpd_names);
+							drv->data->genpd_names,
+							NULL);
 			if (IS_ERR(drv->genpd_opp_tables[cpu])) {
 				ret = PTR_ERR(drv->genpd_opp_tables[cpu]);
 				if (ret != -EPROBE_DEFER)
