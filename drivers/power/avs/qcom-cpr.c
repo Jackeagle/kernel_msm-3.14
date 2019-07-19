@@ -1119,11 +1119,50 @@ static unsigned int cpr_get_fuse_corner(struct dev_pm_opp *opp)
 	return fuse_corner;
 }
 
+unsigned long cpr_get_opp_hz_for_req(struct dev_pm_opp *ref)
+{
+	u64 rate = 0;
+	struct device *cpu_dev;
+	struct device_node *ref_np;
+	struct device_node *desc_np;
+	struct device_node *child_np = NULL;
+	struct device_node *child_req_np = NULL;
+
+	cpu_dev = get_cpu_device(0);
+	if (!cpu_dev)
+		return 0;
+
+	desc_np = dev_pm_opp_of_get_opp_desc_node(cpu_dev);
+	if (!desc_np)
+		return 0;
+
+	ref_np = dev_pm_opp_get_of_node(ref);
+	if (!ref_np)
+		goto out_ref;
+
+	do {
+		of_node_put(child_req_np);
+		child_np = of_get_next_available_child(desc_np, child_np);
+		child_req_np = of_parse_phandle(child_np, "required-opps", 0);
+	} while (child_np && child_req_np != ref_np);
+
+	if (child_np && child_req_np == ref_np)
+		of_property_read_u64(child_np, "opp-hz", &rate);
+
+	of_node_put(child_req_np);
+	of_node_put(child_np);
+	of_node_put(ref_np);
+out_ref:
+	of_node_put(desc_np);
+
+	return (unsigned long) rate;
+}
+
 static int cpr_corner_init(struct cpr_drv *drv)
 {
 	const struct cpr_desc *desc = drv->desc;
 	const struct cpr_fuse *fuses = drv->cpr_fuses;
-	int i, scaling = 0;
+	int i, level, count, scaling = 0;
 	unsigned int fnum, fc;
 	const char *quot_offset;
 	struct fuse_corner *fuse, *prev_fuse;
@@ -1132,7 +1171,7 @@ static int cpr_corner_init(struct cpr_drv *drv)
 	const struct fuse_corner_data *fdata;
 	bool apply_scaling;
 	unsigned long freq_diff, freq_diff_mhz;
-	unsigned long freq = 0;
+	unsigned long freq;
 	int step_volt = regulator_get_linear_step(drv->vdd_apc);
 	struct dev_pm_opp *opp;
 	struct device *pd_dev;
@@ -1154,23 +1193,30 @@ static int cpr_corner_init(struct cpr_drv *drv)
 	 * Store maximum frequency for each fuse corner based on the frequency
 	 * plan
 	 */
-	i = 0;
-	while (!IS_ERR(opp = dev_pm_opp_find_freq_ceil(pd_dev, &freq))) {
-		fc = cpr_get_fuse_corner(opp);
-		if (!fc)
+	count = dev_pm_opp_get_opp_count(pd_dev);
+	for (level = 1; level <= count; level++) {
+		opp = dev_pm_opp_find_level_exact(pd_dev, level);
+		if (IS_ERR(opp))
 			return -EINVAL;
-
+		fc = cpr_get_fuse_corner(opp);
+		if (!fc) {
+			dev_pm_opp_put(opp);
+			return -EINVAL;
+		}
 		fnum = fc - 1;
-		cdata[i].fuse_corner = fnum;
-		cdata[i].freq = freq;
-		i++;
+		freq = cpr_get_opp_hz_for_req(opp);
+		if (!freq) {
+			dev_pm_opp_put(opp);
+			return -EINVAL;
+		}
+		cdata[level - 1].fuse_corner = fnum;
+		cdata[level - 1].freq = freq;
 
 		fuse = &drv->fuse_corners[fnum];
 		dev_dbg(drv->dev, "freq: %lu level: %u fuse level: %u\n",
 			freq, dev_pm_opp_get_level(opp) - 1, fnum);
 		if (freq > fuse->max_freq)
 			fuse->max_freq = freq;
-		freq++;
 		dev_pm_opp_put(opp);
 	}
 

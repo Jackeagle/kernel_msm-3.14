@@ -128,17 +128,14 @@
 		cpr_opp1: opp1 {
 			opp-level = <1>;
 			qcom,opp-fuse-level = <1>;
-			opp-hz = /bits/ 64 <1094400000>;
 		};
 		cpr_opp2: opp2 {
 			opp-level = <2>;
 			qcom,opp-fuse-level = <2>;
-			opp-hz = /bits/ 64 <1248000000>;
 		};
 		cpr_opp3: opp3 {
 			opp-level = <3>;
 			qcom,opp-fuse-level = <3>;
-			opp-hz = /bits/ 64 <1401600000>;
 		};
 	};
 
