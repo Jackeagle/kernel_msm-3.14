@@ -197,7 +197,11 @@ struct acc_desc {
 
 	struct reg_sequence	*config;
 	struct reg_sequence	*settings;
+	struct reg_sequence	*override_settings;
 	int			num_regs_per_fuse;
+
+	char	*override;
+	u8	override_value;
 };
 
 struct cpr_acc_desc {
@@ -979,11 +983,24 @@ static int cpr_fuse_corner_init(struct cpr_drv *drv)
 	unsigned int step_volt;
 	struct fuse_corner_data *fdata;
 	struct fuse_corner *fuse, *end, *prev;
+	const char *redun;
 	int uV;
+	u32 val = 0;
+	u8 expected;
 	const struct reg_sequence *accs;
 	int ret;
 
-	accs = acc_desc->settings;
+	redun = acc_desc->override;
+	expected = acc_desc->override_value;
+
+	ret = cpr_read_efuse(drv->dev, redun, &val);
+	if (ret)
+		return ret;
+
+	if (redun && val == expected)
+		accs = acc_desc->override_settings;
+	else
+		accs = acc_desc->settings;
 
 	//step_volt = regulator_get_linear_step(drv->vdd_apc);
 	step_volt = 12500; /* TODO: Replace with ^ when apc_reg ready */
@@ -1387,11 +1404,13 @@ static const struct cpr_fuse *cpr_get_fuses(struct cpr_drv *drv)
 		if (!fuses[i].quotient)
 			return ERR_PTR(-ENOMEM);
 
+		/*
 		snprintf(tbuf, 32, "cpr_quotient_offset%d", i + 1);
 		fuses[i].quotient_offset = devm_kstrdup(drv->dev, tbuf,
 							GFP_KERNEL);
 		if (!fuses[i].quotient_offset)
 			return ERR_PTR(-ENOMEM);
+		*/
 	}
 
 	return fuses;
@@ -1569,27 +1588,9 @@ static const struct cpr_desc msm8916_cpr_desc = {
 				.vdd_mx_req = 6,
 			},
 		},
-		.cpr_fuse = (struct cpr_fuse[]){
-			{
-				.ring_osc = "cpr_ring_osc1",
-				.init_voltage = "cpr_init_voltage1",
-				.quotient = "cpr_quotient1",
-			},
-			{
-				.ring_osc = "cpr_ring_osc2",
-				.init_voltage = "cpr_init_voltage2",
-				.quotient = "cpr_quotient2",
-			},
-			{
-				.ring_osc = "cpr_ring_osc3",
-				.init_voltage = "cpr_init_voltage3",
-				.quotient = "cpr_quotient3",
-			},
-		},
 	},
-	.pvs_version = "cpr_pvs_version",
-	.fuse_revision = "cpr_fuse_revision",
-	.speed_bin = "cpr_speed_bin",
+	//.pvs_version = "cpr_pvs_version",
+	//.speed_bin = "cpr_speed_bin",
 };
 
 static const struct acc_desc msm8916_acc_desc = {

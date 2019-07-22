@@ -296,7 +296,7 @@
 	};
 
 	cpu_opp_table: cpu_opp_table {
-		compatible = "operating-points-v2-qcom-cpu";
+		compatible = "operating-points-v2-kryo-cpu";
 		nvmem-cells = <&cpr_efuse_speedbin>;
 		opp-shared;
 
@@ -335,6 +335,47 @@
 		opp-1363200000 {
 			opp-hz = /bits/ 64 <1363200000>;
 			required-opps = <&cpr_opp9>;
+		};
+	};
+
+	cpr_opp_table: opp-table {
+		compatible = "operating-points-v2-qcom-level";
+
+		cpr_opp1: opp1 {
+			opp-level = <1>;
+			qcom,opp-fuse-level = <1>;
+		};
+		cpr_opp2: opp2 {
+			opp-level = <2>;
+			qcom,opp-fuse-level = <1>;
+		};
+		cpr_opp3: opp3 {
+			opp-level = <3>;
+			qcom,opp-fuse-level = <2>;
+		};
+		cpr_opp4: opp4 {
+			opp-level = <4>;
+			qcom,opp-fuse-level = <2>;
+		};
+		cpr_opp5: opp5 {
+			opp-level = <5>;
+			qcom,opp-fuse-level = <3>;
+		};
+		cpr_opp6: opp6 {
+			opp-level = <6>;
+			qcom,opp-fuse-level = <3>;
+		};
+		cpr_opp7: opp7 {
+			opp-level = <7>;
+			qcom,opp-fuse-level = <3>;
+		};
+		cpr_opp8: opp8 {
+			opp-level = <8>;
+			qcom,opp-fuse-level = <3>;
+		};
+		cpr_opp9: opp9 {
+			opp-level = <9>;
+			qcom,opp-fuse-level = <3>;
 		};
 	};
 
@@ -1623,9 +1664,11 @@
 		};
 
 		cprpd: cpr@b018000 {
-			compatible = "qcom,msm8916-cpr";
-			reg = <0xb018000 0x1000>;
+			compatible = "qcom,msm8916-cpr", "qcom,cpr";
+			reg = <0x0b018000 0x1000>;
 			interrupts = <0 15 IRQ_TYPE_EDGE_RISING>;
+			clocks = <&xo_board>;
+			clock-names = "ref";
 			vdd-mx-supply = <&pm8916_l3>;
 			vdd-apc-supply = <&pm8916_spmi_s2>;
 			#power-domain-cells = <0>;
@@ -1661,7 +1704,6 @@
 				"cpr_ring_osc3",
 				"cpr_fuse_revision";
 
-			qcom,cpr-ref-clk = <19200>;
 			qcom,cpr-timer-delay-us = <5000>;
 			qcom,cpr-timer-cons-up = <0>;
 			qcom,cpr-timer-cons-down = <2>;
@@ -1671,56 +1713,6 @@
 			qcom,cpr-gcnt-us = <1>;
 			qcom,vdd-apc-step-up-limit = <1>;
 			qcom,vdd-apc-step-down-limit = <1>;
-		};
-
-		cpr_opp_table: opp-table {
-			compatible = "operating-points-v2-qcom-level";
-
-			cpr_opp1: opp1 {
-				opp-level = <1>;
-				qcom,opp-fuse-level = <1>;
-				opp-hz = /bits/ 64 <200000000>;
-			};
-			cpr_opp2: opp2 {
-				opp-level = <2>;
-				qcom,opp-fuse-level = <1>;
-				opp-hz = /bits/ 64 <400000000>;
-			};
-			cpr_opp3: opp3 {
-				opp-level = <3>;
-				qcom,opp-fuse-level = <2>;
-				opp-hz = /bits/ 64 <533330000>;
-			};
-			cpr_opp4: opp4 {
-				opp-level = <4>;
-				qcom,opp-fuse-level = <2>;
-				opp-hz = /bits/ 64 <800000000>;
-			};
-			cpr_opp5: opp5 {
-				opp-level = <5>;
-				qcom,opp-fuse-level = <3>;
-				opp-hz = /bits/ 64 <998400000>;
-			};
-			cpr_opp6: opp6 {
-				opp-level = <6>;
-				qcom,opp-fuse-level = <3>;
-				opp-hz = /bits/ 64 <1094400000>;
-			};
-			cpr_opp7: opp7 {
-				opp-level = <7>;
-				qcom,opp-fuse-level = <3>;
-				opp-hz = /bits/ 64 <1152000000>;
-			};
-			cpr_opp8: opp8 {
-				opp-level = <8>;
-				qcom,opp-fuse-level = <3>;
-				opp-hz = /bits/ 64 <1209600000>;
-			};
-			cpr_opp9: opp9 {
-				opp-level = <9>;
-				qcom,opp-fuse-level = <3>;
-				opp-hz = /bits/ 64 <1363200000>;
-			};
 		};
 	};
 
