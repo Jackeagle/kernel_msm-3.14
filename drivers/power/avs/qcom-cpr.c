@@ -3,7 +3,7 @@
  * Copyright (c) 2013-2015, The Linux Foundation. All rights reserved.
  * Copyright (c) 2019, Linaro Limited
  */
-
+#define DEBUG
 #include <linux/module.h>
 #include <linux/err.h>
 #include <linux/debugfs.h>

@@ -9,7 +9,7 @@
  * based on the silicon variant in use. Qualcomm Process Voltage Scaling Tables
  * defines the voltage and frequency value based on the msm-id in SMEM
  * and speedbin blown in the efuse combination.
- * The qcom-cpufreq driver reads the msm-id and efuse value from the SoC
+ * The qcom-cpufreq-nvmem driver reads the msm-id and efuse value from the SoC
  * to provide the OPP framework with required information.
  * This is used to determine the voltage and frequency value for each OPP of
  * operating-points-v2 table when it is parsed by the OPP framework.
@@ -172,7 +172,6 @@ static int qcom_cpufreq_probe(struct platform_device *pdev)
 
 	if (drv->data->get_version) {
 		speedbin_nvmem = of_nvmem_cell_get(np, NULL);
-		of_node_put(np);
 		if (IS_ERR(speedbin_nvmem)) {
 			if (PTR_ERR(speedbin_nvmem) != -EPROBE_DEFER)
 				dev_err(cpu_dev,
@@ -189,6 +188,7 @@ static int qcom_cpufreq_probe(struct platform_device *pdev)
 		}
 		nvmem_cell_put(speedbin_nvmem);
 	}
+	of_node_put(np);
 
 	drv->opp_tables = kcalloc(num_possible_cpus(), sizeof(*drv->opp_tables),
 				  GFP_KERNEL);
@@ -295,7 +295,7 @@ static struct platform_driver qcom_cpufreq_driver = {
 	.probe = qcom_cpufreq_probe,
 	.remove = qcom_cpufreq_remove,
 	.driver = {
-		.name = "qcom-cpufreq",
+		.name = "qcom-cpufreq-nvmem",
 	},
 };
 
@@ -330,7 +330,7 @@ static int __init qcom_cpufreq_init(void)
 	if (unlikely(ret < 0))
 		return ret;
 
-	cpufreq_pdev = platform_device_register_data(NULL, "qcom-cpufreq",
+	cpufreq_pdev = platform_device_register_data(NULL, "qcom-cpufreq-nvmem",
 						     -1, match, sizeof(*match));
 	ret = PTR_ERR_OR_ZERO(cpufreq_pdev);
 	if (0 == ret)
