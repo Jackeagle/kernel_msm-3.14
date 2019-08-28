@@ -11,6 +11,7 @@
 #define TWO_PT_CALIB		0x3
 
 #include <linux/thermal.h>
+#include <linux/slab.h>
 
 struct tsens_device;
 

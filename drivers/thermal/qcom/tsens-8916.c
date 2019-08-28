@@ -51,9 +51,10 @@ static int calibrate_8916(struct tsens_device *tmdev)
 		return PTR_ERR(qfprom_cdata);
 
 	qfprom_csel = (u32 *)qfprom_read(tmdev->dev, "calib_sel");
-	if (IS_ERR(qfprom_csel))
+	if (IS_ERR(qfprom_csel)) {
+		kfree(qfprom_cdata);
 		return PTR_ERR(qfprom_csel);
-
+	}
 	mode = (qfprom_csel[0] & CAL_SEL_MASK) >> CAL_SEL_SHIFT;
 	dev_dbg(tmdev->dev, "calibration mode is %d\n", mode);
 
@@ -87,6 +88,9 @@ static int calibrate_8916(struct tsens_device *tmdev)
 	}
 
 	compute_intercept_slope(tmdev, p1, p2, mode);
+
+	kfree(qfprom_cdata);
+	kfree(qfprom_csel);
 
 	return 0;
 }

@@ -128,6 +128,7 @@ static int calibrate_v1(struct tsens_device *tmdev)
 
 	compute_intercept_slope(tmdev, p1, p2, mode);
 
+	kfree(qfprom_cdata);
 	return 0;
 }
 

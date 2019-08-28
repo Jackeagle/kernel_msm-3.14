@@ -104,8 +104,10 @@ static int calibrate_8974(struct tsens_device *tmdev)
 		return PTR_ERR(calib);
 
 	bkp = (u32 *)qfprom_read(tmdev->dev, "calib_backup");
-	if (IS_ERR(bkp))
+	if (IS_ERR(bkp)) {
+		kfree(calib);
 		return PTR_ERR(bkp);
+	}
 
 	calib_redun_sel =  bkp[1] & BKP_REDUN_SEL;
 	calib_redun_sel >>= BKP_REDUN_SHIFT;
@@ -219,6 +221,9 @@ static int calibrate_8974(struct tsens_device *tmdev)
 	}
 
 	compute_intercept_slope(tmdev, p1, p2, mode);
+
+	kfree(calib);
+	kfree(bkp);
 
 	return 0;
 }

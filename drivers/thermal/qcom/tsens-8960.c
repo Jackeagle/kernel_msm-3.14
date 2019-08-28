@@ -229,6 +229,8 @@ static int calibrate_8960(struct tsens_device *tmdev)
 	for (i = 0; i < num_read; i++, s++)
 		s->offset = data[i];
 
+	kfree(data);
+
 	return 0;
 }
 
