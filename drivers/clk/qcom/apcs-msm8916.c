@@ -19,9 +19,9 @@
 
 static const u32 gpll0_a53cc_map[] = { 4, 5 };
 
-static const char * const gpll0_a53cc[] = {
-	"gpll0_vote",
-	"a53pll",
+static const struct clk_parent_data pdata[] = {
+	{ .fw_name = "aux", .name = "gpll0_vote", },
+	{ .fw_name = "pll", .name = "a53pll", },
 };
 
 /*
@@ -51,6 +51,19 @@ static int qcom_apcs_msm8916_clk_probe(struct platform_device *pdev)
 	struct clk_init_data init = { };
 	int ret = -ENODEV;
 
+	/*
+	 * This driver is defined by the devicetree binding
+	 * Documentation/devicetree/bindings/mailbox/qcom,apcs-kpss-global.txt,
+	 * however, this driver is registered as a platform device by
+	 * qcom-apcs-ipc-mailbox.c. Because of this, when this driver
+	 * uses dev_get_regmap() and devm_clk_get(), it has to send the parent
+	 * device as argument.
+	 * When registering with the clock framework, we cannot use this trick,
+	 * since the clock framework always looks at dev->of_node when it tries
+	 * to find parent clock names using clk_parent_data.
+	 */
+	dev->of_node = parent->of_node;
+
 	regmap = dev_get_regmap(parent, NULL);
 	if (!regmap) {
 		dev_err(dev, "failed to get regmap: %d\n", ret);
@@ -62,8 +75,8 @@ static int qcom_apcs_msm8916_clk_probe(struct platform_device *pdev)
 		return -ENOMEM;
 
 	init.name = "a53mux";
-	init.parent_names = gpll0_a53cc;
-	init.num_parents = ARRAY_SIZE(gpll0_a53cc);
+	init.parent_data = pdata;
+	init.num_parents = ARRAY_SIZE(pdata);
 	init.ops = &clk_regmap_mux_div_ops;
 	init.flags = CLK_SET_RATE_PARENT;
 
