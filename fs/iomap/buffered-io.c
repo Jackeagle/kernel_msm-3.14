@@ -1068,7 +1068,7 @@ vm_fault_t iomap_page_mkwrite(struct vm_fault *vmf, const struct iomap_ops *ops)
 	lock_page(page);
 	size = i_size_read(inode);
 	offset = page_offset(page);
-	if (page->mapping != inode->i_mapping || offset > size) {
+	if (page->mapping != inode->i_mapping || offset >= size) {
 		/* We overload EFAULT to mean page got truncated */
 		ret = -EFAULT;
 		goto out_unlock;
