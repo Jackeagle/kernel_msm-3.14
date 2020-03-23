@@ -336,6 +336,7 @@ static void renesas_fw_callback(const struct firmware *fw,
 		goto cleanup;
 	}
 
+	xhci_pci_probe(pdev, ctx->id);
 	return;
 
 cleanup:
