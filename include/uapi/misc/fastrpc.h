@@ -40,6 +40,10 @@ struct fastrpc_alloc_dma_buf {
 	__u64 size;	/* size */
 };
 
+#define ADSP_MMAP_HEAP_ADDR		4
+#define ADSP_MMAP_REMOTE_HEAP_ADDR	8
+#define ADSP_MMAP_ADD_PAGES		0x1000
+
 struct fastrpc_req_mmap {
 	__s32 fd;
 	__u32 flags;	/* flags for dsp to map with */

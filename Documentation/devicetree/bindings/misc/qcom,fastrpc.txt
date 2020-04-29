@@ -27,6 +27,11 @@ other tasks.
 	Value type: <u32>
 	Definition: Must be 0
 
+- qcom,vmids:
+        Usage: optional
+        Value type: <u32 array>
+        Definition: vmids of the remote processor, to set up memory protection.
+
 = COMPUTE BANKS
 Each subnode of the Fastrpc represents compute context banks available
 on the dsp.

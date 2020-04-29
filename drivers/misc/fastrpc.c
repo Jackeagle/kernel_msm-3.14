@@ -17,6 +17,7 @@
 #include <linux/rpmsg.h>
 #include <linux/scatterlist.h>
 #include <linux/slab.h>
+#include <linux/qcom_scm.h>
 #include <uapi/misc/fastrpc.h>
 
 #define ADSP_DOMAIN_ID (0)
@@ -25,6 +26,7 @@
 #define CDSP_DOMAIN_ID (3)
 #define FASTRPC_DEV_MAX		4 /* adsp, mdsp, slpi, cdsp*/
 #define FASTRPC_MAX_SESSIONS	9 /*8 compute, 1 cpz*/
+#define FASTRPC_MAX_VMIDS	16
 #define FASTRPC_ALIGN		128
 #define FASTRPC_MAX_FDLIST	16
 #define FASTRPC_MAX_CRCLIST	64
@@ -34,7 +36,6 @@
 #define FASTRPC_CTXID_MASK (0xFF0)
 #define INIT_FILELEN_MAX (2 * 1024 * 1024)
 #define FASTRPC_DEVICE_NAME	"fastrpc"
-#define ADSP_MMAP_ADD_PAGES 0x1000
 
 /* Retrives number of input buffers from the scalars parameter */
 #define REMOTE_SCALARS_INBUFS(sc)	(((sc) >> 16) & 0x0ff)
@@ -92,6 +93,7 @@ struct fastrpc_remote_arg {
 	u64 len;
 };
 
+
 struct fastrpc_mmap_rsp_msg {
 	u64 vaddr;
 };
@@ -140,6 +142,7 @@ struct fastrpc_buf {
 	void *virt;
 	u64 phys;
 	u64 size;
+	u32 flags;
 	/* Lock for dma buf attachments */
 	struct mutex lock;
 	struct list_head attachments;
@@ -202,6 +205,9 @@ struct fastrpc_session_ctx {
 struct fastrpc_channel_ctx {
 	int domain_id;
 	int sesscount;
+	unsigned int perms;
+	struct qcom_scm_vmperm vmperms[FASTRPC_MAX_VMIDS];
+	int vmcount;
 	struct rpmsg_device *rpdev;
 	struct fastrpc_session_ctx session[FASTRPC_MAX_SESSIONS];
 	spinlock_t lock;
@@ -1320,6 +1326,7 @@ static int fastrpc_req_munmap_impl(struct fastrpc_user *fl,
 				   struct fastrpc_req_munmap *req)
 {
 	struct fastrpc_invoke_args args[1] = { [0] = { 0 } };
+	struct fastrpc_channel_ctx *cctx = fl->cctx;
 	struct fastrpc_buf *buf, *b;
 	struct fastrpc_munmap_req_msg req_msg;
 	struct device *dev = fl->sctx->dev;
@@ -1359,6 +1366,22 @@ static int fastrpc_req_munmap_impl(struct fastrpc_user *fl,
 		dev_err(dev, "unmmap\tpt 0x%09lx ERROR\n", buf->raddr);
 	}
 
+	if (buf->flags == ADSP_MMAP_REMOTE_HEAP_ADDR) {
+		struct qcom_scm_vmperm perm;
+
+		perm.vmid = QCOM_SCM_VMID_HLOS;
+		perm.perm = QCOM_SCM_PERM_RWX;
+
+		err = qcom_scm_assign_mem(buf->phys, buf->size,
+					  &cctx->perms,
+					  &perm, 1);
+		if (err) {
+			dev_err(dev, "assign memory failed\n");
+			return err;
+		}
+	}
+
+
 	return err;
 }
 
@@ -1382,6 +1405,7 @@ static int fastrpc_req_mmap(struct fastrpc_user *fl, char __user *argp)
 	struct fastrpc_phy_page pages;
 	struct fastrpc_req_mmap req;
 	struct device *dev = fl->sctx->dev;
+	struct fastrpc_channel_ctx *cctx = fl->cctx;
 	int err;
 	u32 sc;
 
@@ -1414,6 +1438,7 @@ static int fastrpc_req_mmap(struct fastrpc_user *fl, char __user *argp)
 
 	pages.addr = buf->phys;
 	pages.size = buf->size;
+	buf->flags = req.flags;
 
 	args[1].ptr = (u64) (uintptr_t) &pages;
 	args[1].length = sizeof(pages);
@@ -1427,6 +1452,16 @@ static int fastrpc_req_mmap(struct fastrpc_user *fl, char __user *argp)
 	if (err) {
 		dev_err(dev, "mmap error (len 0x%08llx)\n", buf->size);
 		goto err_invoke;
+	}
+
+	if (req.flags == ADSP_MMAP_REMOTE_HEAP_ADDR) {
+		err = qcom_scm_assign_mem(buf->phys, buf->size,
+					  &cctx->perms,
+					  cctx->vmperms, cctx->vmcount);
+		if (err) {
+			dev_err(dev, "assign memory failed\n");
+			return err;
+		}
 	}
 
 	/* update the buffer to be able to deallocate the memory on the DSP */
@@ -1585,6 +1620,7 @@ static int fastrpc_rpmsg_probe(struct rpmsg_device *rpdev)
 	struct fastrpc_channel_ctx *data;
 	int i, err, domain_id = -1;
 	const char *domain;
+	unsigned int vmids[FASTRPC_MAX_VMIDS];
 
 	err = of_property_read_string(rdev->of_node, "label", &domain);
 	if (err) {
@@ -1607,6 +1643,27 @@ static int fastrpc_rpmsg_probe(struct rpmsg_device *rpdev)
 	data = kzalloc(sizeof(*data), GFP_KERNEL);
 	if (!data)
 		return -ENOMEM;
+
+	data->vmcount = of_property_read_variable_u32_array(rdev->of_node,
+							    "qcom,vmids",
+							    &vmids[0], 0,
+							    FASTRPC_MAX_VMIDS);
+	if (data->vmcount < 0) {
+		data->vmcount = 0;
+	} else {
+		if (!qcom_scm_is_available()) {
+			kfree(data);
+			return -EPROBE_DEFER;
+		}
+
+		data->perms = BIT(QCOM_SCM_VMID_HLOS);
+
+		for (i = 0; i < data->vmcount; i++) {
+			data->vmperms[i].vmid = vmids[i];
+			data->vmperms[i].perm = QCOM_SCM_PERM_RWX;
+		}
+	}
+
 
 	data->miscdev.minor = MISC_DYNAMIC_MINOR;
 	data->miscdev.name = devm_kasprintf(rdev, GFP_KERNEL, "fastrpc-%s",
