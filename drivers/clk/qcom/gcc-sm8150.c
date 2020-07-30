@@ -75,8 +75,7 @@ static struct clk_alpha_pll_postdiv gpll0_out_even = {
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "gpll0_out_even",
 		.parent_data = &(const struct clk_parent_data){
-			.fw_name = "bi_tcxo",
-			.name = "bi_tcxo",
+			.hw = &gpll0.clkr.hw,
 		},
 		.num_parents = 1,
 		.ops = &clk_trion_pll_postdiv_ops,
@@ -1616,9 +1615,7 @@ static struct clk_branch gcc_gpu_cfg_ahb_clk = {
 	},
 };
 
-/* external clocks so add BRANCH_HALT_SKIP */
 static struct clk_branch gcc_gpu_gpll0_clk_src = {
-	.halt_check = BRANCH_HALT_SKIP,
 	.clkr = {
 		.enable_reg = 0x52004,
 		.enable_mask = BIT(15),
@@ -1633,9 +1630,7 @@ static struct clk_branch gcc_gpu_gpll0_clk_src = {
 	},
 };
 
-/* these are external clocks so add BRANCH_HALT_SKIP */
 static struct clk_branch gcc_gpu_gpll0_div_clk_src = {
-	.halt_check = BRANCH_HALT_SKIP,
 	.clkr = {
 		.enable_reg = 0x52004,
 		.enable_mask = BIT(16),
@@ -1732,9 +1727,7 @@ static struct clk_branch gcc_npu_cfg_ahb_clk = {
 	},
 };
 
-/* external clocks so add BRANCH_HALT_SKIP */
 static struct clk_branch gcc_npu_gpll0_clk_src = {
-	.halt_check = BRANCH_HALT_SKIP,
 	.clkr = {
 		.enable_reg = 0x52004,
 		.enable_mask = BIT(18),
@@ -1749,9 +1742,7 @@ static struct clk_branch gcc_npu_gpll0_clk_src = {
 	},
 };
 
-/* external clocks so add BRANCH_HALT_SKIP */
 static struct clk_branch gcc_npu_gpll0_div_clk_src = {
-	.halt_check = BRANCH_HALT_SKIP,
 	.clkr = {
 		.enable_reg = 0x52004,
 		.enable_mask = BIT(19),
