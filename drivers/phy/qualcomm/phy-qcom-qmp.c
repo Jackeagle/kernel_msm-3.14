@@ -19,6 +19,7 @@
 #include <linux/regulator/consumer.h>
 #include <linux/reset.h>
 #include <linux/slab.h>
+#include <linux/usb/typec_mux.h>
 
 #include <dt-bindings/phy/phy.h>
 
@@ -65,6 +66,9 @@
 
 /* QPHY_V3_PCS_MISC_CLAMP_ENABLE register bits */
 #define CLAMP_EN				BIT(0) /* enables i/o clamp_n */
+
+#define SW_PORTSELECT_VAL			BIT(0)
+#define SW_PORTSELECT_MUX			BIT(1)
 
 #define PHY_INIT_COMPLETE_TIMEOUT		10000
 #define POWER_DOWN_DELAY_US_MIN			10
@@ -215,6 +219,13 @@ static const unsigned int qmp_v4_usb3_uniphy_regs_layout[QPHY_LAYOUT_SIZE] = {
 static const unsigned int sdm845_ufsphy_regs_layout[QPHY_LAYOUT_SIZE] = {
 	[QPHY_START_CTRL]		= 0x00,
 	[QPHY_PCS_READY_STATUS]		= 0x160,
+};
+
+static const unsigned int sm8250_pcie_regs_layout[QPHY_LAYOUT_SIZE] = {
+	[QPHY_SW_RESET]			= 0x00,
+	[QPHY_START_CTRL]		= 0x44,
+	[QPHY_PCS_STATUS]		= 0x14,
+	[QPHY_PCS_POWER_DOWN_CONTROL]	= 0x40,
 };
 
 static const unsigned int sm8150_ufsphy_regs_layout[QPHY_LAYOUT_SIZE] = {
@@ -1742,6 +1753,234 @@ static const struct qmp_phy_init_tbl sm8250_usb3_uniphy_pcs_tbl[] = {
 	QMP_PHY_INIT_CFG(QPHY_V4_PCS_REFGEN_REQ_CONFIG1, 0x21),
 };
 
+static const struct qmp_phy_init_tbl sm8250_qmp_pcie_serdes_tbl[] = {
+	QMP_PHY_INIT_CFG(0x0094, 0x08),
+	QMP_PHY_INIT_CFG(0x0154, 0x34),
+	QMP_PHY_INIT_CFG(0x016c, 0x08),
+	QMP_PHY_INIT_CFG(0x0058, 0x0f),
+	QMP_PHY_INIT_CFG(0x00a4, 0x42),
+	QMP_PHY_INIT_CFG(0x0110, 0x24),
+	QMP_PHY_INIT_CFG(0x011c, 0x03),
+	QMP_PHY_INIT_CFG(0x0118, 0xb4),
+	QMP_PHY_INIT_CFG(0x010c, 0x02),
+	QMP_PHY_INIT_CFG(0x01bc, 0x11),
+	QMP_PHY_INIT_CFG(0x00bc, 0x82),
+	QMP_PHY_INIT_CFG(0x00d4, 0x03),
+	QMP_PHY_INIT_CFG(0x00d0, 0x55),
+	QMP_PHY_INIT_CFG(0x00cc, 0x55),
+	QMP_PHY_INIT_CFG(0x00b0, 0x1a),
+	QMP_PHY_INIT_CFG(0x00ac, 0x0a),
+	QMP_PHY_INIT_CFG(0x00c4, 0x68),
+	QMP_PHY_INIT_CFG(0x00e0, 0x02),
+	QMP_PHY_INIT_CFG(0x00dc, 0xaa),
+	QMP_PHY_INIT_CFG(0x00d8, 0xab),
+	QMP_PHY_INIT_CFG(0x00b8, 0x34),
+	QMP_PHY_INIT_CFG(0x00b4, 0x14),
+	QMP_PHY_INIT_CFG(0x0158, 0x01),
+	QMP_PHY_INIT_CFG(0x0074, 0x06),
+	QMP_PHY_INIT_CFG(0x007c, 0x16),
+	QMP_PHY_INIT_CFG(0x0084, 0x36),
+	QMP_PHY_INIT_CFG(0x0078, 0x06),
+	QMP_PHY_INIT_CFG(0x0080, 0x16),
+	QMP_PHY_INIT_CFG(0x0088, 0x36),
+	QMP_PHY_INIT_CFG(0x01b0, 0x1e),
+	QMP_PHY_INIT_CFG(0x01ac, 0xca),
+	QMP_PHY_INIT_CFG(0x01b8, 0x18),
+	QMP_PHY_INIT_CFG(0x01b4, 0xa2),
+	QMP_PHY_INIT_CFG(0x0050, 0x07),
+	QMP_PHY_INIT_CFG(0x0010, 0x01),
+	QMP_PHY_INIT_CFG(0x001c, 0x31),
+	QMP_PHY_INIT_CFG(0x0020, 0x01),
+	QMP_PHY_INIT_CFG(0x0024, 0xde),
+	QMP_PHY_INIT_CFG(0x0028, 0x07),
+	QMP_PHY_INIT_CFG(0x0030, 0x4c),
+	QMP_PHY_INIT_CFG(0x0034, 0x06),
+	QMP_PHY_INIT_CFG(0x0048, 0x90),
+};
+
+static const struct qmp_phy_init_tbl sm8250_qmp_pcie_tx_tbl[] = {
+	QMP_PHY_INIT_CFG(0x09c, 0x12),
+	QMP_PHY_INIT_CFG(0x084, 0x35),
+	QMP_PHY_INIT_CFG(0x03c, 0x11),
+};
+
+static const struct qmp_phy_init_tbl sm8250_qmp_pcie_rx_tbl[] = {
+	QMP_PHY_INIT_CFG(0x008, 0x0c),
+	QMP_PHY_INIT_CFG(0x014, 0x03),
+	QMP_PHY_INIT_CFG(0x0dc, 0x1b),
+	QMP_PHY_INIT_CFG(0x0fc, 0x00),
+	QMP_PHY_INIT_CFG(0x0f8, 0xc0),
+	QMP_PHY_INIT_CFG(0x060, 0x30),
+	QMP_PHY_INIT_CFG(0x064, 0x00),
+	QMP_PHY_INIT_CFG(0x0d4, 0x04),
+	QMP_PHY_INIT_CFG(0x0d8, 0x07),
+	QMP_PHY_INIT_CFG(0x034, 0x7f),
+	QMP_PHY_INIT_CFG(0x044, 0x70),
+	QMP_PHY_INIT_CFG(0x0e8, 0x00),
+	QMP_PHY_INIT_CFG(0x0ec, 0x0e),
+	QMP_PHY_INIT_CFG(0x0f0, 0x4a),
+	QMP_PHY_INIT_CFG(0x0f4, 0x0f),
+
+	QMP_PHY_INIT_CFG(0x11c, 0x03),
+	QMP_PHY_INIT_CFG(0x118, 0x1c),
+	QMP_PHY_INIT_CFG(0x124, 0x1e),
+	QMP_PHY_INIT_CFG(0x1b4, 0x04),
+	QMP_PHY_INIT_CFG(0x110, 0x17),
+	QMP_PHY_INIT_CFG(0x198, 0xd4),
+	QMP_PHY_INIT_CFG(0x19c, 0x54),
+	QMP_PHY_INIT_CFG(0x1a0, 0xdb),
+	QMP_PHY_INIT_CFG(0x1a4, 0x3b),
+	QMP_PHY_INIT_CFG(0x1a8, 0x31),
+
+	QMP_PHY_INIT_CFG(0x184, 0x24),
+
+	QMP_PHY_INIT_CFG(0x170, 0x3f),
+	QMP_PHY_INIT_CFG(0x174, 0x3f),
+	QMP_PHY_INIT_CFG(0x178, 0xff),
+	QMP_PHY_INIT_CFG(0x17c, 0x7f),
+	QMP_PHY_INIT_CFG(0x180, 0x14),
+
+	QMP_PHY_INIT_CFG(0x1bc, 0x0c),
+	QMP_PHY_INIT_CFG(0x1b8, 0x30),
+
+	QMP_PHY_INIT_CFG(0x188, 0xe4),
+	QMP_PHY_INIT_CFG(0x18c, 0xec),
+	QMP_PHY_INIT_CFG(0x190, 0x3b),
+	QMP_PHY_INIT_CFG(0x194, 0x36),
+};
+
+static const struct qmp_phy_init_tbl sm8250_qmp_pcie_pcs_tbl[] = {
+	QMP_PHY_INIT_CFG(0x0dc, 0x0d),
+	QMP_PHY_INIT_CFG(0x1a4, 0x01),
+
+	QMP_PHY_INIT_CFG(0x188, 0x77),
+	QMP_PHY_INIT_CFG(0x198, 0x0b),
+	QMP_PHY_INIT_CFG(0x1ec, 0x12),
+};
+
+static const struct qmp_phy_init_tbl sm8250_qmp_pcie_pcs_misc_tbl[] = {
+	QMP_PHY_INIT_CFG(0x090, 0x00),
+	QMP_PHY_INIT_CFG(0x040, 0x01),
+	QMP_PHY_INIT_CFG(0x048, 0x01),
+	QMP_PHY_INIT_CFG(0x050, 0x00),
+	QMP_PHY_INIT_CFG(0x0b4, 0x33),
+	QMP_PHY_INIT_CFG(0x0bc, 0x00),
+	QMP_PHY_INIT_CFG(0x0e0, 0x58),
+	QMP_PHY_INIT_CFG(0x0a4, 0x0f),
+	QMP_PHY_INIT_CFG(0x01c, 0xc1),
+};
+
+
+static const struct qmp_phy_init_tbl sm8250_qhp_pcie_serdes_tbl[] = {
+	QMP_PHY_INIT_CFG(0x0010, 0x01),
+	QMP_PHY_INIT_CFG(0x001c, 0x31),
+	QMP_PHY_INIT_CFG(0x0020, 0x01),
+	QMP_PHY_INIT_CFG(0x0024, 0xde),
+	QMP_PHY_INIT_CFG(0x0028, 0x07),
+	QMP_PHY_INIT_CFG(0x0030, 0x4c),
+	QMP_PHY_INIT_CFG(0x0034, 0x06),
+	QMP_PHY_INIT_CFG(0x0048, 0x90),
+	QMP_PHY_INIT_CFG(0x0058, 0x0f),
+	QMP_PHY_INIT_CFG(0x0074, 0x06),
+	QMP_PHY_INIT_CFG(0x0078, 0x06),
+	QMP_PHY_INIT_CFG(0x007c, 0x16),
+	QMP_PHY_INIT_CFG(0x0080, 0x16),
+	QMP_PHY_INIT_CFG(0x0084, 0x36),
+	QMP_PHY_INIT_CFG(0x0088, 0x36),
+	QMP_PHY_INIT_CFG(0x0094, 0x08),
+	QMP_PHY_INIT_CFG(0x00a4, 0x42),
+	QMP_PHY_INIT_CFG(0x00ac, 0x0a),
+	QMP_PHY_INIT_CFG(0x00b0, 0x1a),
+	QMP_PHY_INIT_CFG(0x00b4, 0x14),
+	QMP_PHY_INIT_CFG(0x00b8, 0x34),
+	QMP_PHY_INIT_CFG(0x00bc, 0x82),
+	QMP_PHY_INIT_CFG(0x00c4, 0x68),
+	QMP_PHY_INIT_CFG(0x00cc, 0x55),
+	QMP_PHY_INIT_CFG(0x00d0, 0x55),
+	QMP_PHY_INIT_CFG(0x00d4, 0x03),
+	QMP_PHY_INIT_CFG(0x00d8, 0xab),
+	QMP_PHY_INIT_CFG(0x00dc, 0xaa),
+	QMP_PHY_INIT_CFG(0x00e0, 0x02),
+	QMP_PHY_INIT_CFG(0x010c, 0x02),
+	QMP_PHY_INIT_CFG(0x0110, 0x24),
+	QMP_PHY_INIT_CFG(0x0118, 0xb4),
+	QMP_PHY_INIT_CFG(0x011c, 0x03),
+	QMP_PHY_INIT_CFG(0x0154, 0x34),
+	QMP_PHY_INIT_CFG(0x0158, 0x01),
+	QMP_PHY_INIT_CFG(0x016c, 0x08),
+	QMP_PHY_INIT_CFG(0x01ac, 0xca),
+	QMP_PHY_INIT_CFG(0x01b0, 0x1e),
+	QMP_PHY_INIT_CFG(0x01b4, 0xa2),
+	QMP_PHY_INIT_CFG(0x01b8, 0x18),
+	QMP_PHY_INIT_CFG(0x01bc, 0x11),
+};
+
+static const struct qmp_phy_init_tbl sm8250_qhp_pcie_tx_tbl[] = {
+	QMP_PHY_INIT_CFG(0x03c, 0x11),
+	QMP_PHY_INIT_CFG(0x084, 0x75),
+	QMP_PHY_INIT_CFG(0x09c, 0x12),
+	QMP_PHY_INIT_CFG(0x104, 0x20),
+};
+
+static const struct qmp_phy_init_tbl sm8250_qhp_pcie_rx_tbl[] = {
+	QMP_PHY_INIT_CFG(0x008, 0x0c),
+	QMP_PHY_INIT_CFG(0x014, 0x03),
+	QMP_PHY_INIT_CFG(0x034, 0x7f),
+	QMP_PHY_INIT_CFG(0x044, 0x70),
+	QMP_PHY_INIT_CFG(0x060, 0x30),
+	QMP_PHY_INIT_CFG(0x0d4, 0x04),
+	QMP_PHY_INIT_CFG(0x0d8, 0x07),
+	QMP_PHY_INIT_CFG(0x0dc, 0x1b),
+	QMP_PHY_INIT_CFG(0x0e8, 0x04),
+	QMP_PHY_INIT_CFG(0x0ec, 0x0e),
+	QMP_PHY_INIT_CFG(0x0f0, 0x4a),
+	QMP_PHY_INIT_CFG(0x0f4, 0x0f),
+	QMP_PHY_INIT_CFG(0x0f8, 0xc0),
+	QMP_PHY_INIT_CFG(0x0fc, 0x00),
+	QMP_PHY_INIT_CFG(0x110, 0x17),
+
+	QMP_PHY_INIT_CFG(0x118, 0x1c),
+	QMP_PHY_INIT_CFG(0x11c, 0x03),
+	QMP_PHY_INIT_CFG(0x124, 0x1e),
+	QMP_PHY_INIT_CFG(0x170, 0xbf),
+	QMP_PHY_INIT_CFG(0x174, 0x3f),
+	QMP_PHY_INIT_CFG(0x178, 0xff),
+	QMP_PHY_INIT_CFG(0x17c, 0x7f),
+	QMP_PHY_INIT_CFG(0x180, 0x15),
+	QMP_PHY_INIT_CFG(0x184, 0x24),
+	QMP_PHY_INIT_CFG(0x188, 0xe4),
+	QMP_PHY_INIT_CFG(0x18c, 0xec),
+	QMP_PHY_INIT_CFG(0x190, 0x3b),
+	QMP_PHY_INIT_CFG(0x194, 0x36),
+	QMP_PHY_INIT_CFG(0x198, 0xd4),
+	QMP_PHY_INIT_CFG(0x19c, 0x54),
+	QMP_PHY_INIT_CFG(0x1a0, 0xdb),
+	QMP_PHY_INIT_CFG(0x1a4, 0x3b),
+	QMP_PHY_INIT_CFG(0x1a8, 0x31),
+	QMP_PHY_INIT_CFG(0x1bc, 0x0c),
+	QMP_PHY_INIT_CFG(0x1b8, 0x38),
+};
+
+static const struct qmp_phy_init_tbl sm8250_qhp_pcie_pcs_tbl[] = {
+	QMP_PHY_INIT_CFG(0x0dc, 0x05),
+	QMP_PHY_INIT_CFG(0x188, 0x77),
+	QMP_PHY_INIT_CFG(0x198, 0x0b),
+	QMP_PHY_INIT_CFG(0x1a4, 0x01),
+	QMP_PHY_INIT_CFG(0x1e0, 0x0f),
+};
+
+static const struct qmp_phy_init_tbl sm8250_qhp_pcie_pcs_misc_tbl[] = {
+	QMP_PHY_INIT_CFG(0x00c, 0x0d),
+	QMP_PHY_INIT_CFG(0x014, 0x07),
+	QMP_PHY_INIT_CFG(0x01c, 0xc1),
+	QMP_PHY_INIT_CFG(0x040, 0x01),
+	QMP_PHY_INIT_CFG(0x048, 0x01),
+	QMP_PHY_INIT_CFG(0x090, 0x00),
+	QMP_PHY_INIT_CFG(0x0b4, 0x33),
+	QMP_PHY_INIT_CFG(0x0bc, 0x00),
+	QMP_PHY_INIT_CFG(0x0e0, 0x58),
+};
+
 /* struct qmp_phy_cfg - per-PHY initialization config */
 struct qmp_phy_cfg {
 	/* phy-type - PCIE/UFS/USB */
@@ -1844,6 +2083,8 @@ struct qmp_phy {
  * @phy_initialized: indicate if PHY has been initialized
  * @mode: current PHY mode
  * @ufs_reset: optional UFS PHY reset handle
+ * @sw: typec switch for receiving orientation changes
+ * @orientation: carries current CC orientation
  */
 struct qcom_qmp {
 	struct device *dev;
@@ -1863,6 +2104,8 @@ struct qcom_qmp {
 	enum phy_mode mode;
 
 	struct reset_control *ufs_reset;
+	struct typec_switch *sw;
+	enum typec_orientation orientation;
 };
 
 static inline void qphy_setbits(void __iomem *base, u32 offset, u32 val)
@@ -2136,6 +2379,67 @@ static const struct qmp_phy_cfg sdm845_qhp_pciephy_cfg = {
 	.start_ctrl		= PCS_START | SERDES_START,
 	.pwrdn_ctrl		= SW_PWRDN | REFCLK_DRV_DSBL,
 
+	.has_pwrdn_delay	= true,
+	.pwrdn_delay_min	= 995,		/* us */
+	.pwrdn_delay_max	= 1005,		/* us */
+};
+
+static const struct qmp_phy_cfg sm8250_qmp_pciephy_cfg = {
+	.type = PHY_TYPE_PCIE,
+	.nlanes = 1,
+
+	.serdes_tbl		= sm8250_qmp_pcie_serdes_tbl,
+	.serdes_tbl_num		= ARRAY_SIZE(sm8250_qmp_pcie_serdes_tbl),
+	.tx_tbl			= sm8250_qmp_pcie_tx_tbl,
+	.tx_tbl_num		= ARRAY_SIZE(sm8250_qmp_pcie_tx_tbl),
+	.rx_tbl			= sm8250_qmp_pcie_rx_tbl,
+	.rx_tbl_num		= ARRAY_SIZE(sm8250_qmp_pcie_rx_tbl),
+	.pcs_tbl		= sm8250_qmp_pcie_pcs_tbl,
+	.pcs_tbl_num		= ARRAY_SIZE(sm8250_qmp_pcie_pcs_tbl),
+	.pcs_misc_tbl		= sm8250_qmp_pcie_pcs_misc_tbl,
+	.pcs_misc_tbl_num	= ARRAY_SIZE(sm8250_qmp_pcie_pcs_misc_tbl),
+	.clk_list		= sdm845_pciephy_clk_l,
+	.num_clks		= ARRAY_SIZE(sdm845_pciephy_clk_l),
+	.reset_list		= sdm845_pciephy_reset_l,
+	.num_resets		= ARRAY_SIZE(sdm845_pciephy_reset_l),
+	.vreg_list		= qmp_phy_vreg_l,
+	.num_vregs		= ARRAY_SIZE(qmp_phy_vreg_l),
+	.regs			= sm8250_pcie_regs_layout,
+
+	.start_ctrl		= PCS_START | SERDES_START,
+	.pwrdn_ctrl		= SW_PWRDN | REFCLK_DRV_DSBL,
+
+	.has_pwrdn_delay	= true,
+	.pwrdn_delay_min	= 995,		/* us */
+	.pwrdn_delay_max	= 1005,		/* us */
+};
+
+static const struct qmp_phy_cfg sm8250_qhp_pciephy_cfg = {
+	.type = PHY_TYPE_PCIE,
+	.nlanes = 2,
+
+	.serdes_tbl		= sm8250_qhp_pcie_serdes_tbl,
+	.serdes_tbl_num		= ARRAY_SIZE(sm8250_qhp_pcie_serdes_tbl),
+	.tx_tbl			= sm8250_qhp_pcie_tx_tbl,
+	.tx_tbl_num		= ARRAY_SIZE(sm8250_qhp_pcie_tx_tbl),
+	.rx_tbl			= sm8250_qhp_pcie_rx_tbl,
+	.rx_tbl_num		= ARRAY_SIZE(sm8250_qhp_pcie_rx_tbl),
+	.pcs_tbl		= sm8250_qhp_pcie_pcs_tbl,
+	.pcs_tbl_num		= ARRAY_SIZE(sm8250_qhp_pcie_pcs_tbl),
+	.pcs_misc_tbl		= sm8250_qhp_pcie_pcs_misc_tbl,
+	.pcs_misc_tbl_num	= ARRAY_SIZE(sm8250_qhp_pcie_pcs_misc_tbl),
+	.clk_list		= sdm845_pciephy_clk_l,
+	.num_clks		= ARRAY_SIZE(sdm845_pciephy_clk_l),
+	.reset_list		= sdm845_pciephy_reset_l,
+	.num_resets		= ARRAY_SIZE(sdm845_pciephy_reset_l),
+	.vreg_list		= qmp_phy_vreg_l,
+	.num_vregs		= ARRAY_SIZE(qmp_phy_vreg_l),
+	.regs			= sm8250_pcie_regs_layout,
+
+	.start_ctrl		= PCS_START | SERDES_START,
+	.pwrdn_ctrl		= SW_PWRDN | REFCLK_DRV_DSBL,
+
+	.is_dual_lane_phy	= true,
 	.has_pwrdn_delay	= true,
 	.pwrdn_delay_min	= 995,		/* us */
 	.pwrdn_delay_max	= 1005,		/* us */
@@ -2487,6 +2791,7 @@ static int qcom_qmp_phy_com_init(struct qmp_phy *qphy)
 	void __iomem *pcs = qphy->pcs;
 	void __iomem *dp_com = qmp->dp_com;
 	int ret, i;
+	unsigned int val;
 
 	mutex_lock(&qmp->phy_mutex);
 	if (qmp->init_count++) {
@@ -2536,6 +2841,13 @@ static int qcom_qmp_phy_com_init(struct qmp_phy *qphy)
 		qphy_setbits(dp_com, QPHY_V3_DP_COM_PHY_MODE_CTRL,
 			     USB3_MODE | DP_MODE);
 
+		if (cfg->is_dual_lane_phy) {
+			val = SW_PORTSELECT_MUX;
+			if (qmp->orientation == TYPEC_ORIENTATION_REVERSE)
+				val |= SW_PORTSELECT_VAL;
+			qphy_setbits(dp_com, QPHY_V3_DP_COM_TYPEC_CTRL, val);
+		}
+
 		/* bring both QMP USB and QMP DP PHYs PCS block out of reset */
 		qphy_clrbits(dp_com, QPHY_V3_DP_COM_RESET_OVRD_CTRL,
 			     SW_DPPHY_RESET_MUX | SW_DPPHY_RESET |
@@ -2561,7 +2873,7 @@ static int qcom_qmp_phy_com_init(struct qmp_phy *qphy)
 
 	if (cfg->has_phy_com_ctrl) {
 		void __iomem *status;
-		unsigned int mask, val;
+		unsigned int mask;
 
 		qphy_clrbits(serdes, cfg->regs[QPHY_COM_SW_RESET], SW_RESET);
 		qphy_setbits(serdes, cfg->regs[QPHY_COM_START_CONTROL],
@@ -3234,6 +3546,12 @@ static const struct of_device_id qcom_qmp_phy_of_match_table[] = {
 	}, {
 		.compatible = "qcom,sm8250-qmp-usb3-uni-phy",
 		.data = &sm8250_usb3_uniphy_cfg,
+	}, {
+		.compatible = "qcom,sm8250-qmp-pcie-phy",
+		.data = &sm8250_qmp_pciephy_cfg,
+	}, {
+		.compatible = "qcom,sm8250-qhp-pcie-phy",
+		.data = &sm8250_qhp_pciephy_cfg,
 	},
 	{ },
 };
@@ -3244,6 +3562,47 @@ static const struct dev_pm_ops qcom_qmp_phy_pm_ops = {
 			   qcom_qmp_phy_runtime_resume, NULL)
 };
 
+#if IS_ENABLED(CONFIG_PHY_QCOM_QMP_TYPEC)
+static int qcom_qmp_phy_typec_switch_set(struct typec_switch *sw,
+					 enum typec_orientation orientation)
+{
+	struct qcom_qmp *qmp = typec_switch_get_drvdata(sw);
+	struct qmp_phy *qphy = qmp->phys[0];
+
+	qmp->orientation = orientation;
+	if (qmp->phy_initialized) {
+		qcom_qmp_phy_disable(qphy->phy);
+		qcom_qmp_phy_enable(qphy->phy);
+	}
+
+	return 0;
+}
+
+static int qcom_qmp_phy_typec_switch_register(struct qcom_qmp *qmp)
+{
+	struct typec_switch_desc sw_desc;
+	struct device *dev = qmp->dev;
+
+	if (qmp->cfg->is_dual_lane_phy) {
+		sw_desc.drvdata = qmp;
+		sw_desc.fwnode = dev->fwnode;
+		sw_desc.set = qcom_qmp_phy_typec_switch_set;
+		qmp->sw = typec_switch_register(dev, &sw_desc);
+		if (IS_ERR(qmp->sw)) {
+			dev_err(dev, "Error registering typec switch: %ld\n",
+				PTR_ERR(qmp->sw));
+		}
+	}
+
+	return 0;
+}
+#else
+static int qcom_qmp_phy_typec_switch_register(struct qcom_qmp *qmp)
+{
+	return 0;
+}
+#endif
+
 static int qcom_qmp_phy_probe(struct platform_device *pdev)
 {
 	struct qcom_qmp *qmp;
@@ -3252,7 +3611,7 @@ static int qcom_qmp_phy_probe(struct platform_device *pdev)
 	struct device_node *child;
 	struct phy_provider *phy_provider;
 	void __iomem *base;
-	int num, id;
+	int num = 0, id;
 	int ret;
 
 	qmp = devm_kzalloc(dev, sizeof(*qmp), GFP_KERNEL);
@@ -3304,7 +3663,11 @@ static int qcom_qmp_phy_probe(struct platform_device *pdev)
 		return ret;
 	}
 
-	num = of_get_available_child_count(dev->of_node);
+	qcom_qmp_phy_typec_switch_register(qmp);
+	for_each_available_child_of_node(dev->of_node, child) {
+		if (!strncmp("lanes", child->name, 5))
+			num++;
+	}
 	/* do we have a rogue child node ? */
 	if (num > qmp->cfg->nlanes)
 		return -EINVAL;
@@ -3324,6 +3687,9 @@ static int qcom_qmp_phy_probe(struct platform_device *pdev)
 
 	for_each_available_child_of_node(dev->of_node, child) {
 		/* Create per-lane phy */
+		if (strncmp("lanes", child->name, 5))
+			continue;
+
 		ret = qcom_qmp_phy_create(dev, child, id);
 		if (ret) {
 			dev_err(dev, "failed to create lane%d phy, %d\n",
