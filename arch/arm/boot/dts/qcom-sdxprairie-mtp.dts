@@ -1,0 +1,30 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2018-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020, Linaro Ltd.
+ */
+
+/dts-v1/;
+
+#include "qcom-sdxprairie.dtsi"
+
+/ {
+	model = "Qualcomm Technologies, Inc. SDXPRAIRIE MTP V2";
+	compatible = "qcom,sdxprairie-mtp", "qcom,sdxprairie", "qcom,mtp";
+	qcom,board-id = <0x5010008 0x0>;
+
+	aliases {
+		serial0 = &blsp1_uart3;
+	};
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+	};
+
+	soc {
+		serial@831000 {
+			status = "ok";
+		};
+	};
+};
+
