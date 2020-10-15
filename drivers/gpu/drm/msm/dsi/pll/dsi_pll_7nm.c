@@ -542,7 +542,7 @@ static unsigned long dsi_pll_7nm_vco_recalc_rate(struct clk_hw *hw,
 	tmp64 = (ref_clk * 2 * frac);
 	pll_freq += div_u64(tmp64, multiplier);
 
-	vco_rate = div_u64(pll_freq, outdiv);
+	vco_rate = pll_freq;
 
 	DBG("DSI PLL%d returning vco rate = %lu, dec = %x, frac = %x, outdiv = %x",
 	    pll_7nm->id, (unsigned long)vco_rate, dec, frac, outdiv);
