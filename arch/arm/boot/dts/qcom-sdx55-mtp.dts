@@ -6,11 +6,11 @@
 
 /dts-v1/;
 
-#include "qcom-sdxprairie.dtsi"
+#include "qcom-sdx55.dtsi"
 
 / {
-	model = "Qualcomm Technologies, Inc. SDXPRAIRIE MTP V2";
-	compatible = "qcom,sdxprairie-mtp", "qcom,sdxprairie", "qcom,mtp";
+	model = "Qualcomm Technologies, Inc. SDX55 MTP";
+	compatible = "qcom,sdx55-mtp", "qcom,sdx55", "qcom,mtp";
 	qcom,board-id = <0x5010008 0x0>;
 
 	aliases {
@@ -27,4 +27,3 @@
 		};
 	};
 };
-
