@@ -145,6 +145,7 @@
 #define	OP_PAGE_READ			0x2
 #define	OP_PAGE_READ_WITH_ECC		0x3
 #define	OP_PAGE_READ_WITH_ECC_SPARE	0x4
+#define	OP_ONFI_READ			0x5
 #define	OP_PROGRAM_PAGE			0x6
 #define	OP_PAGE_PROGRAM_WITH_ECC	0x7
 #define	OP_PROGRAM_PAGE_SPARE		0x9
@@ -460,12 +461,14 @@ struct qcom_nand_host {
  * @ecc_modes - ecc mode for NAND
  * @is_bam - whether NAND controller is using BAM
  * @is_qpic - whether NAND CTRL is part of qpic IP
+ * @qpic_v2 - flag to indicate QPIC IP v2
  * @dev_cmd_reg_start - NAND_DEV_CMD_* registers starting offset
  */
 struct qcom_nandc_props {
 	u32 ecc_modes;
 	bool is_bam;
 	bool is_qpic;
+	bool qpic_v2;
 	u32 dev_cmd_reg_start;
 };
 
@@ -1164,7 +1167,11 @@ static int nandc_param(struct qcom_nand_host *host)
 	 * in use. we configure the controller to perform a raw read of 512
 	 * bytes to read onfi params
 	 */
-	nandc_set_reg(nandc, NAND_FLASH_CMD, OP_PAGE_READ | PAGE_ACC | LAST_PAGE);
+	if (nandc->props->qpic_v2)
+		nandc_set_reg(nandc, NAND_FLASH_CMD, OP_ONFI_READ | PAGE_ACC | LAST_PAGE);
+	else
+		nandc_set_reg(nandc, NAND_FLASH_CMD, OP_PAGE_READ | PAGE_ACC | LAST_PAGE);
+
 	nandc_set_reg(nandc, NAND_ADDR0, 0);
 	nandc_set_reg(nandc, NAND_ADDR1, 0);
 	nandc_set_reg(nandc, NAND_DEV0_CFG0, 0 << CW_PER_PAGE
@@ -1181,11 +1188,13 @@ static int nandc_param(struct qcom_nand_host *host)
 	nandc_set_reg(nandc, NAND_EBI2_ECC_BUF_CFG, 1 << ECC_CFG_ECC_DISABLE);
 
 	/* configure CMD1 and VLD for ONFI param probing */
-	nandc_set_reg(nandc, NAND_DEV_CMD_VLD,
-		      (nandc->vld & ~READ_START_VLD));
-	nandc_set_reg(nandc, NAND_DEV_CMD1,
-		      (nandc->cmd1 & ~(0xFF << READ_ADDR))
-		      | NAND_CMD_PARAM << READ_ADDR);
+	if (!nandc->props->qpic_v2) {
+		nandc_set_reg(nandc, NAND_DEV_CMD_VLD,
+			      (nandc->vld & ~READ_START_VLD));
+		nandc_set_reg(nandc, NAND_DEV_CMD1,
+			      (nandc->cmd1 & ~(0xFF << READ_ADDR))
+			      | NAND_CMD_PARAM << READ_ADDR);
+	}
 
 	nandc_set_reg(nandc, NAND_EXEC_CMD, 1);
 
@@ -1193,8 +1202,10 @@ static int nandc_param(struct qcom_nand_host *host)
 	nandc_set_reg(nandc, NAND_DEV_CMD_VLD_RESTORE, nandc->vld);
 	nandc_set_read_loc(nandc, 0, 0, 512, 1);
 
-	write_reg_dma(nandc, NAND_DEV_CMD_VLD, 1, 0);
-	write_reg_dma(nandc, NAND_DEV_CMD1, 1, NAND_BAM_NEXT_SGL);
+	if (!nandc->props->qpic_v2) {
+		write_reg_dma(nandc, NAND_DEV_CMD_VLD, 1, 0);
+		write_reg_dma(nandc, NAND_DEV_CMD1, 1, NAND_BAM_NEXT_SGL);
+	}
 
 	nandc->buf_count = 512;
 	memset(nandc->data_buffer, 0xff, nandc->buf_count);
@@ -1205,8 +1216,10 @@ static int nandc_param(struct qcom_nand_host *host)
 		      nandc->buf_count, 0);
 
 	/* restore CMD1 and VLD regs */
-	write_reg_dma(nandc, NAND_DEV_CMD1_RESTORE, 1, 0);
-	write_reg_dma(nandc, NAND_DEV_CMD_VLD_RESTORE, 1, NAND_BAM_NEXT_SGL);
+	if (!nandc->props->qpic_v2) {
+		write_reg_dma(nandc, NAND_DEV_CMD1_RESTORE, 1, 0);
+		write_reg_dma(nandc, NAND_DEV_CMD_VLD_RESTORE, 1, NAND_BAM_NEXT_SGL);
+	}
 
 	return 0;
 }
@@ -2770,8 +2783,10 @@ static int qcom_nandc_setup(struct qcom_nand_controller *nandc)
 	/* kill onenand */
 	if (!nandc->props->is_qpic)
 		nandc_write(nandc, SFLASHC_BURST_CFG, 0);
-	nandc_write(nandc, dev_cmd_reg_addr(nandc, NAND_DEV_CMD_VLD),
-		    NAND_DEV_CMD_VLD_VAL);
+
+	if (!nandc->props->qpic_v2)
+		nandc_write(nandc, dev_cmd_reg_addr(nandc, NAND_DEV_CMD_VLD),
+			    NAND_DEV_CMD_VLD_VAL);
 
 	/* enable ADM or BAM DMA */
 	if (nandc->props->is_bam) {
@@ -2791,8 +2806,10 @@ static int qcom_nandc_setup(struct qcom_nand_controller *nandc)
 	}
 
 	/* save the original values of these registers */
-	nandc->cmd1 = nandc_read(nandc, dev_cmd_reg_addr(nandc, NAND_DEV_CMD1));
-	nandc->vld = NAND_DEV_CMD_VLD_VAL;
+	if (!nandc->props->qpic_v2) {
+		nandc->cmd1 = nandc_read(nandc, dev_cmd_reg_addr(nandc, NAND_DEV_CMD1));
+		nandc->vld = NAND_DEV_CMD_VLD_VAL;
+	}
 
 	return 0;
 }
@@ -3052,6 +3069,14 @@ static const struct qcom_nandc_props ipq8074_nandc_props = {
 	.dev_cmd_reg_start = 0x7000,
 };
 
+static const struct qcom_nandc_props sdx55_nandc_props = {
+	.ecc_modes = (ECC_BCH_4BIT | ECC_BCH_8BIT),
+	.is_bam = true,
+	.is_qpic = true,
+	.qpic_v2 = true,
+	.dev_cmd_reg_start = 0x7000,
+};
+
 /*
  * data will hold a struct pointer containing more differences once we support
  * more controller variants
@@ -3068,6 +3093,10 @@ static const struct of_device_id qcom_nandc_of_match[] = {
 	{
 		.compatible = "qcom,ipq8074-nand",
 		.data = &ipq8074_nandc_props,
+	},
+	{
+		.compatible = "qcom,sdx55-nand",
+		.data = &sdx55_nandc_props,
 	},
 	{}
 };
