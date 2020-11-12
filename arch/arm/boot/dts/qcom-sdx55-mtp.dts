@@ -51,6 +51,10 @@
 			status = "ok";
 		};
 
+		dma@1b04000 {
+			status = "ok";
+		};
+
 		pinctrl@f100000 {
 			sdc1_default_state: sdc1-default {
 				clk {
