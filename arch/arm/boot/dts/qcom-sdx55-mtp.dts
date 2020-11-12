@@ -55,6 +55,18 @@
 			status = "ok";
 		};
 
+		nand@1b30000 {
+			status = "ok";
+
+			nand@0 {
+				reg = <0>;
+
+				nand-ecc-strength = <8>;
+				nand-ecc-step-size = <512>;
+				nand-bus-width = <8>;
+			};
+		};
+
 		pinctrl@f100000 {
 			sdc1_default_state: sdc1-default {
 				clk {
